@@ -1,0 +1,111 @@
+div[role="header"] {
+    width: 100%;
+    padding: 10px 0;
+    background-color: white;
+    border-bottom: 2px solid #eee;
+}
+div[role="header"] h2 {
+    margin-bottom: 0px;
+    padding: 6px 10px 0 20px;
+    color: #545454;
+    font-size: 30px;
+}
+.searchBar input{
+    background-color: #eee;
+    border: none;
+    border-radius: 0 3px 3px 0;
+    padding: 5px 10px;
+    margin-top: 8px;
+    width: calc(100% - 33px);
+    outline: none;
+}
+.searchBar i {
+    float: left;
+    background-color: #eeeeee;
+    padding: 8px 0px 9px 10px;
+    margin-top: 8px;
+    border-radius: 3px 0 0 3px;
+    color: #7d7d7d;
+}
+.accountMenu {
+    text-align: right;
+}
+.accountMenu i {
+    font-size: 20px;
+    padding: 12px 20px;
+    cursor: pointer;
+}
+.dropdown {
+    position: absolute;
+    background-color: white;
+    padding: 20px;
+    min-width: 300px;
+    right: 0;
+    list-style: none;
+    text-align: left;
+    box-shadow: -3px 4px 8px #0000000a;
+    transform: scale(0);
+    transform-origin: top;
+    transition: all .1s ease-in-out;
+}
+.dropdown.open {
+    transform: scale(1);
+}
+.dropdown img {
+    float: left;
+}
+.currentAccount {
+    overflow: hidden;
+    padding: 10px 0 0 0;
+}
+.currentAccount p {
+    padding: 10px 0 0 64px;
+    font-size: 1.3em;
+}
+.facilityMenu .currentFacility > i {
+    font-size: 29px;
+    float: left;
+    padding: 8px;
+    color: #6abb2e;
+}
+.facilityMenu .dropdown {
+    min-width: 200px;
+    left: 0;
+}
+.facilityMenu p {
+    margin: 0px;
+}
+.currentFacility {
+    cursor: pointer;
+}
+.currentFacility p{
+    font-size: 20px;
+    font-weight: bold;
+    margin-top: -6px!important;
+}
+.dropdown p:hover {
+    color: #307100;
+    cursor: pointer;
+}
+@keyframes openDropdown {
+    0% {
+        height: 0;
+        opacity: 0;
+    }
+    25% {
+        height: 25%;
+        opacity: 0;
+    }
+    50% {
+        height: 50%;
+        opacity: 0;
+    }
+    75% {
+        height: 75%;
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+        height: 100%;
+    }
+}

@@ -1,0 +1,34 @@
+<div class="sidebar" role="sidebar">
+    <div class="menuToggle" (click)="toggleSidebar()">
+        <i class="fa fa-align-left" [hidden]="!open"></i>
+        <i class="fa fa-align-right" [hidden]="open"></i>
+    </div>
+
+    <br>
+
+    <ul>
+        <li class="active"><i class="fa fa-home"></i> <span>Home</span></li>
+        <li><i class="fa fa-bar-chart"></i> <span>Utility Data</span></li>
+    </ul>
+
+    <br>
+
+    <div class="menuHeader">
+        <p>Reports</p>
+        <hr style="height: 4px;" [hidden]="open">
+    </div>
+
+    <ul>
+        <li><i class="fa fa-th"></i> <span>Overview</span></li>
+        <li><i class="fa fa-th"></i> <span>Regression</span></li>
+        <li><i class="fa fa-th"></i> <span>Scorecards</span></li>
+    </ul>
+    
+    <hr>
+    <ul>
+        <li><i class="fa fa-th"></i> <span>Help</span></li>
+        <li><i class="fa fa-th"></i> <span>About</span></li>
+        <li><i class="fa fa-th"></i> <span>Feedback</span></li>
+        <li><i class="fa fa-th"></i> <span>Acknoledgments</span></li>
+    </ul>
+</div>

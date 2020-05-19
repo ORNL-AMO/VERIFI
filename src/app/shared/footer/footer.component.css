@@ -1,0 +1,15 @@
+div#footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background-color: white;
+    border-top: 2px solid #eee;
+}
+#footer div {
+    text-align:right;
+}
+#footer p {
+    display: inline-block;
+    padding: 6px 10px;
+    margin: 0;
+}

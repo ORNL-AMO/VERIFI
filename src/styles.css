@@ -1,1 +1,59 @@
 /* You can add global styles to this file, and also import other style files */
+@import "~font-awesome/css/font-awesome.min.css";
+body {
+    padding: 0;
+    margin: 0;
+}
+.min-height-100 {
+    min-height: calc(100vh - 95px);
+}
+.content {
+    margin: 0 0 0 70px;
+    padding: 20px 16px;
+    background-color: #f1f1f1;
+    min-height: calc(100vh - 95px);
+    transition: .2s all;
+}
+.open .content {
+    margin: 0 0 0 261px;
+}
+
+.open .sidebar {
+    width: calc(310px - 50px)!important;
+}
+
+.menuHeader p{
+    display: none;
+}
+.open  .menuHeader p{
+    display: inline-block;
+    animation: .6s fadeInAnimation ease;
+}
+.sidebar span {
+    padding-left: 10px;
+    display: none;
+}
+.open .sidebar span {
+    display: inline-block;
+    animation: .6s fadeInAnimation ease;
+}
+.resetmargin {
+    margin: 0!important;
+}
+@keyframes fadeInAnimation {
+    0% {
+        height: 0;
+        opacity: 0;
+        display: none;
+    }
+    50% {
+        height: 0;
+        opacity: 0;
+        display: none;
+    }
+    100% {
+        height: auto;
+        opacity: 1;
+        display: inline-block;
+    }
+}
