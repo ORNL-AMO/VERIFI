@@ -1,6 +1,5 @@
-import { Component, OnInit, Renderer2 } from '@angular/core';
-import { $ } from 'protractor';
-import { trigger, state, style, animate, transition } from '@angular/animations';
+import { Component, ElementRef, OnInit, Renderer2 } from '@angular/core';
+import { Router, Event, NavigationEnd} from '@angular/router';
 
 @Component({
   selector: 'app-sidebar',
@@ -9,13 +8,27 @@ import { trigger, state, style, animate, transition } from '@angular/animations'
 })
 export class SidebarComponent implements OnInit {
   open: boolean;
-  constructor(private renderer: Renderer2) {
-    this.renderer.addClass(document.body, 'open');
-   }
 
-  ngOnInit() {
-    this.open = true;
+  constructor(
+    private renderer: Renderer2,
+    private eRef: ElementRef,
+    private router: Router) {
+
+    router.events.subscribe( (event: Event) => {
+      if (event instanceof NavigationEnd) {
+        // Close sidebar on navigation
+        this.open = true;
+        this.toggleSidebar();
+      } else if (router.url.toString() === "/") {
+        // Keep sidebar open if its the homepage
+        this.open = false;
+        this.toggleSidebar();
+      }
+    });
+
   }
+
+  ngOnInit() {}
 
   toggleSidebar() {
     this.open = !this.open;

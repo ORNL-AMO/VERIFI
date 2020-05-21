@@ -1,0 +1,32 @@
+<h4>Energy Sources</h4>
+<p>Select all energy sources that <strong>Plant 1</strong> uses.</p>
+<br>
+<form [formGroup]="energySource" (change)="formChange()">
+    <label for="energySourceElec">
+        <input id="energySourceElec" type="checkbox" formControlName="electricity">Electricity
+    </label>
+    <label for="energySourceNG">
+        <input id="energySourceNG" type="checkbox" formControlName="naturalGas">Natural Gas
+    </label>
+    <label for="energySourceLPG">
+        <input id="energySourceLPG" type="checkbox" formControlName="lpg">LPG
+    </label>
+    <label for="energySourceFO">
+        <input id="energySourceFO" type="checkbox" formControlName="fuelOil">Fuel Oil
+    </label>
+    <label for="energySourceCoal">
+        <input id="energySourceCoal" type="checkbox" formControlName="coal">Coal
+    </label>
+    <label for="energySourceWood">
+        <input id="energySourceWood" type="checkbox" formControlName="wood">Wood
+    </label>
+    <label for="energySourcePaper">
+        <input id="energySourcePaper" type="checkbox" formControlName="paper">Paper
+    </label>
+    <label for="energySourceGas">
+        <input id="energySourceGas" type="checkbox" formControlName="otherGas">Other Gas
+    </label>
+    <label for="energySourceEnergy">
+        <input id="energySourceEnergy" type="checkbox" formControlName="otherEnergy">Other Energy
+    </label>
+</form>

@@ -1,0 +1,27 @@
+.notes i {
+	font-size: 12px;
+	padding: 4px 0px 0px 7px;
+	color: #aaa;
+	float: right;
+}
+ul.notes li:nth-child(3) {
+	width: 610px;
+	display: block;
+}
+ul span.underline {
+	border-bottom:1px solid #ddd;
+	padding: 4px 0px;
+	border-radius: 3px;
+	width: 100%;
+	display: block;
+}
+ul.notes {
+	padding: 10px 0px;
+}
+ul span.select {
+	background-color: #eee;
+	padding: 2px 8px;
+	border-radius: 3px;
+	width: 100%;
+	display: block;
+}
