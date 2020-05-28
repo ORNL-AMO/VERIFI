@@ -5,10 +5,10 @@ import { FormGroup, FormControl, Validators } from '@angular/forms';
   providedIn: 'root'
 })
 export class EnergyConsumptionService {
-    
+
     energySource = new FormGroup({
-        electricity: new FormControl(false, [Validators.required]),
-        naturalGas: new FormControl(false, [Validators.required]),
+        electricity: new FormControl(true, [Validators.required]),
+        naturalGas: new FormControl(true, [Validators.required]),
         lpg: new FormControl(false, [Validators.required]),
         fuelOil: new FormControl(false, [Validators.required]),
         coal: new FormControl(false, [Validators.required]),

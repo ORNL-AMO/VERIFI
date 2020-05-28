@@ -12,6 +12,7 @@ import { Router, Event, NavigationStart} from '@angular/router';
 export class HeaderComponent implements OnInit {
   accountMenu: boolean;
   facilityMenu: boolean;
+  manageAccountMenu: boolean;
 
   constructor(
     private eRef: ElementRef,
@@ -34,10 +35,17 @@ export class HeaderComponent implements OnInit {
   toggleFacilityMenu() {
     this.facilityMenu = !this.facilityMenu;
     this.accountMenu = false;
+    this.manageAccountMenu = false;
   }
   toggleAccountMenu() {
     this.accountMenu = !this.accountMenu;
     this.facilityMenu = false;
+    this.manageAccountMenu = false;
+  }
+  toggleManageAccountsMenu() {
+    this.manageAccountMenu = !this.manageAccountMenu;
+    this.facilityMenu = false;
+    this.accountMenu = false;
   }
 
   
@@ -46,6 +54,7 @@ export class HeaderComponent implements OnInit {
     if(!this.eRef.nativeElement.contains(event.target)) {
       this.accountMenu = false;
       this.facilityMenu = false;
+      this.manageAccountMenu = false;
     }
   }
 

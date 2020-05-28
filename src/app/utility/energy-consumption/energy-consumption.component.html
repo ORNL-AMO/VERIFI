@@ -1,6 +1,6 @@
 <div class="tabs">
     <ul>
-        <li><a routerLink="energy-source" [routerLinkActive]="['active']">Energy Source</a></li>
+        <li><a routerLink="/utility/energy-consumption" [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">Energy Source</a></li>
         <li [hidden]="!energySource.value.electricity"><a routerLink="electricity" [routerLinkActive]="['active']">Electricity</a></li>
         <li [hidden]="!energySource.value.naturalGas"><a routerLink="natural-gas" [routerLinkActive]="['active']">Natural Gas</a></li>
 

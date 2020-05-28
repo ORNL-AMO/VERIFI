@@ -1,4 +1,4 @@
-<div class="sidebar" role="sidebar">
+<div id="sidebar" role="sidebar">
     <div class="menuToggle" (click)="toggleSidebar()">
         <i class="fa fa-align-left" [hidden]="!open"></i>
         <i class="fa fa-align-right" [hidden]="open"></i>
@@ -8,7 +8,7 @@
 
     <ul>
         <li><a routerLink="/" [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-home"></i> <span>Home</span></a></li>
-        <li><a routerLink="utility/energy-consumtion" [routerLinkActive]="['active']"><i class="fa fa-bar-chart"></i> <span>Utility Data</span></a></li>
+        <li><a routerLink="utility/energy-consumption" [routerLinkActive]="['active']"><i class="fa fa-bar-chart"></i> <span>Utility Data</span></a></li>
     </ul>
 
     <br>

@@ -1,4 +1,4 @@
-<div role="header">
+<div id="header" role="header">
     <div class="row resetmargin">
         <div class="col-2">
             <h2>VERIFI</h2>
@@ -28,17 +28,31 @@
             <div class="accountMenu">
                 <i class="fa fa-ellipsis-v" (click)="toggleAccountMenu()"></i>
                 <div class="dropdown" [class.open]="accountMenu == true">
-                    <div class="currentAccount">
+                    <div class="currentAccount" routerLink="/account/account">
                         <img src="https://placehold.it/50x50" alt="">
                         <p>General Motors</p>
                     </div>
                     <hr>
                     <a routerLink="/account/facility">Manage Facility</a>
                     <br>
-                    <a routerLink="/account/account">Manage Accounts</a>
+                    <a (click)="toggleManageAccountsMenu()">Manage Accounts</a>
                     <p>Settings</p>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<div id="manageAccounts" [class.open]="manageAccountMenu == true">
+<h5>Choose an Account</h5>
+    <div class="account" (click)="toggleManageAccountsMenu()">
+        <img src="https://placehold.it/50x50">
+        <p class="company">General Motors</p>
+        <p class="facilityCount">43 Facilities</p>
+        <i class="fa fa-check"></i>
+    </div>
+
+    <hr>
+    <button class="btn btn-link" (click)="toggleManageAccountsMenu()"><i class="fa fa-plus"></i> Add Account</button>
+</div>
+<div id="darkoverlay" [class.open]="manageAccountMenu == true" (click)="toggleManageAccountsMenu()"></div>
