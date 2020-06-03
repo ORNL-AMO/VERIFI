@@ -30,8 +30,8 @@ export class HeaderComponent implements OnInit {
     private router: Router,
     private accountService: AccountService,
     private facilityService: FacilityService,
-    private accountdbService: AccountdbService,
-    private facilitydbService: FacilitydbService
+    public accountdbService: AccountdbService,
+    public facilitydbService: FacilitydbService
     ) { 
       // Close menus on navigation
       router.events.subscribe( (event: Event) => {
