@@ -18,17 +18,13 @@ const routes: Routes = [
       component: UtilityComponent,
       children: [
         {
-          path: '',
+          path: 'energy-consumption', component: EnergyConsumptionComponent, 
           children: [
-            { path: 'energy-consumtion', component: EnergyConsumptionComponent,
-              children:[
-                { path: 'energy-source', component: EnergySourceComponent },
-                { path: 'electricity', component: ElectricityComponent }
-              ] 
-            },
-            { path: 'data-table', component: DataTableComponent }
+            { path: '', component: EnergySourceComponent },
+            { path: 'electricity', component: ElectricityComponent },
           ],
-        }
+        },
+        { path: 'data-table', component: DataTableComponent },
       ]
   }
 ];

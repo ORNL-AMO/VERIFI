@@ -12,25 +12,21 @@
             <img src="https://placehold.it/250x200" alt="">
         </div>
         <div class="col">
-            <form>
+            <form [formGroup]="accountForm">
                 <label>Corporation Name
-                    <input type="text">
+                    <input type="text" formControlName="name" (input)="onFormChange();">
                 </label>
                 <br>
-                <label>Plant Name
-                    <input type="text">
-                </label>
-                <br>
-                <label>Industry Typex
-                    <input type="text">
+                <label>Industry Type
+                    <input type="text" formControlName="industry" (input)="onFormChange();">
                 </label>
                 <br>
                 <label>NAICS Code
-                    <input type="text">
+                    <input type="text" formControlName="naics" (input)="onFormChange();">
                 </label>
                 <br>
-                <label>Other
-                    <input type="text">
+                <label>Notes
+                    <textarea formControlName="notes" (input)="onFormChange();"></textarea>
                 </label>
             </form>
         </div>
@@ -50,41 +46,29 @@
             <th>Facilities</th>
             <th>Country</th>
             <th>Business</th>
-            <th>Teir</th>
+            <th>Tier</th>
             <th>Facility Size</th>
             <th>Units</th>
             <th>Division</th>
             <th></th>
         </tr>
-        <tr>
-            <td>Plant 1</td>
-            <td>Argentina</td>
-            <td>Intl Export</td>
-            <td>3</td>
-            <td>10,764</td>
-            <td>ft<span class="superscript">2</span></td>
-            <td>International Operations</td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>Plant 1</td>
-            <td>Argentina</td>
-            <td>Intl Export</td>
-            <td>3</td>
-            <td>10,764</td>
-            <td>ft<span class="superscript">2</span></td>
-            <td>International Operations</td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>Plant 1</td>
-            <td>Argentina</td>
-            <td>Intl Export</td>
-            <td>3</td>
-            <td>10,764</td>
-            <td>ft<span class="superscript">2</span></td>
-            <td>International Operations</td>
-            <td></td>
+        <tr *ngFor="let facilityLists of facilityList">
+            <td>{{facilityLists.name}}</td>
+            <td>{{facilityLists.country}}</td>
+            <td>{{facilityLists.type}}</td>
+            <td>{{facilityLists.tier}}</td>
+            <td>{{facilityLists.size}}</td>
+            <td>{{facilityLists.units}}<span class="superscript">2</span></td>
+            <td>{{facilityLists.division}}</td>
+            <td (click)="$event.stopPropagation();"> <!-- Prevents closure of menu on document click-->
+                <i class="fa fa-ellipsis-v" (click)="facilityToggleMenu(facilityLists.id)" ></i>
+                <div class="facilityMenu" [class.open]="facilityMenuOpen === facilityLists.id">
+                    <p (click)="facilityEdit(facilityLists.id)">Edit</p>
+                    <p (click)="facilityDelete(facilityLists.id)">Delete</p>
+                </div>
+            </td>
         </tr>
     </table>
+
+    <button class="btn btn-link" (click)="addNewFacility()"><i class="fa fa-plus"></i> Add New Facility</button>
 </div>

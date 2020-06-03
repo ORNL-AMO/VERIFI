@@ -1,4 +1,4 @@
-<div role="header">
+<div id="header" role="header">
     <div class="row resetmargin">
         <div class="col-2">
             <h2>VERIFI</h2>
@@ -13,12 +13,11 @@
             <div class="facilityMenu">
                 <div class="currentFacility" (click)="toggleFacilityMenu()">
                     <i class="fa fa-fort-awesome"></i>
-                    <span>General Motors</span>
-                    <p>Plant 1 <i class="fa fa-caret-down"></i></p>
+                    <span>{{activeAccount}}</span>
+                    <p>{{activeFacility}} <i class="fa fa-caret-down"></i></p>
                 </div>
                 <div class="dropdown" [class.open]="facilityMenu == true">
-                    <p><i class="fa fa-fort-awesome"></i> Plant 2</p>
-                    <p><i class="fa fa-fort-awesome"></i> Plant 3</p>
+                    <p (click)="switchFacility(facilityLists.id)" *ngFor="let facilityLists of facilityList"><i class="fa fa-fort-awesome"></i> {{facilityLists.name}}</p>
                     <hr>
                     <p><i class="fa fa-plus"></i> Add New Facility</p>
                 </div>
@@ -28,17 +27,41 @@
             <div class="accountMenu">
                 <i class="fa fa-ellipsis-v" (click)="toggleAccountMenu()"></i>
                 <div class="dropdown" [class.open]="accountMenu == true">
-                    <div class="currentAccount">
+                    <div class="currentAccount" routerLink="/account/account">
                         <img src="https://placehold.it/50x50" alt="">
-                        <p>General Motors</p>
+                        <p>{{activeAccount}}</p>
                     </div>
                     <hr>
                     <a routerLink="/account/facility">Manage Facility</a>
                     <br>
-                    <a routerLink="/account/account">Manage Accounts</a>
+                    <a (click)="toggleManageAccountsMenu()">Manage Accounts</a>
                     <p>Settings</p>
                 </div>
             </div>
         </div>
     </div>
+</div>
+
+<div id="manageAccounts" [class.open]="manageAccountMenu == true">
+<h5>Choose an Account</h5>
+    <div class="account" (click)="switchAccount(accountLists.id)" *ngFor="let accountLists of accountList">
+        <img src="https://placehold.it/50x50" alt="">
+        <p class="company">{{accountLists.name}}</p>
+        <p class="facilityCount">{{accountLists.facilityCount}} Facilities</p>
+        <i class="fa" [class.fa-check]="accountid === accountLists.id" [class.fa-chevron-right]="accountid != accountLists.id"></i>
+    </div>
+
+    <hr>
+    <button class="btn btn-link" (click)="addNewAccount()"><i class="fa fa-plus"></i> Add Account</button>
+</div>
+<div id="darkoverlay" [class.open]="manageAccountMenu == true" (click)="toggleManageAccountsMenu()"></div>
+
+
+<div id="devtools" (click)="devtools = !devtools" [class.open]="devtools">
+    <p>Dev Tools</p>
+    <button class="btn btn-secondary" (click)="loadTestData();">Load Test Accounts</button><br>
+    <button class="btn btn-secondary" (click)="getAllAccounts();">Get All Accounts</button>
+    <button class="btn btn-secondary" (click)="getAllFacilities();">Get All Facilities</button><br>
+    <button class="btn btn-secondary" (click)="clearLocalstorage();">Clear localstorage</button><br>
+    <button class="btn btn-secondary" (click)="accountdbService.deleteDatabase();">Delete Database</button>
 </div>
