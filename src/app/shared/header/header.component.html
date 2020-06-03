@@ -59,8 +59,9 @@
 
 <div id="devtools" (click)="devtools = !devtools" [class.open]="devtools">
     <p>Dev Tools</p>
-    <button class="btn btn-secondary" (click)="loadTestData();">Load Test Accounts & Facilities</button><br>
+    <button class="btn btn-secondary" (click)="loadTestData();">Load Test Accounts</button><br>
     <button class="btn btn-secondary" (click)="getAllAccounts();">Get All Accounts</button>
     <button class="btn btn-secondary" (click)="getAllFacilities();">Get All Facilities</button><br>
+    <button class="btn btn-secondary" (click)="clearLocalstorage();">Clear localstorage</button><br>
     <button class="btn btn-secondary" (click)="accountdbService.deleteDatabase();">Delete Database</button>
 </div>

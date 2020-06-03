@@ -4,6 +4,7 @@ import { AccountService } from "../../account/account/account.service";
 import { AccountdbService } from "../../indexedDB/account-db.service";
 import { FacilitydbService } from "../../indexedDB/facility-db-service";
 import { FacilityService } from 'src/app/account/facility/facility.service';
+import { LocalStorageService } from 'ngx-webstorage';
 
 @Component({
   selector: 'app-header',
@@ -31,7 +32,8 @@ export class HeaderComponent implements OnInit {
     private accountService: AccountService,
     private facilityService: FacilityService,
     public accountdbService: AccountdbService,
-    public facilitydbService: FacilitydbService
+    public facilitydbService: FacilitydbService,
+    private localStorage:LocalStorageService
     ) { 
       // Close menus on navigation
       router.events.subscribe( (event: Event) => {
@@ -60,9 +62,15 @@ export class HeaderComponent implements OnInit {
     // List all accounts for popup
     this.accountdbService.getAll().then(
       data => {
+        // Load test data if no data is present
+        if (data.length != 0) {
           this.accountList = data;
           const index = this.accountList.findIndex(x => x.id === this.accountid);
           this.activeAccount = this.accountList[index]['name']; // get the name
+        } else {
+          //TEMPORARY
+          this.loadTestData();
+        }
       },
       error => {
           console.log(error);
@@ -133,7 +141,7 @@ export class HeaderComponent implements OnInit {
 
   switchFacility(index) {
     this.toggleFacilityMenu();
-    this.router.navigate(['account/facility']);
+    //this.router.navigate(['account/facility']); dont navigate away
     this.facilityService.setValue(index);
   }
 
@@ -152,7 +160,11 @@ export class HeaderComponent implements OnInit {
   *******************************************************************************/
   loadTestData() {
     this.accountdbService.addTestData();
-    this.facilitydbService.addTestData();
+    this.facilitydbService.addTestData().then(
+      data => {
+          location.reload();
+      }
+    );
     //location.reload();
     console.log("Data loaded");
   }
@@ -171,6 +183,12 @@ export class HeaderComponent implements OnInit {
           console.log(data);
       }
     ); 
+  }
+
+  clearLocalstorage() {
+    this.localStorage.clear('accountid');
+    this.localStorage.clear('facilityid');
+    console.log("data cleared");
   }
 
 }

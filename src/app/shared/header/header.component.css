@@ -177,7 +177,7 @@ div#devtools {
     left: 0;
     z-index: 1000;
     padding: 10px;
-    background-color: #000000;
+    background-color: #060a2b;
 }
 div#devtools.open {
     top: auto;
