@@ -14,44 +14,44 @@
     <div class="col">
         <div class="row">
             <div class="col">
-                <form>
+                <form [formGroup]="facilityForm">
                     <label>Building / Area
-                        <input type="text">
+                        <input type="text" formControlName="name" (input)="onFormChange();">
                     </label>
                     <br>
                     <label>County
-                        <input type="text">
+                        <input type="text" formControlName="country" (input)="onFormChange();">
                     </label>
                     <br>
                     <label>State
-                        <input type="text">
+                        <input type="text" formControlName="state" (input)="onFormChange();">
                     </label>
                     <br>
                     <label>Address
-                        <input type="text">
+                        <input type="text" formControlName="address" (input)="onFormChange();">
                     </label>
                 </form>
             </div>
             <div class="col">
-                <form>
+                <form [formGroup]="facilityForm">
                     <label>Business Type
-                        <input type="text">
+                        <input type="text" formControlName="type" (input)="onFormChange();">
                     </label>
                     <br>
                     <label>Teir
-                        <input type="text">
+                        <input type="text" formControlName="tier" (input)="onFormChange();">
                     </label>
                     <br>
                     <label>Size
-                        <input type="text">
+                        <input type="text" formControlName="size" (input)="onFormChange();">
                     </label>
                     <br>
                     <label>Units
-                        <input type="text">
+                        <input type="text" formControlName="units" (input)="onFormChange();">
                     </label>
                     <br>
                     <label>Division
-                        <input type="text">
+                        <input type="text" formControlName="division" (input)="onFormChange();">
                     </label>
                 </form>
             </div>

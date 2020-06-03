@@ -1,3 +1,31 @@
 #account .banner {
     background-color: #1e5ab3;
 }
+td i.fa.fa-ellipsis-v {
+    text-align: center;
+    display: block;
+    cursor: pointer;
+}
+td .facilityMenu {
+    position: absolute;
+    background-color: white;
+    border: 1px solid #dddddd;
+    left: 0;
+    top: 29px;
+    display: none;
+    z-index: 1;
+}
+td .facilityMenu.open {
+    display: block;
+}
+td {
+    position: relative;
+}
+td .facilityMenu p {
+    padding: 5px 10px;
+    margin: 0px;
+    cursor: pointer;
+}
+td .facilityMenu p:hover {
+    background-color: #f3f6fd;
+}
