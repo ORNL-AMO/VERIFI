@@ -1,9 +1,9 @@
 <div id="footer" role="footer">
     <div>
-        <p><i class="fa fa-calendar"></i> 5/18/20</p>
+        <p><i class="fa fa-calendar"></i> {{date | date:'MM/dd/yyyy'}}</p>
         <p><i class="fa fa-cog"></i> Settings</p>
-        <p><i class="fa fa-building-o"></i> Facilities 0/0</p>
-        <p><i class="fa fa-key"></i> Password</p>
-        <p>v0.0.1</p>
+        <p><i class="fa fa-building-o"></i> Facilities {{facilityCount}}/{{facilityCountTotal}}</p>
+        <p><i class="fa fa-user-circle-o"></i> Accounts {{accountCount}}</p>
+        <p>v{{version}}</p>
     </div>
 </div>
