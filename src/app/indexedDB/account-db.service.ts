@@ -13,6 +13,10 @@ export class AccountdbService {
     getByKey(index) {
         return this.dbService.getByKey('accounts', index);
     }
+
+    count() {
+        return this.dbService.count('accounts');
+    }
     
     add() {
         return this.dbService.add('accounts', {

@@ -15,13 +15,13 @@ import { LocalStorageService } from 'ngx-webstorage';
   }
 })
 export class HeaderComponent implements OnInit {
+  accountid: number;
+  facilityid: number;
   accountMenu: boolean = false;
   facilityMenu: boolean = false;
   manageAccountMenu: boolean;
   accountList: any = [];
   facilityList: any = [];
-  accountid: number;
-  facilityid: number;
   activeAccount: string = '';
   activeFacility: string = '';
   devtools: boolean = false;

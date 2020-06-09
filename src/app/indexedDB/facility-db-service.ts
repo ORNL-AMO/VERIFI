@@ -19,9 +19,11 @@ export class FacilitydbService {
     getByIndex(accountid) {
         return this.dbService.getByIndex('facilities', 'accountid', accountid);
     }
+    
     getAllByIndex(accountid) {
         return this.dbService.getAllByIndex('facilities', 'accountid', accountid);
     }
+
     count() {
         return this.dbService.count('facilities');
     }
