@@ -5,8 +5,14 @@ HTML Elements
 body {
     padding: 0;
     margin: 0;
+    overflow: hidden;
 }
-
+.item-right {
+    float: right;
+}
+.item-left {
+    float: left;
+}
 /*
 Typography
 ======================================================== */
@@ -64,8 +70,8 @@ Buttons
 =============================================== */
 .btn-primary {
     color: #fff;
-    background-color: #6abb2e;
-    border-color: #6abb2e;
+    background-color: #6abb2e!important;
+    border-color: #6abb2e!important;
 }
 .btn-secondary {
     color: #1f457d!important;
@@ -82,11 +88,44 @@ Buttons
     border-radius: 3px;
     margin: 10px 0;
 }
-.importExport {
-    float: right;
-}
 .importExport button:first-child {
     margin-right: 5px;
+}
+.saveCancel button:first-child {
+    margin-right: 10px;
+}
+/*
+Popups
+======================================================== */
+.popup {
+    position: relative;
+    z-index: 1000;
+    display: none;
+}
+.popup.open {
+    position: relative;
+    z-index: 1000;
+    display: block;
+}
+.popupOverlay {
+    position: fixed;
+    background-color: black;
+    width: 100vw;
+    height: 100vh;
+    top: 0;
+    left: 0;
+    opacity: 0.8;
+}
+.popupContent {
+    position: fixed;
+    background-color: white;
+    top: 10%;
+    left: calc(50% - 250px);
+    max-width: 500px;
+    box-shadow: -3px 4px 8px #0000001c;
+    border: 1px solid white;
+    padding: 30px;
+    border-radius: 3px;
 }
 /*
 Forms
@@ -105,14 +144,17 @@ label {
     width: 100%;
 }
 label input,
-label textarea {
+label textarea,
+label select {
     float: right;
     width: 70%;
 }
 label:hover {
     background-color: #f7f7f7;
 }
-
+input:disabled {
+    border: none;
+}
 /*
 Tables
 ========================================= */
@@ -129,6 +171,38 @@ table tr:first-child {
 table td, table th {
     padding: 4px 10px;
     border: 1px solid #ddd;
+}
+td i.fa.fa-ellipsis-v {
+    text-align: center;
+    display: block;
+    cursor: pointer;
+}
+td .facilityMenu,
+td .meterMenu {
+    position: absolute;
+    background-color: white;
+    border: 1px solid #dddddd;
+    left: 0;
+    top: 29px;
+    display: none;
+    z-index: 1;
+}
+td .facilityMenu.open,
+td .meterMenu.open {
+    display: block;
+}
+td {
+    position: relative;
+}
+td .facilityMenu p,
+td .meterMenu p {
+    padding: 5px 10px;
+    margin: 0px;
+    cursor: pointer;
+}
+td .facilityMenu p:hover,
+td .meterMenu p:hover  {
+    background-color: #f3f6fd;
 }
 /*
 Popovers (Contextual Help)
@@ -164,14 +238,16 @@ Popovers (Contextual Help)
 Sidebar
 =========================================== */ 
 .content {
-    margin: 0 0 0 70px;
+    margin: 67px 0 0 70px;
     /*padding: 20px 16px;*/
     background-color: #f1f1f1;
     min-height: calc(100vh - 95px);
+    height: calc(100vh - 95px);
     transition: .2s all;
+    overflow: scroll!important;
 }
 .open .content {
-    margin: 0 0 0 261px;
+    margin: 67px 0 0 261px;
 }
 .open #sidebar {
     width: calc(310px - 50px)!important;

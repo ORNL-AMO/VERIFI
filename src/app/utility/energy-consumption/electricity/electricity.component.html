@@ -1,27 +1,158 @@
-<div class="row">
-    <div class="col">
-        <form>
-            <label>Building / Area
-                <input type="text">
-            </label>
-            <br>
-            <label>Utility Supplier
-                <input type="text">
-            </label>
-            <br>
-            <label>Account Number
-                <input type="text">
-            </label>
-            <br>
-            <label>Notes
-                <textarea></textarea>
-            </label>
-        </form>
+<div class="meter" *ngFor="let meterLists of meterList">
+    <div class="meterData item-left">
+        <p><span class="bold">Meter #</span> {{meterLists.meterNumber}}</p>
+        <p><span class="bold">Account #</span> {{meterLists.accountNumber}}</p>
+        <p><span class="bold">Building / Area</span> {{meterLists.name}}</p>
+        <p><span class="bold">Utility Supplier</span> {{meterLists.supplier}}</p>
+        <p><span class="bold">Notes</span> {{meterLists.notes}}</p>
     </div>
-    <div class="col">
+
+    <div class="filter item-right">
+        <button class="btn btn-secondary" (click)="filterMenu = !filterMenu">Filter</button>
+        <div class="filter-dropdown" [hidden]="!filterMenu">
+            <label>
+                <input type="checkbox" name="filterkWh" [checked]="filterkWh" (change)="filterkWh = !filterkWh">Total kWh
+            </label>
+            <label>
+                <input type="checkbox" name="filterPeak" [checked]="filterPeak" (change)="filterPeak = !filterPeak">Peak Demand
+            </label>
+            <label>
+                <input type="checkbox" name="filterOffpeak" [checked]="filterOffpeak" (change)="filterOffpeak = !filterOffpeak">Off-Peak Demand
+            </label>
+            <label>
+                <input type="checkbox" name="filterDemand" [checked]="filterDemand" (change)="filterDemand = !filterDemand">Total Demand
+            </label>
+            <label>
+                <input type="checkbox" name="filterCost" [checked]="filterCost" (change)="filterCost = !filterCost">Total Cost
+            </label>
+            <label>
+                <input type="checkbox" name="filterAvg" [checked]="filterAvg" (change)="filterAvg = !filterAvg">Average Cost
+            </label>
+        </div>
+    </div>
+    <table>
+        <tr>
+            <th class="row-year">Meter Read Date</th>
+            <th [hidden]="!filterkWh">Total kWh</th>
+            <th [hidden]="!filterPeak">Peak Demand</th>
+            <th [hidden]="!filterOffpeak">Off-Peak Demand</th>
+            <th [hidden]="!filterDemand">Total Demand</th>
+            <th [hidden]="!filterCost">Total Cost</th>
+            <th [hidden]="!filterAvg">Average Cost</th>
+            <th></th>
+        </tr>
+        <tr *ngFor="let bill of bills">
+            <td>{{bill.readDate}}</td>
+            <td [hidden]="!filterkWh">{{bill.kWh}}</td>
+            <td [hidden]="!filterPeak">{{bill.peak}}</td>
+            <td [hidden]="!filterOffpeak">{{bill.offPeak}}</td>
+            <td [hidden]="!filterDemand">{{bill.demand}}</td>
+            <td [hidden]="!filterCost">{{bill.cost}}</td>
+            <td [hidden]="!filterAvg"><i class="fa fa-arrow-circle-up"></i></td>
+            <td (click)="popup = !popup"><i class="fa fa-ellipsis-v"></i></td>
+        </tr>
+    </table>
+    <button class="btn btn-link" (click)="addNewBill();"><i class="fa fa-plus"></i> Add New Bill</button>
+</div>
+
+<div class="meter">
+    <div class="meterData">
+        <p><span class="bold">Meter #</span> 13231</p>
+        <p><span class="bold">Account #</span> 123123</p>
+        <p><span class="bold">Building / Area</span> Knoxville</p>
+        <p><span class="bold">Utility Supplier</span> Knox Co</p>
+        <p><span class="bold">Notes</span> The meter is on the back wall.</p>
+    </div>
+
+    <table>
+        <tr>
+            <th class="row-year"></th>
+            <th class="row-subheader"></th>
+            <th>Jan</th>
+            <th>Feb</th>
+            <th>March</th>
+            <th>April</th>
+            <th>May</th>
+            <th>June</th>
+            <th>July</th>
+            <th>Aug</th>
+            <th>Sept</th>
+            <th>Oct</th>
+            <th>Nov</th>
+            <th>Dec</th>
+            <th></th>
+        </tr>
+        <tr>
+            <th class="row-year" rowspan="2">2020</th>
+            <th class="row-subheader">$$</th>
+            <td>0.00</td><td>0.00</td>
+            <td>0.00</td><td>0.00</td>
+            <td>0.00</td><td>0.00</td>
+            <td>0.00</td><td>0.00</td>
+            <td>0.00</td><td>0.00</td>
+            <td>0.00</td><td>0.00</td>
+            <td rowspan="2"><i class="fa fa-ellipsis-v"></i></td>
+        </tr>
+        <tr>
+            <th class="row-subheader">Qty</th>
+            <td>0.00</td><td>0.00</td>
+            <td>0.00</td><td>0.00</td>
+            <td>0.00</td><td>0.00</td>
+            <td>0.00</td><td>0.00</td>
+            <td>0.00</td><td>0.00</td>
+            <td>0.00</td><td>0.00</td>
+        </tr>
+        <tr>
+            <th class="row-year" rowspan="2">2019</th>
+            <th class="row-subheader">$$</th>
+            <td>0.00</td><td>0.00</td>
+            <td>0.00</td><td>0.00</td>
+            <td>0.00</td><td>0.00</td>
+            <td>0.00</td><td>0.00</td>
+            <td>0.00</td><td>0.00</td>
+            <td>0.00</td><td>0.00</td>
+            <td rowspan="2"><i class="fa fa-ellipsis-v"></i></td>
+        </tr>
+        <tr>
+            <th class="row-subheader">Qty</th>
+            <td>0.00</td><td>0.00</td>
+            <td>0.00</td><td>0.00</td>
+            <td>0.00</td><td>0.00</td>
+            <td>0.00</td><td>0.00</td>
+            <td>0.00</td><td>0.00</td>
+            <td>0.00</td><td>0.00</td>
+        </tr>
+        <tr>
+            <th class="row-year" rowspan="2">2018</th>
+            <th class="row-subheader">$$</th>
+            <td>0.00</td><td>0.00</td>
+            <td>0.00</td><td>0.00</td>
+            <td>0.00</td><td>0.00</td>
+            <td>0.00</td><td>0.00</td>
+            <td>0.00</td><td>0.00</td>
+            <td>0.00</td><td>0.00</td>
+            <td rowspan="2" (click)="popup2 = !popup2"><i class="fa fa-ellipsis-v"></i></td>
+        </tr>
+        <tr>
+            <th class="row-subheader">Qty</th>
+            <td>0.00</td><td>0.00</td>
+            <td>0.00</td><td>0.00</td>
+            <td>0.00</td><td>0.00</td>
+            <td>0.00</td><td>0.00</td>
+            <td>0.00</td><td>0.00</td>
+            <td>0.00</td><td>0.00</td>
+        </tr>
+    </table>
+</div>
+
+<div class="popup" [class.open]="popup == true">
+    <div class="popupOverlay"></div>
+    <div class="popupContent">
+        <h4>Edit Meter Data</h4>
+        <p class="bold">Meter Data</p>
         <form>
-            <label>Bill Period
-                <input type="text">
+            <label>Meter Read Date
+                <input type="date">
             </label>
             <br>
             <label>Total kWh
@@ -36,100 +167,44 @@
                 <input type="text">
             </label>
             <br>
-            <label>Peak Demand Change
+            <label>Total Demand
                 <input type="text">
             </label>
-            <label>Total
-                <input type="text">
+            <label>Total Cost
+                <input type="number">
             </label>
         </form>
+        <div class="saveCancel item-right">
+            <button class="btn btn-primary" (click)="popup = !popup">Cancel</button>
+            <button class="btn btn-primary">Save</button>
+        </div>
     </div>
 </div>
 
-
-
-<div class="importExport">
-    <button class="btn btn-secondary">Import</button>
-    <button class="btn btn-secondary">Export</button>
+<div class="popup" [class.open]="popup2 == true">
+    <div class="popupOverlay"></div>
+    <div class="popupContent">
+        <h4>Edit Meter Data</h4>
+        <p class="bold">Meter Data</p>
+        <form *ngFor="let meter of meters">
+            <label>Meter Read Date
+                <input type="date">
+            </label>
+            <br>
+            <label>Total kWh
+                <input type="text">
+            </label>
+            <br>
+            <label>Total Demand
+                <input type="text">
+            </label>
+            <label>Total Cost
+                <input type="number">
+            </label>
+        </form>
+        <div class="saveCancel item-right">
+            <button class="btn btn-primary" (click)="popup2 = !popup2">Cancel</button>
+            <button class="btn btn-primary">Save</button>
+        </div>
+    </div>
 </div>
-<div class="meterNum">
-    <strong>Meter #</strong> 13231
-</div>
-
-<table>
-    <tr>
-        <th class="row-year"></th>
-        <th class="row-subheader"></th>
-        <th>Jan</th>
-        <th>Feb</th>
-        <th>March</th>
-        <th>April</th>
-        <th>May</th>
-        <th>June</th>
-        <th>July</th>
-        <th>Aug</th>
-        <th>Sept</th>
-        <th>Oct</th>
-        <th>Nov</th>
-        <th>Dec</th>
-    </tr>
-    <tr>
-        <th class="row-year" rowspan="2">2020</th>
-        <th class="row-subheader">$$</th>
-        <td>0.00</td><td>0.00</td>
-        <td>0.00</td><td>0.00</td>
-        <td>0.00</td><td>0.00</td>
-        <td>0.00</td><td>0.00</td>
-        <td>0.00</td><td>0.00</td>
-        <td>0.00</td><td>0.00</td>
-    </tr>
-    <tr>
-        <th class="row-subheader">Qty</th>
-        <td>0.00</td><td>0.00</td>
-        <td>0.00</td><td>0.00</td>
-        <td>0.00</td><td>0.00</td>
-        <td>0.00</td><td>0.00</td>
-        <td>0.00</td><td>0.00</td>
-        <td>0.00</td><td>0.00</td>
-    </tr>
-    <tr>
-        <th class="row-year" rowspan="2">2019</th>
-        <th class="row-subheader">$$</th>
-        <td>0.00</td><td>0.00</td>
-        <td>0.00</td><td>0.00</td>
-        <td>0.00</td><td>0.00</td>
-        <td>0.00</td><td>0.00</td>
-        <td>0.00</td><td>0.00</td>
-        <td>0.00</td><td>0.00</td>
-    </tr>
-    <tr>
-        <th class="row-subheader">Qty</th>
-        <td>0.00</td><td>0.00</td>
-        <td>0.00</td><td>0.00</td>
-        <td>0.00</td><td>0.00</td>
-        <td>0.00</td><td>0.00</td>
-        <td>0.00</td><td>0.00</td>
-        <td>0.00</td><td>0.00</td>
-    </tr>
-    <tr>
-        <th class="row-year" rowspan="2">2018</th>
-        <th class="row-subheader">$$</th>
-        <td>0.00</td><td>0.00</td>
-        <td>0.00</td><td>0.00</td>
-        <td>0.00</td><td>0.00</td>
-        <td>0.00</td><td>0.00</td>
-        <td>0.00</td><td>0.00</td>
-        <td>0.00</td><td>0.00</td>
-    </tr>
-    <tr>
-        <th class="row-subheader">Qty</th>
-        <td>0.00</td><td>0.00</td>
-        <td>0.00</td><td>0.00</td>
-        <td>0.00</td><td>0.00</td>
-        <td>0.00</td><td>0.00</td>
-        <td>0.00</td><td>0.00</td>
-        <td>0.00</td><td>0.00</td>
-    </tr>
-</table>
-
-<button class="btn btn-link"><i class="fa fa-plus"></i> Add New Meter</button>

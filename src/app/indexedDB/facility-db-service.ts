@@ -16,6 +16,10 @@ export class FacilitydbService {
         return this.dbService.getByKey('facilities', index);
     }
 
+    getById(facilityid) {
+        return this.dbService.getByIndex('facilities', 'facilityid', facilityid);
+    }
+
     getByIndex(accountid) {
         return this.dbService.getByIndex('facilities', 'accountid', accountid);
     }
@@ -28,8 +32,11 @@ export class FacilitydbService {
         return this.dbService.count('facilities');
     }
 
-    add(accountid) {
+    async add(accountid) {
+        console.log("test");
+        let facilityCount = this.count();
         return this.dbService.add('facilities', { 
+            facilityid: await facilityCount + 1,
             accountid: accountid,
             name: 'New Facility',
             country: '',
@@ -54,6 +61,7 @@ export class FacilitydbService {
 
     addTestData() {
         this.dbService.add('facilities', { 
+            facilityid: 1, // Captin Crunch
             accountid: 1, // Captin Crunch
             name: 'Crunch-a-tize',
             country: 'USA',
@@ -67,6 +75,7 @@ export class FacilitydbService {
             img: 'https://placthold.it/50x50'}
         );
         this.dbService.add('facilities', { 
+            facilityid: 2,
             accountid: 2, // Mini Wheats
             name: 'Frosted Side',
             country: 'USA',
@@ -80,6 +89,7 @@ export class FacilitydbService {
             img: 'https://placthold.it/50x50'}
         );
         this.dbService.add('facilities', { 
+            facilityid: 3,
             accountid: 2, // Mini Wheats
             name: 'Plain Side',
             country: 'USA',
@@ -93,6 +103,7 @@ export class FacilitydbService {
             img: 'https://placthold.it/50x50'}
         );
         return this.dbService.add('facilities', { 
+            facilityid: 4,
             accountid: 3, // Special K
             name: 'Almond Milk',
             country: 'USA',

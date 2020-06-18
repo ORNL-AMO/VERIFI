@@ -1,4 +1,35 @@
-.meterNum {
-    float: left;
+.meter {
+    margin-bottom: 50px;
+}
+.meterData {
     padding: 10px 0px;
+}
+.meterData p {
+    margin: 0px;
+}
+.filter {
+    position: relative;
+}
+.filter-dropdown {
+    position: absolute;
+    top: 37px;
+    background-color: white;
+    z-index: 1;
+    padding: 20px;
+    min-width: 180px;
+    box-shadow: -3px 4px 8px #0000001c;
+}
+.filter .filter-dropdown label {
+    margin: 0px 10px 0 0;
+}
+.filter .filter-dropdown input {
+    float: left;
+    width: auto;
+    margin: 0px 10px 0 0;
+}
+i.fa.fa-arrow-circle-up {
+    color: green;
+}
+i.fa.fa-arrow-circle-down {
+    color: red;
 }

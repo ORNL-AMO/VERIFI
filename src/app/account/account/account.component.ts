@@ -117,7 +117,7 @@ export class AccountComponent implements OnInit {
       // Update db
       this.accountdbService.update(this.accountForm.value).then(
         data => {
-          this.accountService.setValue(this.accountid);
+          this.accountService.setValue(this.accountid); // forces ui to update
         },
         error => {
             console.log(error);
