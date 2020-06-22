@@ -1,6 +1,8 @@
-<div class="meter" *ngFor="let meterLists of meterList">
+<!--<div [@listAnimation]="meterList.length">-->
+<div>
+<div class="meter" *ngFor="let meterLists of meterList" >
     <div class="meterData item-left">
-        <p><span class="bold">Meter #</span> {{meterLists.meterNumber}}</p>
+        <p><span class="bold">Meter #</span>{{meterLists.id}} {{meterLists.meterNumber}}</p>
         <p><span class="bold">Account #</span> {{meterLists.accountNumber}}</p>
         <p><span class="bold">Building / Area</span> {{meterLists.name}}</p>
         <p><span class="bold">Utility Supplier</span> {{meterLists.supplier}}</p>
@@ -41,20 +43,27 @@
             <th [hidden]="!filterAvg">Average Cost</th>
             <th></th>
         </tr>
-        <tr *ngFor="let bill of bills">
-            <td>{{bill.readDate}}</td>
-            <td [hidden]="!filterkWh">{{bill.kWh}}</td>
-            <td [hidden]="!filterPeak">{{bill.peak}}</td>
-            <td [hidden]="!filterOffpeak">{{bill.offPeak}}</td>
-            <td [hidden]="!filterDemand">{{bill.demand}}</td>
-            <td [hidden]="!filterCost">{{bill.cost}}</td>
+        <tr *ngFor="let meterData of meterLists.data">
+            <td>{{meterData.id}} {{meterData.readDate}}</td>
+            <td [hidden]="!filterkWh">{{meterData.kwh}}</td>
+            <td [hidden]="!filterPeak">{{meterData.peak}}</td>
+            <td [hidden]="!filterOffpeak">{{meterData.offpeak}}</td>
+            <td [hidden]="!filterDemand">{{meterData.totalDemand}}</td>
+            <td [hidden]="!filterCost">{{meterData.totalCost}}</td>
             <td [hidden]="!filterAvg"><i class="fa fa-arrow-circle-up"></i></td>
-            <td (click)="popup = !popup"><i class="fa fa-ellipsis-v"></i></td>
+            <td (click)="$event.stopPropagation();"> <!-- Prevents closure of menu on document click-->
+                <i class="fa fa-ellipsis-v" (click)="meterDataToggleMenu(meterData.id)" ></i>
+                <div class="meterMenu" [class.open]="meterDataMenuOpen === meterData.id">
+                    <p (click)="meterDataEdit(meterLists.id,meterData.id)">Edit</p>
+                    <p (click)="meterDataDelete(meterData.id)">Delete</p>
+                </div>
+            </td>
         </tr>
     </table>
-    <button class="btn btn-link" (click)="addNewBill();"><i class="fa fa-plus"></i> Add New Bill</button>
+    <button class="btn btn-link" (click)="meterDataAdd(meterLists.id)"><i class="fa fa-plus"></i> Add New Bill</button>
 </div>
 
+<!--
 <div class="meter">
     <div class="meterData">
         <p><span class="bold">Meter #</span> 13231</p>
@@ -131,7 +140,7 @@
             <td>0.00</td><td>0.00</td>
             <td>0.00</td><td>0.00</td>
             <td>0.00</td><td>0.00</td>
-            <td rowspan="2" (click)="popup2 = !popup2"><i class="fa fa-ellipsis-v"></i></td>
+            <td rowspan="2" (click)="popup = !popup"><i class="fa fa-ellipsis-v"></i></td>
         </tr>
         <tr>
             <th class="row-subheader">Qty</th>
@@ -144,67 +153,49 @@
         </tr>
     </table>
 </div>
-
+-->
 <div class="popup" [class.open]="popup == true">
     <div class="popupOverlay"></div>
     <div class="popupContent">
         <h4>Edit Meter Data</h4>
         <p class="bold">Meter Data</p>
-        <form>
+        <form [formGroup]="meterDataForm">
+            <label>Id
+                <input type="text" formControlName="id">
+            </label>
+            <br>
+            <label>Meter id
+                <input type="text" formControlName="meterid">
+            </label>
+            <br>
             <label>Meter Read Date
-                <input type="date">
+                <input type="text" formControlName="readDate">
             </label>
             <br>
             <label>Total kWh
-                <input type="text">
+                <input type="text" formControlName="kwh">
             </label>
             <br>
             <label>Peak Demand
-                <input type="text">
+                <input type="text" formControlName="peak">
             </label>
             <br>
             <label>Off-Peak Demand
-                <input type="text">
+                <input type="text" formControlName="offpeak">
             </label>
             <br>
             <label>Total Demand
-                <input type="text">
+                <input type="text" formControlName="totalDemand">
             </label>
             <label>Total Cost
-                <input type="number">
+                <input type="number" formControlName="totalCost">
             </label>
         </form>
         <div class="saveCancel item-right">
             <button class="btn btn-primary" (click)="popup = !popup">Cancel</button>
-            <button class="btn btn-primary">Save</button>
+            <button class="btn btn-primary" (click)="meterDataSave()">Save</button>
         </div>
     </div>
 </div>
 
-<div class="popup" [class.open]="popup2 == true">
-    <div class="popupOverlay"></div>
-    <div class="popupContent">
-        <h4>Edit Meter Data</h4>
-        <p class="bold">Meter Data</p>
-        <form *ngFor="let meter of meters">
-            <label>Meter Read Date
-                <input type="date">
-            </label>
-            <br>
-            <label>Total kWh
-                <input type="text">
-            </label>
-            <br>
-            <label>Total Demand
-                <input type="text">
-            </label>
-            <label>Total Cost
-                <input type="number">
-            </label>
-        </form>
-        <div class="saveCancel item-right">
-            <button class="btn btn-primary" (click)="popup2 = !popup2">Cancel</button>
-            <button class="btn btn-primary">Save</button>
-        </div>
-    </div>
 </div>

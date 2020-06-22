@@ -1,6 +1,7 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { CallbackPipe } from "./callback.pipe";
 
 import { NgxIndexedDBModule, DBConfig } from 'ngx-indexed-db';
 import { NgxWebstorageModule } from 'ngx-webstorage';
@@ -22,7 +23,7 @@ import { ElectricityComponent } from './utility/energy-consumption/electricity/e
 
 const dbConfig: DBConfig  = {
   name: 'verifi',
-  version: 4.2,
+  version: 4.3,
   objectStoresMeta: [{
     store: 'accounts',
     storeConfig: { keyPath: 'id', autoIncrement: true },
@@ -87,6 +88,7 @@ const dbConfig: DBConfig  = {
 
 @NgModule({
   declarations: [
+    CallbackPipe,
     AppComponent,
     HeaderComponent,
     FooterComponent,

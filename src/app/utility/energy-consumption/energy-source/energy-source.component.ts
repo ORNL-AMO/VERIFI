@@ -6,11 +6,15 @@ import { AccountdbService } from "../../../indexedDB/account-db.service";
 import { FacilitydbService } from "../../../indexedDB/facility-db-service";
 import { FacilityService } from 'src/app/account/facility/facility.service';
 import { UtilityMeterdbService } from "../../../indexedDB/utilityMeter-db-service";
+import {listAnimation} from '../../../animations';
 
 @Component({
   selector: 'app-energy-source',
   templateUrl: './energy-source.component.html',
   styleUrls: ['./energy-source.component.css'],
+  animations: [
+    listAnimation
+  ],
   host: {
     '(document:click)': 'documentClick($event)',
   }
@@ -80,6 +84,7 @@ export class EnergySourceComponent implements OnInit {
     this.utilityMeterdbService.getAllByIndex(this.facilityid).then(
       data => {
         this.meterList = data;
+        this.meterMapTabs();
       },
       error => {
           console.log(error);
@@ -103,6 +108,7 @@ export class EnergySourceComponent implements OnInit {
           data => {
               this.meterList = data; // refresh the data 
               this.meterEdit(id); // edit data
+              this.meterMapTabs(); // Remap tabs
           }
         );
       },
@@ -112,13 +118,14 @@ export class EnergySourceComponent implements OnInit {
     );
   }
 
-  meterSave() {
-    this.popup = !this.popup;
-  
+  meterMapTabs() {
     // Remap tabs
     this.energySource = this.meterList.map(function (el) { return el.type; });
     this.energyConsumptionService.setValue(this.energySource);
-  
+
+  }
+  meterSave() {
+    this.popup = !this.popup;
     this.utilityMeterdbService.update(this.meterForm.value);// Update db
     this.meterLoadList(); // refresh the data
   }

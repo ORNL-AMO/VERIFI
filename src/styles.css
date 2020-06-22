@@ -121,7 +121,7 @@ Popups
     background-color: white;
     top: 10%;
     left: calc(50% - 250px);
-    max-width: 500px;
+    width: 500px;
     box-shadow: -3px 4px 8px #0000001c;
     border: 1px solid white;
     padding: 30px;
@@ -341,6 +341,7 @@ Content Container
 }
 .wrapper.main-content {
     margin-right: 0px;
+    min-height: 100vh;
 }
 .help-panel.tab-margin {
     margin-top: 65px;

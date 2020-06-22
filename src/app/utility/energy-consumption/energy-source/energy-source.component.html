@@ -38,7 +38,7 @@
         <p class="bold">Meter Information</p>
         <form [formGroup]="meterForm">
             <label hidden>ID
-                <input type="text"  formControlName="id">
+                <input type="text" formControlName="id">
             </label>
 
             <label>Meter Number
@@ -73,32 +73,6 @@
             <br>
             <label>Notes
                 <textarea formControlName="notes"></textarea>
-            </label>
-        </form>
-    <br>
-    <p class="bold">Add A Bill</p>
-        <form>
-            <label>Meter Read Date
-                <input type="date">
-            </label>
-            <br>
-            <label>Total kWh
-                <input type="text">
-            </label>
-            <br>
-            <label>Peak Demand
-                <input type="text">
-            </label>
-            <br>
-            <label>Off-Peak Demand
-                <input type="text">
-            </label>
-            <br>
-            <label>Total Demand
-                <input type="text">
-            </label>
-            <label>Total Cost
-                <input type="number">
             </label>
         </form>
         <div class="saveCancel item-right">
