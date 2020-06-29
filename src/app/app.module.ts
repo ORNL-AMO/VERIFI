@@ -23,7 +23,7 @@ import { ElectricityComponent } from './utility/energy-consumption/electricity/e
 
 const dbConfig: DBConfig  = {
   name: 'verifi',
-  version: 4.3,
+  version: 4.4,
   objectStoresMeta: [{
     store: 'accounts',
     storeConfig: { keyPath: 'id', autoIncrement: true },
@@ -72,16 +72,32 @@ const dbConfig: DBConfig  = {
     store: 'utilityMeterData',
     storeConfig: { keyPath: 'id', autoIncrement: true },
     storeSchema: [
-      { name: 'dataid', keypath: 'dataid', options: { unique: true} },
-      { name: 'meterid', keypath: 'meterid', options: { unique: false} },
-      { name: 'facilityid', keypath: 'facilityid', options: { unique: false} },
+      { name: 'meterid', keypath: 'meterid', options: { unique: false } },
+      { name: 'facilityid', keypath: 'facilityid', options: { unique: false } },
       { name: 'accountid', keypath: 'accountid', options: { unique: false } },
       { name: 'readDate', keypath: 'readDate', options: { unique: false } },
-      { name: 'kwh', keypath: 'kwh', options: { unique: false } },
-      { name: 'peak', keypath: 'peak', options: { unique: false } },
-      { name: 'offpeak', keypath: 'offpeak', options: { unique: false } },
+      { name: 'totalKwh', keypath: 'totalKwh', options: { unique: false } },
       { name: 'totalDemand', keypath: 'totalDemand', options: { unique: false } },
-      { name: 'totalCost', keypath: 'totalCost', options: { unique: false } }
+      { name: 'totalCost', keypath: 'totalCost', options: { unique: false } },
+      { name: 'basicCharge', keypath: 'basicCharge', options: { unique: false } },
+      { name: 'supplyBlockAmt', keypath: 'supplyBlockAmt', options: { unique: false } },
+      { name: 'supplyBlockCharge', keypath: 'supplyBlockCharge', options: { unique: false } },
+      { name: 'flatRateAmt', keypath: 'flatRateAmt', options: { unique: false } },
+      { name: 'flatRateCharge', keypath: 'flatRateCharge', options: { unique: false } },
+      { name: 'peakAmt', keypath: 'peakAmt', options: { unique: false } },
+      { name: 'peakCharge', keypath: 'peakCharge', options: { unique: false } },
+      { name: 'offpeakAmt', keypath: 'offpeakAmt', options: { unique: false } },
+      { name: 'offpeakCharge', keypath: 'offpeakCharge', options: { unique: false } },
+      { name: 'demandBlockAmt', keypath: 'demandBlockAmt', options: { unique: false } },
+      { name: 'demandBlockCharge', keypath: 'demandBlockCharge', options: { unique: false } },
+      { name: 'genTransCharge', keypath: 'genTransCharge', options: { unique: false } },
+      { name: 'deliveryCharge', keypath: 'deliveryCharge', options: { unique: false } },
+      { name: 'transCharge', keypath: 'transCharge', options: { unique: false } },
+      { name: 'powerFactorCharge', keypath: 'powerFactorCharge', options: { unique: false } },
+      { name: 'businessCharge', keypath: 'businessCharge', options: { unique: false } },
+      { name: 'utilityTax', keypath: 'utilityTax', options: { unique: false } },
+      { name: 'latePayment', keypath: 'latePayment', options: { unique: false } },
+      { name: 'otherCharge', keypath: 'otherCharge', options: { unique: false } }
     ]
   }]
 };

@@ -3,6 +3,7 @@
         "accountid",
         "dataid",
         "facilityid",
-        "meterid"
+        "meterid",
+        "offpeak"
     ]
 }

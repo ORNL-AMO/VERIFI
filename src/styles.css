@@ -13,6 +13,10 @@ body {
 .item-left {
     float: left;
 }
+.no-margin {
+    margin: 0!important;
+    padding: 0!important;
+}
 /*
 Typography
 ======================================================== */
@@ -121,11 +125,18 @@ Popups
     background-color: white;
     top: 10%;
     left: calc(50% - 250px);
+    height: 100%;
+    max-height: 80%;
+    overflow: scroll;
     width: 500px;
     box-shadow: -3px 4px 8px #0000001c;
     border: 1px solid white;
     padding: 30px;
     border-radius: 3px;
+}
+.popupContentLg {
+    width: 600px;
+    left: calc(50% - 300px);
 }
 /*
 Forms
@@ -143,6 +154,14 @@ input[type="checkbox"] {
 label {
     width: 100%;
 }
+.popup label {
+    position: relative;
+    width: calc(100% - 30px);
+    padding-left: 15px;
+}
+.popup label label {
+    width: 100%;
+}
 label input,
 label textarea,
 label select {
@@ -155,12 +174,57 @@ label:hover {
 input:disabled {
     border: none;
 }
+label .row {
+    width: 68%;
+    float: right;
+}
+.meterForm input {
+    width: 25.6%;
+    /*margin-right: 37px;*/
+}
+label .col input {
+    width: 100%;
+}
+label .row .col:nth-child(3) {
+    padding-left: 10px!important;
+}
+label label {
+    padding-left: 20px;
+}
+label a {
+    position: absolute;
+    right: -37px;
+    font-size: 12px;
+    top: 5px;
+}
+span.unit {
+    float: right;
+    display: block;
+    border: 1px solid #9b9b9b;
+    border-left: none;
+    padding: 2px 5px;
+    color: #909090;
+}
 /*
 Tables
 ========================================= */
 table {
     width: 100%;
     border: 1px solid #ddd;
+}
+.tableOverflow {
+    width: 100%;
+    overflow: scroll;
+}
+::-webkit-scrollbar {
+    -webkit-appearance: none;
+    width: 10px;
+    height: 10px;
+}
+::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background-color: rgba(0, 0, 0, 0.3);
+    -webkit-box-shadow: 0 0 1px rgba(255,255,255,.5);
 }
 table tr:nth-child(odd) {
     background-color: #f3f6fd;
@@ -172,6 +236,9 @@ table td, table th {
     padding: 4px 10px;
     border: 1px solid #ddd;
 }
+th {
+    white-space: nowrap;
+}
 td i.fa.fa-ellipsis-v {
     text-align: center;
     display: block;
@@ -182,7 +249,7 @@ td .meterMenu {
     position: absolute;
     background-color: white;
     border: 1px solid #dddddd;
-    left: 0;
+    right: 0;
     top: 29px;
     display: none;
     z-index: 1;
