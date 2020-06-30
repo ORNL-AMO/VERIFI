@@ -4,6 +4,8 @@ import { AccountService } from "../../account/account/account.service";
 import { AccountdbService } from "../../indexedDB/account-db.service";
 import { FacilitydbService } from "../../indexedDB/facility-db-service";
 import { FacilityService } from 'src/app/account/facility/facility.service';
+import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db-service";
+import { UtilityMeterDatadbService } from "../../indexedDB/utilityMeterData-db-service";
 import { LocalStorageService } from 'ngx-webstorage';
 
 @Component({
@@ -33,6 +35,8 @@ export class HeaderComponent implements OnInit {
     private facilityService: FacilityService,
     public accountdbService: AccountdbService,
     public facilitydbService: FacilitydbService,
+    public utilityMeterdbService: UtilityMeterdbService,
+    public utilityMeterDatadbService: UtilityMeterDatadbService,
     private localStorage:LocalStorageService
     ) { 
       // Close menus on navigation
@@ -128,8 +132,13 @@ export class HeaderComponent implements OnInit {
     this.accountdbService.add();
     this.router.navigate(['account/account']);
     this.accountService.setValue(this.accountList.length + 1); // switch to new account
-    this.facilitydbService.add(this.accountid); // add 1 facilty with every new account
+    this.facilitydbService.add(this.accountid); // add 1 facility with every new account
     this.facilityService.setValue(0); // having problems with selecting first index
+  }
+
+  addNewFacility() {
+    this.facilitydbService.add(this.accountid);
+    this.facilityLoadList(); // refresh the data
   }
 
   switchAccount(index) {
@@ -179,6 +188,22 @@ export class HeaderComponent implements OnInit {
 
   getAllFacilities() {
     this.facilitydbService.getAll().then(
+      data => {
+          console.log(data);
+      }
+    ); 
+  }
+
+  getAllMeters() {
+    this.utilityMeterdbService.getAll().then(
+      data => {
+          console.log(data);
+      }
+    ); 
+  }
+
+  getAllMeterData() {
+    this.utilityMeterDatadbService.getAll().then(
       data => {
           console.log(data);
       }

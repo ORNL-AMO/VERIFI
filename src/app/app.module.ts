@@ -1,9 +1,10 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { CallbackPipe } from "./callback.pipe";
 
 import { NgxIndexedDBModule, DBConfig } from 'ngx-indexed-db';
-import {NgxWebstorageModule} from 'ngx-webstorage';
+import { NgxWebstorageModule } from 'ngx-webstorage';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { HeaderComponent } from './shared/header/header.component';
@@ -22,7 +23,7 @@ import { ElectricityComponent } from './utility/energy-consumption/electricity/e
 
 const dbConfig: DBConfig  = {
   name: 'verifi',
-  version: 3,
+  version: 4.4,
   objectStoresMeta: [{
     store: 'accounts',
     storeConfig: { keyPath: 'id', autoIncrement: true },
@@ -38,6 +39,7 @@ const dbConfig: DBConfig  = {
     store: 'facilities',
     storeConfig: { keyPath: 'id', autoIncrement: true },
     storeSchema: [
+      { name: 'facilityid', keypath: 'facilityid', options: { unique: true} },
       { name: 'accountid', keypath: 'accountid', options: { unique: false } },
       { name: 'name', keypath: 'name', options: { unique: false } },
       { name: 'country', keypath: 'country', options: { unique: false } },
@@ -50,11 +52,59 @@ const dbConfig: DBConfig  = {
       { name: 'division', keypath: 'division', options: { unique: false } },
       { name: 'img', keypath: 'img', options: { unique: false } }
     ]
+  },
+  {
+    store: 'utilityMeter',
+    storeConfig: { keyPath: 'id', autoIncrement: true },
+    storeSchema: [
+      { name: 'meterid', keypath: 'meterid', options: { unique: true} },
+      { name: 'facilityid', keypath: 'facilityid', options: { unique: false} },
+      { name: 'accountid', keypath: 'accountid', options: { unique: false } },
+      { name: 'meterNumber', keypath: 'meterNumber', options: { unique: false } },
+      { name: 'accountNumber', keypath: 'accountNumber', options: { unique: false } },
+      { name: 'type', keypath: 'type', options: { unique: false } },
+      { name: 'name', keypath: 'name', options: { unique: false } },
+      { name: 'supplier', keypath: 'supplier', options: { unique: false } },
+      { name: 'notes', keypath: 'notes', options: { unique: false } }
+    ]
+  },
+  {
+    store: 'utilityMeterData',
+    storeConfig: { keyPath: 'id', autoIncrement: true },
+    storeSchema: [
+      { name: 'meterid', keypath: 'meterid', options: { unique: false } },
+      { name: 'facilityid', keypath: 'facilityid', options: { unique: false } },
+      { name: 'accountid', keypath: 'accountid', options: { unique: false } },
+      { name: 'readDate', keypath: 'readDate', options: { unique: false } },
+      { name: 'totalKwh', keypath: 'totalKwh', options: { unique: false } },
+      { name: 'totalDemand', keypath: 'totalDemand', options: { unique: false } },
+      { name: 'totalCost', keypath: 'totalCost', options: { unique: false } },
+      { name: 'basicCharge', keypath: 'basicCharge', options: { unique: false } },
+      { name: 'supplyBlockAmt', keypath: 'supplyBlockAmt', options: { unique: false } },
+      { name: 'supplyBlockCharge', keypath: 'supplyBlockCharge', options: { unique: false } },
+      { name: 'flatRateAmt', keypath: 'flatRateAmt', options: { unique: false } },
+      { name: 'flatRateCharge', keypath: 'flatRateCharge', options: { unique: false } },
+      { name: 'peakAmt', keypath: 'peakAmt', options: { unique: false } },
+      { name: 'peakCharge', keypath: 'peakCharge', options: { unique: false } },
+      { name: 'offpeakAmt', keypath: 'offpeakAmt', options: { unique: false } },
+      { name: 'offpeakCharge', keypath: 'offpeakCharge', options: { unique: false } },
+      { name: 'demandBlockAmt', keypath: 'demandBlockAmt', options: { unique: false } },
+      { name: 'demandBlockCharge', keypath: 'demandBlockCharge', options: { unique: false } },
+      { name: 'genTransCharge', keypath: 'genTransCharge', options: { unique: false } },
+      { name: 'deliveryCharge', keypath: 'deliveryCharge', options: { unique: false } },
+      { name: 'transCharge', keypath: 'transCharge', options: { unique: false } },
+      { name: 'powerFactorCharge', keypath: 'powerFactorCharge', options: { unique: false } },
+      { name: 'businessCharge', keypath: 'businessCharge', options: { unique: false } },
+      { name: 'utilityTax', keypath: 'utilityTax', options: { unique: false } },
+      { name: 'latePayment', keypath: 'latePayment', options: { unique: false } },
+      { name: 'otherCharge', keypath: 'otherCharge', options: { unique: false } }
+    ]
   }]
 };
 
 @NgModule({
   declarations: [
+    CallbackPipe,
     AppComponent,
     HeaderComponent,
     FooterComponent,
