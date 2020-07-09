@@ -1,6 +1,9 @@
+<h4>Electricity Bills</h4>
+<br>
+
 <div class="filter item-right">
     Filter:
-    <button class="btn btn-secondary" [class.btn-primary]="filterInpMenu" (click)="filterColMenu = !filterColMenu; filterInpMenu = false">Columns</button>
+    <button class="btn btn-secondary" (click)="filterColMenu = !filterColMenu; filterInpMenu = false">Columns</button>
     <button class="btn btn-secondary" (click)="filterInpMenu = !filterInpMenu; filterColMenu = false">Inputs</button>
     
     <!--Column Filters-->
@@ -24,15 +27,15 @@
 
 <div class="meter" *ngFor="let meterLists of meterList">
     <div class="meterData">
-        <p><span class="bold">Meter #</span>{{meterLists.meterNumber}}</p>
-        <p><span class="bold">Account #</span> {{meterLists.accountNumber}}</p>
-        <p><span class="bold">Building / Area</span> {{meterLists.name}}</p>
-        <p><span class="bold">Utility Supplier</span> {{meterLists.supplier}}</p>
-        <p><span class="bold">Notes</span> {{meterLists.notes}}</p>
+        <p><span class="bold">Meter</span> # {{meterLists.meterNumber}}</p>
+        <p><span class="bold">Account</span> # {{meterLists.accountNumber}}</p>
+        <p><span class="bold">Building / Area</span> : {{meterLists.name}}</p>
+        <p><span class="bold">Utility Supplier</span> : {{meterLists.supplier}}</p>
+        <p><span class="bold">Notes</span> : {{meterLists.notes}}</p>
     </div>
 
-    <div class="row">
-        <div class="col tableData">
+    <div class="row no-margin">
+        <div class="col no-margin tableData">
         <table>
             <tr>
                 <th class="row-year">Meter Read Date</th>

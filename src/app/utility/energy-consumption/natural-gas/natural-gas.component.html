@@ -1,0 +1,97 @@
+<h4>Natural Gas Bills</h4>
+<br>
+
+<div class="meter" *ngFor="let meterLists of meterList">
+    <div class="meterData">
+        <p><span class="bold">Meter</span> # {{meterLists.meterNumber}}</p>
+        <p><span class="bold">Account</span> # {{meterLists.accountNumber}}</p>
+        <p><span class="bold">Building / Area</span> : {{meterLists.name}}</p>
+        <p><span class="bold">Utility Supplier</span> : {{meterLists.supplier}}</p>
+        <p><span class="bold">Notes</span> : {{meterLists.notes}}</p>
+    </div>
+
+    <div class="row no-margin">
+        <div class="col no-margin tableData">
+        <table>
+            <tr>
+                <th class="row-year">Meter Read Date</th>
+                <th>Total Volume (cfm)/MMBTU</th>
+                <th>Commodity Charge</th>
+                <th>Delivery Charge</th>
+                <th>Other Charges</th>
+            </tr>
+            <tr *ngFor="let meterData of meterLists.data">
+                <td>{{meterData.readDate}}</td>
+                <td>{{meterData.totalVolume}}</td>
+                <td>${{meterData.commodityCharge}}</td>
+                <td>${{meterData.deliveryCharge}}</td>
+                <td>${{meterData.otherCharge}}</td>
+            </tr>
+        </table>
+    </div>
+        <div class="col tableMenu">
+            <table>
+                <tr>
+                    <th></th>
+                </tr>
+                <tr *ngFor="let meterData of meterLists.data">
+                    <td (click)="$event.stopPropagation();"> <!-- Prevents closure of menu on document click-->
+                        <i class="fa fa-ellipsis-v" (click)="meterDataToggleMenu(meterData.id)" ></i>
+                        <div class="meterMenu" [class.open]="meterDataMenuOpen === meterData.id">
+                            <p (click)="meterDataEdit(meterLists.id,meterData.id)">Edit</p>
+                            <p (click)="meterDataDelete(meterData.id)">Delete</p>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <button class="btn btn-link" (click)="meterDataAdd(meterLists.id)"><i class="fa fa-plus"></i> Add New Bill</button>
+</div>
+
+<div class="popup" [class.open]="popup == true">
+    <div class="popupOverlay"></div>
+    <div class="popupContent popupContentLg">
+
+        <h4>Edit Natural Gas Bill</h4>
+        <p class="bold">General Information</p>
+        <form class="meterForm" [formGroup]="meterDataForm">
+            <label hidden>ID
+                <input type="text" formControlName="id" hidden>
+            </label>
+            <br hidden>
+            <label hidden>Meter id
+                <input type="text" formControlName="meterid" hidden>
+            </label>
+            <br hidden>
+            <label>Meter Read Date
+                <input type="date" formControlName="readDate">
+            </label>
+            <br>
+            <label>Total Volume
+                <span class="unit">$</span>
+                <input type="text" formControlName="totalVolume">
+            </label>
+            <br>
+            <label>Commodity Charge
+                <span class="unit">$</span>
+                <input type="number" formControlName="commodityCharge">
+            </label>
+            <label>Delivery Charges
+                <span class="unit">$</span>
+                <input type="number" formControlName="deliveryCharge">
+            </label>
+            <label>Other Charges
+                <span class="unit">$</span>
+                <input type="number" formControlName="otherCharge">
+            </label>
+        </form>
+
+        <hr>
+
+        <div class="saveCancel item-right">
+            <button class="btn btn-primary" (click)="popup = !popup">Cancel</button>
+            <button class="btn btn-primary" (click)="meterDataSave()">Save</button>
+        </div>
+    </div>
+</div>
