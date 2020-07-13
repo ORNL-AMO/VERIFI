@@ -1,6 +1,13 @@
-.bold {
+.meterData .bold {
     font-weight: bold;
     color: #060a2b;
     width: 115px;
     display: inline-block;
+}
+.popup .filter-dropdown {
+    top: 115px;
+    width: calc(100% - 60px);
+    background-color: #eee;
+    box-shadow: none;
+    position: absolute;
 }

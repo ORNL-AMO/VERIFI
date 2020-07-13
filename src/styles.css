@@ -162,7 +162,7 @@ label {
 }
 .popup label {
     position: relative;
-    width: calc(100% - 30px);
+    width: 100%;
     padding-left: 15px;
 }
 .popup label label {

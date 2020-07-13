@@ -85,4 +85,7 @@
 <div class="importExport item-right">
     <button class="btn btn-secondary">Import</button>
     <button class="btn btn-secondary">Export</button>
+    <form>
+        <input type="file" (change)="changeListener($event.target.files)">
+    </form>
 </div>
