@@ -1,5 +1,5 @@
 <h4>Energy Sources</h4>
-<p>All energy sources that <strong>{{activeFacility.name}}</strong> uses can be viewed in the tabs at the top of the screen.</p>
+<p>All energy sources that <strong>Facility<!--{{activeFacility.name}}--></strong> uses can be viewed in the tabs at the top of the screen.</p>
 <br>
 
 <table>
@@ -83,9 +83,46 @@
 </div>
 
 <div class="importExport item-right">
-    <button class="btn btn-secondary">Import</button>
-    <button class="btn btn-secondary">Export</button>
-    <form>
-        <input type="file" (change)="changeListener($event.target.files)">
-    </form>
+    <button class="btn btn-secondary" (click)="importPopup = true">Import</button>
+    <button class="btn btn-secondary" (click)="meterExport()">Export</button>
+</div>
+
+
+<div class="popup"  [class.open]="importPopup == true">
+    <div class="popupOverlay"></div>
+    <div class="popupContent">
+        <h4>Import Meters</h4>
+        <br>
+        <form>
+            <input type="file" #inputFile accept=".csv" (change)="meterImport($event.target.files)">
+        </form>
+        <br>
+        <div class="importQuickView" [hidden]="quickView ==''">
+            <p class="bold">Quick View</p>
+            <table>
+                <tr>
+                    <th>Meter #</th>
+                    <th>Account #</th>
+                    <th>Type</th>
+                    <th>Building / Area</th>
+                    <th>Utility Supplier</th>
+                    <th>Notes</th>
+                </tr>
+                <tr *ngFor="let quickViews of quickView">
+                    <td>{{quickViews.meterNumber}}</td>
+                    <td>{{quickViews.accountNumber}}</td>
+                    <td>{{quickViews.type}}</td>
+                    <td>{{quickViews.name}}</td>
+                    <td>{{quickViews.supplier}}</td>
+                    <td>{{quickViews.notes}}</td>
+                </tr>
+            </table>
+        </div>
+        <p class="error" [hidden]="importError == ''">{{importError}}</p>
+
+        <div class="saveCancel item-right">
+            <button class="btn btn-primary" (click)="resetImport(); importPopup = !importPopup">Cancel</button>
+            <button class="btn btn-primary" (click)="meterAddCSV()" [disabled]="importError != ''">Submit</button>
+        </div>
+    </div>
 </div>

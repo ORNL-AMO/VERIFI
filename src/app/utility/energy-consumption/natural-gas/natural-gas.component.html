@@ -3,6 +3,7 @@
 
 <div class="meter" *ngFor="let meterLists of meterList">
     <div class="meterData">
+        <p><span class="bold">Meter ID</span> # {{meterLists.id}}</p>
         <p><span class="bold">Meter</span> # {{meterLists.meterNumber}}</p>
         <p><span class="bold">Account</span> # {{meterLists.accountNumber}}</p>
         <p><span class="bold">Building / Area</span> : {{meterLists.name}}</p>

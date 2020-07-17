@@ -69,6 +69,12 @@ Typography
     font-size: 10px;
     position: absolute;
 }
+p.error {
+    background-color: #ffebeb;
+    border: 1px solid #dc3737;
+    color: #960202;
+    padding: 10px;
+}
 /*
 Buttons
 =============================================== */
@@ -156,6 +162,12 @@ input, textarea {
 }
 input[type="checkbox"] {
     height: 21px;
+}
+input[type="file"] {
+    border: none;
+    background-color: #eee;
+    padding: 10px;
+    width: 100%;
 }
 label {
     width: 100%;
@@ -276,6 +288,10 @@ td .meterMenu p {
 td .facilityMenu p:hover,
 td .meterMenu p:hover  {
     background-color: #f3f6fd;
+}
+.importQuickView {
+    width: 100%;
+    overflow: scroll;
 }
 /*
 Popovers (Contextual Help)

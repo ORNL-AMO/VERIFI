@@ -16,6 +16,7 @@
 
 <div class="meter" *ngFor="let meterLists of meterList">
     <div class="meterData">
+        <p><span class="bold">Meter ID</span> # {{meterLists.id}}</p>
         <p><span class="bold">Meter</span> # {{meterLists.meterNumber}}</p>
         <p><span class="bold">Account</span> # {{meterLists.accountNumber}}</p>
         <p><span class="bold">Building / Area</span> : {{meterLists.name}}</p>
@@ -217,7 +218,7 @@
             </label>
             <br hidden>
             <label>Meter Read Date
-                <input type="date" formControlName="readDate">
+                <input type="date" formControlName="readDate" required>
             </label>
             <br>
             <label [hidden]="!filterInp[0]['filter']">Basic Charge/fixed fee
@@ -351,16 +352,16 @@
             <hr>
             <p class="bold">Totals</p>
             <label>Total kWh
-                <span class="unit">$</span>
-                <input type="text" formControlName="totalKwh">
+                <span class="unit">kWh</span>
+                <input type="text" formControlName="totalKwh" required>
             </label>
             <label>Total Demand
                 <span class="unit">$</span>
-                <input type="text" formControlName="totalDemand">
+                <input type="text" formControlName="totalDemand" required>
             </label>
             <label>Total Cost
                 <span class="unit">$</span>
-                <input type="text" formControlName="totalCost">
+                <input type="text" formControlName="totalCost" required>
             </label>
         </form>
 
@@ -373,3 +374,83 @@
         </div>
     </div>
 </div>
+
+<div class="importExport item-right">
+    <button class="btn btn-secondary" (click)="importPopup = true">Import</button>
+    <button class="btn btn-secondary" (click)="meterExport()">Export</button>
+</div>
+
+
+<div class="popup"  [class.open]="importPopup == true">
+    <div class="popupOverlay"></div>
+    <div class="popupContent">
+        <h4>Import Meters</h4>
+        <br>
+        <form>
+            <input type="file" #inputFile accept=".csv" (change)="meterDataImport($event.target.files)">
+        </form>
+        <br>
+        <div class="importQuickView" [hidden]="quickView ==''">
+            <p class="bold">Quick View</p>
+            <table>
+                <tr>
+                    <th class="row-year">Meter Read Date</th>
+                    <th>Total kWh</th>
+                    <th>Total Demand</th>
+                    <th>Total Cost</th>
+                    <th [hidden]="!filterCol[0]['filter']">Basic Charge</th>
+                    <th [hidden]="!filterCol[1]['filter']">Supply Block Amt</th>
+                    <th [hidden]="!filterCol[2]['filter']">Supply Block Charge</th>
+                    <th [hidden]="!filterCol[3]['filter']">Flat Rate Amount</th>
+                    <th [hidden]="!filterCol[4]['filter']">Flat Rate Charge</th>
+                    <th [hidden]="!filterCol[5]['filter']">Peak Amount</th>
+                    <th [hidden]="!filterCol[6]['filter']">Peak Charge</th>
+                    <th [hidden]="!filterCol[7]['filter']">Off-Peak Amount</th>
+                    <th [hidden]="!filterCol[8]['filter']">Off-Peak Charge</th>
+                    <th [hidden]="!filterCol[9]['filter']">Demand Block Amt</th>
+                    <th [hidden]="!filterCol[10]['filter']">Demand Block Charge</th>
+                    <th [hidden]="!filterCol[11]['filter']">Gen Trans Charge</th>
+                    <th [hidden]="!filterCol[12]['filter']">Delivery Charge</th>
+                    <th [hidden]="!filterCol[13]['filter']">Trans Charge</th>
+                    <th [hidden]="!filterCol[14]['filter']">Power Factor Charge</th>
+                    <th [hidden]="!filterCol[15]['filter']">Business Charge</th>
+                    <th [hidden]="!filterCol[16]['filter']">Utility Tax</th>
+                    <th [hidden]="!filterCol[17]['filter']">Late Payment</th>
+                    <th [hidden]="!filterCol[18]['filter']">Other Charge</th>
+                </tr>
+                <tr *ngFor="let quickViews of quickView">
+                    <td>{{quickViews.readDate}}</td>
+                    <td>{{quickViews.totalKwh}}</td>
+                    <td>{{quickViews.totalDemand}}</td>
+                    <td>${{quickViews.totalCost}}</td>
+                    <td [hidden]="!filterCol[0]['filter']">${{quickViews.basicCharge}}</td>
+                    <td [hidden]="!filterCol[1]['filter']">{{quickViews.supplyBlockAmt}}</td>
+                    <td [hidden]="!filterCol[2]['filter']">${{quickViews.supplyBlockCharge}}</td>
+                    <td [hidden]="!filterCol[3]['filter']">{{quickViews.flatRateAmt}}</td>
+                    <td [hidden]="!filterCol[4]['filter']">${{quickViews.flatRateCharge}}</td>
+                    <td [hidden]="!filterCol[5]['filter']">{{quickViews.peakAmt}}</td>
+                    <td [hidden]="!filterCol[6]['filter']">${{quickViews.peakCharge}}</td>
+                    <td [hidden]="!filterCol[7]['filter']">{{quickViews.offpeakAmt}}</td>
+                    <td [hidden]="!filterCol[8]['filter']">${{quickViews.offpeakCharge}}</td>
+                    <td [hidden]="!filterCol[9]['filter']">{{quickViews.demandBlockAmt}}</td>
+                    <td [hidden]="!filterCol[10]['filter']">${{quickViews.demandBlockCharge}}</td>
+                    <td [hidden]="!filterCol[11]['filter']">${{quickViews.genTransCharge}}</td>
+                    <td [hidden]="!filterCol[12]['filter']">${{quickViews.deliveryCharge}}</td>
+                    <td [hidden]="!filterCol[13]['filter']">${{quickViews.transCharge}}</td>
+                    <td [hidden]="!filterCol[14]['filter']">${{quickViews.powerFactorCharge}}</td>
+                    <td [hidden]="!filterCol[15]['filter']">${{quickViews.businessCharge}}</td>
+                    <td [hidden]="!filterCol[16]['filter']">${{quickViews.utilityTax}}</td>
+                    <td [hidden]="!filterCol[17]['filter']">${{quickViews.latePayment}}</td>
+                    <td [hidden]="!filterCol[18]['filter']">${{quickViews.otherCharge}}</td>
+                </tr>
+            </table>
+        </div>
+        <p class="error" [hidden]="importError == ''">{{importError}}</p>
+
+        <div class="saveCancel item-right">
+            <button class="btn btn-primary" (click)="resetImport(); importPopup = !importPopup">Cancel</button>
+            <button class="btn btn-primary" (click)="meterAddCSV()" [disabled]="importError != ''">Submit</button>
+        </div>
+    </div>
+</div>
+
