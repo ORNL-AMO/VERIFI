@@ -20,10 +20,12 @@ import { DataTableComponent } from './utility/data-table/data-table.component';
 import { EnergySourceComponent } from './utility/energy-consumption/energy-source/energy-source.component';
 import { HelpPanelComponent } from './utility/help-panel/help-panel.component';
 import { ElectricityComponent } from './utility/energy-consumption/electricity/electricity.component';
+import { NaturalGasComponent } from './utility/energy-consumption/natural-gas/natural-gas.component';
+import { LpgComponent } from './utility/energy-consumption/lpg/lpg.component';
 
 const dbConfig: DBConfig  = {
   name: 'verifi',
-  version: 4.4,
+  version: 4.5,
   objectStoresMeta: [{
     store: 'accounts',
     storeConfig: { keyPath: 'id', autoIncrement: true },
@@ -99,6 +101,20 @@ const dbConfig: DBConfig  = {
       { name: 'latePayment', keypath: 'latePayment', options: { unique: false } },
       { name: 'otherCharge', keypath: 'otherCharge', options: { unique: false } }
     ]
+  },
+  {
+    store: 'naturalGasData',
+    storeConfig: { keyPath: 'id', autoIncrement: true },
+    storeSchema: [
+      { name: 'meterid', keypath: 'meterid', options: { unique: false } },
+      { name: 'facilityid', keypath: 'facilityid', options: { unique: false } },
+      { name: 'accountid', keypath: 'accountid', options: { unique: false } },
+      { name: 'readDate', keypath: 'readDate', options: { unique: false } },
+      { name: 'totalVolume', keypath: 'totalVolume', options: { unique: false } },
+      { name: 'commodityCharge', keypath: 'commodityCharge', options: { unique: false } },
+      { name: 'deliveryCharge', keypath: 'deliveryCharge', options: { unique: false } },
+      { name: 'otherCharge', keypath: 'otherCharge', options: { unique: false } }
+    ]
   }]
 };
 
@@ -117,7 +133,9 @@ const dbConfig: DBConfig  = {
     DataTableComponent,
     EnergySourceComponent,
     HelpPanelComponent,
-    ElectricityComponent
+    ElectricityComponent,
+    NaturalGasComponent,
+    LpgComponent
   ],
   imports: [
     NgxIndexedDBModule.forRoot(dbConfig),

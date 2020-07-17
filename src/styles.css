@@ -69,6 +69,12 @@ Typography
     font-size: 10px;
     position: absolute;
 }
+p.error {
+    background-color: #ffebeb;
+    border: 1px solid #dc3737;
+    color: #960202;
+    padding: 10px;
+}
 /*
 Buttons
 =============================================== */
@@ -81,6 +87,12 @@ Buttons
     color: #1f457d!important;
     background-color: #ffffff!important;
     border-color: #1e5ab3!important;
+    padding: 2px 13px!important;
+    border-radius: 0!important;
+}
+.btn-blue {
+    color: #ffffff!important;
+    background-color: #1f457d!important;
     padding: 2px 13px!important;
     border-radius: 0!important;
 }
@@ -151,12 +163,18 @@ input, textarea {
 input[type="checkbox"] {
     height: 21px;
 }
+input[type="file"] {
+    border: none;
+    background-color: #eee;
+    padding: 10px;
+    width: 100%;
+}
 label {
     width: 100%;
 }
 .popup label {
     position: relative;
-    width: calc(100% - 30px);
+    width: 100%;
     padding-left: 15px;
 }
 .popup label label {
@@ -241,8 +259,8 @@ th {
 }
 td i.fa.fa-ellipsis-v {
     text-align: center;
-    display: block;
     cursor: pointer;
+    padding: 0px 3px;
 }
 td .facilityMenu,
 td .meterMenu {
@@ -270,6 +288,10 @@ td .meterMenu p {
 td .facilityMenu p:hover,
 td .meterMenu p:hover  {
     background-color: #f3f6fd;
+}
+.importQuickView {
+    width: 100%;
+    overflow: scroll;
 }
 /*
 Popovers (Contextual Help)
@@ -440,4 +462,99 @@ Content Tabs
 }
 .tabs ul li a.active {
     background-color: white;
+}
+
+/*
+Meter Displays
+=============================================== */
+.meter {
+    margin-bottom: 50px;
+}
+.meterData {
+    padding: 10px 0px;
+}
+.meterData p {
+    margin: 0px;
+}
+.filter {
+    position: relative;
+}
+.filter-dropdown {
+    position: absolute;
+    top: 37px;
+    background-color: white;
+    z-index: 1;
+    padding: 20px;
+    min-width: 210px;
+    box-shadow: -3px 4px 8px #0000001c;
+}
+.filter .filter-dropdown label {
+    margin: 0px 10px 0 0;
+}
+.filter .filter-dropdown input {
+    float: left;
+    width: auto;
+    margin: 0px 10px 0 0;
+}
+i.fa.fa-arrow-circle-up {
+    color: green;
+}
+i.fa.fa-arrow-circle-down {
+    color: red;
+}
+.filter button:nth-child(2) {
+    border-left: none;
+}
+
+.subheader {
+    text-transform: uppercase;
+    font-size: 12px;
+    font-weight: bold;
+    border-bottom: 1px solid #dadada;
+    padding: 20px 0 0;
+    color: #9e7f5e;
+}
+.col.unitCurrency {
+    width: 20px;
+    max-width: 20px;
+    padding: 0px;
+}
+.col.unitKwh {
+    width: 39px;
+    max-width: 39px;
+    padding: 0px;
+}
+.meterForm input[type="date"] {
+    width: 66%;
+}
+.tableMenu {
+    max-width: 32px!important;
+    background-color: white;
+    padding: 0px!important;
+    margin: 0px!important;
+}
+.tableMenu th,
+.tableMenu td {
+    display: block;
+    min-height: 30px;
+}  
+
+.tableData {
+    width: 100%;
+    overflow: scroll;
+    padding-right: 0px!important;
+    overflow-y: auto;
+}
+.tableData table {
+    border-right: none;
+}
+
+.tableMenu td {
+    border-bottom: 1px solid #ddd!important;
+}
+.tableMenu td, .tableMenu th {
+    border: none;
+}
+.tableMenu table {
+    border-bottom: none;
 }

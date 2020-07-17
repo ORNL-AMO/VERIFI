@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
 import { AccountService } from "../../../account/account/account.service";
 import { FacilityService } from 'src/app/account/facility/facility.service';
 import { UtilityMeterdbService } from "../../../indexedDB/utilityMeter-db-service";
@@ -21,9 +21,14 @@ export class ElectricityComponent implements OnInit {
   accountid: number;
   facilityid: number;
   meterid: number = 1;
+
   meterList: any = [];
   meterDataList: any;
   meterDataMenuOpen: number;
+
+  importPopup: boolean = false;
+  importError: string = '';
+  quickView: any = [];
 
   filterColMenu: boolean = false;
   filterCol = [
@@ -104,6 +109,8 @@ export class ElectricityComponent implements OnInit {
     otherCharge: new FormControl('', [Validators.required]),
   });
 
+  @ViewChild('inputFile') myInputVariable: ElementRef;
+
   constructor(
     private accountService: AccountService,
     private facilityService: FacilityService,
@@ -150,6 +157,7 @@ export class ElectricityComponent implements OnInit {
         data => {
           // push to meterlist object
           this.meterList[i]['data'] = data;
+          this.meterList[i]['data'].sort(this.sortByDate);
         },
         error => {
             console.log(error);
@@ -157,7 +165,9 @@ export class ElectricityComponent implements OnInit {
       );
     }
   }
-
+  sortByDate(a, b) {
+    return new Date(a.readDate).getTime() - new Date(b.readDate).getTime();
+  }
   // Close menus when user clicks outside the dropdown
   documentClick () {
     this.meterDataMenuOpen = null;
@@ -172,7 +182,6 @@ export class ElectricityComponent implements OnInit {
   }
 
   meterDataAdd(id) {
-    console.log("meter id " +id);
     this.utilityMeterDatadbService.add(id,this.facilityid,this.accountid).then(
       dataid => {
         // filter meter data based on meterid
@@ -196,7 +205,6 @@ export class ElectricityComponent implements OnInit {
 
   meterDataSave() {
     this.popup = !this.popup;
-    console.log(this.meterDataForm.value);
     this.utilityMeterDatadbService.update(this.meterDataForm.value);// Update db
     this.meterDataLoadList(); // refresh the data
   }
@@ -226,4 +234,133 @@ export class ElectricityComponent implements OnInit {
       this.filterCol[i]["filter"] = true;
     }
   }
+
+  meterDataImport (files: FileList) {
+    // Clear with each upload
+    this.quickView = []; 
+    this.importError = '';
+
+    if(files && files.length > 0) {
+       let file : File = files.item(0); 
+         //console.log(file.name);
+         
+         let reader: FileReader = new FileReader();
+         reader.readAsText(file);
+         reader.onload = (e) => {
+            let csv: string = reader.result as string;
+            const lines = csv.split("\n");
+            const headers = lines[0].replace('\r', '').split(",");
+            const allowedHeaders = ["meterNumber","readDate","totalKwh","totalDemand","totalCost","basicCharge","supplyBlockAmt","supplyBlockCharge","flatRateAmt","flatRateCharge","peakAmt","peakCharge","offpeakAmt","offpeakCharge","demandBlockAmt","demandBlockCharge","genTransCharge","deliveryCharge","transCharge","powerFactorCharge","businessCharge","utilityTax","latePayment","otherCharge"];
+
+            if (JSON.stringify(headers) === JSON.stringify(allowedHeaders)) {
+
+              for(var i=1;i<lines.length;i++){
+                const obj = {};
+                const currentline=lines[i].split(",");
+                for(var j=0;j<headers.length;j++){
+                  obj[headers[j]] = currentline[j];
+                }
+                this.quickView.push(obj); // Read csv and push to obj array.
+              }  
+            } else {
+              // csv didn't match -> Show error
+              this.importError = "Error with file. Please match your file to the provided template.";
+              return false;
+            }
+         }
+      }
+  }
+
+  meterAddCSV() {
+    this.importPopup = false;
+    
+    for(let i=0;i<this.quickView.length;i++){
+      let obj = this.quickView[i];
+      this.meterid = this.meterList.find(x => x.meterNumber == obj.meterNumber).id; // Get id of matching meter numbers
+
+      this.utilityMeterDatadbService.add(this.meterid,this.facilityid,this.accountid).then(
+        id => {
+          const importLine = {
+            id: id,
+            meterid: this.meterid,
+            facilityid: this.facilityid,
+            accountid: this.accountid,
+            readDate: obj.readDate,
+            totalKwh: obj.totalKwh,
+            totalDemand: obj.totalDemand,
+            totalCost: obj.totalCost,
+            basicCharge: obj.basicCharge,
+            supplyBlockAmt: obj.supplyBlockAmt,
+            supplyBlockCharge: obj.supplyBlockCharge,
+            flatRateAmt: obj.flatRateAmt,
+            flatRateCharge: obj.flatRateCharge,
+            peakAmt: obj.peakAmt,
+            peakCharge: obj.peakCharge,
+            offpeakAmt: obj.offpeakAmt,
+            offpeakCharge: obj.offpeakCharge,
+            demandBlockAmt: obj.demandBlockAmt,
+            demandBlockCharge: obj.demandBlockCharge,
+            genTransCharge: obj.genTransCharge,
+            deliveryCharge: obj.deliveryCharge,
+            transCharge: obj.transCharge,
+            powerFactorCharge: obj.powerFactorCharge,
+            businessCharge: obj.businessCharge,
+            utilityTax: obj.utilityTax,
+            latePayment: obj.latePayment,
+            otherCharge: obj.otherCharge
+          }
+
+          this.utilityMeterDatadbService.update(importLine); // Update db
+          this.meterLoadList(); // refresh the data
+        },
+        error => {
+            console.log(error);
+        }
+      );
+    }
+    this.resetImport();
+
+  }
+
+  resetImport() {
+    this.myInputVariable.nativeElement.value = '';
+    this.quickView = []; 
+    this.importError = '';
+  }
+
+  meterExport() {
+    
+      for (let i=0; i < this.meterList.length; i++) {
+
+        const replacer = (key, value) => value === null ? '' : value; // specify how you want to handle null values here
+        const header = Object.keys(this.meterList[i].data[0]);
+
+        header.splice(0, 4); // remove 1st 4 headers
+        header.splice(0, 1, "meterNumber"); // add meterNumber
+
+        
+        let csv = this.meterList[i].data.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer)).join(','));
+        
+        // add meterNumber as first cell
+        for (let j=0; j < csv.length; j++) {
+          csv[j] = '"' +this.meterList[i].meterNumber +  '"' + csv[j];
+        }
+  
+        csv.unshift(header.join(','));
+        csv = csv.join('\r\n');
+
+        //Download the file as CSV
+        var downloadLink = document.createElement("a");
+        var blob = new Blob(["\ufeff", csv]);
+        var url = URL.createObjectURL(blob);
+        downloadLink.href = url;
+        downloadLink.download = "VerifiMeterDataDump.csv";
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+
+      }
+      
+  }
+
 }

@@ -1,8 +1,9 @@
+<h4>Electricity Bills</h4>
+<br>
+
 <div class="filter item-right">
-    Filter:
-    <button class="btn btn-secondary" [class.btn-primary]="filterInpMenu" (click)="filterColMenu = !filterColMenu; filterInpMenu = false">Columns</button>
-    <button class="btn btn-secondary" (click)="filterInpMenu = !filterInpMenu; filterColMenu = false">Inputs</button>
-    
+    <button class="btn" [ngClass]="{'btn-secondary' : !filterColMenu, 'btn-blue' : filterColMenu}" (click)="filterColMenu = !filterColMenu; filterInpMenu = false">Filter</button>
+
     <!--Column Filters-->
     <div class="filter-dropdown" [hidden]="!filterColMenu">
         <label *ngFor="let filterCols of filterCol">
@@ -11,28 +12,20 @@
         <br><br>
         <a (click)="showAllColumns();">Show All</a>
     </div>
-
-    <!--Input Filters-->
-    <div class="filter-dropdown" [hidden]="!filterInpMenu">
-        <label *ngFor="let filterInps of filterInp">
-            <input type="checkbox" name="filterInps.name" [checked]="filterInps.filter" (change)="filterInps.filter = !filterInps.filter">{{filterInps.display}}
-        </label>
-        <br><br>
-        <a (click)="showAllFields();">Show All</a>
-    </div>
 </div>
 
 <div class="meter" *ngFor="let meterLists of meterList">
     <div class="meterData">
-        <p><span class="bold">Meter #</span>{{meterLists.meterNumber}}</p>
-        <p><span class="bold">Account #</span> {{meterLists.accountNumber}}</p>
-        <p><span class="bold">Building / Area</span> {{meterLists.name}}</p>
-        <p><span class="bold">Utility Supplier</span> {{meterLists.supplier}}</p>
-        <p><span class="bold">Notes</span> {{meterLists.notes}}</p>
+        <p><span class="bold">Meter ID</span> # {{meterLists.id}}</p>
+        <p><span class="bold">Meter</span> # {{meterLists.meterNumber}}</p>
+        <p><span class="bold">Account</span> # {{meterLists.accountNumber}}</p>
+        <p><span class="bold">Building / Area</span> : {{meterLists.name}}</p>
+        <p><span class="bold">Utility Supplier</span> : {{meterLists.supplier}}</p>
+        <p><span class="bold">Notes</span> : {{meterLists.notes}}</p>
     </div>
 
-    <div class="row">
-        <div class="col tableData">
+    <div class="row no-margin">
+        <div class="col no-margin tableData">
         <table>
             <tr>
                 <th class="row-year">Meter Read Date</th>
@@ -201,6 +194,19 @@
     <div class="popupOverlay"></div>
     <div class="popupContent popupContentLg">
         <h4>Edit Electric Bill</h4>
+
+        <div class="filter item-right">
+            <button class="btn" [ngClass]="{'btn-secondary' : !filterInpMenu, 'btn-blue' : filterInpMenu}" (click)="filterInpMenu = !filterInpMenu; filterColMenu = false">Filter</button>
+        </div> 
+            <!--Input Filters-->
+            <div class="filter-dropdown" [hidden]="!filterInpMenu">
+                <label *ngFor="let filterInps of filterInp">
+                    <input type="checkbox" name="filterInps.name" [checked]="filterInps.filter" (change)="filterInps.filter = !filterInps.filter">{{filterInps.display}}
+                </label>
+                <br><br>
+                <a (click)="showAllFields();">Show All</a>
+            </div>
+
         <p class="bold">General Information</p>
         <form class="meterForm" [formGroup]="meterDataForm">
             <label hidden>ID
@@ -212,13 +218,12 @@
             </label>
             <br hidden>
             <label>Meter Read Date
-                <input type="date" formControlName="readDate">
+                <input type="date" formControlName="readDate" required>
             </label>
             <br>
             <label [hidden]="!filterInp[0]['filter']">Basic Charge/fixed fee
                 <span class="unit">$</span>
                 <input type="text" formControlName="basicCharge">
-                <a (click)="filterInp[0]['filter'] = false">HIDE</a>
             </label>
             <br>
             <label [hidden]="!filterInp[1]['filter'] && !filterInp[2]['filter'] && !filterInp[3]['filter'] && !filterInp[4]['filter']">
@@ -228,34 +233,32 @@
                         <div [hidden]="!filterInp[1]['filter']" class="col no-margin">
                             <input type="number" formControlName="supplyBlockAmt">
                         </div>
-                        <div class="col unitKwh">
+                        <div [hidden]="!filterInp[1]['filter']" class="col unitKwh">
                             <span class="unit">kWh</span>
                         </div>
-                        <div  [hidden]="!filterInp[2]['filter']"class="col no-margin">
+                        <div [hidden]="!filterInp[2]['filter']" class="col no-margin">
                             <input type="number" formControlName="supplyBlockCharge">
                         </div>
-                        <div class="col unitCurrency">
+                        <div [hidden]="!filterInp[2]['filter']" class="col unitCurrency">
                             <span class="unit">$</span>
                         </div>
                     </div>
-                    <a (click)="filterInp[1]['filter'] = false; filterInp[2]['filter'] = false;">HIDE</a>
                 </label>
                 <label [hidden]="!filterInp[3]['filter'] && !filterInp[4]['filter']">Flat Rates
                     <div class="row no-margin">
                         <div [hidden]="!filterInp[3]['filter']" class="col no-margin">
                             <input type="number" formControlName="flatRateAmt">
                         </div>
-                        <div class="col unitKwh">
+                        <div [hidden]="!filterInp[3]['filter']" class="col unitKwh">
                             <span class="unit">kWh</span>
                         </div>
                         <div [hidden]="!filterInp[4]['filter']" class="col no-margin">
                             <input type="number" formControlName="flatRateCharge">
                         </div>
-                        <div class="col unitCurrency">
+                        <div  [hidden]="!filterInp[4]['filter']" class="col unitCurrency">
                             <span class="unit">$</span>
                         </div>
                     </div>
-                    <a (click)="filterInp[3]['filter'] = false; filterInp[4]['filter'] = false;">HIDE</a>
                 </label>
             </label>
 
@@ -266,72 +269,65 @@
                         <div [hidden]="!filterInp[5]['filter']" class="col no-margin">
                             <input type="number" formControlName="peakAmt">
                         </div>
-                        <div class="col unitKwh">
+                        <div [hidden]="!filterInp[5]['filter']" class="col unitKwh">
                             <span class="unit">kWh</span>
                         </div>
                         <div [hidden]="!filterInp[6]['filter']" class="col no-margin">
                             <input type="number" formControlName="peakCharge">
                         </div>
-                        <div class="col unitCurrency">
+                        <div [hidden]="!filterInp[6]['filter']" class="col unitCurrency">
                             <span class="unit">$</span>
                         </div>
                     </div>
-                    <a (click)="filterInp[5]['filter'] = false; filterInp[6]['filter'] = false;">HIDE</a>
                 </label>
                 <label [hidden]="!filterInp[7]['filter'] && !filterInp[8]['filter']">Off-Peak Demand
                     <div class="row no-margin">
                         <div [hidden]="!filterInp[7]['filter']" class="col no-margin">
                             <input type="number" formControlName="offpeakAmt">
                         </div>
-                        <div class="col unitKwh">
+                        <div [hidden]="!filterInp[7]['filter']" class="col unitKwh">
                             <span class="unit">kWh</span>
                         </div>
                         <div [hidden]="!filterInp[8]['filter']" class="col no-margin">
                             <input type="number" formControlName="offpeakCharge">
                         </div>
-                        <div class="col unitCurrency">
+                        <div [hidden]="!filterInp[8]['filter']" class="col unitCurrency">
                             <span class="unit">$</span>
                         </div>
                     </div>
-                    <a (click)="filterInp[7]['filter'] = false; filterInp[8]['filter'] = false;">HIDE</a>
                 </label>
                 <label [hidden]="!filterInp[9]['filter'] && !filterInp[10]['filter']">Block Rates
                     <div class="row no-margin">
                         <div [hidden]="!filterInp[9]['filter']" class="col no-margin">
                             <input type="number" formControlName="demandBlockAmt">
                         </div>
-                        <div class="col unitKwh">
+                        <div [hidden]="!filterInp[9]['filter']" class="col unitKwh">
                             <span class="unit">kWh</span>
                         </div>
                         <div [hidden]="!filterInp[10]['filter']" class="col no-margin">
                             <input type="number" formControlName="demandBlockCharge">
                         </div>
-                        <div class="col unitCurrency">
+                        <div [hidden]="!filterInp[10]['filter']" class="col unitCurrency">
                             <span class="unit">$</span>
                         </div>
                     </div> 
-                    <a (click)="filterInp[9]['filter'] = false; filterInp[10]['filter'] = false;">HIDE</a>
                 </label>
             </label>
             <label [hidden]="!filterInp[11]['filter']">Generation and Transmission charges
                 <span class="unit">$</span>
                 <input type="number" formControlName="genTransCharge">
-                <a (click)="filterInp[11]['filter'] = false">HIDE</a>
             </label>
             <label [hidden]="!filterInp[12]['filter']">Delivery Charges
                 <span class="unit">$</span>
                 <input type="number" formControlName="deliveryCharge">
-                <a (click)="filterInp[12]['filter'] = false">HIDE</a>
             </label>
             <label [hidden]="!filterInp[13]['filter']">Transmission Charges
                 <span class="unit">$</span>
                 <input type="number" formControlName="transCharge">
-                <a (click)="filterInp[13]['filter'] = false">HIDE</a>
             </label>
             <label [hidden]="!filterInp[14]['filter']">Power factor Charges
                 <span class="unit">$</span>
                 <input type="number" formControlName="powerFactorCharge">
-                <a (click)="filterInp[14]['filter'] = false">HIDE</a>
             </label>
             
             <br><br>
@@ -340,36 +336,32 @@
             <label [hidden]="!filterInp[15]['filter']">Local Business and Occupation Charge
                 <span class="unit">$</span>
                 <input type="text" formControlName="businessCharge">
-                <a (click)="filterInp[15]['filter'] = false">HIDE</a>
             </label>
             <label [hidden]="!filterInp[16]['filter']">Local Utility Tax
                 <span class="unit">$</span>
                 <input type="text" formControlName="utilityTax">
-                <a (click)="filterInp[16]['filter'] = false">HIDE</a>
             </label>
             <label [hidden]="!filterInp[17]['filter']">Late Payment Charge
                 <span class="unit">$</span>
                 <input type="text" formControlName="latePayment">
-                <a (click)="filterInp[17]['filter'] = false">HIDE</a>
             </label>
             <label [hidden]="!filterInp[18]['filter']">Other Charges
                 <span class="unit">$</span>
                 <input type="text" formControlName="otherCharge">
-                <a (click)="filterInp[18]['filter'] = false">HIDE</a>
             </label>
             <hr>
             <p class="bold">Totals</p>
             <label>Total kWh
-                <span class="unit">$</span>
-                <input type="text" formControlName="totalKwh">
+                <span class="unit">kWh</span>
+                <input type="text" formControlName="totalKwh" required>
             </label>
             <label>Total Demand
                 <span class="unit">$</span>
-                <input type="text" formControlName="totalDemand">
+                <input type="text" formControlName="totalDemand" required>
             </label>
             <label>Total Cost
                 <span class="unit">$</span>
-                <input type="text" formControlName="totalCost">
+                <input type="text" formControlName="totalCost" required>
             </label>
         </form>
 
@@ -382,3 +374,83 @@
         </div>
     </div>
 </div>
+
+<div class="importExport item-right">
+    <button class="btn btn-secondary" (click)="importPopup = true">Import</button>
+    <button class="btn btn-secondary" (click)="meterExport()">Export</button>
+</div>
+
+
+<div class="popup"  [class.open]="importPopup == true">
+    <div class="popupOverlay"></div>
+    <div class="popupContent">
+        <h4>Import Meters</h4>
+        <br>
+        <form>
+            <input type="file" #inputFile accept=".csv" (change)="meterDataImport($event.target.files)">
+        </form>
+        <br>
+        <div class="importQuickView" [hidden]="quickView ==''">
+            <p class="bold">Quick View</p>
+            <table>
+                <tr>
+                    <th class="row-year">Meter Read Date</th>
+                    <th>Total kWh</th>
+                    <th>Total Demand</th>
+                    <th>Total Cost</th>
+                    <th [hidden]="!filterCol[0]['filter']">Basic Charge</th>
+                    <th [hidden]="!filterCol[1]['filter']">Supply Block Amt</th>
+                    <th [hidden]="!filterCol[2]['filter']">Supply Block Charge</th>
+                    <th [hidden]="!filterCol[3]['filter']">Flat Rate Amount</th>
+                    <th [hidden]="!filterCol[4]['filter']">Flat Rate Charge</th>
+                    <th [hidden]="!filterCol[5]['filter']">Peak Amount</th>
+                    <th [hidden]="!filterCol[6]['filter']">Peak Charge</th>
+                    <th [hidden]="!filterCol[7]['filter']">Off-Peak Amount</th>
+                    <th [hidden]="!filterCol[8]['filter']">Off-Peak Charge</th>
+                    <th [hidden]="!filterCol[9]['filter']">Demand Block Amt</th>
+                    <th [hidden]="!filterCol[10]['filter']">Demand Block Charge</th>
+                    <th [hidden]="!filterCol[11]['filter']">Gen Trans Charge</th>
+                    <th [hidden]="!filterCol[12]['filter']">Delivery Charge</th>
+                    <th [hidden]="!filterCol[13]['filter']">Trans Charge</th>
+                    <th [hidden]="!filterCol[14]['filter']">Power Factor Charge</th>
+                    <th [hidden]="!filterCol[15]['filter']">Business Charge</th>
+                    <th [hidden]="!filterCol[16]['filter']">Utility Tax</th>
+                    <th [hidden]="!filterCol[17]['filter']">Late Payment</th>
+                    <th [hidden]="!filterCol[18]['filter']">Other Charge</th>
+                </tr>
+                <tr *ngFor="let quickViews of quickView">
+                    <td>{{quickViews.readDate}}</td>
+                    <td>{{quickViews.totalKwh}}</td>
+                    <td>{{quickViews.totalDemand}}</td>
+                    <td>${{quickViews.totalCost}}</td>
+                    <td [hidden]="!filterCol[0]['filter']">${{quickViews.basicCharge}}</td>
+                    <td [hidden]="!filterCol[1]['filter']">{{quickViews.supplyBlockAmt}}</td>
+                    <td [hidden]="!filterCol[2]['filter']">${{quickViews.supplyBlockCharge}}</td>
+                    <td [hidden]="!filterCol[3]['filter']">{{quickViews.flatRateAmt}}</td>
+                    <td [hidden]="!filterCol[4]['filter']">${{quickViews.flatRateCharge}}</td>
+                    <td [hidden]="!filterCol[5]['filter']">{{quickViews.peakAmt}}</td>
+                    <td [hidden]="!filterCol[6]['filter']">${{quickViews.peakCharge}}</td>
+                    <td [hidden]="!filterCol[7]['filter']">{{quickViews.offpeakAmt}}</td>
+                    <td [hidden]="!filterCol[8]['filter']">${{quickViews.offpeakCharge}}</td>
+                    <td [hidden]="!filterCol[9]['filter']">{{quickViews.demandBlockAmt}}</td>
+                    <td [hidden]="!filterCol[10]['filter']">${{quickViews.demandBlockCharge}}</td>
+                    <td [hidden]="!filterCol[11]['filter']">${{quickViews.genTransCharge}}</td>
+                    <td [hidden]="!filterCol[12]['filter']">${{quickViews.deliveryCharge}}</td>
+                    <td [hidden]="!filterCol[13]['filter']">${{quickViews.transCharge}}</td>
+                    <td [hidden]="!filterCol[14]['filter']">${{quickViews.powerFactorCharge}}</td>
+                    <td [hidden]="!filterCol[15]['filter']">${{quickViews.businessCharge}}</td>
+                    <td [hidden]="!filterCol[16]['filter']">${{quickViews.utilityTax}}</td>
+                    <td [hidden]="!filterCol[17]['filter']">${{quickViews.latePayment}}</td>
+                    <td [hidden]="!filterCol[18]['filter']">${{quickViews.otherCharge}}</td>
+                </tr>
+            </table>
+        </div>
+        <p class="error" [hidden]="importError == ''">{{importError}}</p>
+
+        <div class="saveCancel item-right">
+            <button class="btn btn-primary" (click)="resetImport(); importPopup = !importPopup">Cancel</button>
+            <button class="btn btn-primary" (click)="meterAddCSV()" [disabled]="importError != ''">Submit</button>
+        </div>
+    </div>
+</div>
+

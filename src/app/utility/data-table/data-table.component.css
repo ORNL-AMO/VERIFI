@@ -1,0 +1,9 @@
+.reg-weight {
+    font-weight: normal!important;
+    color: #949494;
+}
+tr.na td {
+    color: #8c8c8c!important;
+    font-style: italic;
+    background-color: #eeeeee;
+}

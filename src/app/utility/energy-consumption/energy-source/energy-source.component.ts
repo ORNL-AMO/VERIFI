@@ -1,12 +1,12 @@
-import { Component, OnInit} from '@angular/core';
-import { FormGroup, FormControl, Validators, ControlContainer, FormGroupDirective } from '@angular/forms';
+import { Component, OnInit, ElementRef, ViewChild} from '@angular/core';
+import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { EnergyConsumptionService } from '../energy-consumption.service';
 import { AccountService } from "../../../account/account/account.service";
 import { AccountdbService } from "../../../indexedDB/account-db.service";
 import { FacilitydbService } from "../../../indexedDB/facility-db-service";
 import { FacilityService } from 'src/app/account/facility/facility.service';
 import { UtilityMeterdbService } from "../../../indexedDB/utilityMeter-db-service";
-import {listAnimation} from '../../../animations';
+import { listAnimation } from '../../../animations';
 
 @Component({
   selector: 'app-energy-source',
@@ -23,11 +23,17 @@ export class EnergySourceComponent implements OnInit {
   accountid: number;
   facilityid: number;
   activeFacility: any = {name: ''};
-  energySource: any;
+
   meterMenuOpen: number;
   popup: boolean = false;
+
+  energySource: any;
   selectedMeter: any;
   meterList: any = [{type: ''}];
+  
+  importPopup: boolean = false;
+  importError: string = '';
+  quickView: any = [];
 
   meterForm = new FormGroup({
     id: new FormControl('', [Validators.required]),
@@ -41,6 +47,8 @@ export class EnergySourceComponent implements OnInit {
     supplier: new FormControl('', [Validators.required]),
     notes: new FormControl('', [Validators.required])
   });
+  
+  @ViewChild('inputFile') myInputVariable: ElementRef;
 
   constructor(
     private accountService: AccountService,
@@ -79,8 +87,8 @@ export class EnergySourceComponent implements OnInit {
     this.meterMenuOpen = null;
   }
 
+  // List all meters
   meterLoadList() {
-    // List all meters
     this.utilityMeterdbService.getAllByIndex(this.facilityid).then(
       data => {
         this.meterList = data;
@@ -122,11 +130,11 @@ export class EnergySourceComponent implements OnInit {
     // Remap tabs
     this.energySource = this.meterList.map(function (el) { return el.type; });
     this.energyConsumptionService.setValue(this.energySource);
-
   }
+
   meterSave() {
     this.popup = !this.popup;
-    this.utilityMeterdbService.update(this.meterForm.value);// Update db
+    this.utilityMeterdbService.update(this.meterForm.value); // Update db
     this.meterLoadList(); // refresh the data
   }
 
@@ -141,4 +149,96 @@ export class EnergySourceComponent implements OnInit {
     this.utilityMeterdbService.deleteIndex(id);
     this.meterLoadList(); // refresh the data
   }
+
+  meterImport (files: FileList) {
+    // Clear with each upload
+    this.quickView = []; 
+    this.importError = '';
+
+    if(files && files.length > 0) {
+       let file : File = files.item(0); 
+         //console.log(file.name);
+         
+         let reader: FileReader = new FileReader();
+         reader.readAsText(file);
+         reader.onload = (e) => {
+            let csv: string = reader.result as string;
+            const lines = csv.split("\n");
+            const headers = lines[0].replace('\r', '').split(",");
+            const allowedHeaders = ["meterNumber", "accountNumber", "type", "name", "supplier", "notes"];
+
+            if (JSON.stringify(headers) === JSON.stringify(allowedHeaders)) {
+
+              for(var i=1;i<lines.length;i++){
+                const obj = {};
+                const currentline=lines[i].split(",");
+                for(var j=0;j<headers.length;j++){
+                  obj[headers[j]] = currentline[j];
+                }
+                this.quickView.push(obj); // Read csv and push to obj array.
+              }  
+            } else {
+              // csv didn't match -> Show error
+              this.importError = "Error with file. Please match your file to the provided template.";
+              return false;
+            }
+         }
+      }
+  }
+
+  meterAddCSV() {
+    this.importPopup = false;
+    
+    for(let i=0;i<this.quickView.length;i++){
+      let obj = this.quickView[i];
+
+      this.utilityMeterdbService.add(this.facilityid,this.accountid).then(
+        id => {
+          const importLine = {
+            id: id,
+            facilityid: this.facilityid,
+            accountid: this.accountid,
+            meterNumber: obj.meterNumber,
+            accountNumber: obj.accountNumber,
+            type: obj.type,
+            name: obj.name,
+            supplier: obj.supplier,
+            notes: obj.notes
+          }
+
+          this.utilityMeterdbService.update(importLine); // Update db
+          this.meterLoadList(); // refresh the data
+        },
+        error => {
+            console.log(error);
+        }
+      );
+    }
+    this.resetImport();
+  }
+
+  resetImport() {
+    this.myInputVariable.nativeElement.value = '';
+    this.quickView = []; 
+    this.importError = '';
+  }
+
+  meterExport() {
+      const replacer = (key, value) => value === null ? '' : value; // specify how you want to handle null values here
+      const header = Object.keys(this.meterList[0]);
+      let csv = this.meterList.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer)).join(','));
+      csv.unshift(header.join(','));
+      csv = csv.join('\r\n');
+      
+      //Download the file as CSV
+      var downloadLink = document.createElement("a");
+      var blob = new Blob(["\ufeff", csv]);
+      var url = URL.createObjectURL(blob);
+      downloadLink.href = url;
+      downloadLink.download = "VerifiMeterDump.csv";
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+  }
+
 }
