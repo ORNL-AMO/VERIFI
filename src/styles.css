@@ -75,6 +75,12 @@ p.error {
     color: #960202;
     padding: 10px;
 }
+.green {
+    color: green;
+}
+.red {
+    color: red;
+}
 /*
 Buttons
 =============================================== */

@@ -6,6 +6,7 @@ import { CallbackPipe } from "./callback.pipe";
 import { NgxIndexedDBModule, DBConfig } from 'ngx-indexed-db';
 import { NgxWebstorageModule } from 'ngx-webstorage';
 import { AppRoutingModule } from './app-routing.module';
+
 import { AppComponent } from './app.component';
 import { HeaderComponent } from './shared/header/header.component';
 import { FooterComponent } from './shared/footer/footer.component';
@@ -22,6 +23,13 @@ import { HelpPanelComponent } from './utility/help-panel/help-panel.component';
 import { ElectricityComponent } from './utility/energy-consumption/electricity/electricity.component';
 import { NaturalGasComponent } from './utility/energy-consumption/natural-gas/natural-gas.component';
 import { LpgComponent } from './utility/energy-consumption/lpg/lpg.component';
+
+import { CommonModule } from '@angular/common';
+
+import * as PlotlyJS from 'plotly.js/dist/plotly.js';
+import { PlotlyModule } from 'angular-plotly.js';
+
+PlotlyModule.plotlyjs = PlotlyJS;
 
 const dbConfig: DBConfig  = {
   name: 'verifi',
@@ -144,7 +152,8 @@ const dbConfig: DBConfig  = {
     AppRoutingModule,
     BrowserAnimationsModule,
     FormsModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    CommonModule, PlotlyModule
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -4,6 +4,7 @@ import { FacilityService } from 'src/app/account/facility/facility.service';
 import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db-service";
 import { UtilityMeterDatadbService } from "../../indexedDB/utilityMeterData-db-service";
 import { NaturalGasdbService } from "../../indexedDB/naturalGas-db-service";
+import { UtilityService } from "../utility.service";
 
 @Component({
   selector: 'app-data-table',
@@ -24,7 +25,8 @@ export class DataTableComponent implements OnInit {
     private facilityService: FacilityService,
     public utilityMeterdbService: UtilityMeterdbService,
     public utilityMeterDatadbService: UtilityMeterDatadbService,
-    public naturalGasdbService: NaturalGasdbService
+    public naturalGasdbService: NaturalGasdbService,
+    public utilityService: UtilityService
     ) { }
 
   ngOnInit() {
@@ -68,9 +70,8 @@ export class DataTableComponent implements OnInit {
           data => {
             // push to meterlist object
             this.meterList[i]['data'] = data.sort(this.sortByDate);;
-            //this.meterList[i]['data'].sort(this.sortByDate);
             this.meterList[i]['calendarization'] = this.calendarization(data, 'Elec');
-            console.log(this.meterList);
+            this.utilityService.setValue(this.meterList);
           },
           error => {
               console.log(error);
@@ -83,8 +84,8 @@ export class DataTableComponent implements OnInit {
           data => {
             // push to meterlist object
             this.meterList[i]['data'] = data.sort(this.sortByDate);;
-            //this.meterList[i]['data'].sort(this.sortByDate);
             this.meterList[i]['calendarization'] = this.calendarization(data, 'NatGas');
+            this.utilityService.setValue(this.meterList);
           },
           error => {
               console.log(error);
