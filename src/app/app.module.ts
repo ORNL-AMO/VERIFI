@@ -28,6 +28,7 @@ import { CommonModule } from '@angular/common';
 
 import * as PlotlyJS from 'plotly.js/dist/plotly.js';
 import { PlotlyModule } from 'angular-plotly.js';
+import { StyleGuideComponent } from './shared/style-guide/style-guide.component';
 
 PlotlyModule.plotlyjs = PlotlyJS;
 
@@ -143,7 +144,8 @@ const dbConfig: DBConfig  = {
     HelpPanelComponent,
     ElectricityComponent,
     NaturalGasComponent,
-    LpgComponent
+    LpgComponent,
+    StyleGuideComponent
   ],
   imports: [
     NgxIndexedDBModule.forRoot(dbConfig),

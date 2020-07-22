@@ -23,8 +23,8 @@ export class DashboardComponent implements OnInit {
   calendarCost: any = [];
   meterList: any;
   meterListData: any = [];
-  avgUse: any;
-  avgCost: any;
+  avgUse: any = 0;
+  avgCost: any = 0;
   meterListType: any = [];
   xMonths = ['2020-01','2020-02','2020-03','2020-04','2020-05','2020-06','2020-07','2020-08','2020-09','2020-10','2020-11','2020-12'];
   
@@ -64,11 +64,13 @@ export class DashboardComponent implements OnInit {
 
     this.utilityService.getValue().subscribe((value) => {
       this.utilities = value;
+      console.log(this.utilities);
       this.combineCalendar();
     });
 
     this.meterDataLoadAll();
   }
+
   meterLoadList() {
     // List all meters
     this.utilityMeterdbService.getAllByIndex(this.facilityid).then(
@@ -168,8 +170,8 @@ export class DashboardComponent implements OnInit {
 
   public graph1 = {
     data: [
-        { x: this.calendarMonths, y: this.calendarVol, type: 'scatter', mode: 'lines+points', marker: {color: '#0070ff'}, fill: 'tozeroy', name: 'Volume' },
-        { x: this.calendarMonths, y: this.calendarCost, type: 'scatter', mode: 'lines+points', marker: {color: 'orange'}, fill: 'tonexty', name: 'Cost' }
+        { x: this.calendarMonths, y: this.calendarVol, type: 'scatter', mode: 'lines+points', marker: {color: '#2980b9'}, fill: 'tozeroy', name: 'Volume' },
+        { x: this.calendarMonths, y: this.calendarCost, type: 'scatter', mode: 'lines+points', marker: {color: '#17a1b8'}, fill: 'tonexty', name: 'Cost' }
     ],
     layout: {
       height: 160, 
@@ -198,7 +200,7 @@ export class DashboardComponent implements OnInit {
   };
   public graph3 = {
     data: [
-        {values: this.meterListType, labels: ['Electricity', 'Natural Gas', 'Other'], type: 'pie', marker:{colors: ['#8bbbff','#d0e8b3','#ffd399']}},
+        {values: this.meterListType, labels: ['Electricity', 'Natural Gas', 'Other'], type: 'pie', marker:{colors: ['#2c386b','#2980b9','#17a1b8']}},
     ],
     layout: {height: 250, margin: {l: 10,r: 10,b: 10,t: 10, pad: 10}},
     config: {responsive: true},
@@ -206,8 +208,8 @@ export class DashboardComponent implements OnInit {
   
   public graph4 = {
     data: [
-        { x: [1,2,3,4,5,6,7,8,9,10,11,12], y: [2,5,3,2,5,3,2,5,3,1,8,13], type: 'scatter', mode: 'lines+points', marker: {color: '#8BC34A'} },
-        { x: [1,2,3,4,5,6,7,8,9,10,11,12], y: [2,5,3,2,5,3,2,5,3,1,8,13], type: 'bar', marker:{color: '#d0e8b3'} },
+        { x: [1,2,3,4,5,6,7,8,9,10,11,12], y: [2,5,3,2,5,3,2,5,3,1,8,13], type: 'scatter', mode: 'lines+points', marker: {color: '#FFE400'} },
+        { x: [1,2,3,4,5,6,7,8,9,10,11,12], y: [2,5,3,2,5,3,2,5,3,1,8,13], type: 'bar', marker:{color: '#f39c11'} },
     ],
     layout: {height: 250, margin: {l: 40,r: 40,b: 50,t: 50, pad: 20}},
     config: {responsive: true}

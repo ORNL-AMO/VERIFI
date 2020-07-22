@@ -68,7 +68,7 @@ p.display-lg {
 .dashboard-nav ul {
   list-style: none;
   display: inline-block;
-  margin: 7px 0 0;
+  margin: 3px 0 0;
   padding: 0px;
 }
 .dashboard-nav ul li {
@@ -77,4 +77,7 @@ p.display-lg {
 }
 .dashboard-nav li.active {
   border-bottom: 3px solid #2c386b;
+}
+.bg-success {
+  background-color: #6abb2e!important;
 }

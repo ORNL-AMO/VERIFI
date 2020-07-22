@@ -9,6 +9,7 @@ import { DataTableComponent } from './utility/data-table/data-table.component';
 import { EnergySourceComponent } from './utility/energy-consumption/energy-source/energy-source.component';
 import { ElectricityComponent } from './utility/energy-consumption/electricity/electricity.component';
 import { NaturalGasComponent } from './utility/energy-consumption/natural-gas/natural-gas.component';
+import { StyleGuideComponent } from './shared/style-guide/style-guide.component';
 
 const routes: Routes = [
   { path: '', component: DashboardComponent },
@@ -27,7 +28,8 @@ const routes: Routes = [
         },
         { path: 'data-table', component: DataTableComponent },
       ]
-  }
+  },
+  { path: 'style-guide', component: StyleGuideComponent },
 ];
 
 @NgModule({
