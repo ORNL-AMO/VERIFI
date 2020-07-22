@@ -30,9 +30,9 @@
 </table>
 <button class="btn btn-link" (click)="meterAdd()"><i class="fa fa-plus"></i> Add New Meter</button>
 
-<div class="popup" [class.open]="popup == true">
-    <div class="popupOverlay"></div>
-    <div class="popupContent">
+<div class="window" [class.open]="popup == true">
+    <div class="windowOverlay"></div>
+    <div class="windowContent">
         <h4>Edit Meter</h4>
         <br>
         <p class="bold">Meter Information</p>
@@ -88,9 +88,9 @@
 </div>
 
 
-<div class="popup"  [class.open]="importPopup == true">
-    <div class="popupOverlay"></div>
-    <div class="popupContent">
+<div class="window" [class.open]="importPopup == true">
+    <div class="windowOverlay"></div>
+    <div class="windowContent">
         <h4>Import Meters</h4>
         <br>
         <form>
