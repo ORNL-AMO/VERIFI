@@ -8,7 +8,8 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { DataTableComponent } from './utility/data-table/data-table.component';
 import { EnergySourceComponent } from './utility/energy-consumption/energy-source/energy-source.component';
 import { ElectricityComponent } from './utility/energy-consumption/electricity/electricity.component';
-
+import { NaturalGasComponent } from './utility/energy-consumption/natural-gas/natural-gas.component';
+import { StyleGuideComponent } from './shared/style-guide/style-guide.component';
 
 const routes: Routes = [
   { path: '', component: DashboardComponent },
@@ -22,11 +23,13 @@ const routes: Routes = [
           children: [
             { path: '', component: EnergySourceComponent },
             { path: 'electricity', component: ElectricityComponent },
+            { path: 'natural-gas', component: NaturalGasComponent },
           ],
         },
         { path: 'data-table', component: DataTableComponent },
       ]
-  }
+  },
+  { path: 'style-guide', component: StyleGuideComponent },
 ];
 
 @NgModule({

@@ -1,4 +1,13 @@
-.meterNum {
-    float: left;
-    padding: 10px 0px;
+.meterData .bold {
+    font-weight: bold;
+    color: #060a2b;
+    width: 115px;
+    display: inline-block;
+}
+.window .filter-dropdown {
+    top: 115px;
+    width: calc(100% - 60px);
+    background-color: #eee;
+    box-shadow: none;
+    position: absolute;
 }

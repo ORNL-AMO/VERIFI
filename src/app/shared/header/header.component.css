@@ -6,6 +6,10 @@ Header
     padding: 10px 0;
     background-color: white;
     border-bottom: 2px solid #eee;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 100;
 }
 #header h2 {
     margin-bottom: 0px;
@@ -115,6 +119,8 @@ div#manageAccounts {
     padding: 20px;
     width: 400px;
     border-radius: 3px;
+    overflow: scroll;
+    max-height: 500px;
     transform: scale(0);
     transition: all .1s ease-in-out;
 }
@@ -128,6 +134,8 @@ div#manageAccounts.open {
 }
 .account img {
     float: left;
+    max-height: 50px;
+    max-width: 50px;
 }
 .account .company {
     font-size: 20px;
@@ -143,6 +151,9 @@ div#manageAccounts.open {
     right: 10px;
     top: 38%;
     font-size: 20px;
+}
+.account i.fa.fa-chevron-right {
+    color: #a7a4a4;
 }
 .account:hover {
     background-color: #eee;
@@ -161,4 +172,22 @@ div#darkoverlay {
 div#darkoverlay.open {
     height: 100vh;
     width: 100vw;
+}
+
+
+div#devtools {
+    position: fixed;
+    top: calc(100vh - 37px);
+    left: 0;
+    z-index: 1000;
+    padding: 10px;
+    background-color: #060a2b;
+}
+div#devtools.open {
+    top: auto;
+    bottom: 0;
+}
+div#devtools p {
+    color: white;
+    margin: 0;
 }
