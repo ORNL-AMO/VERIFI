@@ -75,6 +75,12 @@ p.error {
     color: #960202;
     padding: 10px;
 }
+.green {
+    color: green;
+}
+.red {
+    color: red;
+}
 /*
 Buttons
 =============================================== */
@@ -89,6 +95,11 @@ Buttons
     border-color: #1e5ab3!important;
     padding: 2px 13px!important;
     border-radius: 0!important;
+}
+.btn-danger {
+    color: #fff;
+    background-color: #dc3545;
+    border-color: #dc3545;
 }
 .btn-blue {
     color: #ffffff!important;
@@ -111,19 +122,42 @@ Buttons
     margin-right: 10px;
 }
 /*
-Popups
+Alerts
 ======================================================== */
-.popup {
+.alert {
+    padding: 5px;
+    margin: 5px 0px;
+    width: 100%;
+}
+.alert-info {
+    color: #0c5460;
+    background-color: #d1ecf1;
+    border-color: #bee5eb;
+}
+.alert-warning {
+    color: #856404;
+    background-color: #fff3cd;
+    border-color: #ffeeba;
+}
+.alert-danger {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}
+/*
+Popups & Windows
+======================================================== */
+.window {
     position: relative;
     z-index: 1000;
     display: none;
 }
-.popup.open {
+.window.open {
     position: relative;
     z-index: 1000;
     display: block;
 }
-.popupOverlay {
+.windowOverlay {
     position: fixed;
     background-color: black;
     width: 100vw;
@@ -132,7 +166,7 @@ Popups
     left: 0;
     opacity: 0.8;
 }
-.popupContent {
+.windowContent {
     position: fixed;
     background-color: white;
     top: 10%;
@@ -146,7 +180,7 @@ Popups
     padding: 30px;
     border-radius: 3px;
 }
-.popupContentLg {
+.windowContentLg {
     width: 600px;
     left: calc(50% - 300px);
 }

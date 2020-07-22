@@ -445,7 +445,7 @@
                 </tr>
             </table>
         </div>
-        <p class="error" [hidden]="importError == ''">{{importError}}</p>
+        <p class="alert alert-danger" [hidden]="importError == ''">{{importError}}</p>
 
         <div class="saveCancel item-right">
             <button class="btn btn-primary" (click)="resetImport(); importPopup = !importPopup">Cancel</button>
