@@ -2,8 +2,8 @@ import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
 import { AccountService } from "../../../account/account/account.service";
 import { FacilityService } from 'src/app/account/facility/facility.service';
 import { UtilityMeterdbService } from "../../../indexedDB/utilityMeter-db-service";
-import { UtilityMeterDatadbService } from "../../../indexedDB/utilityMeterData-db-service";
-import {listAnimation} from '../../../animations';
+import { ElectricitydbService } from "../../../indexedDB/electricity-db-service";
+import { listAnimation } from '../../../animations';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 
 
@@ -115,7 +115,7 @@ export class ElectricityComponent implements OnInit {
     private accountService: AccountService,
     private facilityService: FacilityService,
     public utilityMeterdbService: UtilityMeterdbService,
-    public utilityMeterDatadbService: UtilityMeterDatadbService
+    public electricitydbService: ElectricitydbService
     ) { }
 
   ngOnInit() {
@@ -153,7 +153,7 @@ export class ElectricityComponent implements OnInit {
   // loop each meter
     for (let i=0; i < this.meterList.length; i++) {
       // filter meter data based on meterid
-      this.utilityMeterDatadbService.getAllByIndex(this.meterList[i]['id']).then(
+      this.electricitydbService.getAllByIndex(this.meterList[i]['id']).then(
         data => {
           // push to meterlist object
           this.meterList[i]['data'] = data;
@@ -182,10 +182,10 @@ export class ElectricityComponent implements OnInit {
   }
 
   meterDataAdd(id) {
-    this.utilityMeterDatadbService.add(id,this.facilityid,this.accountid).then(
+    this.electricitydbService.add(id,this.facilityid,this.accountid).then(
       dataid => {
         // filter meter data based on meterid
-        this.utilityMeterDatadbService.getAllByIndex(id).then(
+        this.electricitydbService.getAllByIndex(id).then(
           result => {
             // push to meterlist object
             const index = this.meterList.findIndex(obj => obj.id == id);
@@ -205,7 +205,7 @@ export class ElectricityComponent implements OnInit {
 
   meterDataSave() {
     this.popup = !this.popup;
-    this.utilityMeterDatadbService.update(this.meterDataForm.value);// Update db
+    this.electricitydbService.update(this.meterDataForm.value);// Update db
     this.meterDataLoadList(); // refresh the data
   }
 
@@ -219,7 +219,7 @@ export class ElectricityComponent implements OnInit {
 
   meterDataDelete(dataid) {
     this.meterDataMenuOpen = null;
-    this.utilityMeterDatadbService.deleteIndex(dataid);
+    this.electricitydbService.deleteIndex(dataid);
     this.meterDataLoadList(); // refresh the data
   }
 
@@ -278,7 +278,7 @@ export class ElectricityComponent implements OnInit {
       let obj = this.quickView[i];
       this.meterid = this.meterList.find(x => x.meterNumber == obj.meterNumber).id; // Get id of matching meter numbers
 
-      this.utilityMeterDatadbService.add(this.meterid,this.facilityid,this.accountid).then(
+      this.electricitydbService.add(this.meterid,this.facilityid,this.accountid).then(
         id => {
           const importLine = {
             id: id,
@@ -310,7 +310,7 @@ export class ElectricityComponent implements OnInit {
             otherCharge: obj.otherCharge
           }
 
-          this.utilityMeterDatadbService.update(importLine); // Update db
+          this.electricitydbService.update(importLine); // Update db
           this.meterLoadList(); // refresh the data
         },
         error => {
