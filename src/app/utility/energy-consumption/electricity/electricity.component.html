@@ -2,7 +2,7 @@
 <br>
 
 <div class="filter item-right">
-    <button class="btn" [ngClass]="{'btn-secondary' : !filterColMenu, 'btn-blue' : filterColMenu}" (click)="filterColMenu = !filterColMenu; filterInpMenu = false">Filter</button>
+    <button class="btn" [ngClass]="{'btn-outline' : !filterColMenu, 'btn-solid' : filterColMenu}" (click)="filterColMenu = !filterColMenu; filterInpMenu = false">Filter</button>
 
     <!--Column Filters-->
     <div class="filter-dropdown" [hidden]="!filterColMenu">
@@ -196,7 +196,7 @@
         <h4>Edit Electric Bill</h4>
 
         <div class="filter item-right">
-            <button class="btn" [ngClass]="{'btn-secondary' : !filterInpMenu, 'btn-blue' : filterInpMenu}" (click)="filterInpMenu = !filterInpMenu; filterColMenu = false">Filter</button>
+            <button class="btn" [ngClass]="{'btn-outline' : !filterInpMenu, 'btn-solid' : filterInpMenu}" (click)="filterInpMenu = !filterInpMenu; filterColMenu = false">Filter</button>
         </div> 
             <!--Input Filters-->
             <div class="filter-dropdown" [hidden]="!filterInpMenu">
@@ -376,8 +376,8 @@
 </div>
 
 <div class="importExport item-right">
-    <button class="btn btn-secondary" (click)="importPopup = true">Import</button>
-    <button class="btn btn-secondary" (click)="meterExport()">Export</button>
+    <button class="btn btn-outline" (click)="importPopup = true">Import</button>
+    <button class="btn btn-outline" (click)="meterExport()">Export</button>
 </div>
 
 

@@ -4,7 +4,7 @@ import { AccountdbService } from "../indexedDB/account-db.service";
 import { FacilitydbService } from "../indexedDB/facility-db-service";
 import { FacilityService } from 'src/app/account/facility/facility.service';
 import { UtilityMeterdbService } from "../indexedDB/utilityMeter-db-service";
-import { UtilityMeterDatadbService } from "../indexedDB/utilityMeterData-db-service";
+import { ElectricitydbService } from "../indexedDB/electricity-db-service";
 import { UtilityService } from "../utility/utility.service";
 
 @Component({
@@ -35,7 +35,7 @@ export class DashboardComponent implements OnInit {
     public accountdbService: AccountdbService,
     public facilitydbService: FacilitydbService,
     public utilityMeterdbService: UtilityMeterdbService,
-    public utilityMeterDatadbService: UtilityMeterDatadbService,
+    public electricitydbService: ElectricitydbService,
     public utilityService: UtilityService
   ) { 
     this.renderer.addClass(document.body, 'open');
@@ -95,7 +95,7 @@ export class DashboardComponent implements OnInit {
   // loop each meter
     for (let i=0; i < this.meterList.length; i++) {
       // filter meter data based on meterid
-      this.utilityMeterDatadbService.getAllByIndex(this.meterList[i]['id']).then(
+      this.electricitydbService.getAllByIndex(this.meterList[i]['id']).then(
         data => {
             this.meterList[i]['data'] = data; // set meter data
             this.meterAverages(i,data); // Set meter averages
@@ -108,7 +108,7 @@ export class DashboardComponent implements OnInit {
   }
 
   meterDataLoadAll() {
-    this.utilityMeterDatadbService.getAll().then(
+    this.electricitydbService.getAll().then(
       data => {
         if(data.length != 0){ // Prevent NAN
           this.meterListData = data; // push all meter data to array
