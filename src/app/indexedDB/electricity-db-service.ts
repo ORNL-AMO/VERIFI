@@ -5,7 +5,7 @@ import { resolve } from 'url';
 @Injectable({
     providedIn: 'root'
 })
-export class UtilityMeterDatadbService {
+export class ElectricitydbService {
   constructor(private dbService: NgxIndexedDBService) {}
 
     getAll() {

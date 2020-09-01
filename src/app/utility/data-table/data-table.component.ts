@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { AccountService } from "../../account/account/account.service";
 import { FacilityService } from 'src/app/account/facility/facility.service';
 import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db-service";
-import { UtilityMeterDatadbService } from "../../indexedDB/utilityMeterData-db-service";
+import { ElectricitydbService } from "../../indexedDB/electricity-db-service";
 import { NaturalGasdbService } from "../../indexedDB/naturalGas-db-service";
 import { UtilityService } from "../utility.service";
 
@@ -24,7 +24,7 @@ export class DataTableComponent implements OnInit {
     private accountService: AccountService,
     private facilityService: FacilityService,
     public utilityMeterdbService: UtilityMeterdbService,
-    public utilityMeterDatadbService: UtilityMeterDatadbService,
+    public electricitydbService: ElectricitydbService,
     public naturalGasdbService: NaturalGasdbService,
     public utilityService: UtilityService
     ) { }
@@ -66,7 +66,7 @@ export class DataTableComponent implements OnInit {
       //console.log(this.meterList);
       if (this.meterList[i].type == 'Electricity') {
         // filter meter data based on meterid
-        this.utilityMeterDatadbService.getAllByIndex(this.meterList[i]['id']).then(
+        this.electricitydbService.getAllByIndex(this.meterList[i]['id']).then(
           data => {
             // push to meterlist object
             this.meterList[i]['data'] = data.sort(this.sortByDate);;
