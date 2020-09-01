@@ -39,6 +39,7 @@ export class UtilityMeterdbService {
             meterNumber: '000',
             accountNumber: '000',
             type: '',
+            group: '',
             name: '',
             supplier: '',
             notes: ''

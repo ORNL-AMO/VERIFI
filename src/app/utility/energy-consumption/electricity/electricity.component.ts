@@ -141,7 +141,8 @@ export class ElectricityComponent implements OnInit {
             return obj.type == "Electricity"
           });
           // Add all meter data to meter list
-          this.meterDataLoadList()
+          this.meterDataLoadList();
+          console.log(this.meterList);
       },
       error => {
           console.log(error);

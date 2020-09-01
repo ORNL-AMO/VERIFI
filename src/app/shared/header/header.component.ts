@@ -5,6 +5,7 @@ import { AccountdbService } from "../../indexedDB/account-db.service";
 import { FacilitydbService } from "../../indexedDB/facility-db-service";
 import { FacilityService } from 'src/app/account/facility/facility.service';
 import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db-service";
+import { UtilityMeterGroupdbService } from "../../indexedDB/utilityMeterGroup-db.service";
 import { ElectricitydbService } from "../../indexedDB/electricity-db-service";
 import { LocalStorageService } from 'ngx-webstorage';
 
@@ -36,6 +37,7 @@ export class HeaderComponent implements OnInit {
     public accountdbService: AccountdbService,
     public facilitydbService: FacilitydbService,
     public utilityMeterdbService: UtilityMeterdbService,
+    public utilityMeterGroupdbService: UtilityMeterGroupdbService,
     public electricitydbService: ElectricitydbService,
     private localStorage:LocalStorageService
     ) { 
@@ -204,6 +206,14 @@ export class HeaderComponent implements OnInit {
 
   getAllMeterData() {
     this.electricitydbService.getAll().then(
+      data => {
+          console.log(data);
+      }
+    ); 
+  }
+
+  getAllMeterGroups() {
+    this.utilityMeterGroupdbService.getAll().then(
       data => {
           console.log(data);
       }

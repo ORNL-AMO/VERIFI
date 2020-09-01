@@ -29,6 +29,8 @@ import { CommonModule } from '@angular/common';
 import * as PlotlyJS from 'plotly.js/dist/plotly.js';
 import { PlotlyModule } from 'angular-plotly.js';
 import { StyleGuideComponent } from './shared/style-guide/style-guide.component';
+import { PredictorsComponent } from './utility/predictors/predictors.component';
+import { MoMeterDataComponent } from './utility/mo-meter-data/mo-meter-data.component';
 
 PlotlyModule.plotlyjs = PlotlyJS;
 
@@ -74,6 +76,7 @@ const dbConfig: DBConfig  = {
       { name: 'meterNumber', keypath: 'meterNumber', options: { unique: false } },
       { name: 'accountNumber', keypath: 'accountNumber', options: { unique: false } },
       { name: 'type', keypath: 'type', options: { unique: false } },
+      { name: 'group', keypath: 'group', options: { unique: false } },
       { name: 'name', keypath: 'name', options: { unique: false } },
       { name: 'supplier', keypath: 'supplier', options: { unique: false } },
       { name: 'notes', keypath: 'notes', options: { unique: false } }
@@ -124,6 +127,20 @@ const dbConfig: DBConfig  = {
       { name: 'deliveryCharge', keypath: 'deliveryCharge', options: { unique: false } },
       { name: 'otherCharge', keypath: 'otherCharge', options: { unique: false } }
     ]
+  },
+  {
+    store: 'utilityMeterGroups',
+    storeConfig: { keyPath: 'id', autoIncrement: true },
+    storeSchema: [
+      { name: 'groupid', keypath: 'groupid', options: { unique: false } },
+      { name: 'facilityid', keypath: 'facilityid', options: { unique: false } },
+      { name: 'accountid', keypath: 'accountid', options: { unique: false } },
+      { name: 'name', keypath: 'name', options: { unique: false } },
+      { name: 'desc', keypath: 'desc', options: { unique: false } },
+      { name: 'unit', keypath: 'unit', options: { unique: false } },
+      { name: 'dateModified', keypath: 'dateModified', options: { unique: false } },
+      { name: 'fracTotEnergy', keypath: 'fracTotEnergy', options: { unique: false } }
+    ]
   }]
 };
 
@@ -145,7 +162,9 @@ const dbConfig: DBConfig  = {
     ElectricityComponent,
     NaturalGasComponent,
     LpgComponent,
-    StyleGuideComponent
+    StyleGuideComponent,
+    PredictorsComponent,
+    MoMeterDataComponent
   ],
   imports: [
     NgxIndexedDBModule.forRoot(dbConfig),

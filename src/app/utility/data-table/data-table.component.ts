@@ -5,6 +5,8 @@ import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db-service";
 import { ElectricitydbService } from "../../indexedDB/electricity-db-service";
 import { NaturalGasdbService } from "../../indexedDB/naturalGas-db-service";
 import { UtilityService } from "../utility.service";
+import { UtilityMeterGroupdbService } from "../../indexedDB/utilityMeterGroup-db.service";
+import { FormGroup, FormControl, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-data-table',
@@ -15,10 +17,29 @@ export class DataTableComponent implements OnInit {
   accountid: number;
   facilityid: number;
   meterList: any = [];
+  meterGroups: any = [];
   meterDataList: any;
   dataTable: any = [];
   unit: string;
 
+  date = new Date();
+  today = this.date.toDateString()
+
+  groupMenuOpen: boolean = false;
+  tooltip: boolean = false;
+  popup: boolean = false;
+
+  groupForm = new FormGroup({
+    id: new FormControl('', [Validators.required]),
+    groupid: new FormControl('', [Validators.required]),
+    facilityid: new FormControl('', [Validators.required]),
+    accountid: new FormControl('', [Validators.required]),
+    name: new FormControl('', [Validators.required]),
+    desc: new FormControl('', [Validators.required]),
+    unit: new FormControl('', [Validators.required]),
+    dateModified: new FormControl('', [Validators.required]),
+    fracTotEnergy: new FormControl('', [Validators.required])
+  });
 
   constructor(
     private accountService: AccountService,
@@ -26,8 +47,31 @@ export class DataTableComponent implements OnInit {
     public utilityMeterdbService: UtilityMeterdbService,
     public electricitydbService: ElectricitydbService,
     public naturalGasdbService: NaturalGasdbService,
-    public utilityService: UtilityService
+    public utilityService: UtilityService,
+    public utilityMeterGroupdbService: UtilityMeterGroupdbService,
     ) { }
+
+    public graph3 = {
+      data: [
+        {
+          domain: { x: [0, 1], y: [0, 1] },
+          value: 0,
+          type: "indicator",
+          mode: "gauge+number",
+          gauge: {
+            axis: { range: [null, 500] },
+            bar: { color: "#2980b9" },
+            bgcolor: "#eee",
+            borderwidth: 0,
+            steps: [
+              { range: [0, 0], color: "#2980b9" }
+            ]
+          }
+        }
+        ],
+      layout: {height: 150, margin: {l: 10,r: 10,b: 20,t: 20, pad: 20}},
+      config: {responsive: true},
+    };
 
   ngOnInit() {
     // Observe the accountid var
@@ -41,6 +85,8 @@ export class DataTableComponent implements OnInit {
       this.meterLoadList();
       //this.meterDataLoadList();
     });
+
+    this.groupLoadList(); // List all groups
   }
 
   meterLoadList() {
@@ -69,8 +115,6 @@ export class DataTableComponent implements OnInit {
         this.electricitydbService.getAllByIndex(this.meterList[i]['id']).then(
           data => {
             // push to meterlist object
-            this.meterList[i]['data'] = data.sort(this.sortByDate);;
-            this.meterList[i]['calendarization'] = this.calendarization(data, 'Elec');
             this.utilityService.setValue(this.meterList);
           },
           error => {
@@ -83,8 +127,6 @@ export class DataTableComponent implements OnInit {
         this.naturalGasdbService.getAllByIndex(this.meterList[i]['id']).then(
           data => {
             // push to meterlist object
-            this.meterList[i]['data'] = data.sort(this.sortByDate);;
-            this.meterList[i]['calendarization'] = this.calendarization(data, 'NatGas');
             this.utilityService.setValue(this.meterList);
           },
           error => {
@@ -96,123 +138,66 @@ export class DataTableComponent implements OnInit {
     }
   }
 
-  sortByDate(a, b) {
-    return new Date(a.readDate).getTime() - new Date(b.readDate).getTime();
+  groupLoadList() {
+    // List the meter groups
+    this.utilityMeterGroupdbService.getAllByIndex(this.facilityid).then(
+      data => {
+        this.meterGroups = data;
+        console.log(this.meterGroups);
+      },
+      error => {
+          console.log(error);
+      }
+    );
   }
-
-  calendarization (data, type) {
-    this.dataTable = [];
-
-    for(let i=1; i < data.length -1; i++) {
-      
-      let billDate = new Date(data[i]['readDate']);
-      let billDateNext = new Date(data[i]['readDate']);;
-      let billDatePrev = new Date(data[i]['readDate']);;
-
-      const monthName = billDate.toLocaleString('default', { month: 'long' });
-      const year = billDate.getFullYear();
-
-      // End of billing cycle (meter read date)
-      // prevent errors on 1st and last entry
-      if (i == 0)  {
-        billDateNext = new Date(data[i+1]['readDate']);
-        billDatePrev.setMonth(billDatePrev.getMonth()-1);
-      } else if ( i == data.length - 1) {
-        billDateNext.setMonth(billDateNext.getMonth() + 1);
-        billDatePrev = new Date(data[i-1]['readDate']);
-      } else {
-        billDateNext = new Date(data[i+1]['readDate']);
-        billDatePrev = new Date(data[i-1]['readDate']);
-      }
-
-      // First of month (1)
-      let firstDay = new Date(billDate); firstDay.setDate(1);
-      let firstDayNext = new Date(billDateNext); firstDayNext.setDate(1);
-
-      // Days in billing cycle (next meter date - prev meter date)
-      const difference = this.dateDiffInDays(billDatePrev, billDate);
-      const differenceNext = this.dateDiffInDays(billDate, billDateNext);
-
-      // Prevents skipped months from displaying
-      if (difference > 28 && difference < 40) {
-        // Days before and after
-        const daysBefore = this.dateDiffInDays(firstDay, billDate) + 1;
-        const daysAfter = this.dateDiffInDays(billDate, firstDayNext) - 1;
-
-        // Billed cost & volume
-        let vol = 0;
-        let volNext = 0;
-        let cost = 0;
-        let costNext = 0;
-        
-        if ( i == data.length - 1) { // If last entry
-          if (type == 'Elec') {
-            vol = data[i]['totalKwh'];
-          }
-          if (type == 'NatGas') {
-            vol = data[i]['totalVolume'];
-          }
-          cost = data[i]['totalCost'];
-          
-        } else {
-          if (type == 'Elec') {
-            vol = data[i]['totalKwh'];
-            volNext = data[i+1]['totalKwh'];
-          }
-          if (type == 'NatGas') {
-            vol = data[i]['totalVolume'];
-            volNext = data[i+1]['totalVolume'];
-          }
-          cost = data[i]['totalCost'];
-          costNext = data[i+1]['totalCost'];
-        }
-
-        // Volume per day (billed volume / days in cycle)
-        const volPerDay = vol / difference;
-        const volPerDayNext = volNext / differenceNext;
-        let monthlyVol = volPerDay * daysBefore + volPerDayNext * daysAfter;
-        if (isNaN(monthlyVol)) {
-          monthlyVol = 0;
-        }
-
-        // Cost per day (billed volume / days in cycle)
-        const costPerDay = cost / difference;
-        const costPerDayNext = costNext / differenceNext;
-        let monthlyCost = costPerDay * daysBefore + costPerDayNext * daysAfter;
-        if (isNaN(monthlyCost)) {
-          monthlyCost = 0;
-        }
-
-        this.dataTable.push({
-          year: year,
-          month: monthName,
-          monthKwh: monthlyVol.toFixed(2),
-          monthCost: monthlyCost.toFixed(2)
-        });
-
-      } else {
-        // Show month, but don't calculate.
-        this.dataTable.push({
-          year: year,
-          month: monthName,
-          monthKwh: 'NA',
-          monthCost: 'NA'
-        });
-      }
+  groupToggleMenu (index) {
+    if (this.groupMenuOpen === index) {
+      this.groupMenuOpen = null;
+    } else {
+      this.groupMenuOpen = index;
     }
-    return this.dataTable;
   }
-  
 
-  // a and b are javascript Date objects
-  dateDiffInDays(a, b) {
-    const _MS_PER_DAY = 1000 * 60 * 60 * 24;
-    // Discard the time and time-zone information.
-    const utc1 = Date.UTC(a.getFullYear(), a.getMonth(), a.getDate());
-    const utc2 = Date.UTC(b.getFullYear(), b.getMonth(), b.getDate());
-  
-    return Math.floor((utc2 - utc1) / _MS_PER_DAY);
+  groupAdd(name) {
+    this.utilityMeterGroupdbService.add(name,this.facilityid,this.accountid).then(
+      data => {
+        this.meterGroups.push({'name': 'New Group '  + (+this.meterGroups.length + +1),'desc': 'You may edit this group to fit your needs.'}); // Shows the next group before its actually populated... better or worse?
+        this.groupLoadList(); // Refresh list of groups
+      },
+      error => {
+          console.log(error);
+      }
+    );
   }
-  
-  
+
+  groupEdit(id) {
+    this.popup = !this.popup;
+    this.groupMenuOpen = null;
+    this.groupForm.setValue(this.meterGroups.find(obj => obj.id == id)); // Set form values to current selected meter
+    this.groupForm.controls.dateModified.setValue(this.today);
+  }
+
+  groupDelete(id) {
+    console.log("delete");
+    this.groupMenuOpen = null;
+    // First check if all meters have been removed from the group
+    // If no, alert the user.
+    // If yes, delete group
+    // Refresh group list
+
+    this.utilityMeterGroupdbService.deleteIndex(id);
+
+    // Refresh list of groups
+    // I splice the array vs refreshing the list because its faster for the user.
+    const index = this.meterGroups.map(e => e.id).indexOf(id);
+    this.meterGroups.splice(index, 1); // remove it
+
+  }
+
+  groupSave() {
+    this.popup = !this.popup;
+    this.groupMenuOpen = null;
+    this.utilityMeterGroupdbService.update(this.groupForm.value); // Update db
+    this.groupLoadList(); // Refresh list of groups
+  }
 }

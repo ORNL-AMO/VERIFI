@@ -7,18 +7,28 @@
         <th>Meter #</th>
         <th>Account #</th>
         <th>Type</th>
+        <th>Group</th>
         <th>Building / Area</th>
+        <th>Building Type</th>
         <th>Utility Supplier</th>
         <th>Notes</th>
+        <th>Unit</th>
+        <th>Export</th>
+        <th>STS</th>
         <th></th>
     </tr>
     <tr *ngFor="let meterLists of meterList">
         <td>{{meterLists.meterNumber}}</td>
         <td>{{meterLists.accountNumber}}</td>
         <td>{{meterLists.type}}</td>
+        <td>{{meterLists.group}}</td>
         <td>{{meterLists.name}}</td>
+        <td></td>
         <td>{{meterLists.supplier}}</td>
         <td>{{meterLists.notes}}</td>
+        <td></td>
+        <td></td>
+        <td></td>
         <td (click)="$event.stopPropagation();"> <!-- Prevents closure of menu on document click-->
             <i class="fa fa-ellipsis-v" (click)="meterToggleMenu(meterLists.id)" ></i>
             <div class="meterMenu" [class.open]="meterMenuOpen === meterLists.id">
@@ -63,6 +73,10 @@
                 </select>
             </label>
             <br>
+            <label>Group
+                <input type="text" formControlName="group">
+            </label>
+            <br>
             <label>Building / Area
                 <input type="text" formControlName="name">
             </label>
@@ -87,6 +101,10 @@
     <button class="btn btn-outline" (click)="meterExport()">Export</button>
 </div>
 
+<div class="wizard">
+    <button class="btn btn-secondary item-left">Prev</button>
+    <button class="btn btn-primary item-right">Next</button>
+</div>
 
 <div class="window" [class.open]="importPopup == true">
     <div class="windowOverlay"></div>

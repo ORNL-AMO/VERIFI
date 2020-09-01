@@ -1,32 +1,89 @@
 <div class="wrapper main-content">
-    <h4>Data Table</h4>
-    <p>Meter data has been calendarized. Data represented with <span class="bold">NA</span> does not have a full month of data to calculate.</p>
+    <h4>Meter Grouping</h4>
+    <p>Your meters have been grouped by type. You are free to edit or add groups based on your preferences. These groups will represent your data visualization.</p>
+    <!--<button class="btn btn-primary item-right">Add New Group</button>-->
     <br>
 
-    <div class="meter" *ngFor="let meterLists of meterList">
+    <div class="row no-gutters">
+        <div class="col-4" *ngFor="let meterGroup of meterGroups">
+            <div class="meter-group">
 
-        <div class="row">
-            <div class="col tableData">
-                <table>
-                    <tr>
-                        <th colspan=4>Account #: {{meterLists.meterNumber}} <span class="item-right reg-weight">{{meterLists.type}}</span></th>
-                    </tr>
-                    <tr>
-                        <th class="row-year">Month</th>
-                        <th class="row-year">Year</th>
-                        <th [hidden]="meterLists.type != 'Electricity'">Total kWh</th>
-                        <th [hidden]="meterLists.type != 'Natural Gas'">Total Volume (cfm)/MMBTU</th>
-                        <th>Total Cost</th>
-                    </tr>
-                    <tr *ngFor="let meterData of meterLists.calendarization" [class.na]="meterData.monthKwh == 'NA'">
-                        <td>{{meterData.month}}</td>
-                        <td>{{meterData.year}}</td>
-                        <td>{{meterData.monthKwh}}</td>
-                        <td><span [hidden]="meterData.monthCost == 'NA'">$</span>{{meterData.monthCost}}</td>
-                    </tr>
-                </table>
+                <div class="meter-group-header">
+                    <i class="fa fa-ellipsis-v item-right" (click)="groupToggleMenu(meterGroup.id)"></i>
+                    <div class="groupMenu" [class.open]="groupMenuOpen === meterGroup.id">
+                        <p>View</p>
+                        <p (click)="groupEdit(meterGroup.id)">Edit</p>
+                        <hr>
+                        <p (click)="groupDelete(meterGroup.id)">Delete</p>
+                    </div>
+
+                    <h6 class="bold"><i class="fa fa-folder-open-o"></i> {{meterGroup.name}}</h6>
+                    <hr>
+                    <p>{{meterGroup.desc}}</p>
+                </div>
+
+                <div class="meter-group-stats">
+                    <plotly-plot [data]="graph3.data" [layout]="graph3.layout"></plotly-plot>
+                    <p>Fraction of total energy</p>
+                </div>
+
+                <div class="meter-group-footer">
+                    <p class="item-left">Final Unit: {{meterGroup.unit}}</p>
+                    <p class="item-right meterCount">Meters: <span class="group">0</span>
+                        <span class="tooltip up">meter info<span class="arrow arrow-up"></span></span>
+                    </p>
+                </div>
+                <div class="meter-group-updated">
+                    <p class="item-right">Last Updated: {{meterGroup.dateModified}}</p>
+                </div>
             </div>
         </div>
     </div>
 
+    <button class="btn btn-link" (click)="groupAdd('New Group '  + (+meterGroups.length + +1))"><i class="fa fa-plus"></i> Add New Group</button> 
+
+    <div class="window" [class.open]="popup == true">
+        <div class="windowOverlay"></div>
+        <div class="windowContent">
+            <h4>Edit Group</h4>
+            <br>
+            <p class="bold">Group Information</p>
+            <form [formGroup]="groupForm">
+                <label hidden>ID
+                    <input type="text" formControlName="id">
+                </label>
+                <label hidden>Date Modified
+                    <input type="text" formControlName="dateModified">
+                </label>
+    
+                <label>Name
+                    <input type="text" formControlName="name">
+                </label>
+                <br>
+                <label>Description
+                    <input type="text" formControlName="desc">
+                </label>
+                <br>
+                <label>Final Unit
+                    <select type="text" formControlName="unit">
+                        <option value="MMBtu">MMBtu</option>
+                        <option value="Kwh">Kwh</option>
+                    </select>
+                </label>
+                <br>
+                <label hidden>fracTotEnergy
+                    <input type="text" formControlName="fracTotEnergy">
+                </label>
+            </form>
+            <div class="saveCancel item-right">
+                <button class="btn btn-primary" (click)="popup = !popup">Cancel</button>
+                <button class="btn btn-primary" (click)="groupSave()">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="wizard">
+    <button class="btn btn-secondary item-left">Prev</button>
+    <button class="btn btn-primary item-right">Next</button>
 </div>

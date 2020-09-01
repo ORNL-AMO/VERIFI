@@ -6,6 +6,7 @@ import { AccountdbService } from "../../../indexedDB/account-db.service";
 import { FacilitydbService } from "../../../indexedDB/facility-db-service";
 import { FacilityService } from 'src/app/account/facility/facility.service';
 import { UtilityMeterdbService } from "../../../indexedDB/utilityMeter-db-service";
+import { UtilityMeterGroupdbService } from "../../../indexedDB/utilityMeterGroup-db.service";
 import { listAnimation } from '../../../animations';
 
 @Component({
@@ -43,6 +44,7 @@ export class EnergySourceComponent implements OnInit {
     meterNumber: new FormControl('', [Validators.required]),
     accountNumber: new FormControl('', [Validators.required]),
     type: new FormControl('', [Validators.required]),
+    group: new FormControl('', [Validators.required]),
     name: new FormControl('', [Validators.required]),
     supplier: new FormControl('', [Validators.required]),
     notes: new FormControl('', [Validators.required])
@@ -56,6 +58,7 @@ export class EnergySourceComponent implements OnInit {
     public accountdbService: AccountdbService,
     public facilitydbService: FacilitydbService,
     public utilityMeterdbService: UtilityMeterdbService,
+    public utilityMeterGroupdbService: UtilityMeterGroupdbService,
     private energyConsumptionService: EnergyConsumptionService
     ) {}
 
@@ -126,6 +129,33 @@ export class EnergySourceComponent implements OnInit {
     );
   }
 
+
+  groupCheckExistence(name) {
+    this.utilityMeterGroupdbService.getByName(name).then(
+      data => {
+        console.log("check groups");
+        console.log(data);
+        if (data == null) {
+          console.log("add it");
+          this.groupAdd(this.meterForm.value.group); // if not, create it
+        }
+      },
+      error => {
+          console.log(error);
+      }
+    );
+  }
+  groupAdd(name) {
+    this.utilityMeterGroupdbService.add(name,this.facilityid,this.accountid).then(
+      data => {
+        console.log(data);
+      },
+      error => {
+          console.log(error);
+      }
+    );
+  }
+
   meterMapTabs() {
     // Remap tabs
     this.energySource = this.meterList.map(function (el) { return el.type; });
@@ -134,6 +164,14 @@ export class EnergySourceComponent implements OnInit {
 
   meterSave() {
     this.popup = !this.popup;
+    // Save this meter in a default group based on its type. 
+    // Prevent bad reporting by changing the group if the type is changed.
+    // But only if the meter has not been moved from the default grouping.
+    if (this.meterForm.value.group == '' || this.meterForm.value.group == 'Electricity' || this.meterForm.value.group == 'Natural Gas') {
+      this.meterForm.value.group = this.meterForm.value.type;
+    }
+    this.groupCheckExistence(this.meterForm.value.group); // check if group exists
+
     this.utilityMeterdbService.update(this.meterForm.value); // Update db
     this.meterLoadList(); // refresh the data
   }
@@ -201,6 +239,7 @@ export class EnergySourceComponent implements OnInit {
             meterNumber: obj.meterNumber,
             accountNumber: obj.accountNumber,
             type: obj.type,
+            group: obj.type,
             name: obj.name,
             supplier: obj.supplier,
             notes: obj.notes

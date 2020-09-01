@@ -1,0 +1,35 @@
+<div class="wrapper main-content">
+    <h4>Monthly Meter Data</h4>
+    <p>Meter data has been calendarized. Data represented with <span class="bold">NA</span> does not have a full month of data to calculate.</p>
+    <br>
+
+    <div class="meter" *ngFor="let meterLists of meterList">
+
+        <div class="row">
+            <div class="col tableData">
+                <table>
+                    <tr>
+                        <th colspan=4>Account #: {{meterLists.meterNumber}} <span class="item-right reg-weight">{{meterLists.type}}</span></th>
+                    </tr>
+                    <tr>
+                        <th class="row-year">Month</th>
+                        <th class="row-year">Year</th>
+                        <th [hidden]="meterLists.type != 'Electricity'">Total kWh</th>
+                        <th [hidden]="meterLists.type != 'Natural Gas'">Total Volume (cfm)/MMBTU</th>
+                        <th>Total Cost</th>
+                    </tr>
+                    <tr *ngFor="let meterData of meterLists.calendarization" [class.na]="meterData.monthKwh == 'NA'">
+                        <td>{{meterData.month}}</td>
+                        <td>{{meterData.year}}</td>
+                        <td>{{meterData.monthKwh}}</td>
+                        <td><span [hidden]="meterData.monthCost == 'NA'">$</span>{{meterData.monthCost}}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="wizard">
+        <button class="btn btn-secondary item-left">Prev</button>
+        <button class="btn btn-primary item-right">Next</button>
+    </div>
+</div>
