@@ -135,9 +135,11 @@ const dbConfig: DBConfig  = {
       { name: 'groupid', keypath: 'groupid', options: { unique: false } },
       { name: 'facilityid', keypath: 'facilityid', options: { unique: false } },
       { name: 'accountid', keypath: 'accountid', options: { unique: false } },
-      { name: 'name', keypath: 'name', options: { unique: false } },
+      { name: 'groupType', keypath: 'accountid', options: { unique: false } },
+      { name: 'name', keypath: 'name', options: { unique: true } },
       { name: 'desc', keypath: 'desc', options: { unique: false } },
       { name: 'unit', keypath: 'unit', options: { unique: false } },
+      { name: 'data', keypath: 'data', options: { unique: false } },
       { name: 'dateModified', keypath: 'dateModified', options: { unique: false } },
       { name: 'fracTotEnergy', keypath: 'fracTotEnergy', options: { unique: false } }
     ]
@@ -174,7 +176,8 @@ const dbConfig: DBConfig  = {
     BrowserAnimationsModule,
     FormsModule,
     ReactiveFormsModule,
-    CommonModule, PlotlyModule
+    CommonModule, 
+    PlotlyModule
   ],
   providers: [],
   bootstrap: [AppComponent]

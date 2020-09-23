@@ -15,6 +15,7 @@
         <div class="col no-margin tableData">
         <table>
             <tr>
+                <th></th>
                 <th class="row-year">Meter Read Date</th>
                 <th>Total Volume (cfm)/MMBTU</th>
                 <th>Commodity Charge</th>
@@ -22,6 +23,7 @@
                 <th>Other Charges</th>
             </tr>
             <tr *ngFor="let meterData of meterLists.data">
+                <td><input type="checkbox"></td>
                 <td>{{meterData.readDate}}</td>
                 <td>{{meterData.totalVolume}}</td>
                 <td>${{meterData.commodityCharge}}</td>

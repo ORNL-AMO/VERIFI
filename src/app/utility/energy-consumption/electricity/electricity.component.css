@@ -11,3 +11,7 @@
     box-shadow: none;
     position: absolute;
 }
+.filter {
+    position: relative;
+    margin-right: 25px;
+}

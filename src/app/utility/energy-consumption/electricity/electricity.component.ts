@@ -2,6 +2,7 @@ import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
 import { AccountService } from "../../../account/account/account.service";
 import { FacilityService } from 'src/app/account/facility/facility.service';
 import { UtilityMeterdbService } from "../../../indexedDB/utilityMeter-db-service";
+import { UtilityService } from "../../../utility/utility.service";
 import { ElectricitydbService } from "../../../indexedDB/electricity-db-service";
 import { listAnimation } from '../../../animations';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
@@ -114,6 +115,7 @@ export class ElectricityComponent implements OnInit {
   constructor(
     private accountService: AccountService,
     private facilityService: FacilityService,
+    private utilityService: UtilityService,
     public utilityMeterdbService: UtilityMeterdbService,
     public electricitydbService: ElectricitydbService
     ) { }
@@ -127,48 +129,19 @@ export class ElectricityComponent implements OnInit {
     // Observe the facilityid var
     this.facilityService.getValue().subscribe((value) => {
       this.facilityid = value;
-      this.meterLoadList();
+      //this.meterLoadList();
       //this.meterDataLoadList();
     });
+
+    // Observe the meter list
+    this.utilityService.getMeters().subscribe((value) => {
+      this.meterList = value;
+      this.meterList = this.meterList.filter(function(obj) {
+        return obj.type == "Electricity"
+      });
+    });    
   }
 
-  meterLoadList() {
-    // List all meters
-    this.utilityMeterdbService.getAllByIndex(this.facilityid).then(
-      data => {
-          this.meterList = data;
-          this.meterList = this.meterList.filter(function(obj) {
-            return obj.type == "Electricity"
-          });
-          // Add all meter data to meter list
-          this.meterDataLoadList();
-          console.log(this.meterList);
-      },
-      error => {
-          console.log(error);
-      }
-    );
-  }
-
-  meterDataLoadList() {
-  // loop each meter
-    for (let i=0; i < this.meterList.length; i++) {
-      // filter meter data based on meterid
-      this.electricitydbService.getAllByIndex(this.meterList[i]['id']).then(
-        data => {
-          // push to meterlist object
-          this.meterList[i]['data'] = data;
-          this.meterList[i]['data'].sort(this.sortByDate);
-        },
-        error => {
-            console.log(error);
-        }
-      );
-    }
-  }
-  sortByDate(a, b) {
-    return new Date(a.readDate).getTime() - new Date(b.readDate).getTime();
-  }
   // Close menus when user clicks outside the dropdown
   documentClick () {
     this.meterDataMenuOpen = null;
@@ -207,7 +180,7 @@ export class ElectricityComponent implements OnInit {
   meterDataSave() {
     this.popup = !this.popup;
     this.electricitydbService.update(this.meterDataForm.value);// Update db
-    this.meterDataLoadList(); // refresh the data
+    this.utilityService.setMeterData(this.meterList); // refresh the data
   }
 
   meterDataEdit(meterid,dataid) {
@@ -221,7 +194,7 @@ export class ElectricityComponent implements OnInit {
   meterDataDelete(dataid) {
     this.meterDataMenuOpen = null;
     this.electricitydbService.deleteIndex(dataid);
-    this.meterDataLoadList(); // refresh the data
+    this.utilityService.setMeterData(this.meterList); // refresh the data
   }
 
   showAllFields() {
@@ -255,7 +228,7 @@ export class ElectricityComponent implements OnInit {
 
             if (JSON.stringify(headers) === JSON.stringify(allowedHeaders)) {
 
-              for(var i=1;i<lines.length;i++){
+              for(var i=1;i<4;i++){
                 const obj = {};
                 const currentline=lines[i].split(",");
                 for(var j=0;j<headers.length;j++){
@@ -312,7 +285,7 @@ export class ElectricityComponent implements OnInit {
           }
 
           this.electricitydbService.update(importLine); // Update db
-          this.meterLoadList(); // refresh the data
+          this.utilityService.setMeterData(this.meterList); // refresh the data
         },
         error => {
             console.log(error);

@@ -1,10 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AccountService } from "../../account/account/account.service";
 import { FacilityService } from 'src/app/account/facility/facility.service';
-import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db-service";
-import { ElectricitydbService } from "../../indexedDB/electricity-db-service";
-import { NaturalGasdbService } from "../../indexedDB/naturalGas-db-service";
-import { UtilityService } from "../utility.service";
+import { UtilityService } from "../../utility/utility.service";
 import { UtilityMeterGroupdbService } from "../../indexedDB/utilityMeterGroup-db.service";
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 
@@ -18,7 +15,12 @@ export class DataTableComponent implements OnInit {
   facilityid: number;
   meterList: any = [];
   meterGroups: any = [];
-  meterDataList: any;
+  dataGroups: any = [];
+  tempList: any = [];
+  tempList2: any = [];
+  allMeterData: any = [];
+  calendarData: any = [];
+
   dataTable: any = [];
   unit: string;
 
@@ -37,6 +39,7 @@ export class DataTableComponent implements OnInit {
     name: new FormControl('', [Validators.required]),
     desc: new FormControl('', [Validators.required]),
     unit: new FormControl('', [Validators.required]),
+    data: new FormControl([], [Validators.required]),
     dateModified: new FormControl('', [Validators.required]),
     fracTotEnergy: new FormControl('', [Validators.required])
   });
@@ -44,14 +47,11 @@ export class DataTableComponent implements OnInit {
   constructor(
     private accountService: AccountService,
     private facilityService: FacilityService,
-    public utilityMeterdbService: UtilityMeterdbService,
-    public electricitydbService: ElectricitydbService,
-    public naturalGasdbService: NaturalGasdbService,
-    public utilityService: UtilityService,
+    private utilityService: UtilityService,
     public utilityMeterGroupdbService: UtilityMeterGroupdbService,
     ) { }
 
-    public graph3 = {
+    public chart = {
       data: [
         {
           domain: { x: [0, 1], y: [0, 1] },
@@ -68,8 +68,11 @@ export class DataTableComponent implements OnInit {
             ]
           }
         }
-        ],
-      layout: {height: 150, margin: {l: 10,r: 10,b: 20,t: 20, pad: 20}},
+        ]
+    };
+
+    public chartLayout = {
+      layout: {height: 140, margin: {l: 10,r: 10,b: 20,t: 20, pad: 20}},
       config: {responsive: true},
     };
 
@@ -82,74 +85,109 @@ export class DataTableComponent implements OnInit {
     // Observe the facilityid var
     this.facilityService.getValue().subscribe((value) => {
       this.facilityid = value;
-      this.meterLoadList();
-      //this.meterDataLoadList();
     });
 
-    this.groupLoadList(); // List all groups
+    // Observe the meter list
+    this.utilityService.getMeters().subscribe((value) => {
+      this.meterList = value;
+      this.tempList = value;
+      this.tempList2 = value;
+
+      this.groupLoadList(); // List all groups
+    });
+
+    // Observe the meter list
+    this.utilityService.getCalendarData().subscribe((value) => {
+      this.calendarData = value;
+    });
+
+
   }
 
-  meterLoadList() {
-    // List all meters
-    this.utilityMeterdbService.getAllByIndex(this.facilityid).then(
-      data => {
-          this.meterList = data;
-          /*this.meterList = this.meterList.filter(function(obj) {
-            return obj.type == "Electricity"
-          });*/
-          // Add all meter data to meter list
-          this.meterDataLoadList()
-      },
-      error => {
-          console.log(error);
-      }
-    );
-  }
-
-  meterDataLoadList() {
-  // loop each meter
-    for (let i=0; i < this.meterList.length; i++) {
-      //console.log(this.meterList);
-      if (this.meterList[i].type == 'Electricity') {
-        // filter meter data based on meterid
-        this.electricitydbService.getAllByIndex(this.meterList[i]['id']).then(
-          data => {
-            // push to meterlist object
-            this.utilityService.setValue(this.meterList);
-          },
-          error => {
-              console.log(error);
-          }
-        );
-        this.unit = 'kWh';
-      }
-      if (this.meterList[i].type == 'Natural Gas') {
-        this.naturalGasdbService.getAllByIndex(this.meterList[i]['id']).then(
-          data => {
-            // push to meterlist object
-            this.utilityService.setValue(this.meterList);
-          },
-          error => {
-              console.log(error);
-          }
-        );
-        this.unit = '(cfm)/MMBTU';
-      }
-    }
-  }
 
   groupLoadList() {
     // List the meter groups
     this.utilityMeterGroupdbService.getAllByIndex(this.facilityid).then(
       data => {
         this.meterGroups = data;
-        console.log(this.meterGroups);
+        this.groupLoadMeters(); // load meters into groups
+        this.groupGetAvg();
+        this.groupTestLabels();
+        //console.log(this.meterGroups);
       },
       error => {
           console.log(error);
       }
     );
   }
+
+  groupLoadMeters() {
+    let result = this.tempList2.reduce((result, item) => {
+      const group = (result[item.group] || []);
+      group.push(item);
+      result[item.group] = group;
+      const index = this.meterGroups.map(e => e.name).indexOf(item.group);
+      this.meterGroups[index]['data'] = group;
+      return result;
+    }, {});
+    console.log("here");
+    console.log(this.meterList);
+    console.log(this.meterGroups);
+  }
+
+  // Adding the dropdown list of types
+  groupTestLabels() {
+    let result = this.tempList.reduce((result, item) => {
+      const type = (result[item.type] || []);
+      type.push(0);
+      result[item.type] = type;
+
+      const index = this.meterGroups.map(e => e.name).indexOf(item.group);
+      this.meterGroups[index]['types'] = Object.keys(result) +" "+ type.length;
+      return result;
+    }, {});
+    console.log(result);
+  }
+
+  groupGetAvg() {
+    let groupTotal = 0;
+    let fraction = 0;
+    let result = 0;
+    let allMeterTotal = 0;
+
+    console.log("Avg");
+    console.log(this.meterList[0]);
+
+
+    // Add up the total kwh for every meter
+    for(let i=0; i<this.calendarData.length; i++) {
+      allMeterTotal = +allMeterTotal + +this.calendarData[i]['monthKwh'];
+    }
+
+    // Add up the month kwh for all meters inside the group
+    for(let i=0; i<this.meterGroups.length; i++) {
+
+      for(let j=0; j<this.meterList.length; j++) {
+        if (this.meterGroups[i]["name"] == this.meterList[j]["type"]) {
+
+            for(let k=0; k<this.meterList[j]['calendarization'].length; k++) {
+              //console.log(this.meterList[j]['calendarization'][k]['monthKwh']);
+              groupTotal = +groupTotal + +this.meterList[j]['calendarization'][k]['monthKwh'];
+
+            }
+            //console.log(this.meterList[j]["calendarization"]);
+        }
+      }
+
+      // Do some math to get percent
+      // Set the object value for each meter group.
+      this.meterGroups[i].fracTotEnergy = ((groupTotal/allMeterTotal)*100).toFixed();
+
+      // reset total for next group
+      groupTotal = 0;
+    }
+  }
+
   groupToggleMenu (index) {
     if (this.groupMenuOpen === index) {
       this.groupMenuOpen = null;
@@ -158,10 +196,10 @@ export class DataTableComponent implements OnInit {
     }
   }
 
-  groupAdd(name) {
-    this.utilityMeterGroupdbService.add(name,this.facilityid,this.accountid).then(
+  groupAdd(type, name) {
+    this.utilityMeterGroupdbService.add(type,name,this.facilityid,this.accountid).then(
       data => {
-        this.meterGroups.push({'name': 'New Group '  + (+this.meterGroups.length + +1),'desc': 'You may edit this group to fit your needs.'}); // Shows the next group before its actually populated... better or worse?
+        this.meterGroups.push({'name': 'New Group '  + (+this.meterGroups.length + +1),'desc': 'You may edit this group to fit your needs.', data: []}); // Shows the next group before its actually populated... better or worse?
         this.groupLoadList(); // Refresh list of groups
       },
       error => {

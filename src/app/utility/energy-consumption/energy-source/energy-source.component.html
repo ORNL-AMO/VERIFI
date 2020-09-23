@@ -1,7 +1,10 @@
 <h4>Energy Sources</h4>
 <p>All energy sources that <strong>Facility<!--{{activeFacility.name}}--></strong> uses can be viewed in the tabs at the top of the screen.</p>
 <br>
-
+<div class="importExport item-right">
+    <button class="btn btn-outline" (click)="importWindow = true">Import</button>
+    <button class="btn btn-outline" (click)="meterExport()">Export</button>
+</div>
 <table>
     <tr>
         <th>Meter #</th>
@@ -33,14 +36,14 @@
             <i class="fa fa-ellipsis-v" (click)="meterToggleMenu(meterLists.id)" ></i>
             <div class="meterMenu" [class.open]="meterMenuOpen === meterLists.id">
                 <p (click)="meterEdit(meterLists.id)">Edit</p>
-                <p (click)="meterDelete(meterLists.id)">Delete</p>
+                <p (click)="popup = true; id = meterLists.id">Delete</p>
             </div>
         </td>
     </tr>
 </table>
 <button class="btn btn-link" (click)="meterAdd()"><i class="fa fa-plus"></i> Add New Meter</button>
 
-<div class="window" [class.open]="popup == true">
+<div class="window" [class.open]="window == true">
     <div class="windowOverlay"></div>
     <div class="windowContent">
         <h4>Edit Meter</h4>
@@ -90,15 +93,10 @@
             </label>
         </form>
         <div class="saveCancel item-right">
-            <button class="btn btn-primary" (click)="popup = !popup">Cancel</button>
+            <button class="btn btn-primary" (click)="window = !window" [disabled]="toggleCancel">Cancel</button>
             <button class="btn btn-primary" (click)="meterSave()">Save</button>
         </div>
     </div>
-</div>
-
-<div class="importExport item-right">
-    <button class="btn btn-outline" (click)="importPopup = true">Import</button>
-    <button class="btn btn-outline" (click)="meterExport()">Export</button>
 </div>
 
 <div class="wizard">
@@ -106,7 +104,7 @@
     <button class="btn btn-primary item-right">Next</button>
 </div>
 
-<div class="window" [class.open]="importPopup == true">
+<div class="window" [class.open]="importWindow == true">
     <div class="windowOverlay"></div>
     <div class="windowContent">
         <h4>Import Meters</h4>
@@ -139,8 +137,20 @@
         <p class="alert alert-danger" [hidden]="importError == ''">{{importError}}</p>
 
         <div class="saveCancel item-right">
-            <button class="btn btn-primary" (click)="resetImport(); importPopup = !importPopup">Cancel</button>
+            <button class="btn btn-primary" (click)="resetImport(); importWindow = !importWindow">Cancel</button>
             <button class="btn btn-primary" (click)="meterAddCSV()" [disabled]="importError != ''">Submit</button>
         </div>
+    </div>
+</div>
+
+<div class="popup" [class.open]="popup == true">
+    <div class="popup-header">Delete Meter 
+        <button class="item-right" (click)="popup = false">x</button>
+    </div>
+        <div class="popup-body">
+        <p>WARNING: By deleting this meter, you are also deleting all of the meter data and bills associated with it. Are you sure you want to preform this action?</p>
+    </div>
+    <div class="popup-footer text-right">
+        <button class="btn btn-danger" (click)="meterDelete(id); popup=false">Delete</button>
     </div>
 </div>

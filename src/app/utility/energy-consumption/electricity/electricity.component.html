@@ -1,6 +1,9 @@
 <h4>Electricity Bills</h4>
 <br>
-
+<div class="importExport item-right">
+    <button class="btn btn-outline" (click)="importPopup = true">Import</button>
+    <button class="btn btn-outline" (click)="meterExport()">Export</button>
+</div>
 <div class="filter item-right">
     <button class="btn" [ngClass]="{'btn-outline' : !filterColMenu, 'btn-solid' : filterColMenu}" (click)="filterColMenu = !filterColMenu; filterInpMenu = false">Filter</button>
 
@@ -13,7 +16,19 @@
         <a (click)="showAllColumns();">Show All</a>
     </div>
 </div>
+<div class="bulk-delete item-right">
+    <button class="btn btn-danger" (click)="filterColMenu = !filterColMenu; filterInpMenu = false">Bulk Delete</button>
 
+    <!--Column Filters-->
+    <div class="filter-dropdown" [hidden]="!filterColMenu">
+        <label *ngFor="let filterCols of filterCol">
+            <input type="checkbox" name="filterCols.name" [checked]="filterCols.filter" (change)="filterCols.filter = !filterCols.filter">{{filterCols.display}}
+        </label>
+        <br><br>
+        <a (click)="showAllColumns();">Show All</a>
+    </div>
+</div>
+<br>
 <div class="meter" *ngFor="let meterLists of meterList">
     <div class="meterData">
         <p><span class="bold">Meter ID</span> # {{meterLists.id}}</p>
@@ -28,6 +43,7 @@
         <div class="col no-margin tableData">
         <table>
             <tr>
+                <th></th>
                 <th class="row-year">Meter Read Date</th>
                 <th>Total kWh</th>
                 <th>Total Demand</th>
@@ -53,6 +69,7 @@
                 <th [hidden]="!filterCol[18]['filter']">Other Charge</th>
             </tr>
             <tr *ngFor="let meterData of meterLists.data">
+                <td><input type="checkbox"></td>
                 <td>{{meterData.readDate}}</td>
                 <td>{{meterData.totalKwh}}</td>
                 <td>{{meterData.totalDemand}}</td>
@@ -373,11 +390,6 @@
             <button class="btn btn-primary" (click)="meterDataSave()">Save</button>
         </div>
     </div>
-</div>
-
-<div class="importExport item-right">
-    <button class="btn btn-outline" (click)="importPopup = true">Import</button>
-    <button class="btn btn-outline" (click)="meterExport()">Export</button>
 </div>
 
 
