@@ -6,6 +6,7 @@ import { CallbackPipe } from "./callback.pipe";
 import { NgxIndexedDBModule, DBConfig } from 'ngx-indexed-db';
 import { NgxWebstorageModule } from 'ngx-webstorage';
 import { AppRoutingModule } from './app-routing.module';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 
 import { AppComponent } from './app.component';
 import { HeaderComponent } from './shared/header/header.component';
@@ -26,13 +27,12 @@ import { LpgComponent } from './utility/energy-consumption/lpg/lpg.component';
 
 import { CommonModule } from '@angular/common';
 
-import * as PlotlyJS from 'plotly.js/dist/plotly.js';
-import { PlotlyModule } from 'angular-plotly.js';
+import { PlotlyViaWindowModule } from 'angular-plotly.js';
 import { StyleGuideComponent } from './shared/style-guide/style-guide.component';
 import { PredictorsComponent } from './utility/predictors/predictors.component';
 import { MoMeterDataComponent } from './utility/mo-meter-data/mo-meter-data.component';
+import { LoadingComponent } from './shared/loading/loading.component';
 
-PlotlyModule.plotlyjs = PlotlyJS;
 
 const dbConfig: DBConfig  = {
   name: 'verifi',
@@ -78,6 +78,7 @@ const dbConfig: DBConfig  = {
       { name: 'type', keypath: 'type', options: { unique: false } },
       { name: 'group', keypath: 'group', options: { unique: false } },
       { name: 'name', keypath: 'name', options: { unique: false } },
+      { name: 'location', keypath: 'notes', options: { unique: false } },
       { name: 'supplier', keypath: 'supplier', options: { unique: false } },
       { name: 'notes', keypath: 'notes', options: { unique: false } }
     ]
@@ -111,7 +112,8 @@ const dbConfig: DBConfig  = {
       { name: 'businessCharge', keypath: 'businessCharge', options: { unique: false } },
       { name: 'utilityTax', keypath: 'utilityTax', options: { unique: false } },
       { name: 'latePayment', keypath: 'latePayment', options: { unique: false } },
-      { name: 'otherCharge', keypath: 'otherCharge', options: { unique: false } }
+      { name: 'otherCharge', keypath: 'otherCharge', options: { unique: false } },
+      { name: 'checked', keypath: 'checked', options: { unique: false } }
     ]
   },
   {
@@ -166,7 +168,8 @@ const dbConfig: DBConfig  = {
     LpgComponent,
     StyleGuideComponent,
     PredictorsComponent,
-    MoMeterDataComponent
+    MoMeterDataComponent,
+    LoadingComponent
   ],
   imports: [
     NgxIndexedDBModule.forRoot(dbConfig),
@@ -177,7 +180,8 @@ const dbConfig: DBConfig  = {
     FormsModule,
     ReactiveFormsModule,
     CommonModule, 
-    PlotlyModule
+    PlotlyViaWindowModule,
+    DragDropModule
   ],
   providers: [],
   bootstrap: [AppComponent]

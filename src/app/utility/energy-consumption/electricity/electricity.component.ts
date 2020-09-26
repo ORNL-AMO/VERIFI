@@ -1,4 +1,4 @@
-import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild, QueryList, ViewChildren } from '@angular/core';
 import { AccountService } from "../../../account/account/account.service";
 import { FacilityService } from 'src/app/account/facility/facility.service';
 import { UtilityMeterdbService } from "../../../indexedDB/utilityMeter-db-service";
@@ -19,6 +19,12 @@ import { FormGroup, FormControl, Validators } from '@angular/forms';
 
 
 export class ElectricityComponent implements OnInit {
+  @ViewChildren("masterCheckbox") masterCheckbox: QueryList<ElementRef>;
+  
+  is_checked: boolean = false;
+  is_checkedList: any = [];
+  isMasterSel:boolean;
+
   accountid: number;
   facilityid: number;
   meterid: number = 1;
@@ -30,6 +36,7 @@ export class ElectricityComponent implements OnInit {
   importPopup: boolean = false;
   importError: string = '';
   quickView: any = [];
+  import: any = [];
 
   filterColMenu: boolean = false;
   filterCol = [
@@ -108,6 +115,7 @@ export class ElectricityComponent implements OnInit {
     utilityTax: new FormControl('', [Validators.required]),
     latePayment: new FormControl('', [Validators.required]),
     otherCharge: new FormControl('', [Validators.required]),
+    checked: new FormControl(false)
   });
 
   @ViewChild('inputFile') myInputVariable: ElementRef;
@@ -134,7 +142,7 @@ export class ElectricityComponent implements OnInit {
     });
 
     // Observe the meter list
-    this.utilityService.getMeters().subscribe((value) => {
+    this.utilityService.getMeterData().subscribe((value) => {
       this.meterList = value;
       this.meterList = this.meterList.filter(function(obj) {
         return obj.type == "Electricity"
@@ -179,8 +187,13 @@ export class ElectricityComponent implements OnInit {
 
   meterDataSave() {
     this.popup = !this.popup;
+    // This forces all checkboxes to be reset to false on save.
+    // Otherwise you get weird behavior with saving.
+    this.meterDataForm.controls['checked'].setValue(false); 
+
     this.electricitydbService.update(this.meterDataForm.value);// Update db
-    this.utilityService.setMeterData(this.meterList); // refresh the data
+    this.utilityService.refreshMeters(); // refresh calendarization
+    this.utilityService.refreshMeterData(); // refresh the data for this page
   }
 
   meterDataEdit(meterid,dataid) {
@@ -195,6 +208,65 @@ export class ElectricityComponent implements OnInit {
     this.meterDataMenuOpen = null;
     this.electricitydbService.deleteIndex(dataid);
     this.utilityService.setMeterData(this.meterList); // refresh the data
+  }
+
+  bulkDelete() {
+    this.meterDataMenuOpen = null;
+    // Uncheck master inputs after delete
+    this.masterCheckbox.forEach((element) => {
+      element.nativeElement.checked = false;
+    });
+
+    for(let i=0; i < this.is_checkedList.length; i++) {
+      this.electricitydbService.deleteIndex(+this.is_checkedList[i]);
+    }
+    this.utilityService.setMeterData(this.meterList); // refresh the data
+    this.showBulkDelete();
+  }
+
+  checkCheckboxes(e) {
+
+    // Add/Remove meter id's from is_checkedList array.
+    if(e.target.checked) {
+      this.is_checkedList.push(e.target.value);
+    } else {
+      const index = this.is_checkedList.indexOf(e.target.value);
+      this.is_checkedList.splice(index, 1);
+    }
+
+    this.showBulkDelete();
+  }
+
+  checkAll(meterid, e) {
+    // Get all bill id's with the meter value of e
+
+    var index = this.meterList.map(function(el) { return el.id; }).indexOf(meterid);
+
+    // Add/Remove meter id's from is_checkedList array.
+    if(e.target.checked) {
+      // get all meter data ids
+      for(let i=0; i<this.meterList[index]['data'].length; i++) {
+        this.is_checkedList.push(this.meterList[index]['data'][i]['id']); // Adds to queue array
+        this.meterList[index]['data'][i]['checked'] = true; // Shows user which are checked
+      }
+    } else {
+      for(let i=0; i<this.meterList[index]['data'].length; i++) {
+        const meterindex = this.is_checkedList.indexOf(meterid);
+        this.is_checkedList.splice(meterindex,1); // Adds to queue array
+        this.meterList[index]['data'][i]['checked'] = false; // Shows user which are unchecked
+      }
+      
+    }
+    this.showBulkDelete();
+  }
+
+  showBulkDelete() {
+    // Show "Bulk Delete" button if any items are checked
+    if(this.is_checkedList.length != 0) {
+      this.is_checked = true;
+    } else {
+      this.is_checked = false;
+    }
   }
 
   showAllFields() {
@@ -228,13 +300,21 @@ export class ElectricityComponent implements OnInit {
 
             if (JSON.stringify(headers) === JSON.stringify(allowedHeaders)) {
 
-              for(var i=1;i<4;i++){
+              for(var i=1;i<lines.length;i++){
                 const obj = {};
                 const currentline=lines[i].split(",");
                 for(var j=0;j<headers.length;j++){
                   obj[headers[j]] = currentline[j];
                 }
-                this.quickView.push(obj); // Read csv and push to obj array.
+
+                // Read csv and push to obj array.
+                this.import.push(obj); 
+
+                // Push the first 3 results to a quick view array
+                if (i < 4) {
+                  this.quickView.push(obj);
+                }
+                
               }  
             } else {
               // csv didn't match -> Show error
@@ -246,17 +326,21 @@ export class ElectricityComponent implements OnInit {
   }
 
   meterAddCSV() {
+    let meterids = [];
     this.importPopup = false;
     
-    for(let i=0;i<this.quickView.length;i++){
-      let obj = this.quickView[i];
-      this.meterid = this.meterList.find(x => x.meterNumber == obj.meterNumber).id; // Get id of matching meter numbers
+    for(let i=0;i<this.import.length;i++){
+      let obj = this.import[i];
+      
+      meterids.push(this.meterList.find(x => x.meterNumber == obj.meterNumber)['id']); // Get id of matching meter numbers
+      console.log('this.meterid');
+      console.log(this.meterid);
 
       this.electricitydbService.add(this.meterid,this.facilityid,this.accountid).then(
         id => {
           const importLine = {
             id: id,
-            meterid: this.meterid,
+            meterid: meterids[i],
             facilityid: this.facilityid,
             accountid: this.accountid,
             readDate: obj.readDate,
@@ -283,7 +367,7 @@ export class ElectricityComponent implements OnInit {
             latePayment: obj.latePayment,
             otherCharge: obj.otherCharge
           }
-
+          console.log(importLine);
           this.electricitydbService.update(importLine); // Update db
           this.utilityService.setMeterData(this.meterList); // refresh the data
         },
@@ -299,6 +383,7 @@ export class ElectricityComponent implements OnInit {
   resetImport() {
     this.myInputVariable.nativeElement.value = '';
     this.quickView = []; 
+    this.import = [];
     this.importError = '';
   }
 

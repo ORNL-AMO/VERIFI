@@ -41,6 +41,7 @@ export class UtilityMeterdbService {
             type: '',
             group: '',
             name: '',
+            location: '',
             supplier: '',
             notes: ''
         });

@@ -39,6 +39,7 @@ export class EnergySourceComponent implements OnInit {
   importWindow: boolean = false;
   importError: string = '';
   quickView: any = [];
+  import: any = [];
   toggleCancel: boolean = false; // Used to prevent "Cancel" when Adding New Meter (Cancel leaves the meter blank)
 
   meterForm = new FormGroup({
@@ -47,12 +48,13 @@ export class EnergySourceComponent implements OnInit {
     facilityid: new FormControl('', [Validators.required]),
     accountid: new FormControl('', [Validators.required]),
     meterNumber: new FormControl('', [Validators.required]),
-    accountNumber: new FormControl('', [Validators.required]),
+    accountNumber: new FormControl(''),
     type: new FormControl('', [Validators.required]),
     group: new FormControl('', [Validators.required]),
     name: new FormControl('', [Validators.required]),
-    supplier: new FormControl('', [Validators.required]),
-    notes: new FormControl('', [Validators.required])
+    location: new FormControl(''),
+    supplier: new FormControl(''),
+    notes: new FormControl('')
   });
   
   @ViewChild('inputFile') myInputVariable: ElementRef;
@@ -95,7 +97,6 @@ export class EnergySourceComponent implements OnInit {
     this.utilityService.getMeters().subscribe((value) => {
       this.meterList = value;
       this.meterMapTabs();
-      console.log(this.meterList);
     });
   }
 
@@ -134,11 +135,12 @@ export class EnergySourceComponent implements OnInit {
 
 
   groupCheckExistence(name) {
-    this.utilityMeterGroupdbService.getByName(name).then(
+    this.utilityMeterGroupdbService.getByName('Unsorted').then(
       data => {
         // if doesn't, create it
+        console.log(data);
         if (data == null) {
-          this.groupAdd('Energy',this.meterForm.value.group); 
+          this.groupAdd('Energy','Unsorted'); 
         }
       },
       error => {
@@ -147,8 +149,18 @@ export class EnergySourceComponent implements OnInit {
     );
   }
 
+
   groupAdd(type,name) {
-    this.utilityMeterGroupdbService.add(type,name,this.facilityid,this.accountid);
+    let defaultGroupId = 1;
+    this.utilityMeterGroupdbService.add(type,name,this.facilityid,this.accountid).then(
+      data => {
+        defaultGroupId =  data;
+      },
+      error => {
+          console.log(error);
+      }
+    );
+    return defaultGroupId;
   }
 
   meterMapTabs() {
@@ -157,24 +169,39 @@ export class EnergySourceComponent implements OnInit {
     this.energyConsumptionService.setValue(this.energySource);
   }
 
-  meterSave() {
+  async meterSave() {
+    let groupid = 1;
     this.window = !this.window;
-    // Save this meter in a default group based on its type. 
-    // Prevent bad reporting by changing the group if the type is changed.
-    // But only if the meter has not been moved from the default grouping.
-    if (this.meterForm.value.group == '' || this.meterForm.value.group == 'Electricity' || this.meterForm.value.group == 'Natural Gas') {
-      this.meterForm.value.group = this.meterForm.value.type;
-    }
-    this.groupCheckExistence(this.meterForm.value.group); // check if group exists
 
+    //this.groupCheckExistence(this.meterForm.value.group); // check if group exists
+
+    // Save this meter in a default "unsorted" group.
+    // This group can be renamed or deleted by user.
+    // If they do this, another "unsorted" group will be created
+    if (this.meterForm.value.group == '') {
+      const group = await this.utilityMeterGroupdbService.getByName('Unsorted'); // check if default group exists
+
+      // If not add it
+      if (group == null) {
+        groupid = await this.utilityMeterGroupdbService.add('Energy','Unsorted',this.facilityid,this.accountid); // add service returns id
+      } else {
+        groupid = group.id; // get current id
+      }
+      
+      this.meterForm.value.group = groupid; // This is the unsorted list
+    }
+
+    console.log(this.meterList);
     this.utilityMeterdbService.update(this.meterForm.value); // Update db
     this.utilityService.refreshMeters(); // refresh the data
+    //this.utilityService.setMetersOnly(); // refresh the data
     this.toggleCancel = false; // re-enable "edit meter" cancel button
   }
 
   meterEdit(id) {
     this.window = !this.window;
     this.meterMenuOpen = null;
+    console.log(this.meterList);
     this.meterForm.setValue(this.meterList.find(obj => obj.id == id)); // Set form values to current selected meter
   }
 
@@ -210,6 +237,7 @@ export class EnergySourceComponent implements OnInit {
   meterImport (files: FileList) {
     // Clear with each upload
     this.quickView = []; 
+    this.import = []; 
     this.importError = '';
 
     if(files && files.length > 0) {
@@ -222,17 +250,25 @@ export class EnergySourceComponent implements OnInit {
             let csv: string = reader.result as string;
             const lines = csv.split("\n");
             const headers = lines[0].replace('\r', '').split(",");
-            const allowedHeaders = ["meterNumber", "accountNumber", "type", "name", "supplier", "notes"];
+            const allowedHeaders = ["meterNumber", "accountNumber", "type", "name", "location", "supplier", "notes", "group"];
 
             if (JSON.stringify(headers) === JSON.stringify(allowedHeaders)) {
 
-              for(var i=1;i<4;i++){
+              for(var i=1;i<lines.length;i++){
                 const obj = {};
                 const currentline=lines[i].split(",");
                 for(var j=0;j<headers.length;j++){
                   obj[headers[j]] = currentline[j];
                 }
-                this.quickView.push(obj); // Read csv and push to obj array.
+
+                // Read csv and push to obj array.
+                this.import.push(obj); 
+
+                // Push the first 3 results to a quick view array
+                if (i < 4) {
+                  this.quickView.push(obj);
+                }
+                
               }  
             } else {
               // csv didn't match -> Show error
@@ -246,8 +282,8 @@ export class EnergySourceComponent implements OnInit {
   meterAddCSV() {
     this.importWindow = false;
     
-    for(let i=0;i<this.quickView.length;i++){
-      let obj = this.quickView[i];
+    for(let i=0;i<this.import.length;i++){
+      let obj = this.import[i];
 
       this.utilityMeterdbService.add(this.facilityid,this.accountid).then(
         id => {
@@ -258,7 +294,8 @@ export class EnergySourceComponent implements OnInit {
             meterNumber: obj.meterNumber,
             accountNumber: obj.accountNumber,
             type: obj.type,
-            group: obj.type,
+            location: obj.location,
+            group: +obj.group,
             name: obj.name,
             supplier: obj.supplier,
             notes: obj.notes
@@ -278,6 +315,7 @@ export class EnergySourceComponent implements OnInit {
   resetImport() {
     this.myInputVariable.nativeElement.value = '';
     this.quickView = []; 
+    this.import = []; 
     this.importError = '';
   }
 

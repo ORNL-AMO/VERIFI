@@ -5,7 +5,7 @@
 
     <div class="meter" *ngFor="let meterLists of meterList">
 
-        <div class="row">
+        <div class="row overflowTable">
             <div class="col tableData">
                 <table>
                     <tr>
@@ -29,7 +29,7 @@
         </div>
     </div>
     <div class="wizard">
-        <button class="btn btn-secondary item-left">Prev</button>
-        <button class="btn btn-primary item-right">Next</button>
+        <button class="btn btn-secondary item-left" routerLink="/utility/energy-consumption">Prev</button>
+        <button class="btn btn-primary item-right" routerLink="/utility/data-table">Next</button>
     </div>
 </div>

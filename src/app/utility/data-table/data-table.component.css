@@ -73,6 +73,8 @@ table select {
     padding: 0px;
     right: 23px;
     top: 60px;
+    right: 35px;
+    top: 30px;
     display: none;
     z-index: 1;
 }
@@ -102,6 +104,12 @@ table select {
     bottom: 9999px;
     transition: .5s opacity;
 }
+.progress:hover .tooltip {
+    /*display: block!important;*/
+    opacity: 1!important;
+    bottom: -50px;
+}
+
 .meterCount {
     cursor: pointer;
 }
@@ -121,15 +129,17 @@ table select {
     text-shadow: 1px 1px 2px white;
 }
 .group-section i {
-    padding: 6px;
+    padding: 3px 10px;
 }
-.group-section h5+label {
+.group-section label {
     width: initial!important;
     margin-bottom: 0px;
 }
-.group-section h5+label select {
+.group-section label select {
     width: initial;
     float: none;
+    background-color: transparent;
+    border: none;
 }
 .group-section {
     background-color: #f7f0ed;
@@ -149,11 +159,11 @@ table select {
     position: relative;
     margin-bottom: 20px;
 }
-.grouped-list ul {
+.grouped-list .group-meters,
+.group-meters.cdk-drag-preview {
     list-style: none;
     background-color: #f3f6fd;
     border: 1px solid #e1e4ea;
-    border-radius: 4px;
     padding: 5px 10px;
     margin: 5px 15px;
     cursor: move;
@@ -188,14 +198,63 @@ meter::-webkit-meter-even-less-good-value {
     background: #CC4600;
 }
 
+.progress {
+    margin: 7px 30px;
+    height: 8px;
+}
 .progress-bar {
-    background-color: #2980b9;
+    background-color: #2c386b;
+}
+.progress-bar-data {
+    position: absolute;
+    right: 0;
+    top: 0;
+    font-weight: bold;
 }
 
-.grouped-list ul li span, .grouped-list ul li i {
+.group-meters span, 
+.group-meters i,
+.group-meters.cdk-drag-preview i,
+.group-meters.cdk-drag-preview span{
     color: #41558a!important;
 }
 
-.grouped-list ul li i {
+.group-meters i,
+.group-meters.cdk-drag-preview i{
     margin: 0px 15px 0 5px;
+}
+
+.cdk-drag-placeholder {
+    opacity: 0;
+}
+  
+.cdk-drag-animating {
+    transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+  
+.cdk-drop-list-dragging {
+    transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+.group-meters-placeholder {
+    height: 0px;
+    opacity: 0;
+    border: none;
+    margin: 0px 15px;
+    transition: .5s all;
+}
+.group-meters-placeholder.show {
+    height: 33px;
+    border: 1px dashed #cccccc;
+    opacity: 1;
+}
+
+.grouped-list h6 i {
+    margin-right: 5px;
+}
+.group-desc {
+    margin: auto 0 15px 15px;
+}
+.grouped-list .fa-ellipsis-v {
+    padding: 5px 20px;
+    border-left: 1px solid #dadada;
 }

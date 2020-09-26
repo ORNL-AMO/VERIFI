@@ -100,9 +100,11 @@ Buttons
     border-radius: 0!important;
 }
 .btn-danger {
-    color: #fff;
-    background-color: #bf3d00;
-    border-color: #bf3d00;
+    color: #ec0000!important;
+    background-color: #ffffff!important;
+    border-color: #ec0000!important;
+    border-radius: 0px!important;
+    padding: 2px 10px!important;
 }
 .btn-solid {
     color: #ffffff!important;
@@ -769,3 +771,12 @@ i.fa.fa-arrow-circle-down {
 }
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+.spacer {
+    margin: 0px 10px;
+}
+
+
+.overflowTable {
+    max-height: 400px;
+    overflow: auto;
+}

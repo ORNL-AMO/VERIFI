@@ -2,8 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { AccountService } from "../../account/account/account.service";
 import { FacilityService } from 'src/app/account/facility/facility.service';
 import { UtilityService } from "../../utility/utility.service";
+import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db-service";
 import { UtilityMeterGroupdbService } from "../../indexedDB/utilityMeterGroup-db.service";
 import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-data-table',
@@ -20,6 +22,8 @@ export class DataTableComponent implements OnInit {
   tempList2: any = [];
   allMeterData: any = [];
   calendarData: any = [];
+  calendarDataTemp: any = [];
+  connectedTo: any = [];
 
   dataTable: any = [];
   unit: string;
@@ -36,6 +40,7 @@ export class DataTableComponent implements OnInit {
     groupid: new FormControl('', [Validators.required]),
     facilityid: new FormControl('', [Validators.required]),
     accountid: new FormControl('', [Validators.required]),
+    groupType: new FormControl('', [Validators.required]),
     name: new FormControl('', [Validators.required]),
     desc: new FormControl('', [Validators.required]),
     unit: new FormControl('', [Validators.required]),
@@ -48,33 +53,9 @@ export class DataTableComponent implements OnInit {
     private accountService: AccountService,
     private facilityService: FacilityService,
     private utilityService: UtilityService,
+    private utilityMeterdbService: UtilityMeterdbService,
     public utilityMeterGroupdbService: UtilityMeterGroupdbService,
     ) { }
-
-    public chart = {
-      data: [
-        {
-          domain: { x: [0, 1], y: [0, 1] },
-          value: 0,
-          type: "indicator",
-          mode: "gauge+number",
-          gauge: {
-            axis: { range: [null, 500] },
-            bar: { color: "#2980b9" },
-            bgcolor: "#eee",
-            borderwidth: 0,
-            steps: [
-              { range: [0, 0], color: "#2980b9" }
-            ]
-          }
-        }
-        ]
-    };
-
-    public chartLayout = {
-      layout: {height: 140, margin: {l: 10,r: 10,b: 20,t: 20, pad: 20}},
-      config: {responsive: true},
-    };
 
   ngOnInit() {
     // Observe the accountid var
@@ -92,15 +73,17 @@ export class DataTableComponent implements OnInit {
       this.meterList = value;
       this.tempList = value;
       this.tempList2 = value;
-
-      this.groupLoadList(); // List all groups
+     // this.groupLoadList(); // List all groups
     });
 
     // Observe the meter list
     this.utilityService.getCalendarData().subscribe((value) => {
       this.calendarData = value;
+      this.calendarDataTemp = value;
+      //console.log("Calendar");
+      //console.log(value);
+      this.groupLoadList(); // List all groups
     });
-
 
   }
 
@@ -112,27 +95,39 @@ export class DataTableComponent implements OnInit {
         this.meterGroups = data;
         this.groupLoadMeters(); // load meters into groups
         this.groupGetAvg();
-        this.groupTestLabels();
+        //this.groupTestLabels();
+
+        this.connectedTo=[];
+        for (let index of this.meterGroups) {
+          this.connectedTo.push('energy'+String(index.id));
+        }
+        //console.log("Meter Groups");
         //console.log(this.meterGroups);
       },
       error => {
           console.log(error);
       }
     );
+    
   }
 
   groupLoadMeters() {
+    // Reset data
+    for (let i=0; i<this.meterGroups.length; i++) {
+      this.meterGroups[i]['data']=[];
+    }
+
+    // Store new results
     let result = this.tempList2.reduce((result, item) => {
       const group = (result[item.group] || []);
       group.push(item);
       result[item.group] = group;
-      const index = this.meterGroups.map(e => e.name).indexOf(item.group);
+      const index = this.meterGroups.map(e => e.id).indexOf(+item.group);
       this.meterGroups[index]['data'] = group;
       return result;
     }, {});
-    console.log("here");
-    console.log(this.meterList);
-    console.log(this.meterGroups);
+    //console.log("Meter List");
+    //console.log(this.meterList);
   }
 
   // Adding the dropdown list of types
@@ -146,43 +141,57 @@ export class DataTableComponent implements OnInit {
       this.meterGroups[index]['types'] = Object.keys(result) +" "+ type.length;
       return result;
     }, {});
-    console.log(result);
+    //console.log(result);
+  }
+
+   
+   meterCalendarTotals() {
+    //console.log(this.calendarDataTemp);
+    //console.log(this.calendarData.length);
+    // Quickly calculate calendar totals for each meter
+    let result = this.calendarDataTemp.reduce((result, item) => {
+      const meterid = [];
+      
+      meterid.push(item.monthKwh);
+
+      result[item.meterid] = (result[item.meterid] || 0) + +meterid;
+      
+      return result;
+    }, {});
+    return result;
   }
 
   groupGetAvg() {
     let groupTotal = 0;
-    let fraction = 0;
-    let result = 0;
     let allMeterTotal = 0;
 
-    console.log("Avg");
-    console.log(this.meterList[0]);
+    let meterCalTot = this.meterCalendarTotals(); // Object containing totals for each meter
 
-
-    // Add up the total kwh for every meter
-    for(let i=0; i<this.calendarData.length; i++) {
-      allMeterTotal = +allMeterTotal + +this.calendarData[i]['monthKwh'];
+    // Add up the total kwh for every month available
+    if (this.calendarData != null) {
+      for(let i=0; i<this.calendarData.length; i++) {
+        
+        if(this.calendarData[i]['monthKwh'] != 'NA') {
+          allMeterTotal = +allMeterTotal + +this.calendarData[i]['monthKwh'];
+        }
+  
+      }
     }
 
     // Add up the month kwh for all meters inside the group
     for(let i=0; i<this.meterGroups.length; i++) {
 
       for(let j=0; j<this.meterList.length; j++) {
-        if (this.meterGroups[i]["name"] == this.meterList[j]["type"]) {
-
-            for(let k=0; k<this.meterList[j]['calendarization'].length; k++) {
-              //console.log(this.meterList[j]['calendarization'][k]['monthKwh']);
-              groupTotal = +groupTotal + +this.meterList[j]['calendarization'][k]['monthKwh'];
-
-            }
-            //console.log(this.meterList[j]["calendarization"]);
+        
+        if (this.meterGroups[i]["id"] == this.meterList[j]["group"]) {
+          groupTotal = groupTotal + meterCalTot[this.meterList[j]['id']]; // meterCalendarTotals() object from earlier
         }
       }
 
-      // Do some math to get percent
       // Set the object value for each meter group.
       this.meterGroups[i].fracTotEnergy = ((groupTotal/allMeterTotal)*100).toFixed();
-
+      //console.log("groupTotal "+groupTotal);
+      //console.log("allMeterTotal "+allMeterTotal);
       // reset total for next group
       groupTotal = 0;
     }
@@ -199,7 +208,7 @@ export class DataTableComponent implements OnInit {
   groupAdd(type, name) {
     this.utilityMeterGroupdbService.add(type,name,this.facilityid,this.accountid).then(
       data => {
-        this.meterGroups.push({'name': 'New Group '  + (+this.meterGroups.length + +1),'desc': 'You may edit this group to fit your needs.', data: []}); // Shows the next group before its actually populated... better or worse?
+        //this.meterGroups.push({'name': 'New Group '  + (+this.meterGroups.length + +1), data: []}); // Shows the next group before its actually populated... better or worse?
         this.groupLoadList(); // Refresh list of groups
       },
       error => {
@@ -209,6 +218,7 @@ export class DataTableComponent implements OnInit {
   }
 
   groupEdit(id) {
+    console.log(id);
     this.popup = !this.popup;
     this.groupMenuOpen = null;
     this.groupForm.setValue(this.meterGroups.find(obj => obj.id == id)); // Set form values to current selected meter
@@ -237,5 +247,47 @@ export class DataTableComponent implements OnInit {
     this.groupMenuOpen = null;
     this.utilityMeterGroupdbService.update(this.groupForm.value); // Update db
     this.groupLoadList(); // Refresh list of groups
+  }
+
+  drop(event: CdkDragDrop<string[]>) {
+    if (event.previousContainer === event.container) { // if same list
+      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+    } else {
+      transferArrayItem(event.previousContainer.data, // if different list
+        event.container.data,
+        event.previousIndex,
+        event.currentIndex);
+
+        // After list has updated, get its info
+        const currentIndex = event.currentIndex;
+
+        // Get this meter's value
+        let meterValues = event.container.data[currentIndex];
+    
+        // Set this meter's id
+        const meterId = meterValues['id'];
+        
+        // Get new container group id
+        const newGroupId = (event.container.id).replace('energy', '');
+
+        // Set New Group Value
+        meterValues['group'] = +newGroupId; // make sure its an int
+
+        // Remove 'data' and 'calendarization' before importing. These values do not exist in the database.
+        delete meterValues['calendarization']; 
+
+        // Update meter with its new group id
+        this.utilityMeterdbService.update(meterValues).then(
+          data => {
+            // recalculate average when done.
+            this.groupGetAvg();
+          },
+          error => {
+              console.log(error);
+          }
+        );
+
+        
+    }
   }
 }

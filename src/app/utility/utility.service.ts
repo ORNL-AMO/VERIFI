@@ -10,10 +10,12 @@ import { ElectricitydbService } from "../indexedDB/electricity-db-service";
     providedIn: 'root'
 })
 export class UtilityService {
-  public meterList = new BehaviorSubject([]);
-  public meterDataList = new BehaviorSubject([]);
-  public calendarData = new BehaviorSubject([]);
   private facilityid: number;
+  public meterOnly = new BehaviorSubject([]);
+  public meterList = new BehaviorSubject([]);
+  public meterData = new BehaviorSubject([]);
+  public calendarData = new BehaviorSubject([]);
+  
     
   constructor(
     private localStorage:LocalStorageService,
@@ -26,61 +28,94 @@ export class UtilityService {
         });
      }
 
-    getMeters(): Observable<any> {
+/* Meter Only. Does not add calendarization or raw data. Used when those items to do need to be recalculated on update 
+    getMetersOnly(): Observable<any> {
         // Query meters if first time
-        if (this.meterList.value.length == 0) {
-            this.refreshMeters();
+        if (this.meterOnly.value.length == 0) {
+            this.setMetersOnly();
         }
         // List all meters
-        return this.meterList.asObservable();
+        return this.meterOnly.asObservable();
     }
 
-    getCalendarData(): Observable<any> {
+    setMetersOnly(): void {
+      this.utilityMeterdbService.getAllByIndex(this.facilityid).then(
+        data => {
+        this.meterOnly.next(data);
+        },
+        error => {
+            console.log(error);
+        }
+      );
+    }
+*/
+    getMeters(): Observable<any> {
+      // Query meters if first time
+      if (this.meterList.value.length == 0) {
+          this.refreshMeters();
+      }
       // List all meters
-      return this.calendarData.asObservable();
+      return this.meterList.asObservable();
     }
 
+    // Only refresh all the data when a new meter bill is added.
     refreshMeters(): void {
-        // Query all meters
-        this.utilityMeterdbService.getAllByIndex(this.facilityid).then(
-            data => {
-            //this.localStorage.store('meterList', data);
-            //this.meterList.next(data);
-            this.setMeterData(data);
-            },
-            error => {
-                console.log(error);
-            }
-        );
+      // Query all meters
+      this.utilityMeterdbService.getAllByIndex(this.facilityid).then(
+          data => {
+          //this.localStorage.store('meterList', data);
+          //this.meterList.next(data);
+          this.setCalendarData(data);
+          },
+          error => {
+              console.log(error);
+          }
+      );
+  }
+
+    refreshMeterData(): void {
+      // Query all meters
+      this.utilityMeterdbService.getAllByIndex(this.facilityid).then(
+          data => {
+          //this.localStorage.store('meterList', data);
+          //this.meterList.next(data);
+          this.setMeterData(data);
+          },
+          error => {
+              console.log(error);
+          }
+      );
+  }
+
+
+
+/* Raw Meter Data. Only used for utilities/energySource/[energy] */
+    getMeterData(): Observable<any> {
+      // Query meters if first time
+      if (this.meterData.value.length == 0) {
+          this.refreshMeterData();
+      }
+      // List all meters
+      return this.meterData.asObservable();
     }
 
     setMeterData(meters): void {
-        let calendarize = [];
+
         // loop each meter
         for (let i=0; i < meters.length; i++) {
             // filter meter data based on meterid
             this.electricitydbService.getAllByIndex(meters[i]['id']).then(
               data => {
-
-                /* THIS IS PUSHING RAW DATA. IT IS ONLY NEEDED FOR 1 PAGE. CONSIDER ALTERNATE.*/
+                
                 // push to meterlist object
                 meters[i]['data'] = data;
                 meters[i]['data'].sort(this.sortByDate);
 
-                /* PUSH CALENDAR DATA TO SPECIFIC METER */
-                //if (this.meterList[i].type == 'Electricity') {
-                  meters[i]['calendarization'] = this.calendarization(data, 'Elec');
-                  meters[i]['calendarization'].sort(this.sortByDate);
 
-                /* PUSH ALL CALENDAR DATA TO SINGLE ARRAY */
-                  calendarize.push(...this.calendarization(data, 'Elec'));
+                // If last iteration, set new observable value. ** Issue with async on large data sets
+                //if (i === meters.length - 1) {
+                    this.meterData.next(meters);
                 //}
-
-                // If last iteration, set new observable value.
-                if (i == meters.length - 1) {
-                    this.meterList.next(meters);
-                    this.calendarData.next(calendarize);
-                }
               },
               error => {
                   console.log(error);
@@ -89,15 +124,48 @@ export class UtilityService {
         }
     }
 
-    getMeterData() {
-      // filter meter data based on meterid
-      return this.electricitydbService.getAllByIndex(this.facilityid);
+/* Calendarization */
+
+    getCalendarData(): Observable<any> {
+      // List all meters
+      return this.calendarData.asObservable();
     }
+
+    setCalendarData(meters) {
+      let calendarize = [];
+
+      for (let i=0; i < meters.length; i++) {
+          // filter meter data based on meterid
+          this.electricitydbService.getAllByIndex(meters[i]['id']).then(
+            data => {
+
+              /* PUSH CALENDAR DATA TO SPECIFIC METER */ // Used for UI ngFor
+              //if (this.meterList[i].type == 'Electricity')
+              meters[i]['calendarization'] = this.calendarization(data, 'Elec',meters[i]['id']);
+              meters[i]['calendarization'].sort(this.sortByDate);
+
+              /* PUSH ALL CALENDAR DATA TO SINGLE ARRAY */ // Used for quick calculations
+              const calData = this.calendarization(data, 'Elec',meters[i]['id']);
+              calendarize.push(...calData);
+
+              // If last iteration, set new observable value. ** Issue with async on large data sets
+              //if (i === meters.length - 1) {
+                  this.meterList.next(meters);
+                  this.calendarData.next(calendarize);
+              //}
+            },
+            error => {
+                console.log(error);
+            }
+          );
+      }
+    }
+
     sortByDate(a, b) {
         return new Date(a.readDate).getTime() - new Date(b.readDate).getTime();
     }
 
-    calendarization (data, type) {
+    calendarization (data, type, meterid) {
       let dataTable = [];
   
       for(let i=1; i < data.length -1; i++) {
@@ -181,6 +249,7 @@ export class UtilityService {
           }
   
           dataTable.push({
+            meterid: meterid,
             year: year,
             month: monthName,
             monthKwh: monthlyVol.toFixed(2),
@@ -190,6 +259,7 @@ export class UtilityService {
         } else {
           // Show month, but don't calculate.
           dataTable.push({
+            meterid: meterid,
             year: year,
             month: monthName,
             monthKwh: 'NA',
@@ -197,6 +267,7 @@ export class UtilityService {
           });
         }
       }
+      //console.log("async?");
       return dataTable;
     }
     

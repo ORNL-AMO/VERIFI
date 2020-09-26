@@ -19,6 +19,10 @@ export class UtilityMeterGroupdbService {
         return this.dbService.getByIndex('utilityMeterGroups', 'name', name);
     }
 
+    getById(id) {
+        return this.dbService.getByIndex('utilityMeterGroups', 'id', id);
+    }
+
     getByIndex(facilityid) {
         return this.dbService.getByIndex('utilityMeterGroups', 'facilityid', facilityid);
     }
@@ -39,7 +43,7 @@ export class UtilityMeterGroupdbService {
             accountid: accountid,
             groupType: type,
             name: name,
-            desc: 'You may edit this group to fit your needs.',
+            desc: '',
             unit: 'MMBtu',
             data: [],
             dateModified: 'Unknown',

@@ -7,11 +7,12 @@
 </div>
 <table>
     <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th><i>Group</i></th>
         <th>Meter #</th>
         <th>Account #</th>
-        <th>Type</th>
-        <th>Group</th>
-        <th>Building / Area</th>
+        <th>Building / Location</th>
         <th>Building Type</th>
         <th>Utility Supplier</th>
         <th>Notes</th>
@@ -21,11 +22,12 @@
         <th></th>
     </tr>
     <tr *ngFor="let meterLists of meterList">
-        <td>{{meterLists.meterNumber}}</td>
-        <td>{{meterLists.accountNumber}}</td>
+        <td>{{meterLists.name}}</td>
         <td>{{meterLists.type}}</td>
         <td>{{meterLists.group}}</td>
-        <td>{{meterLists.name}}</td>
+        <td>{{meterLists.meterNumber}}</td>
+        <td>{{meterLists.accountNumber}}</td>
+        <td>{{meterLists.location}}</td>
         <td></td>
         <td>{{meterLists.supplier}}</td>
         <td>{{meterLists.notes}}</td>
@@ -50,19 +52,13 @@
         <br>
         <p class="bold">Meter Information</p>
         <form [formGroup]="meterForm">
-            <label hidden>ID
-                <input type="text" formControlName="id">
-            </label>
-
-            <label>Meter Number
-                <input type="text" formControlName="meterNumber">
+            <label hidden>ID<input type="text" formControlName="id"></label>
+            <label>Group<input type="text" formControlName="group"></label>
+            <label>*Name
+                <input type="text" formControlName="name">
             </label>
             <br>
-            <label>Account Number
-                <input type="text" formControlName="accountNumber">
-            </label>
-            <br>
-            <label>Type
+            <label>*Type
                 <select type="text" formControlName="type">
                     <option value="Electricity">Electricity</option>
                     <option value="Natural Gas">Natural Gas</option>
@@ -75,13 +71,17 @@
                     <option value="Other Energy">Other Energy</option>-->
                 </select>
             </label>
-            <br>
-            <label>Group
-                <input type="text" formControlName="group">
+            <hr>
+            <label>Meter Number
+                <input type="text" formControlName="meterNumber">
             </label>
             <br>
-            <label>Building / Area
-                <input type="text" formControlName="name">
+            <label>Account Number
+                <input type="text" formControlName="accountNumber">
+            </label>
+            <br>
+            <label>Building / Location
+                <input type="text" formControlName="location">
             </label>
             <br>
             <label>Utility Supplier
@@ -100,8 +100,8 @@
 </div>
 
 <div class="wizard">
-    <button class="btn btn-secondary item-left">Prev</button>
-    <button class="btn btn-primary item-right">Next</button>
+    <!--<button class="btn btn-secondary item-left">Prev</button>-->
+    <button class="btn btn-primary item-right" routerLink="/utility/mo-meter-data">Next</button>
 </div>
 
 <div class="window" [class.open]="importWindow == true">

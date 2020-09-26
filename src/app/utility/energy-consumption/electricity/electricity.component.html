@@ -5,7 +5,7 @@
     <button class="btn btn-outline" (click)="meterExport()">Export</button>
 </div>
 <div class="filter item-right">
-    <button class="btn" [ngClass]="{'btn-outline' : !filterColMenu, 'btn-solid' : filterColMenu}" (click)="filterColMenu = !filterColMenu; filterInpMenu = false">Filter</button>
+    <button class="btn" [ngClass]="{'btn-solid' : !filterColMenu, 'btn-outline' : filterColMenu}" (click)="filterColMenu = !filterColMenu; filterInpMenu = false">Filter</button>
 
     <!--Column Filters-->
     <div class="filter-dropdown" [hidden]="!filterColMenu">
@@ -16,34 +16,26 @@
         <a (click)="showAllColumns();">Show All</a>
     </div>
 </div>
-<div class="bulk-delete item-right">
-    <button class="btn btn-danger" (click)="filterColMenu = !filterColMenu; filterInpMenu = false">Bulk Delete</button>
-
-    <!--Column Filters-->
-    <div class="filter-dropdown" [hidden]="!filterColMenu">
-        <label *ngFor="let filterCols of filterCol">
-            <input type="checkbox" name="filterCols.name" [checked]="filterCols.filter" (change)="filterCols.filter = !filterCols.filter">{{filterCols.display}}
-        </label>
-        <br><br>
-        <a (click)="showAllColumns();">Show All</a>
-    </div>
+<div class="bulk-delete item-right" [class.show]="is_checked">
+    <button class="btn btn-danger" (click)='bulkDelete()'>Bulk Delete</button>
 </div>
 <br>
 <div class="meter" *ngFor="let meterLists of meterList">
     <div class="meterData">
+        <p><span class="bold">Name</span> : {{meterLists.name}}</p>
         <p><span class="bold">Meter ID</span> # {{meterLists.id}}</p>
         <p><span class="bold">Meter</span> # {{meterLists.meterNumber}}</p>
         <p><span class="bold">Account</span> # {{meterLists.accountNumber}}</p>
-        <p><span class="bold">Building / Area</span> : {{meterLists.name}}</p>
+        <p><span class="bold">Building / Area</span> : {{meterLists.location}}</p>
         <p><span class="bold">Utility Supplier</span> : {{meterLists.supplier}}</p>
         <p><span class="bold">Notes</span> : {{meterLists.notes}}</p>
     </div>
 
-    <div class="row no-margin">
+    <div class="row overflowTable no-margin">
         <div class="col no-margin tableData">
         <table>
             <tr>
-                <th></th>
+                <th><input #masterCheckbox type="checkbox" (change)="checkAll(meterLists.id, $event)"></th>
                 <th class="row-year">Meter Read Date</th>
                 <th>Total kWh</th>
                 <th>Total Demand</th>
@@ -69,7 +61,7 @@
                 <th [hidden]="!filterCol[18]['filter']">Other Charge</th>
             </tr>
             <tr *ngFor="let meterData of meterLists.data">
-                <td><input type="checkbox"></td>
+                <td><input [value]="meterData.id" type="checkbox" name="metersSelected" (change)="checkCheckboxes($event)" [(ngModel)]="meterData.checked"></td>
                 <td>{{meterData.readDate}}</td>
                 <td>{{meterData.totalKwh}}</td>
                 <td>{{meterData.totalDemand}}</td>
@@ -379,6 +371,10 @@
             <label>Total Cost
                 <span class="unit">$</span>
                 <input type="text" formControlName="totalCost" required>
+            </label>
+            <label hidden>Checked
+                <span class="unit">$</span>
+                <input type="checkbox" formControlName="checked" required>
             </label>
         </form>
 
