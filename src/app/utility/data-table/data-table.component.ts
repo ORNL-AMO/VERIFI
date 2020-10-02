@@ -80,8 +80,6 @@ export class DataTableComponent implements OnInit {
     this.utilityService.getCalendarData().subscribe((value) => {
       this.calendarData = value;
       this.calendarDataTemp = value;
-      //console.log("Calendar");
-      //console.log(value);
       this.groupLoadList(); // List all groups
     });
 
@@ -141,13 +139,10 @@ export class DataTableComponent implements OnInit {
       this.meterGroups[index]['types'] = Object.keys(result) +" "+ type.length;
       return result;
     }, {});
-    //console.log(result);
   }
 
    
    meterCalendarTotals() {
-    //console.log(this.calendarDataTemp);
-    //console.log(this.calendarData.length);
     // Quickly calculate calendar totals for each meter
     let result = this.calendarDataTemp.reduce((result, item) => {
       const meterid = [];
@@ -164,6 +159,7 @@ export class DataTableComponent implements OnInit {
   groupGetAvg() {
     let groupTotal = 0;
     let allMeterTotal = 0;
+    let total;
 
     let meterCalTot = this.meterCalendarTotals(); // Object containing totals for each meter
 
@@ -189,9 +185,13 @@ export class DataTableComponent implements OnInit {
       }
 
       // Set the object value for each meter group.
-      this.meterGroups[i].fracTotEnergy = ((groupTotal/allMeterTotal)*100).toFixed();
-      //console.log("groupTotal "+groupTotal);
-      //console.log("allMeterTotal "+allMeterTotal);
+      total = ((groupTotal/allMeterTotal)*100).toFixed();
+
+      //prevent NaN output
+      if(isNaN(total)) {total = 0;} 
+
+      this.meterGroups[i].fracTotEnergy = total;
+
       // reset total for next group
       groupTotal = 0;
     }
@@ -208,7 +208,6 @@ export class DataTableComponent implements OnInit {
   groupAdd(type, name) {
     this.utilityMeterGroupdbService.add(type,name,this.facilityid,this.accountid).then(
       data => {
-        //this.meterGroups.push({'name': 'New Group '  + (+this.meterGroups.length + +1), data: []}); // Shows the next group before its actually populated... better or worse?
         this.groupLoadList(); // Refresh list of groups
       },
       error => {
@@ -218,7 +217,6 @@ export class DataTableComponent implements OnInit {
   }
 
   groupEdit(id) {
-    console.log(id);
     this.popup = !this.popup;
     this.groupMenuOpen = null;
     this.groupForm.setValue(this.meterGroups.find(obj => obj.id == id)); // Set form values to current selected meter
@@ -226,27 +224,53 @@ export class DataTableComponent implements OnInit {
   }
 
   groupDelete(id) {
-    console.log("delete");
     this.groupMenuOpen = null;
-    // First check if all meters have been removed from the group
-    // If no, alert the user.
-    // If yes, delete group
-    // Refresh group list
 
-    this.utilityMeterGroupdbService.deleteIndex(id);
-
-    // Refresh list of groups
-    // I splice the array vs refreshing the list because its faster for the user.
-    const index = this.meterGroups.map(e => e.id).indexOf(id);
-    this.meterGroups.splice(index, 1); // remove it
-
+    // Check if all meters have been removed from the group
+    if(this.checkGroupData(id)) {
+      this.utilityMeterGroupdbService.deleteIndex(id);
+      // Refresh list of groups
+      // I splice the array vs refreshing the list because its faster for the user.
+      const index = this.meterGroups.map(e => e.id).indexOf(id);
+      this.meterGroups.splice(index, 1); // remove it
+    }
   }
 
   groupSave() {
     this.popup = !this.popup;
     this.groupMenuOpen = null;
-    this.utilityMeterGroupdbService.update(this.groupForm.value); // Update db
+    
+    // Check if name is unique before updating
+    if (this.checkGroupName()) {
+      this.utilityMeterGroupdbService.update(this.groupForm.value);
+    }
+    
     this.groupLoadList(); // Refresh list of groups
+  }
+
+  checkGroupName() {
+    const tempGroupName = this.groupForm.controls['name'].value;
+
+    // Check if name is unique
+    for(let i=0; i<this.meterGroups.length; i++){
+      if(this.meterGroups[i]['name'] == tempGroupName){
+        alert("Group name must be unique.");
+        return false;
+      }
+    }
+    return true;
+  }
+
+  checkGroupData(id) {
+    const index = this.meterGroups.map(e => e.id).indexOf(id);
+
+    // Check if group has data
+    if(this.meterGroups[index]['data'].length != 0){
+        alert("Group must be empty before deleting.");
+        return false;
+    }
+    
+    return true;
   }
 
   drop(event: CdkDragDrop<string[]>) {

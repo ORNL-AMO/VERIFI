@@ -134,21 +134,21 @@
             <p class="bold">Group Information</p>
             <form [formGroup]="groupForm">
                 <label hidden>ID
-                    <input type="text" formControlName="id">
+                    <input type="text" formControlName="id" minlength="1" maxlength="10">
                 </label>
                 <label hidden>Date Modified
-                    <input type="text" formControlName="dateModified">
+                    <input type="text" formControlName="dateModified" minlength="1" maxlength="40">
                 </label>
                 <label hidden>Group Type
-                    <input type="text" formControlName="groupType">
+                    <input type="text" formControlName="groupType" minlength="1" maxlength="11">
                 </label>
                 
                 <label>Name
-                    <input type="text" formControlName="name">
+                    <input type="text" formControlName="name" minlength="1" maxlength="50">
                 </label>
                 <br>
                 <label>Description
-                    <textarea formControlName="desc"></textarea>
+                    <textarea formControlName="desc" minlength="1" maxlength="65"></textarea>
                 </label>
                 <br>
                 <label hidden>Final Unit

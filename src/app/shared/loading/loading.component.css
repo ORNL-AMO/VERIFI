@@ -1,0 +1,32 @@
+div#loading {
+    position: fixed;
+    top: -9999px;
+    left: calc(50% - 100px);
+    background-color: white;
+    box-shadow: 0px 0px 31px #0000002e;
+    z-index: 9999;
+    text-align: center;
+    padding: 20px;
+    width: 200px;
+    opacity: 0;
+    transition: .5s opacity;
+}
+#overlay {
+    position: fixed;
+    background-color: black;
+    width: 100vw;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    z-index: 9998;
+    height:0;
+    transition: .5s opacity;
+}
+#loading.open {
+    top: calc(50% - 100px);
+    opacity: 1;
+}
+#overlay.open {
+    opacity: 0.5;
+    height: 100vh;
+}

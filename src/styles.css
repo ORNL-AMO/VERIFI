@@ -520,16 +520,18 @@ Popovers (Contextual Help)
 Sidebar
 =========================================== */ 
 .content {
-    margin: 67px 0 0 70px;
-    /*padding: 20px 16px;*/
+    /*margin: 67px 0 0 70px;
+    padding: 20px 16px;*/
+    padding: 67px 0 0 70px;
     background-color: #f1f1f1;
-    min-height: calc(100vh - 95px);
-    height: calc(100vh - 95px);
+    min-height: calc(100vh - 35px);
+    height: calc(100vh - 35px);
     transition: .2s all;
     overflow: scroll!important;
 }
 .open .content {
-    margin: 67px 0 0 261px;
+    /*margin: 67px 0 0 261px;*/
+    padding: 67px 0 0 261px;
 }
 .open #sidebar {
     width: calc(310px - 50px)!important;

@@ -5,6 +5,7 @@ import { LocalStorageService } from 'ngx-webstorage';
 import { FacilityService } from '../account/facility/facility.service';
 import { UtilityMeterdbService } from "../indexedDB/utilityMeter-db-service";
 import { ElectricitydbService } from "../indexedDB/electricity-db-service";
+import { LoadingService } from "../shared/loading/loading.service";
 
 @Injectable({
     providedIn: 'root'
@@ -20,6 +21,7 @@ export class UtilityService {
   constructor(
     private localStorage:LocalStorageService,
     private facilityService: FacilityService,
+    private loadingService : LoadingService,
     public utilityMeterdbService: UtilityMeterdbService,
     public electricitydbService: ElectricitydbService) {
         // Observe the facilityid var
@@ -27,28 +29,7 @@ export class UtilityService {
             this.facilityid = value;
         });
      }
-
-/* Meter Only. Does not add calendarization or raw data. Used when those items to do need to be recalculated on update 
-    getMetersOnly(): Observable<any> {
-        // Query meters if first time
-        if (this.meterOnly.value.length == 0) {
-            this.setMetersOnly();
-        }
-        // List all meters
-        return this.meterOnly.asObservable();
-    }
-
-    setMetersOnly(): void {
-      this.utilityMeterdbService.getAllByIndex(this.facilityid).then(
-        data => {
-        this.meterOnly.next(data);
-        },
-        error => {
-            console.log(error);
-        }
-      );
-    }
-*/
+  
     getMeters(): Observable<any> {
       // Query meters if first time
       if (this.meterList.value.length == 0) {
@@ -80,6 +61,7 @@ export class UtilityService {
           //this.localStorage.store('meterList', data);
           //this.meterList.next(data);
           this.setMeterData(data);
+          this.setCalendarData(data); // TEMP FIX
           },
           error => {
               console.log(error);
@@ -100,22 +82,33 @@ export class UtilityService {
     }
 
     setMeterData(meters): void {
+      let counter = 1; // keeps track of the end of the loop (async)
+      this.loadingService.setLoadingStatus(true);
+      this.loadingService.setLoadingMessage("Fetching Meter Data...");
+
+      // if meter list is empty for loop wont run
+      if(meters.length < 1 ) {
+        this.loadingService.setLoadingStatus(false);
+        this.meterData.next([]);
+      }
 
         // loop each meter
         for (let i=0; i < meters.length; i++) {
             // filter meter data based on meterid
             this.electricitydbService.getAllByIndex(meters[i]['id']).then(
               data => {
-                
+                counter++;
+
                 // push to meterlist object
                 meters[i]['data'] = data;
                 meters[i]['data'].sort(this.sortByDate);
 
-
-                // If last iteration, set new observable value. ** Issue with async on large data sets
-                //if (i === meters.length - 1) {
-                    this.meterData.next(meters);
-                //}
+                // If last iteration, set new observable value and end loading screen
+                if(counter === meters.length || meters.length < 2) {
+                  this.meterData.next(meters);
+                  this.loadingService.setLoadingStatus(false);
+                }
+                
               },
               error => {
                   console.log(error);
@@ -132,27 +125,39 @@ export class UtilityService {
     }
 
     setCalendarData(meters) {
+      let counter = 1; // keeps track of the end of the loop (async)
+      this.loadingService.setLoadingStatus(true);
+      this.loadingService.setLoadingMessage("Fetching Calendarized Data...");
       let calendarize = [];
+
+      // if meter list is empty for loop wont run
+      if(meters.length < 1 ) {
+        this.loadingService.setLoadingStatus(false);
+        this.meterList.next([]);
+      }
 
       for (let i=0; i < meters.length; i++) {
           // filter meter data based on meterid
           this.electricitydbService.getAllByIndex(meters[i]['id']).then(
             data => {
+              counter++;
 
-              /* PUSH CALENDAR DATA TO SPECIFIC METER */ // Used for UI ngFor
+              // Push calendar data to its meter. Used for UI ngFor
               //if (this.meterList[i].type == 'Electricity')
               meters[i]['calendarization'] = this.calendarization(data, 'Elec',meters[i]['id']);
               meters[i]['calendarization'].sort(this.sortByDate);
 
-              /* PUSH ALL CALENDAR DATA TO SINGLE ARRAY */ // Used for quick calculations
+              // Push all calendar data to seperate array.  Used for quick calculations
               const calData = this.calendarization(data, 'Elec',meters[i]['id']);
               calendarize.push(...calData);
 
-              // If last iteration, set new observable value. ** Issue with async on large data sets
-              //if (i === meters.length - 1) {
-                  this.meterList.next(meters);
-                  this.calendarData.next(calendarize);
-              //}
+              // If last iteration, set new observable value and end loading screen
+              // meters.length < 2 because if meter length is 1 counter is already at 2
+              if(counter === meters.length || meters.length < 2) { 
+                this.meterList.next(meters);
+                this.calendarData.next(calendarize);
+                this.loadingService.setLoadingStatus(false);
+              }
             },
             error => {
                 console.log(error);

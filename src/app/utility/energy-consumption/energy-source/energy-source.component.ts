@@ -94,7 +94,7 @@ export class EnergySourceComponent implements OnInit {
     });
 
     // Observe the meter list
-    this.utilityService.getMeters().subscribe((value) => {
+    this.utilityService.getMeterData().subscribe((value) => {
       this.meterList = value;
       this.meterMapTabs();
     });
@@ -134,33 +134,28 @@ export class EnergySourceComponent implements OnInit {
   }
 
 
-  groupCheckExistence(name) {
-    this.utilityMeterGroupdbService.getByName('Unsorted').then(
-      data => {
-        // if doesn't, create it
-        console.log(data);
-        if (data == null) {
-          this.groupAdd('Energy','Unsorted'); 
-        }
-      },
-      error => {
-          console.log(error);
-      }
-    );
-  }
+  async groupCheckExistence(groupType, groupName) {
+    let groupid = 1;
+    let group = null;
+    // Save this meter in a default "unsorted" group.
+    // This group can be renamed or deleted by user.
+    // If they do this, another "unsorted" group will be created
+    
+    console.log("GROUP NAME");
+    console.log(groupName);
 
-
-  groupAdd(type,name) {
-    let defaultGroupId = 1;
-    this.utilityMeterGroupdbService.add(type,name,this.facilityid,this.accountid).then(
-      data => {
-        defaultGroupId =  data;
-      },
-      error => {
-          console.log(error);
-      }
-    );
-    return defaultGroupId;
+    group = await this.utilityMeterGroupdbService.getByName(groupName); // check if group exists
+    console.log("---Group After");
+      console.log(group);
+    
+    // If not add it
+    if (group == null) {
+      groupid = await this.utilityMeterGroupdbService.add(groupType,groupName,this.facilityid,this.accountid); // add service returns id
+    } else {
+      groupid = group.id; // get current id
+    }
+      
+    return groupid;
   }
 
   meterMapTabs() {
@@ -170,33 +165,21 @@ export class EnergySourceComponent implements OnInit {
   }
 
   async meterSave() {
-    let groupid = 1;
     this.window = !this.window;
 
-    //this.groupCheckExistence(this.meterForm.value.group); // check if group exists
-
-    // Save this meter in a default "unsorted" group.
-    // This group can be renamed or deleted by user.
-    // If they do this, another "unsorted" group will be created
+    // If group is not defined, get "Unsorted" group's id/
+    // The Unsorted group can be altered/deleted by the user so the id can change.
     if (this.meterForm.value.group == '') {
-      const group = await this.utilityMeterGroupdbService.getByName('Unsorted'); // check if default group exists
-
-      // If not add it
-      if (group == null) {
-        groupid = await this.utilityMeterGroupdbService.add('Energy','Unsorted',this.facilityid,this.accountid); // add service returns id
-      } else {
-        groupid = group.id; // get current id
-      }
-      
-      this.meterForm.value.group = groupid; // This is the unsorted list
+      this.meterForm.value.group = await this.groupCheckExistence("Energy", "Unsorted"); 
     }
 
-    console.log(this.meterList);
     this.utilityMeterdbService.update(this.meterForm.value); // Update db
-    this.utilityService.refreshMeters(); // refresh the data
+    this.utilityService.refreshMeterData(); // refresh the data
     //this.utilityService.setMetersOnly(); // refresh the data
     this.toggleCancel = false; // re-enable "edit meter" cancel button
   }
+
+
 
   meterEdit(id) {
     this.window = !this.window;
@@ -231,7 +214,7 @@ export class EnergySourceComponent implements OnInit {
     );
     // Delete meter
     this.utilityMeterdbService.deleteIndex(id);
-    this.utilityService.refreshMeters(); // refresh the data
+    this.utilityService.refreshMeterData(); // refresh the data
   }
 
   meterImport (files: FileList) {
@@ -250,7 +233,7 @@ export class EnergySourceComponent implements OnInit {
             let csv: string = reader.result as string;
             const lines = csv.split("\n");
             const headers = lines[0].replace('\r', '').split(",");
-            const allowedHeaders = ["meterNumber", "accountNumber", "type", "name", "location", "supplier", "notes", "group"];
+            const allowedHeaders = ["meterNumber", "accountNumber", "type", "name", "location", "supplier", "group", "notes"];
 
             if (JSON.stringify(headers) === JSON.stringify(allowedHeaders)) {
 
@@ -279,14 +262,19 @@ export class EnergySourceComponent implements OnInit {
       }
   }
 
-  meterAddCSV() {
+  async meterAddCSV() {
     this.importWindow = false;
-    
-    for(let i=0;i<this.import.length;i++){
+    let counter = 1;
+
+    for(let i=0;i<this.import.length+1;i++){
       let obj = this.import[i];
+      
+      let tempGroupid = await this.groupCheckExistence("Energy", obj.group);  // check if group exists, if not create it
 
       this.utilityMeterdbService.add(this.facilityid,this.accountid).then(
         id => {
+          counter++;
+
           const importLine = {
             id: id,
             facilityid: this.facilityid,
@@ -295,14 +283,18 @@ export class EnergySourceComponent implements OnInit {
             accountNumber: obj.accountNumber,
             type: obj.type,
             location: obj.location,
-            group: +obj.group,
+            group: +tempGroupid,
             name: obj.name,
             supplier: obj.supplier,
             notes: obj.notes
           }
 
           this.utilityMeterdbService.update(importLine); // Update db
-          this.utilityService.refreshMeters();
+
+          if(counter === this.import.length) {
+            this.utilityService.refreshMeterData();
+          }
+          
         },
         error => {
             console.log(error);

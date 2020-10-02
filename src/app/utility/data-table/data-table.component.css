@@ -252,7 +252,7 @@ meter::-webkit-meter-even-less-good-value {
     margin-right: 5px;
 }
 .group-desc {
-    margin: auto 0 15px 15px;
+    margin: 15px;
 }
 .grouped-list .fa-ellipsis-v {
     padding: 5px 20px;

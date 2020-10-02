@@ -40,8 +40,6 @@ export class MoMeterDataComponent implements OnInit {
     // Observe the meter list
     this.utilityService.getMeters().subscribe((value) => {
       this.meterList = value;
-      console.log("observe");
-      console.log(value);
     });
   }
 
