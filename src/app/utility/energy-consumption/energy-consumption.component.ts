@@ -20,7 +20,6 @@ export class EnergyConsumptionComponent implements OnInit {
   fuelOil: boolean;
   coal: boolean;
   wood: boolean;
-  paper: boolean;
   otherGas: boolean;
   otherEnergy: boolean;
   meterList: any = [{type: ''}];
@@ -69,7 +68,6 @@ export class EnergyConsumptionComponent implements OnInit {
         this.fuelOil = this.energySource.indexOf("Fuel Oil") > -1;
         this.coal = this.energySource.indexOf("Coal") > -1;
         this.wood = this.energySource.indexOf("Wood") > -1;
-        this.paper = this.energySource.indexOf("Paper") > -1;
         this.otherGas = this.energySource.indexOf("Other Gas") > -1;
         this.otherEnergy = this.energySource.indexOf("Other Energy") > -1;
       }

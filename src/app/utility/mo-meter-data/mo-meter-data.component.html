@@ -1,7 +1,27 @@
 <div class="wrapper main-content">
     <h4>Monthly Meter Data</h4>
     <p>Meter data has been calendarized. Data represented with <span class="bold">NA</span> does not have a full month of data to calculate.</p>
-    <br>
+
+    <div class="controls">
+        <!--Column Filters-->
+        <div class="filter item-right">
+            <button class="btn btn-solid">Filter</button>
+        </div>
+        <!--Items Per Page-->
+        <div class="items-per-page item-right">
+            <span>Show </span>
+            <select (change)="changePagesize($event.target.value)">
+                <option value="6">6</option>
+                <option value="12">12</option>
+                <option value="24">24</option>
+                <option value="36">36</option>
+                <option value="48">48</option>
+                <option value="60">60</option>
+            </select>
+            <span> rows</span>
+        </div>
+
+    </div>
 
     <div class="meter" *ngFor="let meterLists of meterList">
 
@@ -9,7 +29,7 @@
             <div class="col tableData">
                 <table>
                     <tr>
-                        <th colspan=4>Account #: {{meterLists.meterNumber}} <span class="item-right reg-weight">{{meterLists.type}}</span></th>
+                        <th colspan=4>{{meterLists.name}} <span class="item-right reg-weight">{{meterLists.type}}</span></th>
                     </tr>
                     <tr>
                         <th class="row-year">Month</th>
@@ -18,7 +38,7 @@
                         <th [hidden]="meterLists.type != 'Natural Gas'">Total Volume (cfm)/MMBTU</th>
                         <th>Total Cost</th>
                     </tr>
-                    <tr *ngFor="let meterData of meterLists.calendarization" [class.na]="meterData.monthKwh == 'NA'">
+                    <tr *ngFor="let meterData of meterLists.calendarization | slice: pageSize | slice: 0:itemsPerPage" [class.na]="meterData.monthKwh == 'NA'">
                         <td>{{meterData.month}}</td>
                         <td>{{meterData.year}}</td>
                         <td>{{meterData.monthKwh}}</td>
@@ -26,6 +46,12 @@
                     </tr>
                 </table>
             </div>
+        </div>
+        <div class="tableControls overflow-hidden">
+            <div class="item-right">
+                <ngb-pagination [collectionSize]="meterLists.calendarization.length" [(page)]="page" [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" [boundaryLinks]="true" aria-label="Default pagination" (pageChange)="onPageChange(page)"></ngb-pagination>
+            </div>
+            <p class="item-right">Showing {{page*itemsPerPage-(itemsPerPage-1)}} to {{page*itemsPerPage}} of {{meterLists.calendarization.length}} entries</p>
         </div>
     </div>
     <div class="wizard">

@@ -6,7 +6,7 @@ import { AccountdbService } from "../../../indexedDB/account-db.service";
 import { FacilitydbService } from "../../../indexedDB/facility-db-service";
 import { FacilityService } from 'src/app/account/facility/facility.service';
 import { UtilityService } from "../../../utility/utility.service";
-import { ElectricitydbService } from "../../../indexedDB/electricity-db-service";
+import { UtilityMeterDatadbService } from "../../../indexedDB/utilityMeterData-db-service";
 import { UtilityMeterdbService } from "../../../indexedDB/utilityMeter-db-service";
 import { UtilityMeterGroupdbService } from "../../../indexedDB/utilityMeterGroup-db.service";
 import { listAnimation } from '../../../animations';
@@ -32,7 +32,7 @@ export class EnergySourceComponent implements OnInit {
   popup: boolean = false;
   id: number;
 
-  energySource: any;
+  energySources: any;
   selectedMeter: any;
   meterList: any = [{type: ''}];
   
@@ -42,6 +42,12 @@ export class EnergySourceComponent implements OnInit {
   import: any = [];
   toggleCancel: boolean = false; // Used to prevent "Cancel" when Adding New Meter (Cancel leaves the meter blank)
 
+  page = 1;
+  itemsPerPage = 10;
+  pageSize: number;
+
+  is_ele_ng: boolean = false;
+
   meterForm = new FormGroup({
     id: new FormControl('', [Validators.required]),
     //meterid: new FormControl('', [Validators.required]),
@@ -49,7 +55,12 @@ export class EnergySourceComponent implements OnInit {
     accountid: new FormControl('', [Validators.required]),
     meterNumber: new FormControl('', [Validators.required]),
     accountNumber: new FormControl(''),
-    type: new FormControl('', [Validators.required]),
+    type: new FormControl('Electricity', [Validators.required]),
+    phase: new FormControl('NA', [Validators.required]),
+    fuel: new FormControl('', [Validators.required]),
+    startingUnit: new FormControl('1', [Validators.required]),
+    heatCapacity: new FormControl('1', [Validators.required]),
+    siteToSource: new FormControl('1', [Validators.required]),
     group: new FormControl('', [Validators.required]),
     name: new FormControl('', [Validators.required]),
     location: new FormControl(''),
@@ -65,7 +76,7 @@ export class EnergySourceComponent implements OnInit {
     public accountdbService: AccountdbService,
     public facilitydbService: FacilitydbService,
     private utilityService: UtilityService,
-    public electricitydbService: ElectricitydbService,
+    public utilityMeterDatadbService: UtilityMeterDatadbService,
     public utilityMeterdbService: UtilityMeterdbService,
     public utilityMeterGroupdbService: UtilityMeterGroupdbService,
     private energyConsumptionService: EnergyConsumptionService
@@ -85,7 +96,6 @@ export class EnergySourceComponent implements OnInit {
         this.facilitydbService.getById(this.facilityid).then(
           data => {
             this.activeFacility = data;
-            //this.meterLoadList();
           },
           error => {
               console.log(error);
@@ -160,8 +170,8 @@ export class EnergySourceComponent implements OnInit {
 
   meterMapTabs() {
     // Remap tabs
-    this.energySource = this.meterList.map(function (el) { return el.type; });
-    this.energyConsumptionService.setValue(this.energySource);
+    this.energySources = this.meterList.map(function (el) { return el.type; });
+    this.energyConsumptionService.setValue(this.energySources);
   }
 
   async meterSave() {
@@ -193,11 +203,11 @@ export class EnergySourceComponent implements OnInit {
     // Alert the user
 
     // Delete all meter data for this meter
-    this.electricitydbService.getAllByIndex(id).then(
+    this.utilityMeterDatadbService.getAllByIndex(id).then(
       data => {
         // delete
         for(let i=0; i<data.length; i++) {
-          this.electricitydbService.deleteIndex(data[i]["id"]).then(
+          this.utilityMeterDatadbService.deleteIndex(data[i]["id"]).then(
             data => {
               console.log("deleted");
             },
@@ -266,7 +276,7 @@ export class EnergySourceComponent implements OnInit {
     this.importWindow = false;
     let counter = 1;
 
-    for(let i=0;i<this.import.length+1;i++){
+    for(let i=0;i<this.import.length;i++){
       let obj = this.import[i];
       
       let tempGroupid = await this.groupCheckExistence("Energy", obj.group);  // check if group exists, if not create it
@@ -282,6 +292,11 @@ export class EnergySourceComponent implements OnInit {
             meterNumber: obj.meterNumber,
             accountNumber: obj.accountNumber,
             type: obj.type,
+            phase: '',
+            fuel: '',
+            startingUnit: '',
+            heatCapacity: '',
+            siteToSource:'',
             location: obj.location,
             group: +tempGroupid,
             name: obj.name,
@@ -327,6 +342,19 @@ export class EnergySourceComponent implements OnInit {
       document.body.appendChild(downloadLink);
       downloadLink.click();
       document.body.removeChild(downloadLink);
+  }
+
+  public onPageChange(pageNum: number): void {
+    this.pageSize = this.itemsPerPage*(pageNum - 1);
+  }
+
+  onTypeChange(value) {
+    console.log(value);
+    if(value == 'Electricity' || value == 'Natural Gas') {
+      this.is_ele_ng = true;
+    } else {
+      this.is_ele_ng = false;
+    }
   }
 
 }

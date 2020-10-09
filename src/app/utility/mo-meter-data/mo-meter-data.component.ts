@@ -2,8 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { AccountService } from "../../account/account/account.service";
 import { FacilityService } from 'src/app/account/facility/facility.service';
 import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db-service";
-import { ElectricitydbService } from "../../indexedDB/electricity-db-service";
-import { NaturalGasdbService } from "../../indexedDB/naturalGas-db-service";
 import { UtilityService } from "../utility.service";
 
 @Component({
@@ -17,12 +15,14 @@ export class MoMeterDataComponent implements OnInit {
   meterList: any = [];
   meterDataList: any;
 
+  page = 1;
+  itemsPerPage = 6;
+  pageSize: number;
+
   constructor(
     private accountService: AccountService,
     private facilityService: FacilityService,
     public utilityMeterdbService: UtilityMeterdbService,
-    public electricitydbService: ElectricitydbService,
-    public naturalGasdbService: NaturalGasdbService,
     public utilityService: UtilityService
     ) { }
 
@@ -43,4 +43,12 @@ export class MoMeterDataComponent implements OnInit {
     });
   }
 
+  public onPageChange(pageNum: number): void {
+    this.pageSize = this.itemsPerPage*(pageNum - 1);
+  }
+  
+  public changePagesize(num: number): void {
+    this.itemsPerPage = num;
+    this.onPageChange(this.page);
+  }
 }

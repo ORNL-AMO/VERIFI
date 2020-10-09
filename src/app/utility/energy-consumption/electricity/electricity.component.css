@@ -1,9 +1,3 @@
-.meterData .bold {
-    font-weight: bold;
-    color: #060a2b;
-    width: 115px;
-    display: inline-block;
-}
 .window .filter-dropdown {
     top: 115px;
     width: calc(100% - 60px);
@@ -14,13 +8,4 @@
 .filter {
     position: relative;
     margin-right: 25px;
-}
-
-.bulk-delete {
- opacity: 0;
- transition: .5s opacity;
- margin-right: 25px;
-}
-.bulk-delete.show {
-    opacity: 1;
 }

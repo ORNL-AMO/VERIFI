@@ -4,7 +4,7 @@ import { BehaviorSubject } from 'rxjs';
 import { LocalStorageService } from 'ngx-webstorage';
 import { FacilityService } from '../account/facility/facility.service';
 import { UtilityMeterdbService } from "../indexedDB/utilityMeter-db-service";
-import { ElectricitydbService } from "../indexedDB/electricity-db-service";
+import { UtilityMeterDatadbService } from "../indexedDB/utilityMeterData-db-service";
 import { LoadingService } from "../shared/loading/loading.service";
 
 @Injectable({
@@ -23,7 +23,7 @@ export class UtilityService {
     private facilityService: FacilityService,
     private loadingService : LoadingService,
     public utilityMeterdbService: UtilityMeterdbService,
-    public electricitydbService: ElectricitydbService) {
+    public utilityMeterDatadbService: UtilityMeterDatadbService) {
         // Observe the facilityid var
         this.facilityService.getValue().subscribe((value) => {
             this.facilityid = value;
@@ -95,7 +95,7 @@ export class UtilityService {
         // loop each meter
         for (let i=0; i < meters.length; i++) {
             // filter meter data based on meterid
-            this.electricitydbService.getAllByIndex(meters[i]['id']).then(
+            this.utilityMeterDatadbService.getAllByIndex(meters[i]['id']).then(
               data => {
                 counter++;
 
@@ -138,7 +138,7 @@ export class UtilityService {
 
       for (let i=0; i < meters.length; i++) {
           // filter meter data based on meterid
-          this.electricitydbService.getAllByIndex(meters[i]['id']).then(
+          this.utilityMeterDatadbService.getAllByIndex(meters[i]['id']).then(
             data => {
               counter++;
 

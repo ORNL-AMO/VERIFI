@@ -1,5 +1,13 @@
 <h4>Natural Gas Bills</h4>
 <br>
+<div class="importExport item-right">
+    <button class="btn btn-outline" (click)="energyConsumptionService.importPopup = true">Import</button>
+    <button class="btn btn-outline" (click)="energyConsumptionService.meterExport('Natural Gas')">Export</button>
+</div>
+<div class="bulk-delete item-right" [class.show]="energyConsumptionService.is_checked">
+    <button class="btn btn-danger" (click)='energyConsumptionService.bulkDelete()'>Bulk Delete</button>
+</div>
+<br>
 
 <div class="meter" *ngFor="let meterLists of meterList">
     <div class="meterData">
@@ -11,11 +19,11 @@
         <p><span class="bold">Notes</span> : {{meterLists.notes}}</p>
     </div>
 
-    <div class="row no-margin">
+    <div class="row overflowTable no-margin">
         <div class="col no-margin tableData">
         <table>
             <tr>
-                <th></th>
+                <th><input #masterCheckbox type="checkbox" (change)="energyConsumptionService.checkAll(meterLists.id, $event)"></th>
                 <th class="row-year">Meter Read Date</th>
                 <th>Total Volume (cfm)/MMBTU</th>
                 <th>Commodity Charge</th>
@@ -23,7 +31,7 @@
                 <th>Other Charges</th>
             </tr>
             <tr *ngFor="let meterData of meterLists.data">
-                <td><input type="checkbox"></td>
+                <td><input [value]="meterData.id" type="checkbox" name="metersSelected" (change)="energyConsumptionService.checkCheckboxes($event)" [(ngModel)]="meterData.checked"></td>
                 <td>{{meterData.readDate}}</td>
                 <td>{{meterData.totalVolume}}</td>
                 <td>${{meterData.commodityCharge}}</td>
@@ -39,62 +47,126 @@
                 </tr>
                 <tr *ngFor="let meterData of meterLists.data">
                     <td (click)="$event.stopPropagation();"> <!-- Prevents closure of menu on document click-->
-                        <i class="fa fa-ellipsis-v" (click)="meterDataToggleMenu(meterData.id)" ></i>
-                        <div class="meterMenu" [class.open]="meterDataMenuOpen === meterData.id">
-                            <p (click)="meterDataEdit(meterLists.id,meterData.id)">Edit</p>
-                            <p (click)="meterDataDelete(meterData.id)">Delete</p>
+                        <i class="fa fa-ellipsis-v" (click)="energyConsumptionService.meterDataToggleMenu(meterData.id)" ></i>
+                        <div class="meterMenu" [class.open]="energyConsumptionService.meterDataMenuOpen === meterData.id">
+                            <p (click)="energyConsumptionService.meterDataEdit(meterLists.id,meterData.id)">Edit</p>
+                            <p (click)="energyConsumptionService.meterDataDelete(meterData.id)">Delete</p>
                         </div>
                     </td>
                 </tr>
             </table>
         </div>
     </div>
-    <button class="btn btn-link" (click)="meterDataAdd(meterLists.id)"><i class="fa fa-plus"></i> Add New Bill</button>
+    <button class="btn btn-link" (click)="energyConsumptionService.meterDataAdd(meterLists.id)"><i class="fa fa-plus"></i> Add New Bill</button>
 </div>
 
-<div class="window" [class.open]="popup == true">
+<div class="window" [class.open]="energyConsumptionService.popup == true">
     <div class="windowOverlay"></div>
     <div class="windowContent popupContentLg">
 
         <h4>Edit Natural Gas Bill</h4>
         <p class="bold">General Information</p>
-        <form class="meterForm" [formGroup]="meterDataForm">
-            <label hidden>ID
-                <input type="text" formControlName="id" hidden>
-            </label>
-            <br hidden>
-            <label hidden>Meter id
-                <input type="text" formControlName="meterid" hidden>
-            </label>
-            <br hidden>
+        <form class="meterForm" [formGroup]="energyConsumptionService.meterDataForm">
+
             <label>Meter Read Date
                 <input type="date" formControlName="readDate">
-            </label>
-            <br>
+            </label><br>
+
             <label>Total Volume
                 <span class="unit">$</span>
                 <input type="text" formControlName="totalVolume">
-            </label>
-            <br>
+            </label><br>
+
             <label>Commodity Charge
                 <span class="unit">$</span>
                 <input type="number" formControlName="commodityCharge">
-            </label>
+            </label><br>
+
             <label>Delivery Charges
                 <span class="unit">$</span>
                 <input type="number" formControlName="deliveryCharge">
-            </label>
+            </label><br>
+
             <label>Other Charges
                 <span class="unit">$</span>
                 <input type="number" formControlName="otherCharge">
-            </label>
+            </label><br>
+
+            <!--Do not allow users to change these values-->
+            <input hidden type="text" formControlName="id">
+            <input hidden type="text" formControlName="facilityid">
+            <input hidden type="text" formControlName="accountid">
+            <input hidden type="text" formControlName="meterid">
+
+            <!--These are required even though they are blank under Natural Gas-->
+            <input hidden type="number" formControlName="basicCharge">
+            <input hidden type="number" formControlName="supplyBlockAmt">
+            <input hidden type="number" formControlName="supplyBlockCharge">
+            <input hidden type="number" formControlName="flatRateAmt">
+            <input hidden type="number" formControlName="flatRateCharge">
+            <input hidden type="number" formControlName="peakAmt">
+            <input hidden type="number" formControlName="peakCharge">
+            <input hidden type="number" formControlName="offpeakAmt">
+            <input hidden type="number" formControlName="offpeakCharge">
+            <input hidden type="number" formControlName="demandBlockAmt">
+            <input hidden type="number" formControlName="demandBlockCharge">
+            <input hidden type="number" formControlName="genTransCharge">
+            <input hidden type="number" formControlName="deliveryCharge">
+            <input hidden type="number" formControlName="transCharge">
+            <input hidden type="number" formControlName="powerFactorCharge">
+            <input hidden type="number" formControlName="businessCharge">
+            <input hidden type="number" formControlName="utilityTax">
+            <input hidden type="number" formControlName="latePayment">
+            <input hidden type="number" formControlName="otherCharge">
+            <input hidden type="number" formControlName="totalKwh">
+            <input hidden type="number" formControlName="totalDemand">
+            <input hidden type="number" formControlName="totalCost">
+            <input hidden type="checkbox" formControlName="checked">
         </form>
 
         <hr>
 
         <div class="saveCancel item-right">
-            <button class="btn btn-primary" (click)="popup = !popup">Cancel</button>
-            <button class="btn btn-primary" (click)="meterDataSave()">Save</button>
+            <button class="btn btn-primary" (click)="energyConsumptionService.popup = !energyConsumptionService.popup">Cancel</button>
+            <button class="btn btn-primary" (click)="energyConsumptionService.meterDataSave()">Save</button>
         </div>
     </div>
 </div>
+
+<div class="window"  [class.open]="energyConsumptionService.importPopup == true">
+    <div class="windowOverlay"></div>
+    <div class="windowContent">
+        <h4>Import Meters</h4>
+        <br>
+        <form>
+            <input type="file" #inputFile accept=".csv" (change)="energyConsumptionService.meterDataImport('Natural Gas',$event.target.files)">
+        </form>
+        <br>
+        <div class="energyConsumptionService.importQuickView" [hidden]="energyConsumptionService.quickView ==''">
+            <p class="bold">Quick View</p>
+            <table>
+                <tr>
+                    <th class="row-year">Meter Read Date</th>
+                    <th>Total Volume</th>
+                    <th>Commodity Charge</th>
+                    <th>Delivery Charge</th>
+                    <th>Other Charge</th>
+                </tr>
+                <tr *ngFor="let line of energyConsumptionService.quickView">
+                    <td>{{line.readDate}}</td>
+                    <td>{{line.totalVolume}}</td>
+                    <td>{{line.commodityCharge}}</td>
+                    <td>{{line.deliveryCharge}}</td>
+                    <td>{{line.otherCharge}}</td>
+                </tr>
+            </table>
+        </div>
+        <p class="alert alert-danger" [hidden]="energyConsumptionService.importError == ''">{{energyConsumptionService.importError}}</p>
+
+        <div class="saveCancel item-right">
+            <button class="btn btn-primary" (click)="resetImport(); energyConsumptionService.resetImport(); energyConsumptionService.importPopup = !energyConsumptionService.importPopup">Cancel</button>
+            <button class="btn btn-primary" (click)="resetImport(); energyConsumptionService.meterAddCSV()" [disabled]="energyConsumptionService.importError != ''">Submit</button>
+        </div>
+    </div>
+</div>
+

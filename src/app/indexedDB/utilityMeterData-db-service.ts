@@ -5,7 +5,7 @@ import { resolve } from 'url';
 @Injectable({
     providedIn: 'root'
 })
-export class ElectricitydbService {
+export class UtilityMeterDatadbService {
   constructor(private dbService: NgxIndexedDBService) {}
 
     getAll() {
@@ -39,6 +39,7 @@ export class ElectricitydbService {
             accountid: accountid,
             readDate: '',
             totalKwh: '',
+            totalVolume: '',
             totalDemand: '',
             totalCost: '',
             basicCharge: '',
@@ -57,6 +58,7 @@ export class ElectricitydbService {
             transCharge: '',
             powerFactorCharge: '',
             businessCharge: '',
+            commodityCharge: '',
             utilityTax: '',
             latePayment: '',
             otherCharge: '',
