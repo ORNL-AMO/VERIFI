@@ -11,3 +11,16 @@
     box-shadow: none;
     position: absolute;
 }
+.filter {
+    position: relative;
+    margin-right: 25px;
+}
+
+.bulk-delete {
+ opacity: 0;
+ transition: .5s opacity;
+ margin-right: 25px;
+}
+.bulk-delete.show {
+    opacity: 1;
+}

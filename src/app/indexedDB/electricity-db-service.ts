@@ -60,6 +60,7 @@ export class ElectricitydbService {
             utilityTax: '',
             latePayment: '',
             otherCharge: '',
+            checked: false
         });
     }
 

@@ -33,7 +33,6 @@ export class FacilitydbService {
     }
 
     async add(accountid) {
-        console.log("test");
         let facilityCount = this.count();
         return this.dbService.add('facilities', { 
             facilityid: await facilityCount + 1,

@@ -6,6 +6,7 @@ import { CallbackPipe } from "./callback.pipe";
 import { NgxIndexedDBModule, DBConfig } from 'ngx-indexed-db';
 import { NgxWebstorageModule } from 'ngx-webstorage';
 import { AppRoutingModule } from './app-routing.module';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 
 import { AppComponent } from './app.component';
 import { HeaderComponent } from './shared/header/header.component';
@@ -26,11 +27,12 @@ import { LpgComponent } from './utility/energy-consumption/lpg/lpg.component';
 
 import { CommonModule } from '@angular/common';
 
-import * as PlotlyJS from 'plotly.js/dist/plotly.js';
-import { PlotlyModule } from 'angular-plotly.js';
+import { PlotlyViaWindowModule } from 'angular-plotly.js';
 import { StyleGuideComponent } from './shared/style-guide/style-guide.component';
+import { PredictorsComponent } from './utility/predictors/predictors.component';
+import { MoMeterDataComponent } from './utility/mo-meter-data/mo-meter-data.component';
+import { LoadingComponent } from './shared/loading/loading.component';
 
-PlotlyModule.plotlyjs = PlotlyJS;
 
 const dbConfig: DBConfig  = {
   name: 'verifi',
@@ -74,7 +76,9 @@ const dbConfig: DBConfig  = {
       { name: 'meterNumber', keypath: 'meterNumber', options: { unique: false } },
       { name: 'accountNumber', keypath: 'accountNumber', options: { unique: false } },
       { name: 'type', keypath: 'type', options: { unique: false } },
+      { name: 'group', keypath: 'group', options: { unique: false } },
       { name: 'name', keypath: 'name', options: { unique: false } },
+      { name: 'location', keypath: 'notes', options: { unique: false } },
       { name: 'supplier', keypath: 'supplier', options: { unique: false } },
       { name: 'notes', keypath: 'notes', options: { unique: false } }
     ]
@@ -108,7 +112,8 @@ const dbConfig: DBConfig  = {
       { name: 'businessCharge', keypath: 'businessCharge', options: { unique: false } },
       { name: 'utilityTax', keypath: 'utilityTax', options: { unique: false } },
       { name: 'latePayment', keypath: 'latePayment', options: { unique: false } },
-      { name: 'otherCharge', keypath: 'otherCharge', options: { unique: false } }
+      { name: 'otherCharge', keypath: 'otherCharge', options: { unique: false } },
+      { name: 'checked', keypath: 'checked', options: { unique: false } }
     ]
   },
   {
@@ -123,6 +128,22 @@ const dbConfig: DBConfig  = {
       { name: 'commodityCharge', keypath: 'commodityCharge', options: { unique: false } },
       { name: 'deliveryCharge', keypath: 'deliveryCharge', options: { unique: false } },
       { name: 'otherCharge', keypath: 'otherCharge', options: { unique: false } }
+    ]
+  },
+  {
+    store: 'utilityMeterGroups',
+    storeConfig: { keyPath: 'id', autoIncrement: true },
+    storeSchema: [
+      { name: 'groupid', keypath: 'groupid', options: { unique: false } },
+      { name: 'facilityid', keypath: 'facilityid', options: { unique: false } },
+      { name: 'accountid', keypath: 'accountid', options: { unique: false } },
+      { name: 'groupType', keypath: 'accountid', options: { unique: false } },
+      { name: 'name', keypath: 'name', options: { unique: true } },
+      { name: 'desc', keypath: 'desc', options: { unique: false } },
+      { name: 'unit', keypath: 'unit', options: { unique: false } },
+      { name: 'data', keypath: 'data', options: { unique: false } },
+      { name: 'dateModified', keypath: 'dateModified', options: { unique: false } },
+      { name: 'fracTotEnergy', keypath: 'fracTotEnergy', options: { unique: false } }
     ]
   }]
 };
@@ -145,7 +166,10 @@ const dbConfig: DBConfig  = {
     ElectricityComponent,
     NaturalGasComponent,
     LpgComponent,
-    StyleGuideComponent
+    StyleGuideComponent,
+    PredictorsComponent,
+    MoMeterDataComponent,
+    LoadingComponent
   ],
   imports: [
     NgxIndexedDBModule.forRoot(dbConfig),
@@ -155,7 +179,9 @@ const dbConfig: DBConfig  = {
     BrowserAnimationsModule,
     FormsModule,
     ReactiveFormsModule,
-    CommonModule, PlotlyModule
+    CommonModule, 
+    PlotlyViaWindowModule,
+    DragDropModule
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -1,11 +1,12 @@
-import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild, QueryList, ViewChildren } from '@angular/core';
 import { AccountService } from "../../../account/account/account.service";
 import { FacilityService } from 'src/app/account/facility/facility.service';
 import { UtilityMeterdbService } from "../../../indexedDB/utilityMeter-db-service";
+import { UtilityService } from "../../../utility/utility.service";
 import { ElectricitydbService } from "../../../indexedDB/electricity-db-service";
 import { listAnimation } from '../../../animations';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
-
+import { LoadingService } from "../../../shared/loading/loading.service";
 
 @Component({
   selector: 'app-electricity',
@@ -18,6 +19,12 @@ import { FormGroup, FormControl, Validators } from '@angular/forms';
 
 
 export class ElectricityComponent implements OnInit {
+  @ViewChildren("masterCheckbox") masterCheckbox: QueryList<ElementRef>;
+  
+  is_checked: boolean = false;
+  is_checkedList: any = [];
+  isMasterSel:boolean;
+
   accountid: number;
   facilityid: number;
   meterid: number = 1;
@@ -29,6 +36,7 @@ export class ElectricityComponent implements OnInit {
   importPopup: boolean = false;
   importError: string = '';
   quickView: any = [];
+  import: any = [];
 
   filterColMenu: boolean = false;
   filterCol = [
@@ -107,6 +115,7 @@ export class ElectricityComponent implements OnInit {
     utilityTax: new FormControl('', [Validators.required]),
     latePayment: new FormControl('', [Validators.required]),
     otherCharge: new FormControl('', [Validators.required]),
+    checked: new FormControl(false)
   });
 
   @ViewChild('inputFile') myInputVariable: ElementRef;
@@ -114,6 +123,8 @@ export class ElectricityComponent implements OnInit {
   constructor(
     private accountService: AccountService,
     private facilityService: FacilityService,
+    private utilityService: UtilityService,
+    private loadingService: LoadingService,
     public utilityMeterdbService: UtilityMeterdbService,
     public electricitydbService: ElectricitydbService
     ) { }
@@ -127,47 +138,17 @@ export class ElectricityComponent implements OnInit {
     // Observe the facilityid var
     this.facilityService.getValue().subscribe((value) => {
       this.facilityid = value;
-      this.meterLoadList();
-      //this.meterDataLoadList();
     });
+
+    // Observe the meter list
+    this.utilityService.getMeterData().subscribe((value) => {
+      this.meterList = value;
+      this.meterList = this.meterList.filter(function(obj) {
+        return obj.type == "Electricity"
+      });
+    });    
   }
 
-  meterLoadList() {
-    // List all meters
-    this.utilityMeterdbService.getAllByIndex(this.facilityid).then(
-      data => {
-          this.meterList = data;
-          this.meterList = this.meterList.filter(function(obj) {
-            return obj.type == "Electricity"
-          });
-          // Add all meter data to meter list
-          this.meterDataLoadList()
-      },
-      error => {
-          console.log(error);
-      }
-    );
-  }
-
-  meterDataLoadList() {
-  // loop each meter
-    for (let i=0; i < this.meterList.length; i++) {
-      // filter meter data based on meterid
-      this.electricitydbService.getAllByIndex(this.meterList[i]['id']).then(
-        data => {
-          // push to meterlist object
-          this.meterList[i]['data'] = data;
-          this.meterList[i]['data'].sort(this.sortByDate);
-        },
-        error => {
-            console.log(error);
-        }
-      );
-    }
-  }
-  sortByDate(a, b) {
-    return new Date(a.readDate).getTime() - new Date(b.readDate).getTime();
-  }
   // Close menus when user clicks outside the dropdown
   documentClick () {
     this.meterDataMenuOpen = null;
@@ -205,8 +186,13 @@ export class ElectricityComponent implements OnInit {
 
   meterDataSave() {
     this.popup = !this.popup;
+    // This forces all checkboxes to be reset to false on save.
+    // Otherwise you get weird behavior with saving.
+    this.meterDataForm.controls['checked'].setValue(false); 
+
     this.electricitydbService.update(this.meterDataForm.value);// Update db
-    this.meterDataLoadList(); // refresh the data
+    this.utilityService.refreshMeters(); // refresh calendarization
+    this.utilityService.refreshMeterData(); // refresh the data for this page
   }
 
   meterDataEdit(meterid,dataid) {
@@ -220,7 +206,82 @@ export class ElectricityComponent implements OnInit {
   meterDataDelete(dataid) {
     this.meterDataMenuOpen = null;
     this.electricitydbService.deleteIndex(dataid);
-    this.meterDataLoadList(); // refresh the data
+    this.utilityService.setMeterData(this.meterList); // refresh the data
+  }
+
+  checkCheckboxes(e) {
+    // Add/Remove meter id's from is_checkedList array.
+    if(e.target.checked) {
+      this.is_checkedList.push(e.target.value);
+    } else {
+      const index = this.is_checkedList.indexOf(e.target.value);
+      this.is_checkedList.splice(index, 1);
+    }
+
+    this.showBulkDelete();
+  }
+
+  checkAll(meterid, e) {
+    // Get all bill id's with the meter value of e
+
+    var index = this.meterList.map(function(el) { return el.id; }).indexOf(meterid);
+
+    // Add/Remove meter id's from is_checkedList array.
+    if(e.target.checked) {
+      // get all meter data ids
+      for(let i=0; i<this.meterList[index]['data'].length; i++) {
+        this.is_checkedList.push(this.meterList[index]['data'][i]['id']); // Adds to queue array
+        this.meterList[index]['data'][i]['checked'] = true; // Shows user which are checked
+      }
+    } else {
+      for(let i=0; i<this.meterList[index]['data'].length; i++) {
+        const meterindex = this.is_checkedList.indexOf(meterid);
+        this.is_checkedList.splice(meterindex,1); // Adds to queue array
+        this.meterList[index]['data'][i]['checked'] = false; // Shows user which are unchecked
+      }
+      
+    }
+    this.showBulkDelete();
+  }
+
+  showBulkDelete() {
+    // Show "Bulk Delete" button if any items are checked
+    if(this.is_checkedList.length != 0) {
+      this.is_checked = true;
+    } else {
+      this.is_checked = false;
+    }
+  }
+
+  bulkDelete() {
+    let counter = 1; // keeps track of the end of the loop (async)
+    this.loadingService.setLoadingStatus(true);
+    this.loadingService.setLoadingMessage("Deleting Records...");
+    this.meterDataMenuOpen = null;
+
+    // Uncheck master inputs after delete
+    this.masterCheckbox.forEach((element) => {
+      element.nativeElement.checked = false;
+    });
+
+    for(let i=0; i < this.is_checkedList.length; i++) {
+      this.electricitydbService.deleteIndex(+this.is_checkedList[i]).then(
+        id => {
+          counter++;
+
+          if(counter === this.is_checkedList.length) {
+            this.loadingService.setLoadingStatus(false);
+            this.utilityService.setMeterData(this.meterList); // refresh the data
+            this.is_checked = false;
+          }
+          
+        },
+        error => {
+            console.log(error);
+        }
+      );;
+    }
+    
   }
 
   showAllFields() {
@@ -242,7 +303,6 @@ export class ElectricityComponent implements OnInit {
 
     if(files && files.length > 0) {
        let file : File = files.item(0); 
-         //console.log(file.name);
          
          let reader: FileReader = new FileReader();
          reader.readAsText(file);
@@ -260,7 +320,15 @@ export class ElectricityComponent implements OnInit {
                 for(var j=0;j<headers.length;j++){
                   obj[headers[j]] = currentline[j];
                 }
-                this.quickView.push(obj); // Read csv and push to obj array.
+
+                // Read csv and push to obj array.
+                this.import.push(obj); 
+
+                // Push the first 3 results to a quick view array
+                if (i < 4) {
+                  this.quickView.push(obj);
+                }
+                
               }  
             } else {
               // csv didn't match -> Show error
@@ -272,17 +340,27 @@ export class ElectricityComponent implements OnInit {
   }
 
   meterAddCSV() {
+    let counter = 1; // keeps track of the end of the loop (async)
+    let meterids = [];
+    const length = this.import.length;
+
     this.importPopup = false;
+    this.loadingService.setLoadingStatus(true);
     
-    for(let i=0;i<this.quickView.length;i++){
-      let obj = this.quickView[i];
-      this.meterid = this.meterList.find(x => x.meterNumber == obj.meterNumber).id; // Get id of matching meter numbers
+    for(let i=0;i<this.import.length;i++){
+      let obj = this.import[i];
+      
+      meterids.push(this.meterList.find(x => x.meterNumber == obj.meterNumber)['id']); // Get id of matching meter numbers
+      console.log(meterids);
 
       this.electricitydbService.add(this.meterid,this.facilityid,this.accountid).then(
         id => {
+          counter++;
+          this.loadingService.setLoadingMessage(counter + " of " + length + " Records Imported...");
+
           const importLine = {
             id: id,
-            meterid: this.meterid,
+            meterid: meterids[i],
             facilityid: this.facilityid,
             accountid: this.accountid,
             readDate: obj.readDate,
@@ -311,7 +389,12 @@ export class ElectricityComponent implements OnInit {
           }
 
           this.electricitydbService.update(importLine); // Update db
-          this.meterLoadList(); // refresh the data
+          
+          // If end of the loop
+          if (counter === length) {
+            this.utilityService.setMeterData(this.meterList); // refresh the data
+          }
+
         },
         error => {
             console.log(error);
@@ -319,12 +402,13 @@ export class ElectricityComponent implements OnInit {
       );
     }
     this.resetImport();
-
+    
   }
 
   resetImport() {
     this.myInputVariable.nativeElement.value = '';
     this.quickView = []; 
+    this.import = [];
     this.importError = '';
   }
 

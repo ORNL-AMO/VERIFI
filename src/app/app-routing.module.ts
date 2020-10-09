@@ -5,7 +5,9 @@ import { FacilityComponent } from './account/facility/facility.component';
 import { UtilityComponent } from './utility/utility.component';
 import { EnergyConsumptionComponent } from './utility/energy-consumption/energy-consumption.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
+import { MoMeterDataComponent } from './utility/mo-meter-data/mo-meter-data.component';
 import { DataTableComponent } from './utility/data-table/data-table.component';
+import { PredictorsComponent } from './utility/predictors/predictors.component';
 import { EnergySourceComponent } from './utility/energy-consumption/energy-source/energy-source.component';
 import { ElectricityComponent } from './utility/energy-consumption/electricity/electricity.component';
 import { NaturalGasComponent } from './utility/energy-consumption/natural-gas/natural-gas.component';
@@ -26,7 +28,9 @@ const routes: Routes = [
             { path: 'natural-gas', component: NaturalGasComponent },
           ],
         },
+        { path: 'mo-meter-data', component: MoMeterDataComponent },
         { path: 'data-table', component: DataTableComponent },
+        { path: 'predictors', component: PredictorsComponent },
       ]
   },
   { path: 'style-guide', component: StyleGuideComponent },

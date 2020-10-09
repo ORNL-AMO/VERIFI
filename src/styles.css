@@ -100,9 +100,11 @@ Buttons
     border-radius: 0!important;
 }
 .btn-danger {
-    color: #fff;
-    background-color: #bf3d00;
-    border-color: #bf3d00;
+    color: #ec0000!important;
+    background-color: #ffffff!important;
+    border-color: #ec0000!important;
+    border-radius: 0px!important;
+    padding: 2px 10px!important;
 }
 .btn-solid {
     color: #ffffff!important;
@@ -205,7 +207,7 @@ Popups & Windows
     background-color: white;
     top: 10%;
     left: calc(50% - 250px);
-    height: 100%;
+    /*height: 100%;*/
     max-height: 80%;
     overflow: scroll;
     width: 500px;
@@ -218,7 +220,33 @@ Popups & Windows
     width: 600px;
     left: calc(50% - 300px);
 }
-
+.popup {
+    border-style: solid;
+    border: 1px solid #ffffff;
+    border-radius: 3px;
+    box-shadow: 0px 0px 10px #0000003d;
+}
+.popup-header {
+    color: white;
+    padding: 10px;
+    background-color: #2c386b;
+    font-weight: bold;
+    border-radius: 3px 3px 0 0;
+}
+.popup-header button {
+    border: none;
+    background-color: transparent;
+    color: white;
+    font-weight: bold;
+}
+.popup-body {
+    background-color: #ffffff;
+    color: black;
+    padding: 10px;
+}
+.popup-footer {
+    padding: 0px 10px;
+}
 /*
 Arrows & Tooltips
 =============================================== */
@@ -492,16 +520,18 @@ Popovers (Contextual Help)
 Sidebar
 =========================================== */ 
 .content {
-    margin: 67px 0 0 70px;
-    /*padding: 20px 16px;*/
+    /*margin: 67px 0 0 70px;
+    padding: 20px 16px;*/
+    padding: 67px 0 0 70px;
     background-color: #f1f1f1;
-    min-height: calc(100vh - 95px);
-    height: calc(100vh - 95px);
+    min-height: calc(100vh - 35px);
+    height: calc(100vh - 35px);
     transition: .2s all;
     overflow: scroll!important;
 }
 .open .content {
-    margin: 67px 0 0 261px;
+    /*margin: 67px 0 0 261px;*/
+    padding: 67px 0 0 261px;
 }
 .open #sidebar {
     width: calc(310px - 50px)!important;
@@ -595,7 +625,7 @@ Content Container
 }
 .wrapper.main-content {
     margin-right: 0px;
-    min-height: 100vh;
+    min-height: calc(100vh - 225px);
 }
 .help-panel.tab-margin {
     margin-top: 65px;
@@ -647,6 +677,7 @@ Meter Displays
 .filter-dropdown {
     position: absolute;
     top: 37px;
+    right: 0;
     background-color: white;
     z-index: 1;
     padding: 20px;
@@ -722,4 +753,32 @@ i.fa.fa-arrow-circle-down {
 }
 .tableMenu table {
     border-bottom: none;
+}
+
+
+
+.wizard {
+    overflow: hidden;
+    position: fixed;
+    bottom: 37px;
+    left: 70px;
+    z-index: 1;
+    width: calc(100% - 80px);
+    padding: 0px 30px;
+    background-color: #2980b957;
+    box-shadow: 3px -3px 9px #d4d4d4b0;
+}
+.fa-ellipsis-v {
+    cursor: pointer;
+}
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+.spacer {
+    margin: 0px 10px;
+}
+
+
+.overflowTable {
+    max-height: 400px;
+    overflow: auto;
 }
