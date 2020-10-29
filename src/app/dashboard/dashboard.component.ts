@@ -4,7 +4,7 @@ import { AccountdbService } from "../indexedDB/account-db.service";
 import { FacilitydbService } from "../indexedDB/facility-db-service";
 import { FacilityService } from 'src/app/account/facility/facility.service';
 import { UtilityMeterdbService } from "../indexedDB/utilityMeter-db-service";
-import { ElectricitydbService } from "../indexedDB/electricity-db-service";
+import { UtilityMeterDatadbService } from "../indexedDB/utilityMeterData-db-service";
 import { UtilityService } from "../utility/utility.service";
 
 @Component({
@@ -35,7 +35,7 @@ export class DashboardComponent implements OnInit {
     public accountdbService: AccountdbService,
     public facilitydbService: FacilitydbService,
     public utilityMeterdbService: UtilityMeterdbService,
-    public electricitydbService: ElectricitydbService,
+    public utilityMeterDatadbService: UtilityMeterDatadbService,
     public utilityService: UtilityService
   ) { 
     this.renderer.addClass(document.body, 'open');
@@ -62,7 +62,7 @@ export class DashboardComponent implements OnInit {
         );
     });
 
-    this.utilityService.getMeters().subscribe((value) => {
+    this.utilityService.getMeterList().subscribe((value) => {
       this.utilities = value;
       console.log(this.utilities);
       this.combineCalendar();
@@ -95,7 +95,7 @@ export class DashboardComponent implements OnInit {
   // loop each meter
     for (let i=0; i < this.meterList.length; i++) {
       // filter meter data based on meterid
-      this.electricitydbService.getAllByIndex(this.meterList[i]['id']).then(
+      this.utilityMeterDatadbService.getAllByIndex(this.meterList[i]['id']).then(
         data => {
             this.meterList[i]['data'] = data; // set meter data
             this.meterAverages(i,data); // Set meter averages
@@ -108,7 +108,7 @@ export class DashboardComponent implements OnInit {
   }
 
   meterDataLoadAll() {
-    this.electricitydbService.getAll().then(
+    this.utilityMeterDatadbService.getAll().then(
       data => {
         if(data.length != 0){ // Prevent NAN
           this.meterListData = data; // push all meter data to array

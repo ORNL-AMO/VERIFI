@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { LpgComponent } from './lpg.component';
+import { WasteWaterComponent } from './waste-water.component';
 
-describe('LpgComponent', () => {
-  let component: LpgComponent;
-  let fixture: ComponentFixture<LpgComponent>;
+describe('WasteWaterComponent', () => {
+  let component: WasteWaterComponent;
+  let fixture: ComponentFixture<WasteWaterComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ LpgComponent ]
+      declarations: [ WasteWaterComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(LpgComponent);
+    fixture = TestBed.createComponent(WasteWaterComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

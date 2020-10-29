@@ -4,177 +4,214 @@ import { BehaviorSubject } from 'rxjs';
 import { LocalStorageService } from 'ngx-webstorage';
 import { FacilityService } from '../account/facility/facility.service';
 import { UtilityMeterdbService } from "../indexedDB/utilityMeter-db-service";
-import { ElectricitydbService } from "../indexedDB/electricity-db-service";
+import { UtilityMeterDatadbService } from "../indexedDB/utilityMeterData-db-service";
 import { LoadingService } from "../shared/loading/loading.service";
+import { ConvertUnitsService } from 'src/app/shared/convert-units/convert-units.service';
 
 @Injectable({
     providedIn: 'root'
 })
 export class UtilityService {
+  private autoIncrementor: number
   private facilityid: number;
-  public meterOnly = new BehaviorSubject([]);
-  public meterList = new BehaviorSubject([]);
-  public meterData = new BehaviorSubject([]);
-  public calendarData = new BehaviorSubject([]);
+
+  public meterList = new BehaviorSubject([]); // Stage 1 get meters
+  public meterData = new BehaviorSubject([]); // Stage 2 get raw data
+  public meterRawCalendarData = new BehaviorSubject([]); // Stage 3 calculate calendar data (stays in ori unit)
+  public meterCalendarData = new BehaviorSubject([]); // Stage 4 calculate calendar data (units will change)
+  public meterObj = new BehaviorSubject([]); // Used for frontend easy ngFor
+  //public meterGroups = new BehaviorSubject([]); // Stage 5 get groups
   
-    
+  public energyFinalUnit = new BehaviorSubject('MMBtu'); // Set default
+
   constructor(
     private localStorage:LocalStorageService,
     private facilityService: FacilityService,
     private loadingService : LoadingService,
     public utilityMeterdbService: UtilityMeterdbService,
-    public electricitydbService: ElectricitydbService) {
+    private convertUnitsService: ConvertUnitsService,
+    public utilityMeterDatadbService: UtilityMeterDatadbService) {
+        
         // Observe the facilityid var
         this.facilityService.getValue().subscribe((value) => {
             this.facilityid = value;
         });
+
+        // Keep users state
+        if(this.localStorage.retrieve('verifi_meterList')) {
+          this.meterList.next(this.localStorage.retrieve('verifi_meterList'));
+        }
+        // Keep users state
+        if(this.localStorage.retrieve('verifi_meterData')) {
+          this.meterData.next(this.localStorage.retrieve('verifi_meterData'));
+        }
+        // Keep users state
+        if(this.localStorage.retrieve('verifi_meterRawCalendarData')) {
+          this.meterRawCalendarData.next(this.localStorage.retrieve('verifi_meterRawCalendarData'));
+        }
+        // Keep users state
+        if(this.localStorage.retrieve('verifi_meterCalendarData')) {
+          this.meterCalendarData.next(this.localStorage.retrieve('verifi_meterCalendarData'));
+        }
+        // Keep users state
+        if(this.localStorage.retrieve('verifi_meterObj')) {
+          this.meterObj.next(this.localStorage.retrieve('verifi_meterObj'));
+        }
+        // Keep users state
+        if(this.localStorage.retrieve('verifi_energyFinalUnit')) {
+          this.energyFinalUnit.next(this.localStorage.retrieve('verifi_energyFinalUnit'));
+        }
      }
-  
-    getMeters(): Observable<any> {
+
+    /* Final Units */
+    getEnergyFinalUnit(): Observable<any> {
+      if (this.energyFinalUnit.value == "") {
+          this.setMeterList();
+      }
+      return this.energyFinalUnit.asObservable();
+    }
+
+    setEnergyFinalUnit(value): void {
+      this.localStorage.store('verifi_energyFinalUnit', value);
+      this.energyFinalUnit.next(value);
+    }
+
+    /* Meter Lists */
+    getMeterList(): Observable<any> {
       // Query meters if first time
       if (this.meterList.value.length == 0) {
-          this.refreshMeters();
+          this.setMeterList();
       }
       // List all meters
       return this.meterList.asObservable();
     }
 
-    // Only refresh all the data when a new meter bill is added.
-    refreshMeters(): void {
+    refreshMeterList(data): void {
+      // Quick Refresh
+      this.localStorage.store('verifi_meterList', data);
+      this.meterList.next(data);
+    }
+  
+    setMeterList(): void  {
       // Query all meters
       this.utilityMeterdbService.getAllByIndex(this.facilityid).then(
           data => {
-          //this.localStorage.store('meterList', data);
-          //this.meterList.next(data);
-          this.setCalendarData(data);
+          this.localStorage.store('verifi_meterList', data);
+          this.meterList.next(data);
+
+          // Cascading Updates
+          this.setDisplayObj(); 
+
           },
           error => {
               console.log(error);
           }
       );
-  }
+    }
 
-    refreshMeterData(): void {
-      // Query all meters
-      this.utilityMeterdbService.getAllByIndex(this.facilityid).then(
-          data => {
-          //this.localStorage.store('meterList', data);
-          //this.meterList.next(data);
-          this.setMeterData(data);
-          this.setCalendarData(data); // TEMP FIX
-          },
-          error => {
-              console.log(error);
-          }
-      );
-  }
-
-
-
-/* Raw Meter Data. Only used for utilities/energySource/[energy] */
+    /* Raw Meter Data */
     getMeterData(): Observable<any> {
       // Query meters if first time
       if (this.meterData.value.length == 0) {
-          this.refreshMeterData();
+        this.setMeterData();
       }
-      // List all meters
+      // List all Data
       return this.meterData.asObservable();
     }
 
-    setMeterData(meters): void {
-      let counter = 1; // keeps track of the end of the loop (async)
-      this.loadingService.setLoadingStatus(true);
-      this.loadingService.setLoadingMessage("Fetching Meter Data...");
-
-      // if meter list is empty for loop wont run
-      if(meters.length < 1 ) {
-        this.loadingService.setLoadingStatus(false);
-        this.meterData.next([]);
-      }
-
-        // loop each meter
-        for (let i=0; i < meters.length; i++) {
-            // filter meter data based on meterid
-            this.electricitydbService.getAllByIndex(meters[i]['id']).then(
-              data => {
-                counter++;
-
-                // push to meterlist object
-                meters[i]['data'] = data;
-                meters[i]['data'].sort(this.sortByDate);
-
-                // If last iteration, set new observable value and end loading screen
-                if(counter === meters.length || meters.length < 2) {
-                  this.meterData.next(meters);
-                  this.loadingService.setLoadingStatus(false);
-                }
-                
-              },
-              error => {
-                  console.log(error);
-              }
-            );
-        }
+    refreshMeterData(data): void  {
+      // Quick Refresh
+      this.localStorage.store('verifi_meterData', data);
+      this.meterData.next(data);
     }
 
-/* Calendarization */
+    setMeterData(): void  {
+      // Query all meter data
+      this.utilityMeterDatadbService.getAllByFacility(this.facilityid).then(
+        data => {
+          this.localStorage.store('verifi_meterData', data);
+          this.meterData.next(data);
+
+          // Cascading Updates
+          this.setCalendarData();
+
+        },
+        error => {
+            console.log(error);
+        }
+      );
+    }
+
+    /* Calendarization */
+    getRawCalendarData(): Observable<any> {
+      // List all meters
+      return this.meterRawCalendarData.asObservable();
+    }
 
     getCalendarData(): Observable<any> {
+      // Query meters if first time
+      if (this.meterCalendarData.value.length == 0) {
+        this.setCalendarData();
+      }
       // List all meters
-      return this.calendarData.asObservable();
+      return this.meterCalendarData.asObservable();
     }
 
-    setCalendarData(meters) {
-      let counter = 1; // keeps track of the end of the loop (async)
-      this.loadingService.setLoadingStatus(true);
-      this.loadingService.setLoadingMessage("Fetching Calendarized Data...");
+    refreshCalendarData(data): void  {
+      // Quick Refresh
+      this.localStorage.store('verifi_meterCalendarData', data);
+      this.meterCalendarData.next(data);
+    }
+
+    setCalendarData(): void  {
       let calendarize = [];
+      const meters = this.meterList.value;
+      const tempMeterData = this.meterData.value;
+      this.autoIncrementor = 1;
+
+      this.loadingService.setLoadingStatus(true);
+      this.loadingService.setLoadingMessage("Calendarizing Data...");
 
       // if meter list is empty for loop wont run
       if(meters.length < 1 ) {
         this.loadingService.setLoadingStatus(false);
-        this.meterList.next([]);
       }
 
       for (let i=0; i < meters.length; i++) {
           // filter meter data based on meterid
-          this.electricitydbService.getAllByIndex(meters[i]['id']).then(
-            data => {
-              counter++;
+          let data = tempMeterData.filter(function(obj) {
+            return obj.meterid == meters[i]['id'];
+          });
 
-              // Push calendar data to its meter. Used for UI ngFor
-              //if (this.meterList[i].type == 'Electricity')
-              meters[i]['calendarization'] = this.calendarization(data, 'Elec',meters[i]['id']);
-              meters[i]['calendarization'].sort(this.sortByDate);
+          // Push calculated calendar data
+          const calData = this.calendarization(data,meters[i]['id']);
+          calendarize.push(...calData);
 
-              // Push all calendar data to seperate array.  Used for quick calculations
-              const calData = this.calendarization(data, 'Elec',meters[i]['id']);
-              calendarize.push(...calData);
-
-              // If last iteration, set new observable value and end loading screen
-              // meters.length < 2 because if meter length is 1 counter is already at 2
-              if(counter === meters.length || meters.length < 2) { 
-                this.meterList.next(meters);
-                this.calendarData.next(calendarize);
-                this.loadingService.setLoadingStatus(false);
-              }
-            },
-            error => {
-                console.log(error);
-            }
-          );
+          // If last iteration, set new observable value and end loading screen
+          if(i === meters.length - 1) {
+            this.localStorage.store('verifi_meterRawCalendarData', calendarize);
+            this.localStorage.store('verifi_meterCalendarData', calendarize);
+            
+            this.meterRawCalendarData.next(calendarize); // Store this value for the "Monthly Meter Data" page
+            this.meterCalendarData.next(calendarize); // This value moves forward and is unit converted.
+            this.loadingService.setLoadingStatus(false);
+          }
       }
+      // Cascading Updates
+      this.setDisplayObj();
+      this.convertUnits();
     }
 
     sortByDate(a, b) {
         return new Date(a.readDate).getTime() - new Date(b.readDate).getTime();
     }
 
-    calendarization (data, type, meterid) {
+    calendarization (data, meterid) {
       let dataTable = [];
   
       for(let i=1; i < data.length -1; i++) {
-        
+        this.autoIncrementor++;
+
         let billDate = new Date(data[i]['readDate']);
         let billDateNext = new Date(data[i]['readDate']);;
         let billDatePrev = new Date(data[i]['readDate']);;
@@ -214,25 +251,13 @@ export class UtilityService {
           let volNext = 0;
           let cost = 0;
           let costNext = 0;
-          
+
           if ( i == data.length - 1) { // If last entry
-            if (type == 'Elec') {
-              vol = data[i]['totalKwh'];
-            }
-            if (type == 'NatGas') {
-              vol = data[i]['totalVolume'];
-            }
+            vol = data[i]['totalEnergyUse'];
             cost = data[i]['totalCost'];
-            
           } else {
-            if (type == 'Elec') {
-              vol = data[i]['totalKwh'];
-              volNext = data[i+1]['totalKwh'];
-            }
-            if (type == 'NatGas') {
-              vol = data[i]['totalVolume'];
-              volNext = data[i+1]['totalVolume'];
-            }
+            vol = data[i]['totalEnergyUse'];
+            volNext = data[i+1]['totalEnergyUse'];
             cost = data[i]['totalCost'];
             costNext = data[i+1]['totalCost'];
           }
@@ -254,20 +279,22 @@ export class UtilityService {
           }
   
           dataTable.push({
+            id: this.autoIncrementor,
             meterid: meterid,
             year: year,
             month: monthName,
-            monthKwh: monthlyVol.toFixed(2),
+            monthEnergy: monthlyVol.toFixed(2),
             monthCost: monthlyCost.toFixed(2)
           });
   
         } else {
           // Show month, but don't calculate.
           dataTable.push({
+            id: this.autoIncrementor,
             meterid: meterid,
             year: year,
             month: monthName,
-            monthKwh: 'NA',
+            monthEnergy: 'NA',
             monthCost: 'NA'
           });
         }
@@ -275,8 +302,7 @@ export class UtilityService {
       //console.log("async?");
       return dataTable;
     }
-    
-  
+
     // a and b are javascript Date objects
     dateDiffInDays(a, b) {
       const _MS_PER_DAY = 1000 * 60 * 60 * 24;
@@ -287,4 +313,96 @@ export class UtilityService {
       return Math.floor((utc2 - utc1) / _MS_PER_DAY);
     }
     
+    getDisplayObj(): Observable<any> {
+      // Set meterObj if empty
+      if (this.meterObj.value.length == 0) {
+       this.setDisplayObj();
+      }
+      // Create meter object
+      return this.meterObj.asObservable();
+    }
+
+    refreshDisplayObj(meterObj): void  {
+      // Quick Refresh
+      this.localStorage.store('verifi_meterObj', meterObj);
+      this.meterObj.next(meterObj);
+    }
+
+    // Use this to generate JSON Objects for the frontend.
+    setDisplayObj(): void  {
+      let meters = JSON.parse(JSON.stringify(this.meterList.value));
+      const tempMeterData = this.meterData.value;
+      const tempMeterRawCal = this.meterRawCalendarData.value;
+      
+        // loop each meter
+        for (let i=0; i < meters.length; i++) {
+          // filter meterData data based on meterid
+          let data = tempMeterData.filter(function(obj) {
+            return obj.meterid == meters[i]['id'];
+          });
+          // filter meterCal data based on meterid
+          let cal = tempMeterRawCal.filter(function(obj) {
+            return obj.meterid == meters[i]['id'];
+          });
+
+          // add data/calendar to meter object 
+          meters[i]['calendarization'] = cal;
+          meters[i]['data'] = data;
+
+          // go ahead and sort it
+          meters[i]['calendarization'].sort(this.sortByDate);
+          meters[i]['data'].sort(this.sortByDate);
+        }
+
+        this.localStorage.store('verifi_meterObj', meters);
+        this.meterObj.next(meters);
+    }
+
+    convertUnits(): void  {
+      console.log("converting");
+      
+      let meters = JSON.parse(JSON.stringify(this.meterList.value));
+      let startingUnit = "";
+      let finalUnit = "";
+      const tempMeterRawCal = JSON.parse(JSON.stringify(this.meterCalendarData.value));
+
+      // loop each meter
+      for (let i=0; i < meters.length; i++) {
+        // filter meterCal data based on meterid
+        let data = tempMeterRawCal.filter(function(obj) {
+          return obj.meterid == meters[i]['id'];
+        });
+
+        startingUnit = meters[i]["startingUnit"]; // from unit
+        finalUnit = meters[i]["finalUnit"]; // from unit
+        //console.log(startingUnit + " -> " + finalUnit);
+        console.log("final Unit");
+        console.log(finalUnit);
+        this.convertCal(data, startingUnit, finalUnit);
+        //this.convertCal(data, 'kWh', 'MMBtu');
+      }
+    }
+
+    // Converts whole meter
+    convertCal(data, from, to): void  {
+      let index = 0;
+      let value = 0;
+      let conversion = {};
+      let tempMeterCalendarData = JSON.parse(JSON.stringify(this.meterCalendarData.value));
+
+      // Each meter's data is sent via the data variable. This allows meters to have different to and from units.
+      // Each meter is converted independently then is replaced in the main meterCalendarData service one at a time.
+      for (let i=0; i < data.length; i++) {
+        value = data[i]['monthEnergy'];
+        conversion = Math.round(this.convertUnitsService.value(value).from(from).to(to));
+        // find corresponding row
+        index = tempMeterCalendarData.map(function(obj) {return obj.id; }).indexOf(data[i]['id']);
+        //replace row
+        tempMeterCalendarData[index]['monthEnergy'] = conversion;
+      }
+
+      // Create meter object
+      this.meterCalendarData.next(tempMeterCalendarData);
+      this.localStorage.store('verifi_meterCalendarData', tempMeterCalendarData);
+    }
 }

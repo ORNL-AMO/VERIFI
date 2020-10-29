@@ -23,7 +23,6 @@ import { EnergySourceComponent } from './utility/energy-consumption/energy-sourc
 import { HelpPanelComponent } from './utility/help-panel/help-panel.component';
 import { ElectricityComponent } from './utility/energy-consumption/electricity/electricity.component';
 import { NaturalGasComponent } from './utility/energy-consumption/natural-gas/natural-gas.component';
-import { LpgComponent } from './utility/energy-consumption/lpg/lpg.component';
 
 import { CommonModule } from '@angular/common';
 
@@ -32,6 +31,8 @@ import { StyleGuideComponent } from './shared/style-guide/style-guide.component'
 import { PredictorsComponent } from './utility/predictors/predictors.component';
 import { MoMeterDataComponent } from './utility/mo-meter-data/mo-meter-data.component';
 import { LoadingComponent } from './shared/loading/loading.component';
+import { OtherFuelsComponent } from './utility/energy-consumption/other-fuels/other-fuels.component';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 
 const dbConfig: DBConfig  = {
@@ -76,6 +77,10 @@ const dbConfig: DBConfig  = {
       { name: 'meterNumber', keypath: 'meterNumber', options: { unique: false } },
       { name: 'accountNumber', keypath: 'accountNumber', options: { unique: false } },
       { name: 'type', keypath: 'type', options: { unique: false } },
+      { name: 'phase', keypath: 'phase', options: { unique: false } },
+      { name: 'unit', keypath: 'startingUnit', options: { unique: false } },
+      { name: 'heatCapacity', keypath: 'heatCapacity', options: { unique: false } },
+      { name: 'siteToSource', keypath: 'siteToSource', options: { unique: false } },
       { name: 'group', keypath: 'group', options: { unique: false } },
       { name: 'name', keypath: 'name', options: { unique: false } },
       { name: 'location', keypath: 'notes', options: { unique: false } },
@@ -91,9 +96,15 @@ const dbConfig: DBConfig  = {
       { name: 'facilityid', keypath: 'facilityid', options: { unique: false } },
       { name: 'accountid', keypath: 'accountid', options: { unique: false } },
       { name: 'readDate', keypath: 'readDate', options: { unique: false } },
-      { name: 'totalKwh', keypath: 'totalKwh', options: { unique: false } },
-      { name: 'totalDemand', keypath: 'totalDemand', options: { unique: false } },
+      { name: 'unit', keypath: 'unit', options: { unique: false } },
+      { name: 'totalEnergyUse', keypath: 'totalEnergyUse', options: { unique: false } },
       { name: 'totalCost', keypath: 'totalCost', options: { unique: false } },
+      { name: 'commodityCharge', keypath: 'commodityCharge', options: { unique: false } },
+      { name: 'deliveryCharge', keypath: 'deliveryCharge', options: { unique: false } },
+      { name: 'otherCharge', keypath: 'otherCharge', options: { unique: false } },
+      { name: 'checked', keypath: 'checked', options: { unique: false } },
+      // Electricity Use Only
+      { name: 'totalDemand', keypath: 'totalDemand', options: { unique: false } },
       { name: 'basicCharge', keypath: 'basicCharge', options: { unique: false } },
       { name: 'supplyBlockAmt', keypath: 'supplyBlockAmt', options: { unique: false } },
       { name: 'supplyBlockCharge', keypath: 'supplyBlockCharge', options: { unique: false } },
@@ -106,28 +117,11 @@ const dbConfig: DBConfig  = {
       { name: 'demandBlockAmt', keypath: 'demandBlockAmt', options: { unique: false } },
       { name: 'demandBlockCharge', keypath: 'demandBlockCharge', options: { unique: false } },
       { name: 'genTransCharge', keypath: 'genTransCharge', options: { unique: false } },
-      { name: 'deliveryCharge', keypath: 'deliveryCharge', options: { unique: false } },
       { name: 'transCharge', keypath: 'transCharge', options: { unique: false } },
       { name: 'powerFactorCharge', keypath: 'powerFactorCharge', options: { unique: false } },
       { name: 'businessCharge', keypath: 'businessCharge', options: { unique: false } },
       { name: 'utilityTax', keypath: 'utilityTax', options: { unique: false } },
-      { name: 'latePayment', keypath: 'latePayment', options: { unique: false } },
-      { name: 'otherCharge', keypath: 'otherCharge', options: { unique: false } },
-      { name: 'checked', keypath: 'checked', options: { unique: false } }
-    ]
-  },
-  {
-    store: 'naturalGasData',
-    storeConfig: { keyPath: 'id', autoIncrement: true },
-    storeSchema: [
-      { name: 'meterid', keypath: 'meterid', options: { unique: false } },
-      { name: 'facilityid', keypath: 'facilityid', options: { unique: false } },
-      { name: 'accountid', keypath: 'accountid', options: { unique: false } },
-      { name: 'readDate', keypath: 'readDate', options: { unique: false } },
-      { name: 'totalVolume', keypath: 'totalVolume', options: { unique: false } },
-      { name: 'commodityCharge', keypath: 'commodityCharge', options: { unique: false } },
-      { name: 'deliveryCharge', keypath: 'deliveryCharge', options: { unique: false } },
-      { name: 'otherCharge', keypath: 'otherCharge', options: { unique: false } }
+      { name: 'latePayment', keypath: 'latePayment', options: { unique: false } }
     ]
   },
   {
@@ -165,11 +159,11 @@ const dbConfig: DBConfig  = {
     HelpPanelComponent,
     ElectricityComponent,
     NaturalGasComponent,
-    LpgComponent,
     StyleGuideComponent,
     PredictorsComponent,
     MoMeterDataComponent,
-    LoadingComponent
+    LoadingComponent,
+    OtherFuelsComponent
   ],
   imports: [
     NgxIndexedDBModule.forRoot(dbConfig),
@@ -181,7 +175,8 @@ const dbConfig: DBConfig  = {
     ReactiveFormsModule,
     CommonModule, 
     PlotlyViaWindowModule,
-    DragDropModule
+    DragDropModule,
+    NgbModule
   ],
   providers: [],
   bootstrap: [AppComponent]

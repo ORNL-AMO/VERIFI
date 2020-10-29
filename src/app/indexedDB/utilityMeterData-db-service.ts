@@ -5,7 +5,7 @@ import { resolve } from 'url';
 @Injectable({
     providedIn: 'root'
 })
-export class ElectricitydbService {
+export class UtilityMeterDatadbService {
   constructor(private dbService: NgxIndexedDBService) {}
 
     getAll() {
@@ -23,6 +23,10 @@ export class ElectricitydbService {
     getByIndex(facilityid) {
         return this.dbService.getByIndex('utilityMeterData', 'facilityid', facilityid);
     }
+
+    getAllByFacility(facilityid) {
+        return this.dbService.getAllByIndex('utilityMeterData', 'facilityid', facilityid);
+    }
     
     getAllByIndex(meterid) {
         return this.dbService.getAllByIndex('utilityMeterData', 'meterid', meterid);
@@ -38,9 +42,15 @@ export class ElectricitydbService {
             facilityid: facilityid,
             accountid: accountid,
             readDate: '',
-            totalKwh: '',
-            totalDemand: '',
+            unit: '',
+            totalEnergyUse: '',
             totalCost: '',
+            commodityCharge: '',
+            deliveryCharge: '',
+            otherCharge: '',
+            checked: false,
+            // Electricity Use Only
+            totalDemand: '',
             basicCharge: '',
             supplyBlockAmt: '',
             supplyBlockCharge: '',
@@ -53,14 +63,11 @@ export class ElectricitydbService {
             demandBlockAmt: '',
             demandBlockCharge: '',
             genTransCharge: '',
-            deliveryCharge: '',
             transCharge: '',
             powerFactorCharge: '',
             businessCharge: '',
             utilityTax: '',
-            latePayment: '',
-            otherCharge: '',
-            checked: false
+            latePayment: ''
         });
     }
 

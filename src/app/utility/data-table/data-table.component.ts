@@ -24,6 +24,7 @@ export class DataTableComponent implements OnInit {
   calendarData: any = [];
   calendarDataTemp: any = [];
   connectedTo: any = [];
+  energyFinalUnit: string;
 
   dataTable: any = [];
   unit: string;
@@ -69,22 +70,75 @@ export class DataTableComponent implements OnInit {
     });
 
     // Observe the meter list
-    this.utilityService.getMeters().subscribe((value) => {
+    this.utilityService.getMeterList().subscribe((value) => {
       this.meterList = value;
       this.tempList = value;
       this.tempList2 = value;
      // this.groupLoadList(); // List all groups
     });
 
-    // Observe the meter list
+    // Observe the calendar data
     this.utilityService.getCalendarData().subscribe((value) => {
       this.calendarData = value;
       this.calendarDataTemp = value;
       this.groupLoadList(); // List all groups
+      console.log(value[0]);
+    });
+
+    // Observe the Energy Final Unit
+    this.utilityService.getEnergyFinalUnit().subscribe((value) => {
+      this.energyFinalUnit = value;
     });
 
   }
 
+  setEnergyFinalUnit(value) {
+    let counter = 0;
+    // Reset all group units
+      // get groups with type "energy"
+      let tempGroup = JSON.parse(JSON.stringify(this.meterGroups));
+
+      let data = tempGroup.filter(function(obj) {
+        return obj.groupType == 'Energy';
+      });
+
+      // loop
+      for (let i of data) {
+        i["unit"] = this.energyFinalUnit; // replace unit
+        this.utilityMeterGroupdbService.update(i); // set groups
+      }
+
+    // Reset all meter final units
+      // get meters with type "energy"
+      let tempMeters = JSON.parse(JSON.stringify(this.meterList));
+
+      let data2 = tempMeters.filter(function(obj) {
+        return obj.groupType == 'Energy';
+      });
+
+      // loop
+      for (let i of data2) {
+        i["finalUnit"] = this.energyFinalUnit; // replace unit
+        this.utilityMeterdbService.update(i); // set meters
+        counter++;
+      }
+  
+      if(counter == data2.length) {
+        this.utilityService.setMeterList(); // refresh list
+        console.log(counter +" - "+ data2.length);
+        
+        // ****TEMP FIX
+        const self = this;
+        setTimeout(function(){ 
+          self.utilityService.setCalendarData(); // refresh conversions
+         }, 1000);
+        
+      }
+    
+      
+    // Set the Energy Final Unit
+    this.utilityService.setEnergyFinalUnit(value);
+  }
 
   groupLoadList() {
     // List the meter groups
@@ -93,7 +147,6 @@ export class DataTableComponent implements OnInit {
         this.meterGroups = data;
         this.groupLoadMeters(); // load meters into groups
         this.groupGetAvg();
-        //this.groupTestLabels();
 
         this.connectedTo=[];
         for (let index of this.meterGroups) {
@@ -124,33 +177,19 @@ export class DataTableComponent implements OnInit {
       this.meterGroups[index]['data'] = group;
       return result;
     }, {});
-    //console.log("Meter List");
-    //console.log(this.meterList);
+    //console.log("Meter Group");
+    //console.log(this.meterGroups);
   }
-
-  // Adding the dropdown list of types
-  groupTestLabels() {
-    let result = this.tempList.reduce((result, item) => {
-      const type = (result[item.type] || []);
-      type.push(0);
-      result[item.type] = type;
-
-      const index = this.meterGroups.map(e => e.name).indexOf(item.group);
-      this.meterGroups[index]['types'] = Object.keys(result) +" "+ type.length;
-      return result;
-    }, {});
-  }
-
    
    meterCalendarTotals() {
     // Quickly calculate calendar totals for each meter
     let result = this.calendarDataTemp.reduce((result, item) => {
       const meterid = [];
       
-      meterid.push(item.monthKwh);
+      meterid.push(item.monthEnergy);
 
       result[item.meterid] = (result[item.meterid] || 0) + +meterid;
-      
+  
       return result;
     }, {});
     return result;
@@ -162,13 +201,14 @@ export class DataTableComponent implements OnInit {
     let total;
 
     let meterCalTot = this.meterCalendarTotals(); // Object containing totals for each meter
+    console.log(meterCalTot);
 
     // Add up the total kwh for every month available
     if (this.calendarData != null) {
       for(let i=0; i<this.calendarData.length; i++) {
         
-        if(this.calendarData[i]['monthKwh'] != 'NA') {
-          allMeterTotal = +allMeterTotal + +this.calendarData[i]['monthKwh'];
+        if(this.calendarData[i]['monthEnergy'] != 'NA') {
+          allMeterTotal = +allMeterTotal + +this.calendarData[i]['monthEnergy'];
         }
   
       }
@@ -191,7 +231,8 @@ export class DataTableComponent implements OnInit {
       if(isNaN(total)) {total = 0;} 
 
       this.meterGroups[i].fracTotEnergy = total;
-
+      this.meterGroups[i].energyTotal = groupTotal;
+      
       // reset total for next group
       groupTotal = 0;
     }
@@ -205,8 +246,8 @@ export class DataTableComponent implements OnInit {
     }
   }
 
-  groupAdd(type, name) {
-    this.utilityMeterGroupdbService.add(type,name,this.facilityid,this.accountid).then(
+  groupAdd(type, unit, name) {
+    this.utilityMeterGroupdbService.add(type,unit,name,this.facilityid,this.accountid).then(
       data => {
         this.groupLoadList(); // Refresh list of groups
       },
@@ -302,7 +343,10 @@ export class DataTableComponent implements OnInit {
 
         // Update meter with its new group id
         this.utilityMeterdbService.update(meterValues).then(
-          data => {
+          result => {
+
+            this.utilityService.setMeterList();
+
             // recalculate average when done.
             this.groupGetAvg();
           },

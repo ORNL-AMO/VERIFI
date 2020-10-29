@@ -12,6 +12,11 @@ import { EnergySourceComponent } from './utility/energy-consumption/energy-sourc
 import { ElectricityComponent } from './utility/energy-consumption/electricity/electricity.component';
 import { NaturalGasComponent } from './utility/energy-consumption/natural-gas/natural-gas.component';
 import { StyleGuideComponent } from './shared/style-guide/style-guide.component';
+import { OtherFuelsComponent } from './utility/energy-consumption/other-fuels/other-fuels.component';
+import { OtherEnergyComponent } from './utility/energy-consumption/other-energy/other-energy.component';
+import { WaterComponent } from './utility/energy-consumption/water/water.component';
+import { WasteWaterComponent } from './utility/energy-consumption/waste-water/waste-water.component';
+import { OtherUtilityComponent } from './utility/energy-consumption/other-utility/other-utility.component';
 
 const routes: Routes = [
   { path: '', component: DashboardComponent },
@@ -26,6 +31,11 @@ const routes: Routes = [
             { path: '', component: EnergySourceComponent },
             { path: 'electricity', component: ElectricityComponent },
             { path: 'natural-gas', component: NaturalGasComponent },
+            { path: 'other-fuels', component: OtherFuelsComponent },
+            { path: 'other-energy', component: OtherEnergyComponent },
+            { path: 'water', component: WaterComponent },
+            { path: 'waste-water', component: WasteWaterComponent },
+            { path: 'other-utility', component: OtherUtilityComponent },
           ],
         },
         { path: 'mo-meter-data', component: MoMeterDataComponent },

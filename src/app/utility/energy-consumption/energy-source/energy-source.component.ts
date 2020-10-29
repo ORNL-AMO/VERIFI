@@ -6,10 +6,11 @@ import { AccountdbService } from "../../../indexedDB/account-db.service";
 import { FacilitydbService } from "../../../indexedDB/facility-db-service";
 import { FacilityService } from 'src/app/account/facility/facility.service';
 import { UtilityService } from "../../../utility/utility.service";
-import { ElectricitydbService } from "../../../indexedDB/electricity-db-service";
+import { UtilityMeterDatadbService } from "../../../indexedDB/utilityMeterData-db-service";
 import { UtilityMeterdbService } from "../../../indexedDB/utilityMeter-db-service";
 import { UtilityMeterGroupdbService } from "../../../indexedDB/utilityMeterGroup-db.service";
 import { listAnimation } from '../../../animations';
+import { ConvertUnitsService } from '../../../shared/convert-units/convert-units.service';
 
 @Component({
   selector: 'app-energy-source',
@@ -32,15 +33,22 @@ export class EnergySourceComponent implements OnInit {
   popup: boolean = false;
   id: number;
 
-  energySource: any;
+  energySources: any;
   selectedMeter: any;
   meterList: any = [{type: ''}];
-  
+  energyFinalUnit: string;
+
   importWindow: boolean = false;
   importError: string = '';
   quickView: any = [];
   import: any = [];
   toggleCancel: boolean = false; // Used to prevent "Cancel" when Adding New Meter (Cancel leaves the meter blank)
+
+  page = 1;
+  itemsPerPage = 10;
+  pageSize: number;
+
+  is_ele_ng: boolean = false;
 
   meterForm = new FormGroup({
     id: new FormControl('', [Validators.required]),
@@ -49,8 +57,15 @@ export class EnergySourceComponent implements OnInit {
     accountid: new FormControl('', [Validators.required]),
     meterNumber: new FormControl('', [Validators.required]),
     accountNumber: new FormControl(''),
-    type: new FormControl('', [Validators.required]),
+    source: new FormControl('Electricity', [Validators.required]),
+    phase: new FormControl('NA', [Validators.required]),
+    fuel: new FormControl('', [Validators.required]),
+    finalUnit: new FormControl('', [Validators.required]),
+    startingUnit: new FormControl('', [Validators.required]),
+    heatCapacity: new FormControl('1', [Validators.required]),
+    siteToSource: new FormControl('1', [Validators.required]),
     group: new FormControl('', [Validators.required]),
+    groupType: new FormControl('', [Validators.required]),
     name: new FormControl('', [Validators.required]),
     location: new FormControl(''),
     supplier: new FormControl(''),
@@ -65,10 +80,11 @@ export class EnergySourceComponent implements OnInit {
     public accountdbService: AccountdbService,
     public facilitydbService: FacilitydbService,
     private utilityService: UtilityService,
-    public electricitydbService: ElectricitydbService,
+    public utilityMeterDatadbService: UtilityMeterDatadbService,
     public utilityMeterdbService: UtilityMeterdbService,
     public utilityMeterGroupdbService: UtilityMeterGroupdbService,
-    private energyConsumptionService: EnergyConsumptionService
+    private energyConsumptionService: EnergyConsumptionService,
+    private convertUnitsService: ConvertUnitsService
     ) {}
 
   ngOnInit() {
@@ -85,7 +101,6 @@ export class EnergySourceComponent implements OnInit {
         this.facilitydbService.getById(this.facilityid).then(
           data => {
             this.activeFacility = data;
-            //this.meterLoadList();
           },
           error => {
               console.log(error);
@@ -94,9 +109,15 @@ export class EnergySourceComponent implements OnInit {
     });
 
     // Observe the meter list
-    this.utilityService.getMeterData().subscribe((value) => {
+    this.utilityService.getMeterList().subscribe((value) => {
       this.meterList = value;
+      console.log(value);
       this.meterMapTabs();
+    });
+
+    // Observe the energy final unit
+    this.utilityService.getEnergyFinalUnit().subscribe((value) => {
+      this.energyFinalUnit = value;
     });
   }
 
@@ -140,17 +161,12 @@ export class EnergySourceComponent implements OnInit {
     // Save this meter in a default "unsorted" group.
     // This group can be renamed or deleted by user.
     // If they do this, another "unsorted" group will be created
-    
-    console.log("GROUP NAME");
-    console.log(groupName);
 
     group = await this.utilityMeterGroupdbService.getByName(groupName); // check if group exists
-    console.log("---Group After");
-      console.log(group);
     
     // If not add it
     if (group == null) {
-      groupid = await this.utilityMeterGroupdbService.add(groupType,groupName,this.facilityid,this.accountid); // add service returns id
+      groupid = await this.utilityMeterGroupdbService.add(groupType,this.energyFinalUnit,groupName,this.facilityid,this.accountid); // add service returns id
     } else {
       groupid = group.id; // get current id
     }
@@ -160,8 +176,8 @@ export class EnergySourceComponent implements OnInit {
 
   meterMapTabs() {
     // Remap tabs
-    this.energySource = this.meterList.map(function (el) { return el.type; });
-    this.energyConsumptionService.setValue(this.energySource);
+    this.energySources = this.meterList.map(function (el) { return el.source; });
+    this.energyConsumptionService.setEnergySource(this.energySources);
   }
 
   async meterSave() {
@@ -172,10 +188,11 @@ export class EnergySourceComponent implements OnInit {
     if (this.meterForm.value.group == '') {
       this.meterForm.value.group = await this.groupCheckExistence("Energy", "Unsorted"); 
     }
+    this.meterForm.controls['groupType'].setValue("Energy");
+    this.meterForm.controls['finalUnit'].setValue(this.energyFinalUnit);
 
     this.utilityMeterdbService.update(this.meterForm.value); // Update db
-    this.utilityService.refreshMeterData(); // refresh the data
-    //this.utilityService.setMetersOnly(); // refresh the data
+    this.utilityService.setMeterList(); // refresh the data
     this.toggleCancel = false; // re-enable "edit meter" cancel button
   }
 
@@ -184,8 +201,9 @@ export class EnergySourceComponent implements OnInit {
   meterEdit(id) {
     this.window = !this.window;
     this.meterMenuOpen = null;
-    console.log(this.meterList);
-    this.meterForm.setValue(this.meterList.find(obj => obj.id == id)); // Set form values to current selected meter
+    
+    const thisMeter = this.meterList.find(obj => obj.id == id);
+    this.meterForm.patchValue(thisMeter); // Set form values to current selected meter
   }
 
   meterDelete(id) {
@@ -193,11 +211,11 @@ export class EnergySourceComponent implements OnInit {
     // Alert the user
 
     // Delete all meter data for this meter
-    this.electricitydbService.getAllByIndex(id).then(
+    this.utilityMeterDatadbService.getAllByIndex(id).then(
       data => {
         // delete
         for(let i=0; i<data.length; i++) {
-          this.electricitydbService.deleteIndex(data[i]["id"]).then(
+          this.utilityMeterDatadbService.deleteIndex(data[i]["id"]).then(
             data => {
               console.log("deleted");
             },
@@ -214,7 +232,7 @@ export class EnergySourceComponent implements OnInit {
     );
     // Delete meter
     this.utilityMeterdbService.deleteIndex(id);
-    this.utilityService.refreshMeterData(); // refresh the data
+    this.utilityService.setMeterList(); // refresh the data
   }
 
   meterImport (files: FileList) {
@@ -266,7 +284,7 @@ export class EnergySourceComponent implements OnInit {
     this.importWindow = false;
     let counter = 1;
 
-    for(let i=0;i<this.import.length+1;i++){
+    for(let i=0;i<this.import.length;i++){
       let obj = this.import[i];
       
       let tempGroupid = await this.groupCheckExistence("Energy", obj.group);  // check if group exists, if not create it
@@ -281,9 +299,16 @@ export class EnergySourceComponent implements OnInit {
             accountid: this.accountid,
             meterNumber: obj.meterNumber,
             accountNumber: obj.accountNumber,
-            type: obj.type,
+            source: obj.source,
+            phase: '',
+            fuel: '',
+            finalUnit: '',
+            startingUnit: '',
+            heatCapacity: '',
+            siteToSource:'',
             location: obj.location,
             group: +tempGroupid,
+            groupType: '',
             name: obj.name,
             supplier: obj.supplier,
             notes: obj.notes
@@ -292,7 +317,7 @@ export class EnergySourceComponent implements OnInit {
           this.utilityMeterdbService.update(importLine); // Update db
 
           if(counter === this.import.length) {
-            this.utilityService.refreshMeterData();
+            this.utilityService.setMeterList(); // refresh the data
           }
           
         },
@@ -327,6 +352,24 @@ export class EnergySourceComponent implements OnInit {
       document.body.appendChild(downloadLink);
       downloadLink.click();
       document.body.removeChild(downloadLink);
+  }
+
+  public onPageChange(pageNum: number): void {
+    this.pageSize = this.itemsPerPage*(pageNum - 1);
+  }
+
+  public changePagesize(num: number): void {
+    this.itemsPerPage = num;
+    this.onPageChange(this.page);
+  }
+
+  onTypeChange(value) {
+    console.log(value);
+    if(value == 'Electricity' || value == 'Natural Gas') {
+      this.is_ele_ng = true;
+    } else {
+      this.is_ele_ng = false;
+    }
   }
 
 }

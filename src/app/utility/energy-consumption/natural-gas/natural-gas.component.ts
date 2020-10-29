@@ -1,9 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
 import { AccountService } from "../../../account/account/account.service";
 import { FacilityService } from 'src/app/account/facility/facility.service';
-import { UtilityMeterdbService } from "../../../indexedDB/utilityMeter-db-service";
-import { NaturalGasdbService } from "../../../indexedDB/naturalGas-db-service";
-import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { UtilityService } from "../../../utility/utility.service";
+import { EnergyConsumptionService } from "../energy-consumption.service";
 
 @Component({
   selector: 'app-natural-gas',
@@ -11,33 +10,21 @@ import { FormGroup, FormControl, Validators } from '@angular/forms';
   styleUrls: ['./natural-gas.component.css']
 })
 export class NaturalGasComponent implements OnInit {
+  @ViewChild('inputFile') myInputVariable: ElementRef;
+  
   accountid: number;
   facilityid: number;
-  meterid: number = 1;
   meterList: any = [];
-  meterDataList: any;
-  meterDataMenuOpen: number;
 
-  popup: boolean = false;
-
-  meterDataForm = new FormGroup({
-    id: new FormControl('', [Validators.required]),
-    //dataid: new FormControl('', [Validators.required]),
-    meterid: new FormControl('', [Validators.required]),
-    facilityid: new FormControl('', [Validators.required]),
-    accountid: new FormControl('', [Validators.required]),
-    readDate: new FormControl('', [Validators.required]),
-    totalVolume: new FormControl('', [Validators.required]),
-    commodityCharge: new FormControl('', [Validators.required]),
-    deliveryCharge: new FormControl('', [Validators.required]),
-    otherCharge: new FormControl('', [Validators.required]),
-  });
+  page = [];
+  itemsPerPage = 6;
+  pageSize = [];
 
   constructor(
     private accountService: AccountService,
     private facilityService: FacilityService,
-    public utilityMeterdbService: UtilityMeterdbService,
-    public naturalGasdbService: NaturalGasdbService
+    private utilityService: UtilityService,
+    public energyConsumptionService: EnergyConsumptionService, // used in html
     ) { }
 
   ngOnInit() {
@@ -49,99 +36,41 @@ export class NaturalGasComponent implements OnInit {
     // Observe the facilityid var
     this.facilityService.getValue().subscribe((value) => {
       this.facilityid = value;
-      this.meterLoadList();
-      //this.meterDataLoadList();
+    });
+
+    // Observe the meter list
+    this.utilityService.getMeterData().subscribe((value) => {
+      this.meterList = value;
+      this.meterList = this.meterList.filter(function(obj) {
+        return obj.source == "Natural Gas"
+      });
+      this.setMeterPages();
     });
   }
 
-  meterLoadList() {
-    // List all meters
-    this.utilityMeterdbService.getAllByIndex(this.facilityid).then(
-      data => {
-          this.meterList = data;
-          this.meterList = this.meterList.filter(function(obj) {
-            return obj.type == "Natural Gas"
-          });
-          // Add all meter data to meter list
-          this.meterDataLoadList()
-      },
-      error => {
-          console.log(error);
-      }
-    );
+  resetImport() {
+    this.myInputVariable.nativeElement.value = '';
   }
 
-  meterDataLoadList() {
-  // loop each meter
-    for (let i=0; i < this.meterList.length; i++) {
-      // filter meter data based on meterid
-      this.naturalGasdbService.getAllByIndex(this.meterList[i]['id']).then(
-        data => {
-          // push to meterlist object
-          this.meterList[i]['data'] = data;
-        },
-        error => {
-            console.log(error);
-        }
-      );
+  setMeterPages() {
+    for(let i=0; i < this.meterList.length; i++) {
+      this.page.push(1);
+      this.pageSize.push(1);
     }
   }
 
-  // Close menus when user clicks outside the dropdown
-  documentClick () {
-    this.meterDataMenuOpen = null;
+  public onPageChange(index, pageNum: number): void {
+    this.pageSize[index] = this.itemsPerPage*(pageNum - 1);
   }
+  
+  public changePagesize(num: number): void {
+    this.itemsPerPage = num;
 
-  meterDataToggleMenu (index) {
-    if (this.meterDataMenuOpen === index) {
-      this.meterDataMenuOpen = null;
-    } else {
-      this.meterDataMenuOpen = index;
+    for(let i=0; i < this.meterList.length; i++) {
+      this.onPageChange(i, this.page[i]);
     }
+   
   }
 
-  meterDataAdd(id) {
-    console.log("meter id " +id);
-    this.naturalGasdbService.add(id,this.facilityid,this.accountid).then(
-      dataid => {
-        // filter meter data based on meterid
-        this.naturalGasdbService.getAllByIndex(id).then(
-          result => {
-            // push to meterlist object
-            const index = this.meterList.findIndex(obj => obj.id == id);
-            this.meterList[index]['data'] = result;
-            this.meterDataEdit(id,dataid); // edit data
-          },
-          error => {
-              console.log(error);
-          }
-        );
-      },
-      error => {
-          console.log(error);
-      }
-    );
-  }
-
-  meterDataSave() {
-    this.popup = !this.popup;
-    console.log(this.meterDataForm.value);
-    this.naturalGasdbService.update(this.meterDataForm.value);// Update db
-    this.meterDataLoadList(); // refresh the data
-  }
-
-  meterDataEdit(meterid,dataid) {
-    this.popup = !this.popup;
-    this.meterDataMenuOpen = null;
-    const meter = this.meterList.find(obj => obj.id == meterid);
-    const meterdata = meter.data.find(obj => obj.id == dataid);
-    this.meterDataForm.setValue(meterdata); // Set form values to current selected meter
-  }
-
-  meterDataDelete(dataid) {
-    this.meterDataMenuOpen = null;
-    this.naturalGasdbService.deleteIndex(dataid);
-    this.meterDataLoadList(); // refresh the data
-  }
 }
 

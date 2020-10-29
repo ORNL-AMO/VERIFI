@@ -258,3 +258,6 @@ meter::-webkit-meter-even-less-good-value {
     padding: 5px 20px;
     border-left: 1px solid #dadada;
 }
+.group-title p {
+    text-transform: uppercase;
+}

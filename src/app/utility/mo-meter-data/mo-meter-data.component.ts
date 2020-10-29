@@ -1,9 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { AccountService } from "../../account/account/account.service";
-import { FacilityService } from 'src/app/account/facility/facility.service';
 import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db-service";
-import { ElectricitydbService } from "../../indexedDB/electricity-db-service";
-import { NaturalGasdbService } from "../../indexedDB/naturalGas-db-service";
 import { UtilityService } from "../utility.service";
 
 @Component({
@@ -12,35 +8,49 @@ import { UtilityService } from "../utility.service";
   styleUrls: ['./mo-meter-data.component.css']
 })
 export class MoMeterDataComponent implements OnInit {
-  accountid: number;
-  facilityid: number;
-  meterList: any = [];
+  meterObj: any = [];
   meterDataList: any;
 
+  page = [];
+  itemsPerPage = 12;
+  pageSize = [];
+
   constructor(
-    private accountService: AccountService,
-    private facilityService: FacilityService,
     public utilityMeterdbService: UtilityMeterdbService,
-    public electricitydbService: ElectricitydbService,
-    public naturalGasdbService: NaturalGasdbService,
     public utilityService: UtilityService
     ) { }
 
   ngOnInit() {
-    // Observe the accountid var
-    this.accountService.getValue().subscribe((value) => {
-      this.accountid = value;
-    });
+    // Trigger calculated calendar data
+    //this.utilityService.setCalendarData();
 
-    // Observe the facilityid var
-    this.facilityService.getValue().subscribe((value) => {
-      this.facilityid = value;
+    // Observe the meter object
+    this.utilityService.getDisplayObj().subscribe((value) => {
+      this.meterObj = value;
+      this.setMeterPages();
+      console.log("Mo Meter");
+      console.log(value);
     });
-
-    // Observe the meter list
-    this.utilityService.getMeters().subscribe((value) => {
-      this.meterList = value;
-    });
+    
   }
 
+  setMeterPages() {
+    for(let i=0; i < this.meterObj.length; i++) {
+      this.page.push(1);
+      this.pageSize.push(1);
+    }
+  }
+
+  public onPageChange(index, pageNum: number): void {
+    this.pageSize[index] = this.itemsPerPage*(pageNum - 1);
+  }
+  
+  public changePagesize(num: number): void {
+    this.itemsPerPage = num;
+
+    for(let i=0; i < this.meterObj.length; i++) {
+      this.onPageChange(i, this.page[i]);
+    }
+   
+  }
 }
