@@ -62,7 +62,7 @@ export class DashboardComponent implements OnInit {
         );
     });
 
-    this.utilityService.getMeters().subscribe((value) => {
+    this.utilityService.getMeterList().subscribe((value) => {
       this.utilities = value;
       console.log(this.utilities);
       this.combineCalendar();

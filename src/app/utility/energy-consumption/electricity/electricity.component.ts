@@ -19,9 +19,9 @@ export class ElectricityComponent implements OnInit {
 
   meterList: any = [];
 
-  page = 1;
+  page = [];
   itemsPerPage = 6;
-  pageSize: number;
+  pageSize = [];
 
   filterColMenu: boolean = false;
   filterCol = [
@@ -75,14 +75,19 @@ export class ElectricityComponent implements OnInit {
     ) { }
 
   ngOnInit() {
+    // Trigger Data
+    //this.utilityService.setMeterData();
+
     // Observe the meter list
-    this.utilityService.getMeterData().subscribe((value) => {
+    this.utilityService.getDisplayObj().subscribe((value) => {
       this.meterList = value;
-      console.log(value);
       this.meterList = this.meterList.filter(function(obj) {
-        return obj.type == "Electricity"
+        return obj.source == "Electricity"
       });
-    });    
+      this.setMeterPages(); // Pagination per meter
+      console.log("ELECTRICITY");
+      console.log(this.meterList);
+    }); 
   }
 
   showAllFields() {
@@ -101,12 +106,23 @@ export class ElectricityComponent implements OnInit {
     this.myInputVariable.nativeElement.value = '';
   }
 
-  public onPageChange(pageNum: number): void {
-    this.pageSize = this.itemsPerPage*(pageNum - 1);
+  setMeterPages() {
+    for(let i=0; i < this.meterList.length; i++) {
+      this.page.push(1);
+      this.pageSize.push(1);
+    }
+  }
+
+  public onPageChange(index, pageNum: number): void {
+    this.pageSize[index] = this.itemsPerPage*(pageNum - 1);
   }
   
   public changePagesize(num: number): void {
     this.itemsPerPage = num;
-    this.onPageChange(this.page);
+
+    for(let i=0; i < this.meterList.length; i++) {
+      this.onPageChange(i, this.page[i]);
+    }
+   
   }
 }

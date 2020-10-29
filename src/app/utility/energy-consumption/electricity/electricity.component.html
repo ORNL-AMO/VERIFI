@@ -1,6 +1,15 @@
 <h4>Electricity Bills</h4>
 
 <div class="controls">
+    <!--Import/Export-->
+    <div class="importExport item-right">
+        <button class="btn btn-outline" (click)="energyConsumptionService.importPopup = true">Import</button>
+        <button class="btn btn-outline" (click)="energyConsumptionService.meterExport('Electricity')">Export</button>
+    </div>
+    <!--Bulk Delete-->
+    <div class="bulk-delete item-right" [class.show]="energyConsumptionService.is_checked">
+        <button class="btn btn-danger" (click)='energyConsumptionService.bulkDelete()'>Bulk Delete</button>
+    </div>
     <!--Column Filters-->
     <div class="filter item-right">
         <button class="btn" [ngClass]="{'btn-solid' : !filterColMenu, 'btn-outline' : filterColMenu}" (click)="filterColMenu = !filterColMenu; filterInpMenu = false">Filter</button>
@@ -23,36 +32,25 @@
             <option value="48">48</option>
             <option value="60">60</option>
         </select>
-        <span> rows</span>
-    </div>
-
-    <!--Import/Export-->
-    <div class="importExport item-left">
-        <button class="btn btn-outline" (click)="energyConsumptionService.importPopup = true">Import</button>
-        <button class="btn btn-outline" (click)="energyConsumptionService.meterExport('Electricity')">Export</button>
-    </div>
-    <!--Bulk Delete-->
-    <div class="bulk-delete item-left" [class.show]="energyConsumptionService.is_checked">
-        <button class="btn btn-danger" (click)='energyConsumptionService.bulkDelete()'>Bulk Delete</button>
-    </div>
+    </div>    
 </div>
 
-<div class="meter" *ngFor="let meterLists of meterList">
+<div class="meter" *ngFor="let meterLists of meterList; let i=index;">
     <div class="meterData">
-        <h6 class="item-left"><i class="fa fa-caret-right"></i> #{{meterLists.id}} {{meterLists.name}}</h6>
-        <i class="fa fa-cog item-right"></i>
-        
+        <h6><i class="fa fa-caret-right"></i> #{{meterLists.id}} {{meterLists.name}}</h6>
+        <p>{{meterLists.notes}}</p>
         
         <button class="btn btn-link item-right" (click)="energyConsumptionService.meterDataAdd(meterLists.id)"><i class="fa fa-plus"></i> Add New Bill</button>
-        <!--<p><span class="bold">Name</span> : #{{meterLists.id}} {{meterLists.name}}</p>
-        <p><span class="bold">Meter</span> # {{meterLists.meterNumber}}</p>
-        <p><span class="bold">Account</span> # {{meterLists.accountNumber}}</p>
-        <p><span class="bold">Building / Area</span> : {{meterLists.location}}</p>
-        <p><span class="bold">Utility Supplier</span> : {{meterLists.supplier}}</p>
-        <p><span class="bold">Notes</span> : {{meterLists.notes}}</p>-->
+        <div class="tableControls overflow-hidden item-right">
+            <div class="item-right">
+                <ngb-pagination [collectionSize]="meterLists.data.length" [(page)]="page[i]" [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Default pagination" (pageChange)="onPageChange(i, page[i])"></ngb-pagination>
+            </div>
+            <p class="item-right">{{meterLists.data.length}} entries</p>
+        </div>
     </div>
+    
 
-    <div class="row overflowTable no-margin">
+    <div class="row no-margin">
         <div class="col no-margin tableData">
         <table>
             <tr>
@@ -81,10 +79,10 @@
                 <th [hidden]="!filterCol[17]['filter']">Late Payment</th>
                 <th [hidden]="!filterCol[18]['filter']">Other Charge</th>
             </tr>
-            <tr *ngFor="let meterData of meterLists.data | slice: pageSize | slice: 0:itemsPerPage">
+            <tr *ngFor="let meterData of meterLists.data | slice: pageSize[i] | slice: 0:itemsPerPage">
                 <td><input [value]="meterData.id" type="checkbox" name="metersSelected" (change)="energyConsumptionService.checkCheckboxes($event)" [(ngModel)]="meterData.checked"></td>
                 <td>{{meterData.readDate}}</td>
-                <td>{{meterData.totalKwh}}</td>
+                <td>{{meterData.totalEnergyUse}}</td>
                 <td>{{meterData.totalDemand}}</td>
                 <td>${{meterData.totalCost}}</td>
                 <td [hidden]="!filterCol[0]['filter']">${{meterData.basicCharge}}</td>
@@ -114,7 +112,7 @@
                 <tr>
                     <th></th>
                 </tr>
-                <tr *ngFor="let meterData of meterLists.data | slice: pageSize | slice: 0:itemsPerPage">
+                <tr *ngFor="let meterData of meterLists.data | slice: pageSize[i] | slice: 0:itemsPerPage">
                     <td (click)="$event.stopPropagation();"> <!-- Prevents closure of menu on document click-->
                         <i class="fa fa-ellipsis-v" (click)="energyConsumptionService.meterDataToggleMenu(meterData.id)" ></i>
                         <div class="meterMenu" [class.open]="energyConsumptionService.meterDataMenuOpen === meterData.id">
@@ -125,13 +123,6 @@
                 </tr>
             </table>
         </div>
-    </div>
-    <!--<button class="btn btn-link" (click)="energyConsumptionService.meterDataAdd(meterLists.id)"><i class="fa fa-plus"></i> Add New Bill</button>-->
-    <div class="tableControls overflow-hidden">
-        <div class="item-right">
-            <ngb-pagination [collectionSize]="meterLists.data.length" [(page)]="page" [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" [boundaryLinks]="true" aria-label="Default pagination" (pageChange)="onPageChange(page)"></ngb-pagination>
-        </div>
-        <p class="item-right">Showing {{page*itemsPerPage-(itemsPerPage-1)}} to {{page*itemsPerPage}} of {{meterLists.data.length}} entries</p>
     </div>
 </div>
 
@@ -160,13 +151,12 @@
             <input hidden type="text" formControlName="meterid">
             <input hidden type="text" formControlName="facilityid">
             <input hidden type="text" formControlName="accountid">
-
-            <!--These are required even though they are blank under Electricity-->
-            <input hidden type="text" formControlName="totalVolume">
+            <input hidden type="text" formControlName="unit">
             <input hidden type="text" formControlName="commodityCharge">
             
+            <!--Allow users to change these values-->
             <label>Meter Read Date
-                <input type="date" formControlName="readDate" required>
+                <input type="text" formControlName="readDate" required>
             </label>
             <br>
             <label [hidden]="!filterInp[0]['filter']">Basic Charge/fixed fee
@@ -299,9 +289,9 @@
             </label>
             <hr>
             <p class="bold">Totals</p>
-            <label>Total kWh
+            <label>Total Energy Use
                 <span class="unit">kWh</span>
-                <input type="text" formControlName="totalKwh" required>
+                <input type="text" formControlName="totalEnergyUse" required>
             </label>
             <label>Total Demand
                 <span class="unit">$</span>

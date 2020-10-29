@@ -35,7 +35,7 @@ export class UtilityMeterGroupdbService {
         return this.dbService.count('utilityMeterGroups');
     }
 
-    async add(type,name,facilityid,accountid) {
+    async add(type,unit,name,facilityid,accountid) {
         let groupid = this.count();
         return this.dbService.add('utilityMeterGroups', { 
             groupid: await groupid + 1,
@@ -44,7 +44,7 @@ export class UtilityMeterGroupdbService {
             groupType: type,
             name: name,
             desc: '',
-            unit: 'MMBtu',
+            unit: unit,
             data: [],
             dateModified: 'Unknown',
             fracTotEnergy: ''

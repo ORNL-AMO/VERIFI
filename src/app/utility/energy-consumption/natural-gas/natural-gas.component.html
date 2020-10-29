@@ -1,25 +1,30 @@
 <h4>Natural Gas Bills</h4>
-<br>
-<div class="importExport item-right">
-    <button class="btn btn-outline" (click)="energyConsumptionService.importPopup = true">Import</button>
-    <button class="btn btn-outline" (click)="energyConsumptionService.meterExport('Natural Gas')">Export</button>
-</div>
-<div class="bulk-delete item-right" [class.show]="energyConsumptionService.is_checked">
-    <button class="btn btn-danger" (click)='energyConsumptionService.bulkDelete()'>Bulk Delete</button>
-</div>
-<br>
 
-<div class="meter" *ngFor="let meterLists of meterList">
+<div class="controls">
+    <div class="importExport item-right">
+        <button class="btn btn-outline" (click)="energyConsumptionService.importPopup = true">Import</button>
+        <button class="btn btn-outline" (click)="energyConsumptionService.meterExport('Natural Gas')">Export</button>
+    </div>
+    <div class="bulk-delete item-right" [class.show]="energyConsumptionService.is_checked">
+        <button class="btn btn-danger" (click)='energyConsumptionService.bulkDelete()'>Bulk Delete</button>
+    </div>
+</div>
+
+<div class="meter" *ngFor="let meterLists of meterList; let i=index;">
     <div class="meterData">
-        <p><span class="bold">Meter ID</span> # {{meterLists.id}}</p>
-        <p><span class="bold">Meter</span> # {{meterLists.meterNumber}}</p>
-        <p><span class="bold">Account</span> # {{meterLists.accountNumber}}</p>
-        <p><span class="bold">Building / Area</span> : {{meterLists.name}}</p>
-        <p><span class="bold">Utility Supplier</span> : {{meterLists.supplier}}</p>
-        <p><span class="bold">Notes</span> : {{meterLists.notes}}</p>
+        <h6><i class="fa fa-caret-right"></i> #{{meterLists.id}} {{meterLists.name}}</h6>
+        <p>{{meterLists.notes}}</p>
+        
+        <button class="btn btn-link item-right" (click)="energyConsumptionService.meterDataAdd(meterLists.id)"><i class="fa fa-plus"></i> Add New Bill</button>
+        <div class="tableControls overflow-hidden item-right">
+            <div class="item-right">
+                <ngb-pagination [collectionSize]="meterLists.data.length" [(page)]="page[i]" [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Default pagination" (pageChange)="onPageChange(i, page[i])"></ngb-pagination>
+            </div>
+            <p class="item-right">{{meterLists.data.length}} entries</p>
+        </div>
     </div>
 
-    <div class="row overflowTable no-margin">
+    <div class="row no-margin">
         <div class="col no-margin tableData">
         <table>
             <tr>
@@ -57,7 +62,6 @@
             </table>
         </div>
     </div>
-    <button class="btn btn-link" (click)="energyConsumptionService.meterDataAdd(meterLists.id)"><i class="fa fa-plus"></i> Add New Bill</button>
 </div>
 
 <div class="window" [class.open]="energyConsumptionService.popup == true">
@@ -72,9 +76,9 @@
                 <input type="date" formControlName="readDate">
             </label><br>
 
-            <label>Total Volume
+            <label>Total Energy Use
                 <span class="unit">$</span>
-                <input type="text" formControlName="totalVolume">
+                <input type="text" formControlName="totalEnergyUse">
             </label><br>
 
             <label>Commodity Charge
@@ -97,6 +101,7 @@
             <input hidden type="text" formControlName="facilityid">
             <input hidden type="text" formControlName="accountid">
             <input hidden type="text" formControlName="meterid">
+            <input hidden type="text" formControlName="unit">
 
             <!--These are required even though they are blank under Natural Gas-->
             <input hidden type="number" formControlName="basicCharge">
@@ -118,7 +123,6 @@
             <input hidden type="number" formControlName="utilityTax">
             <input hidden type="number" formControlName="latePayment">
             <input hidden type="number" formControlName="otherCharge">
-            <input hidden type="number" formControlName="totalKwh">
             <input hidden type="number" formControlName="totalDemand">
             <input hidden type="number" formControlName="totalCost">
             <input hidden type="checkbox" formControlName="checked">

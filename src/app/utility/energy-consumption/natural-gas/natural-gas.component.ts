@@ -16,6 +16,10 @@ export class NaturalGasComponent implements OnInit {
   facilityid: number;
   meterList: any = [];
 
+  page = [];
+  itemsPerPage = 6;
+  pageSize = [];
+
   constructor(
     private accountService: AccountService,
     private facilityService: FacilityService,
@@ -37,15 +41,35 @@ export class NaturalGasComponent implements OnInit {
     // Observe the meter list
     this.utilityService.getMeterData().subscribe((value) => {
       this.meterList = value;
-      console.log(value);
       this.meterList = this.meterList.filter(function(obj) {
-        return obj.type == "Natural Gas"
+        return obj.source == "Natural Gas"
       });
+      this.setMeterPages();
     });
   }
 
   resetImport() {
     this.myInputVariable.nativeElement.value = '';
+  }
+
+  setMeterPages() {
+    for(let i=0; i < this.meterList.length; i++) {
+      this.page.push(1);
+      this.pageSize.push(1);
+    }
+  }
+
+  public onPageChange(index, pageNum: number): void {
+    this.pageSize[index] = this.itemsPerPage*(pageNum - 1);
+  }
+  
+  public changePagesize(num: number): void {
+    this.itemsPerPage = num;
+
+    for(let i=0; i < this.meterList.length; i++) {
+      this.onPageChange(i, this.page[i]);
+    }
+   
   }
 
 }

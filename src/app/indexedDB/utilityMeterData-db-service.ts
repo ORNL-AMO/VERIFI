@@ -23,6 +23,10 @@ export class UtilityMeterDatadbService {
     getByIndex(facilityid) {
         return this.dbService.getByIndex('utilityMeterData', 'facilityid', facilityid);
     }
+
+    getAllByFacility(facilityid) {
+        return this.dbService.getAllByIndex('utilityMeterData', 'facilityid', facilityid);
+    }
     
     getAllByIndex(meterid) {
         return this.dbService.getAllByIndex('utilityMeterData', 'meterid', meterid);
@@ -38,10 +42,15 @@ export class UtilityMeterDatadbService {
             facilityid: facilityid,
             accountid: accountid,
             readDate: '',
-            totalKwh: '',
-            totalVolume: '',
-            totalDemand: '',
+            unit: '',
+            totalEnergyUse: '',
             totalCost: '',
+            commodityCharge: '',
+            deliveryCharge: '',
+            otherCharge: '',
+            checked: false,
+            // Electricity Use Only
+            totalDemand: '',
             basicCharge: '',
             supplyBlockAmt: '',
             supplyBlockCharge: '',
@@ -54,15 +63,11 @@ export class UtilityMeterDatadbService {
             demandBlockAmt: '',
             demandBlockCharge: '',
             genTransCharge: '',
-            deliveryCharge: '',
             transCharge: '',
             powerFactorCharge: '',
             businessCharge: '',
-            commodityCharge: '',
             utilityTax: '',
-            latePayment: '',
-            otherCharge: '',
-            checked: false
+            latePayment: ''
         });
     }
 

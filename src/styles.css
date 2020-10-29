@@ -230,6 +230,7 @@ Popups & Windows
     border: 1px solid #ffffff;
     border-radius: 3px;
     box-shadow: 0px 0px 10px #0000003d;
+    z-index: 9999;
 }
 .popup-header {
     color: white;
@@ -439,7 +440,8 @@ table {
 }
 ::-webkit-scrollbar-thumb {
     border-radius: 10px;
-    background-color: rgba(0, 0, 0, 0.3);
+    /*background-color: rgba(0, 0, 0, 0.3);*/
+    background-color: rgb(0 0 0 / 15%);
     -webkit-box-shadow: 0 0 1px rgba(255,255,255,.5);
 }
 table tr:nth-child(odd) {
@@ -673,9 +675,10 @@ Meter Displays
 }
 .meterData {
     padding: 10px 0px;
+    position: relative;
 }
 .meterData p {
-    margin: 0px;
+    margin: 0 0 0 10px;
 }
 .filter {
     position: relative;
@@ -742,8 +745,7 @@ i.fa.fa-arrow-circle-down {
 }  
 
 .tableData {
-    width: 100%;
-    overflow: scroll;
+    max-width: calc(100% - 15px)!important;
     padding-right: 0px!important;
     overflow-y: auto;
 }
@@ -807,6 +809,7 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
 .page-item.active .page-link {
     background-color: #2c386b!important;
+    background-color: #2c386b00!important;
     border-color: #2c386b!important;
 }
 .page-item:last-child .page-link {
@@ -819,6 +822,11 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 }
 .page-link {
     padding: 3px 8px!important;
+    border: none!important;
+    color: #37383a!important;
+}
+.page-item.active .page-link {
+    color: #228aff!important;
 }
 .controls {
     overflow: hidden;
@@ -843,7 +851,7 @@ i.fa.fa-cog.item-right {
     margin: 0px;
 }
 .meterData h6 {
-    padding: 9px 0;
+    padding: 9px 0 0;
     margin: 0px;
 }
 .pagination {
@@ -851,9 +859,15 @@ i.fa.fa-cog.item-right {
 }
 
 .tableControls {
-    padding: 4px 15px;
+    padding: 4px 0px;
     margin: 0px;
 }
 .required {
     color: red;
+}
+
+.btn.add-new {
+    position: absolute;
+    bottom: 10px;
+    right: 0;
 }

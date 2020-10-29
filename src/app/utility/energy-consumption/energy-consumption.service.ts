@@ -40,10 +40,15 @@ export class EnergyConsumptionService {
     facilityid: new FormControl('', [Validators.required]),
     accountid: new FormControl('', [Validators.required]),
     readDate: new FormControl('', [Validators.required]),
-    totalKwh: new FormControl('', [Validators.required]),
-    totalVolume: new FormControl('', [Validators.required]),
-    totalDemand: new FormControl('', [Validators.required]),
+    unit: new FormControl('', [Validators.required]),
+    totalEnergyUse: new FormControl('', [Validators.required]),
     totalCost: new FormControl('', [Validators.required]),
+    commodityCharge: new FormControl('', [Validators.required]),
+    deliveryCharge: new FormControl('', [Validators.required]),
+    otherCharge: new FormControl('', [Validators.required]),
+    checked: new FormControl(false),
+    // Electricity Use Only
+    totalDemand: new FormControl('', [Validators.required]),
     basicCharge: new FormControl('', [Validators.required]),
     supplyBlockAmt: new FormControl('', [Validators.required]),
     supplyBlockCharge: new FormControl('', [Validators.required]),
@@ -56,15 +61,11 @@ export class EnergyConsumptionService {
     demandBlockAmt: new FormControl('', [Validators.required]),
     demandBlockCharge: new FormControl('', [Validators.required]),
     genTransCharge: new FormControl('', [Validators.required]),
-    deliveryCharge: new FormControl('', [Validators.required]),
     transCharge: new FormControl('', [Validators.required]),
     powerFactorCharge: new FormControl('', [Validators.required]),
     businessCharge: new FormControl('', [Validators.required]),
-    commodityCharge: new FormControl('', [Validators.required]),
     utilityTax: new FormControl('', [Validators.required]),
-    latePayment: new FormControl('', [Validators.required]),
-    otherCharge: new FormControl('', [Validators.required]),
-    checked: new FormControl(false)
+    latePayment: new FormControl('', [Validators.required])
   });
 
   constructor(
@@ -84,18 +85,22 @@ export class EnergyConsumptionService {
     this.facilityService.getValue().subscribe((value) => {
       this.facilityid = value;
     });   
+  
     // Observe the meter list
-    this.utilityService.getMeterData().subscribe((value) => {
+    this.utilityService.getDisplayObj().subscribe((value) => {
       this.meterList = value;
     });
+
+    // Observe the meter list
+    this.utilityService.getMeterData();
   }
 
-  getValue(): Observable<number> {
+  getEnergySource(): Observable<number> {
     // Keep users state
     return this.energySource.asObservable();
   }
 
-  setValue(newValue): void {
+  setEnergySource(newValue): void {
     this.energySource.next(newValue);
   }
 
@@ -141,8 +146,7 @@ export class EnergyConsumptionService {
     this.meterDataForm.controls['checked'].setValue(false); 
 
     this.utilityMeterDatadbService.update(this.meterDataForm.value);// Update db
-    this.utilityService.refreshMeters(); // refresh calendarization
-    this.utilityService.refreshMeterData(); // refresh the data for this page
+    this.utilityService.setMeterData(); // refresh the data for this page
   }
 
   meterDataEdit(meterid,dataid) {
@@ -150,13 +154,14 @@ export class EnergyConsumptionService {
     this.meterDataMenuOpen = null;
     const meter = this.meterList.find(obj => obj.id == meterid);
     const meterdata = meter.data.find(obj => obj.id == dataid);
-    this.meterDataForm.setValue(meterdata); // Set form values to current selected meter
+    this.meterDataForm.patchValue(meterdata); // Set form values to current selected meter
   }
 
   meterDataDelete(dataid) {
     this.meterDataMenuOpen = null;
     this.utilityMeterDatadbService.deleteIndex(dataid);
-    this.utilityService.setMeterData(this.meterList); // refresh the data
+    //this.utilityService.refreshDisplayObj(this.meterList); // refresh the data for this page
+    this.utilityService.setMeterData(); // refresh the data for this page
   }
 
   checkCheckboxes(e) {
@@ -222,7 +227,8 @@ export class EnergyConsumptionService {
           
           if(counter === this.is_checkedList.length) {
             this.loadingService.setLoadingStatus(false);
-            this.utilityService.setMeterData(this.meterList); // refresh the data
+            //this.utilityService.setMeterData(this.meterList); // refresh the data
+            this.utilityService.setMeterData(); // refresh the data for this page
             this.is_checked = false;
           }
           counter++;
@@ -236,16 +242,16 @@ export class EnergyConsumptionService {
     
   }
 
-  meterDataImport (type, files: FileList) {
+  meterDataImport (source, files: FileList) {
     // Clear with each upload
     this.quickView = []; 
     this.importError = '';
     let allowedHeaders;
 
-    if (type == 'Electricity') {
-      allowedHeaders = ["meterNumber","readDate","totalKwh","totalDemand","totalCost","basicCharge","supplyBlockAmt","supplyBlockCharge","flatRateAmt","flatRateCharge","peakAmt","peakCharge","offpeakAmt","offpeakCharge","demandBlockAmt","demandBlockCharge","genTransCharge","deliveryCharge","transCharge","powerFactorCharge","businessCharge","utilityTax","latePayment","otherCharge"];
+    if (source == 'Electricity') {
+      allowedHeaders = ["meterNumber","readDate","totalEnergyUse","totalDemand","totalCost","unit","basicCharge","supplyBlockAmt","supplyBlockCharge","flatRateAmt","flatRateCharge","peakAmt","peakCharge","offpeakAmt","offpeakCharge","demandBlockAmt","demandBlockCharge","genTransCharge","deliveryCharge","transCharge","powerFactorCharge","businessCharge","utilityTax","latePayment","otherCharge"];
     } else {
-      allowedHeaders = ["meterNumber","readDate","totalVolume","commodityCharge","deliveryCharge","otherCharge"];
+      allowedHeaders = ["meterNumber","readDate","totalEnergyUse","commodityCharge","deliveryCharge","otherCharge","unit"];
     }
 
     if(files && files.length > 0) {
@@ -312,15 +318,15 @@ export class EnergyConsumptionService {
             facilityid: this.facilityid,
             accountid: this.accountid,
             readDate: obj.readDate,
+            unit: obj.unit || 'NA',
+            totalEnergyUse: obj.totalEnergyUse || 0,
 
             // Natural Gas +
-            totalVolume: obj.totalVolume || 0,
             commodityCharge: obj.commodityCharge || 0,
             deliveryCharge: obj.deliveryCharge || 0,
             otherCharge: obj.otherCharge || 0,
 
             // Electric only
-            totalKwh: obj.totalKwh || 0,
             totalDemand: obj.totalDemand || 0,
             totalCost: obj.totalCost || 0,
             basicCharge: obj.basicCharge || 0,
@@ -347,7 +353,9 @@ export class EnergyConsumptionService {
           
           // If end of the loop
           if (counter === length) {
-            this.utilityService.setMeterData(this.meterList); // refresh the data
+            //this.utilityService.setMeterData(this.meterList); // refresh the data
+            this.utilityService.setMeterData(); // refresh the data
+            this.loadingService.setLoadingStatus(false);
           }
 
           counter++;
@@ -369,12 +377,12 @@ export class EnergyConsumptionService {
     this.importError = '';
   }
 
-  meterExport(type) {
+  meterExport(source) {
     let csv;
 
     // Filter based on type
     const meterListByType = this.meterList.filter(function(obj) {
-      return obj.type == type;
+      return obj.source == source;
     });
 
     for (let i=0; i < meterListByType.length; i++) {
@@ -400,7 +408,7 @@ export class EnergyConsumptionService {
       var blob = new Blob(["\ufeff", csv]);
       var url = URL.createObjectURL(blob);
       downloadLink.href = url;
-      downloadLink.download = "Verifi_"+type+"_Meter_Data_Dump.csv";
+      downloadLink.download = "Verifi_"+source+"_Meter_Data_Dump.csv";
       document.body.appendChild(downloadLink);
       downloadLink.click();
       document.body.removeChild(downloadLink);
