@@ -1,0 +1,12 @@
+table input, table select {
+    border: none;
+    background: transparent;
+    width: 100%;
+}
+table input:focus {
+    border: none;
+}
+.predictor {
+    overflow: hidden;
+    margin-bottom: 50px;
+}

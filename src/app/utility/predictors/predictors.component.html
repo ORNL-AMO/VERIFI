@@ -1,4 +1,77 @@
 <div class="wrapper main-content">
     <h4>Predictors</h4>
-    <br>
+    <p>All energy sources that <strong>Facility<!--{{activeFacility.name}}--></strong> uses can be viewed in the tabs at the top of the screen.</p>
+
+    <div class="controls">
+        <!--<div class="importExport item-right">
+            <button class="btn btn-outline">Import</button>
+            <button class="btn btn-outline">Export</button>
+        </div>-->
+        <!--Items Per Page-->
+        <div class="items-per-page item-right">
+            <span>Show </span>
+            <select>
+                <option value="6">6</option>
+                <option value="12">12</option>
+                <option value="18">18</option>
+                <option value="24">24</option>
+            </select>
+        </div>    
+    </div>
+
+    <div class="meterData">
+        <button class="btn btn-link item-right" ><i class="fa fa-plus"></i> Add New Predictor</button>
+       <!-- <div class="tableControls overflow-hidden item-right">
+            <div class="item-right">
+                <ngb-pagination [collectionSize]="meterList.length" [(page)]="page" [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Default pagination" (pageChange)="onPageChange(page)"></ngb-pagination>
+            </div>
+            <p class="item-right">{{meterList.length}} entries</p>
+        </div>-->
+    </div>
+
+    
+
+<div class="predictor" *ngFor="let item of predictor">
+    <div class="meterData">
+        <h6 class="item-left"><i class="fa fa-caret-right"></i> #1 {{item}}</h6>
+        <div class="item-right">Unit: 
+            <select>
+                <option>Hours</option>
+            </select>
+        </div>
+    </div>
+    <table>
+        <tr>
+            <th>Month</th>
+            <th>Year</th>
+            <th>Amount</th>
+            <th></th>
+        </tr>
+        <tr>
+            <td>
+                <select>
+                    <option *ngFor="let month of months">{{month}}</option>
+                </select>
+            </td>
+            <td><input type="number" value="2020"></td>
+            <td><input type="number" value="123"></td>
+            <td> <!-- Prevents closure of menu on document click-->
+                <i class="fa fa-ellipsis-v" ></i>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <select>
+                    <option *ngFor="let month of months">{{month}}</option>
+                </select>
+            </td>
+            <td><input type="number" value="2020"></td>
+            <td><input type="number" value="123"></td>
+            <td> <!-- Prevents closure of menu on document click-->
+                <i class="fa fa-ellipsis-v" ></i>
+            </td>
+        </tr>
+    </table>
+    <button class="btn btn-link item-left"><i class="fa fa-plus"></i> Add Row</button>
+</div>
 </div>
