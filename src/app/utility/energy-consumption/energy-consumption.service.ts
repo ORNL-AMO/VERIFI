@@ -4,8 +4,8 @@ import { Observable, BehaviorSubject } from 'rxjs';
 import { AccountService } from "../../account/account/account.service";
 import { FacilityService } from 'src/app/account/facility/facility.service';
 import { UtilityService } from "../../utility/utility.service";
-import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db-service";
-import { UtilityMeterDatadbService } from "../../indexedDB/utilityMeterData-db-service";
+import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db.service";
+import { UtilityMeterDatadbService } from "../../indexedDB/utilityMeterData-db.service";
 import { LoadingService } from "../../shared/loading/loading.service";
 
 @Injectable({

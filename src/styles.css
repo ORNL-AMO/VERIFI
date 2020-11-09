@@ -162,6 +162,13 @@ Buttons
     background-color: #ffe400!important;
     border-color: #ffe400!important;
 }
+.btn-primary i,
+.btn-primary-1 i,
+.btn-primary-2 i,
+.btn-primary-3 i,
+.btn-primary-4 i {
+    color: #fff!important;
+}
 /*
 Alerts
 ======================================================== */

@@ -1,12 +1,12 @@
 <div class="wrapper main-content">
     <h4>Predictors</h4>
-    <p>All energy sources that <strong>Facility<!--{{activeFacility.name}}--></strong> uses can be viewed in the tabs at the top of the screen.</p>
+    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
 
     <div class="controls">
-        <!--<div class="importExport item-right">
+        <div class="importExport item-right">
             <button class="btn btn-outline">Import</button>
             <button class="btn btn-outline">Export</button>
-        </div>-->
+        </div>
         <!--Items Per Page-->
         <div class="items-per-page item-right">
             <span>Show </span>
@@ -16,62 +16,78 @@
                 <option value="18">18</option>
                 <option value="24">24</option>
             </select>
-        </div>    
+        </div>  
+        
     </div>
 
     <div class="meterData">
-        <button class="btn btn-link item-right" ><i class="fa fa-plus"></i> Add New Predictor</button>
-       <!-- <div class="tableControls overflow-hidden item-right">
-            <div class="item-right">
-                <ngb-pagination [collectionSize]="meterList.length" [(page)]="page" [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Default pagination" (pageChange)="onPageChange(page)"></ngb-pagination>
-            </div>
-            <p class="item-right">{{meterList.length}} entries</p>
-        </div>-->
+        <button class="btn btn-primary-4 item-right" (click)="predictorAdd()"><i class="fa fa-plus"></i> Add New Predictor</button>  
     </div>
 
-    
-
-<div class="predictor" *ngFor="let item of predictor">
-    <div class="meterData">
-        <h6 class="item-left"><i class="fa fa-caret-right"></i> #1 {{item}}</h6>
-        <div class="item-right">Unit: 
-            <select>
-                <option>Hours</option>
-            </select>
-        </div>
+    <!--
+    <div class="row">
+        <ul class="col verticalTable">
+            <li>Month</li>
+            <li class="bold">Month</li>
+            <li *ngFor="let header of predictorHeaders">Jan</li>
+        </ul>
+        <ul class="col verticalTable">
+            <li>Year</li>
+            <li class="bold">Year</li>
+            <li *ngFor="let header of predictorHeaders">2020</li>
+        </ul>
+        <ul class="col verticalTable" *ngFor="let header of predictorHeaders">
+            <li class="bold">{{header}}</li>
+            <li class="bold">Amount</li>
+            <li *ngFor="let predictor of predictors | filter:header">{{predictor.month}} {{predictor.name}}</li>
+        </ul>
     </div>
+    <br>
+    -->
     <table>
         <tr>
-            <th>Month</th>
-            <th>Year</th>
-            <th>Amount</th>
             <th></th>
-        </tr>
-        <tr>
+            <th class="header" *ngFor="let header of predictorHeaders">{{header}} <span class="small block">hours</span></th>
             <td>
-                <select>
-                    <option *ngFor="let month of months">{{month}}</option>
-                </select>
-            </td>
-            <td><input type="number" value="2020"></td>
-            <td><input type="number" value="123"></td>
-            <td> <!-- Prevents closure of menu on document click-->
                 <i class="fa fa-ellipsis-v" ></i>
             </td>
         </tr>
         <tr>
+            <th>Date</th>
+            <th *ngFor="let header of predictorHeaders">Amount</th>
+            <th></th>
+        </tr>
+        <tr *ngFor="let data of dataTable">
+            <td>{{data.date}}</td>
+            <td *ngFor="let item of data.amount"><input type="text" [value]="item"></td>
             <td>
-                <select>
-                    <option *ngFor="let month of months">{{month}}</option>
-                </select>
-            </td>
-            <td><input type="number" value="2020"></td>
-            <td><input type="number" value="123"></td>
-            <td> <!-- Prevents closure of menu on document click-->
                 <i class="fa fa-ellipsis-v" ></i>
             </td>
         </tr>
     </table>
-    <button class="btn btn-link item-left"><i class="fa fa-plus"></i> Add Row</button>
+    
+    <div class="tableControls overflow-hidden">
+        <button class="btn btn-link item-left" (click)="predictorAddRow()"><i class="fa fa-plus"></i> Add Row</button>
+        <div class="item-right">
+            <ngb-pagination [collectionSize]="predictors.length" [(page)]="page" [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Default pagination" (pageChange)="onPageChange(page)"></ngb-pagination>
+        </div>
+        <p class="item-right">{{predictors.length}} entries</p>
+    </div>
 </div>
+
+<div class="window" [class.open]="popup == true">
+    <div class="windowOverlay"></div>
+    <div class="windowContent windowContentLg">
+        <h4>Edit Predictors</h4>
+        <p>Jan: 2020</p>
+        <label *ngFor="let header of predictorHeaders">
+            {{header}}
+            <input type="text" [value]="header">
+        </label>
+        
+        <div class="saveCancel item-right">
+            <button class="btn btn-primary" (click)="popup = !popup">Cancel</button>
+            <button class="btn btn-primary" (click)="popup = !popup">Save</button>
+        </div>
+    </div>
 </div>
