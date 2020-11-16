@@ -1,6 +1,7 @@
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { Injectable } from '@angular/core';
 import { IdbUtilityMeter } from '../models/idb';
+import { Observable } from 'rxjs';
 
 @Injectable({
     providedIn: 'root'
@@ -8,19 +9,19 @@ import { IdbUtilityMeter } from '../models/idb';
 export class UtilityMeterdbService {
     constructor(private dbService: NgxIndexedDBService) { }
 
-    getAll(): Promise<Array<IdbUtilityMeter>> {
+    getAll(): Observable<Array<IdbUtilityMeter>> {
         return this.dbService.getAll('utilityMeter');
     }
 
-    getById(meterId: number): Promise<IdbUtilityMeter> {
+    getById(meterId: number): Observable<IdbUtilityMeter> {
         return this.dbService.getByKey('utilityMeter', meterId);
     }
 
-    getByIndex(indexName: string, indexValue: number): Promise<IdbUtilityMeter> {
+    getByIndex(indexName: string, indexValue: number): Observable<IdbUtilityMeter> {
         return this.dbService.getByIndex('utilityMeter', indexName, indexValue);
     }
 
-    getAllByIndexRange(indexName: string, indexValue: number | string): Promise<Array<IdbUtilityMeter>> {
+    getAllByIndexRange(indexName: string, indexValue: number | string): Observable<Array<IdbUtilityMeter>> {
         let idbKeyRange: IDBKeyRange = IDBKeyRange.only(indexValue);
         return this.dbService.getAllByIndex('utilityMeter', indexName, idbKeyRange);
     }
@@ -29,15 +30,15 @@ export class UtilityMeterdbService {
         return this.dbService.count('utilityMeter');
     }
 
-    add(utilityMeter: IdbUtilityMeter): Promise<any> {
+    add(utilityMeter: IdbUtilityMeter): Observable<any> {
         return this.dbService.add('utilityMeter', utilityMeter);
     }
 
-    update(values: IdbUtilityMeter): Promise<any> {
+    update(values: IdbUtilityMeter): Observable<any> {
         return this.dbService.update('utilityMeter', values);
     }
 
-    deleteIndex(utilityMeterId: number): Promise<any> {
+    deleteIndex(utilityMeterId: number): Observable<any> {
         return this.dbService.delete('utilityMeter', utilityMeterId);
     }
 

@@ -40,7 +40,7 @@ export class FacilityComponent implements OnInit {
     this.facilityService.getValue().subscribe((value) => {
       this.facilityid = value;
 
-      this.facilitydbService.getById(this.facilityid).then(
+      this.facilitydbService.getById(this.facilityid).subscribe(
         data => {
           if (data != null) {
             this.facilityForm.get('id').setValue(data.id);
@@ -67,7 +67,7 @@ export class FacilityComponent implements OnInit {
 
   onFormChange(): void {
     // Update db
-    this.facilitydbService.update(this.facilityForm.value).then(
+    this.facilitydbService.update(this.facilityForm.value).subscribe(
       data => {
         this.facilityService.setValue(this.facilityid);
       },

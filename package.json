@@ -31,7 +31,7 @@
     "lodash": "^4.17.20",
     "lodash.foreach": "^4.5.0",
     "lodash.keys": "^4.2.0",
-    "ngx-indexed-db": "^5.0.4",
+    "ngx-indexed-db": "6.1.1",
     "ngx-webstorage": "^5.0.0",
     "plotly.js": "^1.54.6",
     "plotly.js-dist": "^1.54.6",

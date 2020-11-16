@@ -52,7 +52,7 @@ export class DashboardComponent implements OnInit {
       this.facilityid = value;
 
       // get current facility object
-      this.facilitydbService.getById(this.facilityid).then(
+      this.facilitydbService.getById(this.facilityid).subscribe(
         data => {
           this.meterLoadList();
         },
@@ -73,7 +73,7 @@ export class DashboardComponent implements OnInit {
 
   meterLoadList() {
     // List all meters
-    this.utilityMeterdbService.getAllByIndexRange('facilityId', this.facilityid).then(
+    this.utilityMeterdbService.getAllByIndexRange('facilityId', this.facilityid).subscribe(
       data => {
         this.meterList = data;
 
@@ -95,7 +95,7 @@ export class DashboardComponent implements OnInit {
     // loop each meter
     for (let i = 0; i < this.meterList.length; i++) {
       // filter meter data based on meterid
-      this.utilityMeterDatadbService.getAllByIndexRange('meterId', this.meterList[i]['id']).then(
+      this.utilityMeterDatadbService.getAllByIndexRange('meterId', this.meterList[i]['id']).subscribe(
         data => {
           this.meterList[i]['data'] = data; // set meter data
           this.meterAverages(i, data); // Set meter averages
@@ -108,7 +108,7 @@ export class DashboardComponent implements OnInit {
   }
 
   meterDataLoadAll() {
-    this.utilityMeterDatadbService.getAll().then(
+    this.utilityMeterDatadbService.getAll().subscribe(
       data => {
         if (data.length != 0) { // Prevent NAN
           this.meterListData = data; // push all meter data to array

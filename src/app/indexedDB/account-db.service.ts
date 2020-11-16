@@ -1,6 +1,7 @@
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { Injectable } from '@angular/core';
 import { IdbAccount } from '../models/idb';
+import { Observable } from 'rxjs';
 
 @Injectable({
     providedIn: 'root'
@@ -8,11 +9,11 @@ import { IdbAccount } from '../models/idb';
 export class AccountdbService {
     constructor(private dbService: NgxIndexedDBService) { }
 
-    getAll(): Promise<Array<IdbAccount>> {
+    getAll(): Observable<Array<IdbAccount>> {
         return this.dbService.getAll('accounts');
     }
 
-    getById(accountId: number): Promise<IdbAccount> {
+    getById(accountId: number): Observable<IdbAccount> {
         return this.dbService.getByKey('accounts', accountId);
     }
 
@@ -20,29 +21,29 @@ export class AccountdbService {
         return this.dbService.count('accounts');
     }
 
-    add(account: IdbAccount): Promise<any> {
+    add(account: IdbAccount): Observable<any> {
         return this.dbService.add('accounts', account);
     }
 
-    update(account: IdbAccount): Promise<any> {
+    update(account: IdbAccount): Observable<any> {
         return this.dbService.update('accounts', account);
     }
 
-    deleteIndex(accountId: number): Promise<any> {
+    deleteIndex(accountId: number): Observable<any> {
         return this.dbService.delete('accounts', accountId);
     }
 
     //TODO: MOVE
     // *WARNING* Can not be undone
     deleteDatabase() {
-        this.dbService.deleteDatabase().then(
-            () => {
-                console.log('Database deleted successfully');
-            },
-            error => {
-                console.log(error);
-            }
-        );
+        // this.dbService.deleteDatabase().then(
+        //     () => {
+        //         console.log('Database deleted successfully');
+        //     },
+        //     error => {
+        //         console.log(error);
+        //     }
+        // );
     }
     addTestData() {
         TestAccountData.forEach(accountItem => {

@@ -67,7 +67,7 @@ export class HeaderComponent implements OnInit {
   }
   accountLoadList() {
     // List all accounts for popup
-    this.accountdbService.getAll().then(
+    this.accountdbService.getAll().subscribe(
       data => {
         // Load test data if no data is present
         if (data.length != 0) {
@@ -87,7 +87,7 @@ export class HeaderComponent implements OnInit {
 
   facilityLoadList() {
     // List all facilities for dropdown
-    this.facilitydbService.getAllByIndexRange('accountId', this.accountid).then(
+    this.facilitydbService.getAllByIndexRange('accountId', this.accountid).subscribe(
       data => {
         // avoid empty errors
         if (data.length != 0) {
@@ -186,7 +186,7 @@ export class HeaderComponent implements OnInit {
   }
 
   getAllAccounts() {
-    this.accountdbService.getAll().then(
+    this.accountdbService.getAll().subscribe(
       data => {
         console.log(data);
       }
@@ -194,7 +194,7 @@ export class HeaderComponent implements OnInit {
   }
 
   getAllFacilities() {
-    this.facilitydbService.getAll().then(
+    this.facilitydbService.getAll().subscribe(
       data => {
         console.log(data);
       }
@@ -202,7 +202,7 @@ export class HeaderComponent implements OnInit {
   }
 
   getAllMeters() {
-    this.utilityMeterdbService.getAll().then(
+    this.utilityMeterdbService.getAll().subscribe(
       data => {
         console.log(data);
       }
@@ -210,7 +210,7 @@ export class HeaderComponent implements OnInit {
   }
 
   getAllMeterData() {
-    this.utilityMeterDatadbService.getAll().then(
+    this.utilityMeterDatadbService.getAll().subscribe(
       data => {
         console.log(data);
       }
@@ -218,7 +218,7 @@ export class HeaderComponent implements OnInit {
   }
 
   getAllMeterGroups() {
-    this.utilityMeterGroupdbService.getAll().then(
+    this.utilityMeterGroupdbService.getAll().subscribe(
       data => {
         console.log(data);
       }

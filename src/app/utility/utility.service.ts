@@ -94,7 +94,7 @@ export class UtilityService {
 
   setMeterList(): void {
     // Query all meters
-    this.utilityMeterdbService.getAllByIndexRange('facilityId', this.facilityid).then(
+    this.utilityMeterdbService.getAllByIndexRange('facilityId', this.facilityid).subscribe(
       data => {
         this.localStorage.store('verifi_meterList', data);
         this.meterList.next(data);
@@ -127,7 +127,7 @@ export class UtilityService {
 
   setMeterData(): void {
     // Query all meter data
-    this.utilityMeterDatadbService.getAllByIndexRange('facilityId', this.facilityid).then(
+    this.utilityMeterDatadbService.getAllByIndexRange('facilityId', this.facilityid).subscribe(
       data => {
         this.localStorage.store('verifi_meterData', data);
         this.meterData.next(data);

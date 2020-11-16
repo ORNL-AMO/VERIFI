@@ -1,6 +1,7 @@
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { Injectable } from '@angular/core';
 import { IdbFacility } from '../models/idb';
+import { Observable } from 'rxjs';
 
 @Injectable({
     providedIn: 'root'
@@ -8,19 +9,19 @@ import { IdbFacility } from '../models/idb';
 export class FacilitydbService {
     constructor(private dbService: NgxIndexedDBService) { }
 
-    getAll(): Promise<Array<IdbFacility>> {
+    getAll(): Observable<Array<IdbFacility>> {
         return this.dbService.getAll('facilities');
     }
 
-    getById(facilityId: number): Promise<IdbFacility> {
+    getById(facilityId: number): Observable<IdbFacility> {
         return this.dbService.getByKey('facilities', facilityId);
     }
 
-    getByIndex(indexName: string, indexValue: number): Promise<IdbFacility> {
+    getByIndex(indexName: string, indexValue: number): Observable<IdbFacility> {
         return this.dbService.getByIndex('facilities', indexName, indexValue);
     }
 
-    getAllByIndexRange(indexName: string, indexValue: number | string): Promise<Array<IdbFacility>> {
+    getAllByIndexRange(indexName: string, indexValue: number | string): Observable<Array<IdbFacility>> {
         let idbKeyRange: IDBKeyRange = IDBKeyRange.only(indexValue);
         return this.dbService.getAllByIndex('facilities', indexName, idbKeyRange);
     }
@@ -29,15 +30,15 @@ export class FacilitydbService {
         return this.dbService.count('facilities');
     }
 
-    add(facility: IdbFacility): Promise<any> {
+    add(facility: IdbFacility): Observable<any> {
         return this.dbService.add('facilities', facility);
     }
 
-    update(values: IdbFacility): Promise<any> {
+    update(values: IdbFacility): Observable<any> {
         return this.dbService.update('facilities', values);
     }
 
-    deleteIndex(facilityId: number): Promise<any> {
+    deleteIndex(facilityId: number): Observable<any> {
         return this.dbService.delete('facilities', facilityId);
     }
 

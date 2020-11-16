@@ -99,7 +99,7 @@ export class EnergySourceComponent implements OnInit {
       this.facilityid = value;
 
       // get current facility object
-      this.facilitydbService.getById(this.facilityid).then(
+      this.facilitydbService.getById(this.facilityid).subscribe(
         data => {
           this.activeFacility = data;
         },
@@ -137,10 +137,10 @@ export class EnergySourceComponent implements OnInit {
 
   meterAdd() {
     let utilityMeter: IdbUtilityMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(this.facilityid, this.accountid);
-    this.utilityMeterdbService.add(utilityMeter).then(
+    this.utilityMeterdbService.add(utilityMeter).subscribe(
       id => {
         // unable to use subscription() in this scenario due to async issues
-        this.utilityMeterdbService.getAllByIndexRange('facilityId', this.facilityid).then(
+        this.utilityMeterdbService.getAllByIndexRange('facilityId', this.facilityid).subscribe(
           data => {
             this.meterList = data; // refresh the data 
 
@@ -169,7 +169,9 @@ export class EnergySourceComponent implements OnInit {
     // If not add it
     if (group == null) {
       let utilityMeterGroup: IdbUtilityMeterGroup = this.utilityMeterGroupdbService.getNewIdbUtilityMeterGroup(groupType, this.energyFinalUnit, groupName, this.facilityid, this.accountid);
-      groupid = await this.utilityMeterGroupdbService.add(utilityMeterGroup); // add service returns id
+      this.utilityMeterGroupdbService.add(utilityMeterGroup).subscribe(id => {
+        groupid = id;
+      }); // add service returns id
     } else {
       groupid = group.id; // get current id
     }
@@ -214,11 +216,11 @@ export class EnergySourceComponent implements OnInit {
     // Alert the user
 
     // Delete all meter data for this meter
-    this.utilityMeterDatadbService.getAllByIndexRange('meterId', id).then(
+    this.utilityMeterDatadbService.getAllByIndexRange('meterId', id).subscribe(
       data => {
         // delete
         for (let i = 0; i < data.length; i++) {
-          this.utilityMeterDatadbService.deleteIndex(data[i]["id"]).then(
+          this.utilityMeterDatadbService.deleteIndex(data[i]["id"]).subscribe(
             data => {
               console.log("deleted");
             },
@@ -292,7 +294,7 @@ export class EnergySourceComponent implements OnInit {
 
       let tempGroupid = await this.groupCheckExistence("Energy", obj.group);  // check if group exists, if not create it
       let newUtilityMeter: IdbUtilityMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(this.facilityid, this.accountid);
-      this.utilityMeterdbService.add(newUtilityMeter).then(
+      this.utilityMeterdbService.add(newUtilityMeter).subscribe(
         id => {
           counter++;
 

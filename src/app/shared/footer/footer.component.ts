@@ -38,7 +38,7 @@ export class FooterComponent implements OnInit {
 
   countAccounts() {
     // Count all accounts
-    this.accountdbService.count().then(
+    this.accountdbService.count().subscribe(
       data => {
         this.accountCount = data;
       },
@@ -50,7 +50,7 @@ export class FooterComponent implements OnInit {
 
   countFacilities() {
     // Count current facilities
-    this.facilitydbService.getAllByIndexRange('accountId', this.accountid).then(
+    this.facilitydbService.getAllByIndexRange('accountId', this.accountid).subscribe(
       data => {
         this.facilityCount = data.length;
       },
@@ -62,7 +62,7 @@ export class FooterComponent implements OnInit {
 
   countAllFacilities() {
     // Count all facilities
-    this.facilitydbService.count().then(
+    this.facilitydbService.count().subscribe(
       data => {
         this.facilityCountTotal = data;
       },

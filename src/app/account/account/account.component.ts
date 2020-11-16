@@ -61,7 +61,7 @@ export class AccountComponent implements OnInit {
 
   accountLoadList() {
     // Get current account and fill form.
-    this.accountdbService.getById(this.accountid).then(
+    this.accountdbService.getById(this.accountid).subscribe(
       data => {
         // avoid empty errors
         if (data != null) {
@@ -81,7 +81,7 @@ export class AccountComponent implements OnInit {
 
   facilityLoadList() {
     // List all facilities
-    this.facilitydbService.getAllByIndexRange('accountId', this.accountid).then(
+    this.facilitydbService.getAllByIndexRange('accountId', this.accountid).subscribe(
       data => {
         this.facilityList = data;
       },
@@ -117,7 +117,7 @@ export class AccountComponent implements OnInit {
 
   onFormChange(): void {
     // Update db
-    this.accountdbService.update(this.accountForm.value).then(
+    this.accountdbService.update(this.accountForm.value).subscribe(
       data => {
         this.accountService.setValue(this.accountid); // forces ui to update
       },
