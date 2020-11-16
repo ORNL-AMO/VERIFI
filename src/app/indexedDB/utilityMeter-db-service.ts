@@ -1,64 +1,62 @@
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { Injectable } from '@angular/core';
-import { resolve } from 'url';
+import { IdbUtilityMeter } from '../models/idb';
 
 @Injectable({
     providedIn: 'root'
 })
 export class UtilityMeterdbService {
-  constructor(private dbService: NgxIndexedDBService) {}
+    constructor(private dbService: NgxIndexedDBService) { }
 
-    getAll() {
+    getAll(): Promise<Array<IdbUtilityMeter>> {
         return this.dbService.getAll('utilityMeter');
     }
 
-    getByKey(index) {
-        return this.dbService.getByKey('utilityMeter', index);
+    getById(meterId: number): Promise<IdbUtilityMeter> {
+        return this.dbService.getByKey('utilityMeter', meterId);
     }
 
-    getById(meterid) {
-        return this.dbService.getByIndex('utilityMeter', 'meterid', meterid);
+    getByIndex(indexName: string, indexValue: number): Promise<IdbUtilityMeter> {
+        return this.dbService.getByIndex('utilityMeter', indexName, indexValue);
     }
 
-    getByIndex(facilityid) {
-        return this.dbService.getByIndex('utilityMeter', 'facilityid', facilityid);
-    }
-    
-    getAllByIndex(facilityid) {
-        return this.dbService.getAllByIndex('utilityMeter', 'facilityid', facilityid);
+    getAllByIndex(indexName: string, idbKeyRange: IDBKeyRange): Promise<Array<IdbUtilityMeter>> {
+        return this.dbService.getAllByIndex('utilityMeter', indexName, idbKeyRange);
     }
 
     count() {
         return this.dbService.count('utilityMeter');
     }
 
-    add(facilityid,accountid) {
-        return this.dbService.add('utilityMeter', { 
-            facilityid: facilityid,
-            accountid: accountid,
-            meterNumber: '000',
-            accountNumber: '000',
-            source: '',
-            phase: '',
-            fuel: '',
-            finalUnit: '',
-            startingUnit: '',
-            heatCapacity: '',
-            siteToSource:'',
-            group: '',
-            groupType: '',
-            name: '',
-            location: '',
-            supplier: '',
-            notes: ''
-        });
+    add(utilityMeter: IdbUtilityMeter): Promise<any> {
+        return this.dbService.add('utilityMeter', utilityMeter);
     }
 
-    update(values) {
+    update(values: IdbUtilityMeter): Promise<any> {
         return this.dbService.update('utilityMeter', values);
     }
-    
-    deleteIndex(index) {
-        return this.dbService.delete('utilityMeter', index);
+
+    deleteIndex(utilityMeterId: number): Promise<any> {
+        return this.dbService.delete('utilityMeter', utilityMeterId);
+    }
+
+    getNewIdbUtilityMeter(facilityId: number, accountId: number): IdbUtilityMeter {
+        return  { 
+            facilityId: facilityId,
+            accountId: accountId,
+            id: undefined,
+            groupId: undefined,
+            meterNumber: undefined,
+            accountNumber: undefined,
+            type: undefined,
+            phase: undefined,
+            unit: undefined,
+            heatCapacity: undefined,
+            siteToSource: undefined,
+            name: undefined,
+            location: undefined,
+            supplier: undefined,
+            notes: undefined
+        }
     }
 }

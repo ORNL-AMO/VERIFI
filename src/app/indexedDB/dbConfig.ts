@@ -1,5 +1,9 @@
 import { DBConfig } from "ngx-indexed-db";
 
+
+//facilityId inside of "facilities" doesn't seem correct
+//same with meterid and group
+
 export const dbConfig: DBConfig  = {
     name: 'verifi',
     version: 4.5,
@@ -18,8 +22,8 @@ export const dbConfig: DBConfig  = {
       store: 'facilities',
       storeConfig: { keyPath: 'id', autoIncrement: true },
       storeSchema: [
-        { name: 'facilityid', keypath: 'facilityid', options: { unique: true} },
-        { name: 'accountid', keypath: 'accountid', options: { unique: false } },
+        // { name: 'facilityId', keypath: 'facilityId', options: { unique: true} },
+        { name: 'accountId', keypath: 'accountId', options: { unique: false } },
         { name: 'name', keypath: 'name', options: { unique: false } },
         { name: 'country', keypath: 'country', options: { unique: false } },
         { name: 'state', keypath: 'state', options: { unique: false } },
@@ -36,9 +40,10 @@ export const dbConfig: DBConfig  = {
       store: 'utilityMeter',
       storeConfig: { keyPath: 'id', autoIncrement: true },
       storeSchema: [
-        { name: 'meterid', keypath: 'meterid', options: { unique: true} },
-        { name: 'facilityid', keypath: 'facilityid', options: { unique: false} },
-        { name: 'accountid', keypath: 'accountid', options: { unique: false } },
+        // { name: 'meterid', keypath: 'meterid', options: { unique: true} },
+        { name: 'facilityId', keypath: 'facilityId', options: { unique: false} },
+        { name: 'accountId', keypath: 'accountId', options: { unique: false } },
+        { name: 'groupId', keypath: 'groupId', options: { unique: false } },
         { name: 'meterNumber', keypath: 'meterNumber', options: { unique: false } },
         { name: 'accountNumber', keypath: 'accountNumber', options: { unique: false } },
         { name: 'type', keypath: 'type', options: { unique: false } },
@@ -46,7 +51,6 @@ export const dbConfig: DBConfig  = {
         { name: 'unit', keypath: 'startingUnit', options: { unique: false } },
         { name: 'heatCapacity', keypath: 'heatCapacity', options: { unique: false } },
         { name: 'siteToSource', keypath: 'siteToSource', options: { unique: false } },
-        { name: 'group', keypath: 'group', options: { unique: false } },
         { name: 'name', keypath: 'name', options: { unique: false } },
         { name: 'location', keypath: 'notes', options: { unique: false } },
         { name: 'supplier', keypath: 'supplier', options: { unique: false } },
@@ -57,9 +61,9 @@ export const dbConfig: DBConfig  = {
       store: 'utilityMeterData',
       storeConfig: { keyPath: 'id', autoIncrement: true },
       storeSchema: [
-        { name: 'meterid', keypath: 'meterid', options: { unique: false } },
-        { name: 'facilityid', keypath: 'facilityid', options: { unique: false } },
-        { name: 'accountid', keypath: 'accountid', options: { unique: false } },
+        { name: 'meterId', keypath: 'meterId', options: { unique: false } },
+        { name: 'facilityId', keypath: 'facilityId', options: { unique: false } },
+        { name: 'accountId', keypath: 'accountId', options: { unique: false } },
         { name: 'readDate', keypath: 'readDate', options: { unique: false } },
         { name: 'unit', keypath: 'unit', options: { unique: false } },
         { name: 'totalEnergyUse', keypath: 'totalEnergyUse', options: { unique: false } },
@@ -93,10 +97,10 @@ export const dbConfig: DBConfig  = {
       store: 'utilityMeterGroups',
       storeConfig: { keyPath: 'id', autoIncrement: true },
       storeSchema: [
-        { name: 'groupid', keypath: 'groupid', options: { unique: false } },
-        { name: 'facilityid', keypath: 'facilityid', options: { unique: false } },
-        { name: 'accountid', keypath: 'accountid', options: { unique: false } },
-        { name: 'groupType', keypath: 'accountid', options: { unique: false } },
+        // { name: 'groupid', keypath: 'groupid', options: { unique: false } },
+        { name: 'facilityId', keypath: 'facilityId', options: { unique: false } },
+        { name: 'accountId', keypath: 'accountId', options: { unique: false } },
+        { name: 'groupType', keypath: 'accountId', options: { unique: false } },
         { name: 'name', keypath: 'name', options: { unique: true } },
         { name: 'desc', keypath: 'desc', options: { unique: false } },
         { name: 'unit', keypath: 'unit', options: { unique: false } },

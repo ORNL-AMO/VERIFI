@@ -1,61 +1,56 @@
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { Injectable } from '@angular/core';
+import { IdbUtilityMeterGroup } from '../models/idb';
 
 @Injectable({
     providedIn: 'root'
 })
 export class UtilityMeterGroupdbService {
-  constructor(private dbService: NgxIndexedDBService) {}
+    constructor(private dbService: NgxIndexedDBService) { }
 
-    getAll() {
+    getAll(): Promise<Array<IdbUtilityMeterGroup>> {
         return this.dbService.getAll('utilityMeterGroups');
     }
 
-    getByKey(index) {
-        return this.dbService.getByKey('utilityMeterGroups', index);
+    getById(groupId: number): Promise<IdbUtilityMeterGroup> {
+        return this.dbService.getByKey('utilityMeterGroups', groupId);
     }
 
-    getByName(name) {
-        return this.dbService.getByIndex('utilityMeterGroups', 'name', name);
+    getByIndex(indexName: string, indexValue: number): Promise<IdbUtilityMeterGroup> {
+        return this.dbService.getByIndex('utilityMeterGroups', indexName, indexValue);
     }
 
-    getById(id) {
-        return this.dbService.getByIndex('utilityMeterGroups', 'id', id);
-    }
-
-    getByIndex(facilityid) {
-        return this.dbService.getByIndex('utilityMeterGroups', 'facilityid', facilityid);
-    }
-    
-    getAllByIndex(facilityid) {
-        return this.dbService.getAllByIndex('utilityMeterGroups', 'facilityid', facilityid);
+    getAllByIndex(indexName: string, idbKeyRange: IDBKeyRange): Promise<Array<IdbUtilityMeterGroup>> {
+        return this.dbService.getAllByIndex('utilityMeterGroups', indexName, idbKeyRange);
     }
 
     count() {
         return this.dbService.count('utilityMeterGroups');
     }
 
-    async add(type,unit,name,facilityid,accountid) {
-        let groupid = this.count();
-        return this.dbService.add('utilityMeterGroups', { 
-            groupid: await groupid + 1,
-            facilityid: facilityid,
-            accountid: accountid,
-            groupType: type,
-            name: name,
-            desc: '',
-            unit: unit,
-            data: [],
-            dateModified: 'Unknown',
-            fracTotEnergy: ''
-        });
+    add(utilityMeterGroup: IdbUtilityMeterGroup): Promise<any> {
+        return this.dbService.add('utilityMeterGroups', utilityMeterGroup);
     }
 
-    update(values) {
-        return this.dbService.update('utilityMeterGroups', values);
+    update(utilityMeterGroup: IdbUtilityMeterGroup): Promise<any> {
+        return this.dbService.update('utilityMeterGroups', utilityMeterGroup);
     }
-    
-    deleteIndex(index) {
-        return this.dbService.delete('utilityMeterGroups', index);
+
+    deleteIndex(meterGroupId: number): Promise<any> {
+        return this.dbService.delete('utilityMeterGroups', meterGroupId);
+    }
+
+    getNewIdbUtilityMeterGroup(type: string, unit: string, name: string, facilityId: number, accountId: number): IdbUtilityMeterGroup {
+        return {
+            facilityId: facilityId,
+            accountId: accountId,
+            groupType: type,
+            name: name,
+            description: undefined,
+            unit: unit,
+            dateModified: undefined,
+            factionOfTotalEnergy: undefined,
+            id: undefined
+        }
     }
 }
