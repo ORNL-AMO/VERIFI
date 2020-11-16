@@ -45,7 +45,7 @@ export class UtilityMeterdbService {
         return {
             facilityId: facilityId,
             accountId: accountId,
-            id: undefined,
+            // id: undefined,
             groupId: undefined,
             meterNumber: undefined,
             accountNumber: undefined,

@@ -6,7 +6,7 @@ import { DBConfig } from "ngx-indexed-db";
 
 export const dbConfig: DBConfig  = {
     name: 'verifi',
-    version: 4.5,
+    version: 5,
     objectStoresMeta: [{
       store: 'accounts',
       storeConfig: { keyPath: 'id', autoIncrement: true },
@@ -48,7 +48,7 @@ export const dbConfig: DBConfig  = {
         { name: 'accountNumber', keypath: 'accountNumber', options: { unique: false } },
         { name: 'type', keypath: 'type', options: { unique: false } },
         { name: 'phase', keypath: 'phase', options: { unique: false } },
-        { name: 'unit', keypath: 'startingUnit', options: { unique: false } },
+        { name: 'unit', keypath: 'unit', options: { unique: false } },
         { name: 'heatCapacity', keypath: 'heatCapacity', options: { unique: false } },
         { name: 'siteToSource', keypath: 'siteToSource', options: { unique: false } },
         { name: 'name', keypath: 'name', options: { unique: false } },
@@ -75,17 +75,17 @@ export const dbConfig: DBConfig  = {
         // Electricity Use Only
         { name: 'totalDemand', keypath: 'totalDemand', options: { unique: false } },
         { name: 'basicCharge', keypath: 'basicCharge', options: { unique: false } },
-        { name: 'supplyBlockAmt', keypath: 'supplyBlockAmt', options: { unique: false } },
+        { name: 'supplyBlockAmount', keypath: 'supplyBlockAmount', options: { unique: false } },
         { name: 'supplyBlockCharge', keypath: 'supplyBlockCharge', options: { unique: false } },
-        { name: 'flatRateAmt', keypath: 'flatRateAmt', options: { unique: false } },
+        { name: 'flatRateAmount', keypath: 'flatRateAmount', options: { unique: false } },
         { name: 'flatRateCharge', keypath: 'flatRateCharge', options: { unique: false } },
-        { name: 'peakAmt', keypath: 'peakAmt', options: { unique: false } },
+        { name: 'peakAmount', keypath: 'peakAmount', options: { unique: false } },
         { name: 'peakCharge', keypath: 'peakCharge', options: { unique: false } },
-        { name: 'offpeakAmt', keypath: 'offpeakAmt', options: { unique: false } },
-        { name: 'offpeakCharge', keypath: 'offpeakCharge', options: { unique: false } },
-        { name: 'demandBlockAmt', keypath: 'demandBlockAmt', options: { unique: false } },
+        { name: 'offPeakAmount', keypath: 'offPeakAmount', options: { unique: false } },
+        { name: 'offPeakCharge', keypath: 'offPeakCharge', options: { unique: false } },
+        { name: 'demandBlockAmount', keypath: 'demandBlockAmount', options: { unique: false } },
         { name: 'demandBlockCharge', keypath: 'demandBlockCharge', options: { unique: false } },
-        { name: 'genTransCharge', keypath: 'genTransCharge', options: { unique: false } },
+        { name: 'generalTransCharge', keypath: 'generalTransCharge', options: { unique: false } },
         { name: 'transCharge', keypath: 'transCharge', options: { unique: false } },
         { name: 'powerFactorCharge', keypath: 'powerFactorCharge', options: { unique: false } },
         { name: 'businessCharge', keypath: 'businessCharge', options: { unique: false } },
@@ -100,13 +100,13 @@ export const dbConfig: DBConfig  = {
         // { name: 'groupid', keypath: 'groupid', options: { unique: false } },
         { name: 'facilityId', keypath: 'facilityId', options: { unique: false } },
         { name: 'accountId', keypath: 'accountId', options: { unique: false } },
-        { name: 'groupType', keypath: 'accountId', options: { unique: false } },
+        { name: 'groupType', keypath: 'groupType', options: { unique: false } },
         { name: 'name', keypath: 'name', options: { unique: true } },
-        { name: 'desc', keypath: 'desc', options: { unique: false } },
+        { name: 'description', keypath: 'description', options: { unique: false } },
         { name: 'unit', keypath: 'unit', options: { unique: false } },
-        { name: 'data', keypath: 'data', options: { unique: false } },
+        // { name: 'data', keypath: 'data', options: { unique: false } },
         { name: 'dateModified', keypath: 'dateModified', options: { unique: false } },
-        { name: 'fracTotEnergy', keypath: 'fracTotEnergy', options: { unique: false } }
+        { name: 'factionOfTotalEnergy', keypath: 'factionOfTotalEnergy', options: { unique: false } }
       ]
     }]
   };

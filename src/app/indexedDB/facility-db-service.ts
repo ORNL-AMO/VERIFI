@@ -60,7 +60,7 @@ export class FacilitydbService {
             units: undefined,
             division: undefined,
             img: undefined,
-            id: undefined
+            // id: undefined
         }
     }
 }
@@ -68,7 +68,7 @@ export class FacilitydbService {
 
 export const TestFacilityData: Array<IdbFacility> = [
     {
-        id: undefined,
+        // id: undefined,
         // facilityid: 1, // Captin Crunch
         accountId: 1, // Captin Crunch
         name: 'Crunch-a-tize',
@@ -83,7 +83,7 @@ export const TestFacilityData: Array<IdbFacility> = [
         img: 'https://placthold.it/50x50'
     },
     {
-        id: undefined,
+        // id: undefined,
         // facilityid: 2,
         accountId: 2, // Mini Wheats
         name: 'Frosted Side',
@@ -98,7 +98,7 @@ export const TestFacilityData: Array<IdbFacility> = [
         img: 'https://placthold.it/50x50'
     },
     {
-        id: undefined,
+        // id: undefined,
         // facilityid: 3,
         accountId: 2, // Mini Wheats
         name: 'Plain Side',
@@ -113,7 +113,7 @@ export const TestFacilityData: Array<IdbFacility> = [
         img: 'https://placthold.it/50x50'
     },
     {
-        id: undefined,
+        // id: undefined,
         // facilityid: 4,
         accountId: 3, // Special K
         name: 'Almond Milk',

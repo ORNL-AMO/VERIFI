@@ -57,7 +57,7 @@ export class AccountdbService {
             naics: '000000',
             notes: '',
             img: 'https://placehold.it/50x50',
-            id: undefined
+            // id: undefined
         }
     }
 }
@@ -65,7 +65,7 @@ export class AccountdbService {
 
 export const TestAccountData: Array<IdbAccount> = [
     {
-        id: undefined,
+        // id: undefined,
         name: 'Captain Crunch',
         industry: 'Cereal',
         naics: '123456',
@@ -73,7 +73,7 @@ export const TestAccountData: Array<IdbAccount> = [
         img: 'https://placehold.it/50x50'
     },
     {
-        id: undefined,
+        // id: undefined,
         name: 'Mini Wheets',
         industry: 'Cereal',
         naics: '555555',
@@ -81,7 +81,7 @@ export const TestAccountData: Array<IdbAccount> = [
         img: 'https://placehold.it/50x50'
     },
     {
-        id: undefined,
+        // id: undefined,
         name: 'Special K',
         industry: 'Cereal',
         naics: '234567',

@@ -2,7 +2,7 @@
 
 export interface IdbAccount {
     //keys (id primary)
-    id: number,
+    id?: number,
     name: string,
     industry: string,
     naics: string,
@@ -12,7 +12,7 @@ export interface IdbAccount {
 
 export interface IdbFacility {
     //keys (id primary)
-    id: number,
+    id?: number,
     accountId: number,
     //data
     name: string,
@@ -29,7 +29,7 @@ export interface IdbFacility {
 
 export interface IdbUtilityMeterGroup {
     //keys (id primary)
-    id: number,
+    id?: number,
     facilityId: number,
     accountId: number,
     //data
@@ -43,7 +43,7 @@ export interface IdbUtilityMeterGroup {
 
 export interface IdbUtilityMeter {
     //keys (id primary)
-    id: number,
+    id?: number,
     facilityId: number,
     accountId: number,
     groupId: string,
@@ -63,7 +63,7 @@ export interface IdbUtilityMeter {
 
 export interface IdbUtilityMeterData {
     //keys (id primary)
-    id: number,
+    id?: number,
     meterId: number,
     facilityId: number,
     accountId: number,
@@ -99,7 +99,7 @@ export interface IdbUtilityMeterData {
 
 export interface IdbPredictors {
     //keys (id primary)
-    id: number,
+    id?: number,
     facilityId: number,
     accountId: number,
     //data

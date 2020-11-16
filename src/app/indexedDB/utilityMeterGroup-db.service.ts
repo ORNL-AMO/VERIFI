@@ -51,7 +51,7 @@ export class UtilityMeterGroupdbService {
             unit: unit,
             dateModified: undefined,
             factionOfTotalEnergy: undefined,
-            id: undefined
+            // id: undefined
         }
     }
 }

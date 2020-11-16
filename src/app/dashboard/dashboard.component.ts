@@ -156,16 +156,16 @@ export class DashboardComponent implements OnInit {
   }
 
   combineCalendar() {
-    for (let i = 0; i < this.utilities.length; i++) {
-      for (let j = 0; j < this.utilities[i]['calendarization'].length; j++) {
-        this.calendarData.push(this.utilities[i]['calendarization'][j]);
-      }
-    }
-    for (let i = 0; i < this.calendarData.length; i++) {
-      this.calendarMonths.push(this.calendarData[i]['month']);
-      this.calendarVol.push(this.calendarData[i]['monthKwh']);
-      this.calendarCost.push(this.calendarData[i]['monthCost']);
-    }
+    // for (let i = 0; i < this.utilities.length; i++) {
+    //   for (let j = 0; j < this.utilities[i]['calendarization'].length; j++) {
+    //     this.calendarData.push(this.utilities[i]['calendarization'][j]);
+    //   }
+    // }
+    // for (let i = 0; i < this.calendarData.length; i++) {
+    //   this.calendarMonths.push(this.calendarData[i]['month']);
+    //   this.calendarVol.push(this.calendarData[i]['monthKwh']);
+    //   this.calendarCost.push(this.calendarData[i]['monthCost']);
+    // }
   }
 
   public graph1 = {

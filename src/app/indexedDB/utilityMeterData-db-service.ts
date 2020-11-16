@@ -43,7 +43,7 @@ export class UtilityMeterDatadbService {
 
     getNewIdbUtilityMeterData(meterId: number, facilityId: number, accountId: number): IdbUtilityMeterData {
         return {
-            id: undefined,
+            // id: undefined,
             meterId: meterId,
             facilityId: facilityId,
             accountId: accountId,
