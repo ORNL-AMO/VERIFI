@@ -20,7 +20,8 @@ export class FacilitydbService {
         return this.dbService.getByIndex('facilities', indexName, indexValue);
     }
 
-    getAllByIndexRange(indexName: string, idbKeyRange: IDBKeyRange): Promise<Array<IdbFacility>> {
+    getAllByIndexRange(indexName: string, indexValue: number | string): Promise<Array<IdbFacility>> {
+        let idbKeyRange: IDBKeyRange = IDBKeyRange.only(indexValue);
         return this.dbService.getAllByIndex('facilities', indexName, idbKeyRange);
     }
 

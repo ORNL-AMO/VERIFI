@@ -5,6 +5,7 @@ import { AccountService } from "./account.service";
 import { FacilityService } from '../facility/facility.service';
 import { AccountdbService } from "../../indexedDB/account-db.service";
 import { FacilitydbService } from "../../indexedDB/facility-db-service";
+import { IdbAccount, IdbFacility } from 'src/app/models/idb';
 
 
 @Component({
@@ -28,7 +29,7 @@ export class AccountComponent implements OnInit {
     naics: new FormControl('', [Validators.required]),
     notes: new FormControl('', [Validators.required])
   });
-  
+
   constructor(
     private eRef: ElementRef,
     private router: Router,
@@ -50,17 +51,17 @@ export class AccountComponent implements OnInit {
     this.facilityService.getValue().subscribe((value) => {
       this.facilityid = value;
       this.facilityLoadList();
-    });        
+    });
   }
-  
+
   // Close menus when user clicks outside the dropdown
-  documentClick () {
+  documentClick() {
     this.facilityMenuOpen = null;
   }
 
   accountLoadList() {
     // Get current account and fill form.
-    this.accountdbService.getByKey(this.accountid).then(
+    this.accountdbService.getById(this.accountid).then(
       data => {
         // avoid empty errors
         if (data != null) {
@@ -73,24 +74,24 @@ export class AccountComponent implements OnInit {
         }
       },
       error => {
-          console.log(error);
+        console.log(error);
       }
     );
   }
 
   facilityLoadList() {
     // List all facilities
-    this.facilitydbService.getAllByIndex(this.accountid).then(
+    this.facilitydbService.getAllByIndexRange('accountId', this.accountid).then(
       data => {
-          this.facilityList = data;
+        this.facilityList = data;
       },
       error => {
-          console.log(error);
+        console.log(error);
       }
     );
   }
 
-  facilityToggleMenu (index) {
+  facilityToggleMenu(index) {
     if (this.facilityMenuOpen === index) {
       this.facilityMenuOpen = null;
     } else {
@@ -98,31 +99,32 @@ export class AccountComponent implements OnInit {
     }
   }
 
-  facilityEdit (index) {
+  facilityEdit(index) {
     this.facilityService.setValue(index);
     this.router.navigate(['account/facility']);
   }
 
-  facilityDelete (index) {
+  facilityDelete(index) {
     this.facilitydbService.deleteIndex(index);
     this.facilityLoadList(); // refresh the data
   }
 
-  addNewFacility () {
-    this.facilitydbService.add(this.accountid);
+  addNewFacility() {
+    let idbFacility: IdbFacility = this.facilitydbService.getNewIdbFacility(this.accountid);
+    this.facilitydbService.add(idbFacility);
     this.facilityLoadList(); // refresh the data
   }
 
   onFormChange(): void {
-      // Update db
-      this.accountdbService.update(this.accountForm.value).then(
-        data => {
-          this.accountService.setValue(this.accountid); // forces ui to update
-        },
-        error => {
-            console.log(error);
-        }
-      );
+    // Update db
+    this.accountdbService.update(this.accountForm.value).then(
+      data => {
+        this.accountService.setValue(this.accountid); // forces ui to update
+      },
+      error => {
+        console.log(error);
+      }
+    );
   }
 
 }

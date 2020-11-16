@@ -33,7 +33,7 @@ export interface IdbUtilityMeterGroup {
     facilityId: number,
     accountId: number,
     //data
-    groupType: number,
+    groupType: string,
     name: string,
     description: string,
     unit: string,

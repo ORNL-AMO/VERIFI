@@ -1,5 +1,5 @@
 import { Component, ElementRef, OnInit } from '@angular/core';
-import { Router, Event, NavigationStart} from '@angular/router';
+import { Router, Event, NavigationStart } from '@angular/router';
 import { AccountService } from "../../account/account/account.service";
 import { AccountdbService } from "../../indexedDB/account-db.service";
 import { FacilitydbService } from "../../indexedDB/facility-db-service";
@@ -8,6 +8,7 @@ import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db-service";
 import { UtilityMeterGroupdbService } from "../../indexedDB/utilityMeterGroup-db.service";
 import { UtilityMeterDatadbService } from "../../indexedDB/utilityMeterData-db-service";
 import { LocalStorageService } from 'ngx-webstorage';
+import { IdbAccount, IdbFacility } from 'src/app/models/idb';
 
 @Component({
   selector: 'app-header',
@@ -39,16 +40,16 @@ export class HeaderComponent implements OnInit {
     public utilityMeterdbService: UtilityMeterdbService,
     public utilityMeterGroupdbService: UtilityMeterGroupdbService,
     public utilityMeterDatadbService: UtilityMeterDatadbService,
-    private localStorage:LocalStorageService
-    ) { 
-      // Close menus on navigation
-      router.events.subscribe( (event: Event) => {
-        if (event instanceof NavigationStart) {
-          this.accountMenu = false;
-          this.facilityMenu = false;
-        }
-      });
-    }
+    private localStorage: LocalStorageService
+  ) {
+    // Close menus on navigation
+    router.events.subscribe((event: Event) => {
+      if (event instanceof NavigationStart) {
+        this.accountMenu = false;
+        this.facilityMenu = false;
+      }
+    });
+  }
 
   ngOnInit() {
     // Subscribe to account ID
@@ -79,27 +80,27 @@ export class HeaderComponent implements OnInit {
         }
       },
       error => {
-          console.log(error);
+        console.log(error);
       }
     );
   }
 
   facilityLoadList() {
     // List all facilities for dropdown
-    this.facilitydbService.getAllByIndex(this.accountid).then(
+    this.facilitydbService.getAllByIndexRange('accountId', this.accountid).then(
       data => {
-          // avoid empty errors
-          if (data.length != 0) {
-            this.facilityList = data; // array dropdown
-            const index = this.facilityList.findIndex(x => x.id === this.facilityid); // find current facility in list
-            this.defaultFacility(index); // choose default facility
-          } else {
-            this.facilityList = [];
-            this.activeFacility = '';
-          }
+        // avoid empty errors
+        if (data.length != 0) {
+          this.facilityList = data; // array dropdown
+          const index = this.facilityList.findIndex(x => x.id === this.facilityid); // find current facility in list
+          this.defaultFacility(index); // choose default facility
+        } else {
+          this.facilityList = [];
+          this.activeFacility = '';
+        }
       },
       error => {
-          console.log(error);
+        console.log(error);
       }
     );
   }
@@ -119,10 +120,10 @@ export class HeaderComponent implements OnInit {
     this.facilityMenu = false;
     this.accountMenu = false;
   }
-  
+
   // close menus when user clicks outside the dropdown
   documentClick() {
-    if(!this.eRef.nativeElement.contains(event.target)) {
+    if (!this.eRef.nativeElement.contains(event.target)) {
       this.accountMenu = false;
       this.facilityMenu = false;
       this.manageAccountMenu = false;
@@ -131,15 +132,18 @@ export class HeaderComponent implements OnInit {
 
   addNewAccount() {
     this.toggleManageAccountsMenu();
-    this.accountdbService.add();
+    let newAccount: IdbAccount = this.accountdbService.getNewIdbAccount();
+    this.accountdbService.add(newAccount);
     this.router.navigate(['account/account']);
     this.accountService.setValue(this.accountList.length + 1); // switch to new account
-    this.facilitydbService.add(this.accountid); // add 1 facility with every new account
+    let newFacility: IdbFacility = this.facilitydbService.getNewIdbFacility(this.accountid);
+    this.facilitydbService.add(newFacility); // add 1 facility with every new account
     this.facilityService.setValue(0); // having problems with selecting first index
   }
 
   addNewFacility() {
-    this.facilitydbService.add(this.accountid);
+    let newFacility: IdbFacility = this.facilitydbService.getNewIdbFacility(this.accountid);
+    this.facilitydbService.add(newFacility); // add 1 facility with every new account
     this.facilityLoadList(); // refresh the data
   }
 
@@ -171,11 +175,12 @@ export class HeaderComponent implements OnInit {
   *******************************************************************************/
   loadTestData() {
     this.accountdbService.addTestData();
-    this.facilitydbService.addTestData().then(
-      data => {
-          location.reload();
-      }
-    );
+    this.facilitydbService.addTestData()
+    // .then(
+    //   data => {
+    //     location.reload();
+    //   }
+    // );
     //location.reload();
     console.log("Data loaded");
   }
@@ -183,41 +188,41 @@ export class HeaderComponent implements OnInit {
   getAllAccounts() {
     this.accountdbService.getAll().then(
       data => {
-          console.log(data);
+        console.log(data);
       }
-    ); 
+    );
   }
 
   getAllFacilities() {
     this.facilitydbService.getAll().then(
       data => {
-          console.log(data);
+        console.log(data);
       }
-    ); 
+    );
   }
 
   getAllMeters() {
     this.utilityMeterdbService.getAll().then(
       data => {
-          console.log(data);
+        console.log(data);
       }
-    ); 
+    );
   }
 
   getAllMeterData() {
     this.utilityMeterDatadbService.getAll().then(
       data => {
-          console.log(data);
+        console.log(data);
       }
-    ); 
+    );
   }
 
   getAllMeterGroups() {
     this.utilityMeterGroupdbService.getAll().then(
       data => {
-          console.log(data);
+        console.log(data);
       }
-    ); 
+    );
   }
 
   clearLocalstorage() {

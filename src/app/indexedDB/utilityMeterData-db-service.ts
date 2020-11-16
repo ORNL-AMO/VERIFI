@@ -20,7 +20,8 @@ export class UtilityMeterDatadbService {
         return this.dbService.getByIndex('utilityMeterData', indexName, indexValue);
     }
 
-    getAllByIndexRange(indexName: string, idbKeyRange: IDBKeyRange): Promise<Array<IdbUtilityMeterData>> {
+    getAllByIndexRange(indexName: string, indexValue: number | string): Promise<Array<IdbUtilityMeterData>> {
+        let idbKeyRange: IDBKeyRange = IDBKeyRange.only(indexValue);
         return this.dbService.getAllByIndex('utilityMeterData', indexName, idbKeyRange);
     }
 

@@ -50,7 +50,7 @@ export class FooterComponent implements OnInit {
 
   countFacilities() {
     // Count current facilities
-    this.facilitydbService.getAllByIndex(this.accountid).then(
+    this.facilitydbService.getAllByIndexRange('accountId', this.accountid).then(
       data => {
         this.facilityCount = data.length;
       },

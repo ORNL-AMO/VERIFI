@@ -40,11 +40,11 @@ export class FacilityComponent implements OnInit {
     this.facilityService.getValue().subscribe((value) => {
       this.facilityid = value;
 
-      this.facilitydbService.getByKey(this.facilityid).then(
+      this.facilitydbService.getById(this.facilityid).then(
         data => {
           if (data != null) {
             this.facilityForm.get('id').setValue(data.id);
-            this.facilityForm.get('accountid').setValue(data.accountid);
+            this.facilityForm.get('accountid').setValue(data.accountId);
             this.facilityForm.get('name').setValue(data.name);
             this.facilityForm.get('country').setValue(data.country);
             this.facilityForm.get('state').setValue(data.state);

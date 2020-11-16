@@ -32,17 +32,18 @@ export class AccountdbService {
         return this.dbService.delete('accounts', accountId);
     }
 
-    // // *WARNING* Can not be undone
-    // deleteDatabase() {
-    //     this.dbService.deleteDatabase().then(
-    //         () => {
-    //             console.log('Database deleted successfully');
-    //         },
-    //         error => {
-    //             console.log(error);
-    //         }
-    //     );
-    // }
+    //TODO: MOVE
+    // *WARNING* Can not be undone
+    deleteDatabase() {
+        this.dbService.deleteDatabase().then(
+            () => {
+                console.log('Database deleted successfully');
+            },
+            error => {
+                console.log(error);
+            }
+        );
+    }
     addTestData() {
         TestAccountData.forEach(accountItem => {
             this.add(accountItem);

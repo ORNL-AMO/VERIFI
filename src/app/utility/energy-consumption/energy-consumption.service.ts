@@ -7,6 +7,7 @@ import { UtilityService } from "../../utility/utility.service";
 import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db-service";
 import { UtilityMeterDatadbService } from "../../indexedDB/utilityMeterData-db-service";
 import { LoadingService } from "../../shared/loading/loading.service";
+import { IdbUtilityMeterData } from 'src/app/models/idb';
 
 @Injectable({
   providedIn: 'root'
@@ -17,7 +18,7 @@ export class EnergyConsumptionService {
   public energySource = new BehaviorSubject(null);
   is_checked: boolean = false;
   is_checkedList: any = [];
-  isMasterSel:boolean;
+  isMasterSel: boolean;
 
   accountid: number;
   facilityid: number;
@@ -75,17 +76,17 @@ export class EnergyConsumptionService {
     private loadingService: LoadingService,
     public utilityMeterdbService: UtilityMeterdbService,
     public utilityMeterDatadbService: UtilityMeterDatadbService
-  ) { 
-     // Observe the accountid var
-     this.accountService.getValue().subscribe((value) => {
+  ) {
+    // Observe the accountid var
+    this.accountService.getValue().subscribe((value) => {
       this.accountid = value;
     });
 
     // Observe the facilityid var
     this.facilityService.getValue().subscribe((value) => {
       this.facilityid = value;
-    });   
-  
+    });
+
     // Observe the meter list
     this.utilityService.getDisplayObj().subscribe((value) => {
       this.meterList = value;
@@ -105,11 +106,11 @@ export class EnergyConsumptionService {
   }
 
   // Close menus when user clicks outside the dropdown
-  documentClick () {
+  documentClick() {
     this.meterDataMenuOpen = null;
   }
 
-  meterDataToggleMenu (index) {
+  meterDataToggleMenu(index) {
     if (this.meterDataMenuOpen === index) {
       this.meterDataMenuOpen = null;
     } else {
@@ -118,23 +119,24 @@ export class EnergyConsumptionService {
   }
 
   meterDataAdd(id) {
-    this.utilityMeterDatadbService.add(id,this.facilityid,this.accountid).then(
+    let newMeterData: IdbUtilityMeterData = this.utilityMeterDatadbService.getNewIdbUtilityMeterData(id, this.facilityid, this.accountid);
+    this.utilityMeterDatadbService.add(newMeterData).then(
       dataid => {
         // filter meter data based on meterid
-        this.utilityMeterDatadbService.getAllByIndex(id).then(
+        this.utilityMeterDatadbService.getById(id).then(
           result => {
             // push to meterlist object
             const index = this.meterList.findIndex(obj => obj.id == id);
             this.meterList[index]['data'] = result;
-            this.meterDataEdit(id,dataid); // edit data
+            this.meterDataEdit(id, dataid); // edit data
           },
           error => {
-              console.log(error);
+            console.log(error);
           }
         );
       },
       error => {
-          console.log(error);
+        console.log(error);
       }
     );
   }
@@ -143,13 +145,13 @@ export class EnergyConsumptionService {
     this.popup = !this.popup;
     // This forces all checkboxes to be reset to false on save.
     // Otherwise you get weird behavior with saving.
-    this.meterDataForm.controls['checked'].setValue(false); 
+    this.meterDataForm.controls['checked'].setValue(false);
 
     this.utilityMeterDatadbService.update(this.meterDataForm.value);// Update db
     this.utilityService.setMeterData(); // refresh the data for this page
   }
 
-  meterDataEdit(meterid,dataid) {
+  meterDataEdit(meterid, dataid) {
     this.popup = !this.popup;
     this.meterDataMenuOpen = null;
     const meter = this.meterList.find(obj => obj.id == meterid);
@@ -166,7 +168,7 @@ export class EnergyConsumptionService {
 
   checkCheckboxes(e) {
     // Add/Remove meter id's from is_checkedList array.
-    if(e.target.checked) {
+    if (e.target.checked) {
       this.is_checkedList.push(e.target.value);
     } else {
       const index = this.is_checkedList.indexOf(e.target.value);
@@ -179,29 +181,29 @@ export class EnergyConsumptionService {
   checkAll(meterid, e) {
     // Get all bill id's with the meter value of e
 
-    var index = this.meterList.map(function(el) { return el.id; }).indexOf(meterid);
+    var index = this.meterList.map(function (el) { return el.id; }).indexOf(meterid);
 
     // Add/Remove meter id's from is_checkedList array.
-    if(e.target.checked) {
+    if (e.target.checked) {
       // get all meter data ids
-      for(let i=0; i<this.meterList[index]['data'].length; i++) {
+      for (let i = 0; i < this.meterList[index]['data'].length; i++) {
         this.is_checkedList.push(this.meterList[index]['data'][i]['id']); // Adds to queue array
         this.meterList[index]['data'][i]['checked'] = true; // Shows user which are checked
       }
     } else {
-      for(let i=0; i<this.meterList[index]['data'].length; i++) {
+      for (let i = 0; i < this.meterList[index]['data'].length; i++) {
         const meterindex = this.is_checkedList.indexOf(meterid);
-        this.is_checkedList.splice(meterindex,1); // Adds to queue array
+        this.is_checkedList.splice(meterindex, 1); // Adds to queue array
         this.meterList[index]['data'][i]['checked'] = false; // Shows user which are unchecked
       }
-      
+
     }
     this.showBulkDelete();
   }
 
   showBulkDelete() {
     // Show "Bulk Delete" button if any items are checked
-    if(this.is_checkedList.length != 0) {
+    if (this.is_checkedList.length != 0) {
       this.is_checked = true;
     } else {
       this.is_checked = false;
@@ -213,84 +215,84 @@ export class EnergyConsumptionService {
     this.loadingService.setLoadingStatus(true);
     this.loadingService.setLoadingMessage("Deleting Records...");
     this.meterDataMenuOpen = null;
-    
+
     /*
     // Uncheck master inputs after delete
     this.masterCheckbox.forEach((element) => {
       element.nativeElement.checked = false;
     });*/
 
-    
-    for(let i=0; i < this.is_checkedList.length; i++) {
+
+    for (let i = 0; i < this.is_checkedList.length; i++) {
       this.utilityMeterDatadbService.deleteIndex(+this.is_checkedList[i]).then(
         id => {
-          
-          if(counter === this.is_checkedList.length) {
+
+          if (counter === this.is_checkedList.length) {
             this.loadingService.setLoadingStatus(false);
             //this.utilityService.setMeterData(this.meterList); // refresh the data
             this.utilityService.setMeterData(); // refresh the data for this page
             this.is_checked = false;
           }
           counter++;
-          
+
         },
         error => {
-            console.log(error);
+          console.log(error);
         }
       );;
     }
-    
+
   }
 
-  meterDataImport (source, files: FileList) {
+  meterDataImport(source, files: FileList) {
     // Clear with each upload
-    this.quickView = []; 
+    this.quickView = [];
     this.importError = '';
     let allowedHeaders;
 
     if (source == 'Electricity') {
-      allowedHeaders = ["meterNumber","readDate","totalEnergyUse","totalDemand","totalCost","unit","basicCharge","supplyBlockAmt","supplyBlockCharge","flatRateAmt","flatRateCharge","peakAmt","peakCharge","offpeakAmt","offpeakCharge","demandBlockAmt","demandBlockCharge","genTransCharge","deliveryCharge","transCharge","powerFactorCharge","businessCharge","utilityTax","latePayment","otherCharge"];
+      allowedHeaders = ["meterNumber", "readDate", "totalEnergyUse", "totalDemand", "totalCost", "unit", "basicCharge", "supplyBlockAmt", "supplyBlockCharge", "flatRateAmt", "flatRateCharge", "peakAmt", "peakCharge", "offpeakAmt", "offpeakCharge", "demandBlockAmt", "demandBlockCharge", "genTransCharge", "deliveryCharge", "transCharge", "powerFactorCharge", "businessCharge", "utilityTax", "latePayment", "otherCharge"];
     } else {
-      allowedHeaders = ["meterNumber","readDate","totalEnergyUse","commodityCharge","deliveryCharge","otherCharge","unit"];
+      allowedHeaders = ["meterNumber", "readDate", "totalEnergyUse", "commodityCharge", "deliveryCharge", "otherCharge", "unit"];
     }
 
-    if(files && files.length > 0) {
-       let file : File = files.item(0); 
-         
-         let reader: FileReader = new FileReader();
-         reader.readAsText(file);
-         reader.onload = (e) => {
-            let csv: string = reader.result as string;
-            const lines = csv.split("\n");
-            const headers = lines[0].replace('\r', '').split(",");
-            
+    if (files && files.length > 0) {
+      let file: File = files.item(0);
 
-            // if contains.. not if in the same order
-            if (JSON.stringify(headers) === JSON.stringify(allowedHeaders)) {
+      let reader: FileReader = new FileReader();
+      reader.readAsText(file);
+      reader.onload = (e) => {
+        let csv: string = reader.result as string;
+        const lines = csv.split("\n");
+        const headers = lines[0].replace('\r', '').split(",");
 
-              for(var i=1;i<lines.length;i++){
-                const obj = {};
-                const currentline=lines[i].split(",");
-                for(var j=0;j<headers.length;j++){
-                  obj[headers[j]] = currentline[j];
-                }
 
-                // Read csv and push to obj array.
-                this.import.push(obj); 
+        // if contains.. not if in the same order
+        if (JSON.stringify(headers) === JSON.stringify(allowedHeaders)) {
 
-                // Push the first 3 results to a quick view array
-                if (i < 4) {
-                  this.quickView.push(obj);
-                }
-                
-              }  
-            } else {
-              // csv didn't match -> Show error
-              this.importError = "Error with file. Please match your file to the provided template.";
-              return false;
+          for (var i = 1; i < lines.length; i++) {
+            const obj = {};
+            const currentline = lines[i].split(",");
+            for (var j = 0; j < headers.length; j++) {
+              obj[headers[j]] = currentline[j];
             }
-         }
+
+            // Read csv and push to obj array.
+            this.import.push(obj);
+
+            // Push the first 3 results to a quick view array
+            if (i < 4) {
+              this.quickView.push(obj);
+            }
+
+          }
+        } else {
+          // csv didn't match -> Show error
+          this.importError = "Error with file. Please match your file to the provided template.";
+          return false;
+        }
       }
+    }
   }
 
   meterAddCSV() {
@@ -300,14 +302,14 @@ export class EnergyConsumptionService {
 
     this.importPopup = false;
     this.loadingService.setLoadingStatus(true);
-    
-    for(let i=0;i<this.import.length;i++){
+
+    for (let i = 0; i < this.import.length; i++) {
       let obj = this.import[i];
-      
+
       meterids.push(this.meterList.find(x => x.meterNumber == obj.meterNumber)['id']); // Get id of matching meter numbers
       console.log(meterids);
-
-      this.utilityMeterDatadbService.add(meterids[i],this.facilityid,this.accountid).then(
+      let newMeterData: IdbUtilityMeterData = this.utilityMeterDatadbService.getNewIdbUtilityMeterData(meterids[i], this.facilityid, this.accountid);
+      this.utilityMeterDatadbService.add(newMeterData).then(
         id => {
           this.loadingService.setLoadingMessage(counter + " of " + length + " Records Imported...");
 
@@ -348,9 +350,9 @@ export class EnergyConsumptionService {
             latePayment: obj.latePayment || 0,
             checked: false,
           }
+          //TODO: MARK COMMENTED OUT ISSUE-55
+          // this.utilityMeterDatadbService.update(importLine); // Update db
 
-          this.utilityMeterDatadbService.update(importLine); // Update db
-          
           // If end of the loop
           if (counter === length) {
             //this.utilityService.setMeterData(this.meterList); // refresh the data
@@ -362,17 +364,17 @@ export class EnergyConsumptionService {
 
         },
         error => {
-            console.log(error);
+          console.log(error);
         }
       );
     }
     this.resetImport();
-    
+
   }
 
   resetImport() {
-   // this.myInputVariable.nativeElement.value = '';
-    this.quickView = []; 
+    // this.myInputVariable.nativeElement.value = '';
+    this.quickView = [];
     this.import = [];
     this.importError = '';
   }
@@ -381,23 +383,23 @@ export class EnergyConsumptionService {
     let csv;
 
     // Filter based on type
-    const meterListByType = this.meterList.filter(function(obj) {
+    const meterListByType = this.meterList.filter(function (obj) {
       return obj.source == source;
     });
 
-    for (let i=0; i < meterListByType.length; i++) {
+    for (let i = 0; i < meterListByType.length; i++) {
 
       const replacer = (key, value) => value === null ? '' : value; // specify how you want to handle null values here
       const header = Object.keys(meterListByType[i].data[0]);
 
       header.splice(0, 4); // remove 1st 4 headers
       header.splice(0, 1, "meterNumber"); // add meterNumber
-      
+
       csv = meterListByType[i].data.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer)).join(','));
-      
+
       // add meterNumber as first cell
-      for (let j=0; j < csv.length; j++) {
-        csv[j] = '"' +meterListByType[i].meterNumber +  '"' + csv[j];
+      for (let j = 0; j < csv.length; j++) {
+        csv[j] = '"' + meterListByType[i].meterNumber + '"' + csv[j];
       }
 
       csv.unshift(header.join(','));
@@ -408,11 +410,11 @@ export class EnergyConsumptionService {
       var blob = new Blob(["\ufeff", csv]);
       var url = URL.createObjectURL(blob);
       downloadLink.href = url;
-      downloadLink.download = "Verifi_"+source+"_Meter_Data_Dump.csv";
+      downloadLink.download = "Verifi_" + source + "_Meter_Data_Dump.csv";
       document.body.appendChild(downloadLink);
       downloadLink.click();
       document.body.removeChild(downloadLink);
     }
-    
+
   }
 }
