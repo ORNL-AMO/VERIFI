@@ -1,13 +1,44 @@
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { Injectable } from '@angular/core';
 import { IdbAccount } from '../models/idb';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { LocalStorageService } from 'ngx-webstorage';
 
 @Injectable({
     providedIn: 'root'
 })
 export class AccountdbService {
-    constructor(private dbService: NgxIndexedDBService) { }
+
+    selectedAccount: BehaviorSubject<IdbAccount>;
+    allAccounts: BehaviorSubject<Array<IdbAccount>>;
+    constructor(private dbService: NgxIndexedDBService, private localStorageService: LocalStorageService) {
+        this.selectedAccount = new BehaviorSubject<IdbAccount>(undefined);
+        this.allAccounts = new BehaviorSubject<Array<IdbAccount>>(new Array());
+        let localStorageAccountId: number = this.localStorageService.retrieve("accountId");
+        this.setSelectedAccount(localStorageAccountId);
+
+        this.selectedAccount.subscribe(account => {
+            if (account) {
+                this.localStorageService.store("accountId", account.id);
+            }
+        });
+    }
+
+    setSelectedAccount(accountId: number) {
+        if (accountId) {
+            this.getById(accountId).subscribe(account => {
+                this.selectedAccount.next(account);
+            });
+        } else {
+            this.setSelectedAccount(1);
+        }
+    }
+
+    setAllAccounts() {
+        this.getAll().subscribe(allAccounts => {
+            this.allAccounts.next(allAccounts);
+        });
+    }
 
     getAll(): Observable<Array<IdbAccount>> {
         return this.dbService.getAll('accounts');
@@ -21,29 +52,36 @@ export class AccountdbService {
         return this.dbService.count('accounts');
     }
 
-    add(account: IdbAccount): Observable<any> {
-        return this.dbService.add('accounts', account);
+    add(account: IdbAccount): void {
+        this.dbService.add('accounts', account).subscribe(newAccountId => {
+            this.setAllAccounts();
+            this.setSelectedAccount(newAccountId);
+        });
     }
 
-    update(account: IdbAccount): Observable<any> {
-        return this.dbService.update('accounts', account);
+    update(account: IdbAccount): void {
+        this.dbService.update('accounts', account).subscribe(() => {
+            this.setAllAccounts();
+        });
     }
 
-    deleteIndex(accountId: number): Observable<any> {
-        return this.dbService.delete('accounts', accountId);
+    deleteIndex(accountId: number): void {
+        this.dbService.delete('accounts', accountId).subscribe(() => {
+            this.setAllAccounts();
+        });
     }
 
     //TODO: MOVE
     // *WARNING* Can not be undone
     deleteDatabase() {
-        // this.dbService.deleteDatabase().then(
-        //     () => {
-        //         console.log('Database deleted successfully');
-        //     },
-        //     error => {
-        //         console.log(error);
-        //     }
-        // );
+        this.dbService.deleteDatabase().subscribe(
+            () => {
+                console.log('Database deleted successfully');
+            },
+            error => {
+                console.log(error);
+            }
+        );
     }
     addTestData() {
         TestAccountData.forEach(accountItem => {

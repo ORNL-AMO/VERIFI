@@ -120,10 +120,10 @@ export class EnergyConsumptionService {
 
   meterDataAdd(id) {
     let newMeterData: IdbUtilityMeterData = this.utilityMeterDatadbService.getNewIdbUtilityMeterData(id, this.facilityid, this.accountid);
-    this.utilityMeterDatadbService.add(newMeterData).then(
+    this.utilityMeterDatadbService.add(newMeterData).subscribe(
       dataid => {
         // filter meter data based on meterid
-        this.utilityMeterDatadbService.getById(id).then(
+        this.utilityMeterDatadbService.getById(id).subscribe(
           result => {
             // push to meterlist object
             const index = this.meterList.findIndex(obj => obj.id == id);
@@ -224,7 +224,7 @@ export class EnergyConsumptionService {
 
 
     for (let i = 0; i < this.is_checkedList.length; i++) {
-      this.utilityMeterDatadbService.deleteIndex(+this.is_checkedList[i]).then(
+      this.utilityMeterDatadbService.deleteIndex(+this.is_checkedList[i]).subscribe(
         id => {
 
           if (counter === this.is_checkedList.length) {
@@ -309,7 +309,7 @@ export class EnergyConsumptionService {
       meterids.push(this.meterList.find(x => x.meterNumber == obj.meterNumber)['id']); // Get id of matching meter numbers
       console.log(meterids);
       let newMeterData: IdbUtilityMeterData = this.utilityMeterDatadbService.getNewIdbUtilityMeterData(meterids[i], this.facilityid, this.accountid);
-      this.utilityMeterDatadbService.add(newMeterData).then(
+      this.utilityMeterDatadbService.add(newMeterData).subscribe(
         id => {
           this.loadingService.setLoadingMessage(counter + " of " + length + " Records Imported...");
 

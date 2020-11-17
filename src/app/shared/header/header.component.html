@@ -1,4 +1,4 @@
-<div id="header" role="header">
+<div id="header" role="header" *ngIf="activeAccount && activeFacility">
     <div class="row resetmargin">
         <div class="col-2">
             <h2>VERIFI</h2>
@@ -13,11 +13,12 @@
             <div class="facilityMenu">
                 <div class="currentFacility" (click)="toggleFacilityMenu()">
                     <i class="fa fa-fort-awesome"></i>
-                    <span>{{activeAccount}}</span>
-                    <p>{{activeFacility}} <i class="fa fa-caret-down"></i></p>
+                    <span>{{activeAccount.name}}</span>
+                    <p>{{activeFacility.name}} <i class="fa fa-caret-down"></i></p>
                 </div>
                 <div class="dropdown" [class.open]="facilityMenu == true">
-                    <p (click)="switchFacility(facilityLists.id)" *ngFor="let facilityLists of facilityList"><i class="fa fa-fort-awesome"></i> {{facilityLists.name}}</p>
+                    <p (click)="switchFacility(facility)" *ngFor="let facility of facilityList"><i
+                            class="fa fa-fort-awesome"></i> {{facility.name}}</p>
                     <hr>
                     <p (click)="addNewFacility()"><i class="fa fa-plus"></i> Add New Facility</p>
                 </div>
@@ -29,7 +30,7 @@
                 <div class="dropdown" [class.open]="accountMenu == true">
                     <div class="currentAccount" routerLink="/account/account">
                         <img src="https://placehold.it/50x50" alt="">
-                        <p>{{activeAccount}}</p>
+                        <p>{{activeAccount.name}}</p>
                     </div>
                     <hr>
                     <a routerLink="/account/facility">Manage Facility</a>
@@ -43,12 +44,13 @@
 </div>
 
 <div id="manageAccounts" [class.open]="manageAccountMenu == true">
-<h5>Choose an Account</h5>
-    <div class="account" (click)="switchAccount(accountLists.id)" *ngFor="let accountLists of accountList">
+    <h5>Choose an Account</h5>
+    <div class="account" (click)="switchAccount(account)" *ngFor="let account of accountList">
         <img src="https://placehold.it/50x50" alt="">
-        <p class="company">{{accountLists.name}}</p>
-        <p class="facilityCount">{{accountLists.facilityCount}} Facilities</p>
-        <i class="fa" [class.fa-check]="accountid === accountLists.id" [class.fa-chevron-right]="accountid != accountLists.id"></i>
+        <p class="company">{{account.name}}</p>
+        <p class="facilityCount">{{account.facilityCount}} Facilities</p>
+        <i class="fa" [class.fa-check]="activeAccount.id === account.id"
+            [class.fa-chevron-right]="activeAccount.id != account.id"></i>
     </div>
 
     <hr>
@@ -60,9 +62,9 @@
 <div id="devtools" (click)="devtools = !devtools" [class.open]="devtools">
     <p>Dev Tools</p>
     <button class="btn btn-secondary" (click)="loadTestData();">Load Test Accounts</button><br>
-    <button class="btn btn-secondary" (click)="getAllAccounts();">Get All Accounts</button> | 
+    <button class="btn btn-secondary" (click)="getAllAccounts();">Get All Accounts</button> |
     <button class="btn btn-secondary" (click)="getAllFacilities();">Get All Facilities</button><br>
-    <button class="btn btn-secondary" (click)="getAllMeters();">Get All Meters</button> | 
+    <button class="btn btn-secondary" (click)="getAllMeters();">Get All Meters</button> |
     <button class="btn btn-secondary" (click)="getAllMeterData();">Get All Meter Data</button><br>
     <button class="btn btn-secondary" (click)="getAllMeterData();">Get All Meter Groups</button><br>
     <button class="btn btn-secondary" (click)="clearLocalstorage();">Clear localstorage</button><br>

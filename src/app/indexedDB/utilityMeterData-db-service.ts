@@ -1,13 +1,31 @@
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { Injectable } from '@angular/core';
-import { IdbUtilityMeterData } from '../models/idb';
-import { Observable } from 'rxjs';
+import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from '../models/idb';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { UtilityMeterdbService } from './utilityMeter-db-service';
+import { FacilitydbService } from './facility-db-service';
 
 @Injectable({
     providedIn: 'root'
 })
 export class UtilityMeterDatadbService {
-    constructor(private dbService: NgxIndexedDBService) { }
+
+    facilityMeterData: BehaviorSubject<Array<IdbUtilityMeterData>>;
+    constructor(private dbService: NgxIndexedDBService, private facilityDbService: FacilitydbService) {
+        this.facilityMeterData = new BehaviorSubject<Array<IdbUtilityMeterData>>(new Array());
+        this.facilityDbService.selectedFacility.subscribe(() => {
+            this.setFacilityMeterData();
+        });
+    }
+
+    setFacilityMeterData() {
+        let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+        if (facility) {
+            this.getAllByIndexRange('facilityId', facility.id).subscribe(meterData => {
+                this.facilityMeterData.next(meterData);
+            });
+        }
+    }
 
     getAll(): Observable<Array<IdbUtilityMeterData>> {
         return this.dbService.getAll('utilityMeterData');
@@ -30,16 +48,22 @@ export class UtilityMeterDatadbService {
         return this.dbService.count('utilityMeterData');
     }
 
-    add(meterData: IdbUtilityMeterData): Observable<any> {
-        return this.dbService.add('utilityMeterData', meterData);
+    add(meterData: IdbUtilityMeterData): void {
+        this.dbService.add('utilityMeterData', meterData).subscribe(() => {
+            this.setFacilityMeterData();
+        });
     }
 
-    update(meterData: IdbUtilityMeterData): Observable<any> {
-        return this.dbService.update('utilityMeterData', meterData);
+    update(meterData: IdbUtilityMeterData): void {
+        this.dbService.update('utilityMeterData', meterData).subscribe(() => {
+            this.setFacilityMeterData();
+        });
     }
 
-    deleteIndex(meterDataId: number): Observable<any> {
-        return this.dbService.delete('utilityMeterData', meterDataId);
+    deleteIndex(meterDataId: number): void {
+        this.dbService.delete('utilityMeterData', meterDataId).subscribe(() => {
+            this.setFacilityMeterData();
+        });
     }
 
     getNewIdbUtilityMeterData(meterId: number, facilityId: number, accountId: number): IdbUtilityMeterData {

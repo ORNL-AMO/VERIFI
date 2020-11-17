@@ -33,9 +33,9 @@ export class UtilityService {
     public utilityMeterDatadbService: UtilityMeterDatadbService) {
 
     // Observe the facilityid var
-    this.facilityService.getValue().subscribe((value) => {
-      this.facilityid = value;
-    });
+    // this.facilityService.getValue().subscribe((value) => {
+    //   this.facilityid = value;
+    // });
 
     // Keep users state
     if (this.localStorage.retrieve('verifi_meterList')) {

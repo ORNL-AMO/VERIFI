@@ -1,13 +1,75 @@
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { Injectable } from '@angular/core';
-import { IdbFacility } from '../models/idb';
-import { Observable } from 'rxjs';
+import { IdbAccount, IdbFacility } from '../models/idb';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { LocalStorageService } from 'ngx-webstorage';
+import { AccountdbService } from './account-db.service';
 
 @Injectable({
     providedIn: 'root'
 })
 export class FacilitydbService {
-    constructor(private dbService: NgxIndexedDBService) { }
+
+    allFacilities: BehaviorSubject<Array<IdbFacility>>;
+    accountFacilities: BehaviorSubject<Array<IdbFacility>>;
+    selectedFacility: BehaviorSubject<IdbFacility>;
+
+    constructor(private dbService: NgxIndexedDBService, private localStorageService: LocalStorageService, private accountDbService: AccountdbService) {
+        this.accountFacilities = new BehaviorSubject<Array<IdbFacility>>(new Array());
+        this.allFacilities = new BehaviorSubject<Array<IdbFacility>>(new Array());
+        this.selectedFacility = new BehaviorSubject<IdbFacility>(undefined);
+        this.setAllFacilities();
+
+        this.accountDbService.selectedAccount.subscribe(() => {
+            this.setAccountFacilities();
+        });
+
+        this.accountFacilities.subscribe(() => {
+            this.setSelectedFacility();
+        });
+
+        this.selectedFacility.subscribe(facility => {
+            if (facility) {
+                this.localStorageService.store('facilityId', facility.id);
+            }
+        });
+    }
+
+    setAccountFacilities() {
+        let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+        if (selectedAccount) {
+            this.getAllByIndexRange('accountId', selectedAccount.id).subscribe(facilities => {
+                this.accountFacilities.next(facilities);
+            });
+        }
+    }
+
+    setSelectedFacility() {
+        let accountFacilities: Array<IdbFacility> = this.accountFacilities.getValue();
+        let selectedFacility: IdbFacility = this.selectedFacility.getValue();
+        if (!selectedFacility && accountFacilities.length != 0) {
+            let updatedFacility: IdbFacility = accountFacilities.find(facility => { return facility.id == selectedFacility.id });
+            if (!updatedFacility) {
+                this.selectedFacility.next(accountFacilities[0]);
+            } else {
+                this.selectedFacility.next(updatedFacility);
+            }
+        } else {
+            let storedFacilityId: number = this.localStorageService.retrieve("facilityId");
+            if (storedFacilityId) {
+                this.getById(storedFacilityId).subscribe(facility => {
+                    this.selectedFacility.next(facility);
+                });
+            }
+        }
+    }
+
+
+    setAllFacilities() {
+        this.getAll().subscribe(allFacilities => {
+            this.allFacilities.next(allFacilities);
+        });
+    }
 
     getAll(): Observable<Array<IdbFacility>> {
         return this.dbService.getAll('facilities');
@@ -30,16 +92,24 @@ export class FacilitydbService {
         return this.dbService.count('facilities');
     }
 
-    add(facility: IdbFacility): Observable<any> {
-        return this.dbService.add('facilities', facility);
+    add(facility: IdbFacility): void {
+        this.dbService.add('facilities', facility).subscribe(() => {
+            this.setAllFacilities();
+            this.setAccountFacilities();
+        });
     }
 
-    update(values: IdbFacility): Observable<any> {
-        return this.dbService.update('facilities', values);
+    update(values: IdbFacility): void {
+        this.dbService.update('facilities', values).subscribe(() => {
+            this.setAllFacilities();
+            this.setAccountFacilities();
+        });
     }
 
-    deleteIndex(facilityId: number): Observable<any> {
-        return this.dbService.delete('facilities', facilityId);
+    deleteById(facilityId: number): void {
+        this.dbService.delete('facilities', facilityId).subscribe(() => {
+            this.setAccountFacilities();
+        });
     }
 
     addTestData() {

@@ -143,7 +143,7 @@ export class DataTableComponent implements OnInit {
 
   groupLoadList() {
     // List the meter groups
-    this.utilityMeterGroupdbService.getAllByIndexRange('facilityId', this.facilityid).then(
+    this.utilityMeterGroupdbService.getAllByIndexRange('facilityId', this.facilityid).subscribe(
       data => {
         this.meterGroups = data;
         this.groupLoadMeters(); // load meters into groups
@@ -249,7 +249,7 @@ export class DataTableComponent implements OnInit {
 
   groupAdd(type, unit, name) {
     let newGroup: IdbUtilityMeterGroup = this.utilityMeterGroupdbService.getNewIdbUtilityMeterGroup(type, unit, name, this.facilityid, this.accountid);
-    this.utilityMeterGroupdbService.add(newGroup).then(
+    this.utilityMeterGroupdbService.add(newGroup).subscribe(
       data => {
         this.groupLoadList(); // Refresh list of groups
       },
