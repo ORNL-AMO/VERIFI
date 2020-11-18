@@ -1,9 +1,7 @@
 import { Component, ElementRef, OnInit } from '@angular/core';
 import { Router, Event, NavigationStart } from '@angular/router';
-import { AccountService } from "../../account/account/account.service";
 import { AccountdbService } from "../../indexedDB/account-db.service";
 import { FacilitydbService } from "../../indexedDB/facility-db-service";
-import { FacilityService } from 'src/app/account/facility/facility.service';
 import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db-service";
 import { UtilityMeterGroupdbService } from "../../indexedDB/utilityMeterGroup-db.service";
 import { UtilityMeterDatadbService } from "../../indexedDB/utilityMeterData-db-service";
@@ -38,8 +36,6 @@ export class HeaderComponent implements OnInit {
   constructor(
     private eRef: ElementRef,
     private router: Router,
-    private accountService: AccountService,
-    private facilityService: FacilityService,
     public accountdbService: AccountdbService,
     public facilitydbService: FacilitydbService,
     public utilityMeterdbService: UtilityMeterdbService,
@@ -107,47 +103,27 @@ export class HeaderComponent implements OnInit {
   }
 
   addNewAccount() {
-    console.log('add');
     this.toggleManageAccountsMenu();
     let newAccount: IdbAccount = this.accountdbService.getNewIdbAccount();
     this.accountdbService.add(newAccount);
     this.router.navigate(['account/account']);
-    // this.accountService.setValue(this.accountList.length + 1); // switch to new account
-    // let newFacility: IdbFacility = this.facilitydbService.getNewIdbFacility(this.activeAccount.id);
-    // this.facilitydbService.add(newFacility); // add 1 facility with every new account
-    // this.facilityService.setValue(0); // having problems with selecting first index
   }
 
   addNewFacility() {
     let newFacility: IdbFacility = this.facilitydbService.getNewIdbFacility(this.activeAccount.id);
-    this.facilitydbService.add(newFacility); // add 1 facility with every new account
-    // this.facilityLoadList(); // refresh the data
+    this.facilitydbService.add(newFacility);
   }
 
   switchAccount(account: IdbAccount) {
     this.toggleManageAccountsMenu();
     this.router.navigate(['account/account']);
     this.accountdbService.setSelectedAccount(account.id);
-    // this.accountService.setValue(index);
-    // this.facilityService.setValue(0); // having problems with selecting first index
   }
 
   switchFacility(facility: IdbFacility) {
     this.toggleFacilityMenu();
-    //this.router.navigate(['account/facility']); dont navigate away
     this.facilitydbService.selectedFacility.next(facility);
   }
-
-  // defaultFacility(index) {
-  //   if (index != -1) {
-  //     this.activeFacility = this.facilityList[index]['name']; // get the name
-  //   } else {
-  //     this.activeFacility = this.facilityList[0]['name']; // get the name
-  //     const index = this.facilityList[0]['id'];
-  //     this.facilityService.setValue(index);
-  //   }
-  // }
-
 
   /* DEV TOOLS BELOW 
   *******************************************************************************/

@@ -53,6 +53,10 @@ export class UtilityMeterGroupdbService {
         });
     }
 
+    addFromImport(utilityMeterGroup: IdbUtilityMeterGroup): Observable<number> {
+        return this.dbService.add('utilityMeterGroups', utilityMeterGroup);
+    }
+
     update(utilityMeterGroup: IdbUtilityMeterGroup): void {
         this.dbService.update('utilityMeterGroups', utilityMeterGroup).subscribe(() => {
             this.setFacilityMeterGroups();

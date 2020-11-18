@@ -32,7 +32,11 @@ export class AccountdbService {
             });
         } else {
             let allAccounts: Array<IdbAccount> = this.allAccounts.getValue();
-            this.setSelectedAccount(allAccounts[0].id);
+            if (allAccounts.length != 0) {
+                this.setSelectedAccount(allAccounts[0].id);
+            } else {
+                this.addTestData();
+            }
         }
     }
 

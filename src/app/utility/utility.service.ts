@@ -38,29 +38,29 @@ export class UtilityService {
     // });
 
     // Keep users state
-    if (this.localStorage.retrieve('verifi_meterList')) {
-      this.meterList.next(this.localStorage.retrieve('verifi_meterList'));
-    }
-    // Keep users state
-    if (this.localStorage.retrieve('verifi_meterData')) {
-      this.meterData.next(this.localStorage.retrieve('verifi_meterData'));
-    }
-    // Keep users state
-    if (this.localStorage.retrieve('verifi_meterRawCalendarData')) {
-      this.meterRawCalendarData.next(this.localStorage.retrieve('verifi_meterRawCalendarData'));
-    }
-    // Keep users state
-    if (this.localStorage.retrieve('verifi_meterCalendarData')) {
-      this.meterCalendarData.next(this.localStorage.retrieve('verifi_meterCalendarData'));
-    }
-    // Keep users state
-    if (this.localStorage.retrieve('verifi_meterObj')) {
-      this.meterObj.next(this.localStorage.retrieve('verifi_meterObj'));
-    }
-    // Keep users state
-    if (this.localStorage.retrieve('verifi_energyFinalUnit')) {
-      this.energyFinalUnit.next(this.localStorage.retrieve('verifi_energyFinalUnit'));
-    }
+    // if (this.localStorage.retrieve('verifi_meterList')) {
+    //   this.meterList.next(this.localStorage.retrieve('verifi_meterList'));
+    // }
+    // // Keep users state
+    // if (this.localStorage.retrieve('verifi_meterData')) {
+    //   this.meterData.next(this.localStorage.retrieve('verifi_meterData'));
+    // }
+    // // Keep users state
+    // if (this.localStorage.retrieve('verifi_meterRawCalendarData')) {
+    //   this.meterRawCalendarData.next(this.localStorage.retrieve('verifi_meterRawCalendarData'));
+    // }
+    // // Keep users state
+    // if (this.localStorage.retrieve('verifi_meterCalendarData')) {
+    //   this.meterCalendarData.next(this.localStorage.retrieve('verifi_meterCalendarData'));
+    // }
+    // // Keep users state
+    // if (this.localStorage.retrieve('verifi_meterObj')) {
+    //   this.meterObj.next(this.localStorage.retrieve('verifi_meterObj'));
+    // }
+    // // Keep users state
+    // if (this.localStorage.retrieve('verifi_energyFinalUnit')) {
+    //   this.energyFinalUnit.next(this.localStorage.retrieve('verifi_energyFinalUnit'));
+    // }
   }
 
   /* Final Units */

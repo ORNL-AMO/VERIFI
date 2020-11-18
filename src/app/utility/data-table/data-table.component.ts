@@ -249,14 +249,7 @@ export class DataTableComponent implements OnInit {
 
   groupAdd(type, unit, name) {
     let newGroup: IdbUtilityMeterGroup = this.utilityMeterGroupdbService.getNewIdbUtilityMeterGroup(type, unit, name, this.facilityid, this.accountid);
-    this.utilityMeterGroupdbService.add(newGroup).subscribe(
-      data => {
-        this.groupLoadList(); // Refresh list of groups
-      },
-      error => {
-        console.log(error);
-      }
-    );
+    this.utilityMeterGroupdbService.add(newGroup);
   }
 
   groupEdit(id) {

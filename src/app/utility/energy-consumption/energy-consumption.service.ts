@@ -1,8 +1,8 @@
 import { ElementRef, QueryList, ViewChildren, Injectable } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { Observable, BehaviorSubject } from 'rxjs';
-import { AccountService } from "../../account/account/account.service";
-import { FacilityService } from 'src/app/account/facility/facility.service';
+// import { AccountService } from "../../account/account/account.service";
+// import { FacilityService } from 'src/app/account/facility/facility.service';
 import { UtilityService } from "../../utility/utility.service";
 import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db-service";
 import { UtilityMeterDatadbService } from "../../indexedDB/utilityMeterData-db-service";
@@ -70,22 +70,22 @@ export class EnergyConsumptionService {
   });
 
   constructor(
-    private accountService: AccountService,
-    private facilityService: FacilityService,
+    // private accountService: AccountService,
+    // private facilityService: FacilityService,
     private utilityService: UtilityService,
     private loadingService: LoadingService,
     public utilityMeterdbService: UtilityMeterdbService,
     public utilityMeterDatadbService: UtilityMeterDatadbService
   ) {
     // Observe the accountid var
-    this.accountService.getValue().subscribe((value) => {
-      this.accountid = value;
-    });
+    // this.accountService.getValue().subscribe((value) => {
+    //   this.accountid = value;
+    // });
 
-    // Observe the facilityid var
-    this.facilityService.getValue().subscribe((value) => {
-      this.facilityid = value;
-    });
+    // // Observe the facilityid var
+    // this.facilityService.getValue().subscribe((value) => {
+    //   this.facilityid = value;
+    // });
 
     // Observe the meter list
     this.utilityService.getDisplayObj().subscribe((value) => {
@@ -120,25 +120,25 @@ export class EnergyConsumptionService {
 
   meterDataAdd(id) {
     let newMeterData: IdbUtilityMeterData = this.utilityMeterDatadbService.getNewIdbUtilityMeterData(id, this.facilityid, this.accountid);
-    this.utilityMeterDatadbService.add(newMeterData).subscribe(
-      dataid => {
-        // filter meter data based on meterid
-        this.utilityMeterDatadbService.getById(id).subscribe(
-          result => {
-            // push to meterlist object
-            const index = this.meterList.findIndex(obj => obj.id == id);
-            this.meterList[index]['data'] = result;
-            this.meterDataEdit(id, dataid); // edit data
-          },
-          error => {
-            console.log(error);
-          }
-        );
-      },
-      error => {
-        console.log(error);
-      }
-    );
+    // this.utilityMeterDatadbService.add(newMeterData).subscribe(
+    //   dataid => {
+    //     // filter meter data based on meterid
+    //     this.utilityMeterDatadbService.getById(id).subscribe(
+    //       result => {
+    //         // push to meterlist object
+    //         const index = this.meterList.findIndex(obj => obj.id == id);
+    //         this.meterList[index]['data'] = result;
+    //         this.meterDataEdit(id, dataid); // edit data
+    //       },
+    //       error => {
+    //         console.log(error);
+    //       }
+    //     );
+    //   },
+    //   error => {
+    //     console.log(error);
+    //   }
+    // );
   }
 
   meterDataSave() {
@@ -224,22 +224,22 @@ export class EnergyConsumptionService {
 
 
     for (let i = 0; i < this.is_checkedList.length; i++) {
-      this.utilityMeterDatadbService.deleteIndex(+this.is_checkedList[i]).subscribe(
-        id => {
+      // this.utilityMeterDatadbService.deleteIndex(+this.is_checkedList[i]).subscribe(
+      //   id => {
 
-          if (counter === this.is_checkedList.length) {
-            this.loadingService.setLoadingStatus(false);
-            //this.utilityService.setMeterData(this.meterList); // refresh the data
-            this.utilityService.setMeterData(); // refresh the data for this page
-            this.is_checked = false;
-          }
-          counter++;
+      //     if (counter === this.is_checkedList.length) {
+      //       this.loadingService.setLoadingStatus(false);
+      //       //this.utilityService.setMeterData(this.meterList); // refresh the data
+      //       this.utilityService.setMeterData(); // refresh the data for this page
+      //       this.is_checked = false;
+      //     }
+      //     counter++;
 
-        },
-        error => {
-          console.log(error);
-        }
-      );;
+      //   },
+      //   error => {
+      //     console.log(error);
+      //   }
+      // );;
     }
 
   }
@@ -309,64 +309,64 @@ export class EnergyConsumptionService {
       meterids.push(this.meterList.find(x => x.meterNumber == obj.meterNumber)['id']); // Get id of matching meter numbers
       console.log(meterids);
       let newMeterData: IdbUtilityMeterData = this.utilityMeterDatadbService.getNewIdbUtilityMeterData(meterids[i], this.facilityid, this.accountid);
-      this.utilityMeterDatadbService.add(newMeterData).subscribe(
-        id => {
-          this.loadingService.setLoadingMessage(counter + " of " + length + " Records Imported...");
+      // this.utilityMeterDatadbService.add(newMeterData).subscribe(
+      //   id => {
+      //     this.loadingService.setLoadingMessage(counter + " of " + length + " Records Imported...");
 
-          const importLine = {
-            // All Fuels
-            id: id,
-            meterid: meterids[i],
-            facilityid: this.facilityid,
-            accountid: this.accountid,
-            readDate: obj.readDate,
-            unit: obj.unit || 'NA',
-            totalEnergyUse: obj.totalEnergyUse || 0,
+      //     const importLine = {
+      //       // All Fuels
+      //       id: id,
+      //       meterid: meterids[i],
+      //       facilityid: this.facilityid,
+      //       accountid: this.accountid,
+      //       readDate: obj.readDate,
+      //       unit: obj.unit || 'NA',
+      //       totalEnergyUse: obj.totalEnergyUse || 0,
 
-            // Natural Gas +
-            commodityCharge: obj.commodityCharge || 0,
-            deliveryCharge: obj.deliveryCharge || 0,
-            otherCharge: obj.otherCharge || 0,
+      //       // Natural Gas +
+      //       commodityCharge: obj.commodityCharge || 0,
+      //       deliveryCharge: obj.deliveryCharge || 0,
+      //       otherCharge: obj.otherCharge || 0,
 
-            // Electric only
-            totalDemand: obj.totalDemand || 0,
-            totalCost: obj.totalCost || 0,
-            basicCharge: obj.basicCharge || 0,
-            supplyBlockAmt: obj.supplyBlockAmt || 0,
-            supplyBlockCharge: obj.supplyBlockCharge || 0,
-            flatRateAmt: obj.flatRateAmt || 0,
-            flatRateCharge: obj.flatRateCharge || 0,
-            peakAmt: obj.peakAmt || 0,
-            peakCharge: obj.peakCharge || 0,
-            offpeakAmt: obj.offpeakAmt || 0,
-            offpeakCharge: obj.offpeakCharge || 0,
-            demandBlockAmt: obj.demandBlockAmt || 0,
-            demandBlockCharge: obj.demandBlockCharge || 0,
-            genTransCharge: obj.genTransCharge || 0,
-            transCharge: obj.transCharge || 0,
-            powerFactorCharge: obj.powerFactorCharge || 0,
-            businessCharge: obj.businessCharge || 0,
-            utilityTax: obj.utilityTax || 0,
-            latePayment: obj.latePayment || 0,
-            checked: false,
-          }
-          //TODO: MARK COMMENTED OUT ISSUE-55
-          // this.utilityMeterDatadbService.update(importLine); // Update db
+      //       // Electric only
+      //       totalDemand: obj.totalDemand || 0,
+      //       totalCost: obj.totalCost || 0,
+      //       basicCharge: obj.basicCharge || 0,
+      //       supplyBlockAmt: obj.supplyBlockAmt || 0,
+      //       supplyBlockCharge: obj.supplyBlockCharge || 0,
+      //       flatRateAmt: obj.flatRateAmt || 0,
+      //       flatRateCharge: obj.flatRateCharge || 0,
+      //       peakAmt: obj.peakAmt || 0,
+      //       peakCharge: obj.peakCharge || 0,
+      //       offpeakAmt: obj.offpeakAmt || 0,
+      //       offpeakCharge: obj.offpeakCharge || 0,
+      //       demandBlockAmt: obj.demandBlockAmt || 0,
+      //       demandBlockCharge: obj.demandBlockCharge || 0,
+      //       genTransCharge: obj.genTransCharge || 0,
+      //       transCharge: obj.transCharge || 0,
+      //       powerFactorCharge: obj.powerFactorCharge || 0,
+      //       businessCharge: obj.businessCharge || 0,
+      //       utilityTax: obj.utilityTax || 0,
+      //       latePayment: obj.latePayment || 0,
+      //       checked: false,
+      //     }
+      //     //TODO: MARK COMMENTED OUT ISSUE-55
+      //     // this.utilityMeterDatadbService.update(importLine); // Update db
 
-          // If end of the loop
-          if (counter === length) {
-            //this.utilityService.setMeterData(this.meterList); // refresh the data
-            this.utilityService.setMeterData(); // refresh the data
-            this.loadingService.setLoadingStatus(false);
-          }
+      //     // If end of the loop
+      //     if (counter === length) {
+      //       //this.utilityService.setMeterData(this.meterList); // refresh the data
+      //       this.utilityService.setMeterData(); // refresh the data
+      //       this.loadingService.setLoadingStatus(false);
+      //     }
 
-          counter++;
+      //     counter++;
 
-        },
-        error => {
-          console.log(error);
-        }
-      );
+      //   },
+      //   error => {
+      //     console.log(error);
+      //   }
+      // );
     }
     this.resetImport();
 

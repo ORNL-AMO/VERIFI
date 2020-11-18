@@ -32,6 +32,7 @@ import { LoadingComponent } from './shared/loading/loading.component';
 import { OtherFuelsComponent } from './utility/energy-consumption/other-fuels/other-fuels.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { IndexedDBModule } from './indexedDB/indexed-db.module';
+import { ImportMeterDataComponent } from './utility/energy-consumption/energy-source/import-meter-data/import-meter-data.component';
 
 
 
@@ -56,7 +57,8 @@ import { IndexedDBModule } from './indexedDB/indexed-db.module';
     PredictorsComponent,
     MoMeterDataComponent,
     LoadingComponent,
-    OtherFuelsComponent
+    OtherFuelsComponent,
+    ImportMeterDataComponent
   ],
   imports: [
     BrowserModule,

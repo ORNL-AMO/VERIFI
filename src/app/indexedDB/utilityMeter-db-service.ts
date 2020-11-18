@@ -82,7 +82,9 @@ export class UtilityMeterdbService {
             name: undefined,
             location: undefined,
             supplier: undefined,
-            notes: undefined
+            notes: undefined,
+            source: undefined,
+            group: undefined
         }
     }
 }

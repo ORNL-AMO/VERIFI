@@ -26,27 +26,25 @@ export class FooterComponent implements OnInit {
     public accountService: AccountService,
     public accountdbService: AccountdbService,
     public facilitydbService: FacilitydbService,
-  ) { 
+  ) {
 
   }
 
   ngOnInit() {
-    // Subscribe to account ID
-
-   this.allAccountsSub = this.accountdbService.allAccounts.subscribe(allAccounts => {
+    this.allAccountsSub = this.accountdbService.allAccounts.subscribe(allAccounts => {
       this.accountCount = allAccounts.length;
     });
 
-   this.allFacilitiesSub = this.facilitydbService.allFacilities.subscribe(allFacilities => {
+    this.allFacilitiesSub = this.facilitydbService.allFacilities.subscribe(allFacilities => {
       this.facilityCountTotal = allFacilities.length;
     });
 
-   this.accountFacilitiesSub = this.facilitydbService.accountFacilities.subscribe(accountFacilities => {
+    this.accountFacilitiesSub = this.facilitydbService.accountFacilities.subscribe(accountFacilities => {
       this.facilityCount = accountFacilities.length;
     });
   }
 
-  ngOnDestroy(){
+  ngOnDestroy() {
     this.allAccountsSub.unsubscribe();
     this.allFacilitiesSub.unsubscribe();
     this.accountFacilitiesSub.unsubscribe();

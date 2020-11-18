@@ -1,0 +1,33 @@
+<h4>Import Meters</h4>
+<br>
+<form>
+    <input type="file" #inputFile accept=".csv" (change)="meterImport($event.target.files)">
+</form>
+<br>
+<div class="importQuickView" [hidden]="!quickViewMeters">
+    <p class="bold">Quick View</p>
+    <table>
+        <tr>
+            <th>Meter #</th>
+            <th>Account #</th>
+            <th>Type</th>
+            <th>Building / Area</th>
+            <th>Utility Supplier</th>
+            <th>Notes</th>
+        </tr>
+        <tr *ngFor="let meter of quickViewMeters">
+            <td>{{meter.meterNumber}}</td>
+            <td>{{meter.accountNumber}}</td>
+            <td>{{meter.type}}</td>
+            <td>{{meter.name}}</td>
+            <td>{{meter.supplier}}</td>
+            <td>{{meter.notes}}</td>
+        </tr>
+    </table>
+</div>
+<p class="alert alert-danger" [hidden]="importError == ''">{{importError}}</p>
+
+<div class="saveCancel item-right">
+    <button class="btn btn-primary" (click)="resetImport(); importWindow = !importWindow">Cancel</button>
+    <button class="btn btn-primary" (click)="runImport()" [disabled]="importError != ''">Submit</button>
+</div>

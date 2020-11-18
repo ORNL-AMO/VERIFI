@@ -46,7 +46,7 @@ export interface IdbUtilityMeter {
     id?: number,
     facilityId: number,
     accountId: number,
-    groupId: string,
+    groupId: number,
     //data
     meterNumber: number,
     accountNumber: number,
@@ -58,7 +58,10 @@ export interface IdbUtilityMeter {
     name: string,
     location: number,
     supplier: string,
-    notes: string
+    notes: string,
+    source: string,
+    //group = groupName
+    group: string
 }
 
 export interface IdbUtilityMeterData {

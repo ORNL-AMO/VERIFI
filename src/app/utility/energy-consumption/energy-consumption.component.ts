@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { EnergyConsumptionService } from './energy-consumption.service';
-import { UtilityService } from "../../utility/utility.service";
+import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db-service';
 
 @Component({
   selector: 'app-energy-consumption',
@@ -19,40 +18,44 @@ export class EnergyConsumptionComponent implements OnInit {
   wood: boolean;
   otherGas: boolean;
   otherEnergy: boolean;
-  meterList: any = [{source: ''}];
-  
+  meterList: any = [{ source: '' }];
+
   constructor(
-    private energyConsumptionService: EnergyConsumptionService,
-    private utilityService: UtilityService
-    ) {}
+    private utilityMeterDbService: UtilityMeterdbService
+  ) { }
 
   ngOnInit() {
+    this.utilityMeterDbService.facilityMeters.subscribe(facilityMeters => {
+      console.log(facilityMeters);
+      let energySources = facilityMeters.map(function (el) { return el.source; });
+      console.log(energySources)
+    })
 
     // Observe the meter list
-    this.utilityService.getMeterList().subscribe((value) => {
-      this.meterList = value;
+    // this.utilityService.getMeterList().subscribe((value) => {
+    //   this.meterList = value;
 
-      // Map tabs based on array of energy source types.
-      this.energySource = this.meterList.map(function (el) { return el.source; });
-      this.energyConsumptionService.setEnergySource(this.energySource);
-      
-    });
-    
+    //   // Map tabs based on array of energy source types.
+    //   this.energySource = this.meterList.map(function (el) { return el.source; });
+    //   this.energyConsumptionService.setEnergySource(this.energySource);
+
+    // });
+
     // Observe the energySource var
-    this.energyConsumptionService.getEnergySource().subscribe((value) => {
-      this.energySource = value;
+    // this.energyConsumptionService.getEnergySource().subscribe((value) => {
+    //   this.energySource = value;
 
-      if (value != null) {
-        this.electricity = this.energySource.indexOf("Electricity") > -1;
-        this.naturalGas = this.energySource.indexOf("Natural Gas") > -1;
-        this.lpg = this.energySource.indexOf("LPG") > -1;
-        this.fuelOil = this.energySource.indexOf("Fuel Oil") > -1;
-        this.coal = this.energySource.indexOf("Coal") > -1;
-        this.wood = this.energySource.indexOf("Wood") > -1;
-        this.otherGas = this.energySource.indexOf("Other Gas") > -1;
-        this.otherEnergy = this.energySource.indexOf("Other Energy") > -1;
-      }
-    });
+    //   if (value != null) {
+    //     this.electricity = this.energySource.indexOf("Electricity") > -1;
+    //     this.naturalGas = this.energySource.indexOf("Natural Gas") > -1;
+    //     this.lpg = this.energySource.indexOf("LPG") > -1;
+    //     this.fuelOil = this.energySource.indexOf("Fuel Oil") > -1;
+    //     this.coal = this.energySource.indexOf("Coal") > -1;
+    //     this.wood = this.energySource.indexOf("Wood") > -1;
+    //     this.otherGas = this.energySource.indexOf("Other Gas") > -1;
+    //     this.otherEnergy = this.energySource.indexOf("Other Energy") > -1;
+    //   }
+    // });
   }
 
 }
