@@ -14,6 +14,7 @@ export class AccountdbService {
     constructor(private dbService: NgxIndexedDBService, private localStorageService: LocalStorageService) {
         this.selectedAccount = new BehaviorSubject<IdbAccount>(undefined);
         this.allAccounts = new BehaviorSubject<Array<IdbAccount>>(new Array());
+        this.setAllAccounts();
         let localStorageAccountId: number = this.localStorageService.retrieve("accountId");
         this.setSelectedAccount(localStorageAccountId);
 
@@ -30,7 +31,8 @@ export class AccountdbService {
                 this.selectedAccount.next(account);
             });
         } else {
-            this.setSelectedAccount(1);
+            let allAccounts: Array<IdbAccount> = this.allAccounts.getValue();
+            this.setSelectedAccount(allAccounts[0].id);
         }
     }
 
@@ -62,6 +64,7 @@ export class AccountdbService {
     update(account: IdbAccount): void {
         this.dbService.update('accounts', account).subscribe(() => {
             this.setAllAccounts();
+            this.setSelectedAccount(account.id);
         });
     }
 

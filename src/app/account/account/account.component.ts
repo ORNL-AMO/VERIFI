@@ -1,8 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
-import { AccountService } from "./account.service";
-import { FacilityService } from '../facility/facility.service';
 import { AccountdbService } from "../../indexedDB/account-db.service";
 import { FacilitydbService } from "../../indexedDB/facility-db-service";
 import { IdbAccount, IdbFacility } from 'src/app/models/idb';
@@ -18,7 +16,6 @@ import { Subscription } from 'rxjs';
   }
 })
 export class AccountComponent implements OnInit {
-  accountId: number;
   facilityList: Array<IdbFacility> = [];
   facilityMenuOpen: number;
 
@@ -49,7 +46,7 @@ export class AccountComponent implements OnInit {
     });
   }
 
-  ngOnDestroy(){
+  ngOnDestroy() {
     this.selectedAccountSub.unsubscribe();
     this.accountFacilitiesSub.unsubscribe();
   }
@@ -88,7 +85,8 @@ export class AccountComponent implements OnInit {
   }
 
   addNewFacility() {
-    let idbFacility: IdbFacility = this.facilityDbService.getNewIdbFacility(this.accountId);
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let idbFacility: IdbFacility = this.facilityDbService.getNewIdbFacility(selectedAccount.id);
     this.facilityDbService.add(idbFacility);
   }
 

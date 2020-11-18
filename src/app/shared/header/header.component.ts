@@ -74,51 +74,12 @@ export class HeaderComponent implements OnInit {
     });
   }
 
-  ngOnDestroy(){
+  ngOnDestroy() {
     this.allAccountsSub.unsubscribe();
     this.selectedAccountSub.unsubscribe();
     this.accountFacilitiesSub.unsubscribe();
     this.selectedFacilitySub.unsubscribe();
   }
-  // accountLoadList() {
-  //   // List all accounts for popup
-  //   this.accountdbService.getAll().subscribe(
-  //     data => {
-  //       // Load test data if no data is present
-  //       if (data.length != 0) {
-  //         this.accountList = data;
-  //         const index = this.accountList.findIndex(x => x.id === this.accountid);
-  //         this.activeAccount = this.accountList[index]['name']; // get the name
-  //       } else {
-  //         //TEMPORARY
-  //         this.loadTestData();
-  //       }
-  //     },
-  //     error => {
-  //       console.log(error);
-  //     }
-  //   );
-  // }
-
-  // facilityLoadList() {
-  //   // List all facilities for dropdown
-  //   this.facilitydbService.getAllByIndexRange('accountId', this.accountid).subscribe(
-  //     data => {
-  //       // avoid empty errors
-  //       if (data.length != 0) {
-  //         this.facilityList = data; // array dropdown
-  //         const index = this.facilityList.findIndex(x => x.id === this.facilityid); // find current facility in list
-  //         this.defaultFacility(index); // choose default facility
-  //       } else {
-  //         this.facilityList = [];
-  //         this.activeFacility = '';
-  //       }
-  //     },
-  //     error => {
-  //       console.log(error);
-  //     }
-  //   );
-  // }
 
   toggleFacilityMenu() {
     this.facilityMenu = !this.facilityMenu;
@@ -146,13 +107,14 @@ export class HeaderComponent implements OnInit {
   }
 
   addNewAccount() {
+    console.log('add');
     this.toggleManageAccountsMenu();
     let newAccount: IdbAccount = this.accountdbService.getNewIdbAccount();
     this.accountdbService.add(newAccount);
     this.router.navigate(['account/account']);
     // this.accountService.setValue(this.accountList.length + 1); // switch to new account
-    let newFacility: IdbFacility = this.facilitydbService.getNewIdbFacility(this.activeAccount.id);
-    this.facilitydbService.add(newFacility); // add 1 facility with every new account
+    // let newFacility: IdbFacility = this.facilitydbService.getNewIdbFacility(this.activeAccount.id);
+    // this.facilitydbService.add(newFacility); // add 1 facility with every new account
     // this.facilityService.setValue(0); // having problems with selecting first index
   }
 

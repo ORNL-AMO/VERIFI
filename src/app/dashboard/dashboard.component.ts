@@ -43,32 +43,32 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit() {
     // Observe the accountid var
-    this.accountService.getValue().subscribe((value) => {
-      this.accountid = value;
-    });
+    // this.accountService.getValue().subscribe((value) => {
+    //   this.accountid = value;
+    // });
 
-    // Observe the facilityid var
-    this.facilityService.getValue().subscribe((value) => {
-      this.facilityid = value;
+    // // Observe the facilityid var
+    // this.facilityService.getValue().subscribe((value) => {
+    //   this.facilityid = value;
 
-      // get current facility object
-      this.facilitydbService.getById(this.facilityid).subscribe(
-        data => {
-          this.meterLoadList();
-        },
-        error => {
-          console.log(error);
-        }
-      );
-    });
+    //   // get current facility object
+    //   this.facilitydbService.getById(this.facilityid).subscribe(
+    //     data => {
+    //       this.meterLoadList();
+    //     },
+    //     error => {
+    //       console.log(error);
+    //     }
+    //   );
+    // });
 
-    this.utilityService.getMeterList().subscribe((value) => {
-      this.utilities = value;
-      console.log(this.utilities);
-      this.combineCalendar();
-    });
+    // this.utilityService.getMeterList().subscribe((value) => {
+    //   this.utilities = value;
+    //   console.log(this.utilities);
+    //   this.combineCalendar();
+    // });
 
-    this.meterDataLoadAll();
+    // this.meterDataLoadAll();
   }
 
   meterLoadList() {

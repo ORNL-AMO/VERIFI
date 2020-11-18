@@ -60,15 +60,15 @@ export class DataTableComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    // Observe the accountid var
-    this.accountService.getValue().subscribe((value) => {
-      this.accountid = value;
-    });
+    // // Observe the accountid var
+    // this.accountService.getValue().subscribe((value) => {
+    //   this.accountid = value;
+    // });
 
-    // Observe the facilityid var
-    this.facilityService.getValue().subscribe((value) => {
-      this.facilityid = value;
-    });
+    // // Observe the facilityid var
+    // this.facilityService.getValue().subscribe((value) => {
+    //   this.facilityid = value;
+    // });
 
     // Observe the meter list
     this.utilityService.getMeterList().subscribe((value) => {

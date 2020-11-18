@@ -19,6 +19,7 @@ export class FacilitydbService {
         this.allFacilities = new BehaviorSubject<Array<IdbFacility>>(new Array());
         this.selectedFacility = new BehaviorSubject<IdbFacility>(undefined);
         this.setAllFacilities();
+        this.initializeLocalFromLocalStorage();
 
         this.accountDbService.selectedAccount.subscribe(() => {
             this.setAccountFacilities();
@@ -35,6 +36,15 @@ export class FacilitydbService {
         });
     }
 
+    initializeLocalFromLocalStorage() {
+        let storedFacilityId: number = this.localStorageService.retrieve("facilityId");
+        if (storedFacilityId) {
+            this.getById(storedFacilityId).subscribe(facility => {
+                this.selectedFacility.next(facility);
+            });
+        }
+    }
+
     setAccountFacilities() {
         let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
         if (selectedAccount) {
@@ -46,20 +56,23 @@ export class FacilitydbService {
 
     setSelectedFacility() {
         let accountFacilities: Array<IdbFacility> = this.accountFacilities.getValue();
-        let selectedFacility: IdbFacility = this.selectedFacility.getValue();
-        if (!selectedFacility && accountFacilities.length != 0) {
-            let updatedFacility: IdbFacility = accountFacilities.find(facility => { return facility.id == selectedFacility.id });
-            if (!updatedFacility) {
-                this.selectedFacility.next(accountFacilities[0]);
+        if (accountFacilities.length != 0) {
+            let selectedFacility: IdbFacility = this.selectedFacility.getValue();
+            if (selectedFacility) {
+                let updatedFacility: IdbFacility = accountFacilities.find(facility => { return facility.id == selectedFacility.id });
+                if (!updatedFacility) {
+                    this.selectedFacility.next(accountFacilities[0]);
+                } else {
+                    this.selectedFacility.next(updatedFacility);
+                }
             } else {
-                this.selectedFacility.next(updatedFacility);
+                this.selectedFacility.next(accountFacilities[0]);
             }
         } else {
-            let storedFacilityId: number = this.localStorageService.retrieve("facilityId");
-            if (storedFacilityId) {
-                this.getById(storedFacilityId).subscribe(facility => {
-                    this.selectedFacility.next(facility);
-                });
+            let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+            if (selectedAccount) {
+                let newFacility: IdbFacility = this.getNewIdbFacility(selectedAccount.id);
+                this.add(newFacility);
             }
         }
     }
