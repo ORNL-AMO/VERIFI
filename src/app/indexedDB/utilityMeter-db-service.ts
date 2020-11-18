@@ -84,7 +84,9 @@ export class UtilityMeterdbService {
             supplier: undefined,
             notes: undefined,
             source: undefined,
-            group: undefined
+            group: undefined,
+            startingUnit: undefined,
+            fuel: undefined
         }
     }
 }
