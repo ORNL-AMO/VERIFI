@@ -11,7 +11,7 @@ import { UtilityMeterdbService } from "../../../indexedDB/utilityMeter-db-servic
 import { UtilityMeterGroupdbService } from "../../../indexedDB/utilityMeterGroup-db.service";
 import { listAnimation } from '../../../animations';
 import { ConvertUnitsService } from '../../../shared/convert-units/convert-units.service';
-import { IdbUtilityMeter, IdbUtilityMeterGroup } from 'src/app/models/idb';
+import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterGroup } from 'src/app/models/idb';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -44,58 +44,24 @@ export class EnergySourceComponent implements OnInit {
 
   toggleCancel: boolean = false; // Used to prevent "Cancel" when Adding New Meter (Cancel leaves the meter blank)
 
-  page = 1;
-  itemsPerPage = 10;
+  page: number = 1;
+  itemsPerPage: number = 10;
   pageSize: number;
-
-  is_ele_ng: boolean = false;
-
- 
-
   importWindow: boolean;
   editMeter: IdbUtilityMeter;
+  deleteMeterId: number;
   constructor(
-    private accountService: AccountService,
-    private facilityService: FacilityService,
     public accountdbService: AccountdbService,
     public facilitydbService: FacilitydbService,
     private utilityService: UtilityService,
     public utilityMeterDatadbService: UtilityMeterDatadbService,
     public utilityMeterdbService: UtilityMeterdbService,
     public utilityMeterGroupdbService: UtilityMeterGroupdbService,
-    // private energyConsumptionService: EnergyConsumptionService,
-    private convertUnitsService: ConvertUnitsService
   ) { }
 
   ngOnInit() {
     this.meterListSub = this.utilityMeterdbService.facilityMeters.subscribe(meters => {
       this.meterList = meters;
-    });
-    // Observe the accountid var
-    // this.accountService.getValue().subscribe((value) => {
-    //   this.accountid = value;
-    // });
-
-    // // Observe the facilityid var
-    // this.facilityService.getValue().subscribe((value) => {
-    //   this.facilityid = value;
-
-    //   // get current facility object
-    //   this.facilitydbService.getById(this.facilityid).subscribe(
-    //     data => {
-    //       this.activeFacility = data;
-    //     },
-    //     error => {
-    //       console.log(error);
-    //     }
-    //   );
-    // });
-
-    // Observe the meter list
-    this.utilityService.getMeterList().subscribe((value) => {
-      this.meterList = value;
-      console.log(value);
-      this.meterMapTabs();
     });
 
     // Observe the energy final unit
@@ -113,7 +79,7 @@ export class EnergySourceComponent implements OnInit {
     this.meterMenuOpen = null;
   }
 
-  meterToggleMenu(index) {
+  meterToggleMenu(index: number) {
     if (this.meterMenuOpen === index) {
       this.meterMenuOpen = null;
     } else {
@@ -121,114 +87,23 @@ export class EnergySourceComponent implements OnInit {
     }
   }
 
-  meterAdd() {
-    let utilityMeter: IdbUtilityMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(this.facilityid, this.accountid);
-    // this.utilityMeterdbService.add(utilityMeter).subscribe(
-    //   id => {
-    //     // unable to use subscription() in this scenario due to async issues
-    //     this.utilityMeterdbService.getAllByIndexRange('facilityId', this.facilityid).subscribe(
-    //       data => {
-    //         this.meterList = data; // refresh the data 
-
-    //         this.toggleCancel = true; // requires the user to save the data of their new meter
-    //         this.meterEdit(id); // edit data
-    //         this.meterMapTabs(); // Remap tabs
-    //       }
-    //     );
-    //   },
-    //   error => {
-    //     console.log(error);
-    //   }
-    // );
+  addMeter() {
+    let selectedFacility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
+    let selectedAccount: IdbAccount = this.accountdbService.selectedAccount.getValue();
+    let utilityMeter: IdbUtilityMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.id, selectedAccount.id);
+    this.utilityMeterdbService.addWithObservable(utilityMeter).subscribe(meterId => {
+      this.utilityMeterdbService.setFacilityMeters();
+      utilityMeter.id = meterId;
+      this.selectEditMeter(utilityMeter);
+    });
   }
 
-
-  async groupCheckExistence(groupType, groupName) {
-    let groupid = 1;
-    let group = null;
-    // Save this meter in a default "unsorted" group.
-    // This group can be renamed or deleted by user.
-    // If they do this, another "unsorted" group will be created
-
-    group = await this.utilityMeterGroupdbService.getByIndex('name', groupName); // check if group exists
-
-    // If not add it
-    if (group == null) {
-      let utilityMeterGroup: IdbUtilityMeterGroup = this.utilityMeterGroupdbService.getNewIdbUtilityMeterGroup(groupType, this.energyFinalUnit, groupName, this.facilityid, this.accountid);
-      // this.utilityMeterGroupdbService.add(utilityMeterGroup).subscribe(id => {
-      //   groupid = id;
-      // }); // add service returns id
-    } else {
-      groupid = group.id; // get current id
-    }
-
-    return groupid;
-  }
-
+  //idk what this is for..
   meterMapTabs() {
     // Remap tabs
     this.energySources = this.meterList.map(function (el) { return el.source; });
     // this.energyConsumptionService.setEnergySource(this.energySources);
   }
-
-  // async meterSave() {
-  //   this.window = !this.window;
-
-  //   // If group is not defined, get "Unsorted" group's id/
-  //   // The Unsorted group can be altered/deleted by the user so the id can change.
-  //   if (this.meterForm.value.group == '') {
-  //     this.meterForm.value.group = await this.groupCheckExistence("Energy", "Unsorted");
-  //   }
-  //   this.meterForm.controls['groupType'].setValue("Energy");
-  //   this.meterForm.controls['finalUnit'].setValue(this.energyFinalUnit);
-
-  //   this.utilityMeterdbService.update(this.meterForm.value); // Update db
-  //   this.utilityService.setMeterList(); // refresh the data
-  //   this.toggleCancel = false; // re-enable "edit meter" cancel button
-  // }
-
-
-
-  // meterEdit(id) {
-  //   this.window = !this.window;
-  //   this.meterMenuOpen = null;
-
-  //   const thisMeter = this.meterList.find(obj => obj.id == id);
-  //   this.meterForm.patchValue(thisMeter); // Set form values to current selected meter
-  // }
-
-  meterDelete(id) {
-    this.meterMenuOpen = null;
-    // Alert the user
-
-    // Delete all meter data for this meter
-    this.utilityMeterDatadbService.getAllByIndexRange('meterId', id).subscribe(
-      data => {
-        // delete
-        for (let i = 0; i < data.length; i++) {
-          // this.utilityMeterDatadbService.deleteIndex(data[i]["id"]).subscribe(
-          //   data => {
-          //     console.log("deleted");
-          //   },
-          //   error => {
-          //     console.log(error);
-          //   }
-          // );
-        }
-
-      },
-      error => {
-        console.log(error);
-      }
-    );
-    // Delete meter
-    this.utilityMeterdbService.deleteIndex(id);
-    this.utilityService.setMeterList(); // refresh the data
-  }
-
-
-
-
 
   meterExport() {
     const replacer = (key, value) => value === null ? '' : value; // specify how you want to handle null values here
@@ -265,11 +140,23 @@ export class EnergySourceComponent implements OnInit {
     this.importWindow = true;
   }
 
-  selectEditMeter(meter: IdbUtilityMeter){
+  selectEditMeter(meter: IdbUtilityMeter) {
     this.editMeter = meter;
   }
 
-  closeEditMeter(){
+  closeEditMeter() {
     this.editMeter = undefined;
+  }
+
+  selectDeleteMeter(id: number){
+    this.deleteMeterId = id;
+  }
+
+  deleteMeter(){
+    this.meterMenuOpen = null;
+    //delete meter
+    this.utilityMeterdbService.deleteIndex(this.deleteMeterId);
+    //delete meter data
+    this.utilityMeterDatadbService.deleteMeterDataByMeterId(this.deleteMeterId);
   }
 }

@@ -22,7 +22,7 @@
             <option value="Other Utility">Other Utility</option>
         </select>
     </label>
-    <label *ngIf="meterForm.controls.source.value != 'Electricity' && meterForm.controls.source.value != 'Natural Gas'">
+    <label *ngIf="displayPhaseAndFuel">
         <span class="required">*</span> Phase
         <select type="text" formControlName="phase">
             <option value="NA">NA</option>
@@ -32,7 +32,7 @@
         </select>
     </label>
 
-    <label *ngIf="meterForm.controls.source.value != 'Electricity' && meterForm.controls.source.value != 'Natural Gas'">
+    <label *ngIf="displayPhaseAndFuel">
         <span class="required">*</span> Fuel
         <select type="text" formControlName="fuel">
             <option *ngIf="meterForm.value['phase'] == 'Gas'" value="Blast Furnace Gas">Blast Furnace Gas
@@ -149,5 +149,5 @@
 </form>
 <div class="saveCancel item-right">
     <button class="btn btn-primary" (click)="cancel()" [disabled]="toggleCancel">Cancel</button>
-    <button class="btn btn-primary" (click)="saveChanges()">Save</button>
+    <button class="btn btn-primary" (click)="saveChanges()" [disbled]="meterForm.invalid">Save</button>
 </div>

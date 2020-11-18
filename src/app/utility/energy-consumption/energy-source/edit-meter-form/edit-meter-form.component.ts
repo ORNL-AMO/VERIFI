@@ -15,27 +15,28 @@ export class EditMeterFormComponent implements OnInit {
   emitClose: EventEmitter<boolean> = new EventEmitter<boolean>();
 
   meterForm: FormGroup;
+  displayPhaseAndFuel: boolean;
   constructor(private formBuilder: FormBuilder, private utilityMeterDbService: UtilityMeterdbService) { }
 
   ngOnInit(): void {
     this.meterForm = this.formBuilder.group({
-      id: [this.editMeter.id, Validators.required],
-      facilityId: [this.editMeter.facilityId, Validators.required],
-      accountId: [this.editMeter.accountId, Validators.required],
-      groupId: [this.editMeter.groupId, Validators.required],
-      meterNumber: [this.editMeter.meterNumber, Validators.required],
-      accountNumber: [this.editMeter.accountNumber, Validators.required],
-      type: [this.editMeter.type, Validators.required],
-      phase: [this.editMeter.phase, Validators.required],
+      id: [this.editMeter.id],
+      facilityId: [this.editMeter.facilityId],
+      accountId: [this.editMeter.accountId],
+      groupId: [this.editMeter.groupId],
+      meterNumber: [this.editMeter.meterNumber],
+      accountNumber: [this.editMeter.accountNumber],
+      type: [this.editMeter.type],
+      phase: [this.editMeter.phase],
       unit: [this.editMeter.unit, Validators.required],
       heatCapacity: [this.editMeter.heatCapacity, Validators.required],
       siteToSource: [this.editMeter.siteToSource, Validators.required],
       name: [this.editMeter.name, Validators.required],
-      location: [this.editMeter.location, Validators.required],
+      location: [this.editMeter.location],
       supplier: [this.editMeter.supplier, Validators.required],
-      notes: [this.editMeter.notes, Validators.required],
+      notes: [this.editMeter.notes],
       source: [this.editMeter.source, Validators.required],
-      group: [this.editMeter.group, Validators.required],
+      group: [this.editMeter.group],
       fuel: [this.editMeter.fuel, Validators.required],
       startingUnit: [this.editMeter.startingUnit, Validators.required]
     });
@@ -61,5 +62,19 @@ export class EditMeterFormComponent implements OnInit {
 
   cancel() {
     this.emitClose.emit(true);
+  }
+
+  setSourceValidation() {
+    if (this.meterForm.controls.source.value == 'Electricity' || this.meterForm.controls.source.value == 'Natural Gas') {
+      this.displayPhaseAndFuel = false;
+      this.meterForm.controls.phase.setValidators([]);
+      this.meterForm.controls.fuel.setValidators([]);
+    } else {
+      this.displayPhaseAndFuel = true;
+      this.meterForm.controls.phase.setValidators([Validators.required]);
+      this.meterForm.controls.fuel.setValidators([Validators.required]);
+    }
+    this.meterForm.controls.phase.updateValueAndValidity();
+    this.meterForm.controls.fuel.updateValueAndValidity();
   }
 }

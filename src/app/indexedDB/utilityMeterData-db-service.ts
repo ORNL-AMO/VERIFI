@@ -66,6 +66,14 @@ export class UtilityMeterDatadbService {
         });
     }
 
+    deleteMeterDataByMeterId(meterId: number): void {
+        this.getAllByIndexRange('meterId', meterId).subscribe(meterData => {
+            meterData.forEach(dataItem => {
+                this.deleteIndex(dataItem.id);
+            });
+        });
+    }
+
     getNewIdbUtilityMeterData(meterId: number, facilityId: number, accountId: number): IdbUtilityMeterData {
         return {
             // id: undefined,

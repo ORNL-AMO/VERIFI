@@ -20,7 +20,7 @@
 </div>
 
 <div class="meterData">
-    <button class="btn btn-link item-right" (click)="meterAdd()"><i class="fa fa-plus"></i> Add New Meter</button>
+    <button class="btn btn-link item-right" (click)="addMeter()"><i class="fa fa-plus"></i> Add New Meter</button>
     <div class="tableControls overflow-hidden item-right">
         <div class="item-right">
             <ngb-pagination [collectionSize]="meterList.length" [(page)]="page" [pageSize]="itemsPerPage" [maxSize]="5"
