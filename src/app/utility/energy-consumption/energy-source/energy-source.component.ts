@@ -26,34 +26,25 @@ import { Subscription } from 'rxjs';
   }
 })
 export class EnergySourceComponent implements OnInit {
-  accountid: number;
-  facilityid: number;
-  activeFacility: any = { name: '' };
 
   meterMenuOpen: number;
-  window: boolean = false;
-  popup: boolean = false;
-  id: number;
 
-  energySources: any;
-  selectedMeter: any;
+  // energySources: any;
+  // selectedMeter: any;
   meterList: Array<IdbUtilityMeter>;
   meterListSub: Subscription;
-  energyFinalUnit: string;
-
-
-  toggleCancel: boolean = false; // Used to prevent "Cancel" when Adding New Meter (Cancel leaves the meter blank)
+  // energyFinalUnit: string;
 
   page: number = 1;
   itemsPerPage: number = 10;
   pageSize: number;
   importWindow: boolean;
   editMeter: IdbUtilityMeter;
-  deleteMeterId: number;
+  meterToDelete: IdbUtilityMeter;
   constructor(
     public accountdbService: AccountdbService,
     public facilitydbService: FacilitydbService,
-    private utilityService: UtilityService,
+    // private utilityService: UtilityService,
     public utilityMeterDatadbService: UtilityMeterDatadbService,
     public utilityMeterdbService: UtilityMeterdbService,
     public utilityMeterGroupdbService: UtilityMeterGroupdbService,
@@ -64,10 +55,10 @@ export class EnergySourceComponent implements OnInit {
       this.meterList = meters;
     });
 
-    // Observe the energy final unit
-    this.utilityService.getEnergyFinalUnit().subscribe((value) => {
-      this.energyFinalUnit = value;
-    });
+    // Observe the energy final unit (not sure how the energyFinalUnit is used...-mark)
+    // this.utilityService.getEnergyFinalUnit().subscribe((value) => {
+    //   this.energyFinalUnit = value;
+    // });
   }
 
   ngOnDestroy() {
@@ -99,11 +90,11 @@ export class EnergySourceComponent implements OnInit {
   }
 
   //idk what this is for..
-  meterMapTabs() {
-    // Remap tabs
-    this.energySources = this.meterList.map(function (el) { return el.source; });
-    // this.energyConsumptionService.setEnergySource(this.energySources);
-  }
+  // meterMapTabs() {
+  //   // Remap tabs
+  //   this.energySources = this.meterList.map(function (el) { return el.source; });
+  //   // this.energyConsumptionService.setEnergySource(this.energySources);
+  // }
 
   meterExport() {
     const replacer = (key, value) => value === null ? '' : value; // specify how you want to handle null values here
@@ -148,15 +139,21 @@ export class EnergySourceComponent implements OnInit {
     this.editMeter = undefined;
   }
 
-  selectDeleteMeter(id: number){
-    this.deleteMeterId = id;
-  }
 
   deleteMeter(){
-    this.meterMenuOpen = null;
     //delete meter
-    this.utilityMeterdbService.deleteIndex(this.deleteMeterId);
+    this.utilityMeterdbService.deleteIndex(this.meterToDelete.id);
     //delete meter data
-    this.utilityMeterDatadbService.deleteMeterDataByMeterId(this.deleteMeterId);
+    this.utilityMeterDatadbService.deleteMeterDataByMeterId(this.meterToDelete.id);
+    this.cancelDelete();
+  }
+
+  selectDeleteMeter(meter: IdbUtilityMeter){
+    this.meterToDelete = meter;
+  }
+
+  cancelDelete(){
+    this.meterToDelete = undefined;
+    this.meterMenuOpen = null;
   }
 }

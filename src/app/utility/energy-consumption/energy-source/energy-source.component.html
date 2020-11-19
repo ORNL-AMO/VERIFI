@@ -64,7 +64,7 @@
             <i class="fa fa-ellipsis-v" (click)="meterToggleMenu(meter.id)"></i>
             <div class="meterMenu" [class.open]="meterMenuOpen === meter.id">
                 <p (click)="selectEditMeter(meter)">Edit</p>
-                <p (click)="popup = true; id = meter.id">Delete</p>
+                <p (click)="selectDeleteMeter(meter)">Delete</p>
             </div>
         </td>
     </tr>
@@ -90,15 +90,15 @@
     </div>
 </div>
 
-<div class="popup" [class.open]="popup == true">
-    <div class="popup-header">Delete Meter
-        <button class="item-right" (click)="popup = false">x</button>
+<div class="popup" [class.open]="meterToDelete">
+    <div class="popup-header" *ngIf="meterToDelete">Delete Meter: {{meterToDelete.name}}
+        <button class="item-right" (click)="cancelDelete()">x</button>
     </div>
     <div class="popup-body">
         <p>WARNING: By deleting this meter, you are also deleting all of the meter data and bills associated with it.
             Are you sure you want to preform this action?</p>
     </div>
     <div class="popup-footer text-right">
-        <button class="btn btn-danger" (click)="meterDelete(id); popup=false">Delete</button>
+        <button class="btn btn-danger" (click)="deleteMeter()">Delete</button>
     </div>
 </div>
