@@ -95,8 +95,8 @@ export interface IdbUtilityMeterData {
     demandBlockAmount: number,
     demandBlockCharge: number,
     //trans?
-    generalTransCharge: number,
-    transCharge: number,
+    generationTransmissionCharge: number,
+    transmissionCharge: number,
     powerFactorCharge: number,
     businessCharge: number,
     utilityTax: number,

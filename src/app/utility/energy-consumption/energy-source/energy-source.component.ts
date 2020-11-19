@@ -1,17 +1,11 @@
-import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
-import { FormGroup, FormControl, Validators } from '@angular/forms';
-// import { EnergyConsumptionService } from '../energy-consumption.service';
-import { AccountService } from "../../../account/account/account.service";
+import { Component, OnInit } from '@angular/core';
 import { AccountdbService } from "../../../indexedDB/account-db.service";
 import { FacilitydbService } from "../../../indexedDB/facility-db-service";
-import { FacilityService } from 'src/app/account/facility/facility.service';
-import { UtilityService } from "../../../utility/utility.service";
 import { UtilityMeterDatadbService } from "../../../indexedDB/utilityMeterData-db-service";
 import { UtilityMeterdbService } from "../../../indexedDB/utilityMeter-db-service";
 import { UtilityMeterGroupdbService } from "../../../indexedDB/utilityMeterGroup-db.service";
 import { listAnimation } from '../../../animations';
-import { ConvertUnitsService } from '../../../shared/convert-units/convert-units.service';
-import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterGroup } from 'src/app/models/idb';
+import { IdbAccount, IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
 import { Subscription } from 'rxjs';
 
 @Component({

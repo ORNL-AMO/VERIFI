@@ -28,6 +28,6 @@
 <p class="alert alert-danger" [hidden]="importError == ''">{{importError}}</p>
 
 <div class="saveCancel item-right">
-    <button class="btn btn-primary" (click)="resetImport(); importWindow = !importWindow">Cancel</button>
+    <button class="btn btn-primary" (click)="resetImport()">Cancel</button>
     <button class="btn btn-primary" (click)="runImport()" [disabled]="importError != ''">Submit</button>
 </div>

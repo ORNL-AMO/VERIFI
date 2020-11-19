@@ -34,6 +34,7 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { IndexedDBModule } from './indexedDB/indexed-db.module';
 import { ImportMeterDataComponent } from './utility/energy-consumption/energy-source/import-meter-data/import-meter-data.component';
 import { EditMeterFormComponent } from './utility/energy-consumption/energy-source/edit-meter-form/edit-meter-form.component';
+import { EditElectricBillComponent } from './utility/energy-consumption/electricity/edit-electric-bill/edit-electric-bill.component';
 
 
 
@@ -60,7 +61,8 @@ import { EditMeterFormComponent } from './utility/energy-consumption/energy-sour
     LoadingComponent,
     OtherFuelsComponent,
     ImportMeterDataComponent,
-    EditMeterFormComponent
+    EditMeterFormComponent,
+    EditElectricBillComponent
   ],
   imports: [
     BrowserModule,

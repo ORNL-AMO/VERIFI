@@ -1,5 +1,5 @@
 import { ElementRef, QueryList, ViewChildren, Injectable } from '@angular/core';
-import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { FormGroup, FormControl, Validators, FormBuilder } from '@angular/forms';
 import { Observable, BehaviorSubject } from 'rxjs';
 // import { AccountService } from "../../account/account/account.service";
 // import { FacilityService } from 'src/app/account/facility/facility.service';
@@ -75,7 +75,8 @@ export class EnergyConsumptionService {
     private utilityService: UtilityService,
     private loadingService: LoadingService,
     public utilityMeterdbService: UtilityMeterdbService,
-    public utilityMeterDatadbService: UtilityMeterDatadbService
+    public utilityMeterDatadbService: UtilityMeterDatadbService,
+    private formBuilder: FormBuilder
   ) {
     // Observe the accountid var
     // this.accountService.getValue().subscribe((value) => {
@@ -88,12 +89,12 @@ export class EnergyConsumptionService {
     // });
 
     // Observe the meter list
-    this.utilityService.getDisplayObj().subscribe((value) => {
-      this.meterList = value;
-    });
+    // this.utilityService.getDisplayObj().subscribe((value) => {
+    //   this.meterList = value;
+    // });
 
-    // Observe the meter list
-    this.utilityService.getMeterData();
+    // // Observe the meter list
+    // this.utilityService.getMeterData();
   }
 
   getEnergySource(): Observable<number> {
@@ -415,6 +416,47 @@ export class EnergyConsumptionService {
       downloadLink.click();
       document.body.removeChild(downloadLink);
     }
+  }
 
+
+  getMeterData(meterId: number): Array<IdbUtilityMeterData> {
+    let allFacilityData: Array<IdbUtilityMeterData> = this.utilityMeterDatadbService.facilityMeterData.getValue();
+    allFacilityData = allFacilityData.filter(meterDataItem => { return meterDataItem.meterId == meterId });
+    return allFacilityData;
+  }
+
+  getElectricityMeterDataForm(meterData: IdbUtilityMeterData): FormGroup {
+    return this.formBuilder.group({
+      id: [meterData.id, Validators.required],
+      meterId: [meterData.meterId, Validators.required],
+      facilityId: [meterData.facilityId, Validators.required],
+      accountId: [meterData.accountId, Validators.required],
+      readDate: [meterData.readDate, Validators.required],
+      unit: [meterData.unit, Validators.required],
+      totalEnergyUse: [meterData.totalEnergyUse, Validators.required],
+      totalCost: [meterData.totalCost, Validators.required],
+      commodityCharge: [meterData.commodityCharge, Validators.required],
+      deliveryCharge: [meterData.deliveryCharge, Validators.required],
+      otherCharge: [meterData.otherCharge, Validators.required],
+      checked: [meterData.checked, Validators.required],
+      totalDemand: [meterData.totalDemand, Validators.required],
+      basicCharge: [meterData.basicCharge, Validators.required],
+      supplyBlockAmount: [meterData.supplyBlockAmount, Validators.required],
+      supplyBlockCharge: [meterData.supplyBlockCharge, Validators.required],
+      flatRateAmount: [meterData.flatRateAmount, Validators.required],
+      flatRateCharge: [meterData.flatRateCharge, Validators.required],
+      peakAmount: [meterData.peakAmount, Validators.required],
+      peakCharge: [meterData.peakCharge, Validators.required],
+      offPeakAmount: [meterData.offPeakAmount, Validators.required],
+      offPeakCharge: [meterData.offPeakCharge, Validators.required],
+      demandBlockAmount: [meterData.demandBlockAmount, Validators.required],
+      demandBlockCharge: [meterData.demandBlockCharge, Validators.required],
+      generationTransmissionCharge: [meterData.generationTransmissionCharge, Validators.required],
+      transmissionCharge: [meterData.transmissionCharge, Validators.required],
+      powerFactorCharge: [meterData.powerFactorCharge, Validators.required],
+      businessCharge: [meterData.businessCharge, Validators.required],
+      utilityTax: [meterData.utilityTax, Validators.required],
+      latePayment: [meterData.latePayment, Validators.required]
+    })
   }
 }
