@@ -35,3 +35,33 @@ ul.col.verticalTable li:first-child {
 ul.col.verticalTable {
     padding: 0px;
 }
+
+.stick-scroll-x{
+    display: block;
+    border: none;
+    overflow-x: scroll;
+}
+
+.stick-scroll-x table tr th:first-child,
+.stick-scroll-x table tr td:first-child {
+    position: sticky;
+    left: -1px;
+    background-color: white;
+    box-shadow: 1px 1px 0px 0px #dde0e6;
+    z-index: 1;
+    white-space: nowrap;
+}
+.stick-scroll-x table tr:first-child th:first-child {
+    background-color: #ebeef3;
+}
+.stick-scroll-x table>tr:nth-of-type(odd)>td:first-child {
+    background-color: #f3f6fd;
+}
+.stick-scroll-x table td:last-child .meterMenu {
+    top: initial;
+    bottom: 30px;
+}
+.stick-scroll-x table tr:first-child td .meterMenu {
+    top: 30px;
+    bottom: initial;
+}
