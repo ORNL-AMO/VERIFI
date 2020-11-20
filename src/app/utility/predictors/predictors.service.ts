@@ -115,4 +115,34 @@ export class PredictorsService {
     return this.predictordbService.getAllByName(name);
   }
 
+  addPredictorByImport(obj): void {
+    let counter = 1;
+
+      this.predictordbService.add('name',this.facilityid,this.accountid,'date').then(
+        id => {
+          counter++;
+
+          const importLine = {
+            id: id,
+            facilityid: this.facilityid,
+            accountid: this.accountid,
+            name: obj.name,
+            desc: obj.desc,
+            unit: obj.unit,
+            date: obj.date,
+            amount: obj.amount
+          }
+
+          this.predictordbService.update(importLine); // Update db
+
+          /*if(counter === this.import.length) {
+            this.utilityService.setMeterList(); // refresh the data
+          }*/
+          
+        },
+        error => {
+            console.log(error);
+        }
+      );
+  }
 }
