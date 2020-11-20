@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db-service';
 import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { ElectricityDataFilter, UtilityMeterDataService } from '../utility-meter-data.service';
 
@@ -24,9 +25,12 @@ export class ElectricityDataTableComponent implements OnInit {
 
   electricityDataFilters: Array<ElectricityDataFilter>;
   electricityDataFilterSub: Subscription;
-  constructor(private utilityMeterDataService: UtilityMeterDataService) { }
+  allChecked: boolean;
+  constructor(private utilityMeterDataService: UtilityMeterDataService, private utilityMeterDataDbService: UtilityMeterDatadbService) { }
 
   ngOnInit(): void {
+    let hasFalseChecked: IdbUtilityMeterData = this.meterListItem.meterDataItems.find(meterDataItem => { return meterDataItem.checked == false });
+    this.allChecked = (hasFalseChecked == undefined);
     this.electricityDataFilterSub = this.utilityMeterDataService.electricityDataFilters.subscribe(electricityDataFilters => {
       this.electricityDataFilters = electricityDataFilters;
     });
@@ -34,5 +38,16 @@ export class ElectricityDataTableComponent implements OnInit {
 
   ngOnDestroy() {
     this.electricityDataFilterSub.unsubscribe();
+  }
+
+  checkAll() {
+    this.meterListItem.meterDataItems.forEach(dataItem => {
+      dataItem.checked = this.allChecked;
+      this.utilityMeterDataDbService.update(dataItem);
+    })
+  }
+
+  toggleChecked(itemIndex: number) {
+    this.utilityMeterDataDbService.update(this.meterListItem.meterDataItems[itemIndex]);
   }
 }

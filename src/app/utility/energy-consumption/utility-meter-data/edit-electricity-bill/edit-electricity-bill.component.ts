@@ -23,10 +23,10 @@ export class EditElectricityBillComponent implements OnInit {
   meterDataForm: FormGroup;
   electricityDataFilters: Array<ElectricityDataFilter>;
   electricityDataFiltersSub: Subscription;
-  constructor(private energyConsumptionService: EnergyConsumptionService, private utilityMeterDataDbService: UtilityMeterDatadbService, private utilityMeterDataService: UtilityMeterDataService) { }
+  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private utilityMeterDataService: UtilityMeterDataService) { }
 
   ngOnInit(): void {
-    this.meterDataForm = this.energyConsumptionService.getElectricityMeterDataForm(this.editMeterData);
+    this.meterDataForm = this.utilityMeterDataService.getElectricityMeterDataForm(this.editMeterData);
     this.electricityDataFiltersSub = this.utilityMeterDataService.electricityDataFilters.subscribe(dataFilters => {
       this.electricityDataFilters = dataFilters;
     });
@@ -49,6 +49,13 @@ export class EditElectricityBillComponent implements OnInit {
       this.utilityMeterDataDbService.add(this.meterDataForm.value);
     }
     this.cancel();
+  }
+
+  showAllFields(){
+    this.electricityDataFilters.forEach(field => {
+      field.filter = true;
+    });
+    this.utilityMeterDataService.electricityDataFilters.next(this.electricityDataFilters);
   }
 
 }

@@ -4,25 +4,13 @@
     <!--Import/Export-->
     <div class="importExport item-right">
         <button class="btn btn-outline" (click)="openImportModal()">Import</button>
-        <button class="btn btn-outline" (click)="meterExport('Electricity')">Export</button>
+        <button class="btn btn-outline" (click)="meterExport()">Export</button>
     </div>
     <!--Bulk Delete-->
-    <div class="bulk-delete item-right" [class.show]="is_checked">
+    <div class="bulk-delete item-right" [class.show]="hasCheckedItems">
         <button class="btn btn-danger" (click)='bulkDelete()'>Bulk Delete</button>
     </div>
     <!--Column Filters-->
-    <!-- <div class="filter item-right">
-        <button class="btn" [ngClass]="{'btn-solid' : !filterColMenu, 'btn-outline' : filterColMenu}"
-            (click)="filterColMenu = !filterColMenu; filterInpMenu = false">Filter</button>
-        <div class="filter-dropdown" [hidden]="!filterColMenu">
-            <label *ngFor="let filterCols of filterCol">
-                <input type="checkbox" name="filterCols.name" [checked]="filterCols.filter"
-                    (change)="filterCols.filter = !filterCols.filter">{{filterCols.display}}
-            </label>
-            <br><br>
-            <a (click)="showAllColumns();">Show All</a>
-        </div>
-    </div> -->
     <app-utility-meter-data-filter *ngIf="selectedSource == 'Electricity'"></app-utility-meter-data-filter>
     <!--Items Per Page-->
     <div class="items-per-page item-right">
@@ -89,9 +77,9 @@
 <div class="window" [class.open]="editMeterData">
     <div class="windowOverlay"></div>
     <div class="windowContent windowContentLg">
-        <app-edit-electricy-bill *ngIf="editMeterData && selectedSource == 'Electricity'" [editMeterData]="editMeterData"
+        <app-edit-electricity-bill *ngIf="editMeterData && selectedSource == 'Electricity'" [editMeterData]="editMeterData"
             (emitClose)="cancelEditMeter()" [addOrEdit]="addOrEdit">
-        </app-edit-electricy-bill>
+        </app-edit-electricity-bill>
         <app-edit-utility-bill *ngIf="editMeterData && selectedSource != 'Electricity'" [editMeterData]="editMeterData"
             (emitClose)="cancelEditMeter()" [addOrEdit]="addOrEdit">
         </app-edit-utility-bill>
@@ -102,6 +90,6 @@
 <div class="window" [class.open]="showImport">
     <div class="windowOverlay"></div>
     <div class="windowContent">
-        <app-import-meter-data *ngIf="showImport" (emitClose)="closeImportModal()"></app-import-meter-data>
+        <app-import-meter-data *ngIf="showImport" (emitClose)="closeImportModal()" [selectedSource]="selectedSource"></app-import-meter-data>
     </div>
 </div>

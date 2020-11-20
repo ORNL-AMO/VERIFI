@@ -7,6 +7,7 @@ import { Subscription } from 'rxjs';
 import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db-service';
 import { ActivatedRoute } from '@angular/router';
+import { UtilityMeterDataService } from './utility-meter-data.service';
 
 @Component({
   selector: 'app-utility-meter-data',
@@ -39,16 +40,17 @@ export class UtilityMeterDataComponent implements OnInit {
   showImport: boolean;
   addOrEdit: string;
   selectedSource: string;
+  hasCheckedItems: boolean;
   constructor(
     public energyConsumptionService: EnergyConsumptionService,
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private activatedRoute: ActivatedRoute
+    private activatedRoute: ActivatedRoute,
+    private utilityMeterDataService: UtilityMeterDataService
   ) { }
 
   ngOnInit() {
     this.activatedRoute.url.subscribe(url => {
-      console.log('url change');
       this.setUtilitySource(url[0].path);
       this.setData();
     })
@@ -101,6 +103,7 @@ export class UtilityMeterDataComponent implements OnInit {
         meterDataItems: meterData
       });
     });
+    this.setHasCheckedItems();
   }
 
   resetImport() {
@@ -149,11 +152,19 @@ export class UtilityMeterDataComponent implements OnInit {
   }
 
   meterExport() {
-
+    this.utilityMeterDataService.meterExport(this.meterList, this.selectedSource);
   }
 
   bulkDelete() {
-
+    let meterDataItemsToDelete: Array<IdbUtilityMeterData> = new Array();
+    this.meterList.forEach(meterListItem => {
+      meterListItem.meterDataItems.forEach(meterDataItem => {
+        if (meterDataItem.checked) {
+          meterDataItemsToDelete.push(meterDataItem);
+        }
+      })
+    });
+    meterDataItemsToDelete.forEach(meterItemToDelete => { this.utilityMeterDataDbService.deleteIndex(meterItemToDelete.id) });
   }
 
   meterDataAdd(meter: IdbUtilityMeter) {
@@ -161,7 +172,14 @@ export class UtilityMeterDataComponent implements OnInit {
     this.editMeterData = this.utilityMeterDataDbService.getNewIdbUtilityMeterData(meter.id, meter.facilityId, meter.accountId);
   }
 
-  checkAll() {
+  setHasCheckedItems() {
+    let findCheckedItem: { idbMeter: IdbUtilityMeter, meterDataItems: Array<IdbUtilityMeterData> } = this.meterList.find(meterItem => {
+      return meterItem.meterDataItems.find(meterDataItem => { return meterDataItem.checked == true });
+    });
+    this.hasCheckedItems = (findCheckedItem != undefined);
+  }
 
+  setDeleteMeterData(meter: IdbUtilityMeterData){
+    //TODO
   }
 }

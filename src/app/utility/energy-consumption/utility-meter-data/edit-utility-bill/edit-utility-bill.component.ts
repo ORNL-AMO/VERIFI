@@ -3,6 +3,7 @@ import { FormGroup } from '@angular/forms';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db-service';
 import { IdbUtilityMeterData } from 'src/app/models/idb';
 import { EnergyConsumptionService } from '../../energy-consumption.service';
+import { UtilityMeterDataService } from '../utility-meter-data.service';
 
 @Component({
   selector: 'app-edit-utility-bill',
@@ -19,10 +20,10 @@ export class EditUtilityBillComponent implements OnInit {
 
   meterDataForm: FormGroup;
 
-  constructor(private energyConsumptionService: EnergyConsumptionService, private utilityMeterDataDbService: UtilityMeterDatadbService) { }
+  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private utilityMeterDataService: UtilityMeterDataService) { }
 
   ngOnInit(): void {
-    this.meterDataForm = this.energyConsumptionService.getGeneralMeterDataForm(this.editMeterData);
+    this.meterDataForm = this.utilityMeterDataService.getGeneralMeterDataForm(this.editMeterData);
   }
 
   cancel() {

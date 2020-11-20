@@ -1,11 +1,10 @@
 <h4>Import Meters</h4>
 <br>
 <form>
-    <input type="file" #inputFile accept=".csv"
-        (change)="meterDataImport('Electricity',$event.target.files)">
+    <input type="file" #inputFile accept=".csv" (change)="meterDataImport($event.target.files)">
 </form>
 <br>
-<div class="importQuickView" [hidden]="quickView ==''">
+<div class="importQuickView" [hidden]="!quickView">
     <p class="bold">Quick View</p>
     <table>
         <tr>
@@ -13,50 +12,50 @@
             <th>Total kWh</th>
             <th>Total Demand</th>
             <th>Total Cost</th>
-            <th [hidden]="!filterCol[0]['filter']">Basic Charge</th>
-            <th [hidden]="!filterCol[1]['filter']">Supply Block Amt</th>
-            <th [hidden]="!filterCol[2]['filter']">Supply Block Charge</th>
-            <th [hidden]="!filterCol[3]['filter']">Flat Rate Amount</th>
-            <th [hidden]="!filterCol[4]['filter']">Flat Rate Charge</th>
-            <th [hidden]="!filterCol[5]['filter']">Peak Amount</th>
-            <th [hidden]="!filterCol[6]['filter']">Peak Charge</th>
-            <th [hidden]="!filterCol[7]['filter']">Off-Peak Amount</th>
-            <th [hidden]="!filterCol[8]['filter']">Off-Peak Charge</th>
-            <th [hidden]="!filterCol[9]['filter']">Demand Block Amt</th>
-            <th [hidden]="!filterCol[10]['filter']">Demand Block Charge</th>
-            <th [hidden]="!filterCol[11]['filter']">Gen Trans Charge</th>
-            <th [hidden]="!filterCol[12]['filter']">Delivery Charge</th>
-            <th [hidden]="!filterCol[13]['filter']">Trans Charge</th>
-            <th [hidden]="!filterCol[14]['filter']">Power Factor Charge</th>
-            <th [hidden]="!filterCol[15]['filter']">Business Charge</th>
-            <th [hidden]="!filterCol[16]['filter']">Utility Tax</th>
-            <th [hidden]="!filterCol[17]['filter']">Late Payment</th>
-            <th [hidden]="!filterCol[18]['filter']">Other Charge</th>
+            <th [hidden]="!electricityDataFilters[0]['filter']">Basic Charge</th>
+            <th [hidden]="!electricityDataFilters[1]['filter']">Supply Block Amt</th>
+            <th [hidden]="!electricityDataFilters[2]['filter']">Supply Block Charge</th>
+            <th [hidden]="!electricityDataFilters[3]['filter']">Flat Rate Amount</th>
+            <th [hidden]="!electricityDataFilters[4]['filter']">Flat Rate Charge</th>
+            <th [hidden]="!electricityDataFilters[5]['filter']">Peak Amount</th>
+            <th [hidden]="!electricityDataFilters[6]['filter']">Peak Charge</th>
+            <th [hidden]="!electricityDataFilters[7]['filter']">Off-Peak Amount</th>
+            <th [hidden]="!electricityDataFilters[8]['filter']">Off-Peak Charge</th>
+            <th [hidden]="!electricityDataFilters[9]['filter']">Demand Block Amt</th>
+            <th [hidden]="!electricityDataFilters[10]['filter']">Demand Block Charge</th>
+            <th [hidden]="!electricityDataFilters[11]['filter']">Gen Trans Charge</th>
+            <th [hidden]="!electricityDataFilters[12]['filter']">Delivery Charge</th>
+            <th [hidden]="!electricityDataFilters[13]['filter']">Trans Charge</th>
+            <th [hidden]="!electricityDataFilters[14]['filter']">Power Factor Charge</th>
+            <th [hidden]="!electricityDataFilters[15]['filter']">Business Charge</th>
+            <th [hidden]="!electricityDataFilters[16]['filter']">Utility Tax</th>
+            <th [hidden]="!electricityDataFilters[17]['filter']">Late Payment</th>
+            <th [hidden]="!electricityDataFilters[18]['filter']">Other Charge</th>
         </tr>
         <tr *ngFor="let item of quickView">
             <td>{{item.readDate}}</td>
             <td>{{item.totalKwh}}</td>
             <td>{{item.totalDemand}}</td>
             <td>${{item.totalCost}}</td>
-            <td [hidden]="!filterCol[0]['filter']">${{item.basicCharge}}</td>
-            <td [hidden]="!filterCol[1]['filter']">{{item.supplyBlockAmt}}</td>
-            <td [hidden]="!filterCol[2]['filter']">${{item.supplyBlockCharge}}</td>
-            <td [hidden]="!filterCol[3]['filter']">{{item.flatRateAmt}}</td>
-            <td [hidden]="!filterCol[4]['filter']">${{item.flatRateCharge}}</td>
-            <td [hidden]="!filterCol[5]['filter']">{{item.peakAmt}}</td>
-            <td [hidden]="!filterCol[6]['filter']">${{item.peakCharge}}</td>
-            <td [hidden]="!filterCol[7]['filter']">{{item.offpeakAmt}}</td>
-            <td [hidden]="!filterCol[8]['filter']">${{item.offpeakCharge}}</td>
-            <td [hidden]="!filterCol[9]['filter']">{{item.demandBlockAmt}}</td>
-            <td [hidden]="!filterCol[10]['filter']">${{item.demandBlockCharge}}</td>
-            <td [hidden]="!filterCol[11]['filter']">${{item.genTransCharge}}</td>
-            <td [hidden]="!filterCol[12]['filter']">${{item.deliveryCharge}}</td>
-            <td [hidden]="!filterCol[13]['filter']">${{item.transCharge}}</td>
-            <td [hidden]="!filterCol[14]['filter']">${{item.powerFactorCharge}}</td>
-            <td [hidden]="!filterCol[15]['filter']">${{item.businessCharge}}</td>
-            <td [hidden]="!filterCol[16]['filter']">${{item.utilityTax}}</td>
-            <td [hidden]="!filterCol[17]['filter']">${{item.latePayment}}</td>
-            <td [hidden]="!filterCol[18]['filter']">${{item.otherCharge}}</td>
+            <td [hidden]="!electricityDataFilters[0]['filter']">${{item.basicCharge}}</td>
+            <td [hidden]="!electricityDataFilters[1]['filter']">{{item.supplyBlockAmt}}</td>
+            <td [hidden]="!electricityDataFilters[2]['filter']">${{item.supplyBlockCharge}}</td>
+            <td [hidden]="!electricityDataFilters[3]['filter']">{{item.flatRateAmt}}</td>
+            <td [hidden]="!electricityDataFilters[4]['filter']">${{item.flatRateCharge}}</td>
+            <td [hidden]="!electricityDataFilters[5]['filter']">{{item.peakAmt}}</td>
+            <td [hidden]="!electricityDataFilters[6]['filter']">${{item.peakCharge}}</td>
+            <td [hidden]="!electricityDataFilters[7]['filter']">{{item.offpeakAmt}}</td>
+            <td [hidden]="!electricityDataFilters[8]['filter']">${{item.offpeakCharge}}</td>
+            <td [hidden]="!electricityDataFilters[9]['filter']">{{item.demandBlockAmt}}</td>
+            <td [hidden]="!electricityDataFilters[10]['filter']">${{item.demandBlockCharge}}</td>
+            <td [hidden]="!electricityDataFilters[11]['filter']">${{item.genTransCharge}}</td>
+            <td [hidden]="!electricityDataFilters[12]['filter']">${{item.deliveryCharge}}</td>
+            <td [hidden]="!electricityDataFilters[13]['filter']">${{item.transCharge}}</td>
+            <td [hidden]="!electricityDataFilters[14]['filter']">${{item.powerFactorCharge}}</td>
+            <td [hidden]="!electricityDataFilters[15]['filter']">${{item.businessCharge}}</td>
+            <td [hidden]="!electricityDataFilters[16]['filter']">${{item.utilityTax}}</td>
+            <td [hidden]="!electricityDataFilters[17]['filter']">${{item.latePayment}}</td>
+            <td [hidden]="!electricityDataFilters[18]['filter']">${{item.otherCharge}}</td>
         </tr>
     </table>
 </div>

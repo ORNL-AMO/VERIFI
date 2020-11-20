@@ -245,140 +245,140 @@ export class EnergyConsumptionService {
 
   }
 
-  meterDataImport(source, files: FileList) {
-    // Clear with each upload
-    this.quickView = [];
-    this.importError = '';
-    let allowedHeaders;
+  // meterDataImport(source, files: FileList) {
+  //   // Clear with each upload
+  //   this.quickView = [];
+  //   this.importError = '';
+  //   let allowedHeaders;
 
-    if (source == 'Electricity') {
-      allowedHeaders = ["meterNumber", "readDate", "totalEnergyUse", "totalDemand", "totalCost", "unit", "basicCharge", "supplyBlockAmt", "supplyBlockCharge", "flatRateAmt", "flatRateCharge", "peakAmt", "peakCharge", "offpeakAmt", "offpeakCharge", "demandBlockAmt", "demandBlockCharge", "genTransCharge", "deliveryCharge", "transCharge", "powerFactorCharge", "businessCharge", "utilityTax", "latePayment", "otherCharge"];
-    } else {
-      allowedHeaders = ["meterNumber", "readDate", "totalEnergyUse", "commodityCharge", "deliveryCharge", "otherCharge", "unit"];
-    }
+  //   if (source == 'Electricity') {
+  //     allowedHeaders = ["meterNumber", "readDate", "totalEnergyUse", "totalDemand", "totalCost", "unit", "basicCharge", "supplyBlockAmt", "supplyBlockCharge", "flatRateAmt", "flatRateCharge", "peakAmt", "peakCharge", "offpeakAmt", "offpeakCharge", "demandBlockAmt", "demandBlockCharge", "genTransCharge", "deliveryCharge", "transCharge", "powerFactorCharge", "businessCharge", "utilityTax", "latePayment", "otherCharge"];
+  //   } else {
+  //     allowedHeaders = ["meterNumber", "readDate", "totalEnergyUse", "commodityCharge", "deliveryCharge", "otherCharge", "unit"];
+  //   }
 
-    if (files && files.length > 0) {
-      let file: File = files.item(0);
+  //   if (files && files.length > 0) {
+  //     let file: File = files.item(0);
 
-      let reader: FileReader = new FileReader();
-      reader.readAsText(file);
-      reader.onload = (e) => {
-        let csv: string = reader.result as string;
-        const lines = csv.split("\n");
-        const headers = lines[0].replace('\r', '').split(",");
+  //     let reader: FileReader = new FileReader();
+  //     reader.readAsText(file);
+  //     reader.onload = (e) => {
+  //       let csv: string = reader.result as string;
+  //       const lines = csv.split("\n");
+  //       const headers = lines[0].replace('\r', '').split(",");
 
 
-        // if contains.. not if in the same order
-        if (JSON.stringify(headers) === JSON.stringify(allowedHeaders)) {
+  //       // if contains.. not if in the same order
+  //       if (JSON.stringify(headers) === JSON.stringify(allowedHeaders)) {
 
-          for (var i = 1; i < lines.length; i++) {
-            const obj = {};
-            const currentline = lines[i].split(",");
-            for (var j = 0; j < headers.length; j++) {
-              obj[headers[j]] = currentline[j];
-            }
+  //         for (var i = 1; i < lines.length; i++) {
+  //           const obj = {};
+  //           const currentline = lines[i].split(",");
+  //           for (var j = 0; j < headers.length; j++) {
+  //             obj[headers[j]] = currentline[j];
+  //           }
 
-            // Read csv and push to obj array.
-            this.import.push(obj);
+  //           // Read csv and push to obj array.
+  //           this.import.push(obj);
 
-            // Push the first 3 results to a quick view array
-            if (i < 4) {
-              this.quickView.push(obj);
-            }
+  //           // Push the first 3 results to a quick view array
+  //           if (i < 4) {
+  //             this.quickView.push(obj);
+  //           }
 
-          }
-        } else {
-          // csv didn't match -> Show error
-          this.importError = "Error with file. Please match your file to the provided template.";
-          return false;
-        }
-      }
-    }
-  }
+  //         }
+  //       } else {
+  //         // csv didn't match -> Show error
+  //         this.importError = "Error with file. Please match your file to the provided template.";
+  //         return false;
+  //       }
+  //     }
+  //   }
+  // }
 
-  meterAddCSV() {
-    let counter = 1; // keeps track of the end of the loop (async)
-    let meterids = [];
-    const length = this.import.length;
+  // meterAddCSV() {
+  //   let counter = 1; // keeps track of the end of the loop (async)
+  //   let meterids = [];
+  //   const length = this.import.length;
 
-    this.importPopup = false;
-    this.loadingService.setLoadingStatus(true);
+  //   this.importPopup = false;
+  //   this.loadingService.setLoadingStatus(true);
 
-    for (let i = 0; i < this.import.length; i++) {
-      let obj = this.import[i];
+  //   for (let i = 0; i < this.import.length; i++) {
+  //     let obj = this.import[i];
 
-      meterids.push(this.meterList.find(x => x.meterNumber == obj.meterNumber)['id']); // Get id of matching meter numbers
-      console.log(meterids);
-      let newMeterData: IdbUtilityMeterData = this.utilityMeterDatadbService.getNewIdbUtilityMeterData(meterids[i], this.facilityid, this.accountid);
-      // this.utilityMeterDatadbService.add(newMeterData).subscribe(
-      //   id => {
-      //     this.loadingService.setLoadingMessage(counter + " of " + length + " Records Imported...");
+  //     meterids.push(this.meterList.find(x => x.meterNumber == obj.meterNumber)['id']); // Get id of matching meter numbers
+  //     console.log(meterids);
+  //     let newMeterData: IdbUtilityMeterData = this.utilityMeterDatadbService.getNewIdbUtilityMeterData(meterids[i], this.facilityid, this.accountid);
+  //     // this.utilityMeterDatadbService.add(newMeterData).subscribe(
+  //     //   id => {
+  //     //     this.loadingService.setLoadingMessage(counter + " of " + length + " Records Imported...");
 
-      //     const importLine = {
-      //       // All Fuels
-      //       id: id,
-      //       meterid: meterids[i],
-      //       facilityid: this.facilityid,
-      //       accountid: this.accountid,
-      //       readDate: obj.readDate,
-      //       unit: obj.unit || 'NA',
-      //       totalEnergyUse: obj.totalEnergyUse || 0,
+  //     //     const importLine = {
+  //     //       // All Fuels
+  //     //       id: id,
+  //     //       meterid: meterids[i],
+  //     //       facilityid: this.facilityid,
+  //     //       accountid: this.accountid,
+  //     //       readDate: obj.readDate,
+  //     //       unit: obj.unit || 'NA',
+  //     //       totalEnergyUse: obj.totalEnergyUse || 0,
 
-      //       // Natural Gas +
-      //       commodityCharge: obj.commodityCharge || 0,
-      //       deliveryCharge: obj.deliveryCharge || 0,
-      //       otherCharge: obj.otherCharge || 0,
+  //     //       // Natural Gas +
+  //     //       commodityCharge: obj.commodityCharge || 0,
+  //     //       deliveryCharge: obj.deliveryCharge || 0,
+  //     //       otherCharge: obj.otherCharge || 0,
 
-      //       // Electric only
-      //       totalDemand: obj.totalDemand || 0,
-      //       totalCost: obj.totalCost || 0,
-      //       basicCharge: obj.basicCharge || 0,
-      //       supplyBlockAmt: obj.supplyBlockAmt || 0,
-      //       supplyBlockCharge: obj.supplyBlockCharge || 0,
-      //       flatRateAmt: obj.flatRateAmt || 0,
-      //       flatRateCharge: obj.flatRateCharge || 0,
-      //       peakAmt: obj.peakAmt || 0,
-      //       peakCharge: obj.peakCharge || 0,
-      //       offpeakAmt: obj.offpeakAmt || 0,
-      //       offpeakCharge: obj.offpeakCharge || 0,
-      //       demandBlockAmt: obj.demandBlockAmt || 0,
-      //       demandBlockCharge: obj.demandBlockCharge || 0,
-      //       genTransCharge: obj.genTransCharge || 0,
-      //       transCharge: obj.transCharge || 0,
-      //       powerFactorCharge: obj.powerFactorCharge || 0,
-      //       businessCharge: obj.businessCharge || 0,
-      //       utilityTax: obj.utilityTax || 0,
-      //       latePayment: obj.latePayment || 0,
-      //       checked: false,
-      //     }
-      //     //TODO: MARK COMMENTED OUT ISSUE-55
-      //     // this.utilityMeterDatadbService.update(importLine); // Update db
+  //     //       // Electric only
+  //     //       totalDemand: obj.totalDemand || 0,
+  //     //       totalCost: obj.totalCost || 0,
+  //     //       basicCharge: obj.basicCharge || 0,
+  //     //       supplyBlockAmt: obj.supplyBlockAmt || 0,
+  //     //       supplyBlockCharge: obj.supplyBlockCharge || 0,
+  //     //       flatRateAmt: obj.flatRateAmt || 0,
+  //     //       flatRateCharge: obj.flatRateCharge || 0,
+  //     //       peakAmt: obj.peakAmt || 0,
+  //     //       peakCharge: obj.peakCharge || 0,
+  //     //       offpeakAmt: obj.offpeakAmt || 0,
+  //     //       offpeakCharge: obj.offpeakCharge || 0,
+  //     //       demandBlockAmt: obj.demandBlockAmt || 0,
+  //     //       demandBlockCharge: obj.demandBlockCharge || 0,
+  //     //       genTransCharge: obj.genTransCharge || 0,
+  //     //       transCharge: obj.transCharge || 0,
+  //     //       powerFactorCharge: obj.powerFactorCharge || 0,
+  //     //       businessCharge: obj.businessCharge || 0,
+  //     //       utilityTax: obj.utilityTax || 0,
+  //     //       latePayment: obj.latePayment || 0,
+  //     //       checked: false,
+  //     //     }
+  //     //     //TODO: MARK COMMENTED OUT ISSUE-55
+  //     //     // this.utilityMeterDatadbService.update(importLine); // Update db
 
-      //     // If end of the loop
-      //     if (counter === length) {
-      //       //this.utilityService.setMeterData(this.meterList); // refresh the data
-      //       this.utilityService.setMeterData(); // refresh the data
-      //       this.loadingService.setLoadingStatus(false);
-      //     }
+  //     //     // If end of the loop
+  //     //     if (counter === length) {
+  //     //       //this.utilityService.setMeterData(this.meterList); // refresh the data
+  //     //       this.utilityService.setMeterData(); // refresh the data
+  //     //       this.loadingService.setLoadingStatus(false);
+  //     //     }
 
-      //     counter++;
+  //     //     counter++;
 
-      //   },
-      //   error => {
-      //     console.log(error);
-      //   }
-      // );
-    }
-    this.resetImport();
+  //     //   },
+  //     //   error => {
+  //     //     console.log(error);
+  //     //   }
+  //     // );
+  //   }
+  //   this.resetImport();
 
-  }
+  // }
 
-  resetImport() {
-    // this.myInputVariable.nativeElement.value = '';
-    this.quickView = [];
-    this.import = [];
-    this.importError = '';
-  }
+  // resetImport() {
+  //   // this.myInputVariable.nativeElement.value = '';
+  //   this.quickView = [];
+  //   this.import = [];
+  //   this.importError = '';
+  // }
 
   meterExport(source) {
     let csv;
@@ -421,59 +421,9 @@ export class EnergyConsumptionService {
 
   getMeterData(meterId: number): Array<IdbUtilityMeterData> {
     let allFacilityData: Array<IdbUtilityMeterData> = this.utilityMeterDatadbService.facilityMeterData.getValue();
-    allFacilityData = allFacilityData.filter(meterDataItem => { return meterDataItem.meterId == meterId });
-    return allFacilityData;
+    let allMeterData: Array<IdbUtilityMeterData> = allFacilityData.filter(meterDataItem => { return meterDataItem.meterId == meterId });
+    return allMeterData;
   }
 
-  getElectricityMeterDataForm(meterData: IdbUtilityMeterData): FormGroup {
-    return this.formBuilder.group({
-      id: [meterData.id, Validators.required],
-      meterId: [meterData.meterId, Validators.required],
-      facilityId: [meterData.facilityId, Validators.required],
-      accountId: [meterData.accountId, Validators.required],
-      readDate: [meterData.readDate, Validators.required],
-      unit: [meterData.unit, Validators.required],
-      totalEnergyUse: [meterData.totalEnergyUse, Validators.required],
-      totalCost: [meterData.totalCost, Validators.required],
-      commodityCharge: [meterData.commodityCharge, Validators.required],
-      deliveryCharge: [meterData.deliveryCharge, Validators.required],
-      otherCharge: [meterData.otherCharge, Validators.required],
-      checked: [meterData.checked, Validators.required],
-      totalDemand: [meterData.totalDemand, Validators.required],
-      basicCharge: [meterData.basicCharge, Validators.required],
-      supplyBlockAmount: [meterData.supplyBlockAmount, Validators.required],
-      supplyBlockCharge: [meterData.supplyBlockCharge, Validators.required],
-      flatRateAmount: [meterData.flatRateAmount, Validators.required],
-      flatRateCharge: [meterData.flatRateCharge, Validators.required],
-      peakAmount: [meterData.peakAmount, Validators.required],
-      peakCharge: [meterData.peakCharge, Validators.required],
-      offPeakAmount: [meterData.offPeakAmount, Validators.required],
-      offPeakCharge: [meterData.offPeakCharge, Validators.required],
-      demandBlockAmount: [meterData.demandBlockAmount, Validators.required],
-      demandBlockCharge: [meterData.demandBlockCharge, Validators.required],
-      generationTransmissionCharge: [meterData.generationTransmissionCharge, Validators.required],
-      transmissionCharge: [meterData.transmissionCharge, Validators.required],
-      powerFactorCharge: [meterData.powerFactorCharge, Validators.required],
-      businessCharge: [meterData.businessCharge, Validators.required],
-      utilityTax: [meterData.utilityTax, Validators.required],
-      latePayment: [meterData.latePayment, Validators.required]
-    })
-  }
-
-  getGeneralMeterDataForm(meterData: IdbUtilityMeterData): FormGroup {
-    return this.formBuilder.group({
-      id: [meterData.id, Validators.required],
-      meterId: [meterData.meterId, Validators.required],
-      facilityId: [meterData.facilityId, Validators.required],
-      accountId: [meterData.accountId, Validators.required],
-      readDate: [meterData.readDate, Validators.required],
-      unit: [meterData.unit, Validators.required],
-      totalEnergyUse: [meterData.totalEnergyUse, Validators.required],
-      totalCost: [meterData.totalCost, Validators.required],
-      commodityCharge: [meterData.commodityCharge, Validators.required],
-      deliveryCharge: [meterData.deliveryCharge, Validators.required],
-      otherCharge: [meterData.otherCharge, Validators.required],
-      checked: [meterData.checked, Validators.required]
-    });
-  }
+  
 }

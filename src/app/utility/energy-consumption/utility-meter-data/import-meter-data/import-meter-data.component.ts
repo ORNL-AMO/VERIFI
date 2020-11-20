@@ -2,33 +2,38 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db-service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db-service';
 import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { ElectricityDataFilter, UtilityMeterDataService } from '../utility-meter-data.service';
 
 @Component({
   selector: 'app-import-meter-data',
   templateUrl: './import-meter-data.component.html',
-  styleUrls: ['./import-meter-data.component.css', '../electricity.component.css']
+  styleUrls: ['./import-meter-data.component.css']
 })
 export class ImportMeterDataComponent implements OnInit {
+  @Input()
+  selectedSource: string;
   @Output('emitClose')
   emitClose: EventEmitter<boolean> = new EventEmitter<boolean>();
 
   importError: string;
   quickView: Array<IdbUtilityMeterData>;
   import: Array<IdbUtilityMeterData>;
-  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private utilityMeterDbService: UtilityMeterdbService) { }
+  electricityDataFilters: Array<ElectricityDataFilter>;
+  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private utilityMeterDbService: UtilityMeterdbService, private utilityMeterDataService: UtilityMeterDataService) { }
 
   ngOnInit(): void {
+    this.electricityDataFilters = this.utilityMeterDataService.electricityDataFilters.getValue();
   }
 
 
-  meterDataImport(source: string, files: FileList) {
+  meterDataImport(files: FileList) {
     // Clear with each upload
     this.quickView = new Array();
     this.importError = '';
     this.import = new Array();
     let allowedHeaders: Array<string>;
 
-    if (source == 'Electricity') {
+    if (this.selectedSource == 'Electricity') {
       allowedHeaders = ["meterNumber", "readDate", "totalEnergyUse", "totalDemand", "totalCost", "unit", "basicCharge", "supplyBlockAmt", "supplyBlockCharge", "flatRateAmt", "flatRateCharge", "peakAmt", "peakCharge", "offpeakAmt", "offpeakCharge", "demandBlockAmt", "demandBlockCharge", "genTransCharge", "deliveryCharge", "transCharge", "powerFactorCharge", "businessCharge", "utilityTax", "latePayment", "otherCharge"];
     } else {
       allowedHeaders = ["meterNumber", "readDate", "totalEnergyUse", "commodityCharge", "deliveryCharge", "otherCharge", "unit"];

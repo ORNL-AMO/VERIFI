@@ -37,6 +37,7 @@ import { GeneralUtilityDataTableComponent } from './utility/energy-consumption/u
 import { EditUtilityBillComponent } from './utility/energy-consumption/utility-meter-data/edit-utility-bill/edit-utility-bill.component';
 import { EditElectricityBillComponent } from './utility/energy-consumption/utility-meter-data/edit-electricity-bill/edit-electricity-bill.component';
 import { ImportMeterComponent } from './utility/energy-consumption/energy-source/import-meter/import-meter.component';
+import { ImportMeterDataComponent } from './utility/energy-consumption/utility-meter-data/import-meter-data/import-meter-data.component';
 
 
 
@@ -66,7 +67,8 @@ import { ImportMeterComponent } from './utility/energy-consumption/energy-source
     GeneralUtilityDataTableComponent,
     EditUtilityBillComponent,
     EditElectricityBillComponent,
-    ImportMeterComponent
+    ImportMeterComponent,
+    ImportMeterDataComponent
   ],
   imports: [
     BrowserModule,
