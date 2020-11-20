@@ -9,14 +9,8 @@ import { MoMeterDataComponent } from './utility/mo-meter-data/mo-meter-data.comp
 import { DataTableComponent } from './utility/data-table/data-table.component';
 import { PredictorsComponent } from './utility/predictors/predictors.component';
 import { EnergySourceComponent } from './utility/energy-consumption/energy-source/energy-source.component';
-import { ElectricityComponent } from './utility/energy-consumption/electricity/electricity.component';
-import { NaturalGasComponent } from './utility/energy-consumption/natural-gas/natural-gas.component';
 import { StyleGuideComponent } from './shared/style-guide/style-guide.component';
-import { OtherFuelsComponent } from './utility/energy-consumption/other-fuels/other-fuels.component';
-import { OtherEnergyComponent } from './utility/energy-consumption/other-energy/other-energy.component';
-import { WaterComponent } from './utility/energy-consumption/water/water.component';
-import { WasteWaterComponent } from './utility/energy-consumption/waste-water/waste-water.component';
-import { OtherUtilityComponent } from './utility/energy-consumption/other-utility/other-utility.component';
+import { UtilityMeterDataComponent } from './utility/energy-consumption/utility-meter-data/utility-meter-data.component';
 
 const routes: Routes = [
   { path: '', component: DashboardComponent },
@@ -29,13 +23,13 @@ const routes: Routes = [
           path: 'energy-consumption', component: EnergyConsumptionComponent, 
           children: [
             { path: '', component: EnergySourceComponent },
-            { path: 'electricity', component: ElectricityComponent },
-            { path: 'natural-gas', component: NaturalGasComponent },
-            { path: 'other-fuels', component: OtherFuelsComponent },
-            { path: 'other-energy', component: OtherEnergyComponent },
-            { path: 'water', component: WaterComponent },
-            { path: 'waste-water', component: WasteWaterComponent },
-            { path: 'other-utility', component: OtherUtilityComponent },
+            { path: 'electricity', component: UtilityMeterDataComponent },
+            { path: 'natural-gas', component: UtilityMeterDataComponent },
+            { path: 'other-fuels', component: UtilityMeterDataComponent },
+            { path: 'other-energy', component: UtilityMeterDataComponent },
+            { path: 'water', component: UtilityMeterDataComponent },
+            { path: 'waste-water', component: UtilityMeterDataComponent },
+            { path: 'other-utility', component: UtilityMeterDataComponent },
           ],
         },
         { path: 'mo-meter-data', component: MoMeterDataComponent },

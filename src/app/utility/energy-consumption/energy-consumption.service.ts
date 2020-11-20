@@ -459,4 +459,21 @@ export class EnergyConsumptionService {
       latePayment: [meterData.latePayment, Validators.required]
     })
   }
+
+  getGeneralMeterDataForm(meterData: IdbUtilityMeterData): FormGroup {
+    return this.formBuilder.group({
+      id: [meterData.id, Validators.required],
+      meterId: [meterData.meterId, Validators.required],
+      facilityId: [meterData.facilityId, Validators.required],
+      accountId: [meterData.accountId, Validators.required],
+      readDate: [meterData.readDate, Validators.required],
+      unit: [meterData.unit, Validators.required],
+      totalEnergyUse: [meterData.totalEnergyUse, Validators.required],
+      totalCost: [meterData.totalCost, Validators.required],
+      commodityCharge: [meterData.commodityCharge, Validators.required],
+      deliveryCharge: [meterData.deliveryCharge, Validators.required],
+      otherCharge: [meterData.otherCharge, Validators.required],
+      checked: [meterData.checked, Validators.required]
+    });
+  }
 }

@@ -1,0 +1,20 @@
+<table>
+    <tr>
+        <th><input #masterCheckbox type="checkbox" (change)="checkAll()">
+        </th>
+        <th class="row-year">Meter Read Date</th>
+        <th>Total Volume (cfm)/MMBTU</th>
+        <th>Commodity Charge</th>
+        <th>Delivery Charge</th>
+        <th>Other Charges</th>
+    </tr>
+    <tr *ngFor="let meterData of meterListItem.meterDataItems">
+        <td><input [value]="meterData.id" type="checkbox" name="metersSelected" (change)="checkCheckboxes()"
+                [(ngModel)]="meterData.checked"></td>
+        <td>{{meterData.readDate}}</td>
+        <td>{{meterData.totalVolume}}</td>
+        <td>${{meterData.commodityCharge}}</td>
+        <td>${{meterData.deliveryCharge}}</td>
+        <td>${{meterData.otherCharge}}</td>
+    </tr>
+</table>

@@ -10,12 +10,11 @@ import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db-service
 export class EnergyConsumptionComponent implements OnInit {
   electricity: boolean;
   naturalGas: boolean;
-  lpg: boolean;
-  fuelOil: boolean;
-  coal: boolean;
-  wood: boolean;
-  otherGas: boolean;
+  otherFuels: boolean;
   otherEnergy: boolean;
+  water: boolean;
+  wasteWater: boolean;
+  otherUtility: boolean;
 
   facilityMetersSub: Subscription;
   constructor(
@@ -27,12 +26,11 @@ export class EnergyConsumptionComponent implements OnInit {
       let energySources = facilityMeters.map(function (el) { return el.source; });
       this.electricity = energySources.indexOf("Electricity") > -1;
       this.naturalGas = energySources.indexOf("Natural Gas") > -1;
-      this.lpg = energySources.indexOf("LPG") > -1;
-      this.fuelOil = energySources.indexOf("Fuel Oil") > -1;
-      this.coal = energySources.indexOf("Coal") > -1;
-      this.wood = energySources.indexOf("Wood") > -1;
-      this.otherGas = energySources.indexOf("Other Gas") > -1;
+      this.otherFuels = energySources.indexOf("Other Fuels") > -1;
       this.otherEnergy = energySources.indexOf("Other Energy") > -1;
+      this.water = energySources.indexOf("Water") > -1;
+      this.wasteWater = energySources.indexOf("Waste Water") > -1;
+      this.otherUtility = energySources.indexOf("Other Utility") > -1;
     });
   }
 

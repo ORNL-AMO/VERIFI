@@ -1,0 +1,107 @@
+<h4>{{selectedSource}} Bills</h4>
+
+<div class="controls">
+    <!--Import/Export-->
+    <div class="importExport item-right">
+        <button class="btn btn-outline" (click)="openImportModal()">Import</button>
+        <button class="btn btn-outline" (click)="meterExport('Electricity')">Export</button>
+    </div>
+    <!--Bulk Delete-->
+    <div class="bulk-delete item-right" [class.show]="is_checked">
+        <button class="btn btn-danger" (click)='bulkDelete()'>Bulk Delete</button>
+    </div>
+    <!--Column Filters-->
+    <!-- <div class="filter item-right">
+        <button class="btn" [ngClass]="{'btn-solid' : !filterColMenu, 'btn-outline' : filterColMenu}"
+            (click)="filterColMenu = !filterColMenu; filterInpMenu = false">Filter</button>
+        <div class="filter-dropdown" [hidden]="!filterColMenu">
+            <label *ngFor="let filterCols of filterCol">
+                <input type="checkbox" name="filterCols.name" [checked]="filterCols.filter"
+                    (change)="filterCols.filter = !filterCols.filter">{{filterCols.display}}
+            </label>
+            <br><br>
+            <a (click)="showAllColumns();">Show All</a>
+        </div>
+    </div> -->
+    <app-utility-meter-data-filter *ngIf="selectedSource == 'Electricity'"></app-utility-meter-data-filter>
+    <!--Items Per Page-->
+    <div class="items-per-page item-right">
+        <span>Show </span>
+        <select (change)="changePagesize($event.target.value)">
+            <option value="6">6</option>
+            <option value="12">12</option>
+            <option value="24">24</option>
+            <option value="36">36</option>
+            <option value="48">48</option>
+            <option value="60">60</option>
+        </select>
+    </div>
+</div>
+
+<div class="meter" *ngFor="let meterListItem of meterList; let index=index;">
+    <div class="meterData">
+        <h6><i class="fa fa-caret-right"></i> #{{meterListItem.idbMeter.id}} {{meterListItem.idbMeter.name}}</h6>
+        <p>{{meterListItem.idbMeter.notes}}</p>
+
+        <button class="btn btn-link item-right" (click)="meterDataAdd(meterListItem.idbMeter)"><i
+                class="fa fa-plus"></i> Add New Bill</button>
+        <div class="tableControls overflow-hidden item-right">
+            <div class="item-right">
+                <ngb-pagination [collectionSize]="meterListItem.meterDataItems.length" [(page)]="page[index]"
+                    [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Default pagination"
+                    (pageChange)="onPageChange(index, page[index])"></ngb-pagination>
+            </div>
+            <p class="item-right">{{meterListItem.meterDataItems.length}} entries</p>
+        </div>
+    </div>
+
+
+    <div class="row no-margin">
+        <div class="col no-margin tableData">
+            <app-electricity-data-table *ngIf="selectedSource == 'Electricity'" [meterListItem]="meterListItem"
+                [pageSize]="pageSize" [itemsPerPage]="itemsPerPage" [meterIndex]="index">
+            </app-electricity-data-table>
+            <app-general-utility-data-table *ngIf="selectedSource != 'Electricity'" [meterListItem]="meterListItem"
+                [pageSize]="pageSize" [itemsPerPage]="itemsPerPage" [meterIndex]="index">
+            </app-general-utility-data-table>
+        </div>
+        <div class="col tableMenu">
+            <table>
+                <tr>
+                    <th></th>
+                </tr>
+                <tr
+                    *ngFor="let meterData of meterListItem.meterDataItems | slice: pageSize[index] | slice: 0:itemsPerPage">
+                    <td (click)="$event.stopPropagation();">
+                        <!-- Prevents closure of menu on document click-->
+                        <i class="fa fa-ellipsis-v" (click)="meterDataToggleMenu(meterData.id)"></i>
+                        <div class="meterMenu" [class.open]="meterDataMenuOpen === meterData.id">
+                            <p (click)="setEditMeterData(meterData)">Edit</p>
+                            <p (click)="setDeleteMeterData(meterData)">Delete</p>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="window" [class.open]="editMeterData">
+    <div class="windowOverlay"></div>
+    <div class="windowContent windowContentLg">
+        <app-edit-electricy-bill *ngIf="editMeterData && selectedSource == 'Electricity'" [editMeterData]="editMeterData"
+            (emitClose)="cancelEditMeter()" [addOrEdit]="addOrEdit">
+        </app-edit-electricy-bill>
+        <app-edit-utility-bill *ngIf="editMeterData && selectedSource != 'Electricity'" [editMeterData]="editMeterData"
+            (emitClose)="cancelEditMeter()" [addOrEdit]="addOrEdit">
+        </app-edit-utility-bill>
+    </div>
+</div>
+
+
+<div class="window" [class.open]="showImport">
+    <div class="windowOverlay"></div>
+    <div class="windowContent">
+        <app-import-meter-data *ngIf="showImport" (emitClose)="closeImportModal()"></app-import-meter-data>
+    </div>
+</div>

@@ -1,0 +1,12 @@
+<div class="filter item-right">
+    <button class="btn" [ngClass]="{'btn-solid' : !showFilterDropdown, 'btn-outline' : showFilterDropdown}"
+        (click)="toggleFilterMenu()">Filter</button>
+    <div class="filter-dropdown" *ngIf="showFilterDropdown">
+        <label *ngFor="let electricityDataFilter of electricityDataFilters">
+            <input type="checkbox" name="electricityDataFilter.name" [(ngModel)]="electricityDataFilter.filter"
+                (change)="save()">{{electricityDataFilter.display}}
+        </label>
+        <br><br>
+        <a (click)="showAllColumns();">Show All</a>
+    </div>
+</div>

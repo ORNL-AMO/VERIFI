@@ -1,0 +1,22 @@
+<table>
+    <tr>
+        <th><input #masterCheckbox type="checkbox" (change)="checkAll(meterListItem.idbMeter.id, $event)">
+        </th>
+        <th class="row-year">Meter Read Date</th>
+        <th>Total kWh</th>
+        <th>Total Demand</th>
+        <th>Total Cost</th>
+        <th *ngFor="let electricityDataFilter of electricityDataFilters" [hidden]="!electricityDataFilter.filter">
+            {{electricityDataFilter.display}}</th>
+    </tr>
+    <tr *ngFor="let meterData of meterListItem.meterDataItems | slice: pageSize[meterIndex] | slice: 0:itemsPerPage">
+        <td><input [value]="meterData.id" type="checkbox" name="metersSelected" (change)="checkCheckboxes($event)"
+                [(ngModel)]="meterData.checked"></td>
+        <td>{{meterData.readDate}}</td>
+        <td>{{meterData.totalEnergyUse}}</td>
+        <td>{{meterData.totalDemand}}</td>
+        <td>${{meterData.totalCost}}</td>
+        <td *ngFor="let electricityDataFilter of electricityDataFilters" [hidden]="!electricityDataFilter.filter">
+            {{meterData[electricityDataFilter.name]}}</td>
+    </tr>
+</table>

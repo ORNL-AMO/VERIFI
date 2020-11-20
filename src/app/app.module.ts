@@ -19,8 +19,6 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { DataTableComponent } from './utility/data-table/data-table.component';
 import { EnergySourceComponent } from './utility/energy-consumption/energy-source/energy-source.component';
 import { HelpPanelComponent } from './utility/help-panel/help-panel.component';
-import { ElectricityComponent } from './utility/energy-consumption/electricity/electricity.component';
-import { NaturalGasComponent } from './utility/energy-consumption/natural-gas/natural-gas.component';
 
 import { CommonModule } from '@angular/common';
 
@@ -29,12 +27,16 @@ import { StyleGuideComponent } from './shared/style-guide/style-guide.component'
 import { PredictorsComponent } from './utility/predictors/predictors.component';
 import { MoMeterDataComponent } from './utility/mo-meter-data/mo-meter-data.component';
 import { LoadingComponent } from './shared/loading/loading.component';
-import { OtherFuelsComponent } from './utility/energy-consumption/other-fuels/other-fuels.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { IndexedDBModule } from './indexedDB/indexed-db.module';
-import { ImportMeterDataComponent } from './utility/energy-consumption/energy-source/import-meter-data/import-meter-data.component';
 import { EditMeterFormComponent } from './utility/energy-consumption/energy-source/edit-meter-form/edit-meter-form.component';
-import { EditElectricBillComponent } from './utility/energy-consumption/electricity/edit-electric-bill/edit-electric-bill.component';
+import { UtilityMeterDataComponent } from './utility/energy-consumption/utility-meter-data/utility-meter-data.component';
+import { UtilityMeterDataFilterComponent } from './utility/energy-consumption/utility-meter-data/utility-meter-data-filter/utility-meter-data-filter.component';
+import { ElectricityDataTableComponent } from './utility/energy-consumption/utility-meter-data/electricity-data-table/electricity-data-table.component';
+import { GeneralUtilityDataTableComponent } from './utility/energy-consumption/utility-meter-data/general-utility-data-table/general-utility-data-table.component';
+import { EditUtilityBillComponent } from './utility/energy-consumption/utility-meter-data/edit-utility-bill/edit-utility-bill.component';
+import { EditElectricityBillComponent } from './utility/energy-consumption/utility-meter-data/edit-electricity-bill/edit-electricity-bill.component';
+import { ImportMeterComponent } from './utility/energy-consumption/energy-source/import-meter/import-meter.component';
 
 
 
@@ -53,16 +55,18 @@ import { EditElectricBillComponent } from './utility/energy-consumption/electric
     DataTableComponent,
     EnergySourceComponent,
     HelpPanelComponent,
-    ElectricityComponent,
-    NaturalGasComponent,
     StyleGuideComponent,
     PredictorsComponent,
     MoMeterDataComponent,
     LoadingComponent,
-    OtherFuelsComponent,
-    ImportMeterDataComponent,
     EditMeterFormComponent,
-    EditElectricBillComponent
+    UtilityMeterDataComponent,
+    UtilityMeterDataFilterComponent,
+    ElectricityDataTableComponent,
+    GeneralUtilityDataTableComponent,
+    EditUtilityBillComponent,
+    EditElectricityBillComponent,
+    ImportMeterComponent
   ],
   imports: [
     BrowserModule,
