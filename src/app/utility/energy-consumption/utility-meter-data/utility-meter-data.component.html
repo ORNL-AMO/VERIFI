@@ -77,8 +77,8 @@
 <div class="window" [class.open]="editMeterData">
     <div class="windowOverlay"></div>
     <div class="windowContent windowContentLg">
-        <app-edit-electricity-bill *ngIf="editMeterData && selectedSource == 'Electricity'" [editMeterData]="editMeterData"
-            (emitClose)="cancelEditMeter()" [addOrEdit]="addOrEdit">
+        <app-edit-electricity-bill *ngIf="editMeterData && selectedSource == 'Electricity'"
+            [editMeterData]="editMeterData" (emitClose)="cancelEditMeter()" [addOrEdit]="addOrEdit">
         </app-edit-electricity-bill>
         <app-edit-utility-bill *ngIf="editMeterData && selectedSource != 'Electricity'" [editMeterData]="editMeterData"
             (emitClose)="cancelEditMeter()" [addOrEdit]="addOrEdit">
@@ -90,6 +90,20 @@
 <div class="window" [class.open]="showImport">
     <div class="windowOverlay"></div>
     <div class="windowContent">
-        <app-import-meter-data *ngIf="showImport" (emitClose)="closeImportModal()" [selectedSource]="selectedSource"></app-import-meter-data>
+        <app-import-meter-data *ngIf="showImport" (emitClose)="closeImportModal()" [selectedSource]="selectedSource">
+        </app-import-meter-data>
+    </div>
+</div>
+
+<div class="popup" [class.open]="meterDataToDelete">
+    <div class="popup-header" *ngIf="meterDataToDelete">Delete Meter Data
+        <button class="item-right" (click)="cancelDelete()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>WARNING: Deleting meter data cannot be undone.
+            Are you sure you want to preform this action?</p>
+    </div>
+    <div class="popup-footer text-right">
+        <button class="btn btn-danger" (click)="deleteMeterData()">Delete</button>
     </div>
 </div>

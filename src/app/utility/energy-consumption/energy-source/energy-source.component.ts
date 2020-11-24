@@ -93,7 +93,7 @@ export class EnergySourceComponent implements OnInit {
   meterExport() {
     const replacer = (key, value) => value === null ? '' : value; // specify how you want to handle null values here
     const header = Object.keys(this.meterList[0]);
-    let csv = this.meterList.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer)).join(','));
+    // let csv: BlobPart = this.meterList.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer)).join(','));
     // csv.unshift(header.join(','));
     // csv = csv.join('\r\n');
 

@@ -41,6 +41,7 @@ export class UtilityMeterDataComponent implements OnInit {
   addOrEdit: string;
   selectedSource: string;
   hasCheckedItems: boolean;
+  meterDataToDelete: IdbUtilityMeterData;
   constructor(
     public energyConsumptionService: EnergyConsumptionService,
     private utilityMeterDbService: UtilityMeterdbService,
@@ -180,6 +181,16 @@ export class UtilityMeterDataComponent implements OnInit {
   }
 
   setDeleteMeterData(meter: IdbUtilityMeterData){
-    //TODO
+    this.meterDataToDelete = meter;
+  }
+
+  cancelDelete(){
+    this.meterDataToDelete = undefined;
+    this.meterDataMenuOpen = undefined;
+  }
+
+  deleteMeterData(){
+    this.utilityMeterDataDbService.deleteIndex(this.meterDataToDelete.id);
+    this.cancelDelete();
   }
 }
