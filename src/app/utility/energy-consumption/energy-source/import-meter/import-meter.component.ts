@@ -49,7 +49,6 @@ export class ImportMeterComponent implements OnInit {
           for (var i = 1; i < lines.length; i++) {
             const obj: IdbUtilityMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.id, selectedAccount.id);
             const currentline = lines[i].split(",");
-            console.log(currentline);
             for (var j = 0; j < headers.length; j++) {
               obj[headers[j]] = currentline[j];
             }
@@ -63,7 +62,6 @@ export class ImportMeterComponent implements OnInit {
             }
 
           }
-          console.log(this.importMeters);
         } else {
           // csv didn't match -> Show error
           this.importError = "Error with file. Please match your file to the provided template.";
