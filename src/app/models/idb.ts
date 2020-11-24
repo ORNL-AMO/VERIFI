@@ -38,7 +38,9 @@ export interface IdbUtilityMeterGroup {
     description: string,
     unit: string,
     dateModified: Date,
-    factionOfTotalEnergy: number
+    factionOfTotalEnergy: number,
+    totalEnergyUse?: number,
+    groupData?: Array<IdbUtilityMeter>
 }
 
 export interface IdbUtilityMeter {

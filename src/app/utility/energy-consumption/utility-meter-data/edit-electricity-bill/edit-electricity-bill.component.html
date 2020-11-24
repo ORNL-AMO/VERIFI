@@ -128,33 +128,33 @@
         Tax and other</p>
     <label [hidden]="!electricityDataFilters[15].filter">Local Business and Occupation Charge
         <span class="unit">$</span>
-        <input type="text" formControlName="businessCharge">
+        <input type="number" formControlName="businessCharge">
     </label>
     <label [hidden]="!electricityDataFilters[16].filter">Local Utility Tax
         <span class="unit">$</span>
-        <input type="text" formControlName="utilityTax">
+        <input type="number" formControlName="utilityTax">
     </label>
     <label [hidden]="!electricityDataFilters[17].filter">Late Payment Charge
         <span class="unit">$</span>
-        <input type="text" formControlName="latePayment">
+        <input type="number" formControlName="latePayment">
     </label>
     <label [hidden]="!electricityDataFilters[18].filter">Other Charges
         <span class="unit">$</span>
-        <input type="text" formControlName="otherCharge">
+        <input type="number" formControlName="otherCharge">
     </label>
     <hr>
     <p class="bold">Totals</p>
     <label>Total Energy Use
         <span class="unit">kWh</span>
-        <input type="text" formControlName="totalEnergyUse" required>
+        <input type="number" formControlName="totalEnergyUse" required>
     </label>
     <label>Total Demand
         <span class="unit">$</span>
-        <input type="text" formControlName="totalDemand" required>
+        <input type="number" formControlName="totalDemand" required>
     </label>
     <label>Total Cost
         <span class="unit">$</span>
-        <input type="text" formControlName="totalCost" required>
+        <input type="number" formControlName="totalCost" required>
     </label>
     <label hidden>Checked
         <span class="unit">$</span>

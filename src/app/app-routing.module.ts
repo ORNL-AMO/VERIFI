@@ -11,6 +11,7 @@ import { PredictorsComponent } from './utility/predictors/predictors.component';
 import { EnergySourceComponent } from './utility/energy-consumption/energy-source/energy-source.component';
 import { StyleGuideComponent } from './shared/style-guide/style-guide.component';
 import { UtilityMeterDataComponent } from './utility/energy-consumption/utility-meter-data/utility-meter-data.component';
+import { MeterGroupingComponent } from './utility/meter-grouping/meter-grouping.component';
 
 const routes: Routes = [
   { path: '', component: DashboardComponent },
@@ -33,7 +34,7 @@ const routes: Routes = [
           ],
         },
         { path: 'mo-meter-data', component: MoMeterDataComponent },
-        { path: 'data-table', component: DataTableComponent },
+        { path: 'meter-groups', component: MeterGroupingComponent },
         { path: 'predictors', component: PredictorsComponent },
       ]
   },

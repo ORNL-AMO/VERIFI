@@ -88,10 +88,15 @@ export class UtilityMeterdbService {
             location: undefined,
             supplier: undefined,
             notes: undefined,
-            source: undefined,
+            source: 'Electricity',
             group: undefined,
             startingUnit: undefined,
             fuel: undefined
         }
+    }
+
+    getGroupMetersByGroupId(groupId: number): Array<IdbUtilityMeter> {
+        let facilityMeters: Array<IdbUtilityMeter> = this.facilityMeters.getValue();
+        return facilityMeters.filter(meter => { return meter.groupId == groupId });
     }
 }

@@ -104,6 +104,7 @@ export class ImportMeterComponent implements OnInit {
     await uniqNeededGroups.forEach(neededGroup => {
       this.utilityMeterGroupdbService.addFromImport(neededGroup);
     });
+    this.utilityMeterGroupdbService.setFacilityMeterGroups();
   }
 
   resetImport() {

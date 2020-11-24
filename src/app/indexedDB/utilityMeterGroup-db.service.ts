@@ -26,6 +26,7 @@ export class UtilityMeterGroupdbService {
             });
         }
     }
+
     getAll(): Observable<Array<IdbUtilityMeterGroup>> {
         return this.dbService.getAll('utilityMeterGroups');
     }

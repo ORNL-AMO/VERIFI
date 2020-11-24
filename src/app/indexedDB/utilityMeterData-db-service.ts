@@ -109,4 +109,14 @@ export class UtilityMeterDatadbService {
             latePayment: undefined
         }
     }
+
+    getMeterDataFromMeterId(meterId: number): Array<IdbUtilityMeterData> {
+        let facilityMeterData: Array<IdbUtilityMeterData> = this.facilityMeterData.getValue();
+        return facilityMeterData.filter(meterData => { return meterData.meterId == meterId });
+    }
+
+    getMeterDataFromMeterIds(meterIds: Array<number>): Array<IdbUtilityMeterData> {
+        let facilityMeterData: Array<IdbUtilityMeterData> = this.facilityMeterData.getValue();
+        return facilityMeterData.filter(meterData => { return meterIds.includes(meterData.meterId) });
+    }
 }

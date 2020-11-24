@@ -1,0 +1,93 @@
+<div class="wrapper main-content">
+    <h4>Meter Grouping</h4>
+    <p>Your meters have been grouped by type. You are free to edit or add groups based on your preferences. These groups
+        will represent your data visualization.</p>
+    <!--<button class="btn btn-primary item-right">Add New Group</button>-->
+    <br>
+    <div *ngFor="let meterGroupType of meterGroupTypes">
+        <div class="group-section">
+            <h5>{{meterGroupType.groupType}}</h5>
+            <!-- <label class="item-right">Final Unit:
+                <select type="text" [(ngModel)]="energyFinalUnit" (change)="setEnergyFinalUnit($event.target.value);">
+                    <option value="MMBtu">MMBtu</option>
+                    <option value="kWh">kWh</option>
+                    <option value="J">J</option>
+                </select>
+            </label> -->
+        </div>
+        <div class="group-section-folders">
+            <div cdkDropList [cdkDropListData]="meterGroupType.meterGroups" class="grouped-list"
+                *ngFor="let meterGroup of meterGroupType.meterGroups" (cdkDropListDropped)="drop($event)"
+                id={{meterGroup.id}} [cdkDropListConnectedTo]="meterGroupIds">
+                <div class="row group-title">
+                    <p class="bold col"><i class="fa fa-caret-right"></i> {{meterGroup.name}}</p>
+                    <div class="item-left">
+                        Energy Total: {{meterGroup.totalEnergyUse | number:'1.0-1'}}
+                    </div>
+
+                    <div class="col-3">
+                        <div class="progress">
+                            <div class="progress-bar" [ngClass]="meterGroup.name" role="progressbar"
+                                [style.width.%]="meterGroup.factionOfTotalEnergy" aria-valuemin="0" aria-valuemax="100">
+                            </div>
+                            <span class="tooltip up">(total energy in this group / total energy in all groups)*100<span
+                                    class="arrow arrow-up"></span></span>
+                        </div>
+                        <span class="progress-bar-data">{{meterGroup.factionOfTotalEnergy | number:'1.0-1'}}%</span>
+
+                    </div>
+
+                    <div class="col-1">
+                        <i class="fa fa-ellipsis-v item-right" (click)="groupToggleMenu(meterGroup.id)"></i>
+                        <div class="groupMenu" [class.open]="groupMenuOpen === meterGroup.id">
+                            <p (click)="setEditGroup(meterGroup)">Edit</p>
+                            <hr>
+                            <p (click)="setDeleteGroup(meterGroup)">Delete</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" [hidden]="!meterGroup.description">
+                    <div class="col">
+                        <p class="group-desc">{{meterGroup.description}}</p>
+                    </div>
+                </div>
+
+                <div [cdkDragData]="meter" class="group-meters" *ngFor="let meter of meterGroup.groupData" cdkDrag>
+                    <i class="fa fa-th"></i>
+                    <span> {{meter.name}}</span>
+                    <span class="item-right">{{meter.type}}</span>
+                </div>
+            </div>
+            <button class="btn btn-link" (click)="groupAdd(meterGroupType.groupType)"><i class="fa fa-plus"></i> Add New
+                Group</button>
+        </div>
+    </div>
+
+    <div class="window" [class.open]="groupToEdit">
+        <div class="windowOverlay"></div>
+        <div class="windowContent">
+            <app-edit-meter-group-form *ngIf="groupToEdit" [groupToEdit]="groupToEdit" (emitClose)="closeEditGroup()"
+                [editOrAdd]="editOrAdd">
+            </app-edit-meter-group-form>
+        </div>
+    </div>
+</div>
+
+<!-- <div class="wizard">
+    <button class="btn btn-secondary item-left" routerLink="/utility/mo-meter-data">Prev</button>
+    <button class="btn btn-primary item-right" routerLink="/utility/predictors">Next</button>
+</div> -->
+
+
+<div class="popup" [class.open]="groupToDelete">
+    <div class="popup-header" *ngIf="groupToDelete">Delete Meter Data {{groupToDelete.name}}
+        <button class="item-right" (click)="closeDeleteGroup()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>WARNING: Deleting meter group cannot be undone.
+            Are you sure you want to preform this action?</p>
+    </div>
+    <div class="popup-footer text-right">
+        <button class="btn btn-danger" (click)="deleteMeterGroup()">Delete</button>
+    </div>
+</div>

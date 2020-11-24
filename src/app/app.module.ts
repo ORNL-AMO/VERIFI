@@ -38,6 +38,8 @@ import { EditUtilityBillComponent } from './utility/energy-consumption/utility-m
 import { EditElectricityBillComponent } from './utility/energy-consumption/utility-meter-data/edit-electricity-bill/edit-electricity-bill.component';
 import { ImportMeterComponent } from './utility/energy-consumption/energy-source/import-meter/import-meter.component';
 import { ImportMeterDataComponent } from './utility/energy-consumption/utility-meter-data/import-meter-data/import-meter-data.component';
+import { MeterGroupingComponent } from './utility/meter-grouping/meter-grouping.component';
+import { EditMeterGroupFormComponent } from './utility/meter-grouping/edit-meter-group-form/edit-meter-group-form.component';
 
 
 
@@ -68,7 +70,9 @@ import { ImportMeterDataComponent } from './utility/energy-consumption/utility-m
     EditUtilityBillComponent,
     EditElectricityBillComponent,
     ImportMeterComponent,
-    ImportMeterDataComponent
+    ImportMeterDataComponent,
+    MeterGroupingComponent,
+    EditMeterGroupFormComponent
   ],
   imports: [
     BrowserModule,
