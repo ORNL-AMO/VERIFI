@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/internal/Observable';
 import { BehaviorSubject } from 'rxjs';
-import { FacilitydbService } from "../../indexedDB/facility-db-service";
+import { FacilitydbService } from "../../indexedDB/facility-db.service";
 import { LocalStorageService } from 'ngx-webstorage';
 
 @Injectable({

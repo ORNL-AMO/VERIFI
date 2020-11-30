@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { AccountService } from "../../account/account/account.service";
 import { FacilityService } from 'src/app/account/facility/facility.service';
 import { UtilityService } from "../../utility/utility.service";
-import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db-service";
+import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db.service";
 import { UtilityMeterGroupdbService } from "../../indexedDB/utilityMeterGroup-db.service";
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
@@ -82,7 +82,7 @@ export class DataTableComponent implements OnInit {
       this.calendarData = value;
       this.calendarDataTemp = value;
       this.groupLoadList(); // List all groups
-      console.log(value[0]);
+      // console.log(value[0]);
     });
 
     // Observe the Energy Final Unit
@@ -125,13 +125,13 @@ export class DataTableComponent implements OnInit {
   
       if(counter == data2.length) {
         this.utilityService.setMeterList(); // refresh list
-        console.log(counter +" - "+ data2.length);
+        // console.log(counter +" - "+ data2.length);
         
         // ****TEMP FIX
         const self = this;
         setTimeout(function(){ 
           self.utilityService.setCalendarData(); // refresh conversions
-         }, 1000);
+         }, 500);
         
       }
     
@@ -141,6 +141,7 @@ export class DataTableComponent implements OnInit {
   }
 
   groupLoadList() {
+    //console.log("load list");
     // List the meter groups
     this.utilityMeterGroupdbService.getAllByIndex(this.facilityid).then(
       data => {
@@ -201,7 +202,7 @@ export class DataTableComponent implements OnInit {
     let total;
 
     let meterCalTot = this.meterCalendarTotals(); // Object containing totals for each meter
-    console.log(meterCalTot);
+    // console.log(meterCalTot);
 
     // Add up the total kwh for every month available
     if (this.calendarData != null) {
@@ -232,7 +233,9 @@ export class DataTableComponent implements OnInit {
 
       this.meterGroups[i].fracTotEnergy = total;
       this.meterGroups[i].energyTotal = groupTotal;
-      
+      console.log("-----");
+      console.log("Total: " + total);
+      console.log("Group: " + groupTotal);
       // reset total for next group
       groupTotal = 0;
     }
@@ -345,7 +348,7 @@ export class DataTableComponent implements OnInit {
         this.utilityMeterdbService.update(meterValues).then(
           result => {
 
-            this.utilityService.setMeterList();
+            this.utilityService.setMeterList(); // make sure the meter is set
 
             // recalculate average when done.
             this.groupGetAvg();

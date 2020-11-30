@@ -2,7 +2,7 @@ import { Component, OnInit} from '@angular/core';
 import { AccountService } from '../account/account.service';
 import { FacilityService } from '../facility/facility.service';
 import { AccountdbService } from "../../indexedDB/account-db.service";
-import { FacilitydbService } from "../../indexedDB/facility-db-service";
+import { FacilitydbService } from "../../indexedDB/facility-db.service";
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 
 @Component({

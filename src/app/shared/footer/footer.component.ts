@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { version } from '../../../../package.json';
 import { AccountService } from "../../account/account/account.service";
 import { AccountdbService } from "../../indexedDB/account-db.service";
-import { FacilitydbService } from "../../indexedDB/facility-db-service";
+import { FacilitydbService } from "../../indexedDB/facility-db.service";
 
 @Component({
   selector: 'app-footer',

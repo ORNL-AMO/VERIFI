@@ -34,6 +34,7 @@ import { LoadingComponent } from './shared/loading/loading.component';
 import { OtherFuelsComponent } from './utility/energy-consumption/other-fuels/other-fuels.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
+import { PredictorPipe } from './utility/predictors/predictor.pipe';
 
 const dbConfig: DBConfig  = {
   name: 'verifi',
@@ -139,6 +140,19 @@ const dbConfig: DBConfig  = {
       { name: 'dateModified', keypath: 'dateModified', options: { unique: false } },
       { name: 'fracTotEnergy', keypath: 'fracTotEnergy', options: { unique: false } }
     ]
+  },
+  {
+    store: 'predictors',
+    storeConfig: { keyPath: 'id', autoIncrement: true },
+    storeSchema: [
+      { name: 'facilityid', keypath: 'facilityid', options: { unique: false } },
+      { name: 'accountid', keypath: 'accountid', options: { unique: false } },
+      { name: 'name', keypath: 'name', options: { unique: false } },
+      { name: 'desc', keypath: 'desc', options: { unique: false } },
+      { name: 'unit', keypath: 'unit', options: { unique: false } },
+      { name: 'date', keypath: 'date', options: { unique: false } },
+      { name: 'amount', keypath: 'amount', options: { unique: false } }
+    ]
   }]
 };
 
@@ -163,7 +177,8 @@ const dbConfig: DBConfig  = {
     PredictorsComponent,
     MoMeterDataComponent,
     LoadingComponent,
-    OtherFuelsComponent
+    OtherFuelsComponent,
+    PredictorPipe
   ],
   imports: [
     NgxIndexedDBModule.forRoot(dbConfig),
