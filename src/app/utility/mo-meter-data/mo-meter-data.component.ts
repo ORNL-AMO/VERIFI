@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db-service";
+import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db.service";
 import { UtilityService } from "../utility.service";
 
 @Component({

@@ -2,9 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { AccountdbService } from "../../indexedDB/account-db.service";
-import { FacilitydbService } from "../../indexedDB/facility-db-service";
 import { IdbAccount, IdbFacility } from 'src/app/models/idb';
 import { Subscription } from 'rxjs';
+import { FacilitydbService } from "../../indexedDB/facility-db.service";
 
 
 @Component({

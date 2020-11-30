@@ -108,5 +108,18 @@ export const dbConfig: DBConfig  = {
         { name: 'dateModified', keypath: 'dateModified', options: { unique: false } },
         { name: 'factionOfTotalEnergy', keypath: 'factionOfTotalEnergy', options: { unique: false } }
       ]
+    },
+    {
+      store: 'predictors',
+      storeConfig: { keyPath: 'id', autoIncrement: true },
+      storeSchema: [
+        { name: 'facilityId', keypath: 'facilityId', options: { unique: false } },
+        { name: 'accountId', keypath: 'accountId', options: { unique: false } },
+        { name: 'name', keypath: 'name', options: { unique: false } },
+        { name: 'desc', keypath: 'desc', options: { unique: false } },
+        { name: 'unit', keypath: 'unit', options: { unique: false } },
+        { name: 'date', keypath: 'date', options: { unique: false } },
+        { name: 'amount', keypath: 'amount', options: { unique: false } }
+      ]
     }]
   };

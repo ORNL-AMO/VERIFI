@@ -41,7 +41,7 @@ import { ImportMeterDataComponent } from './utility/energy-consumption/utility-m
 import { MeterGroupingComponent } from './utility/meter-grouping/meter-grouping.component';
 import { EditMeterGroupFormComponent } from './utility/meter-grouping/edit-meter-group-form/edit-meter-group-form.component';
 
-
+import { PredictorPipe } from './utility/predictors/predictor.pipe';
 
 @NgModule({
   declarations: [
@@ -72,7 +72,8 @@ import { EditMeterGroupFormComponent } from './utility/meter-grouping/edit-meter
     ImportMeterComponent,
     ImportMeterDataComponent,
     MeterGroupingComponent,
-    EditMeterGroupFormComponent
+    EditMeterGroupFormComponent,
+    PredictorPipe
   ],
   imports: [
     BrowserModule,

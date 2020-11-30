@@ -1,10 +1,10 @@
 import { Component, OnInit, Renderer2, ViewChild, ElementRef, Input } from '@angular/core';
 import { AccountService } from "../account/account/account.service";
 import { AccountdbService } from "../indexedDB/account-db.service";
-import { FacilitydbService } from "../indexedDB/facility-db-service";
+import { FacilitydbService } from "../indexedDB/facility-db.service";
 import { FacilityService } from 'src/app/account/facility/facility.service';
-import { UtilityMeterdbService } from "../indexedDB/utilityMeter-db-service";
-import { UtilityMeterDatadbService } from "../indexedDB/utilityMeterData-db-service";
+import { UtilityMeterdbService } from "../indexedDB/utilityMeter-db.service";
+import { UtilityMeterDatadbService } from "../indexedDB/utilityMeterData-db.service";
 import { UtilityService } from "../utility/utility.service";
 
 @Component({

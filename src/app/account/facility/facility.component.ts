@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FacilitydbService } from "../../indexedDB/facility-db-service";
+import { FacilitydbService } from "../../indexedDB/facility-db.service";
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
 

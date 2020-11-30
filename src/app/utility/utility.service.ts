@@ -3,8 +3,8 @@ import { Observable } from 'rxjs/internal/Observable';
 import { BehaviorSubject } from 'rxjs';
 import { LocalStorageService } from 'ngx-webstorage';
 import { FacilityService } from '../account/facility/facility.service';
-import { UtilityMeterdbService } from "../indexedDB/utilityMeter-db-service";
-import { UtilityMeterDatadbService } from "../indexedDB/utilityMeterData-db-service";
+import { UtilityMeterdbService } from "../indexedDB/utilityMeter-db.service";
+import { UtilityMeterDatadbService } from "../indexedDB/utilityMeterData-db.service";
 import { LoadingService } from "../shared/loading/loading.service";
 import { ConvertUnitsService } from 'src/app/shared/convert-units/convert-units.service';
 

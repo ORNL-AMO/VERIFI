@@ -162,6 +162,13 @@ Buttons
     background-color: #ffe400!important;
     border-color: #ffe400!important;
 }
+.btn-primary i,
+.btn-primary-1 i,
+.btn-primary-2 i,
+.btn-primary-3 i,
+.btn-primary-4 i {
+    color: #fff!important;
+}
 /*
 Alerts
 ======================================================== */
@@ -252,6 +259,18 @@ Popups & Windows
 }
 .popup-footer {
     padding: 0px 10px;
+}
+.popup {
+    transform: scale(0);
+    position: fixed;
+    width: 500px;
+    left: calc(50% - 250px);
+    top: 31%;
+    background-color: white;
+    transition: .2s transform;
+}
+.popup.open {
+    transform: scale(1);
 }
 /*
 Arrows & Tooltips
@@ -471,7 +490,7 @@ td .meterMenu {
     right: 0;
     top: 29px;
     display: none;
-    z-index: 1;
+    z-index: 5;
 }
 td .facilityMenu.open,
 td .meterMenu.open {
@@ -870,4 +889,11 @@ i.fa.fa-cog.item-right {
     position: absolute;
     bottom: 10px;
     right: 0;
+}
+.full-width {
+    width: 100%;
+}
+
+.pointer {
+    cursor: pointer;
 }

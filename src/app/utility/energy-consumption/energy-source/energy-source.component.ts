@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { AccountdbService } from "../../../indexedDB/account-db.service";
-import { FacilitydbService } from "../../../indexedDB/facility-db-service";
-import { UtilityMeterDatadbService } from "../../../indexedDB/utilityMeterData-db-service";
-import { UtilityMeterdbService } from "../../../indexedDB/utilityMeter-db-service";
+import { FacilitydbService } from "../../../indexedDB/facility-db.service";
+import { UtilityMeterDatadbService } from "../../../indexedDB/utilityMeterData-db.service";
+import { UtilityMeterdbService } from "../../../indexedDB/utilityMeter-db.service";
 import { UtilityMeterGroupdbService } from "../../../indexedDB/utilityMeterGroup-db.service";
 import { listAnimation } from '../../../animations';
 import { IdbAccount, IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';

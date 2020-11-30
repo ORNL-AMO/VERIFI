@@ -1,10 +1,10 @@
 import { Component, ElementRef, OnInit } from '@angular/core';
 import { Router, Event, NavigationStart } from '@angular/router';
 import { AccountdbService } from "../../indexedDB/account-db.service";
-import { FacilitydbService } from "../../indexedDB/facility-db-service";
-import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db-service";
+import { FacilitydbService } from "../../indexedDB/facility-db.service";
+import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db.service";
 import { UtilityMeterGroupdbService } from "../../indexedDB/utilityMeterGroup-db.service";
-import { UtilityMeterDatadbService } from "../../indexedDB/utilityMeterData-db-service";
+import { UtilityMeterDatadbService } from "../../indexedDB/utilityMeterData-db.service";
 import { LocalStorageService } from 'ngx-webstorage';
 import { IdbAccount, IdbFacility } from 'src/app/models/idb';
 import { Subscription } from 'rxjs';
