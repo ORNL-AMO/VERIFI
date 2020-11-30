@@ -1,11 +1,10 @@
 import { Component, OnInit, ElementRef, ViewChild, QueryList, ViewChildren } from '@angular/core';
-import { UtilityService } from "../../../utility/utility.service";
 import { listAnimation } from '../../../animations';
 import { EnergyConsumptionService } from "../energy-consumption.service";
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db-service';
+import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { Subscription } from 'rxjs';
 import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db-service';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { ActivatedRoute } from '@angular/router';
 import { UtilityMeterDataService } from './utility-meter-data.service';
 

@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db-service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db-service';
+import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { ElectricityDataFilter, UtilityMeterDataService } from '../utility-meter-data.service';
 

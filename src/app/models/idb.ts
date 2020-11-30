@@ -105,15 +105,16 @@ export interface IdbUtilityMeterData {
     latePayment: number
 }
 
-export interface IdbPredictors {
+export interface IdbPredictor {
     //keys (id primary)
     id?: number,
     facilityId: number,
     accountId: number,
     //data
     name: string,
+    description: string,
     unit: string,
-    month: string,
-    year: number,
-    amount: number
+    amount: number,
+    date: Date
 }
+

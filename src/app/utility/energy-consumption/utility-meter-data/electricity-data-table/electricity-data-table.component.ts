@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db-service';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { ElectricityDataFilter, UtilityMeterDataService } from '../utility-meter-data.service';
 

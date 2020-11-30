@@ -1,9 +1,8 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db-service';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbUtilityMeterData } from 'src/app/models/idb';
-import { EnergyConsumptionService } from '../../energy-consumption.service';
 import { ElectricityDataFilter, UtilityMeterDataService } from '../utility-meter-data.service';
 
 @Component({

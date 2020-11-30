@@ -1,9 +1,8 @@
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { Injectable } from '@angular/core';
-import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from '../models/idb';
+import { IdbFacility, IdbUtilityMeterData } from '../models/idb';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { UtilityMeterdbService } from './utilityMeter-db-service';
-import { FacilitydbService } from './facility-db-service';
+import { FacilitydbService } from './facility-db.service';
 
 @Injectable({
     providedIn: 'root'
