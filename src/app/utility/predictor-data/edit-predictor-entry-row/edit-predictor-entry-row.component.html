@@ -4,8 +4,8 @@
 <form>
     <label>
         Date
-        <input type="month" (change)="setMonth()" [ngModel]="predictorEntryCopy.date | date:'yyyy-MM'"
-            (ngModelChange)="setDate($event)" name="date">
+        <input type="month" [ngModel]="predictorEntryCopy.date | date:'yyyy-MM'" (ngModelChange)="setDate($event)"
+            name="date">
     </label>
 
     <label *ngFor="let predictor of predictorEntryCopy.predictors">

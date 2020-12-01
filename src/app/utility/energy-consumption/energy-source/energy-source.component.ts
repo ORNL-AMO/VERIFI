@@ -47,7 +47,6 @@ export class EnergySourceComponent implements OnInit {
   ngOnInit() {
     this.meterListSub = this.utilityMeterdbService.facilityMeters.subscribe(meters => {
       this.meterList = meters;
-      console.log(this.meterList);
     });
 
     // Observe the energy final unit (not sure how the energyFinalUnit is used...-mark)

@@ -45,12 +45,12 @@ export class EditElectricityBillComponent implements OnInit {
     } else {
       let meterData: IdbUtilityMeterData = this.meterDataForm.value;
       delete meterData.id;
-      this.utilityMeterDataDbService.add(this.meterDataForm.value);
+      this.utilityMeterDataDbService.add(meterData);
     }
     this.cancel();
   }
 
-  showAllFields(){
+  showAllFields() {
     this.electricityDataFilters.forEach(field => {
       field.filter = true;
     });

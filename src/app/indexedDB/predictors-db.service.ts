@@ -16,6 +16,8 @@ export class PredictordbService {
         this.facilityPredictorEntries = new BehaviorSubject<Array<IdbPredictorEntry>>(new Array());
         this.facilityPredictors = new BehaviorSubject<Array<PredictorData>>(new Array());
         this.facilityDbService.selectedFacility.subscribe(() => {
+            this.facilityPredictors.next(new Array());
+            this.facilityPredictorEntries.next(new Array());
             this.setFacilityPredictors();
         });
     }

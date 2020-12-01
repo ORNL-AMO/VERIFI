@@ -45,6 +45,7 @@ import { PredictorPipe } from './utility/predictors/predictor.pipe';
 import { PredictorDataComponent } from './utility/predictor-data/predictor-data.component';
 import { EditPredictorEntryRowComponent } from './utility/predictor-data/edit-predictor-entry-row/edit-predictor-entry-row.component';
 import { EditPredictorsComponent } from './utility/predictor-data/edit-predictors/edit-predictors.component';
+import { CalanderizationComponent } from './utility/calanderization/calanderization.component';
 
 @NgModule({
   declarations: [
@@ -79,7 +80,8 @@ import { EditPredictorsComponent } from './utility/predictor-data/edit-predictor
     PredictorPipe,
     PredictorDataComponent,
     EditPredictorEntryRowComponent,
-    EditPredictorsComponent
+    EditPredictorsComponent,
+    CalanderizationComponent
   ],
   imports: [
     BrowserModule,

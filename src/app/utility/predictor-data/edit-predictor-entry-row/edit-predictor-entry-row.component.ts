@@ -15,17 +15,11 @@ export class EditPredictorEntryRowComponent implements OnInit {
   emitClose: EventEmitter<boolean> = new EventEmitter<boolean>();
 
 
-  dateMonth: string;
   predictorEntryCopy: IdbPredictorEntry;
   constructor(private predictorDbService: PredictordbService) { }
 
   ngOnInit(): void {
     this.predictorEntryCopy = JSON.parse(JSON.stringify(this.predictorEntry));
-    this.dateMonth = this.predictorEntry.date.getUTCFullYear() + '-' + this.predictorEntry.date.getMonth();
-  }
-
-  setMonth() {
-    // console.log(this.predictorEntry.date);
   }
 
   saveChanges() {
@@ -33,9 +27,8 @@ export class EditPredictorEntryRowComponent implements OnInit {
     this.cancel();
   }
 
-  setDate(data) {
-    let newDate = new Date(data);
-    console.log(newDate);
+  setDate(eventData) {
+    this.predictorEntryCopy.date = new Date(eventData);
   }
 
   cancel() {
