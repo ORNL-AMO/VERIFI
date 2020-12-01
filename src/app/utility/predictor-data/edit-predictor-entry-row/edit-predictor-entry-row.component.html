@@ -1,0 +1,20 @@
+<h4>Edit Predictor Row</h4>
+<p><span class="red">*</span> Dates must be unique.</p>
+<br>
+<form>
+    <label>
+        Date
+        <input type="month" (change)="setMonth()" [ngModel]="predictorEntryCopy.date | date:'yyyy-MM'"
+            (ngModelChange)="setDate($event)" name="date">
+    </label>
+
+    <label *ngFor="let predictor of predictorEntryCopy.predictors">
+        {{predictor.name}}
+        <input type="number" [(ngModel)]="predictor.amount" name="{{'predictorAmount'+predictor.id}}">
+    </label>
+</form>
+
+<div class="saveCancel item-right">
+    <button class="btn btn-primary" (click)="cancel()">Cancel</button>
+    <button class="btn btn-primary" (click)="saveChanges()">Save</button>
+</div>

@@ -28,7 +28,7 @@
 
 <div class="meter" *ngFor="let meterListItem of meterList; let index=index;">
     <div class="meterData">
-        <h6><i class="fa fa-caret-right"></i> #{{meterListItem.idbMeter.id}} {{meterListItem.idbMeter.name}}</h6>
+        <h6><i class="fa fa-caret-right"></i> {{meterListItem.idbMeter.name}}</h6>
         <p>{{meterListItem.idbMeter.notes}}</p>
 
         <button class="btn btn-link item-right" (click)="meterDataAdd(meterListItem.idbMeter)"><i

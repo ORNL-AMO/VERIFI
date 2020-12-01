@@ -24,7 +24,7 @@ import { CommonModule } from '@angular/common';
 
 import { PlotlyViaWindowModule } from 'angular-plotly.js';
 import { StyleGuideComponent } from './shared/style-guide/style-guide.component';
-import { PredictorsComponent } from './utility/predictors/predictors.component';
+// import { PredictorsComponent } from './utility/predictors/predictors.component';
 import { MoMeterDataComponent } from './utility/mo-meter-data/mo-meter-data.component';
 import { LoadingComponent } from './shared/loading/loading.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
@@ -42,6 +42,9 @@ import { MeterGroupingComponent } from './utility/meter-grouping/meter-grouping.
 import { EditMeterGroupFormComponent } from './utility/meter-grouping/edit-meter-group-form/edit-meter-group-form.component';
 
 import { PredictorPipe } from './utility/predictors/predictor.pipe';
+import { PredictorDataComponent } from './utility/predictor-data/predictor-data.component';
+import { EditPredictorEntryRowComponent } from './utility/predictor-data/edit-predictor-entry-row/edit-predictor-entry-row.component';
+import { EditPredictorsComponent } from './utility/predictor-data/edit-predictors/edit-predictors.component';
 
 @NgModule({
   declarations: [
@@ -59,7 +62,7 @@ import { PredictorPipe } from './utility/predictors/predictor.pipe';
     EnergySourceComponent,
     HelpPanelComponent,
     StyleGuideComponent,
-    PredictorsComponent,
+    // PredictorsComponent,
     MoMeterDataComponent,
     LoadingComponent,
     EditMeterFormComponent,
@@ -73,7 +76,10 @@ import { PredictorPipe } from './utility/predictors/predictor.pipe';
     ImportMeterDataComponent,
     MeterGroupingComponent,
     EditMeterGroupFormComponent,
-    PredictorPipe
+    PredictorPipe,
+    PredictorDataComponent,
+    EditPredictorEntryRowComponent,
+    EditPredictorsComponent
   ],
   imports: [
     BrowserModule,
