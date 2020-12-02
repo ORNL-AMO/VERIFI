@@ -55,7 +55,7 @@
                 <div [cdkDragData]="meter" class="group-meters" *ngFor="let meter of meterGroup.groupData" cdkDrag>
                     <i class="fa fa-th"></i>
                     <span> {{meter.name}}</span>
-                    <span class="item-right">{{meter.type}}</span>
+                    <span class="item-right">{{meter.source}}</span>
                 </div>
             </div>
             <button class="btn btn-link" (click)="groupAdd(meterGroupType.groupType)"><i class="fa fa-plus"></i> Add New
