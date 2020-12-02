@@ -42,7 +42,6 @@ export class MeterGroupingComponent implements OnInit {
   }
 
   setGroupTypes() {
-    console.log('set group types');
     let meterGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.facilityMeterGroups.getValue();
     this.meterGroupTypes = _.chain(meterGroups).groupBy('groupType').map((value: Array<IdbUtilityMeterGroup>, key: string) => {
       return {
