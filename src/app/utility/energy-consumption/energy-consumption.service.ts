@@ -417,13 +417,5 @@ export class EnergyConsumptionService {
       document.body.removeChild(downloadLink);
     }
   }
-
-
-  getMeterData(meterId: number): Array<IdbUtilityMeterData> {
-    let allFacilityData: Array<IdbUtilityMeterData> = this.utilityMeterDatadbService.facilityMeterData.getValue();
-    let allMeterData: Array<IdbUtilityMeterData> = allFacilityData.filter(meterDataItem => { return meterDataItem.meterId == meterId });
-    return allMeterData;
-  }
-
-  
+ 
 }

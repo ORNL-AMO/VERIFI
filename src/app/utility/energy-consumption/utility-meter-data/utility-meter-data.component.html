@@ -47,7 +47,8 @@
     <div class="row no-margin">
         <div class="col no-margin tableData">
             <app-electricity-data-table *ngIf="selectedSource == 'Electricity'" [meterListItem]="meterListItem"
-                [pageSize]="pageSize" [itemsPerPage]="itemsPerPage" [meterIndex]="index">
+                [pageSize]="pageSize" [itemsPerPage]="itemsPerPage" [meterIndex]="index"
+                (setChecked)="setHasCheckedItems()">
             </app-electricity-data-table>
             <app-general-utility-data-table *ngIf="selectedSource != 'Electricity'" [meterListItem]="meterListItem"
                 [pageSize]="pageSize" [itemsPerPage]="itemsPerPage" [meterIndex]="index">

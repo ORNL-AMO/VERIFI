@@ -97,7 +97,7 @@ export class UtilityMeterDataComponent implements OnInit {
   setMeterList() {
     this.meterList = new Array();
     this.utilityMeters.forEach(meter => {
-      let meterData: Array<IdbUtilityMeterData> = this.energyConsumptionService.getMeterData(meter.id);
+      let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(meter.id);
       this.meterList.push({
         idbMeter: meter,
         meterDataItems: meterData
@@ -173,22 +173,26 @@ export class UtilityMeterDataComponent implements OnInit {
   }
 
   setHasCheckedItems() {
-    let findCheckedItem: { idbMeter: IdbUtilityMeter, meterDataItems: Array<IdbUtilityMeterData> } = this.meterList.find(meterItem => {
-      return meterItem.meterDataItems.find(meterDataItem => { return meterDataItem.checked == true });
-    });
-    this.hasCheckedItems = (findCheckedItem != undefined);
+    if (this.meterList.length != 0) {
+      let findCheckedItem: { idbMeter: IdbUtilityMeter, meterDataItems: Array<IdbUtilityMeterData> } = this.meterList.find(meterItem => {
+        return meterItem.meterDataItems.find(meterDataItem => { return meterDataItem.checked == true });
+      });
+      this.hasCheckedItems = (findCheckedItem != undefined);
+    }else{
+      this.hasCheckedItems = false;
+    }
   }
 
-  setDeleteMeterData(meter: IdbUtilityMeterData){
+  setDeleteMeterData(meter: IdbUtilityMeterData) {
     this.meterDataToDelete = meter;
   }
 
-  cancelDelete(){
+  cancelDelete() {
     this.meterDataToDelete = undefined;
     this.meterDataMenuOpen = undefined;
   }
 
-  deleteMeterData(){
+  deleteMeterData() {
     this.utilityMeterDataDbService.deleteIndex(this.meterDataToDelete.id);
     this.cancelDelete();
   }

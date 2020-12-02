@@ -16,7 +16,7 @@ export class CalanderizationService {
     let calanderizedMeterData: Array<CalanderizedMeter> = new Array();
     facilityMeters.forEach(meter => {
       let meterData: Array<IdbUtilityMeterData> = facilityMeterData.filter(meterData => { return meterData.meterId == meter.id });
-      let calanderizedMeter: Array<MonthlyData> = this.calanderizeData(meterData);
+      let calanderizedMeter: Array<MonthlyData> = this.calanderizeMeterData(meterData);
       calanderizedMeterData.push({
         meter: meter,
         monthlyData: calanderizedMeter
@@ -26,7 +26,7 @@ export class CalanderizationService {
   }
 
 
-  calanderizeData(meterData: Array<IdbUtilityMeterData>): Array<MonthlyData> {
+  calanderizeMeterData(meterData: Array<IdbUtilityMeterData>): Array<MonthlyData> {
     let calanderizeData: Array<MonthlyData> = new Array();
     let orderedMeterData: Array<IdbUtilityMeterData> = _.orderBy(meterData, (data) => { return new Date(data.readDate) });
     for (let meterIndex = 1; meterIndex < orderedMeterData.length - 1; meterIndex++) {
@@ -65,8 +65,6 @@ export class CalanderizationService {
     return calanderizeData;
   }
 
-
-  // a and b are javascript Date objects
   daysBetweenDates(firstDate: Date, secondDate: Date) {
     const _MS_PER_DAY = 1000 * 60 * 60 * 24;
     // Discard the time and time-zone information.

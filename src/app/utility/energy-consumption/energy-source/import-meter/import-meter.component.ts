@@ -1,9 +1,8 @@
 import { Component, ElementRef, EventEmitter, OnInit, Output, ViewChild } from '@angular/core';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
-import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterGroup } from 'src/app/models/idb';
+import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterGroup } from 'src/app/models/idb';
 
 @Component({
   selector: 'app-import-meter',
@@ -19,8 +18,7 @@ export class ImportMeterComponent implements OnInit {
   importError: string = '';
   quickViewMeters: Array<IdbUtilityMeter>;
   importMeters: Array<IdbUtilityMeter>;
-  constructor(private utilityMeterGroupdbService: UtilityMeterGroupdbService, private utilityMeterdbService: UtilityMeterdbService, private accountDbService: AccountdbService,
-    private facilityDbService: FacilitydbService) { }
+  constructor(private utilityMeterGroupdbService: UtilityMeterGroupdbService, private utilityMeterdbService: UtilityMeterdbService, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
   }
@@ -33,8 +31,6 @@ export class ImportMeterComponent implements OnInit {
 
     if (files && files.length > 0) {
       let file: File = files.item(0);
-      //console.log(file.name);
-
       let reader: FileReader = new FileReader();
       reader.readAsText(file);
       reader.onload = (e) => {
@@ -44,10 +40,9 @@ export class ImportMeterComponent implements OnInit {
         const allowedHeaders = ["meterNumber", "accountNumber", "type", "name", "location", "supplier", "group", "notes"];
 
         if (JSON.stringify(headers) === JSON.stringify(allowedHeaders)) {
-          let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
           let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
           for (var i = 1; i < lines.length; i++) {
-            const obj: IdbUtilityMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.id, selectedAccount.id);
+            const obj: IdbUtilityMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.id, selectedFacility.accountId);
             const currentline = lines[i].split(",");
             for (var j = 0; j < headers.length; j++) {
               obj[headers[j]] = currentline[j];
@@ -78,10 +73,7 @@ export class ImportMeterComponent implements OnInit {
       this.importMeters.forEach(meter => {
         let existingGroup: IdbUtilityMeterGroup = facilityGroups.find(meterGroup => { return meterGroup.name == meter.group });
         if (existingGroup) {
-          console.log('exists!');
           meter.groupId = existingGroup.id;
-        } else {
-          console.log('does not exist');
         }
         this.utilityMeterdbService.add(meter);
       });

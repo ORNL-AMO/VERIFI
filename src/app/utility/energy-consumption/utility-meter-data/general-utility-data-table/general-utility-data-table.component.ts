@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 
@@ -19,23 +19,27 @@ export class GeneralUtilityDataTableComponent implements OnInit {
   itemsPerPage: number;
   @Input()
   meterIndex: number;
+  @Output('setChecked')
+  setChecked: EventEmitter<boolean> = new EventEmitter<boolean>();
 
   allChecked: boolean;
-  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService) { }
+  constructor() { }
 
   ngOnInit(): void {
-    let hasFalseChecked: IdbUtilityMeterData = this.meterListItem.meterDataItems.find(meterDataItem => { return meterDataItem.checked == false });
-    this.allChecked = (hasFalseChecked == undefined);
+    if (this.meterListItem.meterDataItems.length != 0) {
+      let hasFalseChecked: IdbUtilityMeterData = this.meterListItem.meterDataItems.find(meterDataItem => { return meterDataItem.checked == false });
+      this.allChecked = (hasFalseChecked == undefined);
+    }
   }
 
   checkAll() {
     this.meterListItem.meterDataItems.forEach(dataItem => {
       dataItem.checked = this.allChecked;
-      this.utilityMeterDataDbService.update(dataItem);
-    })
+    });
+    this.setChecked.emit(true);
   }
 
-  toggleChecked(itemIndex: number) {
-    this.utilityMeterDataDbService.update(this.meterListItem.meterDataItems[itemIndex]);
+  toggleChecked() {
+    this.setChecked.emit(true);
   }
 }

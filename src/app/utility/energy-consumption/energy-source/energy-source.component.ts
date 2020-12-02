@@ -35,10 +35,11 @@ export class EnergySourceComponent implements OnInit {
   importWindow: boolean;
   editMeter: IdbUtilityMeter;
   meterToDelete: IdbUtilityMeter;
+  selectedFacilitySub: Subscription;
+  selectedFacilityName: string = 'Facility';
   constructor(
     public accountdbService: AccountdbService,
     public facilitydbService: FacilitydbService,
-    // private utilityService: UtilityService,
     public utilityMeterDatadbService: UtilityMeterDatadbService,
     public utilityMeterdbService: UtilityMeterdbService,
     public utilityMeterGroupdbService: UtilityMeterGroupdbService,
@@ -49,6 +50,11 @@ export class EnergySourceComponent implements OnInit {
       this.meterList = meters;
     });
 
+    this.selectedFacilitySub = this.facilitydbService.selectedFacility.subscribe(facility => {
+      if (facility) {
+        this.selectedFacilityName = facility.name;
+      }
+    });
     // Observe the energy final unit (not sure how the energyFinalUnit is used...-mark)
     // this.utilityService.getEnergyFinalUnit().subscribe((value) => {
     //   this.energyFinalUnit = value;
@@ -57,6 +63,7 @@ export class EnergySourceComponent implements OnInit {
 
   ngOnDestroy() {
     this.meterListSub.unsubscribe();
+    this.selectedFacilitySub.unsubscribe();
   }
 
   // Close menus when user clicks outside the dropdown
@@ -83,29 +90,22 @@ export class EnergySourceComponent implements OnInit {
     });
   }
 
-  //idk what this is for..
-  // meterMapTabs() {
-  //   // Remap tabs
-  //   this.energySources = this.meterList.map(function (el) { return el.source; });
-  //   // this.energyConsumptionService.setEnergySource(this.energySources);
-  // }
-
   meterExport() {
     const replacer = (key, value) => value === null ? '' : value; // specify how you want to handle null values here
     const header = Object.keys(this.meterList[0]);
-    // let csv: BlobPart = this.meterList.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer)).join(','));
-    // csv.unshift(header.join(','));
-    // csv = csv.join('\r\n');
+    let csvData: Array<string> = this.meterList.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer)).join(','));
+    csvData.unshift(header.join(','));
+    let csvBlob: BlobPart = csvData.join('\r\n');
 
-    // //Download the file as CSV
-    // var downloadLink = document.createElement("a");
-    // var blob = new Blob(["\ufeff", csv]);
-    // var url = URL.createObjectURL(blob);
-    // downloadLink.href = url;
-    // downloadLink.download = "VerifiMeterDump.csv";
-    // document.body.appendChild(downloadLink);
-    // downloadLink.click();
-    // document.body.removeChild(downloadLink);
+    //Download the file as CSV
+    var downloadLink = document.createElement("a");
+    var blob = new Blob(["\ufeff", csvBlob]);
+    var url = URL.createObjectURL(blob);
+    downloadLink.href = url;
+    downloadLink.download = "VerifiMeterDump.csv";
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
   }
 
   public onPageChange(pageNum: number): void {
@@ -134,7 +134,7 @@ export class EnergySourceComponent implements OnInit {
   }
 
 
-  deleteMeter(){
+  deleteMeter() {
     //delete meter
     this.utilityMeterdbService.deleteIndex(this.meterToDelete.id);
     //delete meter data
@@ -142,11 +142,11 @@ export class EnergySourceComponent implements OnInit {
     this.cancelDelete();
   }
 
-  selectDeleteMeter(meter: IdbUtilityMeter){
+  selectDeleteMeter(meter: IdbUtilityMeter) {
     this.meterToDelete = meter;
   }
 
-  cancelDelete(){
+  cancelDelete() {
     this.meterToDelete = undefined;
     this.meterMenuOpen = null;
   }

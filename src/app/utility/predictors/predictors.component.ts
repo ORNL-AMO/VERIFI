@@ -44,26 +44,26 @@ export class PredictorsComponent implements OnInit {
 
   getPredictors(): void {
     // Observe the Predictors
-    this.predictorsService.getPredictors().subscribe((value) => {
+    // this.predictorsService.getPredictors().subscribe((value) => {
           
-      // Predictor values
-      this.predictors = value;
+    //   // Predictor values
+    //   this.predictors = value;
       
-      // Headers for table
-      this.predictorHeaders = [...new Set(value.map(item => item['name']) as unknown as string)];
+    //   // Headers for table
+    //   this.predictorHeaders = [...new Set(value.map(item => item['name']) as unknown as string)];
 
-      // Data for table
-      this.formatPredictorTable();
+    //   // Data for table
+    //   this.formatPredictorTable();
 
-      // Set to last page
-      const lastPage = Math.ceil(this.dataTable.length/this.itemsPerPage);
-      this.page = lastPage;
-      this.onPageChange(lastPage);
+    //   // Set to last page
+    //   const lastPage = Math.ceil(this.dataTable.length/this.itemsPerPage);
+    //   this.page = lastPage;
+    //   this.onPageChange(lastPage);
 
-      // Edit form for predictor headers
-      this.setDynamicHeaderForm();
-      this.setDynamicRowForm();
-    });
+    //   // Edit form for predictor headers
+    //   this.setDynamicHeaderForm();
+    //   this.setDynamicRowForm();
+    // });
   }
 
   documentClick (): void {
@@ -144,7 +144,7 @@ export class PredictorsComponent implements OnInit {
     }
 
     if (this.predictorHeaders.length < 10) {
-      this.predictorsService.addPredictor(this.dates, this.predictorHeaders.length);
+      // this.predictorsService.addPredictor(this.dates, this.predictorHeaders.length);
     } else {
       alert("You're max of 10 predictor variables has been reached.");
     }
@@ -183,7 +183,7 @@ export class PredictorsComponent implements OnInit {
     }
     const nextDate = nextYear + "-" + nextMonth;
 
-    this.predictorsService.addPredictorRow(this.predictorHeaders,nextDate);
+    // this.predictorsService.addPredictorRow(this.predictorHeaders,nextDate);
   }
 
   predictorEdit(): void {
@@ -223,22 +223,22 @@ export class PredictorsComponent implements OnInit {
       this.predictorHeaders.splice(index, 1, controlValue); // remove it
 
       // get everything with that form name
-      this.predictorsService.getAllByName(control).then(
-        data => {
+      // this.predictorsService.getAllByName(control).then(
+      //   data => {
 
-          // update everything with form name
-          for (let item of data) {
-            item['name'] = controlValue;
+      //     // update everything with form name
+      //     for (let item of data) {
+      //       item['name'] = controlValue;
 
-            // save the values
-            this.predictorsService.updatePredictor([item]);
-          }
+      //       // save the values
+      //       this.predictorsService.updatePredictor([item]);
+      //     }
           
-        },
-        error => {
-            console.log(error);
-        }
-      );
+      //   },
+      //   error => {
+      //       console.log(error);
+      //   }
+      // );
       
     }
 
@@ -267,7 +267,7 @@ export class PredictorsComponent implements OnInit {
     }
 
     // update predictor db
-    this.predictorsService.updatePredictor(this.predictorRow);
+    // this.predictorsService.updatePredictor(this.predictorRow);
 
     // refresh table
     this.getPredictors();
@@ -305,7 +305,7 @@ export class PredictorsComponent implements OnInit {
     }
 
     // Delete predictors
-    this.predictorsService.deletePredictors(deleteQueue);
+    // this.predictorsService.deletePredictors(deleteQueue);
   }
 
   predictorImport (files: FileList) {
@@ -362,7 +362,7 @@ export class PredictorsComponent implements OnInit {
       // 2. Does it fit the correct format
       // 3. If new predictor, add all back dates
       // 4. If new date, add 0 to all predictors
-      this.predictorsService.addPredictorByImport(obj);
+      // this.predictorsService.addPredictorByImport(obj);
       
     }
   
