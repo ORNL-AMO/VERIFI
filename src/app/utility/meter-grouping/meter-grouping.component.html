@@ -4,7 +4,7 @@
         will represent your data visualization.</p>
     <!--<button class="btn btn-primary item-right">Add New Group</button>-->
     <br>
-    <div *ngFor="let meterGroupType of meterGroupTypes">
+    <div *ngFor="let meterGroupType of meterGroupTypes" id={{meterGroupType.groupType}}>
         <div class="group-section">
             <h5>{{meterGroupType.groupType}}</h5>
             <!-- <label class="item-right">Final Unit:
