@@ -23,22 +23,39 @@ export class MeterGroupingComponent implements OnInit {
   groupToEdit: IdbUtilityMeterGroup;
   groupToDelete: IdbUtilityMeterGroup;
   meterGroupIds: Array<string>;
-  facilityMetersSub: Subscription;
+  facilityMeterDataSub: Subscription;
   facilityMeterGroupsSub: Subscription;
   facilityMeters: Array<IdbUtilityMeter>;
   editOrAdd: string;
+  facilityMetersSub: Subscription;
   constructor(private utilityMeterGroupDbService: UtilityMeterGroupdbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterDbService: UtilityMeterdbService, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
     this.facilityMeterGroupsSub = this.utilityMeterGroupDbService.facilityMeterGroups.subscribe(() => {
-      this.facilityMeters = this.utilityMeterDbService.facilityMeters.getValue();
-      this.setGroupTypes();
+      if (this.facilityMeters) {
+        this.setGroupTypes();
+      }
     });
+
+    this.facilityMeterDataSub = this.utilityMeterDataDbService.facilityMeterData.subscribe(() => {
+      if (this.facilityMeters) {
+        this.setGroupTypes();
+      }
+    });
+
+    this.facilityMetersSub = this.utilityMeterDbService.facilityMeters.subscribe(val => {
+      this.facilityMeters = val;
+      if (this.facilityMeters) {
+        this.setGroupTypes();
+      }
+    })
   }
 
   ngOnDestroy() {
     this.facilityMeterGroupsSub.unsubscribe();
+    this.facilityMeterDataSub.unsubscribe();
+    this.facilityMetersSub.unsubscribe();
   }
 
   setGroupTypes() {
@@ -68,9 +85,9 @@ export class MeterGroupingComponent implements OnInit {
     if (otherMeters.length != 0) {
       this.addEnergyMetersWithoutGroups(otherMeters, 'Other');
     }
-    this.meterGroupTypes.forEach(groupType => {
-      groupType.meterGroups = this.setFractionOfTotalEnergy(groupType.meterGroups);
-    });
+    for (let i = 0; i < this.meterGroupTypes.length; i++) {
+      this.meterGroupTypes[i].meterGroups = this.setFractionOfTotalEnergy(this.meterGroupTypes[i].meterGroups);
+    }
   }
 
   setGroupDataSummary(meterGroups: Array<IdbUtilityMeterGroup>): Array<IdbUtilityMeterGroup> {

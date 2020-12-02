@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { IdbUtilityMeter } from 'src/app/models/idb';
 import { CalanderizationService, CalanderizedMeter } from './calanderization.service';
 
 @Component({
@@ -17,17 +19,31 @@ export class CalanderizationComponent implements OnInit {
 
   calanderizedMeterData: Array<CalanderizedMeter>
   facilityMetersSub: Subscription;
-  constructor(private calanderizationService: CalanderizationService, private utilityMeterDbService: UtilityMeterdbService) { }
+  facilityMeterDataSub: Subscription;
+  facilityMeters: Array<IdbUtilityMeter>;
+  constructor(private calanderizationService: CalanderizationService, private utilityMeterDbService: UtilityMeterdbService, private utilityMeterDataDbService: UtilityMeterDatadbService) { }
 
   ngOnInit(): void {
     this.facilityMetersSub = this.utilityMeterDbService.facilityMeters.subscribe(facilityMeters => {
-      this.calanderizedMeterData = this.calanderizationService.calanderizeFacilityMeters(facilityMeters);
+      this.facilityMeters = facilityMeters;
+      this.setCalanderizedMeterData();
+    });
+
+    this.facilityMeterDataSub = this.utilityMeterDataDbService.facilityMeterData.subscribe(() => {
+      this.setCalanderizedMeterData();
     });
   }
 
   ngOnDestroy() {
     this.facilityMetersSub.unsubscribe();
   }
+
+  setCalanderizedMeterData() {
+    if (this.facilityMeters) {
+      this.calanderizedMeterData = this.calanderizationService.calanderizeFacilityMeters(this.facilityMeters);
+    }
+  }
+
 
   setMeterPages() {
     for (let i = 0; i < this.calanderizedMeterData.length; i++) {
