@@ -31,7 +31,6 @@ export class EditElectricityBillComponent implements OnInit {
     this.meterDataForm = this.utilityMeterDataService.getElectricityMeterDataForm(this.editMeterData);
     this.electricityDataFiltersSub = this.utilityMeterDataService.electricityInputFilters.subscribe(dataFilters => {
       this.electricityDataFilters = dataFilters;
-      console.log('update!');
     });
   }
 
