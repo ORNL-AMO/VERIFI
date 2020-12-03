@@ -16,13 +16,14 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 export class MeterGroupingComponent implements OnInit {
   meterGroupTypes: Array<{
     meterGroups: Array<IdbUtilityMeterGroup>,
-    groupType: string
+    groupType: string,
+    id: string,
+    meterGroupIds: Array<string>
   }>;
 
   groupMenuOpen: number;
   groupToEdit: IdbUtilityMeterGroup;
   groupToDelete: IdbUtilityMeterGroup;
-  meterGroupIds: Array<string>;
   facilityMeterDataSub: Subscription;
   facilityMeterGroupsSub: Subscription;
   facilityMeters: Array<IdbUtilityMeter>;
@@ -61,9 +62,12 @@ export class MeterGroupingComponent implements OnInit {
   setGroupTypes() {
     let meterGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.facilityMeterGroups.getValue();
     this.meterGroupTypes = _.chain(meterGroups).groupBy('groupType').map((value: Array<IdbUtilityMeterGroup>, key: string) => {
+      let meterGroups: Array<IdbUtilityMeterGroup> = this.setGroupDataSummary(value)
       return {
-        meterGroups: this.setGroupDataSummary(value),
-        groupType: key
+        meterGroups: meterGroups,
+        groupType: key,
+        id: Math.random().toString(36).substr(2, 9),
+        meterGroupIds: meterGroups.map(meterGroup => { return String(meterGroup.id) })
       }
     }).value();
 
@@ -91,9 +95,7 @@ export class MeterGroupingComponent implements OnInit {
   }
 
   setGroupDataSummary(meterGroups: Array<IdbUtilityMeterGroup>): Array<IdbUtilityMeterGroup> {
-    this.meterGroupIds = new Array();
     meterGroups.forEach(group => {
-      this.meterGroupIds.push(String(group.id));
       let groupMeters: Array<IdbUtilityMeter> = this.facilityMeters.filter(meter => { return meter.groupId == group.id });
       let groupMeterIds: Array<number> = groupMeters.map(meter => { return meter.id });
       let groupMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterIds(groupMeterIds);
@@ -120,13 +122,21 @@ export class MeterGroupingComponent implements OnInit {
       totalEnergyUse: _.sumBy(groupMeterData, 'totalEnergyUse'),
       groupData: energyMeters
     }
-    let energyGroup: { meterGroups: Array<IdbUtilityMeterGroup>, groupType: string } = this.meterGroupTypes.find(meterGroup => { return meterGroup.groupType == groupType })
+    let energyGroup: {
+      meterGroups: Array<IdbUtilityMeterGroup>,
+      groupType: string,
+      id: string,
+      meterGroupIds: Array<string>
+    } = this.meterGroupTypes.find(meterGroup => { return meterGroup.groupType == groupType })
     if (energyGroup) {
       energyGroup.meterGroups.push(meterGroup);
+      energyGroup.meterGroupIds.push(String(meterGroup.id));
     } else {
       this.meterGroupTypes.push({
         groupType: groupType,
-        meterGroups: [meterGroup]
+        meterGroups: [meterGroup],
+        id: Math.random().toString(36).substr(2, 9),
+        meterGroupIds: [String(meterGroup.id)]
       });
     }
   }
