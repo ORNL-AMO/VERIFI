@@ -1,9 +1,10 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { ElectricityDataFilter } from 'src/app/models/electricityFilter';
-import { IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbFacility, IdbUtilityMeterData } from 'src/app/models/idb';
 import { UtilityMeterDataService } from '../utility-meter-data.service';
 
 @Component({
@@ -23,12 +24,14 @@ export class EditElectricityBillComponent implements OnInit {
   meterDataForm: FormGroup;
   electricityDataFilters: Array<ElectricityDataFilter>;
   electricityDataFiltersSub: Subscription;
-  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private utilityMeterDataService: UtilityMeterDataService) { }
+  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private utilityMeterDataService: UtilityMeterDataService,
+    private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
     this.meterDataForm = this.utilityMeterDataService.getElectricityMeterDataForm(this.editMeterData);
-    this.electricityDataFiltersSub = this.utilityMeterDataService.electricityDataFilters.subscribe(dataFilters => {
+    this.electricityDataFiltersSub = this.utilityMeterDataService.electricityInputFilters.subscribe(dataFilters => {
       this.electricityDataFilters = dataFilters;
+      console.log('update!');
     });
   }
 
@@ -55,7 +58,9 @@ export class EditElectricityBillComponent implements OnInit {
     this.electricityDataFilters.forEach(field => {
       field.filter = true;
     });
-    this.utilityMeterDataService.electricityDataFilters.next(this.electricityDataFilters);
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    selectedFacility.electricityInputFilters = this.electricityDataFilters;
+    this.facilityDbService.update(selectedFacility);
   }
 
 }

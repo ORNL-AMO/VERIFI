@@ -34,7 +34,7 @@ export class ElectricityDataTableComponent implements OnInit {
       let hasFalseChecked: IdbUtilityMeterData = this.meterListItem.meterDataItems.find(meterDataItem => { return meterDataItem.checked == false });
       this.allChecked = (hasFalseChecked == undefined);
     }
-    this.electricityDataFilterSub = this.utilityMeterDataService.electricityDataFilters.subscribe(electricityDataFilters => {
+    this.electricityDataFilterSub = this.utilityMeterDataService.tableElectricityFilters.subscribe(electricityDataFilters => {
       this.electricityDataFilters = electricityDataFilters;
     });
   }

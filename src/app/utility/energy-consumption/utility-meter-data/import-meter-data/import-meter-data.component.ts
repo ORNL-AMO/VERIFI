@@ -23,7 +23,7 @@ export class ImportMeterDataComponent implements OnInit {
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private utilityMeterDbService: UtilityMeterdbService, private utilityMeterDataService: UtilityMeterDataService) { }
 
   ngOnInit(): void {
-    this.electricityDataFilters = this.utilityMeterDataService.electricityDataFilters.getValue();
+    this.electricityDataFilters = this.utilityMeterDataService.electricityInputFilters.getValue();
   }
 
 

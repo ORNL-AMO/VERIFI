@@ -26,8 +26,8 @@ export interface IdbFacility {
     units: string,
     division: string,
     img: string,
-    tableElectricityFilter?: ElectricityDataFilter,
-    electricityInputFilter?: ElectricityDataFilter
+    tableElectricityFilters?: Array<ElectricityDataFilter>,
+    electricityInputFilters?: Array<ElectricityDataFilter>
     
 }
 
