@@ -36,6 +36,7 @@ export class CalanderizationComponent implements OnInit {
 
   ngOnDestroy() {
     this.facilityMetersSub.unsubscribe();
+    this.facilityMeterDataSub.unsubscribe();
   }
 
   setCalanderizedMeterData() {
