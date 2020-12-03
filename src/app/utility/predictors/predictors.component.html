@@ -1,4 +1,4 @@
-<div class="wrapper main-content">
+<!-- <div class="wrapper main-content">
     <h4>Predictors</h4>
     <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
 
@@ -7,7 +7,7 @@
             <button class="btn btn-outline" (click)="importWindow = true">Import</button>
             <button class="btn btn-outline" (click)="predictorExport()">Export</button>
         </div>
-        <!--Items Per Page-->
+        <!--Items Per Page--
         <div class="items-per-page item-right">
             <span>Show </span>
             <select (change)="changePagesize($event.target.value)">
@@ -28,7 +28,7 @@
         <tr>
             <th></th>
             <th class="header" *ngFor="let header of predictorHeaders">{{header}} <span class="small block">hours</span></th>
-            <td (click)="$event.stopPropagation();"> <!-- Prevents closure of menu on document click-->
+            <td (click)="$event.stopPropagation();"> <!-- Prevents closure of menu on document click--
                 <i class="fa fa-ellipsis-v" (click)="predictorToggleMenu('header')" ></i>
                 <div class="meterMenu" [class.open]="predictorMenu === 'header'">
                     <p (click)="predictorEdit()">Edit / Delete</p>
@@ -43,7 +43,7 @@
         <tr *ngFor="let data of dataTable | slice: pageSize | slice: 0:itemsPerPage">
             <td>{{data.date}}</td>
             <td *ngFor="let item of data.amount">{{item.amount}}</td>
-            <td (click)="$event.stopPropagation();"> <!-- Prevents closure of menu on document click-->
+            <td (click)="$event.stopPropagation();"> <!-- Prevents closure of menu on document click--
                 <i class="fa fa-ellipsis-v" (click)="predictorToggleMenu(data.date)" ></i>
                 <div class="meterMenu" [class.open]="predictorMenu === data.date">
                     <p (click)="predictorDataEdit(data.date)">Edit</p>
@@ -175,4 +175,4 @@
             <button class="btn btn-primary" (click)="predictorAddCSV()" [disabled]="importError != ''">Submit</button>
         </div>
     </div>
-</div>
+</div> -->

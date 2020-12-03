@@ -1,9 +1,10 @@
 <h4>Energy Sources</h4>
-<p>All energy sources that <strong>Facility<!--{{activeFacility.name}}--></strong> uses can be viewed in the tabs at the top of the screen.</p>
+<p>All energy sources that <strong>{{selectedFacilityName}}</strong> uses can be viewed in the tabs at the top of the
+    screen.</p>
 
 <div class="controls">
     <div class="importExport item-right">
-        <button class="btn btn-outline" (click)="importWindow = true">Import</button>
+        <button class="btn btn-outline" (click)="showImportWindow()">Import</button>
         <button class="btn btn-outline" (click)="meterExport()">Export</button>
     </div>
     <!--Items Per Page-->
@@ -15,14 +16,15 @@
             <option value="30">30</option>
             <option value="40">40</option>
         </select>
-    </div>    
+    </div>
 </div>
 
 <div class="meterData">
-    <button class="btn btn-link item-right" (click)="meterAdd()"><i class="fa fa-plus"></i> Add New Meter</button>
+    <button class="btn btn-link item-right" (click)="addMeter()"><i class="fa fa-plus"></i> Add New Meter</button>
     <div class="tableControls overflow-hidden item-right">
         <div class="item-right">
-            <ngb-pagination [collectionSize]="meterList.length" [(page)]="page" [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Default pagination" (pageChange)="onPageChange(page)"></ngb-pagination>
+            <ngb-pagination [collectionSize]="meterList.length" [(page)]="page" [pageSize]="itemsPerPage" [maxSize]="5"
+                [rotate]="true" aria-label="Default pagination" (pageChange)="onPageChange(page)"></ngb-pagination>
         </div>
         <p class="item-right">{{meterList.length}} entries</p>
     </div>
@@ -44,238 +46,54 @@
         <th>STS</th>
         <th></th>
     </tr>
-    <tr *ngFor="let meterLists of meterList | slice: pageSize | slice: 0:itemsPerPage">
-        <td>{{meterLists.name}}</td>
-        <td>{{meterLists.source}}</td>
-        <!--<td>{{meterLists.group}}</td>-->
-        <td>{{meterLists.meterNumber}}</td>
-        <td>{{meterLists.accountNumber}}</td>
-        <td>{{meterLists.location}}</td>
-        <td>{{meterLists.supplier}}</td>
-        <td>{{meterLists.notes}}</td>
-        <td>{{meterLists.startingUnit}}</td>
-        <td>{{meterLists.finalUnit}}</td>
-        <td>{{meterLists.heatCapacity}}</td>
-        <td>{{meterLists.siteToSource}}</td>
-        <td (click)="$event.stopPropagation();"> <!-- Prevents closure of menu on document click-->
-            <i class="fa fa-ellipsis-v" (click)="meterToggleMenu(meterLists.id)" ></i>
-            <div class="meterMenu" [class.open]="meterMenuOpen === meterLists.id">
-                <p (click)="meterEdit(meterLists.id)">Edit</p>
-                <p (click)="popup = true; id = meterLists.id">Delete</p>
+    <tr *ngFor="let meter of meterList | slice: pageSize | slice: 0:itemsPerPage">
+        <td>{{meter.name}}</td>
+        <td>{{meter.source}}</td>
+        <!--<td>{{meter.group}}</td>-->
+        <td>{{meter.meterNumber}}</td>
+        <td>{{meter.accountNumber}}</td>
+        <td>{{meter.location}}</td>
+        <td>{{meter.supplier}}</td>
+        <td>{{meter.notes}}</td>
+        <td>{{meter.startingUnit}}</td>
+        <td>{{meter.finalUnit}}</td>
+        <td>{{meter.heatCapacity}}</td>
+        <td>{{meter.siteToSource}}</td>
+        <td (click)="$event.stopPropagation();">
+            <!-- Prevents closure of menu on document click-->
+            <i class="fa fa-ellipsis-v" (click)="meterToggleMenu(meter.id)"></i>
+            <div class="meterMenu" [class.open]="meterMenuOpen === meter.id">
+                <p (click)="selectEditMeter(meter)">Edit</p>
+                <p (click)="selectDeleteMeter(meter)">Delete</p>
             </div>
         </td>
     </tr>
 </table>
 
-<div class="window" [class.open]="window == true">
+<div class="window" [class.open]="editMeter">
     <div class="windowOverlay"></div>
     <div class="windowContent">
-        <h4>Edit Meter</h4>
-        <br>
-        <p class="bold">Meter Information</p>
-        <form [formGroup]="meterForm">
-            <input hidden type="text" formControlName="id">
-            <input hidden type="text" formControlName="group">
-
-            <label>
-                <span class="required">*</span> Name
-                <input type="text" formControlName="name">
-            </label>
-            <br>
-            <label>
-                <span class="required">*</span> Source
-                <select type="text" formControlName="source" (change)='onTypeChange($event.target.value)'>
-                    <option value="Electricity">Electricity</option>
-                    <option value="Natural Gas">Natural Gas</option>
-                    <option value="Other Fuels">Other Fuels</option>
-                    <option value="Other Energy">Other Energy</option>
-                    <option value="Water">Water</option>
-                    <option value="Waste Water">Waste Water</option>
-                    <option value="Other Utility">Other Utility</option>
-                </select>
-            </label>
-            <label *ngIf="!is_ele_ng">
-                <span class="required">*</span> Phase
-                <select type="text" formControlName="phase">
-                    <option value="NA">NA</option>
-                    <option value="Solid">Solid</option>
-                    <option value="Liquid">Liquid</option>
-                    <option value="Gas">Gas</option>
-                </select>
-            </label>
-            
-            <label *ngIf="!is_ele_ng">
-                <span class="required">*</span> Fuel
-                <select type="text" formControlName="fuel">
-                    <option *ngIf="meterForm.value['phase'] == 'Gas'" value="Blast Furnace Gas">Blast Furnace Gas</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Gas'" value="Coke Oven Gas">Coke Oven Gas</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Gas'" value="Liquefied Petroleum Gas (LPG)">Liquefied Petroleum Gas (LPG)</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Gas'" value="Propane">Propane</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Gas'" value="Butane">Butane</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Gas'" value="">Isobutane</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Gas'" value="">Landfill Gas</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Gas'" value="">Oil Gases</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Propane</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">LPG</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Distillate Fuel Oil</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Residual Fuel Oil</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Heating Oil</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Diesel</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Butane</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Isobutane</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Pentane</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Ethylene</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Propylene</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Butene</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Pentene</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Benzene</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Toluene</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Xylene</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Methyl Alcohol</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Ethyl Alcohol</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Fuel Oil #1</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Fuel Oil #2</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Fuel Oil #4</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Fuel Oil #5</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Fuel Oil #6 (high sulfur)</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Fuel Oil #6 (low sulfur)</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Crude Oil</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Gasoline</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Kerosene</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Gas Oil</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Liquefied Natural Gas (LNG)</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Solid'" value="">Coal (anthracite)</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Solid'" value="">Coal - (bituminous)</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Solid'" value="">Coal</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Solid'" value="">Coke</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Solid'" value="">Peat</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Solid'" value="">Wood</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Solid'" value="">Biomass</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Solid'" value="">Black Liquor</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Solid'" value="">Scrap Tires</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Solid'" value="">Sulfur</option>
-                    <option value="">District Steam (150 psig)</option>
-                    <option value="">Purchased Steam</option>
-                    <option value="">Purchased Chilled Water (Absorption Chiller)</option>
-                    <option value="">Purchased Chilled Water (Electric-driven Compressor)</option>
-                    <option value="">Purchased Chilled Water (Engine-driven Compressor)</option>
-                    <option value="">Purchased Chilled Water (Absorption Chiller)</option>
-                    <option value="">Purchased Chilled Water (Electric-driven Compressor)</option>
-                    <option value="">Purchased Chilled Water (Engine-driven Compressor)</option>
-                    <option value="">District Hot Water</option>
-                    <option value="">Biodiesel (100%)</option>
-                    <option value="">Ethanol (100%)</option>
-                    <option value="">Purchased Compressed Air (100 psi, motor driven compressor)</option>
-                </select>
-            </label>
-            <label>
-                <span class="required">*</span> Starting Unit
-                <select type="text" formControlName="startingUnit">
-                    <option *ngIf="meterForm.value['source'] == 'Electricity'" value="kWh">kWh</option>
-                    <option *ngIf="meterForm.value['source'] == 'Electricity'" value="MWh">MWh</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Gas'" value="SCF">SCF</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Gas'" value="Pounds">Pounds</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Solid'" value="Tons">Tons</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Solid'" value="lb">lb</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="Gallons">Gallons</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="Ton Hours">Ton Hours</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="gal-F">gal-F</option>
-                    <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="Therms">Therms</option>
-                </select>
-            </label>
-            <br>
-            <label>
-                <span class="required">*</span> Heat Capacity
-                <input type="text" formControlName="heatCapacity">
-            </label>
-            <br>
-            <label>
-                <span class="required">*</span> Site to source
-                <input type="text" formControlName="siteToSource">
-            </label>
-
-            <hr>
-            <p class="bold">Other Information</p>
-            
-            <label>Meter Number
-                <input type="text" formControlName="meterNumber">
-            </label>
-            <br>
-            <label>Account Number
-                <input type="text" formControlName="accountNumber">
-            </label>
-            <br>
-            <label>Building / Location
-                <input type="text" formControlName="location">
-            </label>
-            <br>
-            <label>Utility Supplier
-                <input type="text" formControlName="supplier">
-            </label>
-            <br>
-            <label>Notes
-                <textarea formControlName="notes"></textarea>
-            </label>
-        </form>
-        <div class="saveCancel item-right">
-            <button class="btn btn-primary" (click)="window = !window" [disabled]="toggleCancel">Cancel</button>
-            <button class="btn btn-primary" (click)="meterSave()">Save</button>
-        </div>
+        <app-edit-meter-form *ngIf="editMeter" [editMeter]="editMeter" (emitClose)="closeEditMeter()">
+        </app-edit-meter-form>
     </div>
-</div>
-
-<div class="wizard">
-    <!--<button class="btn btn-secondary item-left">Prev</button>-->
-    <button class="btn btn-primary item-right" routerLink="/utility/mo-meter-data">Next</button>
 </div>
 
 <div class="window" [class.open]="importWindow == true">
     <div class="windowOverlay"></div>
     <div class="windowContent">
-        <h4>Import Meters</h4>
-        <br>
-        <form>
-            <input type="file" #inputFile accept=".csv" (change)="meterImport($event.target.files)">
-        </form>
-        <br>
-        <div class="importQuickView" [hidden]="quickView ==''">
-            <p class="bold">Quick View</p>
-            <table>
-                <tr>
-                    <th>Meter #</th>
-                    <th>Account #</th>
-                    <th>Type</th>
-                    <th>Building / Area</th>
-                    <th>Utility Supplier</th>
-                    <th>Notes</th>
-                </tr>
-                <tr *ngFor="let quickViews of quickView">
-                    <td>{{quickViews.meterNumber}}</td>
-                    <td>{{quickViews.accountNumber}}</td>
-                    <td>{{quickViews.type}}</td>
-                    <td>{{quickViews.name}}</td>
-                    <td>{{quickViews.supplier}}</td>
-                    <td>{{quickViews.notes}}</td>
-                </tr>
-            </table>
-        </div>
-        <p class="alert alert-danger" [hidden]="importError == ''">{{importError}}</p>
-
-        <div class="saveCancel item-right">
-            <button class="btn btn-primary" (click)="resetImport(); importWindow = !importWindow">Cancel</button>
-            <button class="btn btn-primary" (click)="meterAddCSV()" [disabled]="importError != ''">Submit</button>
-        </div>
+        <app-import-meter (emitClose)="closeImportWindow()"></app-import-meter>
     </div>
 </div>
 
-<div class="popup" [class.open]="popup == true">
-    <div class="popup-header">Delete Meter 
-        <button class="item-right" (click)="popup = false">x</button>
+<div class="popup" [class.open]="meterToDelete">
+    <div class="popup-header" *ngIf="meterToDelete">Delete Meter: {{meterToDelete.name}}
+        <button class="item-right" (click)="cancelDelete()">x</button>
     </div>
-        <div class="popup-body">
-        <p>WARNING: By deleting this meter, you are also deleting all of the meter data and bills associated with it. Are you sure you want to preform this action?</p>
+    <div class="popup-body">
+        <p>WARNING: By deleting this meter, you are also deleting all of the meter data and bills associated with it.
+            Are you sure you want to preform this action?</p>
     </div>
     <div class="popup-footer text-right">
-        <button class="btn btn-danger" (click)="meterDelete(id); popup=false">Delete</button>
+        <button class="btn btn-danger" (click)="deleteMeter()">Delete</button>
     </div>
 </div>

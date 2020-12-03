@@ -1,9 +1,7 @@
-import { Component, OnInit} from '@angular/core';
-import { AccountService } from '../account/account.service';
-import { FacilityService } from '../facility/facility.service';
-import { AccountdbService } from "../../indexedDB/account-db.service";
+import { Component, OnInit } from '@angular/core';
 import { FacilitydbService } from "../../indexedDB/facility-db.service";
 import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-facility',
@@ -11,12 +9,10 @@ import { FormGroup, FormControl, Validators } from '@angular/forms';
   styleUrls: ['./facility.component.css']
 })
 export class FacilityComponent implements OnInit {
-  accountid: number;
-  facilityid: number;
-
+  facilityId: number;
   facilityForm = new FormGroup({
     id: new FormControl('', [Validators.required]),
-    accountid: new FormControl('', [Validators.required]),
+    accountId: new FormControl('', [Validators.required]),
     name: new FormControl('', [Validators.required]),
     country: new FormControl('', [Validators.required]),
     state: new FormControl('', [Validators.required]),
@@ -28,54 +24,35 @@ export class FacilityComponent implements OnInit {
     division: new FormControl('', [Validators.required]),
   });
 
-  constructor(
-    private accountService: AccountService,
-    private facilityService: FacilityService,
-    private accountdbService: AccountdbService,
-    private facilitydbService: FacilitydbService
-  ) {}
+  selectedFacilitySub: Subscription;
+  constructor(private facilitydbService: FacilitydbService) { }
 
   ngOnInit() {
-    // Get current account and fill form.
-    this.facilityService.getValue().subscribe((value) => {
-      this.facilityid = value;
-
-      this.facilitydbService.getByKey(this.facilityid).then(
-        data => {
-          if (data != null) {
-            this.facilityForm.get('id').setValue(data.id);
-            this.facilityForm.get('accountid').setValue(data.accountid);
-            this.facilityForm.get('name').setValue(data.name);
-            this.facilityForm.get('country').setValue(data.country);
-            this.facilityForm.get('state').setValue(data.state);
-            this.facilityForm.get('address').setValue(data.address);
-            this.facilityForm.get('type').setValue(data.type);
-            this.facilityForm.get('tier').setValue(data.tier);
-            this.facilityForm.get('size').setValue(data.size);
-            this.facilityForm.get('units').setValue(data.units);
-            this.facilityForm.get('division').setValue(data.division);
-            // Needs image
-          }
-        },
-        error => {
-            console.log(error);
-        }
-      );
-      
+    this.selectedFacilitySub = this.facilitydbService.selectedFacility.subscribe(facility => {
+      if (facility != null) {
+        this.facilityForm.controls.id.setValue(facility.id);
+        this.facilityForm.controls.accountId.setValue(facility.accountId);
+        this.facilityForm.controls.name.setValue(facility.name);
+        this.facilityForm.controls.country.setValue(facility.country);
+        this.facilityForm.controls.state.setValue(facility.state);
+        this.facilityForm.controls.address.setValue(facility.address);
+        this.facilityForm.controls.type.setValue(facility.type);
+        this.facilityForm.controls.tier.setValue(facility.tier);
+        this.facilityForm.controls.size.setValue(facility.size);
+        this.facilityForm.controls.units.setValue(facility.units);
+        this.facilityForm.controls.division.setValue(facility.division);
+        // Needs image
+      }
     });
+  }
+
+  ngOnDestroy() {
+    this.selectedFacilitySub.unsubscribe();
   }
 
   onFormChange(): void {
     // Update db
-    this.facilitydbService.update(this.facilityForm.value).then(
-      data => {
-        this.facilityService.setValue(this.facilityid);
-      },
-      error => {
-          console.log(error);
-      }
-    );
-    
-}
+    this.facilitydbService.update(this.facilityForm.value);
+  }
 
 }

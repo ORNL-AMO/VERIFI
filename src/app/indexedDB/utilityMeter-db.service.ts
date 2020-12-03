@@ -1,64 +1,102 @@
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { Injectable } from '@angular/core';
-import { resolve } from 'url';
+import { IdbFacility, IdbUtilityMeter } from '../models/idb';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { FacilitydbService } from './facility-db.service';
 
 @Injectable({
     providedIn: 'root'
 })
 export class UtilityMeterdbService {
-  constructor(private dbService: NgxIndexedDBService) {}
 
-    getAll() {
+    facilityMeters: BehaviorSubject<Array<IdbUtilityMeter>>;
+
+    constructor(private dbService: NgxIndexedDBService, private facilityDbService: FacilitydbService) {
+        this.facilityMeters = new BehaviorSubject<Array<IdbUtilityMeter>>(new Array());
+        this.facilityDbService.selectedFacility.subscribe(() => {
+            this.setFacilityMeters();
+        });
+    }
+
+    setFacilityMeters() {
+        let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+        if (selectedFacility) {
+            this.getAllByIndexRange('facilityId', selectedFacility.id).subscribe(facilityMeters => {
+                this.facilityMeters.next(facilityMeters);
+            });
+        }
+    }
+
+    getAll(): Observable<Array<IdbUtilityMeter>> {
         return this.dbService.getAll('utilityMeter');
     }
 
-    getByKey(index) {
-        return this.dbService.getByKey('utilityMeter', index);
+    getById(meterId: number): Observable<IdbUtilityMeter> {
+        return this.dbService.getByKey('utilityMeter', meterId);
     }
 
-    getById(meterid) {
-        return this.dbService.getByIndex('utilityMeter', 'meterid', meterid);
+    getByIndex(indexName: string, indexValue: number): Observable<IdbUtilityMeter> {
+        return this.dbService.getByIndex('utilityMeter', indexName, indexValue);
     }
 
-    getByIndex(facilityid) {
-        return this.dbService.getByIndex('utilityMeter', 'facilityid', facilityid);
-    }
-    
-    getAllByIndex(facilityid) {
-        return this.dbService.getAllByIndex('utilityMeter', 'facilityid', facilityid);
+    getAllByIndexRange(indexName: string, indexValue: number | string): Observable<Array<IdbUtilityMeter>> {
+        let idbKeyRange: IDBKeyRange = IDBKeyRange.only(indexValue);
+        return this.dbService.getAllByIndex('utilityMeter', indexName, idbKeyRange);
     }
 
     count() {
         return this.dbService.count('utilityMeter');
     }
 
-    add(facilityid,accountid) {
-        return this.dbService.add('utilityMeter', { 
-            facilityid: facilityid,
-            accountid: accountid,
-            meterNumber: '000',
-            accountNumber: '000',
-            source: '',
-            phase: '',
-            fuel: '',
-            finalUnit: '',
-            startingUnit: '',
-            heatCapacity: '',
-            siteToSource:'',
-            group: '',
-            groupType: '',
-            name: '',
-            location: '',
-            supplier: '',
-            notes: ''
+    add(utilityMeter: IdbUtilityMeter): void {
+        this.dbService.add('utilityMeter', utilityMeter).subscribe(() => {
+            this.setFacilityMeters();
         });
     }
 
-    update(values) {
-        return this.dbService.update('utilityMeter', values);
+    addWithObservable(utilityMeter: IdbUtilityMeter): Observable<number> {
+        return this.dbService.add('utilityMeter', utilityMeter);
     }
-    
-    deleteIndex(index) {
-        return this.dbService.delete('utilityMeter', index);
+
+
+    update(values: IdbUtilityMeter): void {
+        this.dbService.update('utilityMeter', values).subscribe(() => {
+            this.setFacilityMeters();
+        });
+    }
+
+    deleteIndex(utilityMeterId: number): void {
+        this.dbService.delete('utilityMeter', utilityMeterId).subscribe(() => {
+            this.setFacilityMeters();
+        });
+    }
+
+    getNewIdbUtilityMeter(facilityId: number, accountId: number): IdbUtilityMeter {
+        return {
+            facilityId: facilityId,
+            accountId: accountId,
+            // id: undefined,
+            groupId: undefined,
+            meterNumber: undefined,
+            accountNumber: undefined,
+            type: undefined,
+            phase: undefined,
+            unit: undefined,
+            heatCapacity: undefined,
+            siteToSource: undefined,
+            name: undefined,
+            location: undefined,
+            supplier: undefined,
+            notes: undefined,
+            source: 'Electricity',
+            group: undefined,
+            startingUnit: undefined,
+            fuel: undefined
+        }
+    }
+
+    getGroupMetersByGroupId(groupId: number): Array<IdbUtilityMeter> {
+        let facilityMeters: Array<IdbUtilityMeter> = this.facilityMeters.getValue();
+        return facilityMeters.filter(meter => { return meter.groupId == groupId });
     }
 }

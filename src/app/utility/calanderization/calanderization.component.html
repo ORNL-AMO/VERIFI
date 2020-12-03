@@ -1,0 +1,66 @@
+<div class="wrapper main-content">
+    <h4>Monthly Meter Data</h4>
+    <p>Meter data has been calendarized. Data represented with <span class="bold">NA</span> does not have a full month
+        of data to calculate.</p>
+
+    <div class="controls">
+        <!--Column Filters-->
+        <div class="filter item-right">
+            <button class="btn btn-solid">Filter</button>
+        </div>
+        <!--Items Per Page-->
+        <div class="items-per-page item-right">
+            <span>Show </span>
+            <select (change)="changePagesize($event.target.value)">
+                <option value="6">6</option>
+                <option value="12" selected>12</option>
+                <option value="24">24</option>
+                <option value="36">36</option>
+                <option value="48">48</option>
+                <option value="60">60</option>
+            </select>
+        </div>
+
+    </div>
+
+    <div class="meter" *ngFor="let meterData of calanderizedMeterData; let i=index;">
+        <div class="tableControls overflow-hidden">
+            <div class="item-right">
+                <ngb-pagination [collectionSize]="meterData.monthlyData.length" [(page)]="page[i]"
+                    [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Default pagination"
+                    (pageChange)="onPageChange(i, page[i])"></ngb-pagination>
+            </div>
+            <p class="item-right">{{meterData.monthlyData.length}} entries</p>
+        </div>
+        <div class="row">
+            <div class="col tableData">
+                <table>
+                    <tr>
+                        <th colspan=4>{{meterData.meter.name}} <span
+                                class="item-right reg-weight">{{meterData.meter.source}}</span></th>
+                    </tr>
+                    <tr>
+                        <th class="row-year">Month</th>
+                        <th class="row-year">Year</th>
+                        <th [hidden]="meterData.meter.source != 'Electricity'">Total kWh</th>
+                        <th [hidden]="meterData.meter.source != 'Natural Gas'">Total Volume (cfm)/MMBTU</th>
+                        <th>Total Cost</th>
+                    </tr>
+                    <tr *ngFor="let data of meterData.monthlyData | slice: pageSize[i] | slice: 0:itemsPerPage"
+                        [class.na]="!data.energyUse">
+                        <td>{{data.month}}</td>
+                        <td>{{data.year}}</td>
+                        <td>
+                            <span *ngIf="data.energyUse">{{data.energyUse | number:'1.0-2'}}</span>
+                            <span *ngIf="!data.energyUse">N/A</span>
+                        </td>
+                        <td>
+                            <span *ngIf="data.energyCost">{{data.energyCost | currency}}</span>
+                            <span *ngIf="!data.energyCost">N/A</span>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

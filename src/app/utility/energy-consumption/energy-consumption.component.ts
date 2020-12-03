@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { EnergyConsumptionService } from './energy-consumption.service';
-import { UtilityService } from "../../utility/utility.service";
+import { Subscription } from 'rxjs';
+import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 
 @Component({
   selector: 'app-energy-consumption',
@@ -8,51 +8,34 @@ import { UtilityService } from "../../utility/utility.service";
   styleUrls: ['./energy-consumption.component.css']
 })
 export class EnergyConsumptionComponent implements OnInit {
-  accountid: number;
-  facilityid: number;
-  energySource: any;
   electricity: boolean;
   naturalGas: boolean;
-  lpg: boolean;
-  fuelOil: boolean;
-  coal: boolean;
-  wood: boolean;
-  otherGas: boolean;
+  otherFuels: boolean;
   otherEnergy: boolean;
-  meterList: any = [{source: ''}];
-  
+  water: boolean;
+  wasteWater: boolean;
+  otherUtility: boolean;
+
+  facilityMetersSub: Subscription;
   constructor(
-    private energyConsumptionService: EnergyConsumptionService,
-    private utilityService: UtilityService
-    ) {}
+    private utilityMeterDbService: UtilityMeterdbService
+  ) { }
 
   ngOnInit() {
-
-    // Observe the meter list
-    this.utilityService.getMeterList().subscribe((value) => {
-      this.meterList = value;
-
-      // Map tabs based on array of energy source types.
-      this.energySource = this.meterList.map(function (el) { return el.source; });
-      this.energyConsumptionService.setEnergySource(this.energySource);
-      
+    this.facilityMetersSub = this.utilityMeterDbService.facilityMeters.subscribe(facilityMeters => {
+      let energySources = facilityMeters.map(function (el) { return el.source; });
+      this.electricity = energySources.indexOf("Electricity") > -1;
+      this.naturalGas = energySources.indexOf("Natural Gas") > -1;
+      this.otherFuels = energySources.indexOf("Other Fuels") > -1;
+      this.otherEnergy = energySources.indexOf("Other Energy") > -1;
+      this.water = energySources.indexOf("Water") > -1;
+      this.wasteWater = energySources.indexOf("Waste Water") > -1;
+      this.otherUtility = energySources.indexOf("Other Utility") > -1;
     });
-    
-    // Observe the energySource var
-    this.energyConsumptionService.getEnergySource().subscribe((value) => {
-      this.energySource = value;
+  }
 
-      if (value != null) {
-        this.electricity = this.energySource.indexOf("Electricity") > -1;
-        this.naturalGas = this.energySource.indexOf("Natural Gas") > -1;
-        this.lpg = this.energySource.indexOf("LPG") > -1;
-        this.fuelOil = this.energySource.indexOf("Fuel Oil") > -1;
-        this.coal = this.energySource.indexOf("Coal") > -1;
-        this.wood = this.energySource.indexOf("Wood") > -1;
-        this.otherGas = this.energySource.indexOf("Other Gas") > -1;
-        this.otherEnergy = this.energySource.indexOf("Other Energy") > -1;
-      }
-    });
+  ngOnDestroy() {
+    this.facilityMetersSub.unsubscribe();
   }
 
 }

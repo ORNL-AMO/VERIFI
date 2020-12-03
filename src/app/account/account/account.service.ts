@@ -11,16 +11,16 @@ export class AccountService {
     
   constructor(private localStorage:LocalStorageService) { }
 
-  getValue(): Observable<number> {
-    // Keep users state
-    if(this.localStorage.retrieve('accountid')) {
-        this.accountId.next(this.localStorage.retrieve('accountid'));
-    }
-    return this.accountId.asObservable();
-  }
+  // getValue(): Observable<number> {
+  //   // Keep users state
+  //   if(this.localStorage.retrieve('accountid')) {
+  //       this.accountId.next(this.localStorage.retrieve('accountid'));
+  //   }
+  //   return this.accountId.asObservable();
+  // }
 
-  setValue(newValue): void {
-    this.localStorage.store('accountid', newValue);
-    this.accountId.next(newValue);
-  }
+  // setValue(newValue): void {
+  //   this.localStorage.store('accountid', newValue);
+  //   this.accountId.next(newValue);
+  // }
 }

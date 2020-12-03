@@ -52,19 +52,19 @@
             <th>Division</th>
             <th></th>
         </tr>
-        <tr *ngFor="let facilityLists of facilityList">
-            <td>{{facilityLists.name}}</td>
-            <td>{{facilityLists.country}}</td>
-            <td>{{facilityLists.type}}</td>
-            <td>{{facilityLists.tier}}</td>
-            <td>{{facilityLists.size}}</td>
-            <td>{{facilityLists.units}}<span class="superscript">2</span></td>
-            <td>{{facilityLists.division}}</td>
+        <tr *ngFor="let facility of facilityList">
+            <td>{{facility.name}}</td>
+            <td>{{facility.country}}</td>
+            <td>{{facility.type}}</td>
+            <td>{{facility.tier}}</td>
+            <td>{{facility.size}}</td>
+            <td>{{facility.units}}<span class="superscript">2</span></td>
+            <td>{{facility.division}}</td>
             <td (click)="$event.stopPropagation();"> <!-- Prevents closure of menu on document click-->
-                <i class="fa fa-ellipsis-v" (click)="facilityToggleMenu(facilityLists.id)" ></i>
-                <div class="facilityMenu" [class.open]="facilityMenuOpen === facilityLists.id">
-                    <p (click)="facilityEdit(facilityLists.id)">Edit</p>
-                    <p (click)="facilityDelete(facilityLists.id)">Delete</p>
+                <i class="fa fa-ellipsis-v" (click)="facilityToggleMenu(facility.id)" ></i>
+                <div class="facilityMenu" [class.open]="facilityMenuOpen === facility.id">
+                    <p (click)="facilityEdit(facility)">Edit</p>
+                    <p (click)="facilityDelete(facility.id)">Delete</p>
                 </div>
             </td>
         </tr>

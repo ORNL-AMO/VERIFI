@@ -1,0 +1,143 @@
+<div class="wrapper main-content">
+    <h4>Predictors</h4>
+    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore
+        magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+        consequat.</p>
+
+    <div class="controls">
+        <div class="importExport item-right">
+            <!-- <button class="btn btn-outline" (click)="importWindow = true">Import</button>
+            <button class="btn btn-outline" (click)="predictorExport()">Export</button> -->
+        </div>
+        <!--Items Per Page-->
+        <div class="items-per-page item-right">
+            <span>Show </span>
+            <select (change)="changePagesize($event.target.value)">
+                <option value="6">6</option>
+                <option value="12" selected>12</option>
+                <option value="18">18</option>
+                <option value="24">24</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="meterData">
+        <button class="btn btn-primary-4 item-right" (click)="addNewPredictor()"><i class="fa fa-plus"></i> Add New
+            Predictor</button>
+    </div>
+
+    <div class='stick-scroll-x'>
+        <table>
+            <tr>
+                <th></th>
+                <th class="header" *ngFor="let predictor of facilityPredictors">{{predictor.name}}
+                    <!-- <span class="small block">{{predictor.unit}}</span> -->
+                </th>
+                <td (click)="$event.stopPropagation();">
+                    <!-- Prevents closure of menu on document click-->
+                    <i class="fa fa-ellipsis-v" (click)="togglePredictorMenu()"></i>
+                    <div class="meterMenu" [class.open]="showPredictorMenu">
+                        <p (click)="editPredictors()">Edit / Delete</p>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <th>Date</th>
+                <th *ngFor="let predictor of facilityPredictors">
+                    <span *ngIf="!predictor.unit">Amount</span>
+                    <span *ngIf="predictor.unit">{{predictor.unit}}</span>
+                </th>
+                <th></th>
+            </tr>
+            <tr *ngFor="let predictorEntry of facilityPredictorEntries | slice: pageSize | slice: 0:itemsPerPage">
+                <td>{{predictorEntry.date | date:'MMM, yyyy'}}</td>
+                <td *ngFor="let predictor of predictorEntry.predictors">{{predictor.amount}}</td>
+                <td (click)="$event.stopPropagation();">
+                    <!-- Prevents closure of menu on document click-->
+                    <i class="fa fa-ellipsis-v" (click)="predictorToggleMenu(predictorEntry.id)"></i>
+                    <div class="meterMenu" [class.open]="predictorMenuOpenId === predictorEntry.id">
+                        <p (click)="setEditPredictorEntry(predictorEntry)">Edit</p>
+                        <p (click)="setDeletePredictorEntry(predictorEntry)">Delete
+                        </p>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div class="tableControls overflow-hidden">
+        <button class="btn btn-link item-left" (click)="addPredictorEntry()"
+            [hidden]="facilityPredictorEntries.length === 0"><i class="fa fa-plus"></i> Add Row</button>
+        <div class="item-right">
+            <ngb-pagination [collectionSize]="facilityPredictorEntries.length" [(page)]="page" [pageSize]="itemsPerPage"
+                [maxSize]="5" [rotate]="true" aria-label="Default pagination" (pageChange)="onPageChange(page)">
+            </ngb-pagination>
+        </div>
+        <p class="item-right">{{facilityPredictorEntries.length}} entries</p>
+    </div>
+</div>
+
+<div class="window" [class.open]="predictorEntryToEdit">
+    <div class="windowOverlay"></div>
+    <div class="windowContent">
+        <app-edit-predictor-entry-row *ngIf="predictorEntryToEdit" (emitClose)="cancelEditPredictorEntry()"
+            [predictorEntry]="predictorEntryToEdit">
+        </app-edit-predictor-entry-row>
+    </div>
+</div>
+
+
+<div class="window" [class.open]="showEditPredictors">
+    <div class="windowOverlay"></div>
+    <div class="windowContent windowContentLg">
+        <app-edit-predictors *ngIf="showEditPredictors" (emitClose)="closeEditPredictors()"></app-edit-predictors>
+    </div>
+</div>
+
+
+<div class="popup" [class.open]="predictorEntryToDelete">
+    <div class="popup-header">Delete Predictor
+        <button class="item-right" (click)="cancelDeletePredictorEntry()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>WARNING: By deleting this predictor, you are also deleting all of the data associated with it. Are you sure
+            you want to preform this action?</p>
+    </div>
+    <div class="popup-footer text-right">
+        <button class="btn btn-danger" (click)="confirmDeletePredictorEntry()">Delete</button>
+    </div>
+</div>
+<!--
+<div class="window" [class.open]="importWindow == true">
+    <div class="windowOverlay"></div>
+    <div class="windowContent">
+        <h4>Import Predictors</h4>
+        <br>
+        <form>
+            <input type="file" #inputFile accept=".csv" (change)="predictorImport($event.target.files)">
+        </form>
+        <br>
+        <div class="importQuickView" [hidden]="quickView ==''">
+            <p class="bold">Quick View</p>
+            <table>
+                <tr>
+                    <th>Predictor Name</th>
+                    <th>Units</th>
+                    <th>Date</th>
+                    <th>Amount</th>
+                </tr>
+                <tr *ngFor="let quickViews of quickView">
+                    <td>{{quickViews.name}}</td>
+                    <td>{{quickViews.unit}}</td>
+                    <td>{{quickViews.date}}</td>
+                    <td>{{quickViews.amount}}</td>
+                </tr>
+            </table>
+        </div>
+        <p class="alert alert-danger" [hidden]="importError == ''">{{importError}}</p>
+
+        <div class="saveCancel item-right">
+            <button class="btn btn-primary" (click)="resetImport(); importWindow = !importWindow">Cancel</button>
+            <button class="btn btn-primary" (click)="predictorAddCSV()" [disabled]="importError != ''">Submit</button>
+        </div>
+    </div>
+</div> -->

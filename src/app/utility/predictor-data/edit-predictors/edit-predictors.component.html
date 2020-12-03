@@ -1,0 +1,51 @@
+<h4>Edit Predictors</h4>
+<br>
+
+<div class="row" *ngIf="!predictorToDelete">
+    <div class="col">
+        <p class="bold">Predictor Name</p>
+    </div>
+    <div class="col-3">
+        <p class="bold">Units</p>
+    </div>
+    <div class="col-1"></div>
+</div>
+
+<form *ngIf="!predictorToDelete">
+    <div class="row" *ngFor="let predictor of facilityPredictors">
+        <div class="col">
+            <label>
+                <input class="full-width" type="text" [(ngModel)]="predictor.name"
+                    name="{{'predictorName'+predictor.id}}">
+            </label>
+        </div>
+        <div class="col-3">
+            <select class="full-width" [(ngModel)]="predictor.unit" name="{{'predictorUnit'+predictor.id}}">
+                <option [ngValue]="'hours'">hours</option>
+                <option [ngValue]="'minutes'">minutes</option>
+                <option [ngValue]="''"></option>
+            </select>
+        </div>
+        <div class="col-1">
+            <button class="btn btn-danger m-0" (click)="deletePredictor(predictor)"><i
+                    class="fa fa-trash-o red pointer"></i>
+            </button>
+        </div>
+    </div>
+</form>
+
+<div class="saveCancel item-right" *ngIf="!predictorToDelete">
+    <button class="btn btn-primary" (click)="cancel()">Cancel</button>
+    <button class="btn btn-primary" (click)="save()">Save</button>
+</div>
+
+
+<div *ngIf="predictorToDelete">
+    <p class="alert-danger p-2 text-center">
+        Are you sure you want to delete {{predictorToDelete.name}}? This cannot be undone.
+    </p>
+    <div class="saveCancel item-right">
+        <button class="btn btn-primary" (click)="cancelDelete()">Cancel</button>
+        <button class="btn btn-danger" (click)="confirmDelete()">Confirm Delete</button>
+    </div>
+</div>

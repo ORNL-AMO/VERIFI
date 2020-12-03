@@ -1,13 +1,13 @@
 import { Component, ElementRef, OnInit } from '@angular/core';
-import { Router, Event, NavigationStart} from '@angular/router';
-import { AccountService } from "../../account/account/account.service";
+import { Router, Event, NavigationStart } from '@angular/router';
 import { AccountdbService } from "../../indexedDB/account-db.service";
 import { FacilitydbService } from "../../indexedDB/facility-db.service";
-import { FacilityService } from 'src/app/account/facility/facility.service';
 import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db.service";
 import { UtilityMeterGroupdbService } from "../../indexedDB/utilityMeterGroup-db.service";
 import { UtilityMeterDatadbService } from "../../indexedDB/utilityMeterData-db.service";
 import { LocalStorageService } from 'ngx-webstorage';
+import { IdbAccount, IdbFacility } from 'src/app/models/idb';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-header',
@@ -18,90 +18,63 @@ import { LocalStorageService } from 'ngx-webstorage';
   }
 })
 export class HeaderComponent implements OnInit {
-  accountid: number;
-  facilityid: number;
+
   accountMenu: boolean = false;
   facilityMenu: boolean = false;
   manageAccountMenu: boolean;
-  accountList: any = [];
-  facilityList: any = [];
-  activeAccount: string = '';
-  activeFacility: string = '';
+  accountList: Array<IdbAccount>;
+  facilityList: Array<IdbFacility>;
+  activeAccount: IdbAccount;
+  activeFacility: IdbFacility;
   devtools: boolean = false;
+
+  allAccountsSub: Subscription;
+  selectedAccountSub: Subscription;
+  accountFacilitiesSub: Subscription;
+  selectedFacilitySub: Subscription;
 
   constructor(
     private eRef: ElementRef,
     private router: Router,
-    private accountService: AccountService,
-    private facilityService: FacilityService,
     public accountdbService: AccountdbService,
     public facilitydbService: FacilitydbService,
     public utilityMeterdbService: UtilityMeterdbService,
     public utilityMeterGroupdbService: UtilityMeterGroupdbService,
     public utilityMeterDatadbService: UtilityMeterDatadbService,
-    private localStorage:LocalStorageService
-    ) { 
-      // Close menus on navigation
-      router.events.subscribe( (event: Event) => {
-        if (event instanceof NavigationStart) {
-          this.accountMenu = false;
-          this.facilityMenu = false;
-        }
-      });
-    }
+    private localStorage: LocalStorageService
+  ) {
+    // Close menus on navigation
+    router.events.subscribe((event: Event) => {
+      if (event instanceof NavigationStart) {
+        this.accountMenu = false;
+        this.facilityMenu = false;
+      }
+    });
+  }
 
   ngOnInit() {
-    // Subscribe to account ID
-    this.accountService.getValue().subscribe((value) => {
-      this.accountid = value;
-      this.accountLoadList();
+    this.allAccountsSub = this.accountdbService.allAccounts.subscribe(allAccounts => {
+      this.accountList = allAccounts;
     });
 
-    // Subscribe to facility ID
-    this.facilityService.getValue().subscribe((value) => {
-      this.facilityid = value;
-      this.facilityLoadList();
+    this.selectedAccountSub = this.accountdbService.selectedAccount.subscribe(selectedAccount => {
+      this.activeAccount = selectedAccount;
     });
 
-  }
-  accountLoadList() {
-    // List all accounts for popup
-    this.accountdbService.getAll().then(
-      data => {
-        // Load test data if no data is present
-        if (data.length != 0) {
-          this.accountList = data;
-          const index = this.accountList.findIndex(x => x.id === this.accountid);
-          this.activeAccount = this.accountList[index]['name']; // get the name
-        } else {
-          //TEMPORARY
-          this.loadTestData();
-        }
-      },
-      error => {
-          console.log(error);
-      }
-    );
+    this.accountFacilitiesSub = this.facilitydbService.accountFacilities.subscribe(accountFacilities => {
+      this.facilityList = accountFacilities;
+    });
+
+    this.selectedFacilitySub = this.facilitydbService.selectedFacility.subscribe(selectedFacility => {
+      this.activeFacility = selectedFacility;
+    });
   }
 
-  facilityLoadList() {
-    // List all facilities for dropdown
-    this.facilitydbService.getAllByIndex(this.accountid).then(
-      data => {
-          // avoid empty errors
-          if (data.length != 0) {
-            this.facilityList = data; // array dropdown
-            const index = this.facilityList.findIndex(x => x.id === this.facilityid); // find current facility in list
-            this.defaultFacility(index); // choose default facility
-          } else {
-            this.facilityList = [];
-            this.activeFacility = '';
-          }
-      },
-      error => {
-          console.log(error);
-      }
-    );
+  ngOnDestroy() {
+    this.allAccountsSub.unsubscribe();
+    this.selectedAccountSub.unsubscribe();
+    this.accountFacilitiesSub.unsubscribe();
+    this.selectedFacilitySub.unsubscribe();
   }
 
   toggleFacilityMenu() {
@@ -119,10 +92,10 @@ export class HeaderComponent implements OnInit {
     this.facilityMenu = false;
     this.accountMenu = false;
   }
-  
+
   // close menus when user clicks outside the dropdown
   documentClick() {
-    if(!this.eRef.nativeElement.contains(event.target)) {
+    if (!this.eRef.nativeElement.contains(event.target)) {
       this.accountMenu = false;
       this.facilityMenu = false;
       this.manageAccountMenu = false;
@@ -131,93 +104,79 @@ export class HeaderComponent implements OnInit {
 
   addNewAccount() {
     this.toggleManageAccountsMenu();
-    this.accountdbService.add();
+    let newAccount: IdbAccount = this.accountdbService.getNewIdbAccount();
+    this.accountdbService.add(newAccount);
     this.router.navigate(['account/account']);
-    this.accountService.setValue(this.accountList.length + 1); // switch to new account
-    this.facilitydbService.add(this.accountid); // add 1 facility with every new account
-    this.facilityService.setValue(0); // having problems with selecting first index
   }
 
   addNewFacility() {
-    this.facilitydbService.add(this.accountid);
-    this.facilityLoadList(); // refresh the data
+    let newFacility: IdbFacility = this.facilitydbService.getNewIdbFacility(this.activeAccount.id);
+    this.facilitydbService.add(newFacility);
   }
 
-  switchAccount(index) {
+  switchAccount(account: IdbAccount) {
     this.toggleManageAccountsMenu();
     this.router.navigate(['account/account']);
-    this.accountService.setValue(index);
-    this.facilityService.setValue(0); // having problems with selecting first index
+    this.accountdbService.setSelectedAccount(account.id);
   }
 
-  switchFacility(index) {
+  switchFacility(facility: IdbFacility) {
     this.toggleFacilityMenu();
-    //this.router.navigate(['account/facility']); dont navigate away
-    this.facilityService.setValue(index);
+    this.facilitydbService.selectedFacility.next(facility);
   }
-
-  defaultFacility(index) {
-    if (index != -1) {
-      this.activeFacility = this.facilityList[index]['name']; // get the name
-    } else {
-      this.activeFacility = this.facilityList[0]['name']; // get the name
-      const index = this.facilityList[0]['id'];
-      this.facilityService.setValue(index);
-    }
-  }
-
 
   /* DEV TOOLS BELOW 
   *******************************************************************************/
   loadTestData() {
     this.accountdbService.addTestData();
-    this.facilitydbService.addTestData().then(
-      data => {
-          location.reload();
-      }
-    );
+    this.facilitydbService.addTestData()
+    // .then(
+    //   data => {
+    //     location.reload();
+    //   }
+    // );
     //location.reload();
     console.log("Data loaded");
   }
 
   getAllAccounts() {
-    this.accountdbService.getAll().then(
+    this.accountdbService.getAll().subscribe(
       data => {
-          console.log(data);
+        console.log(data);
       }
-    ); 
+    );
   }
 
   getAllFacilities() {
-    this.facilitydbService.getAll().then(
+    this.facilitydbService.getAll().subscribe(
       data => {
-          console.log(data);
+        console.log(data);
       }
-    ); 
+    );
   }
 
   getAllMeters() {
-    this.utilityMeterdbService.getAll().then(
+    this.utilityMeterdbService.getAll().subscribe(
       data => {
-          console.log(data);
+        console.log(data);
       }
-    ); 
+    );
   }
 
   getAllMeterData() {
-    this.utilityMeterDatadbService.getAll().then(
+    this.utilityMeterDatadbService.getAll().subscribe(
       data => {
-          console.log(data);
+        console.log(data);
       }
-    ); 
+    );
   }
 
   getAllMeterGroups() {
-    this.utilityMeterGroupdbService.getAll().then(
+    this.utilityMeterGroupdbService.getAll().subscribe(
       data => {
-          console.log(data);
+        console.log(data);
       }
-    ); 
+    );
   }
 
   clearLocalstorage() {
