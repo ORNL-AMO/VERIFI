@@ -2,8 +2,9 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { ElectricityDataFilter } from 'src/app/models/electricityFilter';
 import { IdbUtilityMeterData } from 'src/app/models/idb';
-import { ElectricityDataFilter, UtilityMeterDataService } from '../utility-meter-data.service';
+import { UtilityMeterDataService } from '../utility-meter-data.service';
 
 @Component({
   selector: 'app-edit-electricity-bill',

@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { ElectricityDataFilter, UtilityMeterDataService } from '../utility-meter-data.service';
+import { ElectricityDataFilter } from 'src/app/models/electricityFilter';
+import { UtilityMeterDataService } from '../utility-meter-data.service';
 
 @Component({
   selector: 'app-utility-meter-data-filter',

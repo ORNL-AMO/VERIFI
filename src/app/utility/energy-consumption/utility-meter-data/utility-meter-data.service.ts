@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { BehaviorSubject } from 'rxjs';
+import { ElectricityDataFilter } from 'src/app/models/electricityFilter';
 import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 
 @Injectable({
@@ -122,12 +123,4 @@ export class UtilityMeterDataService {
       document.body.removeChild(downloadLink);
     }
   }
-}
-
-
-export interface ElectricityDataFilter {
-  filter: boolean,
-  display: string,
-  id: number,
-  name: string
 }
