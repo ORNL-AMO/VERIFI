@@ -21,8 +21,9 @@ export class HeaderComponent implements OnInit {
 
   accountMenu: boolean = false;
   facilityMenu: boolean = false;
-  manageAccountMenu: boolean;
+  switchAccountMenu: boolean;
   accountList: Array<IdbAccount>;
+  allFacilities: Array<IdbFacility>;
   facilityList: Array<IdbFacility>;
   activeAccount: IdbAccount;
   activeFacility: IdbFacility;
@@ -30,6 +31,7 @@ export class HeaderComponent implements OnInit {
 
   allAccountsSub: Subscription;
   selectedAccountSub: Subscription;
+  allFacilitiesSub: Subscription;
   accountFacilitiesSub: Subscription;
   selectedFacilitySub: Subscription;
 
@@ -61,8 +63,13 @@ export class HeaderComponent implements OnInit {
       this.activeAccount = selectedAccount;
     });
 
+    this.allFacilitiesSub = this.facilitydbService.allFacilities.subscribe(allFacilities => {
+      this.allFacilities = allFacilities;
+    });
+
     this.accountFacilitiesSub = this.facilitydbService.accountFacilities.subscribe(accountFacilities => {
       this.facilityList = accountFacilities;
+      this.getAccountFacilityCount();
     });
 
     this.selectedFacilitySub = this.facilitydbService.selectedFacility.subscribe(selectedFacility => {
@@ -87,8 +94,8 @@ export class HeaderComponent implements OnInit {
     this.facilityMenu = false;
   }
 
-  toggleManageAccountsMenu() {
-    this.manageAccountMenu = !this.manageAccountMenu;
+  toggleSwitchAccountsMenu() {
+    this.switchAccountMenu = !this.switchAccountMenu;
     this.facilityMenu = false;
     this.accountMenu = false;
   }
@@ -98,12 +105,12 @@ export class HeaderComponent implements OnInit {
     if (!this.eRef.nativeElement.contains(event.target)) {
       this.accountMenu = false;
       this.facilityMenu = false;
-      this.manageAccountMenu = false;
+      this.switchAccountMenu = false;
     }
   }
 
   addNewAccount() {
-    this.toggleManageAccountsMenu();
+    this.toggleSwitchAccountsMenu();
     let newAccount: IdbAccount = this.accountdbService.getNewIdbAccount();
     this.accountdbService.add(newAccount);
     this.router.navigate(['account/account']);
@@ -115,14 +122,32 @@ export class HeaderComponent implements OnInit {
   }
 
   switchAccount(account: IdbAccount) {
-    this.toggleManageAccountsMenu();
-    this.router.navigate(['account/account']);
+    this.toggleSwitchAccountsMenu();
+    this.router.navigate(['/']);
     this.accountdbService.setSelectedAccount(account.id);
   }
 
   switchFacility(facility: IdbFacility) {
     this.toggleFacilityMenu();
     this.facilitydbService.selectedFacility.next(facility);
+  }
+
+  getAccountFacilityCount() {
+    var res = this.allFacilities.reduce(function(obj, v) {
+      obj[v.accountId] = (obj[v.accountId] || 0) + 1;
+      return obj;
+    }, {});
+
+    
+    for(const property in res) {
+      const index = this.accountList.map(function(e) { return e.id; }).indexOf(+property);
+      if (res[property] === 1) {
+        this.accountList[index]['facilityCount'] = res[property] + " Facility";
+      } else {
+        this.accountList[index]['facilityCount'] = res[property] + " Facilities";
+      }
+    }
+    
   }
 
   /* DEV TOOLS BELOW 

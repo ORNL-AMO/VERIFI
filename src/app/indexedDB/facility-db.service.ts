@@ -125,6 +125,13 @@ export class FacilitydbService {
         });
     }
 
+    deleteAllAccountFacilities(): void {
+        let pendingFacilities = JSON.parse(JSON.stringify(this.accountFacilities.value));
+        for(let i=0; i<pendingFacilities.length; i++) {
+            this.dbService.delete('facilities', pendingFacilities[i]['id']);
+        }
+    }
+
     addTestData() {
         TestFacilityData.forEach(facilityDataItem => {
             this.add(facilityDataItem);

@@ -5,61 +5,94 @@
 </div>
 
 <div class="wrapper">
-<h4>Facilty Information</h4>
-<br>
-<div class="row">
-    <div class="col-4">
-        <img src="https://placehold.it/350x200" alt="">
+    <h4>Facilty Information</h4>
+    <br>
+    <div class="row">
+        <div class="col-lg-4 profile-image">
+            <img src="https://placehold.it/350x200" alt="">
+            <form>
+                <label class="profile-image-input" for="img"><i class="fa fa-upload"></i> Upload Image
+                    <input type="file" id="img" name="img" accept="image/*">
+                </label>
+            </form>
+        </div>
+        <div class="col-lg-8">
+            <br>
+            <div class="row">
+                <div class="col-lg-6">
+                    <form [formGroup]="facilityForm" autocomplete="on">
+                        <label>Building / Area
+                            <input type="text" formControlName="name" (input)="onFormChange();">
+                        </label>
+                        <br>
+                        <label>County
+                            <input type="text" formControlName="country" (input)="onFormChange();">
+                        </label>
+                        <br>
+                        <label>State
+                            <input type="text" formControlName="state" (input)="onFormChange();">
+                        </label>
+                        <br>
+                        <label>Address
+                            <input type="address" formControlName="address" (input)="onFormChange();" autocomplete="shipping street-address">
+                        </label>
+                    </form>
+                </div>
+                <div class="col-lg-6">
+                    <form [formGroup]="facilityForm">
+                        <label>Business Type
+                            <input type="text" formControlName="type" (input)="onFormChange();">
+                        </label>
+                        <br>
+                        <label>Teir
+                            <input type="text" formControlName="tier" (input)="onFormChange();">
+                        </label>
+                        <br>
+                        <label>Size
+                            <input type="text" formControlName="size" (input)="onFormChange();">
+                        </label>
+                        <br>
+                        <label>Units
+                            <input type="text" formControlName="units" (input)="onFormChange();">
+                        </label>
+                        <br>
+                        <label>Division
+                            <input type="text" formControlName="division" (input)="onFormChange();">
+                        </label>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="col">
-        <div class="row">
-            <div class="col">
-                <form [formGroup]="facilityForm">
-                    <label>Building / Area
-                        <input type="text" formControlName="name" (input)="onFormChange();">
-                    </label>
-                    <br>
-                    <label>County
-                        <input type="text" formControlName="country" (input)="onFormChange();">
-                    </label>
-                    <br>
-                    <label>State
-                        <input type="text" formControlName="state" (input)="onFormChange();">
-                    </label>
-                    <br>
-                    <label>Address
-                        <input type="text" formControlName="address" (input)="onFormChange();">
-                    </label>
-                </form>
-            </div>
-            <div class="col">
-                <form [formGroup]="facilityForm">
-                    <label>Business Type
-                        <input type="text" formControlName="type" (input)="onFormChange();">
-                    </label>
-                    <br>
-                    <label>Teir
-                        <input type="text" formControlName="tier" (input)="onFormChange();">
-                    </label>
-                    <br>
-                    <label>Size
-                        <input type="text" formControlName="size" (input)="onFormChange();">
-                    </label>
-                    <br>
-                    <label>Units
-                        <input type="text" formControlName="units" (input)="onFormChange();">
-                    </label>
-                    <br>
-                    <label>Division
-                        <input type="text" formControlName="division" (input)="onFormChange();">
-                    </label>
-                </form>
-            </div>
+
+
+    <br>
+    <h4>Operating Schedule</h4>
+
+    <br>
+    <br>
+    <br>
+    <br>
+
+    <div class="row">
+        <div class="col-lg-6">
+            <h4>Delete Facility</h4>
+            <p>Once deleted, you will permanently lose all your data linked to this facility. Please make a backup of your data before proceeding with this step.</p>
+            <button class="btn btn-danger" (click)="editFacility()">Delete Facility</button>
         </div>
     </div>
 </div>
 
-
-<br>
-<h4>Operating Schedule</h4>
+<div class="popup" [class.open]="showDeleteFacility">
+    <div class="popup-header">Delete Facility: {{facilityForm.controls.name.value}}
+        <button class="item-right" (click)="cancelDelete()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>WARNING: By deleting this facility, you are also deleting all of the data associated with it.
+            Are you sure you want to preform this action?</p>
+    </div>
+    <div class="popup-footer text-right">
+        <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
+        <button class="btn btn-danger" (click)="confirmDelete()">Confirm Delete</button>
+    </div>
 </div>

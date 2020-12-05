@@ -19,6 +19,7 @@ export class EditPredictorEntryRowComponent implements OnInit {
   constructor(private predictorDbService: PredictordbService) { }
 
   ngOnInit(): void {
+    console.log(this.predictorEntry);
     this.predictorEntryCopy = JSON.parse(JSON.stringify(this.predictorEntry));
   }
 

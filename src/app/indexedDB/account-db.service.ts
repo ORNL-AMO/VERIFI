@@ -72,7 +72,7 @@ export class AccountdbService {
         });
     }
 
-    deleteIndex(accountId: number): void {
+    deleteById(accountId: number): void {
         this.dbService.delete('accounts', accountId).subscribe(() => {
             this.setAllAccounts();
         });

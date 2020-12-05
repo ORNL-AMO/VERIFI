@@ -5,7 +5,11 @@ import { AccountdbService } from "../../indexedDB/account-db.service";
 import { IdbAccount, IdbFacility } from 'src/app/models/idb';
 import { Subscription } from 'rxjs';
 import { FacilitydbService } from "../../indexedDB/facility-db.service";
-
+import { PredictordbService } from "../../indexedDB/predictors-db.service";
+import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db.service";
+import { UtilityMeterDatadbService } from "../../indexedDB/utilityMeterData-db.service";
+import { UtilityMeterGroupdbService } from "../../indexedDB/utilityMeterGroup-db.service";
+import { LoadingService } from "../../shared/loading/loading.service";
 
 @Component({
   selector: 'app-account',
@@ -18,6 +22,8 @@ import { FacilitydbService } from "../../indexedDB/facility-db.service";
 export class AccountComponent implements OnInit {
   facilityList: Array<IdbFacility> = [];
   facilityMenuOpen: number;
+  showDeleteAccount: boolean;
+  facilityToEdit: IdbFacility;
 
   accountForm: FormGroup = new FormGroup({
     id: new FormControl('', [Validators.required]),
@@ -34,7 +40,12 @@ export class AccountComponent implements OnInit {
     private router: Router,
     private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
-  ) { }
+    private predictorDbService: PredictordbService,
+    private utilityMeterDbService: UtilityMeterdbService,
+    private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private utilityMeterGroupDbService: UtilityMeterGroupdbService,
+    private loadingService: LoadingService
+  ) {}
 
   ngOnInit() {
     this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(val => {
@@ -81,7 +92,7 @@ export class AccountComponent implements OnInit {
   }
 
   facilityDelete(facitilyId: number) {
-    this.facilityDbService.deleteById(facitilyId);
+    //this.facilityDbService.deleteById(facitilyId);
   }
 
   addNewFacility() {
@@ -92,6 +103,47 @@ export class AccountComponent implements OnInit {
 
   onFormChange(): void {
     this.accountDbService.update(this.accountForm.value);
+  }
+
+  accountDelete() {
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+
+    this.loadingService.setLoadingStatus(true);
+    this.loadingService.setLoadingMessage("Deleting Account...");
+
+    // Delete all info associated with account
+    this.predictorDbService.deleteAllAccountPredictors(selectedAccount.id);
+    this.utilityMeterDataDbService.deleteAllAccountMeterData(selectedAccount.id);
+    this.utilityMeterDbService.deleteAllAccountMeters(selectedAccount.id);
+    this.utilityMeterGroupDbService.deleteAllAccountMeterGroups(selectedAccount.id);
+    this.facilityDbService.deleteAllAccountFacilities();
+    this.accountDbService.deleteById(selectedAccount.id);
+
+    // Then navigate to another account
+    this.accountDbService.setSelectedAccount(1);
+    this.router.navigate(['/']);
+    this.loadingService.setLoadingStatus(false);
+  }
+
+  setEditFacilityEntry(facility: IdbFacility) {
+    this.facilityToEdit = facility;
+  }
+
+  closeEditFacility() {
+    this.facilityToEdit = undefined;
+  }
+
+  editAccount() {
+    this.showDeleteAccount = true;
+  }
+
+  confirmDelete() {
+    this.accountDelete();
+    this.showDeleteAccount = undefined;
+  }
+
+  cancelDelete() {
+    this.showDeleteAccount = undefined;
   }
 
 }

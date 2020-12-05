@@ -8,10 +8,16 @@
     <h4>Corporation Information</h4>
     <br>
     <div class="row">
-        <div class="col-3">
-            <img src="https://placehold.it/250x200" alt="">
+        <div class="col-lg-4 profile-image">
+            <img src="https://placehold.it/350x200" alt="">
+            <form>
+                <label class="profile-image-input" for="img"><i class="fa fa-upload"></i> Upload Image
+                    <input type="file" id="img" name="img" accept="image/*">
+                </label>
+            </form>
         </div>
-        <div class="col">
+        <div class="col-lg-8">
+            <br>
             <form [formGroup]="accountForm">
                 <label>Corporation Name
                     <input type="text" formControlName="name" (input)="onFormChange();">
@@ -32,43 +38,89 @@
         </div>
     </div>
     
-    
     <br>
+    <br>
+
     <h4>Portfolio</h4>
 
-    <div class="importExport">
-        <button class="btn btn-outline">Import</button>
-        <button class="btn btn-outline">Export</button>
+    <div class="importExport item-right">
+        <button class="btn btn-small btn-outline">Import</button>
+        <button class="btn btn-small btn-outline">Export</button>
     </div>
 
-    <table>
-        <tr>
-            <th>Facilities</th>
-            <th>Country</th>
-            <th>Business</th>
-            <th>Tier</th>
-            <th>Facility Size</th>
-            <th>Units</th>
-            <th>Division</th>
-            <th></th>
-        </tr>
-        <tr *ngFor="let facility of facilityList">
-            <td>{{facility.name}}</td>
-            <td>{{facility.country}}</td>
-            <td>{{facility.type}}</td>
-            <td>{{facility.tier}}</td>
-            <td>{{facility.size}}</td>
-            <td>{{facility.units}}<span class="superscript">2</span></td>
-            <td>{{facility.division}}</td>
-            <td (click)="$event.stopPropagation();"> <!-- Prevents closure of menu on document click-->
-                <i class="fa fa-ellipsis-v" (click)="facilityToggleMenu(facility.id)" ></i>
-                <div class="facilityMenu" [class.open]="facilityMenuOpen === facility.id">
-                    <p (click)="facilityEdit(facility)">Edit</p>
-                    <p (click)="facilityDelete(facility.id)">Delete</p>
-                </div>
-            </td>
-        </tr>
-    </table>
-
+    <div class="tableOverflow">
+        <table>
+            <tr>
+                <th>Facilities</th>
+                <th>Country</th>
+                <th>Business</th>
+                <th>Tier</th>
+                <th>Facility Size</th>
+                <th>Units</th>
+                <th>Division</th>
+                <th class="actions">Actions</th>
+            </tr>
+            <tr *ngFor="let facility of facilityList">
+                <td>{{facility.name}}</td>
+                <td>{{facility.country}}</td>
+                <td>{{facility.type}}</td>
+                <td>{{facility.tier}}</td>
+                <td>{{facility.size}}</td>
+                <td>{{facility.units}}<span class="superscript">2</span></td>
+                <td>{{facility.division}}</td>
+                <td class="actions">
+                    <i class="fa fa-edit" title="Edit" (click)="setEditFacilityEntry(facility)"></i>
+                    <i class="fa fa-trash-o" title="Delete" (click)="facilityDelete(facility.id)"></i>
+                </td>
+                <!--<td (click)="$event.stopPropagation();">
+                    <i class="fa fa-ellipsis-v" (click)="facilityToggleMenu(facility.id)" ></i>
+                    <div class="facilityMenu" [class.open]="facilityMenuOpen === facility.id">
+                        <p (click)="facilityEdit(facility)">Edit</p>
+                        <p (click)="facilityDelete(facility.id)">Delete</p>
+                    </div>
+                </td>-->
+            </tr>
+        </table>
+    </div>
     <button class="btn btn-link" (click)="addNewFacility()"><i class="fa fa-plus"></i> Add New Facility</button>
+
+    <br>
+    <br>
+    <br>
+    <br>
+
+    <div class="row">
+        <div class="col-lg-6">
+            <h4>Delete Account</h4>
+            <p>Once deleted, you will permanently lose all your data linked to your account. Please make a backup of your data before proceeding with this step.</p>
+            <button class="btn btn-danger" (click)="editAccount()">Delete Account</button>
+        </div>
+        <div class="col-lg-6">
+            <h4>Backup Account</h4>
+            <p>You can protect your files from accidental loss by creating a backup. We recommend backing up your data frequently.</p>
+            <button class="btn btn-outline">Backup Account</button>
+            <p class="small"> Last Backup: 12/04/2020</p>
+        </div>
+    </div>
+</div>
+
+<div class="window" [class.open]="facilityToEdit">
+    <div class="windowOverlay"></div>
+    <div class="windowContent">
+        <app-edit-facility *ngIf="facilityToEdit" [facility]="facilityToEdit" (emitClose)="closeEditFacility()"></app-edit-facility>
+    </div>
+</div>
+
+<div class="popup" [class.open]="showDeleteAccount">
+    <div class="popup-header">Delete Account: {{accountForm.controls.name.value}}
+        <button class="item-right" (click)="cancelDelete()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>WARNING: By deleting this account, you are also deleting all of the data associated with it.
+            Are you sure you want to preform this action?</p>
+    </div>
+    <div class="popup-footer text-right">
+        <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
+        <button class="btn btn-danger" (click)="confirmDelete()">Confirm Delete</button>
+    </div>
 </div>
