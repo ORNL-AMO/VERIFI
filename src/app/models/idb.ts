@@ -50,7 +50,7 @@ export interface IdbUtilityMeter {
     accountId: number,
     groupId: number,
     //data
-    meterNumber: number,
+    meterNumber: string,
     accountNumber: number,
     type: string,
     phase: string,
