@@ -68,3 +68,26 @@ export const OtherEnergyOptions: Array<string> = [
 export const FuelOptions: Array<string> = [
 
 ]
+
+
+export const ElectricityUnits: Array<string> = [
+    'kWh',
+    'MWh'
+]
+
+export const GasUnits: Array<string> = [
+    'SCF',
+    'lbs'
+]
+
+export const SolidUnits: Array<string> = [
+    'Tons',
+    'lbs'
+]
+
+export const LiquidUnits: Array<string> = [
+    'gal',
+    'Ton/hr',
+    'gal-F',
+    'Therms'
+]

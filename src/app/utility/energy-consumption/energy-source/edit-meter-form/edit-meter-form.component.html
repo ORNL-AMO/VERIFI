@@ -12,7 +12,7 @@
     <br>
     <label>
         <span class="required">*</span> Source
-        <select type="text" formControlName="source" (change)="setSourceValidation()">
+        <select type="text" formControlName="source" (change)="changeSource()">
             <option [ngValue]="'Electricity'">Electricity</option>
             <option [ngValue]="'Natural Gas'">Natural Gas</option>
             <option [ngValue]="'Other Fuels'">Other Fuels</option>
@@ -102,7 +102,8 @@
     <label>
         <span class="required">*</span> Starting Unit
         <select type="text" formControlName="startingUnit">
-            <option *ngIf="meterForm.value['source'] == 'Electricity'" value="kWh">kWh</option>
+            <option *ngFor="let startingUnitOption of startingUnitOptions" [ngValue]="startingUnitOption">{{startingUnitOption}}</option>
+            <!-- <option *ngIf="meterForm.value['source'] == 'Electricity'" value="kWh">kWh</option>
             <option *ngIf="meterForm.value['source'] == 'Electricity'" value="MWh">MWh</option>
             <option *ngIf="meterForm.value['phase'] == 'Gas'" value="SCF">SCF</option>
             <option *ngIf="meterForm.value['phase'] == 'Gas'" value="Pounds">Pounds</option>
@@ -111,13 +112,14 @@
             <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="Gallons">Gallons</option>
             <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="Ton Hours">Ton Hours</option>
             <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="gal-F">gal-F</option>
-            <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="Therms">Therms</option>
+            <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="Therms">Therms</option> -->
         </select>
     </label>
     <br>
     <label>
         <span class="required">*</span> Heat Capacity
         <input type="text" formControlName="heatCapacity">
+        <!-- <span class="unit">gal/MMBtu</span> -->
     </label>
     <br>
     <label>

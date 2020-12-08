@@ -1,8 +1,8 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbUtilityMeter } from 'src/app/models/idb';
-import { GasOptions, LiquidOptions, SolidOptions, OtherEnergyOptions } from './fuelOptions';
+import { GasOptions, LiquidOptions, SolidOptions, OtherEnergyOptions, GasUnits, LiquidUnits, SolidUnits, ElectricityUnits } from './editMeterOptions';
 @Component({
   selector: 'app-edit-meter-form',
   templateUrl: './edit-meter-form.component.html',
@@ -17,6 +17,7 @@ export class EditMeterFormComponent implements OnInit {
   meterForm: FormGroup;
   displayPhaseAndFuel: boolean;
   energyOptions: Array<string>;
+  startingUnitOptions: Array<string>;
   constructor(private formBuilder: FormBuilder, private utilityMeterDbService: UtilityMeterdbService) { }
 
   ngOnInit(): void {
@@ -55,6 +56,11 @@ export class EditMeterFormComponent implements OnInit {
     this.emitClose.emit(true);
   }
 
+  changeSource() {
+    this.setSourceValidation();
+    this.setEnergyOptions();
+  }
+
   setSourceValidation() {
     if (this.meterForm.controls.source.value == 'Electricity' || this.meterForm.controls.source.value == 'Natural Gas' || this.meterForm.controls.source.value == 'Other Utility') {
       this.displayPhaseAndFuel = false;
@@ -73,14 +79,19 @@ export class EditMeterFormComponent implements OnInit {
     if (this.meterForm.controls.source.value == 'Other Fuels') {
       if (this.meterForm.controls.phase.value == 'Solid') {
         this.energyOptions = SolidOptions;
+        this.startingUnitOptions = SolidUnits;
       } else if (this.meterForm.controls.phase.value == 'Liquid') {
         this.energyOptions = LiquidOptions;
+        this.startingUnitOptions = LiquidUnits;
       } else if (this.meterForm.controls.phase.value == 'Gas') {
         this.energyOptions = GasOptions;
+        this.startingUnitOptions = GasUnits;
       }
     } else if (this.meterForm.controls.source.value == 'Other Energy' || this.meterForm.controls.source.value == 'Water' ||
       this.meterForm.controls.source.value == 'Waste Water') {
       this.energyOptions = OtherEnergyOptions;
+    } else if (this.meterForm.controls.source.value == 'Electricity') {
+      this.startingUnitOptions = ElectricityUnits;
     }
   }
 }
