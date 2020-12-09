@@ -24,7 +24,14 @@ export interface IdbFacility {
     size: number,
     units: string,
     division: string,
-    img: string
+    img: string,
+    //units
+    unitsOfMeasure: string,
+    energyUnit: string,
+    volumeUnit: string,
+    sizeUnit: string,
+    massUnit: string
+
 }
 
 export interface IdbUtilityMeterGroup {

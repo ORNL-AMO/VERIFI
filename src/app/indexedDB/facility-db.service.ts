@@ -145,6 +145,12 @@ export class FacilitydbService {
             division: undefined,
             img: undefined,
             // id: undefined
+            unitsOfMeasure: 'Imperial',
+            energyUnit: 'kWh',
+            volumeUnit: 'SCF',
+            sizeUnit: 'ft',
+            massUnit: 'lb'
+
         }
     }
 }
@@ -164,7 +170,12 @@ export const TestFacilityData: Array<IdbFacility> = [
         size: 1000,
         units: 'ft',
         division: 'Marketing',
-        img: 'https://placthold.it/50x50'
+        img: 'https://placthold.it/50x50',
+        unitsOfMeasure: 'Imperial',
+        energyUnit: 'kWh',
+        volumeUnit: 'SCF',
+        sizeUnit: 'ft',
+        massUnit: 'lb'
     },
     {
         // id: undefined,
@@ -179,7 +190,12 @@ export const TestFacilityData: Array<IdbFacility> = [
         size: 1000,
         units: 'ft',
         division: 'Sugar',
-        img: 'https://placthold.it/50x50'
+        img: 'https://placthold.it/50x50',
+        unitsOfMeasure: 'Imperial',
+        energyUnit: 'kWh',
+        volumeUnit: 'SCF',
+        sizeUnit: 'ft',
+        massUnit: 'lb'
     },
     {
         // id: undefined,
@@ -194,7 +210,12 @@ export const TestFacilityData: Array<IdbFacility> = [
         size: 1000,
         units: 'ft',
         division: 'Boring',
-        img: 'https://placthold.it/50x50'
+        img: 'https://placthold.it/50x50',
+        unitsOfMeasure: 'Imperial',
+        energyUnit: 'kWh',
+        volumeUnit: 'SCF',
+        sizeUnit: 'ft',
+        massUnit: 'lb'
     },
     {
         // id: undefined,
@@ -209,6 +230,11 @@ export const TestFacilityData: Array<IdbFacility> = [
         size: 10,
         units: 'ft',
         division: 'Fiber',
-        img: 'https://placthold.it/50x50'
+        img: 'https://placthold.it/50x50',
+        unitsOfMeasure: 'Imperial',
+        energyUnit: 'kWh',
+        volumeUnit: 'SCF',
+        sizeUnit: 'ft',
+        massUnit: 'lb'
     }
 ]

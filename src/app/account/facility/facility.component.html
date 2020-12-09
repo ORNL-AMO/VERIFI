@@ -5,61 +5,95 @@
 </div>
 
 <div class="wrapper">
-<h4>Facilty Information</h4>
-<br>
-<div class="row">
-    <div class="col-4">
-        <img src="https://placehold.it/350x200" alt="">
-    </div>
-    <div class="col">
-        <div class="row">
-            <div class="col">
-                <form [formGroup]="facilityForm">
-                    <label>Building / Area
-                        <input type="text" formControlName="name" (input)="onFormChange();">
-                    </label>
-                    <br>
-                    <label>County
-                        <input type="text" formControlName="country" (input)="onFormChange();">
-                    </label>
-                    <br>
-                    <label>State
-                        <input type="text" formControlName="state" (input)="onFormChange();">
-                    </label>
-                    <br>
-                    <label>Address
-                        <input type="text" formControlName="address" (input)="onFormChange();">
-                    </label>
-                </form>
-            </div>
-            <div class="col">
-                <form [formGroup]="facilityForm">
-                    <label>Business Type
-                        <input type="text" formControlName="type" (input)="onFormChange();">
-                    </label>
-                    <br>
-                    <label>Teir
-                        <input type="text" formControlName="tier" (input)="onFormChange();">
-                    </label>
-                    <br>
-                    <label>Size
-                        <input type="text" formControlName="size" (input)="onFormChange();">
-                    </label>
-                    <br>
-                    <label>Units
-                        <input type="text" formControlName="units" (input)="onFormChange();">
-                    </label>
-                    <br>
-                    <label>Division
-                        <input type="text" formControlName="division" (input)="onFormChange();">
-                    </label>
-                </form>
+    <h4>Facilty Information</h4>
+    <br>
+    <div class="row">
+        <div class="col-4">
+            <img src="https://placehold.it/350x200" alt="">
+        </div>
+        <div class="col">
+            <div class="row">
+                <div class="col">
+                    <form [formGroup]="facilityForm">
+                        <label>Building / Area
+                            <input type="text" formControlName="name" (input)="onFormChange();">
+                        </label>
+                        <br>
+                        <label>County
+                            <input type="text" formControlName="country" (input)="onFormChange();">
+                        </label>
+                        <br>
+                        <label>State
+                            <input type="text" formControlName="state" (input)="onFormChange();">
+                        </label>
+                        <br>
+                        <label>Address
+                            <input type="text" formControlName="address" (input)="onFormChange();">
+                        </label>
+                    </form>
+                </div>
+                <div class="col">
+                    <form [formGroup]="facilityForm">
+                        <label>Business Type
+                            <input type="text" formControlName="type" (input)="onFormChange();">
+                        </label>
+                        <br>
+                        <label>Teir
+                            <input type="text" formControlName="tier" (input)="onFormChange();">
+                        </label>
+                        <br>
+                        <label>Size
+                            <input type="text" formControlName="size" (input)="onFormChange();">
+                        </label>
+                        <br>
+                        <label>Units of Measure
+                            <select formControlName="unitsOfMeasure" (change)="setUnitsOfMeasure()">
+                                <option [ngValue]="'Imperial'">Imperial</option>
+                                <option [ngValue]="'Metric'">Metric</option>
+                                <option [ngValue]="'Custom'">Custom</option>
+                            </select>
+                        </label>
+                        <br>
+                        <label>Energy Unit
+                            <select formControlName="energyUnit" (change)="onFormChange()">
+                                <option *ngFor="let energyUnitOption of energyUnitOptions"
+                                    [ngValue]="energyUnitOption.value"><span
+                                        [innerHTML]="energyUnitOption.display"></span></option>
+                            </select>
+                        </label>
+                        <br>
+                        <label>Volume Unit
+                            <select formControlName="volumeUnit" (change)="onFormChange()">
+                                <option *ngFor="let volumeUnitOption of volumeUnitOptions"
+                                    [ngValue]="volumeUnitOption.value"><span
+                                        [innerHTML]="volumeUnitOption.display"></span></option>
+                            </select>
+                        </label>
+                        <br>
+                        <label>Size Unit
+                            <select formControlName="sizeUnit" (change)="onFormChange()">
+                                <option *ngFor="let sizeUnitOption of sizeUnitOptions" [ngValue]="sizeUnitOption.value">
+                                    <span [innerHTML]="sizeUnitOption.display"></span></option>
+                            </select>
+                        </label>
+                        <br>
+                        <label>Mass Unit
+                            <select formControlName="massUnit" (change)="onFormChange()">
+                                <option *ngFor="let massUnitOption of massUnitOptions" [ngValue]="massUnitOption.value">
+                                    <span [innerHTML]="massUnitOption.display"></span></option>
+                            </select>
+                        </label>
+                        <br>
+                        <label>Division
+                            <input type="text" formControlName="division" (input)="onFormChange();">
+                        </label>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
 
-<br>
-<h4>Operating Schedule</h4>
+    <br>
+    <h4>Operating Schedule</h4>
 </div>
