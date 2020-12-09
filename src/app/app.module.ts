@@ -1,7 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { CallbackPipe } from "./callback.pipe";
 
 import { AppRoutingModule } from './app-routing.module';
 import { DragDropModule } from '@angular/cdk/drag-drop';
@@ -16,7 +15,6 @@ import { FacilityComponent } from './account/facility/facility.component';
 import { UtilityComponent } from './utility/utility.component';
 import { EnergyConsumptionComponent } from './utility/energy-consumption/energy-consumption.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
-import { DataTableComponent } from './utility/data-table/data-table.component';
 import { EnergySourceComponent } from './utility/energy-consumption/energy-source/energy-source.component';
 import { HelpPanelComponent } from './utility/help-panel/help-panel.component';
 
@@ -24,8 +22,6 @@ import { CommonModule } from '@angular/common';
 
 import { PlotlyViaWindowModule } from 'angular-plotly.js';
 import { StyleGuideComponent } from './shared/style-guide/style-guide.component';
-// import { PredictorsComponent } from './utility/predictors/predictors.component';
-import { MoMeterDataComponent } from './utility/mo-meter-data/mo-meter-data.component';
 import { LoadingComponent } from './shared/loading/loading.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { IndexedDBModule } from './indexedDB/indexed-db.module';
@@ -41,7 +37,7 @@ import { ImportMeterDataComponent } from './utility/energy-consumption/utility-m
 import { MeterGroupingComponent } from './utility/meter-grouping/meter-grouping.component';
 import { EditMeterGroupFormComponent } from './utility/meter-grouping/edit-meter-group-form/edit-meter-group-form.component';
 
-import { PredictorPipe } from './utility/predictors/predictor.pipe';
+
 import { PredictorDataComponent } from './utility/predictor-data/predictor-data.component';
 import { EditPredictorEntryRowComponent } from './utility/predictor-data/edit-predictor-entry-row/edit-predictor-entry-row.component';
 import { EditPredictorsComponent } from './utility/predictor-data/edit-predictors/edit-predictors.component';
@@ -49,7 +45,6 @@ import { CalanderizationComponent } from './utility/calanderization/calanderizat
 
 @NgModule({
   declarations: [
-    CallbackPipe,
     AppComponent,
     HeaderComponent,
     FooterComponent,
@@ -59,12 +54,9 @@ import { CalanderizationComponent } from './utility/calanderization/calanderizat
     UtilityComponent,
     EnergyConsumptionComponent,
     DashboardComponent,
-    DataTableComponent,
     EnergySourceComponent,
     HelpPanelComponent,
     StyleGuideComponent,
-    // PredictorsComponent,
-    MoMeterDataComponent,
     LoadingComponent,
     EditMeterFormComponent,
     UtilityMeterDataComponent,
@@ -77,7 +69,6 @@ import { CalanderizationComponent } from './utility/calanderization/calanderizat
     ImportMeterDataComponent,
     MeterGroupingComponent,
     EditMeterGroupFormComponent,
-    PredictorPipe,
     PredictorDataComponent,
     EditPredictorEntryRowComponent,
     EditPredictorsComponent,
