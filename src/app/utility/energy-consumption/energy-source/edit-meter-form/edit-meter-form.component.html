@@ -12,7 +12,7 @@
     <br>
     <label>
         <span class="required">*</span> Source
-        <select type="text" formControlName="source" (change)="changeSource()">
+        <select type="text" formControlName="source" (change)="setSource()">
             <option [ngValue]="'Electricity'">Electricity</option>
             <option [ngValue]="'Natural Gas'">Natural Gas</option>
             <option [ngValue]="'Other Fuels'">Other Fuels</option>
@@ -32,7 +32,7 @@
     </label>
 
     <label *ngIf="displayFuel">
-        <span class="required">*</span> 
+        <span class="required">*</span>
         {{energySourceLabel}}
         <select type="text" formControlName="fuel" (change)="setFuelType()">
             <option *ngFor="let energyOption of energyOptions" [ngValue]="energyOption.value">{{energyOption.value}}
@@ -40,10 +40,10 @@
         </select>
     </label>
     <label>
-        <span class="required">*</span> Starting Unit
+        <span class="required">*</span> Collection Unit
         <select type="text" formControlName="startingUnit">
-            <option *ngFor="let startingUnitOption of startingUnitOptions" [ngValue]="startingUnitOption">
-                {{startingUnitOption}}</option>
+            <option *ngFor="let startingUnitOption of startingUnitOptions" [ngValue]="startingUnitOption.value">
+                <span [innerHTML]="startingUnitOption.display"></span></option>
         </select>
     </label>
     <br>
