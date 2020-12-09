@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { BehaviorSubject } from 'rxjs';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { ElectricityDataFilter } from 'src/app/models/electricityFilter';
 import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 
 @Injectable({
@@ -8,10 +10,22 @@ import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 })
 export class UtilityMeterDataService {
 
-  electricityDataFilters: BehaviorSubject<Array<ElectricityDataFilter>>;
-  constructor(private formBuilder: FormBuilder) {
+  tableElectricityFilters: BehaviorSubject<Array<ElectricityDataFilter>>;
+  electricityInputFilters: BehaviorSubject<Array<ElectricityDataFilter>>;
+  constructor(private formBuilder: FormBuilder, private facilityDbService: FacilitydbService) {
     let defaultFilters: Array<ElectricityDataFilter> = this.getDefaultFilters();
-    this.electricityDataFilters = new BehaviorSubject<Array<ElectricityDataFilter>>(defaultFilters);
+    this.tableElectricityFilters = new BehaviorSubject<Array<ElectricityDataFilter>>(defaultFilters);
+    this.electricityInputFilters = new BehaviorSubject<Array<ElectricityDataFilter>>(defaultFilters);
+    this.facilityDbService.selectedFacility.subscribe(selectedFacility => {
+      if (selectedFacility) {
+        if (selectedFacility.electricityInputFilters) {
+          this.electricityInputFilters.next(selectedFacility.electricityInputFilters);
+        }
+        if (selectedFacility.tableElectricityFilters) {
+          this.electricityInputFilters.next(selectedFacility.tableElectricityFilters);
+        }
+      }
+    });
   }
 
   getDefaultFilters(): Array<ElectricityDataFilter> {
@@ -122,12 +136,4 @@ export class UtilityMeterDataService {
       document.body.removeChild(downloadLink);
     }
   }
-}
-
-
-export interface ElectricityDataFilter {
-  filter: boolean,
-  display: string,
-  id: number,
-  name: string
 }

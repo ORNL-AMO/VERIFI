@@ -1,8 +1,9 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { ElectricityDataFilter } from 'src/app/models/electricityFilter';
 import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
-import { ElectricityDataFilter, UtilityMeterDataService } from '../utility-meter-data.service';
+import { UtilityMeterDataService } from '../utility-meter-data.service';
 
 @Component({
   selector: 'app-import-meter-data',
@@ -22,7 +23,7 @@ export class ImportMeterDataComponent implements OnInit {
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private utilityMeterDbService: UtilityMeterdbService, private utilityMeterDataService: UtilityMeterDataService) { }
 
   ngOnInit(): void {
-    this.electricityDataFilters = this.utilityMeterDataService.electricityDataFilters.getValue();
+    this.electricityDataFilters = this.utilityMeterDataService.electricityInputFilters.getValue();
   }
 
 
