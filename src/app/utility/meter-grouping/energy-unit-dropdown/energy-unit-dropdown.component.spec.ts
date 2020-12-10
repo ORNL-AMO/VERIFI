@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { DataTableComponent } from './data-table.component';
+import { EnergyUnitDropdownComponent } from './energy-unit-dropdown.component';
 
-describe('DataTableComponent', () => {
-  let component: DataTableComponent;
-  let fixture: ComponentFixture<DataTableComponent>;
+describe('EnergyUnitDropdownComponent', () => {
+  let component: EnergyUnitDropdownComponent;
+  let fixture: ComponentFixture<EnergyUnitDropdownComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ DataTableComponent ]
+      declarations: [ EnergyUnitDropdownComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(DataTableComponent);
+    fixture = TestBed.createComponent(EnergyUnitDropdownComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

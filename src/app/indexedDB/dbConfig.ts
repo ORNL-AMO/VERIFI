@@ -101,7 +101,7 @@ export const dbConfig: DBConfig  = {
         { name: 'facilityId', keypath: 'facilityId', options: { unique: false } },
         { name: 'accountId', keypath: 'accountId', options: { unique: false } },
         { name: 'groupType', keypath: 'groupType', options: { unique: false } },
-        { name: 'name', keypath: 'name', options: { unique: true } },
+        { name: 'name', keypath: 'name', options: { unique: false } },
         { name: 'description', keypath: 'description', options: { unique: false } },
         { name: 'unit', keypath: 'unit', options: { unique: false } },
         // { name: 'data', keypath: 'data', options: { unique: false } },

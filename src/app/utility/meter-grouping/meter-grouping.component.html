@@ -2,23 +2,16 @@
     <h4>Meter Grouping</h4>
     <p>Your meters have been grouped by type. You are free to edit or add groups based on your preferences. These groups
         will represent your data visualization.</p>
-    <!--<button class="btn btn-primary item-right">Add New Group</button>-->
     <br>
-    <div *ngFor="let meterGroupType of meterGroupTypes">
+    <div *ngFor="let meterGroupType of meterGroupTypes" id={{meterGroupType.id}}>
         <div class="group-section">
             <h5>{{meterGroupType.groupType}}</h5>
-            <!-- <label class="item-right">Final Unit:
-                <select type="text" [(ngModel)]="energyFinalUnit" (change)="setEnergyFinalUnit($event.target.value);">
-                    <option value="MMBtu">MMBtu</option>
-                    <option value="kWh">kWh</option>
-                    <option value="J">J</option>
-                </select>
-            </label> -->
+            <!-- <app-energy-unit-dropdown [groupType]="meterGroupType.groupType"></app-energy-unit-dropdown> -->
         </div>
         <div class="group-section-folders">
             <div cdkDropList [cdkDropListData]="meterGroupType.meterGroups" class="grouped-list"
                 *ngFor="let meterGroup of meterGroupType.meterGroups" (cdkDropListDropped)="drop($event)"
-                id={{meterGroup.id}} [cdkDropListConnectedTo]="meterGroupIds">
+                id={{meterGroup.id}} [cdkDropListConnectedTo]="meterGroupType.meterGroupIds">
                 <div class="row group-title">
                     <p class="bold col"><i class="fa fa-caret-right"></i> {{meterGroup.name}}</p>
                     <div class="item-left">
@@ -53,9 +46,10 @@
                 </div>
 
                 <div [cdkDragData]="meter" class="group-meters" *ngFor="let meter of meterGroup.groupData" cdkDrag>
+                    <!-- id={{meter.id}}> -->
                     <i class="fa fa-th"></i>
                     <span> {{meter.name}}</span>
-                    <span class="item-right">{{meter.type}}</span>
+                    <span class="item-right">{{meter.source}}</span>
                 </div>
             </div>
             <button class="btn btn-link" (click)="groupAdd(meterGroupType.groupType)"><i class="fa fa-plus"></i> Add New

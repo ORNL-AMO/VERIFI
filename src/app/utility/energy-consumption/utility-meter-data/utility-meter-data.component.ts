@@ -1,6 +1,5 @@
 import { Component, OnInit, ElementRef, ViewChild, QueryList, ViewChildren } from '@angular/core';
 import { listAnimation } from '../../../animations';
-import { EnergyConsumptionService } from "../energy-consumption.service";
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { Subscription } from 'rxjs';
 import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
@@ -42,7 +41,6 @@ export class UtilityMeterDataComponent implements OnInit {
   hasCheckedItems: boolean;
   meterDataToDelete: IdbUtilityMeterData;
   constructor(
-    public energyConsumptionService: EnergyConsumptionService,
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private activatedRoute: ActivatedRoute,
