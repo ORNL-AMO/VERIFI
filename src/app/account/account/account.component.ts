@@ -24,6 +24,7 @@ export class AccountComponent implements OnInit {
   facilityMenuOpen: number;
   showDeleteAccount: boolean;
   facilityToEdit: IdbFacility;
+  facilityToDelete: IdbFacility;
 
   accountForm: FormGroup = new FormGroup({
     id: new FormControl('', [Validators.required]),
@@ -91,10 +92,6 @@ export class AccountComponent implements OnInit {
     this.router.navigate(['account/facility']);
   }
 
-  facilityDelete(facitilyId: number) {
-    //this.facilityDbService.deleteById(facitilyId);
-  }
-
   addNewFacility() {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let idbFacility: IdbFacility = this.facilityDbService.getNewIdbFacility(selectedAccount.id);
@@ -103,6 +100,23 @@ export class AccountComponent implements OnInit {
 
   onFormChange(): void {
     this.accountDbService.update(this.accountForm.value);
+  }
+
+  facilityDelete() {
+    this.loadingService.setLoadingStatus(true);
+    this.loadingService.setLoadingMessage("Deleting Facility...");
+
+    // Delete all info associated with account
+    this.predictorDbService.deleteAllFacilityPredictors(this.facilityToDelete.id);
+    this.utilityMeterDataDbService.deleteAllFacilityMeterData(this.facilityToDelete.id);
+    this.utilityMeterDbService.deleteAllFacilityMeters(this.facilityToDelete.id);
+    this.utilityMeterGroupDbService.deleteAllFacilityMeterGroups(this.facilityToDelete.id);
+    this.facilityDbService.deleteById(this.facilityToDelete.id);
+
+    // Then navigate to another facility
+    this.facilityDbService.setSelectedFacility();
+    this.loadingService.setLoadingStatus(false);
+    
   }
 
   accountDelete() {
@@ -125,8 +139,13 @@ export class AccountComponent implements OnInit {
     this.loadingService.setLoadingStatus(false);
   }
 
+
   setEditFacilityEntry(facility: IdbFacility) {
     this.facilityToEdit = facility;
+  }
+
+  setDeleteFacilityEntry(facility: IdbFacility) {
+    this.facilityToDelete = facility;
   }
 
   closeEditFacility() {
@@ -137,13 +156,22 @@ export class AccountComponent implements OnInit {
     this.showDeleteAccount = true;
   }
 
-  confirmDelete() {
+  confirmFacilityDelete() {
+    this.facilityDelete();
+    this.facilityToDelete = undefined;
+  }
+
+  confirmAccountDelete() {
     this.accountDelete();
     this.showDeleteAccount = undefined;
   }
 
-  cancelDelete() {
+  cancelAccountDelete() {
     this.showDeleteAccount = undefined;
+  }
+
+  cancelFacilityDelete() {
+    this.facilityToDelete = undefined;
   }
 
 }

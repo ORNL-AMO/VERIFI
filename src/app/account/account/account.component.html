@@ -70,15 +70,8 @@
                 <td>{{facility.division}}</td>
                 <td class="actions">
                     <i class="fa fa-edit" title="Edit" (click)="setEditFacilityEntry(facility)"></i>
-                    <i class="fa fa-trash-o" title="Delete" (click)="facilityDelete(facility.id)"></i>
+                    <i class="fa fa-trash-o" title="Delete" (click)="setDeleteFacilityEntry(facility)"></i>
                 </td>
-                <!--<td (click)="$event.stopPropagation();">
-                    <i class="fa fa-ellipsis-v" (click)="facilityToggleMenu(facility.id)" ></i>
-                    <div class="facilityMenu" [class.open]="facilityMenuOpen === facility.id">
-                        <p (click)="facilityEdit(facility)">Edit</p>
-                        <p (click)="facilityDelete(facility.id)">Delete</p>
-                    </div>
-                </td>-->
             </tr>
         </table>
     </div>
@@ -120,7 +113,21 @@
             Are you sure you want to preform this action?</p>
     </div>
     <div class="popup-footer text-right">
-        <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
-        <button class="btn btn-danger" (click)="confirmDelete()">Confirm Delete</button>
+        <button class="btn btn-secondary" (click)="cancelAccountDelete()">Cancel</button>
+        <button class="btn btn-danger" (click)="confirmAccountDelete()">Confirm Delete</button>
+    </div>
+</div>
+
+<div class="popup" [class.open]="facilityToDelete" *ngIf="facilityToDelete">
+    <div class="popup-header">Delete Facility: {{facilityToDelete.name}}
+        <button class="item-right" (click)="cancelDelete()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>WARNING: By deleting this facility, you are also deleting all of the data associated with it.
+            Are you sure you want to preform this action?</p>
+    </div>
+    <div class="popup-footer text-right">
+        <button class="btn btn-secondary" (click)="cancelFacilityDelete()">Cancel</button>
+        <button class="btn btn-danger" (click)="confirmFacilityDelete()">Confirm Delete</button>
     </div>
 </div>

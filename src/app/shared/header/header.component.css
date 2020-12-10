@@ -90,6 +90,8 @@ Facility
 .facilityMenu {
     width: calc(100% - 50px);
     float: left;
+}
+.col-lg-3.facilityMenu {
     min-width: 300px;
 }
 .facilityMenu .currentFacility > i {
@@ -103,6 +105,13 @@ Facility
     left: 0;
 }
 .facilityMenu .dropdown .arrow-up {
+    top: -9px;
+    position: absolute;
+    border-bottom: 10px solid #ffffff;
+    right: 18px;
+    left: auto;
+}
+.facilityMenu .facilityMenu .dropdown .arrow-up {
     left: 27px;
     right: auto;
 }
@@ -127,6 +136,7 @@ Facility
 .facilities .fa-cog:hover {
     color: #145932;
 }
+
 .currentFacility {
     cursor: pointer;
 }
@@ -170,15 +180,9 @@ Dropdown Menu
     background-color: #f3f3f3;
     cursor: pointer;
 }
-.dropdown .arrow-up {
-    top: -9px;
-    position: absolute;
-    border-bottom: 10px solid #ffffff;
-    right: 18px;
-    left: auto;
-}
+
 /*
-Switch Accounts
+Manage Accounts
 =============================================== */
 div#switchAccounts {
     background-color: white;
@@ -213,10 +217,6 @@ div#switchAccounts.open {
     padding: 15px 0px;
     border-bottom: 1px solid #e6e6e6;
 }
-.account:hover {
-    background-color: #efefef;
-    cursor: pointer;
-}
 .account.active {
     background-color: #f0f6ff;
 }
@@ -242,7 +242,11 @@ div#switchAccounts.open {
 .account i.fa.right.fa-check {
     color: #007bff;
 }
-
+.account:hover {
+    /*background-color: #eee;*/
+    background-color: #efefef;
+    cursor: pointer;
+}
 div#darkoverlay {
     position: fixed;
     background-color: black;
@@ -259,9 +263,6 @@ div#darkoverlay.open {
 }
 
 
-/*
-Dev Tools
-=============================================== */
 div#devtools {
     position: fixed;
     top: calc(100vh - 37px);
