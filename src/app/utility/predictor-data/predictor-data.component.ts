@@ -25,6 +25,7 @@ export class PredictorDataComponent implements OnInit {
   predictorEntryToEdit: IdbPredictorEntry;
   showPredictorMenu: boolean = false;
   showEditPredictors: boolean = false;
+  showImportPredictors: boolean = false;
   constructor(private predictorsDbService: PredictordbService) { }
 
   ngOnInit(): void {
@@ -105,5 +106,13 @@ export class PredictorDataComponent implements OnInit {
   closeEditPredictors() {
     this.showEditPredictors = false;
     this.showPredictorMenu = false;
+  }
+
+  openImportPredictors(){
+    this.showImportPredictors = true;
+  }
+
+  closeImportPredictors(){
+    this.showImportPredictors = false;
   }
 }

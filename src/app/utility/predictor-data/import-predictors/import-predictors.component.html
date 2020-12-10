@@ -1,0 +1,29 @@
+<!-- <h4>Import Predictors</h4>
+<br>
+<form>
+    <input type="file" #inputFile accept=".csv" (change)="predictorImport($event.target.files)">
+</form>
+<br>
+<div class="importQuickView" [hidden]="quickView ==''">
+    <p class="bold">Quick View</p>
+    <table>
+        <tr>
+            <th>Predictor Name</th>
+            <th>Units</th>
+            <th>Date</th>
+            <th>Amount</th>
+        </tr>
+        <tr *ngFor="let quickViews of quickView">
+            <td>{{quickViews.name}}</td>
+            <td>{{quickViews.unit}}</td>
+            <td>{{quickViews.date}}</td>
+            <td>{{quickViews.amount}}</td>
+        </tr>
+    </table>
+</div> -->
+<p class="alert alert-danger" [hidden]="!importError">{{importError}}</p>
+
+<div class="saveCancel item-right">
+    <button class="btn btn-primary" (click)="cancel()">Cancel</button>
+    <button class="btn btn-primary" (click)="addPredictors()" [disabled]="!importError">Submit</button>
+</div>
