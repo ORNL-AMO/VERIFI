@@ -1,8 +1,8 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { ElectricityDataFilter } from 'src/app/models/electricityFilter';
 import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
-import { ElectricityDataFilter, UtilityMeterDataService } from '../utility-meter-data.service';
+import { UtilityMeterDataService } from '../utility-meter-data.service';
 
 @Component({
   selector: 'app-electricity-data-table',
@@ -27,14 +27,14 @@ export class ElectricityDataTableComponent implements OnInit {
   electricityDataFilters: Array<ElectricityDataFilter>;
   electricityDataFilterSub: Subscription;
   allChecked: boolean;
-  constructor(private utilityMeterDataService: UtilityMeterDataService, private utilityMeterDataDbService: UtilityMeterDatadbService) { }
+  constructor(private utilityMeterDataService: UtilityMeterDataService) { }
 
   ngOnInit(): void {
     if (this.meterListItem.meterDataItems.length != 0) {
       let hasFalseChecked: IdbUtilityMeterData = this.meterListItem.meterDataItems.find(meterDataItem => { return meterDataItem.checked == false });
       this.allChecked = (hasFalseChecked == undefined);
     }
-    this.electricityDataFilterSub = this.utilityMeterDataService.electricityDataFilters.subscribe(electricityDataFilters => {
+    this.electricityDataFilterSub = this.utilityMeterDataService.tableElectricityFilters.subscribe(electricityDataFilters => {
       this.electricityDataFilters = electricityDataFilters;
     });
   }

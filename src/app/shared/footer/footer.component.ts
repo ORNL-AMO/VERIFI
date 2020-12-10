@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { version } from '../../../../package.json';
-import { AccountService } from "../../account/account/account.service";
 import { AccountdbService } from "../../indexedDB/account-db.service";
 import { FacilitydbService } from "../../indexedDB/facility-db.service";
 
@@ -11,7 +10,7 @@ import { FacilitydbService } from "../../indexedDB/facility-db.service";
   styleUrls: ['./footer.component.css']
 })
 export class FooterComponent implements OnInit {
-  accountid: number;
+
   date: Date = new Date();
   version: string = version;
   accountCount: number = 0;
@@ -23,7 +22,6 @@ export class FooterComponent implements OnInit {
   allFacilitiesSub: Subscription;
   accountFacilitiesSub: Subscription;
   constructor(
-    public accountService: AccountService,
     public accountdbService: AccountdbService,
     public facilitydbService: FacilitydbService,
   ) {

@@ -1,3 +1,4 @@
+import { ElectricityDataFilter } from './electricityFilter';
 
 
 export interface IdbAccount {
@@ -32,6 +33,9 @@ export interface IdbFacility {
     sizeUnit: string,
     massUnit: string
 
+    tableElectricityFilters?: Array<ElectricityDataFilter>,
+    electricityInputFilters?: Array<ElectricityDataFilter>
+    
 }
 
 export interface IdbUtilityMeterGroup {
@@ -57,7 +61,7 @@ export interface IdbUtilityMeter {
     accountId: number,
     groupId: number,
     //data
-    meterNumber: number,
+    meterNumber: string,
     accountNumber: number,
     type: string,
     phase: string,
