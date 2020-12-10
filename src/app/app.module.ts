@@ -43,6 +43,7 @@ import { EditPredictorEntryRowComponent } from './utility/predictor-data/edit-pr
 import { EditPredictorsComponent } from './utility/predictor-data/edit-predictors/edit-predictors.component';
 import { CalanderizationComponent } from './utility/calanderization/calanderization.component';
 import { ImportPredictorsComponent } from './utility/predictor-data/import-predictors/import-predictors.component';
+import { EnergyUnitDropdownComponent } from './utility/meter-grouping/energy-unit-dropdown/energy-unit-dropdown.component';
 
 @NgModule({
   declarations: [
@@ -74,7 +75,8 @@ import { ImportPredictorsComponent } from './utility/predictor-data/import-predi
     EditPredictorEntryRowComponent,
     EditPredictorsComponent,
     CalanderizationComponent,
-    ImportPredictorsComponent
+    ImportPredictorsComponent,
+    EnergyUnitDropdownComponent
   ],
   imports: [
     BrowserModule,

@@ -30,7 +30,7 @@ export class ImportMeterDataComponent implements OnInit {
   meterDataImport(files: FileList) {
     // Clear with each upload
     this.quickView = new Array();
-    this.importError = '';
+    this.importError = undefined;
     this.import = new Array();
     let allowedHeaders: Array<string>;
 
@@ -56,7 +56,7 @@ export class ImportMeterDataComponent implements OnInit {
 
           for (var i = 1; i < lines.length; i++) {
             const currentline = lines[i].split(",");
-            let idbMeter: IdbUtilityMeter = facilityMeters.find(facilityMeter => { return facilityMeter == currentline['meterNumber'] });
+            let idbMeter: IdbUtilityMeter = facilityMeters.find(facilityMeter => { return facilityMeter.meterNumber == currentline[0] });
             //TODO: Ignoring meter data without a matching meter with the same meterNumber
             //add some sort of error handling/messaging
             if (idbMeter) {
@@ -70,8 +70,11 @@ export class ImportMeterDataComponent implements OnInit {
               if (i < 4) {
                 this.quickView.push(obj);
               }
+            } else {
+              console.log('no number')
             }
           }
+          console.log(this.import);
         } else {
           // csv didn't match -> Show error
           this.importError = "Error with file. Please match your file to the provided template.";
