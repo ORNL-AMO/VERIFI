@@ -76,7 +76,6 @@ export class PredictordbService {
     }
 
     updateOnImport(values: IdbPredictorEntry): Observable<any> {
-        console.log('update on import');
         return this.dbService.update('predictors', values);
     }
 
