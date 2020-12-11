@@ -16,6 +16,8 @@ export class EditMeterFormComponent implements OnInit {
   editMeter: IdbUtilityMeter;
   @Output('emitClose')
   emitClose: EventEmitter<boolean> = new EventEmitter<boolean>();
+  @Input()
+  addOrEdit: string;
 
   meterForm: FormGroup;
   displayPhase: boolean;
@@ -47,12 +49,25 @@ export class EditMeterFormComponent implements OnInit {
       fuel: [this.editMeter.fuel, Validators.required],
       startingUnit: [this.editMeter.startingUnit, Validators.required]
     });
-    this.setSource();
+
+    if (!this.meterForm.controls.source.value) {
+      this.meterForm.controls.source.patchValue('Electricity');
+      this.setSource();
+    } else {
+      this.setSourceValidation();
+      this.setEnergyOptions();
+    }
   }
 
 
   saveChanges() {
-    this.utilityMeterDbService.update(this.meterForm.value);
+    if (this.addOrEdit == 'edit') {
+      this.utilityMeterDbService.update(this.meterForm.value);
+    } else if (this.addOrEdit == 'add') {
+      let newMeter: IdbUtilityMeter = this.meterForm.value;
+      delete newMeter.id;
+      this.utilityMeterDbService.add(newMeter);
+    }
     this.cancel();
   }
 
@@ -63,6 +78,7 @@ export class EditMeterFormComponent implements OnInit {
   setSource() {
     this.setSourceValidation();
     this.setEnergyOptions();
+    this.setHeatCapacity();
   }
 
   setSourceValidation() {
@@ -110,16 +126,30 @@ export class EditMeterFormComponent implements OnInit {
   }
 
   //TODO: Set heat capacity and source for electricity and natural gas (no energy options used);
-  setFuelType() {
-    let selectedEnergyOption: FuelTypeOption = JSON.parse(JSON.stringify(this.energyOptions.find(option => { return option.value == this.meterForm.controls.fuel.value })));
-    if (selectedEnergyOption) {
-      //TODO: Add therms to unit converter
-      if (selectedEnergyOption.startingUnit != 'Therms') {
-        //TODO: Round value to some decimal place
-        selectedEnergyOption.heatCapacityValue = this.convertUnitsService.value(selectedEnergyOption.heatCapacityValue).from(selectedEnergyOption.startingUnit).to(this.meterForm.controls.startingUnit.value);
+  setHeatCapacity() {
+    if (this.meterForm.controls.source.value == 'Electricity') {
+      let heatCapacity: number = this.convertUnitsService.value(.003412).from('kWh').to(this.meterForm.controls.startingUnit.value);
+      this.meterForm.controls.heatCapacity.patchValue(heatCapacity);
+      this.meterForm.controls.siteToSource.patchValue(3);
+      //TODO: "On-site Renewable Electricity" has siteToSource = 1;
+      //don't have any way to currently set "On-site"
+    } else if (this.meterForm.controls.source.value == 'Natural Gas') {
+      let heatCapacity: number = this.convertUnitsService.value(.001029).from('ft3').to(this.meterForm.controls.startingUnit.value);
+      this.meterForm.controls.heatCapacity.patchValue(heatCapacity);
+      this.meterForm.controls.siteToSource.patchValue(1);
+    } else {
+      let selectedEnergyOption: FuelTypeOption = this.energyOptions.find(option => { return option.value == this.meterForm.controls.fuel.value });
+      if (selectedEnergyOption) {
+        //copy for conversions
+        let selectedEnergyOptionsCpy: FuelTypeOption = JSON.parse(JSON.stringify(selectedEnergyOption))
+        //TODO: Add therms to unit converter
+        if (selectedEnergyOption.startingUnit != 'Therms') {
+          //TODO: Round value to some decimal place
+          selectedEnergyOptionsCpy.heatCapacityValue = this.convertUnitsService.value(selectedEnergyOptionsCpy.heatCapacityValue).from(selectedEnergyOptionsCpy.startingUnit).to(this.meterForm.controls.startingUnit.value);
+        }
+        this.meterForm.controls.heatCapacity.patchValue(selectedEnergyOptionsCpy.heatCapacityValue);
+        this.meterForm.controls.siteToSource.patchValue(selectedEnergyOptionsCpy.siteToSourceMultiplier);
       }
-      this.meterForm.controls.heatCapacity.patchValue(selectedEnergyOption.heatCapacityValue);
-      this.meterForm.controls.siteToSource.patchValue(selectedEnergyOption.siteToSourceMultiplier);
     }
   }
 

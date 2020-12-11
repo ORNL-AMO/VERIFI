@@ -37,6 +37,8 @@ export class EnergySourceComponent implements OnInit {
   meterToDelete: IdbUtilityMeter;
   selectedFacilitySub: Subscription;
   selectedFacilityName: string = 'Facility';
+
+  addOrEdit: string = 'add';
   constructor(
     public accountdbService: AccountdbService,
     public facilitydbService: FacilitydbService,
@@ -82,12 +84,13 @@ export class EnergySourceComponent implements OnInit {
   addMeter() {
     let selectedFacility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
     let selectedAccount: IdbAccount = this.accountdbService.selectedAccount.getValue();
-    let utilityMeter: IdbUtilityMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.id, selectedAccount.id);
-    this.utilityMeterdbService.addWithObservable(utilityMeter).subscribe(meterId => {
-      this.utilityMeterdbService.setFacilityMeters();
-      utilityMeter.id = meterId;
-      this.selectEditMeter(utilityMeter);
-    });
+    this.addOrEdit = 'add';
+    this.editMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.id, selectedAccount.id);
+    // this.utilityMeterdbService.addWithObservable(utilityMeter).subscribe(meterId => {
+    //   this.utilityMeterdbService.setFacilityMeters();
+    //   utilityMeter.id = meterId;
+    //   this.selectEditMeter(utilityMeter);
+    // });
   }
 
   meterExport() {
@@ -126,6 +129,7 @@ export class EnergySourceComponent implements OnInit {
   }
 
   selectEditMeter(meter: IdbUtilityMeter) {
+    this.addOrEdit = 'edit';
     this.editMeter = meter;
   }
 

@@ -40,9 +40,8 @@
         <th>Building / Location</th>
         <th>Utility Supplier</th>
         <th>Notes</th>
-        <th>Unit</th>
-        <th><i>F Unit</i></th>
-        <th>Heat</th>
+        <th>Collection Units</th>
+        <th>Heat Capacity</th>
         <th>STS</th>
         <th></th>
     </tr>
@@ -56,7 +55,6 @@
         <td>{{meter.supplier}}</td>
         <td>{{meter.notes}}</td>
         <td>{{meter.startingUnit}}</td>
-        <td>{{meter.finalUnit}}</td>
         <td>{{meter.heatCapacity}}</td>
         <td>{{meter.siteToSource}}</td>
         <td (click)="$event.stopPropagation();">
@@ -73,7 +71,8 @@
 <div class="window" [class.open]="editMeter">
     <div class="windowOverlay"></div>
     <div class="windowContent">
-        <app-edit-meter-form *ngIf="editMeter" [editMeter]="editMeter" (emitClose)="closeEditMeter()">
+        <app-edit-meter-form *ngIf="editMeter" [editMeter]="editMeter" (emitClose)="closeEditMeter()"
+            [addOrEdit]="addOrEdit">
         </app-edit-meter-form>
     </div>
 </div>

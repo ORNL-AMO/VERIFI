@@ -34,7 +34,7 @@
     <label *ngIf="displayFuel">
         <span class="required">*</span>
         {{energySourceLabel}}
-        <select type="text" formControlName="fuel" (change)="setFuelType()">
+        <select type="text" formControlName="fuel" (change)="setHeatCapacity()">
             <option *ngFor="let energyOption of energyOptions" [ngValue]="energyOption.value">{{energyOption.value}}
             </option>
         </select>
