@@ -1,3 +1,20 @@
 #account .banner {
     background-color: #1e5ab3;
 }
+
+.actions {
+    width: 75px;
+}
+td.actions i {
+    padding: 0px 7px;
+    cursor: pointer;
+}
+td.actions i:hover {
+    color: #1e5ab3;
+}
+td.actions i.fa-edit:hover {
+    color: #1e5ab3;
+}
+td.actions i.fa-trash-o:hover {
+    color: red;
+}

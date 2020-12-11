@@ -35,7 +35,7 @@
 </form>
 
 <div class="saveCancel item-right" *ngIf="!predictorToDelete">
-    <button class="btn btn-primary" (click)="cancel()">Cancel</button>
+    <button class="btn btn-secondary" (click)="cancel()">Cancel</button>
     <button class="btn btn-primary" (click)="save()">Save</button>
 </div>
 
@@ -45,7 +45,7 @@
         Are you sure you want to delete {{predictorToDelete.name}}? This cannot be undone.
     </p>
     <div class="saveCancel item-right">
-        <button class="btn btn-primary" (click)="cancelDelete()">Cancel</button>
+        <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
         <button class="btn btn-danger" (click)="confirmDelete()">Confirm Delete</button>
     </div>
 </div>

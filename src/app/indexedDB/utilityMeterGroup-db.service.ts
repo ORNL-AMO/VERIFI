@@ -70,6 +70,22 @@ export class UtilityMeterGroupdbService {
         });
     }
 
+    deleteAllFacilityMeterGroups(facilityId: number): void {
+        this.getAllByIndexRange('facilityId', facilityId).subscribe(facilityGroupEntries => {
+            for(let i=0; i<facilityGroupEntries.length; i++) {
+                this.dbService.delete('utilityMeterGroups', facilityGroupEntries[i].id);
+            }
+        });
+    }
+
+    deleteAllAccountMeterGroups(accountId: number): void {
+        this.getAllByIndexRange('accountId', accountId).subscribe(accountGroupEntries => {
+            for(let i=0; i<accountGroupEntries.length; i++) {
+                this.dbService.delete('utilityMeterGroups', accountGroupEntries[i].id);
+            }
+        });
+    }
+
     getNewIdbUtilityMeterGroup(type: string, unit: string, name: string, facilityId: number, accountId: number): IdbUtilityMeterGroup {
         return {
             facilityId: facilityId,
