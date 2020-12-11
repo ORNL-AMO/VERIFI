@@ -2,7 +2,8 @@ export interface FuelTypeOption {
     startingUnit: string,
     heatCapacityValue: number
     value: string,
-    siteToSourceMultiplier: number
+    siteToSourceMultiplier: number,
+    otherEnergyType?: string
 }
 
 export const GasOptions: Array<FuelTypeOption> = [
@@ -314,36 +315,42 @@ export const OtherEnergyOptions: Array<FuelTypeOption> = [
         startingUnit: 'lb',
         heatCapacityValue: .001194,
         value: 'District Steam (150 psig)',
-        siteToSourceMultiplier: undefined
+        siteToSourceMultiplier: undefined,
+        otherEnergyType: 'Steam'
     },
     {
         startingUnit: 'lb',
         heatCapacityValue: undefined,
         value: 'Purchased Steam',
-        siteToSourceMultiplier: 1.33
+        siteToSourceMultiplier: 1.33,
+        otherEnergyType: 'Steam'
     },
     {
         startingUnit: 'lb',
         heatCapacityValue: .012,
         value: 'Purchased Chilled Water (Absorption Chiller)',
-        siteToSourceMultiplier: 1.25
+        siteToSourceMultiplier: 1.25,
+        otherEnergyType: 'Chilled Water'
     },
     {
         startingUnit: 'lb',
         heatCapacityValue: .012,
         value: 'Purchased Chilled Water (Electric-driven Compressor)',
-        siteToSourceMultiplier: .24
+        siteToSourceMultiplier: .24,
+        otherEnergyType: 'Chilled Water'
     },
     {
         startingUnit: 'lb',
         heatCapacityValue: .012,
         value: 'Purchased Chilled Water (Engine-driven Compressor)',
-        siteToSourceMultiplier: .83
+        siteToSourceMultiplier: .83,
+        otherEnergyType: 'Chilled Water'
     },
     {
         startingUnit: 'Therms',
         heatCapacityValue: .1,
         value: 'District Hot Water',
-        siteToSourceMultiplier: undefined
+        siteToSourceMultiplier: undefined,
+        otherEnergyType: 'Chilled Water'
     }
 ]
