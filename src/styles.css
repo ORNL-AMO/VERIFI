@@ -270,6 +270,10 @@ Popups & Windows
   width: 600px;
   left: calc(50% - 300px);
 }
+.windowContentXLg {
+  width: 900px;
+  left: calc(50% - 450px);
+}
 .popup {
   border-style: solid;
   border: 1px solid #ffffff;
@@ -420,10 +424,6 @@ label .row {
   width: 68%;
   float: right;
 }
-.meterForm input {
-  width: 25.6%;
-  /*margin-right: 37px;*/
-}
 label .col input {
   width: 100%;
 }
@@ -440,12 +440,30 @@ label a {
   top: 5px;
 }
 span.unit {
-  float: right;
-  display: block;
+  /*float: right;
+  display: block;*/
   border: 1px solid #9b9b9b;
   border-left: none;
   padding: 2px 5px;
   color: #909090;
+}
+.input-group input:nth-child(3) {
+  border-left: 0px!important;
+}
+.form-control {
+  display: block;
+  width: 100%;
+  height: initial!important;
+  padding: 2px 7px!important;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #495057;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid #9c9c9c!important;
+  border-radius: 0!important;
+  transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
 }
 textarea {
   width: 100%;
@@ -480,9 +498,6 @@ input:disabled {
   right: 14px;
   color: red;
   padding: 5px 7px 0 0;
-}
-input.unitDollar {
-  width: calc(70% - 20px);
 }
 select {
   padding: 3px;
@@ -928,6 +943,7 @@ Pagination
 TO SORT
 =============================================== */
 
+/*
 .col.unitCurrency {
   width: 20px;
   max-width: 20px;
@@ -938,6 +954,10 @@ TO SORT
   max-width: 39px;
   padding: 0px;
 }
+input.unitDollar {
+  width: calc(70% - 20px);
+}
+*/
 .wizard {
   overflow: hidden;
   position: fixed;
@@ -976,9 +996,6 @@ TO SORT
 .meterData h6 {
   padding: 9px 0 0;
   margin: 0px;
-}
-.meterForm input[type="date"] {
-  width: 66%;
 }
 .importQuickView {
   width: 100%;
