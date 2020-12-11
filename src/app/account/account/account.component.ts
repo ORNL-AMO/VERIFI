@@ -134,7 +134,7 @@ export class AccountComponent implements OnInit {
     this.accountDbService.deleteById(selectedAccount.id);
 
     // Then navigate to another account
-    this.accountDbService.setSelectedAccount(1);
+    this.accountDbService.setSelectedAccount(undefined);
     this.router.navigate(['/']);
     this.loadingService.setLoadingStatus(false);
   }

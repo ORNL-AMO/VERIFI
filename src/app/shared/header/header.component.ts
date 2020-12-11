@@ -82,6 +82,7 @@ export class HeaderComponent implements OnInit {
     this.selectedAccountSub.unsubscribe();
     this.accountFacilitiesSub.unsubscribe();
     this.selectedFacilitySub.unsubscribe();
+    this.allFacilitiesSub.unsubscribe();
   }
 
   toggleFacilityMenu() {

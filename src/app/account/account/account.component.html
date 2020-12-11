@@ -106,7 +106,7 @@
 
 <div class="popup" [class.open]="showDeleteAccount">
     <div class="popup-header">Delete Account: {{accountForm.controls.name.value}}
-        <button class="item-right" (click)="cancelDelete()">x</button>
+        <button class="item-right" (click)="cancelAccountDelete()">x</button>
     </div>
     <div class="popup-body">
         <p>WARNING: By deleting this account, you are also deleting all of the data associated with it.
@@ -120,7 +120,7 @@
 
 <div class="popup" [class.open]="facilityToDelete" *ngIf="facilityToDelete">
     <div class="popup-header">Delete Facility: {{facilityToDelete.name}}
-        <button class="item-right" (click)="cancelDelete()">x</button>
+        <button class="item-right" (click)="cancelFacilityDelete()">x</button>
     </div>
     <div class="popup-body">
         <p>WARNING: By deleting this facility, you are also deleting all of the data associated with it.

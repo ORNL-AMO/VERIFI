@@ -74,7 +74,7 @@ export class UtilityMeterdbService {
     deleteAllFacilityMeters(facilityId: number): void {
         this.getAllByIndexRange('facilityId', facilityId).subscribe(facilityMeterEntries => {
             for(let i=0; i<facilityMeterEntries.length; i++) {
-                this.dbService.delete('utilityMeter', facilityMeterEntries[i]['id']);
+                this.dbService.delete('utilityMeter', facilityMeterEntries[i].id);
             }
         });
     }
@@ -82,7 +82,7 @@ export class UtilityMeterdbService {
     deleteAllAccountMeters(accountId: number): void {
         this.getAllByIndexRange('accountId', accountId).subscribe(accountMeterEntries => {
             for(let i=0; i<accountMeterEntries.length; i++) {
-                this.dbService.delete('utilityMeter', accountMeterEntries[i]['id']);
+                this.dbService.delete('utilityMeter', accountMeterEntries[i].id);
             }
         });
     }

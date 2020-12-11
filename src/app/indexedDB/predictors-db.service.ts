@@ -85,7 +85,7 @@ export class PredictordbService {
     deleteAllFacilityPredictors(facilityId: number): void {
         this.getAllByIndexRange('facilityId', facilityId).subscribe(facilityPredictorEntries => {
             for(let i=0; i<facilityPredictorEntries.length; i++) {
-                this.dbService.delete('predictors', facilityPredictorEntries[i]['id']);
+                this.dbService.delete('predictors', facilityPredictorEntries[i].id);
             }
         });
     }
@@ -93,7 +93,7 @@ export class PredictordbService {
     deleteAllAccountPredictors(accountId: number): void {
         this.getAllByIndexRange('accountId', accountId).subscribe(accountPredictorEntries => {
             for(let i=0; i<accountPredictorEntries.length; i++) {
-                this.dbService.delete('predictors', accountPredictorEntries[i]['id']);
+                this.dbService.delete('predictors', accountPredictorEntries[i].id);
             }
         });
     }
