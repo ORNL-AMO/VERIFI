@@ -2,29 +2,34 @@
 <p class="bold">General Information</p>
 <form class="meterForm" [formGroup]="meterDataForm">
 
-    <label>Meter Read Date
-        <input type="date" formControlName="readDate">
-    </label><br>
+    <label for="readDate">Meter Read Date</label>
+    <div class="input-group mb-3">
+        <input id="readDate" class="form-control" type="date" formControlName="readDate">
+    </div>
 
-    <label>Total Energy Use
-        <span class="unit">$</span>
-        <input type="number" formControlName="totalEnergyUse">
-    </label><br>
+    <label for="totalEnergyUse">Total Energy Use</label>
+    <div class="input-group mb-3">
+        <input id="totalEnergyUse" class="form-control" type="number" formControlName="totalEnergyUse">
+        <span class="unit">kWh</span>
+    </div>
 
-    <label>Commodity Charge
+    <label for="commodityCharge">Commodity Charge</label>
+    <div class="input-group mb-3">
+        <input id="commodityCharge" class="form-control" type="number" formControlName="commodityCharge">
         <span class="unit">$</span>
-        <input type="number" formControlName="commodityCharge">
-    </label><br>
+    </div>
 
-    <label>Delivery Charges
+    <label for="deliveryCharge">Delivery Charges</label>
+    <div class="input-group mb-3">
+        <input id="deliveryCharge" class="form-control" type="number" formControlName="deliveryCharge">
         <span class="unit">$</span>
-        <input type="number" formControlName="deliveryCharge">
-    </label><br>
+    </div>
 
-    <label>Other Charges
+    <label for="otherCharge">Other Charges</label>
+    <div class="input-group mb-3">
+        <input id="otherCharge" class="form-control" type="number" formControlName="otherCharge">
         <span class="unit">$</span>
-        <input type="number" formControlName="otherCharge">
-    </label><br>
+    </div>
 </form>
 
 <hr>
