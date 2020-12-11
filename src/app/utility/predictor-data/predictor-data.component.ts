@@ -25,6 +25,7 @@ export class PredictorDataComponent implements OnInit {
   predictorEntryToEdit: IdbPredictorEntry;
   showPredictorMenu: boolean = false;
   showEditPredictors: boolean = false;
+  showImportPredictors: boolean = false;
   constructor(private predictorsDbService: PredictordbService) { }
 
   ngOnInit(): void {
@@ -91,7 +92,38 @@ export class PredictorDataComponent implements OnInit {
   }
 
   predictorExport() {
+    const replacer = (key, value) => value === null ? '' : value; // specify how you want to handle null values here
+    const header = this.facilityPredictors.map(predictor => { return predictor.name });
 
+    header.unshift('Month/Year');
+    let csvData: Array<string> = new Array();
+    this.facilityPredictorEntries.forEach(entry => {
+      let dataRow: Array<any> = new Array();
+      let predictorVals: Array<number> = entry.predictors.map(predictor => { return predictor.amount });
+      dataRow = dataRow.concat(predictorVals);
+      let entryDate: Date = new Date(entry.date);
+      dataRow.unshift((entryDate.getMonth() + 1) + '/' + entryDate.getFullYear());
+      csvData.push(JSON.stringify(dataRow, replacer));
+    });
+
+    csvData = csvData.map(dataRow => {
+      dataRow = dataRow.replace(/\\r/, '');
+      dataRow = dataRow.replace('[', '');
+      dataRow = dataRow.replace(']', '');
+      return dataRow;
+    });
+    csvData.unshift(header.join(','));
+    let csvBlob: BlobPart = csvData.join('\r\n');
+
+    //Download the file as CSV
+    var downloadLink = document.createElement("a");
+    var blob = new Blob(["\ufeff", csvBlob]);
+    var url = URL.createObjectURL(blob);
+    downloadLink.href = url;
+    downloadLink.download = "VerifiPredictorDump.csv";
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
   }
 
   togglePredictorMenu() {
@@ -105,5 +137,13 @@ export class PredictorDataComponent implements OnInit {
   closeEditPredictors() {
     this.showEditPredictors = false;
     this.showPredictorMenu = false;
+  }
+
+  openImportPredictors() {
+    this.showImportPredictors = true;
+  }
+
+  closeImportPredictors() {
+    this.showImportPredictors = false;
   }
 }
