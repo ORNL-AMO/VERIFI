@@ -54,7 +54,9 @@
         <td>{{meter.location}}</td>
         <td>{{meter.supplier}}</td>
         <td>{{meter.notes}}</td>
-        <td>{{meter.startingUnit}}</td>
+        <td>
+            <span [innerHTML]="meter.startingUnit | settingsLabel"></span>
+        </td>
         <td>{{meter.heatCapacity}}</td>
         <td>{{meter.siteToSource}}</td>
         <td (click)="$event.stopPropagation();">

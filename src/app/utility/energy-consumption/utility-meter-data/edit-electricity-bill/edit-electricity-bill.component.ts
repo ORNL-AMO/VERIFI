@@ -24,10 +24,12 @@ export class EditElectricityBillComponent implements OnInit {
   meterDataForm: FormGroup;
   electricityDataFilters: Array<ElectricityDataFilter>;
   electricityDataFiltersSub: Subscription;
+  selectedFacility: IdbFacility;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private utilityMeterDataService: UtilityMeterDataService,
     private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
+    this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
     this.meterDataForm = this.utilityMeterDataService.getElectricityMeterDataForm(this.editMeterData);
     this.electricityDataFiltersSub = this.utilityMeterDataService.electricityInputFilters.subscribe(dataFilters => {
       this.electricityDataFilters = dataFilters;

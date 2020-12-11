@@ -9,32 +9,32 @@
   <div class="row">
     <div class="col">
       <label for="readDate">Meter Read Date</label>
-      <div class="input-group mb-3"> 
+      <div class="input-group mb-3">
         <input id="readDate" class="form-control" type="date" formControlName="readDate" required>
       </div>
 
       <label for="totalEnergyUse">Total Energy Use</label>
       <div class="input-group mb-3">
         <input id="totalEnergyUse" class="form-control" type="number" formControlName="totalEnergyUse" required>
-        <span class="unit">kWh</span>
+        <span class="unit" [innerHTML]="selectedFacility.energyUnit | settingsLabel"></span>
       </div>
     </div>
 
     <div class="col">
       <label for="totalDemand">Total Demand</label>
-      <div class="input-group mb-3"> 
-        <input id="totalDemand" class="form-control"type="number" formControlName="totalDemand" required>
+      <div class="input-group mb-3">
+        <input id="totalDemand" class="form-control" type="number" formControlName="totalDemand" required>
         <span class="unit">$</span>
       </div>
 
       <label for="totalCost">Total Cost</label>
-      <div class="input-group mb-3">  
+      <div class="input-group mb-3">
         <input id="totalCost" class="form-control" type="number" formControlName="totalCost" required>
         <span class="unit">$</span>
       </div>
 
       <label for="checked" hidden>Checked</label>
-      <div hidden class="input-group mb-3">   
+      <div hidden class="input-group mb-3">
         <input id="checked" class="form-control" type="checkbox" formControlName="checked" required>
         <span class="unit">$</span>
       </div>
@@ -43,54 +43,76 @@
 
   <div class="row">
     <div class="col">
-      <div [hidden]="!electricityDataFilters[1].filter && !electricityDataFilters[2].filter && !electricityDataFilters[3].filter && !electricityDataFilters[4].filter">
+      <div
+        [hidden]="!electricityDataFilters[1].filter && !electricityDataFilters[2].filter && !electricityDataFilters[3].filter && !electricityDataFilters[4].filter">
         <p class="bold subheader">Supply Charges</p>
-        <label for="supplyBlockAmount" [hidden]="!electricityDataFilters[1].filter && !electricityDataFilters[2].filter">Block Rates</label>
-          <div class="input-group mb-3">
-            <input id="supplyBlockAmount" [hidden]="!electricityDataFilters[1].filter" class="form-control" type="number" formControlName="supplyBlockAmount">
-            <span [hidden]="!electricityDataFilters[1].filter" class="unit">kWh</span>
-            <input id="supplyBlockCharge" [hidden]="!electricityDataFilters[2].filter" class="form-control" type="number" formControlName="supplyBlockCharge">
-            <span [hidden]="!electricityDataFilters[2].filter" class="unit">$</span>
-          </div>
+        <label for="supplyBlockAmount"
+          [hidden]="!electricityDataFilters[1].filter && !electricityDataFilters[2].filter">Block Rates</label>
+        <div class="input-group mb-3">
+          <input id="supplyBlockAmount" [hidden]="!electricityDataFilters[1].filter" class="form-control" type="number"
+            formControlName="supplyBlockAmount">
+          <span [hidden]="!electricityDataFilters[1].filter" class="unit"
+            [innerHTML]="selectedFacility.energyUnit | settingsLabel"></span>
+          <input id="supplyBlockCharge" [hidden]="!electricityDataFilters[2].filter" class="form-control" type="number"
+            formControlName="supplyBlockCharge">
+          <span [hidden]="!electricityDataFilters[2].filter" class="unit">$</span>
+        </div>
 
 
-        <label for="flatRateAmount" [hidden]="!electricityDataFilters[3].filter && !electricityDataFilters[4].filter">Flat Rates</label>
-          <div class="input-group mb-3">
-            <input id="flatRateAmount" [hidden]="!electricityDataFilters[3].filter" class="form-control" type="number" formControlName="flatRateAmount">
-            <span [hidden]="!electricityDataFilters[3].filter" class="unit">kWh</span>
-            <input id="flatRateCharge" [hidden]="!electricityDataFilters[4].filter" class="form-control" type="number" formControlName="flatRateCharge">
-            <span [hidden]="!electricityDataFilters[4].filter" class="unit">$</span>
-          </div>
+        <label for="flatRateAmount"
+          [hidden]="!electricityDataFilters[3].filter && !electricityDataFilters[4].filter">Flat Rates</label>
+        <div class="input-group mb-3">
+          <input id="flatRateAmount" [hidden]="!electricityDataFilters[3].filter" class="form-control" type="number"
+            formControlName="flatRateAmount">
+          <span [hidden]="!electricityDataFilters[3].filter" class="unit"
+            [innerHTML]="selectedFacility.energyUnit | settingsLabel"></span>
+          <input id="flatRateCharge" [hidden]="!electricityDataFilters[4].filter" class="form-control" type="number"
+            formControlName="flatRateCharge">
+          <span [hidden]="!electricityDataFilters[4].filter" class="unit">$</span>
+        </div>
 
       </div>
     </div>
 
     <div class="col">
-      <div [hidden]="!electricityDataFilters[5].filter && !electricityDataFilters[6].filter && !electricityDataFilters[7].filter && !electricityDataFilters[8].filter && !electricityDataFilters[9].filter && !electricityDataFilters[10].filter">
+      <div
+        [hidden]="!electricityDataFilters[5].filter && !electricityDataFilters[6].filter && !electricityDataFilters[7].filter && !electricityDataFilters[8].filter && !electricityDataFilters[9].filter && !electricityDataFilters[10].filter">
         <p class="bold subheader">Demand Charge</p>
-        <label for="peakAmount" [hidden]="!electricityDataFilters[5].filter && !electricityDataFilters[6].filter">On-Peak Demand</label>
-          <div class="input-group mb-3">
-            <input id="peakAmount" [hidden]="!electricityDataFilters[5].filter" class="form-control" type="number" formControlName="peakAmount">
-            <span [hidden]="!electricityDataFilters[5].filter" class="unit">kWh</span>
-            <input id="peakCharge" [hidden]="!electricityDataFilters[6].filter" class="form-control" type="number" formControlName="peakCharge">
-            <span [hidden]="!electricityDataFilters[6].filter" class="unit">$</span>
-          </div>
+        <label for="peakAmount"
+          [hidden]="!electricityDataFilters[5].filter && !electricityDataFilters[6].filter">On-Peak Demand</label>
+        <div class="input-group mb-3">
+          <input id="peakAmount" [hidden]="!electricityDataFilters[5].filter" class="form-control" type="number"
+            formControlName="peakAmount">
+          <span [hidden]="!electricityDataFilters[5].filter" class="unit"
+            [innerHTML]="selectedFacility.energyUnit | settingsLabel"></span>
+          <input id="peakCharge" [hidden]="!electricityDataFilters[6].filter" class="form-control" type="number"
+            formControlName="peakCharge">
+          <span [hidden]="!electricityDataFilters[6].filter" class="unit">$</span>
+        </div>
 
-        <label for="offPeakAmount" [hidden]="!electricityDataFilters[7].filter && !electricityDataFilters[8].filter">Off-Peak Demand</label>
-          <div class="input-group mb-3">
-            <input id="offPeakAmount" [hidden]="!electricityDataFilters[7].filter" class="form-control" type="number" formControlName="offPeakAmount">
-            <span [hidden]="!electricityDataFilters[7].filter" class="unit">kWh</span>
-            <input id="offPeakCharge" [hidden]="!electricityDataFilters[8].filter" class="form-control" type="number" formControlName="offPeakCharge">
-            <span [hidden]="!electricityDataFilters[8].filter" class="unit">$</span>
-          </div>
+        <label for="offPeakAmount"
+          [hidden]="!electricityDataFilters[7].filter && !electricityDataFilters[8].filter">Off-Peak Demand</label>
+        <div class="input-group mb-3">
+          <input id="offPeakAmount" [hidden]="!electricityDataFilters[7].filter" class="form-control" type="number"
+            formControlName="offPeakAmount">
+          <span [hidden]="!electricityDataFilters[7].filter" class="unit"
+            [innerHTML]="selectedFacility.energyUnit | settingsLabel"></span>
+          <input id="offPeakCharge" [hidden]="!electricityDataFilters[8].filter" class="form-control" type="number"
+            formControlName="offPeakCharge">
+          <span [hidden]="!electricityDataFilters[8].filter" class="unit">$</span>
+        </div>
 
-        <label for="demandBlockAmount" [hidden]="!electricityDataFilters[9].filter && !electricityDataFilters[10].filter">Block Rates</label>
-          <div class="input-group mb-3">
-            <input id="demandBlockAmount" [hidden]="!electricityDataFilters[9].filter" class="form-control" type="number" formControlName="demandBlockAmount">
-            <span [hidden]="!electricityDataFilters[9].filter" class="unit">kWh</span>
-            <input id="demandBlockCharge" [hidden]="!electricityDataFilters[10].filter" class="form-control" type="number" formControlName="demandBlockCharge">
-            <span [hidden]="!electricityDataFilters[10].filter" class="unit">$</span>
-          </div>
+        <label for="demandBlockAmount"
+          [hidden]="!electricityDataFilters[9].filter && !electricityDataFilters[10].filter">Block Rates</label>
+        <div class="input-group mb-3">
+          <input id="demandBlockAmount" [hidden]="!electricityDataFilters[9].filter" class="form-control" type="number"
+            formControlName="demandBlockAmount">
+          <span [hidden]="!electricityDataFilters[9].filter" class="unit"
+            [innerHTML]="selectedFacility.energyUnit | settingsLabel"></span>
+          <input id="demandBlockCharge" [hidden]="!electricityDataFilters[10].filter" class="form-control" type="number"
+            formControlName="demandBlockCharge">
+          <span [hidden]="!electricityDataFilters[10].filter" class="unit">$</span>
+        </div>
       </div>
     </div>
     <br>
@@ -98,13 +120,15 @@
   </div>
 
 
-  <p class="bold" [hidden]="!electricityDataFilters[15].filter && !electricityDataFilters[16].filter && !electricityDataFilters[17].filter && !electricityDataFilters[18].filter">
+  <p class="bold"
+    [hidden]="!electricityDataFilters[15].filter && !electricityDataFilters[16].filter && !electricityDataFilters[17].filter && !electricityDataFilters[18].filter">
     Tax and other
   </p>
 
   <div class="row">
     <div class="col">
-      <label for="businessCharge" [hidden]="!electricityDataFilters[15].filter">Local Business and Occupation Charge</label>
+      <label for="businessCharge" [hidden]="!electricityDataFilters[15].filter">Local Business and Occupation
+        Charge</label>
       <div [hidden]="!electricityDataFilters[15].filter" class="input-group mb-3">
         <input id="businessCharge" class="form-control" type="number" formControlName="businessCharge">
         <span class="unit">$</span>
@@ -136,9 +160,11 @@
     </div>
 
     <div class="col">
-      <label for="generationTransmissionCharge" [hidden]="!electricityDataFilters[11].filter">Generation and Transmission charges</label>
+      <label for="generationTransmissionCharge" [hidden]="!electricityDataFilters[11].filter">Generation and
+        Transmission charges</label>
       <div [hidden]="!electricityDataFilters[11].filter" class="input-group mb-3">
-        <input id="generationTransmissionCharge" class="form-control" type="number" formControlName="generationTransmissionCharge">
+        <input id="generationTransmissionCharge" class="form-control" type="number"
+          formControlName="generationTransmissionCharge">
         <span class="unit">$</span>
       </div>
 

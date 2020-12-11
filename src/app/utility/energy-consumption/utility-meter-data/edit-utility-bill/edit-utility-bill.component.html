@@ -1,4 +1,4 @@
-<h4>Edit Natural Gas Bill</h4>
+<h4>Edit {{source}} Bill</h4>
 <p class="bold">General Information</p>
 <form class="meterForm" [formGroup]="meterDataForm">
 
@@ -10,7 +10,7 @@
     <label for="totalEnergyUse">Total Energy Use</label>
     <div class="input-group mb-3">
         <input id="totalEnergyUse" class="form-control" type="number" formControlName="totalEnergyUse">
-        <span class="unit">kWh</span>
+        <span class="unit" [innerHTML]="energyUnit | settingsLabel"></span>
     </div>
 
     <label for="commodityCharge">Commodity Charge</label>

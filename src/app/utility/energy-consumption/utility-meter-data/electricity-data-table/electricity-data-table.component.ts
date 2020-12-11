@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { ElectricityDataFilter } from 'src/app/models/electricityFilter';
 import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 import { UtilityMeterDataService } from '../utility-meter-data.service';
 
 @Component({
@@ -27,9 +28,11 @@ export class ElectricityDataTableComponent implements OnInit {
   electricityDataFilters: Array<ElectricityDataFilter>;
   electricityDataFilterSub: Subscription;
   allChecked: boolean;
-  constructor(private utilityMeterDataService: UtilityMeterDataService) { }
+  energyUnit: string;
+  constructor(private utilityMeterDataService: UtilityMeterDataService, private energyUnitsHelperService: EnergyUnitsHelperService) { }
 
   ngOnInit(): void {
+    this.energyUnit = this.energyUnitsHelperService.getEnergyUnit(this.meterListItem.idbMeter.id);
     if (this.meterListItem.meterDataItems.length != 0) {
       let hasFalseChecked: IdbUtilityMeterData = this.meterListItem.meterDataItems.find(meterDataItem => { return meterDataItem.checked == false });
       this.allChecked = (hasFalseChecked == undefined);

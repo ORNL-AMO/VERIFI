@@ -1,7 +1,11 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormGroup } from '@angular/forms';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
+import { FuelTypeOption, OtherEnergyOptions } from '../../energy-source/edit-meter-form/editMeterOptions';
 import { UtilityMeterDataService } from '../utility-meter-data.service';
 
 @Component({
@@ -19,9 +23,17 @@ export class EditUtilityBillComponent implements OnInit {
 
   meterDataForm: FormGroup;
 
-  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private utilityMeterDataService: UtilityMeterDataService) { }
+  energyUnit: string;
+  source: string;
+  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private utilityMeterDataService: UtilityMeterDataService, private utilityMeterDbService: UtilityMeterdbService,
+    private energyUnitsHelperService: EnergyUnitsHelperService) { }
 
   ngOnInit(): void {
+    this.energyUnit = this.energyUnitsHelperService.getEnergyUnit(this.editMeterData.meterId);
+    let facilityMeter: IdbUtilityMeter = this.utilityMeterDbService.getFacilityMeterById(this.editMeterData.meterId);
+    if (facilityMeter) {
+      this.source = facilityMeter.source;
+    }
     this.meterDataForm = this.utilityMeterDataService.getGeneralMeterDataForm(this.editMeterData);
   }
 

@@ -45,6 +45,7 @@ import { CalanderizationComponent } from './utility/calanderization/calanderizat
 import { EditFacilityComponent } from './account/account/edit-facility/edit-facility.component';
 import { ImportPredictorsComponent } from './utility/predictor-data/import-predictors/import-predictors.component';
 import { EnergyUnitDropdownComponent } from './utility/meter-grouping/energy-unit-dropdown/energy-unit-dropdown.component';
+import { SettingsLabelPipe } from './shared/helper-pipes/settings-label.pipe';
 
 @NgModule({
   declarations: [
@@ -78,7 +79,8 @@ import { EnergyUnitDropdownComponent } from './utility/meter-grouping/energy-uni
     CalanderizationComponent,
     EditFacilityComponent,
     ImportPredictorsComponent,
-    EnergyUnitDropdownComponent
+    EnergyUnitDropdownComponent,
+    SettingsLabelPipe
   ],
   imports: [
     BrowserModule,
