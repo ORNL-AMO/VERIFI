@@ -1,6 +1,5 @@
 import { Component, OnInit, Renderer2 } from '@angular/core';
 import { AccountdbService } from "../indexedDB/account-db.service";
-import { UtilityService } from "../utility/utility.service";
 import { FacilitydbService } from '../indexedDB/facility-db.service';
 import { UtilityMeterdbService } from '../indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from '../indexedDB/utilityMeterData-db.service';
@@ -32,7 +31,6 @@ export class DashboardComponent implements OnInit {
     public facilitydbService: FacilitydbService,
     public utilityMeterdbService: UtilityMeterdbService,
     public utilityMeterDatadbService: UtilityMeterDatadbService,
-    public utilityService: UtilityService
   ) {
     this.renderer.addClass(document.body, 'open');
   }

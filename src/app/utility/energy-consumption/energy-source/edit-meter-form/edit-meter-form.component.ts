@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbUtilityMeter } from 'src/app/models/idb';
-
+import { GasOptions, LiquidOptions, SolidOptions, OtherEnergyOptions } from './fuelOptions';
 @Component({
   selector: 'app-edit-meter-form',
   templateUrl: './edit-meter-form.component.html',
@@ -16,6 +16,7 @@ export class EditMeterFormComponent implements OnInit {
 
   meterForm: FormGroup;
   displayPhaseAndFuel: boolean;
+  energyOptions: Array<string>;
   constructor(private formBuilder: FormBuilder, private utilityMeterDbService: UtilityMeterdbService) { }
 
   ngOnInit(): void {
@@ -40,22 +41,12 @@ export class EditMeterFormComponent implements OnInit {
       fuel: [this.editMeter.fuel, Validators.required],
       startingUnit: [this.editMeter.startingUnit, Validators.required]
     });
+    this.setSourceValidation();
+    this.setEnergyOptions();
   }
 
 
   saveChanges() {
-    //TODO: Decide if we want to add unsorted group here of in group page for all meters without group
-    // If group is not defined, get "Unsorted" group's id/
-    // The Unsorted group can be altered/deleted by the user so the id can change.
-    if (this.meterForm.value.group == '') {
-      //this.meterForm.value.group = await this.groupCheckExistence("Energy", "Unsorted");
-    }
-    //don't think group type is used
-    // this.meterForm.controls['groupType'].setValue("Energy");
-
-    //TODO: idk about energyFinalUnit
-    // this.meterForm.controls['finalUnit'].setValue(this.energyFinalUnit);
-
     this.utilityMeterDbService.update(this.meterForm.value);
     this.cancel();
   }
@@ -65,7 +56,7 @@ export class EditMeterFormComponent implements OnInit {
   }
 
   setSourceValidation() {
-    if (this.meterForm.controls.source.value == 'Electricity' || this.meterForm.controls.source.value == 'Natural Gas') {
+    if (this.meterForm.controls.source.value == 'Electricity' || this.meterForm.controls.source.value == 'Natural Gas' || this.meterForm.controls.source.value == 'Other Utility') {
       this.displayPhaseAndFuel = false;
       this.meterForm.controls.phase.setValidators([]);
       this.meterForm.controls.fuel.setValidators([]);
@@ -76,5 +67,20 @@ export class EditMeterFormComponent implements OnInit {
     }
     this.meterForm.controls.phase.updateValueAndValidity();
     this.meterForm.controls.fuel.updateValueAndValidity();
+  }
+
+  setEnergyOptions() {
+    if (this.meterForm.controls.source.value == 'Other Fuels') {
+      if (this.meterForm.controls.phase.value == 'Solid') {
+        this.energyOptions = SolidOptions;
+      } else if (this.meterForm.controls.phase.value == 'Liquid') {
+        this.energyOptions = LiquidOptions;
+      } else if (this.meterForm.controls.phase.value == 'Gas') {
+        this.energyOptions = GasOptions;
+      }
+    } else if (this.meterForm.controls.source.value == 'Other Energy' || this.meterForm.controls.source.value == 'Water' ||
+      this.meterForm.controls.source.value == 'Waste Water') {
+      this.energyOptions = OtherEnergyOptions;
+    }
   }
 }

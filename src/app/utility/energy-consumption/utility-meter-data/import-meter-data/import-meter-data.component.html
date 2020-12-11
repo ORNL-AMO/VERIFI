@@ -59,10 +59,10 @@
         </tr>
     </table>
 </div>
-<p class="alert alert-danger" [hidden]="importError == ''">
+<p class="alert alert-danger" [hidden]="importError ==  undefined">
     {{importError}}</p>
 
 <div class="saveCancel item-right">
     <button class="btn btn-secondary" (click)="resetImport()">Cancel</button>
-    <button class="btn btn-primary" (click)="meterAddCSV()" [disabled]="importError != ''">Submit</button>
+    <button class="btn btn-primary" (click)="meterAddCSV()" [disabled]="importError != undefined">Submit</button>
 </div>
