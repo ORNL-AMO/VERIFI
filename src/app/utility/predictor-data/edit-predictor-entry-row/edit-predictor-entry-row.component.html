@@ -2,16 +2,18 @@
 <p><span class="red">*</span> Dates must be unique.</p>
 <br>
 <form>
-    <label>
-        Date
-        <input type="month" [ngModel]="predictorEntryCopy.date | date:'yyyy-MM'" (ngModelChange)="setDate($event)"
-            name="date">
-    </label>
+    <label for="predictorDate">Date</label>
+    <div class="input-group mb-3">
+        <input id="predictorDate" class="form-control" type="month" [ngModel]="predictorEntryCopy.date | date:'yyyy-MM'" (ngModelChange)="setDate($event)" name="date">
+    </div>
 
-    <label *ngFor="let predictor of predictorEntryCopy.predictors">
-        {{predictor.name}}
-        <input type="number" [(ngModel)]="predictor.amount" name="{{'predictorAmount'+predictor.id}}">
-    </label>
+    <div *ngFor="let predictor of predictorEntryCopy.predictors">
+        <label [for]="'predictor-' + predictor.id">{{predictor.name}}</label>
+        <div class="input-group mb-3">
+            <input [id]="'predictor-' + predictor.id" class="form-control" type="number" [(ngModel)]="predictor.amount" name="{{'predictorAmount'+predictor.id}}">
+            <span class="unit">{{predictor.unit}}</span>
+        </div>
+    </div>
 </form>
 
 <div class="saveCancel item-right">
