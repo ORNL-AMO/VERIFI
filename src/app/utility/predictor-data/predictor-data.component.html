@@ -8,6 +8,8 @@
         <div class="importExport item-right">
             <!-- <button class="btn btn-small btn-outline" (click)="importWindow = true">Import</button>
             <button class="btn btn-small btn-outline" (click)="predictorExport()">Export</button> -->
+            <button class="btn btn-small btn-outline" (click)="openImportPredictors()">Import</button>
+            <button class="btn btn-small btn-outline" (click)="predictorExport()">Export</button>
         </div>
         <!--Items Per Page-->
         <div class="items-per-page item-right">
@@ -106,38 +108,11 @@
         <button class="btn btn-danger" (click)="confirmDeletePredictorEntry()">Delete</button>
     </div>
 </div>
-<!--
-<div class="window" [class.open]="importWindow == true">
+
+<div class="window" [class.open]="showImportPredictors">
     <div class="windowOverlay"></div>
     <div class="windowContent">
-        <h4>Import Predictors</h4>
-        <br>
-        <form>
-            <input type="file" #inputFile accept=".csv" (change)="predictorImport($event.target.files)">
-        </form>
-        <br>
-        <div class="importQuickView" [hidden]="quickView ==''">
-            <p class="bold">Quick View</p>
-            <table>
-                <tr>
-                    <th>Predictor Name</th>
-                    <th>Units</th>
-                    <th>Date</th>
-                    <th>Amount</th>
-                </tr>
-                <tr *ngFor="let quickViews of quickView">
-                    <td>{{quickViews.name}}</td>
-                    <td>{{quickViews.unit}}</td>
-                    <td>{{quickViews.date}}</td>
-                    <td>{{quickViews.amount}}</td>
-                </tr>
-            </table>
-        </div>
-        <p class="alert alert-danger" [hidden]="importError == ''">{{importError}}</p>
-
-        <div class="saveCancel item-right">
-            <button class="btn btn-primary" (click)="resetImport(); importWindow = !importWindow">Cancel</button>
-            <button class="btn btn-primary" (click)="predictorAddCSV()" [disabled]="importError != ''">Submit</button>
-        </div>
+        <app-import-predictors *ngIf="showImportPredictors" (emitClose)="closeImportPredictors()">
+        </app-import-predictors>
     </div>
-</div> -->
+</div>
