@@ -62,24 +62,32 @@
                             </select>
                         </label>
                         <br>
-                        <label>Volume Unit
-                            <select formControlName="volumeUnit" (change)="onFormChange()">
-                                <option *ngFor="let volumeUnitOption of volumeUnitOptions"
+                        <label>Liquid Volume Unit
+                            <select formControlName="volumeLiquidUnit" (change)="onFormChange()">
+                                <option *ngFor="let volumeUnitOption of volumeLiquidOptions"
                                     [ngValue]="volumeUnitOption.value"><span
                                         [innerHTML]="volumeUnitOption.display"></span></option>
                             </select>
                         </label>
                         <br>
+                        <label>Gas Volume Unit
+                            <select formControlName="volumeGasUnit" (change)="onFormChange()">
+                                <option *ngFor="let volumeUnitOption of volumeGasOptions"
+                                    [ngValue]="volumeUnitOption.value"><span
+                                        [innerHTML]="volumeUnitOption.display"></span></option>
+                            </select>
+                        </label>
+                        <!-- <br>
                         <label>Size Unit
                             <select formControlName="sizeUnit" (change)="onFormChange()">
                                 <option *ngFor="let sizeUnitOption of sizeUnitOptions" [ngValue]="sizeUnitOption.value">
                                     <span [innerHTML]="sizeUnitOption.display"></span></option>
                             </select>
-                        </label>
+                        </label> -->
                         <br>
-                        <label>Mass Unit
-                            <select formControlName="massUnit" (change)="onFormChange()">
-                                <option *ngFor="let massUnitOption of massUnitOptions" [ngValue]="massUnitOption.value">
+                        <label>Solid Mass Unit
+                            <select formControlName="massSolidUnit" (change)="onFormChange()">
+                                <option *ngFor="let massUnitOption of solidMassOptions" [ngValue]="massUnitOption.value">
                                     <span [innerHTML]="massUnitOption.display"></span></option>
                             </select>
                         </label>

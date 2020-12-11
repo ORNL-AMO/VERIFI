@@ -16,11 +16,6 @@ export const EnergyUnitOptions: Array<UnitOption> = [
         unitsOfMeasure: 'Imperial'
     },
     {
-        display: 'Joules (J)',
-        value: 'J',
-        unitsOfMeasure: 'Imperial'
-    },
-    {
         display: 'Kilojoules (kJ)',
         value: 'kJ',
         unitsOfMeasure: 'Imperial'
@@ -36,37 +31,37 @@ export const EnergyUnitOptions: Array<UnitOption> = [
         unitsOfMeasure: 'Imperial'
     },
     {
-        display: 'British Thermal Units (Btu)',
-        value: 'Btu',
+        display: 'Therms',
+        value: 'Therms',
+        unitsOfMeasure: 'Metric'
+    },
+    {
+        display: 'Dekatherms (DTherms)',
+        value: 'Therms',
         unitsOfMeasure: 'Metric'
     },
     {
         display: 'Million British Thermal Units (MMBtu)',
         value: 'MMBtu',
         unitsOfMeasure: 'Metric'
+    },
+    {
+        display: 'Kilocalorie (kcal)',
+        value: 'kcal',
+        unitsOfMeasure: 'Imperial'
     }
 ];
 
 
-export const VolumeUnitOptions: Array<UnitOption> = [
+export const VolumeLiquidOptions: Array<UnitOption> = [
     {
-        display: 'Standard Cubic Feet (SCF)',
+        display: 'Feet Cubed (ft&#x00B3;)',
         value: 'ft3',
-        unitsOfMeasure: 'Imperial'
-    },
-    {
-        display: 'Thousand Standard Cubic Feet (kSCF)',
-        value: 'kSCF',
         unitsOfMeasure: 'Imperial'
     },
     {
         display: 'Gallon (gal)',
         value: 'gal',
-        unitsOfMeasure: 'Imperial'
-    },
-    {
-        display: 'Thousand U.S. Gallos (kgal)',
-        value: 'kgal',
         unitsOfMeasure: 'Imperial'
     },
     {
@@ -77,6 +72,19 @@ export const VolumeUnitOptions: Array<UnitOption> = [
     {
         display: 'Liters (L)',
         value: 'L',
+        unitsOfMeasure: 'Metric'
+    }
+]
+
+export const VolumeGasOptions: Array<UnitOption> = [
+    {
+        display: 'Standard Cubic Feet (SCF)',
+        value: 'ft3',
+        unitsOfMeasure: 'Imperial'
+    },
+    {
+        display: 'Normal Meter Cubed (m&#x00B3;)',
+        value: 'm3',
         unitsOfMeasure: 'Metric'
     }
 ]
@@ -101,7 +109,7 @@ export const SizeUnitOptions: Array<UnitOption> = [
 ]
 
 
-export const MassUnitOptions: Array<UnitOption> = [
+export const SolidMassOptions: Array<UnitOption> = [
     {
         display: 'Pounds (lb)',
         value: 'lb',
@@ -116,5 +124,10 @@ export const MassUnitOptions: Array<UnitOption> = [
         display: 'Tons',
         value: 'ton',
         unitsOfMeasure: 'Imperial'
+    },
+    {
+        display: 'Metric Tonnes (tonnes)',
+        value: 'tonne',
+        unitsOfMeasure: 'Metric'
     }
 ]

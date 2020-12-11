@@ -29,9 +29,10 @@ export interface IdbFacility {
     //units
     unitsOfMeasure: string,
     energyUnit: string,
-    volumeUnit: string,
-    sizeUnit: string,
-    massUnit: string
+    massSolidUnit: string,
+    volumeLiquidUnit: string,
+    volumeGasUnit: string,
+    chilledWaterUnit: string
 
     tableElectricityFilters?: Array<ElectricityDataFilter>,
     electricityInputFilters?: Array<ElectricityDataFilter>

@@ -147,9 +147,10 @@ export class FacilitydbService {
             // id: undefined
             unitsOfMeasure: 'Imperial',
             energyUnit: 'kWh',
-            volumeUnit: 'SCF',
-            sizeUnit: 'ft',
-            massUnit: 'lb'
+            volumeLiquidUnit: 'SCF',
+            volumeGasUnit: 'SCF',
+            chilledWaterUnit: undefined,
+            massSolidUnit: 'lb'
 
         }
     }
@@ -173,9 +174,10 @@ export const TestFacilityData: Array<IdbFacility> = [
         img: 'https://placthold.it/50x50',
         unitsOfMeasure: 'Imperial',
         energyUnit: 'kWh',
-        volumeUnit: 'SCF',
-        sizeUnit: 'ft',
-        massUnit: 'lb'
+        volumeLiquidUnit: 'SCF',
+        volumeGasUnit: 'SCF',
+        chilledWaterUnit: undefined,
+        massSolidUnit: 'lb'
     },
     {
         // id: undefined,
@@ -193,9 +195,10 @@ export const TestFacilityData: Array<IdbFacility> = [
         img: 'https://placthold.it/50x50',
         unitsOfMeasure: 'Imperial',
         energyUnit: 'kWh',
-        volumeUnit: 'SCF',
-        sizeUnit: 'ft',
-        massUnit: 'lb'
+        volumeLiquidUnit: 'SCF',
+        volumeGasUnit: 'SCF',
+        chilledWaterUnit: undefined,
+        massSolidUnit: 'lb'
     },
     {
         // id: undefined,
@@ -213,9 +216,10 @@ export const TestFacilityData: Array<IdbFacility> = [
         img: 'https://placthold.it/50x50',
         unitsOfMeasure: 'Imperial',
         energyUnit: 'kWh',
-        volumeUnit: 'SCF',
-        sizeUnit: 'ft',
-        massUnit: 'lb'
+        volumeLiquidUnit: 'SCF',
+        volumeGasUnit: 'SCF',
+        chilledWaterUnit: undefined,
+        massSolidUnit: 'lb'
     },
     {
         // id: undefined,
@@ -233,8 +237,9 @@ export const TestFacilityData: Array<IdbFacility> = [
         img: 'https://placthold.it/50x50',
         unitsOfMeasure: 'Imperial',
         energyUnit: 'kWh',
-        volumeUnit: 'SCF',
-        sizeUnit: 'ft',
-        massUnit: 'lb'
+        volumeLiquidUnit: 'SCF',
+        volumeGasUnit: 'SCF',
+        chilledWaterUnit: undefined,
+        massSolidUnit: 'lb'
     }
 ]
