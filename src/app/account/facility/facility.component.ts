@@ -21,8 +21,6 @@ export class FacilityComponent implements OnInit {
   showDeleteFacility: boolean = false;
 
   facilityForm = new FormGroup({
-    id: new FormControl('', [Validators.required]),
-    accountId: new FormControl('', [Validators.required]),
     name: new FormControl('', [Validators.required]),
     country: new FormControl('', [Validators.required]),
     state: new FormControl('', [Validators.required]),
@@ -58,13 +56,12 @@ export class FacilityComponent implements OnInit {
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private loadingService: LoadingService
-    ) { }
+  ) { }
 
   ngOnInit() {
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
+      this.selectedFacility = facility;
       if (facility != null) {
-        this.facilityForm.controls.id.setValue(facility.id);
-        this.facilityForm.controls.accountId.setValue(facility.accountId);
         this.facilityForm.controls.name.setValue(facility.name);
         this.facilityForm.controls.country.setValue(facility.country);
         this.facilityForm.controls.state.setValue(facility.state);
@@ -91,8 +88,25 @@ export class FacilityComponent implements OnInit {
   onFormChange(): void {
     // Update db
     this.checkCustom();
+    this.updateSelectedFacility();
     //TODO: stop using .value, remove ids from form
-    this.facilityDbService.update(this.facilityForm.value);
+    this.facilityDbService.update(this.selectedFacility);
+  }
+
+  updateSelectedFacility() {
+    this.selectedFacility.name = this.facilityForm.controls.name.value;
+    this.selectedFacility.country = this.facilityForm.controls.country.value;
+    this.selectedFacility.address = this.facilityForm.controls.address.value;
+    this.selectedFacility.type = this.facilityForm.controls.type.value;
+    this.selectedFacility.tier = this.facilityForm.controls.tier.value;
+    this.selectedFacility.size = this.facilityForm.controls.size.value;
+    this.selectedFacility.division = this.facilityForm.controls.division.value;
+    this.selectedFacility.unitsOfMeasure = this.facilityForm.controls.unitsOfMeasure.value;
+    this.selectedFacility.energyUnit = this.facilityForm.controls.energyUnit.value;
+    this.selectedFacility.massSolidUnit = this.facilityForm.controls.massSolidUnit.value;
+    this.selectedFacility.volumeGasUnit = this.facilityForm.controls.volumeGasUnit.value;
+    this.selectedFacility.volumeLiquidUnit = this.facilityForm.controls.volumeLiquidUnit.value;
+    this.selectedFacility.chilledWaterUnit = this.facilityForm.controls.chilledWaterUnit.value;
   }
 
   facilityDelete() {
@@ -112,7 +126,7 @@ export class FacilityComponent implements OnInit {
     this.facilityDbService.setSelectedFacility();
     this.router.navigate(['/']);
     this.loadingService.setLoadingStatus(false);
-    
+
   }
 
   editFacility() {
@@ -130,16 +144,18 @@ export class FacilityComponent implements OnInit {
 
   checkCustom() {
     let selectedEnergyOption: UnitOption = this.energyUnitOptions.find(option => { return option.value == this.facilityForm.controls.energyUnit.value });
-    let selectedVolumeGasOption: UnitOption = this.volumeGasOptions.find(option => { return option.value == this.facilityForm.controls.volumeUnit.value });
-    let selectedVolumeLiquidOption: UnitOption = this.volumeLiquidOptions.find(option => { return option.value == this.facilityForm.controls.volumeUnit.value });
+    let selectedVolumeGasOption: UnitOption = this.volumeGasOptions.find(option => { return option.value == this.facilityForm.controls.volumeGasUnit.value });
+    let selectedVolumeLiquidOption: UnitOption = this.volumeLiquidOptions.find(option => { return option.value == this.facilityForm.controls.volumeLiquidUnit.value });
     // let selectedSizeOption: UnitOption = this.sizeUnitOptions.find(option => { return option.value == this.facilityForm.controls.sizeUnit.value });
-    let selectedMassOption: UnitOption = this.solidMassOptions.find(option => { return option.value == this.facilityForm.controls.massUnit.value });
-    if (selectedEnergyOption.unitsOfMeasure == 'Metric' && selectedVolumeLiquidOption.unitsOfMeasure == 'Metric' && selectedVolumeGasOption.unitsOfMeasure == 'Metric' && selectedMassOption.unitsOfMeasure == 'Metric') {
-      this.facilityForm.controls.unitsOfMeasure.patchValue('Metric');
-    } else if (selectedEnergyOption.unitsOfMeasure == 'Imperial' && selectedVolumeLiquidOption.unitsOfMeasure == 'Imperial' && selectedVolumeGasOption.unitsOfMeasure == 'Imperial' && selectedMassOption.unitsOfMeasure == 'Imperial') {
-      this.facilityForm.controls.unitsOfMeasure.patchValue('Imperial');
-    } else {
-      this.facilityForm.controls.unitsOfMeasure.patchValue('Custom');
+    let selectedMassOption: UnitOption = this.solidMassOptions.find(option => { return option.value == this.facilityForm.controls.massSolidUnit.value });
+    if (selectedEnergyOption && selectedVolumeGasOption && selectedVolumeLiquidOption && selectedMassOption) {
+      if (selectedEnergyOption.unitsOfMeasure == 'Metric' && selectedVolumeLiquidOption.unitsOfMeasure == 'Metric' && selectedVolumeGasOption.unitsOfMeasure == 'Metric' && selectedMassOption.unitsOfMeasure == 'Metric') {
+        this.facilityForm.controls.unitsOfMeasure.patchValue('Metric');
+      } else if (selectedEnergyOption.unitsOfMeasure == 'Imperial' && selectedVolumeLiquidOption.unitsOfMeasure == 'Imperial' && selectedVolumeGasOption.unitsOfMeasure == 'Imperial' && selectedMassOption.unitsOfMeasure == 'Imperial') {
+        this.facilityForm.controls.unitsOfMeasure.patchValue('Imperial');
+      } else {
+        this.facilityForm.controls.unitsOfMeasure.patchValue('Custom');
+      }
     }
   }
 
