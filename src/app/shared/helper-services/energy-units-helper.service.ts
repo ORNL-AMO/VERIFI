@@ -25,14 +25,14 @@ export class EnergyUnitsHelperService {
       } else if (facilityMeter.phase == 'Liquid') {
         return selectedFacility.volumeLiquidUnit;
       } else if (facilityMeter.phase == 'Solid') {
-        return selectedFacility.massSolidUnit;
+        return selectedFacility.massUnit;
       }
     } else if (facilityMeter.source == 'Water' || facilityMeter.source == 'Waste Water') {
       return selectedFacility.volumeLiquidUnit;
     } else if (facilityMeter.source == 'Other Energy') {
       let selectedEnergyOption: FuelTypeOption = JSON.parse(JSON.stringify(OtherEnergyOptions.find(option => { return option.value == facilityMeter.fuel })));
       if (selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Steam') {
-        return selectedFacility.massSolidUnit;
+        return selectedFacility.massUnit;
       } else if (selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Chilled Water') {
         return selectedFacility.chilledWaterUnit;
       }

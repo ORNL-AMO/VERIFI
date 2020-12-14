@@ -42,8 +42,7 @@
                     <tr>
                         <th class="row-year">Month</th>
                         <th class="row-year">Year</th>
-                        <th [hidden]="meterData.meter.source != 'Electricity'">Total kWh</th>
-                        <th [hidden]="meterData.meter.source != 'Natural Gas'">Total Volume (cfm)/MMBTU</th>
+                        <th>Total <span [innerHTML]="meterData.energyUnit | settingsLabel"></span></th>
                         <th>Total Cost</th>
                     </tr>
                     <tr *ngFor="let data of meterData.monthlyData | slice: pageSize[i] | slice: 0:itemsPerPage"

@@ -2,22 +2,25 @@ import { Injectable } from '@angular/core';
 import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CalanderizationService {
 
-  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService) {
+  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private energyUnitsHelperService: EnergyUnitsHelperService) {
   }
 
   calanderizeFacilityMeters(facilityMeters: Array<IdbUtilityMeter>) {
     let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
     let calanderizedMeterData: Array<CalanderizedMeter> = new Array();
     facilityMeters.forEach(meter => {
+      let energyUnit: string = this.energyUnitsHelperService.getEnergyUnit(meter.id);
       let meterData: Array<IdbUtilityMeterData> = facilityMeterData.filter(meterData => { return meterData.meterId == meter.id });
       let calanderizedMeter: Array<MonthlyData> = this.calanderizeMeterData(meterData);
       calanderizedMeterData.push({
+        energyUnit: energyUnit,
         meter: meter,
         monthlyData: calanderizedMeter
       });
@@ -77,6 +80,7 @@ export class CalanderizationService {
 
 export interface CalanderizedMeter {
   meter: IdbUtilityMeter,
+  energyUnit: string,
   monthlyData: Array<MonthlyData>
 }
 
