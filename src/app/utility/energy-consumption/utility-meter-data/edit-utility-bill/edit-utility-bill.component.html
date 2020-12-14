@@ -1,40 +1,48 @@
 <h4>Edit Natural Gas Bill</h4>
-<p class="bold">General Information</p>
+<br>
+
 <form class="meterForm" [formGroup]="meterDataForm">
-
-    <label for="readDate">Meter Read Date</label>
-    <div class="input-group mb-3">
+  <div class="row">
+      
+    <div class="col">
+      <label for="readDate">Meter Read Date <span class="required">*</span> </label>
+      <div class="input-group">
         <input id="readDate" class="form-control" type="date" formControlName="readDate">
-    </div>
+      </div>
 
-    <label for="totalEnergyUse">Total Energy Use</label>
-    <div class="input-group mb-3">
+      <label for="totalEnergyUse">Total Energy Use <span class="required">*</span> </label>
+      <div class="input-group mb-3">
         <input id="totalEnergyUse" class="form-control" type="number" formControlName="totalEnergyUse">
         <span class="unit">kWh</span>
+      </div>
     </div>
 
-    <label for="commodityCharge">Commodity Charge</label>
-    <div class="input-group mb-3">
+    <div class="col">
+      <label for="commodityCharge">Commodity Charge</label>
+      <div class="input-group mb-3">
         <input id="commodityCharge" class="form-control" type="number" formControlName="commodityCharge">
         <span class="unit">$</span>
-    </div>
+      </div>
 
-    <label for="deliveryCharge">Delivery Charges</label>
-    <div class="input-group mb-3">
+      <label for="deliveryCharge">Delivery Charges</label>
+      <div class="input-group mb-3">
         <input id="deliveryCharge" class="form-control" type="number" formControlName="deliveryCharge">
         <span class="unit">$</span>
-    </div>
+      </div>
 
-    <label for="otherCharge">Other Charges</label>
-    <div class="input-group mb-3">
+      <label for="otherCharge">Other Charges</label>
+      <div class="input-group mb-3">
         <input id="otherCharge" class="form-control" type="number" formControlName="otherCharge">
         <span class="unit">$</span>
+      </div>
     </div>
+
+  </div>
 </form>
 
 <hr>
 
 <div class="saveCancel item-right">
-    <button class="btn btn-secondary" (click)="cancel()">Cancel</button>
-    <button class="btn btn-primary" (click)="meterDataSave()">Save</button>
+  <button class="btn btn-secondary" (click)="cancel()">Cancel</button>
+  <button class="btn btn-primary" (click)="meterDataSave()">Save</button>
 </div>

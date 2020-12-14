@@ -77,7 +77,7 @@
 
 <div class="window" [class.open]="editMeterData">
     <div class="windowOverlay"></div>
-    <div class="windowContent windowContentXLg">
+    <div class="windowContent windowContentLg">
         <app-edit-electricity-bill *ngIf="editMeterData && selectedSource == 'Electricity'"
             [editMeterData]="editMeterData" (emitClose)="cancelEditMeter()" [addOrEdit]="addOrEdit">
         </app-edit-electricity-bill>
