@@ -91,9 +91,9 @@
                             </select>
                         </label> -->
                         <br>
-                        <label>Solid Mass Unit
-                            <select formControlName="massSolidUnit" (change)="onFormChange()">
-                                <option *ngFor="let massUnitOption of solidMassOptions" [ngValue]="massUnitOption.value">
+                        <label>Mass Unit
+                            <select formControlName="massUnit" (change)="onFormChange()">
+                                <option *ngFor="let massUnitOption of massUnitOptions" [ngValue]="massUnitOption.value">
                                     <span [innerHTML]="massUnitOption.display"></span></option>
                             </select>
                         </label>

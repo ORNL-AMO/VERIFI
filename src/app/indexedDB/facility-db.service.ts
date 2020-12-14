@@ -157,7 +157,7 @@ export class FacilitydbService {
             volumeLiquidUnit: 'SCF',
             volumeGasUnit: 'SCF',
             chilledWaterUnit: undefined,
-            massSolidUnit: 'lb'
+            massUnit: 'lb'
 
         }
     }
@@ -184,7 +184,7 @@ export const TestFacilityData: Array<IdbFacility> = [
         volumeLiquidUnit: 'SCF',
         volumeGasUnit: 'SCF',
         chilledWaterUnit: undefined,
-        massSolidUnit: 'lb'
+        massUnit: 'lb'
     },
     {
         // id: undefined,
@@ -205,7 +205,7 @@ export const TestFacilityData: Array<IdbFacility> = [
         volumeLiquidUnit: 'SCF',
         volumeGasUnit: 'SCF',
         chilledWaterUnit: undefined,
-        massSolidUnit: 'lb'
+        massUnit: 'lb'
     },
     {
         // id: undefined,
@@ -226,7 +226,7 @@ export const TestFacilityData: Array<IdbFacility> = [
         volumeLiquidUnit: 'SCF',
         volumeGasUnit: 'SCF',
         chilledWaterUnit: undefined,
-        massSolidUnit: 'lb'
+        massUnit: 'lb'
     },
     {
         // id: undefined,
@@ -247,6 +247,6 @@ export const TestFacilityData: Array<IdbFacility> = [
         volumeLiquidUnit: 'SCF',
         volumeGasUnit: 'SCF',
         chilledWaterUnit: undefined,
-        massSolidUnit: 'lb'
+        massUnit: 'lb'
     }
 ]

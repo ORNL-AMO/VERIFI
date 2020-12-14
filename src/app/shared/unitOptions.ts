@@ -79,7 +79,7 @@ export const VolumeLiquidOptions: Array<UnitOption> = [
 export const VolumeGasOptions: Array<UnitOption> = [
     {
         display: 'Standard Cubic Feet (SCF)',
-        value: 'ft3',
+        value: 'SCF',
         unitsOfMeasure: 'Imperial'
     },
     {
@@ -109,7 +109,7 @@ export const SizeUnitOptions: Array<UnitOption> = [
 ]
 
 
-export const SolidMassOptions: Array<UnitOption> = [
+export const MassUnitOptions: Array<UnitOption> = [
     {
         display: 'Pounds (lb)',
         value: 'lb',

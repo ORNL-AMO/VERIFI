@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { FacilitydbService } from "../../indexedDB/facility-db.service";
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { EnergyUnitOptions, SizeUnitOptions, SolidMassOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from 'src/app/shared/unitOptions';
+import { EnergyUnitOptions, MassUnitOptions, SizeUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from 'src/app/shared/unitOptions';
 import { IdbFacility } from 'src/app/models/idb';
 import { PredictordbService } from "../../indexedDB/predictors-db.service";
 import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db.service";
@@ -32,7 +32,7 @@ export class FacilityComponent implements OnInit {
     division: new FormControl('', [Validators.required]),
     unitsOfMeasure: new FormControl('', [Validators.required]),
     energyUnit: new FormControl('', [Validators.required]),
-    massSolidUnit: new FormControl('', [Validators.required]),
+    massUnit: new FormControl('', [Validators.required]),
     volumeLiquidUnit: new FormControl('', [Validators.required]),
     volumeGasUnit: new FormControl('', [Validators.required]),
     chilledWaterUnit: new FormControl('', [Validators.required]),
@@ -45,7 +45,7 @@ export class FacilityComponent implements OnInit {
   volumeGasOptions: Array<UnitOption> = VolumeGasOptions;
   volumeLiquidOptions: Array<UnitOption> = VolumeLiquidOptions;
   sizeUnitOptions: Array<UnitOption> = SizeUnitOptions;
-  solidMassOptions: Array<UnitOption> = SolidMassOptions;
+  massUnitOptions: Array<UnitOption> = MassUnitOptions;
   selectedFacility: IdbFacility;
 
   constructor(
@@ -73,7 +73,7 @@ export class FacilityComponent implements OnInit {
         // Needs image
         this.facilityForm.controls.unitsOfMeasure.setValue(facility.unitsOfMeasure);
         this.facilityForm.controls.energyUnit.setValue(facility.energyUnit);
-        this.facilityForm.controls.massSolidUnit.setValue(facility.massSolidUnit);
+        this.facilityForm.controls.massUnit.setValue(facility.massUnit);
         this.facilityForm.controls.volumeLiquidUnit.setValue(facility.volumeLiquidUnit);
         this.facilityForm.controls.volumeGasUnit.setValue(facility.volumeGasUnit);
         this.facilityForm.controls.chilledWaterUnit.setValue(facility.chilledWaterUnit);
@@ -103,7 +103,7 @@ export class FacilityComponent implements OnInit {
     this.selectedFacility.division = this.facilityForm.controls.division.value;
     this.selectedFacility.unitsOfMeasure = this.facilityForm.controls.unitsOfMeasure.value;
     this.selectedFacility.energyUnit = this.facilityForm.controls.energyUnit.value;
-    this.selectedFacility.massSolidUnit = this.facilityForm.controls.massSolidUnit.value;
+    this.selectedFacility.massUnit = this.facilityForm.controls.massUnit.value;
     this.selectedFacility.volumeGasUnit = this.facilityForm.controls.volumeGasUnit.value;
     this.selectedFacility.volumeLiquidUnit = this.facilityForm.controls.volumeLiquidUnit.value;
     this.selectedFacility.chilledWaterUnit = this.facilityForm.controls.chilledWaterUnit.value;
@@ -147,7 +147,7 @@ export class FacilityComponent implements OnInit {
     let selectedVolumeGasOption: UnitOption = this.volumeGasOptions.find(option => { return option.value == this.facilityForm.controls.volumeGasUnit.value });
     let selectedVolumeLiquidOption: UnitOption = this.volumeLiquidOptions.find(option => { return option.value == this.facilityForm.controls.volumeLiquidUnit.value });
     // let selectedSizeOption: UnitOption = this.sizeUnitOptions.find(option => { return option.value == this.facilityForm.controls.sizeUnit.value });
-    let selectedMassOption: UnitOption = this.solidMassOptions.find(option => { return option.value == this.facilityForm.controls.massSolidUnit.value });
+    let selectedMassOption: UnitOption = this.massUnitOptions.find(option => { return option.value == this.facilityForm.controls.massUnit.value });
     if (selectedEnergyOption && selectedVolumeGasOption && selectedVolumeLiquidOption && selectedMassOption) {
       if (selectedEnergyOption.unitsOfMeasure == 'Metric' && selectedVolumeLiquidOption.unitsOfMeasure == 'Metric' && selectedVolumeGasOption.unitsOfMeasure == 'Metric' && selectedMassOption.unitsOfMeasure == 'Metric') {
         this.facilityForm.controls.unitsOfMeasure.patchValue('Metric');
@@ -164,12 +164,12 @@ export class FacilityComponent implements OnInit {
       this.facilityForm.controls.energyUnit.setValue('kWh');
       this.facilityForm.controls.volumeLiquidUnit.setValue('ft3');
       this.facilityForm.controls.volumeGasUnit.setValue('ft3');
-      this.facilityForm.controls.massSolidUnit.setValue('lb');
+      this.facilityForm.controls.massUnit.setValue('lb');
     } else if (this.facilityForm.controls.unitsOfMeasure.value == 'Metric') {
       this.facilityForm.controls.energyUnit.setValue('MMBtu');
       this.facilityForm.controls.volumeLiquidUnit.setValue('m3');
       this.facilityForm.controls.volumeGasUnit.setValue('m3');
-      this.facilityForm.controls.massSolidUnit.setValue('kg');
+      this.facilityForm.controls.massUnit.setValue('kg');
     }
     this.onFormChange();
   }
