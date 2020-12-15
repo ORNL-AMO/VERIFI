@@ -5,10 +5,9 @@
     <div class="col">
         <p class="bold">Predictor Name</p>
     </div>
-    <div class="col-3">
+    <div class="col-5">
         <p class="bold">Units</p>
     </div>
-    <div class="col-1"></div>
 </div>
 
 <form *ngIf="!predictorToDelete">
@@ -19,15 +18,14 @@
                     name="{{'predictorName'+predictor.id}}">
             </label>
         </div>
-        <div class="col-3">
-            <select class="full-width" [(ngModel)]="predictor.unit" name="{{'predictorUnit'+predictor.id}}">
+        <div class="col-5">
+            <select class="three-quarter-width" [(ngModel)]="predictor.unit" name="{{'predictorUnit'+predictor.id}}">
                 <option [ngValue]="'hours'">hours</option>
                 <option [ngValue]="'minutes'">minutes</option>
                 <option [ngValue]="''"></option>
             </select>
-        </div>
-        <div class="col-1">
-            <button class="btn btn-danger m-0" (click)="deletePredictor(predictor)"><i
+
+            <button class="btn btn-small btn-danger m-0 item-right" (click)="deletePredictor(predictor)"><i
                     class="fa fa-trash-o red pointer"></i>
             </button>
         </div>
@@ -46,6 +44,6 @@
     </p>
     <div class="saveCancel item-right">
         <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
-        <button class="btn btn-danger" (click)="confirmDelete()">Confirm Delete</button>
+        <button class="btn btn-small btn-danger" (click)="confirmDelete()">Confirm Delete</button>
     </div>
 </div>

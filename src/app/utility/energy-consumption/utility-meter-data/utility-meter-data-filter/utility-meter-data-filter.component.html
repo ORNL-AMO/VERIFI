@@ -1,12 +1,37 @@
-<div class="filter item-right">
+<div class="filter">
     <button class="btn btn-small" [ngClass]="{'btn-solid' : !showFilterDropdown, 'btn-outline' : showFilterDropdown}"
         (click)="toggleFilterMenu()">Filter</button>
     <div class="filter-dropdown" *ngIf="showFilterDropdown">
-        <label *ngFor="let electricityDataFilter of electricityDataFilters">
-            <input type="checkbox" name="electricityDataFilter.name" [(ngModel)]="electricityDataFilter.filter"
-                (change)="save()">{{electricityDataFilter.display}}
-        </label>
-        <br><br>
+        <p class="small">Filter Input Fields</p>
+        <div class="row">
+            <div class="col">
+                <div *ngFor="let electricityDataFilter of electricityDataFilters; let ind = index;">
+                    <label *ngIf="ind < electricityDataFilters.length/3">
+                        <input type="checkbox" name="electricityDataFilter.name" [(ngModel)]="electricityDataFilter.filter"
+                            (change)="save()">{{electricityDataFilter.display}}
+                    </label>
+                </div>
+            </div>
+            <div class="col">
+                <div *ngFor="let electricityDataFilter of electricityDataFilters; let ind = index;">
+                    <label *ngIf="ind < (electricityDataFilters.length/3 * 2) && ind > electricityDataFilters.length/3">
+                        <input type="checkbox" name="electricityDataFilter.name" [(ngModel)]="electricityDataFilter.filter"
+                            (change)="save()">{{electricityDataFilter.display}}
+                    </label>
+                </div>
+            </div>
+            <div class="col">
+                <div *ngFor="let electricityDataFilter of electricityDataFilters; let ind = index;">
+                    <label *ngIf="ind > electricityDataFilters.length/3 * 2">
+                        <input type="checkbox" name="electricityDataFilter.name" [(ngModel)]="electricityDataFilter.filter"
+                            (change)="save()">{{electricityDataFilter.display}}
+                    </label>
+                </div>
+            </div>
+        </div>
+        <br>
         <a (click)="showAllColumns();">Show All</a>
+        <span> / </span>
+        <a (click)="hideAllColumns();">Hide All</a>
     </div>
 </div>

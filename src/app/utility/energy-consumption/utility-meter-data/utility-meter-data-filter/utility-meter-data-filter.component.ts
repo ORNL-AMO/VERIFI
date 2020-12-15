@@ -49,4 +49,11 @@ export class UtilityMeterDataFilterComponent implements OnInit {
     });
     this.save();
   }
+
+  hideAllColumns() {
+    this.electricityDataFilters.forEach(electricityDataFilter => {
+      electricityDataFilter.filter = false;
+    });
+    this.save();
+  }
 }
