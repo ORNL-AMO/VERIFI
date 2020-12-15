@@ -26,6 +26,9 @@ body {
 .full-width {
   width: 100%;
 }
+.three-quarter-width {
+  width: 75%;
+}
 .spacer {
   margin: 0px 10px;
 }
@@ -145,6 +148,9 @@ Buttons
   background-color: #ec0000 !important;
   color: #fff !important;
 }
+.btn-danger:hover i {
+  color: white;
+}
 .btn-primary {
   color: #fff;
   background-color: #2980b9 !important;
@@ -256,23 +262,27 @@ Popups & Windows
   position: fixed;
   background-color: white;
   top: 10%;
-  left: calc(50% - 250px);
-  /*height: 100%;*/
-  max-height: 80%;
-  overflow: scroll;
   width: 500px;
+  left: calc(50% - 250px);
   box-shadow: -3px 4px 8px #0000001c;
   border: 1px solid white;
   padding: 30px;
   border-radius: 3px;
 }
-.windowContentLg {
+.windowContentMed {
   width: 600px;
   left: calc(50% - 300px);
 }
-.windowContentXLg {
-  width: 900px;
-  left: calc(50% - 450px);
+.windowContentLg {
+  width: 800px;
+  left: calc(50% - 400px);
+}
+.windowContentScroll {
+  overflow-y: scroll;
+  overflow-x: hidden;
+  margin: 0px;
+  padding: 0 30px 0 0;
+  max-height: calc(100vh - 375px);
 }
 .popup {
   border-style: solid;
@@ -450,6 +460,9 @@ span.unit {
 .input-group input:nth-child(3) {
   border-left: 0px!important;
 }
+.input-group span[hidden] + input {
+  border-left: 1px solid #9c9c9c!important;
+}
 .form-control {
   display: block;
   width: 100%;
@@ -501,6 +514,7 @@ input:disabled {
 }
 select {
   padding: 3px;
+  border: 1px solid #9c9c9c;
 }
 /*
 Tables
@@ -795,13 +809,14 @@ Meter Displays
 }
 .filter-dropdown {
   position: absolute;
-  top: 37px;
-  right: 0;
-  background-color: white;
+  top: 44px;
+  left: 0;
+  width: 100%;
+  background-color: #ececec;
   z-index: 1;
   padding: 20px;
   min-width: 210px;
-  box-shadow: -3px 4px 8px #0000001c;
+  border-radius: 2px;
 }
 .filter .filter-dropdown label {
   margin: 0px 10px 0 0;
@@ -911,6 +926,7 @@ input:checked + .slider:before {
 Pagination
 =============================================== */
 .page-item.active .page-link {
+  z-index: 0!important;
   background-color: #2c386b !important;
   background-color: #2c386b00 !important;
   border-color: #2c386b !important;
