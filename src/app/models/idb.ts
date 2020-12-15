@@ -72,7 +72,6 @@ export interface IdbUtilityMeter {
     accountNumber: number,
     type: string,
     phase: string,
-    unit: string,
     heatCapacity: string,
     siteToSource: string,
     name: string,

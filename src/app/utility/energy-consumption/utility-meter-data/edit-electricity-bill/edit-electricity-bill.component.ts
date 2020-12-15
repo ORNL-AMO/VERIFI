@@ -2,9 +2,10 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { ElectricityDataFilter } from 'src/app/models/electricityFilter';
-import { IdbFacility, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { UtilityMeterDataService } from '../utility-meter-data.service';
 
 @Component({
@@ -24,12 +25,13 @@ export class EditElectricityBillComponent implements OnInit {
   meterDataForm: FormGroup;
   electricityDataFilters: Array<ElectricityDataFilter>;
   electricityDataFiltersSub: Subscription;
-  selectedFacility: IdbFacility;
+  energyUnit: string;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private utilityMeterDataService: UtilityMeterDataService,
-    private facilityDbService: FacilitydbService) { }
+    private facilityDbService: FacilitydbService, private utilityMeterDbService: UtilityMeterdbService) { }
 
   ngOnInit(): void {
-    this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
+    let facilityMeter: IdbUtilityMeter = this.utilityMeterDbService.getFacilityMeterById(this.editMeterData.meterId);
+    this.energyUnit = facilityMeter.startingUnit
     this.meterDataForm = this.utilityMeterDataService.getElectricityMeterDataForm(this.editMeterData);
     this.electricityDataFiltersSub = this.utilityMeterDataService.electricityInputFilters.subscribe(dataFilters => {
       this.electricityDataFilters = dataFilters;

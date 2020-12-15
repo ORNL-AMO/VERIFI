@@ -37,7 +37,6 @@ export class EditMeterFormComponent implements OnInit {
       accountNumber: [this.editMeter.accountNumber],
       type: [this.editMeter.type],
       phase: [this.editMeter.phase],
-      unit: [this.editMeter.unit, Validators.required],
       heatCapacity: [this.editMeter.heatCapacity, Validators.required],
       siteToSource: [this.editMeter.siteToSource, Validators.required],
       name: [this.editMeter.name, Validators.required],

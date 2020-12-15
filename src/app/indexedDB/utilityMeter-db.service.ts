@@ -97,7 +97,6 @@ export class UtilityMeterdbService {
             accountNumber: undefined,
             type: undefined,
             phase: undefined,
-            unit: undefined,
             heatCapacity: undefined,
             siteToSource: undefined,
             name: undefined,
