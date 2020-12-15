@@ -6,12 +6,6 @@
         <button class="btn btn-small btn-outline" (click)="openImportModal()">Import</button>
         <button class="btn btn-small btn-outline" (click)="meterExport()">Export</button>
     </div>
-    <!--Bulk Delete-->
-    <div class="bulk-delete item-right" [class.show]="hasCheckedItems">
-        <button class="btn btn-small btn-danger" (click)='bulkDelete()'>Bulk Delete</button>
-    </div>
-    <!--Column Filters-->
-    <app-utility-meter-data-filter *ngIf="selectedSource == 'Electricity'"></app-utility-meter-data-filter>
     <!--Items Per Page-->
     <div class="items-per-page item-right">
         <span>Show </span>
@@ -24,6 +18,12 @@
             <option value="60">60</option>
         </select>
     </div>
+    <!--Bulk Delete-->
+    <div class="bulk-delete item-right" [class.show]="hasCheckedItems">
+        <button class="btn btn-small btn-danger" (click)='bulkDelete()'>Bulk Delete</button>
+    </div>
+    <!--Column Filters-->
+    <app-utility-meter-data-filter *ngIf="selectedSource == 'Electricity'"></app-utility-meter-data-filter>
 </div>
 
 <div class="meter" *ngFor="let meterListItem of meterList; let index=index;">
