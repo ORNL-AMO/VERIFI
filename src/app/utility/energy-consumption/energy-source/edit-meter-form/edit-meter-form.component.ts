@@ -143,7 +143,7 @@ export class EditMeterFormComponent implements OnInit {
         //copy for conversions
         let selectedEnergyOptionsCpy: FuelTypeOption = JSON.parse(JSON.stringify(selectedEnergyOption))
         //TODO: Add therms to unit converter
-        if (selectedEnergyOption.startingUnit != 'Therms') {
+        if (selectedEnergyOption.startingUnit && selectedEnergyOption.startingUnit != 'Therms') {
           //TODO: Round value to some decimal place
           selectedEnergyOptionsCpy.heatCapacityValue = this.convertUnitsService.value(selectedEnergyOptionsCpy.heatCapacityValue).from(selectedEnergyOptionsCpy.startingUnit).to(this.meterForm.controls.startingUnit.value);
         }

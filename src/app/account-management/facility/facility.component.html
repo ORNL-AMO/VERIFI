@@ -16,7 +16,7 @@
                 </label>
             </form>
         </div>
-        <div class="col-lg-8">
+        <div class="col-lg-8" *ngIf="facilityForm">
             <br>
             <div class="row">
                 <div class="col-lg-6">
@@ -34,7 +34,8 @@
                         </label>
                         <br>
                         <label>Address
-                            <input type="address" formControlName="address" (input)="onFormChange();" autocomplete="shipping street-address">
+                            <input type="address" formControlName="address" (input)="onFormChange();"
+                                autocomplete="shipping street-address">
                         </label>
                     </form>
                 </div>
@@ -50,6 +51,10 @@
                         <br>
                         <label>Size
                             <input type="text" formControlName="size" (input)="onFormChange();">
+                        </label>
+                        <br>
+                        <label>Division
+                            <input type="text" formControlName="division" (input)="onFormChange();">
                         </label>
                         <br>
                         <label>Units of Measure
@@ -97,11 +102,11 @@
                                     <span [innerHTML]="massUnitOption.display"></span></option>
                             </select>
                         </label>
-                        <br>
-                        <label>Division
-                            <input type="text" formControlName="division" (input)="onFormChange();">
-                        </label>
                     </form>
+                    <p class="alert alert-warning" *ngIf="unitsDontMatchAccount">
+                        Facility Units are different then the units set for the account. If you would like to use the
+                        account units for this faclity clike here: <a (click)="setAccountUnits()">Use Account Units</a>
+                    </p>
                 </div>
             </div>
         </div>
@@ -119,13 +124,14 @@
     <div class="row">
         <div class="col-lg-6">
             <h4>Delete Facility</h4>
-            <p>Once deleted, you will permanently lose all your data linked to this facility. Please make a backup of your data before proceeding with this step.</p>
+            <p>Once deleted, you will permanently lose all your data linked to this facility. Please make a backup of
+                your data before proceeding with this step.</p>
             <button class="btn btn-danger" (click)="editFacility()">Delete Facility</button>
         </div>
     </div>
 </div>
 
-<div class="popup" [class.open]="showDeleteFacility">
+<div class="popup" [class.open]="showDeleteFacility" *ngIf="facilityForm">
     <div class="popup-header">Delete Facility: {{facilityForm.controls.name.value}}
         <button class="item-right" (click)="cancelDelete()">x</button>
     </div>

@@ -9,6 +9,12 @@ export interface IdbAccount {
     naics: string,
     notes: string,
     img: string
+    unitsOfMeasure: string,
+    energyUnit: string,
+    massUnit: string,
+    volumeLiquidUnit: string,
+    volumeGasUnit: string,
+    chilledWaterUnit: string
 }
 
 export interface IdbFacility {
