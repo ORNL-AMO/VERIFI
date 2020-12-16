@@ -71,7 +71,7 @@ export class FacilitydbService {
         } else {
             let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
             if (selectedAccount) {
-                let newFacility: IdbFacility = this.getNewIdbFacility(selectedAccount.id);
+                let newFacility: IdbFacility = this.getNewIdbFacility(selectedAccount);
                 this.add(newFacility);
             }
         }
@@ -127,7 +127,7 @@ export class FacilitydbService {
 
     deleteAllAccountFacilities(): void {
         let pendingFacilities = JSON.parse(JSON.stringify(this.accountFacilities.value));
-        for(let i=0; i<pendingFacilities.length; i++) {
+        for (let i = 0; i < pendingFacilities.length; i++) {
             this.dbService.delete('facilities', pendingFacilities[i].id);
         }
     }
@@ -138,9 +138,9 @@ export class FacilitydbService {
         });
     }
 
-    getNewIdbFacility(accountId: number): IdbFacility {
+    getNewIdbFacility(account: IdbAccount): IdbFacility {
         return {
-            accountId: accountId,
+            accountId: account.id,
             name: 'New Facility',
             country: undefined,
             state: undefined,
@@ -152,6 +152,13 @@ export class FacilitydbService {
             division: undefined,
             img: undefined,
             // id: undefined
+            unitsOfMeasure: account.unitsOfMeasure,
+            energyUnit: account.energyUnit,
+            volumeLiquidUnit: account.volumeLiquidUnit,
+            volumeGasUnit: account.volumeGasUnit,
+            chilledWaterUnit: account.chilledWaterUnit,
+            massUnit: account.massUnit
+
         }
     }
 }
@@ -171,7 +178,13 @@ export const TestFacilityData: Array<IdbFacility> = [
         size: 1000,
         units: 'ft',
         division: 'Marketing',
-        img: 'https://placthold.it/50x50'
+        img: 'https://placthold.it/50x50',
+        unitsOfMeasure: 'Imperial',
+        energyUnit: 'kWh',
+        volumeLiquidUnit: 'SCF',
+        volumeGasUnit: 'SCF',
+        chilledWaterUnit: undefined,
+        massUnit: 'lb'
     },
     {
         // id: undefined,
@@ -186,7 +199,13 @@ export const TestFacilityData: Array<IdbFacility> = [
         size: 1000,
         units: 'ft',
         division: 'Sugar',
-        img: 'https://placthold.it/50x50'
+        img: 'https://placthold.it/50x50',
+        unitsOfMeasure: 'Imperial',
+        energyUnit: 'kWh',
+        volumeLiquidUnit: 'SCF',
+        volumeGasUnit: 'SCF',
+        chilledWaterUnit: undefined,
+        massUnit: 'lb'
     },
     {
         // id: undefined,
@@ -201,7 +220,13 @@ export const TestFacilityData: Array<IdbFacility> = [
         size: 1000,
         units: 'ft',
         division: 'Boring',
-        img: 'https://placthold.it/50x50'
+        img: 'https://placthold.it/50x50',
+        unitsOfMeasure: 'Imperial',
+        energyUnit: 'kWh',
+        volumeLiquidUnit: 'SCF',
+        volumeGasUnit: 'SCF',
+        chilledWaterUnit: undefined,
+        massUnit: 'lb'
     },
     {
         // id: undefined,
@@ -216,6 +241,12 @@ export const TestFacilityData: Array<IdbFacility> = [
         size: 10,
         units: 'ft',
         division: 'Fiber',
-        img: 'https://placthold.it/50x50'
+        img: 'https://placthold.it/50x50',
+        unitsOfMeasure: 'Imperial',
+        energyUnit: 'kWh',
+        volumeLiquidUnit: 'SCF',
+        volumeGasUnit: 'SCF',
+        chilledWaterUnit: undefined,
+        massUnit: 'lb'
     }
 ]

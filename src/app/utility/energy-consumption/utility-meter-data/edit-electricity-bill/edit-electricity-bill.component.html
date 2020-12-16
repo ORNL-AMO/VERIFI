@@ -23,7 +23,7 @@
         </label>
         <div class="input-group mb-3">
           <input id="totalEnergyUse" class="form-control" type="number" formControlName="totalEnergyUse" required>
-          <span class="unit">kWh</span>
+          <span class="unit" [innerHTML]="energyUnit | settingsLabel"></span>
         </div>
       </div>
       <div class="col">

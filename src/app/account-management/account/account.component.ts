@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { FormGroup } from '@angular/forms';
 import { AccountdbService } from "../../indexedDB/account-db.service";
 import { IdbAccount, IdbFacility } from 'src/app/models/idb';
 import { Subscription } from 'rxjs';
@@ -10,6 +10,8 @@ import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db.service";
 import { UtilityMeterDatadbService } from "../../indexedDB/utilityMeterData-db.service";
 import { UtilityMeterGroupdbService } from "../../indexedDB/utilityMeterGroup-db.service";
 import { LoadingService } from "../../shared/loading/loading.service";
+import { AccountManagementService } from '../account-management.service';
+import { EnergyUnitOptions, MassUnitOptions, SizeUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from 'src/app/shared/unitOptions';
 
 @Component({
   selector: 'app-account',
@@ -26,17 +28,16 @@ export class AccountComponent implements OnInit {
   facilityToEdit: IdbFacility;
   facilityToDelete: IdbFacility;
 
-  accountForm: FormGroup = new FormGroup({
-    id: new FormControl('', [Validators.required]),
-    name: new FormControl('', [Validators.required]),
-    industry: new FormControl('', [Validators.required]),
-    naics: new FormControl('', [Validators.required]),
-    notes: new FormControl('', [Validators.required])
-  });
+  accountForm: FormGroup;
 
   selectedAccountSub: Subscription;
   accountFacilitiesSub: Subscription;
-
+  selectedAccount: IdbAccount;
+  energyUnitOptions: Array<UnitOption> = EnergyUnitOptions;
+  volumeGasOptions: Array<UnitOption> = VolumeGasOptions;
+  volumeLiquidOptions: Array<UnitOption> = VolumeLiquidOptions;
+  sizeUnitOptions: Array<UnitOption> = SizeUnitOptions;
+  massUnitOptions: Array<UnitOption> = MassUnitOptions;
   constructor(
     private router: Router,
     private accountDbService: AccountdbService,
@@ -45,12 +46,16 @@ export class AccountComponent implements OnInit {
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
-    private loadingService: LoadingService
-  ) {}
+    private loadingService: LoadingService,
+    private accountManagementService: AccountManagementService
+  ) { }
 
   ngOnInit() {
     this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(val => {
-      this.setAccountForm(val);
+      this.selectedAccount = val;
+      if (val) {
+        this.accountForm = this.accountManagementService.getAccountForm(val);
+      }
     });
 
     this.accountFacilitiesSub = this.facilityDbService.accountFacilities.subscribe(val => {
@@ -68,17 +73,6 @@ export class AccountComponent implements OnInit {
     this.facilityMenuOpen = null;
   }
 
-  setAccountForm(idbAccount: IdbAccount) {
-    if (idbAccount != null) {
-      this.accountForm.controls.id.setValue(idbAccount.id);
-      this.accountForm.controls.name.setValue(idbAccount.name);
-      this.accountForm.controls.industry.setValue(idbAccount.industry);
-      this.accountForm.controls.naics.setValue(idbAccount.naics);
-      this.accountForm.controls.notes.setValue(idbAccount.notes);
-      // Needs image
-    }
-  }
-
   facilityToggleMenu(index) {
     if (this.facilityMenuOpen === index) {
       this.facilityMenuOpen = null;
@@ -94,12 +88,14 @@ export class AccountComponent implements OnInit {
 
   addNewFacility() {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let idbFacility: IdbFacility = this.facilityDbService.getNewIdbFacility(selectedAccount.id);
+    let idbFacility: IdbFacility = this.facilityDbService.getNewIdbFacility(selectedAccount);
     this.facilityDbService.add(idbFacility);
   }
 
   onFormChange(): void {
-    this.accountDbService.update(this.accountForm.value);
+    this.accountForm = this.accountManagementService.checkCustom(this.accountForm);
+    this.selectedAccount = this.accountManagementService.updateAccountFromForm(this.accountForm, this.selectedAccount);
+    this.accountDbService.update(this.selectedAccount);
   }
 
   facilityDelete() {
@@ -116,7 +112,7 @@ export class AccountComponent implements OnInit {
     // Then navigate to another facility
     this.facilityDbService.setSelectedFacility();
     this.loadingService.setLoadingStatus(false);
-    
+
   }
 
   accountDelete() {
@@ -174,4 +170,8 @@ export class AccountComponent implements OnInit {
     this.facilityToDelete = undefined;
   }
 
+  setUnitsOfMeasure() {
+    this.accountForm = this.accountManagementService.setUnitsOfMeasure(this.accountForm);
+    this.onFormChange();
+  }
 }
