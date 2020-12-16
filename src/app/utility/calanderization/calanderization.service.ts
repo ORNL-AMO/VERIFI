@@ -3,6 +3,7 @@ import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
+import { by } from 'protractor';
 
 @Injectable({
   providedIn: 'root'
@@ -13,11 +14,10 @@ export class CalanderizationService {
   }
 
   calanderizeFacilityMeters(facilityMeters: Array<IdbUtilityMeter>) {
-    let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
     let calanderizedMeterData: Array<CalanderizedMeter> = new Array();
     facilityMeters.forEach(meter => {
       let energyUnit: string = this.energyUnitsHelperService.getEnergyUnit(meter.id);
-      let meterData: Array<IdbUtilityMeterData> = facilityMeterData.filter(meterData => { return meterData.meterId == meter.id });
+      let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(meter.id);
       let calanderizedMeter: Array<MonthlyData> = this.calanderizeMeterData(meterData);
       calanderizedMeterData.push({
         energyUnit: energyUnit,
@@ -75,6 +75,76 @@ export class CalanderizationService {
     const utc2 = Date.UTC(secondDate.getFullYear(), secondDate.getMonth(), secondDate.getDate());
 
     return Math.floor((utc2 - utc1) / _MS_PER_DAY);
+  }
+
+
+  calanderizeMultipleMeters(meters: Array<IdbUtilityMeter>, sumByMonth: boolean): Array<{ time: string, energyUse: number, energyCost: number }> {
+    //calanderize meters
+    let calanderizedMeterData: Array<CalanderizedMeter> = this.calanderizeFacilityMeters(meters);
+    //TODO: convert data here?
+
+    //create array of just the meter data
+    let combindedCalanderizedMeterData: Array<MonthlyData> = calanderizedMeterData.flatMap(meterData => {
+      return meterData.monthlyData;
+    });
+    //create array of the uniq months and years
+    let yearMonths: Array<{ year: number, month: string }> = combindedCalanderizedMeterData.map(data => { return { year: data.year, month: data.month } });
+    let resultData: Array<{ time: string, energyUse: number, energyCost: number }> = new Array();
+    //iterate array of uniq months and years and sum energy/cost
+    if (sumByMonth) {
+      yearMonths = _.uniqWith(yearMonths, (a, b) => {
+        return (a.year == b.year && a.month == b.month)
+      });
+      resultData = yearMonths.map(yearMonth => {
+        let totalEnergyUse: number = _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
+          if (meterData.month == yearMonth.month && meterData.year == yearMonth.year) {
+            return meterData.energyUse;
+          } else {
+            return 0;
+          }
+        });
+        let totalEnergyCost: number = _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
+          if (meterData.month == yearMonth.month && meterData.year == yearMonth.year) {
+            return meterData.energyCost;
+          } else {
+            return 0;
+          }
+        });
+        return {
+          time: yearMonth.month + ', ' + yearMonth.year,
+          energyUse: totalEnergyUse,
+          energyCost: totalEnergyCost
+        }
+
+      });
+    } else {
+      yearMonths = _.uniqWith(yearMonths, (a, b) => {
+        return (a.year == b.year)
+      });
+      resultData = yearMonths.map(yearMonth => {
+        let totalEnergyUse: number = _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
+          if (meterData.year == yearMonth.year) {
+            return meterData.energyUse;
+          } else {
+            return 0;
+          }
+        });
+        let totalEnergyCost: number = _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
+          if (meterData.year == yearMonth.year) {
+            return meterData.energyCost;
+          } else {
+            return 0;
+          }
+        });
+        return {
+          time: String(yearMonth.year),
+          energyUse: totalEnergyUse,
+          energyCost: totalEnergyCost
+        }
+      });
+    }
+
+    return resultData;
   }
 }
 

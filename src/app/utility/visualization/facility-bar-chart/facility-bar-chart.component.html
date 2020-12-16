@@ -1,0 +1,7 @@
+<!--should be bootstrap switch (may be not working cuz of version)-->
+<div class="form-check form-switch large">
+    <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" [(ngModel)]="sumByMonth" (change)="setUtilityData()">
+    <label class="form-check-label" for="flexSwitchCheckDefault">Data by month</label>
+</div>
+
+<div #utilityBarChart id="utilityBarChart"></div>

@@ -20,7 +20,10 @@ import { HelpPanelComponent } from './utility/help-panel/help-panel.component';
 
 import { CommonModule } from '@angular/common';
 
+
 import { PlotlyViaWindowModule } from 'angular-plotly.js';
+
+
 import { StyleGuideComponent } from './shared/style-guide/style-guide.component';
 import { LoadingComponent } from './shared/loading/loading.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
@@ -46,6 +49,8 @@ import { EditFacilityComponent } from './account-management/account/edit-facilit
 import { ImportPredictorsComponent } from './utility/predictor-data/import-predictors/import-predictors.component';
 import { EnergyUnitDropdownComponent } from './utility/meter-grouping/energy-unit-dropdown/energy-unit-dropdown.component';
 import { SettingsLabelPipe } from './shared/helper-pipes/settings-label.pipe';
+import { VisualizationComponent } from './utility/visualization/visualization.component';
+import { FacilityBarChartComponent } from './utility/visualization/facility-bar-chart/facility-bar-chart.component';
 
 @NgModule({
   declarations: [
@@ -80,7 +85,9 @@ import { SettingsLabelPipe } from './shared/helper-pipes/settings-label.pipe';
     EditFacilityComponent,
     ImportPredictorsComponent,
     EnergyUnitDropdownComponent,
-    SettingsLabelPipe
+    SettingsLabelPipe,
+    VisualizationComponent,
+    FacilityBarChartComponent
   ],
   imports: [
     BrowserModule,

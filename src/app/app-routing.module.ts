@@ -11,6 +11,7 @@ import { UtilityMeterDataComponent } from './utility/energy-consumption/utility-
 import { MeterGroupingComponent } from './utility/meter-grouping/meter-grouping.component';
 import { PredictorDataComponent } from './utility/predictor-data/predictor-data.component';
 import { CalanderizationComponent } from './utility/calanderization/calanderization.component';
+import { VisualizationComponent } from './utility/visualization/visualization.component';
 
 const routes: Routes = [
   { path: '', component: DashboardComponent },
@@ -35,6 +36,7 @@ const routes: Routes = [
         { path: 'mo-meter-data', component: CalanderizationComponent },
         { path: 'meter-groups', component: MeterGroupingComponent },
         { path: 'predictors', component: PredictorDataComponent },
+        { path: 'visualization', component: VisualizationComponent}
       ]
   },
   { path: 'style-guide', component: StyleGuideComponent },
