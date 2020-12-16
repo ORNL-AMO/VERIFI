@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { ElectricityDataFilter } from 'src/app/models/electricityFilter';
+import { ElectricityDataFilters, SupplyDemandChargeFilters, TaxAndOtherFilters } from 'src/app/models/electricityFilter';
 import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { UtilityMeterDataService } from '../utility-meter-data.service';
 
@@ -19,13 +19,15 @@ export class ImportMeterDataComponent implements OnInit {
   importError: string;
   quickView: Array<IdbUtilityMeterData>;
   import: Array<IdbUtilityMeterData>;
-  electricityDataFilters: Array<ElectricityDataFilter>;
+  supplyDemandCharge: SupplyDemandChargeFilters;
+  taxAndOther: TaxAndOtherFilters;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private utilityMeterDbService: UtilityMeterdbService, private utilityMeterDataService: UtilityMeterDataService) { }
 
   ngOnInit(): void {
-    this.electricityDataFilters = this.utilityMeterDataService.electricityInputFilters.getValue();
+    let electricityDataFilters: ElectricityDataFilters = this.utilityMeterDataService.electricityInputFilters.getValue();
+    this.taxAndOther = electricityDataFilters.taxAndOther;
+    this.supplyDemandCharge = electricityDataFilters.supplyDemandCharge;
   }
-
 
   meterDataImport(files: FileList) {
     // Clear with each upload

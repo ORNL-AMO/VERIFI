@@ -1,4 +1,4 @@
-import { ElectricityDataFilter } from './electricityFilter';
+import { ElectricityDataFilters } from './electricityFilter';
 
 
 export interface IdbAccount {
@@ -26,8 +26,8 @@ export interface IdbFacility {
     units: string,
     division: string,
     img: string,
-    tableElectricityFilters?: Array<ElectricityDataFilter>,
-    electricityInputFilters?: Array<ElectricityDataFilter>
+    tableElectricityFilters?: ElectricityDataFilters,
+    electricityInputFilters?: ElectricityDataFilters
     
 }
 
