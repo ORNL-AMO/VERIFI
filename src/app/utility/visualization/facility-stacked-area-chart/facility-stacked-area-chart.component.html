@@ -2,20 +2,19 @@
 <div class="row">
     <div class="col">
         <div class="form-check form-switch large">
-            <input class="form-check-input" type="checkbox" id="sumByMonthBar" [(ngModel)]="sumByMonth"
+            <input class="form-check-input" type="checkbox" id="sumByMonthStacked" [(ngModel)]="sumByMonth"
                 (change)="setUtilityData()">
-            <label class="form-check-label" for="sumByMonthBar">Data by month</label>
+            <label class="form-check-label" for="sumByMonthStacked">Data by month</label>
         </div>
-
     </div>
     <div class="col">
         <div class="form-check form-switch large pull-right" [hidden]="sumByMonth == true">
-            <input class="form-check-input" type="checkbox" id="removeIncompleteYearsBar"
+            <input class="form-check-input" type="checkbox" id="removeIncompleteYearsStacked"
                 [(ngModel)]="removeIncompleteYears" (change)="setUtilityData()">
-            <label class="form-check-label" for="removeIncompleteYearsBar">Remove Incomplete Years</label>
+            <label class="form-check-label" for="removeIncompleteYearsStacked">Remove Incomplete Years</label>
         </div>
     </div>
 </div>
 
 
-<div #utilityBarChart id="utilityBarChart"></div>
+<div #stackedAreaChart id="stackedAreaChart"></div>

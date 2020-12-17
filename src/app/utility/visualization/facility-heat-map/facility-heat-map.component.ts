@@ -4,7 +4,7 @@ import { Subscription } from 'rxjs';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbUtilityMeter } from 'src/app/models/idb';
-import { CalanderizationService } from '../../calanderization/calanderization.service';
+import { VisualizationService } from '../visualization.service';
 
 @Component({
   selector: 'app-facility-heat-map',
@@ -20,7 +20,7 @@ export class FacilityHeatMapComponent implements OnInit {
   months: Array<string>;
   years: Array<number>;
   constructor(private plotlyService: PlotlyService, private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private utilityMeterDbService: UtilityMeterdbService, private calanderizationService: CalanderizationService) { }
+    private utilityMeterDbService: UtilityMeterdbService, private vizualizationService: VisualizationService) { }
 
   ngOnInit(): void {
     this.facilityMetersSub = this.utilityMeterDataDbService.facilityMeterData.subscribe(data => {
@@ -33,6 +33,7 @@ export class FacilityHeatMapComponent implements OnInit {
   }
 
   ngAfterViewInit() {
+    this.drawChart();
   }
 
   drawChart() {
@@ -102,7 +103,7 @@ export class FacilityHeatMapComponent implements OnInit {
 
   setGraphData() {
     if (this.facilityMeters) {
-      let heatMapData: { resultData: Array<{ monthlyEnergy: Array<number>, monthlyCost: Array<number> }>, months: Array<string>, years: Array<number> } = this.calanderizationService.getMeterHeatMapData(this.facilityMeters);
+      let heatMapData: { resultData: Array<{ monthlyEnergy: Array<number>, monthlyCost: Array<number> }>, months: Array<string>, years: Array<number> } = this.vizualizationService.getMeterHeatMapData(this.facilityMeters);
       this.resultData = heatMapData.resultData;
       this.months = heatMapData.months;
       this.years = heatMapData.years;

@@ -5,33 +5,25 @@ import { Subscription } from 'rxjs';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbUtilityMeter } from 'src/app/models/idb';
+import { CalanderizationService } from '../../calanderization/calanderization.service';
 import { VisualizationService } from '../visualization.service';
 
 @Component({
-  selector: 'app-facility-bar-chart',
-  templateUrl: './facility-bar-chart.component.html',
-  styleUrls: ['./facility-bar-chart.component.css']
+  selector: 'app-facility-stacked-area-chart',
+  templateUrl: './facility-stacked-area-chart.component.html',
+  styleUrls: ['./facility-stacked-area-chart.component.css']
 })
-export class FacilityBarChartComponent implements OnInit {
-  /*Grouped bar chart
-    Group by utility
-    Bars are energy usage and cost by time
-    Month or year (user selection)
-  */
+export class FacilityStackedAreaChartComponent implements OnInit {
 
-
-  @ViewChild('utilityBarChart', { static: false }) utilityBarChart: ElementRef;
-
+  @ViewChild('stackedAreaChart', { static: false }) stackedAreaChart: ElementRef;
   facilityMetersSub: Subscription;
-
-
+  facilityMeters: Array<IdbUtilityMeter>;
   electricityData: Array<{ time: string, energyUse: number, energyCost: number }>;
   naturalGasData: Array<{ time: string, energyUse: number, energyCost: number }>;
   otherFuelsData: Array<{ time: string, energyUse: number, energyCost: number }>;
   waterData: Array<{ time: string, energyUse: number, energyCost: number }>;
   wasteWaterData: Array<{ time: string, energyUse: number, energyCost: number }>;
   otherUtilityData: Array<{ time: string, energyUse: number, energyCost: number }>;
-  facilityMeters: Array<IdbUtilityMeter>;
   sumByMonth: boolean = false;
   removeIncompleteYears: boolean = true;
   constructor(private plotlyService: PlotlyService, private utilityMeterDbService: UtilityMeterdbService,
@@ -52,7 +44,6 @@ export class FacilityBarChartComponent implements OnInit {
   ngAfterViewInit() {
     this.drawChart();
   }
-
   setUtilityData() {
     if (this.facilityMeters) {
       this.electricityData = this.getDataByUtility('Electricity', this.facilityMeters);
@@ -66,15 +57,16 @@ export class FacilityBarChartComponent implements OnInit {
   }
 
 
+
   drawChart() {
-    if (this.utilityBarChart) {
+    if (this.stackedAreaChart) {
       let traceData = new Array();
       if (this.electricityData.length != 0) {
         let trace = {
           x: this.electricityData.map(data => { return data.time }),
           y: this.electricityData.map(data => { return data.energyCost }),
           name: 'Electricity',
-          type: 'bar'
+          stackgroup: 'one'
         }
         traceData.push(trace);
       }
@@ -83,7 +75,7 @@ export class FacilityBarChartComponent implements OnInit {
           x: this.naturalGasData.map(data => { return data.time }),
           y: this.naturalGasData.map(data => { return data.energyCost }),
           name: 'Natural Gas',
-          type: 'bar'
+          stackgroup: 'one'
         };
         traceData.push(trace);
       }
@@ -92,7 +84,7 @@ export class FacilityBarChartComponent implements OnInit {
           x: this.otherFuelsData.map(data => { return data.time }),
           y: this.otherFuelsData.map(data => { return data.energyCost }),
           name: 'Other Fuels',
-          type: 'bar'
+          stackgroup: 'one'
         };
         traceData.push(trace);
       }
@@ -101,7 +93,7 @@ export class FacilityBarChartComponent implements OnInit {
           x: this.waterData.map(data => { return data.time }),
           y: this.waterData.map(data => { return data.energyCost }),
           name: 'Water',
-          type: 'bar'
+          stackgroup: 'one'
         };
         traceData.push(trace);
       }
@@ -110,7 +102,7 @@ export class FacilityBarChartComponent implements OnInit {
           x: this.wasteWaterData.map(data => { return data.time }),
           y: this.wasteWaterData.map(data => { return data.energyCost }),
           name: 'Waste Water',
-          type: 'bar'
+          stackgroup: 'one'
         };
         traceData.push(trace);
       }
@@ -119,16 +111,10 @@ export class FacilityBarChartComponent implements OnInit {
           x: this.otherUtilityData.map(data => { return data.time }),
           y: this.otherUtilityData.map(data => { return data.energyCost }),
           name: 'Other Utility',
-          type: 'bar'
+          stackgroup: 'one'
         };
         traceData.push(trace);
       }
-      let xAxisTitle: string = 'Year';
-      if(this.sumByMonth){
-        xAxisTitle = 'Month';        
-      }
-
-
       var layout = {
         barmode: 'group',
         title: {
@@ -138,8 +124,9 @@ export class FacilityBarChartComponent implements OnInit {
           },
         },
         xaxis: {
+          autotick: false,
           title: {
-            text: xAxisTitle,
+            text: 'Year',
             font: {
               size: 18
             },
@@ -156,8 +143,7 @@ export class FacilityBarChartComponent implements OnInit {
         }
       };
       var config = { responsive: true };
-
-      this.plotlyService.newPlot(this.utilityBarChart.nativeElement, traceData, layout, config);
+      this.plotlyService.newPlot(this.stackedAreaChart.nativeElement, traceData, layout, config);
     }
   }
 

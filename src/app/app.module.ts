@@ -52,6 +52,7 @@ import { SettingsLabelPipe } from './shared/helper-pipes/settings-label.pipe';
 import { VisualizationComponent } from './utility/visualization/visualization.component';
 import { FacilityBarChartComponent } from './utility/visualization/facility-bar-chart/facility-bar-chart.component';
 import { FacilityHeatMapComponent } from './utility/visualization/facility-heat-map/facility-heat-map.component';
+import { FacilityStackedAreaChartComponent } from './utility/visualization/facility-stacked-area-chart/facility-stacked-area-chart.component';
 
 @NgModule({
   declarations: [
@@ -89,7 +90,8 @@ import { FacilityHeatMapComponent } from './utility/visualization/facility-heat-
     SettingsLabelPipe,
     VisualizationComponent,
     FacilityBarChartComponent,
-    FacilityHeatMapComponent
+    FacilityHeatMapComponent,
+    FacilityStackedAreaChartComponent
   ],
   imports: [
     BrowserModule,
