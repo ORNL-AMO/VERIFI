@@ -51,6 +51,7 @@ import { EnergyUnitDropdownComponent } from './utility/meter-grouping/energy-uni
 import { SettingsLabelPipe } from './shared/helper-pipes/settings-label.pipe';
 import { VisualizationComponent } from './utility/visualization/visualization.component';
 import { FacilityBarChartComponent } from './utility/visualization/facility-bar-chart/facility-bar-chart.component';
+import { FacilityHeatMapComponent } from './utility/visualization/facility-heat-map/facility-heat-map.component';
 
 @NgModule({
   declarations: [
@@ -87,7 +88,8 @@ import { FacilityBarChartComponent } from './utility/visualization/facility-bar-
     EnergyUnitDropdownComponent,
     SettingsLabelPipe,
     VisualizationComponent,
-    FacilityBarChartComponent
+    FacilityBarChartComponent,
+    FacilityHeatMapComponent
   ],
   imports: [
     BrowserModule,

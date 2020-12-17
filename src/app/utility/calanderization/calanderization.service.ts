@@ -143,9 +143,54 @@ export class CalanderizationService {
         }
       });
     }
-
     return resultData;
   }
+
+  getMeterHeatMapData(meters: Array<IdbUtilityMeter>): { resultData: Array<{ monthlyEnergy: Array<number>, monthlyCost: Array<number> }>, months: Array<string>, years: Array<number> } {
+    let months: Array<string> = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    //calanderize meters
+    let calanderizedMeterData: Array<CalanderizedMeter> = this.calanderizeFacilityMeters(meters);
+    //TODO: convert data here?
+
+    //create array of just the meter data
+    let combindedCalanderizedMeterData: Array<MonthlyData> = calanderizedMeterData.flatMap(meterData => {
+      return meterData.monthlyData;
+    });
+    //create array of the uniq months and years
+    let years: Array<number> = combindedCalanderizedMeterData.map(data => { return data.year });
+    years = _.uniq(years);
+    years = _.orderBy(years, (year) => { return year }, ['asc', 'desc']);
+    let resultData: Array<{ monthlyEnergy: Array<number>, monthlyCost: Array<number> }> = new Array();
+    years.forEach(year => {
+      let yearData: { monthlyEnergy: Array<number>, monthlyCost: Array<number> } = { monthlyEnergy: new Array(), monthlyCost: new Array() };
+      months.forEach(month => {
+        let totalCost: number = _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
+          if (meterData.year == year && meterData.month == month) {
+            return meterData.energyUse;
+          } else {
+            return 0;
+          }
+        });
+        let totalEnergy: number = _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
+          if (meterData.year == year && meterData.month == month) {
+            return meterData.energyUse;
+          } else {
+            return 0;
+          }
+        });
+        yearData.monthlyCost.push(totalCost)
+        yearData.monthlyEnergy.push(totalEnergy);
+      });
+      resultData.push(yearData);
+    });
+    return {
+      months: months,
+      years: years,
+      resultData: resultData
+    }
+  }
+
+
 }
 
 export interface CalanderizedMeter {
