@@ -1,84 +1,28 @@
-<!-- <div class="banner">
-  <h3>Dashboard</h3>
+<div class="banner">
+  <h3 *ngIf="!selectedAccount">
+    Dashboard
+  </h3>
+  <h3 *ngIf="selectedAccount">
+    {{selectedAccount.name}}
+    <h3 *ngIf="selectedFacility && facilityDashboard">
+      / {{selectedFacility.name}}
+    </h3>
+  </h3>
 </div>
 <div class="dashboard-nav">
   <ul>
-    <li>Summary</li>
-    <li class="active">Utilities</li>
-    <li>Water</li>
+    <!-- <li >Summary</li>
+    <li [disabled] class="active">Utilities</li>
+    <li>Water</li> -->
+    <li routerLink="/account-summary/overview" [routerLinkActive]="['active']">Summary</li>
+    <li routerLink="utilities" [routerLinkActive]="['active']">All Utilitie</li>
+    <!-- <li><a routerLink="meter-groups" [routerLinkActive]="['active']">Meter Grouping</a></li>
+    <li><a routerLink="predictors" [routerLinkActive]="['active']">Predictors</a></li>
+    <li><a routerLink="visualization" [routerLinkActive]="['active']">Data Visualization</a></li> -->
   </ul>
   <button class="btn btn-outline item-right">Generate Report</button>
 </div>
 <div class="wrapper main-content">
-  
-  <div class="row">
-    <div class="col plot">
-      <p>Energy Use (last 30 days)</p>
-      <p class="display-lg center bold no-margin">{{avgUse.toLocaleString(undefined, {maximumFractionDigits: 2})}}</p>
-      <p class="center">vs <span class="highlight">{{avgUse.toLocaleString(undefined, {maximumFractionDigits: 2})}}</span> average use</p>
-    </div>
-    <div class="col plot">
-      <p>Average Energy Cost</p>
-      <p class="display-lg center bold no-margin">${{avgCost.toLocaleString(undefined, {maximumFractionDigits: 2})}}</p>
-      <p class="center">average cost of all utility meters</p>
-    </div>
-    <div class="col plot">
-      <p>Energy Saving Progress</p>
-      <p class="display-lg center bold no-margin">30%</p>
-      <div class="progress">
-        <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" style="width:30%"></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="row">
-    <div class="col plot">
-      <p>Energy Usage and Cost Per Month (2020)</p>
-      <plotly-plot [data]="graph1.data" [layout]="graph1.layout" [config]="graph1.config"></plotly-plot>
-      <!--<plotly-plot [data]="graph2.data" [layout]="graph2.layout" [config]="graph2.config"></plotly-plot>--
-    </div>
-  </div>
-
-  <div class="row">
-    <div class="col plot">
-      <p>Energy Usage Per Type</p>
-      <plotly-plot [data]="graph3.data" [layout]="graph3.layout"></plotly-plot>
-    </div>
-    <div class="col plot">
-      <p>Company Average vs Facility Energy Usage Per Month (2020)</p>
-      <plotly-plot [data]="graph4.data" [layout]="graph4.layout"></plotly-plot>
-    </div>
-  </div>
-
-  <div class="row">
-    <div class="col plot">
-      <p>Meter Performance Compared To Facility Average</p>
-      <table>
-        <tr>
-            <th>Meter #</th>
-            <th>Account #</th>
-            <th>Type</th>
-            <th>Energy Cost</th>
-            <th>Energy Vol</th>
-        </tr>
-        <tr *ngFor="let meterLists of meterList">
-          <td>{{meterLists.meterNumber}}</td>
-          <td>{{meterLists.accountNumber}}</td>
-          <td>{{meterLists.type}}</td>
-          <td>
-            <i [hidden]="meterLists.avgCostCompare > 1" class="fa fa-caret-up green"></i>
-            <i [hidden]="meterLists.avgCostCompare < 1" class="fa fa-caret-down red"></i>
-            {{meterLists.avgCostCompare}}
-          </td>
-          <td>
-            <i [hidden]="meterLists.avgUseCompare > 1" class="fa fa-caret-up green"></i>
-            <i [hidden]="meterLists.avgUseCompare < 1" class="fa fa-caret-down red"></i>
-            {{meterLists.avgUseCompare}}
-          </td>
-        </tr>
-      </table>
-    </div>
-  </div>
-
+  <router-outlet></router-outlet>
 </div>
-<div class="measurFooter"></div> -->
+<div class="measurFooter"></div>

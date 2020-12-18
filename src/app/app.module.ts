@@ -53,6 +53,10 @@ import { VisualizationComponent } from './utility/visualization/visualization.co
 import { FacilityBarChartComponent } from './utility/visualization/facility-bar-chart/facility-bar-chart.component';
 import { FacilityHeatMapComponent } from './utility/visualization/facility-heat-map/facility-heat-map.component';
 import { FacilityStackedAreaChartComponent } from './utility/visualization/facility-stacked-area-chart/facility-stacked-area-chart.component';
+import { FacilitySummaryComponent } from './dashboard/facility-summary/facility-summary.component';
+import { AccountSummaryComponent } from './dashboard/account-summary/account-summary.component';
+import { FacilityOverviewComponent } from './dashboard/facility-summary/facility-overview/facility-overview.component';
+import { AccountOverviewComponent } from './dashboard/account-summary/account-overview/account-overview.component';
 
 @NgModule({
   declarations: [
@@ -91,7 +95,11 @@ import { FacilityStackedAreaChartComponent } from './utility/visualization/facil
     VisualizationComponent,
     FacilityBarChartComponent,
     FacilityHeatMapComponent,
-    FacilityStackedAreaChartComponent
+    FacilityStackedAreaChartComponent,
+    FacilitySummaryComponent,
+    AccountSummaryComponent,
+    FacilityOverviewComponent,
+    AccountOverviewComponent
   ],
   imports: [
     BrowserModule,
