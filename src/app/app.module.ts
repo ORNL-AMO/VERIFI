@@ -57,6 +57,7 @@ import { FacilitySummaryComponent } from './dashboard/facility-summary/facility-
 import { AccountSummaryComponent } from './dashboard/account-summary/account-summary.component';
 import { FacilityOverviewComponent } from './dashboard/facility-summary/facility-overview/facility-overview.component';
 import { AccountOverviewComponent } from './dashboard/account-summary/account-overview/account-overview.component';
+import { FacilitiesTableComponent } from './dashboard/account-summary/account-overview/facilities-table/facilities-table.component';
 
 @NgModule({
   declarations: [
@@ -99,7 +100,8 @@ import { AccountOverviewComponent } from './dashboard/account-summary/account-ov
     FacilitySummaryComponent,
     AccountSummaryComponent,
     FacilityOverviewComponent,
-    AccountOverviewComponent
+    AccountOverviewComponent,
+    FacilitiesTableComponent
   ],
   imports: [
     BrowserModule,

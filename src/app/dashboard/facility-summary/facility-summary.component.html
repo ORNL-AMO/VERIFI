@@ -9,7 +9,10 @@
       <li><a routerLink="predictors" [routerLinkActive]="['active']">Predictors</a></li>
       <li><a routerLink="visualization" [routerLinkActive]="['active']">Data Visualization</a></li> -->
     </ul>
-    <button class="btn btn-outline item-right">Generate Report</button>
+    <ul class="item-right">
+      <li routerLink="/facility-summary/management" [routerLinkActive]="['active']">Manage</li>
+    </ul>
+    <!-- <button class="btn btn-outline item-right">Generate Report</button> -->
 </div>
 <div class="wrapper main-content">
     <router-outlet></router-outlet>

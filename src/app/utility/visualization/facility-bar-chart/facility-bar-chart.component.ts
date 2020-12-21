@@ -131,19 +131,19 @@ export class FacilityBarChartComponent implements OnInit {
 
       var layout = {
         barmode: 'group',
-        title: {
-          text: 'Utility Costs',
-          font: {
-            size: 24
-          },
-        },
+        // title: {
+        //   text: 'Utility Costs',
+        //   font: {
+        //     size: 24
+        //   },
+        // },
         xaxis: {
-          title: {
-            text: xAxisTitle,
-            font: {
-              size: 18
-            },
-          },
+          // title: {
+          //   text: xAxisTitle,
+          //   font: {
+          //     size: 18
+          //   },
+          // },
         },
         yaxis: {
           title: {
@@ -153,7 +153,8 @@ export class FacilityBarChartComponent implements OnInit {
             },
           },
           hoverformat: '$,.2f'
-        }
+        },
+        margin: {r: 0, t: 50}
       };
       var config = { responsive: true };
 

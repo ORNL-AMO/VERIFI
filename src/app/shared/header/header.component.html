@@ -13,9 +13,9 @@
             <div class="facilityMenu">
                 <div class="currentFacility" (click)="toggleFacilityMenu()">
                     <i class="fa fa-industry item-left"></i>
-                    <span>{{activeAccount.name}}</span>
+                    <span>{{activeAccount.name}} {{activeAccount.id}}</span>
                     <p *ngIf="!activeFacility">All Facilites <i class="fa fa-caret-down"></i></p>
-                    <p *ngIf="activeFacility">{{activeFacility.name}} <i class="fa fa-caret-down"></i></p>
+                    <p *ngIf="activeFacility">{{activeFacility.name}} {{activeFacility.id}} <i class="fa fa-caret-down"></i></p>
                 </div>
                 <div class="dropdown" [class.open]="facilityMenu == true">
                     <div class="arrow-up"></div>
@@ -27,7 +27,7 @@
                         <p class="small">Switch Facility <i class="fa fa-random item-right"></i></p>
                         <p (click)="switchFacility(facility)" *ngFor="let facility of facilityList">
                             {{facility.name}}
-                            <i class="fa fa-cog item-right" routerLink="/account/facility"
+                            <i class="fa fa-cog item-right" routerLink="/facility-summary/management"
                                 title="Manage Facility Settings"></i>
                         </p>
                     </div>
@@ -40,7 +40,7 @@
                 <i class="fa fa-ellipsis-v" (click)="toggleAccountMenu()"></i>
                 <div class="dropdown" [class.open]="accountMenu == true">
                     <div class="arrow-up"></div>
-                    <div class="currentAccount" routerLink="/account/account">
+                    <div class="currentAccount" routerLink="/account-summary/management">
                         <i class="fa fa-user-circle-o item-left"></i>
                         <p>{{activeAccount.name}}</p>
                         <span class="small">Manage Account</span>

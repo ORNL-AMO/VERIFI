@@ -47,7 +47,7 @@ export class HeaderComponent implements OnInit {
   ) {
     // Close menus on navigation
     router.events.subscribe((event: Event) => {
-      console.log(event);
+      // console.log(event);
       if (event instanceof NavigationStart) {
         this.accountMenu = false;
         this.facilityMenu = false;

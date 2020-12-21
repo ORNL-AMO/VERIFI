@@ -19,27 +19,13 @@ import { AccountOverviewComponent } from './dashboard/account-summary/account-ov
 
 const routes: Routes = [
   {
-    path: '',  
+    path: '',
     component: DashboardComponent,
     children: [
       {
         path: '',
         pathMatch: 'full',
         redirectTo: 'account-summary'
-      },
-      {
-        path: 'facility-summary', component: FacilitySummaryComponent,
-        children: [
-          {
-            path: 'overview',
-            component: FacilityOverviewComponent
-          },
-          {
-            path: '',
-            pathMatch: 'full',
-            redirectTo: 'overview'
-          }
-        ]
       },
       {
         path: 'account-summary', component: AccountSummaryComponent,
@@ -52,13 +38,33 @@ const routes: Routes = [
             path: '',
             pathMatch: 'full',
             redirectTo: 'overview'
+          },
+          {
+            path: 'management',
+            component: AccountComponent
+          }
+        ]
+      },
+      {
+        path: 'facility-summary', component: FacilitySummaryComponent,
+        children: [
+          {
+            path: 'overview',
+            component: FacilityOverviewComponent
+          },
+          {
+            path: '',
+            pathMatch: 'full',
+            redirectTo: 'overview'
+          },
+          {
+            path: 'management',
+            component: FacilityComponent
           }
         ]
       }
     ]
   },
-  { path: 'account/account', component: AccountComponent },
-  { path: 'account/facility', component: FacilityComponent },
   {
     path: 'utility',
     component: UtilityComponent,

@@ -75,6 +75,12 @@ p.display-lg {
   display: inline-block;
   padding: 10px;
 }
+
+.dashboard-nav ul li:hover {
+  cursor: pointer;
+  background-color: #efefef;
+}
+
 .dashboard-nav li.active {
   border-bottom: 3px solid #2c386b;
 }
@@ -83,7 +89,12 @@ p.display-lg {
 }
 
 h3 a{
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   color: white;
+  /* text-decoration: underline; */
+}
+
+h3 a:hover{
   text-decoration: underline;
+  cursor: pointer;
 }

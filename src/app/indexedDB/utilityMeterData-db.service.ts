@@ -1,8 +1,9 @@
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { Injectable } from '@angular/core';
-import { IdbFacility, IdbUtilityMeterData } from '../models/idb';
+import { IdbAccount, IdbFacility, IdbUtilityMeterData } from '../models/idb';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { FacilitydbService } from './facility-db.service';
+import { AccountdbService } from './account-db.service';
 
 @Injectable({
     providedIn: 'root'
@@ -10,11 +11,19 @@ import { FacilitydbService } from './facility-db.service';
 export class UtilityMeterDatadbService {
 
     facilityMeterData: BehaviorSubject<Array<IdbUtilityMeterData>>;
-    constructor(private dbService: NgxIndexedDBService, private facilityDbService: FacilitydbService) {
+    accountMeterData: BehaviorSubject<Array<IdbUtilityMeterData>>;
+    constructor(private dbService: NgxIndexedDBService, private facilityDbService: FacilitydbService, private accountDbService: AccountdbService) {
         this.facilityMeterData = new BehaviorSubject<Array<IdbUtilityMeterData>>(new Array());
+        this.accountMeterData = new BehaviorSubject<Array<IdbUtilityMeterData>>(new Array());
+
         this.facilityDbService.selectedFacility.subscribe(() => {
             this.setFacilityMeterData();
         });
+
+        this.accountDbService.selectedAccount.subscribe(() => {
+            console.log('SET')
+            this.setAccountMeterData();
+        })
     }
 
     setFacilityMeterData() {
@@ -22,6 +31,17 @@ export class UtilityMeterDatadbService {
         if (facility) {
             this.getAllByIndexRange('facilityId', facility.id).subscribe(meterData => {
                 this.facilityMeterData.next(meterData);
+            });
+        }
+    }
+
+    setAccountMeterData() {
+        let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+        if (account) {
+            console.log('get all' + account.id);
+            this.getAllByIndexRange('accountId', account.id).subscribe(meterData => {
+                console.log(meterData);
+                this.accountMeterData.next(meterData);
             });
         }
     }
@@ -50,18 +70,21 @@ export class UtilityMeterDatadbService {
     add(meterData: IdbUtilityMeterData): void {
         this.dbService.add('utilityMeterData', meterData).subscribe(() => {
             this.setFacilityMeterData();
+            this.setAccountMeterData();
         });
     }
 
     update(meterData: IdbUtilityMeterData): void {
         this.dbService.update('utilityMeterData', meterData).subscribe(() => {
             this.setFacilityMeterData();
+            this.setAccountMeterData();
         });
     }
 
     deleteIndex(meterDataId: number): void {
         this.dbService.delete('utilityMeterData', meterDataId).subscribe(() => {
             this.setFacilityMeterData();
+            this.setAccountMeterData();
         });
     }
 
@@ -126,12 +149,12 @@ export class UtilityMeterDatadbService {
     }
 
     getMeterDataFromMeterId(meterId: number): Array<IdbUtilityMeterData> {
-        let facilityMeterData: Array<IdbUtilityMeterData> = this.facilityMeterData.getValue();
+        let facilityMeterData: Array<IdbUtilityMeterData> = this.accountMeterData.getValue();
         return facilityMeterData.filter(meterData => { return meterData.meterId == meterId });
     }
 
     getMeterDataFromMeterIds(meterIds: Array<number>): Array<IdbUtilityMeterData> {
-        let facilityMeterData: Array<IdbUtilityMeterData> = this.facilityMeterData.getValue();
+        let facilityMeterData: Array<IdbUtilityMeterData> = this.accountMeterData.getValue();
         return facilityMeterData.filter(meterData => { return meterIds.includes(meterData.meterId) });
     }
 }

@@ -1,0 +1,51 @@
+<table>
+    <thead>
+        <tr>
+            <th>Facility</th>
+            <th># of Meters</th>
+            <th>Energy Usage</th>
+            <th>Energy Cost</th>
+            <!-- <th></th> -->
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let summary of facilitiesSummary">
+            <td>
+                <a (click)="selectFacility(summary.facility)">{{summary.facility.name}}</a>
+            </td>
+            <td>
+                {{summary.numberOfMeters}}
+            </td>
+            <td>
+                {{summary.energyUsage | number:'1.0-0'}}
+
+            </td>
+            <td>
+                {{summary.energyCost | currency : 'USD' : 'symbol' : '1.0-0' }}
+            </td>
+            <!-- <td class="w-50">
+                <div class="progress">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-success"
+                        [ngStyle]="{'width.%': (summary.energyCost / totalEnergyCost * 100) }"></div>
+                </div>
+            </td> -->
+        </tr>
+    </tbody>
+    <tfoot>
+        <tr>
+            <th>
+                Total
+            </th>
+            <th>
+                {{totalMeters}}
+            </th>
+            <th>
+                {{totalEnergyUsage | number:'1.0-0'}}
+            </th>
+            <th>
+                {{totalEnergyCost | currency : 'USD' : 'symbol' : '1.0-0' }}
+            </th>
+            <!-- <td></td> -->
+        </tr>
+    </tfoot>
+</table>
