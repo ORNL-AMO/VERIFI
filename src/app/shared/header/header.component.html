@@ -1,4 +1,4 @@
-<div id="header" role="header" *ngIf="activeAccount && activeFacility">
+<div id="header" role="header" *ngIf="activeAccount">
     <div class="row resetmargin">
         <div class="col-lg-2">
             <h2>VERIFI</h2>
@@ -14,15 +14,21 @@
                 <div class="currentFacility" (click)="toggleFacilityMenu()">
                     <i class="fa fa-industry item-left"></i>
                     <span>{{activeAccount.name}}</span>
-                    <p>{{activeFacility.name}} <i class="fa fa-caret-down"></i></p>
+                    <p *ngIf="!activeFacility">All Facilites <i class="fa fa-caret-down"></i></p>
+                    <p *ngIf="activeFacility">{{activeFacility.name}} <i class="fa fa-caret-down"></i></p>
                 </div>
                 <div class="dropdown" [class.open]="facilityMenu == true">
                     <div class="arrow-up"></div>
-                    <div class="facilities">  
+                    <div class="facilities">
+                        <p (click)="switchFacility(undefined)">
+                            All Facilities
+                        </p>
+                        <hr>
                         <p class="small">Switch Facility <i class="fa fa-random item-right"></i></p>
                         <p (click)="switchFacility(facility)" *ngFor="let facility of facilityList">
                             {{facility.name}}
-                           <i class="fa fa-cog item-right" routerLink="/account/facility" title="Manage Facility Settings"></i>
+                            <i class="fa fa-cog item-right" routerLink="/account/facility"
+                                title="Manage Facility Settings"></i>
                         </p>
                     </div>
                     <!--<hr>
@@ -54,7 +60,8 @@
 <div id="switchAccounts" [class.open]="switchAccountMenu == true">
     <h5>Switch Account</h5>
     <div class="accounts">
-        <div class="account" [class.active]="activeAccount.id === account.id" (click)="switchAccount(account)" *ngFor="let account of accountList">
+        <div class="account" [class.active]="activeAccount.id === account.id" (click)="switchAccount(account)"
+            *ngFor="let account of accountList">
             <!--<i class="fa fa-user-circle-o item-left"></i>-->
             <p class="company item-left">{{account.name}}</p>
             <p class="facilityCount item-right">{{account.facilityCount}}</p>

@@ -1,1 +1,16 @@
-<router-outlet></router-outlet>
+<div class="dashboard-nav">
+    <ul>
+        <!-- <li >Summary</li>
+      <li [disabled] class="active">Utilities</li>
+      <li>Water</li> -->
+        <li routerLink="/facility-summary/overview" [routerLinkActive]="['active']">Summary</li>
+        <!-- <li routerLink="utilities" [routerLinkActive]="['active']">All Utilities</li> -->
+        <!-- <li><a routerLink="meter-groups" [routerLinkActive]="['active']">Meter Grouping</a></li>
+      <li><a routerLink="predictors" [routerLinkActive]="['active']">Predictors</a></li>
+      <li><a routerLink="visualization" [routerLinkActive]="['active']">Data Visualization</a></li> -->
+    </ul>
+    <button class="btn btn-outline item-right">Generate Report</button>
+</div>
+<div class="wrapper main-content">
+    <router-outlet></router-outlet>
+</div>

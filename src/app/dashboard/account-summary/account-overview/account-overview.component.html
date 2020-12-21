@@ -1,1 +1,32 @@
-<p>account-overview works!</p>
+<div class="row">
+    <div class="col plot">
+        <p>Account Facilities</p>
+        <table>
+            <tr>
+                <th>Facility</th>
+                <th>Location</th>
+                <th># of Meters</th>
+                <th>Energy Usage</th>
+                <th>Energy Cost</th>
+            </tr>
+            <tr *ngFor="let facility of accountFacilities">
+                <td>
+                    <a (click)="selectFacility(facility)">{{facility.name}}</a>
+                </td>
+                <td></td>
+                <td></td>
+                <td>
+                    <!-- <i [hidden]="meterLists.avgCostCompare > 1" class="fa fa-caret-up green"></i>
+                    <i [hidden]="meterLists.avgCostCompare < 1" class="fa fa-caret-down red"></i>
+                    {{meterLists.avgCostCompare}} -->
+
+                </td>
+                <td>
+                    <!-- <i [hidden]="meterLists.avgUseCompare > 1" class="fa fa-caret-up green"></i>
+                    <i [hidden]="meterLists.avgUseCompare < 1" class="fa fa-caret-down red"></i>
+                    {{meterLists.avgUseCompare}} -->
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>

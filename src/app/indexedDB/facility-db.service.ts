@@ -65,16 +65,18 @@ export class FacilitydbService {
                 } else {
                     this.selectedFacility.next(updatedFacility);
                 }
-            } else {
+            } 
+            else {
                 this.selectedFacility.next(accountFacilities[0]);
             }
-        } else {
-            let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-            if (selectedAccount) {
-                let newFacility: IdbFacility = this.getNewIdbFacility(selectedAccount);
-                this.add(newFacility);
-            }
         }
+        //  else {
+        //     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+        //     if (selectedAccount) {
+        //         let newFacility: IdbFacility = this.getNewIdbFacility(selectedAccount);
+        //         this.add(newFacility);
+        //     }
+        // }
     }
 
 

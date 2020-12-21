@@ -81,3 +81,9 @@ p.display-lg {
 .bg-success {
   background-color: #6abb2e!important;
 }
+
+h3 a{
+  font-size: 1.5rem;
+  color: white;
+  text-decoration: underline;
+}

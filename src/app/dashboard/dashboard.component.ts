@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AccountdbService } from '../indexedDB/account-db.service';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
 import { IdbAccount, IdbFacility } from '../models/idb';
+import { Router, Event, NavigationStart, NavigationEnd } from '@angular/router';
 
 @Component({
   selector: 'app-dashboard',
@@ -18,22 +18,17 @@ export class DashboardComponent implements OnInit {
   selectedFacility: IdbFacility;
   selectedFacilitySub: Subscription;
   facilityDashboard: boolean;
-  constructor(private accountDbService: AccountdbService, private facilityDbService: FacilitydbService, private activatedRoute: ActivatedRoute) {
+  constructor(private accountDbService: AccountdbService, private facilityDbService: FacilitydbService,
+    router: Router) {
+    // Close menus on navigation
+    router.events.subscribe((event: Event) => {
+      if (event instanceof NavigationEnd) {
+        this.facilityDashboard = event.urlAfterRedirects.includes('facility-summary');
+      }
+    });
   }
 
   ngOnInit() {
-    this.activatedRoute.firstChild.url.subscribe(val => {
-      this.facilityDashboard = (val[0].path != 'account-summary')
-    })
-
-    this.activatedRoute.data.subscribe(val => {
-      console.log(val);
-    })
-    this.activatedRoute.url.subscribe(val => {
-      console.log(val)
-    })
-
-
     this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(val => {
       this.selectedAccount = val;
     });

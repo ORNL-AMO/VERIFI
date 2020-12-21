@@ -2,27 +2,13 @@
   <h3 *ngIf="!selectedAccount">
     Dashboard
   </h3>
-  <h3 *ngIf="selectedAccount">
+  <h3 *ngIf="selectedAccount && selectedFacility && facilityDashboard">
+    <a routerLink="/account-summary" [routerLinkActive]="['active']">{{selectedAccount.name}}</a>
+    / {{selectedFacility.name}}
+  </h3>
+  <h3 *ngIf="selectedAccount && !facilityDashboard">
     {{selectedAccount.name}}
-    <h3 *ngIf="selectedFacility && facilityDashboard">
-      / {{selectedFacility.name}}
-    </h3>
   </h3>
 </div>
-<div class="dashboard-nav">
-  <ul>
-    <!-- <li >Summary</li>
-    <li [disabled] class="active">Utilities</li>
-    <li>Water</li> -->
-    <li routerLink="/account-summary/overview" [routerLinkActive]="['active']">Summary</li>
-    <li routerLink="utilities" [routerLinkActive]="['active']">All Utilitie</li>
-    <!-- <li><a routerLink="meter-groups" [routerLinkActive]="['active']">Meter Grouping</a></li>
-    <li><a routerLink="predictors" [routerLinkActive]="['active']">Predictors</a></li>
-    <li><a routerLink="visualization" [routerLinkActive]="['active']">Data Visualization</a></li> -->
-  </ul>
-  <button class="btn btn-outline item-right">Generate Report</button>
-</div>
-<div class="wrapper main-content">
-  <router-outlet></router-outlet>
-</div>
+<router-outlet></router-outlet>
 <div class="measurFooter"></div>
