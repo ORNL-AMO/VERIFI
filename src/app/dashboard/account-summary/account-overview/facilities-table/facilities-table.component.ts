@@ -25,25 +25,11 @@ export class FacilitiesTableComponent implements OnInit {
 
   ngOnInit(): void {
     this.accountFacilitiesSub = this.utilityMeterDataDbService.accountMeterData.subscribe(val => {
-      console.log(val);
       this.facilitiesSummary = this.accountSummaryService.getAccountFacilitesSummary();
       this.totalEnergyUsage = _.sumBy(this.facilitiesSummary, 'energyUsage');
       this.totalMeters = _.sumBy(this.facilitiesSummary, 'numberOfMeters');
       this.totalEnergyCost = _.sumBy(this.facilitiesSummary, 'energyCost');
     });
-
-    // this.utilityMeterDbService.getAll().subscribe(val => {
-    //   console.log(val.length);
-    //   val.forEach(meterData => {
-    //     if (meterData.facilityId == 2 && meterData.accountId != 2) {
-    //       console.log('update')
-    //       meterData.accountId = 2;
-    //       this.utilityMeterDbService.update(meterData);
-    //     }
-    //   })
-    // })
-
-
   }
 
   ngOnDestroy() {

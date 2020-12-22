@@ -21,7 +21,6 @@ export class UtilityMeterDatadbService {
         });
 
         this.accountDbService.selectedAccount.subscribe(() => {
-            console.log('SET')
             this.setAccountMeterData();
         })
     }
@@ -38,9 +37,7 @@ export class UtilityMeterDatadbService {
     setAccountMeterData() {
         let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
         if (account) {
-            console.log('get all' + account.id);
             this.getAllByIndexRange('accountId', account.id).subscribe(meterData => {
-                console.log(meterData);
                 this.accountMeterData.next(meterData);
             });
         }
