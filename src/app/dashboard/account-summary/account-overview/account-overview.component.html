@@ -34,12 +34,13 @@
 
 <div class="row">
     <div class="col plot">
-        <p class="mb-0">Facility Energy Costs</p>
-        <!-- <plotly-plot [data]="graph3.data" [layout]="graph3.layout"></plotly-plot> -->
-        <app-energy-use-donut></app-energy-use-donut>
+        <p>Monthly Energy Costs</p>
+        <app-energy-use-heat-map></app-energy-use-heat-map>
     </div>
+</div>
+<div class="row">
     <div class="col plot">
-        <p>Company Average vs Facility Energy Usage Per Month (2020)</p>
-        <!-- <plotly-plot [data]="graph4.data" [layout]="graph4.layout"></plotly-plot> -->
+        <p class="mb-0">Facility Energy Costs</p>
+        <app-energy-use-donut></app-energy-use-donut>
     </div>
 </div>

@@ -1,10 +1,11 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbUtilityMeter } from 'src/app/models/idb';
-import { VisualizationService } from '../visualization.service';
+import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
+import { HeatMapData, VisualizationService } from '../visualization.service';
 
 @Component({
   selector: 'app-facility-heat-map',
@@ -20,7 +21,7 @@ export class FacilityHeatMapComponent implements OnInit {
   months: Array<string>;
   years: Array<number>;
   constructor(private plotlyService: PlotlyService, private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private utilityMeterDbService: UtilityMeterdbService, private vizualizationService: VisualizationService) { }
+    private utilityMeterDbService: UtilityMeterdbService, private vizualizationService: VisualizationService, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
     this.facilityMetersSub = this.utilityMeterDataDbService.facilityMeterData.subscribe(data => {
@@ -103,7 +104,8 @@ export class FacilityHeatMapComponent implements OnInit {
 
   setGraphData() {
     if (this.facilityMeters) {
-      let heatMapData: { resultData: Array<{ monthlyEnergy: Array<number>, monthlyCost: Array<number> }>, months: Array<string>, years: Array<number> } = this.vizualizationService.getMeterHeatMapData(this.facilityMeters);
+      let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+      let heatMapData: HeatMapData = this.vizualizationService.getMeterHeatMapData(this.facilityMeters, selectedFacility.name, true);
       this.resultData = heatMapData.resultData;
       this.months = heatMapData.months;
       this.years = heatMapData.years;

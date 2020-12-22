@@ -59,6 +59,7 @@ import { FacilityOverviewComponent } from './dashboard/facility-summary/facility
 import { AccountOverviewComponent } from './dashboard/account-summary/account-overview/account-overview.component';
 import { FacilitiesTableComponent } from './dashboard/account-summary/account-overview/facilities-table/facilities-table.component';
 import { EnergyUseDonutComponent } from './dashboard/account-summary/account-overview/energy-use-donut/energy-use-donut.component';
+import { EnergyUseHeatMapComponent } from './dashboard/account-summary/account-overview/energy-use-heat-map/energy-use-heat-map.component';
 
 @NgModule({
   declarations: [
@@ -103,7 +104,8 @@ import { EnergyUseDonutComponent } from './dashboard/account-summary/account-ove
     FacilityOverviewComponent,
     AccountOverviewComponent,
     FacilitiesTableComponent,
-    EnergyUseDonutComponent
+    EnergyUseDonutComponent,
+    EnergyUseHeatMapComponent
   ],
   imports: [
     BrowserModule,
