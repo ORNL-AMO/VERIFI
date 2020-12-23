@@ -13,9 +13,9 @@
             <div class="facilityMenu">
                 <div class="currentFacility" (click)="toggleFacilityMenu()">
                     <i class="fa fa-industry item-left"></i>
-                    <span>{{activeAccount.name}} {{activeAccount.id}}</span>
+                    <span>{{activeAccount.name}}</span>
                     <p *ngIf="!activeFacility">All Facilites <i class="fa fa-caret-down"></i></p>
-                    <p *ngIf="activeFacility">{{activeFacility.name}} {{activeFacility.id}} <i class="fa fa-caret-down"></i></p>
+                    <p *ngIf="activeFacility">{{activeFacility.name}} <i class="fa fa-caret-down"></i></p>
                 </div>
                 <div class="dropdown" [class.open]="facilityMenu == true">
                     <div class="arrow-up"></div>
@@ -59,7 +59,7 @@
 
 <div id="switchAccounts" [class.open]="switchAccountMenu == true">
     <h5>Switch Account</h5>
-    <div class="accounts">
+    <div class="accounts" *ngIf="activeAccount">
         <div class="account" [class.active]="activeAccount.id === account.id" (click)="switchAccount(account)"
             *ngFor="let account of accountList">
             <!--<i class="fa fa-user-circle-o item-left"></i>-->

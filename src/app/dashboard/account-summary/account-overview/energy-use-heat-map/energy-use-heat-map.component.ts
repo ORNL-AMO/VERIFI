@@ -69,7 +69,7 @@ export class EnergyUseHeatMapComponent implements OnInit {
           z: zData,
           x: months,
           y: heatMapData.years.map(year => { return heatMapData.facilityName + ' (' + year + ')' }),
-          type: 'heatmapgl',
+          // type: 'heatmapgl',
           hoverongaps: false,
           hovertemplate: '%{y}, %{x}: %{z:$,.0f}<extra></extra>'
         });

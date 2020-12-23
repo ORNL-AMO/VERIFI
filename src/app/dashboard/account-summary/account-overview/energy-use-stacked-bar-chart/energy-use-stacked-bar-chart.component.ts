@@ -95,8 +95,21 @@ export class EnergyUseStackedBarChartComponent implements OnInit {
         })
       }
 
-      var layout = { barmode: 'stack' };
-      let config = { responsive: true };
+      var layout = {
+         barmode: 'stack',
+         showlegend: true,
+         yaxis: {
+          //  title: 'Utility Cost',
+           tickprefix: '$',
+           automargin: true
+         },
+         xaxis: {
+           automargin: true
+         }
+        };
+      let config = { 
+        responsive: true 
+      };
       this.plotlyService.newPlot(this.energyUseStackedBarChart.nativeElement, data, layout, config);
     }
   }
