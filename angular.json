@@ -126,8 +126,5 @@
       }
     }
   },
-  "defaultProject": "verifi",
-  "cli": {
-    "analytics": "67d19212-adfa-45b3-9ccd-6994b4aa5986"
-  }
+  "defaultProject": "verifi"
 }
