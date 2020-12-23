@@ -53,7 +53,7 @@
 
 <div id="switchAccounts" [class.open]="switchAccountMenu == true">
     <h5>Switch Account</h5>
-    <div class="accounts">
+    <div class="accounts" *ngIf="activeAccount">
         <div class="account" [class.active]="activeAccount.id === account.id" (click)="switchAccount(account)" *ngFor="let account of accountList">
             <!--<i class="fa fa-user-circle-o item-left"></i>-->
             <p class="company item-left">{{account.name}}</p>
