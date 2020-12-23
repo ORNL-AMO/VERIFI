@@ -54,11 +54,6 @@ export class ImportMeterComponent implements OnInit {
               obj.supplier = currentLine[5];
               obj.group = currentLine[6];
               obj.notes = currentLine[7];
-            //   if(headers[j] == 'type'){
-
-            //   }
-            //   obj[headers[j]] = currentLine[j];
-            // }
 
             // Read csv and push to obj array.
             this.importMeters.push(obj);
