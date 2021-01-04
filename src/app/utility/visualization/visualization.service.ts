@@ -54,7 +54,6 @@ export class VisualizationService {
           return (a.year == b.year && a.month == b.month)
         });
         //remove data without 12 months for the year
-        //TODO: Make optional?
         let counts = _.countBy(yearMonths, 'year');
         yearMonths = yearMonths.filter(yearMonthItem => { return counts[yearMonthItem.year] == 12 })
       }
@@ -139,10 +138,6 @@ export class VisualizationService {
       resultData: resultData,
       facilityName: facilityName
     }
-  }
-
-  getSackedAreaChartData() {
-
   }
 }
 

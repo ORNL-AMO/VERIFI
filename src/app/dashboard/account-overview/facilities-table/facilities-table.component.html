@@ -3,8 +3,9 @@
         <tr>
             <th>Facility</th>
             <th># of Meters</th>
-            <th>Energy Usage</th>
-            <th>Energy Cost</th>
+            <th>Last Bill Entered</th>
+            <th>Energy Usage <small>({{yearAgoDate | date: 'MMM, y'}} - {{todaysDate | date: 'MMM, y'}})</small></th>
+            <th>Energy Cost <small>({{yearAgoDate | date: 'MMM, y'}} - {{todaysDate | date: 'MMM, y'}})</small></th>
             <!-- <th></th> -->
         </tr>
     </thead>
@@ -15,6 +16,9 @@
             </td>
             <td>
                 {{summary.numberOfMeters}}
+            </td>
+            <td>
+                {{summary.lastBillDate | date: 'MMM, y'}}
             </td>
             <td>
                 {{summary.energyUsage | number:'1.0-0'}}
@@ -38,6 +42,9 @@
             </th>
             <th>
                 {{totalMeters}}
+            </th>
+            <th>
+
             </th>
             <th>
                 {{totalEnergyUsage | number:'1.0-0'}}

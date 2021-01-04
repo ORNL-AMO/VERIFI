@@ -19,10 +19,16 @@ export class FacilitiesTableComponent implements OnInit {
   totalEnergyUsage: number;
   totalEnergyCost: number;
   totalMeters: number;
+  todaysDate: Date;
+  yearAgoDate: Date;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private facilityDbService: FacilitydbService,
     private router: Router, private dashboardService: DashboardService) { }
 
   ngOnInit(): void {
+    this.todaysDate = new Date();
+    this.yearAgoDate = new Date((this.todaysDate.getFullYear() - 1), (this.todaysDate.getMonth()));
+
+
     this.accountFacilitiesSub = this.utilityMeterDataDbService.accountMeterData.subscribe(val => {
       this.facilitiesSummary = this.dashboardService.getAccountFacilitesSummary();
       this.totalEnergyUsage = _.sumBy(this.facilitiesSummary, 'energyUsage');
