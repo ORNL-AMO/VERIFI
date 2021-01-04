@@ -12,10 +12,8 @@ import { MeterGroupingComponent } from './utility/meter-grouping/meter-grouping.
 import { PredictorDataComponent } from './utility/predictor-data/predictor-data.component';
 import { CalanderizationComponent } from './utility/calanderization/calanderization.component';
 import { VisualizationComponent } from './utility/visualization/visualization.component';
-import { FacilitySummaryComponent } from './dashboard/facility-summary/facility-summary.component';
-import { AccountSummaryComponent } from './dashboard/account-summary/account-summary.component';
-import { FacilityOverviewComponent } from './dashboard/facility-summary/facility-overview/facility-overview.component';
-import { AccountOverviewComponent } from './dashboard/account-summary/account-overview/account-overview.component';
+import { FacilityOverviewComponent } from './dashboard/facility-overview/facility-overview.component';
+import { AccountOverviewComponent } from './dashboard/account-overview/account-overview.component';
 
 const routes: Routes = [
   {
@@ -28,42 +26,22 @@ const routes: Routes = [
         redirectTo: 'account-summary'
       },
       {
-        path: 'account-summary', component: AccountSummaryComponent,
-        children: [
-          {
-            path: 'overview',
-            component: AccountOverviewComponent
-          },
-          {
-            path: '',
-            pathMatch: 'full',
-            redirectTo: 'overview'
-          },
-          {
-            path: 'management',
-            component: AccountComponent
-          }
-        ]
+        path: 'account-summary', 
+        component: AccountOverviewComponent,
       },
       {
-        path: 'facility-summary', component: FacilitySummaryComponent,
-        children: [
-          {
-            path: 'overview',
-            component: FacilityOverviewComponent
-          },
-          {
-            path: '',
-            pathMatch: 'full',
-            redirectTo: 'overview'
-          },
-          {
-            path: 'management',
-            component: FacilityComponent
-          }
-        ]
+        path: 'facility-summary', 
+        component: FacilityOverviewComponent,
       }
     ]
+  },
+  {
+    path: 'account-management',
+    component: AccountComponent
+  },
+  {
+    path: 'facility-management',
+    component: FacilityComponent
   },
   {
     path: 'utility',

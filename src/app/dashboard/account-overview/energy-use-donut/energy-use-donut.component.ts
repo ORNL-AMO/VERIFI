@@ -2,7 +2,7 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { AccountSummaryService, FacilitySummary } from '../../account-summary.service';
+import { DashboardService, FacilitySummary } from '../../dashboard.service';
 
 @Component({
   selector: 'app-energy-use-donut',
@@ -16,11 +16,11 @@ export class EnergyUseDonutComponent implements OnInit {
   facilitiesSummary: Array<FacilitySummary>;
   accountFacilitiesSub: Subscription;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private accountSummaryService: AccountSummaryService, private plotlyService: PlotlyService) { }
+    private dashboardService: DashboardService, private plotlyService: PlotlyService) { }
 
   ngOnInit(): void {
     this.accountFacilitiesSub = this.utilityMeterDataDbService.accountMeterData.subscribe(val => {
-      this.facilitiesSummary = this.accountSummaryService.getAccountFacilitesSummary();
+      this.facilitiesSummary = this.dashboardService.getAccountFacilitesSummary();
       this.drawChart();
       // this.totalEnergyUsage = _.sumBy(this.facilitiesSummary, 'energyUsage');
       // this.totalMeters = _.sumBy(this.facilitiesSummary, 'numberOfMeters');

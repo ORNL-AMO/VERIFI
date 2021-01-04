@@ -1,16 +1,13 @@
 import { Injectable } from '@angular/core';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbAccount, IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
-import { CalanderizationService, CalanderizedMeter } from 'src/app/utility/calanderization/calanderization.service';
+import { FacilitydbService } from '../indexedDB/facility-db.service';
+import { UtilityMeterdbService } from '../indexedDB/utilityMeter-db.service';
+import { IdbFacility, IdbUtilityMeter } from '../models/idb';
+import { VisualizationService } from '../utility/visualization/visualization.service';
 import * as _ from 'lodash';
-import { VisualizationService } from 'src/app/utility/visualization/visualization.service';
-
 @Injectable({
   providedIn: 'root'
 })
-export class AccountSummaryService {
+export class DashboardService {
 
   constructor(private facilityDbService: FacilitydbService, private utilityMeterDbService: UtilityMeterdbService, private visualizationService: VisualizationService) { }
 
@@ -37,7 +34,6 @@ export class AccountSummaryService {
     }
   }
 }
-
 
 export interface FacilitySummary {
   facility: IdbFacility,

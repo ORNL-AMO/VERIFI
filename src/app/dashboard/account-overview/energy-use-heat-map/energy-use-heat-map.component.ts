@@ -4,10 +4,10 @@ import { Subscription } from 'rxjs';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
-import { AccountSummaryService, FacilitySummary } from '../../account-summary.service';
 import * as _ from 'lodash';
 import { HeatMapData, VisualizationService } from 'src/app/utility/visualization/visualization.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { DashboardService, FacilitySummary } from '../../dashboard.service';
 @Component({
   selector: 'app-energy-use-heat-map',
   templateUrl: './energy-use-heat-map.component.html',
@@ -20,13 +20,13 @@ export class EnergyUseHeatMapComponent implements OnInit {
   accountFacilitiesSub: Subscription;
   facilityHeatMapData: Array<HeatMapData>;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private visualizationService: VisualizationService,
-    private accountSummaryService: AccountSummaryService, private plotlyService: PlotlyService, private utilityMeterDbService: UtilityMeterdbService,
+    private dashboardService: DashboardService, private plotlyService: PlotlyService, private utilityMeterDbService: UtilityMeterdbService,
     private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
 
     this.accountFacilitiesSub = this.utilityMeterDataDbService.accountMeterData.subscribe(val => {
-      this.facilitiesSummary = this.accountSummaryService.getAccountFacilitesSummary();
+      this.facilitiesSummary = this.dashboardService.getAccountFacilitesSummary();
       this.setData();
       this.drawChart();
     });
