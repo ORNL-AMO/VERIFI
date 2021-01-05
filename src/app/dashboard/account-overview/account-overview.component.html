@@ -35,11 +35,11 @@
 </div>
 <div class="row">
     <div class="col plot">
-        <p class="mb-0">Facility Total Energy Costs</p>
+        <p class="mb-0">Facility Total Energy Costs ({{yearAgoDate | date: 'MMM, y'}} - {{todaysDate | date: 'MMM, y'}})</p>
         <app-energy-use-donut></app-energy-use-donut>
     </div>
     <div class="col plot">
-        <p class="mb-0">Facility Energy Source Costs</p>
+        <p class="mb-0">Facility Energy Source Costs (All-time)</p>
         <app-energy-use-stacked-bar-chart></app-energy-use-stacked-bar-chart>
     </div>
 </div>

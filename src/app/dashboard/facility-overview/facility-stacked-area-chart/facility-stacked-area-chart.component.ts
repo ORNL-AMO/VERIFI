@@ -143,12 +143,12 @@ export class FacilityStackedAreaChartComponent implements OnInit {
         // },
         xaxis: {
           autotick: false,
-          title: {
-            text: 'Year',
-            font: {
-              size: 18
-            },
-          },
+          // title: {
+          //   text: 'Year',
+          //   font: {
+          //     size: 18
+          //   },
+          // },
         },
         yaxis: {
           // title: {

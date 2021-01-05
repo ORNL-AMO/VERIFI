@@ -19,9 +19,14 @@ export class AccountOverviewComponent implements OnInit {
   lastMonthsDate: Date;
   averageEnergyCost: number;
   averageEnergyUse: number;
+  todaysDate: Date;
+  yearAgoDate: Date;
   constructor(private facilityDbService: FacilitydbService, private router: Router, private dashboardService: DashboardService, private utilityMeterDataDbService: UtilityMeterDatadbService) { }
 
   ngOnInit(): void {
+    this.todaysDate = new Date();
+    this.yearAgoDate = new Date((this.todaysDate.getFullYear() - 1), (this.todaysDate.getMonth()));
+
     let lastMonthYear: { lastMonth: number, lastMonthYear: number } = this.dashboardService.getLastMonthYear();
     this.lastMonthsDate = new Date(lastMonthYear.lastMonthYear, lastMonthYear.lastMonth);
     this.accountMeterDataSub = this.utilityMeterDataDbService.accountMeterData.subscribe(val => {
