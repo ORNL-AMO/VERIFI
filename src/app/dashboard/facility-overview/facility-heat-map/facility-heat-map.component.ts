@@ -5,7 +5,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
-import { HeatMapData, VisualizationService } from '../visualization.service';
+import { HeatMapData, VisualizationService } from '../../../utility/visualization/visualization.service';
 
 @Component({
   selector: 'app-facility-heat-map',
@@ -15,26 +15,56 @@ import { HeatMapData, VisualizationService } from '../visualization.service';
 export class FacilityHeatMapComponent implements OnInit {
 
   @ViewChild('facilityHeatMap', { static: false }) facilityHeatMap: ElementRef;
-  facilityMetersSub: Subscription;
-  facilityMeters: Array<IdbUtilityMeter>;
   resultData: Array<{ monthlyEnergy: Array<number>, monthlyCost: Array<number> }>;
   months: Array<string>;
   years: Array<number>;
+  selectedFacility: IdbFacility;
+  selectedFacilitySub: Subscription;
+  accountMeterDataSub: Subscription;
+  facilityMeters: Array<IdbUtilityMeter>;
+  accountMeters: Array<IdbUtilityMeter>;
+  accountMetersSub: Subscription;
   constructor(private plotlyService: PlotlyService, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterDbService: UtilityMeterdbService, private vizualizationService: VisualizationService, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
-    this.facilityMetersSub = this.utilityMeterDataDbService.facilityMeterData.subscribe(data => {
-      if (data) {
-        let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
-        this.facilityMeters = JSON.parse(JSON.stringify(facilityMeters));
+    this.accountMetersSub = this.utilityMeterDbService.accountMeters.subscribe(accountMeters => {
+      this.accountMeters = accountMeters;
+      this.setGraphData();
+    });
+
+
+    this.selectedFacilitySub = this.utilityMeterDbService.facilityMeters.subscribe(facilityMeters => {
+      this.facilityMeters = JSON.parse(JSON.stringify(facilityMeters));
+      this.setGraphData();
+    });
+
+    this.accountMeterDataSub = this.utilityMeterDataDbService.accountMeterData.subscribe(accountMeterData => {
+      if (accountMeterData && accountMeterData.length != 0) {
         this.setGraphData();
       }
     });
   }
 
   ngAfterViewInit() {
-    this.drawChart();
+    this.setGraphData()
+  }
+
+  ngOnDestroy() {
+    this.accountMeterDataSub.unsubscribe();
+    this.selectedFacilitySub.unsubscribe();
+    this.accountMetersSub.unsubscribe();
+  }
+
+  setGraphData() {
+    if (this.facilityMeters && this.facilityMeters.length != 0 && this.accountMeters && this.accountMeters.length != 0) {
+      let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+      let heatMapData: HeatMapData = this.vizualizationService.getMeterHeatMapData(this.facilityMeters, selectedFacility.name, true);
+      this.resultData = heatMapData.resultData;
+      this.months = heatMapData.months;
+      this.years = heatMapData.years;
+      this.drawChart();
+    }
   }
 
   drawChart() {
@@ -56,12 +86,12 @@ export class FacilityHeatMapComponent implements OnInit {
       ];
 
       let layout = {
-        title: {
-          text: 'Utility Costs',
-          font: {
-            size: 24
-          },
-        },
+        // title: {
+        //   text: 'Utility Costs',
+        //   font: {
+        //     size: 24
+        //   },
+        // },
         annotations: [],
         xaxis: {
           side: 'top'
@@ -70,8 +100,8 @@ export class FacilityHeatMapComponent implements OnInit {
         }
       };
 
-      for ( var i = 0; i < this.years.length; i++ ) {
-        for ( var j = 0; j < months.length; j++ ) {
+      for (var i = 0; i < this.years.length; i++) {
+        for (var j = 0; j < months.length; j++) {
           // var currentValue = zData[i][j];
           // if (currentValue != 0.0) {
           //   var textColor = '';
@@ -83,7 +113,7 @@ export class FacilityHeatMapComponent implements OnInit {
             yref: 'y1',
             x: months[j],
             y: this.years[i],
-            text: '$'+ Math.round(zData[i][j]).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
+            text: '$' + Math.round(zData[i][j]).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
             font: {
               // family: 'Arial',
               size: 12,
@@ -102,15 +132,5 @@ export class FacilityHeatMapComponent implements OnInit {
     }
   }
 
-  setGraphData() {
-    if (this.facilityMeters) {
-      let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-      let heatMapData: HeatMapData = this.vizualizationService.getMeterHeatMapData(this.facilityMeters, selectedFacility.name, true);
-      this.resultData = heatMapData.resultData;
-      this.months = heatMapData.months;
-      this.years = heatMapData.years;
-      this.drawChart();
-    }
-  }
 
 }

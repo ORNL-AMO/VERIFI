@@ -14,7 +14,6 @@ export class EnergyUnitsHelperService {
   getEnergyUnit(meterId: number): string {
     let facilityMeter: IdbUtilityMeter = this.utilityMeterDbService.getFacilityMeterById(meterId);
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-
     if (facilityMeter.source == 'Electricity') {
       return selectedFacility.energyUnit;
     } else if (facilityMeter.source == 'Natural Gas') {
