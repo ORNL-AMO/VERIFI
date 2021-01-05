@@ -174,7 +174,6 @@ export class EnergyUseStackedBarChartComponent implements OnInit {
         wasteWater: wasteWater,
         otherUtility: otherUtility
       });
-      console.log(this.barChartData);
     });
   }
 

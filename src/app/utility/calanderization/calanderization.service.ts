@@ -29,7 +29,6 @@ export class CalanderizationService {
 
 
   calanderizeMeterData(meterData: Array<IdbUtilityMeterData>, monthDisplayShort?: boolean): Array<MonthlyData> {
-    debugger
     let calanderizeData: Array<MonthlyData> = new Array();
     let orderedMeterData: Array<IdbUtilityMeterData> = _.orderBy(meterData, (data) => { return new Date(data.readDate) });
     for (let meterIndex = 1; meterIndex < orderedMeterData.length - 1; meterIndex++) {

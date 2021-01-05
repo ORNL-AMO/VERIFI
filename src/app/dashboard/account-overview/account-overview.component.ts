@@ -13,8 +13,7 @@ import { DashboardService } from '../dashboard.service';
 })
 export class AccountOverviewComponent implements OnInit {
 
-  accountFacilities: Array<IdbFacility>;
-  accountFacilitiesSub: Subscription;
+  accountMeterDataSub: Subscription;
   lastBillEnergyUse: number;
   lastBillEnergyCost: number;
   lastMonthsDate: Date;
@@ -24,29 +23,39 @@ export class AccountOverviewComponent implements OnInit {
 
   ngOnInit(): void {
     let lastMonthYear: { lastMonth: number, lastMonthYear: number } = this.dashboardService.getLastMonthYear();
-    // -1 because months 0 indexed
-    this.lastMonthsDate = new Date(lastMonthYear.lastMonthYear, (lastMonthYear.lastMonth - 1));
-    this.accountFacilitiesSub = this.utilityMeterDataDbService.accountMeterData.subscribe(val => {
+    this.lastMonthsDate = new Date(lastMonthYear.lastMonthYear, lastMonthYear.lastMonth);
+    this.accountMeterDataSub = this.utilityMeterDataDbService.accountMeterData.subscribe(val => {
       if (val && val.length != 0) {
-        let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-        let lastBillUsage: { energyUse: number, energyCost: number } = this.dashboardService.getLastMonthsEnergyUseAndCost(selectedFacility);
-        this.lastBillEnergyUse = lastBillUsage.energyUse;
-        this.lastBillEnergyCost = lastBillUsage.energyCost;
-        let averageEnergyUsage: { energyUse: number, energyCost: number } = this.dashboardService.getAverageEnergyUseAndCost(selectedFacility);
-        console.log(averageEnergyUsage);
-        this.averageEnergyCost = averageEnergyUsage.energyCost;
-        this.averageEnergyUse = averageEnergyUsage.energyUse;
+        this.setUsageValues();
       }
     });
   }
 
   ngOnDestroy() {
-    this.accountFacilitiesSub.unsubscribe();
+    this.accountMeterDataSub.unsubscribe();
   }
 
 
   selectFacility(facility: IdbFacility) {
     this.facilityDbService.selectedFacility.next(facility);
     this.router.navigateByUrl('/facility-summary');
+  }
+
+  setUsageValues() {
+    this.lastBillEnergyCost = 0;
+    this.lastBillEnergyUse = 0;
+    this.averageEnergyCost = 0;
+    this.averageEnergyUse = 0;
+    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    accountFacilities.forEach(facility => {
+      //last month
+      let lastBillUsage: { energyUse: number, energyCost: number } = this.dashboardService.getLastMonthsEnergyUseAndCost(facility);
+      this.lastBillEnergyUse += lastBillUsage.energyUse;
+      this.lastBillEnergyCost += lastBillUsage.energyCost;
+      //average
+      let averageEnergyUsage: { energyUse: number, energyCost: number } = this.dashboardService.getAverageEnergyUseAndCost(facility);
+      this.averageEnergyCost += averageEnergyUsage.energyCost;
+      this.averageEnergyUse += averageEnergyUsage.energyUse;
+    });
   }
 }

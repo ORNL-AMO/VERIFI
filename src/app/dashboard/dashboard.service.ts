@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
 import { UtilityMeterdbService } from '../indexedDB/utilityMeter-db.service';
-import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from '../models/idb';
-import { VisualizationService } from '../utility/visualization/visualization.service';
+import { IdbFacility, IdbUtilityMeter } from '../models/idb';
 import * as _ from 'lodash';
 import { CalanderizationService, CalanderizedMeter, MonthlyData } from '../utility/calanderization/calanderization.service';
 @Injectable({
@@ -10,7 +9,7 @@ import { CalanderizationService, CalanderizedMeter, MonthlyData } from '../utili
 })
 export class DashboardService {
 
-  constructor(private facilityDbService: FacilitydbService, private utilityMeterDbService: UtilityMeterdbService, private visualizationService: VisualizationService,
+  constructor(private facilityDbService: FacilitydbService, private utilityMeterDbService: UtilityMeterdbService,
     private calanderizationService: CalanderizationService) { }
 
   getAccountFacilitesSummary(): Array<FacilitySummary> {
@@ -110,7 +109,7 @@ export class DashboardService {
     let lastMonth: number;
     let lastMonthYear: number;
     if (todaysDate.getMonth() == 0) {
-      lastMonth = 12;
+      lastMonth = 11;
       lastMonthYear = todaysDate.getFullYear() - 1;
     } else {
       lastMonth = todaysDate.getMonth() - 1;

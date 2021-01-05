@@ -38,10 +38,12 @@ export class FacilityBarChartComponent implements OnInit {
     private utilityMeterDataDbService: UtilityMeterDatadbService, private vizualizationService: VisualizationService) { }
 
   ngOnInit(): void {
-    this.facilityMetersSub = this.utilityMeterDataDbService.facilityMeterData.subscribe(() => {
-      let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
-      this.facilityMeters = JSON.parse(JSON.stringify(facilityMeters))
-      this.setUtilityData();
+    this.facilityMetersSub = this.utilityMeterDataDbService.accountMeterData.subscribe(accountMeterData => {
+      if (accountMeterData && accountMeterData.length != 0) {
+        let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+        this.facilityMeters = JSON.parse(JSON.stringify(facilityMeters))
+        this.setUtilityData();
+      }
     });
   }
 
@@ -50,7 +52,7 @@ export class FacilityBarChartComponent implements OnInit {
   }
 
   ngAfterViewInit() {
-    this.drawChart();
+    this.setUtilityData();
   }
 
   setUtilityData() {
@@ -124,8 +126,8 @@ export class FacilityBarChartComponent implements OnInit {
         traceData.push(trace);
       }
       let xAxisTitle: string = 'Year';
-      if(this.sumByMonth){
-        xAxisTitle = 'Month';        
+      if (this.sumByMonth) {
+        xAxisTitle = 'Month';
       }
 
 
@@ -154,7 +156,7 @@ export class FacilityBarChartComponent implements OnInit {
           },
           hoverformat: '$,.2f'
         },
-        margin: {r: 0, t: 50}
+        margin: { r: 0, t: 50 }
       };
       var config = { responsive: true };
 

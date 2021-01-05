@@ -48,7 +48,6 @@ export class MetersTableComponent implements OnInit {
 
   getSummary() {
     if (this.accountMeterData && this.accountMeterData.length != 0) {
-      console.log('get summary');
       this.facilityMetersSummary = this.dashboardService.getFacilityMetersSummary();
       this.totalEnergyUsage = _.sumBy(this.facilityMetersSummary, 'energyUsage');
       this.totalEnergyCost = _.sumBy(this.facilityMetersSummary, 'energyCost');
