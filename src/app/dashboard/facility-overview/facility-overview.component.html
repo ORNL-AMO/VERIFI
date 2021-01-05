@@ -1,5 +1,12 @@
 <div class="row">
     <div class="col plot">
+        <p>Facility Meters</p>
+        <app-meters-table></app-meters-table>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col plot">
         <p>Energy Use (last 30 days)</p>
         <p class="display-lg center bold no-margin">50</p>
         <p class="center">vs <span class="highlight">50</span> average use</p>
@@ -22,46 +29,5 @@
     <div class="col plot">
         <!-- <p>Energy Usage and Cost Per Month (2020)</p> -->
         <app-facility-bar-chart></app-facility-bar-chart>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col plot">
-        <p>Energy Usage Per Type</p>
-        <!-- <plotly-plot [data]="graph3.data" [layout]="graph3.layout"></plotly-plot> -->
-    </div>
-    <div class="col plot">
-        <p>Company Average vs Facility Energy Usage Per Month (2020)</p>
-        <!-- <plotly-plot [data]="graph4.data" [layout]="graph4.layout"></plotly-plot> -->
-    </div>
-</div>
-
-<div class="row">
-    <div class="col plot">
-        <p>Meter Performance Compared To Facility Average</p>
-        <table>
-            <tr>
-                <th>Meter #</th>
-                <th>Account #</th>
-                <th>Type</th>
-                <th>Energy Cost</th>
-                <th>Energy Vol</th>
-            </tr>
-            <!-- <tr *ngFor="let meterLists of meterList">
-          <td>{{meterLists.meterNumber}}</td>
-          <td>{{meterLists.accountNumber}}</td>
-          <td>{{meterLists.type}}</td>
-          <td>
-            <i [hidden]="meterLists.avgCostCompare > 1" class="fa fa-caret-up green"></i>
-            <i [hidden]="meterLists.avgCostCompare < 1" class="fa fa-caret-down red"></i>
-            {{meterLists.avgCostCompare}}
-          </td>
-          <td>
-            <i [hidden]="meterLists.avgUseCompare > 1" class="fa fa-caret-up green"></i>
-            <i [hidden]="meterLists.avgUseCompare < 1" class="fa fa-caret-down red"></i>
-            {{meterLists.avgUseCompare}}
-          </td>
-        </tr> -->
-        </table>
     </div>
 </div>

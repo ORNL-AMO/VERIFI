@@ -9,12 +9,14 @@
     <div class="col plot">
         <p>Energy Use ({{lastMonthsDate | date: 'MMM, y'}})</p>
         <p class="display-lg center bold no-margin">{{lastBillEnergyUse | number:'1.0-0'}}</p>
-        <p class="center">vs <span class="highlight">{{averageEnergyUse | number:'1.0-0'}}</span> average monthly use</p>
+        <p class="center">vs <span class="highlight">{{averageEnergyUse | number:'1.0-0'}}</span> average monthly use
+        </p>
     </div>
     <div class="col plot">
         <p>Energy Cost ({{lastMonthsDate | date: 'MMM, y'}})</p>
-        <p class="display-lg center bold no-margin">{{lastBillEnergyCost | currency}}</p>
-        <p class="center">vs <span class="highlight">{{averageEnergyCost | currency}}</span> average monthly cost</p>
+        <p class="display-lg center bold no-margin">{{lastBillEnergyCost | currency: 'USD' : 'symbol' : '1.0-0'}}</p>
+        <p class="center">vs <span class="highlight">{{averageEnergyCost | currency: 'USD' : 'symbol' : '1.0-0'}}</span>
+            average monthly cost</p>
     </div>
     <div class="col plot">
         <p>Energy Saving Progress</p>

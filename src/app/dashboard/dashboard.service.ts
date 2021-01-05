@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
 import { UtilityMeterdbService } from '../indexedDB/utilityMeter-db.service';
-import { IdbFacility, IdbUtilityMeter } from '../models/idb';
+import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from '../models/idb';
 import { VisualizationService } from '../utility/visualization/visualization.service';
 import * as _ from 'lodash';
 import { CalanderizationService, CalanderizedMeter, MonthlyData } from '../utility/calanderization/calanderization.service';
@@ -150,10 +150,10 @@ export class DashboardService {
     let totalEnergyCost: number = 0;
     //sum totals
     monthlyData.forEach(data => {
-      if(data.energyUse){
+      if (data.energyUse) {
         totalEnergyUse += data.energyUse;
       }
-      if(data.energyCost){
+      if (data.energyCost) {
         totalEnergyCost += data.energyCost;
       }
     });
@@ -168,6 +168,32 @@ export class DashboardService {
     let averageEnergyCost: number = (totalEnergyCost / yearMonths.length);
     return { energyUse: averageEnergyUse, energyCost: averageEnergyCost };
   }
+
+
+  getFacilityMetersSummary(): Array<MeterSummary> {
+    let facilityMetersSummary: Array<MeterSummary> = new Array();
+    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+    facilityMeters.forEach(meter => {
+      let summary: MeterSummary = this.getMeterSummary(meter);
+      facilityMetersSummary.push(summary);
+    });
+    return facilityMetersSummary;
+  }
+
+  getMeterSummary(meter: IdbUtilityMeter): MeterSummary {
+    let lastYearData: Array<{ time: string, energyUse: number, energyCost: number }> = this.getPastYearData([meter]);
+    let lastMonthBill: MonthlyData = this.getLastBillEntry([meter]);
+    let lastBillDate: Date;
+    if (lastMonthBill) {
+      lastBillDate = new Date(lastMonthBill.year, (lastMonthBill.monthNumValue));
+    }
+    return {
+      meter: meter,
+      energyUsage: _.sumBy(lastYearData, 'energyUse'),
+      energyCost: _.sumBy(lastYearData, 'energyCost'),
+      lastBillDate: lastBillDate
+    }
+  }
 }
 
 export interface FacilitySummary {
@@ -175,5 +201,13 @@ export interface FacilitySummary {
   energyUsage: number,
   energyCost: number,
   numberOfMeters: number,
+  lastBillDate: Date
+}
+
+
+export interface MeterSummary {
+  meter: IdbUtilityMeter,
+  energyUsage: number,
+  energyCost: number,
   lastBillDate: Date
 }

@@ -1,38 +1,31 @@
 <table>
     <thead>
         <tr>
-            <th>Facility</th>
-            <th># of Meters</th>
+            <th>Meter</th>
+            <th>Utility</th>
             <th>Last Bill Entered</th>
-            <th>Energy Usage<small>({{yearAgoDate | date: 'MMM, y'}} - {{todaysDate | date: 'MMM, y'}})</small></th>
+            <th>Energy Usage <small>({{yearAgoDate | date: 'MMM, y'}} - {{todaysDate | date: 'MMM, y'}})</small></th>
             <th>Energy Cost <small>({{yearAgoDate | date: 'MMM, y'}} - {{todaysDate | date: 'MMM, y'}})</small></th>
-            <!-- <th></th> -->
         </tr>
     </thead>
     <tbody>
-        <tr *ngFor="let summary of facilitiesSummary">
+        <tr *ngFor="let summary of facilityMetersSummary">
             <td>
-                <a (click)="selectFacility(summary.facility)">{{summary.facility.name}}</a>
+                {{summary.meter.name}}
             </td>
             <td>
-                {{summary.numberOfMeters}}
+                {{summary.meter.source}}
             </td>
             <td>
-                {{summary.lastBillDate | date: 'MMM, y'}}
+                <span *ngIf="summary.lastBillDate">{{summary.lastBillDate | date: 'MMM, y'}}</span>
+                <span *ngIf="!summary.lastBillDate">&mdash;</span>
             </td>
             <td>
                 {{summary.energyUsage | number:'1.0-0'}}
-
             </td>
             <td>
                 {{summary.energyCost | currency : 'USD' : 'symbol' : '1.0-0' }}
             </td>
-            <!-- <td class="w-50">
-                <div class="progress">
-                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-success"
-                        [ngStyle]="{'width.%': (summary.energyCost / totalEnergyCost * 100) }"></div>
-                </div>
-            </td> -->
         </tr>
     </tbody>
     <tfoot>
@@ -41,7 +34,6 @@
                 Total
             </th>
             <th>
-                {{totalMeters}}
             </th>
             <th>
 
@@ -52,7 +44,6 @@
             <th>
                 {{totalEnergyCost | currency : 'USD' : 'symbol' : '1.0-0' }}
             </th>
-            <!-- <td></td> -->
         </tr>
     </tfoot>
 </table>

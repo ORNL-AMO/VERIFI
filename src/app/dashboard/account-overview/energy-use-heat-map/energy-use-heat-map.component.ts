@@ -111,7 +111,6 @@ export class EnergyUseHeatMapComponent implements OnInit {
       let config = {
         responsive: true
       }
-
       this.plotlyService.newPlot(this.energyUseHeatMap.nativeElement, data, layout, config);
     }
   }
