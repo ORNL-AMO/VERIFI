@@ -3,6 +3,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterGroup } from 'src/app/models/idb';
+import { current } from 'src/app/shared/convert-units/definitions/current';
 
 @Component({
   selector: 'app-import-meter',
@@ -43,10 +44,16 @@ export class ImportMeterComponent implements OnInit {
           let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
           for (var i = 1; i < lines.length; i++) {
             const obj: IdbUtilityMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.id, selectedFacility.accountId);
-            const currentline = lines[i].split(",");
-            for (var j = 0; j < headers.length; j++) {
-              obj[headers[j]] = currentline[j];
-            }
+            const currentLine = lines[i].split(",");
+            // for (var j = 0; j < headers.length; j++) {
+              obj.meterNumber = currentLine[0];
+              obj.accountNumber = Number(currentLine[1]);
+              obj.source = currentLine[2];
+              obj.name = currentLine[3];
+              obj.location = currentLine[4];
+              obj.supplier = currentLine[5];
+              obj.group = currentLine[6];
+              obj.notes = currentLine[7];
 
             // Read csv and push to obj array.
             this.importMeters.push(obj);

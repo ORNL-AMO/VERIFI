@@ -41,7 +41,6 @@ export interface IdbFacility {
     volumeLiquidUnit: string,
     volumeGasUnit: string,
     chilledWaterUnit: string
-    
 }
 
 export interface IdbUtilityMeterGroup {
@@ -74,7 +73,7 @@ export interface IdbUtilityMeter {
     heatCapacity: string,
     siteToSource: string,
     name: string,
-    location: number,
+    location: string,
     supplier: string,
     notes: string,
     source: string,
