@@ -12,13 +12,12 @@ export class CalanderizationService {
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private energyUnitsHelperService: EnergyUnitsHelperService) {
   }
 
-  calanderizeFacilityMeters(facilityMeters: Array<IdbUtilityMeter>) {
-    let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
+  calanderizeFacilityMeters(facilityMeters: Array<IdbUtilityMeter>, monthDisplayShort?: boolean) {
     let calanderizedMeterData: Array<CalanderizedMeter> = new Array();
     facilityMeters.forEach(meter => {
       let energyUnit: string = this.energyUnitsHelperService.getEnergyUnit(meter.id);
-      let meterData: Array<IdbUtilityMeterData> = facilityMeterData.filter(meterData => { return meterData.meterId == meter.id });
-      let calanderizedMeter: Array<MonthlyData> = this.calanderizeMeterData(meterData);
+      let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(meter.id);
+      let calanderizedMeter: Array<MonthlyData> = this.calanderizeMeterData(meterData, monthDisplayShort);
       calanderizedMeterData.push({
         energyUnit: energyUnit,
         meter: meter,
@@ -29,7 +28,7 @@ export class CalanderizationService {
   }
 
 
-  calanderizeMeterData(meterData: Array<IdbUtilityMeterData>): Array<MonthlyData> {
+  calanderizeMeterData(meterData: Array<IdbUtilityMeterData>, monthDisplayShort?: boolean): Array<MonthlyData> {
     let calanderizeData: Array<MonthlyData> = new Array();
     let orderedMeterData: Array<IdbUtilityMeterData> = _.orderBy(meterData, (data) => { return new Date(data.readDate) });
     for (let meterIndex = 1; meterIndex < orderedMeterData.length - 1; meterIndex++) {
@@ -58,8 +57,16 @@ export class CalanderizationService {
         totalMonthCost = (costPerDayCurrentBill * daysBeforeCurrentBill) + (costPerDayNextBill * daysAfterCurrentBill);
         totalMonthEnergyUse = (energyUsePerDayCurrentBill * daysBeforeCurrentBill) + (energyUsePerDayNextBill * daysAfterCurrentBill);
       }
+      let month: string;
+      if(monthDisplayShort){
+        month = new Date(currentBill.readDate).toLocaleString('default', { month: 'short' });
+      }else{
+        month = new Date(currentBill.readDate).toLocaleString('default', { month: 'long' });
+      }
+
+
       calanderizeData.push({
-        month: new Date(currentBill.readDate).toLocaleString('default', { month: 'long' }),
+        month: month,
         year: new Date(currentBill.readDate).getFullYear(),
         energyUse: totalMonthEnergyUse,
         energyCost: totalMonthCost,
