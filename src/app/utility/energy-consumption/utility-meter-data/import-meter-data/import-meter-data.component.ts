@@ -3,6 +3,7 @@ import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { ElectricityDataFilters, SupplyDemandChargeFilters, TaxAndOtherFilters } from 'src/app/models/electricityFilter';
 import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { LoadingService } from 'src/app/shared/loading/loading.service';
 import { UtilityMeterDataService } from '../utility-meter-data.service';
 
 @Component({
@@ -19,9 +20,12 @@ export class ImportMeterDataComponent implements OnInit {
   importError: string;
   quickView: Array<IdbUtilityMeterData>;
   import: Array<IdbUtilityMeterData>;
+  electricityDataFilters: Array<ElectricityDataFilters>;
   supplyDemandCharge: SupplyDemandChargeFilters;
   taxAndOther: TaxAndOtherFilters;
-  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private utilityMeterDbService: UtilityMeterdbService, private utilityMeterDataService: UtilityMeterDataService) { }
+
+  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private utilityMeterDbService: UtilityMeterdbService, private utilityMeterDataService: UtilityMeterDataService,
+    private loadingService: LoadingService) { }
 
   ngOnInit(): void {
     let electricityDataFilters: ElectricityDataFilters = this.utilityMeterDataService.electricityInputFilters.getValue();
@@ -76,7 +80,6 @@ export class ImportMeterDataComponent implements OnInit {
               console.log('no number')
             }
           }
-          console.log(this.import);
         } else {
           // csv didn't match -> Show error
           this.importError = "Error with file. Please match your file to the provided template.";
@@ -91,10 +94,14 @@ export class ImportMeterDataComponent implements OnInit {
   }
 
   async meterAddCSV() {
+
+    this.loadingService.setLoadingStatus(true);
+    this.loadingService.setLoadingMessage("Importing Meter Data...");
     //TODO: Add loading message
     await this.import.forEach(importItem => {
       this.utilityMeterDataDbService.add(importItem);
     });
+    this.loadingService.setLoadingStatus(false);
     this.resetImport();
   }
 }
