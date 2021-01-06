@@ -1,17 +1,18 @@
 import { Injectable } from '@angular/core';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
 import { UtilityMeterdbService } from '../indexedDB/utilityMeter-db.service';
-import { IdbFacility, IdbUtilityMeter } from '../models/idb';
+import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterGroup } from '../models/idb';
 import * as _ from 'lodash';
 import { CalanderizationService, CalanderizedMeter, MonthlyData } from '../utility/calanderization/calanderization.service';
-import { Summary } from '@angular/compiler';
+import { UtilityMeterGroupdbService } from '../indexedDB/utilityMeterGroup-db.service';
+
 @Injectable({
   providedIn: 'root'
 })
 export class DashboardService {
 
   constructor(private facilityDbService: FacilitydbService, private utilityMeterDbService: UtilityMeterdbService,
-    private calanderizationService: CalanderizationService) { }
+    private calanderizationService: CalanderizationService, private utilityMeterGroupDbService: UtilityMeterGroupdbService) { }
 
   getAccountFacilitesSummary(): Array<FacilitySummary> {
     let facilitiesSummary: Array<FacilitySummary> = new Array();
@@ -380,39 +381,6 @@ export class DashboardService {
     }
   }
 
-
-
-
-  getAverageEnergyUseAndCost(facility: IdbFacility): { energyUse: number, energyCost: number } {
-    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    let accountMetersCopy: Array<IdbUtilityMeter> = JSON.parse(JSON.stringify(accountMeters));
-    let facilityMeters: Array<IdbUtilityMeter> = accountMetersCopy.filter(meter => { return meter.facilityId == facility.id });
-    let calanderizedMeterData: Array<CalanderizedMeter> = this.calanderizationService.calanderizeFacilityMeters(facilityMeters, false);
-    let monthlyData: Array<MonthlyData> = calanderizedMeterData.flatMap(meterData => { return meterData.monthlyData });
-    let totalEnergyUse: number = 0;
-    let totalEnergyCost: number = 0;
-    //sum totals
-    monthlyData.forEach(data => {
-      if (data.energyUse) {
-        totalEnergyUse += data.energyUse;
-      }
-      if (data.energyCost) {
-        totalEnergyCost += data.energyCost;
-      }
-    });
-
-    //create array of the uniq months and years
-    let yearMonths: Array<{ year: number, month: number }> = monthlyData.map(data => { return { year: data.year, month: data.monthNumValue } });
-    yearMonths = _.uniqWith(yearMonths, (a, b) => {
-      return (a.year == b.year && a.month == b.month)
-    });
-    //divide by total uniq months/years for average
-    let averageEnergyUse: number = (totalEnergyUse / yearMonths.length);
-    let averageEnergyCost: number = (totalEnergyCost / yearMonths.length);
-    return { energyUse: averageEnergyUse, energyCost: averageEnergyCost };
-  }
-
-
   getFacilityMetersSummary(): Array<MeterSummary> {
     let facilityMetersSummary: Array<MeterSummary> = new Array();
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
@@ -430,11 +398,19 @@ export class DashboardService {
     if (lastMonthBill) {
       lastBillDate = new Date(lastMonthBill.year, (lastMonthBill.monthNumValue));
     }
+
+    let group: IdbUtilityMeterGroup = this.utilityMeterGroupDbService.getGroupById(meter.groupId);
+    let groupName: string = 'Ungrouped';
+    if(group){
+      groupName = group.name;
+    }
+
     return {
       meter: meter,
       energyUsage: _.sumBy(lastYearData, 'energyUse'),
       energyCost: _.sumBy(lastYearData, 'energyCost'),
-      lastBillDate: lastBillDate
+      lastBillDate: lastBillDate,
+      groupName: groupName
     }
   }
 }
@@ -452,7 +428,8 @@ export interface MeterSummary {
   meter: IdbUtilityMeter,
   energyUsage: number,
   energyCost: number,
-  lastBillDate: Date
+  lastBillDate: Date,
+  groupName: string
 }
 
 

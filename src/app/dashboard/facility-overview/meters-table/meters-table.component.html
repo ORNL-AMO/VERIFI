@@ -3,6 +3,7 @@
     <tr>
         <th>Meter</th>
         <th>Utility</th>
+        <th>Group</th>
         <th>Last Bill Entered</th>
         <th>Energy Usage <small>({{yearAgoDate | date: 'MMM, y'}} - {{todaysDate | date: 'MMM, y'}})</small></th>
         <th>Energy Cost <small>({{yearAgoDate | date: 'MMM, y'}} - {{todaysDate | date: 'MMM, y'}})</small></th>
@@ -15,6 +16,9 @@
         </td>
         <td>
             {{summary.meter.source}}
+        </td>
+        <td>
+            {{summary.groupName}}
         </td>
         <td>
             <span *ngIf="summary.lastBillDate">{{summary.lastBillDate | date: 'MMM, y'}}</span>
@@ -36,7 +40,8 @@
             <th>
             </th>
             <th>
-
+            </th>
+            <th>
             </th>
             <th>
                 {{totalEnergyUsage | number:'1.0-0'}}

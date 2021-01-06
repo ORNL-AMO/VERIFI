@@ -134,6 +134,13 @@ export class HeaderComponent implements OnInit {
     this.facilitydbService.selectedFacility.next(facility);
   }
 
+  selectAllFacilites(){
+    this.toggleFacilityMenu();
+    this.router.navigate(['/account-summary']);
+
+  }
+
+
   getAccountFacilityCount() {
     var res = this.allFacilities.reduce(function(obj, v) {
       obj[v.accountId] = (obj[v.accountId] || 0) + 1;
