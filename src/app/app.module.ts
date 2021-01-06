@@ -60,6 +60,7 @@ import { EnergyUseDonutComponent } from './dashboard/account-overview/energy-use
 import { EnergyUseHeatMapComponent } from './dashboard/account-overview/energy-use-heat-map/energy-use-heat-map.component';
 import { EnergyUseStackedBarChartComponent } from './dashboard/account-overview/energy-use-stacked-bar-chart/energy-use-stacked-bar-chart.component';
 import { MetersTableComponent } from './dashboard/facility-overview/meters-table/meters-table.component';
+import { UtilityEnergyUseTableComponent } from './dashboard/facility-overview/utility-energy-use-table/utility-energy-use-table.component';
 
 @NgModule({
   declarations: [
@@ -105,7 +106,8 @@ import { MetersTableComponent } from './dashboard/facility-overview/meters-table
     EnergyUseDonutComponent,
     EnergyUseHeatMapComponent,
     EnergyUseStackedBarChartComponent,
-    MetersTableComponent
+    MetersTableComponent,
+    UtilityEnergyUseTableComponent
   ],
   imports: [
     BrowserModule,
