@@ -12,7 +12,7 @@
     <br>
     <label>
         <span class="required">*</span> Source
-        <select type="text" formControlName="source" (change)="setSourceValidation()">
+        <select type="text" formControlName="source" (change)="setSource()">
             <option [ngValue]="'Electricity'">Electricity</option>
             <option [ngValue]="'Natural Gas'">Natural Gas</option>
             <option [ngValue]="'Other Fuels'">Other Fuels</option>
@@ -22,102 +22,35 @@
             <option [ngValue]="'Other Utility'">Other Utility</option>
         </select>
     </label>
-    <label *ngIf="displayPhaseAndFuel">
+    <label *ngIf="displayPhase">
         <span class="required">*</span> Phase
         <select type="text" formControlName="phase" (change)="setEnergyOptions()">
-            <option [ngValue]="'NA'">NA</option>
             <option [ngValue]="'Solid'">Solid</option>
             <option [ngValue]="'Liquid'">Liquid</option>
             <option [ngValue]="'Gas'">Gas</option>
         </select>
     </label>
 
-    <label *ngIf="displayPhaseAndFuel">
-        <span class="required">*</span> Fuel
-        <select type="text" formControlName="fuel">
-            <option *ngFor="let energyOption of energyOptions" [ngValue]="energyOption">{{energyOption}}</option>
-            <!-- <option *ngIf="meterForm.value['phase'] == 'Gas'" value="Blast Furnace Gas">Blast Furnace Gas
+    <label *ngIf="displayFuel">
+        <span class="required">*</span>
+        {{energySourceLabel}}
+        <select type="text" formControlName="fuel" (change)="setHeatCapacity()">
+            <option *ngFor="let energyOption of energyOptions" [ngValue]="energyOption.value">{{energyOption.value}}
             </option>
-            <option *ngIf="meterForm.value['phase'] == 'Gas'" value="Coke Oven Gas">Coke Oven Gas</option>
-            <option *ngIf="meterForm.value['phase'] == 'Gas'" value="Liquefied Petroleum Gas (LPG)">Liquefied
-                Petroleum Gas (LPG)</option>
-            <option *ngIf="meterForm.value['phase'] == 'Gas'" value="Propane">Propane</option>
-            <option *ngIf="meterForm.value['phase'] == 'Gas'" value="Butane">Butane</option>
-            <option *ngIf="meterForm.value['phase'] == 'Gas'" value="">Isobutane</option>
-            <option *ngIf="meterForm.value['phase'] == 'Gas'" value="">Landfill Gas</option>
-            <option *ngIf="meterForm.value['phase'] == 'Gas'" value="">Oil Gases</option>
-            <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Propane</option>
-            <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">LPG</option>
-            <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Distillate Fuel Oil</option>
-            <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Residual Fuel Oil</option>
-            <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Heating Oil</option>
-            <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Diesel</option>
-            <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Butane</option>
-            <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Isobutane</option>
-            <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Pentane</option>
-            <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Ethylene</option>
-            <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Propylene</option>
-            <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Butene</option>
-            <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Pentene</option>
-            <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Benzene</option>
-            <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Toluene</option>
-            <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Xylene</option>
-            <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Methyl Alcohol</option>
-            <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Ethyl Alcohol</option>
-            <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Fuel Oil #1</option>
-            <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Fuel Oil #2</option>
-            <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Fuel Oil #4</option>
-            <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Fuel Oil #5</option>
-            <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Fuel Oil #6 (high sulfur)</option>
-            <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Fuel Oil #6 (low sulfur)</option>
-            <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Crude Oil</option>
-            <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Gasoline</option>
-            <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Kerosene</option>
-            <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Gas Oil</option>
-            <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="">Liquefied Natural Gas (LNG)</option>
-            <option *ngIf="meterForm.value['phase'] == 'Solid'" value="">Coal (anthracite)</option>
-            <option *ngIf="meterForm.value['phase'] == 'Solid'" value="">Coal - (bituminous)</option>
-            <option *ngIf="meterForm.value['phase'] == 'Solid'" value="">Coal</option>
-            <option *ngIf="meterForm.value['phase'] == 'Solid'" value="">Coke</option>
-            <option *ngIf="meterForm.value['phase'] == 'Solid'" value="">Peat</option>
-            <option *ngIf="meterForm.value['phase'] == 'Solid'" value="">Wood</option>
-            <option *ngIf="meterForm.value['phase'] == 'Solid'" value="">Biomass</option>
-            <option *ngIf="meterForm.value['phase'] == 'Solid'" value="">Black Liquor</option>
-            <option *ngIf="meterForm.value['phase'] == 'Solid'" value="">Scrap Tires</option>
-            <option *ngIf="meterForm.value['phase'] == 'Solid'" value="">Sulfur</option>
-            <option value="">District Steam (150 psig)</option>
-            <option value="">Purchased Steam</option>
-            <option value="">Purchased Chilled Water (Absorption Chiller)</option>
-            <option value="">Purchased Chilled Water (Electric-driven Compressor)</option>
-            <option value="">Purchased Chilled Water (Engine-driven Compressor)</option>
-            <option value="">Purchased Chilled Water (Absorption Chiller)</option>
-            <option value="">Purchased Chilled Water (Electric-driven Compressor)</option>
-            <option value="">Purchased Chilled Water (Engine-driven Compressor)</option>
-            <option value="">District Hot Water</option>
-            <option value="">Biodiesel (100%)</option>
-            <option value="">Ethanol (100%)</option>
-            <option value="">Purchased Compressed Air (100 psi, motor driven compressor)</option> -->
         </select>
     </label>
     <label>
-        <span class="required">*</span> Starting Unit
+        <span class="required">*</span> Collection Unit
         <select type="text" formControlName="startingUnit">
-            <option *ngIf="meterForm.value['source'] == 'Electricity'" value="kWh">kWh</option>
-            <option *ngIf="meterForm.value['source'] == 'Electricity'" value="MWh">MWh</option>
-            <option *ngIf="meterForm.value['phase'] == 'Gas'" value="SCF">SCF</option>
-            <option *ngIf="meterForm.value['phase'] == 'Gas'" value="Pounds">Pounds</option>
-            <option *ngIf="meterForm.value['phase'] == 'Solid'" value="Tons">Tons</option>
-            <option *ngIf="meterForm.value['phase'] == 'Solid'" value="lb">lb</option>
-            <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="Gallons">Gallons</option>
-            <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="Ton Hours">Ton Hours</option>
-            <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="gal-F">gal-F</option>
-            <option *ngIf="meterForm.value['phase'] == 'Liquid'" value="Therms">Therms</option>
+            <option *ngFor="let startingUnitOption of startingUnitOptions" [ngValue]="startingUnitOption.value">
+                <span [innerHTML]="startingUnitOption.display"></span></option>
         </select>
     </label>
     <br>
     <label>
         <span class="required">*</span> Heat Capacity
         <input type="text" formControlName="heatCapacity">
+        <!-- <span class="unit">gal/MMBtu</span> -->
     </label>
     <br>
     <label>

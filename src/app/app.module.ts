@@ -10,8 +10,8 @@ import { HeaderComponent } from './shared/header/header.component';
 import { FooterComponent } from './shared/footer/footer.component';
 import { SidebarComponent } from './shared/sidebar/sidebar.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { AccountComponent } from './account/account/account.component';
-import { FacilityComponent } from './account/facility/facility.component';
+import { AccountComponent } from './account-management/account/account.component';
+import { FacilityComponent } from './account-management/facility/facility.component';
 import { UtilityComponent } from './utility/utility.component';
 import { EnergyConsumptionComponent } from './utility/energy-consumption/energy-consumption.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
@@ -42,9 +42,10 @@ import { PredictorDataComponent } from './utility/predictor-data/predictor-data.
 import { EditPredictorEntryRowComponent } from './utility/predictor-data/edit-predictor-entry-row/edit-predictor-entry-row.component';
 import { EditPredictorsComponent } from './utility/predictor-data/edit-predictors/edit-predictors.component';
 import { CalanderizationComponent } from './utility/calanderization/calanderization.component';
-import { EditFacilityComponent } from './account/account/edit-facility/edit-facility.component';
+import { EditFacilityComponent } from './account-management/account/edit-facility/edit-facility.component';
 import { ImportPredictorsComponent } from './utility/predictor-data/import-predictors/import-predictors.component';
 import { EnergyUnitDropdownComponent } from './utility/meter-grouping/energy-unit-dropdown/energy-unit-dropdown.component';
+import { SettingsLabelPipe } from './shared/helper-pipes/settings-label.pipe';
 
 @NgModule({
   declarations: [
@@ -78,7 +79,8 @@ import { EnergyUnitDropdownComponent } from './utility/meter-grouping/energy-uni
     CalanderizationComponent,
     EditFacilityComponent,
     ImportPredictorsComponent,
-    EnergyUnitDropdownComponent
+    EnergyUnitDropdownComponent,
+    SettingsLabelPipe
   ],
   imports: [
     BrowserModule,

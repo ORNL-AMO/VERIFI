@@ -16,7 +16,7 @@
                 </label>
             </form>
         </div>
-        <div class="col-lg-8">
+        <div class="col-lg-8" *ngIf="accountForm">
             <br>
             <form [formGroup]="accountForm">
                 <label>Corporation Name
@@ -34,10 +34,53 @@
                 <label>Notes
                     <textarea formControlName="notes" (input)="onFormChange();"></textarea>
                 </label>
+                <br>
+                <label>Units of Measure
+                    <select formControlName="unitsOfMeasure" (change)="setUnitsOfMeasure()">
+                        <option [ngValue]="'Imperial'">Imperial</option>
+                        <option [ngValue]="'Metric'">Metric</option>
+                        <option [ngValue]="'Custom'">Custom</option>
+                    </select>
+                </label>
+                <br>
+                <label>Energy Unit
+                    <select formControlName="energyUnit" (change)="onFormChange()">
+                        <option *ngFor="let energyUnitOption of energyUnitOptions" [ngValue]="energyUnitOption.value">
+                            <span [innerHTML]="energyUnitOption.display"></span></option>
+                    </select>
+                </label>
+                <br>
+                <label>Liquid Volume Unit
+                    <select formControlName="volumeLiquidUnit" (change)="onFormChange()">
+                        <option *ngFor="let volumeUnitOption of volumeLiquidOptions" [ngValue]="volumeUnitOption.value">
+                            <span [innerHTML]="volumeUnitOption.display"></span></option>
+                    </select>
+                </label>
+                <br>
+                <label>Gas Volume Unit
+                    <select formControlName="volumeGasUnit" (change)="onFormChange()">
+                        <option *ngFor="let volumeUnitOption of volumeGasOptions" [ngValue]="volumeUnitOption.value">
+                            <span [innerHTML]="volumeUnitOption.display"></span></option>
+                    </select>
+                </label>
+                <!-- <br>
+                <label>Size Unit
+                    <select formControlName="sizeUnit" (change)="onFormChange()">
+                        <option *ngFor="let sizeUnitOption of sizeUnitOptions" [ngValue]="sizeUnitOption.value">
+                            <span [innerHTML]="sizeUnitOption.display"></span></option>
+                    </select>
+                </label> -->
+                <br>
+                <label>Mass Unit
+                    <select formControlName="massUnit" (change)="onFormChange()">
+                        <option *ngFor="let massUnitOption of massUnitOptions" [ngValue]="massUnitOption.value">
+                            <span [innerHTML]="massUnitOption.display"></span></option>
+                    </select>
+                </label>
             </form>
         </div>
     </div>
-    
+
     <br>
     <br>
 
@@ -85,12 +128,14 @@
     <div class="row">
         <div class="col-lg-6">
             <h4>Delete Account</h4>
-            <p>Once deleted, you will permanently lose all your data linked to your account. Please make a backup of your data before proceeding with this step.</p>
+            <p>Once deleted, you will permanently lose all your data linked to your account. Please make a backup of
+                your data before proceeding with this step.</p>
             <button class="btn btn-danger" (click)="editAccount()">Delete Account</button>
         </div>
         <div class="col-lg-6">
             <h4>Backup Account</h4>
-            <p>You can protect your files from accidental loss by creating a backup. We recommend backing up your data frequently.</p>
+            <p>You can protect your files from accidental loss by creating a backup. We recommend backing up your data
+                frequently.</p>
             <button class="btn btn-outline">Backup Account</button>
             <p class="small"> Last Backup: 12/04/2020</p>
         </div>
@@ -100,11 +145,12 @@
 <div class="window" [class.open]="facilityToEdit">
     <div class="windowOverlay"></div>
     <div class="windowContent">
-        <app-edit-facility *ngIf="facilityToEdit" [facility]="facilityToEdit" (emitClose)="closeEditFacility()"></app-edit-facility>
+        <app-edit-facility *ngIf="facilityToEdit" [facility]="facilityToEdit" (emitClose)="closeEditFacility()">
+        </app-edit-facility>
     </div>
 </div>
 
-<div class="popup" [class.open]="showDeleteAccount">
+<div class="popup" [class.open]="showDeleteAccount" *ngIf="accountForm">
     <div class="popup-header">Delete Account: {{accountForm.controls.name.value}}
         <button class="item-right" (click)="cancelAccountDelete()">x</button>
     </div>

@@ -9,6 +9,12 @@ export interface IdbAccount {
     naics: string,
     notes: string,
     img: string
+    unitsOfMeasure: string,
+    energyUnit: string,
+    massUnit: string,
+    volumeLiquidUnit: string,
+    volumeGasUnit: string,
+    chilledWaterUnit: string
 }
 
 export interface IdbFacility {
@@ -26,6 +32,14 @@ export interface IdbFacility {
     units: string,
     division: string,
     img: string,
+    //units
+    unitsOfMeasure: string,
+    energyUnit: string,
+    massUnit: string,
+    volumeLiquidUnit: string,
+    volumeGasUnit: string,
+    chilledWaterUnit: string
+
     tableElectricityFilters?: Array<ElectricityDataFilter>,
     electricityInputFilters?: Array<ElectricityDataFilter>
     
@@ -58,7 +72,6 @@ export interface IdbUtilityMeter {
     accountNumber: number,
     type: string,
     phase: string,
-    unit: string,
     heatCapacity: string,
     siteToSource: string,
     name: string,
