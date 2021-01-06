@@ -1,0 +1,44 @@
+import { Component, OnInit } from '@angular/core';
+import { Subscription } from 'rxjs';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { IdbFacility, IdbUtilityMeterData } from 'src/app/models/idb';
+import { DashboardService, UtilityUsageSummaryData } from '../../dashboard.service';
+
+@Component({
+  selector: 'app-account-utility-energy-use-table',
+  templateUrl: './account-utility-energy-use-table.component.html',
+  styleUrls: ['./account-utility-energy-use-table.component.css']
+})
+export class AccountUtilityEnergyUseTableComponent implements OnInit {
+
+
+  accountMeterDataSub: Subscription;
+  accountMeterData: Array<IdbUtilityMeterData>;
+  selectedFacility: IdbFacility;
+  selectedFacilitySub: Subscription;
+
+  utilityUsageSummaryData: UtilityUsageSummaryData;
+  lastMonthsDate: Date;
+
+  constructor(private dashboardService: DashboardService, private utilityMeterDataDbService: UtilityMeterDatadbService, private facilityDbService: FacilitydbService) { }
+
+  ngOnInit(): void {
+    let lastMonthYear: { lastMonth: number, lastMonthYear: number } = this.dashboardService.getLastMonthYear();
+    this.lastMonthsDate = new Date(lastMonthYear.lastMonthYear, lastMonthYear.lastMonth);
+    this.accountMeterDataSub = this.utilityMeterDataDbService.accountMeterData.subscribe(val => {
+      if (val && val.length != 0) {
+        this.setUsageValues();
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    this.accountMeterDataSub.unsubscribe();
+  }
+
+  setUsageValues() {
+    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    this.utilityUsageSummaryData = this.dashboardService.getFacilitiesUtilityUsageSummaryData(accountFacilities);
+  }
+}

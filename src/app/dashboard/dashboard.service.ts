@@ -140,6 +140,126 @@ export class DashboardService {
     return { energyUse: totalEnergyUse, energyCost: totalEnergyCost };
   }
 
+  getFacilitiesUtilityUsageSummaryData(facilities: Array<IdbFacility>): UtilityUsageSummaryData {
+    let accountUtilitySummaries: Array<SummaryData> = new Array();
+    let facilitySummaries: Array<UtilityUsageSummaryData> = new Array();
+    facilities.forEach(facility => {
+      let utilityUsageSummaryData: UtilityUsageSummaryData = this.getFacilityUtilityUsageSummaryData(facility);
+      facilitySummaries.push(utilityUsageSummaryData);
+    });
+    let utilitySummaries: Array<SummaryData> = facilitySummaries.flatMap(summary => { return summary.utilitySummaries });
+    // electricity
+    let electricitySummaries: Array<SummaryData> = utilitySummaries.filter(summary => { return summary.utility == 'Electricity' });
+    if (electricitySummaries.length != 0) {
+      let dates: Array<Date> = electricitySummaries.map(summary => { return summary.lastBillDate });
+      let summaryData: SummaryData = {
+        lastBillDate: _.max(dates),
+        previousMonthEnergyUse: _.sumBy(electricitySummaries, 'previousMonthEnergyUse'),
+        previousMonthEnergyCost: _.sumBy(electricitySummaries, 'previousMonthEnergyCost'),
+        averageEnergyUse: _.sumBy(electricitySummaries, 'averageEnergyUse'),
+        averageEnergyCost: _.sumBy(electricitySummaries, 'averageEnergyCost'),
+        utility: 'Electricity'
+      }
+      accountUtilitySummaries.push(summaryData);
+    }
+    // naturalGas
+    let naturalGasSummary: Array<SummaryData> = utilitySummaries.filter(summary => { return summary.utility == 'Natural Gas' });
+    if (naturalGasSummary.length != 0) {
+      let dates: Array<Date> = naturalGasSummary.map(summary => { return summary.lastBillDate });
+      let summaryData: SummaryData = {
+        lastBillDate: _.max(dates),
+        previousMonthEnergyUse: _.sumBy(naturalGasSummary, 'previousMonthEnergyUse'),
+        previousMonthEnergyCost: _.sumBy(naturalGasSummary, 'previousMonthEnergyCost'),
+        averageEnergyUse: _.sumBy(naturalGasSummary, 'averageEnergyUse'),
+        averageEnergyCost: _.sumBy(naturalGasSummary, 'averageEnergyCost'),
+        utility: 'Natural Gas'
+      }
+      accountUtilitySummaries.push(summaryData);
+    }
+    // otherFuels
+    let otherFuelsSummary: Array<SummaryData> = utilitySummaries.filter(summary => { return summary.utility == 'Other Fuels' });
+    if (otherFuelsSummary.length != 0) {
+      let dates: Array<Date> = utilitySummaries.map(summary => { return summary.lastBillDate });
+      let summaryData: SummaryData = {
+        lastBillDate: _.max(dates),
+        previousMonthEnergyUse: _.sumBy(otherFuelsSummary, 'previousMonthEnergyUse'),
+        previousMonthEnergyCost: _.sumBy(otherFuelsSummary, 'previousMonthEnergyCost'),
+        averageEnergyUse: _.sumBy(otherFuelsSummary, 'averageEnergyUse'),
+        averageEnergyCost: _.sumBy(otherFuelsSummary, 'averageEnergyCost'),
+        utility: 'Other Fuels'
+      }
+      accountUtilitySummaries.push(summaryData);
+    }
+    // otherEnergy
+    let otherEnergySummary: Array<SummaryData> = utilitySummaries.filter(summary => { return summary.utility == 'Other Energy' });
+    if (otherEnergySummary.length != 0) {
+      let dates: Array<Date> = otherEnergySummary.map(summary => { return summary.lastBillDate });
+      let summaryData: SummaryData = {
+        lastBillDate: _.max(dates),
+        previousMonthEnergyUse: _.sumBy(otherEnergySummary, 'previousMonthEnergyUse'),
+        previousMonthEnergyCost: _.sumBy(otherEnergySummary, 'previousMonthEnergyCost'),
+        averageEnergyUse: _.sumBy(otherEnergySummary, 'averageEnergyUse'),
+        averageEnergyCost: _.sumBy(otherEnergySummary, 'averageEnergyCost'),
+        utility: 'Other Energy'
+      }
+      accountUtilitySummaries.push(summaryData);
+    }
+    // water
+    let waterSummary: Array<SummaryData> = utilitySummaries.filter(summary => { return summary.utility == 'Water' });
+    if (waterSummary.length != 0) {
+      let dates: Array<Date> = waterSummary.map(summary => { return summary.lastBillDate });
+      let summaryData: SummaryData = {
+        lastBillDate: _.max(dates),
+        previousMonthEnergyUse: _.sumBy(waterSummary, 'previousMonthEnergyUse'),
+        previousMonthEnergyCost: _.sumBy(waterSummary, 'previousMonthEnergyCost'),
+        averageEnergyUse: _.sumBy(waterSummary, 'averageEnergyUse'),
+        averageEnergyCost: _.sumBy(waterSummary, 'averageEnergyCost'),
+        utility: 'Water'
+      }
+      accountUtilitySummaries.push(summaryData);
+    }
+    // wasteWater
+    let wasteWaterSummary: Array<SummaryData> = utilitySummaries.filter(summary => { return summary.utility == 'Waste Water' });
+    if (wasteWaterSummary.length != 0) {
+      let dates: Array<Date> = wasteWaterSummary.map(summary => { return summary.lastBillDate });
+      let summaryData: SummaryData = {
+        lastBillDate: _.max(dates),
+        previousMonthEnergyUse: _.sumBy(wasteWaterSummary, 'previousMonthEnergyUse'),
+        previousMonthEnergyCost: _.sumBy(wasteWaterSummary, 'previousMonthEnergyCost'),
+        averageEnergyUse: _.sumBy(wasteWaterSummary, 'averageEnergyUse'),
+        averageEnergyCost: _.sumBy(wasteWaterSummary, 'averageEnergyCost'),
+        utility: 'Waste Water'
+      }
+      accountUtilitySummaries.push(summaryData);
+    }
+    // otherUtility
+    let otherUtilitySummary: Array<SummaryData> = utilitySummaries.filter(summary => { return summary.utility == 'Other Utility' });
+    if (otherUtilitySummary.length != 0) {
+      let dates: Array<Date> = otherUtilitySummary.map(summary => { return summary.lastBillDate });
+      let summaryData: SummaryData = {
+        lastBillDate: _.max(dates),
+        previousMonthEnergyUse: _.sumBy(otherUtilitySummary, 'previousMonthEnergyUse'),
+        previousMonthEnergyCost: _.sumBy(otherUtilitySummary, 'previousMonthEnergyCost'),
+        averageEnergyUse: _.sumBy(otherUtilitySummary, 'averageEnergyUse'),
+        averageEnergyCost: _.sumBy(otherUtilitySummary, 'averageEnergyCost'),
+        utility: 'Other Utility'
+      }
+      accountUtilitySummaries.push(summaryData);
+    }
+    return {
+      utilitySummaries: utilitySummaries,
+      total: {
+        lastBillDate: _.maxBy(utilitySummaries, 'lastBillDate'),
+        previousMonthEnergyUse: _.sumBy(utilitySummaries, 'previousMonthEnergyUse'),
+        previousMonthEnergyCost: _.sumBy(utilitySummaries, 'previousMonthEnergyCost'),
+        averageEnergyUse: _.sumBy(utilitySummaries, 'averageEnergyUse'),
+        averageEnergyCost: _.sumBy(utilitySummaries, 'averageEnergyCost'),
+        utility: 'Total'
+      }
+    }
+  }
+
+
   //
   getFacilityUtilityUsageSummaryData(facility: IdbFacility): UtilityUsageSummaryData {
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
@@ -181,12 +301,10 @@ export class DashboardService {
     if (otherUtilitySummary.lastBillDate) {
       utilitySummaries.push(otherUtilitySummary);
     }
-    let lastBillDate: Date = _.maxBy(utilitySummaries, 'lastBillDate');
-
     return {
       utilitySummaries: utilitySummaries,
       total: {
-        lastBillDate: lastBillDate,
+        lastBillDate: _.maxBy(utilitySummaries, 'lastBillDate'),
         previousMonthEnergyUse: _.sumBy(utilitySummaries, 'previousMonthEnergyUse'),
         previousMonthEnergyCost: _.sumBy(utilitySummaries, 'previousMonthEnergyCost'),
         averageEnergyUse: _.sumBy(utilitySummaries, 'averageEnergyUse'),
