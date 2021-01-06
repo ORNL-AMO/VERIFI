@@ -3,12 +3,15 @@ import { Router } from '@angular/router';
 import { FacilitydbService } from "../../indexedDB/facility-db.service";
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { IdbFacility } from 'src/app/models/idb';
+import { EnergyUnitOptions, MassUnitOptions, SizeUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from 'src/app/shared/unitOptions';
+import { IdbAccount, IdbFacility } from 'src/app/models/idb';
 import { PredictordbService } from "../../indexedDB/predictors-db.service";
 import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db.service";
 import { UtilityMeterDatadbService } from "../../indexedDB/utilityMeterData-db.service";
 import { UtilityMeterGroupdbService } from "../../indexedDB/utilityMeterGroup-db.service";
 import { LoadingService } from "../../shared/loading/loading.service";
+import { AccountManagementService } from '../account-management.service';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 
 @Component({
   selector: 'app-facility',
@@ -18,23 +21,15 @@ import { LoadingService } from "../../shared/loading/loading.service";
 export class FacilityComponent implements OnInit {
   facilityId: number;
   showDeleteFacility: boolean = false;
-
-  facilityForm = new FormGroup({
-    id: new FormControl('', [Validators.required]),
-    accountId: new FormControl('', [Validators.required]),
-    name: new FormControl('', [Validators.required]),
-    country: new FormControl('', [Validators.required]),
-    state: new FormControl('', [Validators.required]),
-    address: new FormControl('', [Validators.required]),
-    type: new FormControl('', [Validators.required]),
-    tier: new FormControl('', [Validators.required]),
-    size: new FormControl('', [Validators.required]),
-    units: new FormControl('', [Validators.required]),
-    division: new FormControl('', [Validators.required]),
-  });
-
+  facilityForm: FormGroup;
   selectedFacilitySub: Subscription;
-
+  energyUnitOptions: Array<UnitOption> = EnergyUnitOptions;
+  volumeGasOptions: Array<UnitOption> = VolumeGasOptions;
+  volumeLiquidOptions: Array<UnitOption> = VolumeLiquidOptions;
+  sizeUnitOptions: Array<UnitOption> = SizeUnitOptions;
+  massUnitOptions: Array<UnitOption> = MassUnitOptions;
+  selectedFacility: IdbFacility;
+  unitsDontMatchAccount: boolean;
   constructor(
     private router: Router,
     private facilityDbService: FacilitydbService,
@@ -42,24 +37,18 @@ export class FacilityComponent implements OnInit {
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
-    private loadingService: LoadingService
-    ) { }
+    private loadingService: LoadingService,
+    private accountManagementService: AccountManagementService,
+    private accountDbService: AccountdbService
+  ) { }
 
   ngOnInit() {
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
+      let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+      this.unitsDontMatchAccount = this.accountManagementService.areAccountAndFacilityUnitsDifferent(account, facility);
+      this.selectedFacility = facility;
       if (facility != null) {
-        this.facilityForm.controls.id.setValue(facility.id);
-        this.facilityForm.controls.accountId.setValue(facility.accountId);
-        this.facilityForm.controls.name.setValue(facility.name);
-        this.facilityForm.controls.country.setValue(facility.country);
-        this.facilityForm.controls.state.setValue(facility.state);
-        this.facilityForm.controls.address.setValue(facility.address);
-        this.facilityForm.controls.type.setValue(facility.type);
-        this.facilityForm.controls.tier.setValue(facility.tier);
-        this.facilityForm.controls.size.setValue(facility.size);
-        this.facilityForm.controls.units.setValue(facility.units);
-        this.facilityForm.controls.division.setValue(facility.division);
-        // Needs image
+        this.facilityForm = this.accountManagementService.getFacilityForm(facility);
       }
     });
   }
@@ -69,28 +58,27 @@ export class FacilityComponent implements OnInit {
   }
 
   onFormChange(): void {
-    // Update db
-    this.facilityDbService.update(this.facilityForm.value);
+    //update facility object and put in db
+    this.facilityForm = this.accountManagementService.checkCustom(this.facilityForm);
+    this.selectedFacility = this.accountManagementService.updateFacilityFromForm(this.facilityForm, this.selectedFacility);
+    this.facilityDbService.update(this.selectedFacility);
   }
 
   facilityDelete() {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-
     this.loadingService.setLoadingStatus(true);
     this.loadingService.setLoadingMessage("Deleting Facility...");
-
     // Delete all info associated with account
     this.predictorDbService.deleteAllFacilityPredictors(selectedFacility.id);
     this.utilityMeterDataDbService.deleteAllFacilityMeterData(selectedFacility.id);
     this.utilityMeterDbService.deleteAllFacilityMeters(selectedFacility.id);
     this.utilityMeterGroupDbService.deleteAllFacilityMeterGroups(selectedFacility.id);
     this.facilityDbService.deleteById(selectedFacility.id);
-
     // Then navigate to another facility
     this.facilityDbService.setSelectedFacility();
     this.router.navigate(['/']);
     this.loadingService.setLoadingStatus(false);
-    
+
   }
 
   editFacility() {
@@ -104,6 +92,17 @@ export class FacilityComponent implements OnInit {
 
   cancelDelete() {
     this.showDeleteFacility = undefined;
+  }
+
+  setUnitsOfMeasure() {
+    this.facilityForm = this.accountManagementService.setUnitsOfMeasure(this.facilityForm);
+    this.onFormChange();
+  }
+
+  setAccountUnits(){
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    this.facilityForm = this.accountManagementService.setAccountUnits(this.facilityForm, account);
+    this.onFormChange();
   }
 
 }

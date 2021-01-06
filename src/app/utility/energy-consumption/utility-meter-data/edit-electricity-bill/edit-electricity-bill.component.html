@@ -10,37 +10,37 @@
     <div class="row">
       <div class="col-6">
         <label for="readDate">
-          Meter Read Date 
-          <span class="required">*</span> 
+          Meter Read Date
+          <span class="required">*</span>
         </label>
-        <div class="input-group mb-3"> 
+        <div class="input-group mb-3">
           <input id="readDate" class="form-control" type="date" formControlName="readDate" required>
         </div>
 
         <label for="totalEnergyUse">
-          Total Energy Use 
-          <span class="required">*</span> 
+          Total Energy Use
+          <span class="required">*</span>
         </label>
         <div class="input-group mb-3">
           <input id="totalEnergyUse" class="form-control" type="number" formControlName="totalEnergyUse" required>
-          <span class="unit">kWh</span>
+          <span class="unit" [innerHTML]="energyUnit | settingsLabel"></span>
         </div>
       </div>
       <div class="col">
         <label for="totalDemand">
-          Total Demand 
-          <span class="required">*</span> 
+          Total Demand
+          <span class="required">*</span>
         </label>
-        <div class="input-group mb-3"> 
-          <input id="totalDemand" class="form-control"type="number" formControlName="totalDemand" required>
+        <div class="input-group mb-3">
+          <input id="totalDemand" class="form-control" type="number" formControlName="totalDemand" required>
           <span class="unit">$</span>
         </div>
 
         <label for="totalCost">
-          Total Cost 
-          <span class="required">*</span> 
+          Total Cost
+          <span class="required">*</span>
         </label>
-        <div class="input-group mb-3">  
+        <div class="input-group mb-3">
           <input id="totalCost" class="form-control" type="number" formControlName="totalCost" required>
           <span class="unit">$</span>
         </div>
@@ -52,50 +52,71 @@
     <hr>
     <br>
 
-    <div [hidden]="!electricityDataFilters[5].filter && !electricityDataFilters[6].filter && !electricityDataFilters[7].filter && !electricityDataFilters[8].filter && !electricityDataFilters[9].filter && !electricityDataFilters[10].filter && !electricityDataFilters[1].filter && !electricityDataFilters[2].filter && !electricityDataFilters[3].filter && !electricityDataFilters[4].filter">
+    <div *ngIf="supplyDemandFilters.showSection">
       <p class="bold">Supply / Demand Charge</p>
       <div class="row">
-        <div class="col" [hidden]="!electricityDataFilters[5].filter && !electricityDataFilters[6].filter && !electricityDataFilters[7].filter && !electricityDataFilters[8].filter && !electricityDataFilters[9].filter && !electricityDataFilters[10].filter">
-          <label for="peakAmount" [hidden]="!electricityDataFilters[5].filter && !electricityDataFilters[6].filter">On-Peak Demand</label>
-          <div class="input-group mb-3" [hidden]="!electricityDataFilters[5].filter && !electricityDataFilters[6].filter">
-            <input id="peakAmount" [hidden]="!electricityDataFilters[5].filter" class="form-control" type="number" formControlName="peakAmount">
-            <span [hidden]="!electricityDataFilters[5].filter" class="unit">kWh</span>
-            <input id="peakCharge" [hidden]="!electricityDataFilters[6].filter" class="form-control" type="number" formControlName="peakCharge">
-            <span [hidden]="!electricityDataFilters[6].filter" class="unit">$</span>
+        <!--supply demand column one-->
+        <div class="col" *ngIf="displaySupplyDemandColumnOne">
+          <div *ngIf="supplyDemandFilters.peakAmount ||  supplyDemandFilters.peakCharge">
+            <label for="peakAmount">On-Peak Demand</label>
+            <div class="input-group mb-3">
+              <input id="peakAmount" *ngIf="supplyDemandFilters.peakAmount" class="form-control" type="number"
+                formControlName="peakAmount">
+              <span *ngIf="supplyDemandFilters.peakAmount" class="unit">kWh</span>
+              <input id="peakCharge" *ngIf="supplyDemandFilters.peakCharge" class="form-control" type="number"
+                formControlName="peakCharge">
+              <span *ngIf="supplyDemandFilters.peakCharge" class="unit">$</span>
+            </div>
+          </div>
+          <div *ngIf="supplyDemandFilters.offPeakAmount || supplyDemandFilters.offPeakCharge">
+            <label for="offPeakAmount">Off-Peak Demand</label>
+            <div class="input-group mb-3">
+              <input id="offPeakAmount" *ngIf="supplyDemandFilters.offPeakAmount" class="form-control" type="number"
+                formControlName="offPeakAmount">
+              <span *ngIf="supplyDemandFilters.offPeakAmount" class="unit">kWh</span>
+              <input id="offPeakCharge" *ngIf="supplyDemandFilters.offPeakCharge" class="form-control" type="number"
+                formControlName="offPeakCharge">
+              <span *ngIf="supplyDemandFilters.offPeakCharge" class="unit">$</span>
+            </div>
           </div>
 
-          <label for="offPeakAmount" [hidden]="!electricityDataFilters[7].filter && !electricityDataFilters[8].filter">Off-Peak Demand</label>
-          <div class="input-group mb-3" [hidden]="!electricityDataFilters[7].filter && !electricityDataFilters[8].filter">
-            <input id="offPeakAmount" [hidden]="!electricityDataFilters[7].filter" class="form-control" type="number" formControlName="offPeakAmount">
-            <span [hidden]="!electricityDataFilters[7].filter" class="unit">kWh</span>
-            <input id="offPeakCharge" [hidden]="!electricityDataFilters[8].filter" class="form-control" type="number" formControlName="offPeakCharge">
-            <span [hidden]="!electricityDataFilters[8].filter" class="unit">$</span>
-          </div>
-
-          <label for="demandBlockAmount" [hidden]="!electricityDataFilters[9].filter && !electricityDataFilters[10].filter">Block Rates Demand</label>
-          <div class="input-group mb-3" [hidden]="!electricityDataFilters[9].filter && !electricityDataFilters[10].filter">
-            <input id="demandBlockAmount" [hidden]="!electricityDataFilters[9].filter" class="form-control" type="number" formControlName="demandBlockAmount">
-            <span [hidden]="!electricityDataFilters[9].filter" class="unit">kWh</span>
-            <input id="demandBlockCharge" [hidden]="!electricityDataFilters[10].filter" class="form-control" type="number" formControlName="demandBlockCharge">
-            <span [hidden]="!electricityDataFilters[10].filter" class="unit">$</span>
+          <div *ngIf="supplyDemandFilters.demandBlockAmount || supplyDemandFilters.demandBlockCharge">
+            <label for="demandBlockAmount">Block Rates
+              Demand</label>
+            <div class="input-group mb-3">
+              <input id="demandBlockAmount" *ngIf="supplyDemandFilters.demandBlockAmount" class="form-control"
+                type="number" formControlName="demandBlockAmount">
+              <span *ngIf="supplyDemandFilters.demandBlockAmount" class="unit">kWh</span>
+              <input id="demandBlockCharge" *ngIf="supplyDemandFilters.demandBlockCharge" class="form-control"
+                type="number" formControlName="demandBlockCharge">
+              <span *ngIf="supplyDemandFilters.demandBlockCharge" class="unit">$</span>
+            </div>
           </div>
         </div>
-
-        <div class="col" [hidden]="!electricityDataFilters[1].filter && !electricityDataFilters[2].filter && !electricityDataFilters[3].filter && !electricityDataFilters[4].filter">
-          <label for="supplyBlockAmount" [hidden]="!electricityDataFilters[1].filter && !electricityDataFilters[2].filter">Block Rates Supply</label>
-          <div class="input-group mb-3" [hidden]="!electricityDataFilters[1].filter && !electricityDataFilters[2].filter">
-            <input id="supplyBlockAmount" [hidden]="!electricityDataFilters[1].filter" class="form-control" type="number" formControlName="supplyBlockAmount">
-            <span [hidden]="!electricityDataFilters[1].filter" class="unit">kWh</span>
-            <input id="supplyBlockCharge" [hidden]="!electricityDataFilters[2].filter" class="form-control" type="number" formControlName="supplyBlockCharge">
-            <span [hidden]="!electricityDataFilters[2].filter" class="unit">$</span>
+        <!--supply demand column two-->
+        <div class="col" *ngIf="displaySupplyDemandColumnTwo">
+          <div *ngIf="supplyDemandFilters.supplyBlockAmount || supplyDemandFilters.supplyBlockCharge">
+            <label for="supplyBlockAmount">Block Rates Supply</label>
+            <div class="input-group mb-3">
+              <input id="supplyBlockAmount" *ngIf="supplyDemandFilters.supplyBlockAmount" class="form-control"
+                type="number" formControlName="supplyBlockAmount">
+              <span *ngIf="supplyDemandFilters.supplyBlockAmount" class="unit">kWh</span>
+              <input id="supplyBlockCharge" *ngIf="supplyDemandFilters.supplyBlockCharge" class="form-control"
+                type="number" formControlName="supplyBlockCharge">
+              <span *ngIf="supplyDemandFilters.supplyBlockCharge" class="unit">$</span>
+            </div>
           </div>
 
-          <label for="flatRateAmount" [hidden]="!electricityDataFilters[3].filter && !electricityDataFilters[4].filter">Flat Rates Supply</label>
-          <div class="input-group mb-3" [hidden]="!electricityDataFilters[3].filter && !electricityDataFilters[4].filter">
-            <input id="flatRateAmount" [hidden]="!electricityDataFilters[3].filter" class="form-control" type="number" formControlName="flatRateAmount">
-            <span [hidden]="!electricityDataFilters[3].filter" class="unit">kWh</span>
-            <input id="flatRateCharge" [hidden]="!electricityDataFilters[4].filter" class="form-control" type="number" formControlName="flatRateCharge">
-            <span [hidden]="!electricityDataFilters[4].filter" class="unit">$</span>
+          <div *ngIf="supplyDemandFilters.flatRateAmount || supplyDemandFilters.flatRateCharge">
+            <label for="flatRateAmount">Flat Rates Supply</label>
+            <div class="input-group mb-3">
+              <input id="flatRateAmount" *ngIf="supplyDemandFilters.flatRateAmount" class="form-control" type="number"
+                formControlName="flatRateAmount">
+              <span *ngIf="supplyDemandFilters.flatRateAmount" class="unit">kWh</span>
+              <input id="flatRateCharge" *ngIf="supplyDemandFilters.flatRateCharge" class="form-control" type="number"
+                formControlName="flatRateCharge">
+              <span *ngIf="supplyDemandFilters.flatRateCharge" class="unit">$</span>
+            </div>
           </div>
         </div>
       </div>
@@ -106,64 +127,85 @@
 
     </div>
 
-    <div [hidden]="!electricityDataFilters[0].filter && !electricityDataFilters[12].filter && !electricityDataFilters[13].filter && !electricityDataFilters[14].filter && !electricityDataFilters[15].filter && !electricityDataFilters[16].filter && !electricityDataFilters[17].filter && !electricityDataFilters[18].filter">
+    <div *ngIf="taxAndOtherFilters.showSection">
       <p class="bold">Tax and other</p>
       <div class="row">
-        <div class="col" [hidden]="!electricityDataFilters[0].filter && !electricityDataFilters[15].filter && !electricityDataFilters[16].filter && !electricityDataFilters[17].filter && !electricityDataFilters[18].filter">
-          <label for="businessCharge" [hidden]="!electricityDataFilters[15].filter">Local Business and Occupation Charge</label>
-          <div class="input-group mb-3" [hidden]="!electricityDataFilters[15].filter">
-            <input id="businessCharge" class="form-control" type="number" formControlName="businessCharge">
-            <span class="unit">$</span>
+        <div class="col" *ngIf="displayTaxAndOthersColumnOne">
+          <div *ngIf="taxAndOtherFilters.businessCharge">
+            <label for="businessCharge">Local Business and Occupation
+              Charge</label>
+            <div class="input-group mb-3">
+              <input id="businessCharge" class="form-control" type="number" formControlName="businessCharge">
+              <span class="unit">$</span>
+            </div>
           </div>
 
-          <label for="utilityTax" [hidden]="!electricityDataFilters[16].filter">Local Utility Tax</label>
-          <div class="input-group mb-3" [hidden]="!electricityDataFilters[16].filter">
-            <input id="utilityTax" class="form-control" type="number" formControlName="utilityTax">
-            <span class="unit">$</span>
+          <div *ngIf="taxAndOtherFilters.utilityTax">
+            <label for="utilityTax">Local Utility Tax</label>
+            <div class="input-group mb-3">
+              <input id="utilityTax" class="form-control" type="number" formControlName="utilityTax">
+              <span class="unit">$</span>
+            </div>
+          </div>
+          <div *ngIf="taxAndOtherFilters.latePayment">
+            <label for="latePayment">Late Payment Charge</label>
+            <div class="input-group mb-3">
+              <input id="latePayment" class="form-control" type="number" formControlName="latePayment">
+              <span class="unit">$</span>
+            </div>
           </div>
 
-          <label for="latePayment" [hidden]="!electricityDataFilters[17].filter">Late Payment Charge</label>
-          <div class="input-group mb-3" [hidden]="!electricityDataFilters[17].filter">
-            <input id="latePayment" class="form-control" type="number" formControlName="latePayment">
-            <span class="unit">$</span>
+          <div *ngIf="taxAndOtherFilters.otherCharge">
+            <label for="otherCharge">Other Charge</label>
+            <div class="input-group mb-3">
+              <input id="otherCharge" class="form-control" type="number" formControlName="otherCharge">
+              <span class="unit">$</span>
+            </div>
           </div>
 
-          <label for="otherCharge" [hidden]="!electricityDataFilters[18].filter">Other Charge</label>
-          <div class="input-group mb-3" [hidden]="!electricityDataFilters[18].filter">
-            <input id="otherCharge" class="form-control" type="number" formControlName="otherCharge">
-            <span class="unit">$</span>
-          </div>
-
-          <label for="basicCharge" [hidden]="!electricityDataFilters[0].filter">Basic Charge/fixed fee</label>
-          <div class="input-group mb-3" [hidden]="!electricityDataFilters[0].filter">
-            <input id="basicCharge" class="form-control" type="text" formControlName="basicCharge">
-            <span class="unit">$</span>
+          <div *ngIf="taxAndOtherFilters.basicCharge">
+            <label for="basicCharge">Basic Charge/fixed fee</label>
+            <div class="input-group mb-3">
+              <input id="basicCharge" class="form-control" type="text" formControlName="basicCharge">
+              <span class="unit">$</span>
+            </div>
           </div>
         </div>
 
-        <div class="col" [hidden]="!electricityDataFilters[11].filter && !electricityDataFilters[12].filter && !electricityDataFilters[13].filter && !electricityDataFilters[14].filter">
-          <label for="generationTransmissionCharge" [hidden]="!electricityDataFilters[11].filter">Generation and Transmission Charge</label>
-          <div class="input-group mb-3" [hidden]="!electricityDataFilters[11].filter">
-            <input id="generationTransmissionCharge" class="form-control" type="number" formControlName="generationTransmissionCharge">
-            <span class="unit">$</span>
+        <div class="col" *ngIf="displayTaxAndOthersColumnTwo">
+          <div *ngIf="taxAndOtherFilters.generationTransmissionCharge">
+            <label for="generationTransmissionCharge">Generation and
+              Transmission Charge</label>
+            <div class="input-group mb-3">
+              <input id="generationTransmissionCharge" class="form-control" type="number"
+                formControlName="generationTransmissionCharge">
+              <span class="unit">$</span>
+            </div>
           </div>
 
-          <label for="deliveryCharge" [hidden]="!electricityDataFilters[12].filter">Delivery Charge</label>
-          <div class="input-group mb-3" [hidden]="!electricityDataFilters[12].filter">
-            <input id="deliveryCharge" class="form-control" type="number" formControlName="deliveryCharge">
-            <span class="unit">$</span>
+          <div *ngIf="taxAndOtherFilters.deliveryCharge">
+
+            <label for="deliveryCharge">Delivery Charge</label>
+            <div class="input-group mb-3">
+              <input id="deliveryCharge" class="form-control" type="number" formControlName="deliveryCharge">
+              <span class="unit">$</span>
+            </div>
           </div>
 
-          <label for="transmissionCharge" [hidden]="!electricityDataFilters[13].filter">Transmission Charge</label>
-          <div  class="input-group mb-3"[hidden]="!electricityDataFilters[13].filter">
-            <input id="transmissionCharge" class="form-control" type="number" formControlName="transmissionCharge">
-            <span class="unit">$</span>
-          </div>
 
-          <label for="powerFactorCharge" [hidden]="!electricityDataFilters[14].filter">Power factor Charge</label>
-          <div class="input-group mb-3" [hidden]="!electricityDataFilters[14].filter">
-            <input id="powerFactorCharge" class="form-control" type="number" formControlName="powerFactorCharge">
-            <span class="unit">$</span>
+          <div *ngIf="taxAndOtherFilters.transmissionCharge">
+            <label for="transmissionCharge">Transmission Charge</label>
+            <div class="input-group mb-3">
+              <input id="transmissionCharge" class="form-control" type="number" formControlName="transmissionCharge">
+              <span class="unit">$</span>
+            </div>
+          </div>
+          <div *ngIf="taxAndOtherFilters.powerFactorCharge">
+            <label for="powerFactorCharge">Power factor Charge</label>
+            <div class="input-group mb-3">
+              <input id="powerFactorCharge" class="form-control" type="number" formControlName="powerFactorCharge">
+              <span class="unit">$</span>
+            </div>
           </div>
         </div>
       </div>

@@ -1,0 +1,146 @@
+<div id="facility">
+    <div class="banner">
+        <h3>Facility Information</h3>
+    </div>
+</div>
+
+<div class="wrapper">
+    <h4>Facilty Information</h4>
+    <br>
+    <div class="row">
+        <div class="col-lg-4 profile-image">
+            <img src="https://placehold.it/350x200" alt="">
+            <form>
+                <label class="profile-image-input" for="img"><i class="fa fa-upload"></i> Upload Image
+                    <input type="file" id="img" name="img" accept="image/*">
+                </label>
+            </form>
+        </div>
+        <div class="col-lg-8" *ngIf="facilityForm">
+            <br>
+            <div class="row">
+                <div class="col-lg-6">
+                    <form [formGroup]="facilityForm" autocomplete="on">
+                        <label>Building / Area
+                            <input type="text" formControlName="name" (input)="onFormChange();">
+                        </label>
+                        <br>
+                        <label>Country
+                            <input type="country" formControlName="country" (input)="onFormChange();">
+                        </label>
+                        <br>
+                        <label>State
+                            <input type="state" formControlName="state" (input)="onFormChange();">
+                        </label>
+                        <br>
+                        <label>Address
+                            <input type="address" formControlName="address" (input)="onFormChange();"
+                                autocomplete="shipping street-address">
+                        </label>
+                    </form>
+                </div>
+                <div class="col-lg-6">
+                    <form [formGroup]="facilityForm">
+                        <label>Business Type
+                            <input type="text" formControlName="type" (input)="onFormChange();">
+                        </label>
+                        <br>
+                        <label>Teir
+                            <input type="text" formControlName="tier" (input)="onFormChange();">
+                        </label>
+                        <br>
+                        <label>Size
+                            <input type="text" formControlName="size" (input)="onFormChange();">
+                        </label>
+                        <br>
+                        <label>Division
+                            <input type="text" formControlName="division" (input)="onFormChange();">
+                        </label>
+                        <br>
+                        <label>Units of Measure
+                            <select formControlName="unitsOfMeasure" (change)="setUnitsOfMeasure()">
+                                <option [ngValue]="'Imperial'">Imperial</option>
+                                <option [ngValue]="'Metric'">Metric</option>
+                                <option [ngValue]="'Custom'">Custom</option>
+                            </select>
+                        </label>
+                        <br>
+                        <label>Energy Unit
+                            <select formControlName="energyUnit" (change)="onFormChange()">
+                                <option *ngFor="let energyUnitOption of energyUnitOptions"
+                                    [ngValue]="energyUnitOption.value"><span
+                                        [innerHTML]="energyUnitOption.display"></span></option>
+                            </select>
+                        </label>
+                        <br>
+                        <label>Liquid Volume Unit
+                            <select formControlName="volumeLiquidUnit" (change)="onFormChange()">
+                                <option *ngFor="let volumeUnitOption of volumeLiquidOptions"
+                                    [ngValue]="volumeUnitOption.value"><span
+                                        [innerHTML]="volumeUnitOption.display"></span></option>
+                            </select>
+                        </label>
+                        <br>
+                        <label>Gas Volume Unit
+                            <select formControlName="volumeGasUnit" (change)="onFormChange()">
+                                <option *ngFor="let volumeUnitOption of volumeGasOptions"
+                                    [ngValue]="volumeUnitOption.value"><span
+                                        [innerHTML]="volumeUnitOption.display"></span></option>
+                            </select>
+                        </label>
+                        <!-- <br>
+                        <label>Size Unit
+                            <select formControlName="sizeUnit" (change)="onFormChange()">
+                                <option *ngFor="let sizeUnitOption of sizeUnitOptions" [ngValue]="sizeUnitOption.value">
+                                    <span [innerHTML]="sizeUnitOption.display"></span></option>
+                            </select>
+                        </label> -->
+                        <br>
+                        <label>Mass Unit
+                            <select formControlName="massUnit" (change)="onFormChange()">
+                                <option *ngFor="let massUnitOption of massUnitOptions" [ngValue]="massUnitOption.value">
+                                    <span [innerHTML]="massUnitOption.display"></span></option>
+                            </select>
+                        </label>
+                    </form>
+                    <p class="alert alert-warning" *ngIf="unitsDontMatchAccount">
+                        Facility Units are different then the units set for the account. If you would like to use the
+                        account units for this faclity clike here: <a (click)="setAccountUnits()">Use Account Units</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <br>
+    <!--<h4>Operating Schedule</h4>-->
+
+    <br>
+    <br>
+    <br>
+    <br>
+
+    <div class="row">
+        <div class="col-lg-6">
+            <h4>Delete Facility</h4>
+            <p>Once deleted, you will permanently lose all your data linked to this facility. Please make a backup of
+                your data before proceeding with this step.</p>
+            <button class="btn btn-danger" (click)="editFacility()">Delete Facility</button>
+        </div>
+    </div>
+</div>
+
+<div class="popup" [class.open]="showDeleteFacility" *ngIf="facilityForm">
+    <div class="popup-header">Delete Facility: {{facilityForm.controls.name.value}}
+        <button class="item-right" (click)="cancelDelete()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>WARNING: By deleting this facility, you are also deleting all of the data associated with it.
+            Are you sure you want to preform this action?</p>
+    </div>
+    <div class="popup-footer text-right">
+        <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
+        <button class="btn btn-danger" (click)="confirmDelete()">Confirm Delete</button>
+    </div>
+</div>

@@ -103,7 +103,14 @@ export class AccountdbService {
             naics: '000000',
             notes: '',
             img: 'https://placehold.it/50x50',
-            // id: undefined
+            // id: undefined,            
+            unitsOfMeasure: 'Imperial',
+            energyUnit: 'kWh',
+            volumeLiquidUnit: 'SCF',
+            volumeGasUnit: 'SCF',
+            chilledWaterUnit: undefined,
+            massUnit: 'lb'
+
         }
     }
 }
@@ -116,7 +123,14 @@ export const TestAccountData: Array<IdbAccount> = [
         industry: 'Cereal',
         naics: '123456',
         notes: 'Delicious',
-        img: 'https://placehold.it/50x50'
+        img: 'https://placehold.it/50x50',
+        unitsOfMeasure: 'Imperial',
+        energyUnit: 'kWh',
+        volumeLiquidUnit: 'SCF',
+        volumeGasUnit: 'SCF',
+        chilledWaterUnit: undefined,
+        massUnit: 'lb'
+
     },
     {
         // id: undefined,
@@ -124,7 +138,13 @@ export const TestAccountData: Array<IdbAccount> = [
         industry: 'Cereal',
         naics: '555555',
         notes: 'The frosted kind',
-        img: 'https://placehold.it/50x50'
+        img: 'https://placehold.it/50x50',
+        unitsOfMeasure: 'Imperial',
+        energyUnit: 'kWh',
+        volumeLiquidUnit: 'SCF',
+        volumeGasUnit: 'SCF',
+        chilledWaterUnit: undefined,
+        massUnit: 'lb'
     },
     {
         // id: undefined,
@@ -132,6 +152,12 @@ export const TestAccountData: Array<IdbAccount> = [
         industry: 'Cereal',
         naics: '234567',
         notes: 'Not the worst',
-        img: 'https://placehold.it/50x50'
+        img: 'https://placehold.it/50x50',
+        unitsOfMeasure: 'Imperial',
+        energyUnit: 'kWh',
+        volumeLiquidUnit: 'SCF',
+        volumeGasUnit: 'SCF',
+        chilledWaterUnit: undefined,
+        massUnit: 'lb'
     }
 ]

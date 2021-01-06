@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { ElectricityDataFilter } from 'src/app/models/electricityFilter';
+import { ElectricityDataFilters, SupplyDemandChargeFilters, TaxAndOtherFilters } from 'src/app/models/electricityFilter';
 import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { UtilityMeterDataService } from '../utility-meter-data.service';
 
@@ -24,18 +24,22 @@ export class ElectricityDataTableComponent implements OnInit {
   @Output('setChecked')
   setChecked: EventEmitter<boolean> = new EventEmitter<boolean>();
 
-  electricityDataFilters: Array<ElectricityDataFilter>;
+  supplyDemandCharge: SupplyDemandChargeFilters;
+  taxAndOther: TaxAndOtherFilters;
   electricityDataFilterSub: Subscription;
   allChecked: boolean;
+  energyUnit: string;
   constructor(private utilityMeterDataService: UtilityMeterDataService) { }
 
   ngOnInit(): void {
+    this.energyUnit = this.meterListItem.idbMeter.startingUnit;
     if (this.meterListItem.meterDataItems.length != 0) {
       let hasFalseChecked: IdbUtilityMeterData = this.meterListItem.meterDataItems.find(meterDataItem => { return meterDataItem.checked == false });
       this.allChecked = (hasFalseChecked == undefined);
     }
     this.electricityDataFilterSub = this.utilityMeterDataService.tableElectricityFilters.subscribe(electricityDataFilters => {
-      this.electricityDataFilters = electricityDataFilters;
+      this.taxAndOther = electricityDataFilters.taxAndOther;
+      this.supplyDemandCharge = electricityDataFilters.supplyDemandCharge;
     });
   }
 

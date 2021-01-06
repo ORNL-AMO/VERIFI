@@ -4,7 +4,7 @@ export const volume = {
             name: {
                 singular: 'Cubic Millimeter',
                 plural: 'Cubic Millimeters',
-                display:  '(mm&#x00B3;)'
+                display: '(mm&#x00B3;)'
             }
             , to_anchor: 1 / 1000000
         }
@@ -12,7 +12,7 @@ export const volume = {
             name: {
                 singular: 'Cubic Centimeter',
                 plural: 'Cubic Centimeters',
-               display:  '(cm&#x00B3;)'
+                display: '(cm&#x00B3;)'
             }
             , to_anchor: 1 / 1000
         }
@@ -20,7 +20,7 @@ export const volume = {
             name: {
                 singular: 'Milliliter',
                 plural: 'Milliliters',
-                display:  '(mL)'
+                display: '(mL)'
             }
             , to_anchor: 1 / 1000
         }
@@ -28,7 +28,7 @@ export const volume = {
             name: {
                 singular: 'Centiliter',
                 plural: 'Centiliters',
-                display:  '(cL)'
+                display: '(cL)'
             }
             , to_anchor: 1 / 100
         }
@@ -36,7 +36,7 @@ export const volume = {
             name: {
                 singular: 'Deciliter',
                 plural: 'Deciliters',
-             display:  '(dL)'
+                display: '(dL)'
             }
             , to_anchor: 1 / 10
         }
@@ -44,7 +44,7 @@ export const volume = {
             name: {
                 singular: 'Liter',
                 plural: 'Liters',
-                display:  '(L)'
+                display: '(L)'
             }
             , to_anchor: 1
         }
@@ -52,7 +52,7 @@ export const volume = {
             name: {
                 singular: 'Cubic meter',
                 plural: 'Cubic meters',
-                display:  '(m&#x00B3;)'
+                display: '(m&#x00B3;)'
             }
             , to_anchor: 1000
         }
@@ -60,7 +60,7 @@ export const volume = {
             name: {
                 singular: 'Cubic kilometer',
                 plural: 'Cubic kilometers',
-                display:  '(km&#x00B3;)'
+                display: '(km&#x00B3;)'
             }
             , to_anchor: 1000000000000
         }
@@ -70,7 +70,7 @@ export const volume = {
             name: {
                 singular: 'Matsked',
                 plural: 'Matskedar',
-             display:  '(krm)'
+                display: '(krm)'
             }
             , to_anchor: 1 / 1000
         }
@@ -78,7 +78,7 @@ export const volume = {
             name: {
                 singular: 'Tesked',
                 plural: 'Teskedar',
-                display:  '(tsk)'
+                display: '(tsk)'
             }
             , to_anchor: 5 / 1000
         }
@@ -86,7 +86,7 @@ export const volume = {
             name: {
                 singular: 'Matsked',
                 plural: 'Matskedar',
-                display:  '(msk)'
+                display: '(msk)'
             }
             , to_anchor: 15 / 1000
         }
@@ -94,7 +94,7 @@ export const volume = {
             name: {
                 singular: 'Kaffekopp',
                 plural: 'Kaffekoppar',
-                display:  '(kkp)'
+                display: '(kkp)'
             }
             , to_anchor: 150 / 1000
         }
@@ -102,7 +102,7 @@ export const volume = {
             name: {
                 singular: 'Glas',
                 plural: 'Glas',
-                display:  '(glas)'
+                display: '(glas)'
             }
             , to_anchor: 200 / 1000
         }
@@ -110,7 +110,7 @@ export const volume = {
             name: {
                 singular: 'Kanna',
                 plural: 'Kannor',
-                display:  '(kanna)'
+                display: '(kanna)'
             }
             , to_anchor: 2.617
         }
@@ -121,7 +121,7 @@ export const volume = {
             name: {
                 singular: 'Teaspoon',
                 plural: 'Teaspoons',
-                display:  '(tsp)'
+                display: '(tsp)'
             }
             , to_anchor: 1 / 6
         }
@@ -129,7 +129,7 @@ export const volume = {
             name: {
                 singular: 'Tablespoon',
                 plural: 'Tablespoons',
-                display:  '(Tbs)'
+                display: '(Tbs)'
             }
             , to_anchor: 1 / 2
         }
@@ -137,7 +137,7 @@ export const volume = {
             name: {
                 singular: 'Cubic inch',
                 plural: 'Cubic inches',
-                display:  '(in&#x00B3;)'
+                display: '(in&#x00B3;)'
             }
             , to_anchor: 0.55411
         }
@@ -145,7 +145,7 @@ export const volume = {
             name: {
                 singular: 'Fluid Ounce',
                 plural: 'Fluid Ounces',
-                display:  '(fl-oz)'
+                display: '(fl-oz)'
             }
             , to_anchor: 1
         }
@@ -153,7 +153,7 @@ export const volume = {
             name: {
                 singular: 'Cup',
                 plural: 'Cups',
-             display:  '(cup)'
+                display: '(cup)'
             }
             , to_anchor: 8
         }
@@ -161,7 +161,7 @@ export const volume = {
             name: {
                 singular: 'Pint',
                 plural: 'Pints',
-                display:  '(pnt)'
+                display: '(pnt)'
             }
             , to_anchor: 16
         }
@@ -169,7 +169,7 @@ export const volume = {
             name: {
                 singular: 'Quart',
                 plural: 'Quarts',
-                display:  '(qt)'
+                display: '(qt)'
             }
             , to_anchor: 32
         }
@@ -177,7 +177,7 @@ export const volume = {
             name: {
                 singular: 'U.S. Gallon',
                 plural: 'U.S. Gallons',
-                display:  '(gal)'
+                display: '(gal)'
             }
             , to_anchor: 128
         }
@@ -185,7 +185,7 @@ export const volume = {
             name: {
                 singular: 'Thousand U.S. Gallons',
                 plural: 'Thousands U.S. Gallons',
-                display:  '(kgal)'
+                display: '(kgal)'
             }
             , to_anchor: 128 * 1000
         }
@@ -193,7 +193,15 @@ export const volume = {
             name: {
                 singular: 'Cubic foot',
                 plural: 'Cubic feet',
-                display:  '(ft&#x00B3;)'
+                display: '(ft&#x00B3;)'
+            }
+            , to_anchor: 957.506
+        }
+        , SCF: {
+            name: {
+                singular: 'Standard Cubic foot',
+                plural: 'Standard Cubic feet',
+                display: '(SCF)'
             }
             , to_anchor: 957.506
         }
@@ -201,7 +209,7 @@ export const volume = {
             name: {
                 singular: 'Thousand Standard Cubic foot',
                 plural: 'Thousand Standard Cubic feet',
-                display:  '(kSCF;)'
+                display: '(kSCF;)'
             }
             , to_anchor: 957.506 / 1000
         }
@@ -209,18 +217,18 @@ export const volume = {
             name: {
                 singular: 'Cubic yard',
                 plural: 'Cubic yards',
-                display:  '(yd&#x00B3;)'
+                display: '(yd&#x00B3;)'
             }
             , to_anchor: 25852.7
 
         }
         , 'impgal': {
-          name: {
-            singular: 'Imperial Gallon',
-            plural: 'Imperial Gallons',
-            display:  '(imp gal)'
-          }
-          , to_anchor: 153.722
+            name: {
+                singular: 'Imperial Gallon',
+                plural: 'Imperial Gallons',
+                display: '(imp gal)'
+            }
+            , to_anchor: 153.722
         }
     },
     _anchors: {
