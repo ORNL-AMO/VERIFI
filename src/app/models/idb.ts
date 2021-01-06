@@ -41,7 +41,6 @@ export interface IdbFacility {
     volumeLiquidUnit: string,
     volumeGasUnit: string,
     chilledWaterUnit: string
-    
 }
 
 export interface IdbUtilityMeterGroup {
