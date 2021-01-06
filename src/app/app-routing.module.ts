@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { AccountComponent } from './account/account/account.component';
-import { FacilityComponent } from './account/facility/facility.component';
+import { AccountComponent } from './account-management/account/account.component';
+import { FacilityComponent } from './account-management/facility/facility.component';
 import { UtilityComponent } from './utility/utility.component';
 import { EnergyConsumptionComponent } from './utility/energy-consumption/energy-consumption.component';
 import { DashboardComponent } from './dashboard/dashboard.component';

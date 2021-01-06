@@ -118,7 +118,7 @@ export class HeaderComponent implements OnInit {
   }
 
   addNewFacility() {
-    let newFacility: IdbFacility = this.facilitydbService.getNewIdbFacility(this.activeAccount.id);
+    let newFacility: IdbFacility = this.facilitydbService.getNewIdbFacility(this.activeAccount);
     this.facilitydbService.add(newFacility);
   }
 

@@ -3,7 +3,7 @@
         <th><input #masterCheckbox type="checkbox" (change)="checkAll()" [(ngModel)]="allChecked">
         </th>
         <th class="row-year">Meter Read Date</th>
-        <th>Total kWh</th>
+        <th>Total Energy (<span [innerHTML]="energyUnit | settingsLabel"></span>)</th>
         <th>Total Demand</th>
         <th>Total Cost</th>
         <th *ngIf="supplyDemandCharge.supplyBlockAmount">

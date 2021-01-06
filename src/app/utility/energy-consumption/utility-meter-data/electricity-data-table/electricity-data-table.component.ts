@@ -28,9 +28,11 @@ export class ElectricityDataTableComponent implements OnInit {
   taxAndOther: TaxAndOtherFilters;
   electricityDataFilterSub: Subscription;
   allChecked: boolean;
+  energyUnit: string;
   constructor(private utilityMeterDataService: UtilityMeterDataService) { }
 
   ngOnInit(): void {
+    this.energyUnit = this.meterListItem.idbMeter.startingUnit;
     if (this.meterListItem.meterDataItems.length != 0) {
       let hasFalseChecked: IdbUtilityMeterData = this.meterListItem.meterDataItems.find(meterDataItem => { return meterDataItem.checked == false });
       this.allChecked = (hasFalseChecked == undefined);
