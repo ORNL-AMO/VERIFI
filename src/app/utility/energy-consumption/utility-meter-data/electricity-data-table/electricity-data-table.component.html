@@ -6,8 +6,64 @@
         <th>Total Energy (<span [innerHTML]="energyUnit | settingsLabel"></span>)</th>
         <th>Total Demand</th>
         <th>Total Cost</th>
-        <th *ngFor="let electricityDataFilter of electricityDataFilters" [hidden]="!electricityDataFilter.filter">
-            {{electricityDataFilter.display}}</th>
+        <th *ngIf="supplyDemandCharge.supplyBlockAmount">
+            Block Rates Supply Amt
+        </th>
+        <th *ngIf="supplyDemandCharge.supplyBlockCharge">
+            Block Rates Supply Charge
+        </th>
+        <th *ngIf="supplyDemandCharge.flatRateAmount">
+            Flat Rate Amt
+        </th>
+        <th *ngIf="supplyDemandCharge.flatRateCharge">
+            Flat Rate Charge
+        </th>
+        <th *ngIf="supplyDemandCharge.peakAmount">
+            On-Peak Amt
+        </th>
+        <th *ngIf="supplyDemandCharge.peakCharge">
+            On-Peak Charge
+        </th>
+        <th *ngIf="supplyDemandCharge.offPeakAmount">
+            Off-Peak Amt
+        </th>
+        <th *ngIf="supplyDemandCharge.offPeakCharge">
+            Off-Peak Charge
+        </th>
+        <th *ngIf="supplyDemandCharge.demandBlockAmount">
+            Block Rates Demand Amt
+        </th>
+        <th *ngIf="supplyDemandCharge.demandBlockCharge">
+            Block Rates Demand Charge
+        </th>
+
+        <th *ngIf="taxAndOther.generationTransmissionCharge">
+            Generation and Transmission Charge
+        </th>
+        <th *ngIf="taxAndOther.deliveryCharge">
+            Delivery Charge
+        </th>
+        <th *ngIf="taxAndOther.transmissionCharge">
+            Transmission Charge
+        </th>
+        <th *ngIf="taxAndOther.powerFactorCharge">
+            Power Factor Charge
+        </th>
+        <th *ngIf="taxAndOther.businessCharge">
+            Local Business Charge
+        </th>
+        <th *ngIf="taxAndOther.utilityTax">
+            Local Utility Tax
+        </th>
+        <th *ngIf="taxAndOther.latePayment">
+            Late Payment
+        </th>
+        <th *ngIf="taxAndOther.otherCharge">
+            Other Charge
+        </th>
+        <th *ngIf="taxAndOther.basicCharge">
+            Basic Charge
+        </th>
     </tr>
     <tr *ngFor="let meterData of meterListItem.meterDataItems | slice: pageSize[meterIndex] | slice: 0:itemsPerPage;">
         <td><input type="checkbox" name="metersSelected" (change)="toggleChecked()" [(ngModel)]="meterData.checked">
@@ -15,8 +71,64 @@
         <td>{{meterData.readDate}}</td>
         <td>{{meterData.totalEnergyUse}}</td>
         <td>{{meterData.totalDemand}}</td>
-        <td>${{meterData.totalCost}}</td>
-        <td *ngFor="let electricityDataFilter of electricityDataFilters" [hidden]="!electricityDataFilter.filter">
-            {{meterData[electricityDataFilter.name]}}</td>
+        <td>{{meterData.totalCost}}</td>
+        <td *ngIf="supplyDemandCharge.supplyBlockAmount">
+            {{meterData.supplyBlockAmount}}
+        </td>
+        <td *ngIf="supplyDemandCharge.supplyBlockCharge">
+            {{meterData.supplyBlockCharge}}
+        </td>
+        <td *ngIf="supplyDemandCharge.flatRateAmount">
+            {{meterData.flatRateAmount}}
+        </td>
+        <td *ngIf="supplyDemandCharge.flatRateCharge">
+            {{meterData.flatRateCharge}}
+        </td>
+        <td *ngIf="supplyDemandCharge.peakAmount">
+            {{meterData.peakAmount}}
+        </td>
+        <td *ngIf="supplyDemandCharge.peakCharge">
+            {{meterData.peakCharge}}
+        </td>
+        <td *ngIf="supplyDemandCharge.offPeakAmount">
+            {{meterData.offPeakAmount}}
+        </td>
+        <td *ngIf="supplyDemandCharge.offPeakCharge">
+            {{meterData.offPeakCharge}}
+        </td>
+        <td *ngIf="supplyDemandCharge.demandBlockAmount">
+            {{meterData.demandBlockAmount}}
+        </td>
+        <td *ngIf="supplyDemandCharge.demandBlockCharge">
+            {{meterData.demandBlockCharge}}
+        </td>
+
+        <td *ngIf="taxAndOther.generationTransmissionCharge">
+            {{meterData.generationTransmissionCharge}}
+        </td>
+        <td *ngIf="taxAndOther.deliveryCharge">
+            {{meterData.deliveryCharge}}
+        </td>
+        <td *ngIf="taxAndOther.transmissionCharge">
+            {{meterData.transmissionCharge}}
+        </td>
+        <td *ngIf="taxAndOther.powerFactorCharge">
+            {{meterData.powerFactorCharge}}
+        </td>
+        <td *ngIf="taxAndOther.businessCharge">
+            {{meterData.businessCharge}}
+        </td>
+        <td *ngIf="taxAndOther.utilityTax">
+            {{meterData.utilityTax}}
+        </td>
+        <td *ngIf="taxAndOther.latePayment">
+            {{meterData.latePayment}}
+        </td>
+        <td *ngIf="taxAndOther.otherCharge">
+            {{meterData.otherCharge}}
+        </td>
+        <td *ngIf="taxAndOther.basicCharge">
+            {{meterData.basicCharge}}
+        </td>
     </tr>
 </table>

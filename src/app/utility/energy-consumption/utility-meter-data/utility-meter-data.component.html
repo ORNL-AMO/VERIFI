@@ -23,7 +23,8 @@
         <button class="btn btn-small btn-danger" (click)='bulkDelete()'>Bulk Delete</button>
     </div>
     <!--Column Filters-->
-    <app-utility-meter-data-filter *ngIf="selectedSource == 'Electricity'"></app-utility-meter-data-filter>
+    <app-utility-meter-data-filter *ngIf="selectedSource == 'Electricity'" [filterType]="'table'">
+    </app-utility-meter-data-filter>
 </div>
 
 <div class="meter" *ngFor="let meterListItem of meterList; let index=index;">

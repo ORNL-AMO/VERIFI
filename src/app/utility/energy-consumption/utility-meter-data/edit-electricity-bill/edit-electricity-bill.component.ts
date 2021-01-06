@@ -4,7 +4,7 @@ import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { ElectricityDataFilter } from 'src/app/models/electricityFilter';
+import { ElectricityDataFilters, SupplyDemandChargeFilters, TaxAndOtherFilters } from 'src/app/models/electricityFilter';
 import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { UtilityMeterDataService } from '../utility-meter-data.service';
 
@@ -23,8 +23,14 @@ export class EditElectricityBillComponent implements OnInit {
 
 
   meterDataForm: FormGroup;
-  electricityDataFilters: Array<ElectricityDataFilter>;
+  electricityDataFilters: ElectricityDataFilters;
   electricityDataFiltersSub: Subscription;
+  displaySupplyDemandColumnOne: boolean;
+  displaySupplyDemandColumnTwo: boolean;
+  displayTaxAndOthersColumnOne: boolean;
+  displayTaxAndOthersColumnTwo: boolean;
+  supplyDemandFilters: SupplyDemandChargeFilters;
+  taxAndOtherFilters: TaxAndOtherFilters;
   energyUnit: string;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private utilityMeterDataService: UtilityMeterDataService,
     private facilityDbService: FacilitydbService, private utilityMeterDbService: UtilityMeterdbService) { }
@@ -34,7 +40,9 @@ export class EditElectricityBillComponent implements OnInit {
     this.energyUnit = facilityMeter.startingUnit
     this.meterDataForm = this.utilityMeterDataService.getElectricityMeterDataForm(this.editMeterData);
     this.electricityDataFiltersSub = this.utilityMeterDataService.electricityInputFilters.subscribe(dataFilters => {
-      this.electricityDataFilters = dataFilters;
+      this.supplyDemandFilters = dataFilters.supplyDemandCharge;
+      this.taxAndOtherFilters = dataFilters.taxAndOther
+      this.setDisplayColumns();
     });
   }
 
@@ -58,12 +66,57 @@ export class EditElectricityBillComponent implements OnInit {
   }
 
   showAllFields() {
-    this.electricityDataFilters.forEach(field => {
-      field.filter = true;
-    });
+    this.electricityDataFilters = {
+      supplyDemandCharge: {
+        showSection: true,
+        supplyBlockAmount: true,
+        supplyBlockCharge: true,
+        flatRateAmount: true,
+        flatRateCharge: true,
+        peakAmount: true,
+        peakCharge: true,
+        offPeakAmount: true,
+        offPeakCharge: true,
+        demandBlockAmount: true,
+        demandBlockCharge: true,
+      },
+      taxAndOther: {
+        showSection: true,
+        utilityTax: true,
+        latePayment: true,
+        otherCharge: true,
+        basicCharge: true,
+        generationTransmissionCharge: true,
+        deliveryCharge: true,
+        transmissionCharge: true,
+        powerFactorCharge: true,
+        businessCharge: true
+      }
+    }
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     selectedFacility.electricityInputFilters = this.electricityDataFilters;
     this.facilityDbService.update(selectedFacility);
+  }
+
+
+  setDisplayColumns() {
+    this.displaySupplyDemandColumnOne = (
+      this.supplyDemandFilters.peakAmount || this.supplyDemandFilters.peakCharge || this.supplyDemandFilters.offPeakAmount || this.supplyDemandFilters.offPeakCharge
+      || this.supplyDemandFilters.demandBlockAmount || this.supplyDemandFilters.demandBlockCharge
+    );
+
+    this.displaySupplyDemandColumnTwo = (
+      this.supplyDemandFilters.supplyBlockAmount || this.supplyDemandFilters.supplyBlockCharge || this.supplyDemandFilters.flatRateAmount || this.supplyDemandFilters.flatRateCharge
+    );
+
+    this.displayTaxAndOthersColumnOne = (
+      this.taxAndOtherFilters.businessCharge || this.taxAndOtherFilters.utilityTax || this.taxAndOtherFilters.latePayment ||
+      this.taxAndOtherFilters.otherCharge || this.taxAndOtherFilters.basicCharge
+    );
+
+    this.displayTaxAndOthersColumnTwo = (
+      this.taxAndOtherFilters.generationTransmissionCharge || this.taxAndOtherFilters.deliveryCharge || this.taxAndOtherFilters.powerFactorCharge
+    );
   }
 
 }

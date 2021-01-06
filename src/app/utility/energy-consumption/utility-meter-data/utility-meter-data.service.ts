@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { BehaviorSubject } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { ElectricityDataFilter } from 'src/app/models/electricityFilter';
+import { ElectricityDataFilters } from 'src/app/models/electricityFilter';
 import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 
 @Injectable({
@@ -10,46 +10,52 @@ import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 })
 export class UtilityMeterDataService {
 
-  tableElectricityFilters: BehaviorSubject<Array<ElectricityDataFilter>>;
-  electricityInputFilters: BehaviorSubject<Array<ElectricityDataFilter>>;
+  tableElectricityFilters: BehaviorSubject<ElectricityDataFilters>;
+  electricityInputFilters: BehaviorSubject<ElectricityDataFilters>;
   constructor(private formBuilder: FormBuilder, private facilityDbService: FacilitydbService) {
-    let defaultFilters: Array<ElectricityDataFilter> = this.getDefaultFilters();
-    this.tableElectricityFilters = new BehaviorSubject<Array<ElectricityDataFilter>>(defaultFilters);
-    this.electricityInputFilters = new BehaviorSubject<Array<ElectricityDataFilter>>(defaultFilters);
+    let defaultFilters: ElectricityDataFilters = this.getDefaultFilters();
+    this.tableElectricityFilters = new BehaviorSubject<ElectricityDataFilters>(defaultFilters);
+    this.electricityInputFilters = new BehaviorSubject<ElectricityDataFilters>(defaultFilters);
     this.facilityDbService.selectedFacility.subscribe(selectedFacility => {
       if (selectedFacility) {
         if (selectedFacility.electricityInputFilters) {
           this.electricityInputFilters.next(selectedFacility.electricityInputFilters);
         }
         if (selectedFacility.tableElectricityFilters) {
-          this.electricityInputFilters.next(selectedFacility.tableElectricityFilters);
+          this.tableElectricityFilters.next(selectedFacility.tableElectricityFilters);
         }
       }
     });
   }
 
-  getDefaultFilters(): Array<ElectricityDataFilter> {
-    return [
-      { id: 1, filter: false, name: 'supplyBlockAmount', display: 'Block Rates Supply Amt' },
-      { id: 2, filter: false, name: 'supplyBlockCharge', display: 'Block Rates Supply Charge' },
-      { id: 3, filter: false, name: 'flatRateAmount', display: 'Flat Rate Amt' },
-      { id: 4, filter: false, name: 'flatRateCharge', display: 'Flat Rate Charge' },
-      { id: 5, filter: false, name: 'peakAmount', display: 'On-Peak Amt' },
-      { id: 6, filter: false, name: 'peakCharge', display: 'On-Peak Charge' },
-      { id: 7, filter: false, name: 'offPeakAmount', display: 'Off-Peak Amt' },
-      { id: 8, filter: false, name: 'offPeakCharge', display: 'Off-Peak Charge' },
-      { id: 9, filter: false, name: 'demandBlockAmount', display: 'Block Rates Demand Amt' },
-      { id: 10, filter: false, name: 'demandBlockCharge', display: 'Block Rates Demand Charge' },
-      { id: 11, filter: false, name: 'generationTransmissionCharge', display: 'Generation and Transmission Charge' },
-      { id: 12, filter: true, name: 'deliveryCharge', display: 'Delivery Charge' },
-      { id: 13, filter: false, name: 'transmissionCharge', display: 'Transmission Charge' },
-      { id: 14, filter: false, name: 'powerFactorCharge', display: 'Power Factor Charge' },
-      { id: 15, filter: false, name: 'businessCharge', display: 'Local Business Charge' },
-      { id: 16, filter: true, name: 'utilityTax', display: 'Local Utility Tax' },
-      { id: 17, filter: true, name: 'latePayment', display: 'Late Payment' },
-      { id: 18, filter: true, name: 'otherCharge', display: 'Other Charge' },
-      { id: 0, filter: true, name: 'basicCharge', display: 'Basic Charge' },
-    ]
+  getDefaultFilters(): ElectricityDataFilters {
+    return {
+      supplyDemandCharge: {
+        showSection: false,
+        supplyBlockAmount: false,
+        supplyBlockCharge: false,
+        flatRateAmount: false,
+        flatRateCharge: false,
+        peakAmount: false,
+        peakCharge: false,
+        offPeakAmount: false,
+        offPeakCharge: false,
+        demandBlockAmount: false,
+        demandBlockCharge: false,
+      },
+      taxAndOther: {
+        showSection: true,
+        utilityTax: true,
+        latePayment: true,
+        otherCharge: true,
+        basicCharge: true,
+        generationTransmissionCharge: false,
+        deliveryCharge: false,
+        transmissionCharge: false,
+        powerFactorCharge: false,
+        businessCharge: false
+      }
+    }
   }
 
   //TODO validators based off of filters
