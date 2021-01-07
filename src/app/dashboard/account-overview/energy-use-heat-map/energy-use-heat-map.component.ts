@@ -28,7 +28,6 @@ export class EnergyUseHeatMapComponent implements OnInit {
     this.accountFacilitiesSub = this.utilityMeterDataDbService.accountMeterData.subscribe(val => {
       this.facilitiesSummary = this.dashboardService.getAccountFacilitesSummary();
       this.setData();
-      this.drawChart();
     });
   }
 
@@ -38,7 +37,7 @@ export class EnergyUseHeatMapComponent implements OnInit {
 
 
   ngAfterViewInit() {
-    this.drawChart();
+    this.setData();
   }
 
   drawChart() {
@@ -57,7 +56,7 @@ export class EnergyUseHeatMapComponent implements OnInit {
         yaxis: {
           automargin: true
         },
-        margin: { "t": 50, "b": 50},
+        margin: { "t": 50, "b": 50 },
       };
       var individualData = new Array();
       this.facilityHeatMapData.forEach(heatMapData => {
@@ -119,17 +118,25 @@ export class EnergyUseHeatMapComponent implements OnInit {
   setData() {
     this.facilityHeatMapData = new Array();
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+
     let accountMetersCopy: Array<IdbUtilityMeter> = JSON.parse(JSON.stringify(accountMeters));
     let accountFacilites: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-    //filter by facility
-    let facilityIds: Array<number> = accountMeters.map(meter => { return meter.facilityId });
-    facilityIds = _.uniq(facilityIds);
-    facilityIds.forEach(id => {
-      let facilityMeters: Array<IdbUtilityMeter> = accountMetersCopy.filter(meter => { return meter.facilityId == id });
-      let facility: IdbFacility = accountFacilites.find(facility => { return facility.id == id });
-      let facilityHeatMapData: HeatMapData = this.visualizationService.getMeterHeatMapData(facilityMeters, facility.name, true);
-      this.facilityHeatMapData.push(facilityHeatMapData);
-    })
+    if (accountMeters.length != 0 && accountFacilites.length != 0) {
+      //filter by facility
+      let facilityIds: Array<number> = accountMeters.map(meter => { return meter.facilityId });
+      facilityIds = _.uniq(facilityIds);
+      facilityIds.forEach(id => {
+        let facilityMeters: Array<IdbUtilityMeter> = accountMetersCopy.filter(meter => { return meter.facilityId == id });
+        let facility: IdbFacility = accountFacilites.find(facility => { return facility.id == id });
+        let facilityHeatMapData: HeatMapData = this.visualizationService.getMeterHeatMapData(facilityMeters, facility.name, true);
+        this.facilityHeatMapData.push(facilityHeatMapData);
+      });
+      this.drawChart();
+    } else if (this.energyUseHeatMap) {
+      let Plotly = this.plotlyService.getPlotly();
+      Plotly.purge(this.energyUseHeatMap.nativeElement);
+    }
+
   }
 
 }

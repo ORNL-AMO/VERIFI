@@ -21,10 +21,12 @@ export class EnergyUseDonutComponent implements OnInit {
   ngOnInit(): void {
     this.accountFacilitiesSub = this.utilityMeterDataDbService.accountMeterData.subscribe(val => {
       this.facilitiesSummary = this.dashboardService.getAccountFacilitesSummary();
-      this.drawChart();
-      // this.totalEnergyUsage = _.sumBy(this.facilitiesSummary, 'energyUsage');
-      // this.totalMeters = _.sumBy(this.facilitiesSummary, 'numberOfMeters');
-      // this.totalEnergyCost = _.sumBy(this.facilitiesSummary, 'energyCost');
+      if (this.facilitiesSummary.length != 0) {
+        this.drawChart();
+      } else if (this.energyUseDonut) {
+        let Plotly = this.plotlyService.getPlotly();
+        Plotly.purge(this.energyUseDonut.nativeElement);
+      }
     });
   }
 
@@ -38,7 +40,7 @@ export class EnergyUseDonutComponent implements OnInit {
   }
 
   drawChart() {
-    if (this.energyUseDonut) {
+    if (this.energyUseDonut && this.facilitiesSummary.length != 0) {
       var data = [{
         values: this.facilitiesSummary.map(summary => { return summary.energyCost }),
         labels: this.facilitiesSummary.map(summary => { return summary.facility.name }),

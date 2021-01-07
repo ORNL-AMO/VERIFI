@@ -17,6 +17,7 @@ export class DashboardService {
   getAccountFacilitesSummary(): Array<FacilitySummary> {
     let facilitiesSummary: Array<FacilitySummary> = new Array();
     let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    console.log(facilities)
     facilities.forEach(facility => {
       let facilityMeterSummary: FacilitySummary = this.getFacilitySummary(facility);
       facilitiesSummary.push(facilityMeterSummary);
@@ -28,15 +29,24 @@ export class DashboardService {
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let accountMetersCopy: Array<IdbUtilityMeter> = JSON.parse(JSON.stringify(accountMeters));
     let facilityMeters: Array<IdbUtilityMeter> = accountMetersCopy.filter(meter => { return meter.facilityId == facility.id });
-    let facilityMetersDataSummary: Array<{ time: string, energyUse: number, energyCost: number }> = this.getPastYearData(facilityMeters);
-    let lastBill: MonthlyData = this.getLastBillEntry(facilityMeters);
-
-    return {
-      facility: facility,
-      energyUsage: _.sumBy(facilityMetersDataSummary, 'energyUse'),
-      energyCost: _.sumBy(facilityMetersDataSummary, 'energyCost'),
-      numberOfMeters: facilityMeters.length,
-      lastBillDate: new Date(lastBill.year, (lastBill.monthNumValue))
+    if (facilityMeters.length != 0) {
+      let facilityMetersDataSummary: Array<{ time: string, energyUse: number, energyCost: number }> = this.getPastYearData(facilityMeters);
+      let lastBill: MonthlyData = this.getLastBillEntry(facilityMeters);
+      return {
+        facility: facility,
+        energyUsage: _.sumBy(facilityMetersDataSummary, 'energyUse'),
+        energyCost: _.sumBy(facilityMetersDataSummary, 'energyCost'),
+        numberOfMeters: facilityMeters.length,
+        lastBillDate: new Date(lastBill.year, (lastBill.monthNumValue))
+      }
+    } else {
+      return {
+        facility: facility,
+        energyCost: 0,
+        energyUsage: 0,
+        numberOfMeters: 0,
+        lastBillDate: undefined
+      }
     }
   }
 
@@ -401,7 +411,7 @@ export class DashboardService {
 
     let group: IdbUtilityMeterGroup = this.utilityMeterGroupDbService.getGroupById(meter.groupId);
     let groupName: string = 'Ungrouped';
-    if(group){
+    if (group) {
       groupName = group.name;
     }
 
