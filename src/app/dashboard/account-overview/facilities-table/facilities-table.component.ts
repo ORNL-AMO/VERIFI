@@ -34,6 +34,7 @@ export class FacilitiesTableComponent implements OnInit {
       this.totalEnergyUsage = _.sumBy(this.facilitiesSummary, 'energyUsage');
       this.totalMeters = _.sumBy(this.facilitiesSummary, 'numberOfMeters');
       this.totalEnergyCost = _.sumBy(this.facilitiesSummary, 'energyCost');
+      
     });
   }
 

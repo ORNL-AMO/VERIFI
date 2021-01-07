@@ -81,7 +81,7 @@ export class AccountComponent implements OnInit {
     }
   }
 
-  facilityEdit(facility: IdbFacility) {
+  switchFacility(facility: IdbFacility) {
     this.facilityDbService.selectedFacility.next(facility);
     this.router.navigate(['account/facility']);
   }
