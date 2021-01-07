@@ -29,7 +29,7 @@ export class UtilityMeterDataComponent implements OnInit {
   itemsPerPage: number = 6;
   pageSize: Array<number> = [];
 
-  meterListSub: Subscription;
+  accountMeterDataSub: Subscription;
   facilityMetersSub: Subscription;
   editMeterData: IdbUtilityMeterData;
   utilityMeters: Array<IdbUtilityMeter>;
@@ -52,16 +52,16 @@ export class UtilityMeterDataComponent implements OnInit {
       this.setUtilitySource(url[0].path);
       this.setData();
     })
-    this.facilityMetersSub = this.utilityMeterDbService.facilityMeters.subscribe(facilityMeters => {
+    this.facilityMetersSub = this.utilityMeterDbService.facilityMeters.subscribe(() => {
       this.setData();
     });
-    this.meterListSub = this.utilityMeterDataDbService.facilityMeterData.subscribe(() => {
+    this.accountMeterDataSub = this.utilityMeterDataDbService.accountMeterData.subscribe(() => {
       this.setData();
     });
   }
 
   ngOnDestroy() {
-    this.meterListSub.unsubscribe();
+    this.accountMeterDataSub.unsubscribe();
     this.facilityMetersSub.unsubscribe();
   }
 
