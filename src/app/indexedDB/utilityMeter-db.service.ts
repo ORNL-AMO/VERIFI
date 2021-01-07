@@ -1,8 +1,9 @@
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { Injectable } from '@angular/core';
-import { IdbFacility, IdbUtilityMeter } from '../models/idb';
+import { IdbAccount, IdbFacility, IdbUtilityMeter } from '../models/idb';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { FacilitydbService } from './facility-db.service';
+import { AccountdbService } from './account-db.service';
 
 @Injectable({
     providedIn: 'root'
@@ -10,12 +11,17 @@ import { FacilitydbService } from './facility-db.service';
 export class UtilityMeterdbService {
 
     facilityMeters: BehaviorSubject<Array<IdbUtilityMeter>>;
-
-    constructor(private dbService: NgxIndexedDBService, private facilityDbService: FacilitydbService) {
+    accountMeters: BehaviorSubject<Array<IdbUtilityMeter>>;
+    constructor(private dbService: NgxIndexedDBService, private facilityDbService: FacilitydbService, private accountdbService: AccountdbService) {
         this.facilityMeters = new BehaviorSubject<Array<IdbUtilityMeter>>(new Array());
+        this.accountMeters = new BehaviorSubject<Array<IdbUtilityMeter>>(new Array());
+        this.accountdbService.selectedAccount.subscribe(() => {
+            this.setAccountMeters();
+        })
         this.facilityDbService.selectedFacility.subscribe(() => {
             this.setFacilityMeters();
         });
+
     }
 
     setFacilityMeters() {
@@ -26,6 +32,16 @@ export class UtilityMeterdbService {
             });
         }
     }
+
+    setAccountMeters(){
+        let selectedAccount: IdbAccount = this.accountdbService.selectedAccount.getValue();
+        if(selectedAccount){
+            this.getAllByIndexRange('accountId', selectedAccount.id).subscribe(facilityMeters => {
+                this.accountMeters.next(facilityMeters);
+            });
+        }
+    }
+
 
     getAll(): Observable<Array<IdbUtilityMeter>> {
         return this.dbService.getAll('utilityMeter');
@@ -51,6 +67,7 @@ export class UtilityMeterdbService {
     add(utilityMeter: IdbUtilityMeter): void {
         this.dbService.add('utilityMeter', utilityMeter).subscribe(() => {
             this.setFacilityMeters();
+            this.setAccountMeters();
         });
     }
 
@@ -62,6 +79,7 @@ export class UtilityMeterdbService {
     update(values: IdbUtilityMeter): void {
         this.dbService.update('utilityMeter', values).subscribe(() => {
             this.setFacilityMeters();
+            this.setAccountMeters();
         });
     }
 
@@ -69,6 +87,7 @@ export class UtilityMeterdbService {
         this.dbService.delete('utilityMeter', utilityMeterId).subscribe(() => {
             this.setFacilityMeters();
         });
+        this.setAccountMeters();
     }
 
     deleteAllFacilityMeters(facilityId: number): void {
@@ -111,12 +130,12 @@ export class UtilityMeterdbService {
     }
 
     getGroupMetersByGroupId(groupId: number): Array<IdbUtilityMeter> {
-        let facilityMeters: Array<IdbUtilityMeter> = this.facilityMeters.getValue();
+        let facilityMeters: Array<IdbUtilityMeter> = this.accountMeters.getValue();
         return facilityMeters.filter(meter => { return meter.groupId == groupId });
     }
 
     getFacilityMeterById(id: number): IdbUtilityMeter {
-        let facilityMeters: Array<IdbUtilityMeter> = this.facilityMeters.getValue();
+        let facilityMeters: Array<IdbUtilityMeter> = this.accountMeters.getValue();
         return facilityMeters.find(meter => { return meter.id == id });
     }
 }

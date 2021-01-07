@@ -75,9 +75,30 @@ p.display-lg {
   display: inline-block;
   padding: 10px;
 }
+
+.dashboard-nav ul li:hover {
+  cursor: pointer;
+  background-color: #efefef;
+}
+
 .dashboard-nav li.active {
   border-bottom: 3px solid #2c386b;
 }
 .bg-success {
   background-color: #6abb2e!important;
+}
+
+h3 a{
+  font-size: 1.25rem;
+  color: white;
+  /* text-decoration: underline; */
+}
+
+h3 a:hover{
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+p{
+  margin-bottom: .5rem;
 }

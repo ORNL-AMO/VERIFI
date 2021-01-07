@@ -47,6 +47,7 @@ export class HeaderComponent implements OnInit {
   ) {
     // Close menus on navigation
     router.events.subscribe((event: Event) => {
+      // console.log(event);
       if (event instanceof NavigationStart) {
         this.accountMenu = false;
         this.facilityMenu = false;
@@ -133,6 +134,13 @@ export class HeaderComponent implements OnInit {
     this.facilitydbService.selectedFacility.next(facility);
   }
 
+  selectAllFacilites(){
+    this.toggleFacilityMenu();
+    this.router.navigate(['/account-summary']);
+
+  }
+
+
   getAccountFacilityCount() {
     var res = this.allFacilities.reduce(function(obj, v) {
       obj[v.accountId] = (obj[v.accountId] || 0) + 1;
@@ -148,7 +156,6 @@ export class HeaderComponent implements OnInit {
         this.accountList[index]['facilityCount'] = res[property] + " Facilities";
       }
     }
-    
   }
 
   /* DEV TOOLS BELOW 

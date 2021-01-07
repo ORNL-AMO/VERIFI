@@ -50,9 +50,18 @@ import { ImportPredictorsComponent } from './utility/predictor-data/import-predi
 import { EnergyUnitDropdownComponent } from './utility/meter-grouping/energy-unit-dropdown/energy-unit-dropdown.component';
 import { SettingsLabelPipe } from './shared/helper-pipes/settings-label.pipe';
 import { VisualizationComponent } from './utility/visualization/visualization.component';
-import { FacilityBarChartComponent } from './utility/visualization/facility-bar-chart/facility-bar-chart.component';
-import { FacilityHeatMapComponent } from './utility/visualization/facility-heat-map/facility-heat-map.component';
-import { FacilityStackedAreaChartComponent } from './utility/visualization/facility-stacked-area-chart/facility-stacked-area-chart.component';
+import { FacilityBarChartComponent } from './dashboard/facility-overview/facility-bar-chart/facility-bar-chart.component';
+import { FacilityHeatMapComponent } from './dashboard/facility-overview/facility-heat-map/facility-heat-map.component';
+import { FacilityStackedAreaChartComponent } from './dashboard/facility-overview/facility-stacked-area-chart/facility-stacked-area-chart.component';
+import { FacilityOverviewComponent } from './dashboard/facility-overview/facility-overview.component';
+import { AccountOverviewComponent } from './dashboard/account-overview/account-overview.component';
+import { FacilitiesTableComponent } from './dashboard/account-overview/facilities-table/facilities-table.component';
+import { EnergyUseDonutComponent } from './dashboard/account-overview/energy-use-donut/energy-use-donut.component';
+import { EnergyUseHeatMapComponent } from './dashboard/account-overview/energy-use-heat-map/energy-use-heat-map.component';
+import { EnergyUseStackedBarChartComponent } from './dashboard/account-overview/energy-use-stacked-bar-chart/energy-use-stacked-bar-chart.component';
+import { MetersTableComponent } from './dashboard/facility-overview/meters-table/meters-table.component';
+import { UtilityEnergyUseTableComponent } from './dashboard/facility-overview/utility-energy-use-table/utility-energy-use-table.component';
+import { AccountUtilityEnergyUseTableComponent } from './dashboard/account-overview/account-utility-energy-use-table/account-utility-energy-use-table.component';
 
 @NgModule({
   declarations: [
@@ -91,7 +100,16 @@ import { FacilityStackedAreaChartComponent } from './utility/visualization/facil
     VisualizationComponent,
     FacilityBarChartComponent,
     FacilityHeatMapComponent,
-    FacilityStackedAreaChartComponent
+    FacilityStackedAreaChartComponent,
+    FacilityOverviewComponent,
+    AccountOverviewComponent,
+    FacilitiesTableComponent,
+    EnergyUseDonutComponent,
+    EnergyUseHeatMapComponent,
+    EnergyUseStackedBarChartComponent,
+    MetersTableComponent,
+    UtilityEnergyUseTableComponent,
+    AccountUtilityEnergyUseTableComponent
   ],
   imports: [
     BrowserModule,

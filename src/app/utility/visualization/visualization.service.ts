@@ -54,7 +54,6 @@ export class VisualizationService {
           return (a.year == b.year && a.month == b.month)
         });
         //remove data without 12 months for the year
-        //TODO: Make optional?
         let counts = _.countBy(yearMonths, 'year');
         yearMonths = yearMonths.filter(yearMonthItem => { return counts[yearMonthItem.year] == 12 })
       }
@@ -86,7 +85,7 @@ export class VisualizationService {
     return resultData;
   }
 
-  getMeterHeatMapData(meters: Array<IdbUtilityMeter>): { resultData: Array<{ monthlyEnergy: Array<number>, monthlyCost: Array<number> }>, months: Array<string>, years: Array<number> } {
+  getMeterHeatMapData(meters: Array<IdbUtilityMeter>, facilityName: string, removeIncompleteYears: boolean): HeatMapData {
     let months: Array<string> = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     //calanderize meters
     let calanderizedMeterData: Array<CalanderizedMeter> = this.calanderizationService.calanderizeFacilityMeters(meters);
@@ -96,8 +95,18 @@ export class VisualizationService {
     let combindedCalanderizedMeterData: Array<MonthlyData> = calanderizedMeterData.flatMap(meterData => {
       return meterData.monthlyData;
     });
+    let yearMonths = combindedCalanderizedMeterData.map(data => { return { year: data.year, month: data.month } });
+    if (removeIncompleteYears) {
+      yearMonths = _.uniqWith(yearMonths, (a, b) => {
+        return (a.year == b.year && a.month == b.month)
+      });
+      //remove data without 12 months for the year
+      //TODO: Make optional?
+      let counts = _.countBy(yearMonths, 'year');
+      yearMonths = yearMonths.filter(yearMonthItem => { return counts[yearMonthItem.year] == 12 })
+    }
     //create array of the uniq months and years
-    let years: Array<number> = combindedCalanderizedMeterData.map(data => { return data.year });
+    let years: Array<number> = yearMonths.map(data => { return data.year });
     years = _.uniq(years);
     years = _.orderBy(years, (year) => { return year }, ['asc', 'desc']);
     let resultData: Array<{ monthlyEnergy: Array<number>, monthlyCost: Array<number> }> = new Array();
@@ -126,11 +135,16 @@ export class VisualizationService {
     return {
       months: months,
       years: years,
-      resultData: resultData
+      resultData: resultData,
+      facilityName: facilityName
     }
   }
+}
 
-  getSackedAreaChartData() {
 
-  }
+export interface HeatMapData {
+  resultData: Array<{ monthlyEnergy: Array<number>, monthlyCost: Array<number> }>,
+  months: Array<string>,
+  years: Array<number>,
+  facilityName: string
 }

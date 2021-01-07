@@ -12,32 +12,59 @@ import { MeterGroupingComponent } from './utility/meter-grouping/meter-grouping.
 import { PredictorDataComponent } from './utility/predictor-data/predictor-data.component';
 import { CalanderizationComponent } from './utility/calanderization/calanderization.component';
 import { VisualizationComponent } from './utility/visualization/visualization.component';
+import { FacilityOverviewComponent } from './dashboard/facility-overview/facility-overview.component';
+import { AccountOverviewComponent } from './dashboard/account-overview/account-overview.component';
 
 const routes: Routes = [
-  { path: '', component: DashboardComponent },
-  { path: 'account/account', component: AccountComponent },
-  { path: 'account/facility', component: FacilityComponent },
-  { path: 'utility',
-      component: UtilityComponent,
-      children: [
-        {
-          path: 'energy-consumption', component: EnergyConsumptionComponent, 
-          children: [
-            { path: '', component: EnergySourceComponent },
-            { path: 'electricity', component: UtilityMeterDataComponent },
-            { path: 'natural-gas', component: UtilityMeterDataComponent },
-            { path: 'other-fuels', component: UtilityMeterDataComponent },
-            { path: 'other-energy', component: UtilityMeterDataComponent },
-            { path: 'water', component: UtilityMeterDataComponent },
-            { path: 'waste-water', component: UtilityMeterDataComponent },
-            { path: 'other-utility', component: UtilityMeterDataComponent },
-          ],
-        },
-        { path: 'mo-meter-data', component: CalanderizationComponent },
-        { path: 'meter-groups', component: MeterGroupingComponent },
-        { path: 'predictors', component: PredictorDataComponent },
-        { path: 'visualization', component: VisualizationComponent}
-      ]
+  {
+    path: '',
+    component: DashboardComponent,
+    children: [
+      {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: 'account-summary'
+      },
+      {
+        path: 'account-summary', 
+        component: AccountOverviewComponent,
+      },
+      {
+        path: 'facility-summary', 
+        component: FacilityOverviewComponent,
+      }
+    ]
+  },
+  {
+    path: 'account-management',
+    component: AccountComponent
+  },
+  {
+    path: 'facility-management',
+    component: FacilityComponent
+  },
+  {
+    path: 'utility',
+    component: UtilityComponent,
+    children: [
+      {
+        path: 'energy-consumption', component: EnergyConsumptionComponent,
+        children: [
+          { path: '', component: EnergySourceComponent },
+          { path: 'electricity', component: UtilityMeterDataComponent },
+          { path: 'natural-gas', component: UtilityMeterDataComponent },
+          { path: 'other-fuels', component: UtilityMeterDataComponent },
+          { path: 'other-energy', component: UtilityMeterDataComponent },
+          { path: 'water', component: UtilityMeterDataComponent },
+          { path: 'waste-water', component: UtilityMeterDataComponent },
+          { path: 'other-utility', component: UtilityMeterDataComponent },
+        ],
+      },
+      { path: 'mo-meter-data', component: CalanderizationComponent },
+      { path: 'meter-groups', component: MeterGroupingComponent },
+      { path: 'predictors', component: PredictorDataComponent },
+      { path: 'visualization', component: VisualizationComponent }
+    ]
   },
   { path: 'style-guide', component: StyleGuideComponent },
 ];

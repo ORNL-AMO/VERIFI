@@ -72,7 +72,7 @@ export class UtilityMeterGroupdbService {
 
     deleteAllFacilityMeterGroups(facilityId: number): void {
         this.getAllByIndexRange('facilityId', facilityId).subscribe(facilityGroupEntries => {
-            for(let i=0; i<facilityGroupEntries.length; i++) {
+            for (let i = 0; i < facilityGroupEntries.length; i++) {
                 this.dbService.delete('utilityMeterGroups', facilityGroupEntries[i].id);
             }
         });
@@ -80,7 +80,7 @@ export class UtilityMeterGroupdbService {
 
     deleteAllAccountMeterGroups(accountId: number): void {
         this.getAllByIndexRange('accountId', accountId).subscribe(accountGroupEntries => {
-            for(let i=0; i<accountGroupEntries.length; i++) {
+            for (let i = 0; i < accountGroupEntries.length; i++) {
                 this.dbService.delete('utilityMeterGroups', accountGroupEntries[i].id);
             }
         });
@@ -98,5 +98,10 @@ export class UtilityMeterGroupdbService {
             factionOfTotalEnergy: undefined,
             // id: undefined
         }
+    }
+
+    getGroupById(groupId: number): IdbUtilityMeterGroup {
+        let groups: Array<IdbUtilityMeterGroup> = this.facilityMeterGroups.getValue();
+        return groups.find(group => { return group.id == groupId });
     }
 }

@@ -67,6 +67,7 @@ export class CalanderizationService {
 
       calanderizeData.push({
         month: month,
+        monthNumValue: new Date(currentBill.readDate).getMonth(),
         year: new Date(currentBill.readDate).getFullYear(),
         energyUse: totalMonthEnergyUse,
         energyCost: totalMonthCost,
@@ -93,6 +94,7 @@ export interface CalanderizedMeter {
 
 export interface MonthlyData {
   month: string,
+  monthNumValue: number,
   year: number,
   energyUse: number,
   energyCost: number,
