@@ -51,10 +51,13 @@ ul.col.verticalTable {
     z-index: 1;
     white-space: nowrap;
 }
-.stick-scroll-x table tr:first-child th:first-child {
-    background-color: #ebeef3;
+.stick-scroll-x table thead tr th:first-child {
+    background-color: #e3e7ec;
 }
-.stick-scroll-x table>tr:nth-of-type(odd)>td:first-child {
+.stick-scroll-x table thead tr:nth-child(2) th:first-child {
+    background-color: #f3f6fd;
+}
+.stick-scroll-x table tbody>tr:nth-of-type(even)>td:first-child {
     background-color: #f3f6fd;
 }
 .stick-scroll-x table td:last-child .meterMenu {

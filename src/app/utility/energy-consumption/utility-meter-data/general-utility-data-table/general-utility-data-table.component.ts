@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { UtilityMeterDataService } from '../utility-meter-data.service';
 
 @Component({
   selector: 'app-general-utility-data-table',
@@ -20,10 +21,16 @@ export class GeneralUtilityDataTableComponent implements OnInit {
   meterIndex: number;
   @Output('setChecked')
   setChecked: EventEmitter<boolean> = new EventEmitter<boolean>();
+  @Output('setEdit')
+  setEdit: EventEmitter<IdbUtilityMeterData> = new EventEmitter<IdbUtilityMeterData>();
+  @Output('setDelete')
+  setDelete: EventEmitter<IdbUtilityMeterData> = new EventEmitter<IdbUtilityMeterData>();
 
   allChecked: boolean;
   energyUnit: string;
-  constructor() { }
+  addOrEdit: string;
+
+  constructor(public utilityMeterDataService: UtilityMeterDataService) { }
 
   ngOnInit(): void {
     this.energyUnit = this.meterListItem.idbMeter.startingUnit;
@@ -42,5 +49,13 @@ export class GeneralUtilityDataTableComponent implements OnInit {
 
   toggleChecked() {
     this.setChecked.emit(true);
+  }
+
+  setEditMeterData(meterData): void {
+    this.setEdit.emit(meterData);
+  }
+
+  setDeleteMeterData(meterData): void {
+    this.setDelete.emit(meterData);
   }
 }

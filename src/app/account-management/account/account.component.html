@@ -91,31 +91,35 @@
         <button class="btn btn-small btn-outline">Export</button>
     </div>
 
-    <div class="tableOverflow">
-        <table>
-            <tr>
-                <th>Facilities</th>
-                <th>Country</th>
-                <th>Business</th>
-                <th>Tier</th>
-                <th>Facility Size</th>
-                <th>Units</th>
-                <th>Division</th>
-                <th class="actions">Actions</th>
-            </tr>
-            <tr *ngFor="let facility of facilityList">
-                <td>{{facility.name}}</td>
-                <td>{{facility.country}}</td>
-                <td>{{facility.type}}</td>
-                <td>{{facility.tier}}</td>
-                <td>{{facility.size}}</td>
-                <td>{{facility.units}}<span class="superscript">2</span></td>
-                <td>{{facility.division}}</td>
-                <td class="actions">
-                    <i class="fa fa-edit" title="Edit" (click)="setEditFacilityEntry(facility)"></i>
-                    <i class="fa fa-trash-o" title="Delete" (click)="setDeleteFacilityEntry(facility)"></i>
-                </td>
-            </tr>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Facilities</th>
+                    <th>Country</th>
+                    <th>Business</th>
+                    <th>Tier</th>
+                    <th>Facility Size</th>
+                    <th>Units</th>
+                    <th>Division</th>
+                    <th class="actions">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let facility of facilityList">
+                    <td><a (click)="switchFacility(facility)">{{facility.name}}</a></td>
+                    <td>{{facility.country}}</td>
+                    <td>{{facility.type}}</td>
+                    <td>{{facility.tier}}</td>
+                    <td>{{facility.size}}</td>
+                    <td>{{facility.units}}<span class="superscript">2</span></td>
+                    <td>{{facility.division}}</td>
+                    <td class="actions">
+                        <i class="fa fa-pencil" title="Edit" (click)="setEditFacilityEntry(facility)"></i>
+                        <i class="fa fa-trash-o" title="Delete" (click)="setDeleteFacilityEntry(facility)"></i>
+                    </td>
+                </tr>
+            </tbody>
         </table>
     </div>
     <button class="btn btn-link" (click)="addNewFacility()"><i class="fa fa-plus"></i> Add New Facility</button>

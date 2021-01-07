@@ -46,32 +46,15 @@
 
 
     <div class="row no-margin">
-        <div class="col no-margin tableData">
+        <div class="col no-margin table-responsive">
             <app-electricity-data-table *ngIf="selectedSource == 'Electricity'" [meterListItem]="meterListItem"
                 [pageSize]="pageSize" [itemsPerPage]="itemsPerPage" [meterIndex]="index"
-                (setChecked)="setHasCheckedItems()">
+                (setChecked)="setHasCheckedItems()" (setEdit)="setEditMeterData($event)" (setDelete)="setDeleteMeterData($event)">
             </app-electricity-data-table>
             <app-general-utility-data-table *ngIf="selectedSource != 'Electricity'" [meterListItem]="meterListItem"
-                [pageSize]="pageSize" [itemsPerPage]="itemsPerPage" [meterIndex]="index">
+                [pageSize]="pageSize" [itemsPerPage]="itemsPerPage" [meterIndex]="index" 
+                (setEdit)="setEditMeterData($event)" (setDelete)="setDeleteMeterData($event)">
             </app-general-utility-data-table>
-        </div>
-        <div class="col tableMenu">
-            <table>
-                <tr>
-                    <th></th>
-                </tr>
-                <tr
-                    *ngFor="let meterData of meterListItem.meterDataItems | slice: pageSize[index] | slice: 0:itemsPerPage">
-                    <td (click)="$event.stopPropagation();">
-                        <!-- Prevents closure of menu on document click-->
-                        <i class="fa fa-ellipsis-v" (click)="meterDataToggleMenu(meterData.id)"></i>
-                        <div class="meterMenu" [class.open]="meterDataMenuOpen === meterData.id">
-                            <p (click)="setEditMeterData(meterData)">Edit</p>
-                            <p (click)="setDeleteMeterData(meterData)">Delete</p>
-                        </div>
-                    </td>
-                </tr>
-            </table>
         </div>
     </div>
 </div>
@@ -79,8 +62,8 @@
 <div class="window" [class.open]="editMeterData">
     <div class="windowOverlay"></div>
     <div class="windowContent windowContentLg">
-        <app-edit-electricity-bill *ngIf="editMeterData && selectedSource == 'Electricity'"
-            [editMeterData]="editMeterData" (emitClose)="cancelEditMeter()" [addOrEdit]="addOrEdit">
+        <app-edit-electricity-bill *ngIf="editMeterData && selectedSource == 'Electricity'" [editMeterData]="editMeterData" 
+            (emitClose)="cancelEditMeter()" [addOrEdit]="addOrEdit">
         </app-edit-electricity-bill>
         <app-edit-utility-bill *ngIf="editMeterData && selectedSource != 'Electricity'" [editMeterData]="editMeterData"
             (emitClose)="cancelEditMeter()" [addOrEdit]="addOrEdit">

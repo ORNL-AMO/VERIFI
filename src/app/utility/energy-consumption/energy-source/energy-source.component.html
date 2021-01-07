@@ -30,45 +30,54 @@
     </div>
 </div>
 
-<table>
-    <tr>
-        <th>Name</th>
-        <th>Source</th>
-        <!--<th><i>Group</i></th>-->
-        <th>Meter #</th>
-        <th>Account #</th>
-        <th>Building / Location</th>
-        <th>Utility Supplier</th>
-        <th>Notes</th>
-        <th>Collection Units</th>
-        <th>Heat Capacity</th>
-        <th>STS</th>
-        <th></th>
-    </tr>
-    <tr *ngFor="let meter of meterList | slice: pageSize | slice: 0:itemsPerPage">
-        <td>{{meter.name}}</td>
-        <td>{{meter.source}}</td>
-        <!--<td>{{meter.group}}</td>-->
-        <td>{{meter.meterNumber}}</td>
-        <td>{{meter.accountNumber}}</td>
-        <td>{{meter.location}}</td>
-        <td>{{meter.supplier}}</td>
-        <td>{{meter.notes}}</td>
-        <td>
-            <span [innerHTML]="meter.startingUnit | settingsLabel"></span>
-        </td>
-        <td>{{meter.heatCapacity}}</td>
-        <td>{{meter.siteToSource}}</td>
-        <td (click)="$event.stopPropagation();">
-            <!-- Prevents closure of menu on document click-->
-            <i class="fa fa-ellipsis-v" (click)="meterToggleMenu(meter.id)"></i>
-            <div class="meterMenu" [class.open]="meterMenuOpen === meter.id">
-                <p (click)="selectEditMeter(meter)">Edit</p>
-                <p (click)="selectDeleteMeter(meter)">Delete</p>
-            </div>
-        </td>
-    </tr>
-</table>
+<div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Source</th>
+                <!--<th><i>Group</i></th>-->
+                <th>Meter #</th>
+                <th>Account #</th>
+                <th>Building / Location</th>
+                <th>Utility Supplier</th>
+                <th>Notes</th>
+                <th>Collection Units</th>
+                <th>Heat Capacity</th>
+                <th>STS</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let meter of meterList | slice: pageSize | slice: 0:itemsPerPage">
+                <td>{{meter.name}}</td>
+                <td>{{meter.source}}</td>
+                <!--<td>{{meter.group}}</td>-->
+                <td>{{meter.meterNumber}}</td>
+                <td>{{meter.accountNumber}}</td>
+                <td>{{meter.location}}</td>
+                <td>{{meter.supplier}}</td>
+                <td>{{meter.notes}}</td>
+                <td>
+                    <span [innerHTML]="meter.startingUnit | settingsLabel"></span>
+                </td>
+                <td>{{meter.heatCapacity}}</td>
+                <td>{{meter.siteToSource}}</td>
+                <!--<td (click)="$event.stopPropagation();">
+                    <i class="fa fa-ellipsis-v" (click)="meterToggleMenu(meter.id)"></i>
+                    <div class="meterMenu" [class.open]="meterMenuOpen === meter.id">
+                        <p (click)="selectEditMeter(meter)">Edit</p>
+                        <p (click)="selectDeleteMeter(meter)">Delete</p>
+                    </div>
+                </td>-->
+                <td class="actions">
+                    <i class="fa fa-pencil" title="Edit" (click)="selectEditMeter(meter)"></i>
+                    <i class="fa fa-trash-o" title="Delete" (click)="selectDeleteMeter(meter)"></i>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
 
 <div class="window" [class.open]="editMeter">
     <div class="windowOverlay"></div>
