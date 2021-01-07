@@ -28,7 +28,6 @@ export class GeneralUtilityDataTableComponent implements OnInit {
 
   allChecked: boolean;
   energyUnit: string;
-  addOrEdit: string;
 
   constructor(public utilityMeterDataService: UtilityMeterDataService) { }
 
