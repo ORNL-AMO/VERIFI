@@ -9,10 +9,18 @@
         <input id="readDate" class="form-control" type="date" formControlName="readDate">
       </div>
 
-      <label for="totalEnergyUse">Total Energy Use <span class="required">*</span> </label>
+      <label for="totalVolume">Total Volume <span class="required">*</span> </label>
       <div class="input-group mb-3">
-        <input id="totalEnergyUse" class="form-control" type="number" formControlName="totalEnergyUse">
+        <input id="totalVolume" class="form-control" type="number" formControlName="totalVolume"
+          (input)="calculateTotalEnergyUse()">
         <span class="unit" [innerHTML]="energyUnit | settingsLabel"></span>
+      </div>
+
+      <label for="totalEnergyUse">Total Energy Use </label>
+      <div class="input-group mb-3">
+        {{meterDataForm.controls.totalEnergyUse.value}}
+        <!-- <input id="totalEnergyUse" class="form-control" type="number" formControlName="totalEnergyUse"> -->
+        <span [innerHTML]="energyUnit | settingsLabel"></span>
       </div>
 
       <div class="col">

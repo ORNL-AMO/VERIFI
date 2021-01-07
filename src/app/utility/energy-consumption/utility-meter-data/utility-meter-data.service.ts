@@ -102,6 +102,7 @@ export class UtilityMeterDataService {
       accountId: [meterData.accountId, Validators.required],
       readDate: [meterData.readDate, Validators.required],
       unit: [meterData.unit, Validators.required],
+      totalVolume: [meterData.totalVolume, Validators.required],
       totalEnergyUse: [meterData.totalEnergyUse, Validators.required],
       totalCost: [meterData.totalCost, Validators.required],
       commodityCharge: [meterData.commodityCharge, Validators.required],

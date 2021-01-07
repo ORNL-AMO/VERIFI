@@ -22,13 +22,14 @@ export class EditUtilityBillComponent implements OnInit {
 
   energyUnit: string;
   source: string;
+  facilityMeter: IdbUtilityMeter;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private utilityMeterDataService: UtilityMeterDataService, private utilityMeterDbService: UtilityMeterdbService) { }
 
   ngOnInit(): void {
-    let facilityMeter: IdbUtilityMeter = this.utilityMeterDbService.getFacilityMeterById(this.editMeterData.meterId);
-    if (facilityMeter) {
-      this.energyUnit = facilityMeter.startingUnit
-      this.source = facilityMeter.source;
+    this.facilityMeter = this.utilityMeterDbService.getFacilityMeterById(this.editMeterData.meterId);
+    if (this.facilityMeter) {
+      this.energyUnit = this.facilityMeter.startingUnit
+      this.source = this.facilityMeter.source;
     }
     this.meterDataForm = this.utilityMeterDataService.getGeneralMeterDataForm(this.editMeterData);
   }
@@ -46,5 +47,11 @@ export class EditUtilityBillComponent implements OnInit {
       this.utilityMeterDataDbService.add(this.meterDataForm.value);
     }
     this.cancel();
+  }
+
+
+  calculateTotalEnergyUse(){
+    let totalEnergyUse: number = this.meterDataForm.controls.totalVolume.value * this.facilityMeter.heatCapacity * this.facilityMeter.siteToSource;
+    this.meterDataForm.controls.totalEnergyUse.patchValue(totalEnergyUse);
   }
 }
