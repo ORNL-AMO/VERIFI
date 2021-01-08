@@ -34,82 +34,86 @@ export class EnergyUseStackedBarChartComponent implements OnInit {
   }
 
   drawChart() {
-    if (this.energyUseStackedBarChart && this.barChartData && this.barChartData.length != 0) {
+    if (this.energyUseStackedBarChart) {
+      if (this.barChartData && this.barChartData.length != 0) {
+        let data = new Array();
+        if (this.barChartData.findIndex(dataItem => { return dataItem.electricity.energyCost != 0 }) != -1) {
+          data.push({
+            x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
+            y: this.barChartData.map(dataItem => { return dataItem.electricity.energyCost }),
+            name: 'Electricity',
+            type: 'bar'
+          });
+        }
+        if (this.barChartData.findIndex(dataItem => { return dataItem.naturalGas.energyCost != 0 }) != -1) {
+          data.push({
+            x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
+            y: this.barChartData.map(dataItem => { return dataItem.naturalGas.energyCost }),
+            name: 'Natural Gas',
+            type: 'bar'
+          })
+        }
+        if (this.barChartData.findIndex(dataItem => { return dataItem.otherFuels.energyCost != 0 }) != -1) {
+          data.push({
+            x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
+            y: this.barChartData.map(dataItem => { return dataItem.otherFuels.energyCost }),
+            name: 'Other Fuels',
+            type: 'bar'
+          })
+        }
+        if (this.barChartData.findIndex(dataItem => { return dataItem.otherEnergy.energyCost != 0 }) != -1) {
+          data.push({
+            x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
+            y: this.barChartData.map(dataItem => { return dataItem.otherEnergy.energyCost }),
+            name: 'Other Energy',
+            type: 'bar'
+          })
+        }
+        if (this.barChartData.findIndex(dataItem => { return dataItem.water.energyCost != 0 }) != -1) {
+          data.push({
+            x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
+            y: this.barChartData.map(dataItem => { return dataItem.water.energyCost }),
+            name: 'Water',
+            type: 'bar'
+          })
+        }
+        if (this.barChartData.findIndex(dataItem => { return dataItem.wasteWater.energyCost != 0 }) != -1) {
+          data.push({
+            x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
+            y: this.barChartData.map(dataItem => { return dataItem.wasteWater.energyCost }),
+            name: 'Waste Water',
+            type: 'bar'
+          })
+        }
+        if (this.barChartData.findIndex(dataItem => { return dataItem.otherUtility.energyCost != 0 }) != -1) {
+          data.push({
+            x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
+            y: this.barChartData.map(dataItem => { return dataItem.otherUtility.energyCost }),
+            name: 'Other Utility',
+            type: 'bar'
+          })
+        }
 
-      let data = new Array();
-      if (this.barChartData.findIndex(dataItem => { return dataItem.electricity.energyCost != 0 }) != -1) {
-        data.push({
-          x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
-          y: this.barChartData.map(dataItem => { return dataItem.electricity.energyCost }),
-          name: 'Electricity',
-          type: 'bar'
-        });
-      }
-      if (this.barChartData.findIndex(dataItem => { return dataItem.naturalGas.energyCost != 0 }) != -1) {
-        data.push({
-          x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
-          y: this.barChartData.map(dataItem => { return dataItem.naturalGas.energyCost }),
-          name: 'Natural Gas',
-          type: 'bar'
-        })
-      }
-      if (this.barChartData.findIndex(dataItem => { return dataItem.otherFuels.energyCost != 0 }) != -1) {
-        data.push({
-          x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
-          y: this.barChartData.map(dataItem => { return dataItem.otherFuels.energyCost }),
-          name: 'Other Fuels',
-          type: 'bar'
-        })
-      }
-      if (this.barChartData.findIndex(dataItem => { return dataItem.otherEnergy.energyCost != 0 }) != -1) {
-        data.push({
-          x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
-          y: this.barChartData.map(dataItem => { return dataItem.otherEnergy.energyCost }),
-          name: 'Other Energy',
-          type: 'bar'
-        })
-      }
-      if (this.barChartData.findIndex(dataItem => { return dataItem.water.energyCost != 0 }) != -1) {
-        data.push({
-          x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
-          y: this.barChartData.map(dataItem => { return dataItem.water.energyCost }),
-          name: 'Water',
-          type: 'bar'
-        })
-      }
-      if (this.barChartData.findIndex(dataItem => { return dataItem.wasteWater.energyCost != 0 }) != -1) {
-        data.push({
-          x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
-          y: this.barChartData.map(dataItem => { return dataItem.wasteWater.energyCost }),
-          name: 'Waste Water',
-          type: 'bar'
-        })
-      }
-      if (this.barChartData.findIndex(dataItem => { return dataItem.otherUtility.energyCost != 0 }) != -1) {
-        data.push({
-          x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
-          y: this.barChartData.map(dataItem => { return dataItem.otherUtility.energyCost }),
-          name: 'Other Utility',
-          type: 'bar'
-        })
-      }
-
-      var layout = {
-         barmode: 'stack',
-         showlegend: true,
-         yaxis: {
-          //  title: 'Utility Cost',
-           tickprefix: '$',
-           automargin: true
-         },
-         xaxis: {
-           automargin: true
-         }
+        var layout = {
+          barmode: 'stack',
+          showlegend: true,
+          yaxis: {
+            //  title: 'Utility Cost',
+            tickprefix: '$',
+            automargin: true
+          },
+          xaxis: {
+            automargin: true
+          }
         };
-      let config = { 
-        responsive: true 
-      };
-      this.plotlyService.newPlot(this.energyUseStackedBarChart.nativeElement, data, layout, config);
+        let config = {
+          responsive: true
+        };
+        this.plotlyService.newPlot(this.energyUseStackedBarChart.nativeElement, data, layout, config);
+      } else {
+        let Plotly = this.plotlyService.getPlotly();
+        Plotly.purge(this.energyUseStackedBarChart.nativeElement);
+      }
     }
   }
 
