@@ -21,7 +21,7 @@ export class MeterGroupingComponent implements OnInit {
     meterGroupIds: Array<string>
   }>;
 
-  groupMenuOpen: number;
+  /*groupMenuOpen: number;*/
   groupToEdit: IdbUtilityMeterGroup;
   groupToDelete: IdbUtilityMeterGroup;
   facilityMeterDataSub: Subscription;
@@ -120,7 +120,8 @@ export class MeterGroupingComponent implements OnInit {
       dateModified: undefined,
       factionOfTotalEnergy: undefined,
       totalEnergyUse: _.sumBy(groupMeterData, 'totalEnergyUse'),
-      groupData: energyMeters
+      groupData: energyMeters,
+      visible: true
     }
     let energyGroup: {
       meterGroups: Array<IdbUtilityMeterGroup>,
@@ -149,13 +150,14 @@ export class MeterGroupingComponent implements OnInit {
     return meterGroups
   }
 
+  /*
   groupToggleMenu(groupId: number) {
     if (groupId != this.groupMenuOpen) {
       this.groupMenuOpen = groupId;
     } else {
       this.groupMenuOpen = undefined;
     }
-  }
+  }*/
 
   setEditGroup(group: IdbUtilityMeterGroup) {
     this.editOrAdd = 'edit';
@@ -175,12 +177,12 @@ export class MeterGroupingComponent implements OnInit {
   closeEditGroup() {
     this.editOrAdd = undefined;
     this.groupToEdit = undefined;
-    this.groupMenuOpen = undefined;
+    /*this.groupMenuOpen = undefined;*/
   }
 
   closeDeleteGroup() {
     this.groupToDelete = undefined;
-    this.groupMenuOpen = undefined;
+    /*this.groupMenuOpen = undefined;*/
   }
 
   drop(event: CdkDragDrop<string[]>) {
@@ -200,5 +202,19 @@ export class MeterGroupingComponent implements OnInit {
   deleteMeterGroup() {
     this.utilityMeterGroupDbService.deleteIndex(this.groupToDelete.id);
     this.closeDeleteGroup();
+  }
+
+  setToggleView(typeID,groupId) {
+    // get meter with id
+    var typeIndex = this.meterGroupTypes.map(function(e) { return e.id; }).indexOf(typeID);
+    var groupIndex = this.meterGroupTypes[typeIndex].meterGroups.map(function(e) { return e.id; }).indexOf(groupId);
+
+    // set visible to opposite of current value
+    this.meterGroupTypes[typeIndex].meterGroups[groupIndex].visible = !this.meterGroupTypes[typeIndex].meterGroups[groupIndex].visible;
+    
+    if(this.meterGroupTypes[typeIndex].meterGroups[groupIndex].name != "Ungrouped") {
+      this.utilityMeterGroupDbService.update(this.meterGroupTypes[typeIndex].meterGroups[groupIndex]);
+    }
+
   }
 }

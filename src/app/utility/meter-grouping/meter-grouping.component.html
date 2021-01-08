@@ -13,7 +13,10 @@
                 *ngFor="let meterGroup of meterGroupType.meterGroups" (cdkDropListDropped)="drop($event)"
                 id={{meterGroup.id}} [cdkDropListConnectedTo]="meterGroupType.meterGroupIds">
                 <div class="row group-title">
-                    <p class="bold col"><i class="fa fa-caret-right"></i> {{meterGroup.name}}</p>
+                    <p class="bold col" (click)="setToggleView(meterGroupType.id,meterGroup.id)">
+                        <i class="fa fa-caret-right" *ngIf="!meterGroup.visible"></i> 
+                        <i class="fa fa-caret-down" *ngIf="meterGroup.visible"></i>
+                        {{meterGroup.name}}</p>
                     <div class="item-left">
                         Energy Total: {{meterGroup.totalEnergyUse | number:'1.0-1'}}
                     </div>
@@ -31,25 +34,33 @@
                     </div>
 
                     <div class="col-1">
-                        <i class="fa fa-ellipsis-v item-right" (click)="groupToggleMenu(meterGroup.id)"></i>
+                         <!--<i class="fa fa-ellipsis-v item-right" (click)="groupToggleMenu(meterGroup.id)"></i>
                         <div class="groupMenu" [class.open]="groupMenuOpen === meterGroup.id">
                             <p (click)="setEditGroup(meterGroup)">Edit</p>
                             <hr>
                             <p (click)="setDeleteGroup(meterGroup)">Delete</p>
+                            <i class="fa fa-pencil" title="Edit" (click)="setEditGroup(meterGroup)"></i>
+                            <i class="fa fa-trash-o" title="Delete" (click)="setDeleteGroup(meterGroup)"></i>
+                        </div>-->
+                        <div class="actions">
+                            <i class="fa fa-pencil" title="Edit" (click)="setEditGroup(meterGroup)"></i>
+                            <i class="fa fa-trash-o" title="Delete" (click)="setDeleteGroup(meterGroup)"></i>
                         </div>
                     </div>
                 </div>
-                <div class="row" [hidden]="!meterGroup.description">
-                    <div class="col">
-                        <p class="group-desc">{{meterGroup.description}}</p>
+                <div *ngIf="meterGroup.visible">
+                    <div class="row" [hidden]="!meterGroup.description">
+                        <div class="col">
+                            <p class="group-desc">{{meterGroup.description}}</p>
+                        </div>
                     </div>
-                </div>
 
-                <div [cdkDragData]="meter" class="group-meters" *ngFor="let meter of meterGroup.groupData" cdkDrag>
-                    <!-- id={{meter.id}}> -->
-                    <i class="fa fa-th"></i>
-                    <span> {{meter.name}}</span>
-                    <span class="item-right">{{meter.source}}</span>
+                    <div [cdkDragData]="meter" class="group-meters" *ngFor="let meter of meterGroup.groupData" cdkDrag>
+                        <!-- id={{meter.id}}> -->
+                        <i class="fa fa-th"></i>
+                        <span> {{meter.name}}</span>
+                        <span class="item-right">{{meter.source}}</span>
+                    </div>
                 </div>
             </div>
             <button class="btn btn-link" (click)="groupAdd(meterGroupType.groupType)"><i class="fa fa-plus"></i> Add New
