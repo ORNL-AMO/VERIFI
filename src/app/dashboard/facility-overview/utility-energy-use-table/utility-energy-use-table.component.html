@@ -1,59 +1,60 @@
-<table *ngIf="utilityUsageSummaryData">
-    <!-- <thead> -->
-    <tr>
-        <th></th>
-        <th colspan="2">
-            Last Month ({{lastMonthsDate | date: 'MMM, y'}})
-        </th>
-        <th colspan="2">
-            Average
-        </th>
-    </tr>
-    <tr>
-        <th>Utility</th>
-        <th>Energy Use</th>
-        <th>Energy Cost</th>
-        <th>Energy Use</th>
-        <th>Energy Cost</th>
-    </tr>
-    <!-- </thead>
-    <tbody> -->
-    <!---->
-    <tr *ngFor="let utilityUsageSummary of utilityUsageSummaryData.utilitySummaries">
-        <td>
-            {{utilityUsageSummary.utility}}
-        </td>
-        <td>
-            {{utilityUsageSummary.previousMonthEnergyUse | number:'1.0-0'}}
-        </td>
-        <td>
-            {{utilityUsageSummary.previousMonthEnergyCost | currency : 'USD' : 'symbol' : '1.0-0' }}
-        </td>
-        <td>
-            {{utilityUsageSummary.averageEnergyUse | number:'1.0-0'}}
-        </td>
-        <td>
-            {{utilityUsageSummary.averageEnergyCost | currency : 'USD' : 'symbol' : '1.0-0' }}
-        </td>
-    </tr>
-    <!-- </tbody>-->
-    <tfoot>
-        <tr>
-            <th>
-                Total
-            </th>
-            <th>
-                {{utilityUsageSummaryData.total.previousMonthEnergyUse | number:'1.0-0'}}
-            </th>
-            <th>
-                {{utilityUsageSummaryData.total.previousMonthEnergyCost | currency : 'USD' : 'symbol' : '1.0-0' }}
-            </th>
-            <th>
-                {{utilityUsageSummaryData.total.averageEnergyUse | number:'1.0-0'}}
-            </th>
-            <th>
-                {{utilityUsageSummaryData.total.averageEnergyCost | currency : 'USD' : 'symbol' : '1.0-0' }}
-            </th>
-        </tr>
-    </tfoot>
-</table>
+<div class="table-responsive">
+    <table class="table table-sm" *ngIf="utilityUsageSummaryData">
+        <thead>
+            <tr>
+                <th></th>
+                <th colspan="2">
+                    Last Month ({{lastMonthsDate | date: 'MMM, y'}})
+                </th>
+                <th colspan="2">
+                    Average
+                </th>
+            </tr>
+            <tr>
+                <th>Utility</th>
+                <th>Energy Use</th>
+                <th>Energy Cost</th>
+                <th>Energy Use</th>
+                <th>Energy Cost</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let utilityUsageSummary of utilityUsageSummaryData.utilitySummaries">
+                <td>
+                    {{utilityUsageSummary.utility}}
+                </td>
+                <td>
+                    {{utilityUsageSummary.previousMonthEnergyUse | number:'1.0-0'}}
+                </td>
+                <td>
+                    {{utilityUsageSummary.previousMonthEnergyCost | currency : 'USD' : 'symbol' : '1.0-0' }}
+                </td>
+                <td>
+                    {{utilityUsageSummary.averageEnergyUse | number:'1.0-0'}}
+                </td>
+                <td>
+                    {{utilityUsageSummary.averageEnergyCost | currency : 'USD' : 'symbol' : '1.0-0' }}
+                </td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <th>
+                    Total
+                </th>
+                <th>
+                    {{utilityUsageSummaryData.total.previousMonthEnergyUse | number:'1.0-0'}}
+                </th>
+                <th>
+                    {{utilityUsageSummaryData.total.previousMonthEnergyCost | currency : 'USD' : 'symbol' : '1.0-0' }}
+                </th>
+                <th>
+                    {{utilityUsageSummaryData.total.averageEnergyUse | number:'1.0-0'}}
+                </th>
+                <th>
+                    {{utilityUsageSummaryData.total.averageEnergyCost | currency : 'USD' : 'symbol' : '1.0-0' }}
+                </th>
+            </tr>
+        </tfoot>
+    </table>
+</div>
