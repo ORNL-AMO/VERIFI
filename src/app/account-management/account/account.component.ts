@@ -83,7 +83,7 @@ export class AccountComponent implements OnInit {
 
   switchFacility(facility: IdbFacility) {
     this.facilityDbService.selectedFacility.next(facility);
-    this.router.navigate(['account/facility']);
+    this.router.navigate(['/facility-summary']);
   }
 
   addNewFacility() {
@@ -174,4 +174,5 @@ export class AccountComponent implements OnInit {
     this.accountForm = this.accountManagementService.setUnitsOfMeasure(this.accountForm);
     this.onFormChange();
   }
+  
 }
