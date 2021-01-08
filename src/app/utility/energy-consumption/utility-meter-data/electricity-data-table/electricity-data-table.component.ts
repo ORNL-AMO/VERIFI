@@ -23,6 +23,10 @@ export class ElectricityDataTableComponent implements OnInit {
   meterIndex: number;
   @Output('setChecked')
   setChecked: EventEmitter<boolean> = new EventEmitter<boolean>();
+  @Output('setEdit')
+  setEdit: EventEmitter<IdbUtilityMeterData> = new EventEmitter<IdbUtilityMeterData>();
+  @Output('setDelete')
+  setDelete: EventEmitter<IdbUtilityMeterData> = new EventEmitter<IdbUtilityMeterData>();
 
   supplyDemandCharge: SupplyDemandChargeFilters;
   taxAndOther: TaxAndOtherFilters;
@@ -56,5 +60,13 @@ export class ElectricityDataTableComponent implements OnInit {
 
   toggleChecked() {
     this.setChecked.emit(true);
+  }
+
+  setEditMeterData(meterData): void {
+    this.setEdit.emit(meterData);
+  }
+
+  setDeleteMeterData(meterData): void {
+    this.setDelete.emit(meterData);
   }
 }

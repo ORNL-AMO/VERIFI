@@ -523,6 +523,9 @@ table {
   width: 100%;
   border: 1px solid #ddd;
 }
+.table {
+  margin-bottom: 0!important;
+}
 .tableOverflow {
   width: 100%;
   overflow: auto;
@@ -542,18 +545,25 @@ table {
   background-color: rgb(0 0 0 / 15%);
   -webkit-box-shadow: 0 0 1px rgba(255, 255, 255, 0.5);
 }
-table tr:nth-child(odd) {
+tfoot {
+  border-top: 3px double #c9d3e0;
+}
+table tr:nth-child(even) {
   background-color: #f3f6fd;
 }
-table tr:first-child {
-  background-color: #eee;
-  background-color: #ebeef3;
+table thead tr {
+  background-color: #e3e7ec;
+}
+table tfoot tr {
+  background-color: #ffffff;
+  font-weight: bold;
 }
 table td,
 table th {
   padding: 4px 10px;
   border: 1px solid #dde0e6;
 }
+
 th {
   white-space: nowrap;
 }
@@ -589,34 +599,40 @@ td .facilityMenu p:hover,
 td .meterMenu p:hover {
   background-color: #f3f6fd;
 }
-.tableMenu {
-  max-width: 32px !important;
-  background-color: white;
-  padding: 0px !important;
-  margin: 0px !important;
+th.input,
+td.input {
+  max-width: 30px;
+  width: 30px;
 }
-.tableMenu th,
-.tableMenu td {
+td.actions {
+  width: 75px;
+  min-width: 75px;
+}
+.table-sm td.actions {
+  padding: 4px 11px;
+}
+td.actions i {
+  padding: 3px 5px;
+  margin: 0 2px;
+  cursor: pointer;
+  background-color: #d4d9de;
+  color: #170a4a;
+  border-radius: 3px;
+}
+td.actions i:hover {
+  color: #1e5ab3;
+  background-color: #e3e7ec;
+}
+td.actions i.fa-edit:hover {
+  color: #1e5ab3;
+}
+td.actions i.fa-trash-o:hover {
+  color: red;
+}
+table input {
+  margin: 3px auto;
   display: block;
-  min-height: 30px;
-}
-.tableData {
-  max-width: calc(100% - 15px) !important;
-  padding-right: 0px !important;
-  overflow-y: auto;
-}
-.tableData table {
-  border-right: none;
-}
-.tableMenu td {
-  border-bottom: 1px solid #ddd !important;
-}
-.tableMenu td,
-.tableMenu th {
-  border: none;
-}
-.tableMenu table {
-  border-bottom: none;
+  width: 13px;
 }
 /*
 Popovers (Contextual Help)
