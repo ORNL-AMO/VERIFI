@@ -134,10 +134,9 @@ export class HeaderComponent implements OnInit {
     this.facilitydbService.selectedFacility.next(facility);
   }
 
-  selectAllFacilites(){
+  selectAllFacilities(){
     this.toggleFacilityMenu();
     this.router.navigate(['/account-summary']);
-
   }
 
 
