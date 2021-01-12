@@ -105,7 +105,8 @@ export const energy = {
         display: '(kgoe)'
       }
       , to_anchor: 41868000
-    }
+    },
+
   },
   imperial: {
     Btu: {
@@ -121,6 +122,20 @@ export const energy = {
         singular: 'Million British Thermal Units',
         plural: 'Millions British Thermal Units',
         display: '(MMBtu)'
+      }
+      , to_anchor: 1000000
+    }, Therm: {
+      name: {
+        singular: 'Therm'
+        , plural: 'Therms',
+        display: '(Therm)'
+      }
+      , to_anchor: 100000
+    }, DTherm: {
+      name: {
+        singular: 'Dekatherm'
+        , plural: 'Dekatherms',
+        display: '(DTherm)'
       }
       , to_anchor: 1000000
     }
