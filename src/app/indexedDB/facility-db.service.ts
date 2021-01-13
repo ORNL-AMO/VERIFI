@@ -56,27 +56,18 @@ export class FacilitydbService {
 
     setSelectedFacility() {
         let accountFacilities: Array<IdbFacility> = this.accountFacilities.getValue();
-        if (accountFacilities.length != 0) {
-            let selectedFacility: IdbFacility = this.selectedFacility.getValue();
-            if (selectedFacility) {
-                let updatedFacility: IdbFacility = accountFacilities.find(facility => { return facility.id == selectedFacility.id });
-                if (!updatedFacility) {
-                    this.selectedFacility.next(accountFacilities[0]);
-                } else {
-                    this.selectedFacility.next(updatedFacility);
-                }
-            } 
-            else {
+        let selectedFacility: IdbFacility = this.selectedFacility.getValue();
+        if (selectedFacility) {
+            let updatedFacility: IdbFacility = accountFacilities.find(facility => { return facility.id == selectedFacility.id });
+            if (!updatedFacility) {
                 this.selectedFacility.next(accountFacilities[0]);
+            } else {
+                this.selectedFacility.next(updatedFacility);
             }
         }
-        //  else {
-        //     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-        //     if (selectedAccount) {
-        //         let newFacility: IdbFacility = this.getNewIdbFacility(selectedAccount);
-        //         this.add(newFacility);
-        //     }
-        // }
+        else {
+            this.selectedFacility.next(accountFacilities[0]);
+        }
     }
 
 

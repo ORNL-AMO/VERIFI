@@ -13,8 +13,8 @@ import { DashboardService, FacilitySummary } from '../../dashboard.service';
 })
 export class FacilitiesTableComponent implements OnInit {
 
-  accountFacilities: Array<IdbFacility>;
   accountFacilitiesSub: Subscription;
+  accountMeterDataSub: Subscription;
   facilitiesSummary: Array<FacilitySummary>;
   totalEnergyUsage: number;
   totalEnergyCost: number;
@@ -28,23 +28,45 @@ export class FacilitiesTableComponent implements OnInit {
     this.todaysDate = new Date();
     this.yearAgoDate = new Date((this.todaysDate.getFullYear() - 1), (this.todaysDate.getMonth()));
 
+    this.accountFacilitiesSub = this.facilityDbService.accountFacilities.subscribe(accountFacilities => {
+      if (accountFacilities && accountFacilities.length != 0) {
+        this.setAccountFacilities();
+      } else {
+        this.setEmpty()
+      }
+    });
 
-    this.accountFacilitiesSub = this.utilityMeterDataDbService.accountMeterData.subscribe(val => {
-      this.facilitiesSummary = this.dashboardService.getAccountFacilitesSummary();
-      this.totalEnergyUsage = _.sumBy(this.facilitiesSummary, 'energyUsage');
-      this.totalMeters = _.sumBy(this.facilitiesSummary, 'numberOfMeters');
-      this.totalEnergyCost = _.sumBy(this.facilitiesSummary, 'energyCost');
-      
+    this.accountMeterDataSub = this.utilityMeterDataDbService.accountMeterData.subscribe(val => {
+      if (val && val.length != 0) {
+        this.setAccountFacilities();
+      } else {
+        this.setEmpty()
+      }
     });
   }
 
   ngOnDestroy() {
     this.accountFacilitiesSub.unsubscribe();
+    this.accountMeterDataSub.unsubscribe();
   }
 
 
   selectFacility(facility: IdbFacility) {
     this.facilityDbService.selectedFacility.next(facility);
     this.router.navigateByUrl('/facility-summary');
+  }
+
+  setAccountFacilities() {
+    this.facilitiesSummary = this.dashboardService.getAccountFacilitesSummary();
+    this.totalEnergyUsage = _.sumBy(this.facilitiesSummary, 'energyUsage');
+    this.totalMeters = _.sumBy(this.facilitiesSummary, 'numberOfMeters');
+    this.totalEnergyCost = _.sumBy(this.facilitiesSummary, 'energyCost');
+  }
+
+  setEmpty() {
+    this.facilitiesSummary = new Array();
+    this.totalEnergyUsage = 0;
+    this.totalMeters = 0;
+    this.totalEnergyCost = 0;
   }
 }

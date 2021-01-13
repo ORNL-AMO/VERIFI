@@ -29,6 +29,18 @@ export class AccountUtilityEnergyUseTableComponent implements OnInit {
     this.accountMeterDataSub = this.utilityMeterDataDbService.accountMeterData.subscribe(val => {
       if (val && val.length != 0) {
         this.setUsageValues();
+      } else {
+        this.utilityUsageSummaryData = {
+          utilitySummaries: new Array(),
+          total: {
+            lastBillDate: undefined,
+            previousMonthEnergyUse: 0,
+            previousMonthEnergyCost: 0,
+            averageEnergyUse: 0,
+            averageEnergyCost: 0,
+            utility: undefined
+          }
+        }
       }
     });
   }
