@@ -55,7 +55,7 @@ export class EditUtilityBillComponent implements OnInit {
 
 
   calculateTotalEnergyUse() {
-    let totalEnergyUse: number = this.meterDataForm.controls.totalVolume.value * this.facilityMeter.heatCapacity * this.facilityMeter.siteToSource;
+    let totalEnergyUse: number = this.meterDataForm.controls.totalVolume.value * this.facilityMeter.heatCapacity;
     this.meterDataForm.controls.totalEnergyUse.patchValue(totalEnergyUse);
   }
 }

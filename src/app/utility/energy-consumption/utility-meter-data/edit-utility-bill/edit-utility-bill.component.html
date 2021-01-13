@@ -18,17 +18,19 @@
         </div>
       </div>
 
-      <div>
-        <label for="totalEnergyUse">Total Energy Use </label>
-        <div class="input-group mb-3">
-          <span *ngIf="displayVolumeInput">{{meterDataForm.controls.totalEnergyUse.value}}</span>
-          <input *ngIf="!displayVolumeInput" id="totalEnergyUse" class="form-control" type="number"
-            formControlName="totalEnergyUse">
-          <span [ngClass]="{'unit': !displayVolumeInput}" [innerHTML]="energyUnit | settingsLabel"></span>
-        </div>
+      <label for="totalEnergyUse">Total Energy Use </label>
+      <div class="input-group mb-3">
+        <span *ngIf="displayVolumeInput">{{meterDataForm.controls.totalEnergyUse.value}}</span>
+        <input *ngIf="!displayVolumeInput" id="totalEnergyUse" class="form-control" type="number"
+          formControlName="totalEnergyUse">
+        <span [ngClass]="{'unit': !displayVolumeInput}" [innerHTML]="energyUnit | settingsLabel"></span>
       </div>
 
-
+      <label for="totalCost">Total Cost </label>
+      <div class="input-group mb-3">
+        <input id="totalCost" class="form-control" type="number" formControlName="totalCost">
+        <span class="unit">$</span>
+      </div>
 
       <label for="commodityCharge">Commodity Charge</label>
       <div class="input-group mb-3">

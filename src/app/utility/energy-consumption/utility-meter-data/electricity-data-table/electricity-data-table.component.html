@@ -74,7 +74,7 @@
             <td class="input">
                 <input type="checkbox" name="metersSelected" (change)="toggleChecked()" [(ngModel)]="meterData.checked">
             </td>
-            <td>{{meterData.readDate}}</td>
+            <td>{{meterData.readDate | date}}</td>
             <td>{{meterData.totalEnergyUse}}</td>
             <td>{{meterData.totalDemand}}</td>
             <td>{{meterData.totalCost}}</td>

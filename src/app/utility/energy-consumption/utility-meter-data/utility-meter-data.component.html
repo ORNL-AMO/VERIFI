@@ -49,10 +49,11 @@
         <div class="col no-margin table-responsive">
             <app-electricity-data-table *ngIf="selectedSource == 'Electricity'" [meterListItem]="meterListItem"
                 [pageSize]="pageSize" [itemsPerPage]="itemsPerPage" [meterIndex]="index"
-                (setChecked)="setHasCheckedItems()" (setEdit)="setEditMeterData($event)" (setDelete)="setDeleteMeterData($event)">
+                (setChecked)="setHasCheckedItems()" (setEdit)="setEditMeterData($event)"
+                (setDelete)="setDeleteMeterData($event)">
             </app-electricity-data-table>
             <app-general-utility-data-table *ngIf="selectedSource != 'Electricity'" [meterListItem]="meterListItem"
-                [pageSize]="pageSize" [itemsPerPage]="itemsPerPage" [meterIndex]="index" 
+                [pageSize]="pageSize" [itemsPerPage]="itemsPerPage" [meterIndex]="index"
                 (setEdit)="setEditMeterData($event)" (setDelete)="setDeleteMeterData($event)">
             </app-general-utility-data-table>
         </div>
@@ -62,8 +63,8 @@
 <div class="window" [class.open]="editMeterData">
     <div class="windowOverlay"></div>
     <div class="windowContent windowContentLg">
-        <app-edit-electricity-bill *ngIf="editMeterData && selectedSource == 'Electricity'" [editMeterData]="editMeterData" 
-            (emitClose)="cancelEditMeter()" [addOrEdit]="addOrEdit">
+        <app-edit-electricity-bill *ngIf="editMeterData && selectedSource == 'Electricity'"
+            [editMeterData]="editMeterData" (emitClose)="cancelEditMeter()" [addOrEdit]="addOrEdit">
         </app-edit-electricity-bill>
         <app-edit-utility-bill *ngIf="editMeterData && selectedSource != 'Electricity'" [editMeterData]="editMeterData"
             (emitClose)="cancelEditMeter()" [addOrEdit]="addOrEdit">
@@ -75,7 +76,7 @@
 <div class="window" [class.open]="showImport">
     <div class="windowOverlay"></div>
     <div class="windowContent">
-        <app-import-meter-data *ngIf="showImport" (emitClose)="closeImportModal()" [selectedSource]="selectedSource">
+        <app-import-meter-data *ngIf="showImport" (emitClose)="closeImportModal()">
         </app-import-meter-data>
     </div>
 </div>
