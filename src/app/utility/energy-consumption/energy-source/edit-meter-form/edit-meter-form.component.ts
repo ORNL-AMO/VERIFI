@@ -3,9 +3,10 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
-import { ConvertUnitsService } from 'src/app/shared/convert-units/convert-units.service';
+import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
+import { EnergyUseCalculationsService } from 'src/app/shared/helper-services/energy-use-calculations.service';
 import { EnergyUnitOptions, MassUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from 'src/app/shared/unitOptions';
-import { GasOptions, LiquidOptions, SolidOptions, OtherEnergyOptions, FuelTypeOption } from './editMeterOptions';
+import { FuelTypeOption } from './editMeterOptions';
 @Component({
   selector: 'app-edit-meter-form',
   templateUrl: './edit-meter-form.component.html',
@@ -22,10 +23,12 @@ export class EditMeterFormComponent implements OnInit {
   meterForm: FormGroup;
   displayPhase: boolean;
   displayFuel: boolean;
-  energyOptions: Array<FuelTypeOption>;
+  fuelTypeOptions: Array<FuelTypeOption>;
   startingUnitOptions: Array<UnitOption>;
   energySourceLabel: string = 'Fuel Type';
-  constructor(private formBuilder: FormBuilder, private utilityMeterDbService: UtilityMeterdbService, private facilityDbService: FacilitydbService, private convertUnitsService: ConvertUnitsService) { }
+  displayHeatCapacity: boolean;
+  constructor(private formBuilder: FormBuilder, private utilityMeterDbService: UtilityMeterdbService, private facilityDbService: FacilitydbService,
+    private energyUnitsHelperService: EnergyUnitsHelperService, private energyUseCalculationsService: EnergyUseCalculationsService) { }
 
   ngOnInit(): void {
     this.meterForm = this.formBuilder.group({
@@ -90,66 +93,47 @@ export class EditMeterFormComponent implements OnInit {
     } else {
       this.displayPhase = false;
       this.meterForm.controls.phase.setValidators([]);
-
     }
 
-    if (this.meterForm.controls.source.value == 'Electricity' || this.meterForm.controls.source.value == 'Natural Gas' || this.meterForm.controls.source.value == 'Other Utility') {
-      this.displayFuel = false;
-      this.meterForm.controls.fuel.setValidators([]);
-    } else {
+    if (this.meterForm.controls.source.value == 'Other Fuels' || this.meterForm.controls.source.value == 'Other Energy') {
       this.displayFuel = true;
       this.meterForm.controls.fuel.setValidators([Validators.required]);
+    } else {
+      this.displayFuel = false;
+      this.meterForm.controls.fuel.setValidators([]);
     }
     this.meterForm.controls.phase.updateValueAndValidity();
     this.meterForm.controls.fuel.updateValueAndValidity();
   }
 
   setEnergyOptions() {
+    this.fuelTypeOptions = this.energyUseCalculationsService.getFuelTypeOptions(this.meterForm.controls.source.value, this.meterForm.controls.phase.value);
+    let selectedEnergyOption: FuelTypeOption = this.fuelTypeOptions.find(option => { return option.value == this.meterForm.controls.fuel.value });
+    if (!selectedEnergyOption && this.fuelTypeOptions.length != 0) {
+      this.meterForm.controls.fuel.patchValue(this.fuelTypeOptions[0].value);
+    }
     if (this.meterForm.controls.source.value == 'Other Fuels') {
       this.energySourceLabel = 'Fuel Type';
-      if (this.meterForm.controls.phase.value == 'Solid') {
-        this.energyOptions = SolidOptions;
-      } else if (this.meterForm.controls.phase.value == 'Liquid') {
-        this.energyOptions = LiquidOptions;
-      } else if (this.meterForm.controls.phase.value == 'Gas') {
-        this.energyOptions = GasOptions;
-      }
-    } else if (this.meterForm.controls.source.value == 'Water' || this.meterForm.controls.source.value == 'Waste Water') {
-      this.energySourceLabel = 'Water Type'
-      this.energyOptions = OtherEnergyOptions;
     } else if (this.meterForm.controls.source.value == 'Other Energy') {
       this.energySourceLabel = 'Energy Type'
-      this.energyOptions = OtherEnergyOptions;
     }
     this.setUnitOptions();
   }
 
+  changeFuelType() {
+    if (this.meterForm.controls.source.value == 'Other Energy') {
+      let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+      this.setOtherEnergyUnitOptions(selectedFacility);
+    }
+    this.checkShowHeatCapacity();
+  }
+
   //TODO: Set heat capacity and source for electricity and natural gas (no energy options used);
   setHeatCapacity() {
-    if (this.meterForm.controls.source.value == 'Electricity') {
-      let heatCapacity: number = this.convertUnitsService.value(.003412).from('kWh').to(this.meterForm.controls.startingUnit.value);
-      this.meterForm.controls.heatCapacity.patchValue(heatCapacity);
-      this.meterForm.controls.siteToSource.patchValue(3);
-      //TODO: "On-site Renewable Electricity" has siteToSource = 1;
-      //don't have any way to currently set "On-site"
-    } else if (this.meterForm.controls.source.value == 'Natural Gas') {
-      let heatCapacity: number = this.convertUnitsService.value(.001029).from('ft3').to(this.meterForm.controls.startingUnit.value);
-      this.meterForm.controls.heatCapacity.patchValue(heatCapacity);
-      this.meterForm.controls.siteToSource.patchValue(1);
-    } else {
-      let selectedEnergyOption: FuelTypeOption = this.energyOptions.find(option => { return option.value == this.meterForm.controls.fuel.value });
-      if (selectedEnergyOption) {
-        //copy for conversions
-        let selectedEnergyOptionsCpy: FuelTypeOption = JSON.parse(JSON.stringify(selectedEnergyOption))
-        //TODO: Add therms to unit converter
-        if (selectedEnergyOption.startingUnit && selectedEnergyOption.startingUnit != 'Therms') {
-          //TODO: Round value to some decimal place
-          selectedEnergyOptionsCpy.heatCapacityValue = this.convertUnitsService.value(selectedEnergyOptionsCpy.heatCapacityValue).from(selectedEnergyOptionsCpy.startingUnit).to(this.meterForm.controls.startingUnit.value);
-        }
-        this.meterForm.controls.heatCapacity.patchValue(selectedEnergyOptionsCpy.heatCapacityValue);
-        this.meterForm.controls.siteToSource.patchValue(selectedEnergyOptionsCpy.siteToSourceMultiplier);
-      }
-    }
+    let selectedEnergyOption: FuelTypeOption = this.fuelTypeOptions.find(option => { return option.value == this.meterForm.controls.fuel.value });
+    let heatCapacityAndSiteToSource: { heatCapacity: number, siteToSource: number } = this.energyUseCalculationsService.getHeatingCapacityAndSiteToSourceValue(this.meterForm.controls.source.value, this.meterForm.controls.startingUnit.value, selectedEnergyOption)
+    this.meterForm.controls.heatCapacity.patchValue(heatCapacityAndSiteToSource.heatCapacity);
+    this.meterForm.controls.siteToSource.patchValue(heatCapacityAndSiteToSource.siteToSource);
   }
 
   setUnitOptions() {
@@ -159,30 +143,55 @@ export class EditMeterFormComponent implements OnInit {
       this.startingUnitOptions = EnergyUnitOptions;
     } else if (this.meterForm.controls.source.value == 'Natural Gas') {
       this.meterForm.controls.startingUnit.patchValue(selectedFacility.volumeGasUnit);
-      this.startingUnitOptions = VolumeGasOptions;
+      this.startingUnitOptions = VolumeGasOptions.concat(EnergyUnitOptions);
     } else if (this.meterForm.controls.source.value == 'Other Fuels') {
       if (this.meterForm.controls.phase.value == 'Gas') {
         this.meterForm.controls.startingUnit.patchValue(selectedFacility.volumeGasUnit);
-        this.startingUnitOptions = VolumeGasOptions;
+        this.startingUnitOptions = VolumeGasOptions.concat(EnergyUnitOptions);
       } else if (this.meterForm.controls.phase.value == 'Liquid') {
         this.meterForm.controls.startingUnit.patchValue(selectedFacility.volumeLiquidUnit);
-        this.startingUnitOptions = VolumeLiquidOptions;
+        this.startingUnitOptions = VolumeLiquidOptions.concat(EnergyUnitOptions);
       } else if (this.meterForm.controls.phase.value == 'Solid') {
         this.meterForm.controls.startingUnit.patchValue(selectedFacility.massUnit);
-        this.startingUnitOptions = MassUnitOptions;
+        this.startingUnitOptions = MassUnitOptions.concat(EnergyUnitOptions);
       }
-    } else if (this.meterForm.controls.source.value == 'Water' || this.meterForm.controls.source.value == 'Waste Water') {
-      this.meterForm.controls.startingUnit.patchValue(selectedFacility.volumeLiquidUnit);
-      this.startingUnitOptions = VolumeLiquidOptions;
     } else if (this.meterForm.controls.source.value == 'Other Energy') {
-      let selectedEnergyOption: FuelTypeOption = JSON.parse(JSON.stringify(this.energyOptions.find(option => { return option.value == this.meterForm.controls.fuel.value })));
-      if (selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Steam') {
-        this.meterForm.controls.startingUnit.patchValue(selectedFacility.massUnit);
-        this.startingUnitOptions = MassUnitOptions;
-      } else if (selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Chilled Water') {
-        this.meterForm.controls.startingUnit.patchValue(selectedFacility.chilledWaterUnit);
-        //TODO: Add chilled water units
-      }
+      this.setOtherEnergyUnitOptions(selectedFacility);
+    } else if (this.meterForm.controls.source.value == 'Water' || this.meterForm.controls.source.value == 'Waste Water') {
+      this.startingUnitOptions = VolumeLiquidOptions;
+      this.meterForm.controls.startingUnit.patchValue(selectedFacility.volumeLiquidUnit);
     }
+    this.checkShowHeatCapacity();
+  }
+
+  setOtherEnergyUnitOptions(selectedFacility: IdbFacility) {
+    let selectedEnergyOption: FuelTypeOption = this.fuelTypeOptions.find(option => { return option.value == this.meterForm.controls.fuel.value });
+    if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Steam') {
+      this.meterForm.controls.startingUnit.patchValue(selectedFacility.massUnit);
+      this.startingUnitOptions = MassUnitOptions.concat(EnergyUnitOptions);
+    } else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Chilled Water') {
+      this.meterForm.controls.startingUnit.patchValue(selectedFacility.chilledWaterUnit);
+      //TODO: Add chilled water units
+    } else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Hot Water') {
+      this.meterForm.controls.startingUnit.patchValue(selectedFacility.energyUnit);
+      this.startingUnitOptions = EnergyUnitOptions;
+    }
+  }
+
+
+  checkShowHeatCapacity() {
+    if (this.meterForm.controls.source.value != 'Waste Water' && this.meterForm.controls.source.value != 'Water' && this.meterForm.controls.source.value != 'Other Utility') {
+      this.displayHeatCapacity = (this.energyUnitsHelperService.isEnergyUnit(this.meterForm.controls.startingUnit.value) == false);
+      if (this.displayHeatCapacity) {
+        this.setHeatCapacity();
+      }
+    } else {
+      this.displayHeatCapacity = false;
+    }
+  }
+
+  changePhase() {
+    this.setEnergyOptions();
+    this.setHeatCapacity();
   }
 }

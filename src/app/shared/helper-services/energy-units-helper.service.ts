@@ -3,6 +3,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
 import { FuelTypeOption, OtherEnergyOptions } from 'src/app/utility/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
+import { EnergyUnitOptions, UnitOption } from '../unitOptions';
 
 @Injectable({
   providedIn: 'root'
@@ -36,5 +37,10 @@ export class EnergyUnitsHelperService {
         return selectedFacility.chilledWaterUnit;
       }
     }
+  }
+
+  isEnergyUnit(unit: string): boolean {
+    let findEnergyUnit: UnitOption = EnergyUnitOptions.find(unitOption => { return unitOption.value == unit });
+    return findEnergyUnit != undefined;
   }
 }

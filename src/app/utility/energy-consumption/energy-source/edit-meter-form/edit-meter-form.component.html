@@ -24,7 +24,7 @@
     </label>
     <label *ngIf="displayPhase">
         <span class="required">*</span> Phase
-        <select type="text" formControlName="phase" (change)="setEnergyOptions()">
+        <select type="text" formControlName="phase" (change)="changePhase();">
             <option [ngValue]="'Solid'">Solid</option>
             <option [ngValue]="'Liquid'">Liquid</option>
             <option [ngValue]="'Gas'">Gas</option>
@@ -34,26 +34,26 @@
     <label *ngIf="displayFuel">
         <span class="required">*</span>
         {{energySourceLabel}}
-        <select type="text" formControlName="fuel" (change)="setHeatCapacity()">
-            <option *ngFor="let energyOption of energyOptions" [ngValue]="energyOption.value">{{energyOption.value}}
+        <select type="text" formControlName="fuel" (change)="changeFuelType()">
+            <option *ngFor="let fuelOption of fuelTypeOptions" [ngValue]="fuelOption.value">{{fuelOption.value}}
             </option>
         </select>
     </label>
     <label>
         <span class="required">*</span> Collection Unit
-        <select type="text" formControlName="startingUnit">
+        <select type="text" formControlName="startingUnit" (change)="checkShowHeatCapacity()">
             <option *ngFor="let startingUnitOption of startingUnitOptions" [ngValue]="startingUnitOption.value">
                 <span [innerHTML]="startingUnitOption.display"></span></option>
         </select>
     </label>
     <br>
-    <label>
+    <label *ngIf="displayHeatCapacity">
         <span class="required">*</span> Heat Capacity
         <input type="text" formControlName="heatCapacity">
         <!-- <span class="unit">gal/MMBtu</span> -->
     </label>
     <br>
-    <label>
+    <label *ngIf="displayHeatCapacity">
         <span class="required">*</span> Site to source
         <input type="text" formControlName="siteToSource">
     </label>

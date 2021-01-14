@@ -3,6 +3,7 @@ import { FormGroup } from '@angular/forms';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 import { UtilityMeterDataService } from '../utility-meter-data.service';
 
 @Component({
@@ -22,14 +23,18 @@ export class EditUtilityBillComponent implements OnInit {
 
   energyUnit: string;
   source: string;
-  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private utilityMeterDataService: UtilityMeterDataService, private utilityMeterDbService: UtilityMeterdbService) { }
+  facilityMeter: IdbUtilityMeter;
+  displayVolumeInput: boolean;
+  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private utilityMeterDataService: UtilityMeterDataService,
+    private utilityMeterDbService: UtilityMeterdbService, private energyUnitsHelperService: EnergyUnitsHelperService) { }
 
   ngOnInit(): void {
-    let facilityMeter: IdbUtilityMeter = this.utilityMeterDbService.getFacilityMeterById(this.editMeterData.meterId);
-    if (facilityMeter) {
-      this.energyUnit = facilityMeter.startingUnit
-      this.source = facilityMeter.source;
+    this.facilityMeter = this.utilityMeterDbService.getFacilityMeterById(this.editMeterData.meterId);
+    if (this.facilityMeter) {
+      this.energyUnit = this.facilityMeter.startingUnit
+      this.source = this.facilityMeter.source;
     }
+    this.displayVolumeInput = (this.energyUnitsHelperService.isEnergyUnit(this.energyUnit) == false);
     this.meterDataForm = this.utilityMeterDataService.getGeneralMeterDataForm(this.editMeterData);
   }
 
@@ -46,5 +51,11 @@ export class EditUtilityBillComponent implements OnInit {
       this.utilityMeterDataDbService.add(this.meterDataForm.value);
     }
     this.cancel();
+  }
+
+
+  calculateTotalEnergyUse() {
+    let totalEnergyUse: number = this.meterDataForm.controls.totalVolume.value * this.facilityMeter.heatCapacity * this.facilityMeter.siteToSource;
+    this.meterDataForm.controls.totalEnergyUse.patchValue(totalEnergyUse);
   }
 }

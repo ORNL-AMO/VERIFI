@@ -71,8 +71,8 @@ export interface IdbUtilityMeter {
     accountNumber: number,
     type: string,
     phase: string,
-    heatCapacity: string,
-    siteToSource: string,
+    heatCapacity: number,
+    siteToSource: number,
     name: string,
     location: string,
     supplier: string,
@@ -94,6 +94,7 @@ export interface IdbUtilityMeterData {
     //data
     readDate: Date,
     unit: string,
+    totalVolume: number,
     totalEnergyUse: number,
     totalCost: number,
     commodityCharge: number,

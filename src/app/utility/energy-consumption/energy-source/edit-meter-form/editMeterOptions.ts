@@ -313,44 +313,37 @@ export const SolidOptions: Array<FuelTypeOption> = [
 export const OtherEnergyOptions: Array<FuelTypeOption> = [
     {
         startingUnit: 'lb',
-        heatCapacityValue: .001194,
-        value: 'District Steam (150 psig)',
-        siteToSourceMultiplier: undefined,
-        otherEnergyType: 'Steam'
-    },
-    {
-        startingUnit: 'lb',
         heatCapacityValue: undefined,
         value: 'Purchased Steam',
         siteToSourceMultiplier: 1.33,
         otherEnergyType: 'Steam'
     },
     {
-        startingUnit: 'lb',
+        startingUnit: 'ton',
         heatCapacityValue: .012,
         value: 'Purchased Chilled Water (Absorption Chiller)',
         siteToSourceMultiplier: 1.25,
         otherEnergyType: 'Chilled Water'
     },
     {
-        startingUnit: 'lb',
+        startingUnit: 'ton',
         heatCapacityValue: .012,
         value: 'Purchased Chilled Water (Electric-driven Compressor)',
         siteToSourceMultiplier: .24,
         otherEnergyType: 'Chilled Water'
     },
     {
-        startingUnit: 'lb',
+        startingUnit: 'ton',
         heatCapacityValue: .012,
         value: 'Purchased Chilled Water (Engine-driven Compressor)',
         siteToSourceMultiplier: .83,
         otherEnergyType: 'Chilled Water'
     },
     {
-        startingUnit: 'Therms',
+        startingUnit: 'Therm',
         heatCapacityValue: .1,
         value: 'District Hot Water',
         siteToSourceMultiplier: undefined,
-        otherEnergyType: 'Chilled Water'
+        otherEnergyType: 'Hot Water'
     }
 ]
