@@ -6,6 +6,7 @@
             </th>
             <th class="row-year">Meter Read Date</th>
             <th>Total Energy (<span [innerHTML]="energyUnit | settingsLabel"></span>)</th>
+            <th>Total Cost</th>
             <th>Commodity Charge</th>
             <th>Delivery Charge</th>
             <th>Other Charges</th>
@@ -17,11 +18,12 @@
             <td class="input">
                 <input type="checkbox" name="metersSelected" (change)="toggleChecked()" [(ngModel)]="meterData.checked">
             </td>
-            <td>{{meterData.readDate}}</td>
+            <td>{{meterData.readDate | date}}</td>
             <td>{{meterData.totalEnergyUse}}</td>
-            <td>${{meterData.commodityCharge}}</td>
-            <td>${{meterData.deliveryCharge}}</td>
-            <td>${{meterData.otherCharge}}</td>
+            <td>{{meterData.totalCost | currency}}</td>
+            <td>{{meterData.commodityCharge | currency}}</td>
+            <td>{{meterData.deliveryCharge | currency}}</td>
+            <td>{{meterData.otherCharge | currency}}</td>
             <td class="actions">
                 <i class="fa fa-pencil" title="Edit" (click)="setEditMeterData(meterData)"></i>
                 <i class="fa fa-trash-o" title="Delete" (click)="setDeleteMeterData(meterData)"></i>

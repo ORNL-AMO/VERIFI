@@ -15,7 +15,7 @@ export class CalanderizationService {
   calanderizeFacilityMeters(facilityMeters: Array<IdbUtilityMeter>, monthDisplayShort?: boolean) {
     let calanderizedMeterData: Array<CalanderizedMeter> = new Array();
     facilityMeters.forEach(meter => {
-      let energyUnit: string = this.energyUnitsHelperService.getEnergyUnit(meter.id);
+      let energyUnit: string = this.energyUnitsHelperService.getMeterEnergyUnit(meter.id);
       let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(meter.id);
       let calanderizedMeter: Array<MonthlyData> = this.calanderizeMeterData(meterData, monthDisplayShort);
       calanderizedMeterData.push({

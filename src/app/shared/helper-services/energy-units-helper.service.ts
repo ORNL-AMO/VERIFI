@@ -12,8 +12,22 @@ export class EnergyUnitsHelperService {
 
   constructor(private utilityMeterDbService: UtilityMeterdbService, private facilityDbService: FacilitydbService) { }
 
-  getEnergyUnit(meterId: number): string {
+  getMeterEnergyUnit(meterId: number): string {
     let facilityMeter: IdbUtilityMeter = this.utilityMeterDbService.getFacilityMeterById(meterId);
+    if (facilityMeter) {
+      let meterUnitIsEnergy: boolean = this.isEnergyUnit(facilityMeter.startingUnit);
+      //use meter unit 
+      if (meterUnitIsEnergy) {
+        return facilityMeter.startingUnit;
+      } else {
+        return this.getFacilityUnitFromMeter(facilityMeter);
+      }
+    } else {
+      return;
+    }
+  }
+
+  getFacilityUnitFromMeter(facilityMeter: IdbUtilityMeter): string {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     if (facilityMeter.source == 'Electricity') {
       return selectedFacility.energyUnit;
@@ -38,6 +52,7 @@ export class EnergyUnitsHelperService {
       }
     }
   }
+
 
   isEnergyUnit(unit: string): boolean {
     let findEnergyUnit: UnitOption = EnergyUnitOptions.find(unitOption => { return unitOption.value == unit });

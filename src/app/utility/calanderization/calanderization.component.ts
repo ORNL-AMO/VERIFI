@@ -29,7 +29,7 @@ export class CalanderizationComponent implements OnInit {
       this.setCalanderizedMeterData();
     });
 
-    this.facilityMeterDataSub = this.utilityMeterDataDbService.facilityMeterData.subscribe(() => {
+    this.facilityMeterDataSub = this.utilityMeterDataDbService.accountMeterData.subscribe(() => {
       this.setCalanderizedMeterData();
     });
   }

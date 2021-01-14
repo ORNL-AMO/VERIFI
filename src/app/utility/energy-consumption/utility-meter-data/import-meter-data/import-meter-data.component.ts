@@ -133,19 +133,19 @@ export class ImportMeterDataComponent implements OnInit {
   getOtherSourceMeterDataObject(idbMeter: IdbUtilityMeter, currentLine: Array<string>): IdbUtilityMeterData {
     let obj: IdbUtilityMeterData = this.utilityMeterDataDbService.getNewIdbUtilityMeterData(idbMeter.id, idbMeter.facilityId, idbMeter.accountId);
     let isEnergyUnit: boolean = this.energyUnitsHelperService.isEnergyUnit(idbMeter.startingUnit);
+    obj.readDate = new Date(currentLine[1]);
     if (isEnergyUnit) {
-      obj.totalEnergyUse = Number(currentLine["totalEnergyUse"]);
+      obj.totalEnergyUse = Number(currentLine[2]);
     } else {
-      obj.totalVolume = Number(currentLine["totalEnergyUse"]);
+      obj.totalVolume = Number(currentLine[2]);
       obj.totalEnergyUse = obj.totalVolume * idbMeter.heatCapacity;
     }
-    obj.readDate = new Date(currentLine["readDate"]);
-    obj.totalDemand = Number(currentLine["totalDemand"]);
+    obj.totalCost = Number(currentLine[3]);
+    obj.commodityCharge = Number(currentLine[4]);
     // obj.totalCost = Number(currentLine["totalCost"]);
     // obj.unit = currentLine["unit"];
-    obj.deliveryCharge = Number(currentLine["deliveryCharge"]);
-    obj.otherCharge = Number(currentLine["otherCharge"]);
-    obj.commodityCharge = Number(currentLine["commodityCharge"]);
+    obj.deliveryCharge = Number(currentLine[5]);
+    obj.otherCharge = Number(currentLine[6]);
     return obj;
   }
 
@@ -153,7 +153,7 @@ export class ImportMeterDataComponent implements OnInit {
     if (idbMeter.source == 'Electricity') {
       return ["Meter Number", "Read Date", "Total Energy", "Total Demand", "Total Cost", "Basic Charge", "Supply Block Amount", "Supply Block Charge", "Flat Rate Amount", "Flat Rate Charge", "Peak Amount", "Peak Charge", "Off Peak Amount", "Off Peak Charge", "Demand Block Amount", "Demand Block Charge", "Generation and Transmission Charge", "Delivery Charge", "Transmission Charge", "Power Factor Charge", "Local Business Charge", "Local Utility Tax", "Late Payment", "Other Charge"];
     } else {
-      return ["meterNumber", "readDate", "totalEnergyUse", "commodityCharge", "deliveryCharge", "otherCharge", "unit"];
+      return ["Meter Number", "Read Date", "Total Consumption", "Total Cost", "Commodity Charge", "Delivery Charge", "Other Charge"];
     }
   }
 
