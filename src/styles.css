@@ -604,14 +604,16 @@ td.input {
   max-width: 30px;
   width: 30px;
 }
-td.actions {
+td.actions,
+.actions {
   width: 75px;
   min-width: 75px;
 }
 .table-sm td.actions {
   padding: 4px 11px;
 }
-td.actions i {
+td.actions i,
+.actions i  {
   padding: 3px 5px;
   margin: 0 2px;
   cursor: pointer;

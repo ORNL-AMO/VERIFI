@@ -97,6 +97,7 @@ export class UtilityMeterGroupdbService {
             dateModified: undefined,
             factionOfTotalEnergy: undefined,
             // id: undefined
+            visible: true
         }
     }
 
