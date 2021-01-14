@@ -13,7 +13,7 @@
                 *ngFor="let meterGroup of meterGroupType.meterGroups" (cdkDropListDropped)="drop($event)"
                 id={{meterGroup.id}} [cdkDropListConnectedTo]="meterGroupType.meterGroupIds">
                 <div class="row group-title">
-                    <p class="bold col" (click)="setToggleView(meterGroupType.id,meterGroup.id)">
+                    <p class="bold col" (click)="setToggleView(meterGroup)">
                         <i class="fa fa-caret-right" *ngIf="!meterGroup.visible"></i> 
                         <i class="fa fa-caret-down" *ngIf="meterGroup.visible"></i>
                         {{meterGroup.name}}</p>
@@ -34,14 +34,6 @@
                     </div>
 
                     <div class="col-1">
-                         <!--<i class="fa fa-ellipsis-v item-right" (click)="groupToggleMenu(meterGroup.id)"></i>
-                        <div class="groupMenu" [class.open]="groupMenuOpen === meterGroup.id">
-                            <p (click)="setEditGroup(meterGroup)">Edit</p>
-                            <hr>
-                            <p (click)="setDeleteGroup(meterGroup)">Delete</p>
-                            <i class="fa fa-pencil" title="Edit" (click)="setEditGroup(meterGroup)"></i>
-                            <i class="fa fa-trash-o" title="Delete" (click)="setDeleteGroup(meterGroup)"></i>
-                        </div>-->
                         <div class="actions">
                             <i class="fa fa-pencil" title="Edit" (click)="setEditGroup(meterGroup)"></i>
                             <i class="fa fa-trash-o" title="Delete" (click)="setDeleteGroup(meterGroup)"></i>

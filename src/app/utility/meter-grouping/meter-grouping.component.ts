@@ -21,7 +21,6 @@ export class MeterGroupingComponent implements OnInit {
     meterGroupIds: Array<string>
   }>;
 
-  /*groupMenuOpen: number;*/
   groupToEdit: IdbUtilityMeterGroup;
   groupToDelete: IdbUtilityMeterGroup;
   facilityMeterDataSub: Subscription;
@@ -150,15 +149,6 @@ export class MeterGroupingComponent implements OnInit {
     return meterGroups
   }
 
-  /*
-  groupToggleMenu(groupId: number) {
-    if (groupId != this.groupMenuOpen) {
-      this.groupMenuOpen = groupId;
-    } else {
-      this.groupMenuOpen = undefined;
-    }
-  }*/
-
   setEditGroup(group: IdbUtilityMeterGroup) {
     this.editOrAdd = 'edit';
     this.groupToEdit = group;
@@ -177,12 +167,10 @@ export class MeterGroupingComponent implements OnInit {
   closeEditGroup() {
     this.editOrAdd = undefined;
     this.groupToEdit = undefined;
-    /*this.groupMenuOpen = undefined;*/
   }
 
   closeDeleteGroup() {
     this.groupToDelete = undefined;
-    /*this.groupMenuOpen = undefined;*/
   }
 
   drop(event: CdkDragDrop<string[]>) {
@@ -204,16 +192,11 @@ export class MeterGroupingComponent implements OnInit {
     this.closeDeleteGroup();
   }
 
-  setToggleView(typeID,groupId) {
-    // get meter with id
-    var typeIndex = this.meterGroupTypes.map(function(e) { return e.id; }).indexOf(typeID);
-    var groupIndex = this.meterGroupTypes[typeIndex].meterGroups.map(function(e) { return e.id; }).indexOf(groupId);
-
-    // set visible to opposite of current value
-    this.meterGroupTypes[typeIndex].meterGroups[groupIndex].visible = !this.meterGroupTypes[typeIndex].meterGroups[groupIndex].visible;
+  setToggleView(meterGroup) {
+    meterGroup.visible = !meterGroup.visible
     
-    if(this.meterGroupTypes[typeIndex].meterGroups[groupIndex].name != "Ungrouped") {
-      this.utilityMeterGroupDbService.update(this.meterGroupTypes[typeIndex].meterGroups[groupIndex]);
+    if(meterGroup.name != "Ungrouped") {
+      this.utilityMeterGroupDbService.update(meterGroup);
     }
 
   }
