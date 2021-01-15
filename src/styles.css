@@ -815,6 +815,9 @@ Meter Displays
 .meter {
   margin-bottom: 50px;
 }
+.meter.collapsed {
+  margin-bottom: 0px;
+}
 .meterData {
   padding: 10px 0px;
   position: relative;
@@ -1044,7 +1047,7 @@ input.unitDollar {
 }
 .meterData h6 {
   padding: 9px 0 0;
-  margin: 0px;
+  margin: 0 0 10px 0;
 }
 .importQuickView {
   width: 100%;

@@ -27,15 +27,19 @@
     </app-utility-meter-data-filter>
 </div>
 
-<div class="meter" *ngFor="let meterListItem of meterList; let index=index;">
+<div class="meter" *ngFor="let meterListItem of meterList; let index=index;" [class.collapsed]="!meterListItem.idbMeter.visible">
     <div class="meterData">
-        <h6><i class="fa fa-caret-right"></i> {{meterListItem.idbMeter.name}}</h6>
-        <p>{{meterListItem.idbMeter.notes}}</p>
+        <h6 class="pointer" (click)="setToggleView(meterListItem.idbMeter)">
+            <i class="fa fa-caret-right" *ngIf="!meterListItem.idbMeter.visible"></i> 
+            <i class="fa fa-caret-down" *ngIf="meterListItem.idbMeter.visible"></i>
+            {{meterListItem.idbMeter.name}}
+        </h6>
+        <p *ngIf="meterListItem.idbMeter.visible">{{meterListItem.idbMeter.notes}}</p>
 
         <button class="btn btn-link item-right" (click)="meterDataAdd(meterListItem.idbMeter)"><i
                 class="fa fa-plus"></i> Add New Bill</button>
         <div class="tableControls overflow-hidden item-right">
-            <div class="item-right">
+            <div class="item-right" *ngIf="meterListItem.idbMeter.visible">
                 <ngb-pagination [collectionSize]="meterListItem.meterDataItems.length" [(page)]="page[index]"
                     [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Default pagination"
                     (pageChange)="onPageChange(index, page[index])"></ngb-pagination>
@@ -45,7 +49,7 @@
     </div>
 
 
-    <div class="row no-margin">
+    <div class="row no-margin" *ngIf="meterListItem.idbMeter.visible">
         <div class="col no-margin table-responsive">
             <app-electricity-data-table *ngIf="selectedSource == 'Electricity'" [meterListItem]="meterListItem"
                 [pageSize]="pageSize" [itemsPerPage]="itemsPerPage" [meterIndex]="index"
