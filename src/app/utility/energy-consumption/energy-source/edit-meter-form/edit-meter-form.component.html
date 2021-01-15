@@ -43,19 +43,21 @@
         <span class="required">*</span> Collection Unit
         <select type="text" formControlName="startingUnit" (change)="checkShowHeatCapacity()">
             <option *ngFor="let startingUnitOption of startingUnitOptions" [ngValue]="startingUnitOption.value">
-                <span [innerHTML]="startingUnitOption.display"></span></option>
+                <span [innerHTML]="startingUnitOption.display"></span>
+            </option>
         </select>
     </label>
     <br>
-    <label *ngIf="displayHeatCapacity">
-        <span class="required">*</span> Heat Capacity
-        <input type="text" formControlName="heatCapacity">
-        <!-- <span class="unit">gal/MMBtu</span> -->
+    <label *ngIf="displayHeatCapacity"><span class="required">*</span> Heat Capacity
+        <div *ngIf="displayHeatCapacity" class="input-group">
+            <input type="number" formControlName="heatCapacity">
+            <span class="unit">{{facilityEnergyUnit}}/{{meterForm.controls.startingUnit.value}}</span>
+        </div>
     </label>
     <br>
     <label *ngIf="displayHeatCapacity">
         <span class="required">*</span> Site to source
-        <input type="text" formControlName="siteToSource">
+        <input type="number" formControlName="siteToSource">
     </label>
 
     <hr>

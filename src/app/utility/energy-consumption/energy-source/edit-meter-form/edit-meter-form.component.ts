@@ -27,10 +27,17 @@ export class EditMeterFormComponent implements OnInit {
   startingUnitOptions: Array<UnitOption>;
   energySourceLabel: string = 'Fuel Type';
   displayHeatCapacity: boolean;
+  facilityEnergyUnit: string;
   constructor(private formBuilder: FormBuilder, private utilityMeterDbService: UtilityMeterdbService, private facilityDbService: FacilitydbService,
     private energyUnitsHelperService: EnergyUnitsHelperService, private energyUseCalculationsService: EnergyUseCalculationsService) { }
 
   ngOnInit(): void {
+
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    if (selectedFacility) {
+      this.facilityEnergyUnit = selectedFacility.energyUnit;
+    }
+
     this.meterForm = this.formBuilder.group({
       id: [this.editMeter.id],
       facilityId: [this.editMeter.facilityId],
