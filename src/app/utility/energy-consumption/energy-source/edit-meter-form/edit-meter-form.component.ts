@@ -1,11 +1,12 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 import { EnergyUseCalculationsService } from 'src/app/shared/helper-services/energy-use-calculations.service';
 import { EnergyUnitOptions, MassUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from 'src/app/shared/unitOptions';
+import { EditMeterFormService } from './edit-meter-form.service';
 import { FuelTypeOption } from './editMeterOptions';
 @Component({
   selector: 'app-edit-meter-form',
@@ -28,124 +29,143 @@ export class EditMeterFormComponent implements OnInit {
   energySourceLabel: string = 'Fuel Type';
   displayHeatCapacity: boolean;
   facilityEnergyUnit: string;
-  constructor(private formBuilder: FormBuilder, private utilityMeterDbService: UtilityMeterdbService, private facilityDbService: FacilitydbService,
-    private energyUnitsHelperService: EnergyUnitsHelperService, private energyUseCalculationsService: EnergyUseCalculationsService) { }
+  constructor(private utilityMeterDbService: UtilityMeterdbService, private facilityDbService: FacilitydbService,
+    private energyUnitsHelperService: EnergyUnitsHelperService, private energyUseCalculationsService: EnergyUseCalculationsService, private editMeterFormService: EditMeterFormService) { }
 
   ngOnInit(): void {
-
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     if (selectedFacility) {
       this.facilityEnergyUnit = selectedFacility.energyUnit;
     }
-
-    this.meterForm = this.formBuilder.group({
-      id: [this.editMeter.id],
-      facilityId: [this.editMeter.facilityId],
-      accountId: [this.editMeter.accountId],
-      groupId: [this.editMeter.groupId],
-      meterNumber: [this.editMeter.meterNumber],
-      accountNumber: [this.editMeter.accountNumber],
-      type: [this.editMeter.type],
-      phase: [this.editMeter.phase],
-      heatCapacity: [this.editMeter.heatCapacity, Validators.required],
-      siteToSource: [this.editMeter.siteToSource, Validators.required],
-      name: [this.editMeter.name, Validators.required],
-      location: [this.editMeter.location],
-      supplier: [this.editMeter.supplier, Validators.required],
-      notes: [this.editMeter.notes],
-      source: [this.editMeter.source, Validators.required],
-      group: [this.editMeter.group],
-      fuel: [this.editMeter.fuel, Validators.required],
-      startingUnit: [this.editMeter.startingUnit, Validators.required],
-      energyUnit: [this.editMeter.energyUnit]
-    });
-
-    if (!this.meterForm.controls.source.value) {
-      this.meterForm.controls.source.patchValue('Electricity');
-      this.setSource();
-    } else {
-      this.setSourceValidation();
-      this.setEnergyOptions();
-    }
+    this.meterForm = this.editMeterFormService.getFormFromMeter(this.editMeter);
+    this.setFuelTypeOptions();
+    this.checkDisplayFuel();
+    this.checkDisplayPhase();
+    this.setStartingUnitOptions();
+    this.checkShowHeatCapacity();
   }
 
-
   saveChanges() {
-    this.setMeterEnergyUnit();
+    let meterToSave: IdbUtilityMeter = this.editMeterFormService.updateMeterFromForm(this.editMeter, this.meterForm);
+    meterToSave.energyUnit = this.getMeterEnergyUnit();
     if (this.addOrEdit == 'edit') {
-      this.utilityMeterDbService.update(this.meterForm.value);
+      this.utilityMeterDbService.update(meterToSave);
     } else if (this.addOrEdit == 'add') {
-      let newMeter: IdbUtilityMeter = this.meterForm.value;
-      delete newMeter.id;
-      this.utilityMeterDbService.add(newMeter);
+      delete meterToSave.id;
+      this.utilityMeterDbService.add(meterToSave);
     }
     this.cancel();
+
   }
 
   cancel() {
     this.emitClose.emit(true);
   }
 
-  setSource() {
-    this.setSourceValidation();
-    this.setEnergyOptions();
-    this.setHeatCapacity();
+  changeSource() {
+    this.setFuelTypeOptions();
+    this.checkDisplayFuel();
+    this.checkDisplayPhase();
+    this.updatePhaseAndFuelValidation();
+    this.setStartingUnitOptions();
+    this.checkShowHeatCapacity();
+    this.setHeatCapacityAndSiteToSource();
   }
 
-  setSourceValidation() {
-    if (this.meterForm.controls.source.value == 'Other Fuels') {
-      this.meterForm.controls.phase.setValidators([Validators.required]);
-      if (!this.meterForm.controls.phase.value) {
-        this.meterForm.controls.phase.patchValue('Gas');
-      }
-      this.displayPhase = true;
-    } else {
-      this.displayPhase = false;
-      this.meterForm.controls.phase.setValidators([]);
-    }
-
-    if (this.meterForm.controls.source.value == 'Other Fuels' || this.meterForm.controls.source.value == 'Other Energy') {
-      this.displayFuel = true;
-      this.meterForm.controls.fuel.setValidators([Validators.required]);
-    } else {
-      this.displayFuel = false;
-      this.meterForm.controls.fuel.setValidators([]);
-    }
-    this.meterForm.controls.phase.updateValueAndValidity();
-    this.meterForm.controls.fuel.updateValueAndValidity();
-  }
-
-  setEnergyOptions() {
-    this.fuelTypeOptions = this.energyUseCalculationsService.getFuelTypeOptions(this.meterForm.controls.source.value, this.meterForm.controls.phase.value);
-    let selectedEnergyOption: FuelTypeOption = this.fuelTypeOptions.find(option => { return option.value == this.meterForm.controls.fuel.value });
-    if (!selectedEnergyOption && this.fuelTypeOptions.length != 0) {
-      this.meterForm.controls.fuel.patchValue(this.fuelTypeOptions[0].value);
-    }
-    if (this.meterForm.controls.source.value == 'Other Fuels') {
-      this.energySourceLabel = 'Fuel Type';
-    } else if (this.meterForm.controls.source.value == 'Other Energy') {
-      this.energySourceLabel = 'Energy Type'
-    }
-    this.setUnitOptions();
-  }
-
-  changeFuelType() {
+  changeFuel() {
     if (this.meterForm.controls.source.value == 'Other Energy') {
       let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
       this.setOtherEnergyUnitOptions(selectedFacility);
     }
     this.checkShowHeatCapacity();
+    this.setHeatCapacityAndSiteToSource();
+  }
+
+  changePhase() {
+    this.setStartingUnitOptions();
+    this.setFuelTypeOptions();
+    this.checkShowHeatCapacity();
+    this.setHeatCapacityAndSiteToSource();
+  }
+
+  changeUnit() {
+    this.checkShowHeatCapacity();
+    this.setHeatCapacityAndSiteToSource();
+
+  }
+
+  setEnergySourceLabel() {
+    if (this.meterForm.controls.source.value == 'Other Fuels') {
+      this.energySourceLabel = 'Fuel Type';
+    } else if (this.meterForm.controls.source.value == 'Other Energy') {
+      this.energySourceLabel = 'Energy Type'
+    }
+  }
+
+  checkDisplayPhase() {
+    if (this.meterForm.controls.source.value == 'Other Fuels') {
+      this.displayPhase = true;
+    } else {
+      this.displayPhase = false;
+    }
+  }
+
+  checkDisplayFuel() {
+    if (this.meterForm.controls.source.value == 'Other Fuels' || this.meterForm.controls.source.value == 'Other Energy') {
+      this.displayFuel = true;
+    } else {
+      this.displayFuel = false;
+    }
+  }
+
+  updatePhaseAndFuelValidation() {
+    let fuelValidators: Array<ValidatorFn> = this.editMeterFormService.getFuelValidation(this.meterForm.controls.source.value);
+    this.meterForm.controls.fuel.setValidators(fuelValidators);
+    this.meterForm.controls.fuel.updateValueAndValidity();
+
+    let phaseValidators: Array<ValidatorFn> = this.editMeterFormService.getPhaseValidation(this.meterForm.controls.source.value);
+    this.meterForm.controls.phase.setValidators(phaseValidators);
+    this.meterForm.controls.phase.updateValueAndValidity();
+  }
+
+  setFuelTypeOptions() {
+    this.fuelTypeOptions = this.energyUseCalculationsService.getFuelTypeOptions(this.meterForm.controls.source.value, this.meterForm.controls.phase.value);
+    let selectedEnergyOption: FuelTypeOption = this.fuelTypeOptions.find(option => { return option.value == this.meterForm.controls.fuel.value });
+    if (!selectedEnergyOption && this.fuelTypeOptions.length != 0) {
+      this.meterForm.controls.fuel.patchValue(this.fuelTypeOptions[0].value);
+    }
   }
 
   //TODO: Set heat capacity and source for electricity and natural gas (no energy options used);
-  setHeatCapacity() {
-    let selectedEnergyOption: FuelTypeOption = this.fuelTypeOptions.find(option => { return option.value == this.meterForm.controls.fuel.value });
-    let heatCapacityAndSiteToSource: { heatCapacity: number, siteToSource: number } = this.energyUseCalculationsService.getHeatingCapacityAndSiteToSourceValue(this.meterForm.controls.source.value, this.meterForm.controls.startingUnit.value, selectedEnergyOption)
-    this.meterForm.controls.heatCapacity.patchValue(heatCapacityAndSiteToSource.heatCapacity);
-    this.meterForm.controls.siteToSource.patchValue(heatCapacityAndSiteToSource.siteToSource);
+  setHeatCapacityAndSiteToSource() {
+    if (this.displayHeatCapacity) {
+      let selectedEnergyOption: FuelTypeOption = this.fuelTypeOptions.find(option => { return option.value == this.meterForm.controls.fuel.value });
+      let heatCapacityAndSiteToSource: { heatCapacity: number, siteToSource: number } = this.energyUseCalculationsService.getHeatingCapacityAndSiteToSourceValue(this.meterForm.controls.source.value, this.meterForm.controls.startingUnit.value, selectedEnergyOption)
+      this.meterForm.controls.heatCapacity.patchValue(heatCapacityAndSiteToSource.heatCapacity);
+      this.meterForm.controls.siteToSource.patchValue(heatCapacityAndSiteToSource.siteToSource);
+    }
   }
 
-  setUnitOptions() {
+  checkShowHeatCapacity() {
+    this.displayHeatCapacity = this.editMeterFormService.checkShowHeatCapacity(this.meterForm.controls.source.value, this.meterForm.controls.startingUnit.value);
+  }
+
+  getMeterEnergyUnit(): string {
+    let isEnergyUnit: boolean = this.energyUnitsHelperService.isEnergyUnit(this.meterForm.controls.startingUnit.value);
+    if (isEnergyUnit) {
+      return this.meterForm.controls.startingUnit.value;
+    } else {
+      let isEnergyMeter: boolean = this.energyUnitsHelperService.isEnergyMeter(this.meterForm.controls.source.value);
+      if (isEnergyMeter) {
+        let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+        return selectedFacility.energyUnit;
+      } else {
+        return undefined;
+      }
+    }
+  }
+
+  setStartingUnitOptions() {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     if (this.meterForm.controls.source.value == 'Electricity') {
       this.meterForm.controls.startingUnit.patchValue(selectedFacility.energyUnit);
@@ -170,7 +190,6 @@ export class EditMeterFormComponent implements OnInit {
       this.startingUnitOptions = VolumeLiquidOptions;
       this.meterForm.controls.startingUnit.patchValue(selectedFacility.volumeLiquidUnit);
     }
-    this.checkShowHeatCapacity();
   }
 
   setOtherEnergyUnitOptions(selectedFacility: IdbFacility) {
@@ -184,38 +203,6 @@ export class EditMeterFormComponent implements OnInit {
     } else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Hot Water') {
       this.meterForm.controls.startingUnit.patchValue(selectedFacility.energyUnit);
       this.startingUnitOptions = EnergyUnitOptions;
-    }
-  }
-
-
-  checkShowHeatCapacity() {
-    if (this.meterForm.controls.source.value != 'Waste Water' && this.meterForm.controls.source.value != 'Water' && this.meterForm.controls.source.value != 'Other Utility') {
-      this.displayHeatCapacity = (this.energyUnitsHelperService.isEnergyUnit(this.meterForm.controls.startingUnit.value) == false);
-      if (this.displayHeatCapacity) {
-        this.setHeatCapacity();
-      }
-    } else {
-      this.displayHeatCapacity = false;
-    }
-  }
-
-  changePhase() {
-    this.setEnergyOptions();
-    this.setHeatCapacity();
-  }
-
-  setMeterEnergyUnit() {
-    let isEnergyUnit: boolean = this.energyUnitsHelperService.isEnergyUnit(this.meterForm.controls.startingUnit.value);
-    if (isEnergyUnit) {
-      this.meterForm.controls.energyUnit.patchValue(this.meterForm.controls.startingUnit.value);
-    } else {
-      let isEnergyMeter: boolean = this.energyUnitsHelperService.isEnergyMeter(this.meterForm.controls.source.value);
-      if (isEnergyMeter) {
-        let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-        this.meterForm.controls.energyUnit.patchValue(selectedFacility.energyUnit);
-      } else {
-        this.meterForm.controls.energyUnit.patchValue(undefined);
-      }
     }
   }
 }

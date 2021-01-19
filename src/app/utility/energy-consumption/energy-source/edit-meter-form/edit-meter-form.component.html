@@ -2,9 +2,6 @@
 <br>
 <p class="bold">Meter Information</p>
 <form [formGroup]="meterForm">
-    <input hidden type="text" formControlName="id">
-    <input hidden type="text" formControlName="group">
-
     <label>
         <span class="required">*</span> Name
         <input type="text" formControlName="name">
@@ -12,7 +9,7 @@
     <br>
     <label>
         <span class="required">*</span> Source
-        <select type="text" formControlName="source" (change)="setSource()">
+        <select type="text" formControlName="source" (change)="changeSource()">
             <option [ngValue]="'Electricity'">Electricity</option>
             <option [ngValue]="'Natural Gas'">Natural Gas</option>
             <option [ngValue]="'Other Fuels'">Other Fuels</option>
@@ -34,14 +31,14 @@
     <label *ngIf="displayFuel">
         <span class="required">*</span>
         {{energySourceLabel}}
-        <select type="text" formControlName="fuel" (change)="changeFuelType()">
+        <select type="text" formControlName="fuel" (change)="changeFuel()">
             <option *ngFor="let fuelOption of fuelTypeOptions" [ngValue]="fuelOption.value">{{fuelOption.value}}
             </option>
         </select>
     </label>
     <label>
         <span class="required">*</span> Collection Unit
-        <select type="text" formControlName="startingUnit" (change)="checkShowHeatCapacity()">
+        <select type="text" formControlName="startingUnit" (change)="changeUnit()">
             <option *ngFor="let startingUnitOption of startingUnitOptions" [ngValue]="startingUnitOption.value">
                 <span [innerHTML]="startingUnitOption.display"></span>
             </option>
