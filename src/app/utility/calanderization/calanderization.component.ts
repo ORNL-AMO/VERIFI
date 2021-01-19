@@ -41,7 +41,7 @@ export class CalanderizationComponent implements OnInit {
 
   setCalanderizedMeterData() {
     if (this.facilityMeters) {
-      this.calanderizedMeterData = this.calanderizationService.calanderizeFacilityMeters(this.facilityMeters);
+      this.calanderizedMeterData = this.calanderizationService.calanderizeMetersInFacility(this.facilityMeters);
     }
   }
 

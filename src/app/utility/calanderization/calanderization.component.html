@@ -46,16 +46,16 @@
                         <tr>
                             <th class="row-year">Month</th>
                             <th class="row-year">Year</th>
-                            <th>Total <span [innerHTML]="meterData.energyUnit | settingsLabel"></span></th>
+                            <th>Total <span [innerHTML]="meterData.consumptionUnit | settingsLabel"></span></th>
                             <th>Total Cost</th>
                         </tr>
                         <tr *ngFor="let data of meterData.monthlyData | slice: pageSize[i] | slice: 0:itemsPerPage"
-                            [class.na]="!data.energyUse">
+                            [class.na]="!data.energyConsumption">
                             <td>{{data.month}}</td>
                             <td>{{data.year}}</td>
                             <td>
-                                <span *ngIf="data.energyUse">{{data.energyUse | number:'1.0-2'}}</span>
-                                <span *ngIf="!data.energyUse">N/A</span>
+                                <span *ngIf="data.energyConsumption">{{data.energyConsumption | number:'1.0-2'}}</span>
+                                <span *ngIf="!data.energyConsumption">N/A</span>
                             </td>
                             <td>
                                 <span *ngIf="data.energyCost">{{data.energyCost | currency}}</span>

@@ -56,7 +56,8 @@ export class EditMeterFormComponent implements OnInit {
       source: [this.editMeter.source, Validators.required],
       group: [this.editMeter.group],
       fuel: [this.editMeter.fuel, Validators.required],
-      startingUnit: [this.editMeter.startingUnit, Validators.required]
+      startingUnit: [this.editMeter.startingUnit, Validators.required],
+      energyUnit: [this.editMeter.energyUnit]
     });
 
     if (!this.meterForm.controls.source.value) {
@@ -70,6 +71,7 @@ export class EditMeterFormComponent implements OnInit {
 
 
   saveChanges() {
+    this.setMeterEnergyUnit();
     if (this.addOrEdit == 'edit') {
       this.utilityMeterDbService.update(this.meterForm.value);
     } else if (this.addOrEdit == 'add') {
@@ -200,5 +202,20 @@ export class EditMeterFormComponent implements OnInit {
   changePhase() {
     this.setEnergyOptions();
     this.setHeatCapacity();
+  }
+
+  setMeterEnergyUnit() {
+    let isEnergyUnit: boolean = this.energyUnitsHelperService.isEnergyUnit(this.meterForm.controls.startingUnit.value);
+    if (isEnergyUnit) {
+      this.meterForm.controls.energyUnit.patchValue(this.meterForm.controls.startingUnit.value);
+    } else {
+      let isEnergyMeter: boolean = this.energyUnitsHelperService.isEnergyMeter(this.meterForm.controls.source.value);
+      if (isEnergyMeter) {
+        let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+        this.meterForm.controls.energyUnit.patchValue(selectedFacility.energyUnit);
+      } else {
+        this.meterForm.controls.energyUnit.patchValue(undefined);
+      }
+    }
   }
 }

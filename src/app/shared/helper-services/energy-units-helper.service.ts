@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
+import { IdbAccount, IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
 import { FuelTypeOption, OtherEnergyOptions } from 'src/app/utility/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
 import { EnergyUnitOptions, UnitOption } from '../unitOptions';
 
@@ -10,17 +11,32 @@ import { EnergyUnitOptions, UnitOption } from '../unitOptions';
 })
 export class EnergyUnitsHelperService {
 
-  constructor(private utilityMeterDbService: UtilityMeterdbService, private facilityDbService: FacilitydbService) { }
+  constructor(private utilityMeterDbService: UtilityMeterdbService, private facilityDbService: FacilitydbService, private accountDbService: AccountdbService) { }
 
-  getMeterEnergyUnit(meterId: number): string {
-    let facilityMeter: IdbUtilityMeter = this.utilityMeterDbService.getFacilityMeterById(meterId);
-    if (facilityMeter) {
-      let meterUnitIsEnergy: boolean = this.isEnergyUnit(facilityMeter.startingUnit);
+  getMeterConsumptionUnitInAccount(meter: IdbUtilityMeter): string {
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    if (selectedAccount) {
+      let isEnergyMeter: boolean = this.isEnergyMeter(meter.source);
       //use meter unit 
-      if (meterUnitIsEnergy) {
-        return facilityMeter.startingUnit;
+      if (isEnergyMeter) {
+        return selectedAccount.energyUnit;
       } else {
-        return this.getFacilityUnitFromMeter(facilityMeter);
+        return this.getAccountUnitFromMeter(meter);
+      }
+    } else {
+      return;
+    }
+  }
+
+  getMeterConsumptionUnitInFacility(meter: IdbUtilityMeter): string {
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    if (selectedFacility) {
+      let isEnergyMeter: boolean = this.isEnergyMeter(meter.source);
+      //use meter unit 
+      if (isEnergyMeter) {
+        return selectedFacility.energyUnit;
+      } else {
+        return this.getFacilityUnitFromMeter(meter);
       }
     } else {
       return;
@@ -53,9 +69,44 @@ export class EnergyUnitsHelperService {
     }
   }
 
+  getAccountUnitFromMeter(accountMeter: IdbUtilityMeter): string {
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    if (accountMeter.source == 'Electricity') {
+      return selectedAccount.energyUnit;
+    } else if (accountMeter.source == 'Natural Gas') {
+      return selectedAccount.volumeGasUnit;
+    } else if (accountMeter.source == 'Other Fuels') {
+      if (accountMeter.phase == 'Gas') {
+        return selectedAccount.volumeGasUnit;
+      } else if (accountMeter.phase == 'Liquid') {
+        return selectedAccount.volumeLiquidUnit;
+      } else if (accountMeter.phase == 'Solid') {
+        return selectedAccount.massUnit;
+      }
+    } else if (accountMeter.source == 'Water' || accountMeter.source == 'Waste Water') {
+      return selectedAccount.volumeLiquidUnit;
+    } else if (accountMeter.source == 'Other Energy') {
+      let selectedEnergyOption: FuelTypeOption = JSON.parse(JSON.stringify(OtherEnergyOptions.find(option => { return option.value == accountMeter.fuel })));
+      if (selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Steam') {
+        return selectedAccount.massUnit;
+      } else if (selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Chilled Water') {
+        return selectedAccount.chilledWaterUnit;
+      }
+    }
+  }
+
 
   isEnergyUnit(unit: string): boolean {
     let findEnergyUnit: UnitOption = EnergyUnitOptions.find(unitOption => { return unitOption.value == unit });
     return findEnergyUnit != undefined;
+  }
+
+
+  isEnergyMeter(source: string): boolean {
+    if (source == 'Electricity' || source == 'Natural Gas' || source == 'Other Fuels' || source == 'Other Energy') {
+      return true;
+    } else {
+      return false;
+    }
   }
 }

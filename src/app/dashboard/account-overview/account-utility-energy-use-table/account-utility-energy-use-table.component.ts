@@ -51,6 +51,6 @@ export class AccountUtilityEnergyUseTableComponent implements OnInit {
 
   setUsageValues() {
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-    this.utilityUsageSummaryData = this.dashboardService.getFacilitiesUtilityUsageSummaryData(accountFacilities);
+    this.utilityUsageSummaryData = this.dashboardService.getFacilitiesUtilityUsageSummaryData(accountFacilities, true);
   }
 }

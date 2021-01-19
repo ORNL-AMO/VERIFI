@@ -81,7 +81,8 @@ export interface IdbUtilityMeter {
     //group = groupName
     group: string
 
-    startingUnit: string
+    startingUnit: string,
+    energyUnit: string,
     fuel:string
 }
 

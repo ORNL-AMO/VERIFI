@@ -59,7 +59,7 @@ export class FacilityHeatMapComponent implements OnInit {
   setGraphData() {
     if (this.facilityMeters && this.facilityMeters.length != 0 && this.accountMeters && this.accountMeters.length != 0) {
       let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-      let heatMapData: HeatMapData = this.vizualizationService.getMeterHeatMapData(this.facilityMeters, selectedFacility.name, true);
+      let heatMapData: HeatMapData = this.vizualizationService.getMeterHeatMapData(this.facilityMeters, selectedFacility.name, true, false);
       this.resultData = heatMapData.resultData;
       this.months = heatMapData.months;
       this.years = heatMapData.years;

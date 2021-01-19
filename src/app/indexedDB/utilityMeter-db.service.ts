@@ -125,6 +125,7 @@ export class UtilityMeterdbService {
             source: undefined,
             group: undefined,
             startingUnit: undefined,
+            energyUnit: undefined,
             fuel: undefined
         }
     }

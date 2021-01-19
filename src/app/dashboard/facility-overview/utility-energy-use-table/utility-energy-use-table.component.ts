@@ -44,7 +44,7 @@ export class UtilityEnergyUseTableComponent implements OnInit {
 
   setUsageValues() {
     if (this.accountMeterData && this.accountMeterData.length != 0 && this.selectedFacility) {
-      this.utilityUsageSummaryData = this.dashboardService.getFacilityUtilityUsageSummaryData(this.selectedFacility);
+      this.utilityUsageSummaryData = this.dashboardService.getFacilityUtilityUsageSummaryData(this.selectedFacility, false);
     }
   }
 }
