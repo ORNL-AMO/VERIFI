@@ -29,6 +29,7 @@
 
 <div class="meter" *ngFor="let meterListItem of meterList; let index=index;" [class.collapsed]="!meterListItem.idbMeter.visible">
     <div class="meterData">
+
         <p class="section-name bold pointer" (click)="setToggleView(meterListItem.idbMeter)">
             <i class="fa fa-caret-right" *ngIf="!meterListItem.idbMeter.visible"></i> 
             <i class="fa fa-caret-down" *ngIf="meterListItem.idbMeter.visible"></i>
