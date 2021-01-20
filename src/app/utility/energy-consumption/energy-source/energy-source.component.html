@@ -20,14 +20,7 @@
 </div>
 
 <div class="meterData">
-    <button class="btn btn-link item-right" (click)="addMeter()"><i class="fa fa-plus"></i> Add New Meter</button>
-    <div class="tableControls overflow-hidden item-right">
-        <div class="item-right">
-            <ngb-pagination [collectionSize]="meterList.length" [(page)]="page" [pageSize]="itemsPerPage" [maxSize]="5"
-                [rotate]="true" aria-label="Default pagination" (pageChange)="onPageChange(page)"></ngb-pagination>
-        </div>
-        <p class="item-right">{{meterList.length}} entries</p>
-    </div>
+    <button class="btn btn-primary-4 item-right" (click)="addMeter()"><i class="fa fa-plus"></i> Add New Meter</button>
 </div>
 
 <div class="table-responsive">
@@ -77,6 +70,14 @@
             </tr>
         </tbody>
     </table>
+</div>
+
+<div class="tableControls overflow-hidden">
+    <div class="item-right">
+        <ngb-pagination [collectionSize]="meterList.length" [(page)]="page" [pageSize]="itemsPerPage" [maxSize]="5"
+            [rotate]="true" aria-label="Default pagination" (pageChange)="onPageChange(page)"></ngb-pagination>
+    </div>
+    <p class="item-right">{{meterList.length}} entries</p>
 </div>
 
 <div class="window" [class.open]="editMeter">

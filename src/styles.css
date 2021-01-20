@@ -815,6 +815,9 @@ Meter Displays
 .meter {
   margin-bottom: 50px;
 }
+.meter.collapsed {
+  margin-bottom: 0px;
+}
 .meterData {
   padding: 10px 0px;
   position: relative;
@@ -1033,12 +1036,12 @@ input.unitDollar {
 .meterData {
   overflow: hidden;
 }
+/*
 .meterData .bold {
-  font-weight: bold;
   color: #060a2b;
   width: 115px;
   display: inline-block;
-}
+}*/
 .meterData .btn-link {
   margin: 0px;
 }
@@ -1049,4 +1052,10 @@ input.unitDollar {
 .importQuickView {
   width: 100%;
   overflow: scroll;
+}
+.section-name {
+  text-transform: uppercase;
+}
+.meterData .section-name {
+  margin: 5px 0px;
 }

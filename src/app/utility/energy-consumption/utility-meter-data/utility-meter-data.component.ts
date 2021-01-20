@@ -194,4 +194,9 @@ export class UtilityMeterDataComponent implements OnInit {
     this.utilityMeterDataDbService.deleteIndex(this.meterDataToDelete.id);
     this.cancelDelete();
   }
+
+  setToggleView(idbMeter) {
+    idbMeter.visible = !idbMeter.visible
+    this.utilityMeterDbService.update(idbMeter);
+  }
 }
