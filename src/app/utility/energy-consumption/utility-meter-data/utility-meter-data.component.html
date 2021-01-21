@@ -29,28 +29,18 @@
 
 <div class="meter" *ngFor="let meterListItem of meterList; let index=index;" [class.collapsed]="!meterListItem.idbMeter.visible">
     <div class="meterData">
-        <h6 class="pointer" (click)="setToggleView(meterListItem.idbMeter)">
+
+        <p class="section-name bold pointer" (click)="setToggleView(meterListItem.idbMeter)">
             <i class="fa fa-caret-right" *ngIf="!meterListItem.idbMeter.visible"></i> 
             <i class="fa fa-caret-down" *ngIf="meterListItem.idbMeter.visible"></i>
             {{meterListItem.idbMeter.name}}
-        </h6>
+        </p>
         <p *ngIf="meterListItem.idbMeter.visible">{{meterListItem.idbMeter.notes}}</p>
-
-        <button class="btn btn-link item-right" (click)="meterDataAdd(meterListItem.idbMeter)"><i
-                class="fa fa-plus"></i> Add New Bill</button>
-        <div class="tableControls overflow-hidden item-right">
-            <div class="item-right" *ngIf="meterListItem.idbMeter.visible">
-                <ngb-pagination [collectionSize]="meterListItem.meterDataItems.length" [(page)]="page[index]"
-                    [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Default pagination"
-                    (pageChange)="onPageChange(index, page[index])"></ngb-pagination>
-            </div>
-            <p class="item-right">{{meterListItem.meterDataItems.length}} entries</p>
-        </div>
     </div>
 
 
-    <div class="row no-margin" *ngIf="meterListItem.idbMeter.visible">
-        <div class="col no-margin table-responsive">
+    <div class="row no-margin">
+        <div class="col no-margin table-responsive" *ngIf="meterListItem.idbMeter.visible">
             <app-electricity-data-table *ngIf="selectedSource == 'Electricity'" [meterListItem]="meterListItem"
                 [pageSize]="pageSize" [itemsPerPage]="itemsPerPage" [meterIndex]="index"
                 (setChecked)="setHasCheckedItems()" (setEdit)="setEditMeterData($event)" (setDelete)="setDeleteMeterData($event)">
@@ -60,6 +50,18 @@
                 (setEdit)="setEditMeterData($event)" (setDelete)="setDeleteMeterData($event)">
             </app-general-utility-data-table>
         </div>
+    </div>
+
+    <div class="tableControls overflow-hidden" *ngIf="meterListItem.idbMeter.visible">
+        <button class="btn btn-link item-left" (click)="meterDataAdd(meterListItem.idbMeter)">
+            <i class="fa fa-plus"></i> Add New Bill
+        </button>
+        <div class="item-right">
+            <ngb-pagination [collectionSize]="meterListItem.meterDataItems.length" [(page)]="page[index]"
+                [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Default pagination"
+                (pageChange)="onPageChange(index, page[index])"></ngb-pagination>
+        </div>
+        <p class="item-right">{{meterListItem.meterDataItems.length}} entries</p>
     </div>
 </div>
 

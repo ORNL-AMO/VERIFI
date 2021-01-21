@@ -13,7 +13,7 @@
                 *ngFor="let meterGroup of meterGroupType.meterGroups" (cdkDropListDropped)="drop($event)"
                 id={{meterGroup.id}} [cdkDropListConnectedTo]="meterGroupType.meterGroupIds">
                 <div class="row group-title">
-                    <p class="bold col" (click)="setToggleView(meterGroup)">
+                    <p class="bold pointer col" (click)="setToggleView(meterGroup)">
                         <i class="fa fa-caret-right" *ngIf="!meterGroup.visible"></i> 
                         <i class="fa fa-caret-down" *ngIf="meterGroup.visible"></i>
                         {{meterGroup.name}}</p>
