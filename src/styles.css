@@ -277,6 +277,10 @@ Popups & Windows
   width: 800px;
   left: calc(50% - 400px);
 }
+.windowContentXLg {
+  width: 1000px;
+  left: calc(50% - 500px);
+}
 .windowContentScroll {
   overflow-y: scroll;
   overflow-x: hidden;
@@ -515,6 +519,10 @@ input:disabled {
 select {
   padding: 3px;
   border: 1px solid #9c9c9c;
+}
+form select {
+  max-width: 100%;
+  width: 100%;
 }
 /*
 Tables
