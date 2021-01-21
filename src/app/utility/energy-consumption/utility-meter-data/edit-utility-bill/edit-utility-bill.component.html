@@ -1,53 +1,48 @@
 <h4>Edit {{source}} Bill</h4>
 <p class="bold">General Information</p>
 <form class="meterForm" [formGroup]="meterDataForm">
+
+  <label for="readDate">Meter Read Date <span class="required">*</span> </label>
+  <div class="input-group mb-3">
+    <input id="readDate" class="form-control" type="date" formControlName="readDate">
+  </div>
+
   <div class="row">
-
-    <div class="col">
-      <label for="readDate">Meter Read Date <span class="required">*</span> </label>
-      <div class="input-group">
-        <input id="readDate" class="form-control" type="date" formControlName="readDate">
-      </div>
-
-      <div *ngIf="displayVolumeInput">
-        <label for="totalVolume">Total Volume <span class="required">*</span> </label>
-        <div class="input-group mb-3">
-          <input id="totalVolume" class="form-control" type="number" formControlName="totalVolume"
-            (input)="calculateTotalEnergyUse()">
-          <span class="unit" [innerHTML]="energyUnit | settingsLabel"></span>
-        </div>
-      </div>
-
-      <div>
-        <label for="totalEnergyUse">Total Energy Use </label>
-        <div class="input-group mb-3">
-          <span *ngIf="displayVolumeInput">{{meterDataForm.controls.totalEnergyUse.value}}</span>
-          <input *ngIf="!displayVolumeInput" id="totalEnergyUse" class="form-control" type="number"
-            formControlName="totalEnergyUse">
-          <span [ngClass]="{'unit': !displayVolumeInput}" [innerHTML]="energyUnit | settingsLabel"></span>
-        </div>
-      </div>
-
-
-
-      <label for="commodityCharge">Commodity Charge</label>
+    <div *ngIf="displayVolumeInput" class="col">
+      <label for="totalVolume">Total Volume <span class="required">*</span> </label>
       <div class="input-group mb-3">
-        <input id="commodityCharge" class="form-control" type="number" formControlName="commodityCharge">
-        <span class="unit">$</span>
-      </div>
-
-      <label for="deliveryCharge">Delivery Charges</label>
-      <div class="input-group mb-3">
-        <input id="deliveryCharge" class="form-control" type="number" formControlName="deliveryCharge">
-        <span class="unit">$</span>
-      </div>
-
-      <label for="otherCharge">Other Charges</label>
-      <div class="input-group mb-3">
-        <input id="otherCharge" class="form-control" type="number" formControlName="otherCharge">
-        <span class="unit">$</span>
+        <input id="totalVolume" class="form-control" type="number" formControlName="totalVolume"
+          (input)="calculateTotalEnergyUse()">
+        <span class="unit" [innerHTML]="energyUnit | settingsLabel"></span>
       </div>
     </div>
+
+    <div class="col">
+      <label for="totalEnergyUse">Total Energy Use </label>
+      <div class="input-group mb-3">
+        <input [attr.readonly]= "displayVolumeInput" id="totalEnergyUse" class="form-control" type="number"
+          formControlName="totalEnergyUse">
+        <span class="unit" [innerHTML]="energyUnit | settingsLabel"></span>
+      </div>
+    </div>
+  </div>
+
+  <label for="commodityCharge">Commodity Charge</label>
+  <div class="input-group mb-3">
+    <input id="commodityCharge" class="form-control" type="number" formControlName="commodityCharge">
+    <span class="unit">$</span>
+  </div>
+
+  <label for="deliveryCharge">Delivery Charges</label>
+  <div class="input-group mb-3">
+    <input id="deliveryCharge" class="form-control" type="number" formControlName="deliveryCharge">
+    <span class="unit">$</span>
+  </div>
+
+  <label for="otherCharge">Other Charges</label>
+  <div class="input-group mb-3">
+    <input id="otherCharge" class="form-control" type="number" formControlName="otherCharge">
+    <span class="unit">$</span>
   </div>
 </form>
 
