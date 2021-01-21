@@ -14,12 +14,12 @@ export class ConvertMeterDataService {
     let isEnergyMeter: boolean = this.energyUnitsHelperService.isEnergyMeter(meter.source);
     if (isEnergyMeter) {
       for (let index: number = 0; index < meterData.length; index++) {
-        meterData[index].totalEnergyUse = this.convertUnitsService.from(meter.energyUnit).to(facility.energyUnit);
+        meterData[index].totalEnergyUse = this.convertUnitsService.value(meterData[index].totalEnergyUse).from(meter.energyUnit).to(facility.energyUnit);
       }
     } else {
       let facilityUnit: string = this.energyUnitsHelperService.getFacilityUnitFromMeter(meter)
       for (let index: number = 0; index < meterData.length; index++) {
-        meterData[index].totalVolume = this.convertUnitsService.from(meter.startingUnit).to(facilityUnit);
+        meterData[index].totalVolume = this.convertUnitsService.value(meterData[index].totalVolume).from(meter.startingUnit).to(facilityUnit);
       }
     }
     return meterData;
@@ -29,12 +29,12 @@ export class ConvertMeterDataService {
     let isEnergyMeter: boolean = this.energyUnitsHelperService.isEnergyMeter(meter.source);
     if (isEnergyMeter) {
       for (let index: number = 0; index < meterData.length; index++) {
-        meterData[index].totalEnergyUse = this.convertUnitsService.from(meter.energyUnit).to(account.energyUnit);
+        meterData[index].totalEnergyUse = this.convertUnitsService.value(meterData[index].totalEnergyUse).from(meter.energyUnit).to(account.energyUnit);
       }
     } else {
       let accountUnit: string = this.energyUnitsHelperService.getAccountUnitFromMeter(meter)
       for (let index: number = 0; index < meterData.length; index++) {
-        meterData[index].totalVolume = this.convertUnitsService.from(meter.startingUnit).to(accountUnit);
+        meterData[index].totalVolume = this.convertUnitsService.value(meterData[index].totalVolume).from(meter.startingUnit).to(accountUnit);
       }
     }
     return meterData;

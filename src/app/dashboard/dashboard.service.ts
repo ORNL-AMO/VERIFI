@@ -343,9 +343,9 @@ export class DashboardService {
     if (utilityMeters.length != 0) {
       let calanderizedMeterData: Array<CalanderizedMeter>;
       if (inAccount) {
-        calanderizedMeterData = this.calanderizationService.calanderizeMetersInAccount(facilityMeters, false);
+        calanderizedMeterData = this.calanderizationService.calanderizeMetersInAccount(utilityMeters, false);
       } else {
-        calanderizedMeterData = this.calanderizationService.calanderizeMetersInFacility(facilityMeters, false);
+        calanderizedMeterData = this.calanderizationService.calanderizeMetersInFacility(utilityMeters, false);
       }
       let monthlyData: Array<MonthlyData> = calanderizedMeterData.flatMap(meterData => { return meterData.monthlyData });
       let totalEnergyUse: number = 0;

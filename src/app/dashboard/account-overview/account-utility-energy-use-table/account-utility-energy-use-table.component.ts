@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbFacility, IdbUtilityMeterData } from 'src/app/models/idb';
@@ -12,6 +13,8 @@ import { DashboardService, UtilityUsageSummaryData } from '../../dashboard.servi
 })
 export class AccountUtilityEnergyUseTableComponent implements OnInit {
 
+  selectedAccountSub: Subscription;
+  accountEnergyUnit: string;
 
   accountMeterDataSub: Subscription;
   accountMeterData: Array<IdbUtilityMeterData>;
@@ -21,11 +24,19 @@ export class AccountUtilityEnergyUseTableComponent implements OnInit {
   utilityUsageSummaryData: UtilityUsageSummaryData;
   lastMonthsDate: Date;
 
-  constructor(private dashboardService: DashboardService, private utilityMeterDataDbService: UtilityMeterDatadbService, private facilityDbService: FacilitydbService) { }
+  constructor(private dashboardService: DashboardService, private utilityMeterDataDbService: UtilityMeterDatadbService, private facilityDbService: FacilitydbService,
+    private accountdbService: AccountdbService) { }
 
   ngOnInit(): void {
     let lastMonthYear: { lastMonth: number, lastMonthYear: number } = this.dashboardService.getLastMonthYear();
     this.lastMonthsDate = new Date(lastMonthYear.lastMonthYear, lastMonthYear.lastMonth);
+
+    this.selectedAccountSub = this.accountdbService.selectedAccount.subscribe(val => {
+      if (val) {
+        this.accountEnergyUnit = val.energyUnit;
+      }
+    });
+
     this.accountMeterDataSub = this.utilityMeterDataDbService.accountMeterData.subscribe(val => {
       if (val && val.length != 0) {
         this.setUsageValues();
@@ -47,6 +58,7 @@ export class AccountUtilityEnergyUseTableComponent implements OnInit {
 
   ngOnDestroy() {
     this.accountMeterDataSub.unsubscribe();
+    this.selectedAccountSub.unsubscribe();
   }
 
   setUsageValues() {

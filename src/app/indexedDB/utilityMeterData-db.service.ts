@@ -161,14 +161,14 @@ export class UtilityMeterDatadbService {
     getMeterDataForFacility(meter: IdbUtilityMeter): Array<IdbUtilityMeterData> {
         let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
         let meterData: Array<IdbUtilityMeterData> = this.getMeterDataFromMeterId(meter.id);
-        meterData = this.convertMeterDataService.convertMeterDataToFacility(meter, meterData, facility);
+        meterData = this.convertMeterDataService.convertMeterDataToFacility(meter, JSON.parse(JSON.stringify(meterData)), facility);
         return meterData;
     }
 
     getMeterDataForAccount(meter: IdbUtilityMeter): Array<IdbUtilityMeterData> {
         let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
         let meterData: Array<IdbUtilityMeterData> = this.getMeterDataFromMeterId(meter.id);
-        meterData = this.convertMeterDataService.convertMeterDataToAccount(meter, meterData, account);
+        meterData = this.convertMeterDataService.convertMeterDataToAccount(meter, JSON.parse(JSON.stringify(meterData)), account);
         return meterData;
     }
 
