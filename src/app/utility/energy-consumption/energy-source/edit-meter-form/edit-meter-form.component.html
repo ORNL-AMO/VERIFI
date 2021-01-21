@@ -30,8 +30,7 @@
                 <div class="col">
                     <label for="startingUnit">Collection Unit <span class="required">*</span> </label>
                     <div class="mb-3">
-                        <select id="startingUnit" type="text" formControlName="startingUnit"
-                            (change)="changeUnit()">
+                        <select id="startingUnit" type="text" formControlName="startingUnit" (change)="changeUnit()">
                             <option *ngFor="let startingUnitOption of startingUnitOptions"
                                 [ngValue]="startingUnitOption.value">
                                 <span [innerHTML]="startingUnitOption.display"></span>
@@ -70,7 +69,8 @@
                     <label for="heatCapacity">Heat Capacity <span class="required">*</span> </label>
                     <div class="input-group mb-3">
                         <input id="heatCapacity" class="form-control" type="number" formControlName="heatCapacity">
-                        <span class="unit">{{facilityEnergyUnit}}/{{meterForm.controls.startingUnit.value}}</span>
+                        <span class="unit"><span [innerHTML]="facilityEnergyUnit | settingsLabel"></span>/<span [innerHTML]="meterForm.controls.startingUnit.value | settingsLabel"></span>
+                        </span>
                     </div>
                 </div>
 
@@ -126,5 +126,5 @@
 </form>
 <div class="saveCancel item-right">
     <button class="btn btn-secondary" (click)="cancel()">Cancel</button>
-    <button class="btn btn-primary" (click)="saveChanges()">Save</button>
+    <button class="btn btn-primary" (click)="saveChanges()" [disabled]="meterForm.invalid">Save</button>
 </div>
