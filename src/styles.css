@@ -277,6 +277,10 @@ Popups & Windows
   width: 800px;
   left: calc(50% - 400px);
 }
+.windowContentXLg {
+  width: 1000px;
+  left: calc(50% - 500px);
+}
 .windowContentScroll {
   overflow-y: scroll;
   overflow-x: hidden;
@@ -515,6 +519,10 @@ input:disabled {
 select {
   padding: 3px;
   border: 1px solid #9c9c9c;
+}
+form select {
+  max-width: 100%;
+  width: 100%;
 }
 /*
 Tables
@@ -815,6 +823,9 @@ Meter Displays
 .meter {
   margin-bottom: 50px;
 }
+.meter.collapsed {
+  margin-bottom: 0px;
+}
 .meterData {
   padding: 10px 0px;
   position: relative;
@@ -1033,20 +1044,26 @@ input.unitDollar {
 .meterData {
   overflow: hidden;
 }
+/*
 .meterData .bold {
-  font-weight: bold;
   color: #060a2b;
   width: 115px;
   display: inline-block;
-}
+}*/
 .meterData .btn-link {
   margin: 0px;
 }
 .meterData h6 {
   padding: 9px 0 0;
-  margin: 0px;
+  margin: 0 0 10px 0;
 }
 .importQuickView {
   width: 100%;
   overflow: scroll;
+}
+.section-name {
+  text-transform: uppercase;
+}
+.meterData .section-name {
+  margin: 5px 0px;
 }
