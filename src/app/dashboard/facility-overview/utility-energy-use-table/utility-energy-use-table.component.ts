@@ -11,7 +11,7 @@ import { DashboardService, UtilityUsageSummaryData } from '../../dashboard.servi
   styleUrls: ['./utility-energy-use-table.component.css']
 })
 export class UtilityEnergyUseTableComponent implements OnInit {
-  
+
   accountMeterDataSub: Subscription;
   accountMeterData: Array<IdbUtilityMeterData>;
   selectedFacility: IdbFacility;
@@ -19,15 +19,21 @@ export class UtilityEnergyUseTableComponent implements OnInit {
 
   utilityUsageSummaryData: UtilityUsageSummaryData;
   lastMonthsDate: Date;
+  facilityEnergyUnit: string;
   constructor(private dashboardService: DashboardService, private utilityMeterDataDbService: UtilityMeterDatadbService, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
+
+
     let lastMonthYear: { lastMonth: number, lastMonthYear: number } = this.dashboardService.getLastMonthYear();
     this.lastMonthsDate = new Date(lastMonthYear.lastMonthYear, lastMonthYear.lastMonth);
-  
+
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
       this.selectedFacility = val;
-      this.setUsageValues();
+      if (this.selectedFacility) {
+        this.facilityEnergyUnit = this.selectedFacility.energyUnit;
+        this.setUsageValues();
+      }
     })
 
     this.accountMeterDataSub = this.utilityMeterDataDbService.accountMeterData.subscribe(accountMeterData => {

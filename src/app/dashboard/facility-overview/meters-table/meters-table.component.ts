@@ -18,32 +18,39 @@ export class MetersTableComponent implements OnInit {
   todaysDate: Date;
   yearAgoDate: Date;
   facilityMetersSummary: Array<MeterSummary>;
-  facilityMeterDataSub: Subscription;
+  facilityMetersSub: Subscription;
+  accountMeterDataSub: Subscription;
   selectedFacilitySub: Subscription;
 
   accountMeterData: Array<IdbUtilityMeterData>;
+  facilityEnergyUnit: string;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private utilityMeterDbService: UtilityMeterdbService,
-    private dashboardService: DashboardService) { }
+    private dashboardService: DashboardService, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
     this.todaysDate = new Date();
     this.yearAgoDate = new Date((this.todaysDate.getFullYear() - 1), (this.todaysDate.getMonth()));
 
-    
-    this.selectedFacilitySub =  this.utilityMeterDbService.facilityMeters.subscribe(val => {
+    this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
+      if (val) {
+        this.facilityEnergyUnit = val.energyUnit;
+      }
+    })
+
+    this.facilityMetersSub = this.utilityMeterDbService.facilityMeters.subscribe(val => {
       this.getSummary();
     });
 
-    this.facilityMeterDataSub = this.utilityMeterDataDbService.accountMeterData.subscribe(accountMeterData => {
+    this.accountMeterDataSub = this.utilityMeterDataDbService.accountMeterData.subscribe(accountMeterData => {
       this.accountMeterData = accountMeterData;
       this.getSummary();
     });
-
-
   }
 
   ngOnDestroy() {
-    this.facilityMeterDataSub.unsubscribe();
+    this.selectedFacilitySub.unsubscribe();
+    this.facilityMetersSub.unsubscribe();
+    this.accountMeterDataSub.unsubscribe();
   }
 
   getSummary() {
