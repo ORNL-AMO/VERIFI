@@ -84,6 +84,7 @@ export interface IdbUtilityMeter {
     startingUnit: string,
     energyUnit: string,
     fuel:string
+    visible?: boolean
 }
 
 export interface IdbUtilityMeterData {

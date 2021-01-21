@@ -1,84 +1,128 @@
 <h4>Edit Meter</h4>
 <br>
-<p class="bold">Meter Information</p>
 <form [formGroup]="meterForm">
-    <label>
-        <span class="required">*</span> Name
-        <input type="text" formControlName="name">
-    </label>
-    <br>
-    <label>
-        <span class="required">*</span> Source
-        <select type="text" formControlName="source" (change)="changeSource()">
-            <option [ngValue]="'Electricity'">Electricity</option>
-            <option [ngValue]="'Natural Gas'">Natural Gas</option>
-            <option [ngValue]="'Other Fuels'">Other Fuels</option>
-            <option [ngValue]="'Other Energy'">Other Energy</option>
-            <option [ngValue]="'Water'">Water</option>
-            <option [ngValue]="'Waste Water'">Waste Water</option>
-            <option [ngValue]="'Other Utility'">Other Utility</option>
-        </select>
-    </label>
-    <label *ngIf="displayPhase">
-        <span class="required">*</span> Phase
-        <select type="text" formControlName="phase" (change)="changePhase();">
-            <option [ngValue]="'Solid'">Solid</option>
-            <option [ngValue]="'Liquid'">Liquid</option>
-            <option [ngValue]="'Gas'">Gas</option>
-        </select>
-    </label>
+    <div class="row">
+        <div class="col">
+            <p class="bold">Meter Information</p>
+            <div>
+                <label for="meterName">Name <span class="required">*</span> </label>
+                <div class="mb-3">
+                    <input id="meterName" class="form-control" type="text" formControlName="name">
+                </div>
+            </div>
 
-    <label *ngIf="displayFuel">
-        <span class="required">*</span>
-        {{energySourceLabel}}
-        <select type="text" formControlName="fuel" (change)="changeFuel()">
-            <option *ngFor="let fuelOption of fuelTypeOptions" [ngValue]="fuelOption.value">{{fuelOption.value}}
-            </option>
-        </select>
-    </label>
-    <label>
-        <span class="required">*</span> Collection Unit
-        <select type="text" formControlName="startingUnit" (change)="changeUnit()">
-            <option *ngFor="let startingUnitOption of startingUnitOptions" [ngValue]="startingUnitOption.value">
-                <span [innerHTML]="startingUnitOption.display"></span>
-            </option>
-        </select>
-    </label>
-    <br>
-    <label *ngIf="displayHeatCapacity"><span class="required">*</span> Heat Capacity
-        <div *ngIf="displayHeatCapacity" class="input-group">
-            <input type="number" formControlName="heatCapacity">
-            <span class="unit">{{facilityEnergyUnit}}/{{meterForm.controls.startingUnit.value}}</span>
+            <div class="row">
+                <div class="col">
+                    <label for="source">Source <span class="required">*</span> </label>
+                    <div class="mb-3">
+                        <select id="source" type="text" formControlName="source" (change)="changeSource()">
+                            <option [ngValue]="'Electricity'">Electricity</option>
+                            <option [ngValue]="'Natural Gas'">Natural Gas</option>
+                            <option [ngValue]="'Other Fuels'">Other Fuels</option>
+                            <option [ngValue]="'Other Energy'">Other Energy</option>
+                            <option [ngValue]="'Water'">Water</option>
+                            <option [ngValue]="'Waste Water'">Waste Water</option>
+                            <option [ngValue]="'Other Utility'">Other Utility</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col">
+                    <label for="startingUnit">Collection Unit <span class="required">*</span> </label>
+                    <div class="mb-3">
+                        <select id="startingUnit" type="text" formControlName="startingUnit"
+                            (change)="changeUnit()">
+                            <option *ngFor="let startingUnitOption of startingUnitOptions"
+                                [ngValue]="startingUnitOption.value">
+                                <span [innerHTML]="startingUnitOption.display"></span>
+                            </option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div *ngIf="displayPhase" class="col">
+                    <label for="phase">Phase <span class="required">*</span> </label>
+                    <div class="mb-3">
+                        <select id="phase" type="text" formControlName="phase" (change)="changePhase();">
+                            <option [ngValue]="'Solid'">Solid</option>
+                            <option [ngValue]="'Liquid'">Liquid</option>
+                            <option [ngValue]="'Gas'">Gas</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div *ngIf="displayFuel" class="col">
+                    <label for="energySource">{{energySourceLabel}} <span class="required">*</span> </label>
+                    <div class="mb-3">
+                        <select id="energySource" type="text" formControlName="fuel" (change)="changeFuel()">
+                            <option *ngFor="let fuelOption of fuelTypeOptions" [ngValue]="fuelOption.value">
+                                {{fuelOption.value}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div *ngIf="displayHeatCapacity" class="row">
+                <div class="col">
+                    <label for="heatCapacity">Heat Capacity <span class="required">*</span> </label>
+                    <div class="input-group mb-3">
+                        <input id="heatCapacity" class="form-control" type="number" formControlName="heatCapacity">
+                        <span class="unit">{{facilityEnergyUnit}}/{{meterForm.controls.startingUnit.value}}</span>
+                    </div>
+                </div>
+
+                <div class="col">
+                    <label for="siteToSource">Site to source <span class="required">*</span> </label>
+                    <div class="mb-3">
+                        <input id="siteToSource" class="form-control" type="number" formControlName="siteToSource">
+                    </div>
+                </div>
+            </div>
         </div>
-    </label>
-    <br>
-    <label *ngIf="displayHeatCapacity">
-        <span class="required">*</span> Site to source
-        <input type="number" formControlName="siteToSource">
-    </label>
+        <div class="col-5">
+            <p class="bold">Other Information</p>
 
-    <hr>
-    <p class="bold">Other Information</p>
+            <div class="row">
+                <div class="col">
+                    <label for="meterNumber">Meter Number</label>
+                    <div class="mb-3">
+                        <input id="meterNumber" class="form-control" type="text" formControlName="meterNumber">
+                    </div>
+                </div>
 
-    <label>Meter Number
-        <input type="text" formControlName="meterNumber">
-    </label>
-    <br>
-    <label>Account Number
-        <input type="text" formControlName="accountNumber">
-    </label>
-    <br>
-    <label>Building / Location
-        <input type="text" formControlName="location">
-    </label>
-    <br>
-    <label>Utility Supplier
-        <input type="text" formControlName="supplier">
-    </label>
-    <br>
-    <label>Notes
-        <textarea formControlName="notes"></textarea>
-    </label>
+                <div class="col">
+                    <label for="accountNumber">Account Number</label>
+                    <div class="mb-3">
+                        <input id="accountNumber" class="form-control" type="text" formControlName="accountNumber">
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col">
+                    <label for="location">Building / Location</label>
+                    <div class="mb-3">
+                        <input id="location" class="form-control" type="text" formControlName="location">
+                    </div>
+                </div>
+
+                <div class="col">
+                    <label for="supplier">Utility Supplier</label>
+                    <div class="mb-3">
+                        <input id="supplier" class="form-control" type="text" formControlName="supplier">
+                    </div>
+                </div>
+            </div>
+
+            <label for="notes">Notes</label>
+            <div class="mb-3">
+                <textarea id="notes" class="form-control" formControlName="notes"></textarea>
+            </div>
+        </div>
+    </div>
 </form>
 <div class="saveCancel item-right">
     <button class="btn btn-secondary" (click)="cancel()">Cancel</button>

@@ -65,6 +65,7 @@ export class UtilityMeterdbService {
     }
 
     add(utilityMeter: IdbUtilityMeter): void {
+        utilityMeter.visible = true;
         this.dbService.add('utilityMeter', utilityMeter).subscribe(() => {
             this.setFacilityMeters();
             this.setAccountMeters();

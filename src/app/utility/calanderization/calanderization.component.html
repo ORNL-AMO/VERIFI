@@ -5,7 +5,7 @@
 
     <div class="controls">
         <!--Column Filters-->
-        <div class="filter item-right">
+        <div class="filter item-left">
             <button class="btn btn-small btn-solid">Filter</button>
         </div>
         <!--Items Per Page-->
@@ -24,14 +24,6 @@
     </div>
 
     <div class="meter" *ngFor="let meterData of calanderizedMeterData; let i=index;">
-        <div class="tableControls overflow-hidden">
-            <div class="item-right">
-                <ngb-pagination [collectionSize]="meterData.monthlyData.length" [(page)]="page[i]"
-                    [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Default pagination"
-                    (pageChange)="onPageChange(i, page[i])"></ngb-pagination>
-            </div>
-            <p class="item-right">{{meterData.monthlyData.length}} entries</p>
-        </div>
         <div class="row">
             <div class="col table-responsive">
                 <table class="table table-sm">
@@ -65,6 +57,14 @@
                     </tbody>
                 </table>
             </div>
+        </div>
+        <div class="tableControls overflow-hidden">
+            <div class="item-right">
+                <ngb-pagination [collectionSize]="meterData.monthlyData.length" [(page)]="page[i]"
+                    [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Default pagination"
+                    (pageChange)="onPageChange(i, page[i])"></ngb-pagination>
+            </div>
+            <p class="item-right">{{meterData.monthlyData.length}} entries</p>
         </div>
     </div>
 </div>
