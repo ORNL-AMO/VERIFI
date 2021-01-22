@@ -1,12 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
-import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from 'src/app/models/idb';
+import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterGroup } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { DashboardService, LastYearData } from 'src/app/dashboard/dashboard.service';
+import { MonthlyData } from '../calanderization/calanderization.service';
 
 @Component({
   selector: 'app-meter-grouping',
@@ -18,20 +20,34 @@ export class MeterGroupingComponent implements OnInit {
     meterGroups: Array<IdbUtilityMeterGroup>,
     groupType: string,
     id: string,
-    meterGroupIds: Array<string>
+    meterGroupIds: Array<string>,
+    totalUsage: number
   }>;
 
   groupToEdit: IdbUtilityMeterGroup;
   groupToDelete: IdbUtilityMeterGroup;
   facilityMeterDataSub: Subscription;
   facilityMeterGroupsSub: Subscription;
+  selectedFacilitySub: Subscription;
   facilityMeters: Array<IdbUtilityMeter>;
   editOrAdd: string;
   facilityMetersSub: Subscription;
+  waterUnit: string;
+  energyUnit: string;
+  lastBill: MonthlyData;
+  lastBillDate: Date;
+  yearPriorToLastBill: Date;
   constructor(private utilityMeterGroupDbService: UtilityMeterGroupdbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private utilityMeterDbService: UtilityMeterdbService, private facilityDbService: FacilitydbService) { }
+    private utilityMeterDbService: UtilityMeterdbService, private facilityDbService: FacilitydbService, private dashboardService: DashboardService) { }
 
   ngOnInit(): void {
+    this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(selectedFacility => {
+      if (selectedFacility) {
+        this.waterUnit = selectedFacility.volumeLiquidUnit;
+        this.energyUnit = selectedFacility.energyUnit;
+      }
+    });
+
     this.facilityMeterGroupsSub = this.utilityMeterGroupDbService.facilityMeterGroups.subscribe(() => {
       if (this.facilityMeters) {
         this.setGroupTypes();
@@ -56,57 +72,78 @@ export class MeterGroupingComponent implements OnInit {
     this.facilityMeterGroupsSub.unsubscribe();
     this.facilityMeterDataSub.unsubscribe();
     this.facilityMetersSub.unsubscribe();
+    this.selectedFacilitySub.unsubscribe();
+  }
+
+  setLastBill() {
+    this.lastBill = this.dashboardService.getLastBillEntry(this.facilityMeters, false);
+    if (this.lastBill) {
+      this.lastBillDate = new Date(this.lastBill.year, this.lastBill.monthNumValue);
+      this.yearPriorToLastBill = new Date(this.lastBill.year - 1, this.lastBill.monthNumValue + 1);
+    }
   }
 
   setGroupTypes() {
-    let meterGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.facilityMeterGroups.getValue();
-    this.meterGroupTypes = _.chain(meterGroups).groupBy('groupType').map((value: Array<IdbUtilityMeterGroup>, key: string) => {
-      let meterGroups: Array<IdbUtilityMeterGroup> = this.setGroupDataSummary(value)
-      return {
-        meterGroups: meterGroups,
-        groupType: key,
-        id: Math.random().toString(36).substr(2, 9),
-        meterGroupIds: meterGroups.map(meterGroup => { return String(meterGroup.id) })
-      }
-    }).value();
+    this.setLastBill();
+    if (this.lastBill) {
+      let meterGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.facilityMeterGroups.getValue();
+      //group meters by group type and set summaries
+      this.meterGroupTypes = _.chain(meterGroups).groupBy('groupType').map((value: Array<IdbUtilityMeterGroup>, key: string) => {
+        let meterGroups: Array<IdbUtilityMeterGroup> = this.setGroupDataSummary(value, this.lastBill)
+        return {
+          meterGroups: meterGroups,
+          groupType: key,
+          id: Math.random().toString(36).substr(2, 9),
+          meterGroupIds: meterGroups.map(meterGroup => { return String(meterGroup.id) })
+        }
+      }).value();
 
-    let meterGroupIds: Array<number> = meterGroups.map(meterGroup => { return meterGroup.id });
-    //set no groups
-    let metersWithoutGroups: Array<IdbUtilityMeter> = this.facilityMeters.filter(meter => { return !meterGroupIds.includes(meter.groupId) });
-    //Energy (Electricity/Natural Gas)
-    let energyMeters: Array<IdbUtilityMeter> = metersWithoutGroups.filter(meter => { return meter.source == 'Electricity' || meter.source == 'Natural Gas' || meter.source == 'Other Fuels' || meter.source == 'Other Energy' });
-    if (energyMeters.length != 0) {
-      this.addEnergyMetersWithoutGroups(energyMeters, 'Energy');
-    }
-    //Water/WasteWater
-    let waterMeters: Array<IdbUtilityMeter> = metersWithoutGroups.filter(meter => { return meter.source == 'Water' || meter.source == 'Waste Water' });
-    if (waterMeters.length != 0) {
-      this.addEnergyMetersWithoutGroups(waterMeters, 'Water');
-    }
-    //Other
-    let otherMeters: Array<IdbUtilityMeter> = metersWithoutGroups.filter(meter => { return meter.source == 'Other Utility' });
-    if (otherMeters.length != 0) {
-      this.addEnergyMetersWithoutGroups(otherMeters, 'Other');
-    }
-    for (let i = 0; i < this.meterGroupTypes.length; i++) {
-      this.meterGroupTypes[i].meterGroups = this.setFractionOfTotalEnergy(this.meterGroupTypes[i].meterGroups);
+      let meterGroupIds: Array<number> = meterGroups.map(meterGroup => { return meterGroup.id });
+      //set no groups
+      let metersWithoutGroups: Array<IdbUtilityMeter> = this.facilityMeters.filter(meter => { return !meterGroupIds.includes(meter.groupId) });
+      //Energy (Electricity/Natural Gas)
+      let energyMeters: Array<IdbUtilityMeter> = metersWithoutGroups.filter(meter => { return meter.source == 'Electricity' || meter.source == 'Natural Gas' || meter.source == 'Other Fuels' || meter.source == 'Other Energy' });
+      if (energyMeters.length != 0) {
+        this.addEnergyMetersWithoutGroups(energyMeters, 'Energy', this.lastBill);
+      }
+      //Water/WasteWater
+      let waterMeters: Array<IdbUtilityMeter> = metersWithoutGroups.filter(meter => { return meter.source == 'Water' || meter.source == 'Waste Water' });
+      if (waterMeters.length != 0) {
+        this.addEnergyMetersWithoutGroups(waterMeters, 'Water', this.lastBill);
+      }
+      //Other
+      let otherMeters: Array<IdbUtilityMeter> = metersWithoutGroups.filter(meter => { return meter.source == 'Other Utility' });
+      if (otherMeters.length != 0) {
+        this.addEnergyMetersWithoutGroups(otherMeters, 'Other', this.lastBill);
+      }
+      //set fraction usage
+      for (let i = 0; i < this.meterGroupTypes.length; i++) {
+        this.meterGroupTypes[i].meterGroups = this.setFractionOfTotalEnergy(this.meterGroupTypes[i].meterGroups, this.meterGroupTypes[i].groupType);
+        if (this.meterGroupTypes[i].groupType == 'Energy') {
+          this.meterGroupTypes[i].totalUsage = _.sumBy(this.meterGroupTypes[i].meterGroups, 'totalEnergyUse');
+        } else {
+          this.meterGroupTypes[i].totalUsage = _.sumBy(this.meterGroupTypes[i].meterGroups, 'totalConsumption');
+        }
+      }
     }
   }
 
-  setGroupDataSummary(meterGroups: Array<IdbUtilityMeterGroup>): Array<IdbUtilityMeterGroup> {
+  setGroupDataSummary(meterGroups: Array<IdbUtilityMeterGroup>, lastBill: MonthlyData): Array<IdbUtilityMeterGroup> {
     meterGroups.forEach(group => {
       let groupMeters: Array<IdbUtilityMeter> = this.facilityMeters.filter(meter => { return meter.groupId == group.id });
-      let groupMeterIds: Array<number> = groupMeters.map(meter => { return meter.id });
-      let groupMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterIds(groupMeterIds);
-      group.groupData = groupMeters;
-      group.totalEnergyUse = _.sumBy(groupMeterData, 'totalEnergyUse');
+      if (groupMeters.length != 0) {
+        // let groupMeterIds: Array<number> = groupMeters.map(meter => { return meter.id });
+        let groupMeterData: Array<LastYearData> = this.dashboardService.getPastYearData(groupMeters, false, lastBill);
+        group.groupData = groupMeters;
+        group.totalEnergyUse = _.sumBy(groupMeterData, 'energyUse');
+        group.totalConsumption = _.sumBy(groupMeterData, 'energyConsumption');
+      }
     });
     return meterGroups;
   }
 
-  addEnergyMetersWithoutGroups(energyMeters: Array<IdbUtilityMeter>, groupType: string) {
-    let groupMeterIds: Array<number> = energyMeters.map(meter => { return meter.id });
-    let groupMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterIds(groupMeterIds);
+  addEnergyMetersWithoutGroups(energyMeters: Array<IdbUtilityMeter>, groupType: string, lastBill: MonthlyData) {
+    let groupMeterData: Array<LastYearData> = this.dashboardService.getPastYearData(energyMeters, false, lastBill);
     let meterGroup: IdbUtilityMeterGroup = {
       //randon number id for unsaved
       id: 1000000000000000 * Math.random(),
@@ -118,7 +155,8 @@ export class MeterGroupingComponent implements OnInit {
       unit: undefined,
       dateModified: undefined,
       factionOfTotalEnergy: undefined,
-      totalEnergyUse: _.sumBy(groupMeterData, 'totalEnergyUse'),
+      totalEnergyUse: _.sumBy(groupMeterData, 'energyUse'),
+      totalConsumption: _.sumBy(groupMeterData, 'energyConsumption'),
       groupData: energyMeters,
       visible: true
     }
@@ -136,16 +174,24 @@ export class MeterGroupingComponent implements OnInit {
         groupType: groupType,
         meterGroups: [meterGroup],
         id: Math.random().toString(36).substr(2, 9),
-        meterGroupIds: [String(meterGroup.id)]
+        meterGroupIds: [String(meterGroup.id)],
+        totalUsage: 0
       });
     }
   }
 
-  setFractionOfTotalEnergy(meterGroups: Array<IdbUtilityMeterGroup>): Array<IdbUtilityMeterGroup> {
-    let totalGroupEnergyUse: number = _.sumBy(meterGroups, 'totalEnergyUse');
-    meterGroups.forEach(group => {
-      group.factionOfTotalEnergy = (group.totalEnergyUse / totalGroupEnergyUse) * 100;
-    });
+  setFractionOfTotalEnergy(meterGroups: Array<IdbUtilityMeterGroup>, groupType: string): Array<IdbUtilityMeterGroup> {
+    if (groupType == 'Energy') {
+      let totalGroupEnergyUse: number = _.sumBy(meterGroups, 'totalEnergyUse');
+      meterGroups.forEach(group => {
+        group.factionOfTotalEnergy = (group.totalEnergyUse / totalGroupEnergyUse) * 100;
+      });
+    } else {
+      let totalGroupConsumption: number = _.sumBy(meterGroups, 'totalConsumption');
+      meterGroups.forEach(group => {
+        group.factionOfTotalEnergy = (group.totalConsumption / totalGroupConsumption) * 100;
+      });
+    }
     return meterGroups
   }
 
@@ -194,10 +240,8 @@ export class MeterGroupingComponent implements OnInit {
 
   setToggleView(meterGroup) {
     meterGroup.visible = !meterGroup.visible
-    
-    if(meterGroup.name != "Ungrouped") {
+    if (meterGroup.name != "Ungrouped") {
       this.utilityMeterGroupDbService.update(meterGroup);
     }
-
   }
 }

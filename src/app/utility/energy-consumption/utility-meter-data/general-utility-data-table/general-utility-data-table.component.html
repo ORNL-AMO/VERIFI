@@ -6,7 +6,7 @@
             </th>
             <th class="row-year">Meter Read Date</th>
             <th *ngIf="showVolumeColumn">Total Consumption (<span [innerHTML]="volumeUnit | settingsLabel"></span>)</th>
-            <th>Total Energy (<span [innerHTML]="energyUnit | settingsLabel"></span>)</th>
+            <th *ngIf="showEnergyColumn">Total Energy (<span [innerHTML]="energyUnit | settingsLabel"></span>)</th>
             <th>Total Cost</th>
             <th>Commodity Charge</th>
             <th>Delivery Charge</th>
@@ -22,7 +22,7 @@
             </td>
             <td>{{meterData.readDate | date}}</td>
             <td *ngIf="showVolumeColumn">{{meterData.totalVolume}}</td>
-            <td>{{meterData.totalEnergyUse}}</td>
+            <td *ngIf="showEnergyColumn">{{meterData.totalEnergyUse}}</td>
             <td>{{meterData.totalCost | currency}}</td>
             <td>{{meterData.commodityCharge | currency}}</td>
             <td>{{meterData.deliveryCharge | currency}}</td>

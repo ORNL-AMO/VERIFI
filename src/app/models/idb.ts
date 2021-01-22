@@ -56,6 +56,7 @@ export interface IdbUtilityMeterGroup {
     dateModified: Date,
     factionOfTotalEnergy: number,
     totalEnergyUse?: number,
+    totalConsumption?: number,
     groupData?: Array<IdbUtilityMeter>,
     visible?: boolean
 }
