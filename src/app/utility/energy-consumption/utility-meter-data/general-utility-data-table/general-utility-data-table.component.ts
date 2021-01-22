@@ -28,11 +28,14 @@ export class GeneralUtilityDataTableComponent implements OnInit {
 
   allChecked: boolean;
   energyUnit: string;
-
+  volumeUnit: string;
+  showVolumeColumn: boolean;
   constructor(public utilityMeterDataService: UtilityMeterDataService) { }
 
   ngOnInit(): void {
-    this.energyUnit = this.meterListItem.idbMeter.startingUnit;
+    this.showVolumeColumn = (this.meterListItem.meterDataItems.find(dataItem => { return dataItem.totalVolume != undefined }) != undefined);
+    this.volumeUnit = this.meterListItem.idbMeter.startingUnit;
+    this.energyUnit = this.meterListItem.idbMeter.energyUnit;
     if (this.meterListItem.meterDataItems.length != 0) {
       let hasFalseChecked: IdbUtilityMeterData = this.meterListItem.meterDataItems.find(meterDataItem => { return meterDataItem.checked == false });
       this.allChecked = (hasFalseChecked == undefined);

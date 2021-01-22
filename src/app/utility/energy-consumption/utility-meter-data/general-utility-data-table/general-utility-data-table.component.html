@@ -5,6 +5,7 @@
                 <input #masterCheckbox type="checkbox" (change)="checkAll()" [(ngModel)]="allChecked">
             </th>
             <th class="row-year">Meter Read Date</th>
+            <th *ngIf="showVolumeColumn">Total Consumption (<span [innerHTML]="volumeUnit | settingsLabel"></span>)</th>
             <th>Total Energy (<span [innerHTML]="energyUnit | settingsLabel"></span>)</th>
             <th>Total Cost</th>
             <th>Commodity Charge</th>
@@ -14,11 +15,13 @@
         </tr>
     </thead>
     <tbody>
-        <tr *ngFor="let meterData of meterListItem.meterDataItems | slice: pageSize[meterIndex] | slice: 0:itemsPerPage;">
+        <tr
+            *ngFor="let meterData of meterListItem.meterDataItems | slice: pageSize[meterIndex] | slice: 0:itemsPerPage;">
             <td class="input">
                 <input type="checkbox" name="metersSelected" (change)="toggleChecked()" [(ngModel)]="meterData.checked">
             </td>
             <td>{{meterData.readDate | date}}</td>
+            <td *ngIf="showVolumeColumn">{{meterData.totalVolume}}</td>
             <td>{{meterData.totalEnergyUse}}</td>
             <td>{{meterData.totalCost | currency}}</td>
             <td>{{meterData.commodityCharge | currency}}</td>
