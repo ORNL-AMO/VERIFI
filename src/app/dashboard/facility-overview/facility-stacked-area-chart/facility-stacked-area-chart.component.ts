@@ -2,11 +2,9 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
-import { CalanderizationService } from '../../../utility/calanderization/calanderization.service';
 import { VisualizationService } from '../../../utility/visualization/visualization.service';
 
 @Component({

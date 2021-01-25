@@ -3,8 +3,9 @@ import { Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { UtilityUsageSummaryData } from 'src/app/models/dashboard';
 import { IdbFacility, IdbUtilityMeterData } from 'src/app/models/idb';
-import { DashboardService, UtilityUsageSummaryData } from '../../dashboard.service';
+import { DashboardService } from '../../dashboard.service';
 
 @Component({
   selector: 'app-account-utility-energy-use-table',

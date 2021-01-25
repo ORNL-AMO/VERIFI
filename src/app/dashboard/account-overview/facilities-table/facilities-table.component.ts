@@ -1,12 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Subscription, SubscriptionLike } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbAccount, IdbFacility } from 'src/app/models/idb';
+import { IdbFacility } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { DashboardService, FacilitySummary } from '../../dashboard.service';
+import { DashboardService } from '../../dashboard.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { FacilitySummary } from 'src/app/models/dashboard';
 @Component({
   selector: 'app-facilities-table',
   templateUrl: './facilities-table.component.html',

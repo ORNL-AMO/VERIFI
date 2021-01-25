@@ -2,10 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { DashboardService, MeterSummary } from '../../dashboard.service';
+import { DashboardService } from '../../dashboard.service';
 import * as _ from 'lodash';
 import { IdbUtilityMeterData } from 'src/app/models/idb';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
+import { MeterSummary } from 'src/app/models/dashboard';
 @Component({
   selector: 'app-meters-table',
   templateUrl: './meters-table.component.html',

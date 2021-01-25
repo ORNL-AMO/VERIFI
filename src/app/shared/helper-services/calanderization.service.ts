@@ -3,7 +3,7 @@ import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
-import { current } from 'src/app/shared/convert-units/definitions/current';
+import { CalanderizedMeter, MonthlyData, LastYearData } from 'src/app/models/calanderization';
 
 @Injectable({
   providedIn: 'root'
@@ -13,29 +13,34 @@ export class CalanderizationService {
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private energyUnitsHelperService: EnergyUnitsHelperService) {
   }
 
-  calanderizeMetersInAccount(facilityMeters: Array<IdbUtilityMeter>, monthDisplayShort?: boolean) {
-    let calanderizedMeterData: Array<CalanderizedMeter> = new Array();
-    facilityMeters.forEach(meter => {
-      let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataForAccount(meter);
-      let calanderizedMeter: Array<MonthlyData> = this.calanderizeMeterData(meter, meterData, monthDisplayShort);
-      let showConsumption: boolean = calanderizedMeter.find(meterData => { return meterData.energyConsumption != 0 }) != undefined;
-      let showEnergyUse: boolean = calanderizedMeter.find(meterData => { return meterData.energyUse != 0 }) != undefined;
-      calanderizedMeterData.push({
-        consumptionUnit: meter.startingUnit,
-        meter: meter,
-        monthlyData: calanderizedMeter,
-        showConsumption: showConsumption,
-        showEnergyUse: showEnergyUse,
-        energyUnit: meter.energyUnit
-      });
-    });
-    return calanderizedMeterData;
-  }
+  // calanderizeMetersInAccount(facilityMeters: Array<IdbUtilityMeter>, monthDisplayShort?: boolean) {
+  //   let calanderizedMeterData: Array<CalanderizedMeter> = new Array();
+  //   facilityMeters.forEach(meter => {
+  //     let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataForAccount(meter);
+  //     let calanderizedMeter: Array<MonthlyData> = this.calanderizeMeterData(meter, meterData, monthDisplayShort);
+  //     let showConsumption: boolean = calanderizedMeter.find(meterData => { return meterData.energyConsumption != 0 }) != undefined;
+  //     let showEnergyUse: boolean = calanderizedMeter.find(meterData => { return meterData.energyUse != 0 }) != undefined;
+  //     calanderizedMeterData.push({
+  //       consumptionUnit: meter.startingUnit,
+  //       meter: meter,
+  //       monthlyData: calanderizedMeter,
+  //       showConsumption: showConsumption,
+  //       showEnergyUse: showEnergyUse,
+  //       energyUnit: meter.energyUnit
+  //     });
+  //   });
+  //   return calanderizedMeterData;
+  // }
 
-  calanderizeMetersInFacility(facilityMeters: Array<IdbUtilityMeter>, monthDisplayShort?: boolean) {
+  getCalanderizedMeterData(meters: Array<IdbUtilityMeter>, inAccount: boolean, monthDisplayShort?: boolean) {
     let calanderizedMeterData: Array<CalanderizedMeter> = new Array();
-    facilityMeters.forEach(meter => {
-      let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataForFacility(meter);
+    meters.forEach(meter => {
+      let meterData: Array<IdbUtilityMeterData>
+      if(inAccount){
+        meterData = this.utilityMeterDataDbService.getMeterDataForAccount(meter);
+      }else{
+        meterData = this.utilityMeterDataDbService.getMeterDataForFacility(meter);
+      }      
       let calanderizedMeter: Array<MonthlyData> = this.calanderizeMeterData(meter, meterData, monthDisplayShort);
       let showConsumption: boolean = calanderizedMeter.find(meterData => { return meterData.energyConsumption != 0 }) != undefined;
       let showEnergyUse: boolean = this.energyUnitsHelperService.isEnergyMeter(meter.source);
@@ -101,9 +106,7 @@ export class CalanderizationService {
         monthNumValue: new Date(currentBill.readDate).getMonth(),
         year: new Date(currentBill.readDate).getFullYear(),
         energyConsumption: totalMonthEnergyConsumption,
-        // showConsumption: (totalMonthEnergyConsumption != 0),
         energyUse: totalMonthEnergyUse,
-        // showEnergyUse: (totalMonthEnergyUse != 0),
         energyCost: totalMonthCost,
       });
     }
@@ -118,22 +121,82 @@ export class CalanderizationService {
 
     return Math.floor((utc2 - utc1) / _MS_PER_DAY);
   }
-}
 
-export interface CalanderizedMeter {
-  meter: IdbUtilityMeter,
-  consumptionUnit: string,
-  monthlyData: Array<MonthlyData>,
-  showConsumption: boolean,
-  showEnergyUse: boolean,
-  energyUnit: string
-}
+  getPastYearData(meters: Array<IdbUtilityMeter>, inAccount: boolean, lastBill: MonthlyData): Array<LastYearData> {
+    //calanderize meters
+    let calanderizedMeterData: Array<CalanderizedMeter> = this.getCalanderizedMeterData(meters, inAccount);
+    //create array of just the meter data
+    let combindedCalanderizedMeterData: Array<MonthlyData> = calanderizedMeterData.flatMap(meterData => {
+      return meterData.monthlyData;
+    });
+    //create array of the uniq months and years
+    let yearMonths: Array<{ year: number, month: number }> = combindedCalanderizedMeterData.map(data => { return { year: data.year, month: data.monthNumValue } });
+    let resultData: Array<LastYearData> = new Array();
+    yearMonths = _.uniqWith(yearMonths, (a, b) => {
+      return (a.year == b.year && a.month == b.month)
+    });
+    //filter year/months over a year old
+    let todaysDate: Date = new Date(lastBill.year - 1, lastBill.monthNumValue + 1);
+    let oneYearAgo: number = todaysDate.getFullYear();
+    let month: number = todaysDate.getMonth();
+    yearMonths = _.filter(yearMonths, yearMonth => {
+      if (yearMonth.year >= oneYearAgo) {
+        let monthTest: number = yearMonth.month - month;
+        if (monthTest >= 0 || yearMonth.year == (oneYearAgo + 1)) {
+          return true;
+        }
+      }
+    });
 
-export interface MonthlyData {
-  month: string,
-  monthNumValue: number,
-  year: number,
-  energyConsumption: number,
-  energyUse: number,
-  energyCost: number,
+    resultData = yearMonths.map(yearMonth => {
+      let totalEnergyUse: number = _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
+        if (meterData.monthNumValue == yearMonth.month && meterData.year == yearMonth.year) {
+          return meterData.energyUse;
+        } else {
+          return 0;
+        }
+      });
+      let totalEnergyConsumption: number = _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
+        if (meterData.monthNumValue == yearMonth.month && meterData.year == yearMonth.year) {
+          return meterData.energyConsumption;
+        } else {
+          return 0;
+        }
+      });
+      let totalEnergyCost: number = _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
+        if (meterData.monthNumValue == yearMonth.month && meterData.year == yearMonth.year) {
+          return meterData.energyCost;
+        } else {
+          return 0;
+        }
+      });
+      return {
+        time: yearMonth.month + ', ' + yearMonth.year,
+        energyUse: totalEnergyUse,
+        energyCost: totalEnergyCost,
+        energyConsumption: totalEnergyConsumption
+      }
+
+    });
+    return resultData;
+  }
+
+
+  getLastBillEntry(facilityMeters: Array<IdbUtilityMeter>, inAccount: boolean): MonthlyData {
+    let calanderizedMeterData: Array<CalanderizedMeter> = this.getCalanderizedMeterData(facilityMeters, inAccount, false);
+    let lastBill: MonthlyData = this.getLastBillEntryFromCalanderizedMeterData(calanderizedMeterData);
+    return lastBill;
+  }
+
+  getLastBillEntryFromCalanderizedMeterData(calanderizedMeterData: Array<CalanderizedMeter>): MonthlyData {
+    let monthlyData: Array<MonthlyData> = calanderizedMeterData.flatMap(data => {
+      return data.monthlyData;
+    })
+    let lastBill: MonthlyData = _.maxBy(monthlyData, (data: MonthlyData) => {
+      let date = new Date();
+      date.setFullYear(data.year, data.monthNumValue);
+      return date;
+    });
+    return lastBill;
+  }
 }

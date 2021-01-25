@@ -2,8 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { UtilityUsageSummaryData } from 'src/app/models/dashboard';
 import { IdbFacility, IdbUtilityMeterData } from 'src/app/models/idb';
-import { DashboardService, UtilityUsageSummaryData } from '../../dashboard.service';
+import { DashboardService } from '../../dashboard.service';
 
 @Component({
   selector: 'app-utility-energy-use-table',

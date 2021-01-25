@@ -148,14 +148,9 @@ export class UtilityMeterDatadbService {
         }
     }
 
-    getMeterDataFromMeterId(meterId: number): Array<IdbUtilityMeterData> {
+    private getMeterDataFromMeterId(meterId: number): Array<IdbUtilityMeterData> {
         let facilityMeterData: Array<IdbUtilityMeterData> = this.accountMeterData.getValue();
         return facilityMeterData.filter(meterData => { return meterData.meterId == meterId });
-    }
-
-    getMeterDataFromMeterIds(meterIds: Array<number>): Array<IdbUtilityMeterData> {
-        let facilityMeterData: Array<IdbUtilityMeterData> = this.accountMeterData.getValue();
-        return facilityMeterData.filter(meterData => { return meterIds.includes(meterData.meterId) });
     }
 
     getMeterDataForFacility(meter: IdbUtilityMeter): Array<IdbUtilityMeterData> {

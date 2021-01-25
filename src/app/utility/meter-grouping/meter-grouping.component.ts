@@ -7,8 +7,8 @@ import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { DashboardService, LastYearData } from 'src/app/dashboard/dashboard.service';
-import { MonthlyData } from '../calanderization/calanderization.service';
+import { CalanderizationService } from '../../shared/helper-services/calanderization.service';
+import { LastYearData, MonthlyData } from 'src/app/models/calanderization';
 
 @Component({
   selector: 'app-meter-grouping',
@@ -38,7 +38,7 @@ export class MeterGroupingComponent implements OnInit {
   lastBillDate: Date;
   yearPriorToLastBill: Date;
   constructor(private utilityMeterGroupDbService: UtilityMeterGroupdbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private utilityMeterDbService: UtilityMeterdbService, private facilityDbService: FacilitydbService, private dashboardService: DashboardService) { }
+    private utilityMeterDbService: UtilityMeterdbService, private facilityDbService: FacilitydbService, private calanderizationService: CalanderizationService) { }
 
   ngOnInit(): void {
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(selectedFacility => {
@@ -76,7 +76,7 @@ export class MeterGroupingComponent implements OnInit {
   }
 
   setLastBill() {
-    this.lastBill = this.dashboardService.getLastBillEntry(this.facilityMeters, false);
+    this.lastBill = this.calanderizationService.getLastBillEntry(this.facilityMeters, false);
     if (this.lastBill) {
       this.lastBillDate = new Date(this.lastBill.year, this.lastBill.monthNumValue);
       this.yearPriorToLastBill = new Date(this.lastBill.year - 1, this.lastBill.monthNumValue + 1);
@@ -133,7 +133,7 @@ export class MeterGroupingComponent implements OnInit {
       let groupMeters: Array<IdbUtilityMeter> = this.facilityMeters.filter(meter => { return meter.groupId == group.id });
       if (groupMeters.length != 0) {
         // let groupMeterIds: Array<number> = groupMeters.map(meter => { return meter.id });
-        let groupMeterData: Array<LastYearData> = this.dashboardService.getPastYearData(groupMeters, false, lastBill);
+        let groupMeterData: Array<LastYearData> = this.calanderizationService.getPastYearData(groupMeters, false, lastBill);
         group.groupData = groupMeters;
         group.totalEnergyUse = _.sumBy(groupMeterData, 'energyUse');
         group.totalConsumption = _.sumBy(groupMeterData, 'energyConsumption');
@@ -143,7 +143,7 @@ export class MeterGroupingComponent implements OnInit {
   }
 
   addEnergyMetersWithoutGroups(energyMeters: Array<IdbUtilityMeter>, groupType: string, lastBill: MonthlyData) {
-    let groupMeterData: Array<LastYearData> = this.dashboardService.getPastYearData(energyMeters, false, lastBill);
+    let groupMeterData: Array<LastYearData> = this.calanderizationService.getPastYearData(energyMeters, false, lastBill);
     let meterGroup: IdbUtilityMeterGroup = {
       //randon number id for unsaved
       id: 1000000000000000 * Math.random(),

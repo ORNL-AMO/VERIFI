@@ -2,8 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { IdbUtilityMeter } from 'src/app/models/idb';
-import { CalanderizationService, CalanderizedMeter } from './calanderization.service';
+import { CalanderizationService } from '../../shared/helper-services/calanderization.service';
 
 @Component({
   selector: 'app-calanderization',
@@ -41,7 +42,7 @@ export class CalanderizationComponent implements OnInit {
 
   setCalanderizedMeterData() {
     if (this.facilityMeters) {
-      this.calanderizedMeterData = this.calanderizationService.calanderizeMetersInFacility(this.facilityMeters);
+      this.calanderizedMeterData = this.calanderizationService.getCalanderizedMeterData(this.facilityMeters, false);
       console.log(this.calanderizedMeterData);
     }
   }
