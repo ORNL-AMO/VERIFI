@@ -13,25 +13,6 @@ export class CalanderizationService {
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private energyUnitsHelperService: EnergyUnitsHelperService) {
   }
 
-  // calanderizeMetersInAccount(facilityMeters: Array<IdbUtilityMeter>, monthDisplayShort?: boolean) {
-  //   let calanderizedMeterData: Array<CalanderizedMeter> = new Array();
-  //   facilityMeters.forEach(meter => {
-  //     let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataForAccount(meter);
-  //     let calanderizedMeter: Array<MonthlyData> = this.calanderizeMeterData(meter, meterData, monthDisplayShort);
-  //     let showConsumption: boolean = calanderizedMeter.find(meterData => { return meterData.energyConsumption != 0 }) != undefined;
-  //     let showEnergyUse: boolean = calanderizedMeter.find(meterData => { return meterData.energyUse != 0 }) != undefined;
-  //     calanderizedMeterData.push({
-  //       consumptionUnit: meter.startingUnit,
-  //       meter: meter,
-  //       monthlyData: calanderizedMeter,
-  //       showConsumption: showConsumption,
-  //       showEnergyUse: showEnergyUse,
-  //       energyUnit: meter.energyUnit
-  //     });
-  //   });
-  //   return calanderizedMeterData;
-  // }
-
   getCalanderizedMeterData(meters: Array<IdbUtilityMeter>, inAccount: boolean, monthDisplayShort?: boolean) {
     let calanderizedMeterData: Array<CalanderizedMeter> = new Array();
     meters.forEach(meter => {

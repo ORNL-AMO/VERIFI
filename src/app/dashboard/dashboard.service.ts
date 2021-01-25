@@ -51,24 +51,6 @@ export class DashboardService {
     }
   }
 
-  // getLastBillEntry(facilityMeters: Array<IdbUtilityMeter>, inAccount: boolean): MonthlyData {
-  //   let calanderizedMeterData: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMeterData(facilityMeters, inAccount, false);
-  //   let lastBill: MonthlyData = this.getLastBillEntryFromCalanderizedMeterData(calanderizedMeterData);
-  //   return lastBill;
-  // }
-
-  // getLastBillEntryFromCalanderizedMeterData(calanderizedMeterData: Array<CalanderizedMeter>): MonthlyData {
-  //   let monthlyData: Array<MonthlyData> = calanderizedMeterData.flatMap(data => {
-  //     return data.monthlyData;
-  //   })
-  //   let lastBill: MonthlyData = _.maxBy(monthlyData, (data: MonthlyData) => {
-  //     let date = new Date();
-  //     date.setFullYear(data.year, data.monthNumValue);
-  //     return date;
-  //   });
-  //   return lastBill;
-  // }
-
   getLastMonthYear(): { lastMonth: number, lastMonthYear: number } {
     let todaysDate: Date = new Date();
     let lastMonth: number;
