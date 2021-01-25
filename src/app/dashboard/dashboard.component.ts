@@ -57,6 +57,7 @@ export class DashboardComponent implements OnInit {
   ngOnDestroy() {
     this.selectedAccountSub.unsubscribe();
     this.selectedFacilitySub.unsubscribe();
+    this.accountFacilitiesSub.unsubscribe();
   }
 
   switchFacility(facility: number) {
