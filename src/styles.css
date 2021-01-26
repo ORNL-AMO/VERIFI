@@ -744,7 +744,7 @@ Section Headers
 }
 .compNav {
   float: left;
-  margin-top: 9px;
+  margin-top: 5px;
 }
 .compNav ul {
   list-style: none;
@@ -1066,4 +1066,27 @@ input.unitDollar {
 }
 .meterData .section-name {
   margin: 5px 0px;
+}
+.breadcrumbs {
+  background-color: #f5f5f5;
+  padding: 5px 40px;
+  border-bottom: 1px solid #e5e6e6;
+}
+.breadcrumbs a,
+.breadcrumbs p {
+  margin: 0px!important;
+  text-transform: capitalize;
+  font-size: 12px;
+  padding: 5px 0;
+  color: #5f5f5f;
+}
+.breadcrumbs i {
+  margin: 0px 3px;
+}
+.breadcrumbs i.fa-angle-right {
+  margin: 0px 10px;
+}
+.breadcrumbs select {
+  border: none;
+  background-color: #e6e6e6;
 }
