@@ -155,7 +155,10 @@ export class CalanderizationService {
         time: yearMonth.month + ', ' + yearMonth.year,
         energyUse: totalEnergyUse,
         energyCost: totalEnergyCost,
-        energyConsumption: totalEnergyConsumption
+        energyConsumption: totalEnergyConsumption,
+        year: yearMonth.year,
+        month: yearMonth.month,
+        date: new Date(yearMonth.year, yearMonth.month)
       }
 
     });
