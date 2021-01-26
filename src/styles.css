@@ -1090,3 +1090,11 @@ input.unitDollar {
   border: none;
   background-color: #e6e6e6;
 }
+.measurFooter {
+  background-color: #577656;
+  height: 69px;
+  margin-top: -68px;
+  z-index: 2;
+  border-top: 1px solid #5c7859;
+  box-shadow: 1px -1px 0px #9eb39b;
+}
