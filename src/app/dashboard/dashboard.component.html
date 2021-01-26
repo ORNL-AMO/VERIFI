@@ -1,6 +1,6 @@
 <div class="banner">
-  <h3 *ngIf="selectedAccount && !facilityDashboard">Account Dashboard</h3>
-  <h3 *ngIf="selectedAccount && selectedFacility && facilityDashboard">Facility Dashboard</h3>
+  <h3 *ngIf="selectedAccount && !isFacilityDashboard">Account Dashboard</h3>
+  <h3 *ngIf="selectedAccount && selectedFacility && isFacilityDashboard">Facility Dashboard</h3>
   <button class="m-0 btn btn-outline item-right">Generate Report</button>
 </div>
 
@@ -8,9 +8,9 @@
   <p *ngIf="selectedAccount">
     <i class="fa fa-home"></i>{{selectedAccount.name}}
     <i class="fa fa-angle-right"></i>
-    <select (change)="switchFacility($event.target.value)">
-      <option value="-1">All Facilities</option>
-      <option *ngFor="let facility of facilityList" [value]="facility.id" [selected]="facility.id === breadcrumbFacility">{{facility.name}}</option>
+    <select [(ngModel)]="breadcrumbFacilityId" (change)="switchFacility()">
+      <option [ngValue]="undefined">All Facilities</option>
+      <option *ngFor="let facility of facilityList" [ngValue]="facility.id">{{facility.name}}</option>
     </select>
   </p>
 </div>

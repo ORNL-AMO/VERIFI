@@ -3,7 +3,7 @@ import { Subscription } from 'rxjs';
 import { AccountdbService } from '../indexedDB/account-db.service';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
 import { IdbAccount, IdbFacility } from '../models/idb';
-import { Router, Event, NavigationStart, NavigationEnd } from '@angular/router';
+import { Router, Event, NavigationEnd } from '@angular/router';
 
 @Component({
   selector: 'app-dashboard',
@@ -16,8 +16,8 @@ export class DashboardComponent implements OnInit {
   selectedAccountSub: Subscription;
   selectedFacility: IdbFacility;
   selectedFacilitySub: Subscription;
-  facilityDashboard: boolean;
-  breadcrumbFacility: number;
+  isFacilityDashboard: boolean;
+  breadcrumbFacilityId: number;
 
   accountFacilitiesSub: Subscription;
   facilityList: Array<IdbFacility>;
@@ -27,10 +27,14 @@ export class DashboardComponent implements OnInit {
     private facilityDbService: FacilitydbService,
     private router: Router
     ) {
-    // Close menus on navigation
     router.events.subscribe((event: Event) => {
       if (event instanceof NavigationEnd) {
-        this.facilityDashboard = event.urlAfterRedirects.includes('facility-summary');
+        this.isFacilityDashboard = event.urlAfterRedirects.includes('facility-summary');
+        if(this.isFacilityDashboard && this.selectedFacility){
+          this.breadcrumbFacilityId = this.selectedFacility.id
+        }else{
+          this.breadcrumbFacilityId = undefined;
+        }
       }
     });
   }
@@ -43,9 +47,9 @@ export class DashboardComponent implements OnInit {
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
       this.selectedFacility = val;
       if (this.router.url.indexOf('account-summary') > -1) {
-        this.breadcrumbFacility = -1;
+        this.breadcrumbFacilityId = undefined;
       } else if (this.selectedFacility) {
-        this.breadcrumbFacility = this.selectedFacility.id;
+        this.breadcrumbFacilityId = this.selectedFacility.id;
       }
     });
 
@@ -60,12 +64,12 @@ export class DashboardComponent implements OnInit {
     this.accountFacilitiesSub.unsubscribe();
   }
 
-  switchFacility(facility: number) {
-    if (facility == -1) {
+  switchFacility() {
+    if (this.breadcrumbFacilityId == undefined) {
       this.router.navigateByUrl('/account-summary');
     } else {
-      const index = this.facilityList.map(function(e) { return e.id; }).indexOf(+facility);
-      this.facilityDbService.selectedFacility.next(this.facilityList[index]);
+      let selectedFacility: IdbFacility = this.facilityList.find(facility => {return facility.id == this.breadcrumbFacilityId});
+      this.facilityDbService.selectedFacility.next(selectedFacility);
       this.router.navigateByUrl('/facility-summary');
     }
   }

@@ -7,7 +7,8 @@ import * as _ from 'lodash';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { DashboardService } from '../../dashboard.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { FacilitySummary } from 'src/app/models/dashboard';
+import { AccountFacilitiesSummary, FacilitySummary } from 'src/app/models/dashboard';
+
 @Component({
   selector: 'app-facilities-table',
   templateUrl: './facilities-table.component.html',
@@ -19,19 +20,13 @@ export class FacilitiesTableComponent implements OnInit {
   accountMeterDataSub: Subscription;
   selectedAccountSub: Subscription;
   accountEnergyUnit: string;
-  facilitiesSummary: Array<FacilitySummary>;
-  totalEnergyUsage: number;
-  totalEnergyCost: number;
-  totalMeters: number;
-  todaysDate: Date;
-  yearAgoDate: Date;
+  accountFacilitiesSummary:  AccountFacilitiesSummary;
+  lastMonthsDate: Date;
+  yearPriorDate: Date;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private facilityDbService: FacilitydbService,
     private router: Router, private dashboardService: DashboardService, private accountdbService: AccountdbService) { }
 
   ngOnInit(): void {
-    this.todaysDate = new Date();
-    this.yearAgoDate = new Date((this.todaysDate.getFullYear() - 1), (this.todaysDate.getMonth()));
-
     this.selectedAccountSub = this.accountdbService.selectedAccount.subscribe(val => {
       if (val) {
         this.accountEnergyUnit = val.energyUnit;
@@ -68,16 +63,23 @@ export class FacilitiesTableComponent implements OnInit {
   }
 
   setAccountFacilities() {
-    this.facilitiesSummary = this.dashboardService.getAccountFacilitesSummary();
-    this.totalEnergyUsage = _.sumBy(this.facilitiesSummary, 'energyUsage');
-    this.totalMeters = _.sumBy(this.facilitiesSummary, 'numberOfMeters');
-    this.totalEnergyCost = _.sumBy(this.facilitiesSummary, 'energyCost');
+    this.accountFacilitiesSummary = this.dashboardService.getAccountFacilitesSummary();
+    if (this.accountFacilitiesSummary.allMetersLastBill) {
+      this.lastMonthsDate = new Date(this.accountFacilitiesSummary.allMetersLastBill.year, this.accountFacilitiesSummary.allMetersLastBill.monthNumValue);
+      this.yearPriorDate = new Date(this.accountFacilitiesSummary.allMetersLastBill.year - 1, this.accountFacilitiesSummary.allMetersLastBill.monthNumValue + 1);
+    }
   }
 
   setEmpty() {
-    this.facilitiesSummary = new Array();
-    this.totalEnergyUsage = 0;
-    this.totalMeters = 0;
-    this.totalEnergyCost = 0;
+    this.accountFacilitiesSummary = {
+      facilitySummaries: [],
+      totalEnergyUse: undefined,
+      totalEnergyCost: undefined,
+      totalNumberOfMeters: undefined,
+      allMetersLastBill: undefined
+    };
+    this.lastMonthsDate = undefined;
+    this.yearPriorDate = undefined;
+
   }
 }

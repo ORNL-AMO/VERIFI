@@ -4,10 +4,10 @@
             <tr>
                 <th></th>
                 <th colspan="2">
-                    Last Month ({{lastMonthsDate | date: 'MMM, y'}})
+                    Last Month <span class="small" *ngIf="yearPriorDate">({{lastMonthsDate | date: 'MMM, y'}})</span>
                 </th>
                 <th colspan="2">
-                    Average
+                    Monthly Average <span class="small" *ngIf="yearPriorDate">({{yearPriorDate | date: 'MMM, y'}} - {{lastMonthsDate | date: 'MMM, y'}})</span>
                 </th>
             </tr>
             <tr>

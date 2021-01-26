@@ -8,8 +8,8 @@ import * as _ from 'lodash';
 import { VisualizationService } from 'src/app/utility/visualization/visualization.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { DashboardService } from '../../dashboard.service';
-import { FacilitySummary } from 'src/app/models/dashboard';
 import { HeatMapData } from 'src/app/models/visualization';
+// import { AccountFacilitiesSummary } from 'src/app/models/dashboard';
 @Component({
   selector: 'app-energy-use-heat-map',
   templateUrl: './energy-use-heat-map.component.html',
@@ -18,7 +18,7 @@ import { HeatMapData } from 'src/app/models/visualization';
 export class EnergyUseHeatMapComponent implements OnInit {
 
   @ViewChild('energyUseHeatMap', { static: false }) energyUseHeatMap: ElementRef;
-  facilitiesSummary: Array<FacilitySummary>;
+  // facilitiesSummary: AccountFacilitiesSummary;
   accountFacilitiesSub: Subscription;
   facilityHeatMapData: Array<HeatMapData>;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private visualizationService: VisualizationService,
@@ -27,7 +27,7 @@ export class EnergyUseHeatMapComponent implements OnInit {
 
   ngOnInit(): void {
     this.accountFacilitiesSub = this.utilityMeterDataDbService.accountMeterData.subscribe(val => {
-      this.facilitiesSummary = this.dashboardService.getAccountFacilitesSummary();
+      // this.facilitiesSummary = this.dashboardService.getAccountFacilitesSummary();
       this.setData();
     });
   }

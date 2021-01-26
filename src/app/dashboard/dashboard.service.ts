@@ -5,7 +5,7 @@ import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterGroup } from '../models/id
 import * as _ from 'lodash';
 import { CalanderizationService } from '../shared/helper-services/calanderization.service';
 import { UtilityMeterGroupdbService } from '../indexedDB/utilityMeterGroup-db.service';
-import { FacilityMeterSummaryData, FacilitySummary, MeterSummary, SummaryData, UtilityUsageSummaryData } from '../models/dashboard';
+import { AccountFacilitiesSummary, FacilityMeterSummaryData, FacilitySummary, MeterSummary, SummaryData, UtilityUsageSummaryData } from '../models/dashboard';
 import { CalanderizedMeter, LastYearData, MonthlyData } from '../models/calanderization';
 
 @Injectable({
@@ -16,29 +16,37 @@ export class DashboardService {
   constructor(private facilityDbService: FacilitydbService, private utilityMeterDbService: UtilityMeterdbService,
     private calanderizationService: CalanderizationService, private utilityMeterGroupDbService: UtilityMeterGroupdbService) { }
 
-  getAccountFacilitesSummary(): Array<FacilitySummary> {
+  getAccountFacilitesSummary(): AccountFacilitiesSummary {
     let facilitiesSummary: Array<FacilitySummary> = new Array();
     let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let allAccountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    let accountLastBill: MonthlyData = this.calanderizationService.getLastBillEntry(allAccountMeters, true);
     facilities.forEach(facility => {
-      let facilityMeterSummary: FacilitySummary = this.getFacilitySummary(facility, true);
+      let facilityMeterSummary: FacilitySummary = this.getFacilitySummary(facility, true, accountLastBill);
       facilitiesSummary.push(facilityMeterSummary);
     });
-    return facilitiesSummary;
+    return {
+      facilitySummaries: facilitiesSummary,
+      totalEnergyUse: _.sumBy(facilitiesSummary, 'energyUsage'),
+      totalEnergyCost: _.sumBy(facilitiesSummary, 'energyCost'),
+      totalNumberOfMeters: _.sumBy(facilitiesSummary, 'numberOfMeters'),
+      allMetersLastBill: accountLastBill
+    };
   }
 
-  getFacilitySummary(facility: IdbFacility, inAccount: boolean): FacilitySummary {
+  getFacilitySummary(facility: IdbFacility, inAccount: boolean, accountMetersLastBill: MonthlyData): FacilitySummary {
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let accountMetersCopy: Array<IdbUtilityMeter> = JSON.parse(JSON.stringify(accountMeters));
     let facilityMeters: Array<IdbUtilityMeter> = accountMetersCopy.filter(meter => { return meter.facilityId == facility.id });
     if (facilityMeters.length != 0) {
-      let lastBill: MonthlyData = this.calanderizationService.getLastBillEntry(facilityMeters, inAccount);
-      let facilityMetersDataSummary: Array<{ time: string, energyUse: number, energyCost: number }> = this.calanderizationService.getPastYearData(facilityMeters, inAccount, lastBill);
+      let facilityLastBill: MonthlyData = this.calanderizationService.getLastBillEntry(facilityMeters, inAccount);
+      let facilityMetersDataSummary: Array<{ time: string, energyUse: number, energyCost: number }> = this.calanderizationService.getPastYearData(facilityMeters, inAccount, accountMetersLastBill);
       return {
         facility: facility,
         energyUsage: _.sumBy(facilityMetersDataSummary, 'energyUse'),
         energyCost: _.sumBy(facilityMetersDataSummary, 'energyCost'),
         numberOfMeters: facilityMeters.length,
-        lastBillDate: new Date(lastBill.year, (lastBill.monthNumValue))
+        lastBillDate: new Date(facilityLastBill.year, (facilityLastBill.monthNumValue))
       }
     } else {
       return {

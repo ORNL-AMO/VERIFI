@@ -1,6 +1,15 @@
 import { MonthlyData } from "./calanderization";
 import { IdbFacility, IdbUtilityMeter } from "./idb";
 
+
+export interface AccountFacilitiesSummary {
+    facilitySummaries: Array<FacilitySummary>,
+    totalEnergyUse: number,
+    totalEnergyCost: number,
+    totalNumberOfMeters: number,
+    allMetersLastBill: MonthlyData
+}
+
 export interface FacilitySummary {
     facility: IdbFacility,
     energyUsage: number,
