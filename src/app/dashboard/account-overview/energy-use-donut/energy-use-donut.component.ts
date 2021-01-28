@@ -2,7 +2,8 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { DashboardService, FacilitySummary } from '../../dashboard.service';
+import { FacilitySummary } from 'src/app/models/dashboard';
+import { DashboardService } from '../../dashboard.service';
 
 @Component({
   selector: 'app-energy-use-donut',

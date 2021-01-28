@@ -74,67 +74,67 @@
             <td class="input">
                 <input type="checkbox" name="metersSelected" (change)="toggleChecked()" [(ngModel)]="meterData.checked">
             </td>
-            <td>{{meterData.readDate}}</td>
+            <td>{{meterData.readDate | date}}</td>
             <td>{{meterData.totalEnergyUse}}</td>
             <td>{{meterData.totalDemand}}</td>
-            <td>{{meterData.totalCost}}</td>
+            <td>{{meterData.totalCost | currency}}</td>
             <td *ngIf="supplyDemandCharge.supplyBlockAmount">
                 {{meterData.supplyBlockAmount}}
             </td>
             <td *ngIf="supplyDemandCharge.supplyBlockCharge">
-                {{meterData.supplyBlockCharge}}
+                {{meterData.supplyBlockCharge | currency}}
             </td>
             <td *ngIf="supplyDemandCharge.flatRateAmount">
                 {{meterData.flatRateAmount}}
             </td>
             <td *ngIf="supplyDemandCharge.flatRateCharge">
-                {{meterData.flatRateCharge}}
+                {{meterData.flatRateCharge | currency}}
             </td>
             <td *ngIf="supplyDemandCharge.peakAmount">
                 {{meterData.peakAmount}}
             </td>
             <td *ngIf="supplyDemandCharge.peakCharge">
-                {{meterData.peakCharge}}
+                {{meterData.peakCharge | currency}}
             </td>
             <td *ngIf="supplyDemandCharge.offPeakAmount">
                 {{meterData.offPeakAmount}}
             </td>
             <td *ngIf="supplyDemandCharge.offPeakCharge">
-                {{meterData.offPeakCharge}}
+                {{meterData.offPeakCharge | currency}}
             </td>
             <td *ngIf="supplyDemandCharge.demandBlockAmount">
                 {{meterData.demandBlockAmount}}
             </td>
             <td *ngIf="supplyDemandCharge.demandBlockCharge">
-                {{meterData.demandBlockCharge}}
+                {{meterData.demandBlockCharge | currency}}
             </td>
 
             <td *ngIf="taxAndOther.generationTransmissionCharge">
-                {{meterData.generationTransmissionCharge}}
+                {{meterData.generationTransmissionCharge | currency}}
             </td>
             <td *ngIf="taxAndOther.deliveryCharge">
-                {{meterData.deliveryCharge}}
+                {{meterData.deliveryCharge | currency}}
             </td>
             <td *ngIf="taxAndOther.transmissionCharge">
-                {{meterData.transmissionCharge}}
+                {{meterData.transmissionCharge | currency}}
             </td>
             <td *ngIf="taxAndOther.powerFactorCharge">
-                {{meterData.powerFactorCharge}}
+                {{meterData.powerFactorCharge | currency}}
             </td>
             <td *ngIf="taxAndOther.businessCharge">
-                {{meterData.businessCharge}}
+                {{meterData.businessCharge | currency}}
             </td>
             <td *ngIf="taxAndOther.utilityTax">
-                {{meterData.utilityTax}}
+                {{meterData.utilityTax | currency}}
             </td>
             <td *ngIf="taxAndOther.latePayment">
-                {{meterData.latePayment}}
+                {{meterData.latePayment | currency}}
             </td>
             <td *ngIf="taxAndOther.otherCharge">
-                {{meterData.otherCharge}}
+                {{meterData.otherCharge | currency}}
             </td>
             <td *ngIf="taxAndOther.basicCharge">
-                {{meterData.basicCharge}}
+                {{meterData.basicCharge | currency}}
             </td>
             <td class="actions">
                 <i class="fa fa-pencil" title="Edit" (click)="setEditMeterData(meterData)"></i>

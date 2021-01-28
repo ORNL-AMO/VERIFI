@@ -17,3 +17,7 @@ span.group {
 .popup.open {
     transform: scale(1);
 }
+
+.invalid{
+    background-color: red;
+}

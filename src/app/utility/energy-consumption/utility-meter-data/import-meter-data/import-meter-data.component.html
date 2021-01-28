@@ -9,10 +9,10 @@
     <table>
         <tr>
             <th class="row-year">Meter Read Date</th>
-            <th>Total kWh</th>
+            <th>Total Energy Use</th>
             <th>Total Demand</th>
             <th>Total Cost</th>
-            <th *ngIf="selectedSource == 'Electricity' && supplyDemandCharge.supplyBlockAmount">
+            <!-- <th *ngIf="selectedSource == 'Electricity' && supplyDemandCharge.supplyBlockAmount">
                 Block Rates Supply Amt
             </th>
             <th *ngIf="selectedSource == 'Electricity' && supplyDemandCharge.supplyBlockCharge">
@@ -69,14 +69,14 @@
             </th>
             <th *ngIf="selectedSource == 'Electricity' && taxAndOther.basicCharge">
                 Basic Charge
-            </th>
+            </th> -->
         </tr>
         <tr *ngFor="let item of quickView">
-            <td>{{item.readDate}}</td>
-            <td>{{item.totalKwh}}</td>
+            <td>{{item.readDate | date}}</td>
+            <td>{{item.totalEnergyUse}}</td>
             <td>{{item.totalDemand}}</td>
-            <td>${{item.totalCost}}</td>
-            <td *ngIf="selectedSource == 'Electricity' && supplyDemandCharge.supplyBlockAmount">
+            <td>{{item.totalCost | currency}}</td>
+            <!-- <td *ngIf="selectedSource == 'Electricity' && supplyDemandCharge.supplyBlockAmount">
                 {{item.supplyBlockAmount}}
             </td>
             <td *ngIf="selectedSource == 'Electricity' && supplyDemandCharge.supplyBlockCharge">
@@ -133,7 +133,7 @@
             </td>
             <td *ngIf="selectedSource == 'Electricity' && taxAndOther.basicCharge">
                 {{item.basicCharge}}
-            </td>
+            </td> -->
         </tr>
     </table>
 </div>

@@ -43,7 +43,7 @@
         </thead>
         <tbody>
             <tr *ngFor="let meter of meterList | slice: pageSize | slice: 0:itemsPerPage">
-                <td>{{meter.name}}</td>
+                <td [ngClass]="{'invalid': isMeterInvalid(meter)}">{{meter.name}}</td>
                 <td>{{meter.source}}</td>
                 <!--<td>{{meter.group}}</td>-->
                 <td>{{meter.meterNumber}}</td>

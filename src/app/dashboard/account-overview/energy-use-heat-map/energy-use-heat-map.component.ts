@@ -5,9 +5,11 @@ import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
 import * as _ from 'lodash';
-import { HeatMapData, VisualizationService } from 'src/app/utility/visualization/visualization.service';
+import { VisualizationService } from 'src/app/utility/visualization/visualization.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { DashboardService, FacilitySummary } from '../../dashboard.service';
+import { DashboardService } from '../../dashboard.service';
+import { FacilitySummary } from 'src/app/models/dashboard';
+import { HeatMapData } from 'src/app/models/visualization';
 @Component({
   selector: 'app-energy-use-heat-map',
   templateUrl: './energy-use-heat-map.component.html',
@@ -24,7 +26,6 @@ export class EnergyUseHeatMapComponent implements OnInit {
     private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
-
     this.accountFacilitiesSub = this.utilityMeterDataDbService.accountMeterData.subscribe(val => {
       this.facilitiesSummary = this.dashboardService.getAccountFacilitesSummary();
       this.setData();
@@ -34,7 +35,6 @@ export class EnergyUseHeatMapComponent implements OnInit {
   ngOnDestroy() {
     this.accountFacilitiesSub.unsubscribe();
   }
-
 
   ngAfterViewInit() {
     this.setData();
@@ -114,11 +114,9 @@ export class EnergyUseHeatMapComponent implements OnInit {
     }
   }
 
-
   setData() {
     this.facilityHeatMapData = new Array();
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-
     let accountMetersCopy: Array<IdbUtilityMeter> = JSON.parse(JSON.stringify(accountMeters));
     let accountFacilites: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     if (accountMeters.length != 0 && accountFacilites.length != 0) {
@@ -128,7 +126,7 @@ export class EnergyUseHeatMapComponent implements OnInit {
       facilityIds.forEach(id => {
         let facilityMeters: Array<IdbUtilityMeter> = accountMetersCopy.filter(meter => { return meter.facilityId == id });
         let facility: IdbFacility = accountFacilites.find(facility => { return facility.id == id });
-        let facilityHeatMapData: HeatMapData = this.visualizationService.getMeterHeatMapData(facilityMeters, facility.name, true);
+        let facilityHeatMapData: HeatMapData = this.visualizationService.getMeterHeatMapData(facilityMeters, facility.name, true, true);
         this.facilityHeatMapData.push(facilityHeatMapData);
       });
       this.drawChart();
@@ -136,7 +134,5 @@ export class EnergyUseHeatMapComponent implements OnInit {
       let Plotly = this.plotlyService.getPlotly();
       Plotly.purge(this.energyUseHeatMap.nativeElement);
     }
-
   }
-
 }

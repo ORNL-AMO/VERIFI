@@ -5,7 +5,8 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
-import { HeatMapData, VisualizationService } from '../../../utility/visualization/visualization.service';
+import { HeatMapData } from 'src/app/models/visualization';
+import { VisualizationService } from '../../../utility/visualization/visualization.service';
 
 @Component({
   selector: 'app-facility-heat-map',
@@ -59,7 +60,7 @@ export class FacilityHeatMapComponent implements OnInit {
   setGraphData() {
     if (this.facilityMeters && this.facilityMeters.length != 0 && this.accountMeters && this.accountMeters.length != 0) {
       let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-      let heatMapData: HeatMapData = this.vizualizationService.getMeterHeatMapData(this.facilityMeters, selectedFacility.name, true);
+      let heatMapData: HeatMapData = this.vizualizationService.getMeterHeatMapData(this.facilityMeters, selectedFacility.name, true, false);
       this.resultData = heatMapData.resultData;
       this.months = heatMapData.months;
       this.years = heatMapData.years;

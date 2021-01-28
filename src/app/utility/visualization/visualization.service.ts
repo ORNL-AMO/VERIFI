@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
 import { IdbUtilityMeter } from 'src/app/models/idb';
-import { CalanderizationService, CalanderizedMeter, MonthlyData } from '../calanderization/calanderization.service';
+import { CalanderizationService } from '../../shared/helper-services/calanderization.service';
 import * as _ from 'lodash';
+import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
+import { HeatMapData } from 'src/app/models/visualization';
 @Injectable({
   providedIn: 'root'
 })
@@ -11,8 +13,7 @@ export class VisualizationService {
 
   getFacilityBarChartData(meters: Array<IdbUtilityMeter>, sumByMonth: boolean, removeIncompleteYears: boolean): Array<{ time: string, energyUse: number, energyCost: number }> {
     //calanderize meters
-    let calanderizedMeterData: Array<CalanderizedMeter> = this.calanderizationService.calanderizeFacilityMeters(meters, true);
-    //TODO: convert data here?
+    let calanderizedMeterData: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMeterData(meters, true, true);
 
     //create array of just the meter data
     let combindedCalanderizedMeterData: Array<MonthlyData> = calanderizedMeterData.flatMap(meterData => {
@@ -29,7 +30,7 @@ export class VisualizationService {
       resultData = yearMonths.map(yearMonth => {
         let totalEnergyUse: number = _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
           if (meterData.month == yearMonth.month && meterData.year == yearMonth.year) {
-            return meterData.energyUse;
+            return meterData.energyConsumption;
           } else {
             return 0;
           }
@@ -63,7 +64,7 @@ export class VisualizationService {
       resultData = yearMonths.map(yearMonth => {
         let totalEnergyUse: number = _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
           if (meterData.year == yearMonth.year) {
-            return meterData.energyUse;
+            return meterData.energyConsumption;
           } else {
             return 0;
           }
@@ -85,12 +86,10 @@ export class VisualizationService {
     return resultData;
   }
 
-  getMeterHeatMapData(meters: Array<IdbUtilityMeter>, facilityName: string, removeIncompleteYears: boolean): HeatMapData {
+  getMeterHeatMapData(meters: Array<IdbUtilityMeter>, facilityName: string, removeIncompleteYears: boolean, inAccount: boolean): HeatMapData {
     let months: Array<string> = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     //calanderize meters
-    let calanderizedMeterData: Array<CalanderizedMeter> = this.calanderizationService.calanderizeFacilityMeters(meters);
-    //TODO: convert data here?
-
+    let calanderizedMeterData: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMeterData(meters, inAccount, false);
     //create array of just the meter data
     let combindedCalanderizedMeterData: Array<MonthlyData> = calanderizedMeterData.flatMap(meterData => {
       return meterData.monthlyData;
@@ -115,14 +114,14 @@ export class VisualizationService {
       months.forEach(month => {
         let totalCost: number = _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
           if (meterData.year == year && meterData.month == month) {
-            return meterData.energyUse;
+            return meterData.energyConsumption;
           } else {
             return 0;
           }
         });
         let totalEnergy: number = _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
           if (meterData.year == year && meterData.month == month) {
-            return meterData.energyUse;
+            return meterData.energyConsumption;
           } else {
             return 0;
           }
@@ -139,12 +138,4 @@ export class VisualizationService {
       facilityName: facilityName
     }
   }
-}
-
-
-export interface HeatMapData {
-  resultData: Array<{ monthlyEnergy: Array<number>, monthlyCost: Array<number> }>,
-  months: Array<string>,
-  years: Array<number>,
-  facilityName: string
 }

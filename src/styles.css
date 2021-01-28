@@ -556,7 +556,7 @@ table {
 tfoot {
   border-top: 3px double #c9d3e0;
 }
-table tr:nth-child(even) {
+table tbody tr:nth-child(even) {
   background-color: #f3f6fd;
 }
 table thead tr {

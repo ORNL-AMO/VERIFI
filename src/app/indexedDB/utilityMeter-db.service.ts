@@ -123,9 +123,10 @@ export class UtilityMeterdbService {
             location: undefined,
             supplier: undefined,
             notes: undefined,
-            source: undefined,
+            source: "Electricity",
             group: undefined,
-            startingUnit: undefined,
+            startingUnit: "kWh",
+            energyUnit: undefined,
             fuel: undefined
         }
     }

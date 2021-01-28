@@ -1,9 +1,10 @@
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { Injectable } from '@angular/core';
-import { IdbAccount, IdbFacility, IdbUtilityMeterData } from '../models/idb';
+import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from '../models/idb';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { FacilitydbService } from './facility-db.service';
 import { AccountdbService } from './account-db.service';
+import { ConvertMeterDataService } from '../shared/helper-services/convert-meter-data.service';
 
 @Injectable({
     providedIn: 'root'
@@ -12,7 +13,8 @@ export class UtilityMeterDatadbService {
 
     facilityMeterData: BehaviorSubject<Array<IdbUtilityMeterData>>;
     accountMeterData: BehaviorSubject<Array<IdbUtilityMeterData>>;
-    constructor(private dbService: NgxIndexedDBService, private facilityDbService: FacilitydbService, private accountDbService: AccountdbService) {
+    constructor(private dbService: NgxIndexedDBService, private facilityDbService: FacilitydbService, private accountDbService: AccountdbService,
+        private convertMeterDataService: ConvertMeterDataService) {
         this.facilityMeterData = new BehaviorSubject<Array<IdbUtilityMeterData>>(new Array());
         this.accountMeterData = new BehaviorSubject<Array<IdbUtilityMeterData>>(new Array());
 
@@ -95,7 +97,7 @@ export class UtilityMeterDatadbService {
 
     deleteAllFacilityMeterData(facilityId: number): void {
         this.getAllByIndexRange('facilityId', facilityId).subscribe(facilityMeterDataEntries => {
-            for(let i=0; i<facilityMeterDataEntries.length; i++) {
+            for (let i = 0; i < facilityMeterDataEntries.length; i++) {
                 this.dbService.delete('utilityMeterData', facilityMeterDataEntries[i].id);
             }
         });
@@ -103,7 +105,7 @@ export class UtilityMeterDatadbService {
 
     deleteAllAccountMeterData(accountId: number): void {
         this.getAllByIndexRange('accountId', accountId).subscribe(accountMeterDataEntries => {
-            for(let i=0; i<accountMeterDataEntries.length; i++) {
+            for (let i = 0; i < accountMeterDataEntries.length; i++) {
                 this.dbService.delete('utilityMeterData', accountMeterDataEntries[i].id);
             }
         });
@@ -146,13 +148,23 @@ export class UtilityMeterDatadbService {
         }
     }
 
-    getMeterDataFromMeterId(meterId: number): Array<IdbUtilityMeterData> {
+    private getMeterDataFromMeterId(meterId: number): Array<IdbUtilityMeterData> {
         let facilityMeterData: Array<IdbUtilityMeterData> = this.accountMeterData.getValue();
         return facilityMeterData.filter(meterData => { return meterData.meterId == meterId });
     }
 
-    getMeterDataFromMeterIds(meterIds: Array<number>): Array<IdbUtilityMeterData> {
-        let facilityMeterData: Array<IdbUtilityMeterData> = this.accountMeterData.getValue();
-        return facilityMeterData.filter(meterData => { return meterIds.includes(meterData.meterId) });
+    getMeterDataForFacility(meter: IdbUtilityMeter): Array<IdbUtilityMeterData> {
+        let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+        let meterData: Array<IdbUtilityMeterData> = this.getMeterDataFromMeterId(meter.id);
+        meterData = this.convertMeterDataService.convertMeterDataToFacility(meter, JSON.parse(JSON.stringify(meterData)), facility);
+        return meterData;
     }
+
+    getMeterDataForAccount(meter: IdbUtilityMeter): Array<IdbUtilityMeterData> {
+        let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+        let meterData: Array<IdbUtilityMeterData> = this.getMeterDataFromMeterId(meter.id);
+        meterData = this.convertMeterDataService.convertMeterDataToAccount(meter, JSON.parse(JSON.stringify(meterData)), account);
+        return meterData;
+    }
+
 }

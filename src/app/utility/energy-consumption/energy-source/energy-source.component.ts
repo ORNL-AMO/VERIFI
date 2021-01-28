@@ -7,6 +7,8 @@ import { UtilityMeterGroupdbService } from "../../../indexedDB/utilityMeterGroup
 import { listAnimation } from '../../../animations';
 import { IdbAccount, IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
 import { Subscription } from 'rxjs';
+import { EditMeterFormService } from './edit-meter-form/edit-meter-form.service';
+import { FormGroup } from '@angular/forms';
 
 @Component({
   selector: 'app-energy-source',
@@ -40,11 +42,11 @@ export class EnergySourceComponent implements OnInit {
 
   addOrEdit: string = 'add';
   constructor(
-    public accountdbService: AccountdbService,
-    public facilitydbService: FacilitydbService,
-    public utilityMeterDatadbService: UtilityMeterDatadbService,
-    public utilityMeterdbService: UtilityMeterdbService,
-    public utilityMeterGroupdbService: UtilityMeterGroupdbService,
+    private accountdbService: AccountdbService,
+    private facilitydbService: FacilitydbService,
+    private utilityMeterDatadbService: UtilityMeterDatadbService,
+    private utilityMeterdbService: UtilityMeterdbService,
+    private editMeterFormService: EditMeterFormService
   ) { }
 
   ngOnInit() {
@@ -57,10 +59,6 @@ export class EnergySourceComponent implements OnInit {
         this.selectedFacilityName = facility.name;
       }
     });
-    // Observe the energy final unit (not sure how the energyFinalUnit is used...-mark)
-    // this.utilityService.getEnergyFinalUnit().subscribe((value) => {
-    //   this.energyFinalUnit = value;
-    // });
   }
 
   ngOnDestroy() {
@@ -86,11 +84,6 @@ export class EnergySourceComponent implements OnInit {
     let selectedAccount: IdbAccount = this.accountdbService.selectedAccount.getValue();
     this.addOrEdit = 'add';
     this.editMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.id, selectedAccount.id);
-    // this.utilityMeterdbService.addWithObservable(utilityMeter).subscribe(meterId => {
-    //   this.utilityMeterdbService.setFacilityMeters();
-    //   utilityMeter.id = meterId;
-    //   this.selectEditMeter(utilityMeter);
-    // });
   }
 
   meterExport() {
@@ -153,5 +146,10 @@ export class EnergySourceComponent implements OnInit {
   cancelDelete() {
     this.meterToDelete = undefined;
     this.meterMenuOpen = null;
+  }
+
+  isMeterInvalid(meter: IdbUtilityMeter): boolean{
+    let form: FormGroup = this.editMeterFormService.getFormFromMeter(meter);
+    return form.invalid;
   }
 }

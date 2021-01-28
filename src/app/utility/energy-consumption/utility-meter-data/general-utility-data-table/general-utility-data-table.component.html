@@ -5,7 +5,9 @@
                 <input #masterCheckbox type="checkbox" (change)="checkAll()" [(ngModel)]="allChecked">
             </th>
             <th class="row-year">Meter Read Date</th>
-            <th>Total Energy (<span [innerHTML]="energyUnit | settingsLabel"></span>)</th>
+            <th *ngIf="showVolumeColumn">Total Consumption (<span [innerHTML]="volumeUnit | settingsLabel"></span>)</th>
+            <th *ngIf="showEnergyColumn">Total Energy (<span [innerHTML]="energyUnit | settingsLabel"></span>)</th>
+            <th>Total Cost</th>
             <th>Commodity Charge</th>
             <th>Delivery Charge</th>
             <th>Other Charges</th>
@@ -13,15 +15,18 @@
         </tr>
     </thead>
     <tbody>
-        <tr *ngFor="let meterData of meterListItem.meterDataItems | slice: pageSize[meterIndex] | slice: 0:itemsPerPage;">
+        <tr
+            *ngFor="let meterData of meterListItem.meterDataItems | slice: pageSize[meterIndex] | slice: 0:itemsPerPage;">
             <td class="input">
                 <input type="checkbox" name="metersSelected" (change)="toggleChecked()" [(ngModel)]="meterData.checked">
             </td>
-            <td>{{meterData.readDate}}</td>
-            <td>{{meterData.totalEnergyUse}}</td>
-            <td>${{meterData.commodityCharge}}</td>
-            <td>${{meterData.deliveryCharge}}</td>
-            <td>${{meterData.otherCharge}}</td>
+            <td>{{meterData.readDate | date}}</td>
+            <td *ngIf="showVolumeColumn">{{meterData.totalVolume}}</td>
+            <td *ngIf="showEnergyColumn">{{meterData.totalEnergyUse}}</td>
+            <td>{{meterData.totalCost | currency}}</td>
+            <td>{{meterData.commodityCharge | currency}}</td>
+            <td>{{meterData.deliveryCharge | currency}}</td>
+            <td>{{meterData.otherCharge | currency}}</td>
             <td class="actions">
                 <i class="fa fa-pencil" title="Edit" (click)="setEditMeterData(meterData)"></i>
                 <i class="fa fa-trash-o" title="Delete" (click)="setDeleteMeterData(meterData)"></i>

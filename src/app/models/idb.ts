@@ -56,6 +56,7 @@ export interface IdbUtilityMeterGroup {
     dateModified: Date,
     factionOfTotalEnergy: number,
     totalEnergyUse?: number,
+    totalConsumption?: number,
     groupData?: Array<IdbUtilityMeter>,
     visible?: boolean
 }
@@ -81,7 +82,8 @@ export interface IdbUtilityMeter {
     //group = groupName
     group: string
 
-    startingUnit: string
+    startingUnit: string,
+    energyUnit: string,
     fuel:string
     visible?: boolean
 }

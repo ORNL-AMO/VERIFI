@@ -6,7 +6,7 @@
                 <th>Utility</th>
                 <th>Group</th>
                 <th>Last Bill Entered</th>
-                <th>Energy Usage <small>({{yearAgoDate | date: 'MMM, y'}} - {{todaysDate | date: 'MMM, y'}})</small></th>
+                <th>Energy Usage (<span [innerHTML]="facilityEnergyUnit | settingsLabel"></span>) <small>({{yearAgoDate | date: 'MMM, y'}} - {{todaysDate | date: 'MMM, y'}})</small></th>
                 <th>Energy Cost <small>({{yearAgoDate | date: 'MMM, y'}} - {{todaysDate | date: 'MMM, y'}})</small></th>
             </tr>
         </thead>

@@ -4,13 +4,10 @@
     <div class="row">
         <div class="col">
             <p class="bold">Meter Information</p>
-            <input hidden type="text" formControlName="id">
-            <input hidden type="text" formControlName="group">
-
             <div>
                 <label for="meterName">Name <span class="required">*</span> </label>
                 <div class="mb-3">
-                <input id="meterName" class="form-control" type="text" formControlName="name">
+                    <input id="meterName" class="form-control" type="text" formControlName="name">
                 </div>
             </div>
 
@@ -18,7 +15,7 @@
                 <div class="col">
                     <label for="source">Source <span class="required">*</span> </label>
                     <div class="mb-3">
-                        <select id="source" type="text" formControlName="source" (change)="setSource()">
+                        <select id="source" type="text" formControlName="source" (change)="changeSource()">
                             <option [ngValue]="'Electricity'">Electricity</option>
                             <option [ngValue]="'Natural Gas'">Natural Gas</option>
                             <option [ngValue]="'Other Fuels'">Other Fuels</option>
@@ -31,11 +28,13 @@
                 </div>
 
                 <div class="col">
-                    <label for="siteToSource">Collection Unit <span class="required">*</span> </label>
+                    <label for="startingUnit">Collection Unit <span class="required">*</span> </label>
                     <div class="mb-3">
-                        <select id="siteToSource" type="text" formControlName="startingUnit" (change)="checkShowHeatCapacity()">
-                            <option *ngFor="let startingUnitOption of startingUnitOptions" [ngValue]="startingUnitOption.value">
-                                <span [innerHTML]="startingUnitOption.display"></span></option>
+                        <select id="startingUnit" type="text" formControlName="startingUnit" (change)="changeUnit()">
+                            <option *ngFor="let startingUnitOption of startingUnitOptions"
+                                [ngValue]="startingUnitOption.value">
+                                <span [innerHTML]="startingUnitOption.display"></span>
+                            </option>
                         </select>
                     </div>
                 </div>
@@ -56,8 +55,9 @@
                 <div *ngIf="displayFuel" class="col">
                     <label for="energySource">{{energySourceLabel}} <span class="required">*</span> </label>
                     <div class="mb-3">
-                        <select id="energySource" type="text" formControlName="fuel" (change)="changeFuelType()">
-                            <option *ngFor="let fuelOption of fuelTypeOptions" [ngValue]="fuelOption.value">{{fuelOption.value}}
+                        <select id="energySource" type="text" formControlName="fuel" (change)="changeFuel()">
+                            <option *ngFor="let fuelOption of fuelTypeOptions" [ngValue]="fuelOption.value">
+                                {{fuelOption.value}}
                             </option>
                         </select>
                     </div>
@@ -69,7 +69,8 @@
                     <label for="heatCapacity">Heat Capacity <span class="required">*</span> </label>
                     <div class="input-group mb-3">
                         <input id="heatCapacity" class="form-control" type="number" formControlName="heatCapacity">
-                        <span class="unit">gal/MMBtu</span>
+                        <span class="unit"><span [innerHTML]="facilityEnergyUnit | settingsLabel"></span>/<span [innerHTML]="meterForm.controls.startingUnit.value | settingsLabel"></span>
+                        </span>
                     </div>
                 </div>
 
@@ -125,5 +126,5 @@
 </form>
 <div class="saveCancel item-right">
     <button class="btn btn-secondary" (click)="cancel()">Cancel</button>
-    <button class="btn btn-primary" (click)="saveChanges()">Save</button>
+    <button class="btn btn-primary" (click)="saveChanges()" [disabled]="meterForm.invalid">Save</button>
 </div>
