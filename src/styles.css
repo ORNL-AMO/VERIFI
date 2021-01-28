@@ -111,7 +111,7 @@ p.error {
 }
 .red,
 .required {
-  color: red;
+  color: #bf2d00;
 }
 .pointer {
   cursor: pointer;
@@ -287,6 +287,9 @@ Popups & Windows
   margin: 0px;
   padding: 0 30px 0 0;
   max-height: calc(100vh - 375px);
+}
+.windowContentScroll form {
+  padding: 0 2px;
 }
 .popup {
   border-style: solid;
@@ -486,21 +489,24 @@ textarea {
   width: 100%;
 }
 input.warning {
-  outline: 2px solid #f39c11 !important;
+  outline: 2px solid #f39c1196 !important;
   outline-offset: 0;
-  border: 1px solid white;
+  background-color: #f39c1114;
+  border: 1px solid white !important;
 }
-input.error {
-  outline: 2px solid #bf3d00 !important;
+input.error,
+input.ng-invalid {
+  outline: 2px solid #bf3d00c4 !important;
   outline-offset: 0;
-  border: 1px solid white;
+  background-color: #bf3d001c;
+  border: 1px solid #fff !important;
 }
 input:active,
 input:focus,
 input.active {
   outline: 2px solid #2980b95e !important;
   outline-offset: 0;
-  border: 1px solid white;
+  border: 1px solid white !important;
 }
 input:disabled {
   border: 1px solid #d0d0d0;
@@ -513,7 +519,7 @@ input:disabled {
 .required span {
   position: absolute;
   right: 14px;
-  color: red;
+  color: #bf2d00;
   padding: 5px 7px 0 0;
 }
 select {
@@ -523,6 +529,16 @@ select {
 form select {
   max-width: 100%;
   width: 100%;
+}
+.inputError,
+.inputWarning {
+  display: block;
+  margin: -10px 0 10px 0;
+  font-size: 12px;
+  color: #822900;
+}
+.inputWarning {
+  color: #a76c00;
 }
 /*
 Tables

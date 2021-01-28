@@ -16,15 +16,20 @@
         <div class="input-group mb-3">
           <input id="readDate" class="form-control" type="date" formControlName="readDate" required>
         </div>
+        <span class="inputError" *ngIf="meterDataForm.get('readDate').hasError('required')">Meter read date is required</span>
 
         <label for="totalEnergyUse">
           Total Energy Use
           <span class="required">*</span>
         </label>
         <div class="input-group mb-3">
-          <input id="totalEnergyUse" class="form-control" type="number" formControlName="totalEnergyUse" required>
+          <input id="totalEnergyUse" class="form-control" type="number" formControlName="totalEnergyUse" 
+          [class.warning]="meterDataForm.controls.totalEnergyUse.value === 0">
           <span class="unit" [innerHTML]="energyUnit | settingsLabel"></span>
         </div>
+        <span class="inputError" *ngIf="meterDataForm.get('totalEnergyUse').hasError('required')">Total energy use is required</span>
+        <span class="inputError" *ngIf="meterDataForm.get('totalEnergyUse').hasError('min')">Can't be less than 0</span>
+        <span class="inputWarning" *ngIf="meterDataForm.controls.totalEnergyUse.value === 0">Total energy use should be greater than 0</span>
       </div>
       <div class="col">
         <label for="totalDemand">
@@ -32,18 +37,26 @@
           <span class="required">*</span>
         </label>
         <div class="input-group mb-3">
-          <input id="totalDemand" class="form-control" type="number" formControlName="totalDemand" required>
+          <input id="totalDemand" class="form-control" type="number" formControlName="totalDemand" 
+          [class.warning]="meterDataForm.controls.totalDemand.value === 0">
           <span class="unit">$</span>
         </div>
+        <span class="inputError" *ngIf="meterDataForm.get('totalDemand').hasError('required')">Total demand is required</span>
+        <span class="inputError" *ngIf="meterDataForm.get('totalDemand').hasError('min')">Can't be less than 0</span>
+        <span class="inputWarning" *ngIf="meterDataForm.controls.totalDemand.value === 0">Total demand should be greater than 0</span>
 
         <label for="totalCost">
           Total Cost
           <span class="required">*</span>
         </label>
         <div class="input-group mb-3">
-          <input id="totalCost" class="form-control" type="number" formControlName="totalCost" required>
+          <input id="totalCost" class="form-control" type="number" formControlName="totalCost" 
+          [class.warning]="meterDataForm.controls.totalCost.value === 0">
           <span class="unit">$</span>
         </div>
+        <span class="inputError" *ngIf="meterDataForm.get('totalCost').hasError('required')">Total cost is required</span>
+        <span class="inputError" *ngIf="meterDataForm.get('totalCost').hasError('min')">Can't be less than 0</span>
+        <span class="inputWarning" *ngIf="meterDataForm.controls.totalCost.value === 0">Total cost should be greater than 0</span>
 
       </div>
     </div>
@@ -219,5 +232,5 @@
 
 <div class="saveCancel item-right">
   <button class="btn btn-secondary" (click)="cancel()">Cancel</button>
-  <button class="btn btn-primary" (click)="meterDataSave()">Save</button>
+  <button class="btn btn-primary" (click)="meterDataSave()" [disabled]="meterDataForm.invalid">Save</button>
 </div>

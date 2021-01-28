@@ -58,57 +58,56 @@ export class UtilityMeterDataService {
     }
   }
 
-  //TODO validators based off of filters
   getElectricityMeterDataForm(meterData: IdbUtilityMeterData): FormGroup {
     return this.formBuilder.group({
-      id: [meterData.id, Validators.required],
-      meterId: [meterData.meterId, Validators.required],
-      facilityId: [meterData.facilityId, Validators.required],
-      accountId: [meterData.accountId, Validators.required],
+      id: [meterData.id],
+      meterId: [meterData.meterId],
+      facilityId: [meterData.facilityId],
+      accountId: [meterData.accountId],
       readDate: [meterData.readDate, Validators.required],
-      unit: [meterData.unit, Validators.required],
-      totalEnergyUse: [meterData.totalEnergyUse, Validators.required],
-      totalCost: [meterData.totalCost, Validators.required],
-      commodityCharge: [meterData.commodityCharge, Validators.required],
-      deliveryCharge: [meterData.deliveryCharge, Validators.required],
-      otherCharge: [meterData.otherCharge, Validators.required],
-      checked: [meterData.checked, Validators.required],
-      totalDemand: [meterData.totalDemand, Validators.required],
-      basicCharge: [meterData.basicCharge, Validators.required],
-      supplyBlockAmount: [meterData.supplyBlockAmount, Validators.required],
-      supplyBlockCharge: [meterData.supplyBlockCharge, Validators.required],
-      flatRateAmount: [meterData.flatRateAmount, Validators.required],
-      flatRateCharge: [meterData.flatRateCharge, Validators.required],
-      peakAmount: [meterData.peakAmount, Validators.required],
-      peakCharge: [meterData.peakCharge, Validators.required],
-      offPeakAmount: [meterData.offPeakAmount, Validators.required],
-      offPeakCharge: [meterData.offPeakCharge, Validators.required],
-      demandBlockAmount: [meterData.demandBlockAmount, Validators.required],
-      demandBlockCharge: [meterData.demandBlockCharge, Validators.required],
-      generationTransmissionCharge: [meterData.generationTransmissionCharge, Validators.required],
-      transmissionCharge: [meterData.transmissionCharge, Validators.required],
-      powerFactorCharge: [meterData.powerFactorCharge, Validators.required],
-      businessCharge: [meterData.businessCharge, Validators.required],
-      utilityTax: [meterData.utilityTax, Validators.required],
-      latePayment: [meterData.latePayment, Validators.required]
+      unit: [meterData.unit],
+      totalEnergyUse: [meterData.totalEnergyUse, [Validators.required, Validators.min(0)]],
+      totalCost: [meterData.totalCost, [Validators.required, Validators.min(0)]],
+      commodityCharge: [meterData.commodityCharge],
+      deliveryCharge: [meterData.deliveryCharge],
+      otherCharge: [meterData.otherCharge],
+      checked: [meterData.checked],
+      totalDemand: [meterData.totalDemand, [Validators.required, Validators.min(0)]],
+      basicCharge: [meterData.basicCharge],
+      supplyBlockAmount: [meterData.supplyBlockAmount],
+      supplyBlockCharge: [meterData.supplyBlockCharge],
+      flatRateAmount: [meterData.flatRateAmount],
+      flatRateCharge: [meterData.flatRateCharge],
+      peakAmount: [meterData.peakAmount],
+      peakCharge: [meterData.peakCharge],
+      offPeakAmount: [meterData.offPeakAmount],
+      offPeakCharge: [meterData.offPeakCharge],
+      demandBlockAmount: [meterData.demandBlockAmount],
+      demandBlockCharge: [meterData.demandBlockCharge],
+      generationTransmissionCharge: [meterData.generationTransmissionCharge],
+      transmissionCharge: [meterData.transmissionCharge],
+      powerFactorCharge: [meterData.powerFactorCharge],
+      businessCharge: [meterData.businessCharge],
+      utilityTax: [meterData.utilityTax],
+      latePayment: [meterData.latePayment]
     })
   }
 
   getGeneralMeterDataForm(meterData: IdbUtilityMeterData): FormGroup {
     return this.formBuilder.group({
-      id: [meterData.id, Validators.required],
-      meterId: [meterData.meterId, Validators.required],
-      facilityId: [meterData.facilityId, Validators.required],
-      accountId: [meterData.accountId, Validators.required],
+      id: [meterData.id],
+      meterId: [meterData.meterId],
+      facilityId: [meterData.facilityId],
+      accountId: [meterData.accountId],
       readDate: [meterData.readDate, Validators.required],
-      unit: [meterData.unit, Validators.required],
-      totalVolume: [meterData.totalVolume, Validators.required],
-      totalEnergyUse: [meterData.totalEnergyUse, Validators.required],
-      totalCost: [meterData.totalCost, Validators.required],
-      commodityCharge: [meterData.commodityCharge, Validators.required],
-      deliveryCharge: [meterData.deliveryCharge, Validators.required],
-      otherCharge: [meterData.otherCharge, Validators.required],
-      checked: [meterData.checked, Validators.required]
+      unit: [meterData.unit],
+      totalVolume: [meterData.totalVolume, [Validators.required, Validators.min(0)]],
+      totalEnergyUse: [meterData.totalEnergyUse],
+      totalCost: [meterData.totalCost, [Validators.required, Validators.min(0)]],
+      commodityCharge: [meterData.commodityCharge],
+      deliveryCharge: [meterData.deliveryCharge],
+      otherCharge: [meterData.otherCharge],
+      checked: [meterData.checked]
     });
   }
 

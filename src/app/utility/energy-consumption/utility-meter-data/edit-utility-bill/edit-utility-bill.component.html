@@ -6,15 +6,19 @@
   <div class="input-group mb-3">
     <input id="readDate" class="form-control" type="date" formControlName="readDate">
   </div>
+  <span class="inputError" *ngIf="meterDataForm.get('readDate').hasError('required')">Meter read date is required</span>
 
   <div class="row">
     <div *ngIf="displayVolumeInput" class="col">
       <label for="totalVolume">Total Volume <span class="required">*</span> </label>
       <div class="input-group mb-3">
         <input id="totalVolume" class="form-control" type="number" formControlName="totalVolume"
-          (input)="calculateTotalEnergyUse()">
+          (input)="calculateTotalEnergyUse()" [class.warning]="meterDataForm.controls.totalVolume.value === 0">
         <span class="unit" [innerHTML]="energyUnit | settingsLabel"></span>
       </div>
+      <span class="inputError" *ngIf="meterDataForm.get('totalVolume').hasError('required')">Total volume use is required</span>
+      <span class="inputError" *ngIf="meterDataForm.get('totalVolume').hasError('min')">Can't be less than 0</span>
+      <span class="inputWarning" *ngIf="meterDataForm.controls.totalVolume.value === 0">Total volume should be greater than 0</span>
     </div>
 
     <div class="col">
@@ -50,5 +54,5 @@
 
 <div class="saveCancel item-right">
   <button class="btn btn-secondary" (click)="cancel()">Cancel</button>
-  <button class="btn btn-primary" (click)="meterDataSave()">Save</button>
+  <button class="btn btn-primary" (click)="meterDataSave()" [disabled]="meterDataForm.invalid">Save</button>
 </div>
