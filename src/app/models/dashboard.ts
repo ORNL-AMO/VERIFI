@@ -51,5 +51,7 @@ export interface SummaryData {
     averageEnergyCost: number,
     yearPriorEnergyUse: number,
     yearPriorEnergyCost: number,
+    energyUseChangeSinceLastYear: number,
+    energyCostChangeSinceLastYear: number,
     utility: string
 }

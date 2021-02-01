@@ -32,9 +32,14 @@
                 </td>
                 <td>
                     {{utilityUsageSummary.previousMonthEnergyUse | number:'1.0-0'}}
+                    <span class="small pl-2 pull-right">({{utilityUsageSummary.energyUseChangeSinceLastYear |
+                        number:'1.0-0'}})</span>
                 </td>
                 <td>
                     {{utilityUsageSummary.previousMonthEnergyCost | currency : 'USD' : 'symbol' : '1.0-0' }}
+                    <span class="small pl-2 pull-right">({{utilityUsageSummary.energyCostChangeSinceLastYear | currency
+                        : 'USD' :
+                        'symbol' : '1.0-0'}})</span>
                 </td>
                 <td>
                     {{utilityUsageSummary.yearPriorEnergyUse | number:'1.0-0'}}
@@ -57,9 +62,14 @@
                 </th>
                 <th>
                     {{utilityUsageSummaryData.total.previousMonthEnergyUse | number:'1.0-0'}}
+                    <span class="small pl-2 pull-right">({{utilityUsageSummaryData.total.energyUseChangeSinceLastYear |
+                        number:'1.0-0'}})</span>
                 </th>
                 <th>
                     {{utilityUsageSummaryData.total.previousMonthEnergyCost | currency : 'USD' : 'symbol' : '1.0-0' }}
+                    <span class="small pl-2 pull-right">({{utilityUsageSummaryData.total.energyCostChangeSinceLastYear |
+                        currency : 'USD' :
+                        'symbol' : '1.0-0'}})</span>
                 </th>
                 <th>
                     {{utilityUsageSummaryData.total.yearPriorEnergyUse | number:'1.0-0'}}

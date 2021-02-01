@@ -51,7 +51,9 @@ export class AccountUtilityEnergyUseTableComponent implements OnInit {
             averageEnergyCost: 0,
             utility: undefined,
             yearPriorEnergyCost: 0,
-            yearPriorEnergyUse: 0
+            yearPriorEnergyUse: 0,
+            energyUseChangeSinceLastYear: 0,
+            energyCostChangeSinceLastYear: 0,
           },
           allMetersLastBill: undefined
         }

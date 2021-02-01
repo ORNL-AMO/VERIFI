@@ -108,16 +108,22 @@ export class DashboardService {
     accountUtilitySummaries = this.getUtilityUsageSummaryData(accountUtilitySummaries, utilitySummaries, 'Waste Water');
     accountUtilitySummaries = this.getUtilityUsageSummaryData(accountUtilitySummaries, utilitySummaries, 'Other Utility');
     let lastBills: Array<MonthlyData> = facilitySummaries.flatMap(summary => { return summary.allMetersLastBill });
+    let previousMonthEnergyUse: number = _.sumBy(accountUtilitySummaries, 'previousMonthEnergyUse');
+    let previousMonthEnergyCost: number = _.sumBy(accountUtilitySummaries, 'previousMonthEnergyCost');
+    let yearPriorEnergyUse: number = _.sumBy(accountUtilitySummaries, 'yearPriorEnergyUse');
+    let yearPriorEnergyCost: number = _.sumBy(accountUtilitySummaries, 'yearPriorEnergyCost');
     return {
       utilitySummaries: accountUtilitySummaries,
       total: {
         lastBillDate: _.maxBy(accountUtilitySummaries, 'lastBillDate'),
-        previousMonthEnergyUse: _.sumBy(accountUtilitySummaries, 'previousMonthEnergyUse'),
-        previousMonthEnergyCost: _.sumBy(accountUtilitySummaries, 'previousMonthEnergyCost'),
+        previousMonthEnergyUse: previousMonthEnergyUse,
+        previousMonthEnergyCost: previousMonthEnergyCost,
         averageEnergyUse: _.sumBy(accountUtilitySummaries, 'averageEnergyUse'),
         averageEnergyCost: _.sumBy(accountUtilitySummaries, 'averageEnergyCost'),
-        yearPriorEnergyUse: _.sumBy(accountUtilitySummaries, 'yearPriorEnergyUse'),
-        yearPriorEnergyCost: _.sumBy(accountUtilitySummaries, 'yearPriorEnergyCost'),
+        yearPriorEnergyUse: yearPriorEnergyUse,
+        yearPriorEnergyCost: yearPriorEnergyCost,
+        energyCostChangeSinceLastYear: yearPriorEnergyCost - previousMonthEnergyCost,
+        energyUseChangeSinceLastYear: yearPriorEnergyUse - previousMonthEnergyUse,
         utility: 'Total'
       },
       allMetersLastBill: _.maxBy(lastBills, (bill: MonthlyData) => { return new Date(bill.year, bill.monthNumValue) })
@@ -128,14 +134,20 @@ export class DashboardService {
     let filteredUtilitySummaries: Array<SummaryData> = allUtilitySummaries.filter(summary => { return summary.utility == utility });
     if (filteredUtilitySummaries.length != 0) {
       let dates: Array<Date> = filteredUtilitySummaries.map(summary => { return summary.lastBillDate });
+      let previousMonthEnergyUse: number = _.sumBy(filteredUtilitySummaries, 'previousMonthEnergyUse');
+      let previousMonthEnergyCost: number = _.sumBy(filteredUtilitySummaries, 'previousMonthEnergyCost');
+      let yearPriorEnergyUse: number = _.sumBy(filteredUtilitySummaries, 'yearPriorEnergyUse');
+      let yearPriorEnergyCost: number = _.sumBy(filteredUtilitySummaries, 'yearPriorEnergyCost');
       let summaryData: SummaryData = {
         lastBillDate: _.max(dates),
-        previousMonthEnergyUse: _.sumBy(filteredUtilitySummaries, 'previousMonthEnergyUse'),
-        previousMonthEnergyCost: _.sumBy(filteredUtilitySummaries, 'previousMonthEnergyCost'),
+        previousMonthEnergyUse: previousMonthEnergyUse,
+        previousMonthEnergyCost: previousMonthEnergyCost,
         averageEnergyUse: _.sumBy(filteredUtilitySummaries, 'averageEnergyUse'),
         averageEnergyCost: _.sumBy(filteredUtilitySummaries, 'averageEnergyCost'),
-        yearPriorEnergyUse: _.sumBy(filteredUtilitySummaries, 'yearPriorEnergyUse'),
-        yearPriorEnergyCost: _.sumBy(filteredUtilitySummaries, 'yearPriorEnergyCost'),
+        yearPriorEnergyUse: yearPriorEnergyUse,
+        yearPriorEnergyCost: yearPriorEnergyCost,
+        energyCostChangeSinceLastYear: yearPriorEnergyCost - previousMonthEnergyCost,
+        energyUseChangeSinceLastYear: yearPriorEnergyUse - previousMonthEnergyUse,
         utility: utility
       }
       accountUtilitySummaries.push(summaryData);
@@ -157,16 +169,25 @@ export class DashboardService {
     utilitySummaries = this.getMetersSummaryByUtility(utilitySummaries, 'Water', facilityMeters, inAccount, allMetersLastBill);
     utilitySummaries = this.getMetersSummaryByUtility(utilitySummaries, 'Waste Water', facilityMeters, inAccount, allMetersLastBill);
     utilitySummaries = this.getMetersSummaryByUtility(utilitySummaries, 'Other Utility', facilityMeters, inAccount, allMetersLastBill);
+    let previousMonthEnergyUse: number = _.sumBy(utilitySummaries, 'previousMonthEnergyUse');
+    let previousMonthEnergyCost: number = _.sumBy(utilitySummaries, 'previousMonthEnergyCost');
+    let yearPriorEnergyUse: number = _.sumBy(utilitySummaries, 'yearPriorEnergyUse');
+    let yearPriorEnergyCost: number = _.sumBy(utilitySummaries, 'yearPriorEnergyCost');
+
+
+
     return {
       utilitySummaries: utilitySummaries,
       total: {
         lastBillDate: _.maxBy(utilitySummaries, 'lastBillDate'),
-        previousMonthEnergyUse: _.sumBy(utilitySummaries, 'previousMonthEnergyUse'),
-        previousMonthEnergyCost: _.sumBy(utilitySummaries, 'previousMonthEnergyCost'),
+        previousMonthEnergyUse: previousMonthEnergyUse,
+        previousMonthEnergyCost: previousMonthEnergyCost,
         averageEnergyUse: _.sumBy(utilitySummaries, 'averageEnergyUse'),
         averageEnergyCost: _.sumBy(utilitySummaries, 'averageEnergyCost'),
-        yearPriorEnergyUse: _.sumBy(utilitySummaries, 'yearPriorEnergyUse'),
-        yearPriorEnergyCost: _.sumBy(utilitySummaries, 'yearPriorEnergyCost'),
+        yearPriorEnergyUse: yearPriorEnergyUse,
+        yearPriorEnergyCost: yearPriorEnergyCost,
+        energyCostChangeSinceLastYear: yearPriorEnergyCost - previousMonthEnergyCost,
+        energyUseChangeSinceLastYear: yearPriorEnergyUse - previousMonthEnergyUse,
         utility: 'Total'
       },
       allMetersLastBill: allMetersLastBill
@@ -198,6 +219,8 @@ export class DashboardService {
         averageEnergyCost: (totalEnergyCostFromLastYear / lastYearData.length),
         yearPriorEnergyCost: yearPriorBill.energyCost,
         yearPriorEnergyUse: yearPriorBill.energyUse,
+        energyCostChangeSinceLastYear: yearPriorBill.energyCost - previousMonthData.energyCost,
+        energyUseChangeSinceLastYear: yearPriorBill.energyUse - previousMonthData.energyUse,
         utility: utility
       };
     } else {
@@ -209,6 +232,8 @@ export class DashboardService {
         averageEnergyCost: 0,
         yearPriorEnergyCost: 0,
         yearPriorEnergyUse: 0,
+        energyUseChangeSinceLastYear: 0,
+        energyCostChangeSinceLastYear: 0,
         utility: utility
       }
     }
