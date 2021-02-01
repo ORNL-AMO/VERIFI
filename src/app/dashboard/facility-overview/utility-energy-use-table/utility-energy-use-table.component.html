@@ -4,10 +4,10 @@
             <tr>
                 <th></th>
                 <th colspan="2">
-                    Last Month <span class="small" *ngIf="yearPriorDate">({{lastMonthsDate | date: 'MMM, y'}})</span>
+                    Last Month <span class="small" *ngIf="lastMonthsDate">({{lastMonthsDate | date: 'MMM, y'}})</span>
                 </th>
                 <th colspan="2">
-                    Previous Year <span class="small" *ngIf="yearPriorDate">({{yearPriorLastMonth | date: 'MMM,
+                    Previous Year <span class="small" *ngIf="yearPriorLastMonth">({{yearPriorLastMonth | date: 'MMM,
                         y'}})</span>
                 </th>
                 <th colspan="2">
