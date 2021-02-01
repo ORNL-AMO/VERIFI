@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { IdbUtilityMeterGroup } from 'src/app/models/idb';
 
@@ -20,7 +20,7 @@ export class EditMeterGroupFormComponent implements OnInit {
 
   ngOnInit(): void {
     this.groupForm = this.formBuilder.group({
-      name: [this.groupToEdit.name],
+      name: [this.groupToEdit.name, Validators.required],
       description: [this.groupToEdit.description]
     });
   }

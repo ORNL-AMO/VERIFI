@@ -2,16 +2,18 @@
 <br>
 <p class="bold">Group Information</p>
 <form [formGroup]="groupForm">
-    <label>Name
-        <input type="text" formControlName="name" minlength="1" maxlength="50">
-    </label>
-    <br>
-    <label>Description
+    <label for="name">Name <span class="required">*</span> </label>
+    <div class="input-group mb-3">
+        <input id="name" class="form-control" type="text" formControlName="name">
+    </div>
+    <span class="inputError" *ngIf="groupForm.get('name').hasError('required')">Name is required</span>
+
+    <label for="name">Description</label>
+    <div class="input-group mb-3">
         <textarea formControlName="description" minlength="1" maxlength="65"></textarea>
-    </label>
-    <br>
+    </div>
 </form>
 <div class="saveCancel item-right">
     <button class="btn btn-secondary" (click)="cancel()">Cancel</button>
-    <button class="btn btn-primary" (click)="save()">Save</button>
+    <button class="btn btn-primary" (click)="save()" [disabled]="groupForm.invalid">Save</button>
 </div>
