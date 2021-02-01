@@ -96,7 +96,7 @@ export interface IdbUtilityMeterData {
     accountId: number,
     //data
     readDate: Date,
-    unit: string,
+    // unit: string,
     totalVolume: number,
     totalEnergyUse: number,
     totalCost: number,
