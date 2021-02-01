@@ -7,11 +7,17 @@
                     Last Month <span class="small" *ngIf="yearPriorDate">({{lastMonthsDate | date: 'MMM, y'}})</span>
                 </th>
                 <th colspan="2">
+                    Previous Year <span class="small" *ngIf="yearPriorDate">({{yearPriorLastMonth | date: 'MMM,
+                        y'}})</span>
+                </th>
+                <th colspan="2">
                     Monthly Average <span class="small" *ngIf="yearPriorDate">({{yearPriorDate | date: 'MMM, y'}} - {{lastMonthsDate | date: 'MMM, y'}})</span>
                 </th>
             </tr>
             <tr>
                 <th>Utility</th>
+                <th>Energy Use (<span [innerHTML]="facilityEnergyUnit | settingsLabel"></span>)</th>
+                <th>Energy Cost</th>
                 <th>Energy Use (<span [innerHTML]="facilityEnergyUnit | settingsLabel"></span>)</th>
                 <th>Energy Cost</th>
                 <th>Energy Use (<span [innerHTML]="facilityEnergyUnit | settingsLabel"></span>)</th>
@@ -28,6 +34,12 @@
                 </td>
                 <td>
                     {{utilityUsageSummary.previousMonthEnergyCost | currency : 'USD' : 'symbol' : '1.0-0' }}
+                </td>
+                <td>
+                    {{utilityUsageSummary.yearPriorEnergyUse | number:'1.0-0'}}
+                </td>
+                <td>
+                    {{utilityUsageSummary.yearPriorEnergyCost | currency : 'USD' : 'symbol' : '1.0-0' }}
                 </td>
                 <td>
                     {{utilityUsageSummary.averageEnergyUse | number:'1.0-0'}}
@@ -47,6 +59,12 @@
                 </th>
                 <th>
                     {{utilityUsageSummaryData.total.previousMonthEnergyCost | currency : 'USD' : 'symbol' : '1.0-0' }}
+                </th>
+                <th>
+                    {{utilityUsageSummaryData.total.yearPriorEnergyUse | number:'1.0-0'}}
+                </th>
+                <th>
+                    {{utilityUsageSummaryData.total.yearPriorEnergyCost | currency : 'USD' : 'symbol' : '1.0-0' }}
                 </th>
                 <th>
                     {{utilityUsageSummaryData.total.averageEnergyUse | number:'1.0-0'}}

@@ -24,6 +24,7 @@ export class AccountUtilityEnergyUseTableComponent implements OnInit {
 
   utilityUsageSummaryData: UtilityUsageSummaryData;
   lastMonthsDate: Date;
+  yearPriorLastMonth: Date;
   yearPriorDate: Date;
 
   constructor(private dashboardService: DashboardService, private utilityMeterDataDbService: UtilityMeterDatadbService, private facilityDbService: FacilitydbService,
@@ -48,7 +49,9 @@ export class AccountUtilityEnergyUseTableComponent implements OnInit {
             previousMonthEnergyCost: 0,
             averageEnergyUse: 0,
             averageEnergyCost: 0,
-            utility: undefined
+            utility: undefined,
+            yearPriorEnergyCost: 0,
+            yearPriorEnergyUse: 0
           },
           allMetersLastBill: undefined
         }
@@ -67,6 +70,7 @@ export class AccountUtilityEnergyUseTableComponent implements OnInit {
     if (this.utilityUsageSummaryData.allMetersLastBill) {
       this.lastMonthsDate = new Date(this.utilityUsageSummaryData.allMetersLastBill.year, this.utilityUsageSummaryData.allMetersLastBill.monthNumValue);
       this.yearPriorDate = new Date(this.utilityUsageSummaryData.allMetersLastBill.year - 1, this.utilityUsageSummaryData.allMetersLastBill.monthNumValue + 1);
+      this.yearPriorLastMonth = new Date(this.utilityUsageSummaryData.allMetersLastBill.year - 1, this.utilityUsageSummaryData.allMetersLastBill.monthNumValue );
     }
   }
 }

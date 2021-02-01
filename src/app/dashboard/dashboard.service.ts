@@ -116,6 +116,8 @@ export class DashboardService {
         previousMonthEnergyCost: _.sumBy(accountUtilitySummaries, 'previousMonthEnergyCost'),
         averageEnergyUse: _.sumBy(accountUtilitySummaries, 'averageEnergyUse'),
         averageEnergyCost: _.sumBy(accountUtilitySummaries, 'averageEnergyCost'),
+        yearPriorEnergyUse: _.sumBy(accountUtilitySummaries, 'yearPriorEnergyUse'),
+        yearPriorEnergyCost: _.sumBy(accountUtilitySummaries, 'yearPriorEnergyCost'),
         utility: 'Total'
       },
       allMetersLastBill: _.maxBy(lastBills, (bill: MonthlyData) => { return new Date(bill.year, bill.monthNumValue) })
@@ -132,6 +134,8 @@ export class DashboardService {
         previousMonthEnergyCost: _.sumBy(filteredUtilitySummaries, 'previousMonthEnergyCost'),
         averageEnergyUse: _.sumBy(filteredUtilitySummaries, 'averageEnergyUse'),
         averageEnergyCost: _.sumBy(filteredUtilitySummaries, 'averageEnergyCost'),
+        yearPriorEnergyUse: _.sumBy(filteredUtilitySummaries, 'yearPriorEnergyUse'),
+        yearPriorEnergyCost: _.sumBy(filteredUtilitySummaries, 'yearPriorEnergyCost'),
         utility: utility
       }
       accountUtilitySummaries.push(summaryData);
@@ -161,6 +165,8 @@ export class DashboardService {
         previousMonthEnergyCost: _.sumBy(utilitySummaries, 'previousMonthEnergyCost'),
         averageEnergyUse: _.sumBy(utilitySummaries, 'averageEnergyUse'),
         averageEnergyCost: _.sumBy(utilitySummaries, 'averageEnergyCost'),
+        yearPriorEnergyUse: _.sumBy(utilitySummaries, 'yearPriorEnergyUse'),
+        yearPriorEnergyCost: _.sumBy(utilitySummaries, 'yearPriorEnergyCost'),
         utility: 'Total'
       },
       allMetersLastBill: allMetersLastBill
@@ -183,13 +189,15 @@ export class DashboardService {
       let totalEnergyUseFromLastYear: number = _.sumBy(lastYearData, 'energyUse');
       let totalEnergyCostFromLastYear: number = _.sumBy(lastYearData, 'energyCost');
       let lastBillForTheseMeters: MonthlyData = this.calanderizationService.getLastBillEntry(utilityMeters, inAccount);
-
+      let yearPriorBill: MonthlyData = this.calanderizationService.getYearPriorBillEntry(utilityMeters, inAccount, lastBillForTheseMeters);
       return {
         lastBillDate: new Date(lastBillForTheseMeters.year, lastBillForTheseMeters.monthNumValue),
         previousMonthEnergyUse: previousMonthData.energyUse,
         previousMonthEnergyCost: previousMonthData.energyCost,
         averageEnergyUse: (totalEnergyUseFromLastYear / lastYearData.length),
         averageEnergyCost: (totalEnergyCostFromLastYear / lastYearData.length),
+        yearPriorEnergyCost: yearPriorBill.energyCost,
+        yearPriorEnergyUse: yearPriorBill.energyUse,
         utility: utility
       };
     } else {
@@ -199,6 +207,8 @@ export class DashboardService {
         previousMonthEnergyCost: 0,
         averageEnergyUse: 0,
         averageEnergyCost: 0,
+        yearPriorEnergyCost: 0,
+        yearPriorEnergyUse: 0,
         utility: utility
       }
     }

@@ -49,5 +49,7 @@ export interface SummaryData {
     previousMonthEnergyCost: number,
     averageEnergyUse: number,
     averageEnergyCost: number,
+    yearPriorEnergyUse: number,
+    yearPriorEnergyCost: number,
     utility: string
 }

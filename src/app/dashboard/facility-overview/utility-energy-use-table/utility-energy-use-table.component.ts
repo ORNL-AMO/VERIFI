@@ -21,6 +21,7 @@ export class UtilityEnergyUseTableComponent implements OnInit {
   utilityUsageSummaryData: UtilityUsageSummaryData;
   lastMonthsDate: Date;
   yearPriorDate: Date;
+  yearPriorLastMonth: Date;
   facilityEnergyUnit: string;
   constructor(private dashboardService: DashboardService, private utilityMeterDataDbService: UtilityMeterDatadbService, private facilityDbService: FacilitydbService) { }
 
@@ -51,6 +52,7 @@ export class UtilityEnergyUseTableComponent implements OnInit {
       if (this.utilityUsageSummaryData.total) {
         this.lastMonthsDate = new Date(this.utilityUsageSummaryData.allMetersLastBill.year, this.utilityUsageSummaryData.allMetersLastBill.monthNumValue);
         this.yearPriorDate = new Date(this.utilityUsageSummaryData.allMetersLastBill.year - 1, this.utilityUsageSummaryData.allMetersLastBill.monthNumValue + 1);
+        this.yearPriorLastMonth = new Date(this.utilityUsageSummaryData.allMetersLastBill.year - 1, this.utilityUsageSummaryData.allMetersLastBill.monthNumValue );
       }
     }
   }
