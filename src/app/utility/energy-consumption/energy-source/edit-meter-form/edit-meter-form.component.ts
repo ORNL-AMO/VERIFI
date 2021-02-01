@@ -1,8 +1,9 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { FormGroup, ValidatorFn } from '@angular/forms';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 import { EnergyUseCalculationsService } from 'src/app/shared/helper-services/energy-use-calculations.service';
 import { EnergyUnitOptions, MassUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from 'src/app/shared/unitOptions';
@@ -29,9 +30,10 @@ export class EditMeterFormComponent implements OnInit {
   energySourceLabel: string = 'Fuel Type';
   displayHeatCapacity: boolean;
   facilityEnergyUnit: string;
+  meterFormDisabled: boolean;
   constructor(private utilityMeterDbService: UtilityMeterdbService, private facilityDbService: FacilitydbService,
     private energyUnitsHelperService: EnergyUnitsHelperService, private energyUseCalculationsService: EnergyUseCalculationsService,
-    private editMeterFormService: EditMeterFormService) { }
+    private editMeterFormService: EditMeterFormService, private utilityMeterDataDbService: UtilityMeterDatadbService) { }
 
   ngOnInit(): void {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
@@ -39,6 +41,16 @@ export class EditMeterFormComponent implements OnInit {
       this.facilityEnergyUnit = selectedFacility.energyUnit;
     }
     this.meterForm = this.editMeterFormService.getFormFromMeter(this.editMeter);
+    let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataForFacility(this.editMeter);
+    if (meterData.length != 0) {
+      this.meterFormDisabled = true;
+      this.meterForm.controls.source.disable();
+      this.meterForm.controls.startingUnit.disable();
+      this.meterForm.controls.phase.disable();
+      this.meterForm.controls.fuel.disable();
+      this.meterForm.controls.heatCapacity.disable();
+      this.meterForm.controls.siteToSource.disable();
+    }
     this.setFuelTypeOptions();
     this.checkDisplayFuel();
     this.checkDisplayPhase();
@@ -131,7 +143,7 @@ export class EditMeterFormComponent implements OnInit {
     this.meterForm.controls.phase.updateValueAndValidity();
   }
 
-  updateHeatCapacityValidation(){
+  updateHeatCapacityValidation() {
     let heatCapacityAndSiteToSourceValidators: Array<ValidatorFn> = this.editMeterFormService.getHeatCapacityAndSiteToSourceValidation(this.meterForm.controls.source.value, this.meterForm.controls.startingUnit.value);
     this.meterForm.controls.heatCapacity.setValidators(heatCapacityAndSiteToSourceValidators);
     this.meterForm.controls.heatCapacity.updateValueAndValidity();
