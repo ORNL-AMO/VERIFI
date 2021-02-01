@@ -122,8 +122,8 @@ export class DashboardService {
         averageEnergyCost: _.sumBy(accountUtilitySummaries, 'averageEnergyCost'),
         yearPriorEnergyUse: yearPriorEnergyUse,
         yearPriorEnergyCost: yearPriorEnergyCost,
-        energyCostChangeSinceLastYear: yearPriorEnergyCost - previousMonthEnergyCost,
-        energyUseChangeSinceLastYear: yearPriorEnergyUse - previousMonthEnergyUse,
+        energyCostChangeSinceLastYear: previousMonthEnergyCost - yearPriorEnergyCost,
+        energyUseChangeSinceLastYear: previousMonthEnergyUse - yearPriorEnergyUse,
         utility: 'Total'
       },
       allMetersLastBill: _.maxBy(lastBills, (bill: MonthlyData) => { return new Date(bill.year, bill.monthNumValue) })
@@ -146,8 +146,8 @@ export class DashboardService {
         averageEnergyCost: _.sumBy(filteredUtilitySummaries, 'averageEnergyCost'),
         yearPriorEnergyUse: yearPriorEnergyUse,
         yearPriorEnergyCost: yearPriorEnergyCost,
-        energyCostChangeSinceLastYear: yearPriorEnergyCost - previousMonthEnergyCost,
-        energyUseChangeSinceLastYear: yearPriorEnergyUse - previousMonthEnergyUse,
+        energyCostChangeSinceLastYear: previousMonthEnergyCost - yearPriorEnergyCost,
+        energyUseChangeSinceLastYear: previousMonthEnergyUse - yearPriorEnergyUse,
         utility: utility
       }
       accountUtilitySummaries.push(summaryData);
@@ -186,8 +186,8 @@ export class DashboardService {
         averageEnergyCost: _.sumBy(utilitySummaries, 'averageEnergyCost'),
         yearPriorEnergyUse: yearPriorEnergyUse,
         yearPriorEnergyCost: yearPriorEnergyCost,
-        energyCostChangeSinceLastYear: yearPriorEnergyCost - previousMonthEnergyCost,
-        energyUseChangeSinceLastYear: yearPriorEnergyUse - previousMonthEnergyUse,
+        energyCostChangeSinceLastYear: previousMonthEnergyCost - yearPriorEnergyCost,
+        energyUseChangeSinceLastYear: previousMonthEnergyUse - yearPriorEnergyUse,
         utility: 'Total'
       },
       allMetersLastBill: allMetersLastBill
@@ -219,8 +219,8 @@ export class DashboardService {
         averageEnergyCost: (totalEnergyCostFromLastYear / lastYearData.length),
         yearPriorEnergyCost: yearPriorBill.energyCost,
         yearPriorEnergyUse: yearPriorBill.energyUse,
-        energyCostChangeSinceLastYear: yearPriorBill.energyCost - previousMonthData.energyCost,
-        energyUseChangeSinceLastYear: yearPriorBill.energyUse - previousMonthData.energyUse,
+        energyCostChangeSinceLastYear: previousMonthData.energyCost - yearPriorBill.energyCost,
+        energyUseChangeSinceLastYear: previousMonthData.energyUse - yearPriorBill.energyUse,
         utility: utility
       };
     } else {

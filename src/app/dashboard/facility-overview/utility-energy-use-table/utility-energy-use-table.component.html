@@ -30,26 +30,61 @@
                     {{utilityUsageSummary.utility}}
                 </td>
                 <td>
-                    {{utilityUsageSummary.previousMonthEnergyUse | number:'1.0-0'}}
-                    <span class="small pl-2 pull-right">({{utilityUsageSummary.energyUseChangeSinceLastYear |
-                        number:'1.0-0'}})</span>
+                    <span *ngIf="utilityUsageSummary.previousMonthEnergyUse">
+                        {{utilityUsageSummary.previousMonthEnergyUse | number:'1.0-0'}}
+                    </span>
+                    <span *ngIf="!utilityUsageSummary.previousMonthEnergyUse">
+                        &mdash;
+                    </span>
+                    <span *ngIf="utilityUsageSummary.energyUseChangeSinceLastYear" class="small pl-2 pull-right green"
+                        [ngClass]="{'red': utilityUsageSummary.energyUseChangeSinceLastYear > 0}">
+                        ({{utilityUsageSummary.energyUseChangeSinceLastYear | number:'1.0-0'}})
+                    </span>
                 </td>
                 <td>
-                    {{utilityUsageSummary.previousMonthEnergyCost | currency : 'USD' : 'symbol' : '1.0-0' }}
-                    <span class="small pl-2 pull-right">({{utilityUsageSummary.energyCostChangeSinceLastYear | currency : 'USD' :
-                        'symbol' : '1.0-0'}})</span>
+                    <span *ngIf="utilityUsageSummary.previousMonthEnergyCost">
+                        {{utilityUsageSummary.previousMonthEnergyCost | currency : 'USD' : 'symbol' : '1.0-0' }}
+                    </span>
+                    <span *ngIf="!utilityUsageSummary.previousMonthEnergyCost">
+                        &mdash;
+                    </span>
+
+                    <span *ngIf="utilityUsageSummary.energyCostChangeSinceLastYear" class="small pl-2 pull-right green"
+                        [ngClass]="{'red': utilityUsageSummary.energyCostChangeSinceLastYear > 0}">
+                        ({{utilityUsageSummary.energyCostChangeSinceLastYear | currency : 'USD' : 'symbol' :'1.0-0'}})
+                    </span>
                 </td>
                 <td>
-                    {{utilityUsageSummary.yearPriorEnergyUse | number:'1.0-0'}}
+                    <span *ngIf="utilityUsageSummary.yearPriorEnergyUse">
+                        {{utilityUsageSummary.yearPriorEnergyUse | number:'1.0-0'}}
+                    </span>
+                    <span *ngIf="!utilityUsageSummary.yearPriorEnergyUse">
+                        &mdash;
+                    </span>
                 </td>
                 <td>
-                    {{utilityUsageSummary.yearPriorEnergyCost | currency : 'USD' : 'symbol' : '1.0-0' }}
+                    <span *ngIf="utilityUsageSummary.yearPriorEnergyCost">
+                        {{utilityUsageSummary.yearPriorEnergyCost | currency : 'USD' : 'symbol' : '1.0-0' }}
+                    </span>
+                    <span *ngIf="!utilityUsageSummary.yearPriorEnergyCost">
+                        &mdash;
+                    </span>
                 </td>
                 <td>
-                    {{utilityUsageSummary.averageEnergyUse | number:'1.0-0'}}
+                    <span *ngIf="utilityUsageSummary.averageEnergyUse">
+                        {{utilityUsageSummary.averageEnergyUse | number:'1.0-0'}}
+                    </span>
+                    <span *ngIf="!utilityUsageSummary.averageEnergyUse">
+                        &mdash;
+                    </span>
                 </td>
                 <td>
-                    {{utilityUsageSummary.averageEnergyCost | currency : 'USD' : 'symbol' : '1.0-0' }}
+                    <span *ngIf="utilityUsageSummary.averageEnergyCost">
+                        {{utilityUsageSummary.averageEnergyCost | currency : 'USD' : 'symbol' : '1.0-0' }}
+                    </span>
+                    <span *ngIf="!utilityUsageSummary.averageEnergyCost">
+                        &mdash;
+                    </span>
                 </td>
             </tr>
         </tbody>
@@ -57,24 +92,66 @@
             <tr>
                 <th>
                     Total
+                </th><th>
+                    <span *ngIf="utilityUsageSummaryData.total.previousMonthEnergyUse">
+                        {{utilityUsageSummaryData.total.previousMonthEnergyUse | number:'1.0-0'}}
+                    </span>
+                    <span *ngIf="!utilityUsageSummaryData.total.previousMonthEnergyUse">
+                        &mdash;
+                    </span>
+                    <span *ngIf="utilityUsageSummaryData.total.energyUseChangeSinceLastYear"
+                        class="small pl-2 pull-right green"
+                        [ngClass]="{'red': utilityUsageSummaryData.total.energyUseChangeSinceLastYear > 0}">
+                        ({{utilityUsageSummaryData.total.energyUseChangeSinceLastYear | number:'1.0-0'}})
+                    </span>
                 </th>
                 <th>
-                    {{utilityUsageSummaryData.total.previousMonthEnergyUse | number:'1.0-0'}}
+                    <span *ngIf="utilityUsageSummaryData.total.previousMonthEnergyCost">
+                        {{utilityUsageSummaryData.total.previousMonthEnergyCost | currency : 'USD' : 'symbol' : '1.0-0'
+                        }}
+                    </span>
+                    <span *ngIf="!utilityUsageSummaryData.total.previousMonthEnergyCost">
+                        &mdash;
+                    </span>
+                    <span *ngIf="utilityUsageSummaryData.total.energyCostChangeSinceLastYear"
+                        class="small pl-2 pull-right green"
+                        [ngClass]="{'red': utilityUsageSummaryData.total.energyCostChangeSinceLastYear > 0}">
+                        ({{utilityUsageSummaryData.total.energyCostChangeSinceLastYear | currency : 'USD' : 'symbol'
+                        :'1.0-0'}})
+                    </span>
                 </th>
                 <th>
-                    {{utilityUsageSummaryData.total.previousMonthEnergyCost | currency : 'USD' : 'symbol' : '1.0-0' }}
+                    <span *ngIf="utilityUsageSummaryData.total.yearPriorEnergyUse">
+                        {{utilityUsageSummaryData.total.yearPriorEnergyUse | number:'1.0-0'}}
+                    </span>
+                    <span *ngIf="!utilityUsageSummaryData.total.yearPriorEnergyUse">
+                        &mdash;
+                    </span>
+
                 </th>
                 <th>
-                    {{utilityUsageSummaryData.total.yearPriorEnergyUse | number:'1.0-0'}}
+                    <span *ngIf="utilityUsageSummaryData.total.yearPriorEnergyCost">
+                        {{utilityUsageSummaryData.total.yearPriorEnergyCost | currency : 'USD' : 'symbol' : '1.0-0' }}
+                    </span>
+                    <span *ngIf="!utilityUsageSummaryData.total.yearPriorEnergyCost">
+                        &mdash;
+                    </span>
                 </th>
                 <th>
-                    {{utilityUsageSummaryData.total.yearPriorEnergyCost | currency : 'USD' : 'symbol' : '1.0-0' }}
+                    <span *ngIf="utilityUsageSummaryData.total.averageEnergyUse">
+                        {{utilityUsageSummaryData.total.averageEnergyUse | number:'1.0-0'}}
+                    </span>
+                    <span *ngIf="!utilityUsageSummaryData.total.averageEnergyUse">
+                        &mdash;
+                    </span>
                 </th>
                 <th>
-                    {{utilityUsageSummaryData.total.averageEnergyUse | number:'1.0-0'}}
-                </th>
-                <th>
-                    {{utilityUsageSummaryData.total.averageEnergyCost | currency : 'USD' : 'symbol' : '1.0-0' }}
+                    <span *ngIf="utilityUsageSummaryData.total.averageEnergyCost">
+                        {{utilityUsageSummaryData.total.averageEnergyCost | currency : 'USD' : 'symbol' : '1.0-0' }}
+                    </span>
+                    <span *ngIf="!utilityUsageSummaryData.total.averageEnergyCost">
+                        &mdash;
+                    </span>
                 </th>
             </tr>
         </tfoot>
