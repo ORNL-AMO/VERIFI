@@ -46,14 +46,7 @@ p.display-lg {
 .banner {
   background-color: #145A32;
 }
-.measurFooter {
-  background-color: #577656;
-  height: 69px;
-  margin-top: -68px;
-  z-index: 2;
-  border-top: 1px solid #5c7859;
-  box-shadow: 1px -1px 0px #9eb39b;
-}
+
 .filters {
   padding: 15px 40px 0px;
   text-align: right;

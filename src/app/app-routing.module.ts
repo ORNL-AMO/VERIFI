@@ -14,6 +14,7 @@ import { CalanderizationComponent } from './utility/calanderization/calanderizat
 import { VisualizationComponent } from './utility/visualization/visualization.component';
 import { FacilityOverviewComponent } from './dashboard/facility-overview/facility-overview.component';
 import { AccountOverviewComponent } from './dashboard/account-overview/account-overview.component';
+import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
 
 const routes: Routes = [
   {
@@ -67,6 +68,7 @@ const routes: Routes = [
     ]
   },
   { path: 'style-guide', component: StyleGuideComponent },
+  { path: "**", component: PageNotFoundComponent }
 ];
 
 @NgModule({
