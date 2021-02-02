@@ -1,76 +1,104 @@
-
 <table class="table table-sm">
     <thead>
         <tr>
             <th class="input">
                 <input #masterCheckbox type="checkbox" (change)="checkAll()" [(ngModel)]="allChecked">
             </th>
-            <th class="row-year">Meter Read Date</th>
-            <th>Total Energy (<span [innerHTML]="energyUnit | settingsLabel"></span>)</th>
-            <th>Total Demand</th>
-            <th>Total Cost</th>
-            <th *ngIf="supplyDemandCharge.supplyBlockAmount">
+            <th (click)="setOrderDataField('readDate')" [ngClass]="{'active': orderDataField == 'readDate'}"
+                class="row-year">Meter Read Date</th>
+            <th (click)="setOrderDataField('totalEnergyUse')"
+                [ngClass]="{'active': orderDataField == 'totalEnergyUse'}">Total Energy (<span
+                    [innerHTML]="energyUnit | settingsLabel"></span>)</th>
+            <th (click)="setOrderDataField('totalDemand')" [ngClass]="{'active': orderDataField == 'totalDemand'}">Total
+                Demand</th>
+            <th (click)="setOrderDataField('totalCost')" [ngClass]="{'active': orderDataField == 'totalCost'}">Total
+                Cost</th>
+            <th (click)="setOrderDataField('supplyBlockAmount')"
+                [ngClass]="{'active': orderDataField == 'supplyBlockAmount'}"
+                *ngIf="supplyDemandCharge.supplyBlockAmount">
                 Block Rates Supply Amt
             </th>
-            <th *ngIf="supplyDemandCharge.supplyBlockCharge">
+            <th (click)="setOrderDataField('supplyBlockCharge')"
+                [ngClass]="{'active': orderDataField == 'supplyBlockCharge'}"
+                *ngIf="supplyDemandCharge.supplyBlockCharge">
                 Block Rates Supply Charge
             </th>
-            <th *ngIf="supplyDemandCharge.flatRateAmount">
+            <th (click)="setOrderDataField('flatRateAmount')" [ngClass]="{'active': orderDataField == 'flatRateAmount'}"
+                *ngIf="supplyDemandCharge.flatRateAmount">
                 Flat Rate Amt
             </th>
-            <th *ngIf="supplyDemandCharge.flatRateCharge">
+            <th (click)="setOrderDataField('flatRateCharge')" [ngClass]="{'active': orderDataField == 'flatRateCharge'}"
+                *ngIf="supplyDemandCharge.flatRateCharge">
                 Flat Rate Charge
             </th>
-            <th *ngIf="supplyDemandCharge.peakAmount">
+            <th (click)="setOrderDataField('peakAmount')" [ngClass]="{'active': orderDataField == 'peakAmount'}"
+                *ngIf="supplyDemandCharge.peakAmount">
                 On-Peak Amt
             </th>
-            <th *ngIf="supplyDemandCharge.peakCharge">
+            <th (click)="setOrderDataField('peakCharge')" [ngClass]="{'active': orderDataField == 'peakCharge'}"
+                *ngIf="supplyDemandCharge.peakCharge">
                 On-Peak Charge
             </th>
-            <th *ngIf="supplyDemandCharge.offPeakAmount">
+            <th (click)="setOrderDataField('offPeakAmount')" [ngClass]="{'active': orderDataField == 'offPeakAmount'}"
+                *ngIf="supplyDemandCharge.offPeakAmount">
                 Off-Peak Amt
             </th>
-            <th *ngIf="supplyDemandCharge.offPeakCharge">
+            <th (click)="setOrderDataField('offPeakCharge')" [ngClass]="{'active': orderDataField == 'offPeakCharge'}"
+                *ngIf="supplyDemandCharge.offPeakCharge">
                 Off-Peak Charge
             </th>
-            <th *ngIf="supplyDemandCharge.demandBlockAmount">
+            <th (click)="setOrderDataField('demandBlockAmount')"
+                [ngClass]="{'active': orderDataField == 'demandBlockAmount'}"
+                *ngIf="supplyDemandCharge.demandBlockAmount">
                 Block Rates Demand Amt
             </th>
-            <th *ngIf="supplyDemandCharge.demandBlockCharge">
+            <th (click)="setOrderDataField('demandBlockCharge')"
+                [ngClass]="{'active': orderDataField == 'demandBlockCharge'}"
+                *ngIf="supplyDemandCharge.demandBlockCharge">
                 Block Rates Demand Charge
             </th>
-            <th *ngIf="taxAndOther.generationTransmissionCharge">
+            <th (click)="setOrderDataField('generationTransmissionCharge')"
+                [ngClass]="{'active': orderDataField == 'generationTransmissionCharge'}"
+                *ngIf="taxAndOther.generationTransmissionCharge">
                 Generation and Transmission Charge
             </th>
-            <th *ngIf="taxAndOther.deliveryCharge">
+            <th (click)="setOrderDataField('deliveryCharge')" [ngClass]="{'active': orderDataField == 'deliveryCharge'}"
+                *ngIf="taxAndOther.deliveryCharge">
                 Delivery Charge
             </th>
-            <th *ngIf="taxAndOther.transmissionCharge">
+            <th (click)="setOrderDataField('transmissionCharge')"
+                [ngClass]="{'active': orderDataField == 'transmissionCharge'}" *ngIf="taxAndOther.transmissionCharge">
                 Transmission Charge
             </th>
-            <th *ngIf="taxAndOther.powerFactorCharge">
+            <th (click)="setOrderDataField('powerFactorCharge')"
+                [ngClass]="{'active': orderDataField == 'powerFactorCharge'}" *ngIf="taxAndOther.powerFactorCharge">
                 Power Factor Charge
             </th>
-            <th *ngIf="taxAndOther.businessCharge">
+            <th (click)="setOrderDataField('businessCharge')" [ngClass]="{'active': orderDataField == 'businessCharge'}"
+                *ngIf="taxAndOther.businessCharge">
                 Local Business Charge
             </th>
-            <th *ngIf="taxAndOther.utilityTax">
+            <th (click)="setOrderDataField('utilityTax')" [ngClass]="{'active': orderDataField == 'utilityTax'}"
+                *ngIf="taxAndOther.utilityTax">
                 Local Utility Tax
             </th>
-            <th *ngIf="taxAndOther.latePayment">
+            <th (click)="setOrderDataField('latePayment')" [ngClass]="{'active': orderDataField == 'latePayment'}"
+                *ngIf="taxAndOther.latePayment">
                 Late Payment
             </th>
-            <th *ngIf="taxAndOther.otherCharge">
+            <th (click)="setOrderDataField('otherCharge')" [ngClass]="{'active': orderDataField == 'otherCharge'}"
+                *ngIf="taxAndOther.otherCharge">
                 Other Charge
             </th>
-            <th *ngIf="taxAndOther.basicCharge">
+            <th (click)="setOrderDataField('basicCharge')" [ngClass]="{'active': orderDataField == 'basicCharge'}"
+                *ngIf="taxAndOther.basicCharge">
                 Basic Charge
             </th>
             <th>Actions</th>
         </tr>
     </thead>
     <tbody>
-        <tr *ngFor="let meterData of meterListItem.meterDataItems | slice: pageSize[meterIndex] | slice: 0:itemsPerPage;">
+        <tr *ngFor="let meterData of meterListItem.meterDataItems | orderBy: orderDataField: orderByDirection">
             <td class="input">
                 <input type="checkbox" name="metersSelected" (change)="toggleChecked()" [(ngModel)]="meterData.checked">
             </td>

@@ -33,6 +33,9 @@ export class ElectricityDataTableComponent implements OnInit {
   electricityDataFilterSub: Subscription;
   allChecked: boolean;
   energyUnit: string;
+  
+  orderDataField: string = 'readDate';
+  orderByDirection: string = 'desc';
   constructor(private utilityMeterDataService: UtilityMeterDataService) { }
 
   ngOnInit(): void {
@@ -68,5 +71,17 @@ export class ElectricityDataTableComponent implements OnInit {
 
   setDeleteMeterData(meterData): void {
     this.setDelete.emit(meterData);
+  }
+
+  setOrderDataField(str: string){
+    if(str == this.orderDataField){
+      if(this.orderByDirection == 'desc'){
+        this.orderByDirection = 'asc';
+      }else{
+        this.orderByDirection = 'desc';
+      }
+    }else{
+      this.orderDataField = str;
+    }
   }
 }
