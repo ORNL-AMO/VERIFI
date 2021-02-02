@@ -32,6 +32,8 @@ export class GeneralUtilityDataTableComponent implements OnInit {
   volumeUnit: string;
   showVolumeColumn: boolean;
   showEnergyColumn: boolean;
+  orderDataField: string = 'readDate';
+  orderByDirection: string = 'desc';
   constructor(public utilityMeterDataService: UtilityMeterDataService, private energyUnitsHelperService: EnergyUnitsHelperService) { }
 
   ngOnInit(): void {
@@ -64,5 +66,17 @@ export class GeneralUtilityDataTableComponent implements OnInit {
 
   setDeleteMeterData(meterData): void {
     this.setDelete.emit(meterData);
+  }
+
+  setOrderDataField(str: string){
+    if(str == this.orderDataField){
+      if(this.orderByDirection == 'desc'){
+        this.orderByDirection = 'asc';
+      }else{
+        this.orderByDirection = 'desc';
+      }
+    }else{
+      this.orderDataField = str;
+    }
   }
 }
