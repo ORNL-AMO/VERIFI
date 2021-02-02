@@ -11,19 +11,20 @@
         <!--Items Per Page-->
         <div class="items-per-page item-right">
             <span>Show </span>
-            <select (change)="changePagesize($event.target.value)">
-                <option value="6">6</option>
-                <option value="12" selected>12</option>
-                <option value="24">24</option>
-                <option value="36">36</option>
-                <option value="48">48</option>
-                <option value="60">60</option>
+            <select [(ngModel)]="itemsPerPage">
+                <option [ngValue]=6>6</option>
+                <option [ngValue]=12>12</option>
+                <option [ngValue]=24>24</option>
+                <option [ngValue]=36>36</option>
+                <option [ngValue]=48>48</option>
+                <option [ngValue]=60>60</option>
+                <option [ngValue]=999999999999>All</option>
             </select>
         </div>
 
     </div>
 
-    <div class="meter" *ngFor="let meterData of calanderizedMeterData; let i=index;">
+    <div class="meter" *ngFor="let meterData of calanderizedMeterData; let index=index;">
         <div class="row">
             <div class="col table-responsive">
                 <table class="table table-sm">
@@ -33,21 +34,25 @@
                                 <span class="item-right reg-weight">{{meterData.meter.source}}</span>
                             </th>
                         </tr>
+                        <tr>
+                            <th (click)="setOrderDataField('date')" [ngClass]="{'active': orderDataField == 'date'}"
+                                class="row-year">Month</th>
+                            <th (click)="setOrderDataField('energyConsumption')"
+                                [ngClass]="{'active': orderDataField == 'energyConsumption'}"
+                                *ngIf="meterData.showConsumption">
+                                Total Consumption (<span
+                                    [innerHTML]="meterData.consumptionUnit | settingsLabel"></span>)</th>
+                            <th (click)="setOrderDataField('energyUse')"
+                                [ngClass]="{'active': orderDataField == 'energyUse'}" *ngIf="meterData.showEnergyUse">
+                                Total Energy (<span [innerHTML]="meterData.energyUnit | settingsLabel"></span>)</th>
+                            <th (click)="setOrderDataField('energyCost')"
+                                [ngClass]="{'active': orderDataField == 'energyCost'}">Total Cost</th>
+                        </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <th class="row-year">Month</th>
-                            <th class="row-year">Year</th>
-                            <th *ngIf="meterData.showConsumption">Total Consumption (<span
-                                    [innerHTML]="meterData.consumptionUnit | settingsLabel"></span>)</th>
-                            <th *ngIf="meterData.showEnergyUse">Total Energy (<span
-                                    [innerHTML]="meterData.energyUnit | settingsLabel"></span>)</th>
-                            <th>Total Cost</th>
-                        </tr>
-                        <tr *ngFor="let data of meterData.monthlyData | slice: pageSize[i] | slice: 0:itemsPerPage"
-                            [class.na]="!data.energyUse">
-                            <td>{{data.month}}</td>
-                            <td>{{data.year}}</td>
+                        <tr *ngFor="let data of meterData.monthlyData| orderBy: orderDataField: orderByDirection | slice: ((tablePageNumbers[index]-1) * itemsPerPage): tablePageNumbers[index] * itemsPerPage"
+                            [ngClass]="{'use-and-consumption': data.energyConsumption && data.energyUse}">
+                            <td>{{data.date | date: 'MMMM, y'}}</td>
                             <td *ngIf="meterData.showConsumption">
                                 <span *ngIf="data.energyConsumption">{{data.energyConsumption | number:'1.0-2'}}</span>
                                 <span *ngIf="!data.energyConsumption">N/A</span>
@@ -67,9 +72,9 @@
         </div>
         <div class="tableControls overflow-hidden">
             <div class="item-right">
-                <ngb-pagination [collectionSize]="meterData.monthlyData.length" [(page)]="page[i]"
-                    [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Default pagination"
-                    (pageChange)="onPageChange(i, page[i])"></ngb-pagination>
+                <ngb-pagination [collectionSize]="meterData.monthlyData.length" [(page)]="tablePageNumbers[index]"
+                    [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Default pagination">
+                </ngb-pagination>
             </div>
             <p class="item-right">{{meterData.monthlyData.length}} entries</p>
         </div>

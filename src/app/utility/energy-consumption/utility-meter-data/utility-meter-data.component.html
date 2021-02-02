@@ -62,7 +62,7 @@
         </button>
         <div class="item-right">
             <ngb-pagination [collectionSize]="meterListItem.meterDataItems.length" [(page)]="tablePageNumbers[index]"
-                [pageSize]="itemsPerPage" [rotate]="true" aria-label="Default pagination">
+                [pageSize]="itemsPerPage" [rotate]="true" aria-label="Default pagination" [maxSize]="5">
             </ngb-pagination>
         </div>
         <p class="item-right">{{meterListItem.meterDataItems.length}} entries</p>

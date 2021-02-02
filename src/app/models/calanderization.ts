@@ -16,6 +16,7 @@ export interface MonthlyData {
     energyConsumption: number,
     energyUse: number,
     energyCost: number,
+    date: Date
 }
 
 
