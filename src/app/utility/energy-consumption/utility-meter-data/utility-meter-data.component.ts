@@ -25,9 +25,8 @@ export class UtilityMeterDataComponent implements OnInit {
     meterDataItems: Array<IdbUtilityMeterData>
   }>;
 
-  page: Array<number> = [];
   itemsPerPage: number = 6;
-  pageSize: Array<number> = [];
+  tablePageNumbers: Array<number> = [];
 
   accountMeterDataSub: Subscription;
   facilityMetersSub: Subscription;
@@ -87,8 +86,7 @@ export class UtilityMeterDataComponent implements OnInit {
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
     this.utilityMeters = facilityMeters.filter(meter => { return meter.source == this.selectedSource });
     this.setMeterList();
-    this.setMeterPages();
-    this.changePagesize(this.itemsPerPage);
+    this.tablePageNumbers = this.meterList.map(() => {return 1});
   }
 
 
@@ -106,24 +104,6 @@ export class UtilityMeterDataComponent implements OnInit {
 
   resetImport() {
     this.myInputVariable.nativeElement.value = '';
-  }
-
-  setMeterPages() {
-    for (let i = 0; i < this.meterList.length; i++) {
-      this.page.push(1);
-      this.pageSize.push(1);
-    }
-  }
-
-  public onPageChange(index, pageNum: number): void {
-    this.pageSize[index] = this.itemsPerPage * (pageNum - 1);
-  }
-
-  public changePagesize(num: number): void {
-    this.itemsPerPage = num;
-    for (let i = 0; i < this.meterList.length; i++) {
-      this.onPageChange(i, this.page[i]);
-    }
   }
 
   setEditMeterData(meterData: IdbUtilityMeterData) {

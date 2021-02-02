@@ -24,7 +24,6 @@ export class EnergySourceComponent implements OnInit {
 
   currentPageNumber: number = 1;
   itemsPerPage: number = 10;
-  pageSize: number;
   importWindow: boolean;
   editMeter: IdbUtilityMeter;
   meterToDelete: IdbUtilityMeter;

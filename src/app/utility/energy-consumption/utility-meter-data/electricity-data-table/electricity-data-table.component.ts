@@ -16,7 +16,7 @@ export class ElectricityDataTableComponent implements OnInit {
     meterDataItems: Array<IdbUtilityMeterData>
   };
   @Input()
-  pageSize: Array<number>;
+  currentPageNumber: number;
   @Input()
   itemsPerPage: number;
   @Input()
