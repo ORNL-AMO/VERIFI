@@ -41,6 +41,8 @@ export class EnergySourceComponent implements OnInit {
   selectedFacilityName: string = 'Facility';
 
   addOrEdit: string = 'add';
+  orderDataField: string = 'name';
+  orderByDirection: string = 'desc';
   constructor(
     private accountdbService: AccountdbService,
     private facilitydbService: FacilitydbService,
@@ -151,5 +153,16 @@ export class EnergySourceComponent implements OnInit {
   isMeterInvalid(meter: IdbUtilityMeter): boolean{
     let form: FormGroup = this.editMeterFormService.getFormFromMeter(meter);
     return form.invalid;
+  }
+  setOrderDataField(str: string){
+    if(str == this.orderDataField){
+      if(this.orderByDirection == 'desc'){
+        this.orderByDirection = 'asc';
+      }else{
+        this.orderByDirection = 'desc';
+      }
+    }else{
+      this.orderDataField = str;
+    }
   }
 }
