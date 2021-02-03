@@ -1,14 +1,18 @@
 {
   "name": "verifi",
   "version": "0.0.1",
+  "main": "main.js",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build --base-href /",
+    "electron-start": "electron-forge start",
+    "build": "ng build --base-href ./",
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "build-web": "ng build --base-href ."
+    "build-web": "ng build --base-href .",
+    "package": "electron-forge package",
+    "make": "electron-forge make"
   },
   "private": true,
   "dependencies": {
@@ -26,6 +30,7 @@
     "@ng-bootstrap/ng-bootstrap": "^6.2.0",
     "angular-plotly.js": "^2.0.0",
     "bootstrap": "^4.5.0",
+    "electron-squirrel-startup": "^1.0.0",
     "font-awesome": "^4.7.0",
     "jquery": "^3.5.1",
     "lodash.foreach": "^4.5.0",
@@ -44,10 +49,16 @@
     "@angular/cli": "~9.1.7",
     "@angular/compiler-cli": "~9.1.9",
     "@angular/language-service": "~9.1.9",
+    "@electron-forge/cli": "^6.0.0-beta.54",
+    "@electron-forge/maker-deb": "^6.0.0-beta.54",
+    "@electron-forge/maker-rpm": "^6.0.0-beta.54",
+    "@electron-forge/maker-squirrel": "^6.0.0-beta.54",
+    "@electron-forge/maker-zip": "^6.0.0-beta.54",
     "@types/jasmine": "~3.3.8",
     "@types/jasminewd2": "~2.0.3",
     "@types/node": "^12.11.1",
     "codelyzer": "^5.1.2",
+    "electron": "11.2.2",
     "jasmine-core": "~3.4.0",
     "jasmine-spec-reporter": "~4.2.1",
     "karma": "~4.1.0",
@@ -60,5 +71,8 @@
     "ts-node": "~7.0.0",
     "tslint": "~5.15.0",
     "typescript": "~3.8.3"
+  },
+  "config": {
+    "forge": "./forge.config.js"
   }
 }
