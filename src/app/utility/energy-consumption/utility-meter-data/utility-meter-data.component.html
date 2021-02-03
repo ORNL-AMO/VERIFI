@@ -21,7 +21,7 @@
     </div>
     <!--Bulk Delete-->
     <div class="bulk-delete item-right" [class.show]="hasCheckedItems">
-        <button class="btn btn-small btn-danger" (click)='bulkDelete()'>Bulk Delete</button>
+        <button class="btn btn-small btn-danger" (click)='openBulkDelete()'>Bulk Delete</button>
     </div>
     <!--Column Filters-->
     <app-utility-meter-data-filter *ngIf="selectedSource == 'Electricity'" [filterType]="'table'">
@@ -89,7 +89,7 @@
         </app-import-meter-data>
     </div>
 </div>
-
+<!--individual delete-->
 <div class="popup" [class.open]="meterDataToDelete">
     <div class="popup-header" *ngIf="meterDataToDelete">Delete Meter Data
         <button class="item-right" (click)="cancelDelete()">x</button>
@@ -100,5 +100,18 @@
     </div>
     <div class="popup-footer text-right">
         <button class="btn btn-danger" (click)="deleteMeterData()">Delete</button>
+    </div>
+</div>
+<!--bulk delete-->
+<div class="popup" [class.open]="showBulkDelete">
+    <div class="popup-header" *ngIf="showBulkDelete">Delete Meter Data Items
+        <button class="item-right" (click)="cancelBulkDelete()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>WARNING: Deleting meter data cannot be undone.
+            Are you sure you want to preform this action?</p>
+    </div>
+    <div class="popup-footer text-right">
+        <button class="btn btn-danger" (click)="bulkDelete()">Delete</button>
     </div>
 </div>

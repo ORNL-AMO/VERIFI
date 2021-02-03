@@ -39,6 +39,8 @@ export class UtilityMeterDataComponent implements OnInit {
   selectedSource: string;
   hasCheckedItems: boolean;
   meterDataToDelete: IdbUtilityMeterData;
+  showDeleteModal: boolean = false;
+  showBulkDelete: boolean = false;
   constructor(
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
@@ -143,7 +145,10 @@ export class UtilityMeterDataComponent implements OnInit {
       })
     });
     meterDataItemsToDelete.forEach(meterItemToDelete => { this.utilityMeterDataDbService.deleteIndex(meterItemToDelete.id) });
+    this.showBulkDelete = false;
   }
+
+
 
   meterDataAdd(meter: IdbUtilityMeter) {
     this.addOrEdit = 'add';
@@ -178,5 +183,13 @@ export class UtilityMeterDataComponent implements OnInit {
   setToggleView(idbMeter) {
     idbMeter.visible = !idbMeter.visible
     this.utilityMeterDbService.update(idbMeter);
+  }
+
+  openBulkDelete(){
+    this.showBulkDelete = true;
+  }
+
+  cancelBulkDelete(){
+    this.showBulkDelete = false;
   }
 }
