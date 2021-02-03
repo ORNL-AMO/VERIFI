@@ -1,17 +1,20 @@
 <div class="table-responsive">
-    <table class="table table-sm">
+    <table class="table table-sm" *ngIf="facilityMeterSummaryData">
         <thead>
             <tr>
                 <th>Meter</th>
                 <th>Utility</th>
                 <th>Group</th>
                 <th>Last Bill Entered</th>
-                <th>Energy Usage (<span [innerHTML]="facilityEnergyUnit | settingsLabel"></span>) <small>({{yearAgoDate | date: 'MMM, y'}} - {{todaysDate | date: 'MMM, y'}})</small></th>
-                <th>Energy Cost <small>({{yearAgoDate | date: 'MMM, y'}} - {{todaysDate | date: 'MMM, y'}})</small></th>
+                <th>Energy Usage (<span [innerHTML]="facilityEnergyUnit | settingsLabel"></span>) <span class="small"
+                        *ngIf="yearPriorDate">({{yearPriorDate | date: 'MMM, y'}} - {{lastMonthsDate | date: 'MMM,
+                        y'}})</span></th>
+                <th>Energy Cost <span class="small" *ngIf="yearPriorDate">({{yearPriorDate | date: 'MMM, y'}} -
+                        {{lastMonthsDate | date: 'MMM, y'}})</span></th>
             </tr>
         </thead>
         <tbody>
-            <tr *ngFor="let summary of facilityMetersSummary">
+            <tr *ngFor="let summary of facilityMeterSummaryData.meterSummaries">
                 <td>
                     {{summary.meter.name}}
                 </td>
@@ -22,7 +25,7 @@
                     {{summary.groupName}}
                 </td>
                 <td>
-                    <span *ngIf="summary.lastBillDate">{{summary.lastBillDate | date: 'MMM, y'}}</span>
+                    <span *ngIf="summary.lastBillDate">{{summary.lastBillDate | date: 'MMM, y'}} </span>
                     <span *ngIf="!summary.lastBillDate">&mdash;</span>
                 </td>
                 <td>
@@ -45,10 +48,10 @@
                 <th>
                 </th>
                 <th>
-                    {{totalEnergyUsage | number:'1.0-0'}}
+                    {{facilityMeterSummaryData.totalEnergyUse | number:'1.0-0'}}
                 </th>
                 <th>
-                    {{totalEnergyCost | currency : 'USD' : 'symbol' : '1.0-0' }}
+                    {{facilityMeterSummaryData.totalEnergyCost | currency : 'USD' : 'symbol' : '1.0-0' }}
                 </th>
             </tr>
         </tfoot>

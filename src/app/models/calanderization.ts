@@ -23,5 +23,6 @@ export interface LastYearData {
     time: string,
     energyUse: number,
     energyCost: number,
-    energyConsumption: number
+    energyConsumption: number,
+    date: Date
 }

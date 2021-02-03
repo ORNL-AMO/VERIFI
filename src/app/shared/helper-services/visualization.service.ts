@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { IdbUtilityMeter } from 'src/app/models/idb';
-import { CalanderizationService } from '../../shared/helper-services/calanderization.service';
+import { CalanderizationService } from './calanderization.service';
 import * as _ from 'lodash';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import { HeatMapData } from 'src/app/models/visualization';
@@ -11,9 +11,9 @@ export class VisualizationService {
 
   constructor(private calanderizationService: CalanderizationService) { }
 
-  getFacilityBarChartData(meters: Array<IdbUtilityMeter>, sumByMonth: boolean, removeIncompleteYears: boolean): Array<{ time: string, energyUse: number, energyCost: number }> {
+  getFacilityBarChartData(meters: Array<IdbUtilityMeter>, sumByMonth: boolean, removeIncompleteYears: boolean, inAccount: boolean): Array<{ time: string, energyUse: number, energyCost: number }> {
     //calanderize meters
-    let calanderizedMeterData: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMeterData(meters, true, true);
+    let calanderizedMeterData: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMeterData(meters, inAccount, true);
 
     //create array of just the meter data
     let combindedCalanderizedMeterData: Array<MonthlyData> = calanderizedMeterData.flatMap(meterData => {
@@ -114,14 +114,14 @@ export class VisualizationService {
       months.forEach(month => {
         let totalCost: number = _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
           if (meterData.year == year && meterData.month == month) {
-            return meterData.energyConsumption;
+            return meterData.energyCost;
           } else {
             return 0;
           }
         });
         let totalEnergy: number = _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
           if (meterData.year == year && meterData.month == month) {
-            return meterData.energyConsumption;
+            return meterData.energyUse;
           } else {
             return 0;
           }
