@@ -1,31 +1,35 @@
-import { Component, ElementRef, EventEmitter, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, ElementRef, ViewChild } from '@angular/core';
+import { FormGroup } from '@angular/forms';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterGroup } from 'src/app/models/idb';
+import { EditMeterFormService } from '../edit-meter-form/edit-meter-form.service';
 
 @Component({
-  selector: 'app-import-meter',
-  templateUrl: './import-meter.component.html',
-  styleUrls: ['./import-meter.component.css']
+  selector: 'app-import-meter-wizard',
+  templateUrl: './import-meter-wizard.component.html',
+  styleUrls: ['./import-meter-wizard.component.css']
 })
-export class ImportMeterComponent implements OnInit {
+export class ImportMeterWizardComponent implements OnInit {
   @Output()
   emitClose: EventEmitter<boolean> = new EventEmitter<boolean>();
 
   @ViewChild('inputFile') myInputVariable: ElementRef;
 
   importError: string = '';
-  quickViewMeters: Array<IdbUtilityMeter>;
+  // quickViewMeters: Array<IdbUtilityMeter>;
   importMeters: Array<IdbUtilityMeter>;
-  constructor(private utilityMeterGroupdbService: UtilityMeterGroupdbService, private utilityMeterdbService: UtilityMeterdbService, private facilityDbService: FacilitydbService) { }
+  selectedMeterForm: FormGroup;
+  constructor(private utilityMeterGroupdbService: UtilityMeterGroupdbService, private utilityMeterdbService: UtilityMeterdbService, 
+    private facilityDbService: FacilitydbService, private editMeterFormService: EditMeterFormService) { }
 
   ngOnInit(): void {
   }
 
   meterImport(files: FileList) {
     // Clear with each upload
-    this.quickViewMeters = new Array();
+    // this.quickViewMeters = new Array();
     this.importMeters = new Array();
     this.importError = '';
 
@@ -37,11 +41,11 @@ export class ImportMeterComponent implements OnInit {
         let csv: string = reader.result as string;
         const lines = csv.split("\n");
         const headers = lines[0].replace('\r', '').split(",");
-        const allowedHeaders = ["meterNumber", "accountNumber", "type", "name", "location", "supplier", "group", "notes"];
+        const allowedHeaders = ["Meter Number", "Account Number", "Source", "Meter Name", "Utility Supplier", "Notes", "Building / Location", "Meter Group"];
 
         if (JSON.stringify(headers) === JSON.stringify(allowedHeaders)) {
           let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-          for (var i = 1; i < lines.length; i++) {
+          for (var i = 1; i < lines.length -1; i++) {
             const obj: IdbUtilityMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.id, selectedFacility.accountId);
             const currentLine = lines[i].split(",");
             // for (var j = 0; j < headers.length; j++) {
@@ -49,19 +53,20 @@ export class ImportMeterComponent implements OnInit {
               obj.accountNumber = Number(currentLine[1]);
               obj.source = currentLine[2];
               obj.name = currentLine[3];
-              obj.location = currentLine[4];
-              obj.supplier = currentLine[5];
-              obj.group = currentLine[6];
-              obj.notes = currentLine[7];
-
+              obj.supplier = currentLine[4];
+              obj.notes = currentLine[5];
+              obj.location = currentLine[6];
+              obj.group = currentLine[7];
             // Read csv and push to obj array.
             this.importMeters.push(obj);
 
             // Push the first 3 results to a quick view array
-            if (i < 4) {
-              this.quickViewMeters.push(obj);
+            // if (i < 4) {
+            //   this.quickViewMeters.push(obj);
+            // }
+            if(i == 1){
+              this.selectedMeterForm = this.editMeterFormService.getFormFromMeter(obj);
             }
-
           }
         } else {
           // csv didn't match -> Show error
@@ -71,7 +76,6 @@ export class ImportMeterComponent implements OnInit {
       }
     }
   }
-
   runImport() {
     this.checkImportMeterGroups();
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
@@ -107,9 +111,13 @@ export class ImportMeterComponent implements OnInit {
 
   resetImport() {
     this.myInputVariable.nativeElement.value = '';
-    this.quickViewMeters = undefined;
+    // this.quickViewMeters = undefined;
     this.importMeters = undefined;
     this.importError = '';
     this.emitClose.emit(true);
+  }
+
+  selectMeter(meter: IdbUtilityMeter){
+    this.selectedMeterForm = this.editMeterFormService.getFormFromMeter(meter);
   }
 }

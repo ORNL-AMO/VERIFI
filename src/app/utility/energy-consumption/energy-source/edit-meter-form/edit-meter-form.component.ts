@@ -1,13 +1,13 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { Component, Input, OnInit } from '@angular/core';
+import { FormGroup, ValidatorFn } from '@angular/forms';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
+import { IdbFacility } from 'src/app/models/idb';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 import { EnergyUseCalculationsService } from 'src/app/shared/helper-services/energy-use-calculations.service';
 import { EnergyUnitOptions, MassUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from 'src/app/shared/unitOptions';
 import { EditMeterFormService } from './edit-meter-form.service';
 import { FuelTypeOption } from './editMeterOptions';
+
 @Component({
   selector: 'app-edit-meter-form',
   templateUrl: './edit-meter-form.component.html',
@@ -15,13 +15,8 @@ import { FuelTypeOption } from './editMeterOptions';
 })
 export class EditMeterFormComponent implements OnInit {
   @Input()
-  editMeter: IdbUtilityMeter;
-  @Output('emitClose')
-  emitClose: EventEmitter<boolean> = new EventEmitter<boolean>();
-  @Input()
-  addOrEdit: string;
-
   meterForm: FormGroup;
+
   displayPhase: boolean;
   displayFuel: boolean;
   fuelTypeOptions: Array<FuelTypeOption>;
@@ -29,7 +24,7 @@ export class EditMeterFormComponent implements OnInit {
   energySourceLabel: string = 'Fuel Type';
   displayHeatCapacity: boolean;
   facilityEnergyUnit: string;
-  constructor(private utilityMeterDbService: UtilityMeterdbService, private facilityDbService: FacilitydbService,
+  constructor(private facilityDbService: FacilitydbService,
     private energyUnitsHelperService: EnergyUnitsHelperService, private energyUseCalculationsService: EnergyUseCalculationsService,
     private editMeterFormService: EditMeterFormService) { }
 
@@ -38,7 +33,6 @@ export class EditMeterFormComponent implements OnInit {
     if (selectedFacility) {
       this.facilityEnergyUnit = selectedFacility.energyUnit;
     }
-    this.meterForm = this.editMeterFormService.getFormFromMeter(this.editMeter);
     this.setFuelTypeOptions();
     this.checkDisplayFuel();
     this.checkDisplayPhase();
@@ -46,22 +40,6 @@ export class EditMeterFormComponent implements OnInit {
     this.checkShowHeatCapacity();
   }
 
-  saveChanges() {
-    let meterToSave: IdbUtilityMeter = this.editMeterFormService.updateMeterFromForm(this.editMeter, this.meterForm);
-    meterToSave.energyUnit = this.getMeterEnergyUnit();
-    if (this.addOrEdit == 'edit') {
-      this.utilityMeterDbService.update(meterToSave);
-    } else if (this.addOrEdit == 'add') {
-      delete meterToSave.id;
-      this.utilityMeterDbService.add(meterToSave);
-    }
-    this.cancel();
-
-  }
-
-  cancel() {
-    this.emitClose.emit(true);
-  }
 
   changeSource() {
     this.setFuelTypeOptions();
@@ -137,7 +115,6 @@ export class EditMeterFormComponent implements OnInit {
     this.meterForm.controls.heatCapacity.updateValueAndValidity();
     this.meterForm.controls.siteToSource.setValidators(heatCapacityAndSiteToSourceValidators);
     this.meterForm.controls.siteToSource.updateValueAndValidity();
-
   }
 
   setFuelTypeOptions() {

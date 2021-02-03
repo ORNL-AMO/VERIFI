@@ -1,0 +1,29 @@
+<h4>Import Meters</h4>
+<br>
+<form>
+    <input type="file" #inputFile accept=".csv" (change)="meterImport($event.target.files)">
+</form>
+<br>
+
+<p class="alert-warning w-100 p-2 text-center" *ngIf="!importMeters">
+    Select .csv template file from VERIFI.
+</p>
+
+<div class="d-flex flex-column" *ngIf="importMeters && selectedMeterForm">
+    <ul class="nav nav-tabs">
+        <li class="nav-item" *ngFor="let importMeter of importMeters; let index=index;">
+            <a class="nav-link" [ngClass]="{'active': selectedMeterForm.controls.name.value == importMeter.name}"
+                (click)="selectMeter(importMeter)">
+                {{index+1}} {{importMeter.name}}
+            </a>
+        </li>
+    </ul>
+    <div class="p-3">
+        <app-edit-meter-form [(meterForm)]="selectedMeterForm"></app-edit-meter-form>
+    </div>
+</div>
+
+<div class="saveCancel item-right align-bottom">
+    <button class="btn btn-secondary" (click)="resetImport()">Cancel</button>
+    <!-- <button class="btn btn-primary" (click)="runImport()" [disabled]="importError != ''">Submit</button> -->
+</div>
