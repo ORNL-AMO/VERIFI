@@ -1,8 +1,9 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { SupplyDemandChargeFilters, TaxAndOtherFilters } from 'src/app/models/electricityFilter';
 import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { UtilityMeterDataService } from '../utility-meter-data.service';
+import * as _ from 'lodash';
 
 @Component({
   selector: 'app-electricity-data-table',
@@ -16,7 +17,7 @@ export class ElectricityDataTableComponent implements OnInit {
     meterDataItems: Array<IdbUtilityMeterData>
   };
   @Input()
-  pageSize: Array<number>;
+  currentPageNumber: number;
   @Input()
   itemsPerPage: number;
   @Input()
@@ -33,6 +34,9 @@ export class ElectricityDataTableComponent implements OnInit {
   electricityDataFilterSub: Subscription;
   allChecked: boolean;
   energyUnit: string;
+
+  orderDataField: string = 'readDate';
+  orderByDirection: string = 'desc';
   constructor(private utilityMeterDataService: UtilityMeterDataService) { }
 
   ngOnInit(): void {
@@ -51,10 +55,29 @@ export class ElectricityDataTableComponent implements OnInit {
     this.electricityDataFilterSub.unsubscribe();
   }
 
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes.currentPageNumber && !changes.currentPageNumber.firstChange) {
+      this.allChecked = false;
+      this.checkAll();
+    }
+    if (changes.itemsPerPage && !changes.itemsPerPage.firstChange) {
+      this.allChecked = false;
+      this.checkAll();
+    }
+  }
+
   checkAll() {
-    this.meterListItem.meterDataItems.forEach(dataItem => {
-      dataItem.checked = this.allChecked;
-    });
+    if (this.allChecked) {
+      this.meterListItem.meterDataItems = _.orderBy(this.meterListItem.meterDataItems, this.orderDataField, this.orderByDirection)
+      let displayedItems = this.meterListItem.meterDataItems.slice(((this.currentPageNumber - 1) * this.itemsPerPage), (this.currentPageNumber * this.itemsPerPage))
+      displayedItems.forEach(item => {
+        item.checked = this.allChecked;
+      });
+    } else {
+      this.meterListItem.meterDataItems.forEach(item => {
+        item.checked = false;
+      });
+    }
     this.setChecked.emit(true);
   }
 
@@ -68,5 +91,17 @@ export class ElectricityDataTableComponent implements OnInit {
 
   setDeleteMeterData(meterData): void {
     this.setDelete.emit(meterData);
+  }
+
+  setOrderDataField(str: string) {
+    if (str == this.orderDataField) {
+      if (this.orderByDirection == 'desc') {
+        this.orderByDirection = 'asc';
+      } else {
+        this.orderByDirection = 'desc';
+      }
+    } else {
+      this.orderDataField = str;
+    }
   }
 }

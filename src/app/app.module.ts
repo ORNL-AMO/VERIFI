@@ -63,6 +63,7 @@ import { MetersTableComponent } from './dashboard/facility-overview/meters-table
 import { UtilityEnergyUseTableComponent } from './dashboard/facility-overview/utility-energy-use-table/utility-energy-use-table.component';
 import { AccountUtilityEnergyUseTableComponent } from './dashboard/account-overview/account-utility-energy-use-table/account-utility-energy-use-table.component';
 import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
+import { OrderByPipe } from './shared/helper-pipes/order-by.pipe';
 
 @NgModule({
   declarations: [
@@ -111,7 +112,8 @@ import { PageNotFoundComponent } from './page-not-found/page-not-found.component
     MetersTableComponent,
     UtilityEnergyUseTableComponent,
     AccountUtilityEnergyUseTableComponent,
-    PageNotFoundComponent
+    PageNotFoundComponent,
+    OrderByPipe
   ],
   imports: [
     BrowserModule,

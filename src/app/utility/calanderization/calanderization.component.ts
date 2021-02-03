@@ -14,14 +14,14 @@ import { CalanderizationService } from '../../shared/helper-services/calanderiza
 export class CalanderizationComponent implements OnInit {
 
 
-  page = [];
   itemsPerPage = 12;
-  pageSize = [];
-
+  tablePageNumbers: Array<number>;
   calanderizedMeterData: Array<CalanderizedMeter>
   facilityMetersSub: Subscription;
   facilityMeterDataSub: Subscription;
-  facilityMeters: Array<IdbUtilityMeter>;
+  facilityMeters: Array<IdbUtilityMeter>;  
+  orderDataField: string = 'date';
+  orderByDirection: string = 'desc';
   constructor(private calanderizationService: CalanderizationService, private utilityMeterDbService: UtilityMeterdbService, private utilityMeterDataDbService: UtilityMeterDatadbService) { }
 
   ngOnInit(): void {
@@ -43,28 +43,19 @@ export class CalanderizationComponent implements OnInit {
   setCalanderizedMeterData() {
     if (this.facilityMeters) {
       this.calanderizedMeterData = this.calanderizationService.getCalanderizedMeterData(this.facilityMeters, false);
-      console.log(this.calanderizedMeterData);
+      this.tablePageNumbers = this.calanderizedMeterData.map(() => { return 1 });
     }
   }
 
-
-  setMeterPages() {
-    for (let i = 0; i < this.calanderizedMeterData.length; i++) {
-      this.page.push(1);
-      this.pageSize.push(1);
+  setOrderDataField(str: string){
+    if(str == this.orderDataField){
+      if(this.orderByDirection == 'desc'){
+        this.orderByDirection = 'asc';
+      }else{
+        this.orderByDirection = 'desc';
+      }
+    }else{
+      this.orderDataField = str;
     }
-  }
-
-  public onPageChange(index, pageNum: number): void {
-    this.pageSize[index] = this.itemsPerPage * (pageNum - 1);
-  }
-
-  public changePagesize(num: number): void {
-    this.itemsPerPage = num;
-
-    for (let i = 0; i < this.calanderizedMeterData.length; i++) {
-      this.onPageChange(i, this.page[i]);
-    }
-
   }
 }

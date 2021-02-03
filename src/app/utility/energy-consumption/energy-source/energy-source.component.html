@@ -10,11 +10,11 @@
     <!--Items Per Page-->
     <div class="items-per-page item-right">
         <span>Show </span>
-        <select (change)="changePagesize($event.target.value)">
-            <option value="10">10</option>
-            <option value="20">20</option>
-            <option value="30">30</option>
-            <option value="40">40</option>
+        <select [(ngModel)]="itemsPerPage">
+            <option [ngValue]=10>10</option>
+            <option [ngValue]=20>20</option>
+            <option [ngValue]=30>30</option>
+            <option [ngValue]=40>40</option>
         </select>
     </div>
 </div>
@@ -27,22 +27,30 @@
     <table class="table table-sm">
         <thead>
             <tr>
-                <th>Name</th>
-                <th>Source</th>
+                <th (click)="setOrderDataField('name')" [ngClass]="{'active': orderDataField == 'name'}">Name</th>
+                <th (click)="setOrderDataField('source')" [ngClass]="{'active': orderDataField == 'source'}">Source</th>
                 <!--<th><i>Group</i></th>-->
-                <th>Meter #</th>
-                <th>Account #</th>
-                <th>Building / Location</th>
-                <th>Utility Supplier</th>
-                <th>Notes</th>
-                <th>Collection Units</th>
-                <th>Heat Capacity</th>
-                <th>STS</th>
+                <th (click)="setOrderDataField('meterNumber')" [ngClass]="{'active': orderDataField == 'meterNumber'}">
+                    Meter #</th>
+                <th (click)="setOrderDataField('accountNumber')"
+                    [ngClass]="{'active': orderDataField == 'accountNumber'}">Account #</th>
+                <th (click)="setOrderDataField('location')" [ngClass]="{'active': orderDataField == 'location'}">
+                    Building / Location</th>
+                <th (click)="setOrderDataField('supplier')" [ngClass]="{'active': orderDataField == 'supplier'}">Utility
+                    Supplier</th>
+                <th (click)="setOrderDataField('notes')" [ngClass]="{'active': orderDataField == 'notes'}">Notes</th>
+                <th (click)="setOrderDataField('startingUnit')"
+                    [ngClass]="{'active': orderDataField == 'startingUnit'}">Collection Units</th>
+                <th (click)="setOrderDataField('heatCapacity')"
+                    [ngClass]="{'active': orderDataField == 'heatCapacity'}">Heat Capacity</th>
+                <th (click)="setOrderDataField('siteToSource')"
+                    [ngClass]="{'active': orderDataField == 'siteToSource'}">STS</th>
                 <th>Actions</th>
             </tr>
         </thead>
         <tbody>
-            <tr *ngFor="let meter of meterList | slice: pageSize | slice: 0:itemsPerPage">
+            <tr
+                *ngFor="let meter of meterList  | orderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
                 <td [ngClass]="{'invalid': isMeterInvalid(meter)}">{{meter.name}}</td>
                 <td>{{meter.source}}</td>
                 <!--<td>{{meter.group}}</td>-->
@@ -56,13 +64,6 @@
                 </td>
                 <td>{{meter.heatCapacity}}</td>
                 <td>{{meter.siteToSource}}</td>
-                <!--<td (click)="$event.stopPropagation();">
-                    <i class="fa fa-ellipsis-v" (click)="meterToggleMenu(meter.id)"></i>
-                    <div class="meterMenu" [class.open]="meterMenuOpen === meter.id">
-                        <p (click)="selectEditMeter(meter)">Edit</p>
-                        <p (click)="selectDeleteMeter(meter)">Delete</p>
-                    </div>
-                </td>-->
                 <td class="actions">
                     <i class="fa fa-pencil" title="Edit" (click)="selectEditMeter(meter)"></i>
                     <i class="fa fa-trash-o" title="Delete" (click)="selectDeleteMeter(meter)"></i>
@@ -74,8 +75,8 @@
 
 <div class="tableControls overflow-hidden">
     <div class="item-right">
-        <ngb-pagination [collectionSize]="meterList.length" [(page)]="page" [pageSize]="itemsPerPage" [maxSize]="5"
-            [rotate]="true" aria-label="Default pagination" (pageChange)="onPageChange(page)"></ngb-pagination>
+        <ngb-pagination [collectionSize]="meterList.length" [(page)]="currentPageNumber" [pageSize]="itemsPerPage"
+            [rotate]="true" aria-label="Default pagination"></ngb-pagination>
     </div>
     <p class="item-right">{{meterList.length}} entries</p>
 </div>

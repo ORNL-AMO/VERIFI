@@ -21,3 +21,12 @@ span.group {
 .invalid{
     background-color: red;
 }
+
+thead th.active {
+    text-decoration: underline;
+}
+
+thead th:hover{
+    cursor: pointer;
+    text-decoration: underline;
+}

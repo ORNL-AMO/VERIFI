@@ -82,13 +82,16 @@ export class CalanderizationService {
       } else {
         month = new Date(currentBill.readDate).toLocaleString('default', { month: 'long' });
       }
+      let monthNumValue: number = new Date(currentBill.readDate).getMonth();
+      let year: number = new Date(currentBill.readDate).getFullYear();
       calanderizeData.push({
         month: month,
-        monthNumValue: new Date(currentBill.readDate).getMonth(),
-        year: new Date(currentBill.readDate).getFullYear(),
+        monthNumValue: monthNumValue,
+        year: year,
         energyConsumption: totalMonthEnergyConsumption,
         energyUse: totalMonthEnergyUse,
         energyCost: totalMonthCost,
+        date: new Date(year, monthNumValue)
       });
     }
     return calanderizeData;
