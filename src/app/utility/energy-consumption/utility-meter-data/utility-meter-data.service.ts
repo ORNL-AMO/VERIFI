@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { BehaviorSubject } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { ElectricityDataFilters } from 'src/app/models/electricityFilter';
@@ -60,18 +60,11 @@ export class UtilityMeterDataService {
 
   getElectricityMeterDataForm(meterData: IdbUtilityMeterData): FormGroup {
     return this.formBuilder.group({
-      id: [meterData.id],
-      meterId: [meterData.meterId],
-      facilityId: [meterData.facilityId],
-      accountId: [meterData.accountId],
       readDate: [meterData.readDate, Validators.required],
-      unit: [meterData.unit],
       totalEnergyUse: [meterData.totalEnergyUse, [Validators.required, Validators.min(0)]],
       totalCost: [meterData.totalCost, [Validators.required, Validators.min(0)]],
-      commodityCharge: [meterData.commodityCharge],
       deliveryCharge: [meterData.deliveryCharge],
       otherCharge: [meterData.otherCharge],
-      checked: [meterData.checked],
       totalDemand: [meterData.totalDemand, [Validators.required, Validators.min(0)]],
       basicCharge: [meterData.basicCharge],
       supplyBlockAmount: [meterData.supplyBlockAmount],
@@ -93,23 +86,66 @@ export class UtilityMeterDataService {
     })
   }
 
-  getGeneralMeterDataForm(meterData: IdbUtilityMeterData): FormGroup {
+
+  updateElectricityMeterDataFromForm(meterData: IdbUtilityMeterData, form: FormGroup): IdbUtilityMeterData {
+    meterData.readDate = form.controls.readDate.value;
+    meterData.totalEnergyUse = form.controls.totalEnergyUse.value;
+    meterData.totalCost = form.controls.totalCost.value;
+    meterData.deliveryCharge = form.controls.deliveryCharge.value;
+    meterData.otherCharge = form.controls.otherCharge.value;
+    meterData.totalDemand = form.controls.totalDemand.value;
+    meterData.basicCharge = form.controls.basicCharge.value;
+    meterData.supplyBlockAmount = form.controls.supplyBlockAmount.value;
+    meterData.supplyBlockCharge = form.controls.supplyBlockCharge.value;
+    meterData.flatRateAmount = form.controls.flatRateAmount.value;
+    meterData.flatRateCharge = form.controls.flatRateCharge.value;
+    meterData.peakAmount = form.controls.peakAmount.value;
+    meterData.peakCharge = form.controls.peakCharge.value;
+    meterData.offPeakAmount = form.controls.offPeakAmount.value;
+    meterData.offPeakCharge = form.controls.offPeakCharge.value;
+    meterData.demandBlockAmount = form.controls.demandBlockAmount.value;
+    meterData.demandBlockCharge = form.controls.demandBlockCharge.value;
+    meterData.generationTransmissionCharge = form.controls.generationTransmissionCharge.value;
+    meterData.transmissionCharge = form.controls.transmissionCharge.value;
+    meterData.powerFactorCharge = form.controls.powerFactorCharge.value;
+    meterData.businessCharge = form.controls.businessCharge.value;
+    meterData.utilityTax = form.controls.utilityTax.value;
+    meterData.latePayment = form.controls.latePayment.value;
+    return meterData;
+  }
+
+
+  getGeneralMeterDataForm(meterData: IdbUtilityMeterData, displayVolumeInput: boolean, displayEnergyInput: boolean): FormGroup {
+    let totalVolumeValidators: Array<ValidatorFn> = [];
+    if(displayVolumeInput){
+      totalVolumeValidators = [Validators.required, Validators.min(0)]
+    }
+    let totalEnergyUseValidators: Array<ValidatorFn> = [];
+    if(displayEnergyInput){
+      totalEnergyUseValidators = [Validators.required, Validators.min(0)];
+    }
     return this.formBuilder.group({
-      id: [meterData.id],
-      meterId: [meterData.meterId],
-      facilityId: [meterData.facilityId],
-      accountId: [meterData.accountId],
       readDate: [meterData.readDate, Validators.required],
-      unit: [meterData.unit],
-      totalVolume: [meterData.totalVolume, [Validators.required, Validators.min(0)]],
-      totalEnergyUse: [meterData.totalEnergyUse],
+      totalVolume: [meterData.totalVolume, totalVolumeValidators],
+      totalEnergyUse: [meterData.totalEnergyUse, totalEnergyUseValidators],
       totalCost: [meterData.totalCost, [Validators.required, Validators.min(0)]],
       commodityCharge: [meterData.commodityCharge],
       deliveryCharge: [meterData.deliveryCharge],
       otherCharge: [meterData.otherCharge],
-      checked: [meterData.checked]
     });
   }
+
+  updateGeneralMeterDataFromForm(meterData: IdbUtilityMeterData, form: FormGroup): IdbUtilityMeterData {
+    meterData.readDate = form.controls.readDate.value;
+    meterData.totalVolume = form.controls.totalVolume.value;
+    meterData.totalEnergyUse = form.controls.totalEnergyUse.value;
+    meterData.totalCost = form.controls.totalCost.value;
+    meterData.commodityCharge = form.controls.commodityCharge.value;
+    meterData.deliveryCharge = form.controls.deliveryCharge.value;
+    meterData.otherCharge = form.controls.otherCharge.value;
+    return meterData;
+  }
+
 
   meterExport(meterList: Array<{ idbMeter: IdbUtilityMeter, meterDataItems: Array<IdbUtilityMeterData> }>, source: string) {
     let csv;

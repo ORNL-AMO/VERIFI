@@ -118,7 +118,6 @@ export class UtilityMeterDatadbService {
             facilityId: facilityId,
             accountId: accountId,
             readDate: undefined,
-            unit: undefined,
             totalVolume: undefined,
             totalEnergyUse: undefined,
             totalCost: undefined,

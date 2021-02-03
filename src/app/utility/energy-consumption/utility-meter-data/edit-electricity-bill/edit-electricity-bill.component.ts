@@ -55,12 +55,12 @@ export class EditElectricityBillComponent implements OnInit {
   }
 
   meterDataSave() {
+    let meterDataToSave: IdbUtilityMeterData = this.utilityMeterDataService.updateElectricityMeterDataFromForm(this.editMeterData, this.meterDataForm);
     if (this.addOrEdit == 'edit') {
-      this.utilityMeterDataDbService.update(this.meterDataForm.value);
+      this.utilityMeterDataDbService.update(meterDataToSave);
     } else {
-      let meterData: IdbUtilityMeterData = this.meterDataForm.value;
-      delete meterData.id;
-      this.utilityMeterDataDbService.add(meterData);
+      delete meterDataToSave.id;
+      this.utilityMeterDataDbService.add(meterDataToSave);
     }
     this.cancel();
   }
