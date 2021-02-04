@@ -1,5 +1,4 @@
-import { invalid } from '@angular/compiler/src/render3/view/util';
-import { Component, OnInit, Output, EventEmitter, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -22,10 +21,7 @@ export class ImportMeterWizardComponent implements OnInit {
   @Output()
   emitClose: EventEmitter<boolean> = new EventEmitter<boolean>();
 
-  @ViewChild('inputFile') myInputVariable: ElementRef;
-
   importError: boolean;
-  // quickViewMeters: Array<IdbUtilityMeter>;
   importMeters: Array<IdbUtilityMeter>;
   selectedMeterForm: FormGroup;
   selectedMeterIndex: number;
@@ -185,7 +181,7 @@ export class ImportMeterWizardComponent implements OnInit {
   async addMeters() {
     await this.importMeters.forEach((importMeter: IdbUtilityMeter, index: number) => {
       if (this.skipMeters[index] == false) {
-        //check if meter already exists
+        //check if meter already exists (same name)
         let facilityMeter: IdbUtilityMeter = this.facilityMeters.find(facilityMeter => { return facilityMeter.name == importMeter.name });
         if (facilityMeter) {
           //update existing meter with form from import meter
@@ -202,7 +198,6 @@ export class ImportMeterWizardComponent implements OnInit {
   }
 
   resetImport() {
-    this.myInputVariable.nativeElement.value = '';
     this.importMeters = undefined;
     this.importError = false;
     this.emitClose.emit(true);
