@@ -9,14 +9,16 @@
                 <div class="mb-3">
                     <input id="meterName" class="form-control" type="text" formControlName="name">
                 </div>
-                <span class="inputError" *ngIf="meterForm.get('name').hasError('required')">Meter name is required</span>
+                <span class="inputError" *ngIf="meterForm.get('name').hasError('required')">Meter name is
+                    required</span>
             </div>
 
             <div class="row">
                 <div class="col">
                     <label for="source">Source <span class="required">*</span> </label>
                     <div class="mb-3">
-                        <select id="source" type="text" formControlName="source" (change)="changeSource()">
+                        <select class="form-control" id="source" type="text" formControlName="source"
+                            (change)="changeSource()">
                             <option [ngValue]="'Electricity'">Electricity</option>
                             <option [ngValue]="'Natural Gas'">Natural Gas</option>
                             <option [ngValue]="'Other Fuels'">Other Fuels</option>
@@ -26,20 +28,23 @@
                             <option [ngValue]="'Other Utility'">Other Utility</option>
                         </select>
                     </div>
-                    <span class="inputError" *ngIf="meterForm.get('source').hasError('required')">Source is required</span>
+                    <span class="inputError" *ngIf="meterForm.get('source').hasError('required')">Source is
+                        required</span>
                 </div>
 
                 <div class="col">
                     <label for="startingUnit">Collection Unit <span class="required">*</span> </label>
                     <div class="mb-3">
-                        <select id="startingUnit" type="text" formControlName="startingUnit" (change)="changeUnit()">
+                        <select class="form-control" id="startingUnit" type="text" formControlName="startingUnit"
+                            (change)="changeUnit()">
                             <option *ngFor="let startingUnitOption of startingUnitOptions"
                                 [ngValue]="startingUnitOption.value">
                                 <span [innerHTML]="startingUnitOption.display"></span>
                             </option>
                         </select>
                     </div>
-                    <span class="inputError" *ngIf="meterForm.get('startingUnit').hasError('required')">Starting unit is required</span>
+                    <span class="inputError" *ngIf="meterForm.get('startingUnit').hasError('required')">Starting unit is
+                        required</span>
                 </div>
             </div>
 
@@ -47,25 +52,29 @@
                 <div *ngIf="displayPhase" class="col">
                     <label for="phase">Phase <span class="required">*</span> </label>
                     <div class="mb-3">
-                        <select id="phase" type="text" formControlName="phase" (change)="changePhase();">
+                        <select class="form-control" id="phase" type="text" formControlName="phase"
+                            (change)="changePhase();">
                             <option [ngValue]="'Solid'">Solid</option>
                             <option [ngValue]="'Liquid'">Liquid</option>
                             <option [ngValue]="'Gas'">Gas</option>
                         </select>
                     </div>
-                    <span class="inputError" *ngIf="meterForm.get('phase').hasError('required')">Phase is required</span>
+                    <span class="inputError" *ngIf="meterForm.get('phase').hasError('required')">Phase is
+                        required</span>
                 </div>
 
                 <div *ngIf="displayFuel" class="col">
                     <label for="energySource">{{energySourceLabel}} <span class="required">*</span> </label>
                     <div class="mb-3">
-                        <select id="energySource" type="text" formControlName="fuel" (change)="changeFuel()">
+                        <select class="form-control" id="energySource" type="text" formControlName="fuel"
+                            (change)="changeFuel()">
                             <option *ngFor="let fuelOption of fuelTypeOptions" [ngValue]="fuelOption.value">
                                 {{fuelOption.value}}
                             </option>
                         </select>
                     </div>
-                    <span class="inputError" *ngIf="meterForm.get('fuel').hasError('required')">Fuel type is required</span>
+                    <span class="inputError" *ngIf="meterForm.get('fuel').hasError('required')">Fuel type is
+                        required</span>
                 </div>
             </div>
 
@@ -74,11 +83,14 @@
                     <label for="heatCapacity">Heat Capacity <span class="required">*</span> </label>
                     <div class="input-group mb-3">
                         <input id="heatCapacity" class="form-control" type="number" formControlName="heatCapacity">
-                        <span class="unit"><span [innerHTML]="facilityEnergyUnit | settingsLabel"></span>/<span [innerHTML]="meterForm.controls.startingUnit.value | settingsLabel"></span>
+                        <span class="unit"><span [innerHTML]="facilityEnergyUnit | settingsLabel"></span>/<span
+                                [innerHTML]="meterForm.controls.startingUnit.value | settingsLabel"></span>
                         </span>
                     </div>
-                    <span class="inputError" *ngIf="meterForm.get('heatCapacity').hasError('required')">Heat capacity is required</span>
-                    <span class="inputError" *ngIf="meterForm.get('heatCapacity').hasError('min')">Value can't be less than 0</span>
+                    <span class="inputError" *ngIf="meterForm.get('heatCapacity').hasError('required')">Heat capacity is
+                        required</span>
+                    <span class="inputError" *ngIf="meterForm.get('heatCapacity').hasError('min')">Value can't be less
+                        than 0</span>
                 </div>
 
                 <div class="col">
@@ -86,9 +98,13 @@
                     <div class="mb-3">
                         <input id="siteToSource" class="form-control" type="number" formControlName="siteToSource">
                     </div>
-                    <span class="inputError" *ngIf="meterForm.get('siteToSource').hasError('required')">Site to source is required</span>
+                    <span class="inputError" *ngIf="meterForm.get('siteToSource').hasError('required')">Site to source
+                        is required</span>
                 </div>
             </div>
+
+            <p class="alert alert-warning" *ngIf="meterFormDisabled"> Data found for this meter. Some meter properties
+                cannot be changed. </p>
         </div>
         <div class="col-5">
             <p class="bold">Other Information</p>
