@@ -6,8 +6,12 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterGroup } from 'src/app/models/idb';
+import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
+import { EnergyUseCalculationsService } from 'src/app/shared/helper-services/energy-use-calculations.service';
 import { LoadingService } from 'src/app/shared/loading/loading.service';
+import { UnitOption } from 'src/app/shared/unitOptions';
 import { EditMeterFormService } from '../edit-meter-form/edit-meter-form.service';
+import { FuelTypeOption, SourceOptions } from '../edit-meter-form/editMeterOptions';
 
 @Component({
   selector: 'app-import-meter-wizard',
@@ -20,7 +24,7 @@ export class ImportMeterWizardComponent implements OnInit {
 
   @ViewChild('inputFile') myInputVariable: ElementRef;
 
-  importError: string = '';
+  importError: boolean;
   // quickViewMeters: Array<IdbUtilityMeter>;
   importMeters: Array<IdbUtilityMeter>;
   selectedMeterForm: FormGroup;
@@ -30,7 +34,8 @@ export class ImportMeterWizardComponent implements OnInit {
   facilityMetersSub: Subscription;
   skipMeters: Array<boolean>;
   constructor(private utilityMeterGroupdbService: UtilityMeterGroupdbService, private utilityMeterdbService: UtilityMeterdbService,
-    private facilityDbService: FacilitydbService, private editMeterFormService: EditMeterFormService, private loadingService: LoadingService) { }
+    private facilityDbService: FacilitydbService, private editMeterFormService: EditMeterFormService, private loadingService: LoadingService,
+    private energyUseCalculationsService: EnergyUseCalculationsService, private energyUnitsHelperService: EnergyUnitsHelperService) { }
 
   ngOnInit(): void {
     this.facilityMetersSub = this.utilityMeterdbService.facilityMeters.subscribe(val => {
@@ -43,10 +48,7 @@ export class ImportMeterWizardComponent implements OnInit {
   }
 
   meterImport(files: FileList) {
-    // Clear with each upload
-    // this.quickViewMeters = new Array();
     this.importMeters = new Array();
-    this.importError = '';
     this.skipMeters = new Array();
     if (files && files.length > 0) {
       let file: File = files.item(0);
@@ -56,37 +58,86 @@ export class ImportMeterWizardComponent implements OnInit {
         let csv: string = reader.result as string;
         const lines = csv.split("\n");
         const headers = lines[0].replace('\r', '').split(",");
-        const allowedHeaders = ["Meter Number", "Account Number", "Source", "Meter Name", "Utility Supplier", "Notes", "Building / Location", "Meter Group"];
-
+        const allowedHeaders = ["Meter Number", "Account Number", "Source", "Meter Name", "Utility Supplier", "Notes", "Building / Location", "Meter Group", "Collection Unit", "Phase", "Fuel", "Heat Capacity", "Site To Source"];
         if (JSON.stringify(headers) === JSON.stringify(allowedHeaders)) {
+          this.importError = false;
           let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
           for (var i = 1; i < lines.length - 1; i++) {
-            const obj: IdbUtilityMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.id, selectedFacility.accountId);
-            const currentLine = lines[i].split(",");
-            // for (var j = 0; j < headers.length; j++) {
-            obj.meterNumber = currentLine[0];
-            obj.accountNumber = Number(currentLine[1]);
-            obj.source = currentLine[2];
-            obj.name = currentLine[3];
-            obj.supplier = currentLine[4];
-            obj.notes = currentLine[5];
-            obj.location = currentLine[6];
-            obj.group = currentLine[7];
-            // Read csv and push to obj array.
-            this.importMeters.push(obj);
+            let currentLine: Array<string> = lines[i].split(",");
+            let newImportMeter: IdbUtilityMeter = this.getNewMeterFromCurrentLine(currentLine, selectedFacility);
+            this.importMeters.push(newImportMeter);
             this.skipMeters.push(false);
             if (i == 1) {
-              this.selectMeter(obj, 0);
+              this.selectMeter(newImportMeter, 0);
             }
           }
         } else {
-          // csv didn't match -> Show error
-          this.importError = "Error with file. Please match your file to the provided template.";
-          return false;
+          this.importError = true;
         }
       }
     }
   }
+
+  getNewMeterFromCurrentLine(currentLine: Array<string>, selectedFacility: IdbFacility): IdbUtilityMeter {
+    let newMeter: IdbUtilityMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.id, selectedFacility.accountId);
+    newMeter.meterNumber = currentLine[0];
+    newMeter.accountNumber = Number(currentLine[1]);
+    newMeter.source = this.checkImportSource(currentLine[2]);
+    console.log(newMeter.source);
+    newMeter.phase = this.checkImportPhase(currentLine[9]);
+    newMeter.name = currentLine[3];
+    newMeter.supplier = currentLine[4];
+    newMeter.notes = currentLine[5];
+    newMeter.location = currentLine[6];
+    newMeter.group = currentLine[7];
+    newMeter.fuel = currentLine[10];
+    newMeter.startingUnit = this.checkImportStartingUnit(currentLine[8], newMeter.source, newMeter.phase, newMeter.fuel);
+    if (currentLine[11] != '') {
+      newMeter.heatCapacity = Number(currentLine[11]);
+    }
+    if (Number(currentLine[12]) != 0) {
+      console.log(currentLine[12]);
+      newMeter.siteToSource = Number(currentLine[12]);
+    }
+    return newMeter;
+  }
+
+  //will only return source if matches from our options
+  checkImportSource(source: string): string {
+    console.log(source);
+    let selectedSource: string = SourceOptions.find(sourceOption => { return sourceOption == source });
+    console.log(selectedSource);
+    return selectedSource;
+  }
+
+  checkImportPhase(phase: string): string {
+    if (phase == 'Gas' || phase == 'Liquid' || phase == 'Solid') {
+      return phase;
+    }
+    return undefined;
+  }
+
+  checkImportStartingUnit(importUnit: string, source: string, phase: string, fuel: string): string {
+    if (source) {
+      let startingUnitOptions: Array<UnitOption> = this.energyUnitsHelperService.getStartingUnitOptions(source, phase, fuel);
+      let selectedUnitOption: UnitOption = startingUnitOptions.find(unitOption => { return unitOption.value == importUnit });
+      if (selectedUnitOption) {
+        return selectedUnitOption.value;
+      }
+    }
+    return undefined;
+  }
+
+  checkImportFuel(fuel: string, source: string, phase: string): string {
+    let fuelTypeOptions = this.energyUseCalculationsService.getFuelTypeOptions(source, phase);
+    let selectedEnergyOption: FuelTypeOption = fuelTypeOptions.find(option => { return option.value == fuel });
+    if (selectedEnergyOption) {
+      return selectedEnergyOption.value;
+    }
+    return undefined;
+  }
+
+
   runImport() {
     this.loadingService.setLoadingStatus(true);
     this.loadingService.setLoadingMessage("Adding Meters...");
@@ -104,12 +155,19 @@ export class ImportMeterWizardComponent implements OnInit {
     let uniqNeededGroups: Array<IdbUtilityMeterGroup> = new Array();
 
     this.importMeters.forEach(meter => {
-      let checkExistsInDb: IdbUtilityMeterGroup = facilityMeterGroups.find(existingGroup => { return existingGroup.name == meter.group });
-      let checkExistsInArray: IdbUtilityMeterGroup = uniqNeededGroups.find(existingGroup => { return existingGroup.name == meter.group });
-      if (checkExistsInDb == undefined && checkExistsInArray == undefined) {
-        //TODO: Alternate meter group type (Energy/Water/Other)
-        let utilityMeterGroup: IdbUtilityMeterGroup = this.utilityMeterGroupdbService.getNewIdbUtilityMeterGroup("Energy", '', meter.group, meter.facilityId, meter.accountId);
-        uniqNeededGroups.push(utilityMeterGroup);
+      if (meter.group) {
+        let checkExistsInDb: IdbUtilityMeterGroup = facilityMeterGroups.find(existingGroup => { return existingGroup.name == meter.group });
+        let checkExistsInArray: IdbUtilityMeterGroup = uniqNeededGroups.find(existingGroup => { return existingGroup.name == meter.group });
+        if (checkExistsInDb == undefined && checkExistsInArray == undefined) {
+          let groupType: string = "Energy";
+          if (meter.source == 'Water' || meter.source == 'Waste Water') {
+            groupType = "Water"
+          } else if (meter.source == 'Other Utility') {
+            groupType = "Other"
+          }
+          let utilityMeterGroup: IdbUtilityMeterGroup = this.utilityMeterGroupdbService.getNewIdbUtilityMeterGroup(groupType, meter.group, meter.facilityId, meter.accountId);
+          uniqNeededGroups.push(utilityMeterGroup);
+        }
       }
     });
     await uniqNeededGroups.forEach(neededGroup => {
@@ -147,12 +205,10 @@ export class ImportMeterWizardComponent implements OnInit {
     });
   }
 
-
   resetImport() {
     this.myInputVariable.nativeElement.value = '';
-    // this.quickViewMeters = undefined;
     this.importMeters = undefined;
-    this.importError = '';
+    this.importError = false;
     this.emitClose.emit(true);
   }
 
@@ -193,13 +249,13 @@ export class ImportMeterWizardComponent implements OnInit {
     if (this.skipMeters[index] == true) {
       return 'badge-secondary';
     } else {
-      let facilityMeter: IdbUtilityMeter = this.facilityMeters.find(facilityMeter => { return facilityMeter.name == meter.name });
-      if (facilityMeter) {
-        return 'badge-warning';
+      let isMeterInvalid: boolean = this.isMeterInvalid(meter);
+      if (isMeterInvalid) {
+        return 'badge-danger';
       } else {
-        let isMeterInvalid: boolean = this.isMeterInvalid(meter);
-        if (isMeterInvalid) {
-          return 'badge-danger';
+        let facilityMeter: IdbUtilityMeter = this.facilityMeters.find(facilityMeter => { return facilityMeter.name == meter.name });
+        if (facilityMeter) {
+          return 'badge-warning';
         } else {
           return 'badge-success';
         }

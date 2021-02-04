@@ -504,7 +504,8 @@ input.warning {
   border: 1px solid white !important;
 }
 input.error,
-input.ng-invalid {
+input.ng-invalid,
+select.ng-invalid {
   outline: 2px solid #bf3d00c4 !important;
   outline-offset: 0;
   background-color: #bf3d001c;

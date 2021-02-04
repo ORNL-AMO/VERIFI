@@ -114,7 +114,7 @@ export class UtilityMeterdbService {
         });
     }
 
-    getNewIdbUtilityMeter(facilityId: number, accountId: number): IdbUtilityMeter {
+    getNewIdbUtilityMeter(facilityId: number, accountId: number, source?: string): IdbUtilityMeter {
         return {
             facilityId: facilityId,
             accountId: accountId,
@@ -122,7 +122,7 @@ export class UtilityMeterdbService {
             groupId: undefined,
             meterNumber: undefined,
             accountNumber: undefined,
-            type: undefined,
+            // type: undefined,
             phase: undefined,
             heatCapacity: undefined,
             siteToSource: undefined,
