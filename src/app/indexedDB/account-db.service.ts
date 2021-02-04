@@ -109,7 +109,29 @@ export class AccountdbService {
             volumeLiquidUnit: 'SCF',
             volumeGasUnit: 'SCF',
             chilledWaterUnit: undefined,
-            massUnit: 'lb'
+            massUnit: 'lb',
+            sustainabilityQuestions: {
+                energyReductionGoal: false,
+                energyReductionPercent: 0,
+                energyReductionBaselineYear: 0,
+                energyReductionTargetYear: 0,
+                greenhouseReductionGoal: false,
+                greenhouseReductionPercent: 0,
+                greenhouseReductionBaselineYear: 0,
+                greenhouseReductionTargetYear: 0,
+                renewableEnergyGoal: false,
+                renewableEnergyPercent: 0,
+                renewableEnergyBaselineYear: 0,
+                renewableEnergyTargetYear: 0,
+                wasteReductionGoal: false,
+                wasteReductionPercent: 0,
+                wasteReductionBaselineYear: 0,
+                wasteReductionTargetYear: 0,
+                waterReductionGoal: false,
+                waterReductionPercent: 0,
+                waterReductionBaselineYear: 0,
+                waterReductionTargetYear: 0,
+            }
 
         }
     }
@@ -129,7 +151,29 @@ export const TestAccountData: Array<IdbAccount> = [
         volumeLiquidUnit: 'SCF',
         volumeGasUnit: 'SCF',
         chilledWaterUnit: undefined,
-        massUnit: 'lb'
+        massUnit: 'lb',
+        sustainabilityQuestions: {
+            energyReductionGoal: false,
+            energyReductionPercent: 0,
+            energyReductionBaselineYear: 0,
+            energyReductionTargetYear: 0,
+            greenhouseReductionGoal: false,
+            greenhouseReductionPercent: 0,
+            greenhouseReductionBaselineYear: 0,
+            greenhouseReductionTargetYear: 0,
+            renewableEnergyGoal: false,
+            renewableEnergyPercent: 0,
+            renewableEnergyBaselineYear: 0,
+            renewableEnergyTargetYear: 0,
+            wasteReductionGoal: false,
+            wasteReductionPercent: 0,
+            wasteReductionBaselineYear: 0,
+            wasteReductionTargetYear: 0,
+            waterReductionGoal: false,
+            waterReductionPercent: 0,
+            waterReductionBaselineYear: 0,
+            waterReductionTargetYear: 0,
+        }
 
     },
     {
@@ -144,7 +188,29 @@ export const TestAccountData: Array<IdbAccount> = [
         volumeLiquidUnit: 'SCF',
         volumeGasUnit: 'SCF',
         chilledWaterUnit: undefined,
-        massUnit: 'lb'
+        massUnit: 'lb',
+        sustainabilityQuestions: {
+            energyReductionGoal: false,
+            energyReductionPercent: 0,
+            energyReductionBaselineYear: 0,
+            energyReductionTargetYear: 0,
+            greenhouseReductionGoal: false,
+            greenhouseReductionPercent: 0,
+            greenhouseReductionBaselineYear: 0,
+            greenhouseReductionTargetYear: 0,
+            renewableEnergyGoal: false,
+            renewableEnergyPercent: 0,
+            renewableEnergyBaselineYear: 0,
+            renewableEnergyTargetYear: 0,
+            wasteReductionGoal: false,
+            wasteReductionPercent: 0,
+            wasteReductionBaselineYear: 0,
+            wasteReductionTargetYear: 0,
+            waterReductionGoal: false,
+            waterReductionPercent: 0,
+            waterReductionBaselineYear: 0,
+            waterReductionTargetYear: 0,
+        }
     },
     {
         // id: undefined,
@@ -158,6 +224,28 @@ export const TestAccountData: Array<IdbAccount> = [
         volumeLiquidUnit: 'SCF',
         volumeGasUnit: 'SCF',
         chilledWaterUnit: undefined,
-        massUnit: 'lb'
+        massUnit: 'lb',
+        sustainabilityQuestions: {
+            energyReductionGoal: false,
+            energyReductionPercent: 0,
+            energyReductionBaselineYear: 0,
+            energyReductionTargetYear: 0,
+            greenhouseReductionGoal: false,
+            greenhouseReductionPercent: 0,
+            greenhouseReductionBaselineYear: 0,
+            greenhouseReductionTargetYear: 0,
+            renewableEnergyGoal: false,
+            renewableEnergyPercent: 0,
+            renewableEnergyBaselineYear: 0,
+            renewableEnergyTargetYear: 0,
+            wasteReductionGoal: false,
+            wasteReductionPercent: 0,
+            wasteReductionBaselineYear: 0,
+            wasteReductionTargetYear: 0,
+            waterReductionGoal: false,
+            waterReductionPercent: 0,
+            waterReductionBaselineYear: 0,
+            waterReductionTargetYear: 0,
+        }
     }
 ]
