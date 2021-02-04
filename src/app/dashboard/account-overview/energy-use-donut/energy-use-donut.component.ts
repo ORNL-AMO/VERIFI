@@ -2,7 +2,7 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { FacilitySummary } from 'src/app/models/dashboard';
+import { AccountFacilitiesSummary } from 'src/app/models/dashboard';
 import { DashboardService } from '../../dashboard.service';
 
 @Component({
@@ -14,7 +14,7 @@ export class EnergyUseDonutComponent implements OnInit {
 
 
   @ViewChild('energyUseDonut', { static: false }) energyUseDonut: ElementRef;
-  facilitiesSummary: Array<FacilitySummary>;
+  facilitiesSummary: AccountFacilitiesSummary;
   accountFacilitiesSub: Subscription;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService,
     private dashboardService: DashboardService, private plotlyService: PlotlyService) { }
@@ -22,7 +22,7 @@ export class EnergyUseDonutComponent implements OnInit {
   ngOnInit(): void {
     this.accountFacilitiesSub = this.utilityMeterDataDbService.accountMeterData.subscribe(val => {
       this.facilitiesSummary = this.dashboardService.getAccountFacilitesSummary();
-      if (this.facilitiesSummary.length != 0) {
+      if (this.facilitiesSummary.facilitySummaries.length) {
         this.drawChart();
       } else if (this.energyUseDonut) {
         let Plotly = this.plotlyService.getPlotly();
@@ -41,10 +41,10 @@ export class EnergyUseDonutComponent implements OnInit {
   }
 
   drawChart() {
-    if (this.energyUseDonut && this.facilitiesSummary.length != 0) {
+    if (this.energyUseDonut && this.facilitiesSummary.facilitySummaries.length != 0) {
       var data = [{
-        values: this.facilitiesSummary.map(summary => { return summary.energyCost }),
-        labels: this.facilitiesSummary.map(summary => { return summary.facility.name }),
+        values: this.facilitiesSummary.facilitySummaries.map(summary => { return summary.energyCost }),
+        labels: this.facilitiesSummary.facilitySummaries.map(summary => { return summary.facility.name }),
         textinfo: 'label+percent',
         textposition: 'auto',
         insidetextorientation: "horizontal",

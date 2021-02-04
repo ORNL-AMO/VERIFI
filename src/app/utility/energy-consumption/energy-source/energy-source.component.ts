@@ -3,7 +3,6 @@ import { AccountdbService } from "../../../indexedDB/account-db.service";
 import { FacilitydbService } from "../../../indexedDB/facility-db.service";
 import { UtilityMeterDatadbService } from "../../../indexedDB/utilityMeterData-db.service";
 import { UtilityMeterdbService } from "../../../indexedDB/utilityMeter-db.service";
-import { UtilityMeterGroupdbService } from "../../../indexedDB/utilityMeterGroup-db.service";
 import { listAnimation } from '../../../animations';
 import { IdbAccount, IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
 import { Subscription } from 'rxjs';
@@ -16,24 +15,15 @@ import { FormGroup } from '@angular/forms';
   styleUrls: ['./energy-source.component.css'],
   animations: [
     listAnimation
-  ],
-  host: {
-    '(document:click)': 'documentClick($event)',
-  }
+  ]
 })
 export class EnergySourceComponent implements OnInit {
 
-  meterMenuOpen: number;
-
-  // energySources: any;
-  // selectedMeter: any;
   meterList: Array<IdbUtilityMeter>;
   meterListSub: Subscription;
-  // energyFinalUnit: string;
 
-  page: number = 1;
+  currentPageNumber: number = 1;
   itemsPerPage: number = 10;
-  pageSize: number;
   importWindow: boolean;
   editMeter: IdbUtilityMeter;
   meterToDelete: IdbUtilityMeter;
@@ -41,6 +31,8 @@ export class EnergySourceComponent implements OnInit {
   selectedFacilityName: string = 'Facility';
 
   addOrEdit: string = 'add';
+  orderDataField: string = 'name';
+  orderByDirection: string = 'desc';
   constructor(
     private accountdbService: AccountdbService,
     private facilitydbService: FacilitydbService,
@@ -66,18 +58,6 @@ export class EnergySourceComponent implements OnInit {
     this.selectedFacilitySub.unsubscribe();
   }
 
-  // Close menus when user clicks outside the dropdown
-  documentClick() {
-    this.meterMenuOpen = null;
-  }
-
-  meterToggleMenu(index: number) {
-    if (this.meterMenuOpen === index) {
-      this.meterMenuOpen = null;
-    } else {
-      this.meterMenuOpen = index;
-    }
-  }
 
   addMeter() {
     let selectedFacility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
@@ -104,15 +84,6 @@ export class EnergySourceComponent implements OnInit {
     document.body.removeChild(downloadLink);
   }
 
-  public onPageChange(pageNum: number): void {
-    this.pageSize = this.itemsPerPage * (pageNum - 1);
-  }
-
-  public changePagesize(num: number): void {
-    this.itemsPerPage = num;
-    this.onPageChange(this.page);
-  }
-
   closeImportWindow() {
     this.importWindow = false;
   }
@@ -130,7 +101,6 @@ export class EnergySourceComponent implements OnInit {
     this.editMeter = undefined;
   }
 
-
   deleteMeter() {
     //delete meter
     this.utilityMeterdbService.deleteIndex(this.meterToDelete.id);
@@ -145,11 +115,22 @@ export class EnergySourceComponent implements OnInit {
 
   cancelDelete() {
     this.meterToDelete = undefined;
-    this.meterMenuOpen = null;
   }
 
   isMeterInvalid(meter: IdbUtilityMeter): boolean{
     let form: FormGroup = this.editMeterFormService.getFormFromMeter(meter);
     return form.invalid;
+  }
+
+  setOrderDataField(str: string){
+    if(str == this.orderDataField){
+      if(this.orderByDirection == 'desc'){
+        this.orderByDirection = 'asc';
+      }else{
+        this.orderByDirection = 'desc';
+      }
+    }else{
+      this.orderDataField = str;
+    }
   }
 }

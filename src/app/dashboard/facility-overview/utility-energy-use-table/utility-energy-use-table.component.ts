@@ -20,15 +20,12 @@ export class UtilityEnergyUseTableComponent implements OnInit {
 
   utilityUsageSummaryData: UtilityUsageSummaryData;
   lastMonthsDate: Date;
+  yearPriorDate: Date;
+  yearPriorLastMonth: Date;
   facilityEnergyUnit: string;
   constructor(private dashboardService: DashboardService, private utilityMeterDataDbService: UtilityMeterDatadbService, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
-
-
-    let lastMonthYear: { lastMonth: number, lastMonthYear: number } = this.dashboardService.getLastMonthYear();
-    this.lastMonthsDate = new Date(lastMonthYear.lastMonthYear, lastMonthYear.lastMonth);
-
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
       this.selectedFacility = val;
       if (this.selectedFacility) {
@@ -52,6 +49,11 @@ export class UtilityEnergyUseTableComponent implements OnInit {
   setUsageValues() {
     if (this.accountMeterData && this.accountMeterData.length != 0 && this.selectedFacility) {
       this.utilityUsageSummaryData = this.dashboardService.getFacilityUtilityUsageSummaryData(this.selectedFacility, false);
+      if (this.utilityUsageSummaryData.total) {
+        this.lastMonthsDate = new Date(this.utilityUsageSummaryData.allMetersLastBill.year, this.utilityUsageSummaryData.allMetersLastBill.monthNumValue);
+        this.yearPriorDate = new Date(this.utilityUsageSummaryData.allMetersLastBill.year - 1, this.utilityUsageSummaryData.allMetersLastBill.monthNumValue + 1);
+        this.yearPriorLastMonth = new Date(this.utilityUsageSummaryData.allMetersLastBill.year - 1, this.utilityUsageSummaryData.allMetersLastBill.monthNumValue );
+      }
     }
   }
 }

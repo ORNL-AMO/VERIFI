@@ -1,7 +1,8 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output, SimpleChanges } from '@angular/core';
 import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 import { UtilityMeterDataService } from '../utility-meter-data.service';
+import * as _ from 'lodash';
 
 @Component({
   selector: 'app-general-utility-data-table',
@@ -15,7 +16,7 @@ export class GeneralUtilityDataTableComponent implements OnInit {
     meterDataItems: Array<IdbUtilityMeterData>
   };
   @Input()
-  pageSize: Array<number>;
+  currentPageNumber: number;
   @Input()
   itemsPerPage: number;
   @Input()
@@ -32,7 +33,9 @@ export class GeneralUtilityDataTableComponent implements OnInit {
   volumeUnit: string;
   showVolumeColumn: boolean;
   showEnergyColumn: boolean;
-  constructor(public utilityMeterDataService: UtilityMeterDataService, private energyUnitsHelperService: EnergyUnitsHelperService) { }
+  orderDataField: string = 'readDate';
+  orderByDirection: string = 'desc';
+  constructor(public utilityMeterDataService: UtilityMeterDataService, private energyUnitsHelperService: EnergyUnitsHelperService, private cd: ChangeDetectorRef) { }
 
   ngOnInit(): void {
     this.showVolumeColumn = (this.meterListItem.meterDataItems.find(dataItem => { return dataItem.totalVolume != undefined }) != undefined);
@@ -47,10 +50,29 @@ export class GeneralUtilityDataTableComponent implements OnInit {
     }
   }
 
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes.currentPageNumber && !changes.currentPageNumber.firstChange) {
+      this.allChecked = false;
+      this.checkAll();
+    }
+    if (changes.itemsPerPage && !changes.itemsPerPage.firstChange) {
+      this.allChecked = false;
+      this.checkAll();
+    }
+  }
+
   checkAll() {
-    this.meterListItem.meterDataItems.forEach(dataItem => {
-      dataItem.checked = this.allChecked;
-    });
+    if (this.allChecked) {
+      this.meterListItem.meterDataItems = _.orderBy(this.meterListItem.meterDataItems, this.orderDataField, this.orderByDirection)
+      let displayedItems = this.meterListItem.meterDataItems.slice(((this.currentPageNumber - 1) * this.itemsPerPage), (this.currentPageNumber * this.itemsPerPage))
+      displayedItems.forEach(item => {
+        item.checked = this.allChecked;
+      });
+    } else {
+      this.meterListItem.meterDataItems.forEach(item => {
+        item.checked = false;
+      });
+    }
     this.setChecked.emit(true);
   }
 
@@ -64,5 +86,17 @@ export class GeneralUtilityDataTableComponent implements OnInit {
 
   setDeleteMeterData(meterData): void {
     this.setDelete.emit(meterData);
+  }
+
+  setOrderDataField(str: string){
+    if(str == this.orderDataField){
+      if(this.orderByDirection == 'desc'){
+        this.orderByDirection = 'asc';
+      }else{
+        this.orderByDirection = 'desc';
+      }
+    }else{
+      this.orderDataField = str;
+    }
   }
 }

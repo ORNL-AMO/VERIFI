@@ -25,17 +25,22 @@ export class EditUtilityBillComponent implements OnInit {
   source: string;
   facilityMeter: IdbUtilityMeter;
   displayVolumeInput: boolean;
+  displayEnergyUse: boolean;
+  volumeUnit: string;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private utilityMeterDataService: UtilityMeterDataService,
     private utilityMeterDbService: UtilityMeterdbService, private energyUnitsHelperService: EnergyUnitsHelperService) { }
 
   ngOnInit(): void {
     this.facilityMeter = this.utilityMeterDbService.getFacilityMeterById(this.editMeterData.meterId);
-    if (this.facilityMeter) {
-      this.energyUnit = this.facilityMeter.startingUnit
-      this.source = this.facilityMeter.source;
+    this.displayVolumeInput = (this.energyUnitsHelperService.isEnergyUnit(this.facilityMeter.startingUnit) == false);
+    this.source = this.facilityMeter.source;
+    this.energyUnit = this.facilityMeter.energyUnit;
+    this.volumeUnit = this.facilityMeter.startingUnit;
+    this.displayEnergyUse = this.energyUnitsHelperService.isEnergyMeter(this.source);
+    this.meterDataForm = this.utilityMeterDataService.getGeneralMeterDataForm(this.editMeterData, this.displayVolumeInput, this.displayEnergyUse);
+    if (this.displayVolumeInput) {
+      this.meterDataForm.controls.totalEnergyUse.disable();
     }
-    this.displayVolumeInput = (this.energyUnitsHelperService.isEnergyUnit(this.energyUnit) == false);
-    this.meterDataForm = this.utilityMeterDataService.getGeneralMeterDataForm(this.editMeterData);
   }
 
   cancel() {
@@ -43,16 +48,15 @@ export class EditUtilityBillComponent implements OnInit {
   }
 
   meterDataSave() {
+    let meterDataToSave: IdbUtilityMeterData = this.utilityMeterDataService.updateGeneralMeterDataFromForm(this.editMeterData, this.meterDataForm);
     if (this.addOrEdit == 'edit') {
-      this.utilityMeterDataDbService.update(this.meterDataForm.value);
+      this.utilityMeterDataDbService.update(meterDataToSave);
     } else {
-      let meterData: IdbUtilityMeterData = this.meterDataForm.value;
-      delete meterData.id;
-      this.utilityMeterDataDbService.add(this.meterDataForm.value);
+      delete meterDataToSave.id;
+      this.utilityMeterDataDbService.add(meterDataToSave);
     }
     this.cancel();
   }
-
 
   calculateTotalEnergyUse() {
     let totalEnergyUse: number = this.meterDataForm.controls.totalVolume.value * this.facilityMeter.heatCapacity;

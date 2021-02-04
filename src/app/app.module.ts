@@ -64,6 +64,7 @@ import { AccountUtilityEnergyUseTableComponent } from './dashboard/account-overv
 import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
 import { ImportMeterWizardComponent } from './utility/energy-consumption/energy-source/import-meter-wizard/import-meter-wizard.component';
 import { EditMeterComponent } from './utility/energy-consumption/energy-source/edit-meter/edit-meter.component';
+import { OrderByPipe } from './shared/helper-pipes/order-by.pipe';
 
 @NgModule({
   declarations: [
@@ -113,7 +114,8 @@ import { EditMeterComponent } from './utility/energy-consumption/energy-source/e
     AccountUtilityEnergyUseTableComponent,
     PageNotFoundComponent,
     ImportMeterWizardComponent,
-    EditMeterComponent
+    EditMeterComponent,
+    OrderByPipe
   ],
   imports: [
     BrowserModule,
