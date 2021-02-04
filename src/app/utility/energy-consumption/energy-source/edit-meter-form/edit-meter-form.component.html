@@ -102,13 +102,9 @@
                         is required</span>
                 </div>
             </div>
-            <div class="row" *ngIf="meterFormDisabled">
-                <div class="col text-center">
-                    <span class="p-2 bg-warning">
-                        Data found for this meter. Some meter properties cannot be changed.
-                    </span>
-                </div>
-            </div>
+
+            <p class="alert alert-warning" *ngIf="meterFormDisabled"> Data found for this meter. Some meter properties
+                cannot be changed. </p>
         </div>
         <div class="col-5">
             <p class="bold">Other Information</p>
