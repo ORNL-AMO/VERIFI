@@ -58,7 +58,7 @@ export class ImportMeterWizardComponent implements OnInit {
         let csv: string = reader.result as string;
         const lines = csv.split("\n");
         const headers = lines[0].replace('\r', '').split(",");
-        const allowedHeaders = ["Meter Number", "Account Number", "Source", "Meter Name", "Utility Supplier", "Notes", "Building / Location", "Meter Group", "Collection Unit", "Phase", "Fuel", "Heat Capacity", "Site To Source"];
+        const allowedHeaders: Array<string> = ["Meter Number", "Account Number", "Source", "Meter Name", "Utility Supplier", "Notes", "Building / Location", "Meter Group", "Collection Unit", "Phase", "Fuel", "Heat Capacity", "Site To Source"];
         if (JSON.stringify(headers) === JSON.stringify(allowedHeaders)) {
           this.importError = false;
           let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
@@ -83,7 +83,6 @@ export class ImportMeterWizardComponent implements OnInit {
     newMeter.meterNumber = currentLine[0];
     newMeter.accountNumber = Number(currentLine[1]);
     newMeter.source = this.checkImportSource(currentLine[2]);
-    console.log(newMeter.source);
     newMeter.phase = this.checkImportPhase(currentLine[9]);
     newMeter.name = currentLine[3];
     newMeter.supplier = currentLine[4];
@@ -96,7 +95,6 @@ export class ImportMeterWizardComponent implements OnInit {
       newMeter.heatCapacity = Number(currentLine[11]);
     }
     if (Number(currentLine[12]) != 0) {
-      console.log(currentLine[12]);
       newMeter.siteToSource = Number(currentLine[12]);
     }
     return newMeter;
@@ -104,9 +102,7 @@ export class ImportMeterWizardComponent implements OnInit {
 
   //will only return source if matches from our options
   checkImportSource(source: string): string {
-    console.log(source);
     let selectedSource: string = SourceOptions.find(sourceOption => { return sourceOption == source });
-    console.log(selectedSource);
     return selectedSource;
   }
 
