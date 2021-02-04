@@ -58,13 +58,16 @@ export class ImportMeterWizardComponent implements OnInit {
         if (JSON.stringify(headers) === JSON.stringify(allowedHeaders)) {
           this.importError = false;
           let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-          for (var i = 1; i < lines.length - 1; i++) {
+          for (var i = 1; i < lines.length; i++) {
             let currentLine: Array<string> = lines[i].split(",");
-            let newImportMeter: IdbUtilityMeter = this.getNewMeterFromCurrentLine(currentLine, selectedFacility);
-            this.importMeters.push(newImportMeter);
-            this.skipMeters.push(false);
-            if (i == 1) {
-              this.selectMeter(newImportMeter, 0);
+            let lineHasData = currentLine.find(lineItem => {return lineItem != '' && lineItem != undefined});
+            if(lineHasData){
+              let newImportMeter: IdbUtilityMeter = this.getNewMeterFromCurrentLine(currentLine, selectedFacility);
+              this.importMeters.push(newImportMeter);
+              this.skipMeters.push(false);
+              if (i == 1) {
+                this.selectMeter(newImportMeter, 0);
+              }
             }
           }
         } else {

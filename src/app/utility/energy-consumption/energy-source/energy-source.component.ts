@@ -67,10 +67,14 @@ export class EnergySourceComponent implements OnInit {
   }
 
   meterExport() {
-    const replacer = (key, value) => value === null ? '' : value; // specify how you want to handle null values here
-    const header = Object.keys(this.meterList[0]);
-    let csvData: Array<string> = this.meterList.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer)).join(','));
-    csvData.unshift(header.join(','));
+    // const replacer = (key, value) => value === null ? '' : value; // specify how you want to handle null values here
+    const allowedHeaders: Array<string> = ["Meter Number", "Account Number", "Source", "Meter Name", "Utility Supplier", "Notes", "Building / Location", "Meter Group", "Collection Unit", "Phase", "Fuel", "Heat Capacity", "Site To Source"];
+    let csvData: Array<string> = new Array();
+    this.meterList.forEach(meter => {
+      let meterCSVData: string = this.getMeterCSVData(meter);
+      csvData.push(meterCSVData);
+    })
+    csvData.unshift(allowedHeaders.join(','));
     let csvBlob: BlobPart = csvData.join('\r\n');
 
     //Download the file as CSV
@@ -83,6 +87,33 @@ export class EnergySourceComponent implements OnInit {
     downloadLink.click();
     document.body.removeChild(downloadLink);
   }
+
+  getMeterCSVData(meter: IdbUtilityMeter): string {
+    let meterCSVItem: string = meter.meterNumber;
+    // meterCSVItem = this.addToString(meterCSVItem, meter.meterNumber);
+    meterCSVItem = this.addToString(meterCSVItem, meter.accountNumber);
+    meterCSVItem = this.addToString(meterCSVItem, meter.source);
+    meterCSVItem = this.addToString(meterCSVItem, meter.name);
+    meterCSVItem = this.addToString(meterCSVItem, meter.supplier);
+    meterCSVItem = this.addToString(meterCSVItem, meter.notes);
+    meterCSVItem = this.addToString(meterCSVItem, meter.location);
+    meterCSVItem = this.addToString(meterCSVItem, meter.group);
+    meterCSVItem = this.addToString(meterCSVItem, meter.startingUnit);
+    meterCSVItem = this.addToString(meterCSVItem, meter.phase);
+    meterCSVItem = this.addToString(meterCSVItem, meter.fuel);
+    meterCSVItem = this.addToString(meterCSVItem, meter.heatCapacity);
+    meterCSVItem = this.addToString(meterCSVItem, meter.siteToSource);
+    return meterCSVItem;
+  }
+
+  addToString(str: string, addition: string | number): string {
+    if (addition != undefined) {
+      return str + ',' + addition;
+    } else {
+      return str + ',' + '';
+    }
+  }
+
 
   closeImportWindow() {
     this.importWindow = false;
@@ -117,19 +148,19 @@ export class EnergySourceComponent implements OnInit {
     this.meterToDelete = undefined;
   }
 
-  isMeterInvalid(meter: IdbUtilityMeter): boolean{
+  isMeterInvalid(meter: IdbUtilityMeter): boolean {
     let form: FormGroup = this.editMeterFormService.getFormFromMeter(meter);
     return form.invalid;
   }
 
-  setOrderDataField(str: string){
-    if(str == this.orderDataField){
-      if(this.orderByDirection == 'desc'){
+  setOrderDataField(str: string) {
+    if (str == this.orderDataField) {
+      if (this.orderByDirection == 'desc') {
         this.orderByDirection = 'asc';
-      }else{
+      } else {
         this.orderByDirection = 'desc';
       }
-    }else{
+    } else {
       this.orderDataField = str;
     }
   }
