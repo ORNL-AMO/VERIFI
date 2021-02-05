@@ -156,13 +156,24 @@ export class UtilityMeterDatadbService {
     }
 
 
-    getLastMeterReadingDate(meter: IdbUtilityMeter): Date{
+    getLastMeterReadingDate(meter: IdbUtilityMeter): Date {
         let allSelectedMeterData: Array<IdbUtilityMeterData> = this.getMeterDataForFacility(meter);
         if (allSelectedMeterData.length != 0) {
             let lastMeterReading: IdbUtilityMeterData = _.maxBy(allSelectedMeterData, 'readDate');
             return new Date(lastMeterReading.readDate);
         }
         return undefined;
+    }
+
+
+    checkMeterReadingExistForDate(date: Date, meter: IdbUtilityMeter): boolean {
+        let newDate: Date = new Date(date);
+        let allSelectedMeterData: Array<IdbUtilityMeterData> = this.getMeterDataForFacility(meter);
+        let existingData: IdbUtilityMeterData = allSelectedMeterData.find(dataItem => {
+            let dataItemDate: Date = new Date(dataItem.readDate);
+            return (dataItemDate.getMonth() == newDate.getMonth()) && (dataItemDate.getFullYear() == newDate.getFullYear());
+        });
+        return existingData != undefined;
     }
 
     private getMeterDataFromMeterId(meterId: number): Array<IdbUtilityMeterData> {
@@ -183,5 +194,4 @@ export class UtilityMeterDatadbService {
         meterData = this.convertMeterDataService.convertMeterDataToAccount(meter, JSON.parse(JSON.stringify(meterData)), account);
         return meterData;
     }
-
 }

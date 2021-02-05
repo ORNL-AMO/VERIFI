@@ -27,6 +27,7 @@ export class EditUtilityBillComponent implements OnInit {
   displayVolumeInput: boolean;
   displayEnergyUse: boolean;
   volumeUnit: string;
+  invalidDate: boolean;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private utilityMeterDataService: UtilityMeterDataService,
     private utilityMeterDbService: UtilityMeterdbService, private energyUnitsHelperService: EnergyUnitsHelperService) { }
 
@@ -44,6 +45,7 @@ export class EditUtilityBillComponent implements OnInit {
     if (this.displayVolumeInput) {
       this.meterDataForm.controls.totalEnergyUse.disable();
     }
+    this.checkDate();
   }
 
   cancel() {
@@ -65,4 +67,9 @@ export class EditUtilityBillComponent implements OnInit {
     let totalEnergyUse: number = this.meterDataForm.controls.totalVolume.value * this.facilityMeter.heatCapacity;
     this.meterDataForm.controls.totalEnergyUse.patchValue(totalEnergyUse);
   }
+  
+  checkDate() {
+    this.invalidDate = this.utilityMeterDataDbService.checkMeterReadingExistForDate(this.meterDataForm.controls.readDate.value, this.facilityMeter);
+  }
+
 }

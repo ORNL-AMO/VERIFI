@@ -1,5 +1,3 @@
-
-
 <app-utility-meter-data-filter></app-utility-meter-data-filter>
 
 <br>
@@ -14,10 +12,13 @@
           <span class="required">*</span>
         </label>
         <div class="input-group mb-3">
-          <input id="readDate" class="form-control" type="date" formControlName="readDate" required>
+          <input id="readDate" class="form-control" type="date" formControlName="readDate" (change)="checkDate()"
+            [ngClass]="{'error': invalidDate}">
         </div>
         <span class="inputError" *ngIf="meterDataForm.get('readDate').hasError('required')">Meter read date is
           required</span>
+        <span class="inputError" *ngIf="invalidDate">Meter already has data entered for selected month</span>
+
 
         <label for="totalEnergyUse">
           Total Energy Use
@@ -239,5 +240,6 @@
 
 <div class="saveCancel item-right">
   <button class="btn btn-secondary" (click)="cancel()">Cancel</button>
-  <button class="btn btn-primary" (click)="meterDataSave()" [disabled]="meterDataForm.invalid">Save</button>
+  <button class="btn btn-primary" (click)="meterDataSave()"
+    [disabled]="meterDataForm.invalid || invalidDate">Save</button>
 </div>

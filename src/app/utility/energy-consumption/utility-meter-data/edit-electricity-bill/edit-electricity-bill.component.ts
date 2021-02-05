@@ -31,6 +31,8 @@ export class EditElectricityBillComponent implements OnInit {
   supplyDemandFilters: SupplyDemandChargeFilters;
   taxAndOtherFilters: TaxAndOtherFilters;
   energyUnit: string;
+  invalidDate: boolean;
+  facilityMeter: IdbUtilityMeter;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private utilityMeterDataService: UtilityMeterDataService,
     private facilityDbService: FacilitydbService, private utilityMeterDbService: UtilityMeterdbService) { }
 
@@ -43,10 +45,10 @@ export class EditElectricityBillComponent implements OnInit {
   }
 
   ngOnChanges() {
-    let facilityMeter: IdbUtilityMeter = this.utilityMeterDbService.getFacilityMeterById(this.editMeterData.meterId);
-    this.energyUnit = facilityMeter.startingUnit
+    this.facilityMeter = this.utilityMeterDbService.getFacilityMeterById(this.editMeterData.meterId);
+    this.energyUnit = this.facilityMeter.startingUnit;
     this.meterDataForm = this.utilityMeterDataService.getElectricityMeterDataForm(this.editMeterData);
-    console.log(this.meterDataForm.controls.readDate.value);
+    this.checkDate();
   }
 
   ngOnDestroy() {
@@ -120,6 +122,10 @@ export class EditElectricityBillComponent implements OnInit {
     this.displayTaxAndOthersColumnTwo = (
       this.taxAndOtherFilters.generationTransmissionCharge || this.taxAndOtherFilters.deliveryCharge || this.taxAndOtherFilters.powerFactorCharge
     );
+  }
+
+  checkDate() {
+    this.invalidDate = this.utilityMeterDataDbService.checkMeterReadingExistForDate(this.meterDataForm.controls.readDate.value, this.facilityMeter);
   }
 
 }
