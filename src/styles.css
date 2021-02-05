@@ -291,6 +291,15 @@ Popups & Windows
 .windowContentScroll form {
   padding: 0 2px;
 }
+
+.importMeterWindowContent{
+  top: 5%;
+  left: 5%;
+  right: 5%;
+  width: auto;
+  bottom: 5%;
+}
+
 .popup {
   border-style: solid;
   border: 1px solid #ffffff;
@@ -495,7 +504,8 @@ input.warning {
   border: 1px solid white !important;
 }
 input.error,
-input.ng-invalid {
+input.ng-invalid,
+select.ng-invalid {
   outline: 2px solid #bf3d00c4 !important;
   outline-offset: 0;
   background-color: #bf3d001c;

@@ -35,7 +35,6 @@ import { ElectricityDataTableComponent } from './utility/energy-consumption/util
 import { GeneralUtilityDataTableComponent } from './utility/energy-consumption/utility-meter-data/general-utility-data-table/general-utility-data-table.component';
 import { EditUtilityBillComponent } from './utility/energy-consumption/utility-meter-data/edit-utility-bill/edit-utility-bill.component';
 import { EditElectricityBillComponent } from './utility/energy-consumption/utility-meter-data/edit-electricity-bill/edit-electricity-bill.component';
-import { ImportMeterComponent } from './utility/energy-consumption/energy-source/import-meter/import-meter.component';
 import { ImportMeterDataComponent } from './utility/energy-consumption/utility-meter-data/import-meter-data/import-meter-data.component';
 import { MeterGroupingComponent } from './utility/meter-grouping/meter-grouping.component';
 import { EditMeterGroupFormComponent } from './utility/meter-grouping/edit-meter-group-form/edit-meter-group-form.component';
@@ -63,6 +62,8 @@ import { MetersTableComponent } from './dashboard/facility-overview/meters-table
 import { UtilityEnergyUseTableComponent } from './dashboard/facility-overview/utility-energy-use-table/utility-energy-use-table.component';
 import { AccountUtilityEnergyUseTableComponent } from './dashboard/account-overview/account-utility-energy-use-table/account-utility-energy-use-table.component';
 import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
+import { ImportMeterWizardComponent } from './utility/energy-consumption/energy-source/import-meter-wizard/import-meter-wizard.component';
+import { EditMeterComponent } from './utility/energy-consumption/energy-source/edit-meter/edit-meter.component';
 import { OrderByPipe } from './shared/helper-pipes/order-by.pipe';
 
 @NgModule({
@@ -87,7 +88,6 @@ import { OrderByPipe } from './shared/helper-pipes/order-by.pipe';
     GeneralUtilityDataTableComponent,
     EditUtilityBillComponent,
     EditElectricityBillComponent,
-    ImportMeterComponent,
     ImportMeterDataComponent,
     MeterGroupingComponent,
     EditMeterGroupFormComponent,
@@ -113,6 +113,8 @@ import { OrderByPipe } from './shared/helper-pipes/order-by.pipe';
     UtilityEnergyUseTableComponent,
     AccountUtilityEnergyUseTableComponent,
     PageNotFoundComponent,
+    ImportMeterWizardComponent,
+    EditMeterComponent,
     OrderByPipe
   ],
   imports: [

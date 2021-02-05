@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ImportMeterComponent } from './import-meter.component';
+import { ImportMeterWizardComponent } from './import-meter-wizard.component';
 
-describe('ImportMeterComponent', () => {
-  let component: ImportMeterComponent;
-  let fixture: ComponentFixture<ImportMeterComponent>;
+describe('ImportMeterWizardComponent', () => {
+  let component: ImportMeterWizardComponent;
+  let fixture: ComponentFixture<ImportMeterWizardComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ ImportMeterComponent ]
+      declarations: [ ImportMeterWizardComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(ImportMeterComponent);
+    fixture = TestBed.createComponent(ImportMeterWizardComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

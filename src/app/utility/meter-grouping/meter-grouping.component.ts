@@ -152,7 +152,6 @@ export class MeterGroupingComponent implements OnInit {
       groupType: groupType,
       name: 'Ungrouped',
       description: 'Meters with no group',
-      unit: undefined,
       dateModified: undefined,
       factionOfTotalEnergy: undefined,
       totalEnergyUse: _.sumBy(groupMeterData, 'energyUse'),
@@ -230,7 +229,7 @@ export class MeterGroupingComponent implements OnInit {
   groupAdd(groupType: string) {
     this.editOrAdd = 'add';
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.groupToEdit = this.utilityMeterGroupDbService.getNewIdbUtilityMeterGroup(groupType, '', 'New Group', facility.id, facility.accountId);
+    this.groupToEdit = this.utilityMeterGroupDbService.getNewIdbUtilityMeterGroup(groupType, 'New Group', facility.id, facility.accountId);
   }
 
   deleteMeterGroup() {

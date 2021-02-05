@@ -1,5 +1,3 @@
-<h4>Edit Meter</h4>
-<br>
 <form [formGroup]="meterForm">
     <div class="row">
         <div class="col">
@@ -17,15 +15,9 @@
                 <div class="col">
                     <label for="source">Source <span class="required">*</span> </label>
                     <div class="mb-3">
-                        <select class="form-control" id="source" type="text" formControlName="source"
-                            (change)="changeSource()">
-                            <option [ngValue]="'Electricity'">Electricity</option>
-                            <option [ngValue]="'Natural Gas'">Natural Gas</option>
-                            <option [ngValue]="'Other Fuels'">Other Fuels</option>
-                            <option [ngValue]="'Other Energy'">Other Energy</option>
-                            <option [ngValue]="'Water'">Water</option>
-                            <option [ngValue]="'Waste Water'">Waste Water</option>
-                            <option [ngValue]="'Other Utility'">Other Utility</option>
+                        <select class="form-control" id="source" type="text" formControlName="source" (change)="changeSource()">
+                            <option *ngFor="let sourceOption of sourceOptions" [ngValue]="sourceOption">{{sourceOption}}
+                            </option>
                         </select>
                     </div>
                     <span class="inputError" *ngIf="meterForm.get('source').hasError('required')">Source is
@@ -91,6 +83,8 @@
                         required</span>
                     <span class="inputError" *ngIf="meterForm.get('heatCapacity').hasError('min')">Value can't be less
                         than 0</span>
+                    <span class="inputWarning" *ngIf="meterForm.controls.heatCapacity.value === 0">Heat capacity
+                        should be greater than 0</span>
                 </div>
 
                 <div class="col">
@@ -100,6 +94,8 @@
                     </div>
                     <span class="inputError" *ngIf="meterForm.get('siteToSource').hasError('required')">Site to source
                         is required</span>
+                    <span class="inputWarning" *ngIf="meterForm.controls.siteToSource.value === 0">Site to source
+                        should be greater than 0</span>
                 </div>
             </div>
 
@@ -148,7 +144,3 @@
         </div>
     </div>
 </form>
-<div class="saveCancel item-right">
-    <button class="btn btn-secondary" (click)="cancel()">Cancel</button>
-    <button class="btn btn-primary" (click)="saveChanges()" [disabled]="meterForm.invalid">Save</button>
-</div>

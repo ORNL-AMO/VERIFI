@@ -33,9 +33,9 @@ export class UtilityMeterdbService {
         }
     }
 
-    setAccountMeters(){
+    setAccountMeters() {
         let selectedAccount: IdbAccount = this.accountdbService.selectedAccount.getValue();
-        if(selectedAccount){
+        if (selectedAccount) {
             this.getAllByIndexRange('accountId', selectedAccount.id).subscribe(facilityMeters => {
                 this.accountMeters.next(facilityMeters);
             });
@@ -73,7 +73,12 @@ export class UtilityMeterdbService {
     }
 
     addWithObservable(utilityMeter: IdbUtilityMeter): Observable<number> {
+        utilityMeter.visible = true;
         return this.dbService.add('utilityMeter', utilityMeter);
+    }
+
+    updateWithObservable(utilityMeter: IdbUtilityMeter): Observable<any> {
+        return this.dbService.update('utilityMeter', utilityMeter);
     }
 
 
@@ -107,7 +112,7 @@ export class UtilityMeterdbService {
         });
     }
 
-    getNewIdbUtilityMeter(facilityId: number, accountId: number): IdbUtilityMeter {
+    getNewIdbUtilityMeter(facilityId: number, accountId: number, source?: string): IdbUtilityMeter {
         return {
             facilityId: facilityId,
             accountId: accountId,
@@ -115,7 +120,6 @@ export class UtilityMeterdbService {
             groupId: undefined,
             meterNumber: undefined,
             accountNumber: undefined,
-            type: undefined,
             phase: undefined,
             heatCapacity: undefined,
             siteToSource: undefined,

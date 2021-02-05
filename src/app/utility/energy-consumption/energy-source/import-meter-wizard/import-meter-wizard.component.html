@@ -1,0 +1,68 @@
+<h4>Import Meters</h4>
+<br>
+<form>
+    <input type="file" #inputFile accept=".csv" (change)="meterImport($event.target.files)">
+</form>
+<br>
+
+<p class="alert-warning w-100 p-2 text-center" *ngIf="!importMeters && !importError">
+    Select .csv template file from VERIFI.
+</p>
+
+<p class="alert-danger w-100 p-2 text-center" *ngIf="importError">
+    Select .csv template file from VERIFI. The .csv file does not match the correct template: <a
+        href="../../../assets/csv_templates/Verifi_import_meters.csv">Verifi_import_meters.csv</a>
+</p>
+
+<div class="d-flex flex-column" *ngIf="importMeters && selectedMeterForm">
+    <ul class="nav nav-tabs">
+        <li class="nav-item" *ngFor="let importMeter of importMeters; let index=index;">
+            <a class="nav-link" [ngClass]="{'active': selectedMeterIndex == index}"
+                (click)="selectMeter(importMeter, index)">
+                <span class="badge" [ngClass]="getBadgeClass(importMeter, index)">
+                    {{index+1}}
+                </span>
+            </a>
+        </li>
+    </ul>
+    <div class="pull-right">
+        <button type="button" class="btn btn-danger pull-right" (click)="toggleSkipMeter(selectedMeterIndex)">
+            Skip Meter
+        </button>
+    </div>
+    <div class="p-3" *ngIf="!skipMeters[selectedMeterIndex]">
+        <app-edit-meter-form [(meterForm)]="selectedMeterForm"></app-edit-meter-form>
+    </div>
+    <p class="alert-warning text-center w-100 p-3" *ngIf="skipMeters[selectedMeterIndex]">
+        Importing Meter Will Be Skipped
+    </p>
+</div>
+
+<div class="row">
+    <div class="col">
+        <div class="d-flex flex-column" *ngIf="importMeters">
+            <div class="p-1">
+                <span class="badge badge-danger">#</span> Invalid Meter
+            </div>
+            <div class="p-1">
+                <span class="badge badge-success">#</span> Vaild Meter
+            </div>
+            <div class="p-1">
+                <span class="badge badge-warning">#</span> Existing Meter (has same name)
+            </div>
+            <div class="p-1">
+                <span class="badge badge-secondary">#</span> Meter Import Skipped
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="saveCancel item-right text-right">
+            <button class="btn btn-secondary" (click)="resetImport()">Cancel</button>
+            <button class="btn btn-primary" (click)="runImport()" [disabled]="hasInvalidMeter()">Submit</button>
+            <p *ngIf="importMeters && hasInvalidMeter()" class="alert alert-danger p-2 text-center">One or more of the
+                meters
+                has invalid data
+            </p>
+        </div>
+    </div>
+</div>

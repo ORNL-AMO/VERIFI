@@ -6,6 +6,16 @@ export interface FuelTypeOption {
     otherEnergyType?: string
 }
 
+export const SourceOptions: Array<string> = [
+    "Electricity",
+    "Natural Gas",
+    "Other Fuels",
+    "Other Energy",
+    "Water",
+    "Waste Water",
+    "Other Utility"
+]
+
 export const GasOptions: Array<FuelTypeOption> = [
     {
         startingUnit: 'ft3',

@@ -17,15 +17,14 @@ export class EditMeterFormService {
     return this.formBuilder.group({
       meterNumber: [meter.meterNumber],
       accountNumber: [meter.accountNumber],
-      type: [meter.type],
-      phase: [meter.phase || 'Gas', phaseValidators],
+      phase: [meter.phase, phaseValidators],
       heatCapacity: [meter.heatCapacity, heatCapacityAndSiteToSourceValidators],
       siteToSource: [meter.siteToSource, heatCapacityAndSiteToSourceValidators],
       name: [meter.name, Validators.required],
       location: [meter.location],
       supplier: [meter.supplier],
       notes: [meter.notes],
-      source: [meter.source || 'Electricity', Validators.required],
+      source: [meter.source, Validators.required],
       group: [meter.group],
       fuel: [meter.fuel, fuelValidators],
       startingUnit: [meter.startingUnit, Validators.required],
@@ -35,7 +34,7 @@ export class EditMeterFormService {
   updateMeterFromForm(meter: IdbUtilityMeter, form: FormGroup): IdbUtilityMeter {
     meter.meterNumber = form.controls.meterNumber.value;
     meter.accountNumber = form.controls.accountNumber.value;
-    meter.type = form.controls.type.value;
+    // meter.type = form.controls.type.value;
     meter.phase = form.controls.phase.value;
     meter.heatCapacity = form.controls.heatCapacity.value;
     meter.siteToSource = form.controls.siteToSource.value;
@@ -76,7 +75,7 @@ export class EditMeterFormService {
   }
 
   checkShowHeatCapacity(source: string, startingUnit: string): boolean {
-    if (source != 'Waste Water' && source != 'Water' && source != 'Other Utility') {
+    if (source != 'Waste Water' && source != 'Water' && source != 'Other Utility' && startingUnit) {
       return (this.energyUnitsHelperService.isEnergyUnit(startingUnit) == false);
     } else {
       return false;

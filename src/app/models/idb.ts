@@ -52,7 +52,6 @@ export interface IdbUtilityMeterGroup {
     groupType: string,
     name: string,
     description: string,
-    unit: string,
     dateModified: Date,
     factionOfTotalEnergy: number,
     totalEnergyUse?: number,
@@ -70,7 +69,6 @@ export interface IdbUtilityMeter {
     //data
     meterNumber: string,
     accountNumber: number,
-    type: string,
     phase: string,
     heatCapacity: number,
     siteToSource: number,
