@@ -58,7 +58,7 @@ h5,
 h6 {
   margin: 8px 0;
 }
-h4 {
+h4, .h4 {
   text-transform: uppercase;
   font-size: 16px !important;
   padding: 10px 0;
@@ -261,7 +261,7 @@ Popups & Windows
 .windowContent {
   position: fixed;
   background-color: white;
-  top: 10%;
+  top: 3%;
   width: 500px;
   left: calc(50% - 250px);
   box-shadow: -3px 4px 8px #0000001c;

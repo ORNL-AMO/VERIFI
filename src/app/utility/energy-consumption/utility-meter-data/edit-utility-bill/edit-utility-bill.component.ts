@@ -31,6 +31,9 @@ export class EditUtilityBillComponent implements OnInit {
     private utilityMeterDbService: UtilityMeterdbService, private energyUnitsHelperService: EnergyUnitsHelperService) { }
 
   ngOnInit(): void {
+  }
+
+  ngOnChanges(){
     this.facilityMeter = this.utilityMeterDbService.getFacilityMeterById(this.editMeterData.meterId);
     this.displayVolumeInput = (this.energyUnitsHelperService.isEnergyUnit(this.facilityMeter.startingUnit) == false);
     this.source = this.facilityMeter.source;

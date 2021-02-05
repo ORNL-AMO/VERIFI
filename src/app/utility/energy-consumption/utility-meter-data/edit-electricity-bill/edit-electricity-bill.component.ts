@@ -21,7 +21,6 @@ export class EditElectricityBillComponent implements OnInit {
   @Output('emitClose')
   emitClose: EventEmitter<boolean> = new EventEmitter<boolean>();
 
-
   meterDataForm: FormGroup;
   electricityDataFilters: ElectricityDataFilters;
   electricityDataFiltersSub: Subscription;
@@ -32,18 +31,37 @@ export class EditElectricityBillComponent implements OnInit {
   supplyDemandFilters: SupplyDemandChargeFilters;
   taxAndOtherFilters: TaxAndOtherFilters;
   energyUnit: string;
+  // facilityMeters: Array<IdbUtilityMeter>;
+  // selectedMeter: IdbUtilityMeter;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private utilityMeterDataService: UtilityMeterDataService,
     private facilityDbService: FacilitydbService, private utilityMeterDbService: UtilityMeterdbService) { }
 
   ngOnInit(): void {
-    let facilityMeter: IdbUtilityMeter = this.utilityMeterDbService.getFacilityMeterById(this.editMeterData.meterId);
-    this.energyUnit = facilityMeter.startingUnit
-    this.meterDataForm = this.utilityMeterDataService.getElectricityMeterDataForm(this.editMeterData);
+    // if(this.addOrEdit != 'add'){
+    // let facilityMeter: IdbUtilityMeter = this.utilityMeterDbService.getFacilityMeterById(this.editMeterData.meterId);
+    // this.energyUnit = facilityMeter.startingUnit
+    // this.meterDataForm = this.utilityMeterDataService.getElectricityMeterDataForm(this.editMeterData);
+    // }else{
+    //   let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+    //   this.facilityMeters = facilityMeters.filter(meter => {return meter.source == 'Electricity'});
+    //   this.selectedMeter = this.facilityMeters[0];
+    //   // this.selectedMeterId = selectedMeter.id;
+    //   this.energyUnit = this.selectedMeter.startingUnit
+    //   this.editMeterData = this.utilityMeterDataDbService.getNewIdbUtilityMeterData(this.selectedMeter.id, this.selectedMeter.facilityId, this.selectedMeter.accountId);
+    //   this.meterDataForm = this.utilityMeterDataService.getElectricityMeterDataForm(this.editMeterData);
+    // }
+
     this.electricityDataFiltersSub = this.utilityMeterDataService.electricityInputFilters.subscribe(dataFilters => {
       this.supplyDemandFilters = dataFilters.supplyDemandCharge;
       this.taxAndOtherFilters = dataFilters.taxAndOther
       this.setDisplayColumns();
     });
+  }
+
+  ngOnChanges() {
+    let facilityMeter: IdbUtilityMeter = this.utilityMeterDbService.getFacilityMeterById(this.editMeterData.meterId);
+    this.energyUnit = facilityMeter.startingUnit
+    this.meterDataForm = this.utilityMeterDataService.getElectricityMeterDataForm(this.editMeterData);
   }
 
   ngOnDestroy() {
@@ -53,6 +71,13 @@ export class EditElectricityBillComponent implements OnInit {
   cancel() {
     this.emitClose.emit(true);
   }
+
+  // changeSelectedMeter() {
+  //   this.editMeterData.meterId = this.selectedMeter.id;
+  //   this.editMeterData.facilityId = this.selectedMeter.facilityId;
+  //   this.editMeterData.accountId = this.selectedMeter.accountId;
+  //   this.energyUnit = this.selectedMeter.startingUnit
+  // }
 
   meterDataSave() {
     let meterDataToSave: IdbUtilityMeterData = this.utilityMeterDataService.updateElectricityMeterDataFromForm(this.editMeterData, this.meterDataForm);
