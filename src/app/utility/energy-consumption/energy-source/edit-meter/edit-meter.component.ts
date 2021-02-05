@@ -2,7 +2,8 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 import { EditMeterFormService } from '../edit-meter-form/edit-meter-form.service';
 
@@ -20,11 +21,23 @@ export class EditMeterComponent implements OnInit {
   addOrEdit: string;
 
   meterForm: FormGroup;
+  meterFormDisabled: boolean;
   constructor(private utilityMeterDbService: UtilityMeterdbService, private facilityDbService: FacilitydbService,
-    private energyUnitsHelperService: EnergyUnitsHelperService, private editMeterFormService: EditMeterFormService) { }
+    private energyUnitsHelperService: EnergyUnitsHelperService, private editMeterFormService: EditMeterFormService,
+    private utilityMeterDataDbService: UtilityMeterDatadbService) { }
 
   ngOnInit(): void {
     this.meterForm = this.editMeterFormService.getFormFromMeter(this.editMeter);
+    let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataForFacility(this.editMeter);
+    if (meterData.length != 0) {
+      this.meterFormDisabled = true;
+      this.meterForm.controls.source.disable();
+      this.meterForm.controls.startingUnit.disable();
+      this.meterForm.controls.phase.disable();
+      this.meterForm.controls.fuel.disable();
+      this.meterForm.controls.heatCapacity.disable();
+      this.meterForm.controls.siteToSource.disable();
+    }
   }
 
   saveChanges() {

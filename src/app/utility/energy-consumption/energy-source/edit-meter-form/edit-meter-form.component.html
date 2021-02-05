@@ -15,7 +15,7 @@
                 <div class="col">
                     <label for="source">Source <span class="required">*</span> </label>
                     <div class="mb-3">
-                        <select id="source" type="text" formControlName="source" (change)="changeSource()">
+                        <select class="form-control" id="source" type="text" formControlName="source" (change)="changeSource()">
                             <option *ngFor="let sourceOption of sourceOptions" [ngValue]="sourceOption">{{sourceOption}}
                             </option>
                         </select>
@@ -27,7 +27,8 @@
                 <div class="col">
                     <label for="startingUnit">Collection Unit <span class="required">*</span> </label>
                     <div class="mb-3">
-                        <select id="startingUnit" type="text" formControlName="startingUnit" (change)="changeUnit()">
+                        <select class="form-control" id="startingUnit" type="text" formControlName="startingUnit"
+                            (change)="changeUnit()">
                             <option *ngFor="let startingUnitOption of startingUnitOptions"
                                 [ngValue]="startingUnitOption.value">
                                 <span [innerHTML]="startingUnitOption.display"></span>
@@ -43,7 +44,8 @@
                 <div *ngIf="displayPhase" class="col">
                     <label for="phase">Phase <span class="required">*</span> </label>
                     <div class="mb-3">
-                        <select id="phase" type="text" formControlName="phase" (change)="changePhase();">
+                        <select class="form-control" id="phase" type="text" formControlName="phase"
+                            (change)="changePhase();">
                             <option [ngValue]="'Solid'">Solid</option>
                             <option [ngValue]="'Liquid'">Liquid</option>
                             <option [ngValue]="'Gas'">Gas</option>
@@ -56,7 +58,8 @@
                 <div *ngIf="displayFuel" class="col">
                     <label for="energySource">{{energySourceLabel}} <span class="required">*</span> </label>
                     <div class="mb-3">
-                        <select id="energySource" type="text" formControlName="fuel" (change)="changeFuel()">
+                        <select class="form-control" id="energySource" type="text" formControlName="fuel"
+                            (change)="changeFuel()">
                             <option *ngFor="let fuelOption of fuelTypeOptions" [ngValue]="fuelOption.value">
                                 {{fuelOption.value}}
                             </option>
@@ -91,10 +94,13 @@
                     </div>
                     <span class="inputError" *ngIf="meterForm.get('siteToSource').hasError('required')">Site to source
                         is required</span>
-                    <span class="inputWarning" *ngIf="meterForm.controls.heatCapacity.value === 0">Site to source
+                    <span class="inputWarning" *ngIf="meterForm.controls.siteToSource.value === 0">Site to source
                         should be greater than 0</span>
                 </div>
             </div>
+
+            <p class="alert alert-warning" *ngIf="meterFormDisabled"> Data found for this meter. Some meter properties
+                cannot be changed. </p>
         </div>
         <div class="col-5">
             <p class="bold">Other Information</p>

@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { FormGroup, ValidatorFn } from '@angular/forms';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idb';
@@ -16,6 +16,8 @@ import { FuelTypeOption, OtherEnergyOptions, SourceOptions } from './editMeterOp
 export class EditMeterFormComponent implements OnInit {
   @Input()
   meterForm: FormGroup;
+  @Input()
+  meterFormDisabled: boolean;
 
   displayPhase: boolean;
   displayFuel: boolean;
@@ -27,7 +29,7 @@ export class EditMeterFormComponent implements OnInit {
   sourceOptions: Array<string> = SourceOptions
   constructor(private facilityDbService: FacilitydbService,
     private energyUnitsHelperService: EnergyUnitsHelperService, private energyUseCalculationsService: EnergyUseCalculationsService,
-    private editMeterFormService: EditMeterFormService, private cd: ChangeDetectorRef) { }
+    private editMeterFormService: EditMeterFormService) { }
 
   ngOnInit(): void {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
