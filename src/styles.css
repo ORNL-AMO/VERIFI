@@ -409,12 +409,13 @@ textarea {
   padding: 2px 7px;
   outline: none;
 }
-label input[type="radio"],
-label input[type="checkbox"] {
+input[type="radio"],
+input[type="checkbox"] {
   float: left;
   width: auto;
   margin: 0px 10px;
-  height: 21px;
+  height: 15px;
+  width: 15px;
 }
 input[type="file"] {
   border: none;
@@ -424,6 +425,15 @@ input[type="file"] {
 }
 label {
   width: 100%;
+}
+label.checkbox {
+  display: block;
+  margin-left: 10px;
+  width: 100%;
+  margin-top: 0px;
+}
+label.checkbox + .row {
+  margin: 10px 23px 15px;
 }
 .popup label {
   position: relative;
@@ -669,6 +679,19 @@ table input {
   margin: 3px auto;
   display: block;
   width: 13px;
+}
+.table-mh th, 
+.table-mh th span {
+  /* font-weight: normal!important; 
+  background-color: #d2d9e2;*/
+  background-color: #2c386b;
+  border: 1px solid #c2ccda;
+  font-size: 12px;
+  padding: 10px 5px!important;
+  color: #ffffff;
+}
+.table-mh th span {
+  border: none;
 }
 /*
 Popovers (Contextual Help)

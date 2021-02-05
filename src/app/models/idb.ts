@@ -1,5 +1,5 @@
 import { ElectricityDataFilters } from './electricityFilter';
-
+import { SustainabilityQuestions } from './sustainabilityQuestions';
 
 export interface IdbAccount {
     //keys (id primary)
@@ -14,7 +14,8 @@ export interface IdbAccount {
     massUnit: string,
     volumeLiquidUnit: string,
     volumeGasUnit: string,
-    chilledWaterUnit: string
+    chilledWaterUnit: string,
+    sustainabilityQuestions: SustainabilityQuestions
 }
 
 export interface IdbFacility {
@@ -27,10 +28,9 @@ export interface IdbFacility {
     state: string,
     address: string,
     type: string,
-    tier: number,
     size: number,
     units: string,
-    division: string,
+    notes: string,
     img: string,
     tableElectricityFilters?: ElectricityDataFilters,
     electricityInputFilters?: ElectricityDataFilters,
@@ -40,7 +40,8 @@ export interface IdbFacility {
     massUnit: string,
     volumeLiquidUnit: string,
     volumeGasUnit: string,
-    chilledWaterUnit: string
+    chilledWaterUnit: string,
+    sustainabilityQuestions: SustainabilityQuestions
 }
 
 export interface IdbUtilityMeterGroup {

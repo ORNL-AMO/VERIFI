@@ -30,6 +30,7 @@ export class FacilityComponent implements OnInit {
   massUnitOptions: Array<UnitOption> = MassUnitOptions;
   selectedFacility: IdbFacility;
   unitsDontMatchAccount: boolean;
+  sustainQuestionsDontMatchAccount: boolean;
   constructor(
     private router: Router,
     private facilityDbService: FacilitydbService,
@@ -46,6 +47,7 @@ export class FacilityComponent implements OnInit {
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
       let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
       this.unitsDontMatchAccount = this.accountManagementService.areAccountAndFacilityUnitsDifferent(account, facility);
+      this.sustainQuestionsDontMatchAccount = this.accountManagementService.areAccountAndFacilitySustainQuestionsDifferent(account, facility);
       this.selectedFacility = facility;
       if (facility != null) {
         this.facilityForm = this.accountManagementService.getFacilityForm(facility);
@@ -102,6 +104,12 @@ export class FacilityComponent implements OnInit {
   setAccountUnits(){
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     this.facilityForm = this.accountManagementService.setAccountUnits(this.facilityForm, account);
+    this.onFormChange();
+  }
+
+  setAccountSustainQuestions(){
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    this.facilityForm = this.accountManagementService.setAccountSustainQuestions(this.facilityForm, account);
     this.onFormChange();
   }
 
