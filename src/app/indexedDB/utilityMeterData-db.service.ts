@@ -5,6 +5,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { FacilitydbService } from './facility-db.service';
 import { AccountdbService } from './account-db.service';
 import { ConvertMeterDataService } from '../shared/helper-services/convert-meter-data.service';
+import * as _ from 'lodash';
 
 @Injectable({
     providedIn: 'root'
@@ -111,13 +112,20 @@ export class UtilityMeterDatadbService {
         });
     }
 
-    getNewIdbUtilityMeterData(meterId: number, facilityId: number, accountId: number): IdbUtilityMeterData {
+    getNewIdbUtilityMeterData(meter: IdbUtilityMeter): IdbUtilityMeterData {
+        let lastMeterDate: Date = this.getLastMeterReadingDate(meter);
+        let newDate: Date = new Date();
+        if (lastMeterDate) {
+            newDate = new Date(lastMeterDate);
+            newDate.setMonth(newDate.getMonth() + 1);
+        }
+
         return {
             // id: undefined,
-            meterId: meterId,
-            facilityId: facilityId,
-            accountId: accountId,
-            readDate: undefined,
+            meterId: meter.id,
+            facilityId: meter.facilityId,
+            accountId: meter.accountId,
+            readDate: newDate,
             totalVolume: undefined,
             totalEnergyUse: undefined,
             totalCost: undefined,
@@ -145,6 +153,16 @@ export class UtilityMeterDatadbService {
             utilityTax: undefined,
             latePayment: undefined
         }
+    }
+
+
+    getLastMeterReadingDate(meter: IdbUtilityMeter): Date{
+        let allSelectedMeterData: Array<IdbUtilityMeterData> = this.getMeterDataForFacility(meter);
+        if (allSelectedMeterData.length != 0) {
+            let lastMeterReading: IdbUtilityMeterData = _.maxBy(allSelectedMeterData, 'readDate');
+            return new Date(lastMeterReading.readDate);
+        }
+        return undefined;
     }
 
     private getMeterDataFromMeterId(meterId: number): Array<IdbUtilityMeterData> {

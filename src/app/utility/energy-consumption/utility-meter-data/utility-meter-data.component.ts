@@ -113,7 +113,7 @@ export class UtilityMeterDataComponent implements OnInit {
 
   setEditMeterData(meterData: IdbUtilityMeterData) {
     this.addOrEdit = 'edit';
-    this.selectedMeter = this.facilityMeters.find(meter => {return meter.id == meterData.meterId});
+    this.selectedMeter = this.facilityMeters.find(meter => { return meter.id == meterData.meterId });
     this.editMeterData = meterData;
   }
 
@@ -160,7 +160,11 @@ export class UtilityMeterDataComponent implements OnInit {
   }
 
   changeSelectedMeter() {
-    this.editMeterData = this.utilityMeterDataDbService.getNewIdbUtilityMeterData(this.selectedMeter.id, this.selectedMeter.facilityId, this.selectedMeter.accountId);
+    this.editMeterData = this.utilityMeterDataDbService.getNewIdbUtilityMeterData(this.selectedMeter);
+  }
+
+  getLastMeterBillDate(meter: IdbUtilityMeter): Date {
+    return this.utilityMeterDataDbService.getLastMeterReadingDate(meter);
   }
 
   setHasCheckedItems() {

@@ -101,7 +101,7 @@ export class ImportMeterDataComponent implements OnInit {
   }
 
   getElectricityMeterDataObject(idbMeter: IdbUtilityMeter, currentLine: Array<string>): IdbUtilityMeterData {
-    let obj: IdbUtilityMeterData = this.utilityMeterDataDbService.getNewIdbUtilityMeterData(idbMeter.id, idbMeter.facilityId, idbMeter.accountId);
+    let obj: IdbUtilityMeterData = this.utilityMeterDataDbService.getNewIdbUtilityMeterData(idbMeter);
     //  currentLine["meterNumber"]
     obj.readDate = new Date(currentLine[1]);
     obj.totalEnergyUse = Number(currentLine[2]);
@@ -131,7 +131,7 @@ export class ImportMeterDataComponent implements OnInit {
   }
 
   getOtherSourceMeterDataObject(idbMeter: IdbUtilityMeter, currentLine: Array<string>): IdbUtilityMeterData {
-    let obj: IdbUtilityMeterData = this.utilityMeterDataDbService.getNewIdbUtilityMeterData(idbMeter.id, idbMeter.facilityId, idbMeter.accountId);
+    let obj: IdbUtilityMeterData = this.utilityMeterDataDbService.getNewIdbUtilityMeterData(idbMeter);
     let isEnergyUnit: boolean = this.energyUnitsHelperService.isEnergyUnit(idbMeter.startingUnit);
     obj.readDate = new Date(currentLine[1]);
     if (isEnergyUnit) {

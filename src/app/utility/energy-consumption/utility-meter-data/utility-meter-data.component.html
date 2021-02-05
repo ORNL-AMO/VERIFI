@@ -62,9 +62,6 @@
     </div>
 
     <div class="tableControls overflow-hidden" *ngIf="meterListItem.idbMeter.visible">
-        <!-- <button class="btn btn-link item-left" (click)="meterDataAdd(meterListItem.idbMeter)">
-            <i class="fa fa-plus"></i> Add New Bill
-        </button> -->
         <div class="item-right">
             <ngb-pagination [collectionSize]="meterListItem.meterDataItems.length" [(page)]="tablePageNumbers[index]"
                 [pageSize]="itemsPerPage" [rotate]="true" aria-label="Default pagination" [maxSize]="5">
@@ -86,7 +83,7 @@
                     <select name="selectedMeter" [(ngModel)]="selectedMeter" class="form-control"
                         (change)="changeSelectedMeter()">
                         <option *ngFor="let facilityMeter of facilityMeters" [ngValue]="facilityMeter">
-                            {{facilityMeter.name}}</option>
+                            {{facilityMeter.name}} (Last Bill: {{getLastMeterBillDate(facilityMeter) | date}})</option>
                     </select>
                 </form>
             </div>
