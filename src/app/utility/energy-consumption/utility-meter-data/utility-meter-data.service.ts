@@ -93,7 +93,9 @@ export class UtilityMeterDataService {
 
 
   updateElectricityMeterDataFromForm(meterData: IdbUtilityMeterData, form: FormGroup): IdbUtilityMeterData {
-    meterData.readDate = new Date(form.controls.readDate.value);
+    //UTC date is one day behind from form
+    let formDate: Date = new Date(form.controls.readDate.value)
+    meterData.readDate = new Date(formDate.getUTCFullYear(), formDate.getUTCMonth(), formDate.getUTCDate());
     meterData.totalEnergyUse = form.controls.totalEnergyUse.value;
     meterData.totalCost = form.controls.totalCost.value;
     meterData.deliveryCharge = form.controls.deliveryCharge.value;
@@ -145,7 +147,9 @@ export class UtilityMeterDataService {
   }
 
   updateGeneralMeterDataFromForm(meterData: IdbUtilityMeterData, form: FormGroup): IdbUtilityMeterData {
-    meterData.readDate = new Date(form.controls.readDate.value);
+    //UTC date is one day behind from form
+    let formDate: Date = new Date(form.controls.readDate.value)
+    meterData.readDate = new Date(formDate.getUTCFullYear(), formDate.getUTCMonth(), formDate.getUTCDate());
     meterData.totalVolume = form.controls.totalVolume.value;
     meterData.totalEnergyUse = form.controls.totalEnergyUse.value;
     meterData.totalCost = form.controls.totalCost.value;

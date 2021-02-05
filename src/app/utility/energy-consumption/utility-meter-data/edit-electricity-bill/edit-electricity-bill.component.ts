@@ -59,7 +59,7 @@ export class EditElectricityBillComponent implements OnInit {
     this.emitClose.emit(true);
   }
 
-  meterDataSave() {
+  saveAndQuit() {
     let meterDataToSave: IdbUtilityMeterData = this.utilityMeterDataService.updateElectricityMeterDataFromForm(this.editMeterData, this.meterDataForm);
     if (this.addOrEdit == 'edit') {
       this.utilityMeterDataDbService.update(meterDataToSave);
@@ -68,6 +68,16 @@ export class EditElectricityBillComponent implements OnInit {
       this.utilityMeterDataDbService.add(meterDataToSave);
     }
     this.cancel();
+  }
+
+  saveAndAddAnother() {
+    let meterDataToSave: IdbUtilityMeterData = this.utilityMeterDataService.updateElectricityMeterDataFromForm(this.editMeterData, this.meterDataForm);
+    delete meterDataToSave.id;
+    this.utilityMeterDataDbService.add(meterDataToSave);
+    this.editMeterData = this.utilityMeterDataDbService.getNewIdbUtilityMeterData(this.facilityMeter);
+    this.editMeterData.readDate = new Date(meterDataToSave.readDate);
+    this.editMeterData.readDate.setMonth(this.editMeterData.readDate.getUTCMonth() + 1);
+    this.meterDataForm = this.utilityMeterDataService.getElectricityMeterDataForm(this.editMeterData);
   }
 
   showAllFields() {
@@ -125,7 +135,19 @@ export class EditElectricityBillComponent implements OnInit {
   }
 
   checkDate() {
-    this.invalidDate = this.utilityMeterDataDbService.checkMeterReadingExistForDate(this.meterDataForm.controls.readDate.value, this.facilityMeter);
+    if (this.addOrEdit == 'add') {
+      //new meter entry should have any year/month combo of existing meter reading
+      this.invalidDate = this.utilityMeterDataDbService.checkMeterReadingExistForDate(this.meterDataForm.controls.readDate.value, this.facilityMeter);
+    } else {
+      //edit meter needs to allow year/month combo of the meter being edited
+      let currentMeterItemDate: Date = new Date(this.editMeterData.readDate);
+      let changeDate: Date = new Date(this.meterDataForm.controls.readDate.value);
+      if (currentMeterItemDate.getFullYear() == changeDate.getFullYear() && currentMeterItemDate.getMonth() && changeDate.getMonth()) {
+        this.invalidDate = false;
+      } else {
+        this.invalidDate = this.utilityMeterDataDbService.checkMeterReadingExistForDate(this.meterDataForm.controls.readDate.value, this.facilityMeter);
+      }
+    }
   }
 
 }

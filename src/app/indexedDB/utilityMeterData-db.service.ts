@@ -74,6 +74,10 @@ export class UtilityMeterDatadbService {
         });
     }
 
+    addWithObservable(meterData: IdbUtilityMeterData): Observable<number> {
+        return this.dbService.add('utilityMeterData', meterData);
+    }
+
     update(meterData: IdbUtilityMeterData): void {
         this.dbService.update('utilityMeterData', meterData).subscribe(() => {
             this.setFacilityMeterData();
@@ -171,7 +175,7 @@ export class UtilityMeterDatadbService {
         let allSelectedMeterData: Array<IdbUtilityMeterData> = this.getMeterDataForFacility(meter);
         let existingData: IdbUtilityMeterData = allSelectedMeterData.find(dataItem => {
             let dataItemDate: Date = new Date(dataItem.readDate);
-            return (dataItemDate.getMonth() == newDate.getMonth()) && (dataItemDate.getFullYear() == newDate.getFullYear());
+            return (dataItemDate.getUTCMonth() == newDate.getUTCMonth()) && (dataItemDate.getUTCFullYear() == newDate.getUTCFullYear());
         });
         return existingData != undefined;
     }
