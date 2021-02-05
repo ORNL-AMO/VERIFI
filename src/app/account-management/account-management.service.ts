@@ -89,7 +89,7 @@ export class AccountManagementService {
       address: [facility.address],
       type: [facility.type],
       size: [facility.size],
-      division: [facility.division],
+      notes: [facility.notes],
       unitsOfMeasure: [facility.unitsOfMeasure, [Validators.required]],
       energyUnit: [facility.energyUnit, [Validators.required]],
       massUnit: [facility.massUnit, [Validators.required]],
@@ -128,7 +128,7 @@ export class AccountManagementService {
     facility.address = form.controls.address.value;
     facility.type = form.controls.type.value;
     facility.size = form.controls.size.value;
-    facility.division = form.controls.division.value;
+    facility.notes = form.controls.notes.value;
     facility.unitsOfMeasure = form.controls.unitsOfMeasure.value;
     facility.energyUnit = form.controls.energyUnit.value;
     facility.massUnit = form.controls.massUnit.value;

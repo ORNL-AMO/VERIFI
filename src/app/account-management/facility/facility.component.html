@@ -1,286 +1,279 @@
 <div id="facility">
-    <div class="banner">
-        <h3>Facility Information</h3>
-    </div>
+	<div class="banner">
+		<h3>Facility Information</h3>
+	</div>
 </div>
 
 <div class="wrapper">
-    <div class="row">
-        <!--<div class="col-lg-4 profile-image">
-            <img src="https://placehold.it/350x200" alt="">
-            <form>
-                <label class="profile-image-input" for="img"><i class="fa fa-upload"></i> Upload Image
-                    <input type="file" id="img" name="img" accept="image/*">
-                </label>
-            </form>
+	<div class="row">
+		<!--<div class="col-lg-4 profile-image">
+        <img src="https://placehold.it/350x200" alt="">
+        <form>
+            <label class="profile-image-input" for="img"><i class="fa fa-upload"></i> Upload Image
+                <input type="file" id="img" name="img" accept="image/*">
+            </label>
+        </form>
         </div>-->
-        <div class="col-lg-7" *ngIf="facilityForm">
-            <h4>Facility Information</h4>
-            <br>
-            <form [formGroup]="facilityForm" autocomplete="on">
-                        <div class="row">
-                            <label class="col">Facility Name <span class="required">*</span></label>
-                            <div class="mb-3 col">
-                                <input type="text" class="form-control" formControlName="name" (input)="onFormChange();">
-                            </div>
-                            <span class="inputError" *ngIf="facilityForm.get('name').hasError('required')">Facility name is required</span>
-                        </div>
+		<div class="col" *ngIf="facilityForm">
+			<h4>Facility Information</h4>
+			<br>
+			<form [formGroup]="facilityForm" autocomplete="on">
+				<div class="row"> 
+					<div class="col">
+						<div class="mb-3">
+							<label>Facility Name <span class="required">*</span></label>
+							<input type="text" class="form-control" formControlName="name" (input)="onFormChange();">
+						</div>
+						<span class="inputError" *ngIf="facilityForm.get('name').hasError('required')">Facility name is required</span>
 
-                        <div class="row">
-                            <label class="col">Country</label>
-                            <div class="mb-3 col">
-                                <input type="text" class="form-control" formControlName="country" (input)="onFormChange();">
-                            </div>
-                        </div>
+						<div class="mb-3">
+							<label>Address</label>
+							<input type="text" class="form-control" formControlName="address" (input)="onFormChange();" autocomplete="shipping street-address">
+						</div>
 
-                        <div class="row">
-                            <label class="col">State</label>
-                            <div class="mb-3 col">
-                                <input type="text" class="form-control" formControlName="state" (input)="onFormChange();">
-                            </div>
-                        </div>
+						<div class="row">
+							<div class="mb-3 col">
+								<label>State</label>
+								<input type="text" class="form-control" formControlName="state" (input)="onFormChange();">
+							</div>
 
-                        <div class="row">
-                            <label class="col">Address</label>
-                            <div class="mb-3 col">
-                                <input type="text" class="form-control" formControlName="address" (input)="onFormChange();" autocomplete="shipping street-address">
-                            </div>
-                        </div>
+							<div class="mb-3 col">
+								<label>Country</label>
+								<input type="text" class="form-control" formControlName="country" (input)="onFormChange();">
+							</div>
+						</div>
 
-                        <div class="row">
-                            <label class="col">Business Type</label>
-                            <div class="mb-3 col">
-                                <input type="text" class="form-control" formControlName="type" (input)="onFormChange();">
-                            </div>
-                        </div>
+						<div class="row">
+							<div class="mb-3 col">
+								<label>Business Type</label>
+								<input type="text" class="form-control" formControlName="type" (input)="onFormChange();">
+							</div>
 
-                        <div class="row">
-                            <label class="col">Facility Sqft</label>
-                            <div class="mb-3 col">
-                                <input type="text" class="form-control" formControlName="size" (input)="onFormChange();">
-                            </div>
-                        </div>
+							<div class="input-group mb-3 col">
+								<label>Facility Sqft</label>
+								<input type="text" class="form-control" formControlName="size" (input)="onFormChange();">
+								<span class="unit">Sqft</span>
+							</div>
+						</div>
 
-                        <div class="row">
-                            <label class="col">Division</label>
-                            <div class="mb-3 col">
-                                <input type="text" class="form-control" formControlName="division" (input)="onFormChange();">
-                            </div>
-                        </div>
-            </form>
+						<div class="mb-3">
+							<label>Notes</label>
+							<textarea class="" formControlName="notes" (input)="onFormChange();"></textarea>
+						</div>
+					</div>
+				</div> 
+			</form>
         </div>
-
-                <div class="col-lg-5" *ngIf="facilityForm">
-                    <h4>Corporate Default Units</h4>
-                    <br>
-                    <form [formGroup]="facilityForm">
-                        <div class="row">
-                            <label class="col">Units of Measure</label>
-                            <div class="mb-3 col">
-                                <select formControlName="unitsOfMeasure" (change)="setUnitsOfMeasure()">
-                                    <option [ngValue]="'Imperial'">Imperial</option>
-                                    <option [ngValue]="'Metric'">Metric</option>
-                                    <option [ngValue]="'Custom'">Custom</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <label class="col">Energy Unit</label>
-                            <div class="mb-3 col">
-                                <select formControlName="energyUnit" (change)="onFormChange()">
-                                    <option *ngFor="let energyUnitOption of energyUnitOptions" [ngValue]="energyUnitOption.value">
-                                        <span [innerHTML]="energyUnitOption.display"></span></option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <label class="col">Liquid Volume Unit</label>
-                            <div class="mb-3 col">
-                                <select formControlName="volumeLiquidUnit" (change)="onFormChange()">
-                                    <option *ngFor="let volumeUnitOption of volumeLiquidOptions" [ngValue]="volumeUnitOption.value">
-                                        <span [innerHTML]="volumeUnitOption.display"></span></option>
-                                </select>
-                            </div>
-                        </div>
         
-                        <div class="row">
-                            <label class="col">Gas Volume Unit</label>
-                            <div class="mb-3 col">
-                                <select formControlName="volumeGasUnit" (change)="onFormChange()">
-                                    <option *ngFor="let volumeUnitOption of volumeGasOptions" [ngValue]="volumeUnitOption.value">
-                                        <span [innerHTML]="volumeUnitOption.display"></span></option>
-                                </select>
-                            </div>
-                        </div>
-                        <!--    
-                        <div class="row">
-                            <label class="col">Size Unit</label>
-                            <div class="mb-3 col">
-                                <select formControlName="sizeUnit" (change)="onFormChange()">
-                                    <option *ngFor="let sizeUnitOption of sizeUnitOptions" [ngValue]="sizeUnitOption.value">
-                                        <span [innerHTML]="sizeUnitOption.display"></span></option>
-                                </select>
-                            </div>
-                        </div>
-                        -->
-                        <div class="row">
-                            <label class="col">Mass Unit</label>
-                            <div class="mb-3 col">
-                                <select formControlName="massUnit" (change)="onFormChange()">
-                                    <option *ngFor="let massUnitOption of massUnitOptions" [ngValue]="massUnitOption.value">
-                                        <span [innerHTML]="massUnitOption.display"></span></option>
-                                </select>
-                            </div>
-                        </div>
-                    </form>
-                    <p class="alert alert-warning" *ngIf="unitsDontMatchAccount">
-                        Facility Units are different then the units set for the account. If you would like to use the
-                        account units for this facility click here: <a (click)="setAccountUnits()">Use Account Units</a>
-                    </p>
-                </div>
-
-        
-    </div>
-
-
-    <br>
-    <h4>Sustainability Questions</h4>
-    <br>
-    <div class="row">
-        <div class="col-lg-7" *ngIf="facilityForm">
-            
-            <form [formGroup]="facilityForm">
-                <input type="checkbox" name="energyReductionGoal" formControlName="energyReductionGoal" (change)="onFormChange()">
-                <label class="checkbox mb-3">1. Do you have Energy reduction goal? </label> 
-                <div class="row">
-                    <div class="col" [hidden]="!facilityForm.controls.energyReductionGoal.value">
-                        <label>Reduction Goal</label>
-                        <div class="input-group mb-3">
-                            <input type="number" class="form-control" formControlName="energyReductionPercent" (input)="onFormChange();">
-                            <span class="unit">%</span>
-                        </div>
-                    </div>
-                    <div class="col" [hidden]="!facilityForm.controls.energyReductionGoal.value">
-                        <label>Baseline Year</label>
-                        <input type="number" class="form-control" formControlName="energyReductionBaselineYear" (input)="onFormChange();">
-                    </div>
-                    <div class="col" [hidden]="!facilityForm.controls.energyReductionGoal.value">
-                        <label>Target Year</label>
-                        <input type="number" class="form-control" formControlName="energyReductionTargetYear" (input)="onFormChange();">
-                    </div>
+		<div class="col-lg-5" *ngIf="facilityForm">
+			<h4>Corporate Default Units</h4>
+			<br>
+			<form [formGroup]="facilityForm">
+				<div class="row">
+					<div class="mb-3 col">
+                        <label>Units of Measure</label>
+						<select formControlName="unitsOfMeasure" (change)="setUnitsOfMeasure()">
+							<option [ngValue]="'Imperial'">Imperial</option>
+							<option [ngValue]="'Metric'">Metric</option>
+							<option [ngValue]="'Custom'">Custom</option>
+						</select>
+					</div>
                 </div>
                 
-                <input type="checkbox" name="greenhouseReductionGoal" formControlName="greenhouseReductionGoal" (change)="onFormChange()">
-                <label class="checkbox mb-3">2. Do you have a Greenhouse Emission/Carbon reduction goal? </label>
+				<div class="row">
+					<div class="mb-3 col">
+                        <label>Energy Unit</label>
+						<select formControlName="energyUnit" (change)="onFormChange()">
+							<option *ngFor="let energyUnitOption of energyUnitOptions" [ngValue]="energyUnitOption.value">
+								<span [innerHTML]="energyUnitOption.display"></span></option>
+						</select>
+                    </div>
+                    <div class="mb-3 col">
+                        <label>Liquid Volume Unit</label>
+						<select formControlName="volumeLiquidUnit" (change)="onFormChange()">
+							<option *ngFor="let volumeUnitOption of volumeLiquidOptions" [ngValue]="volumeUnitOption.value">
+								<span [innerHTML]="volumeUnitOption.display"></span></option>
+						</select>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="mb-3 col">
+                        <label>Gas Volume Unit</label>
+						<select formControlName="volumeGasUnit" (change)="onFormChange()">
+							<option *ngFor="let volumeUnitOption of volumeGasOptions" [ngValue]="volumeUnitOption.value">
+								<span [innerHTML]="volumeUnitOption.display"></span></option>
+						</select>
+                    </div>
+                    <div class="mb-3 col">
+                        <label>Mass Unit</label>
+						<select formControlName="massUnit" (change)="onFormChange()">
+							<option *ngFor="let massUnitOption of massUnitOptions" [ngValue]="massUnitOption.value">
+								<span [innerHTML]="massUnitOption.display"></span></option>
+						</select>
+					</div>
+                </div>
+                
+				<!--    
                 <div class="row">
-                    <div class="col" [hidden]="!facilityForm.controls.greenhouseReductionGoal.value">
-                        <label>Reduction Goal</label>
-                        <div class="input-group mb-3">
-                            <input type="number" class="form-control" formControlName="greenhouseReductionPercent" (input)="onFormChange();">
-                            <span class="unit">%</span>
-                        </div>
-                    </div>
-                    <div class="col" [hidden]="!facilityForm.controls.greenhouseReductionGoal.value">
-                        <label>Baseline Year</label>
-                        <input type="number" class="form-control" formControlName="greenhouseReductionBaselineYear" (input)="onFormChange();">
-                    </div>
-                    <div class="col" [hidden]="!facilityForm.controls.greenhouseReductionGoal.value">
-                        <label>Target Year</label>
-                        <input type="number" class="form-control" formControlName="greenhouseReductionTargetYear" (input)="onFormChange();">
+                    <label class="col-lg-4">Size Unit</label>
+                    <div class="mb-3 col">
+                        <select formControlName="sizeUnit" (change)="onFormChange()">
+                            <option *ngFor="let sizeUnitOption of sizeUnitOptions" [ngValue]="sizeUnitOption.value">
+                            <span [innerHTML]="sizeUnitOption.display"></span></option>
+                        </select>
                     </div>
                 </div>
-
-                <input type="checkbox" name="renewableEnergyGoal" formControlName="renewableEnergyGoal" (change)="onFormChange()">
-                <label class="checkbox mb-3">3. Do you have renewable energy goal?</label>
-                <div class="row">
-                    <div class="col" [hidden]="!facilityForm.controls.renewableEnergyGoal.value">
-                        <label>Implementation Goal</label>
-                        <div class="input-group mb-3">
-                            <input type="number" class="form-control" formControlName="renewableEnergyPercent" (input)="onFormChange();">
-                            <span class="unit">%</span>
-                        </div>
-                    </div>
-                    <div class="col" [hidden]="!facilityForm.controls.renewableEnergyGoal.value">
-                        <label>Baseline Year</label>
-                        <input type="number" class="form-control" formControlName="renewableEnergyBaselineYear" (input)="onFormChange();">
-                    </div>
-                    <div class="col" [hidden]="!facilityForm.controls.renewableEnergyGoal.value">
-                        <label>Target Year</label>
-                        <input type="number" class="form-control" formControlName="renewableEnergyTargetYear" (input)="onFormChange();">
-                    </div>
-                </div>
-
-                <input type="checkbox" name="wasteReductionGoal" formControlName="wasteReductionGoal" (change)="onFormChange()">
-                <label class="checkbox mb-3">4. Do you have waste reduction goal?</label>
-                <div class="row">
-                    <div class="col" [hidden]="!facilityForm.controls.wasteReductionGoal.value">
-                        <label>Reduction Goal</label>
-                        <div class="input-group mb-3">
-                            <input type="number" class="form-control" formControlName="wasteReductionPercent" (input)="onFormChange();">
-                            <span class="unit">%</span>
-                        </div>
-                    </div>
-                    <div class="col" [hidden]="!facilityForm.controls.wasteReductionGoal.value">
-                        <label>Baseline Year</label>
-                        <input type="number" class="form-control" formControlName="wasteReductionBaselineYear" (input)="onFormChange();">
-                    </div>
-                    <div class="col" [hidden]="!facilityForm.controls.wasteReductionGoal.value">
-                        <label>Target Year</label>
-                        <input type="number" class="form-control" formControlName="wasteReductionTargetYear" (input)="onFormChange();">
-                    </div>
-                </div>
-
-                <input type="checkbox" name="waterReductionGoal" formControlName="waterReductionGoal" (change)="onFormChange()">
-                <label class="checkbox mb-3">5. Do you have water reduction goal?</label> 
-                <div class="row">
-                    <div class="col" [hidden]="!facilityForm.controls.waterReductionGoal.value">
-                        <label>Reduction Goal</label>
-                        <div class="input-group mb-3">
-                            <input type="number" class="form-control" formControlName="waterReductionPercent" (input)="onFormChange();">
-                            <span class="unit">%</span>
-                        </div>
-                    </div>
-                    <div class="col" [hidden]="!facilityForm.controls.waterReductionGoal.value">
-                        <label>Baseline Year</label>
-                        <input type="number" class="form-control" formControlName="waterReductionBaselineYear" (input)="onFormChange();">
-                    </div>
-                    <div class="col" [hidden]="!facilityForm.controls.waterReductionGoal.value">
-                        <label>Target Year</label>
-                        <input type="number" class="form-control" formControlName="waterReductionTargetYear" (input)="onFormChange();">
-                    </div>
-                </div>
-            </form>
-            <p class="alert alert-warning" *ngIf="sustainQuestionsDontMatchAccount">
-                Facility sustainability answers are different then the answers set for the account. If you would like to use the
-                account answers for this facility click here: <a (click)="setAccountSustainQuestions()">Use Account Answers</a>
-            </p>
-        </div>
-    </div>
-
-    <br>
+                -->
+			</form>
+			<p class="alert alert-warning" *ngIf="unitsDontMatchAccount">
+				Facility Units are different then the units set for the account. If you would like to use the
+				account units for this facility click here: <a (click)="setAccountUnits()">Use Account Units</a>
+			</p>
+		</div>
 
 
-    <div class="row">
-        <div class="col-lg-6">
-            <h4>Delete Facility</h4>
-            <p>Once deleted, you will permanently lose all your data linked to this facility. Please make a backup of
-                your data before proceeding with this step.</p>
-            <button class="btn btn-danger" (click)="editFacility()">Delete Facility</button>
-        </div>
-    </div>
+
+	</div>
+
+
+	<br>
+	<h4>Sustainability Questions</h4>
+	<br>
+	<div class="row">
+		<div class="col-lg-7" *ngIf="facilityForm">
+
+			<form [formGroup]="facilityForm">
+				<input type="checkbox" name="energyReductionGoal" formControlName="energyReductionGoal" (change)="onFormChange()">
+				<label class="checkbox mb-3">1. Do you have Energy reduction goal? </label> 
+				<div class="row">
+					<div class="col" [hidden]="!facilityForm.controls.energyReductionGoal.value">
+						<label>Reduction Goal</label>
+						<div class="input-group mb-3">
+							<input type="number" class="form-control" formControlName="energyReductionPercent" (input)="onFormChange();">
+							<span class="unit">%</span>
+						</div>
+					</div>
+					<div class="col" [hidden]="!facilityForm.controls.energyReductionGoal.value">
+						<label>Baseline Year</label>
+						<input type="number" class="form-control" formControlName="energyReductionBaselineYear" (input)="onFormChange();">
+					</div>
+					<div class="col" [hidden]="!facilityForm.controls.energyReductionGoal.value">
+						<label>Target Year</label>
+						<input type="number" class="form-control" formControlName="energyReductionTargetYear" (input)="onFormChange();">
+					</div>
+				</div>
+
+				<input type="checkbox" name="greenhouseReductionGoal" formControlName="greenhouseReductionGoal" (change)="onFormChange()">
+				<label class="checkbox mb-3">2. Do you have a Greenhouse Emission/Carbon reduction goal? </label>
+				<div class="row">
+					<div class="col" [hidden]="!facilityForm.controls.greenhouseReductionGoal.value">
+						<label>Reduction Goal</label>
+						<div class="input-group mb-3">
+							<input type="number" class="form-control" formControlName="greenhouseReductionPercent" (input)="onFormChange();">
+							<span class="unit">%</span>
+						</div>
+					</div>
+					<div class="col" [hidden]="!facilityForm.controls.greenhouseReductionGoal.value">
+						<label>Baseline Year</label>
+						<input type="number" class="form-control" formControlName="greenhouseReductionBaselineYear" (input)="onFormChange();">
+					</div>
+					<div class="col" [hidden]="!facilityForm.controls.greenhouseReductionGoal.value">
+						<label>Target Year</label>
+						<input type="number" class="form-control" formControlName="greenhouseReductionTargetYear" (input)="onFormChange();">
+					</div>
+				</div>
+
+				<input type="checkbox" name="renewableEnergyGoal" formControlName="renewableEnergyGoal" (change)="onFormChange()">
+				<label class="checkbox mb-3">3. Do you have renewable energy goal?</label>
+				<div class="row">
+					<div class="col" [hidden]="!facilityForm.controls.renewableEnergyGoal.value">
+						<label>Implementation Goal</label>
+						<div class="input-group mb-3">
+							<input type="number" class="form-control" formControlName="renewableEnergyPercent" (input)="onFormChange();">
+							<span class="unit">%</span>
+						</div>
+					</div>
+					<div class="col" [hidden]="!facilityForm.controls.renewableEnergyGoal.value">
+						<label>Baseline Year</label>
+						<input type="number" class="form-control" formControlName="renewableEnergyBaselineYear" (input)="onFormChange();">
+					</div>
+					<div class="col" [hidden]="!facilityForm.controls.renewableEnergyGoal.value">
+						<label>Target Year</label>
+						<input type="number" class="form-control" formControlName="renewableEnergyTargetYear" (input)="onFormChange();">
+					</div>
+				</div>
+
+				<input type="checkbox" name="wasteReductionGoal" formControlName="wasteReductionGoal" (change)="onFormChange()">
+				<label class="checkbox mb-3">4. Do you have waste reduction goal?</label>
+				<div class="row">
+					<div class="col" [hidden]="!facilityForm.controls.wasteReductionGoal.value">
+						<label>Reduction Goal</label>
+						<div class="input-group mb-3">
+							<input type="number" class="form-control" formControlName="wasteReductionPercent" (input)="onFormChange();">
+							<span class="unit">%</span>
+						</div>
+					</div>
+					<div class="col" [hidden]="!facilityForm.controls.wasteReductionGoal.value">
+						<label>Baseline Year</label>
+						<input type="number" class="form-control" formControlName="wasteReductionBaselineYear" (input)="onFormChange();">
+					</div>
+					<div class="col" [hidden]="!facilityForm.controls.wasteReductionGoal.value">
+						<label>Target Year</label>
+						<input type="number" class="form-control" formControlName="wasteReductionTargetYear" (input)="onFormChange();">
+					</div>
+				</div>
+
+				<input type="checkbox" name="waterReductionGoal" formControlName="waterReductionGoal" (change)="onFormChange()">
+				<label class="checkbox mb-3">5. Do you have water reduction goal?</label> 
+				<div class="row">
+					<div class="col" [hidden]="!facilityForm.controls.waterReductionGoal.value">
+						<label>Reduction Goal</label>
+						<div class="input-group mb-3">
+							<input type="number" class="form-control" formControlName="waterReductionPercent" (input)="onFormChange();">
+							<span class="unit">%</span>
+						</div>
+					</div>
+					<div class="col" [hidden]="!facilityForm.controls.waterReductionGoal.value">
+						<label>Baseline Year</label>
+						<input type="number" class="form-control" formControlName="waterReductionBaselineYear" (input)="onFormChange();">
+					</div>
+					<div class="col" [hidden]="!facilityForm.controls.waterReductionGoal.value">
+						<label>Target Year</label>
+						<input type="number" class="form-control" formControlName="waterReductionTargetYear" (input)="onFormChange();">
+					</div>
+				</div>
+			</form>
+			<p class="alert alert-warning" *ngIf="sustainQuestionsDontMatchAccount">
+				Facility sustainability answers are different then the answers set for the account. If you would like to use the
+				account answers for this facility click here: <a (click)="setAccountSustainQuestions()">Use Account Answers</a>
+			</p>
+		</div>
+	</div>
+
+	<br>
+
+
+	<div class="row">
+		<div class="col-lg-6">
+			<h4>Delete Facility</h4>
+			<p>Once deleted, you will permanently lose all your data linked to this facility. Please make a backup of
+				your data before proceeding with this step.</p>
+			<button class="btn btn-danger" (click)="editFacility()">Delete Facility</button>
+		</div>
+	</div>
 </div>
 
 <div class="popup" [class.open]="showDeleteFacility" *ngIf="facilityForm">
-    <div class="popup-header">Delete Facility: {{facilityForm.controls.name.value}}
-        <button class="item-right" (click)="cancelDelete()">x</button>
-    </div>
-    <div class="popup-body">
-        <p>WARNING: By deleting this facility, you are also deleting all of the data associated with it.
-            Are you sure you want to preform this action?</p>
-    </div>
-    <div class="popup-footer text-right">
-        <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
-        <button class="btn btn-danger" (click)="confirmDelete()">Confirm Delete</button>
-    </div>
+	<div class="popup-header">Delete Facility: {{facilityForm.controls.name.value}}
+		<button class="item-right" (click)="cancelDelete()">x</button>
+	</div>
+	<div class="popup-body">
+		<p>WARNING: By deleting this facility, you are also deleting all of the data associated with it.
+			Are you sure you want to preform this action?</p>
+	</div>
+	<div class="popup-footer text-right">
+		<button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
+		<button class="btn btn-danger" (click)="confirmDelete()">Confirm Delete</button>
+	</div>
 </div>
