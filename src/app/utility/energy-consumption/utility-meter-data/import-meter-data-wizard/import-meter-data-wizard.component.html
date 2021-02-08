@@ -1,20 +1,24 @@
-<h4>Import Meter Data</h4>
+<h4>Import Meter Data <span *ngIf="importMeterDataFileType">(File Type: {{importMeterDataFileType}})</span></h4>
 <br>
-<!-- <form>
-    <input type="file" #inputFile accept=".csv" (change)="meterImport($event.target.files)">
+<form>
+    <input type="file" #inputFile accept=".csv" (change)="meterDataImport($event.target.files)">
 </form>
 <br>
 
-<p class="alert-warning w-100 p-2 text-center" *ngIf="!importMeters && !importError">
+<p class="alert-warning w-100 p-2 text-center" *ngIf="!importMeterData && !importError">
     Select .csv template file from VERIFI.
 </p>
 
 <p class="alert-danger w-100 p-2 text-center" *ngIf="importError">
-    Select .csv template file from VERIFI. The .csv file does not match the correct template: <a
-        href="../../../assets/csv_templates/Verifi_import_meters.csv">Verifi_import_meters.csv</a>
+    Select .csv template file from VERIFI. The .csv file does not match the correct template:<br>
+    <a href="../../../assets/csv_templates/Verifi_import_electricity.csv">Electricity Bills:
+        Verifi_import_electricity.csv</a>
+    <br>
+    <a href="../../../assets/csv_templates/Verifi_import_non_electricity.csv">Other Utility Bills:
+        Verifi_import_non_electricity.csv</a>
 </p>
 
-<div class="d-flex flex-column" *ngIf="importMeters && selectedMeterForm">
+<!--<div class="d-flex flex-column" *ngIf="importMeters && selectedMeterForm">
     <ul class="nav nav-tabs">
         <li class="nav-item" *ngFor="let importMeter of importMeters; let index=index;">
             <a class="nav-link" [ngClass]="{'active': selectedMeterIndex == index}"
