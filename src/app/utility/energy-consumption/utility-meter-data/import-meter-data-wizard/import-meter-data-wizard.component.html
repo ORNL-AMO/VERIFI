@@ -5,7 +5,7 @@
 </form>
 <br>
 
-<p class="alert-warning w-100 p-2 text-center" *ngIf="!importMeterData && !importError">
+<p class="alert-warning w-100 p-2 text-center" *ngIf="!importDataExists && !importError">
     Select .csv template file from VERIFI.
 </p>
 
@@ -18,18 +18,60 @@
         Verifi_import_non_electricity.csv</a>
 </p>
 
-<!--<div class="d-flex flex-column" *ngIf="importMeters && selectedMeterForm">
+
+
+<div class="d-flex flex-column" *ngIf="importDataExists">
     <ul class="nav nav-tabs">
-        <li class="nav-item" *ngFor="let importMeter of importMeters; let index=index;">
+        <li class="nav-item">
+            <a class="nav-link" [ngClass]="{'active': selectedTab == 'valid'}" (click)="setTab('valid')">
+                <span class="badge badge-success">
+                    {{validNewReadings.length}}
+                </span> Valid New
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" [ngClass]="{'active': selectedTab == 'existing'}" (click)="setTab('existing')">
+                <span class="badge badge-warning">
+                    {{validExistingReadings.length}}
+                </span> Existing
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" [ngClass]="{'active': selectedTab == 'missingMeterNumber'}"
+                (click)="setTab('missingMeterNumber')">
+                <span class="badge badge-danger">
+                    {{missingMeterNumberLineNumbers.length}}
+                </span> Missing Meter #
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" [ngClass]="{'active': selectedTab == 'invalid'}" (click)="setTab('invalid')">
+                <span class="badge badge-danger">
+                    {{invalidReadings.length}}
+                </span> Invalid Data
+            </a>
+        </li>
+
+
+
+        <!-- <li class="nav-item" *ngFor="let importMeter of importMeters; let index=index;">
             <a class="nav-link" [ngClass]="{'active': selectedMeterIndex == index}"
                 (click)="selectMeter(importMeter, index)">
                 <span class="badge" [ngClass]="getBadgeClass(importMeter, index)">
                     {{index+1}}
                 </span>
             </a>
-        </li>
+        </li> -->
     </ul>
-    <div class="pull-right">
+    <!--Valid Import Data-->
+
+    <!--Existing Import Data-->
+
+
+    <!--Invalid Import Data-->
+
+
+    <!-- <div class="pull-right">
         <button type="button" class="btn btn-danger pull-right" (click)="toggleSkipMeter(selectedMeterIndex)">
             Skip Meter
         </button>
@@ -39,8 +81,8 @@
     </div>
     <p class="alert-warning text-center w-100 p-3" *ngIf="skipMeters[selectedMeterIndex]">
         Importing Meter Will Be Skipped
-    </p>
-</div> -->
+    </p> -->
+</div>
 
 <div class="row">
     <!-- <div class="col">

@@ -170,14 +170,14 @@ export class UtilityMeterDatadbService {
     }
 
 
-    checkMeterReadingExistForDate(date: Date, meter: IdbUtilityMeter): boolean {
+    checkMeterReadingExistForDate(date: Date, meter: IdbUtilityMeter): IdbUtilityMeterData {
         let newDate: Date = new Date(date);
         let allSelectedMeterData: Array<IdbUtilityMeterData> = this.getMeterDataForFacility(meter);
         let existingData: IdbUtilityMeterData = allSelectedMeterData.find(dataItem => {
             let dataItemDate: Date = new Date(dataItem.readDate);
             return (dataItemDate.getUTCMonth() == newDate.getUTCMonth()) && (dataItemDate.getUTCFullYear() == newDate.getUTCFullYear());
         });
-        return existingData != undefined;
+        return existingData;
     }
 
     private getMeterDataFromMeterId(meterId: number): Array<IdbUtilityMeterData> {

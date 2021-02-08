@@ -137,7 +137,7 @@ export class EditElectricityBillComponent implements OnInit {
   checkDate() {
     if (this.addOrEdit == 'add') {
       //new meter entry should have any year/month combo of existing meter reading
-      this.invalidDate = this.utilityMeterDataDbService.checkMeterReadingExistForDate(this.meterDataForm.controls.readDate.value, this.facilityMeter);
+      this.invalidDate = this.utilityMeterDataDbService.checkMeterReadingExistForDate(this.meterDataForm.controls.readDate.value, this.facilityMeter) != undefined;
     } else {
       //edit meter needs to allow year/month combo of the meter being edited
       let currentMeterItemDate: Date = new Date(this.editMeterData.readDate);
@@ -145,7 +145,7 @@ export class EditElectricityBillComponent implements OnInit {
       if (currentMeterItemDate.getFullYear() == changeDate.getFullYear() && currentMeterItemDate.getMonth() && changeDate.getMonth()) {
         this.invalidDate = false;
       } else {
-        this.invalidDate = this.utilityMeterDataDbService.checkMeterReadingExistForDate(this.meterDataForm.controls.readDate.value, this.facilityMeter);
+        this.invalidDate = this.utilityMeterDataDbService.checkMeterReadingExistForDate(this.meterDataForm.controls.readDate.value, this.facilityMeter) != undefined;
       }
     }
   }
