@@ -1,3 +1,4 @@
+import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { BehaviorSubject } from 'rxjs';
@@ -59,8 +60,12 @@ export class UtilityMeterDataService {
   }
 
   getElectricityMeterDataForm(meterData: IdbUtilityMeterData): FormGroup {
+    //need to use date string for calander to work in form
+    let datePipe: DatePipe = new DatePipe(navigator.language);
+    let stringFormat: string = 'y-MM-dd'; // YYYY-MM-DD
+    let dateString: string = datePipe.transform(meterData.readDate, stringFormat);
     return this.formBuilder.group({
-      readDate: [meterData.readDate, Validators.required],
+      readDate: [dateString, Validators.required],
       totalEnergyUse: [meterData.totalEnergyUse, [Validators.required, Validators.min(0)]],
       totalCost: [meterData.totalCost, [Validators.required, Validators.min(0)]],
       deliveryCharge: [meterData.deliveryCharge],
@@ -88,7 +93,9 @@ export class UtilityMeterDataService {
 
 
   updateElectricityMeterDataFromForm(meterData: IdbUtilityMeterData, form: FormGroup): IdbUtilityMeterData {
-    meterData.readDate = form.controls.readDate.value;
+    //UTC date is one day behind from form
+    let formDate: Date = new Date(form.controls.readDate.value)
+    meterData.readDate = new Date(formDate.getUTCFullYear(), formDate.getUTCMonth(), formDate.getUTCDate());
     meterData.totalEnergyUse = form.controls.totalEnergyUse.value;
     meterData.totalCost = form.controls.totalCost.value;
     meterData.deliveryCharge = form.controls.deliveryCharge.value;
@@ -116,16 +123,20 @@ export class UtilityMeterDataService {
 
 
   getGeneralMeterDataForm(meterData: IdbUtilityMeterData, displayVolumeInput: boolean, displayEnergyInput: boolean): FormGroup {
+    //need to use date string for calander to work in form 
+    let datePipe: DatePipe = new DatePipe(navigator.language);
+    let stringFormat: string = 'y-MM-dd'; // YYYY-MM-DD
+    let dateString: string = datePipe.transform(meterData.readDate, stringFormat);
     let totalVolumeValidators: Array<ValidatorFn> = [];
-    if(displayVolumeInput){
+    if (displayVolumeInput) {
       totalVolumeValidators = [Validators.required, Validators.min(0)]
     }
     let totalEnergyUseValidators: Array<ValidatorFn> = [];
-    if(displayEnergyInput){
+    if (displayEnergyInput) {
       totalEnergyUseValidators = [Validators.required, Validators.min(0)];
     }
     return this.formBuilder.group({
-      readDate: [meterData.readDate, Validators.required],
+      readDate: [dateString, Validators.required],
       totalVolume: [meterData.totalVolume, totalVolumeValidators],
       totalEnergyUse: [meterData.totalEnergyUse, totalEnergyUseValidators],
       totalCost: [meterData.totalCost, [Validators.required, Validators.min(0)]],
@@ -136,7 +147,9 @@ export class UtilityMeterDataService {
   }
 
   updateGeneralMeterDataFromForm(meterData: IdbUtilityMeterData, form: FormGroup): IdbUtilityMeterData {
-    meterData.readDate = form.controls.readDate.value;
+    //UTC date is one day behind from form
+    let formDate: Date = new Date(form.controls.readDate.value)
+    meterData.readDate = new Date(formDate.getUTCFullYear(), formDate.getUTCMonth(), formDate.getUTCDate());
     meterData.totalVolume = form.controls.totalVolume.value;
     meterData.totalEnergyUse = form.controls.totalEnergyUse.value;
     meterData.totalCost = form.controls.totalCost.value;

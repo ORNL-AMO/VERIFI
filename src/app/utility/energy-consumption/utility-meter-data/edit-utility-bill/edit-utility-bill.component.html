@@ -1,12 +1,13 @@
-<h4>Edit {{source}} Bill</h4>
 <p class="bold">General Information</p>
 <form class="meterForm" [formGroup]="meterDataForm">
 
   <label for="readDate">Meter Read Date <span class="required">*</span> </label>
   <div class="input-group mb-3">
-    <input id="readDate" class="form-control" type="date" formControlName="readDate">
+    <input id="readDate" class="form-control" type="date" formControlName="readDate" (change)="checkDate()"
+      [ngClass]="{'error': invalidDate}">
   </div>
   <span class="inputError" *ngIf="meterDataForm.get('readDate').hasError('required')">Meter read date is required</span>
+  <span class="inputError" *ngIf="invalidDate">Meter already has data entered for selected month</span>
 
   <div class="row">
     <div *ngIf="displayVolumeInput" class="col">
@@ -71,5 +72,8 @@
 
 <div class="saveCancel item-right">
   <button class="btn btn-secondary" (click)="cancel()">Cancel</button>
-  <button class="btn btn-primary" (click)="meterDataSave()" [disabled]="meterDataForm.invalid">Save</button>
+  <button *ngIf="addOrEdit == 'edit'" class="btn btn-primary" (click)="saveAndQuit()" [disabled]="meterDataForm.invalid || invalidDate">Save</button>
+  <button *ngIf="addOrEdit == 'add'" class="btn btn-primary mr-2" (click)="saveAndQuit()" [disabled]="meterDataForm.invalid || invalidDate">Save + Quit</button>
+  <button *ngIf="addOrEdit == 'add'" class="btn btn-primary" (click)="saveAndAddAnother()" [disabled]="meterDataForm.invalid || invalidDate">Save +
+    Add Another</button>
 </div>
