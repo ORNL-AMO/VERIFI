@@ -60,7 +60,7 @@ export class ImportMeterWizardComponent implements OnInit {
           let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
           for (var i = 1; i < lines.length; i++) {
             let currentLine: Array<string> = lines[i].split(",");
-            let lineHasData = currentLine.find(lineItem => {return lineItem != '' && lineItem != undefined});
+            let lineHasData = currentLine.find(lineItem => {return lineItem != "" && lineItem != undefined});
             if(lineHasData){
               let newImportMeter: IdbUtilityMeter = this.getNewMeterFromCurrentLine(currentLine, selectedFacility);
               this.importMeters.push(newImportMeter);

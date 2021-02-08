@@ -29,14 +29,14 @@
                 </span> Valid New
             </a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item" *ngIf="validExistingReadings.length != 0">
             <a class="nav-link" [ngClass]="{'active': selectedTab == 'existing'}" (click)="setTab('existing')">
                 <span class="badge badge-warning">
                     {{validExistingReadings.length}}
                 </span> Existing
             </a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item" *ngIf="missingMeterNumberLineNumbers.length != 0">
             <a class="nav-link" [ngClass]="{'active': selectedTab == 'missingMeterNumber'}"
                 (click)="setTab('missingMeterNumber')">
                 <span class="badge badge-danger">
@@ -44,7 +44,7 @@
                 </span> Missing Meter #
             </a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item" *ngIf="invalidReadings.length != 0">
             <a class="nav-link" [ngClass]="{'active': selectedTab == 'invalid'}" (click)="setTab('invalid')">
                 <span class="badge badge-danger">
                     {{invalidReadings.length}}
@@ -70,6 +70,49 @@
 
     <!--Invalid Import Data-->
 
+    <!--Missing Meter #-->
+    <div class="d-flex flex-column" *ngIf="selectedTab == 'missingMeterNumber'">
+        <p class="alert alert-warning p-2 text-center">
+            The following line numbers from the uploaded .csv do not have a meter that corresponds to their meter
+            number.
+        </p>
+        <table class="table table-sm">
+            <thead>
+                <tr>
+                    <th class="text-center w-50" colspan="2">Line Numbers</th>
+                    <th class="text-center w-50"></th>
+                </tr>
+                <tr>
+                    <th class="text-center">
+                        Start
+                    </th>
+                    <th class="text-center">
+                        End
+                    </th>
+                    <th>
+                        Select Meter
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let missingMeterNumberBound of missingMeterNumberBounds; let index = index;">
+                    <td class="text-center">{{missingMeterNumberBound.start}}</td>
+                    <td class="text-center">{{missingMeterNumberBound.end}}</td>
+                    <td>
+                        <select class="form-control" name="{{'selectedMeter'+index}}"
+                            [(ngModel)]="missingMeterNumberBound.selectedMeter">
+                            <option *ngFor="let facilityMeter of facilityMeters" [ngValue]="facilityMeter">
+                                {{facilityMeter.name}}</option>
+                            <option [ngValue]="undefined">Skip Import</option>
+                        </select>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="d-flex justify-content-end">
+            <button class="btn btn-primary" (click)="submitMissingMeterNumberUpdates()">Update Import</button>
+        </div>
+    </div>
 
     <!-- <div class="pull-right">
         <button type="button" class="btn btn-danger pull-right" (click)="toggleSkipMeter(selectedMeterIndex)">

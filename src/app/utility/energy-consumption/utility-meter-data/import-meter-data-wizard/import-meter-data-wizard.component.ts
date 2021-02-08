@@ -5,7 +5,7 @@ import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db
 import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 import { UtilityMeterDataService } from '../utility-meter-data.service';
-
+import * as _ from 'lodash';
 @Component({
   selector: 'app-import-meter-data-wizard',
   templateUrl: './import-meter-data-wizard.component.html',
@@ -18,11 +18,12 @@ export class ImportMeterDataWizardComponent implements OnInit {
   importError: boolean;
   importMeterDataFileType: string;
 
-  invalidReadings: Array<any>;
-  validNewReadings: Array<any>;
-  validExistingReadings: Array<any>;
-  missingMeterNumberLineNumbers: Array<any>;
-
+  allImportDataLines: Array<Array<string>>;
+  invalidReadings: Array<IdbUtilityMeterData>;
+  validNewReadings: Array<IdbUtilityMeterData>;
+  validExistingReadings: Array<IdbUtilityMeterData>;
+  missingMeterNumberLineNumbers: Array<number>;
+  missingMeterNumberBounds: Array<{ start: number, end: number, selectedMeter: IdbUtilityMeter }>;
   facilityMeters: Array<IdbUtilityMeter>;
   selectedTab: string = 'valid';
   importDataExists: boolean;
@@ -41,6 +42,7 @@ export class ImportMeterDataWizardComponent implements OnInit {
       reader.onload = (e) => {
         let csv: string = reader.result as string;
         let lines: Array<string> = csv.split("\n");
+        console.log(lines);
         let headers: Array<string> = lines[0].replace('\r', '').split(",");
         let electricityHeaders: Array<string> = ["Meter Number", "Read Date", "Total Energy", "Total Demand", "Total Cost", "Basic Charge", "Supply Block Amount", "Supply Block Charge", "Flat Rate Amount", "Flat Rate Charge", "Peak Amount", "Peak Charge", "Off Peak Amount", "Off Peak Charge", "Demand Block Amount", "Demand Block Charge", "Generation and Transmission Charge", "Delivery Charge", "Transmission Charge", "Power Factor Charge", "Local Business Charge", "Local Utility Tax", "Late Payment", "Other Charge"];
         let nonElectricityHeaders: Array<string> = ["Meter Number", "Read Date", "Total Consumption", "Total Cost", "Commodity Charge", "Delivery Charge", "Other Charge"];
@@ -66,6 +68,7 @@ export class ImportMeterDataWizardComponent implements OnInit {
   }
 
   initializeArrays() {
+    this.allImportDataLines = new Array();
     this.invalidReadings = new Array();
     this.validExistingReadings = new Array();
     this.missingMeterNumberLineNumbers = new Array();
@@ -75,8 +78,19 @@ export class ImportMeterDataWizardComponent implements OnInit {
   parseImportCsvData(lines: Array<string>) {
     for (var i = 1; i < lines.length; i++) {
       let currentLine: Array<string> = lines[i].split(",");
-      this.parseMeterReading(currentLine, i);
+      let lineHasData = currentLine.find(lineItem => {
+        if (lineItem) {
+          let lineItemCopy = JSON.parse(JSON.stringify(lineItem));
+          let test = lineItemCopy.replace(/\s/g, '');
+          return test.length != 0
+        }
+      });
+      if (lineHasData) {
+        this.allImportDataLines.push(currentLine);
+        this.parseMeterReading(currentLine, i);
+      }
     }
+    this.setMissingMeterDataBounds();
   }
 
   parseMeterReading(currentLine: Array<string>, lineNumber: number) {
@@ -84,28 +98,32 @@ export class ImportMeterDataWizardComponent implements OnInit {
     //find corresponding meter
     let idbMeter: IdbUtilityMeter = this.facilityMeters.find(facilityMeter => { return facilityMeter.meterNumber == currentLine[0] });
     if (idbMeter) {
-      //meter exists matching meter number
-      if (idbMeter.source == 'Electricity' && this.importMeterDataFileType == 'Electricity') {
-        //importing electricity data
-        let electricityMeterDataObj: IdbUtilityMeterData = this.getElectricityMeterDataObject(idbMeter, currentLine);
-        let meterDataForm: FormGroup = this.utilityMeterDataService.getElectricityMeterDataForm(electricityMeterDataObj);
-        this.addMeterReading(electricityMeterDataObj, meterDataForm, idbMeter);
-
-      } else if (idbMeter.source != 'Electricity' && this.importMeterDataFileType != 'Electricity') {
-        //importing non electricity data
-        let displayVolumeInput: boolean = (this.energyUnitsHelperService.isEnergyUnit(idbMeter.startingUnit) == false);
-        let displayEnergyUse: boolean = this.energyUnitsHelperService.isEnergyMeter(idbMeter.source);
-        let nonElectricityMeterDataObj: IdbUtilityMeterData = this.getOtherSourceMeterDataObject(idbMeter, currentLine, displayVolumeInput, displayEnergyUse);
-        let meterDataForm: FormGroup = this.utilityMeterDataService.getGeneralMeterDataForm(nonElectricityMeterDataObj, displayVolumeInput, displayEnergyUse);
-        this.addMeterReading(nonElectricityMeterDataObj, meterDataForm, idbMeter);
-
-      } else {
-        //electricity or non-elecricity data being imported with incorrect data file
-
-      }
+      this.setupAndAddMeterReading(currentLine, idbMeter);
     } else {
       //no meter exists matching meter number
       this.missingMeterNumberLineNumbers.push(lineNumber);
+    }
+  }
+
+  setupAndAddMeterReading(currentLine: Array<string>, idbMeter: IdbUtilityMeter) {
+    //meter exists matching meter number
+    if (idbMeter.source == 'Electricity' && this.importMeterDataFileType == 'Electricity') {
+      //importing electricity data
+      let electricityMeterDataObj: IdbUtilityMeterData = this.getElectricityMeterDataObject(idbMeter, currentLine);
+      let meterDataForm: FormGroup = this.utilityMeterDataService.getElectricityMeterDataForm(electricityMeterDataObj);
+      this.addMeterReading(electricityMeterDataObj, meterDataForm, idbMeter);
+
+    } else if (idbMeter.source != 'Electricity' && this.importMeterDataFileType != 'Electricity') {
+      //importing non electricity data
+      let displayVolumeInput: boolean = (this.energyUnitsHelperService.isEnergyUnit(idbMeter.startingUnit) == false);
+      let displayEnergyUse: boolean = this.energyUnitsHelperService.isEnergyMeter(idbMeter.source);
+      let nonElectricityMeterDataObj: IdbUtilityMeterData = this.getOtherSourceMeterDataObject(idbMeter, currentLine, displayVolumeInput, displayEnergyUse);
+      let meterDataForm: FormGroup = this.utilityMeterDataService.getGeneralMeterDataForm(nonElectricityMeterDataObj, displayVolumeInput, displayEnergyUse);
+      this.addMeterReading(nonElectricityMeterDataObj, meterDataForm, idbMeter);
+
+    } else {
+      //electricity or non-elecricity data being imported with incorrect data file
+
     }
   }
 
@@ -181,5 +199,35 @@ export class ImportMeterDataWizardComponent implements OnInit {
 
   setTab(str: string) {
     this.selectedTab = str;
+  }
+
+  setMissingMeterDataBounds() {
+    this.missingMeterNumberBounds = new Array();
+    let start: number = this.missingMeterNumberLineNumbers[0];
+    for (let i = 0; i < this.missingMeterNumberLineNumbers.length; i++) {
+      if ((this.missingMeterNumberLineNumbers[i] + 1) != this.missingMeterNumberLineNumbers[i + 1]) {
+        this.missingMeterNumberBounds.push({ start: start, end: this.missingMeterNumberLineNumbers[i], selectedMeter: undefined });
+        start = this.missingMeterNumberLineNumbers[i + 1];
+      }
+    }
+  }
+
+  submitMissingMeterNumberUpdates() {
+    this.missingMeterNumberBounds.forEach(boundItem => {
+      if (boundItem.selectedMeter != undefined) {
+        for (let i = boundItem.start - 1; i < boundItem.end; i++) {
+          let currentLine: Array<string> = this.allImportDataLines[i];
+          this.setupAndAddMeterReading(currentLine, boundItem.selectedMeter);
+          let indexOfMissingNumber: number = this.missingMeterNumberLineNumbers.indexOf(i + 1);
+          if (indexOfMissingNumber > -1) {
+            this.missingMeterNumberLineNumbers.splice(indexOfMissingNumber);
+          }
+        }
+      }
+    });
+    this.setMissingMeterDataBounds();
+    if (this.missingMeterNumberLineNumbers.length == 0) {
+      this.setTab('valid');
+    }
   }
 }
