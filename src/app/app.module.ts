@@ -65,6 +65,7 @@ import { PageNotFoundComponent } from './page-not-found/page-not-found.component
 import { ImportMeterWizardComponent } from './utility/energy-consumption/energy-source/import-meter-wizard/import-meter-wizard.component';
 import { EditMeterComponent } from './utility/energy-consumption/energy-source/edit-meter/edit-meter.component';
 import { OrderByPipe } from './shared/helper-pipes/order-by.pipe';
+import { ImportMeterDataWizardComponent } from './utility/energy-consumption/utility-meter-data/import-meter-data-wizard/import-meter-data-wizard.component';
 
 @NgModule({
   declarations: [
@@ -115,7 +116,8 @@ import { OrderByPipe } from './shared/helper-pipes/order-by.pipe';
     PageNotFoundComponent,
     ImportMeterWizardComponent,
     EditMeterComponent,
-    OrderByPipe
+    OrderByPipe,
+    ImportMeterDataWizardComponent
   ],
   imports: [
     BrowserModule,
