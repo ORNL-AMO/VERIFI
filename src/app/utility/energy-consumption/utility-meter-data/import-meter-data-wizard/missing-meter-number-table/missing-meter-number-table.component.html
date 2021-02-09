@@ -2,7 +2,7 @@
     <thead>
         <tr>
             <th class="text-center w-50" colspan="2">Line Numbers</th>
-            <th class="text-center w-50"></th>
+            <th class="text-center w-50" *ngIf="showMeterDropdown"></th>
         </tr>
         <tr>
             <th class="text-center">
@@ -11,7 +11,7 @@
             <th class="text-center">
                 End
             </th>
-            <th>
+            <th *ngIf="showMeterDropdown">
                 Select Meter
             </th>
         </tr>
@@ -20,7 +20,7 @@
         <tr *ngFor="let missingMeterNumberBound of missingMeterNumberBounds; let index = index;">
             <td class="text-center">{{missingMeterNumberBound.start}}</td>
             <td class="text-center">{{missingMeterNumberBound.end}}</td>
-            <td>
+            <td *ngIf="showMeterDropdown">
                 <select class="form-control" name="{{'selectedMeter'+index}}"
                     [(ngModel)]="missingMeterNumberBound.selectedMeter">
                     <option *ngFor="let facilityMeter of facilityMeters" [ngValue]="facilityMeter">
@@ -31,6 +31,6 @@
         </tr>
     </tbody>
 </table>
-<div class="d-flex justify-content-end">
+<div class="d-flex justify-content-end" *ngIf="showMeterDropdown">
     <button class="btn btn-primary" (click)="submitChanges()">Update Import</button>
 </div>

@@ -51,6 +51,14 @@
                 </span> Invalid Data
             </a>
         </li>
+        <li class="nav-item" *ngIf="invalidMeterTypesLineNumbers.length != 0">
+            <a class="nav-link" [ngClass]="{'active': selectedTab == 'invalidSource'}"
+                (click)="setTab('invalidSource')">
+                <span class="badge badge-danger">
+                    {{invalidMeterTypesLineNumbers.length}}
+                </span> Invalid Source
+            </a>
+        </li>
     </ul>
     <!--Valid Import Data-->
     <div class="d-flex flex-column" *ngIf="selectedTab == 'valid'">
@@ -72,6 +80,20 @@
 
     <!--Invalid Import Data-->
 
+    <!--Invalid import meter source type-->
+    <div class="d-flex flex-column" *ngIf="selectedTab == 'invalidSource'">
+        <p class="alert alert-danger p-2 text-center" *ngIf="importMeterDataFileType == 'Electricity'">
+            The following line numbers from the uploaded .csv have meter numbers corresponding to Non Electricity meters
+            and will be skipped.
+        </p>
+        <p class="alert alert-danger p-2 text-center" *ngIf="importMeterDataFileType != 'Electricity'">
+            The following line numbers from the uploaded .csv have meter numbers corresponding to Electricity meters
+            and will be skipped.
+        </p>
+        <app-missing-meter-number-table [(missingMeterNumberBounds)]="invalidMeterTypeBounds"
+            [showMeterDropdown]="false">
+        </app-missing-meter-number-table>
+    </div>
 
     <!--Missing Meter #-->
     <div class="d-flex flex-column" *ngIf="selectedTab == 'missingMeterNumber'">
@@ -80,7 +102,8 @@
             number.
         </p>
         <app-missing-meter-number-table [(missingMeterNumberBounds)]="missingMeterNumberBounds"
-            (submit)="submitMissingMeterNumberUpdates()" [importMeterDataFileType]="importMeterDataFileType">
+            (submit)="submitMissingMeterNumberUpdates()" [importMeterDataFileType]="importMeterDataFileType"
+            [showMeterDropdown]="true">
         </app-missing-meter-number-table>
     </div>
 

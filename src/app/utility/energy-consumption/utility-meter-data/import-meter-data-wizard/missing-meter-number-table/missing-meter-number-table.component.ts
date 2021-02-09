@@ -14,21 +14,24 @@ export class MissingMeterNumberTableComponent implements OnInit {
   importMeterDataFileType: string;
   @Output()
   submit: EventEmitter<boolean> = new EventEmitter<boolean>();
-
+  @Input()
+  showMeterDropdown: boolean;
 
   facilityMeters: Array<IdbUtilityMeter>;
   constructor(private utilityMeterDbService: UtilityMeterdbService) { }
 
   ngOnInit(): void {
-    let allFacilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
-    if(this.importMeterDataFileType == 'Electricity'){
-      this.facilityMeters = allFacilityMeters.filter(meter => {return meter.source == 'Electricity'})
-    }else{
-      this.facilityMeters = allFacilityMeters.filter(meter => {return meter.source != 'Electricity'})
+    if (this.showMeterDropdown) {
+      let allFacilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+      if (this.importMeterDataFileType == 'Electricity') {
+        this.facilityMeters = allFacilityMeters.filter(meter => { return meter.source == 'Electricity' })
+      } else {
+        this.facilityMeters = allFacilityMeters.filter(meter => { return meter.source != 'Electricity' })
+      }
     }
   }
 
-  submitChanges(){
+  submitChanges() {
     this.submit.emit(true);
   }
 }

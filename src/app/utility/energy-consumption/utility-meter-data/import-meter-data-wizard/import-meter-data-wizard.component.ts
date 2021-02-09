@@ -24,12 +24,16 @@ export class ImportMeterDataWizardComponent implements OnInit {
   validExistingReadings: Array<IdbUtilityMeterData>;
   existingData: Array<{ meterName: string, numberOfEntries: number, startDate: Date, endDate: Date }>;
   newData: Array<{ meterName: string, numberOfEntries: number, startDate: Date, endDate: Date }>;
+  
   missingMeterNumberLineNumbers: Array<number>;
   missingMeterNumberBounds: Array<{ start: number, end: number, selectedMeter: IdbUtilityMeter }>;
+
+  invalidMeterTypesLineNumbers: Array<number>;
+  invalidMeterTypeBounds: Array<{ start: number, end: number, selectedMeter: IdbUtilityMeter }>;
+
   facilityMeters: Array<IdbUtilityMeter>;
   selectedTab: string = 'valid';
   importDataExists: boolean;
-  invalidMeterTypes: Array<{ meter: IdbUtilityMeter, numberOfEntries: number }>;
   constructor(private utilityMeterDataService: UtilityMeterDataService, private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService, private energyUnitsHelperService: EnergyUnitsHelperService) { }
 
@@ -75,6 +79,7 @@ export class ImportMeterDataWizardComponent implements OnInit {
     this.validExistingReadings = new Array();
     this.missingMeterNumberLineNumbers = new Array();
     this.validNewReadings = new Array();
+    this.invalidMeterTypesLineNumbers = new Array();
   }
 
   parseImportCsvData(lines: Array<string>) {
@@ -93,6 +98,7 @@ export class ImportMeterDataWizardComponent implements OnInit {
       }
     }
     this.setMissingMeterDataBounds();
+    this.setInvalidMeterTypeBounds();
     this.setExistingData();
     this.setNewData();
   }
@@ -102,7 +108,12 @@ export class ImportMeterDataWizardComponent implements OnInit {
     //find corresponding meter
     let idbMeter: IdbUtilityMeter = this.facilityMeters.find(facilityMeter => { return facilityMeter.meterNumber == currentLine[0] });
     if (idbMeter) {
-      this.setupAndAddMeterReading(currentLine, idbMeter);
+      if(idbMeter.source == 'Electricity' && this.importMeterDataFileType != 'Electricity' || idbMeter.source == 'Electricity' && this.importMeterDataFileType == 'Electricity'){
+        //import meter number source doesn't match file type
+        this.invalidMeterTypesLineNumbers.push(lineNumber);
+      }else{
+        this.setupAndAddMeterReading(currentLine, idbMeter);
+      }
     } else {
       //no meter exists matching meter number
       this.missingMeterNumberLineNumbers.push(lineNumber);
@@ -111,37 +122,20 @@ export class ImportMeterDataWizardComponent implements OnInit {
 
   setupAndAddMeterReading(currentLine: Array<string>, idbMeter: IdbUtilityMeter) {
     //meter exists matching meter number
-    if (idbMeter.source == 'Electricity' && this.importMeterDataFileType == 'Electricity') {
+    if (idbMeter.source == 'Electricity') {
       //importing electricity data
       let electricityMeterDataObj: IdbUtilityMeterData = this.getElectricityMeterDataObject(idbMeter, currentLine);
       let meterDataForm: FormGroup = this.utilityMeterDataService.getElectricityMeterDataForm(electricityMeterDataObj);
       this.addMeterReading(electricityMeterDataObj, meterDataForm, idbMeter);
 
-    } else if (idbMeter.source != 'Electricity' && this.importMeterDataFileType != 'Electricity') {
+    } else if (idbMeter.source != 'Electricity') {
       //importing non electricity data
       let displayVolumeInput: boolean = (this.energyUnitsHelperService.isEnergyUnit(idbMeter.startingUnit) == false);
       let displayEnergyUse: boolean = this.energyUnitsHelperService.isEnergyMeter(idbMeter.source);
       let nonElectricityMeterDataObj: IdbUtilityMeterData = this.getOtherSourceMeterDataObject(idbMeter, currentLine, displayVolumeInput, displayEnergyUse);
       let meterDataForm: FormGroup = this.utilityMeterDataService.getGeneralMeterDataForm(nonElectricityMeterDataObj, displayVolumeInput, displayEnergyUse);
       this.addMeterReading(nonElectricityMeterDataObj, meterDataForm, idbMeter);
-
-    } else {
-      //electricity or non-elecricity data being imported with incorrect data file
-      this.addInvalidMeterTypeItem(idbMeter);
-    }
-  }
-
-
-  addInvalidMeterTypeItem(idbMeter: IdbUtilityMeter) {
-    let indexInInvalidMeterTypes: number = this.invalidMeterTypes.findIndex(meterTypeEntry => { return meterTypeEntry.meter.id == idbMeter.id });
-    if (indexInInvalidMeterTypes > -1) {
-      this.invalidMeterTypes[indexInInvalidMeterTypes].numberOfEntries++;
-    } else {
-      this.invalidMeterTypes.push({
-        meter: idbMeter,
-        numberOfEntries: 1
-      })
-    }
+    } 
   }
 
   addMeterReading(readingData: IdbUtilityMeterData, meterDataForm: FormGroup, idbMeter: IdbUtilityMeter) {
@@ -225,6 +219,17 @@ export class ImportMeterDataWizardComponent implements OnInit {
       if ((this.missingMeterNumberLineNumbers[i] + 1) != this.missingMeterNumberLineNumbers[i + 1]) {
         this.missingMeterNumberBounds.push({ start: start, end: this.missingMeterNumberLineNumbers[i], selectedMeter: undefined });
         start = this.missingMeterNumberLineNumbers[i + 1];
+      }
+    }
+  }
+
+  setInvalidMeterTypeBounds() {
+    this.invalidMeterTypeBounds = new Array();
+    let start: number = this.invalidMeterTypesLineNumbers[0];
+    for (let i = 0; i < this.invalidMeterTypesLineNumbers.length; i++) {
+      if ((this.invalidMeterTypesLineNumbers[i] + 1) != this.invalidMeterTypesLineNumbers[i + 1]) {
+        this.invalidMeterTypeBounds.push({ start: start, end: this.invalidMeterTypesLineNumbers[i], selectedMeter: undefined });
+        start = this.invalidMeterTypesLineNumbers[i + 1];
       }
     }
   }
