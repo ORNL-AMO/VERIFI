@@ -85,6 +85,10 @@ export class UtilityMeterDatadbService {
         });
     }
 
+    updateWithObservable(meterData: IdbUtilityMeterData): Observable<any> {
+        return this.dbService.update('utilityMeterData', meterData);
+    }
+
     deleteIndex(meterDataId: number): void {
         this.dbService.delete('utilityMeterData', meterDataId).subscribe(() => {
             this.setFacilityMeterData();

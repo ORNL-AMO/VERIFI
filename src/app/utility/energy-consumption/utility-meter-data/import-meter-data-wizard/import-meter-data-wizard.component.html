@@ -70,12 +70,21 @@
 
     <!--Existing Import Data-->
     <div class="d-flex flex-column" *ngIf="selectedTab == 'existing'">
-        <p class="alert alert-warning p-2 text-center">
+        <div class="pull-right">
+            <button type="button" class="btn btn-danger pull-right" (click)="toggleSkipExisting()">
+                Skip Existing Data
+            </button>
+        </div>
+        <p class="alert alert-warning p-2 text-center" *ngIf="!skipExisting">
             Some of the meters corresponding to the imported data have existing entries matching the months of the
             imported data. The existing entries will be replaced with the new imported
             data.
         </p>
-        <app-valid-data-table [dataItems]="existingData" [newOrExisting]="'Existing'"></app-valid-data-table>
+        <p class="alert alert-warning text-center p-2" *ngIf="skipExisting">
+            Importing Meter Will Be Skipped
+        </p>
+        <app-valid-data-table *ngIf="!skipExisting" [dataItems]="existingData" [newOrExisting]="'Existing'">
+        </app-valid-data-table>
     </div>
 
     <!--Invalid Import Data-->
@@ -149,27 +158,11 @@
 </div>
 
 <div class="row">
-    <!-- <div class="col">
-        <div class="d-flex flex-column" *ngIf="importMeters">
-            <div class="p-1">
-                <span class="badge badge-danger">#</span> Invalid Meter
-            </div>
-            <div class="p-1">
-                <span class="badge badge-success">#</span> Vaild Meter
-            </div>
-            <div class="p-1">
-                <span class="badge badge-warning">#</span> Existing Meter (has same name)
-            </div>
-            <div class="p-1">
-                <span class="badge badge-secondary">#</span> Meter Import Skipped
-            </div>
-        </div>
-    </div> -->
     <div class="col">
         <div class="saveCancel item-right text-right">
             <button class="btn btn-secondary" (click)="close()">Cancel</button>
-            <!-- <button class="btn btn-primary" (click)="runImport()" [disabled]="hasInvalidMeter()">Submit</button>
-            <p *ngIf="importMeters && hasInvalidMeter()" class="alert alert-danger p-2 text-center">One or more of the
+            <button class="btn btn-primary" (click)="runImport()">Submit</button>
+            <!-- <p *ngIf="importMeters && hasInvalidMeter()" class="alert alert-danger p-2 text-center">One or more of the
                 meters
                 has invalid data
             </p> -->

@@ -2,10 +2,13 @@ import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 import { UtilityMeterDataService } from '../utility-meter-data.service';
 import * as _ from 'lodash';
+import { LoadingService } from 'src/app/shared/loading/loading.service';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 @Component({
   selector: 'app-import-meter-data-wizard',
   templateUrl: './import-meter-data-wizard.component.html',
@@ -34,8 +37,10 @@ export class ImportMeterDataWizardComponent implements OnInit {
   facilityMeters: Array<IdbUtilityMeter>;
   selectedTab: string = 'valid';
   importDataExists: boolean;
+  skipExisting: boolean = false;
   constructor(private utilityMeterDataService: UtilityMeterDataService, private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService, private energyUnitsHelperService: EnergyUnitsHelperService) { }
+    private utilityMeterDataDbService: UtilityMeterDatadbService, private energyUnitsHelperService: EnergyUnitsHelperService,
+    private loadingService: LoadingService, private facilityDbService: FacilitydbService, private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
     this.facilityMeters = this.utilityMeterDbService.facilityMeters.getValue();
@@ -116,7 +121,7 @@ export class ImportMeterDataWizardComponent implements OnInit {
     //find corresponding meter
     let idbMeter: IdbUtilityMeter = this.facilityMeters.find(facilityMeter => { return facilityMeter.meterNumber == currentLine[0] });
     if (idbMeter) {
-      if (idbMeter.source == 'Electricity' && this.importMeterDataFileType != 'Electricity' || idbMeter.source == 'Electricity' && this.importMeterDataFileType == 'Electricity') {
+      if ((idbMeter.source == 'Electricity' && this.importMeterDataFileType != 'Electricity') || (idbMeter.source != 'Electricity' && this.importMeterDataFileType == 'Electricity')) {
         //import meter number source doesn't match file type
         this.invalidMeterTypesLineNumbers.push(lineNumber);
       } else {
@@ -177,45 +182,45 @@ export class ImportMeterDataWizardComponent implements OnInit {
     });
   }
 
-  getErrorsFromForm(form:FormGroup): Array<string> {
+  getErrorsFromForm(form: FormGroup): Array<string> {
     let errors: Array<string> = new Array();
     //read date
-    if(form.controls.readDate.errors){
+    if (form.controls.readDate.errors) {
       errors.push('Read Date Missing');
     }
     //total cost
-    if(form.controls.totalCost.errors){
-      if(form.controls.totalCost.errors.min){
+    if (form.controls.totalCost.errors) {
+      if (form.controls.totalCost.errors.min) {
         errors.push('Total Cost Less Than 0');
       }
-      if(form.controls.totalCost.errors.required){
+      if (form.controls.totalCost.errors.required) {
         errors.push('Total Cost Missing');
       }
     }
     //total demand
-    if(form.controls.totalDemand && form.controls.totalDemand.errors){
-      if(form.controls.totalDemand.errors.min){
+    if (form.controls.totalDemand && form.controls.totalDemand.errors) {
+      if (form.controls.totalDemand.errors.min) {
         errors.push('Total Demand Less Than 0');
       }
-      if(form.controls.totalDemand.errors.required){
+      if (form.controls.totalDemand.errors.required) {
         errors.push('Total Demand Missing');
       }
     }
     //totalEnergyUse
-    if(form.controls.totalEnergyUse && form.controls.totalEnergyUse.errors){
-      if(form.controls.totalEnergyUse.errors.min){
+    if (form.controls.totalEnergyUse && form.controls.totalEnergyUse.errors) {
+      if (form.controls.totalEnergyUse.errors.min) {
         errors.push('Total Energy Use Less Than 0');
       }
-      if(form.controls.totalEnergyUse.errors.required){
+      if (form.controls.totalEnergyUse.errors.required) {
         errors.push('Total Energy Use Missing');
       }
     }
     //total consumption
-    if(form.controls.totalVolume && form.controls.totalVolume.errors){
-      if(form.controls.totalVolume.errors.min){
+    if (form.controls.totalVolume && form.controls.totalVolume.errors) {
+      if (form.controls.totalVolume.errors.min) {
         errors.push('Total Consumption Less Than 0');
       }
-      if(form.controls.totalVolume.errors.required){
+      if (form.controls.totalVolume.errors.required) {
         errors.push('Total Consumption Missing');
       }
     }
@@ -369,6 +374,33 @@ export class ImportMeterDataWizardComponent implements OnInit {
         numberOfEntries: counts[key],
         startDate: new Date(startDate.readDate),
         endDate: new Date(endDate.readDate)
+      });
+    });
+  }
+
+  toggleSkipExisting() {
+    this.skipExisting = !this.skipExisting;
+  }
+
+  async runImport() {
+    this.loadingService.setLoadingStatus(true);
+    this.loadingService.setLoadingMessage("Importing Meter Data...");
+    await this.validNewReadings.forEach((importMeterData: IdbUtilityMeterData) => {
+      this.utilityMeterDataDbService.addWithObservable(importMeterData);
+    });
+    if (!this.skipExisting) {
+      await this.validExistingReadings.forEach((importMeterData: IdbUtilityMeterData) => {
+        this.utilityMeterDataDbService.updateWithObservable(importMeterData);
+      });
+    }
+    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    this.utilityMeterDataDbService.getAllByIndexRange('facilityId', facility.id).subscribe(meterData => {
+      this.utilityMeterDataDbService.facilityMeterData.next(meterData);
+      let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+      this.utilityMeterDataDbService.getAllByIndexRange('accountId', account.id).subscribe(meterData => {
+        this.utilityMeterDataDbService.accountMeterData.next(meterData);
+        this.loadingService.setLoadingStatus(false);
+        this.close();
       });
     });
   }
