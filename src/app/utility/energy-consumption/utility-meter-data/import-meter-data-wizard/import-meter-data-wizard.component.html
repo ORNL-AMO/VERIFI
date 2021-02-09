@@ -79,6 +79,34 @@
     </div>
 
     <!--Invalid Import Data-->
+    <div class="d-flex flex-column" *ngIf="selectedTab == 'invalidData'">
+        <p class="alert alert-danger p-2 text-center">
+            The following line numbers in the .csv are invalid. This data will be skipped on import. Fix the .csv file
+            with the correct data and re-run import.
+        </p>
+        <table class="table table-sm">
+            <thead>
+                <tr>
+                    <th class="w-25">
+                        Line Number
+                    </th>
+                    <th class="w-75">
+                        Data Errors
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let invalidReading of invalidReadings">
+                    <td>{{invalidReading.lineNumber}}</td>
+                    <td>
+                        <span *ngFor="let error of invalidReading.errors">
+                            {{error}};
+                        </span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 
     <!--Invalid import meter source type-->
     <div class="d-flex flex-column" *ngIf="selectedTab == 'invalidSource'">
