@@ -22,11 +22,14 @@ export class ImportMeterDataWizardComponent implements OnInit {
   invalidReadings: Array<IdbUtilityMeterData>;
   validNewReadings: Array<IdbUtilityMeterData>;
   validExistingReadings: Array<IdbUtilityMeterData>;
+  existingData: Array<{ meterName: string, numberOfEntries: number, startDate: Date, endDate: Date }>;
+  newData: Array<{ meterName: string, numberOfEntries: number, startDate: Date, endDate: Date }>;
   missingMeterNumberLineNumbers: Array<number>;
   missingMeterNumberBounds: Array<{ start: number, end: number, selectedMeter: IdbUtilityMeter }>;
   facilityMeters: Array<IdbUtilityMeter>;
   selectedTab: string = 'valid';
   importDataExists: boolean;
+  invalidMeterTypes: Array<{ meter: IdbUtilityMeter, numberOfEntries: number }>;
   constructor(private utilityMeterDataService: UtilityMeterDataService, private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService, private energyUnitsHelperService: EnergyUnitsHelperService) { }
 
@@ -42,7 +45,6 @@ export class ImportMeterDataWizardComponent implements OnInit {
       reader.onload = (e) => {
         let csv: string = reader.result as string;
         let lines: Array<string> = csv.split("\n");
-        console.log(lines);
         let headers: Array<string> = lines[0].replace('\r', '').split(",");
         let electricityHeaders: Array<string> = ["Meter Number", "Read Date", "Total Energy", "Total Demand", "Total Cost", "Basic Charge", "Supply Block Amount", "Supply Block Charge", "Flat Rate Amount", "Flat Rate Charge", "Peak Amount", "Peak Charge", "Off Peak Amount", "Off Peak Charge", "Demand Block Amount", "Demand Block Charge", "Generation and Transmission Charge", "Delivery Charge", "Transmission Charge", "Power Factor Charge", "Local Business Charge", "Local Utility Tax", "Late Payment", "Other Charge"];
         let nonElectricityHeaders: Array<string> = ["Meter Number", "Read Date", "Total Consumption", "Total Cost", "Commodity Charge", "Delivery Charge", "Other Charge"];
@@ -91,6 +93,8 @@ export class ImportMeterDataWizardComponent implements OnInit {
       }
     }
     this.setMissingMeterDataBounds();
+    this.setExistingData();
+    this.setNewData();
   }
 
   parseMeterReading(currentLine: Array<string>, lineNumber: number) {
@@ -123,7 +127,20 @@ export class ImportMeterDataWizardComponent implements OnInit {
 
     } else {
       //electricity or non-elecricity data being imported with incorrect data file
+      this.addInvalidMeterTypeItem(idbMeter);
+    }
+  }
 
+
+  addInvalidMeterTypeItem(idbMeter: IdbUtilityMeter) {
+    let indexInInvalidMeterTypes: number = this.invalidMeterTypes.findIndex(meterTypeEntry => { return meterTypeEntry.meter.id == idbMeter.id });
+    if (indexInInvalidMeterTypes > -1) {
+      this.invalidMeterTypes[indexInInvalidMeterTypes].numberOfEntries++;
+    } else {
+      this.invalidMeterTypes.push({
+        meter: idbMeter,
+        numberOfEntries: 1
+      })
     }
   }
 
@@ -226,8 +243,48 @@ export class ImportMeterDataWizardComponent implements OnInit {
       }
     });
     this.setMissingMeterDataBounds();
+    this.setExistingData();
+    this.setNewData();
     if (this.missingMeterNumberLineNumbers.length == 0) {
-      this.setTab('valid');
+      if (this.validExistingReadings.length != 0) {
+        this.setTab('valid');
+      } else {
+        this.setTab('existing');
+      }
     }
+  }
+
+  setExistingData() {
+    this.existingData = new Array();
+    let counts = _.countBy(this.validExistingReadings, 'meterId');
+    Object.keys(counts).forEach((key, index) => {
+      let meter: IdbUtilityMeter = this.facilityMeters.find(meter => { return meter.id == Number(key) })
+      let meterData: Array<IdbUtilityMeterData> = this.validExistingReadings.filter(reading => { return reading.meterId == meter.id });
+      let startDate: IdbUtilityMeterData = _.minBy(meterData, 'readDate');
+      let endDate: IdbUtilityMeterData = _.maxBy(meterData, 'readDate');
+      this.existingData.push({
+        meterName: meter.name,
+        numberOfEntries: counts[key],
+        startDate: new Date(startDate.readDate),
+        endDate: new Date(endDate.readDate)
+      });
+    });
+  }
+
+  setNewData() {
+    this.newData = new Array();
+    let counts = _.countBy(this.validNewReadings, 'meterId');
+    Object.keys(counts).forEach((key, index) => {
+      let meter: IdbUtilityMeter = this.facilityMeters.find(meter => { return meter.id == Number(key) })
+      let meterData: Array<IdbUtilityMeterData> = this.validNewReadings.filter(reading => { return reading.meterId == meter.id });
+      let startDate: IdbUtilityMeterData = _.minBy(meterData, 'readDate');
+      let endDate: IdbUtilityMeterData = _.maxBy(meterData, 'readDate');
+      this.newData.push({
+        meterName: meter.name,
+        numberOfEntries: counts[key],
+        startDate: new Date(startDate.readDate),
+        endDate: new Date(endDate.readDate)
+      });
+    });
   }
 }

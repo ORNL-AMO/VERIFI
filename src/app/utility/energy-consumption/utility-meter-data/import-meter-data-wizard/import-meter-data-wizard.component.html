@@ -5,6 +5,7 @@
 </form>
 <br>
 
+<!--setup warnings/errors-->
 <p class="alert-warning w-100 p-2 text-center" *ngIf="!importDataExists && !importError">
     Select .csv template file from VERIFI.
 </p>
@@ -18,8 +19,7 @@
         Verifi_import_non_electricity.csv</a>
 </p>
 
-
-
+<!--tabs and content-->
 <div class="d-flex flex-column" *ngIf="importDataExists">
     <ul class="nav nav-tabs">
         <li class="nav-item">
@@ -45,30 +45,33 @@
             </a>
         </li>
         <li class="nav-item" *ngIf="invalidReadings.length != 0">
-            <a class="nav-link" [ngClass]="{'active': selectedTab == 'invalid'}" (click)="setTab('invalid')">
+            <a class="nav-link" [ngClass]="{'active': selectedTab == 'invalidData'}" (click)="setTab('invalidData')">
                 <span class="badge badge-danger">
                     {{invalidReadings.length}}
                 </span> Invalid Data
             </a>
         </li>
-
-
-
-        <!-- <li class="nav-item" *ngFor="let importMeter of importMeters; let index=index;">
-            <a class="nav-link" [ngClass]="{'active': selectedMeterIndex == index}"
-                (click)="selectMeter(importMeter, index)">
-                <span class="badge" [ngClass]="getBadgeClass(importMeter, index)">
-                    {{index+1}}
-                </span>
-            </a>
-        </li> -->
     </ul>
     <!--Valid Import Data-->
+    <div class="d-flex flex-column" *ngIf="selectedTab == 'valid'">
+        <p class="alert alert-success p-2 text-center">
+            New data will be imported for the following meters.
+        </p>
+        <app-valid-data-table [dataItems]="newData" [newOrExisting]="'New'"></app-valid-data-table>
+    </div>
 
     <!--Existing Import Data-->
-
+    <div class="d-flex flex-column" *ngIf="selectedTab == 'existing'">
+        <p class="alert alert-warning p-2 text-center">
+            Some of the meters corresponding to the imported data have existing entries matching the months of the
+            imported data. The existing entries will be replaced with the new imported
+            data.
+        </p>
+        <app-valid-data-table [dataItems]="existingData" [newOrExisting]="'Existing'"></app-valid-data-table>
+    </div>
 
     <!--Invalid Import Data-->
+
 
     <!--Missing Meter #-->
     <div class="d-flex flex-column" *ngIf="selectedTab == 'missingMeterNumber'">
@@ -76,42 +79,9 @@
             The following line numbers from the uploaded .csv do not have a meter that corresponds to their meter
             number.
         </p>
-        <table class="table table-sm">
-            <thead>
-                <tr>
-                    <th class="text-center w-50" colspan="2">Line Numbers</th>
-                    <th class="text-center w-50"></th>
-                </tr>
-                <tr>
-                    <th class="text-center">
-                        Start
-                    </th>
-                    <th class="text-center">
-                        End
-                    </th>
-                    <th>
-                        Select Meter
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let missingMeterNumberBound of missingMeterNumberBounds; let index = index;">
-                    <td class="text-center">{{missingMeterNumberBound.start}}</td>
-                    <td class="text-center">{{missingMeterNumberBound.end}}</td>
-                    <td>
-                        <select class="form-control" name="{{'selectedMeter'+index}}"
-                            [(ngModel)]="missingMeterNumberBound.selectedMeter">
-                            <option *ngFor="let facilityMeter of facilityMeters" [ngValue]="facilityMeter">
-                                {{facilityMeter.name}}</option>
-                            <option [ngValue]="undefined">Skip Import</option>
-                        </select>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-        <div class="d-flex justify-content-end">
-            <button class="btn btn-primary" (click)="submitMissingMeterNumberUpdates()">Update Import</button>
-        </div>
+        <app-missing-meter-number-table [(missingMeterNumberBounds)]="missingMeterNumberBounds"
+            (submit)="submitMissingMeterNumberUpdates()" [importMeterDataFileType]="importMeterDataFileType">
+        </app-missing-meter-number-table>
     </div>
 
     <!-- <div class="pull-right">
