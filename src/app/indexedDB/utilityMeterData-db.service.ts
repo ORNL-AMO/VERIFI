@@ -173,7 +173,6 @@ export class UtilityMeterDatadbService {
         return undefined;
     }
 
-
     checkMeterReadingExistForDate(date: Date, meter: IdbUtilityMeter): IdbUtilityMeterData {
         let newDate: Date = new Date(date);
         let allSelectedMeterData: Array<IdbUtilityMeterData> = this.getMeterDataForFacility(meter);
