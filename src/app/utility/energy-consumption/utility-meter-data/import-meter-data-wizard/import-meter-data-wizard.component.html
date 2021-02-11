@@ -192,7 +192,7 @@
             <button class="btn btn-secondary" (click)="reset()">Start Over</button>
             <button class="btn btn-secondary" (click)="close()">Cancel</button>
             <button class="btn btn-primary" (click)="runImport()"
-                [disabled]="validExistingReadings.length == 0 && validExistingReadings.length == 0">Submit</button>
+                [disabled]="validExistingReadings.length != 0 || validExistingReadings.length != 0">Submit</button>
             <p *ngIf="missingMeterNumberLineNumbers.length != 0 || duplicateEntries.length != 0 || invalidMeterTypesLineNumbers.length != 0 || invalidReadings.length != 0"
                 class="alert alert-danger p-2 text-center">One or more of the meter readings is invalid and will be skipped.
             </p>
