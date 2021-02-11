@@ -28,6 +28,10 @@
     </app-utility-meter-data-filter>
 </div>
 
+<div class="meterData">
+    <button class="btn btn-primary-4 item-right" (click)="meterDataAdd()"><i class="fa fa-plus"></i> Add New Bill</button>
+</div>
+
 <div class="meter" *ngFor="let meterListItem of meterList; let index=index;"
     [class.collapsed]="!meterListItem.idbMeter.visible">
     <div class="meterData">
@@ -57,9 +61,6 @@
     </div>
 
     <div class="tableControls overflow-hidden" *ngIf="meterListItem.idbMeter.visible">
-        <button class="btn btn-link item-left" (click)="meterDataAdd(meterListItem.idbMeter)">
-            <i class="fa fa-plus"></i> Add New Bill
-        </button>
         <div class="item-right">
             <ngb-pagination [collectionSize]="meterListItem.meterDataItems.length" [(page)]="tablePageNumbers[index]"
                 [pageSize]="itemsPerPage" [rotate]="true" aria-label="Default pagination" [maxSize]="5">
@@ -69,13 +70,27 @@
     </div>
 </div>
 
-<div class="window" [class.open]="editMeterData">
+<div class="window" [class.open]="editMeterData || addOrEdit == 'add'">
     <div class="windowOverlay"></div>
-    <div class="windowContent windowContentLg">
-        <app-edit-electricity-bill *ngIf="editMeterData && selectedSource == 'Electricity'"
-            [editMeterData]="editMeterData" (emitClose)="cancelEditMeter()" [addOrEdit]="addOrEdit">
+    <div class="windowContent windowContentLg" *ngIf="(editMeterData || addOrEdit == 'add')">
+        <h4 *ngIf="addOrEdit == 'add'">Add {{selectedMeter.source}} Bill</h4>
+        <h4 *ngIf="addOrEdit == 'edit'">Edit {{selectedSource}} Bill</h4>
+        <div class="row" *ngIf="addOrEdit == 'add'">
+            <div class="col">
+                <form>
+                    <label class="bold">Select Meter</label>
+                    <select name="selectedMeter" [(ngModel)]="selectedMeter" class="form-control"
+                        (change)="changeSelectedMeter()">
+                        <option *ngFor="let facilityMeter of facilityMeters" [ngValue]="facilityMeter">
+                            {{facilityMeter.name}} (Last Bill: {{getLastMeterBillDate(facilityMeter) | date}})</option>
+                    </select>
+                </form>
+            </div>
+        </div>
+        <app-edit-electricity-bill *ngIf="selectedMeter.source == 'Electricity'" [editMeterData]="editMeterData"
+            (emitClose)="cancelEditMeter()" [addOrEdit]="addOrEdit">
         </app-edit-electricity-bill>
-        <app-edit-utility-bill *ngIf="editMeterData && selectedSource != 'Electricity'" [editMeterData]="editMeterData"
+        <app-edit-utility-bill *ngIf="selectedMeter.source != 'Electricity'" [editMeterData]="editMeterData"
             (emitClose)="cancelEditMeter()" [addOrEdit]="addOrEdit">
         </app-edit-utility-bill>
     </div>

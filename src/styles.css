@@ -261,7 +261,7 @@ Popups & Windows
 .windowContent {
   position: fixed;
   background-color: white;
-  top: 10%;
+  top: 3%;
   width: 500px;
   left: calc(50% - 250px);
   box-shadow: -3px 4px 8px #0000001c;

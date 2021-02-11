@@ -21,7 +21,6 @@ export class EditElectricityBillComponent implements OnInit {
   @Output('emitClose')
   emitClose: EventEmitter<boolean> = new EventEmitter<boolean>();
 
-
   meterDataForm: FormGroup;
   electricityDataFilters: ElectricityDataFilters;
   electricityDataFiltersSub: Subscription;
@@ -32,18 +31,24 @@ export class EditElectricityBillComponent implements OnInit {
   supplyDemandFilters: SupplyDemandChargeFilters;
   taxAndOtherFilters: TaxAndOtherFilters;
   energyUnit: string;
+  invalidDate: boolean;
+  facilityMeter: IdbUtilityMeter;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private utilityMeterDataService: UtilityMeterDataService,
     private facilityDbService: FacilitydbService, private utilityMeterDbService: UtilityMeterdbService) { }
 
   ngOnInit(): void {
-    let facilityMeter: IdbUtilityMeter = this.utilityMeterDbService.getFacilityMeterById(this.editMeterData.meterId);
-    this.energyUnit = facilityMeter.startingUnit
-    this.meterDataForm = this.utilityMeterDataService.getElectricityMeterDataForm(this.editMeterData);
     this.electricityDataFiltersSub = this.utilityMeterDataService.electricityInputFilters.subscribe(dataFilters => {
       this.supplyDemandFilters = dataFilters.supplyDemandCharge;
       this.taxAndOtherFilters = dataFilters.taxAndOther
       this.setDisplayColumns();
     });
+  }
+
+  ngOnChanges() {
+    this.facilityMeter = this.utilityMeterDbService.getFacilityMeterById(this.editMeterData.meterId);
+    this.energyUnit = this.facilityMeter.startingUnit;
+    this.meterDataForm = this.utilityMeterDataService.getElectricityMeterDataForm(this.editMeterData);
+    this.checkDate();
   }
 
   ngOnDestroy() {
@@ -54,7 +59,7 @@ export class EditElectricityBillComponent implements OnInit {
     this.emitClose.emit(true);
   }
 
-  meterDataSave() {
+  saveAndQuit() {
     let meterDataToSave: IdbUtilityMeterData = this.utilityMeterDataService.updateElectricityMeterDataFromForm(this.editMeterData, this.meterDataForm);
     if (this.addOrEdit == 'edit') {
       this.utilityMeterDataDbService.update(meterDataToSave);
@@ -63,6 +68,16 @@ export class EditElectricityBillComponent implements OnInit {
       this.utilityMeterDataDbService.add(meterDataToSave);
     }
     this.cancel();
+  }
+
+  saveAndAddAnother() {
+    let meterDataToSave: IdbUtilityMeterData = this.utilityMeterDataService.updateElectricityMeterDataFromForm(this.editMeterData, this.meterDataForm);
+    delete meterDataToSave.id;
+    this.utilityMeterDataDbService.add(meterDataToSave);
+    this.editMeterData = this.utilityMeterDataDbService.getNewIdbUtilityMeterData(this.facilityMeter);
+    this.editMeterData.readDate = new Date(meterDataToSave.readDate);
+    this.editMeterData.readDate.setMonth(this.editMeterData.readDate.getUTCMonth() + 1);
+    this.meterDataForm = this.utilityMeterDataService.getElectricityMeterDataForm(this.editMeterData);
   }
 
   showAllFields() {
@@ -117,6 +132,22 @@ export class EditElectricityBillComponent implements OnInit {
     this.displayTaxAndOthersColumnTwo = (
       this.taxAndOtherFilters.generationTransmissionCharge || this.taxAndOtherFilters.deliveryCharge || this.taxAndOtherFilters.powerFactorCharge
     );
+  }
+
+  checkDate() {
+    if (this.addOrEdit == 'add') {
+      //new meter entry should have any year/month combo of existing meter reading
+      this.invalidDate = this.utilityMeterDataDbService.checkMeterReadingExistForDate(this.meterDataForm.controls.readDate.value, this.facilityMeter);
+    } else {
+      //edit meter needs to allow year/month combo of the meter being edited
+      let currentMeterItemDate: Date = new Date(this.editMeterData.readDate);
+      let changeDate: Date = new Date(this.meterDataForm.controls.readDate.value);
+      if (currentMeterItemDate.getFullYear() == changeDate.getFullYear() && currentMeterItemDate.getMonth() && changeDate.getMonth()) {
+        this.invalidDate = false;
+      } else {
+        this.invalidDate = this.utilityMeterDataDbService.checkMeterReadingExistForDate(this.meterDataForm.controls.readDate.value, this.facilityMeter);
+      }
+    }
   }
 
 }
