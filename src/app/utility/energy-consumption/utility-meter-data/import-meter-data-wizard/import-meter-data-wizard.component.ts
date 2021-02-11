@@ -43,15 +43,18 @@ export class ImportMeterDataWizardComponent implements OnInit {
   selectedTab: string = 'valid';
   importDataExists: boolean;
   skipExisting: boolean = false;
+  inputFile: any;
   constructor(private utilityMeterDataService: UtilityMeterDataService, private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService, private energyUnitsHelperService: EnergyUnitsHelperService,
     private loadingService: LoadingService, private facilityDbService: FacilitydbService, private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
+    this.initializeArrays();
     this.facilityMeters = this.utilityMeterDbService.facilityMeters.getValue();
   }
 
   meterDataImport(files: FileList) {
+    console.log('import');
     this.initializeArrays();
     if (files && files.length > 0) {
       let file: File = files.item(0);
@@ -348,6 +351,8 @@ export class ImportMeterDataWizardComponent implements OnInit {
         }
       }
     });
+    this.checkDuplicateEntries();
+    this.splitExistingAndNewReadings();
     this.setMissingMeterDataBounds();
     this.setExistingData();
     this.setNewData();
@@ -451,25 +456,13 @@ export class ImportMeterDataWizardComponent implements OnInit {
           lineNumbers: [entry.lineNumber]
         });
       }
-    })
-
-    // let counts = _.countBy(duplicateEntries, (item) => {
-    //   let readDate: Date = new Date(item.readingData.readDate);
-    //   return new Date(readDate.getUTCFullYear(), readDate.getUTCMonth());
-    // });
-
-    // Object.keys(counts).forEach((key, index) => {
-    //   let countDate: Date = new Date(key);
-    //   let lineNumbers: Array<number> = new Array();
-    //   this.allImportDataLines.forEach((line: Array<string>, index: number) => {
-    //     let entryDate: Date = new Date(line[1]);
-    //     if (entryDate.getUTCFullYear() == countDate.getUTCFullYear() && entryDate.getUTCMonth() == countDate.getUTCMonth()) {
-    //       lineNumbers.push(index + 1);
-    //     }
-    //   });
-    //   console.log(countDate);
-    //   console.log(lineNumbers);
-    // });
+    });
   }
 
+  reset(){
+    this.inputFile = undefined;
+    this.importError = undefined;
+    this.importDataExists = false;
+    this.initializeArrays();
+  }
 }

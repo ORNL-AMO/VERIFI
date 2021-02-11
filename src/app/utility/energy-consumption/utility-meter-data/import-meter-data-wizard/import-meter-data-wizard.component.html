@@ -1,7 +1,7 @@
 <h4>Import Meter Data <span *ngIf="importMeterDataFileType">(File Type: {{importMeterDataFileType}})</span></h4>
 <br>
 <form>
-    <input type="file" #inputFile accept=".csv" (input)="meterDataImport($event.target.files)">
+    <input type="file" [(ngModel)]="inputFile" accept=".csv" (input)="meterDataImport($event.target.files)" name="inputFile">
 </form>
 <br>
 
@@ -184,29 +184,18 @@
             </tbody>
         </table>
     </div>
-
-    <!-- <div class="pull-right">
-        <button type="button" class="btn btn-danger pull-right" (click)="toggleSkipMeter(selectedMeterIndex)">
-            Skip Meter
-        </button>
-    </div>
-    <div class="p-3" *ngIf="!skipMeters[selectedMeterIndex]">
-        <app-edit-meter-form [(meterForm)]="selectedMeterForm"></app-edit-meter-form>
-    </div>
-    <p class="alert-warning text-center w-100 p-3" *ngIf="skipMeters[selectedMeterIndex]">
-        Importing Meter Will Be Skipped
-    </p> -->
 </div>
 
 <div class="row">
     <div class="col">
         <div class="saveCancel item-right text-right">
+            <button class="btn btn-secondary" (click)="reset()">Start Over</button>
             <button class="btn btn-secondary" (click)="close()">Cancel</button>
-            <button class="btn btn-primary" (click)="runImport()">Submit</button>
-            <!-- <p *ngIf="importMeters && hasInvalidMeter()" class="alert alert-danger p-2 text-center">One or more of the
-                meters
-                has invalid data
-            </p> -->
+            <button class="btn btn-primary" (click)="runImport()"
+                [disabled]="validExistingReadings.length == 0 && validExistingReadings.length == 0">Submit</button>
+            <p *ngIf="missingMeterNumberLineNumbers.length != 0 || duplicateEntries.length != 0 || invalidMeterTypesLineNumbers.length != 0 || invalidReadings.length != 0"
+                class="alert alert-danger p-2 text-center">One or more of the meter readings is invalid and will be skipped.
+            </p>
         </div>
     </div>
 </div>
