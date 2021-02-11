@@ -85,6 +85,10 @@ export class UtilityMeterDatadbService {
         });
     }
 
+    updateWithObservable(meterData: IdbUtilityMeterData): Observable<any> {
+        return this.dbService.update('utilityMeterData', meterData);
+    }
+
     deleteIndex(meterDataId: number): void {
         this.dbService.delete('utilityMeterData', meterDataId).subscribe(() => {
             this.setFacilityMeterData();
@@ -169,15 +173,18 @@ export class UtilityMeterDatadbService {
         return undefined;
     }
 
-
-    checkMeterReadingExistForDate(date: Date, meter: IdbUtilityMeter): boolean {
+    checkMeterReadingExistForDate(date: Date, meter: IdbUtilityMeter): IdbUtilityMeterData {
         let newDate: Date = new Date(date);
         let allSelectedMeterData: Array<IdbUtilityMeterData> = this.getMeterDataForFacility(meter);
         let existingData: IdbUtilityMeterData = allSelectedMeterData.find(dataItem => {
-            let dataItemDate: Date = new Date(dataItem.readDate);
-            return (dataItemDate.getUTCMonth() == newDate.getUTCMonth()) && (dataItemDate.getUTCFullYear() == newDate.getUTCFullYear());
+            return this.checkSameMonthYear(newDate, dataItem);
         });
-        return existingData != undefined;
+        return existingData;
+    }
+
+    checkSameMonthYear(date: Date, dataItem: IdbUtilityMeterData): boolean {
+        let dataItemDate: Date = new Date(dataItem.readDate);
+        return (dataItemDate.getUTCMonth() == date.getUTCMonth()) && (dataItemDate.getUTCFullYear() == date.getUTCFullYear());
     }
 
     private getMeterDataFromMeterId(meterId: number): Array<IdbUtilityMeterData> {

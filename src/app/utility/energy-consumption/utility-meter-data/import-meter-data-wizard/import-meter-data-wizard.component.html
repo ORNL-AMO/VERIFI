@@ -1,0 +1,201 @@
+<h4>Import Meter Data <span *ngIf="importMeterDataFileType">(File Type: {{importMeterDataFileType}})</span></h4>
+<br>
+<form>
+    <input type="file" [(ngModel)]="inputFile" accept=".csv" (input)="meterDataImport($event.target.files)" name="inputFile">
+</form>
+<br>
+
+<!--setup warnings/errors-->
+<p class="alert-warning w-100 p-2 text-center" *ngIf="!importDataExists && !importError">
+    Select .csv template file from VERIFI.
+</p>
+
+<p class="alert-danger w-100 p-2 text-center" *ngIf="importError">
+    Select .csv template file from VERIFI. The .csv file does not match the correct template:<br>
+    <a href="../../../assets/csv_templates/Verifi_import_electricity.csv">Electricity Bills:
+        Verifi_import_electricity.csv</a>
+    <br>
+    <a href="../../../assets/csv_templates/Verifi_import_non_electricity.csv">Other Utility Bills:
+        Verifi_import_non_electricity.csv</a>
+</p>
+
+<!--tabs and content-->
+<div class="d-flex flex-column" *ngIf="importDataExists">
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <a class="nav-link" [ngClass]="{'active': selectedTab == 'valid'}" (click)="setTab('valid')">
+                <span class="badge badge-success">
+                    {{validNewReadings.length}}
+                </span> Valid New
+            </a>
+        </li>
+        <li class="nav-item" *ngIf="validExistingReadings.length != 0">
+            <a class="nav-link" [ngClass]="{'active': selectedTab == 'existing'}" (click)="setTab('existing')">
+                <span class="badge badge-warning">
+                    {{validExistingReadings.length}}
+                </span> Existing
+            </a>
+        </li>
+        <li class="nav-item" *ngIf="missingMeterNumberLineNumbers.length != 0">
+            <a class="nav-link" [ngClass]="{'active': selectedTab == 'missingMeterNumber'}"
+                (click)="setTab('missingMeterNumber')">
+                <span class="badge badge-danger">
+                    {{missingMeterNumberLineNumbers.length}}
+                </span> Missing Meter #
+            </a>
+        </li>
+        <li class="nav-item" *ngIf="invalidReadings.length != 0">
+            <a class="nav-link" [ngClass]="{'active': selectedTab == 'invalidData'}" (click)="setTab('invalidData')">
+                <span class="badge badge-danger">
+                    {{invalidReadings.length}}
+                </span> Invalid Data
+            </a>
+        </li>
+        <li class="nav-item" *ngIf="invalidMeterTypesLineNumbers.length != 0">
+            <a class="nav-link" [ngClass]="{'active': selectedTab == 'invalidSource'}"
+                (click)="setTab('invalidSource')">
+                <span class="badge badge-danger">
+                    {{invalidMeterTypesLineNumbers.length}}
+                </span> Invalid Source
+            </a>
+        </li>
+        <li class="nav-item" *ngIf="duplicateEntries.length != 0">
+            <a class="nav-link" [ngClass]="{'active': selectedTab == 'duplicates'}" (click)="setTab('duplicates')">
+                <span class="badge badge-danger">
+                    {{duplicateEntries.length}}
+                </span> Duplicate Entries
+            </a>
+        </li>
+    </ul>
+    <!--Valid Import Data-->
+    <div class="d-flex flex-column" *ngIf="selectedTab == 'valid'">
+        <p class="alert alert-success p-2 text-center">
+            New data will be imported for the following meters.
+        </p>
+        <app-valid-data-table [dataItems]="newData" [newOrExisting]="'New'"></app-valid-data-table>
+    </div>
+
+    <!--Existing Import Data-->
+    <div class="d-flex flex-column" *ngIf="selectedTab == 'existing'">
+        <div class="pull-right">
+            <button type="button" class="btn btn-danger pull-right" (click)="toggleSkipExisting()">
+                Skip Existing Data
+            </button>
+        </div>
+        <p class="alert alert-warning p-2 text-center" *ngIf="!skipExisting">
+            Some of the meters corresponding to the imported data have existing entries matching the months of the
+            imported data. The existing entries will be replaced with the new imported
+            data.
+        </p>
+        <p class="alert alert-warning text-center p-2" *ngIf="skipExisting">
+            Importing Meter Will Be Skipped
+        </p>
+        <app-valid-data-table *ngIf="!skipExisting" [dataItems]="existingData" [newOrExisting]="'Existing'">
+        </app-valid-data-table>
+    </div>
+
+    <!--Invalid Import Data-->
+    <div class="d-flex flex-column" *ngIf="selectedTab == 'invalidData'">
+        <p class="alert alert-danger p-2 text-center">
+            The following line numbers in the .csv are invalid. This data will be skipped on import. Fix the .csv file
+            with the correct data and re-run import.
+        </p>
+        <table class="table table-sm">
+            <thead>
+                <tr>
+                    <th class="w-25">
+                        Line Number
+                    </th>
+                    <th class="w-75">
+                        Data Errors
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let invalidReading of invalidReadings">
+                    <td>{{invalidReading.lineNumber}}</td>
+                    <td>
+                        <span *ngFor="let error of invalidReading.errors">
+                            {{error}};
+                        </span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!--Invalid import meter source type-->
+    <div class="d-flex flex-column" *ngIf="selectedTab == 'invalidSource'">
+        <p class="alert alert-danger p-2 text-center" *ngIf="importMeterDataFileType == 'Electricity'">
+            The following line numbers from the uploaded .csv have meter numbers corresponding to Non Electricity meters
+            and will be skipped.
+        </p>
+        <p class="alert alert-danger p-2 text-center" *ngIf="importMeterDataFileType != 'Electricity'">
+            The following line numbers from the uploaded .csv have meter numbers corresponding to Electricity meters
+            and will be skipped.
+        </p>
+        <app-missing-meter-number-table [(missingMeterNumberBounds)]="invalidMeterTypeBounds"
+            [showMeterDropdown]="false">
+        </app-missing-meter-number-table>
+    </div>
+
+    <!--Missing Meter #-->
+    <div class="d-flex flex-column" *ngIf="selectedTab == 'missingMeterNumber'">
+        <p class="alert alert-warning p-2 text-center">
+            The following line numbers from the uploaded .csv do not have a meter number that corresponds to an existing
+            meter number.
+        </p>
+        <app-missing-meter-number-table [(missingMeterNumberBounds)]="missingMeterNumberBounds"
+            (submit)="submitMissingMeterNumberUpdates()" [importMeterDataFileType]="importMeterDataFileType"
+            [showMeterDropdown]="true">
+        </app-missing-meter-number-table>
+    </div>
+
+
+    <!--Missing Meter #-->
+    <div class="d-flex flex-column" *ngIf="selectedTab == 'duplicates'">
+        <p class="alert alert-danger p-2 text-center">
+            The following are duplicate entries for the same meters. These entries will be ignored by the import.
+        </p>
+        <table class="table table-sm">
+            <thead>
+                <tr>
+                    <th class="w-25">
+                        Date
+                    </th>
+                    <th class="w-25">
+                        Meter
+                    </th>
+                    <th class="w-50">
+                        Line Numbers
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let entry of duplicateEntries">
+                    <td>{{entry.date | date: 'MMM, y'}}</td>
+                    <td>{{entry.idbMeter.name}}</td>
+                    <td>
+                        <span *ngFor="let lineNumber of entry.lineNumbers">
+                            {{lineNumber}};
+                        </span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col">
+        <div class="saveCancel item-right text-right">
+            <button class="btn btn-secondary" (click)="reset()">Start Over</button>
+            <button class="btn btn-secondary" (click)="close()">Cancel</button>
+            <button class="btn btn-primary" (click)="runImport()"
+                [disabled]="validExistingReadings.length != 0 || validExistingReadings.length != 0">Submit</button>
+            <p *ngIf="missingMeterNumberLineNumbers.length != 0 || duplicateEntries.length != 0 || invalidMeterTypesLineNumbers.length != 0 || invalidReadings.length != 0"
+                class="alert alert-danger p-2 text-center">One or more of the meter readings is invalid and will be skipped.
+            </p>
+        </div>
+    </div>
+</div>

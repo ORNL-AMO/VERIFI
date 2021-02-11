@@ -1,10 +1,11 @@
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
-import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterGroup } from 'src/app/models/idb';
+import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterGroup } from 'src/app/models/idb';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 import { EnergyUseCalculationsService } from 'src/app/shared/helper-services/energy-use-calculations.service';
 import { LoadingService } from 'src/app/shared/loading/loading.service';
@@ -31,7 +32,7 @@ export class ImportMeterWizardComponent implements OnInit {
   skipMeters: Array<boolean>;
   constructor(private utilityMeterGroupdbService: UtilityMeterGroupdbService, private utilityMeterdbService: UtilityMeterdbService,
     private facilityDbService: FacilitydbService, private editMeterFormService: EditMeterFormService, private loadingService: LoadingService,
-    private energyUseCalculationsService: EnergyUseCalculationsService, private energyUnitsHelperService: EnergyUnitsHelperService) { }
+    private energyUseCalculationsService: EnergyUseCalculationsService, private energyUnitsHelperService: EnergyUnitsHelperService, private accountdbService: AccountdbService) { }
 
   ngOnInit(): void {
     this.facilityMetersSub = this.utilityMeterdbService.facilityMeters.subscribe(val => {
@@ -60,8 +61,14 @@ export class ImportMeterWizardComponent implements OnInit {
           let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
           for (var i = 1; i < lines.length; i++) {
             let currentLine: Array<string> = lines[i].split(",");
-            let lineHasData = currentLine.find(lineItem => {return lineItem != '' && lineItem != undefined});
-            if(lineHasData){
+            let lineHasData = currentLine.find(lineItem => {
+              if (lineItem) {
+                let lineItemCopy = JSON.parse(JSON.stringify(lineItem));
+                let test = lineItemCopy.replace(/\s/g, '');
+                return test.length != 0
+              }
+            });
+            if (lineHasData) {
               let newImportMeter: IdbUtilityMeter = this.getNewMeterFromCurrentLine(currentLine, selectedFacility);
               this.importMeters.push(newImportMeter);
               this.skipMeters.push(false);
@@ -133,19 +140,9 @@ export class ImportMeterWizardComponent implements OnInit {
   }
 
 
-  runImport() {
+  async runImport() {
     this.loadingService.setLoadingStatus(true);
-    this.loadingService.setLoadingMessage("Adding Meters...");
-    this.checkImportMeterGroups();
-    this.setGroupIds();
-    this.addMeters();
-    this.utilityMeterdbService.setAccountMeters();
-    this.utilityMeterdbService.setFacilityMeters();
-    this.loadingService.setLoadingStatus(false);
-    this.resetImport();
-  }
-
-  async checkImportMeterGroups() {
+    this.loadingService.setLoadingMessage("Importing Meters...");
     let facilityMeterGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupdbService.facilityMeterGroups.getValue();
     let uniqNeededGroups: Array<IdbUtilityMeterGroup> = new Array();
 
@@ -168,20 +165,9 @@ export class ImportMeterWizardComponent implements OnInit {
     await uniqNeededGroups.forEach(neededGroup => {
       this.utilityMeterGroupdbService.addFromImport(neededGroup);
     });
+    
     this.utilityMeterGroupdbService.setFacilityMeterGroups();
-  }
-
-  setGroupIds() {
-    let facilityGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupdbService.facilityMeterGroups.getValue()
-    this.importMeters.forEach(meter => {
-      let existingGroup: IdbUtilityMeterGroup = facilityGroups.find(meterGroup => { return meterGroup.name == meter.group });
-      if (existingGroup) {
-        meter.groupId = existingGroup.id;
-      }
-    });
-  }
-
-  async addMeters() {
+    this.setGroupIds();
     await this.importMeters.forEach((importMeter: IdbUtilityMeter, index: number) => {
       if (this.skipMeters[index] == false) {
         //check if meter already exists (same name)
@@ -190,12 +176,50 @@ export class ImportMeterWizardComponent implements OnInit {
           //update existing meter with form from import meter
           let form: FormGroup = this.editMeterFormService.getFormFromMeter(importMeter);
           facilityMeter = this.editMeterFormService.updateMeterFromForm(facilityMeter, form);
+          facilityMeter.energyUnit = this.getMeterEnergyUnit(form);
           //update
           this.utilityMeterdbService.updateWithObservable(facilityMeter);
         } else {
           //add
+          let form: FormGroup = this.editMeterFormService.getFormFromMeter(importMeter);
+          importMeter.energyUnit = this.getMeterEnergyUnit(form);
           this.utilityMeterdbService.addWithObservable(importMeter);
         }
+      }
+    });
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    this.utilityMeterdbService.getAllByIndexRange('facilityId', selectedFacility.id).subscribe(facilityMeters => {
+      this.utilityMeterdbService.facilityMeters.next(facilityMeters);
+      let selectedAccount: IdbAccount = this.accountdbService.selectedAccount.getValue();
+      this.utilityMeterdbService.getAllByIndexRange('accountId', selectedAccount.id).subscribe(facilityMeters => {
+        this.utilityMeterdbService.accountMeters.next(facilityMeters);
+        this.loadingService.setLoadingStatus(false);
+        this.resetImport();
+      });
+    });
+  }
+
+  getMeterEnergyUnit(meterForm: FormGroup): string {
+    let isEnergyUnit: boolean = this.energyUnitsHelperService.isEnergyUnit(meterForm.controls.startingUnit.value);
+    if (isEnergyUnit) {
+      return meterForm.controls.startingUnit.value;
+    } else {
+      let isEnergyMeter: boolean = this.energyUnitsHelperService.isEnergyMeter(meterForm.controls.source.value);
+      if (isEnergyMeter) {
+        let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+        return selectedFacility.energyUnit;
+      } else {
+        return undefined;
+      }
+    }
+  }
+
+  setGroupIds() {
+    let facilityGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupdbService.facilityMeterGroups.getValue()
+    this.importMeters.forEach(meter => {
+      let existingGroup: IdbUtilityMeterGroup = facilityGroups.find(meterGroup => { return meterGroup.name == meter.group });
+      if (existingGroup) {
+        meter.groupId = existingGroup.id;
       }
     });
   }

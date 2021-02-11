@@ -99,9 +99,10 @@
 
 <div class="window" [class.open]="showImport">
     <div class="windowOverlay"></div>
-    <div class="windowContent">
-        <app-import-meter-data *ngIf="showImport" (emitClose)="closeImportModal()">
-        </app-import-meter-data>
+    <div class="windowContent importMeterWindowContent">
+        <!-- <app-import-meter-data *ngIf="showImport" (emitClose)="closeImportModal()">
+        </app-import-meter-data> -->
+        <app-import-meter-data-wizard *ngIf="showImport" (emitClose)="closeImportModal()"></app-import-meter-data-wizard>
     </div>
 </div>
 <!--individual delete-->

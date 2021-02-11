@@ -61,16 +61,19 @@ export class UtilityMeterDataService {
 
   getElectricityMeterDataForm(meterData: IdbUtilityMeterData): FormGroup {
     //need to use date string for calander to work in form
-    let datePipe: DatePipe = new DatePipe(navigator.language);
-    let stringFormat: string = 'y-MM-dd'; // YYYY-MM-DD
-    let dateString: string = datePipe.transform(meterData.readDate, stringFormat);
+    let dateString: string;
+    if (meterData.readDate) {
+      let datePipe: DatePipe = new DatePipe(navigator.language);
+      let stringFormat: string = 'y-MM-dd'; // YYYY-MM-DD  
+      dateString = datePipe.transform(meterData.readDate, stringFormat);
+    }
     return this.formBuilder.group({
       readDate: [dateString, Validators.required],
       totalEnergyUse: [meterData.totalEnergyUse, [Validators.required, Validators.min(0)]],
-      totalCost: [meterData.totalCost, [Validators.required, Validators.min(0)]],
+      totalCost: [meterData.totalCost],
       deliveryCharge: [meterData.deliveryCharge],
       otherCharge: [meterData.otherCharge],
-      totalDemand: [meterData.totalDemand, [Validators.required, Validators.min(0)]],
+      totalDemand: [meterData.totalDemand],
       basicCharge: [meterData.basicCharge],
       supplyBlockAmount: [meterData.supplyBlockAmount],
       supplyBlockCharge: [meterData.supplyBlockCharge],
@@ -124,9 +127,12 @@ export class UtilityMeterDataService {
 
   getGeneralMeterDataForm(meterData: IdbUtilityMeterData, displayVolumeInput: boolean, displayEnergyInput: boolean): FormGroup {
     //need to use date string for calander to work in form 
-    let datePipe: DatePipe = new DatePipe(navigator.language);
-    let stringFormat: string = 'y-MM-dd'; // YYYY-MM-DD
-    let dateString: string = datePipe.transform(meterData.readDate, stringFormat);
+    let dateString: string;
+    if (meterData.readDate) {
+      let datePipe: DatePipe = new DatePipe(navigator.language);
+      let stringFormat: string = 'y-MM-dd'; // YYYY-MM-DD  
+      dateString = datePipe.transform(meterData.readDate, stringFormat);
+    }
     let totalVolumeValidators: Array<ValidatorFn> = [];
     if (displayVolumeInput) {
       totalVolumeValidators = [Validators.required, Validators.min(0)]
@@ -139,7 +145,7 @@ export class UtilityMeterDataService {
       readDate: [dateString, Validators.required],
       totalVolume: [meterData.totalVolume, totalVolumeValidators],
       totalEnergyUse: [meterData.totalEnergyUse, totalEnergyUseValidators],
-      totalCost: [meterData.totalCost, [Validators.required, Validators.min(0)]],
+      totalCost: [meterData.totalCost],
       commodityCharge: [meterData.commodityCharge],
       deliveryCharge: [meterData.deliveryCharge],
       otherCharge: [meterData.otherCharge],

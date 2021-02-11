@@ -35,7 +35,6 @@ import { ElectricityDataTableComponent } from './utility/energy-consumption/util
 import { GeneralUtilityDataTableComponent } from './utility/energy-consumption/utility-meter-data/general-utility-data-table/general-utility-data-table.component';
 import { EditUtilityBillComponent } from './utility/energy-consumption/utility-meter-data/edit-utility-bill/edit-utility-bill.component';
 import { EditElectricityBillComponent } from './utility/energy-consumption/utility-meter-data/edit-electricity-bill/edit-electricity-bill.component';
-import { ImportMeterDataComponent } from './utility/energy-consumption/utility-meter-data/import-meter-data/import-meter-data.component';
 import { MeterGroupingComponent } from './utility/meter-grouping/meter-grouping.component';
 import { EditMeterGroupFormComponent } from './utility/meter-grouping/edit-meter-group-form/edit-meter-group-form.component';
 
@@ -65,6 +64,9 @@ import { PageNotFoundComponent } from './page-not-found/page-not-found.component
 import { ImportMeterWizardComponent } from './utility/energy-consumption/energy-source/import-meter-wizard/import-meter-wizard.component';
 import { EditMeterComponent } from './utility/energy-consumption/energy-source/edit-meter/edit-meter.component';
 import { OrderByPipe } from './shared/helper-pipes/order-by.pipe';
+import { ImportMeterDataWizardComponent } from './utility/energy-consumption/utility-meter-data/import-meter-data-wizard/import-meter-data-wizard.component';
+import { ValidDataTableComponent } from './utility/energy-consumption/utility-meter-data/import-meter-data-wizard/valid-data-table/valid-data-table.component';
+import { MissingMeterNumberTableComponent } from './utility/energy-consumption/utility-meter-data/import-meter-data-wizard/missing-meter-number-table/missing-meter-number-table.component';
 
 @NgModule({
   declarations: [
@@ -88,7 +90,6 @@ import { OrderByPipe } from './shared/helper-pipes/order-by.pipe';
     GeneralUtilityDataTableComponent,
     EditUtilityBillComponent,
     EditElectricityBillComponent,
-    ImportMeterDataComponent,
     MeterGroupingComponent,
     EditMeterGroupFormComponent,
     PredictorDataComponent,
@@ -115,7 +116,10 @@ import { OrderByPipe } from './shared/helper-pipes/order-by.pipe';
     PageNotFoundComponent,
     ImportMeterWizardComponent,
     EditMeterComponent,
-    OrderByPipe
+    OrderByPipe,
+    ImportMeterDataWizardComponent,
+    ValidDataTableComponent,
+    MissingMeterNumberTableComponent
   ],
   imports: [
     BrowserModule,

@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ImportMeterDataComponent } from './import-meter-data.component';
+import { ValidDataTableComponent } from './valid-data-table.component';
 
-describe('ImportMeterDataComponent', () => {
-  let component: ImportMeterDataComponent;
-  let fixture: ComponentFixture<ImportMeterDataComponent>;
+describe('ValidDataTableComponent', () => {
+  let component: ValidDataTableComponent;
+  let fixture: ComponentFixture<ValidDataTableComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ ImportMeterDataComponent ]
+      declarations: [ ValidDataTableComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(ImportMeterDataComponent);
+    fixture = TestBed.createComponent(ValidDataTableComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
