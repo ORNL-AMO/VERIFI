@@ -1,7 +1,7 @@
 <h4>Import Meter Data <span *ngIf="importMeterDataFileType">(File Type: {{importMeterDataFileType}})</span></h4>
 <br>
 <form>
-    <input type="file" #inputFile accept=".csv" (change)="meterDataImport($event.target.files)">
+    <input type="file" #inputFile accept=".csv" (input)="meterDataImport($event.target.files)">
 </form>
 <br>
 
@@ -57,6 +57,13 @@
                 <span class="badge badge-danger">
                     {{invalidMeterTypesLineNumbers.length}}
                 </span> Invalid Source
+            </a>
+        </li>
+        <li class="nav-item" *ngIf="duplicateEntries.length != 0">
+            <a class="nav-link" [ngClass]="{'active': selectedTab == 'duplicates'}" (click)="setTab('duplicates')">
+                <span class="badge badge-danger">
+                    {{duplicateEntries.length}}
+                </span> Duplicate Entries
             </a>
         </li>
     </ul>
@@ -135,13 +142,47 @@
     <!--Missing Meter #-->
     <div class="d-flex flex-column" *ngIf="selectedTab == 'missingMeterNumber'">
         <p class="alert alert-warning p-2 text-center">
-            The following line numbers from the uploaded .csv do not have a meter that corresponds to their meter
-            number.
+            The following line numbers from the uploaded .csv do not have a meter number that corresponds to an existing
+            meter number.
         </p>
         <app-missing-meter-number-table [(missingMeterNumberBounds)]="missingMeterNumberBounds"
             (submit)="submitMissingMeterNumberUpdates()" [importMeterDataFileType]="importMeterDataFileType"
             [showMeterDropdown]="true">
         </app-missing-meter-number-table>
+    </div>
+
+
+    <!--Missing Meter #-->
+    <div class="d-flex flex-column" *ngIf="selectedTab == 'duplicates'">
+        <p class="alert alert-danger p-2 text-center">
+            The following are duplicate entries for the same meters. These entries will be ignored by the import.
+        </p>
+        <table class="table table-sm">
+            <thead>
+                <tr>
+                    <th class="w-25">
+                        Date
+                    </th>
+                    <th class="w-25">
+                        Meter
+                    </th>
+                    <th class="w-50">
+                        Line Numbers
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let entry of duplicateEntries">
+                    <td>{{entry.date | date: 'MMM, y'}}</td>
+                    <td>{{entry.idbMeter.name}}</td>
+                    <td>
+                        <span *ngFor="let lineNumber of entry.lineNumbers">
+                            {{lineNumber}};
+                        </span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 
     <!-- <div class="pull-right">

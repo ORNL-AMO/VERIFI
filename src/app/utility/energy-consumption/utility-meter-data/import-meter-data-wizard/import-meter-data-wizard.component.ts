@@ -34,6 +34,11 @@ export class ImportMeterDataWizardComponent implements OnInit {
   invalidMeterTypesLineNumbers: Array<number>;
   invalidMeterTypeBounds: Array<{ start: number, end: number, selectedMeter: IdbUtilityMeter }>;
 
+  uniqNewAndExistingEntries: Array<{ readingData: IdbUtilityMeterData, meterDataForm: FormGroup, idbMeter: IdbUtilityMeter, lineNumber: number }>;
+
+  duplicateEntries: Array<{ date: Date, idbMeter: IdbUtilityMeter, lineNumbers: Array<number> }>;
+
+
   facilityMeters: Array<IdbUtilityMeter>;
   selectedTab: string = 'valid';
   importDataExists: boolean;
@@ -47,6 +52,7 @@ export class ImportMeterDataWizardComponent implements OnInit {
   }
 
   meterDataImport(files: FileList) {
+    this.initializeArrays();
     if (files && files.length > 0) {
       let file: File = files.item(0);
       let reader: FileReader = new FileReader();
@@ -57,16 +63,13 @@ export class ImportMeterDataWizardComponent implements OnInit {
         let headers: Array<string> = lines[0].replace('\r', '').split(",");
         let electricityHeaders: Array<string> = ["Meter Number", "Read Date", "Total Energy", "Total Demand", "Total Cost", "Basic Charge", "Supply Block Amount", "Supply Block Charge", "Flat Rate Amount", "Flat Rate Charge", "Peak Amount", "Peak Charge", "Off Peak Amount", "Off Peak Charge", "Demand Block Amount", "Demand Block Charge", "Generation and Transmission Charge", "Delivery Charge", "Transmission Charge", "Power Factor Charge", "Local Business Charge", "Local Utility Tax", "Late Payment", "Other Charge"];
         let nonElectricityHeaders: Array<string> = ["Meter Number", "Read Date", "Total Consumption", "Total Cost", "Commodity Charge", "Delivery Charge", "Other Charge"];
-
         if (JSON.stringify(headers) === JSON.stringify(electricityHeaders)) {
           this.importMeterDataFileType = 'Electricity';
-          this.initializeArrays();
           this.importError = false;
           this.parseImportCsvData(lines);
           this.importDataExists = true;
         } else if (JSON.stringify(headers) === JSON.stringify(nonElectricityHeaders)) {
           this.importMeterDataFileType = 'Non Electricity';
-          this.initializeArrays();
           this.importError = false;
           this.parseImportCsvData(lines);
           this.importDataExists = true;
@@ -85,6 +88,8 @@ export class ImportMeterDataWizardComponent implements OnInit {
     this.missingMeterNumberLineNumbers = new Array();
     this.validNewReadings = new Array();
     this.invalidMeterTypesLineNumbers = new Array();
+    this.duplicateEntries = new Array();
+    this.uniqNewAndExistingEntries = new Array();
   }
 
   parseImportCsvData(lines: Array<string>) {
@@ -110,6 +115,8 @@ export class ImportMeterDataWizardComponent implements OnInit {
         this.parseMeterReading(currentLine, i);
       }
     }
+    this.checkDuplicateEntries();
+    this.splitExistingAndNewReadings();
     this.setMissingMeterDataBounds();
     this.setInvalidMeterTypeBounds();
     this.setExistingData();
@@ -140,7 +147,7 @@ export class ImportMeterDataWizardComponent implements OnInit {
       let electricityMeterDataObj: IdbUtilityMeterData = this.getElectricityMeterDataObject(idbMeter, currentLine);
       let meterDataForm: FormGroup = this.utilityMeterDataService.getElectricityMeterDataForm(electricityMeterDataObj);
       if (meterDataForm.valid) {
-        this.addMeterReading(electricityMeterDataObj, meterDataForm, idbMeter);
+        this.addMeterReading(electricityMeterDataObj, meterDataForm, idbMeter, lineNumber);
       } else {
         this.addInvalidReading(meterDataForm, lineNumber);
       }
@@ -152,27 +159,36 @@ export class ImportMeterDataWizardComponent implements OnInit {
       let nonElectricityMeterDataObj: IdbUtilityMeterData = this.getOtherSourceMeterDataObject(idbMeter, currentLine, displayVolumeInput, displayEnergyUse);
       let meterDataForm: FormGroup = this.utilityMeterDataService.getGeneralMeterDataForm(nonElectricityMeterDataObj, displayVolumeInput, displayEnergyUse);
       if (meterDataForm.valid) {
-        this.addMeterReading(nonElectricityMeterDataObj, meterDataForm, idbMeter);
+        this.addMeterReading(nonElectricityMeterDataObj, meterDataForm, idbMeter, lineNumber);
       } else {
         this.addInvalidReading(meterDataForm, lineNumber);
       }
     }
   }
 
-  addMeterReading(readingData: IdbUtilityMeterData, meterDataForm: FormGroup, idbMeter: IdbUtilityMeter) {
-    //check reading exists for month/year (update vs add)
-    let existingReadingForMonth: IdbUtilityMeterData = this.utilityMeterDataDbService.checkMeterReadingExistForDate(readingData.readDate, idbMeter);
-    if (existingReadingForMonth) {
-      let updatedReading: IdbUtilityMeterData;
-      if (idbMeter.source == 'Electricity') {
-        updatedReading = this.utilityMeterDataService.updateElectricityMeterDataFromForm(existingReadingForMonth, meterDataForm);
+  addMeterReading(readingData: IdbUtilityMeterData, meterDataForm: FormGroup, idbMeter: IdbUtilityMeter, lineNumber: number) {
+    this.uniqNewAndExistingEntries.push({ readingData: readingData, meterDataForm: meterDataForm, idbMeter: idbMeter, lineNumber: lineNumber });
+  }
+
+
+  splitExistingAndNewReadings() {
+    this.validExistingReadings = new Array();
+    this.validNewReadings = new Array();
+    this.uniqNewAndExistingEntries.forEach(entry => {
+      //check reading exists for month/year (update vs add)
+      let existingReadingForMonth: IdbUtilityMeterData = this.utilityMeterDataDbService.checkMeterReadingExistForDate(entry.readingData.readDate, entry.idbMeter);
+      if (existingReadingForMonth) {
+        let updatedReading: IdbUtilityMeterData;
+        if (entry.idbMeter.source == 'Electricity') {
+          updatedReading = this.utilityMeterDataService.updateElectricityMeterDataFromForm(existingReadingForMonth, entry.meterDataForm);
+        } else {
+          updatedReading = this.utilityMeterDataService.updateGeneralMeterDataFromForm(existingReadingForMonth, entry.meterDataForm);
+        }
+        this.validExistingReadings.push(updatedReading);
       } else {
-        updatedReading = this.utilityMeterDataService.updateGeneralMeterDataFromForm(existingReadingForMonth, meterDataForm);
+        this.validNewReadings.push(entry.readingData);
       }
-      this.validExistingReadings.push(updatedReading);
-    } else {
-      this.validNewReadings.push(readingData);
-    }
+    })
   }
 
   addInvalidReading(form: FormGroup, lineNumber: number) {
@@ -404,4 +420,56 @@ export class ImportMeterDataWizardComponent implements OnInit {
       });
     });
   }
+
+  checkDuplicateEntries() {
+    let duplicateEntries: Array<{ readingData: IdbUtilityMeterData, meterDataForm: FormGroup, idbMeter: IdbUtilityMeter, lineNumber: number }> = new Array();
+
+    this.uniqNewAndExistingEntries = this.uniqNewAndExistingEntries.filter((existingReading, index) => {
+      let duplicates = this.uniqNewAndExistingEntries.filter((entry) => {
+        return (this.utilityMeterDataDbService.checkSameMonthYear(new Date(entry.readingData.readDate), existingReading.readingData) && existingReading.idbMeter.id == entry.idbMeter.id);
+      });
+      if (duplicates.length > 1) {
+        duplicateEntries.push(existingReading);
+      }
+      if (duplicates.length == 1) {
+        return true;
+      }
+    });
+
+
+    this.duplicateEntries = new Array();
+    duplicateEntries.forEach(entry => {
+      let checkExistIndex: number = this.duplicateEntries.findIndex(duplicateEntry => {
+        return (this.utilityMeterDataDbService.checkSameMonthYear(new Date(duplicateEntry.date), entry.readingData) && duplicateEntry.idbMeter.id == entry.idbMeter.id);
+      });
+      if(checkExistIndex > -1){
+        this.duplicateEntries[checkExistIndex].lineNumbers.push(entry.lineNumber);
+      }else{
+        this.duplicateEntries.push({
+          date: new Date(entry.readingData.readDate),
+          idbMeter: entry.idbMeter,
+          lineNumbers: [entry.lineNumber]
+        });
+      }
+    })
+
+    // let counts = _.countBy(duplicateEntries, (item) => {
+    //   let readDate: Date = new Date(item.readingData.readDate);
+    //   return new Date(readDate.getUTCFullYear(), readDate.getUTCMonth());
+    // });
+
+    // Object.keys(counts).forEach((key, index) => {
+    //   let countDate: Date = new Date(key);
+    //   let lineNumbers: Array<number> = new Array();
+    //   this.allImportDataLines.forEach((line: Array<string>, index: number) => {
+    //     let entryDate: Date = new Date(line[1]);
+    //     if (entryDate.getUTCFullYear() == countDate.getUTCFullYear() && entryDate.getUTCMonth() == countDate.getUTCMonth()) {
+    //       lineNumbers.push(index + 1);
+    //     }
+    //   });
+    //   console.log(countDate);
+    //   console.log(lineNumbers);
+    // });
+  }
+
 }

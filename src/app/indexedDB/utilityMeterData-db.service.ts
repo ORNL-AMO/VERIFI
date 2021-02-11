@@ -178,10 +178,14 @@ export class UtilityMeterDatadbService {
         let newDate: Date = new Date(date);
         let allSelectedMeterData: Array<IdbUtilityMeterData> = this.getMeterDataForFacility(meter);
         let existingData: IdbUtilityMeterData = allSelectedMeterData.find(dataItem => {
-            let dataItemDate: Date = new Date(dataItem.readDate);
-            return (dataItemDate.getUTCMonth() == newDate.getUTCMonth()) && (dataItemDate.getUTCFullYear() == newDate.getUTCFullYear());
+            return this.checkSameMonthYear(newDate, dataItem);
         });
         return existingData;
+    }
+
+    checkSameMonthYear(date: Date, dataItem: IdbUtilityMeterData): boolean {
+        let dataItemDate: Date = new Date(dataItem.readDate);
+        return (dataItemDate.getUTCMonth() == date.getUTCMonth()) && (dataItemDate.getUTCFullYear() == date.getUTCFullYear());
     }
 
     private getMeterDataFromMeterId(meterId: number): Array<IdbUtilityMeterData> {
