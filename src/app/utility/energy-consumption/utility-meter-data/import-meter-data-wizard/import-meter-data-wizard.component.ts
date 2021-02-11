@@ -54,7 +54,6 @@ export class ImportMeterDataWizardComponent implements OnInit {
   }
 
   meterDataImport(files: FileList) {
-    console.log('import');
     this.initializeArrays();
     if (files && files.length > 0) {
       let file: File = files.item(0);
@@ -356,13 +355,7 @@ export class ImportMeterDataWizardComponent implements OnInit {
     this.setMissingMeterDataBounds();
     this.setExistingData();
     this.setNewData();
-    if (this.missingMeterNumberLineNumbers.length == 0) {
-      if (this.validExistingReadings.length != 0) {
-        this.setTab('valid');
-      } else {
-        this.setTab('existing');
-      }
-    }
+    this.setTab('valid');
   }
 
   setExistingData() {
@@ -447,9 +440,9 @@ export class ImportMeterDataWizardComponent implements OnInit {
       let checkExistIndex: number = this.duplicateEntries.findIndex(duplicateEntry => {
         return (this.utilityMeterDataDbService.checkSameMonthYear(new Date(duplicateEntry.date), entry.readingData) && duplicateEntry.idbMeter.id == entry.idbMeter.id);
       });
-      if(checkExistIndex > -1){
+      if (checkExistIndex > -1) {
         this.duplicateEntries[checkExistIndex].lineNumbers.push(entry.lineNumber);
-      }else{
+      } else {
         this.duplicateEntries.push({
           date: new Date(entry.readingData.readDate),
           idbMeter: entry.idbMeter,
@@ -459,7 +452,7 @@ export class ImportMeterDataWizardComponent implements OnInit {
     });
   }
 
-  reset(){
+  reset() {
     this.inputFile = undefined;
     this.importError = undefined;
     this.importDataExists = false;

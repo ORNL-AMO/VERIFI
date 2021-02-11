@@ -176,10 +176,13 @@ export class ImportMeterWizardComponent implements OnInit {
           //update existing meter with form from import meter
           let form: FormGroup = this.editMeterFormService.getFormFromMeter(importMeter);
           facilityMeter = this.editMeterFormService.updateMeterFromForm(facilityMeter, form);
+          facilityMeter.energyUnit = this.getMeterEnergyUnit(form);
           //update
           this.utilityMeterdbService.updateWithObservable(facilityMeter);
         } else {
           //add
+          let form: FormGroup = this.editMeterFormService.getFormFromMeter(importMeter);
+          importMeter.energyUnit = this.getMeterEnergyUnit(form);
           this.utilityMeterdbService.addWithObservable(importMeter);
         }
       }
@@ -194,6 +197,21 @@ export class ImportMeterWizardComponent implements OnInit {
         this.resetImport();
       });
     });
+  }
+
+  getMeterEnergyUnit(meterForm: FormGroup): string {
+    let isEnergyUnit: boolean = this.energyUnitsHelperService.isEnergyUnit(meterForm.controls.startingUnit.value);
+    if (isEnergyUnit) {
+      return meterForm.controls.startingUnit.value;
+    } else {
+      let isEnergyMeter: boolean = this.energyUnitsHelperService.isEnergyMeter(meterForm.controls.source.value);
+      if (isEnergyMeter) {
+        let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+        return selectedFacility.energyUnit;
+      } else {
+        return undefined;
+      }
+    }
   }
 
   setGroupIds() {
