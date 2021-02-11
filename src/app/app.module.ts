@@ -35,7 +35,6 @@ import { ElectricityDataTableComponent } from './utility/energy-consumption/util
 import { GeneralUtilityDataTableComponent } from './utility/energy-consumption/utility-meter-data/general-utility-data-table/general-utility-data-table.component';
 import { EditUtilityBillComponent } from './utility/energy-consumption/utility-meter-data/edit-utility-bill/edit-utility-bill.component';
 import { EditElectricityBillComponent } from './utility/energy-consumption/utility-meter-data/edit-electricity-bill/edit-electricity-bill.component';
-import { ImportMeterDataComponent } from './utility/energy-consumption/utility-meter-data/import-meter-data/import-meter-data.component';
 import { MeterGroupingComponent } from './utility/meter-grouping/meter-grouping.component';
 import { EditMeterGroupFormComponent } from './utility/meter-grouping/edit-meter-group-form/edit-meter-group-form.component';
 
@@ -91,7 +90,6 @@ import { MissingMeterNumberTableComponent } from './utility/energy-consumption/u
     GeneralUtilityDataTableComponent,
     EditUtilityBillComponent,
     EditElectricityBillComponent,
-    ImportMeterDataComponent,
     MeterGroupingComponent,
     EditMeterGroupFormComponent,
     PredictorDataComponent,
