@@ -67,6 +67,7 @@ import { OrderByPipe } from './shared/helper-pipes/order-by.pipe';
 import { ImportMeterDataWizardComponent } from './utility/energy-consumption/utility-meter-data/import-meter-data-wizard/import-meter-data-wizard.component';
 import { ValidDataTableComponent } from './utility/energy-consumption/utility-meter-data/import-meter-data-wizard/valid-data-table/valid-data-table.component';
 import { MissingMeterNumberTableComponent } from './utility/energy-consumption/utility-meter-data/import-meter-data-wizard/missing-meter-number-table/missing-meter-number-table.component';
+import { UploadDataComponent } from './utility/upload-data/upload-data.component';
 
 @NgModule({
   declarations: [
@@ -119,7 +120,8 @@ import { MissingMeterNumberTableComponent } from './utility/energy-consumption/u
     OrderByPipe,
     ImportMeterDataWizardComponent,
     ValidDataTableComponent,
-    MissingMeterNumberTableComponent
+    MissingMeterNumberTableComponent,
+    UploadDataComponent
   ],
   imports: [
     BrowserModule,

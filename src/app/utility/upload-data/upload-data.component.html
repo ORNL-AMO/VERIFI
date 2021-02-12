@@ -1,0 +1,16 @@
+<div class="wrapper main-content">
+    <h4>Upload Data Files</h4>
+    <p>Select the method you want to use to upload data.</p>
+
+    <div class="card mt-5">
+        <div class="card-body">
+            <h5 class="card-title">Upload File</h5>
+            <div class="input-group">
+                <div class="custom-file">
+                    <input type="file" class="custom-file-input" id="meterTemplate" accept=".csv" (input)="setImportFile($event.target.files)">
+                    <label class="custom-file-label" for="meterTemplate">Choose file</label>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
