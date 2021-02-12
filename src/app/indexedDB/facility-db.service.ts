@@ -136,8 +136,11 @@ export class FacilitydbService {
             accountId: account.id,
             name: 'New Facility',
             country: undefined,
+            city: undefined,
             state: undefined,
+            zip: undefined,
             address: undefined,
+            naics: '',
             type: undefined,
             size: undefined,
             units: undefined,
@@ -171,7 +174,10 @@ export class FacilitydbService {
                 waterReductionPercent: 0,
                 waterReductionBaselineYear: 0,
                 waterReductionTargetYear: 0,
-            }
+            },
+            fiscalYear: 'calendarYear',
+            fiscalYearMonth: 'January',
+            fiscalYearCalendarEnd: true,
 
         }
     }
@@ -186,7 +192,10 @@ export const TestFacilityData: Array<IdbFacility> = [
         name: 'Crunch-a-tize',
         country: 'USA',
         state: 'TN',
+        city: undefined,
+        zip: undefined,
         address: '',
+        naics: '',
         type: 'Breakfast',
         size: 1000,
         units: 'ft',
@@ -219,7 +228,10 @@ export const TestFacilityData: Array<IdbFacility> = [
             waterReductionPercent: 0,
             waterReductionBaselineYear: 0,
             waterReductionTargetYear: 0,
-        }
+        },
+        fiscalYear: 'calendarYear',
+        fiscalYearMonth: 'January',
+        fiscalYearCalendarEnd: true,
     },
     {
         // id: undefined,
@@ -228,7 +240,10 @@ export const TestFacilityData: Array<IdbFacility> = [
         name: 'Frosted Side',
         country: 'USA',
         state: 'TN',
+        city: undefined,
+        zip: undefined,
         address: '',
+        naics: '',
         type: 'Breakfast',
         size: 1000,
         units: 'ft',
@@ -261,7 +276,10 @@ export const TestFacilityData: Array<IdbFacility> = [
             waterReductionPercent: 0,
             waterReductionBaselineYear: 0,
             waterReductionTargetYear: 0,
-        }
+        },
+        fiscalYear: 'calendarYear',
+        fiscalYearMonth: 'January',
+        fiscalYearCalendarEnd: true,
     },
     {
         // id: undefined,
@@ -270,7 +288,10 @@ export const TestFacilityData: Array<IdbFacility> = [
         name: 'Plain Side',
         country: 'USA',
         state: 'TN',
+        city: undefined,
+        zip: undefined,
         address: '',
+        naics: '',
         type: 'Breakfast',
         size: 1000,
         units: 'ft',
@@ -303,7 +324,10 @@ export const TestFacilityData: Array<IdbFacility> = [
             waterReductionPercent: 0,
             waterReductionBaselineYear: 0,
             waterReductionTargetYear: 0,
-        }
+        },
+        fiscalYear: 'calendarYear',
+        fiscalYearMonth: 'January',
+        fiscalYearCalendarEnd: true,
     },
     {
         // id: undefined,
@@ -312,7 +336,10 @@ export const TestFacilityData: Array<IdbFacility> = [
         name: 'Almond Milk',
         country: 'USA',
         state: 'TN',
+        city: undefined,
+        zip: undefined,
         address: '',
+        naics: '',
         type: 'Breakfast',
         size: 10,
         units: 'ft',
@@ -345,6 +372,9 @@ export const TestFacilityData: Array<IdbFacility> = [
             waterReductionPercent: 0,
             waterReductionBaselineYear: 0,
             waterReductionTargetYear: 0,
-        }
+        },
+        fiscalYear: 'calendarYear',
+        fiscalYearMonth: 'January',
+        fiscalYearCalendarEnd: true,
     }
 ]

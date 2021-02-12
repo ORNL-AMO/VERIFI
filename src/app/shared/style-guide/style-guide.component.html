@@ -52,6 +52,19 @@
             <p>Body Text</p>
             <p>Lorem <span class="red">red</span> dolor sit <span class="green">green</span>, consectetur adipiscing <a>Link</a>, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
             
+            <h6>Tooltips</h6>
+            <div class="tooltip-box">
+                <p class="tooltip up">Tooltip Up<span class="arrow arrow-up"></span></p>
+            </div>
+            <div class="tooltip-box">
+                <p class="tooltip down">Tooltip Down<span class="arrow arrow-down"></span></p>
+            </div>
+            <div class="tooltip-box">
+                <p class="tooltip left">Tooltip Left<span class="arrow arrow-left"></span></p>
+            </div>
+            <div class="tooltip-box">
+                <p class="tooltip right">Tooltip Right<span class="arrow arrow-right"></span></p>
+            </div>
         </div>
         <div class="col">
             <h6>Alerts</h6>
@@ -104,46 +117,49 @@
             <br>
 
             <h6>Tables</h6>
-            <table>
-                <tr>
-                    <th>Header</th>
-                    <th>Header</th>
-                    <th>Header</th>
-                    <th>Header</th>
-                </tr>
-                <tr>
-                    <td>0</td><td>0</td><td>0</td><td>0</td>
-                </tr>
-                <tr>
-                    <td>0</td><td>0</td><td>0</td><td>0</td>
-                </tr>
+            <table class="table table-sm table-striped table-hover">
+                <thead>
+                    <tr class="table-mh">
+                        <th colspan=2>Header</th>
+                        <th colspan=2>Header</th>
+                    </tr>
+                    <tr>
+                        <th>Header</th>
+                        <th>Header</th>
+                        <th>Header</th>
+                        <th>Header</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>0</td><td>0</td><td>0</td><td>0</td>
+                    </tr>
+                    <tr>
+                        <td>0</td><td>0</td><td>0</td><td>0</td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td>0</td><td>0</td><td>0</td><td>0</td>
+                    </tr>
+                </tfoot>
             </table>
             <br>
 
             <h6>Switches</h6>
-            <label class="switch">
-                <input type="checkbox" checked>
-                <span class="slider round"></span>
-            </label>
-            <br>
-            <label class="switch">
-                <input type="checkbox">
-                <span class="slider round"></span>
-            </label>
-            <br>
-
-            <h6>Tooltips</h6>
-            <div class="tooltip-box">
-                <p class="tooltip up">Tooltip Up<span class="arrow arrow-up"></span></p>
-            </div>
-            <div class="tooltip-box">
-                <p class="tooltip down">Tooltip Down<span class="arrow arrow-down"></span></p>
-            </div>
-            <div class="tooltip-box">
-                <p class="tooltip left">Tooltip Left<span class="arrow arrow-left"></span></p>
-            </div>
-            <div class="tooltip-box">
-                <p class="tooltip right">Tooltip Right<span class="arrow arrow-right"></span></p>
+            <div class="row">
+                <div class="col-2">
+                    <label class="switch">
+                        <input type="checkbox" checked>
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="col-2">
+                    <label class="switch">
+                        <input type="checkbox">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
             </div>
         </div>
     </div>
@@ -175,18 +191,31 @@
                 </label>
             </div>
             <div class="col">
-                <label>Input Unit
-                    <span class="unit">$</span>
-                    <input class="unitDollar" type="text" placeholder="123">
-                </label>
-                <label>Input Disabled
-                    <input type="text" placeholder="123" disabled>
-                </label>
-                <label>Select
-                    <select>
-                        <option>1</option>
-                    </select>
-                </label>
+                <div class="row">
+                    <label class="col-lg-4">Input Unit</label>
+                    <div class="input-group mb-1 col">
+                        <input class="form-control" type="text" placeholder="123">
+                        <span class="unit">$</span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-4">
+                        <label>Input Disabled</label>
+                    </div>
+                    <div class="col mb-1">
+                        <input type="text" class="form-control" placeholder="123" disabled>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-4">
+                        <label>Select</label>
+                    </div>
+                    <div class="col mb-1">
+                        <select>
+                            <option>1</option>
+                        </select>
+                    </div>
+                </div>
             </div>
         </div>
         <br><br>
@@ -218,23 +247,34 @@
     </form>
     <br>
 
-    <h6>Icons</h6>
-    <div>
-        <i class="fa fa-home"></i>
-        <i class="fa fa-bar-chart"></i>
-        <i class="fa fa-th"></i>
-        <i class="fa fa-area-chart"></i>
-        <i class="fa fa-list-alt"></i>
-        <i class="fa fa-question"></i>
-        <i class="fa fa-info-circle"></i>
-        <i class="fa fa-inbox"></i>
-        <i class="fa fa-trophy"></i>
-        <i class="fa fa-star"></i>
-        <i class="fa fa-fort-awesome"></i>
-        <i class="fa fa fa-calendar"></i>
-        <i class="fa fa-cog"></i>
-        <i class="fa fa-building-o"></i>
-        <i class="fa fa-user-circle-o"></i>
+    <div class="row">
+        <div class="col">
+            <h6>Icons</h6>
+            <div>
+                <i class="fa fa-home"></i>
+                <i class="fa fa-bar-chart"></i>
+                <i class="fa fa-th"></i>
+                <i class="fa fa-area-chart"></i>
+                <i class="fa fa-list-alt"></i>
+                <i class="fa fa-question"></i>
+                <i class="fa fa-info-circle"></i>
+                <i class="fa fa-inbox"></i>
+                <i class="fa fa-trophy"></i>
+                <i class="fa fa-star"></i>
+                <i class="fa fa-fort-awesome"></i>
+                <i class="fa fa fa-calendar"></i>
+                <i class="fa fa-cog"></i>
+                <i class="fa fa-building-o"></i>
+                <i class="fa fa-user-circle-o"></i>
+            </div>
+        </div>
+        <div class="col">
+            <h6>Tags</h6>
+            <div>
+                <span class="tag coming-soon">Coming Soon</span>
+                <span class="tag new">New</span>
+            </div>
+        </div>
     </div>
 </div>
 

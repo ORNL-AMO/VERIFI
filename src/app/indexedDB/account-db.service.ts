@@ -99,7 +99,12 @@ export class AccountdbService {
     getNewIdbAccount(): IdbAccount {
         return {
             name: 'New Account',
-            industry: '',
+            city: '',
+            state: '',
+            zip: 90210,
+            country: '',
+            address: '',
+            size: 0,
             naics: '000000',
             notes: '',
             img: 'https://placehold.it/50x50',
@@ -131,7 +136,10 @@ export class AccountdbService {
                 waterReductionPercent: 0,
                 waterReductionBaselineYear: 0,
                 waterReductionTargetYear: 0,
-            }
+            },
+            fiscalYear: 'calendarYear',
+            fiscalYearMonth: 'January',
+            fiscalYearCalendarEnd: true,
 
         }
     }
@@ -142,7 +150,12 @@ export const TestAccountData: Array<IdbAccount> = [
     {
         // id: undefined,
         name: 'Captain Crunch',
-        industry: 'Cereal',
+        city: '',
+        state: '',
+        zip: 90210,
+        country: '',
+        address: '',
+        size: 0,
         naics: '123456',
         notes: 'Delicious',
         img: 'https://placehold.it/50x50',
@@ -173,13 +186,21 @@ export const TestAccountData: Array<IdbAccount> = [
             waterReductionPercent: 0,
             waterReductionBaselineYear: 0,
             waterReductionTargetYear: 0,
-        }
+        },
+        fiscalYear: 'calendarYear',
+        fiscalYearMonth: 'January',
+        fiscalYearCalendarEnd: true,
 
     },
     {
         // id: undefined,
         name: 'Mini Wheets',
-        industry: 'Cereal',
+        city: '',
+        state: '',
+        zip: 90210,
+        country: '',
+        address: '',
+        size: 0,
         naics: '555555',
         notes: 'The frosted kind',
         img: 'https://placehold.it/50x50',
@@ -210,12 +231,20 @@ export const TestAccountData: Array<IdbAccount> = [
             waterReductionPercent: 0,
             waterReductionBaselineYear: 0,
             waterReductionTargetYear: 0,
-        }
+        },
+        fiscalYear: 'calendarYear',
+        fiscalYearMonth: 'January',
+        fiscalYearCalendarEnd: true,
     },
     {
         // id: undefined,
         name: 'Special K',
-        industry: 'Cereal',
+        city: '',
+        state: '',
+        zip: 90210,
+        country: '',
+        address: '',
+        size: 0,
         naics: '234567',
         notes: 'Not the worst',
         img: 'https://placehold.it/50x50',
@@ -246,6 +275,9 @@ export const TestAccountData: Array<IdbAccount> = [
             waterReductionPercent: 0,
             waterReductionBaselineYear: 0,
             waterReductionTargetYear: 0,
-        }
+        },
+        fiscalYear: 'calendarYear',
+        fiscalYearMonth: 'January',
+        fiscalYearCalendarEnd: true,
     }
 ]

@@ -130,12 +130,12 @@ export class HeaderComponent implements OnInit {
   }
 
   switchFacility(facility: IdbFacility) {
-    this.toggleFacilityMenu();
+    //this.toggleFacilityMenu();
     this.facilitydbService.selectedFacility.next(facility);
   }
 
   selectAllFacilities(){
-    this.toggleFacilityMenu();
+    //this.toggleFacilityMenu();
     this.router.navigate(['/account-summary']);
   }
 

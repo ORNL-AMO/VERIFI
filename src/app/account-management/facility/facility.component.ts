@@ -12,6 +12,7 @@ import { UtilityMeterGroupdbService } from "../../indexedDB/utilityMeterGroup-db
 import { LoadingService } from "../../shared/loading/loading.service";
 import { AccountManagementService } from '../account-management.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { globalVariables } from "../../../environments/environment";
 
 @Component({
   selector: 'app-facility',
@@ -31,6 +32,10 @@ export class FacilityComponent implements OnInit {
   selectedFacility: IdbFacility;
   unitsDontMatchAccount: boolean;
   sustainQuestionsDontMatchAccount: boolean;
+  financialReportingDoestMatchAccount: boolean;
+  years: Array<number> = [];
+  globalVariables = globalVariables;
+  
   constructor(
     private router: Router,
     private facilityDbService: FacilitydbService,
@@ -48,11 +53,16 @@ export class FacilityComponent implements OnInit {
       let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
       this.unitsDontMatchAccount = this.accountManagementService.areAccountAndFacilityUnitsDifferent(account, facility);
       this.sustainQuestionsDontMatchAccount = this.accountManagementService.areAccountAndFacilitySustainQuestionsDifferent(account, facility);
+      this.financialReportingDoestMatchAccount = this.accountManagementService.areAccountAndFacilityFinancialReportingDifferent(account, facility);
       this.selectedFacility = facility;
       if (facility != null) {
         this.facilityForm = this.accountManagementService.getFacilityForm(facility);
       }
     });
+
+    for(let i=2050; i>2000; i--) {
+      this.years.push(i);
+    }
   }
 
   ngOnDestroy() {
@@ -106,10 +116,15 @@ export class FacilityComponent implements OnInit {
     this.facilityForm = this.accountManagementService.setAccountUnits(this.facilityForm, account);
     this.onFormChange();
   }
-
   setAccountSustainQuestions(){
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     this.facilityForm = this.accountManagementService.setAccountSustainQuestions(this.facilityForm, account);
+    this.onFormChange();
+  }
+
+  setAccountFinancialReporting(){
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    this.facilityForm = this.accountManagementService.setAccountFinancialReporting(this.facilityForm, account);
     this.onFormChange();
   }
 

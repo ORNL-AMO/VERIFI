@@ -12,6 +12,7 @@ import { UtilityMeterGroupdbService } from "../../indexedDB/utilityMeterGroup-db
 import { LoadingService } from "../../shared/loading/loading.service";
 import { AccountManagementService } from '../account-management.service';
 import { EnergyUnitOptions, MassUnitOptions, SizeUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from 'src/app/shared/unitOptions';
+import { globalVariables } from "../../../environments/environment";
 
 @Component({
   selector: 'app-account',
@@ -38,6 +39,9 @@ export class AccountComponent implements OnInit {
   volumeLiquidOptions: Array<UnitOption> = VolumeLiquidOptions;
   sizeUnitOptions: Array<UnitOption> = SizeUnitOptions;
   massUnitOptions: Array<UnitOption> = MassUnitOptions;
+  years: Array<number> = [];
+  globalVariables = globalVariables;
+
   constructor(
     private router: Router,
     private accountDbService: AccountdbService,
@@ -61,6 +65,10 @@ export class AccountComponent implements OnInit {
     this.accountFacilitiesSub = this.facilityDbService.accountFacilities.subscribe(val => {
       this.facilityList = val;
     });
+
+    for(let i=2050; i>2000; i--) {
+      this.years.push(i);
+    }
   }
 
   ngOnDestroy() {
