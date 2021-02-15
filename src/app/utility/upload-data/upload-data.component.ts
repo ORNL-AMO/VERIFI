@@ -7,6 +7,8 @@ import { LoadingService } from 'src/app/shared/loading/loading.service';
 import { ImportMeterService, ImportMeterFileSummary } from './import-meter.service';
 import { ElectricityMeterDataHeaders, MeterHeaders, NonElectricityMeterDataHeaders } from './templateHeaders';
 import * as XLSX from 'xlsx';
+import { UploadDataService } from './upload-data.service';
+import { Subscription } from 'rxjs';
 
 type AOA = any[][];
 
@@ -17,7 +19,6 @@ type AOA = any[][];
 })
 export class UploadDataComponent implements OnInit {
 
-  importMeterFiles: Array<{ fileName: string, importMeterFileSummary: ImportMeterFileSummary }>;
 
 
   filesSummary: Array<{ fileType: string, fileData: CsvImportData, fileName: string }>;
@@ -25,21 +26,27 @@ export class UploadDataComponent implements OnInit {
   nonTemplateFiles: Array<{ fileType: string, fileData: CsvImportData, fileName: string }>;
   inputLabel: string = 'Browse Files'
 
-  excelFiles: Array<any>;
-
+  // selectedExcelFile: File;
+  // selectedExcelFileSub: Subscription;
   constructor(private csvToJsonService: CsvToJsonService, private loadingService: LoadingService,
     private importMeterService: ImportMeterService, private facilityDbService: FacilitydbService,
-    private utilityMeterDbService: UtilityMeterdbService) { }
+    private utilityMeterDbService: UtilityMeterdbService, private uploadDataService: UploadDataService) { }
 
   ngOnInit(): void {
+    // this.selectedExcelFileSub = this.uploadDataService.selectedExcelFile.subscribe(val => {
+    //   this.selectedExcelFile = val;
+    // });
     this.initArrays();
   }
 
+  ngOnDestroy() {
+    // this.selectedExcelFileSub.unsubscribe();
+  }
+
   initArrays() {
-    this.importMeterFiles = new Array();
+    this.uploadDataService.initArrays();
     this.filesSummary = new Array();
     this.nonTemplateFiles = new Array();
-    this.excelFiles = new Array();
     this.fileReferences = new Array();
   }
 
@@ -67,7 +74,7 @@ export class UploadDataComponent implements OnInit {
     this.fileReferences.forEach(fileReference => {
       let excelTest = /.xlsx$/;
       if (excelTest.test(fileReference.name)) {
-        this.excelFiles.push(fileReference);
+        this.uploadDataService.addExcelFile(fileReference);
       } else {
         let fr: FileReader = new FileReader();
         fr.readAsText(fileReference);
@@ -83,17 +90,8 @@ export class UploadDataComponent implements OnInit {
 
 
   addFile(data: any, fileHeaders: Array<string>, fileName: string) {
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
     if (JSON.stringify(fileHeaders) === JSON.stringify(MeterHeaders)) {
-      let fileData: CsvImportData = this.csvToJsonService.parseCsvWithHeaders(data, 0);
-      let summary: ImportMeterFileSummary = this.importMeterService.importMetersFromDataFile(fileData, selectedFacility, facilityMeters)
-      //meter template
-      this.importMeterFiles.push({
-        fileName: fileName,
-        importMeterFileSummary: summary
-      });
-
+      this.addMeterFile(data, fileName);
     } else if (JSON.stringify(fileHeaders) === JSON.stringify(ElectricityMeterDataHeaders)) {
       //electricity meter data template 
       this.filesSummary.push({
@@ -121,6 +119,15 @@ export class UploadDataComponent implements OnInit {
 
   }
 
+  addMeterFile(data: any, fileName: string) {
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+    let fileData: CsvImportData = this.csvToJsonService.parseCsvWithHeaders(data, 0);
+    let summary: ImportMeterFileSummary = this.importMeterService.importMetersFromDataFile(fileData, selectedFacility, facilityMeters)
+    this.uploadDataService.addMeterFile(fileName, summary);
+  }
+
+
 
   // parsePreviewData() {
   //   this.previewDataFromCsv = this.csvToJsonService.parseCsvWithoutHeaders(this.importData);
@@ -139,8 +146,6 @@ export class UploadDataComponent implements OnInit {
   // }
 
   data: AOA = [[1, 2], [3, 4]];
-  wopts: XLSX.WritingOptions = { bookType: 'xlsx', type: 'array' };
-  fileName: string = 'SheetJS.xlsx';
 
   onFileChange(evt: any) {
     /* wire up file reader */
@@ -167,4 +172,26 @@ export class UploadDataComponent implements OnInit {
     reader.readAsBinaryString(target.files[0]);
   }
 
+
+  selectExcelFile(fileReference: any) {
+    const reader: FileReader = new FileReader();
+    reader.onload = (e: any) => {
+      /* read workbook */
+      const bstr: string = e.target.result;
+      const wb: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary', cellDates: true });
+
+      /* grab first sheet */
+      const wsname: string = wb.SheetNames[1];
+      const ws: XLSX.WorkSheet = wb.Sheets["Sheet1"];
+      var csv = XLSX.utils.sheet_to_csv(wb.Sheets["Sheet1"]);
+      console.log(csv)
+      var XL_row_object = XLSX.utils.sheet_to_json(wb.Sheets["Sheet1"], { header: 1 });
+      console.log(XL_row_object);
+
+
+      /* save data */
+      this.data = <AOA>(XL_row_object);
+    };
+    reader.readAsBinaryString(fileReference);
+  }
 }

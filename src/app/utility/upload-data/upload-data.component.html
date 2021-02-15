@@ -14,82 +14,9 @@
                     </label>
                 </div>
             </div>
-            <div class="mt-3" *ngIf="excelFiles.length != 0">
-                <h6 class="card-subtitle mb-2 text-muted">Excel Files</h6>
-                <p class="card-text">
-                    Excel file data needs some setup.
-                </p>
-                <table class="table table-sm">
-                    <thead>
-                        <tr class="import-meter">
-                            <th class="file-name-width">
-                                File Name
-                            </th>
-                            <!-- <th>
-                                New
-                            </th>
-                            <th>
-                                Existing
-                            </th>
-                            <th>
-                                Invalid
-                            </th>
-                            <th>
-                                Actions
-                            </th> -->
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr *ngFor="let excelFile of excelFiles">
-                            <td>{{excelFile.name}}</td>
-                            <!-- <td>{{importMeterFile.importMeterFileSummary.newMeters.length}}</td>
-                            <td>{{importMeterFile.importMeterFileSummary.existingMeters.length}}</td>
-                            <td>{{importMeterFile.importMeterFileSummary.invalidMeters.length}}</td>
-                            <td>
+            <app-excel-data-table></app-excel-data-table>
+            <app-meter-table></app-meter-table>
 
-                            </td> -->
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            <div class="mt-3" *ngIf="importMeterFiles.length != 0">
-                <h6 class="card-subtitle mb-2 text-muted">Template Files</h6>
-                <p class="card-text">
-                    The following files follow the provided template. Fix any errors before importing the data.
-                </p>
-                <table class="table table-sm">
-                    <thead>
-                        <tr class="import-meter">
-                            <th class="file-name-width">
-                                File Name
-                            </th>
-                            <th>
-                                New
-                            </th>
-                            <th>
-                                Existing
-                            </th>
-                            <th>
-                                Invalid
-                            </th>
-                            <th>
-                                Actions
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr *ngFor="let importMeterFile of importMeterFiles">
-                            <td>{{importMeterFile.fileName}}</td>
-                            <td>{{importMeterFile.importMeterFileSummary.newMeters.length}}</td>
-                            <td>{{importMeterFile.importMeterFileSummary.existingMeters.length}}</td>
-                            <td>{{importMeterFile.importMeterFileSummary.invalidMeters.length}}</td>
-                            <td>
-
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
             <!-- <table class="table table-sm" *ngIf="filesSummary.length != 0">
                     <thead>
                         <tr>
