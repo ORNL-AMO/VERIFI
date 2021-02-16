@@ -1,67 +1,110 @@
 <h4>Import Data from {{selectedExcelFile.name}}</h4>
-<label for="worksheetName">Select Worksheet</label>
-<select class="form-control" name="worksheetName" [(ngModel)]="selectedWorksheetName" (change)="parseWorksheet()">
-    <option class="form-control" *ngFor="let name of worksheetNames" [ngValue]="name">{{name}}</option>
-</select>
-<br>
+<!--Page 1: Select data fields-->
+<div *ngIf="wizardPage == 1">
+    <label for="worksheetName">Select Worksheet</label>
+    <select class="form-control" name="worksheetName" [(ngModel)]="selectedWorksheetName" (change)="parseWorksheet()">
+        <option class="form-control" *ngFor="let name of worksheetNames" [ngValue]="name">{{name}}</option>
+    </select>
+    <br>
 
-<div class="mt-2 table-div" *ngIf="selectedWorksheetData">
-    <table>
-        <tbody>
-            <tr *ngFor="let worksheetData of selectedWorksheetData">
-                <td *ngFor="let data of worksheetData">
-                    {{data}}
-                </td>
-            </tr>
-        </tbody>
-    </table>
-</div>
-<br>
-<label for="dataOrientation">
-    Are meters entered as rows or columns?
-</label>
-<select class="form-control" name="dataOrientation" [(ngModel)]="dataOrientation">
-    <option [ngValue]="'row'">Rows</option>
-    <option [ngValue]="'column'">Columns</option>
-</select>
-<br>
-
-<label for="dateColumn">
-    Which column has the date of a reading?
-</label>
-<select class="form-control" name="dateColumn" [(ngModel)]="selectedDateColumn" (change)="setColumns()">
-    <option class="form-control" *ngFor="let header of headers; let index = index;" [ngValue]="index">{{header}}
-    </option>
-</select>
-<br>
-
-<div class="row" *ngIf="dataOrientation == 'column'">
-    <div class="col-6 border-right">
-        <label>Columns representing meters</label>
-        <div class="d-flex flex-wrap">
-            <button class="btn btn-primary m-1" *ngFor="let selectedColumn of selectedMeterColumns"
-                (click)="removeSelectedMeterColumn(selectedColumn)">{{selectedColumn.name}}</button>
-        </div>
+    <div class="mt-2 table-div" *ngIf="selectedWorksheetData">
+        <table>
+            <tbody>
+                <tr *ngFor="let worksheetData of selectedWorksheetData">
+                    <td *ngFor="let data of worksheetData">
+                        {{data}}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
     </div>
-    <div class="col-6">
-        <label>Columns to be ignored</label>
-        <div class="d-flex flex-wrap">
-            <button class="btn btn-danger m-1" *ngFor="let nonMeterColumn of nonMeterColumns"
-                (click)="removeNonMeterColumn(nonMeterColumn)">{{nonMeterColumn.name}}</button>
-        </div>
-    </div>
-</div>
-<br>
-
-<div *ngIf="dataOrientation == 'rows'">
-    <label for="dateColumn">
-        Which column has the meter name or meter number?
+    <br>
+    <label for="dataOrientation">
+        Are meters entered as rows or columns?
     </label>
-    <select class="form-control" name="dateColumn" [(ngModel)]="selectedDateColumn">
+    <select class="form-control" name="dataOrientation" [(ngModel)]="dataOrientation">
+        <option [ngValue]="'row'">Rows</option>
+        <option [ngValue]="'column'">Columns</option>
+    </select>
+    <br>
+
+    <div *ngIf="dataOrientation == 'column'">
+        <label for="dateColumn">
+            Which column has the date of a reading? ({{minDate | date}} - {{maxDate | date}})
+        </label>
+        <select class="form-control" name="dateColumn" [(ngModel)]="selectedDateColumn" (change)="setColumns()">
+            <option class="form-control" *ngFor="let header of headers; let index = index;" [ngValue]="index">{{header}}
+            </option>
+        </select>
+        <br>
+    </div>
+
+    <div class="row" *ngIf="dataOrientation == 'column'">
+        <div class="col-6 border-right">
+            <label>Columns representing meters</label>
+            <div class="d-flex flex-wrap">
+                <button class="btn btn-primary m-1" *ngFor="let selectedColumn of selectedMeterColumns"
+                    (click)="removeSelectedMeterColumn(selectedColumn)">{{selectedColumn.name}}</button>
+            </div>
+        </div>
+        <div class="col-6">
+            <label>Columns to be ignored</label>
+            <div class="d-flex flex-wrap">
+                <button class="btn btn-danger m-1" *ngFor="let nonMeterColumn of nonMeterColumns"
+                    (click)="removeNonMeterColumn(nonMeterColumn)">{{nonMeterColumn.name}}</button>
+            </div>
+        </div>
+        <br>
+    </div>
+
+    <div *ngIf="dataOrientation == 'row'">
+        <h6>Select the data fields the columns correspond to</h6>
+        <label for="dateColumn">
+            Read Date
+        </label>
+        <select class="form-control" name="dateColumn" [(ngModel)]="selectedDateColumn" (change)="setColumns()">
+            <option class="form-control" *ngFor="let header of headers; let index = index;" [ngValue]="index">{{header}}
+            </option>
+        </select>
+
+        <br>
+        <label for="meterNumber">
+            Meter Number or Name
+        </label>
+        <select class="form-control" name="meterNumber" [(ngModel)]="selectedMeterNumberColumn">
+            <option class="form-control" *ngFor="let header of headers; let index = index;" [ngValue]="index">{{header}}
+            </option>
+        </select>
+
+        <br>
+        <label for="energyConsumptionColumn">
+            Energy Consumption
+        </label>
+        <select class="form-control" name="energyConsumptionColumn" [(ngModel)]="selectedEnergyConsumptionColumn">
+            <option class="form-control" *ngFor="let header of headers; let index = index;" [ngValue]="index">{{header}}
+            </option>
+        </select>
+
+        <!-- <label for="energyCost">
+        Energy Consumption
+    </label>
+    <select class="form-control" name="energyConsumptionColumn" [(ngModel)]="selectedEnergyConsumptionColumn" (change)="setColumns()">
         <option class="form-control" *ngFor="let header of headers; let index = index;" [ngValue]="index">{{header}}
         </option>
-    </select>
-</div>
+    </select> -->
 
-<br>
-<button class="btn btn-danger" (click)="close()">Cancel</button>
+
+    </div>
+
+    <br>
+</div>
+<!--Page 2: Setup Meters-->
+<div *ngIf="wizardPage == 2">
+    <app-meter-wizard [importMeters]="importMeters"></app-meter-wizard>
+</div>
+<hr>
+
+<div class="saveCancel item-right text-right">
+    <button class="btn btn-danger" (click)="close()">Cancel</button>
+    <button class="btn btn-success" (click)="continue()">Continue</button>
+</div>

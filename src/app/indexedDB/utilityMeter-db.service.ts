@@ -112,7 +112,13 @@ export class UtilityMeterdbService {
         });
     }
 
-    getNewIdbUtilityMeter(facilityId: number, accountId: number, source?: string): IdbUtilityMeter {
+    getNewIdbUtilityMeter(facilityId: number, accountId: number, setDefaults: boolean): IdbUtilityMeter {
+        let source: string;
+        let startingUnit: string;
+        if(setDefaults){
+            source = 'Electricity';
+            startingUnit = 'kWh';
+        }
         return {
             facilityId: facilityId,
             accountId: accountId,
@@ -127,9 +133,9 @@ export class UtilityMeterdbService {
             location: undefined,
             supplier: undefined,
             notes: undefined,
-            source: "Electricity",
+            source: source,
             group: undefined,
-            startingUnit: "kWh",
+            startingUnit: startingUnit,
             energyUnit: undefined,
             fuel: undefined
         }

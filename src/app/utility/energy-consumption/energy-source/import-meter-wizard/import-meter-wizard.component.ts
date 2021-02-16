@@ -85,7 +85,7 @@ export class ImportMeterWizardComponent implements OnInit {
   }
 
   getNewMeterFromCurrentLine(currentLine: Array<string>, selectedFacility: IdbFacility): IdbUtilityMeter {
-    let newMeter: IdbUtilityMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.id, selectedFacility.accountId);
+    let newMeter: IdbUtilityMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.id, selectedFacility.accountId, false);
     newMeter.meterNumber = currentLine[0];
     newMeter.accountNumber = Number(currentLine[1]);
     newMeter.source = this.checkImportSource(currentLine[2]);

@@ -67,7 +67,7 @@ export class ImportMeterService {
 
 
   getNewMeterFromImportMeter(importMeter: ImportMeter, selectedFacility: IdbFacility): IdbUtilityMeter {
-    let newMeter: IdbUtilityMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.id, selectedFacility.accountId);
+    let newMeter: IdbUtilityMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.id, selectedFacility.accountId, false);
     newMeter.meterNumber = importMeter.meterNumber;
     newMeter.accountNumber = importMeter.accountNumber;
     newMeter.source = this.checkImportSource(importMeter.source);

@@ -2,6 +2,10 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { UploadDataService } from '../../upload-data.service';
 import * as XLSX from 'xlsx';
+import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
+import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import * as _ from 'lodash';
 
 @Component({
   selector: 'app-excel-wizard',
@@ -22,10 +26,19 @@ export class ExcelWizardComponent implements OnInit {
   headerRow: number = 0;
   headers: Array<number | string | Date>;
   selectedDateColumn: number = 0;
+  selectedEnergyConsumptionColumn: number;
+  selectedMeterNumberColumn: number;
   selectedMeterColumns: Array<{ index: number, name: number | string | Date }> = [];
   nonMeterColumns: Array<{ index: number, name: number | string | Date }> = [];
   dataOrientation: string = 'column';
-  constructor(private uploadDataService: UploadDataService) { }
+  importMeters: Array<IdbUtilityMeter>;
+  importMeterDates: Array<Date>;
+  importMeterConsumption: Array<Array<number>>;
+  wizardPage: number = 1;
+  minDate: Date;
+  maxDate: Date;
+  constructor(private uploadDataService: UploadDataService, private utilityMeterdbService: UtilityMeterdbService,
+    private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
     this.readWorkbook(this.selectedExcelFile);
@@ -61,8 +74,21 @@ export class ExcelWizardComponent implements OnInit {
           name: header
         });
       }
-    })
+    });
+    this.setDates();
   }
+
+  setDates() {
+    let datesColumnData: Array<number | string | Date> = this.selectedWorksheetData.map(dataItem => {
+      return dataItem[this.selectedDateColumn];
+    });
+    datesColumnData = datesColumnData.filter(item => { return item != undefined });
+    this.importMeterDates = datesColumnData.map(data => { return new Date(data) });
+    this.importMeterDates = this.importMeterDates.filter(dateItem => {return dateItem instanceof Date && !isNaN(dateItem.getTime())});
+    this.minDate = _.min(this.importMeterDates);
+    this.maxDate = _.max(this.importMeterDates);
+  }
+
 
   close() {
     this.emitClose.emit(true);
@@ -77,4 +103,19 @@ export class ExcelWizardComponent implements OnInit {
     this.nonMeterColumns.push(column);
     this.selectedMeterColumns = this.selectedMeterColumns.filter(selectedColumn => { return column.index != selectedColumn.index });
   }
+
+
+  continue() {
+    this.importMeters = new Array();
+    this.importMeterConsumption = new Array();
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    this.selectedMeterColumns.forEach(column => {
+      let newMeter: IdbUtilityMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.id, selectedFacility.accountId, false);
+      newMeter.name = String(column.name);
+      this.importMeters.push(newMeter);
+    });
+    this.wizardPage = 2;
+  }
+
+
 }

@@ -30,7 +30,6 @@ export class UploadDataService {
   }
 
   addExcelFile(fileReference: any) {
-    console.log('ADDDD')
     let excelFiles: Array<File> = this.excelFiles.getValue();
     excelFiles.push(fileReference);
     this.excelFiles.next(excelFiles);
