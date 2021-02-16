@@ -1,21 +1,12 @@
 <div class="wrapper main-content">
     <h4>Upload Data From .CSV or .XLSX Files</h4>
-    <div class="card mt-5">
-        <div class="card-body">
-            <h5 class="card-title">Select Files</h5>
-            <div class="input-group">
-                <div class="custom-file">
-                    <input type="file" class="custom-file-input" id="meterTemplate"
-                        (input)="setImportFile($event.target.files)" multiple accept=".csv, .xlsx">
-                    <label class="custom-file-label" for="meterTemplate">
-                        {{inputLabel}}
-                    </label>
-                </div>
-            </div>
-            <app-excel-data-table></app-excel-data-table>
-            <app-meter-table></app-meter-table>
+    <input type="file" id="meterTemplate" (input)="setImportFile($event.target.files)" multiple accept=".csv, .xlsx">
+    <hr>
+    <app-excel-data-table></app-excel-data-table>
+    <hr>
+    <app-meter-table></app-meter-table>
 
-            <!-- <table class="table table-sm" *ngIf="filesSummary.length != 0">
+    <!-- <table class="table table-sm" *ngIf="filesSummary.length != 0">
                     <thead>
                         <tr>
                             <th class="w-25">
@@ -34,6 +25,4 @@
                     </tbody>
                 </table> 
         </div>-->
-        </div>
-    </div>
 </div>

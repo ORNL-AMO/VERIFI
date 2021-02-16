@@ -1,0 +1,8 @@
+.scroll-item{
+    overflow-y: scroll;
+}
+
+.table-div{
+    max-height: 300px;
+    overflow-y: scroll;
+}

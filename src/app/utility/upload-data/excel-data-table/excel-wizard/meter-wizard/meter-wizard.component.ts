@@ -1,8 +1,9 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbUtilityMeter } from 'src/app/models/idb';
 import { EditMeterFormService } from 'src/app/utility/energy-consumption/energy-source/edit-meter-form/edit-meter-form.service';
+import { UploadDataService } from '../../../upload-data.service';
 
 @Component({
   selector: 'app-meter-wizard',
@@ -10,21 +11,25 @@ import { EditMeterFormService } from 'src/app/utility/energy-consumption/energy-
   styleUrls: ['./meter-wizard.component.css']
 })
 export class MeterWizardComponent implements OnInit {
-  @Input()
-  importMeters: Array<IdbUtilityMeter>;
-  @Input()
-  importMeterConsumption: Array<Array<number>>;
-  @Input()
-  importMeterDates: Array<Date>;
+  @Output('emitBack')
+  emitBack: EventEmitter<boolean> = new EventEmitter();
 
+  importMeters: Array<IdbUtilityMeter>;
+  importMeterConsumption: Array<Array<number>>;
+  importMeterDates: Array<Date>;
 
   skipMeters: Array<boolean>;
   selectedMeterForm: FormGroup;
   selectedMeterIndex: number;
   facilityMeters: Array<IdbUtilityMeter>;
-  constructor(private editMeterFormService: EditMeterFormService, private utilityMeterDbService: UtilityMeterdbService) { }
+  constructor(private editMeterFormService: EditMeterFormService, private utilityMeterDbService: UtilityMeterdbService,
+    private uploadDataService: UploadDataService) { }
 
   ngOnInit(): void {
+    this.importMeters = this.uploadDataService.excelImportMeters.getValue();
+    this.importMeterDates = this.uploadDataService.excelImportMeterDates.getValue();
+    this.importMeterConsumption = this.uploadDataService.excelImportMeterConsumption.getValue();
+
     this.facilityMeters = this.utilityMeterDbService.facilityMeters.getValue();
     this.skipMeters = this.importMeters.map(() => { return false });
     this.selectMeter(this.importMeters[0], 0);
@@ -69,4 +74,11 @@ export class MeterWizardComponent implements OnInit {
     }
   }
 
+  submit(){
+
+  }
+
+  back(){
+    this.emitBack.emit(true);
+  }
 }

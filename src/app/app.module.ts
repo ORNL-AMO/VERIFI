@@ -73,6 +73,7 @@ import { ExcelDataTableComponent } from './utility/upload-data/excel-data-table/
 import { MeterTableComponent } from './utility/upload-data/meter-table/meter-table.component';
 import { MeterDataTableComponent } from './utility/upload-data/meter-data-table/meter-data-table.component';
 import { MeterWizardComponent } from './utility/upload-data/excel-data-table/excel-wizard/meter-wizard/meter-wizard.component';
+import { SetupDataWizardComponent } from './utility/upload-data/excel-data-table/excel-wizard/setup-data-wizard/setup-data-wizard.component';
 
 @NgModule({
   declarations: [
@@ -131,7 +132,8 @@ import { MeterWizardComponent } from './utility/upload-data/excel-data-table/exc
     ExcelDataTableComponent,
     MeterTableComponent,
     MeterDataTableComponent,
-    MeterWizardComponent
+    MeterWizardComponent,
+    SetupDataWizardComponent
   ],
   imports: [
     BrowserModule,

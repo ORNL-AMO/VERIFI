@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import { IdbUtilityMeter } from 'src/app/models/idb';
 import { ImportMeterFileSummary } from './import-meter.service';
 
 @Injectable({
@@ -10,9 +11,16 @@ export class UploadDataService {
   importMeterFiles: BehaviorSubject<Array<{ fileName: string, importMeterFileSummary: ImportMeterFileSummary }>>;
   excelFiles: BehaviorSubject<Array<File>>;
   // selectedExcelFile: BehaviorSubject<File>;
+  excelImportMeters: BehaviorSubject<Array<IdbUtilityMeter>>;
+  excelImportMeterDates: BehaviorSubject<Array<Date>>;
+  excelImportMeterConsumption: BehaviorSubject<Array<Array<number>>>;
+
   constructor() {
     this.importMeterFiles = new BehaviorSubject([]);
     this.excelFiles = new BehaviorSubject<Array<File>>([]);
+    this.excelImportMeters = new BehaviorSubject<Array<IdbUtilityMeter>>([]);
+    this.excelImportMeterDates = new BehaviorSubject<Array<Date>>([]);
+    this.excelImportMeterConsumption = new BehaviorSubject<Array<Array<number>>>([]);
     // this.selectedExcelFile = new BehaviorSubject<File>(undefined);
   }
 
