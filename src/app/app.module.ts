@@ -68,7 +68,7 @@ import { ImportMeterDataWizardComponent } from './utility/energy-consumption/uti
 import { ValidDataTableComponent } from './utility/energy-consumption/utility-meter-data/import-meter-data-wizard/valid-data-table/valid-data-table.component';
 import { MissingMeterNumberTableComponent } from './utility/energy-consumption/utility-meter-data/import-meter-data-wizard/missing-meter-number-table/missing-meter-number-table.component';
 import { UploadDataComponent } from './utility/upload-data/upload-data.component';
-import { ExcelWizardComponent } from './utility/upload-data/excel-wizard/excel-wizard.component';
+import { ExcelWizardComponent } from './utility/upload-data/excel-data-table/excel-wizard/excel-wizard.component';
 import { ExcelDataTableComponent } from './utility/upload-data/excel-data-table/excel-data-table.component';
 import { MeterTableComponent } from './utility/upload-data/meter-table/meter-table.component';
 import { MeterDataTableComponent } from './utility/upload-data/meter-data-table/meter-data-table.component';

@@ -44,3 +44,12 @@
         </tbody>
     </table>
 </div>
+
+
+<div class="window" [ngClass]="{'open': selectedExcelFile}">
+    <div class="windowOverlay"></div>
+    <div class="windowContent importMeterWindowContent scroll-item">
+        <app-excel-wizard *ngIf="selectedExcelFile" [selectedExcelFile]="selectedExcelFile"
+            (emitClose)="closeExcelWizard()"></app-excel-wizard>
+    </div>
+</div>

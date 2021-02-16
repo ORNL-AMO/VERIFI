@@ -12,12 +12,13 @@ export class ExcelDataTableComponent implements OnInit {
 
   excelFilesSub: Subscription;
   excelFiles: Array<File>;
+
+  selectedExcelFile: File;
   constructor(private uploadDataService: UploadDataService) { }
 
   ngOnInit(): void {
     this.excelFilesSub = this.uploadDataService.excelFiles.subscribe(val => {
       this.excelFiles = val;
-      console.log(this.excelFiles);
     });
   }
 
@@ -27,6 +28,10 @@ export class ExcelDataTableComponent implements OnInit {
 
 
   selectExcelFile(fileReference: File) {
-    // this.uploadDataService.selectedExcelFile.next(fileReference);
+    this.selectedExcelFile = fileReference;
+  }
+
+  closeExcelWizard(){
+    this.selectedExcelFile = undefined;
   }
 }
