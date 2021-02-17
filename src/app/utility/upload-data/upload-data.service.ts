@@ -9,8 +9,8 @@ import { ImportMeterFileSummary } from './import-meter.service';
 export class UploadDataService {
 
   importMeterFiles: BehaviorSubject<Array<{ fileName: string, importMeterFileSummary: ImportMeterFileSummary }>>;
+  importMeterDataFiles: BehaviorSubject<Array<{ fileName: string, fileType: string }>>;
   excelFiles: BehaviorSubject<Array<File>>;
-  // selectedExcelFile: BehaviorSubject<File>;
   excelImportMeters: BehaviorSubject<Array<IdbUtilityMeter>>;
   excelImportMeterDates: BehaviorSubject<Array<Date>>;
   excelImportMeterConsumption: BehaviorSubject<Array<Array<number>>>;
@@ -21,11 +21,7 @@ export class UploadDataService {
     this.excelImportMeters = new BehaviorSubject<Array<IdbUtilityMeter>>([]);
     this.excelImportMeterDates = new BehaviorSubject<Array<Date>>([]);
     this.excelImportMeterConsumption = new BehaviorSubject<Array<Array<number>>>([]);
-    // this.selectedExcelFile = new BehaviorSubject<File>(undefined);
-  }
-
-
-  initArrays() {
+    this.importMeterDataFiles = new BehaviorSubject([]);
   }
 
   addMeterFile(fileName: string, summary: ImportMeterFileSummary) {
@@ -41,5 +37,13 @@ export class UploadDataService {
     let excelFiles: Array<File> = this.excelFiles.getValue();
     excelFiles.push(fileReference);
     this.excelFiles.next(excelFiles);
+  }
+
+  addMeterDataFile(fileName: string, fileType: string) {
+    let importMeterDataFiles: Array<{ fileName: string, fileType: string }> = this.importMeterDataFiles.getValue();
+    importMeterDataFiles.push({
+      fileName: fileName,
+      fileType: fileType
+    });
   }
 }

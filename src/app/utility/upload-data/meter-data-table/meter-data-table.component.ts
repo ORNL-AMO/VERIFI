@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { Subscription } from 'rxjs';
+import { UploadDataService } from '../upload-data.service';
 
 @Component({
   selector: 'app-meter-data-table',
@@ -7,9 +9,18 @@ import { Component, OnInit } from '@angular/core';
 })
 export class MeterDataTableComponent implements OnInit {
 
-  constructor() { }
+  importMeterDataFiles: Array<{ fileName: string, fileType: string }>;
+  importMeterDataFilesSub: Subscription;
+  constructor(private uploadDataService: UploadDataService) { }
 
   ngOnInit(): void {
+    this.importMeterDataFilesSub = this.uploadDataService.importMeterDataFiles.subscribe(val => {
+      this.importMeterDataFiles = val;
+    });
+  }
+
+  ngOnDestroy(){
+    this.importMeterDataFilesSub.unsubscribe();
   }
 
 }

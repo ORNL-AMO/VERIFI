@@ -21,10 +21,10 @@ export class UploadDataComponent implements OnInit {
 
 
 
-  filesSummary: Array<{ fileType: string, fileData: CsvImportData, fileName: string }>;
+  // filesSummary: Array<{ fileType: string, fileData: CsvImportData, fileName: string }>;
   fileReferences: Array<any>;
-  nonTemplateFiles: Array<{ fileType: string, fileData: CsvImportData, fileName: string }>;
-  inputLabel: string = 'Browse Files'
+  // nonTemplateFiles: Array<{ fileType: string, fileData: CsvImportData, fileName: string }>;
+  // inputLabel: string = 'Browse Files'
 
   // selectedExcelFile: File;
   // selectedExcelFileSub: Subscription;
@@ -44,9 +44,8 @@ export class UploadDataComponent implements OnInit {
   }
 
   initArrays() {
-    this.uploadDataService.initArrays();
-    this.filesSummary = new Array();
-    this.nonTemplateFiles = new Array();
+    // this.filesSummary = new Array();
+    // this.nonTemplateFiles = new Array();
     this.fileReferences = new Array();
   }
 
@@ -94,27 +93,27 @@ export class UploadDataComponent implements OnInit {
       this.addMeterFile(data, fileName);
     } else if (JSON.stringify(fileHeaders) === JSON.stringify(ElectricityMeterDataHeaders)) {
       //electricity meter data template 
-      this.filesSummary.push({
-        fileType: 'Meter Data',
-        fileData: this.csvToJsonService.parseCsvWithHeaders(data, 0),
-        fileName: fileName
-      });
-
+      // this.filesSummary.push({
+      //   fileType: 'Meter Data',
+      //   fileData: this.csvToJsonService.parseCsvWithHeaders(data, 0),
+      //   fileName: fileName
+      // });
+      this.uploadDataService.addMeterDataFile(fileName, 'Electricity');
     } else if (JSON.stringify(fileHeaders) === JSON.stringify(NonElectricityMeterDataHeaders)) {
       //non electricity meter data template
-      this.filesSummary.push({
-        fileType: 'Meter Data',
-        fileData: this.csvToJsonService.parseCsvWithHeaders(data, 0),
-        fileName: fileName
-      });
-
+      // this.filesSummary.push({
+      //   fileType: 'Meter Data',
+      //   fileData: this.csvToJsonService.parseCsvWithHeaders(data, 0),
+      //   fileName: fileName
+      // });
+      this.uploadDataService.addMeterDataFile(fileName, 'Non-Electricity');
     } else {
       //other .csv file
-      this.nonTemplateFiles.push({
-        fileType: undefined,
-        fileData: this.csvToJsonService.parseCsvWithHeaders(data, 0),
-        fileName: fileName
-      });
+      // this.nonTemplateFiles.push({
+      //   fileType: undefined,
+      //   fileData: this.csvToJsonService.parseCsvWithHeaders(data, 0),
+      //   fileName: fileName
+      // });
     }
 
   }
@@ -125,73 +124,5 @@ export class UploadDataComponent implements OnInit {
     let fileData: CsvImportData = this.csvToJsonService.parseCsvWithHeaders(data, 0);
     let summary: ImportMeterFileSummary = this.importMeterService.importMetersFromDataFile(fileData, selectedFacility, facilityMeters)
     this.uploadDataService.addMeterFile(fileName, summary);
-  }
-
-
-
-  // parsePreviewData() {
-  //   this.previewDataFromCsv = this.csvToJsonService.parseCsvWithoutHeaders(this.importData);
-  // }
-
-  // parseImportData() {
-  //   this.loadingService.setLoadingMessage('Parsing CSV');
-  //   this.loadingService.setLoadingStatus(true);
-  //   this.importingData = true;
-  //   this.previewDataFromCsv = undefined;
-  //   this.importDataFromCsv = this.csvToJsonService.parseCsvWithHeaders(this.importData, Number(this.selectedHeaderRow));
-  //   this.importSuccesful = true;
-  //   this.importData = undefined;
-  //   this.loadingService.setLoadingStatus(false);
-  //   this.loadingService.setLoadingMessage(undefined);
-  // }
-
-  data: AOA = [[1, 2], [3, 4]];
-
-  onFileChange(evt: any) {
-    /* wire up file reader */
-    const target: DataTransfer = <DataTransfer>(evt.target);
-    if (target.files.length !== 1) throw new Error('Cannot use multiple files');
-    const reader: FileReader = new FileReader();
-    reader.onload = (e: any) => {
-      /* read workbook */
-      const bstr: string = e.target.result;
-      const wb: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary', cellDates: true });
-
-      /* grab first sheet */
-      const wsname: string = wb.SheetNames[1];
-      const ws: XLSX.WorkSheet = wb.Sheets["Sheet1"];
-      var csv = XLSX.utils.sheet_to_csv(wb.Sheets["Sheet1"]);
-      console.log(csv)
-      var XL_row_object = XLSX.utils.sheet_to_json(wb.Sheets["Sheet1"], { header: 1 });
-      console.log(XL_row_object);
-
-
-      /* save data */
-      this.data = <AOA>(XL_row_object);
-    };
-    reader.readAsBinaryString(target.files[0]);
-  }
-
-
-  selectExcelFile(fileReference: any) {
-    const reader: FileReader = new FileReader();
-    reader.onload = (e: any) => {
-      /* read workbook */
-      const bstr: string = e.target.result;
-      const wb: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary', cellDates: true });
-
-      /* grab first sheet */
-      const wsname: string = wb.SheetNames[1];
-      const ws: XLSX.WorkSheet = wb.Sheets["Sheet1"];
-      var csv = XLSX.utils.sheet_to_csv(wb.Sheets["Sheet1"]);
-      console.log(csv)
-      var XL_row_object = XLSX.utils.sheet_to_json(wb.Sheets["Sheet1"], { header: 1 });
-      console.log(XL_row_object);
-
-
-      /* save data */
-      this.data = <AOA>(XL_row_object);
-    };
-    reader.readAsBinaryString(fileReference);
   }
 }
