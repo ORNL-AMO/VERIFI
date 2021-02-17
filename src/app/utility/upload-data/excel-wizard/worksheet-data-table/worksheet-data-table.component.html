@@ -1,0 +1,9 @@
+<table *ngIf="selectedWorksheetData">
+    <tbody>
+        <tr *ngFor="let worksheetData of selectedWorksheetData">
+            <td *ngFor="let data of worksheetData">
+                {{data}}
+            </td>
+        </tr>
+    </tbody>
+</table>

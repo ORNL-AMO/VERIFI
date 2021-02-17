@@ -1,0 +1,56 @@
+<div class="worksheet-data-table">
+    <app-worksheet-data-table></app-worksheet-data-table>
+</div>
+<hr>
+<div class="row no-gutters">
+    <div class="col-6">
+        <div class="card">
+            <div class="card-header">
+                Unused Columns
+            </div>
+            <div class="card-body">
+                <div class="d-flex flex-wrap">
+                    <button class="btn btn-primary m-1"
+                        *ngFor="let unusedColumn of unusedColumns">{{unusedColumn.value}}</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="col-6">
+        <div class="card">
+            <div class="card-header">
+                Date Column
+            </div>
+            <div class="card-body">
+                <button class="btn btn-primary m-1" *ngIf="dateColumn">{{dateColumn.value}}</button>
+            </div>
+        </div>
+
+    </div>
+    <div class="col-6">
+        <div class="card">
+            <div class="card-header">
+                Meters Columns
+            </div>
+            <div class="card-body">
+                <button class="btn btn-primary m-1"
+                    *ngFor="let meterColumn of meterColumns">{{meterColumn.value}}</button>
+            </div>
+        </div>
+
+    </div>
+    <div class="col-6">
+        <div class="card">
+            <div class="card-header">
+                Predictors Columns
+            </div>
+            <div class="card-body">
+                <button class="btn btn-primary m-1"
+                    *ngFor="let predictorColumn of predictorsColumns">{{predictorColumn.value}}</button>
+
+            </div>
+        </div>
+
+    </div>
+</div>

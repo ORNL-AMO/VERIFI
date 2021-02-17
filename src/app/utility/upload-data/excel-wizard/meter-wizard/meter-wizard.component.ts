@@ -3,7 +3,7 @@ import { FormGroup } from '@angular/forms';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbUtilityMeter } from 'src/app/models/idb';
 import { EditMeterFormService } from 'src/app/utility/energy-consumption/energy-source/edit-meter-form/edit-meter-form.service';
-import { UploadDataService } from '../../../upload-data.service';
+import { UploadDataService } from '../../upload-data.service';
 
 @Component({
   selector: 'app-meter-wizard',
@@ -26,13 +26,13 @@ export class MeterWizardComponent implements OnInit {
     private uploadDataService: UploadDataService) { }
 
   ngOnInit(): void {
-    this.importMeters = this.uploadDataService.excelImportMeters.getValue();
-    this.importMeterDates = this.uploadDataService.excelImportMeterDates.getValue();
-    this.importMeterConsumption = this.uploadDataService.excelImportMeterConsumption.getValue();
+    // this.importMeters = this.uploadDataService.excelImportMeters.getValue();
+    // this.importMeterDates = this.uploadDataService.excelImportMeterDates.getValue();
+    // this.importMeterConsumption = this.uploadDataService.excelImportMeterConsumption.getValue();
 
-    this.facilityMeters = this.utilityMeterDbService.facilityMeters.getValue();
-    this.skipMeters = this.importMeters.map(() => { return false });
-    this.selectMeter(this.importMeters[0], 0);
+    // this.facilityMeters = this.utilityMeterDbService.facilityMeters.getValue();
+    // this.skipMeters = this.importMeters.map(() => { return false });
+    // this.selectMeter(this.importMeters[0], 0);
   }
 
 

@@ -1,0 +1,14 @@
+.worksheet-data-table{
+    max-height: 150px;
+    overflow-y: scroll;
+}
+
+.card-header{
+    color: #2980b9;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.card-body{
+    min-height: 150px;
+}

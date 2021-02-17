@@ -1,21 +1,15 @@
 <label for="worksheetName">Select Worksheet</label>
-<select class="form-control" name="worksheetName" [(ngModel)]="selectedWorksheetName" (change)="parseWorksheet()">
+<select class="form-control" name="worksheetName" [(ngModel)]="selectedWorksheetName"
+    (change)="setSelectedWorksheetName()">
     <option class="form-control" *ngFor="let name of worksheetNames" [ngValue]="name">{{name}}</option>
 </select>
 <br>
-
-<div class="mt-2 table-div" *ngIf="selectedWorksheetData">
-    <table>
-        <tbody>
-            <tr *ngFor="let worksheetData of selectedWorksheetData">
-                <td *ngFor="let data of worksheetData">
-                    {{data}}
-                </td>
-            </tr>
-        </tbody>
-    </table>
+<div class="setup-data-table mt-2">
+    <app-worksheet-data-table></app-worksheet-data-table>
 </div>
-<br>
+
+
+<!-- <br>
 <label for="dataOrientation">
     Are meters entered as rows or columns?
 </label>
@@ -88,7 +82,7 @@
     <select class="form-control" name="energyConsumptionColumn" [(ngModel)]="selectedEnergyConsumptionColumn" (change)="setColumns()">
         <option class="form-control" *ngFor="let header of headers; let index = index;" [ngValue]="index">{{header}}
         </option>
-    </select> -->
+    </select> --
 
 
 </div>
@@ -97,4 +91,4 @@
 <div class="saveCancel item-right text-right">
     <button class="btn btn-danger" (click)="close()">Cancel</button>
     <button class="btn btn-success" (click)="continue()">Continue</button>
-</div>
+</div> -->
