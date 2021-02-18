@@ -1,7 +1,7 @@
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { Component, OnInit } from '@angular/core';
 import { ColumnItem, ExcelWizardService } from '../excel-wizard.service';
-
+import * as _ from 'lodash';
 @Component({
   selector: 'app-columns-wizard',
   templateUrl: './columns-wizard.component.html',
@@ -11,15 +11,19 @@ export class ColumnsWizardComponent implements OnInit {
 
   columnGroups: Array<{ groupLabel: string, groupItems: Array<ColumnItem>, id: string }>;
   groupItemIds: Array<string>;
+  dataOrientation: string = 'column';
+  minDate: Date;
+  maxDate: Date;
   constructor(private excelWizardService: ExcelWizardService) { }
 
   ngOnInit(): void {
     this.columnGroups = this.excelWizardService.columnGroups.getValue();
     this.groupItemIds = this.columnGroups.map(group => { return group.id });
+    this.setMinMaxDate();
   }
 
 
-  drop(dropData: CdkDragDrop<string[]>) {
+  dropColumn(dropData: CdkDragDrop<string[]>) {
     this.columnGroups.forEach(group => {
       if (group.id == dropData.previousContainer.id) {
         //remove
@@ -27,11 +31,47 @@ export class ColumnsWizardComponent implements OnInit {
         if (itemIndex > -1) {
           group.groupItems.splice(itemIndex, 1);
         }
+        if (group.groupLabel == 'Date' && group.groupItems.length == 0) {
+          this.minDate = undefined;
+          this.maxDate = undefined;
+        }
       }
       if (group.id == dropData.container.id) {
-        //add
-        group.groupItems.push(dropData.item.data);
+        //check is date (only one)
+        if (group.groupLabel == 'Date') {
+          if (group.groupItems.length != 0) {
+            let removeExisting: ColumnItem = group.groupItems.pop();
+            this.columnGroups.forEach(group => {
+              if (group.groupLabel == 'Unused') {
+                group.groupItems.push(removeExisting);
+              }
+            });
+          }
+          //add
+          group.groupItems.push(dropData.item.data);
+          this.setMinMaxDate();
+        } else {
+          //add
+          group.groupItems.push(dropData.item.data);
+        }
       }
     });
+  }
+
+
+  setMinMaxDate() {
+    let selectedWorksheetDataHeaderMap: Array<any> = this.excelWizardService.selectedWorksheetDataHeaderMap.getValue();
+    let dateGroup = this.columnGroups.find(group => {
+      return group.groupLabel == 'Date';
+    });
+    if (dateGroup.groupItems.length != 0) {
+      let dateColumn: ColumnItem = dateGroup.groupItems[0];
+      let datesColumnData: Array<string> = selectedWorksheetDataHeaderMap.map(data => { return data[dateColumn.value] });
+      datesColumnData = datesColumnData.filter(item => { return item != undefined });
+      let importMeterDates: Array<Date> = datesColumnData.map(data => { return new Date(data) });
+      importMeterDates = importMeterDates.filter(dateItem => { return dateItem instanceof Date && !isNaN(dateItem.getTime()) });
+      this.minDate = _.min(importMeterDates);
+      this.maxDate = _.max(importMeterDates);
+    }
   }
 }

@@ -10,7 +10,8 @@ export class ExcelWizardService {
 
   workbook: XLSX.WorkBook;
   importMeters: Array<IdbUtilityMeter>;
-  selectedWorksheetData: BehaviorSubject<Array<Array<number | string | Date>>>;
+  selectedWorksheetData: BehaviorSubject<Array<Array<string>>>;
+  selectedWorksheetDataHeaderMap: BehaviorSubject<Array<any>>;
   selectedWorksheetName: string;
 
   // unusedColumns: BehaviorSubject<Array<ColumnItem>>;
@@ -22,6 +23,7 @@ export class ExcelWizardService {
 
   constructor() {
     this.selectedWorksheetData = new BehaviorSubject([]);
+    this.selectedWorksheetDataHeaderMap = new BehaviorSubject([]);
     this.columnGroups = new BehaviorSubject<Array<{groupLabel: string, groupItems: Array<ColumnItem>, id: string}>>([]);
     this.selectedWorksheetData.subscribe(data => {
       if (data && data.length != 0) {
@@ -36,13 +38,15 @@ export class ExcelWizardService {
   }
 
   parseWorksheet() {
-    let selectedWorksheetData: Array<Array<number | string | Date>> = XLSX.utils.sheet_to_json(this.workbook.Sheets[this.selectedWorksheetName], { header: 1 });
+    let selectedWorksheetData: Array<Array<string>> = XLSX.utils.sheet_to_json(this.workbook.Sheets[this.selectedWorksheetName], { header: 1 });
     this.selectedWorksheetData.next(selectedWorksheetData);
+    let selectedWorksheetDataHeaderMap: Array<any> = XLSX.utils.sheet_to_json(this.workbook.Sheets[this.selectedWorksheetName]);
+    this.selectedWorksheetDataHeaderMap.next(selectedWorksheetDataHeaderMap);
     // this.selectedDateColumn = 0;
     // this.setColumns();
   }
 
-  setColumnGroups(headers: Array<number | string | Date>) {
+  setColumnGroups(headers: Array<string>) {
     let columnGroups: Array<{groupLabel: string, groupItems: Array<ColumnItem>, id: string}> = new Array();
     let dateGroupItems: Array<ColumnItem> = new Array();
     let unusedColumns: Array<ColumnItem> = new Array();
@@ -110,6 +114,6 @@ export class ExcelWizardService {
 
 export interface ColumnItem {
   index: number,
-  value: number | string | Date,
+  value: string,
   id: string
 }

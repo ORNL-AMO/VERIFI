@@ -1,20 +1,70 @@
 <div class="worksheet-data-table">
-    <app-worksheet-data-table></app-worksheet-data-table>
+    <app-worksheet-data-table [columnGroups]="columnGroups"></app-worksheet-data-table>
 </div>
 <hr>
-<div class="row no-gutters">
-    <div cdkDropList [cdkDropListData]="columnGroups" class="card col-6" *ngFor="let columnGroup of columnGroups"
-        (cdkDropListDropped)="drop($event)" id={{columnGroup.id}} [cdkDropListConnectedTo]="groupItemIds">
+<label for="dataOrientation">
+    Are meters entered as rows or columns?
+</label>
+<select class="form-control" name="dataOrientation" [(ngModel)]="dataOrientation">
+    <option [ngValue]="'column'">Columns</option>
+    <option [ngValue]="'row'">Rows</option>
+</select>
+<hr>
+<h6>Map the data columns</h6>
+<div class="row no-gutters" *ngIf="dataOrientation == 'column'">
+    <div cdkDropList [cdkDropListData]="columnGroups" class="card col-md-3 col-sm-6"
+        *ngFor="let columnGroup of columnGroups" (cdkDropListDropped)="dropColumn($event)" id={{columnGroup.id}}
+        [cdkDropListConnectedTo]="groupItemIds" [ngClass]="columnGroup.groupLabel">
         <div class="card-header">
             {{columnGroup.groupLabel}}
         </div>
         <div class="card-body">
-            <!-- <div class="d-flex flex-wrap"> -->
-            <button [cdkDragData]="groupItem" class="btn btn-primary m-2"
-                *ngFor="let groupItem of columnGroup.groupItems" cdkDrag>
+            <!-- <button [cdkDragData]="groupItem" class="btn m-2" *ngFor="let groupItem of columnGroup.groupItems" cdkDrag>
                 {{groupItem.value}}
-            </button>
-            <!-- </div> -->
+            </button> -->
+
+            <div class="list-item mt-2 mb-2 p-2" [cdkDragData]="groupItem" *ngFor="let groupItem of columnGroup.groupItems"
+                cdkDrag>
+                <span class="fa fa-arrows-alt"></span>{{groupItem.value}}
+            </div>
+
+
+            <p class="alert alert-warning" *ngIf="columnGroup.groupLabel == 'Date'">Date range based on selection:
+                ({{minDate | date}} - {{maxDate | date}})</p>
+        </div>
+    </div>
+</div>
+<div class="row no-gutters" *ngIf="dataOrientation == 'row'">
+    <div class="col card">
+        <div class="card-header">
+            Unused Columns
+        </div>
+        <div class="card-body">
+
+        </div>
+    </div>
+    <div class="col card">
+        <div class="card-header">
+            Date ({{minDate | date}} - {{maxDate | date}})
+        </div>
+        <div class="card-body">
+
+        </div>
+    </div>
+    <div class="col card">
+        <div class="card-header">
+            Meter Number/Name
+        </div>
+        <div class="card-body">
+
+        </div>
+    </div>
+    <div class="col card">
+        <div class="card-header">
+            Energy Consumption
+        </div>
+        <div class="card-body">
+
         </div>
     </div>
 </div>
