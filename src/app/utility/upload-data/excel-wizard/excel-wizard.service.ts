@@ -13,22 +13,19 @@ export class ExcelWizardService {
   selectedWorksheetData: BehaviorSubject<Array<Array<number | string | Date>>>;
   selectedWorksheetName: string;
 
-  unusedColumns: BehaviorSubject<Array<ColumnItem>>;
-  dateColumn: BehaviorSubject<ColumnItem>;
-  meterColumns: BehaviorSubject<Array<ColumnItem>>;
-  predictorsColumns: BehaviorSubject<Array<ColumnItem>>;
+  // unusedColumns: BehaviorSubject<Array<ColumnItem>>;
+  // dateColumn: BehaviorSubject<ColumnItem>;
+  // meterColumns: BehaviorSubject<Array<ColumnItem>>;
+  // predictorsColumns: BehaviorSubject<Array<ColumnItem>>;
 
-
+  columnGroups: BehaviorSubject<Array<{groupLabel: string, groupItems: Array<ColumnItem>, id: string}>>;
 
   constructor() {
     this.selectedWorksheetData = new BehaviorSubject([]);
-    this.meterColumns = new BehaviorSubject<Array<ColumnItem>>([]);
-    this.predictorsColumns = new BehaviorSubject<Array<ColumnItem>>([]);
-    this.dateColumn = new BehaviorSubject<ColumnItem>(undefined);
-    this.unusedColumns = new BehaviorSubject<Array<ColumnItem>>([]);
+    this.columnGroups = new BehaviorSubject<Array<{groupLabel: string, groupItems: Array<ColumnItem>, id: string}>>([]);
     this.selectedWorksheetData.subscribe(data => {
       if (data && data.length != 0) {
-        this.setColumns(data[0]);
+        this.setColumnGroups(data[0]);
       }
     });
   }
@@ -45,23 +42,42 @@ export class ExcelWizardService {
     // this.setColumns();
   }
 
-  setColumns(headers: Array<number | string | Date>) {
-    this.meterColumns.next([]);
-    this.dateColumn.next(undefined);
-    this.predictorsColumns.next([]);
+  setColumnGroups(headers: Array<number | string | Date>) {
+    let columnGroups: Array<{groupLabel: string, groupItems: Array<ColumnItem>, id: string}> = new Array();
+    let dateGroupItems: Array<ColumnItem> = new Array();
     let unusedColumns: Array<ColumnItem> = new Array();
     headers.forEach((header, index) => {
-      unusedColumns.push({ value: header, index: index });
+      unusedColumns.push({ value: header, index: index, id: Math.random().toString(36).substr(2, 9)});
     });
 
     //todo: enhance check for "Date"
     let dateColumnIndex: number = unusedColumns.findIndex((column) => {return column.value == 'Date'});
     if(dateColumnIndex > -1){
       let dateColumn: ColumnItem = unusedColumns[dateColumnIndex];
-      this.dateColumn.next(dateColumn);
+      dateGroupItems.push(dateColumn);
       unusedColumns.splice(dateColumnIndex, 1);
     }
-    this.unusedColumns.next(unusedColumns);
+    columnGroups.push({
+      groupLabel: 'Date',
+      groupItems: dateGroupItems,
+      id: Math.random().toString(36).substr(2, 9)
+    });
+    columnGroups.push({
+      groupLabel: 'Meters',
+      groupItems: [],
+      id: Math.random().toString(36).substr(2, 9)
+    });
+    columnGroups.push({
+      groupLabel: 'Predictors',
+      groupItems: [],
+      id: Math.random().toString(36).substr(2, 9)
+    });
+    columnGroups.push({
+      groupLabel: 'Unused',
+      groupItems: unusedColumns,
+      id: Math.random().toString(36).substr(2, 9)
+    });
+    this.columnGroups.next(columnGroups);
   }
 
   // setColumns() {
@@ -94,5 +110,6 @@ export class ExcelWizardService {
 
 export interface ColumnItem {
   index: number,
-  value: number | string | Date
+  value: number | string | Date,
+  id: string
 }

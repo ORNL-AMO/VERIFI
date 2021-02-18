@@ -3,54 +3,18 @@
 </div>
 <hr>
 <div class="row no-gutters">
-    <div class="col-6">
-        <div class="card">
-            <div class="card-header">
-                Unused Columns
-            </div>
-            <div class="card-body">
-                <div class="d-flex flex-wrap">
-                    <button class="btn btn-primary m-1"
-                        *ngFor="let unusedColumn of unusedColumns">{{unusedColumn.value}}</button>
-                </div>
-            </div>
+    <div cdkDropList [cdkDropListData]="columnGroups" class="card col-6" *ngFor="let columnGroup of columnGroups"
+        (cdkDropListDropped)="drop($event)" id={{columnGroup.id}} [cdkDropListConnectedTo]="groupItemIds">
+        <div class="card-header">
+            {{columnGroup.groupLabel}}
         </div>
-
-    </div>
-    <div class="col-6">
-        <div class="card">
-            <div class="card-header">
-                Date Column
-            </div>
-            <div class="card-body">
-                <button class="btn btn-primary m-1" *ngIf="dateColumn">{{dateColumn.value}}</button>
-            </div>
+        <div class="card-body">
+            <!-- <div class="d-flex flex-wrap"> -->
+            <button [cdkDragData]="groupItem" class="btn btn-primary m-2"
+                *ngFor="let groupItem of columnGroup.groupItems" cdkDrag>
+                {{groupItem.value}}
+            </button>
+            <!-- </div> -->
         </div>
-
-    </div>
-    <div class="col-6">
-        <div class="card">
-            <div class="card-header">
-                Meters Columns
-            </div>
-            <div class="card-body">
-                <button class="btn btn-primary m-1"
-                    *ngFor="let meterColumn of meterColumns">{{meterColumn.value}}</button>
-            </div>
-        </div>
-
-    </div>
-    <div class="col-6">
-        <div class="card">
-            <div class="card-header">
-                Predictors Columns
-            </div>
-            <div class="card-body">
-                <button class="btn btn-primary m-1"
-                    *ngFor="let predictorColumn of predictorsColumns">{{predictorColumn.value}}</button>
-
-            </div>
-        </div>
-
     </div>
 </div>

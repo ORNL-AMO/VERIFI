@@ -1,3 +1,4 @@
+import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { Component, OnInit } from '@angular/core';
 import { ColumnItem, ExcelWizardService } from '../excel-wizard.service';
 
@@ -8,18 +9,29 @@ import { ColumnItem, ExcelWizardService } from '../excel-wizard.service';
 })
 export class ColumnsWizardComponent implements OnInit {
 
-  unusedColumns: Array<ColumnItem>;
-  dateColumn: ColumnItem;
-  meterColumns: Array<ColumnItem>;
-  predictorsColumns: Array<ColumnItem>;
-
+  columnGroups: Array<{ groupLabel: string, groupItems: Array<ColumnItem>, id: string }>;
+  groupItemIds: Array<string>;
   constructor(private excelWizardService: ExcelWizardService) { }
 
   ngOnInit(): void {
-    this.unusedColumns = this.excelWizardService.unusedColumns.getValue();
-    this.dateColumn = this.excelWizardService.dateColumn.getValue();
-    this.predictorsColumns = this.excelWizardService.predictorsColumns.getValue();
-    this.meterColumns = this.excelWizardService.meterColumns.getValue();
+    this.columnGroups = this.excelWizardService.columnGroups.getValue();
+    this.groupItemIds = this.columnGroups.map(group => { return group.id });
   }
 
+
+  drop(dropData: CdkDragDrop<string[]>) {
+    this.columnGroups.forEach(group => {
+      if (group.id == dropData.previousContainer.id) {
+        //remove
+        let itemIndex: number = group.groupItems.findIndex(groupItem => { return groupItem.id == dropData.item.data.id });
+        if (itemIndex > -1) {
+          group.groupItems.splice(itemIndex, 1);
+        }
+      }
+      if (group.id == dropData.container.id) {
+        //add
+        group.groupItems.push(dropData.item.data);
+      }
+    });
+  }
 }
