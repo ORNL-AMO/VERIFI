@@ -53,6 +53,7 @@
     transition: background-color 1s ease;
     font-size: 14px;
     font-weight: bold;
+    background-color: #fff;
   }
 
   .list-item:hover{

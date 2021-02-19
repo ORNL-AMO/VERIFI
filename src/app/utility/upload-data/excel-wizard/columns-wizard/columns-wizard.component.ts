@@ -10,18 +10,50 @@ import * as _ from 'lodash';
 export class ColumnsWizardComponent implements OnInit {
 
   columnGroups: Array<{ groupLabel: string, groupItems: Array<ColumnItem>, id: string }>;
-  groupItemIds: Array<string>;
+  rowGroups: Array<{ fieldLabel: string, fieldName: string, groupItems: Array<ColumnItem>, id: string }>;
+  columnGroupItemIds: Array<string>;
+  rowGroupItemIds: Array<string>;
+
   dataOrientation: string = 'column';
   minDate: Date;
   maxDate: Date;
+  rowOptionsToAdd: Array<{ fieldLabel: string, fieldName: string }> = [
+    {
+      fieldLabel: 'Total Cost',
+      fieldName: 'energyCost'
+    },
+    {
+      fieldLabel: 'Total Demand',
+      fieldName: 'totalDemand'
+    },
+    {
+      fieldLabel: 'Commodity Charge',
+      fieldName: 'commodityCharge'
+    },
+    {
+      fieldLabel: 'Delivery Charges',
+      fieldName: 'deliveryCharges'
+    },
+    {
+      fieldLabel: 'Other Charges',
+      fieldName: 'otherCharges'
+    }
+  ];
+  fieldToAdd: { fieldLabel: string, fieldName: string } = {
+    fieldLabel: 'Total Cost',
+    fieldName: 'energyCost'
+  };
   constructor(private excelWizardService: ExcelWizardService) { }
 
   ngOnInit(): void {
+    this.rowGroups = this.excelWizardService.rowGroups.getValue();
+    this.rowGroupItemIds = this.rowGroups.map(group => { return group.id });
+
     this.columnGroups = this.excelWizardService.columnGroups.getValue();
-    this.groupItemIds = this.columnGroups.map(group => { return group.id });
+    this.columnGroupItemIds = this.columnGroups.map(group => { return group.id });
+
     this.setMinMaxDate();
   }
-
 
   dropColumn(dropData: CdkDragDrop<string[]>) {
     this.columnGroups.forEach(group => {
@@ -73,5 +105,38 @@ export class ColumnsWizardComponent implements OnInit {
       this.minDate = _.min(importMeterDates);
       this.maxDate = _.max(importMeterDates);
     }
+  }
+
+  dropRow(dropData: CdkDragDrop<string[]>) {
+    let unusedGroup: { fieldLabel: string, fieldName: string, groupItems: Array<ColumnItem>, id: string } = this.rowGroups[0];
+    this.rowGroups.forEach(group => {
+      if (group.id == dropData.previousContainer.id) {
+        //remove
+        let itemIndex: number = group.groupItems.findIndex(groupItem => { return groupItem.id == dropData.item.data.id });
+        if (itemIndex > -1) {
+          group.groupItems.splice(itemIndex, 1);
+        }
+      }
+      if (group.id == dropData.container.id) {
+        //check is date (only one)
+        if (group.groupItems.length != 0) {
+          let removeExisting: ColumnItem = group.groupItems.pop();
+          unusedGroup.groupItems.push(removeExisting);
+        }
+        //add
+        group.groupItems.push(dropData.item.data);
+      }
+    });
+  }
+
+  addField() {
+    let id: string = Math.random().toString(36).substr(2, 9);
+    this.rowGroups.push({
+      fieldLabel: this.fieldToAdd.fieldLabel,
+      fieldName: this.fieldToAdd.fieldName,
+      groupItems: new Array(),
+      id: id
+    });
+    this.rowGroupItemIds.push(id);
   }
 }

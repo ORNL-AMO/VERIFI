@@ -20,14 +20,17 @@ export class ExcelWizardService {
   // predictorsColumns: BehaviorSubject<Array<ColumnItem>>;
 
   columnGroups: BehaviorSubject<Array<{groupLabel: string, groupItems: Array<ColumnItem>, id: string}>>;
+  rowGroups:BehaviorSubject<Array<{fieldLabel: string, fieldName: string, groupItems: Array<ColumnItem>, id: string}>>;
 
   constructor() {
     this.selectedWorksheetData = new BehaviorSubject([]);
     this.selectedWorksheetDataHeaderMap = new BehaviorSubject([]);
+    this.rowGroups = new BehaviorSubject([]);
     this.columnGroups = new BehaviorSubject<Array<{groupLabel: string, groupItems: Array<ColumnItem>, id: string}>>([]);
     this.selectedWorksheetData.subscribe(data => {
       if (data && data.length != 0) {
         this.setColumnGroups(data[0]);
+        this.setRowGroups(data[0]);
       }
     });
   }
@@ -42,8 +45,6 @@ export class ExcelWizardService {
     this.selectedWorksheetData.next(selectedWorksheetData);
     let selectedWorksheetDataHeaderMap: Array<any> = XLSX.utils.sheet_to_json(this.workbook.Sheets[this.selectedWorksheetName]);
     this.selectedWorksheetDataHeaderMap.next(selectedWorksheetDataHeaderMap);
-    // this.selectedDateColumn = 0;
-    // this.setColumns();
   }
 
   setColumnGroups(headers: Array<string>) {
@@ -84,29 +85,51 @@ export class ExcelWizardService {
     this.columnGroups.next(columnGroups);
   }
 
-  // setColumns() {
-  //   this.headers.forEach((header, index) => {
-  //     if (index != this.selectedDateColumn) {
-  //       this.selectedMeterColumns.push({
-  //         index: index,
-  //         name: header
-  //       });
-  //     }
-  //   });
-  //   this.setDates();
-  // }
 
-  // setDates() {
-  //   let datesColumnData: Array<number | string | Date> = this.selectedWorksheetData.map(dataItem => {
-  //     return dataItem[this.selectedDateColumn];
-  //   });
-  //   datesColumnData = datesColumnData.filter(item => { return item != undefined });
-  //   let importMeterDates: Array<Date> = datesColumnData.map(data => { return new Date(data) });
-  //   importMeterDates = importMeterDates.filter(dateItem => { return dateItem instanceof Date && !isNaN(dateItem.getTime()) });
-  //   this.minDate = _.min(importMeterDates);
-  //   this.maxDate = _.max(importMeterDates);
-  //   this.uploadDataService.excelImportMeterDates.next(importMeterDates);
-  // }
+  setRowGroups(headers: Array<string>) {
+    let rowGroups: Array<{fieldLabel: string, fieldName: string, groupItems: Array<ColumnItem>, id: string}> = new Array();
+    let dateGroupItems: Array<ColumnItem> = new Array();
+    let unusedColumns: Array<ColumnItem> = new Array();
+    headers.forEach((header, index) => {
+      unusedColumns.push({ value: header, index: index, id: Math.random().toString(36).substr(2, 9)});
+    });
+
+    //todo: enhance check for "Date"
+    let dateColumnIndex: number = unusedColumns.findIndex((column) => {return column.value == 'Date'});
+    if(dateColumnIndex > -1){
+      let dateColumn: ColumnItem = unusedColumns[dateColumnIndex];
+      dateGroupItems.push(dateColumn);
+      unusedColumns.splice(dateColumnIndex, 1);
+    }
+    rowGroups.push({
+      fieldLabel: 'Unused',
+      fieldName: 'unused',
+      groupItems: unusedColumns,
+      id: Math.random().toString(36).substr(2, 9)
+    });
+    rowGroups.push({
+      fieldLabel: 'Date',
+      fieldName: 'readDate',
+      groupItems: dateGroupItems,
+      id: Math.random().toString(36).substr(2, 9)
+    });
+    rowGroups.push({
+      fieldLabel: 'Meter Number/Name',
+      fieldName: 'meterNumber',
+      groupItems: [],
+      id: Math.random().toString(36).substr(2, 9)
+    });
+    rowGroups.push({
+      fieldLabel: 'Energy Consumption',
+      fieldName: 'energyConsumption',
+      groupItems: [],
+      id: Math.random().toString(36).substr(2, 9)
+    });
+    this.rowGroups.next(rowGroups);
+  }
+
+
+
 
 
 }
