@@ -27,7 +27,7 @@ export class UploadDataComponent implements OnInit {
   // inputLabel: string = 'Browse Files'
 
   // selectedExcelFile: File;
-  // selectedExcelFileSub: Subscription;
+  // templateWorkBooksSub: Subscription;
   constructor(private csvToJsonService: CsvToJsonService, private loadingService: LoadingService,
     private importMeterService: ImportMeterService, private facilityDbService: FacilitydbService,
     private utilityMeterDbService: UtilityMeterdbService, private uploadDataService: UploadDataService) { }
@@ -37,6 +37,10 @@ export class UploadDataComponent implements OnInit {
     //   this.selectedExcelFile = val;
     // });
     this.initArrays();
+
+    this.uploadDataService.templateWorkBooks.subscribe(val => {
+      console.log(val);
+    })
   }
 
   ngOnDestroy() {
@@ -73,7 +77,23 @@ export class UploadDataComponent implements OnInit {
     this.fileReferences.forEach(fileReference => {
       let excelTest = /.xlsx$/;
       if (excelTest.test(fileReference.name)) {
-        this.uploadDataService.addExcelFile(fileReference);
+        // this.uploadDataService.addExcelFile(fileReference);
+
+        const reader: FileReader = new FileReader();
+        reader.onload = (e: any) => {
+          /* read workbook */
+          const bstr: string = e.target.result;
+          let workBook: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary', cellDates: true });
+          let isTemplate: boolean = this.checkSheetNamesForTemplate(workBook.SheetNames);
+          if (isTemplate) {
+            this.uploadDataService.addTemplateWorkBook(workBook, fileReference.name);
+          } else {
+            this.uploadDataService.addExcelFile(fileReference);
+          }
+        };
+        reader.readAsBinaryString(fileReference);
+
+
       } else {
         let fr: FileReader = new FileReader();
         fr.readAsText(fileReference);
@@ -85,6 +105,14 @@ export class UploadDataComponent implements OnInit {
 
       }
     })
+  }
+
+  checkSheetNamesForTemplate(sheetNames: Array<string>): boolean {
+    if (sheetNames[0] == "Meters-Utilities" && sheetNames[1] == "Electricity" && sheetNames[2] == "Non-electricity" && sheetNames[3] == "HIDE") {
+      return true;
+    } else {
+      return false;
+    }
   }
 
 

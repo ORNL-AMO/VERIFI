@@ -47,6 +47,38 @@ export class ImportMeterService {
     }
   }
 
+  importMetersFromTemplateFile(data: Array<any>, selectedFacility: IdbFacility, facilityMeters: Array<IdbUtilityMeter>): ImportMeterFileSummary {
+    let existingMeters: Array<IdbUtilityMeter> = new Array();
+    let newMeters: Array<IdbUtilityMeter> = new Array();
+    let invalidMeters: Array<IdbUtilityMeter> = new Array();
+    data.forEach(dataItem => {
+      let checkHasData: boolean = false;
+      Object.keys(dataItem).forEach((key) => {
+        if (dataItem[key] != null) {
+          checkHasData = true;
+        }
+      });
+      if (checkHasData) {
+        let importMeter: ImportMeter = this.parseDataItem(dataItem);
+        let newMeter: IdbUtilityMeter = this.getNewMeterFromImportMeter(importMeter, selectedFacility);
+        let importMeterStatus: string = this.getImportMeterStatus(newMeter, facilityMeters);
+        if (importMeterStatus == "new") {
+          newMeters.push(newMeter);
+        } else if (importMeterStatus == "existing") {
+          existingMeters.push(newMeter);
+        } else if (importMeterStatus == "invalid") {
+          invalidMeters.push(newMeter);
+        }
+      }
+    });
+    return {
+      existingMeters: existingMeters,
+      newMeters: newMeters,
+      invalidMeters: invalidMeters
+    }
+  }
+
+
   parseDataItem(dataItem: any): ImportMeter {
     return {
       accountNumber: dataItem["Account Number"],
