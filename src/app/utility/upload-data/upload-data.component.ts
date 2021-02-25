@@ -8,9 +8,6 @@ import { ImportMeterService, ImportMeterFileSummary } from './import-meter.servi
 import { ElectricityMeterDataHeaders, MeterHeaders, NonElectricityMeterDataHeaders } from './templateHeaders';
 import * as XLSX from 'xlsx';
 import { UploadDataService } from './upload-data.service';
-import { Subscription } from 'rxjs';
-
-type AOA = any[][];
 
 @Component({
   selector: 'app-upload-data',
@@ -21,35 +18,17 @@ export class UploadDataComponent implements OnInit {
 
 
 
-  // filesSummary: Array<{ fileType: string, fileData: CsvImportData, fileName: string }>;
   fileReferences: Array<any>;
-  // nonTemplateFiles: Array<{ fileType: string, fileData: CsvImportData, fileName: string }>;
-  // inputLabel: string = 'Browse Files'
-
-  // selectedExcelFile: File;
-  // templateWorkBooksSub: Subscription;
   constructor(private csvToJsonService: CsvToJsonService, private loadingService: LoadingService,
     private importMeterService: ImportMeterService, private facilityDbService: FacilitydbService,
     private utilityMeterDbService: UtilityMeterdbService, private uploadDataService: UploadDataService) { }
 
   ngOnInit(): void {
-    // this.selectedExcelFileSub = this.uploadDataService.selectedExcelFile.subscribe(val => {
-    //   this.selectedExcelFile = val;
-    // });
     this.initArrays();
-
-    this.uploadDataService.templateWorkBooks.subscribe(val => {
-      console.log(val);
-    })
   }
 
-  ngOnDestroy() {
-    // this.selectedExcelFileSub.unsubscribe();
-  }
 
   initArrays() {
-    // this.filesSummary = new Array();
-    // this.nonTemplateFiles = new Array();
     this.fileReferences = new Array();
   }
 
@@ -61,7 +40,6 @@ export class UploadDataComponent implements OnInit {
         let regex2 = /.CSV$/;
         let regex3 = /.xlsx$/;
         for (let index = 0; index < files.length; index++) {
-          const element = files[index];
           if (regex.test(files[index].name) || regex2.test(files[index].name) || regex3.test(files[index].name)) {
             this.fileReferences.push(files[index]);
           }
@@ -77,8 +55,6 @@ export class UploadDataComponent implements OnInit {
     this.fileReferences.forEach(fileReference => {
       let excelTest = /.xlsx$/;
       if (excelTest.test(fileReference.name)) {
-        // this.uploadDataService.addExcelFile(fileReference);
-
         const reader: FileReader = new FileReader();
         reader.onload = (e: any) => {
           /* read workbook */
@@ -92,18 +68,18 @@ export class UploadDataComponent implements OnInit {
           }
         };
         reader.readAsBinaryString(fileReference);
-
-
-      } else {
-        let fr: FileReader = new FileReader();
-        fr.readAsText(fileReference);
-        fr.onloadend = (e) => {
-          let importData: any = JSON.parse(JSON.stringify(fr.result));
-          let fileHeaders: Array<string> = this.csvToJsonService.parseCsvHeaders(importData);
-          this.addFile(importData, fileHeaders, fileReference.name);
-        };
-
       }
+
+      // } else {
+      //   let fr: FileReader = new FileReader();
+      //   fr.readAsText(fileReference);
+      //   fr.onloadend = (e) => {
+      //     let importData: any = JSON.parse(JSON.stringify(fr.result));
+      //     let fileHeaders: Array<string> = this.csvToJsonService.parseCsvHeaders(importData);
+      //     this.addFile(importData, fileHeaders, fileReference.name);
+      //   };
+
+      // }
     })
   }
 
@@ -116,35 +92,35 @@ export class UploadDataComponent implements OnInit {
   }
 
 
-  addFile(data: any, fileHeaders: Array<string>, fileName: string) {
-    if (JSON.stringify(fileHeaders) === JSON.stringify(MeterHeaders)) {
-      this.addMeterFile(data, fileName);
-    } else if (JSON.stringify(fileHeaders) === JSON.stringify(ElectricityMeterDataHeaders)) {
-      //electricity meter data template 
-      // this.filesSummary.push({
-      //   fileType: 'Meter Data',
-      //   fileData: this.csvToJsonService.parseCsvWithHeaders(data, 0),
-      //   fileName: fileName
-      // });
-      this.uploadDataService.addMeterDataFile(fileName, 'Electricity');
-    } else if (JSON.stringify(fileHeaders) === JSON.stringify(NonElectricityMeterDataHeaders)) {
-      //non electricity meter data template
-      // this.filesSummary.push({
-      //   fileType: 'Meter Data',
-      //   fileData: this.csvToJsonService.parseCsvWithHeaders(data, 0),
-      //   fileName: fileName
-      // });
-      this.uploadDataService.addMeterDataFile(fileName, 'Non-Electricity');
-    } else {
-      //other .csv file
-      // this.nonTemplateFiles.push({
-      //   fileType: undefined,
-      //   fileData: this.csvToJsonService.parseCsvWithHeaders(data, 0),
-      //   fileName: fileName
-      // });
-    }
+  // addFile(data: any, fileHeaders: Array<string>, fileName: string) {
+  //   if (JSON.stringify(fileHeaders) === JSON.stringify(MeterHeaders)) {
+  //     this.addMeterFile(data, fileName);
+  //   } else if (JSON.stringify(fileHeaders) === JSON.stringify(ElectricityMeterDataHeaders)) {
+  //     //electricity meter data template 
+  //     // this.filesSummary.push({
+  //     //   fileType: 'Meter Data',
+  //     //   fileData: this.csvToJsonService.parseCsvWithHeaders(data, 0),
+  //     //   fileName: fileName
+  //     // });
+  //     this.uploadDataService.addMeterDataFile(fileName, 'Electricity');
+  //   } else if (JSON.stringify(fileHeaders) === JSON.stringify(NonElectricityMeterDataHeaders)) {
+  //     //non electricity meter data template
+  //     // this.filesSummary.push({
+  //     //   fileType: 'Meter Data',
+  //     //   fileData: this.csvToJsonService.parseCsvWithHeaders(data, 0),
+  //     //   fileName: fileName
+  //     // });
+  //     this.uploadDataService.addMeterDataFile(fileName, 'Non-Electricity');
+  //   } else {
+  //     //other .csv file
+  //     // this.nonTemplateFiles.push({
+  //     //   fileType: undefined,
+  //     //   fileData: this.csvToJsonService.parseCsvWithHeaders(data, 0),
+  //     //   fileName: fileName
+  //     // });
+  //   }
 
-  }
+  // }
 
   addMeterFile(data: any, fileName: string) {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();

@@ -10,9 +10,6 @@
                     File Name
                 </th>
                 <th>
-                    File Type
-                </th>
-                <th>
                     New
                 </th>
                 <th>
@@ -29,11 +26,12 @@
         <tbody>
             <tr *ngFor="let importMeterFile of importMeterDataFiles">
                 <td>{{importMeterFile.fileName}}</td>
-                <td>{{importMeterFile.fileType}}</td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
+                <td>{{importMeterFile.importMeterDataFileSummary.newMeterData.length}}</td>
+                <td>{{importMeterFile.importMeterDataFileSummary.existingMeterData.length}}</td>
+                <td>{{importMeterFile.importMeterDataFileSummary.invalidMeterData.length}}</td>
+                <td>
+
+                </td>
             </tr>
         </tbody>
     </table>

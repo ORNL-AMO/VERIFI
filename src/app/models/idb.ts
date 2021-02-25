@@ -120,7 +120,8 @@ export interface IdbUtilityMeterData {
     powerFactorCharge: number,
     businessCharge: number,
     utilityTax: number,
-    latePayment: number
+    latePayment: number,
+    meterNumber?: string
 }
 
 export interface IdbPredictorEntry {

@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
+import { ImportMeterDataFileSummary } from '../import-meter-data.service';
 import { UploadDataService } from '../upload-data.service';
 
 @Component({
@@ -9,7 +10,7 @@ import { UploadDataService } from '../upload-data.service';
 })
 export class MeterDataTableComponent implements OnInit {
 
-  importMeterDataFiles: Array<{ fileName: string, fileType: string }>;
+  importMeterDataFiles: Array<{ fileName: string, importMeterDataFileSummary: ImportMeterDataFileSummary }>;
   importMeterDataFilesSub: Subscription;
   constructor(private uploadDataService: UploadDataService) { }
 
