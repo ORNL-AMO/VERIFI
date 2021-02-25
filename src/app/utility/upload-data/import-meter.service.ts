@@ -43,7 +43,8 @@ export class ImportMeterService {
     return {
       existingMeters: existingMeters,
       newMeters: newMeters,
-      invalidMeters: invalidMeters
+      invalidMeters: invalidMeters,
+      skippedMeters: []
     }
   }
 
@@ -74,7 +75,8 @@ export class ImportMeterService {
     return {
       existingMeters: existingMeters,
       newMeters: newMeters,
-      invalidMeters: invalidMeters
+      invalidMeters: invalidMeters,
+      skippedMeters: []
     }
   }
 
@@ -186,4 +188,5 @@ export interface ImportMeterFileSummary {
   existingMeters: Array<IdbUtilityMeter>,
   newMeters: Array<IdbUtilityMeter>,
   invalidMeters: Array<IdbUtilityMeter>
+  skippedMeters: Array<IdbUtilityMeter>;
 }

@@ -13,13 +13,16 @@ import { ImportMeterFileSummary, ImportMeterService } from './import-meter.servi
 })
 export class UploadDataService {
 
-  importMeterFiles: BehaviorSubject<Array<{ fileName: string, importMeterFileSummary: ImportMeterFileSummary }>>;
-  importMeterDataFiles: BehaviorSubject<Array<{ fileName: string, importMeterDataFileSummary: ImportMeterDataFileSummary }>>;
+  importMeterFiles: BehaviorSubject<Array<{ fileName: string, importMeterFileSummary: ImportMeterFileSummary, id: string }>>;
+  importMeterDataFiles: BehaviorSubject<Array<{ fileName: string, importMeterDataFileSummary: ImportMeterDataFileSummary, id: string }>>;
   excelFiles: BehaviorSubject<Array<File>>;
   excelImportMeters: BehaviorSubject<Array<IdbUtilityMeter>>;
   excelImportMeterDates: BehaviorSubject<Array<Date>>;
   excelImportMeterConsumption: BehaviorSubject<Array<Array<number>>>;
   templateWorkBooks: BehaviorSubject<Array<{ workBook: XLSX.WorkBook, fileName: string }>>;
+
+  importMeterFileWizard: BehaviorSubject<{ fileName: string, importMeterFileSummary: ImportMeterFileSummary, id: string }>;
+
   constructor(private facilityDbService: FacilitydbService, private utilityMeterDbService: UtilityMeterdbService, private importMeterService: ImportMeterService,
     private ImportMeterDataService: ImportMeterDataService, private utilityMeterDataDbService: UtilityMeterDatadbService) {
     this.importMeterFiles = new BehaviorSubject([]);
@@ -29,16 +32,20 @@ export class UploadDataService {
     this.excelImportMeterConsumption = new BehaviorSubject<Array<Array<number>>>([]);
     this.importMeterDataFiles = new BehaviorSubject([]);
     this.templateWorkBooks = new BehaviorSubject([]);
+    this.importMeterFileWizard = new BehaviorSubject(undefined);
+
+
     this.templateWorkBooks.subscribe(workBookData => {
       this.parseWorkBooks(workBookData);
     })
   }
 
   addMeterFile(fileName: string, summary: ImportMeterFileSummary) {
-    let importMeterFiles: Array<{ fileName: string, importMeterFileSummary: ImportMeterFileSummary }> = this.importMeterFiles.getValue();
+    let importMeterFiles: Array<{ fileName: string, importMeterFileSummary: ImportMeterFileSummary, id: string }> = this.importMeterFiles.getValue();
     importMeterFiles.push({
       fileName: fileName,
-      importMeterFileSummary: summary
+      importMeterFileSummary: summary,
+      id: Math.random().toString(36).substr(2, 9),
     });
     this.importMeterFiles.next(importMeterFiles);
   }
@@ -57,10 +64,11 @@ export class UploadDataService {
   }
 
   addMeterDataFile(fileName: string, importMeterDataFileSummary: ImportMeterDataFileSummary) {
-    let importMeterDataFiles: Array<{ fileName: string, importMeterDataFileSummary: ImportMeterDataFileSummary }> = this.importMeterDataFiles.getValue();
+    let importMeterDataFiles: Array<{ fileName: string, importMeterDataFileSummary: ImportMeterDataFileSummary, id: string }> = this.importMeterDataFiles.getValue();
     importMeterDataFiles.push({
       fileName: fileName,
-      importMeterDataFileSummary: importMeterDataFileSummary
+      importMeterDataFileSummary: importMeterDataFileSummary,
+      id: Math.random().toString(36).substr(2, 9)
     });
     this.importMeterDataFiles.next(importMeterDataFiles);
   }

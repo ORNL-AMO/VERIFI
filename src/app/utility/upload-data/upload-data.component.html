@@ -28,3 +28,11 @@
                 </table> 
         </div>-->
 </div>
+
+
+<div class="window" [class.open]="importMeterFileWizard">
+    <div class="windowOverlay"></div>
+    <div class="windowContent importMeterWindowContent">
+        <app-import-meter-wizard *ngIf="importMeterFileWizard"></app-import-meter-wizard>
+    </div>
+</div>

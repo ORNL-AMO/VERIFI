@@ -124,7 +124,6 @@ export class ImportMeterDataService {
     if (meterData.meterId) {
       correspondingMeter = facilityMeters.find(meter => { return meter.id == meterData.meterId })
     } else {
-      debugger
       correspondingMeter = metersToImport.find(meter => { return meter.meterNumber == meterData.meterNumber });
     }
     if (correspondingMeter) {

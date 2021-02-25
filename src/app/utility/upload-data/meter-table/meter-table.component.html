@@ -16,7 +16,7 @@
                     Existing
                 </th>
                 <th>
-                    Invalid
+                    Invalid/Skipped
                 </th>
                 <th>
                     Actions
@@ -28,9 +28,9 @@
                 <td>{{importMeterFile.fileName}}</td>
                 <td>{{importMeterFile.importMeterFileSummary.newMeters.length}}</td>
                 <td>{{importMeterFile.importMeterFileSummary.existingMeters.length}}</td>
-                <td>{{importMeterFile.importMeterFileSummary.invalidMeters.length}}</td>
+                <td>{{importMeterFile.importMeterFileSummary.skippedMeters.length + importMeterFile.importMeterFileSummary.invalidMeters.length}}</td>
                 <td>
-
+                    <a (click)="selectMeterFile(importMeterFile)">Wizard</a>
                 </td>
             </tr>
         </tbody>

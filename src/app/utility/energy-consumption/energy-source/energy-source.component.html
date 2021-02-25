@@ -90,12 +90,12 @@
     </div>
 </div>
 
-<div class="window" [class.open]="importWindow == true">
+<!-- <div class="window" [class.open]="importWindow == true">
     <div class="windowOverlay"></div>
     <div class="windowContent importMeterWindowContent">
         <app-import-meter-wizard (emitClose)="closeImportWindow()"></app-import-meter-wizard>
     </div>
-</div>
+</div> -->
 
 <div class="popup" [class.open]="meterToDelete">
     <div class="popup-header" *ngIf="meterToDelete">Delete Meter: {{meterToDelete.name}}

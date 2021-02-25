@@ -10,7 +10,7 @@ import { UploadDataService } from '../upload-data.service';
 })
 export class MeterTableComponent implements OnInit {
 
-  importMeterFiles: Array<{ fileName: string, importMeterFileSummary: ImportMeterFileSummary }>;
+  importMeterFiles: Array<{ fileName: string, importMeterFileSummary: ImportMeterFileSummary, id: string }>;
   importMeterFilesSub: Subscription;
   constructor(private uploadDataService: UploadDataService) { }
 
@@ -23,5 +23,10 @@ export class MeterTableComponent implements OnInit {
   ngOnDestroy(){
     this.importMeterFilesSub.unsubscribe();
   }
+
+  selectMeterFile(selectedFile: { fileName: string, importMeterFileSummary: ImportMeterFileSummary, id: string }){
+    this.uploadDataService.importMeterFileWizard.next(selectedFile);
+  }
+
 
 }

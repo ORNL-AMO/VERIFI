@@ -61,7 +61,7 @@ import { MetersTableComponent } from './dashboard/facility-overview/meters-table
 import { UtilityEnergyUseTableComponent } from './dashboard/facility-overview/utility-energy-use-table/utility-energy-use-table.component';
 import { AccountUtilityEnergyUseTableComponent } from './dashboard/account-overview/account-utility-energy-use-table/account-utility-energy-use-table.component';
 import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
-import { ImportMeterWizardComponent } from './utility/energy-consumption/energy-source/import-meter-wizard/import-meter-wizard.component';
+import { ImportMeterWizardComponent } from './utility/upload-data/import-meter-wizard/import-meter-wizard.component';
 import { EditMeterComponent } from './utility/energy-consumption/energy-source/edit-meter/edit-meter.component';
 import { OrderByPipe } from './shared/helper-pipes/order-by.pipe';
 import { ImportMeterDataWizardComponent } from './utility/energy-consumption/utility-meter-data/import-meter-data-wizard/import-meter-data-wizard.component';

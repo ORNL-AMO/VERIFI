@@ -8,6 +8,7 @@ import { ImportMeterService, ImportMeterFileSummary } from './import-meter.servi
 import { ElectricityMeterDataHeaders, MeterHeaders, NonElectricityMeterDataHeaders } from './templateHeaders';
 import * as XLSX from 'xlsx';
 import { UploadDataService } from './upload-data.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-upload-data',
@@ -16,7 +17,8 @@ import { UploadDataService } from './upload-data.service';
 })
 export class UploadDataComponent implements OnInit {
 
-
+  importMeterFileWizard: { fileName: string, importMeterFileSummary: ImportMeterFileSummary };
+  importMeterFileWizardSub: Subscription;
 
   fileReferences: Array<any>;
   constructor(private csvToJsonService: CsvToJsonService, private loadingService: LoadingService,
@@ -25,8 +27,15 @@ export class UploadDataComponent implements OnInit {
 
   ngOnInit(): void {
     this.initArrays();
+
+    this.importMeterFileWizardSub = this.uploadDataService.importMeterFileWizard.subscribe(val => {
+      this.importMeterFileWizard = val;
+    });
   }
 
+  ngOnDestroy(){
+    this.importMeterFileWizardSub.unsubscribe();
+  }
 
   initArrays() {
     this.fileReferences = new Array();
