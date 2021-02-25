@@ -14,7 +14,7 @@ import { ImportMeterFileSummary, ImportMeterService } from './import-meter.servi
 export class UploadDataService {
 
   importMeterFiles: BehaviorSubject<Array<{ fileName: string, importMeterFileSummary: ImportMeterFileSummary, id: string }>>;
-  importMeterDataFiles: BehaviorSubject<Array<{ fileName: string, importMeterDataFileSummary: ImportMeterDataFileSummary, id: string }>>;
+  importMeterDataFiles: BehaviorSubject<Array<{ fileName: string, importMeterDataFileSummary: ImportMeterDataFileSummary, id: string, isTemplateElectricity: boolean }>>;
   excelFiles: BehaviorSubject<Array<File>>;
   excelImportMeters: BehaviorSubject<Array<IdbUtilityMeter>>;
   excelImportMeterDates: BehaviorSubject<Array<Date>>;
@@ -37,7 +37,7 @@ export class UploadDataService {
 
     this.templateWorkBooks.subscribe(workBookData => {
       this.parseWorkBooks(workBookData);
-    })
+    });
   }
 
   addMeterFile(fileName: string, summary: ImportMeterFileSummary) {
@@ -63,21 +63,24 @@ export class UploadDataService {
     this.templateWorkBooks.next(templateWorkBooks);
   }
 
-  addMeterDataFile(fileName: string, importMeterDataFileSummary: ImportMeterDataFileSummary) {
-    let importMeterDataFiles: Array<{ fileName: string, importMeterDataFileSummary: ImportMeterDataFileSummary, id: string }> = this.importMeterDataFiles.getValue();
+  addMeterDataFile(fileName: string, importMeterDataFileSummary: ImportMeterDataFileSummary, isTemplateElectricity: boolean) {
+    let importMeterDataFiles: Array<{ fileName: string, importMeterDataFileSummary: ImportMeterDataFileSummary, id: string, isTemplateElectricity: boolean }> = this.importMeterDataFiles.getValue();
     importMeterDataFiles.push({
       fileName: fileName,
       importMeterDataFileSummary: importMeterDataFileSummary,
-      id: Math.random().toString(36).substr(2, 9)
+      id: Math.random().toString(36).substr(2, 9),
+      isTemplateElectricity: isTemplateElectricity
     });
     this.importMeterDataFiles.next(importMeterDataFiles);
   }
 
-  parseWorkBooks(workBooksData: Array<{ workBook: XLSX.WorkBook, fileName: string }>) {
+  parseWorkBooks(workBooksData: Array<{ workBook: XLSX.WorkBook, fileName: string }>, skipMeters?: boolean) {
     workBooksData.forEach(data => {
-      //meters
-      let meterData: Array<Array<string>> = XLSX.utils.sheet_to_json(data.workBook.Sheets["Meters-Utilities"]);
-      this.addMetersFromTemplate(meterData, data.fileName)
+      if (!skipMeters) {
+        //meters
+        let meterData: Array<Array<string>> = XLSX.utils.sheet_to_json(data.workBook.Sheets["Meters-Utilities"]);
+        this.addMetersFromTemplate(meterData, data.fileName)
+      }
       //electricity readings
       let electricityMeterReadingData: Array<Array<string>> = XLSX.utils.sheet_to_json(data.workBook.Sheets["Electricity"]);
       this.addMeterDataFromTemplate(electricityMeterReadingData, data.fileName, true);
@@ -98,11 +101,21 @@ export class UploadDataService {
   addMeterDataFromTemplate(fileData: any, fileName: string, isTemplateElectricity: boolean) {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
-    let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
+    // let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
     let importMeterFiles: Array<{ fileName: string, importMeterFileSummary: ImportMeterFileSummary }> = this.importMeterFiles.getValue();
     let metersToImport: Array<IdbUtilityMeter> = importMeterFiles.flatMap(importMeterFile => { return importMeterFile.importMeterFileSummary.newMeters });
-    let summary: ImportMeterDataFileSummary = this.ImportMeterDataService.importMeterDataFromTemplateFile(fileData, selectedFacility, facilityMeterData, facilityMeters, isTemplateElectricity, metersToImport);
-    this.addMeterDataFile(fileName, summary)
+    let summary: ImportMeterDataFileSummary = this.ImportMeterDataService.importMeterDataFromTemplateFile(fileData, selectedFacility, facilityMeters, isTemplateElectricity, metersToImport);
+    this.addMeterDataFile(fileName, summary, isTemplateElectricity);
+  }
 
+  updateMeterDataFromTemplates() {
+    this.importMeterDataFiles.next([]);
+    let templateWorkBooks: Array<{ workBook: XLSX.WorkBook, fileName: string }> = this.templateWorkBooks.getValue();
+    this.parseWorkBooks(templateWorkBooks, true);
+  }
+
+
+  importData(){
+    
   }
 }

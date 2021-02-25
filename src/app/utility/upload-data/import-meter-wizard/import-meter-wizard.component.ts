@@ -266,6 +266,7 @@ export class ImportMeterWizardComponent implements OnInit {
     let wizardFileIndex: number = importMeterFiles.findIndex(file => { return file.id == this.importMeterFileWizard.id });
     importMeterFiles[wizardFileIndex] = this.importMeterFileWizard;
     this.uploadDataService.importMeterFiles.next(importMeterFiles);
+    this.uploadDataService.updateMeterDataFromTemplates();
     this.cancel();
   }
 

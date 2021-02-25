@@ -1,7 +1,8 @@
 <div class="mt-3" *ngIf="importMeterDataFiles.length != 0">
     <h6>Meter Data Template Files</h6>
     <p>
-        The following files follow the provided template. Fix any errors before importing the data. Invalid entries will be ignored.
+        The following files follow the provided template. Fix any errors before importing the data. Invalid entries will
+        be ignored.
     </p>
     <table class="table table-sm">
         <thead>
@@ -10,13 +11,13 @@
                     File Name
                 </th>
                 <th>
-                    New
+                    New Readings
                 </th>
                 <th>
-                    Existing
+                    Existing Readings
                 </th>
                 <th>
-                    Invalid
+                    Invalid Readings
                 </th>
                 <th>
                     Actions
@@ -25,7 +26,10 @@
         </thead>
         <tbody>
             <tr *ngFor="let importMeterFile of importMeterDataFiles">
-                <td>{{importMeterFile.fileName}}</td>
+                <td>{{importMeterFile.fileName}}
+                    <span class="pl-1" *ngIf="importMeterFile.isTemplateElectricity">(Electricity)</span>
+                    <span class="pl-1" *ngIf="!importMeterFile.isTemplateElectricity">(Non-electricity)</span>
+                </td>
                 <td>{{importMeterFile.importMeterDataFileSummary.newMeterData.length}}</td>
                 <td>{{importMeterFile.importMeterDataFileSummary.existingMeterData.length}}</td>
                 <td>{{importMeterFile.importMeterDataFileSummary.invalidMeterData.length}}</td>
@@ -35,4 +39,5 @@
             </tr>
         </tbody>
     </table>
+    <hr>
 </div>

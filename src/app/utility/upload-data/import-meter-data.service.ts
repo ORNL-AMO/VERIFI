@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { FormGroup } from '@angular/forms';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 import { UtilityMeterDataService } from '../energy-consumption/utility-meter-data/utility-meter-data.service';
@@ -9,10 +10,10 @@ import { UtilityMeterDataService } from '../energy-consumption/utility-meter-dat
 })
 export class ImportMeterDataService {
 
-  constructor(private energyUnitsHelperService: EnergyUnitsHelperService, private utilityMeterDataService: UtilityMeterDataService) { }
+  constructor(private energyUnitsHelperService: EnergyUnitsHelperService, private utilityMeterDataService: UtilityMeterDataService, private utilityMeterDataDbService: UtilityMeterDatadbService) { }
 
 
-  importMeterDataFromTemplateFile(data: Array<any>, selectedFacility: IdbFacility, facilityMeterData: Array<IdbUtilityMeterData>, facilityMeters: Array<IdbUtilityMeter>, isTemplateElectricity: boolean, metersToImport: Array<IdbUtilityMeter>): ImportMeterDataFileSummary {
+  importMeterDataFromTemplateFile(data: Array<any>, selectedFacility: IdbFacility, facilityMeters: Array<IdbUtilityMeter>, isTemplateElectricity: boolean, metersToImport: Array<IdbUtilityMeter>): ImportMeterDataFileSummary {
     let existingMeterData: Array<IdbUtilityMeterData> = new Array();
     let newMeterData: Array<IdbUtilityMeterData> = new Array();
     let invalidMeterData: Array<IdbUtilityMeterData> = new Array();
@@ -25,7 +26,7 @@ export class ImportMeterDataService {
       });
       if (checkHasData) {
         let importMeterData: IdbUtilityMeterData = this.parseMeterDataItem(dataItem, selectedFacility, facilityMeters, isTemplateElectricity);
-        let importMeterStatus: string = this.getImportMeterStatus(importMeterData, facilityMeterData, facilityMeters, metersToImport);
+        let importMeterStatus: string = this.getImportMeterStatus(importMeterData, facilityMeters, metersToImport);
         if (importMeterStatus == "new") {
           newMeterData.push(importMeterData);
         } else if (importMeterStatus == "existing") {
@@ -74,7 +75,6 @@ export class ImportMeterDataService {
     }
     return {
       //keys (id primary)
-      id: undefined,
       meterId: meterId,
       facilityId: facility.id,
       accountId: facility.accountId,
@@ -105,7 +105,8 @@ export class ImportMeterDataService {
       businessCharge: dataItem["Local Business Charge"],
       utilityTax: dataItem["Local Utility Tax"],
       latePayment: dataItem["Late Payment"],
-      meterNumber: meterNumber
+      meterNumber: meterNumber,
+      totalImportConsumption: dataItem["Total Consumption"]
     }
   }
 
@@ -118,7 +119,7 @@ export class ImportMeterDataService {
     return undefined;
   }
 
-  getImportMeterStatus(meterData: IdbUtilityMeterData, existingMeterData: Array<IdbUtilityMeterData>, facilityMeters: Array<IdbUtilityMeter>, metersToImport: Array<IdbUtilityMeter>) {
+  getImportMeterStatus(meterData: IdbUtilityMeterData, facilityMeters: Array<IdbUtilityMeter>, metersToImport: Array<IdbUtilityMeter>) {
     let correspondingMeter: IdbUtilityMeter;
 
     if (meterData.meterId) {
@@ -129,6 +130,14 @@ export class ImportMeterDataService {
     if (correspondingMeter) {
       let displayVolumeInput: boolean = (this.energyUnitsHelperService.isEnergyUnit(correspondingMeter.startingUnit) == false);
       let displayEnergyUse: boolean = this.energyUnitsHelperService.isEnergyMeter(correspondingMeter.source);
+      if (!displayVolumeInput && meterData.totalImportConsumption) {
+        meterData.totalEnergyUse = meterData.totalImportConsumption;
+      } else if (meterData.totalImportConsumption) {
+        meterData.totalVolume = meterData.totalImportConsumption;
+        if (displayEnergyUse && meterData.totalVolume) {
+          meterData.totalEnergyUse = meterData.totalVolume * correspondingMeter.heatCapacity;
+        }
+      }
       let meterDataForm: FormGroup;
       if (correspondingMeter.source == 'Electricity') {
         meterDataForm = this.utilityMeterDataService.getElectricityMeterDataForm(meterData);
@@ -139,8 +148,16 @@ export class ImportMeterDataService {
         return 'invalid';
       } else {
         //check exists
-
-        return 'new';
+        if (correspondingMeter.id) {
+          let existingReadingForMonth: IdbUtilityMeterData = this.utilityMeterDataDbService.checkMeterReadingExistForDate(meterData.readDate, correspondingMeter);
+          if (existingReadingForMonth) {
+            return 'existing'
+          } else {
+            return 'new'
+          }
+        } else {
+          return 'new';
+        }
       }
 
     } else {

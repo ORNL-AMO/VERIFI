@@ -1,7 +1,8 @@
 <div class="mt-3" *ngIf="importMeterFiles.length != 0">
     <h6>Meter Template Files</h6>
     <p>
-        The following files follow the provided template. Fix any errors before importing the data. Invalid entries will be ignored.
+        The following files follow the provided template. Fix any errors before importing the data. Invalid entries will
+        be ignored.
     </p>
     <table class="table table-sm">
         <thead>
@@ -10,13 +11,13 @@
                     File Name
                 </th>
                 <th>
-                    New
+                    New Meters
                 </th>
                 <th>
-                    Existing
+                    Existing Meters
                 </th>
                 <th>
-                    Invalid/Skipped
+                    Invalid/Skipped Meters
                 </th>
                 <th>
                     Actions
@@ -28,11 +29,13 @@
                 <td>{{importMeterFile.fileName}}</td>
                 <td>{{importMeterFile.importMeterFileSummary.newMeters.length}}</td>
                 <td>{{importMeterFile.importMeterFileSummary.existingMeters.length}}</td>
-                <td>{{importMeterFile.importMeterFileSummary.skippedMeters.length + importMeterFile.importMeterFileSummary.invalidMeters.length}}</td>
+                <td>{{importMeterFile.importMeterFileSummary.skippedMeters.length +
+                    importMeterFile.importMeterFileSummary.invalidMeters.length}}</td>
                 <td>
                     <a (click)="selectMeterFile(importMeterFile)">Wizard</a>
                 </td>
             </tr>
         </tbody>
     </table>
+    <hr>
 </div>
