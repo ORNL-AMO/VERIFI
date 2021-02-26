@@ -15,6 +15,7 @@ import { VisualizationComponent } from './utility/visualization/visualization.co
 import { FacilityOverviewComponent } from './dashboard/facility-overview/facility-overview.component';
 import { AccountOverviewComponent } from './dashboard/account-overview/account-overview.component';
 import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
+import { EmptyStateComponent } from './dashboard/empty-state/empty-state.component';
 
 const routes: Routes = [
   {
@@ -34,6 +35,11 @@ const routes: Routes = [
         path: 'facility-summary', 
         component: FacilityOverviewComponent,
       }
+      // ,
+      // {
+      //   path: 'empty-state',
+      //   component: EmptyStateComponent
+      // }
     ]
   },
   {
