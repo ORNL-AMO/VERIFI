@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { FormGroup } from '@angular/forms';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
 import { CsvImportData } from 'src/app/shared/helper-services/csv-to-json.service';
@@ -30,13 +31,13 @@ export class ImportMeterService {
       if (checkHasData) {
         let importMeter: ImportMeter = this.parseDataItem(dataItem);
         let newMeter: IdbUtilityMeter = this.getNewMeterFromImportMeter(importMeter, selectedFacility);
-        let importMeterStatus: string = this.getImportMeterStatus(newMeter, facilityMeters);
-        if (importMeterStatus == "new") {
-          newMeters.push(newMeter);
-        } else if (importMeterStatus == "existing") {
-          existingMeters.push(newMeter);
-        } else if (importMeterStatus == "invalid") {
-          invalidMeters.push(newMeter);
+        let importMeterStatus: { meter: IdbUtilityMeter, status: "existing" | "new" | "invalid" } = this.getImportMeterStatus(newMeter, facilityMeters);
+        if (importMeterStatus.status == "new") {
+          newMeters.push(importMeterStatus.meter);
+        } else if (importMeterStatus.status == "existing") {
+          existingMeters.push(importMeterStatus.meter);
+        } else if (importMeterStatus.status == "invalid") {
+          invalidMeters.push(importMeterStatus.meter);
         }
       }
     });
@@ -62,13 +63,13 @@ export class ImportMeterService {
       if (checkHasData) {
         let importMeter: ImportMeter = this.parseDataItem(dataItem);
         let newMeter: IdbUtilityMeter = this.getNewMeterFromImportMeter(importMeter, selectedFacility);
-        let importMeterStatus: string = this.getImportMeterStatus(newMeter, facilityMeters);
-        if (importMeterStatus == "new") {
-          newMeters.push(newMeter);
-        } else if (importMeterStatus == "existing") {
-          existingMeters.push(newMeter);
-        } else if (importMeterStatus == "invalid") {
-          invalidMeters.push(newMeter);
+        let importMeterStatus: { meter: IdbUtilityMeter, status: "existing" | "new" | "invalid" } = this.getImportMeterStatus(newMeter, facilityMeters);
+        if (importMeterStatus.status == "new") {
+          newMeters.push(importMeterStatus.meter);
+        } else if (importMeterStatus.status == "existing") {
+          existingMeters.push(importMeterStatus.meter);
+        } else if (importMeterStatus.status == "invalid") {
+          invalidMeters.push(importMeterStatus.meter);
         }
       }
     });
@@ -151,16 +152,17 @@ export class ImportMeterService {
     return undefined;
   }
 
-  getImportMeterStatus(importMeter: IdbUtilityMeter, facilityMeters: Array<IdbUtilityMeter>): "invalid" | "existing" | "new" {
-    let isMeterInvalid: boolean = this.editMeterFormService.getFormFromMeter(importMeter).invalid;
-    if (isMeterInvalid) {
-      return 'invalid';
+  getImportMeterStatus(importMeter: IdbUtilityMeter, facilityMeters: Array<IdbUtilityMeter>): { meter: IdbUtilityMeter, status: "existing" | "new" | "invalid" } {
+    let meterForm: FormGroup = this.editMeterFormService.getFormFromMeter(importMeter);
+    if (meterForm.invalid) {
+      return { meter: importMeter, status: 'invalid' };
     } else {
       let facilityMeter: IdbUtilityMeter = facilityMeters.find(facilityMeter => { return facilityMeter.name == importMeter.name });
       if (facilityMeter) {
-        return 'existing';
+        importMeter = this.editMeterFormService.updateMeterFromForm(facilityMeter, meterForm);
+        return { meter: importMeter, status: 'existing' };;
       } else {
-        return 'new';
+        return { meter: importMeter, status: 'new' };
       }
     }
   }

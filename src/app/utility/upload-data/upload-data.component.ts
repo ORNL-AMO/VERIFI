@@ -233,12 +233,9 @@ export class UploadDataComponent implements OnInit {
     newReadings = newReadings.map(reading => { return this.setMeterId(reading, facilityMeters) });
     existingReadings = existingReadings.map(reading => { return this.setMeterId(reading, facilityMeters) });
     await newReadings.forEach(reading => {
-      console.log('add new')
-      console.log(reading);
       this.utilityMeterDataDbService.addWithObservable(reading);
     });
     await existingReadings.forEach(reading => {
-      console.log('update existing new')
       this.utilityMeterDataDbService.updateWithObservable(reading);
     });
     this.utilityMeterDataDbService.getAllByIndexRange('facilityId', selectedFacility.id).subscribe(meterData => {

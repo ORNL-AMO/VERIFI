@@ -26,12 +26,13 @@ export class ImportMeterDataService {
       });
       if (checkHasData) {
         let importMeterData: IdbUtilityMeterData = this.parseMeterDataItem(dataItem, selectedFacility, facilityMeters, isTemplateElectricity);
-        let importMeterStatus: string = this.getImportMeterStatus(importMeterData, facilityMeters, metersToImport);
-        if (importMeterStatus == "new") {
+        let importMeterStatus: { meterData: IdbUtilityMeterData, status: "existing" | "new" | "invalid" } = this.getImportMeterStatus(importMeterData, facilityMeters, metersToImport);
+        importMeterData = importMeterStatus.meterData;
+        if (importMeterStatus.status == "new") {
           newMeterData.push(importMeterData);
-        } else if (importMeterStatus == "existing") {
+        } else if (importMeterStatus.status == "existing") {
           existingMeterData.push(importMeterData);
-        } else if (importMeterStatus == "invalid") {
+        } else if (importMeterStatus.status == "invalid") {
           invalidMeterData.push(importMeterData);
         }
       }
@@ -119,7 +120,7 @@ export class ImportMeterDataService {
     return undefined;
   }
 
-  getImportMeterStatus(meterData: IdbUtilityMeterData, facilityMeters: Array<IdbUtilityMeter>, metersToImport: Array<IdbUtilityMeter>) {
+  getImportMeterStatus(meterData: IdbUtilityMeterData, facilityMeters: Array<IdbUtilityMeter>, metersToImport: Array<IdbUtilityMeter>): { meterData: IdbUtilityMeterData, status: "existing" | "new" | "invalid" } {
     let correspondingMeter: IdbUtilityMeter;
 
     if (meterData.meterId) {
@@ -145,23 +146,33 @@ export class ImportMeterDataService {
         meterDataForm = this.utilityMeterDataService.getGeneralMeterDataForm(meterData, displayVolumeInput, displayEnergyUse);
       }
       if (meterDataForm.invalid) {
-        return 'invalid';
+        return { meterData: meterData, status: "invalid" };
       } else {
         //check exists
         if (correspondingMeter.id) {
           let existingReadingForMonth: IdbUtilityMeterData = this.utilityMeterDataDbService.checkMeterReadingExistForDate(meterData.readDate, correspondingMeter);
+          
           if (existingReadingForMonth) {
-            return 'existing'
+            if (correspondingMeter.source == 'Electricity') {
+              existingReadingForMonth = this.utilityMeterDataService.updateElectricityMeterDataFromForm(existingReadingForMonth, meterDataForm);
+              existingReadingForMonth.meterNumber = meterData.meterNumber;
+              existingReadingForMonth.totalImportConsumption = meterData.totalImportConsumption;
+            } else {
+              existingReadingForMonth = this.utilityMeterDataService.updateGeneralMeterDataFromForm(existingReadingForMonth, meterDataForm);
+              existingReadingForMonth.meterNumber = meterData.meterNumber;
+              existingReadingForMonth.totalImportConsumption = meterData.totalImportConsumption;
+            }
+            return { meterData: existingReadingForMonth, status: "existing" };
           } else {
-            return 'new'
+            return { meterData: meterData, status: "new" };
           }
         } else {
-          return 'new';
+          return { meterData: meterData, status: "new" };
         }
       }
 
     } else {
-      return 'invalid'
+      return { meterData: meterData, status: "invalid" };
     }
 
 
