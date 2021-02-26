@@ -21,9 +21,11 @@ export interface IdbAccount {
     volumeGasUnit: string,
     chilledWaterUnit: string,
     sustainabilityQuestions: SustainabilityQuestions,
-    fiscalYear,
-    fiscalYearMonth,
-    fiscalYearCalendarEnd
+    fiscalYear: string,
+    fiscalYearMonth: string,
+    fiscalYearCalendarEnd: boolean,
+    setupWizard: boolean,
+    setupWizardComplete: boolean,
 }
 
 export interface IdbFacility {
@@ -53,9 +55,9 @@ export interface IdbFacility {
     volumeGasUnit: string,
     chilledWaterUnit: string,
     sustainabilityQuestions: SustainabilityQuestions,
-    fiscalYear,
-    fiscalYearMonth,
-    fiscalYearCalendarEnd
+    fiscalYear: string,
+    fiscalYearMonth: string,
+    fiscalYearCalendarEnd: boolean,
 }
 
 export interface IdbUtilityMeterGroup {
