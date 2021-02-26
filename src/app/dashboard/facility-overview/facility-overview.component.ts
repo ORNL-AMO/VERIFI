@@ -1,4 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { Subscription } from 'rxjs';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { IdbUtilityMeterData } from 'src/app/models/idb';
 
 @Component({
   selector: 'app-facility-overview',
@@ -7,9 +10,15 @@ import { Component, OnInit } from '@angular/core';
 })
 export class FacilityOverviewComponent implements OnInit {
 
-  constructor() { }
+  utilityMeterFacilityData: Array<IdbUtilityMeterData>;
+  utilityMeterDataSub: Subscription;
+  
+  constructor(public utilityMeterDataDbService: UtilityMeterDatadbService) { }
 
   ngOnInit(): void {
+    this.utilityMeterDataSub = this.utilityMeterDataDbService.facilityMeterData.subscribe(utilityMeterFacilityData => {
+      this.utilityMeterFacilityData = utilityMeterFacilityData;
+    });
   }
 
   ngOnDestroy() {
