@@ -64,9 +64,9 @@ import { PageNotFoundComponent } from './page-not-found/page-not-found.component
 import { ImportMeterWizardComponent } from './utility/upload-data/import-meter-wizard/import-meter-wizard.component';
 import { EditMeterComponent } from './utility/energy-consumption/energy-source/edit-meter/edit-meter.component';
 import { OrderByPipe } from './shared/helper-pipes/order-by.pipe';
-import { ImportMeterDataWizardComponent } from './utility/energy-consumption/utility-meter-data/import-meter-data-wizard/import-meter-data-wizard.component';
-import { ValidDataTableComponent } from './utility/energy-consumption/utility-meter-data/import-meter-data-wizard/valid-data-table/valid-data-table.component';
-import { MissingMeterNumberTableComponent } from './utility/energy-consumption/utility-meter-data/import-meter-data-wizard/missing-meter-number-table/missing-meter-number-table.component';
+import { ImportMeterDataWizardComponent } from './utility/upload-data/import-meter-data-wizard/import-meter-data-wizard.component';
+import { ValidDataTableComponent } from './utility/upload-data/import-meter-data-wizard/valid-data-table/valid-data-table.component';
+import { MissingMeterNumberTableComponent } from './utility/upload-data/import-meter-data-wizard/missing-meter-number-table/missing-meter-number-table.component';
 import { UploadDataComponent } from './utility/upload-data/upload-data.component';
 import { ExcelWizardComponent } from './utility/upload-data/excel-wizard/excel-wizard.component';
 import { ExcelDataTableComponent } from './utility/upload-data/excel-data-table/excel-data-table.component';

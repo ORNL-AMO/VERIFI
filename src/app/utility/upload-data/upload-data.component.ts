@@ -27,6 +27,8 @@ export class UploadDataComponent implements OnInit {
 
   importMeterFileWizard: { fileName: string, importMeterFileSummary: ImportMeterFileSummary };
   importMeterFileWizardSub: Subscription;
+  importMeterDataFileWizard: { fileName: string, importMeterDataFileSummary: ImportMeterDataFileSummary, id: string, isTemplateElectricity: boolean };
+  importMeterDataFileWizardSub: Subscription;
 
   fileReferences: Array<any>;
   filesUploaded: boolean = false;
@@ -43,10 +45,15 @@ export class UploadDataComponent implements OnInit {
     this.importMeterFileWizardSub = this.uploadDataService.importMeterFileWizard.subscribe(val => {
       this.importMeterFileWizard = val;
     });
+
+    this.importMeterDataFileWizardSub = this.uploadDataService.importMeterDataFileWizard.subscribe(val => {
+      this.importMeterDataFileWizard = val;
+    });
   }
 
   ngOnDestroy() {
     this.importMeterFileWizardSub.unsubscribe();
+    this.importMeterDataFileWizardSub.unsubscribe();
     this.resetData();
   }
 

@@ -10,7 +10,7 @@ import { UploadDataService } from '../upload-data.service';
 })
 export class MeterDataTableComponent implements OnInit {
 
-  importMeterDataFiles: Array<{ fileName: string, importMeterDataFileSummary: ImportMeterDataFileSummary }>;
+  importMeterDataFiles: Array<{ fileName: string, importMeterDataFileSummary: ImportMeterDataFileSummary, id: string, isTemplateElectricity: boolean }>;
   importMeterDataFilesSub: Subscription;
   constructor(private uploadDataService: UploadDataService) { }
 
@@ -20,8 +20,12 @@ export class MeterDataTableComponent implements OnInit {
     });
   }
 
-  ngOnDestroy(){
+  ngOnDestroy() {
     this.importMeterDataFilesSub.unsubscribe();
   }
 
+
+  selectMeterDataFile(dataFile: { fileName: string, importMeterDataFileSummary: ImportMeterDataFileSummary, id: string, isTemplateElectricity: boolean }) {
+    this.uploadDataService.importMeterDataFileWizard.next(dataFile);
+  }
 }

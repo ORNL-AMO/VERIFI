@@ -170,12 +170,9 @@ export class ImportMeterDataService {
           return { meterData: meterData, status: "new" };
         }
       }
-
     } else {
       return { meterData: meterData, status: "invalid" };
     }
-
-
   }
 }
 
