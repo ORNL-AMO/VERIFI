@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from 'src/app/models/idb';
@@ -22,6 +22,9 @@ import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db
 })
 export class UploadDataComponent implements OnInit {
 
+  @ViewChild("importFile")
+  importFile: ElementRef;
+
   importMeterFileWizard: { fileName: string, importMeterFileSummary: ImportMeterFileSummary };
   importMeterFileWizardSub: Subscription;
 
@@ -44,10 +47,18 @@ export class UploadDataComponent implements OnInit {
 
   ngOnDestroy() {
     this.importMeterFileWizardSub.unsubscribe();
+    this.resetData();
   }
 
   initArrays() {
     this.fileReferences = new Array();
+  }
+
+  resetData(){
+    this.uploadDataService.resetData();
+    this.initArrays();
+    this.filesUploaded = false;
+    this.importFile.nativeElement.value = ""
   }
 
   setImportFile(files: FileList) {
@@ -243,6 +254,7 @@ export class UploadDataComponent implements OnInit {
       this.utilityMeterDataDbService.getAllByIndexRange('accountId', selectedFacility.accountId).subscribe(meterData => {
         this.utilityMeterDataDbService.accountMeterData.next(meterData);
         this.loadingService.setLoadingStatus(false);
+        this.resetData();
       });
     });
   }

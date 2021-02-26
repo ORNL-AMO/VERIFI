@@ -40,6 +40,18 @@ export class UploadDataService {
     });
   }
 
+  resetData(){
+    this.importMeterFiles.next([]);
+    this.excelFiles.next([]);
+    this.excelImportMeters.next([]);
+    this.excelImportMeterDates.next([]);
+    this.excelImportMeterConsumption.next([]);
+    this.importMeterDataFiles.next([]);
+    this.templateWorkBooks.next([]);
+    this.importMeterFileWizard.next(undefined);
+  }
+
+
   addMeterFile(fileName: string, summary: ImportMeterFileSummary) {
     let importMeterFiles: Array<{ fileName: string, importMeterFileSummary: ImportMeterFileSummary, id: string }> = this.importMeterFiles.getValue();
     importMeterFiles.push({
@@ -114,8 +126,4 @@ export class UploadDataService {
     this.parseWorkBooks(templateWorkBooks, true);
   }
 
-
-  importData(){
-    
-  }
 }
