@@ -24,7 +24,7 @@ import { CommonModule } from '@angular/common';
 import { PlotlyViaWindowModule } from 'angular-plotly.js';
 
 
-import { StyleGuideComponent } from './shared/style-guide/style-guide.component';
+import { StyleGuideComponent } from './static-content/style-guide/style-guide.component';
 import { LoadingComponent } from './shared/loading/loading.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { IndexedDBModule } from './indexedDB/indexed-db.module';
@@ -67,6 +67,10 @@ import { OrderByPipe } from './shared/helper-pipes/order-by.pipe';
 import { ImportMeterDataWizardComponent } from './utility/energy-consumption/utility-meter-data/import-meter-data-wizard/import-meter-data-wizard.component';
 import { ValidDataTableComponent } from './utility/energy-consumption/utility-meter-data/import-meter-data-wizard/valid-data-table/valid-data-table.component';
 import { MissingMeterNumberTableComponent } from './utility/energy-consumption/utility-meter-data/import-meter-data-wizard/missing-meter-number-table/missing-meter-number-table.component';
+import { AboutComponent } from './static-content/about/about.component';
+import { FeedbackComponent } from './static-content/feedback/feedback.component';
+import { AcknowledgmentsComponent } from './static-content/acknowledgments/acknowledgments.component';
+import { HelpComponent } from './static-content/help/help.component';
 
 @NgModule({
   declarations: [
@@ -119,7 +123,11 @@ import { MissingMeterNumberTableComponent } from './utility/energy-consumption/u
     OrderByPipe,
     ImportMeterDataWizardComponent,
     ValidDataTableComponent,
-    MissingMeterNumberTableComponent
+    MissingMeterNumberTableComponent,
+    AboutComponent,
+    FeedbackComponent,
+    AcknowledgmentsComponent,
+    HelpComponent
   ],
   imports: [
     BrowserModule,
