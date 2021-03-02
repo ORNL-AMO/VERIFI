@@ -61,7 +61,7 @@ export class UploadDataComponent implements OnInit {
     this.fileReferences = new Array();
   }
 
-  resetData(){
+  resetData() {
     this.uploadDataService.resetData();
     this.initArrays();
     this.filesUploaded = false;
@@ -240,12 +240,14 @@ export class UploadDataComponent implements OnInit {
   async addMeterData(facilityMeters: Array<IdbUtilityMeter>, selectedFacility: IdbFacility) {
     this.loadingService.setLoadingMessage('Addings Meter Readings..');
     //import valid meter readings
-    let importMeterDataFiles: Array<{ fileName: string, importMeterDataFileSummary: ImportMeterDataFileSummary, id: string, isTemplateElectricity: boolean }> = this.uploadDataService.importMeterDataFiles.getValue();
+    let importMeterDataFiles: Array<{ fileName: string, importMeterDataFileSummary: ImportMeterDataFileSummary, id: string, isTemplateElectricity: boolean, skipExisting: boolean }> = this.uploadDataService.importMeterDataFiles.getValue();
     let newReadings: Array<IdbUtilityMeterData> = new Array();
     let existingReadings: Array<IdbUtilityMeterData> = new Array();
     importMeterDataFiles.forEach(dataFile => {
       newReadings = newReadings.concat(dataFile.importMeterDataFileSummary.newMeterData);
-      existingReadings = existingReadings.concat(dataFile.importMeterDataFileSummary.existingMeterData);
+      if (!dataFile.skipExisting) {
+        existingReadings = existingReadings.concat(dataFile.importMeterDataFileSummary.existingMeterData);
+      }
     });
     //set meterId's
     newReadings = newReadings.map(reading => { return this.setMeterId(reading, facilityMeters) });

@@ -1,6 +1,8 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { IdbUtilityMeter } from 'src/app/models/idb';
+import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { ImportMeterFileSummary } from '../../import-meter.service';
+import { UploadDataService } from '../../upload-data.service';
 
 @Component({
   selector: 'app-missing-meter-number-table',
@@ -9,29 +11,42 @@ import { IdbUtilityMeter } from 'src/app/models/idb';
 })
 export class MissingMeterNumberTableComponent implements OnInit {
   @Input()
-  missingMeterNumberBounds: Array<{ start: number, end: number, selectedMeter: IdbUtilityMeter }>
+  invalidMissingMeter: Array<IdbUtilityMeterData>
   @Input()
-  importMeterDataFileType: string;
-  @Output()
-  submit: EventEmitter<boolean> = new EventEmitter<boolean>();
-  @Input()
-  showMeterDropdown: boolean;
+  isTemplateElectricity: boolean;
 
   facilityMeters: Array<IdbUtilityMeter>;
-  constructor(private utilityMeterDbService: UtilityMeterdbService) { }
+
+  meterDataArrays: Array<Array<IdbUtilityMeterData>>;
+
+  constructor(private utilityMeterDbService: UtilityMeterdbService, private uploadDataService: UploadDataService) { }
 
   ngOnInit(): void {
-    if (this.showMeterDropdown) {
-      let allFacilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
-      if (this.importMeterDataFileType == 'Electricity') {
-        this.facilityMeters = allFacilityMeters.filter(meter => { return meter.source == 'Electricity' })
-      } else {
-        this.facilityMeters = allFacilityMeters.filter(meter => { return meter.source != 'Electricity' })
+    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+    let importMeterDataFiles: Array<{ fileName: string; importMeterFileSummary: ImportMeterFileSummary; id: string; }> = this.uploadDataService.importMeterFiles.getValue();
+    this.facilityMeters = new Array();
+    facilityMeters.forEach(meter => {
+      if (meter.source == 'Electricity' && this.isTemplateElectricity) {
+        this.facilityMeters.push(meter);
+      } else if (meter.source != 'Electricity' && !this.isTemplateElectricity) {
+        this.facilityMeters.push(meter);
       }
-    }
+    });
+
+    let validNewMeters: Array<IdbUtilityMeter> = importMeterDataFiles.flatMap(meterFile => { return meterFile.importMeterFileSummary.newMeters });
+    validNewMeters.forEach(meter => {
+      if (meter.source == 'Electricity' && this.isTemplateElectricity) {
+        this.facilityMeters.push(meter);
+      } else if (meter.source != 'Electricity' && !this.isTemplateElectricity) {
+        this.facilityMeters.push(meter);
+      }
+    });
   }
 
-  submitChanges() {
-    this.submit.emit(true);
+  setMeterNumber(index: number) {
+    for (let i = index; i < this.invalidMissingMeter.length; i++) {
+      //TODO: Verifiy meterNumber/data combo doesn't repeat?
+      this.invalidMissingMeter[i].meterNumber = this.invalidMissingMeter[index].meterNumber;
+    }
   }
 }

@@ -14,7 +14,7 @@ import { ImportMeterFileSummary, ImportMeterService } from './import-meter.servi
 export class UploadDataService {
 
   importMeterFiles: BehaviorSubject<Array<{ fileName: string, importMeterFileSummary: ImportMeterFileSummary, id: string }>>;
-  importMeterDataFiles: BehaviorSubject<Array<{ fileName: string, importMeterDataFileSummary: ImportMeterDataFileSummary, id: string, isTemplateElectricity: boolean }>>;
+  importMeterDataFiles: BehaviorSubject<Array<ImportMeterDataFile>>;
   excelFiles: BehaviorSubject<Array<File>>;
   excelImportMeters: BehaviorSubject<Array<IdbUtilityMeter>>;
   excelImportMeterDates: BehaviorSubject<Array<Date>>;
@@ -22,7 +22,7 @@ export class UploadDataService {
   templateWorkBooks: BehaviorSubject<Array<{ workBook: XLSX.WorkBook, fileName: string }>>;
 
   importMeterFileWizard: BehaviorSubject<{ fileName: string, importMeterFileSummary: ImportMeterFileSummary, id: string }>;
-  importMeterDataFileWizard: BehaviorSubject<{ fileName: string, importMeterDataFileSummary: ImportMeterDataFileSummary, id: string, isTemplateElectricity: boolean }>;
+  importMeterDataFileWizard: BehaviorSubject<ImportMeterDataFile>;
   constructor(private facilityDbService: FacilitydbService, private utilityMeterDbService: UtilityMeterdbService, private importMeterService: ImportMeterService,
     private ImportMeterDataService: ImportMeterDataService, private utilityMeterDataDbService: UtilityMeterDatadbService) {
     this.importMeterFiles = new BehaviorSubject([]);
@@ -77,12 +77,13 @@ export class UploadDataService {
   }
 
   addMeterDataFile(fileName: string, importMeterDataFileSummary: ImportMeterDataFileSummary, isTemplateElectricity: boolean) {
-    let importMeterDataFiles: Array<{ fileName: string, importMeterDataFileSummary: ImportMeterDataFileSummary, id: string, isTemplateElectricity: boolean }> = this.importMeterDataFiles.getValue();
+    let importMeterDataFiles: Array<ImportMeterDataFile> = this.importMeterDataFiles.getValue();
     importMeterDataFiles.push({
       fileName: fileName,
       importMeterDataFileSummary: importMeterDataFileSummary,
       id: Math.random().toString(36).substr(2, 9),
-      isTemplateElectricity: isTemplateElectricity
+      isTemplateElectricity: isTemplateElectricity,
+      skipExisting: false
     });
     this.importMeterDataFiles.next(importMeterDataFiles);
   }
@@ -127,4 +128,13 @@ export class UploadDataService {
     this.parseWorkBooks(templateWorkBooks, true);
   }
 
+}
+
+
+export interface ImportMeterDataFile {
+  fileName: string, 
+  importMeterDataFileSummary: ImportMeterDataFileSummary, 
+  id: string, 
+  isTemplateElectricity: boolean,
+   skipExisting: boolean 
 }

@@ -5,3 +5,14 @@
 .saveCancel .btn-secondary {
     margin-right: 10px;
 }
+
+
+.wizard-content{
+    max-height: 85%;
+    height: 85%;
+}
+
+.scroll-item{
+    overflow-y: scroll;
+    max-height: 100%;
+}

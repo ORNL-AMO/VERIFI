@@ -60,7 +60,6 @@ export class ImportMeterDataService {
     if (isTemplateElectricity) {
       energyUse = dataItem["Total Energy"];
     } else {
-      //check meter, do math stuff
       if (correspondingMeter) {
         let displayVolumeInput: boolean = (this.energyUnitsHelperService.isEnergyUnit(correspondingMeter.startingUnit) == false);
         let displayEnergyUse: boolean = this.energyUnitsHelperService.isEnergyMeter(correspondingMeter.source);
@@ -111,7 +110,7 @@ export class ImportMeterDataService {
     }
   }
 
-
+  //TODO: Include import meters?
   getCorrespondingMeter(meterNumber: string, facilityMeters: Array<IdbUtilityMeter>): IdbUtilityMeter {
     if (meterNumber) {
       let meter: IdbUtilityMeter = facilityMeters.find(meter => { return meter.name == meterNumber || meter.meterNumber == meterNumber });
@@ -123,10 +122,11 @@ export class ImportMeterDataService {
   getImportMeterStatus(meterData: IdbUtilityMeterData, facilityMeters: Array<IdbUtilityMeter>, metersToImport: Array<IdbUtilityMeter>): { meterData: IdbUtilityMeterData, status: "existing" | "new" | "invalid" } {
     let correspondingMeter: IdbUtilityMeter;
 
-    if (meterData.meterId) {
-      correspondingMeter = facilityMeters.find(meter => { return meter.id == meterData.meterId })
-    } else {
-      correspondingMeter = metersToImport.find(meter => { return meter.meterNumber == meterData.meterNumber });
+    if (meterData.meterId || meterData.meterNumber) {
+      correspondingMeter = facilityMeters.find(meter => { return meter.id == meterData.meterId || meter.meterNumber == meterData.meterNumber })
+    }
+    if (!correspondingMeter) {
+      correspondingMeter = metersToImport.find(meter => { return meter.meterNumber == meterData.meterNumber || meter.name == meterData.meterNumber });
     }
     if (correspondingMeter) {
       let displayVolumeInput: boolean = (this.energyUnitsHelperService.isEnergyUnit(correspondingMeter.startingUnit) == false);
@@ -151,7 +151,7 @@ export class ImportMeterDataService {
         //check exists
         if (correspondingMeter.id) {
           let existingReadingForMonth: IdbUtilityMeterData = this.utilityMeterDataDbService.checkMeterReadingExistForDate(meterData.readDate, correspondingMeter);
-          
+
           if (existingReadingForMonth) {
             if (correspondingMeter.source == 'Electricity') {
               existingReadingForMonth = this.utilityMeterDataService.updateElectricityMeterDataFromForm(existingReadingForMonth, meterDataForm);
