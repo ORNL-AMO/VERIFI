@@ -16,3 +16,12 @@
     overflow-y: scroll;
     max-height: 100%;
 }
+
+.purple{
+    background-color: purple;
+    color: white;
+}
+
+h4 span{
+    text-transform: none;
+}

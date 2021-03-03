@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { ImportMeterDataFileSummary } from '../import-meter-data.service';
-import { UploadDataService } from '../upload-data.service';
+import { ImportMeterDataFile, UploadDataService } from '../upload-data.service';
 
 @Component({
   selector: 'app-meter-data-table',
@@ -10,7 +10,7 @@ import { UploadDataService } from '../upload-data.service';
 })
 export class MeterDataTableComponent implements OnInit {
 
-  importMeterDataFiles: Array<{ fileName: string, importMeterDataFileSummary: ImportMeterDataFileSummary, id: string, isTemplateElectricity: boolean }>;
+  importMeterDataFiles: Array<ImportMeterDataFile>;
   importMeterDataFilesSub: Subscription;
   constructor(private uploadDataService: UploadDataService) { }
 
@@ -25,7 +25,7 @@ export class MeterDataTableComponent implements OnInit {
   }
 
 
-  selectMeterDataFile(dataFile: { fileName: string, importMeterDataFileSummary: ImportMeterDataFileSummary, id: string, isTemplateElectricity: boolean }) {
+  selectMeterDataFile(dataFile: ImportMeterDataFile) {
     this.uploadDataService.importMeterDataFileWizard.next(dataFile);
   }
 }

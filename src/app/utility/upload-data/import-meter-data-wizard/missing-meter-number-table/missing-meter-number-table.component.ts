@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { ImportMeterFileSummary } from '../../import-meter.service';
 import { UploadDataService } from '../../upload-data.service';
@@ -19,7 +20,7 @@ export class MissingMeterNumberTableComponent implements OnInit {
 
   meterDataArrays: Array<Array<IdbUtilityMeterData>>;
 
-  constructor(private utilityMeterDbService: UtilityMeterdbService, private uploadDataService: UploadDataService) { }
+  constructor(private utilityMeterDbService: UtilityMeterdbService, private uploadDataService: UploadDataService, private utilityMeterDataDbService: UtilityMeterDatadbService) { }
 
   ngOnInit(): void {
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
@@ -45,8 +46,22 @@ export class MissingMeterNumberTableComponent implements OnInit {
 
   setMeterNumber(index: number) {
     for (let i = index; i < this.invalidMissingMeter.length; i++) {
-      //TODO: Verifiy meterNumber/data combo doesn't repeat?
-      this.invalidMissingMeter[i].meterNumber = this.invalidMissingMeter[index].meterNumber;
+      let hasSameMonthYear: boolean = this.checkMeterUpdate(i);
+      if (!hasSameMonthYear) {
+        this.invalidMissingMeter[i].meterNumber = this.invalidMissingMeter[index].meterNumber;
+      }
     }
+  }
+
+  checkMeterUpdate(updateIndex: number): boolean {
+    let hasSameMonthYear: boolean;
+    let date: Date = new Date(this.invalidMissingMeter[updateIndex].readDate);
+    for (let i = 0; i < updateIndex; i++) {
+      hasSameMonthYear = this.utilityMeterDataDbService.checkSameMonthYear(date, this.invalidMissingMeter[i]);
+      if (hasSameMonthYear) {
+        break;
+      }
+    }
+    return hasSameMonthYear;
   }
 }

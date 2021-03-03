@@ -19,7 +19,7 @@
         <li class="nav-item" *ngIf="invalidMissingMeter.length != 0">
             <a class="nav-link" [ngClass]="{'active': selectedTab == 'missingMeterNumber'}"
                 (click)="setTab('missingMeterNumber')">
-                <span class="badge badge-danger">
+                <span class="badge purple">
                     {{invalidMissingMeter.length}}
                 </span> Missing Meter #
             </a>
@@ -28,6 +28,13 @@
             <a class="nav-link" [ngClass]="{'active': selectedTab == 'invalidData'}" (click)="setTab('invalidData')">
                 <span class="badge badge-danger">
                     {{invalidReadings.length}}
+                </span> Invalid Data
+            </a>
+        </li>
+        <li class="nav-item" *ngIf="totalInvalidCorrespondingMeter != 0">
+            <a class="nav-link" [ngClass]="{'active': selectedTab == 'invalidImportMeter'}" (click)="setTab('invalidImportMeter')">
+                <span class="badge badge-danger">
+                    {{totalInvalidCorrespondingMeter}}
                 </span> Invalid Data
             </a>
         </li>
@@ -109,40 +116,6 @@
             [isTemplateElectricity]="importMeterDataFileWizard.isTemplateElectricity">
         </app-missing-meter-number-table>
     </div>
-
-
-    <!--Missing Meter #-->
-    <div class="d-flex flex-column" *ngIf="selectedTab == 'duplicates'">
-        <p class="alert alert-danger p-2 text-center">
-            The following are duplicate entries for the same meters. These entries will be ignored by the import.
-        </p>
-        <!-- <table class="table table-sm">
-            <thead>
-                <tr>
-                    <th class="w-25">
-                        Date
-                    </th>
-                    <th class="w-25">
-                        Meter
-                    </th>
-                    <th class="w-50">
-                        Line Numbers
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let entry of duplicateEntries">
-                    <td>{{entry.date | date: 'MMM, y'}}</td>
-                    <td>{{entry.idbMeter.name}}</td>
-                    <td>
-                        <span *ngFor="let lineNumber of entry.lineNumbers">
-                            {{lineNumber}};
-                        </span>
-                    </td>
-                </tr>
-            </tbody>
-        </table> -->
-    </div>
 </div>
 <hr>
 <div class="row">
@@ -158,8 +131,8 @@
                 (click)="close()">Cancel</button>
             <button *ngIf="selectedTab != 'missingMeterNumber'" class="btn btn-primary"
                 (click)="submit()">Submit</button>
-            <button *ngIf="selectedTab == 'missingMeterNumber'" class="btn btn-primary"
-                (click)="updateMissingMeterNumberData()">Submit Updates</button>
+            <button *ngIf="selectedTab == 'missingMeterNumber'" class="btn purple"
+                (click)="updateMissingMeterNumberData()">Update Meter Numbers</button>
         </div>
     </div>
 </div>
