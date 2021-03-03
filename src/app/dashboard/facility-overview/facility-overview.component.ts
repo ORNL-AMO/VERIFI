@@ -22,6 +22,7 @@ export class FacilityOverviewComponent implements OnInit {
   }
 
   ngOnDestroy() {
+    this.utilityMeterDataSub.unsubscribe();
   }
 
 }

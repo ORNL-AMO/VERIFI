@@ -41,6 +41,12 @@ export class EmptyStateComponent implements OnInit {
     });
   }
 
+  ngOnDestroy() {
+    this.selectedAccountSub.unsubscribe();
+    this.selectedFacilitySub.unsubscribe();
+    this.utilityDataSub.unsubscribe();
+  }
+
   addAccount() {
     if(!this.selectedAccount) {
       let newAccount: IdbAccount = this.accountdbService.getNewIdbAccount();

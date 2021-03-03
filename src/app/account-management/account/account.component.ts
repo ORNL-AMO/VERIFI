@@ -143,12 +143,6 @@ export class AccountComponent implements OnInit {
     this.loadingService.setLoadingStatus(false);
   }
 
-
-  /*
-  setEditFacilityEntry(facility: IdbFacility) {
-    this.facilityToEdit = facility;
-  }*/
-
   setDeleteFacilityEntry(facility: IdbFacility) {
     this.facilityToDelete = facility;
   }

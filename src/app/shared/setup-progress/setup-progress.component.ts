@@ -76,8 +76,7 @@ export class SetupProgressComponent implements OnInit {
         this.progress = '66%';
       } else if(this.selectedAccount && this.selectedFacility && this.setupWizardComplete) {
         this.progress = '100%';
-        const self = this;
-        setTimeout(function(){self.createConfetti();}, 1000);
+        setTimeout(() => { this.createConfetti(); }, 1000)
       }
     }
   }

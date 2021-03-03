@@ -352,14 +352,6 @@
     </div>
   </div>
   
-  <div class="window" [class.open]="facilityToEdit">
-    <div class="windowOverlay"></div>
-    <div class="windowContent">
-      <app-edit-facility *ngIf="facilityToEdit" [facility]="facilityToEdit" (emitClose)="closeEditFacility()">
-      </app-edit-facility>
-    </div>
-  </div>
-  
   <div class="popup" [class.open]="showDeleteAccount" *ngIf="accountForm">
     <div class="popup-header">Delete Account: {{accountForm.controls.name.value}}
       <button class="item-right" (click)="cancelAccountDelete()">x</button>
