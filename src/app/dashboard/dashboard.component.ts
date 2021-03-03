@@ -2,8 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AccountdbService } from '../indexedDB/account-db.service';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
-import { IdbAccount, IdbFacility } from '../models/idb';
+import { IdbAccount, IdbFacility, IdbUtilityMeter } from '../models/idb';
 import { Router, Event, NavigationEnd } from '@angular/router';
+import { UtilityMeterdbService } from '../indexedDB/utilityMeter-db.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -13,18 +14,22 @@ import { Router, Event, NavigationEnd } from '@angular/router';
 export class DashboardComponent implements OnInit {
 
   selectedAccount: IdbAccount;
-  selectedAccountSub: Subscription;
   selectedFacility: IdbFacility;
-  selectedFacilitySub: Subscription;
+  facilityList: Array<IdbFacility>;
   isFacilityDashboard: boolean;
   breadcrumbFacilityId: number;
+  utilityMeters: Array<IdbUtilityMeter>;
 
+  selectedAccountSub: Subscription;
+  selectedFacilitySub: Subscription;
+  utilityDataSub: Subscription;
   accountFacilitiesSub: Subscription;
-  facilityList: Array<IdbFacility>;
+  appRendered: boolean = false;
 
   constructor(
     private accountDbService: AccountdbService, 
     private facilityDbService: FacilitydbService,
+    public utilityMeterDbService: UtilityMeterdbService,
     private router: Router
     ) {
     router.events.subscribe((event: Event) => {
@@ -56,6 +61,15 @@ export class DashboardComponent implements OnInit {
     this.accountFacilitiesSub = this.facilityDbService.accountFacilities.subscribe(accountFacilities => {
       this.facilityList = accountFacilities;
     });
+
+    this.utilityDataSub = this.utilityMeterDbService.facilityMeters.subscribe(utilityMeters => {
+      this.utilityMeters = utilityMeters;
+    });
+
+    // TEMP MANUAL DELAY TO PREVENT PAGE FLICKERING.
+    // ADDING TICKET TO FIX THIS BUG
+    const self = this;
+    setTimeout(function(){ self.appRendered = true}, 300);
   }
 
   ngOnDestroy() {

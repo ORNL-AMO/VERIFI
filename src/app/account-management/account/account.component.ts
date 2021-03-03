@@ -91,7 +91,7 @@ export class AccountComponent implements OnInit {
 
   switchFacility(facility: IdbFacility) {
     this.facilityDbService.selectedFacility.next(facility);
-    this.router.navigate(['/facility-summary']);
+    this.router.navigate(['/facility-management']);
   }
 
   addNewFacility() {
@@ -141,11 +141,6 @@ export class AccountComponent implements OnInit {
     this.accountDbService.setSelectedAccount(undefined);
     this.router.navigate(['/']);
     this.loadingService.setLoadingStatus(false);
-  }
-
-
-  setEditFacilityEntry(facility: IdbFacility) {
-    this.facilityToEdit = facility;
   }
 
   setDeleteFacilityEntry(facility: IdbFacility) {

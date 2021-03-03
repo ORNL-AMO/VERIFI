@@ -41,7 +41,7 @@ export class EnergyUseDonutComponent implements OnInit {
   }
 
   drawChart() {
-    if (this.energyUseDonut && this.facilitiesSummary.facilitySummaries.length != 0) {
+    if (this.energyUseDonut && this.facilitiesSummary && this.facilitiesSummary.facilitySummaries.length != 0) {
       var data = [{
         values: this.facilitiesSummary.facilitySummaries.map(summary => { return summary.energyCost }),
         labels: this.facilitiesSummary.facilitySummaries.map(summary => { return summary.facility.name }),

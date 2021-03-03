@@ -299,36 +299,29 @@
   
     <h4>Portfolio</h4>
   
-    <div class="importExport item-right">
-      <button class="btn btn-small btn-outline">Import</button>
-      <button class="btn btn-small btn-outline">Export</button>
-    </div>
-  
     <div class="table-responsive">
       <table class="table table-sm">
         <thead>
           <tr>
             <th>Facilities</th>
+            <th>NAICS</th>
+            <th>State</th>
             <th>Country</th>
-            <th>Business</th>
-            <th>Tier</th>
             <th>Facility Size</th>
             <th>Units</th>
-            <th>Division</th>
             <th class="actions">Actions</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let facility of facilityList">
             <td><a (click)="switchFacility(facility)">{{facility.name}}</a></td>
+            <td>{{facility.naics}}</td>
+            <td>{{facility.state}}</td>
             <td>{{facility.country}}</td>
-            <td>{{facility.type}}</td>
-            <td>{{facility.tier}}</td>
             <td>{{facility.size}}</td>
-            <td>{{facility.units}}<span class="superscript">2</span></td>
-            <td>{{facility.division}}</td>
+            <td>{{facility.unitsOfMeasure}}</td>
             <td class="actions">
-              <i class="fa fa-pencil" title="Edit" (click)="setEditFacilityEntry(facility)"></i>
+              <i class="fa fa-pencil" title="Edit" (click)="switchFacility(facility)"></i>
               <i class="fa fa-trash-o" title="Delete" (click)="setDeleteFacilityEntry(facility)"></i>
             </td>
           </tr>
@@ -356,14 +349,6 @@
         <button class="btn btn-outline">Backup Account</button>
         <p class="small"> Last Backup: 12/04/2020</p>
       </div>
-    </div>
-  </div>
-  
-  <div class="window" [class.open]="facilityToEdit">
-    <div class="windowOverlay"></div>
-    <div class="windowContent">
-      <app-edit-facility *ngIf="facilityToEdit" [facility]="facilityToEdit" (emitClose)="closeEditFacility()">
-      </app-edit-facility>
     </div>
   </div>
   

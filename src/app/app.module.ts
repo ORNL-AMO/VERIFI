@@ -43,7 +43,6 @@ import { PredictorDataComponent } from './utility/predictor-data/predictor-data.
 import { EditPredictorEntryRowComponent } from './utility/predictor-data/edit-predictor-entry-row/edit-predictor-entry-row.component';
 import { EditPredictorsComponent } from './utility/predictor-data/edit-predictors/edit-predictors.component';
 import { CalanderizationComponent } from './utility/calanderization/calanderization.component';
-import { EditFacilityComponent } from './account-management/account/edit-facility/edit-facility.component';
 import { ImportPredictorsComponent } from './utility/predictor-data/import-predictors/import-predictors.component';
 import { EnergyUnitDropdownComponent } from './utility/meter-grouping/energy-unit-dropdown/energy-unit-dropdown.component';
 import { SettingsLabelPipe } from './shared/helper-pipes/settings-label.pipe';
@@ -67,6 +66,8 @@ import { OrderByPipe } from './shared/helper-pipes/order-by.pipe';
 import { ImportMeterDataWizardComponent } from './utility/energy-consumption/utility-meter-data/import-meter-data-wizard/import-meter-data-wizard.component';
 import { ValidDataTableComponent } from './utility/energy-consumption/utility-meter-data/import-meter-data-wizard/valid-data-table/valid-data-table.component';
 import { MissingMeterNumberTableComponent } from './utility/energy-consumption/utility-meter-data/import-meter-data-wizard/missing-meter-number-table/missing-meter-number-table.component';
+import { SetupProgressComponent } from './shared/setup-progress/setup-progress.component';
+import { EmptyStateComponent } from './dashboard/empty-state/empty-state.component';
 
 @NgModule({
   declarations: [
@@ -96,7 +97,6 @@ import { MissingMeterNumberTableComponent } from './utility/energy-consumption/u
     EditPredictorEntryRowComponent,
     EditPredictorsComponent,
     CalanderizationComponent,
-    EditFacilityComponent,
     ImportPredictorsComponent,
     EnergyUnitDropdownComponent,
     SettingsLabelPipe,
@@ -119,7 +119,9 @@ import { MissingMeterNumberTableComponent } from './utility/energy-consumption/u
     OrderByPipe,
     ImportMeterDataWizardComponent,
     ValidDataTableComponent,
-    MissingMeterNumberTableComponent
+    MissingMeterNumberTableComponent,
+    SetupProgressComponent,
+    EmptyStateComponent
   ],
   imports: [
     BrowserModule,

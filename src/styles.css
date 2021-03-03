@@ -218,7 +218,7 @@ Alerts
 ======================================================== */
 .alert {
   padding: 5px !important;
-  margin: 5px 0px;
+  margin: 5px 0px!important;
   width: 100%;
 }
 .alert-info {
@@ -235,6 +235,18 @@ Alerts
   color: #923d15;
   background-color: #f0d3ca;
   border-color: #d0bab3;
+}
+.alert-info i {
+  color: #2b77a9;
+  margin: 5px;
+}
+.alert-warning i {
+  color: #856404;
+  margin: 5px;
+}
+.alert-danger i {
+  color: #923d15;
+  margin: 5px;
 }
 /*
 Popups & Windows
@@ -1163,4 +1175,13 @@ input.unitDollar {
 .tag.new {
   background-color: #145932;
   color: white;
+}
+
+canvas {
+  top: auto!important;
+  left: auto!important;
+  bottom: 65px!important;
+  right: 50px!important;
+  z-index: 1001!important;
+  /*height: 200px;*/
 }

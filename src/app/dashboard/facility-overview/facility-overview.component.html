@@ -1,36 +1,44 @@
-<div class="row">
-    <div class="col plot">
-        <p>Facility Meters</p>
-        <app-meters-table></app-meters-table>
-    </div>
+<div *ngIf="utilityMeterFacilityData.length === 0" class="text-center mt-3">
+    <h2>Start building your facility dashboard!</h2>
+    <p>Before we can create any charts, you will need to add some utility data.</p>
+    <button class="btn btn-primary-2" routerLink="/utility/energy-consumption"><i class="fa fa-plus"></i> Add Utility Data</button>
 </div>
 
-<div class="row">
-    <div class="col plot">
-        <p>Energy Usage and Cost</p>
-        <app-utility-energy-use-table></app-utility-energy-use-table>
+<div *ngIf="utilityMeterFacilityData.length > 0">
+    <div class="row">
+        <div class="col plot">
+            <p>Facility Meters</p>
+            <app-meters-table></app-meters-table>
+        </div>
     </div>
-</div>
 
-<div class="row">
-    <div class="col plot">
-        <p>Monthly Energy Costs</p>
-        <app-facility-heat-map></app-facility-heat-map>
+    <div class="row">
+        <div class="col plot">
+            <p>Energy Usage and Cost</p>
+            <app-utility-energy-use-table></app-utility-energy-use-table>
+        </div>
     </div>
-</div>
 
-
-<div class="row">
-    <div class="col plot">
-        <p>Annual Utility Costs</p>
-        <app-facility-bar-chart></app-facility-bar-chart>
+    <div class="row">
+        <div class="col plot">
+            <p>Monthly Energy Costs</p>
+            <app-facility-heat-map></app-facility-heat-map>
+        </div>
     </div>
-</div>
 
 
-<div class="row">
-    <div class="col plot">
-        <p>Annual Utility Costs</p>
-        <app-facility-stacked-area-chart></app-facility-stacked-area-chart>
+    <div class="row">
+        <div class="col plot">
+            <p>Annual Utility Costs</p>
+            <app-facility-bar-chart></app-facility-bar-chart>
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="col plot">
+            <p>Annual Utility Costs</p>
+            <app-facility-stacked-area-chart></app-facility-stacked-area-chart>
+        </div>
     </div>
 </div>

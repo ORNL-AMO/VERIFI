@@ -27,7 +27,6 @@ export class HeaderComponent implements OnInit {
   facilityList: Array<IdbFacility>;
   activeAccount: IdbAccount;
   activeFacility: IdbFacility;
-  devtools: boolean = false;
 
   allAccountsSub: Subscription;
   selectedAccountSub: Subscription;
@@ -112,10 +111,10 @@ export class HeaderComponent implements OnInit {
   }
 
   addNewAccount() {
-    this.toggleSwitchAccountsMenu();
+    this.switchAccountMenu = false;
     let newAccount: IdbAccount = this.accountdbService.getNewIdbAccount();
     this.accountdbService.add(newAccount);
-    this.router.navigate(['account/account']);
+    this.router.navigate(['/account-management']);
   }
 
   addNewFacility() {
@@ -155,66 +154,6 @@ export class HeaderComponent implements OnInit {
         this.accountList[index]['facilityCount'] = res[property] + " Facilities";
       }
     }
-  }
-
-  /* DEV TOOLS BELOW 
-  *******************************************************************************/
-  loadTestData() {
-    this.accountdbService.addTestData();
-    this.facilitydbService.addTestData()
-    // .then(
-    //   data => {
-    //     location.reload();
-    //   }
-    // );
-    //location.reload();
-    console.log("Data loaded");
-  }
-
-  getAllAccounts() {
-    this.accountdbService.getAll().subscribe(
-      data => {
-        console.log(data);
-      }
-    );
-  }
-
-  getAllFacilities() {
-    this.facilitydbService.getAll().subscribe(
-      data => {
-        console.log(data);
-      }
-    );
-  }
-
-  getAllMeters() {
-    this.utilityMeterdbService.getAll().subscribe(
-      data => {
-        console.log(data);
-      }
-    );
-  }
-
-  getAllMeterData() {
-    this.utilityMeterDatadbService.getAll().subscribe(
-      data => {
-        console.log(data);
-      }
-    );
-  }
-
-  getAllMeterGroups() {
-    this.utilityMeterGroupdbService.getAll().subscribe(
-      data => {
-        console.log(data);
-      }
-    );
-  }
-
-  clearLocalstorage() {
-    this.localStorage.clear('accountid');
-    this.localStorage.clear('facilityid');
-    console.log("data cleared");
   }
 
 }
