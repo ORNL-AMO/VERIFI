@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import * as XLSX from 'xlsx';
+import { ImportMeterFileSummary } from '../import-meter.service';
 import { ExcelWizardService } from './excel-wizard.service';
 
 @Component({
@@ -15,6 +16,7 @@ export class ExcelWizardComponent implements OnInit {
 
   wizardPage: number = 1;
   workbookLoaded: boolean = false;
+  importMeterFileWizard: { fileName: string, importMeterFileSummary: ImportMeterFileSummary, id: string };
   constructor(private excelWizardService: ExcelWizardService) { }
 
   ngOnInit(): void {
@@ -38,6 +40,14 @@ export class ExcelWizardComponent implements OnInit {
   }
 
   continue() {
+    if(this.wizardPage == 2){
+     let meterSumary: ImportMeterFileSummary = this.excelWizardService.getImportMeterFileSummary();
+     this.importMeterFileWizard = {
+       fileName: 'SOME FILE NAME',
+       importMeterFileSummary: meterSumary,
+       id: 'asdfaksjda;lkn'
+     }
+    }
     this.wizardPage++;
   }
 

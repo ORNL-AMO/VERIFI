@@ -5,7 +5,7 @@
 <label for="dataOrientation">
     Are meters entered as rows or columns?
 </label>
-<select class="form-control" name="dataOrientation" [(ngModel)]="dataOrientation">
+<select class="form-control" name="dataOrientation" [(ngModel)]="dataOrientation" (change)="setDataOrientation()">
     <option [ngValue]="'column'">Columns</option>
     <option [ngValue]="'row'">Rows</option>
 </select>

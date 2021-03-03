@@ -72,7 +72,6 @@ import { ExcelWizardComponent } from './utility/upload-data/excel-wizard/excel-w
 import { ExcelDataTableComponent } from './utility/upload-data/excel-data-table/excel-data-table.component';
 import { MeterTableComponent } from './utility/upload-data/meter-table/meter-table.component';
 import { MeterDataTableComponent } from './utility/upload-data/meter-data-table/meter-data-table.component';
-import { MeterWizardComponent } from './utility/upload-data/excel-wizard/meter-wizard/meter-wizard.component';
 import { SetupDataWizardComponent } from './utility/upload-data/excel-wizard/setup-data-wizard/setup-data-wizard.component';
 import { ColumnsWizardComponent } from './utility/upload-data/excel-wizard/columns-wizard/columns-wizard.component';
 import { WorksheetDataTableComponent } from './utility/upload-data/excel-wizard/worksheet-data-table/worksheet-data-table.component';
@@ -135,7 +134,6 @@ import { InvalidMeterDataTableComponent } from './utility/upload-data/import-met
     ExcelDataTableComponent,
     MeterTableComponent,
     MeterDataTableComponent,
-    MeterWizardComponent,
     SetupDataWizardComponent,
     ColumnsWizardComponent,
     WorksheetDataTableComponent,

@@ -1,7 +1,11 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { IdbUtilityMeter } from 'src/app/models/idb';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
+import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
 import * as XLSX from 'xlsx';
+import { ImportMeterFileSummary, ImportMeterService } from '../import-meter.service';
+import { UploadDataService } from '../upload-data.service';
 
 @Injectable({
   providedIn: 'root'
@@ -13,20 +17,15 @@ export class ExcelWizardService {
   selectedWorksheetData: BehaviorSubject<Array<Array<string>>>;
   selectedWorksheetDataHeaderMap: BehaviorSubject<Array<any>>;
   selectedWorksheetName: string;
+  columnGroups: BehaviorSubject<Array<{ groupLabel: string, groupItems: Array<ColumnItem>, id: string }>>;
+  rowGroups: BehaviorSubject<Array<{ fieldLabel: string, fieldName: string, groupItems: Array<ColumnItem>, id: string }>>;
+  dataOrientation: string = 'column';
 
-  // unusedColumns: BehaviorSubject<Array<ColumnItem>>;
-  // dateColumn: BehaviorSubject<ColumnItem>;
-  // meterColumns: BehaviorSubject<Array<ColumnItem>>;
-  // predictorsColumns: BehaviorSubject<Array<ColumnItem>>;
-
-  columnGroups: BehaviorSubject<Array<{groupLabel: string, groupItems: Array<ColumnItem>, id: string}>>;
-  rowGroups:BehaviorSubject<Array<{fieldLabel: string, fieldName: string, groupItems: Array<ColumnItem>, id: string}>>;
-
-  constructor() {
+  constructor(private importMeterSevice: ImportMeterService, private facilityDbService: FacilitydbService, private utilityMeterDbService: UtilityMeterdbService) {
     this.selectedWorksheetData = new BehaviorSubject([]);
     this.selectedWorksheetDataHeaderMap = new BehaviorSubject([]);
     this.rowGroups = new BehaviorSubject([]);
-    this.columnGroups = new BehaviorSubject<Array<{groupLabel: string, groupItems: Array<ColumnItem>, id: string}>>([]);
+    this.columnGroups = new BehaviorSubject<Array<{ groupLabel: string, groupItems: Array<ColumnItem>, id: string }>>([]);
     this.selectedWorksheetData.subscribe(data => {
       if (data && data.length != 0) {
         this.setColumnGroups(data[0]);
@@ -48,16 +47,16 @@ export class ExcelWizardService {
   }
 
   setColumnGroups(headers: Array<string>) {
-    let columnGroups: Array<{groupLabel: string, groupItems: Array<ColumnItem>, id: string}> = new Array();
+    let columnGroups: Array<{ groupLabel: string, groupItems: Array<ColumnItem>, id: string }> = new Array();
     let dateGroupItems: Array<ColumnItem> = new Array();
     let unusedColumns: Array<ColumnItem> = new Array();
     headers.forEach((header, index) => {
-      unusedColumns.push({ value: header, index: index, id: Math.random().toString(36).substr(2, 9)});
+      unusedColumns.push({ value: header, index: index, id: Math.random().toString(36).substr(2, 9) });
     });
 
     //todo: enhance check for "Date"
-    let dateColumnIndex: number = unusedColumns.findIndex((column) => {return column.value == 'Date'});
-    if(dateColumnIndex > -1){
+    let dateColumnIndex: number = unusedColumns.findIndex((column) => { return column.value == 'Date' });
+    if (dateColumnIndex > -1) {
       let dateColumn: ColumnItem = unusedColumns[dateColumnIndex];
       dateGroupItems.push(dateColumn);
       unusedColumns.splice(dateColumnIndex, 1);
@@ -87,16 +86,16 @@ export class ExcelWizardService {
 
 
   setRowGroups(headers: Array<string>) {
-    let rowGroups: Array<{fieldLabel: string, fieldName: string, groupItems: Array<ColumnItem>, id: string}> = new Array();
+    let rowGroups: Array<{ fieldLabel: string, fieldName: string, groupItems: Array<ColumnItem>, id: string }> = new Array();
     let dateGroupItems: Array<ColumnItem> = new Array();
     let unusedColumns: Array<ColumnItem> = new Array();
     headers.forEach((header, index) => {
-      unusedColumns.push({ value: header, index: index, id: Math.random().toString(36).substr(2, 9)});
+      unusedColumns.push({ value: header, index: index, id: Math.random().toString(36).substr(2, 9) });
     });
 
     //todo: enhance check for "Date"
-    let dateColumnIndex: number = unusedColumns.findIndex((column) => {return column.value == 'Date'});
-    if(dateColumnIndex > -1){
+    let dateColumnIndex: number = unusedColumns.findIndex((column) => { return column.value == 'Date' });
+    if (dateColumnIndex > -1) {
       let dateColumn: ColumnItem = unusedColumns[dateColumnIndex];
       dateGroupItems.push(dateColumn);
       unusedColumns.splice(dateColumnIndex, 1);
@@ -129,9 +128,33 @@ export class ExcelWizardService {
   }
 
 
+  // mapData() {
+  //   // let worksheetData = this.selectedWorksheetDataHeaderMap.getValue();
+  //   let columnGroups: Array<{ groupLabel: string, groupItems: Array<ColumnItem>, id: string }> = this.columnGroups.getValue();
+  //   let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+  //   let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+  //   if (this.dataOrientation == 'column') {
+  //     // let dateGroup = columnGroups.find(group => { return group.groupLabel == 'Date' });
+  //     let metersGroup = columnGroups.find(group => { return group.groupLabel == 'Meters' });
+  //     let importMeterFileSummary: ImportMeterFileSummary = this.importMeterSevice.importMetersFromExcelFile(metersGroup.groupItems, selectedFacility, facilityMeters);
+  //     this.
+  //   } else {
 
+  //   }
+  // }
 
-
+  getImportMeterFileSummary(): ImportMeterFileSummary {
+    let columnGroups: Array<{ groupLabel: string, groupItems: Array<ColumnItem>, id: string }> = this.columnGroups.getValue();
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+    if (this.dataOrientation == 'column') {
+      // let dateGroup = columnGroups.find(group => { return group.groupLabel == 'Date' });
+      let metersGroup = columnGroups.find(group => { return group.groupLabel == 'Meters' });
+      return this.importMeterSevice.importMetersFromExcelFile(metersGroup.groupItems, selectedFacility, facilityMeters);
+    } else {
+      //TODO
+    }
+  }
 }
 
 

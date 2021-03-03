@@ -19,7 +19,7 @@
 <div class="window" [class.open]="importMeterFileWizard || importMeterDataFileWizard">
     <div class="windowOverlay"></div>
     <div class="windowContent importMeterWindowContent">
-        <app-import-meter-wizard *ngIf="importMeterFileWizard"></app-import-meter-wizard>
+        <app-import-meter-wizard *ngIf="importMeterFileWizard" [wizardContext]="template"></app-import-meter-wizard>
         <app-import-meter-data-wizard *ngIf="importMeterDataFileWizard"></app-import-meter-data-wizard>
     </div>
 </div>

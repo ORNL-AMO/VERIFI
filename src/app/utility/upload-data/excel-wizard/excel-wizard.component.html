@@ -16,7 +16,9 @@
     </div>
     <!--Page 3: Setup Meters-->
     <div *ngIf="wizardPage == 3">
-        <app-meter-wizard (emitBack)="back()"></app-meter-wizard>
+        <app-import-meter-wizard [wizardContext]="'excel'" [importMeterFileWizard]="importMeterFileWizard">
+        </app-import-meter-wizard>
+        <!-- <app-meter-wizard (emitBack)="back()"></app-meter-wizard> -->
     </div>
 </div>
 <hr>

@@ -1,5 +1,5 @@
-<h4>Import Meters</h4>
-<br>
+<h4 *ngIf="wizardContext == 'template'">Import Meters</h4>
+<br *ngIf="wizardContext == 'template'">
 
 <div class="d-flex flex-column" *ngIf="importMeters && selectedMeterForm">
     <ul class="nav nav-tabs">
@@ -12,7 +12,7 @@
             </a>
         </li>
     </ul>
-    <div class="pull-right">
+    <div class="pull-right" *ngIf="wizardContext == 'template'">
         <button type="button" class="btn btn-danger pull-right" (click)="toggleSkipMeter(selectedMeterIndex)">
             Skip Meter
         </button>

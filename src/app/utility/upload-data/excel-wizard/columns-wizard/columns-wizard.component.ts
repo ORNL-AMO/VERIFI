@@ -14,7 +14,7 @@ export class ColumnsWizardComponent implements OnInit {
   columnGroupItemIds: Array<string>;
   rowGroupItemIds: Array<string>;
 
-  dataOrientation: string = 'column';
+  dataOrientation: string;
   minDate: Date;
   maxDate: Date;
   rowOptionsToAdd: Array<{ fieldLabel: string, fieldName: string }> = [
@@ -46,12 +46,11 @@ export class ColumnsWizardComponent implements OnInit {
   constructor(private excelWizardService: ExcelWizardService) { }
 
   ngOnInit(): void {
+    this.dataOrientation = this.excelWizardService.dataOrientation;
     this.rowGroups = this.excelWizardService.rowGroups.getValue();
     this.rowGroupItemIds = this.rowGroups.map(group => { return group.id });
-
     this.columnGroups = this.excelWizardService.columnGroups.getValue();
     this.columnGroupItemIds = this.columnGroups.map(group => { return group.id });
-
     this.setMinMaxDate();
   }
 
@@ -88,6 +87,7 @@ export class ColumnsWizardComponent implements OnInit {
         }
       }
     });
+    this.excelWizardService.columnGroups.next(this.columnGroups);
   }
 
 
@@ -138,5 +138,9 @@ export class ColumnsWizardComponent implements OnInit {
       id: id
     });
     this.rowGroupItemIds.push(id);
+  }
+
+  setDataOrientation(){
+    this.excelWizardService.dataOrientation = this.dataOrientation;
   }
 }

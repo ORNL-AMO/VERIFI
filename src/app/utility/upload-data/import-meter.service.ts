@@ -8,6 +8,7 @@ import { EnergyUseCalculationsService } from 'src/app/shared/helper-services/ene
 import { UnitOption } from 'src/app/shared/unitOptions';
 import { EditMeterFormService } from '../energy-consumption/energy-source/edit-meter-form/edit-meter-form.service';
 import { FuelTypeOption, SourceOptions } from '../energy-consumption/energy-source/edit-meter-form/editMeterOptions';
+import { ColumnItem } from './excel-wizard/excel-wizard.service';
 
 @Injectable({
   providedIn: 'root'
@@ -165,6 +166,48 @@ export class ImportMeterService {
         return { meter: importMeter, status: 'new' };
       }
     }
+  }
+
+  importMetersFromExcelFile(groupItems: Array<ColumnItem>, selectedFacility: IdbFacility, facilityMeters: Array<IdbUtilityMeter>): ImportMeterFileSummary {
+    let existingMeters: Array<IdbUtilityMeter> = new Array();
+    let newMeters: Array<IdbUtilityMeter> = new Array();
+    let invalidMeters: Array<IdbUtilityMeter> = new Array();
+    groupItems.forEach(groupItem => {
+        let newMeter: IdbUtilityMeter = this.getNewMeterFromExcelColumn(groupItem, selectedFacility);
+        let importMeterStatus: { meter: IdbUtilityMeter, status: "existing" | "new" | "invalid" } = this.getImportMeterStatus(newMeter, facilityMeters);
+        if (importMeterStatus.status == "new") {
+          newMeters.push(importMeterStatus.meter);
+        } else if (importMeterStatus.status == "existing") {
+          existingMeters.push(importMeterStatus.meter);
+        } else if (importMeterStatus.status == "invalid") {
+          invalidMeters.push(importMeterStatus.meter);
+        }
+    });
+    return {
+      existingMeters: existingMeters,
+      newMeters: newMeters,
+      invalidMeters: invalidMeters,
+      skippedMeters: []
+    }
+  }
+
+  getNewMeterFromExcelColumn(groupItem: ColumnItem, selectedFacility: IdbFacility): IdbUtilityMeter{
+    let newMeter: IdbUtilityMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.id, selectedFacility.accountId, false);
+    //TODO: PARSE NAME FOR KEYWORDS LIKE SOURCE/UNITS Etc..
+    // newMeter.meterNumber = importMeter.meterNumber;
+    // newMeter.accountNumber = importMeter.accountNumber;
+    // newMeter.source = this.checkImportSource(importMeter.source);
+    // newMeter.phase = this.checkImportPhase(importMeter.phase);
+    newMeter.name = groupItem.value;
+    // newMeter.supplier = importMeter.utilitySupplier;
+    // newMeter.notes = importMeter.notes;
+    // newMeter.location = importMeter.location;
+    // newMeter.group = importMeter.meterGroup;
+    // newMeter.fuel = importMeter.fuel;
+    // newMeter.startingUnit = this.checkImportStartingUnit(importMeter.collectionUnit, newMeter.source, newMeter.phase, newMeter.fuel);
+    // newMeter.heatCapacity = importMeter.heatCapacity;
+    // newMeter.siteToSource = importMeter.siteToSource;
+    return newMeter;
   }
 
 }
