@@ -76,6 +76,7 @@ import { SetupDataWizardComponent } from './utility/upload-data/excel-wizard/set
 import { ColumnsWizardComponent } from './utility/upload-data/excel-wizard/columns-wizard/columns-wizard.component';
 import { WorksheetDataTableComponent } from './utility/upload-data/excel-wizard/worksheet-data-table/worksheet-data-table.component';
 import { InvalidMeterDataTableComponent } from './utility/upload-data/import-meter-data-wizard/invalid-meter-data-table/invalid-meter-data-table.component';
+import { WizardDataSummaryComponent } from './utility/upload-data/excel-wizard/wizard-data-summary/wizard-data-summary.component';
 
 @NgModule({
   declarations: [
@@ -137,7 +138,8 @@ import { InvalidMeterDataTableComponent } from './utility/upload-data/import-met
     SetupDataWizardComponent,
     ColumnsWizardComponent,
     WorksheetDataTableComponent,
-    InvalidMeterDataTableComponent
+    InvalidMeterDataTableComponent,
+    WizardDataSummaryComponent
   ],
   imports: [
     BrowserModule,

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
@@ -17,6 +17,10 @@ export class ImportMeterWizardComponent implements OnInit {
   wizardContext: "excel" | "template";
   @Input()
   importMeterFileWizard: { fileName: string, importMeterFileSummary: ImportMeterFileSummary, id: string };
+  @Output('emitBack')
+  emitBack: EventEmitter<boolean> = new EventEmitter();
+  @Output('emitContinue')
+  emitContinue: EventEmitter<boolean> = new EventEmitter();
 
   importError: boolean;
   importMeters: Array<IdbUtilityMeter>;
@@ -116,6 +120,18 @@ export class ImportMeterWizardComponent implements OnInit {
   }
 
   submit() {
+    this.updateImportMeterFileWizard();
+    let importMeterFiles: Array<{ fileName: string, importMeterFileSummary: ImportMeterFileSummary, id: string }> = this.uploadDataService.importMeterFiles.getValue();
+    let wizardFileIndex: number = importMeterFiles.findIndex(file => { return file.id == this.importMeterFileWizard.id });
+    importMeterFiles[wizardFileIndex] = this.importMeterFileWizard;
+    this.uploadDataService.importMeterFiles.next(importMeterFiles);
+    this.uploadDataService.updateMeterDataFromTemplates();
+    this.cancel();
+  }
+
+
+
+  updateImportMeterFileWizard() {
     this.importMeterFileWizard.importMeterFileSummary.existingMeters = new Array();
     this.importMeterFileWizard.importMeterFileSummary.newMeters = new Array();
     this.importMeterFileWizard.importMeterFileSummary.invalidMeters = new Array();
@@ -133,16 +149,16 @@ export class ImportMeterWizardComponent implements OnInit {
       }
     });
 
-    if (this.wizardContext == "template") {
-      let importMeterFiles: Array<{ fileName: string, importMeterFileSummary: ImportMeterFileSummary, id: string }> = this.uploadDataService.importMeterFiles.getValue();
-      let wizardFileIndex: number = importMeterFiles.findIndex(file => { return file.id == this.importMeterFileWizard.id });
-      importMeterFiles[wizardFileIndex] = this.importMeterFileWizard;
-      this.uploadDataService.importMeterFiles.next(importMeterFiles);
-    } else {
-      //add
-    }
-    this.uploadDataService.updateMeterDataFromTemplates();
-    this.cancel();
+  }
+
+
+  back() {
+    this.emitBack.emit(true);
+  }
+
+  continue() {
+    this.updateImportMeterFileWizard();
+    this.emitContinue.emit(true);
   }
 
 

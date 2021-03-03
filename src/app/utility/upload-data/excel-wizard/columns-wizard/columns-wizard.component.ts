@@ -1,5 +1,5 @@
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { ColumnItem, ExcelWizardService } from '../excel-wizard.service';
 import * as _ from 'lodash';
 @Component({
@@ -8,6 +8,12 @@ import * as _ from 'lodash';
   styleUrls: ['./columns-wizard.component.css']
 })
 export class ColumnsWizardComponent implements OnInit {
+
+  @Output('emitBack')
+  emitBack: EventEmitter<boolean> = new EventEmitter();
+  @Output('emitContinue')
+  emitContinue: EventEmitter<boolean> = new EventEmitter();
+
 
   columnGroups: Array<{ groupLabel: string, groupItems: Array<ColumnItem>, id: string }>;
   rowGroups: Array<{ fieldLabel: string, fieldName: string, groupItems: Array<ColumnItem>, id: string }>;
@@ -142,5 +148,13 @@ export class ColumnsWizardComponent implements OnInit {
 
   setDataOrientation(){
     this.excelWizardService.dataOrientation = this.dataOrientation;
+  }
+
+  continue(){
+    this.emitContinue.next(true)
+  }
+
+  back(){
+    this.emitBack.emit(true);
   }
 }

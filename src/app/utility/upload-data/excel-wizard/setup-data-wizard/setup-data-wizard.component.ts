@@ -9,9 +9,6 @@ import { ExcelWizardService } from '../excel-wizard.service';
   styleUrls: ['./setup-data-wizard.component.css']
 })
 export class SetupDataWizardComponent implements OnInit {
-
-  @Output('emitClose')
-  emitClose: EventEmitter<boolean> = new EventEmitter();
   @Output('emitContinue')
   emitContinue: EventEmitter<boolean> = new EventEmitter();
 
@@ -39,5 +36,9 @@ export class SetupDataWizardComponent implements OnInit {
 
   setSelectedWorksheetName(){
     this.excelWizardService.setSelectedWorksheetName(this.selectedWorksheetName);
+  }
+
+  continue(){
+    this.emitContinue.emit(true);
   }
 }

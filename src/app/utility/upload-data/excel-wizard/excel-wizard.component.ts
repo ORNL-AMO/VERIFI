@@ -43,9 +43,9 @@ export class ExcelWizardComponent implements OnInit {
     if(this.wizardPage == 2){
      let meterSumary: ImportMeterFileSummary = this.excelWizardService.getImportMeterFileSummary();
      this.importMeterFileWizard = {
-       fileName: 'SOME FILE NAME',
+       fileName: undefined,
        importMeterFileSummary: meterSumary,
-       id: 'asdfaksjda;lkn'
+       id: undefined
      }
     }
     this.wizardPage++;

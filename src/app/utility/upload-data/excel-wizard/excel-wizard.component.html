@@ -3,26 +3,23 @@
         &times;
     </button>
 </h4>
-<div class="accordian">
-    <!--Page 1: Select data fields-->
-    <div *ngIf="wizardPage == 1 && workbookLoaded">
-        <app-setup-data-wizard (emitClose)="close()" (emitContinue)="continue()">
-        </app-setup-data-wizard>
-    </div>
-
-    <!--Page 2: Select data fields-->
-    <div *ngIf="wizardPage == 2">
-        <app-columns-wizard></app-columns-wizard>
-    </div>
-    <!--Page 3: Setup Meters-->
-    <div *ngIf="wizardPage == 3">
-        <app-import-meter-wizard [wizardContext]="'excel'" [importMeterFileWizard]="importMeterFileWizard">
-        </app-import-meter-wizard>
-        <!-- <app-meter-wizard (emitBack)="back()"></app-meter-wizard> -->
-    </div>
+<!--Page 1: Select data fields-->
+<div *ngIf="wizardPage == 1 && workbookLoaded">
+    <app-setup-data-wizard (emitContinue)="continue()">
+    </app-setup-data-wizard>
 </div>
-<hr>
-<div class="d-flex w-100 justify-content-between">
-    <button class="btn btn-secondary" (click)="back()" [disabled]="wizardPage == 1">Back</button>
-    <button class="btn btn-success" (click)="continue()">Continue</button>
+
+<!--Page 2: Select data fields-->
+<div *ngIf="wizardPage == 2">
+    <app-columns-wizard (emitContinue)="continue()" (emitBack)="back()"></app-columns-wizard>
+</div>
+<!--Page 3: Setup Meters-->
+<div *ngIf="wizardPage == 3">
+    <app-import-meter-wizard [wizardContext]="'excel'" [(importMeterFileWizard)]="importMeterFileWizard"
+        (emitContinue)="continue()" (emitBack)="back()">
+    </app-import-meter-wizard>
+</div>
+
+<div *ngIf="wizardPage == 4">
+    <app-wizard-data-summary [(importMeterFileWizard)]="importMeterFileWizard"></app-wizard-data-summary>
 </div>
