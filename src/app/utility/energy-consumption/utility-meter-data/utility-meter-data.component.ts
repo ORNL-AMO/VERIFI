@@ -4,7 +4,7 @@ import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service
 import { Subscription } from 'rxjs';
 import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { UtilityMeterDataService } from './utility-meter-data.service';
 
 @Component({
@@ -47,7 +47,8 @@ export class UtilityMeterDataComponent implements OnInit {
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private activatedRoute: ActivatedRoute,
-    private utilityMeterDataService: UtilityMeterDataService
+    private utilityMeterDataService: UtilityMeterDataService,
+    private router: Router
   ) { }
 
   ngOnInit() {
@@ -127,8 +128,8 @@ export class UtilityMeterDataComponent implements OnInit {
     this.meterDataMenuOpen = meterId;
   }
 
-  openImportModal() {
-    this.showImport = true;
+  uploadData() {
+    this.router.navigateByUrl('utility/upload-data');
   }
 
   closeImportModal() {
