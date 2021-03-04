@@ -72,11 +72,9 @@ export class UploadDataComponent implements OnInit {
     this.initArrays();
     if (files) {
       if (files.length !== 0) {
-        let regex = /.csv$/;
-        let regex2 = /.CSV$/;
         let regex3 = /.xlsx$/;
         for (let index = 0; index < files.length; index++) {
-          if (regex.test(files[index].name) || regex2.test(files[index].name) || regex3.test(files[index].name)) {
+          if (regex3.test(files[index].name)) {
             this.fileReferences.push(files[index]);
           }
         }
@@ -105,17 +103,6 @@ export class UploadDataComponent implements OnInit {
         };
         reader.readAsBinaryString(fileReference);
       }
-
-      // } else {
-      //   let fr: FileReader = new FileReader();
-      //   fr.readAsText(fileReference);
-      //   fr.onloadend = (e) => {
-      //     let importData: any = JSON.parse(JSON.stringify(fr.result));
-      //     let fileHeaders: Array<string> = this.csvToJsonService.parseCsvHeaders(importData);
-      //     this.addFile(importData, fileHeaders, fileReference.name);
-      //   };
-
-      // }
     });
     this.filesUploaded = true;
   }
@@ -127,37 +114,6 @@ export class UploadDataComponent implements OnInit {
       return false;
     }
   }
-
-
-  // addFile(data: any, fileHeaders: Array<string>, fileName: string) {
-  //   if (JSON.stringify(fileHeaders) === JSON.stringify(MeterHeaders)) {
-  //     this.addMeterFile(data, fileName);
-  //   } else if (JSON.stringify(fileHeaders) === JSON.stringify(ElectricityMeterDataHeaders)) {
-  //     //electricity meter data template 
-  //     // this.filesSummary.push({
-  //     //   fileType: 'Meter Data',
-  //     //   fileData: this.csvToJsonService.parseCsvWithHeaders(data, 0),
-  //     //   fileName: fileName
-  //     // });
-  //     this.uploadDataService.addMeterDataFile(fileName, 'Electricity');
-  //   } else if (JSON.stringify(fileHeaders) === JSON.stringify(NonElectricityMeterDataHeaders)) {
-  //     //non electricity meter data template
-  //     // this.filesSummary.push({
-  //     //   fileType: 'Meter Data',
-  //     //   fileData: this.csvToJsonService.parseCsvWithHeaders(data, 0),
-  //     //   fileName: fileName
-  //     // });
-  //     this.uploadDataService.addMeterDataFile(fileName, 'Non-Electricity');
-  //   } else {
-  //     //other .csv file
-  //     // this.nonTemplateFiles.push({
-  //     //   fileType: undefined,
-  //     //   fileData: this.csvToJsonService.parseCsvWithHeaders(data, 0),
-  //     //   fileName: fileName
-  //     // });
-  //   }
-
-  // }
 
   addMeterFile(data: any, fileName: string) {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
@@ -267,7 +223,6 @@ export class UploadDataComponent implements OnInit {
     //set meterId's
     newReadings = newReadings.map(reading => { return this.setMeterId(reading, facilityMeters) });
     existingReadings = existingReadings.map(reading => { return this.setMeterId(reading, facilityMeters) });
-    debugger
     //add new readings
     await newReadings.forEach(reading => {
       this.utilityMeterDataDbService.addWithObservable(reading);

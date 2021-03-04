@@ -129,6 +129,9 @@ export class ImportMeterDataService {
       correspondingMeter = metersToImport.find(meter => { return meter.meterNumber == meterData.meterNumber || meter.name == meterData.meterNumber });
     }
     if (correspondingMeter) {
+      if (correspondingMeter.meterNumber) {
+        meterData.meterNumber = correspondingMeter.meterNumber;
+      }
       let displayVolumeInput: boolean = (this.energyUnitsHelperService.isEnergyUnit(correspondingMeter.startingUnit) == false);
       let displayEnergyUse: boolean = this.energyUnitsHelperService.isEnergyMeter(correspondingMeter.source);
       if (!displayVolumeInput && meterData.totalImportConsumption) {
@@ -183,6 +186,7 @@ export class ImportMeterDataService {
     meterData.forEach(importMeterData => {
       let importMeterStatus: { meterData: IdbUtilityMeterData, status: "existing" | "new" | "invalid" } = this.getImportMeterDataStatus(importMeterData, facilityMeters, metersToImport);
       importMeterData = importMeterStatus.meterData;
+      console.log(importMeterData.meterNumber);
       if (importMeterStatus.status == "new") {
         newMeterData.push(importMeterData);
       } else if (importMeterStatus.status == "existing") {
