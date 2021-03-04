@@ -26,7 +26,7 @@ export class ImportMeterDataService {
       });
       if (checkHasData) {
         let importMeterData: IdbUtilityMeterData = this.parseMeterDataItem(dataItem, selectedFacility, facilityMeters, isTemplateElectricity);
-        let importMeterStatus: { meterData: IdbUtilityMeterData, status: "existing" | "new" | "invalid" } = this.getImportMeterStatus(importMeterData, facilityMeters, metersToImport);
+        let importMeterStatus: { meterData: IdbUtilityMeterData, status: "existing" | "new" | "invalid" } = this.getImportMeterDataStatus(importMeterData, facilityMeters, metersToImport);
         importMeterData = importMeterStatus.meterData;
         if (importMeterStatus.status == "new") {
           newMeterData.push(importMeterData);
@@ -119,7 +119,7 @@ export class ImportMeterDataService {
     return undefined;
   }
 
-  getImportMeterStatus(meterData: IdbUtilityMeterData, facilityMeters: Array<IdbUtilityMeter>, metersToImport: Array<IdbUtilityMeter>): { meterData: IdbUtilityMeterData, status: "existing" | "new" | "invalid" } {
+  getImportMeterDataStatus(meterData: IdbUtilityMeterData, facilityMeters: Array<IdbUtilityMeter>, metersToImport: Array<IdbUtilityMeter>): { meterData: IdbUtilityMeterData, status: "existing" | "new" | "invalid" } {
     let correspondingMeter: IdbUtilityMeter;
 
     if (meterData.meterId || meterData.meterNumber) {
@@ -172,6 +172,29 @@ export class ImportMeterDataService {
       }
     } else {
       return { meterData: meterData, status: "invalid" };
+    }
+  }
+
+
+  importMeterDataFromExcelFile(meterData: Array<IdbUtilityMeterData>, facilityMeters: Array<IdbUtilityMeter>, metersToImport: Array<IdbUtilityMeter>): ImportMeterDataFileSummary {
+    let existingMeterData: Array<IdbUtilityMeterData> = new Array();
+    let newMeterData: Array<IdbUtilityMeterData> = new Array();
+    let invalidMeterData: Array<IdbUtilityMeterData> = new Array();
+    meterData.forEach(importMeterData => {
+      let importMeterStatus: { meterData: IdbUtilityMeterData, status: "existing" | "new" | "invalid" } = this.getImportMeterDataStatus(importMeterData, facilityMeters, metersToImport);
+      importMeterData = importMeterStatus.meterData;
+      if (importMeterStatus.status == "new") {
+        newMeterData.push(importMeterData);
+      } else if (importMeterStatus.status == "existing") {
+        existingMeterData.push(importMeterData);
+      } else if (importMeterStatus.status == "invalid") {
+        invalidMeterData.push(importMeterData);
+      }
+    });
+    return {
+      existingMeterData: existingMeterData,
+      newMeterData: newMeterData,
+      invalidMeterData: invalidMeterData
     }
   }
 }

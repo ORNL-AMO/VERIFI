@@ -1,1 +1,41 @@
-<p>wizard-data-summary works!</p>
+<table>
+    <thead>
+        <tr>
+            <th>
+                Meter
+            </th>
+            <th>
+                Source
+            </th>
+            <th>
+                Collection Unit
+            </th>
+            <th>
+                Number of Readings
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let summary of metersSummary">
+            <td>
+                {{summary.meter.name}}
+            </td>
+            <td>
+                {{summary.meter.source}}
+            </td>
+            <td>
+                {{summary.meter.startingUnit}}
+            </td>
+            <td>
+                {{summary.meterData.length}}
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+
+<hr>
+<div class="d-flex w-100 justify-content-between">
+    <button class="btn btn-secondary" (click)="back()">Meters Setup</button>
+    <button class="btn btn-primary" (click)="continue()">Submit & Finish</button>
+</div>

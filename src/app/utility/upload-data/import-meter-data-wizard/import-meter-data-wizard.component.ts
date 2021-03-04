@@ -291,7 +291,7 @@ export class ImportMeterDataWizardComponent implements OnInit {
     let indexesToRemove: Array<number> = new Array();
     this.invalidMissingMeter.forEach((meterData, index) => {
       if (meterData.meterNumber) {
-        let meterStatus: { meterData: IdbUtilityMeterData, status: "existing" | "new" | "invalid" } = this.importMeterDataService.getImportMeterStatus(meterData, this.facilityMeters, this.newImportMeters);
+        let meterStatus: { meterData: IdbUtilityMeterData, status: "existing" | "new" | "invalid" } = this.importMeterDataService.getImportMeterDataStatus(meterData, this.facilityMeters, this.newImportMeters);
         if (meterStatus.status == 'existing') {
           indexesToRemove.push(index);
           this.validExistingReadings.push(meterStatus.meterData);

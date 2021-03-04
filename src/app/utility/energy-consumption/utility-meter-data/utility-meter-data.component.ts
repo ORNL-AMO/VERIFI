@@ -98,7 +98,7 @@ export class UtilityMeterDataComponent implements OnInit {
   setMeterList() {
     this.meterList = new Array();
     this.utilityMeters.forEach(meter => {
-      let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataForFacility(meter);
+      let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataForFacility(meter, false);
       this.meterList.push({
         idbMeter: meter,
         meterDataItems: meterData

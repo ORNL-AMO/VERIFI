@@ -21,5 +21,6 @@
 </div>
 
 <div *ngIf="wizardPage == 4">
-    <app-wizard-data-summary [(importMeterFileWizard)]="importMeterFileWizard"></app-wizard-data-summary>
+    <app-wizard-data-summary [(importMeterFileWizard)]="importMeterFileWizard" (emitClose)="close()"
+        (emitBack)="back()"></app-wizard-data-summary>
 </div>

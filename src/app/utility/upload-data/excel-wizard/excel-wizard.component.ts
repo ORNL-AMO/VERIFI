@@ -17,6 +17,7 @@ export class ExcelWizardComponent implements OnInit {
   wizardPage: number = 1;
   workbookLoaded: boolean = false;
   importMeterFileWizard: { fileName: string, importMeterFileSummary: ImportMeterFileSummary, id: string };
+  fileName: string
   constructor(private excelWizardService: ExcelWizardService) { }
 
   ngOnInit(): void {
@@ -43,7 +44,7 @@ export class ExcelWizardComponent implements OnInit {
     if(this.wizardPage == 2){
      let meterSumary: ImportMeterFileSummary = this.excelWizardService.getImportMeterFileSummary();
      this.importMeterFileWizard = {
-       fileName: undefined,
+       fileName: this.selectedExcelFile.name,
        importMeterFileSummary: meterSumary,
        id: undefined
      }

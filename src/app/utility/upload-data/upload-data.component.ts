@@ -267,6 +267,7 @@ export class UploadDataComponent implements OnInit {
     //set meterId's
     newReadings = newReadings.map(reading => { return this.setMeterId(reading, facilityMeters) });
     existingReadings = existingReadings.map(reading => { return this.setMeterId(reading, facilityMeters) });
+    debugger
     //add new readings
     await newReadings.forEach(reading => {
       this.utilityMeterDataDbService.addWithObservable(reading);

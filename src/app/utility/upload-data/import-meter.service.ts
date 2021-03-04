@@ -173,15 +173,15 @@ export class ImportMeterService {
     let newMeters: Array<IdbUtilityMeter> = new Array();
     let invalidMeters: Array<IdbUtilityMeter> = new Array();
     groupItems.forEach(groupItem => {
-        let newMeter: IdbUtilityMeter = this.getNewMeterFromExcelColumn(groupItem, selectedFacility);
-        let importMeterStatus: { meter: IdbUtilityMeter, status: "existing" | "new" | "invalid" } = this.getImportMeterStatus(newMeter, facilityMeters);
-        if (importMeterStatus.status == "new") {
-          newMeters.push(importMeterStatus.meter);
-        } else if (importMeterStatus.status == "existing") {
-          existingMeters.push(importMeterStatus.meter);
-        } else if (importMeterStatus.status == "invalid") {
-          invalidMeters.push(importMeterStatus.meter);
-        }
+      let newMeter: IdbUtilityMeter = this.getNewMeterFromExcelColumn(groupItem, selectedFacility);
+      let importMeterStatus: { meter: IdbUtilityMeter, status: "existing" | "new" | "invalid" } = this.getImportMeterStatus(newMeter, facilityMeters);
+      if (importMeterStatus.status == "new") {
+        newMeters.push(importMeterStatus.meter);
+      } else if (importMeterStatus.status == "existing") {
+        existingMeters.push(importMeterStatus.meter);
+      } else if (importMeterStatus.status == "invalid") {
+        invalidMeters.push(importMeterStatus.meter);
+      }
     });
     return {
       existingMeters: existingMeters,
@@ -191,12 +191,13 @@ export class ImportMeterService {
     }
   }
 
-  getNewMeterFromExcelColumn(groupItem: ColumnItem, selectedFacility: IdbFacility): IdbUtilityMeter{
+  getNewMeterFromExcelColumn(groupItem: ColumnItem, selectedFacility: IdbFacility): IdbUtilityMeter {
     let newMeter: IdbUtilityMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.id, selectedFacility.accountId, false);
     //TODO: PARSE NAME FOR KEYWORDS LIKE SOURCE/UNITS Etc..
+
     // newMeter.meterNumber = importMeter.meterNumber;
     // newMeter.accountNumber = importMeter.accountNumber;
-    // newMeter.source = this.checkImportSource(importMeter.source);
+    newMeter.source = this.energyUnitsHelperService.parseSource(groupItem.value);
     // newMeter.phase = this.checkImportPhase(importMeter.phase);
     newMeter.name = groupItem.value;
     // newMeter.supplier = importMeter.utilitySupplier;
@@ -204,11 +205,22 @@ export class ImportMeterService {
     // newMeter.location = importMeter.location;
     // newMeter.group = importMeter.meterGroup;
     // newMeter.fuel = importMeter.fuel;
-    // newMeter.startingUnit = this.checkImportStartingUnit(importMeter.collectionUnit, newMeter.source, newMeter.phase, newMeter.fuel);
-    // newMeter.heatCapacity = importMeter.heatCapacity;
-    // newMeter.siteToSource = importMeter.siteToSource;
+    newMeter.startingUnit = this.energyUnitsHelperService.parseStartingUnit(groupItem.value);
+    if (newMeter.startingUnit && newMeter.source) {
+      if(this.energyUnitsHelperService.isEnergyUnit(newMeter.startingUnit) == false){
+        let heatCapacityAndSiteToSource: { heatCapacity: number, siteToSource: number } = this.energyUseCalculationsService.getHeatingCapacityAndSiteToSourceValue(newMeter.source, newMeter.startingUnit);
+        newMeter.heatCapacity = heatCapacityAndSiteToSource.heatCapacity;
+        newMeter.siteToSource = heatCapacityAndSiteToSource.siteToSource;
+      }
+    }
+    //use import wizard name so that the name of the meter can be changed but 
+    //we can still access the data using this value
+    newMeter.importWizardName = groupItem.value;
+    newMeter.meterNumber =  Math.random().toString(36).substr(2, 9);
     return newMeter;
   }
+
+
 
 }
 

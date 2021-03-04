@@ -85,6 +85,7 @@ export interface IdbUtilityMeter {
     energyUnit: string,
     fuel:string
     visible?: boolean
+    importWizardName?: string
 }
 
 export interface IdbUtilityMeterData {

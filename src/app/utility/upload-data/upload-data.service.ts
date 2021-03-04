@@ -16,9 +16,9 @@ export class UploadDataService {
   importMeterFiles: BehaviorSubject<Array<{ fileName: string, importMeterFileSummary: ImportMeterFileSummary, id: string }>>;
   importMeterDataFiles: BehaviorSubject<Array<ImportMeterDataFile>>;
   excelFiles: BehaviorSubject<Array<File>>;
-  excelImportMeters: BehaviorSubject<Array<IdbUtilityMeter>>;
-  excelImportMeterDates: BehaviorSubject<Array<Date>>;
-  excelImportMeterConsumption: BehaviorSubject<Array<Array<number>>>;
+  // excelImportMeters: BehaviorSubject<Array<IdbUtilityMeter>>;
+  // excelImportMeterDates: BehaviorSubject<Array<Date>>;
+  // excelImportMeterConsumption: BehaviorSubject<Array<Array<number>>>;
   templateWorkBooks: BehaviorSubject<Array<{ workBook: XLSX.WorkBook, fileName: string }>>;
 
   importMeterFileWizard: BehaviorSubject<{ fileName: string, importMeterFileSummary: ImportMeterFileSummary, id: string }>;
@@ -27,9 +27,9 @@ export class UploadDataService {
     private ImportMeterDataService: ImportMeterDataService, private utilityMeterDataDbService: UtilityMeterDatadbService) {
     this.importMeterFiles = new BehaviorSubject([]);
     this.excelFiles = new BehaviorSubject<Array<File>>([]);
-    this.excelImportMeters = new BehaviorSubject<Array<IdbUtilityMeter>>([]);
-    this.excelImportMeterDates = new BehaviorSubject<Array<Date>>([]);
-    this.excelImportMeterConsumption = new BehaviorSubject<Array<Array<number>>>([]);
+    // this.excelImportMeters = new BehaviorSubject<Array<IdbUtilityMeter>>([]);
+    // this.excelImportMeterDates = new BehaviorSubject<Array<Date>>([]);
+    // this.excelImportMeterConsumption = new BehaviorSubject<Array<Array<number>>>([]);
     this.importMeterDataFiles = new BehaviorSubject([]);
     this.templateWorkBooks = new BehaviorSubject([]);
     this.importMeterFileWizard = new BehaviorSubject(undefined);
@@ -43,9 +43,9 @@ export class UploadDataService {
   resetData(){
     this.importMeterFiles.next([]);
     this.excelFiles.next([]);
-    this.excelImportMeters.next([]);
-    this.excelImportMeterDates.next([]);
-    this.excelImportMeterConsumption.next([]);
+    // this.excelImportMeters.next([]);
+    // this.excelImportMeterDates.next([]);
+    // this.excelImportMeterConsumption.next([]);
     this.importMeterDataFiles.next([]);
     this.templateWorkBooks.next([]);
     this.importMeterFileWizard.next(undefined);
@@ -126,6 +126,13 @@ export class UploadDataService {
     this.importMeterDataFiles.next([]);
     let templateWorkBooks: Array<{ workBook: XLSX.WorkBook, fileName: string }> = this.templateWorkBooks.getValue();
     this.parseWorkBooks(templateWorkBooks, true);
+  }
+
+  removeExcelFile(fileName: string){
+    let excelFiles: Array<File> = this.excelFiles.getValue();
+    let fileIndex: number = excelFiles.findIndex(file => {return file.name == fileName});
+    excelFiles.splice(fileIndex, 1);
+    this.excelFiles.next(excelFiles);
   }
 
 }

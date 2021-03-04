@@ -28,7 +28,7 @@ export class EditMeterComponent implements OnInit {
 
   ngOnInit(): void {
     this.meterForm = this.editMeterFormService.getFormFromMeter(this.editMeter);
-    let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataForFacility(this.editMeter);
+    let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataForFacility(this.editMeter, false);
     if (meterData.length != 0) {
       this.meterFormDisabled = true;
       this.meterForm.controls.source.disable();

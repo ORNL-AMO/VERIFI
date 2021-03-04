@@ -1,6 +1,6 @@
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
-import { ColumnItem, ExcelWizardService } from '../excel-wizard.service';
+import { ColumnGroup, ColumnItem, ExcelWizardService } from '../excel-wizard.service';
 import * as _ from 'lodash';
 @Component({
   selector: 'app-columns-wizard',
@@ -15,7 +15,7 @@ export class ColumnsWizardComponent implements OnInit {
   emitContinue: EventEmitter<boolean> = new EventEmitter();
 
 
-  columnGroups: Array<{ groupLabel: string, groupItems: Array<ColumnItem>, id: string }>;
+  columnGroups: Array<ColumnGroup>;
   rowGroups: Array<{ fieldLabel: string, fieldName: string, groupItems: Array<ColumnItem>, id: string }>;
   columnGroupItemIds: Array<string>;
   rowGroupItemIds: Array<string>;

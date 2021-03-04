@@ -159,13 +159,14 @@ export class UtilityMeterDatadbService {
             powerFactorCharge: undefined,
             businessCharge: undefined,
             utilityTax: undefined,
-            latePayment: undefined
+            latePayment: undefined,
+            meterNumber: meter.meterNumber
         }
     }
 
 
     getLastMeterReadingDate(meter: IdbUtilityMeter): Date {
-        let allSelectedMeterData: Array<IdbUtilityMeterData> = this.getMeterDataForFacility(meter);
+        let allSelectedMeterData: Array<IdbUtilityMeterData> = this.getMeterDataForFacility(meter, false);
         if (allSelectedMeterData.length != 0) {
             let lastMeterReading: IdbUtilityMeterData = _.maxBy(allSelectedMeterData, 'readDate');
             return new Date(lastMeterReading.readDate);
@@ -175,7 +176,7 @@ export class UtilityMeterDatadbService {
 
     checkMeterReadingExistForDate(date: Date, meter: IdbUtilityMeter): IdbUtilityMeterData {
         let newDate: Date = new Date(date);
-        let allSelectedMeterData: Array<IdbUtilityMeterData> = this.getMeterDataForFacility(meter);
+        let allSelectedMeterData: Array<IdbUtilityMeterData> = this.getMeterDataForFacility(meter, false);
         let existingData: IdbUtilityMeterData = allSelectedMeterData.find(dataItem => {
             return this.checkSameMonthYear(newDate, dataItem);
         });
@@ -192,17 +193,21 @@ export class UtilityMeterDatadbService {
         return facilityMeterData.filter(meterData => { return meterData.meterId == meterId });
     }
 
-    getMeterDataForFacility(meter: IdbUtilityMeter): Array<IdbUtilityMeterData> {
+    getMeterDataForFacility(meter: IdbUtilityMeter, convertData: boolean): Array<IdbUtilityMeterData> {
         let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
         let meterData: Array<IdbUtilityMeterData> = this.getMeterDataFromMeterId(meter.id);
-        meterData = this.convertMeterDataService.convertMeterDataToFacility(meter, JSON.parse(JSON.stringify(meterData)), facility);
+        if (convertData) {
+            meterData = this.convertMeterDataService.convertMeterDataToFacility(meter, JSON.parse(JSON.stringify(meterData)), facility);
+        }
         return meterData;
     }
 
-    getMeterDataForAccount(meter: IdbUtilityMeter): Array<IdbUtilityMeterData> {
+    getMeterDataForAccount(meter: IdbUtilityMeter, convertData: boolean): Array<IdbUtilityMeterData> {
         let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
         let meterData: Array<IdbUtilityMeterData> = this.getMeterDataFromMeterId(meter.id);
-        meterData = this.convertMeterDataService.convertMeterDataToAccount(meter, JSON.parse(JSON.stringify(meterData)), account);
+        if (convertData) {
+            meterData = this.convertMeterDataService.convertMeterDataToAccount(meter, JSON.parse(JSON.stringify(meterData)), account);
+        }
         return meterData;
     }
 }

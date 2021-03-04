@@ -2,8 +2,11 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 import * as XLSX from 'xlsx';
+import { ImportMeterDataFileSummary, ImportMeterDataService } from '../import-meter-data.service';
 import { ImportMeterFileSummary, ImportMeterService } from '../import-meter.service';
 import { UploadDataService } from '../upload-data.service';
 
@@ -17,15 +20,17 @@ export class ExcelWizardService {
   selectedWorksheetData: BehaviorSubject<Array<Array<string>>>;
   selectedWorksheetDataHeaderMap: BehaviorSubject<Array<any>>;
   selectedWorksheetName: string;
-  columnGroups: BehaviorSubject<Array<{ groupLabel: string, groupItems: Array<ColumnItem>, id: string }>>;
+  columnGroups: BehaviorSubject<Array<ColumnGroup>>;
   rowGroups: BehaviorSubject<Array<{ fieldLabel: string, fieldName: string, groupItems: Array<ColumnItem>, id: string }>>;
   dataOrientation: string = 'column';
 
-  constructor(private importMeterSevice: ImportMeterService, private facilityDbService: FacilitydbService, private utilityMeterDbService: UtilityMeterdbService) {
+  constructor(private importMeterSevice: ImportMeterService, private facilityDbService: FacilitydbService, private utilityMeterDbService: UtilityMeterdbService,
+    private importMeterDataService: ImportMeterDataService, private energyUnitsHelperService: EnergyUnitsHelperService, private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private uploadDataService: UploadDataService) {
     this.selectedWorksheetData = new BehaviorSubject([]);
     this.selectedWorksheetDataHeaderMap = new BehaviorSubject([]);
     this.rowGroups = new BehaviorSubject([]);
-    this.columnGroups = new BehaviorSubject<Array<{ groupLabel: string, groupItems: Array<ColumnItem>, id: string }>>([]);
+    this.columnGroups = new BehaviorSubject<Array<ColumnGroup>>([]);
     this.selectedWorksheetData.subscribe(data => {
       if (data && data.length != 0) {
         this.setColumnGroups(data[0]);
@@ -127,27 +132,11 @@ export class ExcelWizardService {
     this.rowGroups.next(rowGroups);
   }
 
-
-  // mapData() {
-  //   // let worksheetData = this.selectedWorksheetDataHeaderMap.getValue();
-  //   let columnGroups: Array<{ groupLabel: string, groupItems: Array<ColumnItem>, id: string }> = this.columnGroups.getValue();
-  //   let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-  //   let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
-  //   if (this.dataOrientation == 'column') {
-  //     // let dateGroup = columnGroups.find(group => { return group.groupLabel == 'Date' });
-  //     let metersGroup = columnGroups.find(group => { return group.groupLabel == 'Meters' });
-  //     let importMeterFileSummary: ImportMeterFileSummary = this.importMeterSevice.importMetersFromExcelFile(metersGroup.groupItems, selectedFacility, facilityMeters);
-  //     this.
-  //   } else {
-
-  //   }
-  // }
-
   getImportMeterFileSummary(): ImportMeterFileSummary {
-    let columnGroups: Array<{ groupLabel: string, groupItems: Array<ColumnItem>, id: string }> = this.columnGroups.getValue();
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
     if (this.dataOrientation == 'column') {
+      let columnGroups: Array<{ groupLabel: string, groupItems: Array<ColumnItem>, id: string }> = this.columnGroups.getValue();
+      let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+      let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
       // let dateGroup = columnGroups.find(group => { return group.groupLabel == 'Date' });
       let metersGroup = columnGroups.find(group => { return group.groupLabel == 'Meters' });
       return this.importMeterSevice.importMetersFromExcelFile(metersGroup.groupItems, selectedFacility, facilityMeters);
@@ -155,6 +144,78 @@ export class ExcelWizardService {
       //TODO
     }
   }
+
+  // getPredictorsSummary() {
+  //   let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+  //   let predictors: Array<IdbPredictorEntry> = new Array();
+  //   let columnGroups: Array<ColumnGroup> = this.columnGroups.getValue();
+  //   let dateGroup: ColumnGroup = columnGroups.find(group => { return group.groupLabel == 'Date' });
+  //   let predictorGroup: ColumnGroup = columnGroups.find(group => {return group.groupLabel == 'Predictors'});
+  //   predictorGroup.groupItems.forEach(groupItem => {
+
+  //   });
+
+  // }
+
+  getMetersSummary(importMeterFileWizard: { fileName: string, importMeterFileSummary: ImportMeterFileSummary, id: string }): Array<{ meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData> }> {
+    let importMeters: Array<IdbUtilityMeter> = new Array();
+    importMeterFileWizard.importMeterFileSummary.newMeters.forEach(meter => {
+      importMeters.push(meter);
+    });
+    importMeterFileWizard.importMeterFileSummary.existingMeters.forEach(meter => {
+      importMeters.push(meter);
+    });
+    let columnGroups: Array<{ groupLabel: string, groupItems: Array<ColumnItem>, id: string }> = this.columnGroups.getValue();
+    let dateGroup = columnGroups.find(group => { return group.groupLabel == 'Date' })
+    let worksheetData: Array<any> = this.selectedWorksheetDataHeaderMap.getValue();
+
+    let metersSummary: Array<{ meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData> }> = new Array();
+    importMeters.forEach(meter => {
+      let meterDataArr: Array<IdbUtilityMeterData> = new Array();
+      let displayVolumeInput: boolean = (this.energyUnitsHelperService.isEnergyUnit(meter.startingUnit) == false);
+      let displayEnergyUse: boolean = this.energyUnitsHelperService.isEnergyMeter(meter.source);
+      worksheetData.forEach(dataItem => {
+        let newMeterDataItem: IdbUtilityMeterData = this.utilityMeterDataDbService.getNewIdbUtilityMeterData(meter);
+        newMeterDataItem.readDate = new Date(dataItem[dateGroup.groupItems[0].value]);
+        let totalImportConsumption: number = dataItem[meter.importWizardName];
+        if (!displayVolumeInput) {
+          newMeterDataItem.totalEnergyUse = totalImportConsumption;
+        } else {
+          newMeterDataItem.totalVolume = totalImportConsumption;
+          if (displayEnergyUse && newMeterDataItem.totalVolume) {
+            newMeterDataItem.totalEnergyUse = newMeterDataItem.totalVolume * meter.heatCapacity;
+          }
+        }
+        meterDataArr.push(newMeterDataItem);
+      });
+      metersSummary.push({
+        meter: meter,
+        meterData: meterDataArr
+      })
+    });
+    return metersSummary;
+  }
+
+  submitExcelData(importMeterFileWizard: { fileName: string, importMeterFileSummary: ImportMeterFileSummary, id: string }, meterData: Array<IdbUtilityMeterData>, facilityMeters: Array<IdbUtilityMeter>) {
+    let metersToImport: Array<IdbUtilityMeter> = new Array();
+    importMeterFileWizard.importMeterFileSummary.newMeters.forEach(meter => {
+      metersToImport.push(meter);
+    })
+    importMeterFileWizard.importMeterFileSummary.existingMeters.forEach(meter => {
+      metersToImport.push(meter);
+    })
+
+    let importMeterDataFileSummary: ImportMeterDataFileSummary = this.importMeterDataService.importMeterDataFromExcelFile(meterData, facilityMeters, metersToImport);
+    this.uploadDataService.addMeterFile(importMeterFileWizard.fileName, importMeterFileWizard.importMeterFileSummary);
+    this.uploadDataService.addMeterDataFile(importMeterFileWizard.fileName, importMeterDataFileSummary, undefined);
+    this.uploadDataService.removeExcelFile(importMeterFileWizard.fileName);
+  }
+}
+
+export interface ColumnGroup {
+  groupLabel: string,
+  groupItems: Array<ColumnItem>,
+  id: string
 }
 
 
