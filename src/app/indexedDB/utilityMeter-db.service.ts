@@ -129,7 +129,7 @@ export class UtilityMeterdbService {
             phase: undefined,
             heatCapacity: undefined,
             siteToSource: undefined,
-            name: undefined,
+            name: "New Meter",
             location: undefined,
             supplier: undefined,
             notes: undefined,

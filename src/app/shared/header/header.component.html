@@ -1,4 +1,4 @@
-<div id="header" role="header" *ngIf="activeAccount">
+<div id="header" role="header">
     <div class="row resetmargin">
         <div class="col-lg-2">
             <h2>VERIFI</h2>
@@ -6,11 +6,17 @@
         <div class="col">
             <div class="searchBar">
                 <i class="fa fa-search"></i>
-                <input type="text" ng-model="searchBox" placeholder="Search Verifi">
+                <input type="text" ng-model="searchBox" placeholder="Search Verifi (Coming Soon)">
             </div>
         </div>
         <div class="col-lg-3 facilityMenu">
-            <div class="facilityMenu">
+            <div class="facilityMenu" *ngIf="!activeAccount">
+                <div class="currentFacility">
+                    <i class="fa fa-industry item-left"></i>
+                    <span class="accountRequired">Account Required</span>
+                </div>
+            </div>
+            <div class="facilityMenu" *ngIf="activeAccount">
                 <div class="currentFacility" (click)="toggleFacilityMenu()">
                     <i class="fa fa-industry item-left"></i>
                     <span>{{activeAccount.name}}</span>
@@ -41,17 +47,25 @@
                 <i class="fa fa-ellipsis-v" (click)="toggleAccountMenu()"></i>
                 <div class="dropdown" [class.open]="accountMenu == true">
                     <div class="arrow-up"></div>
-                    <div class="currentAccount" routerLink="/account-management">
-                        <i class="fa fa-user-circle-o item-left"></i>
-                        <p>{{activeAccount.name}}</p>
-                        <span class="small">Manage Account</span>
-                        <!--<i class="fa fa-random right"></i>-->
-                        <i class="fa fa-chevron-right right"></i>
+                    <div *ngIf="!activeAccount">
+                        <div class="noAccount">
+                            <i class="fa fa-user-circle-o item-left"></i>
+                            <span>Account Required</span>
+                        </div>
                     </div>
-                    <hr>
-                    <a (click)="toggleSwitchAccountsMenu()">Switch Account</a>
-                    <br>
-                    <a routerLink="/">Settings</a>
+                    <div *ngIf="activeAccount">
+                        <div class="currentAccount" routerLink="/account-management">
+                            <i class="fa fa-user-circle-o item-left"></i>
+                            <p>{{activeAccount.name}}</p>
+                            <span class="small">Manage Account</span>
+                            <!--<i class="fa fa-random right"></i>-->
+                            <i class="fa fa-chevron-right right"></i>
+                        </div>
+                        <hr>
+                        <a (click)="toggleSwitchAccountsMenu()">Switch Account</a>
+                        <br>
+                        <!--<a routerLink="/">Settings</a>-->
+                    </div>
                 </div>
             </div>
         </div>
@@ -73,16 +87,3 @@
     <button class="btn btn-link" (click)="addNewAccount()"><i class="fa fa-plus"></i> Add Account</button>
 </div>
 <div id="darkoverlay" [class.open]="switchAccountMenu == true" (click)="toggleSwitchAccountsMenu()"></div>
-
-
-<div id="devtools" (click)="devtools = !devtools" [class.open]="devtools">
-    <p>Dev Tools</p>
-    <button class="btn btn-secondary" (click)="loadTestData();">Load Test Accounts</button><br>
-    <button class="btn btn-secondary" (click)="getAllAccounts();">Get All Accounts</button> |
-    <button class="btn btn-secondary" (click)="getAllFacilities();">Get All Facilities</button><br>
-    <button class="btn btn-secondary" (click)="getAllMeters();">Get All Meters</button> |
-    <button class="btn btn-secondary" (click)="getAllMeterData();">Get All Meter Data</button><br>
-    <button class="btn btn-secondary" (click)="getAllMeterData();">Get All Meter Groups</button><br>
-    <button class="btn btn-secondary" (click)="clearLocalstorage();">Clear localstorage</button><br>
-    <button class="btn btn-secondary" (click)="accountdbService.deleteDatabase();">Delete Database</button>
-</div>

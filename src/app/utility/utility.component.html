@@ -2,7 +2,7 @@
     <div class="banner">
         <h3>Utility Data</h3>
         <div class="compNav">
-            <ul>
+            <ul *ngIf="selectedAccount && selectedFacility">
                 <li><a routerLink="energy-consumption" [routerLinkActive]="['active']">Utilities</a></li>
                 <li><a routerLink="mo-meter-data" [routerLinkActive]="['active']">Monthly Meter Data</a></li>
                 <li><a routerLink="meter-groups" [routerLinkActive]="['active']">Meter Grouping</a></li>
@@ -18,7 +18,7 @@
     </div>
 </div>
 
-<div class="row no-margin">
+<div class="row no-margin" *ngIf="(selectedAccount && selectedFacility) && appRendered">
     <div class="col">
         <router-outlet></router-outlet>
     </div>
@@ -26,3 +26,12 @@
         <app-help-panel></app-help-panel>
     </div>
 </div>
+
+<div *ngIf="(!selectedAccount || !selectedFacility) && appRendered">
+    <div class="wrapper main-content">
+        <h4>Info</h4>
+        <p class="alert alert-warning"><i class="fa fa-info-circle"></i> No account or facility selected. <a routerLink="/account-summary">Return to dashboard</a></p>
+        
+    </div>
+</div>
+

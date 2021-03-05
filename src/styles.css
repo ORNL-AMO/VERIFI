@@ -218,7 +218,7 @@ Alerts
 ======================================================== */
 .alert {
   padding: 5px !important;
-  margin: 5px 0px;
+  margin: 5px 0px!important;
   width: 100%;
 }
 .alert-info {
@@ -235,6 +235,18 @@ Alerts
   color: #923d15;
   background-color: #f0d3ca;
   border-color: #d0bab3;
+}
+.alert-info i {
+  color: #2b77a9;
+  margin: 5px;
+}
+.alert-warning i {
+  color: #856404;
+  margin: 5px;
+}
+.alert-danger i {
+  color: #923d15;
+  margin: 5px;
 }
 /*
 Popups & Windows
@@ -409,11 +421,11 @@ textarea {
   padding: 2px 7px;
   outline: none;
 }
-input[type="radio"],
-input[type="checkbox"] {
+input[type="checkbox"].rowToggle,
+input[type="radio"].rowToggle {
   float: left;
   width: auto;
-  margin: 0px 10px;
+  margin: 3px 10px;
   height: 15px;
   width: 15px;
 }
@@ -1146,4 +1158,30 @@ input.unitDollar {
   z-index: 2;
   border-top: 1px solid #5c7859;
   box-shadow: 1px -1px 0px #9eb39b;
+}
+
+.tag {
+  background-color: #eee;
+  color: #333333;
+  padding: 2px 7px!Important;
+  font-size: 11px;
+  margin-left: 10px;
+  line-height: initial;
+}
+.tag.coming-soon {
+  background-color: #ffe400;
+}
+
+.tag.new {
+  background-color: #145932;
+  color: white;
+}
+
+canvas {
+  top: auto!important;
+  left: auto!important;
+  bottom: 65px!important;
+  right: 50px!important;
+  z-index: 1001!important;
+  /*height: 200px;*/
 }

@@ -13,8 +13,13 @@ export class AccountManagementService {
   getAccountForm(account: IdbAccount): FormGroup {
     let form: FormGroup = this.formBuilder.group({
       name: [account.name, [Validators.required]],
-      industry: [account.industry],
+      country: [account.country],
+      city: [account.city],
+      state: [account.state],
+      zip: [account.zip],
+      address: [account.address],
       naics: [account.naics],
+      size: [account.size],
       notes: [account.notes],
       unitsOfMeasure: [account.unitsOfMeasure, [Validators.required]],
       energyUnit: [account.energyUnit, [Validators.required]],
@@ -42,6 +47,9 @@ export class AccountManagementService {
       waterReductionPercent: [account.sustainabilityQuestions? account.sustainabilityQuestions.waterReductionPercent:null],
       waterReductionBaselineYear: [account.sustainabilityQuestions? account.sustainabilityQuestions.waterReductionBaselineYear:null],
       waterReductionTargetYear: [account.sustainabilityQuestions? account.sustainabilityQuestions.waterReductionTargetYear:null],
+      fiscalYear: [account.fiscalYear],
+      fiscalYearMonth: [account.fiscalYearMonth],
+      fiscalYearCalendarEnd: [account.fiscalYearCalendarEnd],
     });
     return form;
 
@@ -49,7 +57,11 @@ export class AccountManagementService {
 
   updateAccountFromForm(form: FormGroup, account: IdbAccount): IdbAccount {
     account.name = form.controls.name.value;
-    account.industry = form.controls.industry.value;
+    account.country = form.controls.country.value;
+    account.city = form.controls.city.value;
+    account.state = form.controls.state.value;
+    account.zip = form.controls.zip.value;
+    account.address = form.controls.address.value;
     account.naics = form.controls.naics.value;
     account.notes = form.controls.notes.value;
     account.unitsOfMeasure = form.controls.unitsOfMeasure.value;
@@ -78,6 +90,9 @@ export class AccountManagementService {
     account.sustainabilityQuestions.waterReductionPercent = form.controls.waterReductionPercent.value;
     account.sustainabilityQuestions.waterReductionBaselineYear = form.controls.waterReductionBaselineYear.value;
     account.sustainabilityQuestions.waterReductionTargetYear = form.controls.waterReductionTargetYear.value;
+    account.fiscalYear = form.controls.fiscalYear.value;
+    account.fiscalYearMonth = form.controls.fiscalYearMonth.value;
+    account.fiscalYearCalendarEnd = form.controls.fiscalYearCalendarEnd.value;
     return account;
   }
 
@@ -85,9 +100,11 @@ export class AccountManagementService {
     let form: FormGroup = this.formBuilder.group({
       name: [facility.name, [Validators.required]],
       country: [facility.country],
+      city: [facility.city],
       state: [facility.state],
+      zip: [facility.zip],
       address: [facility.address],
-      type: [facility.type],
+      naics: [facility.naics],
       size: [facility.size],
       notes: [facility.notes],
       unitsOfMeasure: [facility.unitsOfMeasure, [Validators.required]],
@@ -116,7 +133,9 @@ export class AccountManagementService {
       waterReductionPercent: [facility.sustainabilityQuestions? facility.sustainabilityQuestions.waterReductionPercent:null],
       waterReductionBaselineYear: [facility.sustainabilityQuestions? facility.sustainabilityQuestions.waterReductionBaselineYear:null],
       waterReductionTargetYear: [facility.sustainabilityQuestions? facility.sustainabilityQuestions.waterReductionTargetYear:null],
-      
+      fiscalYear: [facility.fiscalYear],
+      fiscalYearMonth: [facility.fiscalYearMonth],
+      fiscalYearCalendarEnd: [facility.fiscalYearCalendarEnd],
     });
     return form;
   }
@@ -124,9 +143,11 @@ export class AccountManagementService {
   updateFacilityFromForm(form: FormGroup, facility: IdbFacility): IdbFacility {
     facility.name = form.controls.name.value;
     facility.country = form.controls.country.value;
+    facility.city = form.controls.city.value;
     facility.state = form.controls.state.value;
+    facility.zip = form.controls.zip.value;
     facility.address = form.controls.address.value;
-    facility.type = form.controls.type.value;
+    facility.naics = form.controls.naics.value;
     facility.size = form.controls.size.value;
     facility.notes = form.controls.notes.value;
     facility.unitsOfMeasure = form.controls.unitsOfMeasure.value;
@@ -155,6 +176,9 @@ export class AccountManagementService {
     facility.sustainabilityQuestions.waterReductionPercent = form.controls.waterReductionPercent.value;
     facility.sustainabilityQuestions.waterReductionBaselineYear = form.controls.waterReductionBaselineYear.value;
     facility.sustainabilityQuestions.waterReductionTargetYear = form.controls.waterReductionTargetYear.value;
+    facility.fiscalYear = form.controls.fiscalYear.value;
+    facility.fiscalYearMonth = form.controls.fiscalYearMonth.value;
+    facility.fiscalYearCalendarEnd = form.controls.fiscalYearCalendarEnd.value;
     return facility;
   }
 
@@ -265,6 +289,25 @@ export class AccountManagementService {
     facilityForm.controls.waterReductionPercent.patchValue(account.sustainabilityQuestions.waterReductionPercent);
     facilityForm.controls.waterReductionBaselineYear.patchValue(account.sustainabilityQuestions.waterReductionBaselineYear);
     facilityForm.controls.waterReductionTargetYear.patchValue(account.sustainabilityQuestions.waterReductionTargetYear);
+    return facilityForm;
+  }
+
+  areAccountAndFacilityFinancialReportingDifferent(account: IdbAccount, facility: IdbFacility): boolean {
+    if (account && facility) {
+      return (
+        account.fiscalYear !=  facility.fiscalYear ||
+        account.fiscalYearMonth != facility.fiscalYearMonth ||
+        account.fiscalYearCalendarEnd !=  facility.fiscalYearCalendarEnd
+      )
+    } else {
+      return false;
+    }
+  }
+
+  setAccountFinancialReporting(facilityForm: FormGroup, account: IdbAccount): FormGroup {
+    facilityForm.controls.fiscalYear.patchValue(account.fiscalYear);
+    facilityForm.controls.fiscalYearMonth.patchValue(account.fiscalYearMonth);
+    facilityForm.controls.fiscalYearCalendarEnd.patchValue(account.fiscalYearCalendarEnd);
     return facilityForm;
   }
 

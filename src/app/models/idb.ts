@@ -5,7 +5,12 @@ export interface IdbAccount {
     //keys (id primary)
     id?: number,
     name: string,
-    industry: string,
+    country: string,
+    city: string,
+    state: string,
+    zip: number,
+    address: string,
+    size: number,
     naics: string,
     notes: string,
     img: string
@@ -15,7 +20,12 @@ export interface IdbAccount {
     volumeLiquidUnit: string,
     volumeGasUnit: string,
     chilledWaterUnit: string,
-    sustainabilityQuestions: SustainabilityQuestions
+    sustainabilityQuestions: SustainabilityQuestions,
+    fiscalYear: string,
+    fiscalYearMonth: string,
+    fiscalYearCalendarEnd: boolean,
+    setupWizard: boolean,
+    setupWizardComplete: boolean,
 }
 
 export interface IdbFacility {
@@ -25,8 +35,11 @@ export interface IdbFacility {
     //data
     name: string,
     country: string,
+    city: string,
     state: string,
+    zip: number,
     address: string,
+    naics: string,
     type: string,
     size: number,
     units: string,
@@ -41,7 +54,10 @@ export interface IdbFacility {
     volumeLiquidUnit: string,
     volumeGasUnit: string,
     chilledWaterUnit: string,
-    sustainabilityQuestions: SustainabilityQuestions
+    sustainabilityQuestions: SustainabilityQuestions,
+    fiscalYear: string,
+    fiscalYearMonth: string,
+    fiscalYearCalendarEnd: boolean,
 }
 
 export interface IdbUtilityMeterGroup {

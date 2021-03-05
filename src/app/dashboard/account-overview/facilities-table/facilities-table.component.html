@@ -13,7 +13,7 @@
                         {{lastMonthsDate | date: 'MMM, y'}})</span></th>
             </tr>
         </thead>
-        <tbody *ngIf="accountFacilitiesSummary">
+        <tbody *ngIf="accountFacilitiesSummary && accountFacilitiesSummary.facilitySummaries">
             <tr *ngFor="let summary of accountFacilitiesSummary.facilitySummaries">
                 <td>
                     <a (click)="selectFacility(summary.facility)">{{summary.facility.name}}</a>
