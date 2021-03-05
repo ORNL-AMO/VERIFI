@@ -17,7 +17,7 @@ export class ImportMeterService {
   constructor(private energyUnitsHelperService: EnergyUnitsHelperService, private energyUseCalculationsService: EnergyUseCalculationsService,
     private utilityMeterdbService: UtilityMeterdbService, private editMeterFormService: EditMeterFormService) { }
 
-  importMetersFromTemplateFile(data: Array<any>, selectedFacility: IdbFacility, facilityMeters: Array<IdbUtilityMeter>): ImportMeterFileSummary {
+  getMetersSummaryFromTemplateFile(data: Array<any>, selectedFacility: IdbFacility, facilityMeters: Array<IdbUtilityMeter>): ImportMeterFileSummary {
     let existingMeters: Array<IdbUtilityMeter> = new Array();
     let newMeters: Array<IdbUtilityMeter> = new Array();
     let invalidMeters: Array<IdbUtilityMeter> = new Array();
@@ -138,7 +138,7 @@ export class ImportMeterService {
     }
   }
 
-  importMetersFromExcelFile(groupItems: Array<ColumnItem>, selectedFacility: IdbFacility, facilityMeters: Array<IdbUtilityMeter>): ImportMeterFileSummary {
+  getMetersSummaryFromExcelFile(groupItems: Array<ColumnItem>, selectedFacility: IdbFacility, facilityMeters: Array<IdbUtilityMeter>): ImportMeterFileSummary {
     let existingMeters: Array<IdbUtilityMeter> = new Array();
     let newMeters: Array<IdbUtilityMeter> = new Array();
     let invalidMeters: Array<IdbUtilityMeter> = new Array();

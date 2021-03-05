@@ -105,7 +105,7 @@ export class UploadDataComponent implements OnInit {
   }
 
   checkSheetNamesForTemplate(sheetNames: Array<string>): boolean {
-    if (sheetNames[0] == "Meters-Utilities" && sheetNames[1] == "Electricity" && sheetNames[2] == "Non-electricity" && sheetNames[3] == "HIDE") {
+    if (sheetNames[0] == "Help" && sheetNames[1] == "Meters-Utilities" && sheetNames[2] == "Electricity" && sheetNames[3] == "Non-electricity" && sheetNames[4] == "HIDE") {
       return true;
     } else {
       return false;

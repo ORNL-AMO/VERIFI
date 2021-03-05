@@ -137,14 +137,14 @@ export class ExcelWizardService {
       let columnGroups: Array<{ groupLabel: string, groupItems: Array<ColumnItem>, id: string }> = this.columnGroups.getValue();
       let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
       let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
-      // let dateGroup = columnGroups.find(group => { return group.groupLabel == 'Date' });
       let metersGroup = columnGroups.find(group => { return group.groupLabel == 'Meters' });
-      return this.importMeterSevice.importMetersFromExcelFile(metersGroup.groupItems, selectedFacility, facilityMeters);
+      return this.importMeterSevice.getMetersSummaryFromExcelFile(metersGroup.groupItems, selectedFacility, facilityMeters);
     } else {
-      //TODO
+      //TODO handle row orientation
     }
   }
 
+  //TODO import predictors
   // getPredictorsSummary() {
   //   let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
   //   let predictors: Array<IdbPredictorEntry> = new Array();
@@ -205,7 +205,7 @@ export class ExcelWizardService {
       metersToImport.push(meter);
     })
 
-    let importMeterDataFileSummary: ImportMeterDataFileSummary = this.importMeterDataService.importMeterDataFromExcelFile(meterData, facilityMeters, metersToImport);
+    let importMeterDataFileSummary: ImportMeterDataFileSummary = this.importMeterDataService.getMeterDataSummaryFromExcelFile(meterData, facilityMeters, metersToImport);
     this.uploadDataService.addMeterFile(importMeterFileWizard.fileName, importMeterFileWizard.importMeterFileSummary);
     this.uploadDataService.addMeterDataFile(importMeterFileWizard.fileName, importMeterDataFileSummary, undefined);
     this.uploadDataService.removeExcelFile(importMeterFileWizard.fileName);

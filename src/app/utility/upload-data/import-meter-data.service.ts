@@ -13,7 +13,7 @@ export class ImportMeterDataService {
   constructor(private energyUnitsHelperService: EnergyUnitsHelperService, private utilityMeterDataService: UtilityMeterDataService, private utilityMeterDataDbService: UtilityMeterDatadbService) { }
 
 
-  importMeterDataFromTemplateFile(data: Array<any>, selectedFacility: IdbFacility, facilityMeters: Array<IdbUtilityMeter>, isTemplateElectricity: boolean, metersToImport: Array<IdbUtilityMeter>): ImportMeterDataFileSummary {
+  getMeterDataSummaryFromTemplateFile(data: Array<any>, selectedFacility: IdbFacility, facilityMeters: Array<IdbUtilityMeter>, isTemplateElectricity: boolean, metersToImport: Array<IdbUtilityMeter>): ImportMeterDataFileSummary {
     let existingMeterData: Array<IdbUtilityMeterData> = new Array();
     let newMeterData: Array<IdbUtilityMeterData> = new Array();
     let invalidMeterData: Array<IdbUtilityMeterData> = new Array();
@@ -179,7 +179,7 @@ export class ImportMeterDataService {
   }
 
 
-  importMeterDataFromExcelFile(meterData: Array<IdbUtilityMeterData>, facilityMeters: Array<IdbUtilityMeter>, metersToImport: Array<IdbUtilityMeter>): ImportMeterDataFileSummary {
+  getMeterDataSummaryFromExcelFile(meterData: Array<IdbUtilityMeterData>, facilityMeters: Array<IdbUtilityMeter>, metersToImport: Array<IdbUtilityMeter>): ImportMeterDataFileSummary {
     let existingMeterData: Array<IdbUtilityMeterData> = new Array();
     let newMeterData: Array<IdbUtilityMeterData> = new Array();
     let invalidMeterData: Array<IdbUtilityMeterData> = new Array();

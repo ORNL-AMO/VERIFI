@@ -97,7 +97,7 @@ export class UploadDataService {
   addMetersFromTemplate(fileData: any, fileName: string) {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
-    let summary: ImportMeterFileSummary = this.importMeterService.importMetersFromTemplateFile(fileData, selectedFacility, facilityMeters)
+    let summary: ImportMeterFileSummary = this.importMeterService.getMetersSummaryFromTemplateFile(fileData, selectedFacility, facilityMeters)
     this.addMeterFile(fileName, summary);
   }
 
@@ -106,7 +106,7 @@ export class UploadDataService {
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
     let importMeterFiles: Array<{ fileName: string, importMeterFileSummary: ImportMeterFileSummary }> = this.importMeterFiles.getValue();
     let metersToImport: Array<IdbUtilityMeter> = importMeterFiles.flatMap(importMeterFile => { return importMeterFile.importMeterFileSummary.newMeters });
-    let summary: ImportMeterDataFileSummary = this.importMeterDataService.importMeterDataFromTemplateFile(fileData, selectedFacility, facilityMeters, isTemplateElectricity, metersToImport);
+    let summary: ImportMeterDataFileSummary = this.importMeterDataService.getMeterDataSummaryFromTemplateFile(fileData, selectedFacility, facilityMeters, isTemplateElectricity, metersToImport);
     this.addMeterDataFile(fileName, summary, isTemplateElectricity);
   }
 
@@ -135,7 +135,7 @@ export class UploadDataService {
       file.importMeterDataFileSummary.newMeterData.forEach(meterData => {
         meterDataArr.push(meterData);
       });
-      file.importMeterDataFileSummary = this.importMeterDataService.importMeterDataFromExcelFile(meterDataArr, facilityMeters, metersToImport);
+      file.importMeterDataFileSummary = this.importMeterDataService.getMeterDataSummaryFromExcelFile(meterDataArr, facilityMeters, metersToImport);
       this.addMeterDataFile(file.fileName, file.importMeterDataFileSummary, undefined);
     })
 
