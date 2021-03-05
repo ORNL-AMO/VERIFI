@@ -186,7 +186,6 @@ export class ImportMeterDataService {
     meterData.forEach(importMeterData => {
       let importMeterStatus: { meterData: IdbUtilityMeterData, status: "existing" | "new" | "invalid" } = this.getImportMeterDataStatus(importMeterData, facilityMeters, metersToImport);
       importMeterData = importMeterStatus.meterData;
-      console.log(importMeterData.meterNumber);
       if (importMeterStatus.status == "new") {
         newMeterData.push(importMeterData);
       } else if (importMeterStatus.status == "existing") {

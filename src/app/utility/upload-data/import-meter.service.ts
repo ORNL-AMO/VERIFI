@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
-import { CsvImportData } from 'src/app/shared/helper-services/csv-to-json.service';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 import { EnergyUseCalculationsService } from 'src/app/shared/helper-services/energy-use-calculations.service';
 import { UnitOption } from 'src/app/shared/unitOptions';
@@ -17,38 +16,6 @@ export class ImportMeterService {
 
   constructor(private energyUnitsHelperService: EnergyUnitsHelperService, private energyUseCalculationsService: EnergyUseCalculationsService,
     private utilityMeterdbService: UtilityMeterdbService, private editMeterFormService: EditMeterFormService) { }
-
-  importMetersFromDataFile(csvImportData: CsvImportData, selectedFacility: IdbFacility, facilityMeters: Array<IdbUtilityMeter>): ImportMeterFileSummary {
-    let existingMeters: Array<IdbUtilityMeter> = new Array();
-    let newMeters: Array<IdbUtilityMeter> = new Array();
-    let invalidMeters: Array<IdbUtilityMeter> = new Array();
-    csvImportData.data.forEach(dataItem => {
-      let checkHasData: boolean = false;
-      Object.keys(dataItem).forEach((key) => {
-        if (dataItem[key] != null) {
-          checkHasData = true;
-        }
-      });
-      if (checkHasData) {
-        let importMeter: ImportMeter = this.parseDataItem(dataItem);
-        let newMeter: IdbUtilityMeter = this.getNewMeterFromImportMeter(importMeter, selectedFacility);
-        let importMeterStatus: { meter: IdbUtilityMeter, status: "existing" | "new" | "invalid" } = this.getImportMeterStatus(newMeter, facilityMeters);
-        if (importMeterStatus.status == "new") {
-          newMeters.push(importMeterStatus.meter);
-        } else if (importMeterStatus.status == "existing") {
-          existingMeters.push(importMeterStatus.meter);
-        } else if (importMeterStatus.status == "invalid") {
-          invalidMeters.push(importMeterStatus.meter);
-        }
-      }
-    });
-    return {
-      existingMeters: existingMeters,
-      newMeters: newMeters,
-      invalidMeters: invalidMeters,
-      skippedMeters: []
-    }
-  }
 
   importMetersFromTemplateFile(data: Array<any>, selectedFacility: IdbFacility, facilityMeters: Array<IdbUtilityMeter>): ImportMeterFileSummary {
     let existingMeters: Array<IdbUtilityMeter> = new Array();
@@ -81,7 +48,6 @@ export class ImportMeterService {
       skippedMeters: []
     }
   }
-
 
   parseDataItem(dataItem: any): ImportMeter {
     return {
@@ -160,6 +126,10 @@ export class ImportMeterService {
     } else {
       let facilityMeter: IdbUtilityMeter = facilityMeters.find(facilityMeter => { return facilityMeter.name == importMeter.name });
       if (facilityMeter) {
+        //overide random meter number set
+        if (facilityMeter.meterNumber) {
+          meterForm.controls.meterNumber.patchValue(facilityMeter.meterNumber);
+        }
         importMeter = this.editMeterFormService.updateMeterFromForm(facilityMeter, meterForm);
         return { meter: importMeter, status: 'existing' };;
       } else {
@@ -193,30 +163,38 @@ export class ImportMeterService {
 
   getNewMeterFromExcelColumn(groupItem: ColumnItem, selectedFacility: IdbFacility): IdbUtilityMeter {
     let newMeter: IdbUtilityMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.id, selectedFacility.accountId, false);
-    //TODO: PARSE NAME FOR KEYWORDS LIKE SOURCE/UNITS Etc..
-
-    // newMeter.meterNumber = importMeter.meterNumber;
-    // newMeter.accountNumber = importMeter.accountNumber;
-    newMeter.source = this.energyUnitsHelperService.parseSource(groupItem.value);
-    // newMeter.phase = this.checkImportPhase(importMeter.phase);
-    newMeter.name = groupItem.value;
-    // newMeter.supplier = importMeter.utilitySupplier;
-    // newMeter.notes = importMeter.notes;
-    // newMeter.location = importMeter.location;
-    // newMeter.group = importMeter.meterGroup;
-    // newMeter.fuel = importMeter.fuel;
-    newMeter.startingUnit = this.energyUnitsHelperService.parseStartingUnit(groupItem.value);
-    if (newMeter.startingUnit && newMeter.source) {
-      if(this.energyUnitsHelperService.isEnergyUnit(newMeter.startingUnit) == false){
-        let heatCapacityAndSiteToSource: { heatCapacity: number, siteToSource: number } = this.energyUseCalculationsService.getHeatingCapacityAndSiteToSourceValue(newMeter.source, newMeter.startingUnit);
-        newMeter.heatCapacity = heatCapacityAndSiteToSource.heatCapacity;
-        newMeter.siteToSource = heatCapacityAndSiteToSource.siteToSource;
+    let fuelType: { phase: string, fuelTypeOption: FuelTypeOption } = this.energyUnitsHelperService.parseFuelType(groupItem.value);
+    if (fuelType) {
+      newMeter.source = "Other Fuels";
+      newMeter.phase = fuelType.phase;
+      newMeter.fuel = fuelType.fuelTypeOption.value;
+      newMeter.heatCapacity = fuelType.fuelTypeOption.heatCapacityValue;
+      newMeter.siteToSource = fuelType.fuelTypeOption.siteToSourceMultiplier;
+      //check if unit is in name
+      let startingUnit: string = this.energyUnitsHelperService.parseStartingUnit(groupItem.value);
+      if (startingUnit) {
+        newMeter.startingUnit = startingUnit;
+      } else {
+        //use fuel option
+        newMeter.startingUnit = fuelType.fuelTypeOption.startingUnit;
+      }
+    } else {
+      newMeter.source = this.energyUnitsHelperService.parseSource(groupItem.value);
+      newMeter.startingUnit = this.energyUnitsHelperService.parseStartingUnit(groupItem.value);
+      if (newMeter.startingUnit && newMeter.source) {
+        if (this.energyUnitsHelperService.isEnergyUnit(newMeter.startingUnit) == false) {
+          let heatCapacityAndSiteToSource: { heatCapacity: number, siteToSource: number } = this.energyUseCalculationsService.getHeatingCapacityAndSiteToSourceValue(newMeter.source, newMeter.startingUnit);
+          newMeter.heatCapacity = heatCapacityAndSiteToSource.heatCapacity;
+          newMeter.siteToSource = heatCapacityAndSiteToSource.siteToSource;
+        }
       }
     }
+    newMeter.name = groupItem.value;
     //use import wizard name so that the name of the meter can be changed but 
     //we can still access the data using this value
     newMeter.importWizardName = groupItem.value;
-    newMeter.meterNumber =  Math.random().toString(36).substr(2, 9);
+    //start with random meter number
+    newMeter.meterNumber = Math.random().toString(36).substr(2, 9);
     return newMeter;
   }
 

@@ -2,9 +2,8 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from 'src/app/models/idb';
-import { CsvImportData, CsvToJsonService } from 'src/app/shared/helper-services/csv-to-json.service';
 import { LoadingService } from 'src/app/shared/loading/loading.service';
-import { ImportMeterService, ImportMeterFileSummary } from './import-meter.service';
+import { ImportMeterFileSummary } from './import-meter.service';
 import * as XLSX from 'xlsx';
 import { ImportMeterDataFile, UploadDataService } from './upload-data.service';
 import { Subscription } from 'rxjs';
@@ -32,9 +31,7 @@ export class UploadDataComponent implements OnInit {
 
   fileReferences: Array<any>;
   filesUploaded: boolean = false;
-  constructor(private csvToJsonService: CsvToJsonService, private loadingService: LoadingService,
-    private importMeterService: ImportMeterService, private facilityDbService: FacilitydbService,
-    private utilityMeterDbService: UtilityMeterdbService, private uploadDataService: UploadDataService,
+  constructor(private loadingService: LoadingService, private facilityDbService: FacilitydbService, private uploadDataService: UploadDataService,
     private utilityMeterGroupdbService: UtilityMeterGroupdbService, private energyUnitsHelperService: EnergyUnitsHelperService,
     private utilityMeterdbService: UtilityMeterdbService, private editMeterFormService: EditMeterFormService,
     private utilityMeterDataDbService: UtilityMeterDatadbService) { }
@@ -115,16 +112,7 @@ export class UploadDataComponent implements OnInit {
     }
   }
 
-  addMeterFile(data: any, fileName: string) {
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
-    let fileData: CsvImportData = this.csvToJsonService.parseCsvWithHeaders(data, 0);
-    let summary: ImportMeterFileSummary = this.importMeterService.importMetersFromDataFile(fileData, selectedFacility, facilityMeters)
-    this.uploadDataService.addMeterFile(fileName, summary);
-  }
-
-
-  /*LOGIC FOR IMPORTING VALID METER AND DATA*/ 
+  /*LOGIC FOR IMPORTING VALID METER AND DATA*/
   async importData() {
     this.loadingService.setLoadingMessage("Importing Meters..");
     this.loadingService.setLoadingStatus(true);

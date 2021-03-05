@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAccount, IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
-import { FuelTypeOption, OtherEnergyOptions, SourceOptions } from 'src/app/utility/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
+import { FuelTypeOption, GasOptions, LiquidOptions, OtherEnergyOptions, SolidOptions, SourceOptions } from 'src/app/utility/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
 import { EnergyUnitOptions, MassUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from '../unitOptions';
 
 @Injectable({
@@ -179,6 +179,35 @@ export class EnergyUnitsHelperService {
 
     }
     return unit.value;
+  }
+
+
+  parseFuelType(name: string): { phase: string, fuelTypeOption: FuelTypeOption } {
+    let fuelTypeOption: FuelTypeOption = GasOptions.find(option => {
+      let lowerCaseOption: string = option.value.toLocaleLowerCase();
+      let lowerCaseName: string = name.toLocaleLowerCase();
+      return lowerCaseName.includes(lowerCaseOption)
+    });
+    if (fuelTypeOption) {
+      return { phase: 'Gas', fuelTypeOption: fuelTypeOption };
+    }
+    fuelTypeOption = LiquidOptions.find(option => {
+      let lowerCaseOption: string = option.value.toLocaleLowerCase();
+      let lowerCaseName: string = name.toLocaleLowerCase();
+      return lowerCaseName.includes(lowerCaseOption)
+    });
+    if (fuelTypeOption) {
+      return { phase: 'Liquid', fuelTypeOption: fuelTypeOption };
+    }
+    fuelTypeOption = SolidOptions.find(option => {
+      let lowerCaseOption: string = option.value.toLocaleLowerCase();
+      let lowerCaseName: string = name.toLocaleLowerCase();
+      return lowerCaseName.includes(lowerCaseOption)
+    });
+    if (fuelTypeOption) {
+      return { phase: 'Solid', fuelTypeOption: fuelTypeOption };
+    }
+    return undefined;
   }
 
 }

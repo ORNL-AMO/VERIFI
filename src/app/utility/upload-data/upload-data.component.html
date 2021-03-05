@@ -1,7 +1,7 @@
 <div class="wrapper main-content">
-    <h4>Upload Data From .CSV or .XLSX Files</h4>
+    <h4>Upload Data From .XLSX Files</h4>
     <input type="file" #importFile id="importFile" (input)="setImportFile($event.target.files)" multiple
-        accept=".csv, .xlsx">
+        accept=".xlsx">
     <div *ngIf="filesUploaded">
         <hr>
         <app-excel-data-table></app-excel-data-table>
