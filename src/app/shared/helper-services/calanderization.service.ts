@@ -4,13 +4,21 @@ import * as _ from 'lodash';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 import { CalanderizedMeter, MonthlyData, LastYearData } from 'src/app/models/calanderization';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CalanderizationService {
 
+
+  calanderizedDataFilters: BehaviorSubject<CalanderizationFilters>
+
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private energyUnitsHelperService: EnergyUnitsHelperService) {
+    this.calanderizedDataFilters = new BehaviorSubject({
+      selectedSources: [],
+      showAllSources: true
+    });
   }
 
   getCalanderizedMeterData(meters: Array<IdbUtilityMeter>, inAccount: boolean, monthDisplayShort?: boolean) {
@@ -204,4 +212,13 @@ export class CalanderizationService {
     });
     return yearPriorBill;
   }
+}
+
+
+export interface CalanderizationFilters{
+  showAllSources: boolean;
+  selectedSources: Array<{
+    source: string,
+    selected: boolean
+  }>
 }

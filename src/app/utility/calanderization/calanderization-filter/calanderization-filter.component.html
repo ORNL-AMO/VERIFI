@@ -1,0 +1,18 @@
+<div class="filter">
+    <button class="btn btn-small" [ngClass]="{'btn-solid' : !showFilterDropdown, 'btn-outline' : showFilterDropdown}"
+        (click)="toggleFilterMenu()">Filter</button>
+    <div class="filter-dropdown" *ngIf="showFilterDropdown">
+        <p class="small">Filter Monthly Meter Data</p>
+
+
+        <label>Sources</label>
+        <label>
+            <input type="checkbox" name="showAllSources" [(ngModel)]="calanderizedDataFilters.showAllSources"
+                (change)="setAll()">All Sources
+        </label>
+        <label *ngFor="let sourceOption of calanderizedDataFilters.selectedSources">
+            <input type="checkbox" name={{sourceOption.source}} [(ngModel)]="sourceOption.selected"
+                (change)="save()">{{sourceOption.source}}
+        </label>
+    </div>
+</div>

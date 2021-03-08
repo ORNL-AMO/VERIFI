@@ -4,10 +4,6 @@
         of data to calculate.</p>
 
     <div class="controls">
-        <!--Column Filters-->
-        <!-- <div class="filter item-left">
-            <button class="btn btn-small btn-solid">Filter</button>
-        </div> -->
         <!--Items Per Page-->
         <div class="items-per-page item-right">
             <span>Show </span>
@@ -22,6 +18,7 @@
             </select>
         </div>
 
+        <app-calanderization-filter></app-calanderization-filter>
     </div>
 
     <div class="meter" *ngFor="let meterData of calanderizedMeterData; let index=index;">

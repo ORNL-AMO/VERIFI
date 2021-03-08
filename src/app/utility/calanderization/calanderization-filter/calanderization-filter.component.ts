@@ -1,0 +1,82 @@
+import { Component, OnInit } from '@angular/core';
+import { Subscription } from 'rxjs';
+import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
+import { IdbUtilityMeter } from 'src/app/models/idb';
+import { CalanderizationFilters, CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
+
+@Component({
+  selector: 'app-calanderization-filter',
+  templateUrl: './calanderization-filter.component.html',
+  styleUrls: ['./calanderization-filter.component.css']
+})
+export class CalanderizationFilterComponent implements OnInit {
+
+  showFilterDropdown: boolean = false;
+  calanderizedDataFilters: CalanderizationFilters;
+  calanderizedDataFiltersSub: Subscription;
+
+  facilityMetersSub: Subscription;
+  facilityMeters: Array<IdbUtilityMeter>;
+
+  constructor(private calanderizationService: CalanderizationService, private utilityMeterDbService: UtilityMeterdbService) { }
+
+  ngOnInit(): void {
+    this.calanderizedDataFiltersSub = this.calanderizationService.calanderizedDataFilters.subscribe(val => {
+      this.calanderizedDataFilters = val;
+    });
+
+    this.facilityMetersSub = this.utilityMeterDbService.facilityMeters.subscribe(facilityMeters => {
+      this.facilityMeters = facilityMeters;
+      this.setSourceOptions();
+    });
+  }
+
+  ngOnDestroy() {
+    this.calanderizedDataFiltersSub.unsubscribe();
+    this.facilityMetersSub.unsubscribe();
+  }
+
+
+  toggleFilterMenu() {
+    this.showFilterDropdown = !this.showFilterDropdown;
+  }
+
+  setSourceOptions() {
+    this.calanderizedDataFilters.selectedSources = new Array();
+    if (this.facilityMeters) {
+      if (this.facilityMeters.find(meter => { return meter.source == 'Electricity' })) {
+        this.calanderizedDataFilters.selectedSources.push({ source: "Electricity", selected: true });
+      }
+      if (this.facilityMeters.find(meter => { return meter.source == 'Natural Gas' })) {
+        this.calanderizedDataFilters.selectedSources.push({ source: "Natural Gas", selected: true });
+      }
+      if (this.facilityMeters.find(meter => { return meter.source == 'Other Fuels' })) {
+        this.calanderizedDataFilters.selectedSources.push({ source: "Other Fuels", selected: true });
+      }
+      if (this.facilityMeters.find(meter => { return meter.source == 'Other Energy' })) {
+        this.calanderizedDataFilters.selectedSources.push({ source: "Other Energy", selected: true });
+      }
+      if (this.facilityMeters.find(meter => { return meter.source == 'Water' })) {
+        this.calanderizedDataFilters.selectedSources.push({ source: "Water", selected: true });
+      }
+      if (this.facilityMeters.find(meter => { return meter.source == 'Waste Water' })) {
+        this.calanderizedDataFilters.selectedSources.push({ source: "Waste Water", selected: true });
+      }
+      if (this.facilityMeters.find(meter => { return meter.source == 'Other Utility' })) {
+        this.calanderizedDataFilters.selectedSources.push({ source: "Other Utility", selected: true });
+      }
+    }
+  }
+
+  setAll() {
+    this.calanderizedDataFilters.selectedSources.forEach(selectedSource => {
+      selectedSource.selected = true;
+    });
+    this.save();
+  }
+
+  save() {
+    this.calanderizedDataFilters.showAllSources = (this.calanderizedDataFilters.selectedSources.find(source => { return source.selected == false }) == undefined);
+    this.calanderizationService.calanderizedDataFilters.next(this.calanderizedDataFilters);
+  }
+}
