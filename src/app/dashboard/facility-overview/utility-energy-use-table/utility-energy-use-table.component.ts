@@ -49,7 +49,7 @@ export class UtilityEnergyUseTableComponent implements OnInit {
   setUsageValues() {
     if (this.accountMeterData && this.accountMeterData.length != 0 && this.selectedFacility) {
       this.utilityUsageSummaryData = this.dashboardService.getFacilityUtilityUsageSummaryData(this.selectedFacility, false);
-      if (this.utilityUsageSummaryData.total) {
+      if (this.utilityUsageSummaryData.total && this.utilityUsageSummaryData.allMetersLastBill) {
         this.lastMonthsDate = new Date(this.utilityUsageSummaryData.allMetersLastBill.year, this.utilityUsageSummaryData.allMetersLastBill.monthNumValue);
         this.yearPriorDate = new Date(this.utilityUsageSummaryData.allMetersLastBill.year - 1, this.utilityUsageSummaryData.allMetersLastBill.monthNumValue + 1);
         this.yearPriorLastMonth = new Date(this.utilityUsageSummaryData.allMetersLastBill.year - 1, this.utilityUsageSummaryData.allMetersLastBill.monthNumValue );
