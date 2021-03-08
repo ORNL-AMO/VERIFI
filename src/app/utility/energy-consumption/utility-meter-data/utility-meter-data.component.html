@@ -1,6 +1,6 @@
 <h4>{{selectedSource}} Bills</h4>
 
-<div *ngIf="meterList.length != 0 && meterList[0].meterDataItems.length === 0" class="text-center mt-5">
+<div *ngIf="meterList.length != 0 && !meterListHasData" class="text-center mt-5">
     <h5>No {{selectedSource}} bills found for this facility.</h5>
     <p>Please <i class="fa fa-plus"></i> Add New Bill or <i class="fa fa-upload"></i> Import multiple bills from excel.</p>
     <div class="meterData">
@@ -8,7 +8,7 @@
         <button class="btn btn-outline" (click)="uploadData()"><i class="fa fa-upload"></i> Import Bills</button>
     </div>
 </div>
-<div *ngIf="meterList.length != 0 && meterList[0].meterDataItems.length > 0">
+<div *ngIf="meterList.length != 0 && meterListHasData">
     <div class="controls">
         <!--Import/Export-->
         <div class="importExport item-right">

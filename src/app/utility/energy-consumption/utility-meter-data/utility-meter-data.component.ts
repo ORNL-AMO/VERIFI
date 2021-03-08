@@ -43,6 +43,7 @@ export class UtilityMeterDataComponent implements OnInit {
   showBulkDelete: boolean = false;
   facilityMeters: Array<IdbUtilityMeter>;
   selectedMeter: IdbUtilityMeter;
+  meterListHasData: boolean = false;
   constructor(
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
@@ -97,9 +98,13 @@ export class UtilityMeterDataComponent implements OnInit {
 
 
   setMeterList() {
+    this.meterListHasData = false;
     this.meterList = new Array();
     this.utilityMeters.forEach(meter => {
       let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataForFacility(meter, false);
+      if(meterData.length != 0){
+        this.meterListHasData = true;
+      }
       this.meterList.push({
         idbMeter: meter,
         meterDataItems: meterData
