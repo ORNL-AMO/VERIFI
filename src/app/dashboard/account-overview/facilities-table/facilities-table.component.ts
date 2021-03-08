@@ -69,7 +69,6 @@ export class FacilitiesTableComponent implements OnInit {
   }
 
   setAccountFacilities() {
-
     this.accountFacilitiesSummary = this.dashboardService.getAccountFacilitesSummary();
     if (this.accountFacilitiesSummary.allMetersLastBill) {
       this.lastMonthsDate = new Date(this.accountFacilitiesSummary.allMetersLastBill.year, this.accountFacilitiesSummary.allMetersLastBill.monthNumValue);
@@ -78,7 +77,6 @@ export class FacilitiesTableComponent implements OnInit {
   }
 
   setEmpty() {
-    console.log('set empty');
     this.accountFacilitiesSummary = {
       facilitySummaries: [],
       totalEnergyUse: undefined,
