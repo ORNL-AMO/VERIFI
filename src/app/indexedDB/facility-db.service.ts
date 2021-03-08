@@ -105,6 +105,11 @@ export class FacilitydbService {
         });
     }
 
+    addWithObservable(facility: IdbFacility): Observable<any> {
+        return this.dbService.add('facilities', facility);
+    }
+
+
     update(values: IdbFacility): void {
         this.dbService.update('facilities', values).subscribe(() => {
             this.setAllFacilities();
@@ -125,9 +130,22 @@ export class FacilitydbService {
         }
     }
 
-    addTestData() {
-        TestFacilityData.forEach(facilityDataItem => {
-            this.add(facilityDataItem);
+    async addTestData(allAccounts: Array<IdbAccount>) {
+        await TestFacilityData.forEach(facilityDataItem => {
+            //set account ID from corresponding account in db
+            if (facilityDataItem.name == 'Frosted Side' || facilityDataItem.name == 'Plain Side') {
+                let correspondingAccount: IdbAccount = allAccounts.find(account => { return account.name == 'Mini Wheats' });
+                facilityDataItem.accountId = correspondingAccount.id;
+            }
+            if (facilityDataItem.name == 'Almond Milk') {
+                let correspondingAccount: IdbAccount = allAccounts.find(account => { return account.name == 'Special K' });
+                facilityDataItem.accountId = correspondingAccount.id;
+            }
+            if (facilityDataItem.name == 'Crunch-a-tize') {
+                let correspondingAccount: IdbAccount = allAccounts.find(account => { return account.name == 'Captain Crunch' });
+                facilityDataItem.accountId = correspondingAccount.id;
+            }
+            this.addWithObservable(facilityDataItem);
         });
     }
 
