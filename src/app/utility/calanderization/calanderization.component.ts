@@ -2,9 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { CalanderizedMeter } from 'src/app/models/calanderization';
+import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
 import { CalanderizationFilters, CalanderizationService } from '../../shared/helper-services/calanderization.service';
+import * as _ from 'lodash';
 
 @Component({
   selector: 'app-calanderization',
@@ -55,6 +56,8 @@ export class CalanderizationComponent implements OnInit {
     if (this.facilityMeters) {
       let filteredMeters: Array<IdbUtilityMeter> = this.filterMeters(this.facilityMeters);
       this.calanderizedMeterData = this.calanderizationService.getCalanderizedMeterData(filteredMeters, false);
+      this.setDateRange();
+      this.calanderizedMeterData = this.filterMeterDataDateRanges(this.calanderizedMeterData);
       this.tablePageNumbers = this.calanderizedMeterData.map(() => { return 1 });
     }
   }
@@ -78,7 +81,7 @@ export class CalanderizationComponent implements OnInit {
       if (!this.calanderizedDataFilters.showAllSources) {
         let selectedSources: Array<string> = new Array();
         this.calanderizedDataFilters.selectedSources.forEach(sourceOption => {
-          if(sourceOption.selected){
+          if (sourceOption.selected) {
             selectedSources.push(sourceOption.source);
           }
         })
@@ -86,5 +89,56 @@ export class CalanderizationComponent implements OnInit {
       }
     }
     return filteredMeters;
+  }
+
+  setDateRange() {
+    if (!this.calanderizedDataFilters.selectedDateMax || !this.calanderizedDataFilters.selectedDateMin) {
+      let allMeterData: Array<MonthlyData> = this.calanderizedMeterData.flatMap(calanderizedMeter => { return calanderizedMeter.monthlyData });
+      let maxDateEntry: MonthlyData = _.maxBy(allMeterData, 'date');
+      let minDateEntry: MonthlyData = _.minBy(allMeterData, 'date');
+      if (minDateEntry && maxDateEntry) {
+        this.calanderizedDataFilters.selectedDateMax = {
+          year: maxDateEntry.year,
+          month: maxDateEntry.monthNumValue
+        };
+        this.calanderizedDataFilters.selectedDateMin = {
+          year: minDateEntry.year,
+          month: minDateEntry.monthNumValue
+        };
+        this.calanderizedDataFilters.dataDateRange = {
+          minDate: minDateEntry.date,
+          maxDate: maxDateEntry.date
+        }
+        this.calanderizationService.calanderizedDataFilters.next(this.calanderizedDataFilters);
+      }
+    }
+  }
+
+  filterMeterDataDateRanges(calanderizedMeterData: Array<CalanderizedMeter>): Array<CalanderizedMeter> {
+    if (this.calanderizedDataFilters.selectedDateMax && this.calanderizedDataFilters.selectedDateMin) {
+      calanderizedMeterData.forEach(calanderizedMeter => {
+        calanderizedMeter.monthlyData = calanderizedMeter.monthlyData.filter(monthlyDataItem => {
+          return this.checkMonthlyDataItemInRange(monthlyDataItem);
+        })
+      });
+    }
+    return calanderizedMeterData;
+  }
+
+  checkMonthlyDataItemInRange(monthlyDataItem: MonthlyData): boolean {
+    let isInRange: boolean = true;
+    if (this.calanderizedDataFilters.selectedDateMax.year < monthlyDataItem.year) {
+      isInRange = false;
+    }
+    if (this.calanderizedDataFilters.selectedDateMax.year == monthlyDataItem.year && this.calanderizedDataFilters.selectedDateMax.month < monthlyDataItem.monthNumValue) {
+      isInRange = false;
+    }
+    if (this.calanderizedDataFilters.selectedDateMin.year > monthlyDataItem.year) {
+      isInRange = false;
+    }
+    if (this.calanderizedDataFilters.selectedDateMin.year == monthlyDataItem.year && this.calanderizedDataFilters.selectedDateMin.month > monthlyDataItem.monthNumValue) {
+      isInRange = false;
+    }
+    return isInRange;
   }
 }

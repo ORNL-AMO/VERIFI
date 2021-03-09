@@ -17,7 +17,10 @@ export class CalanderizationService {
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private energyUnitsHelperService: EnergyUnitsHelperService) {
     this.calanderizedDataFilters = new BehaviorSubject({
       selectedSources: [],
-      showAllSources: true
+      showAllSources: true,
+      selectedDateMax: undefined,
+      selectedDateMin: undefined,
+      dataDateRange: undefined
     });
   }
 
@@ -215,10 +218,22 @@ export class CalanderizationService {
 }
 
 
-export interface CalanderizationFilters{
+export interface CalanderizationFilters {
   showAllSources: boolean;
   selectedSources: Array<{
     source: string,
     selected: boolean
-  }>
+  }>;
+  selectedDateMin: {
+    year: number,
+    month: number
+  },
+  selectedDateMax: {
+    year: number,
+    month: number
+  },
+  dataDateRange: {
+    minDate: Date,
+    maxDate: Date
+  }
 }

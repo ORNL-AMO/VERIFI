@@ -3,6 +3,7 @@ import { Subscription } from 'rxjs';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbUtilityMeter } from 'src/app/models/idb';
 import { CalanderizationFilters, CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
+import { globalVariables } from 'src/environments/environment';
 
 @Component({
   selector: 'app-calanderization-filter',
@@ -18,11 +19,14 @@ export class CalanderizationFilterComponent implements OnInit {
   facilityMetersSub: Subscription;
   facilityMeters: Array<IdbUtilityMeter>;
 
+  monthOptions: Array<{ name: string, abbreviation: string, monthNumValue: number }> = globalVariables.months;
+  yearOptions: Array<number> = [];
   constructor(private calanderizationService: CalanderizationService, private utilityMeterDbService: UtilityMeterdbService) { }
 
   ngOnInit(): void {
     this.calanderizedDataFiltersSub = this.calanderizationService.calanderizedDataFilters.subscribe(val => {
       this.calanderizedDataFilters = val;
+      this.setYearOptions();
     });
 
     this.facilityMetersSub = this.utilityMeterDbService.facilityMeters.subscribe(facilityMeters => {
@@ -78,5 +82,16 @@ export class CalanderizationFilterComponent implements OnInit {
   save() {
     this.calanderizedDataFilters.showAllSources = (this.calanderizedDataFilters.selectedSources.find(source => { return source.selected == false }) == undefined);
     this.calanderizationService.calanderizedDataFilters.next(this.calanderizedDataFilters);
+  }
+
+  setYearOptions() {
+    if (this.calanderizedDataFilters.dataDateRange && this.calanderizedDataFilters.dataDateRange) {
+      this.yearOptions = new Array();
+      let start: number = this.calanderizedDataFilters.dataDateRange.minDate.getFullYear();
+      let end: number = this.calanderizedDataFilters.dataDateRange.maxDate.getFullYear();
+      for (let yearOption = start; yearOption < end + 1; yearOption++) {
+        this.yearOptions.push(yearOption);
+      }
+    }
   }
 }
