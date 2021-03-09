@@ -18,3 +18,8 @@ tbody tr:not(.use-and-consumption) td:not(:first-child){
 tbody tr.use-and-consumption td{
     width: 25%;
 }
+
+
+.btn-group .btn-small{
+    border: solid 1px;
+}

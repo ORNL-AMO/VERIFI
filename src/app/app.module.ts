@@ -79,6 +79,7 @@ import { WorksheetDataTableComponent } from './utility/upload-data/excel-wizard/
 import { InvalidMeterDataTableComponent } from './utility/upload-data/import-meter-data-wizard/invalid-meter-data-table/invalid-meter-data-table.component';
 import { WizardDataSummaryComponent } from './utility/upload-data/excel-wizard/wizard-data-summary/wizard-data-summary.component';
 import { CalanderizationFilterComponent } from './utility/calanderization/calanderization-filter/calanderization-filter.component';
+import { CalanderizationChartComponent } from './utility/calanderization/calanderization-chart/calanderization-chart.component';
 
 @NgModule({
   declarations: [
@@ -143,7 +144,8 @@ import { CalanderizationFilterComponent } from './utility/calanderization/caland
     WizardDataSummaryComponent,
     SetupProgressComponent,
     EmptyStateComponent,
-    CalanderizationFilterComponent
+    CalanderizationFilterComponent,
+    CalanderizationChartComponent
   ],
   imports: [
     BrowserModule,

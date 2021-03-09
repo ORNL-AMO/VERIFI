@@ -1,4 +1,4 @@
-<div class="filter">
+<div class="filter" [ngClass]="{'filter-open': showFilterDropdown}">
     <button class="btn btn-small" [ngClass]="{'btn-solid' : !showFilterDropdown, 'btn-outline' : showFilterDropdown}"
         (click)="toggleFilterMenu()">Filter</button>
     <div class="filter-dropdown" *ngIf="showFilterDropdown">
