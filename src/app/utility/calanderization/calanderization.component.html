@@ -12,10 +12,10 @@
         </div>
 
         <div class="btn-group pull-right pr-2" *ngIf="dataDisplay == 'graph'">
-            <button class="btn btn-small" [ngClass]="{'btn-solid': graphDataType == 'cost'}"
-                (click)="setGraphDataType('cost')">Cost</button>
-            <button class="btn btn-small" [ngClass]="{'btn-solid': graphDataType == 'energy'}"
-                (click)="setGraphDataType('energy')">Consumption</button>
+            <button class="btn btn-small" [ngClass]="{'btn-solid': displayGraphCost}"
+                (click)="toggleDisplayGraphCost()">Cost</button>
+            <button class="btn btn-small" [ngClass]="{'btn-solid': displayGraphEnergy}"
+                (click)="toggleDisplayGraphEnergy()">Consumption</button>
         </div>
         <!--Items Per Page-->
         <div class="items-per-page item-right" *ngIf="dataDisplay == 'table'">
@@ -30,7 +30,6 @@
                 <option [ngValue]=999999999999>All</option>
             </select>
         </div>
-
 
         <app-calanderization-filter></app-calanderization-filter>
         <hr>
@@ -99,7 +98,7 @@
 
     <div *ngIf="dataDisplay == 'graph'">
         <div class="meter" *ngFor="let meterData of calanderizedMeterData; let index=index;">
-            <app-calanderization-chart [meterData]="meterData" [graphDataType]="graphDataType"></app-calanderization-chart>
+            <app-calanderization-chart [meterData]="meterData" [displayGraphEnergy]="displayGraphEnergy" [displayGraphCost]="displayGraphCost"></app-calanderization-chart>
         </div>
     </div>
 </div>

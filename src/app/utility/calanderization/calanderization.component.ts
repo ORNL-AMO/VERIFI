@@ -27,7 +27,9 @@ export class CalanderizationComponent implements OnInit {
   calanderizedDataFilters: CalanderizationFilters;
   calanderizedDataFiltersSub: Subscription;
   dataDisplay: "table" | "graph" = 'table';
-  graphDataType:  "cost" | "energy" = 'cost';
+  displayGraphEnergy: boolean = false;
+  displayGraphCost: boolean = true;
+
   constructor(private calanderizationService: CalanderizationService, private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService) { }
 
@@ -52,6 +54,13 @@ export class CalanderizationComponent implements OnInit {
     this.facilityMetersSub.unsubscribe();
     this.facilityMeterDataSub.unsubscribe();
     this.calanderizedDataFiltersSub.unsubscribe();
+    this.calanderizationService.calanderizedDataFilters.next({
+      selectedSources: [],
+      showAllSources: true,
+      selectedDateMax: undefined,
+      selectedDateMin: undefined,
+      dataDateRange: undefined
+    })
   }
 
   setCalanderizedMeterData() {
@@ -149,7 +158,17 @@ export class CalanderizationComponent implements OnInit {
     this.dataDisplay = str;
   }
 
-  setGraphDataType(str: "cost" | "energy"){
-    this.graphDataType = str;
+  toggleDisplayGraphEnergy() {
+    this.displayGraphEnergy = !this.displayGraphEnergy;
+    if(!this.displayGraphEnergy && !this.displayGraphCost){
+      this.displayGraphCost = true;
+    }
+  }
+
+  toggleDisplayGraphCost() {
+    this.displayGraphCost = !this.displayGraphCost;
+    if(!this.displayGraphEnergy && !this.displayGraphCost){
+      this.displayGraphEnergy = true;
+    }
   }
 }
