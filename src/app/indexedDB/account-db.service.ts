@@ -65,6 +65,11 @@ export class AccountdbService {
         });
     }
 
+    addWithObservable(account: IdbAccount): Observable<any> {
+        return this.dbService.add('accounts', account);
+    }
+
+
     update(account: IdbAccount): void {
         this.dbService.update('accounts', account).subscribe(() => {
             this.setAllAccounts();
@@ -90,9 +95,12 @@ export class AccountdbService {
             }
         );
     }
-    addTestData() {
-        TestAccountData.forEach(accountItem => {
-            this.add(accountItem);
+
+
+
+    async addTestData() {
+        await TestAccountData.forEach(accountItem => {
+            this.addWithObservable(accountItem);
         });
     }
 
