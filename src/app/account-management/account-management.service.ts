@@ -10,43 +10,73 @@ export class AccountManagementService {
 
   constructor(private formBuilder: FormBuilder) { }
 
+  getGeneralInformationForm(generalInformation: IdbAccount | IdbFacility): FormGroup {
+    let form: FormGroup = this.formBuilder.group({
+      name: [generalInformation.name, [Validators.required]],
+      country: [generalInformation.country],
+      city: [generalInformation.city],
+      state: [generalInformation.state],
+      zip: [generalInformation.zip],
+      address: [generalInformation.address],
+      naics: [generalInformation.naics],
+      size: [generalInformation.size],
+      notes: [generalInformation.notes],
+    });
+    return form;
+  }
+
+  updateAccountFromGeneralInformationForm(form: FormGroup, account: IdbAccount): IdbAccount {
+    account.name = form.controls.name.value;
+    account.country = form.controls.country.value;
+    account.city = form.controls.city.value;
+    account.state = form.controls.state.value;
+    account.zip = form.controls.zip.value;
+    account.address = form.controls.address.value;
+    account.naics = form.controls.naics.value;
+    account.notes = form.controls.notes.value;
+    return account;
+  }
+
+  updateFacilityFromGeneralInformationForm(form: FormGroup, facility: IdbFacility): IdbFacility {
+    facility.name = form.controls.name.value;
+    facility.country = form.controls.country.value;
+    facility.city = form.controls.city.value;
+    facility.state = form.controls.state.value;
+    facility.zip = form.controls.zip.value;
+    facility.address = form.controls.address.value;
+    facility.naics = form.controls.naics.value;
+    facility.notes = form.controls.notes.value;
+    return facility;
+  }
+
   getAccountForm(account: IdbAccount): FormGroup {
     let form: FormGroup = this.formBuilder.group({
-      name: [account.name, [Validators.required]],
-      country: [account.country],
-      city: [account.city],
-      state: [account.state],
-      zip: [account.zip],
-      address: [account.address],
-      naics: [account.naics],
-      size: [account.size],
-      notes: [account.notes],
       unitsOfMeasure: [account.unitsOfMeasure, [Validators.required]],
       energyUnit: [account.energyUnit, [Validators.required]],
       massUnit: [account.massUnit, [Validators.required]],
       volumeLiquidUnit: [account.volumeLiquidUnit, [Validators.required]],
       volumeGasUnit: [account.volumeGasUnit, [Validators.required]],
       chilledWaterUnit: [account.chilledWaterUnit, [Validators.required]],
-      energyReductionGoal: [account.sustainabilityQuestions? account.sustainabilityQuestions.energyReductionGoal:null],
-      energyReductionPercent: [account.sustainabilityQuestions? account.sustainabilityQuestions.energyReductionPercent:null],
-      energyReductionBaselineYear: [account.sustainabilityQuestions? account.sustainabilityQuestions.energyReductionBaselineYear:null],
-      energyReductionTargetYear: [account.sustainabilityQuestions? account.sustainabilityQuestions.energyReductionTargetYear:null],
-      greenhouseReductionGoal: [account.sustainabilityQuestions? account.sustainabilityQuestions.greenhouseReductionGoal:null],
-      greenhouseReductionPercent: [account.sustainabilityQuestions? account.sustainabilityQuestions.greenhouseReductionPercent:null],
-      greenhouseReductionBaselineYear: [account.sustainabilityQuestions? account.sustainabilityQuestions.greenhouseReductionBaselineYear:null],
-      greenhouseReductionTargetYear: [account.sustainabilityQuestions? account.sustainabilityQuestions.greenhouseReductionTargetYear:null],
-      renewableEnergyGoal: [account.sustainabilityQuestions? account.sustainabilityQuestions.renewableEnergyGoal:null],
-      renewableEnergyPercent: [account.sustainabilityQuestions? account.sustainabilityQuestions.renewableEnergyPercent:null],
-      renewableEnergyBaselineYear: [account.sustainabilityQuestions? account.sustainabilityQuestions.renewableEnergyBaselineYear:null],
-      renewableEnergyTargetYear: [account.sustainabilityQuestions? account.sustainabilityQuestions.renewableEnergyTargetYear:null],
-      wasteReductionGoal: [account.sustainabilityQuestions? account.sustainabilityQuestions.wasteReductionGoal:null],
-      wasteReductionPercent: [account.sustainabilityQuestions? account.sustainabilityQuestions.wasteReductionPercent:null],
-      wasteReductionBaselineYear: [account.sustainabilityQuestions? account.sustainabilityQuestions.wasteReductionBaselineYear:null],
-      wasteReductionTargetYear: [account.sustainabilityQuestions? account.sustainabilityQuestions.wasteReductionTargetYear:null],
-      waterReductionGoal: [account.sustainabilityQuestions? account.sustainabilityQuestions.waterReductionGoal:null],
-      waterReductionPercent: [account.sustainabilityQuestions? account.sustainabilityQuestions.waterReductionPercent:null],
-      waterReductionBaselineYear: [account.sustainabilityQuestions? account.sustainabilityQuestions.waterReductionBaselineYear:null],
-      waterReductionTargetYear: [account.sustainabilityQuestions? account.sustainabilityQuestions.waterReductionTargetYear:null],
+      energyReductionGoal: [account.sustainabilityQuestions ? account.sustainabilityQuestions.energyReductionGoal : null],
+      energyReductionPercent: [account.sustainabilityQuestions ? account.sustainabilityQuestions.energyReductionPercent : null],
+      energyReductionBaselineYear: [account.sustainabilityQuestions ? account.sustainabilityQuestions.energyReductionBaselineYear : null],
+      energyReductionTargetYear: [account.sustainabilityQuestions ? account.sustainabilityQuestions.energyReductionTargetYear : null],
+      greenhouseReductionGoal: [account.sustainabilityQuestions ? account.sustainabilityQuestions.greenhouseReductionGoal : null],
+      greenhouseReductionPercent: [account.sustainabilityQuestions ? account.sustainabilityQuestions.greenhouseReductionPercent : null],
+      greenhouseReductionBaselineYear: [account.sustainabilityQuestions ? account.sustainabilityQuestions.greenhouseReductionBaselineYear : null],
+      greenhouseReductionTargetYear: [account.sustainabilityQuestions ? account.sustainabilityQuestions.greenhouseReductionTargetYear : null],
+      renewableEnergyGoal: [account.sustainabilityQuestions ? account.sustainabilityQuestions.renewableEnergyGoal : null],
+      renewableEnergyPercent: [account.sustainabilityQuestions ? account.sustainabilityQuestions.renewableEnergyPercent : null],
+      renewableEnergyBaselineYear: [account.sustainabilityQuestions ? account.sustainabilityQuestions.renewableEnergyBaselineYear : null],
+      renewableEnergyTargetYear: [account.sustainabilityQuestions ? account.sustainabilityQuestions.renewableEnergyTargetYear : null],
+      wasteReductionGoal: [account.sustainabilityQuestions ? account.sustainabilityQuestions.wasteReductionGoal : null],
+      wasteReductionPercent: [account.sustainabilityQuestions ? account.sustainabilityQuestions.wasteReductionPercent : null],
+      wasteReductionBaselineYear: [account.sustainabilityQuestions ? account.sustainabilityQuestions.wasteReductionBaselineYear : null],
+      wasteReductionTargetYear: [account.sustainabilityQuestions ? account.sustainabilityQuestions.wasteReductionTargetYear : null],
+      waterReductionGoal: [account.sustainabilityQuestions ? account.sustainabilityQuestions.waterReductionGoal : null],
+      waterReductionPercent: [account.sustainabilityQuestions ? account.sustainabilityQuestions.waterReductionPercent : null],
+      waterReductionBaselineYear: [account.sustainabilityQuestions ? account.sustainabilityQuestions.waterReductionBaselineYear : null],
+      waterReductionTargetYear: [account.sustainabilityQuestions ? account.sustainabilityQuestions.waterReductionTargetYear : null],
       fiscalYear: [account.fiscalYear],
       fiscalYearMonth: [account.fiscalYearMonth],
       fiscalYearCalendarEnd: [account.fiscalYearCalendarEnd],
@@ -56,14 +86,6 @@ export class AccountManagementService {
   }
 
   updateAccountFromForm(form: FormGroup, account: IdbAccount): IdbAccount {
-    account.name = form.controls.name.value;
-    account.country = form.controls.country.value;
-    account.city = form.controls.city.value;
-    account.state = form.controls.state.value;
-    account.zip = form.controls.zip.value;
-    account.address = form.controls.address.value;
-    account.naics = form.controls.naics.value;
-    account.notes = form.controls.notes.value;
     account.unitsOfMeasure = form.controls.unitsOfMeasure.value;
     account.energyUnit = form.controls.energyUnit.value;
     account.massUnit = form.controls.massUnit.value;
@@ -113,26 +135,26 @@ export class AccountManagementService {
       volumeLiquidUnit: [facility.volumeLiquidUnit, [Validators.required]],
       volumeGasUnit: [facility.volumeGasUnit, [Validators.required]],
       chilledWaterUnit: [facility.chilledWaterUnit, [Validators.required]],
-      energyReductionGoal: [facility.sustainabilityQuestions? facility.sustainabilityQuestions.energyReductionGoal:null],
-      energyReductionPercent: [facility.sustainabilityQuestions? facility.sustainabilityQuestions.energyReductionPercent:null],
-      energyReductionBaselineYear: [facility.sustainabilityQuestions? facility.sustainabilityQuestions.energyReductionBaselineYear:null],
-      energyReductionTargetYear: [facility.sustainabilityQuestions? facility.sustainabilityQuestions.energyReductionTargetYear:null],
-      greenhouseReductionGoal: [facility.sustainabilityQuestions? facility.sustainabilityQuestions.greenhouseReductionGoal:null],
-      greenhouseReductionPercent: [facility.sustainabilityQuestions? facility.sustainabilityQuestions.greenhouseReductionPercent:null],
-      greenhouseReductionBaselineYear: [facility.sustainabilityQuestions? facility.sustainabilityQuestions.greenhouseReductionBaselineYear:null],
-      greenhouseReductionTargetYear: [facility.sustainabilityQuestions? facility.sustainabilityQuestions.greenhouseReductionTargetYear:null],
-      renewableEnergyGoal: [facility.sustainabilityQuestions? facility.sustainabilityQuestions.renewableEnergyGoal:null],
-      renewableEnergyPercent: [facility.sustainabilityQuestions? facility.sustainabilityQuestions.renewableEnergyPercent:null],
-      renewableEnergyBaselineYear: [facility.sustainabilityQuestions? facility.sustainabilityQuestions.renewableEnergyBaselineYear:null],
-      renewableEnergyTargetYear: [facility.sustainabilityQuestions? facility.sustainabilityQuestions.renewableEnergyTargetYear:null],
-      wasteReductionGoal: [facility.sustainabilityQuestions? facility.sustainabilityQuestions.wasteReductionGoal:null],
-      wasteReductionPercent: [facility.sustainabilityQuestions? facility.sustainabilityQuestions.wasteReductionPercent:null],
-      wasteReductionBaselineYear: [facility.sustainabilityQuestions? facility.sustainabilityQuestions.wasteReductionBaselineYear:null],
-      wasteReductionTargetYear: [facility.sustainabilityQuestions? facility.sustainabilityQuestions.wasteReductionTargetYear:null],
-      waterReductionGoal: [facility.sustainabilityQuestions? facility.sustainabilityQuestions.waterReductionGoal:null],
-      waterReductionPercent: [facility.sustainabilityQuestions? facility.sustainabilityQuestions.waterReductionPercent:null],
-      waterReductionBaselineYear: [facility.sustainabilityQuestions? facility.sustainabilityQuestions.waterReductionBaselineYear:null],
-      waterReductionTargetYear: [facility.sustainabilityQuestions? facility.sustainabilityQuestions.waterReductionTargetYear:null],
+      energyReductionGoal: [facility.sustainabilityQuestions ? facility.sustainabilityQuestions.energyReductionGoal : null],
+      energyReductionPercent: [facility.sustainabilityQuestions ? facility.sustainabilityQuestions.energyReductionPercent : null],
+      energyReductionBaselineYear: [facility.sustainabilityQuestions ? facility.sustainabilityQuestions.energyReductionBaselineYear : null],
+      energyReductionTargetYear: [facility.sustainabilityQuestions ? facility.sustainabilityQuestions.energyReductionTargetYear : null],
+      greenhouseReductionGoal: [facility.sustainabilityQuestions ? facility.sustainabilityQuestions.greenhouseReductionGoal : null],
+      greenhouseReductionPercent: [facility.sustainabilityQuestions ? facility.sustainabilityQuestions.greenhouseReductionPercent : null],
+      greenhouseReductionBaselineYear: [facility.sustainabilityQuestions ? facility.sustainabilityQuestions.greenhouseReductionBaselineYear : null],
+      greenhouseReductionTargetYear: [facility.sustainabilityQuestions ? facility.sustainabilityQuestions.greenhouseReductionTargetYear : null],
+      renewableEnergyGoal: [facility.sustainabilityQuestions ? facility.sustainabilityQuestions.renewableEnergyGoal : null],
+      renewableEnergyPercent: [facility.sustainabilityQuestions ? facility.sustainabilityQuestions.renewableEnergyPercent : null],
+      renewableEnergyBaselineYear: [facility.sustainabilityQuestions ? facility.sustainabilityQuestions.renewableEnergyBaselineYear : null],
+      renewableEnergyTargetYear: [facility.sustainabilityQuestions ? facility.sustainabilityQuestions.renewableEnergyTargetYear : null],
+      wasteReductionGoal: [facility.sustainabilityQuestions ? facility.sustainabilityQuestions.wasteReductionGoal : null],
+      wasteReductionPercent: [facility.sustainabilityQuestions ? facility.sustainabilityQuestions.wasteReductionPercent : null],
+      wasteReductionBaselineYear: [facility.sustainabilityQuestions ? facility.sustainabilityQuestions.wasteReductionBaselineYear : null],
+      wasteReductionTargetYear: [facility.sustainabilityQuestions ? facility.sustainabilityQuestions.wasteReductionTargetYear : null],
+      waterReductionGoal: [facility.sustainabilityQuestions ? facility.sustainabilityQuestions.waterReductionGoal : null],
+      waterReductionPercent: [facility.sustainabilityQuestions ? facility.sustainabilityQuestions.waterReductionPercent : null],
+      waterReductionBaselineYear: [facility.sustainabilityQuestions ? facility.sustainabilityQuestions.waterReductionBaselineYear : null],
+      waterReductionTargetYear: [facility.sustainabilityQuestions ? facility.sustainabilityQuestions.waterReductionTargetYear : null],
       fiscalYear: [facility.fiscalYear],
       fiscalYearMonth: [facility.fiscalYearMonth],
       fiscalYearCalendarEnd: [facility.fiscalYearCalendarEnd],
@@ -249,7 +271,7 @@ export class AccountManagementService {
         account.sustainabilityQuestions.greenhouseReductionGoal != facility.sustainabilityQuestions.greenhouseReductionGoal ||
         account.sustainabilityQuestions.greenhouseReductionPercent != facility.sustainabilityQuestions.greenhouseReductionPercent ||
         account.sustainabilityQuestions.greenhouseReductionBaselineYear != facility.sustainabilityQuestions.greenhouseReductionBaselineYear ||
-        account.sustainabilityQuestions.greenhouseReductionTargetYear!= facility.sustainabilityQuestions.greenhouseReductionTargetYear ||
+        account.sustainabilityQuestions.greenhouseReductionTargetYear != facility.sustainabilityQuestions.greenhouseReductionTargetYear ||
         account.sustainabilityQuestions.renewableEnergyGoal != facility.sustainabilityQuestions.renewableEnergyGoal ||
         account.sustainabilityQuestions.renewableEnergyPercent != facility.sustainabilityQuestions.renewableEnergyPercent ||
         account.sustainabilityQuestions.renewableEnergyBaselineYear != facility.sustainabilityQuestions.renewableEnergyBaselineYear ||
@@ -295,9 +317,9 @@ export class AccountManagementService {
   areAccountAndFacilityFinancialReportingDifferent(account: IdbAccount, facility: IdbFacility): boolean {
     if (account && facility) {
       return (
-        account.fiscalYear !=  facility.fiscalYear ||
+        account.fiscalYear != facility.fiscalYear ||
         account.fiscalYearMonth != facility.fiscalYearMonth ||
-        account.fiscalYearCalendarEnd !=  facility.fiscalYearCalendarEnd
+        account.fiscalYearCalendarEnd != facility.fiscalYearCalendarEnd
       )
     } else {
       return false;

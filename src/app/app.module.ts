@@ -68,6 +68,10 @@ import { ValidDataTableComponent } from './utility/energy-consumption/utility-me
 import { MissingMeterNumberTableComponent } from './utility/energy-consumption/utility-meter-data/import-meter-data-wizard/missing-meter-number-table/missing-meter-number-table.component';
 import { SetupProgressComponent } from './shared/setup-progress/setup-progress.component';
 import { EmptyStateComponent } from './dashboard/empty-state/empty-state.component';
+import { GeneralInformationFormComponent } from './account-management/general-information-form/general-information-form.component';
+import { DefaultUnitsFormComponent } from './account-management/default-units-form/default-units-form.component';
+import { FinancialReportingFormComponent } from './account-management/financial-reporting-form/financial-reporting-form.component';
+import { SustainabilityQuestionsFormComponent } from './account-management/sustainability-questions-form/sustainability-questions-form.component';
 
 @NgModule({
   declarations: [
@@ -121,7 +125,11 @@ import { EmptyStateComponent } from './dashboard/empty-state/empty-state.compone
     ValidDataTableComponent,
     MissingMeterNumberTableComponent,
     SetupProgressComponent,
-    EmptyStateComponent
+    EmptyStateComponent,
+    GeneralInformationFormComponent,
+    DefaultUnitsFormComponent,
+    FinancialReportingFormComponent,
+    SustainabilityQuestionsFormComponent
   ],
   imports: [
     BrowserModule,

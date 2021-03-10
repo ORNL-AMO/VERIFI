@@ -14,67 +14,10 @@
             </label>
         </form>
         </div>-->
-		<div class="col" *ngIf="facilityForm">
+		<div class="col">
 			<h4>Facility Information</h4>
 			<br>
-			<form [formGroup]="facilityForm" autocomplete="on">
-				<div class="row"> 
-					<div class="col">
-						<div class="mb-3">
-							<label>Facility Name <span class="required">*</span></label>
-							<input type="text" class="form-control" formControlName="name" (input)="onFormChange();">
-						</div>
-						<span class="inputError" *ngIf="facilityForm.get('name').hasError('required')">Facility name is required</span>
-
-						<div class="mb-3">
-							<label>Address</label>
-							<input type="text" class="form-control" formControlName="address" (input)="onFormChange();" autocomplete="shipping street-address">
-						</div>
-
-						<div class="row">
-							<div class="mb-3 col">
-								<label>City</label>
-								<input type="text" class="form-control" formControlName="city" (input)="onFormChange();">
-							</div>
-							<div class="mb-3 col">
-								<label>State</label>
-								<select formControlName="state" (change)="onFormChange()">
-									<option *ngFor="let state of globalVariables.states" [ngValue]="state.name">{{state.name}}</option>
-								</select>
-							</div>
-							<div class="mb-3 col">
-								<label>Zip</label>
-								<input type="number" class="form-control" formControlName="zip" (input)="onFormChange();">
-							</div>
-							<div class="mb-3 col">
-								<label>Country</label>
-								<input type="text" class="form-control" formControlName="country" (input)="onFormChange();">
-							</div>
-						</div>
-
-						<div class="row">
-							<div class="mb-3 col">
-								<label>NAICS Code</label>
-								<select formControlName="naics" (change)="onFormChange()">
-									<option *ngFor="let naics of globalVariables.naicsCodes" [ngValue]="naics.code">{{naics.code}} - {{naics.industyType}}</option>
-								  </select>
-							</div>
-
-							<div class="input-group mb-3 col">
-								<label>Facility Area</label>
-								<input type="text" class="form-control" formControlName="size" (input)="onFormChange();">
-								<span class="unit" *ngIf="selectedFacility.unitsOfMeasure === 'Imperial'">ft2</span>
-								<span class="unit" *ngIf="selectedFacility.unitsOfMeasure === 'Metric'">m2</span>
-							</div>
-						</div>
-
-						<div class="mb-3">
-							<label>Notes</label>
-							<textarea class="" formControlName="notes" (input)="onFormChange();"></textarea>
-						</div>
-					</div>
-				</div> 
-			</form>
+			<app-general-information-form [inAccount]="false" [(form)]="generalInformationForm" [unitsOfMeasure]="selectedFacility.unitsOfMeasure"></app-general-information-form>
         </div>
         
 		<div class="col-lg-5" *ngIf="facilityForm">
