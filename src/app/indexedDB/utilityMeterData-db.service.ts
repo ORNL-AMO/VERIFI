@@ -104,6 +104,10 @@ export class UtilityMeterDatadbService {
         });
     }
 
+    deleteWithObservable(meterDataId: number): Observable<any> {
+        return this.dbService.delete('utilityMeterData', meterDataId);
+    }
+
     deleteAllFacilityMeterData(facilityId: number): void {
         this.getAllByIndexRange('facilityId', facilityId).subscribe(facilityMeterDataEntries => {
             for (let i = 0; i < facilityMeterDataEntries.length; i++) {
