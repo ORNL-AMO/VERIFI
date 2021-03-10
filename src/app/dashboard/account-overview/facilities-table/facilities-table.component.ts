@@ -20,7 +20,13 @@ export class FacilitiesTableComponent implements OnInit {
   accountMeterDataSub: Subscription;
   selectedAccountSub: Subscription;
   accountEnergyUnit: string;
-  accountFacilitiesSummary:  AccountFacilitiesSummary;
+  accountFacilitiesSummary: AccountFacilitiesSummary = {
+    facilitySummaries: [],
+    totalEnergyUse: undefined,
+    totalEnergyCost: undefined,
+    totalNumberOfMeters: undefined,
+    allMetersLastBill: undefined
+  };
   lastMonthsDate: Date;
   yearPriorDate: Date;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private facilityDbService: FacilitydbService,
