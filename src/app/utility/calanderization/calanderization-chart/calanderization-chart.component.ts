@@ -16,10 +16,6 @@ export class CalanderizationChartComponent implements OnInit {
   displayGraphEnergy: boolean;
   @ViewChild('monthlyMeterDataBarChart', { static: false }) monthlyMeterDataBarChart: ElementRef;
 
-
-
-  //Colors:
-
   constructor(private plotlyService: PlotlyService) { }
 
   ngOnInit(): void {
@@ -106,15 +102,10 @@ export class CalanderizationChartComponent implements OnInit {
         });
       }
 
-
-
-
-
       var layout = {
         legend: {
           orientation: "h"
         },
-        // barmode: 'group',
         title: {
           text: this.meterData.meter.name,
           font: {
@@ -122,12 +113,6 @@ export class CalanderizationChartComponent implements OnInit {
           },
         },
         xaxis: {
-          // title: {
-          //   text: xAxisTitle,
-          //   font: {
-          //     size: 18
-          //   },
-          // },
           hoverformat: "%b, %y"
         },
         yaxis: {
@@ -157,7 +142,6 @@ export class CalanderizationChartComponent implements OnInit {
           automargin: true,
           overlaying: 'y',
           side: 'right',
-          // anchor: 'x'
         },
         margin: { r: 0, t: 50 }
       };
