@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { FormGroup } from '@angular/forms';
 import { AccountdbService } from "../../indexedDB/account-db.service";
 import { IdbAccount, IdbFacility } from 'src/app/models/idb';
 import { Subscription } from 'rxjs';
@@ -10,17 +9,11 @@ import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db.service";
 import { UtilityMeterDatadbService } from "../../indexedDB/utilityMeterData-db.service";
 import { UtilityMeterGroupdbService } from "../../indexedDB/utilityMeterGroup-db.service";
 import { LoadingService } from "../../shared/loading/loading.service";
-import { AccountManagementService } from '../account-management.service';
-import { EnergyUnitOptions, MassUnitOptions, SizeUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from 'src/app/shared/unitOptions';
-import { globalVariables } from "../../../environments/environment";
 
 @Component({
   selector: 'app-account',
   templateUrl: './account.component.html',
   styleUrls: ['./account.component.css'],
-  host: {
-    '(document:click)': 'documentClick($event)',
-  }
 })
 export class AccountComponent implements OnInit {
   facilityList: Array<IdbFacility> = [];
@@ -29,18 +22,9 @@ export class AccountComponent implements OnInit {
   facilityToEdit: IdbFacility;
   facilityToDelete: IdbFacility;
 
-  accountForm: FormGroup;
-
   selectedAccountSub: Subscription;
   accountFacilitiesSub: Subscription;
   selectedAccount: IdbAccount;
-  energyUnitOptions: Array<UnitOption> = EnergyUnitOptions;
-  volumeGasOptions: Array<UnitOption> = VolumeGasOptions;
-  volumeLiquidOptions: Array<UnitOption> = VolumeLiquidOptions;
-  sizeUnitOptions: Array<UnitOption> = SizeUnitOptions;
-  massUnitOptions: Array<UnitOption> = MassUnitOptions;
-  years: Array<number> = [];
-  globalVariables = globalVariables;
 
   constructor(
     private router: Router,
@@ -50,44 +34,22 @@ export class AccountComponent implements OnInit {
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
-    private loadingService: LoadingService,
-    private accountManagementService: AccountManagementService
+    private loadingService: LoadingService
   ) { }
 
   ngOnInit() {
     this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(val => {
       this.selectedAccount = val;
-      if (val) {
-        this.accountForm = this.accountManagementService.getAccountForm(val);
-      }
     });
 
     this.accountFacilitiesSub = this.facilityDbService.accountFacilities.subscribe(val => {
       this.facilityList = val;
     });
-
-    for (let i = 2050; i > 2000; i--) {
-      this.years.push(i);
-    }
-
   }
 
   ngOnDestroy() {
     this.selectedAccountSub.unsubscribe();
     this.accountFacilitiesSub.unsubscribe();
-  }
-
-  // Close menus when user clicks outside the dropdown
-  documentClick() {
-    this.facilityMenuOpen = null;
-  }
-
-  facilityToggleMenu(index) {
-    if (this.facilityMenuOpen === index) {
-      this.facilityMenuOpen = null;
-    } else {
-      this.facilityMenuOpen = index;
-    }
   }
 
   switchFacility(facility: IdbFacility) {
@@ -101,12 +63,6 @@ export class AccountComponent implements OnInit {
     this.facilityDbService.add(idbFacility);
   }
 
-  onFormChange(): void {
-    this.accountForm = this.accountManagementService.checkCustom(this.accountForm);
-    this.selectedAccount = this.accountManagementService.updateAccountFromForm(this.accountForm, this.selectedAccount);
-    this.accountDbService.update(this.selectedAccount);
-  }
-  
 
   facilityDelete() {
     this.loadingService.setLoadingStatus(true);
@@ -174,10 +130,4 @@ export class AccountComponent implements OnInit {
   cancelFacilityDelete() {
     this.facilityToDelete = undefined;
   }
-
-  setUnitsOfMeasure() {
-    this.accountForm = this.accountManagementService.setUnitsOfMeasure(this.accountForm);
-    this.onFormChange();
-  }
-
 }
