@@ -36,7 +36,6 @@ export class FacilityComponent implements OnInit {
   years: Array<number> = [];
   globalVariables = globalVariables;
   
-  generalInformationForm: FormGroup;
   constructor(
     private router: Router,
     private facilityDbService: FacilitydbService,
@@ -57,8 +56,6 @@ export class FacilityComponent implements OnInit {
       this.financialReportingDoestMatchAccount = this.accountManagementService.areAccountAndFacilityFinancialReportingDifferent(account, facility);
       this.selectedFacility = facility;
       if (facility != null) {
-        this.generalInformationForm = this.accountManagementService.getGeneralInformationForm(facility);
-        this.subscribeGeneralInformationForm();
         this.facilityForm = this.accountManagementService.getFacilityForm(facility);
       }
     });
@@ -114,11 +111,6 @@ export class FacilityComponent implements OnInit {
     this.onFormChange();
   }
 
-  setAccountUnits(){
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    this.facilityForm = this.accountManagementService.setAccountUnits(this.facilityForm, account);
-    this.onFormChange();
-  }
   setAccountSustainQuestions(){
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     this.facilityForm = this.accountManagementService.setAccountSustainQuestions(this.facilityForm, account);
@@ -130,14 +122,4 @@ export class FacilityComponent implements OnInit {
     this.facilityForm = this.accountManagementService.setAccountFinancialReporting(this.facilityForm, account);
     this.onFormChange();
   }
-
-
-  subscribeGeneralInformationForm(){
-    this.generalInformationForm.valueChanges.subscribe(() => {
-      this.selectedFacility = this.accountManagementService.updateFacilityFromGeneralInformationForm(this.generalInformationForm, this.selectedFacility);
-      this.facilityDbService.update(this.selectedFacility);
-    });
-  }
-
-
 }

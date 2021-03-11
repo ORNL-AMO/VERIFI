@@ -1,40 +1,41 @@
 <form [formGroup]="form">
     <div class="mb-3 ">
         <label>{{formNameLabel}} Name <span class="required">*</span></label>
-        <input type="text" class="form-control" formControlName="name">
+        <input type="text" class="form-control" formControlName="name" (input)="saveChanges()">
     </div>
     <span class="inputError" *ngIf="form.get('name').hasError('required')">{{formNameLabel}} name is required</span>
 
     <div class="mb-3">
         <label>Address</label>
-        <input type="text" class="form-control" formControlName="address" autocomplete="shipping street-address">
+        <input type="text" class="form-control" formControlName="address" autocomplete="shipping street-address"
+            (input)="saveChanges()">
     </div>
 
     <div class="row">
         <div class="mb-3 col">
             <label>City</label>
-            <input type="text" class="form-control" formControlName="city">
+            <input type="text" class="form-control" formControlName="city" (input)="saveChanges()">
         </div>
         <div class="mb-3 col">
             <label>State</label>
-            <select formControlName="state">
+            <select formControlName="state" (change)="saveChanges()">
                 <option *ngFor="let state of globalVariables.states" [ngValue]="state.name">{{state.name}}</option>
             </select>
         </div>
         <div class="mb-3 col">
             <label>Zip</label>
-            <input type="number" class="form-control" formControlName="zip">
+            <input type="number" class="form-control" formControlName="zip" (input)="saveChanges()">
         </div>
         <div class="mb-3 col">
             <label>Country</label>
-            <input type="text" class="form-control" formControlName="country">
+            <input type="text" class="form-control" formControlName="country" (input)="saveChanges()">
         </div>
     </div>
 
     <div class="row">
         <div class="mb-3 col">
             <label>NAICS Code</label>
-            <select formControlName="naics">
+            <select formControlName="naics" (change)="saveChanges()">
                 <option *ngFor="let naics of globalVariables.naicsCodes" [ngValue]="naics.code">{{naics.code}} -
                     {{naics.industyType}}</option>
             </select>
@@ -42,7 +43,7 @@
 
         <div class="input-group mb-3 col">
             <label>Facility Area</label>
-            <input type="text" class="form-control" formControlName="size">
+            <input type="text" class="form-control" formControlName="size" (input)="saveChanges()">
             <span class="unit" *ngIf="unitsOfMeasure === 'Imperial'">ft<sup>2</sup></span>
             <span class="unit" *ngIf="unitsOfMeasure === 'Metric'">m<sup>2</sup></span>
         </div>
@@ -50,6 +51,6 @@
 
     <div class="mb-3">
         <label class="">Notes</label>
-        <textarea formControlName="notes"></textarea>
+        <textarea formControlName="notes" (input)="saveChanges()"></textarea>
     </div>
 </form>

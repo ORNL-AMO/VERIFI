@@ -15,78 +15,16 @@
             </form>
         </div>-->
 
-    <div class="col-lg-7" *ngIf="accountForm">
+    <div class="col-lg-7">
       <h4>Corporate Information</h4>
       <br>
-      <app-general-information-form [inAccount]="true" [(form)]="generalInformationForm" [unitsOfMeasure]="selectedAccount.unitsOfMeasure"></app-general-information-form>
+      <app-general-information-form *ngIf="selectedAccount" [inAccount]="true"></app-general-information-form>
     </div>
 
-    <div class="col-lg-5" *ngIf="accountForm">
+    <div class="col-lg-5">
       <h4>Corporate Default Units</h4>
       <br>
-      <form [formGroup]="accountForm">
-        <div class="row">
-          <div class="mb-3 col">
-            <label>Units of Measure</label>
-            <select formControlName="unitsOfMeasure" (change)="setUnitsOfMeasure()">
-              <option [ngValue]="'Imperial'">Imperial</option>
-              <option [ngValue]="'Metric'">Metric</option>
-              <option [ngValue]="'Custom'">Custom</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="mb-3 col">
-            <label>Energy Unit</label>
-            <select formControlName="energyUnit" (change)="onFormChange()">
-              <option *ngFor="let energyUnitOption of energyUnitOptions" [ngValue]="energyUnitOption.value">
-                <span [innerHTML]="energyUnitOption.display"></span>
-              </option>
-            </select>
-          </div>
-
-          <div class="mb-3 col">
-            <label>Liquid Volume Unit</label>
-            <select formControlName="volumeLiquidUnit" (change)="onFormChange()">
-              <option *ngFor="let volumeUnitOption of volumeLiquidOptions" [ngValue]="volumeUnitOption.value">
-                <span [innerHTML]="volumeUnitOption.display"></span>
-              </option>
-            </select>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="mb-3 col">
-            <label>Gas Volume Unit</label>
-            <select formControlName="volumeGasUnit" (change)="onFormChange()">
-              <option *ngFor="let volumeUnitOption of volumeGasOptions" [ngValue]="volumeUnitOption.value">
-                <span [innerHTML]="volumeUnitOption.display"></span>
-              </option>
-            </select>
-          </div>
-
-          <div class="mb-3 col">
-            <label>Mass Unit</label>
-            <select formControlName="massUnit" (change)="onFormChange()">
-              <option *ngFor="let massUnitOption of massUnitOptions" [ngValue]="massUnitOption.value">
-                <span [innerHTML]="massUnitOption.display"></span>
-              </option>
-            </select>
-          </div>
-        </div>
-        <!--    
-            <div class="row">
-                <label class="col-lg-4">Size Unit</label>
-                <div class="mb-3 col">
-                    <select formControlName="sizeUnit" (change)="onFormChange()">
-                        <option *ngFor="let sizeUnitOption of sizeUnitOptions" [ngValue]="sizeUnitOption.value">
-                        <span [innerHTML]="sizeUnitOption.display"></span></option>
-                    </select>
-                </div>
-            </div>
-            -->
-      </form>
+      <app-default-units-form *ngIf="selectedAccount" [inAccount]="true"></app-default-units-form>
     </div>
   </div>
   <br>
@@ -317,8 +255,8 @@
   </div>
 </div>
 
-<div class="popup" [class.open]="showDeleteAccount" *ngIf="accountForm">
-  <div class="popup-header">Delete Account: {{accountForm.controls.name.value}}
+<div class="popup" [class.open]="showDeleteAccount" *ngIf="selectedAccount">
+  <div class="popup-header">Delete Account: {{selectedAccount.name}}
     <button class="item-right" (click)="cancelAccountDelete()">x</button>
   </div>
   <div class="popup-body">

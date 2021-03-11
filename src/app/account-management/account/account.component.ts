@@ -42,8 +42,6 @@ export class AccountComponent implements OnInit {
   years: Array<number> = [];
   globalVariables = globalVariables;
 
-
-  generalInformationForm: FormGroup;
   constructor(
     private router: Router,
     private accountDbService: AccountdbService,
@@ -60,8 +58,6 @@ export class AccountComponent implements OnInit {
     this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(val => {
       this.selectedAccount = val;
       if (val) {
-        this.generalInformationForm = this.accountManagementService.getGeneralInformationForm(val);
-        this.subscribeGeneralInformationForm();
         this.accountForm = this.accountManagementService.getAccountForm(val);
       }
     });
@@ -110,14 +106,7 @@ export class AccountComponent implements OnInit {
     this.selectedAccount = this.accountManagementService.updateAccountFromForm(this.accountForm, this.selectedAccount);
     this.accountDbService.update(this.selectedAccount);
   }
-
-
-  subscribeGeneralInformationForm(){
-    this.generalInformationForm.valueChanges.subscribe(() => {
-      this.selectedAccount = this.accountManagementService.updateAccountFromGeneralInformationForm(this.generalInformationForm, this.selectedAccount);
-      this.accountDbService.update(this.selectedAccount);
-    });
-  }
+  
 
   facilityDelete() {
     this.loadingService.setLoadingStatus(true);

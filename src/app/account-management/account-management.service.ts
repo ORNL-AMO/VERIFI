@@ -10,6 +10,7 @@ export class AccountManagementService {
 
   constructor(private formBuilder: FormBuilder) { }
 
+  //GENERAL INFORMATION
   getGeneralInformationForm(generalInformation: IdbAccount | IdbFacility): FormGroup {
     let form: FormGroup = this.formBuilder.group({
       name: [generalInformation.name, [Validators.required]],
@@ -49,14 +50,41 @@ export class AccountManagementService {
     return facility;
   }
 
+  //UNITS
+  getUnitsForm(units: IdbAccount | IdbFacility): FormGroup {
+    let form: FormGroup = this.formBuilder.group({
+      unitsOfMeasure: [units.unitsOfMeasure, [Validators.required]],
+      energyUnit: [units.energyUnit, [Validators.required]],
+      massUnit: [units.massUnit, [Validators.required]],
+      volumeLiquidUnit: [units.volumeLiquidUnit, [Validators.required]],
+      volumeGasUnit: [units.volumeGasUnit, [Validators.required]],
+      chilledWaterUnit: [units.chilledWaterUnit, [Validators.required]],
+    });
+    return form;
+  }
+
+  updateAccountFromUnitsForm(form: FormGroup, account: IdbAccount): IdbAccount {
+    account.unitsOfMeasure = form.controls.unitsOfMeasure.value;
+    account.energyUnit = form.controls.energyUnit.value;
+    account.massUnit = form.controls.massUnit.value;
+    account.volumeLiquidUnit = form.controls.volumeLiquidUnit.value;
+    account.chilledWaterUnit = form.controls.chilledWaterUnit.value;
+    return account;
+  }
+
+  updateFacilityFromUnitsForm(form: FormGroup, facility: IdbFacility): IdbFacility {
+    facility.unitsOfMeasure = form.controls.unitsOfMeasure.value;
+    facility.energyUnit = form.controls.energyUnit.value;
+    facility.massUnit = form.controls.massUnit.value;
+    facility.volumeLiquidUnit = form.controls.volumeLiquidUnit.value;
+    facility.chilledWaterUnit = form.controls.chilledWaterUnit.value;
+    return facility;
+  }
+
+
+
   getAccountForm(account: IdbAccount): FormGroup {
     let form: FormGroup = this.formBuilder.group({
-      unitsOfMeasure: [account.unitsOfMeasure, [Validators.required]],
-      energyUnit: [account.energyUnit, [Validators.required]],
-      massUnit: [account.massUnit, [Validators.required]],
-      volumeLiquidUnit: [account.volumeLiquidUnit, [Validators.required]],
-      volumeGasUnit: [account.volumeGasUnit, [Validators.required]],
-      chilledWaterUnit: [account.chilledWaterUnit, [Validators.required]],
       energyReductionGoal: [account.sustainabilityQuestions ? account.sustainabilityQuestions.energyReductionGoal : null],
       energyReductionPercent: [account.sustainabilityQuestions ? account.sustainabilityQuestions.energyReductionPercent : null],
       energyReductionBaselineYear: [account.sustainabilityQuestions ? account.sustainabilityQuestions.energyReductionBaselineYear : null],
@@ -86,12 +114,6 @@ export class AccountManagementService {
   }
 
   updateAccountFromForm(form: FormGroup, account: IdbAccount): IdbAccount {
-    account.unitsOfMeasure = form.controls.unitsOfMeasure.value;
-    account.energyUnit = form.controls.energyUnit.value;
-    account.massUnit = form.controls.massUnit.value;
-    account.volumeLiquidUnit = form.controls.volumeLiquidUnit.value;
-    account.volumeGasUnit = form.controls.volumeGasUnit.value;
-    account.chilledWaterUnit = form.controls.chilledWaterUnit.value;
     account.sustainabilityQuestions.energyReductionGoal = form.controls.energyReductionGoal.value;
     account.sustainabilityQuestions.energyReductionPercent = form.controls.energyReductionPercent.value;
     account.sustainabilityQuestions.energyReductionBaselineYear = form.controls.energyReductionBaselineYear.value;
@@ -120,21 +142,6 @@ export class AccountManagementService {
 
   getFacilityForm(facility: IdbFacility): FormGroup {
     let form: FormGroup = this.formBuilder.group({
-      name: [facility.name, [Validators.required]],
-      country: [facility.country],
-      city: [facility.city],
-      state: [facility.state],
-      zip: [facility.zip],
-      address: [facility.address],
-      naics: [facility.naics],
-      size: [facility.size],
-      notes: [facility.notes],
-      unitsOfMeasure: [facility.unitsOfMeasure, [Validators.required]],
-      energyUnit: [facility.energyUnit, [Validators.required]],
-      massUnit: [facility.massUnit, [Validators.required]],
-      volumeLiquidUnit: [facility.volumeLiquidUnit, [Validators.required]],
-      volumeGasUnit: [facility.volumeGasUnit, [Validators.required]],
-      chilledWaterUnit: [facility.chilledWaterUnit, [Validators.required]],
       energyReductionGoal: [facility.sustainabilityQuestions ? facility.sustainabilityQuestions.energyReductionGoal : null],
       energyReductionPercent: [facility.sustainabilityQuestions ? facility.sustainabilityQuestions.energyReductionPercent : null],
       energyReductionBaselineYear: [facility.sustainabilityQuestions ? facility.sustainabilityQuestions.energyReductionBaselineYear : null],
@@ -163,21 +170,6 @@ export class AccountManagementService {
   }
 
   updateFacilityFromForm(form: FormGroup, facility: IdbFacility): IdbFacility {
-    facility.name = form.controls.name.value;
-    facility.country = form.controls.country.value;
-    facility.city = form.controls.city.value;
-    facility.state = form.controls.state.value;
-    facility.zip = form.controls.zip.value;
-    facility.address = form.controls.address.value;
-    facility.naics = form.controls.naics.value;
-    facility.size = form.controls.size.value;
-    facility.notes = form.controls.notes.value;
-    facility.unitsOfMeasure = form.controls.unitsOfMeasure.value;
-    facility.energyUnit = form.controls.energyUnit.value;
-    facility.massUnit = form.controls.massUnit.value;
-    facility.volumeLiquidUnit = form.controls.volumeLiquidUnit.value;
-    facility.volumeGasUnit = form.controls.volumeGasUnit.value;
-    facility.chilledWaterUnit = form.controls.chilledWaterUnit.value;
     facility.sustainabilityQuestions.energyReductionGoal = form.controls.energyReductionGoal.value;
     facility.sustainabilityQuestions.energyReductionPercent = form.controls.energyReductionPercent.value;
     facility.sustainabilityQuestions.energyReductionBaselineYear = form.controls.energyReductionBaselineYear.value;
