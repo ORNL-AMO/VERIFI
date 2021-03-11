@@ -32,7 +32,6 @@ export class FacilityComponent implements OnInit {
   selectedFacility: IdbFacility;
   unitsDontMatchAccount: boolean;
   sustainQuestionsDontMatchAccount: boolean;
-  financialReportingDoestMatchAccount: boolean;
   years: Array<number> = [];
   globalVariables = globalVariables;
   
@@ -53,7 +52,6 @@ export class FacilityComponent implements OnInit {
       let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
       this.unitsDontMatchAccount = this.accountManagementService.areAccountAndFacilityUnitsDifferent(account, facility);
       this.sustainQuestionsDontMatchAccount = this.accountManagementService.areAccountAndFacilitySustainQuestionsDifferent(account, facility);
-      this.financialReportingDoestMatchAccount = this.accountManagementService.areAccountAndFacilityFinancialReportingDifferent(account, facility);
       this.selectedFacility = facility;
       if (facility != null) {
         this.facilityForm = this.accountManagementService.getFacilityForm(facility);
@@ -114,12 +112,6 @@ export class FacilityComponent implements OnInit {
   setAccountSustainQuestions(){
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     this.facilityForm = this.accountManagementService.setAccountSustainQuestions(this.facilityForm, account);
-    this.onFormChange();
-  }
-
-  setAccountFinancialReporting(){
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    this.facilityForm = this.accountManagementService.setAccountFinancialReporting(this.facilityForm, account);
     this.onFormChange();
   }
 }

@@ -82,6 +82,30 @@ export class AccountManagementService {
   }
 
 
+  //FISCAL YEAR
+  getFiscalYearForm(fiscalYearData: IdbAccount | IdbFacility): FormGroup {
+    let form: FormGroup = this.formBuilder.group({
+      fiscalYear: [fiscalYearData.fiscalYear],
+      fiscalYearMonth: [fiscalYearData.fiscalYearMonth],
+      fiscalYearCalendarEnd: [fiscalYearData.fiscalYearCalendarEnd],
+    });
+    return form;
+  }
+
+  updateAccountFromFiscalForm(form: FormGroup, account: IdbAccount): IdbAccount {
+    account.fiscalYear = form.controls.fiscalYear.value;
+    account.fiscalYearMonth = form.controls.fiscalYearMonth.value;
+    account.fiscalYearCalendarEnd = form.controls.fiscalYearCalendarEnd.value;
+    return account;
+  }
+
+  updateFacilityFromFiscalForm(form: FormGroup, facility: IdbFacility): IdbFacility {
+    facility.fiscalYear = form.controls.fiscalYear.value;
+    facility.fiscalYearMonth = form.controls.fiscalYearMonth.value;
+    facility.fiscalYearCalendarEnd = form.controls.fiscalYearCalendarEnd.value;
+    return facility;
+  }
+
 
   getAccountForm(account: IdbAccount): FormGroup {
     let form: FormGroup = this.formBuilder.group({
@@ -104,10 +128,7 @@ export class AccountManagementService {
       waterReductionGoal: [account.sustainabilityQuestions ? account.sustainabilityQuestions.waterReductionGoal : null],
       waterReductionPercent: [account.sustainabilityQuestions ? account.sustainabilityQuestions.waterReductionPercent : null],
       waterReductionBaselineYear: [account.sustainabilityQuestions ? account.sustainabilityQuestions.waterReductionBaselineYear : null],
-      waterReductionTargetYear: [account.sustainabilityQuestions ? account.sustainabilityQuestions.waterReductionTargetYear : null],
-      fiscalYear: [account.fiscalYear],
-      fiscalYearMonth: [account.fiscalYearMonth],
-      fiscalYearCalendarEnd: [account.fiscalYearCalendarEnd],
+      waterReductionTargetYear: [account.sustainabilityQuestions ? account.sustainabilityQuestions.waterReductionTargetYear : null]
     });
     return form;
 
@@ -134,9 +155,6 @@ export class AccountManagementService {
     account.sustainabilityQuestions.waterReductionPercent = form.controls.waterReductionPercent.value;
     account.sustainabilityQuestions.waterReductionBaselineYear = form.controls.waterReductionBaselineYear.value;
     account.sustainabilityQuestions.waterReductionTargetYear = form.controls.waterReductionTargetYear.value;
-    account.fiscalYear = form.controls.fiscalYear.value;
-    account.fiscalYearMonth = form.controls.fiscalYearMonth.value;
-    account.fiscalYearCalendarEnd = form.controls.fiscalYearCalendarEnd.value;
     return account;
   }
 
@@ -162,9 +180,6 @@ export class AccountManagementService {
       waterReductionPercent: [facility.sustainabilityQuestions ? facility.sustainabilityQuestions.waterReductionPercent : null],
       waterReductionBaselineYear: [facility.sustainabilityQuestions ? facility.sustainabilityQuestions.waterReductionBaselineYear : null],
       waterReductionTargetYear: [facility.sustainabilityQuestions ? facility.sustainabilityQuestions.waterReductionTargetYear : null],
-      fiscalYear: [facility.fiscalYear],
-      fiscalYearMonth: [facility.fiscalYearMonth],
-      fiscalYearCalendarEnd: [facility.fiscalYearCalendarEnd],
     });
     return form;
   }
@@ -190,9 +205,6 @@ export class AccountManagementService {
     facility.sustainabilityQuestions.waterReductionPercent = form.controls.waterReductionPercent.value;
     facility.sustainabilityQuestions.waterReductionBaselineYear = form.controls.waterReductionBaselineYear.value;
     facility.sustainabilityQuestions.waterReductionTargetYear = form.controls.waterReductionTargetYear.value;
-    facility.fiscalYear = form.controls.fiscalYear.value;
-    facility.fiscalYearMonth = form.controls.fiscalYearMonth.value;
-    facility.fiscalYearCalendarEnd = form.controls.fiscalYearCalendarEnd.value;
     return facility;
   }
 
