@@ -8,6 +8,7 @@ import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 's
 import { Subscription } from 'rxjs';
 import { EditMeterFormService } from './edit-meter-form/edit-meter-form.service';
 import { FormGroup } from '@angular/forms';
+import { Router } from '@angular/router';
 import { LoadingService } from 'src/app/shared/loading/loading.service';
 
 @Component({
@@ -40,6 +41,7 @@ export class EnergySourceComponent implements OnInit {
     private utilityMeterDatadbService: UtilityMeterDatadbService,
     private utilityMeterdbService: UtilityMeterdbService,
     private editMeterFormService: EditMeterFormService,
+    private router: Router,
     private loadingService: LoadingService
   ) { }
 
@@ -65,7 +67,7 @@ export class EnergySourceComponent implements OnInit {
     let selectedFacility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
     let selectedAccount: IdbAccount = this.accountdbService.selectedAccount.getValue();
     this.addOrEdit = 'add';
-    this.editMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.id, selectedAccount.id);
+    this.editMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.id, selectedAccount.id, true);
   }
 
   meterExport() {
@@ -116,13 +118,8 @@ export class EnergySourceComponent implements OnInit {
     }
   }
 
-
-  closeImportWindow() {
-    this.importWindow = false;
-  }
-
-  showImportWindow() {
-    this.importWindow = true;
+  uploadData() {
+    this.router.navigateByUrl('utility/upload-data');
   }
 
   selectEditMeter(meter: IdbUtilityMeter) {

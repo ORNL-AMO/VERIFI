@@ -60,14 +60,24 @@ import { MetersTableComponent } from './dashboard/facility-overview/meters-table
 import { UtilityEnergyUseTableComponent } from './dashboard/facility-overview/utility-energy-use-table/utility-energy-use-table.component';
 import { AccountUtilityEnergyUseTableComponent } from './dashboard/account-overview/account-utility-energy-use-table/account-utility-energy-use-table.component';
 import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
-import { ImportMeterWizardComponent } from './utility/energy-consumption/energy-source/import-meter-wizard/import-meter-wizard.component';
 import { EditMeterComponent } from './utility/energy-consumption/energy-source/edit-meter/edit-meter.component';
 import { OrderByPipe } from './shared/helper-pipes/order-by.pipe';
-import { ImportMeterDataWizardComponent } from './utility/energy-consumption/utility-meter-data/import-meter-data-wizard/import-meter-data-wizard.component';
-import { ValidDataTableComponent } from './utility/energy-consumption/utility-meter-data/import-meter-data-wizard/valid-data-table/valid-data-table.component';
-import { MissingMeterNumberTableComponent } from './utility/energy-consumption/utility-meter-data/import-meter-data-wizard/missing-meter-number-table/missing-meter-number-table.component';
+import { MeterTableComponent } from './utility/upload-data/meter-table/meter-table.component';
+import { MeterDataTableComponent } from './utility/upload-data/meter-data-table/meter-data-table.component';
 import { SetupProgressComponent } from './shared/setup-progress/setup-progress.component';
 import { EmptyStateComponent } from './dashboard/empty-state/empty-state.component';
+import { ImportMeterWizardComponent } from './utility/upload-data/import-meter-wizard/import-meter-wizard.component';
+import { ImportMeterDataWizardComponent } from './utility/upload-data/import-meter-data-wizard/import-meter-data-wizard.component';
+import { ValidDataTableComponent } from './utility/upload-data/import-meter-data-wizard/valid-data-table/valid-data-table.component';
+import { MissingMeterNumberTableComponent } from './utility/upload-data/import-meter-data-wizard/missing-meter-number-table/missing-meter-number-table.component';
+import { UploadDataComponent } from './utility/upload-data/upload-data.component';
+import { ExcelWizardComponent } from './utility/upload-data/excel-wizard/excel-wizard.component';
+import { ExcelDataTableComponent } from './utility/upload-data/excel-data-table/excel-data-table.component';
+import { SetupDataWizardComponent } from './utility/upload-data/excel-wizard/setup-data-wizard/setup-data-wizard.component';
+import { ColumnsWizardComponent } from './utility/upload-data/excel-wizard/columns-wizard/columns-wizard.component';
+import { WorksheetDataTableComponent } from './utility/upload-data/excel-wizard/worksheet-data-table/worksheet-data-table.component';
+import { InvalidMeterDataTableComponent } from './utility/upload-data/import-meter-data-wizard/invalid-meter-data-table/invalid-meter-data-table.component';
+import { WizardDataSummaryComponent } from './utility/upload-data/excel-wizard/wizard-data-summary/wizard-data-summary.component';
 
 @NgModule({
   declarations: [
@@ -120,6 +130,16 @@ import { EmptyStateComponent } from './dashboard/empty-state/empty-state.compone
     ImportMeterDataWizardComponent,
     ValidDataTableComponent,
     MissingMeterNumberTableComponent,
+    UploadDataComponent,
+    ExcelWizardComponent,
+    ExcelDataTableComponent,
+    MeterTableComponent,
+    MeterDataTableComponent,
+    SetupDataWizardComponent,
+    ColumnsWizardComponent,
+    WorksheetDataTableComponent,
+    InvalidMeterDataTableComponent,
+    WizardDataSummaryComponent,
     SetupProgressComponent,
     EmptyStateComponent
   ],

@@ -1185,3 +1185,15 @@ canvas {
   z-index: 1001!important;
   /*height: 200px;*/
 }
+
+
+
+/*Added by mark for import-v2. Not sure correct place to put.*/
+.scroll-item{
+  overflow-y: scroll;
+  max-height: 100%;
+}
+
+.invalid-import-table .header-width{
+  width: 15%;
+}

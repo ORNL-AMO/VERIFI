@@ -101,6 +101,7 @@ export interface IdbUtilityMeter {
     energyUnit: string,
     fuel:string
     visible?: boolean
+    importWizardName?: string
 }
 
 export interface IdbUtilityMeterData {
@@ -136,7 +137,9 @@ export interface IdbUtilityMeterData {
     powerFactorCharge: number,
     businessCharge: number,
     utilityTax: number,
-    latePayment: number
+    latePayment: number,
+    meterNumber?: string,
+    totalImportConsumption?: number
 }
 
 export interface IdbPredictorEntry {

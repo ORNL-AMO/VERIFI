@@ -18,9 +18,9 @@ export class CalanderizationService {
     meters.forEach(meter => {
       let meterData: Array<IdbUtilityMeterData>
       if (inAccount) {
-        meterData = this.utilityMeterDataDbService.getMeterDataForAccount(meter);
+        meterData = this.utilityMeterDataDbService.getMeterDataForAccount(meter, true);
       } else {
-        meterData = this.utilityMeterDataDbService.getMeterDataForFacility(meter);
+        meterData = this.utilityMeterDataDbService.getMeterDataForFacility(meter, true);
       }
       let calanderizedMeter: Array<MonthlyData> = this.calanderizeMeterData(meter, meterData, monthDisplayShort);
       let showConsumption: boolean = calanderizedMeter.find(meterData => { return meterData.energyConsumption != 0 }) != undefined;
