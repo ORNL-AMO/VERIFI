@@ -17,46 +17,34 @@ import { Subscription } from 'rxjs';
   ]
 })
 export class ToastNotificationsComponent implements OnInit {
-  @Input()
-  title: string;
-  @Input()
-  body: string;
-  @Output('emitCloseToast')
-  emitCloseToast = new EventEmitter<boolean>();
-  @Input()
-  setTimeoutVal: number;
-  @Input()
-  toastClass: string;
-  @Input()
-  showDisableFooter: boolean;
-  @Output('emitDisable')
-  emitDisable = new EventEmitter<boolean>();
 
   showToast: string = 'hide';
-  destroyToast: boolean = false;
+  destroyToast: boolean = true;
 
   toastNotification: ToastNotification;
   toastNotificationSub: Subscription;
   constructor(private toastNotificationsService: ToastNotificationsService) { }
 
   ngOnInit() {
-
     this.toastNotificationSub = this.toastNotificationsService.toastNotification.subscribe(val => {
       this.toastNotification = val;
+      this.destroyToast = (val == undefined);
+      if (this.toastNotification) {
+        setTimeout(() => {
+          this.showToast = 'show';
+        }, 100);
+
+        if (this.toastNotification.setTimeoutVal) {
+          setTimeout(() => {
+            this.closeToast();
+          }, this.toastNotification.setTimeoutVal);
+        }
+
+      }
     });
-
-    setTimeout(() => {
-      this.showToast = 'show';
-    }, 100);
-
-    if (this.setTimeoutVal) {
-      setTimeout(() => {
-        this.closeToast();
-      }, this.setTimeoutVal);
-    }
   }
 
-  ngOnDestroy(){
+  ngOnDestroy() {
     this.toastNotificationSub.unsubscribe();
   }
 
@@ -65,15 +53,17 @@ export class ToastNotificationsComponent implements OnInit {
     this.showToast = 'hide';
     setTimeout(() => {
       this.destroyToast = true;
-      this.emitCloseToast.emit(true);
+      this.toastNotificationsService.hideToast();
     }, 500);
   }
 
+  //TODO: Disable logic whenever we want to have something disabled
   disable() {
     this.showToast = 'hide';
     setTimeout(() => {
       this.destroyToast = true;
-      this.emitDisable.emit(true);
+      this.toastNotificationsService.hideToast();
+      //this.emitDisable.emit(true);
     }, 500);
   }
 }

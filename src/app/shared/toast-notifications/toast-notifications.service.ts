@@ -11,12 +11,13 @@ export class ToastNotificationsService {
     this.toastNotification = new BehaviorSubject<ToastNotification>(undefined);
   }
 
-  showToast(title: string, body: string, setTimeoutVal: number, showDisableFooter: boolean) {
+  showToast(title: string, body: string, setTimeoutVal: number, showDisableFooter: boolean, toastClass: "success" | "warning" | "info" | "comment" | "error") {
     this.toastNotification.next({
       title: title,
       body: body,
       setTimeoutVal: setTimeoutVal,
-      showDisableFooter: showDisableFooter
+      showDisableFooter: showDisableFooter,
+      toastClass: toastClass
     });
   }
 
@@ -30,5 +31,6 @@ export interface ToastNotification {
   title: string,
   body: string,
   setTimeoutVal: number,
-  showDisableFooter: boolean
+  showDisableFooter: boolean,
+  toastClass: "success" | "warning" | "info" | "comment" | "error"
 }

@@ -5,6 +5,7 @@ import { FacilitydbService } from '../indexedDB/facility-db.service';
 import { IdbAccount, IdbFacility, IdbUtilityMeter } from '../models/idb';
 import { Router, Event, NavigationEnd } from '@angular/router';
 import { UtilityMeterdbService } from '../indexedDB/utilityMeter-db.service';
+import { ToastNotificationsService } from '../shared/toast-notifications/toast-notifications.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -25,14 +26,12 @@ export class DashboardComponent implements OnInit {
   accountFacilitiesSub: Subscription;
   appRendered: boolean = false;
 
-  toastData: { title: string, body: string, setTimeoutVal: number } = { title: '', body: '', setTimeoutVal: undefined };
-  showToast: boolean = false;
-
   constructor(
     private accountDbService: AccountdbService, 
     private facilityDbService: FacilitydbService,
     public utilityMeterDbService: UtilityMeterdbService,
-    private router: Router
+    private router: Router,
+    private toastNotificationService: ToastNotificationsService
     ) {
     router.events.subscribe((event: Event) => {
       if (event instanceof NavigationEnd) {
@@ -94,21 +93,6 @@ export class DashboardComponent implements OnInit {
   checkToast() {
     let title: string = 'Toast Test';
     let body: string = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.';
-    this.openToast(title, body);
-  }
-
-  openToast(title: string, body: string) {
-    this.toastData.title = title;
-    this.toastData.body = body;
-    this.showToast = true;
-  }
-
-  hideToast() {
-    this.showToast = false;
-    this.toastData = {
-      title: '',
-      body: '',
-      setTimeoutVal: undefined
-    }
+    this.toastNotificationService.showToast(title, body, undefined, false, "info");
   }
 }
