@@ -82,6 +82,7 @@ import { ColumnsWizardComponent } from './utility/upload-data/excel-wizard/colum
 import { WorksheetDataTableComponent } from './utility/upload-data/excel-wizard/worksheet-data-table/worksheet-data-table.component';
 import { InvalidMeterDataTableComponent } from './utility/upload-data/import-meter-data-wizard/invalid-meter-data-table/invalid-meter-data-table.component';
 import { WizardDataSummaryComponent } from './utility/upload-data/excel-wizard/wizard-data-summary/wizard-data-summary.component';
+import { ToastNotificationsComponent } from './shared/toast-notifications/toast-notifications.component';
 
 @NgModule({
   declarations: [
@@ -149,7 +150,8 @@ import { WizardDataSummaryComponent } from './utility/upload-data/excel-wizard/w
     GeneralInformationFormComponent,
     DefaultUnitsFormComponent,
     FinancialReportingFormComponent,
-    SustainabilityQuestionsFormComponent
+    SustainabilityQuestionsFormComponent,
+    ToastNotificationsComponent
   ],
   imports: [
     BrowserModule,

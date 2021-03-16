@@ -27,3 +27,6 @@
 </div>
 
 <div class="measurFooter"></div>
+
+<app-toast-notifications *ngIf="showToast" [title]="toastData.title" [body]="toastData.body" (emitCloseToast)="hideToast()"
+	[setTimeoutVal]="toastData.setTimeoutVal" [toastClass]="'info'"></app-toast-notifications>
