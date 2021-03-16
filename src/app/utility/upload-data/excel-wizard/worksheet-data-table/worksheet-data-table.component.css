@@ -1,0 +1,32 @@
+.table-div{
+    max-height: 300px;
+    overflow-y: scroll;
+}
+
+.th{
+    transition: background-color 1s ease;
+  }
+
+th.Unused{
+    background-color: #2C3E50;
+    color: white;
+}
+
+th.Date{
+    background-color: #9B59B6;
+    color: white;
+}
+
+th.Meters{
+    background-color: #2ECC71;
+    color: white;
+}
+
+th.Predictors{
+    background-color: #3498DB;
+    color: white;
+}
+
+tr.hidden{
+    display: none;
+}
