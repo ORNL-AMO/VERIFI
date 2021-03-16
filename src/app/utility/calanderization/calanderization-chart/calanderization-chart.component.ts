@@ -67,17 +67,17 @@ export class CalanderizationChartComponent implements OnInit {
         hoverformat = '$,.0f'
         if (this.meterData.showConsumption) {
           // tickSuffix = " " + this.meterData.consumptionUnit;
-          yAxisTitle = 'Energy Consumption (' + this.meterData.consumptionUnit + ')';
+          yAxisTitle = 'Utility Consumption (' + this.meterData.consumptionUnit + ')';
           yData = this.meterData.monthlyData.map(data => { return data.energyConsumption })
         } else if (this.meterData.showEnergyUse) {
           // tickSuffix = " " + this.meterData.energyUnit;
-          yAxisTitle = 'Energy Consumption (' + this.meterData.energyUnit + ')';
+          yAxisTitle = 'Utility Consumption (' + this.meterData.energyUnit + ')';
           yData = this.meterData.monthlyData.map(data => { return data.energyUse });
         }
         traceData.push({
           x: this.meterData.monthlyData.map(data => { return data.date }),
           y: yData,
-          name: 'Energy Consumption',
+          name: 'Utility Consumption',
           type: this.displayGraphEnergy,
           yaxis: yaxis,
           offsetgroup: offsetgroup,
@@ -95,17 +95,17 @@ export class CalanderizationChartComponent implements OnInit {
         if (!this.displayGraphEnergy) {
           // tickPrefix = "$";
           hoverformat = ',.0f';
-          yAxisTitle = 'Energy Cost';
+          yAxisTitle = 'Utility Cost';
         } else {
           // tickPrefix2 = "$";
           hoverformat2 = ',.0f';
-          yAxis2Title = 'Energy Cost';
+          yAxis2Title = 'Utility Cost';
         }
 
         traceData.push({
           x: this.meterData.monthlyData.map(data => { return data.date }),
           y: this.meterData.monthlyData.map(data => { return data.energyCost }),
-          name: 'Energy Cost',
+          name: 'Utility Cost',
           type: this.displayGraphCost,
           yaxis: yaxis,
           offsetgroup: offsetgroup,
