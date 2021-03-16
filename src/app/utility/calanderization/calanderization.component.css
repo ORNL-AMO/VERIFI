@@ -23,3 +23,7 @@ tbody tr.use-and-consumption td{
 .btn-group .btn-small{
     border: solid 1px;
 }
+
+.btn.btn-solid span.fa{
+    color: white;
+}

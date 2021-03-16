@@ -11,12 +11,7 @@
                 (click)="setDataDisplay('graph')">Graph</button>
         </div>
 
-        <div class="btn-group pull-right pr-2" *ngIf="dataDisplay == 'graph'">
-            <button class="btn btn-small" [ngClass]="{'btn-solid': displayGraphCost}"
-                (click)="toggleDisplayGraphCost()">Cost</button>
-            <button class="btn btn-small" [ngClass]="{'btn-solid': displayGraphEnergy}"
-                (click)="toggleDisplayGraphEnergy()">Consumption</button>
-        </div>
+
         <!--Items Per Page-->
         <div class="items-per-page item-right" *ngIf="dataDisplay == 'table'">
             <span>Show </span>
@@ -97,8 +92,35 @@
 
 
     <div *ngIf="dataDisplay == 'graph'">
+        <div class="row">
+            <div class="col align-items-end">
+                Energy
+                <br>
+                <div class="btn-group pr-2">
+                    <button class="btn btn-small" [ngClass]="{'btn-solid': displayGraphEnergy == 'bar'}"
+                        (click)="setDisplayGraphEnergy('bar')"><span class="fa fa-bar-chart"></span></button>
+                    <button class="btn btn-small" [ngClass]="{'btn-solid': displayGraphEnergy == 'line'}"
+                        (click)="setDisplayGraphEnergy('line')"><span class="fa fa-line-chart"></span></button>
+                </div>
+
+            </div>
+            <div class="col justify-content-center">
+                <div>
+                    Cost
+                    <br>
+                    <div class="btn-group pr-2">
+
+                        <button class="btn btn-small" [ngClass]="{'btn-solid': displayGraphCost == 'bar'}"
+                            (click)="setDisplayGraphCost('bar')"><span class="fa fa-bar-chart"></span></button>
+                        <button class="btn btn-small" [ngClass]="{'btn-solid': displayGraphCost == 'line'}"
+                            (click)="setDisplayGraphCost('line')"><span class="fa fa-line-chart"></span></button>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="meter" *ngFor="let meterData of calanderizedMeterData; let index=index;">
-            <app-calanderization-chart [meterData]="meterData" [displayGraphEnergy]="displayGraphEnergy" [displayGraphCost]="displayGraphCost"></app-calanderization-chart>
+            <app-calanderization-chart [meterData]="meterData" [displayGraphEnergy]="displayGraphEnergy"
+                [displayGraphCost]="displayGraphCost"></app-calanderization-chart>
         </div>
     </div>
 </div>

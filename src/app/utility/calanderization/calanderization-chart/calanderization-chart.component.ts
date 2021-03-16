@@ -11,9 +11,9 @@ export class CalanderizationChartComponent implements OnInit {
   @Input()
   meterData: CalanderizedMeter;
   @Input()
-  displayGraphCost: boolean;
+  displayGraphCost: "bar" | "line" | null;
   @Input()
-  displayGraphEnergy: boolean;
+  displayGraphEnergy: "bar" | "line" | null;
   @ViewChild('monthlyMeterDataBarChart', { static: false }) monthlyMeterDataBarChart: ElementRef;
 
   constructor(private plotlyService: PlotlyService) { }
@@ -48,6 +48,26 @@ export class CalanderizationChartComponent implements OnInit {
       let yaxis: string = 'y';
       let offsetgroup: number = 1;
 
+      let costLine;
+      let energyLine;
+      let y1overlay: string;
+      let y2overlay: string = 'y';
+
+      if(this.displayGraphCost == 'line'){
+        costLine = { width: 7,  }
+      }
+
+      if(this.displayGraphEnergy == 'line'){
+        energyLine = { width: 7, }
+
+      }
+
+      if(this.displayGraphEnergy == 'line' && this.displayGraphCost == 'bar'){
+        y2overlay = undefined;
+        y1overlay = 'y2';
+      }
+
+
       if (this.displayGraphEnergy) {
         let yData: Array<number>;
         hoverformat = ',.0f'
@@ -64,13 +84,14 @@ export class CalanderizationChartComponent implements OnInit {
           x: this.meterData.monthlyData.map(data => { return data.date }),
           y: yData,
           name: 'Energy Consumption',
-          type: 'bar',
+          type: this.displayGraphEnergy,
           yaxis: yaxis,
           offsetgroup: offsetgroup,
           marker: {
             color: this.getMarkerColor(),
-            line: { color: 'black' }
-          }
+            
+          },
+          line: energyLine
         });
         yaxis = 'y2';
         offsetgroup = 2;
@@ -92,13 +113,13 @@ export class CalanderizationChartComponent implements OnInit {
           x: this.meterData.monthlyData.map(data => { return data.date }),
           y: this.meterData.monthlyData.map(data => { return data.energyCost }),
           name: 'Energy Cost',
-          type: 'bar',
+          type: this.displayGraphCost,
           yaxis: yaxis,
           offsetgroup: offsetgroup,
           marker: {
-            color: 'rgba(20, 90, 50,1)',
-            line: { color: 'black' }
-          }
+            color: 'rgba(39, 174, 96,1)',
+          },
+          line: costLine
         });
       }
 
@@ -126,7 +147,8 @@ export class CalanderizationChartComponent implements OnInit {
           hoverformat: hoverformat,
           ticksuffix: tickSuffix,
           tickprefix: tickPrefix,
-          automargin: true
+          automargin: true,
+          overlaying: y1overlay
         },
         yaxis2: {
           title: {
@@ -140,7 +162,7 @@ export class CalanderizationChartComponent implements OnInit {
           ticksuffix: tickSuffix2,
           tickprefix: tickPrefix2,
           automargin: true,
-          overlaying: 'y',
+          overlaying: y2overlay,
           side: 'right',
         },
         margin: { r: 0, t: 50 }

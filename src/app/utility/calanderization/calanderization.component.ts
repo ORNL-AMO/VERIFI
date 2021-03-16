@@ -26,14 +26,17 @@ export class CalanderizationComponent implements OnInit {
 
   calanderizedDataFilters: CalanderizationFilters;
   calanderizedDataFiltersSub: Subscription;
-  dataDisplay: "table" | "graph" = 'table';
-  displayGraphEnergy: boolean = false;
-  displayGraphCost: boolean = true;
+  dataDisplay: "table" | "graph";
+  displayGraphEnergy: "bar" | "scatter" | null;
+  displayGraphCost:  "bar" | "scatter" | null;
 
   constructor(private calanderizationService: CalanderizationService, private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService) { }
 
   ngOnInit(): void {
+    this.displayGraphCost = this.calanderizationService.displayGraphCost;
+    this.displayGraphEnergy = this.calanderizationService.displayGraphEnergy;
+    this.dataDisplay = this.calanderizationService.dataDisplay;
     this.calanderizedDataFiltersSub = this.calanderizationService.calanderizedDataFilters.subscribe(val => {
       this.calanderizedDataFilters = val;
       this.setCalanderizedMeterData();
@@ -60,7 +63,10 @@ export class CalanderizationComponent implements OnInit {
       selectedDateMax: undefined,
       selectedDateMin: undefined,
       dataDateRange: undefined
-    })
+    });
+    this.calanderizationService.displayGraphCost = this.displayGraphCost;
+    this.calanderizationService.displayGraphEnergy = this.displayGraphEnergy;
+    this.calanderizationService.dataDisplay = this.dataDisplay;
   }
 
   setCalanderizedMeterData() {
@@ -158,17 +164,19 @@ export class CalanderizationComponent implements OnInit {
     this.dataDisplay = str;
   }
 
-  toggleDisplayGraphEnergy() {
-    this.displayGraphEnergy = !this.displayGraphEnergy;
-    if(!this.displayGraphEnergy && !this.displayGraphCost){
-      this.displayGraphCost = true;
+  setDisplayGraphEnergy(str: "bar" | "scatter") {
+    if(str == this.displayGraphEnergy){
+      this.displayGraphEnergy = undefined;
+    }else{
+      this.displayGraphEnergy = str;      
     }
   }
 
-  toggleDisplayGraphCost() {
-    this.displayGraphCost = !this.displayGraphCost;
-    if(!this.displayGraphEnergy && !this.displayGraphCost){
-      this.displayGraphEnergy = true;
+  setDisplayGraphCost(str:  "bar" | "scatter") {
+    if(str == this.displayGraphCost){
+      this.displayGraphCost = undefined;
+    }else{
+      this.displayGraphCost = str;      
     }
   }
 }
