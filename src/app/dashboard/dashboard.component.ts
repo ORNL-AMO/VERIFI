@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AccountdbService } from '../indexedDB/account-db.service';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
@@ -12,7 +12,6 @@ import { UtilityMeterdbService } from '../indexedDB/utilityMeter-db.service';
   styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit {
-
   selectedAccount: IdbAccount;
   selectedFacility: IdbFacility;
   facilityList: Array<IdbFacility>;
@@ -25,6 +24,9 @@ export class DashboardComponent implements OnInit {
   utilityDataSub: Subscription;
   accountFacilitiesSub: Subscription;
   appRendered: boolean = false;
+
+  toastData: { title: string, body: string, setTimeoutVal: number } = { title: '', body: '', setTimeoutVal: undefined };
+  showToast: boolean = false;
 
   constructor(
     private accountDbService: AccountdbService, 
@@ -45,6 +47,7 @@ export class DashboardComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.checkToast();
     this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(val => {
       this.selectedAccount = val;
     });
@@ -85,6 +88,27 @@ export class DashboardComponent implements OnInit {
       let selectedFacility: IdbFacility = this.facilityList.find(facility => {return facility.id == this.breadcrumbFacilityId});
       this.facilityDbService.selectedFacility.next(selectedFacility);
       this.router.navigateByUrl('/facility-summary');
+    }
+  }
+
+  checkToast() {
+    let title: string = 'Toast Test';
+    let body: string = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.';
+    this.openToast(title, body);
+  }
+
+  openToast(title: string, body: string) {
+    this.toastData.title = title;
+    this.toastData.body = body;
+    this.showToast = true;
+  }
+
+  hideToast() {
+    this.showToast = false;
+    this.toastData = {
+      title: '',
+      body: '',
+      setTimeoutVal: undefined
     }
   }
 }
