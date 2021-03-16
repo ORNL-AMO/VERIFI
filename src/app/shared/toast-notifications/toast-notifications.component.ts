@@ -1,5 +1,7 @@
 import { Component, OnInit, Input, EventEmitter, Output } from '@angular/core';
 import { trigger, state, style, animate, transition } from '@angular/animations';
+import { ToastNotification, ToastNotificationsService } from './toast-notifications.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-toast-notifications',
@@ -32,9 +34,17 @@ export class ToastNotificationsComponent implements OnInit {
 
   showToast: string = 'hide';
   destroyToast: boolean = false;
-  constructor() { }
+
+  toastNotification: ToastNotification;
+  toastNotificationSub: Subscription;
+  constructor(private toastNotificationsService: ToastNotificationsService) { }
 
   ngOnInit() {
+
+    this.toastNotificationSub = this.toastNotificationsService.toastNotification.subscribe(val => {
+      this.toastNotification = val;
+    });
+
     setTimeout(() => {
       this.showToast = 'show';
     }, 100);
@@ -45,6 +55,11 @@ export class ToastNotificationsComponent implements OnInit {
       }, this.setTimeoutVal);
     }
   }
+
+  ngOnDestroy(){
+    this.toastNotificationSub.unsubscribe();
+  }
+
 
   closeToast() {
     this.showToast = 'hide';
