@@ -15,7 +15,7 @@ export class CalanderizationService {
   calanderizedDataFilters: BehaviorSubject<CalanderizationFilters>
   displayGraphEnergy:  "bar" | "scatter" | null = "bar";
   displayGraphCost:  "bar" | "scatter" | null = "bar";
-  dataDisplay: "table" | "graph" = 'graph'
+  dataDisplay: "table" | "graph" = 'table';
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private energyUnitsHelperService: EnergyUnitsHelperService) {
     this.calanderizedDataFilters = new BehaviorSubject({
       selectedSources: [],

@@ -27,3 +27,9 @@ tbody tr.use-and-consumption td{
 .btn.btn-solid span.fa{
     color: white;
 }
+
+.button-label{
+    font-size: 24px;
+    padding-right: .5rem;
+    padding-top: .25rem;
+}
