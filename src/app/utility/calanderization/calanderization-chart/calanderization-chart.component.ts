@@ -14,7 +14,8 @@ export class CalanderizationChartComponent implements OnInit {
   displayGraphCost: "bar" | "scatter" | null;
   @Input()
   displayGraphEnergy: "bar" | "scatter" | null;
-  @ViewChild('monthlyMeterDataBarChart', { static: false }) monthlyMeterDataBarChart: ElementRef;
+
+  @ViewChild('monthlyMeterDataChart', { static: false }) monthlyMeterDataChart: ElementRef;
 
   constructor(private plotlyService: PlotlyService) { }
 
@@ -30,7 +31,7 @@ export class CalanderizationChartComponent implements OnInit {
   }
 
   drawChart() {
-    if (this.monthlyMeterDataBarChart) {
+    if (this.monthlyMeterDataChart) {
       let traceData = new Array();
       let yAxisTitle: string;
       let yAxis2Title: string;
@@ -158,7 +159,7 @@ export class CalanderizationChartComponent implements OnInit {
         margin: { r: 0, t: 50 }
       };
       var config = { responsive: true };
-      this.plotlyService.newPlot(this.monthlyMeterDataBarChart.nativeElement, traceData, layout, config);
+      this.plotlyService.newPlot(this.monthlyMeterDataChart.nativeElement, traceData, layout, config);
     }
   }
 }
