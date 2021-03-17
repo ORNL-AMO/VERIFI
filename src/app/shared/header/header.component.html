@@ -20,8 +20,8 @@
                 <div class="currentFacility" (click)="toggleFacilityMenu()">
                     <i class="fa fa-industry item-left"></i>
                     <span>{{activeAccount.name}}</span>
-                    <p *ngIf="!activeFacility">All Facilites <i class="fa fa-caret-down"></i></p>
-                    <p *ngIf="activeFacility">{{activeFacility.name}} <i class="fa fa-caret-down"></i></p>
+                    <p *ngIf="!activeFacility || viewingAccountManagementPage">All Facilites <i class="fa fa-caret-down"></i></p>
+                    <p *ngIf="activeFacility && !viewingAccountManagementPage">{{activeFacility.name}} <i class="fa fa-caret-down"></i></p>
                 </div>
                 <div class="dropdown" [class.open]="facilityMenu == true">
                     <div class="arrow-up"></div>

@@ -1,5 +1,5 @@
 import { Component, ElementRef, OnInit } from '@angular/core';
-import { Router, Event, NavigationStart } from '@angular/router';
+import { Router, Event, NavigationStart, NavigationEnd } from '@angular/router';
 import { AccountdbService } from "../../indexedDB/account-db.service";
 import { FacilitydbService } from "../../indexedDB/facility-db.service";
 import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db.service";
@@ -27,6 +27,7 @@ export class HeaderComponent implements OnInit {
   facilityList: Array<IdbFacility>;
   activeAccount: IdbAccount;
   activeFacility: IdbFacility;
+  viewingAccountManagementPage: boolean;
 
   allAccountsSub: Subscription;
   selectedAccountSub: Subscription;
@@ -46,10 +47,15 @@ export class HeaderComponent implements OnInit {
   ) {
     // Close menus on navigation
     router.events.subscribe((event: Event) => {
-      // console.log(event);
       if (event instanceof NavigationStart) {
         this.accountMenu = false;
         this.facilityMenu = false;
+      }
+      if (event instanceof NavigationEnd && this.router.url === '/account-management') {
+        this.viewingAccountManagementPage = true;
+      }
+      if (event instanceof NavigationEnd && this.router.url != '/account-management') {
+        this.viewingAccountManagementPage = false;
       }
     });
   }
