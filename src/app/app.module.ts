@@ -66,6 +66,10 @@ import { MeterTableComponent } from './utility/upload-data/meter-table/meter-tab
 import { MeterDataTableComponent } from './utility/upload-data/meter-data-table/meter-data-table.component';
 import { SetupProgressComponent } from './shared/setup-progress/setup-progress.component';
 import { EmptyStateComponent } from './dashboard/empty-state/empty-state.component';
+import { GeneralInformationFormComponent } from './account-management/general-information-form/general-information-form.component';
+import { DefaultUnitsFormComponent } from './account-management/default-units-form/default-units-form.component';
+import { FinancialReportingFormComponent } from './account-management/financial-reporting-form/financial-reporting-form.component';
+import { SustainabilityQuestionsFormComponent } from './account-management/sustainability-questions-form/sustainability-questions-form.component';
 import { ImportMeterWizardComponent } from './utility/upload-data/import-meter-wizard/import-meter-wizard.component';
 import { ImportMeterDataWizardComponent } from './utility/upload-data/import-meter-data-wizard/import-meter-data-wizard.component';
 import { ValidDataTableComponent } from './utility/upload-data/import-meter-data-wizard/valid-data-table/valid-data-table.component';
@@ -143,6 +147,10 @@ import { ToastNotificationsComponent } from './shared/toast-notifications/toast-
     WizardDataSummaryComponent,
     SetupProgressComponent,
     EmptyStateComponent,
+    GeneralInformationFormComponent,
+    DefaultUnitsFormComponent,
+    FinancialReportingFormComponent,
+    SustainabilityQuestionsFormComponent,
     ToastNotificationsComponent
   ],
   imports: [
