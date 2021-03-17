@@ -1,5 +1,7 @@
 import { Component, OnInit, Input, EventEmitter, Output } from '@angular/core';
 import { trigger, state, style, animate, transition } from '@angular/animations';
+import { ToastNotification, ToastNotificationsService } from './toast-notifications.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-toast-notifications',
@@ -15,50 +17,53 @@ import { trigger, state, style, animate, transition } from '@angular/animations'
   ]
 })
 export class ToastNotificationsComponent implements OnInit {
-  @Input()
-  title: string;
-  @Input()
-  body: string;
-  @Output('emitCloseToast')
-  emitCloseToast = new EventEmitter<boolean>();
-  @Input()
-  setTimeoutVal: number;
-  @Input()
-  toastClass: string;
-  @Input()
-  showDisableFooter: boolean;
-  @Output('emitDisable')
-  emitDisable = new EventEmitter<boolean>();
 
   showToast: string = 'hide';
-  destroyToast: boolean = false;
-  constructor() { }
+  destroyToast: boolean = true;
+
+  toastNotification: ToastNotification;
+  toastNotificationSub: Subscription;
+  constructor(private toastNotificationsService: ToastNotificationsService) { }
 
   ngOnInit() {
-    setTimeout(() => {
-      this.showToast = 'show';
-    }, 100);
+    this.toastNotificationSub = this.toastNotificationsService.toastNotification.subscribe(val => {
+      this.toastNotification = val;
+      this.destroyToast = (val == undefined);
+      if (this.toastNotification) {
+        setTimeout(() => {
+          this.showToast = 'show';
+        }, 100);
 
-    if (this.setTimeoutVal) {
-      setTimeout(() => {
-        this.closeToast();
-      }, this.setTimeoutVal);
-    }
+        if (this.toastNotification.setTimeoutVal) {
+          setTimeout(() => {
+            this.closeToast();
+          }, this.toastNotification.setTimeoutVal);
+        }
+
+      }
+    });
   }
+
+  ngOnDestroy() {
+    this.toastNotificationSub.unsubscribe();
+  }
+
 
   closeToast() {
     this.showToast = 'hide';
     setTimeout(() => {
       this.destroyToast = true;
-      this.emitCloseToast.emit(true);
+      this.toastNotificationsService.hideToast();
     }, 500);
   }
 
+  //TODO: Disable logic whenever we want to have something disabled
   disable() {
     this.showToast = 'hide';
     setTimeout(() => {
       this.destroyToast = true;
-      this.emitDisable.emit(true);
+      this.toastNotificationsService.hideToast();
+      //this.emitDisable.emit(true);
     }, 500);
   }
 }
