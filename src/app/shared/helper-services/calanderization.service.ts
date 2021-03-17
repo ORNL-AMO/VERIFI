@@ -4,13 +4,26 @@ import * as _ from 'lodash';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 import { CalanderizedMeter, MonthlyData, LastYearData } from 'src/app/models/calanderization';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CalanderizationService {
 
+
+  calanderizedDataFilters: BehaviorSubject<CalanderizationFilters>
+  displayGraphEnergy:  "bar" | "scatter" | null = "bar";
+  displayGraphCost:  "bar" | "scatter" | null = "bar";
+  dataDisplay: "table" | "graph" = 'table';
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private energyUnitsHelperService: EnergyUnitsHelperService) {
+    this.calanderizedDataFilters = new BehaviorSubject({
+      selectedSources: [],
+      showAllSources: true,
+      selectedDateMax: undefined,
+      selectedDateMin: undefined,
+      dataDateRange: undefined
+    });
   }
 
   getCalanderizedMeterData(meters: Array<IdbUtilityMeter>, inAccount: boolean, monthDisplayShort?: boolean) {
@@ -219,5 +232,26 @@ export class CalanderizationService {
       return (dataItem.year == yearPrior) && (dataItem.monthNumValue == lastBill.monthNumValue);
     });
     return yearPriorBill;
+  }
+}
+
+
+export interface CalanderizationFilters {
+  showAllSources: boolean;
+  selectedSources: Array<{
+    source: string,
+    selected: boolean
+  }>;
+  selectedDateMin: {
+    year: number,
+    month: number
+  },
+  selectedDateMax: {
+    year: number,
+    month: number
+  },
+  dataDateRange: {
+    minDate: Date,
+    maxDate: Date
   }
 }
