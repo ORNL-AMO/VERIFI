@@ -96,6 +96,10 @@ export class UtilityMeterdbService {
         this.setAccountMeters();
     }
 
+    deleteIndexWithObservable(utilityMeterId: number): Observable<any> {
+        return this.dbService.delete('utilityMeter', utilityMeterId)
+    }
+
     deleteAllFacilityMeters(facilityId: number): void {
         this.getAllByIndexRange('facilityId', facilityId).subscribe(facilityMeterEntries => {
             for (let i = 0; i < facilityMeterEntries.length; i++) {

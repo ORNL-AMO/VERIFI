@@ -4,6 +4,7 @@ import { Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAccount, IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
+import { LoadingService } from 'src/app/shared/loading/loading.service';
 import { UtilityMeterdbService } from '../../indexedDB/utilityMeter-db.service';
 
 @Component({
@@ -19,12 +20,13 @@ export class EmptyStateComponent implements OnInit {
   selectedAccountSub: Subscription;
   selectedFacilitySub: Subscription;
   utilityDataSub: Subscription;
-  
+
   constructor(
     public accountdbService: AccountdbService,
     public facilityDbService: FacilitydbService,
     public utilityMeterDbService: UtilityMeterdbService,
-    private router: Router
+    private router: Router,
+    private loadingService: LoadingService
   ) { }
 
   ngOnInit(): void {
@@ -48,7 +50,7 @@ export class EmptyStateComponent implements OnInit {
   }
 
   addAccount() {
-    if(!this.selectedAccount) {
+    if (!this.selectedAccount) {
       let newAccount: IdbAccount = this.accountdbService.getNewIdbAccount();
       this.accountdbService.add(newAccount);
     }
@@ -56,7 +58,7 @@ export class EmptyStateComponent implements OnInit {
   }
 
   addFacility() {
-    if(!this.selectedFacility) {
+    if (!this.selectedFacility) {
       let newFacility: IdbFacility = this.facilityDbService.getNewIdbFacility(this.selectedAccount);
       this.facilityDbService.add(newFacility);
     }
@@ -68,7 +70,17 @@ export class EmptyStateComponent implements OnInit {
   }
 
   loadTestData() {
+    this.loadingService.setLoadingMessage('Loading Example Data..');
+    this.loadingService.setLoadingStatus(true);
     this.accountdbService.addTestData();
-    this.facilityDbService.addTestData();
+    this.accountdbService.getAll().subscribe(allAccounts => {
+      this.accountdbService.allAccounts.next(allAccounts);
+      this.facilityDbService.addTestData(allAccounts);
+      this.facilityDbService.getAll().subscribe(val => {
+        this.facilityDbService.allFacilities.next(val);
+        this.accountdbService.setSelectedAccount(allAccounts[0].id);
+        this.loadingService.setLoadingStatus(false);
+      })
+    })
   }
 }
