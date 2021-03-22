@@ -4,7 +4,7 @@ import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service
 import { Subscription } from 'rxjs';
 import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { UtilityMeterDataService } from './utility-meter-data.service';
 
 @Component({
@@ -25,9 +25,8 @@ export class UtilityMeterDataComponent implements OnInit {
     meterDataItems: Array<IdbUtilityMeterData>
   }>;
 
-  page: Array<number> = [];
   itemsPerPage: number = 6;
-  pageSize: Array<number> = [];
+  tablePageNumbers: Array<number> = [];
 
   accountMeterDataSub: Subscription;
   facilityMetersSub: Subscription;
@@ -40,11 +39,17 @@ export class UtilityMeterDataComponent implements OnInit {
   selectedSource: string;
   hasCheckedItems: boolean;
   meterDataToDelete: IdbUtilityMeterData;
+  showDeleteModal: boolean = false;
+  showBulkDelete: boolean = false;
+  facilityMeters: Array<IdbUtilityMeter>;
+  selectedMeter: IdbUtilityMeter;
+  meterListHasData: boolean = false;
   constructor(
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private activatedRoute: ActivatedRoute,
-    private utilityMeterDataService: UtilityMeterDataService
+    private utilityMeterDataService: UtilityMeterDataService,
+    private router: Router
   ) { }
 
   ngOnInit() {
@@ -52,7 +57,8 @@ export class UtilityMeterDataComponent implements OnInit {
       this.setUtilitySource(url[0].path);
       this.setData();
     })
-    this.facilityMetersSub = this.utilityMeterDbService.facilityMeters.subscribe(() => {
+    this.facilityMetersSub = this.utilityMeterDbService.facilityMeters.subscribe(val => {
+      this.facilityMeters = val;
       this.setData();
     });
     this.accountMeterDataSub = this.utilityMeterDataDbService.accountMeterData.subscribe(() => {
@@ -87,15 +93,18 @@ export class UtilityMeterDataComponent implements OnInit {
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
     this.utilityMeters = facilityMeters.filter(meter => { return meter.source == this.selectedSource });
     this.setMeterList();
-    this.setMeterPages();
-    this.changePagesize(this.itemsPerPage);
+    this.tablePageNumbers = this.meterList.map(() => { return 1 });
   }
 
 
   setMeterList() {
+    this.meterListHasData = false;
     this.meterList = new Array();
     this.utilityMeters.forEach(meter => {
-      let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataForFacility(meter);
+      let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataForFacility(meter, false);
+      if(meterData.length != 0){
+        this.meterListHasData = true;
+      }
       this.meterList.push({
         idbMeter: meter,
         meterDataItems: meterData
@@ -108,30 +117,14 @@ export class UtilityMeterDataComponent implements OnInit {
     this.myInputVariable.nativeElement.value = '';
   }
 
-  setMeterPages() {
-    for (let i = 0; i < this.meterList.length; i++) {
-      this.page.push(1);
-      this.pageSize.push(1);
-    }
-  }
-
-  public onPageChange(index, pageNum: number): void {
-    this.pageSize[index] = this.itemsPerPage * (pageNum - 1);
-  }
-
-  public changePagesize(num: number): void {
-    this.itemsPerPage = num;
-    for (let i = 0; i < this.meterList.length; i++) {
-      this.onPageChange(i, this.page[i]);
-    }
-  }
-
   setEditMeterData(meterData: IdbUtilityMeterData) {
     this.addOrEdit = 'edit';
+    this.selectedMeter = this.facilityMeters.find(meter => { return meter.id == meterData.meterId });
     this.editMeterData = meterData;
   }
 
   cancelEditMeter() {
+    this.addOrEdit = undefined;
     this.editMeterData = undefined;
     this.meterDataMenuOpen = undefined;
   }
@@ -140,8 +133,8 @@ export class UtilityMeterDataComponent implements OnInit {
     this.meterDataMenuOpen = meterId;
   }
 
-  openImportModal() {
-    this.showImport = true;
+  uploadData() {
+    this.router.navigateByUrl('utility/upload-data');
   }
 
   closeImportModal() {
@@ -163,11 +156,21 @@ export class UtilityMeterDataComponent implements OnInit {
       })
     });
     meterDataItemsToDelete.forEach(meterItemToDelete => { this.utilityMeterDataDbService.deleteIndex(meterItemToDelete.id) });
+    this.showBulkDelete = false;
   }
 
-  meterDataAdd(meter: IdbUtilityMeter) {
+  meterDataAdd() {
     this.addOrEdit = 'add';
-    this.editMeterData = this.utilityMeterDataDbService.getNewIdbUtilityMeterData(meter.id, meter.facilityId, meter.accountId);
+    this.selectedMeter = this.facilityMeters.find(meter => { return meter.source == this.selectedSource });
+    this.changeSelectedMeter();
+  }
+
+  changeSelectedMeter() {
+    this.editMeterData = this.utilityMeterDataDbService.getNewIdbUtilityMeterData(this.selectedMeter);
+  }
+
+  getLastMeterBillDate(meter: IdbUtilityMeter): Date {
+    return this.utilityMeterDataDbService.getLastMeterReadingDate(meter);
   }
 
   setHasCheckedItems() {
@@ -176,7 +179,7 @@ export class UtilityMeterDataComponent implements OnInit {
         return meterItem.meterDataItems.find(meterDataItem => { return meterDataItem.checked == true });
       });
       this.hasCheckedItems = (findCheckedItem != undefined);
-    }else{
+    } else {
       this.hasCheckedItems = false;
     }
   }
@@ -198,5 +201,13 @@ export class UtilityMeterDataComponent implements OnInit {
   setToggleView(idbMeter) {
     idbMeter.visible = !idbMeter.visible
     this.utilityMeterDbService.update(idbMeter);
+  }
+
+  openBulkDelete() {
+    this.showBulkDelete = true;
+  }
+
+  cancelBulkDelete() {
+    this.showBulkDelete = false;
   }
 }

@@ -218,7 +218,7 @@ Alerts
 ======================================================== */
 .alert {
   padding: 5px !important;
-  margin: 5px 0px;
+  margin: 5px 0px!important;
   width: 100%;
 }
 .alert-info {
@@ -235,6 +235,18 @@ Alerts
   color: #923d15;
   background-color: #f0d3ca;
   border-color: #d0bab3;
+}
+.alert-info i {
+  color: #2b77a9;
+  margin: 5px;
+}
+.alert-warning i {
+  color: #856404;
+  margin: 5px;
+}
+.alert-danger i {
+  color: #923d15;
+  margin: 5px;
 }
 /*
 Popups & Windows
@@ -261,7 +273,7 @@ Popups & Windows
 .windowContent {
   position: fixed;
   background-color: white;
-  top: 10%;
+  top: 3%;
   width: 500px;
   left: calc(50% - 250px);
   box-shadow: -3px 4px 8px #0000001c;
@@ -291,6 +303,15 @@ Popups & Windows
 .windowContentScroll form {
   padding: 0 2px;
 }
+
+.importMeterWindowContent{
+  top: 5%;
+  left: 5%;
+  right: 5%;
+  width: auto;
+  bottom: 5%;
+}
+
 .popup {
   border-style: solid;
   border: 1px solid #ffffff;
@@ -400,12 +421,13 @@ textarea {
   padding: 2px 7px;
   outline: none;
 }
-label input[type="radio"],
-label input[type="checkbox"] {
+input[type="checkbox"].rowToggle,
+input[type="radio"].rowToggle {
   float: left;
   width: auto;
-  margin: 0px 10px;
-  height: 21px;
+  margin: 3px 10px;
+  height: 15px;
+  width: 15px;
 }
 input[type="file"] {
   border: none;
@@ -415,6 +437,15 @@ input[type="file"] {
 }
 label {
   width: 100%;
+}
+label.checkbox {
+  display: block;
+  margin-left: 10px;
+  width: 100%;
+  margin-top: 0px;
+}
+label.checkbox + .row {
+  margin: 10px 23px 15px;
 }
 .popup label {
   position: relative;
@@ -495,7 +526,8 @@ input.warning {
   border: 1px solid white !important;
 }
 input.error,
-input.ng-invalid {
+input.ng-invalid,
+select.ng-invalid {
   outline: 2px solid #bf3d00c4 !important;
   outline-offset: 0;
   background-color: #bf3d001c;
@@ -659,6 +691,19 @@ table input {
   margin: 3px auto;
   display: block;
   width: 13px;
+}
+.table-mh th, 
+.table-mh th span {
+  /* font-weight: normal!important; 
+  background-color: #d2d9e2;*/
+  background-color: #2c386b;
+  border: 1px solid #c2ccda;
+  font-size: 12px;
+  padding: 10px 5px!important;
+  color: #ffffff;
+}
+.table-mh th span {
+  border: none;
 }
 /*
 Popovers (Contextual Help)
@@ -1113,4 +1158,42 @@ input.unitDollar {
   z-index: 2;
   border-top: 1px solid #5c7859;
   box-shadow: 1px -1px 0px #9eb39b;
+}
+
+.tag {
+  background-color: #eee;
+  color: #333333;
+  padding: 2px 7px!Important;
+  font-size: 11px;
+  margin-left: 10px;
+  line-height: initial;
+}
+.tag.coming-soon {
+  background-color: #ffe400;
+}
+
+.tag.new {
+  background-color: #145932;
+  color: white;
+}
+
+canvas {
+  top: auto!important;
+  left: auto!important;
+  bottom: 65px!important;
+  right: 50px!important;
+  z-index: 1001!important;
+  /*height: 200px;*/
+}
+
+
+
+/*Added by mark for import-v2. Not sure correct place to put.*/
+.scroll-item{
+  overflow-y: scroll;
+  max-height: 100%;
+}
+
+.invalid-import-table .header-width{
+  width: 15%;
 }

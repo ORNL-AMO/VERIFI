@@ -1,0 +1,9 @@
+<h4>Edit Meter</h4>
+<br>
+
+<app-edit-meter-form [(meterForm)]="meterForm" [meterFormDisabled]="meterFormDisabled"></app-edit-meter-form>
+
+<div class="saveCancel item-right">
+    <button class="btn btn-secondary" (click)="cancel()">Cancel</button>
+    <button class="btn btn-primary" (click)="saveChanges()" [disabled]="meterForm.invalid">Save</button>
+</div>

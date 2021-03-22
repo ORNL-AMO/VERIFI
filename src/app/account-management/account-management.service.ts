@@ -10,72 +10,176 @@ export class AccountManagementService {
 
   constructor(private formBuilder: FormBuilder) { }
 
-  getAccountForm(account: IdbAccount): FormGroup {
+  //GENERAL INFORMATION
+  getGeneralInformationForm(generalInformation: IdbAccount | IdbFacility): FormGroup {
     let form: FormGroup = this.formBuilder.group({
-      name: [account.name, [Validators.required]],
-      industry: [account.industry, [Validators.required]],
-      naics: [account.naics, [Validators.required]],
-      notes: [account.notes, [Validators.required]],
-      unitsOfMeasure: [account.unitsOfMeasure, [Validators.required]],
-      energyUnit: [account.energyUnit, [Validators.required]],
-      massUnit: [account.massUnit, [Validators.required]],
-      volumeLiquidUnit: [account.volumeLiquidUnit, [Validators.required]],
-      volumeGasUnit: [account.volumeGasUnit, [Validators.required]],
-      chilledWaterUnit: [account.chilledWaterUnit, [Validators.required]],
+      name: [generalInformation.name, [Validators.required]],
+      country: [generalInformation.country],
+      city: [generalInformation.city],
+      state: [generalInformation.state],
+      zip: [generalInformation.zip],
+      address: [generalInformation.address],
+      naics: [generalInformation.naics],
+      size: [generalInformation.size],
+      notes: [generalInformation.notes],
     });
     return form;
-
   }
 
-  updateAccountFromForm(form: FormGroup, account: IdbAccount): IdbAccount {
+  updateAccountFromGeneralInformationForm(form: FormGroup, account: IdbAccount): IdbAccount {
     account.name = form.controls.name.value;
-    account.industry = form.controls.industry.value;
+    account.country = form.controls.country.value;
+    account.city = form.controls.city.value;
+    account.state = form.controls.state.value;
+    account.zip = form.controls.zip.value;
+    account.address = form.controls.address.value;
     account.naics = form.controls.naics.value;
     account.notes = form.controls.notes.value;
+    return account;
+  }
+
+  updateFacilityFromGeneralInformationForm(form: FormGroup, facility: IdbFacility): IdbFacility {
+    facility.name = form.controls.name.value;
+    facility.country = form.controls.country.value;
+    facility.city = form.controls.city.value;
+    facility.state = form.controls.state.value;
+    facility.zip = form.controls.zip.value;
+    facility.address = form.controls.address.value;
+    facility.naics = form.controls.naics.value;
+    facility.notes = form.controls.notes.value;
+    return facility;
+  }
+
+  //UNITS
+  getUnitsForm(units: IdbAccount | IdbFacility): FormGroup {
+    let form: FormGroup = this.formBuilder.group({
+      unitsOfMeasure: [units.unitsOfMeasure, [Validators.required]],
+      energyUnit: [units.energyUnit, [Validators.required]],
+      massUnit: [units.massUnit, [Validators.required]],
+      volumeLiquidUnit: [units.volumeLiquidUnit, [Validators.required]],
+      volumeGasUnit: [units.volumeGasUnit, [Validators.required]],
+      chilledWaterUnit: [units.chilledWaterUnit, [Validators.required]],
+    });
+    return form;
+  }
+
+  updateAccountFromUnitsForm(form: FormGroup, account: IdbAccount): IdbAccount {
     account.unitsOfMeasure = form.controls.unitsOfMeasure.value;
     account.energyUnit = form.controls.energyUnit.value;
     account.massUnit = form.controls.massUnit.value;
     account.volumeLiquidUnit = form.controls.volumeLiquidUnit.value;
-    account.volumeGasUnit = form.controls.volumeGasUnit.value;
     account.chilledWaterUnit = form.controls.chilledWaterUnit.value;
     return account;
   }
 
-  getFacilityForm(facility: IdbFacility): FormGroup {
-    let form: FormGroup = this.formBuilder.group({
-      name: [facility.name, [Validators.required]],
-      country: [facility.country, [Validators.required]],
-      state: [facility.state, [Validators.required]],
-      address: [facility.address, [Validators.required]],
-      type: [facility.type, [Validators.required]],
-      tier: [facility.tier, [Validators.required]],
-      size: [facility.size, [Validators.required]],
-      division: [facility.division, [Validators.required]],
-      unitsOfMeasure: [facility.unitsOfMeasure, [Validators.required]],
-      energyUnit: [facility.energyUnit, [Validators.required]],
-      massUnit: [facility.massUnit, [Validators.required]],
-      volumeLiquidUnit: [facility.volumeLiquidUnit, [Validators.required]],
-      volumeGasUnit: [facility.volumeGasUnit, [Validators.required]],
-      chilledWaterUnit: [facility.chilledWaterUnit, [Validators.required]],
-    });
-    return form;
-  }
-
-  updateFacilityFromForm(form: FormGroup, facility: IdbFacility): IdbFacility {
-    facility.name = form.controls.name.value;
-    facility.country = form.controls.country.value;
-    facility.state = form.controls.state.value;
-    facility.address = form.controls.address.value;
-    facility.type = form.controls.type.value;
-    facility.tier = form.controls.tier.value;
-    facility.size = form.controls.size.value;
-    facility.division = form.controls.division.value;
+  updateFacilityFromUnitsForm(form: FormGroup, facility: IdbFacility): IdbFacility {
     facility.unitsOfMeasure = form.controls.unitsOfMeasure.value;
     facility.energyUnit = form.controls.energyUnit.value;
     facility.massUnit = form.controls.massUnit.value;
     facility.volumeLiquidUnit = form.controls.volumeLiquidUnit.value;
-    facility.volumeGasUnit = form.controls.volumeGasUnit.value;
     facility.chilledWaterUnit = form.controls.chilledWaterUnit.value;
+    return facility;
+  }
+
+
+  //FISCAL YEAR
+  getFiscalYearForm(fiscalYearData: IdbAccount | IdbFacility): FormGroup {
+    let form: FormGroup = this.formBuilder.group({
+      fiscalYear: [fiscalYearData.fiscalYear],
+      fiscalYearMonth: [fiscalYearData.fiscalYearMonth],
+      fiscalYearCalendarEnd: [fiscalYearData.fiscalYearCalendarEnd],
+    });
+    return form;
+  }
+
+  updateAccountFromFiscalForm(form: FormGroup, account: IdbAccount): IdbAccount {
+    account.fiscalYear = form.controls.fiscalYear.value;
+    account.fiscalYearMonth = form.controls.fiscalYearMonth.value;
+    account.fiscalYearCalendarEnd = form.controls.fiscalYearCalendarEnd.value;
+    return account;
+  }
+
+  updateFacilityFromFiscalForm(form: FormGroup, facility: IdbFacility): IdbFacility {
+    facility.fiscalYear = form.controls.fiscalYear.value;
+    facility.fiscalYearMonth = form.controls.fiscalYearMonth.value;
+    facility.fiscalYearCalendarEnd = form.controls.fiscalYearCalendarEnd.value;
+    return facility;
+  }
+
+
+  //SUSTAINABILITY QUESTIONS
+  getSustainabilityQuestionsForm(questionsData: IdbAccount | IdbFacility): FormGroup {
+    let form: FormGroup = this.formBuilder.group({
+      energyReductionGoal: [questionsData.sustainabilityQuestions ? questionsData.sustainabilityQuestions.energyReductionGoal : null],
+      energyReductionPercent: [questionsData.sustainabilityQuestions ? questionsData.sustainabilityQuestions.energyReductionPercent : null],
+      energyReductionBaselineYear: [questionsData.sustainabilityQuestions ? questionsData.sustainabilityQuestions.energyReductionBaselineYear : null],
+      energyReductionTargetYear: [questionsData.sustainabilityQuestions ? questionsData.sustainabilityQuestions.energyReductionTargetYear : null],
+      greenhouseReductionGoal: [questionsData.sustainabilityQuestions ? questionsData.sustainabilityQuestions.greenhouseReductionGoal : null],
+      greenhouseReductionPercent: [questionsData.sustainabilityQuestions ? questionsData.sustainabilityQuestions.greenhouseReductionPercent : null],
+      greenhouseReductionBaselineYear: [questionsData.sustainabilityQuestions ? questionsData.sustainabilityQuestions.greenhouseReductionBaselineYear : null],
+      greenhouseReductionTargetYear: [questionsData.sustainabilityQuestions ? questionsData.sustainabilityQuestions.greenhouseReductionTargetYear : null],
+      renewableEnergyGoal: [questionsData.sustainabilityQuestions ? questionsData.sustainabilityQuestions.renewableEnergyGoal : null],
+      renewableEnergyPercent: [questionsData.sustainabilityQuestions ? questionsData.sustainabilityQuestions.renewableEnergyPercent : null],
+      renewableEnergyBaselineYear: [questionsData.sustainabilityQuestions ? questionsData.sustainabilityQuestions.renewableEnergyBaselineYear : null],
+      renewableEnergyTargetYear: [questionsData.sustainabilityQuestions ? questionsData.sustainabilityQuestions.renewableEnergyTargetYear : null],
+      wasteReductionGoal: [questionsData.sustainabilityQuestions ? questionsData.sustainabilityQuestions.wasteReductionGoal : null],
+      wasteReductionPercent: [questionsData.sustainabilityQuestions ? questionsData.sustainabilityQuestions.wasteReductionPercent : null],
+      wasteReductionBaselineYear: [questionsData.sustainabilityQuestions ? questionsData.sustainabilityQuestions.wasteReductionBaselineYear : null],
+      wasteReductionTargetYear: [questionsData.sustainabilityQuestions ? questionsData.sustainabilityQuestions.wasteReductionTargetYear : null],
+      waterReductionGoal: [questionsData.sustainabilityQuestions ? questionsData.sustainabilityQuestions.waterReductionGoal : null],
+      waterReductionPercent: [questionsData.sustainabilityQuestions ? questionsData.sustainabilityQuestions.waterReductionPercent : null],
+      waterReductionBaselineYear: [questionsData.sustainabilityQuestions ? questionsData.sustainabilityQuestions.waterReductionBaselineYear : null],
+      waterReductionTargetYear: [questionsData.sustainabilityQuestions ? questionsData.sustainabilityQuestions.waterReductionTargetYear : null]
+    });
+    return form;
+
+  }
+
+  updateAccountFromSustainabilityQuestionsForm(form: FormGroup, account: IdbAccount): IdbAccount {
+    account.sustainabilityQuestions.energyReductionGoal = form.controls.energyReductionGoal.value;
+    account.sustainabilityQuestions.energyReductionPercent = form.controls.energyReductionPercent.value;
+    account.sustainabilityQuestions.energyReductionBaselineYear = form.controls.energyReductionBaselineYear.value;
+    account.sustainabilityQuestions.energyReductionTargetYear = form.controls.energyReductionTargetYear.value;
+    account.sustainabilityQuestions.greenhouseReductionGoal = form.controls.greenhouseReductionGoal.value;
+    account.sustainabilityQuestions.greenhouseReductionPercent = form.controls.greenhouseReductionPercent.value;
+    account.sustainabilityQuestions.greenhouseReductionBaselineYear = form.controls.greenhouseReductionBaselineYear.value;
+    account.sustainabilityQuestions.greenhouseReductionTargetYear = form.controls.greenhouseReductionTargetYear.value;
+    account.sustainabilityQuestions.renewableEnergyGoal = form.controls.renewableEnergyGoal.value;
+    account.sustainabilityQuestions.renewableEnergyPercent = form.controls.renewableEnergyPercent.value;
+    account.sustainabilityQuestions.renewableEnergyBaselineYear = form.controls.renewableEnergyBaselineYear.value;
+    account.sustainabilityQuestions.renewableEnergyTargetYear = form.controls.renewableEnergyTargetYear.value;
+    account.sustainabilityQuestions.wasteReductionGoal = form.controls.wasteReductionGoal.value;
+    account.sustainabilityQuestions.wasteReductionPercent = form.controls.wasteReductionPercent.value;
+    account.sustainabilityQuestions.wasteReductionBaselineYear = form.controls.wasteReductionBaselineYear.value;
+    account.sustainabilityQuestions.wasteReductionTargetYear = form.controls.wasteReductionTargetYear.value;
+    account.sustainabilityQuestions.waterReductionGoal = form.controls.waterReductionGoal.value;
+    account.sustainabilityQuestions.waterReductionPercent = form.controls.waterReductionPercent.value;
+    account.sustainabilityQuestions.waterReductionBaselineYear = form.controls.waterReductionBaselineYear.value;
+    account.sustainabilityQuestions.waterReductionTargetYear = form.controls.waterReductionTargetYear.value;
+    return account;
+  }
+
+  updateFacilityFromSustainabilityQuestionsForm(form: FormGroup, facility: IdbFacility): IdbFacility {
+    facility.sustainabilityQuestions.energyReductionGoal = form.controls.energyReductionGoal.value;
+    facility.sustainabilityQuestions.energyReductionPercent = form.controls.energyReductionPercent.value;
+    facility.sustainabilityQuestions.energyReductionBaselineYear = form.controls.energyReductionBaselineYear.value;
+    facility.sustainabilityQuestions.energyReductionTargetYear = form.controls.energyReductionTargetYear.value;
+    facility.sustainabilityQuestions.greenhouseReductionGoal = form.controls.greenhouseReductionGoal.value;
+    facility.sustainabilityQuestions.greenhouseReductionPercent = form.controls.greenhouseReductionPercent.value;
+    facility.sustainabilityQuestions.greenhouseReductionBaselineYear = form.controls.greenhouseReductionBaselineYear.value;
+    facility.sustainabilityQuestions.greenhouseReductionTargetYear = form.controls.greenhouseReductionTargetYear.value;
+    facility.sustainabilityQuestions.renewableEnergyGoal = form.controls.renewableEnergyGoal.value;
+    facility.sustainabilityQuestions.renewableEnergyPercent = form.controls.renewableEnergyPercent.value;
+    facility.sustainabilityQuestions.renewableEnergyBaselineYear = form.controls.renewableEnergyBaselineYear.value;
+    facility.sustainabilityQuestions.renewableEnergyTargetYear = form.controls.renewableEnergyTargetYear.value;
+    facility.sustainabilityQuestions.wasteReductionGoal = form.controls.wasteReductionGoal.value;
+    facility.sustainabilityQuestions.wasteReductionPercent = form.controls.wasteReductionPercent.value;
+    facility.sustainabilityQuestions.wasteReductionBaselineYear = form.controls.wasteReductionBaselineYear.value;
+    facility.sustainabilityQuestions.wasteReductionTargetYear = form.controls.wasteReductionTargetYear.value;
+    facility.sustainabilityQuestions.waterReductionGoal = form.controls.waterReductionGoal.value;
+    facility.sustainabilityQuestions.waterReductionPercent = form.controls.waterReductionPercent.value;
+    facility.sustainabilityQuestions.waterReductionBaselineYear = form.controls.waterReductionBaselineYear.value;
+    facility.sustainabilityQuestions.waterReductionTargetYear = form.controls.waterReductionTargetYear.value;
     return facility;
   }
 
@@ -135,5 +239,78 @@ export class AccountManagementService {
     facilityForm.controls.unitsOfMeasure.patchValue(account.unitsOfMeasure);
     return facilityForm;
   }
+
+  areAccountAndFacilitySustainQuestionsDifferent(account: IdbAccount, facility: IdbFacility): boolean {
+    if (account && facility) {
+      return (
+        account.sustainabilityQuestions.energyReductionGoal != facility.sustainabilityQuestions.energyReductionGoal ||
+        account.sustainabilityQuestions.energyReductionPercent != facility.sustainabilityQuestions.energyReductionPercent ||
+        account.sustainabilityQuestions.energyReductionBaselineYear != facility.sustainabilityQuestions.energyReductionBaselineYear ||
+        account.sustainabilityQuestions.energyReductionTargetYear != facility.sustainabilityQuestions.energyReductionTargetYear ||
+        account.sustainabilityQuestions.greenhouseReductionGoal != facility.sustainabilityQuestions.greenhouseReductionGoal ||
+        account.sustainabilityQuestions.greenhouseReductionPercent != facility.sustainabilityQuestions.greenhouseReductionPercent ||
+        account.sustainabilityQuestions.greenhouseReductionBaselineYear != facility.sustainabilityQuestions.greenhouseReductionBaselineYear ||
+        account.sustainabilityQuestions.greenhouseReductionTargetYear != facility.sustainabilityQuestions.greenhouseReductionTargetYear ||
+        account.sustainabilityQuestions.renewableEnergyGoal != facility.sustainabilityQuestions.renewableEnergyGoal ||
+        account.sustainabilityQuestions.renewableEnergyPercent != facility.sustainabilityQuestions.renewableEnergyPercent ||
+        account.sustainabilityQuestions.renewableEnergyBaselineYear != facility.sustainabilityQuestions.renewableEnergyBaselineYear ||
+        account.sustainabilityQuestions.renewableEnergyTargetYear != facility.sustainabilityQuestions.renewableEnergyTargetYear ||
+        account.sustainabilityQuestions.wasteReductionGoal != facility.sustainabilityQuestions.wasteReductionGoal ||
+        account.sustainabilityQuestions.wasteReductionPercent != facility.sustainabilityQuestions.wasteReductionPercent ||
+        account.sustainabilityQuestions.wasteReductionBaselineYear != facility.sustainabilityQuestions.wasteReductionBaselineYear ||
+        account.sustainabilityQuestions.wasteReductionTargetYear != facility.sustainabilityQuestions.wasteReductionTargetYear ||
+        account.sustainabilityQuestions.waterReductionGoal != facility.sustainabilityQuestions.waterReductionGoal ||
+        account.sustainabilityQuestions.waterReductionPercent != facility.sustainabilityQuestions.waterReductionPercent ||
+        account.sustainabilityQuestions.waterReductionBaselineYear != facility.sustainabilityQuestions.waterReductionBaselineYear ||
+        account.sustainabilityQuestions.waterReductionTargetYear != facility.sustainabilityQuestions.waterReductionTargetYear
+      )
+    } else {
+      return false;
+    }
+  }
+
+  setAccountSustainQuestions(facilityForm: FormGroup, account: IdbAccount): FormGroup {
+    facilityForm.controls.energyReductionGoal.patchValue(account.sustainabilityQuestions.energyReductionGoal);
+    facilityForm.controls.energyReductionPercent.patchValue(account.sustainabilityQuestions.energyReductionPercent);
+    facilityForm.controls.energyReductionBaselineYear.patchValue(account.sustainabilityQuestions.energyReductionBaselineYear);
+    facilityForm.controls.energyReductionTargetYear.patchValue(account.sustainabilityQuestions.energyReductionTargetYear);
+    facilityForm.controls.greenhouseReductionGoal.patchValue(account.sustainabilityQuestions.greenhouseReductionGoal);
+    facilityForm.controls.greenhouseReductionPercent.patchValue(account.sustainabilityQuestions.greenhouseReductionPercent);
+    facilityForm.controls.greenhouseReductionBaselineYear.patchValue(account.sustainabilityQuestions.greenhouseReductionBaselineYear);
+    facilityForm.controls.greenhouseReductionTargetYear.patchValue(account.sustainabilityQuestions.greenhouseReductionTargetYear);
+    facilityForm.controls.renewableEnergyGoal.patchValue(account.sustainabilityQuestions.renewableEnergyGoal);
+    facilityForm.controls.renewableEnergyPercent.patchValue(account.sustainabilityQuestions.renewableEnergyPercent);
+    facilityForm.controls.renewableEnergyBaselineYear.patchValue(account.sustainabilityQuestions.renewableEnergyBaselineYear);
+    facilityForm.controls.renewableEnergyTargetYear.patchValue(account.sustainabilityQuestions.renewableEnergyTargetYear);
+    facilityForm.controls.wasteReductionGoal.patchValue(account.sustainabilityQuestions.wasteReductionGoal);
+    facilityForm.controls.wasteReductionPercent.patchValue(account.sustainabilityQuestions.wasteReductionPercent);
+    facilityForm.controls.wasteReductionBaselineYear.patchValue(account.sustainabilityQuestions.wasteReductionBaselineYear);
+    facilityForm.controls.wasteReductionTargetYear.patchValue(account.sustainabilityQuestions.wasteReductionTargetYear);
+    facilityForm.controls.waterReductionGoal.patchValue(account.sustainabilityQuestions.waterReductionGoal);
+    facilityForm.controls.waterReductionPercent.patchValue(account.sustainabilityQuestions.waterReductionPercent);
+    facilityForm.controls.waterReductionBaselineYear.patchValue(account.sustainabilityQuestions.waterReductionBaselineYear);
+    facilityForm.controls.waterReductionTargetYear.patchValue(account.sustainabilityQuestions.waterReductionTargetYear);
+    return facilityForm;
+  }
+
+  areAccountAndFacilityFinancialReportingDifferent(account: IdbAccount, facility: IdbFacility): boolean {
+    if (account && facility) {
+      return (
+        account.fiscalYear != facility.fiscalYear ||
+        account.fiscalYearMonth != facility.fiscalYearMonth ||
+        account.fiscalYearCalendarEnd != facility.fiscalYearCalendarEnd
+      )
+    } else {
+      return false;
+    }
+  }
+
+  setAccountFinancialReporting(facilityForm: FormGroup, account: IdbAccount): FormGroup {
+    facilityForm.controls.fiscalYear.patchValue(account.fiscalYear);
+    facilityForm.controls.fiscalYearMonth.patchValue(account.fiscalYearMonth);
+    facilityForm.controls.fiscalYearCalendarEnd.patchValue(account.fiscalYearCalendarEnd);
+    return facilityForm;
+  }
+
 
 }

@@ -33,9 +33,9 @@ export class UtilityMeterdbService {
         }
     }
 
-    setAccountMeters(){
+    setAccountMeters() {
         let selectedAccount: IdbAccount = this.accountdbService.selectedAccount.getValue();
-        if(selectedAccount){
+        if (selectedAccount) {
             this.getAllByIndexRange('accountId', selectedAccount.id).subscribe(facilityMeters => {
                 this.accountMeters.next(facilityMeters);
             });
@@ -73,7 +73,12 @@ export class UtilityMeterdbService {
     }
 
     addWithObservable(utilityMeter: IdbUtilityMeter): Observable<number> {
+        utilityMeter.visible = true;
         return this.dbService.add('utilityMeter', utilityMeter);
+    }
+
+    updateWithObservable(utilityMeter: IdbUtilityMeter): Observable<any> {
+        return this.dbService.update('utilityMeter', utilityMeter);
     }
 
 
@@ -89,6 +94,10 @@ export class UtilityMeterdbService {
             this.setFacilityMeters();
         });
         this.setAccountMeters();
+    }
+
+    deleteIndexWithObservable(utilityMeterId: number): Observable<any> {
+        return this.dbService.delete('utilityMeter', utilityMeterId)
     }
 
     deleteAllFacilityMeters(facilityId: number): void {
@@ -107,7 +116,13 @@ export class UtilityMeterdbService {
         });
     }
 
-    getNewIdbUtilityMeter(facilityId: number, accountId: number): IdbUtilityMeter {
+    getNewIdbUtilityMeter(facilityId: number, accountId: number, setDefaults: boolean): IdbUtilityMeter {
+        let source: string;
+        let startingUnit: string;
+        if(setDefaults){
+            source = 'Electricity';
+            startingUnit = 'kWh';
+        }
         return {
             facilityId: facilityId,
             accountId: accountId,
@@ -115,17 +130,16 @@ export class UtilityMeterdbService {
             groupId: undefined,
             meterNumber: undefined,
             accountNumber: undefined,
-            type: undefined,
             phase: undefined,
             heatCapacity: undefined,
             siteToSource: undefined,
-            name: undefined,
+            name: "New Meter",
             location: undefined,
             supplier: undefined,
             notes: undefined,
-            source: "Electricity",
+            source: source,
             group: undefined,
-            startingUnit: "kWh",
+            startingUnit: startingUnit,
             energyUnit: undefined,
             fuel: undefined
         }

@@ -1,0 +1,35 @@
+thead th.active {
+    text-decoration: underline;
+}
+
+thead th:hover{
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+tbody tr:not(.use-and-consumption) td:first-child{
+    width: 30%;
+}
+
+tbody tr:not(.use-and-consumption) td:not(:first-child){
+    width: 35%;
+}
+
+tbody tr.use-and-consumption td{
+    width: 25%;
+}
+
+
+.btn-group .btn-small{
+    border: solid 1px;
+}
+
+.btn.btn-solid span.fa{
+    color: white;
+}
+
+.button-label{
+    font-size: 24px;
+    padding-right: .5rem;
+    padding-top: .25rem;
+}

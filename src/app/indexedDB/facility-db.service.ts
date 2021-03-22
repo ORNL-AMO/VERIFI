@@ -105,6 +105,11 @@ export class FacilitydbService {
         });
     }
 
+    addWithObservable(facility: IdbFacility): Observable<any> {
+        return this.dbService.add('facilities', facility);
+    }
+
+
     update(values: IdbFacility): void {
         this.dbService.update('facilities', values).subscribe(() => {
             this.setAllFacilities();
@@ -125,9 +130,22 @@ export class FacilitydbService {
         }
     }
 
-    addTestData() {
-        TestFacilityData.forEach(facilityDataItem => {
-            this.add(facilityDataItem);
+    async addTestData(allAccounts: Array<IdbAccount>) {
+        await TestFacilityData.forEach(facilityDataItem => {
+            //set account ID from corresponding account in db
+            if (facilityDataItem.name == 'Frosted Side' || facilityDataItem.name == 'Plain Side') {
+                let correspondingAccount: IdbAccount = allAccounts.find(account => { return account.name == 'Mini Wheats' });
+                facilityDataItem.accountId = correspondingAccount.id;
+            }
+            if (facilityDataItem.name == 'Almond Milk') {
+                let correspondingAccount: IdbAccount = allAccounts.find(account => { return account.name == 'Special K' });
+                facilityDataItem.accountId = correspondingAccount.id;
+            }
+            if (facilityDataItem.name == 'Crunch-a-tize') {
+                let correspondingAccount: IdbAccount = allAccounts.find(account => { return account.name == 'Captain Crunch' });
+                facilityDataItem.accountId = correspondingAccount.id;
+            }
+            this.addWithObservable(facilityDataItem);
         });
     }
 
@@ -136,13 +154,15 @@ export class FacilitydbService {
             accountId: account.id,
             name: 'New Facility',
             country: undefined,
+            city: undefined,
             state: undefined,
+            zip: undefined,
             address: undefined,
+            naics: '',
             type: undefined,
-            tier: undefined,
             size: undefined,
             units: undefined,
-            division: undefined,
+            notes: undefined,
             img: undefined,
             // id: undefined
             unitsOfMeasure: account.unitsOfMeasure,
@@ -150,7 +170,32 @@ export class FacilitydbService {
             volumeLiquidUnit: account.volumeLiquidUnit,
             volumeGasUnit: account.volumeGasUnit,
             chilledWaterUnit: account.chilledWaterUnit,
-            massUnit: account.massUnit
+            massUnit: account.massUnit,
+            sustainabilityQuestions: {
+                energyReductionGoal: false,
+                energyReductionPercent: 0,
+                energyReductionBaselineYear: 0,
+                energyReductionTargetYear: 0,
+                greenhouseReductionGoal: false,
+                greenhouseReductionPercent: 0,
+                greenhouseReductionBaselineYear: 0,
+                greenhouseReductionTargetYear: 0,
+                renewableEnergyGoal: false,
+                renewableEnergyPercent: 0,
+                renewableEnergyBaselineYear: 0,
+                renewableEnergyTargetYear: 0,
+                wasteReductionGoal: false,
+                wasteReductionPercent: 0,
+                wasteReductionBaselineYear: 0,
+                wasteReductionTargetYear: 0,
+                waterReductionGoal: false,
+                waterReductionPercent: 0,
+                waterReductionBaselineYear: 0,
+                waterReductionTargetYear: 0,
+            },
+            fiscalYear: 'calendarYear',
+            fiscalYearMonth: 'January',
+            fiscalYearCalendarEnd: true,
 
         }
     }
@@ -160,86 +205,194 @@ export class FacilitydbService {
 export const TestFacilityData: Array<IdbFacility> = [
     {
         // id: undefined,
-        // facilityid: 1, // Captin Crunch
-        accountId: 1, // Captin Crunch
-        name: 'Crunch-a-tize',
-        country: 'USA',
-        state: 'TN',
-        address: '',
-        type: 'Breakfast',
-        tier: 1,
-        size: 1000,
-        units: 'ft',
-        division: 'Marketing',
-        img: 'https://placthold.it/50x50',
-        unitsOfMeasure: 'Imperial',
-        energyUnit: 'kWh',
-        volumeLiquidUnit: 'SCF',
-        volumeGasUnit: 'SCF',
-        chilledWaterUnit: undefined,
-        massUnit: 'lb'
-    },
-    {
-        // id: undefined,
         // facilityid: 2,
-        accountId: 2, // Mini Wheats
+        accountId: 1, // Mini Wheats
         name: 'Frosted Side',
         country: 'USA',
-        state: 'TN',
-        address: '',
+        state: 'NEVADA',
+        city: 'Reno',
+        zip: 89501,
+        address: '2193  Sheila Lane',
+        naics: '311',
         type: 'Breakfast',
-        tier: 1,
         size: 1000,
         units: 'ft',
-        division: 'Sugar',
+        notes: 'Sugar',
         img: 'https://placthold.it/50x50',
         unitsOfMeasure: 'Imperial',
         energyUnit: 'kWh',
-        volumeLiquidUnit: 'SCF',
+        volumeLiquidUnit: 'gal',
         volumeGasUnit: 'SCF',
         chilledWaterUnit: undefined,
-        massUnit: 'lb'
+        massUnit: 'lb',
+        sustainabilityQuestions: {
+            energyReductionGoal: false,
+            energyReductionPercent: 0,
+            energyReductionBaselineYear: 0,
+            energyReductionTargetYear: 0,
+            greenhouseReductionGoal: false,
+            greenhouseReductionPercent: 0,
+            greenhouseReductionBaselineYear: 0,
+            greenhouseReductionTargetYear: 0,
+            renewableEnergyGoal: false,
+            renewableEnergyPercent: 0,
+            renewableEnergyBaselineYear: 0,
+            renewableEnergyTargetYear: 0,
+            wasteReductionGoal: false,
+            wasteReductionPercent: 0,
+            wasteReductionBaselineYear: 0,
+            wasteReductionTargetYear: 0,
+            waterReductionGoal: false,
+            waterReductionPercent: 0,
+            waterReductionBaselineYear: 0,
+            waterReductionTargetYear: 0,
+        },
+        fiscalYear: 'calendarYear',
+        fiscalYearMonth: 'January',
+        fiscalYearCalendarEnd: true,
     },
     {
         // id: undefined,
         // facilityid: 3,
-        accountId: 2, // Mini Wheats
+        accountId: 1, // Mini Wheats
         name: 'Plain Side',
         country: 'USA',
-        state: 'TN',
-        address: '',
+        state: 'FLORIDA',
+        city: 'Tampa',
+        zip: 33602,
+        address: '4051  Bernardo Street',
+        naics: '311',
         type: 'Breakfast',
-        tier: 2,
         size: 1000,
         units: 'ft',
-        division: 'Boring',
+        notes: 'Boring',
         img: 'https://placthold.it/50x50',
         unitsOfMeasure: 'Imperial',
         energyUnit: 'kWh',
-        volumeLiquidUnit: 'SCF',
+        volumeLiquidUnit: 'gal',
         volumeGasUnit: 'SCF',
         chilledWaterUnit: undefined,
-        massUnit: 'lb'
+        massUnit: 'lb',
+        sustainabilityQuestions: {
+            energyReductionGoal: false,
+            energyReductionPercent: 0,
+            energyReductionBaselineYear: 0,
+            energyReductionTargetYear: 0,
+            greenhouseReductionGoal: false,
+            greenhouseReductionPercent: 0,
+            greenhouseReductionBaselineYear: 0,
+            greenhouseReductionTargetYear: 0,
+            renewableEnergyGoal: false,
+            renewableEnergyPercent: 0,
+            renewableEnergyBaselineYear: 0,
+            renewableEnergyTargetYear: 0,
+            wasteReductionGoal: false,
+            wasteReductionPercent: 0,
+            wasteReductionBaselineYear: 0,
+            wasteReductionTargetYear: 0,
+            waterReductionGoal: false,
+            waterReductionPercent: 0,
+            waterReductionBaselineYear: 0,
+            waterReductionTargetYear: 0,
+        },
+        fiscalYear: 'calendarYear',
+        fiscalYearMonth: 'January',
+        fiscalYearCalendarEnd: true,
     },
     {
         // id: undefined,
         // facilityid: 4,
-        accountId: 3, // Special K
+        accountId: 2, // Special K
         name: 'Almond Milk',
         country: 'USA',
-        state: 'TN',
-        address: '',
+        state: 'OHIO',
+        city: 'Burton',
+        zip: 44021,
+        address: '3954  Shady Pines Drive',
+        naics: '311',
         type: 'Breakfast',
-        tier: 2,
-        size: 10,
+        size: 1000,
         units: 'ft',
-        division: 'Fiber',
+        notes: 'Fiber',
         img: 'https://placthold.it/50x50',
         unitsOfMeasure: 'Imperial',
         energyUnit: 'kWh',
-        volumeLiquidUnit: 'SCF',
+        volumeLiquidUnit: 'gal',
         volumeGasUnit: 'SCF',
         chilledWaterUnit: undefined,
-        massUnit: 'lb'
+        massUnit: 'lb',
+        sustainabilityQuestions: {
+            energyReductionGoal: false,
+            energyReductionPercent: 0,
+            energyReductionBaselineYear: 0,
+            energyReductionTargetYear: 0,
+            greenhouseReductionGoal: false,
+            greenhouseReductionPercent: 0,
+            greenhouseReductionBaselineYear: 0,
+            greenhouseReductionTargetYear: 0,
+            renewableEnergyGoal: false,
+            renewableEnergyPercent: 0,
+            renewableEnergyBaselineYear: 0,
+            renewableEnergyTargetYear: 0,
+            wasteReductionGoal: false,
+            wasteReductionPercent: 0,
+            wasteReductionBaselineYear: 0,
+            wasteReductionTargetYear: 0,
+            waterReductionGoal: false,
+            waterReductionPercent: 0,
+            waterReductionBaselineYear: 0,
+            waterReductionTargetYear: 0,
+        },
+        fiscalYear: 'calendarYear',
+        fiscalYearMonth: 'January',
+        fiscalYearCalendarEnd: true,
+    },
+    {
+        // id: undefined,
+        // facilityid: 1, // Captin Crunch
+        accountId: 3, // Captin Crunch
+        name: 'Crunch-a-tize',
+        country: 'USA',
+        state: 'CALIFORNIA',
+        city: 'Newport Beach',
+        zip: 92660,
+        address: '4701  Elk Street',
+        naics: '311',
+        type: 'Breakfast',
+        size: 1000,
+        units: 'ft',
+        notes: 'Marketing',
+        img: 'https://placthold.it/50x50',
+        unitsOfMeasure: 'Imperial',
+        energyUnit: 'kWh',
+        volumeLiquidUnit: 'gal',
+        volumeGasUnit: 'SCF',
+        chilledWaterUnit: undefined,
+        massUnit: 'lb',
+        sustainabilityQuestions: {
+            energyReductionGoal: false,
+            energyReductionPercent: 0,
+            energyReductionBaselineYear: 0,
+            energyReductionTargetYear: 0,
+            greenhouseReductionGoal: false,
+            greenhouseReductionPercent: 0,
+            greenhouseReductionBaselineYear: 0,
+            greenhouseReductionTargetYear: 0,
+            renewableEnergyGoal: false,
+            renewableEnergyPercent: 0,
+            renewableEnergyBaselineYear: 0,
+            renewableEnergyTargetYear: 0,
+            wasteReductionGoal: false,
+            wasteReductionPercent: 0,
+            wasteReductionBaselineYear: 0,
+            wasteReductionTargetYear: 0,
+            waterReductionGoal: false,
+            waterReductionPercent: 0,
+            waterReductionBaselineYear: 0,
+            waterReductionTargetYear: 0,
+        },
+        fiscalYear: 'calendarYear',
+        fiscalYearMonth: 'January',
+        fiscalYearCalendarEnd: true,
     }
 ]

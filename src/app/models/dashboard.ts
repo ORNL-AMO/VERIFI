@@ -1,4 +1,14 @@
+import { MonthlyData } from "./calanderization";
 import { IdbFacility, IdbUtilityMeter } from "./idb";
+
+
+export interface AccountFacilitiesSummary {
+    facilitySummaries: Array<FacilitySummary>,
+    totalEnergyUse: number,
+    totalEnergyCost: number,
+    totalNumberOfMeters: number,
+    allMetersLastBill: MonthlyData
+}
 
 export interface FacilitySummary {
     facility: IdbFacility,
@@ -9,18 +19,28 @@ export interface FacilitySummary {
 }
 
 
+export interface FacilityMeterSummaryData {
+    meterSummaries: Array<MeterSummary>,
+    totalEnergyUse: number,
+    totalEnergyCost: number,
+    allMetersLastBill: MonthlyData
+}
+
+
 export interface MeterSummary {
     meter: IdbUtilityMeter,
     energyUsage: number,
     energyCost: number,
-    lastBillDate: Date,
-    groupName: string
+    lastBill: MonthlyData,
+    groupName: string,
+    lastBillDate: Date
 }
 
 
 export interface UtilityUsageSummaryData {
     utilitySummaries: Array<SummaryData>
-    total: SummaryData
+    total: SummaryData,
+    allMetersLastBill: MonthlyData
 }
 
 export interface SummaryData {
@@ -29,5 +49,9 @@ export interface SummaryData {
     previousMonthEnergyCost: number,
     averageEnergyUse: number,
     averageEnergyCost: number,
+    yearPriorEnergyUse: number,
+    yearPriorEnergyCost: number,
+    energyUseChangeSinceLastYear: number,
+    energyCostChangeSinceLastYear: number,
     utility: string
 }

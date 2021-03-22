@@ -1,0 +1,25 @@
+<div class="wrapper main-content">
+    <h4>Upload Data From .XLSX Files</h4>
+    <input type="file" #importFile id="importFile" (input)="setImportFile($event.target.files)" multiple
+        accept=".xlsx">
+    <div *ngIf="filesUploaded">
+        <hr>
+        <app-excel-data-table></app-excel-data-table>
+        <app-meter-table></app-meter-table>
+        <app-meter-data-table></app-meter-data-table>
+        <div class="saveCancel item-right text-right">
+            <button class="btn btn-secondary" (click)="resetData()">Cancel</button>
+            <button class="btn btn-primary pull-right" (click)="importData()">Import</button>
+        </div>
+
+    </div>
+</div>
+
+
+<div class="window" [class.open]="importMeterFileWizard || importMeterDataFileWizard">
+    <div class="windowOverlay"></div>
+    <div class="windowContent importMeterWindowContent">
+        <app-import-meter-wizard *ngIf="importMeterFileWizard" [wizardContext]="'template'"></app-import-meter-wizard>
+        <app-import-meter-data-wizard *ngIf="importMeterDataFileWizard"></app-import-meter-data-wizard>
+    </div>
+</div>

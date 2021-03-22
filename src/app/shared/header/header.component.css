@@ -54,7 +54,16 @@ Account
     padding: 12px 20px;
     cursor: pointer;
 }
-.currentAccount {
+.noAccount i {
+    cursor: default;
+}
+.noAccount span {
+    margin: 4px 5px;
+    font-style: italic;
+    display: inline-block;
+}
+.currentAccount,
+.noAccount {
     overflow: hidden;
     padding: 0;
     margin: 0!important;
@@ -66,17 +75,20 @@ Account
 .currentAccount p:hover {
     color: #333!important;
 }
-.currentAccount p {
+.currentAccount p,
+.noAccount p {
     padding: 0 0 0 36px;
     font-size: 1.3em;
 }
-.currentAccount i.right {
+.currentAccount i.right,
+.noAccount i.right {
     position: absolute;
     right: 0px;
     top: 22px;
     font-size: 15px;
 }
-.currentAccount i.item-left {
+.currentAccount i.item-left,
+.noAccount i.item-left {
     padding: 5px;
 }
 .currentAccount .small {
@@ -275,24 +287,6 @@ div#darkoverlay.open {
     width: 100vw;
 }
 
-
-div#devtools {
-    position: fixed;
-    top: calc(100vh - 37px);
-    left: 0;
-    z-index: 1000;
-    padding: 10px;
-    background-color: #060a2b;
-}
-div#devtools.open {
-    top: auto;
-    bottom: 0;
-}
-div#devtools p {
-    color: white;
-    margin: 0;
-}
-
 /*
 Responsive
 =============================================== */
@@ -314,4 +308,12 @@ Responsive
     .searchBar {
         display: none;
     }
+}
+
+
+.accountRequired {
+    display: block;
+    padding-top: 15px;
+    font-style: italic;
+    cursor: default!important;
 }

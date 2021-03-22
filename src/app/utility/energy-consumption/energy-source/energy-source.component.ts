@@ -3,12 +3,13 @@ import { AccountdbService } from "../../../indexedDB/account-db.service";
 import { FacilitydbService } from "../../../indexedDB/facility-db.service";
 import { UtilityMeterDatadbService } from "../../../indexedDB/utilityMeterData-db.service";
 import { UtilityMeterdbService } from "../../../indexedDB/utilityMeter-db.service";
-import { UtilityMeterGroupdbService } from "../../../indexedDB/utilityMeterGroup-db.service";
 import { listAnimation } from '../../../animations';
-import { IdbAccount, IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
+import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { Subscription } from 'rxjs';
 import { EditMeterFormService } from './edit-meter-form/edit-meter-form.service';
 import { FormGroup } from '@angular/forms';
+import { Router } from '@angular/router';
+import { LoadingService } from 'src/app/shared/loading/loading.service';
 
 @Component({
   selector: 'app-energy-source',
@@ -16,24 +17,15 @@ import { FormGroup } from '@angular/forms';
   styleUrls: ['./energy-source.component.css'],
   animations: [
     listAnimation
-  ],
-  host: {
-    '(document:click)': 'documentClick($event)',
-  }
+  ]
 })
 export class EnergySourceComponent implements OnInit {
 
-  meterMenuOpen: number;
-
-  // energySources: any;
-  // selectedMeter: any;
   meterList: Array<IdbUtilityMeter>;
   meterListSub: Subscription;
-  // energyFinalUnit: string;
 
-  page: number = 1;
+  currentPageNumber: number = 1;
   itemsPerPage: number = 10;
-  pageSize: number;
   importWindow: boolean;
   editMeter: IdbUtilityMeter;
   meterToDelete: IdbUtilityMeter;
@@ -41,12 +33,16 @@ export class EnergySourceComponent implements OnInit {
   selectedFacilityName: string = 'Facility';
 
   addOrEdit: string = 'add';
+  orderDataField: string = 'name';
+  orderByDirection: string = 'desc';
   constructor(
     private accountdbService: AccountdbService,
     private facilitydbService: FacilitydbService,
     private utilityMeterDatadbService: UtilityMeterDatadbService,
     private utilityMeterdbService: UtilityMeterdbService,
-    private editMeterFormService: EditMeterFormService
+    private editMeterFormService: EditMeterFormService,
+    private router: Router,
+    private loadingService: LoadingService
   ) { }
 
   ngOnInit() {
@@ -66,31 +62,23 @@ export class EnergySourceComponent implements OnInit {
     this.selectedFacilitySub.unsubscribe();
   }
 
-  // Close menus when user clicks outside the dropdown
-  documentClick() {
-    this.meterMenuOpen = null;
-  }
-
-  meterToggleMenu(index: number) {
-    if (this.meterMenuOpen === index) {
-      this.meterMenuOpen = null;
-    } else {
-      this.meterMenuOpen = index;
-    }
-  }
 
   addMeter() {
     let selectedFacility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
     let selectedAccount: IdbAccount = this.accountdbService.selectedAccount.getValue();
     this.addOrEdit = 'add';
-    this.editMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.id, selectedAccount.id);
+    this.editMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.id, selectedAccount.id, true);
   }
 
   meterExport() {
-    const replacer = (key, value) => value === null ? '' : value; // specify how you want to handle null values here
-    const header = Object.keys(this.meterList[0]);
-    let csvData: Array<string> = this.meterList.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer)).join(','));
-    csvData.unshift(header.join(','));
+    // const replacer = (key, value) => value === null ? '' : value; // specify how you want to handle null values here
+    const allowedHeaders: Array<string> = ["Meter Number", "Account Number", "Source", "Meter Name", "Utility Supplier", "Notes", "Building / Location", "Meter Group", "Collection Unit", "Phase", "Fuel", "Heat Capacity", "Site To Source"];
+    let csvData: Array<string> = new Array();
+    this.meterList.forEach(meter => {
+      let meterCSVData: string = this.getMeterCSVData(meter);
+      csvData.push(meterCSVData);
+    })
+    csvData.unshift(allowedHeaders.join(','));
     let csvBlob: BlobPart = csvData.join('\r\n');
 
     //Download the file as CSV
@@ -104,21 +92,34 @@ export class EnergySourceComponent implements OnInit {
     document.body.removeChild(downloadLink);
   }
 
-  public onPageChange(pageNum: number): void {
-    this.pageSize = this.itemsPerPage * (pageNum - 1);
+  getMeterCSVData(meter: IdbUtilityMeter): string {
+    let meterCSVItem: string = meter.meterNumber;
+    // meterCSVItem = this.addToString(meterCSVItem, meter.meterNumber);
+    meterCSVItem = this.addToString(meterCSVItem, meter.accountNumber);
+    meterCSVItem = this.addToString(meterCSVItem, meter.source);
+    meterCSVItem = this.addToString(meterCSVItem, meter.name);
+    meterCSVItem = this.addToString(meterCSVItem, meter.supplier);
+    meterCSVItem = this.addToString(meterCSVItem, meter.notes);
+    meterCSVItem = this.addToString(meterCSVItem, meter.location);
+    meterCSVItem = this.addToString(meterCSVItem, meter.group);
+    meterCSVItem = this.addToString(meterCSVItem, meter.startingUnit);
+    meterCSVItem = this.addToString(meterCSVItem, meter.phase);
+    meterCSVItem = this.addToString(meterCSVItem, meter.fuel);
+    meterCSVItem = this.addToString(meterCSVItem, meter.heatCapacity);
+    meterCSVItem = this.addToString(meterCSVItem, meter.siteToSource);
+    return meterCSVItem;
   }
 
-  public changePagesize(num: number): void {
-    this.itemsPerPage = num;
-    this.onPageChange(this.page);
+  addToString(str: string, addition: string | number): string {
+    if (addition != undefined) {
+      return str + ',' + addition;
+    } else {
+      return str + ',' + '';
+    }
   }
 
-  closeImportWindow() {
-    this.importWindow = false;
-  }
-
-  showImportWindow() {
-    this.importWindow = true;
+  uploadData() {
+    this.router.navigateByUrl('utility/upload-data');
   }
 
   selectEditMeter(meter: IdbUtilityMeter) {
@@ -130,13 +131,25 @@ export class EnergySourceComponent implements OnInit {
     this.editMeter = undefined;
   }
 
-
-  deleteMeter() {
+  async deleteMeter() {
+    this.loadingService.setLoadingMessage('Deleteing Meters and Data...')
+    this.loadingService.setLoadingStatus(true);
     //delete meter
-    this.utilityMeterdbService.deleteIndex(this.meterToDelete.id);
+    await this.utilityMeterdbService.deleteIndexWithObservable(this.meterToDelete.id);
     //delete meter data
-    this.utilityMeterDatadbService.deleteMeterDataByMeterId(this.meterToDelete.id);
-    this.cancelDelete();
+    this.utilityMeterDatadbService.getAllByIndexRange('meterId', this.meterToDelete.id).subscribe(data => {
+      data.forEach(item => { this.deleteMeterData(item) });
+      this.utilityMeterdbService.setAccountMeters();
+      this.utilityMeterdbService.setFacilityMeters();
+      this.utilityMeterDatadbService.setAccountMeterData();
+      this.utilityMeterDatadbService.setFacilityMeterData();
+      this.cancelDelete();
+      this.loadingService.setLoadingStatus(false);
+    });
+  }
+
+  async deleteMeterData(meterDataItem: IdbUtilityMeterData) {
+    await this.utilityMeterDatadbService.deleteWithObservable(meterDataItem.id);
   }
 
   selectDeleteMeter(meter: IdbUtilityMeter) {
@@ -145,11 +158,22 @@ export class EnergySourceComponent implements OnInit {
 
   cancelDelete() {
     this.meterToDelete = undefined;
-    this.meterMenuOpen = null;
   }
 
-  isMeterInvalid(meter: IdbUtilityMeter): boolean{
+  isMeterInvalid(meter: IdbUtilityMeter): boolean {
     let form: FormGroup = this.editMeterFormService.getFormFromMeter(meter);
     return form.invalid;
+  }
+
+  setOrderDataField(str: string) {
+    if (str == this.orderDataField) {
+      if (this.orderByDirection == 'desc') {
+        this.orderByDirection = 'asc';
+      } else {
+        this.orderByDirection = 'desc';
+      }
+    } else {
+      this.orderDataField = str;
+    }
   }
 }

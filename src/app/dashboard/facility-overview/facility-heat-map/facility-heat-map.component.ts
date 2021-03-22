@@ -6,7 +6,7 @@ import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
 import { HeatMapData } from 'src/app/models/visualization';
-import { VisualizationService } from '../../../utility/visualization/visualization.service';
+import { VisualizationService } from '../../../shared/helper-services/visualization.service';
 
 @Component({
   selector: 'app-facility-heat-map',

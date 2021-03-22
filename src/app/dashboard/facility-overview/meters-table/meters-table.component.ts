@@ -6,7 +6,7 @@ import { DashboardService } from '../../dashboard.service';
 import * as _ from 'lodash';
 import { IdbUtilityMeterData } from 'src/app/models/idb';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { MeterSummary } from 'src/app/models/dashboard';
+import { FacilityMeterSummaryData } from 'src/app/models/dashboard';
 @Component({
   selector: 'app-meters-table',
   templateUrl: './meters-table.component.html',
@@ -14,24 +14,19 @@ import { MeterSummary } from 'src/app/models/dashboard';
 })
 export class MetersTableComponent implements OnInit {
 
-  totalEnergyUsage: number;
-  totalEnergyCost: number;
-  todaysDate: Date;
-  yearAgoDate: Date;
-  facilityMetersSummary: Array<MeterSummary>;
+  facilityMeterSummaryData: FacilityMeterSummaryData;
   facilityMetersSub: Subscription;
   accountMeterDataSub: Subscription;
   selectedFacilitySub: Subscription;
 
   accountMeterData: Array<IdbUtilityMeterData>;
+  lastMonthsDate: Date;
+  yearPriorDate: Date;
   facilityEnergyUnit: string;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private utilityMeterDbService: UtilityMeterdbService,
     private dashboardService: DashboardService, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
-    this.todaysDate = new Date();
-    this.yearAgoDate = new Date((this.todaysDate.getFullYear() - 1), (this.todaysDate.getMonth()));
-
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
       if (val) {
         this.facilityEnergyUnit = val.energyUnit;
@@ -56,9 +51,11 @@ export class MetersTableComponent implements OnInit {
 
   getSummary() {
     if (this.accountMeterData && this.accountMeterData.length != 0) {
-      this.facilityMetersSummary = this.dashboardService.getFacilityMetersSummary(false);
-      this.totalEnergyUsage = _.sumBy(this.facilityMetersSummary, 'energyUsage');
-      this.totalEnergyCost = _.sumBy(this.facilityMetersSummary, 'energyCost');
+      this.facilityMeterSummaryData = this.dashboardService.getFacilityMetersSummary(false);
+      if (this.facilityMeterSummaryData.allMetersLastBill) {
+        this.lastMonthsDate = new Date(this.facilityMeterSummaryData.allMetersLastBill.year, this.facilityMeterSummaryData.allMetersLastBill.monthNumValue);
+        this.yearPriorDate = new Date(this.facilityMeterSummaryData.allMetersLastBill.year - 1, this.facilityMeterSummaryData.allMetersLastBill.monthNumValue + 1);
+      }
     }
   }
 

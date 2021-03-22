@@ -86,14 +86,13 @@ export class UtilityMeterGroupdbService {
         });
     }
 
-    getNewIdbUtilityMeterGroup(type: string, unit: string, name: string, facilityId: number, accountId: number): IdbUtilityMeterGroup {
+    getNewIdbUtilityMeterGroup(type: string, name: string, facilityId: number, accountId: number): IdbUtilityMeterGroup {
         return {
             facilityId: facilityId,
             accountId: accountId,
             groupType: type,
             name: name,
             description: undefined,
-            unit: unit,
             dateModified: undefined,
             factionOfTotalEnergy: undefined,
             // id: undefined

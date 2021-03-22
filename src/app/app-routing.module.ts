@@ -15,6 +15,7 @@ import { VisualizationComponent } from './utility/visualization/visualization.co
 import { FacilityOverviewComponent } from './dashboard/facility-overview/facility-overview.component';
 import { AccountOverviewComponent } from './dashboard/account-overview/account-overview.component';
 import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
+import { UploadDataComponent } from './utility/upload-data/upload-data.component';
 
 const routes: Routes = [
   {
@@ -27,11 +28,11 @@ const routes: Routes = [
         redirectTo: 'account-summary'
       },
       {
-        path: 'account-summary', 
+        path: 'account-summary',
         component: AccountOverviewComponent,
       },
       {
-        path: 'facility-summary', 
+        path: 'facility-summary',
         component: FacilityOverviewComponent,
       }
     ]
@@ -64,7 +65,9 @@ const routes: Routes = [
       { path: 'mo-meter-data', component: CalanderizationComponent },
       { path: 'meter-groups', component: MeterGroupingComponent },
       { path: 'predictors', component: PredictorDataComponent },
-      { path: 'visualization', component: VisualizationComponent }
+      { path: 'visualization', component: VisualizationComponent },
+      { path: 'upload-data', component: UploadDataComponent }
+
     ]
   },
   { path: 'style-guide', component: StyleGuideComponent },

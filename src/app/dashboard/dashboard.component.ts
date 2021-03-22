@@ -1,9 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AccountdbService } from '../indexedDB/account-db.service';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
-import { IdbAccount, IdbFacility } from '../models/idb';
-import { Router, Event, NavigationStart, NavigationEnd } from '@angular/router';
+import { IdbAccount, IdbFacility, IdbUtilityMeter } from '../models/idb';
+import { Router, Event, NavigationEnd } from '@angular/router';
+import { UtilityMeterdbService } from '../indexedDB/utilityMeter-db.service';
+import { ToastNotificationsService } from '../shared/toast-notifications/toast-notifications.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -11,31 +13,40 @@ import { Router, Event, NavigationStart, NavigationEnd } from '@angular/router';
   styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit {
-
   selectedAccount: IdbAccount;
-  selectedAccountSub: Subscription;
   selectedFacility: IdbFacility;
-  selectedFacilitySub: Subscription;
-  facilityDashboard: boolean;
-  breadcrumbFacility: number;
-
-  accountFacilitiesSub: Subscription;
   facilityList: Array<IdbFacility>;
+  isFacilityDashboard: boolean;
+  breadcrumbFacilityId: number;
+  utilityMeters: Array<IdbUtilityMeter>;
+
+  selectedAccountSub: Subscription;
+  selectedFacilitySub: Subscription;
+  utilityDataSub: Subscription;
+  accountFacilitiesSub: Subscription;
+  appRendered: boolean = false;
 
   constructor(
     private accountDbService: AccountdbService, 
     private facilityDbService: FacilitydbService,
-    private router: Router
+    public utilityMeterDbService: UtilityMeterdbService,
+    private router: Router,
+    private toastNotificationService: ToastNotificationsService
     ) {
-    // Close menus on navigation
     router.events.subscribe((event: Event) => {
       if (event instanceof NavigationEnd) {
-        this.facilityDashboard = event.urlAfterRedirects.includes('facility-summary');
+        this.isFacilityDashboard = event.urlAfterRedirects.includes('facility-summary');
+        if(this.isFacilityDashboard && this.selectedFacility){
+          this.breadcrumbFacilityId = this.selectedFacility.id
+        }else{
+          this.breadcrumbFacilityId = undefined;
+        }
       }
     });
   }
 
   ngOnInit() {
+    this.checkToast();
     this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(val => {
       this.selectedAccount = val;
     });
@@ -43,15 +54,24 @@ export class DashboardComponent implements OnInit {
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
       this.selectedFacility = val;
       if (this.router.url.indexOf('account-summary') > -1) {
-        this.breadcrumbFacility = -1;
+        this.breadcrumbFacilityId = undefined;
       } else if (this.selectedFacility) {
-        this.breadcrumbFacility = this.selectedFacility.id;
+        this.breadcrumbFacilityId = this.selectedFacility.id;
       }
     });
 
     this.accountFacilitiesSub = this.facilityDbService.accountFacilities.subscribe(accountFacilities => {
       this.facilityList = accountFacilities;
     });
+
+    this.utilityDataSub = this.utilityMeterDbService.facilityMeters.subscribe(utilityMeters => {
+      this.utilityMeters = utilityMeters;
+    });
+
+    // TEMP MANUAL DELAY TO PREVENT PAGE FLICKERING.
+    // ADDING TICKET TO FIX THIS BUG
+    const self = this;
+    setTimeout(function(){ self.appRendered = true}, 300);
   }
 
   ngOnDestroy() {
@@ -60,13 +80,19 @@ export class DashboardComponent implements OnInit {
     this.accountFacilitiesSub.unsubscribe();
   }
 
-  switchFacility(facility: number) {
-    if (facility == -1) {
+  switchFacility() {
+    if (this.breadcrumbFacilityId == undefined) {
       this.router.navigateByUrl('/account-summary');
     } else {
-      const index = this.facilityList.map(function(e) { return e.id; }).indexOf(+facility);
-      this.facilityDbService.selectedFacility.next(this.facilityList[index]);
+      let selectedFacility: IdbFacility = this.facilityList.find(facility => {return facility.id == this.breadcrumbFacilityId});
+      this.facilityDbService.selectedFacility.next(selectedFacility);
       this.router.navigateByUrl('/facility-summary');
     }
+  }
+
+  checkToast() {
+    let title: string = 'Toast Test';
+    let body: string = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.';
+    this.toastNotificationService.showToast(title, body, undefined, false, "info");
   }
 }

@@ -1,0 +1,60 @@
+<h4 *ngIf="wizardContext == 'template'">Import Meters</h4>
+<br *ngIf="wizardContext == 'template'">
+
+<div class="d-flex flex-wrap justify-content-center" *ngIf="importMeters">
+    <div class="p-1">
+        <span class="badge badge-danger">#</span> Invalid Meter
+    </div>
+    <div class="p-1">
+        <span class="badge badge-success">#</span> Vaild Meter
+    </div>
+    <div class="p-1">
+        <span class="badge badge-warning">#</span> Existing Meter (has same name)
+    </div>
+    <div class="p-1">
+        <span class="badge badge-secondary">#</span> Meter Import Skipped
+    </div>
+</div>
+<hr class="m-0">
+<div class="d-flex flex-column" *ngIf="importMeters && selectedMeterForm">
+    <ul class="nav nav-tabs">
+        <li class="nav-item" *ngFor="let importMeter of importMeters; let index=index;">
+            <a class="nav-link" [ngClass]="{'active': selectedMeterIndex == index}"
+                (click)="selectMeter(importMeter, index)">
+                <span class="badge" [ngClass]="getBadgeClass(importMeter, index)">
+                    {{index+1}}
+                </span>
+            </a>
+        </li>
+    </ul>
+    <div class="pull-right">
+        <button type="button" class="btn btn-danger pull-right" (click)="toggleSkipMeter(selectedMeterIndex)">
+            Skip Meter
+        </button>
+    </div>
+    <div class="p-3" *ngIf="!skipMeters[selectedMeterIndex]">
+        <app-edit-meter-form [(meterForm)]="selectedMeterForm"></app-edit-meter-form>
+    </div>
+    <p class="alert-warning text-center w-100 p-3" *ngIf="skipMeters[selectedMeterIndex]">
+        Importing Meter Will Be Skipped
+    </p>
+</div>
+
+<hr>
+<div class="row">
+    <div class="col">
+        <p *ngIf="importMeters && hasInvalidMeter()" class="alert alert-danger p-2 text-center">One or more of the
+            meters has invalid data. These meters will be skipped on import.
+        </p>
+    </div>
+    <div class="col">
+        <div class="saveCancel item-right text-right" *ngIf="wizardContext == 'template'">
+            <button class="btn btn-secondary" (click)="cancel()">Cancel</button>
+            <button class="btn btn-primary" (click)="submit()">Submit</button>
+        </div>
+        <div class="saveCancel item-right text-right" *ngIf="wizardContext == 'excel'">
+            <button class="btn btn-secondary" (click)="back()">Back to Setup Data</button>
+            <button class="btn btn-primary" (click)="continue()">Submit & Continue</button>
+        </div>
+    </div>
+</div>

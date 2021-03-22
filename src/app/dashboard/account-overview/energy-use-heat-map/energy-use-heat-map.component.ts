@@ -5,10 +5,8 @@ import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
 import * as _ from 'lodash';
-import { VisualizationService } from 'src/app/utility/visualization/visualization.service';
+import { VisualizationService } from 'src/app/shared/helper-services/visualization.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { DashboardService } from '../../dashboard.service';
-import { FacilitySummary } from 'src/app/models/dashboard';
 import { HeatMapData } from 'src/app/models/visualization';
 @Component({
   selector: 'app-energy-use-heat-map',
@@ -18,16 +16,14 @@ import { HeatMapData } from 'src/app/models/visualization';
 export class EnergyUseHeatMapComponent implements OnInit {
 
   @ViewChild('energyUseHeatMap', { static: false }) energyUseHeatMap: ElementRef;
-  facilitiesSummary: Array<FacilitySummary>;
   accountFacilitiesSub: Subscription;
   facilityHeatMapData: Array<HeatMapData>;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private visualizationService: VisualizationService,
-    private dashboardService: DashboardService, private plotlyService: PlotlyService, private utilityMeterDbService: UtilityMeterdbService,
+    private plotlyService: PlotlyService, private utilityMeterDbService: UtilityMeterdbService,
     private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
     this.accountFacilitiesSub = this.utilityMeterDataDbService.accountMeterData.subscribe(val => {
-      this.facilitiesSummary = this.dashboardService.getAccountFacilitesSummary();
       this.setData();
     });
   }

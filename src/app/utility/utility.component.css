@@ -1,3 +1,26 @@
 #utility .banner {
     background-color: #c53f00;
 }
+
+h3 a{
+    font-size: 1.75rem;
+    color: white;
+}
+
+h3 a span.fa{
+    color: white !important;
+}
+
+
+h3 a.active{
+    background-color: white;
+    color: black;
+    padding: 5px 7px;
+    border-radius: 3px;
+    font-weight: bold;
+}
+
+
+h3 a.active span.fa{
+    color: black !important;
+}

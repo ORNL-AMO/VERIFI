@@ -1,5 +1,5 @@
 import { Component, ElementRef, OnInit } from '@angular/core';
-import { Router, Event, NavigationStart } from '@angular/router';
+import { Router, Event, NavigationStart, NavigationEnd } from '@angular/router';
 import { AccountdbService } from "../../indexedDB/account-db.service";
 import { FacilitydbService } from "../../indexedDB/facility-db.service";
 import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db.service";
@@ -27,7 +27,7 @@ export class HeaderComponent implements OnInit {
   facilityList: Array<IdbFacility>;
   activeAccount: IdbAccount;
   activeFacility: IdbFacility;
-  devtools: boolean = false;
+  viewingAccountManagementPage: boolean;
 
   allAccountsSub: Subscription;
   selectedAccountSub: Subscription;
@@ -47,10 +47,15 @@ export class HeaderComponent implements OnInit {
   ) {
     // Close menus on navigation
     router.events.subscribe((event: Event) => {
-      // console.log(event);
       if (event instanceof NavigationStart) {
         this.accountMenu = false;
         this.facilityMenu = false;
+      }
+      if (event instanceof NavigationEnd && this.router.url === '/account-management') {
+        this.viewingAccountManagementPage = true;
+      }
+      if (event instanceof NavigationEnd && this.router.url != '/account-management') {
+        this.viewingAccountManagementPage = false;
       }
     });
   }
@@ -112,10 +117,10 @@ export class HeaderComponent implements OnInit {
   }
 
   addNewAccount() {
-    this.toggleSwitchAccountsMenu();
+    this.switchAccountMenu = false;
     let newAccount: IdbAccount = this.accountdbService.getNewIdbAccount();
     this.accountdbService.add(newAccount);
-    this.router.navigate(['account/account']);
+    this.router.navigate(['/account-management']);
   }
 
   addNewFacility() {
@@ -130,12 +135,12 @@ export class HeaderComponent implements OnInit {
   }
 
   switchFacility(facility: IdbFacility) {
-    this.toggleFacilityMenu();
+    //this.toggleFacilityMenu();
     this.facilitydbService.selectedFacility.next(facility);
   }
 
   selectAllFacilities(){
-    this.toggleFacilityMenu();
+    //this.toggleFacilityMenu();
     this.router.navigate(['/account-summary']);
   }
 
@@ -155,66 +160,6 @@ export class HeaderComponent implements OnInit {
         this.accountList[index]['facilityCount'] = res[property] + " Facilities";
       }
     }
-  }
-
-  /* DEV TOOLS BELOW 
-  *******************************************************************************/
-  loadTestData() {
-    this.accountdbService.addTestData();
-    this.facilitydbService.addTestData()
-    // .then(
-    //   data => {
-    //     location.reload();
-    //   }
-    // );
-    //location.reload();
-    console.log("Data loaded");
-  }
-
-  getAllAccounts() {
-    this.accountdbService.getAll().subscribe(
-      data => {
-        console.log(data);
-      }
-    );
-  }
-
-  getAllFacilities() {
-    this.facilitydbService.getAll().subscribe(
-      data => {
-        console.log(data);
-      }
-    );
-  }
-
-  getAllMeters() {
-    this.utilityMeterdbService.getAll().subscribe(
-      data => {
-        console.log(data);
-      }
-    );
-  }
-
-  getAllMeterData() {
-    this.utilityMeterDatadbService.getAll().subscribe(
-      data => {
-        console.log(data);
-      }
-    );
-  }
-
-  getAllMeterGroups() {
-    this.utilityMeterGroupdbService.getAll().subscribe(
-      data => {
-        console.log(data);
-      }
-    );
-  }
-
-  clearLocalstorage() {
-    this.localStorage.clear('accountid');
-    this.localStorage.clear('facilityid');
-    console.log("data cleared");
   }
 
 }

@@ -1,11 +1,16 @@
 import { ElectricityDataFilters } from './electricityFilter';
-
+import { SustainabilityQuestions } from './sustainabilityQuestions';
 
 export interface IdbAccount {
     //keys (id primary)
     id?: number,
     name: string,
-    industry: string,
+    country: string,
+    city: string,
+    state: string,
+    zip: number,
+    address: string,
+    size: number,
     naics: string,
     notes: string,
     img: string
@@ -14,7 +19,13 @@ export interface IdbAccount {
     massUnit: string,
     volumeLiquidUnit: string,
     volumeGasUnit: string,
-    chilledWaterUnit: string
+    chilledWaterUnit: string,
+    sustainabilityQuestions: SustainabilityQuestions,
+    fiscalYear: string,
+    fiscalYearMonth: string,
+    fiscalYearCalendarEnd: boolean,
+    setupWizard: boolean,
+    setupWizardComplete: boolean,
 }
 
 export interface IdbFacility {
@@ -24,13 +35,15 @@ export interface IdbFacility {
     //data
     name: string,
     country: string,
+    city: string,
     state: string,
+    zip: number,
     address: string,
+    naics: string,
     type: string,
-    tier: number,
     size: number,
     units: string,
-    division: string,
+    notes: string,
     img: string,
     tableElectricityFilters?: ElectricityDataFilters,
     electricityInputFilters?: ElectricityDataFilters,
@@ -40,7 +53,11 @@ export interface IdbFacility {
     massUnit: string,
     volumeLiquidUnit: string,
     volumeGasUnit: string,
-    chilledWaterUnit: string
+    chilledWaterUnit: string,
+    sustainabilityQuestions: SustainabilityQuestions,
+    fiscalYear: string,
+    fiscalYearMonth: string,
+    fiscalYearCalendarEnd: boolean,
 }
 
 export interface IdbUtilityMeterGroup {
@@ -52,7 +69,6 @@ export interface IdbUtilityMeterGroup {
     groupType: string,
     name: string,
     description: string,
-    unit: string,
     dateModified: Date,
     factionOfTotalEnergy: number,
     totalEnergyUse?: number,
@@ -70,7 +86,6 @@ export interface IdbUtilityMeter {
     //data
     meterNumber: string,
     accountNumber: number,
-    type: string,
     phase: string,
     heatCapacity: number,
     siteToSource: number,
@@ -86,6 +101,7 @@ export interface IdbUtilityMeter {
     energyUnit: string,
     fuel:string
     visible?: boolean
+    importWizardName?: string
 }
 
 export interface IdbUtilityMeterData {
@@ -96,7 +112,6 @@ export interface IdbUtilityMeterData {
     accountId: number,
     //data
     readDate: Date,
-    unit: string,
     totalVolume: number,
     totalEnergyUse: number,
     totalCost: number,
@@ -122,7 +137,9 @@ export interface IdbUtilityMeterData {
     powerFactorCharge: number,
     businessCharge: number,
     utilityTax: number,
-    latePayment: number
+    latePayment: number,
+    meterNumber?: string,
+    totalImportConsumption?: number
 }
 
 export interface IdbPredictorEntry {

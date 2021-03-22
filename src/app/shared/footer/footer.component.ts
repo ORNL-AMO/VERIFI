@@ -47,4 +47,8 @@ export class FooterComponent implements OnInit {
     this.allFacilitiesSub.unsubscribe();
     this.accountFacilitiesSub.unsubscribe();
   }
+
+  deleteDatabase() {
+    this.accountdbService.deleteDatabase(); 
+  }
 }
