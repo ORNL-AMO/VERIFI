@@ -4,11 +4,24 @@
         <div class="compNav">
             <ul *ngIf="selectedAccount && selectedFacility">
                 <li><a routerLink="energy-consumption" [routerLinkActive]="['active']">Utilities</a></li>
-                <li><a routerLink="mo-meter-data" [routerLinkActive]="['active']">Monthly Meter Data</a></li>
-                <li><a routerLink="meter-groups" [routerLinkActive]="['active']">Meter Grouping</a></li>
-                <li><a routerLink="predictors" [routerLinkActive]="['active']">Predictors</a></li>
-                <li><a routerLink="visualization" [routerLinkActive]="['active']">Data Visualization</a></li>
+                <li [class.disabled]="utilityMeterData.length === 0">
+                    <a routerLink="mo-meter-data" [routerLinkActive]="['active']">Monthly Meter Data</a>
+                    <span class="small navigation-warning">Requires Meter Readings</span>
+                </li>
+                <li [class.disabled]="utilityMeterData.length === 0">
+                    <a routerLink="meter-groups" [routerLinkActive]="['active']">Meter Grouping</a>
+                    <span class="small navigation-warning">Requires Meter Readings</span>
+                </li>
+                <li [class.disabled]="utilityMeterData.length === 0">
+                    <a routerLink="predictors" [routerLinkActive]="['active']">Predictors</a>
+                    <span class="small navigation-warning">Requires Meter Readings</span>
+                </li>
+                <li [class.disabled]="utilityMeterData.length === 0">
+                <a routerLink="visualization" [routerLinkActive]="['active']">Data Visualization</a>
+                <span class="small navigation-warning">Requires Meter Readings</span>
+            </li>
             </ul>
+            
         </div>
         <div class="pull-right">
             <h3>

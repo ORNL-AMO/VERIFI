@@ -24,3 +24,19 @@ h3 a.active{
 h3 a.active span.fa{
     color: black !important;
 }
+li.disabled:hover .navigation-warning{
+    display: block;
+}
+.navigation-warning {
+    display: none;
+    position: absolute;
+    top: 110px;
+    padding: 3px 7px;
+    background-color: #f5d0d0e8;
+    color: #c53f00;
+    z-index: 99;
+    margin-left: 10px;
+}
+.navigation-warning .arrow-up {
+    border-bottom: 10px solid #f1c3be;
+}
