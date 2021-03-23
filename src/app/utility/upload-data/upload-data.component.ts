@@ -13,6 +13,8 @@ import { EditMeterFormService } from '../energy-consumption/energy-source/edit-m
 import { FormGroup } from '@angular/forms';
 import { ImportMeterDataFileSummary } from './import-meter-data.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { ToastNotificationsService } from 'src/app/shared/toast-notifications/toast-notifications.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-upload-data',
@@ -42,7 +44,8 @@ export class UploadDataComponent implements OnInit {
   constructor(private loadingService: LoadingService, private facilityDbService: FacilitydbService, private uploadDataService: UploadDataService,
     private utilityMeterGroupdbService: UtilityMeterGroupdbService, private energyUnitsHelperService: EnergyUnitsHelperService,
     private utilityMeterdbService: UtilityMeterdbService, private editMeterFormService: EditMeterFormService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService) { }
+    private utilityMeterDataDbService: UtilityMeterDatadbService, private toastNotificationsService: ToastNotificationsService,
+    private router: Router) { }
 
   ngOnInit(): void {
     this.initArrays();
@@ -245,7 +248,8 @@ export class UploadDataComponent implements OnInit {
       this.utilityMeterDataDbService.getAllByIndexRange('accountId', selectedFacility.accountId).subscribe(meterData => {
         this.utilityMeterDataDbService.accountMeterData.next(meterData);
         this.loadingService.setLoadingStatus(false);
-        this.resetData();
+        this.toastNotificationsService.showToast('Data Imported!', undefined, 3500, false, "success");
+        this.router.navigate(['/utility/energy-consumption']);
       });
     });
   }

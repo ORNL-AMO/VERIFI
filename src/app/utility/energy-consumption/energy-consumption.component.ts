@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 
 @Component({
   selector: 'app-energy-consumption',
@@ -16,9 +18,23 @@ export class EnergyConsumptionComponent implements OnInit {
   wasteWater: boolean;
   otherUtility: boolean;
 
+  hasElectricityData: boolean;
+  hasNaturalGasData: boolean;
+  hasOtherFuelsData: boolean;
+  hasOtherEnergyData: boolean;
+  hasWaterData: boolean;
+  hasWasteWaterData: boolean;
+  hasOtherUtilityData: boolean;
+  
+  utilityMeters: Array<IdbUtilityMeter>;
+  utilityMeterData: Array<IdbUtilityMeterData>;
+
   facilityMetersSub: Subscription;
+  utilityDataSub: Subscription;
+
   constructor(
-    private utilityMeterDbService: UtilityMeterdbService
+    private utilityMeterDbService: UtilityMeterdbService,
+    private utilityMeterDataDbService: UtilityMeterDatadbService
   ) { }
 
   ngOnInit() {
@@ -31,11 +47,45 @@ export class EnergyConsumptionComponent implements OnInit {
       this.water = energySources.indexOf("Water") > -1;
       this.wasteWater = energySources.indexOf("Waste Water") > -1;
       this.otherUtility = energySources.indexOf("Other Utility") > -1;
+      this.utilityMeters = facilityMeters;
+      
+    });
+
+    this.utilityDataSub = this.utilityMeterDataDbService.facilityMeterData.subscribe(utilityMeterData => {
+      this.checkMeterData(utilityMeterData);
     });
   }
 
   ngOnDestroy() {
     this.facilityMetersSub.unsubscribe();
+    this.utilityDataSub.unsubscribe();
+  }
+
+  checkMeterData(utilityMeterData) {
+    this.utilityMeters.forEach(meter => {
+      const meterData = utilityMeterData.filter(meterData => { return meterData.meterId == meter.id });
+      if(meter.source === "Electricity") {
+        this.hasElectricityData = (meterData.length != 0 ? true : false);
+      }
+      if(meter.source === "Natural Gas") {
+        this.hasNaturalGasData = (meterData.length != 0 ? true : false);
+      }
+      if(meter.source === "Other Fuels") {
+        this.hasOtherFuelsData = (meterData.length != 0 ? true : false);
+      }
+      if(meter.source === "Other Energy") {
+        this.hasOtherEnergyData = (meterData.length != 0 ? true : false);
+      }
+      if(meter.source === "Water") {
+        this.hasWaterData = (meterData.length != 0 ? true : false);
+      }
+      if(meter.source === "Waste Water") {
+        this.hasWasteWaterData = (meterData.length != 0 ? true : false);
+      }
+      if(meter.source === "Other Utility") {
+        this.hasOtherUtilityData = (meterData.length != 0 ? true : false);
+      }
+    });
   }
 
 }

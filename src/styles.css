@@ -111,7 +111,7 @@ p.error {
 }
 .red,
 .required {
-  color: #bf2d00;
+  color: #bf2d00!important;
 }
 .pointer {
   cursor: pointer;
@@ -877,7 +877,16 @@ Content Tabs
 .tabs ul li a.active {
   background-color: white;
 }
-
+.tabs ul li {
+  border-top: 3px solid #6abb2e;
+}
+.tabs ul li.red {
+  border-top: 3px solid #bf2d00;
+}
+.tabs ul li.red a, 
+.tabs ul li.red span {
+  color: #bf2d00;
+}
 /*
 Meter Displays
 =============================================== */
@@ -1196,4 +1205,9 @@ canvas {
 
 .invalid-import-table .header-width{
   width: 15%;
+}
+li.disabled a{
+  pointer-events: none;
+  cursor: default;
+  opacity: .7;
 }
