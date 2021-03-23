@@ -33,6 +33,14 @@ export class UploadDataComponent implements OnInit {
 
   fileReferences: Array<any>;
   filesUploaded: boolean = false;
+
+
+  importMeterFiles: Array<{ fileName: string, importMeterFileSummary: ImportMeterFileSummary, id: string }>;
+  importMeterFilesSub: Subscription;
+  importMeterDataFiles: Array<ImportMeterDataFile>;
+  importMeterDataFilesSub: Subscription;
+  disableImport: boolean = true;
+
   constructor(private loadingService: LoadingService, private facilityDbService: FacilitydbService, private uploadDataService: UploadDataService,
     private utilityMeterGroupdbService: UtilityMeterGroupdbService, private energyUnitsHelperService: EnergyUnitsHelperService,
     private utilityMeterdbService: UtilityMeterdbService, private editMeterFormService: EditMeterFormService,
@@ -49,11 +57,23 @@ export class UploadDataComponent implements OnInit {
     this.importMeterDataFileWizardSub = this.uploadDataService.importMeterDataFileWizard.subscribe(val => {
       this.importMeterDataFileWizard = val;
     });
+
+    this.importMeterFilesSub = this.uploadDataService.importMeterFiles.subscribe(val => {
+      this.importMeterFiles = val;
+      this.checkDataToImport();
+    });
+
+    this.importMeterDataFilesSub = this.uploadDataService.importMeterDataFiles.subscribe(val => {
+      this.importMeterDataFiles = val;
+      this.checkDataToImport();
+    });
   }
 
   ngOnDestroy() {
     this.importMeterFileWizardSub.unsubscribe();
     this.importMeterDataFileWizardSub.unsubscribe();
+    this.importMeterFilesSub.unsubscribe();
+    this.importMeterDataFilesSub.unsubscribe();
     this.resetData();
   }
 
@@ -271,6 +291,30 @@ export class UploadDataComponent implements OnInit {
       } else {
         return meterData;
       }
+    }
+  }
+
+  checkDataToImport() {
+    this.disableImport = true;
+    if (this.importMeterDataFiles) {
+      this.importMeterDataFiles.forEach(file => {
+        if (file.importMeterDataFileSummary.newMeterData.length != 0) {
+          this.disableImport = false;
+        }
+        if (!file.skipExisting && file.importMeterDataFileSummary.existingMeterData.length != 0) {
+          this.disableImport = false;
+        }
+      });
+    }
+    if (!this.disableImport && this.importMeterFiles) {
+      this.importMeterFiles.forEach(file => {
+        if (file.importMeterFileSummary.existingMeters.length != 0) {
+          this.disableImport = false;
+        }
+        if (file.importMeterFileSummary.newMeters.length != 0) {
+          this.disableImport = false;
+        }
+      });
     }
   }
 }

@@ -9,7 +9,10 @@
         <app-meter-data-table></app-meter-data-table>
         <div class="saveCancel item-right text-right">
             <button class="btn btn-secondary" (click)="resetData()">Cancel</button>
-            <button class="btn btn-primary pull-right" (click)="importData()">Import Data</button>
+            <button class="btn btn-primary pull-right" (click)="importData()" [disabled]="disableImport">Import Data</button>
+            <div class="alert alert-warning" *ngIf="disableImport">
+                No valid data has been uploaded. Finish setting up your data for import.
+            </div>
         </div>
 
     </div>
