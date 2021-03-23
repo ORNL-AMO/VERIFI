@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, crashReporter, Menu } = require('electron');
+const { app, BrowserWindow, ipcMain, crashReporter, Menu, ipcRenderer } = require('electron');
 const path = require('path');
 const url = require('url');
 const log = require('electron-log');
@@ -24,7 +24,8 @@ app.on('ready', function () {
         height: 600,
         webPreferences: {
           contextIsolation: true,
-          nodeIntegration: false
+          nodeIntegration: false,
+          preload: path.join(__dirname, 'preload.js')
         },
     });
     win.maximize();
@@ -46,28 +47,29 @@ app.on('ready', function () {
 
     //signal from core.component to check for update
     ipcMain.on('ready', (coreCompEvent, arg) => {
-        log.info('ready!!!')
+        log.info('ready!!')
+        win.webContents.send('pong', 'some data');
         // if (!isDev()) {
-        autoUpdater.checkForUpdates().then(() => {
-            log.info('done checking for updates');
-            coreCompEvent.sender.send('release-info', autoUpdater.updateInfoAndProvider.info);
-        });
-        autoUpdater.on('update-available', (event, info) => {
-            log.info('update available');
-            coreCompEvent.sender.send('available', true);
-        });
-        autoUpdater.on('update-not-available', (event, info) => {
-            log.info('no update available..');
-        });
-        autoUpdater.on('error', (event, error) => {
-            log.info('error');
-            coreCompEvent.sender.send('error', error);
-        });
+        // autoUpdater.checkForUpdates().then(() => {
+        //     log.info('done checking for updates');
+        //     coreCompEvent.sender.send('release-info', autoUpdater.updateInfoAndProvider.info);
+        // });
+        // autoUpdater.on('update-available', (event, info) => {
+        //     log.info('update available');
+        //     coreCompEvent.sender.send('available', true);
+        // });
+        // autoUpdater.on('update-not-available', (event, info) => {
+        //     log.info('no update available..');
+        // });
+        // autoUpdater.on('error', (event, error) => {
+        //     log.info('error');
+        //     coreCompEvent.sender.send('error', error);
+        // });
 
-        autoUpdater.on('update-downloaded', (event, info) => {
-            autoUpdater.quitAndInstall();
-            coreCompEvent.sender.send('update-downloaded');
-        });
+        // autoUpdater.on('update-downloaded', (event, info) => {
+        //     autoUpdater.quitAndInstall();
+        //     coreCompEvent.sender.send('update-downloaded');
+        // });
         // }
     })
 
