@@ -49,6 +49,7 @@ export class UtilityComponent implements OnInit {
   ngOnDestroy() {
     this.selectedAccountSub.unsubscribe();
     this.selectedFacilitySub.unsubscribe();
+    this.utilityDataSub.unsubscribe();
   }
 
 }
