@@ -5,14 +5,14 @@
     <p>Please <i class="fa fa-plus"></i> Add New Bill or <i class="fa fa-upload"></i> Import multiple bills from excel.</p>
     <div class="meterData">
         <button class="btn btn-primary-4 mr-2" (click)="meterDataAdd()"><i class="fa fa-plus"></i> Add New Bill</button>
-        <button class="btn btn-outline" (click)="uploadData()"><i class="fa fa-upload"></i> Import Bills</button>
+        <button class="btn btn-outline" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
     </div>
 </div>
 <div *ngIf="meterList.length != 0 && meterListHasData">
     <div class="controls">
         <!--Import/Export-->
         <div class="importExport item-right">
-            <button class="btn btn-small btn-outline" (click)="uploadData()">Import</button>
+            <button class="btn btn-small btn-outline" (click)="uploadData()">Import Data</button>
             <button class="btn btn-small btn-outline" (click)="meterExport()">Export</button>
         </div>
         <!--Items Per Page-->
