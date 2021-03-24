@@ -1,31 +1,62 @@
 import { Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ElectronService {
 
+
+  updateAvailable: BehaviorSubject<boolean>;
+
   constructor() {
-    if (window["api"]) {
-      this.on();
+    this.updateAvailable = new BehaviorSubject<boolean>(false);
+
+    if (window["electronAPI"]) {
+      this.listen();
     } else {
       console.warn('Electron\'s IPC was not loaded');
     }
   }
 
-  on(): void {
-    if (!window["api"]) {
+  //listens for messages from electron about updates
+  listen(): void {
+    if (!window["electronAPI"]) {
       return;
     }
-    window["api"].on("pong", (data) => {
+    window["electronAPI"].on("release-info", (data) => {
+      console.log('release-info');
+      console.log(data)
+    });
+    window["electronAPI"].on("available", (data) => {
+      console.log('available');
+      console.log(data)
+      this.updateAvailable.next(true);
+    });
+    window["electronAPI"].on("error", (data) => {
+      console.log('error');
+      console.log(data)
+    });
+    window["electronAPI"].on("update-downloaded", (data) => {
+      console.log('update-downloaded');
       console.log(data)
     });
   }
 
-  send(data: any): void {
-    if (!window["api"]) {
+  //Used to tell electron that app is ready
+  //does nothing when in browser
+  sendAppReady(data: any): void {
+    if (!window["electronAPI"]) {
       return;
     }
-    window["api"].send("ready", data);
+    window["electronAPI"].send("ready", data);
+  }
+
+  //send signal to ipcMain to update
+  sendUpdateSignal(){
+    if (!window["electronAPI"]) {
+      return;
+    }
+    window["electronAPI"].send("update");
   }
 }

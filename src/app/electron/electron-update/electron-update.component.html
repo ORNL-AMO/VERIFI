@@ -1,0 +1,15 @@
+<div class="card toast info" [@updateToast]="showUpdateAvailable">
+    <div class="header">
+        <i class="fa fa-info-circle item-left mr-2"></i>
+
+        <p class="item-left toast-title">A new version of VERIFI is available!</p>
+        <button class="close item-right" (click)="closeUpdateAvailable()">&times;</button>
+    </div>
+    <!-- <div class="body" *ngIf="toastNotification.body">
+      <p class="mb-0">{{toastNotification.body}}</p>
+    </div> -->
+    <div class="footer text-right">
+        <hr>
+        <a class="click-link" (click)="update()">Download Update</a>
+    </div>
+</div>

@@ -1,7 +1,7 @@
 {
   "name": "verifi",
   "description": "Application for analyzing utility usage",
-  "version": "0.0.1",
+  "version": "0.0.1-alpha",
   "main": "main.js",
   "author": "Advanced Manufacturing Office",
   "repository": "https://github.com/ORNL-AMO/VERIFI.git",
@@ -10,7 +10,7 @@
     "copyright": "Copyright 2021 ORNL. All rights reserved.",
     "productName": "VERIFI",
     "directories": {
-      "output": "../output/"
+      "output": "../output/verifi/"
     },
     "win": {
       "target": "nsis"
