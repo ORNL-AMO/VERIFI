@@ -36,9 +36,9 @@ app.on('ready', function () {
         slashes: true
     }));
 
-    //   if (isDev()) {
-    win.toggleDevTools();
-    //   }
+    if (isDev()) {
+        win.toggleDevTools();
+    }
     // Remove window once app is closed
     win.on('closed', function () {
         win = null;
@@ -47,37 +47,34 @@ app.on('ready', function () {
     //signal from core.component to check for update
     ipcMain.on('ready', (coreCompEvent, arg) => {
 
-        // if (!isDev()) {
-        autoUpdater.checkForUpdates().then(() => {
-            log.info('done checking for updates');
-            if (autoUpdater.updateInfoAndProvider) {
-                win.webContents.send('release-info', autoUpdater.updateInfoAndProvider.info);
-            }
-        });
-        autoUpdater.on('update-available', (event, info) => {
-            log.info('update available');
-            win.webContents.send('available', true);
-        });
-        // autoUpdater.on('update-not-available', (event, info) => {
-        //     log.info('no update available..');
-        // });
-        autoUpdater.on('error', (event, error) => {
-            log.info('error');
-            win.webContents.send('error', error);
-        });
+        if (!isDev()) {
+            autoUpdater.checkForUpdates().then(() => {
+                log.info('done checking for updates');
+                if (autoUpdater.updateInfoAndProvider) {
+                    win.webContents.send('release-info', autoUpdater.updateInfoAndProvider.info);
+                }
+            });
+            autoUpdater.on('update-available', (event, info) => {
+                log.info('update available');
+                win.webContents.send('available', true);
+            });
+            autoUpdater.on('error', (event, error) => {
+                log.info('error');
+                win.webContents.send('error', error);
+            });
 
-        autoUpdater.on('update-downloaded', (event, info) => {
-            autoUpdater.quitAndInstall();
-            win.webContents.send('update-downloaded');
-        });
-        // }
+            autoUpdater.on('update-downloaded', (event, info) => {
+                autoUpdater.quitAndInstall();
+                win.webContents.send('update-downloaded');
+            });
+        }
     })
 
     ipcMain.once('quit-and-install', (event, arg) => {
         autoUpdater.quitAndInstall(false);
     })
 
-    //   //Check for updates and install
+    //Check for updates and install
     autoUpdater.autoDownload = false;
     autoUpdater.autoInstallOnAppQuit = false;
 
@@ -103,7 +100,7 @@ app.on('ready', function () {
     win.setMenuBarVisibility(false)
 });
 
-// Listen for message from core.component to either download updates or not
+// Listen for message from application (electron component) to either download updates
 ipcMain.once('update', (event, arg) => {
     log.info('update')
     autoUpdater.downloadUpdate();

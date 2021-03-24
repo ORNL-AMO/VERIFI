@@ -1,11 +1,10 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AccountdbService } from '../indexedDB/account-db.service';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
 import { IdbAccount, IdbFacility, IdbUtilityMeter } from '../models/idb';
 import { Router, Event, NavigationEnd } from '@angular/router';
 import { UtilityMeterdbService } from '../indexedDB/utilityMeter-db.service';
-import { ToastNotificationsService } from '../shared/toast-notifications/toast-notifications.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -30,8 +29,7 @@ export class DashboardComponent implements OnInit {
     private accountDbService: AccountdbService, 
     private facilityDbService: FacilitydbService,
     public utilityMeterDbService: UtilityMeterdbService,
-    private router: Router,
-    private toastNotificationService: ToastNotificationsService
+    private router: Router
     ) {
     router.events.subscribe((event: Event) => {
       if (event instanceof NavigationEnd) {
@@ -46,7 +44,6 @@ export class DashboardComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.checkToast();
     this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(val => {
       this.selectedAccount = val;
     });
@@ -88,11 +85,5 @@ export class DashboardComponent implements OnInit {
       this.facilityDbService.selectedFacility.next(selectedFacility);
       this.router.navigateByUrl('/facility-summary');
     }
-  }
-
-  checkToast() {
-    let title: string = 'Toast Test';
-    let body: string = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.';
-    this.toastNotificationService.showToast(title, body, undefined, false, "info");
   }
 }

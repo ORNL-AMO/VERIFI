@@ -8,10 +8,12 @@ export class ElectronService {
 
 
   updateAvailable: BehaviorSubject<boolean>;
-
+  updateInfo: BehaviorSubject<{releaseName: string, releaseNotes: string}>;
+  updateError: BehaviorSubject<boolean>;
   constructor() {
     this.updateAvailable = new BehaviorSubject<boolean>(false);
-
+    this.updateInfo = new BehaviorSubject<{releaseName: string, releaseNotes: string}>(undefined);
+    this.updateError = new BehaviorSubject<boolean>(false);
     if (window["electronAPI"]) {
       this.listen();
     } else {
@@ -24,9 +26,10 @@ export class ElectronService {
     if (!window["electronAPI"]) {
       return;
     }
-    window["electronAPI"].on("release-info", (data) => {
+    window["electronAPI"].on("release-info", (data: {releaseName: string, releaseNotes: string}) => {
       console.log('release-info');
       console.log(data)
+      this.updateInfo.next(data);
     });
     window["electronAPI"].on("available", (data) => {
       console.log('available');
@@ -36,6 +39,7 @@ export class ElectronService {
     window["electronAPI"].on("error", (data) => {
       console.log('error');
       console.log(data)
+      this.updateError.next(true);
     });
     window["electronAPI"].on("update-downloaded", (data) => {
       console.log('update-downloaded');

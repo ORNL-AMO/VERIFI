@@ -2,6 +2,7 @@ import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { ElectronService } from '../electron.service';
 import { trigger, state, style, animate, transition } from '@angular/animations';
+import { LoadingService } from 'src/app/shared/loading/loading.service';
 
 @Component({
   selector: 'app-electron-update',
@@ -23,7 +24,14 @@ export class ElectronUpdateComponent implements OnInit {
 
   updateAvailable: boolean;
   updateAvailableSub: Subscription;
-  constructor(private electronService: ElectronService, private cd: ChangeDetectorRef) {
+
+  updateInfo: { releaseName: string, releaseNotes: string };
+  updateInfoSub: Subscription;
+  downloading: boolean;
+
+  updateError: boolean;
+  updateErrorSub: Subscription;
+  constructor(private electronService: ElectronService, private cd: ChangeDetectorRef, private loadingService: LoadingService) {
   }
 
   ngOnInit() {
@@ -38,13 +46,29 @@ export class ElectronUpdateComponent implements OnInit {
         }, 100)
       }
     });
+
+    this.updateInfoSub = this.electronService.updateInfo.subscribe(val => {
+      this.updateInfo = val;
+    });
+
+    this.updateErrorSub = this.electronService.updateError.subscribe(val => {
+      this.updateError = val;
+      if (this.updateError) {
+        this.loadingService.setLoadingStatus(false);
+      }
+    })
   }
 
   ngOnDestroy() {
     this.updateAvailableSub.unsubscribe();
+    this.updateInfoSub.unsubscribe();
+    this.updateErrorSub.unsubscribe();
   }
 
   update() {
+    this.downloading = true;
+    this.loadingService.setLoadingMessage('Downloading update. Application will close when download is completed. This may take a moment.');
+    this.loadingService.setLoadingStatus(true);
     this.electronService.sendUpdateSignal();
   }
 
