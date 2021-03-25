@@ -188,7 +188,7 @@ export class EditMeterFormComponent implements OnInit {
     } else if (this.meterForm.controls.source.value == 'Other Energy') {
       let selectedEnergyOption: FuelTypeOption = OtherEnergyOptions.find(option => { return option.value == this.meterForm.controls.fuel.value });
       if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Steam') {
-        facilityUnit = selectedFacility.volumeLiquidUnit;
+        facilityUnit = selectedFacility.massUnit;
       } else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Chilled Water') {
         // this.meterForm.controls.startingUnit.patchValue(selectedFacility.chilledWaterUnit);
         // this.setStartingUnit(selectedFacility.volumeLiquidUnit);

@@ -125,7 +125,7 @@ export class EnergyUnitsHelperService {
     } else if (source == 'Other Energy') {
       let selectedEnergyOption: FuelTypeOption = OtherEnergyOptions.find(option => { return option.value == fuel });
       if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Steam') {
-        return VolumeLiquidOptions.concat(EnergyUnitOptions);
+        return MassUnitOptions.concat(EnergyUnitOptions);
       } else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Chilled Water') {
         // this.setStartingUnit(selectedFacility.volumeLiquidUnit);
         //TODO: Add chilled water units
