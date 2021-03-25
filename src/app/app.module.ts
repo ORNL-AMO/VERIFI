@@ -85,6 +85,7 @@ import { WizardDataSummaryComponent } from './utility/upload-data/excel-wizard/w
 import { CalanderizationFilterComponent } from './utility/calanderization/calanderization-filter/calanderization-filter.component';
 import { CalanderizationChartComponent } from './utility/calanderization/calanderization-chart/calanderization-chart.component';
 import { ToastNotificationsComponent } from './shared/toast-notifications/toast-notifications.component';
+import { ElectronUpdateComponent } from './electron/electron-update/electron-update.component';
 
 @NgModule({
   declarations: [
@@ -155,7 +156,8 @@ import { ToastNotificationsComponent } from './shared/toast-notifications/toast-
     DefaultUnitsFormComponent,
     FinancialReportingFormComponent,
     SustainabilityQuestionsFormComponent,
-    ToastNotificationsComponent
+    ToastNotificationsComponent,
+    ElectronUpdateComponent
   ],
   imports: [
     BrowserModule,
