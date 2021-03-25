@@ -139,6 +139,22 @@ export const energy = {
       }
       , to_anchor: 1000000
     }
+    , galF: {
+      name: {
+        singular: 'Gallon-Fahrenheit'
+        , plural: 'Gallons-Fahrenheit',
+        display: '(gal-&#x2109;)'
+      }
+      , to_anchor: 8.24
+    }
+    , tonHr: {
+      name: {
+        singular: 'Ton Hour'
+        , plural: 'Ton Hour',
+        display: '(ton-Hr)'
+      }
+      , to_anchor: 12000
+    }
   },
   _anchors: {
     metric: {

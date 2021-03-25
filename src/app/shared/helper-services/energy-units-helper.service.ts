@@ -3,7 +3,7 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAccount, IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
 import { FuelTypeOption, GasOptions, LiquidOptions, OtherEnergyOptions, SolidOptions, SourceOptions } from 'src/app/utility/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
-import { EnergyUnitOptions, MassUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from '../unitOptions';
+import { ChilledWaterUnitOptions, EnergyUnitOptions, MassUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from '../unitOptions';
 
 @Injectable({
   providedIn: 'root'
@@ -63,7 +63,7 @@ export class EnergyUnitsHelperService {
       if (selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Steam') {
         return selectedFacility.massUnit;
       } else if (selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Chilled Water') {
-        return selectedFacility.chilledWaterUnit;
+        return selectedFacility.energyUnit;
       }
     }
   }
@@ -89,7 +89,7 @@ export class EnergyUnitsHelperService {
       if (selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Steam') {
         return selectedAccount.massUnit;
       } else if (selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Chilled Water') {
-        return selectedAccount.chilledWaterUnit;
+        return selectedAccount.energyUnit;
       }
     }
   }
@@ -127,8 +127,8 @@ export class EnergyUnitsHelperService {
       if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Steam') {
         return MassUnitOptions.concat(EnergyUnitOptions);
       } else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Chilled Water') {
-        // this.setStartingUnit(selectedFacility.volumeLiquidUnit);
-        //TODO: Add chilled water units
+        return EnergyUnitOptions.concat(ChilledWaterUnitOptions)
+
       } else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Hot Water') {
         return EnergyUnitOptions;
       }

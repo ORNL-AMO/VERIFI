@@ -121,7 +121,6 @@ export class AccountdbService {
             energyUnit: 'kWh',
             volumeLiquidUnit: 'gal',
             volumeGasUnit: 'SCF',
-            chilledWaterUnit: undefined,
             massUnit: 'lb',
             sustainabilityQuestions: {
                 energyReductionGoal: false,
@@ -172,7 +171,6 @@ export const TestAccountData: Array<IdbAccount> = [
         energyUnit: 'kWh',
         volumeLiquidUnit: 'gal',
         volumeGasUnit: 'SCF',
-        chilledWaterUnit: undefined,
         massUnit: 'lb',
         sustainabilityQuestions: {
             energyReductionGoal: false,
@@ -218,7 +216,6 @@ export const TestAccountData: Array<IdbAccount> = [
         energyUnit: 'kWh',
         volumeLiquidUnit: 'gal',
         volumeGasUnit: 'SCF',
-        chilledWaterUnit: undefined,
         massUnit: 'lb',
         sustainabilityQuestions: {
             energyReductionGoal: false,
@@ -264,7 +261,6 @@ export const TestAccountData: Array<IdbAccount> = [
         energyUnit: 'kWh',
         volumeLiquidUnit: 'gal',
         volumeGasUnit: 'SCF',
-        chilledWaterUnit: undefined,
         massUnit: 'lb',
         sustainabilityQuestions: {
             energyReductionGoal: false,
