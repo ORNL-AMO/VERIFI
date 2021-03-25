@@ -16,12 +16,16 @@
         the
         screen.</p>
 
-    <div class="controls">
-        <div class="importExport item-right">
-            <button class="btn btn-small btn-outline" (click)="uploadData()">Import Data</button>
-            <button class="btn btn-small btn-outline" (click)="meterExport()">Export</button>
+    <div class="controls mb-2">
+        <div class="meterData item-right">
+            <button class="btn btn-primary-4 item-right m-0 ml-2" (click)="addMeter()"><i class="fa fa-plus"></i> Add New Meter</button>
         </div>
-        <!--Items Per Page-->
+
+        <div class="importExport item-right">
+            <button class="btn btn-outline" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
+            <button class="btn btn-outline" (click)="meterExport()"><i class="fa fa-download"></i> Export</button>
+        </div>
+
         <div class="items-per-page item-right">
             <span>Show </span>
             <select [(ngModel)]="itemsPerPage">
@@ -31,11 +35,6 @@
                 <option [ngValue]=40>40</option>
             </select>
         </div>
-    </div>
-
-    <div class="meterData">
-        <button class="btn btn-primary-4 item-right" (click)="addMeter()"><i class="fa fa-plus"></i> Add New
-            Meter</button>
     </div>
 
     <div class="table-responsive">

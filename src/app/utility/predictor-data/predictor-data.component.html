@@ -4,12 +4,16 @@
         magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
         consequat.</p>
 
-    <div class="controls">
+    <div class="controls mb-2">
+        <div class="meterData item-right">
+            <button class="btn btn-primary-4 item-right m-0 ml-2" (click)="addNewPredictor()"><i class="fa fa-plus"></i> Add New Predictor</button>
+        </div>
+
         <div class="importExport item-right">
-            <!-- <button class="btn btn-small btn-outline" (click)="importWindow = true">Import</button>
-            <button class="btn btn-small btn-outline" (click)="predictorExport()">Export</button> -->
-            <button class="btn btn-small btn-outline" (click)="openImportPredictors()">Import</button>
-            <button class="btn btn-small btn-outline" (click)="predictorExport()">Export</button>
+            <!-- <button class="btn btn-outline" (click)="importWindow = true">Import</button>
+            <button class="btn btn-outline" (click)="predictorExport()">Export</button> -->
+            <button class="btn btn-outline" (click)="openImportPredictors()">Import</button>
+            <button class="btn btn-outline" (click)="predictorExport()">Export</button>
         </div>
         <!--Items Per Page-->
         <div class="items-per-page item-right">
@@ -21,11 +25,6 @@
                 <option value="24">24</option>
             </select>
         </div>
-    </div>
-
-    <div class="meterData">
-        <button class="btn btn-primary-4 item-right" (click)="addNewPredictor()"><i class="fa fa-plus"></i> Add New
-            Predictor</button>
     </div>
 
     <div class='stick-scroll-x'>

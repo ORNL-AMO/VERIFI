@@ -128,7 +128,7 @@ Buttons
 }
 .btn-small {
   padding: 2px 10px !important;
-  border-radius: 3px !important;
+  border-radius: 3px;
 }
 .btn-outline {
   color: #2c386b !important;
@@ -191,8 +191,12 @@ Buttons
 .btn-primary-1 i,
 .btn-primary-2 i,
 .btn-primary-3 i,
-.btn-primary-4 i {
+.btn-primary-4 i,
+.btn-outline:hover i {
   color: #fff !important;
+}
+.btn-outline i {
+  color: #2c386b !important;
 }
 .importExport button:first-child {
   margin-right: 5px;
@@ -212,6 +216,15 @@ Buttons
 }
 .bulk-delete.show {
   opacity: 1;
+}
+.btn-group button:fist-child {
+  border-top-right-radius: 0!important;
+  border-bottom-right-radius: 0!important;
+}
+
+.btn-group button:not(:first-child) {
+  border-top-left-radius: 0!important;
+  border-bottom-left-radius: 0!important;
 }
 /*
 Alerts
@@ -702,8 +715,10 @@ table input {
   padding: 10px 5px!important;
   color: #ffffff;
 }
+
 .table-mh th span {
   border: none;
+  padding: 0 5px!important;
 }
 /*
 Popovers (Contextual Help)
@@ -883,10 +898,10 @@ Content Tabs
 .tabs ul li.red {
   border-top: 3px solid #bf2d00;
 }
-.tabs ul li.red a, 
+/* .tabs ul li.red a, 
 .tabs ul li.red span {
   color: #bf2d00;
-}
+} */
 /*
 Meter Displays
 =============================================== */
@@ -936,7 +951,9 @@ i.fa.fa-arrow-circle-down {
 .filter button:nth-child(2) {
   border-left: none;
 }
-
+.controls .meterData {
+  z-index: 2;
+}
 /*
 Account / Facility Profile Picture
 =============================================== */
@@ -1053,13 +1070,13 @@ Pagination
 }
 .items-per-page {
   padding: 10px;
-  font-size: 12px;
+  /* font-size: 12px; */
 }
 .items-per-page span {
   padding: 3px 3px 5px 5px;
 }
 .items-per-page select {
-  padding: 4px;
+  padding: 6px 5px 7px 5px;
   border-radius: 3px;
   cursor: pointer;
 }
