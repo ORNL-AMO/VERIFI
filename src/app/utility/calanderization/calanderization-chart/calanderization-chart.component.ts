@@ -121,7 +121,7 @@ export class CalanderizationChartComponent implements OnInit {
         title: {
           text: this.meterData.meter.name,
           font: {
-            size: 24
+            size: 18
           },
         },
         xaxis: {
