@@ -2,12 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { FacilitydbService } from "../../indexedDB/facility-db.service";
 import { Subscription } from 'rxjs';
-import { IdbFacility } from 'src/app/models/idb';
+import { IdbAccount, IdbFacility } from 'src/app/models/idb';
 import { PredictordbService } from "../../indexedDB/predictors-db.service";
 import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db.service";
 import { UtilityMeterDatadbService } from "../../indexedDB/utilityMeterData-db.service";
 import { UtilityMeterGroupdbService } from "../../indexedDB/utilityMeterGroup-db.service";
 import { LoadingService } from "../../shared/loading/loading.service";
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 
 @Component({
   selector: 'app-facility',
@@ -20,7 +21,7 @@ export class FacilityComponent implements OnInit {
   selectedFacilitySub: Subscription;
   selectedFacility: IdbFacility;
   unitsDontMatchAccount: boolean;
-  
+
   constructor(
     private router: Router,
     private facilityDbService: FacilitydbService,
@@ -28,6 +29,7 @@ export class FacilityComponent implements OnInit {
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
+    private accountDbService: AccountdbService,
     private loadingService: LoadingService
   ) { }
 
@@ -42,30 +44,34 @@ export class FacilityComponent implements OnInit {
   }
 
 
-  facilityDelete() {
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+  async facilityDelete() {
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     this.loadingService.setLoadingStatus(true);
     this.loadingService.setLoadingMessage("Deleting Facility...");
     // Delete all info associated with account
-    this.predictorDbService.deleteAllFacilityPredictors(selectedFacility.id);
-    this.utilityMeterDataDbService.deleteAllFacilityMeterData(selectedFacility.id);
-    this.utilityMeterDbService.deleteAllFacilityMeters(selectedFacility.id);
-    this.utilityMeterGroupDbService.deleteAllFacilityMeterGroups(selectedFacility.id);
-    this.facilityDbService.deleteById(selectedFacility.id);
+    await this.predictorDbService.deleteAllFacilityPredictors(this.selectedFacility.id);
+    await this.utilityMeterDataDbService.deleteAllFacilityMeterData(this.selectedFacility.id);
+    await this.utilityMeterDbService.deleteAllFacilityMeters(this.selectedFacility.id);
+    await this.utilityMeterGroupDbService.deleteAllFacilityMeterGroups(this.selectedFacility.id);
+    await this.facilityDbService.deleteFacilitiesAsync([this.selectedFacility]);
     // Then navigate to another facility
-    this.facilityDbService.setSelectedFacility();
-    this.router.navigate(['/']);
-    this.loadingService.setLoadingStatus(false);
-
+    this.facilityDbService.getAll().subscribe(allFacilities => {
+      this.facilityDbService.allFacilities.next(allFacilities);
+      let accountFacilites: Array<IdbFacility> = allFacilities.filter(facility => {return facility.accountId == selectedAccount.id});
+      this.facilityDbService.accountFacilities.next(accountFacilites);
+      this.facilityDbService.setSelectedFacility();
+      this.router.navigate(['/']);
+      this.loadingService.setLoadingStatus(false);
+    });
   }
 
   editFacility() {
     this.showDeleteFacility = true;
   }
 
-  confirmDelete() {
-    this.facilityDelete();
+  async confirmDelete() {
     this.showDeleteFacility = undefined;
+    await this.facilityDelete();
   }
 
   cancelDelete() {
