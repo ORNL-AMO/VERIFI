@@ -157,7 +157,7 @@ import { ElectronUpdateComponent } from './electron/electron-update/electron-upd
     FinancialReportingFormComponent,
     SustainabilityQuestionsFormComponent,
     ToastNotificationsComponent,
-    ElectronUpdateComponent
+    ElectronUpdateComponent,
   ],
   imports: [
     BrowserModule,

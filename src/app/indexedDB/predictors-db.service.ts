@@ -89,7 +89,7 @@ export class PredictordbService {
 
     deleteAllFacilityPredictors(facilityId: number): void {
         this.getAllByIndexRange('facilityId', facilityId).subscribe(facilityPredictorEntries => {
-            for(let i=0; i<facilityPredictorEntries.length; i++) {
+            for (let i = 0; i < facilityPredictorEntries.length; i++) {
                 this.dbService.delete('predictors', facilityPredictorEntries[i].id);
             }
         });
@@ -97,7 +97,7 @@ export class PredictordbService {
 
     deleteAllAccountPredictors(accountId: number): void {
         this.getAllByIndexRange('accountId', accountId).subscribe(accountPredictorEntries => {
-            for(let i=0; i<accountPredictorEntries.length; i++) {
+            for (let i = 0; i < accountPredictorEntries.length; i++) {
                 this.dbService.delete('predictors', accountPredictorEntries[i].id);
             }
         });
@@ -112,8 +112,8 @@ export class PredictordbService {
         }
     }
 
-    addNewPredictor() {
-        let newPredictor: PredictorData = this.getNewPredictor();
+    addNewPredictor(newPredictor: PredictorData) {
+        // let newPredictor: PredictorData = this.getNewPredictor();
         let facilityPredictorEntries: Array<IdbPredictorEntry> = this.facilityPredictorEntries.getValue();
         facilityPredictorEntries.forEach(predictorEntry => {
             predictorEntry.predictors.push(newPredictor);
@@ -129,8 +129,8 @@ export class PredictordbService {
         });
     }
 
-    getNewPredictor(): PredictorData {
-        let facilityPredictors: Array<PredictorData> = this.facilityPredictors.getValue();
+    getNewPredictor(facilityPredictors: Array<PredictorData>): PredictorData {
+        // let facilityPredictors: Array<PredictorData> = this.facilityPredictors.getValue();
         return {
             name: 'Predictor #' + (facilityPredictors.length + 1),
             amount: undefined,
@@ -194,15 +194,26 @@ export class PredictordbService {
         });
     }
 
-
-
     updateFacilityPredictorEntries(updatedPredictors: Array<PredictorData>) {
         let facilityPredictorEntries: Array<IdbPredictorEntry> = this.facilityPredictorEntries.getValue();
+        let faclilityPredictors: Array<PredictorData> = this.facilityPredictors.getValue();
+        let facilityPredictorIds: Array<string> = faclilityPredictors.map(predictor => { return predictor.id });
+        //track new predictors to add
+        let newPredictors: Array<PredictorData> = new Array();
+        updatedPredictors.forEach(predictor => {
+            if (!facilityPredictorIds.includes(predictor.id)) {
+                newPredictors.push(predictor);
+            }
+        });
+
         //iterate entries
         facilityPredictorEntries.forEach(entry => {
             //update entry predictors
             entry.predictors = this.updateEntryPredictors(entry.predictors, updatedPredictors);
             this.update(entry);
+        });
+        newPredictors.forEach(newPredictor => {
+            this.addNewPredictor(newPredictor);
         });
     }
 

@@ -1,4 +1,5 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { PredictorData } from 'src/app/models/idb';
 
@@ -13,11 +14,17 @@ export class EditPredictorsComponent implements OnInit {
 
   facilityPredictors: Array<PredictorData>;
   predictorToDelete: PredictorData;
+
+  facilityPredictorsSub: Subscription;
   constructor(private predictorDbService: PredictordbService) { }
 
   ngOnInit(): void {
-    this.facilityPredictors = JSON.parse(JSON.stringify(this.predictorDbService.facilityPredictors.getValue()));
+      this.facilityPredictors = JSON.parse(JSON.stringify(this.predictorDbService.facilityPredictors.getValue()));
   }
+
+  // ngOnDestroy() {
+  //   this.facilityPredictorsSub.unsubscribe();
+  // }
 
   save() {
     this.predictorDbService.updateFacilityPredictorEntries(this.facilityPredictors);
@@ -40,5 +47,10 @@ export class EditPredictorsComponent implements OnInit {
 
   cancelDelete() {
     this.predictorToDelete = undefined;
+  }
+
+  addPredictorEntry() {
+    let newPredictor: PredictorData = this.predictorDbService.getNewPredictor(this.facilityPredictors);
+    this.facilityPredictors.push(newPredictor);
   }
 }

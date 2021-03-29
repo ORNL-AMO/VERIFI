@@ -60,9 +60,9 @@ export class PredictorDataComponent implements OnInit {
     }
   }
 
-  addNewPredictor() {
-    this.predictorsDbService.addNewPredictor();
-  }
+  // addNewPredictor() {
+  //   this.predictorsDbService.addNewPredictor();
+  // }
 
   addPredictorEntry() {
     this.predictorsDbService.addNewPredictorEntry();

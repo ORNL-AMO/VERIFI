@@ -5,13 +5,13 @@
         consequat.</p>
 
     <div class="controls mb-2">
+        <button class="btn btn-outline" (click)="editPredictors()">Edit Predictors</button>
+
         <div class="meterData item-right">
-            <button class="btn btn-primary-4 item-right m-0 ml-2" (click)="addNewPredictor()"><i class="fa fa-plus"></i> Add New Predictor</button>
+            <button class="btn btn-primary-4 item-right m-0 ml-2" (click)="addPredictorEntry()"><i class="fa fa-plus"></i> Add New Predictor</button>
         </div>
 
         <div class="importExport item-right">
-            <!-- <button class="btn btn-outline" (click)="importWindow = true">Import</button>
-            <button class="btn btn-outline" (click)="predictorExport()">Export</button> -->
             <button class="btn btn-outline" (click)="openImportPredictors()">Import</button>
             <button class="btn btn-outline" (click)="predictorExport()">Export</button>
         </div>
@@ -27,7 +27,7 @@
         </div>
     </div>
 
-    <div class='stick-scroll-x'>
+    <div>
         <table class="table table-sm">
             <thead>
                 <tr>
@@ -35,15 +35,9 @@
                     <th class="header" *ngFor="let predictor of facilityPredictors">{{predictor.name}}
                         <!-- <span class="small block">{{predictor.unit}}</span> -->
                     </th>
-                    <!--<td (click)="$event.stopPropagation();">
-                        <i class="fa fa-ellipsis-v" (click)="togglePredictorMenu()"></i>
-                        <div class="meterMenu" [class.open]="showPredictorMenu">
-                            <p (click)="editPredictors()">Edit / Delete</p>
-                        </div>
-                    </td>-->
                     <td class="actions">
-                        <i class="fa fa-pencil" title="Edit / Delete" (click)="editPredictors()"></i>
-                        <i class="fa fa-trash-o" title="Edit / Delete" (click)="editPredictors()"></i>
+                        <!-- <i class="fa fa-pencil" title="Edit / Delete" (click)="editPredictors()"></i>
+                        <i class="fa fa-trash-o" title="Edit / Delete" (click)="editPredictors()"></i> -->
                     </td>
                 </tr>
                 <tr>
@@ -59,14 +53,6 @@
                 <tr *ngFor="let predictorEntry of facilityPredictorEntries | slice: pageSize | slice: 0:itemsPerPage">
                     <td>{{predictorEntry.date | date:'MMM, yyyy'}}</td>
                     <td *ngFor="let predictor of predictorEntry.predictors">{{predictor.amount}}</td>
-                    <!--<td (click)="$event.stopPropagation();">
-                        <i class="fa fa-ellipsis-v" (click)="predictorToggleMenu(predictorEntry.id)"></i>
-                        <div class="meterMenu" [class.open]="predictorMenuOpenId === predictorEntry.id">
-                            <p (click)="setEditPredictorEntry(predictorEntry)">Edit</p>
-                            <p (click)="setDeletePredictorEntry(predictorEntry)">Delete
-                            </p>
-                        </div>
-                    </td>-->
                     <td class="actions">
                         <i class="fa fa-pencil" title="Edit" (click)="setEditPredictorEntry(predictorEntry)"></i>
                         <i class="fa fa-trash-o" title="Delete" (click)="setDeletePredictorEntry(predictorEntry)"></i>
@@ -76,8 +62,8 @@
         </table>
     </div>
     <div class="tableControls overflow-hidden">
-        <button class="btn btn-link item-left" (click)="addPredictorEntry()"
-            [hidden]="facilityPredictorEntries.length === 0"><i class="fa fa-plus"></i> Add Row</button>
+        <!-- <button class="btn btn-link item-left" (click)="addPredictorEntry()"
+            [hidden]="facilityPredictorEntries.length === 0"><i class="fa fa-plus"></i> Add Row</button> -->
         <div class="item-right">
             <ngb-pagination [collectionSize]="facilityPredictorEntries.length" [(page)]="page" [pageSize]="itemsPerPage"
                 [maxSize]="5" [rotate]="true" aria-label="Default pagination" (pageChange)="onPageChange(page)">
