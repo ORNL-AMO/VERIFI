@@ -26,6 +26,7 @@ export interface IdbAccount {
     fiscalYearCalendarEnd: boolean,
     setupWizard: boolean,
     setupWizardComplete: boolean,
+    numberOfFacilities?: number
 }
 
 export interface IdbFacility {

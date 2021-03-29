@@ -8,6 +8,7 @@ import { UtilityMeterDatadbService } from "../../indexedDB/utilityMeterData-db.s
 import { LocalStorageService } from 'ngx-webstorage';
 import { IdbAccount, IdbFacility } from 'src/app/models/idb';
 import { Subscription } from 'rxjs';
+import * as _ from 'lodash';
 
 @Component({
   selector: 'app-header',
@@ -146,20 +147,9 @@ export class HeaderComponent implements OnInit {
 
 
   getAccountFacilityCount() {
-    var res = this.allFacilities.reduce(function(obj, v) {
-      obj[v.accountId] = (obj[v.accountId] || 0) + 1;
-      return obj;
-    }, {});
-
-    
-    for(const property in res) {
-      const index = this.accountList.map(function(e) { return e.id; }).indexOf(+property);
-      if (res[property] === 1) {
-        this.accountList[index]['facilityCount'] = res[property] + " Facility";
-      } else {
-        this.accountList[index]['facilityCount'] = res[property] + " Facilities";
-      }
-    }
+    this.accountList.forEach(account => {
+      account.numberOfFacilities = _.sumBy(this.allFacilities, (facility) => {return facility.accountId == account.id});
+    });
   }
 
 }
