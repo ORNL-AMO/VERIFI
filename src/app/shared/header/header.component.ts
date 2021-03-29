@@ -5,7 +5,6 @@ import { FacilitydbService } from "../../indexedDB/facility-db.service";
 import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db.service";
 import { UtilityMeterGroupdbService } from "../../indexedDB/utilityMeterGroup-db.service";
 import { UtilityMeterDatadbService } from "../../indexedDB/utilityMeterData-db.service";
-import { LocalStorageService } from 'ngx-webstorage';
 import { IdbAccount, IdbFacility } from 'src/app/models/idb';
 import { Subscription } from 'rxjs';
 import * as _ from 'lodash';
@@ -43,8 +42,7 @@ export class HeaderComponent implements OnInit {
     public facilitydbService: FacilitydbService,
     public utilityMeterdbService: UtilityMeterdbService,
     public utilityMeterGroupdbService: UtilityMeterGroupdbService,
-    public utilityMeterDatadbService: UtilityMeterDatadbService,
-    private localStorage: LocalStorageService
+    public utilityMeterDatadbService: UtilityMeterDatadbService
   ) {
     // Close menus on navigation
     router.events.subscribe((event: Event) => {
@@ -140,7 +138,7 @@ export class HeaderComponent implements OnInit {
     this.facilitydbService.selectedFacility.next(facility);
   }
 
-  selectAllFacilities(){
+  selectAllFacilities() {
     //this.toggleFacilityMenu();
     this.router.navigate(['/account-summary']);
   }
@@ -148,8 +146,23 @@ export class HeaderComponent implements OnInit {
 
   getAccountFacilityCount() {
     this.accountList.forEach(account => {
-      account.numberOfFacilities = _.sumBy(this.allFacilities, (facility) => {return facility.accountId == account.id});
+      account.numberOfFacilities = this.getNumberOfFacilities(account.id);
+      console.log(account.numberOfFacilities);
     });
+  }
+
+  getNumberOfFacilities(accountId: number): string {
+    let count: number = 0;
+    this.allFacilities.forEach(facility => {
+      if (facility.accountId == accountId) {
+        count++;
+      }
+    });
+    if(count != 1){
+      return count + ' Facilities';
+    }else{
+      return count + ' Facility';
+    }
   }
 
 }

@@ -20,8 +20,10 @@
                 <div class="currentFacility" (click)="toggleFacilityMenu()">
                     <i class="fa fa-industry item-left"></i>
                     <span>{{activeAccount.name}}</span>
-                    <p *ngIf="!activeFacility || viewingAccountManagementPage">All Facilites <i class="fa fa-caret-down"></i></p>
-                    <p *ngIf="activeFacility && !viewingAccountManagementPage">{{activeFacility.name}} <i class="fa fa-caret-down"></i></p>
+                    <p *ngIf="!activeFacility || viewingAccountManagementPage">All Facilities <i
+                            class="fa fa-caret-down"></i></p>
+                    <p *ngIf="activeFacility && !viewingAccountManagementPage">{{activeFacility.name}} <i
+                            class="fa fa-caret-down"></i></p>
                 </div>
                 <div class="dropdown" [class.open]="facilityMenu == true">
                     <div class="arrow-up"></div>
@@ -33,8 +35,10 @@
                         <div *ngFor="let facility of facilityList">
                             <p (click)="switchFacility(facility)" routerLink="/facility-summary">{{facility.name}}</p>
                             <div class="quick-links">
-                                <i class="fa fa-cog item-right" (click)="switchFacility(facility)" routerLink="/facility-management" title="Manage Facility Settings"></i>
-                                <i class="fa fa-random item-right" (click)="switchFacility(facility)" title="Switch Facility"></i>
+                                <i class="fa fa-cog item-right" (click)="switchFacility(facility)"
+                                    routerLink="/facility-management" title="Manage Facility Settings"></i>
+                                <i class="fa fa-random item-right" (click)="switchFacility(facility)"
+                                    title="Switch Facility"></i>
                             </div>
                         </div>
                     </div>
@@ -79,7 +83,8 @@
             *ngFor="let account of accountList">
             <!--<i class="fa fa-user-circle-o item-left"></i>-->
             <p class="company item-left">{{account.name}}</p>
-            <p class="facilityCount item-right">{{account.numberOfFacilities}}</p>
+            <p class="facilityCount item-right">{{account.numberOfFacilities}}
+            </p>
         </div>
     </div>
 

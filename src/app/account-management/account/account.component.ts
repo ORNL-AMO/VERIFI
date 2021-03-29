@@ -111,7 +111,6 @@ export class AccountComponent implements OnInit {
 
     // Then navigate to another account
     this.accountDbService.getAll().subscribe(accounts => {
-      console.log(accounts);
       this.accountDbService.allAccounts.next(accounts);
       if (accounts.length != 0) {
         this.accountDbService.setSelectedAccount(accounts[0].id);
