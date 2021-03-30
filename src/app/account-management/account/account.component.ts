@@ -64,41 +64,62 @@ export class AccountComponent implements OnInit {
   }
 
 
-  facilityDelete() {
+  async facilityDelete() {
     this.loadingService.setLoadingStatus(true);
-    this.loadingService.setLoadingMessage("Deleting Facility...");
 
     // Delete all info associated with account
-    this.predictorDbService.deleteAllFacilityPredictors(this.facilityToDelete.id);
-    this.utilityMeterDataDbService.deleteAllFacilityMeterData(this.facilityToDelete.id);
-    this.utilityMeterDbService.deleteAllFacilityMeters(this.facilityToDelete.id);
-    this.utilityMeterGroupDbService.deleteAllFacilityMeterGroups(this.facilityToDelete.id);
-    this.facilityDbService.deleteById(this.facilityToDelete.id);
+    this.loadingService.setLoadingMessage("Deleting Facility Predictors...");
+    await this.predictorDbService.deleteAllFacilityPredictors(this.facilityToDelete.id);
+    this.loadingService.setLoadingMessage("Deleting Facility Meter Data...");
+    await this.utilityMeterDataDbService.deleteAllFacilityMeterData(this.facilityToDelete.id);
+    this.loadingService.setLoadingMessage("Deleting Facility Meters...");
+    await this.utilityMeterDbService.deleteAllFacilityMeters(this.facilityToDelete.id);
+    this.loadingService.setLoadingMessage("Deleting Facility Meter Groups...");
+    await this.utilityMeterGroupDbService.deleteAllFacilityMeterGroups(this.facilityToDelete.id);
+    this.loadingService.setLoadingMessage("Deleting Facility...");
+    await this.facilityDbService.deleteFacilitiesAsync([this.facilityToDelete]);
 
     // Then navigate to another facility
-    this.facilityDbService.setSelectedFacility();
-    this.loadingService.setLoadingStatus(false);
+    this.facilityDbService.getAll().subscribe(allFacilities => {
+      this.facilityDbService.allFacilities.next(allFacilities);
+      let accountFacilites: Array<IdbFacility> = allFacilities.filter(facility => { return facility.accountId == this.selectedAccount.id });
+      this.facilityDbService.accountFacilities.next(accountFacilites);
+      this.facilityDbService.setSelectedFacility();
+      this.loadingService.setLoadingStatus(false);
+    });
 
   }
 
-  accountDelete() {
+  async accountDelete() {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
 
     this.loadingService.setLoadingStatus(true);
-    this.loadingService.setLoadingMessage("Deleting Account...");
 
     // Delete all info associated with account
-    this.predictorDbService.deleteAllAccountPredictors(selectedAccount.id);
-    this.utilityMeterDataDbService.deleteAllAccountMeterData(selectedAccount.id);
-    this.utilityMeterDbService.deleteAllAccountMeters(selectedAccount.id);
-    this.utilityMeterGroupDbService.deleteAllAccountMeterGroups(selectedAccount.id);
-    this.facilityDbService.deleteAllAccountFacilities();
-    this.accountDbService.deleteById(selectedAccount.id);
+    this.loadingService.setLoadingMessage("Deleting Account Predictors...");
+    await this.predictorDbService.deleteAllSelectedAccountPredictors();
+    this.loadingService.setLoadingMessage("Deleting Account Meter Data...");
+    await this.utilityMeterDataDbService.deleteAllSelectedAccountMeterData();
+    this.loadingService.setLoadingMessage("Deleting Account Meters...");
+    await this.utilityMeterDbService.deleteAllSelectedAccountMeters();
+    this.loadingService.setLoadingMessage("Deleting Account Meter Groups...");
+    await this.utilityMeterGroupDbService.deleteAllSelectedAccountMeterGroups();
+    this.loadingService.setLoadingMessage("Deleting Account Facilities...");
+    await this.facilityDbService.deleteAllSelectedAccountFacilities();
+    this.loadingService.setLoadingMessage("Deleting Account...");
+    await this.accountDbService.deleteAccountWithObservable(selectedAccount.id);
 
     // Then navigate to another account
-    this.accountDbService.setSelectedAccount(undefined);
-    this.router.navigate(['/']);
-    this.loadingService.setLoadingStatus(false);
+    this.accountDbService.getAll().subscribe(accounts => {
+      this.accountDbService.allAccounts.next(accounts);
+      if (accounts.length != 0) {
+        this.accountDbService.setSelectedAccount(accounts[0].id);
+      } else {
+        this.accountDbService.setSelectedAccount(undefined);
+      }
+      this.router.navigate(['/']);
+      this.loadingService.setLoadingStatus(false);
+    })
   }
 
   setDeleteFacilityEntry(facility: IdbFacility) {
@@ -113,8 +134,8 @@ export class AccountComponent implements OnInit {
     this.showDeleteAccount = true;
   }
 
-  confirmFacilityDelete() {
-    this.facilityDelete();
+  async confirmFacilityDelete() {
+    await this.facilityDelete();
     this.facilityToDelete = undefined;
   }
 

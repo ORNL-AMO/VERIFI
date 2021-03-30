@@ -108,20 +108,21 @@ export class UtilityMeterDatadbService {
         return this.dbService.delete('utilityMeterData', meterDataId);
     }
 
-    deleteAllFacilityMeterData(facilityId: number): void {
-        this.getAllByIndexRange('facilityId', facilityId).subscribe(facilityMeterDataEntries => {
-            for (let i = 0; i < facilityMeterDataEntries.length; i++) {
-                this.dbService.delete('utilityMeterData', facilityMeterDataEntries[i].id);
-            }
-        });
+    async deleteAllFacilityMeterData(facilityId: number) {
+        let accountMeterDataEntries: Array<IdbUtilityMeterData> = this.accountMeterData.getValue();
+        let facilityMeterDataEntries: Array<IdbUtilityMeterData> = accountMeterDataEntries.filter(meterData => { return meterData.facilityId == facilityId });
+        await this.deleteMeterDataEntriesAsync(facilityMeterDataEntries);
     }
 
-    deleteAllAccountMeterData(accountId: number): void {
-        this.getAllByIndexRange('accountId', accountId).subscribe(accountMeterDataEntries => {
-            for (let i = 0; i < accountMeterDataEntries.length; i++) {
-                this.dbService.delete('utilityMeterData', accountMeterDataEntries[i].id);
-            }
-        });
+    async deleteAllSelectedAccountMeterData() {
+        let accountMeterDataEntries: Array<IdbUtilityMeterData> = this.accountMeterData.getValue();
+        await this.deleteMeterDataEntriesAsync(accountMeterDataEntries);
+    }
+
+    async deleteMeterDataEntriesAsync(meterDataEntries: Array<IdbUtilityMeterData>) {
+        for (let i = 0; i < meterDataEntries.length; i++) {
+            await this.deleteWithObservable(meterDataEntries[i].id);
+        }
     }
 
     getNewIdbUtilityMeterData(meter: IdbUtilityMeter): IdbUtilityMeterData {

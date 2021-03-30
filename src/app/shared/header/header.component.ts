@@ -5,9 +5,9 @@ import { FacilitydbService } from "../../indexedDB/facility-db.service";
 import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db.service";
 import { UtilityMeterGroupdbService } from "../../indexedDB/utilityMeterGroup-db.service";
 import { UtilityMeterDatadbService } from "../../indexedDB/utilityMeterData-db.service";
-import { LocalStorageService } from 'ngx-webstorage';
 import { IdbAccount, IdbFacility } from 'src/app/models/idb';
 import { Subscription } from 'rxjs';
+import * as _ from 'lodash';
 
 @Component({
   selector: 'app-header',
@@ -42,8 +42,7 @@ export class HeaderComponent implements OnInit {
     public facilitydbService: FacilitydbService,
     public utilityMeterdbService: UtilityMeterdbService,
     public utilityMeterGroupdbService: UtilityMeterGroupdbService,
-    public utilityMeterDatadbService: UtilityMeterDatadbService,
-    private localStorage: LocalStorageService
+    public utilityMeterDatadbService: UtilityMeterDatadbService
   ) {
     // Close menus on navigation
     router.events.subscribe((event: Event) => {
@@ -139,26 +138,30 @@ export class HeaderComponent implements OnInit {
     this.facilitydbService.selectedFacility.next(facility);
   }
 
-  selectAllFacilities(){
+  selectAllFacilities() {
     //this.toggleFacilityMenu();
     this.router.navigate(['/account-summary']);
   }
 
 
   getAccountFacilityCount() {
-    var res = this.allFacilities.reduce(function(obj, v) {
-      obj[v.accountId] = (obj[v.accountId] || 0) + 1;
-      return obj;
-    }, {});
+    this.accountList.forEach(account => {
+      account.numberOfFacilities = this.getNumberOfFacilities(account.id);
+      console.log(account.numberOfFacilities);
+    });
+  }
 
-    
-    for(const property in res) {
-      const index = this.accountList.map(function(e) { return e.id; }).indexOf(+property);
-      if (res[property] === 1) {
-        this.accountList[index]['facilityCount'] = res[property] + " Facility";
-      } else {
-        this.accountList[index]['facilityCount'] = res[property] + " Facilities";
+  getNumberOfFacilities(accountId: number): string {
+    let count: number = 0;
+    this.allFacilities.forEach(facility => {
+      if (facility.accountId == accountId) {
+        count++;
       }
+    });
+    if(count != 1){
+      return count + ' Facilities';
+    }else{
+      return count + ' Facility';
     }
   }
 

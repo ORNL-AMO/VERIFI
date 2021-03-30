@@ -109,6 +109,9 @@ export class FacilitydbService {
         return this.dbService.add('facilities', facility);
     }
 
+    deleteWithObservable(facilityId: number): Observable<any> {
+        return this.dbService.delete('facilities', facilityId);
+    }
 
     update(values: IdbFacility): void {
         this.dbService.update('facilities', values).subscribe(() => {
@@ -123,12 +126,17 @@ export class FacilitydbService {
         });
     }
 
-    deleteAllAccountFacilities(): void {
-        let pendingFacilities = JSON.parse(JSON.stringify(this.accountFacilities.value));
-        for (let i = 0; i < pendingFacilities.length; i++) {
-            this.dbService.delete('facilities', pendingFacilities[i].id);
+    async deleteAllSelectedAccountFacilities() {
+        let accountFacilities: Array<IdbFacility> = this.accountFacilities.getValue();
+        await this.deleteFacilitiesAsync(accountFacilities);
+    }
+
+    async deleteFacilitiesAsync(accountFacilities: Array<IdbFacility>) {
+        for (let i = 0; i < accountFacilities.length; i++) {
+            await this.deleteWithObservable(accountFacilities[i].id);
         }
     }
+
 
     async addTestData(allAccounts: Array<IdbAccount>) {
         await TestFacilityData.forEach(facilityDataItem => {

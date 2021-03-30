@@ -137,47 +137,50 @@ export class EnergyUseStackedBarChartComponent implements OnInit {
       let facilityMeterData: Array<IdbUtilityMeterData> = accountMeterDataCopy.filter(meterData => { return meterData.facilityId == id });
       facilityMeterData.forEach(dataItem => {
         let meter: IdbUtilityMeter = this.utilityMeterDbService.getFacilityMeterById(dataItem.meterId);
-        if (meter.source == 'Electricity') {
-          electricity.energyUse = (electricity.energyUse + Number(dataItem.totalEnergyUse));
-          electricity.energyCost = (electricity.energyCost + Number(dataItem.totalCost));
-        }
-        else if (meter.source == 'Natural Gas') {
-          naturalGas.energyUse = (naturalGas.energyUse + Number(dataItem.totalEnergyUse));
-          naturalGas.energyCost = (naturalGas.energyCost + Number(dataItem.totalCost));
-        }
-        else if (meter.source == 'Other Fuels') {
-          otherFuels.energyUse = (otherFuels.energyUse + Number(dataItem.totalEnergyUse));
-          otherFuels.energyCost = (otherFuels.energyCost + Number(dataItem.totalCost));
-        }
-        else if (meter.source == 'Other Energy') {
-          otherEnergy.energyUse = (otherEnergy.energyUse + Number(dataItem.totalEnergyUse));
-          otherEnergy.energyCost = (otherEnergy.energyCost + Number(dataItem.totalCost));
-        }
-        else if (meter.source == 'Water') {
-          water.energyUse = (water.energyUse + Number(dataItem.totalEnergyUse));
-          water.energyCost = (water.energyCost + Number(dataItem.totalCost));
-        }
-        else if (meter.source == 'Waste Water') {
-          wasteWater.energyUse = (wasteWater.energyUse + Number(dataItem.totalEnergyUse));
-          wasteWater.energyCost = (wasteWater.energyCost + Number(dataItem.totalCost));
-        }
-        else if (meter.source == 'Other Utility') {
-          otherUtility.energyUse = (otherUtility.energyUse + Number(dataItem.totalEnergyUse));
-          otherUtility.energyCost = (otherUtility.energyCost + Number(dataItem.totalCost));
+        if (meter) {
+          if (meter.source == 'Electricity') {
+            electricity.energyUse = (electricity.energyUse + Number(dataItem.totalEnergyUse));
+            electricity.energyCost = (electricity.energyCost + Number(dataItem.totalCost));
+          }
+          else if (meter.source == 'Natural Gas') {
+            naturalGas.energyUse = (naturalGas.energyUse + Number(dataItem.totalEnergyUse));
+            naturalGas.energyCost = (naturalGas.energyCost + Number(dataItem.totalCost));
+          }
+          else if (meter.source == 'Other Fuels') {
+            otherFuels.energyUse = (otherFuels.energyUse + Number(dataItem.totalEnergyUse));
+            otherFuels.energyCost = (otherFuels.energyCost + Number(dataItem.totalCost));
+          }
+          else if (meter.source == 'Other Energy') {
+            otherEnergy.energyUse = (otherEnergy.energyUse + Number(dataItem.totalEnergyUse));
+            otherEnergy.energyCost = (otherEnergy.energyCost + Number(dataItem.totalCost));
+          }
+          else if (meter.source == 'Water') {
+            water.energyUse = (water.energyUse + Number(dataItem.totalEnergyUse));
+            water.energyCost = (water.energyCost + Number(dataItem.totalCost));
+          }
+          else if (meter.source == 'Waste Water') {
+            wasteWater.energyUse = (wasteWater.energyUse + Number(dataItem.totalEnergyUse));
+            wasteWater.energyCost = (wasteWater.energyCost + Number(dataItem.totalCost));
+          }
+          else if (meter.source == 'Other Utility') {
+            otherUtility.energyUse = (otherUtility.energyUse + Number(dataItem.totalEnergyUse));
+            otherUtility.energyCost = (otherUtility.energyCost + Number(dataItem.totalCost));
+          }
         }
       });
       let facility: IdbFacility = accountFacilites.find(facility => { return facility.id == id });
-
-      this.barChartData.push({
-        facilityName: facility.name,
-        electricity: electricity,
-        naturalGas: naturalGas,
-        otherFuels: otherFuels,
-        otherEnergy: otherEnergy,
-        water: water,
-        wasteWater: wasteWater,
-        otherUtility: otherUtility
-      });
+      if (facility) {
+        this.barChartData.push({
+          facilityName: facility.name,
+          electricity: electricity,
+          naturalGas: naturalGas,
+          otherFuels: otherFuels,
+          otherEnergy: otherEnergy,
+          water: water,
+          wasteWater: wasteWater,
+          otherUtility: otherUtility
+        });
+      }
     });
   }
 
