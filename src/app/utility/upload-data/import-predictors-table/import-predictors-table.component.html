@@ -1,0 +1,45 @@
+<div class="mt-3" *ngIf="importPredictorFiles.length != 0">
+    <h6>Predictor Data Files</h6>
+    <p>
+        The following files have predictor data for importing. Fix any errors before importing the data. Invalid entries will
+        be ignored.
+    </p>
+    <table class="table table-sm">
+        <thead>
+            <tr class="import-meter">
+                <th class="file-name-width">
+                    File Name
+                </th>
+                <th>
+                    Existing Predictors
+                </th>
+                <th>
+                    Existing Predictor Entries
+                </th>
+                <th>
+                    New Predictors
+                </th>
+                <th>
+                    New Predictor Entries
+                </th>
+                <th>
+                    Actions
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let importPredictorFile of importPredictorFiles">
+                <td>{{importPredictorFile.fileName}}
+                </td>
+                <td>{{importPredictorFile.importPredictorFileSummary.existingPredictors.length}}</td>
+                <td>{{importPredictorFile.importPredictorFileSummary.existingPredictorEntries.length}}</td>
+                <td>{{importPredictorFile.importPredictorFileSummary.newPredictors.length}}</td>
+                <td>{{importPredictorFile.importPredictorFileSummary.newPredictorEntries.length}}</td>
+                <td>
+                    <!-- <a (click)="selectMeterDataFile(importMeterFile)">Wizard</a> -->
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <hr>
+</div>

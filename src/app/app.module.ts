@@ -86,6 +86,7 @@ import { CalanderizationFilterComponent } from './utility/calanderization/caland
 import { CalanderizationChartComponent } from './utility/calanderization/calanderization-chart/calanderization-chart.component';
 import { ToastNotificationsComponent } from './shared/toast-notifications/toast-notifications.component';
 import { ElectronUpdateComponent } from './electron/electron-update/electron-update.component';
+import { ImportPredictorsTableComponent } from './utility/upload-data/import-predictors-table/import-predictors-table.component';
 
 @NgModule({
   declarations: [
@@ -158,6 +159,7 @@ import { ElectronUpdateComponent } from './electron/electron-update/electron-upd
     SustainabilityQuestionsFormComponent,
     ToastNotificationsComponent,
     ElectronUpdateComponent,
+    ImportPredictorsTableComponent,
   ],
   imports: [
     BrowserModule,
