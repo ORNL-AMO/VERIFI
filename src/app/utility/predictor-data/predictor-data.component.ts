@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { IdbPredictorEntry, PredictorData } from 'src/app/models/idb';
@@ -10,9 +11,8 @@ import { IdbPredictorEntry, PredictorData } from 'src/app/models/idb';
 })
 export class PredictorDataComponent implements OnInit {
 
-  page: number = 1;
-  itemsPerPage: number = 12;
-  pageSize: number;
+  itemsPerPage: number = 6;
+  currentPageNumber: number = 1;
 
   facilityPredictors: Array<PredictorData>;
   facilityPredictorsSub: Subscription;
@@ -20,13 +20,12 @@ export class PredictorDataComponent implements OnInit {
   facilityPredictorEntriesSub: Subscription;
 
   predictorEntryToDelete: IdbPredictorEntry;
-  predictorMenuOpenId: number;
 
   predictorEntryToEdit: IdbPredictorEntry;
   showPredictorMenu: boolean = false;
   showEditPredictors: boolean = false;
   showImportPredictors: boolean = false;
-  constructor(private predictorsDbService: PredictordbService) { }
+  constructor(private predictorsDbService: PredictordbService, private router: Router) { }
 
   ngOnInit(): void {
     this.facilityPredictorsSub = this.predictorsDbService.facilityPredictors.subscribe(predictors => {
@@ -43,27 +42,6 @@ export class PredictorDataComponent implements OnInit {
     this.facilityPredictorEntriesSub.unsubscribe();
   }
 
-  public onPageChange(pageNum: number): void {
-    this.pageSize = this.itemsPerPage * (pageNum - 1);
-  }
-
-  public changePagesize(num: number): void {
-    this.itemsPerPage = num;
-    this.onPageChange(this.page);
-  }
-
-  predictorToggleMenu(toggleMenuId: number) {
-    if (toggleMenuId == this.predictorMenuOpenId) {
-      this.predictorMenuOpenId = undefined;
-    } else {
-      this.predictorMenuOpenId = toggleMenuId;
-    }
-  }
-
-  // addNewPredictor() {
-  //   this.predictorsDbService.addNewPredictor();
-  // }
-
   addPredictorEntry() {
     this.predictorsDbService.addNewPredictorEntry();
   }
@@ -79,7 +57,6 @@ export class PredictorDataComponent implements OnInit {
 
   cancelDeletePredictorEntry() {
     this.predictorEntryToDelete = undefined;
-    this.predictorMenuOpenId = undefined;
   }
 
   setEditPredictorEntry(predictorEntry: IdbPredictorEntry) {
@@ -88,7 +65,6 @@ export class PredictorDataComponent implements OnInit {
 
   cancelEditPredictorEntry() {
     this.predictorEntryToEdit = undefined;
-    this.predictorMenuOpenId = undefined;
   }
 
   predictorExport() {
@@ -145,5 +121,9 @@ export class PredictorDataComponent implements OnInit {
 
   closeImportPredictors() {
     this.showImportPredictors = false;
+  }
+
+  uploadData() {
+    this.router.navigateByUrl('utility/upload-data');
   }
 }
