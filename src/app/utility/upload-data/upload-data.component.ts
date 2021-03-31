@@ -1,11 +1,11 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from 'src/app/models/idb';
+import { IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup, PredictorData } from 'src/app/models/idb';
 import { LoadingService } from 'src/app/shared/loading/loading.service';
 import { ImportMeterFileSummary } from './import-meter.service';
 import * as XLSX from 'xlsx';
-import { ImportMeterDataFile, UploadDataService } from './upload-data.service';
+import { ImportMeterDataFile, ImportPredictorFile, UploadDataService } from './upload-data.service';
 import { Subscription } from 'rxjs';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
@@ -15,6 +15,8 @@ import { ImportMeterDataFileSummary } from './import-meter-data.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { ToastNotificationsService } from 'src/app/shared/toast-notifications/toast-notifications.service';
 import { Router } from '@angular/router';
+import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
+import { UploadDataRunnerService } from './upload-data-runner.service';
 
 @Component({
   selector: 'app-upload-data',
@@ -39,16 +41,18 @@ export class UploadDataComponent implements OnInit {
   importMeterFilesSub: Subscription;
   importMeterDataFiles: Array<ImportMeterDataFile>;
   importMeterDataFilesSub: Subscription;
+  importPredictorFiles: Array<ImportPredictorFile>;
+  importPredictorFilesSub: Subscription;
   disableImport: boolean = true;
 
   constructor(private loadingService: LoadingService, private facilityDbService: FacilitydbService, private uploadDataService: UploadDataService,
     private utilityMeterGroupdbService: UtilityMeterGroupdbService, private energyUnitsHelperService: EnergyUnitsHelperService,
     private utilityMeterdbService: UtilityMeterdbService, private editMeterFormService: EditMeterFormService,
     private utilityMeterDataDbService: UtilityMeterDatadbService, private toastNotificationsService: ToastNotificationsService,
-    private router: Router) { }
+    private router: Router, private predictorDbService: PredictordbService, private uploadDataRunnerService: UploadDataRunnerService) { }
 
   ngOnInit(): void {
-    this.initArrays();
+    this.fileReferences = new Array();
 
     this.importMeterFileWizardSub = this.uploadDataService.importMeterFileWizard.subscribe(val => {
       this.importMeterFileWizard = val;
@@ -67,6 +71,11 @@ export class UploadDataComponent implements OnInit {
       this.importMeterDataFiles = val;
       this.checkDataToImport();
     });
+
+    this.importPredictorFilesSub = this.uploadDataService.importPredictorsFiles.subscribe(val => {
+      this.importPredictorFiles = val;
+      this.checkDataToImport();
+    })
   }
 
   ngOnDestroy() {
@@ -74,22 +83,19 @@ export class UploadDataComponent implements OnInit {
     this.importMeterDataFileWizardSub.unsubscribe();
     this.importMeterFilesSub.unsubscribe();
     this.importMeterDataFilesSub.unsubscribe();
-    this.resetData();
-  }
-
-  initArrays() {
-    this.fileReferences = new Array();
+    this.importPredictorFilesSub.unsubscribe();
+    this.uploadDataService.resetData();
   }
 
   resetData() {
     this.uploadDataService.resetData();
-    this.initArrays();
+    this.fileReferences = new Array();
     this.filesUploaded = false;
     this.importFile.nativeElement.value = ""
   }
 
   setImportFile(files: FileList) {
-    this.initArrays();
+    this.fileReferences = new Array();
     if (files) {
       if (files.length !== 0) {
         let regex3 = /.xlsx$/;
@@ -128,7 +134,6 @@ export class UploadDataComponent implements OnInit {
   }
 
   checkSheetNamesForTemplate(sheetNames: Array<string>): boolean {
-    console.log(sheetNames);
     if (sheetNames[0] == "Help" && sheetNames[1] == "Meters-Utilities" && sheetNames[2] == "Electricity" && sheetNames[3] == "Non-electricity" && sheetNames[4] == "Predictors" && sheetNames[5] == "HIDE") {
       return true;
     } else {
@@ -136,164 +141,227 @@ export class UploadDataComponent implements OnInit {
     }
   }
 
+  importData() {
+    this.uploadDataRunnerService.importData();
+  }
+
   /*LOGIC FOR IMPORTING VALID METER AND DATA*/
-  async importData() {
-    this.loadingService.setLoadingMessage("Importing Meters..");
-    this.loadingService.setLoadingStatus(true);
-    //import valid new and existing meters
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    let newMeters: Array<IdbUtilityMeter> = new Array();
-    let existingMeters: Array<IdbUtilityMeter> = new Array();
-    let importMetersFiles: Array<{ fileName: string, importMeterFileSummary: ImportMeterFileSummary, id: string }> = this.uploadDataService.importMeterFiles.getValue();
-    importMetersFiles.forEach(meterFile => {
-      newMeters = newMeters.concat(meterFile.importMeterFileSummary.newMeters);
-      existingMeters = existingMeters.concat(meterFile.importMeterFileSummary.existingMeters);
-    });
+  // async importData() {
+  //   this.loadingService.setLoadingMessage("Importing Meters..");
+  //   this.loadingService.setLoadingStatus(true);
+  //   //import valid new and existing meters
+  //   let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+  //   let newMeters: Array<IdbUtilityMeter> = new Array();
+  //   let existingMeters: Array<IdbUtilityMeter> = new Array();
+  //   let importMetersFiles: Array<{ fileName: string, importMeterFileSummary: ImportMeterFileSummary, id: string }> = this.uploadDataService.importMeterFiles.getValue();
+  //   importMetersFiles.forEach(meterFile => {
+  //     newMeters = newMeters.concat(meterFile.importMeterFileSummary.newMeters);
+  //     existingMeters = existingMeters.concat(meterFile.importMeterFileSummary.existingMeters);
+  //   });
 
-    // add meter groups
-    let facilityMeterGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupdbService.facilityMeterGroups.getValue();
-    let uniqNeededGroups: Array<IdbUtilityMeterGroup> = new Array();
-    newMeters.forEach(meter => {
-      if (meter.group) {
-        let checkExistsInDb: IdbUtilityMeterGroup = facilityMeterGroups.find(existingGroup => { return existingGroup.name == meter.group });
-        let checkExistsInArray: IdbUtilityMeterGroup = uniqNeededGroups.find(existingGroup => { return existingGroup.name == meter.group });
-        if (checkExistsInDb == undefined && checkExistsInArray == undefined) {
-          let groupType: string = "Energy";
-          if (meter.source == 'Water' || meter.source == 'Waste Water') {
-            groupType = "Water"
-          } else if (meter.source == 'Other Utility') {
-            groupType = "Other"
-          }
-          let utilityMeterGroup: IdbUtilityMeterGroup = this.utilityMeterGroupdbService.getNewIdbUtilityMeterGroup(groupType, meter.group, meter.facilityId, meter.accountId);
-          uniqNeededGroups.push(utilityMeterGroup);
-        }
-      }
-    });
-    this.loadingService.setLoadingMessage('Adding meter groups...');
-    await uniqNeededGroups.forEach(neededGroup => {
-      this.utilityMeterGroupdbService.addFromImport(neededGroup);
-    });
+  //   // add meter groups
+  //   let facilityMeterGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupdbService.facilityMeterGroups.getValue();
+  //   let uniqNeededGroups: Array<IdbUtilityMeterGroup> = new Array();
+  //   newMeters.forEach(meter => {
+  //     if (meter.group) {
+  //       let checkExistsInDb: IdbUtilityMeterGroup = facilityMeterGroups.find(existingGroup => { return existingGroup.name == meter.group });
+  //       let checkExistsInArray: IdbUtilityMeterGroup = uniqNeededGroups.find(existingGroup => { return existingGroup.name == meter.group });
+  //       if (checkExistsInDb == undefined && checkExistsInArray == undefined) {
+  //         let groupType: string = "Energy";
+  //         if (meter.source == 'Water' || meter.source == 'Waste Water') {
+  //           groupType = "Water"
+  //         } else if (meter.source == 'Other Utility') {
+  //           groupType = "Other"
+  //         }
+  //         let utilityMeterGroup: IdbUtilityMeterGroup = this.utilityMeterGroupdbService.getNewIdbUtilityMeterGroup(groupType, meter.group, meter.facilityId, meter.accountId);
+  //         uniqNeededGroups.push(utilityMeterGroup);
+  //       }
+  //     }
+  //   });
+  //   this.loadingService.setLoadingMessage('Adding meter groups...');
+  //   await uniqNeededGroups.forEach(neededGroup => {
+  //     this.utilityMeterGroupdbService.addFromImport(neededGroup);
+  //   });
 
-    //update groups behavior subject, set groupId's for meters
-    this.utilityMeterGroupdbService.getAllByIndexRange('facilityId', selectedFacility.id).subscribe(meterGroups => {
-      this.utilityMeterGroupdbService.facilityMeterGroups.next(meterGroups);
-      newMeters = this.setGroupIds(newMeters);
-      existingMeters = this.setGroupIds(existingMeters);
-      //add meters
-      this.addMeters(newMeters, existingMeters);
+  //   //update groups behavior subject, set groupId's for meters
+  //   this.utilityMeterGroupdbService.getAllByIndexRange('facilityId', selectedFacility.id).subscribe(meterGroups => {
+  //     this.utilityMeterGroupdbService.facilityMeterGroups.next(meterGroups);
+  //     newMeters = this.setGroupIds(newMeters);
+  //     existingMeters = this.setGroupIds(existingMeters);
+  //     //add meters
+  //     this.addMeters(newMeters, existingMeters);
 
-      //update meter behavior subjects
-      let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-      this.utilityMeterdbService.getAllByIndexRange('facilityId', selectedFacility.id).subscribe(facilityMeters => {
-        this.utilityMeterdbService.facilityMeters.next(facilityMeters);
-        this.utilityMeterdbService.getAllByIndexRange('accountId', selectedFacility.accountId).subscribe(facilityMeters => {
-          this.utilityMeterdbService.accountMeters.next(facilityMeters);
-          //add meter data
-          this.addMeterData(facilityMeters, selectedFacility);
-        });
-      });
+  //     //update meter behavior subjects
+  //     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+  //     this.utilityMeterdbService.getAllByIndexRange('facilityId', selectedFacility.id).subscribe(facilityMeters => {
+  //       this.utilityMeterdbService.facilityMeters.next(facilityMeters);
+  //       this.utilityMeterdbService.getAllByIndexRange('accountId', selectedFacility.accountId).subscribe(facilityMeters => {
+  //         this.utilityMeterdbService.accountMeters.next(facilityMeters);
+  //         //add meter data
+  //         this.addMeterData(facilityMeters, selectedFacility);
+  //         this.addPredictors();
+  //         this.finishUpload(selectedFacility);
+  //       });
+  //     });
 
-    });
-  }
+  //   });
+  // }
 
 
-  async addMeters(newMeters: Array<IdbUtilityMeter>, existingMeters: Array<IdbUtilityMeter>) {
-    this.loadingService.setLoadingMessage('Addings meters...')
-    await newMeters.forEach((importMeter: IdbUtilityMeter, index: number) => {
-      importMeter.energyUnit = this.getMeterEnergyUnit(importMeter);
-      this.utilityMeterdbService.addWithObservable(importMeter);
-    });
-    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterdbService.facilityMeters.getValue();
-    await existingMeters.forEach((importMeter: IdbUtilityMeter, index: number) => {
-      //check if meter already exists (same name)
-      let facilityMeter: IdbUtilityMeter = facilityMeters.find(facilityMeter => { return facilityMeter.name == importMeter.name });
-      if (facilityMeter) {
-        //update existing meter with form from import meter
-        let form: FormGroup = this.editMeterFormService.getFormFromMeter(importMeter);
-        facilityMeter = this.editMeterFormService.updateMeterFromForm(facilityMeter, form);
-        facilityMeter.energyUnit = this.getMeterEnergyUnit(facilityMeter);
-        //update
-        this.utilityMeterdbService.updateWithObservable(facilityMeter);
-      }
-    });
-  }
+  // async addMeters(newMeters: Array<IdbUtilityMeter>, existingMeters: Array<IdbUtilityMeter>) {
+  //   this.loadingService.setLoadingMessage('Addings meters...')
+  //   await newMeters.forEach((importMeter: IdbUtilityMeter, index: number) => {
+  //     importMeter.energyUnit = this.getMeterEnergyUnit(importMeter);
+  //     this.utilityMeterdbService.addWithObservable(importMeter);
+  //   });
+  //   let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterdbService.facilityMeters.getValue();
+  //   await existingMeters.forEach((importMeter: IdbUtilityMeter, index: number) => {
+  //     //check if meter already exists (same name)
+  //     let facilityMeter: IdbUtilityMeter = facilityMeters.find(facilityMeter => { return facilityMeter.name == importMeter.name });
+  //     if (facilityMeter) {
+  //       //update existing meter with form from import meter
+  //       let form: FormGroup = this.editMeterFormService.getFormFromMeter(importMeter);
+  //       facilityMeter = this.editMeterFormService.updateMeterFromForm(facilityMeter, form);
+  //       facilityMeter.energyUnit = this.getMeterEnergyUnit(facilityMeter);
+  //       //update
+  //       this.utilityMeterdbService.updateWithObservable(facilityMeter);
+  //     }
+  //   });
+  // }
 
-  async addMeterData(facilityMeters: Array<IdbUtilityMeter>, selectedFacility: IdbFacility) {
-    this.loadingService.setLoadingMessage('Adding meter readings..');
-    //import valid meter readings
-    let importMeterDataFiles: Array<ImportMeterDataFile> = this.uploadDataService.importMeterDataFiles.getValue();
-    //fill out new/existing arrays from files
-    let newReadings: Array<IdbUtilityMeterData> = new Array();
-    let existingReadings: Array<IdbUtilityMeterData> = new Array();
-    importMeterDataFiles.forEach(dataFile => {
-      newReadings = newReadings.concat(dataFile.importMeterDataFileSummary.newMeterData);
-      //check we aren't skiping the existing readings for that file
-      if (!dataFile.skipExisting) {
-        existingReadings = existingReadings.concat(dataFile.importMeterDataFileSummary.existingMeterData);
-      }
-    });
-    //set meterId's
-    newReadings = newReadings.map(reading => { return this.setMeterId(reading, facilityMeters) });
-    existingReadings = existingReadings.map(reading => { return this.setMeterId(reading, facilityMeters) });
-    //add new readings
-    await newReadings.forEach(reading => {
-      this.utilityMeterDataDbService.addWithObservable(reading);
-    });
-    //add existing readings
-    await existingReadings.forEach(reading => {
-      this.utilityMeterDataDbService.updateWithObservable(reading);
-    });
-    //update behavior subjects and reset import
-    this.utilityMeterDataDbService.getAllByIndexRange('facilityId', selectedFacility.id).subscribe(meterData => {
-      this.utilityMeterDataDbService.facilityMeterData.next(meterData);
-      this.utilityMeterDataDbService.getAllByIndexRange('accountId', selectedFacility.accountId).subscribe(meterData => {
-        this.utilityMeterDataDbService.accountMeterData.next(meterData);
-        this.loadingService.setLoadingStatus(false);
-        this.toastNotificationsService.showToast('Data Imported!', undefined, 3500, false, "success");
-        this.router.navigate(['/utility/energy-consumption']);
-      });
-    });
-  }
+  // async addMeterData(facilityMeters: Array<IdbUtilityMeter>, selectedFacility: IdbFacility) {
+  //   this.loadingService.setLoadingMessage('Adding meter readings..');
+  //   //import valid meter readings
+  //   let importMeterDataFiles: Array<ImportMeterDataFile> = this.uploadDataService.importMeterDataFiles.getValue();
+  //   //fill out new/existing arrays from files
+  //   let newReadings: Array<IdbUtilityMeterData> = new Array();
+  //   let existingReadings: Array<IdbUtilityMeterData> = new Array();
+  //   importMeterDataFiles.forEach(dataFile => {
+  //     newReadings = newReadings.concat(dataFile.importMeterDataFileSummary.newMeterData);
+  //     //check we aren't skiping the existing readings for that file
+  //     if (!dataFile.skipExisting) {
+  //       existingReadings = existingReadings.concat(dataFile.importMeterDataFileSummary.existingMeterData);
+  //     }
+  //   });
+  //   //set meterId's
+  //   newReadings = newReadings.map(reading => { return this.setMeterId(reading, facilityMeters) });
+  //   existingReadings = existingReadings.map(reading => { return this.setMeterId(reading, facilityMeters) });
+  //   //add new readings
+  //   await newReadings.forEach(reading => {
+  //     this.utilityMeterDataDbService.addWithObservable(reading);
+  //   });
+  //   //add existing readings
+  //   await existingReadings.forEach(reading => {
+  //     this.utilityMeterDataDbService.updateWithObservable(reading);
+  //   });
 
-  setGroupIds(meters: Array<IdbUtilityMeter>): Array<IdbUtilityMeter> {
-    let facilityGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupdbService.facilityMeterGroups.getValue()
-    meters.forEach(meter => {
-      let existingGroup: IdbUtilityMeterGroup = facilityGroups.find(meterGroup => { return meterGroup.name == meter.group });
-      if (existingGroup) {
-        meter.groupId = existingGroup.id;
-      }
-    });
-    return meters;
-  }
+  // }
 
-  getMeterEnergyUnit(meter: IdbUtilityMeter): string {
-    let isEnergyUnit: boolean = this.energyUnitsHelperService.isEnergyUnit(meter.startingUnit);
-    if (isEnergyUnit) {
-      return meter.startingUnit;
-    } else {
-      let isEnergyMeter: boolean = this.energyUnitsHelperService.isEnergyMeter(meter.source);
-      if (isEnergyMeter) {
-        let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-        return selectedFacility.energyUnit;
-      } else {
-        return undefined;
-      }
-    }
-  }
 
-  setMeterId(meterData: IdbUtilityMeterData, facilityMeters: Array<IdbUtilityMeter>): IdbUtilityMeterData {
-    if (meterData.meterId) {
-      return meterData;
-    } else {
-      let facilityMeter: IdbUtilityMeter = facilityMeters.find(meter => { return meter.meterNumber == meterData.meterNumber || meter.name == meterData.meterNumber });
-      if (facilityMeter) {
-        meterData.meterId = facilityMeter.id;
-        return meterData;
-      } else {
-        return meterData;
-      }
-    }
-  }
+  // async addPredictors() {
+  //   let newPredictors: Array<PredictorData> = new Array();
+  //   let existingPredictors: Array<PredictorData> = new Array();
+  //   let existingPredictorEntries: Array<any> = new Array();
+  //   let newPredictorEntries: Array<any> = new Array();
+  //   this.importPredictorFiles.forEach(file => {
+  //     newPredictors.concat(file.importPredictorFileSummary.newPredictors);
+  //     existingPredictors.concat(file.importPredictorFileSummary.existingPredictors);
+  //     existingPredictorEntries.concat(file.importPredictorFileSummary.existingPredictorEntries);
+  //     newPredictorEntries.concat(file.importPredictorFileSummary.newPredictorEntries);
+  //   })
+
+  //   //add new predictors
+  //   for(let i = 0; i < newPredictors.length; i++){
+  //     await this.predictorDbService.importNewPredictor(newPredictors[i]);
+  //   }
+  //   //update existing? maybe unneeded
+  //   // if(!file.skipExisting){
+  //   //   file.importPredictorFileSummary.existingPredictors.forEach(predictor => {
+
+  //   //   });
+  //   // }
+  //   //add new entries
+
+
+  //   let allPredictors: Array<IdbPredictorEntry>;
+  //   await this.predictorDbService.getAll().subscribe(val => {allPredictors = val; console.log(allPredictors)});
+  //   console.log(allPredictors);
+
+  //   // let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+  //   // for(let i = 0; i < newPredictorEntries.length; i++){
+  //   //   let entryDate: Date = new Date(newPredictorEntries[i]["Date"]);
+  //   //   let newIdbPredictorEntry: IdbPredictorEntry = this.predictorDbService.getNewIdbPredictorEntry(selectedFacility.id, selectedFacility.accountId, entryDate);
+
+  //   // }
+  //   // file.importPredictorFileSummary.newPredictorEntries.forEach(predictorEntry => {
+
+  //   // });
+
+  //   // if(file.skipExisting){
+  //   //   file.importPredictorFileSummary.existingPredictorEntries.forEach(predictorEntry => {
+  //   //     //update existing predictors
+
+
+  //   //   })
+  //   // }
+  // }
+
+
+
+  // finishUpload(selectedFacility: IdbFacility) {
+  //   //update behavior subjects and reset import
+  //   this.utilityMeterDataDbService.getAllByIndexRange('facilityId', selectedFacility.id).subscribe(meterData => {
+  //     this.utilityMeterDataDbService.facilityMeterData.next(meterData);
+  //     this.utilityMeterDataDbService.getAllByIndexRange('accountId', selectedFacility.accountId).subscribe(meterData => {
+  //       this.utilityMeterDataDbService.accountMeterData.next(meterData);
+  //       this.loadingService.setLoadingStatus(false);
+  //       this.toastNotificationsService.showToast('Data Imported!', undefined, 3500, false, "success");
+  //       this.router.navigate(['/utility/energy-consumption']);
+  //     });
+  //   });
+  // }
+
+
+
+  // setGroupIds(meters: Array<IdbUtilityMeter>): Array<IdbUtilityMeter> {
+  //   let facilityGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupdbService.facilityMeterGroups.getValue()
+  //   meters.forEach(meter => {
+  //     let existingGroup: IdbUtilityMeterGroup = facilityGroups.find(meterGroup => { return meterGroup.name == meter.group });
+  //     if (existingGroup) {
+  //       meter.groupId = existingGroup.id;
+  //     }
+  //   });
+  //   return meters;
+  // }
+
+  // getMeterEnergyUnit(meter: IdbUtilityMeter): string {
+  //   let isEnergyUnit: boolean = this.energyUnitsHelperService.isEnergyUnit(meter.startingUnit);
+  //   if (isEnergyUnit) {
+  //     return meter.startingUnit;
+  //   } else {
+  //     let isEnergyMeter: boolean = this.energyUnitsHelperService.isEnergyMeter(meter.source);
+  //     if (isEnergyMeter) {
+  //       let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+  //       return selectedFacility.energyUnit;
+  //     } else {
+  //       return undefined;
+  //     }
+  //   }
+  // }
+
+  // setMeterId(meterData: IdbUtilityMeterData, facilityMeters: Array<IdbUtilityMeter>): IdbUtilityMeterData {
+  //   if (meterData.meterId) {
+  //     return meterData;
+  //   } else {
+  //     let facilityMeter: IdbUtilityMeter = facilityMeters.find(meter => { return meter.meterNumber == meterData.meterNumber || meter.name == meterData.meterNumber });
+  //     if (facilityMeter) {
+  //       meterData.meterId = facilityMeter.id;
+  //       return meterData;
+  //     } else {
+  //       return meterData;
+  //     }
+  //   }
+  // }
 
   checkDataToImport() {
     this.disableImport = true;
@@ -307,12 +375,28 @@ export class UploadDataComponent implements OnInit {
         }
       });
     }
-    if (!this.disableImport && this.importMeterFiles) {
+    if (this.disableImport && this.importMeterFiles) {
       this.importMeterFiles.forEach(file => {
         if (file.importMeterFileSummary.existingMeters.length != 0) {
           this.disableImport = false;
         }
         if (file.importMeterFileSummary.newMeters.length != 0) {
+          this.disableImport = false;
+        }
+      });
+    }
+    if (this.disableImport && this.importPredictorFiles) {
+      this.importPredictorFiles.forEach(file => {
+        if (file.importPredictorFileSummary.existingPredictors.length != 0) {
+          this.disableImport = false;
+        }
+        if (file.importPredictorFileSummary.existingPredictorEntries.length != 0) {
+          this.disableImport = false;
+        }
+        if (file.importPredictorFileSummary.newPredictorEntries.length != 0) {
+          this.disableImport = false;
+        }
+        if (file.importPredictorFileSummary.newPredictors.length != 0) {
           this.disableImport = false;
         }
       });

@@ -144,10 +144,11 @@ export class PredictordbService {
 
     async importNewPredictor(newPredictor: PredictorData) {
         let facilityPredictorEntries: Array<IdbPredictorEntry> = this.facilityPredictorEntries.getValue();
-        await facilityPredictorEntries.forEach(predictorEntry => {
-            predictorEntry.predictors.push(newPredictor);
-            this.updateOnImport(predictorEntry);
-        });
+        for (let i = 0; i < facilityPredictorEntries.length; i++) {
+            facilityPredictorEntries[i].predictors.push(newPredictor);
+            await this.updateOnImport(facilityPredictorEntries[i]);
+            console.log('updated predictor');
+        }
     }
 
     getNewPredictor(facilityPredictors: Array<PredictorData>): PredictorData {
@@ -253,4 +254,14 @@ export class PredictordbService {
         });
         return entryPredictors;
     }
+
+
+    updateWithObservable(values: IdbPredictorEntry): Observable<any> {
+        return this.dbService.update('predictors', values)
+    }
+
+    addWithObservable(predictor: IdbPredictorEntry): Observable<any> {
+        return this.dbService.add('predictors', predictor);
+    }
+
 }

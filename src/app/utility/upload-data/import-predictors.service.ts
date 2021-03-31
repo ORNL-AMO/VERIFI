@@ -14,15 +14,16 @@ export class ImportPredictorsService {
     let existingPredictors: Array<PredictorData> = new Array();
     let newPredictors: Array<PredictorData> = new Array();
     predictorHeaders.forEach(header => {
-      //possibly use "includes" instead of == for check
-      let headerExists: PredictorData = facilityPredictors.find(predictor => { return predictor.name == header });
-      if (headerExists) {
-        existingPredictors.push(headerExists);
-      } else {
-        let newPredictor: PredictorData = this.predictorsDbService.getNewPredictor(facilityPredictors);
-        newPredictor.name = header;
-        // facilityPredictors.push(newPredictor);
-        newPredictors.push(newPredictor);
+      if (header != 'Date') {
+        //possibly use "includes" instead of == for check
+        let headerExists: PredictorData = facilityPredictors.find(predictor => { return predictor.name == header });
+        if (headerExists) {
+          existingPredictors.push(headerExists);
+        } else {
+          let newPredictor: PredictorData = this.predictorsDbService.getNewPredictor(facilityPredictors);
+          newPredictor.name = header;
+          newPredictors.push(newPredictor);
+        }
       }
     });
 
@@ -43,8 +44,8 @@ export class ImportPredictorsService {
     let existingEntries: Array<any> = new Array();
 
     fileData.forEach(dataElement => {
-      let entryExists: IdbPredictorEntry = this.checkEntryExists(new Date(dataElement['Date']), facilityPredictorEntries);
-      if (entryExists) {
+      let existingEntry: IdbPredictorEntry = this.getExistingEntry(new Date(dataElement['Date']), facilityPredictorEntries);
+      if (existingEntry) {
         existingEntries.push(dataElement);
       } else {
         newEntries.push(dataElement);
@@ -59,7 +60,7 @@ export class ImportPredictorsService {
   }
 
 
-  checkEntryExists(elementDate: Date, facilityPredictorEntries: Array<IdbPredictorEntry>): IdbPredictorEntry {
+  getExistingEntry(elementDate: Date, facilityPredictorEntries: Array<IdbPredictorEntry>): IdbPredictorEntry {
     let checkExists: IdbPredictorEntry = facilityPredictorEntries.find(entry => {
       let entryDate: Date = new Date(entry.date);
       return (entryDate.getUTCFullYear() == elementDate.getUTCFullYear() && entryDate.getUTCMonth() == elementDate.getUTCMonth());
