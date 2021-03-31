@@ -49,29 +49,27 @@ export class UploadDataRunnerService {
     });
 
     // add meter groups
-    this.addMeterGroups(newMeters);
+    await this.addMeterGroups(newMeters);
 
     //update groups behavior subject, set groupId's for meters
-    this.utilityMeterGroupdbService.getAllByIndexRange('facilityId', selectedFacility.id).subscribe(meterGroups => {
-      this.utilityMeterGroupdbService.facilityMeterGroups.next(meterGroups);
-      newMeters = this.setGroupIds(newMeters);
-      existingMeters = this.setGroupIds(existingMeters);
-      //add meters
-      this.addMeters(newMeters, existingMeters, selectedFacility);
+    let meterGroups: Array<IdbUtilityMeterGroup> = await this.utilityMeterGroupdbService.getAllByIndexRange('facilityId', selectedFacility.id).toPromise();
+    this.utilityMeterGroupdbService.facilityMeterGroups.next(meterGroups);
+    newMeters = this.setGroupIds(newMeters);
+    existingMeters = this.setGroupIds(existingMeters);
 
-      //update meter behavior subjects, updated meters needed for meter data import
-      this.utilityMeterdbService.getAllByIndexRange('facilityId', selectedFacility.id).subscribe(facilityMeters => {
-        this.utilityMeterdbService.facilityMeters.next(facilityMeters);
-        this.utilityMeterdbService.getAllByIndexRange('accountId', selectedFacility.accountId).subscribe(accountMeters => {
-          this.utilityMeterdbService.accountMeters.next(accountMeters);
-          //add meter data
-          this.addMeterData();
-          this.addPredictors(selectedFacility);
-          this.finishUpload();
-        });
-      });
+    //add meters
+    await this.addMeters(newMeters, existingMeters, selectedFacility);
 
-    });
+    //update meter behavior subjects, updated meters needed for meter data import
+    let accountMeters: Array<IdbUtilityMeter> = await this.utilityMeterdbService.getAllByIndexRange('accountId', selectedFacility.accountId).toPromise();
+    this.utilityMeterdbService.accountMeters.next(accountMeters);
+    let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == selectedFacility.id });
+    this.utilityMeterdbService.facilityMeters.next(facilityMeters);
+
+    //add meter data
+    await this.addMeterData();
+    await this.addPredictors(selectedFacility);
+    this.finishUpload();
   }
 
   async addMeterGroups(newMeters: Array<IdbUtilityMeter>) {
@@ -95,31 +93,31 @@ export class UploadDataRunnerService {
       }
     });
     this.loadingService.setLoadingMessage('Adding meter groups...');
-    await uniqNeededGroups.forEach(neededGroup => {
-      this.utilityMeterGroupdbService.addFromImport(neededGroup);
-    });
+    for (let i = 0; i < uniqNeededGroups.length; i++) {
+      await this.utilityMeterGroupdbService.addFromImport(uniqNeededGroups[i]);
+   }
   }
 
 
   async addMeters(newMeters: Array<IdbUtilityMeter>, existingMeters: Array<IdbUtilityMeter>, selectedFacility: IdbFacility) {
     this.loadingService.setLoadingMessage('Addings meters...')
-    await newMeters.forEach((importMeter: IdbUtilityMeter, index: number) => {
-      importMeter.energyUnit = this.getMeterEnergyUnit(importMeter, selectedFacility);
-      this.utilityMeterdbService.addWithObservable(importMeter);
-    });
+    for (let i = 0; i < newMeters.length; i++) {
+      newMeters[i].energyUnit = this.getMeterEnergyUnit(newMeters[i], selectedFacility);
+      await this.utilityMeterdbService.addWithObservable(newMeters[i]);
+    }
+
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterdbService.facilityMeters.getValue();
-    await existingMeters.forEach((importMeter: IdbUtilityMeter, index: number) => {
-      //check if meter already exists (same name)
-      let facilityMeter: IdbUtilityMeter = facilityMeters.find(facilityMeter => { return facilityMeter.name == importMeter.name });
+    for (let i = 0; i < existingMeters.length; i++) {
+      let facilityMeter: IdbUtilityMeter = facilityMeters.find(facilityMeter => { return facilityMeter.name == existingMeters[i].name });
       if (facilityMeter) {
         //update existing meter with form from import meter
-        let form: FormGroup = this.editMeterFormService.getFormFromMeter(importMeter);
+        let form: FormGroup = this.editMeterFormService.getFormFromMeter(existingMeters[i]);
         facilityMeter = this.editMeterFormService.updateMeterFromForm(facilityMeter, form);
         facilityMeter.energyUnit = this.getMeterEnergyUnit(facilityMeter, selectedFacility);
         //update
-        this.utilityMeterdbService.updateWithObservable(facilityMeter);
+        await this.utilityMeterdbService.updateWithObservable(facilityMeter);
       }
-    });
+    }
   }
 
   async addMeterData() {
@@ -141,22 +139,21 @@ export class UploadDataRunnerService {
     newReadings = newReadings.map(reading => { return this.setMeterId(reading, facilityMeters) });
     existingReadings = existingReadings.map(reading => { return this.setMeterId(reading, facilityMeters) });
     //add new readings
-    await newReadings.forEach(reading => {
-      this.utilityMeterDataDbService.addWithObservable(reading);
-    });
+    for (let i = 0; i < newReadings.length; i++) {
+      await this.utilityMeterDataDbService.addWithObservable(newReadings[i]);
+    }
     //add existing readings
-    await existingReadings.forEach(reading => {
-      this.utilityMeterDataDbService.updateWithObservable(reading);
-    });
+    for (let i = 0; i < existingReadings.length; i++) {
+      await this.utilityMeterDataDbService.updateWithObservable(existingReadings[i]);
+    }
 
   }
-
 
   async addPredictors(selectedFacility: IdbFacility) {
     this.loadingService.setLoadingMessage("Adding predictor data...")
     let importPredictorFiles: Array<ImportPredictorFile> = this.uploadDataService.importPredictorsFiles.getValue();
     let facilityPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.facilityPredictorEntries.getValue();
-
+    let facilityPredictors: Array<PredictorData> = this.predictorDbService.facilityPredictors.getValue();
     let newPredictors: Array<PredictorData> = new Array();
     let existingPredictors: Array<PredictorData> = new Array();
     let existingPredictorEntries: Array<any> = new Array();
@@ -188,9 +185,7 @@ export class UploadDataRunnerService {
       }
       //order all predictors alphabetically and update
       existingEntry.predictors = _.orderBy(existingEntry.predictors, 'name');
-      console.log(existingEntry.predictors);
       await this.predictorDbService.updateWithObservable(existingEntry);
-      console.log('predictor entry updated');
     }
 
     for (let newEntryIndex = 0; newEntryIndex < newPredictorEntries.length; newEntryIndex++) {
@@ -203,16 +198,25 @@ export class UploadDataRunnerService {
         predictorToAdd.amount = newPredictorEntries[newEntryIndex][predictorToAdd.name];
         newEntry.predictors.push(predictorToAdd);
       }
-      //add existing predictors data
+      //add existing predictors data from import
       for (let i = 0; i < existingPredictors.length; i++) {
         existingPredictors[i].amount = newPredictorEntries[newEntryIndex][existingPredictors[i].name];
         newEntry.predictors.push(JSON.parse(JSON.stringify(existingPredictors[i])));
       }
+
+      //add existing predictors no in import
+      for (let i = 0; i < facilityPredictors.length; i++) {
+        let importPredictor: PredictorData = existingPredictors.find(predictor => { return predictor.id == facilityPredictors[i].id });
+        if (!importPredictor) {
+          let existingPredictorToAdd: PredictorData = JSON.parse(JSON.stringify(facilityPredictors[i]));
+          existingPredictorToAdd.amount = undefined;
+          newEntry.predictors.push(existingPredictorToAdd);
+        }
+      }
+
       //order all predictors alphabetically and add
       newEntry.predictors = _.orderBy(newEntry.predictors, 'name');
-      console.log(newEntry.predictors);
       await this.predictorDbService.addWithObservable(newEntry);
-      console.log('predictor entry added');
     }
   }
 

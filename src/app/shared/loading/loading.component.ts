@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { LoadingService } from "./loading.service";
 
 @Component({
@@ -10,7 +10,7 @@ export class LoadingComponent implements OnInit {
   loading: boolean;
   loadingMessage: string;
 
-  constructor(private loadingService: LoadingService) { }
+  constructor(private loadingService: LoadingService, private cd: ChangeDetectorRef) { }
 
   ngOnInit(): void {
     this.loadingService.getLoadingStatus().subscribe((value) => {
@@ -19,6 +19,7 @@ export class LoadingComponent implements OnInit {
 
     this.loadingService.getLoadingMessage().subscribe((value) => {
       this.loadingMessage = value;
+      this.cd.detectChanges();
     });
   }
 
