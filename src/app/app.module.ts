@@ -43,7 +43,6 @@ import { PredictorDataComponent } from './utility/predictor-data/predictor-data.
 import { EditPredictorEntryRowComponent } from './utility/predictor-data/edit-predictor-entry-row/edit-predictor-entry-row.component';
 import { EditPredictorsComponent } from './utility/predictor-data/edit-predictors/edit-predictors.component';
 import { CalanderizationComponent } from './utility/calanderization/calanderization.component';
-import { ImportPredictorsComponent } from './utility/predictor-data/import-predictors/import-predictors.component';
 import { EnergyUnitDropdownComponent } from './utility/meter-grouping/energy-unit-dropdown/energy-unit-dropdown.component';
 import { SettingsLabelPipe } from './shared/helper-pipes/settings-label.pipe';
 import { VisualizationComponent } from './utility/visualization/visualization.component';
@@ -116,7 +115,6 @@ import { ImportPredictorsTableComponent } from './utility/upload-data/import-pre
     EditPredictorEntryRowComponent,
     EditPredictorsComponent,
     CalanderizationComponent,
-    ImportPredictorsComponent,
     EnergyUnitDropdownComponent,
     SettingsLabelPipe,
     VisualizationComponent,

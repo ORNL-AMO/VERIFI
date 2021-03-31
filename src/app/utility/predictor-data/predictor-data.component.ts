@@ -24,7 +24,7 @@ export class PredictorDataComponent implements OnInit {
   predictorEntryToEdit: IdbPredictorEntry;
   showPredictorMenu: boolean = false;
   showEditPredictors: boolean = false;
-  showImportPredictors: boolean = false;
+  addOrEdit: "add" | "edit";
   constructor(private predictorsDbService: PredictordbService, private router: Router) { }
 
   ngOnInit(): void {
@@ -43,7 +43,8 @@ export class PredictorDataComponent implements OnInit {
   }
 
   addPredictorEntry() {
-    this.predictorsDbService.addNewPredictorEntry();
+    this.addOrEdit = "add";
+    this.predictorEntryToEdit = this.predictorsDbService.getNewPredictorEntry();
   }
 
   setDeletePredictorEntry(predictorEntry: IdbPredictorEntry) {
@@ -60,6 +61,7 @@ export class PredictorDataComponent implements OnInit {
   }
 
   setEditPredictorEntry(predictorEntry: IdbPredictorEntry) {
+    this.addOrEdit = "edit";
     this.predictorEntryToEdit = predictorEntry;
   }
 
@@ -113,14 +115,6 @@ export class PredictorDataComponent implements OnInit {
   closeEditPredictors() {
     this.showEditPredictors = false;
     this.showPredictorMenu = false;
-  }
-
-  openImportPredictors() {
-    this.showImportPredictors = true;
-  }
-
-  closeImportPredictors() {
-    this.showImportPredictors = false;
   }
 
   uploadData() {

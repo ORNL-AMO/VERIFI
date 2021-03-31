@@ -9,7 +9,7 @@
 
         <div class="meterData item-right">
             <button class="btn btn-primary-4 item-right m-0 ml-2" (click)="addPredictorEntry()"><i
-                    class="fa fa-plus"></i> Add New Predictor</button>
+                    class="fa fa-plus"></i> Add Predictor Entry</button>
         </div>
 
         <div class="importExport item-right">
@@ -94,13 +94,5 @@
     </div>
     <div class="popup-footer text-right">
         <button class="btn btn-danger" (click)="confirmDeletePredictorEntry()">Delete</button>
-    </div>
-</div>
-
-<div class="window" [class.open]="showImportPredictors">
-    <div class="windowOverlay"></div>
-    <div class="windowContent">
-        <app-import-predictors *ngIf="showImportPredictors" (emitClose)="closeImportPredictors()">
-        </app-import-predictors>
     </div>
 </div>

@@ -163,7 +163,7 @@ export class PredictordbService {
     }
 
 
-    addNewPredictorEntry(): void {
+    getNewPredictorEntry(): IdbPredictorEntry {
         let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
         let newPredictorDate: Date = new Date();
         let facilityPredictorEntries: Array<IdbPredictorEntry> = this.facilityPredictorEntries.getValue();
@@ -186,7 +186,8 @@ export class PredictordbService {
             predictors: predictors,
             date: newPredictorDate
         };
-        this.add(newPredictorEntry);
+        // this.add(newPredictorEntry);
+        return newPredictorEntry;
     }
 
     getNewImportPredictorEntry(headers: Array<string>, dataRow: Array<any>, missingPredictors: Array<PredictorData>): IdbPredictorEntry {

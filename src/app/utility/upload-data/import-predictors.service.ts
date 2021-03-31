@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
-import { IdbFacility, IdbPredictorEntry, PredictorData } from 'src/app/models/idb';
+import { IdbPredictorEntry, PredictorData } from 'src/app/models/idb';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +10,6 @@ export class ImportPredictorsService {
   constructor(private predictorsDbService: PredictordbService) { }
 
   getSummaryFromTemplatesFile(fileData: Array<any>, predictorHeaders: Array<string>, facilityPredictors: Array<PredictorData>, facilityPredictorEntries: Array<IdbPredictorEntry>): ImportPredictorFileSummary {
-    console.log(predictorHeaders);
     let existingPredictors: Array<PredictorData> = new Array();
     let newPredictors: Array<PredictorData> = new Array();
     predictorHeaders.forEach(header => {
@@ -27,7 +26,6 @@ export class ImportPredictorsService {
       }
     });
 
-    //update existing entries with new predictors?
     let splitData: { newEntries: Array<any>, existingEntries: Array<any> } = this.splitExistingAndNewEntries(fileData, facilityPredictorEntries);
 
     return {
