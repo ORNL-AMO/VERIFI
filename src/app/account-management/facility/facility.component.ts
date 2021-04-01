@@ -47,22 +47,25 @@ export class FacilityComponent implements OnInit {
   async facilityDelete() {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     this.loadingService.setLoadingStatus(true);
-    this.loadingService.setLoadingMessage("Deleting Facility...");
+    this.loadingService.setLoadingMessage("Deleting Facility Predictors...");
     // Delete all info associated with account
     await this.predictorDbService.deleteAllFacilityPredictors(this.selectedFacility.id);
+    this.loadingService.setLoadingMessage("Deleting Facility Meter Data...");
     await this.utilityMeterDataDbService.deleteAllFacilityMeterData(this.selectedFacility.id);
+    this.loadingService.setLoadingMessage("Deleting Facility Meters...");
     await this.utilityMeterDbService.deleteAllFacilityMeters(this.selectedFacility.id);
+    this.loadingService.setLoadingMessage("Deleting Facility Meter Groups...");
     await this.utilityMeterGroupDbService.deleteAllFacilityMeterGroups(this.selectedFacility.id);
+    this.loadingService.setLoadingMessage("Deleting Facility...");
     await this.facilityDbService.deleteFacilitiesAsync([this.selectedFacility]);
     // Then navigate to another facility
-    this.facilityDbService.getAll().subscribe(allFacilities => {
-      this.facilityDbService.allFacilities.next(allFacilities);
-      let accountFacilites: Array<IdbFacility> = allFacilities.filter(facility => {return facility.accountId == selectedAccount.id});
-      this.facilityDbService.accountFacilities.next(accountFacilites);
-      this.facilityDbService.setSelectedFacility();
-      this.router.navigate(['/']);
-      this.loadingService.setLoadingStatus(false);
-    });
+    let allFacilities: Array<IdbFacility> = await this.facilityDbService.getAll().toPromise();
+    this.facilityDbService.allFacilities.next(allFacilities);
+    let accountFacilites: Array<IdbFacility> = allFacilities.filter(facility => { return facility.accountId == selectedAccount.id });
+    this.facilityDbService.accountFacilities.next(accountFacilites);
+    this.facilityDbService.setSelectedFacility();
+    this.router.navigate(['/']);
+    this.loadingService.setLoadingStatus(false);
   }
 
   editFacility() {
