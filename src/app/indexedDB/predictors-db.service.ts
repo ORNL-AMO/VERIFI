@@ -120,7 +120,7 @@ export class PredictordbService {
 
     async deletePredictorsAsync(accountPredictorEntries: Array<IdbPredictorEntry>) {
         for (let i = 0; i < accountPredictorEntries.length; i++) {
-            await this.deleteIndexWithObservable(accountPredictorEntries[i].id);
+            await this.deleteIndexWithObservable(accountPredictorEntries[i].id).toPromise();
         }
     }
 

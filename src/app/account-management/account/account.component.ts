@@ -78,19 +78,16 @@ export class AccountComponent implements OnInit {
     await this.utilityMeterGroupDbService.deleteAllFacilityMeterGroups(this.facilityToDelete.id);
     this.loadingService.setLoadingMessage("Deleting Facility...");
     await this.facilityDbService.deleteFacilitiesAsync([this.facilityToDelete]);
-
+    let allFacilities: Array<IdbFacility> = await this.facilityDbService.getAll().toPromise();
     // Then navigate to another facility
-    this.facilityDbService.getAll().subscribe(allFacilities => {
-      this.facilityDbService.allFacilities.next(allFacilities);
-      let accountFacilites: Array<IdbFacility> = allFacilities.filter(facility => { return facility.accountId == this.selectedAccount.id });
-      this.facilityDbService.accountFacilities.next(accountFacilites);
-      this.facilityDbService.setSelectedFacility();
-      this.loadingService.setLoadingStatus(false);
-    });
-
+    this.facilityDbService.allFacilities.next(allFacilities);
+    let accountFacilites: Array<IdbFacility> = allFacilities.filter(facility => { return facility.accountId == this.selectedAccount.id });
+    this.facilityDbService.accountFacilities.next(accountFacilites);
+    this.facilityDbService.setSelectedFacility();
+    this.loadingService.setLoadingStatus(false);
   }
 
-  async accountDelete() {
+  async confirmAccountDelete() {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
 
     this.loadingService.setLoadingStatus(true);
@@ -107,19 +104,18 @@ export class AccountComponent implements OnInit {
     this.loadingService.setLoadingMessage("Deleting Account Facilities...");
     await this.facilityDbService.deleteAllSelectedAccountFacilities();
     this.loadingService.setLoadingMessage("Deleting Account...");
-    await this.accountDbService.deleteAccountWithObservable(selectedAccount.id);
+    await this.accountDbService.deleteAccountWithObservable(selectedAccount.id).toPromise();
 
     // Then navigate to another account
-    this.accountDbService.getAll().subscribe(accounts => {
-      this.accountDbService.allAccounts.next(accounts);
-      if (accounts.length != 0) {
-        this.accountDbService.setSelectedAccount(accounts[0].id);
-      } else {
-        this.accountDbService.setSelectedAccount(undefined);
-      }
-      this.router.navigate(['/']);
-      this.loadingService.setLoadingStatus(false);
-    })
+    let accounts: Array<IdbAccount> = await this.accountDbService.getAll().toPromise();
+    this.accountDbService.allAccounts.next(accounts);
+    if (accounts.length != 0) {
+      this.accountDbService.setSelectedAccount(accounts[0].id);
+    } else {
+      this.accountDbService.setSelectedAccount(undefined);
+    }
+    this.router.navigate(['/']);
+    this.loadingService.setLoadingStatus(false);
   }
 
   setDeleteFacilityEntry(facility: IdbFacility) {
@@ -137,11 +133,6 @@ export class AccountComponent implements OnInit {
   async confirmFacilityDelete() {
     await this.facilityDelete();
     this.facilityToDelete = undefined;
-  }
-
-  confirmAccountDelete() {
-    this.accountDelete();
-    this.showDeleteAccount = undefined;
   }
 
   cancelAccountDelete() {

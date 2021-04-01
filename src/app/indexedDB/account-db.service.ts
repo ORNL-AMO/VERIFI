@@ -102,9 +102,9 @@ export class AccountdbService {
 
 
     async addTestData() {
-        await TestAccountData.forEach(accountItem => {
-            this.addWithObservable(accountItem);
-        });
+        for (let i = 0; i < TestAccountData.length; i++) {
+            await this.addWithObservable(TestAccountData[i]);
+        }
     }
 
     getNewIdbAccount(): IdbAccount {

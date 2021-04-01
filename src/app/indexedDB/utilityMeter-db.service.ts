@@ -114,7 +114,7 @@ export class UtilityMeterdbService {
 
     async deleteMeterEntriesAsync(meterEntries: Array<IdbUtilityMeter>) {
         for (let i = 0; i < meterEntries.length; i++) {
-            await this.deleteIndexWithObservable(meterEntries[i].id);
+            await this.deleteIndexWithObservable(meterEntries[i].id).toPromise();
         }
     }
 

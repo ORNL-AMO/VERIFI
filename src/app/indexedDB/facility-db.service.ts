@@ -133,28 +133,28 @@ export class FacilitydbService {
 
     async deleteFacilitiesAsync(accountFacilities: Array<IdbFacility>) {
         for (let i = 0; i < accountFacilities.length; i++) {
-            await this.deleteWithObservable(accountFacilities[i].id);
+            await this.deleteWithObservable(accountFacilities[i].id).toPromise();
         }
     }
 
 
     async addTestData(allAccounts: Array<IdbAccount>) {
-        await TestFacilityData.forEach(facilityDataItem => {
+        for (let i = 0; i < TestFacilityData.length; i++) {
             //set account ID from corresponding account in db
-            if (facilityDataItem.name == 'Frosted Side' || facilityDataItem.name == 'Plain Side') {
+            if (TestFacilityData[i].name == 'Frosted Side' || TestFacilityData[i].name == 'Plain Side') {
                 let correspondingAccount: IdbAccount = allAccounts.find(account => { return account.name == 'Mini Wheats' });
-                facilityDataItem.accountId = correspondingAccount.id;
+                TestFacilityData[i].accountId = correspondingAccount.id;
             }
-            if (facilityDataItem.name == 'Almond Milk') {
+            if (TestFacilityData[i].name == 'Almond Milk') {
                 let correspondingAccount: IdbAccount = allAccounts.find(account => { return account.name == 'Special K' });
-                facilityDataItem.accountId = correspondingAccount.id;
+                TestFacilityData[i].accountId = correspondingAccount.id;
             }
-            if (facilityDataItem.name == 'Crunch-a-tize') {
+            if (TestFacilityData[i].name == 'Crunch-a-tize') {
                 let correspondingAccount: IdbAccount = allAccounts.find(account => { return account.name == 'Captain Crunch' });
-                facilityDataItem.accountId = correspondingAccount.id;
+                TestFacilityData[i].accountId = correspondingAccount.id;
             }
-            this.addWithObservable(facilityDataItem);
-        });
+            await this.addWithObservable(TestFacilityData[i]).toPromise();
+        };
     }
 
     getNewIdbFacility(account: IdbAccount): IdbFacility {
