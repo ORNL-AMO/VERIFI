@@ -95,7 +95,7 @@ export class UploadDataRunnerService {
     this.loadingService.setLoadingMessage('Adding meter groups...');
     for (let i = 0; i < uniqNeededGroups.length; i++) {
       await this.utilityMeterGroupdbService.addFromImport(uniqNeededGroups[i]);
-   }
+    }
   }
 
 
@@ -188,6 +188,7 @@ export class UploadDataRunnerService {
       await this.predictorDbService.updateWithObservable(existingEntry);
     }
 
+    //iterate new entry data from import
     for (let newEntryIndex = 0; newEntryIndex < newPredictorEntries.length; newEntryIndex++) {
       let newEntryDate: Date = new Date(newPredictorEntries[newEntryIndex]["Date"]);
       //get new entry
@@ -217,6 +218,17 @@ export class UploadDataRunnerService {
       //order all predictors alphabetically and add
       newEntry.predictors = _.orderBy(newEntry.predictors, 'name');
       await this.predictorDbService.addWithObservable(newEntry);
+    }
+
+    //update existing entries in DB with new predictors
+    for (let entryIndex = 0; entryIndex < facilityPredictorEntries.length; entryIndex++) {
+      for (let i = 0; i < newPredictors.length; i++) {
+        newPredictors[i].amount = undefined;
+        facilityPredictorEntries[entryIndex].predictors.push(newPredictors[i]);
+      }
+      //order all predictors alphabetically and update
+      facilityPredictorEntries[entryIndex].predictors = _.orderBy(facilityPredictorEntries[entryIndex].predictors, 'name');
+      await this.predictorDbService.updateWithObservable(facilityPredictorEntries[entryIndex]);
     }
   }
 

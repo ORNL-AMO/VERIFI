@@ -70,7 +70,7 @@
     <div class="windowOverlay"></div>
     <div class="windowContent">
         <app-edit-predictor-entry-row *ngIf="predictorEntryToEdit" (emitClose)="cancelEditPredictorEntry()"
-            [predictorEntry]="predictorEntryToEdit">
+            [predictorEntry]="predictorEntryToEdit" [addOrEdit]="addOrEdit">
         </app-edit-predictor-entry-row>
     </div>
 </div>
