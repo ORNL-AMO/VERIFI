@@ -1,13 +1,15 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, PredictorData } from 'src/app/models/idb';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 import * as XLSX from 'xlsx';
 import { ImportMeterDataFileSummary, ImportMeterDataService } from '../import-meter-data.service';
 import { ImportMeterFileSummary, ImportMeterService } from '../import-meter.service';
+import { ImportPredictorFileSummary, ImportPredictorsService } from '../import-predictors.service';
 import { UploadDataService } from '../upload-data.service';
 
 @Injectable({
@@ -26,7 +28,7 @@ export class ExcelWizardService {
 
   constructor(private importMeterSevice: ImportMeterService, private facilityDbService: FacilitydbService, private utilityMeterDbService: UtilityMeterdbService,
     private importMeterDataService: ImportMeterDataService, private energyUnitsHelperService: EnergyUnitsHelperService, private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private uploadDataService: UploadDataService) {
+    private uploadDataService: UploadDataService, private importPredictorsService: ImportPredictorsService, private predictorDbService: PredictordbService) {
     this.selectedWorksheetData = new BehaviorSubject([]);
     this.selectedWorksheetDataHeaderMap = new BehaviorSubject([]);
     this.rowGroups = new BehaviorSubject([]);
@@ -145,17 +147,13 @@ export class ExcelWizardService {
   }
 
   //TODO import predictors
-  // getPredictorsSummary() {
-  //   let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-  //   let predictors: Array<IdbPredictorEntry> = new Array();
-  //   let columnGroups: Array<ColumnGroup> = this.columnGroups.getValue();
-  //   let dateGroup: ColumnGroup = columnGroups.find(group => { return group.groupLabel == 'Date' });
-  //   let predictorGroup: ColumnGroup = columnGroups.find(group => {return group.groupLabel == 'Predictors'});
-  //   predictorGroup.groupItems.forEach(groupItem => {
-
-  //   });
-
-  // }
+  getImportPredictorFileSummary(): ImportPredictorFileSummary {
+    let columnGroups: Array<ColumnGroup> = this.columnGroups.getValue();
+    let predictorGroup: ColumnGroup = columnGroups.find(group => { return group.groupLabel == 'Predictors' });
+    let worksheetData: Array<any> = this.selectedWorksheetDataHeaderMap.getValue();
+    let facilityPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.facilityPredictorEntries.getValue();
+    return this.importPredictorsService.getPredictorsSummaryFromExcelFile(predictorGroup.groupItems, worksheetData, facilityPredictorEntries);
+  }
 
   getMetersSummary(importMeterFileWizard: { fileName: string, importMeterFileSummary: ImportMeterFileSummary, id: string }): Array<{ meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData> }> {
     let importMeters: Array<IdbUtilityMeter> = new Array();
@@ -196,7 +194,37 @@ export class ExcelWizardService {
     return metersSummary;
   }
 
-  submitExcelData(importMeterFileWizard: { fileName: string, importMeterFileSummary: ImportMeterFileSummary, id: string }, meterData: Array<IdbUtilityMeterData>, facilityMeters: Array<IdbUtilityMeter>) {
+  getPredictorsSummary(importPredictorFileWizard: { fileName: string, importPredictorFileSummary: ImportPredictorFileSummary, id: string }): Array<{ predictor: PredictorData, numberOfReadings: number }> {
+    let predictorsSummary: Array<{ predictor: PredictorData, numberOfReadings: number }> = new Array();
+    let predictors: Array<PredictorData> = new Array();
+    importPredictorFileWizard.importPredictorFileSummary.newPredictors.forEach(predictor => {
+      predictors.push(predictor);
+    });
+    importPredictorFileWizard.importPredictorFileSummary.existingPredictors.forEach(predictor => {
+      predictors.push(predictor);
+    });
+
+    // let columnGroups: Array<{ groupLabel: string, groupItems: Array<ColumnItem>, id: string }> = this.columnGroups.getValue();
+    // let dateGroup = columnGroups.find(group => { return group.groupLabel == 'Date' })
+    let worksheetData: Array<any> = this.selectedWorksheetDataHeaderMap.getValue();
+
+    predictors.forEach(predictor => {
+      let entryCount: number = 0;
+      worksheetData.forEach(dataItem => {
+        if (dataItem[predictor.importWizardName] != undefined || dataItem[predictor.importWizardName] != null) {
+          entryCount++;
+        }
+      });
+      predictorsSummary.push({ predictor: predictor, numberOfReadings: entryCount });
+    });
+    return predictorsSummary;
+  }
+
+
+
+  submitExcelData(importMeterFileWizard: { fileName: string, importMeterFileSummary: ImportMeterFileSummary, id: string },
+    importPredictorFileWizard: { fileName: string, importPredictorFileSummary: ImportPredictorFileSummary, id: string },
+    meterData: Array<IdbUtilityMeterData>, facilityMeters: Array<IdbUtilityMeter>) {
     let metersToImport: Array<IdbUtilityMeter> = new Array();
     importMeterFileWizard.importMeterFileSummary.newMeters.forEach(meter => {
       metersToImport.push(meter);
@@ -208,6 +236,8 @@ export class ExcelWizardService {
     let importMeterDataFileSummary: ImportMeterDataFileSummary = this.importMeterDataService.getMeterDataSummaryFromExcelFile(meterData, facilityMeters, metersToImport);
     this.uploadDataService.addMeterFile(importMeterFileWizard.fileName, importMeterFileWizard.importMeterFileSummary);
     this.uploadDataService.addMeterDataFile(importMeterFileWizard.fileName, importMeterDataFileSummary, undefined);
+    this.uploadDataService.addPredictorFile(importPredictorFileWizard.fileName, importPredictorFileWizard.importPredictorFileSummary);
+
     this.uploadDataService.removeExcelFile(importMeterFileWizard.fileName);
   }
 }

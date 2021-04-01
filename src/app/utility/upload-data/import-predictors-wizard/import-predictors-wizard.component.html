@@ -1,0 +1,61 @@
+<h4 *ngIf="wizardContext == 'template'">Import Predictors</h4>
+<br *ngIf="wizardContext == 'template'">
+
+<div class="d-flex flex-wrap justify-content-center" *ngIf="importPredictors">
+    <div class="p-1">
+        <span class="badge badge-danger">#</span> Invalid Predictor
+    </div>
+    <div class="p-1">
+        <span class="badge badge-success">#</span> Vaild Predictor
+    </div>
+    <div class="p-1">
+        <span class="badge badge-warning">#</span> Existing Predictor (has same name)
+    </div>
+    <div class="p-1">
+        <span class="badge badge-secondary">#</span> Predictor Import Skipped
+    </div>
+</div>
+<hr>
+
+<div class="row">
+    <div class="col-6">
+        <p class="bold">Predictor Name</p>
+    </div>
+    <div class="col-5">
+        <p class="bold">Units</p>
+    </div>
+</div>
+
+<form>
+    <div class="row mb-3" *ngFor="let predictor of importPredictors">
+        <div class="col-6">
+            <div class="input-group w-100">
+                <div class="input-group-prepend">
+                    <!-- <span class="input-group-text" id="basic-addon1">@</span> -->
+                    <span class="input-gorup-text badge" [ngClass]="getPredictorClass(predictor)">
+                        #
+                    </span>
+                </div>
+                <input class="form-control" type="text" [(ngModel)]="predictor.name"
+                    name="{{'predictorName'+predictor.id}}">
+            </div>
+        </div>
+        <div class="col-5">
+            <input class="form-control w-100" [(ngModel)]="predictor.unit" name="{{'predictorUnit'+predictor.id}}">
+
+        </div>
+        <div class="col-1 text-center">
+            <button class="btn btn-outline m-0">Skip
+            </button>
+        </div>
+    </div>
+</form>
+<hr>
+<div class="saveCancel item-right text-right" *ngIf="wizardContext == 'template'">
+    <button class="btn btn-secondary" (click)="cancel()">Cancel</button>
+    <button class="btn btn-primary" (click)="submit()">Submit</button>
+</div>
+<div class="saveCancel item-right text-right" *ngIf="wizardContext == 'excel'">
+    <button class="btn btn-secondary" (click)="back()">Back to Setup Data</button>
+    <button class="btn btn-primary" (click)="continue()">Submit & Continue</button>
+</div>

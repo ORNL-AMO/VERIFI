@@ -175,13 +175,13 @@ export class UploadDataRunnerService {
       //add new predictor data to entry
       for (let i = 0; i < newPredictors.length; i++) {
         let predictorToAdd: PredictorData = newPredictors[i];
-        predictorToAdd.amount = existingPredictorEntries[existingIndex][predictorToAdd.name];
+        predictorToAdd.amount = existingPredictorEntries[existingIndex][predictorToAdd.importWizardName];
         existingEntry.predictors.push(predictorToAdd);
       }
       //update existing predictor data
       for (let i = 0; i < existingPredictors.length; i++) {
         let existingPredictorIndex: number = existingEntry.predictors.findIndex(predictor => { return predictor.id == existingPredictors[i].id });
-        existingEntry.predictors[existingPredictorIndex].amount = existingPredictorEntries[existingIndex][existingPredictors[i].name];
+        existingEntry.predictors[existingPredictorIndex].amount = existingPredictorEntries[existingIndex][existingPredictors[i].importWizardName];
       }
       //order all predictors alphabetically and update
       existingEntry.predictors = _.orderBy(existingEntry.predictors, 'name');
@@ -195,12 +195,12 @@ export class UploadDataRunnerService {
       //add new predictor data to entry
       for (let i = 0; i < newPredictors.length; i++) {
         let predictorToAdd: PredictorData = JSON.parse(JSON.stringify(newPredictors[i]));
-        predictorToAdd.amount = newPredictorEntries[newEntryIndex][predictorToAdd.name];
+        predictorToAdd.amount = newPredictorEntries[newEntryIndex][predictorToAdd.importWizardName];
         newEntry.predictors.push(predictorToAdd);
       }
       //add existing predictors data from import
       for (let i = 0; i < existingPredictors.length; i++) {
-        existingPredictors[i].amount = newPredictorEntries[newEntryIndex][existingPredictors[i].name];
+        existingPredictors[i].amount = newPredictorEntries[newEntryIndex][existingPredictors[i].importWizardName];
         newEntry.predictors.push(JSON.parse(JSON.stringify(existingPredictors[i])));
       }
 

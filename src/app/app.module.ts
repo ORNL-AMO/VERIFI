@@ -86,6 +86,7 @@ import { CalanderizationChartComponent } from './utility/calanderization/calande
 import { ToastNotificationsComponent } from './shared/toast-notifications/toast-notifications.component';
 import { ElectronUpdateComponent } from './electron/electron-update/electron-update.component';
 import { ImportPredictorsTableComponent } from './utility/upload-data/import-predictors-table/import-predictors-table.component';
+import { ImportPredictorsWizardComponent } from './utility/upload-data/import-predictors-wizard/import-predictors-wizard.component';
 
 @NgModule({
   declarations: [
@@ -158,6 +159,7 @@ import { ImportPredictorsTableComponent } from './utility/upload-data/import-pre
     ToastNotificationsComponent,
     ElectronUpdateComponent,
     ImportPredictorsTableComponent,
+    ImportPredictorsWizardComponent,
   ],
   imports: [
     BrowserModule,

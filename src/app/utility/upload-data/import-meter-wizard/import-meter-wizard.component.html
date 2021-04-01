@@ -1,7 +1,7 @@
 <h4 *ngIf="wizardContext == 'template'">Import Meters</h4>
 <br *ngIf="wizardContext == 'template'">
 
-<div class="d-flex flex-wrap justify-content-center" *ngIf="importMeters">
+<div class="d-flex flex-wrap justify-content-center badge-menu" *ngIf="importMeters">
     <div class="p-1">
         <span class="badge badge-danger">#</span> Invalid Meter
     </div>
@@ -11,9 +11,9 @@
     <div class="p-1">
         <span class="badge badge-warning">#</span> Existing Meter (has same name)
     </div>
-    <div class="p-1">
+    <!-- <div class="p-1">
         <span class="badge badge-secondary">#</span> Meter Import Skipped
-    </div>
+    </div> -->
 </div>
 <hr class="m-0">
 <div class="d-flex flex-column" *ngIf="importMeters && selectedMeterForm">

@@ -5,3 +5,8 @@
 .nav-tabs{
     background-color: #efefef;
 }
+
+
+.badge-menu .badge{
+    font-size: 18px;
+}

@@ -20,7 +20,14 @@
     </app-import-meter-wizard>
 </div>
 
+<!--Page 3: Setup Meters-->
 <div *ngIf="wizardPage == 4">
-    <app-wizard-data-summary [(importMeterFileWizard)]="importMeterFileWizard" (emitClose)="close()"
-        (emitBack)="back()"></app-wizard-data-summary>
+    <app-import-predictors-wizard [wizardContext]="'excel'" [(importPredictorFileWizard)]="importPredictorFileWizard"
+        (emitContinue)="continue()" (emitBack)="back()"></app-import-predictors-wizard>
+</div>
+
+<div *ngIf="wizardPage == 5">
+    <app-wizard-data-summary [(importMeterFileWizard)]="importMeterFileWizard"
+        [(importPredictorFileWizard)]="importPredictorFileWizard" (emitClose)="close()" (emitBack)="back()">
+    </app-wizard-data-summary>
 </div>

@@ -32,10 +32,44 @@
         </tr>
     </tbody>
 </table>
-
+<hr>
+<table>
+    <thead>
+        <tr>
+            <th>
+                Predictor
+            </th>
+            <th>
+                Unit
+            </th>
+            <th>
+                Predictor Entries
+            </th>
+            <!-- <th>
+                Number of Readings
+            </th> -->
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let summary of predictorsSummary">
+            <td>
+                {{summary.predictor.name}}
+            </td>
+            <td>
+                {{summary.predictor.unit}}
+            </td>
+            <td>
+                {{summary.numberOfReadings}}
+            </td>
+            <!-- <td>
+                {{summary.meterData.length}}
+            </td> -->
+        </tr>
+    </tbody>
+</table>
 
 <hr>
 <div class="d-flex w-100 justify-content-between">
-    <button class="btn btn-secondary" (click)="back()">Meters Setup</button>
+    <button class="btn btn-secondary" (click)="back()">Predictors Setup</button>
     <button class="btn btn-primary" (click)="continue()">Submit & Finish</button>
 </div>

@@ -16,6 +16,7 @@ export class ImportPredictorsTableComponent implements OnInit {
   ngOnInit(): void {
     this.importPredictorFilesSub = this.uploadDataService.importPredictorsFiles.subscribe(val => {
       this.importPredictorFiles = val;
+      console.log(this.importPredictorFiles);
     });
   }
 
