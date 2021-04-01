@@ -134,7 +134,6 @@ export class PredictordbService {
     }
 
     addNewPredictor(newPredictor: PredictorData) {
-        // let newPredictor: PredictorData = this.getNewPredictor();
         let facilityPredictorEntries: Array<IdbPredictorEntry> = this.facilityPredictorEntries.getValue();
         facilityPredictorEntries.forEach(predictorEntry => {
             predictorEntry.predictors.push(newPredictor);
@@ -152,7 +151,6 @@ export class PredictordbService {
     }
 
     getNewPredictor(facilityPredictors: Array<PredictorData>): PredictorData {
-        // let facilityPredictors: Array<PredictorData> = this.facilityPredictors.getValue();
         return {
             name: 'Predictor #' + (facilityPredictors.length + 1),
             amount: undefined,
@@ -184,28 +182,6 @@ export class PredictordbService {
             facilityId: selectedFacility.id,
             accountId: selectedFacility.accountId,
             predictors: predictors,
-            date: newPredictorDate
-        };
-        // this.add(newPredictorEntry);
-        return newPredictorEntry;
-    }
-
-    getNewImportPredictorEntry(headers: Array<string>, dataRow: Array<any>, missingPredictors: Array<PredictorData>): IdbPredictorEntry {
-        let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-        let newPredictorDate: Date = new Date(dataRow[0]);
-        let predictors: Array<PredictorData> = JSON.parse(JSON.stringify(this.facilityPredictors.getValue()))
-        //not working unless I use copy...
-        let combinedPredictors: Array<PredictorData> = JSON.parse(JSON.stringify(predictors.concat(missingPredictors)));
-        for (let i = 0; i < combinedPredictors.length; i++) {
-            let dataIndex: number = headers.findIndex(header => { return header == combinedPredictors[i].name });
-            if (dataIndex != -1) {
-                combinedPredictors[i].amount = dataRow[dataIndex];
-            }
-        }
-        let newPredictorEntry: IdbPredictorEntry = {
-            facilityId: selectedFacility.id,
-            accountId: selectedFacility.accountId,
-            predictors: combinedPredictors,
             date: newPredictorDate
         };
         return newPredictorEntry;

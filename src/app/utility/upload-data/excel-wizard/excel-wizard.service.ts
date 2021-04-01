@@ -204,8 +204,6 @@ export class ExcelWizardService {
       predictors.push(predictor);
     });
 
-    // let columnGroups: Array<{ groupLabel: string, groupItems: Array<ColumnItem>, id: string }> = this.columnGroups.getValue();
-    // let dateGroup = columnGroups.find(group => { return group.groupLabel == 'Date' })
     let worksheetData: Array<any> = this.selectedWorksheetDataHeaderMap.getValue();
 
     predictors.forEach(predictor => {

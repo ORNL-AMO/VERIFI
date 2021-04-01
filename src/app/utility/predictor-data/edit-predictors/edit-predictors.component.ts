@@ -22,10 +22,6 @@ export class EditPredictorsComponent implements OnInit {
       this.facilityPredictors = JSON.parse(JSON.stringify(this.predictorDbService.facilityPredictors.getValue()));
   }
 
-  // ngOnDestroy() {
-  //   this.facilityPredictorsSub.unsubscribe();
-  // }
-
   save() {
     this.predictorDbService.updateFacilityPredictorEntries(this.facilityPredictors);
     this.cancel();

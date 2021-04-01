@@ -163,12 +163,6 @@ export class UploadDataComponent implements OnInit {
         if (file.importPredictorFileSummary.existingPredictors.length != 0) {
           this.disableImport = false;
         }
-        // if (file.importPredictorFileSummary.existingPredictorEntries.length != 0) {
-        //   this.disableImport = false;
-        // }
-        // if (file.importPredictorFileSummary.newPredictorEntries.length != 0) {
-        //   this.disableImport = false;
-        // }
         if (file.importPredictorFileSummary.newPredictors.length != 0) {
           this.disableImport = false;
         }

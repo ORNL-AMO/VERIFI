@@ -161,7 +161,6 @@ export class UploadDataService {
 
 
   addPredictorDataFromTemplate(predictorsData: Array<any>, predictorHeaders: Array<string>, fileName: string) {
-    // let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let facilityPredictors: Array<PredictorData> = this.predictorsDbService.facilityPredictors.getValue();
     let facilityPredictorEntries: Array<IdbPredictorEntry> = this.predictorsDbService.facilityPredictorEntries.getValue();
     let summary: ImportPredictorFileSummary = this.importPredictorsService.getSummaryFromTemplatesFile(predictorsData, predictorHeaders, facilityPredictors, facilityPredictorEntries);
