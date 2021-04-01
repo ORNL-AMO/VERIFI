@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { PredictorData } from 'src/app/models/idb';
-import { ImportPredictorFileSummary } from '../import-predictors.service';
+import { ImportPredictorFile, UploadDataService } from '../upload-data.service';
 
 @Component({
   selector: 'app-import-predictors-wizard',
@@ -12,7 +12,7 @@ export class ImportPredictorsWizardComponent implements OnInit {
   @Input()
   wizardContext: "excel" | "template";
   @Input()
-  importPredictorFileWizard: { fileName: string, importPredictorFileSummary: ImportPredictorFileSummary, id: string };
+  importPredictorFileWizard: ImportPredictorFile;
   @Output('emitBack')
   emitBack: EventEmitter<boolean> = new EventEmitter();
   @Output('emitContinue')
@@ -21,26 +21,49 @@ export class ImportPredictorsWizardComponent implements OnInit {
 
   importPredictors: Array<PredictorData>;
   facilityPredictors: Array<PredictorData>;
-  constructor(private predictorDbService: PredictordbService) { }
+
+  skippedPredictors: Array<boolean>;
+
+  constructor(private predictorDbService: PredictordbService, private uploadDataService: UploadDataService) { }
 
   ngOnInit(): void {
+    if (this.wizardContext == 'template') {
+      this.importPredictorFileWizard = this.uploadDataService.importPredictorFileWizard.getValue();
+    }
+
     this.facilityPredictors = this.predictorDbService.facilityPredictors.getValue();
     this.importPredictors = new Array();
+    this.skippedPredictors = new Array();
+
     this.importPredictorFileWizard.importPredictorFileSummary.existingPredictors.forEach(predictor => {
       this.importPredictors.push(predictor);
+      this.skippedPredictors.push(false);
     });
     this.importPredictorFileWizard.importPredictorFileSummary.newPredictors.forEach(predictor => {
       this.importPredictors.push(predictor);
+      this.skippedPredictors.push(false);
+    });
+    this.importPredictorFileWizard.importPredictorFileSummary.invalidPredictors.forEach(predictor => {
+      this.importPredictors.push(predictor);
+      this.skippedPredictors.push(false);
+    });
+    this.importPredictorFileWizard.importPredictorFileSummary.skippedPredictors.forEach(predictor => {
+      this.importPredictors.push(predictor);
+      this.skippedPredictors.push(true);
     });
   }
 
-
   cancel() {
-
+    this.uploadDataService.importPredictorFileWizard.next(undefined);
   }
 
   submit() {
-
+    this.updateImportPredictorFileWizard();
+    let importPredictorFiles: Array<ImportPredictorFile> = this.uploadDataService.importPredictorsFiles.getValue();
+    let wizardFileIndex: number = importPredictorFiles.findIndex(file => { return file.id == this.importPredictorFileWizard.id });
+    importPredictorFiles[wizardFileIndex] = this.importPredictorFileWizard;
+    this.uploadDataService.importPredictorsFiles.next(importPredictorFiles);
+    this.cancel();
   }
 
   back() {
@@ -55,14 +78,14 @@ export class ImportPredictorsWizardComponent implements OnInit {
   updateImportPredictorFileWizard() {
     this.importPredictorFileWizard.importPredictorFileSummary.existingPredictors = new Array();
     this.importPredictorFileWizard.importPredictorFileSummary.newPredictors = new Array();
-    // this.importPredictorFileWizard.importPredictorFileSummary.invalidMeters = new Array();
-    // this.importPredictorFileWizard.importPredictorFileSummary.skippedMeters = new Array();
+    this.importPredictorFileWizard.importPredictorFileSummary.skippedPredictors = new Array();
+    this.importPredictorFileWizard.importPredictorFileSummary.invalidPredictors = new Array();
     this.importPredictors.forEach((predictor, index) => {
-      let badgeClass: string = this.getPredictorClass(predictor);
+      let badgeClass: string = this.getPredictorClass(predictor, index);
       if (badgeClass == 'badge-secondary') {
-        // this.importMeterFileWizard.importMeterFileSummary.skippedMeters.push(meter);
+        this.importPredictorFileWizard.importPredictorFileSummary.skippedPredictors.push(predictor);
       } else if (badgeClass == 'badge-danger') {
-        // this.importMeterFileWizard.importMeterFileSummary.invalidMeters.push(meter);
+        this.importPredictorFileWizard.importPredictorFileSummary.invalidPredictors.push(predictor);
       } else if (badgeClass == 'badge-warning') {
         let findPredictor: PredictorData = this.facilityPredictors.find(facilityPedictor => { return facilityPedictor.name == predictor.name })
         let predictorCopy: PredictorData = JSON.parse(JSON.stringify(findPredictor));
@@ -75,18 +98,24 @@ export class ImportPredictorsWizardComponent implements OnInit {
 
   }
 
-  getPredictorClass(predictor: PredictorData): string {
-    if (!predictor.name) {
-      return 'badge-danger';
+  getPredictorClass(predictor: PredictorData, index: number): string {
+    if (this.skippedPredictors[index] == true) {
+      return 'badge-secondary';
     } else {
-      let findPredictor: PredictorData = this.facilityPredictors.find(facilityPedictor => { return facilityPedictor.name == predictor.name });
-      if (findPredictor) {
-        return 'badge-warning';
+      if (!predictor.name) {
+        return 'badge-danger';
       } else {
-        return 'badge-success';
+        let findPredictor: PredictorData = this.facilityPredictors.find(facilityPedictor => { return facilityPedictor.name == predictor.name });
+        if (findPredictor) {
+          return 'badge-warning';
+        } else {
+          return 'badge-success';
+        }
       }
-
     }
   }
 
+  toggleSkipPredictor(index: number) {
+    this.skippedPredictors[index] = !this.skippedPredictors[index];
+  }
 }

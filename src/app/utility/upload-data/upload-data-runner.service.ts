@@ -94,7 +94,7 @@ export class UploadDataRunnerService {
     });
     this.loadingService.setLoadingMessage('Adding meter groups...');
     for (let i = 0; i < uniqNeededGroups.length; i++) {
-      await this.utilityMeterGroupdbService.addFromImport(uniqNeededGroups[i]);
+      await this.utilityMeterGroupdbService.addFromImport(uniqNeededGroups[i]).toPromise();
     }
   }
 
@@ -103,7 +103,7 @@ export class UploadDataRunnerService {
     this.loadingService.setLoadingMessage('Addings meters...')
     for (let i = 0; i < newMeters.length; i++) {
       newMeters[i].energyUnit = this.getMeterEnergyUnit(newMeters[i], selectedFacility);
-      await this.utilityMeterdbService.addWithObservable(newMeters[i]);
+      await this.utilityMeterdbService.addWithObservable(newMeters[i]).toPromise();
     }
 
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterdbService.facilityMeters.getValue();
@@ -115,7 +115,7 @@ export class UploadDataRunnerService {
         facilityMeter = this.editMeterFormService.updateMeterFromForm(facilityMeter, form);
         facilityMeter.energyUnit = this.getMeterEnergyUnit(facilityMeter, selectedFacility);
         //update
-        await this.utilityMeterdbService.updateWithObservable(facilityMeter);
+        await this.utilityMeterdbService.updateWithObservable(facilityMeter).toPromise();
       }
     }
   }
@@ -140,11 +140,11 @@ export class UploadDataRunnerService {
     existingReadings = existingReadings.map(reading => { return this.setMeterId(reading, facilityMeters) });
     //add new readings
     for (let i = 0; i < newReadings.length; i++) {
-      await this.utilityMeterDataDbService.addWithObservable(newReadings[i]);
+      await this.utilityMeterDataDbService.addWithObservable(newReadings[i]).toPromise();
     }
     //add existing readings
     for (let i = 0; i < existingReadings.length; i++) {
-      await this.utilityMeterDataDbService.updateWithObservable(existingReadings[i]);
+      await this.utilityMeterDataDbService.updateWithObservable(existingReadings[i]).toPromise();
     }
 
   }
@@ -185,7 +185,7 @@ export class UploadDataRunnerService {
       }
       //order all predictors alphabetically and update
       existingEntry.predictors = _.orderBy(existingEntry.predictors, 'name');
-      await this.predictorDbService.updateWithObservable(existingEntry);
+      await this.predictorDbService.updateWithObservable(existingEntry).toPromise();
     }
 
     //iterate new entry data from import
@@ -217,7 +217,7 @@ export class UploadDataRunnerService {
 
       //order all predictors alphabetically and add
       newEntry.predictors = _.orderBy(newEntry.predictors, 'name');
-      await this.predictorDbService.addWithObservable(newEntry);
+      await this.predictorDbService.addWithObservable(newEntry).toPromise();
     }
 
     //update existing entries in DB with new predictors
@@ -228,7 +228,7 @@ export class UploadDataRunnerService {
       }
       //order all predictors alphabetically and update
       facilityPredictorEntries[entryIndex].predictors = _.orderBy(facilityPredictorEntries[entryIndex].predictors, 'name');
-      await this.predictorDbService.updateWithObservable(facilityPredictorEntries[entryIndex]);
+      await this.predictorDbService.updateWithObservable(facilityPredictorEntries[entryIndex]).toPromise();
     }
   }
 

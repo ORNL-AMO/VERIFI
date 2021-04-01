@@ -22,6 +22,7 @@ export class UploadDataService {
 
   importMeterFileWizard: BehaviorSubject<{ fileName: string, importMeterFileSummary: ImportMeterFileSummary, id: string }>;
   importMeterDataFileWizard: BehaviorSubject<ImportMeterDataFile>;
+  importPredictorFileWizard: BehaviorSubject<ImportPredictorFile>;
   constructor(private facilityDbService: FacilitydbService, private utilityMeterDbService: UtilityMeterdbService, private importMeterService: ImportMeterService,
     private importMeterDataService: ImportMeterDataService, private importPredictorsService: ImportPredictorsService,
     private predictorsDbService: PredictordbService) {
@@ -32,7 +33,7 @@ export class UploadDataService {
     this.importPredictorsFiles = new BehaviorSubject([]);
     this.importMeterFileWizard = new BehaviorSubject(undefined);
     this.importMeterDataFileWizard = new BehaviorSubject(undefined);
-
+    this.importPredictorFileWizard = new BehaviorSubject(undefined);
     this.templateWorkBooks.subscribe(workBookData => {
       this.parseWorkBooks(workBookData);
     });
@@ -148,8 +149,7 @@ export class UploadDataService {
       });
       file.importMeterDataFileSummary = this.importMeterDataService.getMeterDataSummaryFromExcelFile(meterDataArr, facilityMeters, metersToImport);
       this.addMeterDataFile(file.fileName, file.importMeterDataFileSummary, undefined);
-    })
-
+    });
   }
 
   removeExcelFile(fileName: string) {

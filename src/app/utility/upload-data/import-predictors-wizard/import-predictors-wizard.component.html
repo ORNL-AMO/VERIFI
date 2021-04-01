@@ -17,7 +17,7 @@
 </div>
 <hr>
 
-<div class="row">
+<div class="row" *ngIf="importPredictors.length != 0">
     <div class="col-6">
         <p class="bold">Predictor Name</p>
     </div>
@@ -26,36 +26,43 @@
     </div>
 </div>
 
-<form>
-    <div class="row mb-3" *ngFor="let predictor of importPredictors">
+<form *ngIf="importPredictors.length != 0">
+    <div class="row mb-3" *ngFor="let predictor of importPredictors; let index=index;">
         <div class="col-6">
             <div class="input-group w-100">
                 <div class="input-group-prepend">
                     <!-- <span class="input-group-text" id="basic-addon1">@</span> -->
-                    <span class="input-gorup-text badge" [ngClass]="getPredictorClass(predictor)">
+                    <span class="input-gorup-text badge" [ngClass]="getPredictorClass(predictor, index)">
                         #
                     </span>
                 </div>
                 <input class="form-control" type="text" [(ngModel)]="predictor.name"
-                    name="{{'predictorName'+predictor.id}}">
+                    name="{{'predictorName'+predictor.id}}" [disabled]="skippedPredictors[index]">
             </div>
         </div>
         <div class="col-5">
-            <input class="form-control w-100" [(ngModel)]="predictor.unit" name="{{'predictorUnit'+predictor.id}}">
+            <input class="form-control w-100" [(ngModel)]="predictor.unit" name="{{'predictorUnit'+predictor.id}}"
+                [disabled]="skippedPredictors[index]">
 
         </div>
         <div class="col-1 text-center">
-            <button class="btn btn-outline m-0">Skip
+            <button class="btn btn-outline m-0" (click)="toggleSkipPredictor(index)" *ngIf="!skippedPredictors[index]">Skip
+            </button>
+            <button class="btn btn-outline m-0" (click)="toggleSkipPredictor(index)" *ngIf="skippedPredictors[index]">Use
             </button>
         </div>
     </div>
 </form>
+
+<div class="alert alert-info" *ngIf="importPredictors.length == 0">
+    No import predictors selected.
+</div>
 <hr>
 <div class="saveCancel item-right text-right" *ngIf="wizardContext == 'template'">
     <button class="btn btn-secondary" (click)="cancel()">Cancel</button>
     <button class="btn btn-primary" (click)="submit()">Submit</button>
 </div>
 <div class="saveCancel item-right text-right" *ngIf="wizardContext == 'excel'">
-    <button class="btn btn-secondary" (click)="back()">Back to Setup Data</button>
+    <button class="btn btn-secondary" (click)="back()">Back to Meter Setup</button>
     <button class="btn btn-primary" (click)="continue()">Submit & Continue</button>
 </div>

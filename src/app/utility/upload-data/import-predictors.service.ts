@@ -34,6 +34,8 @@ export class ImportPredictorsService {
     return {
       existingPredictors: existingPredictors,
       newPredictors: newPredictors,
+      skippedPredictors: [],
+      invalidPredictors: [],
       existingPredictorEntries: splitData.existingEntries,
       newPredictorEntries: splitData.newEntries
     };
@@ -92,6 +94,8 @@ export class ImportPredictorsService {
     return {
       existingPredictors: existingPredictors,
       newPredictors: newPredictors,
+      skippedPredictors: [],
+      invalidPredictors: [],
       newPredictorEntries: splitData.newEntries,
       existingPredictorEntries: splitData.existingEntries
     };
@@ -101,6 +105,8 @@ export class ImportPredictorsService {
 
 
 export interface ImportPredictorFileSummary {
+  invalidPredictors: Array<PredictorData>;
+  skippedPredictors: Array<PredictorData>;
   existingPredictors: Array<PredictorData>;
   newPredictors: Array<PredictorData>;
   existingPredictorEntries: Array<any>;

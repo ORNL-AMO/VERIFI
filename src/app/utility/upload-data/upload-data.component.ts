@@ -18,7 +18,7 @@ export class UploadDataComponent implements OnInit {
 
   importMeterFileWizard: { fileName: string, importMeterFileSummary: ImportMeterFileSummary };
   importMeterFileWizardSub: Subscription;
-  importMeterDataFileWizard: { fileName: string, importMeterDataFileSummary: ImportMeterDataFileSummary, id: string, isTemplateElectricity: boolean };
+  importMeterDataFileWizard: ImportMeterDataFile;
   importMeterDataFileWizardSub: Subscription;
 
   fileReferences: Array<any>;
@@ -32,6 +32,9 @@ export class UploadDataComponent implements OnInit {
   importPredictorFilesSub: Subscription;
   disableImport: boolean = true;
 
+  importPredictorFileWizard: ImportPredictorFile;
+  importPredictorFileWizardSub: Subscription;
+
   constructor(private uploadDataService: UploadDataService, private uploadDataRunnerService: UploadDataRunnerService) { }
 
   ngOnInit(): void {
@@ -43,6 +46,10 @@ export class UploadDataComponent implements OnInit {
 
     this.importMeterDataFileWizardSub = this.uploadDataService.importMeterDataFileWizard.subscribe(val => {
       this.importMeterDataFileWizard = val;
+    });
+
+    this.importPredictorFileWizardSub = this.uploadDataService.importPredictorFileWizard.subscribe(val => {
+      this.importPredictorFileWizard = val;
     });
 
     this.importMeterFilesSub = this.uploadDataService.importMeterFiles.subscribe(val => {
@@ -67,6 +74,7 @@ export class UploadDataComponent implements OnInit {
     this.importMeterFilesSub.unsubscribe();
     this.importMeterDataFilesSub.unsubscribe();
     this.importPredictorFilesSub.unsubscribe();
+    this.importPredictorFileWizardSub.unsubscribe();
     this.uploadDataService.resetData();
   }
 
@@ -155,12 +163,12 @@ export class UploadDataComponent implements OnInit {
         if (file.importPredictorFileSummary.existingPredictors.length != 0) {
           this.disableImport = false;
         }
-        if (file.importPredictorFileSummary.existingPredictorEntries.length != 0) {
-          this.disableImport = false;
-        }
-        if (file.importPredictorFileSummary.newPredictorEntries.length != 0) {
-          this.disableImport = false;
-        }
+        // if (file.importPredictorFileSummary.existingPredictorEntries.length != 0) {
+        //   this.disableImport = false;
+        // }
+        // if (file.importPredictorFileSummary.newPredictorEntries.length != 0) {
+        //   this.disableImport = false;
+        // }
         if (file.importPredictorFileSummary.newPredictors.length != 0) {
           this.disableImport = false;
         }
