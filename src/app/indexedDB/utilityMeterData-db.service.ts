@@ -25,7 +25,19 @@ export class UtilityMeterDatadbService {
         this.facilityDbService.selectedFacility.subscribe(() => {
             this.setFacilityMeterData();
         });
+    }
 
+    async initializeMeterData() {
+        let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+        if (selectedAccount) {
+            let accountMeterData: Array<IdbUtilityMeterData> = await this.getAllByIndexRange('accountId', selectedAccount.id).toPromise();
+            this.accountMeterData.next(accountMeterData);
+            let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+            if (selectedFacility) {
+                let facilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.filter(meterData => { return meterData.facilityId == selectedFacility.id });
+                this.facilityMeterData.next(facilityMeterData);
+            }
+        }
     }
 
     setFacilityMeterData() {

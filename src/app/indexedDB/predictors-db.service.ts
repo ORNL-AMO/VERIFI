@@ -23,13 +23,28 @@ export class PredictordbService {
             this.facilityPredictorEntries.next(new Array());
             this.setFacilityPredictors();
         });
-
         this.accountDbService.selectedAccount.subscribe(() => {
             this.accountPredictorEntries.next(new Array());
             this.setAccountPredictors();
         });
-
     }
+
+    async initializePredictorData() {
+        let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+        if (selectedAccount) {
+            let accountPredictorEntries: Array<IdbPredictorEntry> = await this.getAllByIndexRange('accountId', selectedAccount.id).toPromise();
+            this.accountPredictorEntries.next(accountPredictorEntries);
+            let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+            if (selectedFacility) {
+                let facilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(predictor => { return predictor.facilityId == selectedFacility.id });
+                this.facilityPredictorEntries.next(facilityPredictorEntries);
+                if (facilityPredictorEntries.length != 0) {
+                    this.facilityPredictors.next(facilityPredictorEntries[0].predictors);
+                }
+            }
+        }
+    }
+
 
     setFacilityPredictors() {
         let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
