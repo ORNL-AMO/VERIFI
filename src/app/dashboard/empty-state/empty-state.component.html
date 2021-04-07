@@ -41,6 +41,26 @@
         <br>
         <hr>
         <p class="text-center">Want a quick start? <a (click)="loadTestData();">Load our test data</a></p>
+        <p class="text-center">Have an account backup file? <a (click)="openImportBackup();">Load Account Backup</a></p>
     </div>
 </div>
 <div class="measurFooter"></div>
+
+
+<div class="popup" [class.open]="showImportFile" *ngIf="showImportFile">
+    <div class="popup-header">Import Backup File
+      <button class="item-right" (click)="cancelImportBackup()">x</button>
+    </div>
+    <div class="popup-body">
+      <p>Select backup .json file you previously exported from VERIFI application.</p>
+      <input type="file" #importFile id="importFile" (input)="setImportFile($event.target.files)" accept=".json">
+      <p class="alert alert-danger" *ngIf="backupFileError">
+        {{backupFileError}}
+      </p>
+    </div>
+    <div class="popup-footer text-right">
+      <button class="btn btn-secondary" (click)="cancelImportBackup()">Cancel</button>
+      <button class="btn btn-primary" (click)="importBackupFile()"
+        [disabled]="backupFile == undefined || backupFileError != undefined">Import Backup Data</button>
+    </div>
+  </div>

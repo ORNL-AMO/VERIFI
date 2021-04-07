@@ -141,7 +141,6 @@ export class BackupDataService {
 
   async importMeterBackup(meterBackup: MeterBackup, accountId: number, facilityId: number) {
     this.loadingService.setLoadingMessage('Adding meter group..');
-    debugger
     if (meterBackup.meterGroup) {
       //check if group exists in facility
       let facilityGroups: Array<IdbUtilityMeterGroup> = await this.utilityMeterGroupDbService.getAllByFacilityWithObservable(facilityId).toPromise();
