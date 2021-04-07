@@ -9,6 +9,7 @@ import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db.service";
 import { UtilityMeterDatadbService } from "../../indexedDB/utilityMeterData-db.service";
 import { UtilityMeterGroupdbService } from "../../indexedDB/utilityMeterGroup-db.service";
 import { LoadingService } from "../../shared/loading/loading.service";
+import { AccountBackup, BackupDataService, BackupFile } from '../backup-data.service';
 
 @Component({
   selector: 'app-account',
@@ -25,7 +26,9 @@ export class AccountComponent implements OnInit {
   selectedAccountSub: Subscription;
   accountFacilitiesSub: Subscription;
   selectedAccount: IdbAccount;
-
+  showImportFile: boolean = false;
+  backupFile: any;
+  backupFileError: string;
   constructor(
     private router: Router,
     private accountDbService: AccountdbService,
@@ -34,7 +37,8 @@ export class AccountComponent implements OnInit {
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
-    private loadingService: LoadingService
+    private loadingService: LoadingService,
+    private backupDataService: BackupDataService
   ) { }
 
   ngOnInit() {
@@ -141,5 +145,56 @@ export class AccountComponent implements OnInit {
 
   cancelFacilityDelete() {
     this.facilityToDelete = undefined;
+  }
+
+  backupAccount() {
+    this.backupDataService.backupAccount();
+  }
+
+  openImportBackup() {
+    this.showImportFile = true;
+  }
+
+  cancelImportBackup() {
+    this.showImportFile = false;
+  }
+
+  setImportFile(files: FileList) {
+    if (files) {
+      if (files.length !== 0) {
+        let fr: FileReader = new FileReader();
+        fr.readAsText(files[0]);
+        fr.onloadend = (e) => {
+          try {
+            this.backupFile = JSON.parse(JSON.stringify(fr.result));
+            let testBackup = JSON.parse(this.backupFile)
+            if(!testBackup.origin || testBackup.origin != "VERIFI"){
+              this.backupFileError = "Selected file does not come from VERIFI and cannot be imported."
+            }else{
+              this.backupFileError = undefined;
+            }
+          } catch (err) {
+            console.log(err);
+          }
+        };
+      }
+    }
+  }
+
+  async importBackupFile() {
+    this.loadingService.setLoadingStatus(true);
+    let tmpBackupFile: BackupFile = JSON.parse(this.backupFile);
+    if (tmpBackupFile.backupFileType && tmpBackupFile.backupFileType == "Account") {
+      let newAccount: IdbAccount = await this.backupDataService.importAccountBackup(tmpBackupFile.accountBackup);
+      this.accountDbService.setSelectedAccount(newAccount.id);
+    } else {
+      let accountId: number = this.accountDbService.selectedAccount.getValue().id;
+      let newFacility: IdbFacility = await this.backupDataService.importFacilityBackup(tmpBackupFile.facilityBackup, accountId);
+      this.accountDbService.setSelectedAccount(this.selectedAccount.id);
+    }
+    this.facilityDbService.setAllFacilities();
+    this.accountDbService.setAllAccounts();
+    this.loadingService.setLoadingStatus(false);
+    this.cancelImportBackup();
   }
 }

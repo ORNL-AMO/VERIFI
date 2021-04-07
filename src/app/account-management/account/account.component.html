@@ -94,8 +94,8 @@
       <h4>Backup Account</h4>
       <p>You can protect your files from accidental loss by creating a backup. We recommend backing up your data
         frequently.</p>
-      <button class="btn btn-outline">Backup Account</button>
-      <p class="small"> Last Backup: 12/04/2020</p>
+      <button class="btn btn-outline" (click)="backupAccount()">Backup Account</button>
+      <p class="small"><a (click)="openImportBackup()">Import Backup File</a></p>
     </div>
   </div>
 </div>
@@ -125,5 +125,25 @@
   <div class="popup-footer text-right">
     <button class="btn btn-secondary" (click)="cancelFacilityDelete()">Cancel</button>
     <button class="btn btn-danger" (click)="confirmFacilityDelete()">Confirm Delete</button>
+  </div>
+</div>
+
+
+
+<div class="popup" [class.open]="showImportFile" *ngIf="showImportFile">
+  <div class="popup-header">Import Backup File
+    <button class="item-right" (click)="cancelImportBackup()">x</button>
+  </div>
+  <div class="popup-body">
+    <p>Select backup .json file you previously exported from VERIFI application.</p>
+    <input type="file" #importFile id="importFile" (input)="setImportFile($event.target.files)" accept=".json">
+    <p class="alert alert-danger" *ngIf="backupFileError">
+      {{backupFileError}}
+    </p>
+  </div>
+  <div class="popup-footer text-right">
+    <button class="btn btn-secondary" (click)="cancelImportBackup()">Cancel</button>
+    <button class="btn btn-primary" (click)="importBackupFile()"
+      [disabled]="backupFile == undefined || backupFileError != undefined">Import Backup Data</button>
   </div>
 </div>

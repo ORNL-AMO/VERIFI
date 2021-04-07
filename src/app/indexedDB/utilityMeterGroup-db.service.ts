@@ -34,6 +34,10 @@ export class UtilityMeterGroupdbService {
         }
     }
 
+    getAllByFacilityWithObservable(facilityId: number): Observable<Array<IdbUtilityMeterGroup>> {
+        return this.getAllByIndexRange('facilityId', facilityId);
+    }
+
     setAccountMeterGroups() {
         let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
         if (selectedAccount) {
@@ -72,7 +76,7 @@ export class UtilityMeterGroupdbService {
         });
     }
 
-    addFromImport(utilityMeterGroup: IdbUtilityMeterGroup): Observable<number> {
+    addWithObservable(utilityMeterGroup: IdbUtilityMeterGroup): Observable<number> {
         return this.dbService.add('utilityMeterGroups', utilityMeterGroup);
     }
 

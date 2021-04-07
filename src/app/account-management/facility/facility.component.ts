@@ -9,6 +9,7 @@ import { UtilityMeterDatadbService } from "../../indexedDB/utilityMeterData-db.s
 import { UtilityMeterGroupdbService } from "../../indexedDB/utilityMeterGroup-db.service";
 import { LoadingService } from "../../shared/loading/loading.service";
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { BackupDataService } from '../backup-data.service';
 
 @Component({
   selector: 'app-facility',
@@ -30,7 +31,8 @@ export class FacilityComponent implements OnInit {
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private accountDbService: AccountdbService,
-    private loadingService: LoadingService
+    private loadingService: LoadingService,
+    private backupDataService: BackupDataService
   ) { }
 
   ngOnInit() {
@@ -68,7 +70,7 @@ export class FacilityComponent implements OnInit {
     this.loadingService.setLoadingStatus(false);
   }
 
-  editFacility() {
+  openDeleteFacility() {
     this.showDeleteFacility = true;
   }
 
@@ -79,5 +81,9 @@ export class FacilityComponent implements OnInit {
 
   cancelDelete() {
     this.showDeleteFacility = undefined;
+  }
+
+  backupFacility(){
+    this.backupDataService.backupFacility(this.selectedFacility);
   }
 }
