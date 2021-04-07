@@ -5,6 +5,7 @@ import { FacilitydbService } from '../indexedDB/facility-db.service';
 import { IdbAccount, IdbFacility, IdbUtilityMeter } from '../models/idb';
 import { Router, Event, NavigationEnd } from '@angular/router';
 import { UtilityMeterdbService } from '../indexedDB/utilityMeter-db.service';
+import { DashboardService } from './dashboard.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -25,18 +26,21 @@ export class DashboardComponent implements OnInit {
   accountFacilitiesSub: Subscription;
   appRendered: boolean = false;
 
+  graphDisplay: "cost" | "usage";
+  graphDisplaySub: Subscription;
   constructor(
-    private accountDbService: AccountdbService, 
+    private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
     public utilityMeterDbService: UtilityMeterdbService,
-    private router: Router
-    ) {
+    private router: Router,
+    private dashboardService: DashboardService
+  ) {
     router.events.subscribe((event: Event) => {
       if (event instanceof NavigationEnd) {
         this.isFacilityDashboard = event.urlAfterRedirects.includes('facility-summary');
-        if(this.isFacilityDashboard && this.selectedFacility){
+        if (this.isFacilityDashboard && this.selectedFacility) {
           this.breadcrumbFacilityId = this.selectedFacility.id
-        }else{
+        } else {
           this.breadcrumbFacilityId = undefined;
         }
       }
@@ -68,22 +72,31 @@ export class DashboardComponent implements OnInit {
     // TEMP MANUAL DELAY TO PREVENT PAGE FLICKERING.
     // ADDING TICKET TO FIX THIS BUG
     const self = this;
-    setTimeout(function(){ self.appRendered = true}, 300);
+    setTimeout(function () { self.appRendered = true }, 300);
+
+    this.graphDisplaySub = this.dashboardService.graphDisplay.subscribe(val => {
+      this.graphDisplay = val;
+    });
   }
 
   ngOnDestroy() {
     this.selectedAccountSub.unsubscribe();
     this.selectedFacilitySub.unsubscribe();
     this.accountFacilitiesSub.unsubscribe();
+    this.graphDisplaySub.unsubscribe();
   }
 
   switchFacility() {
     if (this.breadcrumbFacilityId == undefined) {
       this.router.navigateByUrl('/account-summary');
     } else {
-      let selectedFacility: IdbFacility = this.facilityList.find(facility => {return facility.id == this.breadcrumbFacilityId});
+      let selectedFacility: IdbFacility = this.facilityList.find(facility => { return facility.id == this.breadcrumbFacilityId });
       this.facilityDbService.selectedFacility.next(selectedFacility);
       this.router.navigateByUrl('/facility-summary');
     }
+  }
+
+  setGraphDisplay(str: "cost" | "usage") {
+    this.dashboardService.graphDisplay.next(str);
   }
 }

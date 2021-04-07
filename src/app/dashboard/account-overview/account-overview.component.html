@@ -14,24 +14,24 @@
 
     <div class="row">
         <div class="col plot">
-            <p>Energy Use and Costs</p>
+            <p>Utility Use and Costs</p>
             <app-account-utility-energy-use-table></app-account-utility-energy-use-table>
         </div>
     </div>
 
     <div class="row">
         <div class="col plot">
-            <p>Monthly Energy Costs</p>
+            <p>Monthly Utility Costs</p>
             <app-energy-use-heat-map></app-energy-use-heat-map>
         </div>
     </div>
     <div class="row">
         <div class="col plot">
-            <p class="mb-0">Facility Total Energy Costs ({{yearAgoDate | date: 'MMM, y'}} - {{todaysDate | date: 'MMM, y'}})</p>
+            <p class="mb-0">Facility Total Utility Costs ({{yearAgoDate | date: 'MMM, y'}} - {{todaysDate | date: 'MMM, y'}})</p>
             <app-energy-use-donut></app-energy-use-donut>
         </div>
         <div class="col plot">
-            <p class="mb-0">Facility Energy Source Costs (All-time)</p>
+            <p class="mb-0">Facility Utility Source Costs (All-time)</p>
             <app-energy-use-stacked-bar-chart></app-energy-use-stacked-bar-chart>
         </div>
     </div>

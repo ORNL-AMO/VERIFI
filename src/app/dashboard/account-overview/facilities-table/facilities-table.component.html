@@ -5,11 +5,11 @@
                 <th>Facility</th>
                 <th># of Meters</th>
                 <th>Last Bill Entered</th>
-                <th>Energy Usage (<span [innerHTML]="accountEnergyUnit | settingsLabel"></span>)
+                <th>Utility Usage (<span [innerHTML]="accountEnergyUnit | settingsLabel"></span>)
                     <span class="small" *ngIf="lastMonthsDate">({{yearPriorDate | date: 'MMM, y'}} - {{lastMonthsDate |
                         date: 'MMM, y'}})</span>
                 </th>
-                <th>Energy Cost <span class="small" *ngIf="lastMonthsDate">({{yearPriorDate | date: 'MMM, y'}} -
+                <th>Utility Cost <span class="small" *ngIf="lastMonthsDate">({{yearPriorDate | date: 'MMM, y'}} -
                         {{lastMonthsDate | date: 'MMM, y'}})</span></th>
             </tr>
         </thead>

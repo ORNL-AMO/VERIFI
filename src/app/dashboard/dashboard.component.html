@@ -4,13 +4,13 @@
 
 <div *ngIf="(selectedAccount && facilityList.length > 0) && appRendered">
   <div class="banner">
-    <h3 *ngIf="selectedAccount && !isFacilityDashboard">Account Dashboard</h3>
-    <h3 *ngIf="selectedAccount && selectedFacility && isFacilityDashboard">Facility Dashboard</h3>
+    <h3 *ngIf="!isFacilityDashboard">Account Dashboard</h3>
+    <h3 *ngIf="selectedFacility && isFacilityDashboard">Facility Dashboard</h3>
     <!--<button class="m-0 btn btn-outline item-right">Generate Report</button>-->
   </div>
 
-  <div class="breadcrumbs">
-    <p *ngIf="selectedAccount">
+  <div class="breadcrumbs d-flex justify-content-between">
+    <p>
       <i class="fa fa-home"></i>{{selectedAccount.name}}
       <i class="fa fa-angle-right"></i>
       <select [(ngModel)]="breadcrumbFacilityId" (change)="switchFacility()">
@@ -18,10 +18,14 @@
         <option *ngFor="let facility of facilityList" [ngValue]="facility.id">{{facility.name}}</option>
       </select>
     </p>
+    <div class="btn-group float-right">
+      <button class="btn btn-sm m-0 btn-selected" (click)="setGraphDisplay('usage')" [ngClass]="{'btn-outline': graphDisplay != 'usage'}">Utility Usage</button>
+      <button class="btn btn-sm btn-selected m-0" (click)="setGraphDisplay('cost')" [ngClass]="{'btn-outline': graphDisplay != 'cost'}">Utility Cost</button>
+    </div>
   </div>
 
   <div class="wrapper main-content">
-    
+
     <router-outlet></router-outlet>
   </div>
 </div>

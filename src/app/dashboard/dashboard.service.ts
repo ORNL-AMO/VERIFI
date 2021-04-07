@@ -7,14 +7,30 @@ import { CalanderizationService } from '../shared/helper-services/calanderizatio
 import { UtilityMeterGroupdbService } from '../indexedDB/utilityMeterGroup-db.service';
 import { AccountFacilitiesSummary, FacilityMeterSummaryData, FacilitySummary, MeterSummary, SummaryData, UtilityUsageSummaryData } from '../models/dashboard';
 import { CalanderizedMeter, LastYearData, MonthlyData } from '../models/calanderization';
+import { BehaviorSubject } from 'rxjs';
+import { LocalStorageService } from 'ngx-webstorage';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DashboardService {
 
+
+
+  graphDisplay: BehaviorSubject<"usage" | "cost">;
   constructor(private facilityDbService: FacilitydbService, private utilityMeterDbService: UtilityMeterdbService,
-    private calanderizationService: CalanderizationService, private utilityMeterGroupDbService: UtilityMeterGroupdbService) { }
+    private calanderizationService: CalanderizationService, private utilityMeterGroupDbService: UtilityMeterGroupdbService,
+    private localStorageService: LocalStorageService) {
+    let dashboardGraphDisplay: "usage" | "cost" = this.localStorageService.retrieve("dashboardGraphDisplay");
+    if (dashboardGraphDisplay) {
+      this.graphDisplay = new BehaviorSubject(dashboardGraphDisplay);
+    } else {
+      this.graphDisplay = new BehaviorSubject("cost");
+    }
+    this.graphDisplay.subscribe(val => {
+      this.localStorageService.store('dashboardGraphDisplay', val);
+    });
+  }
 
   getAccountFacilitesSummary(): AccountFacilitiesSummary {
     let facilitiesSummary: Array<FacilitySummary> = new Array();
