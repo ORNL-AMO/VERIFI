@@ -13,8 +13,8 @@ export class CalanderizationService {
 
 
   calanderizedDataFilters: BehaviorSubject<CalanderizationFilters>
-  displayGraphEnergy:  "bar" | "scatter" | null = "bar";
-  displayGraphCost:  "bar" | "scatter" | null = "bar";
+  displayGraphEnergy: "bar" | "scatter" | null = "bar";
+  displayGraphCost: "bar" | "scatter" | null = "bar";
   dataDisplay: "table" | "graph" = 'table';
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private energyUnitsHelperService: EnergyUnitsHelperService) {
     this.calanderizedDataFilters = new BehaviorSubject({
@@ -83,6 +83,8 @@ export class CalanderizationService {
           let energyConsumptionPerDayCurrentBill: number = currentBill.totalVolume / daysFromPrevious;
           let energyConsumptionPerDayNextBill: number = nextBill.totalVolume / daysFromNext;
           totalMonthEnergyConsumption = (energyConsumptionPerDayCurrentBill * daysBeforeCurrentBill) + (energyConsumptionPerDayNextBill * daysAfterCurrentBill)
+        } else {
+          totalMonthEnergyConsumption = totalMonthEnergyUse;
         }
         //cost
         let costPerDayCurrentBill: number = currentBill.totalCost / daysFromPrevious;

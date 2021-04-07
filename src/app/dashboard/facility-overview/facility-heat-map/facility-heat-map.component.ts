@@ -7,6 +7,7 @@ import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db
 import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
 import { HeatMapData } from 'src/app/models/visualization';
 import { VisualizationService } from '../../../shared/helper-services/visualization.service';
+import { DashboardService } from '../../dashboard.service';
 
 @Component({
   selector: 'app-facility-heat-map',
@@ -25,8 +26,11 @@ export class FacilityHeatMapComponent implements OnInit {
   facilityMeters: Array<IdbUtilityMeter>;
   accountMeters: Array<IdbUtilityMeter>;
   accountMetersSub: Subscription;
+  graphDisplay: "cost" | "usage";
+  graphDisplaySub: Subscription;
   constructor(private plotlyService: PlotlyService, private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private utilityMeterDbService: UtilityMeterdbService, private vizualizationService: VisualizationService, private facilityDbService: FacilitydbService) { }
+    private utilityMeterDbService: UtilityMeterdbService, private vizualizationService: VisualizationService,
+    private facilityDbService: FacilitydbService, private dashboardService: DashboardService) { }
 
   ngOnInit(): void {
     this.accountMetersSub = this.utilityMeterDbService.accountMeters.subscribe(accountMeters => {
@@ -45,6 +49,12 @@ export class FacilityHeatMapComponent implements OnInit {
         this.setGraphData();
       }
     });
+
+    this.graphDisplaySub = this.dashboardService.graphDisplay.subscribe(value => {
+      this.graphDisplay = value;
+      this.setGraphData();
+    });
+
   }
 
   ngAfterViewInit() {
@@ -58,7 +68,7 @@ export class FacilityHeatMapComponent implements OnInit {
   }
 
   setGraphData() {
-    if (this.facilityMeters && this.facilityMeters.length != 0 && this.accountMeters && this.accountMeters.length != 0) {
+    if (this.facilityMeters && this.facilityMeters.length != 0 && this.accountMeters && this.accountMeters.length != 0 && this.graphDisplay) {
       let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
       let heatMapData: HeatMapData = this.vizualizationService.getMeterHeatMapData(this.facilityMeters, selectedFacility.name, true, false);
       this.resultData = heatMapData.resultData;
@@ -71,8 +81,20 @@ export class FacilityHeatMapComponent implements OnInit {
   drawChart() {
     if (this.facilityHeatMap) {
       let zData: Array<Array<number>> = this.resultData.map(dataItem => {
-        return dataItem.monthlyCost
+        if (this.graphDisplay == "cost") {
+          return dataItem.monthlyCost
+        } else {
+          return dataItem.monthlyEnergy
+        }
       });
+
+      let hovertemplate: string = '%{x}, %{y}: %{z:$,.0f}<extra></extra>';
+      let labelPrepend: string = "$"
+      if (this.graphDisplay == "usage") {
+        hovertemplate = '%{x}, %{y}: %{z:,.0f}<extra></extra>';
+        labelPrepend = "";
+      }
+
       let months: Array<string> = ['Jan', 'Feb', 'March', 'April', 'May', 'June', 'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
       var data = [
         {
@@ -82,7 +104,7 @@ export class FacilityHeatMapComponent implements OnInit {
           text: zData,
           type: 'heatmap',
           hoverongaps: false,
-          hovertemplate: '%{x}, %{y}: %{z:$,.0f}<extra></extra>'
+          hovertemplate: hovertemplate
         }
       ];
 
@@ -114,7 +136,7 @@ export class FacilityHeatMapComponent implements OnInit {
             yref: 'y1',
             x: months[j],
             y: this.years[i],
-            text: '$' + Math.round(zData[i][j]).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
+            text: labelPrepend + Math.round(zData[i][j]).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
             font: {
               // family: 'Arial',
               size: 12,

@@ -7,6 +7,7 @@ import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
 import { VisualizationService } from '../../../shared/helper-services/visualization.service';
+import { DashboardService } from '../../dashboard.service';
 
 @Component({
   selector: 'app-facility-bar-chart',
@@ -40,9 +41,13 @@ export class FacilityBarChartComponent implements OnInit {
   accountMeterDataSub: Subscription;
   accountMeters: Array<IdbUtilityMeter>;
   accountMetersSub: Subscription;
+
+  graphDisplay: "cost" | "usage";
+  graphDisplaySub: Subscription;
+
   constructor(private plotlyService: PlotlyService, private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService, private vizualizationService: VisualizationService,
-    private facilityDbService: FacilitydbService) { }
+    private facilityDbService: FacilitydbService, private dashboardService: DashboardService) { }
 
   ngOnInit(): void {
     this.accountMetersSub = this.utilityMeterDbService.accountMeters.subscribe(accountMeters => {
@@ -59,12 +64,20 @@ export class FacilityBarChartComponent implements OnInit {
         this.setUtilityData();
       }
     });
+
+    this.graphDisplaySub = this.dashboardService.graphDisplay.subscribe(value => {
+      this.graphDisplay = value;
+      this.setUtilityData();
+    });
+
+
   }
 
   ngOnDestroy() {
     this.accountMeterDataSub.unsubscribe();
     this.selectedFacilitySub.unsubscribe();
     this.accountMetersSub.unsubscribe();
+    this.graphDisplaySub.unsubscribe();
   }
 
   ngAfterViewInit() {
@@ -72,7 +85,7 @@ export class FacilityBarChartComponent implements OnInit {
   }
 
   setUtilityData() {
-    if (this.facilityMeters && this.facilityMeters.length != 0 && this.accountMeters && this.accountMeters.length != 0) {
+    if (this.facilityMeters && this.facilityMeters.length != 0 && this.accountMeters && this.accountMeters.length != 0 && this.graphDisplay) {
       this.electricityData = this.getDataByUtility('Electricity', this.facilityMeters);
       this.naturalGasData = this.getDataByUtility('Natural Gas', this.facilityMeters);
       this.otherFuelsData = this.getDataByUtility('Other Fuels', this.facilityMeters);
@@ -90,10 +103,17 @@ export class FacilityBarChartComponent implements OnInit {
   drawChart() {
     if (this.utilityBarChart) {
       let traceData = new Array();
+
+      let yDataProperty: "energyCost" | "energyUse";
+      if(this.graphDisplay == "cost"){
+        yDataProperty = "energyCost";
+      }else{
+        yDataProperty = "energyUse";
+      }
       if (this.electricityData.length != 0) {
         let trace = {
           x: this.electricityData.map(data => { return data.time }),
-          y: this.electricityData.map(data => { return data.energyCost }),
+          y: this.electricityData.map(data => { return data[yDataProperty] }),
           name: 'Electricity',
           type: 'bar'
         }
@@ -102,7 +122,7 @@ export class FacilityBarChartComponent implements OnInit {
       if (this.naturalGasData.length != 0) {
         let trace = {
           x: this.naturalGasData.map(data => { return data.time }),
-          y: this.naturalGasData.map(data => { return data.energyCost }),
+          y: this.naturalGasData.map(data => { return data[yDataProperty] }),
           name: 'Natural Gas',
           type: 'bar'
         };
@@ -111,7 +131,7 @@ export class FacilityBarChartComponent implements OnInit {
       if (this.otherFuelsData.length != 0) {
         let trace = {
           x: this.otherFuelsData.map(data => { return data.time }),
-          y: this.otherFuelsData.map(data => { return data.energyCost }),
+          y: this.otherFuelsData.map(data => { return data[yDataProperty] }),
           name: 'Other Fuels',
           type: 'bar'
         };
@@ -120,7 +140,7 @@ export class FacilityBarChartComponent implements OnInit {
       if (this.waterData.length != 0) {
         let trace = {
           x: this.waterData.map(data => { return data.time }),
-          y: this.waterData.map(data => { return data.energyCost }),
+          y: this.waterData.map(data => { return data[yDataProperty] }),
           name: 'Water',
           type: 'bar'
         };
@@ -129,7 +149,7 @@ export class FacilityBarChartComponent implements OnInit {
       if (this.wasteWaterData.length != 0) {
         let trace = {
           x: this.wasteWaterData.map(data => { return data.time }),
-          y: this.wasteWaterData.map(data => { return data.energyCost }),
+          y: this.wasteWaterData.map(data => { return data[yDataProperty] }),
           name: 'Waste Water',
           type: 'bar'
         };
@@ -138,7 +158,7 @@ export class FacilityBarChartComponent implements OnInit {
       if (this.otherUtilityData.length != 0) {
         let trace = {
           x: this.otherUtilityData.map(data => { return data.time }),
-          y: this.otherUtilityData.map(data => { return data.energyCost }),
+          y: this.otherUtilityData.map(data => { return data[yDataProperty] }),
           name: 'Other Utility',
           type: 'bar'
         };
@@ -149,6 +169,10 @@ export class FacilityBarChartComponent implements OnInit {
         xAxisTitle = 'Month';
       }
 
+      let hoverformat: string = '$,.2f';
+      if(this.graphDisplay == "usage"){
+        hoverformat = ",.2f";
+      }
 
       var layout = {
         barmode: 'group',
@@ -173,7 +197,7 @@ export class FacilityBarChartComponent implements OnInit {
           //     size: 18
           //   },
           // },
-          hoverformat: '$,.2f'
+          hoverformat: hoverformat
         },
         margin: { r: 0, t: 50 }
       };
