@@ -5,7 +5,7 @@
             <div>
                 <label for="meterName">Name <span class="required">*</span> </label>
                 <div class="mb-3">
-                    <input id="meterName" class="form-control" type="text" formControlName="name" autofocus>
+                    <input id="meterName" class="form-control" type="text" formControlName="name">
                 </div>
                 <span class="inputError" *ngIf="meterForm.get('name').hasError('required')">Meter name is
                     required</span>

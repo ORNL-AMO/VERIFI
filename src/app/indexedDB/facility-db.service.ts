@@ -177,7 +177,6 @@ export class FacilitydbService {
             energyUnit: account.energyUnit,
             volumeLiquidUnit: account.volumeLiquidUnit,
             volumeGasUnit: account.volumeGasUnit,
-            chilledWaterUnit: account.chilledWaterUnit,
             massUnit: account.massUnit,
             sustainabilityQuestions: {
                 energyReductionGoal: false,
@@ -231,7 +230,6 @@ export const TestFacilityData: Array<IdbFacility> = [
         energyUnit: 'kWh',
         volumeLiquidUnit: 'gal',
         volumeGasUnit: 'SCF',
-        chilledWaterUnit: undefined,
         massUnit: 'lb',
         sustainabilityQuestions: {
             energyReductionGoal: false,
@@ -279,7 +277,6 @@ export const TestFacilityData: Array<IdbFacility> = [
         energyUnit: 'kWh',
         volumeLiquidUnit: 'gal',
         volumeGasUnit: 'SCF',
-        chilledWaterUnit: undefined,
         massUnit: 'lb',
         sustainabilityQuestions: {
             energyReductionGoal: false,
@@ -327,7 +324,6 @@ export const TestFacilityData: Array<IdbFacility> = [
         energyUnit: 'kWh',
         volumeLiquidUnit: 'gal',
         volumeGasUnit: 'SCF',
-        chilledWaterUnit: undefined,
         massUnit: 'lb',
         sustainabilityQuestions: {
             energyReductionGoal: false,
@@ -375,7 +371,6 @@ export const TestFacilityData: Array<IdbFacility> = [
         energyUnit: 'kWh',
         volumeLiquidUnit: 'gal',
         volumeGasUnit: 'SCF',
-        chilledWaterUnit: undefined,
         massUnit: 'lb',
         sustainabilityQuestions: {
             energyReductionGoal: false,

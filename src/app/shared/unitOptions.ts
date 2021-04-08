@@ -131,3 +131,18 @@ export const MassUnitOptions: Array<UnitOption> = [
         unitsOfMeasure: 'Metric'
     }
 ]
+
+
+export const ChilledWaterUnitOptions: Array<UnitOption> = [
+    {
+        display: 'Ton-Hour (ton-Hr)',
+        value: 'tonHr',
+        unitsOfMeasure: 'Imperial'
+    },
+    {
+        display: 'Gallons-Fahrenheit (gal-&#x2109;)',
+        value: 'galF',
+        unitsOfMeasure: 'Imperial'
+    },
+
+]
