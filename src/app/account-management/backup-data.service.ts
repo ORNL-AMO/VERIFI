@@ -174,6 +174,63 @@ export class BackupDataService {
     }
   }
 
+
+  async deleteAccountData(account: IdbAccount) {
+    //delete account
+    await this.accountDbService.deleteAccountWithObservable(account.id).toPromise();
+    let accountFacilites: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    for (let i = 0; i < accountFacilites.length; i++) {
+      await this.facilityDbService.deleteWithObservable(accountFacilites[i].id).toPromise();
+    }
+    //delete meters
+    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    for (let i = 0; i < accountMeters.length; i++) {
+      await this.utilityMeterDbService.deleteIndexWithObservable(accountMeters[i].id).toPromise();
+    }
+    //delete meter data
+    let accountMeterData: Array<IdbUtilityMeterData> = this.uilityMeterDataDbService.accountMeterData.getValue();
+    for (let i = 0; i < accountMeterData.length; i++) {
+      await this.uilityMeterDataDbService.deleteWithObservable(accountMeterData[i].id).toPromise();
+    }
+    //delete predictors
+    let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorsDbService.accountPredictorEntries.getValue();
+    for (let i = 0; i < accountPredictorEntries.length; i++) {
+      await this.predictorsDbService.deleteIndexWithObservable(accountPredictorEntries[i].id).toPromise();
+    }
+    //delete meter groups
+    let accountMeterGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
+    for (let i = 0; i < accountMeterGroups.length; i++) {
+      await this.utilityMeterGroupDbService.deleteWithObservable(accountMeterGroups[i].id).toPromise();
+    }
+  }
+
+  async deleteFacilityData(facility: IdbFacility) {
+    await this.facilityDbService.deleteWithObservable(facility.id).toPromise();
+    //delete meters
+    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == facility.id });
+    for (let i = 0; i < facilityMeters.length; i++) {
+      await this.utilityMeterDbService.deleteIndexWithObservable(facilityMeters[i].id).toPromise();
+    }
+    //delete meter data
+    let accountMeterData: Array<IdbUtilityMeterData> = this.uilityMeterDataDbService.accountMeterData.getValue();
+    let facilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.filter(meterData => { return meterData.facilityId == facility.id });
+    for (let i = 0; i < facilityMeterData.length; i++) {
+      await this.uilityMeterDataDbService.deleteWithObservable(facilityMeterData[i].id).toPromise();
+    }
+    //delete predictors
+    let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorsDbService.accountPredictorEntries.getValue();
+    let facilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(predictor => { return predictor.facilityId == facility.id });
+    for (let i = 0; i < facilityPredictorEntries.length; i++) {
+      await this.predictorsDbService.deleteIndexWithObservable(facilityPredictorEntries[i].id).toPromise();
+    }
+    //delete meter groups
+    let accountMeterGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
+    let facilityMeterGroups: Array<IdbUtilityMeterGroup> = accountMeterGroups.filter(group => { return group.facilityId == facility.id });
+    for (let i = 0; i < facilityMeterGroups.length; i++) {
+      await this.utilityMeterGroupDbService.deleteWithObservable(facilityMeterGroups[i].id).toPromise();
+    }
+  }
 }
 
 export interface BackupFile {
