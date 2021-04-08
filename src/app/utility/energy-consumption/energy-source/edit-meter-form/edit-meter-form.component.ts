@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 import { FormGroup, ValidatorFn } from '@angular/forms';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idb';
@@ -29,7 +29,7 @@ export class EditMeterFormComponent implements OnInit {
   sourceOptions: Array<string> = SourceOptions
   constructor(private facilityDbService: FacilitydbService,
     private energyUnitsHelperService: EnergyUnitsHelperService, private energyUseCalculationsService: EnergyUseCalculationsService,
-    private editMeterFormService: EditMeterFormService) { }
+    private editMeterFormService: EditMeterFormService, private cd: ChangeDetectorRef) { }
 
   ngOnInit(): void {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
@@ -51,10 +51,12 @@ export class EditMeterFormComponent implements OnInit {
     this.checkDisplayFuel();
     this.checkDisplayPhase();
     this.setStartingUnitOptions();
+    this.setStartingUnit();
     this.updatePhaseAndFuelValidation();
     this.updateHeatCapacityValidation();
     this.checkShowHeatCapacity();
     this.setHeatCapacityAndSiteToSource();
+    this.cd.detectChanges();
   }
 
   changeFuel() {
@@ -65,19 +67,23 @@ export class EditMeterFormComponent implements OnInit {
     this.updateHeatCapacityValidation();
     this.checkShowHeatCapacity();
     this.setHeatCapacityAndSiteToSource();
+    this.cd.detectChanges();
   }
 
   changePhase() {
     this.setStartingUnitOptions();
+    this.setStartingUnit();
     this.setFuelTypeOptions();
     this.checkShowHeatCapacity();
     this.setHeatCapacityAndSiteToSource();
+    this.cd.detectChanges();
   }
 
   changeUnit() {
     this.updateHeatCapacityValidation();
     this.checkShowHeatCapacity();
     this.setHeatCapacityAndSiteToSource();
+    this.cd.detectChanges();
   }
 
   setEnergySourceLabel() {
@@ -161,13 +167,14 @@ export class EditMeterFormComponent implements OnInit {
 
   setStartingUnitOptions() {
     this.startingUnitOptions = this.energyUnitsHelperService.getStartingUnitOptions(this.meterForm.controls.source.value, this.meterForm.controls.phase.value, this.meterForm.controls.fuel.value);
+    this.cd.detectChanges();
   }
 
   setStartingUnit() {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let facilityUnit: string;
     if (this.meterForm.controls.source.value == 'Electricity') {
-      facilityUnit = selectedFacility.energyUnit;
+      facilityUnit = 'kWh';
     } else if (this.meterForm.controls.source.value == 'Natural Gas') {
       facilityUnit = selectedFacility.volumeGasUnit;
     } else if (this.meterForm.controls.source.value == 'Other Fuels') {
@@ -181,7 +188,7 @@ export class EditMeterFormComponent implements OnInit {
     } else if (this.meterForm.controls.source.value == 'Other Energy') {
       let selectedEnergyOption: FuelTypeOption = OtherEnergyOptions.find(option => { return option.value == this.meterForm.controls.fuel.value });
       if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Steam') {
-        facilityUnit = selectedFacility.volumeLiquidUnit;
+        facilityUnit = selectedFacility.massUnit;
       } else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Chilled Water') {
         facilityUnit = selectedFacility.energyUnit;
       } else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Hot Water') {
@@ -189,12 +196,10 @@ export class EditMeterFormComponent implements OnInit {
       }
     } else if (this.meterForm.controls.source.value == 'Water' || this.meterForm.controls.source.value == 'Waste Water') {
       facilityUnit = selectedFacility.volumeLiquidUnit;
+    } else if (this.meterForm.controls.source.value == 'Other Utility') {
+      facilityUnit = selectedFacility.energyUnit;
     }
-    let selectedUnit: UnitOption = this.startingUnitOptions.find(unitOption => {
-      return unitOption.value == this.meterForm.controls.startingUnit.value;
-    });
-    if (!selectedUnit) {
-      this.meterForm.controls.startingUnit.patchValue(facilityUnit);
-    }
+    this.meterForm.controls.startingUnit.patchValue(facilityUnit);
+    this.meterForm.controls.startingUnit.updateValueAndValidity();
   }
 }
