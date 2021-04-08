@@ -329,21 +329,21 @@ export const OtherEnergyOptions: Array<FuelTypeOption> = [
         otherEnergyType: 'Steam'
     },
     {
-        startingUnit: 'ton',
+        startingUnit: 'tonHr',
         heatCapacityValue: .012,
         value: 'Purchased Chilled Water (Absorption Chiller)',
         siteToSourceMultiplier: 1.25,
         otherEnergyType: 'Chilled Water'
     },
     {
-        startingUnit: 'ton',
+        startingUnit: 'tonHr',
         heatCapacityValue: .012,
         value: 'Purchased Chilled Water (Electric-driven Compressor)',
         siteToSourceMultiplier: .24,
         otherEnergyType: 'Chilled Water'
     },
     {
-        startingUnit: 'ton',
+        startingUnit: 'tonHr',
         heatCapacityValue: .012,
         value: 'Purchased Chilled Water (Engine-driven Compressor)',
         siteToSourceMultiplier: .83,

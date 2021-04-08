@@ -183,9 +183,7 @@ export class EditMeterFormComponent implements OnInit {
       if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Steam') {
         facilityUnit = selectedFacility.volumeLiquidUnit;
       } else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Chilled Water') {
-        // this.meterForm.controls.startingUnit.patchValue(selectedFacility.chilledWaterUnit);
-        // this.setStartingUnit(selectedFacility.volumeLiquidUnit);
-        //TODO: Add chilled water units
+        facilityUnit = selectedFacility.energyUnit;
       } else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Hot Water') {
         facilityUnit = selectedFacility.energyUnit;
       }
