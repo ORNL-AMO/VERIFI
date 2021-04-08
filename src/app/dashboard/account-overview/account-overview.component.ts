@@ -18,6 +18,7 @@ export class AccountOverviewComponent implements OnInit {
   
   graphDisplaySub: Subscription;
   chartsLabel: "Costs" | "Usage";
+  heatMapShown: boolean = false;
   constructor(public utilityMeterDataDbService: UtilityMeterDatadbService, private dashboardService: DashboardService) { }
 
   ngOnInit(): void {
@@ -40,6 +41,10 @@ export class AccountOverviewComponent implements OnInit {
   ngOnDestroy() {
     this.accountMeterDataSub.unsubscribe();
     this.graphDisplaySub.unsubscribe();
+  }
+
+  toggleHeatMap(){
+    this.heatMapShown = !this.heatMapShown;
   }
 
 }

@@ -13,10 +13,12 @@ export class FacilityOverviewComponent implements OnInit {
 
   utilityMeterFacilityData: Array<IdbUtilityMeterData>;
   utilityMeterDataSub: Subscription;
-  
+
   graphDisplaySub: Subscription;
   chartsLabel: "Costs" | "Usage";
-
+  heatMapShown: boolean = false;
+  stackedAreaShown: boolean = true;
+  barChartShown: boolean = true;
   constructor(public utilityMeterDataDbService: UtilityMeterDatadbService, private dashboardService: DashboardService) { }
 
   ngOnInit(): void {
@@ -25,9 +27,9 @@ export class FacilityOverviewComponent implements OnInit {
     });
 
     this.graphDisplaySub = this.dashboardService.graphDisplay.subscribe(value => {
-      if(value == "cost"){
+      if (value == "cost") {
         this.chartsLabel = "Costs";
-      }else if(value == "usage"){
+      } else if (value == "usage") {
         this.chartsLabel = "Usage";
       }
     })
@@ -38,5 +40,15 @@ export class FacilityOverviewComponent implements OnInit {
     this.graphDisplaySub.unsubscribe();
   }
 
+  toggleHeatMap() {
+    this.heatMapShown = !this.heatMapShown;
+  }
+
+  toggleStackedArea(){
+    this.stackedAreaShown = !this.stackedAreaShown;
+  }
+
+  toggleBarChart(){
+    this.barChartShown = !this.barChartShown;
+  }
 }
- 
