@@ -34,8 +34,6 @@ export class AccountdbService {
             let allAccounts: Array<IdbAccount> = this.allAccounts.getValue();
             if (allAccounts.length != 0) {
                 this.setSelectedAccount(allAccounts[0].id);
-            } else {
-                this.addTestData();
             }
         }
     }
@@ -83,6 +81,11 @@ export class AccountdbService {
         });
     }
 
+    deleteAccountWithObservable(accountId: number): Observable<any> {
+        return this.dbService.delete('accounts', accountId);
+    }
+
+
     //TODO: MOVE
     // *WARNING* Can not be undone
     deleteDatabase() {
@@ -99,9 +102,9 @@ export class AccountdbService {
 
 
     async addTestData() {
-        await TestAccountData.forEach(accountItem => {
-            this.addWithObservable(accountItem);
-        });
+        for (let i = 0; i < TestAccountData.length; i++) {
+            await this.addWithObservable(TestAccountData[i]);
+        }
     }
 
     getNewIdbAccount(): IdbAccount {
