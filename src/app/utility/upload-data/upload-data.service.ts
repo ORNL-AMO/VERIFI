@@ -1,11 +1,13 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, PredictorData } from 'src/app/models/idb';
 import * as XLSX from 'xlsx';
 import { ImportMeterDataFileSummary, ImportMeterDataService } from './import-meter-data.service';
 import { ImportMeterFileSummary, ImportMeterService } from './import-meter.service';
+import { ImportPredictorFileSummary, ImportPredictorsService } from './import-predictors.service';
 
 @Injectable({
   providedIn: 'root'
@@ -14,20 +16,24 @@ export class UploadDataService {
 
   importMeterFiles: BehaviorSubject<Array<{ fileName: string, importMeterFileSummary: ImportMeterFileSummary, id: string }>>;
   importMeterDataFiles: BehaviorSubject<Array<ImportMeterDataFile>>;
+  importPredictorsFiles: BehaviorSubject<Array<ImportPredictorFile>>;
   excelFiles: BehaviorSubject<Array<File>>;
   templateWorkBooks: BehaviorSubject<Array<{ workBook: XLSX.WorkBook, fileName: string }>>;
 
   importMeterFileWizard: BehaviorSubject<{ fileName: string, importMeterFileSummary: ImportMeterFileSummary, id: string }>;
   importMeterDataFileWizard: BehaviorSubject<ImportMeterDataFile>;
+  importPredictorFileWizard: BehaviorSubject<ImportPredictorFile>;
   constructor(private facilityDbService: FacilitydbService, private utilityMeterDbService: UtilityMeterdbService, private importMeterService: ImportMeterService,
-    private importMeterDataService: ImportMeterDataService) {
+    private importMeterDataService: ImportMeterDataService, private importPredictorsService: ImportPredictorsService,
+    private predictorsDbService: PredictordbService) {
     this.importMeterFiles = new BehaviorSubject([]);
     this.excelFiles = new BehaviorSubject<Array<File>>([]);
     this.importMeterDataFiles = new BehaviorSubject([]);
     this.templateWorkBooks = new BehaviorSubject([]);
+    this.importPredictorsFiles = new BehaviorSubject([]);
     this.importMeterFileWizard = new BehaviorSubject(undefined);
     this.importMeterDataFileWizard = new BehaviorSubject(undefined);
-
+    this.importPredictorFileWizard = new BehaviorSubject(undefined);
     this.templateWorkBooks.subscribe(workBookData => {
       this.parseWorkBooks(workBookData);
     });
@@ -38,6 +44,7 @@ export class UploadDataService {
     this.excelFiles.next([]);
     this.importMeterDataFiles.next([]);
     this.templateWorkBooks.next([]);
+    this.importPredictorsFiles.next([]);
     this.importMeterFileWizard.next(undefined);
     this.importMeterDataFileWizard.next(undefined);
   }
@@ -91,6 +98,11 @@ export class UploadDataService {
       //non electricity readings
       let nonElectricityMeterData: Array<Array<string>> = XLSX.utils.sheet_to_json(data.workBook.Sheets["Non-electricity"]);
       this.addMeterDataFromTemplate(nonElectricityMeterData, data.fileName, false);
+      //predictors
+      let predictorsData: Array<any> = XLSX.utils.sheet_to_json(data.workBook.Sheets["Predictors"]);
+      //headers used for predictors, parse data with headers. First element in array will be headers
+      let predictorDataWithHeaders: Array<Array<string>> = XLSX.utils.sheet_to_json(data.workBook.Sheets["Predictors"], { header: 1 });
+      this.addPredictorDataFromTemplate(predictorsData, predictorDataWithHeaders[0], data.fileName);
     });
   }
 
@@ -137,8 +149,7 @@ export class UploadDataService {
       });
       file.importMeterDataFileSummary = this.importMeterDataService.getMeterDataSummaryFromExcelFile(meterDataArr, facilityMeters, metersToImport);
       this.addMeterDataFile(file.fileName, file.importMeterDataFileSummary, undefined);
-    })
-
+    });
   }
 
   removeExcelFile(fileName: string) {
@@ -148,6 +159,25 @@ export class UploadDataService {
     this.excelFiles.next(excelFiles);
   }
 
+
+  addPredictorDataFromTemplate(predictorsData: Array<any>, predictorHeaders: Array<string>, fileName: string) {
+    let facilityPredictors: Array<PredictorData> = this.predictorsDbService.facilityPredictors.getValue();
+    let facilityPredictorEntries: Array<IdbPredictorEntry> = this.predictorsDbService.facilityPredictorEntries.getValue();
+    let summary: ImportPredictorFileSummary = this.importPredictorsService.getSummaryFromTemplatesFile(predictorsData, predictorHeaders, facilityPredictors, facilityPredictorEntries);
+    this.addPredictorFile(fileName, summary);
+  }
+
+
+  addPredictorFile(fileName: string, summary: ImportPredictorFileSummary) {
+    let importPredictorFiles: Array<ImportPredictorFile> = this.importPredictorsFiles.getValue();
+    importPredictorFiles.push({
+      fileName: fileName,
+      importPredictorFileSummary: summary,
+      id: Math.random().toString(36).substr(2, 9),
+      skipExisting: false
+    });
+    this.importPredictorsFiles.next(importPredictorFiles);
+  }
 }
 
 
@@ -157,4 +187,12 @@ export interface ImportMeterDataFile {
   id: string,
   isTemplateElectricity: boolean,
   skipExisting: boolean
+}
+
+
+export interface ImportPredictorFile {
+  fileName: string,
+  id: string,
+  skipExisting: boolean,
+  importPredictorFileSummary: ImportPredictorFileSummary
 }

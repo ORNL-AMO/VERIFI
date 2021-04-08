@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import * as XLSX from 'xlsx';
 import { ImportMeterFileSummary } from '../import-meter.service';
+import { ImportPredictorFileSummary } from '../import-predictors.service';
 import { ExcelWizardService } from './excel-wizard.service';
 
 @Component({
@@ -17,6 +18,7 @@ export class ExcelWizardComponent implements OnInit {
   wizardPage: number = 1;
   workbookLoaded: boolean = false;
   importMeterFileWizard: { fileName: string, importMeterFileSummary: ImportMeterFileSummary, id: string };
+  importPredictorFileWizard: {fileName: string, importPredictorFileSummary: ImportPredictorFileSummary, id: string }
   fileName: string
   constructor(private excelWizardService: ExcelWizardService) { }
 
@@ -48,6 +50,12 @@ export class ExcelWizardComponent implements OnInit {
        importMeterFileSummary: meterSumary,
        id: undefined
      }
+      let predictorSummary: ImportPredictorFileSummary = this.excelWizardService.getImportPredictorFileSummary();
+      this.importPredictorFileWizard = {
+        fileName: this.selectedExcelFile.name,
+        importPredictorFileSummary: predictorSummary,
+        id: undefined
+      };
     }
     this.wizardPage++;
   }

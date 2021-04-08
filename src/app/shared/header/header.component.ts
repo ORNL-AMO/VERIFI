@@ -147,7 +147,6 @@ export class HeaderComponent implements OnInit {
   getAccountFacilityCount() {
     this.accountList.forEach(account => {
       account.numberOfFacilities = this.getNumberOfFacilities(account.id);
-      console.log(account.numberOfFacilities);
     });
   }
 

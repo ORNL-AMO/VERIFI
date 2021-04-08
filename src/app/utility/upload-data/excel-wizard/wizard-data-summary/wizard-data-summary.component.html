@@ -15,7 +15,7 @@
             </th>
         </tr>
     </thead>
-    <tbody>
+    <tbody *ngIf="metersSummary.length != 0">
         <tr *ngFor="let summary of metersSummary">
             <td>
                 {{summary.meter.name}}
@@ -32,10 +32,50 @@
         </tr>
     </tbody>
 </table>
-
+<div class="alert alert-info" *ngIf="metersSummary.length == 0">
+    No import meters selected.
+</div>
+<hr>
+<table>
+    <thead>
+        <tr>
+            <th>
+                Predictor
+            </th>
+            <th>
+                Unit
+            </th>
+            <th>
+                Predictor Entries
+            </th>
+            <!-- <th>
+                Number of Readings
+            </th> -->
+        </tr>
+    </thead>
+    <tbody *ngIf="predictorsSummary.length != 0">
+        <tr *ngFor="let summary of predictorsSummary">
+            <td>
+                {{summary.predictor.name}}
+            </td>
+            <td>
+                {{summary.predictor.unit}}
+            </td>
+            <td>
+                {{summary.numberOfReadings}}
+            </td>
+            <!-- <td>
+                {{summary.meterData.length}}
+            </td> -->
+        </tr>
+    </tbody>
+</table>
+<div class="alert alert-info" *ngIf="predictorsSummary.length == 0">
+    No import predictors selected.
+</div>
 
 <hr>
 <div class="d-flex w-100 justify-content-between">
-    <button class="btn btn-secondary" (click)="back()">Meters Setup</button>
+    <button class="btn btn-secondary" (click)="back()">Predictors Setup</button>
     <button class="btn btn-primary" (click)="continue()">Submit & Finish</button>
 </div>

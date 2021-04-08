@@ -56,7 +56,9 @@ export class ImportMeterWizardComponent implements OnInit {
       this.importMeters.push(meter);
       this.skipMeters.push(false);
     })
-    this.selectMeter(this.importMeters[0], 0);
+    if (this.importMeters.length != 0) {
+      this.selectMeter(this.importMeters[0], 0);
+    }
   }
 
   selectMeter(meter: IdbUtilityMeter, meterIndex: number) {

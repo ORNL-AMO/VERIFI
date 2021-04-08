@@ -133,8 +133,7 @@ export class PredictordbService {
         }
     }
 
-    addNewPredictor() {
-        let newPredictor: PredictorData = this.getNewPredictor();
+    addNewPredictor(newPredictor: PredictorData) {
         let facilityPredictorEntries: Array<IdbPredictorEntry> = this.facilityPredictorEntries.getValue();
         facilityPredictorEntries.forEach(predictorEntry => {
             predictorEntry.predictors.push(newPredictor);
@@ -144,14 +143,14 @@ export class PredictordbService {
 
     async importNewPredictor(newPredictor: PredictorData) {
         let facilityPredictorEntries: Array<IdbPredictorEntry> = this.facilityPredictorEntries.getValue();
-        await facilityPredictorEntries.forEach(predictorEntry => {
-            predictorEntry.predictors.push(newPredictor);
-            this.updateOnImport(predictorEntry);
-        });
+        for (let i = 0; i < facilityPredictorEntries.length; i++) {
+            facilityPredictorEntries[i].predictors.push(newPredictor);
+            await this.updateOnImport(facilityPredictorEntries[i]);
+            console.log('updated predictor');
+        }
     }
 
-    getNewPredictor(): PredictorData {
-        let facilityPredictors: Array<PredictorData> = this.facilityPredictors.getValue();
+    getNewPredictor(facilityPredictors: Array<PredictorData>): PredictorData {
         return {
             name: 'Predictor #' + (facilityPredictors.length + 1),
             amount: undefined,
@@ -162,7 +161,7 @@ export class PredictordbService {
     }
 
 
-    addNewPredictorEntry(): void {
+    getNewPredictorEntry(): IdbPredictorEntry {
         let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
         let newPredictorDate: Date = new Date();
         let facilityPredictorEntries: Array<IdbPredictorEntry> = this.facilityPredictorEntries.getValue();
@@ -185,27 +184,6 @@ export class PredictordbService {
             predictors: predictors,
             date: newPredictorDate
         };
-        this.add(newPredictorEntry);
-    }
-
-    getNewImportPredictorEntry(headers: Array<string>, dataRow: Array<any>, missingPredictors: Array<PredictorData>): IdbPredictorEntry {
-        let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-        let newPredictorDate: Date = new Date(dataRow[0]);
-        let predictors: Array<PredictorData> = JSON.parse(JSON.stringify(this.facilityPredictors.getValue()))
-        //not working unless I use copy...
-        let combinedPredictors: Array<PredictorData> = JSON.parse(JSON.stringify(predictors.concat(missingPredictors)));
-        for (let i = 0; i < combinedPredictors.length; i++) {
-            let dataIndex: number = headers.findIndex(header => { return header == combinedPredictors[i].name });
-            if (dataIndex != -1) {
-                combinedPredictors[i].amount = dataRow[dataIndex];
-            }
-        }
-        let newPredictorEntry: IdbPredictorEntry = {
-            facilityId: selectedFacility.id,
-            accountId: selectedFacility.accountId,
-            predictors: combinedPredictors,
-            date: newPredictorDate
-        };
         return newPredictorEntry;
     }
 
@@ -215,15 +193,26 @@ export class PredictordbService {
         });
     }
 
-
-
     updateFacilityPredictorEntries(updatedPredictors: Array<PredictorData>) {
         let facilityPredictorEntries: Array<IdbPredictorEntry> = this.facilityPredictorEntries.getValue();
+        let faclilityPredictors: Array<PredictorData> = this.facilityPredictors.getValue();
+        let facilityPredictorIds: Array<string> = faclilityPredictors.map(predictor => { return predictor.id });
+        //track new predictors to add
+        let newPredictors: Array<PredictorData> = new Array();
+        updatedPredictors.forEach(predictor => {
+            if (!facilityPredictorIds.includes(predictor.id)) {
+                newPredictors.push(predictor);
+            }
+        });
+
         //iterate entries
         facilityPredictorEntries.forEach(entry => {
             //update entry predictors
             entry.predictors = this.updateEntryPredictors(entry.predictors, updatedPredictors);
             this.update(entry);
+        });
+        newPredictors.forEach(newPredictor => {
+            this.addNewPredictor(newPredictor);
         });
     }
 
@@ -242,4 +231,14 @@ export class PredictordbService {
         });
         return entryPredictors;
     }
+
+
+    updateWithObservable(values: IdbPredictorEntry): Observable<any> {
+        return this.dbService.update('predictors', values)
+    }
+
+    addWithObservable(predictor: IdbPredictorEntry): Observable<any> {
+        return this.dbService.add('predictors', predictor);
+    }
+
 }

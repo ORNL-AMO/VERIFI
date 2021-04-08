@@ -2,13 +2,13 @@
     <app-worksheet-data-table [columnGroups]="columnGroups"></app-worksheet-data-table>
 </div>
 <hr>
-<label for="dataOrientation">
+<!-- <label for="dataOrientation">
     Are meters entered as rows or columns?
-</label>
-<select class="form-control" name="dataOrientation" [(ngModel)]="dataOrientation" (change)="setDataOrientation()">
+</label> -->
+<!-- <select class="form-control" name="dataOrientation" [(ngModel)]="dataOrientation" (change)="setDataOrientation()">
     <option [ngValue]="'column'">Columns</option>
-    <!-- <option [ngValue]="'row'">Rows</option> -->
-</select>
+    <!-- <option [ngValue]="'row'">Rows</option> --
+</select> -->
 <hr>
 <h6>Map the data columns</h6>
 <div class="row no-gutters" *ngIf="dataOrientation == 'column'">

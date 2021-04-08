@@ -19,18 +19,16 @@
             </label>
         </div>
         <div class="col-5">
-            <select class="three-quarter-width" [(ngModel)]="predictor.unit" name="{{'predictorUnit'+predictor.id}}">
-                <option [ngValue]="'hours'">hours</option>
-                <option [ngValue]="'minutes'">minutes</option>
-                <option [ngValue]="''"></option>
-            </select>
-
+            <input class="three-quarter-width" [(ngModel)]="predictor.unit" name="{{'predictorUnit'+predictor.id}}">
             <button class="btn btn-small btn-danger m-0 item-right" (click)="deletePredictor(predictor)"><i
                     class="fa fa-trash-o red pointer"></i>
             </button>
         </div>
     </div>
 </form>
+
+<button *ngIf="!predictorToDelete" class="btn btn-link item-left pl-0" (click)="addPredictorEntry()"><i
+        class="fa fa-plus"></i> Add Predictor</button>
 
 <div class="saveCancel item-right" *ngIf="!predictorToDelete">
     <button class="btn btn-secondary" (click)="cancel()">Cancel</button>

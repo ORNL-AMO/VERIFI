@@ -161,6 +161,7 @@ export interface PredictorData {
     amount: number,
     unit: string,
     description: string,
-    id: string
+    id: string,
+    importWizardName?: string
 }
 
