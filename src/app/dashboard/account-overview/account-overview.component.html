@@ -21,17 +21,17 @@
 
     <div class="row">
         <div class="col plot">
-            <p>Monthly Utility Costs</p>
+            <p>Monthly Utility {{chartsLabel}}</p>
             <app-energy-use-heat-map></app-energy-use-heat-map>
         </div>
     </div>
     <div class="row">
         <div class="col plot">
-            <p class="mb-0">Facility Total Utility Costs ({{yearAgoDate | date: 'MMM, y'}} - {{todaysDate | date: 'MMM, y'}})</p>
+            <p class="mb-0">Facility Total Utility {{chartsLabel}} ({{yearAgoDate | date: 'MMM, y'}} - {{todaysDate | date: 'MMM, y'}})</p>
             <app-energy-use-donut></app-energy-use-donut>
         </div>
         <div class="col plot">
-            <p class="mb-0">Facility Utility Source Costs (All-time)</p>
+            <p class="mb-0">Facility Utility Source {{chartsLabel}} (All-time)</p>
             <app-energy-use-stacked-bar-chart></app-energy-use-stacked-bar-chart>
         </div>
     </div>

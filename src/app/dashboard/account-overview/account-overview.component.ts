@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { IdbUtilityMeterData } from 'src/app/models/idb';
 import { UtilityMeterDatadbService } from '../../indexedDB/utilityMeterData-db.service';
+import { DashboardService } from '../dashboard.service';
 
 @Component({
   selector: 'app-account-overview',
@@ -15,7 +16,9 @@ export class AccountOverviewComponent implements OnInit {
   utilityMeterAccountData: Array<IdbUtilityMeterData>;
   accountMeterDataSub: Subscription;
   
-  constructor(public utilityMeterDataDbService: UtilityMeterDatadbService) { }
+  graphDisplaySub: Subscription;
+  chartsLabel: "Costs" | "Usage";
+  constructor(public utilityMeterDataDbService: UtilityMeterDatadbService, private dashboardService: DashboardService) { }
 
   ngOnInit(): void {
     this.todaysDate = new Date();
@@ -24,10 +27,19 @@ export class AccountOverviewComponent implements OnInit {
     this.accountMeterDataSub = this.utilityMeterDataDbService.accountMeterData.subscribe(utilityMeterAccountData => {
       this.utilityMeterAccountData = utilityMeterAccountData;
     });
+
+    this.graphDisplaySub = this.dashboardService.graphDisplay.subscribe(value => {
+      if(value == "cost"){
+        this.chartsLabel = "Costs";
+      }else if(value == "usage"){
+        this.chartsLabel = "Usage";
+      }
+    })
   }
 
   ngOnDestroy() {
     this.accountMeterDataSub.unsubscribe();
+    this.graphDisplaySub.unsubscribe();
   }
 
 }
