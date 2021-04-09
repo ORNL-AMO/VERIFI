@@ -12,8 +12,10 @@
                     <br>
                     <p>1.</p>
                     <p>Add An Account</p>
-                    <button [hidden]="selectedAccount"class="btn btn-primary-2" (click)="addAccount()">Add Account</button>
-                    <button [hidden]="!selectedAccount" class="btn btn-primary-2" (click)="addAccount()">Update Account</button>
+                    <button [hidden]="selectedAccount" class="btn btn-primary-2" (click)="addAccount()">Add
+                        Account</button>
+                    <button [hidden]="!selectedAccount" class="btn btn-primary-2" (click)="addAccount()">Update
+                        Account</button>
                 </div>
             </div>
             <div class="col">
@@ -23,18 +25,22 @@
                     <br>
                     <p>2.</p>
                     <p>Add A Facility</p>
-                    <button [hidden]="selectedFacility" [disabled]="!selectedAccount" class="btn btn-primary-2" (click)="addFacility()">Add Facility</button>
-                    <button [hidden]="!selectedFacility" class="btn btn-primary-2" (click)="addFacility()">Update Facility</button>
+                    <button [hidden]="selectedFacility" [disabled]="!selectedAccount" class="btn btn-primary-2"
+                        (click)="addFacility()">Add Facility</button>
+                    <button [hidden]="!selectedFacility" class="btn btn-primary-2" (click)="addFacility()">Update
+                        Facility</button>
                 </div>
             </div>
             <div class="col">
                 <div class="box">
                     <img [hidden]="utilityMeters.length > 0" src="assets/images/emptyFile.png" alt="Utility Incomplete">
-                    <img [hidden]="utilityMeters.length === 0" src="assets/images/completeFile.png" alt="Utility Complete">
+                    <img [hidden]="utilityMeters.length === 0" src="assets/images/completeFile.png"
+                        alt="Utility Complete">
                     <br>
                     <p>3.</p>
                     <p>Add Utility Data</p>
-                    <button [disabled]="!selectedFacility" class="btn btn-primary-2" (click)="addUtilityData()">Add Utility Data</button>
+                    <button [disabled]="!selectedFacility" class="btn btn-primary-2" (click)="addUtilityData()">Add
+                        Utility Data</button>
                 </div>
             </div>
         </div>
@@ -46,21 +52,4 @@
 </div>
 <div class="measurFooter"></div>
 
-
-<div class="popup" [class.open]="showImportFile" *ngIf="showImportFile">
-    <div class="popup-header">Import Backup File
-      <button class="item-right" (click)="cancelImportBackup()">x</button>
-    </div>
-    <div class="popup-body">
-      <p>Select backup .json file you previously exported from VERIFI application.</p>
-      <input type="file" #importFile id="importFile" (input)="setImportFile($event.target.files)" accept=".json">
-      <p class="alert alert-danger" *ngIf="backupFileError">
-        {{backupFileError}}
-      </p>
-    </div>
-    <div class="popup-footer text-right">
-      <button class="btn btn-secondary" (click)="cancelImportBackup()">Cancel</button>
-      <button class="btn btn-primary" (click)="importBackupFile()"
-        [disabled]="backupFile == undefined || backupFileError != undefined">Import Backup Data</button>
-    </div>
-  </div>
+<app-import-backup-modal *ngIf="showImportFile" (emitClose)="cancelImportBackup()"></app-import-backup-modal>

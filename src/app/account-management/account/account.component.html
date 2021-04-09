@@ -137,38 +137,3 @@
 </div>
 
 <app-import-backup-modal *ngIf="showImportFile" (emitClose)="cancelImportBackup()"></app-import-backup-modal>
-
-<!-- <div class="popup" [class.open]="showImportFile" *ngIf="showImportFile">
-  <div class="popup-header">Import Backup File
-    <button class="item-right" (click)="cancelImportBackup()">x</button>
-  </div>
-  <div class="popup-body">
-    <p>Select backup .json file you previously exported from VERIFI application.</p>
-    <input type="file" #importFile id="importFile" (input)="setImportFile($event.target.files)" accept=".json">
-    <p class="alert alert-danger" *ngIf="backupFileError">
-      {{backupFileError}}
-    </p>
-
-    <div class="d-flex flex-column pt-3" *ngIf="backupFile != undefined && backupFileError == undefined && importIsAccount">
-      <div class="input-group">
-        <label class="w-50 pl-0">Overwrite current account? </label>
-        <select class="form-control" [(ngModel)]="overwriteAccount" name="overwriteAccount">
-          <option [ngValue]="true">Overwrite Account</option>
-          <option [ngValue]="false">Create New Account</option>
-        </select>
-      </div>
-      <p class="alert alert-warning" *ngIf="overwriteAccount">
-        Existing account data will be overwritten. This cannot be undone.
-      </p>
-    </div>
-  </div>
-  <div class="popup-footer text-right">
-    <button class="btn btn-secondary" (click)="cancelImportBackup()">Cancel</button>
-    <button class="btn btn-primary" (click)="importBackupFile()"
-      [disabled]="backupFile == undefined || backupFileError != undefined" *ngIf="importIsAccount">Import Backup
-      Account</button>
-    <button class="btn btn-primary" (click)="importBackupFile()"
-      [disabled]="backupFile == undefined || backupFileError != undefined" *ngIf="!importIsAccount">Import Backup
-      Facility</button>
-  </div>
-</div> -->

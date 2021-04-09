@@ -32,10 +32,9 @@ export class ImportBackupModalComponent implements OnInit {
 
   ngOnInit(): void {
     this.selectedAccount = this.accountDbService.selectedAccount.getValue();
-    if(!this.selectedAccount){
+    this.accountFacilities = this.facilityDbService.accountFacilities.getValue();
+    if (!this.selectedAccount) {
       this.overwriteData = false;
-    }else{
-      this.accountFacilities = this.facilityDbService.accountFacilities.getValue();
     }
   }
 
@@ -60,18 +59,29 @@ export class ImportBackupModalComponent implements OnInit {
               this.backupFileError = "Selected file does not come from VERIFI and cannot be imported."
             } else {
               this.importIsAccount = (testBackup.backupFileType == "Account");
-              if (testBackup.backupFileType == "Facility" && this.accountFacilities.length != 0) {
-                this.backupName = testBackup.facilityBackup.facility.name;
-                let testFacility: IdbFacility = this.accountFacilities.find(facility => { return testBackup.facilityBackup.facility.name == facility.name });
-                if (testFacility) {
-                  this.overwriteFacility = testFacility;
+              //facility
+              if (!this.importIsAccount) {
+                if (this.selectedAccount) {
+                  this.backupName = testBackup.facilityBackup.facility.name;
+                  if (this.accountFacilities.length != 0) {
+                    let testFacility: IdbFacility = this.accountFacilities.find(facility => { return testBackup.facilityBackup.facility.name == facility.name });
+                    if (testFacility) {
+                      this.overwriteFacility = testFacility;
+                    } else {
+                      this.overwriteFacility = this.accountFacilities[0];
+                    }
+                  }
+                  this.backupFileError = undefined;
                 } else {
-                  this.overwriteFacility = this.accountFacilities[0];
+                  console.log('backup error')
+                  this.backupFileError = "You are trying to import a facility without an account created or selected. Select an account to import this facility into."
                 }
-              } else {
-                this.backupName = testBackup.accountBackup.account.name;
               }
-              this.backupFileError = undefined;
+              //account
+              else if (this.importIsAccount) {
+                this.backupName = testBackup.accountBackup.account.name;
+                this.backupFileError = undefined;
+              }
             }
           } catch (err) {
             console.log(err);

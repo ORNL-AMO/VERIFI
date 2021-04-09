@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { BackupDataService, BackupFile } from 'src/app/account-management/backup-data.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAccount, IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
@@ -22,15 +21,12 @@ export class EmptyStateComponent implements OnInit {
   selectedFacilitySub: Subscription;
   utilityDataSub: Subscription;
   showImportFile: boolean = false;
-  backupFile: any;
-  backupFileError: string;
   constructor(
     public accountdbService: AccountdbService,
     public facilityDbService: FacilitydbService,
     public utilityMeterDbService: UtilityMeterdbService,
     private router: Router,
-    private loadingService: LoadingService,
-    private backupDataService: BackupDataService
+    private loadingService: LoadingService
   ) { }
 
   ngOnInit(): void {
@@ -95,40 +91,4 @@ export class EmptyStateComponent implements OnInit {
   cancelImportBackup() {
     this.showImportFile = false;
   }
-
-  setImportFile(files: FileList) {
-    if (files) {
-      if (files.length !== 0) {
-        let fr: FileReader = new FileReader();
-        fr.readAsText(files[0]);
-        fr.onloadend = (e) => {
-          try {
-            this.backupFile = JSON.parse(JSON.stringify(fr.result));
-            let testBackup = JSON.parse(this.backupFile)
-            if (!testBackup.origin || testBackup.origin != "VERIFI") {
-              this.backupFileError = "Selected file does not come from VERIFI and cannot be imported."
-            } else if (testBackup.backupFileType == "Facility") {
-              this.backupFileError = "Oops it looks like you are trying to import a facility backup. Only account backup files can be loaded in this context. Once an account is created you can import facility backups in the next screen.";
-            } else {
-              this.backupFileError = undefined;
-            }
-          } catch (err) {
-            console.log(err);
-          }
-        };
-      }
-    }
-  }
-
-  async importBackupFile() {
-    this.loadingService.setLoadingStatus(true);
-    let tmpBackupFile: BackupFile = JSON.parse(this.backupFile);
-    let newAccount: IdbAccount = await this.backupDataService.importAccountBackup(tmpBackupFile.accountBackup);
-    this.accountdbService.setSelectedAccount(newAccount.id);
-    this.facilityDbService.setAllFacilities();
-    this.accountdbService.setAllAccounts();
-    this.loadingService.setLoadingStatus(false);
-    this.cancelImportBackup();
-  }
-
 }
