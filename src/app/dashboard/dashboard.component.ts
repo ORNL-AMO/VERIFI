@@ -23,7 +23,7 @@ export class DashboardComponent implements OnInit {
   selectedFacilitySub: Subscription;
   utilityDataSub: Subscription;
   accountFacilitiesSub: Subscription;
-  appRendered: boolean = false;
+  // appRendered: boolean = false;
 
   constructor(
     private accountDbService: AccountdbService, 
@@ -67,8 +67,8 @@ export class DashboardComponent implements OnInit {
 
     // TEMP MANUAL DELAY TO PREVENT PAGE FLICKERING.
     // ADDING TICKET TO FIX THIS BUG
-    const self = this;
-    setTimeout(function(){ self.appRendered = true}, 300);
+    // const self = this;
+    // setTimeout(function(){ self.appRendered = true}, 300);
   }
 
   ngOnDestroy() {
