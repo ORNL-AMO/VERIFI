@@ -94,7 +94,7 @@ export class UploadDataRunnerService {
     });
     this.loadingService.setLoadingMessage('Adding meter groups...');
     for (let i = 0; i < uniqNeededGroups.length; i++) {
-      await this.utilityMeterGroupdbService.addFromImport(uniqNeededGroups[i]).toPromise();
+      await this.utilityMeterGroupdbService.addWithObservable(uniqNeededGroups[i]).toPromise();
     }
   }
 

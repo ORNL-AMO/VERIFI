@@ -32,7 +32,8 @@
 		<div class="col-lg-7">
 			<h4>Sustainability Questions</h4>
 			<br>
-			<app-sustainability-questions-form *ngIf="selectedFacility" [inAccount]="false"></app-sustainability-questions-form>
+			<app-sustainability-questions-form *ngIf="selectedFacility" [inAccount]="false">
+			</app-sustainability-questions-form>
 		</div>
 		<div class="col">
 			<h4>Financial Reporting</h4>
@@ -47,7 +48,13 @@
 			<h4>Delete Facility</h4>
 			<p>Once deleted, you will permanently lose all your data linked to this facility. Please make a backup of
 				your data before proceeding with this step.</p>
-			<button class="btn btn-danger" (click)="editFacility()">Delete Facility</button>
+			<button class="btn btn-danger" (click)="openDeleteFacility()">Delete Facility</button>
+		</div>
+		<div class="col-lg-6">
+			<h4>Export Facility</h4>
+			<p>You can export this facility and it's data to be imported into other accounts or used as a backup of your
+				data set.</p>
+			<button class="btn btn-outline" (click)="backupFacility()">Export Facility</button>
 		</div>
 	</div>
 </div>
