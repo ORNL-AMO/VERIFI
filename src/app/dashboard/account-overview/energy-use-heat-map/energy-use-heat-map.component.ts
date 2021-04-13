@@ -3,12 +3,13 @@ import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
+import { IdbAccount, IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { VisualizationService } from 'src/app/shared/helper-services/visualization.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { HeatMapData } from 'src/app/models/visualization';
 import { DashboardService } from '../../dashboard.service';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 @Component({
   selector: 'app-energy-use-heat-map',
   templateUrl: './energy-use-heat-map.component.html',
@@ -24,7 +25,8 @@ export class EnergyUseHeatMapComponent implements OnInit {
 
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private visualizationService: VisualizationService,
     private plotlyService: PlotlyService, private utilityMeterDbService: UtilityMeterdbService,
-    private facilityDbService: FacilitydbService, private dashboardService: DashboardService) { }
+    private facilityDbService: FacilitydbService, private dashboardService: DashboardService,
+    private accountdbService: AccountdbService) { }
 
   ngOnInit(): void {
     this.accountFacilitiesSub = this.utilityMeterDataDbService.accountMeterData.subscribe(val => {
@@ -51,7 +53,8 @@ export class EnergyUseHeatMapComponent implements OnInit {
       let hovertemplate: string = '%{y}, %{x}: %{z:$,.0f}<extra></extra>';
       let textPrefix: string = "$";
       if(this.graphDisplay == "usage"){
-        hovertemplate = '%{y}, %{x}: {z:$,.0f}<extra></extra>';
+        let selectedAccount: IdbAccount = this.accountdbService.selectedAccount.getValue();
+        hovertemplate = '%{y}, %{x}: %{z:,.0f} ' + selectedAccount.energyUnit + '<extra></extra>';
         textPrefix = "";
       }
 
@@ -68,7 +71,8 @@ export class EnergyUseHeatMapComponent implements OnInit {
           side: 'top',
         },
         yaxis: {
-          automargin: true
+          automargin: true,
+          dtick: 1
         },
         margin: { "t": 50, "b": 50 },
       };

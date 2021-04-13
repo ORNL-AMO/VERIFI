@@ -91,7 +91,8 @@ export class FacilityHeatMapComponent implements OnInit {
       let hovertemplate: string = '%{x}, %{y}: %{z:$,.0f}<extra></extra>';
       let labelPrepend: string = "$"
       if (this.graphDisplay == "usage") {
-        hovertemplate = '%{x}, %{y}: %{z:,.0f}<extra></extra>';
+        let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+        hovertemplate = '%{y}, %{x}: %{z:,.0f} ' + selectedFacility.energyUnit + '<extra></extra>';
         labelPrepend = "";
       }
 
@@ -120,6 +121,7 @@ export class FacilityHeatMapComponent implements OnInit {
           side: 'top'
         },
         yaxis: {
+          dtick: 1
         }
       };
 

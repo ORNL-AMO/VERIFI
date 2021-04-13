@@ -2,6 +2,7 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
@@ -37,7 +38,7 @@ export class FacilityStackedAreaChartComponent implements OnInit {
   graphDisplay: "cost" | "usage";
   constructor(private plotlyService: PlotlyService, private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService, private vizualizationService: VisualizationService,
-    private dashboardService: DashboardService) { }
+    private dashboardService: DashboardService, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
     this.accountMetersSub = this.utilityMeterDbService.accountMeters.subscribe(accountMeters => {
@@ -89,10 +90,20 @@ export class FacilityStackedAreaChartComponent implements OnInit {
     if (this.stackedAreaChart) {
       let traceData = new Array();
       let yDataProperty: "energyCost" | "energyUse";
-      if(this.graphDisplay == "cost"){
+      let yaxisTitle: string;
+      let tickprefix: string;
+      let hoverformat: string;
+      if (this.graphDisplay == "cost") {
+        yaxisTitle = 'Utility Cost';
         yDataProperty = "energyCost";
-      }else{
+        tickprefix = "$";
+        hoverformat = '$,.2f';
+      } else {
+        let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+        yaxisTitle = "Utility Usage (" + selectedFacility.energyUnit + ")";
         yDataProperty = "energyUse";
+        tickprefix = "";
+        hoverformat = ",.2f";
       }
       if (this.electricityData.length != 0) {
         let trace = {
@@ -147,11 +158,8 @@ export class FacilityStackedAreaChartComponent implements OnInit {
           stackgroup: 'one'
         };
         traceData.push(trace);
-      }      
-      let hoverformat: string = '$,.2f';
-      if(this.graphDisplay == "usage"){
-        hoverformat = ",.2f";
       }
+
       var layout = {
         barmode: 'group',
         // title: {
@@ -170,12 +178,13 @@ export class FacilityStackedAreaChartComponent implements OnInit {
           // },
         },
         yaxis: {
-          // title: {
-          //   text: 'Energy Cost',
-          //   font: {
-          //     size: 18
-          //   },
-          // },
+          title: {
+            text: yaxisTitle,
+            tickprefix: tickprefix
+            //   font: {
+            //     size: 18
+            //   },
+          },
           hoverformat: hoverformat
         }
       };

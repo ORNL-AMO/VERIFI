@@ -9,23 +9,25 @@
     <!--<button class="m-0 btn btn-outline item-right">Generate Report</button>-->
   </div>
 
-  <div class="breadcrumbs d-flex justify-content-between">
-    <p>
-      <i class="fa fa-home"></i>{{selectedAccount.name}}
-      <i class="fa fa-angle-right"></i>
-      <select [(ngModel)]="breadcrumbFacilityId" (change)="switchFacility()">
-        <option [ngValue]="undefined">All Facilities</option>
-        <option *ngFor="let facility of facilityList" [ngValue]="facility.id">{{facility.name}}</option>
-      </select>
-    </p>
-    <div class="btn-group float-right">
-      <button class="btn btn-sm m-0 btn-selected" (click)="setGraphDisplay('usage')" [ngClass]="{'btn-outline': graphDisplay != 'usage'}">Utility Usage</button>
-      <button class="btn btn-sm btn-selected m-0" (click)="setGraphDisplay('cost')" [ngClass]="{'btn-outline': graphDisplay != 'cost'}">Utility Cost</button>
+  <div class="sticky-top">
+    <div class="breadcrumbs d-flex justify-content-between">
+      <p>
+        <i class="fa fa-home"></i>{{selectedAccount.name}}
+        <i class="fa fa-angle-right"></i>
+        <select [(ngModel)]="breadcrumbFacilityId" (change)="switchFacility()">
+          <option [ngValue]="undefined">All Facilities</option>
+          <option *ngFor="let facility of facilityList" [ngValue]="facility.id">{{facility.name}}</option>
+        </select>
+      </p>
+      <div class="btn-group float-right">
+        <button class="btn btn-sm m-0 btn-selected" (click)="setGraphDisplay('usage')"
+          [ngClass]="{'btn-outline': graphDisplay != 'usage'}">Utility Usage</button>
+        <button class="btn btn-sm btn-selected m-0" (click)="setGraphDisplay('cost')"
+          [ngClass]="{'btn-outline': graphDisplay != 'cost'}">Utility Cost</button>
+      </div>
     </div>
   </div>
-
   <div class="wrapper main-content">
-
     <router-outlet></router-outlet>
   </div>
 </div>

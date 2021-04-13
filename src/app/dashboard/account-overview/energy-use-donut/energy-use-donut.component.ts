@@ -1,8 +1,10 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { AccountFacilitiesSummary } from 'src/app/models/dashboard';
+import { IdbAccount } from 'src/app/models/idb';
 import { DashboardService } from '../../dashboard.service';
 
 @Component({
@@ -22,7 +24,8 @@ export class EnergyUseDonutComponent implements OnInit {
 
 
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private dashboardService: DashboardService, private plotlyService: PlotlyService) { }
+    private dashboardService: DashboardService, private plotlyService: PlotlyService,
+    private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
     this.accountFacilitiesSub = this.utilityMeterDataDbService.accountMeterData.subscribe(val => {
@@ -51,8 +54,9 @@ export class EnergyUseDonutComponent implements OnInit {
       let yDataProperty: string = "energyCost";
       let hovertemplate: string = '%{label}: %{value:$,.0f} <extra></extra>';
       if (this.graphDisplay == "usage") {
+        let selectedAccout: IdbAccount = this.accountDbService.selectedAccount.getValue();
         yDataProperty = "energyUsage";
-        hovertemplate = '%{label}: %{value:,.0f} <extra></extra>'
+        hovertemplate = '%{label}: %{value:,.0f} ' + selectedAccout.energyUnit + ' <extra></extra>'
       }
 
       var data = [{

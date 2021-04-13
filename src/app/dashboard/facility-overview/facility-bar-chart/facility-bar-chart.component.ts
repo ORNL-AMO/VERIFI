@@ -105,10 +105,21 @@ export class FacilityBarChartComponent implements OnInit {
       let traceData = new Array();
 
       let yDataProperty: "energyCost" | "energyUse";
-      if(this.graphDisplay == "cost"){
+      let yaxisTitle: string;
+
+      let hoverformat: string;
+      let tickprefix: string;
+      if (this.graphDisplay == "cost") {
+        hoverformat = "$,.2f";
+        yaxisTitle = 'Utility Cost';
         yDataProperty = "energyCost";
-      }else{
+        tickprefix = "$";
+      } else {
+        let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+        yaxisTitle = "Utility Usage (" + selectedFacility.energyUnit + ")";
         yDataProperty = "energyUse";
+        tickprefix = "";
+        hoverformat = ",.2f";
       }
       if (this.electricityData.length != 0) {
         let trace = {
@@ -169,10 +180,7 @@ export class FacilityBarChartComponent implements OnInit {
         xAxisTitle = 'Month';
       }
 
-      let hoverformat: string = '$,.2f';
-      if(this.graphDisplay == "usage"){
-        hoverformat = ",.2f";
-      }
+
 
       var layout = {
         barmode: 'group',
@@ -191,12 +199,13 @@ export class FacilityBarChartComponent implements OnInit {
           // },
         },
         yaxis: {
-          // title: {
-          //   text: 'Energy Cost',
-          //   font: {
-          //     size: 18
-          //   },
-          // },
+          title: {
+            text: yaxisTitle,
+            tickprefix: tickprefix
+            // font: {
+            //   size: 18
+            // },
+          },
           hoverformat: hoverformat
         },
         margin: { r: 0, t: 50 }
