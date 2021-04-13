@@ -70,54 +70,6 @@ export class EnergySourceComponent implements OnInit {
     this.editMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.id, selectedAccount.id, true);
   }
 
-  meterExport() {
-    // const replacer = (key, value) => value === null ? '' : value; // specify how you want to handle null values here
-    const allowedHeaders: Array<string> = ["Meter Number", "Account Number", "Source", "Meter Name", "Utility Supplier", "Notes", "Building / Location", "Meter Group", "Collection Unit", "Phase", "Fuel", "Heat Capacity", "Site To Source"];
-    let csvData: Array<string> = new Array();
-    this.meterList.forEach(meter => {
-      let meterCSVData: string = this.getMeterCSVData(meter);
-      csvData.push(meterCSVData);
-    })
-    csvData.unshift(allowedHeaders.join(','));
-    let csvBlob: BlobPart = csvData.join('\r\n');
-
-    //Download the file as CSV
-    var downloadLink = document.createElement("a");
-    var blob = new Blob(["\ufeff", csvBlob]);
-    var url = URL.createObjectURL(blob);
-    downloadLink.href = url;
-    downloadLink.download = "VerifiMeterDump.csv";
-    document.body.appendChild(downloadLink);
-    downloadLink.click();
-    document.body.removeChild(downloadLink);
-  }
-
-  getMeterCSVData(meter: IdbUtilityMeter): string {
-    let meterCSVItem: string = meter.meterNumber;
-    // meterCSVItem = this.addToString(meterCSVItem, meter.meterNumber);
-    meterCSVItem = this.addToString(meterCSVItem, meter.accountNumber);
-    meterCSVItem = this.addToString(meterCSVItem, meter.source);
-    meterCSVItem = this.addToString(meterCSVItem, meter.name);
-    meterCSVItem = this.addToString(meterCSVItem, meter.supplier);
-    meterCSVItem = this.addToString(meterCSVItem, meter.notes);
-    meterCSVItem = this.addToString(meterCSVItem, meter.location);
-    meterCSVItem = this.addToString(meterCSVItem, meter.group);
-    meterCSVItem = this.addToString(meterCSVItem, meter.startingUnit);
-    meterCSVItem = this.addToString(meterCSVItem, meter.phase);
-    meterCSVItem = this.addToString(meterCSVItem, meter.fuel);
-    meterCSVItem = this.addToString(meterCSVItem, meter.heatCapacity);
-    meterCSVItem = this.addToString(meterCSVItem, meter.siteToSource);
-    return meterCSVItem;
-  }
-
-  addToString(str: string, addition: string | number): string {
-    if (addition != undefined) {
-      return str + ',' + addition;
-    } else {
-      return str + ',' + '';
-    }
-  }
-
   uploadData() {
     this.router.navigateByUrl('utility/upload-data');
   }

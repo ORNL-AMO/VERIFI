@@ -199,7 +199,8 @@ Buttons
   color: #2c386b !important;
 }
 .importExport button:first-child {
-  margin-right: 5px;
+  /* bringing back when adding export back */
+  /* margin-right: 5px; */
 }
 .saveCancel button:first-child {
   margin-right: 10px;
