@@ -20,7 +20,7 @@ export class EmptyStateComponent implements OnInit {
   selectedAccountSub: Subscription;
   selectedFacilitySub: Subscription;
   utilityDataSub: Subscription;
-
+  showImportFile: boolean = false;
   constructor(
     public accountdbService: AccountdbService,
     public facilityDbService: FacilitydbService,
@@ -82,5 +82,13 @@ export class EmptyStateComponent implements OnInit {
         this.loadingService.setLoadingStatus(false);
       })
     })
+  }
+
+  openImportBackup() {
+    this.showImportFile = true;
+  }
+
+  cancelImportBackup() {
+    this.showImportFile = false;
   }
 }

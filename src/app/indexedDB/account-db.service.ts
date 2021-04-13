@@ -14,15 +14,21 @@ export class AccountdbService {
     constructor(private dbService: NgxIndexedDBService, private localStorageService: LocalStorageService) {
         this.selectedAccount = new BehaviorSubject<IdbAccount>(undefined);
         this.allAccounts = new BehaviorSubject<Array<IdbAccount>>(new Array());
-        this.setAllAccounts();
-        let localStorageAccountId: number = this.localStorageService.retrieve("accountId");
-        this.setSelectedAccount(localStorageAccountId);
-
         this.selectedAccount.subscribe(account => {
             if (account) {
                 this.localStorageService.store("accountId", account.id);
             }
         });
+    }
+
+    async initializeAccountFromLocalStorage() {
+        let localStorageAccountId: number = this.localStorageService.retrieve("accountId");
+        if (localStorageAccountId) {
+            let selectedAcount: IdbAccount = await this.getById(localStorageAccountId).toPromise();
+            this.selectedAccount.next(selectedAcount);
+        }
+        let allAccounts: Array<IdbAccount> = await this.getAll().toPromise();
+        this.allAccounts.next(allAccounts);
     }
 
     setSelectedAccount(accountId: number) {
@@ -124,7 +130,6 @@ export class AccountdbService {
             energyUnit: 'kWh',
             volumeLiquidUnit: 'gal',
             volumeGasUnit: 'SCF',
-            chilledWaterUnit: undefined,
             massUnit: 'lb',
             sustainabilityQuestions: {
                 energyReductionGoal: false,
@@ -175,7 +180,6 @@ export const TestAccountData: Array<IdbAccount> = [
         energyUnit: 'kWh',
         volumeLiquidUnit: 'gal',
         volumeGasUnit: 'SCF',
-        chilledWaterUnit: undefined,
         massUnit: 'lb',
         sustainabilityQuestions: {
             energyReductionGoal: false,
@@ -221,7 +225,6 @@ export const TestAccountData: Array<IdbAccount> = [
         energyUnit: 'kWh',
         volumeLiquidUnit: 'gal',
         volumeGasUnit: 'SCF',
-        chilledWaterUnit: undefined,
         massUnit: 'lb',
         sustainabilityQuestions: {
             energyReductionGoal: false,
@@ -267,7 +270,6 @@ export const TestAccountData: Array<IdbAccount> = [
         energyUnit: 'kWh',
         volumeLiquidUnit: 'gal',
         volumeGasUnit: 'SCF',
-        chilledWaterUnit: undefined,
         massUnit: 'lb',
         sustainabilityQuestions: {
             energyReductionGoal: false,

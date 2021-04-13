@@ -18,17 +18,12 @@ export class FacilitydbService {
         this.accountFacilities = new BehaviorSubject<Array<IdbFacility>>(new Array());
         this.allFacilities = new BehaviorSubject<Array<IdbFacility>>(new Array());
         this.selectedFacility = new BehaviorSubject<IdbFacility>(undefined);
-        this.setAllFacilities();
-        this.initializeLocalFromLocalStorage();
-
         this.accountDbService.selectedAccount.subscribe(() => {
             this.setAccountFacilities();
         });
-
         this.accountFacilities.subscribe(() => {
             this.setSelectedFacility();
         });
-
         this.selectedFacility.subscribe(facility => {
             if (facility) {
                 this.localStorageService.store('facilityId', facility.id);
@@ -36,12 +31,20 @@ export class FacilitydbService {
         });
     }
 
-    initializeLocalFromLocalStorage() {
-        let storedFacilityId: number = this.localStorageService.retrieve("facilityId");
-        if (storedFacilityId) {
-            this.getById(storedFacilityId).subscribe(facility => {
-                this.selectedFacility.next(facility);
-            });
+    async initializeFacilityFromLocalStorage() {
+        let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+        if (selectedAccount) {
+            let allFacilities: Array<IdbFacility> = await this.getAll().toPromise();
+            this.allFacilities.next(allFacilities);
+            let accountFacilities: Array<IdbFacility> = allFacilities.filter(facility => { return facility.accountId == selectedAccount.id });
+            this.accountFacilities.next(accountFacilities);
+            let storedFacilityId: number = this.localStorageService.retrieve("facilityId");
+            if (storedFacilityId) {
+                let selectedFacility: IdbFacility = accountFacilities.find(facility => { return facility.id == storedFacilityId });
+                this.selectedFacility.next(selectedFacility);
+            } else if (accountFacilities.length != 0) {
+                this.selectedFacility.next(accountFacilities[0]);
+            }
         }
     }
 
@@ -177,7 +180,6 @@ export class FacilitydbService {
             energyUnit: account.energyUnit,
             volumeLiquidUnit: account.volumeLiquidUnit,
             volumeGasUnit: account.volumeGasUnit,
-            chilledWaterUnit: account.chilledWaterUnit,
             massUnit: account.massUnit,
             sustainabilityQuestions: {
                 energyReductionGoal: false,
@@ -231,7 +233,6 @@ export const TestFacilityData: Array<IdbFacility> = [
         energyUnit: 'kWh',
         volumeLiquidUnit: 'gal',
         volumeGasUnit: 'SCF',
-        chilledWaterUnit: undefined,
         massUnit: 'lb',
         sustainabilityQuestions: {
             energyReductionGoal: false,
@@ -279,7 +280,6 @@ export const TestFacilityData: Array<IdbFacility> = [
         energyUnit: 'kWh',
         volumeLiquidUnit: 'gal',
         volumeGasUnit: 'SCF',
-        chilledWaterUnit: undefined,
         massUnit: 'lb',
         sustainabilityQuestions: {
             energyReductionGoal: false,
@@ -327,7 +327,6 @@ export const TestFacilityData: Array<IdbFacility> = [
         energyUnit: 'kWh',
         volumeLiquidUnit: 'gal',
         volumeGasUnit: 'SCF',
-        chilledWaterUnit: undefined,
         massUnit: 'lb',
         sustainabilityQuestions: {
             energyReductionGoal: false,
@@ -375,7 +374,6 @@ export const TestFacilityData: Array<IdbFacility> = [
         energyUnit: 'kWh',
         volumeLiquidUnit: 'gal',
         volumeGasUnit: 'SCF',
-        chilledWaterUnit: undefined,
         massUnit: 'lb',
         sustainabilityQuestions: {
             energyReductionGoal: false,

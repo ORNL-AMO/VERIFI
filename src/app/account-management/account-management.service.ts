@@ -58,7 +58,6 @@ export class AccountManagementService {
       massUnit: [units.massUnit, [Validators.required]],
       volumeLiquidUnit: [units.volumeLiquidUnit, [Validators.required]],
       volumeGasUnit: [units.volumeGasUnit, [Validators.required]],
-      chilledWaterUnit: [units.chilledWaterUnit, [Validators.required]],
     });
     return form;
   }
@@ -68,7 +67,6 @@ export class AccountManagementService {
     account.energyUnit = form.controls.energyUnit.value;
     account.massUnit = form.controls.massUnit.value;
     account.volumeLiquidUnit = form.controls.volumeLiquidUnit.value;
-    account.chilledWaterUnit = form.controls.chilledWaterUnit.value;
     return account;
   }
 
@@ -77,7 +75,6 @@ export class AccountManagementService {
     facility.energyUnit = form.controls.energyUnit.value;
     facility.massUnit = form.controls.massUnit.value;
     facility.volumeLiquidUnit = form.controls.volumeLiquidUnit.value;
-    facility.chilledWaterUnit = form.controls.chilledWaterUnit.value;
     return facility;
   }
 
@@ -223,8 +220,7 @@ export class AccountManagementService {
         account.massUnit != facility.massUnit ||
         account.energyUnit != facility.energyUnit ||
         account.volumeGasUnit != facility.volumeGasUnit ||
-        account.volumeLiquidUnit != facility.volumeLiquidUnit ||
-        account.chilledWaterUnit != facility.chilledWaterUnit
+        account.volumeLiquidUnit != facility.volumeLiquidUnit
       )
     } else {
       return false;

@@ -1,8 +1,8 @@
-<div *ngIf="(!selectedAccount || facilityList.length === 0) && appRendered">
+<div *ngIf="(!selectedAccount || facilityList.length === 0)">
   <app-empty-state></app-empty-state>
 </div>
 
-<div *ngIf="(selectedAccount && facilityList.length > 0) && appRendered">
+<div *ngIf="(selectedAccount && facilityList.length > 0)">
   <div class="banner">
     <h3 *ngIf="!isFacilityDashboard">Account Dashboard</h3>
     <h3 *ngIf="selectedFacility && isFacilityDashboard">Facility Dashboard</h3>

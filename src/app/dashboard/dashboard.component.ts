@@ -24,7 +24,6 @@ export class DashboardComponent implements OnInit {
   selectedFacilitySub: Subscription;
   utilityDataSub: Subscription;
   accountFacilitiesSub: Subscription;
-  appRendered: boolean = false;
 
   graphDisplay: "cost" | "usage";
   graphDisplaySub: Subscription;
@@ -68,11 +67,6 @@ export class DashboardComponent implements OnInit {
     this.utilityDataSub = this.utilityMeterDbService.facilityMeters.subscribe(utilityMeters => {
       this.utilityMeters = utilityMeters;
     });
-
-    // TEMP MANUAL DELAY TO PREVENT PAGE FLICKERING.
-    // ADDING TICKET TO FIX THIS BUG
-    const self = this;
-    setTimeout(function () { self.appRendered = true }, 300);
 
     this.graphDisplaySub = this.dashboardService.graphDisplay.subscribe(val => {
       this.graphDisplay = val;

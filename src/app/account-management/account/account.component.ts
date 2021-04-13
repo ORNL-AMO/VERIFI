@@ -9,6 +9,7 @@ import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db.service";
 import { UtilityMeterDatadbService } from "../../indexedDB/utilityMeterData-db.service";
 import { UtilityMeterGroupdbService } from "../../indexedDB/utilityMeterGroup-db.service";
 import { LoadingService } from "../../shared/loading/loading.service";
+import { AccountBackup, BackupDataService, BackupFile } from '../backup-data.service';
 
 @Component({
   selector: 'app-account',
@@ -25,7 +26,7 @@ export class AccountComponent implements OnInit {
   selectedAccountSub: Subscription;
   accountFacilitiesSub: Subscription;
   selectedAccount: IdbAccount;
-
+  showImportFile: boolean = false;
   constructor(
     private router: Router,
     private accountDbService: AccountdbService,
@@ -34,7 +35,8 @@ export class AccountComponent implements OnInit {
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
-    private loadingService: LoadingService
+    private loadingService: LoadingService,
+    private backupDataService: BackupDataService
   ) { }
 
   ngOnInit() {
@@ -141,5 +143,17 @@ export class AccountComponent implements OnInit {
 
   cancelFacilityDelete() {
     this.facilityToDelete = undefined;
+  }
+
+  backupAccount() {
+    this.backupDataService.backupAccount();
+  }
+
+  openImportBackup() {
+    this.showImportFile = true;
+  }
+
+  cancelImportBackup() {
+    this.showImportFile = false;
   }
 }

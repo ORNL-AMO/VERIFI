@@ -21,7 +21,19 @@ export class UtilityMeterdbService {
         this.facilityDbService.selectedFacility.subscribe(() => {
             this.setFacilityMeters();
         });
+    }
 
+    async initializeMeterData() {
+        let selectedAccount: IdbAccount = this.accountdbService.selectedAccount.getValue();
+        if (selectedAccount) {
+            let accountMeters: Array<IdbUtilityMeter> = await this.getAllByIndexRange('accountId', selectedAccount.id).toPromise();
+            this.accountMeters.next(accountMeters);
+            let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+            if (selectedFacility) {
+                let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == selectedFacility.id });
+                this.facilityMeters.next(facilityMeters);
+            }
+        }
     }
 
     setFacilityMeters() {
@@ -132,7 +144,7 @@ export class UtilityMeterdbService {
             groupId: undefined,
             meterNumber: undefined,
             accountNumber: undefined,
-            phase: undefined,
+            phase: "Gas",
             heatCapacity: undefined,
             siteToSource: undefined,
             name: "New Meter",
