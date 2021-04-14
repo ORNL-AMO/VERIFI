@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
-import { IdbPredictorEntry, PredictorData } from 'src/app/models/idb';
+import { IdbFacility, IdbPredictorEntry, PredictorData } from 'src/app/models/idb';
+import { LoadingService } from 'src/app/shared/loading/loading.service';
 
 @Component({
   selector: 'app-predictor-data',
@@ -25,7 +27,10 @@ export class PredictorDataComponent implements OnInit {
   showPredictorMenu: boolean = false;
   showEditPredictors: boolean = false;
   addOrEdit: "add" | "edit";
-  constructor(private predictorsDbService: PredictordbService, private router: Router) { }
+  allChecked: boolean = false;
+  hasCheckedItems: boolean = false;
+  showBulkDelete: boolean = false;
+  constructor(private predictorsDbService: PredictordbService, private router: Router, private loadingService: LoadingService, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
     this.facilityPredictorsSub = this.predictorsDbService.facilityPredictors.subscribe(predictors => {
@@ -34,7 +39,8 @@ export class PredictorDataComponent implements OnInit {
 
     this.facilityPredictorEntriesSub = this.predictorsDbService.facilityPredictorEntries.subscribe(entries => {
       this.facilityPredictorEntries = entries;
-    })
+      this.setHasChecked();
+    });
   }
 
   ngOnDestroy() {
@@ -119,5 +125,49 @@ export class PredictorDataComponent implements OnInit {
 
   uploadData() {
     this.router.navigateByUrl('utility/upload-data');
+  }
+
+  checkAll(){
+    let displayedItems: Array<IdbPredictorEntry>  = this.facilityPredictorEntries.slice(((this.currentPageNumber - 1) * this.itemsPerPage), (this.currentPageNumber * this.itemsPerPage))
+    displayedItems.forEach(item => {
+      item.checked = this.allChecked;
+    });
+    this.hasCheckedItems = (this.allChecked == true);
+  }
+
+  setHasChecked(){
+    let hasChecked: boolean = false;
+    let displayedItems: Array<IdbPredictorEntry>  = this.facilityPredictorEntries.slice(((this.currentPageNumber - 1) * this.itemsPerPage), (this.currentPageNumber * this.itemsPerPage))
+    displayedItems.forEach(item => {
+      if(item.checked){
+        hasChecked = true;
+      }
+    });
+    this.hasCheckedItems = hasChecked;
+  }
+
+  openBulkDelete(){
+    this.showBulkDelete = true;
+  }
+
+  cancelBulkDelete(){
+    this.showBulkDelete = false;
+  }
+
+  async bulkDelete(){
+    this.loadingService.setLoadingMessage("Deleting Predictor Entries...");
+    this.loadingService.setLoadingStatus(true);
+    let displayedItems: Array<IdbPredictorEntry> = this.facilityPredictorEntries.slice(((this.currentPageNumber - 1) * this.itemsPerPage), (this.currentPageNumber * this.itemsPerPage))
+    for(let index = 0; index < displayedItems.length; index++){
+      await this.predictorsDbService.deleteIndexWithObservable(displayedItems[index].id).toPromise();
+    }
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let accountPredictors: Array<IdbPredictorEntry> = await this.predictorsDbService.getAllByIndexRange("accountId", selectedFacility.accountId).toPromise();
+    this.predictorsDbService.accountPredictorEntries.next(accountPredictors);
+    let facilityPredictors: Array<IdbPredictorEntry> = accountPredictors.filter(predictor => {return predictor.facilityId == selectedFacility.id});
+    this.predictorsDbService.facilityPredictorEntries.next(facilityPredictors);
+    this.allChecked = false;
+    this.loadingService.setLoadingStatus(false);
+    this.cancelBulkDelete();
   }
 }

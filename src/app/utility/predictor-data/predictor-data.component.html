@@ -29,12 +29,19 @@
                 <option [ngValue]=999999999999>All</option>
             </select>
         </div>
+          <!--Bulk Delete-->
+        <div class="bulk-delete item-right" [class.show]="hasCheckedItems">
+            <button class="btn btn-danger" (click)='openBulkDelete()'>Bulk Delete</button>
+        </div>
     </div>
 
     <div>
         <table class="table table-sm">
             <thead>
                 <tr>
+                    <th class="input">
+                        <input #masterCheckbox type="checkbox" (change)="checkAll()" [(ngModel)]="allChecked">
+                    </th>
                     <th>Date</th>
                     <th class="header" *ngFor="let predictor of facilityPredictors">{{predictor.name}}
                         <span class="small block">{{predictor.unit}}</span>
@@ -46,6 +53,9 @@
             </thead>
             <tbody>
                 <tr *ngFor="let predictorEntry of facilityPredictorEntries | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
+                    <td class="input">
+                        <input type="checkbox" name="predictorEntry" (change)="setHasChecked()" [(ngModel)]="predictorEntry.checked">
+                    </td>
                     <td>{{predictorEntry.date | date:'MMM, yyyy'}}</td>
                     <td *ngFor="let predictor of predictorEntry.predictors">{{predictor.amount}}</td>
                     <td class="actions">
@@ -94,5 +104,20 @@
     </div>
     <div class="popup-footer text-right">
         <button class="btn btn-danger" (click)="confirmDeletePredictorEntry()">Delete</button>
+    </div>
+</div>
+
+
+<!--bulk delete-->
+<div class="popup" [class.open]="showBulkDelete">
+    <div class="popup-header" *ngIf="showBulkDelete">Delete Predictor Entries
+        <button class="item-right" (click)="cancelBulkDelete()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>WARNING: Deleting predictor entries cannot be undone.
+            Are you sure you want to preform this action?</p>
+    </div>
+    <div class="popup-footer text-right">
+        <button class="btn btn-danger" (click)="bulkDelete()">Delete</button>
     </div>
 </div>
