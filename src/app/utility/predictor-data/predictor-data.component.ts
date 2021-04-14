@@ -5,6 +5,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { IdbFacility, IdbPredictorEntry, PredictorData } from 'src/app/models/idb';
 import { LoadingService } from 'src/app/shared/loading/loading.service';
+import { ToastNotificationsService } from 'src/app/shared/toast-notifications/toast-notifications.service';
 
 @Component({
   selector: 'app-predictor-data',
@@ -30,7 +31,8 @@ export class PredictorDataComponent implements OnInit {
   allChecked: boolean = false;
   hasCheckedItems: boolean = false;
   showBulkDelete: boolean = false;
-  constructor(private predictorsDbService: PredictordbService, private router: Router, private loadingService: LoadingService, private facilityDbService: FacilitydbService) { }
+  constructor(private predictorsDbService: PredictordbService, private router: Router, private loadingService: LoadingService, 
+    private facilityDbService: FacilitydbService, private toastNotificationsService: ToastNotificationsService) { }
 
   ngOnInit(): void {
     this.facilityPredictorsSub = this.predictorsDbService.facilityPredictors.subscribe(predictors => {
@@ -169,5 +171,6 @@ export class PredictorDataComponent implements OnInit {
     this.allChecked = false;
     this.loadingService.setLoadingStatus(false);
     this.cancelBulkDelete();
+    this.toastNotificationsService.showToast("Predictor Data Deleted!", undefined, undefined, false, "success");
   }
 }
