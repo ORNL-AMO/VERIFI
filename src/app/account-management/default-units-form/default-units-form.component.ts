@@ -30,14 +30,18 @@ export class DefaultUnitsFormComponent implements OnInit {
   selectedAccount: IdbAccount;
   selectedFacility: IdbFacility;
   unitsDontMatchAccount: boolean = false;
-
+  isFormChange: boolean = false
   constructor(private accountDbService: AccountdbService, private accountManagementService: AccountManagementService, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
     this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(account => {
       this.selectedAccount = account;
       if (account && this.inAccount) {
-        this.form = this.accountManagementService.getUnitsForm(account);
+        if (this.isFormChange == false) {
+          this.form = this.accountManagementService.getUnitsForm(account);
+        } else {
+          this.isFormChange = false;
+        }
       }
     });
 
@@ -45,7 +49,11 @@ export class DefaultUnitsFormComponent implements OnInit {
       this.selectedFacility = facility;
       if (facility && !this.inAccount) {
         this.checkUnitsDontMatch();
-        this.form = this.accountManagementService.getUnitsForm(facility);
+        if (this.isFormChange == false) {
+          this.form = this.accountManagementService.getUnitsForm(facility);
+        } else {
+          this.isFormChange = false;
+        }
       }
     });
   }
@@ -62,6 +70,7 @@ export class DefaultUnitsFormComponent implements OnInit {
 
   saveChanges() {
     this.form = this.accountManagementService.checkCustom(this.form);
+    this.isFormChange = true;
     if (this.inAccount) {
       this.selectedAccount = this.accountManagementService.updateAccountFromUnitsForm(this.form, this.selectedAccount);
       this.accountDbService.update(this.selectedAccount);

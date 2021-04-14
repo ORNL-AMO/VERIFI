@@ -25,7 +25,8 @@ export interface IdbAccount {
     fiscalYearCalendarEnd: boolean,
     setupWizard: boolean,
     setupWizardComplete: boolean,
-    numberOfFacilities?: string
+    numberOfFacilities?: string,
+    energyIsSource: boolean
 }
 
 export interface IdbFacility {
@@ -57,6 +58,7 @@ export interface IdbFacility {
     fiscalYear: string,
     fiscalYearMonth: string,
     fiscalYearCalendarEnd: boolean,
+    energyIsSource: boolean
 }
 
 export interface IdbUtilityMeterGroup {

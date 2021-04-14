@@ -206,6 +206,7 @@ export class FacilitydbService {
             fiscalYear: 'calendarYear',
             fiscalYearMonth: 'January',
             fiscalYearCalendarEnd: true,
+            energyIsSource: true
 
         }
     }
@@ -259,6 +260,7 @@ export const TestFacilityData: Array<IdbFacility> = [
         fiscalYear: 'calendarYear',
         fiscalYearMonth: 'January',
         fiscalYearCalendarEnd: true,
+        energyIsSource: true
     },
     {
         // id: undefined,
@@ -306,6 +308,7 @@ export const TestFacilityData: Array<IdbFacility> = [
         fiscalYear: 'calendarYear',
         fiscalYearMonth: 'January',
         fiscalYearCalendarEnd: true,
+        energyIsSource: true
     },
     {
         // id: undefined,
@@ -353,6 +356,7 @@ export const TestFacilityData: Array<IdbFacility> = [
         fiscalYear: 'calendarYear',
         fiscalYearMonth: 'January',
         fiscalYearCalendarEnd: true,
+        energyIsSource: true
     },
     {
         // id: undefined,
@@ -400,5 +404,6 @@ export const TestFacilityData: Array<IdbFacility> = [
         fiscalYear: 'calendarYear',
         fiscalYearMonth: 'January',
         fiscalYearCalendarEnd: true,
+        energyIsSource: true
     }
 ]
