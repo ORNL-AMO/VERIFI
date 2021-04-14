@@ -31,6 +31,8 @@ export class PredictorDataComponent implements OnInit {
   allChecked: boolean = false;
   hasCheckedItems: boolean = false;
   showBulkDelete: boolean = false;
+  orderDataField: string = 'date';
+  orderByDirection: string = 'desc';
   constructor(private predictorsDbService: PredictordbService, private router: Router, private loadingService: LoadingService, 
     private facilityDbService: FacilitydbService, private toastNotificationsService: ToastNotificationsService) { }
 
@@ -172,5 +174,17 @@ export class PredictorDataComponent implements OnInit {
     this.loadingService.setLoadingStatus(false);
     this.cancelBulkDelete();
     this.toastNotificationsService.showToast("Predictor Data Deleted!", undefined, undefined, false, "success");
+  }
+
+  setOrderDataField(str: string){
+    if(str == this.orderDataField){
+      if(this.orderByDirection == 'desc'){
+        this.orderByDirection = 'asc';
+      }else{
+        this.orderByDirection = 'desc';
+      }
+    }else{
+      this.orderDataField = str;
+    }
   }
 }

@@ -88,6 +88,7 @@ import { ElectronUpdateComponent } from './electron/electron-update/electron-upd
 import { ImportPredictorsTableComponent } from './utility/upload-data/import-predictors-table/import-predictors-table.component';
 import { ImportPredictorsWizardComponent } from './utility/upload-data/import-predictors-wizard/import-predictors-wizard.component';
 import { ImportBackupModalComponent } from './shared/import-backup-modal/import-backup-modal.component';
+import { PredictorsOrderByPipe } from './utility/predictor-data/predictors-order-by.pipe';
 
 @NgModule({
   declarations: [
@@ -162,6 +163,7 @@ import { ImportBackupModalComponent } from './shared/import-backup-modal/import-
     ImportPredictorsTableComponent,
     ImportPredictorsWizardComponent,
     ImportBackupModalComponent,
+    PredictorsOrderByPipe,
   ],
   imports: [
     BrowserModule,

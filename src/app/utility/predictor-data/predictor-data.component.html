@@ -29,7 +29,7 @@
                 <option [ngValue]=999999999999>All</option>
             </select>
         </div>
-          <!--Bulk Delete-->
+        <!--Bulk Delete-->
         <div class="bulk-delete item-right" [class.show]="hasCheckedItems">
             <button class="btn btn-danger" (click)='openBulkDelete()'>Bulk Delete</button>
         </div>
@@ -42,8 +42,10 @@
                     <th class="input">
                         <input #masterCheckbox type="checkbox" (change)="checkAll()" [(ngModel)]="allChecked">
                     </th>
-                    <th>Date</th>
-                    <th class="header" *ngFor="let predictor of facilityPredictors">{{predictor.name}}
+                    <th (click)="setOrderDataField('date')" [ngClass]="{'active': orderDataField == 'date'}">Date</th>
+                    <th class="header" *ngFor="let predictor of facilityPredictors"
+                        (click)="setOrderDataField(predictor.name)"
+                        [ngClass]="{'active': orderDataField == predictor.name}">{{predictor.name}}
                         <span class="small block">{{predictor.unit}}</span>
                     </th>
                     <td class="actions">
@@ -52,9 +54,11 @@
                 </tr>
             </thead>
             <tbody>
-                <tr *ngFor="let predictorEntry of facilityPredictorEntries | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
+                <tr
+                    *ngFor="let predictorEntry of facilityPredictorEntries | predictorsOrderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
                     <td class="input">
-                        <input type="checkbox" name="predictorEntry" (change)="setHasChecked()" [(ngModel)]="predictorEntry.checked">
+                        <input type="checkbox" name="predictorEntry" (change)="setHasChecked()"
+                            [(ngModel)]="predictorEntry.checked">
                     </td>
                     <td>{{predictorEntry.date | date:'MMM, yyyy'}}</td>
                     <td *ngFor="let predictor of predictorEntry.predictors">{{predictor.amount}}</td>
