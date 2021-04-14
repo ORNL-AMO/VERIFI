@@ -54,11 +54,11 @@
             <hr>
             <label class="checkbox mb-3">Site or Source Energy? </label>
 
-            <input type="radio" class="rowToggle" name="energyIsSource" formControlName="energyIsSource" value="false"
+            <input type="radio" class="rowToggle" name="energyIsSource" formControlName="energyIsSource" [value]="true"
                 (change)="saveChanges()" id="sourceEnergy">
             <label class="checkbox" for="sourceEnergy">Source Energy</label>
         
-            <input type="radio" class="rowToggle" name="energyIsSource" formControlName="energyIsSource" value="true"
+            <input type="radio" class="rowToggle" name="energyIsSource" formControlName="energyIsSource" [value]="false"
                 (change)="saveChanges()" id="siteEnergy">
             <label class="checkbox" for="siteEnergy">Site Energy</label>
         
