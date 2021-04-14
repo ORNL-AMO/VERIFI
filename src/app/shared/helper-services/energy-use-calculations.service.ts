@@ -20,10 +20,16 @@ export class EnergyUseCalculationsService {
       siteToSource = 3;
       //TODO: "On-site Renewable Electricity" has siteToSource = 1;
       //don't have any way to currently set "On-site"
-    } else if (source == 'Natural Gas') {
-      heatCapacity = this.convertUnitsService.value(.001029).from('ft3').to(startingUnit);
+    } 
+    else if (source == 'Natural Gas') {
+      let tmpHeatCapacity: number = this.convertUnitsService.value(.001029).from('ft3').to(startingUnit);
       siteToSource = 1;
-    } else if (source == 'Other Fuels' || source == 'Other Energy') {
+      let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+      let convertedHeatCapacity: number = this.convertUnitsService.value(tmpHeatCapacity).from('MMBtu').to(selectedFacility.energyUnit);
+      let conversionHelper: number = this.convertUnitsService.value(1).from("ft3").to(startingUnit);
+      heatCapacity = (convertedHeatCapacity / conversionHelper)
+    } 
+    else if (source == 'Other Fuels' || source == 'Other Energy') {
       if (selectedFuelTypeOption) {
         //copy for conversions
         let selectedFuelTypeOptionsCpy: FuelTypeOption = JSON.parse(JSON.stringify(selectedFuelTypeOption))
