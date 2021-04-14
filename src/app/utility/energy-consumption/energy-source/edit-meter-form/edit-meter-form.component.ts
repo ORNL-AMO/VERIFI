@@ -25,6 +25,7 @@ export class EditMeterFormComponent implements OnInit {
   startingUnitOptions: Array<UnitOption>;
   energySourceLabel: string = 'Fuel Type';
   displayHeatCapacity: boolean;
+  displaySiteToSource: boolean;
   facilityEnergyUnit: string;
   sourceOptions: Array<string> = SourceOptions
   constructor(private facilityDbService: FacilitydbService,
@@ -44,6 +45,7 @@ export class EditMeterFormComponent implements OnInit {
     this.checkDisplayPhase();
     this.setStartingUnitOptions();
     this.checkShowHeatCapacity();
+    this.checkShowSiteToSource();
   }
 
   changeSource() {
@@ -55,7 +57,9 @@ export class EditMeterFormComponent implements OnInit {
     this.updatePhaseAndFuelValidation();
     this.updateHeatCapacityValidation();
     this.checkShowHeatCapacity();
-    this.setHeatCapacityAndSiteToSource();
+    this.checkShowSiteToSource();
+    this.setHeatCapacity();
+    this.setSiteToSource();
     this.cd.detectChanges();
   }
 
@@ -66,7 +70,9 @@ export class EditMeterFormComponent implements OnInit {
     }
     this.updateHeatCapacityValidation();
     this.checkShowHeatCapacity();
-    this.setHeatCapacityAndSiteToSource();
+    this.checkShowSiteToSource();
+    this.setHeatCapacity();
+    this.setSiteToSource();
     this.cd.detectChanges();
   }
 
@@ -75,14 +81,18 @@ export class EditMeterFormComponent implements OnInit {
     this.setStartingUnit();
     this.setFuelTypeOptions();
     this.checkShowHeatCapacity();
-    this.setHeatCapacityAndSiteToSource();
+    this.checkShowSiteToSource();
+    this.setHeatCapacity();
+    this.setSiteToSource();
     this.cd.detectChanges();
   }
 
   changeUnit() {
     this.updateHeatCapacityValidation();
     this.checkShowHeatCapacity();
-    this.setHeatCapacityAndSiteToSource();
+    this.checkShowSiteToSource();
+    this.setHeatCapacity();
+    this.setSiteToSource();
     this.cd.detectChanges();
   }
 
@@ -137,17 +147,28 @@ export class EditMeterFormComponent implements OnInit {
   }
 
   //TODO: Set heat capacity and source for electricity and natural gas (no energy options used);
-  setHeatCapacityAndSiteToSource() {
+  setHeatCapacity() {
     if (this.displayHeatCapacity) {
       let selectedEnergyOption: FuelTypeOption = this.fuelTypeOptions.find(option => { return option.value == this.meterForm.controls.fuel.value });
-      let heatCapacityAndSiteToSource: { heatCapacity: number, siteToSource: number } = this.energyUseCalculationsService.getHeatingCapacityAndSiteToSourceValue(this.meterForm.controls.source.value, this.meterForm.controls.startingUnit.value, selectedEnergyOption)
-      this.meterForm.controls.heatCapacity.patchValue(heatCapacityAndSiteToSource.heatCapacity);
-      this.meterForm.controls.siteToSource.patchValue(heatCapacityAndSiteToSource.siteToSource);
+      let heatCapacity: number = this.energyUseCalculationsService.getHeatingCapacity(this.meterForm.controls.source.value, this.meterForm.controls.startingUnit.value, selectedEnergyOption)
+      this.meterForm.controls.heatCapacity.patchValue(heatCapacity);
+    }
+  }
+
+  setSiteToSource(){
+    if(this.displaySiteToSource){
+      let selectedEnergyOption: FuelTypeOption = this.fuelTypeOptions.find(option => { return option.value == this.meterForm.controls.fuel.value });
+      let siteToSource: number = this.energyUseCalculationsService.getSiteToSource(this.meterForm.controls.source.value, this.meterForm.controls.startingUnit.value, selectedEnergyOption)
+      this.meterForm.controls.siteToSource.patchValue(siteToSource);
     }
   }
 
   checkShowHeatCapacity() {
     this.displayHeatCapacity = this.editMeterFormService.checkShowHeatCapacity(this.meterForm.controls.source.value, this.meterForm.controls.startingUnit.value);
+  }
+
+  checkShowSiteToSource(){
+    this.displaySiteToSource = this.editMeterFormService.checkShowSiteToSource(this.meterForm.controls.source.value, this.meterForm.controls.startingUnit.value);
   }
 
   getMeterEnergyUnit(): string {

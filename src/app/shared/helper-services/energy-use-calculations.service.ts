@@ -11,19 +11,13 @@ export class EnergyUseCalculationsService {
 
   constructor(private convertUnitsService: ConvertUnitsService, private facilityDbService: FacilitydbService) { }
 
-  getHeatingCapacityAndSiteToSourceValue(source: string, startingUnit: string, selectedFuelTypeOption?: FuelTypeOption): { heatCapacity: number, siteToSource: number } {
+  getHeatingCapacity(source: string, startingUnit: string, selectedFuelTypeOption?: FuelTypeOption): number {
     let heatCapacity: number;
-    let siteToSource: number;
-
     if (source == 'Electricity') {
       heatCapacity = this.convertUnitsService.value(.003412).from('kWh').to(startingUnit);
-      siteToSource = 3;
-      //TODO: "On-site Renewable Electricity" has siteToSource = 1;
-      //don't have any way to currently set "On-site"
     } 
     else if (source == 'Natural Gas') {
       let tmpHeatCapacity: number = this.convertUnitsService.value(.001029).from('ft3').to(startingUnit);
-      siteToSource = 1;
       let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
       let convertedHeatCapacity: number = this.convertUnitsService.value(tmpHeatCapacity).from('MMBtu').to(selectedFacility.energyUnit);
       let conversionHelper: number = this.convertUnitsService.value(1).from("ft3").to(startingUnit);
@@ -38,13 +32,28 @@ export class EnergyUseCalculationsService {
           selectedFuelTypeOptionsCpy.heatCapacityValue = this.convertHeatCapacity(selectedFuelTypeOptionsCpy, startingUnit)
         }
         heatCapacity = selectedFuelTypeOptionsCpy.heatCapacityValue;
-        siteToSource = selectedFuelTypeOptionsCpy.siteToSourceMultiplier;
       }
     }
-    return {
-      heatCapacity: heatCapacity,
-      siteToSource: siteToSource
+    return heatCapacity;
+  }
+
+
+  getSiteToSource(source: string, startingUnit: string, selectedFuelTypeOption?: FuelTypeOption): number{
+    let siteToSource: number;
+    if (source == 'Electricity') {
+      siteToSource = 3;
+      //TODO: "On-site Renewable Electricity" has siteToSource = 1;
+      //don't have any way to currently set "On-site"
+    } 
+    else if (source == 'Natural Gas') {
+      siteToSource = 1;
+    } 
+    else if (source == 'Other Fuels' || source == 'Other Energy') {
+      if (selectedFuelTypeOption) {
+        siteToSource = selectedFuelTypeOption.siteToSourceMultiplier;
+      }
     }
+    return siteToSource;
   }
 
   getFuelTypeOptions(source: string, phase: string): Array<FuelTypeOption> {
