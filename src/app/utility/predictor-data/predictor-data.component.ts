@@ -6,6 +6,7 @@ import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { IdbFacility, IdbPredictorEntry, PredictorData } from 'src/app/models/idb';
 import { LoadingService } from 'src/app/shared/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/shared/toast-notifications/toast-notifications.service';
+import * as _ from 'lodash';
 
 @Component({
   selector: 'app-predictor-data',
@@ -33,7 +34,7 @@ export class PredictorDataComponent implements OnInit {
   showBulkDelete: boolean = false;
   orderDataField: string = 'date';
   orderByDirection: string = 'desc';
-  constructor(private predictorsDbService: PredictordbService, private router: Router, private loadingService: LoadingService, 
+  constructor(private predictorsDbService: PredictordbService, private router: Router, private loadingService: LoadingService,
     private facilityDbService: FacilitydbService, private toastNotificationsService: ToastNotificationsService) { }
 
   ngOnInit(): void {
@@ -131,44 +132,65 @@ export class PredictorDataComponent implements OnInit {
     this.router.navigateByUrl('utility/upload-data');
   }
 
-  checkAll(){
-    let displayedItems: Array<IdbPredictorEntry>  = this.facilityPredictorEntries.slice(((this.currentPageNumber - 1) * this.itemsPerPage), (this.currentPageNumber * this.itemsPerPage))
+  checkAll() {
+    let orderedItems: Array<IdbPredictorEntry> = this.getOrderedData();
+    let displayedItems: Array<IdbPredictorEntry> = orderedItems.slice(((this.currentPageNumber - 1) * this.itemsPerPage), (this.currentPageNumber * this.itemsPerPage))
     displayedItems.forEach(item => {
       item.checked = this.allChecked;
     });
     this.hasCheckedItems = (this.allChecked == true);
   }
 
-  setHasChecked(){
+  getOrderedData(): Array<IdbPredictorEntry> {
+    if (this.orderDataField == 'date') {
+      return _.orderBy(this.facilityPredictorEntries, this.orderDataField, this.orderByDirection)
+    } else {
+      return _.orderBy(this.facilityPredictorEntries, (data: IdbPredictorEntry) => {
+        let predictorData: PredictorData = data.predictors.find(predictor => { return predictor.name == this.orderDataField });
+        if (predictorData) {
+          return predictorData.amount;
+        } else {
+          return;
+        }
+      }, this.orderByDirection);
+    }
+  }
+
+  setHasChecked() {
     let hasChecked: boolean = false;
-    let displayedItems: Array<IdbPredictorEntry>  = this.facilityPredictorEntries.slice(((this.currentPageNumber - 1) * this.itemsPerPage), (this.currentPageNumber * this.itemsPerPage))
+    let displayedItems: Array<IdbPredictorEntry> = this.facilityPredictorEntries.slice(((this.currentPageNumber - 1) * this.itemsPerPage), (this.currentPageNumber * this.itemsPerPage))
     displayedItems.forEach(item => {
-      if(item.checked){
+      if (item.checked) {
         hasChecked = true;
       }
     });
     this.hasCheckedItems = hasChecked;
   }
 
-  openBulkDelete(){
+  openBulkDelete() {
     this.showBulkDelete = true;
   }
 
-  cancelBulkDelete(){
+  cancelBulkDelete() {
     this.showBulkDelete = false;
   }
 
-  async bulkDelete(){
+  async bulkDelete() {
     this.loadingService.setLoadingMessage("Deleting Predictor Entries...");
     this.loadingService.setLoadingStatus(true);
-    let displayedItems: Array<IdbPredictorEntry> = this.facilityPredictorEntries.slice(((this.currentPageNumber - 1) * this.itemsPerPage), (this.currentPageNumber * this.itemsPerPage))
-    for(let index = 0; index < displayedItems.length; index++){
-      await this.predictorsDbService.deleteIndexWithObservable(displayedItems[index].id).toPromise();
+    let checkedItems: Array<IdbPredictorEntry> = new Array();
+    this.facilityPredictorEntries.forEach(entry => {
+      if (entry.checked == true) {
+        checkedItems.push(entry);
+      }
+    })
+    for (let index = 0; index < checkedItems.length; index++) {
+      await this.predictorsDbService.deleteIndexWithObservable(checkedItems[index].id).toPromise();
     }
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let accountPredictors: Array<IdbPredictorEntry> = await this.predictorsDbService.getAllByIndexRange("accountId", selectedFacility.accountId).toPromise();
     this.predictorsDbService.accountPredictorEntries.next(accountPredictors);
-    let facilityPredictors: Array<IdbPredictorEntry> = accountPredictors.filter(predictor => {return predictor.facilityId == selectedFacility.id});
+    let facilityPredictors: Array<IdbPredictorEntry> = accountPredictors.filter(predictor => { return predictor.facilityId == selectedFacility.id });
     this.predictorsDbService.facilityPredictorEntries.next(facilityPredictors);
     this.allChecked = false;
     this.loadingService.setLoadingStatus(false);
@@ -176,14 +198,14 @@ export class PredictorDataComponent implements OnInit {
     this.toastNotificationsService.showToast("Predictor Data Deleted!", undefined, undefined, false, "success");
   }
 
-  setOrderDataField(str: string){
-    if(str == this.orderDataField){
-      if(this.orderByDirection == 'desc'){
+  setOrderDataField(str: string) {
+    if (str == this.orderDataField) {
+      if (this.orderByDirection == 'desc') {
         this.orderByDirection = 'asc';
-      }else{
+      } else {
         this.orderByDirection = 'desc';
       }
-    }else{
+    } else {
       this.orderDataField = str;
     }
   }
