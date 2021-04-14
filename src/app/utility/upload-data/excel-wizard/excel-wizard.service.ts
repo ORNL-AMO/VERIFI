@@ -150,9 +150,20 @@ export class ExcelWizardService {
   getImportPredictorFileSummary(): ImportPredictorFileSummary {
     let columnGroups: Array<ColumnGroup> = this.columnGroups.getValue();
     let predictorGroup: ColumnGroup = columnGroups.find(group => { return group.groupLabel == 'Predictors' });
-    let worksheetData: Array<any> = this.selectedWorksheetDataHeaderMap.getValue();
-    let facilityPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.facilityPredictorEntries.getValue();
-    return this.importPredictorsService.getPredictorsSummaryFromExcelFile(predictorGroup.groupItems, worksheetData, facilityPredictorEntries);
+    if (predictorGroup.groupItems.length != 0) {
+      let worksheetData: Array<any> = this.selectedWorksheetDataHeaderMap.getValue();
+      let facilityPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.facilityPredictorEntries.getValue();
+      return this.importPredictorsService.getPredictorsSummaryFromExcelFile(predictorGroup.groupItems, worksheetData, facilityPredictorEntries);
+    } else {
+      return {
+        invalidPredictors: [],
+        skippedPredictors: [],
+        existingPredictors: [],
+        newPredictors: [],
+        existingPredictorEntries: [],
+        newPredictorEntries: [],
+      }
+    }
   }
 
   getMetersSummary(importMeterFileWizard: { fileName: string, importMeterFileSummary: ImportMeterFileSummary, id: string }): Array<{ meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData> }> {
@@ -230,12 +241,19 @@ export class ExcelWizardService {
     importMeterFileWizard.importMeterFileSummary.existingMeters.forEach(meter => {
       metersToImport.push(meter);
     })
+    if (importMeterFileWizard.importMeterFileSummary.existingMeters.length != 0 || importMeterFileWizard.importMeterFileSummary.newMeters.length != 0 || importMeterFileWizard.importMeterFileSummary.invalidMeters.length != 0) {
+      this.uploadDataService.addMeterFile(importMeterFileWizard.fileName, importMeterFileWizard.importMeterFileSummary);
+    }
 
     let importMeterDataFileSummary: ImportMeterDataFileSummary = this.importMeterDataService.getMeterDataSummaryFromExcelFile(meterData, facilityMeters, metersToImport);
-    this.uploadDataService.addMeterFile(importMeterFileWizard.fileName, importMeterFileWizard.importMeterFileSummary);
-    this.uploadDataService.addMeterDataFile(importMeterFileWizard.fileName, importMeterDataFileSummary, undefined);
-    this.uploadDataService.addPredictorFile(importPredictorFileWizard.fileName, importPredictorFileWizard.importPredictorFileSummary);
+    if (importMeterDataFileSummary.existingMeterData.length != 0 || importMeterDataFileSummary.newMeterData.length != 0 || importMeterDataFileSummary.invalidMeterData.length != 0) {
+      this.uploadDataService.addMeterDataFile(importMeterFileWizard.fileName, importMeterDataFileSummary, undefined);
+    }
 
+    if (importPredictorFileWizard.importPredictorFileSummary.existingPredictors.length != 0 || importPredictorFileWizard.importPredictorFileSummary.newPredictorEntries.length != 0) {
+      debugger
+      this.uploadDataService.addPredictorFile(importPredictorFileWizard.fileName, importPredictorFileWizard.importPredictorFileSummary);
+    }
     this.uploadDataService.removeExcelFile(importMeterFileWizard.fileName);
   }
 }
