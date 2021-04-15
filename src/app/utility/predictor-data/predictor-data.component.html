@@ -1,7 +1,7 @@
 <div class="wrapper main-content">
     <h4>Predictors</h4>
 
-    <div *ngIf="facilityPredictors.length === 0" class="text-center mt-5">
+    <div *ngIf="!hasData" class="text-center mt-5">
         <h5>No predictors found for this facility.</h5>
         <p>Please <i class="fa fa-plus"></i> Add New Predictor or <i class="fa fa-upload"></i> Import multiple
             predictors from
@@ -13,7 +13,7 @@
         </div>
     </div>
 
-    <div *ngIf="facilityPredictors.length > 0">
+    <div *ngIf="hasData">
         <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore
             magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
             commodo
@@ -51,7 +51,7 @@
         </div>
     </div>
 
-    <div *ngIf="facilityPredictors.length > 0">
+    <div *ngIf="hasData">
         <table class="table table-sm">
             <thead>
                 <tr>
@@ -86,7 +86,7 @@
             </tbody>
         </table>
     </div>
-    <div class="tableControls overflow-hidden" *ngIf="facilityPredictors.length > 0">
+    <div class="tableControls overflow-hidden" *ngIf="hasData">
         <div class="item-right">
             <ngb-pagination [collectionSize]="facilityPredictorEntries.length" [(page)]="currentPageNumber"
                 [pageSize]="itemsPerPage" [rotate]="true" aria-label="Default pagination" [maxSize]="5">

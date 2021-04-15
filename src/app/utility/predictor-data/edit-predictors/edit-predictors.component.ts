@@ -1,5 +1,4 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
-import { Subscription } from 'rxjs';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { IdbPredictorEntry, PredictorData } from 'src/app/models/idb';
 
@@ -21,11 +20,14 @@ export class EditPredictorsComponent implements OnInit {
   ngOnInit(): void {
     this.predictorEntries = this.predictorDbService.facilityPredictorEntries.getValue();
     this.facilityPredictors = JSON.parse(JSON.stringify(this.predictorDbService.facilityPredictors.getValue()));
+    if(this.facilityPredictors.length == 0){
+      this.addPredictorEntry();
+    }
   }
 
   save() {
     if(this.predictorEntries.length == 0){
-      // this.predictorDbService.facilityPredictors.next()
+      this.predictorDbService.facilityPredictors.next(this.facilityPredictors);
     }else{
       this.predictorDbService.updateFacilityPredictorEntries(this.facilityPredictors);
     }

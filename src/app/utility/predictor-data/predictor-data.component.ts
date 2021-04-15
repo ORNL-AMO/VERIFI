@@ -34,17 +34,20 @@ export class PredictorDataComponent implements OnInit {
   showBulkDelete: boolean = false;
   orderDataField: string = 'date';
   orderByDirection: string = 'desc';
+  hasData: boolean;
   constructor(private predictorsDbService: PredictordbService, private router: Router, private loadingService: LoadingService,
     private facilityDbService: FacilitydbService, private toastNotificationsService: ToastNotificationsService) { }
 
   ngOnInit(): void {
     this.facilityPredictorsSub = this.predictorsDbService.facilityPredictors.subscribe(predictors => {
       this.facilityPredictors = predictors;
+      this.setHasData();
     });
 
     this.facilityPredictorEntriesSub = this.predictorsDbService.facilityPredictorEntries.subscribe(entries => {
       this.facilityPredictorEntries = entries;
       this.setHasChecked();
+      this.setHasData();
     });
   }
 
@@ -52,6 +55,11 @@ export class PredictorDataComponent implements OnInit {
     this.facilityPredictorsSub.unsubscribe();
     this.facilityPredictorEntriesSub.unsubscribe();
   }
+
+  setHasData() {
+    this.hasData = (this.facilityPredictors && this.facilityPredictors.length != 0) || (this.facilityPredictorEntries && this.facilityPredictorEntries.length != 0);
+  }
+
 
   addPredictorEntry() {
     this.addOrEdit = "add";
@@ -62,9 +70,10 @@ export class PredictorDataComponent implements OnInit {
     this.predictorEntryToDelete = predictorEntry;
   }
 
-  confirmDeletePredictorEntry() {
-    this.predictorsDbService.deleteById(this.predictorEntryToDelete.id);
+  async confirmDeletePredictorEntry() {
+    await this.predictorsDbService.deleteIndexWithObservable(this.predictorEntryToDelete.id).toPromise();
     this.cancelDeletePredictorEntry();
+    await this.finishDelete();
   }
 
   cancelDeletePredictorEntry() {
@@ -187,16 +196,22 @@ export class PredictorDataComponent implements OnInit {
     for (let index = 0; index < checkedItems.length; index++) {
       await this.predictorsDbService.deleteIndexWithObservable(checkedItems[index].id).toPromise();
     }
+
+    this.allChecked = false;
+    this.cancelBulkDelete();
+    await this.finishDelete();
+  }
+
+  async finishDelete() {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let accountPredictors: Array<IdbPredictorEntry> = await this.predictorsDbService.getAllByIndexRange("accountId", selectedFacility.accountId).toPromise();
     this.predictorsDbService.accountPredictorEntries.next(accountPredictors);
     let facilityPredictors: Array<IdbPredictorEntry> = accountPredictors.filter(predictor => { return predictor.facilityId == selectedFacility.id });
     this.predictorsDbService.facilityPredictorEntries.next(facilityPredictors);
-    this.allChecked = false;
     this.loadingService.setLoadingStatus(false);
-    this.cancelBulkDelete();
     this.toastNotificationsService.showToast("Predictor Data Deleted!", undefined, undefined, false, "success");
   }
+
 
   setOrderDataField(str: string) {
     if (str == this.orderDataField) {
