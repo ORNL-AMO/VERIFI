@@ -213,18 +213,26 @@ export class UtilityMeterDatadbService {
     getMeterDataForFacility(meter: IdbUtilityMeter, convertData: boolean): Array<IdbUtilityMeterData> {
         let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
         let meterData: Array<IdbUtilityMeterData> = this.getMeterDataFromMeterId(meter.id);
-        if (convertData) {
-            meterData = this.convertMeterDataService.convertMeterDataToFacility(meter, JSON.parse(JSON.stringify(meterData)), facility);
+        let meterDataCopy: Array<IdbUtilityMeterData> = JSON.parse(JSON.stringify(meterData));
+        if(!facility.energyIsSource){
+            meterDataCopy = this.convertMeterDataService.applySiteToSourceMultiplier(meter, meterDataCopy);
         }
-        return meterData;
+        if (convertData) {
+            meterDataCopy = this.convertMeterDataService.convertMeterDataToFacility(meter, meterDataCopy, facility);
+        }
+        return meterDataCopy;
     }
 
     getMeterDataForAccount(meter: IdbUtilityMeter, convertData: boolean): Array<IdbUtilityMeterData> {
         let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
         let meterData: Array<IdbUtilityMeterData> = this.getMeterDataFromMeterId(meter.id);
-        if (convertData) {
-            meterData = this.convertMeterDataService.convertMeterDataToAccount(meter, JSON.parse(JSON.stringify(meterData)), account);
+        let meterDataCopy: Array<IdbUtilityMeterData> = JSON.parse(JSON.stringify(meterData));
+        if(!account.energyIsSource){
+            meterDataCopy = this.convertMeterDataService.applySiteToSourceMultiplier(meter, meterDataCopy);
         }
-        return meterData;
+        if (convertData) {
+            meterDataCopy = this.convertMeterDataService.convertMeterDataToAccount(meter, meterDataCopy, account);
+        }
+        return meterDataCopy;
     }
 }
