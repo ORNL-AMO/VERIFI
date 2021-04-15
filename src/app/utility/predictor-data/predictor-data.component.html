@@ -1,33 +1,49 @@
 <div class="wrapper main-content">
     <h4>Predictors</h4>
-    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore
-        magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-        consequat.</p>
 
-    <div class="controls mb-2">
-        <button class="btn btn-outline" (click)="editPredictors()">Edit Predictors</button>
-
-        <div class="meterData item-right">
-            <button class="btn btn-primary-4 item-right m-0 ml-2" (click)="addPredictorEntry()"><i
-                    class="fa fa-plus"></i> Add Predictor Entry</button>
+    <div *ngIf="facilityPredictors.length === 0" class="text-center mt-5">
+        <h5>No predictors found for this facility.</h5>
+        <p>Please <i class="fa fa-plus"></i> Add New Predictor or <i class="fa fa-upload"></i> Import multiple
+            predictors from
+            excel.</p>
+        <div class="meterData">
+            <button class="btn btn-primary-4 mr-2" (click)="editPredictors()"><i
+                    class="fa fa-plus"></i> Add New Predictor</button>
+            <button class="btn btn-outline" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
         </div>
+    </div>
 
-        <div class="importExport item-right">
-            <button class="btn btn-outline" (click)="uploadData()">Import</button>
-            <button class="btn btn-outline" (click)="predictorExport()">Export</button>
-        </div>
-        <!--Items Per Page-->
-        <div class="items-per-page item-right">
-            <span>Show </span>
-            <select [(ngModel)]="itemsPerPage">
-                <option [ngValue]=6>6</option>
-                <option [ngValue]=12>12</option>
-                <option [ngValue]=24>24</option>
-                <option [ngValue]=36>36</option>
-                <option [ngValue]=48>48</option>
-                <option [ngValue]=60>60</option>
-                <option [ngValue]=999999999999>All</option>
-            </select>
+    <div *ngIf="facilityPredictors.length > 0">
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore
+            magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
+            commodo
+            consequat.</p>
+
+        <div class="controls mb-2">
+            <button class="btn btn-outline" (click)="editPredictors()">Add/Edit Predictors</button>
+
+            <div class="meterData item-right">
+                <button class="btn btn-primary-4 item-right m-0 ml-2" (click)="addPredictorEntry()"><i
+                        class="fa fa-plus"></i> Add Predictor Entry</button>
+            </div>
+
+            <div class="importExport item-right">
+                <button class="btn btn-outline" (click)="uploadData()">Import</button>
+                <button class="btn btn-outline" (click)="predictorExport()">Export</button>
+            </div>
+            <!--Items Per Page-->
+            <div class="items-per-page item-right">
+                <span>Show </span>
+                <select [(ngModel)]="itemsPerPage">
+                    <option [ngValue]=6>6</option>
+                    <option [ngValue]=12>12</option>
+                    <option [ngValue]=24>24</option>
+                    <option [ngValue]=36>36</option>
+                    <option [ngValue]=48>48</option>
+                    <option [ngValue]=60>60</option>
+                    <option [ngValue]=999999999999>All</option>
+                </select>
+            </div>
         </div>
         <!--Bulk Delete-->
         <div class="bulk-delete item-right" [class.show]="hasCheckedItems">
@@ -35,7 +51,7 @@
         </div>
     </div>
 
-    <div>
+    <div *ngIf="facilityPredictors.length > 0">
         <table class="table table-sm">
             <thead>
                 <tr>
@@ -70,13 +86,13 @@
             </tbody>
         </table>
     </div>
-    <div class="tableControls overflow-hidden">
+    <div class="tableControls overflow-hidden" *ngIf="facilityPredictors.length > 0">
         <div class="item-right">
             <ngb-pagination [collectionSize]="facilityPredictorEntries.length" [(page)]="currentPageNumber"
                 [pageSize]="itemsPerPage" [rotate]="true" aria-label="Default pagination" [maxSize]="5">
             </ngb-pagination>
         </div>
-        <p class="item-right">{{facilityPredictorEntries.length}} entries</p>
+        <p class="item-right"> {{facilityPredictorEntries.length}} entries</p>
     </div>
 </div>
 
