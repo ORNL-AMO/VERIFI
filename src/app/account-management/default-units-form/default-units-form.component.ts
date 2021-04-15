@@ -4,7 +4,7 @@ import { Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAccount, IdbFacility } from 'src/app/models/idb';
-import { EnergyUnitOptions, MassUnitOptions, SizeUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from 'src/app/shared/unitOptions';
+import { EnergyUnitOptions, MassUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from 'src/app/shared/unitOptions';
 import { AccountManagementService } from '../account-management.service';
 
 @Component({
@@ -22,7 +22,6 @@ export class DefaultUnitsFormComponent implements OnInit {
   energyUnitOptions: Array<UnitOption> = EnergyUnitOptions;
   volumeGasOptions: Array<UnitOption> = VolumeGasOptions;
   volumeLiquidOptions: Array<UnitOption> = VolumeLiquidOptions;
-  sizeUnitOptions: Array<UnitOption> = SizeUnitOptions;
   massUnitOptions: Array<UnitOption> = MassUnitOptions;
 
   selectedFacilitySub: Subscription;

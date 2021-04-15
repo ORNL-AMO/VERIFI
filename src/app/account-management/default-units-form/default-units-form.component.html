@@ -60,24 +60,9 @@
         
             <input type="radio" class="rowToggle" name="energyIsSource" formControlName="energyIsSource" [value]="false"
                 (change)="saveChanges()" id="siteEnergy">
-            <label class="checkbox" for="siteEnergy">Site Energy</label>
-        
-        
+            <label class="checkbox" for="siteEnergy">Site Energy</label>        
         </div>
-
-
     </div>
-    <!--    
-        <div class="row">
-            <label class="col-lg-4">Size Unit</label>
-            <div class="mb-3 col">
-                <select formControlName="sizeUnit">
-                    <option *ngFor="let sizeUnitOption of sizeUnitOptions" [ngValue]="sizeUnitOption.value">
-                    <span [innerHTML]="sizeUnitOption.display"></span></option>
-                </select>
-            </div>
-        </div>
-        -->
 </form>
 
 
