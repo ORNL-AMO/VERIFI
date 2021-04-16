@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { BackupDataService, BackupFile } from 'src/app/account-management/backup-data.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -13,6 +13,8 @@ import { LoadingService } from '../loading/loading.service';
 export class ImportBackupModalComponent implements OnInit {
   @Output('emitClose')
   emitClose = new EventEmitter<boolean>();
+  @Input()
+  inFacility: boolean;
 
   backupFile: any;
   backupFileError: string;
@@ -25,6 +27,7 @@ export class ImportBackupModalComponent implements OnInit {
   accountFacilities: Array<IdbFacility>;
   overwriteFacility: IdbFacility;
   backupName: string;
+  backupType: string;
   constructor(private loadingService: LoadingService,
     private backupDataService: BackupDataService,
     private accountDbService: AccountdbService,
@@ -61,6 +64,7 @@ export class ImportBackupModalComponent implements OnInit {
               this.importIsAccount = (testBackup.backupFileType == "Account");
               //facility
               if (!this.importIsAccount) {
+                this.backupType = "Facility";
                 if (this.selectedAccount) {
                   this.backupName = testBackup.facilityBackup.facility.name;
                   if (this.accountFacilities.length != 0) {
@@ -73,14 +77,18 @@ export class ImportBackupModalComponent implements OnInit {
                   }
                   this.backupFileError = undefined;
                 } else {
-                  console.log('backup error')
                   this.backupFileError = "You are trying to import a facility without an account created or selected. Select an account to import this facility into."
                 }
               }
               //account
               else if (this.importIsAccount) {
-                this.backupName = testBackup.accountBackup.account.name;
-                this.backupFileError = undefined;
+                if (!this.inFacility) {
+                  this.backupType = "Account"
+                  this.backupName = testBackup.accountBackup.account.name;
+                  this.backupFileError = undefined;
+                } else {
+                  this.backupFileError = "You are trying to import an account in the facility management page. Please use the account management section to import accounts.";
+                }
               }
             }
           } catch (err) {
