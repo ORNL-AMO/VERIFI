@@ -20,9 +20,15 @@
     </p>
   </div>
 
-  <div class="wrapper main-content">
-    
-    <router-outlet></router-outlet>
+  <div class="wrapper main-content m-0">
+    <div class="row">
+      <div class="col" [ngClass]="{'col-9': helpOpen}">
+        <router-outlet></router-outlet>
+      </div>
+      <div *ngIf="helpOpen" class="col-3">
+        <app-dashboard-help-panel></app-dashboard-help-panel>
+      </div>
+    </div>
   </div>
 </div>
 

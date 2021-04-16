@@ -5,6 +5,7 @@ import { FacilitydbService } from '../indexedDB/facility-db.service';
 import { IdbAccount, IdbFacility, IdbUtilityMeter } from '../models/idb';
 import { Router, Event, NavigationEnd } from '@angular/router';
 import { UtilityMeterdbService } from '../indexedDB/utilityMeter-db.service';
+import { DashboardService } from './dashboard.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -25,11 +26,14 @@ export class DashboardComponent implements OnInit {
   accountFacilitiesSub: Subscription;
   // appRendered: boolean = false;
 
+  helpOpen: boolean;
+  helpOpenSub: Subscription;
   constructor(
     private accountDbService: AccountdbService, 
     private facilityDbService: FacilitydbService,
     public utilityMeterDbService: UtilityMeterdbService,
-    private router: Router
+    private router: Router,
+    private dashboardService: DashboardService
     ) {
     router.events.subscribe((event: Event) => {
       if (event instanceof NavigationEnd) {
@@ -65,6 +69,10 @@ export class DashboardComponent implements OnInit {
       this.utilityMeters = utilityMeters;
     });
 
+    this.helpOpenSub = this.dashboardService.helpOpen.subscribe(val => {
+      this.helpOpen = val;
+    })
+
     // TEMP MANUAL DELAY TO PREVENT PAGE FLICKERING.
     // ADDING TICKET TO FIX THIS BUG
     // const self = this;
@@ -75,6 +83,7 @@ export class DashboardComponent implements OnInit {
     this.selectedAccountSub.unsubscribe();
     this.selectedFacilitySub.unsubscribe();
     this.accountFacilitiesSub.unsubscribe();
+    this.helpOpenSub.unsubscribe();
   }
 
   switchFacility() {
