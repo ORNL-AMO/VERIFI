@@ -2,10 +2,12 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
 import { VisualizationService } from '../../../shared/helper-services/visualization.service';
+import { DashboardService } from '../../dashboard.service';
 
 @Component({
   selector: 'app-facility-stacked-area-chart',
@@ -31,8 +33,12 @@ export class FacilityStackedAreaChartComponent implements OnInit {
   accountMeterDataSub: Subscription;
   accountMeters: Array<IdbUtilityMeter>;
   accountMetersSub: Subscription;
+
+  graphDisplaySub: Subscription;
+  graphDisplay: "cost" | "usage";
   constructor(private plotlyService: PlotlyService, private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService, private vizualizationService: VisualizationService) { }
+    private utilityMeterDataDbService: UtilityMeterDatadbService, private vizualizationService: VisualizationService,
+    private dashboardService: DashboardService, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
     this.accountMetersSub = this.utilityMeterDbService.accountMeters.subscribe(accountMeters => {
@@ -48,12 +54,18 @@ export class FacilityStackedAreaChartComponent implements OnInit {
         this.setUtilityData();
       }
     });
+
+    this.graphDisplaySub = this.dashboardService.graphDisplay.subscribe(value => {
+      this.graphDisplay = value;
+      this.setUtilityData();
+    });
   }
 
   ngOnDestroy() {
     this.accountMeterDataSub.unsubscribe();
     this.selectedFacilitySub.unsubscribe();
     this.accountMetersSub.unsubscribe();
+    this.graphDisplaySub.unsubscribe();
   }
 
   ngAfterViewInit() {
@@ -61,7 +73,7 @@ export class FacilityStackedAreaChartComponent implements OnInit {
   }
 
   setUtilityData() {
-    if (this.facilityMeters && this.facilityMeters.length != 0 && this.accountMeters && this.accountMeters.length != 0) {
+    if (this.facilityMeters && this.facilityMeters.length != 0 && this.accountMeters && this.accountMeters.length != 0 && this.graphDisplay) {
       this.electricityData = this.getDataByUtility('Electricity', this.facilityMeters);
       this.naturalGasData = this.getDataByUtility('Natural Gas', this.facilityMeters);
       this.otherFuelsData = this.getDataByUtility('Other Fuels', this.facilityMeters);
@@ -77,10 +89,26 @@ export class FacilityStackedAreaChartComponent implements OnInit {
   drawChart() {
     if (this.stackedAreaChart) {
       let traceData = new Array();
+      let yDataProperty: "energyCost" | "energyUse";
+      let yaxisTitle: string;
+      let tickprefix: string;
+      let hoverformat: string;
+      if (this.graphDisplay == "cost") {
+        yaxisTitle = 'Utility Cost';
+        yDataProperty = "energyCost";
+        tickprefix = "$";
+        hoverformat = '$,.2f';
+      } else {
+        let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+        yaxisTitle = "Utility Usage (" + selectedFacility.energyUnit + ")";
+        yDataProperty = "energyUse";
+        tickprefix = "";
+        hoverformat = ",.2f";
+      }
       if (this.electricityData.length != 0) {
         let trace = {
           x: this.electricityData.map(data => { return data.time }),
-          y: this.electricityData.map(data => { return data.energyCost }),
+          y: this.electricityData.map(data => { return data[yDataProperty] }),
           name: 'Electricity',
           stackgroup: 'one'
         }
@@ -89,7 +117,7 @@ export class FacilityStackedAreaChartComponent implements OnInit {
       if (this.naturalGasData.length != 0) {
         let trace = {
           x: this.naturalGasData.map(data => { return data.time }),
-          y: this.naturalGasData.map(data => { return data.energyCost }),
+          y: this.naturalGasData.map(data => { return data[yDataProperty] }),
           name: 'Natural Gas',
           stackgroup: 'one'
         };
@@ -98,7 +126,7 @@ export class FacilityStackedAreaChartComponent implements OnInit {
       if (this.otherFuelsData.length != 0) {
         let trace = {
           x: this.otherFuelsData.map(data => { return data.time }),
-          y: this.otherFuelsData.map(data => { return data.energyCost }),
+          y: this.otherFuelsData.map(data => { return data[yDataProperty] }),
           name: 'Other Fuels',
           stackgroup: 'one'
         };
@@ -107,7 +135,7 @@ export class FacilityStackedAreaChartComponent implements OnInit {
       if (this.waterData.length != 0) {
         let trace = {
           x: this.waterData.map(data => { return data.time }),
-          y: this.waterData.map(data => { return data.energyCost }),
+          y: this.waterData.map(data => { return data[yDataProperty] }),
           name: 'Water',
           stackgroup: 'one'
         };
@@ -116,7 +144,7 @@ export class FacilityStackedAreaChartComponent implements OnInit {
       if (this.wasteWaterData.length != 0) {
         let trace = {
           x: this.wasteWaterData.map(data => { return data.time }),
-          y: this.wasteWaterData.map(data => { return data.energyCost }),
+          y: this.wasteWaterData.map(data => { return data[yDataProperty] }),
           name: 'Waste Water',
           stackgroup: 'one'
         };
@@ -125,12 +153,13 @@ export class FacilityStackedAreaChartComponent implements OnInit {
       if (this.otherUtilityData.length != 0) {
         let trace = {
           x: this.otherUtilityData.map(data => { return data.time }),
-          y: this.otherUtilityData.map(data => { return data.energyCost }),
+          y: this.otherUtilityData.map(data => { return data[yDataProperty] }),
           name: 'Other Utility',
           stackgroup: 'one'
         };
         traceData.push(trace);
       }
+
       var layout = {
         barmode: 'group',
         // title: {
@@ -149,13 +178,14 @@ export class FacilityStackedAreaChartComponent implements OnInit {
           // },
         },
         yaxis: {
-          // title: {
-          //   text: 'Energy Cost',
-          //   font: {
-          //     size: 18
-          //   },
-          // },
-          hoverformat: '$,.2f'
+          title: {
+            text: yaxisTitle,
+            tickprefix: tickprefix
+            //   font: {
+            //     size: 18
+            //   },
+          },
+          hoverformat: hoverformat
         }
       };
       var config = { responsive: true };

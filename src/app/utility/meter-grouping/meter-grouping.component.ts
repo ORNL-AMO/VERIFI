@@ -9,6 +9,8 @@ import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { CalanderizationService } from '../../shared/helper-services/calanderization.service';
 import { LastYearData, MonthlyData } from 'src/app/models/calanderization';
+import { LoadingService } from 'src/app/shared/loading/loading.service';
+import { ToastNotificationsService } from 'src/app/shared/toast-notifications/toast-notifications.service';
 
 @Component({
   selector: 'app-meter-grouping',
@@ -38,7 +40,8 @@ export class MeterGroupingComponent implements OnInit {
   lastBillDate: Date;
   yearPriorToLastBill: Date;
   constructor(private utilityMeterGroupDbService: UtilityMeterGroupdbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private utilityMeterDbService: UtilityMeterdbService, private facilityDbService: FacilitydbService, private calanderizationService: CalanderizationService) { }
+    private utilityMeterDbService: UtilityMeterdbService, private facilityDbService: FacilitydbService, private calanderizationService: CalanderizationService,
+    private loadingService: LoadingService, private toastNoticationService: ToastNotificationsService) { }
 
   ngOnInit(): void {
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(selectedFacility => {
@@ -232,9 +235,18 @@ export class MeterGroupingComponent implements OnInit {
     this.groupToEdit = this.utilityMeterGroupDbService.getNewIdbUtilityMeterGroup(groupType, 'New Group', facility.id, facility.accountId);
   }
 
-  deleteMeterGroup() {
-    this.utilityMeterGroupDbService.deleteIndex(this.groupToDelete.id);
+  async deleteMeterGroup() {
+    this.loadingService.setLoadingMessage("Deleting Meter Group...");
+    this.loadingService.setLoadingStatus(true);
+    await this.utilityMeterGroupDbService.deleteWithObservable(this.groupToDelete.id);
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let accountMeterGroups: Array<IdbUtilityMeterGroup> = await this.utilityMeterGroupDbService.getAllByIndexRange("accountId", selectedFacility.accountId).toPromise();
+    this.utilityMeterGroupDbService.accountMeterGroups.next(accountMeterGroups);
+    let facilityMeterGroups: Array<IdbUtilityMeterGroup> = accountMeterGroups.filter(group => {return group.facilityId == selectedFacility.id});
+    this.utilityMeterGroupDbService.facilityMeterGroups.next(facilityMeterGroups);
     this.closeDeleteGroup();
+    this.loadingService.setLoadingStatus(false);
+    this.toastNoticationService.showToast("Meter Group Deleted!", undefined, undefined, false, "success");
   }
 
   setToggleView(meterGroup) {
