@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { NavigationEnd, Router } from '@angular/router';
 
 @Component({
   selector: 'app-help-panel',
@@ -7,7 +8,15 @@ import { Component, OnInit } from '@angular/core';
 })
 export class HelpPanelComponent implements OnInit {
 
-  constructor() { }
+  helpText: string;
+
+  constructor(private router: Router) { 
+    router.events.subscribe((route) => {
+      if (route instanceof NavigationEnd) {
+        this.helpText = route.url.replace('/utility/','');
+      }
+    });
+  }
 
   ngOnInit() {
   }

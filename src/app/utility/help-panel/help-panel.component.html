@@ -1,17 +1,26 @@
 <div class="wrapper help-panel">
     <h4>Help</h4>
-    <p>Each meter's bill history can be added in the corresponding energy type tab.</p>
-    <br>
-    <p class="bold">To Do</p>
-    <ul>
-        <li>Restrict Number limits</li>
-    </ul>
+    
+    <p *ngIf="helpText === 'energy-consumption'">All energy sources that Kitas Cool Facility uses can be viewed in the tabs at the top of the screen.</p>
 
-    <p class="bold">Template Downloads</p>
-    <ul>
-        <li><a href="../../../assets/csv_templates/Verifi_import_meters.csv">Meters</a></li>
-        <li><a href="../../../assets/csv_templates/Verifi_import_electricity.csv">Electricity Bills</a></li>
-        <li><a href="../../../assets/csv_templates/Verifi_import_non_electricity.csv">Natural Gas Bills</a></li>
-    </ul>
+    <div *ngIf="helpText === 'energy-consumption/electricity' || helpText === 'energy-consumption/natural-gas'">
+        <p>Help Text Coming Soon</p>
+    </div>
+    
+    <p *ngIf="helpText === 'mo-meter-data'">Meter data has been calendarized. Data represented with <b>N/A</b> does not have a full month of data to calculate.</p>
+
+    <p *ngIf="helpText === 'meter-groups'">Your meters have been grouped by type. You are free to edit or add groups based on your preferences. These groups will represent your data visualization.</p>
+
+    <p *ngIf="helpText === 'predictors'">Predictor variables are independent variables used in regression analysis. These variables will be used to predict energy use in the facility.</p>
+
+    
+    <div class="mt-3">
+        <h4>Template Downloads</h4>
+        <ul>
+            <li><a href="../../../assets/csv_templates/Verifi_import_meters.csv">Meters</a></li>
+            <li><a href="../../../assets/csv_templates/Verifi_import_electricity.csv">Electricity Bills</a></li>
+            <li><a href="../../../assets/csv_templates/Verifi_import_non_electricity.csv">Natural Gas Bills</a></li>
+        </ul>
+    </div>
 </div>
 
