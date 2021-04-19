@@ -21,7 +21,7 @@
 
         <div class="controls mb-2">
             <button class="btn btn-outline" (click)="editPredictors()">Add/Edit Predictors</button>
-            
+
             <div class="meterData item-right">
                 <button class="btn btn-primary-4 item-right m-0 ml-2" (click)="addPredictorEntry()"><i
                         class="fa fa-plus"></i> Add Predictor Entry</button>
@@ -128,7 +128,8 @@
         <p>WARNING: By deleting this predictor, you are also deleting all of the data associated with it. Are you sure
             you want to preform this action?</p>
     </div>
-    <div class="popup-footer text-right">
+    <div class="saveCancel popup-footer text-right">
+        <button class="btn btn-secondary" (click)="cancelDeletePredictorEntry()">Cancel</button>
         <button class="btn btn-danger" (click)="confirmDeletePredictorEntry()">Delete</button>
     </div>
 </div>
@@ -143,7 +144,8 @@
         <p>WARNING: Deleting predictor entries cannot be undone.
             Are you sure you want to preform this action?</p>
     </div>
-    <div class="popup-footer text-right">
+    <div class="saveCancel popup-footer text-right">
+        <button class="btn btn-secondary" (click)="cancelBulkDelete()">Cancel</button>
         <button class="btn btn-danger" (click)="bulkDelete()">Delete</button>
     </div>
 </div>

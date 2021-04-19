@@ -18,7 +18,8 @@
 
     <div class="controls mb-2">
         <div class="meterData item-right">
-            <button class="btn btn-primary-4 item-right m-0 ml-2" (click)="addMeter()"><i class="fa fa-plus"></i> Add New Meter</button>
+            <button class="btn btn-primary-4 item-right m-0 ml-2" (click)="addMeter()"><i class="fa fa-plus"></i> Add
+                New Meter</button>
         </div>
 
         <div class="importExport item-right">
@@ -118,7 +119,8 @@
         <p>WARNING: By deleting this meter, you are also deleting all of the meter data and bills associated with it.
             Are you sure you want to preform this action?</p>
     </div>
-    <div class="popup-footer text-right">
+    <div class="saveCancel popup-footer text-right">
+        <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
         <button class="btn btn-danger" (click)="deleteMeter()">Delete</button>
     </div>
 </div>
