@@ -3,11 +3,13 @@ import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
+import { IdbAccount, IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { VisualizationService } from 'src/app/shared/helper-services/visualization.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { HeatMapData } from 'src/app/models/visualization';
+import { DashboardService } from '../../dashboard.service';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 @Component({
   selector: 'app-energy-use-heat-map',
   templateUrl: './energy-use-heat-map.component.html',
@@ -18,18 +20,28 @@ export class EnergyUseHeatMapComponent implements OnInit {
   @ViewChild('energyUseHeatMap', { static: false }) energyUseHeatMap: ElementRef;
   accountFacilitiesSub: Subscription;
   facilityHeatMapData: Array<HeatMapData>;
+  graphDisplay: "cost" | "usage";
+  graphDisplaySub: Subscription;
+
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private visualizationService: VisualizationService,
     private plotlyService: PlotlyService, private utilityMeterDbService: UtilityMeterdbService,
-    private facilityDbService: FacilitydbService) { }
+    private facilityDbService: FacilitydbService, private dashboardService: DashboardService,
+    private accountdbService: AccountdbService) { }
 
   ngOnInit(): void {
     this.accountFacilitiesSub = this.utilityMeterDataDbService.accountMeterData.subscribe(val => {
       this.setData();
     });
+
+    this.graphDisplaySub = this.dashboardService.graphDisplay.subscribe(val => {
+      this.graphDisplay = val;
+      this.setData();
+    })
   }
 
   ngOnDestroy() {
     this.accountFacilitiesSub.unsubscribe();
+    this.graphDisplaySub.unsubscribe();
   }
 
   ngAfterViewInit() {
@@ -37,7 +49,16 @@ export class EnergyUseHeatMapComponent implements OnInit {
   }
 
   drawChart() {
-    if (this.energyUseHeatMap && this.facilityHeatMapData && this.facilityHeatMapData.length != 0) {
+    if (this.energyUseHeatMap && this.facilityHeatMapData && this.facilityHeatMapData.length != 0 && this.graphDisplay) {
+      let hovertemplate: string = '%{y}, %{x}: %{z:$,.0f}<extra></extra>';
+      let textPrefix: string = "$";
+      if(this.graphDisplay == "usage"){
+        let selectedAccount: IdbAccount = this.accountdbService.selectedAccount.getValue();
+        hovertemplate = '%{y}, %{x}: %{z:,.0f} ' + selectedAccount.energyUnit + '<extra></extra>';
+        textPrefix = "";
+      }
+
+
       let layout = {
         // title: {
         //   text: 'Utility Costs',
@@ -50,14 +71,19 @@ export class EnergyUseHeatMapComponent implements OnInit {
           side: 'top',
         },
         yaxis: {
-          automargin: true
+          automargin: true,
+          dtick: 1
         },
         margin: { "t": 50, "b": 50 },
       };
-      var individualData = new Array();
+      let individualData = new Array();
       this.facilityHeatMapData.forEach(heatMapData => {
         let zData: Array<Array<number>> = heatMapData.resultData.map(dataItem => {
-          return dataItem.monthlyCost
+          if(this.graphDisplay == "cost"){
+            return dataItem.monthlyCost
+          }else{
+            return dataItem.monthlyEnergy;
+          }
         });
         let months: Array<string> = ['Jan', 'Feb', 'March', 'April', 'May', 'June', 'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
         individualData.push({
@@ -66,22 +92,16 @@ export class EnergyUseHeatMapComponent implements OnInit {
           y: heatMapData.years.map(year => { return heatMapData.facilityName + ' (' + year + ')' }),
           // type: 'heatmapgl',
           hoverongaps: false,
-          hovertemplate: '%{y}, %{x}: %{z:$,.0f}<extra></extra>'
+          hovertemplate: hovertemplate
         });
-        for (var i = 0; i < heatMapData.years.length; i++) {
-          for (var j = 0; j < months.length; j++) {
-            // var currentValue = zData[i][j];
-            // if (currentValue != 0.0) {
-            //   var textColor = '';
-            // }else{
-            //   var textColor = 'black';
-            // }
-            var result = {
+        for (let i = 0; i < heatMapData.years.length; i++) {
+          for (let j = 0; j < months.length; j++) {
+            let result = {
               xref: 'x1',
               yref: 'y1',
               x: months[j],
               y: heatMapData.facilityName + ' (' + heatMapData.years[i] + ')',
-              text: '$' + Math.round(zData[i][j]).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
+              text: textPrefix + Math.round(zData[i][j]).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
               font: {
                 // family: 'Arial',
                 size: 12,
@@ -100,7 +120,7 @@ export class EnergyUseHeatMapComponent implements OnInit {
         y: individualData.flatMap(dataItem => { return dataItem.y }),
         type: 'heatmap',
         hoverongaps: false,
-        hovertemplate: '%{y}, %{x}: %{z:$,.0f}<extra></extra>'
+        hovertemplate: hovertemplate
       }]
 
       let config = {
@@ -115,14 +135,14 @@ export class EnergyUseHeatMapComponent implements OnInit {
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let accountMetersCopy: Array<IdbUtilityMeter> = JSON.parse(JSON.stringify(accountMeters));
     let accountFacilites: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-    if (accountMeters.length != 0 && accountFacilites.length != 0) {
+    if (accountMeters.length != 0 && accountFacilites.length != 0 && this.graphDisplay) {
       //filter by facility
       let facilityIds: Array<number> = accountMeters.map(meter => { return meter.facilityId });
       facilityIds = _.uniq(facilityIds);
       facilityIds.forEach(id => {
         let facilityMeters: Array<IdbUtilityMeter> = accountMetersCopy.filter(meter => { return meter.facilityId == id });
         let facility: IdbFacility = accountFacilites.find(facility => { return facility.id == id });
-        let facilityHeatMapData: HeatMapData = this.visualizationService.getMeterHeatMapData(facilityMeters, facility.name, true, true);
+        let facilityHeatMapData: HeatMapData = this.visualizationService.getMeterHeatMapData(facilityMeters, facility.name, true);
         this.facilityHeatMapData.push(facilityHeatMapData);
       });
       this.drawChart();

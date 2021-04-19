@@ -4,7 +4,7 @@ import { Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAccount, IdbFacility } from 'src/app/models/idb';
-import { EnergyUnitOptions, MassUnitOptions, SizeUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from 'src/app/shared/unitOptions';
+import { EnergyUnitOptions, MassUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from 'src/app/shared/unitOptions';
 import { AccountManagementService } from '../account-management.service';
 
 @Component({
@@ -22,7 +22,6 @@ export class DefaultUnitsFormComponent implements OnInit {
   energyUnitOptions: Array<UnitOption> = EnergyUnitOptions;
   volumeGasOptions: Array<UnitOption> = VolumeGasOptions;
   volumeLiquidOptions: Array<UnitOption> = VolumeLiquidOptions;
-  sizeUnitOptions: Array<UnitOption> = SizeUnitOptions;
   massUnitOptions: Array<UnitOption> = MassUnitOptions;
 
   selectedFacilitySub: Subscription;
@@ -30,14 +29,18 @@ export class DefaultUnitsFormComponent implements OnInit {
   selectedAccount: IdbAccount;
   selectedFacility: IdbFacility;
   unitsDontMatchAccount: boolean = false;
-
+  isFormChange: boolean = false
   constructor(private accountDbService: AccountdbService, private accountManagementService: AccountManagementService, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
     this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(account => {
       this.selectedAccount = account;
       if (account && this.inAccount) {
-        this.form = this.accountManagementService.getUnitsForm(account);
+        if (this.isFormChange == false) {
+          this.form = this.accountManagementService.getUnitsForm(account);
+        } else {
+          this.isFormChange = false;
+        }
       }
     });
 
@@ -45,7 +48,11 @@ export class DefaultUnitsFormComponent implements OnInit {
       this.selectedFacility = facility;
       if (facility && !this.inAccount) {
         this.checkUnitsDontMatch();
-        this.form = this.accountManagementService.getUnitsForm(facility);
+        if (this.isFormChange == false) {
+          this.form = this.accountManagementService.getUnitsForm(facility);
+        } else {
+          this.isFormChange = false;
+        }
       }
     });
   }
@@ -62,6 +69,7 @@ export class DefaultUnitsFormComponent implements OnInit {
 
   saveChanges() {
     this.form = this.accountManagementService.checkCustom(this.form);
+    this.isFormChange = true;
     if (this.inAccount) {
       this.selectedAccount = this.accountManagementService.updateAccountFromUnitsForm(this.form, this.selectedAccount);
       this.accountDbService.update(this.selectedAccount);

@@ -6,10 +6,10 @@
                 <th>Utility</th>
                 <th>Group</th>
                 <th>Last Bill Entered</th>
-                <th>Energy Usage (<span [innerHTML]="facilityEnergyUnit | settingsLabel"></span>) <span class="small"
+                <th>Utility Usage (<span [innerHTML]="facilityEnergyUnit | settingsLabel"></span>) <span class="small"
                         *ngIf="yearPriorDate">({{yearPriorDate | date: 'MMM, y'}} - {{lastMonthsDate | date: 'MMM,
                         y'}})</span></th>
-                <th>Energy Cost <span class="small" *ngIf="yearPriorDate">({{yearPriorDate | date: 'MMM, y'}} -
+                <th>Utility Cost <span class="small" *ngIf="yearPriorDate">({{yearPriorDate | date: 'MMM, y'}} -
                         {{lastMonthsDate | date: 'MMM, y'}})</span></th>
             </tr>
         </thead>

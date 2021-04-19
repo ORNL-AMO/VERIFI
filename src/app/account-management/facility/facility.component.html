@@ -51,6 +51,13 @@
 			<button class="btn btn-danger" (click)="openDeleteFacility()">Delete Facility</button>
 		</div>
 		<div class="col-lg-6">
+		  <h4>Import Backup Data</h4>
+		  <p>Use the below button to import backup data files. Facilities can be imported as new data or
+			to overwrite existing data.</p>
+		  <button class="btn btn-primary" (click)="openImportBackup()">Import Backup File</button>
+	
+		</div>
+		<div class="col-lg-6">
 			<h4>Export Facility</h4>
 			<p>You can export this facility and it's data to be imported into other accounts or used as a backup of your
 				data set.</p>
@@ -72,3 +79,5 @@
 		<button class="btn btn-danger" (click)="confirmDelete()">Confirm Delete</button>
 	</div>
 </div>
+
+<app-import-backup-modal *ngIf="showImportFile" (emitClose)="cancelImportBackup()" [inFacility]="true"></app-import-backup-modal>

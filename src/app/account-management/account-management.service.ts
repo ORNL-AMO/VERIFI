@@ -58,6 +58,7 @@ export class AccountManagementService {
       massUnit: [units.massUnit, [Validators.required]],
       volumeLiquidUnit: [units.volumeLiquidUnit, [Validators.required]],
       volumeGasUnit: [units.volumeGasUnit, [Validators.required]],
+      energyIsSource: [units.energyIsSource]
     });
     return form;
   }
@@ -67,6 +68,7 @@ export class AccountManagementService {
     account.energyUnit = form.controls.energyUnit.value;
     account.massUnit = form.controls.massUnit.value;
     account.volumeLiquidUnit = form.controls.volumeLiquidUnit.value;
+    account.energyIsSource = form.controls.energyIsSource.value;
     return account;
   }
 
@@ -75,6 +77,7 @@ export class AccountManagementService {
     facility.energyUnit = form.controls.energyUnit.value;
     facility.massUnit = form.controls.massUnit.value;
     facility.volumeLiquidUnit = form.controls.volumeLiquidUnit.value;
+    facility.energyIsSource = form.controls.energyIsSource.value;
     return facility;
   }
 
@@ -220,7 +223,8 @@ export class AccountManagementService {
         account.massUnit != facility.massUnit ||
         account.energyUnit != facility.energyUnit ||
         account.volumeGasUnit != facility.volumeGasUnit ||
-        account.volumeLiquidUnit != facility.volumeLiquidUnit
+        account.volumeLiquidUnit != facility.volumeLiquidUnit || 
+        account.energyIsSource != facility.energyIsSource
       )
     } else {
       return false;
@@ -233,6 +237,7 @@ export class AccountManagementService {
     facilityForm.controls.volumeGasUnit.patchValue(account.volumeGasUnit);
     facilityForm.controls.massUnit.patchValue(account.massUnit);
     facilityForm.controls.unitsOfMeasure.patchValue(account.unitsOfMeasure);
+    facilityForm.controls.energyIsSource.patchValue(account.energyIsSource);
     return facilityForm;
   }
 

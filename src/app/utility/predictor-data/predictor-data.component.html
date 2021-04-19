@@ -1,42 +1,73 @@
 <div class="wrapper main-content">
     <h4>Predictors</h4>
-    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore
-        magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-        consequat.</p>
 
-    <div class="controls mb-2">
-        <button class="btn btn-outline" (click)="editPredictors()">Edit Predictors</button>
-
-        <div class="meterData item-right">
-            <button class="btn btn-primary-4 item-right m-0 ml-2" (click)="addPredictorEntry()"><i
-                    class="fa fa-plus"></i> Add Predictor Entry</button>
-        </div>
-
-        <div class="importExport item-right">
-            <button class="btn btn-outline" (click)="uploadData()">Import</button>
-            <button class="btn btn-outline" (click)="predictorExport()">Export</button>
-        </div>
-        <!--Items Per Page-->
-        <div class="items-per-page item-right">
-            <span>Show </span>
-            <select [(ngModel)]="itemsPerPage">
-                <option [ngValue]=6>6</option>
-                <option [ngValue]=12>12</option>
-                <option [ngValue]=24>24</option>
-                <option [ngValue]=36>36</option>
-                <option [ngValue]=48>48</option>
-                <option [ngValue]=60>60</option>
-                <option [ngValue]=999999999999>All</option>
-            </select>
+    <div *ngIf="!hasData" class="text-center mt-5">
+        <h5>No predictors found for this facility.</h5>
+        <p>Please <i class="fa fa-plus"></i> Add New Predictor or <i class="fa fa-upload"></i> Import multiple
+            predictors from
+            excel.</p>
+        <div class="meterData">
+            <button class="btn btn-primary-4 mr-2" (click)="editPredictors()"><i class="fa fa-plus"></i> Add New
+                Predictor</button>
+            <button class="btn btn-outline" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
         </div>
     </div>
 
-    <div>
+    <div *ngIf="hasData">
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore
+            magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
+            commodo
+            consequat.</p>
+
+        <div class="controls mb-2">
+            <button class="btn btn-outline" (click)="editPredictors()">Add/Edit Predictors</button>
+            
+            <div class="meterData item-right">
+                <button class="btn btn-primary-4 item-right m-0 ml-2" (click)="addPredictorEntry()"><i
+                        class="fa fa-plus"></i> Add Predictor Entry</button>
+            </div>
+            <div class="importExport item-right">
+                <button class="btn btn-outline" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
+                <!-- <button class="btn btn-outline" (click)="predictorExport()">Export</button> -->
+            </div>
+
+
+            <!-- <div class="importExport item-right">
+                <button class="btn btn-outline" (click)="uploadData()">Import</button>
+                <button class="btn btn-outline" (click)="predictorExport()">Export</button>
+            </div> -->
+            <!--Items Per Page-->
+            <div class="items-per-page item-right">
+                <span>Show </span>
+                <select [(ngModel)]="itemsPerPage">
+                    <option [ngValue]=6>6</option>
+                    <option [ngValue]=12>12</option>
+                    <option [ngValue]=24>24</option>
+                    <option [ngValue]=36>36</option>
+                    <option [ngValue]=48>48</option>
+                    <option [ngValue]=60>60</option>
+                    <option [ngValue]=999999999999>All</option>
+                </select>
+            </div>
+
+            <!--Bulk Delete-->
+            <div class="bulk-delete item-right" [class.show]="hasCheckedItems">
+                <button class="btn btn-danger" (click)='openBulkDelete()'>Bulk Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <div *ngIf="hasData">
         <table class="table table-sm">
             <thead>
                 <tr>
-                    <th>Date</th>
-                    <th class="header" *ngFor="let predictor of facilityPredictors">{{predictor.name}}
+                    <th class="input">
+                        <input #masterCheckbox type="checkbox" (change)="checkAll()" [(ngModel)]="allChecked">
+                    </th>
+                    <th (click)="setOrderDataField('date')" [ngClass]="{'active': orderDataField == 'date'}">Date</th>
+                    <th class="header" *ngFor="let predictor of facilityPredictors"
+                        (click)="setOrderDataField(predictor.name)"
+                        [ngClass]="{'active': orderDataField == predictor.name}">{{predictor.name}}
                         <span class="small block">{{predictor.unit}}</span>
                     </th>
                     <td class="actions">
@@ -45,7 +76,12 @@
                 </tr>
             </thead>
             <tbody>
-                <tr *ngFor="let predictorEntry of facilityPredictorEntries | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
+                <tr
+                    *ngFor="let predictorEntry of facilityPredictorEntries | predictorsOrderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
+                    <td class="input">
+                        <input type="checkbox" name="predictorEntry" (change)="setHasChecked()"
+                            [(ngModel)]="predictorEntry.checked">
+                    </td>
                     <td>{{predictorEntry.date | date:'MMM, yyyy'}}</td>
                     <td *ngFor="let predictor of predictorEntry.predictors">{{predictor.amount}}</td>
                     <td class="actions">
@@ -56,13 +92,13 @@
             </tbody>
         </table>
     </div>
-    <div class="tableControls overflow-hidden">
+    <div class="tableControls overflow-hidden" *ngIf="hasData">
         <div class="item-right">
             <ngb-pagination [collectionSize]="facilityPredictorEntries.length" [(page)]="currentPageNumber"
                 [pageSize]="itemsPerPage" [rotate]="true" aria-label="Default pagination" [maxSize]="5">
             </ngb-pagination>
         </div>
-        <p class="item-right">{{facilityPredictorEntries.length}} entries</p>
+        <p class="item-right"> {{facilityPredictorEntries.length}} entries</p>
     </div>
 </div>
 
@@ -94,5 +130,20 @@
     </div>
     <div class="popup-footer text-right">
         <button class="btn btn-danger" (click)="confirmDeletePredictorEntry()">Delete</button>
+    </div>
+</div>
+
+
+<!--bulk delete-->
+<div class="popup" [class.open]="showBulkDelete">
+    <div class="popup-header" *ngIf="showBulkDelete">Delete Predictor Entries
+        <button class="item-right" (click)="cancelBulkDelete()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>WARNING: Deleting predictor entries cannot be undone.
+            Are you sure you want to preform this action?</p>
+    </div>
+    <div class="popup-footer text-right">
+        <button class="btn btn-danger" (click)="bulkDelete()">Delete</button>
     </div>
 </div>

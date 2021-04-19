@@ -13,7 +13,8 @@
       "output": "../output/verifi/"
     },
     "win": {
-      "target": "nsis"
+      "target": "nsis",
+      "icon": "src/assets/electron-icons/icon-256x256.png"
     },
     "nsis": {
       "oneClick": false,
@@ -26,6 +27,7 @@
         "AppImage",
         "tar.gz"
       ],
+      "icon": "src/assets/electron-icons/",
       "executableName": "VERIFI",
       "maintainer": "Advanced Manufacturing Office",
       "artifactName": "${productName}-${version}.${ext}",
@@ -36,6 +38,7 @@
         "dmg",
         "zip"
       ],
+      "icon": "src/assets/electron-icons/icon-512x512.png",
       "hardenedRuntime": true,
       "provisioningProfile": "embedded.provisionprofile",
       "entitlements": "entitlements.mac.inherit.plist",

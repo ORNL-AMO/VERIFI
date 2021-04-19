@@ -81,4 +81,14 @@ export class EditMeterFormService {
       return false;
     }
   }
+
+  checkShowSiteToSource(source: string, startingUnit: string): boolean {
+    if (source == "Electricity" || source == "Natural Gas") {
+      return true;
+    } else if (source != 'Waste Water' && source != 'Water' && source != 'Other Utility' && startingUnit) {
+      return (this.energyUnitsHelperService.isEnergyUnit(startingUnit) == false);
+    } else {
+      return false;
+    }
+  }
 }

@@ -63,10 +63,7 @@
     <div class="popup-footer text-right">
         <button class="btn btn-secondary" (click)="cancelImportBackup()">Cancel</button>
         <button class="btn btn-primary" (click)="importBackupFile()"
-            [disabled]="backupFile == undefined || backupFileError != undefined" *ngIf="importIsAccount">Import Backup
-            Account</button>
-        <button class="btn btn-primary" (click)="importBackupFile()"
-            [disabled]="backupFile == undefined || backupFileError != undefined" *ngIf="!importIsAccount">Import Backup
-            Facility</button>
+            [disabled]="backupFile == undefined || backupFileError != undefined">Import Backup
+            {{backupType}}</button>
     </div>
 </div>

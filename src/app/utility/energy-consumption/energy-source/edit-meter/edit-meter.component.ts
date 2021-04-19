@@ -36,7 +36,6 @@ export class EditMeterComponent implements OnInit {
       this.meterForm.controls.phase.disable();
       this.meterForm.controls.fuel.disable();
       this.meterForm.controls.heatCapacity.disable();
-      this.meterForm.controls.siteToSource.disable();
     }
   }
 

@@ -10,6 +10,7 @@ import { EditMeterFormService } from './edit-meter-form/edit-meter-form.service'
 import { FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { LoadingService } from 'src/app/shared/loading/loading.service';
+import { ToastNotificationsService } from 'src/app/shared/toast-notifications/toast-notifications.service';
 
 @Component({
   selector: 'app-energy-source',
@@ -42,7 +43,8 @@ export class EnergySourceComponent implements OnInit {
     private utilityMeterdbService: UtilityMeterdbService,
     private editMeterFormService: EditMeterFormService,
     private router: Router,
-    private loadingService: LoadingService
+    private loadingService: LoadingService,
+    private toastNoticationService: ToastNotificationsService
   ) { }
 
   ngOnInit() {
@@ -70,54 +72,6 @@ export class EnergySourceComponent implements OnInit {
     this.editMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.id, selectedAccount.id, true);
   }
 
-  meterExport() {
-    // const replacer = (key, value) => value === null ? '' : value; // specify how you want to handle null values here
-    const allowedHeaders: Array<string> = ["Meter Number", "Account Number", "Source", "Meter Name", "Utility Supplier", "Notes", "Building / Location", "Meter Group", "Collection Unit", "Phase", "Fuel", "Heat Capacity", "Site To Source"];
-    let csvData: Array<string> = new Array();
-    this.meterList.forEach(meter => {
-      let meterCSVData: string = this.getMeterCSVData(meter);
-      csvData.push(meterCSVData);
-    })
-    csvData.unshift(allowedHeaders.join(','));
-    let csvBlob: BlobPart = csvData.join('\r\n');
-
-    //Download the file as CSV
-    var downloadLink = document.createElement("a");
-    var blob = new Blob(["\ufeff", csvBlob]);
-    var url = URL.createObjectURL(blob);
-    downloadLink.href = url;
-    downloadLink.download = "VerifiMeterDump.csv";
-    document.body.appendChild(downloadLink);
-    downloadLink.click();
-    document.body.removeChild(downloadLink);
-  }
-
-  getMeterCSVData(meter: IdbUtilityMeter): string {
-    let meterCSVItem: string = meter.meterNumber;
-    // meterCSVItem = this.addToString(meterCSVItem, meter.meterNumber);
-    meterCSVItem = this.addToString(meterCSVItem, meter.accountNumber);
-    meterCSVItem = this.addToString(meterCSVItem, meter.source);
-    meterCSVItem = this.addToString(meterCSVItem, meter.name);
-    meterCSVItem = this.addToString(meterCSVItem, meter.supplier);
-    meterCSVItem = this.addToString(meterCSVItem, meter.notes);
-    meterCSVItem = this.addToString(meterCSVItem, meter.location);
-    meterCSVItem = this.addToString(meterCSVItem, meter.group);
-    meterCSVItem = this.addToString(meterCSVItem, meter.startingUnit);
-    meterCSVItem = this.addToString(meterCSVItem, meter.phase);
-    meterCSVItem = this.addToString(meterCSVItem, meter.fuel);
-    meterCSVItem = this.addToString(meterCSVItem, meter.heatCapacity);
-    meterCSVItem = this.addToString(meterCSVItem, meter.siteToSource);
-    return meterCSVItem;
-  }
-
-  addToString(str: string, addition: string | number): string {
-    if (addition != undefined) {
-      return str + ',' + addition;
-    } else {
-      return str + ',' + '';
-    }
-  }
-
   uploadData() {
     this.router.navigateByUrl('utility/upload-data');
   }
@@ -136,20 +90,27 @@ export class EnergySourceComponent implements OnInit {
     this.loadingService.setLoadingStatus(true);
     //delete meter
     await this.utilityMeterdbService.deleteIndexWithObservable(this.meterToDelete.id);
-    //delete meter data
-    this.utilityMeterDatadbService.getAllByIndexRange('meterId', this.meterToDelete.id).subscribe(data => {
-      data.forEach(item => { this.deleteMeterData(item) });
-      this.utilityMeterdbService.setAccountMeters();
-      this.utilityMeterdbService.setFacilityMeters();
-      this.utilityMeterDatadbService.setAccountMeterData();
-      this.utilityMeterDatadbService.setFacilityMeterData();
-      this.cancelDelete();
-      this.loadingService.setLoadingStatus(false);
-    });
-  }
 
-  async deleteMeterData(meterDataItem: IdbUtilityMeterData) {
-    await this.utilityMeterDatadbService.deleteWithObservable(meterDataItem.id);
+
+    //delete meter data
+    let meterData: Array<IdbUtilityMeterData> = await this.utilityMeterDatadbService.getAllByIndexRange('meterId', this.meterToDelete.id).toPromise();
+    for (let index = 0; index < meterData.length; index++) {
+      await this.utilityMeterDatadbService.deleteWithObservable(meterData[index].id);
+    }
+    let selectedFacility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
+    //set meters
+    let accountMeters: Array<IdbUtilityMeter> = await this.utilityMeterdbService.getAllByIndexRange("accountId", selectedFacility.accountId).toPromise();
+    this.utilityMeterdbService.accountMeters.next(accountMeters);
+    let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == selectedFacility.id });
+    this.utilityMeterdbService.facilityMeters.next(facilityMeters);
+    //set meter data
+    let accountMeterData: Array<IdbUtilityMeterData> = await this.utilityMeterDatadbService.getAllByIndexRange("accountId", selectedFacility.accountId).toPromise();
+    this.utilityMeterDatadbService.accountMeterData.next(accountMeterData);
+    let facilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.filter(meterData => { return meterData.facilityId == selectedFacility.id });
+    this.utilityMeterDatadbService.facilityMeterData.next(facilityMeterData);
+    this.cancelDelete();
+    this.loadingService.setLoadingStatus(false);
+    this.toastNoticationService.showToast("Meter and Meter Data Deleted", undefined, undefined, false, "success");
   }
 
   selectDeleteMeter(meter: IdbUtilityMeter) {

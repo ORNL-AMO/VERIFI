@@ -4,7 +4,7 @@ import { FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms'
 import { BehaviorSubject } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { ElectricityDataFilters } from 'src/app/models/electricityFilter';
-import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbUtilityMeterData } from 'src/app/models/idb';
 
 @Injectable({
   providedIn: 'root'
@@ -165,36 +165,4 @@ export class UtilityMeterDataService {
     return meterData;
   }
 
-
-  meterExport(meterList: Array<{ idbMeter: IdbUtilityMeter, meterDataItems: Array<IdbUtilityMeterData> }>, source: string) {
-    let csv;
-    for (let i = 0; i < meterList.length; i++) {
-      const replacer = (key, value) => value === null ? '' : value; // specify how you want to handle null values here
-      const header = Object.keys(meterList[i].meterDataItems[0]);
-
-      header.splice(0, 4); // remove 1st 4 headers
-      header.splice(0, 1, "meterNumber"); // add meterNumber
-
-      csv = meterList[i].meterDataItems.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer)).join(','));
-
-      // add meterNumber as first cell
-      for (let j = 0; j < csv.length; j++) {
-        csv[j] = '"' + meterList[i].idbMeter.meterNumber + '"' + csv[j];
-      }
-
-      csv.unshift(header.join(','));
-      csv = csv.join('\r\n');
-
-      //Download the file as CSV
-      var downloadLink = document.createElement("a");
-      var blob = new Blob(["\ufeff", csv]);
-      var url = URL.createObjectURL(blob);
-      downloadLink.href = url;
-      //TODO: Verify "Natural Gas" with a space is okay.
-      downloadLink.download = "Verifi_" + source + "_Meter_Data_Dump.csv";
-      document.body.appendChild(downloadLink);
-      downloadLink.click();
-      document.body.removeChild(downloadLink);
-    }
-  }
 }
