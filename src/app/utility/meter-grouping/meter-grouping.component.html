@@ -105,7 +105,8 @@
         <p>WARNING: Deleting meter group cannot be undone.
             Are you sure you want to preform this action?</p>
     </div>
-    <div class="popup-footer text-right">
+    <div class="saveCancel popup-footer text-right">
+        <button class="btn btn-secondary" (click)="closeDeleteGroup()">Cancel</button>
         <button class="btn btn-danger" (click)="deleteMeterGroup()">Delete</button>
     </div>
 </div>
