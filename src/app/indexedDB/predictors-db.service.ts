@@ -148,14 +148,6 @@ export class PredictordbService {
         }
     }
 
-    // addNewPredictor(newPredictor: PredictorData) {
-    //     let facilityPredictorEntries: Array<IdbPredictorEntry> = this.facilityPredictorEntries.getValue();
-    //     facilityPredictorEntries.forEach(predictorEntry => {
-    //         predictorEntry.predictors.push(newPredictor);
-    //         this.update(predictorEntry);
-    //     });
-    // }
-
     async importNewPredictor(newPredictor: PredictorData) {
         let facilityPredictorEntries: Array<IdbPredictorEntry> = this.facilityPredictorEntries.getValue();
         for (let i = 0; i < facilityPredictorEntries.length; i++) {
