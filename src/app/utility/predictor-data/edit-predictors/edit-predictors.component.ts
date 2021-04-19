@@ -25,11 +25,11 @@ export class EditPredictorsComponent implements OnInit {
     }
   }
 
-  save() {
+  async save() {
     if(this.predictorEntries.length == 0){
       this.predictorDbService.facilityPredictors.next(this.facilityPredictors);
     }else{
-      this.predictorDbService.updateFacilityPredictorEntries(this.facilityPredictors);
+      await this.predictorDbService.updateFacilityPredictorEntries(this.facilityPredictors);
     }
     this.cancel();
   }
