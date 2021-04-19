@@ -87,7 +87,7 @@ export const mass = {
             name: {
                 singular: 'Imperial Ton',
                 plural: 'Imperial Ton',
-                display: '()'
+                display: '(Ton)'
             }
             , to_anchor: 2240
         }
