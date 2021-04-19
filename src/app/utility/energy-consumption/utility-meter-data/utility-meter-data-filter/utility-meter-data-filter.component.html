@@ -1,8 +1,12 @@
 <div class="filter">
     <button class="btn" [ngClass]="{'btn-solid' : !showFilterDropdown, 'btn-outline' : showFilterDropdown}"
-        (click)="toggleFilterMenu()">Filter</button>
+        (click)="toggleFilterMenu()">
+        <!-- <span class="fa"
+            [ngClass]="{'fa-chevron-down': showFilterDropdown, 'fa-chevron-up': !showFilterDropdown}"></span> -->
+        Choose Columns
+    </button>
     <div class="filter-dropdown" *ngIf="showFilterDropdown">
-        <p class="small">Filter Input Fields</p>
+        <p class="small">Choose Table Columns</p>
         <div class="row">
             <div class="col">
                 <label>
