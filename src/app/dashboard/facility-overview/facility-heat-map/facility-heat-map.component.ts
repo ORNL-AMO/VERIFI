@@ -97,7 +97,7 @@ export class FacilityHeatMapComponent implements OnInit {
       }
 
       let months: Array<string> = ['Jan', 'Feb', 'March', 'April', 'May', 'June', 'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
-      var data = [
+      let data = [
         {
           z: zData,
           x: months,
@@ -125,15 +125,9 @@ export class FacilityHeatMapComponent implements OnInit {
         }
       };
 
-      for (var i = 0; i < this.years.length; i++) {
-        for (var j = 0; j < months.length; j++) {
-          // var currentValue = zData[i][j];
-          // if (currentValue != 0.0) {
-          //   var textColor = '';
-          // }else{
-          //   var textColor = 'black';
-          // }
-          var result = {
+      for (let i = 0; i < this.years.length; i++) {
+        for (let j = 0; j < months.length; j++) {
+          let result = {
             xref: 'x1',
             yref: 'y1',
             x: months[j],

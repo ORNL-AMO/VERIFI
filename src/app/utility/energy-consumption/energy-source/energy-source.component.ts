@@ -50,7 +50,6 @@ export class EnergySourceComponent implements OnInit {
   ngOnInit() {
     this.meterListSub = this.utilityMeterdbService.facilityMeters.subscribe(meters => {
       this.meterList = meters;
-      console.log(this.meterList);
     });
 
     this.selectedFacilitySub = this.facilitydbService.selectedFacility.subscribe(facility => {
