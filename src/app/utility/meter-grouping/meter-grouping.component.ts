@@ -140,6 +140,10 @@ export class MeterGroupingComponent implements OnInit {
         group.groupData = groupMeters;
         group.totalEnergyUse = _.sumBy(groupMeterData, 'energyUse');
         group.totalConsumption = _.sumBy(groupMeterData, 'energyConsumption');
+      } else {
+        group.groupData = [];
+        group.totalConsumption = 0;
+        group.totalEnergyUse = 0;
       }
     });
     return meterGroups;
@@ -242,7 +246,7 @@ export class MeterGroupingComponent implements OnInit {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let accountMeterGroups: Array<IdbUtilityMeterGroup> = await this.utilityMeterGroupDbService.getAllByIndexRange("accountId", selectedFacility.accountId).toPromise();
     this.utilityMeterGroupDbService.accountMeterGroups.next(accountMeterGroups);
-    let facilityMeterGroups: Array<IdbUtilityMeterGroup> = accountMeterGroups.filter(group => {return group.facilityId == selectedFacility.id});
+    let facilityMeterGroups: Array<IdbUtilityMeterGroup> = accountMeterGroups.filter(group => { return group.facilityId == selectedFacility.id });
     this.utilityMeterGroupDbService.facilityMeterGroups.next(facilityMeterGroups);
     this.closeDeleteGroup();
     this.loadingService.setLoadingStatus(false);
