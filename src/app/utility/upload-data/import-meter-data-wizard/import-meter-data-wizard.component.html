@@ -32,7 +32,8 @@
             </a>
         </li>
         <li class="nav-item" *ngIf="totalInvalidCorrespondingMeter != 0">
-            <a class="nav-link" [ngClass]="{'active': selectedTab == 'invalidImportMeter'}" (click)="setTab('invalidImportMeter')">
+            <a class="nav-link" [ngClass]="{'active': selectedTab == 'invalidImportMeter'}"
+                (click)="setTab('invalidImportMeter')">
                 <span class="badge badge-danger">
                     {{totalInvalidCorrespondingMeter}}
                 </span> Invalid Data
@@ -127,8 +128,7 @@
     </div>
     <div class="col">
         <div class="saveCancel item-right text-right">
-            <button *ngIf="selectedTab != 'missingMeterNumber'" class="btn btn-secondary"
-                (click)="close()">Cancel</button>
+            <button class="btn btn-secondary" (click)="close()">Cancel</button>
             <button *ngIf="selectedTab != 'missingMeterNumber'" class="btn btn-primary"
                 (click)="submit()">Submit</button>
             <button *ngIf="selectedTab == 'missingMeterNumber'" class="btn purple"
