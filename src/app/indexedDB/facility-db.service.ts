@@ -24,20 +24,13 @@ export class FacilitydbService {
         this.accountFacilities.subscribe(() => {
             this.setSelectedFacility();
         });
-        this.selectedFacility.subscribe(facility => {
-            if (facility) {
-                this.localStorageService.store('facilityId', facility.id);
-            }
-        });
     }
 
     async initializeFacilityFromLocalStorage() {
         let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
         if (selectedAccount) {
             let allFacilities: Array<IdbFacility> = await this.getAll().toPromise();
-            this.allFacilities.next(allFacilities);
             let accountFacilities: Array<IdbFacility> = allFacilities.filter(facility => { return facility.accountId == selectedAccount.id });
-            this.accountFacilities.next(accountFacilities);
             let storedFacilityId: number = this.localStorageService.retrieve("facilityId");
             if (storedFacilityId) {
                 let selectedFacility: IdbFacility = accountFacilities.find(facility => { return facility.id == storedFacilityId });
@@ -45,7 +38,15 @@ export class FacilitydbService {
             } else if (accountFacilities.length != 0) {
                 this.selectedFacility.next(accountFacilities[0]);
             }
+            this.allFacilities.next(allFacilities);
+            this.accountFacilities.next(accountFacilities);
         }
+        //subscribe after initialization
+        this.selectedFacility.subscribe(facility => {
+            if (facility) {
+                this.localStorageService.store('facilityId', facility.id);
+            }
+        });
     }
 
     setAccountFacilities() {

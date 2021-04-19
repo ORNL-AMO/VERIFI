@@ -137,18 +137,19 @@ export class HeaderComponent implements OnInit {
     this.toggleSwitchAccountsMenu();
     this.router.navigate(['/']);
     this.accountdbService.setSelectedAccount(account.id);
+    this.switchAccountMenu = false;
     this.dashboardService.bannerDropdownOpen.next(false);
   }
 
   switchFacility(facility: IdbFacility) {
-    //this.toggleFacilityMenu();
     this.facilitydbService.selectedFacility.next(facility);
+    this.facilityMenu = false;
     this.dashboardService.bannerDropdownOpen.next(false);
   }
 
   selectAllFacilities() {
-    //this.toggleFacilityMenu();
     this.router.navigate(['/account-summary']);
+    this.facilityMenu = false;
     this.dashboardService.bannerDropdownOpen.next(false);
   }
 
