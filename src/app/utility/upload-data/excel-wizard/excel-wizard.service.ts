@@ -251,7 +251,6 @@ export class ExcelWizardService {
     }
 
     if (importPredictorFileWizard.importPredictorFileSummary.existingPredictors.length != 0 || importPredictorFileWizard.importPredictorFileSummary.newPredictorEntries.length != 0) {
-      debugger
       this.uploadDataService.addPredictorFile(importPredictorFileWizard.fileName, importPredictorFileWizard.importPredictorFileSummary);
     }
     this.uploadDataService.removeExcelFile(importMeterFileWizard.fileName);
