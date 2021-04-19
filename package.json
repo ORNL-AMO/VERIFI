@@ -6,10 +6,9 @@
   "author": "Advanced Manufacturing Office",
   "repository": "https://github.com/ORNL-AMO/VERIFI.git",
   "build": {
-    "appId": "com.electron.verifi",
+    "appId": "com.ornl.verifi",
     "copyright": "Copyright 2021 ORNL. All rights reserved.",
     "productName": "VERIFI",
-    "afterSign": "notarize.js",
     "directories": {
       "output": "../output/verifi/"
     },
@@ -27,7 +26,7 @@
         "AppImage",
         "tar.gz"
       ],
-      "executableName": "MEASUR",
+      "executableName": "VERIFI",
       "maintainer": "Advanced Manufacturing Office",
       "artifactName": "${productName}-${version}.${ext}",
       "category": "Science"
