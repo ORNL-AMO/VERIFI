@@ -158,6 +158,7 @@ export class AccountdbService {
             fiscalYearCalendarEnd: true,
             setupWizard: true,
             setupWizardComplete: false,
+            energyIsSource: true
         }
     }
 }
@@ -208,6 +209,7 @@ export const TestAccountData: Array<IdbAccount> = [
         fiscalYearCalendarEnd: true,
         setupWizard: false,
         setupWizardComplete: true,
+        energyIsSource: true
     },
     {
         // id: undefined,
@@ -253,6 +255,7 @@ export const TestAccountData: Array<IdbAccount> = [
         fiscalYearCalendarEnd: true,
         setupWizard: false,
         setupWizardComplete: true,
+        energyIsSource: true
     },
     {
         // id: undefined,
@@ -298,5 +301,6 @@ export const TestAccountData: Array<IdbAccount> = [
         fiscalYearCalendarEnd: true,
         setupWizard: false,
         setupWizardComplete: true,
+        energyIsSource: true
     }
 ]

@@ -27,6 +27,8 @@ export class DashboardComponent implements OnInit {
 
   graphDisplay: "cost" | "usage";
   graphDisplaySub: Subscription;
+  bannerDropdownOpen: boolean;
+  bannerDropdownOpenSub: Subscription;
   constructor(
     private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
@@ -71,6 +73,10 @@ export class DashboardComponent implements OnInit {
     this.graphDisplaySub = this.dashboardService.graphDisplay.subscribe(val => {
       this.graphDisplay = val;
     });
+
+    this.bannerDropdownOpenSub = this.dashboardService.bannerDropdownOpen.subscribe(val => {
+      this.bannerDropdownOpen = val;
+    })
   }
 
   ngOnDestroy() {
@@ -78,6 +84,7 @@ export class DashboardComponent implements OnInit {
     this.selectedFacilitySub.unsubscribe();
     this.accountFacilitiesSub.unsubscribe();
     this.graphDisplaySub.unsubscribe();
+    this.bannerDropdownOpenSub.unsubscribe();
   }
 
   switchFacility() {
@@ -92,5 +99,15 @@ export class DashboardComponent implements OnInit {
 
   setGraphDisplay(str: "cost" | "usage") {
     this.dashboardService.graphDisplay.next(str);
+  }
+
+  setAccountEnergyIsSource(energyIsSource: boolean) {
+    this.selectedAccount.energyIsSource = energyIsSource;
+    this.accountDbService.update(this.selectedAccount);
+  }
+
+  setFacilityEnergyIsSource(energyIsSource: boolean) {
+    this.selectedFacility.energyIsSource = energyIsSource;   
+    this.facilityDbService.update(this.selectedFacility);
   }
 }

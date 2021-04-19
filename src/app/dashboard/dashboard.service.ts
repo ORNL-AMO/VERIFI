@@ -18,9 +18,13 @@ export class DashboardService {
 
 
   graphDisplay: BehaviorSubject<"usage" | "cost">;
+  bannerDropdownOpen: BehaviorSubject<boolean>;
   constructor(private facilityDbService: FacilitydbService, private utilityMeterDbService: UtilityMeterdbService,
     private calanderizationService: CalanderizationService, private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private localStorageService: LocalStorageService) {
+
+    this.bannerDropdownOpen = new BehaviorSubject<boolean>(false);
+
     let dashboardGraphDisplay: "usage" | "cost" = this.localStorageService.retrieve("dashboardGraphDisplay");
     if (dashboardGraphDisplay) {
       this.graphDisplay = new BehaviorSubject(dashboardGraphDisplay);

@@ -69,10 +69,10 @@
                                     *ngIf="meterData.showConsumption">
                                     Total Consumption (<span
                                         [innerHTML]="meterData.consumptionUnit | settingsLabel"></span>)</th>
-                                <th (click)="setOrderDataField('energyUse')"
+                                <!-- <th (click)="setOrderDataField('energyUse')"
                                     [ngClass]="{'active': orderDataField == 'energyUse'}"
                                     *ngIf="meterData.showEnergyUse">
-                                    Total Energy (<span [innerHTML]="meterData.energyUnit | settingsLabel"></span>)</th>
+                                    Total Energy (<span [innerHTML]="meterData.energyUnit | settingsLabel"></span>)</th> -->
                                 <th (click)="setOrderDataField('energyCost')"
                                     [ngClass]="{'active': orderDataField == 'energyCost'}">Total Cost</th>
                             </tr>
@@ -86,10 +86,10 @@
                                         number:'1.0-2'}}</span>
                                     <span *ngIf="!data.energyConsumption">N/A</span>
                                 </td>
-                                <td *ngIf="meterData.showEnergyUse">
+                                <!-- <td *ngIf="meterData.showEnergyUse">
                                     <span *ngIf="data.energyUse">{{data.energyUse | number:'1.0-2'}}</span>
                                     <span *ngIf="!data.energyUse">N/A</span>
-                                </td>
+                                </td> -->
                                 <td>
                                     <span *ngIf="data.energyCost">{{data.energyCost | currency}}</span>
                                     <span *ngIf="!data.energyCost">N/A</span>

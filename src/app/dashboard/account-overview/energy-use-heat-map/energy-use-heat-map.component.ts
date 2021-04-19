@@ -76,7 +76,7 @@ export class EnergyUseHeatMapComponent implements OnInit {
         },
         margin: { "t": 50, "b": 50 },
       };
-      var individualData = new Array();
+      let individualData = new Array();
       this.facilityHeatMapData.forEach(heatMapData => {
         let zData: Array<Array<number>> = heatMapData.resultData.map(dataItem => {
           if(this.graphDisplay == "cost"){
@@ -94,15 +94,9 @@ export class EnergyUseHeatMapComponent implements OnInit {
           hoverongaps: false,
           hovertemplate: hovertemplate
         });
-        for (var i = 0; i < heatMapData.years.length; i++) {
-          for (var j = 0; j < months.length; j++) {
-            // var currentValue = zData[i][j];
-            // if (currentValue != 0.0) {
-            //   var textColor = '';
-            // }else{
-            //   var textColor = 'black';
-            // }
-            var result = {
+        for (let i = 0; i < heatMapData.years.length; i++) {
+          for (let j = 0; j < months.length; j++) {
+            let result = {
               xref: 'x1',
               yref: 'y1',
               x: months[j],

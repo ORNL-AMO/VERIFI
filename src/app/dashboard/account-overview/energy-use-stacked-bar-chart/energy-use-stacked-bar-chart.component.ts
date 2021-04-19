@@ -19,7 +19,6 @@ export class EnergyUseStackedBarChartComponent implements OnInit {
   @ViewChild('energyUseStackedBarChart', { static: false }) energyUseStackedBarChart: ElementRef;
 
   accountFacilitiesSub: Subscription;
-  accountMeterData: Array<IdbUtilityMeterData>;
   barChartData: Array<StackedBarChartData>;
   graphDisplay: "cost" | "usage";
   graphDisplaySub: Subscription;
@@ -29,7 +28,6 @@ export class EnergyUseStackedBarChartComponent implements OnInit {
 
   ngOnInit(): void {
     this.accountFacilitiesSub = this.utilityMeterDataDbService.accountMeterData.subscribe(val => {
-      this.accountMeterData = val;
       this.setBarChartData();
       this.drawChart();
     });
@@ -147,10 +145,16 @@ export class EnergyUseStackedBarChartComponent implements OnInit {
 
   setBarChartData() {
     this.barChartData = new Array();
+    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    
+    let accountMeterData: Array<IdbUtilityMeterData> = new Array();
+    accountMeters.forEach(meter => {
+      let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataForAccount(meter, true);
+      accountMeterData = accountMeterData.concat(meterData)
+    })
 
-    let facilityIds: Array<number> = this.accountMeterData.map(data => { return data.facilityId });
+    let facilityIds: Array<number> = accountMeterData.map(data => { return data.facilityId });
     facilityIds = _.uniq(facilityIds);
-    let accountMeterDataCopy: Array<IdbUtilityMeterData> = JSON.parse(JSON.stringify(this.accountMeterData));
 
     let accountFacilites: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
 
@@ -162,7 +166,7 @@ export class EnergyUseStackedBarChartComponent implements OnInit {
       let water: UtilityItem = { energyUse: 0, energyCost: 0 };
       let wasteWater: UtilityItem = { energyUse: 0, energyCost: 0 };
       let otherUtility: UtilityItem = { energyUse: 0, energyCost: 0 };
-      let facilityMeterData: Array<IdbUtilityMeterData> = accountMeterDataCopy.filter(meterData => { return meterData.facilityId == id });
+      let facilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.filter(meterData => { return meterData.facilityId == id });
       facilityMeterData.forEach(dataItem => {
         let meter: IdbUtilityMeter = this.utilityMeterDbService.getFacilityMeterById(dataItem.meterId);
         if (meter) {

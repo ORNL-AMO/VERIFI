@@ -1,4 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { Subscription } from 'rxjs';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { IdbFacility } from 'src/app/models/idb';
 
 @Component({
   selector: 'app-help-panel',
@@ -7,9 +10,23 @@ import { Component, OnInit } from '@angular/core';
 })
 export class HelpPanelComponent implements OnInit {
 
-  constructor() { }
+
+  selectedFacility: IdbFacility;
+  selectedFacilitySub: Subscription;
+  constructor(private facilityDbService: FacilitydbService) { }
 
   ngOnInit() {
+    this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
+      this.selectedFacility = val;
+    })
+  }
+
+  ngOnDestroy(){
+    this.selectedFacilitySub.unsubscribe();
+  }
+
+  save(){
+    this.facilityDbService.update(this.selectedFacility);
   }
 
 }

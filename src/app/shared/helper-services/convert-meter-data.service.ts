@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { EditMeterFormService } from 'src/app/utility/energy-consumption/energy-source/edit-meter-form/edit-meter-form.service';
 import { ConvertUnitsService } from '../convert-units/convert-units.service';
 import { EnergyUnitsHelperService } from './energy-units-helper.service';
 
@@ -8,7 +9,8 @@ import { EnergyUnitsHelperService } from './energy-units-helper.service';
 })
 export class ConvertMeterDataService {
 
-  constructor(private convertUnitsService: ConvertUnitsService, private energyUnitsHelperService: EnergyUnitsHelperService) { }
+  constructor(private convertUnitsService: ConvertUnitsService, private energyUnitsHelperService: EnergyUnitsHelperService,
+    private editMeterFormService: EditMeterFormService) { }
 
   convertMeterDataToFacility(meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData>, facility: IdbFacility): Array<IdbUtilityMeterData> {
     let isEnergyMeter: boolean = this.energyUnitsHelperService.isEnergyMeter(meter.source);
@@ -40,5 +42,14 @@ export class ConvertMeterDataService {
     return meterData;
   }
 
+  applySiteToSourceMultiplier(meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData>): Array<IdbUtilityMeterData> {
+    let showSiteToSource: boolean = this.editMeterFormService.checkShowSiteToSource(meter.source, meter.startingUnit);
+    if (showSiteToSource && meter.siteToSource) {
+      for (let index = 0; index < meterData.length; index++) {
+        meterData[index].totalEnergyUse = meterData[index].totalEnergyUse * meter.siteToSource;
+      }
+    }
+    return meterData;
+  }
 
 }
