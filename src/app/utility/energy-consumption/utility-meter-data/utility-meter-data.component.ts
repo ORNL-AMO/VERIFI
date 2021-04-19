@@ -148,10 +148,6 @@ export class UtilityMeterDataComponent implements OnInit {
     this.meterDataMenuOpen = undefined;
   }
 
-  meterExport() {
-    this.utilityMeterDataService.meterExport(this.meterList, this.selectedSource);
-  }
-
   async bulkDelete() {
     this.loadingService.setLoadingMessage("Deleting Meter Data...");
     this.loadingService.setLoadingStatus(true);

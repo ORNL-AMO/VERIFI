@@ -7,8 +7,8 @@
             predictors from
             excel.</p>
         <div class="meterData">
-            <button class="btn btn-primary-4 mr-2" (click)="editPredictors()"><i
-                    class="fa fa-plus"></i> Add New Predictor</button>
+            <button class="btn btn-primary-4 mr-2" (click)="editPredictors()"><i class="fa fa-plus"></i> Add New
+                Predictor</button>
             <button class="btn btn-outline" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
         </div>
     </div>
@@ -21,16 +21,21 @@
 
         <div class="controls mb-2">
             <button class="btn btn-outline" (click)="editPredictors()">Add/Edit Predictors</button>
-
+            
             <div class="meterData item-right">
                 <button class="btn btn-primary-4 item-right m-0 ml-2" (click)="addPredictorEntry()"><i
                         class="fa fa-plus"></i> Add Predictor Entry</button>
             </div>
-
             <div class="importExport item-right">
+                <button class="btn btn-outline" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
+                <!-- <button class="btn btn-outline" (click)="predictorExport()">Export</button> -->
+            </div>
+
+
+            <!-- <div class="importExport item-right">
                 <button class="btn btn-outline" (click)="uploadData()">Import</button>
                 <button class="btn btn-outline" (click)="predictorExport()">Export</button>
-            </div>
+            </div> -->
             <!--Items Per Page-->
             <div class="items-per-page item-right">
                 <span>Show </span>
@@ -44,10 +49,11 @@
                     <option [ngValue]=999999999999>All</option>
                 </select>
             </div>
-        </div>
-        <!--Bulk Delete-->
-        <div class="bulk-delete item-right" [class.show]="hasCheckedItems">
-            <button class="btn btn-danger" (click)='openBulkDelete()'>Bulk Delete</button>
+
+            <!--Bulk Delete-->
+            <div class="bulk-delete item-right" [class.show]="hasCheckedItems">
+                <button class="btn btn-danger" (click)='openBulkDelete()'>Bulk Delete</button>
+            </div>
         </div>
     </div>
 
