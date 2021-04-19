@@ -38,6 +38,10 @@ export class ToastNotificationsComponent implements OnInit {
           setTimeout(() => {
             this.closeToast();
           }, this.toastNotification.setTimeoutVal);
+        }else{
+          setTimeout(() => {
+            this.closeToast();
+          }, 2000);
         }
 
       }
