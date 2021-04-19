@@ -49,8 +49,7 @@ export class CalanderizationService {
         meter: meter,
         monthlyData: calanderizedMeter,
         showConsumption: showConsumption,
-        showEnergyUse: showEnergyUse,
-        // energyUnit: meter.energyUnit
+        showEnergyUse: showEnergyUse
       });
     });
     return calanderizedMeterData;

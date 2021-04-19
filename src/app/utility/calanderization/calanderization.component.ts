@@ -179,9 +179,4 @@ export class CalanderizationComponent implements OnInit {
       this.displayGraphCost = str;      
     }
   }
-
-  getConsumptionUnit(meterData: IdbUtilityMeterData){
-    let meter: IdbUtilityMeter = this.facilityMeters.find(meter => {return meter.id == meterData.id});
-    
-  }
 }
