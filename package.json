@@ -6,14 +6,15 @@
   "author": "Advanced Manufacturing Office",
   "repository": "https://github.com/ORNL-AMO/VERIFI.git",
   "build": {
-    "appId": "com.electron.verifi",
+    "appId": "com.ornl.verifi",
     "copyright": "Copyright 2021 ORNL. All rights reserved.",
     "productName": "VERIFI",
     "directories": {
       "output": "../output/verifi/"
     },
     "win": {
-      "target": "nsis"
+      "target": "nsis",
+      "icon": "src/assets/electron-icons/icon-256x256.png"
     },
     "nsis": {
       "oneClick": false,
@@ -26,7 +27,8 @@
         "AppImage",
         "tar.gz"
       ],
-      "executableName": "MEASUR",
+      "icon": "src/assets/electron-icons/",
+      "executableName": "VERIFI",
       "maintainer": "Advanced Manufacturing Office",
       "artifactName": "${productName}-${version}.${ext}",
       "category": "Science"
@@ -36,7 +38,9 @@
         "dmg",
         "zip"
       ],
+      "icon": "src/assets/electron-icons/icon-512x512.png",
       "hardenedRuntime": true,
+      "provisioningProfile": "embedded.provisionprofile",
       "entitlements": "entitlements.mac.inherit.plist",
       "entitlementsInherit": "entitlements.mac.inherit.plist",
       "gatekeeperAssess": false

@@ -182,10 +182,13 @@ export class ImportMeterService {
       newMeter.source = this.energyUnitsHelperService.parseSource(groupItem.value);
       newMeter.startingUnit = this.energyUnitsHelperService.parseStartingUnit(groupItem.value);
       if (newMeter.startingUnit && newMeter.source) {
-        if (this.energyUnitsHelperService.isEnergyUnit(newMeter.startingUnit) == false) {
-          let heatCapacityAndSiteToSource: { heatCapacity: number, siteToSource: number } = this.energyUseCalculationsService.getHeatingCapacityAndSiteToSourceValue(newMeter.source, newMeter.startingUnit);
-          newMeter.heatCapacity = heatCapacityAndSiteToSource.heatCapacity;
-          newMeter.siteToSource = heatCapacityAndSiteToSource.siteToSource;
+        let showHeatCapacity: boolean = this.editMeterFormService.checkShowHeatCapacity(newMeter.source, newMeter.startingUnit);
+        if (showHeatCapacity) {
+          newMeter.heatCapacity = this.energyUseCalculationsService.getHeatingCapacity(newMeter.source, newMeter.startingUnit);
+        }
+        let showSiteToSource: boolean = this.editMeterFormService.checkShowSiteToSource(newMeter.source, newMeter.startingUnit);
+        if (showSiteToSource) {
+          newMeter.siteToSource = this.energyUseCalculationsService.getSiteToSource(newMeter.source, newMeter.startingUnit);
         }
       }
     }

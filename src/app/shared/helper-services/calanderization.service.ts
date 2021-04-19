@@ -13,8 +13,8 @@ export class CalanderizationService {
 
 
   calanderizedDataFilters: BehaviorSubject<CalanderizationFilters>
-  displayGraphEnergy:  "bar" | "scatter" | null = "bar";
-  displayGraphCost:  "bar" | "scatter" | null = "bar";
+  displayGraphEnergy: "bar" | "scatter" | null = "bar";
+  displayGraphCost: "bar" | "scatter" | null = "bar";
   dataDisplay: "table" | "graph" = 'table';
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private energyUnitsHelperService: EnergyUnitsHelperService) {
     this.calanderizedDataFilters = new BehaviorSubject({
@@ -38,13 +38,18 @@ export class CalanderizationService {
       let calanderizedMeter: Array<MonthlyData> = this.calanderizeMeterData(meter, meterData, monthDisplayShort);
       let showConsumption: boolean = calanderizedMeter.find(meterData => { return meterData.energyConsumption != 0 }) != undefined;
       let showEnergyUse: boolean = this.energyUnitsHelperService.isEnergyMeter(meter.source);
+      let consumptionUnit: string
+      if (inAccount) {
+        consumptionUnit = this.energyUnitsHelperService.getMeterConsumptionUnitInAccount(meter);
+      } else {
+        consumptionUnit = this.energyUnitsHelperService.getMeterConsumptionUnitInFacility(meter);
+      }
       calanderizedMeterData.push({
-        consumptionUnit: meter.startingUnit,
+        consumptionUnit: consumptionUnit,
         meter: meter,
         monthlyData: calanderizedMeter,
         showConsumption: showConsumption,
-        showEnergyUse: showEnergyUse,
-        energyUnit: meter.energyUnit
+        showEnergyUse: showEnergyUse
       });
     });
     return calanderizedMeterData;
@@ -66,10 +71,10 @@ export class CalanderizationService {
       if (daysFromPrevious > 20 && daysFromPrevious < 40) {
         let firstDayOfCurrentMonth: Date = new Date(currentBill.readDate);
         firstDayOfCurrentMonth.setDate(1);
-        let daysBeforeCurrentBill: number = this.daysBetweenDates(firstDayOfCurrentMonth, new Date(currentBill.readDate)) + 1;
+        let daysBeforeCurrentBill: number = this.daysBetweenDates(firstDayOfCurrentMonth, new Date(currentBill.readDate));
         let firstDayOfNextMonth: Date = new Date(nextBill.readDate);
         firstDayOfNextMonth.setDate(1);
-        let daysAfterCurrentBill: number = this.daysBetweenDates(new Date(currentBill.readDate), firstDayOfNextMonth) + 1;
+        let daysAfterCurrentBill: number = this.daysBetweenDates(new Date(currentBill.readDate), firstDayOfNextMonth);
         //energy use
         let isEnergyMeter: boolean = this.energyUnitsHelperService.isEnergyMeter(meter.source);
         if (isEnergyMeter) {
@@ -83,6 +88,8 @@ export class CalanderizationService {
           let energyConsumptionPerDayCurrentBill: number = currentBill.totalVolume / daysFromPrevious;
           let energyConsumptionPerDayNextBill: number = nextBill.totalVolume / daysFromNext;
           totalMonthEnergyConsumption = (energyConsumptionPerDayCurrentBill * daysBeforeCurrentBill) + (energyConsumptionPerDayNextBill * daysAfterCurrentBill)
+        } else {
+          totalMonthEnergyConsumption = totalMonthEnergyUse;
         }
         //cost
         let costPerDayCurrentBill: number = currentBill.totalCost / daysFromPrevious;

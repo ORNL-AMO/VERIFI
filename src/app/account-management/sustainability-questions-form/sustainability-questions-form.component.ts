@@ -22,13 +22,18 @@ export class SustainabilityQuestionsFormComponent implements OnInit {
   selectedFacility: IdbFacility;
   sustainQuestionsDontMatchAccount: boolean;
   years: Array<number> = new Array();
+  isFormChange: boolean = false;
   constructor(private accountDbService: AccountdbService, private accountManagementService: AccountManagementService, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
     this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(account => {
       this.selectedAccount = account;
       if (account && this.inAccount) {
-        this.form = this.accountManagementService.getSustainabilityQuestionsForm(account);
+        if (this.isFormChange == false) {
+          this.form = this.accountManagementService.getSustainabilityQuestionsForm(account);
+        } else {
+          this.isFormChange = false;
+        }
       }
     });
 
@@ -36,9 +41,12 @@ export class SustainabilityQuestionsFormComponent implements OnInit {
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
       this.selectedFacility = facility;
       if (facility && !this.inAccount) {
-
         this.sustainQuestionsDontMatchAccount = this.accountManagementService.areAccountAndFacilitySustainQuestionsDifferent(this.selectedAccount, this.selectedFacility);
-        this.form = this.accountManagementService.getSustainabilityQuestionsForm(facility);
+        if (this.isFormChange == false) {
+          this.form = this.accountManagementService.getSustainabilityQuestionsForm(facility);
+        } else {
+          this.isFormChange = false;
+        }
       }
     });
     for (let i = 2050; i > 2000; i--) {
@@ -52,6 +60,7 @@ export class SustainabilityQuestionsFormComponent implements OnInit {
   }
 
   saveChanges() {
+    this.isFormChange = true;
     if (!this.inAccount) {
       this.selectedFacility = this.accountManagementService.updateFacilityFromSustainabilityQuestionsForm(this.form, this.selectedFacility);
       this.facilityDbService.update(this.selectedFacility);

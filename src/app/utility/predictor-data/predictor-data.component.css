@@ -1,70 +1,8 @@
-table input, table select {
-    border: none;
-    background: transparent;
-    width: 100%;
-}
-table input:focus {
-    border: none;
-}
-.predictor {
-    overflow: hidden;
-    margin-bottom: 50px;
-}
-th .unit select {
-    width: initial!important;
-}
-span.block {
-    display: block;
-}
-.verticalTable {
-    list-style: none;
+thead th.active {
+    text-decoration: underline;
 }
 
-ul.col.verticalTable li:nth-child(odd) {
-    background-color: #f3f6fd;
-}
-ul.col.verticalTable li {
-    border: 1px solid #dde0e6;
-    border-top: 0px;
-    padding: 4px 10px;
-}
-ul.col.verticalTable li:first-child {
-    border-top: 1px solid #dde0e6;
-    background-color: #ebeef3;
-}
-ul.col.verticalTable {
-    padding: 0px;
-}
-
-.stick-scroll-x{
-    display: block;
-    border: none;
-    overflow-x: scroll;
-}
-
-.stick-scroll-x table tr th:first-child,
-.stick-scroll-x table tr td:first-child {
-    position: sticky;
-    left: -1px;
-    background-color: white;
-    box-shadow: 1px 1px 0px 0px #dde0e6;
-    z-index: 1;
-    white-space: nowrap;
-}
-.stick-scroll-x table thead tr th:first-child {
-    background-color: #e3e7ec;
-}
-.stick-scroll-x table thead tr:nth-child(2) th:first-child {
-    background-color: #f3f6fd;
-}
-.stick-scroll-x table tbody>tr:nth-of-type(even)>td:first-child {
-    background-color: #f3f6fd;
-}
-.stick-scroll-x table td:last-child .meterMenu {
-    top: initial;
-    bottom: 30px;
-}
-.stick-scroll-x table tr:first-child td .meterMenu {
-    top: 30px;
-    bottom: initial;
+thead th:hover{
+    cursor: pointer;
+    text-decoration: underline;
 }

@@ -23,13 +23,18 @@ export class FinancialReportingFormComponent implements OnInit {
   selectedAccount: IdbAccount;
   selectedFacility: IdbFacility;
   financialReportingDoestMatchAccount: boolean;
+  isFormChange: boolean = false;
   constructor(private accountDbService: AccountdbService, private accountManagementService: AccountManagementService, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
     this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(account => {
       this.selectedAccount = account;
       if (account && this.inAccount) {
-        this.form = this.accountManagementService.getFiscalYearForm(account);
+        if (this.isFormChange == false) {
+          this.form = this.accountManagementService.getFiscalYearForm(account);
+        } else {
+          this.isFormChange = false;
+        }
       }
     });
 
@@ -38,28 +43,33 @@ export class FinancialReportingFormComponent implements OnInit {
       this.selectedFacility = facility;
       if (facility && !this.inAccount) {
         this.financialReportingDoestMatchAccount = this.accountManagementService.areAccountAndFacilityFinancialReportingDifferent(this.selectedAccount, this.selectedFacility);
-        this.form = this.accountManagementService.getFiscalYearForm(facility);
+        if (this.isFormChange == false) {
+          this.form = this.accountManagementService.getFiscalYearForm(facility);
+        } else {
+          this.isFormChange = false;
+        }
       }
     });
   }
 
-  ngOnDestroy(){
+  ngOnDestroy() {
     this.selectedAccountSub.unsubscribe();
     this.selectedFacilitySub.unsubscribe();
   }
 
-  saveChanges(){
-    if(!this.inAccount){
+  saveChanges() {
+    this.isFormChange = true;
+    if (!this.inAccount) {
       this.selectedFacility = this.accountManagementService.updateFacilityFromFiscalForm(this.form, this.selectedFacility);
       this.facilityDbService.update(this.selectedFacility);
     }
-    if(this.inAccount){
+    if (this.inAccount) {
       this.selectedAccount = this.accountManagementService.updateAccountFromFiscalForm(this.form, this.selectedAccount);
       this.accountDbService.update(this.selectedAccount);
     }
   }
 
-  setAccountFinancialReporting(){
+  setAccountFinancialReporting() {
     this.form = this.accountManagementService.setAccountFinancialReporting(this.form, this.selectedAccount);
     this.saveChanges();
   }

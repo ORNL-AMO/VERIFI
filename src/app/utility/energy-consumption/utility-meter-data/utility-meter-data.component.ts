@@ -2,10 +2,13 @@ import { Component, OnInit, ElementRef, ViewChild, QueryList, ViewChildren } fro
 import { listAnimation } from '../../../animations';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { Subscription } from 'rxjs';
-import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UtilityMeterDataService } from './utility-meter-data.service';
+import { LoadingService } from 'src/app/shared/loading/loading.service';
+import { ToastNotificationsService } from 'src/app/shared/toast-notifications/toast-notifications.service';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 
 @Component({
   selector: 'app-utility-meter-data',
@@ -49,7 +52,10 @@ export class UtilityMeterDataComponent implements OnInit {
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private activatedRoute: ActivatedRoute,
     private utilityMeterDataService: UtilityMeterDataService,
-    private router: Router
+    private router: Router,
+    private loadingService: LoadingService,
+    private toastNoticationService: ToastNotificationsService,
+    private facilityDbService: FacilitydbService
   ) { }
 
   ngOnInit() {
@@ -142,11 +148,9 @@ export class UtilityMeterDataComponent implements OnInit {
     this.meterDataMenuOpen = undefined;
   }
 
-  meterExport() {
-    this.utilityMeterDataService.meterExport(this.meterList, this.selectedSource);
-  }
-
-  bulkDelete() {
+  async bulkDelete() {
+    this.loadingService.setLoadingMessage("Deleting Meter Data...");
+    this.loadingService.setLoadingStatus(true);
     let meterDataItemsToDelete: Array<IdbUtilityMeterData> = new Array();
     this.meterList.forEach(meterListItem => {
       meterListItem.meterDataItems.forEach(meterDataItem => {
@@ -155,8 +159,17 @@ export class UtilityMeterDataComponent implements OnInit {
         }
       })
     });
-    meterDataItemsToDelete.forEach(meterItemToDelete => { this.utilityMeterDataDbService.deleteIndex(meterItemToDelete.id) });
-    this.showBulkDelete = false;
+    for(let index = 0; index < meterDataItemsToDelete.length; index++){
+      await this.utilityMeterDataDbService.deleteWithObservable(meterDataItemsToDelete[index].id);
+    }
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let accountMeterData: Array<IdbUtilityMeterData> = await this.utilityMeterDataDbService.getAllByIndexRange("accountId", selectedFacility.accountId).toPromise();
+    this.utilityMeterDataDbService.accountMeterData.next(accountMeterData);
+    let facilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.filter(dataItem => {return dataItem.facilityId == selectedFacility.id});
+    this.utilityMeterDataDbService.facilityMeterData.next(facilityMeterData);
+    this.loadingService.setLoadingStatus(false);
+    this.toastNoticationService.showToast("Meter Data Deleted!", undefined, undefined, false, "success");
+    this.cancelBulkDelete();
   }
 
   meterDataAdd() {

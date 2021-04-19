@@ -8,6 +8,7 @@ import { UtilityMeterDatadbService } from "../../indexedDB/utilityMeterData-db.s
 import { IdbAccount, IdbFacility } from 'src/app/models/idb';
 import { Subscription } from 'rxjs';
 import * as _ from 'lodash';
+import { DashboardService } from 'src/app/dashboard/dashboard.service';
 
 @Component({
   selector: 'app-header',
@@ -42,7 +43,8 @@ export class HeaderComponent implements OnInit {
     public facilitydbService: FacilitydbService,
     public utilityMeterdbService: UtilityMeterdbService,
     public utilityMeterGroupdbService: UtilityMeterGroupdbService,
-    public utilityMeterDatadbService: UtilityMeterDatadbService
+    public utilityMeterDatadbService: UtilityMeterDatadbService,
+    private dashboardService: DashboardService
   ) {
     // Close menus on navigation
     router.events.subscribe((event: Event) => {
@@ -93,17 +95,20 @@ export class HeaderComponent implements OnInit {
   toggleFacilityMenu() {
     this.facilityMenu = !this.facilityMenu;
     this.accountMenu = false;
+    this.dashboardService.bannerDropdownOpen.next(this.facilityMenu);
   }
 
   toggleAccountMenu() {
     this.accountMenu = !this.accountMenu;
     this.facilityMenu = false;
+    this.dashboardService.bannerDropdownOpen.next(this.accountMenu);
   }
 
   toggleSwitchAccountsMenu() {
     this.switchAccountMenu = !this.switchAccountMenu;
     this.facilityMenu = false;
     this.accountMenu = false;
+    this.dashboardService.bannerDropdownOpen.next(this.switchAccountMenu);
   }
 
   // close menus when user clicks outside the dropdown
@@ -112,6 +117,7 @@ export class HeaderComponent implements OnInit {
       this.accountMenu = false;
       this.facilityMenu = false;
       this.switchAccountMenu = false;
+      this.dashboardService.bannerDropdownOpen.next(false);
     }
   }
 
@@ -131,16 +137,20 @@ export class HeaderComponent implements OnInit {
     this.toggleSwitchAccountsMenu();
     this.router.navigate(['/']);
     this.accountdbService.setSelectedAccount(account.id);
+    this.switchAccountMenu = false;
+    this.dashboardService.bannerDropdownOpen.next(false);
   }
 
   switchFacility(facility: IdbFacility) {
-    //this.toggleFacilityMenu();
     this.facilitydbService.selectedFacility.next(facility);
+    this.facilityMenu = false;
+    this.dashboardService.bannerDropdownOpen.next(false);
   }
 
   selectAllFacilities() {
-    //this.toggleFacilityMenu();
     this.router.navigate(['/account-summary']);
+    this.facilityMenu = false;
+    this.dashboardService.bannerDropdownOpen.next(false);
   }
 
 

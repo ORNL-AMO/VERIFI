@@ -72,7 +72,7 @@ export class CalanderizationChartComponent implements OnInit {
           yData = this.meterData.monthlyData.map(data => { return data.energyConsumption })
         } else if (this.meterData.showEnergyUse) {
           // tickSuffix = " " + this.meterData.energyUnit;
-          yAxisTitle = 'Utility Consumption (' + this.meterData.energyUnit + ')';
+          yAxisTitle = 'Utility Consumption (' + this.meterData.consumptionUnit + ')';
           yData = this.meterData.monthlyData.map(data => { return data.energyUse });
         }
         traceData.push({
