@@ -241,24 +241,26 @@ export class DashboardService {
       let lastYearData: Array<LastYearData> = this.calanderizationService.getPastYearData(utilityMeters, inAccount, allMetersLastBill);
       let lastBillForTheseMeters: MonthlyData = this.calanderizationService.getLastBillEntry(utilityMeters, inAccount);
       if (lastBillForTheseMeters) {
-        let yearPriorBill: MonthlyData = this.calanderizationService.getYearPriorBillEntry(utilityMeters, inAccount, lastBillForTheseMeters);
+        let yearPriorBill: Array<MonthlyData> = this.calanderizationService.getYearPriorBillEntry(utilityMeters, inAccount, lastBillForTheseMeters);
         if (lastYearData.length != 0) {
           let previousMonthData: LastYearData = _.maxBy(lastYearData, 'date');
           let totalEnergyUseFromLastYear: number = _.sumBy(lastYearData, 'energyUse');
           let totalEnergyCostFromLastYear: number = _.sumBy(lastYearData, 'energyCost');
+          let yearPriorEnergyCost: number = _.sumBy(yearPriorBill, 'energyCost');
+          let yearPriorEnergyUse: number = _.sumBy(yearPriorBill, 'energyUse');
           return {
             lastBillDate: new Date(lastBillForTheseMeters.year, lastBillForTheseMeters.monthNumValue),
             previousMonthEnergyUse: previousMonthData.energyUse,
             previousMonthEnergyCost: previousMonthData.energyCost,
             averageEnergyUse: (totalEnergyUseFromLastYear / lastYearData.length),
             averageEnergyCost: (totalEnergyCostFromLastYear / lastYearData.length),
-            yearPriorEnergyCost: yearPriorBill.energyCost,
-            yearPriorEnergyUse: yearPriorBill.energyUse,
-            energyCostChangeSinceLastYear: previousMonthData.energyCost - yearPriorBill.energyCost,
-            energyUseChangeSinceLastYear: previousMonthData.energyUse - yearPriorBill.energyUse,
+            yearPriorEnergyCost: yearPriorEnergyCost,
+            yearPriorEnergyUse: yearPriorEnergyUse,
+            energyCostChangeSinceLastYear: previousMonthData.energyCost - yearPriorEnergyCost,
+            energyUseChangeSinceLastYear: previousMonthData.energyUse - yearPriorEnergyUse,
             utility: utility
           };
-        }else{
+        } else {
           return {
             lastBillDate: new Date(lastBillForTheseMeters.year, lastBillForTheseMeters.monthNumValue),
             previousMonthEnergyUse: 0,

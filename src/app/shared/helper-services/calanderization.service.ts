@@ -212,13 +212,13 @@ export class CalanderizationService {
   }
 
 
-  getYearPriorBillEntry(facilityMeters: Array<IdbUtilityMeter>, inAccount: boolean, lastBill: MonthlyData): MonthlyData {
+  getYearPriorBillEntry(facilityMeters: Array<IdbUtilityMeter>, inAccount: boolean, lastBill: MonthlyData): Array<MonthlyData> {
     let calanderizedMeterData: Array<CalanderizedMeter> = this.getCalanderizedMeterData(facilityMeters, inAccount, false);
-    let yearPriorBill: MonthlyData = this.getYearPriorBillEntryFromCalanderizedMeterData(calanderizedMeterData, lastBill);
+    let yearPriorBill: Array<MonthlyData> = this.getYearPriorBillEntryFromCalanderizedMeterData(calanderizedMeterData, lastBill);
     if (yearPriorBill) {
       return yearPriorBill;
     } else {
-      return {
+      return [{
         month: undefined,
         monthNumValue: undefined,
         year: undefined,
@@ -226,16 +226,16 @@ export class CalanderizationService {
         energyUse: 0,
         energyCost: 0,
         date: undefined
-      }
+      }]
     }
   }
 
-  getYearPriorBillEntryFromCalanderizedMeterData(calanderizedMeterData: Array<CalanderizedMeter>, lastBill: MonthlyData): MonthlyData {
+  getYearPriorBillEntryFromCalanderizedMeterData(calanderizedMeterData: Array<CalanderizedMeter>, lastBill: MonthlyData): Array<MonthlyData> {
     let monthlyData: Array<MonthlyData> = calanderizedMeterData.flatMap(data => {
       return data.monthlyData;
     });
     let yearPrior: number = lastBill.year - 1;
-    let yearPriorBill: MonthlyData = monthlyData.find(dataItem => {
+    let yearPriorBill: Array<MonthlyData> = monthlyData.filter(dataItem => {
       return (dataItem.year == yearPrior) && (dataItem.monthNumValue == lastBill.monthNumValue);
     });
     return yearPriorBill;
