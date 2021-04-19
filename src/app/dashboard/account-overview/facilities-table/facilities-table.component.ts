@@ -72,7 +72,7 @@ export class FacilitiesTableComponent implements OnInit {
     this.accountFacilitiesSummary = this.dashboardService.getAccountFacilitesSummary();
     if (this.accountFacilitiesSummary.allMetersLastBill) {
       this.lastMonthsDate = new Date(this.accountFacilitiesSummary.allMetersLastBill.year, this.accountFacilitiesSummary.allMetersLastBill.monthNumValue);
-      this.yearPriorDate = new Date(this.accountFacilitiesSummary.allMetersLastBill.year - 1, this.accountFacilitiesSummary.allMetersLastBill.monthNumValue + 1);
+      this.yearPriorDate = new Date(this.accountFacilitiesSummary.allMetersLastBill.year - 1, this.accountFacilitiesSummary.allMetersLastBill.monthNumValue);
     }
   }
 

@@ -94,3 +94,9 @@ h3 a:hover{
 p{
   margin-bottom: .5rem;
 }
+
+
+.btn-selected{
+  background-color: #2c386b;
+  color: #fff;
+}

@@ -2,10 +2,12 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { DashboardService } from '../../dashboard.service';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 
 @Component({
   selector: 'app-energy-use-stacked-bar-chart',
@@ -19,8 +21,11 @@ export class EnergyUseStackedBarChartComponent implements OnInit {
   accountFacilitiesSub: Subscription;
   accountMeterData: Array<IdbUtilityMeterData>;
   barChartData: Array<StackedBarChartData>;
+  graphDisplay: "cost" | "usage";
+  graphDisplaySub: Subscription;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private utilityMeterDbService: UtilityMeterdbService,
-    private facilityDbService: FacilitydbService, private plotlyService: PlotlyService) { }
+    private facilityDbService: FacilitydbService, private plotlyService: PlotlyService, private dashboardService: DashboardService,
+    private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
     this.accountFacilitiesSub = this.utilityMeterDataDbService.accountMeterData.subscribe(val => {
@@ -28,6 +33,11 @@ export class EnergyUseStackedBarChartComponent implements OnInit {
       this.setBarChartData();
       this.drawChart();
     });
+    this.graphDisplaySub = this.dashboardService.graphDisplay.subscribe(val => {
+      this.graphDisplay = val;
+      this.setBarChartData();
+      this.drawChart();
+    })
   }
   ngAfterViewInit() {
     this.drawChart();
@@ -35,60 +45,73 @@ export class EnergyUseStackedBarChartComponent implements OnInit {
 
   drawChart() {
     if (this.energyUseStackedBarChart) {
-      if (this.barChartData && this.barChartData.length != 0) {
+      if (this.barChartData && this.barChartData.length != 0 && this.graphDisplay) {
+        let yDataProperty: "energyCost" | "energyUse";
+        let tickprefix: string;
+        let yaxisTitle: string;
+        if (this.graphDisplay == "cost") {
+          yaxisTitle = "Utility Costs";
+          yDataProperty = "energyCost";
+          tickprefix = "$";
+        } else {
+          let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+          yaxisTitle = "Utility Usage (" + selectedAccount.energyUnit + ")";
+          yDataProperty = "energyUse";
+          tickprefix = "";
+        }
         let data = new Array();
-        if (this.barChartData.findIndex(dataItem => { return dataItem.electricity.energyCost != 0 }) != -1) {
+        if (this.barChartData.findIndex(dataItem => { return dataItem.electricity[yDataProperty] != 0 }) != -1) {
           data.push({
             x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
-            y: this.barChartData.map(dataItem => { return dataItem.electricity.energyCost }),
+            y: this.barChartData.map(dataItem => { return dataItem.electricity[yDataProperty] }),
             name: 'Electricity',
             type: 'bar'
           });
         }
-        if (this.barChartData.findIndex(dataItem => { return dataItem.naturalGas.energyCost != 0 }) != -1) {
+        if (this.barChartData.findIndex(dataItem => { return dataItem.naturalGas[yDataProperty] != 0 }) != -1) {
           data.push({
             x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
-            y: this.barChartData.map(dataItem => { return dataItem.naturalGas.energyCost }),
+            y: this.barChartData.map(dataItem => { return dataItem.naturalGas[yDataProperty] }),
             name: 'Natural Gas',
             type: 'bar'
           })
         }
-        if (this.barChartData.findIndex(dataItem => { return dataItem.otherFuels.energyCost != 0 }) != -1) {
+        if (this.barChartData.findIndex(dataItem => { return dataItem.otherFuels[yDataProperty] != 0 }) != -1) {
           data.push({
             x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
-            y: this.barChartData.map(dataItem => { return dataItem.otherFuels.energyCost }),
+            y: this.barChartData.map(dataItem => { return dataItem.otherFuels[yDataProperty] }),
             name: 'Other Fuels',
             type: 'bar'
           })
         }
-        if (this.barChartData.findIndex(dataItem => { return dataItem.otherEnergy.energyCost != 0 }) != -1) {
+        if (this.barChartData.findIndex(dataItem => { return dataItem.otherEnergy[yDataProperty] != 0 }) != -1) {
           data.push({
             x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
-            y: this.barChartData.map(dataItem => { return dataItem.otherEnergy.energyCost }),
+            y: this.barChartData.map(dataItem => { return dataItem.otherEnergy[yDataProperty] }),
             name: 'Other Energy',
             type: 'bar'
           })
         }
-        if (this.barChartData.findIndex(dataItem => { return dataItem.water.energyCost != 0 }) != -1) {
+        if (this.barChartData.findIndex(dataItem => { return dataItem.water[yDataProperty] != 0 }) != -1) {
           data.push({
             x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
-            y: this.barChartData.map(dataItem => { return dataItem.water.energyCost }),
+            y: this.barChartData.map(dataItem => { return dataItem.water[yDataProperty] }),
             name: 'Water',
             type: 'bar'
           })
         }
-        if (this.barChartData.findIndex(dataItem => { return dataItem.wasteWater.energyCost != 0 }) != -1) {
+        if (this.barChartData.findIndex(dataItem => { return dataItem.wasteWater[yDataProperty] != 0 }) != -1) {
           data.push({
             x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
-            y: this.barChartData.map(dataItem => { return dataItem.wasteWater.energyCost }),
+            y: this.barChartData.map(dataItem => { return dataItem.wasteWater[yDataProperty] }),
             name: 'Waste Water',
             type: 'bar'
           })
         }
-        if (this.barChartData.findIndex(dataItem => { return dataItem.otherUtility.energyCost != 0 }) != -1) {
+        if (this.barChartData.findIndex(dataItem => { return dataItem.otherUtility[yDataProperty] != 0 }) != -1) {
           data.push({
             x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
-            y: this.barChartData.map(dataItem => { return dataItem.otherUtility.energyCost }),
+            y: this.barChartData.map(dataItem => { return dataItem.otherUtility[yDataProperty] }),
             name: 'Other Utility',
             type: 'bar'
           })
@@ -98,15 +121,20 @@ export class EnergyUseStackedBarChartComponent implements OnInit {
           barmode: 'stack',
           showlegend: true,
           yaxis: {
-            //  title: 'Utility Cost',
-            tickprefix: '$',
-            automargin: true
+            title: yaxisTitle,
+            tickprefix: tickprefix,
+            automargin: true,
+            // ticksuffix: ticksuffix
           },
           xaxis: {
             automargin: true
+          },
+          legend: {
+            orientation: "h"
           }
         };
         let config = {
+          displaylogo: false,
           responsive: true
         };
         this.plotlyService.newPlot(this.energyUseStackedBarChart.nativeElement, data, layout, config);
