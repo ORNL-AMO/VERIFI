@@ -22,7 +22,7 @@ export class FacilityComponent implements OnInit {
   selectedFacilitySub: Subscription;
   selectedFacility: IdbFacility;
   unitsDontMatchAccount: boolean;
-
+  showImportFile: boolean = false;
   constructor(
     private router: Router,
     private facilityDbService: FacilitydbService,
@@ -85,5 +85,13 @@ export class FacilityComponent implements OnInit {
 
   backupFacility(){
     this.backupDataService.backupFacility(this.selectedFacility);
+  }  
+  
+  openImportBackup() {
+    this.showImportFile = true;
+  }
+
+  cancelImportBackup() {
+    this.showImportFile = false;
   }
 }

@@ -154,7 +154,8 @@ export interface IdbPredictorEntry {
     // unit: string,
     // amount: number,
     date: Date,
-    predictors: Array<PredictorData>
+    predictors: Array<PredictorData>,
+    checked?: boolean
 }
 
 

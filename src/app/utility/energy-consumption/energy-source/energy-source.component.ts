@@ -10,6 +10,7 @@ import { EditMeterFormService } from './edit-meter-form/edit-meter-form.service'
 import { FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { LoadingService } from 'src/app/shared/loading/loading.service';
+import { ToastNotificationsService } from 'src/app/shared/toast-notifications/toast-notifications.service';
 
 @Component({
   selector: 'app-energy-source',
@@ -42,7 +43,8 @@ export class EnergySourceComponent implements OnInit {
     private utilityMeterdbService: UtilityMeterdbService,
     private editMeterFormService: EditMeterFormService,
     private router: Router,
-    private loadingService: LoadingService
+    private loadingService: LoadingService,
+    private toastNoticationService: ToastNotificationsService
   ) { }
 
   ngOnInit() {
@@ -137,20 +139,27 @@ export class EnergySourceComponent implements OnInit {
     this.loadingService.setLoadingStatus(true);
     //delete meter
     await this.utilityMeterdbService.deleteIndexWithObservable(this.meterToDelete.id);
-    //delete meter data
-    this.utilityMeterDatadbService.getAllByIndexRange('meterId', this.meterToDelete.id).subscribe(data => {
-      data.forEach(item => { this.deleteMeterData(item) });
-      this.utilityMeterdbService.setAccountMeters();
-      this.utilityMeterdbService.setFacilityMeters();
-      this.utilityMeterDatadbService.setAccountMeterData();
-      this.utilityMeterDatadbService.setFacilityMeterData();
-      this.cancelDelete();
-      this.loadingService.setLoadingStatus(false);
-    });
-  }
 
-  async deleteMeterData(meterDataItem: IdbUtilityMeterData) {
-    await this.utilityMeterDatadbService.deleteWithObservable(meterDataItem.id);
+
+    //delete meter data
+    let meterData: Array<IdbUtilityMeterData> = await this.utilityMeterDatadbService.getAllByIndexRange('meterId', this.meterToDelete.id).toPromise();
+    for (let index = 0; index < meterData.length; index++) {
+      await this.utilityMeterDatadbService.deleteWithObservable(meterData[index].id);
+    }
+    let selectedFacility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
+    //set meters
+    let accountMeters: Array<IdbUtilityMeter> = await this.utilityMeterdbService.getAllByIndexRange("accountId", selectedFacility.accountId).toPromise();
+    this.utilityMeterdbService.accountMeters.next(accountMeters);
+    let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == selectedFacility.id });
+    this.utilityMeterdbService.facilityMeters.next(facilityMeters);
+    //set meter data
+    let accountMeterData: Array<IdbUtilityMeterData> = await this.utilityMeterDatadbService.getAllByIndexRange("accountId", selectedFacility.accountId).toPromise();
+    this.utilityMeterDatadbService.accountMeterData.next(accountMeterData);
+    let facilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.filter(meterData => { return meterData.facilityId == selectedFacility.id });
+    this.utilityMeterDatadbService.facilityMeterData.next(facilityMeterData);
+    this.cancelDelete();
+    this.loadingService.setLoadingStatus(false);
+    this.toastNoticationService.showToast("Meter and Meter Data Deleted", undefined, undefined, false, "success");
   }
 
   selectDeleteMeter(meter: IdbUtilityMeter) {
