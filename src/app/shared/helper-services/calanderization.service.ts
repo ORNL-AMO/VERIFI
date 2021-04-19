@@ -38,13 +38,19 @@ export class CalanderizationService {
       let calanderizedMeter: Array<MonthlyData> = this.calanderizeMeterData(meter, meterData, monthDisplayShort);
       let showConsumption: boolean = calanderizedMeter.find(meterData => { return meterData.energyConsumption != 0 }) != undefined;
       let showEnergyUse: boolean = this.energyUnitsHelperService.isEnergyMeter(meter.source);
+      let consumptionUnit: string
+      if (inAccount) {
+        consumptionUnit = this.energyUnitsHelperService.getMeterConsumptionUnitInAccount(meter);
+      }else{
+        consumptionUnit = this.energyUnitsHelperService.getMeterConsumptionUnitInFacility(meter);
+      }
       calanderizedMeterData.push({
-        consumptionUnit: meter.startingUnit,
+        consumptionUnit: consumptionUnit,
         meter: meter,
         monthlyData: calanderizedMeter,
         showConsumption: showConsumption,
         showEnergyUse: showEnergyUse,
-        energyUnit: meter.energyUnit
+        // energyUnit: meter.energyUnit
       });
     });
     return calanderizedMeterData;
