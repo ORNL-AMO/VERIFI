@@ -111,7 +111,7 @@ p.error {
 }
 .red,
 .required {
-  color: #bf2d00;
+  color: #bf2d00!important;
 }
 .pointer {
   cursor: pointer;
@@ -128,7 +128,7 @@ Buttons
 }
 .btn-small {
   padding: 2px 10px !important;
-  border-radius: 3px !important;
+  border-radius: 3px;
 }
 .btn-outline {
   color: #2c386b !important;
@@ -191,8 +191,12 @@ Buttons
 .btn-primary-1 i,
 .btn-primary-2 i,
 .btn-primary-3 i,
-.btn-primary-4 i {
+.btn-primary-4 i,
+.btn-outline:hover i {
   color: #fff !important;
+}
+.btn-outline i {
+  color: #2c386b !important;
 }
 .importExport button:first-child {
   margin-right: 5px;
@@ -213,12 +217,21 @@ Buttons
 .bulk-delete.show {
   opacity: 1;
 }
+.btn-group button:fist-child {
+  border-top-right-radius: 0!important;
+  border-bottom-right-radius: 0!important;
+}
+
+.btn-group button:not(:first-child) {
+  border-top-left-radius: 0!important;
+  border-bottom-left-radius: 0!important;
+}
 /*
 Alerts
 ======================================================== */
 .alert {
   padding: 5px !important;
-  margin: 5px 0px;
+  margin: 5px 0px!important;
   width: 100%;
 }
 .alert-info {
@@ -235,6 +248,18 @@ Alerts
   color: #923d15;
   background-color: #f0d3ca;
   border-color: #d0bab3;
+}
+.alert-info i {
+  color: #2b77a9;
+  margin: 5px;
+}
+.alert-warning i {
+  color: #856404;
+  margin: 5px;
+}
+.alert-danger i {
+  color: #923d15;
+  margin: 5px;
 }
 /*
 Popups & Windows
@@ -690,8 +715,10 @@ table input {
   padding: 10px 5px!important;
   color: #ffffff;
 }
+
 .table-mh th span {
   border: none;
+  padding: 0 5px!important;
 }
 /*
 Popovers (Contextual Help)
@@ -865,7 +892,16 @@ Content Tabs
 .tabs ul li a.active {
   background-color: white;
 }
-
+.tabs ul li {
+  border-top: 3px solid #6abb2e;
+}
+.tabs ul li.red {
+  border-top: 3px solid #bf2d00;
+}
+/* .tabs ul li.red a, 
+.tabs ul li.red span {
+  color: #bf2d00;
+} */
 /*
 Meter Displays
 =============================================== */
@@ -915,7 +951,9 @@ i.fa.fa-arrow-circle-down {
 .filter button:nth-child(2) {
   border-left: none;
 }
-
+.controls .meterData {
+  z-index: 2;
+}
 /*
 Account / Facility Profile Picture
 =============================================== */
@@ -1032,13 +1070,13 @@ Pagination
 }
 .items-per-page {
   padding: 10px;
-  font-size: 12px;
+  /* font-size: 12px; */
 }
 .items-per-page span {
   padding: 3px 3px 5px 5px;
 }
 .items-per-page select {
-  padding: 4px;
+  padding: 6px 5px 7px 5px;
   border-radius: 3px;
   cursor: pointer;
 }
@@ -1173,4 +1211,30 @@ input.unitDollar {
 .tag.new {
   background-color: #145932;
   color: white;
+}
+
+canvas {
+  top: auto!important;
+  left: auto!important;
+  bottom: 65px!important;
+  right: 50px!important;
+  z-index: 1001!important;
+  /*height: 200px;*/
+}
+
+
+
+/*Added by mark for import-v2. Not sure correct place to put.*/
+.scroll-item{
+  overflow-y: scroll;
+  max-height: 100%;
+}
+
+.invalid-import-table .header-width{
+  width: 15%;
+}
+li.disabled a{
+  pointer-events: none;
+  cursor: default;
+  opacity: .7;
 }

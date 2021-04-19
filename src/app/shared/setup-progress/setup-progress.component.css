@@ -1,0 +1,38 @@
+.progress-box {
+    position: fixed;
+    bottom: -350px;
+    right: 0px;
+    z-index: 1000;
+    min-height: 200px;
+    width: 550px;
+    padding: 30px 85px 30px 50px;
+    border-radius: 4px;
+    color: #ffffff;
+    background-color: #2c386b;
+    border: 1px solid #f1f1f1;
+    box-shadow: 0 0 10px #0000002b;
+    transition: 1s all;
+}
+.progress-box.open {
+    bottom: 35px; 
+}
+.progress-box h3,
+.progress-box p,
+.progress-box span{
+    color: white;
+}
+.progress-box span {
+    display: block;
+}
+.progress-box i {
+    margin-top: 3px;
+    font-size: 25px;
+    color: #787f9c;
+}
+.progress-bar {
+    background-color: #2980b9!important;
+}
+#confetti-canvas {
+    position:absolute;
+    top:0;
+  }

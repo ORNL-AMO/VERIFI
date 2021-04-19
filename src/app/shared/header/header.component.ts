@@ -1,13 +1,13 @@
 import { Component, ElementRef, OnInit } from '@angular/core';
-import { Router, Event, NavigationStart } from '@angular/router';
+import { Router, Event, NavigationStart, NavigationEnd } from '@angular/router';
 import { AccountdbService } from "../../indexedDB/account-db.service";
 import { FacilitydbService } from "../../indexedDB/facility-db.service";
 import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db.service";
 import { UtilityMeterGroupdbService } from "../../indexedDB/utilityMeterGroup-db.service";
 import { UtilityMeterDatadbService } from "../../indexedDB/utilityMeterData-db.service";
-import { LocalStorageService } from 'ngx-webstorage';
 import { IdbAccount, IdbFacility } from 'src/app/models/idb';
 import { Subscription } from 'rxjs';
+import * as _ from 'lodash';
 
 @Component({
   selector: 'app-header',
@@ -27,7 +27,7 @@ export class HeaderComponent implements OnInit {
   facilityList: Array<IdbFacility>;
   activeAccount: IdbAccount;
   activeFacility: IdbFacility;
-  devtools: boolean = false;
+  viewingAccountManagementPage: boolean;
 
   allAccountsSub: Subscription;
   selectedAccountSub: Subscription;
@@ -42,15 +42,19 @@ export class HeaderComponent implements OnInit {
     public facilitydbService: FacilitydbService,
     public utilityMeterdbService: UtilityMeterdbService,
     public utilityMeterGroupdbService: UtilityMeterGroupdbService,
-    public utilityMeterDatadbService: UtilityMeterDatadbService,
-    private localStorage: LocalStorageService
+    public utilityMeterDatadbService: UtilityMeterDatadbService
   ) {
     // Close menus on navigation
     router.events.subscribe((event: Event) => {
-      // console.log(event);
       if (event instanceof NavigationStart) {
         this.accountMenu = false;
         this.facilityMenu = false;
+      }
+      if (event instanceof NavigationEnd && this.router.url === '/account-management') {
+        this.viewingAccountManagementPage = true;
+      }
+      if (event instanceof NavigationEnd && this.router.url != '/account-management') {
+        this.viewingAccountManagementPage = false;
       }
     });
   }
@@ -112,10 +116,10 @@ export class HeaderComponent implements OnInit {
   }
 
   addNewAccount() {
-    this.toggleSwitchAccountsMenu();
+    this.switchAccountMenu = false;
     let newAccount: IdbAccount = this.accountdbService.getNewIdbAccount();
     this.accountdbService.add(newAccount);
-    this.router.navigate(['account/account']);
+    this.router.navigate(['/account-management']);
   }
 
   addNewFacility() {
@@ -134,87 +138,30 @@ export class HeaderComponent implements OnInit {
     this.facilitydbService.selectedFacility.next(facility);
   }
 
-  selectAllFacilities(){
+  selectAllFacilities() {
     //this.toggleFacilityMenu();
     this.router.navigate(['/account-summary']);
   }
 
 
   getAccountFacilityCount() {
-    var res = this.allFacilities.reduce(function(obj, v) {
-      obj[v.accountId] = (obj[v.accountId] || 0) + 1;
-      return obj;
-    }, {});
+    this.accountList.forEach(account => {
+      account.numberOfFacilities = this.getNumberOfFacilities(account.id);
+    });
+  }
 
-    
-    for(const property in res) {
-      const index = this.accountList.map(function(e) { return e.id; }).indexOf(+property);
-      if (res[property] === 1) {
-        this.accountList[index]['facilityCount'] = res[property] + " Facility";
-      } else {
-        this.accountList[index]['facilityCount'] = res[property] + " Facilities";
+  getNumberOfFacilities(accountId: number): string {
+    let count: number = 0;
+    this.allFacilities.forEach(facility => {
+      if (facility.accountId == accountId) {
+        count++;
       }
+    });
+    if(count != 1){
+      return count + ' Facilities';
+    }else{
+      return count + ' Facility';
     }
-  }
-
-  /* DEV TOOLS BELOW 
-  *******************************************************************************/
-  loadTestData() {
-    this.accountdbService.addTestData();
-    this.facilitydbService.addTestData()
-    // .then(
-    //   data => {
-    //     location.reload();
-    //   }
-    // );
-    //location.reload();
-    console.log("Data loaded");
-  }
-
-  getAllAccounts() {
-    this.accountdbService.getAll().subscribe(
-      data => {
-        console.log(data);
-      }
-    );
-  }
-
-  getAllFacilities() {
-    this.facilitydbService.getAll().subscribe(
-      data => {
-        console.log(data);
-      }
-    );
-  }
-
-  getAllMeters() {
-    this.utilityMeterdbService.getAll().subscribe(
-      data => {
-        console.log(data);
-      }
-    );
-  }
-
-  getAllMeterData() {
-    this.utilityMeterDatadbService.getAll().subscribe(
-      data => {
-        console.log(data);
-      }
-    );
-  }
-
-  getAllMeterGroups() {
-    this.utilityMeterGroupdbService.getAll().subscribe(
-      data => {
-        console.log(data);
-      }
-    );
-  }
-
-  clearLocalstorage() {
-    this.localStorage.clear('accountid');
-    this.localStorage.clear('facilityid');
-    console.log("data cleared");
   }
 
 }

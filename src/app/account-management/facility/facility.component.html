@@ -14,299 +14,32 @@
             </label>
         </form>
         </div>-->
-		<div class="col" *ngIf="facilityForm">
+		<div class="col">
 			<h4>Facility Information</h4>
 			<br>
-			<form [formGroup]="facilityForm" autocomplete="on">
-				<div class="row"> 
-					<div class="col">
-						<div class="mb-3">
-							<label>Facility Name <span class="required">*</span></label>
-							<input type="text" class="form-control" formControlName="name" (input)="onFormChange();">
-						</div>
-						<span class="inputError" *ngIf="facilityForm.get('name').hasError('required')">Facility name is required</span>
+			<app-general-information-form *ngIf="selectedFacility" [inAccount]="false"></app-general-information-form>
+		</div>
 
-						<div class="mb-3">
-							<label>Address</label>
-							<input type="text" class="form-control" formControlName="address" (input)="onFormChange();" autocomplete="shipping street-address">
-						</div>
-
-						<div class="row">
-							<div class="mb-3 col">
-								<label>City</label>
-								<input type="text" class="form-control" formControlName="city" (input)="onFormChange();">
-							</div>
-							<div class="mb-3 col">
-								<label>State</label>
-								<select formControlName="state" (change)="onFormChange()">
-									<option *ngFor="let state of globalVariables.states" [ngValue]="state.name">{{state.name}}</option>
-								</select>
-							</div>
-							<div class="mb-3 col">
-								<label>Zip</label>
-								<input type="number" class="form-control" formControlName="zip" (input)="onFormChange();">
-							</div>
-							<div class="mb-3 col">
-								<label>Country</label>
-								<input type="text" class="form-control" formControlName="country" (input)="onFormChange();">
-							</div>
-						</div>
-
-						<div class="row">
-							<div class="mb-3 col">
-								<label>NAICS Code</label>
-								<select formControlName="naics" (change)="onFormChange()">
-									<option *ngFor="let naics of globalVariables.naicsCodes" [ngValue]="naics.code">{{naics.code}} - {{naics.industyType}}</option>
-								  </select>
-							</div>
-
-							<div class="input-group mb-3 col">
-								<label>Facility Area</label>
-								<input type="text" class="form-control" formControlName="size" (input)="onFormChange();">
-								<span class="unit" *ngIf="selectedFacility.unitsOfMeasure === 'Imperial'">ft2</span>
-								<span class="unit" *ngIf="selectedFacility.unitsOfMeasure === 'Metric'">m2</span>
-							</div>
-						</div>
-
-						<div class="mb-3">
-							<label>Notes</label>
-							<textarea class="" formControlName="notes" (input)="onFormChange();"></textarea>
-						</div>
-					</div>
-				</div> 
-			</form>
-        </div>
-        
-		<div class="col-lg-5" *ngIf="facilityForm">
+		<div class="col-lg-5">
 			<h4>Corporate Default Units</h4>
 			<br>
-			<form [formGroup]="facilityForm">
-				<div class="row">
-					<div class="mb-3 col">
-                        <label>Units of Measure</label>
-						<select formControlName="unitsOfMeasure" (change)="setUnitsOfMeasure()">
-							<option [ngValue]="'Imperial'">Imperial</option>
-							<option [ngValue]="'Metric'">Metric</option>
-							<option [ngValue]="'Custom'">Custom</option>
-						</select>
-					</div>
-                </div>
-                
-				<div class="row">
-					<div class="mb-3 col">
-                        <label>Energy Unit</label>
-						<select formControlName="energyUnit" (change)="onFormChange()">
-							<option *ngFor="let energyUnitOption of energyUnitOptions" [ngValue]="energyUnitOption.value">
-								<span [innerHTML]="energyUnitOption.display"></span></option>
-						</select>
-                    </div>
-                    <div class="mb-3 col">
-                        <label>Liquid Volume Unit</label>
-						<select formControlName="volumeLiquidUnit" (change)="onFormChange()">
-							<option *ngFor="let volumeUnitOption of volumeLiquidOptions" [ngValue]="volumeUnitOption.value">
-								<span [innerHTML]="volumeUnitOption.display"></span></option>
-						</select>
-					</div>
-				</div>
-
-				<div class="row">
-					<div class="mb-3 col">
-                        <label>Gas Volume Unit</label>
-						<select formControlName="volumeGasUnit" (change)="onFormChange()">
-							<option *ngFor="let volumeUnitOption of volumeGasOptions" [ngValue]="volumeUnitOption.value">
-								<span [innerHTML]="volumeUnitOption.display"></span></option>
-						</select>
-                    </div>
-                    <div class="mb-3 col">
-                        <label>Mass Unit</label>
-						<select formControlName="massUnit" (change)="onFormChange()">
-							<option *ngFor="let massUnitOption of massUnitOptions" [ngValue]="massUnitOption.value">
-								<span [innerHTML]="massUnitOption.display"></span></option>
-						</select>
-					</div>
-                </div>
-                
-				<!--    
-                <div class="row">
-                    <label class="col-lg-4">Size Unit</label>
-                    <div class="mb-3 col">
-                        <select formControlName="sizeUnit" (change)="onFormChange()">
-                            <option *ngFor="let sizeUnitOption of sizeUnitOptions" [ngValue]="sizeUnitOption.value">
-                            <span [innerHTML]="sizeUnitOption.display"></span></option>
-                        </select>
-                    </div>
-                </div>
-                -->
-			</form>
-			<p class="alert alert-warning" *ngIf="unitsDontMatchAccount">
-				Facility Units are different then the units set for the account. If you would like to use the
-				account units for this facility click here: <a (click)="setAccountUnits()">Use Account Units</a>
-			</p>
+			<app-default-units-form *ngIf="selectedFacility" [inAccount]="false"></app-default-units-form>
 		</div>
 	</div>
 	<br>
 
 	<div class="row">
-		<div class="col-lg-7" *ngIf="facilityForm">
+		<div class="col-lg-7">
 			<h4>Sustainability Questions</h4>
 			<br>
-			<form [formGroup]="facilityForm">
-				<input type="checkbox" class="rowToggle" name="energyReductionGoal" formControlName="energyReductionGoal" (change)="onFormChange()">
-				<label class="checkbox mb-3">1. Do you have Energy reduction goal? </label> 
-				<div class="row">
-					<div class="col" [hidden]="!facilityForm.controls.energyReductionGoal.value">
-						<label>Reduction Goal</label>
-						<div class="input-group mb-3">
-							<input type="number" class="form-control" formControlName="energyReductionPercent" (input)="onFormChange();">
-							<span class="unit">%</span>
-						</div>
-					</div>
-					<div class="col" [hidden]="!facilityForm.controls.energyReductionGoal.value">
-						<label>Baseline Year</label>
-						<select formControlName="energyReductionBaselineYear" (change)="onFormChange()">
-							<option *ngFor="let year of years" [ngValue]="year">{{year}}</option>
-						  </select>
-					</div>
-					<div class="col" [hidden]="!facilityForm.controls.energyReductionGoal.value">
-						<label>Target Year</label>
-						<select formControlName="energyReductionTargetYear" (change)="onFormChange()">
-							<option *ngFor="let year of years" [ngValue]="year">{{year}}</option>
-						  </select>
-					</div>
-				</div>
-
-				<input type="checkbox" class="rowToggle" name="greenhouseReductionGoal" formControlName="greenhouseReductionGoal" (change)="onFormChange()">
-				<label class="checkbox mb-3">2. Do you have a Greenhouse Emission/Carbon reduction goal? </label>
-				<div class="row">
-					<div class="col" [hidden]="!facilityForm.controls.greenhouseReductionGoal.value">
-						<label>Reduction Goal</label>
-						<div class="input-group mb-3">
-							<input type="number" class="form-control" formControlName="greenhouseReductionPercent" (input)="onFormChange();">
-							<span class="unit">%</span>
-						</div>
-					</div>
-					<div class="col" [hidden]="!facilityForm.controls.greenhouseReductionGoal.value">
-						<label>Baseline Year</label>
-						<select formControlName="greenhouseReductionBaselineYear" (change)="onFormChange()">
-							<option *ngFor="let year of years" [ngValue]="year">{{year}}</option>
-						  </select>
-					</div>
-					<div class="col" [hidden]="!facilityForm.controls.greenhouseReductionGoal.value">
-						<label>Target Year</label>
-						<select formControlName="greenhouseReductionTargetYear" (change)="onFormChange()">
-							<option *ngFor="let year of years" [ngValue]="year">{{year}}</option>
-						  </select>
-					</div>
-				</div>
-
-				<input type="checkbox" class="rowToggle" name="renewableEnergyGoal" formControlName="renewableEnergyGoal" (change)="onFormChange()">
-				<label class="checkbox mb-3">3. Do you have renewable energy goal?</label>
-				<div class="row">
-					<div class="col" [hidden]="!facilityForm.controls.renewableEnergyGoal.value">
-						<label>Implementation Goal</label>
-						<div class="input-group mb-3">
-							<input type="number" class="form-control" formControlName="renewableEnergyPercent" (input)="onFormChange();">
-							<span class="unit">%</span>
-						</div>
-					</div>
-					<div class="col" [hidden]="!facilityForm.controls.renewableEnergyGoal.value">
-						<label>Baseline Year</label>
-						<select formControlName="renewableEnergyBaselineYear" (change)="onFormChange()">
-							<option *ngFor="let year of years" [ngValue]="year">{{year}}</option>
-						  </select>
-					</div>
-					<div class="col" [hidden]="!facilityForm.controls.renewableEnergyGoal.value">
-						<label>Target Year</label>
-						<select formControlName="renewableEnergyTargetYear" (change)="onFormChange()">
-							<option *ngFor="let year of years" [ngValue]="year">{{year}}</option>
-						  </select>
-					</div>
-				</div>
-
-				<input type="checkbox" class="rowToggle" name="wasteReductionGoal" formControlName="wasteReductionGoal" (change)="onFormChange()">
-				<label class="checkbox mb-3">4. Do you have waste reduction goal?</label>
-				<div class="row">
-					<div class="col" [hidden]="!facilityForm.controls.wasteReductionGoal.value">
-						<label>Reduction Goal</label>
-						<div class="input-group mb-3">
-							<input type="number" class="form-control" formControlName="wasteReductionPercent" (input)="onFormChange();">
-							<span class="unit">%</span>
-						</div>
-					</div>
-					<div class="col" [hidden]="!facilityForm.controls.wasteReductionGoal.value">
-						<label>Baseline Year</label>
-						<select formControlName="wasteReductionBaselineYear" (change)="onFormChange()">
-							<option *ngFor="let year of years" [ngValue]="year">{{year}}</option>
-						  </select>
-					</div>
-					<div class="col" [hidden]="!facilityForm.controls.wasteReductionGoal.value">
-						<label>Target Year</label>
-						<select formControlName="wasteReductionTargetYear" (change)="onFormChange()">
-							<option *ngFor="let year of years" [ngValue]="year">{{year}}</option>
-						  </select>
-					</div>
-				</div>
-
-				<input type="checkbox" class="rowToggle" name="waterReductionGoal" formControlName="waterReductionGoal" (change)="onFormChange()">
-				<label class="checkbox mb-3">5. Do you have water reduction goal?</label> 
-				<div class="row">
-					<div class="col" [hidden]="!facilityForm.controls.waterReductionGoal.value">
-						<label>Reduction Goal</label>
-						<div class="input-group mb-3">
-							<input type="number" class="form-control" formControlName="waterReductionPercent" (input)="onFormChange();">
-							<span class="unit">%</span>
-						</div>
-					</div>
-					<div class="col" [hidden]="!facilityForm.controls.waterReductionGoal.value">
-						<label>Baseline Year</label>
-						<select formControlName="waterReductionBaselineYear" (change)="onFormChange()">
-							<option *ngFor="let year of years" [ngValue]="year">{{year}}</option>
-						  </select>
-					</div>
-					<div class="col" [hidden]="!facilityForm.controls.waterReductionGoal.value">
-						<label>Target Year</label>
-						<select formControlName="waterReductionTargetYear" (change)="onFormChange()">
-							<option *ngFor="let year of years" [ngValue]="year">{{year}}</option>
-						  </select>
-					</div>
-				</div>
-			</form>
-			<p class="alert alert-warning" *ngIf="sustainQuestionsDontMatchAccount">
-				Facility sustainability answers are different then the answers set for the account. If you would like to use the
-				account answers for this facility click here: <a (click)="setAccountSustainQuestions()">Use Account Answers</a>
-			</p>
+			<app-sustainability-questions-form *ngIf="selectedFacility" [inAccount]="false">
+			</app-sustainability-questions-form>
 		</div>
-		<div class="col" *ngIf="facilityForm">
+		<div class="col">
 			<h4>Financial Reporting</h4>
 			<br>
-			<form [formGroup]="facilityForm">
-			  
-			  <label class="checkbox mb-3">When is your fiscal year? </label> 
-	
-			  <input type="radio" class="rowToggle" name="fiscalYear" formControlName="fiscalYear" value="calendarYear" (change)="onFormChange()">
-			  <label class="checkbox">Calendar Year</label>
-	
-			  <input type="radio" class="rowToggle" name="fiscalYear" formControlName="fiscalYear" value="nonCalendarYear" (change)="onFormChange()">
-			  <label class="checkbox">Non Calendar Year</label>
-	
-			  <div class="row" *ngIf="facilityForm.controls.fiscalYear.value === 'nonCalendarYear'">
-				  <div class="col-lg-12 mb-3">
-					<label>Start Month</label>
-					<select formControlName="fiscalYearMonth" (change)="onFormChange()">
-					  <option *ngFor="let month of globalVariables.months" [ngValue]="month.name">{{month.name}}</option>
-					</select>
-				  </div>
-				  <div class="col-lg-12 mb-3">
-					<input type="checkbox" class="rowToggle" name="fiscalYearCalendarEnd" formControlName="fiscalYearCalendarEnd" (change)="onFormChange()">
-					<label class="checkbox">Our FY is denoted by the calendar year in which it ends.</label>
-				</div>
-			  </div>
-			</form>
-			<p class="alert alert-warning" *ngIf="financialReportingDoestMatchAccount">
-				Facility financial reporting is different then the what is set for the account. If you would like to use the
-				account answers for this facility click here: <a (click)="setAccountFinancialReporting()">Use Account Reporting</a>
-			</p>
-		  </div>
+			<app-financial-reporting-form *ngIf="selectedFacility" [inAccount]="false"></app-financial-reporting-form>
+		</div>
 	</div>
 	<br>
 
@@ -315,13 +48,19 @@
 			<h4>Delete Facility</h4>
 			<p>Once deleted, you will permanently lose all your data linked to this facility. Please make a backup of
 				your data before proceeding with this step.</p>
-			<button class="btn btn-danger" (click)="editFacility()">Delete Facility</button>
+			<button class="btn btn-danger" (click)="openDeleteFacility()">Delete Facility</button>
+		</div>
+		<div class="col-lg-6">
+			<h4>Export Facility</h4>
+			<p>You can export this facility and it's data to be imported into other accounts or used as a backup of your
+				data set.</p>
+			<button class="btn btn-outline" (click)="backupFacility()">Export Facility</button>
 		</div>
 	</div>
 </div>
 
-<div class="popup" [class.open]="showDeleteFacility" *ngIf="facilityForm">
-	<div class="popup-header">Delete Facility: {{facilityForm.controls.name.value}}
+<div class="popup" [class.open]="showDeleteFacility" *ngIf="selectedFacility">
+	<div class="popup-header">Delete Facility: {{selectedFacility.name}}
 		<button class="item-right" (click)="cancelDelete()">x</button>
 	</div>
 	<div class="popup-body">

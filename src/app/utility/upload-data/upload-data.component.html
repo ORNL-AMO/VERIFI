@@ -1,0 +1,35 @@
+<div class="wrapper main-content">
+    <h4>Import Data From .XLSX Files</h4>
+    <div class="alert alert-info">
+        If you are importing data from multiple files for a single meter or predictor please import the files one at a
+        time.
+    </div>
+    <input type="file" #importFile id="importFile" (input)="setImportFile($event.target.files)" multiple accept=".xlsx">
+    <div *ngIf="filesUploaded">
+        <hr>
+        <app-excel-data-table></app-excel-data-table>
+        <app-meter-table></app-meter-table>
+        <app-meter-data-table></app-meter-data-table>
+        <app-import-predictors-table></app-import-predictors-table>
+        <div class="saveCancel item-right text-right">
+            <button class="btn btn-secondary" (click)="resetData()">Cancel</button>
+            <button class="btn btn-primary pull-right" (click)="importData()" [disabled]="disableImport">Import
+                Data</button>
+            <div class="alert alert-warning" *ngIf="disableImport">
+                No valid data has been uploaded. Finish using setup wizards to import valid data.
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<div class="window" [class.open]="importMeterFileWizard || importMeterDataFileWizard || importPredictorFileWizard">
+    <div class="windowOverlay"></div>
+    <div class="windowContent importMeterWindowContent">
+        <app-import-meter-wizard *ngIf="importMeterFileWizard" [wizardContext]="'template'"></app-import-meter-wizard>
+        <app-import-meter-data-wizard *ngIf="importMeterDataFileWizard"></app-import-meter-data-wizard>
+        <app-import-predictors-wizard *ngIf="importPredictorFileWizard" [wizardContext]="'template'">
+        </app-import-predictors-wizard>
+    </div>
+</div>

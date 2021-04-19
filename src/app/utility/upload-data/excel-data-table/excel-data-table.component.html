@@ -1,0 +1,38 @@
+<div class="mt-3" *ngIf="excelFiles.length != 0">
+    <h6>Excel Files</h6>
+    <p class="alert alert-warning">
+        Excel file data needs some setup. Click the setup link to use the wizard to prep your data for importing.
+    </p>
+    <table class="table table-sm">
+        <thead>
+            <tr class="import-meter">
+                <th class="w-50">
+                    File Name
+                </th>
+                <th>
+                    Setup Import Data
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let excelFile of excelFiles">
+                <td>{{excelFile.name}}</td>
+                <td>
+                    <a (click)="selectExcelFile(excelFile)">
+                        Setup
+                    </a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <hr>
+</div>
+
+
+<div class="window" [ngClass]="{'open': selectedExcelFile}">
+    <div class="windowOverlay"></div>
+    <div class="windowContent importMeterWindowContent scroll-item">
+        <app-excel-wizard *ngIf="selectedExcelFile" [selectedExcelFile]="selectedExcelFile"
+            (emitClose)="closeExcelWizard()"></app-excel-wizard>
+    </div>
+</div>

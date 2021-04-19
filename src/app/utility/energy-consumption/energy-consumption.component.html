@@ -1,13 +1,41 @@
 <div class="tabs">
     <ul>
         <li><a routerLink="/utility/energy-consumption" [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">Energy Source</a></li>
-        <li [hidden]="!electricity"><a routerLink="electricity" [routerLinkActive]="['active']">Electricity</a></li>
-        <li [hidden]="!naturalGas"><a routerLink="natural-gas" [routerLinkActive]="['active']">Natural Gas</a></li>
-        <li [hidden]="!otherFuels"><a routerLink="other-fuels" [routerLinkActive]="['active']">Other Fuels</a></li>
-        <li [hidden]="!otherEnergy"><a routerLink="other-energy" [routerLinkActive]="['active']">Other Energy</a></li>
-        <li [hidden]="!water"><a routerLink="water" [routerLinkActive]="['active']">Water</a></li>
-        <li [hidden]="!wasteWater"><a routerLink="waste-water" [routerLinkActive]="['active']">Waste Water</a></li>
-        <li [hidden]="!otherUtility"><a routerLink="other-utility" [routerLinkActive]="['active']">Other Utility</a></li>
+        <li [hidden]="!electricity"[class.red]="!hasElectricityData">
+            <a routerLink="electricity" [routerLinkActive]="['active']">Electricity 
+                <!-- <span [hidden]="hasElectricityData">*</span> -->
+            </a>
+        </li>
+        <li [hidden]="!naturalGas" [class.red]="!hasNaturalGasData">
+            <a routerLink="natural-gas" [routerLinkActive]="['active']">Natural Gas 
+                <!-- <span [hidden]="hasNaturalGasData">*</span> -->
+            </a>
+        </li>
+        <li [hidden]="!otherFuels" [class.red]="!hasOtherFuelsData">
+            <a routerLink="other-fuels" [routerLinkActive]="['active']">Other Fuels 
+                <!-- <span [hidden]="hasOtherFuelsData">*</span> -->
+            </a>
+        </li>
+        <li [hidden]="!otherEnergy" [class.red]="!hasOtherEnergyData">
+            <a routerLink="other-energy" [routerLinkActive]="['active']">Other Energy 
+                <!-- <span [hidden]="hasOtherEnergyData">*</span> -->
+            </a>
+        </li>
+        <li [hidden]="!water" [class.red]="!hasWaterData">
+            <a routerLink="water" [routerLinkActive]="['active']">Water 
+                <!-- <span [hidden]="hasWaterData">*</span> -->
+            </a>
+        </li>
+        <li [hidden]="!wasteWater" [class.red]="!hasWasteWaterData">
+            <a routerLink="waste-water" [routerLinkActive]="['active']">Waste Water 
+                <!-- <span [hidden]="hasWasteWaterData">*</span> -->
+            </a>
+        </li>
+        <li [hidden]="!otherUtility" [class.red]="!hasOtherUtilityData">
+            <a routerLink="other-utility" [routerLinkActive]="['active']">Other Utility 
+                <!-- <span [hidden]="hasOtherUtilityData">*</span> -->
+            </a>
+        </li>
     </ul>
 </div>
 <div class="wrapper main-content">

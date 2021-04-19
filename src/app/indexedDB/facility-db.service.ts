@@ -18,17 +18,12 @@ export class FacilitydbService {
         this.accountFacilities = new BehaviorSubject<Array<IdbFacility>>(new Array());
         this.allFacilities = new BehaviorSubject<Array<IdbFacility>>(new Array());
         this.selectedFacility = new BehaviorSubject<IdbFacility>(undefined);
-        this.setAllFacilities();
-        this.initializeLocalFromLocalStorage();
-
         this.accountDbService.selectedAccount.subscribe(() => {
             this.setAccountFacilities();
         });
-
         this.accountFacilities.subscribe(() => {
             this.setSelectedFacility();
         });
-
         this.selectedFacility.subscribe(facility => {
             if (facility) {
                 this.localStorageService.store('facilityId', facility.id);
@@ -36,12 +31,20 @@ export class FacilitydbService {
         });
     }
 
-    initializeLocalFromLocalStorage() {
-        let storedFacilityId: number = this.localStorageService.retrieve("facilityId");
-        if (storedFacilityId) {
-            this.getById(storedFacilityId).subscribe(facility => {
-                this.selectedFacility.next(facility);
-            });
+    async initializeFacilityFromLocalStorage() {
+        let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+        if (selectedAccount) {
+            let allFacilities: Array<IdbFacility> = await this.getAll().toPromise();
+            this.allFacilities.next(allFacilities);
+            let accountFacilities: Array<IdbFacility> = allFacilities.filter(facility => { return facility.accountId == selectedAccount.id });
+            this.accountFacilities.next(accountFacilities);
+            let storedFacilityId: number = this.localStorageService.retrieve("facilityId");
+            if (storedFacilityId) {
+                let selectedFacility: IdbFacility = accountFacilities.find(facility => { return facility.id == storedFacilityId });
+                this.selectedFacility.next(selectedFacility);
+            } else if (accountFacilities.length != 0) {
+                this.selectedFacility.next(accountFacilities[0]);
+            }
         }
     }
 
@@ -105,6 +108,14 @@ export class FacilitydbService {
         });
     }
 
+    addWithObservable(facility: IdbFacility): Observable<any> {
+        return this.dbService.add('facilities', facility);
+    }
+
+    deleteWithObservable(facilityId: number): Observable<any> {
+        return this.dbService.delete('facilities', facilityId);
+    }
+
     update(values: IdbFacility): void {
         this.dbService.update('facilities', values).subscribe(() => {
             this.setAllFacilities();
@@ -118,17 +129,35 @@ export class FacilitydbService {
         });
     }
 
-    deleteAllAccountFacilities(): void {
-        let pendingFacilities = JSON.parse(JSON.stringify(this.accountFacilities.value));
-        for (let i = 0; i < pendingFacilities.length; i++) {
-            this.dbService.delete('facilities', pendingFacilities[i].id);
+    async deleteAllSelectedAccountFacilities() {
+        let accountFacilities: Array<IdbFacility> = this.accountFacilities.getValue();
+        await this.deleteFacilitiesAsync(accountFacilities);
+    }
+
+    async deleteFacilitiesAsync(accountFacilities: Array<IdbFacility>) {
+        for (let i = 0; i < accountFacilities.length; i++) {
+            await this.deleteWithObservable(accountFacilities[i].id).toPromise();
         }
     }
 
-    addTestData() {
-        TestFacilityData.forEach(facilityDataItem => {
-            this.add(facilityDataItem);
-        });
+
+    async addTestData(allAccounts: Array<IdbAccount>) {
+        for (let i = 0; i < TestFacilityData.length; i++) {
+            //set account ID from corresponding account in db
+            if (TestFacilityData[i].name == 'Frosted Side' || TestFacilityData[i].name == 'Plain Side') {
+                let correspondingAccount: IdbAccount = allAccounts.find(account => { return account.name == 'Mini Wheats' });
+                TestFacilityData[i].accountId = correspondingAccount.id;
+            }
+            if (TestFacilityData[i].name == 'Almond Milk') {
+                let correspondingAccount: IdbAccount = allAccounts.find(account => { return account.name == 'Special K' });
+                TestFacilityData[i].accountId = correspondingAccount.id;
+            }
+            if (TestFacilityData[i].name == 'Crunch-a-tize') {
+                let correspondingAccount: IdbAccount = allAccounts.find(account => { return account.name == 'Captain Crunch' });
+                TestFacilityData[i].accountId = correspondingAccount.id;
+            }
+            await this.addWithObservable(TestFacilityData[i]).toPromise();
+        };
     }
 
     getNewIdbFacility(account: IdbAccount): IdbFacility {
@@ -151,7 +180,6 @@ export class FacilitydbService {
             energyUnit: account.energyUnit,
             volumeLiquidUnit: account.volumeLiquidUnit,
             volumeGasUnit: account.volumeGasUnit,
-            chilledWaterUnit: account.chilledWaterUnit,
             massUnit: account.massUnit,
             sustainabilityQuestions: {
                 energyReductionGoal: false,
@@ -187,63 +215,15 @@ export class FacilitydbService {
 export const TestFacilityData: Array<IdbFacility> = [
     {
         // id: undefined,
-        // facilityid: 1, // Captin Crunch
-        accountId: 1, // Captin Crunch
-        name: 'Crunch-a-tize',
-        country: 'USA',
-        state: 'TN',
-        city: undefined,
-        zip: undefined,
-        address: '',
-        naics: '',
-        type: 'Breakfast',
-        size: 1000,
-        units: 'ft',
-        notes: 'Marketing',
-        img: 'https://placthold.it/50x50',
-        unitsOfMeasure: 'Imperial',
-        energyUnit: 'kWh',
-        volumeLiquidUnit: 'SCF',
-        volumeGasUnit: 'SCF',
-        chilledWaterUnit: undefined,
-        massUnit: 'lb',
-        sustainabilityQuestions: {
-            energyReductionGoal: false,
-            energyReductionPercent: 0,
-            energyReductionBaselineYear: 0,
-            energyReductionTargetYear: 0,
-            greenhouseReductionGoal: false,
-            greenhouseReductionPercent: 0,
-            greenhouseReductionBaselineYear: 0,
-            greenhouseReductionTargetYear: 0,
-            renewableEnergyGoal: false,
-            renewableEnergyPercent: 0,
-            renewableEnergyBaselineYear: 0,
-            renewableEnergyTargetYear: 0,
-            wasteReductionGoal: false,
-            wasteReductionPercent: 0,
-            wasteReductionBaselineYear: 0,
-            wasteReductionTargetYear: 0,
-            waterReductionGoal: false,
-            waterReductionPercent: 0,
-            waterReductionBaselineYear: 0,
-            waterReductionTargetYear: 0,
-        },
-        fiscalYear: 'calendarYear',
-        fiscalYearMonth: 'January',
-        fiscalYearCalendarEnd: true,
-    },
-    {
-        // id: undefined,
         // facilityid: 2,
-        accountId: 2, // Mini Wheats
+        accountId: 1, // Mini Wheats
         name: 'Frosted Side',
         country: 'USA',
-        state: 'TN',
-        city: undefined,
-        zip: undefined,
-        address: '',
-        naics: '',
+        state: 'NEVADA',
+        city: 'Reno',
+        zip: 89501,
+        address: '2193  Sheila Lane',
+        naics: '311',
         type: 'Breakfast',
         size: 1000,
         units: 'ft',
@@ -251,9 +231,8 @@ export const TestFacilityData: Array<IdbFacility> = [
         img: 'https://placthold.it/50x50',
         unitsOfMeasure: 'Imperial',
         energyUnit: 'kWh',
-        volumeLiquidUnit: 'SCF',
+        volumeLiquidUnit: 'gal',
         volumeGasUnit: 'SCF',
-        chilledWaterUnit: undefined,
         massUnit: 'lb',
         sustainabilityQuestions: {
             energyReductionGoal: false,
@@ -284,14 +263,14 @@ export const TestFacilityData: Array<IdbFacility> = [
     {
         // id: undefined,
         // facilityid: 3,
-        accountId: 2, // Mini Wheats
+        accountId: 1, // Mini Wheats
         name: 'Plain Side',
         country: 'USA',
-        state: 'TN',
-        city: undefined,
-        zip: undefined,
-        address: '',
-        naics: '',
+        state: 'FLORIDA',
+        city: 'Tampa',
+        zip: 33602,
+        address: '4051  Bernardo Street',
+        naics: '311',
         type: 'Breakfast',
         size: 1000,
         units: 'ft',
@@ -299,9 +278,8 @@ export const TestFacilityData: Array<IdbFacility> = [
         img: 'https://placthold.it/50x50',
         unitsOfMeasure: 'Imperial',
         energyUnit: 'kWh',
-        volumeLiquidUnit: 'SCF',
+        volumeLiquidUnit: 'gal',
         volumeGasUnit: 'SCF',
-        chilledWaterUnit: undefined,
         massUnit: 'lb',
         sustainabilityQuestions: {
             energyReductionGoal: false,
@@ -332,24 +310,70 @@ export const TestFacilityData: Array<IdbFacility> = [
     {
         // id: undefined,
         // facilityid: 4,
-        accountId: 3, // Special K
+        accountId: 2, // Special K
         name: 'Almond Milk',
         country: 'USA',
-        state: 'TN',
-        city: undefined,
-        zip: undefined,
-        address: '',
-        naics: '',
+        state: 'OHIO',
+        city: 'Burton',
+        zip: 44021,
+        address: '3954  Shady Pines Drive',
+        naics: '311',
         type: 'Breakfast',
-        size: 10,
+        size: 1000,
         units: 'ft',
         notes: 'Fiber',
         img: 'https://placthold.it/50x50',
         unitsOfMeasure: 'Imperial',
         energyUnit: 'kWh',
-        volumeLiquidUnit: 'SCF',
+        volumeLiquidUnit: 'gal',
         volumeGasUnit: 'SCF',
-        chilledWaterUnit: undefined,
+        massUnit: 'lb',
+        sustainabilityQuestions: {
+            energyReductionGoal: false,
+            energyReductionPercent: 0,
+            energyReductionBaselineYear: 0,
+            energyReductionTargetYear: 0,
+            greenhouseReductionGoal: false,
+            greenhouseReductionPercent: 0,
+            greenhouseReductionBaselineYear: 0,
+            greenhouseReductionTargetYear: 0,
+            renewableEnergyGoal: false,
+            renewableEnergyPercent: 0,
+            renewableEnergyBaselineYear: 0,
+            renewableEnergyTargetYear: 0,
+            wasteReductionGoal: false,
+            wasteReductionPercent: 0,
+            wasteReductionBaselineYear: 0,
+            wasteReductionTargetYear: 0,
+            waterReductionGoal: false,
+            waterReductionPercent: 0,
+            waterReductionBaselineYear: 0,
+            waterReductionTargetYear: 0,
+        },
+        fiscalYear: 'calendarYear',
+        fiscalYearMonth: 'January',
+        fiscalYearCalendarEnd: true,
+    },
+    {
+        // id: undefined,
+        // facilityid: 1, // Captin Crunch
+        accountId: 3, // Captin Crunch
+        name: 'Crunch-a-tize',
+        country: 'USA',
+        state: 'CALIFORNIA',
+        city: 'Newport Beach',
+        zip: 92660,
+        address: '4701  Elk Street',
+        naics: '311',
+        type: 'Breakfast',
+        size: 1000,
+        units: 'ft',
+        notes: 'Marketing',
+        img: 'https://placthold.it/50x50',
+        unitsOfMeasure: 'Imperial',
+        energyUnit: 'kWh',
+        volumeLiquidUnit: 'gal',
+        volumeGasUnit: 'SCF',
         massUnit: 'lb',
         sustainabilityQuestions: {
             energyReductionGoal: false,

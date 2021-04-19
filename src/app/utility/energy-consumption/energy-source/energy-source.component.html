@@ -1,82 +1,103 @@
 <h4>Energy Sources</h4>
 
-<div class="controls">
-    <div class="importExport item-right">
-        <button class="btn btn-small btn-outline" (click)="showImportWindow()">Import</button>
-        <button class="btn btn-small btn-outline" (click)="meterExport()">Export</button>
-    </div>
-    <!--Items Per Page-->
-    <div class="items-per-page item-right">
-        <span>Show </span>
-        <select [(ngModel)]="itemsPerPage">
-            <option [ngValue]=10>10</option>
-            <option [ngValue]=20>20</option>
-            <option [ngValue]=30>30</option>
-            <option [ngValue]=40>40</option>
-        </select>
+<div *ngIf="meterList.length === 0" class="text-center mt-5">
+    <h5>No utility meters found for this facility.</h5>
+    <p>Please <i class="fa fa-plus"></i> Add New Meter or <i class="fa fa-upload"></i> Import multiple meters from
+        excel.</p>
+    <div class="meterData">
+        <button class="btn btn-primary-4 mr-2" (click)="addMeter()"><i class="fa fa-plus"></i> Add New Meter</button>
+        <button class="btn btn-outline" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
     </div>
 </div>
 
-<div class="meterData">
-    <button class="btn btn-primary-4 item-right" (click)="addMeter()"><i class="fa fa-plus"></i> Add New Meter</button>
-</div>
+<div *ngIf="meterList.length > 0">
 
-<div class="table-responsive">
-    <table class="table table-sm">
-        <thead>
-            <tr>
-                <th (click)="setOrderDataField('name')" [ngClass]="{'active': orderDataField == 'name'}">Name</th>
-                <th (click)="setOrderDataField('source')" [ngClass]="{'active': orderDataField == 'source'}">Source</th>
-                <!--<th><i>Group</i></th>-->
-                <th (click)="setOrderDataField('meterNumber')" [ngClass]="{'active': orderDataField == 'meterNumber'}">
-                    Meter #</th>
-                <th (click)="setOrderDataField('accountNumber')"
-                    [ngClass]="{'active': orderDataField == 'accountNumber'}">Account #</th>
-                <th (click)="setOrderDataField('location')" [ngClass]="{'active': orderDataField == 'location'}">
-                    Building / Location</th>
-                <th (click)="setOrderDataField('supplier')" [ngClass]="{'active': orderDataField == 'supplier'}">Utility
-                    Supplier</th>
-                <th (click)="setOrderDataField('notes')" [ngClass]="{'active': orderDataField == 'notes'}">Notes</th>
-                <th (click)="setOrderDataField('startingUnit')"
-                    [ngClass]="{'active': orderDataField == 'startingUnit'}">Collection Units</th>
-                <th (click)="setOrderDataField('heatCapacity')"
-                    [ngClass]="{'active': orderDataField == 'heatCapacity'}">Heat Capacity</th>
-                <th (click)="setOrderDataField('siteToSource')"
-                    [ngClass]="{'active': orderDataField == 'siteToSource'}">STS</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr
-                *ngFor="let meter of meterList  | orderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
-                <td [ngClass]="{'invalid': isMeterInvalid(meter)}">{{meter.name}}</td>
-                <td>{{meter.source}}</td>
-                <!--<td>{{meter.group}}</td>-->
-                <td>{{meter.meterNumber}}</td>
-                <td>{{meter.accountNumber}}</td>
-                <td>{{meter.location}}</td>
-                <td>{{meter.supplier}}</td>
-                <td>{{meter.notes}}</td>
-                <td>
-                    <span [innerHTML]="meter.startingUnit | settingsLabel"></span>
-                </td>
-                <td>{{meter.heatCapacity}}</td>
-                <td>{{meter.siteToSource}}</td>
-                <td class="actions">
-                    <i class="fa fa-pencil" title="Edit" (click)="selectEditMeter(meter)"></i>
-                    <i class="fa fa-trash-o" title="Delete" (click)="selectDeleteMeter(meter)"></i>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-</div>
+    <p>All energy sources that <strong>{{selectedFacilityName}}</strong> uses can be viewed in the tabs at the top of
+        the
+        screen.</p>
 
-<div class="tableControls overflow-hidden">
-    <div class="item-right">
-        <ngb-pagination [collectionSize]="meterList.length" [(page)]="currentPageNumber" [pageSize]="itemsPerPage"
-            [rotate]="true" aria-label="Default pagination"></ngb-pagination>
+    <div class="controls mb-2">
+        <div class="meterData item-right">
+            <button class="btn btn-primary-4 item-right m-0 ml-2" (click)="addMeter()"><i class="fa fa-plus"></i> Add New Meter</button>
+        </div>
+
+        <div class="importExport item-right">
+            <button class="btn btn-outline" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
+            <button class="btn btn-outline" (click)="meterExport()"><i class="fa fa-download"></i> Export</button>
+        </div>
+
+        <div class="items-per-page item-right">
+            <span>Show </span>
+            <select [(ngModel)]="itemsPerPage">
+                <option [ngValue]=10>10</option>
+                <option [ngValue]=20>20</option>
+                <option [ngValue]=30>30</option>
+                <option [ngValue]=40>40</option>
+            </select>
+        </div>
     </div>
-    <p class="item-right">{{meterList.length}} entries</p>
+
+    <div class="table-responsive">
+        <table class="table table-sm">
+            <thead>
+                <tr>
+                    <th (click)="setOrderDataField('name')" [ngClass]="{'active': orderDataField == 'name'}">Name</th>
+                    <th (click)="setOrderDataField('source')" [ngClass]="{'active': orderDataField == 'source'}">Source
+                    </th>
+                    <!--<th><i>Group</i></th>-->
+                    <th (click)="setOrderDataField('meterNumber')"
+                        [ngClass]="{'active': orderDataField == 'meterNumber'}">
+                        Meter #</th>
+                    <th (click)="setOrderDataField('accountNumber')"
+                        [ngClass]="{'active': orderDataField == 'accountNumber'}">Account #</th>
+                    <th (click)="setOrderDataField('location')" [ngClass]="{'active': orderDataField == 'location'}">
+                        Building / Location</th>
+                    <th (click)="setOrderDataField('supplier')" [ngClass]="{'active': orderDataField == 'supplier'}">
+                        Utility
+                        Supplier</th>
+                    <th (click)="setOrderDataField('notes')" [ngClass]="{'active': orderDataField == 'notes'}">Notes
+                    </th>
+                    <th (click)="setOrderDataField('startingUnit')"
+                        [ngClass]="{'active': orderDataField == 'startingUnit'}">Collection Units</th>
+                    <th (click)="setOrderDataField('heatCapacity')"
+                        [ngClass]="{'active': orderDataField == 'heatCapacity'}">Heat Capacity</th>
+                    <th (click)="setOrderDataField('siteToSource')"
+                        [ngClass]="{'active': orderDataField == 'siteToSource'}">STS</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr
+                    *ngFor="let meter of meterList  | orderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
+                    <td [ngClass]="{'invalid': isMeterInvalid(meter)}">{{meter.name}}</td>
+                    <td>{{meter.source}}</td>
+                    <!--<td>{{meter.group}}</td>-->
+                    <td>{{meter.meterNumber}}</td>
+                    <td>{{meter.accountNumber}}</td>
+                    <td>{{meter.location}}</td>
+                    <td>{{meter.supplier}}</td>
+                    <td>{{meter.notes}}</td>
+                    <td>
+                        <span [innerHTML]="meter.startingUnit | settingsLabel"></span>
+                    </td>
+                    <td>{{meter.heatCapacity}}</td>
+                    <td>{{meter.siteToSource}}</td>
+                    <td class="actions">
+                        <i class="fa fa-pencil" title="Edit" (click)="selectEditMeter(meter)"></i>
+                        <i class="fa fa-trash-o" title="Delete" (click)="selectDeleteMeter(meter)"></i>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="tableControls overflow-hidden">
+        <div class="item-right">
+            <ngb-pagination [collectionSize]="meterList.length" [(page)]="currentPageNumber" [pageSize]="itemsPerPage"
+                [rotate]="true" aria-label="Default pagination"></ngb-pagination>
+        </div>
+        <p class="item-right">{{meterList.length}} entries</p>
+    </div>
 </div>
 
 <div class="window" [class.open]="editMeter">
@@ -88,12 +109,6 @@
     </div>
 </div>
 
-<div class="window" [class.open]="importWindow == true">
-    <div class="windowOverlay"></div>
-    <div class="windowContent importMeterWindowContent">
-        <app-import-meter-wizard (emitClose)="closeImportWindow()"></app-import-meter-wizard>
-    </div>
-</div>
 
 <div class="popup" [class.open]="meterToDelete">
     <div class="popup-header" *ngIf="meterToDelete">Delete Meter: {{meterToDelete.name}}

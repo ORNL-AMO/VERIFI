@@ -43,8 +43,6 @@ import { PredictorDataComponent } from './utility/predictor-data/predictor-data.
 import { EditPredictorEntryRowComponent } from './utility/predictor-data/edit-predictor-entry-row/edit-predictor-entry-row.component';
 import { EditPredictorsComponent } from './utility/predictor-data/edit-predictors/edit-predictors.component';
 import { CalanderizationComponent } from './utility/calanderization/calanderization.component';
-import { EditFacilityComponent } from './account-management/account/edit-facility/edit-facility.component';
-import { ImportPredictorsComponent } from './utility/predictor-data/import-predictors/import-predictors.component';
 import { EnergyUnitDropdownComponent } from './utility/meter-grouping/energy-unit-dropdown/energy-unit-dropdown.component';
 import { SettingsLabelPipe } from './shared/helper-pipes/settings-label.pipe';
 import { VisualizationComponent } from './utility/visualization/visualization.component';
@@ -61,16 +59,39 @@ import { MetersTableComponent } from './dashboard/facility-overview/meters-table
 import { UtilityEnergyUseTableComponent } from './dashboard/facility-overview/utility-energy-use-table/utility-energy-use-table.component';
 import { AccountUtilityEnergyUseTableComponent } from './dashboard/account-overview/account-utility-energy-use-table/account-utility-energy-use-table.component';
 import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
-import { ImportMeterWizardComponent } from './utility/energy-consumption/energy-source/import-meter-wizard/import-meter-wizard.component';
 import { EditMeterComponent } from './utility/energy-consumption/energy-source/edit-meter/edit-meter.component';
 import { OrderByPipe } from './shared/helper-pipes/order-by.pipe';
-import { ImportMeterDataWizardComponent } from './utility/energy-consumption/utility-meter-data/import-meter-data-wizard/import-meter-data-wizard.component';
-import { ValidDataTableComponent } from './utility/energy-consumption/utility-meter-data/import-meter-data-wizard/valid-data-table/valid-data-table.component';
-import { MissingMeterNumberTableComponent } from './utility/energy-consumption/utility-meter-data/import-meter-data-wizard/missing-meter-number-table/missing-meter-number-table.component';
 import { AboutComponent } from './static-content/about/about.component';
 import { FeedbackComponent } from './static-content/feedback/feedback.component';
 import { AcknowledgmentsComponent } from './static-content/acknowledgments/acknowledgments.component';
 import { HelpComponent } from './static-content/help/help.component';
+import { MeterTableComponent } from './utility/upload-data/meter-table/meter-table.component';
+import { MeterDataTableComponent } from './utility/upload-data/meter-data-table/meter-data-table.component';
+import { SetupProgressComponent } from './shared/setup-progress/setup-progress.component';
+import { EmptyStateComponent } from './dashboard/empty-state/empty-state.component';
+import { GeneralInformationFormComponent } from './account-management/general-information-form/general-information-form.component';
+import { DefaultUnitsFormComponent } from './account-management/default-units-form/default-units-form.component';
+import { FinancialReportingFormComponent } from './account-management/financial-reporting-form/financial-reporting-form.component';
+import { SustainabilityQuestionsFormComponent } from './account-management/sustainability-questions-form/sustainability-questions-form.component';
+import { ImportMeterWizardComponent } from './utility/upload-data/import-meter-wizard/import-meter-wizard.component';
+import { ImportMeterDataWizardComponent } from './utility/upload-data/import-meter-data-wizard/import-meter-data-wizard.component';
+import { ValidDataTableComponent } from './utility/upload-data/import-meter-data-wizard/valid-data-table/valid-data-table.component';
+import { MissingMeterNumberTableComponent } from './utility/upload-data/import-meter-data-wizard/missing-meter-number-table/missing-meter-number-table.component';
+import { UploadDataComponent } from './utility/upload-data/upload-data.component';
+import { ExcelWizardComponent } from './utility/upload-data/excel-wizard/excel-wizard.component';
+import { ExcelDataTableComponent } from './utility/upload-data/excel-data-table/excel-data-table.component';
+import { SetupDataWizardComponent } from './utility/upload-data/excel-wizard/setup-data-wizard/setup-data-wizard.component';
+import { ColumnsWizardComponent } from './utility/upload-data/excel-wizard/columns-wizard/columns-wizard.component';
+import { WorksheetDataTableComponent } from './utility/upload-data/excel-wizard/worksheet-data-table/worksheet-data-table.component';
+import { InvalidMeterDataTableComponent } from './utility/upload-data/import-meter-data-wizard/invalid-meter-data-table/invalid-meter-data-table.component';
+import { WizardDataSummaryComponent } from './utility/upload-data/excel-wizard/wizard-data-summary/wizard-data-summary.component';
+import { CalanderizationFilterComponent } from './utility/calanderization/calanderization-filter/calanderization-filter.component';
+import { CalanderizationChartComponent } from './utility/calanderization/calanderization-chart/calanderization-chart.component';
+import { ToastNotificationsComponent } from './shared/toast-notifications/toast-notifications.component';
+import { ElectronUpdateComponent } from './electron/electron-update/electron-update.component';
+import { ImportPredictorsTableComponent } from './utility/upload-data/import-predictors-table/import-predictors-table.component';
+import { ImportPredictorsWizardComponent } from './utility/upload-data/import-predictors-wizard/import-predictors-wizard.component';
+import { ImportBackupModalComponent } from './shared/import-backup-modal/import-backup-modal.component';
 
 @NgModule({
   declarations: [
@@ -100,8 +121,6 @@ import { HelpComponent } from './static-content/help/help.component';
     EditPredictorEntryRowComponent,
     EditPredictorsComponent,
     CalanderizationComponent,
-    EditFacilityComponent,
-    ImportPredictorsComponent,
     EnergyUnitDropdownComponent,
     SettingsLabelPipe,
     VisualizationComponent,
@@ -127,7 +146,30 @@ import { HelpComponent } from './static-content/help/help.component';
     AboutComponent,
     FeedbackComponent,
     AcknowledgmentsComponent,
-    HelpComponent
+    HelpComponent,
+    UploadDataComponent,
+    ExcelWizardComponent,
+    ExcelDataTableComponent,
+    MeterTableComponent,
+    MeterDataTableComponent,
+    SetupDataWizardComponent,
+    ColumnsWizardComponent,
+    WorksheetDataTableComponent,
+    InvalidMeterDataTableComponent,
+    WizardDataSummaryComponent,
+    SetupProgressComponent,
+    EmptyStateComponent,
+    CalanderizationFilterComponent,
+    CalanderizationChartComponent,
+    GeneralInformationFormComponent,
+    DefaultUnitsFormComponent,
+    FinancialReportingFormComponent,
+    SustainabilityQuestionsFormComponent,
+    ToastNotificationsComponent,
+    ElectronUpdateComponent,
+    ImportPredictorsTableComponent,
+    ImportPredictorsWizardComponent,
+    ImportBackupModalComponent,
   ],
   imports: [
     BrowserModule,

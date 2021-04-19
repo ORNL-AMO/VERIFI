@@ -1,0 +1,33 @@
+<h4>Import Data from {{selectedExcelFile.name}}
+    <button type="button" class="close" aria-label="Close" (click)="close()">
+        &times;
+    </button>
+</h4>
+<!--Page 1: Select data fields-->
+<div *ngIf="wizardPage == 1 && workbookLoaded">
+    <app-setup-data-wizard (emitContinue)="continue()">
+    </app-setup-data-wizard>
+</div>
+
+<!--Page 2: Select data fields-->
+<div *ngIf="wizardPage == 2">
+    <app-columns-wizard (emitContinue)="continue()" (emitBack)="back()"></app-columns-wizard>
+</div>
+<!--Page 3: Setup Meters-->
+<div *ngIf="wizardPage == 3">
+    <app-import-meter-wizard [wizardContext]="'excel'" [(importMeterFileWizard)]="importMeterFileWizard"
+        (emitContinue)="continue()" (emitBack)="back()">
+    </app-import-meter-wizard>
+</div>
+
+<!--Page 3: Setup Meters-->
+<div *ngIf="wizardPage == 4">
+    <app-import-predictors-wizard [wizardContext]="'excel'" [(importPredictorFileWizard)]="importPredictorFileWizard"
+        (emitContinue)="continue()" (emitBack)="back()"></app-import-predictors-wizard>
+</div>
+
+<div *ngIf="wizardPage == 5">
+    <app-wizard-data-summary [(importMeterFileWizard)]="importMeterFileWizard"
+        [(importPredictorFileWizard)]="importPredictorFileWizard" (emitClose)="close()" (emitBack)="back()">
+    </app-wizard-data-summary>
+</div>

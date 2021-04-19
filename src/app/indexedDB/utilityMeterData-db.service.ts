@@ -25,7 +25,19 @@ export class UtilityMeterDatadbService {
         this.facilityDbService.selectedFacility.subscribe(() => {
             this.setFacilityMeterData();
         });
+    }
 
+    async initializeMeterData() {
+        let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+        if (selectedAccount) {
+            let accountMeterData: Array<IdbUtilityMeterData> = await this.getAllByIndexRange('accountId', selectedAccount.id).toPromise();
+            this.accountMeterData.next(accountMeterData);
+            let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+            if (selectedFacility) {
+                let facilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.filter(meterData => { return meterData.facilityId == selectedFacility.id });
+                this.facilityMeterData.next(facilityMeterData);
+            }
+        }
     }
 
     setFacilityMeterData() {
@@ -104,20 +116,25 @@ export class UtilityMeterDatadbService {
         });
     }
 
-    deleteAllFacilityMeterData(facilityId: number): void {
-        this.getAllByIndexRange('facilityId', facilityId).subscribe(facilityMeterDataEntries => {
-            for (let i = 0; i < facilityMeterDataEntries.length; i++) {
-                this.dbService.delete('utilityMeterData', facilityMeterDataEntries[i].id);
-            }
-        });
+    deleteWithObservable(meterDataId: number): Observable<any> {
+        return this.dbService.delete('utilityMeterData', meterDataId);
     }
 
-    deleteAllAccountMeterData(accountId: number): void {
-        this.getAllByIndexRange('accountId', accountId).subscribe(accountMeterDataEntries => {
-            for (let i = 0; i < accountMeterDataEntries.length; i++) {
-                this.dbService.delete('utilityMeterData', accountMeterDataEntries[i].id);
-            }
-        });
+    async deleteAllFacilityMeterData(facilityId: number) {
+        let accountMeterDataEntries: Array<IdbUtilityMeterData> = this.accountMeterData.getValue();
+        let facilityMeterDataEntries: Array<IdbUtilityMeterData> = accountMeterDataEntries.filter(meterData => { return meterData.facilityId == facilityId });
+        await this.deleteMeterDataEntriesAsync(facilityMeterDataEntries);
+    }
+
+    async deleteAllSelectedAccountMeterData() {
+        let accountMeterDataEntries: Array<IdbUtilityMeterData> = this.accountMeterData.getValue();
+        await this.deleteMeterDataEntriesAsync(accountMeterDataEntries);
+    }
+
+    async deleteMeterDataEntriesAsync(meterDataEntries: Array<IdbUtilityMeterData>) {
+        for (let i = 0; i < meterDataEntries.length; i++) {
+            await this.deleteWithObservable(meterDataEntries[i].id).toPromise();
+        }
     }
 
     getNewIdbUtilityMeterData(meter: IdbUtilityMeter): IdbUtilityMeterData {
@@ -159,13 +176,14 @@ export class UtilityMeterDatadbService {
             powerFactorCharge: undefined,
             businessCharge: undefined,
             utilityTax: undefined,
-            latePayment: undefined
+            latePayment: undefined,
+            meterNumber: meter.meterNumber
         }
     }
 
 
     getLastMeterReadingDate(meter: IdbUtilityMeter): Date {
-        let allSelectedMeterData: Array<IdbUtilityMeterData> = this.getMeterDataForFacility(meter);
+        let allSelectedMeterData: Array<IdbUtilityMeterData> = this.getMeterDataForFacility(meter, false);
         if (allSelectedMeterData.length != 0) {
             let lastMeterReading: IdbUtilityMeterData = _.maxBy(allSelectedMeterData, 'readDate');
             return new Date(lastMeterReading.readDate);
@@ -175,7 +193,7 @@ export class UtilityMeterDatadbService {
 
     checkMeterReadingExistForDate(date: Date, meter: IdbUtilityMeter): IdbUtilityMeterData {
         let newDate: Date = new Date(date);
-        let allSelectedMeterData: Array<IdbUtilityMeterData> = this.getMeterDataForFacility(meter);
+        let allSelectedMeterData: Array<IdbUtilityMeterData> = this.getMeterDataForFacility(meter, false);
         let existingData: IdbUtilityMeterData = allSelectedMeterData.find(dataItem => {
             return this.checkSameMonthYear(newDate, dataItem);
         });
@@ -192,17 +210,21 @@ export class UtilityMeterDatadbService {
         return facilityMeterData.filter(meterData => { return meterData.meterId == meterId });
     }
 
-    getMeterDataForFacility(meter: IdbUtilityMeter): Array<IdbUtilityMeterData> {
+    getMeterDataForFacility(meter: IdbUtilityMeter, convertData: boolean): Array<IdbUtilityMeterData> {
         let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
         let meterData: Array<IdbUtilityMeterData> = this.getMeterDataFromMeterId(meter.id);
-        meterData = this.convertMeterDataService.convertMeterDataToFacility(meter, JSON.parse(JSON.stringify(meterData)), facility);
+        if (convertData) {
+            meterData = this.convertMeterDataService.convertMeterDataToFacility(meter, JSON.parse(JSON.stringify(meterData)), facility);
+        }
         return meterData;
     }
 
-    getMeterDataForAccount(meter: IdbUtilityMeter): Array<IdbUtilityMeterData> {
+    getMeterDataForAccount(meter: IdbUtilityMeter, convertData: boolean): Array<IdbUtilityMeterData> {
         let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
         let meterData: Array<IdbUtilityMeterData> = this.getMeterDataFromMeterId(meter.id);
-        meterData = this.convertMeterDataService.convertMeterDataToAccount(meter, JSON.parse(JSON.stringify(meterData)), account);
+        if (convertData) {
+            meterData = this.convertMeterDataService.convertMeterDataToAccount(meter, JSON.parse(JSON.stringify(meterData)), account);
+        }
         return meterData;
     }
 }

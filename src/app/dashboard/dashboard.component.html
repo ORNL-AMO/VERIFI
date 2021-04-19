@@ -1,19 +1,24 @@
-<div class="banner">
-  <h3 *ngIf="selectedAccount && !isFacilityDashboard">Account Dashboard</h3>
-  <h3 *ngIf="selectedAccount && selectedFacility && isFacilityDashboard">Facility Dashboard</h3>
-  <button class="m-0 btn btn-outline item-right">Generate Report</button>
+<div *ngIf="(!selectedAccount || facilityList.length === 0)">
+  <app-empty-state></app-empty-state>
 </div>
 
-<div class="breadcrumbs">
-  <p *ngIf="selectedAccount">
-    <i class="fa fa-home"></i>{{selectedAccount.name}}
-    <i class="fa fa-angle-right"></i>
-    <select [(ngModel)]="breadcrumbFacilityId" (change)="switchFacility()">
-      <option [ngValue]="undefined">All Facilities</option>
-      <option *ngFor="let facility of facilityList" [ngValue]="facility.id">{{facility.name}}</option>
-    </select>
-  </p>
-</div>
+<div *ngIf="(selectedAccount && facilityList.length > 0)">
+  <div class="banner">
+    <h3 *ngIf="selectedAccount && !isFacilityDashboard">Account Dashboard</h3>
+    <h3 *ngIf="selectedAccount && selectedFacility && isFacilityDashboard">Facility Dashboard</h3>
+    <!--<button class="m-0 btn btn-outline item-right">Generate Report</button>-->
+  </div>
+
+  <div class="breadcrumbs">
+    <p *ngIf="selectedAccount">
+      <i class="fa fa-home"></i>{{selectedAccount.name}}
+      <i class="fa fa-angle-right"></i>
+      <select [(ngModel)]="breadcrumbFacilityId" (change)="switchFacility()">
+        <option [ngValue]="undefined">All Facilities</option>
+        <option *ngFor="let facility of facilityList" [ngValue]="facility.id">{{facility.name}}</option>
+      </select>
+    </p>
+  </div>
 
 <div class="measur-wrapper main-content">
   <router-outlet></router-outlet>

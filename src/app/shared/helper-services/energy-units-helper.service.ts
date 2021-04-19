@@ -1,17 +1,16 @@
 import { Injectable } from '@angular/core';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbAccount, IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
-import { FuelTypeOption, OtherEnergyOptions } from 'src/app/utility/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
-import { EnergyUnitOptions, MassUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from '../unitOptions';
+import { FuelTypeOption, GasOptions, LiquidOptions, OtherEnergyOptions, SolidOptions, SourceOptions } from 'src/app/utility/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
+import { ChilledWaterUnitOptions, EnergyUnitOptions, MassUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from '../unitOptions';
 
 @Injectable({
   providedIn: 'root'
 })
 export class EnergyUnitsHelperService {
 
-  constructor(private utilityMeterDbService: UtilityMeterdbService, private facilityDbService: FacilitydbService, private accountDbService: AccountdbService) { }
+  constructor(private facilityDbService: FacilitydbService, private accountDbService: AccountdbService) { }
 
   getMeterConsumptionUnitInAccount(meter: IdbUtilityMeter): string {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
@@ -64,7 +63,7 @@ export class EnergyUnitsHelperService {
       if (selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Steam') {
         return selectedFacility.massUnit;
       } else if (selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Chilled Water') {
-        return selectedFacility.chilledWaterUnit;
+        return selectedFacility.energyUnit;
       }
     }
   }
@@ -90,7 +89,7 @@ export class EnergyUnitsHelperService {
       if (selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Steam') {
         return selectedAccount.massUnit;
       } else if (selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Chilled Water') {
-        return selectedAccount.chilledWaterUnit;
+        return selectedAccount.energyUnit;
       }
     }
   }
@@ -128,8 +127,8 @@ export class EnergyUnitsHelperService {
       if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Steam') {
         return MassUnitOptions.concat(EnergyUnitOptions);
       } else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Chilled Water') {
-        // this.setStartingUnit(selectedFacility.volumeLiquidUnit);
-        //TODO: Add chilled water units
+        return EnergyUnitOptions.concat(ChilledWaterUnitOptions)
+
       } else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Hot Water') {
         return EnergyUnitOptions;
       }
@@ -137,6 +136,78 @@ export class EnergyUnitsHelperService {
       return VolumeLiquidOptions;
     }
     return EnergyUnitOptions;
+  }
+
+
+  parseSource(name: string): string {
+    let source: string = SourceOptions.find(option => {
+      let lowerCaseOption: string = option.toLocaleLowerCase();
+      let lowerCaseName: string = name.toLocaleLowerCase();
+      return lowerCaseName.includes(lowerCaseOption)
+    })
+    return source;
+  }
+
+  parseStartingUnit(name: string): string {
+    let unit: UnitOption = EnergyUnitOptions.find(option => {
+      let lowerCaseOption: string = option.value.toLocaleLowerCase();
+      let lowerCaseName: string = name.toLocaleLowerCase();
+      return lowerCaseName.includes(lowerCaseOption)
+    });
+    if (!unit) {
+      unit = VolumeGasOptions.find(option => {
+        let lowerCaseOption: string = option.value.toLocaleLowerCase();
+        let lowerCaseName: string = name.toLocaleLowerCase();
+        return lowerCaseName.includes(lowerCaseOption)
+      });
+
+    }
+    if (!unit) {
+      unit = VolumeLiquidOptions.find(option => {
+        let lowerCaseOption: string = option.value.toLocaleLowerCase();
+        let lowerCaseName: string = name.toLocaleLowerCase();
+        return lowerCaseName.includes(lowerCaseOption)
+      });
+
+    }
+    if (!unit) {
+      unit = MassUnitOptions.find(option => {
+        let lowerCaseOption: string = option.value.toLocaleLowerCase();
+        let lowerCaseName: string = name.toLocaleLowerCase();
+        return lowerCaseName.includes(lowerCaseOption)
+      });
+
+    }
+    return unit.value;
+  }
+
+
+  parseFuelType(name: string): { phase: string, fuelTypeOption: FuelTypeOption } {
+    let fuelTypeOption: FuelTypeOption = GasOptions.find(option => {
+      let lowerCaseOption: string = option.value.toLocaleLowerCase();
+      let lowerCaseName: string = name.toLocaleLowerCase();
+      return lowerCaseName.includes(lowerCaseOption)
+    });
+    if (fuelTypeOption) {
+      return { phase: 'Gas', fuelTypeOption: fuelTypeOption };
+    }
+    fuelTypeOption = LiquidOptions.find(option => {
+      let lowerCaseOption: string = option.value.toLocaleLowerCase();
+      let lowerCaseName: string = name.toLocaleLowerCase();
+      return lowerCaseName.includes(lowerCaseOption)
+    });
+    if (fuelTypeOption) {
+      return { phase: 'Liquid', fuelTypeOption: fuelTypeOption };
+    }
+    fuelTypeOption = SolidOptions.find(option => {
+      let lowerCaseOption: string = option.value.toLocaleLowerCase();
+      let lowerCaseName: string = name.toLocaleLowerCase();
+      return lowerCaseName.includes(lowerCaseOption)
+    });
+    if (fuelTypeOption) {
+      return { phase: 'Solid', fuelTypeOption: fuelTypeOption };
+    }
+    return undefined;
   }
 
 }

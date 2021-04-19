@@ -4,10 +4,12 @@ import { FacilitydbService } from "../../../indexedDB/facility-db.service";
 import { UtilityMeterDatadbService } from "../../../indexedDB/utilityMeterData-db.service";
 import { UtilityMeterdbService } from "../../../indexedDB/utilityMeter-db.service";
 import { listAnimation } from '../../../animations';
-import { IdbAccount, IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
+import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { Subscription } from 'rxjs';
 import { EditMeterFormService } from './edit-meter-form/edit-meter-form.service';
 import { FormGroup } from '@angular/forms';
+import { Router } from '@angular/router';
+import { LoadingService } from 'src/app/shared/loading/loading.service';
 
 @Component({
   selector: 'app-energy-source',
@@ -38,7 +40,9 @@ export class EnergySourceComponent implements OnInit {
     private facilitydbService: FacilitydbService,
     private utilityMeterDatadbService: UtilityMeterDatadbService,
     private utilityMeterdbService: UtilityMeterdbService,
-    private editMeterFormService: EditMeterFormService
+    private editMeterFormService: EditMeterFormService,
+    private router: Router,
+    private loadingService: LoadingService
   ) { }
 
   ngOnInit() {
@@ -63,7 +67,7 @@ export class EnergySourceComponent implements OnInit {
     let selectedFacility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
     let selectedAccount: IdbAccount = this.accountdbService.selectedAccount.getValue();
     this.addOrEdit = 'add';
-    this.editMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.id, selectedAccount.id);
+    this.editMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.id, selectedAccount.id, true);
   }
 
   meterExport() {
@@ -114,13 +118,8 @@ export class EnergySourceComponent implements OnInit {
     }
   }
 
-
-  closeImportWindow() {
-    this.importWindow = false;
-  }
-
-  showImportWindow() {
-    this.importWindow = true;
+  uploadData() {
+    this.router.navigateByUrl('utility/upload-data');
   }
 
   selectEditMeter(meter: IdbUtilityMeter) {
@@ -132,12 +131,25 @@ export class EnergySourceComponent implements OnInit {
     this.editMeter = undefined;
   }
 
-  deleteMeter() {
+  async deleteMeter() {
+    this.loadingService.setLoadingMessage('Deleteing Meters and Data...')
+    this.loadingService.setLoadingStatus(true);
     //delete meter
-    this.utilityMeterdbService.deleteIndex(this.meterToDelete.id);
+    await this.utilityMeterdbService.deleteIndexWithObservable(this.meterToDelete.id);
     //delete meter data
-    this.utilityMeterDatadbService.deleteMeterDataByMeterId(this.meterToDelete.id);
-    this.cancelDelete();
+    this.utilityMeterDatadbService.getAllByIndexRange('meterId', this.meterToDelete.id).subscribe(data => {
+      data.forEach(item => { this.deleteMeterData(item) });
+      this.utilityMeterdbService.setAccountMeters();
+      this.utilityMeterdbService.setFacilityMeters();
+      this.utilityMeterDatadbService.setAccountMeterData();
+      this.utilityMeterDatadbService.setFacilityMeterData();
+      this.cancelDelete();
+      this.loadingService.setLoadingStatus(false);
+    });
+  }
+
+  async deleteMeterData(meterDataItem: IdbUtilityMeterData) {
+    await this.utilityMeterDatadbService.deleteWithObservable(meterDataItem.id);
   }
 
   selectDeleteMeter(meter: IdbUtilityMeter) {

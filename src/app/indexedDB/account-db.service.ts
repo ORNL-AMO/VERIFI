@@ -14,15 +14,21 @@ export class AccountdbService {
     constructor(private dbService: NgxIndexedDBService, private localStorageService: LocalStorageService) {
         this.selectedAccount = new BehaviorSubject<IdbAccount>(undefined);
         this.allAccounts = new BehaviorSubject<Array<IdbAccount>>(new Array());
-        this.setAllAccounts();
-        let localStorageAccountId: number = this.localStorageService.retrieve("accountId");
-        this.setSelectedAccount(localStorageAccountId);
-
         this.selectedAccount.subscribe(account => {
             if (account) {
                 this.localStorageService.store("accountId", account.id);
             }
         });
+    }
+
+    async initializeAccountFromLocalStorage() {
+        let localStorageAccountId: number = this.localStorageService.retrieve("accountId");
+        if (localStorageAccountId) {
+            let selectedAcount: IdbAccount = await this.getById(localStorageAccountId).toPromise();
+            this.selectedAccount.next(selectedAcount);
+        }
+        let allAccounts: Array<IdbAccount> = await this.getAll().toPromise();
+        this.allAccounts.next(allAccounts);
     }
 
     setSelectedAccount(accountId: number) {
@@ -34,8 +40,6 @@ export class AccountdbService {
             let allAccounts: Array<IdbAccount> = this.allAccounts.getValue();
             if (allAccounts.length != 0) {
                 this.setSelectedAccount(allAccounts[0].id);
-            } else {
-                this.addTestData();
             }
         }
     }
@@ -65,6 +69,11 @@ export class AccountdbService {
         });
     }
 
+    addWithObservable(account: IdbAccount): Observable<any> {
+        return this.dbService.add('accounts', account);
+    }
+
+
     update(account: IdbAccount): void {
         this.dbService.update('accounts', account).subscribe(() => {
             this.setAllAccounts();
@@ -78,6 +87,11 @@ export class AccountdbService {
         });
     }
 
+    deleteAccountWithObservable(accountId: number): Observable<any> {
+        return this.dbService.delete('accounts', accountId);
+    }
+
+
     //TODO: MOVE
     // *WARNING* Can not be undone
     deleteDatabase() {
@@ -90,10 +104,13 @@ export class AccountdbService {
             }
         );
     }
-    addTestData() {
-        TestAccountData.forEach(accountItem => {
-            this.add(accountItem);
-        });
+
+
+
+    async addTestData() {
+        for (let i = 0; i < TestAccountData.length; i++) {
+            await this.addWithObservable(TestAccountData[i]);
+        }
     }
 
     getNewIdbAccount(): IdbAccount {
@@ -111,9 +128,8 @@ export class AccountdbService {
             // id: undefined,            
             unitsOfMeasure: 'Imperial',
             energyUnit: 'kWh',
-            volumeLiquidUnit: 'SCF',
+            volumeLiquidUnit: 'gal',
             volumeGasUnit: 'SCF',
-            chilledWaterUnit: undefined,
             massUnit: 'lb',
             sustainabilityQuestions: {
                 energyReductionGoal: false,
@@ -140,7 +156,8 @@ export class AccountdbService {
             fiscalYear: 'calendarYear',
             fiscalYearMonth: 'January',
             fiscalYearCalendarEnd: true,
-
+            setupWizard: true,
+            setupWizardComplete: false,
         }
     }
 }
@@ -149,66 +166,20 @@ export class AccountdbService {
 export const TestAccountData: Array<IdbAccount> = [
     {
         // id: undefined,
-        name: 'Captain Crunch',
-        city: '',
-        state: '',
-        zip: 90210,
-        country: '',
-        address: '',
-        size: 0,
-        naics: '123456',
-        notes: 'Delicious',
-        img: 'https://placehold.it/50x50',
-        unitsOfMeasure: 'Imperial',
-        energyUnit: 'kWh',
-        volumeLiquidUnit: 'SCF',
-        volumeGasUnit: 'SCF',
-        chilledWaterUnit: undefined,
-        massUnit: 'lb',
-        sustainabilityQuestions: {
-            energyReductionGoal: false,
-            energyReductionPercent: 0,
-            energyReductionBaselineYear: 0,
-            energyReductionTargetYear: 0,
-            greenhouseReductionGoal: false,
-            greenhouseReductionPercent: 0,
-            greenhouseReductionBaselineYear: 0,
-            greenhouseReductionTargetYear: 0,
-            renewableEnergyGoal: false,
-            renewableEnergyPercent: 0,
-            renewableEnergyBaselineYear: 0,
-            renewableEnergyTargetYear: 0,
-            wasteReductionGoal: false,
-            wasteReductionPercent: 0,
-            wasteReductionBaselineYear: 0,
-            wasteReductionTargetYear: 0,
-            waterReductionGoal: false,
-            waterReductionPercent: 0,
-            waterReductionBaselineYear: 0,
-            waterReductionTargetYear: 0,
-        },
-        fiscalYear: 'calendarYear',
-        fiscalYearMonth: 'January',
-        fiscalYearCalendarEnd: true,
-
-    },
-    {
-        // id: undefined,
-        name: 'Mini Wheets',
-        city: '',
-        state: '',
-        zip: 90210,
-        country: '',
-        address: '',
-        size: 0,
-        naics: '555555',
+        name: 'Mini Wheats',
+        city: 'Marysville',
+        state: 'KANSAS',
+        zip: 66508,
+        country: 'USA',
+        address: '3474  Sigley Road',
+        size: 16000,
+        naics: '311',
         notes: 'The frosted kind',
         img: 'https://placehold.it/50x50',
         unitsOfMeasure: 'Imperial',
         energyUnit: 'kWh',
-        volumeLiquidUnit: 'SCF',
+        volumeLiquidUnit: 'gal',
         volumeGasUnit: 'SCF',
-        chilledWaterUnit: undefined,
         massUnit: 'lb',
         sustainabilityQuestions: {
             energyReductionGoal: false,
@@ -235,24 +206,25 @@ export const TestAccountData: Array<IdbAccount> = [
         fiscalYear: 'calendarYear',
         fiscalYearMonth: 'January',
         fiscalYearCalendarEnd: true,
+        setupWizard: false,
+        setupWizardComplete: true,
     },
     {
         // id: undefined,
         name: 'Special K',
-        city: '',
-        state: '',
-        zip: 90210,
-        country: '',
-        address: '',
-        size: 0,
-        naics: '234567',
-        notes: 'Not the worst',
+        city: 'New York',
+        state: 'NEW YORK',
+        zip: 10013,
+        country: 'USA',
+        address: '3539  Rosewood Lane',
+        size: 100,
+        naics: '311',
+        notes: 'Good fiber',
         img: 'https://placehold.it/50x50',
         unitsOfMeasure: 'Imperial',
         energyUnit: 'kWh',
-        volumeLiquidUnit: 'SCF',
+        volumeLiquidUnit: 'gal',
         volumeGasUnit: 'SCF',
-        chilledWaterUnit: undefined,
         massUnit: 'lb',
         sustainabilityQuestions: {
             energyReductionGoal: false,
@@ -279,5 +251,52 @@ export const TestAccountData: Array<IdbAccount> = [
         fiscalYear: 'calendarYear',
         fiscalYearMonth: 'January',
         fiscalYearCalendarEnd: true,
+        setupWizard: false,
+        setupWizardComplete: true,
+    },
+    {
+        // id: undefined,
+        name: 'Captain Crunch',
+        city: 'Cleveland',
+        state: 'OHIO',
+        zip: 90210,
+        country: 'USA',
+        address: '4272  Vineyard Drive',
+        size: 20000,
+        naics: '311',
+        notes: 'Not the berry kind.',
+        img: 'https://placehold.it/50x50',
+        unitsOfMeasure: 'Imperial',
+        energyUnit: 'kWh',
+        volumeLiquidUnit: 'gal',
+        volumeGasUnit: 'SCF',
+        massUnit: 'lb',
+        sustainabilityQuestions: {
+            energyReductionGoal: false,
+            energyReductionPercent: 0,
+            energyReductionBaselineYear: 0,
+            energyReductionTargetYear: 0,
+            greenhouseReductionGoal: false,
+            greenhouseReductionPercent: 0,
+            greenhouseReductionBaselineYear: 0,
+            greenhouseReductionTargetYear: 0,
+            renewableEnergyGoal: false,
+            renewableEnergyPercent: 0,
+            renewableEnergyBaselineYear: 0,
+            renewableEnergyTargetYear: 0,
+            wasteReductionGoal: false,
+            wasteReductionPercent: 0,
+            wasteReductionBaselineYear: 0,
+            wasteReductionTargetYear: 0,
+            waterReductionGoal: false,
+            waterReductionPercent: 0,
+            waterReductionBaselineYear: 0,
+            waterReductionTargetYear: 0,
+        },
+        fiscalYear: 'calendarYear',
+        fiscalYearMonth: 'January',
+        fiscalYearCalendarEnd: true,
+        setupWizard: false,
+        setupWizardComplete: true,
     }
 ]

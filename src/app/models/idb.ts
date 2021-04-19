@@ -19,11 +19,13 @@ export interface IdbAccount {
     massUnit: string,
     volumeLiquidUnit: string,
     volumeGasUnit: string,
-    chilledWaterUnit: string,
     sustainabilityQuestions: SustainabilityQuestions,
-    fiscalYear,
-    fiscalYearMonth,
-    fiscalYearCalendarEnd
+    fiscalYear: string,
+    fiscalYearMonth: string,
+    fiscalYearCalendarEnd: boolean,
+    setupWizard: boolean,
+    setupWizardComplete: boolean,
+    numberOfFacilities?: string
 }
 
 export interface IdbFacility {
@@ -51,11 +53,10 @@ export interface IdbFacility {
     massUnit: string,
     volumeLiquidUnit: string,
     volumeGasUnit: string,
-    chilledWaterUnit: string,
     sustainabilityQuestions: SustainabilityQuestions,
-    fiscalYear,
-    fiscalYearMonth,
-    fiscalYearCalendarEnd
+    fiscalYear: string,
+    fiscalYearMonth: string,
+    fiscalYearCalendarEnd: boolean,
 }
 
 export interface IdbUtilityMeterGroup {
@@ -99,6 +100,7 @@ export interface IdbUtilityMeter {
     energyUnit: string,
     fuel:string
     visible?: boolean
+    importWizardName?: string
 }
 
 export interface IdbUtilityMeterData {
@@ -134,7 +136,9 @@ export interface IdbUtilityMeterData {
     powerFactorCharge: number,
     businessCharge: number,
     utilityTax: number,
-    latePayment: number
+    latePayment: number,
+    meterNumber?: string,
+    totalImportConsumption?: number
 }
 
 export interface IdbPredictorEntry {
@@ -157,6 +161,7 @@ export interface PredictorData {
     amount: number,
     unit: string,
     description: string,
-    id: string
+    id: string,
+    importWizardName?: string
 }
 

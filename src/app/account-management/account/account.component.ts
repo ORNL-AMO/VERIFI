@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { FormGroup } from '@angular/forms';
 import { AccountdbService } from "../../indexedDB/account-db.service";
 import { IdbAccount, IdbFacility } from 'src/app/models/idb';
 import { Subscription } from 'rxjs';
@@ -10,17 +9,12 @@ import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db.service";
 import { UtilityMeterDatadbService } from "../../indexedDB/utilityMeterData-db.service";
 import { UtilityMeterGroupdbService } from "../../indexedDB/utilityMeterGroup-db.service";
 import { LoadingService } from "../../shared/loading/loading.service";
-import { AccountManagementService } from '../account-management.service';
-import { EnergyUnitOptions, MassUnitOptions, SizeUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from 'src/app/shared/unitOptions';
-import { globalVariables } from "../../../environments/environment";
+import { AccountBackup, BackupDataService, BackupFile } from '../backup-data.service';
 
 @Component({
   selector: 'app-account',
   templateUrl: './account.component.html',
   styleUrls: ['./account.component.css'],
-  host: {
-    '(document:click)': 'documentClick($event)',
-  }
 })
 export class AccountComponent implements OnInit {
   facilityList: Array<IdbFacility> = [];
@@ -29,19 +23,10 @@ export class AccountComponent implements OnInit {
   facilityToEdit: IdbFacility;
   facilityToDelete: IdbFacility;
 
-  accountForm: FormGroup;
-
   selectedAccountSub: Subscription;
   accountFacilitiesSub: Subscription;
   selectedAccount: IdbAccount;
-  energyUnitOptions: Array<UnitOption> = EnergyUnitOptions;
-  volumeGasOptions: Array<UnitOption> = VolumeGasOptions;
-  volumeLiquidOptions: Array<UnitOption> = VolumeLiquidOptions;
-  sizeUnitOptions: Array<UnitOption> = SizeUnitOptions;
-  massUnitOptions: Array<UnitOption> = MassUnitOptions;
-  years: Array<number> = [];
-  globalVariables = globalVariables;
-
+  showImportFile: boolean = false;
   constructor(
     private router: Router,
     private accountDbService: AccountdbService,
@@ -51,24 +36,17 @@ export class AccountComponent implements OnInit {
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private loadingService: LoadingService,
-    private accountManagementService: AccountManagementService
+    private backupDataService: BackupDataService
   ) { }
 
   ngOnInit() {
     this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(val => {
       this.selectedAccount = val;
-      if (val) {
-        this.accountForm = this.accountManagementService.getAccountForm(val);
-      }
     });
 
     this.accountFacilitiesSub = this.facilityDbService.accountFacilities.subscribe(val => {
       this.facilityList = val;
     });
-
-    for(let i=2050; i>2000; i--) {
-      this.years.push(i);
-    }
   }
 
   ngOnDestroy() {
@@ -76,22 +54,9 @@ export class AccountComponent implements OnInit {
     this.accountFacilitiesSub.unsubscribe();
   }
 
-  // Close menus when user clicks outside the dropdown
-  documentClick() {
-    this.facilityMenuOpen = null;
-  }
-
-  facilityToggleMenu(index) {
-    if (this.facilityMenuOpen === index) {
-      this.facilityMenuOpen = null;
-    } else {
-      this.facilityMenuOpen = index;
-    }
-  }
-
   switchFacility(facility: IdbFacility) {
     this.facilityDbService.selectedFacility.next(facility);
-    this.router.navigate(['/facility-summary']);
+    this.router.navigate(['/facility-management']);
   }
 
   addNewFacility() {
@@ -100,52 +65,59 @@ export class AccountComponent implements OnInit {
     this.facilityDbService.add(idbFacility);
   }
 
-  onFormChange(): void {
-    this.accountForm = this.accountManagementService.checkCustom(this.accountForm);
-    this.selectedAccount = this.accountManagementService.updateAccountFromForm(this.accountForm, this.selectedAccount);
-    this.accountDbService.update(this.selectedAccount);
-  }
 
-  facilityDelete() {
+  async facilityDelete() {
     this.loadingService.setLoadingStatus(true);
-    this.loadingService.setLoadingMessage("Deleting Facility...");
 
     // Delete all info associated with account
-    this.predictorDbService.deleteAllFacilityPredictors(this.facilityToDelete.id);
-    this.utilityMeterDataDbService.deleteAllFacilityMeterData(this.facilityToDelete.id);
-    this.utilityMeterDbService.deleteAllFacilityMeters(this.facilityToDelete.id);
-    this.utilityMeterGroupDbService.deleteAllFacilityMeterGroups(this.facilityToDelete.id);
-    this.facilityDbService.deleteById(this.facilityToDelete.id);
-
+    this.loadingService.setLoadingMessage("Deleting Facility Predictors...");
+    await this.predictorDbService.deleteAllFacilityPredictors(this.facilityToDelete.id);
+    this.loadingService.setLoadingMessage("Deleting Facility Meter Data...");
+    await this.utilityMeterDataDbService.deleteAllFacilityMeterData(this.facilityToDelete.id);
+    this.loadingService.setLoadingMessage("Deleting Facility Meters...");
+    await this.utilityMeterDbService.deleteAllFacilityMeters(this.facilityToDelete.id);
+    this.loadingService.setLoadingMessage("Deleting Facility Meter Groups...");
+    await this.utilityMeterGroupDbService.deleteAllFacilityMeterGroups(this.facilityToDelete.id);
+    this.loadingService.setLoadingMessage("Deleting Facility...");
+    await this.facilityDbService.deleteFacilitiesAsync([this.facilityToDelete]);
+    let allFacilities: Array<IdbFacility> = await this.facilityDbService.getAll().toPromise();
     // Then navigate to another facility
+    this.facilityDbService.allFacilities.next(allFacilities);
+    let accountFacilites: Array<IdbFacility> = allFacilities.filter(facility => { return facility.accountId == this.selectedAccount.id });
+    this.facilityDbService.accountFacilities.next(accountFacilites);
     this.facilityDbService.setSelectedFacility();
     this.loadingService.setLoadingStatus(false);
-
   }
 
-  accountDelete() {
+  async confirmAccountDelete() {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
 
     this.loadingService.setLoadingStatus(true);
-    this.loadingService.setLoadingMessage("Deleting Account...");
 
     // Delete all info associated with account
-    this.predictorDbService.deleteAllAccountPredictors(selectedAccount.id);
-    this.utilityMeterDataDbService.deleteAllAccountMeterData(selectedAccount.id);
-    this.utilityMeterDbService.deleteAllAccountMeters(selectedAccount.id);
-    this.utilityMeterGroupDbService.deleteAllAccountMeterGroups(selectedAccount.id);
-    this.facilityDbService.deleteAllAccountFacilities();
-    this.accountDbService.deleteById(selectedAccount.id);
+    this.loadingService.setLoadingMessage("Deleting Account Predictors...");
+    await this.predictorDbService.deleteAllSelectedAccountPredictors();
+    this.loadingService.setLoadingMessage("Deleting Account Meter Data...");
+    await this.utilityMeterDataDbService.deleteAllSelectedAccountMeterData();
+    this.loadingService.setLoadingMessage("Deleting Account Meters...");
+    await this.utilityMeterDbService.deleteAllSelectedAccountMeters();
+    this.loadingService.setLoadingMessage("Deleting Account Meter Groups...");
+    await this.utilityMeterGroupDbService.deleteAllSelectedAccountMeterGroups();
+    this.loadingService.setLoadingMessage("Deleting Account Facilities...");
+    await this.facilityDbService.deleteAllSelectedAccountFacilities();
+    this.loadingService.setLoadingMessage("Deleting Account...");
+    await this.accountDbService.deleteAccountWithObservable(selectedAccount.id).toPromise();
 
     // Then navigate to another account
-    this.accountDbService.setSelectedAccount(undefined);
+    let accounts: Array<IdbAccount> = await this.accountDbService.getAll().toPromise();
+    this.accountDbService.allAccounts.next(accounts);
+    if (accounts.length != 0) {
+      this.accountDbService.setSelectedAccount(accounts[0].id);
+    } else {
+      this.accountDbService.setSelectedAccount(undefined);
+    }
     this.router.navigate(['/']);
     this.loadingService.setLoadingStatus(false);
-  }
-
-
-  setEditFacilityEntry(facility: IdbFacility) {
-    this.facilityToEdit = facility;
   }
 
   setDeleteFacilityEntry(facility: IdbFacility) {
@@ -160,14 +132,9 @@ export class AccountComponent implements OnInit {
     this.showDeleteAccount = true;
   }
 
-  confirmFacilityDelete() {
-    this.facilityDelete();
+  async confirmFacilityDelete() {
+    await this.facilityDelete();
     this.facilityToDelete = undefined;
-  }
-
-  confirmAccountDelete() {
-    this.accountDelete();
-    this.showDeleteAccount = undefined;
   }
 
   cancelAccountDelete() {
@@ -178,9 +145,15 @@ export class AccountComponent implements OnInit {
     this.facilityToDelete = undefined;
   }
 
-  setUnitsOfMeasure() {
-    this.accountForm = this.accountManagementService.setUnitsOfMeasure(this.accountForm);
-    this.onFormChange();
+  backupAccount() {
+    this.backupDataService.backupAccount();
   }
-  
+
+  openImportBackup() {
+    this.showImportFile = true;
+  }
+
+  cancelImportBackup() {
+    this.showImportFile = false;
+  }
 }
