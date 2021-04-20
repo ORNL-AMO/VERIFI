@@ -25,7 +25,7 @@
                 </label>
                 <select name="minDateMonth" [(ngModel)]="calanderizedDataFilters.selectedDateMin.month"
                     (change)="save()">
-                    <option *ngFor="let monthOption of monthOptions" [ngValue]="monthOption.monthNumValue">
+                    <option *ngFor="let monthOption of globalVariables.months" [ngValue]="monthOption.monthNumValue">
                         {{monthOption.name}}
                     </option>
                 </select>
@@ -40,7 +40,7 @@
                 </label>
                 <select name="maxDateMonth" [(ngModel)]="calanderizedDataFilters.selectedDateMax.month"
                     (change)="save()">
-                    <option *ngFor="let monthOption of monthOptions" [ngValue]="monthOption.monthNumValue">
+                    <option *ngFor="let monthOption of globalVariables.months" [ngValue]="monthOption.monthNumValue">
                         {{monthOption.name}}
                     </option>
                 </select>

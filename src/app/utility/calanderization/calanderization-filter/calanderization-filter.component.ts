@@ -19,7 +19,8 @@ export class CalanderizationFilterComponent implements OnInit {
   facilityMetersSub: Subscription;
   facilityMeters: Array<IdbUtilityMeter>;
 
-  monthOptions: Array<{ name: string, abbreviation: string, monthNumValue: number }> = globalVariables.months;
+
+  globalVariables = globalVariables;
   yearOptions: Array<number> = [];
   constructor(private calanderizationService: CalanderizationService, private utilityMeterDbService: UtilityMeterdbService) { }
 
@@ -39,7 +40,6 @@ export class CalanderizationFilterComponent implements OnInit {
     this.calanderizedDataFiltersSub.unsubscribe();
     this.facilityMetersSub.unsubscribe();
   }
-
 
   toggleFilterMenu() {
     this.showFilterDropdown = !this.showFilterDropdown;
