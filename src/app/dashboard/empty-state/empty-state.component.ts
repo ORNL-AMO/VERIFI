@@ -6,7 +6,8 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAccount, IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
 import { LoadingService } from 'src/app/shared/loading/loading.service';
 import { UtilityMeterdbService } from '../../indexedDB/utilityMeter-db.service';
-
+import { ExampleAccount } from 'src/app/shared/example-data/Better_Plants_Partner_Backup_4-20-2021';
+import { BackupDataService } from 'src/app/account-management/backup-data.service';
 @Component({
   selector: 'app-empty-state',
   templateUrl: './empty-state.component.html',
@@ -26,7 +27,9 @@ export class EmptyStateComponent implements OnInit {
     public facilityDbService: FacilitydbService,
     public utilityMeterDbService: UtilityMeterdbService,
     private router: Router,
-    private loadingService: LoadingService
+    private loadingService: LoadingService,
+    private backupDataService: BackupDataService,
+    private accountDbService: AccountdbService
   ) { }
 
   ngOnInit(): void {
@@ -69,19 +72,12 @@ export class EmptyStateComponent implements OnInit {
     this.router.navigate(['/utility/energy-consumption']);
   }
 
-  loadTestData() {
+  async loadTestData() {
     this.loadingService.setLoadingMessage('Loading Example Data..');
     this.loadingService.setLoadingStatus(true);
-    this.accountdbService.addTestData();
-    this.accountdbService.getAll().subscribe(allAccounts => {
-      this.accountdbService.allAccounts.next(allAccounts);
-      this.facilityDbService.addTestData(allAccounts);
-      this.facilityDbService.getAll().subscribe(val => {
-        this.facilityDbService.allFacilities.next(val);
-        this.accountdbService.setSelectedAccount(allAccounts[0].id);
-        this.loadingService.setLoadingStatus(false);
-      })
-    })
+    let newAccount: IdbAccount = await this.backupDataService.importAccountBackup(ExampleAccount);
+    this.accountDbService.setSelectedAccount(newAccount.id);
+    this.loadingService.setLoadingStatus(false);
   }
 
   openImportBackup() {
