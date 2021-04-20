@@ -23,7 +23,7 @@ export class ImportMeterDataWizardComponent implements OnInit {
   //summaries of valid existing/new
   existingData: Array<{ meterName: string, numberOfEntries: number, startDate: Date, endDate: Date }>;
   newData: Array<{ meterName: string, numberOfEntries: number, startDate: Date, endDate: Date }>;
-  
+
   //meters existing in facility
   facilityMeters: Array<IdbUtilityMeter>;
   //new valid meters to be imported
@@ -44,7 +44,7 @@ export class ImportMeterDataWizardComponent implements OnInit {
 
   fileName: string;
   constructor(private utilityMeterDataService: UtilityMeterDataService, private utilityMeterDbService: UtilityMeterdbService,
-    private energyUnitsHelperService: EnergyUnitsHelperService, private uploadDataService: UploadDataService, 
+    private energyUnitsHelperService: EnergyUnitsHelperService, private uploadDataService: UploadDataService,
     private importMeterDataService: ImportMeterDataService) { }
 
   ngOnInit(): void {
@@ -53,16 +53,16 @@ export class ImportMeterDataWizardComponent implements OnInit {
     let importMeterFiles = this.uploadDataService.importMeterFiles.getValue();
     this.invalidImportMeters = importMeterFiles.flatMap(dataFile => { return dataFile.importMeterFileSummary.invalidMeters });
     this.newImportMeters = importMeterFiles.flatMap(dataFile => { return dataFile.importMeterFileSummary.newMeters });
-    
+
     this.importMeterDataFileWizard = this.uploadDataService.importMeterDataFileWizard.getValue();
     this.skipExisting = this.importMeterDataFileWizard.skipExisting;
-    
+
     this.validNewReadings = JSON.parse(JSON.stringify(this.importMeterDataFileWizard.importMeterDataFileSummary.newMeterData));
     this.validExistingReadings = JSON.parse(JSON.stringify(this.importMeterDataFileWizard.importMeterDataFileSummary.existingMeterData));
     this.setNewData();
     this.setExistingData();
     this.parseInvalidEntries();
-    
+
     if (this.validNewReadings.length == 0) {
       this.selectedTab = 'existing';
     }
@@ -286,7 +286,7 @@ export class ImportMeterDataWizardComponent implements OnInit {
   toggleSkipExisting() {
     this.skipExisting = !this.skipExisting;
   }
-  
+
   updateMissingMeterNumberData() {
     let indexesToRemove: Array<number> = new Array();
     this.invalidMissingMeter.forEach((meterData, index) => {
@@ -310,12 +310,10 @@ export class ImportMeterDataWizardComponent implements OnInit {
     });
     this.setNewData();
     this.setExistingData();
-    if (this.invalidMissingMeter.length == 0) {
-      if (this.validNewReadings.length != 0) {
-        this.setTab('valid');
-      } else {
-        this.setTab('existing');
-      }
+    if (this.validNewReadings.length != 0) {
+      this.setTab('valid');
+    } else {
+      this.setTab('existing');
     }
   }
 
