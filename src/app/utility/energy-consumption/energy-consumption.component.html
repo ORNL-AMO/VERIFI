@@ -11,28 +11,28 @@
                 <!-- <span [hidden]="hasNaturalGasData">*</span> -->
             </a>
         </li>
-        <li [hidden]="!otherFuels">
-            <a routerLink="other-fuels" [routerLinkActive]="['active']" [class.red]="hasOtherFuelsError">Other Fuels 
+        <li [hidden]="!otherFuels" [class.red]="hasOtherFuelsError">
+            <a routerLink="other-fuels" [routerLinkActive]="['active']">Other Fuels 
                 <!-- <span [hidden]="hasOtherFuelsData">*</span> -->
             </a>
         </li>
-        <li [hidden]="!otherEnergy">
-            <a routerLink="other-energy" [routerLinkActive]="['active']" [class.red]="hasOtherEnergyError">Other Energy 
+        <li [hidden]="!otherEnergy" [class.red]="hasOtherEnergyError">
+            <a routerLink="other-energy" [routerLinkActive]="['active']">Other Energy 
                 <!-- <span [hidden]="hasOtherEnergyData">*</span> -->
             </a>
         </li>
-        <li [hidden]="!water">
-            <a routerLink="water" [routerLinkActive]="['active']" [class.red]="hasWaterError">Water 
+        <li [hidden]="!water" [class.red]="hasWaterError">
+            <a routerLink="water" [routerLinkActive]="['active']">Water 
                 <!-- <span [hidden]="hasWaterData">*</span> -->
             </a>
         </li>
-        <li [hidden]="!wasteWater">
-            <a routerLink="waste-water" [routerLinkActive]="['active']" [class.red]="hasWasteWaterError">Waste Water 
+        <li [hidden]="!wasteWater" [class.red]="hasWasteWaterError">
+            <a routerLink="waste-water" [routerLinkActive]="['active']">Waste Water 
                 <!-- <span [hidden]="hasWasteWaterData">*</span> -->
             </a>
         </li>
-        <li [hidden]="!otherUtility">
-            <a routerLink="other-utility" [routerLinkActive]="['active']" [class.red]="hasOtherUtilityError">Other Utility 
+        <li [hidden]="!otherUtility" [class.red]="hasOtherUtilityError">
+            <a routerLink="other-utility" [routerLinkActive]="['active']">Other Utility 
                 <!-- <span [hidden]="hasOtherUtilityData">*</span> -->
             </a>
         </li>
