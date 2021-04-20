@@ -27,10 +27,10 @@
             </a>
         </li>
     </ul>
-    <div class="pull-right">
-        <button type="button" class="btn btn-danger pull-right" (click)="toggleSkipMeter(selectedMeterIndex)">
-            Skip Meter
-        </button>
+    <div class="saveCancel item-right text-right">
+        <button class="btn btn-secondary" (click)="cancel()">Previous</button>
+        <button class="btn btn-secondary" (click)="submit()">Next</button>
+        <button class="btn btn-danger ml-2" (click)="toggleSkipMeter(selectedMeterIndex)">Skip Meter</button>
     </div>
     <div class="p-3" *ngIf="!skipMeters[selectedMeterIndex]">
         <app-edit-meter-form [(meterForm)]="selectedMeterForm"></app-edit-meter-form>
