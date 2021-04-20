@@ -31,6 +31,7 @@ export class ElectricityDataTableComponent implements OnInit {
 
   supplyDemandCharge: SupplyDemandChargeFilters;
   taxAndOther: TaxAndOtherFilters;
+  showTotalDemand: boolean;
   electricityDataFilterSub: Subscription;
   allChecked: boolean;
   energyUnit: string;
@@ -48,6 +49,7 @@ export class ElectricityDataTableComponent implements OnInit {
     this.electricityDataFilterSub = this.utilityMeterDataService.tableElectricityFilters.subscribe(electricityDataFilters => {
       this.taxAndOther = electricityDataFilters.taxAndOther;
       this.supplyDemandCharge = electricityDataFilters.supplyDemandCharge;
+      this.showTotalDemand = electricityDataFilters.showTotalDemand;
     });
   }
 

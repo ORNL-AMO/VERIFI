@@ -9,6 +9,10 @@
         <p class="small">Choose Table Columns</p>
         <div class="row">
             <div class="col">
+                <label *ngIf="filterType == 'table'">
+                    <input type="checkbox" name="showTotalDemand" [(ngModel)]="showTotalDemand"
+                        (change)="save()">Total Demand
+                </label>
                 <label>
                     <input type="checkbox" name="supplyBlockAmount" [(ngModel)]="supplyDemandCharge.supplyBlockAmount"
                         (change)="save()">Block Rates Supply Amt

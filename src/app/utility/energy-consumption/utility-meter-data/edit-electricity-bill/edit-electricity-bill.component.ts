@@ -82,6 +82,7 @@ export class EditElectricityBillComponent implements OnInit {
 
   showAllFields() {
     this.electricityDataFilters = {
+      showTotalDemand: true,
       supplyDemandCharge: {
         showSection: true,
         supplyBlockAmount: true,
