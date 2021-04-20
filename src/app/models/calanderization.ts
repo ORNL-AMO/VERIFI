@@ -5,7 +5,8 @@ export interface CalanderizedMeter {
     consumptionUnit: string,
     monthlyData: Array<MonthlyData>,
     showConsumption: boolean,
-    showEnergyUse: boolean
+    showEnergyUse: boolean,
+    energyUnit: string
 }
 
 export interface MonthlyData {
