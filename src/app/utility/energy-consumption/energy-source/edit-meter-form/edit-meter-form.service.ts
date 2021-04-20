@@ -13,13 +13,14 @@ export class EditMeterFormService {
   getFormFromMeter(meter: IdbUtilityMeter): FormGroup {
     let fuelValidators: Array<ValidatorFn> = this.getFuelValidation(meter.source);
     let phaseValidators: Array<ValidatorFn> = this.getPhaseValidation(meter.source);
-    let heatCapacityAndSiteToSourceValidators: Array<ValidatorFn> = this.getHeatCapacityAndSiteToSourceValidation(meter.source, meter.startingUnit);
+    let heatCapacityValidators: Array<ValidatorFn> = this.getHeatCapacitValidation(meter.source, meter.startingUnit);
+    let siteToSourceValidators: Array<ValidatorFn> = this.getSiteToSourceValidation(meter.source, meter.startingUnit);
     return this.formBuilder.group({
       meterNumber: [meter.meterNumber],
       accountNumber: [meter.accountNumber],
       phase: [meter.phase, phaseValidators],
-      heatCapacity: [meter.heatCapacity, heatCapacityAndSiteToSourceValidators],
-      siteToSource: [meter.siteToSource, heatCapacityAndSiteToSourceValidators],
+      heatCapacity: [meter.heatCapacity, heatCapacityValidators],
+      siteToSource: [meter.siteToSource, siteToSourceValidators],
       name: [meter.name, Validators.required],
       location: [meter.location],
       supplier: [meter.supplier],
@@ -65,9 +66,18 @@ export class EditMeterFormService {
     }
   }
 
-  getHeatCapacityAndSiteToSourceValidation(source: string, startingUnit: string): Array<ValidatorFn> {
+  getHeatCapacitValidation(source: string, startingUnit: string): Array<ValidatorFn> {
     let checkShowHeatCapacity: boolean = this.checkShowHeatCapacity(source, startingUnit);
     if (checkShowHeatCapacity) {
+      return [Validators.required, Validators.min(0)];
+    } else {
+      return [];
+    }
+  }
+
+  getSiteToSourceValidation(source: string, startingUnit: string): Array<ValidatorFn> {
+    let checkShowSiteToSource: boolean = this.checkShowSiteToSource(source, startingUnit);
+    if (checkShowSiteToSource) {
       return [Validators.required, Validators.min(0)];
     } else {
       return [];
