@@ -26,10 +26,10 @@
     
     <hr>
     <ul>
-        <li><i class="fa fa-question"></i> <span>Help</span></li>
-        <li><i class="fa fa-info-circle"></i> <span>About</span></li>
-        <li><i class="fa fa-inbox"></i> <span>Feedback</span></li>
-        <li><i class="fa fa-trophy"></i> <span>Acknowledgments</span></li>
+        <li><a routerLink="/help" [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-question"></i> <span>Help</span> </a></li>
+        <li><a routerLink="/about" [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-info-circle"></i> <span>About</span></a></li>
+        <li><a routerLink="/feedback" [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-inbox"></i> <span>Feedback</span></a></li>
+        <li><a routerLink="/acknowledgments" [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-trophy"></i> <span>Acknowledgments</span></a></li>
     </ul>
     <hr>
     <ul>

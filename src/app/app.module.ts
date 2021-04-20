@@ -24,7 +24,7 @@ import { CommonModule } from '@angular/common';
 import { PlotlyViaWindowModule } from 'angular-plotly.js';
 
 
-import { StyleGuideComponent } from './shared/style-guide/style-guide.component';
+import { StyleGuideComponent } from './static-content/style-guide/style-guide.component';
 import { LoadingComponent } from './shared/loading/loading.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { IndexedDBModule } from './indexedDB/indexed-db.module';
@@ -61,6 +61,10 @@ import { AccountUtilityEnergyUseTableComponent } from './dashboard/account-overv
 import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
 import { EditMeterComponent } from './utility/energy-consumption/energy-source/edit-meter/edit-meter.component';
 import { OrderByPipe } from './shared/helper-pipes/order-by.pipe';
+import { AboutComponent } from './static-content/about/about.component';
+import { FeedbackComponent } from './static-content/feedback/feedback.component';
+import { AcknowledgmentsComponent } from './static-content/acknowledgments/acknowledgments.component';
+import { HelpComponent } from './static-content/help/help.component';
 import { MeterTableComponent } from './utility/upload-data/meter-table/meter-table.component';
 import { MeterDataTableComponent } from './utility/upload-data/meter-data-table/meter-data-table.component';
 import { SetupProgressComponent } from './shared/setup-progress/setup-progress.component';
@@ -140,6 +144,10 @@ import { PredictorsOrderByPipe } from './utility/predictor-data/predictors-order
     ImportMeterDataWizardComponent,
     ValidDataTableComponent,
     MissingMeterNumberTableComponent,
+    AboutComponent,
+    FeedbackComponent,
+    AcknowledgmentsComponent,
+    HelpComponent,
     UploadDataComponent,
     ExcelWizardComponent,
     ExcelDataTableComponent,
