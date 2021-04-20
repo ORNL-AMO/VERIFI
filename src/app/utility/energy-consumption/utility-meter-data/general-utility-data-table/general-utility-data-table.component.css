@@ -6,6 +6,3 @@ thead th:hover{
     cursor: pointer;
     text-decoration: underline;
 }
-td.error{
-    background: red !important;
-}
