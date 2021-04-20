@@ -226,9 +226,4 @@ export class UtilityMeterDataComponent implements OnInit {
   cancelBulkDelete() {
     this.showBulkDelete = false;
   }
-
-
-  checkDuplicateMonthsEntries() {
-
-  }
 }
