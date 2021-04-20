@@ -29,7 +29,7 @@ export class UtilityMeterDataComponent implements OnInit {
     errorDate: Date
   }>;
 
-  itemsPerPage: number = 36;
+  itemsPerPage: number = 6;
   tablePageNumbers: Array<number> = [];
 
   accountMeterDataSub: Subscription;
