@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { NavigationEnd, Router } from '@angular/router';
+import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { IdbFacility } from 'src/app/models/idb';
 
 @Component({
   selector: 'app-help-panel',
@@ -13,30 +14,40 @@ export class HelpPanelComponent implements OnInit {
   helpText: string;
   selectedSource: string;
   selectedFacilitySub: Subscription;
+  selectedFacility: IdbFacility;
   selectedFacilityName: string = 'Facility';
   
   constructor(
     private router: Router,
     private facilityDbService: FacilitydbService,
     ) { 
-    router.events.subscribe((route) => {
-      if (route instanceof NavigationEnd) {
-        this.helpText = route.url.replace('/utility/','');
-        this.selectedSource = this.helpText.split('energy-consumption/')[1];
+    router.events.subscribe((val) => {
+      if (val instanceof NavigationEnd) {
+        this.getUrl(val.url);
       }
     });
   }
 
   ngOnInit() {
-    this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
-      if (facility) {
-        this.selectedFacilityName = facility.name;
-      }
-    });
+    this.getUrl(this.router.url);
+    
+    this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
+      this.selectedFacility = val;
+      this.selectedFacilityName = val.name;
+    })
   }
 
   ngOnDestroy() {
     this.selectedFacilitySub.unsubscribe();
+  }
+
+  save() {
+    this.facilityDbService.update(this.selectedFacility);
+  }
+
+  getUrl(val) {
+    this.helpText = val.replace('/utility/','');
+    this.selectedSource = this.helpText.split('energy-consumption/')[1];
   }
 
 }
