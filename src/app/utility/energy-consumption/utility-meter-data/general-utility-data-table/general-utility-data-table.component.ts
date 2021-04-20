@@ -100,4 +100,14 @@ export class GeneralUtilityDataTableComponent implements OnInit {
       this.orderDataField = str;
     }
   }
+
+  checkError(readDate: Date): boolean {
+    if (this.meterListItem.errorDate) {
+      let readDateItem: Date = new Date(readDate);
+      if (readDateItem.getUTCFullYear() == this.meterListItem.errorDate.getUTCFullYear() && readDateItem.getUTCMonth() == this.meterListItem.errorDate.getUTCMonth()) {
+        return true;
+      }
+    }
+    return false;
+  }
 }
