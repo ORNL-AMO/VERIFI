@@ -12,7 +12,7 @@
   <div class="sticky-top" [ngClass]="{'banner-dropdown-open': bannerDropdownOpen}">
     <div class="breadcrumbs d-flex justify-content-between">
       <p>
-        <i class="fa fa-home"></i>{{selectedAccount.name}}
+        <a routerLink="/account-summary"><i class="fa fa-home"></i>{{selectedAccount.name}}</a>
         <i class="fa fa-angle-right"></i>
         <select [(ngModel)]="breadcrumbFacilityId" (change)="switchFacility()">
           <option [ngValue]="undefined">All Facilities
