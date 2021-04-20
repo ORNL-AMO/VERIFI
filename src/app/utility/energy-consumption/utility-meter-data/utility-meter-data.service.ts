@@ -5,6 +5,7 @@ import { BehaviorSubject } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { ElectricityDataFilters } from 'src/app/models/electricityFilter';
 import { IdbUtilityMeterData } from 'src/app/models/idb';
+import * as _ from 'lodash';
 
 @Injectable({
   providedIn: 'root'
@@ -165,4 +166,17 @@ export class UtilityMeterDataService {
     return meterData;
   }
 
+
+  checkForErrors(meterData: Array<IdbUtilityMeterData>): Date {
+    let orderedData: Array<IdbUtilityMeterData> = _.orderBy(meterData, 'readDate', 'desc');
+    let meterDataDates: Array<Date> = orderedData.map(data => { return data.readDate });
+    for (let index = 0; index < meterDataDates.length - 1; index++) {
+      let date1: Date = new Date(meterDataDates[index]);
+      let date2: Date = new Date(meterDataDates[index + 1]);
+      if(date1.getUTCMonth() == date2.getUTCMonth() && date1.getUTCFullYear() == date2.getUTCFullYear()){
+        return date1;
+      }
+    }
+    return;
+  }
 }

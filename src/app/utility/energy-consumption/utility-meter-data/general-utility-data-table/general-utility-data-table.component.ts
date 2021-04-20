@@ -13,7 +13,8 @@ export class GeneralUtilityDataTableComponent implements OnInit {
   @Input()
   meterListItem: {
     idbMeter: IdbUtilityMeter,
-    meterDataItems: Array<IdbUtilityMeterData>
+    meterDataItems: Array<IdbUtilityMeterData>,
+    errorDate: Date
   };
   @Input()
   currentPageNumber: number;
@@ -98,5 +99,15 @@ export class GeneralUtilityDataTableComponent implements OnInit {
     }else{
       this.orderDataField = str;
     }
+  }
+
+  checkError(readDate: Date): boolean {
+    if (this.meterListItem.errorDate) {
+      let readDateItem: Date = new Date(readDate);
+      if (readDateItem.getUTCFullYear() == this.meterListItem.errorDate.getUTCFullYear() && readDateItem.getUTCMonth() == this.meterListItem.errorDate.getUTCMonth()) {
+        return true;
+      }
+    }
+    return false;
   }
 }
