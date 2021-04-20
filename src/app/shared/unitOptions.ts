@@ -32,12 +32,12 @@ export const EnergyUnitOptions: Array<UnitOption> = [
     },
     {
         display: 'Therms',
-        value: 'Therm',
+        value: 'Therms',
         unitsOfMeasure: 'Metric'
     },
     {
         display: 'Dekatherms (DTherms)',
-        value: 'DTherm',
+        value: 'Dtherms',
         unitsOfMeasure: 'Metric'
     },
     {

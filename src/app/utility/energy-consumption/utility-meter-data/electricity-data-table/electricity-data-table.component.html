@@ -9,7 +9,8 @@
             <th (click)="setOrderDataField('totalEnergyUse')"
                 [ngClass]="{'active': orderDataField == 'totalEnergyUse'}">Total Energy (<span
                     [innerHTML]="energyUnit | settingsLabel"></span>)</th>
-            <th (click)="setOrderDataField('totalDemand')" [ngClass]="{'active': orderDataField == 'totalDemand'}">Total
+            <th *ngIf="showTotalDemand" (click)="setOrderDataField('totalDemand')"
+                [ngClass]="{'active': orderDataField == 'totalDemand'}">Total
                 Demand</th>
             <th (click)="setOrderDataField('totalCost')" [ngClass]="{'active': orderDataField == 'totalCost'}">Total
                 Cost</th>
@@ -105,7 +106,7 @@
             </td>
             <td [ngClass]="{'alert-danger': checkError(meterData.readDate)}">{{meterData.readDate | date}}</td>
             <td>{{meterData.totalEnergyUse}}</td>
-            <td>{{meterData.totalDemand}}</td>
+            <td *ngIf="showTotalDemand">{{meterData.totalDemand}}</td>
             <td>{{meterData.totalCost | currency}}</td>
             <td *ngIf="supplyDemandCharge.supplyBlockAmount">
                 {{meterData.supplyBlockAmount}}

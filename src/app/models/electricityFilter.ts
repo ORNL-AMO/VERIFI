@@ -1,4 +1,5 @@
 export interface ElectricityDataFilters {
+  showTotalDemand: boolean,
   supplyDemandCharge: SupplyDemandChargeFilters,
   taxAndOther: TaxAndOtherFilters
 }

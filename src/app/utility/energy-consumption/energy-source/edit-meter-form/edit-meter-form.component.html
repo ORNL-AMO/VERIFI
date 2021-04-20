@@ -5,7 +5,7 @@
             <div>
                 <label for="meterName">Name <span class="required">*</span> </label>
                 <div class="mb-3">
-                    <input id="meterName" class="form-control" type="text" formControlName="name">
+                    <input id="meterName" class="form-control" type="text" formControlName="name" onfocus="this.select();">
                 </div>
                 <span class="inputError" *ngIf="meterForm.get('name').hasError('required')">Meter name is
                     required</span>
@@ -75,7 +75,7 @@
                 <div class="col-6" *ngIf="displaySiteToSource">
                     <label for="siteToSource">Site to source <span class="required">*</span> </label>
                     <div class="mb-3">
-                        <input id="siteToSource" class="form-control" type="number" formControlName="siteToSource">
+                        <input id="siteToSource" class="form-control" type="number" formControlName="siteToSource" onfocus="this.select();">
                     </div>
                     <span class="inputError" *ngIf="meterForm.get('siteToSource').hasError('required')">Site to source
                         is required</span>
@@ -86,7 +86,7 @@
                 <div class="col-6" *ngIf="displayHeatCapacity">
                     <label for="heatCapacity">Heat Capacity <span class="required">*</span> </label>
                     <div class="input-group mb-3">
-                        <input id="heatCapacity" class="form-control" type="number" formControlName="heatCapacity">
+                        <input id="heatCapacity" class="form-control" type="number" formControlName="heatCapacity" onfocus="this.select();">
                         <span class="unit"><span [innerHTML]="facilityEnergyUnit | settingsLabel"></span>/<span
                                 [innerHTML]="meterForm.controls.startingUnit.value | settingsLabel"></span>
                         </span>
@@ -110,14 +110,14 @@
                 <div class="col">
                     <label for="meterNumber">Meter Number</label>
                     <div class="mb-3">
-                        <input id="meterNumber" class="form-control" type="text" formControlName="meterNumber">
+                        <input id="meterNumber" class="form-control" type="text" formControlName="meterNumber" onfocus="this.select();">
                     </div>
                 </div>
 
                 <div class="col">
                     <label for="accountNumber">Account Number</label>
                     <div class="mb-3">
-                        <input id="accountNumber" class="form-control" type="text" formControlName="accountNumber">
+                        <input id="accountNumber" class="form-control" type="text" formControlName="accountNumber" onfocus="this.select();">
                     </div>
                 </div>
             </div>
@@ -126,14 +126,14 @@
                 <div class="col">
                     <label for="location">Building / Location</label>
                     <div class="mb-3">
-                        <input id="location" class="form-control" type="text" formControlName="location">
+                        <input id="location" class="form-control" type="text" formControlName="location" onfocus="this.select();">
                     </div>
                 </div>
 
                 <div class="col">
                     <label for="supplier">Utility Supplier</label>
                     <div class="mb-3">
-                        <input id="supplier" class="form-control" type="text" formControlName="supplier">
+                        <input id="supplier" class="form-control" type="text" formControlName="supplier" onfocus="this.select();">
                     </div>
                 </div>
             </div>

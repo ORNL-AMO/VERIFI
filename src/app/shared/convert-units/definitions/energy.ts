@@ -124,14 +124,14 @@ export const energy = {
         display: '(MMBtu)'
       }
       , to_anchor: 1000000
-    }, Therm: {
+    }, Therms: {
       name: {
         singular: 'Therm'
         , plural: 'Therms',
         display: '(Therm)'
       }
       , to_anchor: 100000
-    }, DTherm: {
+    }, Dtherms: {
       name: {
         singular: 'Dekatherm'
         , plural: 'Dekatherms',

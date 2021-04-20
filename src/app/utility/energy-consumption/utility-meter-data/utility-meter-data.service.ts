@@ -32,6 +32,7 @@ export class UtilityMeterDataService {
 
   getDefaultFilters(): ElectricityDataFilters {
     return {
+      showTotalDemand: true,
       supplyDemandCharge: {
         showSection: false,
         supplyBlockAmount: false,

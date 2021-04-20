@@ -15,11 +15,11 @@
         <div class="col">
             <label>
                 <input class="full-width" type="text" [(ngModel)]="predictor.name"
-                    name="{{'predictorName'+predictor.id}}">
+                    name="{{'predictorName'+predictor.id}}" onfocus="this.select();">
             </label>
         </div>
         <div class="col-5">
-            <input class="three-quarter-width" [(ngModel)]="predictor.unit" name="{{'predictorUnit'+predictor.id}}">
+            <input class="three-quarter-width" [(ngModel)]="predictor.unit" name="{{'predictorUnit'+predictor.id}}" onfocus="this.select();">
             <button class="btn btn-small btn-danger m-0 item-right" (click)="deletePredictor(predictor)"><i
                     class="fa fa-trash-o red pointer"></i>
             </button>

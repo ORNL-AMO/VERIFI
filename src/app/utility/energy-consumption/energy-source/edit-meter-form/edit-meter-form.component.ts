@@ -40,7 +40,7 @@ export class EditMeterFormComponent implements OnInit {
   }
 
   ngOnChanges() {
-    this.setFuelTypeOptions();
+    this.setFuelTypeOptions(true);
     this.checkDisplayFuel();
     this.checkDisplayPhase();
     this.setStartingUnitOptions();
@@ -49,7 +49,7 @@ export class EditMeterFormComponent implements OnInit {
   }
 
   changeSource() {
-    this.setFuelTypeOptions();
+    this.setFuelTypeOptions(false);
     this.checkDisplayFuel();
     this.checkDisplayPhase();
     this.setStartingUnitOptions();
@@ -79,7 +79,7 @@ export class EditMeterFormComponent implements OnInit {
   changePhase() {
     this.setStartingUnitOptions();
     this.setStartingUnit();
-    this.setFuelTypeOptions();
+    this.setFuelTypeOptions(false);
     this.checkShowHeatCapacity();
     this.checkShowSiteToSource();
     this.setHeatCapacity();
@@ -131,17 +131,18 @@ export class EditMeterFormComponent implements OnInit {
   }
 
   updateHeatCapacityValidation() {
-    let heatCapacityAndSiteToSourceValidators: Array<ValidatorFn> = this.editMeterFormService.getHeatCapacityAndSiteToSourceValidation(this.meterForm.controls.source.value, this.meterForm.controls.startingUnit.value);
-    this.meterForm.controls.heatCapacity.setValidators(heatCapacityAndSiteToSourceValidators);
+    let heatCapacityValidators: Array<ValidatorFn> = this.editMeterFormService.getHeatCapacitValidation(this.meterForm.controls.source.value, this.meterForm.controls.startingUnit.value);
+    this.meterForm.controls.heatCapacity.setValidators(heatCapacityValidators);
     this.meterForm.controls.heatCapacity.updateValueAndValidity();
-    this.meterForm.controls.siteToSource.setValidators(heatCapacityAndSiteToSourceValidators);
+    let siteToSourceValidation: Array<ValidatorFn> = this.editMeterFormService.getSiteToSourceValidation(this.meterForm.controls.source.value, this.meterForm.controls.startingUnit.value);
+    this.meterForm.controls.siteToSource.setValidators(siteToSourceValidation);
     this.meterForm.controls.siteToSource.updateValueAndValidity();
   }
 
-  setFuelTypeOptions() {
+  setFuelTypeOptions(onChange: boolean) {
     this.fuelTypeOptions = this.energyUseCalculationsService.getFuelTypeOptions(this.meterForm.controls.source.value, this.meterForm.controls.phase.value);
     let selectedEnergyOption: FuelTypeOption = this.fuelTypeOptions.find(option => { return option.value == this.meterForm.controls.fuel.value });
-    if (!selectedEnergyOption && this.fuelTypeOptions.length != 0) {
+    if (!selectedEnergyOption && this.fuelTypeOptions.length != 0 && !onChange) {
       this.meterForm.controls.fuel.patchValue(this.fuelTypeOptions[0].value);
     }
   }
@@ -155,8 +156,8 @@ export class EditMeterFormComponent implements OnInit {
     }
   }
 
-  setSiteToSource(){
-    if(this.displaySiteToSource){
+  setSiteToSource() {
+    if (this.displaySiteToSource) {
       let selectedEnergyOption: FuelTypeOption = this.fuelTypeOptions.find(option => { return option.value == this.meterForm.controls.fuel.value });
       let siteToSource: number = this.energyUseCalculationsService.getSiteToSource(this.meterForm.controls.source.value, this.meterForm.controls.startingUnit.value, selectedEnergyOption)
       this.meterForm.controls.siteToSource.patchValue(siteToSource);
@@ -167,7 +168,7 @@ export class EditMeterFormComponent implements OnInit {
     this.displayHeatCapacity = this.editMeterFormService.checkShowHeatCapacity(this.meterForm.controls.source.value, this.meterForm.controls.startingUnit.value);
   }
 
-  checkShowSiteToSource(){
+  checkShowSiteToSource() {
     this.displaySiteToSource = this.editMeterFormService.checkShowSiteToSource(this.meterForm.controls.source.value, this.meterForm.controls.startingUnit.value);
   }
 

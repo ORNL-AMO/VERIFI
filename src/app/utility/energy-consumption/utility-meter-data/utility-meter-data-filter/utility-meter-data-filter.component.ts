@@ -17,6 +17,7 @@ export class UtilityMeterDataFilterComponent implements OnInit {
   showFilterDropdown: boolean = false;
   supplyDemandCharge: SupplyDemandChargeFilters;
   taxAndOther: TaxAndOtherFilters;
+  showTotalDemand: boolean;
   constructor(private utilityMeterDataService: UtilityMeterDataService, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
@@ -33,6 +34,7 @@ export class UtilityMeterDataFilterComponent implements OnInit {
       }
       this.supplyDemandCharge = electricityDataFilters.supplyDemandCharge;
       this.taxAndOther = electricityDataFilters.taxAndOther;
+      this.showTotalDemand = electricityDataFilters.showTotalDemand;
     }
     this.showFilterDropdown = !this.showFilterDropdown;
   }
@@ -40,6 +42,7 @@ export class UtilityMeterDataFilterComponent implements OnInit {
   save() {
     this.checkShowSection();
     let electricityDataFilters: ElectricityDataFilters = {
+      showTotalDemand: this.showTotalDemand,
       supplyDemandCharge: this.supplyDemandCharge,
       taxAndOther: this.taxAndOther
     }
@@ -53,6 +56,7 @@ export class UtilityMeterDataFilterComponent implements OnInit {
   }
 
   showAllColumns() {
+    this.showTotalDemand = true;
     this.supplyDemandCharge = {
       showSection: true,
       supplyBlockAmount: true,
@@ -82,6 +86,7 @@ export class UtilityMeterDataFilterComponent implements OnInit {
   }
 
   hideAllColumns() {
+    this.showTotalDemand = false;
     this.supplyDemandCharge = {
       showSection: false,
       supplyBlockAmount: false,
