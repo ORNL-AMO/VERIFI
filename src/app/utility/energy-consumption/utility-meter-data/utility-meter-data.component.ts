@@ -25,10 +25,11 @@ export class UtilityMeterDataComponent implements OnInit {
 
   meterList: Array<{
     idbMeter: IdbUtilityMeter,
-    meterDataItems: Array<IdbUtilityMeterData>
+    meterDataItems: Array<IdbUtilityMeterData>,
+    errorDate: Date
   }>;
 
-  itemsPerPage: number = 6;
+  itemsPerPage: number = 36;
   tablePageNumbers: Array<number> = [];
 
   accountMeterDataSub: Subscription;
@@ -108,12 +109,14 @@ export class UtilityMeterDataComponent implements OnInit {
     this.meterList = new Array();
     this.utilityMeters.forEach(meter => {
       let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataForFacility(meter, false);
-      if(meterData.length != 0){
+      if (meterData.length != 0) {
         this.meterListHasData = true;
       }
+      let errorDate: Date = this.utilityMeterDataService.checkForErrors(meterData);
       this.meterList.push({
         idbMeter: meter,
-        meterDataItems: meterData
+        meterDataItems: meterData,
+        errorDate: errorDate
       });
     });
     this.setHasCheckedItems();
@@ -159,13 +162,13 @@ export class UtilityMeterDataComponent implements OnInit {
         }
       })
     });
-    for(let index = 0; index < meterDataItemsToDelete.length; index++){
+    for (let index = 0; index < meterDataItemsToDelete.length; index++) {
       await this.utilityMeterDataDbService.deleteWithObservable(meterDataItemsToDelete[index].id);
     }
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let accountMeterData: Array<IdbUtilityMeterData> = await this.utilityMeterDataDbService.getAllByIndexRange("accountId", selectedFacility.accountId).toPromise();
     this.utilityMeterDataDbService.accountMeterData.next(accountMeterData);
-    let facilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.filter(dataItem => {return dataItem.facilityId == selectedFacility.id});
+    let facilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.filter(dataItem => { return dataItem.facilityId == selectedFacility.id });
     this.utilityMeterDataDbService.facilityMeterData.next(facilityMeterData);
     this.loadingService.setLoadingStatus(false);
     this.toastNoticationService.showToast("Meter Data Deleted!", undefined, undefined, false, "success");
@@ -222,5 +225,10 @@ export class UtilityMeterDataComponent implements OnInit {
 
   cancelBulkDelete() {
     this.showBulkDelete = false;
+  }
+
+
+  checkDuplicateMonthsEntries() {
+
   }
 }
