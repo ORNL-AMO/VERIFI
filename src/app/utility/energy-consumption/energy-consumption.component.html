@@ -1,7 +1,7 @@
 <div class="tabs">
     <ul>
         <li><a routerLink="/utility/energy-consumption" [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">Energy Source</a></li>
-        <li [hidden]="!electricity"[class.red]="hasElectricityError">
+        <li [hidden]="!electricity" [class.red]="hasElectricityError">
             <a routerLink="electricity" [routerLinkActive]="['active']">Electricity 
                 <!-- <span [hidden]="hasElectricityData">*</span> -->
             </a>

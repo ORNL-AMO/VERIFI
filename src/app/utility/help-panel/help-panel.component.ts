@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idb';
@@ -10,23 +11,43 @@ import { IdbFacility } from 'src/app/models/idb';
 })
 export class HelpPanelComponent implements OnInit {
 
-
-  selectedFacility: IdbFacility;
+  helpText: string;
+  selectedSource: string;
   selectedFacilitySub: Subscription;
-  constructor(private facilityDbService: FacilitydbService) { }
+  selectedFacility: IdbFacility;
+  selectedFacilityName: string = 'Facility';
+  
+  constructor(
+    private router: Router,
+    private facilityDbService: FacilitydbService,
+    ) { 
+    router.events.subscribe((val) => {
+      if (val instanceof NavigationEnd) {
+        this.getUrl(val.url);
+      }
+    });
+  }
 
   ngOnInit() {
+    this.getUrl(this.router.url);
+    
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
       this.selectedFacility = val;
+      this.selectedFacilityName = val.name;
     })
   }
 
-  ngOnDestroy(){
+  ngOnDestroy() {
     this.selectedFacilitySub.unsubscribe();
   }
 
-  save(){
+  save() {
     this.facilityDbService.update(this.selectedFacility);
+  }
+
+  getUrl(val) {
+    this.helpText = val.replace('/utility/','');
+    this.selectedSource = this.helpText.split('energy-consumption/')[1];
   }
 
 }

@@ -1,10 +1,7 @@
 <div class="wrapper main-content">
     <h4>Meter Grouping
-        <span class="pull-right date-font-size">({{yearPriorToLastBill | date: 'MMM, y'}} - {{lastBillDate | date: 'MMM,
-            y'}})</span>
+        <span class="pull-right date-font-size">({{yearPriorToLastBill | date: 'MMM, y'}} - {{lastBillDate | date: 'MMM, y'}})</span>
     </h4>
-    <p>Your meters have been grouped by type. You are free to edit or add groups based on your preferences. These groups
-        will represent your data visualization.</p>
     <br>
     <div *ngFor="let meterGroupType of meterGroupTypes" id={{meterGroupType.id}}>
         <div class="group-section">

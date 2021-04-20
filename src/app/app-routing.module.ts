@@ -6,7 +6,7 @@ import { UtilityComponent } from './utility/utility.component';
 import { EnergyConsumptionComponent } from './utility/energy-consumption/energy-consumption.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { EnergySourceComponent } from './utility/energy-consumption/energy-source/energy-source.component';
-import { StyleGuideComponent } from './shared/style-guide/style-guide.component';
+import { StyleGuideComponent } from './static-content/style-guide/style-guide.component';
 import { UtilityMeterDataComponent } from './utility/energy-consumption/utility-meter-data/utility-meter-data.component';
 import { MeterGroupingComponent } from './utility/meter-grouping/meter-grouping.component';
 import { PredictorDataComponent } from './utility/predictor-data/predictor-data.component';
@@ -15,6 +15,10 @@ import { VisualizationComponent } from './utility/visualization/visualization.co
 import { FacilityOverviewComponent } from './dashboard/facility-overview/facility-overview.component';
 import { AccountOverviewComponent } from './dashboard/account-overview/account-overview.component';
 import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
+import { AboutComponent } from './static-content/about/about.component';
+import { AcknowledgmentsComponent } from './static-content/acknowledgments/acknowledgments.component';
+import { FeedbackComponent } from './static-content/feedback/feedback.component';
+import { HelpComponent } from './static-content/help/help.component';
 import { UploadDataComponent } from './utility/upload-data/upload-data.component';
 
 const routes: Routes = [
@@ -70,6 +74,10 @@ const routes: Routes = [
 
     ]
   },
+  { path: 'about', component: AboutComponent },
+  { path: 'acknowledgments', component: AcknowledgmentsComponent },
+  { path: 'feedback', component: FeedbackComponent },
+  { path: 'help', component: HelpComponent },
   { path: 'style-guide', component: StyleGuideComponent },
   { path: "**", component: PageNotFoundComponent }
 ];

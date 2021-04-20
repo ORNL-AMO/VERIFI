@@ -128,6 +128,7 @@ export class UploadDataService {
     let nonTemplateFiles: Array<ImportMeterDataFile> = importMeterDataFiles.filter(file => { return file.isTemplateElectricity == undefined });
     //reset array
     this.importMeterDataFiles.next([]);
+    this.importPredictorsFiles.next([]);
     //re parse workbooks
     let templateWorkBooks: Array<{ workBook: XLSX.WorkBook, fileName: string }> = this.templateWorkBooks.getValue();
     this.parseWorkBooks(templateWorkBooks, true);
