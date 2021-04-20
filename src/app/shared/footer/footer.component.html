@@ -1,5 +1,5 @@
 <div id="footer" role="footer">
-    <p class="item-left" (click)="deleteDatabase()">Delete Database</p>
+    <p class="item-left" (click)="deleteDatabase()" *ngIf="isDev">Delete Database</p>
     <div>
         <p><i class="fa fa-calendar"></i> {{date | date:'MM/dd/yyyy'}}</p>
         <p><i class="fa fa-cog"></i> Settings</p>

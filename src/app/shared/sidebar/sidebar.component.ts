@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, Renderer2 } from '@angular/core';
+import { Component, ElementRef, OnInit, Renderer2, isDevMode } from '@angular/core';
 import { Router, Event, NavigationEnd} from '@angular/router';
 
 @Component({
@@ -8,7 +8,7 @@ import { Router, Event, NavigationEnd} from '@angular/router';
 })
 export class SidebarComponent implements OnInit {
   open: boolean;
-
+  isDev: boolean;
   constructor(
     private renderer: Renderer2,
     private eRef: ElementRef,
@@ -28,7 +28,9 @@ export class SidebarComponent implements OnInit {
 
   }
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.isDev = isDevMode();
+  }
 
   toggleSidebar() {
     this.open = !this.open;

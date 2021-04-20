@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, isDevMode, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { version } from '../../../../package.json';
 import { AccountdbService } from "../../indexedDB/account-db.service";
@@ -21,6 +21,7 @@ export class FooterComponent implements OnInit {
   allAccountsSub: Subscription;
   allFacilitiesSub: Subscription;
   accountFacilitiesSub: Subscription;
+  isDev: boolean;
   constructor(
     public accountdbService: AccountdbService,
     public facilitydbService: FacilitydbService,
@@ -29,6 +30,7 @@ export class FooterComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.isDev = isDevMode();
     this.allAccountsSub = this.accountdbService.allAccounts.subscribe(allAccounts => {
       this.accountCount = allAccounts.length;
     });

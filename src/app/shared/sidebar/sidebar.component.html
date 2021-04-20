@@ -34,7 +34,7 @@
         <li><a routerLink="/acknowledgments" [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-trophy"></i> <span>Acknowledgments</span></a></li>
     </ul>
     <hr>
-    <ul>
+    <ul *ngIf="isDev">
         <li><a routerLink="style-guide" [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-star"></i> <span>Style Guide</span></a></li>
     </ul>
 </div>
