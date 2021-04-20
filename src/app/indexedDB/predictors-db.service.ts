@@ -223,7 +223,7 @@ export class PredictordbService {
         let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
         let accountPredictorEntries: Array<IdbPredictorEntry> = await this.getAllByIndexRange('accountId', selectedFacility.accountId).toPromise()
         this.accountPredictorEntries.next(accountPredictorEntries);
-        let updatedFacilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(predictor => {return predictor.facilityId = selectedFacility.id});
+        let updatedFacilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(predictor => {return predictor.facilityId == selectedFacility.id});
         this.facilityPredictorEntries.next(updatedFacilityPredictorEntries);
         this.facilityPredictors.next(updatedPredictors);
     }
