@@ -44,7 +44,6 @@ export class EditMeterComponent implements OnInit {
   saveChanges() {
     let meterToSave: IdbUtilityMeter = this.editMeterFormService.updateMeterFromForm(this.editMeter, this.meterForm);
     if (!this.meterEnergyUnit) {
-      console.log('set');
       meterToSave.energyUnit = this.getMeterEnergyUnit();
     }
     if (this.addOrEdit == 'edit') {

@@ -36,7 +36,6 @@ export class EditMeterFormComponent implements OnInit {
 
   ngOnInit(): void {
     if (!this.meterEnergyUnit) {
-      console.log('facility');
       let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
       if (selectedFacility) {
         this.energyUnit = selectedFacility.energyUnit;
