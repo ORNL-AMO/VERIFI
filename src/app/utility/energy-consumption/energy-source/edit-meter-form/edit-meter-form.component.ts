@@ -18,6 +18,8 @@ export class EditMeterFormComponent implements OnInit {
   meterForm: FormGroup;
   @Input()
   meterFormDisabled: boolean;
+  @Input()
+  meterEnergyUnit: string;
 
   displayPhase: boolean;
   displayFuel: boolean;
@@ -26,16 +28,20 @@ export class EditMeterFormComponent implements OnInit {
   energySourceLabel: string = 'Fuel Type';
   displayHeatCapacity: boolean;
   displaySiteToSource: boolean;
-  facilityEnergyUnit: string;
+  energyUnit: string;
   sourceOptions: Array<string> = SourceOptions
   constructor(private facilityDbService: FacilitydbService,
     private energyUnitsHelperService: EnergyUnitsHelperService, private energyUseCalculationsService: EnergyUseCalculationsService,
     private editMeterFormService: EditMeterFormService, private cd: ChangeDetectorRef) { }
 
   ngOnInit(): void {
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    if (selectedFacility) {
-      this.facilityEnergyUnit = selectedFacility.energyUnit;
+    if (!this.meterEnergyUnit) {
+      let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+      if (selectedFacility) {
+        this.energyUnit = selectedFacility.energyUnit;
+      }
+    }else{
+      this.energyUnit = this.meterEnergyUnit;
     }
   }
 
