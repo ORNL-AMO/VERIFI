@@ -26,3 +26,8 @@ min-height: calc(100vh - 163px);
 .empty-state .box p {
 font-size: 22px;
 }
+
+.loadData,
+.loadData a {
+  font-size: 18px;
+}
