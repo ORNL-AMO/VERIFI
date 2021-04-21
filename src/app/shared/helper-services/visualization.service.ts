@@ -30,7 +30,7 @@ export class VisualizationService {
       resultData = yearMonths.map(yearMonth => {
         let totalEnergyUse: number = _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
           if (meterData.month == yearMonth.month && meterData.year == yearMonth.year) {
-            return meterData.energyConsumption;
+            return meterData.energyUse;
           } else {
             return 0;
           }
@@ -64,7 +64,7 @@ export class VisualizationService {
       resultData = yearMonths.map(yearMonth => {
         let totalEnergyUse: number = _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
           if (meterData.year == yearMonth.year) {
-            return meterData.energyConsumption;
+            return meterData.energyUse;
           } else {
             return 0;
           }
