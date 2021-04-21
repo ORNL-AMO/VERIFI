@@ -22,11 +22,13 @@ export class EditMeterComponent implements OnInit {
 
   meterForm: FormGroup;
   meterFormDisabled: boolean;
+  meterEnergyUnit: string;
   constructor(private utilityMeterDbService: UtilityMeterdbService, private facilityDbService: FacilitydbService,
     private energyUnitsHelperService: EnergyUnitsHelperService, private editMeterFormService: EditMeterFormService,
     private utilityMeterDataDbService: UtilityMeterDatadbService) { }
 
   ngOnInit(): void {
+    this.meterEnergyUnit = this.editMeter.energyUnit;
     this.meterForm = this.editMeterFormService.getFormFromMeter(this.editMeter);
     let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataForFacility(this.editMeter, false);
     if (meterData.length != 0) {
@@ -41,7 +43,10 @@ export class EditMeterComponent implements OnInit {
 
   saveChanges() {
     let meterToSave: IdbUtilityMeter = this.editMeterFormService.updateMeterFromForm(this.editMeter, this.meterForm);
-    meterToSave.energyUnit = this.getMeterEnergyUnit();
+    if (!this.meterEnergyUnit) {
+      console.log('set');
+      meterToSave.energyUnit = this.getMeterEnergyUnit();
+    }
     if (this.addOrEdit == 'edit') {
       this.utilityMeterDbService.update(meterToSave);
     } else if (this.addOrEdit == 'add') {

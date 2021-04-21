@@ -87,7 +87,7 @@
                     <label for="heatCapacity">Heat Capacity <span class="required">*</span> </label>
                     <div class="input-group mb-3">
                         <input id="heatCapacity" class="form-control" type="number" formControlName="heatCapacity" onfocus="this.select();">
-                        <span class="unit"><span [innerHTML]="facilityEnergyUnit | settingsLabel"></span>/<span
+                        <span class="unit"><span [innerHTML]="energyUnit | settingsLabel"></span>/<span
                                 [innerHTML]="meterForm.controls.startingUnit.value | settingsLabel"></span>
                         </span>
                     </div>

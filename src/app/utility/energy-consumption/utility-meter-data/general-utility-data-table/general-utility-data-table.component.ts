@@ -1,9 +1,8 @@
 import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output, SimpleChanges } from '@angular/core';
-import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 import { UtilityMeterDataService } from '../utility-meter-data.service';
 import * as _ from 'lodash';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 
 @Component({
   selector: 'app-general-utility-data-table',
@@ -37,20 +36,14 @@ export class GeneralUtilityDataTableComponent implements OnInit {
   showEnergyColumn: boolean;
   orderDataField: string = 'readDate';
   orderByDirection: string = 'desc';
-  constructor(public utilityMeterDataService: UtilityMeterDataService, private energyUnitsHelperService: EnergyUnitsHelperService, private facilityDbService: FacilitydbService) { }
+  constructor(public utilityMeterDataService: UtilityMeterDataService, private energyUnitsHelperService: EnergyUnitsHelperService, private cd: ChangeDetectorRef) { }
 
   ngOnInit(): void {
     this.showVolumeColumn = (this.meterListItem.meterDataItems.find(dataItem => { return dataItem.totalVolume != undefined }) != undefined);
     this.volumeUnit = this.meterListItem.idbMeter.startingUnit;
     this.showEnergyColumn = this.energyUnitsHelperService.isEnergyMeter(this.meterListItem.idbMeter.source);
     if (this.showEnergyColumn) {
-      let isMeterEnergyUnit: boolean = this.energyUnitsHelperService.isEnergyUnit(this.meterListItem.idbMeter.startingUnit);
-      if (isMeterEnergyUnit) {
-        this.energyUnit = this.meterListItem.idbMeter.startingUnit;
-      } else {
-        let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-        this.energyUnit = selectedFacility.energyUnit;
-      }
+      this.energyUnit = this.meterListItem.idbMeter.energyUnit;
     }
     if (this.meterListItem.meterDataItems.length != 0) {
       let hasFalseChecked: IdbUtilityMeterData = this.meterListItem.meterDataItems.find(meterDataItem => { return meterDataItem.checked == false });
@@ -96,14 +89,14 @@ export class GeneralUtilityDataTableComponent implements OnInit {
     this.setDelete.emit(meterData);
   }
 
-  setOrderDataField(str: string) {
-    if (str == this.orderDataField) {
-      if (this.orderByDirection == 'desc') {
+  setOrderDataField(str: string){
+    if(str == this.orderDataField){
+      if(this.orderByDirection == 'desc'){
         this.orderByDirection = 'asc';
-      } else {
+      }else{
         this.orderByDirection = 'desc';
       }
-    } else {
+    }else{
       this.orderDataField = str;
     }
   }
