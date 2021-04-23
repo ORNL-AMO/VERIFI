@@ -28,7 +28,7 @@ export class HeaderComponent implements OnInit {
   facilityList: Array<IdbFacility>;
   activeAccount: IdbAccount;
   activeFacility: IdbFacility;
-  viewingAccountManagementPage: boolean;
+  viewingAccountPage: boolean;
 
   allAccountsSub: Subscription;
   selectedAccountSub: Subscription;
@@ -52,11 +52,10 @@ export class HeaderComponent implements OnInit {
         this.accountMenu = false;
         this.facilityMenu = false;
       }
-      if (event instanceof NavigationEnd && this.router.url === '/account-management') {
-        this.viewingAccountManagementPage = true;
-      }
-      if (event instanceof NavigationEnd && this.router.url != '/account-management') {
-        this.viewingAccountManagementPage = false;
+
+      // Displays "All Facilities" if viewing an account page
+      if (event instanceof NavigationEnd) {
+        this.checkIfAccountPage();
       }
     });
   }
@@ -171,6 +170,15 @@ export class HeaderComponent implements OnInit {
       return count + ' Facilities';
     }else{
       return count + ' Facility';
+    }
+  }
+
+  checkIfAccountPage() {
+    if (this.router.url === '/account-management' || this.router.url === '/account-summary') {
+      this.viewingAccountPage = true;
+    }
+    if (this.router.url != '/account-management' && this.router.url != '/account-summary') {
+      this.viewingAccountPage = false;
     }
   }
 
