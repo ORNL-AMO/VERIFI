@@ -89,6 +89,9 @@
     </div>
 
     <br>
-    <button class="btn btn-link" (click)="addNewAccount()"><i class="fa fa-plus"></i> Add Account</button>
+    <button class="btn btn-primary-2 pull-right" (click)="addNewAccount()"><i class="fa fa-plus"></i> Add Account</button>
+    <button class="btn btn-outline pull-right mr-2" (click)="openImportBackup()"><i class="fa fa-upload"></i> Import Account</button>
 </div>
 <div id="darkoverlay" [class.open]="switchAccountMenu == true" (click)="toggleSwitchAccountsMenu()"></div>
+
+<app-import-backup-modal *ngIf="showImportFile" (emitClose)="cancelImportBackup()"></app-import-backup-modal>
