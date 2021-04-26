@@ -1,4 +1,5 @@
 # Verifi
+### Downloads  ![Github Releases](https://img.shields.io/github/downloads/ORNL-AMO/VERIFI/latest/total.svg?label=Current%20Release)  ![Github All Releases](https://img.shields.io/github/downloads/ORNL-AMO/VERIFI/total.svg?label=All%20Time&colorB=afdffe)
 
 The Department of Energy Advanced Manufacturing Office has tasked Oak Ridge National Laboratory to develop a tool to track, visualize, analyze and even forecast facility utility data in industrial settings. This tool will incorporate and expand on several existing DOE tools (EnPI, EnPI Lite, Energy Footprint Tool, Plant Energy Profiler), most of which currently are excel-based or excel-add ons. This project will integrate them into a common, open-source framework which is harmonized with other DOE software tools – mainly the DOE’s [MEASUR tool suite](https://github.com/ORNL-AMO/AMO-Tools-Desktop).
 
