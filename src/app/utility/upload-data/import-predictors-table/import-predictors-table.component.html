@@ -12,10 +12,10 @@
                     File Name
                 </th>
                 <th>
-                    Existing Predictors
+                    New Predictors
                 </th>
                 <th>
-                    New Predictors
+                    Existing Predictors
                 </th>
                 <th>
                     Invalid/Skipped Predictors
@@ -32,8 +32,8 @@
             <tr *ngFor="let importPredictorFile of importPredictorFiles">
                 <td>{{importPredictorFile.fileName}}
                 </td>
-                <td>{{importPredictorFile.importPredictorFileSummary.existingPredictors.length}}</td>
                 <td>{{importPredictorFile.importPredictorFileSummary.newPredictors.length}}</td>
+                <td>{{importPredictorFile.importPredictorFileSummary.existingPredictors.length}}</td>
                 <td>
                     {{importPredictorFile.importPredictorFileSummary.invalidPredictors.length
                     +importPredictorFile.importPredictorFileSummary.skippedPredictors.length}}
