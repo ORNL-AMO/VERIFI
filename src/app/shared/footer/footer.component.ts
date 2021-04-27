@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, isDevMode, OnInit } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { version } from '../../../../package.json';
-import { AccountService } from "../../account/account/account.service";
 import { AccountdbService } from "../../indexedDB/account-db.service";
-import { FacilitydbService } from "../../indexedDB/facility-db-service";
+import { FacilitydbService } from "../../indexedDB/facility-db.service";
 
 @Component({
   selector: 'app-footer',
@@ -10,66 +10,47 @@ import { FacilitydbService } from "../../indexedDB/facility-db-service";
   styleUrls: ['./footer.component.css']
 })
 export class FooterComponent implements OnInit {
-  accountid: number;
-  date = new Date();
+
+  date: Date = new Date();
   version: string = version;
   accountCount: number = 0;
   facilityCount: number = 0;
   facilityCountTotal: number = 0;
 
+
+  allAccountsSub: Subscription;
+  allFacilitiesSub: Subscription;
+  accountFacilitiesSub: Subscription;
+  isDev: boolean;
   constructor(
-    public accountService: AccountService,
     public accountdbService: AccountdbService,
     public facilitydbService: FacilitydbService,
-  ) { 
+  ) {
 
   }
 
   ngOnInit() {
-    // Subscribe to account ID
-    this.accountService.getValue().subscribe((value) => {
-      this.accountid = value;
-      this.countFacilities();
+    this.isDev = isDevMode();
+    this.allAccountsSub = this.accountdbService.allAccounts.subscribe(allAccounts => {
+      this.accountCount = allAccounts.length;
     });
 
-    this.countAccounts();
-    this.countAllFacilities();
+    this.allFacilitiesSub = this.facilitydbService.allFacilities.subscribe(allFacilities => {
+      this.facilityCountTotal = allFacilities.length;
+    });
+
+    this.accountFacilitiesSub = this.facilitydbService.accountFacilities.subscribe(accountFacilities => {
+      this.facilityCount = accountFacilities.length;
+    });
   }
 
-  countAccounts() {
-    // Count all accounts
-    this.accountdbService.count().then(
-      data => {
-        this.accountCount = data;
-      },
-      error => {
-          console.log(error);
-      }
-    );
+  ngOnDestroy() {
+    this.allAccountsSub.unsubscribe();
+    this.allFacilitiesSub.unsubscribe();
+    this.accountFacilitiesSub.unsubscribe();
   }
 
-  countFacilities() {
-    // Count current facilities
-    this.facilitydbService.getAllByIndex(this.accountid).then(
-      data => {
-        this.facilityCount = data.length;
-      },
-      error => {
-          console.log(error);
-      }
-    );
+  deleteDatabase() {
+    this.accountdbService.deleteDatabase(); 
   }
-
-  countAllFacilities() {
-    // Count all facilities
-    this.facilitydbService.count().then(
-      data => {
-        this.facilityCountTotal = data;
-      },
-      error => {
-          console.log(error);
-      }
-    );
-  }
-
 }

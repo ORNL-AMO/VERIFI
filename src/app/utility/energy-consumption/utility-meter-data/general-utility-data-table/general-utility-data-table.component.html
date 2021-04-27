@@ -1,0 +1,44 @@
+<table class="table table-sm">
+    <thead>
+        <tr>
+            <th class="input">
+                <input #masterCheckbox type="checkbox" (change)="checkAll()" [(ngModel)]="allChecked">
+            </th>
+            <th (click)="setOrderDataField('readDate')" [ngClass]="{'active': orderDataField == 'readDate'}"
+                class="row-year">Meter Read Date</th>
+            <th (click)="setOrderDataField('totalVolume')" [ngClass]="{'active': orderDataField == 'totalVolume'}"
+                *ngIf="showVolumeColumn">Total Consumption (<span [innerHTML]="volumeUnit | settingsLabel"></span>)</th>
+            <th (click)="setOrderDataField('totalEnergyUse')" [ngClass]="{'active': orderDataField == 'totalEnergyUse'}"
+                *ngIf="showEnergyColumn">Total Energy (<span [innerHTML]="energyUnit | settingsLabel"></span>)</th>
+            <th (click)="setOrderDataField('totalCost')" [ngClass]="{'active': orderDataField == 'totalCost'}">Total
+                Cost</th>
+            <th (click)="setOrderDataField('commodityCharge')"
+                [ngClass]="{'active': orderDataField == 'commodityCharge'}">Commodity Charge</th>
+            <th (click)="setOrderDataField('deliveryCharge')"
+                [ngClass]="{'active': orderDataField == 'deliveryCharge'}">Delivery Charge</th>
+            <th (click)="setOrderDataField('otherCharge')" [ngClass]="{'active': orderDataField == 'otherCharge'}">Other
+                Charges</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr
+            *ngFor="let meterData of meterListItem.meterDataItems | orderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage"
+            >
+            <td class="input">
+                <input type="checkbox" name="metersSelected" (change)="toggleChecked()" [(ngModel)]="meterData.checked">
+            </td>
+            <td [ngClass]="{'alert-danger': checkError(meterData.readDate)}">{{meterData.readDate | date}}</td>
+            <td *ngIf="showVolumeColumn">{{meterData.totalVolume}}</td>
+            <td *ngIf="showEnergyColumn">{{meterData.totalEnergyUse}}</td>
+            <td>{{meterData.totalCost | currency}}</td>
+            <td>{{meterData.commodityCharge | currency}}</td>
+            <td>{{meterData.deliveryCharge | currency}}</td>
+            <td>{{meterData.otherCharge | currency}}</td>
+            <td class="actions">
+                <i class="fa fa-pencil" title="Edit" (click)="setEditMeterData(meterData)"></i>
+                <i class="fa fa-trash-o" title="Delete" (click)="setDeleteMeterData(meterData)"></i>
+            </td>
+        </tr>
+    </tbody>
+</table>

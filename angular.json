@@ -20,16 +20,19 @@
             "tsConfig": "tsconfig.app.json",
             "aot": true,
             "assets": [
-              "src/favicon.ico",
               "src/assets"
             ],
             "styles": [
               "src/styles.css",
+              "node_modules/font-awesome/css/font-awesome.css",
               "node_modules/bootstrap/dist/css/bootstrap.min.css"
             ],
             "scripts": [
-              "node_modules/jquery/dist/jquery.min.js",
-              "node_modules/bootstrap/dist/js/bootstrap.min.js"
+              "node_modules/plotly.js/dist/plotly.min.js"
+            ],
+            "allowedCommonJsDependencies": [
+              "lodash",
+              "xlsx"
             ]
           },
           "configurations": {
@@ -51,8 +54,8 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "2mb",
-                  "maximumError": "5mb"
+                  "maximumWarning": "5mb",
+                  "maximumError": "10mb"
                 },
                 {
                   "type": "anyComponentStyle",
@@ -88,7 +91,6 @@
             "tsConfig": "tsconfig.spec.json",
             "karmaConfig": "karma.conf.js",
             "assets": [
-              "src/favicon.ico",
               "src/assets"
             ],
             "styles": [
@@ -123,6 +125,10 @@
           }
         }
       }
-    }},
-  "defaultProject": "verifi"
+    }
+  },
+  "defaultProject": "verifi",
+  "cli": {
+    "analytics": false
+  }
 }

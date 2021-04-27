@@ -1,135 +1,101 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { CallbackPipe } from "./callback.pipe";
 
-import { NgxIndexedDBModule, DBConfig } from 'ngx-indexed-db';
-import { NgxWebstorageModule } from 'ngx-webstorage';
 import { AppRoutingModule } from './app-routing.module';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 
 import { AppComponent } from './app.component';
 import { HeaderComponent } from './shared/header/header.component';
 import { FooterComponent } from './shared/footer/footer.component';
 import { SidebarComponent } from './shared/sidebar/sidebar.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { AccountComponent } from './account/account/account.component';
-import { FacilityComponent } from './account/facility/facility.component';
+import { AccountComponent } from './account-management/account/account.component';
+import { FacilityComponent } from './account-management/facility/facility.component';
 import { UtilityComponent } from './utility/utility.component';
 import { EnergyConsumptionComponent } from './utility/energy-consumption/energy-consumption.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
-import { DataTableComponent } from './utility/data-table/data-table.component';
 import { EnergySourceComponent } from './utility/energy-consumption/energy-source/energy-source.component';
 import { HelpPanelComponent } from './utility/help-panel/help-panel.component';
-import { ElectricityComponent } from './utility/energy-consumption/electricity/electricity.component';
-import { NaturalGasComponent } from './utility/energy-consumption/natural-gas/natural-gas.component';
-import { LpgComponent } from './utility/energy-consumption/lpg/lpg.component';
 
 import { CommonModule } from '@angular/common';
 
-import * as PlotlyJS from 'plotly.js/dist/plotly.js';
-import { PlotlyModule } from 'angular-plotly.js';
-import { StyleGuideComponent } from './shared/style-guide/style-guide.component';
 
-PlotlyModule.plotlyjs = PlotlyJS;
+import { PlotlyViaWindowModule } from 'angular-plotly.js';
 
-const dbConfig: DBConfig  = {
-  name: 'verifi',
-  version: 4.5,
-  objectStoresMeta: [{
-    store: 'accounts',
-    storeConfig: { keyPath: 'id', autoIncrement: true },
-    storeSchema: [
-      { name: 'name', keypath: 'name', options: { unique: false } },
-      { name: 'industry', keypath: 'industry', options: { unique: false } },
-      { name: 'naics', keypath: 'naics', options: { unique: false } },
-      { name: 'notes', keypath: 'notes', options: { unique: false } },
-      { name: 'img', keypath: 'img', options: { unique: false } }
-    ]
-  },
-  {
-    store: 'facilities',
-    storeConfig: { keyPath: 'id', autoIncrement: true },
-    storeSchema: [
-      { name: 'facilityid', keypath: 'facilityid', options: { unique: true} },
-      { name: 'accountid', keypath: 'accountid', options: { unique: false } },
-      { name: 'name', keypath: 'name', options: { unique: false } },
-      { name: 'country', keypath: 'country', options: { unique: false } },
-      { name: 'state', keypath: 'state', options: { unique: false } },
-      { name: 'address', keypath: 'address', options: { unique: false } },
-      { name: 'type', keypath: 'type', options: { unique: false } },
-      { name: 'tier', keypath: 'tier', options: { unique: false } },
-      { name: 'size', keypath: 'size', options: { unique: false } },
-      { name: 'units', keypath: 'units', options: { unique: false } },
-      { name: 'division', keypath: 'division', options: { unique: false } },
-      { name: 'img', keypath: 'img', options: { unique: false } }
-    ]
-  },
-  {
-    store: 'utilityMeter',
-    storeConfig: { keyPath: 'id', autoIncrement: true },
-    storeSchema: [
-      { name: 'meterid', keypath: 'meterid', options: { unique: true} },
-      { name: 'facilityid', keypath: 'facilityid', options: { unique: false} },
-      { name: 'accountid', keypath: 'accountid', options: { unique: false } },
-      { name: 'meterNumber', keypath: 'meterNumber', options: { unique: false } },
-      { name: 'accountNumber', keypath: 'accountNumber', options: { unique: false } },
-      { name: 'type', keypath: 'type', options: { unique: false } },
-      { name: 'name', keypath: 'name', options: { unique: false } },
-      { name: 'supplier', keypath: 'supplier', options: { unique: false } },
-      { name: 'notes', keypath: 'notes', options: { unique: false } }
-    ]
-  },
-  {
-    store: 'utilityMeterData',
-    storeConfig: { keyPath: 'id', autoIncrement: true },
-    storeSchema: [
-      { name: 'meterid', keypath: 'meterid', options: { unique: false } },
-      { name: 'facilityid', keypath: 'facilityid', options: { unique: false } },
-      { name: 'accountid', keypath: 'accountid', options: { unique: false } },
-      { name: 'readDate', keypath: 'readDate', options: { unique: false } },
-      { name: 'totalKwh', keypath: 'totalKwh', options: { unique: false } },
-      { name: 'totalDemand', keypath: 'totalDemand', options: { unique: false } },
-      { name: 'totalCost', keypath: 'totalCost', options: { unique: false } },
-      { name: 'basicCharge', keypath: 'basicCharge', options: { unique: false } },
-      { name: 'supplyBlockAmt', keypath: 'supplyBlockAmt', options: { unique: false } },
-      { name: 'supplyBlockCharge', keypath: 'supplyBlockCharge', options: { unique: false } },
-      { name: 'flatRateAmt', keypath: 'flatRateAmt', options: { unique: false } },
-      { name: 'flatRateCharge', keypath: 'flatRateCharge', options: { unique: false } },
-      { name: 'peakAmt', keypath: 'peakAmt', options: { unique: false } },
-      { name: 'peakCharge', keypath: 'peakCharge', options: { unique: false } },
-      { name: 'offpeakAmt', keypath: 'offpeakAmt', options: { unique: false } },
-      { name: 'offpeakCharge', keypath: 'offpeakCharge', options: { unique: false } },
-      { name: 'demandBlockAmt', keypath: 'demandBlockAmt', options: { unique: false } },
-      { name: 'demandBlockCharge', keypath: 'demandBlockCharge', options: { unique: false } },
-      { name: 'genTransCharge', keypath: 'genTransCharge', options: { unique: false } },
-      { name: 'deliveryCharge', keypath: 'deliveryCharge', options: { unique: false } },
-      { name: 'transCharge', keypath: 'transCharge', options: { unique: false } },
-      { name: 'powerFactorCharge', keypath: 'powerFactorCharge', options: { unique: false } },
-      { name: 'businessCharge', keypath: 'businessCharge', options: { unique: false } },
-      { name: 'utilityTax', keypath: 'utilityTax', options: { unique: false } },
-      { name: 'latePayment', keypath: 'latePayment', options: { unique: false } },
-      { name: 'otherCharge', keypath: 'otherCharge', options: { unique: false } }
-    ]
-  },
-  {
-    store: 'naturalGasData',
-    storeConfig: { keyPath: 'id', autoIncrement: true },
-    storeSchema: [
-      { name: 'meterid', keypath: 'meterid', options: { unique: false } },
-      { name: 'facilityid', keypath: 'facilityid', options: { unique: false } },
-      { name: 'accountid', keypath: 'accountid', options: { unique: false } },
-      { name: 'readDate', keypath: 'readDate', options: { unique: false } },
-      { name: 'totalVolume', keypath: 'totalVolume', options: { unique: false } },
-      { name: 'commodityCharge', keypath: 'commodityCharge', options: { unique: false } },
-      { name: 'deliveryCharge', keypath: 'deliveryCharge', options: { unique: false } },
-      { name: 'otherCharge', keypath: 'otherCharge', options: { unique: false } }
-    ]
-  }]
-};
+
+import { StyleGuideComponent } from './static-content/style-guide/style-guide.component';
+import { LoadingComponent } from './shared/loading/loading.component';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { IndexedDBModule } from './indexedDB/indexed-db.module';
+import { EditMeterFormComponent } from './utility/energy-consumption/energy-source/edit-meter-form/edit-meter-form.component';
+import { UtilityMeterDataComponent } from './utility/energy-consumption/utility-meter-data/utility-meter-data.component';
+import { UtilityMeterDataFilterComponent } from './utility/energy-consumption/utility-meter-data/utility-meter-data-filter/utility-meter-data-filter.component';
+import { ElectricityDataTableComponent } from './utility/energy-consumption/utility-meter-data/electricity-data-table/electricity-data-table.component';
+import { GeneralUtilityDataTableComponent } from './utility/energy-consumption/utility-meter-data/general-utility-data-table/general-utility-data-table.component';
+import { EditUtilityBillComponent } from './utility/energy-consumption/utility-meter-data/edit-utility-bill/edit-utility-bill.component';
+import { EditElectricityBillComponent } from './utility/energy-consumption/utility-meter-data/edit-electricity-bill/edit-electricity-bill.component';
+import { MeterGroupingComponent } from './utility/meter-grouping/meter-grouping.component';
+import { EditMeterGroupFormComponent } from './utility/meter-grouping/edit-meter-group-form/edit-meter-group-form.component';
+
+
+import { PredictorDataComponent } from './utility/predictor-data/predictor-data.component';
+import { EditPredictorEntryRowComponent } from './utility/predictor-data/edit-predictor-entry-row/edit-predictor-entry-row.component';
+import { EditPredictorsComponent } from './utility/predictor-data/edit-predictors/edit-predictors.component';
+import { CalanderizationComponent } from './utility/calanderization/calanderization.component';
+import { EnergyUnitDropdownComponent } from './utility/meter-grouping/energy-unit-dropdown/energy-unit-dropdown.component';
+import { SettingsLabelPipe } from './shared/helper-pipes/settings-label.pipe';
+import { VisualizationComponent } from './utility/visualization/visualization.component';
+import { FacilityBarChartComponent } from './dashboard/facility-overview/facility-bar-chart/facility-bar-chart.component';
+import { FacilityHeatMapComponent } from './dashboard/facility-overview/facility-heat-map/facility-heat-map.component';
+import { FacilityStackedAreaChartComponent } from './dashboard/facility-overview/facility-stacked-area-chart/facility-stacked-area-chart.component';
+import { FacilityOverviewComponent } from './dashboard/facility-overview/facility-overview.component';
+import { AccountOverviewComponent } from './dashboard/account-overview/account-overview.component';
+import { FacilitiesTableComponent } from './dashboard/account-overview/facilities-table/facilities-table.component';
+import { EnergyUseDonutComponent } from './dashboard/account-overview/energy-use-donut/energy-use-donut.component';
+import { EnergyUseHeatMapComponent } from './dashboard/account-overview/energy-use-heat-map/energy-use-heat-map.component';
+import { EnergyUseStackedBarChartComponent } from './dashboard/account-overview/energy-use-stacked-bar-chart/energy-use-stacked-bar-chart.component';
+import { MetersTableComponent } from './dashboard/facility-overview/meters-table/meters-table.component';
+import { UtilityEnergyUseTableComponent } from './dashboard/facility-overview/utility-energy-use-table/utility-energy-use-table.component';
+import { AccountUtilityEnergyUseTableComponent } from './dashboard/account-overview/account-utility-energy-use-table/account-utility-energy-use-table.component';
+import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
+import { EditMeterComponent } from './utility/energy-consumption/energy-source/edit-meter/edit-meter.component';
+import { OrderByPipe } from './shared/helper-pipes/order-by.pipe';
+import { AboutComponent } from './static-content/about/about.component';
+import { FeedbackComponent } from './static-content/feedback/feedback.component';
+import { AcknowledgmentsComponent } from './static-content/acknowledgments/acknowledgments.component';
+import { HelpComponent } from './static-content/help/help.component';
+import { MeterTableComponent } from './utility/upload-data/meter-table/meter-table.component';
+import { MeterDataTableComponent } from './utility/upload-data/meter-data-table/meter-data-table.component';
+import { SetupProgressComponent } from './shared/setup-progress/setup-progress.component';
+import { EmptyStateComponent } from './dashboard/empty-state/empty-state.component';
+import { GeneralInformationFormComponent } from './account-management/general-information-form/general-information-form.component';
+import { DefaultUnitsFormComponent } from './account-management/default-units-form/default-units-form.component';
+import { FinancialReportingFormComponent } from './account-management/financial-reporting-form/financial-reporting-form.component';
+import { SustainabilityQuestionsFormComponent } from './account-management/sustainability-questions-form/sustainability-questions-form.component';
+import { ImportMeterWizardComponent } from './utility/upload-data/import-meter-wizard/import-meter-wizard.component';
+import { ImportMeterDataWizardComponent } from './utility/upload-data/import-meter-data-wizard/import-meter-data-wizard.component';
+import { ValidDataTableComponent } from './utility/upload-data/import-meter-data-wizard/valid-data-table/valid-data-table.component';
+import { MissingMeterNumberTableComponent } from './utility/upload-data/import-meter-data-wizard/missing-meter-number-table/missing-meter-number-table.component';
+import { UploadDataComponent } from './utility/upload-data/upload-data.component';
+import { ExcelWizardComponent } from './utility/upload-data/excel-wizard/excel-wizard.component';
+import { ExcelDataTableComponent } from './utility/upload-data/excel-data-table/excel-data-table.component';
+import { SetupDataWizardComponent } from './utility/upload-data/excel-wizard/setup-data-wizard/setup-data-wizard.component';
+import { ColumnsWizardComponent } from './utility/upload-data/excel-wizard/columns-wizard/columns-wizard.component';
+import { WorksheetDataTableComponent } from './utility/upload-data/excel-wizard/worksheet-data-table/worksheet-data-table.component';
+import { InvalidMeterDataTableComponent } from './utility/upload-data/import-meter-data-wizard/invalid-meter-data-table/invalid-meter-data-table.component';
+import { WizardDataSummaryComponent } from './utility/upload-data/excel-wizard/wizard-data-summary/wizard-data-summary.component';
+import { CalanderizationFilterComponent } from './utility/calanderization/calanderization-filter/calanderization-filter.component';
+import { CalanderizationChartComponent } from './utility/calanderization/calanderization-chart/calanderization-chart.component';
+import { ToastNotificationsComponent } from './shared/toast-notifications/toast-notifications.component';
+import { ElectronUpdateComponent } from './electron/electron-update/electron-update.component';
+import { ImportPredictorsTableComponent } from './utility/upload-data/import-predictors-table/import-predictors-table.component';
+import { ImportPredictorsWizardComponent } from './utility/upload-data/import-predictors-wizard/import-predictors-wizard.component';
+import { ImportBackupModalComponent } from './shared/import-backup-modal/import-backup-modal.component';
+import { PredictorsOrderByPipe } from './utility/predictor-data/predictors-order-by.pipe';
 
 @NgModule({
   declarations: [
-    CallbackPipe,
     AppComponent,
     HeaderComponent,
     FooterComponent,
@@ -139,23 +105,85 @@ const dbConfig: DBConfig  = {
     UtilityComponent,
     EnergyConsumptionComponent,
     DashboardComponent,
-    DataTableComponent,
     EnergySourceComponent,
     HelpPanelComponent,
-    ElectricityComponent,
-    NaturalGasComponent,
-    LpgComponent,
-    StyleGuideComponent
+    StyleGuideComponent,
+    LoadingComponent,
+    EditMeterFormComponent,
+    UtilityMeterDataComponent,
+    UtilityMeterDataFilterComponent,
+    ElectricityDataTableComponent,
+    GeneralUtilityDataTableComponent,
+    EditUtilityBillComponent,
+    EditElectricityBillComponent,
+    MeterGroupingComponent,
+    EditMeterGroupFormComponent,
+    PredictorDataComponent,
+    EditPredictorEntryRowComponent,
+    EditPredictorsComponent,
+    CalanderizationComponent,
+    EnergyUnitDropdownComponent,
+    SettingsLabelPipe,
+    VisualizationComponent,
+    FacilityBarChartComponent,
+    FacilityHeatMapComponent,
+    FacilityStackedAreaChartComponent,
+    FacilityOverviewComponent,
+    AccountOverviewComponent,
+    FacilitiesTableComponent,
+    EnergyUseDonutComponent,
+    EnergyUseHeatMapComponent,
+    EnergyUseStackedBarChartComponent,
+    MetersTableComponent,
+    UtilityEnergyUseTableComponent,
+    AccountUtilityEnergyUseTableComponent,
+    PageNotFoundComponent,
+    ImportMeterWizardComponent,
+    EditMeterComponent,
+    OrderByPipe,
+    ImportMeterDataWizardComponent,
+    ValidDataTableComponent,
+    MissingMeterNumberTableComponent,
+    AboutComponent,
+    FeedbackComponent,
+    AcknowledgmentsComponent,
+    HelpComponent,
+    UploadDataComponent,
+    ExcelWizardComponent,
+    ExcelDataTableComponent,
+    MeterTableComponent,
+    MeterDataTableComponent,
+    SetupDataWizardComponent,
+    ColumnsWizardComponent,
+    WorksheetDataTableComponent,
+    InvalidMeterDataTableComponent,
+    WizardDataSummaryComponent,
+    SetupProgressComponent,
+    EmptyStateComponent,
+    CalanderizationFilterComponent,
+    CalanderizationChartComponent,
+    GeneralInformationFormComponent,
+    DefaultUnitsFormComponent,
+    FinancialReportingFormComponent,
+    SustainabilityQuestionsFormComponent,
+    ToastNotificationsComponent,
+    ElectronUpdateComponent,
+    ImportPredictorsTableComponent,
+    ImportPredictorsWizardComponent,
+    ImportBackupModalComponent,
+    PredictorsOrderByPipe,
   ],
   imports: [
-    NgxIndexedDBModule.forRoot(dbConfig),
-    NgxWebstorageModule.forRoot(),
     BrowserModule,
     AppRoutingModule,
     BrowserAnimationsModule,
     FormsModule,
     ReactiveFormsModule,
-    CommonModule, PlotlyModule
+    CommonModule, 
+    PlotlyViaWindowModule,
+    DragDropModule,
+    NgbModule,
+    IndexedDBModule
   ],
   providers: [],
   bootstrap: [AppComponent]

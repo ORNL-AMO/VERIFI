@@ -1,84 +1,61 @@
-<div class="banner">
-  <h3>Dashboard</h3>
+<div *ngIf="(!selectedAccount || facilityList.length === 0)">
+  <app-empty-state></app-empty-state>
 </div>
-<div class="dashboard-nav">
-  <ul>
-    <li>Summary</li>
-    <li class="active">Utilities</li>
-    <li>Water</li>
-  </ul>
-  <button class="btn btn-outline item-right">Generate Report</button>
-</div>
-<div class="wrapper main-content">
-  
-  <div class="row">
-    <div class="col plot">
-      <p>Energy Use (last 30 days)</p>
-      <p class="display-lg center bold no-margin">{{avgUse.toLocaleString(undefined, {maximumFractionDigits: 2})}}</p>
-      <p class="center">vs <span class="highlight">{{avgUse.toLocaleString(undefined, {maximumFractionDigits: 2})}}</span> average use</p>
-    </div>
-    <div class="col plot">
-      <p>Average Energy Cost</p>
-      <p class="display-lg center bold no-margin">${{avgCost.toLocaleString(undefined, {maximumFractionDigits: 2})}}</p>
-      <p class="center">average cost of all utility meters</p>
-    </div>
-    <div class="col plot">
-      <p>Energy Saving Progress</p>
-      <p class="display-lg center bold no-margin">30%</p>
-      <div class="progress">
-        <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" style="width:30%"></div>
+
+<div *ngIf="(selectedAccount && facilityList.length > 0)">
+  <div class="banner">
+    <h3 *ngIf="!isFacilityDashboard">Account Dashboard</h3>
+    <h3 *ngIf="selectedFacility && isFacilityDashboard">Facility Dashboard</h3>
+    <!--<button class="m-0 btn btn-outline item-right">Generate Report</button>-->
+  </div>
+
+  <div class="sticky-top" [ngClass]="{'banner-dropdown-open': bannerDropdownOpen}">
+    <div class="breadcrumbs d-flex justify-content-between">
+      <p>
+        <a routerLink="/account-summary"><i class="fa fa-home"></i>{{selectedAccount.name}}</a>
+        <i class="fa fa-angle-right"></i>
+        <select [(ngModel)]="breadcrumbFacilityId" (change)="switchFacility()">
+          <option [ngValue]="undefined">All Facilities
+          </option>
+          <option *ngFor="let facility of facilityList" [ngValue]="facility.id">{{facility.name}}
+          </option>
+        </select>
+      </p>
+
+
+
+      <div class="d-flex">
+        <div class="pr-1">
+          <div class="btn-group" *ngIf="!breadcrumbFacilityId">
+            <button class="btn btn-sm m-0 btn-selected" (click)="setAccountEnergyIsSource(true)"
+              [ngClass]="{'btn-outline': selectedAccount.energyIsSource == false}">Source Energy</button>
+            <button class="btn btn-sm btn-selected m-0" (click)="setAccountEnergyIsSource(false)"
+              [ngClass]="{'btn-outline': selectedAccount.energyIsSource == true}">Site Energy</button>
+          </div>
+          <div class="btn-group" *ngIf="breadcrumbFacilityId">
+            <button class="btn btn-sm m-0 btn-selected" (click)="setFacilityEnergyIsSource(true)"
+              [ngClass]="{'btn-outline': selectedFacility.energyIsSource == false}">Source Energy</button>
+            <button class="btn btn-sm btn-selected m-0" (click)="setFacilityEnergyIsSource(false)"
+              [ngClass]="{'btn-outline': selectedFacility.energyIsSource == true }">Site Energy</button>
+          </div>
+
+        </div>
+
+        <div class="pl-1">
+          <div class="btn-group">
+            <button class="btn btn-sm m-0 btn-selected" (click)="setGraphDisplay('usage')"
+              [ngClass]="{'btn-outline': graphDisplay != 'usage'}">Utility Usage</button>
+            <button class="btn btn-sm btn-selected m-0" (click)="setGraphDisplay('cost')"
+              [ngClass]="{'btn-outline': graphDisplay != 'cost'}">Utility Cost</button>
+          </div>
+        </div>
       </div>
+
     </div>
   </div>
-
-  <div class="row">
-    <div class="col plot">
-      <p>Energy Usage and Cost Per Month (2020)</p>
-      <plotly-plot [data]="graph1.data" [layout]="graph1.layout" [config]="graph1.config"></plotly-plot>
-      <!--<plotly-plot [data]="graph2.data" [layout]="graph2.layout" [config]="graph2.config"></plotly-plot>-->
-    </div>
+  <div class="measur-wrapper main-content">
+    <router-outlet></router-outlet>
   </div>
-
-  <div class="row">
-    <div class="col plot">
-      <p>Energy Usage Per Type</p>
-      <plotly-plot [data]="graph3.data" [layout]="graph3.layout"></plotly-plot>
-    </div>
-    <div class="col plot">
-      <p>Company Average vs Facility Energy Usage Per Month (2020)</p>
-      <plotly-plot [data]="graph4.data" [layout]="graph4.layout"></plotly-plot>
-    </div>
-  </div>
-
-  <div class="row">
-    <div class="col plot">
-      <p>Meter Performance Compared To Facility Average</p>
-      <table>
-        <tr>
-            <th>Meter #</th>
-            <th>Account #</th>
-            <th>Type</th>
-            <th>Energy Cost</th>
-            <th>Energy Vol</th>
-        </tr>
-        <tr *ngFor="let meterLists of meterList">
-          <td>{{meterLists.meterNumber}}</td>
-          <td>{{meterLists.accountNumber}}</td>
-          <td>{{meterLists.type}}</td>
-          <td>
-            <i [hidden]="meterLists.avgCostCompare > 1" class="fa fa-caret-up green"></i>
-            <i [hidden]="meterLists.avgCostCompare < 1" class="fa fa-caret-down red"></i>
-            {{meterLists.avgCostCompare}}
-          </td>
-          <td>
-            <i [hidden]="meterLists.avgUseCompare > 1" class="fa fa-caret-up green"></i>
-            <i [hidden]="meterLists.avgUseCompare < 1" class="fa fa-caret-down red"></i>
-            {{meterLists.avgUseCompare}}
-          </td>
-        </tr>
-      </table>
-    </div>
-  </div>
-
 </div>
+
 <div class="measurFooter"></div>

@@ -1,0 +1,79 @@
+<p class="bold">General Information</p>
+<form class="meterForm" [formGroup]="meterDataForm">
+
+  <label for="readDate">Meter Read Date <span class="required">*</span> </label>
+  <div class="input-group mb-3">
+    <input id="readDate" class="form-control" type="date" formControlName="readDate" (change)="checkDate()"
+      [ngClass]="{'error': invalidDate}">
+  </div>
+  <span class="inputError" *ngIf="meterDataForm.get('readDate').hasError('required')">Meter read date is required</span>
+  <span class="inputError" *ngIf="invalidDate">Meter already has data entered for selected month</span>
+
+  <div class="row">
+    <div *ngIf="displayVolumeInput" class="col">
+      <label for="totalVolume">Total Volume <span class="required">*</span> </label>
+      <div class="input-group mb-3">
+        <input id="totalVolume" class="form-control" type="number" formControlName="totalVolume"
+          (input)="calculateTotalEnergyUse()" [class.warning]="meterDataForm.controls.totalVolume.value === 0" onfocus="this.select();">
+        <span class="unit" [innerHTML]="volumeUnit | settingsLabel"></span>
+      </div>
+      <span class="inputError" *ngIf="meterDataForm.get('totalVolume').hasError('required')">Total volume use is
+        required</span>
+      <span class="inputError" *ngIf="meterDataForm.get('totalVolume').hasError('min')">Can't be less than 0</span>
+      <span class="inputWarning" *ngIf="meterDataForm.controls.totalVolume.value === 0">Total volume should be greater
+        than 0</span>
+    </div>
+
+    <div *ngIf="displayEnergyUse" class="col">
+      <label for="totalEnergyUse">Total Energy Use <span class="required">*</span></label>
+      <div class="input-group mb-3">
+        <input id="totalEnergyUse" class="form-control" type="number" formControlName="totalEnergyUse" onfocus="this.select();">
+        <span class="unit" [innerHTML]="energyUnit | settingsLabel"></span>
+      </div>
+      <span class="inputError" *ngIf="meterDataForm.get('totalEnergyUse').hasError('required')">Total energy use is
+        required</span>
+      <span class="inputError" *ngIf="meterDataForm.get('totalEnergyUse').hasError('min')">Can't be less than 0</span>
+      <span class="inputWarning" *ngIf="meterDataForm.controls.totalEnergyUse.value === 0">Total energy use should be
+        greater than 0</span>
+    </div>
+  </div>
+
+  <label for="totalCost">Total Cost <span class="required">*</span></label>
+  <div class="input-group mb-3">
+    <input id="totalCost" class="form-control" type="number" formControlName="totalCost" onfocus="this.select();">
+    <span class="unit">$</span>
+  </div>
+  <span class="inputError" *ngIf="meterDataForm.get('totalCost').hasError('required')">Total cost is required</span>
+  <span class="inputError" *ngIf="meterDataForm.get('totalCost').hasError('min')">Can't be less than 0</span>
+  <span class="inputWarning" *ngIf="meterDataForm.controls.totalCost.value === 0">Total cost should be greater than
+    0</span>
+
+
+  <label for="commodityCharge">Commodity Charge</label>
+  <div class="input-group mb-3">
+    <input id="commodityCharge" class="form-control" type="number" formControlName="commodityCharge" onfocus="this.select();">
+    <span class="unit">$</span>
+  </div>
+
+  <label for="deliveryCharge">Delivery Charges</label>
+  <div class="input-group mb-3">
+    <input id="deliveryCharge" class="form-control" type="number" formControlName="deliveryCharge" onfocus="this.select();">
+    <span class="unit">$</span>
+  </div>
+
+  <label for="otherCharge">Other Charges</label>
+  <div class="input-group mb-3">
+    <input id="otherCharge" class="form-control" type="number" formControlName="otherCharge" onfocus="this.select();">
+    <span class="unit">$</span>
+  </div>
+</form>
+
+<hr>
+
+<div class="saveCancel item-right">
+  <button class="btn btn-secondary" (click)="cancel()">Cancel</button>
+  <button *ngIf="addOrEdit == 'edit'" class="btn btn-primary" (click)="saveAndQuit()" [disabled]="meterDataForm.invalid || invalidDate">Save</button>
+  <button *ngIf="addOrEdit == 'add'" class="btn btn-primary mr-2" (click)="saveAndQuit()" [disabled]="meterDataForm.invalid || invalidDate">Save + Quit</button>
+  <button *ngIf="addOrEdit == 'add'" class="btn btn-primary" (click)="saveAndAddAnother()" [disabled]="meterDataForm.invalid || invalidDate">Save +
+    Add Another</button>
+</div>

@@ -43,23 +43,68 @@ Search Bar
 }
 
 /*
-Account / Facility
+Account
 =============================================== */
 .accountMenu {
-    text-align: right;
+    width: 50px;
+    float: right;
 }
 .accountMenu i {
     font-size: 20px;
     padding: 12px 20px;
     cursor: pointer;
 }
-.currentAccount {
-    overflow: hidden;
-    padding: 10px 0 0 0;
+.noAccount i {
+    cursor: default;
 }
-.currentAccount p {
-    padding: 10px 0 0 64px;
+.noAccount span {
+    margin: 4px 5px;
+    font-style: italic;
+    display: inline-block;
+}
+.currentAccount,
+.noAccount {
+    overflow: hidden;
+    padding: 0;
+    margin: 0!important;
+}
+.currentAccount:hover {
+    background-color: #f3f3f3;
+    cursor: pointer;
+}
+.currentAccount p:hover {
+    color: #333!important;
+}
+.currentAccount p,
+.noAccount p {
+    padding: 0 0 0 36px;
     font-size: 1.3em;
+}
+.currentAccount i.right,
+.noAccount i.right {
+    position: absolute;
+    right: 0px;
+    top: 22px;
+    font-size: 15px;
+}
+.currentAccount i.item-left,
+.noAccount i.item-left {
+    padding: 5px;
+}
+.currentAccount .small {
+    padding-left: 38px;
+    display: block;
+}
+
+/*
+Facility
+=============================================== */
+.facilityMenu {
+    width: calc(100% - 50px);
+    float: left;
+}
+.col-lg-3.facilityMenu {
+    min-width: 300px;
 }
 .facilityMenu .currentFacility > i {
     font-size: 29px;
@@ -71,27 +116,80 @@ Account / Facility
     min-width: 200px;
     left: 0;
 }
+.facilityMenu .dropdown .arrow-up {
+    top: -9px;
+    position: absolute;
+    border-bottom: 10px solid #ffffff;
+    right: 18px;
+    left: auto;
+}
+.facilityMenu .facilityMenu .dropdown .arrow-up {
+    left: 27px;
+    right: auto;
+}
 .facilityMenu p {
     margin: 0px;
+}
+.facilities p {
+    padding: 4px 0px;
+}
+.facilities .small {
+    padding: 0 0 15px 0;
+}
+.facilities .small:hover {
+    color: #333;
+    background-color: initial;
+    cursor: initial;
+}
+.facilities .fa-cog,
+.facilities .fa-random  {
+    padding: 4px 10px;
+    color: #333;
+    cursor: pointer;
+}
+.facilities .fa-cog:hover,
+.facilities .fa-random:hover {
+    /*color: #5aa722;*/
+    color: #ffffff;
+    background-color: #2c386b;
+    border-radius: 3px;
+}
+.facilities div {
+    position: relative;
+}
+.facilities .quick-links {
+    position: absolute;
+    top: 4px;
+    right:0;
 }
 .currentFacility {
     cursor: pointer;
 }
-.currentFacility p{
+.currentFacility p {
     font-size: 20px;
     font-weight: bold;
     margin-top: -6px!important;
 }
+.currentFacility + .dropdown .btn {
+    margin: 0px;
+}
+
+/*
+Dropdown Menu
+=============================================== */
 .dropdown {
     position: absolute;
     background-color: white;
     padding: 20px;
     min-width: 300px;
-    right: 0;
+    right: 15px;
+    top: 70px;
     z-index: 100;
     list-style: none;
     text-align: left;
-    box-shadow: -3px 4px 8px #0000001c;
+    border-radius: 2px;
+    /*box-shadow: -3px 4px 8px #0000001c;*/
+    box-shadow: 0px 8px 10px #0000001c;
     transform: scale(0);
     transform-origin: top;
     transition: all .1s ease-in-out;
@@ -102,61 +200,76 @@ Account / Facility
 .dropdown img {
     float: left;
 }
-.dropdown p:hover {
+.dropdown p:hover,
+.dropdown p:hover span{
     color: #307100;
+    background-color: #f3f3f3;
     cursor: pointer;
 }
-
 /*
 Manage Accounts
 =============================================== */
-div#manageAccounts {
+div#switchAccounts {
     background-color: white;
     position: fixed;
     top: 20%;
     left: calc(50% - 200px);
-    z-index: 10;
+    z-index: 102;
     padding: 20px;
     width: 400px;
     border-radius: 3px;
-    overflow: scroll;
-    max-height: 500px;
     transform: scale(0);
     transition: all .1s ease-in-out;
 }
-div#manageAccounts.open {
+div#switchAccounts h5 {
+    padding-bottom: 14px;
+}
+div#switchAccounts button.btn.btn-link {
+    margin: 0;
+}
+div#switchAccounts.open {
     transform: scale(1);
+}
+.accounts {
+    overflow: auto;
+    max-height: 350px;
+    padding: 0px;
+    /*box-shadow: inset 0px 0px 5px 0px #0000003b;*/
 }
 .account {
     position: relative;
-    padding: 20px 10px;
-    transition: .3s all;
+    overflow: hidden;
+    padding: 15px 0px;
+    border-bottom: 1px solid #e6e6e6;
 }
-.account img {
-    float: left;
-    max-height: 50px;
-    max-width: 50px;
+.account.active {
+    background-color: #f0f6ff;
+}
+.account i.fa.fa-user-circle-o {
+    padding: 5px 0;
 }
 .account .company {
-    font-size: 20px;
-    padding: 0px 60px;
+    padding: 0px 25px;
     margin: 0;
 }
 .account .facilityCount {
-    padding: 0px 60px;
+    padding: 0px 25px;
     margin: 0;
+    font-size: 12px;
+    color: #777777;
 }
-.account i {
+.account i.right {
     position: absolute;
     right: 10px;
     top: 38%;
-    font-size: 20px;
+    font-size: 15px;
 }
-.account i.fa.fa-chevron-right {
-    color: #a7a4a4;
+.account i.fa.right.fa-check {
+    color: #007bff;
 }
 .account:hover {
-    background-color: #eee;
+    /*background-color: #eee;*/
+    background-color: #efefef;
     cursor: pointer;
 }
 div#darkoverlay {
@@ -167,27 +280,40 @@ div#darkoverlay {
     width: 0vw;
     top: 0;
     left: 0;
-    z-index: 9;
+    z-index: 101;
 }
 div#darkoverlay.open {
     height: 100vh;
     width: 100vw;
 }
 
+/*
+Responsive
+=============================================== */
+@media (max-width: 1350px) {
+    .profile-image {
+        margin: 0 auto 30px;
+        display: block;
+    }
+}
+@media (max-width: 991px) {
+    .col-lg-2 {
+        max-width: 150px;
+    }
+    .col-lg-3 {
+        max-width: 33.3333%;
+    }
+}
+@media (max-width: 524px) {
+    .searchBar {
+        display: none;
+    }
+}
 
-div#devtools {
-    position: fixed;
-    top: calc(100vh - 37px);
-    left: 0;
-    z-index: 1000;
-    padding: 10px;
-    background-color: #060a2b;
-}
-div#devtools.open {
-    top: auto;
-    bottom: 0;
-}
-div#devtools p {
-    color: white;
-    margin: 0;
+
+.accountRequired {
+    display: block;
+    padding-top: 15px;
+    font-style: italic;
+    cursor: default!important;
 }

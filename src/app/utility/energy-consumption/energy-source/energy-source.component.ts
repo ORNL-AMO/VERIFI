@@ -1,12 +1,16 @@
-import { Component, OnInit, ElementRef, ViewChild} from '@angular/core';
-import { FormGroup, FormControl, Validators } from '@angular/forms';
-import { EnergyConsumptionService } from '../energy-consumption.service';
-import { AccountService } from "../../../account/account/account.service";
+import { Component, OnInit } from '@angular/core';
 import { AccountdbService } from "../../../indexedDB/account-db.service";
-import { FacilitydbService } from "../../../indexedDB/facility-db-service";
-import { FacilityService } from 'src/app/account/facility/facility.service';
-import { UtilityMeterdbService } from "../../../indexedDB/utilityMeter-db-service";
+import { FacilitydbService } from "../../../indexedDB/facility-db.service";
+import { UtilityMeterDatadbService } from "../../../indexedDB/utilityMeterData-db.service";
+import { UtilityMeterdbService } from "../../../indexedDB/utilityMeter-db.service";
 import { listAnimation } from '../../../animations';
+import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { Subscription } from 'rxjs';
+import { EditMeterFormService } from './edit-meter-form/edit-meter-form.service';
+import { FormGroup } from '@angular/forms';
+import { Router } from '@angular/router';
+import { LoadingService } from 'src/app/shared/loading/loading.service';
+import { ToastNotificationsService } from 'src/app/shared/toast-notifications/toast-notifications.service';
 
 @Component({
   selector: 'app-energy-source',
@@ -14,231 +18,123 @@ import { listAnimation } from '../../../animations';
   styleUrls: ['./energy-source.component.css'],
   animations: [
     listAnimation
-  ],
-  host: {
-    '(document:click)': 'documentClick($event)',
-  }
+  ]
 })
 export class EnergySourceComponent implements OnInit {
-  accountid: number;
-  facilityid: number;
-  activeFacility: any = {name: ''};
 
-  meterMenuOpen: number;
-  popup: boolean = false;
+  meterList: Array<IdbUtilityMeter>;
+  meterListSub: Subscription;
 
-  energySource: any;
-  selectedMeter: any;
-  meterList: any = [{type: ''}];
-  
-  importPopup: boolean = false;
-  importError: string = '';
-  quickView: any = [];
+  currentPageNumber: number = 1;
+  itemsPerPage: number = 10;
+  importWindow: boolean;
+  editMeter: IdbUtilityMeter;
+  meterToDelete: IdbUtilityMeter;
+  selectedFacilitySub: Subscription;
+  selectedFacilityName: string = 'Facility';
 
-  meterForm = new FormGroup({
-    id: new FormControl('', [Validators.required]),
-    //meterid: new FormControl('', [Validators.required]),
-    facilityid: new FormControl('', [Validators.required]),
-    accountid: new FormControl('', [Validators.required]),
-    meterNumber: new FormControl('', [Validators.required]),
-    accountNumber: new FormControl('', [Validators.required]),
-    type: new FormControl('', [Validators.required]),
-    name: new FormControl('', [Validators.required]),
-    supplier: new FormControl('', [Validators.required]),
-    notes: new FormControl('', [Validators.required])
-  });
-  
-  @ViewChild('inputFile') myInputVariable: ElementRef;
-
+  addOrEdit: string = 'add';
+  orderDataField: string = 'name';
+  orderByDirection: string = 'desc';
   constructor(
-    private accountService: AccountService,
-    private facilityService: FacilityService,
-    public accountdbService: AccountdbService,
-    public facilitydbService: FacilitydbService,
-    public utilityMeterdbService: UtilityMeterdbService,
-    private energyConsumptionService: EnergyConsumptionService
-    ) {}
+    private accountdbService: AccountdbService,
+    private facilitydbService: FacilitydbService,
+    private utilityMeterDatadbService: UtilityMeterDatadbService,
+    private utilityMeterdbService: UtilityMeterdbService,
+    private editMeterFormService: EditMeterFormService,
+    private router: Router,
+    private loadingService: LoadingService,
+    private toastNoticationService: ToastNotificationsService
+  ) { }
 
   ngOnInit() {
-    // Observe the accountid var
-    this.accountService.getValue().subscribe((value) => {
-      this.accountid = value;
+    this.meterListSub = this.utilityMeterdbService.facilityMeters.subscribe(meters => {
+      this.meterList = meters;
     });
 
-    // Observe the facilityid var
-    this.facilityService.getValue().subscribe((value) => {
-      this.facilityid = value;
-
-        // get current facility object
-        this.facilitydbService.getById(this.facilityid).then(
-          data => {
-            this.activeFacility = data;
-            this.meterLoadList();
-          },
-          error => {
-              console.log(error);
-          }
-        );
-    });
-  }
-
-  // Close menus when user clicks outside the dropdown
-  documentClick () {
-    this.meterMenuOpen = null;
-  }
-
-  // List all meters
-  meterLoadList() {
-    this.utilityMeterdbService.getAllByIndex(this.facilityid).then(
-      data => {
-        this.meterList = data;
-        this.meterMapTabs();
-      },
-      error => {
-          console.log(error);
+    this.selectedFacilitySub = this.facilitydbService.selectedFacility.subscribe(facility => {
+      if (facility) {
+        this.selectedFacilityName = facility.name;
       }
-    );
+    });
   }
 
-  meterToggleMenu (index) {
-    if (this.meterMenuOpen === index) {
-      this.meterMenuOpen = null;
+  ngOnDestroy() {
+    this.meterListSub.unsubscribe();
+    this.selectedFacilitySub.unsubscribe();
+  }
+
+
+  addMeter() {
+    let selectedFacility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
+    let selectedAccount: IdbAccount = this.accountdbService.selectedAccount.getValue();
+    this.addOrEdit = 'add';
+    this.editMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.id, selectedAccount.id, true);
+  }
+
+  uploadData() {
+    this.router.navigateByUrl('utility/upload-data');
+  }
+
+  selectEditMeter(meter: IdbUtilityMeter) {
+    this.addOrEdit = 'edit';
+    this.editMeter = meter;
+  }
+
+  closeEditMeter() {
+    this.editMeter = undefined;
+  }
+
+  async deleteMeter() {
+    this.loadingService.setLoadingMessage('Deleteing Meters and Data...')
+    this.loadingService.setLoadingStatus(true);
+    //delete meter
+    await this.utilityMeterdbService.deleteIndexWithObservable(this.meterToDelete.id);
+
+
+    //delete meter data
+    let meterData: Array<IdbUtilityMeterData> = await this.utilityMeterDatadbService.getAllByIndexRange('meterId', this.meterToDelete.id).toPromise();
+    for (let index = 0; index < meterData.length; index++) {
+      await this.utilityMeterDatadbService.deleteWithObservable(meterData[index].id);
+    }
+    let selectedFacility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
+    //set meters
+    let accountMeters: Array<IdbUtilityMeter> = await this.utilityMeterdbService.getAllByIndexRange("accountId", selectedFacility.accountId).toPromise();
+    this.utilityMeterdbService.accountMeters.next(accountMeters);
+    let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == selectedFacility.id });
+    this.utilityMeterdbService.facilityMeters.next(facilityMeters);
+    //set meter data
+    let accountMeterData: Array<IdbUtilityMeterData> = await this.utilityMeterDatadbService.getAllByIndexRange("accountId", selectedFacility.accountId).toPromise();
+    this.utilityMeterDatadbService.accountMeterData.next(accountMeterData);
+    let facilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.filter(meterData => { return meterData.facilityId == selectedFacility.id });
+    this.utilityMeterDatadbService.facilityMeterData.next(facilityMeterData);
+    this.cancelDelete();
+    this.loadingService.setLoadingStatus(false);
+    this.toastNoticationService.showToast("Meter and Meter Data Deleted", undefined, undefined, false, "success");
+  }
+
+  selectDeleteMeter(meter: IdbUtilityMeter) {
+    this.meterToDelete = meter;
+  }
+
+  cancelDelete() {
+    this.meterToDelete = undefined;
+  }
+
+  isMeterInvalid(meter: IdbUtilityMeter): boolean {
+    let form: FormGroup = this.editMeterFormService.getFormFromMeter(meter);
+    return form.invalid;
+  }
+
+  setOrderDataField(str: string) {
+    if (str == this.orderDataField) {
+      if (this.orderByDirection == 'desc') {
+        this.orderByDirection = 'asc';
+      } else {
+        this.orderByDirection = 'desc';
+      }
     } else {
-      this.meterMenuOpen = index;
+      this.orderDataField = str;
     }
   }
-
-  meterAdd() {
-    this.utilityMeterdbService.add(this.facilityid,this.accountid).then(
-      id => {
-        // unable to call meterLoadList() in this scenario due to async properties
-        this.utilityMeterdbService.getAllByIndex(this.facilityid).then(
-          data => {
-              this.meterList = data; // refresh the data 
-              this.meterEdit(id); // edit data
-              this.meterMapTabs(); // Remap tabs
-          }
-        );
-      },
-      error => {
-          console.log(error);
-      }
-    );
-  }
-
-  meterMapTabs() {
-    // Remap tabs
-    this.energySource = this.meterList.map(function (el) { return el.type; });
-    this.energyConsumptionService.setValue(this.energySource);
-  }
-
-  meterSave() {
-    this.popup = !this.popup;
-    this.utilityMeterdbService.update(this.meterForm.value); // Update db
-    this.meterLoadList(); // refresh the data
-  }
-
-  meterEdit(id) {
-    this.popup = !this.popup;
-    this.meterMenuOpen = null;
-    this.meterForm.setValue(this.meterList.find(obj => obj.id == id)); // Set form values to current selected meter
-  }
-
-  meterDelete(id) {
-    this.meterMenuOpen = null;
-    this.utilityMeterdbService.deleteIndex(id);
-    this.meterLoadList(); // refresh the data
-  }
-
-  meterImport (files: FileList) {
-    // Clear with each upload
-    this.quickView = []; 
-    this.importError = '';
-
-    if(files && files.length > 0) {
-       let file : File = files.item(0); 
-         //console.log(file.name);
-         
-         let reader: FileReader = new FileReader();
-         reader.readAsText(file);
-         reader.onload = (e) => {
-            let csv: string = reader.result as string;
-            const lines = csv.split("\n");
-            const headers = lines[0].replace('\r', '').split(",");
-            const allowedHeaders = ["meterNumber", "accountNumber", "type", "name", "supplier", "notes"];
-
-            if (JSON.stringify(headers) === JSON.stringify(allowedHeaders)) {
-
-              for(var i=1;i<lines.length;i++){
-                const obj = {};
-                const currentline=lines[i].split(",");
-                for(var j=0;j<headers.length;j++){
-                  obj[headers[j]] = currentline[j];
-                }
-                this.quickView.push(obj); // Read csv and push to obj array.
-              }  
-            } else {
-              // csv didn't match -> Show error
-              this.importError = "Error with file. Please match your file to the provided template.";
-              return false;
-            }
-         }
-      }
-  }
-
-  meterAddCSV() {
-    this.importPopup = false;
-    
-    for(let i=0;i<this.quickView.length;i++){
-      let obj = this.quickView[i];
-
-      this.utilityMeterdbService.add(this.facilityid,this.accountid).then(
-        id => {
-          const importLine = {
-            id: id,
-            facilityid: this.facilityid,
-            accountid: this.accountid,
-            meterNumber: obj.meterNumber,
-            accountNumber: obj.accountNumber,
-            type: obj.type,
-            name: obj.name,
-            supplier: obj.supplier,
-            notes: obj.notes
-          }
-
-          this.utilityMeterdbService.update(importLine); // Update db
-          this.meterLoadList(); // refresh the data
-        },
-        error => {
-            console.log(error);
-        }
-      );
-    }
-    this.resetImport();
-  }
-
-  resetImport() {
-    this.myInputVariable.nativeElement.value = '';
-    this.quickView = []; 
-    this.importError = '';
-  }
-
-  meterExport() {
-      const replacer = (key, value) => value === null ? '' : value; // specify how you want to handle null values here
-      const header = Object.keys(this.meterList[0]);
-      let csv = this.meterList.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer)).join(','));
-      csv.unshift(header.join(','));
-      csv = csv.join('\r\n');
-      
-      //Download the file as CSV
-      var downloadLink = document.createElement("a");
-      var blob = new Blob(["\ufeff", csv]);
-      var url = URL.createObjectURL(blob);
-      downloadLink.href = url;
-      downloadLink.download = "VerifiMeterDump.csv";
-      document.body.appendChild(downloadLink);
-      downloadLink.click();
-      document.body.removeChild(downloadLink);
-  }
-
 }

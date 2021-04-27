@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { FormGroup, FormControl, Validators, ControlContainer, FormGroupDirective } from '@angular/forms';
-import { EnergyConsumptionService } from './energy-consumption.service';
-import { AccountService } from "../../account/account/account.service";
-import { FacilityService } from 'src/app/account/facility/facility.service';
-import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db-service";
+import { Subscription } from 'rxjs';
+import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { UtilityMeterDataService } from './utility-meter-data/utility-meter-data.service';
 
 @Component({
   selector: 'app-energy-consumption',
@@ -11,70 +11,99 @@ import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db-service";
   styleUrls: ['./energy-consumption.component.css']
 })
 export class EnergyConsumptionComponent implements OnInit {
-  accountid: number;
-  facilityid: number;
-  energySource: any;
   electricity: boolean;
   naturalGas: boolean;
-  lpg: boolean;
-  fuelOil: boolean;
-  coal: boolean;
-  wood: boolean;
-  paper: boolean;
-  otherGas: boolean;
+  otherFuels: boolean;
   otherEnergy: boolean;
-  meterList: any = [{type: ''}];
-  
+  water: boolean;
+  wasteWater: boolean;
+  otherUtility: boolean;
+
+  hasElectricityError: boolean;
+  hasNaturalGasError: boolean;
+  hasOtherFuelsError: boolean;
+  hasOtherEnergyError: boolean;
+  hasWaterError: boolean;
+  hasWasteWaterError: boolean;
+  hasOtherUtilityError: boolean;
+
+  utilityMeters: Array<IdbUtilityMeter>;
+  utilityMeterData: Array<IdbUtilityMeterData>;
+
+  facilityMetersSub: Subscription;
+  utilityDataSub: Subscription;
+
   constructor(
-    private accountService: AccountService,
-    private facilityService: FacilityService,
-    private energyConsumptionService: EnergyConsumptionService,
-    public utilityMeterdbService: UtilityMeterdbService,
-    ) {
-
-    // Get all meters
-    this.utilityMeterdbService.getAllByIndex(this.facilityid).then(
-      data => {
-        this.meterList = data;
-        // Map tabs based on array of energy source types.
-        this.energySource = this.meterList.map(function (el) { return el.type; });
-        this.energyConsumptionService.setValue(this.energySource);
-      },
-      error => {
-          console.log(error);
-      }
-    );
-
-  }
+    private utilityMeterDbService: UtilityMeterdbService,
+    private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private utilityMeterDataService: UtilityMeterDataService
+  ) { }
 
   ngOnInit() {
-    // Observe the accountid var
-    this.accountService.getValue().subscribe((value) => {
-      this.accountid = value;
+    this.facilityMetersSub = this.utilityMeterDbService.facilityMeters.subscribe(facilityMeters => {
+      let energySources = facilityMeters.map(function (el) { return el.source; });
+      this.electricity = energySources.indexOf("Electricity") > -1;
+      this.naturalGas = energySources.indexOf("Natural Gas") > -1;
+      this.otherFuels = energySources.indexOf("Other Fuels") > -1;
+      this.otherEnergy = energySources.indexOf("Other Energy") > -1;
+      this.water = energySources.indexOf("Water") > -1;
+      this.wasteWater = energySources.indexOf("Waste Water") > -1;
+      this.otherUtility = energySources.indexOf("Other Utility") > -1;
+      this.utilityMeters = facilityMeters;
+
     });
 
-    // Observe the facilityid var
-    this.facilityService.getValue().subscribe((value) => {
-      this.facilityid = value;
+    this.utilityDataSub = this.utilityMeterDataDbService.facilityMeterData.subscribe(utilityMeterData => {
+      this.checkMeterData(utilityMeterData);
     });
+  }
 
-    // Observe the energySource var
-    this.energyConsumptionService.getValue().subscribe((value) => {
-      this.energySource = value;
-  
-      if (value != null) {
-        this.electricity = this.energySource.indexOf("Electricity") > -1;
-        this.naturalGas = this.energySource.indexOf("Natural Gas") > -1;
-        this.lpg = this.energySource.indexOf("LPG") > -1;
-        this.fuelOil = this.energySource.indexOf("Fuel Oil") > -1;
-        this.coal = this.energySource.indexOf("Coal") > -1;
-        this.wood = this.energySource.indexOf("Wood") > -1;
-        this.paper = this.energySource.indexOf("Paper") > -1;
-        this.otherGas = this.energySource.indexOf("Other Gas") > -1;
-        this.otherEnergy = this.energySource.indexOf("Other Energy") > -1;
+  ngOnDestroy() {
+    this.facilityMetersSub.unsubscribe();
+    this.utilityDataSub.unsubscribe();
+  }
+
+  checkMeterData(utilityMeterData: Array<IdbUtilityMeterData>) {
+    this.hasElectricityError = false;
+    this.hasNaturalGasError = false;
+    this.hasOtherFuelsError = false;
+    this.hasOtherEnergyError = false;
+    this.hasOtherUtilityError = false;
+    this.hasWasteWaterError = false;
+    this.hasWaterError = false;
+
+    this.utilityMeters.forEach(meter => {
+      if (meter.source === "Electricity" && !this.hasElectricityError) {
+        this.hasElectricityError = this.checkHasErrors(meter, utilityMeterData)
+      } 
+      if (meter.source === "Natural Gas" && !this.hasNaturalGasError) {
+        this.hasNaturalGasError = this.checkHasErrors(meter, utilityMeterData)
+      }
+      if (meter.source === "Other Fuels" && !this.hasOtherFuelsError) {
+        this.hasOtherFuelsError = this.checkHasErrors(meter, utilityMeterData)
+      }
+      if (meter.source === "Other Energy" && !this.hasOtherEnergyError) {
+        this.hasOtherEnergyError = this.checkHasErrors(meter, utilityMeterData)
+      }
+      if (meter.source === "Water" && !this.hasWaterError) {
+        this.hasWaterError = this.checkHasErrors(meter, utilityMeterData)
+      }
+      if (meter.source === "Waste Water" && !this.hasWasteWaterError) {
+        this.hasWasteWaterError = this.checkHasErrors(meter, utilityMeterData)
+      }
+      if (meter.source === "Other Utility" && !this.hasOtherUtilityError) {
+        this.hasOtherUtilityError = this.checkHasErrors(meter, utilityMeterData)
       }
     });
   }
 
+  checkHasErrors(meter: IdbUtilityMeter, facilityMeterData: Array<IdbUtilityMeterData>) {
+    let meterData: Array<IdbUtilityMeterData> = facilityMeterData.filter(data => { return data.meterId == meter.id });
+    let dataHasErrors: Date = this.utilityMeterDataService.checkForErrors(meterData);
+    if(dataHasErrors){
+      return true;
+    }
+    return meterData.length == 0;
+  }
 
 }

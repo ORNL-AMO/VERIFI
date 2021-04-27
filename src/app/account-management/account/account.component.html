@@ -1,0 +1,139 @@
+<div id="account">
+  <div class="banner">
+    <h3>Account</h3>
+  </div>
+</div>
+
+<div class="wrapper">
+  <div class="row">
+    <!--<div class="col-lg-4 profile-image">
+            <img src="https://placehold.it/350x200" alt="">
+            <form>
+                <label class="profile-image-input" for="img"><i class="fa fa-upload"></i> Upload Image
+                <input type="file" id="img" name="img" accept="image/*">
+            </label>
+            </form>
+        </div>-->
+
+    <div class="col-lg-7">
+      <h4>Corporate Information</h4>
+      <br>
+      <app-general-information-form *ngIf="selectedAccount" [inAccount]="true"></app-general-information-form>
+    </div>
+
+    <div class="col-lg-5">
+      <h4>Corporate Default Units</h4>
+      <br>
+      <app-default-units-form *ngIf="selectedAccount" [inAccount]="true"></app-default-units-form>
+    </div>
+  </div>
+  <br>
+
+  <div class="row">
+    <div class="col-lg-7">
+      <h4>Sustainability Questions</h4>
+      <br>
+      <app-sustainability-questions-form *ngIf="selectedAccount" [inAccount]="true"></app-sustainability-questions-form>
+    </div>
+    <div class="col">
+      <h4>Financial Reporting</h4>
+      <br>
+      <app-financial-reporting-form *ngIf="selectedAccount" [inAccount]="true"></app-financial-reporting-form>
+    </div>
+  </div>
+
+  <br>
+  <br>
+
+  <h4>Portfolio</h4>
+
+  <div class="table-responsive">
+    <table class="table table-sm">
+      <thead>
+        <tr>
+          <th>Facilities</th>
+          <th>NAICS</th>
+          <th>State</th>
+          <th>Country</th>
+          <th>Facility Size</th>
+          <th>Units</th>
+          <th class="actions">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let facility of facilityList">
+          <td><a (click)="switchFacility(facility)">{{facility.name}}</a></td>
+          <td>{{facility.naics}}</td>
+          <td>{{facility.state}}</td>
+          <td>{{facility.country}}</td>
+          <td>{{facility.size}}</td>
+          <td>{{facility.unitsOfMeasure}}</td>
+          <td class="actions">
+            <i class="fa fa-pencil" title="Edit" (click)="switchFacility(facility)"></i>
+            <i class="fa fa-trash-o" title="Delete" (click)="setDeleteFacilityEntry(facility)"></i>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <button class="btn btn-link" (click)="addNewFacility()"><i class="fa fa-plus"></i> Add New Facility</button>
+
+  <br>
+  <br>
+  <br>
+  <br>
+
+  <div class="row">
+    <div class="col-lg-6">
+      <h4>Backup Account</h4>
+      <p>You can protect your files from accidental loss by creating a backup. We recommend backing up your data
+        frequently. This button will download a copy of the selected account data. If you want just facility information
+        then selected the facility from the table above and export from that page.</p>
+      <button class="btn btn-outline" (click)="backupAccount()">Backup Account</button>
+
+    </div>
+    <div class="col-lg-6">
+      <h4>Import Backup Data</h4>
+      <p>Use the below button to import backup data files. Accounts or facilities can be imported as new data or
+        to overwrite existing data.</p>
+      <button class="btn btn-primary" (click)="openImportBackup()">Import Backup File</button>
+
+    </div>
+    <div class="col-lg-6">
+      <h4>Delete Account</h4>
+      <p>Once deleted, you will permanently lose all your data linked to your account. Please make a backup of
+        your data before proceeding with this step.</p>
+      <button class="btn btn-danger" (click)="editAccount()">Delete Account</button>
+    </div>
+  </div>
+</div>
+
+<div class="popup" [class.open]="showDeleteAccount" *ngIf="selectedAccount">
+  <div class="popup-header">Delete Account: {{selectedAccount.name}}
+    <button class="item-right" (click)="cancelAccountDelete()">x</button>
+  </div>
+  <div class="popup-body">
+    <p>WARNING: By deleting this account, you are also deleting all of the data associated with it.
+      Are you sure you want to preform this action?</p>
+  </div>
+  <div class="popup-footer text-right">
+    <button class="btn btn-secondary" (click)="cancelAccountDelete()">Cancel</button>
+    <button class="btn btn-danger" (click)="confirmAccountDelete()">Confirm Delete</button>
+  </div>
+</div>
+
+<div class="popup" [class.open]="facilityToDelete" *ngIf="facilityToDelete">
+  <div class="popup-header">Delete Facility: {{facilityToDelete.name}}
+    <button class="item-right" (click)="cancelFacilityDelete()">x</button>
+  </div>
+  <div class="popup-body">
+    <p>WARNING: By deleting this facility, you are also deleting all of the data associated with it.
+      Are you sure you want to preform this action?</p>
+  </div>
+  <div class="popup-footer text-right">
+    <button class="btn btn-secondary" (click)="cancelFacilityDelete()">Cancel</button>
+    <button class="btn btn-danger" (click)="confirmFacilityDelete()">Confirm Delete</button>
+  </div>
+</div>
+
+<app-import-backup-modal *ngIf="showImportFile" (emitClose)="cancelImportBackup()"></app-import-backup-modal>

@@ -1,0 +1,59 @@
+<div *ngIf="utilityMeterFacilityData.length === 0" class="text-center mt-3">
+    <h2>Start building your facility dashboard!</h2>
+    <p>Before we can create any charts, you will need to add some utility data.</p>
+    <button class="btn btn-primary-2" routerLink="/utility/energy-consumption"><i class="fa fa-plus"></i> Add Utility
+        Data</button>
+</div>
+
+<div *ngIf="utilityMeterFacilityData.length > 0">
+    <div class="row">
+        <div class="col plot">
+            <p>Facility Meters</p>
+            <app-meters-table></app-meters-table>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col plot">
+            <p>Utility Usage and Cost</p>
+            <app-utility-energy-use-table></app-utility-energy-use-table>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col plot">
+            <p>Annual Utility {{chartsLabel}}
+                <a class="float-right" (click)="toggleBarChart()" *ngIf="!barChartShown"><span class="fa fa-plus"></span>
+                    Show Chart</a>
+                <a class="float-right" (click)="toggleBarChart()" *ngIf="barChartShown"><span class="fa fa-minus"></span>
+                    Hide Chart</a>
+                </p>
+            <app-facility-bar-chart *ngIf="barChartShown"></app-facility-bar-chart>
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="col plot">
+            <p>Annual Utility {{chartsLabel}}
+                <a class="float-right" (click)="toggleStackedArea()" *ngIf="!stackedAreaShown"><span class="fa fa-plus"></span>
+                    Show Chart</a>
+                <a class="float-right" (click)="toggleStackedArea()" *ngIf="stackedAreaShown"><span class="fa fa-minus"></span>
+                    Hide Chart</a>
+            </p>
+            <app-facility-stacked-area-chart *ngIf="stackedAreaShown"></app-facility-stacked-area-chart>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col plot">
+            <p>Monthly Energy {{chartsLabel}}
+                <a class="float-right" (click)="toggleHeatMap()" *ngIf="!heatMapShown"><span class="fa fa-plus"></span>
+                    Show Heat Map</a>
+                <a class="float-right" (click)="toggleHeatMap()" *ngIf="heatMapShown"><span class="fa fa-minus"></span>
+                    Hide Heat Map</a>
+            </p>
+            <app-facility-heat-map *ngIf="heatMapShown"></app-facility-heat-map>
+        </div>
+    </div>
+</div>

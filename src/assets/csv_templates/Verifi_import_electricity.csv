@@ -1,5 +1,0 @@
-﻿meterNumber,readDate,totalKwh,totalDemand,totalCost,basicCharge,supplyBlockAmt,supplyBlockCharge,flatRateAmt,flatRateCharge,peakAmt,peakCharge,offpeakAmt,offpeakCharge,demandBlockAmt,demandBlockCharge,genTransCharge,deliveryCharge,transCharge,powerFactorCharge,businessCharge,utilityTax,latePayment,otherCharge
-18486878,1/15/20,15750,15750,15750,123,123,123,123,123,123,123,123,123,123,123,123,123,123,123,123,123,123,123
-18486878,2/15/20,20720,20720,20720,456,456,456,456,456,456,456,456,456,456,456,456,456,456,456,456,456,456,456
-18486878,3/15/20,19220,19220,19220,789,789,789,789,789,789,789,789,789,789,789,789,789,789,789,789,789,789,789
-18486878,4/15/20,19820,19820,19820,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12

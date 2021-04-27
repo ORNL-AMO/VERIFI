@@ -2,7 +2,8 @@
 Sidebar
 =============================================== */
 #sidebar {
-    padding: 30px 30px;
+    /*padding: 30px 30px;*/
+    padding: 90px 30px;
     min-height: 100vh;
     width: calc(120px - 50px);
     position: fixed;

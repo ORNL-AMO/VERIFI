@@ -5,16 +5,6 @@
   border-radius: 4px;
   box-shadow: 2px 3px 10px #d6d6d6;
 }
-.wrapper {
-  background-color: #f1f1f100;
-  margin: 0px 30px;
-  padding: 20px 30px 30px;
-  background-image: url('../../assets/images/industrial-skyline.png');
-  background-position: bottom;
-  background-repeat: no-repeat;
-  position:relative;
-  z-index: 1;
-}
 .wrapper.main-content {
   margin-right: 30px;
 }
@@ -44,17 +34,9 @@ p.display-lg {
   margin-bottom: 150px;
 }
 .banner {
-  background-color: #2c386b;
-  background-image: url(../../assets/images/industrial-skyline.png);
+  background-color: #145A32;
 }
-.measurFooter {
-  background-color: #577656;
-  height: 69px;
-  margin-top: -68px;
-  z-index: 2;
-  border-top: 1px solid #5c7859;
-  box-shadow: 1px -1px 0px #9eb39b;
-}
+
 .filters {
   padding: 15px 40px 0px;
   text-align: right;
@@ -75,9 +57,47 @@ p.display-lg {
   display: inline-block;
   padding: 10px;
 }
+
+.dashboard-nav ul li:hover {
+  cursor: pointer;
+  background-color: #efefef;
+}
+
 .dashboard-nav li.active {
   border-bottom: 3px solid #2c386b;
 }
 .bg-success {
   background-color: #6abb2e!important;
+}
+
+h3 a{
+  font-size: 1.25rem;
+  color: white;
+  /* text-decoration: underline; */
+}
+
+h3 a:hover{
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+p{
+  margin-bottom: .5rem;
+}
+
+
+.btn-selected{
+  background-color: #2c386b;
+  color: #fff;
+}
+
+.btn-group{
+  /* font-size: 16px; */
+  padding-top: 5px;
+}
+
+
+
+.sticky-top.banner-dropdown-open{
+  z-index: initial !important;
 }

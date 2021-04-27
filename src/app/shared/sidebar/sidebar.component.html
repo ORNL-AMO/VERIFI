@@ -7,8 +7,10 @@
     <br>
 
     <ul>
-        <li><a routerLink="/" [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-home"></i> <span>Home</span></a></li>
+        <li><a routerLink="/account-summary" [class.active]="facilitySummary.isActive || accountSummary.isActive"><i class="fa fa-home"></i> <span>Home</span></a></li>
         <li><a routerLink="utility/energy-consumption" [routerLinkActive]="['active']"><i class="fa fa-bar-chart"></i> <span>Utility Data</span></a></li>
+        <li hidden><a routerLink="/account-summary" [routerLinkActive]="['active']" #accountSummary="routerLinkActive"><span>Home</span></a></li>
+        <li hidden><a routerLink="/facility-summary" [routerLinkActive]="['active']" #facilitySummary="routerLinkActive"> <span>facilitySummary</span></a></li>
     </ul>
 
     <br>
@@ -19,20 +21,20 @@
     </div>
 
     <ul>
-        <li><i class="fa fa-th"></i> <span>Overview</span></li>
-        <li><i class="fa fa-area-chart"></i> <span>Regression</span></li>
-        <li><i class="fa fa-list-alt"></i> <span>Scorecards</span></li>
+        <li><i class="fa fa-th"></i> <span>Overview</span> <span class="tag coming-soon">Coming soon</span></li>
+        <li><i class="fa fa-area-chart"></i> <span>Regression</span> <span class="tag coming-soon">Coming soon</span></li>
+        <li><i class="fa fa-list-alt"></i> <span>Scorecards</span> <span class="tag coming-soon">Coming soon</span></li>
     </ul>
     
     <hr>
     <ul>
-        <li><i class="fa fa-question"></i> <span>Help</span></li>
-        <li><i class="fa fa-info-circle"></i> <span>About</span></li>
-        <li><i class="fa fa-inbox"></i> <span>Feedback</span></li>
-        <li><i class="fa fa-trophy"></i> <span>Acknowledgments</span></li>
+        <li><a routerLink="/help" [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-question"></i> <span>Help</span> </a></li>
+        <li><a routerLink="/about" [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-info-circle"></i> <span>About</span></a></li>
+        <li><a routerLink="/feedback" [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-inbox"></i> <span>Feedback</span></a></li>
+        <li><a routerLink="/acknowledgments" [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-trophy"></i> <span>Acknowledgments</span></a></li>
     </ul>
     <hr>
-    <ul>
+    <ul *ngIf="isDev">
         <li><a routerLink="style-guide" [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-star"></i> <span>Style Guide</span></a></li>
     </ul>
 </div>

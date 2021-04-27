@@ -1,0 +1,109 @@
+<div class="wrapper main-content">
+    <h4>Meter Grouping
+        <span class="pull-right date-font-size">({{yearPriorToLastBill | date: 'MMM, y'}} - {{lastBillDate | date: 'MMM, y'}})</span>
+    </h4>
+    <br>
+    <div *ngFor="let meterGroupType of meterGroupTypes" id={{meterGroupType.id}}>
+        <div class="group-section">
+            <h5>{{meterGroupType.groupType}}
+                <span class="pull-right" *ngIf="meterGroupType.groupType == 'Energy'">
+                    Total Energy Use: {{meterGroupType.totalUsage | number:'1.0-1'}}
+                    <span [innerHTML]="energyUnit | settingsLabel"></span>
+                </span>
+                <span class="pull-right" *ngIf="meterGroupType.groupType == 'Water'">
+                    Total Consumption: {{meterGroupType.totalUsage | number:'1.0-1'}}
+                    <span [innerHTML]="waterUnit | settingsLabel"></span>
+                </span>
+                <span class="pull-right" *ngIf="meterGroupType.groupType == 'Other'">
+                    Total Consumption: {{meterGroupType.totalUsage | number:'1.0-1'}}
+                    <!-- <span [innerHTML]="waterUnit | settingsLabel"></span> -->
+                </span>
+            </h5>
+        </div>
+        <div class="group-section-folders">
+            <div cdkDropList [cdkDropListData]="meterGroupType.meterGroups" class="grouped-list"
+                *ngFor="let meterGroup of meterGroupType.meterGroups" (cdkDropListDropped)="drop($event)"
+                id={{meterGroup.id}} [cdkDropListConnectedTo]="meterGroupType.meterGroupIds">
+                <div class="row group-title">
+                    <p class="bold pointer col" (click)="setToggleView(meterGroup)">
+                        <i class="fa fa-caret-right" *ngIf="!meterGroup.visible"></i>
+                        <i class="fa fa-caret-down" *ngIf="meterGroup.visible"></i>
+                        {{meterGroup.name}}
+                    </p>
+                    <div class="item-left">
+                        <span *ngIf="meterGroupType.groupType == 'Energy'">
+                            Total Energy Use: {{meterGroup.totalEnergyUse | number:'1.0-1'}}
+                            <span [innerHTML]="energyUnit | settingsLabel"></span>
+                        </span>
+                        <span *ngIf="meterGroupType.groupType == 'Water'">
+                            Total Consumption: {{meterGroup.totalConsumption | number:'1.0-1'}}
+                            <span [innerHTML]="waterUnit | settingsLabel"></span>
+                        </span>
+                        <span *ngIf="meterGroupType.groupType == 'Other'">
+                            Total Consumption: {{meterGroup.totalConsumption | number:'1.0-1'}}
+                            <!-- <span [innerHTML]="waterUnit | settingsLabel"></span> -->
+                        </span>
+                    </div>
+
+                    <div class="col-3">
+                        <div class="progress">
+                            <div class="progress-bar" [ngClass]="meterGroup.name" role="progressbar"
+                                [style.width.%]="meterGroup.factionOfTotalEnergy" aria-valuemin="0" aria-valuemax="100">
+                            </div>
+                            <span class="tooltip up">(total energy in this group / total energy in all groups)*100<span
+                                    class="arrow arrow-up"></span></span>
+                        </div>
+                        <span class="progress-bar-data">{{meterGroup.factionOfTotalEnergy | number:'1.0-1'}}%</span>
+
+                    </div>
+
+                    <div class="col-1">
+                        <div class="actions" *ngIf="meterGroup.name != 'Ungrouped'">
+                            <i class="fa fa-pencil" title="Edit" (click)="setEditGroup(meterGroup)"></i>
+                            <i class="fa fa-trash-o" title="Delete" (click)="setDeleteGroup(meterGroup)"></i>
+                        </div>
+                    </div>
+                </div>
+                <div *ngIf="meterGroup.visible">
+                    <div class="row" [hidden]="!meterGroup.description">
+                        <div class="col">
+                            <p class="group-desc">{{meterGroup.description}}</p>
+                        </div>
+                    </div>
+
+                    <div [cdkDragData]="meter" class="group-meters" *ngFor="let meter of meterGroup.groupData" cdkDrag>
+                        <!-- id={{meter.id}}> -->
+                        <i class="fa fa-th"></i>
+                        <span> {{meter.name}}</span>
+                        <span class="item-right">{{meter.source}}</span>
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn-link" (click)="groupAdd(meterGroupType.groupType)"><i class="fa fa-plus"></i> Add New
+                Group</button>
+        </div>
+    </div>
+
+    <div class="window" [class.open]="groupToEdit">
+        <div class="windowOverlay"></div>
+        <div class="windowContent">
+            <app-edit-meter-group-form *ngIf="groupToEdit" [groupToEdit]="groupToEdit" (emitClose)="closeEditGroup()"
+                [editOrAdd]="editOrAdd">
+            </app-edit-meter-group-form>
+        </div>
+    </div>
+</div>
+
+<div class="popup" [class.open]="groupToDelete">
+    <div class="popup-header" *ngIf="groupToDelete">Delete Meter Data {{groupToDelete.name}}
+        <button class="item-right" (click)="closeDeleteGroup()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>WARNING: Deleting meter group cannot be undone.
+            Are you sure you want to preform this action?</p>
+    </div>
+    <div class="saveCancel popup-footer text-right">
+        <button class="btn btn-secondary" (click)="closeDeleteGroup()">Cancel</button>
+        <button class="btn btn-danger" (click)="deleteMeterGroup()">Delete</button>
+    </div>
+</div>

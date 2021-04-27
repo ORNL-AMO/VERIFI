@@ -1,0 +1,56 @@
+<div class="table-responsive">
+    <table class="table table-sm">
+        <thead>
+            <tr>
+                <th>Facility</th>
+                <th># of Meters</th>
+                <th>Last Bill Entered</th>
+                <th>Utility Usage (<span [innerHTML]="accountEnergyUnit | settingsLabel"></span>)
+                    <span class="small" *ngIf="lastMonthsDate">({{yearPriorDate | date: 'MMM, y'}} - {{lastMonthsDate |
+                        date: 'MMM, y'}})</span>
+                </th>
+                <th>Utility Cost <span class="small" *ngIf="lastMonthsDate">({{yearPriorDate | date: 'MMM, y'}} -
+                        {{lastMonthsDate | date: 'MMM, y'}})</span></th>
+            </tr>
+        </thead>
+        <tbody *ngIf="accountFacilitiesSummary && accountFacilitiesSummary.facilitySummaries">
+            <tr *ngFor="let summary of accountFacilitiesSummary.facilitySummaries">
+                <td>
+                    <a (click)="selectFacility(summary.facility)">{{summary.facility.name}}</a>
+                </td>
+                <td>
+                    {{summary.numberOfMeters}}
+                </td>
+                <td>
+                    {{summary.lastBillDate | date: 'MMM, y'}}
+                </td>
+                <td>
+                    {{summary.energyUsage | number:'1.0-0'}}
+
+                </td>
+                <td>
+                    {{summary.energyCost | currency : 'USD' : 'symbol' : '1.0-0' }}
+                </td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <th>
+                    Total
+                </th>
+                <th>
+                    {{accountFacilitiesSummary.totalNumberOfMeters}}
+                </th>
+                <th>
+
+                </th>
+                <th>
+                    {{accountFacilitiesSummary.totalEnergyUse | number:'1.0-0'}}
+                </th>
+                <th>
+                    {{accountFacilitiesSummary.totalEnergyCost | currency : 'USD' : 'symbol' : '1.0-0' }}
+                </th>
+            </tr>
+        </tfoot>
+    </table>
+</div>

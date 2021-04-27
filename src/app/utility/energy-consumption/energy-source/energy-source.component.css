@@ -1,0 +1,32 @@
+span.group {
+    background-color: #0058c5;
+    color: white;
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-size: 12px;
+}
+.popup {
+    transform: scale(0);
+    position: fixed;
+    width: 500px;
+    left: calc(50% - 250px);
+    top: 31%;
+    background-color: white;
+    transition: .2s transform;
+}
+.popup.open {
+    transform: scale(1);
+}
+
+.invalid{
+    background-color: red;
+}
+
+thead th.active {
+    text-decoration: underline;
+}
+
+thead th:hover{
+    cursor: pointer;
+    text-decoration: underline;
+}

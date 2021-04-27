@@ -1,0 +1,13 @@
+<label for="worksheetName">Select Worksheet</label>
+<select class="form-control" name="worksheetName" [(ngModel)]="selectedWorksheetName"
+    (change)="setSelectedWorksheetName()">
+    <option class="form-control" *ngFor="let name of worksheetNames" [ngValue]="name">{{name}}</option>
+</select>
+<br>
+<div class="setup-data-table mt-2">
+    <app-worksheet-data-table></app-worksheet-data-table>
+</div>
+<hr>
+<div class="saveCancel item-right text-right">
+    <button class="btn btn-primary" (click)="continue()">Setup Data</button>
+</div>

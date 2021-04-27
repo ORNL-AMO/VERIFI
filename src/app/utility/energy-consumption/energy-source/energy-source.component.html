@@ -1,128 +1,122 @@
 <h4>Energy Sources</h4>
-<p>All energy sources that <strong>Facility<!--{{activeFacility.name}}--></strong> uses can be viewed in the tabs at the top of the screen.</p>
-<br>
 
-<table>
-    <tr>
-        <th>Meter #</th>
-        <th>Account #</th>
-        <th>Type</th>
-        <th>Building / Area</th>
-        <th>Utility Supplier</th>
-        <th>Notes</th>
-        <th></th>
-    </tr>
-    <tr *ngFor="let meterLists of meterList">
-        <td>{{meterLists.meterNumber}}</td>
-        <td>{{meterLists.accountNumber}}</td>
-        <td>{{meterLists.type}}</td>
-        <td>{{meterLists.name}}</td>
-        <td>{{meterLists.supplier}}</td>
-        <td>{{meterLists.notes}}</td>
-        <td (click)="$event.stopPropagation();"> <!-- Prevents closure of menu on document click-->
-            <i class="fa fa-ellipsis-v" (click)="meterToggleMenu(meterLists.id)" ></i>
-            <div class="meterMenu" [class.open]="meterMenuOpen === meterLists.id">
-                <p (click)="meterEdit(meterLists.id)">Edit</p>
-                <p (click)="meterDelete(meterLists.id)">Delete</p>
-            </div>
-        </td>
-    </tr>
-</table>
-<button class="btn btn-link" (click)="meterAdd()"><i class="fa fa-plus"></i> Add New Meter</button>
-
-<div class="window" [class.open]="popup == true">
-    <div class="windowOverlay"></div>
-    <div class="windowContent">
-        <h4>Edit Meter</h4>
-        <br>
-        <p class="bold">Meter Information</p>
-        <form [formGroup]="meterForm">
-            <label hidden>ID
-                <input type="text" formControlName="id">
-            </label>
-
-            <label>Meter Number
-                <input type="text" formControlName="meterNumber">
-            </label>
-            <br>
-            <label>Account Number
-                <input type="text" formControlName="accountNumber">
-            </label>
-            <br>
-            <label>Type
-                <select type="text" formControlName="type">
-                    <option value="Electricity">Electricity</option>
-                    <option value="Natural Gas">Natural Gas</option>
-                    <!--<option value="LPG">LPG</option>
-                    <option value="Fuel Oil">Fuel Oil</option>
-                    <option value="Coal">Coal</option>
-                    <option value="Wood">Wood</option>
-                    <option value="Paper">Paper</option>
-                    <option value="Other Gas">Other Gas</option>
-                    <option value="Other Energy">Other Energy</option>-->
-                </select>
-            </label>
-            <br>
-            <label>Building / Area
-                <input type="text" formControlName="name">
-            </label>
-            <br>
-            <label>Utility Supplier
-                <input type="text" formControlName="supplier">
-            </label>
-            <br>
-            <label>Notes
-                <textarea formControlName="notes"></textarea>
-            </label>
-        </form>
-        <div class="saveCancel item-right">
-            <button class="btn btn-primary" (click)="popup = !popup">Cancel</button>
-            <button class="btn btn-primary" (click)="meterSave()">Save</button>
-        </div>
+<div *ngIf="meterList.length === 0" class="text-center mt-5">
+    <h5>No utility meters found for this facility.</h5>
+    <p>Please <i class="fa fa-plus"></i> Add New Meter or <i class="fa fa-upload"></i> Import multiple meters from
+        excel.</p>
+    <div class="meterData">
+        <button class="btn btn-primary-4 mr-2" (click)="addMeter()"><i class="fa fa-plus"></i> Add New Meter</button>
+        <button class="btn btn-outline" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
     </div>
 </div>
 
-<div class="importExport item-right">
-    <button class="btn btn-outline" (click)="importPopup = true">Import</button>
-    <button class="btn btn-outline" (click)="meterExport()">Export</button>
+<div *ngIf="meterList.length > 0">
+
+    <div class="controls mb-2">
+        <div class="meterData item-right">
+            <button class="btn btn-primary-4 item-right m-0 ml-2" (click)="addMeter()"><i class="fa fa-plus"></i> Add
+                New Meter</button>
+        </div>
+
+        <div class="importExport item-right">
+            <button class="btn btn-outline" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
+            <!-- <button class="btn btn-outline" (click)="meterExport()"><i class="fa fa-download"></i> Export</button> -->
+        </div>
+
+        <div class="items-per-page item-right">
+            <span>Show </span>
+            <select [(ngModel)]="itemsPerPage">
+                <option [ngValue]=10>10</option>
+                <option [ngValue]=20>20</option>
+                <option [ngValue]=30>30</option>
+                <option [ngValue]=40>40</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-sm">
+            <thead>
+                <tr>
+                    <th (click)="setOrderDataField('name')" [ngClass]="{'active': orderDataField == 'name'}">Name</th>
+                    <th (click)="setOrderDataField('source')" [ngClass]="{'active': orderDataField == 'source'}">Source
+                    </th>
+                    <!--<th><i>Group</i></th>-->
+                    <th (click)="setOrderDataField('meterNumber')"
+                        [ngClass]="{'active': orderDataField == 'meterNumber'}">
+                        Meter #</th>
+                    <th (click)="setOrderDataField('accountNumber')"
+                        [ngClass]="{'active': orderDataField == 'accountNumber'}">Account #</th>
+                    <th (click)="setOrderDataField('location')" [ngClass]="{'active': orderDataField == 'location'}">
+                        Building / Location</th>
+                    <th (click)="setOrderDataField('supplier')" [ngClass]="{'active': orderDataField == 'supplier'}">
+                        Utility
+                        Supplier</th>
+                    <th (click)="setOrderDataField('notes')" [ngClass]="{'active': orderDataField == 'notes'}">Notes
+                    </th>
+                    <th (click)="setOrderDataField('startingUnit')"
+                        [ngClass]="{'active': orderDataField == 'startingUnit'}">Collection Units</th>
+                    <th (click)="setOrderDataField('heatCapacity')"
+                        [ngClass]="{'active': orderDataField == 'heatCapacity'}">Heat Capacity</th>
+                    <th (click)="setOrderDataField('siteToSource')"
+                        [ngClass]="{'active': orderDataField == 'siteToSource'}">STS</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr
+                    *ngFor="let meter of meterList  | orderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
+                    <td [ngClass]="{'invalid': isMeterInvalid(meter)}">{{meter.name}}</td>
+                    <td>{{meter.source}}</td>
+                    <!--<td>{{meter.group}}</td>-->
+                    <td>{{meter.meterNumber}}</td>
+                    <td>{{meter.accountNumber}}</td>
+                    <td>{{meter.location}}</td>
+                    <td>{{meter.supplier}}</td>
+                    <td>{{meter.notes}}</td>
+                    <td>
+                        <span [innerHTML]="meter.startingUnit | settingsLabel"></span>
+                    </td>
+                    <td>{{meter.heatCapacity}}</td>
+                    <td>{{meter.siteToSource}}</td>
+                    <td class="actions">
+                        <i class="fa fa-pencil" title="Edit" (click)="selectEditMeter(meter)"></i>
+                        <i class="fa fa-trash-o" title="Delete" (click)="selectDeleteMeter(meter)"></i>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="tableControls overflow-hidden">
+        <div class="item-right">
+            <ngb-pagination [collectionSize]="meterList.length" [(page)]="currentPageNumber" [pageSize]="itemsPerPage"
+                [rotate]="true" aria-label="Default pagination"></ngb-pagination>
+        </div>
+        <p class="item-right">{{meterList.length}} entries</p>
+    </div>
+</div>
+
+<div class="window" [class.open]="editMeter">
+    <div class="windowOverlay"></div>
+    <div class="windowContent windowContentXLg">
+        <app-edit-meter *ngIf="editMeter" [editMeter]="editMeter" (emitClose)="closeEditMeter()"
+            [addOrEdit]="addOrEdit">
+        </app-edit-meter>
+    </div>
 </div>
 
 
-<div class="window" [class.open]="importPopup == true">
-    <div class="windowOverlay"></div>
-    <div class="windowContent">
-        <h4>Import Meters</h4>
-        <br>
-        <form>
-            <input type="file" #inputFile accept=".csv" (change)="meterImport($event.target.files)">
-        </form>
-        <br>
-        <div class="importQuickView" [hidden]="quickView ==''">
-            <p class="bold">Quick View</p>
-            <table>
-                <tr>
-                    <th>Meter #</th>
-                    <th>Account #</th>
-                    <th>Type</th>
-                    <th>Building / Area</th>
-                    <th>Utility Supplier</th>
-                    <th>Notes</th>
-                </tr>
-                <tr *ngFor="let quickViews of quickView">
-                    <td>{{quickViews.meterNumber}}</td>
-                    <td>{{quickViews.accountNumber}}</td>
-                    <td>{{quickViews.type}}</td>
-                    <td>{{quickViews.name}}</td>
-                    <td>{{quickViews.supplier}}</td>
-                    <td>{{quickViews.notes}}</td>
-                </tr>
-            </table>
-        </div>
-        <p class="alert alert-danger" [hidden]="importError == ''">{{importError}}</p>
-
-        <div class="saveCancel item-right">
-            <button class="btn btn-primary" (click)="resetImport(); importPopup = !importPopup">Cancel</button>
-            <button class="btn btn-primary" (click)="meterAddCSV()" [disabled]="importError != ''">Submit</button>
-        </div>
+<div class="popup" [class.open]="meterToDelete">
+    <div class="popup-header" *ngIf="meterToDelete">Delete Meter: {{meterToDelete.name}}
+        <button class="item-right" (click)="cancelDelete()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>WARNING: By deleting this meter, you are also deleting all of the meter data and bills associated with it.
+            Are you sure you want to preform this action?</p>
+    </div>
+    <div class="saveCancel popup-footer text-right">
+        <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
+        <button class="btn btn-danger" (click)="deleteMeter()">Delete</button>
     </div>
 </div>

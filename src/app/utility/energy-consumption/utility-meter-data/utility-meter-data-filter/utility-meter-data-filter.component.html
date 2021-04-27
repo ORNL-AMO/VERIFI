@@ -1,0 +1,130 @@
+<div class="filter">
+    <button class="btn" [ngClass]="{'btn-solid' : !showFilterDropdown, 'btn-outline' : showFilterDropdown}"
+        (click)="toggleFilterMenu()">
+        <!-- <span class="fa"
+            [ngClass]="{'fa-chevron-down': showFilterDropdown, 'fa-chevron-up': !showFilterDropdown}"></span> -->
+        Choose Columns
+    </button>
+    <div class="filter-dropdown" *ngIf="showFilterDropdown">
+        <p class="small">Choose Table Columns</p>
+        <div class="row">
+            <div class="col">
+                <label *ngIf="filterType == 'table'">
+                    <input type="checkbox" name="showTotalDemand" [(ngModel)]="showTotalDemand"
+                        (change)="save()">Total Demand
+                </label>
+                <label>
+                    <input type="checkbox" name="supplyBlockAmount" [(ngModel)]="supplyDemandCharge.supplyBlockAmount"
+                        (change)="save()">Block Rates Supply Amt
+                </label>
+                <label>
+                    <input type="checkbox" name="supplyBlockCharge" [(ngModel)]="supplyDemandCharge.supplyBlockCharge"
+                        (change)="save()">Block Rates Supply Charge
+                </label>
+                <label>
+                    <input type="checkbox" name="flatRateAmount" [(ngModel)]="supplyDemandCharge.flatRateAmount"
+                        (change)="save()">Flat Rate Amt
+                </label>
+                <label>
+                    <input type="checkbox" name="flatRateCharge" [(ngModel)]="supplyDemandCharge.flatRateCharge"
+                        (change)="save()">Flat Rate Charge
+                </label>
+                <label>
+                    <input type="checkbox" name="peakAmount" [(ngModel)]="supplyDemandCharge.peakAmount"
+                        (change)="save()">On-Peak Amt
+                </label>
+                <label>
+                    <input type="checkbox" name="peakCharge" [(ngModel)]="supplyDemandCharge.peakCharge"
+                        (change)="save()">On-Peak Charge
+                </label>
+            </div>
+            <div class="col">
+                <label>
+                    <input type="checkbox" name="offPeakAmount" [(ngModel)]="supplyDemandCharge.offPeakAmount"
+                        (change)="save()">Off-Peak Amt
+                </label>
+                <label>
+                    <input type="checkbox" name="offPeakCharge" [(ngModel)]="supplyDemandCharge.offPeakCharge"
+                        (change)="save()">Off-Peak Charge
+                </label>
+                <label>
+                    <input type="checkbox" name="demandBlockAmount" [(ngModel)]="supplyDemandCharge.demandBlockAmount"
+                        (change)="save()">Block Rates Demand Amt
+                </label>
+                <label>
+                    <input type="checkbox" name="demandBlockCharge" [(ngModel)]="supplyDemandCharge.demandBlockCharge"
+                        (change)="save()">Block Rates Demand Charge
+                </label>
+                <label>
+                    <input type="checkbox" name="generationTransmissionCharge"
+                        [(ngModel)]="taxAndOther.generationTransmissionCharge" (change)="save()">Generation and
+                    Transmission Charge
+                </label>
+                <label>
+                    <input type="checkbox" name="deliveryCharge" [(ngModel)]="taxAndOther.deliveryCharge"
+                        (change)="save()">Delivery Charge
+                </label>
+            </div>
+            <div class="col">
+                <label>
+                    <input type="checkbox" name="transmissionCharge" [(ngModel)]="taxAndOther.transmissionCharge"
+                        (change)="save()">Transmission Charge
+                </label>
+                <label>
+                    <input type="checkbox" name="powerFactorCharge" [(ngModel)]="taxAndOther.powerFactorCharge"
+                        (change)="save()">Power Factor Charge
+                </label>
+                <label>
+                    <input type="checkbox" name="businessCharge" [(ngModel)]="taxAndOther.businessCharge"
+                        (change)="save()">Local Business Charge
+                </label>
+                <label>
+                    <input type="checkbox" name="utilityTax" [(ngModel)]="taxAndOther.utilityTax"
+                        (change)="save()">Local Utility Tax
+                </label>
+                <label>
+                    <input type="checkbox" name="latePayment" [(ngModel)]="taxAndOther.latePayment"
+                        (change)="save()">Late Payment
+                </label>
+                <label>
+                    <input type="checkbox" name="otherCharge" [(ngModel)]="taxAndOther.otherCharge"
+                        (change)="save()">Other Charge
+                </label>
+                <label>
+                    <input type="checkbox" name="basicCharge" [(ngModel)]="taxAndOther.basicCharge"
+                        (change)="save()">Basic Charge
+                </label>
+            </div>
+
+
+            <!-- <div class="col">
+                <div *ngFor="let electricityDataFilter of electricityDataFilters; let ind = index;">
+                    <label *ngIf="ind < electricityDataFilters.length/3">
+                        <input type="checkbox" name="electricityDataFilter.name" [(ngModel)]="electricityDataFilter.filter"
+                            (change)="save()">{{electricityDataFilter.display}}
+                    </label>
+                </div>
+            </div>
+            <div class="col">
+                <div *ngFor="let electricityDataFilter of electricityDataFilters; let ind = index;">
+                    <label *ngIf="ind < (electricityDataFilters.length/3 * 2) && ind > electricityDataFilters.length/3">
+                        <input type="checkbox" name="electricityDataFilter.name" [(ngModel)]="electricityDataFilter.filter"
+                            (change)="save()">{{electricityDataFilter.display}}
+                    </label>
+                </div>
+            </div>
+            <div class="col">
+                <div *ngFor="let electricityDataFilter of electricityDataFilters; let ind = index;">
+                    <label *ngIf="ind > electricityDataFilters.length/3 * 2">
+                        <input type="checkbox" name="electricityDataFilter.name" [(ngModel)]="electricityDataFilter.filter"
+                            (change)="save()">{{electricityDataFilter.display}}
+                    </label>
+                </div>
+            </div> -->
+        </div>
+        <br>
+        <a (click)="showAllColumns();">Show All</a>
+        <span> / </span>
+        <a (click)="hideAllColumns();">Hide All</a>
+    </div>
+</div>

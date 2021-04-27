@@ -1,0 +1,66 @@
+<div class="worksheet-data-table">
+    <app-worksheet-data-table [columnGroups]="columnGroups"></app-worksheet-data-table>
+</div>
+<hr>
+<!-- <label for="dataOrientation">
+    Are meters entered as rows or columns?
+</label> -->
+<!-- <select class="form-control" name="dataOrientation" [(ngModel)]="dataOrientation" (change)="setDataOrientation()">
+    <option [ngValue]="'column'">Columns</option>
+    <!-- <option [ngValue]="'row'">Rows</option> --
+</select> -->
+<hr>
+<h6>Map the data columns</h6>
+<div class="row no-gutters" *ngIf="dataOrientation == 'column'">
+    <div cdkDropList [cdkDropListData]="columnGroups" class="card col-md-3 col-sm-6"
+        *ngFor="let columnGroup of columnGroups" (cdkDropListDropped)="dropColumn($event)" id={{columnGroup.id}}
+        [cdkDropListConnectedTo]="columnGroupItemIds" [ngClass]="columnGroup.groupLabel">
+        <div class="card-header">
+            {{columnGroup.groupLabel}}
+        </div>
+        <div class="card-body">
+            <div class="list-item mt-2 mb-2 p-2" [cdkDragData]="groupItem"
+                *ngFor="let groupItem of columnGroup.groupItems" cdkDrag>
+                <span class="fa fa-arrows-alt"></span>{{groupItem.value}}
+            </div>
+            <p class="alert alert-warning" *ngIf="columnGroup.groupLabel == 'Date'">Date range based on selection:
+                ({{minDate | date}} - {{maxDate | date}})</p>
+        </div>
+    </div>
+</div>
+<div class="row no-gutters" *ngIf="dataOrientation == 'row'">
+    <div cdkDropList [cdkDropListData]="rowGroups" class="card col-md-3 col-sm-6" *ngFor="let rowGroup of rowGroups"
+        (cdkDropListDropped)="dropRow($event)" id={{rowGroup.id}} [cdkDropListConnectedTo]="rowGroupItemIds"
+        [ngClass]="rowGroup.fieldLabel">
+        <div class="card-header">
+            {{rowGroup.fieldLabel}}
+        </div>
+        <div class="card-body">
+            <div class="list-item mt-2 mb-2 p-2" [cdkDragData]="groupItem" *ngFor="let groupItem of rowGroup.groupItems"
+                cdkDrag>
+                <span class="fa fa-arrows-alt"></span>{{groupItem.value}}
+            </div>
+            <!-- <p class="alert alert-warning" *ngIf="columnGroup.groupLabel == 'Date'">Date range based on selection:
+                    ({{minDate | date}} - {{maxDate | date}})</p> -->
+        </div>
+    </div>
+</div>
+<hr *ngIf="dataOrientation == 'row'">
+<div class="row justify-content-center" *ngIf="dataOrientation == 'row'">
+    <div class="col-3">
+        <select [(ngModel)]="fieldToAdd" name="fieldToAdd" class="form-control mt-3">
+            <option *ngFor="let option of rowOptionsToAdd" [ngValue]="option">{{option.fieldLabel}}</option>
+        </select>
+    </div>
+    <div class="col-3">
+        <button class="btn btn-primary" (click)="addField()">
+            +Add Field
+        </button>
+    </div>
+</div>
+
+<hr>
+<div class="d-flex w-100 justify-content-between">
+    <button class="btn btn-secondary" (click)="back()">Select Worksheet</button>
+    <button class="btn btn-primary" (click)="continue()">Setup Meters</button>
+</div>

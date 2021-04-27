@@ -1,0 +1,24 @@
+<div class="progress-box" [class.open]="setupWizard">
+    <div class="row">
+        <div class="col">
+            <i class="fa fa-info-circle"></i>
+        </div>
+        <div class="col-lg-10">
+            <h3>Your Setup Progress</h3>
+            <div class="progress">
+                <div class="progress-bar" role="progressbar" [style.width]="progress" aria-valuenow="1" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            <span *ngIf='selectedAccount && !selectedFacility && !setupWizardComplete' class="small">Step 1 of 3 complete</span>
+            <span *ngIf='selectedAccount && selectedFacility && !setupWizardComplete' class="small">Step 2 of 3 complete</span>
+            <span *ngIf='selectedAccount && selectedFacility && setupWizardComplete' class="small">Step 3 of 3 complete</span>
+            <br>
+            <p *ngIf='selectedAccount && !selectedFacility && !setupWizardComplete'>Complete the information about your account then add a new facility.</p>
+            <p *ngIf='selectedAccount && selectedFacility && !setupWizardComplete'>Complete the information about your facility then add your utility data. More facilities can be added later.</p>
+            <p *ngIf='selectedAccount && selectedFacility && setupWizardComplete'>Setup Complete! Continue by adding utility information and reviewing your <a routerLink="/account-summary">dashboard</a>.</p>
+
+            <button *ngIf='selectedAccount && !selectedFacility && !setupWizardComplete' class="btn btn-primary" (click)="addFacility()">Add Facility</button>
+            <button *ngIf='selectedAccount && selectedFacility && !setupWizardComplete' class="btn btn-primary" (click)="addUtilityData()">Add Utility Data</button>
+            <button *ngIf='selectedAccount && selectedFacility && setupWizardComplete' class="btn btn-primary" (click)="closeSetupWizard()">Close</button>
+        </div>
+    </div>
+</div>

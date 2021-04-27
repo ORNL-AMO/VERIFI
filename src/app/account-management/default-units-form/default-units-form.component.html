@@ -1,0 +1,72 @@
+<form [formGroup]="form">
+    <div class="row">
+        <div class="mb-3 col">
+            <label>Units of Measure</label>
+            <select formControlName="unitsOfMeasure" (change)="setUnitsOfMeasure()">
+                <option [ngValue]="'Imperial'">Imperial</option>
+                <option [ngValue]="'Metric'">Metric</option>
+                <option [ngValue]="'Custom'">Custom</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="mb-3 col">
+            <label>Energy Unit</label>
+            <select formControlName="energyUnit" (change)="saveChanges()">
+                <option *ngFor="let energyUnitOption of energyUnitOptions" [ngValue]="energyUnitOption.value">
+                    <span [innerHTML]="energyUnitOption.display"></span>
+                </option>
+            </select>
+        </div>
+
+        <div class="mb-3 col">
+            <label>Liquid Volume Unit</label>
+            <select formControlName="volumeLiquidUnit" (change)="saveChanges()">
+                <option *ngFor="let volumeUnitOption of volumeLiquidOptions" [ngValue]="volumeUnitOption.value">
+                    <span [innerHTML]="volumeUnitOption.display"></span>
+                </option>
+            </select>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="mb-3 col">
+            <label>Gas Volume Unit</label>
+            <select formControlName="volumeGasUnit" (change)="saveChanges()">
+                <option *ngFor="let volumeUnitOption of volumeGasOptions" [ngValue]="volumeUnitOption.value">
+                    <span [innerHTML]="volumeUnitOption.display"></span>
+                </option>
+            </select>
+        </div>
+
+        <div class="mb-3 col">
+            <label>Mass Unit</label>
+            <select formControlName="massUnit" (change)="saveChanges()">
+                <option *ngFor="let massUnitOption of massUnitOptions" [ngValue]="massUnitOption.value">
+                    <span [innerHTML]="massUnitOption.display"></span>
+                </option>
+            </select>
+        </div>
+    </div>
+    <div class="row">
+        <div class="mb-3 col">        
+            <hr>
+            <label class="checkbox mb-3">Energy displayed as site or source? </label>
+
+            <input type="radio" class="rowToggle" name="energyIsSource" formControlName="energyIsSource" [value]="true"
+                (change)="saveChanges()" id="sourceEnergy">
+            <label class="checkbox" for="sourceEnergy">Source Energy</label>
+        
+            <input type="radio" class="rowToggle" name="energyIsSource" formControlName="energyIsSource" [value]="false"
+                (change)="saveChanges()" id="siteEnergy">
+            <label class="checkbox" for="siteEnergy">Site Energy</label>        
+        </div>
+    </div>
+</form>
+
+
+<p class="alert alert-warning" *ngIf="unitsDontMatchAccount">
+    Facility Units are different then the units set for the account. If you would like to use the
+    account units for this facility click here: <a (click)="setAccountUnits()">Use Account Units</a>
+</p>
