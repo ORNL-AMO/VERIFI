@@ -25,6 +25,7 @@ export class SetupProgressComponent implements OnInit {
   progress: string;
   setupWizard: boolean;
   setupWizardComplete: boolean;
+  setupWizardMinimized: boolean;
 
   constructor(
     public accountdbService: AccountdbService,
@@ -104,5 +105,9 @@ export class SetupProgressComponent implements OnInit {
   closeSetupWizard() {
     this.selectedAccount.setupWizard = false;
     this.accountdbService.update(this.selectedAccount);
+  }
+
+  toggleWizard() {
+    this.setupWizardMinimized = !this.setupWizardMinimized;
   }
 }
