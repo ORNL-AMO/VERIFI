@@ -36,6 +36,8 @@ export class HeaderComponent implements OnInit {
   accountFacilitiesSub: Subscription;
   selectedFacilitySub: Subscription;
 
+  showImportFile: boolean = false;
+
   constructor(
     private eRef: ElementRef,
     private router: Router,
@@ -171,6 +173,14 @@ export class HeaderComponent implements OnInit {
     }else{
       return count + ' Facility';
     }
+  }
+  
+  openImportBackup() {
+    this.showImportFile = true;
+  }
+
+  cancelImportBackup() {
+    this.showImportFile = false;
   }
 
   checkIfAccountPage() {
