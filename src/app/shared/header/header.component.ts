@@ -174,9 +174,10 @@ export class HeaderComponent implements OnInit {
       return count + ' Facility';
     }
   }
-  
+
   openImportBackup() {
     this.showImportFile = true;
+    this.switchAccountMenu = false;
   }
 
   cancelImportBackup() {

@@ -29,9 +29,14 @@
                     <div class="arrow-up"></div>
                     <div class="facilities">
                         <p class="small">Switch Facility</p>
-                        <p (click)="selectAllFacilities()">
-                            All Facilities
-                        </p>
+                        <div>
+                            <p (click)="selectAllFacilities()">
+                                All Facilities
+                            </p>
+                            <div class="quick-links">
+                                <i class="fa fa-cog item-right" routerLink="/account-management" title="Manage Facility Settings"></i>
+                            </div>
+                        </div>
                         <div *ngFor="let facility of facilityList">
                             <p (click)="switchFacility(facility)" routerLink="/facility-summary">{{facility.name}}</p>
                             <div class="quick-links">
