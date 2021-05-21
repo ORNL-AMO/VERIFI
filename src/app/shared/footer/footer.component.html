@@ -2,7 +2,7 @@
     <p class="item-left" (click)="deleteDatabase()" *ngIf="isDev">Delete Database</p>
     <div>
         <p><i class="fa fa-calendar"></i> {{date | date:'MM/dd/yyyy'}}</p>
-        <p><i class="fa fa-cog"></i> Settings</p>
+        <p routerLink="/account-management"><i class="fa fa-cog"></i> Settings</p>
         <p><i class="fa fa-building-o"></i> Facilities {{facilityCount}}/{{facilityCountTotal}}</p>
         <p><i class="fa fa-user-circle-o"></i> Accounts {{accountCount}}</p>
         <p>v{{version}}</p>
