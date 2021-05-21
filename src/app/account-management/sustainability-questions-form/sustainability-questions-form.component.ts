@@ -75,4 +75,14 @@ export class SustainabilityQuestionsFormComponent implements OnInit {
     this.form = this.accountManagementService.setAccountSustainQuestions(this.form, this.selectedAccount);
     this.saveChanges();
   }
+
+  setTargetYear(by:string, ty:string) {
+    const plus10Years = this.form.get(by).value + 10;
+    if(plus10Years < 2050) {
+      this.form.controls[ty].setValue(plus10Years);
+    } else {
+      this.form.controls[ty].setValue(2050);
+    }
+    
+  }
 }

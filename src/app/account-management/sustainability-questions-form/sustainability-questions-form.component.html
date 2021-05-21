@@ -13,7 +13,7 @@
         </div>
         <div class="col" [hidden]="!form.controls.energyReductionGoal.value">
             <label>Baseline Year</label>
-            <select formControlName="energyReductionBaselineYear" (change)="saveChanges()">
+            <select formControlName="energyReductionBaselineYear" (change)="setTargetYear('energyReductionBaselineYear','energyReductionTargetYear'); saveChanges()">
                 <option *ngFor="let year of years" [ngValue]="year">{{year}}</option>
             </select>
         </div>
@@ -39,7 +39,7 @@
         </div>
         <div class="col" [hidden]="!form.controls.greenhouseReductionGoal.value">
             <label>Baseline Year</label>
-            <select formControlName="greenhouseReductionBaselineYear" (change)="saveChanges()">
+            <select formControlName="greenhouseReductionBaselineYear" (change)="setTargetYear('greenhouseReductionBaselineYear','greenhouseReductionTargetYear'); saveChanges()">
                 <option *ngFor="let year of years" [ngValue]="year">{{year}}</option>
             </select>
         </div>
@@ -65,7 +65,7 @@
         </div>
         <div class="col" [hidden]="!form.controls.renewableEnergyGoal.value">
             <label>Baseline Year</label>
-            <select formControlName="renewableEnergyBaselineYear" (change)="saveChanges()">
+            <select formControlName="renewableEnergyBaselineYear" (change)="setTargetYear('renewableEnergyBaselineYear','renewableEnergyTargetYear'); saveChanges()">
                 <option *ngFor="let year of years" [ngValue]="year">{{year}}</option>
             </select>
         </div>
@@ -91,7 +91,7 @@
         </div>
         <div class="col" [hidden]="!form.controls.wasteReductionGoal.value">
             <label>Baseline Year</label>
-            <select formControlName="wasteReductionBaselineYear" (change)="saveChanges()">
+            <select formControlName="wasteReductionBaselineYear" (change)="setTargetYear('wasteReductionBaselineYear','wasteReductionTargetYear'); saveChanges()">
                 <option *ngFor="let year of years" [ngValue]="year">{{year}}</option>
             </select>
         </div>
@@ -117,7 +117,7 @@
         </div>
         <div class="col" [hidden]="!form.controls.waterReductionGoal.value">
             <label>Baseline Year</label>
-            <select formControlName="waterReductionBaselineYear" (change)="saveChanges()">
+            <select formControlName="waterReductionBaselineYear" (change)="setTargetYear('waterReductionBaselineYear','waterReductionTargetYear'); saveChanges()">
                 <option *ngFor="let year of years" [ngValue]="year">{{year}}</option>
             </select>
         </div>
