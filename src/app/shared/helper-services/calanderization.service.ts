@@ -213,7 +213,17 @@ export class CalanderizationService {
     return lastBill;
   }
 
-
+  getFirstBillEntryFromCalanderizedMeterData(calanderizedMeterData: Array<CalanderizedMeter>): MonthlyData {
+    let monthlyData: Array<MonthlyData> = calanderizedMeterData.flatMap(data => {
+      return data.monthlyData;
+    })
+    let lastBill: MonthlyData = _.minBy(monthlyData, (data: MonthlyData) => {
+      let date = new Date();
+      date.setFullYear(data.year, data.monthNumValue);
+      return date;
+    });
+    return lastBill;
+  }
   getYearPriorBillEntry(facilityMeters: Array<IdbUtilityMeter>, inAccount: boolean, lastBill: MonthlyData): Array<MonthlyData> {
     let calanderizedMeterData: Array<CalanderizedMeter> = this.getCalanderizedMeterData(facilityMeters, inAccount, false);
     let yearPriorBill: Array<MonthlyData> = this.getYearPriorBillEntryFromCalanderizedMeterData(calanderizedMeterData, lastBill);

@@ -1215,14 +1215,16 @@ input.unitDollar {
   color: white;
 }
 
-canvas {
+
+/*TODO: NEED TO DO THIS AS NOT A GLOBAL STYLE OR SOMETHING ELSE. MESSES WITH PLOTLY*/
+/* canvas {
   top: auto!important;
   left: auto!important;
   bottom: 65px!important;
   right: 50px!important;
   z-index: 1001!important;
-  /*height: 200px;*/
-}
+  /*height: 200px;*
+} */
 
 
 

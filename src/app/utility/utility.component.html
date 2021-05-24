@@ -16,10 +16,10 @@
                     <a routerLink="predictors" [routerLinkActive]="['active']">Predictors</a>
                     <span class="small navigation-warning">Requires Meter Readings</span>
                 </li>
-                <!-- <li [class.disabled]="utilityMeterData.length === 0">
+                <li [class.disabled]="utilityMeterData.length === 0">
                     <a routerLink="visualization" [routerLinkActive]="['active']">Data Visualization</a>
                     <span class="small navigation-warning">Requires Meter Readings</span>
-                </li> -->
+                </li>
             </ul>
             
         </div>
@@ -31,7 +31,7 @@
     </div>
 </div>
 
-<div class="row no-margin" *ngIf="(selectedAccount && selectedFacility) && appRendered">
+<div class="row no-margin flex-grow-1" *ngIf="(selectedAccount && selectedFacility) && appRendered">
     <div class="col">
         <router-outlet></router-outlet>
     </div>
