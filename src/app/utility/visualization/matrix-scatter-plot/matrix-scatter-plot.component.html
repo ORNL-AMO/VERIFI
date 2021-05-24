@@ -1,4 +1,15 @@
-
-<div class="p-2 h-100 w-100">
-    <div #matrixScatterPlot id="matrixScatterPlot"></div>
+<div class="d-flex bg-white">
+    <div class="h-100 w-100">
+        <div #matrixScatterPlot id="matrixScatterPlot"></div>
+    </div>
+    <div class="d-flex flex-wrap flex-column pl-2 pr-2">
+        <div *ngFor="let option of meterOptions; let index = index;">
+            <button class="btn w-100 mb-0" [ngClass]="{'btn-primary': option.selected}"
+                (click)="toggleMeterOption(index)">{{option.meter.name}}</button>
+        </div>
+        <div *ngFor="let option of predictorOptions; let index = index;">
+            <button class="btn w-100 mb-0" [ngClass]="{'btn-primary': option.selected}"
+                (click)="togglePredictorOption(index)">{{option.predictor.name}}</button>
+        </div>
+    </div>
 </div>

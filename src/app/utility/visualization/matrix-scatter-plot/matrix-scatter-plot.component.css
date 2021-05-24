@@ -1,0 +1,3 @@
+.btn:not(.btn-primary){
+    border: solid;
+}
