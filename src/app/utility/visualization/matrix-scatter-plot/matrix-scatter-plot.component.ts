@@ -39,29 +39,32 @@ export class MatrixScatterPlotComponent implements OnInit {
 
   ngOnInit(): void {
     this.facilityPredictorsSub = this.predictorDbService.facilityPredictors.subscribe(predictors => {
-      this.predictorOptions = new Array();
-      predictors.forEach(predictor => {
-        this.predictorOptions.push({
-          predictor: predictor,
-          selected: true
-        });
-        // this.setData();
-      })
+      if (!this.predictorOptions && predictors) {
+        this.setPredictorOptions(predictors);
+      } else {
+        let existingPredictorIds: Array<string> = this.predictorOptions.map(option => { return option.predictor.id });
+        let checkMissing: PredictorData = predictors.find(predictor => { return !existingPredictorIds.includes(predictor.id) });
+        if (checkMissing) {
+          this.setPredictorOptions(predictors);
+        }
+      }
     });
 
     this.metersSub = this.utilityMeterDbService.facilityMeters.subscribe(facilityMeters => {
-      this.meterOptions = new Array();
-      facilityMeters.forEach(meter => {
-        this.meterOptions.push({
-          meter: meter,
-          selected: true
-        });
-        // this.setData();
-      });
+      if (!this.meterOptions && facilityMeters) {
+        this.setMeterOptions(facilityMeters);
+      } else {
+        let existingMeterIds: Array<number> = this.meterOptions.map(option => { return option.meter.id });
+        let checkMissing: IdbUtilityMeter = facilityMeters.find(meter => { return !existingMeterIds.includes(meter.id) });
+        if (checkMissing) {
+          this.setMeterOptions(facilityMeters);
+        }
+      }
     });
 
     this.facilityMeterDataSub = this.utilityMeterDataDbService.facilityMeterData.subscribe(() => {
       this.setData();
+      this.drawChart();
     });
   }
 
@@ -85,6 +88,28 @@ export class MatrixScatterPlotComponent implements OnInit {
       this.regressionTableData = this.getRegressionTableData(this.plotData);
     }
   }
+
+  setPredictorOptions(predictors: Array<PredictorData>) {
+    this.predictorOptions = new Array();
+    predictors.forEach(predictor => {
+      this.predictorOptions.push({
+        predictor: predictor,
+        selected: true
+      });
+    });
+  }
+
+  setMeterOptions(facilityMeters: Array<IdbUtilityMeter>) {
+    this.meterOptions = new Array();
+    facilityMeters.forEach(meter => {
+      this.meterOptions.push({
+        meter: meter,
+        selected: true
+      });
+    });
+  }
+
+
 
   drawChart(): void {
     if (this.matrixPlot && this.plotData && this.regressionTableData) {
@@ -116,7 +141,7 @@ export class MatrixScatterPlotComponent implements OnInit {
     let data = [{
       type: 'splom',
       dimensions: this.plotData,
-      text: this.plotData[0].valueDates.map(valueDate => { return this.monthNames[valueDate.getUTCMonth()] + ', ' + valueDate.getFullYear() }),
+      text: this.plotData[0].valueDates.map(valueDate => { return this.monthNames[valueDate.getMonth()] + ', ' + valueDate.getFullYear() }),
       marker: {
         color: this.plotData.map(() => { return 1 }),
         autocolorscale: true,
@@ -154,14 +179,14 @@ export class MatrixScatterPlotComponent implements OnInit {
     let trace1 = {
       x: this.plotData[0].values,
       y: this.plotData[1].values,
-      text: this.plotData[0].valueDates.map(valueDate => { return this.monthNames[valueDate.getUTCMonth()] + ', ' + valueDate.getFullYear() }),
+      text: this.plotData[0].valueDates.map(valueDate => { return this.monthNames[valueDate.getMonth()] + ', ' + valueDate.getFullYear() }),
       mode: 'markers',
       type: 'scatter',
       name: "Plot Data",
       marker: {
         color: this.plotData[0].values.map(() => { return 'black' }),
       },
-      hovertemplate: "%{text}<br> %{yaxis.title.text}: %{y}<br>%{xaxis.title.text}: %{x}<br><extra></extra>"
+      hovertemplate: "%{text}<br>%{yaxis.title.text}: %{y}<br>%{xaxis.title.text}: %{x}<br><extra></extra>"
     };
 
 
@@ -197,7 +222,7 @@ export class MatrixScatterPlotComponent implements OnInit {
         xanchor: 'left',
         yanchor: 'top',
         showarrow: false,
-        text: "Best Fit:<br>" + this.regressionTableData[0].regressionResult.string + "<br>R&#178;: " + this.regressionTableData[0].r2Value + "<br> P-value: " + this.regressionTableData[0].pValue,
+        text: "Best Fit:<br>" + this.regressionTableData[0].regressionResult.string + "<br>R&#178;: " + this.regressionTableData[0].r2Value + "<br>P-value: " + this.regressionTableData[0].pValue,
         borderwidth: 2,
         borderpad: 4,
         bgcolor: '#fff',
@@ -283,6 +308,7 @@ export class MatrixScatterPlotComponent implements OnInit {
   }
 
   getPlotData(): Array<PlotDataItem> {
+
     let facilityMeters: Array<IdbUtilityMeter> = new Array();
     this.meterOptions.forEach(meterOption => {
       if (meterOption.selected) {
@@ -385,19 +411,21 @@ export class MatrixScatterPlotComponent implements OnInit {
         let regressionDataPairs: Array<Array<number>> = plotData[x].values.map((value, index) => { return [value, plotData[y].values[index]] });
         let regressionResult = regression.linear(regressionDataPairs);
         // debugger
-        console.log(plotData[x].label + ' v ' + plotData[y].label)
-        let xVals = regressionDataPairs.map(pair => { return pair[0] });
-        let yVals = regressionDataPairs.map(pair => { return pair[1] });
-        console.log(xVals);
-        console.log(yVals);
-        let jstatResult = jStat.anovaftest(xVals, yVals);
-        console.log(jstatResult);
+        // console.log(plotData[x].label + ' v ' + plotData[y].label)
+        // let xVals = regressionDataPairs.map(pair => { return [1, pair[0]] });
+        // let yVals = regressionDataPairs.map(pair => { return pair[1] });
+        // console.log(xVals);
+        // console.log(yVals);
+        // let jstatResult = jStat.models.ols(xVals, yVals);
+        // console.log(jstatResult);
+        // let jstatResultFScore = jStat.anovafscore(xVals, yVals);
+        // console.log(jstatResult);
         regressionTableData.push({
           optionOne: plotData[x].label,
           optionTwo: plotData[y].label,
           r2Value: regressionResult.r2,
           regressionResult: regressionResult,
-          pValue: jstatResult
+          pValue: 0
         });
       }
     }
