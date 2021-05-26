@@ -1,3 +1,11 @@
-.btn:not(.btn-primary){
+/* .btn:not(.btn-primary-4):not(.btn-primary-2){
     border: solid;
+} */
+
+.hidden{
+    display: none;
+}
+
+.btn-primary-2 sup{
+    color: white !important;
 }

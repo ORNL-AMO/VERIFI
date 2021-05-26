@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
@@ -8,7 +8,7 @@ import { IdbPredictorEntry, IdbUtilityMeter, PredictorData } from 'src/app/model
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import * as _ from 'lodash';
 import { Subscription } from 'rxjs';
-
+import * as regression from 'regression';
 
 @Component({
   selector: 'app-matrix-scatter-plot',
@@ -17,7 +17,7 @@ import { Subscription } from 'rxjs';
 })
 export class MatrixScatterPlotComponent implements OnInit {
 
-  @ViewChild('matrixScatterPlot', { static: false }) matrixScatterPlot: ElementRef;
+  @ViewChild('matrixPlot', { static: false }) matrixPlot: ElementRef;
 
   facilityMeterDataSub: Subscription;
   metersSub: Subscription;
@@ -26,8 +26,15 @@ export class MatrixScatterPlotComponent implements OnInit {
   facilityPredictorsSub: Subscription;
   predictorOptions: Array<{ predictor: PredictorData, selected: boolean }>;
 
+  regressionTableData: Array<RegressionTableDataItem>;
+  plotData: Array<PlotDataItem>;
+  dataView: "heatmap" | "splom" = "splom";
+  numberOfSelectedOptions: number = 0;
+  monthNames: Array<string> = ["January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
   constructor(private plotlyService: PlotlyService, private predictorDbService: PredictordbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private calanderizationService: CalanderizationService, private utilityMeterDbService: UtilityMeterdbService) { }
+    private calanderizationService: CalanderizationService, private utilityMeterDbService: UtilityMeterdbService, private cd: ChangeDetectorRef) { }
 
   ngOnInit(): void {
     this.facilityPredictorsSub = this.predictorDbService.facilityPredictors.subscribe(predictors => {
@@ -37,6 +44,7 @@ export class MatrixScatterPlotComponent implements OnInit {
           predictor: predictor,
           selected: true
         });
+        this.setData();
       })
     });
 
@@ -47,6 +55,7 @@ export class MatrixScatterPlotComponent implements OnInit {
           meter: meter,
           selected: true
         });
+        this.setData();
       });
     });
 
@@ -69,75 +78,210 @@ export class MatrixScatterPlotComponent implements OnInit {
     this.drawChart();
   }
 
-  drawChart(): void {
-    if (this.matrixScatterPlot) {
-      var axis = {
-        showline: false,
-        zeroline: false,
-        gridcolor: '#ffff',
-        ticklen: 4,
-        // automargin: true
-      };
-
-      let plotData = this.getPlotData();
-      console.log(plotData);
-      var data = [{
-        type: 'splom',
-        dimensions: plotData,
-        text: plotData.map(data => { return data.label }),
-        marker: {
-          color: plotData.map(data => { return 1 }),
-          autocolorscale: true,
-          size: 7,
-          // line: {
-          //   color: 'white',
-          //   width: 0.5
-          // }
-        },
-        diagonal: {
-          visible: plotData.length < 3
-        },
-        showupperhalf: plotData.length < 3
-      }]
-
-      var layout = {
-        margin: {
-          t: 20,
-          r: 20
-        },
-        // title: 'Iris Data set',
-        height: 800,
-        // width: 800,
-        // autosize: false,
-        // hovermode: 'closest',
-        // dragmode: 'select',
-        plot_bgcolor: 'rgba(240,240,240, 0.95)',
-        xaxis: axis,
-        yaxis: axis,
-        xaxis2: axis,
-        xaxis3: axis,
-        xaxis4: axis,
-        yaxis2: axis,
-        yaxis3: axis,
-        yaxis4: axis,
-      }
-      var config = { responsive: true };
-
-      this.plotlyService.newPlot(this.matrixScatterPlot.nativeElement, data, layout, config);
+  setData() {
+    if (this.meterOptions && this.predictorOptions) {
+      this.plotData = this.getPlotData();
+      this.regressionTableData = this.getRegressionTableData(this.plotData);
     }
+  }
+
+  drawChart(): void {
+    if (this.matrixPlot && this.plotData && this.regressionTableData) {
+      this.numberOfSelectedOptions = this.plotData.length;
+      this.cd.detectChanges();
+      if (this.numberOfSelectedOptions > 2) {
+        if (this.dataView == 'splom') {
+          this.drawSplom();
+        } else {
+          this.drawHeatMap();
+        }
+      } else {
+        if (this.numberOfSelectedOptions == 2) {
+          this.drawScatterPlot();
+        } else {
+          //IDK..
+        }
+      }
+    }
+  }
+
+  drawSplom() {
+    var axis = {
+      showline: false,
+      zeroline: false,
+      gridcolor: '#ffff',
+      ticklen: 4,
+    };
+    let data = [{
+      type: 'splom',
+      dimensions: this.plotData,
+      text: this.plotData[0].valueDates.map(valueDate => { return this.monthNames[valueDate.getUTCMonth()] + ', ' + valueDate.getFullYear() }),
+      marker: {
+        color: this.plotData.map(() => { return 1 }),
+        autocolorscale: true,
+        size: 7,
+      },
+      diagonal: {
+        visible: false
+      },
+      showupperhalf: false,
+      hovertemplate: "%{text}<br> %{yaxis.title.text}: %{y}<br>%{xaxis.title.text}: %{x}<br><extra></extra>"
+    }]
+
+    let layout = {
+      title: 'Correlation',
+      height: 800,
+      plot_bgcolor: 'rgba(240,240,240, 0.95)',
+      xaxis: axis,
+      yaxis: axis,
+      xaxis2: axis,
+      xaxis3: axis,
+      xaxis4: axis,
+      yaxis2: axis,
+      yaxis3: axis,
+      yaxis4: axis,
+    }
+    let config = {
+      displaylogo: false,
+      responsive: true
+    };
+    this.plotlyService.newPlot(this.matrixPlot.nativeElement, data, layout, config);
+  }
+
+
+  drawScatterPlot() {
+    let trace1 = {
+      x: this.plotData[0].values,
+      y: this.plotData[1].values,
+      text: this.plotData[0].valueDates.map(valueDate => { return this.monthNames[valueDate.getUTCMonth()] + ', ' + valueDate.getFullYear() }),
+      mode: 'markers',
+      type: 'scatter',
+      name: "Plot Data",
+      marker: {
+        color: this.plotData[0].values.map(() => { return 'black' }),
+      },
+      hovertemplate: "%{text}<br> %{yaxis.title.text}: %{y}<br>%{xaxis.title.text}: %{x}<br><extra></extra>"
+    };
+
+
+    let xMin: number = _.min(this.plotData[0].values);
+    let xMax: number = _.max(this.plotData[0].values);
+
+    let yMinRegressionValue: number = this.regressionTableData[0].regressionResult.predict(xMin)[1];
+    let yMaxRegressionValue: number = this.regressionTableData[0].regressionResult.predict(xMax)[1];
+    let trace2 = {
+      x: [xMin, xMax],
+      y: [yMinRegressionValue, yMaxRegressionValue],
+      mode: "lines",
+      type: "scatter",
+      name: "Best Fit: " + this.regressionTableData[0].regressionResult.string,
+      hoverinfo: 'none'
+    }
+
+    let data = [trace1, trace2];
+    let layout = {
+      plot_bgcolor: 'rgba(240,240,240, 0.95)',
+      title: 'Correlation',
+      xaxis: {
+        title: this.plotData[0].label
+      },
+      yaxis: {
+        title: this.plotData[1].label
+      },
+      annotations: [{
+        xref: 'paper',
+        yref: 'paper',
+        x: .05,
+        y: .9,
+        xanchor: 'left',
+        yanchor: 'top',
+        showarrow: false,
+        text: "Best Fit:<br>" + this.regressionTableData[0].regressionResult.string + "<br>R&#178;: " + this.regressionTableData[0].r2Value,
+        borderwidth: 2,
+        borderpad: 4,
+        bgcolor: '#fff',
+        opacity: 0.8
+      }],
+      showlegend: false
+    }
+    let config = {
+      displaylogo: false,
+      responsive: true
+    };
+    this.plotlyService.newPlot(this.matrixPlot.nativeElement, data, layout, config);
+  }
+
+  drawHeatMap() {
+    //heat map 
+    var xValues: Array<string> = this.plotData.map(data => { return data.label });
+    //pop and reverse used to correctly order labels to match splom
+    xValues.pop();
+    var yValues: Array<string> = this.plotData.map(data => { return data.label });
+    yValues = yValues.reverse();
+    yValues.pop();
+
+    var zValues: Array<Array<number>> = new Array<Array<number>>();
+    for (let y = 0; y < yValues.length; y++) {
+      let valuesArr: Array<number> = new Array();
+      for (let x = 0; x < xValues.length; x++) {
+        let zValue = this.regressionTableData.find(tableItem => { return tableItem.optionOne == xValues[x] && tableItem.optionTwo == yValues[y] });
+        if (zValue) {
+          valuesArr.push(zValue.r2Value);
+        }
+      }
+      zValues.push(valuesArr);
+    }
+
+    var data = [{
+      x: xValues,
+      y: yValues,
+      z: zValues,
+      type: 'heatmap',
+      // hovertemplate: '%{x} vs %{y} : %{z} <extra></extra>'
+    }];
+
+    var layout = {
+      title: 'R&#178; Variance',
+      annotations: []
+    };
+
+    for (let i = 0; i < xValues.length; i++) {
+      for (let j = 0; j < yValues.length; j++) {
+        let result = {
+          xref: 'x1',
+          yref: 'y1',
+          x: xValues[i],
+          y: yValues[j],
+          text: zValues[j][i],
+          font: {
+            size: 12,
+            color: 'white',
+          },
+          showarrow: false,
+        };
+        layout.annotations.push(result);
+      }
+    }
+    let config = {
+      displaylogo: false,
+      responsive: true
+    };
+    this.plotlyService.newPlot(this.matrixPlot.nativeElement, data, layout, config);
   }
 
   toggleMeterOption(index: number) {
     this.meterOptions[index].selected = !this.meterOptions[index].selected;
+    this.setData();
     this.drawChart();
   }
 
   togglePredictorOption(index: number) {
     this.predictorOptions[index].selected = !this.predictorOptions[index].selected;
+    this.setData();
     this.drawChart();
   }
 
-  getPlotData(): Array<{ label: string, values: Array<number> }> {
+  getPlotData(): Array<PlotDataItem> {
     let facilityMeters: Array<IdbUtilityMeter> = new Array();
     this.meterOptions.forEach(meterOption => {
       if (meterOption.selected) {
@@ -159,17 +303,19 @@ export class MatrixScatterPlotComponent implements OnInit {
     });
 
 
-    let plotData: Array<{ label: string, values: Array<number> }> = new Array();
+    let plotData: Array<PlotDataItem> = new Array();
     let endDate: Date = this.getLastDate(lastBillEntry, lastPredictorEntry);
 
     calanderizedMeterData.forEach(calanderizedMeter => {
       let startDate: Date = this.getLastDate(firstBillEntry, firstPredictorEntry);
-      let meterPlotData: { label: string, values: Array<number> } = {
+      let meterPlotData: PlotDataItem = {
         label: calanderizedMeter.meter.name,
-        values: new Array()
+        values: new Array(),
+        valueDates: new Array()
       }
       if (startDate && endDate) {
         while (startDate < endDate) {
+          meterPlotData.valueDates.push(new Date(startDate));
           let meterData: MonthlyData = calanderizedMeter.monthlyData.find(dataItem => {
             return (dataItem.monthNumValue == startDate.getUTCMonth() && dataItem.year == startDate.getUTCFullYear());
           });
@@ -192,12 +338,14 @@ export class MatrixScatterPlotComponent implements OnInit {
     })
     facilityPredictors.forEach(predictor => {
       let startDate: Date = this.getLastDate(firstBillEntry, firstPredictorEntry);
-      let predictorPlotData: { label: string, values: Array<number> } = {
+      let predictorPlotData: PlotDataItem = {
         label: predictor.name,
-        values: new Array()
+        values: new Array(),
+        valueDates: new Array()
       }
       if (startDate && endDate) {
         while (startDate < endDate) {
+          predictorPlotData.valueDates.push(new Date(startDate));
           let facilityPredictor: IdbPredictorEntry = facilityPredictorEntries.find(dataItem => {
             let dataItemDate: Date = new Date(dataItem.date);
             return (dataItemDate.getUTCMonth() == startDate.getUTCMonth() && dataItemDate.getUTCFullYear() == startDate.getUTCFullYear());
@@ -229,4 +377,41 @@ export class MatrixScatterPlotComponent implements OnInit {
     return lastDate;
   }
 
+  getRegressionTableData(plotData: Array<{ label: string, values: Array<number> }>): Array<RegressionTableDataItem> {
+    let regressionTableData = new Array<RegressionTableDataItem>();
+    for (let x = 0; x < plotData.length; x++) {
+      for (let y = (x + 1); y < plotData.length; y++) {
+        let regressionDataPairs: Array<Array<number>> = plotData[x].values.map((value, index) => { return [value, plotData[y].values[index]] });
+        let regressionResult = regression.linear(regressionDataPairs);
+        regressionTableData.push({
+          optionOne: plotData[x].label,
+          optionTwo: plotData[y].label,
+          r2Value: regressionResult.r2,
+          regressionResult: regressionResult
+        });
+      }
+    }
+    return regressionTableData;
+  }
+
+
+  setView(str: "heatmap" | "splom") {
+    this.dataView = str;
+    this.drawChart();
+  }
+}
+
+
+export interface PlotDataItem {
+  label: string,
+  values: Array<number>,
+  valueDates: Array<Date>
+}
+
+export interface RegressionTableDataItem { 
+  optionOne: string, 
+  optionTwo: string, 
+  r2Value: number, 
+  //result from regression library
+  regressionResult: any 
 }

@@ -32,7 +32,8 @@
             ],
             "allowedCommonJsDependencies": [
               "lodash",
-              "xlsx"
+              "xlsx",
+              "regression"
             ]
           },
           "configurations": {
