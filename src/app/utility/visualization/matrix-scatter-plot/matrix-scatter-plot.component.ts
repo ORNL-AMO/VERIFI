@@ -9,6 +9,7 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
 import * as _ from 'lodash';
 import { Subscription } from 'rxjs';
 import * as regression from 'regression';
+import * as jStat from 'jstat';
 
 @Component({
   selector: 'app-matrix-scatter-plot',
@@ -30,8 +31,8 @@ export class MatrixScatterPlotComponent implements OnInit {
   plotData: Array<PlotDataItem>;
   dataView: "heatmap" | "splom" = "splom";
   numberOfSelectedOptions: number = 0;
-  monthNames: Array<string> = ["January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
+  monthNames: Array<string> = ["Jan", "Feb", "March", "April", "May", "June",
+    "July", "Aug", "Sep", "Oct", "Nov", "Dec"
   ];
   constructor(private plotlyService: PlotlyService, private predictorDbService: PredictordbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private calanderizationService: CalanderizationService, private utilityMeterDbService: UtilityMeterdbService, private cd: ChangeDetectorRef) { }
@@ -44,7 +45,7 @@ export class MatrixScatterPlotComponent implements OnInit {
           predictor: predictor,
           selected: true
         });
-        this.setData();
+        // this.setData();
       })
     });
 
@@ -55,12 +56,12 @@ export class MatrixScatterPlotComponent implements OnInit {
           meter: meter,
           selected: true
         });
-        this.setData();
+        // this.setData();
       });
     });
 
     this.facilityMeterDataSub = this.utilityMeterDataDbService.facilityMeterData.subscribe(() => {
-      this.getPlotData();
+      this.setData();
     });
   }
 
@@ -196,7 +197,7 @@ export class MatrixScatterPlotComponent implements OnInit {
         xanchor: 'left',
         yanchor: 'top',
         showarrow: false,
-        text: "Best Fit:<br>" + this.regressionTableData[0].regressionResult.string + "<br>R&#178;: " + this.regressionTableData[0].r2Value,
+        text: "Best Fit:<br>" + this.regressionTableData[0].regressionResult.string + "<br>R&#178;: " + this.regressionTableData[0].r2Value + "<br> P-value: " + this.regressionTableData[0].pValue,
         borderwidth: 2,
         borderpad: 4,
         bgcolor: '#fff',
@@ -383,11 +384,20 @@ export class MatrixScatterPlotComponent implements OnInit {
       for (let y = (x + 1); y < plotData.length; y++) {
         let regressionDataPairs: Array<Array<number>> = plotData[x].values.map((value, index) => { return [value, plotData[y].values[index]] });
         let regressionResult = regression.linear(regressionDataPairs);
+        // debugger
+        console.log(plotData[x].label + ' v ' + plotData[y].label)
+        let xVals = regressionDataPairs.map(pair => { return pair[0] });
+        let yVals = regressionDataPairs.map(pair => { return pair[1] });
+        console.log(xVals);
+        console.log(yVals);
+        let jstatResult = jStat.anovaftest(xVals, yVals);
+        console.log(jstatResult);
         regressionTableData.push({
           optionOne: plotData[x].label,
           optionTwo: plotData[y].label,
           r2Value: regressionResult.r2,
-          regressionResult: regressionResult
+          regressionResult: regressionResult,
+          pValue: jstatResult
         });
       }
     }
@@ -408,10 +418,11 @@ export interface PlotDataItem {
   valueDates: Array<Date>
 }
 
-export interface RegressionTableDataItem { 
-  optionOne: string, 
-  optionTwo: string, 
-  r2Value: number, 
+export interface RegressionTableDataItem {
+  optionOne: string,
+  optionTwo: string,
+  r2Value: number,
   //result from regression library
-  regressionResult: any 
+  regressionResult: any,
+  pValue: number
 }
