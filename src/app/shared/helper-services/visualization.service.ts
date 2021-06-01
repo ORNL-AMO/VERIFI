@@ -242,16 +242,6 @@ export class VisualizationService {
       for (let y = (x + 1); y < plotData.length; y++) {
         let regressionDataPairs: Array<Array<number>> = plotData[x].values.map((value, index) => { return [value, plotData[y].values[index]] });
         let regressionResult = regression.linear(regressionDataPairs);
-        // debugger
-        // console.log(plotData[x].label + ' v ' + plotData[y].label)
-        // let xVals = regressionDataPairs.map(pair => { return [1, pair[0]] });
-        // let yVals = regressionDataPairs.map(pair => { return pair[1] });
-        // console.log(xVals);
-        // console.log(yVals);
-        // let jstatResult = jStat.models.ols(xVals, yVals);
-        // console.log(jstatResult);
-        // let jstatResultFScore = jStat.anovafscore(xVals, yVals);
-        // console.log(jstatResult);
         regressionTableData.push({
           optionOne: plotData[x].label,
           optionTwo: plotData[y].label,
