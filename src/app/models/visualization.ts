@@ -6,3 +6,19 @@ export interface HeatMapData {
     years: Array<number>,
     facilityName: string
 }
+
+
+export interface PlotDataItem {
+    label: string,
+    values: Array<number>,
+    valueDates: Array<Date>
+  }
+  
+  export interface RegressionTableDataItem {
+    optionOne: string,
+    optionTwo: string,
+    r2Value: number,
+    //result from regression library
+    regressionResult: any,
+    pValue: number
+  }

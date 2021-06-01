@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
-import { IdbUtilityMeter } from 'src/app/models/idb';
+import { IdbPredictorEntry, IdbUtilityMeter, PredictorData } from 'src/app/models/idb';
 import { CalanderizationService } from './calanderization.service';
 import * as _ from 'lodash';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
-import { HeatMapData } from 'src/app/models/visualization';
+import { HeatMapData, PlotDataItem, RegressionTableDataItem } from 'src/app/models/visualization';
+import * as regression from 'regression';
 @Injectable({
   providedIn: 'root'
 })
@@ -136,5 +137,130 @@ export class VisualizationService {
       resultData: resultData,
       facilityName: facilityName
     }
+  }
+
+
+  getPlotData(predictorOptions: Array<{ predictor: PredictorData, selected: boolean }>, meterOptions: Array<{ meter: IdbUtilityMeter, selected: boolean }>, facilityPredictorEntries: Array<IdbPredictorEntry>): Array<PlotDataItem> {
+
+    let facilityMeters: Array<IdbUtilityMeter> = new Array();
+    meterOptions.forEach(meterOption => {
+      if (meterOption.selected) {
+        facilityMeters.push(meterOption.meter);
+      }
+    });
+    let calanderizedMeterData = this.calanderizationService.getCalanderizedMeterData(facilityMeters, false);
+    let lastBillEntry: MonthlyData = this.calanderizationService.getLastBillEntryFromCalanderizedMeterData(calanderizedMeterData);
+    let firstBillEntry: MonthlyData = this.calanderizationService.getFirstBillEntryFromCalanderizedMeterData(calanderizedMeterData);
+    let lastPredictorEntry: IdbPredictorEntry = _.maxBy(facilityPredictorEntries, (data: IdbPredictorEntry) => {
+      let date = new Date(data.date);
+      return date;
+    });
+
+    let firstPredictorEntry: IdbPredictorEntry = _.minBy(facilityPredictorEntries, (data: IdbPredictorEntry) => {
+      let date = new Date(data.date);
+      return date;
+    });
+
+
+    let plotData: Array<PlotDataItem> = new Array();
+    let endDate: Date = this.getLastDate(lastBillEntry, lastPredictorEntry);
+
+    calanderizedMeterData.forEach(calanderizedMeter => {
+      let startDate: Date = this.getLastDate(firstBillEntry, firstPredictorEntry);
+      let meterPlotData: PlotDataItem = {
+        label: calanderizedMeter.meter.name,
+        values: new Array(),
+        valueDates: new Array()
+      }
+      if (startDate && endDate) {
+        while (startDate < endDate) {
+          meterPlotData.valueDates.push(new Date(startDate));
+          let meterData: MonthlyData = calanderizedMeter.monthlyData.find(dataItem => {
+            return (dataItem.monthNumValue == startDate.getUTCMonth() && dataItem.year == startDate.getUTCFullYear());
+          });
+          if (meterData) {
+            meterPlotData.values.push(meterData.energyUse);
+          } else {
+            meterPlotData.values.push(0);
+          }
+          startDate.setMonth(startDate.getMonth() + 1)
+        };
+        plotData.push(meterPlotData);
+      }
+    });
+
+    let facilityPredictors: Array<PredictorData> = new Array();
+    predictorOptions.forEach(predictorOption => {
+      if (predictorOption.selected) {
+        facilityPredictors.push(predictorOption.predictor);
+      }
+    })
+    facilityPredictors.forEach(predictor => {
+      let startDate: Date = this.getLastDate(firstBillEntry, firstPredictorEntry);
+      let predictorPlotData: PlotDataItem = {
+        label: predictor.name,
+        values: new Array(),
+        valueDates: new Array()
+      }
+      if (startDate && endDate) {
+        while (startDate < endDate) {
+          predictorPlotData.valueDates.push(new Date(startDate));
+          let facilityPredictor: IdbPredictorEntry = facilityPredictorEntries.find(dataItem => {
+            let dataItemDate: Date = new Date(dataItem.date);
+            return (dataItemDate.getUTCMonth() == startDate.getUTCMonth() && dataItemDate.getUTCFullYear() == startDate.getUTCFullYear());
+          });
+          if (facilityPredictor) {
+            let predictorData: PredictorData = facilityPredictor.predictors.find(predictorEntry => { return predictorEntry.id == predictor.id });
+            predictorPlotData.values.push(predictorData.amount);
+          } else {
+            predictorPlotData.values.push(0);
+          }
+          startDate.setMonth(startDate.getMonth() + 1)
+        };
+        plotData.push(predictorPlotData);
+      }
+    });
+    return plotData;
+  }
+
+
+  getLastDate(monthlyData?: MonthlyData, predictorEntry?: IdbPredictorEntry): Date {
+    let lastDate: Date;
+    if (monthlyData && predictorEntry) {
+      lastDate = _.max([new Date(monthlyData.date), new Date(predictorEntry.date)]);
+    } else if (monthlyData) {
+      lastDate = new Date(monthlyData.date);
+    } else if (predictorEntry) {
+      lastDate = new Date(predictorEntry.date);
+    }
+    return lastDate;
+  }
+
+  getRegressionTableData(plotData: Array<{ label: string, values: Array<number> }>): Array<RegressionTableDataItem> {
+    let regressionTableData = new Array<RegressionTableDataItem>();
+    for (let x = 0; x < plotData.length; x++) {
+      for (let y = (x + 1); y < plotData.length; y++) {
+        let regressionDataPairs: Array<Array<number>> = plotData[x].values.map((value, index) => { return [value, plotData[y].values[index]] });
+        let regressionResult = regression.linear(regressionDataPairs);
+        // debugger
+        // console.log(plotData[x].label + ' v ' + plotData[y].label)
+        // let xVals = regressionDataPairs.map(pair => { return [1, pair[0]] });
+        // let yVals = regressionDataPairs.map(pair => { return pair[1] });
+        // console.log(xVals);
+        // console.log(yVals);
+        // let jstatResult = jStat.models.ols(xVals, yVals);
+        // console.log(jstatResult);
+        // let jstatResultFScore = jStat.anovafscore(xVals, yVals);
+        // console.log(jstatResult);
+        regressionTableData.push({
+          optionOne: plotData[x].label,
+          optionTwo: plotData[y].label,
+          r2Value: regressionResult.r2,
+          regressionResult: regressionResult,
+          pValue: 0
+        });
+      }
+    }
+    return regressionTableData;
   }
 }

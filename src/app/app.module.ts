@@ -93,7 +93,6 @@ import { ImportPredictorsTableComponent } from './utility/upload-data/import-pre
 import { ImportPredictorsWizardComponent } from './utility/upload-data/import-predictors-wizard/import-predictors-wizard.component';
 import { ImportBackupModalComponent } from './shared/import-backup-modal/import-backup-modal.component';
 import { PredictorsOrderByPipe } from './utility/predictor-data/predictors-order-by.pipe';
-import { MatrixScatterPlotComponent } from './utility/visualization/matrix-scatter-plot/matrix-scatter-plot.component';
 
 @NgModule({
   declarations: [
@@ -173,7 +172,6 @@ import { MatrixScatterPlotComponent } from './utility/visualization/matrix-scatt
     ImportPredictorsWizardComponent,
     ImportBackupModalComponent,
     PredictorsOrderByPipe,
-    MatrixScatterPlotComponent,
   ],
   imports: [
     BrowserModule,
