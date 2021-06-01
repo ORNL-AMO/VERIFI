@@ -148,16 +148,16 @@ export class VisualizationService {
         facilityMeters.push(meterOption.meter);
       }
     });
-    let calanderizedMeterData = this.calanderizationService.getCalanderizedMeterData(facilityMeters, false);
+    let calanderizedMeterData: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMeterData(facilityMeters, false);
     let lastBillEntry: MonthlyData = this.calanderizationService.getLastBillEntryFromCalanderizedMeterData(calanderizedMeterData);
     let firstBillEntry: MonthlyData = this.calanderizationService.getFirstBillEntryFromCalanderizedMeterData(calanderizedMeterData);
     let lastPredictorEntry: IdbPredictorEntry = _.maxBy(facilityPredictorEntries, (data: IdbPredictorEntry) => {
-      let date = new Date(data.date);
+      let date: Date = new Date(data.date);
       return date;
     });
 
     let firstPredictorEntry: IdbPredictorEntry = _.minBy(facilityPredictorEntries, (data: IdbPredictorEntry) => {
-      let date = new Date(data.date);
+      let date: Date = new Date(data.date);
       return date;
     });
 
@@ -242,6 +242,7 @@ export class VisualizationService {
       for (let y = (x + 1); y < plotData.length; y++) {
         let regressionDataPairs: Array<Array<number>> = plotData[x].values.map((value, index) => { return [value, plotData[y].values[index]] });
         let regressionResult = regression.linear(regressionDataPairs);
+        //TODO: Calculate P Value
         regressionTableData.push({
           optionOne: plotData[x].label,
           optionTwo: plotData[y].label,

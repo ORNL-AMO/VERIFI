@@ -33,7 +33,7 @@ export class VisualizationComponent implements OnInit {
     "July", "Aug", "Sep", "Oct", "Nov", "Dec"
   ];
   constructor(private plotlyService: PlotlyService, private predictorDbService: PredictordbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
-     private utilityMeterDbService: UtilityMeterdbService, private cd: ChangeDetectorRef,
+    private utilityMeterDbService: UtilityMeterdbService, private cd: ChangeDetectorRef,
     private visualizationService: VisualizationService) { }
 
   ngOnInit(): void {
@@ -109,8 +109,6 @@ export class VisualizationComponent implements OnInit {
     });
   }
 
-
-
   drawChart(): void {
     this.numberOfSelectedOptions = this.plotData.length;
     if (this.matrixPlot && this.plotData && this.regressionTableData) {
@@ -121,12 +119,8 @@ export class VisualizationComponent implements OnInit {
         } else {
           this.drawHeatMap();
         }
-      } else {
-        if (this.numberOfSelectedOptions == 2) {
-          this.drawScatterPlot();
-        } else {
-          //IDK..
-        }
+      } else if (this.numberOfSelectedOptions == 2) {
+        this.drawScatterPlot();
       }
     }
   }
@@ -175,7 +169,6 @@ export class VisualizationComponent implements OnInit {
     this.plotlyService.newPlot(this.matrixPlot.nativeElement, data, layout, config);
   }
 
-
   drawScatterPlot() {
     let trace1 = {
       x: this.plotData[0].values,
@@ -189,7 +182,6 @@ export class VisualizationComponent implements OnInit {
       },
       hovertemplate: "%{text}<br>%{yaxis.title.text}: %{y}<br>%{xaxis.title.text}: %{x}<br><extra></extra>"
     };
-
 
     let xMin: number = _.min(this.plotData[0].values);
     let xMax: number = _.max(this.plotData[0].values);

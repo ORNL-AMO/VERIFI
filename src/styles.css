@@ -1216,7 +1216,9 @@ input.unitDollar {
 }
 
 
-/*TODO: NEED TO DO THIS AS NOT A GLOBAL STYLE OR SOMETHING ELSE. MESSES WITH PLOTLY*/
+/*TODO: NEED TO DO THIS AS NOT A GLOBAL STYLE OR SOMETHING ELSE. MESSES WITH PLOTLY
+(created issue 307)
+*/
 /* canvas {
   top: auto!important;
   left: auto!important;
