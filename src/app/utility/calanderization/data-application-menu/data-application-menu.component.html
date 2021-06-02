@@ -1,12 +1,30 @@
-<div class="row">
+<div class="row" *ngIf="utilityMeterData.length != 0">
     <div class="col">
+        <div class="d-flex pb-2">
+            <div class="pl-0 w-50 calanderization-label" for="dataApplication">Calanderization Method</div>
+            <select id="dataApplication" name="dataApplicationMeter" class="form-control w-50"
+                [(ngModel)]="meter.meterReadingDataApplication" (change)="calanderizeMeter()">
+                <option [ngValue]="'fullMonth'">Apply to Full Read Month</option>
+                <option [ngValue]="'backward'">Apply Partially to Previous Month</option>
+                <option [ngValue]="'forward'">Apply Partially to Read Month</option>
+            </select>
+        </div>
 
-        <label>How would you like {{meter.name}} to be calanderized?</label>
-        <select class="form-control" [(ngModel)]="meter.meterReadingDataApplication" (change)="calanderizeMeter()">
-            <option [ngValue]="'fullMonth'">Apply to Full Read Month</option>
-            <option [ngValue]="'backward'">Apply Partially to Previous Month</option>
-            <option [ngValue]="'forward'">Apply Partially to Read Month</option>
-        </select>
+        <p class="alert alert-secondary p-1" *ngIf="meter.meterReadingDataApplication == 'fullMonth'">
+            The meter readings will be calanderized such that a meter reading will represent the full month in which it
+            is entered.
+        </p>
+        <p class="alet alert-secondary p-1" *ngIf="meter.meterReadingDataApplication == 'backward'">
+            There meter readings will be calanderized such that each entry will be broken down into a per day average
+            based on the number of days between readings and applied to the prior months days since the previous bill
+            entry.
+        </p>
+        <p class="alet alert-secondary p-1" *ngIf="meter.meterReadingDataApplication == 'forward'">
+            The meter readings will be calanderized such that each entry will be broken down into a per day average
+            based on the number of days between readings and applied to the next months days until the following bill
+            entry.
+        </p>
+        <hr>
 
         <table class="table">
             <thead>
@@ -22,9 +40,7 @@
             <tbody *ngIf="monthlyData">
                 <tr *ngFor="let data of monthlyData; let index = index;">
                     <td>
-                        <div class="custom-day mr-2"
-                            [ngStyle]="{'background-color': getDateBackground(data.date, true)}">
-                            #</div>{{data.date | date: 'MMMM, y'}}
+                        {{data.date | date: 'MMMM, y'}}
                     </td>
                     <td>
                         <span *ngIf="data.energyUse">{{data.energyUse | number:'1.0-2'}}</span>
@@ -43,7 +59,15 @@
                 {{ date.day }}
             </div>
         </ng-template>
+        <p class="alert alert-info p-1">
+            The darker circles represent the meter reading date and the corresponding lighter colors represent
+            the days in which the per day average from that bill will be applied will be applied.<br>
+            It takes three meter readings to calanderize a month when "Apply to Full Read Month" is not selected.
+        </p>
     </div>
 </div>
 
-<hr>
+
+<p class="alert alert-info" *ngIf="utilityMeterData.length == 0">
+    Three meter readings are needed to calanderize meter data.
+</p>

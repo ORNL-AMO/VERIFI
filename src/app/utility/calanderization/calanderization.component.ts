@@ -191,6 +191,7 @@ export class CalanderizationComponent implements OnInit {
   }
 
   setDataApplication(){
-
+    this.utilityMeterDbService.update(this.dataApplicationMeter);
+    this.cancelSetDataApplication();
   }
 }

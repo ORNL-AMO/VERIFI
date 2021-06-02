@@ -49,11 +49,6 @@
 
     <div *ngIf="dataDisplay == 'table'">
         <div class="meter" *ngFor="let meterData of calanderizedMeterData; let index=index;">
-            <!-- <div class="row">
-                <div class="col">
-                    <app-data-application-menu [meter]="meterData.meter"></app-data-application-menu>
-                </div>
-            </div> -->
             <div class="row">
                 <div class="col table-responsive">
                     <table class="table table-sm">
@@ -99,7 +94,8 @@
                             </tr>
                         </tbody>
                     </table>
-                    <div class="p-2 text-center select-calanderization" *ngIf="!meterData.meter.meterReadingDataApplication">
+                    <div class="p-2 text-center select-calanderization"
+                        *ngIf="!meterData.meter.meterReadingDataApplication">
                         <button class="btn btn-primary" (click)="showDataApplicationModal(meterData.meter)">
                             Select Calanderization Method.
                         </button>
@@ -108,6 +104,7 @@
                 </div>
             </div>
             <div class="tableControls overflow-hidden" *ngIf="meterData.meter.meterReadingDataApplication">
+                <a (click)="showDataApplicationModal(meterData.meter)">Set Calanderization Method</a>
                 <div class="item-right">
                     <ngb-pagination [collectionSize]="meterData.monthlyData.length" [(page)]="tablePageNumbers[index]"
                         [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Default pagination">
@@ -121,21 +118,39 @@
     <div *ngIf="dataDisplay == 'graph'">
         <br><br>
         <div class="meter" *ngFor="let meterData of calanderizedMeterData; let index=index;">
-            <app-calanderization-chart [meterData]="meterData" [displayGraphEnergy]="displayGraphEnergy"
-                [displayGraphCost]="displayGraphCost"></app-calanderization-chart>
+            <app-calanderization-chart *ngIf="meterData.meter.meterReadingDataApplication" [meterData]="meterData"
+                [displayGraphEnergy]="displayGraphEnergy" [displayGraphCost]="displayGraphCost">
+            </app-calanderization-chart>
+            <div class="col table-responsive" *ngIf="!meterData.meter.meterReadingDataApplication">
+                <table class="table table-sm">
+                    <thead>
+                        <tr class="table-mh">
+                            <th colspan=5>{{meterData.meter.name}}
+                                <span class="item-right small">{{meterData.meter.source}}</span>
+                            </th>
+                        </tr>
+                    </thead>
+                </table>
+                <div class="p-2 text-center select-calanderization">
+                    <button class="btn btn-primary" (click)="showDataApplicationModal(meterData.meter)">
+                        Select Calanderization Method.
+                    </button>
+                    <hr>
+                </div>
+            </div>
         </div>
     </div>
-</div>
 
-<div class="popup calanderization" [class.open]="dataApplicationMeter">
-    <div class="popup-header" *ngIf="dataApplicationMeter">Select Calanderization Method: {{dataApplicationMeter.name}}
-        <button class="item-right" (click)="cancelSetDataApplication()">x</button>
+    <div class="popup calanderization" [class.open]="dataApplicationMeter">
+        <div class="popup-header" *ngIf="dataApplicationMeter">Select Calanderization Method:
+            {{dataApplicationMeter.name}}
+            <button class="item-right" (click)="cancelSetDataApplication()">x</button>
+        </div>
+        <div class="popup-body" *ngIf="dataApplicationMeter">
+            <app-data-application-menu [meter]="dataApplicationMeter"></app-data-application-menu>
+        </div>
+        <div class="saveCancel popup-footer text-right">
+            <button class="btn btn-secondary" (click)="cancelSetDataApplication()">Cancel</button>
+            <button class="btn btn-success" (click)="setDataApplication()">Submit</button>
+        </div>
     </div>
-    <div class="popup-body" *ngIf="dataApplicationMeter">
-        <app-data-application-menu [meter]="dataApplicationMeter"></app-data-application-menu>
-    </div>
-    <div class="saveCancel popup-footer text-right">
-        <button class="btn btn-secondary" (click)="cancelSetDataApplication()">Cancel</button>
-        <button class="btn btn-success" (click)="setDataApplication()">Submit</button>
-    </div>
-</div>

@@ -29,11 +29,45 @@ export class DataApplicationMenuComponent implements OnInit {
   ngOnInit(): void {
     let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataForFacility(this.meter, false);
     this.utilityMeterData = _.orderBy(meterData, (data) => { return new Date(data.readDate) });
-    this.firstBillReadDate = new Date(meterData[0].readDate);
-    this.secondBillReadDate = new Date(meterData[1].readDate);
-    this.thirdBillReadDate = new Date(meterData[2].readDate);
-    this.startDate = { year: this.firstBillReadDate.getUTCFullYear(), month: this.firstBillReadDate.getUTCMonth() + 1, day: this.firstBillReadDate.getUTCDate() };
-    this.calanderizeMeter();
+    if(this.utilityMeterData.length != 0){
+      if(!this.meter.meterReadingDataApplication){
+        this.meter.meterReadingDataApplication = 'fullMonth';
+      }
+      this.firstBillReadDate = new Date(this.utilityMeterData[0].readDate);
+      this.secondBillReadDate = new Date(this.utilityMeterData[1].readDate);
+      this.thirdBillReadDate = new Date(this.utilityMeterData[2].readDate);
+      this.startDate = { year: this.firstBillReadDate.getUTCFullYear(), month: this.firstBillReadDate.getUTCMonth() + 1, day: this.firstBillReadDate.getUTCDate() };
+      this.calanderizeMeter();
+    }
+  }
+
+  calanderizeMeter() {
+    let meterData: Array<IdbUtilityMeterData> = [this.utilityMeterData[0], this.utilityMeterData[1], this.utilityMeterData[2]];
+    this.monthlyData = this.calanderizationService.calanderizeMeterData(this.meter, meterData);
+  }
+
+  checkSameDate(firstDate: Date, secondDate: Date): boolean {
+    return ((firstDate.getUTCMonth() == secondDate.getUTCMonth()) && (firstDate.getUTCDate() == secondDate.getUTCDate()))
+  }
+
+  checkSameMonth(firstDate: Date, secondDate: Date): boolean {
+    return firstDate.getUTCMonth() == secondDate.getUTCMonth();
+  }
+
+  checkPreviousDate(firstDate: Date, secondDate: Date): boolean {
+    if (firstDate.getUTCMonth() == secondDate.getUTCMonth()) {
+      return firstDate.getUTCDate() > secondDate.getUTCDate()
+    } else {
+      return firstDate.getUTCMonth() > secondDate.getUTCMonth();
+    }
+  }
+
+  checkLaterDate(firstDate: Date, secondDate: Date): boolean {
+    if (firstDate.getUTCMonth() == secondDate.getUTCMonth()) {
+      return firstDate.getUTCDate() < secondDate.getUTCDate()
+    } else {
+      return firstDate.getUTCMonth() < secondDate.getUTCMonth();
+    }
   }
 
   getBackground(ngbDate: NgbDateStruct): string {
@@ -52,7 +86,7 @@ export class DataApplicationMenuComponent implements OnInit {
       } else {
         isSameDate = this.checkSameDate(this.thirdBillReadDate, date);
         if (isSameDate) {
-          return 'purple';
+          return '#BA4A00';
         }
       }
     }
@@ -67,7 +101,7 @@ export class DataApplicationMenuComponent implements OnInit {
         } else {
           isSameDate = this.checkSameMonth(this.thirdBillReadDate, date);
           if (isSameDate) {
-            return 'purple';
+            return '#BA4A00';
           }
         }
       }
@@ -83,7 +117,7 @@ export class DataApplicationMenuComponent implements OnInit {
         } else {
           isSameDate = this.checkSameMonth(this.thirdBillReadDate, date);
           if (isSameDate) {
-            return 'magenta';
+            return '#F0B27A';
           }
         }
       }
@@ -98,14 +132,14 @@ export class DataApplicationMenuComponent implements OnInit {
         } else {
           isSameDate = this.checkPreviousDate(this.thirdBillReadDate, date);
           if (isSameDate) {
-            return 'magenta';
+            return '#F0B27A';
           }
         }
       }
     } else if (this.meter.meterReadingDataApplication == 'forward') {
       let isSameDate: boolean = this.checkLaterDate(this.thirdBillReadDate, date);
       if (isSameDate) {
-        return 'magenta';
+        return '#F0B27A';
       } else {
         isSameDate = this.checkLaterDate(this.secondBillReadDate, date);
         if (isSameDate) {
@@ -119,37 +153,5 @@ export class DataApplicationMenuComponent implements OnInit {
       }
     }
     return 'lightgray'
-  }
-
-
-  checkSameDate(firstDate: Date, secondDate: Date): boolean {
-    return ((firstDate.getUTCMonth() == secondDate.getUTCMonth()) && (firstDate.getUTCDate() == secondDate.getUTCDate()))
-  }
-
-  checkSameMonth(firstDate: Date, secondDate: Date): boolean {
-    return firstDate.getUTCMonth() == secondDate.getUTCMonth();
-  }
-
-  checkPreviousDate(firstDate: Date, secondDate: Date): boolean {
-    if (firstDate.getUTCMonth() == secondDate.getUTCMonth()) {
-      return firstDate.getUTCDate() > secondDate.getUTCDate()
-    } else {
-      return firstDate.getUTCMonth() > secondDate.getUTCMonth();
-    }
-  }
-
-
-  checkLaterDate(firstDate: Date, secondDate: Date): boolean {
-    if (firstDate.getUTCMonth() == secondDate.getUTCMonth()) {
-      return firstDate.getUTCDate() < secondDate.getUTCDate()
-    } else {
-      return firstDate.getUTCMonth() < secondDate.getUTCMonth();
-    }
-  }
-
-  calanderizeMeter() {
-    let meterData: Array<IdbUtilityMeterData> = [this.utilityMeterData[0], this.utilityMeterData[1], this.utilityMeterData[2]];
-    this.monthlyData = this.calanderizationService.calanderizeMeterData(this.meter, meterData);
-    console.log(this.monthlyData);
   }
 }

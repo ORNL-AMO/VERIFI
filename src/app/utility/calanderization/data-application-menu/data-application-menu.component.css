@@ -29,5 +29,10 @@
 }
 
 .third-month{
-  background-color: purple;
+  background-color: #BA4A00;
+}
+
+
+.calanderization-label{
+  font-size: 18px;
 }

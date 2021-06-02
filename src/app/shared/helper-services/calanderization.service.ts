@@ -57,15 +57,15 @@ export class CalanderizationService {
     return calanderizedMeterData;
   }
 
-  calanderizeMeterData(meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData>, monthDisplayShort?: boolean): Array<MonthlyData>{
-    if(meter.meterReadingDataApplication == 'backward'){
+  calanderizeMeterData(meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData>, monthDisplayShort?: boolean): Array<MonthlyData> {
+    if (meter.meterReadingDataApplication == 'backward') {
       return this.calanderizeMeterDataBackwards(meter, meterData, monthDisplayShort);
-    }else if(meter.meterReadingDataApplication == 'fullMonth'){
+    } else if (meter.meterReadingDataApplication == 'fullMonth' || !meter.meterReadingDataApplication) {
+      //used as default
       return this.calanderizeMeterDataFullMonth(meter, meterData, monthDisplayShort);
-    }else if(meter.meterReadingDataApplication == 'forward'){
+    } else if (meter.meterReadingDataApplication == 'forward') {
       return this.calanderizeMeterDataForwards(meter, meterData, monthDisplayShort);
     }
-    return [];
   }
 
   //calanderize backwards
@@ -128,7 +128,7 @@ export class CalanderizationService {
         date: new Date(year, monthNumValue)
       });
     }
-    
+
     return calanderizeData;
   }
 
@@ -138,7 +138,7 @@ export class CalanderizationService {
     let orderedMeterData: Array<IdbUtilityMeterData> = _.orderBy(meterData, (data) => { return new Date(data.readDate) });
     for (let meterIndex = 0; meterIndex < orderedMeterData.length; meterIndex++) {
       let currentBill: IdbUtilityMeterData = orderedMeterData[meterIndex];
-      let totalMonthCost: number=  currentBill.totalCost;
+      let totalMonthCost: number = currentBill.totalCost;
       let totalMonthEnergyConsumption: number = 0;
       let totalMonthEnergyUse: number;
 
@@ -263,7 +263,7 @@ export class CalanderizationService {
   }
 
 
-  getBillsCalanderSummaryBefore(currentBill: IdbUtilityMeterData, nextBill?: IdbUtilityMeterData, previousBill?: IdbUtilityMeterData){
+  getBillsCalanderSummaryBefore(currentBill: IdbUtilityMeterData, nextBill?: IdbUtilityMeterData, previousBill?: IdbUtilityMeterData) {
     let daysUsedFromCurrentBill: number = new Date(currentBill.readDate).getUTCDate();
 
   }
