@@ -15,7 +15,19 @@
   background-color: white;
 }
 
-ngb-datepicker{
+/* ngb-datepicker{
   border-top: none;
   border-bottom: none;
+} */
+
+.first-month{
+  background-color: blue;
+}
+
+.second-month{
+  background-color: green;
+}
+
+.third-month{
+  background-color: purple;
 }

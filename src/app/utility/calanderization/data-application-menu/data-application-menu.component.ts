@@ -3,6 +3,8 @@ import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db
 import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { NgbDateStruct } from '@ng-bootstrap/ng-bootstrap';
+import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
+import { MonthlyData } from 'src/app/models/calanderization';
 
 @Component({
   selector: 'app-data-application-menu',
@@ -15,10 +17,14 @@ export class DataApplicationMenuComponent implements OnInit {
 
   utilityMeterData: Array<IdbUtilityMeterData>;
   firstBillReadDate: Date;
+  firstMonthEnergyUse: number;
   startDate: { year: number, month: number, day: number };
   secondBillReadDate: Date;
+  secondMonthEnergyUse: number;
   thirdBillReadDate: Date;
-  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService) { }
+  thirdMonthEnergyUse: number;
+  monthlyData: Array<MonthlyData>;
+  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private calanderizationService: CalanderizationService) { }
 
   ngOnInit(): void {
     let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataForFacility(this.meter, false);
@@ -26,23 +32,16 @@ export class DataApplicationMenuComponent implements OnInit {
     this.firstBillReadDate = new Date(meterData[0].readDate);
     this.secondBillReadDate = new Date(meterData[1].readDate);
     this.thirdBillReadDate = new Date(meterData[2].readDate);
-    this.setStartDate();
-    console.log(this.firstBillReadDate);
+    this.startDate = { year: this.firstBillReadDate.getUTCFullYear(), month: this.firstBillReadDate.getUTCMonth() + 1, day: this.firstBillReadDate.getUTCDate() };
+    this.calanderizeMeter();
   }
 
-  setStartDate(){
-    if(this.meter.meterReadingDataApplication == 'fullMonth' || !this.meter.meterReadingDataApplication){
-      this.startDate = { year: this.firstBillReadDate.getUTCFullYear(), month: this.firstBillReadDate.getUTCMonth() + 1, day: this.firstBillReadDate.getUTCDate() };
-    }else if(this.meter.meterReadingDataApplication == 'forward'){
-      this.startDate = { year: this.firstBillReadDate.getUTCFullYear(), month: this.firstBillReadDate.getUTCMonth() + 1, day: this.firstBillReadDate.getUTCDate() };
-    }else if(this.meter.meterReadingDataApplication == 'backward'){
-      this.startDate = { year: this.firstBillReadDate.getUTCFullYear(), month: this.firstBillReadDate.getUTCMonth(), day: this.firstBillReadDate.getUTCDate() };      
-    }
-  }
-
-  
-  getDateBackground(ngbDate: NgbDateStruct) {
+  getBackground(ngbDate: NgbDateStruct): string {
     let date: Date = new Date(ngbDate.year, ngbDate.month - 1, ngbDate.day);
+    return this.getDateBackground(date)
+  }
+
+  getDateBackground(date: Date, isForTable?: boolean): string {
     let isSameDate: boolean = this.checkSameDate(this.firstBillReadDate, date);
     if (isSameDate) {
       return 'blue';
@@ -57,7 +56,23 @@ export class DataApplicationMenuComponent implements OnInit {
         }
       }
     }
-    if(this.meter.meterReadingDataApplication == 'fullMonth'){
+    if (isForTable) {
+      let isSameDate: boolean = this.checkSameMonth(this.firstBillReadDate, date);
+      if (isSameDate) {
+        return 'blue';
+      } else {
+        isSameDate = this.checkSameMonth(this.secondBillReadDate, date);
+        if (isSameDate) {
+          return 'green';
+        } else {
+          isSameDate = this.checkSameMonth(this.thirdBillReadDate, date);
+          if (isSameDate) {
+            return 'purple';
+          }
+        }
+      }
+    }
+    if (this.meter.meterReadingDataApplication == 'fullMonth') {
       let isSameDate: boolean = this.checkSameMonth(this.firstBillReadDate, date);
       if (isSameDate) {
         return 'lightblue';
@@ -72,7 +87,7 @@ export class DataApplicationMenuComponent implements OnInit {
           }
         }
       }
-    }else if(this.meter.meterReadingDataApplication == 'backward'){
+    } else if (this.meter.meterReadingDataApplication == 'backward') {
       let isSameDate: boolean = this.checkPreviousDate(this.firstBillReadDate, date);
       if (isSameDate) {
         return 'lightblue';
@@ -87,7 +102,7 @@ export class DataApplicationMenuComponent implements OnInit {
           }
         }
       }
-    }else if(this.meter.meterReadingDataApplication == 'forward'){
+    } else if (this.meter.meterReadingDataApplication == 'forward') {
       let isSameDate: boolean = this.checkLaterDate(this.thirdBillReadDate, date);
       if (isSameDate) {
         return 'magenta';
@@ -116,19 +131,25 @@ export class DataApplicationMenuComponent implements OnInit {
   }
 
   checkPreviousDate(firstDate: Date, secondDate: Date): boolean {
-    if(firstDate.getUTCMonth() == secondDate.getUTCMonth()){
+    if (firstDate.getUTCMonth() == secondDate.getUTCMonth()) {
       return firstDate.getUTCDate() > secondDate.getUTCDate()
-    }else{
+    } else {
       return firstDate.getUTCMonth() > secondDate.getUTCMonth();
     }
   }
 
-  
+
   checkLaterDate(firstDate: Date, secondDate: Date): boolean {
-    if(firstDate.getUTCMonth() == secondDate.getUTCMonth()){
+    if (firstDate.getUTCMonth() == secondDate.getUTCMonth()) {
       return firstDate.getUTCDate() < secondDate.getUTCDate()
-    }else{
+    } else {
       return firstDate.getUTCMonth() < secondDate.getUTCMonth();
     }
+  }
+
+  calanderizeMeter() {
+    let meterData: Array<IdbUtilityMeterData> = [this.utilityMeterData[0], this.utilityMeterData[1], this.utilityMeterData[2]];
+    this.monthlyData = this.calanderizationService.calanderizeMeterData(this.meter, meterData);
+    console.log(this.monthlyData);
   }
 }
