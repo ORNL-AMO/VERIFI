@@ -2,9 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
+import { CalanderizationFilters, CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import { IdbUtilityMeter } from 'src/app/models/idb';
-import { CalanderizationFilters, CalanderizationService } from '../../shared/helper-services/calanderization.service';
+import { CalanderizationService } from '../../shared/helper-services/calanderization.service';
 import * as _ from 'lodash';
 
 @Component({
