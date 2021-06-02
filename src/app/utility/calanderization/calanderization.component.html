@@ -55,6 +55,11 @@
     <div *ngIf="dataDisplay == 'table'">
         <div class="meter" *ngFor="let meterData of calanderizedMeterData; let index=index;">
             <div class="row">
+                <div class="col">
+                    <app-data-application-menu [meter]="meterData.meter"></app-data-application-menu>
+                </div>
+            </div>
+            <!-- <div class="row" *ngIf="meterData.meter.meterReadingDataApplication">
                 <div class="col table-responsive">
                     <table class="table table-sm">
                         <thead>
@@ -101,14 +106,14 @@
                     </table>
                 </div>
             </div>
-            <div class="tableControls overflow-hidden">
+            <div class="tableControls overflow-hidden" *ngIf="meterData.meter.meterReadingDataApplication">
                 <div class="item-right">
                     <ngb-pagination [collectionSize]="meterData.monthlyData.length" [(page)]="tablePageNumbers[index]"
                         [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Default pagination">
                     </ngb-pagination>
                 </div>
                 <p class="item-right">{{meterData.monthlyData.length}} entries</p>
-            </div>
+            </div> -->
         </div>
     </div>
 

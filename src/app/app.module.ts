@@ -93,6 +93,7 @@ import { ImportPredictorsTableComponent } from './utility/upload-data/import-pre
 import { ImportPredictorsWizardComponent } from './utility/upload-data/import-predictors-wizard/import-predictors-wizard.component';
 import { ImportBackupModalComponent } from './shared/import-backup-modal/import-backup-modal.component';
 import { PredictorsOrderByPipe } from './utility/predictor-data/predictors-order-by.pipe';
+import { DataApplicationMenuComponent } from './utility/calanderization/data-application-menu/data-application-menu.component';
 
 @NgModule({
   declarations: [
@@ -172,6 +173,7 @@ import { PredictorsOrderByPipe } from './utility/predictor-data/predictors-order
     ImportPredictorsWizardComponent,
     ImportBackupModalComponent,
     PredictorsOrderByPipe,
+    DataApplicationMenuComponent,
   ],
   imports: [
     BrowserModule,

@@ -1,0 +1,17 @@
+<label>How would you like {{meter.name}} to be calanderized?</label>
+<select class="form-control" [(ngModel)]="meter.meterReadingDataApplication">
+    <option [ngValue]="'fullMonth'">Apply to Full Read Month</option>
+    <option [ngValue]="'backward'">Apply Partially to Previous Month</option>
+    <option [ngValue]="'forward'">Apply Partially to Read Month</option>
+</select>
+
+<ngb-datepicker [dayTemplate]="customDay" [navigation]="'none'" [outsideDays]="'hidden'" [startDate]="startDate"
+    [displayMonths]="3" [firstDayOfWeek]="7"></ngb-datepicker>
+
+<ng-template #customDay let-date="date">
+    <div class="custom-day" [style.background-color]="getDateBackground(date)">
+        {{ date.day }}
+    </div>
+</ng-template>
+
+<hr>
