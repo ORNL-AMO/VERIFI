@@ -28,9 +28,9 @@ export class DataApplicationMenuComponent implements OnInit {
 
   ngOnInit(): void {
     let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataForFacility(this.meter, false);
-    this.utilityMeterData = _.orderBy(meterData, (data) => { return new Date(data.readDate) });
-    if(this.utilityMeterData.length != 0){
-      if(!this.meter.meterReadingDataApplication){
+    this.utilityMeterData = _.orderBy(meterData, (data) => { return new Date(data.readDate) }, 'asc');
+    if (this.utilityMeterData.length != 0) {
+      if (!this.meter.meterReadingDataApplication) {
         this.meter.meterReadingDataApplication = 'fullMonth';
       }
       this.firstBillReadDate = new Date(this.utilityMeterData[0].readDate);
@@ -55,18 +55,26 @@ export class DataApplicationMenuComponent implements OnInit {
   }
 
   checkPreviousDate(firstDate: Date, secondDate: Date): boolean {
-    if (firstDate.getUTCMonth() == secondDate.getUTCMonth()) {
-      return firstDate.getUTCDate() > secondDate.getUTCDate()
+    if (firstDate.getUTCFullYear() == secondDate.getUTCFullYear()) {
+      if (firstDate.getUTCMonth() == secondDate.getUTCMonth()) {
+        return firstDate.getUTCDate() > secondDate.getUTCDate()
+      } else {
+        return firstDate.getUTCMonth() > secondDate.getUTCMonth();
+      }
     } else {
-      return firstDate.getUTCMonth() > secondDate.getUTCMonth();
+      return firstDate.getUTCFullYear() > secondDate.getUTCFullYear();
     }
   }
 
   checkLaterDate(firstDate: Date, secondDate: Date): boolean {
-    if (firstDate.getUTCMonth() == secondDate.getUTCMonth()) {
-      return firstDate.getUTCDate() < secondDate.getUTCDate()
+    if (firstDate.getUTCFullYear() == secondDate.getUTCFullYear()) {
+      if (firstDate.getUTCMonth() == secondDate.getUTCMonth()) {
+        return firstDate.getUTCDate() < secondDate.getUTCDate()
+      } else {
+        return firstDate.getUTCMonth() < secondDate.getUTCMonth();
+      }
     } else {
-      return firstDate.getUTCMonth() < secondDate.getUTCMonth();
+      return firstDate.getUTCFullYear() < secondDate.getUTCFullYear();
     }
   }
 

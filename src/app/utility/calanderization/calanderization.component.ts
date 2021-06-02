@@ -75,7 +75,6 @@ export class CalanderizationComponent implements OnInit {
     if (this.facilityMeters) {
       let filteredMeters: Array<IdbUtilityMeter> = this.filterMeters(this.facilityMeters);
       this.calanderizedMeterData = this.calanderizationService.getCalanderizedMeterData(filteredMeters, false);
-      // this.calanderizedMeterData = this.calanderizedMeterData.filter(data => { return data.monthlyData.length != 0 });
       this.setDateRange();
       this.calanderizedMeterData = this.filterMeterDataDateRanges(this.calanderizedMeterData);
       this.tablePageNumbers = this.calanderizedMeterData.map(() => { return 1 });
