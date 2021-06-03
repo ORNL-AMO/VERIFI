@@ -9,7 +9,7 @@ import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db.service";
 import { UtilityMeterDatadbService } from "../../indexedDB/utilityMeterData-db.service";
 import { UtilityMeterGroupdbService } from "../../indexedDB/utilityMeterGroup-db.service";
 import { LoadingService } from "../../shared/loading/loading.service";
-import { AccountBackup, BackupDataService, BackupFile } from '../backup-data.service';
+import { BackupDataService } from '../backup-data.service';
 
 @Component({
   selector: 'app-account',
@@ -105,6 +105,13 @@ export class AccountComponent implements OnInit {
     await this.utilityMeterGroupDbService.deleteAllSelectedAccountMeterGroups();
     this.loadingService.setLoadingMessage("Deleting Account Facilities...");
     await this.facilityDbService.deleteAllSelectedAccountFacilities();
+    
+    let allFacilities: Array<IdbFacility> = await this.facilityDbService.getAll().toPromise();
+    // Then navigate to another facility
+    this.facilityDbService.allFacilities.next(allFacilities);
+    this.facilityDbService.accountFacilities.next([]);
+    this.facilityDbService.setSelectedFacility();
+
     this.loadingService.setLoadingMessage("Deleting Account...");
     await this.accountDbService.deleteAccountWithObservable(selectedAccount.id).toPromise();
 

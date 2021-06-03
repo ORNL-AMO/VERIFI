@@ -64,13 +64,19 @@ export class FacilitydbService {
         if (selectedFacility) {
             let updatedFacility: IdbFacility = accountFacilities.find(facility => { return facility.id == selectedFacility.id });
             if (!updatedFacility) {
-                this.selectedFacility.next(accountFacilities[0]);
+                if (accountFacilities.length != 0) {
+                    this.selectedFacility.next(accountFacilities[0]);
+                } else {
+                    this.selectedFacility.next(undefined);
+                }
             } else {
                 this.selectedFacility.next(updatedFacility);
             }
         }
-        else {
+        else if (accountFacilities.length != 0) {
             this.selectedFacility.next(accountFacilities[0]);
+        } else {
+            this.selectedFacility.next(undefined);
         }
     }
 

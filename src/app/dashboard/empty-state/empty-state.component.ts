@@ -76,6 +76,8 @@ export class EmptyStateComponent implements OnInit {
     this.loadingService.setLoadingMessage('Loading Example Data..');
     this.loadingService.setLoadingStatus(true);
     let newAccount: IdbAccount = await this.backupDataService.importAccountBackup(ExampleAccount);
+    this.accountDbService.setAllAccounts();
+    this.facilityDbService.setAllFacilities();
     this.accountDbService.setSelectedAccount(newAccount.id);
     this.loadingService.setLoadingStatus(false);
   }
