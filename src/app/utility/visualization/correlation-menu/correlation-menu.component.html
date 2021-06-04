@@ -1,0 +1,12 @@
+<div class="d-flex bg-white">
+    <div class="d-flex flex-wrap flex-column pl-2 pr-2 border-left">
+        <div class="pt-1" *ngFor="let option of meterOptions; let index = index;">
+            <button class="btn w-100 mb-0 btn-sm btn-outline" [ngClass]="{'btn-primary-4': option.selected}"
+                (click)="toggleMeterOption(index)">{{option.meter.name}}</button>
+        </div>
+        <div *ngFor="let option of predictorOptions; let index = index;">
+            <button class="btn w-100 mb-0 btn-sm btn-outline" [ngClass]="{'btn-primary-4': option.selected}"
+                (click)="togglePredictorOption(index)">{{option.predictor.name}}</button>
+        </div>
+    </div>
+</div>
