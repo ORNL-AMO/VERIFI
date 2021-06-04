@@ -15,6 +15,6 @@
         <app-correlation-plot class="flex-grow-1" *ngIf="selectedChart == 'splom' || (numberOfOptionsSelected == 2 && selectedChart != 'timeseries')"></app-correlation-plot>
         <app-correlation-heatmap class="flex-grow-1" *ngIf="selectedChart == 'heatmap' && numberOfOptionsSelected > 2"></app-correlation-heatmap>
         <app-time-series class="flex-grow-1" *ngIf="selectedChart == 'timeseries'"></app-time-series>
-        <app-correlation-menu class="h-100"></app-correlation-menu>
+        <app-correlation-menu></app-correlation-menu>
     </div>
 </div>

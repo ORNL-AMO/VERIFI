@@ -142,7 +142,7 @@ export class TimeSeriesComponent implements OnInit {
     // }
 
     var layout = {
-      height: 800,
+      height: 700,
       legend: {
         orientation: "h"
       },

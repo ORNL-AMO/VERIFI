@@ -85,7 +85,7 @@ export class CorrelationPlotComponent implements OnInit {
 
     let layout = {
       title: 'Correlation',
-      height: 800,
+      height: 700,
       plot_bgcolor: 'rgba(240,240,240, 0.95)',
       xaxis: axis,
       yaxis: axis,
