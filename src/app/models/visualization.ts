@@ -11,7 +11,8 @@ export interface HeatMapData {
 export interface PlotDataItem {
     label: string,
     values: Array<number>,
-    valueDates: Array<Date>
+    valueDates: Array<Date>,
+    isMeter: boolean
   }
   
   export interface RegressionTableDataItem {

@@ -170,7 +170,8 @@ export class VisualizationService {
       let meterPlotData: PlotDataItem = {
         label: calanderizedMeter.meter.name,
         values: new Array(),
-        valueDates: new Array()
+        valueDates: new Array(),
+        isMeter: true
       }
       if (startDate && endDate) {
         while (startDate < endDate) {
@@ -200,7 +201,8 @@ export class VisualizationService {
       let predictorPlotData: PlotDataItem = {
         label: predictor.name,
         values: new Array(),
-        valueDates: new Array()
+        valueDates: new Array(),
+        isMeter: false
       }
       if (startDate && endDate) {
         while (startDate < endDate) {
