@@ -20,6 +20,8 @@ import { AcknowledgmentsComponent } from './static-content/acknowledgments/ackno
 import { FeedbackComponent } from './static-content/feedback/feedback.component';
 import { HelpComponent } from './static-content/help/help.component';
 import { UploadDataComponent } from './utility/upload-data/upload-data.component';
+import { RegressionAnalysisComponent } from './regression-analysis/regression-analysis.component';
+import { RegressionDataTableComponent } from './regression-analysis/regression-data-table/regression-data-table.component';
 
 const routes: Routes = [
   {
@@ -72,6 +74,21 @@ const routes: Routes = [
       { path: 'visualization', component: VisualizationComponent },
       { path: 'upload-data', component: UploadDataComponent }
 
+    ]
+  },
+  {
+    path: 'regression',
+    component: RegressionAnalysisComponent,
+    children: [
+      {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: 'data-table'
+      },
+      {
+        path: 'data-table',
+        component: RegressionDataTableComponent
+      }
     ]
   },
   { path: 'about', component: AboutComponent },

@@ -1,0 +1,39 @@
+<div class="banner">
+    <h3>Regression Analysis</h3>
+    <div class="compNav">
+        <ul *ngIf="selectedAccount && selectedFacility">
+            <li><a routerLink="data-table" [routerLinkActive]="['active']">Regression Data</a></li>
+            <!-- <li [class.disabled]="true">
+                <a routerLink="mo-meter-data" [routerLinkActive]="['active']">Monthly Meter Data</a>
+                <span class="small navigation-warning">Requires Meter Readings</span>
+            </li>
+            <li [class.disabled]="utilityMeterData.length === 0">
+                <a routerLink="meter-groups" [routerLinkActive]="['active']">Meter Grouping</a>
+                <span class="small navigation-warning">Requires Meter Readings</span>
+            </li>
+            <li [class.disabled]="utilityMeterData.length === 0">
+                <a routerLink="predictors" [routerLinkActive]="['active']">Predictors</a>
+                <span class="small navigation-warning">Requires Meter Readings</span>
+            </li>
+            <li [class.disabled]="utilityMeterData.length === 0">
+                <a routerLink="visualization" [routerLinkActive]="['active']">Data Visualization</a>
+                <span class="small navigation-warning">Requires Meter Readings</span>
+            </li> -->
+        </ul>
+
+    </div>
+    <!-- <div class="pull-right">
+            <h3>
+                <a routerLink="upload-data" [routerLinkActive]="['active']"><span class="fa fa-upload"></span></a>
+            </h3>
+        </div> -->
+</div>
+
+<div class="row no-margin flex-grow-1" *ngIf="selectedAccount && selectedFacility">
+    <div class="col">
+        <router-outlet></router-outlet>
+    </div>
+    <!-- <div class="col-lg-3">
+        <app-help-panel></app-help-panel>
+    </div> -->
+</div>
