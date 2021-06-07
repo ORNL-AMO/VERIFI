@@ -140,7 +140,7 @@ export class VisualizationService {
   }
 
 
-  getPlotData(predictorOptions: Array<{ predictor: PredictorData, selected: boolean }>, meterOptions: Array<{ meter: IdbUtilityMeter, selected: boolean }>, facilityPredictorEntries: Array<IdbPredictorEntry>): Array<PlotDataItem> {
+  getPlotData(predictorOptions: Array<{ predictor: PredictorData, selected: boolean }>, meterOptions: Array<{ meter: IdbUtilityMeter, selected: boolean }>, facilityPredictorEntries: Array<IdbPredictorEntry>, dateRange: {minDate: Date, maxDate: Date}): Array<PlotDataItem> {
 
     let facilityMeters: Array<IdbUtilityMeter> = new Array();
     meterOptions.forEach(meterOption => {
@@ -164,9 +164,17 @@ export class VisualizationService {
 
     let plotData: Array<PlotDataItem> = new Array();
     let endDate: Date = this.getLastDate(lastBillEntry, lastPredictorEntry);
-
+    if(dateRange && dateRange.maxDate){
+      let maxDate: Date = new Date(dateRange.maxDate);
+      maxDate.setMonth(maxDate.getMonth() + 1);
+      endDate = _.min([endDate, maxDate]);
+    }
     calanderizedMeterData.forEach(calanderizedMeter => {
       let startDate: Date = this.getLastDate(firstBillEntry, firstPredictorEntry);
+      if(dateRange && dateRange.minDate){
+        startDate = _.max([startDate, new Date(dateRange.minDate)]);
+      }
+
       let meterPlotData: PlotDataItem = {
         label: calanderizedMeter.meter.name,
         values: new Array(),
@@ -198,6 +206,9 @@ export class VisualizationService {
     })
     facilityPredictors.forEach(predictor => {
       let startDate: Date = this.getLastDate(firstBillEntry, firstPredictorEntry);
+      if(dateRange && dateRange.minDate){
+        startDate = _.max([startDate, new Date(dateRange.minDate)]);
+      }
       let predictorPlotData: PlotDataItem = {
         label: predictor.name,
         values: new Array(),

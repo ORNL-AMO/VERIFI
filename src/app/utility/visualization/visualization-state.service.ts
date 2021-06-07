@@ -15,13 +15,14 @@ export class VisualizationStateService {
   predictorOptions: BehaviorSubject<Array<{ predictor: PredictorData, selected: boolean }>>;
   regressionTableData: BehaviorSubject<Array<RegressionTableDataItem>>;
   plotData: BehaviorSubject<Array<PlotDataItem>>;
-
+  dateRange: BehaviorSubject<{minDate: Date, maxDate: Date}>;
   constructor(private visualizationService: VisualizationService, private predictorDbService: PredictordbService) {
     this.selectedChart = new BehaviorSubject<"splom" | "heatmap" | "timeseries">("splom");
     this.meterOptions = new BehaviorSubject<Array<{ meter: IdbUtilityMeter, selected: boolean }>>([]);
     this.predictorOptions = new BehaviorSubject<Array<{ predictor: PredictorData, selected: boolean }>>([]);
     this.regressionTableData = new BehaviorSubject<Array<RegressionTableDataItem>>([]);
     this.plotData = new BehaviorSubject<Array<PlotDataItem>>([]);
+    this.dateRange = new BehaviorSubject<{minDate: Date, maxDate: Date}>({minDate: undefined, maxDate: undefined});
   }
 
   setPredictorOptions(predictors: Array<PredictorData>) {
@@ -60,7 +61,8 @@ export class VisualizationStateService {
     let facilityPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.facilityPredictorEntries.getValue();
     let predictorOptions: Array<{ predictor: PredictorData, selected: boolean }> = this.predictorOptions.getValue();
     let meterOptions: Array<{ meter: IdbUtilityMeter, selected: boolean }> = this.meterOptions.getValue();
-    let plotData: Array<PlotDataItem> = this.visualizationService.getPlotData(predictorOptions, meterOptions, facilityPredictorEntries);
+    let dateRange: {minDate: Date, maxDate: Date} = this.dateRange.getValue();
+    let plotData: Array<PlotDataItem> = this.visualizationService.getPlotData(predictorOptions, meterOptions, facilityPredictorEntries, dateRange);
     let regressionTableData: Array<RegressionTableDataItem> = this.visualizationService.getRegressionTableData(plotData);
     this.plotData.next(plotData);
     this.regressionTableData.next(regressionTableData);
