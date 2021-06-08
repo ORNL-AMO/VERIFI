@@ -24,6 +24,24 @@
             ],
             "styles": [
               "src/styles.css",
+              "src/pagination.css",
+              "src/slidertoggle.css",
+              "src/profilepicture.css",
+              "src/meterdisplays.css",
+              "src/contenttabs.css",
+              "src/contentcontainers.css",
+              "src/sectionheaders.css",
+              "src/sidebar.css",
+              "src/popovers.css",
+              "src/tables.css",
+              "src/forms.css",
+              "src/arrowstooltips.css",
+              "src/popupswindows.css",
+              "src/alerts.css",
+              "src/htmlelements.css",
+              "src/typography.css",
+              "src/buttons.css",
+              "src/toast.css",
               "node_modules/font-awesome/css/font-awesome.css",
               "node_modules/bootstrap/dist/css/bootstrap.min.css"
             ],
@@ -94,7 +112,24 @@
               "src/assets"
             ],
             "styles": [
-              "src/styles.css"
+              "src/styles.css",
+              "src/pagination.css",
+              "src/slidertoggle.css",
+              "src/profilepicture.css",
+              "src/meterdisplays.css",
+              "src/contenttabs.css",
+              "src/contentcontainers.css",
+              "src/sectionheaders.css",
+              "src/sidebar.css",
+              "src/popovers.css",
+              "src/tables.css",
+              "src/forms.css",
+              "src/arrowstooltips.css",
+              "src/popupswindows.css",
+              "src/alerts.css",
+              "src/htmlelements.css",
+              "src/typography.css",
+              "src/buttons.css"
             ],
             "scripts": []
           }

@@ -6,7 +6,7 @@ import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-toast-notifications',
   templateUrl: './toast-notifications.component.html',
-  styleUrls: ['./toast-notifications.component.css'],
+  styleUrls: ['../../../toast.css'],
   animations: [
     trigger('toast', [
       state('show', style({ bottom: '40px' })),
