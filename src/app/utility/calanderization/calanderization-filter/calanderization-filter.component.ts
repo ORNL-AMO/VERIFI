@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
+import { CalanderizationFilters } from 'src/app/models/calanderization';
 import { IdbUtilityMeter } from 'src/app/models/idb';
-import { CalanderizationFilters, CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
+import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { globalVariables } from 'src/environments/environment';
 
 @Component({

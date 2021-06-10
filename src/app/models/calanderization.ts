@@ -27,3 +27,24 @@ export interface LastYearData {
     energyConsumption: number,
     date: Date
 }
+
+
+export interface CalanderizationFilters {
+    showAllSources: boolean;
+    selectedSources: Array<{
+      source: string,
+      selected: boolean
+    }>;
+    selectedDateMin: {
+      year: number,
+      month: number
+    },
+    selectedDateMax: {
+      year: number,
+      month: number
+    },
+    dataDateRange: {
+      minDate: Date,
+      maxDate: Date
+    }
+  }

@@ -97,6 +97,7 @@ import { CorrelationPlotComponent } from './utility/visualization/correlation-pl
 import { CorrelationHeatmapComponent } from './utility/visualization/correlation-heatmap/correlation-heatmap.component';
 import { TimeSeriesComponent } from './utility/visualization/time-series/time-series.component';
 import { CorrelationMenuComponent } from './utility/visualization/correlation-menu/correlation-menu.component';
+import { DataApplicationMenuComponent } from './utility/calanderization/data-application-menu/data-application-menu.component';
 
 @NgModule({
   declarations: [
@@ -180,6 +181,7 @@ import { CorrelationMenuComponent } from './utility/visualization/correlation-me
     CorrelationHeatmapComponent,
     TimeSeriesComponent,
     CorrelationMenuComponent,
+    DataApplicationMenuComponent,
   ],
   imports: [
     BrowserModule,
