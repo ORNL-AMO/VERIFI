@@ -93,6 +93,10 @@ import { ImportPredictorsTableComponent } from './utility/upload-data/import-pre
 import { ImportPredictorsWizardComponent } from './utility/upload-data/import-predictors-wizard/import-predictors-wizard.component';
 import { ImportBackupModalComponent } from './shared/import-backup-modal/import-backup-modal.component';
 import { PredictorsOrderByPipe } from './utility/predictor-data/predictors-order-by.pipe';
+import { CorrelationPlotComponent } from './utility/visualization/correlation-plot/correlation-plot.component';
+import { CorrelationHeatmapComponent } from './utility/visualization/correlation-heatmap/correlation-heatmap.component';
+import { TimeSeriesComponent } from './utility/visualization/time-series/time-series.component';
+import { CorrelationMenuComponent } from './utility/visualization/correlation-menu/correlation-menu.component';
 import { DataApplicationMenuComponent } from './utility/calanderization/data-application-menu/data-application-menu.component';
 
 @NgModule({
@@ -173,6 +177,10 @@ import { DataApplicationMenuComponent } from './utility/calanderization/data-app
     ImportPredictorsWizardComponent,
     ImportBackupModalComponent,
     PredictorsOrderByPipe,
+    CorrelationPlotComponent,
+    CorrelationHeatmapComponent,
+    TimeSeriesComponent,
+    CorrelationMenuComponent,
     DataApplicationMenuComponent,
   ],
   imports: [
