@@ -1,0 +1,34 @@
+.custom-day {      
+    text-align: center;
+    padding: 0.185rem 0.25rem;
+    border-radius: 1rem;
+    display: inline-block;
+    width: 2rem;
+    color: white;
+}
+
+.ngb-dp-month-name{
+  background-color: white;
+}
+
+/* ngb-datepicker{
+  border-top: none;
+  border-bottom: none;
+} */
+
+.first-month{
+  background-color: blue;
+}
+
+.second-month{
+  background-color: green;
+}
+
+.third-month{
+  background-color: #BA4A00;
+}
+
+
+.calanderization-label{
+  font-size: 18px;
+}

@@ -2,9 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
+import { CalanderizationFilters, CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import { IdbUtilityMeter } from 'src/app/models/idb';
-import { CalanderizationFilters, CalanderizationService } from '../../shared/helper-services/calanderization.service';
+import { CalanderizationService } from '../../shared/helper-services/calanderization.service';
 import * as _ from 'lodash';
 
 @Component({
@@ -29,6 +29,8 @@ export class CalanderizationComponent implements OnInit {
   dataDisplay: "table" | "graph";
   displayGraphEnergy: "bar" | "scatter" | null;
   displayGraphCost:  "bar" | "scatter" | null;
+
+  dataApplicationMeter: IdbUtilityMeter;
 
   constructor(private calanderizationService: CalanderizationService, private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService) { }
@@ -73,7 +75,6 @@ export class CalanderizationComponent implements OnInit {
     if (this.facilityMeters) {
       let filteredMeters: Array<IdbUtilityMeter> = this.filterMeters(this.facilityMeters);
       this.calanderizedMeterData = this.calanderizationService.getCalanderizedMeterData(filteredMeters, false);
-      this.calanderizedMeterData = this.calanderizedMeterData.filter(data => { return data.monthlyData.length != 0 });
       this.setDateRange();
       this.calanderizedMeterData = this.filterMeterDataDateRanges(this.calanderizedMeterData);
       this.tablePageNumbers = this.calanderizedMeterData.map(() => { return 1 });
@@ -178,5 +179,18 @@ export class CalanderizationComponent implements OnInit {
     }else{
       this.displayGraphCost = str;      
     }
+  }
+
+  showDataApplicationModal(meter: IdbUtilityMeter){
+    this.dataApplicationMeter = JSON.parse(JSON.stringify(meter));
+  }
+
+  cancelSetDataApplication(){
+    this.dataApplicationMeter = undefined;
+  }
+
+  setDataApplication(){
+    this.utilityMeterDbService.update(this.dataApplicationMeter);
+    this.cancelSetDataApplication();
   }
 }
