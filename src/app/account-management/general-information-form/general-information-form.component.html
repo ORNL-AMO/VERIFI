@@ -43,7 +43,7 @@
 
         <div class="input-group mb-3 col">
             <label>Facility Area</label>
-            <input type="text" class="form-control" formControlName="size" (input)="saveChanges()" onfocus="this.select();" minlength="1" maxlength="999999999999999">
+            <input type="text" class="form-control" formControlName="size" (input)="saveChanges()" onfocus="this.select();" minlength="1" maxlength="60">
             <span class="unit" *ngIf="unitsOfMeasure === 'Imperial'">ft<sup>2</sup></span>
             <span class="unit" *ngIf="unitsOfMeasure === 'Metric'">m<sup>2</sup></span>
         </div>
