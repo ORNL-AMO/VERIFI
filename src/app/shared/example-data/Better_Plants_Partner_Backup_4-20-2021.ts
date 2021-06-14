@@ -108,7 +108,8 @@ export const ExampleAccount: AccountBackup = {
                         "startingUnit": "kWh",
                         "energyUnit": "kWh",
                         "visible": true,
-                        "id": 47
+                        "id": 47,
+                        "meterReadingDataApplication": "forward"
                     },
                     "meterData": [
                         {
@@ -1235,7 +1236,8 @@ export const ExampleAccount: AccountBackup = {
                         "startingUnit": "SCF",
                         "energyUnit": "MMBtu",
                         "visible": true,
-                        "id": 48
+                        "id": 48,
+                        "meterReadingDataApplication": "forward"
                     },
                     "meterData": [
                         {
@@ -4568,7 +4570,8 @@ export const ExampleAccount: AccountBackup = {
                         "startingUnit": "kWh",
                         "energyUnit": "kWh",
                         "visible": true,
-                        "id": 49
+                        "id": 49,
+                        "meterReadingDataApplication": "backward"
                     },
                     "meterData": [
                         {
@@ -5245,7 +5248,8 @@ export const ExampleAccount: AccountBackup = {
                         "startingUnit": "SCF",
                         "energyUnit": "MMBtu",
                         "visible": true,
-                        "id": 50
+                        "id": 50,
+                        "meterReadingDataApplication": "backward"
                     },
                     "meterData": [
                         {

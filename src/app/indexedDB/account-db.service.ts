@@ -40,6 +40,8 @@ export class AccountdbService {
             let allAccounts: Array<IdbAccount> = this.allAccounts.getValue();
             if (allAccounts.length != 0) {
                 this.setSelectedAccount(allAccounts[0].id);
+            } else {
+                this.selectedAccount.next(undefined);
             }
         }
     }

@@ -86,6 +86,7 @@
     "ngx-webstorage": "^5.0.0",
     "plotly.js": "^1.54.6",
     "plotly.js-dist": "^1.54.6",
+    "regression": "^2.0.1",
     "rxjs": "~6.5.5",
     "tslib": "^1.10.0",
     "websocket-extensions": "^0.1.4",

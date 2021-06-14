@@ -23,13 +23,12 @@ export class EmptyStateComponent implements OnInit {
   utilityDataSub: Subscription;
   showImportFile: boolean = false;
   constructor(
-    public accountdbService: AccountdbService,
-    public facilityDbService: FacilitydbService,
-    public utilityMeterDbService: UtilityMeterdbService,
+    private accountdbService: AccountdbService,
+    private facilityDbService: FacilitydbService,
+    private utilityMeterDbService: UtilityMeterdbService,
     private router: Router,
     private loadingService: LoadingService,
-    private backupDataService: BackupDataService,
-    private accountDbService: AccountdbService
+    private backupDataService: BackupDataService
   ) { }
 
   ngOnInit(): void {
@@ -76,7 +75,9 @@ export class EmptyStateComponent implements OnInit {
     this.loadingService.setLoadingMessage('Loading Example Data..');
     this.loadingService.setLoadingStatus(true);
     let newAccount: IdbAccount = await this.backupDataService.importAccountBackup(ExampleAccount);
-    this.accountDbService.setSelectedAccount(newAccount.id);
+    this.accountdbService.setAllAccounts();
+    this.facilityDbService.setAllFacilities();
+    this.accountdbService.setSelectedAccount(newAccount.id);
     this.loadingService.setLoadingStatus(false);
   }
 
