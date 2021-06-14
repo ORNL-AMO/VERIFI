@@ -7,7 +7,7 @@ import { LoadingService } from 'src/app/shared/loading/loading.service';
 @Component({
   selector: 'app-electron-update',
   templateUrl: './electron-update.component.html',
-  styleUrls: ['../../../styles/toast.css'],
+  styleUrls: ['./electron-update.component.css'],
   animations: [
     trigger('updateToast', [
       state('show', style({ top: '40px' })),
