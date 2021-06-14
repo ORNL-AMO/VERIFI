@@ -1,4 +1,4 @@
-.toast {
+.toast.card {
     position: fixed;
     z-index: 800;
     right: 15px;
