@@ -3,10 +3,12 @@ export interface SustainabilityQuestions {
     energyReductionPercent: number,
     energyReductionBaselineYear: number,
     energyReductionTargetYear: number,
+    energyIsAbsolute: boolean,
     greenhouseReductionGoal: boolean,
     greenhouseReductionPercent: number,
     greenhouseReductionBaselineYear: number,
     greenhouseReductionTargetYear: number,
+    greenhouseIsAbsolute: boolean,
     renewableEnergyGoal: boolean,
     renewableEnergyPercent: number,
     renewableEnergyBaselineYear: number,
@@ -15,8 +17,10 @@ export interface SustainabilityQuestions {
     wasteReductionPercent: number,
     wasteReductionBaselineYear: number,
     wasteReductionTargetYear: number,
+    wasteIsAbsolute: boolean,
     waterReductionGoal: boolean,
     waterReductionPercent: number,
     waterReductionBaselineYear: number,
     waterReductionTargetYear: number,
+    waterIsAbsolute: boolean
   }
