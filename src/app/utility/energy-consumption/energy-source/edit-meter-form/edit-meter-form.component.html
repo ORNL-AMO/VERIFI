@@ -5,7 +5,7 @@
             <div>
                 <label for="meterName">Name <span class="required">*</span> </label>
                 <div class="mb-3">
-                    <input id="meterName" class="form-control" type="text" formControlName="name" onfocus="this.select();">
+                    <input id="meterName" class="form-control" type="text" formControlName="name" onfocus="this.select();" minlength="0" maxlength ="100">
                 </div>
                 <span class="inputError" *ngIf="meterForm.get('name').hasError('required')">Meter name is
                     required</span>
@@ -75,7 +75,8 @@
                 <div class="col-6" *ngIf="displaySiteToSource">
                     <label for="siteToSource">Site to source <span class="required">*</span> </label>
                     <div class="mb-3">
-                        <input id="siteToSource" class="form-control" type="number" formControlName="siteToSource" onfocus="this.select();">
+                        <input id="siteToSource" class="form-control" type="number" formControlName="siteToSource" onfocus="this.select();" min="0" 
+                        max ="999999999999999">
                     </div>
                     <span class="inputError" *ngIf="meterForm.get('siteToSource').hasError('required')">Site to source
                         is required</span>
@@ -110,14 +111,14 @@
                 <div class="col">
                     <label for="meterNumber">Meter Number</label>
                     <div class="mb-3">
-                        <input id="meterNumber" class="form-control" type="text" formControlName="meterNumber" onfocus="this.select();">
+                        <input id="meterNumber" class="form-control" type="text" formControlName="meterNumber" onfocus="this.select();" minlength="0" maxlength ="35">
                     </div>
                 </div>
 
                 <div class="col">
                     <label for="accountNumber">Account Number</label>
                     <div class="mb-3">
-                        <input id="accountNumber" class="form-control" type="text" formControlName="accountNumber" onfocus="this.select();">
+                        <input id="accountNumber" class="form-control" type="text" formControlName="accountNumber" onfocus="this.select();" minlength="0" maxlength ="20">
                     </div>
                 </div>
             </div>
@@ -126,14 +127,14 @@
                 <div class="col">
                     <label for="location">Building / Location</label>
                     <div class="mb-3">
-                        <input id="location" class="form-control" type="text" formControlName="location" onfocus="this.select();">
+                        <input id="location" class="form-control" type="text" formControlName="location" onfocus="this.select();" minlength="0" maxlength ="42">
                     </div>
                 </div>
 
                 <div class="col">
                     <label for="supplier">Utility Supplier</label>
                     <div class="mb-3">
-                        <input id="supplier" class="form-control" type="text" formControlName="supplier" onfocus="this.select();">
+                        <input id="supplier" class="form-control" type="text" formControlName="supplier" onfocus="this.select();" minlength="0" maxlength ="20">
                     </div>
                 </div>
             </div>
