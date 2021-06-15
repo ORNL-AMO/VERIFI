@@ -1,0 +1,159 @@
+@import "~font-awesome/css/font-awesome.min.css";
+/*
+TO SORT
+=============================================== */
+
+/*
+.col.unitCurrency {
+  width: 20px;
+  max-width: 20px;
+  padding: 0px;
+}
+.col.unitKwh {
+  width: 39px;
+  max-width: 39px;
+  padding: 0px;
+}
+input.unitDollar {
+  width: calc(70% - 20px);
+}
+*/
+.wizard {
+  overflow: hidden;
+  position: fixed;
+  bottom: 37px;
+  left: 70px;
+  z-index: 1;
+  width: calc(100% - 80px);
+  padding: 0px 30px;
+  background-color: #2980b957;
+  box-shadow: 3px -3px 9px #d4d4d4b0;
+}
+.controls {
+  padding: 15px 0px;
+  min-height: 75px;
+}
+.importExport,
+.items-per-page,
+.bulk-delete {
+  position:relative;
+  z-index: 2;
+}
+.tableControls {
+  padding: 4px 0px;
+  margin: 0px;
+}
+.tableControls p {
+  font-size: 12px;
+  margin: 4px 10px 3px;
+}
+.meterData {
+  overflow: hidden;
+}
+/*
+.meterData .bold {
+  color: #060a2b;
+  width: 115px;
+  display: inline-block;
+}*/
+.meterData .btn-link {
+  margin: 0px;
+}
+.meterData h6 {
+  padding: 9px 0 0;
+  margin: 0 0 10px 0;
+}
+.importQuickView {
+  width: 100%;
+  overflow: scroll;
+}
+.section-name {
+  text-transform: uppercase;
+}
+.meterData .section-name {
+  margin: 5px 0px;
+}
+.breadcrumbs {
+  background-color: #f5f5f5;
+  padding: 5px 40px;
+  border-bottom: 1px solid #e5e6e6;
+}
+.breadcrumbs a,
+.breadcrumbs p {
+  margin: 0px!important;
+  text-transform: capitalize;
+  font-size: 12px;
+  padding: 5px 0;
+  color: #5f5f5f;
+}
+.breadcrumbs i {
+  margin: 0px 3px;
+}
+.breadcrumbs i.fa-angle-right {
+  margin: 0px 10px;
+}
+.breadcrumbs select {
+  border: none;
+  background-color: #e6e6e6;
+}
+.measurFooter {
+  background-color: #577656;
+  height: 69px;
+  margin-top: -68px;
+  z-index: 2;
+  border-top: 1px solid #5c7859;
+  box-shadow: 1px -1px 0px #9eb39b;
+}
+.measur-wrapper {
+  background-color: #f1f1f100;
+  margin: 0px 30px;
+  padding: 20px 30px 30px;
+  min-height: calc(100vh - 172px);
+  background-image: url('../assets/images/industrial-skyline.png');
+  background-position: bottom;
+  background-repeat: no-repeat;
+  position:relative;
+  z-index: 1;
+}
+.tag {
+  background-color: #eee;
+  color: #333333;
+  padding: 2px 7px!Important;
+  font-size: 11px;
+  margin-left: 10px;
+  line-height: initial;
+}
+.tag.coming-soon {
+  background-color: #ffe400;
+}
+
+.tag.new {
+  background-color: #145932;
+  color: white;
+}
+
+canvas {
+  top: auto!important;
+  left: auto!important;
+  bottom: 65px!important;
+  right: 50px!important;
+  z-index: 1001!important;
+  /*height: 200px;*/
+}
+
+
+
+/*Added by mark for import-v2. Not sure correct place to put.*/
+.scroll-item{
+  overflow-y: scroll;
+  max-height: 100%;
+}
+
+.invalid-import-table .header-width{
+  width: 15%;
+}
+li.disabled a{
+  pointer-events: none;
+  cursor: default;
+  opacity: .7;
+}
