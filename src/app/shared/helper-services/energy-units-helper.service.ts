@@ -134,6 +134,8 @@ export class EnergyUnitsHelperService {
       }
     } else if (source == 'Water' || source == 'Waste Water') {
       return VolumeLiquidOptions;
+    } else if (source == 'Other Utility') {
+      return EnergyUnitOptions.concat(VolumeGasOptions).concat(VolumeLiquidOptions).concat(MassUnitOptions).concat(ChilledWaterUnitOptions);
     }
     return EnergyUnitOptions;
   }

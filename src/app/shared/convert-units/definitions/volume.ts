@@ -205,6 +205,14 @@ export const volume = {
             }
             , to_anchor: 957.506
         }
+        , CCF: {
+            name: {
+                singular: 'Hundred Cubic feet'
+                , plural: 'Hundreds Cubic feet' ,
+                 display:  'CCF'
+            }
+            , to_anchor: 957.506/100
+        }
         , kSCF: {
             name: {
                 singular: 'Thousand Standard Cubic foot',
