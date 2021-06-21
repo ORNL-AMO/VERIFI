@@ -97,14 +97,14 @@
                     <div class="p-2 text-center select-calanderization"
                         *ngIf="!meterData.meter.meterReadingDataApplication">
                         <button class="btn btn-primary" (click)="showDataApplicationModal(meterData.meter)">
-                            Select Calanderization Method.
+                            Select Calendarization Method
                         </button>
                         <hr>
                     </div>
                 </div>
             </div>
             <div class="tableControls overflow-hidden" *ngIf="meterData.meter.meterReadingDataApplication">
-                <a (click)="showDataApplicationModal(meterData.meter)">Set Calanderization Method</a>
+                <a (click)="showDataApplicationModal(meterData.meter)">Set Calendarization Method</a>
                 <div class="item-right">
                     <ngb-pagination [collectionSize]="meterData.monthlyData.length" [(page)]="tablePageNumbers[index]"
                         [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Default pagination">
@@ -133,7 +133,7 @@
                 </table>
                 <div class="p-2 text-center select-calanderization">
                     <button class="btn btn-primary" (click)="showDataApplicationModal(meterData.meter)">
-                        Select Calanderization Method.
+                        Select Calendarization Method
                     </button>
                     <hr>
                 </div>
@@ -142,7 +142,7 @@
     </div>
 
     <div class="popup calanderization" [class.open]="dataApplicationMeter">
-        <div class="popup-header" *ngIf="dataApplicationMeter">Select Calanderization Method:
+        <div class="popup-header" *ngIf="dataApplicationMeter">Select Calendarization Method:
             {{dataApplicationMeter.name}}
             <button class="item-right" (click)="cancelSetDataApplication()">x</button>
         </div>

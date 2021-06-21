@@ -1,36 +1,108 @@
-<div class="row" *ngIf="utilityMeterData.length != 0">
-    <div class="col-lg-6 col-md-12">
+<div class="row justify-content-center" *ngIf="utilityMeterData.length != 0">
+    <div class="col-md-12 col-lg-8">
         <div class="d-flex pb-2">
-            <div class="pl-0 w-50 calanderization-label" for="dataApplication">Calanderization Method</div>
+            <div class="pl-0 w-50 calanderization-label" for="dataApplication">Calendarization Method</div>
             <select id="dataApplication" name="dataApplicationMeter" class="form-control w-50"
                 [(ngModel)]="meter.meterReadingDataApplication" (change)="calanderizeMeter()">
                 <option [ngValue]="'fullMonth'">Apply to Full Read Month</option>
-                <option [ngValue]="'backward'">Apply Partially to Previous Month</option>
-                <option [ngValue]="'forward'">Apply Partially to Read Month</option>
+                <option [ngValue]="'backward'">Use previous month name for entry</option>
+                <option [ngValue]="'forward'">Use current month name for entry</option>
             </select>
         </div>
 
         <p class="alert alert-secondary p-1" *ngIf="meter.meterReadingDataApplication == 'fullMonth'">
-            The meter readings will be calanderized such that a meter reading will represent the full month in which it
+            The meter readings will be calendarized such that a meter reading will represent the full month in which it
             is entered.
         </p>
         <p class="alet alert-secondary p-1" *ngIf="meter.meterReadingDataApplication == 'backward'">
-            There meter readings will be calanderized such that each entry will be broken down into a per day average
-            based on the number of days between readings and applied to the prior months days since the previous bill
-            entry.
+            Meter readings will be calendarized such that each entry will be broken down into a per day average
+            based on the number of days between readings and applied to the prior month's calendarization. Use this for
+            meter read dates at the beginning of the month. Use "Current" for meter read dates at the end of the month.
+            Use best judgement and match to predictors for meter read dates in the middle of the month.
         </p>
         <p class="alet alert-secondary p-1" *ngIf="meter.meterReadingDataApplication == 'forward'">
-            The meter readings will be calanderized such that each entry will be broken down into a per day average
-            based on the number of days between readings and applied to the next months days until the following bill
-            entry.
+            Meter readings will be calendarized such that each entry will be broken down into a per day average
+            based on the number of days between readings and applied to the current month's calendarization. Use this
+            for meter read dates at the end of the month. Use "Previous" for meter read dates at the beginning of the
+            month. Use best judgement and match to predictors for meter read dates in the middle of the month.
         </p>
         <hr>
+    </div>
+
+    <div class="col-12">
 
         <table class="table">
             <thead>
                 <tr>
                     <th>
-                        Calanderized Month
+                        Meter Read Date
+                    </th>
+                    <th>
+                        kWh/day
+                    </th>
+                    <th>
+                        Calendarized Month 1
+                    </th>
+                    <th>
+                        Month 1 Days Used
+                    </th>
+                    <th>
+                        Total Energy Applied to Month 1
+                    </th>
+                    <th>
+                        Calendarized Month 2
+                    </th>
+                    <th>
+                        Month 2 Days Used
+                    </th>
+                    <th>
+                        Total Energy Applied to Month 2
+                    </th>
+                </tr>
+            </thead>
+            <tbody *ngIf="calanderizationSummary">
+                <tr *ngFor="let calanderizationSummaryItem of calanderizationSummary; let index = index;">
+                    <td>
+                        {{calanderizationSummaryItem.readDate | date}}
+                    </td>
+                    <td>
+                        <span *ngIf="calanderizationSummaryItem.energyUsePerDay">{{calanderizationSummaryItem.energyUsePerDay | number:'1.0-0'}}</span>
+                        <span *ngIf="!calanderizationSummaryItem.energyUsePerDay">N/A</span>
+                    </td>
+                    <td>
+                        <span *ngIf="calanderizationSummaryItem.calanderizationMonthOne">{{calanderizationSummaryItem.calanderizationMonthOne | date: 'MMMM, y'}}</span>
+                        <span *ngIf="!calanderizationSummaryItem.calanderizationMonthOne">N/A</span>
+                    </td>
+                    <td>
+                        <span *ngIf="calanderizationSummaryItem.monthOneDaysUsed">{{calanderizationSummaryItem.monthOneDaysUsed | number:'1.0-0'}}</span>
+                        <span *ngIf="!calanderizationSummaryItem.monthOneDaysUsed">N/A</span>
+                    </td>
+                    <td>
+                        <span *ngIf="calanderizationSummaryItem.monthOneReading">{{calanderizationSummaryItem.monthOneReading | number:'1.0-0'}}</span>
+                        <span *ngIf="!calanderizationSummaryItem.monthOneReading">N/A</span>
+                    </td>
+                    <td>
+                        <span *ngIf="calanderizationSummaryItem.calanderizationMonthTwo">{{calanderizationSummaryItem.calanderizationMonthTwo | date: 'MMMM, y'}}</span>
+                        <span *ngIf="!calanderizationSummaryItem.calanderizationMonthTwo">N/A</span>
+                    </td>
+                    <td>
+                        <span *ngIf="calanderizationSummaryItem.monthTwoDaysUsed">{{calanderizationSummaryItem.monthTwoDaysUsed | number:'1.0-0'}}</span>
+                        <span *ngIf="!calanderizationSummaryItem.monthTwoDaysUsed">N/A</span>
+                    </td>
+                    <td>
+                        <span *ngIf="calanderizationSummaryItem.monthTwoReading">{{calanderizationSummaryItem.monthTwoReading | number:'1.0-0'}}</span>
+                        <span *ngIf="!calanderizationSummaryItem.monthTwoReading">N/A</span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <hr>
+        
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>
+                        Calendarized Month
                     </th>
                     <th>
                         Energy Usage
@@ -49,10 +121,11 @@
                 </tr>
             </tbody>
         </table>
+        <hr>
     </div>
-    <div class="col-lg-6 col-md-12 text-center">
+    <div class="col-12 text-center">
         <ngb-datepicker [dayTemplate]="customDay" [navigation]="'none'" [outsideDays]="'hidden'" [startDate]="startDate"
-            [displayMonths]="3" [firstDayOfWeek]="7"></ngb-datepicker>
+            [displayMonths]="4" [firstDayOfWeek]="7"></ngb-datepicker>
 
         <ng-template #customDay let-date="date">
             <div class="custom-day" [style.background-color]="getBackground(date)">
@@ -62,12 +135,12 @@
         <p class="alert alert-info p-1">
             The darker circles represent the meter reading date and the corresponding lighter colors represent
             the days in which the per day average from that bill will be applied will be applied.<br>
-            It takes three meter readings to calanderize a month when "Apply to Full Read Month" is not selected.
+            It takes three meter readings to calendarize a month when "Apply to Full Read Month" is not selected.
         </p>
     </div>
 </div>
 
 
 <p class="alert alert-info" *ngIf="utilityMeterData.length == 0">
-    Three meter readings are needed to calanderize meter data.
+    Three meter readings are needed to calendarize meter data.
 </p>
