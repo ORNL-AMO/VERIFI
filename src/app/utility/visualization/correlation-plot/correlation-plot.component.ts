@@ -26,13 +26,13 @@ export class CorrelationPlotComponent implements OnInit {
   ngOnInit(): void {
     this.plotDataSub = this.visualizationStateService.plotData.subscribe(plotData => {
       this.plotData = plotData;
-      this.drawChart();
     });
 
     this.regressionTableDataSub = this.visualizationStateService.regressionTableData.subscribe(regressionTableData => {
       this.regressionTableData = regressionTableData;
+      //regression data updates with plot data
       this.drawChart();
-    })
+    });
   }
 
   ngOnDestroy() {
@@ -49,7 +49,7 @@ export class CorrelationPlotComponent implements OnInit {
   }
 
   drawChart(): void {
-    if (this.matrixPlot && this.plotData && this.regressionTableData) {
+    if (this.matrixPlot && this.plotData && this.regressionTableData && this.regressionTableData.length != 0) {
       this.cd.detectChanges();
       if (this.plotData.length > 2) {
         this.drawSplom();
