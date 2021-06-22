@@ -125,7 +125,7 @@
     </div>
     <div class="col-12 text-center">
         <ngb-datepicker [dayTemplate]="customDay" [navigation]="'none'" [outsideDays]="'hidden'" [startDate]="startDate"
-            [displayMonths]="4" [firstDayOfWeek]="7"></ngb-datepicker>
+            [displayMonths]="displayMonths" [firstDayOfWeek]="7"></ngb-datepicker>
 
         <ng-template #customDay let-date="date">
             <div class="custom-day" [style.background-color]="getBackground(date)">

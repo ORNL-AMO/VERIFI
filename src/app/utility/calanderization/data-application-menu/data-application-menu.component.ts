@@ -23,6 +23,7 @@ export class DataApplicationMenuComponent implements OnInit {
   fourthBillReadDate: Date;
   monthlyData: Array<MonthlyData>;
   calanderizationSummary: Array<CalendarizationSummaryItem>;
+  displayMonths: number = 4;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private calanderizationService: CalanderizationService) { }
 
   ngOnInit(): void {
@@ -35,14 +36,21 @@ export class DataApplicationMenuComponent implements OnInit {
       this.firstBillReadDate = new Date(this.utilityMeterData[0].readDate);
       this.secondBillReadDate = new Date(this.utilityMeterData[1].readDate);
       this.thirdBillReadDate = new Date(this.utilityMeterData[2].readDate);
-      this.fourthBillReadDate = new Date(this.utilityMeterData[3].readDate);
+      if (this.utilityMeterData.length > 3) {
+        this.fourthBillReadDate = new Date(this.utilityMeterData[3].readDate);
+      }else{
+        this.displayMonths = 3;
+      }
       this.startDate = { year: this.firstBillReadDate.getUTCFullYear(), month: this.firstBillReadDate.getUTCMonth() + 1, day: this.firstBillReadDate.getUTCDate() };
       this.calanderizeMeter();
     }
   }
 
   calanderizeMeter() {
-    let meterData: Array<IdbUtilityMeterData> = [this.utilityMeterData[0], this.utilityMeterData[1], this.utilityMeterData[2], this.utilityMeterData[3]];
+    let meterData: Array<IdbUtilityMeterData> = [this.utilityMeterData[0], this.utilityMeterData[1], this.utilityMeterData[2]];
+    if(this.utilityMeterData.length >  3){
+      meterData.push(this.utilityMeterData[3]);
+    }
     this.monthlyData = this.calanderizationService.calanderizeMeterData(this.meter, meterData);
     this.calanderizationSummary = this.calanderizationService.getCalendarizationSummary(this.meter, meterData);
   }
@@ -84,7 +92,7 @@ export class DataApplicationMenuComponent implements OnInit {
     return this.getDateBackground(date)
   }
 
-  getDateBackground(date: Date, isForTable?: boolean): string {
+  getDateBackground(date: Date): string {
     let isSameDate: boolean = this.checkSameDate(this.firstBillReadDate, date);
     if (isSameDate) {
       return 'blue';
@@ -96,7 +104,7 @@ export class DataApplicationMenuComponent implements OnInit {
         isSameDate = this.checkSameDate(this.thirdBillReadDate, date);
         if (isSameDate) {
           return '#BA4A00';
-        } else {
+        } else if (this.fourthBillReadDate) {
           isSameDate = this.checkSameDate(this.fourthBillReadDate, date);
           if (isSameDate) {
             return 'purple';
@@ -104,22 +112,7 @@ export class DataApplicationMenuComponent implements OnInit {
         }
       }
     }
-    if (isForTable) {
-      let isSameDate: boolean = this.checkSameMonth(this.firstBillReadDate, date);
-      if (isSameDate) {
-        return 'blue';
-      } else {
-        isSameDate = this.checkSameMonth(this.secondBillReadDate, date);
-        if (isSameDate) {
-          return 'green';
-        } else {
-          isSameDate = this.checkSameMonth(this.thirdBillReadDate, date);
-          if (isSameDate) {
-            return '#BA4A00';
-          }
-        }
-      }
-    }
+
     if (this.meter.meterReadingDataApplication == 'fullMonth') {
       let isSameDate: boolean = this.checkSameMonth(this.firstBillReadDate, date);
       if (isSameDate) {
@@ -132,7 +125,7 @@ export class DataApplicationMenuComponent implements OnInit {
           isSameDate = this.checkSameMonth(this.thirdBillReadDate, date);
           if (isSameDate) {
             return '#F0B27A';
-          } else {
+          } else if (this.fourthBillReadDate) {
             isSameDate = this.checkSameMonth(this.fourthBillReadDate, date);
             if (isSameDate) {
               return '#D2B4DE';
@@ -152,7 +145,7 @@ export class DataApplicationMenuComponent implements OnInit {
           isSameDate = this.checkPreviousDate(this.thirdBillReadDate, date);
           if (isSameDate) {
             return '#F0B27A';
-          } else {
+          } else if(this.fourthBillReadDate) {
             isSameDate = this.checkPreviousDate(this.fourthBillReadDate, date);
             if (isSameDate) {
               return '#D2B4DE';
@@ -161,7 +154,10 @@ export class DataApplicationMenuComponent implements OnInit {
         }
       }
     } else if (this.meter.meterReadingDataApplication == 'forward') {
-      let isSameDate: boolean = this.checkLaterDate(this.fourthBillReadDate, date);
+      let isSameDate: boolean;
+      if (this.fourthBillReadDate) {
+        isSameDate = this.checkLaterDate(this.fourthBillReadDate, date);
+      }
       if (isSameDate) {
         return 'lightgray';
       } else {
