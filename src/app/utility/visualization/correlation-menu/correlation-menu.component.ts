@@ -14,6 +14,8 @@ export class CorrelationMenuComponent implements OnInit {
   meterOptionsSub: Subscription;
   predictorOptions: Array<{ predictor: PredictorData, selected: boolean }>;
   predictorOptionsSub: Subscription;
+  meterDataOptionSub: Subscription;
+  meterDataOption: string;
   constructor(private visualizationStateService: VisualizationStateService) { }
 
   ngOnInit(): void {
@@ -24,11 +26,16 @@ export class CorrelationMenuComponent implements OnInit {
     this.predictorOptionsSub = this.visualizationStateService.predictorOptions.subscribe(val => {
       this.predictorOptions = val;
     });
+
+    this.meterDataOptionSub = this.visualizationStateService.meterDataOption.subscribe(val => {
+      this.meterDataOption = val;
+    });
   }
 
-  ngOnDestroy(){
+  ngOnDestroy() {
     this.meterOptionsSub.unsubscribe();
     this.predictorOptionsSub.unsubscribe();
+    this.meterDataOptionSub.unsubscribe();
   }
 
   toggleMeterOption(index: number) {
@@ -41,5 +48,8 @@ export class CorrelationMenuComponent implements OnInit {
     this.visualizationStateService.predictorOptions.next(this.predictorOptions);
   }
 
+  saveDataOption() {
+    this.visualizationStateService.meterDataOption.next(this.meterDataOption);
+  }
 
 }
