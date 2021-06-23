@@ -93,9 +93,6 @@ export class DataApplicationMenuComponent implements OnInit {
     return this.getDateBackground(date)
   }
 
-
-
-
   getDateBackground(date: Date): string {
     let isSameDate: boolean = this.checkSameDate(this.firstBillReadDate, date);
     if (isSameDate) {
@@ -196,7 +193,6 @@ export class DataApplicationMenuComponent implements OnInit {
       return false;
     }
   }
-
 
   getMonthClass(date: Date): string {
     let isSameDate: boolean = this.checkSameMonth(this.firstBillReadDate, date);

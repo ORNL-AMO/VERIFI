@@ -11,23 +11,6 @@
   background-color: white;
 }
 
-/* ngb-datepicker{
-  border-top: none;
-  border-bottom: none;
-} */
-
-.first-month{
-  background-color: blue;
-}
-
-.second-month{
-  background-color: green;
-}
-
-.third-month{
-  background-color: #BA4A00;
-}
-
 
 .calanderization-label{
   font-size: 18px;
@@ -38,14 +21,9 @@
   box-shadow: 2px 2px 2px 2px grey
 }
 
-.fa-question:hover{
-  cursor: pointer;
-}
-
 table.table tbody tr:nth-child(even){
   background-color: white;
 }
-
 
 .calanderized-months tbody tr:hover{
   border: solid; 
