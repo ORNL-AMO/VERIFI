@@ -5,8 +5,8 @@
             <select id="dataApplication" name="dataApplicationMeter" class="form-control w-50"
                 [(ngModel)]="meter.meterReadingDataApplication" (change)="calanderizeMeter()">
                 <option [ngValue]="'fullMonth'">Apply to Full Read Month</option>
-                <option [ngValue]="'backward'">Use previous month name for entry</option>
-                <option [ngValue]="'forward'">Use current month name for entry</option>
+                <option [ngValue]="'backward'">Calendarize Meter Data</option>
+                <!-- <option [ngValue]="'forward'">Use current month name for entry</option> -->
             </select>
         </div>
 
@@ -31,7 +31,7 @@
 
     <div class="col-12">
 
-        <table class="table">
+        <table class="table" *ngIf="meter.meterReadingDataApplication != 'fullMonth'">
             <thead>
                 <tr>
                     <th>
@@ -66,43 +66,57 @@
                         {{calanderizationSummaryItem.readDate | date}}
                     </td>
                     <td>
-                        <span *ngIf="calanderizationSummaryItem.energyUsePerDay">{{calanderizationSummaryItem.energyUsePerDay | number:'1.0-0'}}</span>
+                        <span
+                            *ngIf="calanderizationSummaryItem.energyUsePerDay">{{calanderizationSummaryItem.energyUsePerDay
+                            | number:'1.0-0'}}</span>
                         <span *ngIf="!calanderizationSummaryItem.energyUsePerDay">N/A</span>
                     </td>
-                    <td>
-                        <span *ngIf="calanderizationSummaryItem.calanderizationMonthOne">{{calanderizationSummaryItem.calanderizationMonthOne | date: 'MMMM, y'}}</span>
+                    <td [ngClass]="getTableCellClass(calanderizationSummaryItem.calanderizationMonthOne, calanderizationSummaryItem.readDate)">
+                        <span
+                            *ngIf="calanderizationSummaryItem.calanderizationMonthOne">{{calanderizationSummaryItem.calanderizationMonthOne
+                            | date: 'MMMM, y'}}</span>
                         <span *ngIf="!calanderizationSummaryItem.calanderizationMonthOne">N/A</span>
                     </td>
-                    <td>
-                        <span *ngIf="calanderizationSummaryItem.monthOneDaysUsed">{{calanderizationSummaryItem.monthOneDaysUsed | number:'1.0-0'}}</span>
+                    <td [ngClass]="getTableCellClass(calanderizationSummaryItem.calanderizationMonthOne, calanderizationSummaryItem.readDate)">
+                        <span
+                            *ngIf="calanderizationSummaryItem.monthOneDaysUsed">{{calanderizationSummaryItem.monthOneDaysUsed
+                            | number:'1.0-0'}}</span>
                         <span *ngIf="!calanderizationSummaryItem.monthOneDaysUsed">N/A</span>
                     </td>
-                    <td>
-                        <span *ngIf="calanderizationSummaryItem.monthOneReading">{{calanderizationSummaryItem.monthOneReading | number:'1.0-0'}}</span>
+                    <td [ngClass]="getTableCellClass(calanderizationSummaryItem.calanderizationMonthOne, calanderizationSummaryItem.readDate)">
+                        <span
+                            *ngIf="calanderizationSummaryItem.monthOneReading">{{calanderizationSummaryItem.monthOneReading
+                            | number:'1.0-0'}}</span>
                         <span *ngIf="!calanderizationSummaryItem.monthOneReading">N/A</span>
                     </td>
-                    <td>
-                        <span *ngIf="calanderizationSummaryItem.calanderizationMonthTwo">{{calanderizationSummaryItem.calanderizationMonthTwo | date: 'MMMM, y'}}</span>
+                    <td [ngClass]="getTableCellClass(calanderizationSummaryItem.calanderizationMonthTwo, calanderizationSummaryItem.readDate)">
+                        <span
+                            *ngIf="calanderizationSummaryItem.calanderizationMonthTwo">{{calanderizationSummaryItem.calanderizationMonthTwo
+                            | date: 'MMMM, y'}}</span>
                         <span *ngIf="!calanderizationSummaryItem.calanderizationMonthTwo">N/A</span>
                     </td>
-                    <td>
-                        <span *ngIf="calanderizationSummaryItem.monthTwoDaysUsed">{{calanderizationSummaryItem.monthTwoDaysUsed | number:'1.0-0'}}</span>
+                    <td [ngClass]="getTableCellClass(calanderizationSummaryItem.calanderizationMonthTwo, calanderizationSummaryItem.readDate)">
+                        <span
+                            *ngIf="calanderizationSummaryItem.monthTwoDaysUsed">{{calanderizationSummaryItem.monthTwoDaysUsed
+                            | number:'1.0-0'}}</span>
                         <span *ngIf="!calanderizationSummaryItem.monthTwoDaysUsed">N/A</span>
                     </td>
-                    <td>
-                        <span *ngIf="calanderizationSummaryItem.monthTwoReading">{{calanderizationSummaryItem.monthTwoReading | number:'1.0-0'}}</span>
+                    <td [ngClass]="getTableCellClass(calanderizationSummaryItem.calanderizationMonthTwo, calanderizationSummaryItem.readDate)">
+                        <span
+                            *ngIf="calanderizationSummaryItem.monthTwoReading">{{calanderizationSummaryItem.monthTwoReading
+                            | number:'1.0-0'}}</span>
                         <span *ngIf="!calanderizationSummaryItem.monthTwoReading">N/A</span>
                     </td>
                 </tr>
             </tbody>
         </table>
-        <hr>
-        
-        <table class="table">
+        <hr *ngIf="meter.meterReadingDataApplication != 'fullMonth'">
+
+        <table class="table calanderized-months">
             <thead>
                 <tr>
                     <th>
-                        Calendarized Month
+                        Calendarized Month <span class="small">Hover for calanderization breakdown</span>
                     </th>
                     <th>
                         Energy Usage
@@ -111,7 +125,7 @@
             </thead>
             <tbody *ngIf="monthlyData">
                 <tr *ngFor="let data of monthlyData; let index = index;">
-                    <td>
+                    <td (mouseenter)="inspectDate(data.date)" (mouseleave)="inspectDate(undefined)">
                         {{data.date | date: 'MMMM, y'}}
                     </td>
                     <td>
@@ -128,13 +142,13 @@
             [displayMonths]="displayMonths" [firstDayOfWeek]="7"></ngb-datepicker>
 
         <ng-template #customDay let-date="date">
-            <div class="custom-day" [style.background-color]="getBackground(date)">
+            <div class="custom-day" [style.background-color]="getBackground(date)" [style.border]="getBorder(date)">
                 {{ date.day }}
             </div>
         </ng-template>
         <p class="alert alert-info p-1">
             The darker circles represent the meter reading date and the corresponding lighter colors represent
-            the days in which the per day average from that bill will be applied will be applied.<br>
+            the days in which the per day average from that bill will be applied will.<br>
             It takes three meter readings to calendarize a month when "Apply to Full Read Month" is not selected.
         </p>
     </div>

@@ -24,6 +24,7 @@ export class DataApplicationMenuComponent implements OnInit {
   monthlyData: Array<MonthlyData>;
   calanderizationSummary: Array<CalendarizationSummaryItem>;
   displayMonths: number = 4;
+  hoverDataDate: Date;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private calanderizationService: CalanderizationService) { }
 
   ngOnInit(): void {
@@ -38,7 +39,7 @@ export class DataApplicationMenuComponent implements OnInit {
       this.thirdBillReadDate = new Date(this.utilityMeterData[2].readDate);
       if (this.utilityMeterData.length > 3) {
         this.fourthBillReadDate = new Date(this.utilityMeterData[3].readDate);
-      }else{
+      } else {
         this.displayMonths = 3;
       }
       this.startDate = { year: this.firstBillReadDate.getUTCFullYear(), month: this.firstBillReadDate.getUTCMonth() + 1, day: this.firstBillReadDate.getUTCDate() };
@@ -48,7 +49,7 @@ export class DataApplicationMenuComponent implements OnInit {
 
   calanderizeMeter() {
     let meterData: Array<IdbUtilityMeterData> = [this.utilityMeterData[0], this.utilityMeterData[1], this.utilityMeterData[2]];
-    if(this.utilityMeterData.length >  3){
+    if (this.utilityMeterData.length > 3) {
       meterData.push(this.utilityMeterData[3]);
     }
     this.monthlyData = this.calanderizationService.calanderizeMeterData(this.meter, meterData);
@@ -92,10 +93,13 @@ export class DataApplicationMenuComponent implements OnInit {
     return this.getDateBackground(date)
   }
 
+
+
+
   getDateBackground(date: Date): string {
     let isSameDate: boolean = this.checkSameDate(this.firstBillReadDate, date);
     if (isSameDate) {
-      return 'blue';
+      return 'purple';
     } else {
       isSameDate = this.checkSameDate(this.secondBillReadDate, date);
       if (isSameDate) {
@@ -107,7 +111,7 @@ export class DataApplicationMenuComponent implements OnInit {
         } else if (this.fourthBillReadDate) {
           isSameDate = this.checkSameDate(this.fourthBillReadDate, date);
           if (isSameDate) {
-            return 'purple';
+            return 'blue';
           }
         }
       }
@@ -116,7 +120,7 @@ export class DataApplicationMenuComponent implements OnInit {
     if (this.meter.meterReadingDataApplication == 'fullMonth') {
       let isSameDate: boolean = this.checkSameMonth(this.firstBillReadDate, date);
       if (isSameDate) {
-        return 'lightblue';
+        return '#D2B4DE';
       } else {
         isSameDate = this.checkSameMonth(this.secondBillReadDate, date);
         if (isSameDate) {
@@ -128,7 +132,7 @@ export class DataApplicationMenuComponent implements OnInit {
           } else if (this.fourthBillReadDate) {
             isSameDate = this.checkSameMonth(this.fourthBillReadDate, date);
             if (isSameDate) {
-              return '#D2B4DE';
+              return 'lightblue';
             }
           }
         }
@@ -145,10 +149,10 @@ export class DataApplicationMenuComponent implements OnInit {
           isSameDate = this.checkPreviousDate(this.thirdBillReadDate, date);
           if (isSameDate) {
             return '#F0B27A';
-          } else if(this.fourthBillReadDate) {
+          } else if (this.fourthBillReadDate) {
             isSameDate = this.checkPreviousDate(this.fourthBillReadDate, date);
             if (isSameDate) {
-              return '#D2B4DE';
+              return 'lightblue';
             }
           }
         }
@@ -171,7 +175,7 @@ export class DataApplicationMenuComponent implements OnInit {
           } else {
             isSameDate = this.checkLaterDate(this.firstBillReadDate, date);
             if (isSameDate) {
-              return 'lightblue';
+              return '#D2B4DE';
             }
           }
         }
@@ -179,5 +183,62 @@ export class DataApplicationMenuComponent implements OnInit {
       }
     }
     return 'lightgray'
+  }
+
+  inspectDate(date: Date) {
+    this.hoverDataDate = new Date(date);
+  }
+
+  isHoverDate(checkDate: Date): boolean {
+    if (this.hoverDataDate) {
+      return this.checkSameMonth(new Date(checkDate), this.hoverDataDate);
+    } else {
+      return false;
+    }
+  }
+
+
+  getMonthClass(date: Date): string {
+    let isSameDate: boolean = this.checkSameMonth(this.firstBillReadDate, date);
+    if (isSameDate) {
+      return 'month-one';
+    } else {
+      isSameDate = this.checkSameMonth(this.secondBillReadDate, date);
+      if (isSameDate) {
+        return 'month-two';
+      } else {
+        isSameDate = this.checkSameMonth(this.thirdBillReadDate, date);
+        if (isSameDate) {
+          return 'month-three';
+        } else if (this.fourthBillReadDate) {
+          isSameDate = this.checkSameMonth(this.fourthBillReadDate, date);
+          if (isSameDate) {
+            return 'month-four';
+          }
+        }
+      }
+    }
+  }
+
+  getTableCellClass(checkDate: Date, readDate: Date): Array<string>{
+    let cellClass: Array<string> = [];
+    let isHoverDate: boolean = this.isHoverDate(checkDate);
+    if(isHoverDate){
+      cellClass.push('highlighted-date');
+      let monthClass: string = this.getMonthClass(new Date(readDate));
+      cellClass.push(monthClass);
+    }
+    return cellClass;
+  }
+
+  getBorder(ngbDate: NgbDateStruct): string {
+    let date: Date = new Date(ngbDate.year, ngbDate.month - 1, ngbDate.day);
+    if (this.hoverDataDate) {
+      let isSameMonth: boolean = this.checkSameMonth(date, this.hoverDataDate);
+      if (isSameMonth) {
+        return 'solid 3px black'
+      }
+    }
+    return '';
   }
 }
