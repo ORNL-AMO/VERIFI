@@ -23,10 +23,6 @@ export class VisualizationComponent implements OnInit {
   predictorsOptionsSub: Subscription;
   plotDataSub: Subscription;
   numberOfOptionsSelected: number;
-  // minDate: Date;
-  // maxDate: Date;
-  // dataMinDate: Date;
-  // dataMaxDate: Date;
   globalVariables = globalVariables;
   minMonth: number;
   minYear: number;
