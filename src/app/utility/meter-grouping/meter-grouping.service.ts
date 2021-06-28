@@ -9,6 +9,9 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
 })
 export class MeterGroupingService {
 
+  dataDisplay: "grouping" | "table" | "graph" = "grouping";
+  displayGraphEnergy: "bar" | "scatter" = "bar";
+  displayGraphCost: "bar" | "scatter" = "bar";
   constructor(private utilityMeterGroupDbService: UtilityMeterGroupdbService, private calanderizationService: CalanderizationService) { }
 
   getMeterGroupTypes(facilityMeters: Array<IdbUtilityMeter>): Array<MeterGroupType> {
@@ -73,6 +76,7 @@ export class MeterGroupingService {
         group.groupData = [];
         group.totalConsumption = 0;
         group.totalEnergyUse = 0;
+        group.combinedMonthlyData = [];
       }
     });
     return meterGroups;

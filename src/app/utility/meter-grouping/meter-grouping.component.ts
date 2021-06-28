@@ -34,12 +34,19 @@ export class MeterGroupingComponent implements OnInit {
   energyUnit: string;
   lastBillDate: Date;
   yearPriorToLastBill: Date;
+  dataDisplay: "grouping" | "table" | "graph";
+  displayGraphEnergy: "bar" | "scatter";
+  displayGraphCost: "bar" | "scatter";
+  itemsPerPage: number = 6;
   constructor(private utilityMeterGroupDbService: UtilityMeterGroupdbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterDbService: UtilityMeterdbService, private facilityDbService: FacilitydbService, private calanderizationService: CalanderizationService,
     private loadingService: LoadingService, private toastNoticationService: ToastNotificationsService,
     private meterGroupingService: MeterGroupingService) { }
 
   ngOnInit(): void {
+    this.dataDisplay = this.meterGroupingService.dataDisplay;
+    this.displayGraphEnergy = this.meterGroupingService.displayGraphEnergy;
+    this.displayGraphCost = this.meterGroupingService.displayGraphCost;
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(selectedFacility => {
       if (selectedFacility) {
         this.waterUnit = selectedFacility.volumeLiquidUnit;
@@ -72,6 +79,9 @@ export class MeterGroupingComponent implements OnInit {
     this.facilityMeterDataSub.unsubscribe();
     this.facilityMetersSub.unsubscribe();
     this.selectedFacilitySub.unsubscribe();
+    this.meterGroupingService.dataDisplay = this.dataDisplay;
+    this.meterGroupingService.displayGraphEnergy = this.displayGraphEnergy;
+    this.meterGroupingService.displayGraphCost = this.displayGraphCost;
   }
 
   setLastBill() {
@@ -145,5 +155,17 @@ export class MeterGroupingComponent implements OnInit {
     if (meterGroup.name != "Ungrouped") {
       this.utilityMeterGroupDbService.update(meterGroup);
     }
+  }
+
+  setDataDisplay(val: "grouping" | "table" | "graph"){
+    this.dataDisplay = val;
+  }
+
+  setDisplayGraphEnergy(val: "bar" | "scatter"){
+    this.displayGraphEnergy = val;
+  }
+
+  setDisplayGraphCost(val: "bar" | "scatter"){
+    this.displayGraphCost = val;
   }
 }

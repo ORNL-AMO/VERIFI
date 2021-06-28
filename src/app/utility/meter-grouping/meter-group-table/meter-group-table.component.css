@@ -1,0 +1,16 @@
+thead th.active {
+    text-decoration: underline;
+}
+
+thead th:hover{
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+tbody tr td:first-child{
+    width: 30%;
+}
+
+tbody tr td:not(:first-child){
+    width: 35%;
+}
