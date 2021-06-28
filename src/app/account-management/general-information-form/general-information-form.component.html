@@ -1,7 +1,8 @@
-<form [formGroup]="form">
+f<form [formGroup]="form">
     <div class="mb-3 ">
         <label>{{formNameLabel}} Name <span class="required">*</span></label>
-        <input type="text" class="form-control" formControlName="name" (input)="saveChanges()" onfocus="this.select();" minlength = "1" maxlength="42">
+        <input type="text" class="form-control" formControlName="name" (input)="saveChanges()" onfocus="this.select();" minlength = "1" maxlength="42" required="required">
+        <input type="submit">
     </div>
     <span class="inputError" *ngIf="form.get('name').hasError('required')">{{formNameLabel}} name is required</span>
 
