@@ -26,6 +26,7 @@ export class GeneralInformationFormComponent implements OnInit {
   selectedAccountSub: Subscription;
   selectedAccount: IdbAccount;
   selectedFacility: IdbFacility;
+  naicsCodesFound: Array<Object>;
   isFormChange: boolean = false;
   constructor(private accountDbService: AccountdbService, private accountManagementService: AccountManagementService, private facilityDbService: FacilitydbService) { }
 
@@ -40,6 +41,7 @@ export class GeneralInformationFormComponent implements OnInit {
           this.isFormChange = false;
         }
       }
+      this.naicsCodesFound = globalVariables.naicsCodes;
     });
 
 
@@ -64,6 +66,23 @@ export class GeneralInformationFormComponent implements OnInit {
   ngOnDestroy() {
     this.selectedAccountSub.unsubscribe();
     this.selectedFacilitySub.unsubscribe();
+  }
+
+  searchNaics(entry: string) {
+    let results = [];
+    let isNumeric = false;
+    if (!isNaN(parseInt(entry.trim()))) {
+      isNumeric = true;
+    }
+    for (let naics of this.globalVariables.naicsCodes) {
+      if (naics.industyType.search(entry) !== -1) {
+        results.push(naics);
+      }
+      else if (isNumeric && naics.code.toString().search(entry) !== -1) {
+        results.push(naics);
+      }
+    }
+    this.naicsCodesFound = results;
   }
 
   saveChanges() {

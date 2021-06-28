@@ -35,8 +35,9 @@
     <div class="row">
         <div class="mb-3 col">
             <label>NAICS Code</label>
+            <input #naicsInput type="text" class="form-control" (input)="this.searchNaics(naicsInput.value)" onfocus="this.select();" minlength="1" maxlength="60">
             <select formControlName="naics" (change)="saveChanges()">
-                <option *ngFor="let naics of globalVariables.naicsCodes" [ngValue]="naics.code">{{naics.code}} -
+                <option *ngFor="let naics of this.naicsCodesFound" [ngValue]="naics.code">{{naics.code}} -
                     {{naics.industyType}}</option>
             </select>
         </div>
