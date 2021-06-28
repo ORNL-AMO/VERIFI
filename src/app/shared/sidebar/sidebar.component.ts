@@ -32,6 +32,10 @@ export class SidebarComponent implements OnInit {
     this.isDev = isDevMode();
   }
 
+  hoverSidebar(delay: number) {
+    setTimeout(() => this.toggleSidebar(), delay);
+  }
+
   toggleSidebar() {
     this.open = !this.open;
     const action = this.open ? 'addClass' : 'removeClass';

@@ -1,5 +1,5 @@
 <app-header></app-header>
-<app-sidebar></app-sidebar>
+<app-sidebar #sidebar (mouseenter) = "sidebar.hoverSidebar(500)" (mouseleave) = "sidebar.hoverSidebar(0)"></app-sidebar>
 
 <div class="content" role="main" *ngIf="dataInitialized">
   <router-outlet></router-outlet>
