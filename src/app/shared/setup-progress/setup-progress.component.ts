@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -26,6 +26,9 @@ export class SetupProgressComponent implements OnInit {
   setupWizard: boolean;
   setupWizardComplete: boolean;
   setupWizardMinimized: boolean;
+
+
+  @ViewChild('canvasElement', { static: false }) canvasElement: ElementRef;
 
   constructor(
     public accountdbService: AccountdbService,
@@ -66,7 +69,7 @@ export class SetupProgressComponent implements OnInit {
     this.selectedAccountSub.unsubscribe();
     this.selectedFacilitySub.unsubscribe();
   }
-
+  
   updateProgress() {
     if (this.setupWizard) {
       if (this.selectedAccount && !this.selectedFacility && !this.setupWizardComplete) {
@@ -81,11 +84,13 @@ export class SetupProgressComponent implements OnInit {
   }
 
   createConfetti() {
-    confetti.create()({
-      particleCount: 100,
-      spread: 70,
-      origin: { y: (1), x: (1) }
-    });
+    if (this.canvasElement) {
+      confetti.create(this.canvasElement.nativeElement)({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 1, x: 1 }
+      });
+    }
   }
 
   addFacility() {

@@ -1,4 +1,3 @@
-@import "~font-awesome/css/font-awesome.min.css";
 /*
 TO SORT
 =============================================== */
@@ -131,17 +130,6 @@ input.unitDollar {
   background-color: #145932;
   color: white;
 }
-
-canvas {
-  top: auto!important;
-  left: auto!important;
-  bottom: 65px!important;
-  right: 50px!important;
-  z-index: 1001!important;
-  /*height: 200px;*/
-}
-
-
 
 /*Added by mark for import-v2. Not sure correct place to put.*/
 .scroll-item{

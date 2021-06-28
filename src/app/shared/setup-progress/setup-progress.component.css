@@ -53,3 +53,13 @@
     font-size: 25px;
     cursor: pointer;
 }
+
+canvas.confetti-canvas {
+    top: auto!important;
+    left: auto!important;
+    bottom: 65px!important;
+    right: 50px!important;
+    z-index: 1001!important;
+    /*height: 200px;*/
+    position: absolute;
+}

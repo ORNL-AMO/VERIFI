@@ -1,5 +1,3 @@
-@import "~font-awesome/css/font-awesome.min.css";
-
 /*
   Buttons
   =============================================== */
@@ -80,10 +78,10 @@
   .btn-outline i {
     color: #2c386b !important;
   }
-  .importExport button:first-child {
-    /* bringing back when adding export back */
-    /* margin-right: 5px; */
-  }
+  /*.importExport button:first-child {
+    bringing back when adding export back 
+    margin-right: 5px; 
+  }*/
   .saveCancel button:first-child {
     margin-right: 10px;
   }
