@@ -18,30 +18,21 @@ export class MeterGroupTableComponent implements OnInit {
   itemsPerPage: number;
   @Input()
   index: number;
+  @Input()
+  energyUnit: string;
+  @Input()
+  waterUnit: string;
 
   orderDataField: string = 'date';
   orderByDirection: string = 'desc';
   tablePageNumbers: Array<number>;
-  energyUnit: string;
-  waterUnit: string;
   consumptionUnit: string;
-  selectedFacilitySub: Subscription;
-  constructor(private facilityDbService: FacilitydbService) { }
+  constructor() { }
 
   ngOnInit(): void {
     if (this.meterGroup.combinedMonthlyData) {
       this.tablePageNumbers = this.meterGroup.combinedMonthlyData.map(() => { return 1 });
     }
-    this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(selectedFacility => {
-      if (selectedFacility) {
-        this.waterUnit = selectedFacility.volumeLiquidUnit;
-        this.energyUnit = selectedFacility.energyUnit;
-      }
-    });
-  }
-
-  ngOnDestroy() {
-    this.selectedFacilitySub.unsubscribe();
   }
 
   setOrderDataField(str: string) {

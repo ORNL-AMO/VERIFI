@@ -133,11 +133,15 @@
                 Group</button>
         </div>
         <div class="pr-2 pl-2" *ngIf="dataDisplay == 'table'">
-            <app-meter-group-table class="p-2" *ngFor="let meterGroup of meterGroupType.meterGroups; let index = index;" [meterGroup]="meterGroup"
-                [itemsPerPage]="itemsPerPage" [index]="index" [meterGroupType]="meterGroupType"></app-meter-group-table>
+            <app-meter-group-table class="p-2" *ngFor="let meterGroup of meterGroupType.meterGroups; let index = index;"
+                [meterGroup]="meterGroup" [itemsPerPage]="itemsPerPage" [index]="index"
+                [meterGroupType]="meterGroupType" [waterUnit]="waterUnit" [energyUnit]="energyUnit">
+            </app-meter-group-table>
         </div>
         <div *ngIf="dataDisplay == 'graph'">
-            <app-meter-group-chart *ngFor="let meterGroup of meterGroupType.meterGroups" [meterGroup]="meterGroup">
+            <app-meter-group-chart *ngFor="let meterGroup of meterGroupType.meterGroups" [meterGroup]="meterGroup"
+                [meterGroupType]="meterGroupType" [waterUnit]="waterUnit" [energyUnit]="energyUnit"
+                [displayGraphCost]="displayGraphCost" [displayGraphEnergy]="displayGraphEnergy">
             </app-meter-group-chart>
         </div>
     </div>
