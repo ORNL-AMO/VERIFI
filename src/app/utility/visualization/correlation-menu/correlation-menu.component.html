@@ -13,6 +13,12 @@
                     (click)="toggleMeterOption(index)">{{option.meter.name}}</button>
             </div>
         </div>
+        <div *ngIf="meterDataOption == 'groups'">
+            <div *ngFor="let option of meterGroupOptions; let index = index;">
+                <button class="btn w-100 mb-0 btn-sm btn-outline" [ngClass]="{'btn-primary-4': option.selected}"
+                    (click)="toggleMeterGroupOption(index)">{{option.meterGroup.name}}</button>
+            </div>
+        </div>
         <div class="w-100 p-1 border-bottom"></div>
         <div *ngFor="let option of predictorOptions; let index = index;">
             <button class="btn w-100 mb-0 btn-sm btn-outline" [ngClass]="{'btn-primary-4': option.selected}"

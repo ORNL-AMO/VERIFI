@@ -6,6 +6,7 @@ import { PlotDataItem } from 'src/app/models/visualization';
 import { VisualizationStateService } from './visualization-state.service';
 import * as _ from 'lodash';
 import { globalVariables } from 'src/environments/environment';
+import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 
 @Component({
   selector: 'app-visualization',
@@ -21,7 +22,10 @@ export class VisualizationComponent implements OnInit {
   facilityPredictorsSub: Subscription;
   meterOptionsSub: Subscription;
   predictorsOptionsSub: Subscription;
+  meterGroupOptionsSub: Subscription;
+  meterDataOptionSub: Subscription;
   plotDataSub: Subscription;
+  meterGroupSub: Subscription;
   numberOfOptionsSelected: number;
   globalVariables = globalVariables;
   minMonth: number;
@@ -30,7 +34,7 @@ export class VisualizationComponent implements OnInit {
   maxYear: number;
   years: Array<number>;
   constructor(private visualizationStateService: VisualizationStateService, private predictorDbService: PredictordbService,
-    private utilityMeterDbService: UtilityMeterdbService) { }
+    private utilityMeterDbService: UtilityMeterdbService, private utilityMeterGroupDbService: UtilityMeterGroupdbService) { }
 
   ngOnInit(): void {
     this.selectedChartSub = this.visualizationStateService.selectedChart.subscribe(val => {
@@ -46,6 +50,7 @@ export class VisualizationComponent implements OnInit {
     this.metersSub = this.utilityMeterDbService.facilityMeters.subscribe(facilityMeters => {
       if (facilityMeters) {
         this.visualizationStateService.setMeterOptions(facilityMeters);
+        this.visualizationStateService.setMeterGroupOptions(facilityMeters)
       }
     });
 
@@ -56,6 +61,14 @@ export class VisualizationComponent implements OnInit {
     this.predictorsOptionsSub = this.visualizationStateService.predictorOptions.subscribe(() => {
       this.visualizationStateService.setData();
     });
+
+    this.meterDataOptionSub = this.visualizationStateService.meterDataOption.subscribe(val => {
+      this.visualizationStateService.setData();
+    });
+
+    this.meterGroupOptionsSub = this.visualizationStateService.meterGroupOptions.subscribe(val => {
+      this.visualizationStateService.setData();
+    })
 
     this.plotDataSub = this.visualizationStateService.plotData.subscribe(plotData => {
       this.numberOfOptionsSelected = plotData.length;
@@ -72,6 +85,8 @@ export class VisualizationComponent implements OnInit {
     this.meterOptionsSub.unsubscribe();
     this.predictorsOptionsSub.unsubscribe();
     this.plotDataSub.unsubscribe();
+    this.meterGroupOptionsSub.unsubscribe();
+    this.meterDataOptionSub.unsubscribe();
     this.visualizationStateService.dateRange.next({ minDate: undefined, maxDate: undefined });
   }
 

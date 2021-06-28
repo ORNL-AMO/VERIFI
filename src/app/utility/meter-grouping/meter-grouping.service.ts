@@ -68,7 +68,7 @@ export class MeterGroupingService {
         group.groupData = groupMeters;
         group.totalEnergyUse = _.sumBy(groupMeterData, 'energyUse');
         group.totalConsumption = _.sumBy(groupMeterData, 'energyConsumption');
-        group.calanderizedData = this.combineCalanderizedMeterData(calanderizedMeterData);
+        group.combinedMonthlyData = this.combineCalanderizedMeterData(calanderizedMeterData);
       } else {
         group.groupData = [];
         group.totalConsumption = 0;
@@ -110,7 +110,7 @@ export class MeterGroupingService {
       totalConsumption: _.sumBy(groupMeterData, 'energyConsumption'),
       groupData: energyMeters,
       visible: true,
-      calanderizedData: this.combineCalanderizedMeterData(calanderizedMeterData)
+      combinedMonthlyData: this.combineCalanderizedMeterData(calanderizedMeterData)
     }
     let energyGroup: MeterGroupType = meterGroupTypes.find(meterGroup => { return meterGroup.groupType == groupType })
     if (energyGroup) {

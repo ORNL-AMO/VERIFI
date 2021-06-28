@@ -321,10 +321,12 @@ export class CalanderizationService {
     return lastBill;
   }
 
-  getLastBillEntryFromCalanderizedMeterData(calanderizedMeterData: Array<CalanderizedMeter>): MonthlyData {
-    let monthlyData: Array<MonthlyData> = calanderizedMeterData.flatMap(data => {
-      return data.monthlyData;
-    })
+  getLastBillEntryFromCalanderizedMeterData(calanderizedMeterData: Array<CalanderizedMeter>, monthlyData?: Array<MonthlyData>): MonthlyData {
+    if (!monthlyData) {
+      monthlyData = calanderizedMeterData.flatMap(data => {
+        return data.monthlyData;
+      });
+    }
     let lastBill: MonthlyData = _.maxBy(monthlyData, (data: MonthlyData) => {
       let date = new Date();
       date.setFullYear(data.year, data.monthNumValue);
@@ -333,10 +335,12 @@ export class CalanderizationService {
     return lastBill;
   }
 
-  getFirstBillEntryFromCalanderizedMeterData(calanderizedMeterData: Array<CalanderizedMeter>): MonthlyData {
-    let monthlyData: Array<MonthlyData> = calanderizedMeterData.flatMap(data => {
-      return data.monthlyData;
-    })
+  getFirstBillEntryFromCalanderizedMeterData(calanderizedMeterData: Array<CalanderizedMeter>, monthlyData?: Array<MonthlyData>): MonthlyData {
+    if (!monthlyData) {
+      monthlyData = calanderizedMeterData.flatMap(data => {
+        return data.monthlyData;
+      });
+    }
     let firstBill: MonthlyData = _.minBy(monthlyData, (data: MonthlyData) => {
       let date = new Date();
       date.setFullYear(data.year, data.monthNumValue);

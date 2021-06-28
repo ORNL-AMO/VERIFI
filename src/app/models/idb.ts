@@ -76,7 +76,7 @@ export interface IdbUtilityMeterGroup {
     totalEnergyUse?: number,
     totalConsumption?: number,
     groupData?: Array<IdbUtilityMeter>,
-    calanderizedData?: Array<MonthlyData>,
+    combinedMonthlyData?: Array<MonthlyData>,
     visible?: boolean
 }
 
