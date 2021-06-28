@@ -111,6 +111,10 @@ Facility
     float: left;
     padding: 8px;
     color: #6abb2e;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 160px;
 }
 .facilityMenu .dropdown {
     min-width: 200px;
