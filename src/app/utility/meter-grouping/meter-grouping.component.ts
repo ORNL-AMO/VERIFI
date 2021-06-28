@@ -85,6 +85,7 @@ export class MeterGroupingComponent implements OnInit {
   setGroupTypes() {
     this.setLastBill();
     this.meterGroupTypes = this.meterGroupingService.getMeterGroupTypes(this.facilityMeters);
+    console.log(this.meterGroupTypes);
   }
 
   setEditGroup(group: IdbUtilityMeterGroup) {
