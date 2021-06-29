@@ -1,0 +1,19 @@
+<div *ngIf="meterGroup.combinedMonthlyData && meterGroup.combinedMonthlyData.length > 0">
+    <div #meterGroupingChart id="meterGroupingChart"></div>
+</div>
+
+<div *ngIf="!meterGroup.combinedMonthlyData || meterGroup.combinedMonthlyData.length == 0">
+    <table class="table table-sm">
+        <thead>
+            <tr class="table-mh">
+                <th colspan=5>{{meterGroup.name}}
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <div class="alert alert-info text-center" >
+                No meter data found for {{meterGroup.name}}.
+            </div>
+        </tbody>
+    </table>
+</div>
