@@ -35,10 +35,17 @@
     <div class="row">
         <div class="mb-3 col">
             <label>NAICS Code</label>
-            <input #naicsInput type="text" class="form-control" (input)="this.searchNaics(naicsInput.value)" onfocus="this.select();" minlength="1" maxlength="60">
-            <select formControlName="naics" (change)="saveChanges()">
-                <option *ngFor="let naics of this.naicsCodesFound" [ngValue]="naics.code">{{naics.code}} -
-                    {{naics.industyType}}</option>
+            <select #firstList formControlName="naics1" (change)="updateNaicsList(firstList.value, '2')">
+                <option *ngFor="let naics of this.naicsFirstList" [ngValue]="naics.code">{{naics.code}} -
+                    {{naics.industryType}}</option>
+            </select>
+            <select #secondList formControlName="naics2" (change)="updateNaicsList(secondList.value, '3')">
+                <option *ngFor="let naics of this.naicsSecondList" [ngValue]="naics.code">{{naics.code}} -
+                    {{naics.industryType}}</option>
+            </select>
+            <select formControlName="naics3" (change)="saveChanges()">
+                <option *ngFor="let naics of this.naicsThirdList" [ngValue]="naics.code">{{naics.code}} -
+                    {{naics.industryType}}</option>
             </select>
         </div>
 

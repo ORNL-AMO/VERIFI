@@ -19,7 +19,9 @@ export class AccountManagementService {
       state: [generalInformation.state],
       zip: [generalInformation.zip],
       address: [generalInformation.address],
-      naics: [generalInformation.naics],
+      naics1: [generalInformation.naics1],
+      naics2: [generalInformation.naics2],
+      naics3: [generalInformation.naics3],
       size: [generalInformation.size],
       notes: [generalInformation.notes],
     });
@@ -33,7 +35,9 @@ export class AccountManagementService {
     account.state = form.controls.state.value;
     account.zip = form.controls.zip.value;
     account.address = form.controls.address.value;
-    account.naics = form.controls.naics.value;
+    account.naics1 = form.controls.naics1.value;
+    account.naics2 = form.controls.naics2.value;
+    account.naics3 = form.controls.naics3.value;
     account.notes = form.controls.notes.value;
     return account;
   }
@@ -45,7 +49,9 @@ export class AccountManagementService {
     facility.state = form.controls.state.value;
     facility.zip = form.controls.zip.value;
     facility.address = form.controls.address.value;
-    facility.naics = form.controls.naics.value;
+    facility.naics1 = form.controls.naics1.value;
+    facility.naics2 = form.controls.naics2.value;
+    facility.naics3 = form.controls.naics3.value;
     facility.notes = form.controls.notes.value;
     return facility;
   }
