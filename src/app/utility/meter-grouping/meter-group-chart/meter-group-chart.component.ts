@@ -38,7 +38,7 @@ export class MeterGroupChartComponent implements OnInit {
   }
 
   drawChart() {
-    if (this.meterGroupingChart) {
+    if (this.meterGroupingChart && this.meterGroup.combinedMonthlyData && this.meterGroup.combinedMonthlyData.length != 0) {
       let traceData = new Array();
       let yAxisTitle: string;
       let yAxis2Title: string;
@@ -72,7 +72,7 @@ export class MeterGroupChartComponent implements OnInit {
 
       if (this.displayGraphEnergy) {
         let yData: Array<number>;
-        hoverformat = '$,.0f'
+        hoverformat = ',.0f'
         if (this.meterGroupType.groupType == 'Water' || this.meterGroupType.groupType == 'Other') {
           yData = this.meterGroup.combinedMonthlyData.map(data => { return data.energyConsumption })
           if (this.meterGroupType.groupType == 'Water') {
@@ -105,11 +105,11 @@ export class MeterGroupChartComponent implements OnInit {
       if (this.displayGraphCost) {
         if (!this.displayGraphEnergy) {
           // tickPrefix = "$";
-          hoverformat = ',.0f';
+          hoverformat = '$,.0f';
           yAxisTitle = 'Utility Cost';
         } else {
           // tickPrefix2 = "$";
-          hoverformat2 = ',.0f';
+          hoverformat2 = '$,.0f';
           yAxis2Title = 'Utility Cost';
         }
 

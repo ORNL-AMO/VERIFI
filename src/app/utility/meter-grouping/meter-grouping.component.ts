@@ -8,10 +8,11 @@ import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { CalanderizationService } from '../../shared/helper-services/calanderization.service';
-import { MeterGroupType, MonthlyData } from 'src/app/models/calanderization';
+import { CalanderizedMeter, MeterGroupType, MonthlyData } from 'src/app/models/calanderization';
 import { LoadingService } from 'src/app/shared/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/shared/toast-notifications/toast-notifications.service';
 import { MeterGroupingService } from './meter-grouping.service';
+import { globalVariables } from 'src/environments/environment';
 
 @Component({
   selector: 'app-meter-grouping',
@@ -22,6 +23,7 @@ export class MeterGroupingComponent implements OnInit {
 
   meterGroupTypes: Array<MeterGroupType>;
 
+  globalVariables = globalVariables;
   groupToEdit: IdbUtilityMeterGroup;
   groupToDelete: IdbUtilityMeterGroup;
   facilityMeterDataSub: Subscription;
@@ -38,6 +40,13 @@ export class MeterGroupingComponent implements OnInit {
   displayGraphEnergy: "bar" | "scatter";
   displayGraphCost: "bar" | "scatter";
   itemsPerPage: number = 6;
+  minMonth: number;
+  minYear: number;
+  maxMonth: number;
+  maxYear: number;
+  years: Array<number>;
+  dateRangeSub: Subscription;
+  dateRange: { maxDate: Date, minDate: Date };
   constructor(private utilityMeterGroupDbService: UtilityMeterGroupdbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterDbService: UtilityMeterdbService, private facilityDbService: FacilitydbService, private calanderizationService: CalanderizationService,
     private loadingService: LoadingService, private toastNoticationService: ToastNotificationsService,
@@ -71,7 +80,22 @@ export class MeterGroupingComponent implements OnInit {
       if (this.facilityMeters) {
         this.setGroupTypes();
       }
-    })
+    });
+
+    this.dateRangeSub = this.meterGroupingService.dateRange.subscribe(val => {
+      this.dateRange = val;
+      if (val.maxDate) {
+        this.setGroupTypes();
+        let maxDate: Date = new Date(val.maxDate);
+        this.maxYear = maxDate.getFullYear();
+        this.maxMonth = maxDate.getMonth();
+        let minDate: Date = new Date(val.minDate);
+        this.minMonth = minDate.getMonth();
+        this.minYear = minDate.getFullYear();
+      } else {
+        this.initializeDateRange();
+      }
+    });
   }
 
   ngOnDestroy() {
@@ -79,23 +103,29 @@ export class MeterGroupingComponent implements OnInit {
     this.facilityMeterDataSub.unsubscribe();
     this.facilityMetersSub.unsubscribe();
     this.selectedFacilitySub.unsubscribe();
+    this.dateRangeSub.unsubscribe();
     this.meterGroupingService.dataDisplay = this.dataDisplay;
     this.meterGroupingService.displayGraphEnergy = this.displayGraphEnergy;
     this.meterGroupingService.displayGraphCost = this.displayGraphCost;
   }
 
-  setLastBill() {
-     let lastBill: MonthlyData = this.calanderizationService.getLastBillEntry(this.facilityMeters, false);
-    if (lastBill) {
-      this.lastBillDate = new Date(lastBill.year, lastBill.monthNumValue);
-      this.yearPriorToLastBill = new Date(lastBill.year - 1, lastBill.monthNumValue + 1);
+  initializeDateRange() {
+    this.years = new Array();
+    let calanderizedMeterData: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMeterData(this.facilityMeters, false);
+    let startDateData: MonthlyData = this.calanderizationService.getFirstBillEntryFromCalanderizedMeterData(calanderizedMeterData);
+    let endDateData: MonthlyData = this.calanderizationService.getLastBillEntryFromCalanderizedMeterData(calanderizedMeterData);
+    let startDate: Date = new Date(startDateData.date);
+    let endDate: Date = new Date(endDateData.date);
+    for (let year = startDate.getFullYear(); year <= endDate.getFullYear(); year++) {
+      this.years.push(year);
     }
+    this.meterGroupingService.dateRange.next({ minDate: new Date(startDateData.date), maxDate: new Date(endDateData.date) });
   }
 
   setGroupTypes() {
-    this.setLastBill();
-    this.meterGroupTypes = this.meterGroupingService.getMeterGroupTypes(this.facilityMeters);
-    console.log(this.meterGroupTypes);
+    if (this.dateRange && this.dateRange.maxDate) {
+      this.meterGroupTypes = this.meterGroupingService.getMeterGroupTypes(this.facilityMeters);
+    }
   }
 
   setEditGroup(group: IdbUtilityMeterGroup) {
@@ -157,15 +187,28 @@ export class MeterGroupingComponent implements OnInit {
     }
   }
 
-  setDataDisplay(val: "grouping" | "table" | "graph"){
+  setDataDisplay(val: "grouping" | "table" | "graph") {
     this.dataDisplay = val;
   }
 
-  setDisplayGraphEnergy(val: "bar" | "scatter"){
+  setDisplayGraphEnergy(val: "bar" | "scatter") {
     this.displayGraphEnergy = val;
   }
 
-  setDisplayGraphCost(val: "bar" | "scatter"){
+  setDisplayGraphCost(val: "bar" | "scatter") {
     this.displayGraphCost = val;
+  }
+  setMinDate() {
+    let minDate: Date = new Date(this.minYear, this.minMonth);
+    let dateRange: { minDate: Date, maxDate: Date } = this.meterGroupingService.dateRange.getValue();
+    dateRange.minDate = minDate;
+    this.meterGroupingService.dateRange.next(dateRange);
+  }
+
+  setMaxDate() {
+    let maxDate: Date = new Date(this.maxYear, this.maxMonth);
+    let dateRange: { minDate: Date, maxDate: Date } = this.meterGroupingService.dateRange.getValue();
+    dateRange.maxDate = maxDate;
+    this.meterGroupingService.dateRange.next(dateRange);
   }
 }

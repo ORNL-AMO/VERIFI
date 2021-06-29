@@ -311,3 +311,14 @@ span.date-font-size{
     border-color: #ff7f0f !important;
     border: 1px solid #e46c04!important;
 }
+
+select.form-control{
+    height: min-content !important;
+    margin-top: 10px;
+}
+
+.fa-arrow-right{
+    padding-top: 16px;
+    padding-right: .25rem;
+    padding-left: .25rem;
+}

@@ -4,6 +4,8 @@ import { CalanderizedMeter, LastYearData, MeterGroupType, MonthlyData } from 'sr
 import { IdbUtilityMeter, IdbUtilityMeterGroup } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
+import { BehaviorSubject } from 'rxjs';
+import { globalVariables } from 'src/environments/environment';
 @Injectable({
   providedIn: 'root'
 })
@@ -12,7 +14,10 @@ export class MeterGroupingService {
   dataDisplay: "grouping" | "table" | "graph" = "grouping";
   displayGraphEnergy: "bar" | "scatter" = "bar";
   displayGraphCost: "bar" | "scatter" = "bar";
-  constructor(private utilityMeterGroupDbService: UtilityMeterGroupdbService, private calanderizationService: CalanderizationService) { }
+  dateRange: BehaviorSubject<{ minDate: Date, maxDate: Date }>;
+  constructor(private utilityMeterGroupDbService: UtilityMeterGroupdbService, private calanderizationService: CalanderizationService) {
+    this.dateRange = new BehaviorSubject<{ minDate: Date, maxDate: Date }>({ minDate: undefined, maxDate: undefined });
+  }
 
   getMeterGroupTypes(facilityMeters: Array<IdbUtilityMeter>): Array<MeterGroupType> {
     let lastBill: MonthlyData = this.calanderizationService.getLastBillEntry(facilityMeters, false);
@@ -56,22 +61,18 @@ export class MeterGroupingService {
         meterGroupTypes[i].totalUsage = _.sumBy(meterGroupTypes[i].meterGroups, 'totalConsumption');
       }
     }
-
     return meterGroupTypes;
   }
-
 
   setGroupDataSummary(meterGroups: Array<IdbUtilityMeterGroup>, lastBill: MonthlyData, facilityMeters: Array<IdbUtilityMeter>): Array<IdbUtilityMeterGroup> {
     meterGroups.forEach(group => {
       let groupMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.groupId == group.id });
       if (groupMeters.length != 0) {
-        // let groupMeterIds: Array<number> = groupMeters.map(meter => { return meter.id });
         let calanderizedMeterData: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMeterData(groupMeters, false);
-        let groupMeterData: Array<LastYearData> = this.calanderizationService.getPastYearData(groupMeters, false, lastBill, calanderizedMeterData);
-        group.groupData = groupMeters;
-        group.totalEnergyUse = _.sumBy(groupMeterData, 'energyUse');
-        group.totalConsumption = _.sumBy(groupMeterData, 'energyConsumption');
         group.combinedMonthlyData = this.combineCalanderizedMeterData(calanderizedMeterData);
+        group.groupData = groupMeters;
+        group.totalEnergyUse = _.sumBy(group.combinedMonthlyData, 'energyUse');
+        group.totalConsumption = _.sumBy(group.combinedMonthlyData, 'energyConsumption');
       } else {
         group.groupData = [];
         group.totalConsumption = 0;
@@ -135,20 +136,21 @@ export class MeterGroupingService {
   combineCalanderizedMeterData(calanderizedMeterData: Array<CalanderizedMeter>): Array<MonthlyData> {
     let combinedMeterData: Array<MonthlyData> = new Array();
     let allMonthlyData: Array<MonthlyData> = calanderizedMeterData.flatMap(meterData => { return meterData.monthlyData });
-    let startDateData: MonthlyData = this.calanderizationService.getFirstBillEntryFromCalanderizedMeterData(calanderizedMeterData);
-    let endDateData: MonthlyData = this.calanderizationService.getLastBillEntryFromCalanderizedMeterData(calanderizedMeterData);
-    let startDate: Date = new Date(startDateData.date);
-    let endDate: Date = new Date(endDateData.date);
+    let dateRange: { minDate: Date, maxDate: Date } = this.dateRange.getValue();
+    let startDate: Date = new Date(dateRange.minDate);
+    let endDate: Date = new Date(dateRange.maxDate);
     //todo short one month
     while (startDate < endDate) {
       let filteredData: Array<MonthlyData> = allMonthlyData.filter(monthlyData => {
         let dataDate: Date = new Date(monthlyData.date);
         return (dataDate.getFullYear() == startDate.getFullYear()) && (dataDate.getMonth() == startDate.getMonth())
       });
+
+      let month = globalVariables.months.find(month => {return month.monthNumValue == startDate.getMonth()})
       combinedMeterData.push({
-        month: filteredData[0].month,
-        monthNumValue: filteredData[0].monthNumValue,
-        year: filteredData[0].year,
+        month: month.abbreviation,
+        monthNumValue: month.monthNumValue,
+        year: startDate.getFullYear(),
         energyConsumption: _.sumBy(filteredData, 'energyConsumption'),
         energyUse: _.sumBy(filteredData, 'energyUse'),
         energyCost: _.sumBy(filteredData, 'energyCost'),
