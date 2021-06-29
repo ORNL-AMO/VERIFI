@@ -20,12 +20,10 @@ export class MeterGroupingService {
   }
 
   getMeterGroupTypes(facilityMeters: Array<IdbUtilityMeter>): Array<MeterGroupType> {
-    let lastBill: MonthlyData = this.calanderizationService.getLastBillEntry(facilityMeters, false);
-
     let meterGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.facilityMeterGroups.getValue();
     //group meters by group type and set summaries
     let meterGroupTypes: Array<MeterGroupType> = _.chain(meterGroups).groupBy('groupType').map((value: Array<IdbUtilityMeterGroup>, key: string) => {
-      let meterGroups: Array<IdbUtilityMeterGroup> = this.setGroupDataSummary(value, lastBill, facilityMeters)
+      let meterGroups: Array<IdbUtilityMeterGroup> = this.setGroupDataSummary(value, facilityMeters)
       return {
         meterGroups: meterGroups,
         groupType: key,
@@ -40,17 +38,17 @@ export class MeterGroupingService {
     //Energy (Electricity/Natural Gas)
     let energyMeters: Array<IdbUtilityMeter> = metersWithoutGroups.filter(meter => { return meter.source == 'Electricity' || meter.source == 'Natural Gas' || meter.source == 'Other Fuels' || meter.source == 'Other Energy' });
     if (energyMeters.length != 0) {
-      meterGroupTypes = this.addEnergyMetersWithoutGroups(energyMeters, 'Energy', lastBill, meterGroupTypes);
+      meterGroupTypes = this.addEnergyMetersWithoutGroups(energyMeters, 'Energy', meterGroupTypes);
     }
     //Water/WasteWater
     let waterMeters: Array<IdbUtilityMeter> = metersWithoutGroups.filter(meter => { return meter.source == 'Water' || meter.source == 'Waste Water' });
     if (waterMeters.length != 0) {
-      meterGroupTypes = this.addEnergyMetersWithoutGroups(waterMeters, 'Water', lastBill, meterGroupTypes);
+      meterGroupTypes = this.addEnergyMetersWithoutGroups(waterMeters, 'Water', meterGroupTypes);
     }
     //Other
     let otherMeters: Array<IdbUtilityMeter> = metersWithoutGroups.filter(meter => { return meter.source == 'Other Utility' });
     if (otherMeters.length != 0) {
-      meterGroupTypes = this.addEnergyMetersWithoutGroups(otherMeters, 'Other', lastBill, meterGroupTypes);
+      meterGroupTypes = this.addEnergyMetersWithoutGroups(otherMeters, 'Other', meterGroupTypes);
     }
     //set fraction usage
     for (let i = 0; i < meterGroupTypes.length; i++) {
@@ -64,7 +62,7 @@ export class MeterGroupingService {
     return meterGroupTypes;
   }
 
-  setGroupDataSummary(meterGroups: Array<IdbUtilityMeterGroup>, lastBill: MonthlyData, facilityMeters: Array<IdbUtilityMeter>): Array<IdbUtilityMeterGroup> {
+  setGroupDataSummary(meterGroups: Array<IdbUtilityMeterGroup>, facilityMeters: Array<IdbUtilityMeter>): Array<IdbUtilityMeterGroup> {
     meterGroups.forEach(group => {
       let groupMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.groupId == group.id });
       if (groupMeters.length != 0) {
@@ -98,9 +96,9 @@ export class MeterGroupingService {
     return meterGroups
   }
 
-  addEnergyMetersWithoutGroups(energyMeters: Array<IdbUtilityMeter>, groupType: string, lastBill: MonthlyData, meterGroupTypes: Array<MeterGroupType>) {
+  addEnergyMetersWithoutGroups(energyMeters: Array<IdbUtilityMeter>, groupType: string, meterGroupTypes: Array<MeterGroupType>) {
     let calanderizedMeterData: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMeterData(energyMeters, false);
-    let groupMeterData: Array<LastYearData> = this.calanderizationService.getPastYearData(energyMeters, false, lastBill, calanderizedMeterData);
+    let combinedMonthlyData: Array<MonthlyData> = this.combineCalanderizedMeterData(calanderizedMeterData);
     let meterGroup: IdbUtilityMeterGroup = {
       //randon number id for unsaved
       id: 1000000000000000 * Math.random(),
@@ -111,11 +109,11 @@ export class MeterGroupingService {
       description: 'Meters with no group',
       dateModified: undefined,
       factionOfTotalEnergy: undefined,
-      totalEnergyUse: _.sumBy(groupMeterData, 'energyUse'),
-      totalConsumption: _.sumBy(groupMeterData, 'energyConsumption'),
+      totalEnergyUse: _.sumBy(combinedMonthlyData, 'energyUse'),
+      totalConsumption: _.sumBy(combinedMonthlyData, 'energyConsumption'),
       groupData: energyMeters,
       visible: true,
-      combinedMonthlyData: this.combineCalanderizedMeterData(calanderizedMeterData)
+      combinedMonthlyData: combinedMonthlyData
     }
     let energyGroup: MeterGroupType = meterGroupTypes.find(meterGroup => { return meterGroup.groupType == groupType })
     if (energyGroup) {
@@ -137,6 +135,12 @@ export class MeterGroupingService {
     let combinedMeterData: Array<MonthlyData> = new Array();
     let allMonthlyData: Array<MonthlyData> = calanderizedMeterData.flatMap(meterData => { return meterData.monthlyData });
     let dateRange: { minDate: Date, maxDate: Date } = this.dateRange.getValue();
+    if(!dateRange.maxDate){
+      let startDateData: MonthlyData = this.calanderizationService.getFirstBillEntryFromCalanderizedMeterData(calanderizedMeterData);
+      dateRange.minDate = new Date(startDateData.date);
+      let endDateData: MonthlyData = this.calanderizationService.getLastBillEntryFromCalanderizedMeterData(calanderizedMeterData);
+      dateRange.maxDate = new Date(endDateData.date);
+    }
     let startDate: Date = new Date(dateRange.minDate);
     let endDate: Date = new Date(dateRange.maxDate);
     //todo short one month

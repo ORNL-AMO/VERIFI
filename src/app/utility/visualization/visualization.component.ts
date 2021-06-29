@@ -7,6 +7,7 @@ import { VisualizationStateService } from './visualization-state.service';
 import * as _ from 'lodash';
 import { globalVariables } from 'src/environments/environment';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
+import { MeterGroupingService } from '../meter-grouping/meter-grouping.service';
 
 @Component({
   selector: 'app-visualization',
@@ -34,7 +35,8 @@ export class VisualizationComponent implements OnInit {
   maxYear: number;
   years: Array<number>;
   constructor(private visualizationStateService: VisualizationStateService, private predictorDbService: PredictordbService,
-    private utilityMeterDbService: UtilityMeterdbService, private utilityMeterGroupDbService: UtilityMeterGroupdbService) { }
+    private utilityMeterDbService: UtilityMeterdbService, private utilityMeterGroupDbService: UtilityMeterGroupdbService,
+    private meterGroupingService: MeterGroupingService) { }
 
   ngOnInit(): void {
     this.selectedChartSub = this.visualizationStateService.selectedChart.subscribe(val => {
@@ -50,7 +52,7 @@ export class VisualizationComponent implements OnInit {
     this.metersSub = this.utilityMeterDbService.facilityMeters.subscribe(facilityMeters => {
       if (facilityMeters) {
         this.visualizationStateService.setMeterOptions(facilityMeters);
-        this.visualizationStateService.setMeterGroupOptions(facilityMeters)
+        this.visualizationStateService.setMeterGroupOptions(facilityMeters);
       }
     });
 
@@ -88,6 +90,7 @@ export class VisualizationComponent implements OnInit {
     this.meterGroupOptionsSub.unsubscribe();
     this.meterDataOptionSub.unsubscribe();
     this.visualizationStateService.dateRange.next({ minDate: undefined, maxDate: undefined });
+    this.meterGroupingService.dateRange.next({minDate: undefined, maxDate: undefined});
   }
 
 

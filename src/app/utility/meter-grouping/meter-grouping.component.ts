@@ -85,13 +85,16 @@ export class MeterGroupingComponent implements OnInit {
     this.dateRangeSub = this.meterGroupingService.dateRange.subscribe(val => {
       this.dateRange = val;
       if (val.maxDate) {
-        this.setGroupTypes();
         let maxDate: Date = new Date(val.maxDate);
         this.maxYear = maxDate.getFullYear();
         this.maxMonth = maxDate.getMonth();
         let minDate: Date = new Date(val.minDate);
         this.minMonth = minDate.getMonth();
         this.minYear = minDate.getFullYear();
+        if (!this.years || this.years.length == 0) {
+          this.setYears();
+        }
+        this.setGroupTypes();
       } else {
         this.initializeDateRange();
       }
@@ -110,16 +113,27 @@ export class MeterGroupingComponent implements OnInit {
   }
 
   initializeDateRange() {
-    this.years = new Array();
     let calanderizedMeterData: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMeterData(this.facilityMeters, false);
     let startDateData: MonthlyData = this.calanderizationService.getFirstBillEntryFromCalanderizedMeterData(calanderizedMeterData);
     let endDateData: MonthlyData = this.calanderizationService.getLastBillEntryFromCalanderizedMeterData(calanderizedMeterData);
     let startDate: Date = new Date(startDateData.date);
     let endDate: Date = new Date(endDateData.date);
+    this.setYears(startDate, endDate);
+    this.meterGroupingService.dateRange.next({ minDate: new Date(startDate), maxDate: new Date(endDate) });
+  }
+
+  setYears(startDate?: Date, endDate?: Date) {
+    if (!startDate || !endDate) {
+      let calanderizedMeterData: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMeterData(this.facilityMeters, false);
+      let startDateData: MonthlyData = this.calanderizationService.getFirstBillEntryFromCalanderizedMeterData(calanderizedMeterData);
+      let endDateData: MonthlyData = this.calanderizationService.getLastBillEntryFromCalanderizedMeterData(calanderizedMeterData);
+      startDate = new Date(startDateData.date);
+      endDate = new Date(endDateData.date);
+    }
+    this.years = new Array();
     for (let year = startDate.getFullYear(); year <= endDate.getFullYear(); year++) {
       this.years.push(year);
     }
-    this.meterGroupingService.dateRange.next({ minDate: new Date(startDateData.date), maxDate: new Date(endDateData.date) });
   }
 
   setGroupTypes() {
