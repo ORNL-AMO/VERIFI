@@ -46,3 +46,8 @@ table.table tbody tr:nth-child(even){
 .month-four{
   background-color: lightblue;
 }
+
+
+.table-col{
+  overflow-x: auto;
+}
