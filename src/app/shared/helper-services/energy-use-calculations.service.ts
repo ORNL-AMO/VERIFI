@@ -20,8 +20,6 @@ export class EnergyUseCalculationsService {
       let tmpHeatCapacity: number = this.convertUnitsService.value(.001029).from('ft3').to(startingUnit);
       let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
       heatCapacity = this.convertUnitsService.value(tmpHeatCapacity).from('MMBtu').to(selectedFacility.energyUnit);
-      // let conversionHelper: number = this.convertUnitsService.value(1).from("ft3").to(startingUnit);
-      // heatCapacity = (convertedHeatCapacity / conversionHelper)
     } 
     else if (source == 'Other Fuels' || source == 'Other Energy') {
       if (selectedFuelTypeOption) {
