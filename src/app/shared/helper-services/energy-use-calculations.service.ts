@@ -19,9 +19,7 @@ export class EnergyUseCalculationsService {
     else if (source == 'Natural Gas') {
       let tmpHeatCapacity: number = this.convertUnitsService.value(.001029).from('ft3').to(startingUnit);
       let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-      let convertedHeatCapacity: number = this.convertUnitsService.value(tmpHeatCapacity).from('MMBtu').to(selectedFacility.energyUnit);
-      let conversionHelper: number = this.convertUnitsService.value(1).from("ft3").to(startingUnit);
-      heatCapacity = (convertedHeatCapacity / conversionHelper)
+      heatCapacity = this.convertUnitsService.value(tmpHeatCapacity).from('MMBtu').to(selectedFacility.energyUnit);
     } 
     else if (source == 'Other Fuels' || source == 'Other Energy') {
       if (selectedFuelTypeOption) {
