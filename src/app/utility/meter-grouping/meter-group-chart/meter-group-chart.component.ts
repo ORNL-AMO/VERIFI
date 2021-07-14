@@ -131,6 +131,7 @@ export class MeterGroupChartComponent implements OnInit {
         title: {
           text: this.meterGroup.name,
           font: {
+            family: "Roboto"
             size: 18
           },
         },
@@ -141,6 +142,7 @@ export class MeterGroupChartComponent implements OnInit {
           title: {
             text: yAxisTitle,
             font: {
+              family: "Roboto"
               size: 16
             },
             standoff: 18
@@ -155,6 +157,7 @@ export class MeterGroupChartComponent implements OnInit {
           title: {
             text: yAxis2Title,
             font: {
+              family: "Roboto"
               size: 16
             },
             standoff: 18

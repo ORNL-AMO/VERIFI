@@ -103,7 +103,7 @@ export class EnergyUseHeatMapComponent implements OnInit {
               y: heatMapData.facilityName + ' (' + heatMapData.years[i] + ')',
               text: textPrefix + Math.round(zData[i][j]).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
               font: {
-                // family: 'Arial',
+                family: 'Roboto',
                 size: 12,
                 // color: 'rgb(50, 171, 96)'
                 color: 'white',
