@@ -121,6 +121,7 @@ export class CalanderizationChartComponent implements OnInit {
         title: {
           text: this.meterData.meter.name,
           font: {
+            family: 'Roboto'
             size: 18
           },
         },
@@ -131,6 +132,7 @@ export class CalanderizationChartComponent implements OnInit {
           title: {
             text: yAxisTitle,
             font: {
+              family: 'Roboto'
               size: 16
             },
             standoff: 18
@@ -145,6 +147,7 @@ export class CalanderizationChartComponent implements OnInit {
           title: {
             text: yAxis2Title,
             font: {
+              family: 'Roboto'
               size: 16
             },
             standoff: 18

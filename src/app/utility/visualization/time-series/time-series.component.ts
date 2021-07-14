@@ -69,6 +69,7 @@ export class TimeSeriesComponent implements OnInit {
       title: {
         text: 'Time Series',
         font: {
+          family: 'Roboto'
           size: 18
         },
       },
@@ -79,6 +80,7 @@ export class TimeSeriesComponent implements OnInit {
         title: {
           text: 'Energy Consumption',
           font: {
+            family: 'Roboto'
             size: 16
           },
           standoff: 18
@@ -89,6 +91,7 @@ export class TimeSeriesComponent implements OnInit {
         title: {
           text: 'Predictor Usage',
           font: {
+            family: 'Roboto'
             size: 16
           },
           standoff: 18

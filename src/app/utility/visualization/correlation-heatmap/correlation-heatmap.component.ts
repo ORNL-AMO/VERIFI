@@ -103,6 +103,7 @@ export class CorrelationHeatmapComponent implements OnInit {
           y: yValues[j],
           text: zValues[j][i],
           font: {
+            family: 'Roboto'
             size: 12,
             color: 'white',
           },
