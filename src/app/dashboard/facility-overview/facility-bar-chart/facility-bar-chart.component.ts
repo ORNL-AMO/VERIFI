@@ -209,9 +209,7 @@ export class FacilityBarChartComponent implements OnInit {
       };
       var config = { responsive: true };
 
-      this.plotlyService.newPlot(this.utilityBarChart.nativeElement, traceData, layout, config).then(something => {
-        console.log(something);
-      });
+      this.plotlyService.newPlot(this.utilityBarChart.nativeElement, traceData, layout, config);
     }
   }
 
