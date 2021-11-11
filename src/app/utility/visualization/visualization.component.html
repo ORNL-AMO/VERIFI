@@ -4,7 +4,7 @@
     <div class="d-flex w-100 justify-content-between border-bottom flex-wrap">
         <div class="d-flex">
             <select name="minMonth" [(ngModel)]="minMonth" class="form-control" (change)="setMinDate()">
-                <option class="pr-2" *ngFor="let month of globalVariables.months" [ngValue]="month.monthNumValue">
+                <option class="pr-2" *ngFor="let month of months" [ngValue]="month.monthNumValue">
                     {{month.abbreviation}}</option>
             </select>
 
@@ -17,7 +17,7 @@
             </div>
 
             <select name="maxMonth" [(ngModel)]="maxMonth" class="form-control" (change)="setMaxDate()">
-                <option class="pr-2" *ngFor="let month of globalVariables.months" [ngValue]="month.monthNumValue">
+                <option class="pr-2" *ngFor="let month of months" [ngValue]="month.monthNumValue">
                     {{month.abbreviation}}</option>
             </select>
 

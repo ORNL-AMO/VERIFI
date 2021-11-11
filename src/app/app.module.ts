@@ -100,6 +100,7 @@ import { CorrelationMenuComponent } from './utility/visualization/correlation-me
 import { DataApplicationMenuComponent } from './utility/calanderization/data-application-menu/data-application-menu.component';
 import { MeterGroupTableComponent } from './utility/meter-grouping/meter-group-table/meter-group-table.component';
 import { MeterGroupChartComponent } from './utility/meter-grouping/meter-group-chart/meter-group-chart.component';
+import { NaicsListPipe } from './account-management/general-information-form/naics-list.pipe';
 
 @NgModule({
   declarations: [
@@ -186,6 +187,7 @@ import { MeterGroupChartComponent } from './utility/meter-grouping/meter-group-c
     DataApplicationMenuComponent,
     MeterGroupTableComponent,
     MeterGroupChartComponent,
+    NaicsListPipe,
   ],
   imports: [
     BrowserModule,

@@ -1,10 +1,10 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
+import { Month, Months } from 'src/app/form-data/months';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAccount, IdbFacility } from 'src/app/models/idb';
-import { globalVariables } from 'src/environments/environment';
 import { AccountManagementService } from '../account-management.service';
 
 @Component({
@@ -17,7 +17,7 @@ export class FinancialReportingFormComponent implements OnInit {
   inAccount: boolean;
 
   form: FormGroup;
-  globalVariables = globalVariables;
+  months: Array<Month> = Months;
   selectedFacilitySub: Subscription;
   selectedAccountSub: Subscription;
   selectedAccount: IdbAccount;

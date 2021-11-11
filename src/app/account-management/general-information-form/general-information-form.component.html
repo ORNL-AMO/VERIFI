@@ -1,7 +1,8 @@
 <form [formGroup]="form">
     <div class="mb-3 ">
         <label>{{formNameLabel}} Name <span class="required">*</span></label>
-        <input type="text" class="form-control" formControlName="name" (input)="saveChanges()" onfocus="this.select();" minlength = "1" maxlength="42">
+        <input type="text" class="form-control" formControlName="name" (input)="saveChanges()" onfocus="this.select();"
+            minlength="1" maxlength="42">
     </div>
     <span class="inputError" *ngIf="form.get('name').hasError('required')">{{formNameLabel}} name is required</span>
 
@@ -12,48 +13,59 @@
     </div>
 
     <div class="row">
-        <div class="mb-3 col">
+        <div class="mb-3 col-md-3 col-sm-12">
             <label>City</label>
-            <input type="text" class="form-control" formControlName="city" (input)="saveChanges()" onfocus="this.select();" minlength="1" maxlength="85">
+            <input type="text" class="form-control" formControlName="city" (input)="saveChanges()"
+                onfocus="this.select();" minlength="1" maxlength="85">
         </div>
-        <div class="mb-3 col">
+        <div class="mb-3 col-md-3 col-sm-12">
             <label>State</label>
             <select formControlName="state" (change)="saveChanges()">
-                <option *ngFor="let state of globalVariables.states" [ngValue]="state.name">{{state.name}}</option>
+                <option *ngFor="let state of states" [ngValue]="state.name">{{state.name}}</option>
             </select>
         </div>
-        <div class="mb-3 col">
+        <div class="mb-3 col-md-3 col-sm-12">
             <label>Zip</label>
-            <input type="text" class="form-control" formControlName="zip" (input)="saveChanges()" autocomplete="postal-code" onfocus="this.select();" minlength="1" maxlength="12">
+            <input type="text" class="form-control" formControlName="zip" (input)="saveChanges()"
+                autocomplete="postal-code" onfocus="this.select();" minlength="1" maxlength="12">
         </div>
-        <div class="mb-3 col">
+        <div class="mb-3 col-md-3 col-sm-12">
             <label>Country</label>
-            <input type="text" class="form-control" formControlName="country" (input)="saveChanges()" onfocus="this.select();" minlength="1" maxlength="60">
+            <input type="text" class="form-control" formControlName="country" (input)="saveChanges()"
+                onfocus="this.select();" minlength="1" maxlength="60">
         </div>
     </div>
 
     <div class="row">
-        <div class="mb-3 col">
+        <div class="mb-3 col-md-6 col-sm-12">
             <label>NAICS Code</label>
-            <select #firstList formControlName="naics1" (change)="updateNaicsList(firstList.value, '2')">
-                <option *ngFor="let naics of this.naicsFirstList" [ngValue]="naics.code">{{naics.code}} -
+            <select formControlName="naics1" (change)="checkNAICS()">
+                <option *ngFor="let naics of firstNaicsList" [ngValue]="naics.code">{{naics.code}} -
                     {{naics.industryType}}</option>
             </select>
-            <select #secondList formControlName="naics2" (change)="updateNaicsList(secondList.value, '3')">
-                <option *ngFor="let naics of this.naicsSecondList" [ngValue]="naics.code">{{naics.code}} -
+            <select formControlName="naics2" (change)="checkNAICS()" *ngIf="form.controls.naics1.value">
+                <option *ngFor="let naics of secondNaicsList | naicsList:form.controls.naics1.value"
+                    [ngValue]="naics.code">{{naics.code}} -
                     {{naics.industryType}}</option>
+                <option [ngValue]=null></option>
             </select>
-            <select formControlName="naics3" (change)="saveChanges()">
-                <option *ngFor="let naics of this.naicsThirdList" [ngValue]="naics.code">{{naics.code}} -
+            <select formControlName="naics3" (change)="saveChanges()" *ngIf="form.controls.naics2.value">
+                <option *ngFor="let naics of thirdNaicsList | naicsList:form.controls.naics2.value"
+                    [ngValue]="naics.code">{{naics.code}} -
                     {{naics.industryType}}</option>
+                <option [ngValue]=null></option>
             </select>
         </div>
 
-        <div class="input-group mb-3 col">
+        <div class="mb-3 col-md-6 col-sm-12">
+
             <label>Facility Area</label>
-            <input type="text" class="form-control" formControlName="size" (input)="saveChanges()" onfocus="this.select();" minlength="1" maxlength="60">
-            <span class="unit" *ngIf="unitsOfMeasure === 'Imperial'">ft<sup>2</sup></span>
-            <span class="unit" *ngIf="unitsOfMeasure === 'Metric'">m<sup>2</sup></span>
+            <div class="input-group">
+                <input type="text" class="form-control" formControlName="size" (input)="saveChanges()"
+                    onfocus="this.select();" minlength="1" maxlength="60">
+                <span class="unit" *ngIf="unitsOfMeasure === 'Imperial'">ft<sup>2</sup></span>
+                <span class="unit" *ngIf="unitsOfMeasure === 'Metric'">m<sup>2</sup></span>
+            </div>
         </div>
     </div>
 

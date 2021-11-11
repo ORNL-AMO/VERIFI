@@ -12,7 +12,7 @@ import { CalanderizedMeter, MeterGroupType, MonthlyData } from 'src/app/models/c
 import { LoadingService } from 'src/app/shared/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/shared/toast-notifications/toast-notifications.service';
 import { MeterGroupingService } from './meter-grouping.service';
-import { globalVariables } from 'src/environments/environment';
+import { Month, Months } from 'src/app/form-data/months';
 
 @Component({
   selector: 'app-meter-grouping',
@@ -23,7 +23,7 @@ export class MeterGroupingComponent implements OnInit {
 
   meterGroupTypes: Array<MeterGroupType>;
 
-  globalVariables = globalVariables;
+  months: Array<Month> = Months;
   groupToEdit: IdbUtilityMeterGroup;
   groupToDelete: IdbUtilityMeterGroup;
   facilityMeterDataSub: Subscription;

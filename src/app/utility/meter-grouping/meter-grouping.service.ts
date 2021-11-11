@@ -5,7 +5,7 @@ import { IdbUtilityMeter, IdbUtilityMeterGroup } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { BehaviorSubject } from 'rxjs';
-import { globalVariables } from 'src/environments/environment';
+import { Month, Months } from 'src/app/form-data/months';
 @Injectable({
   providedIn: 'root'
 })
@@ -150,7 +150,7 @@ export class MeterGroupingService {
         return (dataDate.getFullYear() == startDate.getFullYear()) && (dataDate.getMonth() == startDate.getMonth())
       });
 
-      let month = globalVariables.months.find(month => {return month.monthNumValue == startDate.getMonth()})
+      let month: Month = Months.find(month => {return month.monthNumValue == startDate.getMonth()})
       combinedMeterData.push({
         month: month.abbreviation,
         monthNumValue: month.monthNumValue,

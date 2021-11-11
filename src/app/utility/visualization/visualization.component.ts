@@ -5,9 +5,9 @@ import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service
 import { PlotDataItem } from 'src/app/models/visualization';
 import { VisualizationStateService } from './visualization-state.service';
 import * as _ from 'lodash';
-import { globalVariables } from 'src/environments/environment';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { MeterGroupingService } from '../meter-grouping/meter-grouping.service';
+import { Month, Months } from 'src/app/form-data/months';
 
 @Component({
   selector: 'app-visualization',
@@ -28,7 +28,7 @@ export class VisualizationComponent implements OnInit {
   plotDataSub: Subscription;
   meterGroupSub: Subscription;
   numberOfOptionsSelected: number;
-  globalVariables = globalVariables;
+  months: Array<Month> = Months;
   minMonth: number;
   minYear: number;
   maxMonth: number;
