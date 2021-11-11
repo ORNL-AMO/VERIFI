@@ -93,10 +93,7 @@ export class FacilityBarChartComponent implements OnInit {
       this.wasteWaterData = this.getDataByUtility('Waste Water', this.facilityMeters);
       this.otherUtilityData = this.getDataByUtility('Other Utility', this.facilityMeters);
       this.drawChart();
-    } else if (this.utilityBarChart) {
-      let Plotly = this.plotlyService.getPlotly();
-      Plotly.purge(this.utilityBarChart.nativeElement);
-    }
+    } 
   }
 
 
@@ -212,7 +209,9 @@ export class FacilityBarChartComponent implements OnInit {
       };
       var config = { responsive: true };
 
-      this.plotlyService.newPlot(this.utilityBarChart.nativeElement, traceData, layout, config);
+      this.plotlyService.newPlot(this.utilityBarChart.nativeElement, traceData, layout, config).then(something => {
+        console.log(something);
+      });
     }
   }
 
