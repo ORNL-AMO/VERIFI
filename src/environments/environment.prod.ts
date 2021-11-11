@@ -1,21 +1,24 @@
+
+import packageInfo from '../../package.json';
 export const environment = {
-  production: true
+  production: false,
+  version: packageInfo.version
 };
 
 export const globalVariables = {
   months: [
-    { name: 'January', abbreviation: 'Jan'}, 
-    { name: 'February', abbreviation: 'Feb'}, 
-    { name: 'March', abbreviation: 'Mar'}, 
-    { name: 'April', abbreviation: 'Apr'}, 
-    { name: 'May', abbreviation: 'May'},  
-    { name: 'June', abbreviation: 'Jun'}, 
-    { name: 'July', abbreviation: 'Jul'}, 
-    { name: 'August', abbreviation: 'Aug'}, 
-    { name: 'September', abbreviation: 'Sept'}, 
-    { name: 'October', abbreviation: 'Oct'}, 
-    { name: 'November', abbreviation: 'Nov'}, 
-    { name: 'December', abbreviation: 'Dec'}
+    { name: 'January', abbreviation: 'Jan', monthNumValue: 0 },
+    { name: 'February', abbreviation: 'Feb', monthNumValue: 1 },
+    { name: 'March', abbreviation: 'Mar', monthNumValue: 2 },
+    { name: 'April', abbreviation: 'Apr', monthNumValue: 3 },
+    { name: 'May', abbreviation: 'May', monthNumValue: 4 },
+    { name: 'June', abbreviation: 'Jun', monthNumValue: 5 },
+    { name: 'July', abbreviation: 'Jul', monthNumValue: 6 },
+    { name: 'August', abbreviation: 'Aug', monthNumValue: 7 },
+    { name: 'September', abbreviation: 'Sept', monthNumValue: 8 },
+    { name: 'October', abbreviation: 'Oct', monthNumValue: 9 },
+    { name: 'November', abbreviation: 'Nov', monthNumValue: 10 },
+    { name: 'December', abbreviation: 'Dec', monthNumValue: 11 }
   ],
 
   states: [

@@ -1,4 +1,4 @@
-import { IdbUtilityMeter } from "./idb";
+import { IdbUtilityMeter, IdbUtilityMeterGroup } from "./idb";
 
 export interface CalanderizedMeter {
     meter: IdbUtilityMeter,
@@ -47,4 +47,12 @@ export interface CalanderizationFilters {
       minDate: Date,
       maxDate: Date
     }
+  }
+
+  export interface MeterGroupType {
+    meterGroups: Array<IdbUtilityMeterGroup>,
+    groupType: string,
+    id: string,
+    meterGroupIds: Array<string>,
+    totalUsage: number
   }

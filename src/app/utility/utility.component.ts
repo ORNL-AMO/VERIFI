@@ -4,6 +4,7 @@ import { AccountdbService } from '../indexedDB/account-db.service';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
 import { UtilityMeterDatadbService } from '../indexedDB/utilityMeterData-db.service';
 import { IdbAccount, IdbFacility, IdbUtilityMeterData } from '../models/idb';
+import { MeterGroupingService } from './meter-grouping/meter-grouping.service';
 
 @Component({
   selector: 'app-utility',
@@ -14,7 +15,6 @@ export class UtilityComponent implements OnInit {
 
   selectedAccount: IdbAccount;
   selectedFacility: IdbFacility;
-  appRendered: boolean;
   utilityMeterData: Array<IdbUtilityMeterData>;
 
   selectedAccountSub: Subscription;
@@ -22,9 +22,10 @@ export class UtilityComponent implements OnInit {
   utilityDataSub: Subscription;
   
   constructor(
-    public accountdbService: AccountdbService,
-    public facilityDbService: FacilitydbService,
-    public utilityMeterDataDbService: UtilityMeterDatadbService,
+    private accountdbService: AccountdbService,
+    private facilityDbService: FacilitydbService,
+    private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private meterGroupingService: MeterGroupingService
   ) { }
 
   ngOnInit() {
@@ -39,17 +40,13 @@ export class UtilityComponent implements OnInit {
     this.utilityDataSub = this.utilityMeterDataDbService.facilityMeterData.subscribe(utilityMeterData => {
       this.utilityMeterData = utilityMeterData;
     });
-
-    // TEMP MANUAL DELAY TO PREVENT PAGE FLICKERING.
-    // ADDING TICKET TO FIX THIS BUG
-    const self = this;
-    setTimeout(function(){ self.appRendered = true}, 200);
   }
 
   ngOnDestroy() {
     this.selectedAccountSub.unsubscribe();
     this.selectedFacilitySub.unsubscribe();
     this.utilityDataSub.unsubscribe();
+    this.meterGroupingService.dateRange.next({minDate: undefined, maxDate: undefined})
   }
 
 }

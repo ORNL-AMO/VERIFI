@@ -246,10 +246,12 @@ export class CalanderizationService {
     return Math.floor((utc2 - utc1) / _MS_PER_DAY);
   }
 
-  getPastYearData(meters: Array<IdbUtilityMeter>, inAccount: boolean, lastBill: MonthlyData): Array<LastYearData> {
+  getPastYearData(meters: Array<IdbUtilityMeter>, inAccount: boolean, lastBill: MonthlyData, calanderizedMeterData?: Array<CalanderizedMeter>): Array<LastYearData> {
     if (lastBill) {
       //calanderize meters
-      let calanderizedMeterData: Array<CalanderizedMeter> = this.getCalanderizedMeterData(meters, inAccount);
+      if (!calanderizedMeterData) {
+        calanderizedMeterData = this.getCalanderizedMeterData(meters, inAccount);
+      }
       //create array of just the meter data
       let combindedCalanderizedMeterData: Array<MonthlyData> = calanderizedMeterData.flatMap(meterData => {
         return meterData.monthlyData;
@@ -319,10 +321,12 @@ export class CalanderizationService {
     return lastBill;
   }
 
-  getLastBillEntryFromCalanderizedMeterData(calanderizedMeterData: Array<CalanderizedMeter>): MonthlyData {
-    let monthlyData: Array<MonthlyData> = calanderizedMeterData.flatMap(data => {
-      return data.monthlyData;
-    })
+  getLastBillEntryFromCalanderizedMeterData(calanderizedMeterData: Array<CalanderizedMeter>, monthlyData?: Array<MonthlyData>): MonthlyData {
+    if (!monthlyData) {
+      monthlyData = calanderizedMeterData.flatMap(data => {
+        return data.monthlyData;
+      });
+    }
     let lastBill: MonthlyData = _.maxBy(monthlyData, (data: MonthlyData) => {
       let date = new Date();
       date.setFullYear(data.year, data.monthNumValue);
@@ -331,10 +335,12 @@ export class CalanderizationService {
     return lastBill;
   }
 
-  getFirstBillEntryFromCalanderizedMeterData(calanderizedMeterData: Array<CalanderizedMeter>): MonthlyData {
-    let monthlyData: Array<MonthlyData> = calanderizedMeterData.flatMap(data => {
-      return data.monthlyData;
-    })
+  getFirstBillEntryFromCalanderizedMeterData(calanderizedMeterData: Array<CalanderizedMeter>, monthlyData?: Array<MonthlyData>): MonthlyData {
+    if (!monthlyData) {
+      monthlyData = calanderizedMeterData.flatMap(data => {
+        return data.monthlyData;
+      });
+    }
     let firstBill: MonthlyData = _.minBy(monthlyData, (data: MonthlyData) => {
       let date = new Date();
       date.setFullYear(data.year, data.monthNumValue);
@@ -400,11 +406,11 @@ export class CalanderizationService {
         nextBill = orderedMeterData[meterIndex + 1];
         daysFromNext = this.daysBetweenDates(new Date(currentBill.readDate), new Date(nextBill.readDate));
       }
-     
+
       let daysBeforeCurrentBill: number = 0;
       let firstDayOfCurrentMonth: Date = new Date();
       let energyUsePerDayCurrentBill: number = 0;
-     
+
       let daysAfterCurrentBill: number = 0;
       if (daysFromPrevious > 20 && daysFromPrevious < 60 && meterIndex != 0) {
         firstDayOfCurrentMonth = new Date(currentBill.readDate);
@@ -419,7 +425,7 @@ export class CalanderizationService {
         let isEnergyMeter: boolean = this.energyUnitsHelperService.isEnergyMeter(meter.source);
         if (isEnergyMeter) {
           energyUsePerDayCurrentBill = currentBill.totalEnergyUse / daysFromPrevious;
-      }
+        }
         //energy consumption (data input not as energy)
         let isEnergyUnit: boolean = this.energyUnitsHelperService.isEnergyUnit(meter.startingUnit);
         if (!isEnergyUnit && !energyUsePerDayCurrentBill) {
@@ -469,9 +475,9 @@ export class CalanderizationService {
         nextBill = orderedMeterData[meterIndex + 1];
         daysFromNext = this.daysBetweenDates(new Date(currentBill.readDate), new Date(nextBill.readDate));
       }
-     
+
       let energyUsePerDayCurrentBill: number = 0;
-     
+
       let daysAfterCurrentBill: number = 0;
       if (daysFromNext > 20 && daysFromNext < 60) {
         if (nextBill) {
@@ -483,7 +489,7 @@ export class CalanderizationService {
         let isEnergyMeter: boolean = this.energyUnitsHelperService.isEnergyMeter(meter.source);
         if (isEnergyMeter) {
           energyUsePerDayCurrentBill = currentBill.totalEnergyUse / daysFromNext;
-      }
+        }
         //energy consumption (data input not as energy)
         let isEnergyUnit: boolean = this.energyUnitsHelperService.isEnergyUnit(meter.startingUnit);
         if (!isEnergyUnit && !energyUsePerDayCurrentBill) {

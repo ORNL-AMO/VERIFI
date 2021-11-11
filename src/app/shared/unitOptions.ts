@@ -83,7 +83,7 @@ export const VolumeGasOptions: Array<UnitOption> = [
         unitsOfMeasure: 'Imperial'
     },
     {
-        display: 'Normal Meter Cubed (m&#x00B3;)',
+        display: 'Normal Meters Cubed (Nm&#x00B3;)',
         value: 'm3',
         unitsOfMeasure: 'Metric'
     },

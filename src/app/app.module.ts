@@ -98,6 +98,8 @@ import { CorrelationHeatmapComponent } from './utility/visualization/correlation
 import { TimeSeriesComponent } from './utility/visualization/time-series/time-series.component';
 import { CorrelationMenuComponent } from './utility/visualization/correlation-menu/correlation-menu.component';
 import { DataApplicationMenuComponent } from './utility/calanderization/data-application-menu/data-application-menu.component';
+import { MeterGroupTableComponent } from './utility/meter-grouping/meter-group-table/meter-group-table.component';
+import { MeterGroupChartComponent } from './utility/meter-grouping/meter-group-chart/meter-group-chart.component';
 
 @NgModule({
   declarations: [
@@ -182,6 +184,8 @@ import { DataApplicationMenuComponent } from './utility/calanderization/data-app
     TimeSeriesComponent,
     CorrelationMenuComponent,
     DataApplicationMenuComponent,
+    MeterGroupTableComponent,
+    MeterGroupChartComponent,
   ],
   imports: [
     BrowserModule,

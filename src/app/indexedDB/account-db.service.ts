@@ -65,9 +65,9 @@ export class AccountdbService {
     }
 
     add(account: IdbAccount): void {
-        this.dbService.add('accounts', account).subscribe(newAccountId => {
+        this.dbService.add('accounts', account).subscribe(newAccount => {
             this.setAllAccounts();
-            this.setSelectedAccount(newAccountId);
+            this.setSelectedAccount(newAccount.id);
         });
     }
 

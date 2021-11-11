@@ -1,5 +1,5 @@
-<div id="sidebar" role="sidebar">
-    <div class="menuToggle" (click)="toggleSidebar()">
+<div id="sidebar" role="sidebar" (mouseenter)="hoverIn()" (mouseleave)="hoverOut()">
+    <div class="menuToggle" (click)="toggleSidebar(true)">
         <i class="fa fa-align-left" [hidden]="!open"></i>
         <i class="fa fa-align-right" [hidden]="open"></i>
     </div>
