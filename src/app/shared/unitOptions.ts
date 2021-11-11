@@ -84,7 +84,7 @@ export const VolumeGasOptions: Array<UnitOption> = [
     },
     {
         display: 'Normal Meters Cubed (Nm&#x00B3;)',
-        value: 'Nm3',
+        value: 'm3',
         unitsOfMeasure: 'Metric'
     },
     {
