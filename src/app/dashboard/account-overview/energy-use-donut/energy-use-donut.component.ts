@@ -81,9 +81,6 @@ export class EnergyUseDonutComponent implements OnInit {
         responsive: true
       }
       this.plotlyService.newPlot(this.energyUseDonut.nativeElement, data, layout, config);
-    } else if (this.energyUseDonut) {
-      let Plotly = this.plotlyService.getPlotly();
-      Plotly.purge(this.energyUseDonut.nativeElement);
     }
   }
 

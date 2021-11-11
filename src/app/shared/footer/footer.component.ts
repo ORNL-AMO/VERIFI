@@ -1,6 +1,6 @@
 import { Component, isDevMode, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { version } from '../../../../package.json';
+import { environment } from 'src/environments/environment';
 import { AccountdbService } from "../../indexedDB/account-db.service";
 import { FacilitydbService } from "../../indexedDB/facility-db.service";
 
@@ -12,7 +12,7 @@ import { FacilitydbService } from "../../indexedDB/facility-db.service";
 export class FooterComponent implements OnInit {
 
   date: Date = new Date();
-  version: string = version;
+  version: string = environment.version;
   accountCount: number = 0;
   facilityCount: number = 0;
   facilityCountTotal: number = 0;

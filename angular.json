@@ -23,7 +23,25 @@
               "src/assets"
             ],
             "styles": [
-              "src/styles.css",
+              "src/styles/styles.css",
+              "src/styles/pagination.css",
+              "src/styles/sliderToggle.css",
+              "src/styles/profilePicture.css",
+              "src/styles/meterDisplays.css",
+              "src/styles/contentTabs.css",
+              "src/styles/contentContainers.css",
+              "src/styles/sectionHeaders.css",
+              "src/styles/sidebar.css",
+              "src/styles/popovers.css",
+              "src/styles/tables.css",
+              "src/styles/forms.css",
+              "src/styles/arrowsTooltips.css",
+              "src/styles/popupsWindows.css",
+              "src/styles/alerts.css",
+              "src/styles/htmlElements.css",
+              "src/styles/typography.css",
+              "src/styles/buttons.css",
+              "src/styles/toast.css",
               "node_modules/font-awesome/css/font-awesome.css",
               "node_modules/bootstrap/dist/css/bootstrap.min.css"
             ],
@@ -95,7 +113,27 @@
               "src/assets"
             ],
             "styles": [
-              "src/styles.css"
+              "src/styles/styles.css",
+              "src/styles/pagination.css",
+              "src/styles/sliderToggle.css",
+              "src/styles/profilePicture.css",
+              "src/styles/meterDisplays.css",
+              "src/styles/contentTabs.css",
+              "src/styles/contentContainers.css",
+              "src/styles/sectionHeaders.css",
+              "src/styles/sidebar.css",
+              "src/styles/popovers.css",
+              "src/styles/tables.css",
+              "src/styles/forms.css",
+              "src/styles/arrowsTooltips.css",
+              "src/styles/popupsWindows.css",
+              "src/styles/alerts.css",
+              "src/styles/htmlElements.css",
+              "src/styles/typography.css",
+              "src/styles/buttons.css",
+              "src/styles/toast.css",
+              "node_modules/font-awesome/css/font-awesome.css",
+              "node_modules/bootstrap/dist/css/bootstrap.min.css"
             ],
             "scripts": []
           }

@@ -65,9 +65,9 @@ export class AccountdbService {
     }
 
     add(account: IdbAccount): void {
-        this.dbService.add('accounts', account).subscribe(newAccountId => {
+        this.dbService.add('accounts', account).subscribe(newAccount => {
             this.setAllAccounts();
-            this.setSelectedAccount(newAccountId);
+            this.setSelectedAccount(newAccount.id);
         });
     }
 
@@ -130,10 +130,12 @@ export class AccountdbService {
                 energyReductionPercent: 0,
                 energyReductionBaselineYear: 0,
                 energyReductionTargetYear: 0,
+                energyIsAbsolute: true,
                 greenhouseReductionGoal: false,
                 greenhouseReductionPercent: 0,
                 greenhouseReductionBaselineYear: 0,
                 greenhouseReductionTargetYear: 0,
+                greenhouseIsAbsolute: true,
                 renewableEnergyGoal: false,
                 renewableEnergyPercent: 0,
                 renewableEnergyBaselineYear: 0,
@@ -142,10 +144,12 @@ export class AccountdbService {
                 wasteReductionPercent: 0,
                 wasteReductionBaselineYear: 0,
                 wasteReductionTargetYear: 0,
+                wasteIsAbsolute: true,
                 waterReductionGoal: false,
                 waterReductionPercent: 0,
                 waterReductionBaselineYear: 0,
                 waterReductionTargetYear: 0,
+                waterIsAbsolute: true
             },
             fiscalYear: 'calendarYear',
             fiscalYearMonth: 'January',

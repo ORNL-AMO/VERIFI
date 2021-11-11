@@ -65,7 +65,7 @@ export class CalanderizationChartComponent implements OnInit {
 
       if (this.displayGraphEnergy) {
         let yData: Array<number>;
-        hoverformat = '$,.0f'
+        hoverformat = ',.0f'
         if (this.meterData.showConsumption) {
           // tickSuffix = " " + this.meterData.consumptionUnit;
           yAxisTitle = 'Utility Consumption (' + this.meterData.consumptionUnit + ')';
@@ -95,11 +95,11 @@ export class CalanderizationChartComponent implements OnInit {
       if (this.displayGraphCost) {
         if (!this.displayGraphEnergy) {
           // tickPrefix = "$";
-          hoverformat = ',.0f';
+          hoverformat = '$,.0f';
           yAxisTitle = 'Utility Cost';
         } else {
           // tickPrefix2 = "$";
-          hoverformat2 = ',.0f';
+          hoverformat2 = '$,.0f';
           yAxis2Title = 'Utility Cost';
         }
 

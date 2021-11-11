@@ -1,0 +1,36 @@
+
+/*
+Alerts
+======================================================== */
+.alert {
+    padding: 5px !important;
+    margin: 5px 0px!important;
+    width: 100%;
+  }
+  .alert-info {
+    color: #2b77a9;
+    background-color: #dff0f4;
+    border-color: #c9d7e2;
+  }
+  .alert-warning {
+    color: #77520d;
+    background-color: #fdead4;
+    border: 1px solid #decbb6;
+  }
+  .alert-danger {
+    color: #923d15;
+    background-color: #f0d3ca;
+    border-color: #d0bab3;
+  }
+  .alert-info i {
+    color: #2b77a9;
+    margin: 5px;
+  }
+  .alert-warning i {
+    color: #856404;
+    margin: 5px;
+  }
+  .alert-danger i {
+    color: #923d15;
+    margin: 5px;
+  }

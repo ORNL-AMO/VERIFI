@@ -3,11 +3,11 @@
     <label class="checkbox mb-3">When is your fiscal year? </label>
 
     <input type="radio" class="rowToggle" name="fiscalYear" formControlName="fiscalYear" value="calendarYear"
-        (change)="saveChanges()" id="calendarYear">
+        (change)="saveChanges()" id="calendarYear" maxlength="4">
     <label class="checkbox" for="calendarYear">Calendar Year</label>
 
     <input type="radio" class="rowToggle" name="fiscalYear" formControlName="fiscalYear" value="nonCalendarYear"
-        (change)="saveChanges()" id="nonCalendarYear">
+        (change)="saveChanges()" id="nonCalendarYear" maxlength="9">
     <label class="checkbox" for="nonCalendarYear">Non Calendar Year</label>
 
     <div class="row" *ngIf="form.controls.fiscalYear.value === 'nonCalendarYear'">

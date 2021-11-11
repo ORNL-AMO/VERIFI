@@ -4,7 +4,7 @@
 The Department of Energy Advanced Manufacturing Office has tasked Oak Ridge National Laboratory to develop a tool to track, visualize, analyze and even forecast facility utility data in industrial settings. This tool will incorporate and expand on several existing DOE tools (EnPI, EnPI Lite, Energy Footprint Tool, Plant Energy Profiler), most of which currently are excel-based or excel-add ons. This project will integrate them into a common, open-source framework which is harmonized with other DOE software tools – mainly the DOE’s [MEASUR tool suite](https://github.com/ORNL-AMO/AMO-Tools-Desktop).
 
 ## Dependencies
-- Node.js (https://nodejs.org/en/)
+- Node.js (https://nodejs.org/en/) (v14.15.0 is best option)
 
 
 ## Build
@@ -12,9 +12,11 @@ The Department of Energy Advanced Manufacturing Office has tasked Oak Ridge Nati
 
 - To install all required packages: `npm install`
 
-- Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
+- Run `npm run build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
 
 - To start the electron app: `npm run electron`
+
+- `npm run dist` will create electron installers for your operating system
 
 
 ## Running tests

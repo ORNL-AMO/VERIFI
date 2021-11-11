@@ -31,7 +31,7 @@
     </div>
 </div>
 
-<div class="row no-margin flex-grow-1" *ngIf="(selectedAccount && selectedFacility) && appRendered">
+<div class="row no-margin flex-grow-1" *ngIf="(selectedAccount && selectedFacility)">
     <div class="col">
         <router-outlet></router-outlet>
     </div>
@@ -40,7 +40,7 @@
     </div>
 </div>
 
-<div *ngIf="(!selectedAccount || !selectedFacility) && appRendered">
+<div *ngIf="(!selectedAccount || !selectedFacility)">
     <div class="wrapper main-content">
         <h4>Info</h4>
         <p class="alert alert-warning"><i class="fa fa-info-circle"></i> No account or facility selected. <a routerLink="/account-summary">Return to dashboard</a></p>

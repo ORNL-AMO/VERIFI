@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { IdbUtilityMeter, PredictorData } from 'src/app/models/idb';
+import { IdbUtilityMeter, IdbUtilityMeterGroup, PredictorData } from 'src/app/models/idb';
 import { VisualizationStateService } from '../visualization-state.service';
 
 @Component({
@@ -14,6 +14,11 @@ export class CorrelationMenuComponent implements OnInit {
   meterOptionsSub: Subscription;
   predictorOptions: Array<{ predictor: PredictorData, selected: boolean }>;
   predictorOptionsSub: Subscription;
+  meterDataOptionSub: Subscription;
+  meterDataOption: 'meters' | 'groups';
+
+  meterGroupOptions: Array<{meterGroup: IdbUtilityMeterGroup, selected: boolean}>;
+  meterGroupOptionsSub: Subscription;
   constructor(private visualizationStateService: VisualizationStateService) { }
 
   ngOnInit(): void {
@@ -24,11 +29,21 @@ export class CorrelationMenuComponent implements OnInit {
     this.predictorOptionsSub = this.visualizationStateService.predictorOptions.subscribe(val => {
       this.predictorOptions = val;
     });
+
+    this.meterDataOptionSub = this.visualizationStateService.meterDataOption.subscribe(val => {
+      this.meterDataOption = val;
+    });
+
+    this.meterGroupOptionsSub = this.visualizationStateService.meterGroupOptions.subscribe(val => {
+      this.meterGroupOptions = val;
+    });
   }
 
-  ngOnDestroy(){
+  ngOnDestroy() {
     this.meterOptionsSub.unsubscribe();
     this.predictorOptionsSub.unsubscribe();
+    this.meterDataOptionSub.unsubscribe();
+    this.meterGroupOptionsSub.unsubscribe();
   }
 
   toggleMeterOption(index: number) {
@@ -41,5 +56,13 @@ export class CorrelationMenuComponent implements OnInit {
     this.visualizationStateService.predictorOptions.next(this.predictorOptions);
   }
 
+  toggleMeterGroupOption(index: number){
+    this.meterGroupOptions[index].selected = !this.meterGroupOptions[index].selected;
+    this.visualizationStateService.meterGroupOptions.next(this.meterGroupOptions);
+  }
+
+  saveDataOption() {
+    this.visualizationStateService.meterDataOption.next(this.meterDataOption);
+  }
 
 }

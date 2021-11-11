@@ -7,9 +7,20 @@
             <label>Reduction Goal</label>
             <div class="input-group mb-3">
                 <input type="number" class="form-control" formControlName="energyReductionPercent"
-                    (input)="saveChanges();">
+                    (input)="saveChanges();" min="0" max="100">
                 <span class="unit">%</span>
             </div>
+        </div>
+        <div class="col" [hidden]="!form.controls.energyReductionGoal.value">        
+            <label class="checkbox mb-3">Is goal for absolute energy or energy intensity?</label>
+
+            <input type="radio" class="rowToggle" name="energyIsAbsolute" formControlName="energyIsAbsolute" [value]="true"
+                (change)="saveChanges()" id="energyAbsolute">
+            <label class="checkbox" for="energyAbsolute">Absolute</label>
+        
+            <input type="radio" class="rowToggle" name="energyIsAbsolute" formControlName="energyIsAbsolute" [value]="false"
+                (change)="saveChanges()" id="energyIntensity">
+            <label class="checkbox" for="energyIntensity">Intensity</label>        
         </div>
         <div class="col" [hidden]="!form.controls.energyReductionGoal.value">
             <label>Baseline Year</label>
@@ -33,9 +44,20 @@
             <label>Reduction Goal</label>
             <div class="input-group mb-3">
                 <input type="number" class="form-control" formControlName="greenhouseReductionPercent"
-                    (input)="saveChanges();">
+                    (input)="saveChanges();" min="0" max="100">
                 <span class="unit">%</span>
             </div>
+        </div>
+        <div class="col" [hidden]="!form.controls.greenhouseReductionGoal.value">        
+            <label class="checkbox mb-3">Is goal for absolute energy or energy intensity?</label>
+
+            <input type="radio" class="rowToggle" name="greenhouseIsAbsolute" formControlName="greenhouseIsAbsolute" [value]="true"
+                (change)="saveChanges()" id="greenhouseAbsolute">
+            <label class="checkbox" for="greenhouseAbsolute">Absolute</label>
+        
+            <input type="radio" class="rowToggle" name="greenhouseIsAbsolute" formControlName="greenhouseIsAbsolute" [value]="false"
+                (change)="saveChanges()" id="greenhouseIntensity">
+            <label class="checkbox" for="greenhouseIntensity">Intensity</label>        
         </div>
         <div class="col" [hidden]="!form.controls.greenhouseReductionGoal.value">
             <label>Baseline Year</label>
@@ -59,7 +81,7 @@
             <label>Implementation Goal</label>
             <div class="input-group mb-3">
                 <input type="number" class="form-control" formControlName="renewableEnergyPercent"
-                    (input)="saveChanges();">
+                    (input)="saveChanges();" min="0" max="100">
                 <span class="unit">%</span>
             </div>
         </div>
@@ -85,9 +107,20 @@
             <label>Reduction Goal</label>
             <div class="input-group mb-3">
                 <input type="number" class="form-control" formControlName="wasteReductionPercent"
-                    (input)="saveChanges();">
+                    (input)="saveChanges();" min="0" max="100">
                 <span class="unit">%</span>
             </div>
+        </div>
+        <div class="col" [hidden]="!form.controls.wasteReductionGoal.value">        
+            <label class="checkbox mb-3">Is goal for absolute energy or energy intensity?</label>
+
+            <input type="radio" class="rowToggle" name="wasteIsAbsolute" formControlName="wasteIsAbsolute" [value]="true"
+                (change)="saveChanges()" id="wasteAbsolute">
+            <label class="checkbox" for="wasteAbsolute">Absolute</label>
+        
+            <input type="radio" class="rowToggle" name="wasteIsAbsolute" formControlName="wasteIsAbsolute" [value]="false"
+                (change)="saveChanges()" id="wasteIntensity">
+            <label class="checkbox" for="wasteIntensity">Intensity</label>        
         </div>
         <div class="col" [hidden]="!form.controls.wasteReductionGoal.value">
             <label>Baseline Year</label>
@@ -111,9 +144,20 @@
             <label>Reduction Goal</label>
             <div class="input-group mb-3">
                 <input type="number" class="form-control" formControlName="waterReductionPercent"
-                    (input)="saveChanges();">
+                    (input)="saveChanges();" min="0" max="100">
                 <span class="unit">%</span>
             </div>
+        </div>
+        <div class="col" [hidden]="!form.controls.waterReductionGoal.value">        
+            <label class="checkbox mb-3">Is goal for absolute energy or energy intensity?</label>
+
+            <input type="radio" class="rowToggle" name="waterIsAbsolute" formControlName="waterIsAbsolute" [value]="true"
+                (change)="saveChanges()" id="waterAbsolute">
+            <label class="checkbox" for="waterAbsolute">Absolute</label>
+        
+            <input type="radio" class="rowToggle" name="waterIsAbsolute" formControlName="waterIsAbsolute" [value]="false"
+                (change)="saveChanges()" id="waterIntensity">
+            <label class="checkbox" for="waterIntensity">Intensity</label>        
         </div>
         <div class="col" [hidden]="!form.controls.waterReductionGoal.value">
             <label>Baseline Year</label>
