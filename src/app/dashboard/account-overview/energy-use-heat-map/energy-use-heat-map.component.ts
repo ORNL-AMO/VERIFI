@@ -146,9 +146,6 @@ export class EnergyUseHeatMapComponent implements OnInit {
         this.facilityHeatMapData.push(facilityHeatMapData);
       });
       this.drawChart();
-    } else if (this.energyUseHeatMap) {
-      let Plotly = this.plotlyService.getPlotly();
-      Plotly.purge(this.energyUseHeatMap.nativeElement);
     }
   }
 }

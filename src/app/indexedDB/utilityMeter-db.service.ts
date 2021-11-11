@@ -84,7 +84,7 @@ export class UtilityMeterdbService {
         });
     }
 
-    addWithObservable(utilityMeter: IdbUtilityMeter): Observable<number> {
+    addWithObservable(utilityMeter: IdbUtilityMeter): Observable<IdbUtilityMeter> {
         utilityMeter.visible = true;
         return this.dbService.add('utilityMeter', utilityMeter);
     }

@@ -62,4 +62,6 @@ tbody tr.use-and-consumption td{
     left: 35px;
     right: 35px;
     width: auto;
+    max-height: 90vh;
+    overflow-y: auto;
 }

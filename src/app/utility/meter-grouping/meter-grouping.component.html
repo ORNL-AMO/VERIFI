@@ -1,7 +1,76 @@
 <div class="wrapper main-content">
-    <h4>Meter Grouping
-        <span class="pull-right date-font-size">({{yearPriorToLastBill | date: 'MMM, y'}} - {{lastBillDate | date: 'MMM, y'}})</span>
-    </h4>
+    <h4>Meter Grouping</h4>
+    <div class="controls pb-0 d-flex w-100 justify-content-between flex-wrap">
+
+        <div class="d-flex">
+            <select name="minMonth" [(ngModel)]="minMonth" class="form-control" (change)="setMinDate()">
+                <option class="pr-2" *ngFor="let month of globalVariables.months" [ngValue]="month.monthNumValue">
+                    {{month.abbreviation}}</option>
+            </select>
+
+            <select name="minYear" [(ngModel)]="minYear" class="form-control" (change)="setMinDate()">
+                <option class="pr-2" *ngFor="let year of years" [ngValue]="year">{{year}}</option>
+            </select>
+
+            <div class="pl-1 pr-1">
+                <span class="fa fa-arrow-right"></span>
+            </div>
+
+            <select name="maxMonth" [(ngModel)]="maxMonth" class="form-control" (change)="setMaxDate()">
+                <option class="pr-2" *ngFor="let month of globalVariables.months" [ngValue]="month.monthNumValue">
+                    {{month.abbreviation}}</option>
+            </select>
+
+            <select name="maxYear" [(ngModel)]="maxYear" class="form-control" (change)="setMaxDate()">
+                <option class="pr-2" *ngFor="let year of years" [ngValue]="year">{{year}}</option>
+            </select>
+        </div>
+
+        <div class="d-flex">
+
+            <!--Items Per Page-->
+            <div class="items-per-page" *ngIf="dataDisplay == 'table'">
+                <span>Show </span>
+                <select [(ngModel)]="itemsPerPage">
+                    <option [ngValue]=6>6</option>
+                    <option [ngValue]=12>12</option>
+                    <option [ngValue]=24>24</option>
+                    <option [ngValue]=36>36</option>
+                    <option [ngValue]=48>48</option>
+                    <option [ngValue]=60>60</option>
+                    <option [ngValue]=999999999999>All</option>
+                </select>
+            </div>
+
+            <!--Chart Controls-->
+            <div *ngIf="dataDisplay == 'graph'">
+                <span>Utility </span>
+                <div class="btn-group pr-2 mr-2">
+                    <button class="btn" [ngClass]="{'btn-solid-utility': displayGraphEnergy == 'bar'}"
+                        (click)="setDisplayGraphEnergy('bar')"><span class="fa fa-bar-chart"></span></button>
+                    <button class="btn" [ngClass]="{'btn-solid-utility': displayGraphEnergy == 'scatter'}"
+                        (click)="setDisplayGraphEnergy('scatter')"><span class="fa fa-line-chart"></span></button>
+                </div>
+
+                <span>Cost </span>
+                <div class="btn-group pr-2 mr-2">
+                    <button class="btn" [ngClass]="{'btn-solid-cost': displayGraphCost == 'bar'}"
+                        (click)="setDisplayGraphCost('bar')"><span class="fa fa-bar-chart"></span></button>
+                    <button class="btn" [ngClass]="{'btn-solid-cost': displayGraphCost == 'scatter'}"
+                        (click)="setDisplayGraphCost('scatter')"><span class="fa fa-line-chart"></span></button>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn" [ngClass]="{'btn-solid': dataDisplay == 'grouping'}"
+                    (click)="setDataDisplay('grouping')">Set Groups</button>
+                <button class="btn" [ngClass]="{'btn-solid': dataDisplay == 'table'}"
+                    (click)="setDataDisplay('table')">Table</button>
+                <button class="btn" [ngClass]="{'btn-solid': dataDisplay == 'graph'}"
+                    (click)="setDataDisplay('graph')">Graph</button>
+            </div>
+        </div>
+    </div>
+
     <br>
     <div *ngFor="let meterGroupType of meterGroupTypes" id={{meterGroupType.id}}>
         <div class="group-section">
@@ -20,7 +89,7 @@
                 </span>
             </h5>
         </div>
-        <div class="group-section-folders">
+        <div class="group-section-folders" *ngIf="dataDisplay == 'grouping'">
             <div cdkDropList [cdkDropListData]="meterGroupType.meterGroups" class="grouped-list"
                 *ngFor="let meterGroup of meterGroupType.meterGroups" (cdkDropListDropped)="drop($event)"
                 id={{meterGroup.id}} [cdkDropListConnectedTo]="meterGroupType.meterGroupIds">
@@ -82,15 +151,27 @@
             <button class="btn btn-link" (click)="groupAdd(meterGroupType.groupType)"><i class="fa fa-plus"></i> Add New
                 Group</button>
         </div>
-    </div>
-
-    <div class="window" [class.open]="groupToEdit">
-        <div class="windowOverlay"></div>
-        <div class="windowContent">
-            <app-edit-meter-group-form *ngIf="groupToEdit" [groupToEdit]="groupToEdit" (emitClose)="closeEditGroup()"
-                [editOrAdd]="editOrAdd">
-            </app-edit-meter-group-form>
+        <div class="pr-2 pl-2" *ngIf="dataDisplay == 'table'">
+            <app-meter-group-table class="p-2" *ngFor="let meterGroup of meterGroupType.meterGroups; let index = index;"
+                [meterGroup]="meterGroup" [itemsPerPage]="itemsPerPage" [index]="index"
+                [meterGroupType]="meterGroupType" [waterUnit]="waterUnit" [energyUnit]="energyUnit">
+            </app-meter-group-table>
         </div>
+        <div class="pr-2 pl-2" *ngIf="dataDisplay == 'graph'">
+            <app-meter-group-chart *ngFor="let meterGroup of meterGroupType.meterGroups" [meterGroup]="meterGroup"
+                [meterGroupType]="meterGroupType" [waterUnit]="waterUnit" [energyUnit]="energyUnit"
+                [displayGraphCost]="displayGraphCost" [displayGraphEnergy]="displayGraphEnergy">
+            </app-meter-group-chart>
+        </div>
+    </div>
+</div>
+
+<div class="window" [class.open]="groupToEdit">
+    <div class="windowOverlay"></div>
+    <div class="windowContent">
+        <app-edit-meter-group-form *ngIf="groupToEdit" [groupToEdit]="groupToEdit" (emitClose)="closeEditGroup()"
+            [editOrAdd]="editOrAdd">
+        </app-edit-meter-group-form>
     </div>
 </div>
 

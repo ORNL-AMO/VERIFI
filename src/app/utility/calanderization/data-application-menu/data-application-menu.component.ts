@@ -237,4 +237,9 @@ export class DataApplicationMenuComponent implements OnInit {
     }
     return '';
   }
+
+  hoverDate(ngbDate: NgbDateStruct){
+    let date: Date = new Date(ngbDate.year, ngbDate.month - 1, ngbDate.day);
+    this.inspectDate(date);
+  }
 }

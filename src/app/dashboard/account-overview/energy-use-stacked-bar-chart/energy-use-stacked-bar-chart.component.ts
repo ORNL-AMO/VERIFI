@@ -136,9 +136,6 @@ export class EnergyUseStackedBarChartComponent implements OnInit {
           responsive: true
         };
         this.plotlyService.newPlot(this.energyUseStackedBarChart.nativeElement, data, layout, config);
-      } else {
-        let Plotly = this.plotlyService.getPlotly();
-        Plotly.purge(this.energyUseStackedBarChart.nativeElement);
       }
     }
   }

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { IdbPredictorEntry, IdbUtilityMeter, PredictorData } from 'src/app/models/idb';
+import { IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterGroup, PredictorData } from 'src/app/models/idb';
 import { CalanderizationService } from './calanderization.service';
 import * as _ from 'lodash';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
@@ -140,17 +140,41 @@ export class VisualizationService {
   }
 
 
-  getPlotData(predictorOptions: Array<{ predictor: PredictorData, selected: boolean }>, meterOptions: Array<{ meter: IdbUtilityMeter, selected: boolean }>, facilityPredictorEntries: Array<IdbPredictorEntry>, dateRange: {minDate: Date, maxDate: Date}): Array<PlotDataItem> {
+  getPlotData(
+    predictorOptions: Array<{ predictor: PredictorData, selected: boolean }>,
+    meterOptions: Array<{ meter: IdbUtilityMeter, selected: boolean }>,
+    facilityPredictorEntries: Array<IdbPredictorEntry>,
+    dateRange: { minDate: Date, maxDate: Date },
+    meterGroupOptions: Array<{ meterGroup: IdbUtilityMeterGroup, selected: boolean }>,
+    meterDataOption: string): Array<PlotDataItem> {
 
     let facilityMeters: Array<IdbUtilityMeter> = new Array();
-    meterOptions.forEach(meterOption => {
-      if (meterOption.selected) {
-        facilityMeters.push(meterOption.meter);
-      }
-    });
-    let calanderizedMeterData: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMeterData(facilityMeters, false);
-    let lastBillEntry: MonthlyData = this.calanderizationService.getLastBillEntryFromCalanderizedMeterData(calanderizedMeterData);
-    let firstBillEntry: MonthlyData = this.calanderizationService.getFirstBillEntryFromCalanderizedMeterData(calanderizedMeterData);
+    let selectedGroups: Array<IdbUtilityMeterGroup> = new Array();
+    let calanderizedMeterData: Array<CalanderizedMeter>;
+    let lastBillEntry: MonthlyData;
+    let firstBillEntry: MonthlyData;
+    let plotData: Array<PlotDataItem> = new Array();
+
+    if (meterDataOption == 'meters') {
+      meterOptions.forEach(meterOption => {
+        if (meterOption.selected) {
+          facilityMeters.push(meterOption.meter);
+        }
+      });
+      calanderizedMeterData = this.calanderizationService.getCalanderizedMeterData(facilityMeters, false);
+      lastBillEntry = this.calanderizationService.getLastBillEntryFromCalanderizedMeterData(calanderizedMeterData);
+      firstBillEntry = this.calanderizationService.getFirstBillEntryFromCalanderizedMeterData(calanderizedMeterData);
+    } else {
+      meterGroupOptions.forEach(groupOption => {
+        if (groupOption.selected) {
+          selectedGroups.push(groupOption.meterGroup);
+        }
+      })
+      let combindedMonthlyData: Array<MonthlyData> = selectedGroups.flatMap(group => { return group.combinedMonthlyData });
+      lastBillEntry = this.calanderizationService.getLastBillEntryFromCalanderizedMeterData(calanderizedMeterData, combindedMonthlyData);
+      firstBillEntry = this.calanderizationService.getFirstBillEntryFromCalanderizedMeterData(calanderizedMeterData, combindedMonthlyData);
+    }
+
     let lastPredictorEntry: IdbPredictorEntry = _.maxBy(facilityPredictorEntries, (data: IdbPredictorEntry) => {
       let date: Date = new Date(data.date);
       return date;
@@ -162,41 +186,71 @@ export class VisualizationService {
     });
 
 
-    let plotData: Array<PlotDataItem> = new Array();
     let endDate: Date = this.getLastDate(lastBillEntry, lastPredictorEntry);
-    if(dateRange && dateRange.maxDate){
+    if (dateRange && dateRange.maxDate) {
       let maxDate: Date = new Date(dateRange.maxDate);
       maxDate.setMonth(maxDate.getMonth() + 1);
       endDate = _.min([endDate, maxDate]);
     }
-    calanderizedMeterData.forEach(calanderizedMeter => {
-      let startDate: Date = this.getLastDate(firstBillEntry, firstPredictorEntry);
-      if(dateRange && dateRange.minDate){
-        startDate = _.max([startDate, new Date(dateRange.minDate)]);
-      }
 
-      let meterPlotData: PlotDataItem = {
-        label: calanderizedMeter.meter.name,
-        values: new Array(),
-        valueDates: new Array(),
-        isMeter: true
-      }
-      if (startDate && endDate) {
-        while (startDate < endDate) {
-          meterPlotData.valueDates.push(new Date(startDate));
-          let meterData: MonthlyData = calanderizedMeter.monthlyData.find(dataItem => {
-            return (dataItem.monthNumValue == startDate.getUTCMonth() && dataItem.year == startDate.getUTCFullYear());
-          });
-          if (meterData) {
-            meterPlotData.values.push(meterData.energyUse);
-          } else {
-            meterPlotData.values.push(0);
-          }
-          startDate.setMonth(startDate.getMonth() + 1)
-        };
-        plotData.push(meterPlotData);
-      }
-    });
+    if (meterDataOption == 'meters') {
+      calanderizedMeterData.forEach(calanderizedMeter => {
+        let startDate: Date = this.getLastDate(firstBillEntry, firstPredictorEntry);
+        if (dateRange && dateRange.minDate) {
+          startDate = _.max([startDate, new Date(dateRange.minDate)]);
+        }
+
+        let meterPlotData: PlotDataItem = {
+          label: calanderizedMeter.meter.name,
+          values: new Array(),
+          valueDates: new Array(),
+          isMeter: true
+        }
+        if (startDate && endDate) {
+          while (startDate < endDate) {
+            meterPlotData.valueDates.push(new Date(startDate));
+            let meterData: MonthlyData = calanderizedMeter.monthlyData.find(dataItem => {
+              return (dataItem.monthNumValue == startDate.getUTCMonth() && dataItem.year == startDate.getUTCFullYear());
+            });
+            if (meterData) {
+              meterPlotData.values.push(meterData.energyUse);
+            } else {
+              meterPlotData.values.push(0);
+            }
+            startDate.setMonth(startDate.getMonth() + 1)
+          };
+          plotData.push(meterPlotData);
+        }
+      });
+    } else {
+      selectedGroups.forEach(group => {
+        let startDate: Date = this.getLastDate(firstBillEntry, firstPredictorEntry);
+        if (dateRange && dateRange.minDate) {
+          startDate = _.max([startDate, new Date(dateRange.minDate)]);
+        }
+        let meterPlotData: PlotDataItem = {
+          label: group.name,
+          values: new Array(),
+          valueDates: new Array(),
+          isMeter: true
+        }
+        if (startDate && endDate) {
+          while (startDate < endDate) {
+            meterPlotData.valueDates.push(new Date(startDate));
+            let meterData: MonthlyData = group.combinedMonthlyData.find(dataItem => {
+              return (dataItem.monthNumValue == startDate.getUTCMonth() && dataItem.year == startDate.getUTCFullYear());
+            });
+            if (meterData) {
+              meterPlotData.values.push(meterData.energyUse);
+            } else {
+              meterPlotData.values.push(0);
+            }
+            startDate.setMonth(startDate.getMonth() + 1)
+          };
+          plotData.push(meterPlotData);
+        }
+      });
+    }
 
     let facilityPredictors: Array<PredictorData> = new Array();
     predictorOptions.forEach(predictorOption => {
@@ -206,7 +260,7 @@ export class VisualizationService {
     })
     facilityPredictors.forEach(predictor => {
       let startDate: Date = this.getLastDate(firstBillEntry, firstPredictorEntry);
-      if(dateRange && dateRange.minDate){
+      if (dateRange && dateRange.minDate) {
         startDate = _.max([startDate, new Date(dateRange.minDate)]);
       }
       let predictorPlotData: PlotDataItem = {

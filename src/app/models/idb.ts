@@ -1,3 +1,4 @@
+import { CalanderizedMeter, MonthlyData } from './calanderization';
 import { ElectricityDataFilters } from './electricityFilter';
 import { SustainabilityQuestions } from './sustainabilityQuestions';
 
@@ -75,6 +76,7 @@ export interface IdbUtilityMeterGroup {
     totalEnergyUse?: number,
     totalConsumption?: number,
     groupData?: Array<IdbUtilityMeter>,
+    combinedMonthlyData?: Array<MonthlyData>,
     visible?: boolean
 }
 

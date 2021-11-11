@@ -140,17 +140,17 @@
             </div>
         </div>
     </div>
-
-    <div class="popup calanderization" [class.open]="dataApplicationMeter">
-        <div class="popup-header" *ngIf="dataApplicationMeter">Select Calendarization Method:
-            {{dataApplicationMeter.name}}
-            <button class="item-right" (click)="cancelSetDataApplication()">x</button>
-        </div>
-        <div class="popup-body" *ngIf="dataApplicationMeter">
-            <app-data-application-menu [meter]="dataApplicationMeter"></app-data-application-menu>
-        </div>
-        <div class="saveCancel popup-footer text-right">
-            <button class="btn btn-secondary" (click)="cancelSetDataApplication()">Cancel</button>
-            <button class="btn btn-success" (click)="setDataApplication()">Submit</button>
-        </div>
+</div>
+<div class="popup calanderization" [class.open]="dataApplicationMeter">
+    <div class="popup-header" *ngIf="dataApplicationMeter">Select Calendarization Method:
+        {{dataApplicationMeter.name}}
+        <button class="item-right" (click)="cancelSetDataApplication()">x</button>
     </div>
+    <div class="popup-body" *ngIf="dataApplicationMeter">
+        <app-data-application-menu [meter]="dataApplicationMeter"></app-data-application-menu>
+    </div>
+    <div class="saveCancel popup-footer text-right">
+        <button class="btn btn-secondary" (click)="cancelSetDataApplication()">Cancel</button>
+        <button class="btn btn-success" (click)="setDataApplication()">Submit</button>
+    </div>
+</div>

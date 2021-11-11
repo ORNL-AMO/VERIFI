@@ -278,3 +278,47 @@ meter::-webkit-meter-even-less-good-value {
 span.date-font-size{
     letter-spacing: normal;
 }
+.btn-group button{
+    border: solid 1px;
+}
+
+.btn-group, .btn-group-vertical {
+    display: inline-block!important;
+}
+
+.btn.btn-solid span.fa{
+    color: white;
+}
+
+.button-label{
+    font-size: 24px;
+    padding-right: .5rem;
+    padding-top: .25rem;
+}
+.btn-solid-utility span,
+.btn-solid-cost span {
+    color: #fff !important;
+}
+
+.btn-solid-utility {
+    background-color: #1f78b4 !important;
+    border-color: #1f78b4 !important;
+    border: 1px solid #09619c!important;
+}
+
+.btn-solid-cost {
+    background-color: #ff7f0f !important;
+    border-color: #ff7f0f !important;
+    border: 1px solid #e46c04!important;
+}
+
+select.form-control{
+    height: min-content !important;
+    margin-top: 10px;
+}
+
+.fa-arrow-right{
+    padding-top: 16px;
+    padding-right: .25rem;
+    padding-left: .25rem;
+}

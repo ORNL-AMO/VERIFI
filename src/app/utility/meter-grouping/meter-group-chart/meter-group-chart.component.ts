@@ -1,21 +1,28 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { CalanderizedMeter } from 'src/app/models/calanderization';
+import { MeterGroupType } from 'src/app/models/calanderization';
+import { IdbUtilityMeterGroup } from 'src/app/models/idb';
 
 @Component({
-  selector: 'app-calanderization-chart',
-  templateUrl: './calanderization-chart.component.html',
-  styleUrls: ['./calanderization-chart.component.css']
+  selector: 'app-meter-group-chart',
+  templateUrl: './meter-group-chart.component.html',
+  styleUrls: ['./meter-group-chart.component.css']
 })
-export class CalanderizationChartComponent implements OnInit {
+export class MeterGroupChartComponent implements OnInit {
   @Input()
-  meterData: CalanderizedMeter;
+  meterGroupType: MeterGroupType;
+  @Input()
+  meterGroup: IdbUtilityMeterGroup;
   @Input()
   displayGraphCost: "bar" | "scatter" | null;
   @Input()
   displayGraphEnergy: "bar" | "scatter" | null;
+  @Input()
+  energyUnit: string;
+  @Input()
+  waterUnit: string;
 
-  @ViewChild('monthlyMeterDataChart', { static: false }) monthlyMeterDataChart: ElementRef;
+  @ViewChild('meterGroupingChart', { static: false }) meterGroupingChart: ElementRef;
 
   constructor(private plotlyService: PlotlyService) { }
 
@@ -31,7 +38,7 @@ export class CalanderizationChartComponent implements OnInit {
   }
 
   drawChart() {
-    if (this.monthlyMeterDataChart) {
+    if (this.meterGroupingChart && this.meterGroup.combinedMonthlyData && this.meterGroup.combinedMonthlyData.length != 0) {
       let traceData = new Array();
       let yAxisTitle: string;
       let yAxis2Title: string;
@@ -43,21 +50,21 @@ export class CalanderizationChartComponent implements OnInit {
       // let tickPrefix2: string;
       let yaxis: string = 'y';
       let offsetgroup: number = 1;
-      let costLine: {width: number};
-      let energyLine: {width: number};
+      let costLine: { width: number };
+      let energyLine: { width: number };
       let y1overlay: string;
       let y2overlay: string = 'y';
 
-      if(this.displayGraphCost == 'scatter'){
-        costLine = { width: 5  }
+      if (this.displayGraphCost == 'scatter') {
+        costLine = { width: 5 }
       }
 
-      if(this.displayGraphEnergy == 'scatter'){
+      if (this.displayGraphEnergy == 'scatter') {
         energyLine = { width: 5 }
 
       }
 
-      if(this.displayGraphEnergy == 'scatter' && this.displayGraphCost == 'bar'){
+      if (this.displayGraphEnergy == 'scatter' && this.displayGraphCost == 'bar') {
         y2overlay = undefined;
         y1overlay = 'y2';
       }
@@ -66,17 +73,20 @@ export class CalanderizationChartComponent implements OnInit {
       if (this.displayGraphEnergy) {
         let yData: Array<number>;
         hoverformat = ',.0f'
-        if (this.meterData.showConsumption) {
-          // tickSuffix = " " + this.meterData.consumptionUnit;
-          yAxisTitle = 'Utility Consumption (' + this.meterData.consumptionUnit + ')';
-          yData = this.meterData.monthlyData.map(data => { return data.energyConsumption })
-        } else if (this.meterData.showEnergyUse) {
+        if (this.meterGroupType.groupType == 'Water' || this.meterGroupType.groupType == 'Other') {
+          yData = this.meterGroup.combinedMonthlyData.map(data => { return data.energyConsumption })
+          if (this.meterGroupType.groupType == 'Water') {
+            yAxisTitle = 'Utility Consumption (' + this.waterUnit + ')';
+          } else {
+            yAxisTitle = 'Utility Consumption';
+          }
+        } else {
           // tickSuffix = " " + this.meterData.energyUnit;
-          yAxisTitle = 'Utility Consumption (' + this.meterData.consumptionUnit + ')';
-          yData = this.meterData.monthlyData.map(data => { return data.energyUse });
+          yAxisTitle = 'Utility Consumption (' + this.energyUnit + ')';
+          yData = this.meterGroup.combinedMonthlyData.map(data => { return data.energyUse });
         }
         traceData.push({
-          x: this.meterData.monthlyData.map(data => { return data.date }),
+          x: this.meterGroup.combinedMonthlyData.map(data => { return data.date }),
           y: yData,
           name: 'Utility Consumption',
           type: this.displayGraphEnergy,
@@ -104,8 +114,8 @@ export class CalanderizationChartComponent implements OnInit {
         }
 
         traceData.push({
-          x: this.meterData.monthlyData.map(data => { return data.date }),
-          y: this.meterData.monthlyData.map(data => { return data.energyCost }),
+          x: this.meterGroup.combinedMonthlyData.map(data => { return data.date }),
+          y: this.meterGroup.combinedMonthlyData.map(data => { return data.energyCost }),
           name: 'Utility Cost',
           type: this.displayGraphCost,
           yaxis: yaxis,
@@ -119,7 +129,7 @@ export class CalanderizationChartComponent implements OnInit {
           orientation: "h"
         },
         title: {
-          text: this.meterData.meter.name,
+          text: this.meterGroup.name,
           font: {
             size: 18
           },
@@ -159,7 +169,8 @@ export class CalanderizationChartComponent implements OnInit {
         margin: { r: 0, t: 50 }
       };
       var config = { responsive: true };
-      this.plotlyService.newPlot(this.monthlyMeterDataChart.nativeElement, traceData, layout, config);
+      this.plotlyService.newPlot(this.meterGroupingChart.nativeElement, traceData, layout, config);
     }
   }
+
 }
