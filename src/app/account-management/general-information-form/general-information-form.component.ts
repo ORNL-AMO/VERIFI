@@ -1,10 +1,11 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
+import { FirstNaicsList, NAICS, SecondNaicsList, ThirdNaicsList } from 'src/app/form-data/naics-data';
+import { State, States } from 'src/app/form-data/states';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAccount, IdbFacility } from 'src/app/models/idb';
-import { globalVariables } from 'src/environments/environment';
 import { AccountManagementService } from '../account-management.service';
 
 @Component({
@@ -21,11 +22,14 @@ export class GeneralInformationFormComponent implements OnInit {
   form: FormGroup;
   unitsOfMeasure: string;
   formNameLabel: string = "Account";
-  globalVariables = globalVariables;
   selectedFacilitySub: Subscription;
   selectedAccountSub: Subscription;
   selectedAccount: IdbAccount;
   selectedFacility: IdbFacility;
+  firstNaicsList: Array<NAICS> = FirstNaicsList;
+  secondNaicsList: Array<NAICS> = SecondNaicsList;
+  thirdNaicsList: Array<NAICS> = ThirdNaicsList;
+  states: Array<State> = States;
   isFormChange: boolean = false;
   constructor(private accountDbService: AccountdbService, private accountManagementService: AccountManagementService, private facilityDbService: FacilitydbService) { }
 
@@ -76,5 +80,25 @@ export class GeneralInformationFormComponent implements OnInit {
       this.selectedAccount = this.accountManagementService.updateAccountFromGeneralInformationForm(this.form, this.selectedAccount);
       this.accountDbService.update(this.selectedAccount);
     }
+  }
+
+  checkNAICS() {
+    //make sure sublist selections are a part of selected parent
+    if (this.form.controls.naics1.value && this.form.controls.naics2.value) {
+      let naicsItem: NAICS = this.secondNaicsList.find(item => { return item.code == this.form.controls.naics2.value });
+      if (naicsItem.matchNum != this.form.controls.naics1.value) {
+        this.form.controls.naics2.patchValue(null);
+        this.form.controls.naics2.updateValueAndValidity();
+      }
+    }
+
+    if (this.form.controls.naics2.value && this.form.controls.naics3.value) {
+      let naicsItem: NAICS = this.thirdNaicsList.find(item => { return item.code == this.form.controls.naics3.value });
+      if (naicsItem.matchNum != this.form.controls.naics2.value) {
+        this.form.controls.naics3.patchValue(null);
+        this.form.controls.naics3.updateValueAndValidity();
+      }
+    }
+    this.saveChanges();
   }
 }
