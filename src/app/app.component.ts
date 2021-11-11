@@ -59,8 +59,4 @@ export class AppComponent {
     await this.utilityMeterGroupDbService.initializeMeterGroups();
     this.dataInitialized = true;
   }
-
-  showToggle() {
-    console.log("toggling");
-  }
 }
