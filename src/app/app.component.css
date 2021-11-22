@@ -59,3 +59,7 @@
         transform: scale(1.0);
     }
 }
+
+.container-fluid{
+    height: 100vh;
+}

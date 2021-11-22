@@ -70,3 +70,8 @@ nav.sidebar{
     width: 0px;
     transition: .6s width;
 }
+
+hr{
+    margin-right: 15px;
+    margin-left: 15px;
+}
