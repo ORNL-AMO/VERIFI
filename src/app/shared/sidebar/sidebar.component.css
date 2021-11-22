@@ -1,30 +1,9 @@
 /*
 Sidebar
 =============================================== */
-#sidebar {
-    /*padding: 30px 30px;*/
-    /* padding: 90px 30px; */
-    min-height: 100vh;
-    width: calc(120px - 50px);
-    /* position: fixed; */
-    box-shadow: 2px 3px 5px 0px #77777759;
-    background-color: white;
-    transition: .2s width;
-}
-#sidebar  ul {
-    list-style: none;
-    margin: 0px;
-    padding: 0px;
-}
-#sidebar ul li {
-    padding: 7px 0;
-}
 .menuHeader {
     height: 22px;
     padding-left: 2rem;
-}
-.menuHeader hr{
-    margin: 0px;
 }
 .menuHeader p {
     font-weight: bold;
@@ -37,11 +16,6 @@ i.fa {
     font-size: 1.25rem;
     width: 1.5rem;
 }
-.menuToggle {
-    cursor: pointer;
-}
-
-
 .nav-link{
     padding-left: 2rem;
 }
@@ -74,4 +48,9 @@ nav.sidebar{
 hr{
     margin-right: 15px;
     margin-left: 15px;
+}
+
+.nav-link:hover{
+    cursor: pointer;
+    background-color: #efefef;
 }

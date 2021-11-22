@@ -1,5 +1,5 @@
-import { Component, OnInit, Renderer2, isDevMode } from '@angular/core';
-import { Router, Event, NavigationEnd } from '@angular/router';
+import { Component, OnInit, isDevMode } from '@angular/core';
+import { Router, Event } from '@angular/router';
 
 @Component({
   selector: 'app-sidebar',
@@ -12,7 +12,6 @@ export class SidebarComponent implements OnInit {
   isHovering: any;
   openFromHover: boolean;
   constructor(
-    private renderer: Renderer2,
     private router: Router) {
 
     router.events.subscribe((event: Event) => {
@@ -57,11 +56,6 @@ export class SidebarComponent implements OnInit {
       clearTimeout(this.isHovering);
     }
     this.open = !this.open;
-    // let action: string = 'removeClass';
-    // if (this.open) {
-    //   action = 'addClass';
-    // }
-    // this.renderer[action](document.body, 'open');
   }
 
 }
