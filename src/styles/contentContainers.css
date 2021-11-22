@@ -17,7 +17,8 @@ Content Container
   }
   .wrapper.main-content {
     margin-right: 0px;
-    min-height: calc(100vh - 225px);
+    height: calc(100vh - 225px);
+    overflow-y: auto;
   }
   .help-panel.tab-margin {
     margin-top: 65px;

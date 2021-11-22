@@ -112,7 +112,7 @@ input.unitDollar {
   background-position: bottom;
   background-repeat: no-repeat;
   position:relative;
-  z-index: 1;
+  /* z-index: 1; */
 }
 .tag {
   background-color: #eee;
@@ -133,7 +133,7 @@ input.unitDollar {
 
 /*Added by mark for import-v2. Not sure correct place to put.*/
 .scroll-item{
-  overflow-y: scroll;
+  overflow-y: auto;
   max-height: 100%;
 }
 
