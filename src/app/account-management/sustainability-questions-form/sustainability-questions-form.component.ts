@@ -76,13 +76,15 @@ export class SustainabilityQuestionsFormComponent implements OnInit {
     this.saveChanges();
   }
 
-  setTargetYear(by:string, ty:string) {
-    const plus10Years = this.form.get(by).value + 10;
-    if(plus10Years < 2050) {
-      this.form.controls[ty].setValue(plus10Years);
-    } else {
-      this.form.controls[ty].setValue(2050);
+  changeBaselineYear(baselineControlName: string, targetControlName: string) {
+    let baselineValue: number = this.form.get(baselineControlName).value;
+    if (!this.form.get(targetControlName).value || this.form.get(targetControlName).value < baselineValue) {
+      let value: number = baselineValue + 10;
+      if(value > 2050){
+        value = 2050;
+      }
+      this.form.get(targetControlName).patchValue(value);
     }
-    
+    this.saveChanges();
   }
 }
