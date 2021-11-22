@@ -57,11 +57,11 @@ export class SidebarComponent implements OnInit {
       clearTimeout(this.isHovering);
     }
     this.open = !this.open;
-    let action: string = 'removeClass';
-    if (this.open) {
-      action = 'addClass';
-    }
-    this.renderer[action](document.body, 'open');
+    // let action: string = 'removeClass';
+    // if (this.open) {
+    //   action = 'addClass';
+    // }
+    // this.renderer[action](document.body, 'open');
   }
 
 }

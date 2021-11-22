@@ -101,3 +101,9 @@ p{
 .sticky-top.banner-dropdown-open{
   z-index: initial !important;
 }
+
+
+.dashboard-container{
+      height: calc(100vh - 100px);
+      overflow-y: auto;
+}

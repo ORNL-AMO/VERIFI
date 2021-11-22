@@ -6,10 +6,10 @@ Header
     padding: 10px 0;
     background-color: white;
     border-bottom: 2px solid #eee;
-    position: fixed;
+    /* position: fixed;
     top: 0;
-    left: 0;
-    z-index: 100;
+    left: 0; 
+    z-index: 100;*/
 }
 #header h2 {
     margin-bottom: 0px;

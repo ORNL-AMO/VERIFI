@@ -1,27 +1,31 @@
-<app-header></app-header>
-<app-sidebar></app-sidebar>
+<div class="container-fluid p-0 m-0">
+  <div class="d-flex flex-column">
+    <app-header></app-header>
+    <div class="d-flex h-100">
+      <app-sidebar></app-sidebar>
+      <div class="content w-100 scroll-item" role="main" *ngIf="dataInitialized">
+        <router-outlet></router-outlet>
+        <app-setup-progress></app-setup-progress>
+        <app-toast-notifications></app-toast-notifications>
+      </div>
 
-<div class="content" role="main" *ngIf="dataInitialized">
-  <router-outlet></router-outlet>
-  <app-setup-progress></app-setup-progress>
-  <app-toast-notifications></app-toast-notifications>
-</div>
+      <div class="content w-100" *ngIf="!dataInitialized">
+        <div class="loading-screen">
 
-<div class="content" *ngIf="!dataInitialized">
-  <div class="loading-screen">
+          <!-- <div class="main-content"> -->
+          <div class="spinner">
+            <div class="bounce1"></div>
+            <div class="bounce2"></div>
+            <div class="bounce3"></div>
+          </div>
+          <h1>{{loadingMessage}}</h1>
+          <!-- </div> -->
 
-    <!-- <div class="main-content"> -->
-    <div class="spinner">
-      <div class="bounce1"></div>
-      <div class="bounce2"></div>
-      <div class="bounce3"></div>
+        </div>
+      </div>
     </div>
-    <h1>{{loadingMessage}}</h1>
-    <!-- </div> -->
-
+    <app-footer></app-footer>
+    <app-loading></app-loading>
+    <app-electron-update></app-electron-update>
   </div>
 </div>
-
-<app-footer></app-footer>
-<app-loading></app-loading>
-<app-electron-update></app-electron-update>
