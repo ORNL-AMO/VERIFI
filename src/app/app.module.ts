@@ -101,6 +101,7 @@ import { DataApplicationMenuComponent } from './utility/calanderization/data-app
 import { MeterGroupTableComponent } from './utility/meter-grouping/meter-group-table/meter-group-table.component';
 import { MeterGroupChartComponent } from './utility/meter-grouping/meter-group-chart/meter-group-chart.component';
 import { NaicsListPipe } from './account-management/general-information-form/naics-list.pipe';
+import { YearOptionsPipe } from './account-management/sustainability-questions-form/year-options.pipe';
 
 @NgModule({
   declarations: [
@@ -188,6 +189,7 @@ import { NaicsListPipe } from './account-management/general-information-form/nai
     MeterGroupTableComponent,
     MeterGroupChartComponent,
     NaicsListPipe,
+    YearOptionsPipe,
   ],
   imports: [
     BrowserModule,
