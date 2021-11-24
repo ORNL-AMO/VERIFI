@@ -12,7 +12,6 @@ import { FacilitydbService } from "../../indexedDB/facility-db.service";
 })
 export class FooterComponent implements OnInit {
 
-  // date: Date = new Date();
   version: string = environment.version;
   accountCount: number = 0;
   facilityCount: number = 0;
