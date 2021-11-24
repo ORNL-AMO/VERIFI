@@ -189,7 +189,7 @@ import { YearOptionsPipe } from './account-management/sustainability-questions-f
     MeterGroupTableComponent,
     MeterGroupChartComponent,
     NaicsListPipe,
-    YearOptionsPipe,
+    YearOptionsPipe
   ],
   imports: [
     BrowserModule,

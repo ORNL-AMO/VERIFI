@@ -7,8 +7,10 @@ import { BehaviorSubject } from 'rxjs';
 export class ToastNotificationsService {
 
   toastNotification: BehaviorSubject<ToastNotification>;
+  disableNotification: BehaviorSubject<boolean>;
   constructor() {
     this.toastNotification = new BehaviorSubject<ToastNotification>(undefined);
+    this.disableNotification = new BehaviorSubject<boolean>(false);
   }
 
   showToast(title: string, body: string, setTimeoutVal: number, showDisableFooter: boolean, toastClass: "success" | "warning" | "info" | "comment" | "error") {
@@ -22,6 +24,7 @@ export class ToastNotificationsService {
   }
 
   hideToast() {
+    this.disableNotification.next(false);
     this.toastNotification.next(undefined);
   }
 }

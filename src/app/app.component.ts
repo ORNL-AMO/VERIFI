@@ -1,11 +1,14 @@
 import { Component } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { ElectronService } from './electron/electron.service';
 import { AccountdbService } from './indexedDB/account-db.service';
 import { FacilitydbService } from './indexedDB/facility-db.service';
 import { PredictordbService } from './indexedDB/predictors-db.service';
 import { UtilityMeterdbService } from './indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from './indexedDB/utilityMeterData-db.service';
 import { UtilityMeterGroupdbService } from './indexedDB/utilityMeterGroup-db.service';
+import { ToastNotificationsService } from './shared/toast-notifications/toast-notifications.service';
 
 // declare ga as a function to access the JS code in TS
 declare let gtag: Function;

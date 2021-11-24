@@ -1,5 +1,6 @@
 import { Component, isDevMode, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
+import { BackupDataService } from 'src/app/account-management/backup-data.service';
 import { environment } from 'src/environments/environment';
 import { AccountdbService } from "../../indexedDB/account-db.service";
 import { FacilitydbService } from "../../indexedDB/facility-db.service";
@@ -11,7 +12,7 @@ import { FacilitydbService } from "../../indexedDB/facility-db.service";
 })
 export class FooterComponent implements OnInit {
 
-  date: Date = new Date();
+  // date: Date = new Date();
   version: string = environment.version;
   accountCount: number = 0;
   facilityCount: number = 0;
@@ -21,10 +22,13 @@ export class FooterComponent implements OnInit {
   allAccountsSub: Subscription;
   allFacilitiesSub: Subscription;
   accountFacilitiesSub: Subscription;
+  selectedAccountSub: Subscription;
+  lastBackupDate: Date;
   isDev: boolean;
   constructor(
     public accountdbService: AccountdbService,
     public facilitydbService: FacilitydbService,
+    private backupDataService: BackupDataService
   ) {
 
   }
@@ -42,15 +46,26 @@ export class FooterComponent implements OnInit {
     this.accountFacilitiesSub = this.facilitydbService.accountFacilities.subscribe(accountFacilities => {
       this.facilityCount = accountFacilities.length;
     });
+
+    this.selectedAccountSub = this.accountdbService.selectedAccount.subscribe(selectedAccount => {
+      if(selectedAccount){
+        this.lastBackupDate = selectedAccount.lastBackup;
+      }
+    })
   }
 
   ngOnDestroy() {
     this.allAccountsSub.unsubscribe();
     this.allFacilitiesSub.unsubscribe();
     this.accountFacilitiesSub.unsubscribe();
+    this.selectedAccountSub.unsubscribe();
   }
 
   deleteDatabase() {
     this.accountdbService.deleteDatabase(); 
+  }
+
+  backupAccount(){
+    this.backupDataService.backupAccount();
   }
 }

@@ -55,6 +55,8 @@ export class BackupDataService {
 
   getAccountBackup(): AccountBackup {
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    account.lastBackup = new Date();
+    this.accountDbService.update(account);
     let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
 
     let facilitiesBackups: Array<FacilityBackup> = new Array();
