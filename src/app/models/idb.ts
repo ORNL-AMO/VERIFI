@@ -29,7 +29,8 @@ export interface IdbAccount {
     setupWizard: boolean,
     setupWizardComplete: boolean,
     numberOfFacilities?: string,
-    energyIsSource: boolean
+    energyIsSource: boolean,
+    lastBackup?: Date
 }
 
 export interface IdbFacility {

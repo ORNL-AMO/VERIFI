@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
+import { LocalStorageService } from 'ngx-webstorage';
 import { BehaviorSubject } from 'rxjs';
+import { ToastNotificationsService } from '../shared/toast-notifications/toast-notifications.service';
 
 @Injectable({
   providedIn: 'root'
@@ -8,16 +10,17 @@ export class ElectronService {
 
 
   updateAvailable: BehaviorSubject<boolean>;
-  updateInfo: BehaviorSubject<{releaseName: string, releaseNotes: string}>;
+  updateInfo: BehaviorSubject<{ releaseName: string, releaseNotes: string }>;
   updateError: BehaviorSubject<boolean>;
-  constructor() {
+  constructor(private localStorageService: LocalStorageService, private toastNotificationService: ToastNotificationsService) {
     this.updateAvailable = new BehaviorSubject<boolean>(false);
-    this.updateInfo = new BehaviorSubject<{releaseName: string, releaseNotes: string}>(undefined);
+    this.updateInfo = new BehaviorSubject<{ releaseName: string, releaseNotes: string }>(undefined);
     this.updateError = new BehaviorSubject<boolean>(false);
     if (window["electronAPI"]) {
       this.listen();
     } else {
       console.warn('Electron\'s IPC was not loaded');
+      this.showWebDisclaimer();
     }
   }
 
@@ -26,7 +29,7 @@ export class ElectronService {
     if (!window["electronAPI"]) {
       return;
     }
-    window["electronAPI"].on("release-info", (data: {releaseName: string, releaseNotes: string}) => {
+    window["electronAPI"].on("release-info", (data: { releaseName: string, releaseNotes: string }) => {
       console.log('release-info');
       console.log(data)
       this.updateInfo.next(data);
@@ -57,10 +60,18 @@ export class ElectronService {
   }
 
   //send signal to ipcMain to update
-  sendUpdateSignal(){
+  sendUpdateSignal() {
     if (!window["electronAPI"]) {
       return;
     }
     window["electronAPI"].send("update");
+  }
+
+  showWebDisclaimer() {
+    let title: string = "VERIFI Web";
+    let body: string = `You are running VERIFI in a web browser. All application data is saved within this browser. 
+    It is encouraged that you download backup files of your data frequently. Backups can be uploaded to restore lost or corrupted data. <br> <hr>
+    You can download data backups using the "Backup Account" button in the lower left hand corner of your screen or the account and facility settings pages.`
+    this.toastNotificationService.showToast(title, body, 50000, false, "info");
   }
 }
