@@ -13,31 +13,34 @@
     </div>
 
     <div class="row">
-        <div class="mb-3 col-md-3 col-sm-12">
-            <label>City</label>
-            <input type="text" class="form-control" formControlName="city" (input)="saveChanges()"
-                onfocus="this.select();" minlength="1" maxlength="85">
+        <div class="mb-3 col-md-6 col-sm-12">
+            <label>Country</label>
+            <!-- <input type="text" class="form-control" formControlName="country" (input)="saveChanges()"
+                onfocus="this.select();" minlength="1" maxlength="60"> -->
+            <select formControlName="country" (change)="saveChanges()">
+                <option *ngFor="let country of countries" [ngValue]="country.code">{{country.name}}</option>
+            </select>
         </div>
-        <div class="mb-3 col-md-3 col-sm-12">
+        <div class="mb-3 col-md-6 col-sm-12" *ngIf="form.controls.country.value == 'US'">
             <label>State</label>
             <select formControlName="state" (change)="saveChanges()">
                 <option *ngFor="let state of states" [ngValue]="state.name">{{state.name}}</option>
             </select>
         </div>
-        <div class="mb-3 col-md-3 col-sm-12">
+        <div class="mb-3 col-md-6 col-sm-12" [ngClass]="{'col-6':form.controls.country.value == 'US'}">
+            <label>City</label>
+            <input type="text" class="form-control" formControlName="city" (input)="saveChanges()"
+                onfocus="this.select();" minlength="1" maxlength="85">
+        </div>
+        <div class="mb-3 col-md-6 col-sm-12" *ngIf="form.controls.country.value == 'US'">
             <label>Zip</label>
             <input type="text" class="form-control" formControlName="zip" (input)="saveChanges()"
                 autocomplete="postal-code" onfocus="this.select();" minlength="1" maxlength="12">
         </div>
-        <div class="mb-3 col-md-3 col-sm-12">
-            <label>Country</label>
-            <input type="text" class="form-control" formControlName="country" (input)="saveChanges()"
-                onfocus="this.select();" minlength="1" maxlength="60">
-        </div>
     </div>
 
     <div class="row">
-        <div class="mb-3 col-md-6 col-sm-12">
+        <div class="mb-3  col-sm-12" [ngClass]="{'col-12':inAccount, 'col-md-6':!inAccount}">
             <label>NAICS Code</label>
             <select formControlName="naics1" (change)="checkNAICS()">
                 <option *ngFor="let naics of firstNaicsList" [ngValue]="naics.code">{{naics.code}} -
@@ -57,8 +60,7 @@
             </select>
         </div>
 
-        <div class="mb-3 col-md-6 col-sm-12">
-
+        <div class="mb-3 col-md-6 col-sm-12" *ngIf="!inAccount">
             <label>Facility Area</label>
             <div class="input-group">
                 <input type="text" class="form-control" formControlName="size" (input)="saveChanges()"

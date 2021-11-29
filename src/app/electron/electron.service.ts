@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, isDevMode } from '@angular/core';
 import { LocalStorageService } from 'ngx-webstorage';
 import { BehaviorSubject } from 'rxjs';
 import { ToastNotificationsService } from '../shared/toast-notifications/toast-notifications.service';
@@ -68,10 +68,12 @@ export class ElectronService {
   }
 
   showWebDisclaimer() {
-    let title: string = "VERIFI Web";
-    let body: string = `You are running VERIFI in a web browser. All application data is saved within this browser. 
-    It is encouraged that you download backup files of your data frequently. Backups can be uploaded to restore lost or corrupted data. <br> <hr>
-    You can download data backups using the "Backup Account" button in the lower left hand corner of your screen or the account and facility settings pages.`
-    this.toastNotificationService.showToast(title, body, 50000, false, "info");
+    if (!isDevMode()) {
+      let title: string = "VERIFI Web";
+      let body: string = `You are running VERIFI in a web browser. All application data is saved within this browser. 
+      It is encouraged that you download backup files of your data frequently. Backups can be uploaded to restore lost or corrupted data. <br> <hr>
+      You can download data backups using the "Backup Account" button in the lower left hand corner of your screen or the account and facility settings pages.`
+      this.toastNotificationService.showToast(title, body, 50000, false, "info");
+    }
   }
 }
