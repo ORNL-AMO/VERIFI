@@ -1,6 +1,7 @@
 import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
+import { Countries, Country } from 'src/app/form-data/countries';
 import { FirstNaicsList, NAICS, SecondNaicsList, ThirdNaicsList } from 'src/app/form-data/naics-data';
 import { State, States } from 'src/app/form-data/states';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -29,6 +30,7 @@ export class GeneralInformationFormComponent implements OnInit {
   firstNaicsList: Array<NAICS> = FirstNaicsList;
   secondNaicsList: Array<NAICS> = SecondNaicsList;
   thirdNaicsList: Array<NAICS> = ThirdNaicsList;
+  countries: Array<Country> = Countries;
   states: Array<State> = States;
   isFormChange: boolean = false;
   constructor(private accountDbService: AccountdbService, private accountManagementService: AccountManagementService, private facilityDbService: FacilitydbService) { }
