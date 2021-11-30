@@ -30,7 +30,10 @@ export interface IdbAccount {
     setupWizardComplete: boolean,
     numberOfFacilities?: string,
     energyIsSource: boolean,
-    lastBackup?: Date
+    lastBackup?: Date,
+    emissionsOutputRate?: number,
+    eGridSubregion?: string,
+    customEmissionsRate?: boolean
 }
 
 export interface IdbFacility {
@@ -64,7 +67,10 @@ export interface IdbFacility {
     fiscalYear: string,
     fiscalYearMonth: string,
     fiscalYearCalendarEnd: boolean,
-    energyIsSource: boolean
+    energyIsSource: boolean,
+    emissionsOutputRate?: number,
+    eGridSubregion?: string,
+    customEmissionsRate?: boolean
 }
 
 export interface IdbUtilityMeterGroup {
