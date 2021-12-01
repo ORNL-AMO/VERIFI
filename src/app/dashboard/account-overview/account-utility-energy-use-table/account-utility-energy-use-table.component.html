@@ -32,19 +32,19 @@
                 </td>
                 <td>
                     <span *ngIf="utilityUsageSummary.previousMonthEnergyUse">
-                        {{utilityUsageSummary.previousMonthEnergyUse | number:'1.0-0'}}
+                        {{utilityUsageSummary.previousMonthEnergyUse | customNumber}}
                     </span>
                     <span *ngIf="!utilityUsageSummary.previousMonthEnergyUse">
                         &mdash;
                     </span>
                     <span *ngIf="utilityUsageSummary.energyUseChangeSinceLastYear" class="small pl-2 pull-right green"
                         [ngClass]="{'red': utilityUsageSummary.energyUseChangeSinceLastYear > 0}">
-                        ({{utilityUsageSummary.energyUseChangeSinceLastYear | number:'1.0-0'}})
+                        ({{utilityUsageSummary.energyUseChangeSinceLastYear | customNumber}})
                     </span>
                 </td>
                 <td>
                     <span *ngIf="utilityUsageSummary.previousMonthEnergyCost">
-                        {{utilityUsageSummary.previousMonthEnergyCost | currency : 'USD' : 'symbol' : '1.0-0' }}
+                        {{utilityUsageSummary.previousMonthEnergyCost | customNumber:true }}
                     </span>
                     <span *ngIf="!utilityUsageSummary.previousMonthEnergyCost">
                         &mdash;
@@ -52,12 +52,12 @@
 
                     <span *ngIf="utilityUsageSummary.energyCostChangeSinceLastYear" class="small pl-2 pull-right green"
                         [ngClass]="{'red': utilityUsageSummary.energyCostChangeSinceLastYear > 0}">
-                        ({{utilityUsageSummary.energyCostChangeSinceLastYear | currency : 'USD' : 'symbol' :'1.0-0'}})
+                        ({{utilityUsageSummary.energyCostChangeSinceLastYear | customNumber:true}})
                     </span>
                 </td>
                 <td>
                     <span *ngIf="utilityUsageSummary.yearPriorEnergyUse">
-                        {{utilityUsageSummary.yearPriorEnergyUse | number:'1.0-0'}}
+                        {{utilityUsageSummary.yearPriorEnergyUse | customNumber}}
                     </span>
                     <span *ngIf="!utilityUsageSummary.yearPriorEnergyUse">
                         &mdash;
@@ -65,7 +65,7 @@
                 </td>
                 <td>
                     <span *ngIf="utilityUsageSummary.yearPriorEnergyCost">
-                        {{utilityUsageSummary.yearPriorEnergyCost | currency : 'USD' : 'symbol' : '1.0-0' }}
+                        {{utilityUsageSummary.yearPriorEnergyCost | customNumber:true }}
                     </span>
                     <span *ngIf="!utilityUsageSummary.yearPriorEnergyCost">
                         &mdash;
@@ -73,7 +73,7 @@
                 </td>
                 <td>
                     <span *ngIf="utilityUsageSummary.averageEnergyUse">
-                        {{utilityUsageSummary.averageEnergyUse | number:'1.0-0'}}
+                        {{utilityUsageSummary.averageEnergyUse | customNumber}}
                     </span>
                     <span *ngIf="!utilityUsageSummary.averageEnergyUse">
                         &mdash;
@@ -81,7 +81,7 @@
                 </td>
                 <td>
                     <span *ngIf="utilityUsageSummary.averageEnergyCost">
-                        {{utilityUsageSummary.averageEnergyCost | currency : 'USD' : 'symbol' : '1.0-0' }}
+                        {{utilityUsageSummary.averageEnergyCost | customNumber:true }}
                     </span>
                     <span *ngIf="!utilityUsageSummary.averageEnergyCost">
                         &mdash;
@@ -96,7 +96,7 @@
                 </th>
                 <th>
                     <span *ngIf="utilityUsageSummaryData.total.previousMonthEnergyUse">
-                        {{utilityUsageSummaryData.total.previousMonthEnergyUse | number:'1.0-0'}}
+                        {{utilityUsageSummaryData.total.previousMonthEnergyUse | customNumber}}
                     </span>
                     <span *ngIf="!utilityUsageSummaryData.total.previousMonthEnergyUse">
                         &mdash;
@@ -104,13 +104,12 @@
                     <span *ngIf="utilityUsageSummaryData.total.energyUseChangeSinceLastYear"
                         class="small pl-2 pull-right green"
                         [ngClass]="{'red': utilityUsageSummaryData.total.energyUseChangeSinceLastYear > 0}">
-                        ({{utilityUsageSummaryData.total.energyUseChangeSinceLastYear | number:'1.0-0'}})
+                        ({{utilityUsageSummaryData.total.energyUseChangeSinceLastYear | customNumber}})
                     </span>
                 </th>
                 <th>
                     <span *ngIf="utilityUsageSummaryData.total.previousMonthEnergyCost">
-                        {{utilityUsageSummaryData.total.previousMonthEnergyCost | currency : 'USD' : 'symbol' : '1.0-0'
-                        }}
+                        {{utilityUsageSummaryData.total.previousMonthEnergyCost | customNumber:true }}
                     </span>
                     <span *ngIf="!utilityUsageSummaryData.total.previousMonthEnergyCost">
                         &mdash;
@@ -118,13 +117,12 @@
                     <span *ngIf="utilityUsageSummaryData.total.energyCostChangeSinceLastYear"
                         class="small pl-2 pull-right green"
                         [ngClass]="{'red': utilityUsageSummaryData.total.energyCostChangeSinceLastYear > 0}">
-                        ({{utilityUsageSummaryData.total.energyCostChangeSinceLastYear | currency : 'USD' : 'symbol'
-                        :'1.0-0'}})
+                        ({{utilityUsageSummaryData.total.energyCostChangeSinceLastYear | customNumber:true}})
                     </span>
                 </th>
                 <th>
                     <span *ngIf="utilityUsageSummaryData.total.yearPriorEnergyUse">
-                        {{utilityUsageSummaryData.total.yearPriorEnergyUse | number:'1.0-0'}}
+                        {{utilityUsageSummaryData.total.yearPriorEnergyUse | customNumber}}
                     </span>
                     <span *ngIf="!utilityUsageSummaryData.total.yearPriorEnergyUse">
                         &mdash;
@@ -133,7 +131,7 @@
                 </th>
                 <th>
                     <span *ngIf="utilityUsageSummaryData.total.yearPriorEnergyCost">
-                        {{utilityUsageSummaryData.total.yearPriorEnergyCost | currency : 'USD' : 'symbol' : '1.0-0' }}
+                        {{utilityUsageSummaryData.total.yearPriorEnergyCost | customNumber:true }}
                     </span>
                     <span *ngIf="!utilityUsageSummaryData.total.yearPriorEnergyCost">
                         &mdash;
@@ -141,7 +139,7 @@
                 </th>
                 <th>
                     <span *ngIf="utilityUsageSummaryData.total.averageEnergyUse">
-                        {{utilityUsageSummaryData.total.averageEnergyUse | number:'1.0-0'}}
+                        {{utilityUsageSummaryData.total.averageEnergyUse | customNumber}}
                     </span>
                     <span *ngIf="!utilityUsageSummaryData.total.averageEnergyUse">
                         &mdash;
@@ -149,7 +147,7 @@
                 </th>
                 <th>
                     <span *ngIf="utilityUsageSummaryData.total.averageEnergyCost">
-                        {{utilityUsageSummaryData.total.averageEnergyCost | currency : 'USD' : 'symbol' : '1.0-0' }}
+                        {{utilityUsageSummaryData.total.averageEnergyCost | customNumber:true }}
                     </span>
                     <span *ngIf="!utilityUsageSummaryData.total.averageEnergyCost">
                         &mdash;

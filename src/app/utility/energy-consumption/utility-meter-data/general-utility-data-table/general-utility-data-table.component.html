@@ -23,18 +23,17 @@
     </thead>
     <tbody>
         <tr
-            *ngFor="let meterData of meterListItem.meterDataItems | orderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage"
-            >
+            *ngFor="let meterData of meterListItem.meterDataItems | orderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
             <td class="input">
                 <input type="checkbox" name="metersSelected" (change)="toggleChecked()" [(ngModel)]="meterData.checked">
             </td>
             <td [ngClass]="{'alert-danger': checkError(meterData.readDate)}">{{meterData.readDate | date}}</td>
-            <td *ngIf="showVolumeColumn">{{meterData.totalVolume}}</td>
-            <td *ngIf="showEnergyColumn">{{meterData.totalEnergyUse}}</td>
-            <td>{{meterData.totalCost | currency}}</td>
-            <td>{{meterData.commodityCharge | currency}}</td>
-            <td>{{meterData.deliveryCharge | currency}}</td>
-            <td>{{meterData.otherCharge | currency}}</td>
+            <td *ngIf="showVolumeColumn">{{meterData.totalVolume | customNumber}}</td>
+            <td *ngIf="showEnergyColumn">{{meterData.totalEnergyUse | customNumber}}</td>
+            <td>{{meterData.totalCost | customNumber:true}}</td>
+            <td>{{meterData.commodityCharge | customNumber:true}}</td>
+            <td>{{meterData.deliveryCharge | customNumber:true}}</td>
+            <td>{{meterData.otherCharge | customNumber:true}}</td>
             <td class="actions">
                 <i class="fa fa-pencil" title="Edit" (click)="setEditMeterData(meterData)"></i>
                 <i class="fa fa-trash-o" title="Delete" (click)="setDeleteMeterData(meterData)"></i>
