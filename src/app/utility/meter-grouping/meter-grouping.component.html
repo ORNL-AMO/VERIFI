@@ -76,15 +76,15 @@
         <div class="group-section">
             <h5>{{meterGroupType.groupType}}
                 <span class="pull-right" *ngIf="meterGroupType.groupType == 'Energy'">
-                    Total Energy Use: {{meterGroupType.totalUsage | number:'1.0-1'}}
+                    Total Energy Use: {{meterGroupType.totalUsage | customNumber}}
                     <span [innerHTML]="energyUnit | settingsLabel"></span>
                 </span>
                 <span class="pull-right" *ngIf="meterGroupType.groupType == 'Water'">
-                    Total Consumption: {{meterGroupType.totalUsage | number:'1.0-1'}}
+                    Total Consumption: {{meterGroupType.totalUsage | customNumber}}
                     <span [innerHTML]="waterUnit | settingsLabel"></span>
                 </span>
                 <span class="pull-right" *ngIf="meterGroupType.groupType == 'Other'">
-                    Total Consumption: {{meterGroupType.totalUsage | number:'1.0-1'}}
+                    Total Consumption: {{meterGroupType.totalUsage | customNumber}}
                     <!-- <span [innerHTML]="waterUnit | settingsLabel"></span> -->
                 </span>
             </h5>
@@ -101,15 +101,15 @@
                     </p>
                     <div class="item-left">
                         <span *ngIf="meterGroupType.groupType == 'Energy'">
-                            Total Energy Use: {{meterGroup.totalEnergyUse | number:'1.0-1'}}
+                            Total Energy Use: {{meterGroup.totalEnergyUse | customNumber}}
                             <span [innerHTML]="energyUnit | settingsLabel"></span>
                         </span>
                         <span *ngIf="meterGroupType.groupType == 'Water'">
-                            Total Consumption: {{meterGroup.totalConsumption | number:'1.0-1'}}
+                            Total Consumption: {{meterGroup.totalConsumption | customNumber}}
                             <span [innerHTML]="waterUnit | settingsLabel"></span>
                         </span>
                         <span *ngIf="meterGroupType.groupType == 'Other'">
-                            Total Consumption: {{meterGroup.totalConsumption | number:'1.0-1'}}
+                            Total Consumption: {{meterGroup.totalConsumption | customNumber}}
                             <!-- <span [innerHTML]="waterUnit | settingsLabel"></span> -->
                         </span>
                     </div>

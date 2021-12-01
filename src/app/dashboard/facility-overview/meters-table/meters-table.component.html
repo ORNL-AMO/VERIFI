@@ -29,10 +29,10 @@
                     <span *ngIf="!summary.lastBillDate">&mdash;</span>
                 </td>
                 <td>
-                    {{summary.energyUsage | number:'1.0-0'}}
+                    {{summary.energyUsage | customNumber}}
                 </td>
                 <td>
-                    {{summary.energyCost | currency : 'USD' : 'symbol' : '1.0-0' }}
+                    {{summary.energyCost | customNumber:true }}
                 </td>
             </tr>
         </tbody>
@@ -48,10 +48,10 @@
                 <th>
                 </th>
                 <th>
-                    {{facilityMeterSummaryData.totalEnergyUse | number:'1.0-0'}}
+                    {{facilityMeterSummaryData.totalEnergyUse | customNumber}}
                 </th>
                 <th>
-                    {{facilityMeterSummaryData.totalEnergyCost | currency : 'USD' : 'symbol' : '1.0-0' }}
+                    {{facilityMeterSummaryData.totalEnergyCost | customNumber:true }}
                 </th>
             </tr>
         </tfoot>
