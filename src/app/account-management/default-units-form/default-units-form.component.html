@@ -96,7 +96,7 @@
                 </label>
                 <div class="input-group">
                     <span *ngIf="form.controls.emissionsOutputRate.value">{{form.controls.emissionsOutputRate.value}}
-                        kg/CO<sub>2</sub></span>
+                        kg CO<sub>2</sub></span>/kWh
                     <span *ngIf="!form.controls.emissionsOutputRate.value">&mdash;</span>
                 </div>
             </div>
@@ -115,7 +115,7 @@
                 <div class="input-group">
                     <input type="number" name="emissionsOutputRate" formControlName="emissionsOutputRate"
                         (change)="saveChanges()">
-                    <span class="unit">kg/CO<sub>2</sub></span>
+                    <span class="unit">kg CO<sub>2</sub>/kWh</span>
                 </div>
             </div>
         </div>

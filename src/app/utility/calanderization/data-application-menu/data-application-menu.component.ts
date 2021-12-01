@@ -1,10 +1,11 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { NgbDateStruct } from '@ng-bootstrap/ng-bootstrap';
 import { CalanderizationService, CalendarizationSummaryItem } from 'src/app/shared/helper-services/calanderization.service';
 import { MonthlyData } from 'src/app/models/calanderization';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 
 @Component({
   selector: 'app-data-application-menu',
@@ -25,7 +26,8 @@ export class DataApplicationMenuComponent implements OnInit {
   calanderizationSummary: Array<CalendarizationSummaryItem>;
   displayMonths: number = 4;
   hoverDataDate: Date;
-  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private calanderizationService: CalanderizationService) { }
+  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private calanderizationService: CalanderizationService,
+    private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
     let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataForFacility(this.meter, false);
@@ -52,7 +54,8 @@ export class DataApplicationMenuComponent implements OnInit {
     if (this.utilityMeterData.length > 3) {
       meterData.push(this.utilityMeterData[3]);
     }
-    this.monthlyData = this.calanderizationService.calanderizeMeterData(this.meter, meterData);
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    this.monthlyData = this.calanderizationService.calanderizeMeterData(this.meter, meterData, selectedFacility.energyUnit);
     this.calanderizationSummary = this.calanderizationService.getCalendarizationSummary(this.meter, meterData);
   }
 
