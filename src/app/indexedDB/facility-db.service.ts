@@ -115,7 +115,7 @@ export class FacilitydbService {
         });
     }
 
-    addWithObservable(facility: IdbFacility): Observable<any> {
+    addWithObservable(facility: IdbFacility): Observable<IdbFacility> {
         return this.dbService.add('facilities', facility);
     }
 

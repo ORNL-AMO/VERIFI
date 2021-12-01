@@ -71,7 +71,7 @@ export class AccountdbService {
         });
     }
 
-    addWithObservable(account: IdbAccount): Observable<any> {
+    addWithObservable(account: IdbAccount): Observable<IdbAccount> {
         return this.dbService.add('accounts', account);
     }
 
