@@ -6,7 +6,7 @@ export const ExampleAccount: AccountBackup = {
         "city": "Oak Ridge",
         "state": "TENNESSEE",
         "zip": "37830",
-        "country": "USA",
+        "country": "US",
         "address": "123 First St.",
         "size": 0,
         "naics1": -28,
@@ -58,7 +58,7 @@ export const ExampleAccount: AccountBackup = {
             "facility": {
                 "accountId": 7,
                 "name": "Better Facility North",
-                "country": "USA",
+                "country": "US",
                 "city": "North Town",
                 "state": "WISCONSIN",
                 "zip": "53200",
@@ -4526,7 +4526,7 @@ export const ExampleAccount: AccountBackup = {
             "facility": {
                 "accountId": 7,
                 "name": "Better Facility South",
-                "country": "USA",
+                "country": "US",
                 "city": "South Town",
                 "state": "MINNESOTA",
                 "zip": "55400",

@@ -71,8 +71,9 @@
                                     *ngIf="meterData.showEnergyUse">
                                     Total Energy (<span [innerHTML]="meterData.energyUnit | settingsLabel"></span>)</th>
                                 <th (click)="setOrderDataField('emissions')"
-                                    [ngClass]="{'active': orderDataField == 'emissions'}">
-                                    Total Emissions (kg/CO<sub>2</sub>)
+                                    [ngClass]="{'active': orderDataField == 'emissions'}"
+                                    *ngIf="meterData.showEmissions">
+                                    Total Emissions (kg CO<sub>2</sub>)
                                 </th>
                                 <th (click)="setOrderDataField('energyCost')"
                                     [ngClass]="{'active': orderDataField == 'energyCost'}">Total Cost</th>
@@ -91,7 +92,7 @@
                                     <span *ngIf="data.energyUse">{{data.energyUse | number:'1.0-2'}}</span>
                                     <span *ngIf="!data.energyUse">N/A</span>
                                 </td>
-                                <td>
+                                <td *ngIf="meterData.showEmissions">
                                     <span *ngIf="data.emissions">{{data.emissions | number:'1.0-0'}}</span>
                                     <span *ngIf="!data.emissions">N/A</span>
                                 </td>

@@ -45,6 +45,10 @@ export class EditMeterFormComponent implements OnInit {
     } else {
       this.energyUnit = this.meterEnergyUnit;
     }
+    if(this.meterForm.controls.source.value == 'Electricity'){
+      this.energyUnit = 'kWh';
+      this.meterForm.controls.startingUnit.disable();
+    }
   }
 
   ngOnChanges() {

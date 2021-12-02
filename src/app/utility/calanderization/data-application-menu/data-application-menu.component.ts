@@ -55,7 +55,7 @@ export class DataApplicationMenuComponent implements OnInit {
       meterData.push(this.utilityMeterData[3]);
     }
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.monthlyData = this.calanderizationService.calanderizeMeterData(this.meter, meterData, selectedFacility.energyUnit);
+    this.monthlyData = this.calanderizationService.calanderizeMeterData(this.meter, meterData, selectedFacility.energyIsSource);
     this.calanderizationSummary = this.calanderizationService.getCalendarizationSummary(this.meter, meterData);
   }
 
