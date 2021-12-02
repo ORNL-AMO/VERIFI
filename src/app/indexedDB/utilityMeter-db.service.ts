@@ -130,7 +130,7 @@ export class UtilityMeterdbService {
         }
     }
 
-    getNewIdbUtilityMeter(facilityId: number, accountId: number, setDefaults: boolean): IdbUtilityMeter {
+    getNewIdbUtilityMeter(facilityId: number, accountId: number, setDefaults: boolean, emissionsOutputRate: number): IdbUtilityMeter {
         let source: string;
         let startingUnit: string;
         if (setDefaults) {
@@ -155,7 +155,8 @@ export class UtilityMeterdbService {
             group: undefined,
             startingUnit: startingUnit,
             energyUnit: undefined,
-            fuel: undefined
+            fuel: undefined,
+            emissionsOutputRate: emissionsOutputRate
         }
     }
 

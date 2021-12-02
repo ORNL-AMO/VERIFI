@@ -6,6 +6,7 @@ import { PredictordbService } from './indexedDB/predictors-db.service';
 import { UtilityMeterdbService } from './indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from './indexedDB/utilityMeterData-db.service';
 import { UtilityMeterGroupdbService } from './indexedDB/utilityMeterGroup-db.service';
+import { EGridService } from './shared/helper-services/e-grid.service';
 
 // declare ga as a function to access the JS code in TS
 declare let gtag: Function;
@@ -27,7 +28,8 @@ export class AppComponent {
     private utilityMeterDataDbService: UtilityMeterDatadbService, 
     private predictorsDbService: PredictordbService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
-    public router: Router) {
+    public router: Router,
+    private eGridService: EGridService) {
       this.router.events.subscribe(event => {
         if(event instanceof NavigationEnd){
             gtag('config', 'G-YG1QD02XSE', 
@@ -43,6 +45,7 @@ export class AppComponent {
 
   ngOnInit() {
     this.initializeData();
+    this.eGridService.parseEGridData();
   }
 
   async initializeData() {

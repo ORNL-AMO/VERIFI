@@ -69,7 +69,7 @@ export class ImportMeterService {
 
 
   getNewMeterFromImportMeter(importMeter: ImportMeter, selectedFacility: IdbFacility): IdbUtilityMeter {
-    let newMeter: IdbUtilityMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.id, selectedFacility.accountId, false);
+    let newMeter: IdbUtilityMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.id, selectedFacility.accountId, false, undefined);
     newMeter.meterNumber = importMeter.meterNumber;
     newMeter.accountNumber = importMeter.accountNumber;
     newMeter.source = this.checkImportSource(importMeter.source);
@@ -83,6 +83,7 @@ export class ImportMeterService {
     newMeter.startingUnit = this.checkImportStartingUnit(importMeter.collectionUnit, newMeter.source, newMeter.phase, newMeter.fuel);
     newMeter.heatCapacity = importMeter.heatCapacity;
     newMeter.siteToSource = importMeter.siteToSource;
+    //TODO: Set emissions output rate..
     return newMeter;
   }
 
@@ -162,7 +163,7 @@ export class ImportMeterService {
   }
 
   getNewMeterFromExcelColumn(groupItem: ColumnItem, selectedFacility: IdbFacility): IdbUtilityMeter {
-    let newMeter: IdbUtilityMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.id, selectedFacility.accountId, false);
+    let newMeter: IdbUtilityMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.id, selectedFacility.accountId, false, undefined);
     let fuelType: { phase: string, fuelTypeOption: FuelTypeOption } = this.energyUnitsHelperService.parseFuelType(groupItem.value);
     if (fuelType) {
       newMeter.source = "Other Fuels";
@@ -198,6 +199,8 @@ export class ImportMeterService {
     newMeter.importWizardName = groupItem.value;
     //start with random meter number
     newMeter.meterNumber = Math.random().toString(36).substr(2, 9);
+
+    //TODO: set emissions output rate
     return newMeter;
   }
 

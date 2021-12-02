@@ -42,6 +42,22 @@ export class EnergyUnitsHelperService {
     }
   }
 
+  getEnergyIsSourceInFacility(): boolean {
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    if(selectedFacility){
+      return selectedFacility.energyIsSource;
+    }
+    return;
+  }
+
+  getEnergyIsSourceInAccount(): boolean {
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    if(selectedAccount){
+      return selectedAccount.energyIsSource;
+    }
+    return;
+  }
+
   getFacilityUnitFromMeter(facilityMeter: IdbUtilityMeter): string {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     if (facilityMeter.source == 'Electricity') {

@@ -64,7 +64,10 @@ export class AccountManagementService {
       massUnit: [units.massUnit, [Validators.required]],
       volumeLiquidUnit: [units.volumeLiquidUnit, [Validators.required]],
       volumeGasUnit: [units.volumeGasUnit, [Validators.required]],
-      energyIsSource: [units.energyIsSource]
+      energyIsSource: [units.energyIsSource],
+      emissionsOutputRate: [units.emissionsOutputRate],
+      eGridSubregion: [units.eGridSubregion],
+      customEmissionsRate: [units.customEmissionsRate]
     });
     return form;
   }
@@ -75,6 +78,8 @@ export class AccountManagementService {
     account.massUnit = form.controls.massUnit.value;
     account.volumeLiquidUnit = form.controls.volumeLiquidUnit.value;
     account.energyIsSource = form.controls.energyIsSource.value;
+    account.emissionsOutputRate = form.controls.emissionsOutputRate.value;
+    account.eGridSubregion = form.controls.eGridSubregion.value;
     return account;
   }
 
@@ -84,6 +89,8 @@ export class AccountManagementService {
     facility.massUnit = form.controls.massUnit.value;
     facility.volumeLiquidUnit = form.controls.volumeLiquidUnit.value;
     facility.energyIsSource = form.controls.energyIsSource.value;
+    facility.emissionsOutputRate = form.controls.emissionsOutputRate.value;
+    facility.eGridSubregion = form.controls.eGridSubregion.value;
     return facility;
   }
 
