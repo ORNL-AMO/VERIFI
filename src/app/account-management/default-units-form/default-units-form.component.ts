@@ -38,6 +38,7 @@ export class DefaultUnitsFormComponent implements OnInit {
   }>;
   zipCodeSubRegionData: Array<string>;
   currentZip: string;
+  showCustomLink: boolean;
   constructor(private accountDbService: AccountdbService, private accountManagementService: AccountManagementService, private facilityDbService: FacilitydbService,
     private eGridService: EGridService) { }
 
@@ -47,6 +48,7 @@ export class DefaultUnitsFormComponent implements OnInit {
       if (account && this.inAccount) {
         if (this.isFormChange == false) {
           this.form = this.accountManagementService.getUnitsForm(account);
+          this.setShowCustomLink();
           this.checkCurrentZip();
         } else {
           this.isFormChange = false;
@@ -60,6 +62,7 @@ export class DefaultUnitsFormComponent implements OnInit {
         this.checkUnitsDontMatch();
         if (this.isFormChange == false) {
           this.form = this.accountManagementService.getUnitsForm(facility);
+          this.setShowCustomLink();
           this.checkCurrentZip();
         } else {
           this.isFormChange = false;
@@ -161,6 +164,25 @@ export class DefaultUnitsFormComponent implements OnInit {
     } else {
       this.form.controls.customEmissionsRate.patchValue(true);
       this.saveChanges();
+    }
+  }
+
+  setShowCustomLink() {
+    if (this.inAccount) {
+      if (this.selectedAccount.country != 'US') {
+        this.showCustomLink = false;
+      } else {
+        this.showCustomLink = true;
+      }
+    } else {
+      if (this.selectedFacility.country != 'US') {
+        this.showCustomLink = false;
+      } else {
+        this.showCustomLink = true;
+      }
+    }
+    if (!this.form.controls.customEmissionsRate.value && !this.showCustomLink) {
+      this.form.controls.customEmissionsRate.patchValue(true);
     }
   }
 }

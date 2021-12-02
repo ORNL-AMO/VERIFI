@@ -70,7 +70,7 @@
                 <span (click)="toggleCustomEmissionsRate()" class="float-right click-link"
                     *ngIf="!form.controls.customEmissionsRate.value">Rate Known</span>
                 <span (click)="toggleCustomEmissionsRate()" class="float-right click-link"
-                    *ngIf="form.controls.customEmissionsRate.value">Use eGRID</span>
+                    *ngIf="form.controls.customEmissionsRate.value && showCustomLink">Use eGRID</span>
             </label>
         </div>
     </div>
