@@ -32,6 +32,7 @@ export class EnergyUseCalculationsService {
         heatCapacity = selectedFuelTypeOptionsCpy.heatCapacityValue;
       }
     }
+    heatCapacity = this.convertUnitsService.roundVal(heatCapacity, 4)
     return heatCapacity;
   }
 

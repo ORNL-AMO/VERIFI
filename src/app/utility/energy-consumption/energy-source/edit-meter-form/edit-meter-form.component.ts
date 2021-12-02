@@ -2,6 +2,7 @@ import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 import { FormGroup, ValidatorFn } from '@angular/forms';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idb';
+import { ConvertUnitsService } from 'src/app/shared/convert-units/convert-units.service';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 import { EnergyUseCalculationsService } from 'src/app/shared/helper-services/energy-use-calculations.service';
 import { UnitOption } from 'src/app/shared/unitOptions';
@@ -33,7 +34,7 @@ export class EditMeterFormComponent implements OnInit {
   sourceOptions: Array<string> = SourceOptions;
   constructor(private facilityDbService: FacilitydbService,
     private energyUnitsHelperService: EnergyUnitsHelperService, private energyUseCalculationsService: EnergyUseCalculationsService,
-    private editMeterFormService: EditMeterFormService, private cd: ChangeDetectorRef) { }
+    private editMeterFormService: EditMeterFormService, private cd: ChangeDetectorRef, private convertUnitsService: ConvertUnitsService) { }
 
   ngOnInit(): void {
     if (!this.meterEnergyUnit) {
@@ -41,9 +42,8 @@ export class EditMeterFormComponent implements OnInit {
       if (selectedFacility) {
         this.energyUnit = selectedFacility.energyUnit;
       }
-    }else{
+    } else {
       this.energyUnit = this.meterEnergyUnit;
-      console.log("meter energy unit: " + this.energyUnit);
     }
   }
 
@@ -85,6 +85,7 @@ export class EditMeterFormComponent implements OnInit {
     this.checkShowSiteToSource();
     this.setHeatCapacity();
     this.setSiteToSource();
+    this.setEmissionsOutputRate();
     this.cd.detectChanges();
   }
 
@@ -96,6 +97,7 @@ export class EditMeterFormComponent implements OnInit {
     this.checkShowSiteToSource();
     this.setHeatCapacity();
     this.setSiteToSource();
+    this.setEmissionsOutputRate();
     this.cd.detectChanges();
   }
 
@@ -151,7 +153,7 @@ export class EditMeterFormComponent implements OnInit {
     this.meterForm.controls.siteToSource.updateValueAndValidity();
   }
 
-  updateEmissionsOutputRateValidation(){
+  updateEmissionsOutputRateValidation() {
     let emissionsOutputRateValidators: Array<ValidatorFn> = this.editMeterFormService.getEmissionsOutputRateValidation(this.meterForm.controls.source.value);
     this.meterForm.controls.emissionsOutputRate.setValidators(emissionsOutputRateValidators);
     this.meterForm.controls.emissionsOutputRate.updateValueAndValidity();
@@ -190,7 +192,7 @@ export class EditMeterFormComponent implements OnInit {
     this.displaySiteToSource = this.editMeterFormService.checkShowSiteToSource(this.meterForm.controls.source.value, this.meterForm.controls.startingUnit.value);
   }
 
-  checkShowEmissionsOutputRate(){
+  checkShowEmissionsOutputRate() {
     this.displayEmissionsOutputRate = this.editMeterFormService.checkShowEmissionsOutputRate(this.meterForm.controls.source.value);
   }
 
@@ -247,10 +249,27 @@ export class EditMeterFormComponent implements OnInit {
     this.meterForm.controls.startingUnit.updateValueAndValidity();
   }
 
-  setEmissionsOutputRate(){
-    if(this.meterForm.controls.source.value == 'Electricity'){
+  setEmissionsOutputRate() {
+    let emissionsRate: number;
+    if (this.meterForm.controls.source.value == 'Electricity') {
       let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-      this.meterForm.controls.emissionsOutputRate.patchValue(selectedFacility.emissionsOutputRate);
+      emissionsRate = selectedFacility.emissionsOutputRate;
+    } else if (this.meterForm.controls.source.value == 'Natural Gas') {
+      emissionsRate = this.convertEmissions(53.06);
+    } else if (this.meterForm.controls.source.value == 'Other Fuels') {
+      let selectedFuel: FuelTypeOption = this.fuelTypeOptions.find(option => { return option.value == this.meterForm.controls.fuel.value })
+      emissionsRate = selectedFuel.emissionsOutputRate;
+      emissionsRate = this.convertEmissions(emissionsRate);
     }
+    this.meterForm.controls.emissionsOutputRate.patchValue(emissionsRate);
+  }
+
+  convertEmissions(emissionsRate: number): number {
+    if (this.energyUnit != 'MMBtu') {
+      let conversionHelper: number = this.convertUnitsService.value(1).from('MMBtu').to(this.energyUnit);
+      emissionsRate = emissionsRate / conversionHelper;
+      emissionsRate = this.convertUnitsService.roundVal(emissionsRate, 4)
+    }
+    return emissionsRate;
   }
 }
