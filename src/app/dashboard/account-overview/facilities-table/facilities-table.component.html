@@ -25,11 +25,11 @@
                     {{summary.lastBillDate | date: 'MMM, y'}}
                 </td>
                 <td>
-                    {{summary.energyUsage | number:'1.0-0'}}
+                    {{summary.energyUsage | customNumber}}
 
                 </td>
                 <td>
-                    {{summary.energyCost | currency : 'USD' : 'symbol' : '1.0-0' }}
+                    {{summary.energyCost | customNumber:true }}
                 </td>
             </tr>
         </tbody>
@@ -45,10 +45,10 @@
 
                 </th>
                 <th>
-                    {{accountFacilitiesSummary.totalEnergyUse | number:'1.0-0'}}
+                    {{accountFacilitiesSummary.totalEnergyUse | customNumber}}
                 </th>
                 <th>
-                    {{accountFacilitiesSummary.totalEnergyCost | currency : 'USD' : 'symbol' : '1.0-0' }}
+                    {{accountFacilitiesSummary.totalEnergyCost | customNumber:true }}
                 </th>
             </tr>
         </tfoot>

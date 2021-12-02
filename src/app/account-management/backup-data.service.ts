@@ -110,12 +110,12 @@ export class BackupDataService {
     this.loadingService.setLoadingMessage('Adding account..');
     //add account
     delete accountBackup.account.id;
-    let accountId: number = await this.accountDbService.addWithObservable(accountBackup.account).toPromise();
+    let account: IdbAccount = await this.accountDbService.addWithObservable(accountBackup.account).toPromise();
     //add facilities
     for (let i = 0; i < accountBackup.facilities.length; i++) {
-      await this.importFacilityBackup(accountBackup.facilities[i], accountId);
+      await this.importFacilityBackup(accountBackup.facilities[i], account.id);
     }
-    let newBackupAccount: IdbAccount = await this.accountDbService.getById(accountId).toPromise();
+    let newBackupAccount: IdbAccount = await this.accountDbService.getById(account.id).toPromise();
     return newBackupAccount;
   }
 
@@ -124,20 +124,20 @@ export class BackupDataService {
     //add facility
     delete facilityBackup.facility.id;
     facilityBackup.facility.accountId = accountId;
-    let facilityId: number = await this.facilityDbService.addWithObservable(facilityBackup.facility).toPromise();
+    let facility: IdbFacility = await this.facilityDbService.addWithObservable(facilityBackup.facility).toPromise();
     //add meters
     for (let meterIndex = 0; meterIndex < facilityBackup.meters.length; meterIndex++) {
-      await this.importMeterBackup(facilityBackup.meters[meterIndex], accountId, facilityId);
+      await this.importMeterBackup(facilityBackup.meters[meterIndex], accountId, facility.id);
     }
     //add predictors
     this.loadingService.setLoadingMessage('Adding predictor data..');
     for (let predictorIndex = 0; predictorIndex < facilityBackup.predictors.length; predictorIndex++) {
       delete facilityBackup.predictors[predictorIndex].id;
       facilityBackup.predictors[predictorIndex].accountId = accountId;
-      facilityBackup.predictors[predictorIndex].facilityId = facilityId;
+      facilityBackup.predictors[predictorIndex].facilityId = facility.id;
       await this.predictorsDbService.addWithObservable(facilityBackup.predictors[predictorIndex]).toPromise();
     }
-    let newFacility: IdbFacility = await this.facilityDbService.getById(facilityId).toPromise();
+    let newFacility: IdbFacility = await this.facilityDbService.getById(facility.id).toPromise();
     return newFacility;
   }
 

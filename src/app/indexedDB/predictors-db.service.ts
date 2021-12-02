@@ -249,7 +249,7 @@ export class PredictordbService {
         return this.dbService.update('predictors', values)
     }
 
-    addWithObservable(predictor: IdbPredictorEntry): Observable<any> {
+    addWithObservable(predictor: IdbPredictorEntry): Observable<IdbPredictorEntry> {
         return this.dbService.add('predictors', predictor);
     }
 

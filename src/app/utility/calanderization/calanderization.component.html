@@ -84,12 +84,11 @@
                                 [ngClass]="{'use-and-consumption': data.energyConsumption && data.energyUse}">
                                 <td>{{data.date | date: 'MMMM, y'}}</td>
                                 <td *ngIf="meterData.showConsumption">
-                                    <span *ngIf="data.energyConsumption">{{data.energyConsumption |
-                                        number:'1.0-2'}}</span>
+                                    <span *ngIf="data.energyConsumption">{{data.energyConsumption |customNumber}}</span>
                                     <span *ngIf="!data.energyConsumption">N/A</span>
                                 </td>
                                 <td *ngIf="meterData.showEnergyUse">
-                                    <span *ngIf="data.energyUse">{{data.energyUse | number:'1.0-2'}}</span>
+                                    <span *ngIf="data.energyUse">{{data.energyUse | customNumber}}</span>
                                     <span *ngIf="!data.energyUse">N/A</span>
                                 </td>
                                 <td *ngIf="meterData.showEmissions">
@@ -97,7 +96,7 @@
                                     <span *ngIf="!data.emissions">N/A</span>
                                 </td>
                                 <td>
-                                    <span *ngIf="data.energyCost">{{data.energyCost | currency}}</span>
+                                    <span *ngIf="data.energyCost">{{data.energyCost | customNumber:true}}</span>
                                     <span *ngIf="!data.energyCost">N/A</span>
                                 </td>
                             </tr>
