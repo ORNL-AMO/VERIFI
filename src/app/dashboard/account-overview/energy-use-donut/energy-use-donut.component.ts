@@ -81,6 +81,7 @@ export class EnergyUseDonutComponent implements OnInit {
       };
 
       let config = {
+        displaylogo: false,
         responsive: true
       }
       this.plotlyService.newPlot(this.energyUseDonut.nativeElement, data, layout, config);

@@ -68,7 +68,14 @@ export class EnergyUseStackedBarChartComponent implements OnInit {
             x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
             y: this.barChartData.map(dataItem => { return dataItem.electricity[yDataProperty] }),
             name: 'Electricity',
-            type: 'bar'
+            type: 'bar',
+            marker: {
+              color: 'rgb(241, 196, 15)',
+              line: {
+                color: 'rgb(23, 32, 42)',
+                width: 2.5
+              }
+            }
           });
         }
         if (this.barChartData.findIndex(dataItem => { return dataItem.naturalGas[yDataProperty] != 0 }) != -1) {
@@ -76,7 +83,14 @@ export class EnergyUseStackedBarChartComponent implements OnInit {
             x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
             y: this.barChartData.map(dataItem => { return dataItem.naturalGas[yDataProperty] }),
             name: 'Natural Gas',
-            type: 'bar'
+            type: 'bar',
+            marker: {
+              color: 'rgb(123, 36, 28 )',
+              line: {
+                color: 'rgb(23, 32, 42)',
+                width: 2.5
+              }
+            }
           })
         }
         if (this.barChartData.findIndex(dataItem => { return dataItem.otherFuels[yDataProperty] != 0 }) != -1) {
@@ -134,11 +148,13 @@ export class EnergyUseStackedBarChartComponent implements OnInit {
           },
           legend: {
             orientation: "h"
-          }
+          },
+          clickmode: "none"
         };
         let config = {
+          modeBarButtonsToRemove: ['autoScale2d', 'lasso2d', 'pan2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian', 'autoscale', 'zoom', 'zoomin', 'zoomout'],
           displaylogo: false,
-          responsive: true
+          responsive: true,
         };
         this.plotlyService.newPlot(this.energyUseStackedBarChart.nativeElement, data, layout, config);
       }

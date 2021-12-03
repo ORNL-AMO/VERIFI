@@ -84,9 +84,9 @@ export class EnergyUseHeatMapComponent implements OnInit {
         let zData: Array<Array<number>> = heatMapData.resultData.map(dataItem => {
           if (this.graphDisplay == "cost") {
             return dataItem.monthlyCost
-          } else if(this.graphDisplay == "usage") {
+          } else if (this.graphDisplay == "usage") {
             return dataItem.monthlyEnergy;
-          }else if(this.graphDisplay == "emissions"){
+          } else if (this.graphDisplay == "emissions") {
             return dataItem.monthlyEmissions;
           }
         });
@@ -129,6 +129,8 @@ export class EnergyUseHeatMapComponent implements OnInit {
       }]
 
       let config = {
+        modeBarButtonsToRemove: ['autoScale2d', 'lasso2d', 'pan2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian', 'autoscale', 'zoom', 'zoomin', 'zoomout'],
+        displaylogo: false,
         responsive: true
       }
       this.plotlyService.newPlot(this.energyUseHeatMap.nativeElement, data, layout, config);

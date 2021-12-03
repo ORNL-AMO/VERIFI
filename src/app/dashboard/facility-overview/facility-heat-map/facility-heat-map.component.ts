@@ -149,9 +149,12 @@ export class FacilityHeatMapComponent implements OnInit {
           layout.annotations.push(result);
         }
       }
+
       let config = {
-        responsive: true
-      }
+        modeBarButtonsToRemove: ['autoScale2d', 'lasso2d', 'pan2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian', 'autoscale', 'zoom', 'zoomin', 'zoomout'],
+        displaylogo: false,
+        responsive: true,
+      };
       this.plotlyService.newPlot(this.facilityHeatMap.nativeElement, data, layout, config);
     }
   }

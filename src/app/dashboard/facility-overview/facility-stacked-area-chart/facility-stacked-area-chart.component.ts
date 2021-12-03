@@ -117,7 +117,14 @@ export class FacilityStackedAreaChartComponent implements OnInit {
           x: this.electricityData.map(data => { return data.time }),
           y: this.electricityData.map(data => { return data[yDataProperty] }),
           name: 'Electricity',
-          stackgroup: 'one'
+          stackgroup: 'one',
+          marker: {
+            color: 'rgb(241, 196, 15)',
+            line: {
+              color: 'rgb(23, 32, 42)',
+              width: 2.5
+            }
+          }
         }
         traceData.push(trace);
       }
@@ -126,7 +133,14 @@ export class FacilityStackedAreaChartComponent implements OnInit {
           x: this.naturalGasData.map(data => { return data.time }),
           y: this.naturalGasData.map(data => { return data[yDataProperty] }),
           name: 'Natural Gas',
-          stackgroup: 'one'
+          stackgroup: 'one',
+          marker: {
+            color: 'rgb(123, 36, 28 )',
+            line: {
+              color: 'rgb(23, 32, 42)',
+              width: 2.5
+            }
+          }
         };
         traceData.push(trace);
       }
@@ -195,7 +209,12 @@ export class FacilityStackedAreaChartComponent implements OnInit {
           hoverformat: hoverformat
         }
       };
-      var config = { responsive: true };
+
+      let config = {
+        modeBarButtonsToRemove: ['autoScale2d', 'lasso2d', 'pan2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian', 'autoscale', 'zoom', 'zoomin', 'zoomout'],
+        displaylogo: false,
+        responsive: true,
+      };
       this.plotlyService.newPlot(this.stackedAreaChart.nativeElement, traceData, layout, config);
     }
   }
