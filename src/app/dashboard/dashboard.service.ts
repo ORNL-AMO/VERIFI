@@ -143,7 +143,7 @@ export class DashboardService {
     let lastBills: Array<MonthlyData> = facilitySummaries.flatMap(summary => { return summary.allMetersLastBill });
     let previousMonthEnergyUse: number = _.sumBy(accountUtilitySummaries, 'previousMonthEnergyUse');
     let previousMonthEnergyCost: number = _.sumBy(accountUtilitySummaries, 'previousMonthEnergyCost');
-    let previousMonthEmissions: number =  _.sumBy(accountUtilitySummaries, 'previousMonthEmissions');
+    let previousMonthEmissions: number = _.sumBy(accountUtilitySummaries, 'previousMonthEmissions');
     let yearPriorEnergyUse: number = _.sumBy(accountUtilitySummaries, 'yearPriorEnergyUse');
     let yearPriorEnergyCost: number = _.sumBy(accountUtilitySummaries, 'yearPriorEnergyCost');
     let yearPriorEmissions: number = _.sumBy(accountUtilitySummaries, 'yearPriorEmissions');
@@ -179,7 +179,7 @@ export class DashboardService {
       let dates: Array<Date> = filteredUtilitySummaries.map(summary => { return summary.lastBillDate });
       let previousMonthEnergyUse: number = _.sumBy(filteredUtilitySummaries, 'previousMonthEnergyUse');
       let previousMonthEnergyCost: number = _.sumBy(filteredUtilitySummaries, 'previousMonthEnergyCost');
-      let previousMonthEmissions: number =  _.sumBy(filteredUtilitySummaries, 'previousMonthEmissions');
+      let previousMonthEmissions: number = _.sumBy(filteredUtilitySummaries, 'previousMonthEmissions');
       let yearPriorEnergyUse: number = _.sumBy(filteredUtilitySummaries, 'yearPriorEnergyUse');
       let yearPriorEnergyCost: number = _.sumBy(filteredUtilitySummaries, 'yearPriorEnergyCost');
       let yearPriorEmissions: number = _.sumBy(filteredUtilitySummaries, 'yearPriorEmissions');
@@ -220,7 +220,7 @@ export class DashboardService {
     utilitySummaries = this.getMetersSummaryByUtility(utilitySummaries, 'Other Utility', facilityMeters, inAccount, allMetersLastBill);
     let previousMonthEnergyUse: number = _.sumBy(utilitySummaries, 'previousMonthEnergyUse');
     let previousMonthEnergyCost: number = _.sumBy(utilitySummaries, 'previousMonthEnergyCost');
-    let previousMonthEmissions: number =  _.sumBy(utilitySummaries, 'previousMonthEmissions');
+    let previousMonthEmissions: number = _.sumBy(utilitySummaries, 'previousMonthEmissions');
     let yearPriorEnergyUse: number = _.sumBy(utilitySummaries, 'yearPriorEnergyUse');
     let yearPriorEnergyCost: number = _.sumBy(utilitySummaries, 'yearPriorEnergyCost');
     let yearPriorEmissions: number = _.sumBy(utilitySummaries, 'yearPriorEmissions');
@@ -335,13 +335,14 @@ export class DashboardService {
       meterSummaries: facilityMetersSummary,
       totalEnergyUse: _.sumBy(facilityMetersSummary, 'energyUsage'),
       totalEnergyCost: _.sumBy(facilityMetersSummary, 'energyCost'),
+      totalEmissions: _.sumBy(facilityMetersSummary, 'emissions'),
       allMetersLastBill: allMetersLastBill
     };
   }
 
   getMeterSummary(meter: IdbUtilityMeter, inAccount: boolean, allMetersLastBill: MonthlyData): MeterSummary {
     let lastBill: MonthlyData = this.calanderizationService.getLastBillEntry([meter], inAccount);
-    let lastYearData: Array<{ time: string, energyUse: number, energyCost: number }> = this.calanderizationService.getPastYearData([meter], inAccount, allMetersLastBill);
+    let lastYearData: Array<LastYearData> = this.calanderizationService.getPastYearData([meter], inAccount, allMetersLastBill);
     let group: IdbUtilityMeterGroup = this.utilityMeterGroupDbService.getGroupById(meter.groupId);
     let groupName: string = 'Ungrouped';
     if (group) {
@@ -355,6 +356,7 @@ export class DashboardService {
       meter: meter,
       energyUsage: _.sumBy(lastYearData, 'energyUse'),
       energyCost: _.sumBy(lastYearData, 'energyCost'),
+      emissions: _.sumBy(lastYearData, 'emissions'),
       lastBill: lastBill,
       groupName: groupName,
       lastBillDate: lastBillDate

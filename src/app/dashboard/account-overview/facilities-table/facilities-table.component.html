@@ -1,3 +1,7 @@
+<p class="label">Account Facilities
+    <span class="pull-right" *ngIf="yearPriorDate">({{yearPriorDate | date: 'MMM, y'}} -
+        {{lastMonthsDate | date: 'MMM, y'}})</span>
+</p>
 <div class="table-responsive">
     <table class="table table-sm">
         <thead>
@@ -6,14 +10,10 @@
                 <th class="w-1"># of Meters</th>
                 <th class="w-1">Last Bill Entered</th>
                 <th class="w-2">Utility Usage (<span [innerHTML]="accountEnergyUnit | settingsLabel"></span>)
-                    <span class="small" *ngIf="lastMonthsDate">({{yearPriorDate | date: 'MMM, y'}} - {{lastMonthsDate |
-                        date: 'MMM, y'}})</span>
                 </th>
-                <th class="w-2">Utility Cost <span class="small" *ngIf="lastMonthsDate">({{yearPriorDate | date: 'MMM, y'}} -
-                        {{lastMonthsDate | date: 'MMM, y'}})</span></th>
+                <th class="w-2">Utility Cost </th>
                 <th class="w-2">
-                    Emissions (kg CO<sub>2</sub>) <span class="small" *ngIf="lastMonthsDate">({{yearPriorDate | date: 'MMM, y'}} -
-                        {{lastMonthsDate | date: 'MMM, y'}})</span>
+                    Emissions (kg CO<sub>2</sub>)
                 </th>
             </tr>
         </thead>

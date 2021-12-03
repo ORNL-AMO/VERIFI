@@ -1,11 +1,3 @@
-/* tr > :first-child {
-    width: 8%;
-}
-
-tr > :not(:first-child) {
-    width: 15%;
-} */
-
 tr > td {
     width: 10%;
 } 

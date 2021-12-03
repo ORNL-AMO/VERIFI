@@ -25,6 +25,7 @@ export interface FacilityMeterSummaryData {
     meterSummaries: Array<MeterSummary>,
     totalEnergyUse: number,
     totalEnergyCost: number,
+    totalEmissions: number,
     allMetersLastBill: MonthlyData
 }
 
@@ -33,6 +34,7 @@ export interface MeterSummary {
     meter: IdbUtilityMeter,
     energyUsage: number,
     energyCost: number,
+    emissions: number,
     lastBill: MonthlyData,
     groupName: string,
     lastBillDate: Date
