@@ -7,6 +7,7 @@ export interface AccountFacilitiesSummary {
     totalEnergyUse: number,
     totalEnergyCost: number,
     totalNumberOfMeters: number,
+    totalEmissions: number,
     allMetersLastBill: MonthlyData
 }
 
@@ -14,6 +15,7 @@ export interface FacilitySummary {
     facility: IdbFacility,
     energyUsage: number,
     energyCost: number,
+    emissions: number,
     numberOfMeters: number,
     lastBillDate: Date
 }
@@ -47,11 +49,15 @@ export interface SummaryData {
     lastBillDate: Date,
     previousMonthEnergyUse: number,
     previousMonthEnergyCost: number,
+    previousMonthEmissions: number,
     averageEnergyUse: number,
     averageEnergyCost: number,
+    averageEmissions: number,
     yearPriorEnergyUse: number,
     yearPriorEnergyCost: number,
+    yearPriorEmissions: number,
     energyUseChangeSinceLastYear: number,
     energyCostChangeSinceLastYear: number,
+    emissionsChangeSinceLastYear: number,
     utility: string
 }

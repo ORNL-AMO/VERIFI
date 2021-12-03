@@ -47,13 +47,17 @@ export class AccountUtilityEnergyUseTableComponent implements OnInit {
             lastBillDate: undefined,
             previousMonthEnergyUse: 0,
             previousMonthEnergyCost: 0,
+            previousMonthEmissions: 0,
             averageEnergyUse: 0,
             averageEnergyCost: 0,
+            averageEmissions: 0,
             utility: undefined,
             yearPriorEnergyCost: 0,
             yearPriorEnergyUse: 0,
+            yearPriorEmissions: 0,
             energyUseChangeSinceLastYear: 0,
             energyCostChangeSinceLastYear: 0,
+            emissionsChangeSinceLastYear: 0
           },
           allMetersLastBill: undefined
         }
@@ -69,6 +73,7 @@ export class AccountUtilityEnergyUseTableComponent implements OnInit {
   setUsageValues() {
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     this.utilityUsageSummaryData = this.dashboardService.getFacilitiesUtilityUsageSummaryData(accountFacilities, true);
+    console.log(this.utilityUsageSummaryData);
     if (this.utilityUsageSummaryData.allMetersLastBill) {
       this.lastMonthsDate = new Date(this.utilityUsageSummaryData.allMetersLastBill.year, this.utilityUsageSummaryData.allMetersLastBill.monthNumValue);
       this.yearPriorDate = new Date(this.utilityUsageSummaryData.allMetersLastBill.year - 1, this.utilityUsageSummaryData.allMetersLastBill.monthNumValue + 1);

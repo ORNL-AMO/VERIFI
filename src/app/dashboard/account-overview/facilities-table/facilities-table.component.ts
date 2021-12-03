@@ -25,6 +25,7 @@ export class FacilitiesTableComponent implements OnInit {
     totalEnergyUse: undefined,
     totalEnergyCost: undefined,
     totalNumberOfMeters: undefined,
+    totalEmissions: undefined,
     allMetersLastBill: undefined
   };
   lastMonthsDate: Date;
@@ -82,6 +83,7 @@ export class FacilitiesTableComponent implements OnInit {
       totalEnergyUse: undefined,
       totalEnergyCost: undefined,
       totalNumberOfMeters: undefined,
+      totalEmissions: undefined,
       allMetersLastBill: undefined
     };
     this.lastMonthsDate = undefined;
