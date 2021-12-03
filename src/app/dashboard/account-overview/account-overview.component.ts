@@ -18,7 +18,7 @@ export class AccountOverviewComponent implements OnInit {
   accountMeterDataSub: Subscription;
 
   graphDisplaySub: Subscription;
-  chartsLabel: "Costs" | "Usage";
+  chartsLabel: "Costs" | "Usage" | "Emissions";
   heatMapShown: boolean = false;
   constructor(public utilityMeterDataDbService: UtilityMeterDatadbService, private dashboardService: DashboardService) { }
 
@@ -39,6 +39,8 @@ export class AccountOverviewComponent implements OnInit {
         this.chartsLabel = "Costs";
       } else if (value == "usage") {
         this.chartsLabel = "Usage";
+      } else if(value == "emissions"){
+        this.chartsLabel = "Emissions";
       }
     })
   }

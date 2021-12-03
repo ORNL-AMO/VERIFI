@@ -25,7 +25,7 @@ export class DashboardComponent implements OnInit {
   utilityDataSub: Subscription;
   accountFacilitiesSub: Subscription;
 
-  graphDisplay: "cost" | "usage";
+  graphDisplay: "cost" | "usage" | "emissions";
   graphDisplaySub: Subscription;
   bannerDropdownOpen: boolean;
   bannerDropdownOpenSub: Subscription;
@@ -49,6 +49,9 @@ export class DashboardComponent implements OnInit {
   }
 
   ngOnInit() {
+    if (this.router.url.includes('facility-summary')) {
+      this.isFacilityDashboard = true;
+    }
     this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(val => {
       this.selectedAccount = val;
     });
@@ -97,7 +100,7 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  setGraphDisplay(str: "cost" | "usage") {
+  setGraphDisplay(str: "cost" | "usage" | "emissions") {
     this.dashboardService.graphDisplay.next(str);
   }
 
@@ -107,7 +110,7 @@ export class DashboardComponent implements OnInit {
   }
 
   setFacilityEnergyIsSource(energyIsSource: boolean) {
-    this.selectedFacility.energyIsSource = energyIsSource;   
+    this.selectedFacility.energyIsSource = energyIsSource;
     this.facilityDbService.update(this.selectedFacility);
   }
 }

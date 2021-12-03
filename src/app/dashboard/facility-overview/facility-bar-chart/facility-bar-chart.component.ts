@@ -26,12 +26,12 @@ export class FacilityBarChartComponent implements OnInit {
 
 
 
-  electricityData: Array<{ time: string, energyUse: number, energyCost: number }>;
-  naturalGasData: Array<{ time: string, energyUse: number, energyCost: number }>;
-  otherFuelsData: Array<{ time: string, energyUse: number, energyCost: number }>;
-  waterData: Array<{ time: string, energyUse: number, energyCost: number }>;
-  wasteWaterData: Array<{ time: string, energyUse: number, energyCost: number }>;
-  otherUtilityData: Array<{ time: string, energyUse: number, energyCost: number }>;
+  electricityData: Array<{ time: string, energyUse: number, energyCost: number, emissions: number }>;
+  naturalGasData: Array<{ time: string, energyUse: number, energyCost: number, emissions: number }>;
+  otherFuelsData: Array<{ time: string, energyUse: number, energyCost: number, emissions: number }>;
+  waterData: Array<{ time: string, energyUse: number, energyCost: number, emissions: number }>;
+  wasteWaterData: Array<{ time: string, energyUse: number, energyCost: number, emissions: number }>;
+  otherUtilityData: Array<{ time: string, energyUse: number, energyCost: number, emissions: number }>;
   facilityMeters: Array<IdbUtilityMeter>;
   sumByMonth: boolean = false;
   removeIncompleteYears: boolean = true;
@@ -42,7 +42,7 @@ export class FacilityBarChartComponent implements OnInit {
   accountMeters: Array<IdbUtilityMeter>;
   accountMetersSub: Subscription;
 
-  graphDisplay: "cost" | "usage";
+  graphDisplay: "cost" | "usage" | "emissions";
   graphDisplaySub: Subscription;
 
   constructor(private plotlyService: PlotlyService, private utilityMeterDbService: UtilityMeterdbService,
@@ -101,7 +101,7 @@ export class FacilityBarChartComponent implements OnInit {
     if (this.utilityBarChart) {
       let traceData = new Array();
 
-      let yDataProperty: "energyCost" | "energyUse";
+      let yDataProperty: "energyCost" | "energyUse" | "emissions";
       let yaxisTitle: string;
 
       let hoverformat: string;
@@ -111,13 +111,21 @@ export class FacilityBarChartComponent implements OnInit {
         yaxisTitle = 'Utility Cost';
         yDataProperty = "energyCost";
         tickprefix = "$";
-      } else {
+      } else if(this.graphDisplay == "usage") {
         let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
         yaxisTitle = "Utility Usage (" + selectedFacility.energyUnit + ")";
         yDataProperty = "energyUse";
         tickprefix = "";
         hoverformat = ",.2f";
+      }else if(this.graphDisplay == "emissions"){
+        // let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+        yaxisTitle = "Emissions (kg CO<sub>2</sub>)";
+        yDataProperty = "emissions";
+        tickprefix = "";
+        hoverformat = ",.2f";
       }
+
+
       if (this.electricityData.length != 0) {
         let trace = {
           x: this.electricityData.map(data => { return data.time }),
@@ -213,7 +221,7 @@ export class FacilityBarChartComponent implements OnInit {
     }
   }
 
-  getDataByUtility(utility: string, facilityMeters: Array<IdbUtilityMeter>): Array<{ time: string, energyUse: number, energyCost: number }> {
+  getDataByUtility(utility: string, facilityMeters: Array<IdbUtilityMeter>): Array<{ time: string, energyUse: number, energyCost: number, emissions: number }> {
     let filteredMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.source == utility });
     return this.vizualizationService.getFacilityBarChartData(filteredMeters, this.sumByMonth, this.removeIncompleteYears, false);
   }

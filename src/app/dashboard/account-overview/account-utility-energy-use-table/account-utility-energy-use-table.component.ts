@@ -73,7 +73,6 @@ export class AccountUtilityEnergyUseTableComponent implements OnInit {
   setUsageValues() {
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     this.utilityUsageSummaryData = this.dashboardService.getFacilitiesUtilityUsageSummaryData(accountFacilities, true);
-    console.log(this.utilityUsageSummaryData);
     if (this.utilityUsageSummaryData.allMetersLastBill) {
       this.lastMonthsDate = new Date(this.utilityUsageSummaryData.allMetersLastBill.year, this.utilityUsageSummaryData.allMetersLastBill.monthNumValue);
       this.yearPriorDate = new Date(this.utilityUsageSummaryData.allMetersLastBill.year - 1, this.utilityUsageSummaryData.allMetersLastBill.monthNumValue + 1);

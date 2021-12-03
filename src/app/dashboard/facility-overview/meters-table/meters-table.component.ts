@@ -52,7 +52,6 @@ export class MetersTableComponent implements OnInit {
   getSummary() {
     if (this.accountMeterData && this.accountMeterData.length != 0) {
       this.facilityMeterSummaryData = this.dashboardService.getFacilityMetersSummary(false);
-      console.log(this.facilityMeterSummaryData)
       if (this.facilityMeterSummaryData.allMetersLastBill) {
         this.lastMonthsDate = new Date(this.facilityMeterSummaryData.allMetersLastBill.year, this.facilityMeterSummaryData.allMetersLastBill.monthNumValue);
         this.yearPriorDate = new Date(this.facilityMeterSummaryData.allMetersLastBill.year - 1, this.facilityMeterSummaryData.allMetersLastBill.monthNumValue + 1);

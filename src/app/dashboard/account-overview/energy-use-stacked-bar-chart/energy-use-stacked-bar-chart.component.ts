@@ -8,6 +8,7 @@ import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { DashboardService } from '../../dashboard.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 
 @Component({
   selector: 'app-energy-use-stacked-bar-chart',
@@ -20,11 +21,11 @@ export class EnergyUseStackedBarChartComponent implements OnInit {
 
   accountFacilitiesSub: Subscription;
   barChartData: Array<StackedBarChartData>;
-  graphDisplay: "cost" | "usage";
+  graphDisplay: "cost" | "usage" | "emissions";
   graphDisplaySub: Subscription;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private utilityMeterDbService: UtilityMeterdbService,
     private facilityDbService: FacilitydbService, private plotlyService: PlotlyService, private dashboardService: DashboardService,
-    private accountDbService: AccountdbService) { }
+    private accountDbService: AccountdbService, private calanderizationService: CalanderizationService) { }
 
   ngOnInit(): void {
     this.accountFacilitiesSub = this.utilityMeterDataDbService.accountMeterData.subscribe(val => {
@@ -44,17 +45,21 @@ export class EnergyUseStackedBarChartComponent implements OnInit {
   drawChart() {
     if (this.energyUseStackedBarChart) {
       if (this.barChartData && this.barChartData.length != 0 && this.graphDisplay) {
-        let yDataProperty: "energyCost" | "energyUse";
+        let yDataProperty: "energyCost" | "energyUse" | "emissions";
         let tickprefix: string;
         let yaxisTitle: string;
         if (this.graphDisplay == "cost") {
           yaxisTitle = "Utility Costs";
           yDataProperty = "energyCost";
           tickprefix = "$";
-        } else {
+        } else if(this.graphDisplay == "usage") {
           let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
           yaxisTitle = "Utility Usage (" + selectedAccount.energyUnit + ")";
           yDataProperty = "energyUse";
+          tickprefix = "";
+        } else if(this.graphDisplay == "emissions") {
+          yaxisTitle = "Emissions (kg CO<sub>2</sub>)";
+          yDataProperty = "emissions";
           tickprefix = "";
         }
         let data = new Array();
@@ -141,9 +146,11 @@ export class EnergyUseStackedBarChartComponent implements OnInit {
   }
 
   setBarChartData() {
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     this.barChartData = new Array();
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    
+
+
     let accountMeterData: Array<IdbUtilityMeterData> = new Array();
     accountMeters.forEach(meter => {
       let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataForAccount(meter, true);
@@ -156,28 +163,32 @@ export class EnergyUseStackedBarChartComponent implements OnInit {
     let accountFacilites: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
 
     facilityIds.forEach(id => {
-      let electricity: UtilityItem = { energyUse: 0, energyCost: 0 };
-      let naturalGas: UtilityItem = { energyUse: 0, energyCost: 0 };
-      let otherFuels: UtilityItem = { energyUse: 0, energyCost: 0 };
-      let otherEnergy: UtilityItem = { energyUse: 0, energyCost: 0 };
-      let water: UtilityItem = { energyUse: 0, energyCost: 0 };
-      let wasteWater: UtilityItem = { energyUse: 0, energyCost: 0 };
-      let otherUtility: UtilityItem = { energyUse: 0, energyCost: 0 };
+      let electricity: UtilityItem = { energyUse: 0, energyCost: 0, emissions: 0 };
+      let naturalGas: UtilityItem = { energyUse: 0, energyCost: 0, emissions: 0 };
+      let otherFuels: UtilityItem = { energyUse: 0, energyCost: 0, emissions: 0 };
+      let otherEnergy: UtilityItem = { energyUse: 0, energyCost: 0, emissions: 0 };
+      let water: UtilityItem = { energyUse: 0, energyCost: 0, emissions: 0 };
+      let wasteWater: UtilityItem = { energyUse: 0, energyCost: 0, emissions: 0 };
+      let otherUtility: UtilityItem = { energyUse: 0, energyCost: 0, emissions: 0 };
       let facilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.filter(meterData => { return meterData.facilityId == id });
       facilityMeterData.forEach(dataItem => {
         let meter: IdbUtilityMeter = this.utilityMeterDbService.getFacilityMeterById(dataItem.meterId);
+        let emissions: number = this.calanderizationService.getEmissions(meter, dataItem.totalEnergyUse, selectedAccount.energyUnit, selectedAccount.energyIsSource);
         if (meter) {
           if (meter.source == 'Electricity') {
             electricity.energyUse = (electricity.energyUse + Number(dataItem.totalEnergyUse));
             electricity.energyCost = (electricity.energyCost + Number(dataItem.totalCost));
+            electricity.emissions = (electricity.emissions + emissions);
           }
           else if (meter.source == 'Natural Gas') {
             naturalGas.energyUse = (naturalGas.energyUse + Number(dataItem.totalEnergyUse));
             naturalGas.energyCost = (naturalGas.energyCost + Number(dataItem.totalCost));
+            naturalGas.emissions = (naturalGas.emissions + emissions);
           }
           else if (meter.source == 'Other Fuels') {
             otherFuels.energyUse = (otherFuels.energyUse + Number(dataItem.totalEnergyUse));
             otherFuels.energyCost = (otherFuels.energyCost + Number(dataItem.totalCost));
+            otherFuels.emissions = (otherFuels.emissions + emissions);
           }
           else if (meter.source == 'Other Energy') {
             otherEnergy.energyUse = (otherEnergy.energyUse + Number(dataItem.totalEnergyUse));
@@ -228,5 +239,6 @@ export interface StackedBarChartData {
 
 export interface UtilityItem {
   energyUse: number,
-  energyCost: number
+  energyCost: number,
+  emissions: number
 }

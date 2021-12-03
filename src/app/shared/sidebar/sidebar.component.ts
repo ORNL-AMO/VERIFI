@@ -56,6 +56,7 @@ export class SidebarComponent implements OnInit {
       clearTimeout(this.isHovering);
     }
     this.open = !this.open;
+    window.dispatchEvent(new Event("resize"));
   }
 
 }
