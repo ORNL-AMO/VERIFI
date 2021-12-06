@@ -107,3 +107,13 @@ p{
       height: calc(100vh - 100px);
       overflow-y: auto;
 }
+
+
+h3 a{
+  font-size: 1.75rem;
+  color: white;
+}
+
+h3 a span.fa{
+  color: white !important;
+}

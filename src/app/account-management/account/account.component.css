@@ -10,3 +10,11 @@
 .wrapper{
     margin-bottom: 100px;
 }
+h3 a{
+  font-size: 1.75rem;
+  color: white;
+}
+
+h3 a span.fa{
+  color: white !important;
+}

@@ -149,7 +149,7 @@ export class HeaderComponent implements OnInit {
   }
 
   selectAllFacilities() {
-    this.router.navigate(['/account-summary']);
+    this.router.navigate(['/home/account-summary']);
     this.facilityMenu = false;
     this.dashboardService.bannerDropdownOpen.next(false);
   }
@@ -185,10 +185,10 @@ export class HeaderComponent implements OnInit {
   }
 
   checkIfAccountPage() {
-    if (this.router.url === '/account-management' || this.router.url === '/account-summary') {
+    if (this.router.url === '/account-management' || this.router.url === '/home/account-summary') {
       this.viewingAccountPage = true;
     }
-    if (this.router.url != '/account-management' && this.router.url != '/account-summary') {
+    if (this.router.url != '/account-management' && this.router.url != '/home/account-summary') {
       this.viewingAccountPage = false;
     }
   }
