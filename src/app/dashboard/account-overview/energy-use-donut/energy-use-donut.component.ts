@@ -19,7 +19,7 @@ export class EnergyUseDonutComponent implements OnInit {
   facilitiesSummary: AccountFacilitiesSummary;
   accountFacilitiesSub: Subscription;
 
-  graphDisplay: "cost" | "usage";
+  graphDisplay: "cost" | "usage" | "emissions";
   graphDisplaySub: Subscription;
 
 
@@ -57,6 +57,9 @@ export class EnergyUseDonutComponent implements OnInit {
         let selectedAccout: IdbAccount = this.accountDbService.selectedAccount.getValue();
         yDataProperty = "energyUsage";
         hovertemplate = '%{label}: %{value:,.0f} ' + selectedAccout.energyUnit + ' <extra></extra>'
+      } else if (this.graphDisplay == "emissions") {
+        yDataProperty = "emissions";
+        hovertemplate = '%{label}: %{value:,.0f} kg CO<sub>2</sub> <extra></extra>'
       }
 
       var data = [{

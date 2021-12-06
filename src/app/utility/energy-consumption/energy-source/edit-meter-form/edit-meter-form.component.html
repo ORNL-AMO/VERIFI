@@ -102,8 +102,18 @@
                         should be greater than 0</span>
                 </div>
                 <div class="col-6" *ngIf="displayEmissionsOutputRate">
-                    <label for="emissionsOutputRate">Emissions Output Rate</label>
-                    <div class="input-group mb-3">
+                    <label for="emissionsOutputRate">Emissions Output Rate
+
+                    </label>
+                    <span *ngIf="meterForm.controls.emissionsOutputRate.value">
+                        {{meterForm.controls.emissionsOutputRate.value}} kg CO<sub>2</sub>/<span
+                            [innerHTML]="energyUnit | settingsLabel"></span>
+                    </span>
+                    <div class="alert alert-info" *ngIf="!meterForm.controls.emissionsOutputRate.value">
+                        Electrical emissions output rate is set in the facility settings. No output rate found. <a
+                            routerLink="/facility-management">Change Settings</a>
+                    </div>
+                    <!-- <div class="input-group mb-3">
                         <input id="emissionsOutputRate" class="form-control" type="number"
                             formControlName="emissionsOutputRate" onfocus="this.select();">
                         <span class="unit">
@@ -115,7 +125,7 @@
                         required</span>
                     <span class="inputError" *ngIf="meterForm.get('emissionsOutputRate').hasError('min')">Value can't be
                         less
-                        than 0</span>
+                        than 0</span> -->
                 </div>
             </div>
 

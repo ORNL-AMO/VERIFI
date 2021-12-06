@@ -1,7 +1,7 @@
 
 
 export interface HeatMapData {
-    resultData: Array<{ monthlyEnergy: Array<number>, monthlyCost: Array<number> }>,
+    resultData: Array<{ monthlyEnergy: Array<number>, monthlyCost: Array<number>, monthlyEmissions: Array<number> }>,
     months: Array<string>,
     years: Array<number>,
     facilityName: string

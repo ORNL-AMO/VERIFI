@@ -306,6 +306,13 @@ export class CalanderizationService {
             return 0;
           }
         });
+        let totalEmissions: number =  _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
+          if (meterData.monthNumValue == yearMonth.month && meterData.year == yearMonth.year) {
+            return meterData.emissions;
+          } else {
+            return 0;
+          }
+        });
         return {
           time: yearMonth.month + ', ' + yearMonth.year,
           energyUse: totalEnergyUse,
@@ -313,7 +320,8 @@ export class CalanderizationService {
           energyConsumption: totalEnergyConsumption,
           year: yearMonth.year,
           month: yearMonth.month,
-          date: new Date(yearMonth.year, yearMonth.month)
+          date: new Date(yearMonth.year, yearMonth.month),
+          emissions: totalEmissions
         }
 
       });

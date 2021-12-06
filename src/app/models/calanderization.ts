@@ -27,6 +27,7 @@ export interface LastYearData {
     energyUse: number,
     energyCost: number,
     energyConsumption: number,
+    emissions: number,
     date: Date
 }
 
