@@ -56,7 +56,7 @@ export class EmptyStateComponent implements OnInit {
       let newAccount: IdbAccount = this.accountdbService.getNewIdbAccount();
       this.accountdbService.add(newAccount);
     }
-    this.router.navigate(['/account-management']);
+    this.router.navigate(['/home/account-management']);
   }
 
   addFacility() {
@@ -64,7 +64,7 @@ export class EmptyStateComponent implements OnInit {
       let newFacility: IdbFacility = this.facilityDbService.getNewIdbFacility(this.selectedAccount);
       this.facilityDbService.add(newFacility);
     }
-    this.router.navigate(['/facility-management']);
+    this.router.navigate(['/home/facility-management']);
   }
 
   addUtilityData() {

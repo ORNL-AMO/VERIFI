@@ -24,6 +24,11 @@ import { UploadDataComponent } from './utility/upload-data/upload-data.component
 const routes: Routes = [
   {
     path: '',
+    pathMatch: 'full',
+    redirectTo: 'home'
+  },
+  {
+    path: 'home',
     component: DashboardComponent,
     children: [
       {
@@ -70,7 +75,8 @@ const routes: Routes = [
       { path: 'meter-groups', component: MeterGroupingComponent },
       { path: 'predictors', component: PredictorDataComponent },
       { path: 'visualization', component: VisualizationComponent },
-      { path: 'upload-data', component: UploadDataComponent }
+      { path: 'upload-data', component: UploadDataComponent },
+      { path: '', pathMatch: 'full', redirectTo: 'energy-consumption'}
 
     ]
   },

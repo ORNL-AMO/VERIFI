@@ -3,9 +3,9 @@
         <i class="fa" [ngClass]="{'fa-align-left': !open, 'fa-align-right': open}"></i>
     </a>
     <hr>
-    <a class="nav-link" routerLink="/account-summary" [routerLinkActive]="['active']"><i class="fa fa-home"></i>
+    <a class="nav-link" routerLink="/home" [routerLinkActive]="['active']"><i class="fa fa-home"></i>
         <span [hidden]="!open" class="pl-2 nav-label">Home</span></a>
-    <a class="nav-link" routerLink="utility/energy-consumption" [routerLinkActive]="['active']"><i
+    <a class="nav-link" routerLink="utility/" [routerLinkActive]="['active']"><i
             class="fa fa-bar-chart"></i>
         <span [hidden]="!open" class="pl-2 nav-label">Utility Data</span></a>
     <hr>
