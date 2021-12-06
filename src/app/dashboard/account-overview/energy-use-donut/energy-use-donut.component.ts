@@ -78,7 +78,6 @@ export class EnergyUseDonutComponent implements OnInit {
         type: 'pie',
         automargin: true
       }];
-      console.log(data);
 
       var layout = {
         margin: { "t": 50, "b": 50, "l": 50, "r": 50 },
