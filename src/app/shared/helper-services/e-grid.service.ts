@@ -25,6 +25,11 @@ export class EGridService {
         // 5: "eGRID Subregion #3"]
         let sheetOne = XLSX.utils.sheet_to_json(wb.Sheets["eGrid_zipcode_lookup"], { raw: false });
         this.setSubRegionsByZip(sheetOne)
+        //eGrid data
+        //0: SUBRGN
+        //1: CO2e
+        //2: CH4
+        //3: N2O
         let sheetTwo = XLSX.utils.sheet_to_json(wb.Sheets["eGrid_co2"], { raw: false });
         this.setCo2Emissions(sheetTwo);
       });
