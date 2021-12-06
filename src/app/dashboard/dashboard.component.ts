@@ -92,11 +92,11 @@ export class DashboardComponent implements OnInit {
 
   switchFacility() {
     if (this.breadcrumbFacilityId == undefined) {
-      this.router.navigateByUrl('/account-summary');
+      this.router.navigateByUrl('/home/account-summary');
     } else {
       let selectedFacility: IdbFacility = this.facilityList.find(facility => { return facility.id == this.breadcrumbFacilityId });
       this.facilityDbService.selectedFacility.next(selectedFacility);
-      this.router.navigateByUrl('/facility-summary');
+      this.router.navigateByUrl('/home/facility-summary');
     }
   }
 

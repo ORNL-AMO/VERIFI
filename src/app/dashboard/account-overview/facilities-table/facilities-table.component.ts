@@ -66,7 +66,7 @@ export class FacilitiesTableComponent implements OnInit {
 
   selectFacility(facility: IdbFacility) {
     this.facilityDbService.selectedFacility.next(facility);
-    this.router.navigateByUrl('/facility-summary');
+    this.router.navigateByUrl('/home/facility-summary');
   }
 
   setAccountFacilities() {
