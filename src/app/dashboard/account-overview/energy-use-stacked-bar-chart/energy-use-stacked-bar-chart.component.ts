@@ -9,6 +9,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { DashboardService } from '../../dashboard.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
+import { UtilityColors } from 'src/app/shared/utilityColors';
 
 @Component({
   selector: 'app-energy-use-stacked-bar-chart',
@@ -70,11 +71,7 @@ export class EnergyUseStackedBarChartComponent implements OnInit {
             name: 'Electricity',
             type: 'bar',
             marker: {
-              color: 'rgb(241, 196, 15)',
-              line: {
-                color: 'rgb(23, 32, 42)',
-                width: 2.5
-              }
+              color: UtilityColors.Electricity.color
             }
           });
         }
@@ -85,11 +82,7 @@ export class EnergyUseStackedBarChartComponent implements OnInit {
             name: 'Natural Gas',
             type: 'bar',
             marker: {
-              color: 'rgb(123, 36, 28 )',
-              line: {
-                color: 'rgb(23, 32, 42)',
-                width: 2.5
-              }
+              color: UtilityColors['Natural Gas'].color
             }
           })
         }
@@ -98,7 +91,10 @@ export class EnergyUseStackedBarChartComponent implements OnInit {
             x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
             y: this.barChartData.map(dataItem => { return dataItem.otherFuels[yDataProperty] }),
             name: 'Other Fuels',
-            type: 'bar'
+            type: 'bar',
+            marker: {
+              color: UtilityColors['Other Fuels'].color
+            }
           })
         }
         if (this.barChartData.findIndex(dataItem => { return dataItem.otherEnergy[yDataProperty] != 0 }) != -1) {
@@ -106,7 +102,10 @@ export class EnergyUseStackedBarChartComponent implements OnInit {
             x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
             y: this.barChartData.map(dataItem => { return dataItem.otherEnergy[yDataProperty] }),
             name: 'Other Energy',
-            type: 'bar'
+            type: 'bar',
+            marker: {
+              color: UtilityColors['Other Energy'].color
+            }
           })
         }
         if (this.barChartData.findIndex(dataItem => { return dataItem.water[yDataProperty] != 0 }) != -1) {
@@ -114,7 +113,10 @@ export class EnergyUseStackedBarChartComponent implements OnInit {
             x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
             y: this.barChartData.map(dataItem => { return dataItem.water[yDataProperty] }),
             name: 'Water',
-            type: 'bar'
+            type: 'bar',
+            marker: {
+              color: UtilityColors['Water'].color
+            }
           })
         }
         if (this.barChartData.findIndex(dataItem => { return dataItem.wasteWater[yDataProperty] != 0 }) != -1) {
@@ -122,7 +124,10 @@ export class EnergyUseStackedBarChartComponent implements OnInit {
             x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
             y: this.barChartData.map(dataItem => { return dataItem.wasteWater[yDataProperty] }),
             name: 'Waste Water',
-            type: 'bar'
+            type: 'bar',
+            marker: {
+              color: UtilityColors['Waste Water'].color
+            }
           })
         }
         if (this.barChartData.findIndex(dataItem => { return dataItem.otherUtility[yDataProperty] != 0 }) != -1) {
@@ -130,7 +135,10 @@ export class EnergyUseStackedBarChartComponent implements OnInit {
             x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
             y: this.barChartData.map(dataItem => { return dataItem.otherUtility[yDataProperty] }),
             name: 'Other Utility',
-            type: 'bar'
+            type: 'bar',
+            marker: {
+              color: UtilityColors['Other Utility'].color
+            }
           })
         }
 

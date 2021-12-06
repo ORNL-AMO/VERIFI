@@ -59,12 +59,15 @@ export class EnergyUseDonutComponent implements OnInit {
         hovertemplate = '%{label}: %{value:,.0f} ' + selectedAccout.energyUnit + ' <extra></extra>'
       } else if (this.graphDisplay == "emissions") {
         yDataProperty = "emissions";
-        hovertemplate = '%{label}: %{value:,.0f} CO<sub>2</sub> <extra></extra>'
+        hovertemplate = '%{label}: %{value:,.0f} kg CO<sub>2</sub> <extra></extra>'
       }
 
       var data = [{
         values: this.facilitiesSummary.facilitySummaries.map(summary => { return summary[yDataProperty] }),
         labels: this.facilitiesSummary.facilitySummaries.map(summary => { return summary.facility.name }),
+        marker: {
+          colors: this.facilitiesSummary.facilitySummaries.map(summary => { return summary.facility.color }),
+        },
         textinfo: 'label+percent',
         textposition: 'auto',
         insidetextorientation: "horizontal",
@@ -75,6 +78,7 @@ export class EnergyUseDonutComponent implements OnInit {
         type: 'pie',
         automargin: true
       }];
+      console.log(data);
 
       var layout = {
         margin: { "t": 50, "b": 50, "l": 50, "r": 50 },
