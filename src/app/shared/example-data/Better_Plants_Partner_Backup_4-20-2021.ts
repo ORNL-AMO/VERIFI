@@ -104,7 +104,8 @@ export const ExampleAccount: AccountBackup = {
                 "fiscalYearCalendarEnd": true,
                 "energyIsSource": true,
                 "id": 9,
-                "emissionsOutputRate": 1512.599
+                "emissionsOutputRate": 1512.599,
+                "color": "#0c7e0e"
             },
             "meters": [
                 {
@@ -4575,7 +4576,8 @@ export const ExampleAccount: AccountBackup = {
                 "fiscalYearCalendarEnd": true,
                 "energyIsSource": true,
                 "id": 10,
-                "emissionsOutputRate": 1106.448
+                "emissionsOutputRate": 1106.448,
+                "color": "#6012a1"
             },
             "meters": [
                 {

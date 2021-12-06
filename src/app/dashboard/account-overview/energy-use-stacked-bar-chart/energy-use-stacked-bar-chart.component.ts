@@ -9,6 +9,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { DashboardService } from '../../dashboard.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
+import { UtilityColors } from 'src/app/shared/utilityColors';
 
 @Component({
   selector: 'app-energy-use-stacked-bar-chart',
@@ -68,7 +69,10 @@ export class EnergyUseStackedBarChartComponent implements OnInit {
             x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
             y: this.barChartData.map(dataItem => { return dataItem.electricity[yDataProperty] }),
             name: 'Electricity',
-            type: 'bar'
+            type: 'bar',
+            marker: {
+              color: UtilityColors.Electricity.color
+            }
           });
         }
         if (this.barChartData.findIndex(dataItem => { return dataItem.naturalGas[yDataProperty] != 0 }) != -1) {
@@ -76,7 +80,10 @@ export class EnergyUseStackedBarChartComponent implements OnInit {
             x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
             y: this.barChartData.map(dataItem => { return dataItem.naturalGas[yDataProperty] }),
             name: 'Natural Gas',
-            type: 'bar'
+            type: 'bar',
+            marker: {
+              color: UtilityColors['Natural Gas'].color
+            }
           })
         }
         if (this.barChartData.findIndex(dataItem => { return dataItem.otherFuels[yDataProperty] != 0 }) != -1) {
@@ -84,7 +91,10 @@ export class EnergyUseStackedBarChartComponent implements OnInit {
             x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
             y: this.barChartData.map(dataItem => { return dataItem.otherFuels[yDataProperty] }),
             name: 'Other Fuels',
-            type: 'bar'
+            type: 'bar',
+            marker: {
+              color: UtilityColors['Other Fuels'].color
+            }
           })
         }
         if (this.barChartData.findIndex(dataItem => { return dataItem.otherEnergy[yDataProperty] != 0 }) != -1) {
@@ -92,7 +102,10 @@ export class EnergyUseStackedBarChartComponent implements OnInit {
             x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
             y: this.barChartData.map(dataItem => { return dataItem.otherEnergy[yDataProperty] }),
             name: 'Other Energy',
-            type: 'bar'
+            type: 'bar',
+            marker: {
+              color: UtilityColors['Other Energy'].color
+            }
           })
         }
         if (this.barChartData.findIndex(dataItem => { return dataItem.water[yDataProperty] != 0 }) != -1) {
@@ -100,7 +113,10 @@ export class EnergyUseStackedBarChartComponent implements OnInit {
             x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
             y: this.barChartData.map(dataItem => { return dataItem.water[yDataProperty] }),
             name: 'Water',
-            type: 'bar'
+            type: 'bar',
+            marker: {
+              color: UtilityColors['Water'].color
+            }
           })
         }
         if (this.barChartData.findIndex(dataItem => { return dataItem.wasteWater[yDataProperty] != 0 }) != -1) {
@@ -108,7 +124,10 @@ export class EnergyUseStackedBarChartComponent implements OnInit {
             x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
             y: this.barChartData.map(dataItem => { return dataItem.wasteWater[yDataProperty] }),
             name: 'Waste Water',
-            type: 'bar'
+            type: 'bar',
+            marker: {
+              color: UtilityColors['Waste Water'].color
+            }
           })
         }
         if (this.barChartData.findIndex(dataItem => { return dataItem.otherUtility[yDataProperty] != 0 }) != -1) {
@@ -116,7 +135,10 @@ export class EnergyUseStackedBarChartComponent implements OnInit {
             x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
             y: this.barChartData.map(dataItem => { return dataItem.otherUtility[yDataProperty] }),
             name: 'Other Utility',
-            type: 'bar'
+            type: 'bar',
+            marker: {
+              color: UtilityColors['Other Utility'].color
+            }
           })
         }
 
@@ -134,11 +156,13 @@ export class EnergyUseStackedBarChartComponent implements OnInit {
           },
           legend: {
             orientation: "h"
-          }
+          },
+          clickmode: "none"
         };
         let config = {
+          modeBarButtonsToRemove: ['autoScale2d', 'lasso2d', 'pan2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian', 'autoscale', 'zoom', 'zoomin', 'zoomout'],
           displaylogo: false,
-          responsive: true
+          responsive: true,
         };
         this.plotlyService.newPlot(this.energyUseStackedBarChart.nativeElement, data, layout, config);
       }

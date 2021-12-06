@@ -24,6 +24,7 @@ export class AccountManagementService {
       naics3: [generalInformation.naics3],
       size: [generalInformation.size],
       notes: [generalInformation.notes],
+      color: [generalInformation.color]
     });
     return form;
   }
@@ -39,6 +40,7 @@ export class AccountManagementService {
     account.naics2 = form.controls.naics2.value;
     account.naics3 = form.controls.naics3.value;
     account.notes = form.controls.notes.value;
+    account.color = form.controls.color.value;
     return account;
   }
 
@@ -53,6 +55,7 @@ export class AccountManagementService {
     facility.naics2 = form.controls.naics2.value;
     facility.naics3 = form.controls.naics3.value;
     facility.notes = form.controls.notes.value;
+    facility.color = form.controls.color.value;
     return facility;
   }
 

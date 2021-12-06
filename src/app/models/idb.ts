@@ -33,7 +33,8 @@ export interface IdbAccount {
     lastBackup?: Date,
     emissionsOutputRate?: number,
     eGridSubregion?: string,
-    customEmissionsRate?: boolean
+    customEmissionsRate?: boolean,
+    color?: string
 }
 
 export interface IdbFacility {
@@ -71,6 +72,7 @@ export interface IdbFacility {
     emissionsOutputRate?: number,
     eGridSubregion?: string,
     customEmissionsRate?: boolean
+    color?: string
 }
 
 export interface IdbUtilityMeterGroup {

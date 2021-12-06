@@ -65,6 +65,9 @@ export class EnergyUseDonutComponent implements OnInit {
       var data = [{
         values: this.facilitiesSummary.facilitySummaries.map(summary => { return summary[yDataProperty] }),
         labels: this.facilitiesSummary.facilitySummaries.map(summary => { return summary.facility.name }),
+        marker: {
+          colors: this.facilitiesSummary.facilitySummaries.map(summary => { return summary.facility.color }),
+        },
         textinfo: 'label+percent',
         textposition: 'auto',
         insidetextorientation: "horizontal",
@@ -81,6 +84,7 @@ export class EnergyUseDonutComponent implements OnInit {
       };
 
       let config = {
+        displaylogo: false,
         responsive: true
       }
       this.plotlyService.newPlot(this.energyUseDonut.nativeElement, data, layout, config);

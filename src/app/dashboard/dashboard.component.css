@@ -109,6 +109,10 @@ p{
 }
 
 
+.banner-border{
+  border-bottom: solid #145A32;
+}
+
 h3 a{
   font-size: 1.75rem;
   color: white;
