@@ -57,7 +57,7 @@ export class EnergyUseHeatMapComponent implements OnInit {
         hovertemplate = '%{y}, %{x}: %{z:,.0f} ' + selectedAccount.energyUnit + '<extra></extra>';
         textPrefix = "";
       } else if (this.graphDisplay == "emissions") {
-        hovertemplate = '%{y}, %{x}: %{z:,.0f} CO<sub>2</sub><extra></extra>';
+        hovertemplate = '%{y}, %{x}: %{z:,.0f} kg CO<sub>2</sub><extra></extra>';
         textPrefix = "";
       }
 

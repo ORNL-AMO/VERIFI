@@ -131,19 +131,23 @@ export class DefaultUnitsFormComponent implements OnInit {
             this.form.controls.eGridSubregion.patchValue(this.zipCodeSubRegionData[0]);
             this.setSubRegionEmissionsOutput();
           }
+        } else {
+          this.clearEmissionsValues();
         }
       } else {
-        this.form.controls.eGridSubregion.patchValue(undefined);
-        this.form.patchValue({
-          emissionsOutputRate: undefined
-        });
+        this.clearEmissionsValues();
       }
     } else {
-      this.form.controls.eGridSubregion.patchValue(undefined);
-      this.form.patchValue({
-        emissionsOutputRate: undefined
-      });
+      this.clearEmissionsValues();
     }
+  }
+
+  clearEmissionsValues() {
+    this.form.controls.eGridSubregion.patchValue(undefined);
+    this.form.patchValue({
+      emissionsOutputRate: undefined
+    });
+    this.saveChanges();
   }
 
   setSubRegionEmissionsOutput() {
