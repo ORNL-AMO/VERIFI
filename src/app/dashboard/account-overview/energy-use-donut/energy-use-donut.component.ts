@@ -59,7 +59,7 @@ export class EnergyUseDonutComponent implements OnInit {
         hovertemplate = '%{label}: %{value:,.0f} ' + selectedAccout.energyUnit + ' <extra></extra>'
       } else if (this.graphDisplay == "emissions") {
         yDataProperty = "emissions";
-        hovertemplate = '%{label}: %{value:,.0f} CO<sub>2</sub> <extra></extra>'
+        hovertemplate = '%{label}: %{value:,.0f} kg CO<sub>2</sub> <extra></extra>'
       }
 
       var data = [{
