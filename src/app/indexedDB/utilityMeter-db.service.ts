@@ -1,6 +1,6 @@
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { Injectable } from '@angular/core';
-import { IdbAccount, IdbFacility, IdbUtilityMeter } from '../models/idb';
+import { IdbAccount, IdbFacility, IdbUtilityMeter, MeterSource } from '../models/idb';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { FacilitydbService } from './facility-db.service';
 import { AccountdbService } from './account-db.service';
@@ -131,7 +131,7 @@ export class UtilityMeterdbService {
     }
 
     getNewIdbUtilityMeter(facilityId: number, accountId: number, setDefaults: boolean, emissionsOutputRate: number): IdbUtilityMeter {
-        let source: string;
+        let source: MeterSource;
         let startingUnit: string;
         if (setDefaults) {
             source = 'Electricity';

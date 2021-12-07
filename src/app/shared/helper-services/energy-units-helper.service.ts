@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbAccount, IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
+import { IdbAccount, IdbFacility, IdbUtilityMeter, MeterPhase, MeterSource } from 'src/app/models/idb';
 import { FuelTypeOption, GasOptions, LiquidOptions, OtherEnergyOptions, SolidOptions, SourceOptions } from 'src/app/utility/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
 import { ChilledWaterUnitOptions, EnergyUnitOptions, MassUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from '../unitOptions';
 
@@ -44,7 +44,7 @@ export class EnergyUnitsHelperService {
 
   getEnergyIsSourceInFacility(): boolean {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    if(selectedFacility){
+    if (selectedFacility) {
       return selectedFacility.energyIsSource;
     }
     return;
@@ -52,7 +52,7 @@ export class EnergyUnitsHelperService {
 
   getEnergyIsSourceInAccount(): boolean {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    if(selectedAccount){
+    if (selectedAccount) {
       return selectedAccount.energyIsSource;
     }
     return;
@@ -117,7 +117,7 @@ export class EnergyUnitsHelperService {
   }
 
 
-  isEnergyMeter(source: string): boolean {
+  isEnergyMeter(source: MeterSource): boolean {
     if (source == 'Electricity' || source == 'Natural Gas' || source == 'Other Fuels' || source == 'Other Energy') {
       return true;
     } else {
@@ -125,7 +125,7 @@ export class EnergyUnitsHelperService {
     }
   }
 
-  getStartingUnitOptions(source: string, phase: string, fuel: string): Array<UnitOption> {
+  getStartingUnitOptions(source: MeterSource, phase: MeterPhase, fuel: string): Array<UnitOption> {
     if (source == 'Electricity' || !source) {
       return EnergyUnitOptions;
     } else if (source == 'Natural Gas') {
@@ -157,8 +157,8 @@ export class EnergyUnitsHelperService {
   }
 
 
-  parseSource(name: string): string {
-    let source: string = SourceOptions.find(option => {
+  parseSource(name: string): MeterSource {
+    let source: MeterSource = SourceOptions.find(option => {
       let lowerCaseOption: string = option.toLocaleLowerCase();
       let lowerCaseName: string = name.toLocaleLowerCase();
       return lowerCaseName.includes(lowerCaseOption)
@@ -200,7 +200,7 @@ export class EnergyUnitsHelperService {
   }
 
 
-  parseFuelType(name: string): { phase: string, fuelTypeOption: FuelTypeOption } {
+  parseFuelType(name: string): { phase: MeterPhase, fuelTypeOption: FuelTypeOption } {
     let fuelTypeOption: FuelTypeOption = GasOptions.find(option => {
       let lowerCaseOption: string = option.value.toLocaleLowerCase();
       let lowerCaseName: string = name.toLocaleLowerCase();
@@ -226,6 +226,56 @@ export class EnergyUnitsHelperService {
       return { phase: 'Solid', fuelTypeOption: fuelTypeOption };
     }
     return undefined;
+  }
+
+  checkHasDifferentUnits(source: MeterSource, phase: MeterPhase, emissionsOutputRate: number, startingUnit: string, fuel: string, selectedFacility: IdbFacility): { units: boolean, emissionsOutputRate: boolean } {
+    let hasDifferentUnits: boolean = false;
+    let hasDifferentEmissions: boolean = false;
+    if (source == 'Electricity') {
+      if (emissionsOutputRate != selectedFacility.emissionsOutputRate) {
+        hasDifferentEmissions = true;
+      }
+    } else {
+      let isEnergyMeter: boolean = this.isEnergyMeter(source);
+      if (isEnergyMeter) {
+        let isEnergyUnit: boolean = this.isEnergyUnit(startingUnit);
+        if (isEnergyUnit) {
+          if (startingUnit != selectedFacility.energyUnit) {
+            hasDifferentUnits = true;
+          }
+        } else {
+          if (source == 'Natural Gas' && startingUnit != selectedFacility.volumeGasUnit) {
+            hasDifferentUnits = true;
+          } else if (source == 'Other Fuels') {
+            if (phase == 'Gas' && startingUnit != selectedFacility.volumeGasUnit) {
+              hasDifferentUnits = true;
+
+            } else if (phase == 'Liquid' && startingUnit != selectedFacility.volumeLiquidUnit) {
+              hasDifferentUnits = true;
+
+            } else if (phase == 'Solid' && startingUnit != selectedFacility.massUnit) {
+              hasDifferentUnits = true;
+            }
+          } else if (source == 'Other Energy') {
+            let selectedEnergyOption: FuelTypeOption = OtherEnergyOptions.find(option => { return option.value == fuel });
+            if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Steam') {
+              if (startingUnit != selectedFacility.massUnit) {
+                hasDifferentUnits = true;
+              }
+            }
+            // else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Chilled Water') {
+            //   facilityUnit = selectedFacility.energyUnit;
+            // } else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Hot Water') {
+            //   facilityUnit = selectedFacility.energyUnit;
+            // }
+          } else if ((source == 'Water' || source == 'Waste Water') && (startingUnit != selectedFacility.volumeLiquidUnit)) {
+            // facilityUnit = selectedFacility.volumeLiquidUnit;
+            hasDifferentUnits = true;
+          }
+        }
+      }
+    }
+    return { units: hasDifferentUnits, emissionsOutputRate: hasDifferentEmissions };
   }
 
 }

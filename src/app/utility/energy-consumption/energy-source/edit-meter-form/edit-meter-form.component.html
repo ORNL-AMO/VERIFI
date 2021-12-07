@@ -39,6 +39,10 @@
                     </div>
                     <span class="inputError" *ngIf="meterForm.get('startingUnit').hasError('required')">Starting unit is
                         required</span>
+                    <div class="alert alert-warning" *ngIf="hasDifferentUnits">
+                        Units selected differ from the facility units settings. Click here to use corresponding facility
+                        unit.
+                    </div>
                 </div>
             </div>
 
@@ -112,6 +116,11 @@
                     <div class="alert alert-info" *ngIf="!meterForm.controls.emissionsOutputRate.value">
                         Electrical emissions output rate is set in the facility settings. No output rate found. <a
                             routerLink="/facility-management">Change Settings</a>
+                    </div>
+                    <div class="alert alert-info" *ngIf="hasDifferentEmissions">
+                        Electrical emissions for this facility have changed since this meter was created. <a
+                            (click)="setEmissionsOutputRate()">Click here to
+                            update emissions output rate to match facility.</a>
                     </div>
                     <!-- <div class="input-group mb-3">
                         <input id="emissionsOutputRate" class="form-control" type="number"

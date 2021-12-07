@@ -1,4 +1,4 @@
-import { IdbUtilityMeter, IdbUtilityMeterGroup } from "./idb";
+import { IdbUtilityMeter, IdbUtilityMeterGroup, MeterSource } from "./idb";
 
 export interface CalanderizedMeter {
     meter: IdbUtilityMeter,
@@ -35,7 +35,7 @@ export interface LastYearData {
 export interface CalanderizationFilters {
     showAllSources: boolean;
     selectedSources: Array<{
-      source: string,
+      source: MeterSource,
       selected: boolean
     }>;
     selectedDateMin: {

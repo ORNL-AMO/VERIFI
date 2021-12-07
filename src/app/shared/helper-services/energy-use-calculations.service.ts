@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
+import { IdbFacility, IdbUtilityMeter, MeterPhase, MeterSource } from 'src/app/models/idb';
 import { FuelTypeOption, GasOptions, LiquidOptions, OtherEnergyOptions, SolidOptions } from 'src/app/utility/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
 import { ConvertUnitsService } from '../convert-units/convert-units.service';
 
@@ -11,7 +11,7 @@ export class EnergyUseCalculationsService {
 
   constructor(private convertUnitsService: ConvertUnitsService, private facilityDbService: FacilitydbService) { }
 
-  getHeatingCapacity(source: string, startingUnit: string, selectedFuelTypeOption?: FuelTypeOption): number {
+  getHeatingCapacity(source: MeterSource, startingUnit: string, selectedFuelTypeOption?: FuelTypeOption): number {
     let heatCapacity: number;
     if (source == 'Electricity') {
       heatCapacity = this.convertUnitsService.value(.003412).from('kWh').to(startingUnit);
@@ -37,7 +37,7 @@ export class EnergyUseCalculationsService {
   }
 
 
-  getSiteToSource(source: string, startingUnit: string, selectedFuelTypeOption?: FuelTypeOption): number{
+  getSiteToSource(source: MeterSource, startingUnit: string, selectedFuelTypeOption?: FuelTypeOption): number{
     let siteToSource: number;
     if (source == 'Electricity') {
       siteToSource = 3;
@@ -55,7 +55,7 @@ export class EnergyUseCalculationsService {
     return siteToSource;
   }
 
-  getFuelTypeOptions(source: string, phase: string): Array<FuelTypeOption> {
+  getFuelTypeOptions(source: MeterSource, phase: MeterPhase): Array<FuelTypeOption> {
     if (source == 'Other Fuels') {
       if (phase == 'Solid') {
         return SolidOptions;

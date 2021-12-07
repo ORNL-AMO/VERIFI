@@ -2,7 +2,7 @@ import { Component, OnInit, ElementRef, ViewChild, QueryList, ViewChildren } fro
 import { listAnimation } from '../../../animations';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { Subscription } from 'rxjs';
-import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData, MeterSource } from 'src/app/models/idb';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UtilityMeterDataService } from './utility-meter-data.service';
@@ -40,7 +40,7 @@ export class UtilityMeterDataComponent implements OnInit {
   meterDataMenuOpen: number;
   showImport: boolean;
   addOrEdit: string;
-  selectedSource: string;
+  selectedSource: MeterSource;
   hasCheckedItems: boolean;
   meterDataToDelete: IdbUtilityMeterData;
   showDeleteModal: boolean = false;
@@ -163,7 +163,7 @@ export class UtilityMeterDataComponent implements OnInit {
       })
     });
     for (let index = 0; index < meterDataItemsToDelete.length; index++) {
-      await this.utilityMeterDataDbService.deleteWithObservable(meterDataItemsToDelete[index].id);
+      await this.utilityMeterDataDbService.deleteWithObservable(meterDataItemsToDelete[index].id).toPromise();
     }
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let accountMeterData: Array<IdbUtilityMeterData> = await this.utilityMeterDataDbService.getAllByIndexRange("accountId", selectedFacility.accountId).toPromise();

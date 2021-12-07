@@ -3,11 +3,13 @@ import { FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbAccount, IdbFacility } from 'src/app/models/idb';
+import { IdbAccount, IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
 import { EGridService, SubRegionData, SubregionEmissions } from 'src/app/shared/helper-services/e-grid.service';
 import { EnergyUnitOptions, MassUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from 'src/app/shared/unitOptions';
 import { AccountManagementService } from '../account-management.service';
 import * as _ from 'lodash';
+import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
+import { ToastNotificationsService } from 'src/app/shared/toast-notifications/toast-notifications.service';
 
 @Component({
   selector: 'app-default-units-form',
@@ -40,7 +42,7 @@ export class DefaultUnitsFormComponent implements OnInit {
   currentZip: string;
   showCustomLink: boolean;
   constructor(private accountDbService: AccountdbService, private accountManagementService: AccountManagementService, private facilityDbService: FacilitydbService,
-    private eGridService: EGridService) { }
+    private eGridService: EGridService, private utilityMeterDbService: UtilityMeterdbService, private toastNotificationService: ToastNotificationsService) { }
 
   ngOnInit(): void {
     this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(account => {
@@ -89,6 +91,7 @@ export class DefaultUnitsFormComponent implements OnInit {
       this.accountDbService.update(this.selectedAccount);
     }
     if (!this.inAccount) {
+      this.checkFacilityMeters();
       this.selectedFacility = this.accountManagementService.updateFacilityFromUnitsForm(this.form, this.selectedFacility);
       this.facilityDbService.update(this.selectedFacility);
     }
@@ -187,6 +190,33 @@ export class DefaultUnitsFormComponent implements OnInit {
     }
     if (!this.form.controls.customEmissionsRate.value && !this.showCustomLink) {
       this.form.controls.customEmissionsRate.patchValue(true);
+    }
+  }
+
+  checkFacilityMeters() {
+    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+    let metersNeedUpdate: boolean = false;
+    if (this.selectedFacility.energyUnit != this.form.controls.energyUnit.value) {
+      //check energy meters
+    }
+    if (this.selectedFacility.massUnit != this.form.controls.massUnit.value) {
+
+    }
+    if (this.selectedFacility.volumeGasUnit != this.form.controls.volumeGasUnit.value) {
+
+    }
+    if (this.selectedFacility.volumeLiquidUnit != this.form.controls.volumeLiquidUnit.value) {
+
+    }
+    if (this.selectedFacility.emissionsOutputRate != this.form.controls.emissionsOutputRate.value) {
+      //check electricity meters
+      let findMeter: IdbUtilityMeter = facilityMeters.find(meter => { return meter.source == 'Electricity' });
+      if (findMeter) {
+        metersNeedUpdate = true;
+      }
+    }
+    if (metersNeedUpdate) {
+      this.toastNotificationService.showToast("Meter Update Recommended", "One or more meter collection unit or emissions factor may need to be updated after changing your units. Visit the utility data page for more information.", 15000, false, "warning");
     }
   }
 }
