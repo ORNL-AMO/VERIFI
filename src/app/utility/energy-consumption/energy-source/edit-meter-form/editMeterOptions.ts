@@ -1,3 +1,5 @@
+import { MeterSource } from "src/app/models/idb"
+
 export interface FuelTypeOption {
     startingUnit: string,
     heatCapacityValue: number
@@ -7,7 +9,7 @@ export interface FuelTypeOption {
     otherEnergyType?: string
 }
 
-export const SourceOptions: Array<string> = [
+export const SourceOptions: Array<MeterSource> = [
     "Electricity",
     "Natural Gas",
     "Other Fuels",

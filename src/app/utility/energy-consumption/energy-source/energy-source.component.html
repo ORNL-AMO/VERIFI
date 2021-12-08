@@ -80,7 +80,8 @@
                     <td>{{meter.heatCapacity}}</td>
                     <td>{{meter.siteToSource}}</td>
                     <td class="actions">
-                        <i class="fa fa-pencil" title="Edit" (click)="selectEditMeter(meter)"></i>
+                        <i [ngClass]="{'highlight': meter.unitsDifferent}" class="fa fa-pencil" title="Edit"
+                            (click)="selectEditMeter(meter)"></i>
                         <i class="fa fa-trash-o" title="Delete" (click)="selectDeleteMeter(meter)"></i>
                     </td>
                 </tr>
