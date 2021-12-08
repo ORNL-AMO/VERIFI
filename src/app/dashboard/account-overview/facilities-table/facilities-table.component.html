@@ -13,7 +13,7 @@
                 </th>
                 <th class="w-2">Utility Cost </th>
                 <th class="w-2">
-                    Emissions (kg CO<sub>2</sub>)
+                    Emissions (tonne CO<sub>2</sub>)
                 </th>
             </tr>
         </thead>
@@ -36,7 +36,7 @@
                     {{summary.energyCost | customNumber:true }}
                 </td>
                 <td>
-                    {{summary.emissions | customNumber}}
+                    {{summary.emissions / 1000 | customNumber}}
                 </td>
             </tr>
         </tbody>
@@ -58,7 +58,7 @@
                     {{accountFacilitiesSummary.totalEnergyCost | customNumber:true }}
                 </th>
                 <th>
-                    {{accountFacilitiesSummary.totalEmissions | customNumber}}
+                    {{accountFacilitiesSummary.totalEmissions / 1000 | customNumber}}
                 </th>
             </tr>
         </tfoot>
