@@ -156,6 +156,32 @@ export class EnergyUnitsHelperService {
     return EnergyUnitOptions;
   }
 
+  getStartingUnitOptionsExistingData(source: MeterSource, phase: MeterPhase, fuel: string, startingUnit: string): Array<UnitOption> {
+    let isEnergyUnit: boolean = this.isEnergyUnit(startingUnit);
+    if (isEnergyUnit) {
+      return EnergyUnitOptions;
+    } else if (source == 'Natural Gas') {
+      return VolumeGasOptions;
+    } else if (source == 'Other Fuels') {
+      if (phase == 'Gas') {
+        return VolumeGasOptions;
+      } else if (phase == 'Liquid') {
+        return VolumeLiquidOptions;
+      } else if (phase == 'Solid') {
+        return MassUnitOptions;
+      }
+    } else if (source == 'Other Energy') {
+      let selectedEnergyOption: FuelTypeOption = OtherEnergyOptions.find(option => { return option.value == fuel });
+      if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Steam') {
+        return MassUnitOptions;
+      }
+    } else if (source == 'Water' || source == 'Waste Water') {
+      return VolumeLiquidOptions;
+    } else if (source == 'Other Utility') {
+      return VolumeGasOptions.concat(VolumeLiquidOptions).concat(MassUnitOptions).concat(ChilledWaterUnitOptions);
+    }
+  }
+
 
   parseSource(name: string): MeterSource {
     let source: MeterSource = SourceOptions.find(option => {
@@ -235,43 +261,42 @@ export class EnergyUnitsHelperService {
       if (emissionsOutputRate != selectedFacility.emissionsOutputRate) {
         hasDifferentEmissions = true;
       }
-    } else {
-      let isEnergyMeter: boolean = this.isEnergyMeter(source);
-      if (isEnergyMeter) {
-        let isEnergyUnit: boolean = this.isEnergyUnit(startingUnit);
-        if (isEnergyUnit) {
-          if (startingUnit != selectedFacility.energyUnit) {
+    }
+    let isEnergyMeter: boolean = this.isEnergyMeter(source);
+    if (isEnergyMeter) {
+      let isEnergyUnit: boolean = this.isEnergyUnit(startingUnit);
+      if (isEnergyUnit && source != 'Electricity') {
+        if (startingUnit != selectedFacility.energyUnit) {
+          hasDifferentUnits = true;
+        }
+      } else {
+        if (source == 'Natural Gas' && startingUnit != selectedFacility.volumeGasUnit) {
+          hasDifferentUnits = true;
+        } else if (source == 'Other Fuels') {
+          if (phase == 'Gas' && startingUnit != selectedFacility.volumeGasUnit) {
+            hasDifferentUnits = true;
+
+          } else if (phase == 'Liquid' && startingUnit != selectedFacility.volumeLiquidUnit) {
+            hasDifferentUnits = true;
+
+          } else if (phase == 'Solid' && startingUnit != selectedFacility.massUnit) {
             hasDifferentUnits = true;
           }
-        } else {
-          if (source == 'Natural Gas' && startingUnit != selectedFacility.volumeGasUnit) {
-            hasDifferentUnits = true;
-          } else if (source == 'Other Fuels') {
-            if (phase == 'Gas' && startingUnit != selectedFacility.volumeGasUnit) {
-              hasDifferentUnits = true;
-
-            } else if (phase == 'Liquid' && startingUnit != selectedFacility.volumeLiquidUnit) {
-              hasDifferentUnits = true;
-
-            } else if (phase == 'Solid' && startingUnit != selectedFacility.massUnit) {
+        } else if (source == 'Other Energy') {
+          let selectedEnergyOption: FuelTypeOption = OtherEnergyOptions.find(option => { return option.value == fuel });
+          if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Steam') {
+            if (startingUnit != selectedFacility.massUnit) {
               hasDifferentUnits = true;
             }
-          } else if (source == 'Other Energy') {
-            let selectedEnergyOption: FuelTypeOption = OtherEnergyOptions.find(option => { return option.value == fuel });
-            if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Steam') {
-              if (startingUnit != selectedFacility.massUnit) {
-                hasDifferentUnits = true;
-              }
-            }
-            // else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Chilled Water') {
-            //   facilityUnit = selectedFacility.energyUnit;
-            // } else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Hot Water') {
-            //   facilityUnit = selectedFacility.energyUnit;
-            // }
-          } else if ((source == 'Water' || source == 'Waste Water') && (startingUnit != selectedFacility.volumeLiquidUnit)) {
-            // facilityUnit = selectedFacility.volumeLiquidUnit;
-            hasDifferentUnits = true;
           }
+          // else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Chilled Water') {
+          //   facilityUnit = selectedFacility.energyUnit;
+          // } else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Hot Water') {
+          //   facilityUnit = selectedFacility.energyUnit;
+          // }
+        } else if ((source == 'Water' || source == 'Waste Water') && (startingUnit != selectedFacility.volumeLiquidUnit)) {
+          // facilityUnit = selectedFacility.volumeLiquidUnit;
+          hasDifferentUnits = true;
         }
       }
     }

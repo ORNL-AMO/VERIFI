@@ -91,7 +91,7 @@ export class DefaultUnitsFormComponent implements OnInit {
       this.accountDbService.update(this.selectedAccount);
     }
     if (!this.inAccount) {
-      this.checkFacilityMeters();
+      this.checkMeterEmissions();
       this.selectedFacility = this.accountManagementService.updateFacilityFromUnitsForm(this.form, this.selectedFacility);
       this.facilityDbService.update(this.selectedFacility);
     }
@@ -193,30 +193,14 @@ export class DefaultUnitsFormComponent implements OnInit {
     }
   }
 
-  checkFacilityMeters() {
+  checkMeterEmissions() {
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
-    let metersNeedUpdate: boolean = false;
-    if (this.selectedFacility.energyUnit != this.form.controls.energyUnit.value) {
-      //check energy meters
-    }
-    if (this.selectedFacility.massUnit != this.form.controls.massUnit.value) {
-
-    }
-    if (this.selectedFacility.volumeGasUnit != this.form.controls.volumeGasUnit.value) {
-
-    }
-    if (this.selectedFacility.volumeLiquidUnit != this.form.controls.volumeLiquidUnit.value) {
-
-    }
     if (this.selectedFacility.emissionsOutputRate != this.form.controls.emissionsOutputRate.value) {
       //check electricity meters
       let findMeter: IdbUtilityMeter = facilityMeters.find(meter => { return meter.source == 'Electricity' });
       if (findMeter) {
-        metersNeedUpdate = true;
+        this.toastNotificationService.showToast("Meter Update Recommended", "One or more meter emissions factors may need to be updated. Visit the utility data page for more information.", 15000, false, "warning");
       }
-    }
-    if (metersNeedUpdate) {
-      this.toastNotificationService.showToast("Meter Update Recommended", "One or more meter collection unit or emissions factor may need to be updated after changing your units. Visit the utility data page for more information.", 15000, false, "warning");
     }
   }
 }

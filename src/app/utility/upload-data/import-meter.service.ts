@@ -69,7 +69,7 @@ export class ImportMeterService {
 
 
   getNewMeterFromImportMeter(importMeter: ImportMeter, selectedFacility: IdbFacility): IdbUtilityMeter {
-    let newMeter: IdbUtilityMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.id, selectedFacility.accountId, false, undefined);
+    let newMeter: IdbUtilityMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.id, selectedFacility.accountId, false, undefined, selectedFacility.energyUnit);
     newMeter.meterNumber = importMeter.meterNumber;
     newMeter.accountNumber = importMeter.accountNumber;
     newMeter.source = this.checkImportSource(importMeter.source);
@@ -163,7 +163,7 @@ export class ImportMeterService {
   }
 
   getNewMeterFromExcelColumn(groupItem: ColumnItem, selectedFacility: IdbFacility): IdbUtilityMeter {
-    let newMeter: IdbUtilityMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.id, selectedFacility.accountId, false, undefined);
+    let newMeter: IdbUtilityMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.id, selectedFacility.accountId, false, undefined, selectedFacility.energyUnit);
     let fuelType: { phase: MeterPhase, fuelTypeOption: FuelTypeOption } = this.energyUnitsHelperService.parseFuelType(groupItem.value);
     if (fuelType) {
       newMeter.source = "Other Fuels";
@@ -185,7 +185,7 @@ export class ImportMeterService {
       if (newMeter.startingUnit && newMeter.source) {
         let showHeatCapacity: boolean = this.editMeterFormService.checkShowHeatCapacity(newMeter.source, newMeter.startingUnit);
         if (showHeatCapacity) {
-          newMeter.heatCapacity = this.energyUseCalculationsService.getHeatingCapacity(newMeter.source, newMeter.startingUnit);
+          newMeter.heatCapacity = this.energyUseCalculationsService.getHeatingCapacity(newMeter.source, newMeter.startingUnit, newMeter.energyUnit);
         }
         let showSiteToSource: boolean = this.editMeterFormService.checkShowSiteToSource(newMeter.source, newMeter.startingUnit);
         if (showSiteToSource) {

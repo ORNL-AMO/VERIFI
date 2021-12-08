@@ -40,8 +40,7 @@
                     <span class="inputError" *ngIf="meterForm.get('startingUnit').hasError('required')">Starting unit is
                         required</span>
                     <div class="alert alert-warning" *ngIf="hasDifferentUnits">
-                        Units selected differ from the facility units settings. Click here to use corresponding facility
-                        unit.
+                        Units selected differ from the facility settings.
                     </div>
                 </div>
             </div>
@@ -122,24 +121,18 @@
                             (click)="setEmissionsOutputRate()">Click here to
                             update emissions output rate to match facility.</a>
                     </div>
-                    <!-- <div class="input-group mb-3">
-                        <input id="emissionsOutputRate" class="form-control" type="number"
-                            formControlName="emissionsOutputRate" onfocus="this.select();">
-                        <span class="unit">
-                            kg CO<sub>2</sub>/<span [innerHTML]="energyUnit | settingsLabel"></span>
-                        </span>
-                    </div>
-                    <span class="inputError" *ngIf="meterForm.get('emissionsOutputRate').hasError('required')">Emissions
-                        Output Rate is
-                        required</span>
-                    <span class="inputError" *ngIf="meterForm.get('emissionsOutputRate').hasError('min')">Value can't be
-                        less
-                        than 0</span> -->
                 </div>
             </div>
 
-            <p class="alert alert-warning" *ngIf="meterFormDisabled"> Data found for this meter. Some meter properties
-                cannot be changed. </p>
+            <p class="alert alert-warning"
+                *ngIf="meterFormDisabled && meterForm.controls.source.value != 'Electricity' && !changingUnits"> Data
+                found for this
+                meter. Collection units should not be changed after entering meter readings. If meter readings were
+                entered in the wrong units, <a (click)="enableChangeUnits()">Click here to change units.</a> </p>
+            <p class="alert alert-warning" *ngIf="changingUnits">
+                Data found for this meter. Be careful changing the collection units, <b>amount entered in meter readings
+                will not be altered.</b>
+            </p>
         </div>
         <div class="col-5">
             <p class="bold">Other Information</p>

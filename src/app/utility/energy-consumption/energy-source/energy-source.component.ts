@@ -71,7 +71,7 @@ export class EnergySourceComponent implements OnInit {
     let selectedFacility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
     let selectedAccount: IdbAccount = this.accountdbService.selectedAccount.getValue();
     this.addOrEdit = 'add';
-    this.editMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.id, selectedAccount.id, true, selectedFacility.emissionsOutputRate);
+    this.editMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.id, selectedAccount.id, true, selectedFacility.emissionsOutputRate, selectedFacility.energyUnit);
   }
 
   uploadData() {
@@ -143,7 +143,7 @@ export class EnergySourceComponent implements OnInit {
   checkMeterUnits(meters: Array<IdbUtilityMeter>): Array<IdbUtilityMeter> {
     meters.forEach(meter => {
       let differentUnits: { units: boolean, emissionsOutputRate: boolean } = this.energyUnitsHelperService.checkHasDifferentUnits(meter.source, meter.phase, meter.emissionsOutputRate, meter.startingUnit, meter.fuel, this.selectedFacility);
-      meter.unitsDifferent = (differentUnits.units || differentUnits.emissionsOutputRate);
+      meter.unitsDifferent = differentUnits.emissionsOutputRate;
     });
     return meters;
   }
