@@ -46,7 +46,7 @@ export class EditMeterComponent implements OnInit {
 
   async saveChanges() {
     //if data exists. See if you need to re-calculate energy
-    if(this.meterFormDisabled && this.editMeter.startingUnit != this.meterForm.controls.startingUnit.value){
+    if (this.meterFormDisabled && (this.editMeter.startingUnit != this.meterForm.controls.startingUnit.value) || (this.editMeter.heatCapacity != this.meterForm.controls.heatCapacity.value)) {
       await this.checkMeterData();
     }
     let meterToSave: IdbUtilityMeter = this.editMeterFormService.updateMeterFromForm(this.editMeter, this.meterForm);
@@ -85,15 +85,15 @@ export class EditMeterComponent implements OnInit {
     }
   }
 
-  async checkMeterData(){
+  async checkMeterData() {
     let isEnergyMeter: boolean = this.energyUnitsHelperService.isEnergyMeter(this.editMeter.source);
     let isEnergyUnit: boolean = this.energyUnitsHelperService.isEnergyUnit(this.editMeter.startingUnit);
     //energy meter with data entered as consumption
-    if(isEnergyMeter && !isEnergyUnit){
+    if (isEnergyMeter && !isEnergyUnit) {
       this.loadingService.setLoadingMessage('Updating Meter Data...')
       this.loadingService.setLoadingStatus(true);
       let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataForFacility(this.editMeter, false);
-      for(let i = 0; i < meterData.length; i++){
+      for (let i = 0; i < meterData.length; i++) {
         meterData[i].totalEnergyUse = meterData[i].totalVolume * this.meterForm.controls.heatCapacity.value;
         await this.utilityMeterDataDbService.updateWithObservable(meterData[i]).toPromise();
       }

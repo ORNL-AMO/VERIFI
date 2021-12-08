@@ -127,11 +127,11 @@
             <p class="alert alert-warning"
                 *ngIf="meterFormDisabled && meterForm.controls.source.value != 'Electricity' && !changingUnits"> Data
                 found for this
-                meter. Collection units should not be changed after entering meter readings. If meter readings were
-                entered in the wrong units, <a (click)="enableChangeUnits()">Click here to change units.</a> </p>
+                meter. Collection units and heating capacity should not be changed after entering meter readings. <a
+                    (click)="enableChangeUnits()">Click here to change values if necessary.</a> </p>
             <p class="alert alert-warning" *ngIf="changingUnits">
-                Data found for this meter. Be careful changing the collection units, <b>amount entered in meter readings
-                will not be altered.</b>
+                Data found for this meter. Be careful changing the collection values, <b>amount entered in meter readings
+                    will not be altered.</b>
             </p>
         </div>
         <div class="col-5">

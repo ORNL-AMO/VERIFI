@@ -312,6 +312,7 @@ export class EditMeterFormComponent implements OnInit {
 
   enableChangeUnits() {
     this.meterForm.controls.startingUnit.enable();
+    this.meterForm.controls.heatCapacity.enable();
     this.changingUnits = true;
   }
 }
