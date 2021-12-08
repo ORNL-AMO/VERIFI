@@ -68,6 +68,9 @@
                 <span class="unit" *ngIf="unitsOfMeasure === 'Imperial'">ft<sup>2</sup></span>
                 <span class="unit" *ngIf="unitsOfMeasure === 'Metric'">m<sup>2</sup></span>
             </div>
+            <label>Facility Color</label>
+            <input type="color" class="form-control" formControlName="color" (input)="saveChanges()"
+                [ngStyle]="{'background-color':form.controls.color.value}">
         </div>
     </div>
 

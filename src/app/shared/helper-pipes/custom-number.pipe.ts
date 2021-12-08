@@ -11,12 +11,12 @@ export class CustomNumberPipe implements PipeTransform {
     if (value < 10000) {
       //5 sig figs
       valueStr = (value).toLocaleString(undefined, { maximumSignificantDigits: 5 });
-    } else {
+    } else if (value) {
       //no decimals
       valueStr = (value).toLocaleString(undefined, { maximumFractionDigits: 0, minimumIntegerDigits: 1 });
     }
 
-    if (isCurrency) {
+    if (isCurrency && value) {
       valueStr = '$' + valueStr;
     }
 

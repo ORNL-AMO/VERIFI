@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
-import { IdbUtilityMeter } from 'src/app/models/idb';
+import { IdbUtilityMeter, MeterSource } from 'src/app/models/idb';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 
 @Injectable({
@@ -15,6 +15,7 @@ export class EditMeterFormService {
     let phaseValidators: Array<ValidatorFn> = this.getPhaseValidation(meter.source);
     let heatCapacityValidators: Array<ValidatorFn> = this.getHeatCapacitValidation(meter.source, meter.startingUnit);
     let siteToSourceValidators: Array<ValidatorFn> = this.getSiteToSourceValidation(meter.source, meter.startingUnit);
+    let emissionsOutputRateValidators: Array<ValidatorFn> = this.getEmissionsOutputRateValidation(meter.source);
     return this.formBuilder.group({
       meterNumber: [meter.meterNumber],
       accountNumber: [meter.accountNumber],
@@ -29,6 +30,7 @@ export class EditMeterFormService {
       group: [meter.group],
       fuel: [meter.fuel, fuelValidators],
       startingUnit: [meter.startingUnit, Validators.required],
+      emissionsOutputRate: [meter.emissionsOutputRate, emissionsOutputRateValidators]
     });
   }
 
@@ -47,10 +49,11 @@ export class EditMeterFormService {
     meter.group = form.controls.group.value;
     meter.fuel = form.controls.fuel.value;
     meter.startingUnit = form.controls.startingUnit.value;
+    meter.emissionsOutputRate = form.controls.emissionsOutputRate.value;
     return meter;
   }
 
-  getFuelValidation(source: string): Array<ValidatorFn> {
+  getFuelValidation(source: MeterSource): Array<ValidatorFn> {
     if (source == 'Other Fuels' || source == 'Other Energy') {
       return [Validators.required];
     } else {
@@ -58,7 +61,7 @@ export class EditMeterFormService {
     }
   }
 
-  getPhaseValidation(source: string): Array<ValidatorFn> {
+  getPhaseValidation(source: MeterSource): Array<ValidatorFn> {
     if (source == 'Other Fuels') {
       return [Validators.required];
     } else {
@@ -66,7 +69,7 @@ export class EditMeterFormService {
     }
   }
 
-  getHeatCapacitValidation(source: string, startingUnit: string): Array<ValidatorFn> {
+  getHeatCapacitValidation(source: MeterSource, startingUnit: string): Array<ValidatorFn> {
     let checkShowHeatCapacity: boolean = this.checkShowHeatCapacity(source, startingUnit);
     if (checkShowHeatCapacity) {
       return [Validators.required, Validators.min(0)];
@@ -75,7 +78,7 @@ export class EditMeterFormService {
     }
   }
 
-  getSiteToSourceValidation(source: string, startingUnit: string): Array<ValidatorFn> {
+  getSiteToSourceValidation(source: MeterSource, startingUnit: string): Array<ValidatorFn> {
     let checkShowSiteToSource: boolean = this.checkShowSiteToSource(source, startingUnit);
     if (checkShowSiteToSource) {
       return [Validators.required, Validators.min(0)];
@@ -84,7 +87,17 @@ export class EditMeterFormService {
     }
   }
 
-  checkShowHeatCapacity(source: string, startingUnit: string): boolean {
+  getEmissionsOutputRateValidation(source: MeterSource):Array<ValidatorFn> {
+    let showEmissionsOutputRate: boolean = this.checkShowEmissionsOutputRate(source);
+    if (showEmissionsOutputRate) {
+      return [Validators.required, Validators.min(0)];
+    } else {
+      return [];
+    }
+
+  }
+
+  checkShowHeatCapacity(source: MeterSource, startingUnit: string): boolean {
     if (source != 'Waste Water' && source != 'Water' && source != 'Other Utility' && startingUnit) {
       return (this.energyUnitsHelperService.isEnergyUnit(startingUnit) == false);
     } else {
@@ -92,11 +105,19 @@ export class EditMeterFormService {
     }
   }
 
-  checkShowSiteToSource(source: string, startingUnit: string): boolean {
+  checkShowSiteToSource(source: MeterSource, startingUnit: string): boolean {
     if (source == "Electricity" || source == "Natural Gas") {
       return true;
     } else if (source != 'Waste Water' && source != 'Water' && source != 'Other Utility' && startingUnit) {
       return (this.energyUnitsHelperService.isEnergyUnit(startingUnit) == false);
+    } else {
+      return false;
+    }
+  }
+
+  checkShowEmissionsOutputRate(source: MeterSource): boolean {
+    if (source == "Electricity" || source == "Natural Gas" || source == "Other Fuels") {
+      return true;
     } else {
       return false;
     }

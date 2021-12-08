@@ -6,6 +6,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
+import { UtilityColors } from 'src/app/shared/utilityColors';
 import { VisualizationService } from '../../../shared/helper-services/visualization.service';
 import { DashboardService } from '../../dashboard.service';
 
@@ -19,12 +20,12 @@ export class FacilityStackedAreaChartComponent implements OnInit {
   @ViewChild('stackedAreaChart', { static: false }) stackedAreaChart: ElementRef;
 
   facilityMeters: Array<IdbUtilityMeter>;
-  electricityData: Array<{ time: string, energyUse: number, energyCost: number }>;
-  naturalGasData: Array<{ time: string, energyUse: number, energyCost: number }>;
-  otherFuelsData: Array<{ time: string, energyUse: number, energyCost: number }>;
-  waterData: Array<{ time: string, energyUse: number, energyCost: number }>;
-  wasteWaterData: Array<{ time: string, energyUse: number, energyCost: number }>;
-  otherUtilityData: Array<{ time: string, energyUse: number, energyCost: number }>;
+  electricityData: Array<{ time: string, energyUse: number, energyCost: number, emissions: number }>;
+  naturalGasData: Array<{ time: string, energyUse: number, energyCost: number, emissions: number }>;
+  otherFuelsData: Array<{ time: string, energyUse: number, energyCost: number, emissions: number }>;
+  waterData: Array<{ time: string, energyUse: number, energyCost: number, emissions: number }>;
+  wasteWaterData: Array<{ time: string, energyUse: number, energyCost: number, emissions: number }>;
+  otherUtilityData: Array<{ time: string, energyUse: number, energyCost: number, emissions: number }>;
   sumByMonth: boolean = false;
   removeIncompleteYears: boolean = true;
 
@@ -35,7 +36,7 @@ export class FacilityStackedAreaChartComponent implements OnInit {
   accountMetersSub: Subscription;
 
   graphDisplaySub: Subscription;
-  graphDisplay: "cost" | "usage";
+  graphDisplay: "cost" | "usage" | "emissions";
   constructor(private plotlyService: PlotlyService, private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService, private vizualizationService: VisualizationService,
     private dashboardService: DashboardService, private facilityDbService: FacilitydbService) { }
@@ -89,7 +90,7 @@ export class FacilityStackedAreaChartComponent implements OnInit {
   drawChart() {
     if (this.stackedAreaChart) {
       let traceData = new Array();
-      let yDataProperty: "energyCost" | "energyUse";
+      let yDataProperty: "energyCost" | "energyUse" | "emissions";
       let yaxisTitle: string;
       let tickprefix: string;
       let hoverformat: string;
@@ -98,19 +99,29 @@ export class FacilityStackedAreaChartComponent implements OnInit {
         yDataProperty = "energyCost";
         tickprefix = "$";
         hoverformat = '$,.2f';
-      } else {
+      } else if(this.graphDisplay == "usage") {
         let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
         yaxisTitle = "Utility Usage (" + selectedFacility.energyUnit + ")";
         yDataProperty = "energyUse";
         tickprefix = "";
         hoverformat = ",.2f";
+      } else if(this.graphDisplay == "emissions") {
+        yaxisTitle = "Emissions (kg CO<sub>2</sub>)";
+        yDataProperty = "emissions";
+        tickprefix = "";
+        hoverformat = ",.2f";
       }
+
+
       if (this.electricityData.length != 0) {
         let trace = {
           x: this.electricityData.map(data => { return data.time }),
           y: this.electricityData.map(data => { return data[yDataProperty] }),
           name: 'Electricity',
-          stackgroup: 'one'
+          stackgroup: 'one',
+          marker: {
+            color: UtilityColors.Electricity.color,
+          }
         }
         traceData.push(trace);
       }
@@ -119,7 +130,10 @@ export class FacilityStackedAreaChartComponent implements OnInit {
           x: this.naturalGasData.map(data => { return data.time }),
           y: this.naturalGasData.map(data => { return data[yDataProperty] }),
           name: 'Natural Gas',
-          stackgroup: 'one'
+          stackgroup: 'one',
+          marker: {
+            color: UtilityColors['Natural Gas'].color
+          }
         };
         traceData.push(trace);
       }
@@ -128,7 +142,10 @@ export class FacilityStackedAreaChartComponent implements OnInit {
           x: this.otherFuelsData.map(data => { return data.time }),
           y: this.otherFuelsData.map(data => { return data[yDataProperty] }),
           name: 'Other Fuels',
-          stackgroup: 'one'
+          stackgroup: 'one',
+          marker: {
+            color: UtilityColors['Other Fuels'].color
+          }
         };
         traceData.push(trace);
       }
@@ -137,7 +154,10 @@ export class FacilityStackedAreaChartComponent implements OnInit {
           x: this.waterData.map(data => { return data.time }),
           y: this.waterData.map(data => { return data[yDataProperty] }),
           name: 'Water',
-          stackgroup: 'one'
+          stackgroup: 'one',
+          marker: {
+            color: UtilityColors['Water'].color
+          }
         };
         traceData.push(trace);
       }
@@ -146,7 +166,10 @@ export class FacilityStackedAreaChartComponent implements OnInit {
           x: this.wasteWaterData.map(data => { return data.time }),
           y: this.wasteWaterData.map(data => { return data[yDataProperty] }),
           name: 'Waste Water',
-          stackgroup: 'one'
+          stackgroup: 'one',
+          marker: {
+            color: UtilityColors['Waste Water'].color
+          }
         };
         traceData.push(trace);
       }
@@ -155,7 +178,10 @@ export class FacilityStackedAreaChartComponent implements OnInit {
           x: this.otherUtilityData.map(data => { return data.time }),
           y: this.otherUtilityData.map(data => { return data[yDataProperty] }),
           name: 'Other Utility',
-          stackgroup: 'one'
+          stackgroup: 'one',
+          marker: {
+            color: UtilityColors['Other Utility'].color
+          }
         };
         traceData.push(trace);
       }
@@ -188,12 +214,17 @@ export class FacilityStackedAreaChartComponent implements OnInit {
           hoverformat: hoverformat
         }
       };
-      var config = { responsive: true };
+
+      let config = {
+        modeBarButtonsToRemove: ['autoScale2d', 'lasso2d', 'pan2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian', 'autoscale', 'zoom', 'zoomin', 'zoomout'],
+        displaylogo: false,
+        responsive: true,
+      };
       this.plotlyService.newPlot(this.stackedAreaChart.nativeElement, traceData, layout, config);
     }
   }
 
-  getDataByUtility(utility: string, facilityMeters: Array<IdbUtilityMeter>): Array<{ time: string, energyUse: number, energyCost: number }> {
+  getDataByUtility(utility: string, facilityMeters: Array<IdbUtilityMeter>): Array<{ time: string, energyUse: number, energyCost: number, emissions: number }> {
     let filteredMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.source == utility });
     return this.vizualizationService.getFacilityBarChartData(filteredMeters, this.sumByMonth, this.removeIncompleteYears, false);
   }

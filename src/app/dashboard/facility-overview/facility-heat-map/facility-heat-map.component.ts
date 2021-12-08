@@ -17,7 +17,7 @@ import { DashboardService } from '../../dashboard.service';
 export class FacilityHeatMapComponent implements OnInit {
 
   @ViewChild('facilityHeatMap', { static: false }) facilityHeatMap: ElementRef;
-  resultData: Array<{ monthlyEnergy: Array<number>, monthlyCost: Array<number> }>;
+  resultData: Array<{ monthlyEnergy: Array<number>, monthlyCost: Array<number>, monthlyEmissions: Array<number> }>;
   months: Array<string>;
   years: Array<number>;
   selectedFacility: IdbFacility;
@@ -26,7 +26,7 @@ export class FacilityHeatMapComponent implements OnInit {
   facilityMeters: Array<IdbUtilityMeter>;
   accountMeters: Array<IdbUtilityMeter>;
   accountMetersSub: Subscription;
-  graphDisplay: "cost" | "usage";
+  graphDisplay: "cost" | "usage" | "emissions";
   graphDisplaySub: Subscription;
   constructor(private plotlyService: PlotlyService, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterDbService: UtilityMeterdbService, private vizualizationService: VisualizationService,
@@ -83,8 +83,10 @@ export class FacilityHeatMapComponent implements OnInit {
       let zData: Array<Array<number>> = this.resultData.map(dataItem => {
         if (this.graphDisplay == "cost") {
           return dataItem.monthlyCost
-        } else {
+        } else if(this.graphDisplay == "usage") {
           return dataItem.monthlyEnergy
+        } else if(this.graphDisplay == "emissions"){
+          return dataItem.monthlyEmissions
         }
       });
 
@@ -93,6 +95,9 @@ export class FacilityHeatMapComponent implements OnInit {
       if (this.graphDisplay == "usage") {
         let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
         hovertemplate = '%{y}, %{x}: %{z:,.0f} ' + selectedFacility.energyUnit + '<extra></extra>';
+        labelPrepend = "";
+      }else if(this.graphDisplay == "emissions"){
+        hovertemplate = '%{y}, %{x}: %{z:,.0f} kg CO<sub>2</sub><extra></extra>';
         labelPrepend = "";
       }
 
@@ -144,9 +149,12 @@ export class FacilityHeatMapComponent implements OnInit {
           layout.annotations.push(result);
         }
       }
+
       let config = {
-        responsive: true
-      }
+        modeBarButtonsToRemove: ['autoScale2d', 'lasso2d', 'pan2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian', 'autoscale', 'zoom', 'zoomin', 'zoomout'],
+        displaylogo: false,
+        responsive: true,
+      };
       this.plotlyService.newPlot(this.facilityHeatMap.nativeElement, data, layout, config);
     }
   }

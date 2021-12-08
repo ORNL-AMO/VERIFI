@@ -24,6 +24,7 @@ export class AccountManagementService {
       naics3: [generalInformation.naics3],
       size: [generalInformation.size],
       notes: [generalInformation.notes],
+      color: [generalInformation.color]
     });
     return form;
   }
@@ -39,6 +40,7 @@ export class AccountManagementService {
     account.naics2 = form.controls.naics2.value;
     account.naics3 = form.controls.naics3.value;
     account.notes = form.controls.notes.value;
+    account.color = form.controls.color.value;
     return account;
   }
 
@@ -53,6 +55,7 @@ export class AccountManagementService {
     facility.naics2 = form.controls.naics2.value;
     facility.naics3 = form.controls.naics3.value;
     facility.notes = form.controls.notes.value;
+    facility.color = form.controls.color.value;
     return facility;
   }
 
@@ -64,7 +67,10 @@ export class AccountManagementService {
       massUnit: [units.massUnit, [Validators.required]],
       volumeLiquidUnit: [units.volumeLiquidUnit, [Validators.required]],
       volumeGasUnit: [units.volumeGasUnit, [Validators.required]],
-      energyIsSource: [units.energyIsSource]
+      energyIsSource: [units.energyIsSource],
+      emissionsOutputRate: [units.emissionsOutputRate],
+      eGridSubregion: [units.eGridSubregion],
+      customEmissionsRate: [units.customEmissionsRate]
     });
     return form;
   }
@@ -75,6 +81,8 @@ export class AccountManagementService {
     account.massUnit = form.controls.massUnit.value;
     account.volumeLiquidUnit = form.controls.volumeLiquidUnit.value;
     account.energyIsSource = form.controls.energyIsSource.value;
+    account.emissionsOutputRate = form.controls.emissionsOutputRate.value;
+    account.eGridSubregion = form.controls.eGridSubregion.value;
     return account;
   }
 
@@ -84,6 +92,8 @@ export class AccountManagementService {
     facility.massUnit = form.controls.massUnit.value;
     facility.volumeLiquidUnit = form.controls.volumeLiquidUnit.value;
     facility.energyIsSource = form.controls.energyIsSource.value;
+    facility.emissionsOutputRate = form.controls.emissionsOutputRate.value;
+    facility.eGridSubregion = form.controls.eGridSubregion.value;
     return facility;
   }
 

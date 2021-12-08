@@ -183,7 +183,7 @@ export class MeterGroupingComponent implements OnInit {
   async deleteMeterGroup() {
     this.loadingService.setLoadingMessage("Deleting Meter Group...");
     this.loadingService.setLoadingStatus(true);
-    await this.utilityMeterGroupDbService.deleteWithObservable(this.groupToDelete.id);
+    await this.utilityMeterGroupDbService.deleteWithObservable(this.groupToDelete.id).toPromise();
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let accountMeterGroups: Array<IdbUtilityMeterGroup> = await this.utilityMeterGroupDbService.getAllByIndexRange("accountId", selectedFacility.accountId).toPromise();
     this.utilityMeterGroupDbService.accountMeterGroups.next(accountMeterGroups);

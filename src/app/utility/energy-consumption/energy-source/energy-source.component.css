@@ -30,3 +30,25 @@ thead th:hover{
     cursor: pointer;
     text-decoration: underline;
 }
+
+
+
+.highlight{
+    /* border: solid 4px; */
+    animation-name: highlight-border;
+    animation-duration: .5s;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+  }
+  
+  
+  @keyframes highlight-border{
+    from {
+        background-color: #db281b;
+        /* border-color: #db281b; */
+    }
+    to {
+        background-color: #d4d9de;
+        /* border-color: #F97A1F; */
+    }
+  }

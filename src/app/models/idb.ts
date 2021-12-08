@@ -30,7 +30,11 @@ export interface IdbAccount {
     setupWizardComplete: boolean,
     numberOfFacilities?: string,
     energyIsSource: boolean,
-    lastBackup?: Date
+    lastBackup?: Date,
+    emissionsOutputRate?: number,
+    eGridSubregion?: string,
+    customEmissionsRate?: boolean,
+    color?: string
 }
 
 export interface IdbFacility {
@@ -64,7 +68,11 @@ export interface IdbFacility {
     fiscalYear: string,
     fiscalYearMonth: string,
     fiscalYearCalendarEnd: boolean,
-    energyIsSource: boolean
+    energyIsSource: boolean,
+    emissionsOutputRate?: number,
+    eGridSubregion?: string,
+    customEmissionsRate?: boolean
+    color?: string
 }
 
 export interface IdbUtilityMeterGroup {
@@ -94,23 +102,25 @@ export interface IdbUtilityMeter {
     //data
     meterNumber: string,
     accountNumber: number,
-    phase?: string,
+    phase?: MeterPhase,
     heatCapacity?: number,
     siteToSource: number,
     name: string,
     location?: string,
     supplier: string,
     notes?: string,
-    source: string,
+    source: MeterSource,
     //group = groupName
     group: string
 
     startingUnit: string,
     energyUnit: string,
-    fuel?:string
+    fuel?: string
     visible?: boolean
     importWizardName?: string
-    meterReadingDataApplication?: "forward" | "backward" | "fullMonth"
+    meterReadingDataApplication?: "forward" | "backward" | "fullMonth",
+    emissionsOutputRate?: number,
+    unitsDifferent?: boolean
 }
 
 export interface IdbUtilityMeterData {
@@ -176,3 +186,6 @@ export interface PredictorData {
     importWizardName?: string
 }
 
+
+export type MeterSource = "Electricity" | "Natural Gas" | "Other Fuels" | "Other Energy" | "Water" | "Waste Water" | "Other Utility";
+export type MeterPhase = "Solid" | "Liquid" | "Gas";

@@ -1,5 +1,8 @@
-<div class="banner">
-	<h3>Facility Information</h3>
+<div class="banner d-flex w-100 justify-content-between">
+	<h3>Facility Settings</h3>
+	<h3>
+		<a routerLink="/home/facility-summary"><span class="fa fa-home"></span></a>
+	</h3>
 </div>
 
 <div class="dashboard-container">
@@ -13,7 +16,7 @@
 			</div>
 
 			<div class="col-lg-5">
-				<h4>Corporate Default Units</h4>
+				<h4>Facility Units</h4>
 				<br>
 				<app-default-units-form *ngIf="selectedFacility" [inAccount]="false"></app-default-units-form>
 			</div>

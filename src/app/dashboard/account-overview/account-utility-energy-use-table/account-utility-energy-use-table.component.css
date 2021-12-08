@@ -1,7 +1,7 @@
-tr > :first-child {
+tr > td {
     width: 10%;
-}
+} 
 
-tr > :not(:first-child) {
-    width: 15%;
+thead th{
+    text-align: center;
 }

@@ -1,4 +1,4 @@
-import { IdbUtilityMeter, IdbUtilityMeterGroup } from "./idb";
+import { IdbUtilityMeter, IdbUtilityMeterGroup, MeterSource } from "./idb";
 
 export interface CalanderizedMeter {
     meter: IdbUtilityMeter,
@@ -6,7 +6,8 @@ export interface CalanderizedMeter {
     monthlyData: Array<MonthlyData>,
     showConsumption: boolean,
     showEnergyUse: boolean,
-    energyUnit: string
+    showEmissions: boolean,
+    energyUnit: string,
 }
 
 export interface MonthlyData {
@@ -16,7 +17,8 @@ export interface MonthlyData {
     energyConsumption: number,
     energyUse: number,
     energyCost: number,
-    date: Date
+    date: Date,
+    emissions: number
 }
 
 
@@ -25,6 +27,7 @@ export interface LastYearData {
     energyUse: number,
     energyCost: number,
     energyConsumption: number,
+    emissions: number,
     date: Date
 }
 
@@ -32,7 +35,7 @@ export interface LastYearData {
 export interface CalanderizationFilters {
     showAllSources: boolean;
     selectedSources: Array<{
-      source: string,
+      source: MeterSource,
       selected: boolean
     }>;
     selectedDateMin: {

@@ -12,7 +12,7 @@ export class VisualizationService {
 
   constructor(private calanderizationService: CalanderizationService) { }
 
-  getFacilityBarChartData(meters: Array<IdbUtilityMeter>, sumByMonth: boolean, removeIncompleteYears: boolean, inAccount: boolean): Array<{ time: string, energyUse: number, energyCost: number }> {
+  getFacilityBarChartData(meters: Array<IdbUtilityMeter>, sumByMonth: boolean, removeIncompleteYears: boolean, inAccount: boolean): Array<{ time: string, energyUse: number, energyCost: number, emissions: number }> {
     //calanderize meters
     let calanderizedMeterData: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMeterData(meters, inAccount, true);
 
@@ -22,7 +22,7 @@ export class VisualizationService {
     });
     //create array of the uniq months and years
     let yearMonths: Array<{ year: number, month: string }> = combindedCalanderizedMeterData.map(data => { return { year: data.year, month: data.month } });
-    let resultData: Array<{ time: string, energyUse: number, energyCost: number }> = new Array();
+    let resultData: Array<{ time: string, energyUse: number, energyCost: number, emissions: number }> = new Array();
     //iterate array of uniq months and years and sum energy/cost
     if (sumByMonth) {
       yearMonths = _.uniqWith(yearMonths, (a, b) => {
@@ -43,10 +43,18 @@ export class VisualizationService {
             return 0;
           }
         });
+        let totalEmissions: number = _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
+          if (meterData.month == yearMonth.month && meterData.year == yearMonth.year) {
+            return meterData.emissions;
+          } else {
+            return 0;
+          }
+        }); 
         return {
           time: yearMonth.month + ', ' + yearMonth.year,
           energyUse: totalEnergyUse,
-          energyCost: totalEnergyCost
+          energyCost: totalEnergyCost,
+          emissions: totalEmissions
         }
 
       });
@@ -77,10 +85,19 @@ export class VisualizationService {
             return 0;
           }
         });
+
+        let totalEmissions: number = _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
+          if (meterData.year == yearMonth.year) {
+            return meterData.emissions;
+          } else {
+            return 0;
+          }
+        });
         return {
           time: String(yearMonth.year),
           energyUse: totalEnergyUse,
-          energyCost: totalEnergyCost
+          energyCost: totalEnergyCost,
+          emissions: totalEmissions
         }
       });
     }
@@ -108,9 +125,9 @@ export class VisualizationService {
     let years: Array<number> = yearMonths.map(data => { return data.year });
     years = _.uniq(years);
     years = _.orderBy(years, (year) => { return year }, ['asc', 'desc']);
-    let resultData: Array<{ monthlyEnergy: Array<number>, monthlyCost: Array<number> }> = new Array();
+    let resultData: Array<{ monthlyEnergy: Array<number>, monthlyCost: Array<number>, monthlyEmissions: Array<number> }> = new Array();
     years.forEach(year => {
-      let yearData: { monthlyEnergy: Array<number>, monthlyCost: Array<number> } = { monthlyEnergy: new Array(), monthlyCost: new Array() };
+      let yearData: { monthlyEnergy: Array<number>, monthlyCost: Array<number>, monthlyEmissions: Array<number> } = { monthlyEnergy: new Array(), monthlyCost: new Array(), monthlyEmissions: new Array() };
       months.forEach(month => {
         let totalCost: number = _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
           if (meterData.year == year && meterData.month == month) {
@@ -126,8 +143,16 @@ export class VisualizationService {
             return undefined;
           }
         });
+        let totalEmissions: number =  _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
+          if (meterData.year == year && meterData.month == month) {
+            return meterData.emissions;
+          } else {
+            return undefined;
+          }
+        });
         yearData.monthlyCost.push(totalCost)
         yearData.monthlyEnergy.push(totalEnergy);
+        yearData.monthlyEmissions.push(totalEmissions);
       });
       resultData.push(yearData);
     });

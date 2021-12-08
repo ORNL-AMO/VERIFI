@@ -50,23 +50,80 @@
         </div>
     </div>
     <div class="row">
-        <div class="mb-3 col">        
+        <div class="mb-3 col">
             <hr>
             <label class="checkbox mb-3">Energy displayed as site or source? </label>
 
             <input type="radio" class="rowToggle" name="energyIsSource" formControlName="energyIsSource" [value]="true"
                 (change)="saveChanges()" id="sourceEnergy">
             <label class="checkbox" for="sourceEnergy">Source Energy</label>
-        
+
             <input type="radio" class="rowToggle" name="energyIsSource" formControlName="energyIsSource" [value]="false"
                 (change)="saveChanges()" id="siteEnergy">
-            <label class="checkbox" for="siteEnergy">Site Energy</label>        
+            <label class="checkbox" for="siteEnergy">Site Energy</label>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <hr>
+            <label class="mb-3">Electricity Global Warming Potential
+                <span (click)="toggleCustomEmissionsRate()" class="float-right click-link"
+                    *ngIf="!form.controls.customEmissionsRate.value">Rate Known</span>
+                <span (click)="toggleCustomEmissionsRate()" class="float-right click-link"
+                    *ngIf="form.controls.customEmissionsRate.value && showCustomLink">Use eGRID</span>
+            </label>
+        </div>
+    </div>
+    <div class="row" *ngIf="!form.controls.customEmissionsRate.value">
+        <div class="col">
+            <div class="form-group">
+                <label>eGRID Subregion</label>
+                <select *ngIf="zipCodeSubRegionData.length > 1" name="eGridSubregion" class="form-control"
+                    id="eGridSubregion" formControlName="eGridSubregion" (change)="setSubRegionEmissionsOutput()">
+                    <option *ngFor="let subregion of zipCodeSubRegionData" [ngValue]="subregion">{{subregion}}</option>
+                </select>
+                <span *ngIf="zipCodeSubRegionData.length == 1">
+                    {{form.controls.eGridSubregion.value}}
+                </span>
+                <span class="alert alert-warning" *ngIf="zipCodeSubRegionData.length == 0">
+                    No subregion matching zip code
+                </span>
+            </div>
+        </div>
+        <div class="col">
+            <div class="form-group">
+                <label for="emissionsOutputRate">Emissions Output Rate
+                </label>
+                <div class="input-group">
+                    <span *ngIf="form.controls.emissionsOutputRate.value">{{form.controls.emissionsOutputRate.value}}
+                        kg CO<sub>2</sub></span>/kWh
+                    <span *ngIf="!form.controls.emissionsOutputRate.value">&mdash;</span>
+                </div>
+            </div>
+        </div>
+        <p class="alert alert-info w-100 text-center">The eGRID Subregion and emissions output rate will be set
+            based on your zipcode and the <a target="_blank"
+                href="https://www.epa.gov/sites/default/files/2021-04/documents/emission-factors_apr2021.pdf">EPA
+                Emissions & Generation
+                Resource Integrated Database (2021)</a></p>
+    </div>
+    <div class="row" *ngIf="form.controls.customEmissionsRate.value">
+        <div class="col">
+            <div class="form-group">
+                <label for="emissionsOutputRate">Emissions Output Rate
+                </label>
+                <div class="input-group">
+                    <input type="number" name="emissionsOutputRate" formControlName="emissionsOutputRate"
+                        (change)="saveChanges()">
+                    <span class="unit">kg CO<sub>2</sub>/kWh</span>
+                </div>
+            </div>
         </div>
     </div>
 </form>
 
 
 <p class="alert alert-warning" *ngIf="unitsDontMatchAccount">
-    Facility Units are different then the units set for the account. If you would like to use the
+    The Facility units are different then the units that are set for the account. If you would like to use the
     account units for this facility click here: <a (click)="setAccountUnits()">Use Account Units</a>
 </p>

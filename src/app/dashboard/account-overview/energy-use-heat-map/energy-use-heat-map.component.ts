@@ -20,7 +20,7 @@ export class EnergyUseHeatMapComponent implements OnInit {
   @ViewChild('energyUseHeatMap', { static: false }) energyUseHeatMap: ElementRef;
   accountFacilitiesSub: Subscription;
   facilityHeatMapData: Array<HeatMapData>;
-  graphDisplay: "cost" | "usage";
+  graphDisplay: "cost" | "usage" | "emissions";
   graphDisplaySub: Subscription;
 
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private visualizationService: VisualizationService,
@@ -52,9 +52,12 @@ export class EnergyUseHeatMapComponent implements OnInit {
     if (this.energyUseHeatMap && this.facilityHeatMapData && this.facilityHeatMapData.length != 0 && this.graphDisplay) {
       let hovertemplate: string = '%{y}, %{x}: %{z:$,.0f}<extra></extra>';
       let textPrefix: string = "$";
-      if(this.graphDisplay == "usage"){
+      if (this.graphDisplay == "usage") {
         let selectedAccount: IdbAccount = this.accountdbService.selectedAccount.getValue();
         hovertemplate = '%{y}, %{x}: %{z:,.0f} ' + selectedAccount.energyUnit + '<extra></extra>';
+        textPrefix = "";
+      } else if (this.graphDisplay == "emissions") {
+        hovertemplate = '%{y}, %{x}: %{z:,.0f} kg CO<sub>2</sub><extra></extra>';
         textPrefix = "";
       }
 
@@ -79,10 +82,12 @@ export class EnergyUseHeatMapComponent implements OnInit {
       let individualData = new Array();
       this.facilityHeatMapData.forEach(heatMapData => {
         let zData: Array<Array<number>> = heatMapData.resultData.map(dataItem => {
-          if(this.graphDisplay == "cost"){
+          if (this.graphDisplay == "cost") {
             return dataItem.monthlyCost
-          }else{
+          } else if (this.graphDisplay == "usage") {
             return dataItem.monthlyEnergy;
+          } else if (this.graphDisplay == "emissions") {
+            return dataItem.monthlyEmissions;
           }
         });
         let months: Array<string> = ['Jan', 'Feb', 'March', 'April', 'May', 'June', 'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
@@ -124,6 +129,8 @@ export class EnergyUseHeatMapComponent implements OnInit {
       }]
 
       let config = {
+        modeBarButtonsToRemove: ['autoScale2d', 'lasso2d', 'pan2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian', 'autoscale', 'zoom', 'zoomin', 'zoomout'],
+        displaylogo: false,
         responsive: true
       }
       this.plotlyService.newPlot(this.energyUseHeatMap.nativeElement, data, layout, config);

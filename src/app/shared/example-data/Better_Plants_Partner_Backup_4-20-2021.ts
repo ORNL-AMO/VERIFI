@@ -6,7 +6,7 @@ export const ExampleAccount: AccountBackup = {
         "city": "Oak Ridge",
         "state": "TENNESSEE",
         "zip": "37830",
-        "country": "USA",
+        "country": "US",
         "address": "123 First St.",
         "size": 0,
         "naics1": -28,
@@ -51,17 +51,18 @@ export const ExampleAccount: AccountBackup = {
         "setupWizard": false,
         "setupWizardComplete": true,
         "energyIsSource": true,
-        "id": 7
+        "id": 7,
+        "emissionsOutputRate": 955.587
     },
     "facilities": [
         {
             "facility": {
                 "accountId": 7,
-                "name": "Better Facility North",
-                "country": "USA",
-                "city": "North Town",
+                "name": "Better Facility East",
+                "country": "US",
+                "city": "Wrightstown",
                 "state": "WISCONSIN",
-                "zip": "53200",
+                "zip": "54180",
                 "address": "456 Second St.",
                 "naics1": -28,
                 "naics2": -282,
@@ -102,7 +103,9 @@ export const ExampleAccount: AccountBackup = {
                 "fiscalYearMonth": "January",
                 "fiscalYearCalendarEnd": true,
                 "energyIsSource": true,
-                "id": 9
+                "id": 9,
+                "emissionsOutputRate": 1512.599,
+                "color": "#0c7e0e"
             },
             "meters": [
                 {
@@ -121,7 +124,8 @@ export const ExampleAccount: AccountBackup = {
                         "energyUnit": "kWh",
                         "visible": true,
                         "id": 47,
-                        "meterReadingDataApplication": "forward"
+                        "meterReadingDataApplication": "forward",
+                        "emissionsOutputRate": 1512.599
                     },
                     "meterData": [
                         {
@@ -1249,7 +1253,8 @@ export const ExampleAccount: AccountBackup = {
                         "energyUnit": "MMBtu",
                         "visible": true,
                         "id": 48,
-                        "meterReadingDataApplication": "forward"
+                        "meterReadingDataApplication": "forward",
+                        "emissionsOutputRate": 53.06
                     },
                     "meterData": [
                         {
@@ -4525,11 +4530,11 @@ export const ExampleAccount: AccountBackup = {
         {
             "facility": {
                 "accountId": 7,
-                "name": "Better Facility South",
-                "country": "USA",
-                "city": "South Town",
+                "name": "Better Facility West",
+                "country": "US",
+                "city": "Hopkins",
                 "state": "MINNESOTA",
-                "zip": "55400",
+                "zip": "55343",
                 "address": "789 Third St.",
                 "naics1": -28,
                 "naics2": -282,
@@ -4570,7 +4575,9 @@ export const ExampleAccount: AccountBackup = {
                 "fiscalYearMonth": "January",
                 "fiscalYearCalendarEnd": true,
                 "energyIsSource": true,
-                "id": 10
+                "id": 10,
+                "emissionsOutputRate": 1106.448,
+                "color": "#6012a1"
             },
             "meters": [
                 {
@@ -4589,7 +4596,8 @@ export const ExampleAccount: AccountBackup = {
                         "energyUnit": "kWh",
                         "visible": true,
                         "id": 49,
-                        "meterReadingDataApplication": "backward"
+                        "meterReadingDataApplication": "backward",
+                        "emissionsOutputRate": 1106.448
                     },
                     "meterData": [
                         {
@@ -5267,7 +5275,8 @@ export const ExampleAccount: AccountBackup = {
                         "energyUnit": "MMBtu",
                         "visible": true,
                         "id": 50,
-                        "meterReadingDataApplication": "backward"
+                        "meterReadingDataApplication": "backward",
+                        "emissionsOutputRate": 53.06
                     },
                     "meterData": [
                         {
