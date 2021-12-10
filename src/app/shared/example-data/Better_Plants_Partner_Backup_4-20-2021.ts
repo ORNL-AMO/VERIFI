@@ -124,7 +124,7 @@ export const ExampleAccount: AccountBackup = {
                         "energyUnit": "kWh",
                         "visible": true,
                         "id": 47,
-                        "meterReadingDataApplication": "forward",
+                        "meterReadingDataApplication": "backward",
                         "emissionsOutputRate": 1512.599
                     },
                     "meterData": [
@@ -1253,7 +1253,7 @@ export const ExampleAccount: AccountBackup = {
                         "energyUnit": "MMBtu",
                         "visible": true,
                         "id": 48,
-                        "meterReadingDataApplication": "forward",
+                        "meterReadingDataApplication": "backward",
                         "emissionsOutputRate": 53.06
                     },
                     "meterData": [

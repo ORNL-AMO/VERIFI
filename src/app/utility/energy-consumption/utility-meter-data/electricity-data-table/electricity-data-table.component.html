@@ -104,7 +104,7 @@
             <td class="input">
                 <input type="checkbox" name="metersSelected" (change)="toggleChecked()" [(ngModel)]="meterData.checked">
             </td>
-            <td [ngClass]="{'alert-danger': checkError(meterData.readDate)}">{{meterData.readDate | date}}</td>
+            <td>{{meterData.readDate | date}}</td>
             <td>{{meterData.totalEnergyUse | customNumber}}</td>
             <td *ngIf="showTotalDemand">{{meterData.totalDemand | customNumber}}</td>
             <td>{{meterData.totalCost | customNumber:true}}</td>

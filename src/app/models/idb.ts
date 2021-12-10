@@ -118,7 +118,7 @@ export interface IdbUtilityMeter {
     fuel?: string
     visible?: boolean
     importWizardName?: string
-    meterReadingDataApplication?: "forward" | "backward" | "fullMonth",
+    meterReadingDataApplication?: "backward" | "fullMonth",
     emissionsOutputRate?: number,
     unitsDifferent?: boolean
 }

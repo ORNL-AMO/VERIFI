@@ -97,7 +97,7 @@ export class EnergySourceComponent implements OnInit {
     //delete meter data
     let meterData: Array<IdbUtilityMeterData> = await this.utilityMeterDatadbService.getAllByIndexRange('meterId', this.meterToDelete.id).toPromise();
     for (let index = 0; index < meterData.length; index++) {
-      await this.utilityMeterDatadbService.deleteWithObservable(meterData[index].id);
+      await this.utilityMeterDatadbService.deleteWithObservable(meterData[index].id).toPromise();
     }
     let selectedFacility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
     //set meters

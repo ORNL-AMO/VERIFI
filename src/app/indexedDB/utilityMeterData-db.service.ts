@@ -202,7 +202,7 @@ export class UtilityMeterDatadbService {
 
     checkSameMonthYear(date: Date, dataItem: IdbUtilityMeterData): boolean {
         let dataItemDate: Date = new Date(dataItem.readDate);
-        return (dataItemDate.getUTCMonth() == date.getUTCMonth()) && (dataItemDate.getUTCFullYear() == date.getUTCFullYear());
+        return (dataItemDate.getUTCMonth() == date.getUTCMonth()) && (dataItemDate.getUTCFullYear() == date.getUTCFullYear() && (dataItemDate.getDate() == date.getDate()));
     }
 
     private getMeterDataFromMeterId(meterId: number): Array<IdbUtilityMeterData> {
