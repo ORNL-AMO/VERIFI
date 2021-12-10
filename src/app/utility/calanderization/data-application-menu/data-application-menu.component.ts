@@ -158,31 +158,7 @@ export class DataApplicationMenuComponent implements OnInit {
           }
         }
       }
-    } else if (this.meter.meterReadingDataApplication == 'forward') {
-      let isSameDate: boolean;
-      if (this.fourthBillReadDate) {
-        isSameDate = this.checkLaterDate(this.fourthBillReadDate, date);
-      }
-      if (isSameDate) {
-        return 'lightgray';
-      } else {
-        isSameDate = this.checkLaterDate(this.thirdBillReadDate, date);
-        if (isSameDate) {
-          return '#F0B27A';
-        } else {
-          isSameDate = this.checkLaterDate(this.secondBillReadDate, date);
-          if (isSameDate) {
-            return 'lightgreen';
-          } else {
-            isSameDate = this.checkLaterDate(this.firstBillReadDate, date);
-            if (isSameDate) {
-              return '#D2B4DE';
-            }
-          }
-        }
-
-      }
-    }
+    } 
     return 'lightgray'
   }
 
