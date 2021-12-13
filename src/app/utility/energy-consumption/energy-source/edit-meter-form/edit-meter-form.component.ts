@@ -42,6 +42,21 @@ export class EditMeterFormComponent implements OnInit {
     private editMeterFormService: EditMeterFormService, private cd: ChangeDetectorRef, private convertUnitsService: ConvertUnitsService) { }
 
   ngOnInit(): void {
+    this.initializeEnergyUnit();
+  }
+
+  ngOnChanges() {
+    this.initializeEnergyUnit();
+    this.setFuelTypeOptions(true);
+    this.checkDisplayFuel();
+    this.checkDisplayPhase();
+    this.setStartingUnitOptions();
+    this.checkShowHeatCapacity();
+    this.checkShowSiteToSource();
+    this.checkShowEmissionsOutputRate();
+  }
+
+  initializeEnergyUnit() {
     if (!this.meterEnergyUnit) {
       let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
       if (selectedFacility) {
@@ -57,15 +72,6 @@ export class EditMeterFormComponent implements OnInit {
     this.checkHasDifferentUnits();
   }
 
-  ngOnChanges() {
-    this.setFuelTypeOptions(true);
-    this.checkDisplayFuel();
-    this.checkDisplayPhase();
-    this.setStartingUnitOptions();
-    this.checkShowHeatCapacity();
-    this.checkShowSiteToSource();
-    this.checkShowEmissionsOutputRate();
-  }
 
   changeSource() {
     if (this.meterForm.controls.source.value == 'Electricity') {
