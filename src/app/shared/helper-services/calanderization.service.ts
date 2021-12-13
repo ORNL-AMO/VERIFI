@@ -280,47 +280,64 @@ export class CalanderizationService {
     }
   }
 
-
   //calanderize fullMonth
   calanderizeMeterDataFullMonth(meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData>, energyIsSource: boolean, monthDisplayShort?: boolean): Array<MonthlyData> {
     let calanderizeData: Array<MonthlyData> = new Array();
     let orderedMeterData: Array<IdbUtilityMeterData> = _.orderBy(meterData, (data) => { return new Date(data.readDate) });
-    for (let meterIndex = 0; meterIndex < orderedMeterData.length; meterIndex++) {
-      let currentBill: IdbUtilityMeterData = orderedMeterData[meterIndex];
-      let totalMonthEnergyConsumption: number = 0;
-      let totalMonthEnergyUse: number;
-
-      //energy use
-      let isEnergyMeter: boolean = this.energyUnitsHelperService.isEnergyMeter(meter.source);
-      if (isEnergyMeter) {
-        totalMonthEnergyUse = currentBill.totalEnergyUse;
-      }
-      //energy consumption (data input not as energy)
-      let isEnergyUnit: boolean = this.energyUnitsHelperService.isEnergyUnit(meter.startingUnit);
-      if (!isEnergyUnit) {
-        totalMonthEnergyConsumption = currentBill.totalVolume;
-      } else {
-        totalMonthEnergyConsumption = totalMonthEnergyUse;
-      }
-
-      let month: string;
-      if (monthDisplayShort) {
-        month = new Date(currentBill.readDate).toLocaleString('default', { month: 'short' });
-      } else {
-        month = new Date(currentBill.readDate).toLocaleString('default', { month: 'long' });
-      }
-      let monthNumValue: number = new Date(currentBill.readDate).getMonth();
-      let year: number = new Date(currentBill.readDate).getFullYear();
-      calanderizeData.push({
-        month: month,
-        monthNumValue: monthNumValue,
-        year: year,
-        energyConsumption: totalMonthEnergyConsumption,
-        energyUse: totalMonthEnergyUse,
-        energyCost: currentBill.totalCost,
-        date: new Date(year, monthNumValue),
-        emissions: this.getEmissions(meter, totalMonthEnergyUse, meter.energyUnit, energyIsSource)
+    let startDate: Date = new Date(orderedMeterData[0].readDate);
+    startDate.setUTCMonth(startDate.getUTCMonth() + 1);
+    let endDate: Date = new Date(orderedMeterData[orderedMeterData.length - 1].readDate);
+    while (startDate.getUTCMonth() != endDate.getUTCMonth() || startDate.getUTCFullYear() != endDate.getUTCFullYear()) {
+      let month: number = startDate.getUTCMonth();
+      let year: number = startDate.getUTCFullYear();
+      let currentMonthsReadings: Array<IdbUtilityMeterData> = this.getCurrentMonthsReadings(month, year, orderedMeterData);
+      let readingSummaries: Array<{
+        energyUse: number,
+        energyConsumption: number,
+        cost: number
+      }> = new Array();
+      currentMonthsReadings.forEach(reading => {
+        let totalMonthEnergyUse: number = 0;
+        let totalMonthEnergyConsumption: number = 0;
+        let totalMonthCost: number = reading.totalCost;
+        //energy use
+        let isEnergyMeter: boolean = this.energyUnitsHelperService.isEnergyMeter(meter.source);
+        if (isEnergyMeter) {
+          totalMonthEnergyUse = reading.totalEnergyUse;
+        }
+        //energy consumption (data input not as energy)
+        let isEnergyUnit: boolean = this.energyUnitsHelperService.isEnergyUnit(meter.startingUnit);
+        if (!isEnergyUnit) {
+          totalMonthEnergyConsumption = reading.totalVolume;
+        } else {
+          totalMonthEnergyConsumption = totalMonthEnergyUse;
+        }
+        readingSummaries.push({
+          energyConsumption: totalMonthEnergyConsumption,
+          energyUse: totalMonthEnergyUse,
+          cost: totalMonthCost
+        });
       });
+      let totalEnergyUse: number = _.sumBy(readingSummaries, 'energyUse');
+      let totalCost: number = _.sumBy(readingSummaries, 'cost');
+      let totalConsumption: number = _.sumBy(readingSummaries, 'energyConsumption');
+      let monthStr: string;
+      if (monthDisplayShort) {
+        monthStr = new Date(year, month).toLocaleString('default', { month: 'short' });
+      } else {
+        monthStr = new Date(year, month).toLocaleString('default', { month: 'long' });
+      }
+      calanderizeData.push({
+        month: monthStr,
+        monthNumValue: month,
+        year: year,
+        energyConsumption: totalConsumption,
+        energyUse: totalEnergyUse,
+        energyCost: totalCost,
+        date: new Date(year, month),
+        emissions: this.getEmissions(meter, totalEnergyUse, meter.energyUnit, energyIsSource)
+      });
+      startDate.setUTCMonth(startDate.getUTCMonth() + 1);
     }
     return calanderizeData;
   }
@@ -656,41 +673,56 @@ export class CalanderizationService {
   calanderizationSummaryFullMonth(meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData>): Array<CalendarizationSummaryItem> {
     let calanderizationSummary: Array<CalendarizationSummaryItem> = new Array();
     let orderedMeterData: Array<IdbUtilityMeterData> = _.orderBy(meterData, (data) => { return new Date(data.readDate) });
-    for (let meterIndex = 0; meterIndex < orderedMeterData.length; meterIndex++) {
-      let currentBill: IdbUtilityMeterData = orderedMeterData[meterIndex];
-      let totalMonthEnergyConsumption: number = 0;
-      let totalMonthEnergyUse: number;
+    let startDate: Date = new Date(orderedMeterData[0].readDate);
+    startDate.setUTCMonth(startDate.getUTCMonth() + 1);
 
-      //energy use
-      let isEnergyMeter: boolean = this.energyUnitsHelperService.isEnergyMeter(meter.source);
-      if (isEnergyMeter) {
-        totalMonthEnergyUse = currentBill.totalEnergyUse;
-      }
-      //energy consumption (data input not as energy)
-      let isEnergyUnit: boolean = this.energyUnitsHelperService.isEnergyUnit(meter.startingUnit);
-      if (!isEnergyUnit) {
-        totalMonthEnergyConsumption = currentBill.totalVolume;
-      } else {
-        totalMonthEnergyConsumption = totalMonthEnergyUse;
-      }
-      let startOfMonth: Date = new Date(currentBill.readDate);
-      startOfMonth.setDate(1);
-      let nextMonth: Date = new Date(startOfMonth.getUTCFullYear(), startOfMonth.getUTCMonth() + 1, 1);
-      let daysInMonth: number = this.daysBetweenDates(startOfMonth, nextMonth);
+    let endDate: Date = new Date(startDate.getUTCFullYear(), startDate.getUTCMonth() + 2);
+    while (startDate.getUTCMonth() != endDate.getUTCMonth() || startDate.getUTCFullYear() != endDate.getUTCFullYear()) {
+      let month: number = startDate.getUTCMonth();
+      let year: number = startDate.getUTCFullYear();
+      let monthReadingSummaries: Array<{
+        readDate: Date,
+        daysInBill: number,
+        energyUsePerDay: number,
+        daysApplied: number,
+        totalEnergyFromBill: number
+      }> = new Array();
+      let currentMonthsReadings: Array<IdbUtilityMeterData> = this.getCurrentMonthsReadings(month, year, orderedMeterData);
+      currentMonthsReadings.forEach(reading => {
+        let totalMonthEnergyConsumption: number = 0;
+        let totalMonthEnergyUse: number = 0;
 
+        //energy use
+        let isEnergyMeter: boolean = this.energyUnitsHelperService.isEnergyMeter(meter.source);
+        if (isEnergyMeter) {
+          totalMonthEnergyUse = reading.totalEnergyUse;
+        }
+        //energy consumption (data input not as energy)
+        let isEnergyUnit: boolean = this.energyUnitsHelperService.isEnergyUnit(meter.startingUnit);
+        if (!isEnergyUnit) {
+          totalMonthEnergyConsumption = reading.totalVolume;
+        } else {
+          totalMonthEnergyConsumption = totalMonthEnergyUse;
+        }
+        let startOfMonth: Date = new Date(reading.readDate);
+        startOfMonth.setDate(1);
+        let nextMonth: Date = new Date(startOfMonth.getUTCFullYear(), startOfMonth.getUTCMonth() + 1, 1);
+        let daysInMonth: number = this.daysBetweenDates(startOfMonth, nextMonth);
+        monthReadingSummaries.push({
+          readDate: new Date(reading.readDate),
+          energyUsePerDay: totalMonthEnergyConsumption / daysInMonth,
+          daysApplied: daysInMonth,
+          totalEnergyFromBill: totalMonthEnergyConsumption,
+          daysInBill: daysInMonth
+        })
+
+      })
       calanderizationSummary.push({
-        calanderizedMonth: new Date(currentBill.readDate),
-        monthReadingSummaries: [
-          {
-            readDate: new Date(currentBill.readDate),
-            energyUsePerDay: totalMonthEnergyConsumption / daysInMonth,
-            daysApplied: daysInMonth,
-            totalEnergyFromBill: totalMonthEnergyConsumption,
-            daysInBill: daysInMonth
-          }
-        ],
-        totalEnergyUse: totalMonthEnergyConsumption
+        calanderizedMonth: new Date(year, month),
+        monthReadingSummaries: monthReadingSummaries,
+        totalEnergyUse: _.sumBy(monthReadingSummaries, 'totalEnergyFromBill')
       });
+      startDate.setUTCMonth(startDate.getUTCMonth() + 1);
     }
     return calanderizationSummary;
   }
@@ -711,7 +743,7 @@ export class CalanderizationService {
   }
 }
 
-
+//CalanderizationSummaryItem used in modal to show calanderization method
 export interface CalendarizationSummaryItem {
   calanderizedMonth: Date,
   monthReadingSummaries: Array<{
