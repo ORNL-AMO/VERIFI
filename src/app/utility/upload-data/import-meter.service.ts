@@ -88,7 +88,6 @@ export class ImportMeterService {
       newMeter.heatCapacity = this.energyUseCalculationsService.getHeatingCapacity(newMeter.source, newMeter.startingUnit, newMeter.energyUnit, fuel);
     }
     newMeter.siteToSource = importMeter.siteToSource;
-    //TODO: Set emissions output rate..
     newMeter.emissionsOutputRate = this.energyUseCalculationsService.getEmissionsOutputRate(newMeter.source, newMeter.fuel, newMeter.phase, newMeter.energyUnit);
     return newMeter;
   }

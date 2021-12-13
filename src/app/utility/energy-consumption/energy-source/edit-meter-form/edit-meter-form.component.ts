@@ -271,17 +271,7 @@ export class EditMeterFormComponent implements OnInit {
   }
 
   setEmissionsOutputRate() {
-    let emissionsRate: number;
-    if (this.meterForm.controls.source.value == 'Electricity') {
-      let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-      emissionsRate = selectedFacility.emissionsOutputRate;
-    } else if (this.meterForm.controls.source.value == 'Natural Gas') {
-      emissionsRate = this.convertEmissions(53.06);
-    } else if (this.meterForm.controls.source.value == 'Other Fuels') {
-      let selectedFuel: FuelTypeOption = this.fuelTypeOptions.find(option => { return option.value == this.meterForm.controls.fuel.value })
-      emissionsRate = selectedFuel.emissionsOutputRate;
-      emissionsRate = this.convertEmissions(emissionsRate);
-    }
+    let emissionsRate: number = this.energyUseCalculationsService.getEmissionsOutputRate(this.meterForm.controls.source.value, this.meterForm.controls.fuel.value, this.meterForm.controls.phase.value, this.energyUnit);
     this.meterForm.controls.emissionsOutputRate.patchValue(emissionsRate);
     this.checkHasDifferentUnits();
   }
