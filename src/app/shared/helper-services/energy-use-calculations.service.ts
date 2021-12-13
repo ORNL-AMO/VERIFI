@@ -81,5 +81,30 @@ export class EnergyUseCalculationsService {
     return 0;
   }
 
+  getEmissionsOutputRate(source: MeterSource, fuel: string, phase: MeterPhase, energyUnit: string): number{
+    let emissionsRate: number;
+    if (source == 'Electricity') {
+      let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+      emissionsRate = selectedFacility.emissionsOutputRate;
+    } else if (source == 'Natural Gas') {
+      emissionsRate = this.convertEmissions(53.06, energyUnit);
+    } else if (source == 'Other Fuels') {
+      let fuelTypeOptions: Array<FuelTypeOption> = this.getFuelTypeOptions(source, phase);
+      let selectedFuel: FuelTypeOption = fuelTypeOptions.find(option => { return option.value == fuel })
+      emissionsRate = selectedFuel.emissionsOutputRate;
+      emissionsRate = this.convertEmissions(emissionsRate, energyUnit);
+    }
+    return emissionsRate;
+  }
+
+  convertEmissions(emissionsRate: number, energyUnit: string): number {
+    if (energyUnit != 'MMBtu') {
+      let conversionHelper: number = this.convertUnitsService.value(1).from('MMBtu').to(energyUnit);
+      emissionsRate = emissionsRate / conversionHelper;
+      emissionsRate = this.convertUnitsService.roundVal(emissionsRate, 4)
+    }
+    return emissionsRate;
+  }
+
 
 }
