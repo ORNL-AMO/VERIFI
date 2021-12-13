@@ -174,7 +174,7 @@ export class UtilityMeterDataService {
     for (let index = 0; index < meterDataDates.length - 1; index++) {
       let date1: Date = new Date(meterDataDates[index]);
       let date2: Date = new Date(meterDataDates[index + 1]);
-      if(date1.getUTCMonth() == date2.getUTCMonth() && date1.getUTCFullYear() == date2.getUTCFullYear()){
+      if(date1.getUTCMonth() == date2.getUTCMonth() && date1.getUTCFullYear() == date2.getUTCFullYear() && date1.getUTCDate() == date2.getUTCDate()){
         return date1;
       }
     }

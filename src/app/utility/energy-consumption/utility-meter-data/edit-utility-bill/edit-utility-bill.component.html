@@ -7,7 +7,7 @@
       [ngClass]="{'error': invalidDate}">
   </div>
   <span class="inputError" *ngIf="meterDataForm.get('readDate').hasError('required')">Meter read date is required</span>
-  <span class="inputError" *ngIf="invalidDate">Meter already has data entered for selected month</span>
+  <span class="inputError" *ngIf="invalidDate">Meter already has data entered for selected date</span>
 
   <div class="row">
     <div *ngIf="displayVolumeInput" class="col">
