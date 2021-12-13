@@ -58,7 +58,7 @@
                 <i class="fa fa-caret-down" *ngIf="meterListItem.idbMeter.visible"></i>
                 {{meterListItem.idbMeter.name}}
                 <span class="alert-danger" *ngIf="meterListItem.errorDate">
-                    {{meterListItem.errorDate  | date: 'MMM, y'}} has multiple data entries.
+                    {{meterListItem.errorDate  | date}} has multiple data entries.
                 </span>
             </p>
             <p *ngIf="meterListItem.idbMeter.visible">{{meterListItem.idbMeter.notes}}</p>
