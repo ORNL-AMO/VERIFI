@@ -89,25 +89,25 @@ export class GeneralUtilityDataTableComponent implements OnInit {
     this.setDelete.emit(meterData);
   }
 
-  setOrderDataField(str: string){
-    if(str == this.orderDataField){
-      if(this.orderByDirection == 'desc'){
+  setOrderDataField(str: string) {
+    if (str == this.orderDataField) {
+      if (this.orderByDirection == 'desc') {
         this.orderByDirection = 'asc';
-      }else{
+      } else {
         this.orderByDirection = 'desc';
       }
-    }else{
+    } else {
       this.orderDataField = str;
     }
   }
 
-  // checkError(readDate: Date): boolean {
-  //   if (this.meterListItem.errorDate) {
-  //     let readDateItem: Date = new Date(readDate);
-  //     if (readDateItem.getUTCFullYear() == this.meterListItem.errorDate.getUTCFullYear() && readDateItem.getUTCMonth() == this.meterListItem.errorDate.getUTCMonth()) {
-  //       return true;
-  //     }
-  //   }
-  //   return false;
-  // }
+  checkError(readDate: Date): boolean {
+    if (this.meterListItem.errorDate) {
+      let readDateItem: Date = new Date(readDate);
+      if (readDateItem.getUTCFullYear() == this.meterListItem.errorDate.getUTCFullYear() && readDateItem.getUTCMonth() == this.meterListItem.errorDate.getUTCMonth() && readDateItem.getUTCDate() == this.meterListItem.errorDate.getUTCDate()) {
+        return true;
+      }
+    }
+    return false;
+  }
 }
