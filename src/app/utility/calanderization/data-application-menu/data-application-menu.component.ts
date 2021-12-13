@@ -50,13 +50,14 @@ export class DataApplicationMenuComponent implements OnInit {
   }
 
   calanderizeMeter() {
-    let meterData: Array<IdbUtilityMeterData> = [this.utilityMeterData[0], this.utilityMeterData[1], this.utilityMeterData[2]];
-    if (this.utilityMeterData.length > 3) {
-      meterData.push(this.utilityMeterData[3]);
-    }
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.monthlyData = this.calanderizationService.calanderizeMeterData(this.meter, meterData, selectedFacility.energyIsSource);
-    this.calanderizationSummary = this.calanderizationService.getCalendarizationSummary(this.meter, meterData);
+    this.monthlyData = this.calanderizationService.calanderizeMeterData(this.meter, this.utilityMeterData, selectedFacility.energyIsSource);
+    if (this.meter.meterReadingDataApplication == 'backward') {
+      this.monthlyData = this.monthlyData.splice(0, 2);
+    } else {
+      this.monthlyData = this.monthlyData.splice(0, 4);
+    }
+    this.calanderizationSummary = this.calanderizationService.getCalendarizationSummary(this.meter, this.utilityMeterData);
   }
 
   checkSameDate(firstDate: Date, secondDate: Date): boolean {
@@ -157,31 +158,7 @@ export class DataApplicationMenuComponent implements OnInit {
           }
         }
       }
-    } else if (this.meter.meterReadingDataApplication == 'forward') {
-      let isSameDate: boolean;
-      if (this.fourthBillReadDate) {
-        isSameDate = this.checkLaterDate(this.fourthBillReadDate, date);
-      }
-      if (isSameDate) {
-        return 'lightgray';
-      } else {
-        isSameDate = this.checkLaterDate(this.thirdBillReadDate, date);
-        if (isSameDate) {
-          return '#F0B27A';
-        } else {
-          isSameDate = this.checkLaterDate(this.secondBillReadDate, date);
-          if (isSameDate) {
-            return 'lightgreen';
-          } else {
-            isSameDate = this.checkLaterDate(this.firstBillReadDate, date);
-            if (isSameDate) {
-              return '#D2B4DE';
-            }
-          }
-        }
-
-      }
-    }
+    } 
     return 'lightgray'
   }
 
@@ -219,10 +196,10 @@ export class DataApplicationMenuComponent implements OnInit {
     }
   }
 
-  getTableCellClass(checkDate: Date, readDate: Date): Array<string>{
+  getTableCellClass(checkDate: Date, readDate: Date): Array<string> {
     let cellClass: Array<string> = [];
     let isHoverDate: boolean = this.isHoverDate(checkDate);
-    if(isHoverDate){
+    if (isHoverDate) {
       cellClass.push('highlighted-date');
       let monthClass: string = this.getMonthClass(new Date(readDate));
       cellClass.push(monthClass);
@@ -241,7 +218,7 @@ export class DataApplicationMenuComponent implements OnInit {
     return '';
   }
 
-  hoverDate(ngbDate: NgbDateStruct){
+  hoverDate(ngbDate: NgbDateStruct) {
     let date: Date = new Date(ngbDate.year, ngbDate.month - 1, ngbDate.day);
     this.inspectDate(date);
   }

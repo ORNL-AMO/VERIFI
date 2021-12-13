@@ -111,7 +111,7 @@ export class ElectricityDataTableComponent implements OnInit {
   checkError(readDate: Date): boolean {
     if (this.meterListItem.errorDate) {
       let readDateItem: Date = new Date(readDate);
-      if (readDateItem.getUTCFullYear() == this.meterListItem.errorDate.getUTCFullYear() && readDateItem.getUTCMonth() && this.meterListItem.errorDate.getUTCMonth()) {
+      if (readDateItem.getUTCFullYear() == this.meterListItem.errorDate.getUTCFullYear() && readDateItem.getUTCMonth() == this.meterListItem.errorDate.getUTCMonth() && readDateItem.getUTCDate() == this.meterListItem.errorDate.getUTCDate()) {
         return true;
       }
     }

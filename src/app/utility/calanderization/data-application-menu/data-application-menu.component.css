@@ -51,3 +51,8 @@ table.table tbody tr:nth-child(even){
 .table-col{
   overflow-x: auto;
 }
+
+.table-mh th{
+  background-color: inherit;
+  color: black;
+}
