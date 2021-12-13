@@ -82,6 +82,11 @@ export class ImportMeterService {
     newMeter.fuel = importMeter.fuel;
     newMeter.startingUnit = this.checkImportStartingUnit(importMeter.collectionUnit, newMeter.source, newMeter.phase, newMeter.fuel);
     newMeter.heatCapacity = importMeter.heatCapacity;
+    if (!newMeter.heatCapacity) {
+      let fuelTypeOptions: Array<FuelTypeOption> = this.energyUseCalculationsService.getFuelTypeOptions(newMeter.source, newMeter.phase);
+      let fuel: FuelTypeOption = fuelTypeOptions.find(option => { return option.value == newMeter.fuel });
+      newMeter.heatCapacity = this.energyUseCalculationsService.getHeatingCapacity(newMeter.source, newMeter.startingUnit, newMeter.energyUnit, fuel);
+    }
     newMeter.siteToSource = importMeter.siteToSource;
     //TODO: Set emissions output rate..
     newMeter.emissionsOutputRate = this.energyUseCalculationsService.getEmissionsOutputRate(newMeter.source, newMeter.fuel, newMeter.phase, newMeter.energyUnit);
