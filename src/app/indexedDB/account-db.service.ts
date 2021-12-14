@@ -29,6 +29,9 @@ export class AccountdbService {
         }
         let allAccounts: Array<IdbAccount> = await this.getAll().toPromise();
         this.allAccounts.next(allAccounts);
+        if(!localStorageAccountId){
+            this.setSelectedAccount(undefined);
+        }
     }
 
     setSelectedAccount(accountId: number) {

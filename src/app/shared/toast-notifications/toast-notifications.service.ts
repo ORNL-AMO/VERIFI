@@ -10,7 +10,7 @@ export class ToastNotificationsService {
   disableNotification: BehaviorSubject<boolean>;
   constructor() {
     this.toastNotification = new BehaviorSubject<ToastNotification>(undefined);
-    this.disableNotification = new BehaviorSubject<boolean>(false);
+    this.disableNotification = new BehaviorSubject<boolean>(undefined);
   }
 
   showToast(title: string, body: string, setTimeoutVal: number, showDisableFooter: boolean, toastClass: "success" | "warning" | "info" | "comment" | "error") {
@@ -24,7 +24,7 @@ export class ToastNotificationsService {
   }
 
   hideToast() {
-    this.disableNotification.next(false);
+    this.disableNotification.next(undefined);
     this.toastNotification.next(undefined);
   }
 }
