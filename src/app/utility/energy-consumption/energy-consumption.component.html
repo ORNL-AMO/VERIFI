@@ -3,31 +3,31 @@
         <ul class="mb-0">
             <li><a routerLink="/utility/energy-consumption" [routerLinkActive]="['active']"
                     [routerLinkActiveOptions]="{ exact: true }">Energy Source</a></li>
-            <li [hidden]="!electricity" [class.red]="hasElectricityError">
+            <li [hidden]="!electricity" [ngClass]="electricityTabClass">
                 <a routerLink="electricity" [routerLinkActive]="['active']">Electricity
                 </a>
             </li>
-            <li [hidden]="!naturalGas" [class.red]="hasNaturalGasError">
+            <li [hidden]="!naturalGas" [ngClass]="naturalGasTabClass">
                 <a routerLink="natural-gas" [routerLinkActive]="['active']">Natural Gas
                 </a>
             </li>
-            <li [hidden]="!otherFuels" [class.red]="hasOtherFuelsError">
+            <li [hidden]="!otherFuels" [ngClass]="otherFuelsTabClass">
                 <a routerLink="other-fuels" [routerLinkActive]="['active']">Other Fuels
                 </a>
             </li>
-            <li [hidden]="!otherEnergy" [class.red]="hasOtherEnergyError">
+            <li [hidden]="!otherEnergy" [ngClass]="otherEnergyTabClass">
                 <a routerLink="other-energy" [routerLinkActive]="['active']">Other Energy
                 </a>
             </li>
-            <li [hidden]="!water" [class.red]="hasWaterError">
+            <li [hidden]="!water" [ngClass]="waterTabClass">
                 <a routerLink="water" [routerLinkActive]="['active']">Water
                 </a>
             </li>
-            <li [hidden]="!wasteWater" [class.red]="hasWasteWaterError">
+            <li [hidden]="!wasteWater" [ngClass]="wasteWaterTabClass">
                 <a routerLink="waste-water" [routerLinkActive]="['active']">Waste Water
                 </a>
             </li>
-            <li [hidden]="!otherUtility" [class.red]="hasOtherUtilityError">
+            <li [hidden]="!otherUtility" [ngClass]="otherUtilityTabClass">
                 <a routerLink="other-utility" [routerLinkActive]="['active']">Other Utility
                 </a>
             </li>

@@ -16,7 +16,8 @@ export class ElectricityDataTableComponent implements OnInit {
     idbMeter: IdbUtilityMeter,
     meterDataItems: Array<IdbUtilityMeterData>,
     errorDate: Date,
-    warningDate: Date
+    warningDate: Date,
+    missingMonth: Date
   };
   @Input()
   currentPageNumber: number;
@@ -115,8 +116,17 @@ export class ElectricityDataTableComponent implements OnInit {
       if (readDateItem.getUTCFullYear() == this.meterListItem.errorDate.getUTCFullYear() && readDateItem.getUTCMonth() == this.meterListItem.errorDate.getUTCMonth() && readDateItem.getUTCDate() == this.meterListItem.errorDate.getUTCDate()) {
         return 'alert-danger';
       }
-    }else if(this.meterListItem.warningDate){
+    } else if (this.meterListItem.warningDate) {
       if (readDateItem.getUTCFullYear() == this.meterListItem.warningDate.getUTCFullYear() && readDateItem.getUTCMonth() == this.meterListItem.warningDate.getUTCMonth()) {
+        return 'alert-warning';
+      }
+    } else if (this.meterListItem.missingMonth) {
+      let testDate1: Date = new Date(readDateItem.getUTCFullYear(), readDateItem.getUTCMonth() - 1);
+      let testDate2: Date = new Date(readDateItem.getUTCFullYear(), readDateItem.getUTCMonth() + 1);
+      if (testDate1.getUTCFullYear() == this.meterListItem.missingMonth.getUTCFullYear() && testDate1.getUTCMonth() == this.meterListItem.missingMonth.getUTCMonth()) {
+        return 'alert-warning';
+      }
+      if (testDate2.getUTCFullYear() == this.meterListItem.missingMonth.getUTCFullYear() && testDate2.getUTCMonth() == this.meterListItem.missingMonth.getUTCMonth()) {
         return 'alert-warning';
       }
     }

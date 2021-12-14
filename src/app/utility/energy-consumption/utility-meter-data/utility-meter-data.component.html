@@ -64,7 +64,11 @@
                 </span>
                 <span class="alert-warning" *ngIf="meterListItem.warningDate">
                     {{meterListItem.warningDate | date:'MMM, y'}} has multiple data entries. <a
-                        (click)="ignoreSameMonth(meterListItem.idbMeter)">Ignore for this meter</a>
+                        (click)="ignoreSameMonth(meterListItem.idbMeter)">Ignore <b>duplicate</b> months for this meter</a>
+                </span>
+                <span class="alert-warning" *ngIf="meterListItem.missingMonth">
+                    {{meterListItem.missingMonth | date:'MMMM, y'}} is missing a data entry. <a
+                        (click)="ignoreMissingMonth(meterListItem.idbMeter)">Ignore <b>missing</b> months this meter</a>
                 </span>
             </p>
             <p *ngIf="meterListItem.idbMeter.visible">{{meterListItem.idbMeter.notes}}</p>

@@ -19,13 +19,13 @@ export class EnergyConsumptionComponent implements OnInit {
   wasteWater: boolean;
   otherUtility: boolean;
 
-  hasElectricityError: boolean;
-  hasNaturalGasError: boolean;
-  hasOtherFuelsError: boolean;
-  hasOtherEnergyError: boolean;
-  hasWaterError: boolean;
-  hasWasteWaterError: boolean;
-  hasOtherUtilityError: boolean;
+  electricityTabClass: string;
+  naturalGasTabClass: string;
+  otherFuelsTabClass: string;
+  otherEnergyTabClass: string;
+  waterTabClass: string;
+  wasteWaterTabClass: string;
+  otherUtilityTabClass: string;
 
   utilityMeters: Array<IdbUtilityMeter>;
   utilityMeterData: Array<IdbUtilityMeterData>;
@@ -50,11 +50,13 @@ export class EnergyConsumptionComponent implements OnInit {
       this.wasteWater = energySources.indexOf("Waste Water") > -1;
       this.otherUtility = energySources.indexOf("Other Utility") > -1;
       this.utilityMeters = facilityMeters;
+      this.checkMeterData();
 
     });
 
     this.utilityDataSub = this.utilityMeterDataDbService.facilityMeterData.subscribe(utilityMeterData => {
-      this.checkMeterData(utilityMeterData);
+      this.utilityMeterData = utilityMeterData;
+      this.checkMeterData();
     });
   }
 
@@ -63,47 +65,50 @@ export class EnergyConsumptionComponent implements OnInit {
     this.utilityDataSub.unsubscribe();
   }
 
-  checkMeterData(utilityMeterData: Array<IdbUtilityMeterData>) {
-    this.hasElectricityError = false;
-    this.hasNaturalGasError = false;
-    this.hasOtherFuelsError = false;
-    this.hasOtherEnergyError = false;
-    this.hasOtherUtilityError = false;
-    this.hasWasteWaterError = false;
-    this.hasWaterError = false;
-
-    this.utilityMeters.forEach(meter => {
-      if (meter.source === "Electricity" && !this.hasElectricityError) {
-        this.hasElectricityError = this.checkHasErrors(meter, utilityMeterData)
-      } 
-      if (meter.source === "Natural Gas" && !this.hasNaturalGasError) {
-        this.hasNaturalGasError = this.checkHasErrors(meter, utilityMeterData)
-      }
-      if (meter.source === "Other Fuels" && !this.hasOtherFuelsError) {
-        this.hasOtherFuelsError = this.checkHasErrors(meter, utilityMeterData)
-      }
-      if (meter.source === "Other Energy" && !this.hasOtherEnergyError) {
-        this.hasOtherEnergyError = this.checkHasErrors(meter, utilityMeterData)
-      }
-      if (meter.source === "Water" && !this.hasWaterError) {
-        this.hasWaterError = this.checkHasErrors(meter, utilityMeterData)
-      }
-      if (meter.source === "Waste Water" && !this.hasWasteWaterError) {
-        this.hasWasteWaterError = this.checkHasErrors(meter, utilityMeterData)
-      }
-      if (meter.source === "Other Utility" && !this.hasOtherUtilityError) {
-        this.hasOtherUtilityError = this.checkHasErrors(meter, utilityMeterData)
-      }
-    });
+  checkMeterData() {
+    this.electricityTabClass = undefined;
+    this.naturalGasTabClass = undefined;
+    this.otherFuelsTabClass = undefined;
+    this.otherEnergyTabClass = undefined;
+    this.otherUtilityTabClass = undefined;
+    this.wasteWaterTabClass = undefined;
+    this.waterTabClass = undefined;
+    if (this.utilityMeterData) {
+      this.utilityMeters.forEach(meter => {
+        if (meter.source === "Electricity" && !this.electricityTabClass) {
+          this.electricityTabClass = this.checkHasErrors(meter, this.utilityMeterData)
+        }
+        if (meter.source === "Natural Gas" && !this.naturalGasTabClass) {
+          this.naturalGasTabClass = this.checkHasErrors(meter, this.utilityMeterData)
+        }
+        if (meter.source === "Other Fuels" && !this.otherFuelsTabClass) {
+          this.otherFuelsTabClass = this.checkHasErrors(meter, this.utilityMeterData)
+        }
+        if (meter.source === "Other Energy" && !this.otherEnergyTabClass) {
+          this.otherEnergyTabClass = this.checkHasErrors(meter, this.utilityMeterData)
+        }
+        if (meter.source === "Water" && !this.otherUtilityTabClass) {
+          this.otherUtilityTabClass = this.checkHasErrors(meter, this.utilityMeterData)
+        }
+        if (meter.source === "Waste Water" && !this.wasteWaterTabClass) {
+          this.wasteWaterTabClass = this.checkHasErrors(meter, this.utilityMeterData)
+        }
+        if (meter.source === "Other Utility" && !this.waterTabClass) {
+          this.waterTabClass = this.checkHasErrors(meter, this.utilityMeterData)
+        }
+      });
+    }
   }
 
-  checkHasErrors(meter: IdbUtilityMeter, facilityMeterData: Array<IdbUtilityMeterData>) {
+  checkHasErrors(meter: IdbUtilityMeter, facilityMeterData: Array<IdbUtilityMeterData>): string {
     let meterData: Array<IdbUtilityMeterData> = facilityMeterData.filter(data => { return data.meterId == meter.id });
-    let checkDate: {error: Date, warning: Date}  = this.utilityMeterDataService.checkForErrors(meterData, meter);
-    if(checkDate.error){
-      return true;
+    let checkDate: { error: Date, warning: Date, missingMonth: Date } = this.utilityMeterDataService.checkForErrors(meterData, meter);
+    if (checkDate.error || meterData.length == 0) {
+      return 'error';
+    } else if (checkDate.warning || checkDate.missingMonth) {
+      return 'warning'
     }
-    return meterData.length == 0;
+    return;
   }
 
 }

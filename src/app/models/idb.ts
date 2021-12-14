@@ -121,7 +121,8 @@ export interface IdbUtilityMeter {
     meterReadingDataApplication?: "backward" | "fullMonth",
     emissionsOutputRate?: number,
     unitsDifferent?: boolean,
-    ignoreDuplicateMonths?: boolean
+    ignoreDuplicateMonths?: boolean,
+    ignoreMissingMonths?: boolean
 }
 
 export interface IdbUtilityMeterData {

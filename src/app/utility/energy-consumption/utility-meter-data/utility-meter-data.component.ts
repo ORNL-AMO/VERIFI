@@ -27,7 +27,8 @@ export class UtilityMeterDataComponent implements OnInit {
     idbMeter: IdbUtilityMeter,
     meterDataItems: Array<IdbUtilityMeterData>,
     errorDate: Date,
-    warningDate: Date
+    warningDate: Date,
+    missingMonth: Date
   }>;
 
   itemsPerPage: number = 6;
@@ -113,12 +114,13 @@ export class UtilityMeterDataComponent implements OnInit {
       if (meterData.length != 0) {
         this.meterListHasData = true;
       }
-      let checkDate: {error: Date, warning: Date} = this.utilityMeterDataService.checkForErrors(meterData, meter);
+      let checkDate: {error: Date, warning: Date, missingMonth: Date } = this.utilityMeterDataService.checkForErrors(meterData, meter);
       this.meterList.push({
         idbMeter: meter,
         meterDataItems: meterData,
         errorDate: checkDate.error,
-        warningDate: checkDate.warning
+        warningDate: checkDate.warning,
+        missingMonth: checkDate.missingMonth
       });
     });
     this.setHasCheckedItems();
@@ -231,6 +233,11 @@ export class UtilityMeterDataComponent implements OnInit {
 
   ignoreSameMonth(meter: IdbUtilityMeter){
     meter.ignoreDuplicateMonths = true;
+    this.utilityMeterDbService.update(meter);
+  }
+
+  ignoreMissingMonth(meter: IdbUtilityMeter){
+    meter.ignoreMissingMonths = true;
     this.utilityMeterDbService.update(meter);
   }
 }
