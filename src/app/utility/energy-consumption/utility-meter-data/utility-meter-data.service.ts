@@ -4,7 +4,7 @@ import { FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms'
 import { BehaviorSubject } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { ElectricityDataFilters } from 'src/app/models/electricityFilter';
-import { IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import * as _ from 'lodash';
 
 @Injectable({
@@ -168,16 +168,20 @@ export class UtilityMeterDataService {
   }
 
 
-  checkForErrors(meterData: Array<IdbUtilityMeterData>): Date {
+  checkForErrors(meterData: Array<IdbUtilityMeterData>, meter: IdbUtilityMeter): { error: Date, warning: Date } {
     let orderedData: Array<IdbUtilityMeterData> = _.orderBy(meterData, 'readDate', 'desc');
     let meterDataDates: Array<Date> = orderedData.map(data => { return data.readDate });
     for (let index = 0; index < meterDataDates.length - 1; index++) {
       let date1: Date = new Date(meterDataDates[index]);
       let date2: Date = new Date(meterDataDates[index + 1]);
-      if(date1.getUTCMonth() == date2.getUTCMonth() && date1.getUTCFullYear() == date2.getUTCFullYear() && date1.getUTCDate() == date2.getUTCDate()){
-        return date1;
+      if (date1.getUTCMonth() == date2.getUTCMonth() && date1.getUTCFullYear() == date2.getUTCFullYear()) {
+        if (date1.getUTCDate() == date2.getUTCDate()) {
+          return { error: date1, warning: undefined }
+        } else if (!meter.ignoreDuplicateMonths) {
+          return { error: undefined, warning: date1 }
+        }
       }
     }
-    return;
+    return { error: undefined, warning: undefined };
   }
 }
