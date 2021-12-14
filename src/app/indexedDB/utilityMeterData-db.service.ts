@@ -210,11 +210,11 @@ export class UtilityMeterDatadbService {
         return facilityMeterData.filter(meterData => { return meterData.meterId == meterId });
     }
 
-    getMeterDataForFacility(meter: IdbUtilityMeter, convertData: boolean): Array<IdbUtilityMeterData> {
+    getMeterDataForFacility(meter: IdbUtilityMeter, convertData: boolean, isMeterReadings?: boolean): Array<IdbUtilityMeterData> {
         let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
         let meterData: Array<IdbUtilityMeterData> = this.getMeterDataFromMeterId(meter.id);
         let meterDataCopy: Array<IdbUtilityMeterData> = JSON.parse(JSON.stringify(meterData));
-        if(facility.energyIsSource){
+        if(facility.energyIsSource && !isMeterReadings){
             meterDataCopy = this.convertMeterDataService.applySiteToSourceMultiplier(meter, meterDataCopy);
         }
         if (convertData) {
