@@ -33,7 +33,7 @@
         </button>
     </div>
     <div class="p-3" *ngIf="!skipMeters[selectedMeterIndex]">
-        <app-edit-meter-form [(meterForm)]="selectedMeterForm"></app-edit-meter-form>
+        <app-edit-meter-form *ngIf="showMeterForm" [(meterForm)]="selectedMeterForm"></app-edit-meter-form>
     </div>
     <p class="alert-warning text-center w-100 p-3" *ngIf="skipMeters[selectedMeterIndex]">
         Importing Meter Will Be Skipped

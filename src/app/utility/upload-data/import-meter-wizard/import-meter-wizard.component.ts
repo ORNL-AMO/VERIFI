@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
@@ -30,7 +30,9 @@ export class ImportMeterWizardComponent implements OnInit {
   facilityMeters: Array<IdbUtilityMeter>;
   facilityMetersSub: Subscription;
   skipMeters: Array<boolean>;
-  constructor(private utilityMeterdbService: UtilityMeterdbService, private editMeterFormService: EditMeterFormService, private uploadDataService: UploadDataService) { }
+  showMeterForm: boolean = true;
+  constructor(private utilityMeterdbService: UtilityMeterdbService, private editMeterFormService: EditMeterFormService, private uploadDataService: UploadDataService,
+    private cd: ChangeDetectorRef) { }
 
   ngOnInit(): void {
     this.facilityMeters = this.utilityMeterdbService.facilityMeters.getValue();
@@ -62,11 +64,16 @@ export class ImportMeterWizardComponent implements OnInit {
   }
 
   selectMeter(meter: IdbUtilityMeter, meterIndex: number) {
-    this.selectedMeterIndex = meterIndex;
-    this.selectedMeterForm = this.editMeterFormService.getFormFromMeter(meter);
-    this.selectedMeterForm.statusChanges.subscribe(val => {
-      this.updateSelectedMeter();
-    });
+    this.showMeterForm = false;
+    //need timeout block so form displays disbabled properties properly
+    setTimeout(() => {
+      this.selectedMeterIndex = meterIndex;
+      this.selectedMeterForm = this.editMeterFormService.getFormFromMeter(meter);
+      this.showMeterForm = true;
+      this.selectedMeterForm.statusChanges.subscribe(val => {
+        this.updateSelectedMeter();
+      });
+    })
   }
 
   isMeterInvalid(meter: IdbUtilityMeter): boolean {
@@ -162,6 +169,4 @@ export class ImportMeterWizardComponent implements OnInit {
     this.updateImportMeterFileWizard();
     this.emitContinue.emit(true);
   }
-
-
 }
