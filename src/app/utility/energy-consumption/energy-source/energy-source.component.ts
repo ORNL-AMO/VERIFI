@@ -11,7 +11,6 @@ import { FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { LoadingService } from 'src/app/shared/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/shared/toast-notifications/toast-notifications.service';
-import { FuelTypeOption, OtherEnergyOptions } from './edit-meter-form/editMeterOptions';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 
 @Component({
@@ -142,7 +141,7 @@ export class EnergySourceComponent implements OnInit {
 
   checkMeterUnits(meters: Array<IdbUtilityMeter>): Array<IdbUtilityMeter> {
     meters.forEach(meter => {
-      let differentUnits: { units: boolean, emissionsOutputRate: boolean } = this.energyUnitsHelperService.checkHasDifferentUnits(meter.source, meter.phase, meter.emissionsOutputRate, meter.startingUnit, meter.fuel, this.selectedFacility);
+      let differentUnits: { differentEnergyUnit: boolean, emissionsOutputRate: boolean, differentCollectionUnit: boolean } = this.energyUnitsHelperService.checkHasDifferentUnits(meter.source, meter.phase, meter.emissionsOutputRate, meter.startingUnit, meter.fuel, this.selectedFacility, meter.energyUnit);
       meter.unitsDifferent = differentUnits.emissionsOutputRate;
     });
     return meters;

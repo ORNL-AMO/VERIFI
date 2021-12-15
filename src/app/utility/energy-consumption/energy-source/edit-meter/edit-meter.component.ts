@@ -23,36 +23,32 @@ export class EditMeterComponent implements OnInit {
   addOrEdit: string;
 
   meterForm: FormGroup;
-  meterFormDisabled: boolean;
-  meterEnergyUnit: string;
+  meterDataExists: boolean;
   constructor(private utilityMeterDbService: UtilityMeterdbService, private facilityDbService: FacilitydbService,
     private energyUnitsHelperService: EnergyUnitsHelperService, private editMeterFormService: EditMeterFormService,
     private utilityMeterDataDbService: UtilityMeterDatadbService, private loadingService: LoadingService,
     private toastNoticationService: ToastNotificationsService) { }
 
   ngOnInit(): void {
-    this.meterEnergyUnit = this.editMeter.energyUnit;
     this.meterForm = this.editMeterFormService.getFormFromMeter(this.editMeter);
     let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataForFacility(this.editMeter, false);
     if (meterData.length != 0) {
-      this.meterFormDisabled = true;
+      this.meterDataExists = true;
       this.meterForm.controls.source.disable();
       this.meterForm.controls.startingUnit.disable();
       this.meterForm.controls.phase.disable();
       this.meterForm.controls.fuel.disable();
       this.meterForm.controls.heatCapacity.disable();
+      this.meterForm.controls.energyUnit.disable();
     }
   }
 
   async saveChanges() {
     //if data exists. See if you need to re-calculate energy
-    if (this.meterFormDisabled && (this.editMeter.startingUnit != this.meterForm.controls.startingUnit.value) || (this.editMeter.heatCapacity != this.meterForm.controls.heatCapacity.value)) {
+    if (this.meterDataExists && (this.editMeter.startingUnit != this.meterForm.controls.startingUnit.value) || (this.editMeter.heatCapacity != this.meterForm.controls.heatCapacity.value)) {
       await this.checkMeterData();
     }
     let meterToSave: IdbUtilityMeter = this.editMeterFormService.updateMeterFromForm(this.editMeter, this.meterForm);
-    if (!this.meterEnergyUnit) {
-      meterToSave.energyUnit = this.getMeterEnergyUnit();
-    }
     if (this.addOrEdit == 'edit') {
       this.utilityMeterDbService.update(meterToSave);
     } else if (this.addOrEdit == 'add') {
@@ -68,21 +64,6 @@ export class EditMeterComponent implements OnInit {
 
   meterFormChanges(form: FormGroup) {
     this.meterForm = form;
-  }
-
-  getMeterEnergyUnit(): string {
-    let isEnergyUnit: boolean = this.energyUnitsHelperService.isEnergyUnit(this.meterForm.controls.startingUnit.value);
-    if (isEnergyUnit) {
-      return this.meterForm.controls.startingUnit.value;
-    } else {
-      let isEnergyMeter: boolean = this.energyUnitsHelperService.isEnergyMeter(this.meterForm.controls.source.value);
-      if (isEnergyMeter) {
-        let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-        return selectedFacility.energyUnit;
-      } else {
-        return undefined;
-      }
-    }
   }
 
   async checkMeterData() {
