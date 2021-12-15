@@ -260,8 +260,6 @@ export class EnergyUnitsHelperService {
     let hasDifferentEmissions: boolean = false;
     if (source == 'Electricity') {
       if (emissionsOutputRate != selectedFacility.emissionsOutputRate) {
-        console.log(emissionsOutputRate);
-        console.log(selectedFacility.emissionsOutputRate);
         hasDifferentEmissions = true;
       }
     }
