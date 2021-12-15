@@ -13,7 +13,7 @@
             </div>
 
             <div class="row">
-                <div class="col">
+                <div class="col-6">
                     <label for="source">Source <span class="required">*</span> </label>
                     <div class="mb-3">
                         <select class="form-control" id="source" type="text" formControlName="source"
@@ -25,28 +25,19 @@
                     <span class="inputError" *ngIf="meterForm.get('source').hasError('required')">Source is
                         required</span>
                 </div>
-
-                <div class="col">
-                    <label for="startingUnit">Collection Unit <span class="required">*</span> </label>
+                <div class="col-6" *ngIf="displaySiteToSource">
+                    <label for="siteToSource">Site to source <span class="required">*</span> </label>
                     <div class="mb-3">
-                        <select class="form-control" id="startingUnit" type="text" formControlName="startingUnit"
-                            (change)="changeUnit()">
-                            <option *ngFor="let startingUnitOption of startingUnitOptions"
-                                [ngValue]="startingUnitOption.value">
-                                <span [innerHTML]="startingUnitOption.display"></span>
-                            </option>
-                        </select>
+                        <input id="siteToSource" class="form-control" type="number" formControlName="siteToSource"
+                            onfocus="this.select();" min="0" max="999999999999999">
                     </div>
-                    <span class="inputError" *ngIf="meterForm.get('startingUnit').hasError('required')">Starting unit is
-                        required</span>
-                    <div class="alert alert-warning" *ngIf="hasDifferentUnits">
-                        Units selected differ from the facility settings.
-                    </div>
+                    <span class="inputError" *ngIf="meterForm.get('siteToSource').hasError('required')">Site to source
+                        is required</span>
+                    <span class="inputWarning" *ngIf="meterForm.controls.siteToSource.value === 0">Site to source
+                        should be greater than 0</span>
                 </div>
-            </div>
 
-            <div class="row">
-                <div *ngIf="displayPhase" class="col">
+                <div *ngIf="displayPhase" class="col-6">
                     <label for="phase">Phase <span class="required">*</span> </label>
                     <div class="mb-3">
                         <select class="form-control" id="phase" type="text" formControlName="phase"
@@ -60,7 +51,7 @@
                         required</span>
                 </div>
 
-                <div *ngIf="displayFuel" class="col">
+                <div *ngIf="displayFuel" class="col-6">
                     <label for="energySource">{{energySourceLabel}} <span class="required">*</span> </label>
                     <div class="mb-3">
                         <select class="form-control" id="energySource" type="text" formControlName="fuel"
@@ -73,27 +64,48 @@
                     <span class="inputError" *ngIf="meterForm.get('fuel').hasError('required')">Fuel type is
                         required</span>
                 </div>
-            </div>
-
-            <div class="row">
-                <div class="col-6" *ngIf="displaySiteToSource">
-                    <label for="siteToSource">Site to source <span class="required">*</span> </label>
+                <div class="col-6">
+                    <label for="startingUnit">Collection Unit <span class="required">*</span> </label>
                     <div class="mb-3">
-                        <input id="siteToSource" class="form-control" type="number" formControlName="siteToSource"
-                            onfocus="this.select();" min="0" max="999999999999999">
+                        <select class="form-control" id="startingUnit" type="text" formControlName="startingUnit"
+                            (change)="changeCollectionUnit()">
+                            <option *ngFor="let startingUnitOption of startingUnitOptions"
+                                [ngValue]="startingUnitOption.value">
+                                <span [innerHTML]="startingUnitOption.display"></span>
+                            </option>
+                        </select>
                     </div>
-                    <span class="inputError" *ngIf="meterForm.get('siteToSource').hasError('required')">Site to source
-                        is required</span>
-                    <span class="inputWarning" *ngIf="meterForm.controls.siteToSource.value === 0">Site to source
-                        should be greater than 0</span>
+                    <span class="inputError" *ngIf="meterForm.get('startingUnit').hasError('required')">Starting unit is
+                        required</span>
+                    <div class="alert alert-warning"
+                        *ngIf="hasDifferentCollectionUnits || (hasDifferentEnergyUnits && collectionUnitIsEnergy)">
+                        Units selected differ from the facility settings.
+                    </div>
                 </div>
-
+                <div class="col-6" *ngIf="isEnergyMeter && !collectionUnitIsEnergy">
+                    <label for="energyUnit">Energy Unit <span class="required">*</span> </label>
+                    <div class="mb-3">
+                        <select class="form-control" id="energyUnit" type="text" formControlName="energyUnit"
+                            (change)="changeEnergyUnit()">
+                            <option *ngFor="let energyUnitOption of energyUnitOptions"
+                                [ngValue]="energyUnitOption.value">
+                                <span [innerHTML]="energyUnitOption.display"></span>
+                            </option>
+                        </select>
+                    </div>
+                    <span class="inputError" *ngIf="meterForm.get('energyUnit').hasError('required')">Energy unit is
+                        required</span>
+                    <div class="alert alert-warning" *ngIf="hasDifferentEnergyUnits">
+                        Units selected differ from the facility settings.
+                    </div>
+                </div>
                 <div class="col-6" *ngIf="displayHeatCapacity">
                     <label for="heatCapacity">Heat Capacity <span class="required">*</span> </label>
                     <div class="input-group mb-3">
                         <input id="heatCapacity" class="form-control" type="number" formControlName="heatCapacity"
                             onfocus="this.select();">
-                        <span class="unit"><span [innerHTML]="energyUnit | settingsLabel"></span>/<span
+                        <span class="unit"><span
+                                [innerHTML]="meterForm.controls.energyUnit.value | settingsLabel"></span>/<span
                                 [innerHTML]="meterForm.controls.startingUnit.value | settingsLabel"></span>
                         </span>
                     </div>
@@ -110,7 +122,7 @@
                     </label>
                     <span *ngIf="meterForm.controls.emissionsOutputRate.value">
                         {{meterForm.controls.emissionsOutputRate.value}} kg CO<sub>2</sub>/<span
-                            [innerHTML]="energyUnit | settingsLabel"></span>
+                            [innerHTML]="meterForm.controls.energyUnit.value | settingsLabel"></span>
                     </span>
                     <div class="alert alert-info" *ngIf="!meterForm.controls.emissionsOutputRate.value">
                         Electrical emissions output rate is set in the facility settings. No output rate found. <a
@@ -125,12 +137,13 @@
             </div>
 
             <p class="alert alert-warning"
-                *ngIf="meterFormDisabled && meterForm.controls.source.value != 'Electricity' && !changingUnits"> Data
+                *ngIf="meterDataExists && meterForm.controls.source.value != 'Electricity' && !changingUnits"> Data
                 found for this
                 meter. Collection units and heating capacity should not be changed after entering meter readings. <a
                     (click)="enableChangeUnits()">Click here to change values if necessary.</a> </p>
             <p class="alert alert-warning" *ngIf="changingUnits">
-                Data found for this meter. Be careful changing the collection values, <b>amount entered in meter readings
+                Data found for this meter. Be careful changing the collection values, <b>amount entered in meter
+                    readings
                     will not be altered.</b>
             </p>
         </div>

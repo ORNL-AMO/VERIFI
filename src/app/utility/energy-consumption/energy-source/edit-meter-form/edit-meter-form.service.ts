@@ -30,7 +30,8 @@ export class EditMeterFormService {
       group: [meter.group],
       fuel: [meter.fuel, fuelValidators],
       startingUnit: [meter.startingUnit, Validators.required],
-      emissionsOutputRate: [meter.emissionsOutputRate, emissionsOutputRateValidators]
+      emissionsOutputRate: [meter.emissionsOutputRate, emissionsOutputRateValidators],
+      energyUnit: [meter.energyUnit, Validators.required]
     });
   }
 
@@ -50,6 +51,7 @@ export class EditMeterFormService {
     meter.fuel = form.controls.fuel.value;
     meter.startingUnit = form.controls.startingUnit.value;
     meter.emissionsOutputRate = form.controls.emissionsOutputRate.value;
+    meter.energyUnit = form.controls.energyUnit.value;
     return meter;
   }
 
