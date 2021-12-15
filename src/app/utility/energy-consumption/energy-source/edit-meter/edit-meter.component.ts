@@ -66,21 +66,6 @@ export class EditMeterComponent implements OnInit {
     this.meterForm = form;
   }
 
-  getMeterEnergyUnit(): string {
-    let isEnergyUnit: boolean = this.energyUnitsHelperService.isEnergyUnit(this.meterForm.controls.startingUnit.value);
-    if (isEnergyUnit) {
-      return this.meterForm.controls.startingUnit.value;
-    } else {
-      let isEnergyMeter: boolean = this.energyUnitsHelperService.isEnergyMeter(this.meterForm.controls.source.value);
-      if (isEnergyMeter) {
-        let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-        return selectedFacility.energyUnit;
-      } else {
-        return undefined;
-      }
-    }
-  }
-
   async checkMeterData() {
     let isEnergyMeter: boolean = this.energyUnitsHelperService.isEnergyMeter(this.editMeter.source);
     let isEnergyUnit: boolean = this.energyUnitsHelperService.isEnergyUnit(this.editMeter.startingUnit);

@@ -44,11 +44,10 @@ export class EditMeterFormComponent implements OnInit {
     private editMeterFormService: EditMeterFormService, private cd: ChangeDetectorRef, private convertUnitsService: ConvertUnitsService) { }
 
   ngOnInit(): void {
-    this.initializeEnergyUnit();
   }
 
   ngOnChanges() {
-    this.initializeEnergyUnit();
+    this.checkHasDifferentUnits();
     this.setFuelTypeOptions(true);
     this.checkDisplayFuel();
     this.checkDisplayPhase();
@@ -58,12 +57,6 @@ export class EditMeterFormComponent implements OnInit {
     this.checkShowSiteToSource();
     this.checkShowEmissionsOutputRate();
   }
-
-  initializeEnergyUnit() {
-    this.checkHasDifferentUnits();
-    this.setEmissionsOutputRate();
-  }
-
 
   changeSource() {
     if (this.meterForm.controls.source.value == 'Electricity') {
