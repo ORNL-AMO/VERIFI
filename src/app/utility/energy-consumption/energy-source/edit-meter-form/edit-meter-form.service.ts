@@ -16,7 +16,7 @@ export class EditMeterFormService {
     let heatCapacityValidators: Array<ValidatorFn> = this.getHeatCapacitValidation(meter.source, meter.startingUnit);
     let siteToSourceValidators: Array<ValidatorFn> = this.getSiteToSourceValidation(meter.source, meter.startingUnit);
     let emissionsOutputRateValidators: Array<ValidatorFn> = this.getEmissionsOutputRateValidation(meter.source);
-    return this.formBuilder.group({
+    let form: FormGroup = this.formBuilder.group({
       meterNumber: [meter.meterNumber],
       accountNumber: [meter.accountNumber],
       phase: [meter.phase, phaseValidators],
@@ -33,6 +33,10 @@ export class EditMeterFormService {
       emissionsOutputRate: [meter.emissionsOutputRate, emissionsOutputRateValidators],
       energyUnit: [meter.energyUnit, Validators.required]
     });
+    if(form.controls.source.value == 'Electricity'){
+      form.controls.startingUnit.disable();
+    }
+    return form;
   }
 
   updateMeterFromForm(meter: IdbUtilityMeter, form: FormGroup): IdbUtilityMeter {
