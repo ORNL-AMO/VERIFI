@@ -36,31 +36,33 @@ export class GeneralInformationFormComponent implements OnInit {
   constructor(private accountDbService: AccountdbService, private accountManagementService: AccountManagementService, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
-    this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(account => {
-      this.selectedAccount = account;
-      if (account && this.inAccount) {
-        if (this.isFormChange == false) {
-          this.form = this.accountManagementService.getGeneralInformationForm(account);
-          this.unitsOfMeasure = this.selectedAccount.unitsOfMeasure;
-        } else {
-          this.isFormChange = false;
+    if (this.inAccount) {
+      this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(account => {
+        this.selectedAccount = account;
+        if (account && this.inAccount) {
+          if (this.isFormChange == false) {
+            this.form = this.accountManagementService.getGeneralInformationForm(account);
+            this.unitsOfMeasure = this.selectedAccount.unitsOfMeasure;
+          } else {
+            this.isFormChange = false;
+          }
         }
-      }
-    });
+      });
+    }
+    if (!this.inAccount) {
+      this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
+        this.selectedFacility = facility;
+        if (facility) {
+          if (this.isFormChange == false) {
+            this.form = this.accountManagementService.getGeneralInformationForm(facility);
+            this.unitsOfMeasure = this.selectedFacility.unitsOfMeasure;
+          } else {
+            this.isFormChange = false;
+          }
 
-
-    this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
-      this.selectedFacility = facility;
-      if (facility && !this.inAccount) {
-        if (this.isFormChange == false) {
-          this.form = this.accountManagementService.getGeneralInformationForm(facility);
-          this.unitsOfMeasure = this.selectedFacility.unitsOfMeasure;
-        } else {
-          this.isFormChange = false;
         }
-
-      }
-    });
+      });
+    }
 
     if (!this.inAccount) {
       this.formNameLabel = "Facility";
@@ -68,8 +70,12 @@ export class GeneralInformationFormComponent implements OnInit {
   }
 
   ngOnDestroy() {
-    this.selectedAccountSub.unsubscribe();
-    this.selectedFacilitySub.unsubscribe();
+    if (this.inAccount) {
+      this.selectedAccountSub.unsubscribe();
+    }
+    if (!this.inAccount) {
+      this.selectedFacilitySub.unsubscribe();
+    }
   }
 
   saveChanges() {

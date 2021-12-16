@@ -111,7 +111,7 @@ export class DefaultUnitsFormComponent implements OnInit {
       if (this.inAccount && this.currentZip != this.selectedAccount.zip) {
         this.currentZip = this.selectedAccount.zip;
         this.setSubRegionData();
-      } else if (this.currentZip != this.selectedFacility.zip) {
+      } else if (!this.inAccount && this.currentZip != this.selectedFacility.zip) {
         this.currentZip = this.selectedFacility.zip;
         this.setSubRegionData();
       }

@@ -31,6 +31,9 @@ export class AccountManagementService {
 
   updateAccountFromGeneralInformationForm(form: FormGroup, account: IdbAccount): IdbAccount {
     account.name = form.controls.name.value;
+    if(!account.name){
+      account.name = 'Account: ' + account.id;
+    }
     account.country = form.controls.country.value;
     account.city = form.controls.city.value;
     account.state = form.controls.state.value;
@@ -46,6 +49,9 @@ export class AccountManagementService {
 
   updateFacilityFromGeneralInformationForm(form: FormGroup, facility: IdbFacility): IdbFacility {
     facility.name = form.controls.name.value;
+    if(!facility.name){
+      facility.name = 'Facility: ' + facility.id;
+    }
     facility.country = form.controls.country.value;
     facility.city = form.controls.city.value;
     facility.state = form.controls.state.value;
