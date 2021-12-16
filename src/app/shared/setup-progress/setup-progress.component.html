@@ -20,7 +20,7 @@
                 <br>
                 <p *ngIf='selectedAccount && !selectedFacility && !setupWizardComplete'>Complete the information about your account then add a new facility.</p>
                 <p *ngIf='selectedAccount && selectedFacility && !setupWizardComplete'>Complete the information about your facility then add your utility data. More facilities can be added later.</p>
-                <p *ngIf='selectedAccount && selectedFacility && setupWizardComplete'>Setup Complete! Continue by adding utility information and reviewing your <a routerLink="/account-summary">dashboard</a>.</p>
+                <p *ngIf='selectedAccount && selectedFacility && setupWizardComplete'>Setup Complete! Continue by adding utility information.</p>
 
                 <button *ngIf='selectedAccount && !selectedFacility && !setupWizardComplete' class="btn btn-primary" (click)="addFacility()">Add Facility</button>
                 <button *ngIf='selectedAccount && selectedFacility && !setupWizardComplete' class="btn btn-primary" (click)="addUtilityData()">Add Utility Data</button>
