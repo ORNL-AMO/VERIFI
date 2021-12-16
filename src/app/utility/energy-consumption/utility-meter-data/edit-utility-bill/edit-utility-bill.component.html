@@ -10,7 +10,7 @@
   <span class="inputError" *ngIf="invalidDate">Meter already has data entered for selected date</span>
 
   <div class="row">
-    <div *ngIf="displayVolumeInput" class="col">
+    <div *ngIf="displayVolumeInput" class="col-md-6 col-sm-12">
       <label for="totalVolume">Total Volume <span class="required">*</span> </label>
       <div class="input-group mb-3">
         <input id="totalVolume" class="form-control" type="number" formControlName="totalVolume"
@@ -25,7 +25,7 @@
         than 0</span>
     </div>
 
-    <div *ngIf="displayEnergyUse" class="col">
+    <div *ngIf="displayEnergyUse" class="col-md-6 col-sm-12">
       <label for="totalEnergyUse">Total Energy Use <span class="required">*</span></label>
       <div class="input-group mb-3">
         <input id="totalEnergyUse" class="form-control" type="number" formControlName="totalEnergyUse" onfocus="this.select();"

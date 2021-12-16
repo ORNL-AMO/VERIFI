@@ -104,7 +104,7 @@
 
 <div class="window" [class.open]="editMeterData || addOrEdit == 'add'">
     <div class="windowOverlay"></div>
-    <div class="windowContent windowContentLg" *ngIf="(editMeterData || addOrEdit == 'add')">
+    <div class="windowContent windowContentXLg" *ngIf="(editMeterData || addOrEdit == 'add')">
         <h4 *ngIf="addOrEdit == 'add'">Add {{selectedMeter.source}} Bill</h4>
         <h4 *ngIf="addOrEdit == 'edit'">Edit {{selectedSource}} Bill</h4>
         <div class="row" *ngIf="addOrEdit == 'add'">
