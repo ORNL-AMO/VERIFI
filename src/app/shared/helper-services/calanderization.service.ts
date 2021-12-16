@@ -233,12 +233,11 @@ export class CalanderizationService {
     if (nextMonthsDate.getUTCMonth() != currentDate.getUTCMonth()) {
       //if next months reading need to find until beginning of that month
       //otherwise just will be untill that day
+      nextMonthsDate.setUTCFullYear(currentDate.getUTCFullYear());
       nextMonthsDate.setUTCMonth(currentDate.getUTCMonth() + 1);
       nextMonthsDate.setDate(0);
-      nextMonthsDate.setUTCFullYear(currentDate.getUTCFullYear());
     }
     let daysTillNext: number = this.daysBetweenDates(currentDate, nextMonthsDate);
-    // console.log(daysTillNext);
     let energyUseForNext: number = energyUsePerDayNext * daysTillNext;
     let costForNext: number = (nextReading.totalCost / daysFromNext) * daysTillNext;
     let volumeForNext: number = volumePerDayNext * daysTillNext;
@@ -258,7 +257,6 @@ export class CalanderizationService {
     }
     //cost
     totalCost = costForCurrent + costForNext;
-
     return {
       totalConsumption: totalConsumption,
       totalCost: totalCost,
