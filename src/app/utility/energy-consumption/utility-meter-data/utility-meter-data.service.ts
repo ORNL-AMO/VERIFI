@@ -189,7 +189,8 @@ export class UtilityMeterDataService {
 
       if (!meter.ignoreMissingMonths) {
         meter.meterReadingDataApplication = "fullMonth";
-        let calanderizedData: Array<MonthlyData> = this.calanderizationService.calanderizeMeterData(meter, orderedData, false);
+        //calanderizationEnergyUnit doesn't matter, used for emissions. Hardcoded 'MMBtu'
+        let calanderizedData: Array<MonthlyData> = this.calanderizationService.calanderizeMeterData(meter, orderedData, false, 'MMBtu');
         for (let index = 0; index < calanderizedData.length; index++) {
           let dataItem: MonthlyData = calanderizedData[index];
           if (dataItem.energyUse == 0 && dataItem.energyConsumption == 0) {

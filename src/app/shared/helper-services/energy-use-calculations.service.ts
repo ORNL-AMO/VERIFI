@@ -101,7 +101,7 @@ export class EnergyUseCalculationsService {
     if (energyUnit != 'MMBtu') {
       let conversionHelper: number = this.convertUnitsService.value(1).from('MMBtu').to(energyUnit);
       emissionsRate = emissionsRate / conversionHelper;
-      emissionsRate = this.convertUnitsService.roundVal(emissionsRate, 4)
+      emissionsRate = Number((emissionsRate).toLocaleString(undefined, { maximumSignificantDigits: 5 }));
     }
     return emissionsRate;
   }

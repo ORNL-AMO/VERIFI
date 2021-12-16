@@ -32,19 +32,19 @@ export class CalanderizationService {
     let calanderizedMeterData: Array<CalanderizedMeter> = new Array();
     meters.forEach(meter => {
       let energyIsSource: boolean;
-      let energyUnit: string;
+      let calanderizedenergyUnit: string;
       let meterData: Array<IdbUtilityMeterData>
       if (inAccount) {
         meterData = this.utilityMeterDataDbService.getMeterDataForAccount(meter, true);
-        energyUnit = this.energyUnitsHelperService.getMeterConsumptionUnitInAccount(meter);
+        calanderizedenergyUnit = this.energyUnitsHelperService.getMeterConsumptionUnitInAccount(meter);
         energyIsSource = this.energyUnitsHelperService.getEnergyIsSourceInAccount();
       } else {
         meterData = this.utilityMeterDataDbService.getMeterDataForFacility(meter, true);
-        energyUnit = this.energyUnitsHelperService.getMeterConsumptionUnitInFacility(meter);
+        calanderizedenergyUnit = this.energyUnitsHelperService.getMeterConsumptionUnitInFacility(meter);
         energyIsSource = this.energyUnitsHelperService.getEnergyIsSourceInFacility();
       }
 
-      let calanderizedMeter: Array<MonthlyData> = this.calanderizeMeterData(meter, meterData, energyIsSource, monthDisplayShort);
+      let calanderizedMeter: Array<MonthlyData> = this.calanderizeMeterData(meter, meterData, energyIsSource, calanderizedenergyUnit, monthDisplayShort);
       let showConsumption: boolean = calanderizedMeter.find(meterData => { return meterData.energyConsumption != meterData.energyUse }) != undefined;
       let consumptionUnit: string = meter.startingUnit;
       let showEmissions: boolean = (meter.source == "Electricity" || meter.source == "Natural Gas" || meter.source == "Other Fuels");
@@ -55,24 +55,24 @@ export class CalanderizationService {
         monthlyData: calanderizedMeter,
         showConsumption: showConsumption,
         showEnergyUse: this.energyUnitsHelperService.isEnergyMeter(meter.source),
-        energyUnit: energyUnit,
+        energyUnit: calanderizedenergyUnit,
         showEmissions: showEmissions
       });
     });
     return calanderizedMeterData;
   }
 
-  calanderizeMeterData(meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData>, energyIsSource: boolean, monthDisplayShort?: boolean): Array<MonthlyData> {
+  calanderizeMeterData(meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData>, energyIsSource: boolean, calanderizedEnergyUnit: string, monthDisplayShort?: boolean): Array<MonthlyData> {
     if (meter.meterReadingDataApplication == 'fullMonth' || !meter.meterReadingDataApplication) {
       //used as default
-      return this.calanderizeMeterDataFullMonth(meter, meterData, energyIsSource, monthDisplayShort);
+      return this.calanderizeMeterDataFullMonth(meter, meterData, energyIsSource, calanderizedEnergyUnit, monthDisplayShort);
     } else if (meter.meterReadingDataApplication == 'backward') {
-      return this.calanderizeMeterDataBackwards(meter, meterData, energyIsSource, monthDisplayShort);
+      return this.calanderizeMeterDataBackwards(meter, meterData, energyIsSource, calanderizedEnergyUnit, monthDisplayShort);
     }
   }
 
   //calanderize backwards
-  calanderizeMeterDataBackwards(meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData>, energyIsSource: boolean, monthDisplayShort?: boolean): Array<MonthlyData> {
+  calanderizeMeterDataBackwards(meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData>, energyIsSource: boolean, calanderizedEnergyUnit: string, monthDisplayShort?: boolean): Array<MonthlyData> {
     let calanderizeData: Array<MonthlyData> = new Array();
     let orderedMeterData: Array<IdbUtilityMeterData> = _.orderBy(meterData, (data) => { return new Date(data.readDate) });
     let startDate: Date = new Date(orderedMeterData[0].readDate);
@@ -184,7 +184,7 @@ export class CalanderizationService {
         energyUse: totals.totalEnergyUse,
         energyCost: totals.totalCost,
         date: new Date(year, month),
-        emissions: this.getEmissions(meter, totals.totalEnergyUse, meter.energyUnit, energyIsSource)
+        emissions: this.getEmissions(meter, totals.totalEnergyUse, calanderizedEnergyUnit, energyIsSource)
       });
       startDate.setUTCMonth(startDate.getUTCMonth() + 1);
     }
@@ -279,7 +279,7 @@ export class CalanderizationService {
   }
 
   //calanderize fullMonth
-  calanderizeMeterDataFullMonth(meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData>, energyIsSource: boolean, monthDisplayShort?: boolean): Array<MonthlyData> {
+  calanderizeMeterDataFullMonth(meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData>, energyIsSource: boolean, calanderizedEnergyUnit: string, monthDisplayShort?: boolean): Array<MonthlyData> {
     let calanderizeData: Array<MonthlyData> = new Array();
     let orderedMeterData: Array<IdbUtilityMeterData> = _.orderBy(meterData, (data) => { return new Date(data.readDate) });
     let startDate: Date = new Date(orderedMeterData[0].readDate);
@@ -333,7 +333,7 @@ export class CalanderizationService {
         energyUse: totalEnergyUse,
         energyCost: totalCost,
         date: new Date(year, month),
-        emissions: this.getEmissions(meter, totalEnergyUse, meter.energyUnit, energyIsSource)
+        emissions: this.getEmissions(meter, totalEnergyUse, calanderizedEnergyUnit, energyIsSource)
       });
       startDate.setUTCMonth(startDate.getUTCMonth() + 1);
     }
