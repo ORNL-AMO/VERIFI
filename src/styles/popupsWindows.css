@@ -40,8 +40,8 @@ Popups & Windows
     left: calc(50% - 400px);
   }
   .windowContentXLg {
-    width: 1000px;
-    left: calc(50% - 500px);
+    width: 90%;
+    left: 5%;
   }
   .windowContentScroll {
     overflow-y: scroll;
