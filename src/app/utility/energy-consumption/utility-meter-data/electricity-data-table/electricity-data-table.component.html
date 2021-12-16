@@ -7,7 +7,7 @@
             <th (click)="setOrderDataField('readDate')" [ngClass]="{'active': orderDataField == 'readDate'}"
                 class="row-year">Meter Read Date</th>
             <th (click)="setOrderDataField('totalEnergyUse')"
-                [ngClass]="{'active': orderDataField == 'totalEnergyUse'}">Total Energy (<span
+                [ngClass]="{'active': orderDataField == 'totalEnergyUse'}">Total Energy<br> (<span
                     [innerHTML]="energyUnit | settingsLabel"></span>)</th>
             <th *ngIf="showTotalDemand" (click)="setOrderDataField('totalDemand')"
                 [ngClass]="{'active': orderDataField == 'totalDemand'}">Total

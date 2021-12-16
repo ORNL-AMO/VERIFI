@@ -64,16 +64,16 @@
                                 <th (click)="setOrderDataField('energyConsumption')"
                                     [ngClass]="{'active': orderDataField == 'energyConsumption'}"
                                     *ngIf="meterData.showConsumption">
-                                    Total Consumption (<span
+                                    Total Consumption<br> (<span
                                         [innerHTML]="meterData.consumptionUnit | settingsLabel"></span>)</th>
                                 <th (click)="setOrderDataField('energyUse')"
                                     [ngClass]="{'active': orderDataField == 'energyUse'}"
                                     *ngIf="meterData.showEnergyUse">
-                                    Total Energy (<span [innerHTML]="meterData.energyUnit | settingsLabel"></span>)</th>
+                                    Total Energy<br> (<span [innerHTML]="meterData.energyUnit | settingsLabel"></span>)</th>
                                 <th (click)="setOrderDataField('emissions')"
                                     [ngClass]="{'active': orderDataField == 'emissions'}"
                                     *ngIf="meterData.showEmissions">
-                                    Total Emissions (kg CO<sub>2</sub>)
+                                    Total Emissions<br> (kg CO<sub>2</sub>)
                                 </th>
                                 <th (click)="setOrderDataField('energyCost')"
                                     [ngClass]="{'active': orderDataField == 'energyCost'}">Total Cost</th>
