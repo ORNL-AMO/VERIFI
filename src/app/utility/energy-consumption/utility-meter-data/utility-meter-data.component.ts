@@ -2,7 +2,7 @@ import { Component, OnInit, ElementRef, ViewChild, QueryList, ViewChildren } fro
 import { listAnimation } from '../../../animations';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { Subscription } from 'rxjs';
-import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData, MeterSource } from 'src/app/models/idb';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UtilityMeterDataService } from './utility-meter-data.service';
@@ -26,7 +26,9 @@ export class UtilityMeterDataComponent implements OnInit {
   meterList: Array<{
     idbMeter: IdbUtilityMeter,
     meterDataItems: Array<IdbUtilityMeterData>,
-    errorDate: Date
+    errorDate: Date,
+    warningDate: Date,
+    missingMonth: Date
   }>;
 
   itemsPerPage: number = 6;
@@ -40,7 +42,7 @@ export class UtilityMeterDataComponent implements OnInit {
   meterDataMenuOpen: number;
   showImport: boolean;
   addOrEdit: string;
-  selectedSource: string;
+  selectedSource: MeterSource;
   hasCheckedItems: boolean;
   meterDataToDelete: IdbUtilityMeterData;
   showDeleteModal: boolean = false;
@@ -108,15 +110,17 @@ export class UtilityMeterDataComponent implements OnInit {
     this.meterListHasData = false;
     this.meterList = new Array();
     this.utilityMeters.forEach(meter => {
-      let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataForFacility(meter, false);
+      let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataForFacility(meter, false, true);
       if (meterData.length != 0) {
         this.meterListHasData = true;
       }
-      let errorDate: Date = this.utilityMeterDataService.checkForErrors(meterData);
+      let checkDate: {error: Date, warning: Date, missingMonth: Date } = this.utilityMeterDataService.checkForErrors(meterData, meter);
       this.meterList.push({
         idbMeter: meter,
         meterDataItems: meterData,
-        errorDate: errorDate
+        errorDate: checkDate.error,
+        warningDate: checkDate.warning,
+        missingMonth: checkDate.missingMonth
       });
     });
     this.setHasCheckedItems();
@@ -163,7 +167,7 @@ export class UtilityMeterDataComponent implements OnInit {
       })
     });
     for (let index = 0; index < meterDataItemsToDelete.length; index++) {
-      await this.utilityMeterDataDbService.deleteWithObservable(meterDataItemsToDelete[index].id);
+      await this.utilityMeterDataDbService.deleteWithObservable(meterDataItemsToDelete[index].id).toPromise();
     }
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let accountMeterData: Array<IdbUtilityMeterData> = await this.utilityMeterDataDbService.getAllByIndexRange("accountId", selectedFacility.accountId).toPromise();
@@ -225,5 +229,15 @@ export class UtilityMeterDataComponent implements OnInit {
 
   cancelBulkDelete() {
     this.showBulkDelete = false;
+  }
+
+  ignoreSameMonth(meter: IdbUtilityMeter){
+    meter.ignoreDuplicateMonths = true;
+    this.utilityMeterDbService.update(meter);
+  }
+
+  ignoreMissingMonth(meter: IdbUtilityMeter){
+    meter.ignoreMissingMonths = true;
+    this.utilityMeterDbService.update(meter);
   }
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -25,6 +25,10 @@ export class SetupProgressComponent implements OnInit {
   progress: string;
   setupWizard: boolean;
   setupWizardComplete: boolean;
+  setupWizardMinimized: boolean;
+
+
+  @ViewChild('canvasElement', { static: false }) canvasElement: ElementRef;
 
   constructor(
     public accountdbService: AccountdbService,
@@ -36,7 +40,7 @@ export class SetupProgressComponent implements OnInit {
     this.router.events.subscribe(
       (event: any) => {
         if (event instanceof NavigationEnd && this.router.url === '/utility/energy-consumption') {
-          if(this.selectedAccount) {
+          if (this.selectedAccount) {
             this.selectedAccount.setupWizardComplete = true;
             this.accountdbService.update(this.selectedAccount);
           }
@@ -48,7 +52,7 @@ export class SetupProgressComponent implements OnInit {
   ngOnInit(): void {
     this.selectedAccountSub = this.accountdbService.selectedAccount.subscribe(selectedAccount => {
       this.selectedAccount = selectedAccount;
-      if(selectedAccount) {
+      if (selectedAccount) {
         this.setupWizard = selectedAccount.setupWizard;
         this.setupWizardComplete = selectedAccount.setupWizardComplete;
         this.updateProgress();
@@ -57,9 +61,7 @@ export class SetupProgressComponent implements OnInit {
 
     this.selectedFacilitySub = this.facilitydbService.selectedFacility.subscribe(selectedFacility => {
       this.selectedFacility = selectedFacility;
-      if(selectedFacility) {
-        this.updateProgress();
-      }
+      this.updateProgress();
     });
   }
 
@@ -67,14 +69,14 @@ export class SetupProgressComponent implements OnInit {
     this.selectedAccountSub.unsubscribe();
     this.selectedFacilitySub.unsubscribe();
   }
-
+  
   updateProgress() {
-    if(this.setupWizard) {
-      if(this.selectedAccount && !this.selectedFacility && !this.setupWizardComplete) {
+    if (this.setupWizard) {
+      if (this.selectedAccount && !this.selectedFacility && !this.setupWizardComplete) {
         this.progress = '33%';
-      } else if(this.selectedAccount && this.selectedFacility && !this.setupWizardComplete) {
+      } else if (this.selectedAccount && this.selectedFacility && !this.setupWizardComplete) {
         this.progress = '66%';
-      } else if(this.selectedAccount && this.selectedFacility && this.setupWizardComplete) {
+      } else if (this.selectedAccount && this.selectedFacility && this.setupWizardComplete) {
         this.progress = '100%';
         setTimeout(() => { this.createConfetti(); }, 1000)
       }
@@ -82,15 +84,17 @@ export class SetupProgressComponent implements OnInit {
   }
 
   createConfetti() {
-    confetti.create()({
-      particleCount: 100,
-      spread: 70,
-      origin: { y: (1),x: (1) }
-    });
+    if (this.canvasElement) {
+      confetti.create(this.canvasElement.nativeElement)({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 1, x: 1 }
+      });
+    }
   }
 
   addFacility() {
-    if(!this.selectedFacility) {
+    if (!this.selectedFacility) {
       let newFacility: IdbFacility = this.facilitydbService.getNewIdbFacility(this.selectedAccount);
       this.facilitydbService.add(newFacility);
     }
@@ -104,5 +108,9 @@ export class SetupProgressComponent implements OnInit {
   closeSetupWizard() {
     this.selectedAccount.setupWizard = false;
     this.accountdbService.update(this.selectedAccount);
+  }
+
+  toggleWizard() {
+    this.setupWizardMinimized = !this.setupWizardMinimized;
   }
 }

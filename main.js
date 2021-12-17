@@ -81,7 +81,8 @@ app.on('ready', function () {
     var template = [{
         label: "Application",
         submenu: [
-            { label: "Quit", accelerator: "Command+Q", click: function () { app.quit(); } }
+            { label: "Quit", accelerator: "Command+Q", click: function () { app.quit(); } },
+            { label: "Dev Tools", accelerator: "CmdOrCtrl+I", click: function () { win.toggleDevTools(); } }
         ]
     }, {
         label: "Edit",

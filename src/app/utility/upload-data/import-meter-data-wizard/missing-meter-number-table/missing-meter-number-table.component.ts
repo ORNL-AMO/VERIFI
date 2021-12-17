@@ -57,7 +57,7 @@ export class MissingMeterNumberTableComponent implements OnInit {
     let hasSameMonthYear: boolean;
     let date: Date = new Date(this.invalidMissingMeter[updateIndex].readDate);
     for (let i = 0; i < updateIndex; i++) {
-      hasSameMonthYear = this.utilityMeterDataDbService.checkSameMonthYear(date, this.invalidMissingMeter[i]);
+      hasSameMonthYear = this.utilityMeterDataDbService.checkSameDate(date, this.invalidMissingMeter[i]);
       if (hasSameMonthYear) {
         break;
       }

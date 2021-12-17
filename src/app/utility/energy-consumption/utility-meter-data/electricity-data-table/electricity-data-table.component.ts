@@ -15,7 +15,9 @@ export class ElectricityDataTableComponent implements OnInit {
   meterListItem: {
     idbMeter: IdbUtilityMeter,
     meterDataItems: Array<IdbUtilityMeterData>,
-    errorDate: Date
+    errorDate: Date,
+    warningDate: Date,
+    missingMonth: Date
   };
   @Input()
   currentPageNumber: number;
@@ -108,13 +110,26 @@ export class ElectricityDataTableComponent implements OnInit {
     }
   }
 
-  checkError(readDate: Date): boolean {
+  checkError(readDate: Date): string {
+    let readDateItem: Date = new Date(readDate);
     if (this.meterListItem.errorDate) {
-      let readDateItem: Date = new Date(readDate);
-      if (readDateItem.getUTCFullYear() == this.meterListItem.errorDate.getUTCFullYear() && readDateItem.getUTCMonth() && this.meterListItem.errorDate.getUTCMonth()) {
-        return true;
+      if (readDateItem.getUTCFullYear() == this.meterListItem.errorDate.getUTCFullYear() && readDateItem.getUTCMonth() == this.meterListItem.errorDate.getUTCMonth() && readDateItem.getUTCDate() == this.meterListItem.errorDate.getUTCDate()) {
+        return 'alert-danger';
+      }
+    } else if (this.meterListItem.warningDate) {
+      if (readDateItem.getUTCFullYear() == this.meterListItem.warningDate.getUTCFullYear() && readDateItem.getUTCMonth() == this.meterListItem.warningDate.getUTCMonth()) {
+        return 'alert-warning';
+      }
+    } else if (this.meterListItem.missingMonth) {
+      let testDate1: Date = new Date(readDateItem.getUTCFullYear(), readDateItem.getUTCMonth() - 1);
+      let testDate2: Date = new Date(readDateItem.getUTCFullYear(), readDateItem.getUTCMonth() + 1);
+      if (testDate1.getUTCFullYear() == this.meterListItem.missingMonth.getUTCFullYear() && testDate1.getUTCMonth() == this.meterListItem.missingMonth.getUTCMonth()) {
+        return 'alert-warning';
+      }
+      if (testDate2.getUTCFullYear() == this.meterListItem.missingMonth.getUTCFullYear() && testDate2.getUTCMonth() == this.meterListItem.missingMonth.getUTCMonth()) {
+        return 'alert-warning';
       }
     }
-    return false;
+    return undefined;
   }
 }

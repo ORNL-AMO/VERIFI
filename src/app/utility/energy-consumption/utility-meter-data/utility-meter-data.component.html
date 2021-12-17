@@ -53,12 +53,22 @@
         [class.collapsed]="!meterListItem.idbMeter.visible">
         <div class="meterData">
 
-            <p class="section-name bold pointer" (click)="setToggleView(meterListItem.idbMeter)">
-                <i class="fa fa-caret-right" *ngIf="!meterListItem.idbMeter.visible"></i>
-                <i class="fa fa-caret-down" *ngIf="meterListItem.idbMeter.visible"></i>
-                {{meterListItem.idbMeter.name}}
+            <p class="section-name bold">
+                <span class="pointer" (click)="setToggleView(meterListItem.idbMeter)">
+                    <i class="fa fa-caret-right" *ngIf="!meterListItem.idbMeter.visible"></i>
+                    <i class="fa fa-caret-down" *ngIf="meterListItem.idbMeter.visible"></i>
+                    {{meterListItem.idbMeter.name}}
+                </span>
                 <span class="alert-danger" *ngIf="meterListItem.errorDate">
-                    {{meterListItem.errorDate  | date: 'MMM, y'}} has multiple data entries.
+                    {{meterListItem.errorDate | date}} has multiple data entries.
+                </span>
+                <span class="alert-warning" *ngIf="meterListItem.warningDate">
+                    {{meterListItem.warningDate | date:'MMM, y'}} has multiple data entries. <a
+                        (click)="ignoreSameMonth(meterListItem.idbMeter)">Ignore <b>duplicate</b> months for this meter</a>
+                </span>
+                <span class="alert-warning" *ngIf="meterListItem.missingMonth">
+                    {{meterListItem.missingMonth | date:'MMMM, y'}} is missing a data entry. <a
+                        (click)="ignoreMissingMonth(meterListItem.idbMeter)">Ignore <b>missing</b> months this meter</a>
                 </span>
             </p>
             <p *ngIf="meterListItem.idbMeter.visible">{{meterListItem.idbMeter.notes}}</p>
@@ -94,7 +104,7 @@
 
 <div class="window" [class.open]="editMeterData || addOrEdit == 'add'">
     <div class="windowOverlay"></div>
-    <div class="windowContent windowContentLg" *ngIf="(editMeterData || addOrEdit == 'add')">
+    <div class="windowContent windowContentXLg" *ngIf="(editMeterData || addOrEdit == 'add')">
         <h4 *ngIf="addOrEdit == 'add'">Add {{selectedMeter.source}} Bill</h4>
         <h4 *ngIf="addOrEdit == 'edit'">Edit {{selectedSource}} Bill</h4>
         <div class="row" *ngIf="addOrEdit == 'add'">

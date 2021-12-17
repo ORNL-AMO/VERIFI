@@ -15,7 +15,7 @@ export class FacilityOverviewComponent implements OnInit {
   utilityMeterDataSub: Subscription;
 
   graphDisplaySub: Subscription;
-  chartsLabel: "Costs" | "Usage";
+  chartsLabel: "Costs" | "Usage" | "Emissions";
   heatMapShown: boolean = false;
   stackedAreaShown: boolean = true;
   barChartShown: boolean = true;
@@ -31,6 +31,8 @@ export class FacilityOverviewComponent implements OnInit {
         this.chartsLabel = "Costs";
       } else if (value == "usage") {
         this.chartsLabel = "Usage";
+      } else if (value == "emissions") {
+        this.chartsLabel = "Emissions";
       }
     })
   }
@@ -44,11 +46,11 @@ export class FacilityOverviewComponent implements OnInit {
     this.heatMapShown = !this.heatMapShown;
   }
 
-  toggleStackedArea(){
+  toggleStackedArea() {
     this.stackedAreaShown = !this.stackedAreaShown;
   }
 
-  toggleBarChart(){
+  toggleBarChart() {
     this.barChartShown = !this.barChartShown;
   }
 }

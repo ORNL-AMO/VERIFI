@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbUtilityMeter, IdbUtilityMeterData, MeterSource } from 'src/app/models/idb';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 import { UtilityMeterDataService } from '../utility-meter-data.service';
 
@@ -22,7 +22,7 @@ export class EditUtilityBillComponent implements OnInit {
   meterDataForm: FormGroup;
 
   energyUnit: string;
-  source: string;
+  source: MeterSource;
   facilityMeter: IdbUtilityMeter;
   displayVolumeInput: boolean;
   displayEnergyUse: boolean;
@@ -86,7 +86,7 @@ export class EditUtilityBillComponent implements OnInit {
       //edit meter needs to allow year/month combo of the meter being edited
       let currentMeterItemDate: Date = new Date(this.editMeterData.readDate);
       let changeDate: Date = new Date(this.meterDataForm.controls.readDate.value);
-      if (currentMeterItemDate.getUTCFullYear() == changeDate.getUTCFullYear() && currentMeterItemDate.getUTCMonth() && changeDate.getUTCMonth()) {
+      if (currentMeterItemDate.getUTCFullYear() == changeDate.getUTCFullYear() && currentMeterItemDate.getUTCMonth() == changeDate.getUTCMonth() && currentMeterItemDate.getUTCDate() == changeDate.getUTCDate()) {
         this.invalidDate = false;
       } else {
         this.invalidDate = this.utilityMeterDataDbService.checkMeterReadingExistForDate(this.meterDataForm.controls.readDate.value, this.facilityMeter) != undefined;

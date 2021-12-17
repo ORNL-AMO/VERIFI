@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
+import { NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idb';
@@ -16,7 +16,7 @@ export class HelpPanelComponent implements OnInit {
   selectedFacilitySub: Subscription;
   selectedFacility: IdbFacility;
   selectedFacilityName: string = 'Facility';
-  
+  showSiteToSourceOption: boolean;
   constructor(
     private router: Router,
     private facilityDbService: FacilitydbService,
@@ -45,7 +45,8 @@ export class HelpPanelComponent implements OnInit {
     this.facilityDbService.update(this.selectedFacility);
   }
 
-  getUrl(val) {
+  getUrl(val: string) {
+    this.showSiteToSourceOption = !val.includes('energy-consumption');
     this.helpText = val.replace('/utility/','');
     this.selectedSource = this.helpText.split('energy-consumption/')[1];
   }

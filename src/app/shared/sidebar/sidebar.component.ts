@@ -1,5 +1,6 @@
-import { Component, ElementRef, OnInit, Renderer2, isDevMode } from '@angular/core';
-import { Router, Event, NavigationEnd} from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { Router, Event } from '@angular/router';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-sidebar',
@@ -9,36 +10,54 @@ import { Router, Event, NavigationEnd} from '@angular/router';
 export class SidebarComponent implements OnInit {
   open: boolean;
   isDev: boolean;
+  isHovering: any;
+  openFromHover: boolean;
   constructor(
-    private renderer: Renderer2,
-    private eRef: ElementRef,
     private router: Router) {
 
-    router.events.subscribe( (event: Event) => {
-      if (event instanceof NavigationEnd) {
-        // Close sidebar on navigation
-        this.open = true;
-        this.toggleSidebar();
-      } else if (router.url.toString() === "/") {
+    router.events.subscribe((event: Event) => {
+      if (router.url.toString() === "/") {
         // Keep sidebar open if its the homepage
         this.open = false;
-        this.toggleSidebar();
+        this.toggleSidebar(true);
       }
     });
 
   }
 
   ngOnInit() {
-    this.isDev = isDevMode();
+    this.isDev = !environment.production;
   }
 
-  toggleSidebar() {
-    this.open = !this.open;
-    const action = this.open ? 'addClass' : 'removeClass';
-    this.renderer[action](document.body, 'open');
-    if (action === "removeClass") {
-      
+
+  hoverIn() {
+    if (!this.open) {
+      this.isHovering = setTimeout(() => {
+        this.openFromHover = true;
+        this.toggleSidebar(false);
+      }, 1000)
     }
+  }
+
+  hoverOut() {
+    if (this.isHovering) {
+      clearTimeout(this.isHovering);
+    }
+    if (this.openFromHover) {
+      this.toggleSidebar(false);
+    }
+  }
+
+
+  toggleSidebar(fromClick: boolean) {
+    if (fromClick) {
+      this.openFromHover = false;
+    }
+    if (this.isHovering) {
+      clearTimeout(this.isHovering);
+    }
+    this.open = !this.open;
+    window.dispatchEvent(new Event("resize"));
   }
 
 }

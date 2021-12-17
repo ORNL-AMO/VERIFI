@@ -1,0 +1,55 @@
+/*
+Arrows & Tooltips
+=============================================== */
+.tooltip {
+    opacity: 1 !important;
+    box-shadow: 1px 4px 10px 0px #0000003d;
+    background-color: #2980b9;
+    border: 1px solid #2f96da;
+    padding: 3px 10px;
+    border-radius: 4px;
+    color: white;
+  }
+  .tooltip.up {
+    box-shadow: 1px -4px 10px 0px #0000003d;
+  }
+  .tooltip.left {
+    box-shadow: -4px 1px 10px 0px #0000003d;
+  }
+  .tooltip.right {
+    box-shadow: 4px 1px 10px 0px #0000003d;
+  }
+  .arrow {
+    width: 0;
+    height: 0;
+    position: absolute;
+  }
+  .arrow-up {
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-bottom: 10px solid #2980b9;
+    top: -8px;
+    left: calc(50% - 10px);
+  }
+  .arrow-down {
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 10px solid #2980b9;
+    bottom: -8px;
+    left: calc(50% - 10px);
+  }
+  .arrow-right {
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-left: 10px solid #2980b9;
+    right: -8px;
+    top: calc(50% - 10px);
+  }
+  
+  .arrow-left {
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-right: 10px solid #2980b9;
+    left: -8px;
+    top: calc(50% - 10px);
+  }

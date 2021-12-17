@@ -1,29 +1,9 @@
 /*
 Sidebar
 =============================================== */
-#sidebar {
-    /*padding: 30px 30px;*/
-    padding: 90px 30px;
-    min-height: 100vh;
-    width: calc(120px - 50px);
-    position: fixed;
-    box-shadow: 2px 3px 5px 0px #77777759;
-    background-color: white;
-    transition: .2s width;
-}
-#sidebar  ul {
-    list-style: none;
-    margin: 0px;
-    padding: 0px;
-}
-#sidebar ul li {
-    padding: 7px 0;
-}
 .menuHeader {
     height: 22px;
-}
-.menuHeader hr{
-    margin: 0px;
+    padding-left: 2rem;
 }
 .menuHeader p {
     font-weight: bold;
@@ -32,10 +12,45 @@ Sidebar
 .active i {
     color: #ff6000;
 }
-i.fa.fa-home {
-    font-size: 1.5em;
-    margin-left: -2px;
+i.fa {    
+    font-size: 1.25rem;
+    width: 1.5rem;
 }
-.menuToggle {
+.nav-link{
+    padding-left: 2rem;
+}
+
+nav.sidebar.open{
+    width: 260px;
+}
+
+nav.sidebar{
+    width: 70px;
+    transition: .2s width;
+    box-shadow: 2px 3px 5px 0px #77777759;
+    height: 100%;
+}
+
+.nav-link .nav-label{
+    animation: fadeInAnimation .7s ease;
+}
+
+.open .nav-link span {
+    width: 100%;
+    transition: .6s width;
+}
+
+.nav-link span {
+    width: 0px;
+    transition: .6s width;
+}
+
+hr{
+    margin-right: 15px;
+    margin-left: 15px;
+}
+
+.nav-link:hover{
     cursor: pointer;
+    background-color: #efefef;
 }

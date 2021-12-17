@@ -57,6 +57,7 @@ export class ToastNotificationsComponent implements OnInit {
     this.showToast = 'hide';
     setTimeout(() => {
       this.destroyToast = true;
+      this.toastNotificationsService.disableNotification.next(false);
       this.toastNotificationsService.hideToast();
     }, 500);
   }
@@ -66,8 +67,8 @@ export class ToastNotificationsComponent implements OnInit {
     this.showToast = 'hide';
     setTimeout(() => {
       this.destroyToast = true;
+      this.toastNotificationsService.disableNotification.next(true);
       this.toastNotificationsService.hideToast();
-      //this.emitDisable.emit(true);
     }, 500);
   }
 }

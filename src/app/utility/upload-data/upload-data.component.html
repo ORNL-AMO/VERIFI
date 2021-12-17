@@ -1,9 +1,10 @@
 <div class="wrapper main-content">
     <h4>Import Data From .XLSX Files</h4>
     <div class="alert alert-info">
-        If you are importing data from multiple files for a single meter or predictor please import the files one at a
+        If you are importing data from multiple files for a single meter or predictor, please import the files one at a
         time.
     </div>
+    <hr>
     <input type="file" #importFile id="importFile" (input)="setImportFile($event.target.files)" multiple accept=".xlsx">
     <div *ngIf="filesUploaded">
         <hr>
@@ -23,7 +24,12 @@
                 </div>
             </div>
         </div>
-
+    </div>
+    <div class="data-template-div" *ngIf="!filesUploaded">
+        <hr>
+        <p>An excel tamplate can be used to make uploading your data easier, use this link to download the template:<br> <a
+                href="assets/csv_templates/VERIFI-Import-Data.xlsx">Download Data Template</a>
+        </p>
     </div>
 </div>
 

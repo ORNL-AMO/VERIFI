@@ -10,3 +10,11 @@
 .popup.open {
     transform: scale(1);
 }
+
+.alert-warning, .alert-error{
+    text-transform: none;
+    font-weight: normal;
+}
+a b{
+    color: #007bff !important;
+}

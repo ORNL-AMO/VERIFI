@@ -7,14 +7,15 @@
       [ngClass]="{'error': invalidDate}">
   </div>
   <span class="inputError" *ngIf="meterDataForm.get('readDate').hasError('required')">Meter read date is required</span>
-  <span class="inputError" *ngIf="invalidDate">Meter already has data entered for selected month</span>
+  <span class="inputError" *ngIf="invalidDate">Meter already has data entered for selected date</span>
 
   <div class="row">
-    <div *ngIf="displayVolumeInput" class="col">
+    <div *ngIf="displayVolumeInput" class="col-md-6 col-sm-12">
       <label for="totalVolume">Total Volume <span class="required">*</span> </label>
       <div class="input-group mb-3">
         <input id="totalVolume" class="form-control" type="number" formControlName="totalVolume"
-          (input)="calculateTotalEnergyUse()" [class.warning]="meterDataForm.controls.totalVolume.value === 0" onfocus="this.select();">
+          (input)="calculateTotalEnergyUse()" [class.warning]="meterDataForm.controls.totalVolume.value === 0" onfocus="this.select();" 
+          min="0" max ="999999999999999">
         <span class="unit" [innerHTML]="volumeUnit | settingsLabel"></span>
       </div>
       <span class="inputError" *ngIf="meterDataForm.get('totalVolume').hasError('required')">Total volume use is
@@ -24,10 +25,11 @@
         than 0</span>
     </div>
 
-    <div *ngIf="displayEnergyUse" class="col">
+    <div *ngIf="displayEnergyUse" class="col-md-6 col-sm-12">
       <label for="totalEnergyUse">Total Energy Use <span class="required">*</span></label>
       <div class="input-group mb-3">
-        <input id="totalEnergyUse" class="form-control" type="number" formControlName="totalEnergyUse" onfocus="this.select();">
+        <input id="totalEnergyUse" class="form-control" type="number" formControlName="totalEnergyUse" onfocus="this.select();"
+        min="0" max ="999999999999999">
         <span class="unit" [innerHTML]="energyUnit | settingsLabel"></span>
       </div>
       <span class="inputError" *ngIf="meterDataForm.get('totalEnergyUse').hasError('required')">Total energy use is
@@ -38,9 +40,10 @@
     </div>
   </div>
 
-  <label for="totalCost">Total Cost <span class="required">*</span></label>
+  <label for="totalCost">Total Cost</label>
   <div class="input-group mb-3">
-    <input id="totalCost" class="form-control" type="number" formControlName="totalCost" onfocus="this.select();">
+    <input id="totalCost" class="form-control" type="number" formControlName="totalCost" onfocus="this.select();" 
+    min="0" max ="999999999999999">
     <span class="unit">$</span>
   </div>
   <span class="inputError" *ngIf="meterDataForm.get('totalCost').hasError('required')">Total cost is required</span>
@@ -51,19 +54,22 @@
 
   <label for="commodityCharge">Commodity Charge</label>
   <div class="input-group mb-3">
-    <input id="commodityCharge" class="form-control" type="number" formControlName="commodityCharge" onfocus="this.select();">
+    <input id="commodityCharge" class="form-control" type="number" formControlName="commodityCharge" onfocus="this.select();"
+    min="0" max ="999999999999999">
     <span class="unit">$</span>
   </div>
 
   <label for="deliveryCharge">Delivery Charges</label>
   <div class="input-group mb-3">
-    <input id="deliveryCharge" class="form-control" type="number" formControlName="deliveryCharge" onfocus="this.select();">
+    <input id="deliveryCharge" class="form-control" type="number" formControlName="deliveryCharge" onfocus="this.select();"
+    min="0" max ="999999999999999">
     <span class="unit">$</span>
   </div>
 
   <label for="otherCharge">Other Charges</label>
   <div class="input-group mb-3">
-    <input id="otherCharge" class="form-control" type="number" formControlName="otherCharge" onfocus="this.select();">
+    <input id="otherCharge" class="form-control" type="number" formControlName="otherCharge" onfocus="this.select();"
+    min="0" max ="999999999999999">
     <span class="unit">$</span>
   </div>
 </form>

@@ -5,3 +5,13 @@
 .import-meter th{
     width: 15%;
 }
+
+
+.data-template-div{
+    width: 100%;
+    text-align: center;
+}
+
+.data-template-div p, .data-template-div p a{
+    font-size: larger;
+}

@@ -97,3 +97,11 @@
 .cdk-drag-preview .fa-arrows-alt{
     color: black;
 }
+
+
+.map-columns-label{
+    color: inherit;
+    width: 100%;
+    text-align: center;
+    text-transform: none;
+}

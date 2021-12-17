@@ -29,6 +29,9 @@ export class AccountdbService {
         }
         let allAccounts: Array<IdbAccount> = await this.getAll().toPromise();
         this.allAccounts.next(allAccounts);
+        if(!localStorageAccountId){
+            this.setSelectedAccount(undefined);
+        }
     }
 
     setSelectedAccount(accountId: number) {
@@ -40,6 +43,8 @@ export class AccountdbService {
             let allAccounts: Array<IdbAccount> = this.allAccounts.getValue();
             if (allAccounts.length != 0) {
                 this.setSelectedAccount(allAccounts[0].id);
+            } else {
+                this.selectedAccount.next(undefined);
             }
         }
     }
@@ -63,13 +68,13 @@ export class AccountdbService {
     }
 
     add(account: IdbAccount): void {
-        this.dbService.add('accounts', account).subscribe(newAccountId => {
+        this.dbService.add('accounts', account).subscribe(newAccount => {
             this.setAllAccounts();
-            this.setSelectedAccount(newAccountId);
+            this.setSelectedAccount(newAccount.id);
         });
     }
 
-    addWithObservable(account: IdbAccount): Observable<any> {
+    addWithObservable(account: IdbAccount): Observable<IdbAccount> {
         return this.dbService.add('accounts', account);
     }
 
@@ -114,7 +119,9 @@ export class AccountdbService {
             country: '',
             address: '',
             size: 0,
-            naics: undefined,
+            naics1: undefined,
+            naics2: undefined,
+            naics3: undefined,
             notes: '',
             img: 'https://placehold.it/50x50',
             // id: undefined,            
@@ -128,10 +135,12 @@ export class AccountdbService {
                 energyReductionPercent: 0,
                 energyReductionBaselineYear: 0,
                 energyReductionTargetYear: 0,
+                energyIsAbsolute: true,
                 greenhouseReductionGoal: false,
                 greenhouseReductionPercent: 0,
                 greenhouseReductionBaselineYear: 0,
                 greenhouseReductionTargetYear: 0,
+                greenhouseIsAbsolute: true,
                 renewableEnergyGoal: false,
                 renewableEnergyPercent: 0,
                 renewableEnergyBaselineYear: 0,
@@ -140,10 +149,12 @@ export class AccountdbService {
                 wasteReductionPercent: 0,
                 wasteReductionBaselineYear: 0,
                 wasteReductionTargetYear: 0,
+                wasteIsAbsolute: true,
                 waterReductionGoal: false,
                 waterReductionPercent: 0,
                 waterReductionBaselineYear: 0,
                 waterReductionTargetYear: 0,
+                waterIsAbsolute: true
             },
             fiscalYear: 'calendarYear',
             fiscalYearMonth: 'January',

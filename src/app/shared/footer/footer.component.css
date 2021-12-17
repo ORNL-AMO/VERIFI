@@ -1,18 +1,27 @@
 /*
 Footer
 =============================================== */
-#footer {
+.footer {
     position: fixed;
     bottom: 0;
     width: 100%;
     background-color: white;
     border-top: 2px solid #eee;
 }
-#footer div {
-    text-align:right;
+.action-items {
+    float:right;
 }
-#footer p {
+p {
     display: inline-block;
     padding: 6px 10px;
     margin: 0;
+}
+
+p.clickable:hover{
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+button{
+    border: solid .1px;
 }

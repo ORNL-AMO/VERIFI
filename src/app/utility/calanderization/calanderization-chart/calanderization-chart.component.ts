@@ -1,7 +1,7 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
-
+import * as _ from 'lodash';
 @Component({
   selector: 'app-calanderization-chart',
   templateUrl: './calanderization-chart.component.html',
@@ -48,6 +48,9 @@ export class CalanderizationChartComponent implements OnInit {
       let y1overlay: string;
       let y2overlay: string = 'y';
 
+      let yAxisDtick: number;
+      let yAxis2Dtick: number;
+
       if(this.displayGraphCost == 'scatter'){
         costLine = { width: 5  }
       }
@@ -65,7 +68,7 @@ export class CalanderizationChartComponent implements OnInit {
 
       if (this.displayGraphEnergy) {
         let yData: Array<number>;
-        hoverformat = '$,.0f'
+        hoverformat = ',.0f'
         if (this.meterData.showConsumption) {
           // tickSuffix = " " + this.meterData.consumptionUnit;
           yAxisTitle = 'Utility Consumption (' + this.meterData.consumptionUnit + ')';
@@ -75,6 +78,10 @@ export class CalanderizationChartComponent implements OnInit {
           yAxisTitle = 'Utility Consumption (' + this.meterData.consumptionUnit + ')';
           yData = this.meterData.monthlyData.map(data => { return data.energyUse });
         }
+        // let min: number = _.min(yData);
+        let max: number = _.max(yData);
+        // let diff: number = max - min;
+        yAxisDtick = max / 5;
         traceData.push({
           x: this.meterData.monthlyData.map(data => { return data.date }),
           y: yData,
@@ -93,19 +100,26 @@ export class CalanderizationChartComponent implements OnInit {
 
 
       if (this.displayGraphCost) {
+        let yData: Array<number> = this.meterData.monthlyData.map(data => { return data.energyCost });
+        // let min: number = _.min(yData);
+        let max: number = _.max(yData);
+        // let diff: number = max - min;
+
         if (!this.displayGraphEnergy) {
           // tickPrefix = "$";
-          hoverformat = ',.0f';
+          hoverformat = '$,.0f';
           yAxisTitle = 'Utility Cost';
+          yAxisDtick = max / 5;
         } else {
           // tickPrefix2 = "$";
-          hoverformat2 = ',.0f';
+          hoverformat2 = '$,.0f';
           yAxis2Title = 'Utility Cost';
+          yAxis2Dtick = max / 5;
         }
 
         traceData.push({
           x: this.meterData.monthlyData.map(data => { return data.date }),
-          y: this.meterData.monthlyData.map(data => { return data.energyCost }),
+          y: yData,
           name: 'Utility Cost',
           type: this.displayGraphCost,
           yaxis: yaxis,
@@ -139,7 +153,9 @@ export class CalanderizationChartComponent implements OnInit {
           // ticksuffix: tickSuffix,
           // tickprefix: tickPrefix,
           automargin: true,
-          overlaying: y1overlay
+          overlaying: y1overlay,
+          dtick: yAxisDtick,
+          rangemode: 'tozero'
         },
         yaxis2: {
           title: {
@@ -155,10 +171,16 @@ export class CalanderizationChartComponent implements OnInit {
           automargin: true,
           overlaying: y2overlay,
           side: 'right',
+          dtick: yAxis2Dtick,
+          rangemode: 'tozero'
         },
         margin: { r: 0, t: 50 }
       };
-      var config = { responsive: true };
+      var config = { 
+        responsive: true,
+        modeBarButtonsToRemove: ['autoScale2d', 'lasso2d', 'pan2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian', 'autoscale', 'zoom', 'zoomin', 'zoomout'],
+        displaylogo: false,
+      };
       this.plotlyService.newPlot(this.monthlyMeterDataChart.nativeElement, traceData, layout, config);
     }
   }

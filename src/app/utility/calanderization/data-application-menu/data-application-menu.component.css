@@ -1,0 +1,58 @@
+.custom-day {      
+    text-align: center;
+    padding: 0.185rem 0.25rem;
+    border-radius: 1rem;
+    display: inline-block;
+    width: 2rem;
+    color: white;
+}
+
+.ngb-dp-month-name{
+  background-color: white;
+}
+
+
+.calanderization-label{
+  font-size: 18px;
+}
+
+
+.highlighted-date{
+  box-shadow: 2px 2px 2px 2px grey
+}
+
+table.table tbody tr:nth-child(even){
+  background-color: white;
+}
+
+.calanderized-months tbody tr:hover{
+  border: solid; 
+}
+
+.month-one{
+  background-color: #D2B4DE;
+}
+
+.month-two{
+  background-color: lightgreen;
+
+}
+
+.month-three{
+  background-color: #F0B27A;
+
+}
+
+.month-four{
+  background-color: lightblue;
+}
+
+
+.table-col{
+  overflow-x: auto;
+}
+
+.table-mh th{
+  background-color: inherit;
+  color: black;
+}

@@ -1,0 +1,162 @@
+/*
+Forms
+=============================================== */
+input,
+textarea {
+  background-color: #fff;
+  border: #9c9c9c solid 1px;
+  border-radius: 0px;
+  padding: 2px 7px;
+  outline: none;
+}
+input[type="checkbox"].rowToggle,
+input[type="radio"].rowToggle {
+  float: left;
+  width: auto;
+  margin: 3px 10px;
+  height: 15px;
+  width: 15px;
+}
+input[type="file"] {
+  border: none;
+  background-color: #eee;
+  padding: 10px;
+  width: 100%;
+}
+label {
+  width: 100%;
+}
+label.checkbox {
+  display: block;
+  margin-left: 10px;
+  width: 100%;
+  margin-top: 0px;
+}
+label.checkbox + .row {
+  margin: 10px 23px 15px;
+}
+.popup label {
+  position: relative;
+  width: 100%;
+  padding-left: 15px;
+}
+.popup label label {
+  width: 100%;
+}
+label input,
+label textarea,
+label select {
+  float: right;
+  width: 70%;
+}
+label:hover,
+.hover {
+  background-color: #f7f7f7;
+}
+input:disabled {
+  border: none;
+}
+label .row {
+  width: 68%;
+  float: right;
+}
+label .col input {
+  width: 100%;
+}
+label .row .col:nth-child(3) {
+  padding-left: 10px !important;
+}
+label label {
+  padding-left: 20px;
+}
+label a {
+  position: absolute;
+  right: -37px;
+  font-size: 12px;
+  top: 5px;
+}
+span.unit {
+  /*float: right;
+  display: block;*/
+  border: 1px solid #9b9b9b;
+  border-left: none;
+  padding: 2px 5px;
+  color: #909090;
+}
+.input-group input:nth-child(3) {
+  border-left: 0px!important;
+}
+.input-group span[hidden] + input {
+  border-left: 1px solid #9c9c9c!important;
+}
+.form-control {
+  display: block;
+  width: 100%;
+  height: initial!important;
+  padding: 2px 7px!important;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #495057;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid #9c9c9c!important;
+  border-radius: 0!important;
+  transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+textarea {
+  width: 100%;
+}
+input.warning {
+  outline: 2px solid #f39c1196 !important;
+  outline-offset: 0;
+  background-color: #f39c1114;
+  border: 1px solid white !important;
+}
+input.error,
+input.ng-invalid,
+select.ng-invalid {
+  outline: 2px solid #bf3d00c4 !important;
+  outline-offset: 0;
+  background-color: #bf3d001c;
+  border: 1px solid #fff !important;
+}
+input:active,
+input:focus,
+input.active {
+  outline: 2px solid #2980b95e !important;
+  outline-offset: 0;
+  border: 1px solid white !important;
+}
+input:disabled {
+  border: 1px solid #d0d0d0;
+  background-color: #eeeeee;
+  color: #585858;
+}
+.required input {
+  padding-right: 16px;
+}
+.required span {
+  position: absolute;
+  right: 14px;
+  color: #bf2d00;
+  padding: 5px 7px 0 0;
+}
+select {
+  padding: 3px;
+  border: 1px solid #9c9c9c;
+}
+form select {
+  max-width: 100%;
+  width: 100%;
+}
+.inputError,
+.inputWarning {
+  display: block;
+  margin: -10px 0 10px 0;
+  font-size: 12px;
+  color: #822900;
+}
+.inputWarning {
+  color: #a76c00;
+}

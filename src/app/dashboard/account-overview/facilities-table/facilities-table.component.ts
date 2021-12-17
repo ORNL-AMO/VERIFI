@@ -25,6 +25,7 @@ export class FacilitiesTableComponent implements OnInit {
     totalEnergyUse: undefined,
     totalEnergyCost: undefined,
     totalNumberOfMeters: undefined,
+    totalEmissions: undefined,
     allMetersLastBill: undefined
   };
   lastMonthsDate: Date;
@@ -65,7 +66,7 @@ export class FacilitiesTableComponent implements OnInit {
 
   selectFacility(facility: IdbFacility) {
     this.facilityDbService.selectedFacility.next(facility);
-    this.router.navigateByUrl('/facility-summary');
+    this.router.navigateByUrl('/home/facility-summary');
   }
 
   setAccountFacilities() {
@@ -82,6 +83,7 @@ export class FacilitiesTableComponent implements OnInit {
       totalEnergyUse: undefined,
       totalEnergyCost: undefined,
       totalNumberOfMeters: undefined,
+      totalEmissions: undefined,
       allMetersLastBill: undefined
     };
     this.lastMonthsDate = undefined;

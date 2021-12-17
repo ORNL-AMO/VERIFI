@@ -1,0 +1,30 @@
+/*
+Popovers (Contextual Help)
+=============================================== */
+.popover {
+    max-width: 1000px;
+  }
+  
+  .popover.right {
+    margin-left: 15px;
+  }
+  
+  .popover-title {
+    color: white;
+    background-color: #044976;
+  }
+  
+  .popover-lg {
+    width: 300px;
+    height: 300px;
+  }
+  
+  .popover-md {
+    width: 150px;
+    height: 150px;
+  }
+  
+  .popover-sm {
+    width: 75px;
+    height: 75px;
+  }

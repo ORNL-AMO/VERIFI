@@ -1,3 +1,4 @@
+import { CalanderizedMeter, MonthlyData } from './calanderization';
 import { ElectricityDataFilters } from './electricityFilter';
 import { SustainabilityQuestions } from './sustainabilityQuestions';
 
@@ -11,7 +12,9 @@ export interface IdbAccount {
     zip: string,
     address: string,
     size?: number,
-    naics: number,
+    naics1: number,
+    naics2: number,
+    naics3: number,
     notes: string,
     img: string
     unitsOfMeasure: string,
@@ -26,7 +29,12 @@ export interface IdbAccount {
     setupWizard: boolean,
     setupWizardComplete: boolean,
     numberOfFacilities?: string,
-    energyIsSource: boolean
+    energyIsSource: boolean,
+    lastBackup?: Date,
+    emissionsOutputRate?: number,
+    eGridSubregion?: string,
+    customEmissionsRate?: boolean,
+    color?: string
 }
 
 export interface IdbFacility {
@@ -40,7 +48,9 @@ export interface IdbFacility {
     state: string,
     zip: string,
     address: string,
-    naics: number,
+    naics1: number,
+    naics2: number,
+    naics3: number,
     type?: string,
     size?: number,
     units?: string,
@@ -58,7 +68,11 @@ export interface IdbFacility {
     fiscalYear: string,
     fiscalYearMonth: string,
     fiscalYearCalendarEnd: boolean,
-    energyIsSource: boolean
+    energyIsSource: boolean,
+    emissionsOutputRate?: number,
+    eGridSubregion?: string,
+    customEmissionsRate?: boolean
+    color?: string
 }
 
 export interface IdbUtilityMeterGroup {
@@ -75,6 +89,7 @@ export interface IdbUtilityMeterGroup {
     totalEnergyUse?: number,
     totalConsumption?: number,
     groupData?: Array<IdbUtilityMeter>,
+    combinedMonthlyData?: Array<MonthlyData>,
     visible?: boolean
 }
 
@@ -87,22 +102,27 @@ export interface IdbUtilityMeter {
     //data
     meterNumber: string,
     accountNumber: number,
-    phase?: string,
+    phase?: MeterPhase,
     heatCapacity?: number,
     siteToSource: number,
     name: string,
     location?: string,
     supplier: string,
     notes?: string,
-    source: string,
+    source: MeterSource,
     //group = groupName
     group: string
 
     startingUnit: string,
     energyUnit: string,
-    fuel?:string
+    fuel?: string
     visible?: boolean
     importWizardName?: string
+    meterReadingDataApplication?: "backward" | "fullMonth",
+    emissionsOutputRate?: number,
+    unitsDifferent?: boolean,
+    ignoreDuplicateMonths?: boolean,
+    ignoreMissingMonths?: boolean
 }
 
 export interface IdbUtilityMeterData {
@@ -168,3 +188,6 @@ export interface PredictorData {
     importWizardName?: string
 }
 
+
+export type MeterSource = "Electricity" | "Natural Gas" | "Other Fuels" | "Other Energy" | "Water" | "Waste Water" | "Other Utility";
+export type MeterPhase = "Solid" | "Liquid" | "Gas";

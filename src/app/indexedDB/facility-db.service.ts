@@ -64,13 +64,19 @@ export class FacilitydbService {
         if (selectedFacility) {
             let updatedFacility: IdbFacility = accountFacilities.find(facility => { return facility.id == selectedFacility.id });
             if (!updatedFacility) {
-                this.selectedFacility.next(accountFacilities[0]);
+                if (accountFacilities.length != 0) {
+                    this.selectedFacility.next(accountFacilities[0]);
+                } else {
+                    this.selectedFacility.next(undefined);
+                }
             } else {
                 this.selectedFacility.next(updatedFacility);
             }
         }
-        else {
+        else if (accountFacilities.length != 0) {
             this.selectedFacility.next(accountFacilities[0]);
+        } else {
+            this.selectedFacility.next(undefined);
         }
     }
 
@@ -109,7 +115,7 @@ export class FacilitydbService {
         });
     }
 
-    addWithObservable(facility: IdbFacility): Observable<any> {
+    addWithObservable(facility: IdbFacility): Observable<IdbFacility> {
         return this.dbService.add('facilities', facility);
     }
 
@@ -150,7 +156,9 @@ export class FacilitydbService {
             state: undefined,
             zip: undefined,
             address: undefined,
-            naics: undefined,
+            naics1: undefined,
+            naics2: undefined,
+            naics3: undefined,
             type: undefined,
             size: undefined,
             units: undefined,
@@ -167,10 +175,12 @@ export class FacilitydbService {
                 energyReductionPercent: 0,
                 energyReductionBaselineYear: 0,
                 energyReductionTargetYear: 0,
+                energyIsAbsolute: true,
                 greenhouseReductionGoal: false,
                 greenhouseReductionPercent: 0,
                 greenhouseReductionBaselineYear: 0,
                 greenhouseReductionTargetYear: 0,
+                greenhouseIsAbsolute: true,
                 renewableEnergyGoal: false,
                 renewableEnergyPercent: 0,
                 renewableEnergyBaselineYear: 0,
@@ -179,10 +189,12 @@ export class FacilitydbService {
                 wasteReductionPercent: 0,
                 wasteReductionBaselineYear: 0,
                 wasteReductionTargetYear: 0,
+                wasteIsAbsolute: true,
                 waterReductionGoal: false,
                 waterReductionPercent: 0,
                 waterReductionBaselineYear: 0,
                 waterReductionTargetYear: 0,
+                waterIsAbsolute: true
             },
             fiscalYear: 'calendarYear',
             fiscalYearMonth: 'January',

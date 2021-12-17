@@ -2,15 +2,11 @@
     <app-worksheet-data-table [columnGroups]="columnGroups"></app-worksheet-data-table>
 </div>
 <hr>
-<!-- <label for="dataOrientation">
-    Are meters entered as rows or columns?
-</label> -->
-<!-- <select class="form-control" name="dataOrientation" [(ngModel)]="dataOrientation" (change)="setDataOrientation()">
-    <option [ngValue]="'column'">Columns</option>
-    <!-- <option [ngValue]="'row'">Rows</option> --
-</select> -->
-<hr>
-<h6>Map the data columns</h6>
+<h6 class="map-columns-label">Map the data columns from the excel file to the appropriate data type. <br>
+    Column headers will be used to create meters or predictors.<br>
+    Row data will be used as data entries associated with the corresponding date column and meter or predictor.<br>
+    Please use site energy data when possible.
+</h6>
 <div class="row no-gutters" *ngIf="dataOrientation == 'column'">
     <div cdkDropList [cdkDropListData]="columnGroups" class="card col-md-3 col-sm-6"
         *ngFor="let columnGroup of columnGroups" (cdkDropListDropped)="dropColumn($event)" id={{columnGroup.id}}

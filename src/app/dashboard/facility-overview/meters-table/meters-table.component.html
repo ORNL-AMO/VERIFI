@@ -1,16 +1,22 @@
+<p class="label">Facility Meters
+    <span class="pull-right" *ngIf="yearPriorDate">({{yearPriorDate | date: 'MMM, y'}} -
+        {{lastMonthsDate | date: 'MMM, y'}})</span>
+
+</p>
 <div class="table-responsive">
     <table class="table table-sm" *ngIf="facilityMeterSummaryData">
         <thead>
             <tr>
-                <th>Meter</th>
-                <th>Utility</th>
-                <th>Group</th>
-                <th>Last Bill Entered</th>
-                <th>Utility Usage (<span [innerHTML]="facilityEnergyUnit | settingsLabel"></span>) <span class="small"
-                        *ngIf="yearPriorDate">({{yearPriorDate | date: 'MMM, y'}} - {{lastMonthsDate | date: 'MMM,
-                        y'}})</span></th>
-                <th>Utility Cost <span class="small" *ngIf="yearPriorDate">({{yearPriorDate | date: 'MMM, y'}} -
-                        {{lastMonthsDate | date: 'MMM, y'}})</span></th>
+                <th class="w-1">Meter</th>
+                <th class="w-1">Utility</th>
+                <th class="w-1">Group</th>
+                <th class="w-1">Last Bill Entered</th>
+                <th class="w-2">Utility Usage (<span [innerHTML]="facilityEnergyUnit | settingsLabel"></span>)
+                </th>
+                <th class="w-2">Utility Cost
+                <th class="w-2">
+                    Emissions (kg CO<sub>2</sub>)
+                </th>
             </tr>
         </thead>
         <tbody>
@@ -29,10 +35,13 @@
                     <span *ngIf="!summary.lastBillDate">&mdash;</span>
                 </td>
                 <td>
-                    {{summary.energyUsage | number:'1.0-0'}}
+                    {{summary.energyUsage | customNumber}}
                 </td>
                 <td>
-                    {{summary.energyCost | currency : 'USD' : 'symbol' : '1.0-0' }}
+                    {{summary.energyCost | customNumber:true }}
+                </td>
+                <td>
+                    {{summary.emissions |customNumber }}
                 </td>
             </tr>
         </tbody>
@@ -48,10 +57,13 @@
                 <th>
                 </th>
                 <th>
-                    {{facilityMeterSummaryData.totalEnergyUse | number:'1.0-0'}}
+                    {{facilityMeterSummaryData.totalEnergyUse | customNumber}}
                 </th>
                 <th>
-                    {{facilityMeterSummaryData.totalEnergyCost | currency : 'USD' : 'symbol' : '1.0-0' }}
+                    {{facilityMeterSummaryData.totalEnergyCost | customNumber:true }}
+                </th>
+                <th>
+                    {{facilityMeterSummaryData.totalEmissions | customNumber }}
                 </th>
             </tr>
         </tfoot>

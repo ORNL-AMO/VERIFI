@@ -55,6 +55,8 @@ export class BackupDataService {
 
   getAccountBackup(): AccountBackup {
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    account.lastBackup = new Date();
+    this.accountDbService.update(account);
     let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
 
     let facilitiesBackups: Array<FacilityBackup> = new Array();
@@ -108,12 +110,12 @@ export class BackupDataService {
     this.loadingService.setLoadingMessage('Adding account..');
     //add account
     delete accountBackup.account.id;
-    let accountId: number = await this.accountDbService.addWithObservable(accountBackup.account).toPromise();
+    let account: IdbAccount = await this.accountDbService.addWithObservable(accountBackup.account).toPromise();
     //add facilities
     for (let i = 0; i < accountBackup.facilities.length; i++) {
-      await this.importFacilityBackup(accountBackup.facilities[i], accountId);
+      await this.importFacilityBackup(accountBackup.facilities[i], account.id);
     }
-    let newBackupAccount: IdbAccount = await this.accountDbService.getById(accountId).toPromise();
+    let newBackupAccount: IdbAccount = await this.accountDbService.getById(account.id).toPromise();
     return newBackupAccount;
   }
 
@@ -122,20 +124,20 @@ export class BackupDataService {
     //add facility
     delete facilityBackup.facility.id;
     facilityBackup.facility.accountId = accountId;
-    let facilityId: number = await this.facilityDbService.addWithObservable(facilityBackup.facility).toPromise();
+    let facility: IdbFacility = await this.facilityDbService.addWithObservable(facilityBackup.facility).toPromise();
     //add meters
     for (let meterIndex = 0; meterIndex < facilityBackup.meters.length; meterIndex++) {
-      await this.importMeterBackup(facilityBackup.meters[meterIndex], accountId, facilityId);
+      await this.importMeterBackup(facilityBackup.meters[meterIndex], accountId, facility.id);
     }
     //add predictors
     this.loadingService.setLoadingMessage('Adding predictor data..');
     for (let predictorIndex = 0; predictorIndex < facilityBackup.predictors.length; predictorIndex++) {
       delete facilityBackup.predictors[predictorIndex].id;
       facilityBackup.predictors[predictorIndex].accountId = accountId;
-      facilityBackup.predictors[predictorIndex].facilityId = facilityId;
+      facilityBackup.predictors[predictorIndex].facilityId = facility.id;
       await this.predictorsDbService.addWithObservable(facilityBackup.predictors[predictorIndex]).toPromise();
     }
-    let newFacility: IdbFacility = await this.facilityDbService.getById(facilityId).toPromise();
+    let newFacility: IdbFacility = await this.facilityDbService.getById(facility.id).toPromise();
     return newFacility;
   }
 
@@ -152,8 +154,8 @@ export class BackupDataService {
         delete meterBackup.meterGroup.id;
         meterBackup.meterGroup.facilityId = facilityId;
         meterBackup.meterGroup.accountId = accountId;
-        let newGroupId: number = await this.utilityMeterGroupDbService.addWithObservable(meterBackup.meterGroup).toPromise();
-        meterBackup.meter.groupId = newGroupId;
+        let newMeterGroup: IdbUtilityMeterGroup = await this.utilityMeterGroupDbService.addWithObservable(meterBackup.meterGroup).toPromise();
+        meterBackup.meter.groupId = newMeterGroup.id;
       }
     }
     this.loadingService.setLoadingMessage('Adding meter..');
@@ -161,13 +163,13 @@ export class BackupDataService {
     delete meterBackup.meter.id;
     meterBackup.meter.accountId = accountId;
     meterBackup.meter.facilityId = facilityId;
-    let meterId: number = await this.utilityMeterDbService.addWithObservable(meterBackup.meter).toPromise();
+    let newMeter: IdbUtilityMeter = await this.utilityMeterDbService.addWithObservable(meterBackup.meter).toPromise();
 
     this.loadingService.setLoadingMessage('Adding meter data..');
     //add meter data
     for (let meterDataIndex = 0; meterDataIndex < meterBackup.meterData.length; meterDataIndex++) {
       delete meterBackup.meterData[meterDataIndex].id;
-      meterBackup.meterData[meterDataIndex].meterId = meterId;
+      meterBackup.meterData[meterDataIndex].meterId = newMeter.id;
       meterBackup.meterData[meterDataIndex].accountId = accountId;
       meterBackup.meterData[meterDataIndex].facilityId = facilityId;
       await this.uilityMeterDataDbService.addWithObservable(meterBackup.meterData[meterDataIndex]).toPromise()

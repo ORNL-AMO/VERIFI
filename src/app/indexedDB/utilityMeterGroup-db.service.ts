@@ -90,7 +90,7 @@ export class UtilityMeterGroupdbService {
         });
     }
 
-    addWithObservable(utilityMeterGroup: IdbUtilityMeterGroup): Observable<number> {
+    addWithObservable(utilityMeterGroup: IdbUtilityMeterGroup): Observable<IdbUtilityMeterGroup> {
         return this.dbService.add('utilityMeterGroups', utilityMeterGroup);
     }
 

@@ -28,13 +28,15 @@ export class HeaderComponent implements OnInit {
   facilityList: Array<IdbFacility>;
   activeAccount: IdbAccount;
   activeFacility: IdbFacility;
-  viewingAccountManagementPage: boolean;
+  viewingAccountPage: boolean;
 
   allAccountsSub: Subscription;
   selectedAccountSub: Subscription;
   allFacilitiesSub: Subscription;
   accountFacilitiesSub: Subscription;
   selectedFacilitySub: Subscription;
+
+  showImportFile: boolean = false;
 
   constructor(
     private eRef: ElementRef,
@@ -52,11 +54,10 @@ export class HeaderComponent implements OnInit {
         this.accountMenu = false;
         this.facilityMenu = false;
       }
-      if (event instanceof NavigationEnd && this.router.url === '/account-management') {
-        this.viewingAccountManagementPage = true;
-      }
-      if (event instanceof NavigationEnd && this.router.url != '/account-management') {
-        this.viewingAccountManagementPage = false;
+
+      // Displays "All Facilities" if viewing an account page
+      if (event instanceof NavigationEnd) {
+        this.checkIfAccountPage();
       }
     });
   }
@@ -148,7 +149,7 @@ export class HeaderComponent implements OnInit {
   }
 
   selectAllFacilities() {
-    this.router.navigate(['/account-summary']);
+    this.router.navigate(['/home/account-summary']);
     this.facilityMenu = false;
     this.dashboardService.bannerDropdownOpen.next(false);
   }
@@ -171,6 +172,24 @@ export class HeaderComponent implements OnInit {
       return count + ' Facilities';
     }else{
       return count + ' Facility';
+    }
+  }
+
+  openImportBackup() {
+    this.showImportFile = true;
+    this.switchAccountMenu = false;
+  }
+
+  cancelImportBackup() {
+    this.showImportFile = false;
+  }
+
+  checkIfAccountPage() {
+    if (this.router.url === '/account-management' || this.router.url === '/home/account-summary') {
+      this.viewingAccountPage = true;
+    }
+    if (this.router.url != '/account-management' && this.router.url != '/home/account-summary') {
+      this.viewingAccountPage = false;
     }
   }
 

@@ -1,0 +1,28 @@
+<div class="d-flex bg-white h-100 ml-2">
+    <div class="d-flex flex-wrap flex-column pl-2 pr-2 border-left">
+        <div class="mt-2">
+            <select class="form-control" [(ngModel)]="meterDataOption" (change)="saveDataOption()">
+                <option [ngValue]="'meters'">Meters</option>
+                <option [ngValue]="'groups'">Groups</option>
+            </select>
+        </div>
+        <div class="w-100 p-1 border-bottom"></div>
+        <div *ngIf="meterDataOption == 'meters'">
+            <div *ngFor="let option of meterOptions; let index = index;">
+                <button class="btn w-100 mb-0 btn-sm btn-outline" [ngClass]="{'btn-primary-4': option.selected}"
+                    (click)="toggleMeterOption(index)">{{option.meter.name}}</button>
+            </div>
+        </div>
+        <div *ngIf="meterDataOption == 'groups'">
+            <div *ngFor="let option of meterGroupOptions; let index = index;">
+                <button class="btn w-100 mb-0 btn-sm btn-outline" [ngClass]="{'btn-primary-4': option.selected}"
+                    (click)="toggleMeterGroupOption(index)">{{option.meterGroup.name}}</button>
+            </div>
+        </div>
+        <div class="w-100 p-1 border-bottom"></div>
+        <div *ngFor="let option of predictorOptions; let index = index;">
+            <button class="btn w-100 mb-0 btn-sm btn-outline" [ngClass]="{'btn-primary-4': option.selected}"
+                (click)="togglePredictorOption(index)">{{option.predictor.name}}</button>
+        </div>
+    </div>
+</div>

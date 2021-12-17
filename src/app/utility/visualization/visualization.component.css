@@ -1,0 +1,19 @@
+.btn-primary-2 sup{
+    color: white !important;
+}
+
+
+.fa-arrow-right{
+    padding-top: 16px;
+    padding-right: .25rem;
+    padding-left: .25rem;
+}
+
+select.form-control{
+    height: min-content !important;
+    margin-top: 10px;
+}
+
+.border-bottom{
+    border-bottom-width: 5px !important;
+}

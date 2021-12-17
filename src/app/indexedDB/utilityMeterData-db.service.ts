@@ -86,7 +86,7 @@ export class UtilityMeterDatadbService {
         });
     }
 
-    addWithObservable(meterData: IdbUtilityMeterData): Observable<number> {
+    addWithObservable(meterData: IdbUtilityMeterData): Observable<IdbUtilityMeterData> {
         return this.dbService.add('utilityMeterData', meterData);
     }
 
@@ -195,14 +195,14 @@ export class UtilityMeterDatadbService {
         let newDate: Date = new Date(date);
         let allSelectedMeterData: Array<IdbUtilityMeterData> = this.getMeterDataForFacility(meter, false);
         let existingData: IdbUtilityMeterData = allSelectedMeterData.find(dataItem => {
-            return this.checkSameMonthYear(newDate, dataItem);
+            return this.checkSameDate(newDate, dataItem);
         });
         return existingData;
     }
 
-    checkSameMonthYear(date: Date, dataItem: IdbUtilityMeterData): boolean {
+    checkSameDate(date: Date, dataItem: IdbUtilityMeterData): boolean {
         let dataItemDate: Date = new Date(dataItem.readDate);
-        return (dataItemDate.getUTCMonth() == date.getUTCMonth()) && (dataItemDate.getUTCFullYear() == date.getUTCFullYear());
+        return (dataItemDate.getUTCMonth() == date.getUTCMonth()) && (dataItemDate.getUTCFullYear() == date.getUTCFullYear()) && (dataItemDate.getUTCDate() == date.getUTCDate());
     }
 
     private getMeterDataFromMeterId(meterId: number): Array<IdbUtilityMeterData> {
@@ -210,11 +210,11 @@ export class UtilityMeterDatadbService {
         return facilityMeterData.filter(meterData => { return meterData.meterId == meterId });
     }
 
-    getMeterDataForFacility(meter: IdbUtilityMeter, convertData: boolean): Array<IdbUtilityMeterData> {
+    getMeterDataForFacility(meter: IdbUtilityMeter, convertData: boolean, isMeterReadings?: boolean): Array<IdbUtilityMeterData> {
         let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
         let meterData: Array<IdbUtilityMeterData> = this.getMeterDataFromMeterId(meter.id);
         let meterDataCopy: Array<IdbUtilityMeterData> = JSON.parse(JSON.stringify(meterData));
-        if(facility.energyIsSource){
+        if(facility.energyIsSource && !isMeterReadings){
             meterDataCopy = this.convertMeterDataService.applySiteToSourceMultiplier(meter, meterDataCopy);
         }
         if (convertData) {

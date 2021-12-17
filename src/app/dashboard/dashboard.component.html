@@ -2,17 +2,21 @@
   <app-empty-state></app-empty-state>
 </div>
 
-<div *ngIf="(selectedAccount && facilityList.length > 0)">
-  <div class="banner">
+<div class="dashboard-container" *ngIf="(selectedAccount && facilityList.length > 0)">
+  <div class="banner d-flex w-100 justify-content-between">
     <h3 *ngIf="!isFacilityDashboard">Account Dashboard</h3>
     <h3 *ngIf="selectedFacility && isFacilityDashboard">Facility Dashboard</h3>
     <!--<button class="m-0 btn btn-outline item-right">Generate Report</button>-->
+    <h3>
+      <a *ngIf="!isFacilityDashboard" routerLink="/account-management"><span class="fa fa-cog"></span></a>
+      <a *ngIf="selectedFacility && isFacilityDashboard" routerLink="/facility-management"><span class="fa fa-cog"></span></a>
+    </h3>
   </div>
 
-  <div class="sticky-top" [ngClass]="{'banner-dropdown-open': bannerDropdownOpen}">
+  <div class="sticky-top banner-border" [ngClass]="{'banner-dropdown-open': bannerDropdownOpen}">
     <div class="breadcrumbs d-flex justify-content-between">
       <p>
-        <a routerLink="/account-summary"><i class="fa fa-home"></i>{{selectedAccount.name}}</a>
+        <a routerLink="/home/account-summary"><i class="fa fa-home"></i>{{selectedAccount.name}}</a>
         <i class="fa fa-angle-right"></i>
         <select [(ngModel)]="breadcrumbFacilityId" (change)="switchFacility()">
           <option [ngValue]="undefined">All Facilities
@@ -47,6 +51,8 @@
               [ngClass]="{'btn-outline': graphDisplay != 'usage'}">Utility Usage</button>
             <button class="btn btn-sm btn-selected m-0" (click)="setGraphDisplay('cost')"
               [ngClass]="{'btn-outline': graphDisplay != 'cost'}">Utility Cost</button>
+            <button class="btn btn-sm btn-selected m-0" (click)="setGraphDisplay('emissions')"
+              [ngClass]="{'btn-outline': graphDisplay != 'emissions'}">Emissions</button>
           </div>
         </div>
       </div>

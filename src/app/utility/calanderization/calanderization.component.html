@@ -1,10 +1,5 @@
 <div class="wrapper main-content">
     <h4>Monthly Meter Data</h4>
-    <div class="controls">
-        <!--Column Filters-->
-        <!-- <div class="filter item-left">
-            <button class="btn btn-small btn-solid">Filter</button>
-        </div> -->
 
     <div class="controls pb-0">
 
@@ -38,7 +33,7 @@
                 <button class="btn" [ngClass]="{'btn-solid-utility': displayGraphEnergy == 'scatter'}"
                     (click)="setDisplayGraphEnergy('scatter')"><span class="fa fa-line-chart"></span></button>
             </div>
-                  
+
             <span>Cost </span>
             <div class="btn-group pr-2 mr-2">
                 <button class="btn" [ngClass]="{'btn-solid-cost': displayGraphCost == 'bar'}"
@@ -69,39 +64,55 @@
                                 <th (click)="setOrderDataField('energyConsumption')"
                                     [ngClass]="{'active': orderDataField == 'energyConsumption'}"
                                     *ngIf="meterData.showConsumption">
-                                    Total Consumption (<span
+                                    Total Consumption<br> (<span
                                         [innerHTML]="meterData.consumptionUnit | settingsLabel"></span>)</th>
                                 <th (click)="setOrderDataField('energyUse')"
                                     [ngClass]="{'active': orderDataField == 'energyUse'}"
                                     *ngIf="meterData.showEnergyUse">
-                                    Total Energy (<span [innerHTML]="meterData.energyUnit | settingsLabel"></span>)</th>
+                                    Total Energy<br> (<span [innerHTML]="meterData.energyUnit | settingsLabel"></span>)</th>
+                                <th (click)="setOrderDataField('emissions')"
+                                    [ngClass]="{'active': orderDataField == 'emissions'}"
+                                    *ngIf="meterData.showEmissions">
+                                    Total Emissions<br> (kg CO<sub>2</sub>)
+                                </th>
                                 <th (click)="setOrderDataField('energyCost')"
                                     [ngClass]="{'active': orderDataField == 'energyCost'}">Total Cost</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody *ngIf="meterData.meter.meterReadingDataApplication">
                             <tr *ngFor="let data of meterData.monthlyData| orderBy: orderDataField: orderByDirection | slice: ((tablePageNumbers[index]-1) * itemsPerPage): tablePageNumbers[index] * itemsPerPage"
                                 [ngClass]="{'use-and-consumption': data.energyConsumption && data.energyUse}">
                                 <td>{{data.date | date: 'MMMM, y'}}</td>
                                 <td *ngIf="meterData.showConsumption">
-                                    <span *ngIf="data.energyConsumption">{{data.energyConsumption |
-                                        number:'1.0-2'}}</span>
+                                    <span *ngIf="data.energyConsumption">{{data.energyConsumption |customNumber}}</span>
                                     <span *ngIf="!data.energyConsumption">N/A</span>
                                 </td>
                                 <td *ngIf="meterData.showEnergyUse">
-                                    <span *ngIf="data.energyUse">{{data.energyUse | number:'1.0-2'}}</span>
+                                    <span *ngIf="data.energyUse">{{data.energyUse | customNumber}}</span>
                                     <span *ngIf="!data.energyUse">N/A</span>
                                 </td>
+                                <td *ngIf="meterData.showEmissions">
+                                    <span *ngIf="data.emissions">{{data.emissions | number:'1.0-0'}}</span>
+                                    <span *ngIf="!data.emissions">N/A</span>
+                                </td>
                                 <td>
-                                    <span *ngIf="data.energyCost">{{data.energyCost | currency}}</span>
+                                    <span *ngIf="data.energyCost">{{data.energyCost | customNumber:true}}</span>
                                     <span *ngIf="!data.energyCost">N/A</span>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
+                    <div class="p-2 text-center select-calanderization"
+                        *ngIf="!meterData.meter.meterReadingDataApplication">
+                        <button class="btn btn-primary" (click)="showDataApplicationModal(meterData.meter)">
+                            Select Calendarization Method
+                        </button>
+                        <hr>
+                    </div>
                 </div>
             </div>
-            <div class="tableControls overflow-hidden">
+            <div class="tableControls overflow-hidden" *ngIf="meterData.meter.meterReadingDataApplication">
+                <a (click)="showDataApplicationModal(meterData.meter)">Set Calendarization Method</a>
                 <div class="item-right">
                     <ngb-pagination [collectionSize]="meterData.monthlyData.length" [(page)]="tablePageNumbers[index]"
                         [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Default pagination">
@@ -115,8 +126,39 @@
     <div *ngIf="dataDisplay == 'graph'">
         <br><br>
         <div class="meter" *ngFor="let meterData of calanderizedMeterData; let index=index;">
-            <app-calanderization-chart [meterData]="meterData" [displayGraphEnergy]="displayGraphEnergy"
-                [displayGraphCost]="displayGraphCost"></app-calanderization-chart>
+            <app-calanderization-chart *ngIf="meterData.meter.meterReadingDataApplication" [meterData]="meterData"
+                [displayGraphEnergy]="displayGraphEnergy" [displayGraphCost]="displayGraphCost">
+            </app-calanderization-chart>
+            <div class="col table-responsive" *ngIf="!meterData.meter.meterReadingDataApplication">
+                <table class="table table-sm">
+                    <thead>
+                        <tr class="table-mh">
+                            <th colspan=5>{{meterData.meter.name}}
+                                <span class="item-right small">{{meterData.meter.source}}</span>
+                            </th>
+                        </tr>
+                    </thead>
+                </table>
+                <div class="p-2 text-center select-calanderization">
+                    <button class="btn btn-primary" (click)="showDataApplicationModal(meterData.meter)">
+                        Select Calendarization Method
+                    </button>
+                    <hr>
+                </div>
+            </div>
         </div>
+    </div>
+</div>
+<div class="popup calanderization" [class.open]="dataApplicationMeter">
+    <div class="popup-header" *ngIf="dataApplicationMeter">Select Calendarization Method:
+        {{dataApplicationMeter.name}}
+        <button class="item-right" (click)="cancelSetDataApplication()">x</button>
+    </div>
+    <div class="popup-body" *ngIf="dataApplicationMeter">
+        <app-data-application-menu [meter]="dataApplicationMeter"></app-data-application-menu>
+    </div>
+    <div class="saveCancel popup-footer text-right">
+        <button class="btn btn-secondary" (click)="cancelSetDataApplication()">Cancel</button>
+        <button class="btn btn-success" (click)="setDataApplication()">Submit</button>
     </div>
 </div>

@@ -1,0 +1,69 @@
+.toast.card {
+    position: fixed;
+    z-index: 800;
+    right: 15px;
+    min-width: 300px;
+    max-width: 500px;
+    background-color: #2d386b;
+    padding: 15px 20px;
+    opacity: .95;
+}
+
+.toast span,
+.toast p,
+.toast i,
+.toast button {
+    color: white;
+}
+
+.toast i {
+    font-size: 20px;
+    margin-top: 5px;
+}
+
+.toast-title {
+    font-size: 20px; 
+    margin-right: 20px;
+}
+
+.toast .body {
+    padding: 0px 0px 0px 25px;
+}
+.toast .footer a {
+    color: white!important;
+}
+.toast.success {
+    background-color: #145A32;
+    border-color: #145A32;
+}
+.toast.warning {
+    background-color: #F39C12;
+    border-color: #F39C12;
+}
+.toast.error {
+    background-color: #BF3D00;
+    border-color: #BF3D00;
+}
+.toast.info {
+    background-color: #2980b9;
+    border-color: #2980b9;
+}
+.toast.warning  span, 
+.toast.warning  p,
+.toast.warning  i, 
+.toast.warning  button {
+    color: #382405;
+}
+
+.position2 {
+    bottom: 140px!important;
+}
+.position3 {
+    bottom: 240px!important;
+}
+.position4 {
+    bottom: 340px!important;
+}
+.position5 {
+    bottom: 440px!important;
+}

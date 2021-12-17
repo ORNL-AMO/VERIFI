@@ -1,0 +1,90 @@
+@import "~font-awesome/css/font-awesome.min.css";
+
+/*
+Typography
+======================================================== */
+/*html, body {
+    font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+    font-weight: 100;
+    font-size: 18px;
+    height: 100%;
+    background: #ececec;
+  }*/
+  * {
+    /*font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";*/
+    font-size: 14px;
+    color: #333;
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    margin: 8px 0;
+  }
+  h4 {
+    text-transform: uppercase;
+    font-size: 16px !important;
+    padding: 10px 0;
+    border-bottom: 2px solid orange;
+    font-weight: normal;
+    letter-spacing: 2px;
+  }
+  h6 {
+    color: #2980b9;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  a:not([href]) {
+    color: #007bff !important;
+  }
+  a:not([href]):hover {
+    color: #0056b3 !important;
+    text-decoration: underline !important;
+    cursor: pointer;
+  }
+  p {
+    margin: 0;
+  }
+  .bold {
+    font-weight: bold;
+  }
+  .italic {
+    font-style: italic;
+  }
+  .superscript {
+    font-size: 10px;
+    position: absolute;
+  }
+  .subheader {
+    text-transform: uppercase;
+    font-size: 12px;
+    font-weight: bold;
+    border-bottom: 1px solid #dadada;
+    padding: 20px 0 0;
+    color: #9e7f5e;
+  }
+  p.error {
+    background-color: #ffebeb;
+    border: 1px solid #dc3737;
+    color: #960202;
+    padding: 10px;
+  }
+  .green {
+    color: green;
+  }
+  .red,
+  .required {
+    color: #bf2d00!important;
+  }
+  .pointer {
+    cursor: pointer;
+  }
+  .fa-ellipsis-v {
+    cursor: pointer;
+  }
+  

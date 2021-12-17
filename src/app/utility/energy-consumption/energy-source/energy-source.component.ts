@@ -11,6 +11,7 @@ import { FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { LoadingService } from 'src/app/shared/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/shared/toast-notifications/toast-notifications.service';
+import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 
 @Component({
   selector: 'app-energy-source',
@@ -31,7 +32,7 @@ export class EnergySourceComponent implements OnInit {
   editMeter: IdbUtilityMeter;
   meterToDelete: IdbUtilityMeter;
   selectedFacilitySub: Subscription;
-  selectedFacilityName: string = 'Facility';
+  selectedFacility: IdbFacility;
 
   addOrEdit: string = 'add';
   orderDataField: string = 'name';
@@ -44,19 +45,19 @@ export class EnergySourceComponent implements OnInit {
     private editMeterFormService: EditMeterFormService,
     private router: Router,
     private loadingService: LoadingService,
-    private toastNoticationService: ToastNotificationsService
+    private toastNoticationService: ToastNotificationsService,
+    private energyUnitsHelperService: EnergyUnitsHelperService
   ) { }
 
   ngOnInit() {
-    this.meterListSub = this.utilityMeterdbService.facilityMeters.subscribe(meters => {
-      this.meterList = meters;
+    this.selectedFacilitySub = this.facilitydbService.selectedFacility.subscribe(facility => {
+      this.selectedFacility = facility;
     });
 
-    this.selectedFacilitySub = this.facilitydbService.selectedFacility.subscribe(facility => {
-      if (facility) {
-        this.selectedFacilityName = facility.name;
-      }
+    this.meterListSub = this.utilityMeterdbService.facilityMeters.subscribe(meters => {
+      this.meterList = this.checkMeterUnits(meters);
     });
+
   }
 
   ngOnDestroy() {
@@ -69,7 +70,7 @@ export class EnergySourceComponent implements OnInit {
     let selectedFacility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
     let selectedAccount: IdbAccount = this.accountdbService.selectedAccount.getValue();
     this.addOrEdit = 'add';
-    this.editMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.id, selectedAccount.id, true);
+    this.editMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.id, selectedAccount.id, true, selectedFacility.emissionsOutputRate, selectedFacility.energyUnit);
   }
 
   uploadData() {
@@ -89,13 +90,13 @@ export class EnergySourceComponent implements OnInit {
     this.loadingService.setLoadingMessage('Deleteing Meters and Data...')
     this.loadingService.setLoadingStatus(true);
     //delete meter
-    await this.utilityMeterdbService.deleteIndexWithObservable(this.meterToDelete.id);
+    await this.utilityMeterdbService.deleteIndexWithObservable(this.meterToDelete.id).toPromise();
 
 
     //delete meter data
     let meterData: Array<IdbUtilityMeterData> = await this.utilityMeterDatadbService.getAllByIndexRange('meterId', this.meterToDelete.id).toPromise();
     for (let index = 0; index < meterData.length; index++) {
-      await this.utilityMeterDatadbService.deleteWithObservable(meterData[index].id);
+      await this.utilityMeterDatadbService.deleteWithObservable(meterData[index].id).toPromise();
     }
     let selectedFacility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
     //set meters
@@ -137,4 +138,13 @@ export class EnergySourceComponent implements OnInit {
       this.orderDataField = str;
     }
   }
+
+  checkMeterUnits(meters: Array<IdbUtilityMeter>): Array<IdbUtilityMeter> {
+    meters.forEach(meter => {
+      let differentUnits: { differentEnergyUnit: boolean, emissionsOutputRate: boolean, differentCollectionUnit: boolean } = this.energyUnitsHelperService.checkHasDifferentUnits(meter.source, meter.phase, meter.emissionsOutputRate, meter.startingUnit, meter.fuel, this.selectedFacility, meter.energyUnit);
+      meter.unitsDifferent = differentUnits.emissionsOutputRate;
+    });
+    return meters;
+  }
+
 }

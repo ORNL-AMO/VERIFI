@@ -16,22 +16,25 @@
                     <a routerLink="predictors" [routerLinkActive]="['active']">Predictors</a>
                     <span class="small navigation-warning">Requires Meter Readings</span>
                 </li>
-                <!-- <li [class.disabled]="utilityMeterData.length === 0">
+                <li [class.disabled]="utilityMeterData.length === 0">
                     <a routerLink="visualization" [routerLinkActive]="['active']">Data Visualization</a>
                     <span class="small navigation-warning">Requires Meter Readings</span>
-                </li> -->
+                </li>
             </ul>
             
         </div>
         <div class="pull-right">
-            <h3>
+            <h3 class="pr-3">
                 <a routerLink="upload-data" [routerLinkActive]="['active']"><span class="fa fa-upload"></span></a>
+            </h3>
+            <h3>
+                <a routerLink="/facility-management" [routerLinkActive]="['active']"><span class="fa fa-cog"></span></a>
             </h3>
         </div>
     </div>
 </div>
 
-<div class="row no-margin" *ngIf="(selectedAccount && selectedFacility) && appRendered">
+<div class="row no-margin flex-grow-1" *ngIf="(selectedAccount && selectedFacility)">
     <div class="col">
         <router-outlet></router-outlet>
     </div>
@@ -40,10 +43,10 @@
     </div>
 </div>
 
-<div *ngIf="(!selectedAccount || !selectedFacility) && appRendered">
+<div *ngIf="(!selectedAccount || !selectedFacility)">
     <div class="wrapper main-content">
         <h4>Info</h4>
-        <p class="alert alert-warning"><i class="fa fa-info-circle"></i> No account or facility selected. <a routerLink="/account-summary">Return to dashboard</a></p>
+        <p class="alert alert-warning"><i class="fa fa-info-circle"></i> No account or facility selected. <a routerLink="/home/account-summary">Return to dashboard</a></p>
         
     </div>
 </div>

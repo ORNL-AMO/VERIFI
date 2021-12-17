@@ -19,7 +19,7 @@ export class EnergyUseDonutComponent implements OnInit {
   facilitiesSummary: AccountFacilitiesSummary;
   accountFacilitiesSub: Subscription;
 
-  graphDisplay: "cost" | "usage";
+  graphDisplay: "cost" | "usage" | "emissions";
   graphDisplaySub: Subscription;
 
 
@@ -57,11 +57,17 @@ export class EnergyUseDonutComponent implements OnInit {
         let selectedAccout: IdbAccount = this.accountDbService.selectedAccount.getValue();
         yDataProperty = "energyUsage";
         hovertemplate = '%{label}: %{value:,.0f} ' + selectedAccout.energyUnit + ' <extra></extra>'
+      } else if (this.graphDisplay == "emissions") {
+        yDataProperty = "emissions";
+        hovertemplate = '%{label}: %{value:,.0f} kg CO<sub>2</sub> <extra></extra>'
       }
 
       var data = [{
         values: this.facilitiesSummary.facilitySummaries.map(summary => { return summary[yDataProperty] }),
         labels: this.facilitiesSummary.facilitySummaries.map(summary => { return summary.facility.name }),
+        marker: {
+          colors: this.facilitiesSummary.facilitySummaries.map(summary => { return summary.facility.color }),
+        },
         textinfo: 'label+percent',
         textposition: 'auto',
         insidetextorientation: "horizontal",
@@ -78,12 +84,10 @@ export class EnergyUseDonutComponent implements OnInit {
       };
 
       let config = {
+        displaylogo: false,
         responsive: true
       }
       this.plotlyService.newPlot(this.energyUseDonut.nativeElement, data, layout, config);
-    } else if (this.energyUseDonut) {
-      let Plotly = this.plotlyService.getPlotly();
-      Plotly.purge(this.energyUseDonut.nativeElement);
     }
   }
 

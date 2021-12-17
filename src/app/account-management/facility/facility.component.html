@@ -1,67 +1,66 @@
-<div id="facility">
-	<div class="banner">
-		<h3>Facility Information</h3>
-	</div>
+<div class="banner d-flex w-100 justify-content-between">
+	<h3>Facility Settings</h3>
+	<h3>
+		<a routerLink="/home/facility-summary"><span class="fa fa-home"></span></a>
+	</h3>
 </div>
 
-<div class="wrapper">
-	<div class="row">
-		<!--<div class="col-lg-4 profile-image">
-        <img src="https://placehold.it/350x200" alt="">
-        <form>
-            <label class="profile-image-input" for="img"><i class="fa fa-upload"></i> Upload Image
-                <input type="file" id="img" name="img" accept="image/*">
-            </label>
-        </form>
-        </div>-->
-		<div class="col">
-			<h4>Facility Information</h4>
-			<br>
-			<app-general-information-form *ngIf="selectedFacility" [inAccount]="false"></app-general-information-form>
-		</div>
+<div class="dashboard-container">
+	<div class="wrapper">
+		<div class="row">
+			<div class="col">
+				<h4>Facility Information</h4>
+				<br>
+				<app-general-information-form *ngIf="selectedFacility" [inAccount]="false">
+				</app-general-information-form>
+			</div>
 
-		<div class="col-lg-5">
-			<h4>Corporate Default Units</h4>
-			<br>
-			<app-default-units-form *ngIf="selectedFacility" [inAccount]="false"></app-default-units-form>
+			<div class="col-lg-5">
+				<h4>Facility Units</h4>
+				<br>
+				<app-default-units-form *ngIf="selectedFacility" [inAccount]="false"></app-default-units-form>
+			</div>
 		</div>
-	</div>
-	<br>
+		<br>
 
-	<div class="row">
-		<div class="col-lg-7">
-			<h4>Sustainability Questions</h4>
-			<br>
-			<app-sustainability-questions-form *ngIf="selectedFacility" [inAccount]="false">
-			</app-sustainability-questions-form>
+		<div class="row">
+			<div class="col-lg-7">
+				<h4>Sustainability Questions</h4>
+				<br>
+				<app-sustainability-questions-form *ngIf="selectedFacility" [inAccount]="false">
+				</app-sustainability-questions-form>
+			</div>
+			<div class="col">
+				<h4>Financial Reporting</h4>
+				<br>
+				<app-financial-reporting-form *ngIf="selectedFacility" [inAccount]="false">
+				</app-financial-reporting-form>
+			</div>
 		</div>
-		<div class="col">
-			<h4>Financial Reporting</h4>
-			<br>
-			<app-financial-reporting-form *ngIf="selectedFacility" [inAccount]="false"></app-financial-reporting-form>
-		</div>
-	</div>
-	<br>
+		<br>
 
-	<div class="row">
-		<div class="col-lg-6">
-			<h4>Delete Facility</h4>
-			<p>Once deleted, you will permanently lose all your data linked to this facility. Please make a backup of
-				your data before proceeding with this step.</p>
-			<button class="btn btn-danger" (click)="openDeleteFacility()">Delete Facility</button>
-		</div>
-		<div class="col-lg-6">
-		  <h4>Import Backup Data</h4>
-		  <p>Use the below button to import backup data files. Facilities can be imported as new data or
-			to overwrite existing data.</p>
-		  <button class="btn btn-primary" (click)="openImportBackup()">Import Backup File</button>
-	
-		</div>
-		<div class="col-lg-6">
-			<h4>Export Facility</h4>
-			<p>You can export this facility and it's data to be imported into other accounts or used as a backup of your
-				data set.</p>
-			<button class="btn btn-outline" (click)="backupFacility()">Export Facility</button>
+		<div class="row">
+			<div class="col-lg-6">
+				<h4>Delete Facility</h4>
+				<p>Once deleted, you will permanently lose all your data linked to this facility. Please make a backup
+					of
+					your data before proceeding with this step.</p>
+				<button class="btn btn-danger" (click)="openDeleteFacility()">Delete Facility</button>
+			</div>
+			<div class="col-lg-6">
+				<h4>Import Backup Data</h4>
+				<p>Use the below button to import backup data files. Facilities can be imported as new data or
+					to overwrite existing data.</p>
+				<button class="btn btn-primary" (click)="openImportBackup()">Import Backup File</button>
+
+			</div>
+			<div class="col-lg-6">
+				<h4>Export Facility</h4>
+				<p>You can export this facility and it's data to be imported into other accounts or used as a backup of
+					your
+					data set.</p>
+				<button class="btn btn-outline" (click)="backupFacility()">Export Facility</button>
+			</div>
 		</div>
 	</div>
 </div>
@@ -80,4 +79,5 @@
 	</div>
 </div>
 
-<app-import-backup-modal *ngIf="showImportFile" (emitClose)="cancelImportBackup()" [inFacility]="true"></app-import-backup-modal>
+<app-import-backup-modal *ngIf="showImportFile" (emitClose)="cancelImportBackup()" [inFacility]="true">
+</app-import-backup-modal>

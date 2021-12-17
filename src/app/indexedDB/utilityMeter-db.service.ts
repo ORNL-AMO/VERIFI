@@ -1,6 +1,6 @@
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { Injectable } from '@angular/core';
-import { IdbAccount, IdbFacility, IdbUtilityMeter } from '../models/idb';
+import { IdbAccount, IdbFacility, IdbUtilityMeter, MeterSource } from '../models/idb';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { FacilitydbService } from './facility-db.service';
 import { AccountdbService } from './account-db.service';
@@ -84,7 +84,7 @@ export class UtilityMeterdbService {
         });
     }
 
-    addWithObservable(utilityMeter: IdbUtilityMeter): Observable<number> {
+    addWithObservable(utilityMeter: IdbUtilityMeter): Observable<IdbUtilityMeter> {
         utilityMeter.visible = true;
         return this.dbService.add('utilityMeter', utilityMeter);
     }
@@ -130,12 +130,13 @@ export class UtilityMeterdbService {
         }
     }
 
-    getNewIdbUtilityMeter(facilityId: number, accountId: number, setDefaults: boolean): IdbUtilityMeter {
-        let source: string;
+    getNewIdbUtilityMeter(facilityId: number, accountId: number, setDefaults: boolean, emissionsOutputRate: number, energyUnit: string): IdbUtilityMeter {
+        let source: MeterSource;
         let startingUnit: string;
         if (setDefaults) {
             source = 'Electricity';
             startingUnit = 'kWh';
+            energyUnit = 'kWh';
         }
         return {
             facilityId: facilityId,
@@ -154,8 +155,9 @@ export class UtilityMeterdbService {
             source: source,
             group: undefined,
             startingUnit: startingUnit,
-            energyUnit: undefined,
-            fuel: undefined
+            energyUnit: energyUnit,
+            fuel: undefined,
+            emissionsOutputRate: emissionsOutputRate
         }
     }
 
