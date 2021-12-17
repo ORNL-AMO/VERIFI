@@ -50,7 +50,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build --base-href .",
-    "build-prod": "ng build --prod --base-href .",
+    "build-prod": "ng build --configuration production --base-href .",
     "build-watch": "ng build --base-href . --watch",
     "test": "ng test",
     "lint": "ng lint",
