@@ -734,7 +734,8 @@ export class CalanderizationService {
         let convertedEnergyUse: number = this.convertUnitsService.value(energyUse).from(energyUnit).to(meter.energyUnit);
         return convertedEnergyUse * meter.emissionsOutputRate
       } else {
-        return energyUse * meter.emissionsOutputRate
+        let convertedEnergyUse: number = this.convertUnitsService.value(energyUse).from(energyUnit).to('kWh');
+        return convertedEnergyUse * meter.emissionsOutputRate
       }
     }
     return 0;
