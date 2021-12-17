@@ -1,5 +1,6 @@
-import { Component, OnInit, isDevMode } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router, Event } from '@angular/router';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-sidebar',
@@ -25,7 +26,7 @@ export class SidebarComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.isDev = isDevMode();
+    this.isDev = !environment.production;
   }
 
 

@@ -1,4 +1,4 @@
-import { Component, isDevMode, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { BackupDataService } from 'src/app/account-management/backup-data.service';
 import { environment } from 'src/environments/environment';
@@ -33,7 +33,7 @@ export class FooterComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.isDev = isDevMode();
+    this.isDev = !environment.production;
     this.allAccountsSub = this.accountdbService.allAccounts.subscribe(allAccounts => {
       this.accountCount = allAccounts.length;
     });
