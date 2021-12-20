@@ -185,7 +185,8 @@ export interface PredictorData {
     unit?: string,
     description?: string,
     id: string,
-    importWizardName?: string
+    importWizardName?: string,
+    production?: boolean
 }
 
 

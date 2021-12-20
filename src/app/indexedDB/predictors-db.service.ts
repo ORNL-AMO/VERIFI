@@ -235,10 +235,11 @@ export class PredictordbService {
             return newPredictorIds.includes(predictor.id);
         });
         //update name and unit
-        entryPredictors = _.map(entryPredictors, (predictor) => {
+        entryPredictors = _.map(entryPredictors, (predictor: PredictorData) => {
             let updatedPredictor: PredictorData = updatedPredictors.find(val => { return val.id == predictor.id });
             predictor.name = updatedPredictor.name;
             predictor.unit = updatedPredictor.unit;
+            predictor.production = updatedPredictor.production;
             return predictor;
         });
         return entryPredictors;

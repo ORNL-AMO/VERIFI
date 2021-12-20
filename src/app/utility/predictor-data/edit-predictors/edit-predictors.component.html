@@ -5,8 +5,14 @@
     <div class="col">
         <p class="bold">Predictor Name</p>
     </div>
-    <div class="col-5">
+    <div class="col-4">
         <p class="bold">Units</p>
+    </div>
+    <div class="col-2">
+        <p class="bold">Production?</p>
+    </div>
+    <div class="col-1">
+        <!-- <p class="bold">Delete</p> -->
     </div>
 </div>
 
@@ -15,12 +21,18 @@
         <div class="col">
             <label>
                 <input class="full-width" type="text" [(ngModel)]="predictor.name"
-                    name="{{'predictorName'+predictor.id}}" onfocus="this.select();" minlength="0" maxlength ="100">
+                    name="{{'predictorName'+predictor.id}}" onfocus="this.select();" minlength="0" maxlength="100">
             </label>
         </div>
-        <div class="col-5">
-            <input class="three-quarter-width" [(ngModel)]="predictor.unit" name="{{'predictorUnit'+predictor.id}}" onfocus="this.select();" 
-            minlength="0" maxlength ="100">
+        <div class="col-4">
+            <input [(ngModel)]="predictor.unit" name="{{'predictorUnit'+predictor.id}}" onfocus="this.select();"
+                minlength="0" maxlength="100">
+        </div>
+        <div class="col-2 text-center">
+            <input type="checkbox" [(ngModel)]="predictor.production" name="{{'production'+predictor.id}}"
+                onfocus="this.select();">
+        </div>
+        <div class="col-1">
             <button class="btn btn-small btn-danger m-0 item-right" (click)="deletePredictor(predictor)"><i
                     class="fa fa-trash-o red pointer"></i>
             </button>

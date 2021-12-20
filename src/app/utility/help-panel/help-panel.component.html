@@ -49,13 +49,16 @@
         <p>These are independent variables that will be used for <strong>{{ selectedFacilityName }}'s</strong>
             regression analysis. Predictors can be used to explain the change in your utility use.</p>
         <p>Use “Add/Edit Predictors” to Add new Predictors for your analysis.</p>
+        <p><span class="fa fa-check-circle-o"></span> Indicates the predictor has been selected as a production item.
+        </p>
         <p>Use “Add Predictor Entry” to input your monthly predictor data.</p>
         <p>Use “Import Data” to bulk import Predictor data in csv or excel format.</p>
     </div>
 
     <div *ngIf="helpText === 'upload-data'">
         <p>
-            Upload excel file data from ENPI, our data template or your own data files. Use the data wizards after uploading the files to
+            Upload excel file data from ENPI, our data template or your own data files. Use the data wizards after
+            uploading the files to
             create meters, predictors and data readings.
         </p>
     </div>
