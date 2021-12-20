@@ -61,10 +61,13 @@
                         <input #masterCheckbox type="checkbox" (change)="checkAll()" [(ngModel)]="allChecked">
                     </th>
                     <th (click)="setOrderDataField('date')" [ngClass]="{'active': orderDataField == 'date'}">Date</th>
-                    <th class="header" *ngFor="let predictor of facilityPredictors"
+                    <th class="header" *ngFor="let predictor of facilityPredictors; let predictorIndex = index;"
                         (click)="setOrderDataField(predictor.name)"
-                        [ngClass]="{'active': orderDataField == predictor.name}">{{predictor.name}}
-                        <span class="small block">{{predictor.unit}}</span>
+                        [ngClass]="{'active': orderDataField == predictor.name}">
+                        <span *ngIf="predictor.production" class="fa fa-check-circle-o"></span>
+                        {{predictor.name}}
+                        <br *ngIf="predictor.unit">
+                        <span class="small block" *ngIf="predictor.unit">({{predictor.unit}})</span>
                     </th>
                     <td class="actions">
 
