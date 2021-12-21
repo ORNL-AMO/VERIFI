@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { OverviewReportService, ReportOptions } from '../overview-report.service';
 
 @Component({
   selector: 'app-overview-report-menu',
@@ -7,14 +8,18 @@ import { Component, OnInit } from '@angular/core';
 })
 export class OverviewReportMenuComponent implements OnInit {
 
-  showFilterDropdown: boolean = false;
-  constructor() { }
+  reportOptions: ReportOptions;
+  constructor(private overviewReportService: OverviewReportService) { }
 
   ngOnInit(): void {
+    this.reportOptions = this.overviewReportService.reportOptions.getValue();
   }
 
+  save() {
+    this.overviewReportService.reportOptions.next(this.reportOptions);
+  }
 
-  toggleFilterMenu(){
-    this.showFilterDropdown = !this.showFilterDropdown;
+  close(){
+    this.overviewReportService.showReportMenu.next(false);
   }
 }

@@ -107,6 +107,8 @@ import { OverviewReportComponent } from './overview-report/overview-report.compo
 import { FacilityReportComponent } from './overview-report/facility-report/facility-report.component';
 import { AccountReportComponent } from './overview-report/account-report/account-report.component';
 import { OverviewReportMenuComponent } from './overview-report/overview-report-menu/overview-report-menu.component';
+import { OverviewReportBannerComponent } from './overview-report/overview-report-banner/overview-report-banner.component';
+import { FrontPageComponent } from './overview-report/front-page/front-page.component';
 
 @NgModule({
   declarations: [
@@ -199,7 +201,9 @@ import { OverviewReportMenuComponent } from './overview-report/overview-report-m
     OverviewReportComponent,
     FacilityReportComponent,
     AccountReportComponent,
-    OverviewReportMenuComponent
+    OverviewReportMenuComponent,
+    OverviewReportBannerComponent,
+    FrontPageComponent
   ],
   imports: [
     BrowserModule,

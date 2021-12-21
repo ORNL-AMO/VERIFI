@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { Subscription } from 'rxjs';
+import { OverviewReportService } from './overview-report.service';
 
 @Component({
   selector: 'app-overview-report',
@@ -7,9 +9,19 @@ import { Component, OnInit } from '@angular/core';
 })
 export class OverviewReportComponent implements OnInit {
 
-  constructor() { }
+  showReportMenu: boolean;
+  showReportMenuSub: Subscription;
+  constructor(private overviewReportService: OverviewReportService) { }
 
   ngOnInit(): void {
+    this.overviewReportService.initializeOptions();
+    this.showReportMenuSub = this.overviewReportService.showReportMenu.subscribe(val => { 
+      this.showReportMenu = val;
+    })
+  }
+
+  ngOnDestroy(){
+    this.showReportMenuSub.unsubscribe();
   }
 
 }

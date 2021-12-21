@@ -72,7 +72,8 @@ export interface IdbFacility {
     emissionsOutputRate?: number,
     eGridSubregion?: string,
     customEmissionsRate?: boolean
-    color?: string
+    color?: string,
+    selected?: boolean
 }
 
 export interface IdbUtilityMeterGroup {

@@ -1,8 +1,8 @@
 <div class="d-flex flex-column h-100">
-    <!-- <div class="p-2"> -->
-        <app-overview-report-menu></app-overview-report-menu>
-    <!-- </div> -->
+    <app-overview-report-banner></app-overview-report-banner>
+    <app-overview-report-menu *ngIf="showReportMenu"></app-overview-report-menu>
     <div class="report">
+        <app-front-page></app-front-page>
         <app-account-report></app-account-report>
         <app-facility-report></app-facility-report>
     </div>

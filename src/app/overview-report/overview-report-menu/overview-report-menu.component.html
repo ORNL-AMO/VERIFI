@@ -1,31 +1,44 @@
-<div class="banner">
-    <h3>Overview Report</h3>
-    <div class="pull-right">
-        <h3 class="pr-3">
-            <a><span class="fa fa-print"></span></a>
-        </h3>
-        <h3>
-            <a><span class="fa fa-ellipsis-v"></span></a>
-        </h3>
-    </div>
-    <!-- <div class="filter">
-        <button class="btn" [ngClass]="{'btn-solid' : !showFilterDropdown, 'btn-outline' : showFilterDropdown}"
-            (click)="toggleFilterMenu()">
-            Choose Report Items
-        </button>
-        <div class="filter-dropdown" *ngIf="showFilterDropdown">
+<div class="filter">
+    <div class="filter-dropdown">
+        <div class="row">
+            <div class="col text-right">
+                <a (click)="close()"><span class="fa fa-close"></span></a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-6">
+                <div class="form-group">
+                    <label for="reportTitle">Report Title</label>
+                    <textarea class="form-control" name="reportTitle" id="reportTitle" [(ngModel)]="reportOptions.title"
+                        (input)="save()"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="reportNotes">Report Notes</label>
+                    <textarea class="form-control" name="reportNotes" id="reportNotes" [(ngModel)]="reportOptions.notes"
+                        (input)="save()"></textarea>
+                </div>
+            </div>
+            <div class="col-6">
+                <label>Account Report Options</label>
+                <label for="includeAccount">
+                    <input class="checkbox" type="checkbox" id="includeAccount" name="includeAccount"
+                        [(ngModel)]="reportOptions.includeAccount" (change)="save()">Include Account Report
+                </label>
+                <hr>
+                <label>Facility Reports Options</label>
+                <label for="includeFacilities">
+                    <input class="checkbox" type="checkbox" id="includeFacilities" name="includeFacilities"
+                        [(ngModel)]="reportOptions.includeFacilities" (change)="save()">Include Facility Reports
+                </label>
+                <div *ngIf="reportOptions.includeFacilities">
+                    <label *ngFor="let facility of reportOptions.facilities; let index = index;"
+                        for="{{'facility_'+index}}">
+                        <input class="checkbox" type="checkbox" id="{{'facility_'+index}}" name="{{'facility_'+index}}"
+                            [(ngModel)]="facility.selected" (change)="save()">Include {{facility.name}}
+                    </label>
 
-            <p class="small">Optional Report Items</p>
-            <div class="row">
-                <div class="col">
-                    <label>
-                        <input type="checkbox">Account
-                    </label>
-                    <label>
-                        <input type="checkbox">Facility
-                    </label>
                 </div>
             </div>
         </div>
-    </div> -->
+    </div>
 </div>
