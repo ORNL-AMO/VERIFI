@@ -109,6 +109,9 @@ import { AccountReportComponent } from './overview-report/account-report/account
 import { OverviewReportMenuComponent } from './overview-report/overview-report-menu/overview-report-menu.component';
 import { OverviewReportBannerComponent } from './overview-report/overview-report-banner/overview-report-banner.component';
 import { FrontPageComponent } from './overview-report/front-page/front-page.component';
+import { FacilityReportMetersTableComponent } from './overview-report/facility-report/facility-report-meters-table/facility-report-meters-table.component';
+import { FacilityReportUtilityUsageTableComponent } from './overview-report/facility-report/facility-report-utility-usage-table/facility-report-utility-usage-table.component';
+import { FacilityReportInfoComponent } from './overview-report/facility-report/facility-report-info/facility-report-info.component';
 
 @NgModule({
   declarations: [
@@ -203,7 +206,10 @@ import { FrontPageComponent } from './overview-report/front-page/front-page.comp
     AccountReportComponent,
     OverviewReportMenuComponent,
     OverviewReportBannerComponent,
-    FrontPageComponent
+    FrontPageComponent,
+    FacilityReportMetersTableComponent,
+    FacilityReportUtilityUsageTableComponent,
+    FacilityReportInfoComponent
   ],
   imports: [
     BrowserModule,

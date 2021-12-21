@@ -1,4 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
+import { Subscription } from 'rxjs';
+import { IdbFacility } from 'src/app/models/idb';
+import { OverviewReportService, ReportOptions } from '../overview-report.service';
 
 @Component({
   selector: 'app-facility-report',
@@ -6,10 +9,21 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./facility-report.component.css']
 })
 export class FacilityReportComponent implements OnInit {
+  @Input()
+  facility: IdbFacility;
 
-  constructor() { }
+  reportOptions: ReportOptions;
+  reportOptionsSub: Subscription;
+  constructor(private overviewReportService: OverviewReportService) { }
 
   ngOnInit(): void {
+    this.reportOptionsSub = this.overviewReportService.reportOptions.subscribe(reportOptions => {
+      this.reportOptions = reportOptions;
+    });
+  }
+
+  ngOnDestroy(){
+    this.reportOptionsSub.unsubscribe();
   }
 
 }

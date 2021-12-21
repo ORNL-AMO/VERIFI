@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
 import { UtilityMeterdbService } from '../indexedDB/utilityMeter-db.service';
-import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterGroup } from '../models/idb';
+import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from '../models/idb';
 import * as _ from 'lodash';
 import { CalanderizationService } from '../shared/helper-services/calanderization.service';
 import { UtilityMeterGroupdbService } from '../indexedDB/utilityMeterGroup-db.service';
@@ -323,44 +323,43 @@ export class DashboardService {
     }
   }
 
-  getFacilityMetersSummary(inAccount: boolean): FacilityMeterSummaryData {
-    let facilityMetersSummary: Array<MeterSummary> = new Array();
-    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
-    let allMetersLastBill: MonthlyData = this.calanderizationService.getLastBillEntry(facilityMeters, inAccount)
-    facilityMeters.forEach(meter => {
-      let summary: MeterSummary = this.getMeterSummary(meter, inAccount, allMetersLastBill);
-      facilityMetersSummary.push(summary);
-    });
-    return {
-      meterSummaries: facilityMetersSummary,
-      totalEnergyUse: _.sumBy(facilityMetersSummary, 'energyUsage'),
-      totalEnergyCost: _.sumBy(facilityMetersSummary, 'energyCost'),
-      totalEmissions: _.sumBy(facilityMetersSummary, 'emissions'),
-      allMetersLastBill: allMetersLastBill
-    };
-  }
+  // getFacilityMetersSummary(inAccount: boolean, facilityMeters: Array<IdbUtilityMeter>): FacilityMeterSummaryData {
+  //   let facilityMetersSummary: Array<MeterSummary> = new Array();
+  //   let allMetersLastBill: MonthlyData = this.calanderizationService.getLastBillEntry(facilityMeters, inAccount)
+  //   facilityMeters.forEach(meter => {
+  //     let summary: MeterSummary = this.getMeterSummary(meter, inAccount, allMetersLastBill);
+  //     facilityMetersSummary.push(summary);
+  //   });
+  //   return {
+  //     meterSummaries: facilityMetersSummary,
+  //     totalEnergyUse: _.sumBy(facilityMetersSummary, 'energyUsage'),
+  //     totalEnergyCost: _.sumBy(facilityMetersSummary, 'energyCost'),
+  //     totalEmissions: _.sumBy(facilityMetersSummary, 'emissions'),
+  //     allMetersLastBill: allMetersLastBill
+  //   };
+  // }
 
-  getMeterSummary(meter: IdbUtilityMeter, inAccount: boolean, allMetersLastBill: MonthlyData): MeterSummary {
-    let lastBill: MonthlyData = this.calanderizationService.getLastBillEntry([meter], inAccount);
-    let lastYearData: Array<LastYearData> = this.calanderizationService.getPastYearData([meter], inAccount, allMetersLastBill);
-    let group: IdbUtilityMeterGroup = this.utilityMeterGroupDbService.getGroupById(meter.groupId);
-    let groupName: string = 'Ungrouped';
-    if (group) {
-      groupName = group.name;
-    }
-    let lastBillDate: Date;
-    if (lastBill) {
-      lastBillDate = new Date(lastBill.year, lastBill.monthNumValue + 1);
-    }
-    return {
-      meter: meter,
-      energyUsage: _.sumBy(lastYearData, 'energyUse'),
-      energyCost: _.sumBy(lastYearData, 'energyCost'),
-      emissions: _.sumBy(lastYearData, 'emissions'),
-      lastBill: lastBill,
-      groupName: groupName,
-      lastBillDate: lastBillDate
-    }
-  }
+  // getMeterSummary(meter: IdbUtilityMeter, inAccount: boolean, allMetersLastBill: MonthlyData): MeterSummary {
+  //   let lastBill: MonthlyData = this.calanderizationService.getLastBillEntry([meter], inAccount);
+  //   let lastYearData: Array<LastYearData> = this.calanderizationService.getPastYearData([meter], inAccount, allMetersLastBill);
+  //   let group: IdbUtilityMeterGroup = this.utilityMeterGroupDbService.getGroupById(meter.groupId);
+  //   let groupName: string = 'Ungrouped';
+  //   if (group) {
+  //     groupName = group.name;
+  //   }
+  //   let lastBillDate: Date;
+  //   if (lastBill) {
+  //     lastBillDate = new Date(lastBill.year, lastBill.monthNumValue + 1);
+  //   }
+  //   return {
+  //     meter: meter,
+  //     energyUsage: _.sumBy(lastYearData, 'energyUse'),
+  //     energyCost: _.sumBy(lastYearData, 'energyCost'),
+  //     emissions: _.sumBy(lastYearData, 'emissions'),
+  //     lastBill: lastBill,
+  //     groupName: groupName,
+  //     lastBillDate: lastBillDate
+  //   }
+  // }
 }
 

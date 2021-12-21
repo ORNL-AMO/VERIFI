@@ -39,6 +39,63 @@
 
                 </div>
             </div>
+            <div class="col-6">
+                <div class="row">
+                    <div class="col-6">
+                        <label>Include Utility Types</label>
+                        <label for="electricity">
+                            <input class="checkbox" type="checkbox" id="electricity" name="electricity"
+                                [(ngModel)]="reportOptions.electricity" (change)="save()">Electricity
+                        </label>
+                        <label for="naturalGas">
+                            <input class="checkbox" type="checkbox" id="naturalGas" name="naturalGas"
+                                [(ngModel)]="reportOptions.naturalGas" (change)="save()">Natural Gas
+                        </label>
+                        <label for="otherFuels">
+                            <input class="checkbox" type="checkbox" id="otherFuels" name="otherFuels"
+                                [(ngModel)]="reportOptions.otherFuels" (change)="save()">Other Fuels
+                        </label>
+                    </div>
+                    <div class="col-6">
+                        <label for="otherEnergy">
+                            <input class="checkbox" type="checkbox" id="otherEnergy" name="otherEnergy"
+                                [(ngModel)]="reportOptions.otherEnergy" (change)="save()">Other Energy
+                        </label>
+                        <label for="electricity">
+                            <input class="checkbox" type="checkbox" id="water" name="water"
+                                [(ngModel)]="reportOptions.water" (change)="save()">Water
+                        </label>
+                        <label for="naturalGas">
+                            <input class="checkbox" type="checkbox" id="wasteWater" name="wasteWater"
+                                [(ngModel)]="reportOptions.wasteWater" (change)="save()">Waste Water
+                        </label>
+                        <label for="otherFuels">
+                            <input class="checkbox" type="checkbox" id="otherUtility" name="otherUtility"
+                                [(ngModel)]="reportOptions.otherUtility" (change)="save()">Other Utility
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6" *ngIf="reportOptions.includeFacilities">
+                <div class="row">
+                    <div class="col-6">
+                        <label>Facility Report Items</label>
+                        <label for="facilityInfo">
+                            <input class="checkbox" type="checkbox" id="facilityInfo" name="facilityInfo"
+                                [(ngModel)]="reportOptions.facilityInfo" (change)="save()">Facility Info
+                        </label>
+                        <label for="facilityMetersTable">
+                            <input class="checkbox" type="checkbox" id="facilityMetersTable" name="facilityMetersTable"
+                                [(ngModel)]="reportOptions.facilityMetersTable" (change)="save()">Meters Summary Table
+                        </label>
+                        <label for="facilityUtilityUsageTable">
+                            <input class="checkbox" type="checkbox" id="facilityUtilityUsageTable"
+                                name="facilityUtilityUsageTable" [(ngModel)]="reportOptions.facilityUtilityUsageTable"
+                                (change)="save()">Utility Usage Table
+                        </label>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

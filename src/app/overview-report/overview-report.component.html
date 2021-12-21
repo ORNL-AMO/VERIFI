@@ -3,7 +3,12 @@
     <app-overview-report-menu *ngIf="showReportMenu"></app-overview-report-menu>
     <div class="report">
         <app-front-page></app-front-page>
-        <app-account-report></app-account-report>
-        <app-facility-report></app-facility-report>
+        <hr class="page-spacer">
+        <app-account-report *ngIf="reportOptions.includeAccount"></app-account-report>
+        <div *ngIf="reportOptions.includeFacilities">
+            <div *ngFor="let facility of reportOptions.facilities">
+                <app-facility-report *ngIf="facility.selected" [facility]="facility"></app-facility-report>
+            </div>
+        </div>
     </div>
 </div>
