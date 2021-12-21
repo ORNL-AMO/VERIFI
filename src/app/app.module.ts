@@ -103,6 +103,10 @@ import { MeterGroupChartComponent } from './utility/meter-grouping/meter-group-c
 import { NaicsListPipe } from './account-management/general-information-form/naics-list.pipe';
 import { YearOptionsPipe } from './account-management/sustainability-questions-form/year-options.pipe';
 import { CustomNumberPipe } from './shared/helper-pipes/custom-number.pipe';
+import { OverviewReportComponent } from './overview-report/overview-report.component';
+import { FacilityReportComponent } from './overview-report/facility-report/facility-report.component';
+import { AccountReportComponent } from './overview-report/account-report/account-report.component';
+import { OverviewReportMenuComponent } from './overview-report/overview-report-menu/overview-report-menu.component';
 
 @NgModule({
   declarations: [
@@ -191,7 +195,11 @@ import { CustomNumberPipe } from './shared/helper-pipes/custom-number.pipe';
     MeterGroupChartComponent,
     NaicsListPipe,
     YearOptionsPipe,
-    CustomNumberPipe
+    CustomNumberPipe,
+    OverviewReportComponent,
+    FacilityReportComponent,
+    AccountReportComponent,
+    OverviewReportMenuComponent
   ],
   imports: [
     BrowserModule,

@@ -20,6 +20,7 @@ import { AcknowledgmentsComponent } from './static-content/acknowledgments/ackno
 import { FeedbackComponent } from './static-content/feedback/feedback.component';
 import { HelpComponent } from './static-content/help/help.component';
 import { UploadDataComponent } from './utility/upload-data/upload-data.component';
+import { OverviewReportComponent } from './overview-report/overview-report.component';
 
 const routes: Routes = [
   {
@@ -85,7 +86,10 @@ const routes: Routes = [
   { path: 'feedback', component: FeedbackComponent },
   { path: 'help', component: HelpComponent },
   { path: 'style-guide', component: StyleGuideComponent },
-  { path: "**", component: PageNotFoundComponent }
+  {
+    path: 'overview-report', component: OverviewReportComponent
+  },
+  { path: "**", component: PageNotFoundComponent },
 ];
 
 @NgModule({
