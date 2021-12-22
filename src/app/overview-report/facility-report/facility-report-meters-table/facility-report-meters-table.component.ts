@@ -30,7 +30,7 @@ export class FacilityReportMetersTableComponent implements OnInit {
     let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => {return meter.facilityId == this.facility.id});
-    if (accountMeterData && accountMeterData.length != 0) {
+    if (accountMeterData && accountMeterData.length != 0 && facilityMeters.length != 0) {
       this.facilityMeterSummaryData = this.meterSummaryService.getFacilityMetersSummary(false, facilityMeters);
       if (this.facilityMeterSummaryData.allMetersLastBill) {
         this.lastMonthsDate = new Date(this.facilityMeterSummaryData.allMetersLastBill.year, this.facilityMeterSummaryData.allMetersLastBill.monthNumValue);
