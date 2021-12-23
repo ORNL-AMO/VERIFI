@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import { IdbFacility, IdbUtilityMeter, MeterSource } from 'src/app/models/idb';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
-import { ReportOptions } from '../overview-report.service';
+import { ReportOptions, ReportUtilityOptions } from '../overview-report.service';
 import * as _ from 'lodash';
 
 @Injectable({
@@ -13,38 +13,38 @@ export class FacilityReportService {
   constructor(private calanderizationService: CalanderizationService) { }
 
 
-  getUtilityUsageData(facilityMeters: Array<IdbUtilityMeter>, reportOptions: ReportOptions): FacilityReportUtilitySummary {
+  getUtilityUsageData(facilityMeters: Array<IdbUtilityMeter>, reportUtilityOptions: ReportUtilityOptions): FacilityReportUtilitySummary {
     let utilitySummaries: Array<UtilitySummary> = new Array();
     let lastBillEntry: MonthlyData = this.calanderizationService.getLastBillEntry(facilityMeters, false);
     let pastYearEnd: Date = new Date(lastBillEntry.date);
     let pastYearStart: Date = new Date(pastYearEnd.getUTCFullYear() - 1, pastYearEnd.getUTCMonth() + 1);
     let yearPriorEnd: Date = new Date(pastYearStart.getUTCFullYear(), pastYearStart.getUTCMonth() - 1);
     let yearPriorStart: Date = new Date(yearPriorEnd.getUTCFullYear() - 1, yearPriorEnd.getUTCMonth() + 1);
-    if (reportOptions.electricity) {
+    if (reportUtilityOptions.electricity) {
       let utilitySummary: UtilitySummary = this.getUtilitySummary(facilityMeters, pastYearStart, pastYearEnd, yearPriorStart, yearPriorEnd, 'Electricity');
       utilitySummaries.push(utilitySummary)
     }
-    if (reportOptions.naturalGas) {
+    if (reportUtilityOptions.naturalGas) {
       let utilitySummary: UtilitySummary = this.getUtilitySummary(facilityMeters, pastYearStart, pastYearEnd, yearPriorStart, yearPriorEnd, 'Natural Gas');
       utilitySummaries.push(utilitySummary)
     }
-    if (reportOptions.otherFuels) {
+    if (reportUtilityOptions.otherFuels) {
       let utilitySummary: UtilitySummary = this.getUtilitySummary(facilityMeters, pastYearStart, pastYearEnd, yearPriorStart, yearPriorEnd, 'Other Fuels');
       utilitySummaries.push(utilitySummary)
     }
-    if (reportOptions.otherEnergy) {
+    if (reportUtilityOptions.otherEnergy) {
       let utilitySummary: UtilitySummary = this.getUtilitySummary(facilityMeters, pastYearStart, pastYearEnd, yearPriorStart, yearPriorEnd, 'Other Energy');
       utilitySummaries.push(utilitySummary)
     }
-    if (reportOptions.water) {
+    if (reportUtilityOptions.water) {
       let utilitySummary: UtilitySummary = this.getUtilitySummary(facilityMeters, pastYearStart, pastYearEnd, yearPriorStart, yearPriorEnd, 'Water');
       utilitySummaries.push(utilitySummary)
     }
-    if (reportOptions.wasteWater) {
+    if (reportUtilityOptions.wasteWater) {
       let utilitySummary: UtilitySummary = this.getUtilitySummary(facilityMeters, pastYearStart, pastYearEnd, yearPriorStart, yearPriorEnd, 'Waste Water');
       utilitySummaries.push(utilitySummary)
     }
-    if (reportOptions.otherUtility) {
+    if (reportUtilityOptions.otherUtility) {
       let utilitySummary: UtilitySummary = this.getUtilitySummary(facilityMeters, pastYearStart, pastYearEnd, yearPriorStart, yearPriorEnd, 'Other Utility');
       utilitySummaries.push(utilitySummary)
     }

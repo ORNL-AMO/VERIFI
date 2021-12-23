@@ -5,7 +5,7 @@ import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service
 import { IdbFacility, IdbUtilityMeter, MeterSource } from 'src/app/models/idb';
 import { VisualizationService } from 'src/app/shared/helper-services/visualization.service';
 import { UtilityColors } from 'src/app/shared/utilityColors';
-import { OverviewReportService, ReportOptions } from '../../overview-report.service';
+import { OverviewReportService, ReportOptions, ReportUtilityOptions } from '../../overview-report.service';
 
 @Component({
   selector: 'app-facility-report-bar-chart',
@@ -27,39 +27,69 @@ export class FacilityReportBarChartComponent implements OnInit {
   electricityData: Array<{ time: string, energyUse: number, energyCost: number, emissions: number }>;
   naturalGasData: Array<{ time: string, energyUse: number, energyCost: number, emissions: number }>;
   otherFuelsData: Array<{ time: string, energyUse: number, energyCost: number, emissions: number }>;
+  otherEnergyData: Array<{ time: string, energyUse: number, energyCost: number, emissions: number }>;
   waterData: Array<{ time: string, energyUse: number, energyCost: number, emissions: number }>;
   wasteWaterData: Array<{ time: string, energyUse: number, energyCost: number, emissions: number }>;
   otherUtilityData: Array<{ time: string, energyUse: number, energyCost: number, emissions: number }>;
 
 
-  reportOptions: ReportOptions;
-  reportOptionsSub: Subscription;
+  reportUtilityOptions: ReportUtilityOptions;
+  reportUtilityOptionsSub: Subscription;
   constructor(private overviewReportService: OverviewReportService, private visualizationService: VisualizationService,
     private utilityMeterDbService: UtilityMeterdbService, private plotlyService: PlotlyService) { }
 
   ngOnInit(): void {
-    this.reportOptionsSub = this.overviewReportService.reportOptions.subscribe(reportOptions => {
-      this.reportOptions = reportOptions;
-    })
   }
 
   ngOnDestroy() {
-    this.reportOptionsSub.unsubscribe();
+    this.reportUtilityOptionsSub.unsubscribe();
   }
 
   ngAfterViewInit() {
-    this.setUtilityData();
+    this.reportUtilityOptionsSub = this.overviewReportService.reportUtilityOptions.subscribe(reportUtilityOptions => {
+      this.reportUtilityOptions = reportUtilityOptions;
+      this.setUtilityData();
+    })
   }
 
   setUtilityData() {
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == this.facility.id });
-    this.electricityData = this.getDataByUtility('Electricity', facilityMeters);
-    this.naturalGasData = this.getDataByUtility('Natural Gas', facilityMeters);
-    this.otherFuelsData = this.getDataByUtility('Other Fuels', facilityMeters);
-    this.waterData = this.getDataByUtility('Water', facilityMeters);
-    this.wasteWaterData = this.getDataByUtility('Waste Water', facilityMeters);
-    this.otherUtilityData = this.getDataByUtility('Other Utility', facilityMeters);
+    if (this.reportUtilityOptions.electricity) {
+      this.electricityData = this.getDataByUtility('Electricity', facilityMeters);
+    } else {
+      this.electricityData = [];
+    }
+    if (this.reportUtilityOptions.naturalGas) {
+      this.naturalGasData = this.getDataByUtility('Natural Gas', facilityMeters);
+    } else {
+      this.naturalGasData = [];
+    }
+    if (this.reportUtilityOptions.otherFuels) {
+      this.otherFuelsData = this.getDataByUtility('Other Fuels', facilityMeters);
+    } else {
+      this.otherFuelsData = [];
+    }
+    if (this.reportUtilityOptions.otherEnergy) {
+      this.otherEnergyData = this.getDataByUtility('Other Energy', facilityMeters);
+    } else {
+      this.otherEnergyData = [];
+    }
+    if (this.reportUtilityOptions.water) {
+      this.waterData = this.getDataByUtility('Water', facilityMeters);
+    } else {
+      this.waterData = [];
+    }
+    if (this.reportUtilityOptions.wasteWater) {
+      this.wasteWaterData = this.getDataByUtility('Waste Water', facilityMeters);
+    } else {
+      this.wasteWaterData = [];
+    }
+    if (this.reportUtilityOptions.otherUtility) {
+      this.otherUtilityData = this.getDataByUtility('Other Utility', facilityMeters);
+    } else {
+      this.otherUtilityData = [];
+    }
     this.drawEmissionsChart();
     this.drawCostChart();
     this.drawUsageChart();
@@ -141,6 +171,18 @@ export class FacilityReportBarChartComponent implements OnInit {
           type: 'bar',
           marker: {
             color: UtilityColors['Other Utility'].color
+          }
+        };
+        traceData.push(trace);
+      }
+      if (this.otherEnergyData.length != 0) {
+        let trace = {
+          x: this.otherUtilityData.map(data => { return data.time }),
+          y: this.otherUtilityData.map(data => { return data.emissions / 1000 }),
+          name: 'Other Energy',
+          type: 'bar',
+          marker: {
+            color: UtilityColors['Other Energy'].color
           }
         };
         traceData.push(trace);
@@ -244,6 +286,18 @@ export class FacilityReportBarChartComponent implements OnInit {
         };
         traceData.push(trace);
       }
+      if (this.otherEnergyData.length != 0) {
+        let trace = {
+          x: this.otherUtilityData.map(data => { return data.time }),
+          y: this.otherUtilityData.map(data => { return data.energyCost }),
+          name: 'Other Energy',
+          type: 'bar',
+          marker: {
+            color: UtilityColors['Other Energy'].color
+          }
+        };
+        traceData.push(trace);
+      }
       var layout = {
         barmode: 'group',
         title: {
@@ -340,6 +394,18 @@ export class FacilityReportBarChartComponent implements OnInit {
           type: 'bar',
           marker: {
             color: UtilityColors['Other Utility'].color
+          }
+        };
+        traceData.push(trace);
+      }
+      if (this.otherEnergyData.length != 0) {
+        let trace = {
+          x: this.otherUtilityData.map(data => { return data.time }),
+          y: this.otherUtilityData.map(data => { return data.energyUse }),
+          name: 'Other Energy',
+          type: 'bar',
+          marker: {
+            color: UtilityColors['Other Energy'].color
           }
         };
         traceData.push(trace);

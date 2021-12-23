@@ -11,9 +11,11 @@ export class OverviewReportService {
 
   showReportMenu: BehaviorSubject<boolean>;
   reportOptions: BehaviorSubject<ReportOptions>;
+  reportUtilityOptions: BehaviorSubject<ReportUtilityOptions>;
   constructor(private facilityDbService: FacilitydbService, private utilityMeterDbService: UtilityMeterdbService) {
     this.showReportMenu = new BehaviorSubject<boolean>(false);
     this.reportOptions = new BehaviorSubject<ReportOptions>(undefined);
+    this.reportUtilityOptions = new BehaviorSubject<ReportUtilityOptions>(undefined);
   }
 
   initializeOptions() {
@@ -38,11 +40,11 @@ export class OverviewReportService {
         otherEnergy = true;
       } else if (meter.source == 'Other Fuels') {
         otherFuels = true;
-      }else if(meter.source == 'Other Utility'){
+      } else if (meter.source == 'Other Utility') {
         otherUtility = true;
-      }else if(meter.source == 'Waste Water'){
+      } else if (meter.source == 'Waste Water') {
         wasteWater = true;
-      }else if(meter.source == 'Water'){
+      } else if (meter.source == 'Water') {
         water = true;
       }
     })
@@ -53,18 +55,20 @@ export class OverviewReportService {
       includeAccount: false,
       includeFacilities: true,
       facilities: accountFacilites,
+      facilityMetersTable: true,
+      facilityUtilityUsageTable: true,
+      facilityInfo: true,
+      facilityBarCharts: true
+    });
+    this.reportUtilityOptions.next({
       electricity: electricity,
       naturalGas: naturalGas,
       otherFuels: otherFuels,
       otherEnergy: otherEnergy,
       water: water,
       wasteWater: wasteWater,
-      otherUtility: otherUtility,
-      facilityMetersTable: true,
-      facilityUtilityUsageTable: true,
-      facilityInfo: true,
-      facilityBarCharts: true
-    });
+      otherUtility: otherUtility
+    })
   }
 }
 
@@ -75,6 +79,13 @@ export interface ReportOptions {
   includeAccount: boolean,
   includeFacilities: boolean,
   facilities: Array<IdbFacility>,
+  facilityMetersTable: boolean,
+  facilityUtilityUsageTable: boolean,
+  facilityInfo: boolean,
+  facilityBarCharts: boolean
+}
+
+export interface ReportUtilityOptions {
   electricity: boolean,
   naturalGas: boolean,
   otherFuels: boolean,
@@ -82,8 +93,4 @@ export interface ReportOptions {
   water: boolean,
   wasteWater: boolean,
   otherUtility: boolean,
-  facilityMetersTable: boolean,
-  facilityUtilityUsageTable: boolean,
-  facilityInfo: boolean,
-  facilityBarCharts: boolean
 }
