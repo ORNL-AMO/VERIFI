@@ -112,6 +112,7 @@ import { FrontPageComponent } from './overview-report/front-page/front-page.comp
 import { FacilityReportMetersTableComponent } from './overview-report/facility-report/facility-report-meters-table/facility-report-meters-table.component';
 import { FacilityReportUtilityUsageTableComponent } from './overview-report/facility-report/facility-report-utility-usage-table/facility-report-utility-usage-table.component';
 import { FacilityReportInfoComponent } from './overview-report/facility-report/facility-report-info/facility-report-info.component';
+import { FacilityReportBarChartComponent } from './overview-report/facility-report/facility-report-bar-chart/facility-report-bar-chart.component';
 
 @NgModule({
   declarations: [
@@ -209,7 +210,8 @@ import { FacilityReportInfoComponent } from './overview-report/facility-report/f
     FrontPageComponent,
     FacilityReportMetersTableComponent,
     FacilityReportUtilityUsageTableComponent,
-    FacilityReportInfoComponent
+    FacilityReportInfoComponent,
+    FacilityReportBarChartComponent
   ],
   imports: [
     BrowserModule,

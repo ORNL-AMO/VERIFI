@@ -286,8 +286,8 @@ export class CalanderizationService {
     let orderedMeterData: Array<IdbUtilityMeterData> = _.orderBy(meterData, (data) => { return new Date(data.readDate) });
     if (orderedMeterData.length > 3) {
       let startDate: Date = new Date(orderedMeterData[0].readDate);
-      startDate.setUTCMonth(startDate.getUTCMonth() + 1);
       let endDate: Date = new Date(orderedMeterData[orderedMeterData.length - 1].readDate);
+      endDate.setUTCMonth(endDate.getUTCMonth() + 1);
       while (startDate.getUTCMonth() != endDate.getUTCMonth() || startDate.getUTCFullYear() != endDate.getUTCFullYear()) {
         let month: number = startDate.getUTCMonth();
         let year: number = startDate.getUTCFullYear();

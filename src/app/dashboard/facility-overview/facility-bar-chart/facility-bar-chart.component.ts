@@ -5,7 +5,7 @@ import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
+import { IdbFacility, IdbUtilityMeter, MeterSource } from 'src/app/models/idb';
 import { UtilityColors } from 'src/app/shared/utilityColors';
 import { VisualizationService } from '../../../shared/helper-services/visualization.service';
 import { DashboardService } from '../../dashboard.service';
@@ -245,7 +245,7 @@ export class FacilityBarChartComponent implements OnInit {
     }
   }
 
-  getDataByUtility(utility: string, facilityMeters: Array<IdbUtilityMeter>): Array<{ time: string, energyUse: number, energyCost: number, emissions: number }> {
+  getDataByUtility(utility: MeterSource, facilityMeters: Array<IdbUtilityMeter>): Array<{ time: string, energyUse: number, energyCost: number, emissions: number }> {
     let filteredMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.source == utility });
     return this.vizualizationService.getFacilityBarChartData(filteredMeters, this.sumByMonth, this.removeIncompleteYears, false);
   }

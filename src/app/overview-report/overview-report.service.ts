@@ -62,7 +62,8 @@ export class OverviewReportService {
       otherUtility: otherUtility,
       facilityMetersTable: true,
       facilityUtilityUsageTable: true,
-      facilityInfo: true
+      facilityInfo: true,
+      facilityBarCharts: true
     });
   }
 }
@@ -83,5 +84,6 @@ export interface ReportOptions {
   otherUtility: boolean,
   facilityMetersTable: boolean,
   facilityUtilityUsageTable: boolean,
-  facilityInfo: boolean
+  facilityInfo: boolean,
+  facilityBarCharts: boolean
 }
