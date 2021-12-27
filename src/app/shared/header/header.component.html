@@ -18,7 +18,7 @@
             </div>
             <div class="facilityMenu" *ngIf="activeAccount">
                 <div class="currentFacility" (click)="toggleFacilityMenu()">
-                    <i class="fa fa-industry item-left"></i>
+                    <i class="fa fa-industry item-left" [ngStyle]="{'color': industryColor}"></i>
                     <span>{{activeAccount.name}}</span>
                     <p *ngIf="!activeFacility || viewingAccountPage">All Facilities <i
                             class="fa fa-caret-down"></i></p>

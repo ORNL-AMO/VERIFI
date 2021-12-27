@@ -74,7 +74,7 @@ export class AccountReportDonutComponent implements OnInit {
           y: 0,
           xref: 'x',
           yref: 'y',
-          text: 'Costs <br>(' + this.yearPriorDate + ' - ' + this.lastMonthsDate + ')',
+          text: '<b>Costs <br>(' + this.yearPriorDate + ' - ' + this.lastMonthsDate + ')</b>',
           showarrow: false,
           font: {
             size: 24
@@ -85,12 +85,13 @@ export class AccountReportDonutComponent implements OnInit {
         },
         yaxis: {
           visible: false
-        }
+        },
+        showlegend: false
       };
 
       let config = {
         displaylogo: false,
-        responsive: true
+        responsive: true,
       }
       this.plotlyService.newPlot(this.utilityCostDonut.nativeElement, data, layout, config);
     }
@@ -122,7 +123,7 @@ export class AccountReportDonutComponent implements OnInit {
           y: 0,
           xref: 'x',
           yref: 'y',
-          text: 'Energy Usage <br>(' + this.yearPriorDate + ' - ' + this.lastMonthsDate + ')',
+          text: '<b>Energy Usage <br>(' + this.yearPriorDate + ' - ' + this.lastMonthsDate + ')</b>',
           showarrow: false,
           font: {
             size: 24
@@ -133,7 +134,8 @@ export class AccountReportDonutComponent implements OnInit {
         },
         yaxis: {
           visible: false
-        }
+        },
+        showlegend: false
       };
 
       let config = {
@@ -170,7 +172,7 @@ export class AccountReportDonutComponent implements OnInit {
           y: 0,
           xref: 'x',
           yref: 'y',
-          text: 'Emissions <br>(' + this.yearPriorDate + ' - ' + this.lastMonthsDate + ')',
+          text: '<b>Emissions <br>(' + this.yearPriorDate + ' - ' + this.lastMonthsDate + ')</b>',
           showarrow: false,
           font: {
             size: 24
@@ -181,7 +183,8 @@ export class AccountReportDonutComponent implements OnInit {
         },
         yaxis: {
           visible: false
-        }
+        },
+        showlegend: false
       };
 
       let config = {

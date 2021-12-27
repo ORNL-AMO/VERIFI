@@ -37,7 +37,7 @@ export class HeaderComponent implements OnInit {
   selectedFacilitySub: Subscription;
 
   showImportFile: boolean = false;
-
+  industryColor: string;
   constructor(
     private eRef: ElementRef,
     private router: Router,
@@ -185,11 +185,17 @@ export class HeaderComponent implements OnInit {
   }
 
   checkIfAccountPage() {
-    if (this.router.url === '/account-management' || this.router.url === '/home/account-summary') {
+    if (this.router.url === '/account-management' || this.router.url === '/home/account-summary' || this.router.url == '/overview-report') {
       this.viewingAccountPage = true;
     }
-    if (this.router.url != '/account-management' && this.router.url != '/home/account-summary') {
+    if (this.router.url != '/account-management' && this.router.url != '/home/account-summary' && this.router.url != '/overview-report') {
       this.viewingAccountPage = false;
+    }
+
+    if(!this.viewingAccountPage && this.activeFacility){
+      this.industryColor = this.activeFacility.color;
+    }else{
+      this.industryColor = '#6abb2e';
     }
   }
 
