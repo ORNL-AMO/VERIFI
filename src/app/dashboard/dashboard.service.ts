@@ -36,61 +36,6 @@ export class DashboardService {
     });
   }
 
-  getAccountFacilitesSummary(): AccountFacilitiesSummary {
-    let facilitiesSummary: Array<FacilitySummary> = new Array();
-    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-    let allAccountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    let accountLastBill: MonthlyData = this.calanderizationService.getLastBillEntry(allAccountMeters, true);
-    facilities.forEach(facility => {
-      let facilityMeterSummary: FacilitySummary = this.getFacilitySummary(facility, true, accountLastBill);
-      facilitiesSummary.push(facilityMeterSummary);
-    });
-    return {
-      facilitySummaries: facilitiesSummary,
-      totalEnergyUse: _.sumBy(facilitiesSummary, 'energyUsage'),
-      totalEnergyCost: _.sumBy(facilitiesSummary, 'energyCost'),
-      totalNumberOfMeters: _.sumBy(facilitiesSummary, 'numberOfMeters'),
-      totalEmissions: _.sumBy(facilitiesSummary, 'emissions'),
-      allMetersLastBill: accountLastBill
-    };
-  }
-
-  getFacilitySummary(facility: IdbFacility, inAccount: boolean, accountMetersLastBill: MonthlyData): FacilitySummary {
-    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    let accountMetersCopy: Array<IdbUtilityMeter> = JSON.parse(JSON.stringify(accountMeters));
-    let facilityMeters: Array<IdbUtilityMeter> = accountMetersCopy.filter(meter => { return meter.facilityId == facility.id });
-    if (facilityMeters.length != 0) {
-      let facilityLastBill: MonthlyData = this.calanderizationService.getLastBillEntry(facilityMeters, inAccount);
-      if (facilityLastBill) {
-        let facilityMetersDataSummary: Array<{ time: string, energyUse: number, energyCost: number }> = this.calanderizationService.getPastYearData(facilityMeters, inAccount, accountMetersLastBill);
-        return {
-          facility: facility,
-          energyUsage: _.sumBy(facilityMetersDataSummary, 'energyUse'),
-          energyCost: _.sumBy(facilityMetersDataSummary, 'energyCost'),
-          emissions: _.sumBy(facilityMetersDataSummary, 'emissions'),
-          numberOfMeters: facilityMeters.length,
-          lastBillDate: new Date(facilityLastBill.year, (facilityLastBill.monthNumValue + 1))
-        }
-      } else {
-        return {
-          facility: facility,
-          energyUsage: 0,
-          energyCost: 0,
-          emissions: 0,
-          numberOfMeters: facilityMeters.length,
-          lastBillDate: undefined
-        }
-      }
-    }
-    return {
-      facility: facility,
-      energyCost: 0,
-      energyUsage: 0,
-      emissions: 0,
-      numberOfMeters: 0,
-      lastBillDate: undefined
-    }
-  }
 
   getLastMonthYear(): { lastMonth: number, lastMonthYear: number } {
     let todaysDate: Date = new Date();

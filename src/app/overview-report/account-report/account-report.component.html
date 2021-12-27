@@ -1,1 +1,13 @@
-<p>account-report works!</p>
+<h3 class="text-center">
+    <span class="account-icon">
+        <i class="fa fa-industry" [ngStyle]="{'color': account.color}"></i>
+    </span>
+    {{account.name}}
+</h3>
+<div class="pt-1 pb-4" *ngIf="reportOptions.accountInfo">
+    <app-account-report-info [account]="account"></app-account-report-info>
+</div>
+<div class="pt-5" *ngIf="reportOptions.facilitySummaryTable">
+    <app-account-report-facility-summary-table></app-account-report-facility-summary-table>
+</div>
+<hr>

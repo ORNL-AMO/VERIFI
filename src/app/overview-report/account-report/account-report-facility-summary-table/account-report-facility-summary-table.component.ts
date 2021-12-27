@@ -1,21 +1,19 @@
-import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, Input, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbFacility } from 'src/app/models/idb';
-import * as _ from 'lodash';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { AccountFacilitiesSummary } from 'src/app/models/dashboard';
+import { IdbAccount } from 'src/app/models/idb';
 import { MeterSummaryService } from 'src/app/shared/helper-services/meter-summary.service';
 
 @Component({
-  selector: 'app-facilities-table',
-  templateUrl: './facilities-table.component.html',
-  styleUrls: ['./facilities-table.component.css', '../../dashboard.component.css']
+  selector: 'app-account-report-facility-summary-table',
+  templateUrl: './account-report-facility-summary-table.component.html',
+  styleUrls: ['./account-report-facility-summary-table.component.css']
 })
-export class FacilitiesTableComponent implements OnInit {
-
+export class AccountReportFacilitySummaryTableComponent implements OnInit {
+ 
   accountFacilitiesSub: Subscription;
   accountMeterDataSub: Subscription;
   selectedAccountSub: Subscription;
@@ -31,7 +29,7 @@ export class FacilitiesTableComponent implements OnInit {
   lastMonthsDate: Date;
   yearPriorDate: Date;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private facilityDbService: FacilitydbService,
-    private router: Router, private accountdbService: AccountdbService, private meterSummaryService: MeterSummaryService) { }
+     private accountdbService: AccountdbService, private meterSummaryService: MeterSummaryService) { }
 
   ngOnInit(): void {
     this.selectedAccountSub = this.accountdbService.selectedAccount.subscribe(val => {
@@ -61,12 +59,6 @@ export class FacilitiesTableComponent implements OnInit {
     this.accountFacilitiesSub.unsubscribe();
     this.accountMeterDataSub.unsubscribe();
     this.selectedAccountSub.unsubscribe();
-  }
-
-
-  selectFacility(facility: IdbFacility) {
-    this.facilityDbService.selectedFacility.next(facility);
-    this.router.navigateByUrl('/home/facility-summary');
   }
 
   setAccountFacilities() {

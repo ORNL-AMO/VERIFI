@@ -5,6 +5,7 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { AccountFacilitiesSummary } from 'src/app/models/dashboard';
 import { IdbAccount } from 'src/app/models/idb';
+import { MeterSummaryService } from 'src/app/shared/helper-services/meter-summary.service';
 import { DashboardService } from '../../dashboard.service';
 
 @Component({
@@ -25,11 +26,11 @@ export class EnergyUseDonutComponent implements OnInit {
 
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService,
     private dashboardService: DashboardService, private plotlyService: PlotlyService,
-    private accountDbService: AccountdbService) { }
+    private accountDbService: AccountdbService, private meterSummaryService: MeterSummaryService) { }
 
   ngOnInit(): void {
     this.accountFacilitiesSub = this.utilityMeterDataDbService.accountMeterData.subscribe(val => {
-      this.facilitiesSummary = this.dashboardService.getAccountFacilitesSummary();
+      this.facilitiesSummary = this.meterSummaryService.getAccountFacilitesSummary();
       this.drawChart();
     });
 

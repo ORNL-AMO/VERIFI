@@ -12,9 +12,9 @@ export interface IdbAccount {
     zip: string,
     address: string,
     size?: number,
-    naics1: number,
-    naics2: number,
-    naics3: number,
+    naics1: string,
+    naics2: string,
+    naics3: string,
     notes: string,
     img: string
     unitsOfMeasure: string,
