@@ -38,14 +38,9 @@
                     <input class="checkbox" type="checkbox" id="accountUtilityTable" name="accountUtilityTable"
                         [(ngModel)]="reportOptions.accountUtilityTable" (change)="save()">Include Account Utility Table
                 </label>
-                <label for="accountDonut">
-                    <input class="checkbox" type="checkbox" id="accountDonut" name="accountDonut"
-                        [(ngModel)]="reportOptions.accountDonut" (change)="save()">Include Account Donut Charts
-                </label>
-                <label for="accountUtilityUsageBarChart">
-                    <input class="checkbox" type="checkbox" id="accountUtilityUsageBarChart"
-                        name="accountUtilityUsageBarChart" [(ngModel)]="reportOptions.accountUtilityUsageBarChart"
-                        (change)="save()">Include Account Utility Bar Charts
+                <label for="accountFacilityCharts">
+                    <input class="checkbox" type="checkbox" id="accountFacilityCharts" name="accountFacilityCharts"
+                        [(ngModel)]="reportOptions.accountFacilityCharts" (change)="save()">Include Account Facility Charts
                 </label>
                 <label for="accountFacilityAnnualBarChart">
                     <input class="checkbox" type="checkbox" id="accountFacilityAnnualBarChart"

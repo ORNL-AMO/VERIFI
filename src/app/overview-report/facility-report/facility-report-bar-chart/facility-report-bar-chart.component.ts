@@ -198,7 +198,10 @@ export class FacilityReportBarChartComponent implements OnInit {
         yaxis: {
           hoverformat: ",.2f"
         },
-        margin: { r: 0, t: 50 }
+        margin: { r: 0, t: 50 },        
+        legend: {
+          orientation: "h"
+        },
       };
 
       let config = {
@@ -308,7 +311,10 @@ export class FacilityReportBarChartComponent implements OnInit {
         },
         yaxis: {
           tickprefix: "$",
-          hoverformat: "$,.2f"
+          hoverformat: ",.2f"
+        },
+        legend: {
+          orientation: "h"
         },
         margin: { r: 0, t: 50 }
       };
@@ -421,7 +427,10 @@ export class FacilityReportBarChartComponent implements OnInit {
         yaxis: {
           hoverformat: ",.2f"
         },
-        margin: { r: 0, t: 50 }
+        margin: { r: 0, t: 50 },
+        legend: {
+          orientation: "h"
+        },
       };
 
       let config = {

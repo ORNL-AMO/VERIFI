@@ -12,14 +12,19 @@
         [accountFacilitiesSummary]="accountFacilitiesSummary"></app-account-report-facility-summary-table>
 </div>
 <div class="pt-5" *ngIf="reportOptions.accountUtilityTable">
-    <app-account-report-utility-usage-table [account]="account"></app-account-report-utility-usage-table>
+    <app-account-report-utility-usage-table [account]="account"
+        [accountReportUtilitySummary]="accountReportUtilitySummary"></app-account-report-utility-usage-table>
 </div>
-<div class="pt-5" *ngIf="reportOptions.accountDonut">
-    <app-account-report-donut [account]="account" [accountFacilitiesSummary]="accountFacilitiesSummary">
-    </app-account-report-donut>
-</div>
-<div class="pt-5" *ngIf="reportOptions.accountUtilityUsageBarChart">
-    <app-account-report-utility-usage-bar-chart [account]="account"></app-account-report-utility-usage-bar-chart>
+<div class="row pt-5" *ngIf="reportOptions.accountFacilityCharts">
+    <div class="col-6">
+        <app-account-report-donut [account]="account" [accountFacilitiesSummary]="accountFacilitiesSummary">
+        </app-account-report-donut>
+    </div>
+    <div class="col-6">
+        <app-account-report-utility-usage-bar-chart [account]="account"
+            [facilitiesUtilitySummaries]="facilitiesUtilitySummaries" [reportUtilityOptions]="reportUtilityOptions">
+        </app-account-report-utility-usage-bar-chart>
+    </div>
 </div>
 <div class="pt-5" *ngIf="reportOptions.accountFacilityAnnualBarChart">
     <app-account-report-facility-bar-chart [account]="account"></app-account-report-facility-bar-chart>
