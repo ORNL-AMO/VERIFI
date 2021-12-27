@@ -8,9 +8,20 @@
     <app-account-report-info [account]="account"></app-account-report-info>
 </div>
 <div class="pt-5" *ngIf="reportOptions.facilitySummaryTable">
-    <app-account-report-facility-summary-table></app-account-report-facility-summary-table>
+    <app-account-report-facility-summary-table [account]="account"
+        [accountFacilitiesSummary]="accountFacilitiesSummary"></app-account-report-facility-summary-table>
 </div>
 <div class="pt-5" *ngIf="reportOptions.accountUtilityTable">
     <app-account-report-utility-usage-table [account]="account"></app-account-report-utility-usage-table>
+</div>
+<div class="pt-5" *ngIf="reportOptions.accountDonut">
+    <app-account-report-donut [account]="account" [accountFacilitiesSummary]="accountFacilitiesSummary">
+    </app-account-report-donut>
+</div>
+<div class="pt-5" *ngIf="reportOptions.accountUtilityUsageBarChart">
+    <app-account-report-utility-usage-bar-chart [account]="account"></app-account-report-utility-usage-bar-chart>
+</div>
+<div class="pt-5" *ngIf="reportOptions.accountFacilityAnnualBarChart">
+    <app-account-report-facility-bar-chart [account]="account"></app-account-report-facility-bar-chart>
 </div>
 <hr>

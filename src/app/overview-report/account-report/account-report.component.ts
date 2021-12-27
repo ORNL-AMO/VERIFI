@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { AccountFacilitiesSummary } from 'src/app/models/dashboard';
 import { IdbAccount } from 'src/app/models/idb';
+import { MeterSummaryService } from 'src/app/shared/helper-services/meter-summary.service';
 import { OverviewReportService, ReportOptions } from '../overview-report.service';
 
 @Component({
@@ -15,11 +17,23 @@ export class AccountReportComponent implements OnInit {
   accountSub: Subscription;
   reportOptions: ReportOptions;
   reportOptionsSub: Subscription;
-  constructor(private accountDbService: AccountdbService, private overviewReportService: OverviewReportService) { }
+
+  accountFacilitiesSummary: AccountFacilitiesSummary = {
+    facilitySummaries: [],
+    totalEnergyUse: undefined,
+    totalEnergyCost: undefined,
+    totalNumberOfMeters: undefined,
+    totalEmissions: undefined,
+    allMetersLastBill: undefined
+  };
+
+  constructor(private accountDbService: AccountdbService, private overviewReportService: OverviewReportService,
+    private meterSummaryService: MeterSummaryService) { }
 
   ngOnInit(): void {
     this.accountSub = this.accountDbService.selectedAccount.subscribe(account => {
       this.account = account
+      this.setAccountFacilities();
     });
 
     this.reportOptionsSub = this.overviewReportService.reportOptions.subscribe(reportOptions => {
@@ -32,4 +46,19 @@ export class AccountReportComponent implements OnInit {
     this.reportOptionsSub.unsubscribe();
   }
 
+  setAccountFacilities() {
+    this.accountFacilitiesSummary = this.meterSummaryService.getAccountFacilitesSummary();
+
+  }
+
+  setEmpty() {
+    this.accountFacilitiesSummary = {
+      facilitySummaries: [],
+      totalEnergyUse: undefined,
+      totalEnergyCost: undefined,
+      totalNumberOfMeters: undefined,
+      totalEmissions: undefined,
+      allMetersLastBill: undefined
+    };
+  }
 }
