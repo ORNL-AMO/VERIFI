@@ -33,6 +33,11 @@
                         [(ngModel)]="reportOptions.facilitySummaryTable" (change)="save()">Include Facility Summary
                     Table
                 </label>
+
+                <label for="accountUtilityTable">
+                    <input class="checkbox" type="checkbox" id="accountUtilityTable" name="accountUtilityTable"
+                        [(ngModel)]="reportOptions.accountUtilityTable" (change)="save()">Include Account Utility Table
+                </label>
                 <hr>
                 <label>Facility Reports Options</label>
                 <label for="includeFacilities">

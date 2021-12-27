@@ -115,6 +115,7 @@ import { FacilityReportInfoComponent } from './overview-report/facility-report/f
 import { FacilityReportBarChartComponent } from './overview-report/facility-report/facility-report-bar-chart/facility-report-bar-chart.component';
 import { AccountReportInfoComponent } from './overview-report/account-report/account-report-info/account-report-info.component';
 import { AccountReportFacilitySummaryTableComponent } from './overview-report/account-report/account-report-facility-summary-table/account-report-facility-summary-table.component';
+import { AccountReportUtilityUsageTableComponent } from './overview-report/account-report/account-report-utility-usage-table/account-report-utility-usage-table.component';
 
 @NgModule({
   declarations: [
@@ -215,7 +216,8 @@ import { AccountReportFacilitySummaryTableComponent } from './overview-report/ac
     FacilityReportInfoComponent,
     FacilityReportBarChartComponent,
     AccountReportInfoComponent,
-    AccountReportFacilitySummaryTableComponent
+    AccountReportFacilitySummaryTableComponent,
+    AccountReportUtilityUsageTableComponent
   ],
   imports: [
     BrowserModule,

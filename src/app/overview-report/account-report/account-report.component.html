@@ -10,4 +10,7 @@
 <div class="pt-5" *ngIf="reportOptions.facilitySummaryTable">
     <app-account-report-facility-summary-table></app-account-report-facility-summary-table>
 </div>
+<div class="pt-5" *ngIf="reportOptions.accountUtilityTable">
+    <app-account-report-utility-usage-table [account]="account"></app-account-report-utility-usage-table>
+</div>
 <hr>
