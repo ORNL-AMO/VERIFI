@@ -3,6 +3,7 @@ import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbFacility, IdbUtilityMeter, MeterSource } from 'src/app/models/idb';
+import { FacilityBarChartData } from 'src/app/models/visualization';
 import { VisualizationService } from 'src/app/shared/helper-services/visualization.service';
 import { UtilityColors } from 'src/app/shared/utilityColors';
 import { OverviewReportService, ReportOptions, ReportUtilityOptions } from '../../overview-report.service';
@@ -24,13 +25,13 @@ export class FacilityReportBarChartComponent implements OnInit {
 
 
 
-  electricityData: Array<{ time: string, energyUse: number, energyCost: number, emissions: number }>;
-  naturalGasData: Array<{ time: string, energyUse: number, energyCost: number, emissions: number }>;
-  otherFuelsData: Array<{ time: string, energyUse: number, energyCost: number, emissions: number }>;
-  otherEnergyData: Array<{ time: string, energyUse: number, energyCost: number, emissions: number }>;
-  waterData: Array<{ time: string, energyUse: number, energyCost: number, emissions: number }>;
-  wasteWaterData: Array<{ time: string, energyUse: number, energyCost: number, emissions: number }>;
-  otherUtilityData: Array<{ time: string, energyUse: number, energyCost: number, emissions: number }>;
+  electricityData: Array<FacilityBarChartData>;
+  naturalGasData: Array<FacilityBarChartData>;
+  otherFuelsData: Array<FacilityBarChartData>;
+  otherEnergyData: Array<FacilityBarChartData>;
+  waterData: Array<FacilityBarChartData>;
+  wasteWaterData: Array<FacilityBarChartData>;
+  otherUtilityData: Array<FacilityBarChartData>;
 
 
   reportUtilityOptions: ReportUtilityOptions;
@@ -95,7 +96,7 @@ export class FacilityReportBarChartComponent implements OnInit {
     this.drawUsageChart();
   }
 
-  getDataByUtility(utility: MeterSource, facilityMeters: Array<IdbUtilityMeter>): Array<{ time: string, energyUse: number, energyCost: number, emissions: number }> {
+  getDataByUtility(utility: MeterSource, facilityMeters: Array<IdbUtilityMeter>): Array<FacilityBarChartData> {
     let filteredMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.source == utility });
     return this.visualizationService.getFacilityBarChartData(filteredMeters, false, true, false);
   }
