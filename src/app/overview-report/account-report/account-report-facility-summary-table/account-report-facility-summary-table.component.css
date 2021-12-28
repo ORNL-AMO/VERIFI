@@ -5,3 +5,27 @@
 .w-2{
     width: 20%;
 }
+
+/* table.table.table-sm tr th, table.table.table-sm tbody tr, .table th, .table td {
+    border-top: solid 1px black !important;
+    border-bottom: solid 1px black !important;
+    border-left: solid 1px black !important;
+    border-right: solid 1px black !important;
+    color: black;
+    background-color: white;
+} */
+
+@media print {
+    table.table.table-sm tr th, table.table.table-sm tbody tr, .table th, .table td {
+        border-top: solid 1px black !important;
+        border-bottom: solid 1px black !important;
+        border-left: solid 1px black !important;
+        border-right: solid 1px black !important;
+        color: black;
+        background-color: white;
+    }
+
+    table.table{
+        border-collapse: inherit !important;
+    }
+}

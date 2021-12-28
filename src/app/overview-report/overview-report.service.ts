@@ -15,10 +15,12 @@ export class OverviewReportService {
   showReportMenu: BehaviorSubject<boolean>;
   reportOptions: BehaviorSubject<ReportOptions>;
   reportUtilityOptions: BehaviorSubject<ReportUtilityOptions>;
+  print: BehaviorSubject<boolean>;
   constructor(private facilityDbService: FacilitydbService, private utilityMeterDbService: UtilityMeterdbService, private calanderizationService: CalanderizationService) {
     this.showReportMenu = new BehaviorSubject<boolean>(false);
     this.reportOptions = new BehaviorSubject<ReportOptions>(undefined);
     this.reportUtilityOptions = new BehaviorSubject<ReportUtilityOptions>(undefined);
+    this.print = new BehaviorSubject<boolean>(false);
   }
 
   initializeOptions() {

@@ -1,9 +1,3 @@
 .col-6{
     min-width: 600px;
 }
-
-@media print {
-    .col-6{
-        width: 100%;
-    }
-}

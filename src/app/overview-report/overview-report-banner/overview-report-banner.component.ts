@@ -20,6 +20,6 @@ export class OverviewReportBannerComponent implements OnInit {
   }
 
   print(){
-    window.print();
+    this.overviewReportService.print.next(true);
   }
 }

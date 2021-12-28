@@ -1,7 +1,7 @@
 <div class="d-flex flex-column h-100">
     <app-overview-report-banner class="hide-print"></app-overview-report-banner>
     <app-overview-report-menu *ngIf="showReportMenu"></app-overview-report-menu>
-    <div class="report">
+    <div class="report" [ngClass]="{'print': print}">
         <app-front-page></app-front-page>
         <hr class="print-break-after page-spacer">
         <app-account-report class="print-break-after" *ngIf="reportOptions.includeAccount"></app-account-report>
