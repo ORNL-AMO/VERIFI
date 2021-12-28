@@ -9,10 +9,10 @@
 <div class="pt-5" *ngIf="reportOptions.facilityMetersTable">
     <app-facility-report-meters-table [facility]="facility"></app-facility-report-meters-table>
 </div>
-<div class="pt-5" *ngIf="reportOptions.facilityUtilityUsageTable">
+<div class="pt-5 print-break-after" *ngIf="reportOptions.facilityUtilityUsageTable">
     <app-facility-report-utility-usage-table [facility]="facility"></app-facility-report-utility-usage-table>
 </div>
 <div class="pt-5" *ngIf="reportOptions.facilityBarCharts">
     <app-facility-report-bar-chart [facility]="facility"></app-facility-report-bar-chart>
 </div>
-<hr class="page-spacer">
+<hr class="page-spacer hide-print">

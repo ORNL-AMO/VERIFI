@@ -11,11 +11,11 @@
     <app-account-report-facility-summary-table [account]="account"
         [accountFacilitiesSummary]="accountFacilitiesSummary"></app-account-report-facility-summary-table>
 </div>
-<div class="pt-5" *ngIf="reportOptions.accountUtilityTable">
+<div class="pt-5 print-break-after" *ngIf="reportOptions.accountUtilityTable">
     <app-account-report-utility-usage-table [account]="account"
         [accountReportUtilitySummary]="accountReportUtilitySummary"></app-account-report-utility-usage-table>
 </div>
-<div class="row pt-5" *ngIf="reportOptions.accountFacilityCharts">
+<div class="row pt-5 print-break-after" *ngIf="reportOptions.accountFacilityCharts">
     <div class="col-6">
         <app-account-report-donut [account]="account" [accountFacilitiesSummary]="accountFacilitiesSummary">
         </app-account-report-donut>
@@ -29,4 +29,4 @@
 <div class="pt-5" *ngIf="reportOptions.accountFacilityAnnualBarChart">
     <app-account-report-facility-bar-chart [account]="account"></app-account-report-facility-bar-chart>
 </div>
-<hr>
+<hr class="hide-print">

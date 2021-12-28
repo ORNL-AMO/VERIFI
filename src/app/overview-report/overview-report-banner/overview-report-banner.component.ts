@@ -19,4 +19,7 @@ export class OverviewReportBannerComponent implements OnInit {
     this.overviewReportService.showReportMenu.next(!showReportMenu);
   }
 
+  print(){
+    window.print();
+  }
 }

@@ -16,3 +16,10 @@ hr.page-spacer{
 .report-container{
     margin-bottom: 100px;
 }
+
+@media print {
+    .report{
+        margin: 0px;
+        padding: 0px;
+    }
+}
