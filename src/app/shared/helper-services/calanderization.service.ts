@@ -443,8 +443,8 @@ export class CalanderizationService {
       });
     }
     let lastBill: MonthlyData = _.maxBy(monthlyData, (data: MonthlyData) => {
-      let date = new Date();
-      date.setFullYear(data.year, data.monthNumValue);
+      let date = new Date(data.date);
+      // date.setFullYear(data.year, data.monthNumValue);
       return date;
     });
     return lastBill;
@@ -457,8 +457,8 @@ export class CalanderizationService {
       });
     }
     let firstBill: MonthlyData = _.minBy(monthlyData, (data: MonthlyData) => {
-      let date = new Date();
-      date.setFullYear(data.year, data.monthNumValue);
+      let date = new Date(data.date);
+      // date.setFullYear(data.year, data.monthNumValue);
       return date;
     });
     return firstBill;
@@ -586,8 +586,9 @@ export class CalanderizationService {
   }
 
   getPreviousMonthsBill(month: number, year: number, meterReadings: Array<IdbUtilityMeterData>): IdbUtilityMeterData {
+    //set to the 5th to not conflict
     let previousMonth: Date = new Date();
-    previousMonth.setFullYear(year, month - 1);
+    previousMonth.setUTCFullYear(year, month - 1, 5);
     let previousMonthReadings: Array<IdbUtilityMeterData> = this.getCurrentMonthsReadings(previousMonth.getUTCMonth(), previousMonth.getUTCFullYear(), meterReadings);
     if (previousMonthReadings.length == 0) {
       return this.getPreviousMonthsBill(previousMonth.getUTCMonth(), previousMonth.getUTCFullYear(), meterReadings);
@@ -609,7 +610,7 @@ export class CalanderizationService {
 
   getNextMonthsBill(month: number, year: number, meterReadings: Array<IdbUtilityMeterData>): IdbUtilityMeterData {
     let nextMonth: Date = new Date();
-    nextMonth.setFullYear(year, month + 1);
+    nextMonth.setFullYear(year, month + 1, 5);
     let nextMonthReadings: Array<IdbUtilityMeterData> = this.getCurrentMonthsReadings(nextMonth.getUTCMonth(), nextMonth.getUTCFullYear(), meterReadings);
     if (nextMonthReadings.length == 0) {
       return this.getNextMonthsBill(nextMonth.getUTCMonth(), nextMonth.getUTCFullYear(), meterReadings);
