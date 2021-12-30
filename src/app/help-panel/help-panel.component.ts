@@ -62,4 +62,8 @@ export class HelpPanelComponent implements OnInit {
     this.selectedSource = this.helpText.split('energy-consumption/')[1];
   }
 
+  closePanel(){
+    this.helpPanelService.helpPanelOpen.next(false);
+  }
+
 }

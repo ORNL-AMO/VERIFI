@@ -10,5 +10,12 @@
 
 .help-panel.open{
     width: 260px;
-    margin: .5rem;
 }
+
+h3 a{
+    font-size: 1.75rem;
+  }
+
+  h3 a .fa-close{
+    color: white;
+  }
