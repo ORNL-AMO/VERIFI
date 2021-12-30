@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AccountdbService } from '../indexedDB/account-db.service';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
@@ -17,12 +18,14 @@ export class UtilityComponent implements OnInit {
 
   selectedAccountSub: Subscription;
   selectedFacilitySub: Subscription;
-
+  showSiteToSourceOption: boolean;
   constructor(
     private accountdbService: AccountdbService,
     private facilityDbService: FacilitydbService,
     private meterGroupingService: MeterGroupingService,
-  ) { }
+    private router: Router
+  ) {
+  }
 
   ngOnInit() {
     this.selectedAccountSub = this.accountdbService.selectedAccount.subscribe(selectedAccount => {
@@ -32,6 +35,13 @@ export class UtilityComponent implements OnInit {
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(selectedFacility => {
       this.selectedFacility = selectedFacility;
     });
+
+    this.router.events.subscribe((val) => {
+      if (val instanceof NavigationEnd) {
+        this.showSiteToSourceOption = !val.url.includes('energy-consumption');
+      }
+    });
+    this.showSiteToSourceOption = !this.router.url.includes('energy-consumption')
   }
 
   ngOnDestroy() {

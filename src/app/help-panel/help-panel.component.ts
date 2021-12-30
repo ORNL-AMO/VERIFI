@@ -17,7 +17,6 @@ export class HelpPanelComponent implements OnInit {
   selectedFacilitySub: Subscription;
   selectedFacility: IdbFacility;
   selectedFacilityName: string = 'Facility';
-  showSiteToSourceOption: boolean;
   helpPanelOpen: boolean;
   constructor(
     private router: Router,
@@ -32,7 +31,6 @@ export class HelpPanelComponent implements OnInit {
   }
 
   ngOnInit() {
-
     this.helpPanelService.helpPanelOpen.subscribe(helpPanelOpen => {
       this.helpPanelOpen = helpPanelOpen
       setTimeout(() => {
@@ -57,7 +55,6 @@ export class HelpPanelComponent implements OnInit {
   }
 
   getUrl(val: string) {
-    this.showSiteToSourceOption = !val.includes('energy-consumption');
     this.helpText = val.replace('/utility/', '');
     this.selectedSource = this.helpText.split('energy-consumption/')[1];
   }

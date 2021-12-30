@@ -104,6 +104,7 @@ import { NaicsListPipe } from './account-management/general-information-form/nai
 import { YearOptionsPipe } from './account-management/sustainability-questions-form/year-options.pipe';
 import { CustomNumberPipe } from './shared/helper-pipes/custom-number.pipe';
 import { UtilityBannerComponent } from './utility/utility-banner/utility-banner.component';
+import { SiteToSourceOptionComponent } from './utility/site-to-source-option/site-to-source-option.component';
 
 @NgModule({
   declarations: [
@@ -193,7 +194,8 @@ import { UtilityBannerComponent } from './utility/utility-banner/utility-banner.
     NaicsListPipe,
     YearOptionsPipe,
     CustomNumberPipe,
-    UtilityBannerComponent
+    UtilityBannerComponent,
+    SiteToSourceOptionComponent
   ],
   imports: [
     BrowserModule,

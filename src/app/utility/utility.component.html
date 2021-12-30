@@ -1,20 +1,18 @@
-
 <app-utility-banner *ngIf="selectedAccount && selectedFacility"></app-utility-banner>
 
 <div class="row no-margin flex-grow-1" *ngIf="(selectedAccount && selectedFacility)">
     <div class="col">
         <router-outlet></router-outlet>
     </div>
-    <!-- <div class="col-lg-3">
-        <app-help-panel></app-help-panel>
-    </div> -->
+    <div class="col-lg-3" *ngIf="showSiteToSourceOption">
+        <app-site-to-source-option></app-site-to-source-option>
+    </div>
 </div>
 
 <div *ngIf="(!selectedAccount || !selectedFacility)">
     <div class="wrapper main-content">
         <h4>Info</h4>
-        <p class="alert alert-warning"><i class="fa fa-info-circle"></i> No account or facility selected. <a routerLink="/home/account-summary">Return to dashboard</a></p>
-        
+        <p class="alert alert-warning"><i class="fa fa-info-circle"></i> No account or facility selected. <a
+                routerLink="/home/account-summary">Return to dashboard</a></p>
     </div>
 </div>
-
