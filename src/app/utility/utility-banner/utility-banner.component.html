@@ -5,7 +5,7 @@
             <ul>
                 <li><a routerLink="energy-consumption" [routerLinkActive]="['active']">Utilities</a></li>
                 <li [class.disabled]="utilityMeterData.length === 0">
-                    <a routerLink="mo-meter-data" [routerLinkActive]="['active']">Monthly Meter Data</a>
+                    <a routerLink="monthly-meter-data" [routerLinkActive]="['active']">Monthly Meter Data</a>
                     <span class="small navigation-warning">Requires Meter Readings</span>
                 </li>
                 <li [class.disabled]="utilityMeterData.length === 0">

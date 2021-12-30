@@ -38,16 +38,24 @@ export class UtilityComponent implements OnInit {
 
     this.router.events.subscribe((val) => {
       if (val instanceof NavigationEnd) {
-        this.showSiteToSourceOption = !val.url.includes('energy-consumption');
+        this.setShowSiteToSourceOption(val.url);
       }
     });
-    this.showSiteToSourceOption = !this.router.url.includes('energy-consumption')
+    this.setShowSiteToSourceOption(this.router.url);
   }
 
   ngOnDestroy() {
     this.selectedAccountSub.unsubscribe();
     this.selectedFacilitySub.unsubscribe();
     this.meterGroupingService.dateRange.next({ minDate: undefined, maxDate: undefined })
+  }
+
+  setShowSiteToSourceOption(url: string) {
+    if (url.includes('monthly-meter-data') || url.includes('meter-groups') || url.includes('visualization')) {
+      this.showSiteToSourceOption = true;
+    } else {
+      this.showSiteToSourceOption = false;
+    }
   }
 
 }

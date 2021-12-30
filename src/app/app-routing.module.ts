@@ -71,7 +71,7 @@ const routes: Routes = [
           { path: 'other-utility', component: UtilityMeterDataComponent },
         ],
       },
-      { path: 'mo-meter-data', component: CalanderizationComponent },
+      { path: 'monthly-meter-data', component: CalanderizationComponent },
       { path: 'meter-groups', component: MeterGroupingComponent },
       { path: 'predictors', component: PredictorDataComponent },
       { path: 'visualization', component: VisualizationComponent },

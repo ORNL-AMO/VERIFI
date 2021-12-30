@@ -1,8 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
-import { Subscription } from 'rxjs';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbFacility } from 'src/app/models/idb';
 import { HelpPanelService } from './help-panel.service';
 
 @Component({
@@ -12,24 +9,12 @@ import { HelpPanelService } from './help-panel.service';
 })
 export class HelpPanelComponent implements OnInit {
 
-  helpText: string;
-  selectedSource: string;
-  selectedFacilitySub: Subscription;
-  selectedFacility: IdbFacility;
-  selectedFacilityName: string = 'Facility';
   helpPanelOpen: boolean;
-  helpComponent: string;
+  helpURL: string;
   constructor(
     private router: Router,
-    private facilityDbService: FacilitydbService,
     private helpPanelService: HelpPanelService
   ) {
-    router.events.subscribe((val) => {
-      if (val instanceof NavigationEnd) {
-        this.getUrl(val.url);
-        this.setHelpComponent(val.url);
-      }
-    });
   }
 
   ngOnInit() {
@@ -40,36 +25,41 @@ export class HelpPanelComponent implements OnInit {
       }, 100)
     });
 
-    this.getUrl(this.router.url);
-    this.setHelpComponent(this.router.url);
-
-    this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
-      this.selectedFacility = val;
-      this.selectedFacilityName = val.name;
-    })
-  }
-
-  ngOnDestroy() {
-    this.selectedFacilitySub.unsubscribe();
-  }
-
-  save() {
-    this.facilityDbService.update(this.selectedFacility);
-  }
-
-  getUrl(val: string) {
-    this.helpText = val.replace('/utility/', '');
-    this.selectedSource = this.helpText.split('energy-consumption/')[1];
+    this.router.events.subscribe((val) => {
+      if (val instanceof NavigationEnd) {
+        this.setHelpURL(val.url);
+      }
+    });
+    //navigationsEnd isn't fired on init. Call here.
+    this.setHelpURL(this.router.url);
   }
 
   closePanel() {
     this.helpPanelService.helpPanelOpen.next(false);
   }
 
-  setHelpComponent(url: string) {
+  setHelpURL(url: string) {
     if (url.indexOf('energy-consumption') != -1) {
-      this.helpComponent = 'energy-consumption';
-    };
+      this.helpURL = 'energy-consumption';
+    } else if (url.indexOf('account-summary') != -1) {
+      this.helpURL = 'account-summary';
+    } else if (url.indexOf('facility-summary') != -1) {
+      this.helpURL = 'facility-summary';
+    } else if (url.indexOf('monthly-meter-data') != -1) {
+      this.helpURL = 'monthly-meter-data';
+    } else if (url.indexOf('meter-groups') != -1) {
+      this.helpURL = 'meter-groups';
+    } else if (url.indexOf('predictors') != -1) {
+      this.helpURL = 'predictors';
+    } else if (url.indexOf('visualization') != -1) {
+      this.helpURL = 'visualization';
+    } else if (url.indexOf('upload-data') != -1) {
+      this.helpURL = 'upload-data';
+    } else if (url.indexOf('facility-management') != -1) {
+      this.helpURL = 'facility-management';
+    } else if (url.indexOf('account-management') != -1) {
+      this.helpURL = 'account-management';
+    }
   }
 
 }

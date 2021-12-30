@@ -106,6 +106,15 @@ import { CustomNumberPipe } from './shared/helper-pipes/custom-number.pipe';
 import { UtilityBannerComponent } from './utility/utility-banner/utility-banner.component';
 import { SiteToSourceOptionComponent } from './utility/site-to-source-option/site-to-source-option.component';
 import { EnergyConsumptionHelpComponent } from './help-panel/utility/energy-consumption-help/energy-consumption-help.component';
+import { AccountOverviewHelpComponent } from './help-panel/dashboard/account-overview-help/account-overview-help.component';
+import { FacilityOverviewHelpComponent } from './help-panel/dashboard/facility-overview-help/facility-overview-help.component';
+import { MeterGroupingHelpComponent } from './help-panel/utility/meter-grouping-help/meter-grouping-help.component';
+import { CalanderizationHelpComponent } from './help-panel/utility/calanderization-help/calanderization-help.component';
+import { UploadDataHelpComponent } from './help-panel/utility/upload-data-help/upload-data-help.component';
+import { PredictorsDataHelpComponent } from './help-panel/utility/predictors-data-help/predictors-data-help.component';
+import { VisualizationHelpComponent } from './help-panel/utility/visualization-help/visualization-help.component';
+import { AccountHelpComponent } from './help-panel/account-management/account-help/account-help.component';
+import { FacilityHelpComponent } from './help-panel/account-management/facility-help/facility-help.component';
 
 @NgModule({
   declarations: [
@@ -197,7 +206,16 @@ import { EnergyConsumptionHelpComponent } from './help-panel/utility/energy-cons
     CustomNumberPipe,
     UtilityBannerComponent,
     SiteToSourceOptionComponent,
-    EnergyConsumptionHelpComponent
+    EnergyConsumptionHelpComponent,
+    AccountOverviewHelpComponent,
+    FacilityOverviewHelpComponent,
+    MeterGroupingHelpComponent,
+    CalanderizationHelpComponent,
+    UploadDataHelpComponent,
+    PredictorsDataHelpComponent,
+    VisualizationHelpComponent,
+    AccountHelpComponent,
+    FacilityHelpComponent
   ],
   imports: [
     BrowserModule,
