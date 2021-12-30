@@ -1,0 +1,14 @@
+.fa.fa-check-circle-o{
+    color: green;
+    font-size: larger;
+}
+
+.help-panel{
+    width: 0px;
+    transition: .2s width;
+}
+
+.help-panel.open{
+    width: 260px;
+    margin: .5rem;
+}

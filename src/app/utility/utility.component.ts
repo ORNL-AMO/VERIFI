@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
+import { HelpPanelService } from '../help-panel/help-panel.service';
 import { AccountdbService } from '../indexedDB/account-db.service';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
 import { UtilityMeterDatadbService } from '../indexedDB/utilityMeterData-db.service';
@@ -20,12 +21,13 @@ export class UtilityComponent implements OnInit {
   selectedAccountSub: Subscription;
   selectedFacilitySub: Subscription;
   utilityDataSub: Subscription;
-  
+
   constructor(
     private accountdbService: AccountdbService,
     private facilityDbService: FacilitydbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private meterGroupingService: MeterGroupingService
+    private meterGroupingService: MeterGroupingService,
+    private helpPanelService: HelpPanelService
   ) { }
 
   ngOnInit() {
@@ -46,7 +48,12 @@ export class UtilityComponent implements OnInit {
     this.selectedAccountSub.unsubscribe();
     this.selectedFacilitySub.unsubscribe();
     this.utilityDataSub.unsubscribe();
-    this.meterGroupingService.dateRange.next({minDate: undefined, maxDate: undefined})
+    this.meterGroupingService.dateRange.next({ minDate: undefined, maxDate: undefined })
+  }
+
+  toggleHelpPanel() {
+    let helpPanelOpen: boolean = this.helpPanelService.helpPanelOpen.getValue();
+    this.helpPanelService.helpPanelOpen.next(!helpPanelOpen);
   }
 
 }

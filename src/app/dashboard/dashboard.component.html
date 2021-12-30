@@ -7,10 +7,15 @@
     <h3 *ngIf="!isFacilityDashboard">Account Dashboard</h3>
     <h3 *ngIf="selectedFacility && isFacilityDashboard">Facility Dashboard</h3>
     <!--<button class="m-0 btn btn-outline item-right">Generate Report</button>-->
-    <h3>
-      <a *ngIf="!isFacilityDashboard" routerLink="/account-management"><span class="fa fa-cog"></span></a>
-      <a *ngIf="selectedFacility && isFacilityDashboard" routerLink="/facility-management"><span class="fa fa-cog"></span></a>
-    </h3>
+    <div>
+      <h3 class="pr-3">
+        <a *ngIf="!isFacilityDashboard" routerLink="/account-management"><span class="fa fa-cog"></span></a>
+        <a *ngIf="selectedFacility && isFacilityDashboard" routerLink="/facility-management"><span class="fa fa-cog"></span></a>
+      </h3>
+      <h3>
+          <a (click)="toggleHelpPanel()"><span class="fa fa-question"></span></a>
+      </h3>
+    </div>
   </div>
 
   <div class="sticky-top banner-border" [ngClass]="{'banner-dropdown-open': bannerDropdownOpen}">

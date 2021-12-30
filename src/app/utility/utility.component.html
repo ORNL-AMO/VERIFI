@@ -27,8 +27,11 @@
             <h3 class="pr-3">
                 <a routerLink="upload-data" [routerLinkActive]="['active']"><span class="fa fa-upload"></span></a>
             </h3>
-            <h3>
+            <h3 class="pr-3">
                 <a routerLink="/facility-management" [routerLinkActive]="['active']"><span class="fa fa-cog"></span></a>
+            </h3>
+            <h3>
+                <a (click)="toggleHelpPanel()"><span class="fa fa-question"></span></a>
             </h3>
         </div>
     </div>
@@ -38,9 +41,9 @@
     <div class="col">
         <router-outlet></router-outlet>
     </div>
-    <div class="col-lg-3">
+    <!-- <div class="col-lg-3">
         <app-help-panel></app-help-panel>
-    </div>
+    </div> -->
 </div>
 
 <div *ngIf="(!selectedAccount || !selectedFacility)">

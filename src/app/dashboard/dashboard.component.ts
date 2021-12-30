@@ -6,6 +6,7 @@ import { IdbAccount, IdbFacility, IdbUtilityMeter } from '../models/idb';
 import { Router, Event, NavigationEnd } from '@angular/router';
 import { UtilityMeterdbService } from '../indexedDB/utilityMeter-db.service';
 import { DashboardService } from './dashboard.service';
+import { HelpPanelService } from '../help-panel/help-panel.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -34,7 +35,8 @@ export class DashboardComponent implements OnInit {
     private facilityDbService: FacilitydbService,
     public utilityMeterDbService: UtilityMeterdbService,
     private router: Router,
-    private dashboardService: DashboardService
+    private dashboardService: DashboardService,
+    private helpPanelService: HelpPanelService
   ) {
     router.events.subscribe((event: Event) => {
       if (event instanceof NavigationEnd) {
@@ -112,5 +114,10 @@ export class DashboardComponent implements OnInit {
   setFacilityEnergyIsSource(energyIsSource: boolean) {
     this.selectedFacility.energyIsSource = energyIsSource;
     this.facilityDbService.update(this.selectedFacility);
+  }
+
+  toggleHelpPanel(){
+    let helpPanelOpen: boolean = this.helpPanelService.helpPanelOpen.getValue();
+    this.helpPanelService.helpPanelOpen.next(!helpPanelOpen);
   }
 }

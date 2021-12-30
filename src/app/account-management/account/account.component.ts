@@ -10,6 +10,7 @@ import { UtilityMeterDatadbService } from "../../indexedDB/utilityMeterData-db.s
 import { UtilityMeterGroupdbService } from "../../indexedDB/utilityMeterGroup-db.service";
 import { LoadingService } from "../../shared/loading/loading.service";
 import { BackupDataService } from '../backup-data.service';
+import { HelpPanelService } from 'src/app/help-panel/help-panel.service';
 
 @Component({
   selector: 'app-account',
@@ -36,7 +37,8 @@ export class AccountComponent implements OnInit {
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private loadingService: LoadingService,
-    private backupDataService: BackupDataService
+    private backupDataService: BackupDataService,
+    private helpPanelService: HelpPanelService
   ) { }
 
   ngOnInit() {
@@ -162,5 +164,10 @@ export class AccountComponent implements OnInit {
 
   cancelImportBackup() {
     this.showImportFile = false;
+  }
+
+  toggleHelpPanel(){
+    let helpPanelOpen: boolean = this.helpPanelService.helpPanelOpen.getValue();
+    this.helpPanelService.helpPanelOpen.next(!helpPanelOpen);
   }
 }

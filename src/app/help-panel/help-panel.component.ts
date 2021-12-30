@@ -3,6 +3,7 @@ import { NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idb';
+import { HelpPanelService } from './help-panel.service';
 
 @Component({
   selector: 'app-help-panel',
@@ -17,10 +18,12 @@ export class HelpPanelComponent implements OnInit {
   selectedFacility: IdbFacility;
   selectedFacilityName: string = 'Facility';
   showSiteToSourceOption: boolean;
+  helpPanelOpen: boolean;
   constructor(
     private router: Router,
     private facilityDbService: FacilitydbService,
-    ) { 
+    private helpPanelService: HelpPanelService
+  ) {
     router.events.subscribe((val) => {
       if (val instanceof NavigationEnd) {
         this.getUrl(val.url);
@@ -29,8 +32,16 @@ export class HelpPanelComponent implements OnInit {
   }
 
   ngOnInit() {
+
+    this.helpPanelService.helpPanelOpen.subscribe(helpPanelOpen => {
+      this.helpPanelOpen = helpPanelOpen
+      setTimeout(() => {
+        window.dispatchEvent(new Event("resize"));
+      }, 100)
+    });
+
     this.getUrl(this.router.url);
-    
+
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
       this.selectedFacility = val;
       this.selectedFacilityName = val.name;
@@ -47,7 +58,7 @@ export class HelpPanelComponent implements OnInit {
 
   getUrl(val: string) {
     this.showSiteToSourceOption = !val.includes('energy-consumption');
-    this.helpText = val.replace('/utility/','');
+    this.helpText = val.replace('/utility/', '');
     this.selectedSource = this.helpText.split('energy-consumption/')[1];
   }
 

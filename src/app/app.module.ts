@@ -16,7 +16,7 @@ import { UtilityComponent } from './utility/utility.component';
 import { EnergyConsumptionComponent } from './utility/energy-consumption/energy-consumption.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { EnergySourceComponent } from './utility/energy-consumption/energy-source/energy-source.component';
-import { HelpPanelComponent } from './utility/help-panel/help-panel.component';
+import { HelpPanelComponent } from './help-panel/help-panel.component';
 
 import { CommonModule } from '@angular/common';
 
