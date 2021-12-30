@@ -51,7 +51,7 @@ export class AccountReportUtilityUsageBarChartComponent implements OnInit {
         barmode: 'stack',
         showlegend: true,
         yaxis: {
-          title: "Utility Cost",
+          title: "$/yr",
           tickprefix: "$",
           automargin: true,
           // ticksuffix: ticksuffix
@@ -81,7 +81,7 @@ export class AccountReportUtilityUsageBarChartComponent implements OnInit {
         barmode: 'stack',
         showlegend: true,
         yaxis: {
-          title: "Utility Consumption",
+          title: this.account.energyUnit + '/yr',
           automargin: true,
         },
         xaxis: {
@@ -109,7 +109,7 @@ export class AccountReportUtilityUsageBarChartComponent implements OnInit {
         barmode: 'stack',
         showlegend: true,
         yaxis: {
-          title: "Utility Emissions",
+          title: "tonne CO<sub>2</sub>",
           automargin: true,
         },
         xaxis: {
