@@ -18,6 +18,7 @@ export class HelpPanelComponent implements OnInit {
   selectedFacility: IdbFacility;
   selectedFacilityName: string = 'Facility';
   helpPanelOpen: boolean;
+  helpComponent: string;
   constructor(
     private router: Router,
     private facilityDbService: FacilitydbService,
@@ -26,6 +27,7 @@ export class HelpPanelComponent implements OnInit {
     router.events.subscribe((val) => {
       if (val instanceof NavigationEnd) {
         this.getUrl(val.url);
+        this.setHelpComponent(val.url);
       }
     });
   }
@@ -39,6 +41,7 @@ export class HelpPanelComponent implements OnInit {
     });
 
     this.getUrl(this.router.url);
+    this.setHelpComponent(this.router.url);
 
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
       this.selectedFacility = val;
@@ -59,8 +62,14 @@ export class HelpPanelComponent implements OnInit {
     this.selectedSource = this.helpText.split('energy-consumption/')[1];
   }
 
-  closePanel(){
+  closePanel() {
     this.helpPanelService.helpPanelOpen.next(false);
+  }
+
+  setHelpComponent(url: string) {
+    if (url.indexOf('energy-consumption') != -1) {
+      this.helpComponent = 'energy-consumption';
+    };
   }
 
 }

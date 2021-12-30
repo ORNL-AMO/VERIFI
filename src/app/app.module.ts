@@ -105,6 +105,7 @@ import { YearOptionsPipe } from './account-management/sustainability-questions-f
 import { CustomNumberPipe } from './shared/helper-pipes/custom-number.pipe';
 import { UtilityBannerComponent } from './utility/utility-banner/utility-banner.component';
 import { SiteToSourceOptionComponent } from './utility/site-to-source-option/site-to-source-option.component';
+import { EnergyConsumptionHelpComponent } from './help-panel/utility/energy-consumption-help/energy-consumption-help.component';
 
 @NgModule({
   declarations: [
@@ -195,7 +196,8 @@ import { SiteToSourceOptionComponent } from './utility/site-to-source-option/sit
     YearOptionsPipe,
     CustomNumberPipe,
     UtilityBannerComponent,
-    SiteToSourceOptionComponent
+    SiteToSourceOptionComponent,
+    EnergyConsumptionHelpComponent
   ],
   imports: [
     BrowserModule,

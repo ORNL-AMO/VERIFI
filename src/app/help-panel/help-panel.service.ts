@@ -8,6 +8,6 @@ export class HelpPanelService {
 
   helpPanelOpen: BehaviorSubject<boolean>;
   constructor() { 
-    this.helpPanelOpen = new BehaviorSubject<boolean>(false);
+    this.helpPanelOpen = new BehaviorSubject<boolean>(true);
   }
 }

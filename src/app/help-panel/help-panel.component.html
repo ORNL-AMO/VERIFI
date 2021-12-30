@@ -6,8 +6,10 @@
                 <a (click)="closePanel()"><span class="fa fa-close"></span></a>
             </h3>
         </div>
-
-        <div *ngIf="helpText === 'energy-consumption'">
+        <div class="help-content">
+            <app-energy-consumption-help *ngIf="helpComponent == 'energy-consumption'"></app-energy-consumption-help>
+        </div>
+        <!-- <div *ngIf="helpText === 'energy-consumption'">
             <p>All the utility meters for <strong>{{selectedFacilityName}}</strong> can be viewed on this screen.</p>
             <p>Click “Add New Meter” to add new utility meters.</p>
             <p>Use “Import Data” to bulk import meter information in csv or excel format.</p>
@@ -56,6 +58,6 @@
                 uploading the files to
                 create meters, predictors and data readings.
             </p>
-        </div>
+        </div> -->
     </div>
 </div>

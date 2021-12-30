@@ -19,3 +19,7 @@ h3 a{
   h3 a .fa-close{
     color: white;
   }
+
+  .help-content{
+      padding: 1rem;
+  }
