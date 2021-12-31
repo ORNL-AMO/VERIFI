@@ -3,7 +3,9 @@
         <div class="col-lg-7 col-md-12 col-sm-12">
             <p class="bold">Meter Information</p>
             <div>
-                <label for="meterName">Name <span class="required">*</span> </label>
+                <app-label-with-tooltip [label]="'Name'" [field]="'meterName'" [labelId]="'meterName'"
+                    [isRequired]="true">
+                </app-label-with-tooltip>
                 <div class="mb-3">
                     <input id="meterName" class="form-control" type="text" formControlName="name"
                         onfocus="this.select();" minlength="0" maxlength="100">
@@ -14,7 +16,10 @@
 
             <div class="row">
                 <div class="col-6">
-                    <label for="source">Source <span class="required">*</span> </label>
+                    <app-label-with-tooltip [label]="'Source'" [field]="'source'" [labelId]="'source'"
+                        [isRequired]="true">
+                    </app-label-with-tooltip>
+                    <!-- <label for="source">Source <span class="required">*</span> </label> -->
                     <div class="mb-3">
                         <select class="form-control" id="source" type="text" formControlName="source"
                             (change)="changeSource()">
@@ -26,7 +31,9 @@
                         required</span>
                 </div>
                 <div class="col-6" *ngIf="displaySiteToSource">
-                    <label for="siteToSource">Site to source <span class="required">*</span> </label>
+                    <app-label-with-tooltip [label]="'Site to source'" [field]="'siteToSource'" [labelId]="'siteToSource'"
+                        [isRequired]="true"></app-label-with-tooltip>
+                    <!-- <label for="siteToSource">Site to source <span class="required">*</span> </label> -->
                     <div class="mb-3">
                         <input id="siteToSource" class="form-control" type="number" formControlName="siteToSource"
                             onfocus="this.select();" min="0" max="999999999999999">
@@ -65,7 +72,10 @@
                         required</span>
                 </div>
                 <div class="col-6">
-                    <label for="startingUnit">Collection Unit <span class="required">*</span> </label>
+                    <!-- <label for="startingUnit">Collection Unit <span class="required">*</span> </label> -->
+                    <app-label-with-tooltip [label]="'Collection Unit'" [field]="'startingUnit'" [labelId]="'startingUnit'"
+                        [isRequired]="true">
+                    </app-label-with-tooltip>
                     <div class="mb-3">
                         <select class="form-control" id="startingUnit" type="text" formControlName="startingUnit"
                             (change)="changeCollectionUnit()">

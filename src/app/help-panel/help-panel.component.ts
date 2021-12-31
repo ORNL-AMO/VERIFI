@@ -25,9 +25,9 @@ export class HelpPanelComponent implements OnInit {
       }, 100)
     });
 
-    this.router.events.subscribe((val) => {
-      if (val instanceof NavigationEnd) {
-        this.setHelpURL(val.url);
+    this.router.events.subscribe((event) => {
+      if (event instanceof NavigationEnd) {
+        this.setHelpURL(event.urlAfterRedirects);
       }
     });
     //navigationsEnd isn't fired on init. Call here.

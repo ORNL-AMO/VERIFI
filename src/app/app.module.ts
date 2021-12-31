@@ -115,6 +115,7 @@ import { PredictorsDataHelpComponent } from './help-panel/utility/predictors-dat
 import { VisualizationHelpComponent } from './help-panel/utility/visualization-help/visualization-help.component';
 import { AccountHelpComponent } from './help-panel/account-management/account-help/account-help.component';
 import { FacilityHelpComponent } from './help-panel/account-management/facility-help/facility-help.component';
+import { LabelWithTooltipComponent } from './shared/label-with-tooltip/label-with-tooltip.component';
 
 @NgModule({
   declarations: [
@@ -215,7 +216,8 @@ import { FacilityHelpComponent } from './help-panel/account-management/facility-
     PredictorsDataHelpComponent,
     VisualizationHelpComponent,
     AccountHelpComponent,
-    FacilityHelpComponent
+    FacilityHelpComponent,
+    LabelWithTooltipComponent
   ],
   imports: [
     BrowserModule,
