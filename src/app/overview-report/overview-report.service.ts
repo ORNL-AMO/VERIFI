@@ -65,7 +65,6 @@ export class OverviewReportService {
       accountFacilityCharts: true,
       accountFacilityAnnualBarChart: true,
       includeFacilities: true,
-      facilities: accountFacilites,
       facilityMetersTable: true,
       facilityUtilityUsageTable: true,
       facilityInfo: true,
@@ -78,7 +77,8 @@ export class OverviewReportService {
       otherEnergy: otherEnergy,
       water: water,
       wasteWater: wasteWater,
-      otherUtility: otherUtility
+      otherUtility: otherUtility,
+      facilities: accountFacilites,
     })
   }
 

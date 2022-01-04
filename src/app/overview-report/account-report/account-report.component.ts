@@ -36,13 +36,11 @@ export class AccountReportComponent implements OnInit {
     facility: IdbFacility
   }>;
   constructor(private accountDbService: AccountdbService, private overviewReportService: OverviewReportService,
-    private meterSummaryService: MeterSummaryService, private utilityMeterDbService: UtilityMeterdbService,
-    private facilityDbService: FacilitydbService) { }
+    private meterSummaryService: MeterSummaryService, private utilityMeterDbService: UtilityMeterdbService) { }
 
   ngOnInit(): void {
     this.accountSub = this.accountDbService.selectedAccount.subscribe(account => {
-      this.account = account
-      this.setAccountFacilities();
+      this.account = account;
     });
 
     this.reportOptionsSub = this.overviewReportService.reportOptions.subscribe(reportOptions => {
@@ -53,6 +51,7 @@ export class AccountReportComponent implements OnInit {
       this.reportUtilityOptions = reportUtilityOptions
       this.setFacilitySummary();
       this.setFacilitiesUtilitySummaries();
+      this.setAccountFacilities();
     });
   }
 
@@ -68,20 +67,32 @@ export class AccountReportComponent implements OnInit {
 
   setFacilitySummary() {
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    let removeFacilityId: Array<number> = new Array();
+    this.reportUtilityOptions.facilities.forEach(facility => {
+      if (!facility.selected) {
+        removeFacilityId.push(facility.id);
+      }
+    })
+    console.log(accountMeters.length);
+    accountMeters = accountMeters.filter(meter => {
+      return !removeFacilityId.includes(meter.facilityId);
+    });
+    console.log(accountMeters.length);
     this.accountReportUtilitySummary = this.overviewReportService.getUtilityUsageData(accountMeters, this.reportUtilityOptions, true);
   }
 
   setFacilitiesUtilitySummaries() {
-    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     this.facilitiesUtilitySummaries = new Array();
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    facilities.forEach(facility => {
-      let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == facility.id });
-      let utilitySummary: ReportUtilitySummary = this.overviewReportService.getUtilityUsageData(facilityMeters, this.reportUtilityOptions, true);
-      this.facilitiesUtilitySummaries.push({
-        facility: facility,
-        utilitySummary: utilitySummary
-      })
+    this.reportUtilityOptions.facilities.forEach(facility => {
+      if (facility.selected) {
+        let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == facility.id });
+        let utilitySummary: ReportUtilitySummary = this.overviewReportService.getUtilityUsageData(facilityMeters, this.reportUtilityOptions, true);
+        this.facilitiesUtilitySummaries.push({
+          facility: facility,
+          utilitySummary: utilitySummary
+        })
+      }
     })
 
   }

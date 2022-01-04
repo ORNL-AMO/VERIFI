@@ -44,7 +44,6 @@ export interface ReportUtilitySummary {
     accountFacilityCharts: boolean,
     accountFacilityAnnualBarChart: boolean,
     includeFacilities: boolean,
-    facilities: Array<IdbFacility>,
     facilityMetersTable: boolean,
     facilityUtilityUsageTable: boolean,
     facilityInfo: boolean,
@@ -59,4 +58,5 @@ export interface ReportUtilitySummary {
     water: boolean,
     wasteWater: boolean,
     otherUtility: boolean,
+    facilities: Array<IdbFacility>,
   }

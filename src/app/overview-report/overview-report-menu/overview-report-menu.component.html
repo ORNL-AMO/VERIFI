@@ -40,7 +40,8 @@
                 </label>
                 <label for="accountFacilityCharts">
                     <input class="checkbox" type="checkbox" id="accountFacilityCharts" name="accountFacilityCharts"
-                        [(ngModel)]="reportOptions.accountFacilityCharts" (change)="save()">Include Account Facility Charts
+                        [(ngModel)]="reportOptions.accountFacilityCharts" (change)="save()">Include Account Facility
+                    Charts
                 </label>
                 <label for="accountFacilityAnnualBarChart">
                     <input class="checkbox" type="checkbox" id="accountFacilityAnnualBarChart"
@@ -54,10 +55,11 @@
                         [(ngModel)]="reportOptions.includeFacilities" (change)="save()">Include Facility Reports
                 </label>
                 <div *ngIf="reportOptions.includeFacilities">
-                    <label *ngFor="let facility of reportOptions.facilities; let index = index;"
+                    <label *ngFor="let facility of reportUtilityOptions.facilities; let index = index;"
                         for="{{'facility_'+index}}">
                         <input class="checkbox" type="checkbox" id="{{'facility_'+index}}" name="{{'facility_'+index}}"
-                            [(ngModel)]="facility.selected" (change)="save()">Include {{facility.name}}
+                            [(ngModel)]="facility.selected" (change)="saveUtilityOptions()">Include
+                        <b>{{facility.name}}</b>
                     </label>
 
                 </div>

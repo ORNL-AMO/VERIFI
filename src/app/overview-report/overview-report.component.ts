@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { ReportOptions } from '../models/overview-report';
+import { ReportOptions, ReportUtilityOptions } from '../models/overview-report';
 import { OverviewReportService } from './overview-report.service';
 
 @Component({
@@ -16,6 +16,8 @@ export class OverviewReportComponent implements OnInit {
   reportOptionsSub: Subscription;
   printSub: Subscription;
   print: boolean;
+  reportUtilityOptions: ReportUtilityOptions;
+  reportUtilityOptionsSub: Subscription;
   constructor(private overviewReportService: OverviewReportService) { }
 
   ngOnInit(): void {
@@ -33,6 +35,10 @@ export class OverviewReportComponent implements OnInit {
       if (this.print) {
         this.printReport();
       }
+    });
+
+    this.reportUtilityOptionsSub = this.overviewReportService.reportUtilityOptions.subscribe(reportUtilityOptions => {
+      this.reportUtilityOptions = reportUtilityOptions;
     })
   }
 
@@ -40,6 +46,7 @@ export class OverviewReportComponent implements OnInit {
     this.showReportMenuSub.unsubscribe();
     this.reportOptionsSub.unsubscribe();
     this.printSub.unsubscribe();
+    this.reportUtilityOptionsSub.unsubscribe();
   }
 
   printReport() {

@@ -6,7 +6,7 @@
         <hr class="print-break-after page-spacer">
         <app-account-report class="print-break-after report-item" *ngIf="reportOptions.includeAccount"></app-account-report>
         <div *ngIf="reportOptions.includeFacilities">
-            <div *ngFor="let facility of reportOptions.facilities" class="print-break-before report-item">
+            <div *ngFor="let facility of reportUtilityOptions.facilities" class="print-break-before report-item">
                 <app-facility-report *ngIf="facility.selected" [facility]="facility"></app-facility-report>
             </div>
         </div>

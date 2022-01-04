@@ -205,9 +205,8 @@ export class AccountReportFacilityBarChartComponent implements OnInit {
   setReportData() {
     this.chartData = new Array();
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    let facilities: Array<IdbFacility> = this.overviewReportService.reportOptions.getValue().facilities;
     let selectedSource: Array<MeterSource> = this.overviewReportService.getSelectedSources(this.reportUtilityOptions);
-    facilities.forEach(facility => {
+    this.reportUtilityOptions.facilities.forEach(facility => {
       if (facility.selected) {
         let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => {
           return meter.facilityId == facility.id && selectedSource.includes(meter.source);

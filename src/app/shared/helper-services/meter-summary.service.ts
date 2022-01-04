@@ -60,13 +60,23 @@ export class MeterSummaryService {
 
   getAccountFacilitesSummary(reportUtilityOptions?: ReportUtilityOptions): AccountFacilitiesSummary {
     let facilitiesSummary: Array<FacilitySummary> = new Array();
-    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     let allAccountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let accountLastBill: MonthlyData = this.calanderizationService.getLastBillEntry(allAccountMeters, true);
-    facilities.forEach(facility => {
-      let facilityMeterSummary: FacilitySummary = this.getFacilitySummary(facility, true, accountLastBill, reportUtilityOptions);
-      facilitiesSummary.push(facilityMeterSummary);
-    });
+    if (!reportUtilityOptions) {
+      let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+      facilities.forEach(facility => {
+        let facilityMeterSummary: FacilitySummary = this.getFacilitySummary(facility, true, accountLastBill);
+        facilitiesSummary.push(facilityMeterSummary);
+      });
+    } else {
+      reportUtilityOptions.facilities.forEach(facility => {
+        if (facility.selected) {
+          let facilityMeterSummary: FacilitySummary = this.getFacilitySummary(facility, true, accountLastBill, reportUtilityOptions);
+          facilitiesSummary.push(facilityMeterSummary);
+        }
+      });
+
+    }
     return {
       facilitySummaries: facilitiesSummary,
       totalEnergyUse: _.sumBy(facilitiesSummary, 'energyUsage'),
