@@ -6,6 +6,7 @@ import { CalanderizedMeter, MonthlyData } from '../models/calanderization';
 import { IdbFacility, IdbUtilityMeter, MeterSource } from '../models/idb';
 import { CalanderizationService } from '../shared/helper-services/calanderization.service';
 import * as _ from 'lodash';
+import { ReportOptions, ReportUtilityOptions, ReportUtilitySummary, UtilitySummary } from '../models/overview-report';
 
 @Injectable({
   providedIn: 'root'
@@ -187,53 +188,3 @@ export class OverviewReportService {
 
 }
 
-
-export interface ReportUtilitySummary {
-  utilitySummaries: Array<UtilitySummary>,
-  totals: UtilitySummary,
-  pastYearStart: Date,
-  pastYearEnd: Date,
-  yearPriorStart: Date,
-  yearPriorEnd: Date
-}
-
-export interface UtilitySummary {
-  source: MeterSource,
-  consumptionPastYear: number,
-  costPastYear: number,
-  emissionsPastYear: number,
-  consumptionYearPrior: number,
-  costYearPrior: number,
-  emissionsYearPrior: number,
-  consumptionChange: number,
-  costChange: number,
-  emissionsChange: number
-}
-
-
-export interface ReportOptions {
-  title: string,
-  notes: string,
-  includeAccount: boolean,
-  accountInfo: boolean,
-  facilitySummaryTable: boolean,
-  accountUtilityTable: boolean,
-  accountFacilityCharts: boolean,
-  accountFacilityAnnualBarChart: boolean,
-  includeFacilities: boolean,
-  facilities: Array<IdbFacility>,
-  facilityMetersTable: boolean,
-  facilityUtilityUsageTable: boolean,
-  facilityInfo: boolean,
-  facilityBarCharts: boolean
-}
-
-export interface ReportUtilityOptions {
-  electricity: boolean,
-  naturalGas: boolean,
-  otherFuels: boolean,
-  otherEnergy: boolean,
-  water: boolean,
-  wasteWater: boolean,
-  otherUtility: boolean,
-}

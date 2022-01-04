@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { IdbAccount } from 'src/app/models/idb';
-import { ReportUtilitySummary } from '../../overview-report.service';
+import { ReportUtilitySummary } from 'src/app/models/overview-report';
 
 @Component({
   selector: 'app-account-report-utility-usage-table',

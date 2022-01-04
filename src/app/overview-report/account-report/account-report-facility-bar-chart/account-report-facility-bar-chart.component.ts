@@ -3,9 +3,10 @@ import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbAccount, IdbFacility, IdbUtilityMeter, MeterSource } from 'src/app/models/idb';
+import { ReportOptions, ReportUtilityOptions } from 'src/app/models/overview-report';
 import { FacilityBarChartData } from 'src/app/models/visualization';
 import { VisualizationService } from 'src/app/shared/helper-services/visualization.service';
-import { OverviewReportService, ReportOptions, ReportUtilityOptions } from '../../overview-report.service';
+import { OverviewReportService } from '../../overview-report.service';
 
 @Component({
   selector: 'app-account-report-facility-bar-chart',

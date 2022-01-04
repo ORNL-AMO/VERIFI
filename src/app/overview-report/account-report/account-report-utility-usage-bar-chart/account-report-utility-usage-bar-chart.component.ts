@@ -1,8 +1,8 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { IdbAccount, IdbFacility, MeterSource } from 'src/app/models/idb';
+import { BarChartDataTrace, ReportUtilityOptions, ReportUtilitySummary } from 'src/app/models/overview-report';
 import { UtilityColors } from 'src/app/shared/utilityColors';
-import { ReportUtilityOptions, ReportUtilitySummary } from '../../overview-report.service';
 
 @Component({
   selector: 'app-account-report-utility-usage-bar-chart',
@@ -64,7 +64,7 @@ export class AccountReportUtilityUsageBarChartComponent implements OnInit {
     }
   }
 
-  getData(): Array<DataTrace> {
+  getData(): Array<BarChartDataTrace> {
     let dataType: 'consumptionPastYear' | 'costPastYear' | 'emissionsPastYear';
     if (this.graphType == 'cost') {
       dataType = 'costPastYear'
@@ -74,39 +74,39 @@ export class AccountReportUtilityUsageBarChartComponent implements OnInit {
       dataType = 'emissionsPastYear';
     }
 
-    let data: Array<DataTrace> = new Array();
+    let data: Array<BarChartDataTrace> = new Array();
     if (this.reportUtilityOptions.electricity) {
-      let trace: DataTrace = this.getTrace('Electricity', dataType);
+      let trace: BarChartDataTrace = this.getTrace('Electricity', dataType);
       data.push(trace);
     }
     if (this.reportUtilityOptions.naturalGas) {
-      let trace: DataTrace = this.getTrace('Natural Gas', dataType);
+      let trace: BarChartDataTrace = this.getTrace('Natural Gas', dataType);
       data.push(trace);
     }
     if (this.reportUtilityOptions.otherFuels) {
-      let trace: DataTrace = this.getTrace('Other Fuels', dataType);
+      let trace: BarChartDataTrace = this.getTrace('Other Fuels', dataType);
       data.push(trace);
     }
     if (this.reportUtilityOptions.otherEnergy) {
-      let trace: DataTrace = this.getTrace('Other Energy', dataType);
+      let trace: BarChartDataTrace = this.getTrace('Other Energy', dataType);
       data.push(trace);
     }
     if (this.reportUtilityOptions.water) {
-      let trace: DataTrace = this.getTrace('Water', dataType);
+      let trace: BarChartDataTrace = this.getTrace('Water', dataType);
       data.push(trace);
     }
     if (this.reportUtilityOptions.wasteWater) {
-      let trace: DataTrace = this.getTrace('Waste Water', dataType);
+      let trace: BarChartDataTrace = this.getTrace('Waste Water', dataType);
       data.push(trace);
     }
     if (this.reportUtilityOptions.otherUtility) {
-      let trace: DataTrace = this.getTrace('Other Utility', dataType);
+      let trace: BarChartDataTrace = this.getTrace('Other Utility', dataType);
       data.push(trace);
     }
     return data;
   }
 
-  getTrace(source: MeterSource, dataType: string): DataTrace {
+  getTrace(source: MeterSource, dataType: string): BarChartDataTrace {
     return {
       x: this.facilitiesUtilitySummaries.map(dataItem => { return dataItem.facility.name }),
       y: this.facilitiesUtilitySummaries.map(dataItem => { return dataItem.utilitySummary.utilitySummaries.find(utility => { return utility.source == source })?.[dataType] }),
@@ -136,15 +136,4 @@ export class AccountReportUtilityUsageBarChartComponent implements OnInit {
   }
 
 
-}
-
-
-export interface DataTrace {
-  x: Array<string>,
-  y: Array<number>,
-  name: string,
-  type: string,
-  marker: {
-    color: string
-  }
 }

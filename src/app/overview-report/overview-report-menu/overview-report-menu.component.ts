@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { OverviewReportService, ReportOptions, ReportUtilityOptions } from '../overview-report.service';
+import { ReportOptions, ReportUtilityOptions } from 'src/app/models/overview-report';
+import { OverviewReportService } from '../overview-report.service';
 
 @Component({
   selector: 'app-overview-report-menu',

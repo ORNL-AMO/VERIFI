@@ -5,10 +5,9 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { AccountFacilitiesSummary } from 'src/app/models/dashboard';
 import { IdbAccount, IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
-import { FacilityBarChartData } from 'src/app/models/visualization';
+import { ReportOptions, ReportUtilityOptions, ReportUtilitySummary } from 'src/app/models/overview-report';
 import { MeterSummaryService } from 'src/app/shared/helper-services/meter-summary.service';
-import { VisualizationService } from 'src/app/shared/helper-services/visualization.service';
-import { OverviewReportService, ReportOptions, ReportUtilityOptions, ReportUtilitySummary } from '../overview-report.service';
+import { OverviewReportService } from '../overview-report.service';
 
 @Component({
   selector: 'app-account-report',

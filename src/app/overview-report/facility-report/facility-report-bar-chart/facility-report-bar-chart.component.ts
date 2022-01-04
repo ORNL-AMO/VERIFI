@@ -3,10 +3,11 @@ import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbFacility, IdbUtilityMeter, MeterSource } from 'src/app/models/idb';
+import { BarChartDataTrace, ReportUtilityOptions } from 'src/app/models/overview-report';
 import { FacilityBarChartData } from 'src/app/models/visualization';
 import { VisualizationService } from 'src/app/shared/helper-services/visualization.service';
 import { UtilityColors } from 'src/app/shared/utilityColors';
-import { OverviewReportService, ReportOptions, ReportUtilityOptions } from '../../overview-report.service';
+import { OverviewReportService } from '../../overview-report.service';
 
 @Component({
   selector: 'app-facility-report-bar-chart',
@@ -103,106 +104,16 @@ export class FacilityReportBarChartComponent implements OnInit {
 
   drawEmissionsChart() {
     if (this.utilityEmissionsBarChart) {
-      let traceData = new Array();
-      if (this.electricityData.length != 0) {
-        let trace = {
-          x: this.electricityData.map(data => { return data.time }),
-          y: this.electricityData.map(data => { return data.emissions / 1000 }),
-          name: 'Electricity',
-          type: 'bar',
-          marker: {
-            color: UtilityColors.Electricity.color,
-          }
-        }
-        traceData.push(trace);
-      }
-      if (this.naturalGasData.length != 0) {
-        let trace = {
-          x: this.naturalGasData.map(data => { return data.time }),
-          y: this.naturalGasData.map(data => { return data.emissions / 1000 }),
-          name: 'Natural Gas',
-          type: 'bar',
-          marker: {
-            color: UtilityColors['Natural Gas'].color
-          }
-        };
-        traceData.push(trace);
-      }
-      if (this.otherFuelsData.length != 0) {
-        let trace = {
-          x: this.otherFuelsData.map(data => { return data.time }),
-          y: this.otherFuelsData.map(data => { return data.emissions / 1000 }),
-          name: 'Other Fuels',
-          type: 'bar',
-          marker: {
-            color: UtilityColors['Other Fuels'].color
-          }
-        };
-        traceData.push(trace);
-      }
-      if (this.waterData.length != 0) {
-        let trace = {
-          x: this.waterData.map(data => { return data.time }),
-          y: this.waterData.map(data => { return data.emissions / 1000 }),
-          name: 'Water',
-          type: 'bar',
-          marker: {
-            color: UtilityColors['Water'].color
-          }
-        };
-        traceData.push(trace);
-      }
-      if (this.wasteWaterData.length != 0) {
-        let trace = {
-          x: this.wasteWaterData.map(data => { return data.time }),
-          y: this.wasteWaterData.map(data => { return data.emissions / 1000 }),
-          name: 'Waste Water',
-          type: 'bar',
-          marker: {
-            color: UtilityColors['Waste Water'].color
-          }
-        };
-        traceData.push(trace);
-      }
-      if (this.otherUtilityData.length != 0) {
-        let trace = {
-          x: this.otherUtilityData.map(data => { return data.time }),
-          y: this.otherUtilityData.map(data => { return data.emissions / 1000 }),
-          name: 'Other Utility',
-          type: 'bar',
-          marker: {
-            color: UtilityColors['Other Utility'].color
-          }
-        };
-        traceData.push(trace);
-      }
-      if (this.otherEnergyData.length != 0) {
-        let trace = {
-          x: this.otherUtilityData.map(data => { return data.time }),
-          y: this.otherUtilityData.map(data => { return data.emissions / 1000 }),
-          name: 'Other Energy',
-          type: 'bar',
-          marker: {
-            color: UtilityColors['Other Energy'].color
-          }
-        };
-        traceData.push(trace);
-      }
+      let traceData = this.getDataTraces('emissions');
       var layout = {
         barmode: 'group',
-        // title: {
-        //   text: "Annual Emissions",
-        //   font: {
-        //     size: 24
-        //   },
-        // },
         yaxis: {
           hoverformat: ",.2f",
           title: {
             text: 'tonne CO<sub>2</sub>'
           }
         },
-        margin: { t: 10 },        
+        margin: { t: 10 },
         legend: {
           orientation: "h"
         },
@@ -220,105 +131,12 @@ export class FacilityReportBarChartComponent implements OnInit {
 
   drawCostChart() {
     if (this.utilityCostBarChart) {
-      let traceData = new Array();
-      if (this.electricityData.length != 0) {
-        let trace = {
-          x: this.electricityData.map(data => { return data.time }),
-          y: this.electricityData.map(data => { return data.energyCost }),
-          name: 'Electricity',
-          type: 'bar',
-          marker: {
-            color: UtilityColors.Electricity.color,
-          }
-        }
-        traceData.push(trace);
-      }
-      if (this.naturalGasData.length != 0) {
-        let trace = {
-          x: this.naturalGasData.map(data => { return data.time }),
-          y: this.naturalGasData.map(data => { return data.energyCost }),
-          name: 'Natural Gas',
-          type: 'bar',
-          marker: {
-            color: UtilityColors['Natural Gas'].color
-          }
-        };
-        traceData.push(trace);
-      }
-      if (this.otherFuelsData.length != 0) {
-        let trace = {
-          x: this.otherFuelsData.map(data => { return data.time }),
-          y: this.otherFuelsData.map(data => { return data.energyCost }),
-          name: 'Other Fuels',
-          type: 'bar',
-          marker: {
-            color: UtilityColors['Other Fuels'].color
-          }
-        };
-        traceData.push(trace);
-      }
-      if (this.waterData.length != 0) {
-        let trace = {
-          x: this.waterData.map(data => { return data.time }),
-          y: this.waterData.map(data => { return data.energyCost }),
-          name: 'Water',
-          type: 'bar',
-          marker: {
-            color: UtilityColors['Water'].color
-          }
-        };
-        traceData.push(trace);
-      }
-      if (this.wasteWaterData.length != 0) {
-        let trace = {
-          x: this.wasteWaterData.map(data => { return data.time }),
-          y: this.wasteWaterData.map(data => { return data.energyCost }),
-          name: 'Waste Water',
-          type: 'bar',
-          marker: {
-            color: UtilityColors['Waste Water'].color
-          }
-        };
-        traceData.push(trace);
-      }
-      if (this.otherUtilityData.length != 0) {
-        let trace = {
-          x: this.otherUtilityData.map(data => { return data.time }),
-          y: this.otherUtilityData.map(data => { return data.energyCost }),
-          name: 'Other Utility',
-          type: 'bar',
-          marker: {
-            color: UtilityColors['Other Utility'].color
-          }
-        };
-        traceData.push(trace);
-      }
-      if (this.otherEnergyData.length != 0) {
-        let trace = {
-          x: this.otherUtilityData.map(data => { return data.time }),
-          y: this.otherUtilityData.map(data => { return data.energyCost }),
-          name: 'Other Energy',
-          type: 'bar',
-          marker: {
-            color: UtilityColors['Other Energy'].color
-          }
-        };
-        traceData.push(trace);
-      }
+      let traceData = this.getDataTraces('energyCost');
       var layout = {
         barmode: 'group',
-        // title: {
-        //   text: 'Annual Costs',
-        //   font: {
-        //     size: 24
-        //   },
-        // },
         yaxis: {
           tickprefix: "$",
           hoverformat: ",.2f",
-          // title: {
-          //   text: '$'
-          // }
         },
         legend: {
           orientation: "h"
@@ -338,99 +156,9 @@ export class FacilityReportBarChartComponent implements OnInit {
 
   drawUsageChart() {
     if (this.utilityUsageBarChart) {
-      let traceData = new Array();
-      if (this.electricityData.length != 0) {
-        let trace = {
-          x: this.electricityData.map(data => { return data.time }),
-          y: this.electricityData.map(data => { return data.energyUse }),
-          name: 'Electricity',
-          type: 'bar',
-          marker: {
-            color: UtilityColors.Electricity.color,
-          }
-        }
-        traceData.push(trace);
-      }
-      if (this.naturalGasData.length != 0) {
-        let trace = {
-          x: this.naturalGasData.map(data => { return data.time }),
-          y: this.naturalGasData.map(data => { return data.energyUse }),
-          name: 'Natural Gas',
-          type: 'bar',
-          marker: {
-            color: UtilityColors['Natural Gas'].color
-          }
-        };
-        traceData.push(trace);
-      }
-      if (this.otherFuelsData.length != 0) {
-        let trace = {
-          x: this.otherFuelsData.map(data => { return data.time }),
-          y: this.otherFuelsData.map(data => { return data.energyUse }),
-          name: 'Other Fuels',
-          type: 'bar',
-          marker: {
-            color: UtilityColors['Other Fuels'].color
-          }
-        };
-        traceData.push(trace);
-      }
-      if (this.waterData.length != 0) {
-        let trace = {
-          x: this.waterData.map(data => { return data.time }),
-          y: this.waterData.map(data => { return data.energyUse }),
-          name: 'Water',
-          type: 'bar',
-          marker: {
-            color: UtilityColors['Water'].color
-          }
-        };
-        traceData.push(trace);
-      }
-      if (this.wasteWaterData.length != 0) {
-        let trace = {
-          x: this.wasteWaterData.map(data => { return data.time }),
-          y: this.wasteWaterData.map(data => { return data.energyUse }),
-          name: 'Waste Water',
-          type: 'bar',
-          marker: {
-            color: UtilityColors['Waste Water'].color
-          }
-        };
-        traceData.push(trace);
-      }
-      if (this.otherUtilityData.length != 0) {
-        let trace = {
-          x: this.otherUtilityData.map(data => { return data.time }),
-          y: this.otherUtilityData.map(data => { return data.energyUse }),
-          name: 'Other Utility',
-          type: 'bar',
-          marker: {
-            color: UtilityColors['Other Utility'].color
-          }
-        };
-        traceData.push(trace);
-      }
-      if (this.otherEnergyData.length != 0) {
-        let trace = {
-          x: this.otherUtilityData.map(data => { return data.time }),
-          y: this.otherUtilityData.map(data => { return data.energyUse }),
-          name: 'Other Energy',
-          type: 'bar',
-          marker: {
-            color: UtilityColors['Other Energy'].color
-          }
-        };
-        traceData.push(trace);
-      }
+      let traceData: Array<BarChartDataTrace> = this.getDataTraces('energyUse');
       var layout = {
         barmode: 'group',
-        // title: {
-        //   text: "Annual Consumption",
-        //   font: {
-        //     size: 24
-        //   },
-        // },
         yaxis: {
           hoverformat: ",.2f",
           title: {
@@ -453,5 +181,49 @@ export class FacilityReportBarChartComponent implements OnInit {
     }
   }
 
+  getDataTraces(dataObj: 'energyUse' | 'emissions' | 'energyCost'): Array<BarChartDataTrace> {
+    let traceData: Array<BarChartDataTrace> = new Array();
+    if (this.electricityData.length != 0) {
+      let trace: BarChartDataTrace = this.getDataTrace(this.electricityData, 'Electricity', dataObj);
+      traceData.push(trace)
+    }
+    if (this.naturalGasData.length != 0) {
+      let trace: BarChartDataTrace = this.getDataTrace(this.naturalGasData, 'Natural Gas', dataObj);
+      traceData.push(trace)
+    }
+    if (this.otherFuelsData.length != 0) {
+      let trace: BarChartDataTrace = this.getDataTrace(this.otherFuelsData, 'Other Fuels', dataObj);
+      traceData.push(trace);
+    }
+    if (this.waterData.length != 0) {
+      let trace: BarChartDataTrace = this.getDataTrace(this.waterData, 'Water', dataObj);
+      traceData.push(trace);
+    }
+    if (this.wasteWaterData.length != 0) {
+      let trace: BarChartDataTrace = this.getDataTrace(this.wasteWaterData, 'Waste Water', dataObj);
+      traceData.push(trace);
+    }
+    if (this.otherUtilityData.length != 0) {
+      let trace: BarChartDataTrace = this.getDataTrace(this.otherUtilityData, 'Other Utility', dataObj);
+      traceData.push(trace);
+    }
+    if (this.otherEnergyData.length != 0) {
+      let trace: BarChartDataTrace = this.getDataTrace(this.otherEnergyData, 'Other Energy', dataObj);
+      traceData.push(trace);
+    }
+    return traceData;
+  }
+
+  getDataTrace(chartData: Array<FacilityBarChartData>, source: MeterSource, dataObj: 'energyUse' | 'emissions' | 'energyCost'): BarChartDataTrace {
+    return {
+      x: chartData.map(data => { return data.time }),
+      y: chartData.map(data => { return data[dataObj] }),
+      name: source,
+      type: 'bar',
+      marker: {
+        color: UtilityColors[source].color,
+      }
+    }
+  }
 
 }

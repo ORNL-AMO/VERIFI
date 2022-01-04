@@ -4,8 +4,9 @@ import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { FacilityMeterSummaryData } from 'src/app/models/dashboard';
 import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { ReportUtilityOptions } from 'src/app/models/overview-report';
 import { MeterSummaryService } from 'src/app/shared/helper-services/meter-summary.service';
-import { OverviewReportService, ReportUtilityOptions } from '../../overview-report.service';
+import { OverviewReportService } from '../../overview-report.service';
 
 @Component({
   selector: 'app-facility-report-meters-table',
