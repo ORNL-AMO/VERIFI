@@ -1,6 +1,6 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { IdbAccount, IdbFacility } from 'src/app/models/idb';
+import { IdbAccount, IdbFacility, MeterSource } from 'src/app/models/idb';
 import { UtilityColors } from 'src/app/shared/utilityColors';
 import { ReportUtilityOptions, ReportUtilitySummary } from '../../overview-report.service';
 
@@ -19,69 +19,32 @@ export class AccountReportUtilityUsageBarChartComponent implements OnInit {
   }>;
   @Input()
   reportUtilityOptions: ReportUtilityOptions;
+  @Input()
+  graphType: 'cost' | 'emissions' | 'usage';
 
-
-  @ViewChild('utilityCostBarChart', { static: false }) utilityCostBarChart: ElementRef;
-  @ViewChild('utilityUsageBarChart', { static: false }) utilityUsageBarChart: ElementRef;
-  @ViewChild('utilityEmissionsBarChart', { static: false }) utilityEmissionsBarChart: ElementRef;
-
+  @ViewChild('utilityBarChart', { static: false }) utilityBarChart: ElementRef;
   constructor(private plotlyService: PlotlyService) { }
 
   ngOnInit(): void {
   }
 
-  ngOnChanges(){
-    this.drawCharts();
+  ngOnChanges() {
+    this.drawChart();
   }
 
   ngAfterViewInit() {
-    this.drawCharts();
+    this.drawChart();
   }
 
-  drawCharts(){
-    this.drawCostChart();
-    this.drawEnergyUseChart();
-    this.drawEmissionsChart();
-  }
-
-  drawCostChart() {
-    if (this.utilityCostBarChart) {
-      let data = this.getData('costPastYear');
+  drawChart() {
+    if (this.utilityBarChart) {
+      let data = this.getData();
       var layout = {
         barmode: 'stack',
         showlegend: true,
         yaxis: {
-          title: "$/yr",
-          tickprefix: "$",
-          automargin: true,
-          // ticksuffix: ticksuffix
-        },
-        xaxis: {
-          automargin: true
-        },
-        legend: {
-          orientation: "h"
-        },
-        clickmode: "none"
-      };
-      let config = {
-        modeBarButtonsToRemove: ['autoScale2d', 'lasso2d', 'pan2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian', 'autoscale', 'zoom', 'zoomin', 'zoomout'],
-        displaylogo: false,
-        responsive: true,
-      };
-      this.plotlyService.newPlot(this.utilityCostBarChart.nativeElement, data, layout, config);
-    }
-  }
-
-  drawEnergyUseChart() {
-    if (this.utilityUsageBarChart) {
-      let data = this.getData('consumptionPastYear');
-
-      var layout = {
-        barmode: 'stack',
-        showlegend: true,
-        yaxis: {
-          title: this.account.energyUnit + '/yr',
+          title: this.getYAxisLabel(),
+          tickprefix: this.getPreffix(),
           automargin: true,
         },
         xaxis: {
@@ -97,127 +60,91 @@ export class AccountReportUtilityUsageBarChartComponent implements OnInit {
         displaylogo: false,
         responsive: true,
       };
-      this.plotlyService.newPlot(this.utilityUsageBarChart.nativeElement, data, layout, config);
+      this.plotlyService.newPlot(this.utilityBarChart.nativeElement, data, layout, config);
     }
   }
 
-  drawEmissionsChart() {
-    if (this.utilityEmissionsBarChart) {
-      let data = this.getData('emissionsPastYear');
-
-      var layout = {
-        barmode: 'stack',
-        showlegend: true,
-        yaxis: {
-          title: "tonne CO<sub>2</sub>",
-          automargin: true,
-        },
-        xaxis: {
-          automargin: true
-        },
-        legend: {
-          orientation: "h"
-        },
-        clickmode: "none"
-      };
-      let config = {
-        modeBarButtonsToRemove: ['autoScale2d', 'lasso2d', 'pan2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian', 'autoscale', 'zoom', 'zoomin', 'zoomout'],
-        displaylogo: false,
-        responsive: true,
-      };
-      this.plotlyService.newPlot(this.utilityEmissionsBarChart.nativeElement, data, layout, config);
+  getData(): Array<DataTrace> {
+    let dataType: 'consumptionPastYear' | 'costPastYear' | 'emissionsPastYear';
+    if (this.graphType == 'cost') {
+      dataType = 'costPastYear'
+    } else if (this.graphType == 'usage') {
+      dataType = 'consumptionPastYear';
+    } else if (this.graphType == 'emissions') {
+      dataType = 'emissionsPastYear';
     }
-  }
 
-  getData(dataType: 'consumptionPastYear' | 'costPastYear' | 'emissionsPastYear'): Array<{
-    x: Array<string>,
-    y: Array<number>,
-    name: 'Other Utility',
-    type: 'bar',
-    marker: {
-      color: string
-    }
-  }> {
-    let data = new Array();
+    let data: Array<DataTrace> = new Array();
     if (this.reportUtilityOptions.electricity) {
-      data.push({
-        x: this.facilitiesUtilitySummaries.map(dataItem => { return dataItem.facility.name }),
-        y: this.facilitiesUtilitySummaries.map(dataItem => { return dataItem.utilitySummary.utilitySummaries.find(utility => { return utility.source == 'Electricity' })?.[dataType] }),
-        name: 'Electricity',
-        type: 'bar',
-        marker: {
-          color: UtilityColors.Electricity.color
-        }
-      });
+      let trace: DataTrace = this.getTrace('Electricity', dataType);
+      data.push(trace);
     }
     if (this.reportUtilityOptions.naturalGas) {
-      data.push({
-        x: this.facilitiesUtilitySummaries.map(dataItem => { return dataItem.facility.name }),
-        y: this.facilitiesUtilitySummaries.map(dataItem => { return dataItem.utilitySummary.utilitySummaries.find(utility => { return utility.source == 'Natural Gas' })?.[dataType] }),
-        name: 'Natural Gas',
-        type: 'bar',
-        marker: {
-          color: UtilityColors['Natural Gas'].color
-        }
-      })
+      let trace: DataTrace = this.getTrace('Natural Gas', dataType);
+      data.push(trace);
     }
     if (this.reportUtilityOptions.otherFuels) {
-      data.push({
-        x: this.facilitiesUtilitySummaries.map(dataItem => { return dataItem.facility.name }),
-        y: this.facilitiesUtilitySummaries.map(dataItem => { return dataItem.utilitySummary.utilitySummaries.find(utility => { return utility.source == 'Other Fuels' })?.[dataType] }),
-        name: 'Other Fuels',
-        type: 'bar',
-        marker: {
-          color: UtilityColors['Other Fuels'].color
-        }
-      })
+      let trace: DataTrace = this.getTrace('Other Fuels', dataType);
+      data.push(trace);
     }
     if (this.reportUtilityOptions.otherEnergy) {
-      data.push({
-        x: this.facilitiesUtilitySummaries.map(dataItem => { return dataItem.facility.name }),
-        y: this.facilitiesUtilitySummaries.map(dataItem => { return dataItem.utilitySummary.utilitySummaries.find(utility => { return utility.source == 'Other Energy' })?.[dataType] }),
-        name: 'Other Energy',
-        type: 'bar',
-        marker: {
-          color: UtilityColors['Other Energy'].color
-        }
-      })
+      let trace: DataTrace = this.getTrace('Other Energy', dataType);
+      data.push(trace);
     }
     if (this.reportUtilityOptions.water) {
-      data.push({
-        x: this.facilitiesUtilitySummaries.map(dataItem => { return dataItem.facility.name }),
-        y: this.facilitiesUtilitySummaries.map(dataItem => { return dataItem.utilitySummary.utilitySummaries.find(utility => { return utility.source == 'Water' })?.[dataType] }),
-        name: 'Water',
-        type: 'bar',
-        marker: {
-          color: UtilityColors['Water'].color
-        }
-      })
+      let trace: DataTrace = this.getTrace('Water', dataType);
+      data.push(trace);
     }
     if (this.reportUtilityOptions.wasteWater) {
-      data.push({
-        x: this.facilitiesUtilitySummaries.map(dataItem => { return dataItem.facility.name }),
-        y: this.facilitiesUtilitySummaries.map(dataItem => { return dataItem.utilitySummary.utilitySummaries.find(utility => { return utility.source == 'Waste Water' })?.[dataType] }),
-        name: 'Waste Water',
-        type: 'bar',
-        marker: {
-          color: UtilityColors['Waste Water'].color
-        }
-      })
+      let trace: DataTrace = this.getTrace('Waste Water', dataType);
+      data.push(trace);
     }
     if (this.reportUtilityOptions.otherUtility) {
-      data.push({
-        x: this.facilitiesUtilitySummaries.map(dataItem => { return dataItem.facility.name }),
-        y: this.facilitiesUtilitySummaries.map(dataItem => { return dataItem.utilitySummary.utilitySummaries.find(utility => { return utility.source == 'Other Utility' })?.[dataType] }),
-        name: 'Other Utility',
-        type: 'bar',
-        marker: {
-          color: UtilityColors['Other Utility'].color
-        }
-      })
+      let trace: DataTrace = this.getTrace('Other Utility', dataType);
+      data.push(trace);
     }
     return data;
   }
 
+  getTrace(source: MeterSource, dataType: string): DataTrace {
+    return {
+      x: this.facilitiesUtilitySummaries.map(dataItem => { return dataItem.facility.name }),
+      y: this.facilitiesUtilitySummaries.map(dataItem => { return dataItem.utilitySummary.utilitySummaries.find(utility => { return utility.source == source })?.[dataType] }),
+      name: source,
+      type: 'bar',
+      marker: {
+        color: UtilityColors[source].color
+      }
+    }
+  }
 
+  getYAxisLabel(): string {
+    if (this.graphType == 'cost') {
+      return undefined;
+    } else if (this.graphType == 'usage') {
+      return this.account.energyUnit;
+    } else if (this.graphType == 'emissions') {
+      return "tonne CO<sub>2</sub>";
+    }
+  }
+
+  getPreffix(): string {
+    if (this.graphType == 'cost') {
+      return '$';
+    }
+    return undefined;
+  }
+
+
+}
+
+
+export interface DataTrace {
+  x: Array<string>,
+  y: Array<number>,
+  name: string,
+  type: string,
+  marker: {
+    color: string
+  }
 }

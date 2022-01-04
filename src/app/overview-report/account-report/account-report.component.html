@@ -16,13 +16,55 @@
         [accountReportUtilitySummary]="accountReportUtilitySummary"></app-account-report-utility-usage-table>
 </div>
 <div class="row pt-5 print-break-after" *ngIf="reportOptions.accountFacilityCharts">
+    <!--costs-->
+    <div class="col-12 text-center">
+        <label class="section-label">
+            Costs ({{yearPriorDate}} - {{lastMonthsDate}})
+        </label>
+    </div>
     <div class="col-6">
-        <app-account-report-donut [account]="account" [accountFacilitiesSummary]="accountFacilitiesSummary">
+        <app-account-report-donut [account]="account" [accountFacilitiesSummary]="accountFacilitiesSummary"
+            [graphType]="'cost'">
         </app-account-report-donut>
     </div>
     <div class="col-6">
         <app-account-report-utility-usage-bar-chart [account]="account"
-            [facilitiesUtilitySummaries]="facilitiesUtilitySummaries" [reportUtilityOptions]="reportUtilityOptions">
+            [facilitiesUtilitySummaries]="facilitiesUtilitySummaries" [reportUtilityOptions]="reportUtilityOptions"
+            [graphType]="'cost'">
+        </app-account-report-utility-usage-bar-chart>
+    </div>
+    <!--usage-->
+    <div class="col-12 pt-5 text-center">
+        <label class="section-label">
+            Consumption ({{yearPriorDate}} - {{lastMonthsDate}})
+        </label>
+    </div>
+    <div class="col-6">
+        <app-account-report-donut [account]="account" [accountFacilitiesSummary]="accountFacilitiesSummary"
+            [graphType]="'usage'">
+        </app-account-report-donut>
+    </div>
+    <div class="col-6">
+        <app-account-report-utility-usage-bar-chart [account]="account"
+            [facilitiesUtilitySummaries]="facilitiesUtilitySummaries" [reportUtilityOptions]="reportUtilityOptions"
+            [graphType]="'usage'">
+        </app-account-report-utility-usage-bar-chart>
+    </div>
+    <!--emissions-->
+    <div class="col-12 pt-5 text-center">
+        <label class="section-label">
+            Emissions ({{yearPriorDate}} - {{lastMonthsDate}})
+        </label>
+    </div>
+    <div class="col-6">
+        <app-account-report-donut [account]="account" [accountFacilitiesSummary]="accountFacilitiesSummary"
+            [graphType]="'emissions'">
+        </app-account-report-donut>
+    </div>
+    <div class="col-6">
+        <app-account-report-utility-usage-bar-chart [account]="account"
+            [facilitiesUtilitySummaries]="facilitiesUtilitySummaries" [reportUtilityOptions]="reportUtilityOptions"
+            [graphType]="'emissions'">
         </app-account-report-utility-usage-bar-chart>
     </div>
 </div>

@@ -191,13 +191,16 @@ export class FacilityReportBarChartComponent implements OnInit {
       var layout = {
         barmode: 'group',
         title: {
-          text: "Utility Emissions (tonne CO<sub>2</sub>)",
+          text: "Annual Emissions",
           font: {
             size: 24
           },
         },
         yaxis: {
-          hoverformat: ",.2f"
+          hoverformat: ",.2f",
+          title: {
+            text: 'tonne CO<sub>2</sub>'
+          }
         },
         margin: { r: 0, t: 50 },        
         legend: {
@@ -305,14 +308,17 @@ export class FacilityReportBarChartComponent implements OnInit {
       var layout = {
         barmode: 'group',
         title: {
-          text: 'Utility Costs',
+          text: 'Annual Costs',
           font: {
             size: 24
           },
         },
         yaxis: {
           tickprefix: "$",
-          hoverformat: ",.2f"
+          hoverformat: ",.2f",
+          // title: {
+          //   text: '$'
+          // }
         },
         legend: {
           orientation: "h"
@@ -420,13 +426,16 @@ export class FacilityReportBarChartComponent implements OnInit {
       var layout = {
         barmode: 'group',
         title: {
-          text: "Utility Usage (" + this.facility.energyUnit + ")",
+          text: "Annual Consumption",
           font: {
             size: 24
           },
         },
         yaxis: {
-          hoverformat: ",.2f"
+          hoverformat: ",.2f",
+          title: {
+            text: this.facility.energyUnit
+          }
         },
         margin: { r: 0, t: 50 },
         legend: {
