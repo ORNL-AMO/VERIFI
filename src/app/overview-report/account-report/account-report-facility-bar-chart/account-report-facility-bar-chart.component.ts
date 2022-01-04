@@ -206,7 +206,7 @@ export class AccountReportFacilityBarChartComponent implements OnInit {
     this.chartData = new Array();
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let facilities: Array<IdbFacility> = this.overviewReportService.reportOptions.getValue().facilities;
-    let selectedSource: Array<MeterSource> = this.getSelectedSources();
+    let selectedSource: Array<MeterSource> = this.overviewReportService.getSelectedSources(this.reportUtilityOptions);
     facilities.forEach(facility => {
       if (facility.selected) {
         let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => {
@@ -220,31 +220,4 @@ export class AccountReportFacilityBarChartComponent implements OnInit {
       }
     });
   }
-
-  getSelectedSources(): Array<MeterSource> {
-    let sources: Array<MeterSource> = new Array();
-    if (this.reportUtilityOptions.electricity) {
-      sources.push('Electricity');
-    }
-    if (this.reportUtilityOptions.naturalGas) {
-      sources.push('Natural Gas');
-    }
-    if (this.reportUtilityOptions.otherFuels) {
-      sources.push('Other Fuels');
-    }
-    if (this.reportUtilityOptions.otherEnergy) {
-      sources.push('Other Energy');
-    }
-    if (this.reportUtilityOptions.water) {
-      sources.push('Water');
-    }
-    if (this.reportUtilityOptions.wasteWater) {
-      sources.push('Waste Water');
-    }
-    if (this.reportUtilityOptions.otherUtility) {
-      sources.push('Other Utility');
-    }
-    return sources;
-  }
-
 }

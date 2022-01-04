@@ -1,6 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { AccountFacilitiesSummary } from 'src/app/models/dashboard';
 import { IdbAccount } from 'src/app/models/idb';
+import { ReportUtilitySummary } from 'src/app/models/overview-report';
 
 @Component({
   selector: 'app-account-report-facility-summary-table',
@@ -12,18 +13,12 @@ export class AccountReportFacilitySummaryTableComponent implements OnInit {
   accountFacilitiesSummary: AccountFacilitiesSummary;
   @Input()
   account: IdbAccount;
+  @Input()
+  accountReportUtilitySummary: ReportUtilitySummary;
 
-  lastMonthsDate: Date;
-  yearPriorDate: Date;
   constructor() { }
 
   ngOnInit(): void {
   }
 
-  ngOnChanges(){
-    if (this.accountFacilitiesSummary.allMetersLastBill) {
-      this.lastMonthsDate = new Date(this.accountFacilitiesSummary.allMetersLastBill.year, this.accountFacilitiesSummary.allMetersLastBill.monthNumValue);
-      this.yearPriorDate = new Date(this.accountFacilitiesSummary.allMetersLastBill.year - 1, this.accountFacilitiesSummary.allMetersLastBill.monthNumValue);
-    }
-  }
 }

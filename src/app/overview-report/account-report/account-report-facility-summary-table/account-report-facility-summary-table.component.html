@@ -4,8 +4,8 @@
             <tr class="table-mh">
                 <th colspan="6">
                     Account Facilities
-                    <span class="pull-right" *ngIf="yearPriorDate">({{yearPriorDate | date: 'MMM, y'}} -
-                        {{lastMonthsDate | date: 'MMM, y'}})</span>
+                    <span class="pull-right" *ngIf="accountReportUtilitySummary">({{accountReportUtilitySummary.pastYearStart | date: 'MMM, y'}} -
+                        {{accountReportUtilitySummary.pastYearEnd | date: 'MMM, y'}})</span>
                 </th>
             </tr>
             <tr>

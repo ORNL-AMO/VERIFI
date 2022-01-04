@@ -186,5 +186,31 @@ export class OverviewReportService {
     }
   }
 
+  getSelectedSources(reportUtilityOptions: ReportUtilityOptions): Array<MeterSource> {
+    let sources: Array<MeterSource> = new Array();
+    if (reportUtilityOptions.electricity) {
+      sources.push('Electricity');
+    }
+    if (reportUtilityOptions.naturalGas) {
+      sources.push('Natural Gas');
+    }
+    if (reportUtilityOptions.otherFuels) {
+      sources.push('Other Fuels');
+    }
+    if (reportUtilityOptions.otherEnergy) {
+      sources.push('Other Energy');
+    }
+    if (reportUtilityOptions.water) {
+      sources.push('Water');
+    }
+    if (reportUtilityOptions.wasteWater) {
+      sources.push('Waste Water');
+    }
+    if (reportUtilityOptions.otherUtility) {
+      sources.push('Other Utility');
+    }
+    return sources;
+  }
+
 }
 

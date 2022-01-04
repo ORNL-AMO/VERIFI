@@ -35,8 +35,6 @@ export class AccountReportComponent implements OnInit {
     utilitySummary: ReportUtilitySummary,
     facility: IdbFacility
   }>;
-  lastMonthsDate: string;
-  yearPriorDate: string;
   constructor(private accountDbService: AccountdbService, private overviewReportService: OverviewReportService,
     private meterSummaryService: MeterSummaryService, private utilityMeterDbService: UtilityMeterdbService,
     private facilityDbService: FacilitydbService) { }
@@ -65,8 +63,7 @@ export class AccountReportComponent implements OnInit {
   }
 
   setAccountFacilities() {
-    this.accountFacilitiesSummary = this.meterSummaryService.getAccountFacilitesSummary();
-    this.setDates();
+    this.accountFacilitiesSummary = this.meterSummaryService.getAccountFacilitesSummary(this.reportUtilityOptions);
   }
 
   setFacilitySummary() {
@@ -87,16 +84,5 @@ export class AccountReportComponent implements OnInit {
       })
     })
 
-  }
-
-  setDates(){
-    let date1: Date = new Date(this.accountFacilitiesSummary.allMetersLastBill.year, this.accountFacilitiesSummary.allMetersLastBill.monthNumValue);
-    let date1Month: string = date1.toLocaleDateString("en-US", { month: 'short' });
-    let date1Year: string = date1.toLocaleDateString("en-US", { year: "numeric" })
-    this.lastMonthsDate = date1Month + ', ' + date1Year;
-    let date2: Date = new Date(this.accountFacilitiesSummary.allMetersLastBill.year - 1, this.accountFacilitiesSummary.allMetersLastBill.monthNumValue);
-    let date2Month: string = date2.toLocaleDateString("en-US", { month: 'short' });
-    let date2Year: string = date2.toLocaleDateString("en-US", { year: "numeric" })
-    this.yearPriorDate = date2Month + ', ' + date2Year;
   }
 }

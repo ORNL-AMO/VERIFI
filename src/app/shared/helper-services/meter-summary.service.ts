@@ -2,11 +2,13 @@ import { Injectable } from '@angular/core';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { LastYearData, MonthlyData } from 'src/app/models/calanderization';
 import { AccountFacilitiesSummary, FacilityMeterSummaryData, FacilitySummary, MeterSummary } from 'src/app/models/dashboard';
-import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterGroup } from 'src/app/models/idb';
+import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterGroup, MeterSource } from 'src/app/models/idb';
 import { CalanderizationService } from './calanderization.service';
 import * as _ from 'lodash';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
+import { ReportUtilityOptions } from 'src/app/models/overview-report';
+import { OverviewReportService } from 'src/app/overview-report/overview-report.service';
 
 @Injectable({
   providedIn: 'root'
@@ -14,7 +16,7 @@ import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service
 export class MeterSummaryService {
 
   constructor(private calanderizationService: CalanderizationService, private utilityMeterGroupDbService: UtilityMeterGroupdbService,
-    private facilityDbService: FacilitydbService, private utilityMeterDbService: UtilityMeterdbService) { }
+    private facilityDbService: FacilitydbService, private utilityMeterDbService: UtilityMeterdbService, private overviewReportService: OverviewReportService) { }
 
   getFacilityMetersSummary(inAccount: boolean, facilityMeters: Array<IdbUtilityMeter>): FacilityMeterSummaryData {
     let facilityMetersSummary: Array<MeterSummary> = new Array();
@@ -56,13 +58,13 @@ export class MeterSummaryService {
   }
 
 
-  getAccountFacilitesSummary(): AccountFacilitiesSummary {
+  getAccountFacilitesSummary(reportUtilityOptions?: ReportUtilityOptions): AccountFacilitiesSummary {
     let facilitiesSummary: Array<FacilitySummary> = new Array();
     let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     let allAccountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let accountLastBill: MonthlyData = this.calanderizationService.getLastBillEntry(allAccountMeters, true);
     facilities.forEach(facility => {
-      let facilityMeterSummary: FacilitySummary = this.getFacilitySummary(facility, true, accountLastBill);
+      let facilityMeterSummary: FacilitySummary = this.getFacilitySummary(facility, true, accountLastBill, reportUtilityOptions);
       facilitiesSummary.push(facilityMeterSummary);
     });
     return {
@@ -75,10 +77,14 @@ export class MeterSummaryService {
     };
   }
 
-  getFacilitySummary(facility: IdbFacility, inAccount: boolean, accountMetersLastBill: MonthlyData): FacilitySummary {
+  getFacilitySummary(facility: IdbFacility, inAccount: boolean, accountMetersLastBill: MonthlyData, reportUtilityOptions?: ReportUtilityOptions): FacilitySummary {
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let accountMetersCopy: Array<IdbUtilityMeter> = JSON.parse(JSON.stringify(accountMeters));
     let facilityMeters: Array<IdbUtilityMeter> = accountMetersCopy.filter(meter => { return meter.facilityId == facility.id });
+    if (reportUtilityOptions) {
+      let selectedSources: Array<MeterSource> = this.overviewReportService.getSelectedSources(reportUtilityOptions);
+      facilityMeters = facilityMeters.filter(meter => { return selectedSources.includes(meter.source) });
+    }
     if (facilityMeters.length != 0) {
       let facilityLastBill: MonthlyData = this.calanderizationService.getLastBillEntry(facilityMeters, inAccount);
       if (facilityLastBill) {
