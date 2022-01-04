@@ -2,7 +2,7 @@ import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { IdbAccount, IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
+import { IdbAccount, IdbFacility, IdbUtilityMeter, MeterSource } from 'src/app/models/idb';
 import { FacilityBarChartData } from 'src/app/models/visualization';
 import { VisualizationService } from 'src/app/shared/helper-services/visualization.service';
 import { OverviewReportService, ReportOptions, ReportUtilityOptions } from '../../overview-report.service';
@@ -35,25 +35,26 @@ export class AccountReportFacilityBarChartComponent implements OnInit {
     this.reportUtilityOptionsSub = this.overviewReportService.reportUtilityOptions.subscribe(val => {
       this.reportUtilityOptions = val;
       this.setReportData();
+      this.drawCharts();
     });
   }
 
-  ngOnDestroy(){
+  ngOnDestroy() {
     this.reportUtilityOptionsSub.unsubscribe();
   }
 
-  ngAfterViewInit(){
+  ngAfterViewInit() {
     this.drawCharts();
   }
 
-  drawCharts(){
+  drawCharts() {
     this.drawCostBarChart();
     this.drawEnergyUseBarChart();
     this.drawEmissionsBarChart();
   }
 
-  drawCostBarChart(){
-    if(this.facilityCostBarChart){
+  drawCostBarChart() {
+    if (this.facilityCostBarChart) {
       let traceData = new Array();
 
       this.chartData.forEach(dataItem => {
@@ -73,12 +74,12 @@ export class AccountReportFacilityBarChartComponent implements OnInit {
 
       var layout = {
         barmode: 'group',
-        title: {
-          text: 'Annual Facility Costs',
-          font: {
-            size: 24
-          },
-        },
+        // title: {
+        //   text: 'Annual Facility Costs',
+        //   font: {
+        //     size: 24
+        //   },
+        // },
         yaxis: {
           tickprefix: '$',
           // title: {
@@ -90,7 +91,7 @@ export class AccountReportFacilityBarChartComponent implements OnInit {
           orientation: "h"
         },
         clickmode: "none",
-        // margin: { r: 0, t: 50 }
+        margin: { t: 10 }
       };
 
       let config = {
@@ -103,8 +104,8 @@ export class AccountReportFacilityBarChartComponent implements OnInit {
     }
   }
 
-  drawEnergyUseBarChart(){
-    if(this.facilityUsageBarChart){
+  drawEnergyUseBarChart() {
+    if (this.facilityUsageBarChart) {
       let traceData = new Array();
       this.chartData.forEach(dataItem => {
         let trace = {
@@ -123,12 +124,12 @@ export class AccountReportFacilityBarChartComponent implements OnInit {
 
       var layout = {
         barmode: 'group',
-        title: {
-          text: 'Annual Facility Consumption',
-          font: {
-            size: 24
-          },
-        },
+        // title: {
+        //   text: 'Annual Facility Consumption',
+        //   font: {
+        //     size: 24
+        //   },
+        // },
         yaxis: {
           title: {
             text: this.account.energyUnit,
@@ -139,7 +140,7 @@ export class AccountReportFacilityBarChartComponent implements OnInit {
           orientation: "h"
         },
         clickmode: "none",
-        // margin: { r: 0, t: 50 }
+        margin: { t: 10 }
       };
 
       let config = {
@@ -152,8 +153,8 @@ export class AccountReportFacilityBarChartComponent implements OnInit {
     }
   }
 
-  drawEmissionsBarChart(){
-    if(this.facilityEmissionsDonut){
+  drawEmissionsBarChart() {
+    if (this.facilityEmissionsDonut) {
       let traceData = new Array();
       this.chartData.forEach(dataItem => {
         let trace = {
@@ -170,12 +171,12 @@ export class AccountReportFacilityBarChartComponent implements OnInit {
 
       var layout = {
         barmode: 'group',
-        title: {
-          text: 'Annual Facility Emissions',
-          font: {
-            size: 24
-          }
-        },
+        // title: {
+        //   text: 'Annual Facility Emissions',
+        //   font: {
+        //     size: 24
+        //   }
+        // },
         yaxis: {
           title: {
             text: "tonne CO<sub>2</sub>",
@@ -186,7 +187,7 @@ export class AccountReportFacilityBarChartComponent implements OnInit {
           orientation: "h"
         },
         clickmode: "none",
-        // margin: { r: 0, t: 50 }
+        margin: { t: 10 }
       };
 
       let config = {
@@ -200,16 +201,16 @@ export class AccountReportFacilityBarChartComponent implements OnInit {
   }
 
 
-  setReportData(){
+  setReportData() {
     this.chartData = new Array();
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let facilities: Array<IdbFacility> = this.overviewReportService.reportOptions.getValue().facilities;
+    let selectedSource: Array<MeterSource> = this.getSelectedSources();
     facilities.forEach(facility => {
-      if(facility.selected){
+      if (facility.selected) {
         let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => {
-          return meter.facilityId == facility.id;
+          return meter.facilityId == facility.id && selectedSource.includes(meter.source);
         });
-        //todo filter selected source
         let facilityBarChartData: Array<FacilityBarChartData> = this.visualizationService.getFacilityBarChartData(facilityMeters, false, true, true);
         this.chartData.push({
           facility: facility,
@@ -217,6 +218,32 @@ export class AccountReportFacilityBarChartComponent implements OnInit {
         });
       }
     });
+  }
+
+  getSelectedSources(): Array<MeterSource> {
+    let sources: Array<MeterSource> = new Array();
+    if (this.reportUtilityOptions.electricity) {
+      sources.push('Electricity');
+    }
+    if (this.reportUtilityOptions.naturalGas) {
+      sources.push('Natural Gas');
+    }
+    if (this.reportUtilityOptions.otherFuels) {
+      sources.push('Other Fuels');
+    }
+    if (this.reportUtilityOptions.otherEnergy) {
+      sources.push('Other Energy');
+    }
+    if (this.reportUtilityOptions.water) {
+      sources.push('Water');
+    }
+    if (this.reportUtilityOptions.wasteWater) {
+      sources.push('Waste Water');
+    }
+    if (this.reportUtilityOptions.otherUtility) {
+      sources.push('Other Utility');
+    }
+    return sources;
   }
 
 }

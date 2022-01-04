@@ -26,4 +26,13 @@ hr.page-spacer{
         margin: 0px;
         padding: 0px;
     }
+
+    .report-item{
+        margin-top: 40px;
+    }
+}
+
+
+.report-item{
+    margin-top: 150px;
 }

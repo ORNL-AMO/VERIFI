@@ -190,19 +190,19 @@ export class FacilityReportBarChartComponent implements OnInit {
       }
       var layout = {
         barmode: 'group',
-        title: {
-          text: "Annual Emissions",
-          font: {
-            size: 24
-          },
-        },
+        // title: {
+        //   text: "Annual Emissions",
+        //   font: {
+        //     size: 24
+        //   },
+        // },
         yaxis: {
           hoverformat: ",.2f",
           title: {
             text: 'tonne CO<sub>2</sub>'
           }
         },
-        margin: { r: 0, t: 50 },        
+        margin: { t: 10 },        
         legend: {
           orientation: "h"
         },
@@ -307,12 +307,12 @@ export class FacilityReportBarChartComponent implements OnInit {
       }
       var layout = {
         barmode: 'group',
-        title: {
-          text: 'Annual Costs',
-          font: {
-            size: 24
-          },
-        },
+        // title: {
+        //   text: 'Annual Costs',
+        //   font: {
+        //     size: 24
+        //   },
+        // },
         yaxis: {
           tickprefix: "$",
           hoverformat: ",.2f",
@@ -323,7 +323,7 @@ export class FacilityReportBarChartComponent implements OnInit {
         legend: {
           orientation: "h"
         },
-        margin: { r: 0, t: 50 }
+        margin: { t: 10 }
       };
 
       let config = {
@@ -425,19 +425,19 @@ export class FacilityReportBarChartComponent implements OnInit {
       }
       var layout = {
         barmode: 'group',
-        title: {
-          text: "Annual Consumption",
-          font: {
-            size: 24
-          },
-        },
+        // title: {
+        //   text: "Annual Consumption",
+        //   font: {
+        //     size: 24
+        //   },
+        // },
         yaxis: {
           hoverformat: ",.2f",
           title: {
             text: this.facility.energyUnit
           }
         },
-        margin: { r: 0, t: 50 },
+        margin: { t: 10 },
         legend: {
           orientation: "h"
         },
