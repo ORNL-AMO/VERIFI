@@ -12,5 +12,8 @@ export const LabelTooltips = {
     },
     "startingUnit": {
         "tooltip": "Units of measure meter consumption data will be entered in"
+    },
+    "facilityColor": {
+        "tooltip": "Color used for facility in graphs"
     }
 }

@@ -19,19 +19,28 @@ export class LabelWithTooltipComponent implements OnInit {
   isBold: boolean;
 
   helpTooltip: { tooltip: string };
-  showTooltip: boolean = false;
+  showTooltipHover: boolean = false;
+  showTooltipClick: boolean = false;
   constructor() { }
 
   ngOnInit(): void {
     this.helpTooltip = LabelTooltips[this.field];
+    if(!this.helpTooltip){
+      this.helpTooltip = {
+        tooltip: 'Help Text Missing. Sorry :/'
+      }
+    }
   }
-
   
-  hideTooltip() {
-    this.showTooltip = false;
+  hideTooltipHover() {
+    this.showTooltipHover = false;
   }
 
-  displayTooltip() {
-    this.showTooltip = true;
+  displayTooltipHover() {
+    this.showTooltipHover = true;
+  }
+
+  toggleClickTooltip(){
+    this.showTooltipClick = !this.showTooltipClick;
   }
 }
