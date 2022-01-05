@@ -1,5 +1,7 @@
 <div *ngIf="!selectedSource">
-    <p>All the utility meters for <strong>{{selectedFacility.name}}</strong> can be viewed on this screen.</p>
+    <h4>Manage Meters</h4>
+    <p>All the utility meters for <strong>{{selectedFacility.name}}</strong> can be managed on this screen.
+    </p>
     <hr>
 
     <p>Click “Add New Meter” to add new utility meters.</p>
@@ -15,6 +17,7 @@
 </div>
 
 <div *ngIf="selectedSource">
+    <h4>Manage Bills</h4>
     <p>All the {{selectedSource}} meters for <strong>{{selectedFacility.name}}</strong> can be viewed on this
         screen.
     </p>
