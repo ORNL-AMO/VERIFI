@@ -1,0 +1,37 @@
+.banner h3 a{
+    font-size: 1.75rem;
+    color: white;
+    padding: 5px 2px;
+}
+
+.banner h3 a span.fa{
+    color: white !important;
+}
+
+
+.banner h3 a.active{
+    background-color: white;
+    color: black;
+    padding: 5px 7px;
+    border-radius: 3px;
+    font-weight: bold;
+}
+
+
+.banner h3 a.active span.fa{
+    color: black !important;
+}
+
+
+.banner .nav-items a:hover{
+    cursor: pointer;
+    background-color: white;
+    color: black;
+    /* padding: 5px 7px; */
+    border-radius: 3px;
+    font-weight: bold;
+}
+
+.banner .nav-items h3 a:hover .fa{
+    color: black !important;
+}
