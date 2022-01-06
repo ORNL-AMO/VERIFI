@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { ReportOptions } from 'src/app/models/overview-report';
-import { OverviewReportService } from '../overview-report.service';
+import { OverviewReportService } from '../../overview-report.service';
 
 @Component({
   selector: 'app-front-page',

@@ -7,7 +7,7 @@ import { BarChartDataTrace, ReportUtilityOptions } from 'src/app/models/overview
 import { FacilityBarChartData } from 'src/app/models/visualization';
 import { VisualizationService } from 'src/app/shared/helper-services/visualization.service';
 import { UtilityColors } from 'src/app/shared/utilityColors';
-import { OverviewReportService } from '../../overview-report.service';
+import { OverviewReportService } from '../../../overview-report.service';
 
 @Component({
   selector: 'app-facility-report-bar-chart',

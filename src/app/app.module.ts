@@ -104,22 +104,23 @@ import { NaicsListPipe } from './account-management/general-information-form/nai
 import { YearOptionsPipe } from './account-management/sustainability-questions-form/year-options.pipe';
 import { CustomNumberPipe } from './shared/helper-pipes/custom-number.pipe';
 import { OverviewReportComponent } from './overview-report/overview-report.component';
-import { FacilityReportComponent } from './overview-report/facility-report/facility-report.component';
-import { AccountReportComponent } from './overview-report/account-report/account-report.component';
+import { FacilityReportComponent } from './overview-report/basic-report/facility-report/facility-report.component';
+import { AccountReportComponent } from './overview-report/basic-report/account-report/account-report.component';
 import { OverviewReportMenuComponent } from './overview-report/overview-report-menu/overview-report-menu.component';
 import { OverviewReportBannerComponent } from './overview-report/overview-report-banner/overview-report-banner.component';
-import { FrontPageComponent } from './overview-report/front-page/front-page.component';
-import { FacilityReportMetersTableComponent } from './overview-report/facility-report/facility-report-meters-table/facility-report-meters-table.component';
-import { FacilityReportUtilityUsageTableComponent } from './overview-report/facility-report/facility-report-utility-usage-table/facility-report-utility-usage-table.component';
-import { FacilityReportInfoComponent } from './overview-report/facility-report/facility-report-info/facility-report-info.component';
-import { FacilityReportBarChartComponent } from './overview-report/facility-report/facility-report-bar-chart/facility-report-bar-chart.component';
-import { AccountReportInfoComponent } from './overview-report/account-report/account-report-info/account-report-info.component';
-import { AccountReportFacilitySummaryTableComponent } from './overview-report/account-report/account-report-facility-summary-table/account-report-facility-summary-table.component';
-import { AccountReportUtilityUsageTableComponent } from './overview-report/account-report/account-report-utility-usage-table/account-report-utility-usage-table.component';
-import { AccountReportDonutComponent } from './overview-report/account-report/account-report-donut/account-report-donut.component';
-import { AccountReportUtilityUsageBarChartComponent } from './overview-report/account-report/account-report-utility-usage-bar-chart/account-report-utility-usage-bar-chart.component';
-import { AccountReportFacilityBarChartComponent } from './overview-report/account-report/account-report-facility-bar-chart/account-report-facility-bar-chart.component';
+import { FrontPageComponent } from './overview-report/basic-report/front-page/front-page.component';
+import { FacilityReportMetersTableComponent } from './overview-report/basic-report/facility-report/facility-report-meters-table/facility-report-meters-table.component';
+import { FacilityReportUtilityUsageTableComponent } from './overview-report/basic-report/facility-report/facility-report-utility-usage-table/facility-report-utility-usage-table.component';
+import { FacilityReportInfoComponent } from './overview-report/basic-report/facility-report/facility-report-info/facility-report-info.component';
+import { FacilityReportBarChartComponent } from './overview-report/basic-report/facility-report/facility-report-bar-chart/facility-report-bar-chart.component';
+import { AccountReportInfoComponent } from './overview-report/basic-report/account-report/account-report-info/account-report-info.component';
+import { AccountReportFacilitySummaryTableComponent } from './overview-report/basic-report/account-report/account-report-facility-summary-table/account-report-facility-summary-table.component';
+import { AccountReportUtilityUsageTableComponent } from './overview-report/basic-report/account-report/account-report-utility-usage-table/account-report-utility-usage-table.component';
+import { AccountReportDonutComponent } from './overview-report/basic-report/account-report/account-report-donut/account-report-donut.component';
+import { AccountReportUtilityUsageBarChartComponent } from './overview-report/basic-report/account-report/account-report-utility-usage-bar-chart/account-report-utility-usage-bar-chart.component';
+import { AccountReportFacilityBarChartComponent } from './overview-report/basic-report/account-report/account-report-facility-bar-chart/account-report-facility-bar-chart.component';
 import { OverviewReportDashboardComponent } from './overview-report/overview-report-dashboard/overview-report-dashboard.component';
+import { BasicReportComponent } from './overview-report/basic-report/basic-report.component';
 
 @NgModule({
   declarations: [
@@ -225,7 +226,8 @@ import { OverviewReportDashboardComponent } from './overview-report/overview-rep
     AccountReportDonutComponent,
     AccountReportUtilityUsageBarChartComponent,
     AccountReportFacilityBarChartComponent,
-    OverviewReportDashboardComponent
+    OverviewReportDashboardComponent,
+    BasicReportComponent
   ],
   imports: [
     BrowserModule,

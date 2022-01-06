@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { ReportOptions, ReportUtilityOptions } from 'src/app/models/overview-report';
 import { OverviewReportService } from '../overview-report.service';
 
@@ -11,7 +12,7 @@ export class OverviewReportMenuComponent implements OnInit {
 
   reportOptions: ReportOptions;
   reportUtilityOptions: ReportUtilityOptions;
-  constructor(private overviewReportService: OverviewReportService) { }
+  constructor(private overviewReportService: OverviewReportService, private router: Router) { }
 
   ngOnInit(): void {
     this.reportOptions = this.overviewReportService.reportOptions.getValue();
@@ -26,7 +27,12 @@ export class OverviewReportMenuComponent implements OnInit {
     this.overviewReportService.reportUtilityOptions.next(this.reportUtilityOptions);
   }
 
-  close() {
-    this.overviewReportService.reportView.next('dashboard');
+  goToReport() {
+    this.router.navigateByUrl('/overview-report/basic-report');
+    // this.overviewReportService.reportView.next('dashboard');
+  }
+
+  goToDashboard() {
+    this.router.navigateByUrl('/overview-report/report-dashboard');
   }
 }

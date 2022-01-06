@@ -21,6 +21,9 @@ import { FeedbackComponent } from './static-content/feedback/feedback.component'
 import { HelpComponent } from './static-content/help/help.component';
 import { UploadDataComponent } from './utility/upload-data/upload-data.component';
 import { OverviewReportComponent } from './overview-report/overview-report.component';
+import { OverviewReportDashboardComponent } from './overview-report/overview-report-dashboard/overview-report-dashboard.component';
+import { OverviewReportMenuComponent } from './overview-report/overview-report-menu/overview-report-menu.component';
+import { BasicReportComponent } from './overview-report/basic-report/basic-report.component';
 
 const routes: Routes = [
   {
@@ -77,7 +80,7 @@ const routes: Routes = [
       { path: 'predictors', component: PredictorDataComponent },
       { path: 'visualization', component: VisualizationComponent },
       { path: 'upload-data', component: UploadDataComponent },
-      { path: '', pathMatch: 'full', redirectTo: 'energy-consumption'}
+      { path: '', pathMatch: 'full', redirectTo: 'energy-consumption' }
 
     ]
   },
@@ -87,7 +90,14 @@ const routes: Routes = [
   { path: 'help', component: HelpComponent },
   { path: 'style-guide', component: StyleGuideComponent },
   {
-    path: 'overview-report', component: OverviewReportComponent
+    path: 'overview-report',
+    component: OverviewReportComponent,
+    children: [
+      { path: '', pathMatch: 'full', redirectTo: 'report-dashboard' },
+      { path: 'report-dashboard', component: OverviewReportDashboardComponent },
+      { path: 'report-menu', component: OverviewReportMenuComponent },
+      { path: 'basic-report', component: BasicReportComponent }
+    ]
   },
   { path: "**", component: PageNotFoundComponent },
 ];

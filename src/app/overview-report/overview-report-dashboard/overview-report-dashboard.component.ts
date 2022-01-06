@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { OverviewReportService } from '../overview-report.service';
 
 @Component({
@@ -8,7 +9,7 @@ import { OverviewReportService } from '../overview-report.service';
 })
 export class OverviewReportDashboardComponent implements OnInit {
 
-  constructor(private overviewReportService: OverviewReportService) { }
+  constructor(private overviewReportService: OverviewReportService, private router: Router) { }
 
   ngOnInit(): void {
   }
@@ -16,6 +17,6 @@ export class OverviewReportDashboardComponent implements OnInit {
 
   setDefaultReport() {
     this.overviewReportService.initializeOptions();
-    this.overviewReportService.reportView.next('menu');
+    this.router.navigateByUrl('/overview-report/report-menu');
   }
 }

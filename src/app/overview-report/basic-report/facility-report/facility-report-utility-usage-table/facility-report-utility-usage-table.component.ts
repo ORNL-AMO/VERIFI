@@ -3,7 +3,7 @@ import { Subscription } from 'rxjs';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
 import { ReportUtilityOptions, ReportUtilitySummary } from 'src/app/models/overview-report';
-import { OverviewReportService } from '../../overview-report.service';
+import { OverviewReportService } from '../../../overview-report.service';
 
 @Component({
   selector: 'app-facility-report-utility-usage-table',

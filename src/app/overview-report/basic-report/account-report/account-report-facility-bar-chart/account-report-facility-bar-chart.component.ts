@@ -6,7 +6,7 @@ import { IdbAccount, IdbFacility, IdbUtilityMeter, MeterSource } from 'src/app/m
 import { ReportOptions, ReportUtilityOptions } from 'src/app/models/overview-report';
 import { FacilityBarChartData } from 'src/app/models/visualization';
 import { VisualizationService } from 'src/app/shared/helper-services/visualization.service';
-import { OverviewReportService } from '../../overview-report.service';
+import { OverviewReportService } from '../../../overview-report.service';
 
 @Component({
   selector: 'app-account-report-facility-bar-chart',

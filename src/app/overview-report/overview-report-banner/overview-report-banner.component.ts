@@ -15,20 +15,20 @@ export class OverviewReportBannerComponent implements OnInit {
   constructor(private overviewReportService: OverviewReportService) { }
 
   ngOnInit(): void {
-    this.reportViewSub = this.overviewReportService.reportView.subscribe(val => {
-      this.reportView = val;
-    });
+    // this.reportViewSub = this.overviewReportService.reportView.subscribe(val => {
+    //   this.reportView = val;
+    // });
   }
 
   ngOnDestroy() {
-    this.reportViewSub.unsubscribe();
+    // this.reportViewSub.unsubscribe();
   }
 
 
   toggleReportMenu() {
     // let showReportMenu: boolean = this.overviewReportService.showReportMenu.getValue();
     // this.overviewReportService.showReportMenu.next(!showReportMenu);
-    this.overviewReportService.reportView.next('menu');
+    // this.overviewReportService.reportView.next('menu');
   }
 
   print() {

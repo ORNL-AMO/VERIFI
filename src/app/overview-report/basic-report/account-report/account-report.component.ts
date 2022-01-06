@@ -7,7 +7,7 @@ import { AccountFacilitiesSummary } from 'src/app/models/dashboard';
 import { IdbAccount, IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
 import { ReportOptions, ReportUtilityOptions, ReportUtilitySummary } from 'src/app/models/overview-report';
 import { MeterSummaryService } from 'src/app/shared/helper-services/meter-summary.service';
-import { OverviewReportService } from '../overview-report.service';
+import { OverviewReportService } from '../../overview-report.service';
 
 @Component({
   selector: 'app-account-report',
