@@ -1,5 +1,5 @@
 <div class="filter">
-    <div class="filter-dropdown">
+    <div class="filter-dropdown" *ngIf="reportOptions">
         <!-- <div class="row">
             <div class="col text-right">
                 <a (click)="close()"><span class="fa fa-close"></span></a>
@@ -9,56 +9,56 @@
             <div class="col-6">
                 <div class="form-group">
                     <label for="reportTitle">Report Title</label>
-                    <textarea class="form-control" name="reportTitle" id="reportTitle" [(ngModel)]="reportOptions.title"
-                        (input)="save()"></textarea>
+                    <textarea class="form-control" name="reportTitle" id="reportTitle"
+                        [(ngModel)]="reportOptions.title"></textarea>
                 </div>
                 <div class="form-group">
                     <label for="reportNotes">Report Notes</label>
-                    <textarea class="form-control" name="reportNotes" id="reportNotes" [(ngModel)]="reportOptions.notes"
-                        (input)="save()"></textarea>
+                    <textarea class="form-control" name="reportNotes" id="reportNotes"
+                        [(ngModel)]="reportOptions.notes"></textarea>
                 </div>
             </div>
             <div class="col-6">
                 <label>Account Report Options</label>
                 <label for="includeAccount">
                     <input class="checkbox" type="checkbox" id="includeAccount" name="includeAccount"
-                        [(ngModel)]="reportOptions.includeAccount" (change)="save()">Include Account Report
+                        [(ngModel)]="reportOptions.includeAccount">Include Account Report
                 </label>
                 <label for="accountInfo">
                     <input class="checkbox" type="checkbox" id="accountInfo" name="accountInfo"
-                        [(ngModel)]="reportOptions.accountInfo" (change)="save()">Include Account Info
+                        [(ngModel)]="reportOptions.accountInfo">Include Account Info
                 </label>
                 <label for="facilitySummaryTable">
                     <input class="checkbox" type="checkbox" id="facilitySummaryTable" name="facilitySummaryTable"
-                        [(ngModel)]="reportOptions.facilitySummaryTable" (change)="save()">Include Facility Summary
+                        [(ngModel)]="reportOptions.facilitySummaryTable">Include Facility Summary
                     Table
                 </label>
 
                 <label for="accountUtilityTable">
                     <input class="checkbox" type="checkbox" id="accountUtilityTable" name="accountUtilityTable"
-                        [(ngModel)]="reportOptions.accountUtilityTable" (change)="save()">Include Account Utility Table
+                        [(ngModel)]="reportOptions.accountUtilityTable">Include Account Utility Table
                 </label>
                 <label for="accountFacilityCharts">
                     <input class="checkbox" type="checkbox" id="accountFacilityCharts" name="accountFacilityCharts"
-                        [(ngModel)]="reportOptions.accountFacilityCharts" (change)="save()">Include Account Facility
+                        [(ngModel)]="reportOptions.accountFacilityCharts">Include Account Facility
                     Charts
                 </label>
                 <label for="accountFacilityAnnualBarChart">
                     <input class="checkbox" type="checkbox" id="accountFacilityAnnualBarChart"
-                        name="accountFacilityAnnualBarChart" [(ngModel)]="reportOptions.accountFacilityAnnualBarChart"
-                        (change)="save()">Include Annual Facility Bar Charts
+                        name="accountFacilityAnnualBarChart"
+                        [(ngModel)]="reportOptions.accountFacilityAnnualBarChart">Include Annual Facility Bar Charts
                 </label>
                 <hr>
                 <label>Facility Reports Options</label>
                 <label for="includeFacilities">
                     <input class="checkbox" type="checkbox" id="includeFacilities" name="includeFacilities"
-                        [(ngModel)]="reportOptions.includeFacilities" (change)="save()">Include Facility Reports
+                        [(ngModel)]="reportOptions.includeFacilities">Include Facility Reports
                 </label>
                 <div *ngIf="reportOptions.includeFacilities">
                     <label *ngFor="let facility of reportUtilityOptions.facilities; let index = index;"
                         for="{{'facility_'+index}}">
                         <input class="checkbox" type="checkbox" id="{{'facility_'+index}}" name="{{'facility_'+index}}"
-                            [(ngModel)]="facility.selected" (change)="saveUtilityOptions()">Include
+                            [(ngModel)]="facility.selected">Include
                         <b>{{facility.name}}</b>
                     </label>
 
@@ -70,38 +70,37 @@
                         <label>Include Utility Types</label>
                         <label for="electricity">
                             <input class="checkbox" type="checkbox" id="electricity" name="electricity"
-                                [(ngModel)]="reportUtilityOptions.electricity"
-                                (change)="saveUtilityOptions()">Electricity
+                                [(ngModel)]="reportUtilityOptions.electricity">Electricity
                         </label>
                         <label for="naturalGas">
                             <input class="checkbox" type="checkbox" id="naturalGas" name="naturalGas"
-                                [(ngModel)]="reportUtilityOptions.naturalGas" (change)="saveUtilityOptions()">Natural
+                                [(ngModel)]="reportUtilityOptions.naturalGas">Natural
                             Gas
                         </label>
                         <label for="otherFuels">
                             <input class="checkbox" type="checkbox" id="otherFuels" name="otherFuels"
-                                [(ngModel)]="reportUtilityOptions.otherFuels" (change)="saveUtilityOptions()">Other
+                                [(ngModel)]="reportUtilityOptions.otherFuels">Other
                             Fuels
                         </label>
                     </div>
                     <div class="col-6">
                         <label for="otherEnergy">
                             <input class="checkbox" type="checkbox" id="otherEnergy" name="otherEnergy"
-                                [(ngModel)]="reportUtilityOptions.otherEnergy" (change)="saveUtilityOptions()">Other
+                                [(ngModel)]="reportUtilityOptions.otherEnergy">Other
                             Energy
                         </label>
                         <label for="electricity">
                             <input class="checkbox" type="checkbox" id="water" name="water"
-                                [(ngModel)]="reportUtilityOptions.water" (change)="saveUtilityOptions()">Water
+                                [(ngModel)]="reportUtilityOptions.water">Water
                         </label>
                         <label for="naturalGas">
                             <input class="checkbox" type="checkbox" id="wasteWater" name="wasteWater"
-                                [(ngModel)]="reportUtilityOptions.wasteWater" (change)="saveUtilityOptions()">Waste
+                                [(ngModel)]="reportUtilityOptions.wasteWater">Waste
                             Water
                         </label>
                         <label for="otherFuels">
                             <input class="checkbox" type="checkbox" id="otherUtility" name="otherUtility"
-                                [(ngModel)]="reportUtilityOptions.otherUtility" (change)="saveUtilityOptions()">Other
+                                [(ngModel)]="reportUtilityOptions.otherUtility">Other
                             Utility
                         </label>
                     </div>
@@ -113,31 +112,36 @@
                         <label>Facility Report Items</label>
                         <label for="facilityInfo">
                             <input class="checkbox" type="checkbox" id="facilityInfo" name="facilityInfo"
-                                [(ngModel)]="reportOptions.facilityInfo" (change)="save()">Facility Info
+                                [(ngModel)]="reportOptions.facilityInfo">Facility Info
                         </label>
                         <label for="facilityMetersTable">
                             <input class="checkbox" type="checkbox" id="facilityMetersTable" name="facilityMetersTable"
-                                [(ngModel)]="reportOptions.facilityMetersTable" (change)="save()">Meters Summary Table
+                                [(ngModel)]="reportOptions.facilityMetersTable">Meters Summary Table
                         </label>
                         <label for="facilityUtilityUsageTable">
                             <input class="checkbox" type="checkbox" id="facilityUtilityUsageTable"
-                                name="facilityUtilityUsageTable" [(ngModel)]="reportOptions.facilityUtilityUsageTable"
-                                (change)="save()">Utility Usage Table
+                                name="facilityUtilityUsageTable"
+                                [(ngModel)]="reportOptions.facilityUtilityUsageTable">Utility Usage Table
                         </label>
                         <label for="facilityBarCharts">
                             <input class="checkbox" type="checkbox" id="facilityBarCharts" name="facilityBarCharts"
-                                [(ngModel)]="reportOptions.facilityBarCharts" (change)="save()">Bar Charts
+                                [(ngModel)]="reportOptions.facilityBarCharts">Bar Charts
                         </label>
                     </div>
                 </div>
             </div>
         </div>
+        <hr>
         <div class="row justify-content-between">
             <div class="col">
-                <button class="btn btn-warning" (click)="goToDashboard()">Back To Dashboard</button>
+                <button *ngIf="!selectedReportOptions" class="btn btn-danger" (click)="goToDashboard()">Cancel</button>
+                <button *ngIf="selectedReportOptions" class="btn btn-danger" (click)="cancelChanges()">Discard Changes</button>
             </div>
-            <div class="col">
-                <button class="btn btn-success" (click)="goToReport()">View Report</button>
+            <div class="col text-right">
+                <button *ngIf="!selectedReportOptions" class="btn btn-primary" (click)="createReport()">Create
+                    Report</button>
+                <button *ngIf="selectedReportOptions" class="btn btn-primary" (click)="updateReport()">Update
+                    Report</button>
             </div>
         </div>
     </div>

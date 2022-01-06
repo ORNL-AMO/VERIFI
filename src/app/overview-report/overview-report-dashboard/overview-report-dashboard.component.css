@@ -11,3 +11,15 @@
     /* text-align: center; */
     font-size: larger;
 }
+
+
+.no-reports{
+    margin-top: 40px;
+    background-color: white;
+    padding: 20px;
+    border-radius: .5rem;
+}
+
+.no-reports p, .no-reports .btn{
+    font-size: large;
+}

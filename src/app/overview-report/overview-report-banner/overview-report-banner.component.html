@@ -1,11 +1,14 @@
 <div class="banner">
     <h3>Overview Report</h3>
     <div class="pull-right">
-        <h3 class="pr-3" *ngIf="reportView == 'report'">
-            <a (click)="print()"><span class="fa fa-print"></span></a>
+        <h3 class="pr-3" *ngIf="inBasicReport">
+            <a (click)="goToDashboard()"><span class="fa fa-folder"></span></a>
         </h3>
-        <h3 *ngIf="reportView == 'report'">
-            <a (click)="toggleReportMenu()"><span class="fa fa-edit"></span></a>
+        <h3 class="pr-3" *ngIf="inBasicReport">
+            <a (click)="goToMenu()"><span class="fa fa-edit"></span></a>
+        </h3>
+        <h3 *ngIf="inBasicReport">
+            <a (click)="print()"><span class="fa fa-print"></span></a>
         </h3>
     </div>
 </div>

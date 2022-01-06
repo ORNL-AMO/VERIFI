@@ -185,10 +185,10 @@ export class HeaderComponent implements OnInit {
   }
 
   checkIfAccountPage() {
-    if (this.router.url === '/account-management' || this.router.url === '/home/account-summary' || this.router.url == '/overview-report') {
+    if (this.router.url === '/account-management' || this.router.url === '/home/account-summary' || this.router.url.includes('/overview-report')) {
       this.viewingAccountPage = true;
     }
-    if (this.router.url != '/account-management' && this.router.url != '/home/account-summary' && this.router.url != '/overview-report') {
+    if (this.router.url != '/account-management' && this.router.url != '/home/account-summary' && !this.router.url.includes('/overview-report')) {
       this.viewingAccountPage = false;
     }
 

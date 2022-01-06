@@ -1,5 +1,6 @@
 import { CalanderizedMeter, MonthlyData } from './calanderization';
 import { ElectricityDataFilters } from './electricityFilter';
+import { ReportOptions, ReportUtilityOptions } from './overview-report';
 import { SustainabilityQuestions } from './sustainabilityQuestions';
 
 export interface IdbAccount {
@@ -188,6 +189,15 @@ export interface PredictorData {
     id: string,
     importWizardName?: string,
     production?: boolean
+}
+
+
+export interface IdbOverviewReportOptions {
+    id?: number,
+    accountId: number,
+    reportOptions: ReportOptions,
+    reportUtilityOptions: ReportUtilityOptions,
+    date: Date
 }
 
 

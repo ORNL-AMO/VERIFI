@@ -1,6 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { OverviewReportOptionsDbService } from 'src/app/indexedDB/overview-report-options-db.service';
+import { IdbAccount, IdbOverviewReportOptions } from 'src/app/models/idb';
 import { ReportOptions, ReportUtilityOptions } from 'src/app/models/overview-report';
+import { ToastNotificationsService } from 'src/app/shared/toast-notifications/toast-notifications.service';
 import { OverviewReportService } from '../overview-report.service';
 
 @Component({
@@ -12,11 +16,21 @@ export class OverviewReportMenuComponent implements OnInit {
 
   reportOptions: ReportOptions;
   reportUtilityOptions: ReportUtilityOptions;
-  constructor(private overviewReportService: OverviewReportService, private router: Router) { }
+  selectedReportOptions: IdbOverviewReportOptions;
+  constructor(private overviewReportService: OverviewReportService, private router: Router,
+    private overviewReportOptionsDbService: OverviewReportOptionsDbService,
+    private accountDbService: AccountdbService,
+    private toastNotificationsService: ToastNotificationsService) { }
 
   ngOnInit(): void {
-    this.reportOptions = this.overviewReportService.reportOptions.getValue();
-    this.reportUtilityOptions = this.overviewReportService.reportUtilityOptions.getValue();
+    this.selectedReportOptions = this.overviewReportOptionsDbService.selectedOverviewReportOptions.getValue();
+    let reportOptions: ReportOptions = this.overviewReportService.reportOptions.getValue();
+    if (!reportOptions) {
+      this.goToDashboard();
+    }
+    let reportUtilityOptions: ReportUtilityOptions = this.overviewReportService.reportUtilityOptions.getValue();
+    this.reportOptions = JSON.parse(JSON.stringify(reportOptions));
+    this.reportUtilityOptions = JSON.parse(JSON.stringify(reportUtilityOptions));
   }
 
   save() {
@@ -27,12 +41,35 @@ export class OverviewReportMenuComponent implements OnInit {
     this.overviewReportService.reportUtilityOptions.next(this.reportUtilityOptions);
   }
 
-  goToReport() {
+  async createReport() {
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let newIdbReportOptionsItem: IdbOverviewReportOptions = {
+      date: new Date(),
+      reportOptions: this.reportOptions,
+      reportUtilityOptions: this.reportUtilityOptions,
+      accountId: selectedAccount.id
+    }
+    await this.overviewReportOptionsDbService.addWithObservable(newIdbReportOptionsItem).toPromise();
+    this.overviewReportOptionsDbService.setAccountOverviewReportOptions();
+    this.toastNotificationsService.showToast('New Report Created', undefined, 1000, false, "success");
     this.router.navigateByUrl('/overview-report/basic-report');
-    // this.overviewReportService.reportView.next('dashboard');
   }
 
   goToDashboard() {
     this.router.navigateByUrl('/overview-report/report-dashboard');
+  }
+
+  updateReport() {
+    this.selectedReportOptions.reportOptions = this.reportOptions;
+    this.selectedReportOptions.reportUtilityOptions = this.reportUtilityOptions;
+    this.overviewReportOptionsDbService.update(this.selectedReportOptions);
+    this.overviewReportService.reportOptions.next(this.reportOptions);
+    this.overviewReportService.reportUtilityOptions.next(this.reportUtilityOptions);
+    this.toastNotificationsService.showToast('Report Updated', undefined, 1000, false, "success");
+    this.router.navigateByUrl('/overview-report/basic-report');
+  }
+
+  cancelChanges() {
+    this.router.navigateByUrl('/overview-report/basic-report');
   }
 }
