@@ -13,15 +13,17 @@ import { ReportOptions, ReportUtilityOptions, ReportUtilitySummary, UtilitySumma
 })
 export class OverviewReportService {
 
-  showReportMenu: BehaviorSubject<boolean>;
+  // showReportMenu: BehaviorSubject<boolean>;
   reportOptions: BehaviorSubject<ReportOptions>;
   reportUtilityOptions: BehaviorSubject<ReportUtilityOptions>;
   print: BehaviorSubject<boolean>;
+  reportView: BehaviorSubject<'dashboard' | 'menu' | 'report'>;
   constructor(private facilityDbService: FacilitydbService, private utilityMeterDbService: UtilityMeterdbService, private calanderizationService: CalanderizationService) {
-    this.showReportMenu = new BehaviorSubject<boolean>(false);
+    // this.showReportMenu = new BehaviorSubject<boolean>(false);
     this.reportOptions = new BehaviorSubject<ReportOptions>(undefined);
     this.reportUtilityOptions = new BehaviorSubject<ReportUtilityOptions>(undefined);
     this.print = new BehaviorSubject<boolean>(false);
+    this.reportView = new BehaviorSubject<'dashboard' | 'menu' | 'report'>('dashboard');
   }
 
   initializeOptions() {

@@ -1,0 +1,13 @@
+.report-card{
+    margin: 1rem;
+    background-color: white;
+    padding: .5rem;
+    width: 250px;
+    border-radius: .5rem;
+}
+
+.report-card-header{
+    font-weight: bold;
+    /* text-align: center; */
+    font-size: larger;
+}

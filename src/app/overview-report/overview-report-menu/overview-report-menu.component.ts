@@ -22,11 +22,11 @@ export class OverviewReportMenuComponent implements OnInit {
     this.overviewReportService.reportOptions.next(this.reportOptions);
   }
 
-  saveUtilityOptions(){
+  saveUtilityOptions() {
     this.overviewReportService.reportUtilityOptions.next(this.reportUtilityOptions);
   }
 
-  close(){
-    this.overviewReportService.showReportMenu.next(false);
+  close() {
+    this.overviewReportService.reportView.next('dashboard');
   }
 }

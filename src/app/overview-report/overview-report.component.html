@@ -1,10 +1,12 @@
 <div class="d-flex flex-column h-100">
     <app-overview-report-banner class="hide-print"></app-overview-report-banner>
-    <app-overview-report-menu *ngIf="showReportMenu"></app-overview-report-menu>
-    <div class="report" [ngClass]="{'print': print}">
+    <app-overview-report-menu *ngIf="reportView == 'menu'"></app-overview-report-menu>
+    <app-overview-report-dashboard *ngIf="reportView == 'dashboard'"></app-overview-report-dashboard>
+    <div class="report" [ngClass]="{'print': print}" *ngIf="reportView == 'report'">
         <app-front-page></app-front-page>
         <hr class="print-break-after page-spacer">
-        <app-account-report class="print-break-after report-item" *ngIf="reportOptions.includeAccount"></app-account-report>
+        <app-account-report class="print-break-after report-item" *ngIf="reportOptions.includeAccount">
+        </app-account-report>
         <div *ngIf="reportOptions.includeFacilities">
             <div *ngFor="let facility of reportUtilityOptions.facilities" class="print-break-before report-item">
                 <app-facility-report *ngIf="facility.selected" [facility]="facility"></app-facility-report>

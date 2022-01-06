@@ -119,6 +119,7 @@ import { AccountReportUtilityUsageTableComponent } from './overview-report/accou
 import { AccountReportDonutComponent } from './overview-report/account-report/account-report-donut/account-report-donut.component';
 import { AccountReportUtilityUsageBarChartComponent } from './overview-report/account-report/account-report-utility-usage-bar-chart/account-report-utility-usage-bar-chart.component';
 import { AccountReportFacilityBarChartComponent } from './overview-report/account-report/account-report-facility-bar-chart/account-report-facility-bar-chart.component';
+import { OverviewReportDashboardComponent } from './overview-report/overview-report-dashboard/overview-report-dashboard.component';
 
 @NgModule({
   declarations: [
@@ -223,7 +224,8 @@ import { AccountReportFacilityBarChartComponent } from './overview-report/accoun
     AccountReportUtilityUsageTableComponent,
     AccountReportDonutComponent,
     AccountReportUtilityUsageBarChartComponent,
-    AccountReportFacilityBarChartComponent
+    AccountReportFacilityBarChartComponent,
+    OverviewReportDashboardComponent
   ],
   imports: [
     BrowserModule,

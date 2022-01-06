@@ -10,22 +10,26 @@ import { OverviewReportService } from './overview-report.service';
 })
 export class OverviewReportComponent implements OnInit {
 
-  showReportMenu: boolean;
-  showReportMenuSub: Subscription;
+  // showReportMenu: boolean;
+  // showReportMenuSub: Subscription;
   reportOptions: ReportOptions;
   reportOptionsSub: Subscription;
   printSub: Subscription;
   print: boolean;
   reportUtilityOptions: ReportUtilityOptions;
   reportUtilityOptionsSub: Subscription;
+  reportView: 'dashboard' | 'menu' | 'report';
+  reportViewSub: Subscription;
   constructor(private overviewReportService: OverviewReportService) { }
 
   ngOnInit(): void {
-    this.overviewReportService.initializeOptions();
-
-    this.showReportMenuSub = this.overviewReportService.showReportMenu.subscribe(showReportMenu => {
-      this.showReportMenu = showReportMenu;
+    this.reportViewSub = this.overviewReportService.reportView.subscribe(view => {
+      this.reportView = view;
     });
+
+    // this.showReportMenuSub = this.overviewReportService.showReportMenu.subscribe(showReportMenu => {
+    //   this.showReportMenu = showReportMenu;
+    // });
 
     this.reportOptionsSub = this.overviewReportService.reportOptions.subscribe(reportOptions => {
       this.reportOptions = reportOptions;
@@ -43,7 +47,8 @@ export class OverviewReportComponent implements OnInit {
   }
 
   ngOnDestroy() {
-    this.showReportMenuSub.unsubscribe();
+    // this.showReportMenuSub.unsubscribe();
+    this.reportViewSub.unsubscribe();
     this.reportOptionsSub.unsubscribe();
     this.printSub.unsubscribe();
     this.reportUtilityOptionsSub.unsubscribe();
