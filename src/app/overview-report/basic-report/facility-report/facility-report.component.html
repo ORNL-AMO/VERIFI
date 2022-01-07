@@ -2,17 +2,21 @@
     <span class="facility-icon">
         <i class="fa fa-industry" [ngStyle]="{'color': facility.color}"></i>
     </span>
-    {{facility.name}}</h3>
+    {{facility.name}}
+</h3>
 <div class="pt-1 pb-4" *ngIf="reportOptions.facilityInfo">
     <app-facility-report-info [facility]="facility"></app-facility-report-info>
 </div>
 <div class="pt-5" *ngIf="reportOptions.facilityMetersTable">
-    <app-facility-report-meters-table [facility]="facility"></app-facility-report-meters-table>
+    <app-facility-report-meters-table [facility]="facility" [reportUtilityOptions]="reportUtilityOptions">
+    </app-facility-report-meters-table>
 </div>
 <div class="pt-5 print-break-after" *ngIf="reportOptions.facilityUtilityUsageTable">
-    <app-facility-report-utility-usage-table [facility]="facility"></app-facility-report-utility-usage-table>
+    <app-facility-report-utility-usage-table [facility]="facility" [reportUtilityOptions]="reportUtilityOptions">
+    </app-facility-report-utility-usage-table>
 </div>
 <div class="pt-5" *ngIf="reportOptions.facilityBarCharts">
-    <app-facility-report-bar-chart [facility]="facility"></app-facility-report-bar-chart>
+    <app-facility-report-bar-chart [facility]="facility" [reportUtilityOptions]="reportUtilityOptions">
+    </app-facility-report-bar-chart>
 </div>
 <hr class="page-spacer hide-print">

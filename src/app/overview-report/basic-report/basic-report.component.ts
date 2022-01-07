@@ -1,9 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { OverviewReportOptionsDbService } from 'src/app/indexedDB/overview-report-options-db.service';
-import { IdbOverviewReportOptions } from 'src/app/models/idb';
+import { IdbAccount, IdbOverviewReportOptions } from 'src/app/models/idb';
 import { ReportOptions, ReportUtilityOptions } from 'src/app/models/overview-report';
+import { LoadingService } from 'src/app/shared/loading/loading.service';
 import { OverviewReportService } from '../overview-report.service';
 
 @Component({
@@ -14,37 +16,37 @@ import { OverviewReportService } from '../overview-report.service';
 export class BasicReportComponent implements OnInit {
 
   reportOptions: ReportOptions;
-  reportOptionsSub: Subscription;
   printSub: Subscription;
   print: boolean;
   reportUtilityOptions: ReportUtilityOptions;
-  reportUtilityOptionsSub: Subscription;
+  account: IdbAccount;
   constructor(private overviewReportService: OverviewReportService, private overviewReportOptionsDbService: OverviewReportOptionsDbService,
-    private router: Router) { }
+    private router: Router, private loadingService: LoadingService, private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
-    this.reportOptionsSub = this.overviewReportService.reportOptions.subscribe(reportOptions => {
-      this.reportOptions = reportOptions;
-      if (!this.reportOptions) {
-        this.checkReportOptions();
-      }
-    });
     this.printSub = this.overviewReportService.print.subscribe(print => {
       this.print = print;
       if (this.print) {
         this.printReport();
       }
     });
-
-    this.reportUtilityOptionsSub = this.overviewReportService.reportUtilityOptions.subscribe(reportUtilityOptions => {
-      this.reportUtilityOptions = reportUtilityOptions;
-    })
+    this.account = this.accountDbService.selectedAccount.getValue();
+    this.reportOptions = this.overviewReportService.reportOptions.getValue();
+    if (!this.reportOptions) {
+      let selectedOptions: IdbOverviewReportOptions = this.overviewReportOptionsDbService.selectedOverviewReportOptions.getValue()
+      if (selectedOptions) {
+        this.reportOptions = selectedOptions.reportOptions;
+        this.reportUtilityOptions = selectedOptions.reportUtilityOptions;
+      } else {
+        this.router.navigateByUrl('/overview-report/report-dashboard');
+      }
+    } else {
+      this.reportUtilityOptions = this.overviewReportService.reportUtilityOptions.getValue();
+    }
   }
 
   ngOnDestroy() {
-    this.reportOptionsSub.unsubscribe();
     this.printSub.unsubscribe();
-    this.reportUtilityOptionsSub.unsubscribe();
   }
 
   printReport() {
@@ -56,15 +58,4 @@ export class BasicReportComponent implements OnInit {
       }, 100)
     }, 100)
   }
-
-  checkReportOptions() {
-    let selectedOptions: IdbOverviewReportOptions = this.overviewReportOptionsDbService.selectedOverviewReportOptions.getValue();
-    if (selectedOptions) {
-      this.overviewReportService.reportUtilityOptions.next(selectedOptions.reportUtilityOptions);
-      this.overviewReportService.reportOptions.next(selectedOptions.reportOptions);
-    } else {
-      this.router.navigateByUrl('/overview-report/report-dashboard');
-    }
-  }
-
 }

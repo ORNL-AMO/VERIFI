@@ -1,12 +1,10 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { Subscription } from 'rxjs';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { FacilityMeterSummaryData } from 'src/app/models/dashboard';
 import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { ReportUtilityOptions } from 'src/app/models/overview-report';
 import { MeterSummaryService } from 'src/app/shared/helper-services/meter-summary.service';
-import { OverviewReportService } from '../../../overview-report.service';
 
 @Component({
   selector: 'app-facility-report-meters-table',
@@ -16,27 +14,19 @@ import { OverviewReportService } from '../../../overview-report.service';
 export class FacilityReportMetersTableComponent implements OnInit {
   @Input()
   facility: IdbFacility;
+  @Input()
+  reportUtilityOptions: ReportUtilityOptions;
 
   facilityMeterSummaryData: FacilityMeterSummaryData;
   lastMonthsDate: Date;
   yearPriorDate: Date;
   facilityEnergyUnit: string;
-  reportUtilityOptions: ReportUtilityOptions;
-  reportUtilityOptionsSub: Subscription;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private meterSummaryService: MeterSummaryService,
-    private utilityMeterDbService: UtilityMeterdbService, private overviewReportService: OverviewReportService) { }
+    private utilityMeterDbService: UtilityMeterdbService) { }
 
   ngOnInit(): void {
-    this.reportUtilityOptionsSub = this.overviewReportService.reportUtilityOptions.subscribe(reportUtilityOptions => {
-      this.reportUtilityOptions = reportUtilityOptions
-      this.setMeterSummary();
-    });
+    this.setMeterSummary();
   }
-
-  ngOnDestroy() {
-    this.reportUtilityOptionsSub.unsubscribe();
-  }
-
 
   setMeterSummary() {
     let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();

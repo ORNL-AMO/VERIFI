@@ -1,13 +1,11 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { Subscription } from 'rxjs';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbFacility, IdbUtilityMeter, MeterSource } from 'src/app/models/idb';
 import { BarChartDataTrace, ReportUtilityOptions } from 'src/app/models/overview-report';
 import { FacilityBarChartData } from 'src/app/models/visualization';
 import { VisualizationService } from 'src/app/shared/helper-services/visualization.service';
 import { UtilityColors } from 'src/app/shared/utilityColors';
-import { OverviewReportService } from '../../../overview-report.service';
 
 @Component({
   selector: 'app-facility-report-bar-chart',
@@ -17,14 +15,12 @@ import { OverviewReportService } from '../../../overview-report.service';
 export class FacilityReportBarChartComponent implements OnInit {
   @Input()
   facility: IdbFacility;
-
-
+  @Input()
+  reportUtilityOptions: ReportUtilityOptions;
 
   @ViewChild('utilityCostBarChart', { static: false }) utilityCostBarChart: ElementRef;
   @ViewChild('utilityUsageBarChart', { static: false }) utilityUsageBarChart: ElementRef;
   @ViewChild('utilityEmissionsBarChart', { static: false }) utilityEmissionsBarChart: ElementRef;
-
-
 
   electricityData: Array<FacilityBarChartData>;
   naturalGasData: Array<FacilityBarChartData>;
@@ -34,24 +30,17 @@ export class FacilityReportBarChartComponent implements OnInit {
   wasteWaterData: Array<FacilityBarChartData>;
   otherUtilityData: Array<FacilityBarChartData>;
 
-
-  reportUtilityOptions: ReportUtilityOptions;
-  reportUtilityOptionsSub: Subscription;
-  constructor(private overviewReportService: OverviewReportService, private visualizationService: VisualizationService,
+  constructor(private visualizationService: VisualizationService,
     private utilityMeterDbService: UtilityMeterdbService, private plotlyService: PlotlyService) { }
 
   ngOnInit(): void {
+    this.setUtilityData();
   }
 
-  ngOnDestroy() {
-    this.reportUtilityOptionsSub.unsubscribe();
-  }
-
-  ngAfterViewInit() {
-    this.reportUtilityOptionsSub = this.overviewReportService.reportUtilityOptions.subscribe(reportUtilityOptions => {
-      this.reportUtilityOptions = reportUtilityOptions;
-      this.setUtilityData();
-    })
+  ngAfterViewInit(){
+    this.drawEmissionsChart();
+    this.drawCostChart();
+    this.drawUsageChart();
   }
 
   setUtilityData() {
@@ -92,9 +81,6 @@ export class FacilityReportBarChartComponent implements OnInit {
     } else {
       this.otherUtilityData = [];
     }
-    this.drawEmissionsChart();
-    this.drawCostChart();
-    this.drawUsageChart();
   }
 
   getDataByUtility(utility: MeterSource, facilityMeters: Array<IdbUtilityMeter>): Array<FacilityBarChartData> {

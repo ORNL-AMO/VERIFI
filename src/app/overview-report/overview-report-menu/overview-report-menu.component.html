@@ -24,26 +24,26 @@
                     <input class="checkbox" type="checkbox" id="includeAccount" name="includeAccount"
                         [(ngModel)]="reportOptions.includeAccount">Include Account Report
                 </label>
-                <label for="accountInfo">
+                <label for="accountInfo" *ngIf="reportOptions.includeAccount">
                     <input class="checkbox" type="checkbox" id="accountInfo" name="accountInfo"
                         [(ngModel)]="reportOptions.accountInfo">Include Account Info
                 </label>
-                <label for="facilitySummaryTable">
+                <label for="facilitySummaryTable" *ngIf="reportOptions.includeAccount">
                     <input class="checkbox" type="checkbox" id="facilitySummaryTable" name="facilitySummaryTable"
                         [(ngModel)]="reportOptions.facilitySummaryTable">Include Facility Summary
                     Table
                 </label>
 
-                <label for="accountUtilityTable">
+                <label for="accountUtilityTable" *ngIf="reportOptions.includeAccount">
                     <input class="checkbox" type="checkbox" id="accountUtilityTable" name="accountUtilityTable"
                         [(ngModel)]="reportOptions.accountUtilityTable">Include Account Utility Table
                 </label>
-                <label for="accountFacilityCharts">
+                <label for="accountFacilityCharts" *ngIf="reportOptions.includeAccount">
                     <input class="checkbox" type="checkbox" id="accountFacilityCharts" name="accountFacilityCharts"
                         [(ngModel)]="reportOptions.accountFacilityCharts">Include Account Facility
                     Charts
                 </label>
-                <label for="accountFacilityAnnualBarChart">
+                <label for="accountFacilityAnnualBarChart" *ngIf="reportOptions.includeAccount">
                     <input class="checkbox" type="checkbox" id="accountFacilityAnnualBarChart"
                         name="accountFacilityAnnualBarChart"
                         [(ngModel)]="reportOptions.accountFacilityAnnualBarChart">Include Annual Facility Bar Charts
@@ -89,16 +89,16 @@
                                 [(ngModel)]="reportUtilityOptions.otherEnergy">Other
                             Energy
                         </label>
-                        <label for="electricity">
+                        <label for="water">
                             <input class="checkbox" type="checkbox" id="water" name="water"
                                 [(ngModel)]="reportUtilityOptions.water">Water
                         </label>
-                        <label for="naturalGas">
+                        <label for="wasteWater">
                             <input class="checkbox" type="checkbox" id="wasteWater" name="wasteWater"
                                 [(ngModel)]="reportUtilityOptions.wasteWater">Waste
                             Water
                         </label>
-                        <label for="otherFuels">
+                        <label for="otherUtility">
                             <input class="checkbox" type="checkbox" id="otherUtility" name="otherUtility"
                                 [(ngModel)]="reportUtilityOptions.otherUtility">Other
                             Utility

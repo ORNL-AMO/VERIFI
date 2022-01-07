@@ -1,5 +1,4 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { Subscription } from 'rxjs';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
 import { ReportUtilityOptions, ReportUtilitySummary } from 'src/app/models/overview-report';
@@ -13,20 +12,14 @@ import { OverviewReportService } from '../../../overview-report.service';
 export class FacilityReportUtilityUsageTableComponent implements OnInit {
   @Input()
   facility: IdbFacility;
+  @Input()
   reportUtilityOptions: ReportUtilityOptions;
-  reportUtilityOptionsSub: Subscription;
+
   facilityReportUtilitySummary: ReportUtilitySummary;
   constructor(private utilityMeterDbService: UtilityMeterdbService, private overviewReportService: OverviewReportService) { }
 
   ngOnInit(): void {
-    this.reportUtilityOptionsSub = this.overviewReportService.reportUtilityOptions.subscribe(reportUtilityOptions => {
-      this.reportUtilityOptions = reportUtilityOptions
-      this.setFacilitySummary();
-    });
-  }
-
-  ngOnDestroy() {
-    this.reportUtilityOptionsSub.unsubscribe();
+    this.setFacilitySummary();
   }
 
   setFacilitySummary() {

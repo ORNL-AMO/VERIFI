@@ -51,7 +51,9 @@ export class OverviewReportMenuComponent implements OnInit {
       accountId: selectedAccount.id
     }
     let createdReport: IdbOverviewReportOptions = await this.overviewReportOptionsDbService.addWithObservable(newIdbReportOptionsItem).toPromise();
-    this.overviewReportOptionsDbService.selectedOverviewReportOptions.next(createdReport)
+    this.overviewReportOptionsDbService.selectedOverviewReportOptions.next(createdReport);
+    this.overviewReportService.reportOptions.next(this.reportOptions);
+    this.overviewReportService.reportUtilityOptions.next(this.reportUtilityOptions);
     this.overviewReportOptionsDbService.setAccountOverviewReportOptions();
     this.toastNotificationsService.showToast('New Report Created', undefined, 1000, false, "success");
     this.router.navigateByUrl('/overview-report/basic-report');

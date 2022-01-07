@@ -27,11 +27,7 @@ export class AccountReportUtilityUsageBarChartComponent implements OnInit {
 
   ngOnInit(): void {
   }
-
-  ngOnChanges() {
-    this.drawChart();
-  }
-
+  
   ngAfterViewInit() {
     this.drawChart();
   }

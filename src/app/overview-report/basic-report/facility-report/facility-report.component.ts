@@ -1,8 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { Subscription } from 'rxjs';
 import { IdbFacility } from 'src/app/models/idb';
-import { ReportOptions } from 'src/app/models/overview-report';
-import { OverviewReportService } from '../../overview-report.service';
+import { ReportOptions, ReportUtilityOptions } from 'src/app/models/overview-report';
 
 @Component({
   selector: 'app-facility-report',
@@ -12,19 +10,14 @@ import { OverviewReportService } from '../../overview-report.service';
 export class FacilityReportComponent implements OnInit {
   @Input()
   facility: IdbFacility;
-
+  @Input()
   reportOptions: ReportOptions;
-  reportOptionsSub: Subscription;
-  constructor(private overviewReportService: OverviewReportService) { }
+  @Input()
+  reportUtilityOptions: ReportUtilityOptions;
+
+  constructor() { }
 
   ngOnInit(): void {
-    this.reportOptionsSub = this.overviewReportService.reportOptions.subscribe(reportOptions => {
-      this.reportOptions = reportOptions;
-    });
-  }
 
-  ngOnDestroy(){
-    this.reportOptionsSub.unsubscribe();
   }
-
 }

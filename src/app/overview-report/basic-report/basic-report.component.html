@@ -1,11 +1,13 @@
 <div class="report" [ngClass]="{'print': print}" *ngIf="reportOptions">
-    <app-front-page></app-front-page>
+    <app-front-page [reportOptions]="reportOptions"></app-front-page>
     <hr class="print-break-after page-spacer">
-    <app-account-report class="print-break-after report-item" *ngIf="reportOptions.includeAccount">
+    <app-account-report class="print-break-after report-item" *ngIf="reportOptions.includeAccount"
+        [reportOptions]="reportOptions" [reportUtilityOptions]="reportUtilityOptions" [account]="account">
     </app-account-report>
     <div *ngIf="reportOptions.includeFacilities">
         <div *ngFor="let facility of reportUtilityOptions.facilities" class="print-break-before report-item">
-            <app-facility-report *ngIf="facility.selected" [facility]="facility"></app-facility-report>
+            <app-facility-report *ngIf="facility.selected" [facility]="facility" [reportOptions]="reportOptions"
+                [reportUtilityOptions]="reportUtilityOptions"></app-facility-report>
         </div>
     </div>
 </div>

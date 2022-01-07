@@ -26,10 +26,6 @@ export class AccountReportDonutComponent implements OnInit {
   ngOnInit(): void {
   }
 
-  ngOnChanges() {
-    this.drawUtilityDonut();
-  }
-
   ngAfterViewInit() {
     this.drawUtilityDonut();
   }

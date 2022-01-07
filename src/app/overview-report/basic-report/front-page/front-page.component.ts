@@ -1,7 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Component, Input, OnInit } from '@angular/core';
 import { ReportOptions } from 'src/app/models/overview-report';
-import { OverviewReportService } from '../../overview-report.service';
 
 @Component({
   selector: 'app-front-page',
@@ -9,20 +7,13 @@ import { OverviewReportService } from '../../overview-report.service';
   styleUrls: ['./front-page.component.css']
 })
 export class FrontPageComponent implements OnInit {
-
+  @Input()
   reportOptions: ReportOptions;
-  reportOptionsSub: Subscription;
+
   reportDate: Date = new Date();
-  constructor(private overviewReportService: OverviewReportService) { }
+  constructor() { }
 
   ngOnInit(): void {
-    this.reportOptionsSub = this.overviewReportService.reportOptions.subscribe(val => {
-      this.reportOptions = val;
-    });
-  }
 
-  ngOnDestroy(){
-    this.reportOptionsSub.unsubscribe();
   }
-
 }

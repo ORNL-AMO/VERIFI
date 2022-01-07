@@ -1,7 +1,4 @@
-import { Component, OnInit } from '@angular/core';
-import { Subscription } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { Component, Input, OnInit } from '@angular/core';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { AccountFacilitiesSummary } from 'src/app/models/dashboard';
 import { IdbAccount, IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
@@ -15,13 +12,13 @@ import { OverviewReportService } from '../../overview-report.service';
   styleUrls: ['./account-report.component.css']
 })
 export class AccountReportComponent implements OnInit {
-
+  @Input()
   account: IdbAccount;
-  accountSub: Subscription;
+  @Input()
   reportOptions: ReportOptions;
-  reportOptionsSub: Subscription;
-  reportUtilityOptionsSub: Subscription;
+  @Input()
   reportUtilityOptions: ReportUtilityOptions;
+
   accountFacilitiesSummary: AccountFacilitiesSummary = {
     facilitySummaries: [],
     totalEnergyUse: undefined,
@@ -35,31 +32,15 @@ export class AccountReportComponent implements OnInit {
     utilitySummary: ReportUtilitySummary,
     facility: IdbFacility
   }>;
-  constructor(private accountDbService: AccountdbService, private overviewReportService: OverviewReportService,
+  constructor(private overviewReportService: OverviewReportService,
     private meterSummaryService: MeterSummaryService, private utilityMeterDbService: UtilityMeterdbService) { }
 
   ngOnInit(): void {
-    this.accountSub = this.accountDbService.selectedAccount.subscribe(account => {
-      this.account = account;
-    });
-
-    this.reportOptionsSub = this.overviewReportService.reportOptions.subscribe(reportOptions => {
-      this.reportOptions = reportOptions;
-    });
-
-    this.reportUtilityOptionsSub = this.overviewReportService.reportUtilityOptions.subscribe(reportUtilityOptions => {
-      this.reportUtilityOptions = reportUtilityOptions
-      this.setFacilitySummary();
-      this.setFacilitiesUtilitySummaries();
-      this.setAccountFacilities();
-    });
+    this.setFacilitySummary();
+    this.setFacilitiesUtilitySummaries();
+    this.setAccountFacilities();
   }
 
-  ngOnDestroy() {
-    this.accountSub.unsubscribe();
-    this.reportOptionsSub.unsubscribe();
-    this.reportUtilityOptionsSub.unsubscribe();
-  }
 
   setAccountFacilities() {
     this.accountFacilitiesSummary = this.meterSummaryService.getAccountFacilitesSummary(this.reportUtilityOptions);

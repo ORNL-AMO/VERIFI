@@ -1,9 +1,9 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { Subscription } from 'rxjs';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbAccount, IdbFacility, IdbUtilityMeter, MeterSource } from 'src/app/models/idb';
-import { ReportOptions, ReportUtilityOptions } from 'src/app/models/overview-report';
+import { ReportUtilityOptions } from 'src/app/models/overview-report';
 import { FacilityBarChartData } from 'src/app/models/visualization';
 import { VisualizationService } from 'src/app/shared/helper-services/visualization.service';
 import { OverviewReportService } from '../../../overview-report.service';
@@ -16,32 +16,22 @@ import { OverviewReportService } from '../../../overview-report.service';
 export class AccountReportFacilityBarChartComponent implements OnInit {
   @Input()
   account: IdbAccount;
-
+  @Input()
+  reportUtilityOptions: ReportUtilityOptions;
 
   @ViewChild('facilityCostBarChart', { static: false }) facilityCostBarChart: ElementRef;
   @ViewChild('facilityUsageBarChart', { static: false }) facilityUsageBarChart: ElementRef;
   @ViewChild('facilityEmissionsBarChart', { static: false }) facilityEmissionsDonut: ElementRef;
 
-  reportUtilityOptions: ReportUtilityOptions;
-  reportUtilityOptionsSub: Subscription;
-  reportOptions: ReportOptions;
   chartData: Array<{
     facility: IdbFacility,
     data: Array<FacilityBarChartData>
   }>
   constructor(private visualizationService: VisualizationService, private overviewReportService: OverviewReportService,
-    private utilityMeterDbService: UtilityMeterdbService, private plotlyService: PlotlyService) { }
+    private utilityMeterDbService: UtilityMeterdbService, private plotlyService: PlotlyService, private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
-    this.reportUtilityOptionsSub = this.overviewReportService.reportUtilityOptions.subscribe(val => {
-      this.reportUtilityOptions = val;
-      this.setReportData();
-      this.drawCharts();
-    });
-  }
-
-  ngOnDestroy() {
-    this.reportUtilityOptionsSub.unsubscribe();
+    this.setReportData();
   }
 
   ngAfterViewInit() {
