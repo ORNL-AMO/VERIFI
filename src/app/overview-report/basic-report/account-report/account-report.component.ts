@@ -73,11 +73,9 @@ export class AccountReportComponent implements OnInit {
         removeFacilityId.push(facility.id);
       }
     })
-    console.log(accountMeters.length);
     accountMeters = accountMeters.filter(meter => {
       return !removeFacilityId.includes(meter.facilityId);
     });
-    console.log(accountMeters.length);
     this.accountReportUtilitySummary = this.overviewReportService.getUtilityUsageData(accountMeters, this.reportUtilityOptions, true);
   }
 

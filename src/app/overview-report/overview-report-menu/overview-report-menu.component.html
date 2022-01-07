@@ -134,13 +134,16 @@
         <hr>
         <div class="row justify-content-between">
             <div class="col">
-                <button *ngIf="!selectedReportOptions" class="btn btn-danger" (click)="goToDashboard()">Cancel</button>
-                <button *ngIf="selectedReportOptions" class="btn btn-danger" (click)="cancelChanges()">Discard Changes</button>
+                <button class="btn btn-danger" (click)="goToDashboard()">Return to Dashboard</button>
             </div>
             <div class="col text-right">
-                <button *ngIf="!selectedReportOptions" class="btn btn-primary" (click)="createReport()">Create
+                <button *ngIf="!selectedReportOptions" class="btn btn-primary" (click)="createReport()"><span
+                        class="fa fa-save"></span> Create
                     Report</button>
-                <button *ngIf="selectedReportOptions" class="btn btn-primary" (click)="updateReport()">Update
+                <button *ngIf="selectedReportOptions" class="btn btn-secondary mr-2" (click)="cancelChanges()">Discard
+                    Changes</button>
+                <button *ngIf="selectedReportOptions" class="btn btn-primary" (click)="updateReport()"><span
+                        class="fa fa-save"></span> Update
                     Report</button>
             </div>
         </div>

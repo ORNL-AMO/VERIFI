@@ -27,10 +27,11 @@ export class OverviewReportMenuComponent implements OnInit {
     let reportOptions: ReportOptions = this.overviewReportService.reportOptions.getValue();
     if (!reportOptions) {
       this.goToDashboard();
+    } else {
+      let reportUtilityOptions: ReportUtilityOptions = this.overviewReportService.reportUtilityOptions.getValue();
+      this.reportOptions = JSON.parse(JSON.stringify(reportOptions));
+      this.reportUtilityOptions = JSON.parse(JSON.stringify(reportUtilityOptions));
     }
-    let reportUtilityOptions: ReportUtilityOptions = this.overviewReportService.reportUtilityOptions.getValue();
-    this.reportOptions = JSON.parse(JSON.stringify(reportOptions));
-    this.reportUtilityOptions = JSON.parse(JSON.stringify(reportUtilityOptions));
   }
 
   save() {
@@ -49,7 +50,8 @@ export class OverviewReportMenuComponent implements OnInit {
       reportUtilityOptions: this.reportUtilityOptions,
       accountId: selectedAccount.id
     }
-    await this.overviewReportOptionsDbService.addWithObservable(newIdbReportOptionsItem).toPromise();
+    let createdReport: IdbOverviewReportOptions = await this.overviewReportOptionsDbService.addWithObservable(newIdbReportOptionsItem).toPromise();
+    this.overviewReportOptionsDbService.selectedOverviewReportOptions.next(createdReport)
     this.overviewReportOptionsDbService.setAccountOverviewReportOptions();
     this.toastNotificationsService.showToast('New Report Created', undefined, 1000, false, "success");
     this.router.navigateByUrl('/overview-report/basic-report');

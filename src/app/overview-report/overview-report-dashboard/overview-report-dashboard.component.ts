@@ -15,6 +15,7 @@ export class OverviewReportDashboardComponent implements OnInit {
 
   accountOverviewReportOptions: Array<IdbOverviewReportOptions>;
   accountOverviewReportOptionsSub: Subscription;
+  reportToDelete: IdbOverviewReportOptions;
   constructor(private overviewReportService: OverviewReportService, private router: Router, private overviewReportOptionsDbService: OverviewReportOptionsDbService) { }
 
   ngOnInit(): void {
@@ -46,5 +47,26 @@ export class OverviewReportDashboardComponent implements OnInit {
     this.overviewReportService.reportOptions.next(report.reportOptions);
     this.overviewReportService.reportUtilityOptions.next(report.reportUtilityOptions);
     this.router.navigateByUrl('/overview-report/basic-report');
+  }
+
+  deleteReport(report: IdbOverviewReportOptions) {
+    this.reportToDelete = report;
+  }
+
+  cancelDelete() {
+    this.reportToDelete = undefined;
+  }
+
+  async confirmDelete() {
+    await this.overviewReportOptionsDbService.deleteWithObservable(this.reportToDelete.id).toPromise();
+    this.overviewReportOptionsDbService.setAccountOverviewReportOptions();
+    this.reportToDelete = undefined;
+  }
+
+  editReport(report: IdbOverviewReportOptions) {
+    this.overviewReportOptionsDbService.selectedOverviewReportOptions.next(report);
+    this.overviewReportService.reportOptions.next(report.reportOptions);
+    this.overviewReportService.reportUtilityOptions.next(report.reportUtilityOptions);
+    this.router.navigateByUrl('/overview-report/report-menu');
   }
 }
