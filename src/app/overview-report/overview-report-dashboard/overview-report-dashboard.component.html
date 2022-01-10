@@ -44,7 +44,7 @@
                         <tr *ngFor="let report of accountOverviewReportOptions">
                             <td>
                                 <a (click)="selectReport(report)">
-                                    {{report.reportOptions.title}}
+                                    {{report.name}}
                                 </a>
                             </td>
                             <td>{{report.reportOptions.notes}}</td>

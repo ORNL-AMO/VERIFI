@@ -24,63 +24,63 @@ export class OverviewReportService {
     this.print = new BehaviorSubject<boolean>(false);
   }
 
-  initializeOptions() {
-    let accountFacilites: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-    accountFacilites.forEach(facility => {
-      facility.selected = true;
-    });
-    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    let electricity: boolean = false;
-    let naturalGas: boolean = false;
-    let otherFuels: boolean = false;
-    let otherEnergy: boolean = false;
-    let water: boolean = false;
-    let wasteWater: boolean = false;
-    let otherUtility: boolean = false;
-    accountMeters.forEach(meter => {
-      if (meter.source == 'Electricity') {
-        electricity = true;
-      } else if (meter.source == 'Natural Gas') {
-        naturalGas = true;
-      } else if (meter.source == 'Other Energy') {
-        otherEnergy = true;
-      } else if (meter.source == 'Other Fuels') {
-        otherFuels = true;
-      } else if (meter.source == 'Other Utility') {
-        otherUtility = true;
-      } else if (meter.source == 'Waste Water') {
-        wasteWater = true;
-      } else if (meter.source == 'Water') {
-        water = true;
-      }
-    })
+  // initializeOptions() {
+  //   let accountFacilites: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+  //   accountFacilites.forEach(facility => {
+  //     facility.selected = true;
+  //   });
+  //   let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+  //   let electricity: boolean = false;
+  //   let naturalGas: boolean = false;
+  //   let otherFuels: boolean = false;
+  //   let otherEnergy: boolean = false;
+  //   let water: boolean = false;
+  //   let wasteWater: boolean = false;
+  //   let otherUtility: boolean = false;
+  //   accountMeters.forEach(meter => {
+  //     if (meter.source == 'Electricity') {
+  //       electricity = true;
+  //     } else if (meter.source == 'Natural Gas') {
+  //       naturalGas = true;
+  //     } else if (meter.source == 'Other Energy') {
+  //       otherEnergy = true;
+  //     } else if (meter.source == 'Other Fuels') {
+  //       otherFuels = true;
+  //     } else if (meter.source == 'Other Utility') {
+  //       otherUtility = true;
+  //     } else if (meter.source == 'Waste Water') {
+  //       wasteWater = true;
+  //     } else if (meter.source == 'Water') {
+  //       water = true;
+  //     }
+  //   })
 
-    this.reportOptions.next({
-      title: 'Energy Consumption Report',
-      notes: '',
-      includeAccount: true,
-      accountInfo: true,
-      facilitySummaryTable: true,
-      accountUtilityTable: true,
-      accountFacilityCharts: true,
-      accountFacilityAnnualBarChart: true,
-      includeFacilities: true,
-      facilityMetersTable: true,
-      facilityUtilityUsageTable: true,
-      facilityInfo: true,
-      facilityBarCharts: true
-    });
-    this.reportUtilityOptions.next({
-      electricity: electricity,
-      naturalGas: naturalGas,
-      otherFuels: otherFuels,
-      otherEnergy: otherEnergy,
-      water: water,
-      wasteWater: wasteWater,
-      otherUtility: otherUtility,
-      facilities: accountFacilites,
-    })
-  }
+  //   this.reportOptions.next({
+  //     title: 'Energy Consumption Report',
+  //     notes: '',
+  //     includeAccount: true,
+  //     accountInfo: true,
+  //     facilitySummaryTable: true,
+  //     accountUtilityTable: true,
+  //     accountFacilityCharts: true,
+  //     accountFacilityAnnualBarChart: true,
+  //     includeFacilities: true,
+  //     facilityMetersTable: true,
+  //     facilityUtilityUsageTable: true,
+  //     facilityInfo: true,
+  //     facilityBarCharts: true
+  //   });
+  //   this.reportUtilityOptions.next({
+  //     electricity: electricity,
+  //     naturalGas: naturalGas,
+  //     otherFuels: otherFuels,
+  //     otherEnergy: otherEnergy,
+  //     water: water,
+  //     wasteWater: wasteWater,
+  //     otherUtility: otherUtility,
+  //     facilities: accountFacilites,
+  //   })
+  // }
 
   getInitialReportOptions(): ReportOptions {
     return {
@@ -96,7 +96,8 @@ export class OverviewReportService {
       facilityMetersTable: true,
       facilityUtilityUsageTable: true,
       facilityInfo: true,
-      facilityBarCharts: true
+      facilityBarCharts: true,
+      templateId: undefined
     }
   }
 

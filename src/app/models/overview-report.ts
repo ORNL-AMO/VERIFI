@@ -47,7 +47,8 @@ export interface ReportUtilitySummary {
     facilityMetersTable: boolean,
     facilityUtilityUsageTable: boolean,
     facilityInfo: boolean,
-    facilityBarCharts: boolean
+    facilityBarCharts: boolean,
+    templateId: number
   }
   
   export interface ReportUtilityOptions {

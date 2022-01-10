@@ -28,11 +28,6 @@ export class OverviewReportDashboardComponent implements OnInit {
     this.accountOverviewReportOptionsSub.unsubscribe();
   }
 
-  setDefaultReport() {
-    this.overviewReportService.initializeOptions();
-    this.router.navigateByUrl('/overview-report/report-menu');
-  }
-
   createReport() {
     this.overviewReportOptionsDbService.selectedOverviewReportOptions.next(undefined);
     let newReportOptions: ReportOptions = this.overviewReportService.getInitialReportOptions();

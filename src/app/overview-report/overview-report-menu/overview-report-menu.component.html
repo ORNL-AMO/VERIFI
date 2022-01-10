@@ -1,14 +1,35 @@
 <div class="filter">
     <div class="filter-dropdown" *ngIf="reportOptions">
-        <!-- <div class="row">
-            <div class="col text-right">
-                <a (click)="close()"><span class="fa fa-close"></span></a>
-            </div>
-        </div> -->
         <div class="row">
             <div class="col-6">
+                <label for="reportName">
+                    Report Name
+                </label>
+                <input type="text" class="form-control" name="reportName" id="reportName" [(ngModel)]="name" />
+                <hr>
+            </div>
+            <div class="col-6 text-right">
                 <div class="form-group">
-                    <label for="reportTitle">Report Title</label>
+                    <label class="text-left" for="selectTemplate">
+                        Report Template
+                    </label>
+                    <select id="selectTemplate" [(ngModel)]="reportOptions.templateId" name="templateId"
+                        class="form-control">
+                        <option [ngValue]=undefined>Custom</option>
+                        <option [ngValue]="99999">Better Plants Report</option>
+                        <option *ngFor="let template of reportTemplates" [ngValue]="template.id">{{template.name}}
+                        </option>
+                    </select>
+                </div>
+                <a class="small" (click)="showSaveTemplate()" *ngIf="reportOptions.templateId == undefined">Save
+                    Custom Template</a>
+                <a class="small edit-templates" (click)="editTemplates()" *ngIf="reportTemplates.length != 0">Edit
+                    Templates</a>
+                <hr>
+            </div>
+            <div class="col-6">
+                <div class="form-group">
+                    <label for="reportTitle">Report Cover Title</label>
                     <textarea class="form-control" name="reportTitle" id="reportTitle"
                         [(ngModel)]="reportOptions.title"></textarea>
                 </div>
@@ -149,3 +170,43 @@
         </div>
     </div>
 </div>
+
+<!--save template modal-->
+<div class="popup" [class.open]="displayCreateTemplate">
+    <div class="popup-header" *ngIf="displayCreateTemplate">Create New Report Template
+        <button class="item-right" (click)="cancelNewTemplate()">x</button>
+    </div>
+    <div class="popup-body">
+        <label class="pl-0" for="templateName">Template Name</label>
+        <input type="text" id="templateName" name="templateName" [(ngModel)]="templateName" class="form-control">
+    </div>
+    <div class="saveCancel popup-footer text-right">
+        <button class="btn btn-secondary" (click)="cancelNewTemplate()">Cancel</button>
+        <button class="btn btn-success" (click)="saveTemplate()">Save</button>
+    </div>
+</div>
+
+
+<!-- 
+<div class="window" [class.open]="predictorEntryToEdit">
+    <div class="windowOverlay"></div>
+    <div class="windowContent windowContentMed">
+        <h4>Edit/Delete Templates</h4>
+        <br>
+
+        <div class="row" *ngIf="!predictorToDelete">
+            <div class="col">
+                <p class="bold">Template Name</p>
+            </div>
+            <div class="col-4">
+                <p class="bold">Units</p>
+            </div>
+            <div class="col-2">
+                <p class="bold">Production?</p>
+            </div>
+            <div class="col-1">
+                <!-- <p class="bold">Delete</p> --
+            </div>
+        </div>
+    </div>
+</div> -->

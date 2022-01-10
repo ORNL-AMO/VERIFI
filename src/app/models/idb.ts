@@ -197,7 +197,9 @@ export interface IdbOverviewReportOptions {
     accountId: number,
     reportOptions: ReportOptions,
     reportUtilityOptions: ReportUtilityOptions,
-    date: Date
+    date: Date,
+    type: 'report' | 'template',
+    name: string
 }
 
 

@@ -12,9 +12,11 @@ export class OverviewReportOptionsDbService {
 
   accountOverviewReportOptions: BehaviorSubject<Array<IdbOverviewReportOptions>>;
   selectedOverviewReportOptions: BehaviorSubject<IdbOverviewReportOptions>;
+  overviewReportOptionsTemplates: BehaviorSubject<Array<IdbOverviewReportOptions>>;
   constructor(private dbService: NgxIndexedDBService, private localStorageService: LocalStorageService,
     private accountDbService: AccountdbService) {
     this.accountOverviewReportOptions = new BehaviorSubject<Array<IdbOverviewReportOptions>>(new Array());
+    this.overviewReportOptionsTemplates = new BehaviorSubject<Array<IdbOverviewReportOptions>>(new Array());
     this.selectedOverviewReportOptions = new BehaviorSubject<IdbOverviewReportOptions>(undefined);
   }
 
@@ -22,7 +24,8 @@ export class OverviewReportOptionsDbService {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     if (selectedAccount) {
       let allOverviewReportOptions: Array<IdbOverviewReportOptions> = await this.getAll().toPromise();
-      let accountOverviewReportOptions: Array<IdbOverviewReportOptions> = allOverviewReportOptions.filter(reportOption => { return reportOption.accountId == selectedAccount.id });
+      let accountOverviewReportOptions: Array<IdbOverviewReportOptions> = allOverviewReportOptions.filter(reportOption => { return reportOption.accountId == selectedAccount.id && reportOption.type == 'report' });
+      let templates: Array<IdbOverviewReportOptions> = allOverviewReportOptions.filter(report => { return report.type == 'template' });
       let storedOptionsId: number = this.localStorageService.retrieve("overviewReportOptionsId");
       if (storedOptionsId) {
         let selectedOverviewReportOptions: IdbOverviewReportOptions = accountOverviewReportOptions.find(facility => { return facility.id == storedOptionsId });
@@ -31,6 +34,7 @@ export class OverviewReportOptionsDbService {
         this.selectedOverviewReportOptions.next(accountOverviewReportOptions[0]);
       }
       this.accountOverviewReportOptions.next(accountOverviewReportOptions);
+      this.overviewReportOptionsTemplates.next(templates);
     }
     //subscribe after initialization
     this.selectedOverviewReportOptions.subscribe(overviewReportOptions => {
@@ -43,9 +47,14 @@ export class OverviewReportOptionsDbService {
   setAccountOverviewReportOptions() {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     if (selectedAccount) {
-      this.getAllByIndexRange('accountId', selectedAccount.id).subscribe(facilities => {
-        this.accountOverviewReportOptions.next(facilities);
+      this.getAllByIndexRange('accountId', selectedAccount.id).subscribe(accountReports => {
+        let report: Array<IdbOverviewReportOptions> = accountReports.filter(report => { return report.type == 'report' });
+        this.accountOverviewReportOptions.next(report);
       });
+      this.getAll().subscribe(reports => {
+        let templates: Array<IdbOverviewReportOptions> = reports.filter(report => { return report.type == 'template' });
+        this.overviewReportOptionsTemplates.next(templates);
+      })
     }
   }
 
