@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { IdbFacility } from 'src/app/models/idb';
-import { ReportOptions, ReportUtilityOptions } from 'src/app/models/overview-report';
+import { ReportOptions } from 'src/app/models/overview-report';
 
 @Component({
   selector: 'app-facility-report',
@@ -12,8 +12,6 @@ export class FacilityReportComponent implements OnInit {
   facility: IdbFacility;
   @Input()
   reportOptions: ReportOptions;
-  @Input()
-  reportUtilityOptions: ReportUtilityOptions;
 
   constructor() { }
 

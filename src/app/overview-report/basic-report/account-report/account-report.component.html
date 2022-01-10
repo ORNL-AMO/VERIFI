@@ -30,7 +30,7 @@
     </div>
     <div class="col-6">
         <app-account-report-utility-usage-bar-chart [account]="account"
-            [facilitiesUtilitySummaries]="facilitiesUtilitySummaries" [reportUtilityOptions]="reportUtilityOptions"
+            [facilitiesUtilitySummaries]="facilitiesUtilitySummaries" [reportOptions]="reportOptions"
             [graphType]="'cost'">
         </app-account-report-utility-usage-bar-chart>
     </div>
@@ -48,7 +48,7 @@
     </div>
     <div class="col-6">
         <app-account-report-utility-usage-bar-chart [account]="account"
-            [facilitiesUtilitySummaries]="facilitiesUtilitySummaries" [reportUtilityOptions]="reportUtilityOptions"
+            [facilitiesUtilitySummaries]="facilitiesUtilitySummaries" [reportOptions]="reportOptions"
             [graphType]="'usage'">
         </app-account-report-utility-usage-bar-chart>
     </div>
@@ -66,13 +66,13 @@
     </div>
     <div class="col-6">
         <app-account-report-utility-usage-bar-chart [account]="account"
-            [facilitiesUtilitySummaries]="facilitiesUtilitySummaries" [reportUtilityOptions]="reportUtilityOptions"
+            [facilitiesUtilitySummaries]="facilitiesUtilitySummaries" [reportOptions]="reportOptions"
             [graphType]="'emissions'">
         </app-account-report-utility-usage-bar-chart>
     </div>
 </div>
 <div class="pt-5" *ngIf="reportOptions.accountFacilityAnnualBarChart">
-    <app-account-report-facility-bar-chart [account]="account" [reportUtilityOptions]="reportUtilityOptions">
+    <app-account-report-facility-bar-chart [account]="account" [reportOptions]="reportOptions">
     </app-account-report-facility-bar-chart>
 </div>
 <hr class="hide-print">

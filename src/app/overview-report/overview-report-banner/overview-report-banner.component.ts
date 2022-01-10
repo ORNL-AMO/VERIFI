@@ -1,7 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
-import { Subscription } from 'rxjs';
-import { ReportOptions } from 'src/app/models/overview-report';
 import { OverviewReportService } from '../overview-report.service';
 
 @Component({

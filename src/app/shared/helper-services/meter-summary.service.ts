@@ -7,8 +7,8 @@ import { CalanderizationService } from './calanderization.service';
 import * as _ from 'lodash';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { ReportUtilityOptions } from 'src/app/models/overview-report';
 import { OverviewReportService } from 'src/app/overview-report/overview-report.service';
+import { ReportOptions } from 'src/app/models/overview-report';
 
 @Injectable({
   providedIn: 'root'
@@ -58,20 +58,20 @@ export class MeterSummaryService {
   }
 
 
-  getAccountFacilitesSummary(reportUtilityOptions?: ReportUtilityOptions): AccountFacilitiesSummary {
+  getAccountFacilitesSummary(reportOptions?: ReportOptions): AccountFacilitiesSummary {
     let facilitiesSummary: Array<FacilitySummary> = new Array();
     let allAccountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let accountLastBill: MonthlyData = this.calanderizationService.getLastBillEntry(allAccountMeters, true);
-    if (!reportUtilityOptions) {
+    if (!reportOptions) {
       let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
       facilities.forEach(facility => {
         let facilityMeterSummary: FacilitySummary = this.getFacilitySummary(facility, true, accountLastBill);
         facilitiesSummary.push(facilityMeterSummary);
       });
     } else {
-      reportUtilityOptions.facilities.forEach(facility => {
+      reportOptions.facilities.forEach(facility => {
         if (facility.selected) {
-          let facilityMeterSummary: FacilitySummary = this.getFacilitySummary(facility, true, accountLastBill, reportUtilityOptions);
+          let facilityMeterSummary: FacilitySummary = this.getFacilitySummary(facility, true, accountLastBill, reportOptions);
           facilitiesSummary.push(facilityMeterSummary);
         }
       });
@@ -87,12 +87,12 @@ export class MeterSummaryService {
     };
   }
 
-  getFacilitySummary(facility: IdbFacility, inAccount: boolean, accountMetersLastBill: MonthlyData, reportUtilityOptions?: ReportUtilityOptions): FacilitySummary {
+  getFacilitySummary(facility: IdbFacility, inAccount: boolean, accountMetersLastBill: MonthlyData, reportOptions?: ReportOptions): FacilitySummary {
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let accountMetersCopy: Array<IdbUtilityMeter> = JSON.parse(JSON.stringify(accountMeters));
     let facilityMeters: Array<IdbUtilityMeter> = accountMetersCopy.filter(meter => { return meter.facilityId == facility.id });
-    if (reportUtilityOptions) {
-      let selectedSources: Array<MeterSource> = this.overviewReportService.getSelectedSources(reportUtilityOptions);
+    if (reportOptions) {
+      let selectedSources: Array<MeterSource> = this.overviewReportService.getSelectedSources(reportOptions);
       facilityMeters = facilityMeters.filter(meter => { return selectedSources.includes(meter.source) });
     }
     if (facilityMeters.length != 0) {

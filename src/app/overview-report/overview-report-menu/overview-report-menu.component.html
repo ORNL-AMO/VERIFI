@@ -79,7 +79,7 @@
                         [(ngModel)]="reportOptions.includeFacilities" (change)="saveCustom()">Include Facility Reports
                 </label>
                 <div *ngIf="reportOptions.includeFacilities">
-                    <label *ngFor="let facility of reportUtilityOptions.facilities; let index = index;"
+                    <label *ngFor="let facility of reportOptions.facilities; let index = index;"
                         for="{{'facility_'+index}}">
                         <input class="checkbox" type="checkbox" id="{{'facility_'+index}}" name="{{'facility_'+index}}"
                             [(ngModel)]="facility.selected" (change)="saveCustom()">Include
@@ -94,37 +94,37 @@
                         <label>Include Utility Types</label>
                         <label for="electricity">
                             <input class="checkbox" type="checkbox" id="electricity" name="electricity"
-                                [(ngModel)]="reportUtilityOptions.electricity" (change)="saveCustom()">Electricity
+                                [(ngModel)]="reportOptions.electricity" (change)="saveCustom()">Electricity
                         </label>
                         <label for="naturalGas">
                             <input class="checkbox" type="checkbox" id="naturalGas" name="naturalGas"
-                                [(ngModel)]="reportUtilityOptions.naturalGas" (change)="saveCustom()">Natural
+                                [(ngModel)]="reportOptions.naturalGas" (change)="saveCustom()">Natural
                             Gas
                         </label>
                         <label for="otherFuels">
                             <input class="checkbox" type="checkbox" id="otherFuels" name="otherFuels"
-                                [(ngModel)]="reportUtilityOptions.otherFuels" (change)="saveCustom()">Other
+                                [(ngModel)]="reportOptions.otherFuels" (change)="saveCustom()">Other
                             Fuels
                         </label>
                     </div>
                     <div class="col-6">
                         <label for="otherEnergy">
                             <input class="checkbox" type="checkbox" id="otherEnergy" name="otherEnergy"
-                                [(ngModel)]="reportUtilityOptions.otherEnergy" (change)="saveCustom()">Other
+                                [(ngModel)]="reportOptions.otherEnergy" (change)="saveCustom()">Other
                             Energy
                         </label>
                         <label for="water">
                             <input class="checkbox" type="checkbox" id="water" name="water"
-                                [(ngModel)]="reportUtilityOptions.water" (change)="saveCustom()">Water
+                                [(ngModel)]="reportOptions.water" (change)="saveCustom()">Water
                         </label>
                         <label for="wasteWater">
                             <input class="checkbox" type="checkbox" id="wasteWater" name="wasteWater"
-                                [(ngModel)]="reportUtilityOptions.wasteWater" (change)="saveCustom()">Waste
+                                [(ngModel)]="reportOptions.wasteWater" (change)="saveCustom()">Waste
                             Water
                         </label>
                         <label for="otherUtility">
                             <input class="checkbox" type="checkbox" id="otherUtility" name="otherUtility"
-                                [(ngModel)]="reportUtilityOptions.otherUtility" (change)="saveCustom()">Other
+                                [(ngModel)]="reportOptions.otherUtility" (change)="saveCustom()">Other
                             Utility
                         </label>
                     </div>

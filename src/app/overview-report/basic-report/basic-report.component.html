@@ -2,12 +2,12 @@
     <app-front-page [reportOptions]="reportOptions"></app-front-page>
     <hr class="print-break-after page-spacer">
     <app-account-report class="print-break-after report-item" *ngIf="reportOptions.includeAccount"
-        [reportOptions]="reportOptions" [reportUtilityOptions]="reportUtilityOptions" [account]="account">
+        [reportOptions]="reportOptions" [account]="account">
     </app-account-report>
     <div *ngIf="reportOptions.includeFacilities">
-        <div *ngFor="let facility of reportUtilityOptions.facilities" class="print-break-before report-item">
-            <app-facility-report *ngIf="facility.selected" [facility]="facility" [reportOptions]="reportOptions"
-                [reportUtilityOptions]="reportUtilityOptions"></app-facility-report>
+        <div *ngFor="let facility of reportOptions.facilities" class="print-break-before report-item">
+            <app-facility-report *ngIf="facility.selected" [facility]="facility" [reportOptions]="reportOptions">
+            </app-facility-report>
         </div>
     </div>
 </div>

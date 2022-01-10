@@ -2,7 +2,7 @@ import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbFacility, IdbUtilityMeter, MeterSource } from 'src/app/models/idb';
-import { BarChartDataTrace, ReportUtilityOptions } from 'src/app/models/overview-report';
+import { BarChartDataTrace, ReportOptions } from 'src/app/models/overview-report';
 import { FacilityBarChartData } from 'src/app/models/visualization';
 import { VisualizationService } from 'src/app/shared/helper-services/visualization.service';
 import { UtilityColors } from 'src/app/shared/utilityColors';
@@ -16,7 +16,7 @@ export class FacilityReportBarChartComponent implements OnInit {
   @Input()
   facility: IdbFacility;
   @Input()
-  reportUtilityOptions: ReportUtilityOptions;
+  reportOptions: ReportOptions;
 
   @ViewChild('utilityCostBarChart', { static: false }) utilityCostBarChart: ElementRef;
   @ViewChild('utilityUsageBarChart', { static: false }) utilityUsageBarChart: ElementRef;
@@ -46,37 +46,37 @@ export class FacilityReportBarChartComponent implements OnInit {
   setUtilityData() {
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == this.facility.id });
-    if (this.reportUtilityOptions.electricity) {
+    if (this.reportOptions.electricity) {
       this.electricityData = this.getDataByUtility('Electricity', facilityMeters);
     } else {
       this.electricityData = [];
     }
-    if (this.reportUtilityOptions.naturalGas) {
+    if (this.reportOptions.naturalGas) {
       this.naturalGasData = this.getDataByUtility('Natural Gas', facilityMeters);
     } else {
       this.naturalGasData = [];
     }
-    if (this.reportUtilityOptions.otherFuels) {
+    if (this.reportOptions.otherFuels) {
       this.otherFuelsData = this.getDataByUtility('Other Fuels', facilityMeters);
     } else {
       this.otherFuelsData = [];
     }
-    if (this.reportUtilityOptions.otherEnergy) {
+    if (this.reportOptions.otherEnergy) {
       this.otherEnergyData = this.getDataByUtility('Other Energy', facilityMeters);
     } else {
       this.otherEnergyData = [];
     }
-    if (this.reportUtilityOptions.water) {
+    if (this.reportOptions.water) {
       this.waterData = this.getDataByUtility('Water', facilityMeters);
     } else {
       this.waterData = [];
     }
-    if (this.reportUtilityOptions.wasteWater) {
+    if (this.reportOptions.wasteWater) {
       this.wasteWaterData = this.getDataByUtility('Waste Water', facilityMeters);
     } else {
       this.wasteWaterData = [];
     }
-    if (this.reportUtilityOptions.otherUtility) {
+    if (this.reportOptions.otherUtility) {
       this.otherUtilityData = this.getDataByUtility('Other Utility', facilityMeters);
     } else {
       this.otherUtilityData = [];

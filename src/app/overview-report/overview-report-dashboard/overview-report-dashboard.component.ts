@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { OverviewReportOptionsDbService } from 'src/app/indexedDB/overview-report-options-db.service';
 import { IdbOverviewReportOptions } from 'src/app/models/idb';
-import { ReportOptions, ReportUtilityOptions } from 'src/app/models/overview-report';
+import { ReportOptions } from 'src/app/models/overview-report';
 import { OverviewReportService } from '../overview-report.service';
 
 @Component({
@@ -31,16 +31,13 @@ export class OverviewReportDashboardComponent implements OnInit {
   createReport() {
     this.overviewReportOptionsDbService.selectedOverviewReportOptions.next(undefined);
     let newReportOptions: ReportOptions = this.overviewReportService.getInitialReportOptions();
-    let newReportUtilityOptions: ReportUtilityOptions = this.overviewReportService.getInitialUtilityOptions();
     this.overviewReportService.reportOptions.next(newReportOptions);
-    this.overviewReportService.reportUtilityOptions.next(newReportUtilityOptions);
     this.router.navigateByUrl('/overview-report/report-menu');
   }
 
   selectReport(report: IdbOverviewReportOptions) {
     this.overviewReportOptionsDbService.selectedOverviewReportOptions.next(report);
     this.overviewReportService.reportOptions.next(report.reportOptions);
-    this.overviewReportService.reportUtilityOptions.next(report.reportUtilityOptions);
     this.router.navigateByUrl('/overview-report/basic-report');
   }
 
@@ -61,7 +58,6 @@ export class OverviewReportDashboardComponent implements OnInit {
   editReport(report: IdbOverviewReportOptions) {
     this.overviewReportOptionsDbService.selectedOverviewReportOptions.next(report);
     this.overviewReportService.reportOptions.next(report.reportOptions);
-    this.overviewReportService.reportUtilityOptions.next(report.reportUtilityOptions);
     this.router.navigateByUrl('/overview-report/report-menu');
   }
 }

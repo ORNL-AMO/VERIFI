@@ -8,15 +8,15 @@
     <app-facility-report-info [facility]="facility"></app-facility-report-info>
 </div>
 <div class="pt-5" *ngIf="reportOptions.facilityMetersTable">
-    <app-facility-report-meters-table [facility]="facility" [reportUtilityOptions]="reportUtilityOptions">
+    <app-facility-report-meters-table [facility]="facility" [reportOptions]="reportOptions">
     </app-facility-report-meters-table>
 </div>
 <div class="pt-5 print-break-after" *ngIf="reportOptions.facilityUtilityUsageTable">
-    <app-facility-report-utility-usage-table [facility]="facility" [reportUtilityOptions]="reportUtilityOptions">
+    <app-facility-report-utility-usage-table [facility]="facility" [reportOptions]="reportOptions">
     </app-facility-report-utility-usage-table>
 </div>
 <div class="pt-5" *ngIf="reportOptions.facilityBarCharts">
-    <app-facility-report-bar-chart [facility]="facility" [reportUtilityOptions]="reportUtilityOptions">
+    <app-facility-report-bar-chart [facility]="facility" [reportOptions]="reportOptions">
     </app-facility-report-bar-chart>
 </div>
 <hr class="page-spacer hide-print">

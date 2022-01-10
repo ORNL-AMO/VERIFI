@@ -3,7 +3,7 @@ import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { FacilityMeterSummaryData } from 'src/app/models/dashboard';
 import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
-import { ReportUtilityOptions } from 'src/app/models/overview-report';
+import { ReportOptions } from 'src/app/models/overview-report';
 import { MeterSummaryService } from 'src/app/shared/helper-services/meter-summary.service';
 
 @Component({
@@ -15,7 +15,7 @@ export class FacilityReportMetersTableComponent implements OnInit {
   @Input()
   facility: IdbFacility;
   @Input()
-  reportUtilityOptions: ReportUtilityOptions;
+  reportOptions: ReportOptions;
 
   facilityMeterSummaryData: FacilityMeterSummaryData;
   lastMonthsDate: Date;
@@ -32,25 +32,25 @@ export class FacilityReportMetersTableComponent implements OnInit {
     let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == this.facility.id });
-    if (!this.reportUtilityOptions.electricity) {
+    if (!this.reportOptions.electricity) {
       facilityMeters = facilityMeters.filter(meter => { return meter.source != 'Electricity' });
     }
-    if (!this.reportUtilityOptions.naturalGas) {
+    if (!this.reportOptions.naturalGas) {
       facilityMeters = facilityMeters.filter(meter => { return meter.source != 'Natural Gas' });
     }
-    if (!this.reportUtilityOptions.otherFuels) {
+    if (!this.reportOptions.otherFuels) {
       facilityMeters = facilityMeters.filter(meter => { return meter.source != 'Other Fuels' });
     }
-    if (!this.reportUtilityOptions.otherEnergy) {
+    if (!this.reportOptions.otherEnergy) {
       facilityMeters = facilityMeters.filter(meter => { return meter.source != 'Other Energy' });
     }
-    if (!this.reportUtilityOptions.water) {
+    if (!this.reportOptions.water) {
       facilityMeters = facilityMeters.filter(meter => { return meter.source != 'Water' });
     }
-    if (!this.reportUtilityOptions.wasteWater) {
+    if (!this.reportOptions.wasteWater) {
       facilityMeters = facilityMeters.filter(meter => { return meter.source != 'Waste Water' });
     }
-    if (!this.reportUtilityOptions.otherUtility) {
+    if (!this.reportOptions.otherUtility) {
       facilityMeters = facilityMeters.filter(meter => { return meter.source != 'Other Utility' });
     }
 

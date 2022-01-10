@@ -1,7 +1,7 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { IdbAccount, IdbFacility, MeterSource } from 'src/app/models/idb';
-import { BarChartDataTrace, ReportUtilityOptions, ReportUtilitySummary } from 'src/app/models/overview-report';
+import { BarChartDataTrace, ReportOptions, ReportUtilitySummary } from 'src/app/models/overview-report';
 import { UtilityColors } from 'src/app/shared/utilityColors';
 
 @Component({
@@ -18,7 +18,7 @@ export class AccountReportUtilityUsageBarChartComponent implements OnInit {
     facility: IdbFacility
   }>;
   @Input()
-  reportUtilityOptions: ReportUtilityOptions;
+  reportOptions: ReportOptions;
   @Input()
   graphType: 'cost' | 'emissions' | 'usage';
 
@@ -71,31 +71,31 @@ export class AccountReportUtilityUsageBarChartComponent implements OnInit {
     }
 
     let data: Array<BarChartDataTrace> = new Array();
-    if (this.reportUtilityOptions.electricity) {
+    if (this.reportOptions.electricity) {
       let trace: BarChartDataTrace = this.getTrace('Electricity', dataType);
       data.push(trace);
     }
-    if (this.reportUtilityOptions.naturalGas) {
+    if (this.reportOptions.naturalGas) {
       let trace: BarChartDataTrace = this.getTrace('Natural Gas', dataType);
       data.push(trace);
     }
-    if (this.reportUtilityOptions.otherFuels) {
+    if (this.reportOptions.otherFuels) {
       let trace: BarChartDataTrace = this.getTrace('Other Fuels', dataType);
       data.push(trace);
     }
-    if (this.reportUtilityOptions.otherEnergy) {
+    if (this.reportOptions.otherEnergy) {
       let trace: BarChartDataTrace = this.getTrace('Other Energy', dataType);
       data.push(trace);
     }
-    if (this.reportUtilityOptions.water) {
+    if (this.reportOptions.water) {
       let trace: BarChartDataTrace = this.getTrace('Water', dataType);
       data.push(trace);
     }
-    if (this.reportUtilityOptions.wasteWater) {
+    if (this.reportOptions.wasteWater) {
       let trace: BarChartDataTrace = this.getTrace('Waste Water', dataType);
       data.push(trace);
     }
-    if (this.reportUtilityOptions.otherUtility) {
+    if (this.reportOptions.otherUtility) {
       let trace: BarChartDataTrace = this.getTrace('Other Utility', dataType);
       data.push(trace);
     }

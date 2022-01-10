@@ -3,7 +3,7 @@ import { PlotlyService } from 'angular-plotly.js';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbAccount, IdbFacility, IdbUtilityMeter, MeterSource } from 'src/app/models/idb';
-import { ReportUtilityOptions } from 'src/app/models/overview-report';
+import { ReportOptions } from 'src/app/models/overview-report';
 import { FacilityBarChartData } from 'src/app/models/visualization';
 import { VisualizationService } from 'src/app/shared/helper-services/visualization.service';
 import { OverviewReportService } from '../../../overview-report.service';
@@ -17,7 +17,7 @@ export class AccountReportFacilityBarChartComponent implements OnInit {
   @Input()
   account: IdbAccount;
   @Input()
-  reportUtilityOptions: ReportUtilityOptions;
+  reportOptions: ReportOptions;
 
   @ViewChild('facilityCostBarChart', { static: false }) facilityCostBarChart: ElementRef;
   @ViewChild('facilityUsageBarChart', { static: false }) facilityUsageBarChart: ElementRef;
@@ -195,8 +195,8 @@ export class AccountReportFacilityBarChartComponent implements OnInit {
   setReportData() {
     this.chartData = new Array();
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    let selectedSource: Array<MeterSource> = this.overviewReportService.getSelectedSources(this.reportUtilityOptions);
-    this.reportUtilityOptions.facilities.forEach(facility => {
+    let selectedSource: Array<MeterSource> = this.overviewReportService.getSelectedSources(this.reportOptions);
+    this.reportOptions.facilities.forEach(facility => {
       if (facility.selected) {
         let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => {
           return meter.facilityId == facility.id && selectedSource.includes(meter.source);

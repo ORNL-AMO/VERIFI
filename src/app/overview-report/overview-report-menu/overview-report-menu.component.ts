@@ -2,10 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { OverviewReportOptionsDbService } from 'src/app/indexedDB/overview-report-options-db.service';
-import { IdbAccount, IdbFacility, IdbOverviewReportOptions } from 'src/app/models/idb';
-import { ReportOptions, ReportUtilityOptions } from 'src/app/models/overview-report';
+import { IdbAccount, IdbOverviewReportOptions } from 'src/app/models/idb';
+import { ReportOptions } from 'src/app/models/overview-report';
 import { ToastNotificationsService } from 'src/app/shared/toast-notifications/toast-notifications.service';
 import { OverviewReportService } from '../overview-report.service';
 
@@ -17,7 +16,6 @@ import { OverviewReportService } from '../overview-report.service';
 export class OverviewReportMenuComponent implements OnInit {
 
   reportOptions: ReportOptions;
-  reportUtilityOptions: ReportUtilityOptions;
   selectedReportOptions: IdbOverviewReportOptions;
   reportTemplates: Array<IdbOverviewReportOptions>;
   reportTemplatesSub: Subscription;
@@ -28,8 +26,7 @@ export class OverviewReportMenuComponent implements OnInit {
   constructor(private overviewReportService: OverviewReportService, private router: Router,
     private overviewReportOptionsDbService: OverviewReportOptionsDbService,
     private accountDbService: AccountdbService,
-    private toastNotificationsService: ToastNotificationsService,
-    private facilityDbService: FacilitydbService) { }
+    private toastNotificationsService: ToastNotificationsService) { }
 
   ngOnInit(): void {
     this.selectedReportOptions = this.overviewReportOptionsDbService.selectedOverviewReportOptions.getValue();
@@ -40,14 +37,11 @@ export class OverviewReportMenuComponent implements OnInit {
     if (!reportOptions) {
       if (this.selectedReportOptions) {
         this.reportOptions = JSON.parse(JSON.stringify(this.selectedReportOptions.reportOptions));
-        this.reportUtilityOptions = JSON.parse(JSON.stringify(this.selectedReportOptions.reportUtilityOptions));
       } else {
         this.goToDashboard()
       }
     } else {
-      let reportUtilityOptions: ReportUtilityOptions = this.overviewReportService.reportUtilityOptions.getValue();
       this.reportOptions = JSON.parse(JSON.stringify(reportOptions));
-      this.reportUtilityOptions = JSON.parse(JSON.stringify(reportUtilityOptions));
     }
     this.reportTemplatesSub = this.overviewReportOptionsDbService.overviewReportOptionsTemplates.subscribe(templates => {
       this.reportTemplates = templates;
@@ -63,16 +57,12 @@ export class OverviewReportMenuComponent implements OnInit {
     this.overviewReportService.reportOptions.next(this.reportOptions);
   }
 
-  saveUtilityOptions() {
-    this.overviewReportService.reportUtilityOptions.next(this.reportUtilityOptions);
-  }
 
   async createReport() {
     let newIdbReportOptionsItem: IdbOverviewReportOptions = this.getNewIdbReportOptionsItem('report');
     let createdReport: IdbOverviewReportOptions = await this.overviewReportOptionsDbService.addWithObservable(newIdbReportOptionsItem).toPromise();
     this.overviewReportOptionsDbService.selectedOverviewReportOptions.next(createdReport);
     this.overviewReportService.reportOptions.next(this.reportOptions);
-    this.overviewReportService.reportUtilityOptions.next(this.reportUtilityOptions);
     this.overviewReportOptionsDbService.setAccountOverviewReportOptions();
     this.toastNotificationsService.showToast('New Report Created', undefined, 4000, false, "success");
     this.router.navigateByUrl('/overview-report/basic-report');
@@ -84,10 +74,8 @@ export class OverviewReportMenuComponent implements OnInit {
 
   updateReport() {
     this.selectedReportOptions.reportOptions = this.reportOptions;
-    this.selectedReportOptions.reportUtilityOptions = this.reportUtilityOptions;
     this.overviewReportOptionsDbService.update(this.selectedReportOptions);
     this.overviewReportService.reportOptions.next(this.reportOptions);
-    this.overviewReportService.reportUtilityOptions.next(this.reportUtilityOptions);
     this.toastNotificationsService.showToast('Report Updated', undefined, 4000, false, "success");
     this.router.navigateByUrl('/overview-report/basic-report');
   }
@@ -101,7 +89,6 @@ export class OverviewReportMenuComponent implements OnInit {
     let newIdbReportOptionsItem: IdbOverviewReportOptions = {
       date: new Date(),
       reportOptions: this.reportOptions,
-      reportUtilityOptions: this.reportUtilityOptions,
       accountId: selectedAccount.id,
       type: type,
       name: this.name

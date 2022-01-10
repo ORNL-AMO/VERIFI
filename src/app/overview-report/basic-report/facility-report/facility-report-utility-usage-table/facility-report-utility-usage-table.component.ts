@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
-import { ReportUtilityOptions, ReportUtilitySummary } from 'src/app/models/overview-report';
+import { ReportOptions, ReportUtilitySummary } from 'src/app/models/overview-report';
 import { OverviewReportService } from '../../../overview-report.service';
 
 @Component({
@@ -13,7 +13,7 @@ export class FacilityReportUtilityUsageTableComponent implements OnInit {
   @Input()
   facility: IdbFacility;
   @Input()
-  reportUtilityOptions: ReportUtilityOptions;
+  reportOptions: ReportOptions;
 
   facilityReportUtilitySummary: ReportUtilitySummary;
   constructor(private utilityMeterDbService: UtilityMeterdbService, private overviewReportService: OverviewReportService) { }
@@ -25,6 +25,6 @@ export class FacilityReportUtilityUsageTableComponent implements OnInit {
   setFacilitySummary() {
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == this.facility.id });
-    this.facilityReportUtilitySummary = this.overviewReportService.getUtilityUsageData(facilityMeters, this.reportUtilityOptions, false);
+    this.facilityReportUtilitySummary = this.overviewReportService.getUtilityUsageData(facilityMeters, this.reportOptions, false);
   }
 }
