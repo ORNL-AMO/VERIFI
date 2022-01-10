@@ -99,6 +99,10 @@ export class OverviewReportOptionsDbService {
     });
   }
 
+  updateWithObservable(values: IdbOverviewReportOptions): Observable<Array<IdbOverviewReportOptions>> {
+    return this.dbService.update('overviewReportOptions', values);
+  }
+
   deleteById(facilityId: number): void {
     this.dbService.delete('overviewReportOptions', facilityId).subscribe(() => {
       this.setAccountOverviewReportOptions();

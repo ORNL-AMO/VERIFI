@@ -121,6 +121,7 @@ import { AccountReportUtilityUsageBarChartComponent } from './overview-report/ba
 import { AccountReportFacilityBarChartComponent } from './overview-report/basic-report/account-report/account-report-facility-bar-chart/account-report-facility-bar-chart.component';
 import { OverviewReportDashboardComponent } from './overview-report/overview-report-dashboard/overview-report-dashboard.component';
 import { BasicReportComponent } from './overview-report/basic-report/basic-report.component';
+import { ManageReportTemplatesComponent } from './overview-report/overview-report-menu/manage-report-templates/manage-report-templates.component';
 
 @NgModule({
   declarations: [
@@ -227,7 +228,8 @@ import { BasicReportComponent } from './overview-report/basic-report/basic-repor
     AccountReportUtilityUsageBarChartComponent,
     AccountReportFacilityBarChartComponent,
     OverviewReportDashboardComponent,
-    BasicReportComponent
+    BasicReportComponent,
+    ManageReportTemplatesComponent
   ],
   imports: [
     BrowserModule,

@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { OverviewReportOptionsDbService } from 'src/app/indexedDB/overview-report-options-db.service';
-import { IdbAccount, IdbOverviewReportOptions } from 'src/app/models/idb';
+import { IdbAccount, IdbFacility, IdbOverviewReportOptions } from 'src/app/models/idb';
 import { ReportOptions, ReportUtilityOptions } from 'src/app/models/overview-report';
 import { ToastNotificationsService } from 'src/app/shared/toast-notifications/toast-notifications.service';
 import { OverviewReportService } from '../overview-report.service';
@@ -18,6 +20,7 @@ export class OverviewReportMenuComponent implements OnInit {
   reportUtilityOptions: ReportUtilityOptions;
   selectedReportOptions: IdbOverviewReportOptions;
   reportTemplates: Array<IdbOverviewReportOptions>;
+  reportTemplatesSub: Subscription;
   name: string = 'New Report';
   templateName: string;
   displayCreateTemplate: boolean = false;
@@ -25,11 +28,10 @@ export class OverviewReportMenuComponent implements OnInit {
   constructor(private overviewReportService: OverviewReportService, private router: Router,
     private overviewReportOptionsDbService: OverviewReportOptionsDbService,
     private accountDbService: AccountdbService,
-    private toastNotificationsService: ToastNotificationsService) { }
+    private toastNotificationsService: ToastNotificationsService,
+    private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
-    this.reportTemplates = this.overviewReportOptionsDbService.overviewReportOptionsTemplates.getValue();
-    console.log(this.reportTemplates)
     this.selectedReportOptions = this.overviewReportOptionsDbService.selectedOverviewReportOptions.getValue();
     if (this.selectedReportOptions) {
       this.name = this.selectedReportOptions.name;
@@ -47,7 +49,14 @@ export class OverviewReportMenuComponent implements OnInit {
       this.reportOptions = JSON.parse(JSON.stringify(reportOptions));
       this.reportUtilityOptions = JSON.parse(JSON.stringify(reportUtilityOptions));
     }
-    console.log(this.reportOptions);
+    this.reportTemplatesSub = this.overviewReportOptionsDbService.overviewReportOptionsTemplates.subscribe(templates => {
+      this.reportTemplates = templates;
+      this.checkTemplates();
+    });
+  }
+
+  ngOnDestroy() {
+    this.reportTemplatesSub.unsubscribe();
   }
 
   save() {
@@ -106,31 +115,40 @@ export class OverviewReportMenuComponent implements OnInit {
     let createdTemplate: IdbOverviewReportOptions = await this.overviewReportOptionsDbService.addWithObservable(newIdbReportOptionsItem).toPromise();
     this.reportTemplates.push(createdTemplate);
     this.reportOptions.templateId = createdTemplate.id;
-    this.overviewReportOptionsDbService.update(this.selectedReportOptions);
+    if (this.selectedReportOptions) {
+      this.overviewReportOptionsDbService.update(this.selectedReportOptions);
+    }
     this.overviewReportService.reportOptions.next(this.reportOptions);
     this.toastNotificationsService.showToast('Template Configuration Created', undefined, 4000, false, "success");
     this.displayCreateTemplate = false;
   }
 
 
-  showSaveTemplate(){
+  showSaveTemplate() {
     this.templateName = this.name + ' (template)';
     this.displayCreateTemplate = true;
   }
 
-  cancelNewTemplate(){
+  cancelNewTemplate() {
     this.displayCreateTemplate = false;
   }
 
-  editTemplates(){
+  editTemplates() {
     this.displayEditTemplates = true;
   }
 
-  updateTemplates(){
-
+  closeEditTemplates() {
+    this.displayEditTemplates = false;
   }
 
-  deleteTemplate(){
-    
+  checkTemplates() {
+    let testTemplate: IdbOverviewReportOptions = this.reportTemplates.find(template => { return template.id == this.reportOptions.templateId });
+    if (!testTemplate && this.reportOptions.templateId != 99999) {
+      this.reportOptions.templateId = undefined;
+    }
+  }
+
+  saveCustom() {
+    this.reportOptions.templateId = undefined;
   }
 }
