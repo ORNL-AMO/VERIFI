@@ -1,5 +1,6 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
+import { Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbAccount, IdbFacility, IdbUtilityMeter, MeterSource } from 'src/app/models/idb';
@@ -27,11 +28,20 @@ export class AccountReportFacilityBarChartComponent implements OnInit {
     facility: IdbFacility,
     data: Array<FacilityBarChartData>
   }>
+  print: boolean;
+  printSub: Subscription;
   constructor(private visualizationService: VisualizationService, private overviewReportService: OverviewReportService,
     private utilityMeterDbService: UtilityMeterdbService, private plotlyService: PlotlyService, private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
+    this.printSub = this.overviewReportService.print.subscribe(val => {
+      this.print = val;
+    })
     this.setReportData();
+  }
+
+  ngOnDestroy() {
+    this.printSub.unsubscribe();
   }
 
   ngAfterViewInit() {
@@ -50,7 +60,7 @@ export class AccountReportFacilityBarChartComponent implements OnInit {
 
       this.chartData.forEach(dataItem => {
         let trace = {
-          x: dataItem.data.map(data => { return data.year }),
+          x: this.getXAxisValues(dataItem.data),
           y: dataItem.data.map(data => { return data.energyCost }),
           name: dataItem.facility.name,
           type: 'bar',
@@ -78,9 +88,7 @@ export class AccountReportFacilityBarChartComponent implements OnInit {
           // },
           hoverformat: ",.2f"
         },
-        legend: {
-          orientation: "h"
-        },
+        legend: this.getLegend(),
         clickmode: "none",
         margin: { t: 10 }
       };
@@ -100,7 +108,7 @@ export class AccountReportFacilityBarChartComponent implements OnInit {
       let traceData = new Array();
       this.chartData.forEach(dataItem => {
         let trace = {
-          x: dataItem.data.map(data => { return data.year }),
+          x: this.getXAxisValues(dataItem.data),
           y: dataItem.data.map(data => { return data.energyUse }),
           name: dataItem.facility.name,
           type: 'bar',
@@ -127,9 +135,7 @@ export class AccountReportFacilityBarChartComponent implements OnInit {
           },
           hoverformat: ",.2f"
         },
-        legend: {
-          orientation: "h"
-        },
+        legend: this.getLegend(),
         clickmode: "none",
         margin: { t: 10 }
       };
@@ -149,7 +155,7 @@ export class AccountReportFacilityBarChartComponent implements OnInit {
       let traceData = new Array();
       this.chartData.forEach(dataItem => {
         let trace = {
-          x: dataItem.data.map(data => { return data.year }),
+          x: this.getXAxisValues(dataItem.data),
           y: dataItem.data.map(data => { return data.emissions / 1000 }),
           name: dataItem.facility.name,
           type: 'bar',
@@ -174,9 +180,7 @@ export class AccountReportFacilityBarChartComponent implements OnInit {
           },
           hoverformat: ",.2f"
         },
-        legend: {
-          orientation: "h"
-        },
+        legend: this.getLegend(),
         clickmode: "none",
         margin: { t: 10 }
       };
@@ -192,6 +196,14 @@ export class AccountReportFacilityBarChartComponent implements OnInit {
   }
 
 
+  getXAxisValues(data: Array<FacilityBarChartData>): Array<string | number> {
+    if (this.reportOptions.annualGraphsByMonth) {
+      return data.map(data => { return data.time })
+    } else {
+      return data.map(data => { return data.year })
+    }
+  }
+
   setReportData() {
     this.chartData = new Array();
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
@@ -201,12 +213,21 @@ export class AccountReportFacilityBarChartComponent implements OnInit {
         let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => {
           return meter.facilityId == facility.id && selectedSource.includes(meter.source);
         });
-        let facilityBarChartData: Array<FacilityBarChartData> = this.visualizationService.getFacilityBarChartData(facilityMeters, false, true, true);
+        let facilityBarChartData: Array<FacilityBarChartData> = this.visualizationService.getFacilityBarChartData(facilityMeters, this.reportOptions.annualGraphsByMonth, true, true);
         this.chartData.push({
           facility: facility,
           data: facilityBarChartData
         });
       }
     });
+  }
+
+
+  getLegend(): { orientation: "h" } {
+    if (this.reportOptions.annualGraphsByMonth) {
+      return undefined;
+    } else {
+      return { orientation: "h" };
+    }
   }
 }

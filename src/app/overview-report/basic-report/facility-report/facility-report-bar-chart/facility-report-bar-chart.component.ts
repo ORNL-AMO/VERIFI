@@ -1,9 +1,11 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
+import { Subscription } from 'rxjs';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbFacility, IdbUtilityMeter, MeterSource } from 'src/app/models/idb';
 import { BarChartDataTrace, ReportOptions } from 'src/app/models/overview-report';
 import { FacilityBarChartData } from 'src/app/models/visualization';
+import { OverviewReportService } from 'src/app/overview-report/overview-report.service';
 import { VisualizationService } from 'src/app/shared/helper-services/visualization.service';
 import { UtilityColors } from 'src/app/shared/utilityColors';
 
@@ -30,14 +32,24 @@ export class FacilityReportBarChartComponent implements OnInit {
   wasteWaterData: Array<FacilityBarChartData>;
   otherUtilityData: Array<FacilityBarChartData>;
 
+  print: boolean;
+  printSub: Subscription;
   constructor(private visualizationService: VisualizationService,
-    private utilityMeterDbService: UtilityMeterdbService, private plotlyService: PlotlyService) { }
+    private utilityMeterDbService: UtilityMeterdbService, private plotlyService: PlotlyService,
+    private overviewReportService: OverviewReportService) { }
 
   ngOnInit(): void {
+    this.printSub = this.overviewReportService.print.subscribe(val => {
+      this.print = val;
+    })
     this.setUtilityData();
   }
 
-  ngAfterViewInit(){
+  ngOnDestroy(){
+    this.printSub.unsubscribe();
+  }
+
+  ngAfterViewInit() {
     this.drawEmissionsChart();
     this.drawCostChart();
     this.drawUsageChart();
@@ -85,7 +97,7 @@ export class FacilityReportBarChartComponent implements OnInit {
 
   getDataByUtility(utility: MeterSource, facilityMeters: Array<IdbUtilityMeter>): Array<FacilityBarChartData> {
     let filteredMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.source == utility });
-    return this.visualizationService.getFacilityBarChartData(filteredMeters, false, true, false);
+    return this.visualizationService.getFacilityBarChartData(filteredMeters, this.reportOptions.annualGraphsByMonth, true, false);
   }
 
   drawEmissionsChart() {
@@ -100,9 +112,7 @@ export class FacilityReportBarChartComponent implements OnInit {
           }
         },
         margin: { t: 10 },
-        legend: {
-          orientation: "h"
-        },
+        legend: this.getLegend(),
       };
 
       let config = {
@@ -124,10 +134,8 @@ export class FacilityReportBarChartComponent implements OnInit {
           tickprefix: "$",
           hoverformat: ",.2f",
         },
-        legend: {
-          orientation: "h"
-        },
-        margin: { t: 10 }
+        margin: { t: 10 },
+        legend: this.getLegend(),
       };
 
       let config = {
@@ -152,9 +160,7 @@ export class FacilityReportBarChartComponent implements OnInit {
           }
         },
         margin: { t: 10 },
-        legend: {
-          orientation: "h"
-        },
+        legend: this.getLegend(),
       };
 
       let config = {
@@ -202,7 +208,7 @@ export class FacilityReportBarChartComponent implements OnInit {
 
   getDataTrace(chartData: Array<FacilityBarChartData>, source: MeterSource, dataObj: 'energyUse' | 'emissions' | 'energyCost'): BarChartDataTrace {
     return {
-      x: chartData.map(data => { return data.time }),
+      x: this.getXAxisValues(chartData),
       y: chartData.map(data => { return data[dataObj] }),
       name: source,
       type: 'bar',
@@ -211,5 +217,22 @@ export class FacilityReportBarChartComponent implements OnInit {
       }
     }
   }
+
+  getXAxisValues(data: Array<FacilityBarChartData>): Array<string | number> {
+    if (this.reportOptions.annualGraphsByMonth) {
+      return data.map(data => { return data.time })
+    } else {
+      return data.map(data => { return data.year })
+    }
+  }
+
+  getLegend(): { orientation: "h" } {
+    if (this.reportOptions.annualGraphsByMonth) {
+      return undefined;
+    } else {
+      return { orientation: "h" };
+    }
+  }
+
 
 }

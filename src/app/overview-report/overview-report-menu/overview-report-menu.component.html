@@ -84,6 +84,17 @@
                         </label>
                     </div>
                 </div>
+                <hr>
+                <div class="row">
+                    <div class="col-6">
+                        <label>Graph Options</label>
+                        <label for="annualGraphsByMonth">
+                            <input class="checkbox" type="checkbox" id="annualGraphsByMonth" name="annualGraphsByMonth"
+                                [(ngModel)]="reportOptions.annualGraphsByMonth" (change)="saveCustom()">Display annual
+                            data by month
+                        </label>
+                    </div>
+                </div>
             </div>
             <div class="col-6">
                 <div class="text-right">

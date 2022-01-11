@@ -7,7 +7,6 @@ import { IdbFacility, IdbUtilityMeter, MeterSource } from '../models/idb';
 import { CalanderizationService } from '../shared/helper-services/calanderization.service';
 import * as _ from 'lodash';
 import { ReportOptions, ReportUtilitySummary, UtilitySummary } from '../models/overview-report';
-import { report } from 'process';
 
 @Injectable({
   providedIn: 'root'
@@ -74,6 +73,9 @@ export class OverviewReportService {
       wasteWater: wasteWater,
       otherUtility: otherUtility,
       facilities: accountFacilites,
+      baselineYear: undefined,
+      targetYear: undefined,
+      annualGraphsByMonth: false
     }
   }
 

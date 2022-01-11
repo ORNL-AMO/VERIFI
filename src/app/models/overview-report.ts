@@ -1,7 +1,7 @@
 import { IdbFacility, MeterSource } from "./idb";
 
 export interface BarChartDataTrace {
-  x: Array<string>,
+  x: Array<string | number>,
   y: Array<number>,
   name: string,
   type: string,
@@ -57,6 +57,7 @@ export interface ReportOptions {
   wasteWater: boolean,
   otherUtility: boolean,
   facilities: Array<IdbFacility>,
-  baselineYear?: number,
-  targetYear?: number
+  baselineYear: number,
+  targetYear: number,
+  annualGraphsByMonth: boolean
 }
