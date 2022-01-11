@@ -1,6 +1,6 @@
 <div class="report" [ngClass]="{'print': print}" *ngIf="reportOptions">
     <app-front-page [reportOptions]="reportOptions"></app-front-page>
-    <hr class="print-break-after page-spacer">
+    <hr class="print-break-after page-spacer page-break">
     <app-account-report class="print-break-after report-item" *ngIf="reportOptions.includeAccount"
         [reportOptions]="reportOptions" [account]="account">
     </app-account-report>

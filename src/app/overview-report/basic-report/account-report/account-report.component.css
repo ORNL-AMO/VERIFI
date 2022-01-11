@@ -2,14 +2,15 @@
 hr.page-spacer{
     margin-top: 3rem;
     margin-bottom: 3rem;
+    border: solid;
 }
 
-.fa-industry{
+.fa-building{
     color: #6abb2e;
 }
 
 .account-icon{
-    font-size: 32px;
+    font-size: 75px;
 } 
 .section-label{
     /* text-align: center; */

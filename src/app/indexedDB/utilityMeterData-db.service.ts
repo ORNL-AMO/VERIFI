@@ -234,12 +234,10 @@ export class UtilityMeterDatadbService {
         let meterData: Array<IdbUtilityMeterData> = this.getMeterDataFromMeterId(meter.id);
         let meterDataCopy: Array<IdbUtilityMeterData> = JSON.parse(JSON.stringify(meterData));
         if (!reportOptions) {
-            console.log('no report options')
             if (account.energyIsSource) {
                 meterDataCopy = this.convertMeterDataService.applySiteToSourceMultiplier(meter, meterDataCopy);
             }
         } else if (reportOptions.energyIsSource) {
-            console.log('energy is source')
             meterDataCopy = this.convertMeterDataService.applySiteToSourceMultiplier(meter, meterDataCopy);
         }
         if (convertData) {
