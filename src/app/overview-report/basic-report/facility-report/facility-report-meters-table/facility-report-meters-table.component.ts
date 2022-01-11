@@ -18,8 +18,8 @@ export class FacilityReportMetersTableComponent implements OnInit {
   reportOptions: ReportOptions;
 
   facilityMeterSummaryData: FacilityMeterSummaryData;
-  lastMonthsDate: Date;
-  yearPriorDate: Date;
+  targetYearStartDate: Date;
+  targetYearEndDate: Date;
   facilityEnergyUnit: string;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private meterSummaryService: MeterSummaryService,
     private utilityMeterDbService: UtilityMeterdbService) { }
@@ -55,10 +55,10 @@ export class FacilityReportMetersTableComponent implements OnInit {
     }
 
     if (accountMeterData && accountMeterData.length != 0 && facilityMeters.length != 0) {
-      this.facilityMeterSummaryData = this.meterSummaryService.getFacilityMetersSummary(false, facilityMeters);
+      this.facilityMeterSummaryData = this.meterSummaryService.getFacilityMetersSummary(false, facilityMeters, this.reportOptions);
       if (this.facilityMeterSummaryData.allMetersLastBill) {
-        this.lastMonthsDate = new Date(this.facilityMeterSummaryData.allMetersLastBill.year, this.facilityMeterSummaryData.allMetersLastBill.monthNumValue);
-        this.yearPriorDate = new Date(this.facilityMeterSummaryData.allMetersLastBill.year - 1, this.facilityMeterSummaryData.allMetersLastBill.monthNumValue + 1);
+        this.targetYearStartDate = new Date(this.facilityMeterSummaryData.allMetersLastBill.year, this.facilityMeterSummaryData.allMetersLastBill.monthNumValue);
+        this.targetYearEndDate = new Date(this.facilityMeterSummaryData.allMetersLastBill.year - 1, this.facilityMeterSummaryData.allMetersLastBill.monthNumValue + 1);
       }
     }
   }

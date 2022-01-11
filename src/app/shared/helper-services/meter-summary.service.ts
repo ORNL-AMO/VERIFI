@@ -18,9 +18,21 @@ export class MeterSummaryService {
   constructor(private calanderizationService: CalanderizationService, private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private facilityDbService: FacilitydbService, private utilityMeterDbService: UtilityMeterdbService, private overviewReportService: OverviewReportService) { }
 
-  getFacilityMetersSummary(inAccount: boolean, facilityMeters: Array<IdbUtilityMeter>): FacilityMeterSummaryData {
+  getFacilityMetersSummary(inAccount: boolean, facilityMeters: Array<IdbUtilityMeter>, reportOptions?: ReportOptions): FacilityMeterSummaryData {
     let facilityMetersSummary: Array<MeterSummary> = new Array();
     let allMetersLastBill: MonthlyData = this.calanderizationService.getLastBillEntry(facilityMeters, inAccount)
+    if(reportOptions){
+      allMetersLastBill = {
+        month: 'Dec',
+        monthNumValue: 11,
+        year: reportOptions.targetYear,
+        energyConsumption: undefined,
+        energyUse: undefined,
+        energyCost: undefined,
+        date: new Date(reportOptions.targetYear, 11),
+        emissions: undefined
+      }
+    }
     facilityMeters.forEach(meter => {
       let summary: MeterSummary = this.getMeterSummary(meter, inAccount, allMetersLastBill);
       facilityMetersSummary.push(summary);
@@ -61,30 +73,47 @@ export class MeterSummaryService {
   getAccountFacilitesSummary(reportOptions?: ReportOptions): AccountFacilitiesSummary {
     let facilitiesSummary: Array<FacilitySummary> = new Array();
     let allAccountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    let accountLastBill: MonthlyData = this.calanderizationService.getLastBillEntry(allAccountMeters, true);
     if (!reportOptions) {
+      let accountLastBill: MonthlyData = this.calanderizationService.getLastBillEntry(allAccountMeters, true);
       let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
       facilities.forEach(facility => {
         let facilityMeterSummary: FacilitySummary = this.getFacilitySummary(facility, true, accountLastBill);
         facilitiesSummary.push(facilityMeterSummary);
       });
+      return {
+        facilitySummaries: facilitiesSummary,
+        totalEnergyUse: _.sumBy(facilitiesSummary, 'energyUsage'),
+        totalEnergyCost: _.sumBy(facilitiesSummary, 'energyCost'),
+        totalNumberOfMeters: _.sumBy(facilitiesSummary, 'numberOfMeters'),
+        totalEmissions: _.sumBy(facilitiesSummary, 'emissions'),
+        allMetersLastBill: accountLastBill
+      };
     } else {
+      let accountTargetYearBill: MonthlyData = {
+        month: 'Dec',
+        monthNumValue: 11,
+        year: reportOptions.targetYear,
+        energyConsumption: undefined,
+        energyUse: undefined,
+        energyCost: undefined,
+        date: new Date(reportOptions.targetYear, 11),
+        emissions: undefined
+      }
       reportOptions.facilities.forEach(facility => {
         if (facility.selected) {
-          let facilityMeterSummary: FacilitySummary = this.getFacilitySummary(facility, true, accountLastBill, reportOptions);
+          let facilityMeterSummary: FacilitySummary = this.getFacilitySummary(facility, true, accountTargetYearBill, reportOptions);
           facilitiesSummary.push(facilityMeterSummary);
         }
       });
-
+      return {
+        facilitySummaries: facilitiesSummary,
+        totalEnergyUse: _.sumBy(facilitiesSummary, 'energyUsage'),
+        totalEnergyCost: _.sumBy(facilitiesSummary, 'energyCost'),
+        totalNumberOfMeters: _.sumBy(facilitiesSummary, 'numberOfMeters'),
+        totalEmissions: _.sumBy(facilitiesSummary, 'emissions'),
+        allMetersLastBill: accountTargetYearBill
+      };
     }
-    return {
-      facilitySummaries: facilitiesSummary,
-      totalEnergyUse: _.sumBy(facilitiesSummary, 'energyUsage'),
-      totalEnergyCost: _.sumBy(facilitiesSummary, 'energyCost'),
-      totalNumberOfMeters: _.sumBy(facilitiesSummary, 'numberOfMeters'),
-      totalEmissions: _.sumBy(facilitiesSummary, 'emissions'),
-      allMetersLastBill: accountLastBill
-    };
   }
 
   getFacilitySummary(facility: IdbFacility, inAccount: boolean, accountMetersLastBill: MonthlyData, reportOptions?: ReportOptions): FacilitySummary {

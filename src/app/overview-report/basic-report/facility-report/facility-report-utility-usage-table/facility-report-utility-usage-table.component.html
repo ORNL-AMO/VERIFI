@@ -4,12 +4,12 @@
             <tr class="table-mh">
                 <th></th>
                 <th class="text-center" colspan="3">
-                    {{facilityReportUtilitySummary.pastYearStart | date: 'MMM, y'}} -
-                    {{facilityReportUtilitySummary.pastYearEnd | date: 'MMM, y'}}
+                    Target Year: {{facilityReportUtilitySummary.targetYearStart | date: 'MMM, y'}} -
+                    {{facilityReportUtilitySummary.targetYearEnd | date: 'MMM, y'}}
                 </th>
                 <th class="text-center" colspan="3">
-                    {{facilityReportUtilitySummary.yearPriorStart | date: 'MMM, y'}} -
-                    {{facilityReportUtilitySummary.yearPriorEnd | date: 'MMM, y'}}
+                    Baseline Year: {{facilityReportUtilitySummary.baselineYearStart | date: 'MMM, y'}} -
+                    {{facilityReportUtilitySummary.baselineYearEnd | date: 'MMM, y'}}
                 </th>
             </tr>
             <tr>
@@ -29,10 +29,10 @@
                 </td>
                 <!--past year-->
                 <td>
-                    <span *ngIf="utilityUsageSummary.consumptionPastYear">
-                        {{utilityUsageSummary.consumptionPastYear | customNumber}}
+                    <span *ngIf="utilityUsageSummary.consumptionTargetYear">
+                        {{utilityUsageSummary.consumptionTargetYear | customNumber}}
                     </span>
-                    <span *ngIf="!utilityUsageSummary.consumptionPastYear">
+                    <span *ngIf="!utilityUsageSummary.consumptionTargetYear">
                         &mdash;
                     </span>
                     <span *ngIf="utilityUsageSummary.consumptionChange" class="small pl-2 pull-right green"
@@ -41,10 +41,10 @@
                     </span>
                 </td>
                 <td>
-                    <span *ngIf="utilityUsageSummary.costPastYear">
-                        {{utilityUsageSummary.costPastYear | customNumber:true }}
+                    <span *ngIf="utilityUsageSummary.costTargetYear">
+                        {{utilityUsageSummary.costTargetYear | customNumber:true }}
                     </span>
-                    <span *ngIf="!utilityUsageSummary.costPastYear">
+                    <span *ngIf="!utilityUsageSummary.costTargetYear">
                         &mdash;
                     </span>
 
@@ -54,10 +54,10 @@
                     </span>
                 </td>
                 <td>
-                    <span *ngIf="utilityUsageSummary.emissionsPastYear">
-                        {{utilityUsageSummary.emissionsPastYear | customNumber }}
+                    <span *ngIf="utilityUsageSummary.emissionsTargetYear">
+                        {{utilityUsageSummary.emissionsTargetYear | customNumber }}
                     </span>
-                    <span *ngIf="!utilityUsageSummary.emissionsPastYear">
+                    <span *ngIf="!utilityUsageSummary.emissionsTargetYear">
                         &mdash;
                     </span>
 
@@ -70,26 +70,26 @@
 
                 <!--year prior-->
                 <td>
-                    <span *ngIf="utilityUsageSummary.consumptionYearPrior">
-                        {{utilityUsageSummary.consumptionYearPrior | customNumber}}
+                    <span *ngIf="utilityUsageSummary.consumptionBaselineYear">
+                        {{utilityUsageSummary.consumptionBaselineYear | customNumber}}
                     </span>
-                    <span *ngIf="!utilityUsageSummary.consumptionYearPrior">
+                    <span *ngIf="!utilityUsageSummary.consumptionBaselineYear">
                         &mdash;
                     </span>
                 </td>
                 <td>
-                    <span *ngIf="utilityUsageSummary.costYearPrior">
-                        {{utilityUsageSummary.costYearPrior | customNumber:true }}
+                    <span *ngIf="utilityUsageSummary.costBaselineYear">
+                        {{utilityUsageSummary.costBaselineYear | customNumber:true }}
                     </span>
-                    <span *ngIf="!utilityUsageSummary.costYearPrior">
+                    <span *ngIf="!utilityUsageSummary.costBaselineYear">
                         &mdash;
                     </span>
                 </td>
                 <td>
-                    <span *ngIf="utilityUsageSummary.emissionsYearPrior">
-                        {{utilityUsageSummary.emissionsYearPrior | customNumber}}
+                    <span *ngIf="utilityUsageSummary.emissionsBaselineYear">
+                        {{utilityUsageSummary.emissionsBaselineYear | customNumber}}
                     </span>
-                    <span *ngIf="!utilityUsageSummary.emissionsYearPrior">
+                    <span *ngIf="!utilityUsageSummary.emissionsBaselineYear">
                         &mdash;
                     </span>
                 </td>
@@ -102,10 +102,10 @@
                 </th>
                 <!--previous month-->
                 <th>
-                    <span *ngIf="facilityReportUtilitySummary.totals.consumptionPastYear">
-                        {{facilityReportUtilitySummary.totals.consumptionPastYear | customNumber}}
+                    <span *ngIf="facilityReportUtilitySummary.totals.consumptionTargetYear">
+                        {{facilityReportUtilitySummary.totals.consumptionTargetYear | customNumber}}
                     </span>
-                    <span *ngIf="!facilityReportUtilitySummary.totals.consumptionPastYear">
+                    <span *ngIf="!facilityReportUtilitySummary.totals.consumptionTargetYear">
                         &mdash;
                     </span>
                     <span *ngIf="facilityReportUtilitySummary.totals.consumptionChange"
@@ -115,11 +115,11 @@
                     </span>
                 </th>
                 <th>
-                    <span *ngIf="facilityReportUtilitySummary.totals.costPastYear">
-                        {{facilityReportUtilitySummary.totals.costPastYear | customNumber:true
+                    <span *ngIf="facilityReportUtilitySummary.totals.costTargetYear">
+                        {{facilityReportUtilitySummary.totals.costTargetYear | customNumber:true
                         }}
                     </span>
-                    <span *ngIf="!facilityReportUtilitySummary.totals.costPastYear">
+                    <span *ngIf="!facilityReportUtilitySummary.totals.costTargetYear">
                         &mdash;
                     </span>
                     <span *ngIf="facilityReportUtilitySummary.totals.costChange" class="small pl-2 pull-right green"
@@ -128,40 +128,41 @@
                     </span>
                 </th>
                 <th>
-                    <span *ngIf="facilityReportUtilitySummary.totals.emissionsPastYear">
-                        {{facilityReportUtilitySummary.totals.emissionsPastYear | customNumber}}
+                    <span *ngIf="facilityReportUtilitySummary.totals.emissionsTargetYear">
+                        {{facilityReportUtilitySummary.totals.emissionsTargetYear | customNumber}}
                     </span>
-                    <span *ngIf="!facilityReportUtilitySummary.totals.emissionsPastYear">
+                    <span *ngIf="!facilityReportUtilitySummary.totals.emissionsTargetYear">
                         &mdash;
                     </span>
-                    <span *ngIf="facilityReportUtilitySummary.totals.emissionsChange" class="small pl-2 pull-right green"
+                    <span *ngIf="facilityReportUtilitySummary.totals.emissionsChange"
+                        class="small pl-2 pull-right green"
                         [ngClass]="{'red': facilityReportUtilitySummary.totals.emissionsChange > 0}">
                         ({{facilityReportUtilitySummary.totals.emissionsChange | customNumber}})
                     </span>
                 </th>
                 <!--year prior-->
                 <th>
-                    <span *ngIf="facilityReportUtilitySummary.totals.consumptionYearPrior">
-                        {{facilityReportUtilitySummary.totals.consumptionYearPrior | customNumber}}
+                    <span *ngIf="facilityReportUtilitySummary.totals.consumptionBaselineYear">
+                        {{facilityReportUtilitySummary.totals.consumptionBaselineYear | customNumber}}
                     </span>
-                    <span *ngIf="!facilityReportUtilitySummary.totals.consumptionYearPrior">
+                    <span *ngIf="!facilityReportUtilitySummary.totals.consumptionBaselineYear">
                         &mdash;
                     </span>
 
                 </th>
                 <th>
-                    <span *ngIf="facilityReportUtilitySummary.totals.costYearPrior">
-                        {{facilityReportUtilitySummary.totals.costYearPrior | customNumber:true }}
+                    <span *ngIf="facilityReportUtilitySummary.totals.costBaselineYear">
+                        {{facilityReportUtilitySummary.totals.costBaselineYear | customNumber:true }}
                     </span>
-                    <span *ngIf="!facilityReportUtilitySummary.totals.costYearPrior">
+                    <span *ngIf="!facilityReportUtilitySummary.totals.costBaselineYear">
                         &mdash;
                     </span>
                 </th>
                 <th>
-                    <span *ngIf="facilityReportUtilitySummary.totals.emissionsYearPrior">
-                        {{facilityReportUtilitySummary.totals.emissionsYearPrior | customNumber}}
+                    <span *ngIf="facilityReportUtilitySummary.totals.emissionsBaselineYear">
+                        {{facilityReportUtilitySummary.totals.emissionsBaselineYear | customNumber}}
                     </span>
-                    <span *ngIf="!facilityReportUtilitySummary.totals.emissionsYearPrior">
+                    <span *ngIf="!facilityReportUtilitySummary.totals.emissionsBaselineYear">
                         &mdash;
                     </span>
 

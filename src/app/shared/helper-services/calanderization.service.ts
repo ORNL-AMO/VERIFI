@@ -353,35 +353,25 @@ export class CalanderizationService {
     return Math.floor((utc2 - utc1) / _MS_PER_DAY);
   }
 
-  getPastYearData(meters: Array<IdbUtilityMeter>, inAccount: boolean, lastBill: MonthlyData, calanderizedMeterData?: Array<CalanderizedMeter>): Array<LastYearData> {
-    if (lastBill) {
+  getPastYearData(meters: Array<IdbUtilityMeter>, inAccount: boolean, yearEndBill: MonthlyData, calanderizedMeterData?: Array<CalanderizedMeter>): Array<LastYearData> {
+    if (yearEndBill) {
       //calanderize meters
       if (!calanderizedMeterData) {
         calanderizedMeterData = this.getCalanderizedMeterData(meters, inAccount);
+      }
+      //array of year/month combos needed
+      let yearMonths: Array<{ year: number, month: number }> = new Array();
+      let startDate: Date = new Date(yearEndBill.year - 1, yearEndBill.monthNumValue + 1);
+      let endDate: Date = new Date(yearEndBill.date);
+      while (startDate <= endDate) {
+        yearMonths.push({ year: startDate.getUTCFullYear(), month: startDate.getUTCMonth() });
+        startDate.setUTCMonth(startDate.getUTCMonth() + 1);
       }
       //create array of just the meter data
       let combindedCalanderizedMeterData: Array<MonthlyData> = calanderizedMeterData.flatMap(meterData => {
         return meterData.monthlyData;
       });
-      //create array of the uniq months and years
-      let yearMonths: Array<{ year: number, month: number }> = combindedCalanderizedMeterData.map(data => { return { year: data.year, month: data.monthNumValue } });
       let resultData: Array<LastYearData> = new Array();
-      yearMonths = _.uniqWith(yearMonths, (a, b) => {
-        return (a.year == b.year && a.month == b.month)
-      });
-      //filter year/months over a year old
-      let todaysDate: Date = new Date(lastBill.year - 1, lastBill.monthNumValue + 1);
-      let oneYearAgo: number = todaysDate.getFullYear();
-      let month: number = todaysDate.getMonth();
-      yearMonths = _.filter(yearMonths, yearMonth => {
-        if (yearMonth.year >= oneYearAgo) {
-          let monthTest: number = yearMonth.month - month;
-          if (monthTest >= 0 || yearMonth.year == (oneYearAgo + 1)) {
-            return true;
-          }
-        }
-      });
-
       resultData = yearMonths.map(yearMonth => {
         let totalEnergyUse: number = _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
           if (meterData.monthNumValue == yearMonth.month && meterData.year == yearMonth.year) {

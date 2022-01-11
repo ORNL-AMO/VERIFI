@@ -61,13 +61,13 @@ export class AccountReportUtilityUsageBarChartComponent implements OnInit {
   }
 
   getData(): Array<BarChartDataTrace> {
-    let dataType: 'consumptionPastYear' | 'costPastYear' | 'emissionsPastYear';
+    let dataType: 'consumptionTargetYear' | 'costTargetYear' | 'emissionsTargetYear';
     if (this.graphType == 'cost') {
-      dataType = 'costPastYear'
+      dataType = 'costTargetYear'
     } else if (this.graphType == 'usage') {
-      dataType = 'consumptionPastYear';
+      dataType = 'consumptionTargetYear';
     } else if (this.graphType == 'emissions') {
-      dataType = 'emissionsPastYear';
+      dataType = 'emissionsTargetYear';
     }
 
     let data: Array<BarChartDataTrace> = new Array();

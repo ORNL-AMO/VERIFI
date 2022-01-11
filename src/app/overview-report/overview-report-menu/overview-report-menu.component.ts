@@ -3,10 +3,12 @@ import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { OverviewReportOptionsDbService } from 'src/app/indexedDB/overview-report-options-db.service';
-import { IdbAccount, IdbOverviewReportOptions } from 'src/app/models/idb';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { IdbAccount, IdbOverviewReportOptions, IdbUtilityMeterData } from 'src/app/models/idb';
 import { ReportOptions } from 'src/app/models/overview-report';
 import { ToastNotificationsService } from 'src/app/shared/toast-notifications/toast-notifications.service';
 import { OverviewReportService } from '../overview-report.service';
+import * as _ from 'lodash';
 
 @Component({
   selector: 'app-overview-report-menu',
@@ -23,10 +25,15 @@ export class OverviewReportMenuComponent implements OnInit {
   templateName: string;
   displayCreateTemplate: boolean = false;
   displayEditTemplates: boolean = false;
+
+  baselineYears: Array<number>;
+  targetYears: Array<number>;
+
   constructor(private overviewReportService: OverviewReportService, private router: Router,
     private overviewReportOptionsDbService: OverviewReportOptionsDbService,
     private accountDbService: AccountdbService,
-    private toastNotificationsService: ToastNotificationsService) { }
+    private toastNotificationsService: ToastNotificationsService,
+    private utilityMeterDataDbService: UtilityMeterDatadbService) { }
 
   ngOnInit(): void {
     this.selectedReportOptions = this.overviewReportOptionsDbService.selectedOverviewReportOptions.getValue();
@@ -47,6 +54,7 @@ export class OverviewReportMenuComponent implements OnInit {
       this.reportTemplates = templates;
       this.checkTemplates();
     });
+    this.setYearOptions();
   }
 
   ngOnDestroy() {
@@ -56,7 +64,6 @@ export class OverviewReportMenuComponent implements OnInit {
   save() {
     this.overviewReportService.reportOptions.next(this.reportOptions);
   }
-
 
   async createReport() {
     let newIdbReportOptionsItem: IdbOverviewReportOptions = this.getNewIdbReportOptionsItem('report');
@@ -74,6 +81,7 @@ export class OverviewReportMenuComponent implements OnInit {
 
   updateReport() {
     this.selectedReportOptions.reportOptions = this.reportOptions;
+    this.selectedReportOptions.name = this.name;
     this.overviewReportOptionsDbService.update(this.selectedReportOptions);
     this.overviewReportService.reportOptions.next(this.reportOptions);
     this.toastNotificationsService.showToast('Report Updated', undefined, 4000, false, "success");
@@ -106,10 +114,9 @@ export class OverviewReportMenuComponent implements OnInit {
       this.overviewReportOptionsDbService.update(this.selectedReportOptions);
     }
     this.overviewReportService.reportOptions.next(this.reportOptions);
-    this.toastNotificationsService.showToast('Template Configuration Created', undefined, 4000, false, "success");
+    this.toastNotificationsService.showToast('Template Configuration Saved', undefined, 4000, false, "success");
     this.displayCreateTemplate = false;
   }
-
 
   showSaveTemplate() {
     this.templateName = this.name + ' (template)';
@@ -137,5 +144,20 @@ export class OverviewReportMenuComponent implements OnInit {
 
   saveCustom() {
     this.reportOptions.templateId = undefined;
+  }
+
+  setYearOptions() {
+    let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+    let orderedMeterData: Array<IdbUtilityMeterData> = _.orderBy(accountMeterData, (data) => { return new Date(data.readDate) });
+    let firstBill: IdbUtilityMeterData = orderedMeterData[0];
+    let lastBill: IdbUtilityMeterData = orderedMeterData[orderedMeterData.length - 1];
+    let yearStart: number = new Date(firstBill.readDate).getUTCFullYear();
+    let yearEnd: number = new Date(lastBill.readDate).getUTCFullYear();
+    this.targetYears = new Array();
+    this.baselineYears = new Array();
+    for (let i = yearStart; i <= yearEnd; i++) {
+      this.targetYears.push(i);
+      this.baselineYears.push(i);
+    }
   }
 }

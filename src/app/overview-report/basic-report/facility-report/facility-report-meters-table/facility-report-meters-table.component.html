@@ -1,23 +1,17 @@
-<!-- <p class="label">{{facility.name}} Meters
-    <span class="pull-right" *ngIf="yearPriorDate">({{yearPriorDate | date: 'MMM, y'}} -
-        {{lastMonthsDate | date: 'MMM, y'}})</span>
-
-</p> -->
 <div class="table-responsive">
     <table class="table table-sm" *ngIf="facilityMeterSummaryData">
         <thead>
             <tr class="table-mh">
-                <th colspan="7">
+                <th colspan="6">
                     {{facility.name}} Meters
-                    <span class="pull-right" *ngIf="yearPriorDate">({{yearPriorDate | date: 'MMM, y'}} -
-                        {{lastMonthsDate | date: 'MMM, y'}})</span>
+                    <span class="pull-right">({{targetYearEndDate | date: 'MMM, y'}} -
+                        {{targetYearEndDate | date: 'MMM, y'}})</span>
                 </th>
             </tr>
             <tr>
                 <th class="w-1">Meter</th>
                 <th class="w-1">Utility</th>
                 <th class="w-1">Group</th>
-                <th class="w-1">Last Bill Entered</th>
                 <th class="w-2">Utility Usage<br> (<span [innerHTML]="facility.energyUnit | settingsLabel"></span>)
                 </th>
                 <th class="w-2">Utility Cost
@@ -38,10 +32,6 @@
                     {{summary.groupName}}
                 </td>
                 <td>
-                    <span *ngIf="summary.lastBillDate">{{summary.lastBillDate | date: 'MMM, y'}} </span>
-                    <span *ngIf="!summary.lastBillDate">&mdash;</span>
-                </td>
-                <td>
                     {{summary.energyUsage | customNumber}}
                 </td>
                 <td>
@@ -57,8 +47,6 @@
             <tr>
                 <th>
                     Total
-                </th>
-                <th>
                 </th>
                 <th>
                 </th>

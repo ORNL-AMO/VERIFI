@@ -14,20 +14,20 @@ export interface BarChartDataTrace {
 export interface ReportUtilitySummary {
   utilitySummaries: Array<UtilitySummary>,
   totals: UtilitySummary,
-  pastYearStart: Date,
-  pastYearEnd: Date,
-  yearPriorStart: Date,
-  yearPriorEnd: Date
+  targetYearStart: Date,
+  targetYearEnd: Date,
+  baselineYearStart: Date,
+  baselineYearEnd: Date
 }
 
 export interface UtilitySummary {
   source: MeterSource,
-  consumptionPastYear: number,
-  costPastYear: number,
-  emissionsPastYear: number,
-  consumptionYearPrior: number,
-  costYearPrior: number,
-  emissionsYearPrior: number,
+  consumptionTargetYear: number,
+  costTargetYear: number,
+  emissionsTargetYear: number,
+  consumptionBaselineYear: number,
+  costBaselineYear: number,
+  emissionsBaselineYear: number,
   consumptionChange: number,
   costChange: number,
   emissionsChange: number
@@ -57,4 +57,6 @@ export interface ReportOptions {
   wasteWater: boolean,
   otherUtility: boolean,
   facilities: Array<IdbFacility>,
+  baselineYear?: number,
+  targetYear?: number
 }

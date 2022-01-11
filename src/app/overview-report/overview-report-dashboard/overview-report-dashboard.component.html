@@ -33,10 +33,14 @@
                 <table class="table table-sm">
                     <thead>
                         <tr>
+                            <th>Name</th>
                             <th>Title</th>
-                            <th>Notes
+                            <th>Baseline Year
                             </th>
-                            <th>Created Date</th>
+                            <th>
+                                Target Year
+                            </th>
+                            <th>Last Modified</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -47,7 +51,11 @@
                                     {{report.name}}
                                 </a>
                             </td>
-                            <td>{{report.reportOptions.notes}}</td>
+                            <td>
+                                {{report.reportOptions.title}}
+                            </td>
+                            <td>{{report.reportOptions.baselineYear}}</td>
+                            <td>{{report.reportOptions.targetYear}}</td>
                             <td>{{report.date | date}}</td>
                             <td class="actions">
                                 <i class="fa fa-pencil" title="Edit" (click)="editReport(report)"></i>

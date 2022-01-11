@@ -7,6 +7,7 @@ import { IdbFacility, IdbUtilityMeter, MeterSource } from '../models/idb';
 import { CalanderizationService } from '../shared/helper-services/calanderization.service';
 import * as _ from 'lodash';
 import { ReportOptions, ReportUtilitySummary, UtilitySummary } from '../models/overview-report';
+import { report } from 'process';
 
 @Injectable({
   providedIn: 'root'
@@ -80,96 +81,95 @@ export class OverviewReportService {
 
   getUtilityUsageData(meters: Array<IdbUtilityMeter>, reportOptions: ReportOptions, inAccount: boolean): ReportUtilitySummary {
     let utilitySummaries: Array<UtilitySummary> = new Array();
-    let lastBillEntry: MonthlyData = this.calanderizationService.getLastBillEntry(meters, inAccount);
-    let pastYearEnd: Date = new Date(lastBillEntry.date);
-    let pastYearStart: Date = new Date(pastYearEnd.getUTCFullYear() - 1, pastYearEnd.getUTCMonth() + 1);
-    let yearPriorEnd: Date = new Date(pastYearStart.getUTCFullYear(), pastYearStart.getUTCMonth() - 1);
-    let yearPriorStart: Date = new Date(yearPriorEnd.getUTCFullYear() - 1, yearPriorEnd.getUTCMonth() + 1);
+    let targetYearEnd: Date = new Date(reportOptions.targetYear, 11);
+    let targetYearStart: Date = new Date(reportOptions.targetYear, 0);
+    let baselineYearEnd: Date = new Date(reportOptions.baselineYear, 11);
+    let baselineYearStart: Date = new Date(reportOptions.baselineYear, 0);
     if (reportOptions.electricity) {
-      let utilitySummary: UtilitySummary = this.getUtilitySummary(meters, pastYearStart, pastYearEnd, yearPriorStart, yearPriorEnd, 'Electricity', inAccount);
+      let utilitySummary: UtilitySummary = this.getUtilitySummary(meters, targetYearStart, targetYearEnd, baselineYearStart, baselineYearEnd, 'Electricity', inAccount);
       utilitySummaries.push(utilitySummary)
     }
     if (reportOptions.naturalGas) {
-      let utilitySummary: UtilitySummary = this.getUtilitySummary(meters, pastYearStart, pastYearEnd, yearPriorStart, yearPriorEnd, 'Natural Gas', inAccount);
+      let utilitySummary: UtilitySummary = this.getUtilitySummary(meters, targetYearStart, targetYearEnd, baselineYearStart, baselineYearEnd, 'Natural Gas', inAccount);
       utilitySummaries.push(utilitySummary)
     }
     if (reportOptions.otherFuels) {
-      let utilitySummary: UtilitySummary = this.getUtilitySummary(meters, pastYearStart, pastYearEnd, yearPriorStart, yearPriorEnd, 'Other Fuels', inAccount);
+      let utilitySummary: UtilitySummary = this.getUtilitySummary(meters, targetYearStart, targetYearEnd, baselineYearStart, baselineYearEnd, 'Other Fuels', inAccount);
       utilitySummaries.push(utilitySummary)
     }
     if (reportOptions.otherEnergy) {
-      let utilitySummary: UtilitySummary = this.getUtilitySummary(meters, pastYearStart, pastYearEnd, yearPriorStart, yearPriorEnd, 'Other Energy', inAccount);
+      let utilitySummary: UtilitySummary = this.getUtilitySummary(meters, targetYearStart, targetYearEnd, baselineYearStart, baselineYearEnd, 'Other Energy', inAccount);
       utilitySummaries.push(utilitySummary)
     }
     if (reportOptions.water) {
-      let utilitySummary: UtilitySummary = this.getUtilitySummary(meters, pastYearStart, pastYearEnd, yearPriorStart, yearPriorEnd, 'Water', inAccount);
+      let utilitySummary: UtilitySummary = this.getUtilitySummary(meters, targetYearStart, targetYearEnd, baselineYearStart, baselineYearEnd, 'Water', inAccount);
       utilitySummaries.push(utilitySummary)
     }
     if (reportOptions.wasteWater) {
-      let utilitySummary: UtilitySummary = this.getUtilitySummary(meters, pastYearStart, pastYearEnd, yearPriorStart, yearPriorEnd, 'Waste Water', inAccount);
+      let utilitySummary: UtilitySummary = this.getUtilitySummary(meters, targetYearStart, targetYearEnd, baselineYearStart, baselineYearEnd, 'Waste Water', inAccount);
       utilitySummaries.push(utilitySummary)
     }
     if (reportOptions.otherUtility) {
-      let utilitySummary: UtilitySummary = this.getUtilitySummary(meters, pastYearStart, pastYearEnd, yearPriorStart, yearPriorEnd, 'Other Utility', inAccount);
+      let utilitySummary: UtilitySummary = this.getUtilitySummary(meters, targetYearStart, targetYearEnd, baselineYearStart, baselineYearEnd, 'Other Utility', inAccount);
       utilitySummaries.push(utilitySummary)
     }
-    let consumptionPastYear: number = _.sumBy(utilitySummaries, 'consumptionPastYear');
-    let costPastYear: number = _.sumBy(utilitySummaries, 'costPastYear');
-    let emissionsPastYear: number = _.sumBy(utilitySummaries, 'emissionsPastYear');
-    let consumptionYearPrior: number = _.sumBy(utilitySummaries, 'consumptionYearPrior');
-    let costYearPrior: number = _.sumBy(utilitySummaries, 'costYearPrior');
-    let emissionsYearPrior: number = _.sumBy(utilitySummaries, 'emissionsYearPrior');
+    let consumptionTargetYear: number = _.sumBy(utilitySummaries, 'consumptionTargetYear');
+    let costTargetYear: number = _.sumBy(utilitySummaries, 'costTargetYear');
+    let emissionsTargetYear: number = _.sumBy(utilitySummaries, 'emissionsTargetYear');
+    let consumptionBaselineYear: number = _.sumBy(utilitySummaries, 'consumptionBaselineYear');
+    let costBaselineYear: number = _.sumBy(utilitySummaries, 'costBaselineYear');
+    let emissionsBaselineYear: number = _.sumBy(utilitySummaries, 'emissionsBaselineYear');
     return {
       utilitySummaries: utilitySummaries,
       totals: {
         source: undefined,
-        consumptionPastYear: consumptionPastYear,
-        costPastYear: costPastYear,
-        emissionsPastYear: emissionsPastYear,
-        consumptionYearPrior: consumptionYearPrior,
-        costYearPrior: costYearPrior,
-        emissionsYearPrior: emissionsYearPrior,
-        consumptionChange: consumptionPastYear - consumptionYearPrior,
-        costChange: costPastYear - costYearPrior,
-        emissionsChange: emissionsPastYear - emissionsYearPrior
+        consumptionTargetYear: consumptionTargetYear,
+        costTargetYear: costTargetYear,
+        emissionsTargetYear: emissionsTargetYear,
+        consumptionBaselineYear: consumptionBaselineYear,
+        costBaselineYear: costBaselineYear,
+        emissionsBaselineYear: emissionsBaselineYear,
+        consumptionChange: consumptionTargetYear - consumptionBaselineYear,
+        costChange: costTargetYear - costBaselineYear,
+        emissionsChange: emissionsTargetYear - emissionsBaselineYear
       },
-      pastYearStart: pastYearStart,
-      pastYearEnd: pastYearEnd,
-      yearPriorStart: yearPriorStart,
-      yearPriorEnd: yearPriorEnd
+      targetYearStart: targetYearStart,
+      targetYearEnd: targetYearEnd,
+      baselineYearStart: baselineYearStart,
+      baselineYearEnd: baselineYearEnd
     }
   }
 
-  getUtilitySummary(meters: Array<IdbUtilityMeter>, pastYearStart: Date, pastYearEnd: Date, yearPriorStart: Date, yearPriorEnd: Date, source: MeterSource, inAccount: boolean): UtilitySummary {
+  getUtilitySummary(meters: Array<IdbUtilityMeter>, targetYearStart: Date, targetYearEnd: Date, baselineYearStart: Date, baselineYearEnd: Date, source: MeterSource, inAccount: boolean): UtilitySummary {
     let sourceMeters: Array<IdbUtilityMeter> = meters.filter(meter => { return meter.source == source });
     let calanderizedMeterData: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMeterData(sourceMeters, inAccount);
     let monthlyData: Array<MonthlyData> = calanderizedMeterData.flatMap(data => { return data.monthlyData });
-    let pastYearData: Array<MonthlyData> = monthlyData.filter(data => {
+    let targetYearData: Array<MonthlyData> = monthlyData.filter(data => {
       let dataDate: Date = new Date(data.date);
-      return this.isDateWithinRange(dataDate, pastYearStart, pastYearEnd);
+      return this.isDateWithinRange(dataDate, targetYearStart, targetYearEnd);
     });
-    let yearPriorData: Array<MonthlyData> = monthlyData.filter(data => {
+    let baselineYearData: Array<MonthlyData> = monthlyData.filter(data => {
       let dataDate: Date = new Date(data.date);
-      return this.isDateWithinRange(dataDate, yearPriorStart, yearPriorEnd);
+      return this.isDateWithinRange(dataDate, baselineYearStart, baselineYearEnd);
     });
     //divide emissions by /1000 for tonne
-    let consumptionPastYear: number = _.sumBy(pastYearData, 'energyUse');
-    let costPastYear: number = _.sumBy(pastYearData, 'energyCost');
-    let emissionsPastYear: number = _.sumBy(pastYearData, 'emissions') / 1000;
-    let consumptionYearPrior: number = _.sumBy(yearPriorData, 'energyUse');
-    let costYearPrior: number = _.sumBy(yearPriorData, 'energyCost');
-    let emissionsYearPrior: number = _.sumBy(yearPriorData, 'emissions') / 1000;
+    let consumptionTargetYear: number = _.sumBy(targetYearData, 'energyUse');
+    let costTargetYear: number = _.sumBy(targetYearData, 'energyCost');
+    let emissionsTargetYear: number = _.sumBy(targetYearData, 'emissions') / 1000;
+    let consumptionBaselineYear: number = _.sumBy(baselineYearData, 'energyUse');
+    let costBaselineYear: number = _.sumBy(baselineYearData, 'energyCost');
+    let emissionsBaselineYear: number = _.sumBy(baselineYearData, 'emissions') / 1000;
     return {
       source: source,
-      consumptionPastYear: consumptionPastYear,
-      costPastYear: costPastYear,
-      emissionsPastYear: emissionsPastYear,
-      consumptionYearPrior: consumptionYearPrior,
-      costYearPrior: costYearPrior,
-      emissionsYearPrior: emissionsYearPrior,
-      consumptionChange: consumptionPastYear - consumptionYearPrior,
-      costChange: costPastYear - costYearPrior,
-      emissionsChange: emissionsPastYear - emissionsYearPrior
+      consumptionTargetYear: consumptionTargetYear,
+      costTargetYear: costTargetYear,
+      emissionsTargetYear: emissionsTargetYear,
+      consumptionBaselineYear: consumptionBaselineYear,
+      costBaselineYear: costBaselineYear,
+      emissionsBaselineYear: emissionsBaselineYear,
+      consumptionChange: consumptionTargetYear - consumptionBaselineYear,
+      costChange: costTargetYear - costBaselineYear,
+      emissionsChange: emissionsTargetYear - emissionsBaselineYear
     }
   }
 
