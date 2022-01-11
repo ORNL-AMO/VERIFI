@@ -17,6 +17,9 @@ hr.page-spacer{
     border: solid;
 }
 
+.print hr.page-spacer{
+    border: none;
+}
 
 .report-container{
     margin-bottom: 100px;

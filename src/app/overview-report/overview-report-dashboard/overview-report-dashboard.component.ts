@@ -16,17 +16,33 @@ export class OverviewReportDashboardComponent implements OnInit {
   accountOverviewReportOptions: Array<IdbOverviewReportOptions>;
   accountOverviewReportOptionsSub: Subscription;
   reportToDelete: IdbOverviewReportOptions;
+
+  currentPageNumber: number = 1;
+  itemsPerPage: number = 10;
+  orderDataField: string = 'name';
+  orderByDirection: string = 'desc';
   constructor(private overviewReportService: OverviewReportService, private router: Router, private overviewReportOptionsDbService: OverviewReportOptionsDbService) { }
 
   ngOnInit(): void {
     this.accountOverviewReportOptionsSub = this.overviewReportOptionsDbService.accountOverviewReportOptions.subscribe(options => {
-      this.accountOverviewReportOptions = options;
+      this.accountOverviewReportOptions = this.setOptions(options);
     });
   }
 
   ngOnDestory() {
     this.accountOverviewReportOptionsSub.unsubscribe();
   }
+
+  setOptions(options: Array<IdbOverviewReportOptions>): Array<IdbOverviewReportOptions> {
+    //used for ordering table
+    options.forEach(option => {
+      option.baselineYear = option.reportOptions.baselineYear;
+      option.targetYear = option.reportOptions.targetYear;
+      option.title = option.reportOptions.title
+    });
+    return options;
+  }
+
 
   createReport() {
     this.overviewReportOptionsDbService.selectedOverviewReportOptions.next(undefined);
@@ -59,5 +75,17 @@ export class OverviewReportDashboardComponent implements OnInit {
     this.overviewReportOptionsDbService.selectedOverviewReportOptions.next(report);
     this.overviewReportService.reportOptions.next(report.reportOptions);
     this.router.navigateByUrl('/overview-report/report-menu');
+  }
+
+  setOrderDataField(str: string) {
+    if (str == this.orderDataField) {
+      if (this.orderByDirection == 'desc') {
+        this.orderByDirection = 'asc';
+      } else {
+        this.orderByDirection = 'desc';
+      }
+    } else {
+      this.orderDataField = str;
+    }
   }
 }

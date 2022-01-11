@@ -162,4 +162,12 @@ export class OverviewReportMenuComponent implements OnInit {
       this.baselineYears.push(i);
     }
   }
+
+  selectTemplate() {
+    let template: IdbOverviewReportOptions = this.reportTemplates.find(template => { return template.id == this.reportOptions.templateId });
+    if (template) {
+      this.reportOptions = template.reportOptions;
+      this.reportOptions.templateId = template.id;
+    }
+  }
 }

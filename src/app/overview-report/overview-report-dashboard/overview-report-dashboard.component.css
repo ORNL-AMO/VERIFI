@@ -43,3 +43,12 @@
 .content-padding{
     padding: 20px 30px 30px;
 }
+
+th:hover{
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+th.active{
+    text-decoration: underline;
+}

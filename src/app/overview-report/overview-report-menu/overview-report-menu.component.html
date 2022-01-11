@@ -114,7 +114,7 @@
                             Report Template
                         </label>
                         <select id="selectTemplate" [(ngModel)]="reportOptions.templateId" name="templateId"
-                            class="form-control">
+                            class="form-control" (change)="selectTemplate()">
                             <option [ngValue]=undefined>Custom</option>
                             <option [ngValue]="99999">Better Plants Report</option>
                             <option *ngFor="let template of reportTemplates" [ngValue]="template.id">{{template.name}}
@@ -161,20 +161,21 @@
                         (change)="saveCustom()">Include Annual Facility Bar Charts
                 </label>
                 <hr>
-                <label>Facility Reports Options</label>
-                <label for="includeFacilities">
-                    <input class="checkbox" type="checkbox" id="includeFacilities" name="includeFacilities"
-                        [(ngModel)]="reportOptions.includeFacilities" (change)="saveCustom()">Include Facility Reports
-                </label>
-                <div *ngIf="reportOptions.includeFacilities">
+                <label>Facilites to Include</label>
+                <div>
                     <label *ngFor="let facility of reportOptions.facilities; let index = index;"
                         for="{{'facility_'+index}}">
                         <input class="checkbox" type="checkbox" id="{{'facility_'+index}}" name="{{'facility_'+index}}"
                             [(ngModel)]="facility.selected" (change)="saveCustom()">Include
                         <b>{{facility.name}}</b>
                     </label>
-
                 </div>
+                <hr>
+                <label>Facility Reports Options</label>
+                <label for="includeFacilities">
+                    <input class="checkbox" type="checkbox" id="includeFacilities" name="includeFacilities"
+                        [(ngModel)]="reportOptions.includeFacilities" (change)="saveCustom()">Include Facility Reports
+                </label>
                 <div class="row" *ngIf="reportOptions.includeFacilities">
                     <div class="col-6">
                         <label>Facility Report Items</label>

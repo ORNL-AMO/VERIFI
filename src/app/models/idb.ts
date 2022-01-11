@@ -198,7 +198,10 @@ export interface IdbOverviewReportOptions {
     reportOptions: ReportOptions,
     date: Date,
     type: 'report' | 'template',
-    name: string
+    name: string,
+    baselineYear?: number,
+    targetYear?: number,
+    title?: string,
 }
 
 
