@@ -1,6 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FirstNaicsList, NAICS, SecondNaicsList, ThirdNaicsList } from 'src/app/form-data/naics-data';
 import { IdbFacility } from 'src/app/models/idb';
+import { ReportOptions } from 'src/app/models/overview-report';
 
 @Component({
   selector: 'app-facility-report-info',
@@ -10,7 +11,9 @@ import { IdbFacility } from 'src/app/models/idb';
 export class FacilityReportInfoComponent implements OnInit {
   @Input()
   facility: IdbFacility;
-
+  @Input()
+  reportOptions: ReportOptions;
+  
   naics: string;
   constructor() { }
 

@@ -6,6 +6,7 @@ import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-
 import { CalanderizedMeter, MonthlyData, LastYearData, CalanderizationFilters } from 'src/app/models/calanderization';
 import { BehaviorSubject } from 'rxjs';
 import { ConvertUnitsService } from '../convert-units/convert-units.service';
+import { ReportOptions } from 'src/app/models/overview-report';
 
 @Injectable({
   providedIn: 'root'
@@ -28,20 +29,24 @@ export class CalanderizationService {
     });
   }
 
-  getCalanderizedMeterData(meters: Array<IdbUtilityMeter>, inAccount: boolean, monthDisplayShort?: boolean): Array<CalanderizedMeter> {
+  getCalanderizedMeterData(meters: Array<IdbUtilityMeter>, inAccount: boolean, monthDisplayShort?: boolean, reportOptions?: ReportOptions): Array<CalanderizedMeter> {
     let calanderizedMeterData: Array<CalanderizedMeter> = new Array();
     meters.forEach(meter => {
       let energyIsSource: boolean;
       let calanderizedenergyUnit: string;
       let meterData: Array<IdbUtilityMeterData>
       if (inAccount) {
-        meterData = this.utilityMeterDataDbService.getMeterDataForAccount(meter, true);
+        meterData = this.utilityMeterDataDbService.getMeterDataForAccount(meter, true, reportOptions);
         calanderizedenergyUnit = this.energyUnitsHelperService.getMeterConsumptionUnitInAccount(meter);
         energyIsSource = this.energyUnitsHelperService.getEnergyIsSourceInAccount();
       } else {
-        meterData = this.utilityMeterDataDbService.getMeterDataForFacility(meter, true);
+        meterData = this.utilityMeterDataDbService.getMeterDataForFacility(meter, true, undefined, reportOptions);
         calanderizedenergyUnit = this.energyUnitsHelperService.getMeterConsumptionUnitInFacility(meter);
         energyIsSource = this.energyUnitsHelperService.getEnergyIsSourceInFacility();
+      }
+
+      if (reportOptions) {
+        energyIsSource = reportOptions.energyIsSource;
       }
 
       let calanderizedMeter: Array<MonthlyData> = this.calanderizeMeterData(meter, meterData, energyIsSource, calanderizedenergyUnit, monthDisplayShort);
@@ -353,11 +358,11 @@ export class CalanderizationService {
     return Math.floor((utc2 - utc1) / _MS_PER_DAY);
   }
 
-  getPastYearData(meters: Array<IdbUtilityMeter>, inAccount: boolean, yearEndBill: MonthlyData, calanderizedMeterData?: Array<CalanderizedMeter>): Array<LastYearData> {
+  getPastYearData(meters: Array<IdbUtilityMeter>, inAccount: boolean, yearEndBill: MonthlyData, calanderizedMeterData?: Array<CalanderizedMeter>, reportOptions?: ReportOptions): Array<LastYearData> {
     if (yearEndBill) {
       //calanderize meters
       if (!calanderizedMeterData) {
-        calanderizedMeterData = this.getCalanderizedMeterData(meters, inAccount);
+        calanderizedMeterData = this.getCalanderizedMeterData(meters, inAccount, undefined, reportOptions);
       }
       //array of year/month combos needed
       let yearMonths: Array<{ year: number, month: number }> = new Array();
@@ -420,8 +425,8 @@ export class CalanderizationService {
   }
 
 
-  getLastBillEntry(facilityMeters: Array<IdbUtilityMeter>, inAccount: boolean): MonthlyData {
-    let calanderizedMeterData: Array<CalanderizedMeter> = this.getCalanderizedMeterData(facilityMeters, inAccount, false);
+  getLastBillEntry(facilityMeters: Array<IdbUtilityMeter>, inAccount: boolean, reportOptions?: ReportOptions): MonthlyData {
+    let calanderizedMeterData: Array<CalanderizedMeter> = this.getCalanderizedMeterData(facilityMeters, inAccount, false, reportOptions);
     let lastBill: MonthlyData = this.getLastBillEntryFromCalanderizedMeterData(calanderizedMeterData);
     return lastBill;
   }

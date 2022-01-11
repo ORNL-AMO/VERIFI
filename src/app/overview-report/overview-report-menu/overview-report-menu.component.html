@@ -46,6 +46,28 @@
                 <hr>
                 <div class="row">
                     <div class="col-6">
+                        <label>Site or Source Energy?</label>
+                        <input type="radio" class="rowToggle" name="energyIsSource"
+                            [(ngModel)]="reportOptions.energyIsSource" [value]="true" id="sourceEnergy">
+                        <label class="checkbox" for="sourceEnergy">Source Energy</label>
+
+                        <input type="radio" class="rowToggle" name="energyIsSource"
+                            [(ngModel)]="reportOptions.energyIsSource" [value]="false" id="siteEnergy">
+                        <label class="checkbox" for="siteEnergy">Site Energy</label>
+                    </div>
+                    <div class="col-6">
+                        <label>Graph Options</label>
+                        <label for="annualGraphsByMonth">
+                            <input class="checkbox" type="checkbox" id="annualGraphsByMonth" name="annualGraphsByMonth"
+                                [(ngModel)]="reportOptions.annualGraphsByMonth" (change)="saveCustom()">Display annual
+                            data by month
+                        </label>
+                    </div>
+                </div>
+
+                <hr>
+                <div class="row">
+                    <div class="col-6">
                         <label>Include Utility Types</label>
                         <label for="electricity">
                             <input class="checkbox" type="checkbox" id="electricity" name="electricity"
@@ -81,17 +103,6 @@
                             <input class="checkbox" type="checkbox" id="otherUtility" name="otherUtility"
                                 [(ngModel)]="reportOptions.otherUtility" (change)="saveCustom()">Other
                             Utility
-                        </label>
-                    </div>
-                </div>
-                <hr>
-                <div class="row">
-                    <div class="col-6">
-                        <label>Graph Options</label>
-                        <label for="annualGraphsByMonth">
-                            <input class="checkbox" type="checkbox" id="annualGraphsByMonth" name="annualGraphsByMonth"
-                                [(ngModel)]="reportOptions.annualGraphsByMonth" (change)="saveCustom()">Display annual
-                            data by month
                         </label>
                     </div>
                 </div>

@@ -5,7 +5,7 @@
     {{facility.name}}
 </h3>
 <div class="pt-1 pb-4" *ngIf="reportOptions.facilityInfo">
-    <app-facility-report-info [facility]="facility"></app-facility-report-info>
+    <app-facility-report-info [facility]="facility" [reportOptions]="reportOptions"></app-facility-report-info>
 </div>
 <div class="pt-5" *ngIf="reportOptions.facilityMetersTable">
     <app-facility-report-meters-table [facility]="facility" [reportOptions]="reportOptions">

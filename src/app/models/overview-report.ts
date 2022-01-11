@@ -59,5 +59,6 @@ export interface ReportOptions {
   facilities: Array<IdbFacility>,
   baselineYear: number,
   targetYear: number,
-  annualGraphsByMonth: boolean
+  annualGraphsByMonth: boolean,
+  energyIsSource: boolean
 }

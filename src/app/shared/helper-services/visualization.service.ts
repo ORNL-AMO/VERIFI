@@ -5,6 +5,7 @@ import * as _ from 'lodash';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import { FacilityBarChartData, HeatMapData, PlotDataItem, RegressionTableDataItem } from 'src/app/models/visualization';
 import * as regression from 'regression';
+import { ReportOptions } from 'src/app/models/overview-report';
 @Injectable({
   providedIn: 'root'
 })
@@ -12,9 +13,9 @@ export class VisualizationService {
 
   constructor(private calanderizationService: CalanderizationService) { }
 
-  getFacilityBarChartData(meters: Array<IdbUtilityMeter>, sumByMonth: boolean, removeIncompleteYears: boolean, inAccount: boolean): Array<FacilityBarChartData> {
+  getFacilityBarChartData(meters: Array<IdbUtilityMeter>, sumByMonth: boolean, removeIncompleteYears: boolean, inAccount: boolean, reportOptions?: ReportOptions): Array<FacilityBarChartData> {
     //calanderize meters
-    let calanderizedMeterData: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMeterData(meters, inAccount, true);
+    let calanderizedMeterData: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMeterData(meters, inAccount, true, reportOptions);
 
     //create array of just the meter data
     let combindedCalanderizedMeterData: Array<MonthlyData> = calanderizedMeterData.flatMap(meterData => {

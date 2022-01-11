@@ -1,7 +1,6 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbAccount, IdbFacility, IdbUtilityMeter, MeterSource } from 'src/app/models/idb';
 import { ReportOptions } from 'src/app/models/overview-report';
@@ -31,7 +30,7 @@ export class AccountReportFacilityBarChartComponent implements OnInit {
   print: boolean;
   printSub: Subscription;
   constructor(private visualizationService: VisualizationService, private overviewReportService: OverviewReportService,
-    private utilityMeterDbService: UtilityMeterdbService, private plotlyService: PlotlyService, private accountDbService: AccountdbService) { }
+    private utilityMeterDbService: UtilityMeterdbService, private plotlyService: PlotlyService) { }
 
   ngOnInit(): void {
     this.printSub = this.overviewReportService.print.subscribe(val => {
@@ -213,7 +212,7 @@ export class AccountReportFacilityBarChartComponent implements OnInit {
         let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => {
           return meter.facilityId == facility.id && selectedSource.includes(meter.source);
         });
-        let facilityBarChartData: Array<FacilityBarChartData> = this.visualizationService.getFacilityBarChartData(facilityMeters, this.reportOptions.annualGraphsByMonth, true, true);
+        let facilityBarChartData: Array<FacilityBarChartData> = this.visualizationService.getFacilityBarChartData(facilityMeters, this.reportOptions.annualGraphsByMonth, true, true, this.reportOptions);
         this.chartData.push({
           facility: facility,
           data: facilityBarChartData

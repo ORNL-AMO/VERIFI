@@ -97,7 +97,7 @@ export class FacilityReportBarChartComponent implements OnInit {
 
   getDataByUtility(utility: MeterSource, facilityMeters: Array<IdbUtilityMeter>): Array<FacilityBarChartData> {
     let filteredMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.source == utility });
-    return this.visualizationService.getFacilityBarChartData(filteredMeters, this.reportOptions.annualGraphsByMonth, true, false);
+    return this.visualizationService.getFacilityBarChartData(filteredMeters, this.reportOptions.annualGraphsByMonth, true, false, this.reportOptions);
   }
 
   drawEmissionsChart() {

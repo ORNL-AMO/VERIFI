@@ -3,10 +3,11 @@ import { BehaviorSubject } from 'rxjs';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
 import { UtilityMeterdbService } from '../indexedDB/utilityMeter-db.service';
 import { CalanderizedMeter, MonthlyData } from '../models/calanderization';
-import { IdbFacility, IdbUtilityMeter, MeterSource } from '../models/idb';
+import { IdbAccount, IdbFacility, IdbUtilityMeter, MeterSource } from '../models/idb';
 import { CalanderizationService } from '../shared/helper-services/calanderization.service';
 import * as _ from 'lodash';
 import { ReportOptions, ReportUtilitySummary, UtilitySummary } from '../models/overview-report';
+import { AccountdbService } from '../indexedDB/account-db.service';
 
 @Injectable({
   providedIn: 'root'
@@ -15,12 +16,15 @@ export class OverviewReportService {
 
   reportOptions: BehaviorSubject<ReportOptions>;
   print: BehaviorSubject<boolean>;
-  constructor(private facilityDbService: FacilitydbService, private utilityMeterDbService: UtilityMeterdbService, private calanderizationService: CalanderizationService) {
+  constructor(private facilityDbService: FacilitydbService, private utilityMeterDbService: UtilityMeterdbService, 
+    private calanderizationService: CalanderizationService,
+    private accountDbService: AccountdbService) {
     this.reportOptions = new BehaviorSubject<ReportOptions>(undefined);
     this.print = new BehaviorSubject<boolean>(false);
   }
 
   getInitialReportOptions(): ReportOptions {
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let accountFacilites: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     accountFacilites.forEach(facility => {
       facility.selected = true;
@@ -75,7 +79,8 @@ export class OverviewReportService {
       facilities: accountFacilites,
       baselineYear: undefined,
       targetYear: undefined,
-      annualGraphsByMonth: false
+      annualGraphsByMonth: false,
+      energyIsSource: selectedAccount.energyIsSource
     }
   }
 
@@ -88,31 +93,31 @@ export class OverviewReportService {
     let baselineYearEnd: Date = new Date(reportOptions.baselineYear, 11);
     let baselineYearStart: Date = new Date(reportOptions.baselineYear, 0);
     if (reportOptions.electricity) {
-      let utilitySummary: UtilitySummary = this.getUtilitySummary(meters, targetYearStart, targetYearEnd, baselineYearStart, baselineYearEnd, 'Electricity', inAccount);
+      let utilitySummary: UtilitySummary = this.getUtilitySummary(meters, targetYearStart, targetYearEnd, baselineYearStart, baselineYearEnd, 'Electricity', inAccount, reportOptions);
       utilitySummaries.push(utilitySummary)
     }
     if (reportOptions.naturalGas) {
-      let utilitySummary: UtilitySummary = this.getUtilitySummary(meters, targetYearStart, targetYearEnd, baselineYearStart, baselineYearEnd, 'Natural Gas', inAccount);
+      let utilitySummary: UtilitySummary = this.getUtilitySummary(meters, targetYearStart, targetYearEnd, baselineYearStart, baselineYearEnd, 'Natural Gas', inAccount, reportOptions);
       utilitySummaries.push(utilitySummary)
     }
     if (reportOptions.otherFuels) {
-      let utilitySummary: UtilitySummary = this.getUtilitySummary(meters, targetYearStart, targetYearEnd, baselineYearStart, baselineYearEnd, 'Other Fuels', inAccount);
+      let utilitySummary: UtilitySummary = this.getUtilitySummary(meters, targetYearStart, targetYearEnd, baselineYearStart, baselineYearEnd, 'Other Fuels', inAccount, reportOptions);
       utilitySummaries.push(utilitySummary)
     }
     if (reportOptions.otherEnergy) {
-      let utilitySummary: UtilitySummary = this.getUtilitySummary(meters, targetYearStart, targetYearEnd, baselineYearStart, baselineYearEnd, 'Other Energy', inAccount);
+      let utilitySummary: UtilitySummary = this.getUtilitySummary(meters, targetYearStart, targetYearEnd, baselineYearStart, baselineYearEnd, 'Other Energy', inAccount, reportOptions);
       utilitySummaries.push(utilitySummary)
     }
     if (reportOptions.water) {
-      let utilitySummary: UtilitySummary = this.getUtilitySummary(meters, targetYearStart, targetYearEnd, baselineYearStart, baselineYearEnd, 'Water', inAccount);
+      let utilitySummary: UtilitySummary = this.getUtilitySummary(meters, targetYearStart, targetYearEnd, baselineYearStart, baselineYearEnd, 'Water', inAccount, reportOptions);
       utilitySummaries.push(utilitySummary)
     }
     if (reportOptions.wasteWater) {
-      let utilitySummary: UtilitySummary = this.getUtilitySummary(meters, targetYearStart, targetYearEnd, baselineYearStart, baselineYearEnd, 'Waste Water', inAccount);
+      let utilitySummary: UtilitySummary = this.getUtilitySummary(meters, targetYearStart, targetYearEnd, baselineYearStart, baselineYearEnd, 'Waste Water', inAccount, reportOptions);
       utilitySummaries.push(utilitySummary)
     }
     if (reportOptions.otherUtility) {
-      let utilitySummary: UtilitySummary = this.getUtilitySummary(meters, targetYearStart, targetYearEnd, baselineYearStart, baselineYearEnd, 'Other Utility', inAccount);
+      let utilitySummary: UtilitySummary = this.getUtilitySummary(meters, targetYearStart, targetYearEnd, baselineYearStart, baselineYearEnd, 'Other Utility', inAccount, reportOptions);
       utilitySummaries.push(utilitySummary)
     }
     let consumptionTargetYear: number = _.sumBy(utilitySummaries, 'consumptionTargetYear');
@@ -142,9 +147,9 @@ export class OverviewReportService {
     }
   }
 
-  getUtilitySummary(meters: Array<IdbUtilityMeter>, targetYearStart: Date, targetYearEnd: Date, baselineYearStart: Date, baselineYearEnd: Date, source: MeterSource, inAccount: boolean): UtilitySummary {
+  getUtilitySummary(meters: Array<IdbUtilityMeter>, targetYearStart: Date, targetYearEnd: Date, baselineYearStart: Date, baselineYearEnd: Date, source: MeterSource, inAccount: boolean, reportOptions: ReportOptions): UtilitySummary {
     let sourceMeters: Array<IdbUtilityMeter> = meters.filter(meter => { return meter.source == source });
-    let calanderizedMeterData: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMeterData(sourceMeters, inAccount);
+    let calanderizedMeterData: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMeterData(sourceMeters, inAccount, undefined, reportOptions);
     let monthlyData: Array<MonthlyData> = calanderizedMeterData.flatMap(data => { return data.monthlyData });
     let targetYearData: Array<MonthlyData> = monthlyData.filter(data => {
       let dataDate: Date = new Date(data.date);

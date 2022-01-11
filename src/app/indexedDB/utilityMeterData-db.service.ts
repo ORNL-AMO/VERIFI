@@ -6,6 +6,7 @@ import { FacilitydbService } from './facility-db.service';
 import { AccountdbService } from './account-db.service';
 import { ConvertMeterDataService } from '../shared/helper-services/convert-meter-data.service';
 import * as _ from 'lodash';
+import { ReportOptions } from '../models/overview-report';
 
 @Injectable({
     providedIn: 'root'
@@ -210,11 +211,16 @@ export class UtilityMeterDatadbService {
         return facilityMeterData.filter(meterData => { return meterData.meterId == meterId });
     }
 
-    getMeterDataForFacility(meter: IdbUtilityMeter, convertData: boolean, isMeterReadings?: boolean): Array<IdbUtilityMeterData> {
-        let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    getMeterDataForFacility(meter: IdbUtilityMeter, convertData: boolean, isMeterReadings?: boolean, reportOptions?: ReportOptions): Array<IdbUtilityMeterData> {
+        let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+        let facility: IdbFacility = facilities.find(facility => { return facility.id == meter.facilityId });
         let meterData: Array<IdbUtilityMeterData> = this.getMeterDataFromMeterId(meter.id);
         let meterDataCopy: Array<IdbUtilityMeterData> = JSON.parse(JSON.stringify(meterData));
-        if(facility.energyIsSource && !isMeterReadings){
+        if (!reportOptions) {
+            if (facility.energyIsSource && !isMeterReadings) {
+                meterDataCopy = this.convertMeterDataService.applySiteToSourceMultiplier(meter, meterDataCopy);
+            }
+        } else if (reportOptions.energyIsSource) {
             meterDataCopy = this.convertMeterDataService.applySiteToSourceMultiplier(meter, meterDataCopy);
         }
         if (convertData) {
@@ -223,11 +229,17 @@ export class UtilityMeterDatadbService {
         return meterDataCopy;
     }
 
-    getMeterDataForAccount(meter: IdbUtilityMeter, convertData: boolean): Array<IdbUtilityMeterData> {
+    getMeterDataForAccount(meter: IdbUtilityMeter, convertData: boolean, reportOptions?: ReportOptions): Array<IdbUtilityMeterData> {
         let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
         let meterData: Array<IdbUtilityMeterData> = this.getMeterDataFromMeterId(meter.id);
         let meterDataCopy: Array<IdbUtilityMeterData> = JSON.parse(JSON.stringify(meterData));
-        if(account.energyIsSource){
+        if (!reportOptions) {
+            console.log('no report options')
+            if (account.energyIsSource) {
+                meterDataCopy = this.convertMeterDataService.applySiteToSourceMultiplier(meter, meterDataCopy);
+            }
+        } else if (reportOptions.energyIsSource) {
+            console.log('energy is source')
             meterDataCopy = this.convertMeterDataService.applySiteToSourceMultiplier(meter, meterDataCopy);
         }
         if (convertData) {
