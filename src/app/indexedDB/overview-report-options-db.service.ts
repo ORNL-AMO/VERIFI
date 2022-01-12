@@ -20,7 +20,7 @@ export class OverviewReportOptionsDbService {
     this.selectedOverviewReportOptions = new BehaviorSubject<IdbOverviewReportOptions>(undefined);
   }
 
-  async initializeFacilityFromLocalStorage() {
+  async initializeReportsFromLocalStorage() {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     if (selectedAccount) {
       let allOverviewReportOptions: Array<IdbOverviewReportOptions> = await this.getAll().toPromise();

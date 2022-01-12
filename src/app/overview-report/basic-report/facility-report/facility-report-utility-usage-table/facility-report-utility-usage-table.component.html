@@ -27,7 +27,7 @@
                 <td>
                     {{utilityUsageSummary.source}}
                 </td>
-                <!--past year-->
+                <!--target year-->
                 <td>
                     <span *ngIf="utilityUsageSummary.consumptionTargetYear">
                         {{utilityUsageSummary.consumptionTargetYear | customNumber}}
@@ -66,9 +66,7 @@
                         ({{utilityUsageSummary.emissionsChange | customNumber}})
                     </span>
                 </td>
-
-
-                <!--year prior-->
+                <!--baseline year-->
                 <td>
                     <span *ngIf="utilityUsageSummary.consumptionBaselineYear">
                         {{utilityUsageSummary.consumptionBaselineYear | customNumber}}
@@ -100,7 +98,7 @@
                 <th>
                     Totals
                 </th>
-                <!--previous month-->
+                <!--target year-->
                 <th>
                     <span *ngIf="facilityReportUtilitySummary.totals.consumptionTargetYear">
                         {{facilityReportUtilitySummary.totals.consumptionTargetYear | customNumber}}
@@ -140,7 +138,7 @@
                         ({{facilityReportUtilitySummary.totals.emissionsChange | customNumber}})
                     </span>
                 </th>
-                <!--year prior-->
+                <!--baseline year-->
                 <th>
                     <span *ngIf="facilityReportUtilitySummary.totals.consumptionBaselineYear">
                         {{facilityReportUtilitySummary.totals.consumptionBaselineYear | customNumber}}

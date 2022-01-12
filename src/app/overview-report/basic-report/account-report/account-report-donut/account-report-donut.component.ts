@@ -19,8 +19,6 @@ export class AccountReportDonutComponent implements OnInit {
 
   @ViewChild('utilityDonut', { static: false }) utilityDonut: ElementRef;
 
-  lastMonthsDate: string;
-  yearPriorDate: string;
   constructor(private plotlyService: PlotlyService) { }
 
   ngOnInit(): void {

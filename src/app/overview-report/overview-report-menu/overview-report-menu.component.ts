@@ -4,12 +4,11 @@ import { Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { OverviewReportOptionsDbService } from 'src/app/indexedDB/overview-report-options-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbAccount, IdbFacility, IdbOverviewReportOptions, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbAccount, IdbOverviewReportOptions, IdbUtilityMeterData } from 'src/app/models/idb';
 import { ReportOptions } from 'src/app/models/overview-report';
 import { ToastNotificationsService } from 'src/app/shared/toast-notifications/toast-notifications.service';
 import { OverviewReportService } from '../overview-report.service';
 import * as _ from 'lodash';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 
 @Component({
   selector: 'app-overview-report-menu',
@@ -34,8 +33,7 @@ export class OverviewReportMenuComponent implements OnInit {
     private overviewReportOptionsDbService: OverviewReportOptionsDbService,
     private accountDbService: AccountdbService,
     private toastNotificationsService: ToastNotificationsService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private facilityDbService: FacilitydbService) { }
+    private utilityMeterDataDbService: UtilityMeterDatadbService) { }
 
   ngOnInit(): void {
     this.selectedReportOptions = this.overviewReportOptionsDbService.selectedOverviewReportOptions.getValue();

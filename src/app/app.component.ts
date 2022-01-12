@@ -63,7 +63,7 @@ export class AppComponent {
     this.loadingMessage = "Loading Meter Groups..";
     await this.utilityMeterGroupDbService.initializeMeterGroups();
     this.loadingMessage = 'Loading Reports...'
-    await this.overviewReportOptionsDbService.initializeFacilityFromLocalStorage();
+    await this.overviewReportOptionsDbService.initializeReportsFromLocalStorage();
     this.dataInitialized = true;
   }
 }

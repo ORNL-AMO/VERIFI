@@ -11,7 +11,6 @@
             <tr>
                 <th class="w-1">Facility</th>
                 <th class="w-1"># of Meters</th>
-                <!-- <th class="w-1">Last Bill Entered</th> -->
                 <th class="w-2">Utility Usage <br> (<span [innerHTML]="account.energyUnit | settingsLabel"></span>)
                 </th>
                 <th class="w-2">Utility Cost </th>
@@ -28,9 +27,6 @@
                 <td>
                     {{summary.numberOfMeters}}
                 </td>
-                <!-- <td>
-                    {{summary.lastBillDate | date: 'MMM, y'}}
-                </td> -->
                 <td>
                     {{summary.energyUsage | customNumber}}
 
@@ -51,9 +47,6 @@
                 <th>
                     {{accountFacilitiesSummary.totalNumberOfMeters}}
                 </th>
-                <!-- <th>
-
-                </th> -->
                 <th>
                     {{accountFacilitiesSummary.totalEnergyUse | customNumber}}
                 </th>

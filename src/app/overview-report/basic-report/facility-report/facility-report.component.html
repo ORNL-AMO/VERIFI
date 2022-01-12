@@ -6,17 +6,21 @@
 <h1 class="text-center">
     {{facility.name}}
 </h1>
+<!--facility info-->
 <div class="pt-1 pb-4" *ngIf="reportOptions.facilityInfo">
     <app-facility-report-info [facility]="facility" [reportOptions]="reportOptions"></app-facility-report-info>
 </div>
+<!--meter summary table-->
 <div class="pt-5" *ngIf="reportOptions.facilityMetersTable">
     <app-facility-report-meters-table [facility]="facility" [reportOptions]="reportOptions">
     </app-facility-report-meters-table>
 </div>
+<!--utlity summary table-->
 <div class="pt-5 print-break-after" *ngIf="reportOptions.facilityUtilityUsageTable">
     <app-facility-report-utility-usage-table [facility]="facility" [reportOptions]="reportOptions">
     </app-facility-report-utility-usage-table>
 </div>
+<!--annual data graphs-->
 <div class="pt-5" *ngIf="reportOptions.facilityBarCharts">
     <app-facility-report-bar-chart [facility]="facility" [reportOptions]="reportOptions">
     </app-facility-report-bar-chart>

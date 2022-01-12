@@ -70,21 +70,10 @@ export class AccountReportFacilityBarChartComponent implements OnInit {
         traceData.push(trace);
       });
 
-
-
       var layout = {
         barmode: 'group',
-        // title: {
-        //   text: 'Annual Facility Costs',
-        //   font: {
-        //     size: 24
-        //   },
-        // },
         yaxis: {
           tickprefix: '$',
-          // title: {
-          //   text: '$',
-          // },
           hoverformat: ",.2f"
         },
         legend: this.getLegend(),
@@ -118,16 +107,8 @@ export class AccountReportFacilityBarChartComponent implements OnInit {
         traceData.push(trace);
       });
 
-
-
       var layout = {
         barmode: 'group',
-        // title: {
-        //   text: 'Annual Facility Consumption',
-        //   font: {
-        //     size: 24
-        //   },
-        // },
         yaxis: {
           title: {
             text: this.account.energyUnit,
@@ -167,12 +148,6 @@ export class AccountReportFacilityBarChartComponent implements OnInit {
 
       var layout = {
         barmode: 'group',
-        // title: {
-        //   text: 'Annual Facility Emissions',
-        //   font: {
-        //     size: 24
-        //   }
-        // },
         yaxis: {
           title: {
             text: "tonne CO<sub>2</sub>",
