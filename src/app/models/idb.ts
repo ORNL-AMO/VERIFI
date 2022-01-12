@@ -1,5 +1,6 @@
 import { CalanderizedMeter, MonthlyData } from './calanderization';
 import { ElectricityDataFilters } from './electricityFilter';
+import { ReportOptions } from './overview-report';
 import { SustainabilityQuestions } from './sustainabilityQuestions';
 
 export interface IdbAccount {
@@ -12,9 +13,9 @@ export interface IdbAccount {
     zip: string,
     address: string,
     size?: number,
-    naics1: number,
-    naics2: number,
-    naics3: number,
+    naics1: string,
+    naics2: string,
+    naics3: string,
     notes: string,
     img: string
     unitsOfMeasure: string,
@@ -48,9 +49,9 @@ export interface IdbFacility {
     state: string,
     zip: string,
     address: string,
-    naics1: number,
-    naics2: number,
-    naics3: number,
+    naics1: string,
+    naics2: string,
+    naics3: string,
     type?: string,
     size?: number,
     units?: string,
@@ -72,7 +73,8 @@ export interface IdbFacility {
     emissionsOutputRate?: number,
     eGridSubregion?: string,
     customEmissionsRate?: boolean
-    color?: string
+    color?: string,
+    selected?: boolean
 }
 
 export interface IdbUtilityMeterGroup {
@@ -187,6 +189,19 @@ export interface PredictorData {
     id: string,
     importWizardName?: string,
     production?: boolean
+}
+
+
+export interface IdbOverviewReportOptions {
+    id?: number,
+    accountId: number,
+    reportOptions: ReportOptions,
+    date: Date,
+    type: 'report' | 'template',
+    name: string,
+    baselineYear?: number,
+    targetYear?: number,
+    title?: string,
 }
 
 

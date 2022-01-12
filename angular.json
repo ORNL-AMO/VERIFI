@@ -43,7 +43,8 @@
               "src/styles/buttons.css",
               "src/styles/toast.css",
               "node_modules/font-awesome/css/font-awesome.css",
-              "node_modules/bootstrap/dist/css/bootstrap.min.css"
+              "node_modules/bootstrap/dist/css/bootstrap.min.css",
+              "src/styles/printing.css"
             ],
             "scripts": [
               "node_modules/plotly.js/dist/plotly.min.js"
@@ -144,7 +145,8 @@
               "src/styles/buttons.css",
               "src/styles/toast.css",
               "node_modules/font-awesome/css/font-awesome.css",
-              "node_modules/bootstrap/dist/css/bootstrap.min.css"
+              "node_modules/bootstrap/dist/css/bootstrap.min.css",
+              "src/styles/printing.css"
             ],
             "scripts": []
           }

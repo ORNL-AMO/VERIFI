@@ -94,7 +94,7 @@ export class GeneralInformationFormComponent implements OnInit {
     //make sure sublist selections are a part of selected parent
     if (this.form.controls.naics1.value && this.form.controls.naics2.value) {
       let naicsItem: NAICS = this.secondNaicsList.find(item => { return item.code == this.form.controls.naics2.value });
-      if (naicsItem.matchNum != this.form.controls.naics1.value) {
+      if (naicsItem && naicsItem.matchNum != this.form.controls.naics1.value) {
         this.form.controls.naics2.patchValue(null);
         this.form.controls.naics2.updateValueAndValidity();
       }
@@ -102,7 +102,7 @@ export class GeneralInformationFormComponent implements OnInit {
 
     if (this.form.controls.naics2.value && this.form.controls.naics3.value) {
       let naicsItem: NAICS = this.thirdNaicsList.find(item => { return item.code == this.form.controls.naics3.value });
-      if (naicsItem.matchNum != this.form.controls.naics2.value) {
+      if (naicsItem && naicsItem.matchNum != this.form.controls.naics2.value) {
         this.form.controls.naics3.patchValue(null);
         this.form.controls.naics3.updateValueAndValidity();
       }

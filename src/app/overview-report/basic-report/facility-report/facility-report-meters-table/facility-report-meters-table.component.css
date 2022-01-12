@@ -1,0 +1,14 @@
+.w-1{
+    width: 10%;
+}
+
+.w-2{
+    width: 20%;
+}
+
+p.label{
+    /* text-transform: uppercase; */
+    /* letter-spacing: 1px; */
+    border-bottom: 1px solid #eee;
+    margin-bottom: .5rem;
+}

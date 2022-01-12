@@ -3,8 +3,9 @@ import { IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterGroup, PredictorData
 import { CalanderizationService } from './calanderization.service';
 import * as _ from 'lodash';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
-import { HeatMapData, PlotDataItem, RegressionTableDataItem } from 'src/app/models/visualization';
+import { FacilityBarChartData, HeatMapData, PlotDataItem, RegressionTableDataItem } from 'src/app/models/visualization';
 import * as regression from 'regression';
+import { ReportOptions } from 'src/app/models/overview-report';
 @Injectable({
   providedIn: 'root'
 })
@@ -12,9 +13,9 @@ export class VisualizationService {
 
   constructor(private calanderizationService: CalanderizationService) { }
 
-  getFacilityBarChartData(meters: Array<IdbUtilityMeter>, sumByMonth: boolean, removeIncompleteYears: boolean, inAccount: boolean): Array<{ time: string, energyUse: number, energyCost: number, emissions: number }> {
+  getFacilityBarChartData(meters: Array<IdbUtilityMeter>, sumByMonth: boolean, removeIncompleteYears: boolean, inAccount: boolean, reportOptions?: ReportOptions): Array<FacilityBarChartData> {
     //calanderize meters
-    let calanderizedMeterData: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMeterData(meters, inAccount, true);
+    let calanderizedMeterData: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMeterData(meters, inAccount, true, reportOptions);
 
     //create array of just the meter data
     let combindedCalanderizedMeterData: Array<MonthlyData> = calanderizedMeterData.flatMap(meterData => {
@@ -22,7 +23,7 @@ export class VisualizationService {
     });
     //create array of the uniq months and years
     let yearMonths: Array<{ year: number, month: string }> = combindedCalanderizedMeterData.map(data => { return { year: data.year, month: data.month } });
-    let resultData: Array<{ time: string, energyUse: number, energyCost: number, emissions: number }> = new Array();
+    let resultData: Array<FacilityBarChartData> = new Array();
     //iterate array of uniq months and years and sum energy/cost
     if (sumByMonth) {
       yearMonths = _.uniqWith(yearMonths, (a, b) => {
@@ -54,7 +55,8 @@ export class VisualizationService {
           time: yearMonth.month + ', ' + yearMonth.year,
           energyUse: totalEnergyUse,
           energyCost: totalEnergyCost,
-          emissions: totalEmissions
+          emissions: totalEmissions,
+          year: yearMonth.year
         }
 
       });
@@ -97,7 +99,8 @@ export class VisualizationService {
           time: String(yearMonth.year),
           energyUse: totalEnergyUse,
           energyCost: totalEnergyCost,
-          emissions: totalEmissions
+          emissions: totalEmissions,
+          year: yearMonth.year
         }
       });
     }

@@ -5,7 +5,8 @@ import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
+import { IdbFacility, IdbUtilityMeter, MeterSource } from 'src/app/models/idb';
+import { FacilityBarChartData } from 'src/app/models/visualization';
 import { UtilityColors } from 'src/app/shared/utilityColors';
 import { VisualizationService } from '../../../shared/helper-services/visualization.service';
 import { DashboardService } from '../../dashboard.service';
@@ -27,12 +28,12 @@ export class FacilityBarChartComponent implements OnInit {
 
 
 
-  electricityData: Array<{ time: string, energyUse: number, energyCost: number, emissions: number }>;
-  naturalGasData: Array<{ time: string, energyUse: number, energyCost: number, emissions: number }>;
-  otherFuelsData: Array<{ time: string, energyUse: number, energyCost: number, emissions: number }>;
-  waterData: Array<{ time: string, energyUse: number, energyCost: number, emissions: number }>;
-  wasteWaterData: Array<{ time: string, energyUse: number, energyCost: number, emissions: number }>;
-  otherUtilityData: Array<{ time: string, energyUse: number, energyCost: number, emissions: number }>;
+  electricityData: Array<FacilityBarChartData>;
+  naturalGasData: Array<FacilityBarChartData>;
+  otherFuelsData: Array<FacilityBarChartData>;
+  waterData: Array<FacilityBarChartData>;
+  wasteWaterData: Array<FacilityBarChartData>;
+  otherUtilityData: Array<FacilityBarChartData>;
   facilityMeters: Array<IdbUtilityMeter>;
   sumByMonth: boolean = false;
   removeIncompleteYears: boolean = true;
@@ -245,7 +246,7 @@ export class FacilityBarChartComponent implements OnInit {
     }
   }
 
-  getDataByUtility(utility: string, facilityMeters: Array<IdbUtilityMeter>): Array<{ time: string, energyUse: number, energyCost: number, emissions: number }> {
+  getDataByUtility(utility: MeterSource, facilityMeters: Array<IdbUtilityMeter>): Array<FacilityBarChartData> {
     let filteredMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.source == utility });
     return this.vizualizationService.getFacilityBarChartData(filteredMeters, this.sumByMonth, this.removeIncompleteYears, false);
   }

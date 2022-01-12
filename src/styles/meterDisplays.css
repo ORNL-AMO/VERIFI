@@ -35,7 +35,7 @@ Meter Displays
   .filter .filter-dropdown label {
     margin: 0px 10px 0 0;
   }
-  .filter .filter-dropdown input {
+  .filter .filter-dropdown input[type="checkbox"] {
     float: left;
     width: auto;
     margin: 0px 10px 0 0;

@@ -5,9 +5,9 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { DashboardService } from '../../dashboard.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { AccountFacilitiesSummary, FacilitySummary } from 'src/app/models/dashboard';
+import { AccountFacilitiesSummary } from 'src/app/models/dashboard';
+import { MeterSummaryService } from 'src/app/shared/helper-services/meter-summary.service';
 
 @Component({
   selector: 'app-facilities-table',
@@ -31,7 +31,7 @@ export class FacilitiesTableComponent implements OnInit {
   lastMonthsDate: Date;
   yearPriorDate: Date;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private facilityDbService: FacilitydbService,
-    private router: Router, private dashboardService: DashboardService, private accountdbService: AccountdbService) { }
+    private router: Router, private accountdbService: AccountdbService, private meterSummaryService: MeterSummaryService) { }
 
   ngOnInit(): void {
     this.selectedAccountSub = this.accountdbService.selectedAccount.subscribe(val => {
@@ -70,7 +70,7 @@ export class FacilitiesTableComponent implements OnInit {
   }
 
   setAccountFacilities() {
-    this.accountFacilitiesSummary = this.dashboardService.getAccountFacilitesSummary();
+    this.accountFacilitiesSummary = this.meterSummaryService.getAccountFacilitesSummary();
     if (this.accountFacilitiesSummary.allMetersLastBill) {
       this.lastMonthsDate = new Date(this.accountFacilitiesSummary.allMetersLastBill.year, this.accountFacilitiesSummary.allMetersLastBill.monthNumValue);
       this.yearPriorDate = new Date(this.accountFacilitiesSummary.allMetersLastBill.year - 1, this.accountFacilitiesSummary.allMetersLastBill.monthNumValue);
