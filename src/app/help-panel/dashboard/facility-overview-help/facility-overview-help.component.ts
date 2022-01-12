@@ -1,4 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { Subscription } from 'rxjs';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { IdbFacility } from 'src/app/models/idb';
 
 @Component({
   selector: 'app-facility-overview-help',
@@ -7,9 +10,18 @@ import { Component, OnInit } from '@angular/core';
 })
 export class FacilityOverviewHelpComponent implements OnInit {
 
-  constructor() { }
+  selectedFacility: IdbFacility
+  selectedFacilitySub: Subscription;
+  constructor(private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
+    this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(selectedFacility => {
+      this.selectedFacility = selectedFacility;
+    });
+  }
+
+  ngOnDestroy(){
+    this.selectedFacilitySub.unsubscribe();
   }
 
 }
