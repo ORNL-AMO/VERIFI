@@ -59,6 +59,12 @@ export class HelpPanelComponent implements OnInit {
       this.helpURL = 'facility-management';
     } else if (url.indexOf('account-management') != -1) {
       this.helpURL = 'account-management';
+    } else if (url.indexOf('report-dashboard') != -1) {
+      this.helpURL = 'report-dashboard';
+    } else if (url.indexOf('report-menu') != -1) {
+      this.helpURL = 'report-menu';
+    } else if (url.indexOf('basic-report') != -1) {
+      this.helpURL = 'basic-report';
     }
   }
 

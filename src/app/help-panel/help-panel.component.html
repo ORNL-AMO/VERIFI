@@ -1,4 +1,4 @@
-<div class="help-panel" [ngClass]="{'open': helpPanelOpen}">
+<div class="help-panel hide-print" [ngClass]="{'open': helpPanelOpen}">
     <div *ngIf="helpPanelOpen">
         <div class="banner d-flex w-100 justify-content-between">
             <h3>Help</h3>
@@ -17,6 +17,10 @@
             <app-visualization-help *ngIf="helpURL == 'visualization'"></app-visualization-help>
             <app-account-help *ngIf="helpURL == 'account-management'"></app-account-help>
             <app-facility-help *ngIf="helpURL == 'facility-management'"></app-facility-help>
+            <app-overview-report-dashboard-help *ngIf="helpURL == 'report-dashboard'">
+            </app-overview-report-dashboard-help>
+            <app-basic-report-help *ngIf="helpURL == 'basic-report'"></app-basic-report-help>
+            <app-overview-report-menu-help *ngIf="helpURL == 'report-menu'"></app-overview-report-menu-help>
         </div>
     </div>
 </div>

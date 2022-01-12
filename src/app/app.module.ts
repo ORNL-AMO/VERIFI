@@ -135,6 +135,9 @@ import { AccountReportFacilityBarChartComponent } from './overview-report/basic-
 import { OverviewReportDashboardComponent } from './overview-report/overview-report-dashboard/overview-report-dashboard.component';
 import { BasicReportComponent } from './overview-report/basic-report/basic-report.component';
 import { ManageReportTemplatesComponent } from './overview-report/overview-report-menu/manage-report-templates/manage-report-templates.component';
+import { BasicReportHelpComponent } from './help-panel/overview-report/basic-report-help/basic-report-help.component';
+import { OverviewReportDashboardHelpComponent } from './help-panel/overview-report/overview-report-dashboard-help/overview-report-dashboard-help.component';
+import { OverviewReportMenuHelpComponent } from './help-panel/overview-report/overview-report-menu-help/overview-report-menu-help.component';
 
 @NgModule({
   declarations: [
@@ -255,7 +258,10 @@ import { ManageReportTemplatesComponent } from './overview-report/overview-repor
     AccountReportFacilityBarChartComponent,
     OverviewReportDashboardComponent,
     BasicReportComponent,
-    ManageReportTemplatesComponent
+    ManageReportTemplatesComponent,
+    BasicReportHelpComponent,
+    OverviewReportDashboardHelpComponent,
+    OverviewReportMenuHelpComponent
   ],
   imports: [
     BrowserModule,
