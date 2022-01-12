@@ -23,31 +23,32 @@ export class AppComponent {
   dataInitialized: boolean = false;
   loadingMessage: string = "Loading Accounts...";
   constructor(
-    private accountDbService: AccountdbService, 
-    private facilityDbService: FacilitydbService, 
+    private accountDbService: AccountdbService,
+    private facilityDbService: FacilitydbService,
     private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService, 
+    private utilityMeterDataDbService: UtilityMeterDatadbService,
     private predictorsDbService: PredictordbService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     public router: Router,
     private eGridService: EGridService,
     private overviewReportOptionsDbService: OverviewReportOptionsDbService) {
-      this.router.events.subscribe(event => {
-        if(event instanceof NavigationEnd){
-            gtag('config', 'G-YG1QD02XSE', 
-                  {
-                    'page_path': event.urlAfterRedirects
-                  }
-                 );
-         }
+    this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        gtag('config', 'G-YG1QD02XSE',
+          {
+            'page_path': event.urlAfterRedirects
+          }
+        );
       }
-    )}
+    })
+  }
 
-  
+
 
   ngOnInit() {
     this.initializeData();
     this.eGridService.parseEGridData();
+
   }
 
   async initializeData() {

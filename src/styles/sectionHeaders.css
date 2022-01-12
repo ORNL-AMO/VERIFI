@@ -33,3 +33,10 @@ Section Headers
     border-radius: 3px;
     font-weight: bold;
   }
+
+
+  .help-panel h4{
+      text-transform: none;
+      padding: 5px 0px;
+      border-bottom-color: #2C3E50;
+  }

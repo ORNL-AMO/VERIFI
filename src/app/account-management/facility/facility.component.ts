@@ -10,6 +10,7 @@ import { UtilityMeterGroupdbService } from "../../indexedDB/utilityMeterGroup-db
 import { LoadingService } from "../../shared/loading/loading.service";
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { BackupDataService } from '../backup-data.service';
+import { HelpPanelService } from 'src/app/help-panel/help-panel.service';
 
 @Component({
   selector: 'app-facility',
@@ -32,7 +33,8 @@ export class FacilityComponent implements OnInit {
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private accountDbService: AccountdbService,
     private loadingService: LoadingService,
-    private backupDataService: BackupDataService
+    private backupDataService: BackupDataService,
+    private helpPanelService: HelpPanelService
   ) { }
 
   ngOnInit() {
@@ -93,5 +95,10 @@ export class FacilityComponent implements OnInit {
 
   cancelImportBackup() {
     this.showImportFile = false;
+  }
+  
+  toggleHelpPanel(){
+    let helpPanelOpen: boolean = this.helpPanelService.helpPanelOpen.getValue();
+    this.helpPanelService.helpPanelOpen.next(!helpPanelOpen);
   }
 }

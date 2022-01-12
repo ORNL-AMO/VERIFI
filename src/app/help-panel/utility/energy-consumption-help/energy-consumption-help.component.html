@@ -1,0 +1,36 @@
+<div *ngIf="!selectedSource">
+    <h4>Manage Meters</h4>
+    <p>All the utility meters for <strong>{{selectedFacility.name}}</strong> can be managed on this screen.
+    </p>
+    <hr>
+
+    <p>Click “Add New Meter” to add new utility meters.</p>
+    <hr>
+
+    <p>Use “Import Data” to bulk import meter information in csv or excel format.</p>
+    <hr>
+
+    <p>Once meters are added, they will be seperated by source. Use the tabs to navigate to those meters and add
+        monhtly consumption data.</p>
+    <hr>
+
+</div>
+
+<div *ngIf="selectedSource">
+    <h4>Manage Bills</h4>
+    <p>All the {{selectedSource}} meters for <strong>{{selectedFacility.name}}</strong> can be viewed on this
+        screen.
+    </p>
+    <hr>
+
+    <p>Use “Add new Bill” to add monthly {{selectedSource | lowercase}} consumption data data.</p>
+    <hr>
+
+    <p>Use “Import Data” to bulk import {{selectedSource | lowercase}} consumption data in csv or excel format.</p>
+    <hr>
+    <p *ngIf="selectedSource == 'electricity'">
+        For electricity meters you can filter which columns you would like to track in the tables with the "Choose
+        Columns" dropdown window.
+    </p>
+    <hr *ngIf="selectedSource == 'electricity'">
+</div>

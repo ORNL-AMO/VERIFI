@@ -1,0 +1,36 @@
+<div class="banner">
+    <h3>Utility Data</h3>
+    <div class="compNav">
+        <ul>
+            <li><a routerLink="energy-consumption" [routerLinkActive]="['active']">Utilities</a></li>
+            <li [class.disabled]="utilityMeterData.length === 0">
+                <a routerLink="monthly-meter-data" [routerLinkActive]="['active']">Monthly Meter Data</a>
+                <span class="small navigation-warning">Requires Meter Readings</span>
+            </li>
+            <li [class.disabled]="utilityMeterData.length === 0">
+                <a routerLink="meter-groups" [routerLinkActive]="['active']">Meter Grouping</a>
+                <span class="small navigation-warning">Requires Meter Readings</span>
+            </li>
+            <li [class.disabled]="utilityMeterData.length === 0">
+                <a routerLink="predictors" [routerLinkActive]="['active']">Predictors</a>
+                <span class="small navigation-warning">Requires Meter Readings</span>
+            </li>
+            <li [class.disabled]="utilityMeterData.length === 0">
+                <a routerLink="visualization" [routerLinkActive]="['active']">Data Visualization</a>
+                <span class="small navigation-warning">Requires Meter Readings</span>
+            </li>
+        </ul>
+
+    </div>
+    <div class="pull-right nav-items">
+        <h3 class="pr-3">
+            <a routerLink="upload-data" [routerLinkActive]="['active']"><span class="fa fa-upload"></span></a>
+        </h3>
+        <h3 class="pr-3">
+            <a routerLink="/facility-management" [routerLinkActive]="['active']"><span class="fa fa-cog"></span></a>
+        </h3>
+        <h3>
+            <a (click)="toggleHelpPanel()"><span class="fa fa-question-circle-o"></span></a>
+        </h3>
+    </div>
+</div>

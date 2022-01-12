@@ -70,17 +70,6 @@ p.display-lg {
   background-color: #6abb2e!important;
 }
 
-h3 a{
-  font-size: 1.25rem;
-  color: white;
-  /* text-decoration: underline; */
-}
-
-h3 a:hover{
-  text-decoration: underline;
-  cursor: pointer;
-}
-
 p{
   margin-bottom: .5rem;
 }
@@ -111,13 +100,4 @@ p{
 
 .banner-border{
   border-bottom: solid #145A32;
-}
-
-h3 a{
-  font-size: 1.75rem;
-  color: white;
-}
-
-h3 a span.fa{
-  color: white !important;
 }

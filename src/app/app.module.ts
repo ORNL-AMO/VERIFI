@@ -16,7 +16,7 @@ import { UtilityComponent } from './utility/utility.component';
 import { EnergyConsumptionComponent } from './utility/energy-consumption/energy-consumption.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { EnergySourceComponent } from './utility/energy-consumption/energy-source/energy-source.component';
-import { HelpPanelComponent } from './utility/help-panel/help-panel.component';
+import { HelpPanelComponent } from './help-panel/help-panel.component';
 
 import { CommonModule } from '@angular/common';
 
@@ -103,6 +103,19 @@ import { MeterGroupChartComponent } from './utility/meter-grouping/meter-group-c
 import { NaicsListPipe } from './account-management/general-information-form/naics-list.pipe';
 import { YearOptionsPipe } from './account-management/sustainability-questions-form/year-options.pipe';
 import { CustomNumberPipe } from './shared/helper-pipes/custom-number.pipe';
+import { UtilityBannerComponent } from './utility/utility-banner/utility-banner.component';
+import { SiteToSourceOptionComponent } from './utility/site-to-source-option/site-to-source-option.component';
+import { EnergyConsumptionHelpComponent } from './help-panel/utility/energy-consumption-help/energy-consumption-help.component';
+import { AccountOverviewHelpComponent } from './help-panel/dashboard/account-overview-help/account-overview-help.component';
+import { FacilityOverviewHelpComponent } from './help-panel/dashboard/facility-overview-help/facility-overview-help.component';
+import { MeterGroupingHelpComponent } from './help-panel/utility/meter-grouping-help/meter-grouping-help.component';
+import { CalanderizationHelpComponent } from './help-panel/utility/calanderization-help/calanderization-help.component';
+import { UploadDataHelpComponent } from './help-panel/utility/upload-data-help/upload-data-help.component';
+import { PredictorsDataHelpComponent } from './help-panel/utility/predictors-data-help/predictors-data-help.component';
+import { VisualizationHelpComponent } from './help-panel/utility/visualization-help/visualization-help.component';
+import { AccountHelpComponent } from './help-panel/account-management/account-help/account-help.component';
+import { FacilityHelpComponent } from './help-panel/account-management/facility-help/facility-help.component';
+import { LabelWithTooltipComponent } from './shared/label-with-tooltip/label-with-tooltip.component';
 import { OverviewReportComponent } from './overview-report/overview-report.component';
 import { FacilityReportComponent } from './overview-report/basic-report/facility-report/facility-report.component';
 import { AccountReportComponent } from './overview-report/basic-report/account-report/account-report.component';
@@ -122,6 +135,9 @@ import { AccountReportFacilityBarChartComponent } from './overview-report/basic-
 import { OverviewReportDashboardComponent } from './overview-report/overview-report-dashboard/overview-report-dashboard.component';
 import { BasicReportComponent } from './overview-report/basic-report/basic-report.component';
 import { ManageReportTemplatesComponent } from './overview-report/overview-report-menu/manage-report-templates/manage-report-templates.component';
+import { BasicReportHelpComponent } from './help-panel/overview-report/basic-report-help/basic-report-help.component';
+import { OverviewReportDashboardHelpComponent } from './help-panel/overview-report/overview-report-dashboard-help/overview-report-dashboard-help.component';
+import { OverviewReportMenuHelpComponent } from './help-panel/overview-report/overview-report-menu-help/overview-report-menu-help.component';
 
 @NgModule({
   declarations: [
@@ -211,6 +227,19 @@ import { ManageReportTemplatesComponent } from './overview-report/overview-repor
     NaicsListPipe,
     YearOptionsPipe,
     CustomNumberPipe,
+    UtilityBannerComponent,
+    SiteToSourceOptionComponent,
+    EnergyConsumptionHelpComponent,
+    AccountOverviewHelpComponent,
+    FacilityOverviewHelpComponent,
+    MeterGroupingHelpComponent,
+    CalanderizationHelpComponent,
+    UploadDataHelpComponent,
+    PredictorsDataHelpComponent,
+    VisualizationHelpComponent,
+    AccountHelpComponent,
+    FacilityHelpComponent,
+    LabelWithTooltipComponent,
     OverviewReportComponent,
     FacilityReportComponent,
     AccountReportComponent,
@@ -229,7 +258,10 @@ import { ManageReportTemplatesComponent } from './overview-report/overview-repor
     AccountReportFacilityBarChartComponent,
     OverviewReportDashboardComponent,
     BasicReportComponent,
-    ManageReportTemplatesComponent
+    ManageReportTemplatesComponent,
+    BasicReportHelpComponent,
+    OverviewReportDashboardHelpComponent,
+    OverviewReportMenuHelpComponent
   ],
   imports: [
     BrowserModule,

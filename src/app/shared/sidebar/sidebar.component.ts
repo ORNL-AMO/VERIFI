@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, Event } from '@angular/router';
+import { LocalStorageService } from 'ngx-webstorage';
 import { environment } from 'src/environments/environment';
 
 @Component({
@@ -8,21 +9,15 @@ import { environment } from 'src/environments/environment';
   styleUrls: ['./sidebar.component.css']
 })
 export class SidebarComponent implements OnInit {
-  open: boolean;
+  open: boolean = true;
   isDev: boolean;
   isHovering: any;
   openFromHover: boolean;
-  constructor(
-    private router: Router) {
-
-    router.events.subscribe((event: Event) => {
-      if (router.url.toString() === "/") {
-        // Keep sidebar open if its the homepage
-        this.open = false;
-        this.toggleSidebar(true);
-      }
-    });
-
+  constructor(private localStorageService: LocalStorageService) {
+    let sidebarOpen: boolean = this.localStorageService.retrieve("sidebarOpen");
+    if (sidebarOpen != undefined) {
+      this.open = sidebarOpen;
+    }
   }
 
   ngOnInit() {
@@ -58,6 +53,7 @@ export class SidebarComponent implements OnInit {
     }
     this.open = !this.open;
     window.dispatchEvent(new Event("resize"));
+    this.localStorageService.store('sidebarOpen', this.open);
   }
 
 }

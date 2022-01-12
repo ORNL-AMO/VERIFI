@@ -1,8 +1,13 @@
 <div class="banner d-flex w-100 justify-content-between">
 	<h3>Facility Settings</h3>
-	<h3>
-		<a routerLink="/home/facility-summary"><span class="fa fa-home"></span></a>
-	</h3>
+	<div class="nav-items">
+		<h3 class="pr-3">
+			<a routerLink="/home/facility-summary"><span class="fa fa-home"></span></a>
+		</h3>
+		<h3>
+			<a (click)="toggleHelpPanel()"><span class="fa fa-question-circle-o"></span></a>
+		</h3>
+	</div>
 </div>
 
 <div class="dashboard-container">

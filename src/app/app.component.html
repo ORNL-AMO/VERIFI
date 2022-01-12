@@ -8,7 +8,7 @@
         <app-setup-progress class="hide-print"></app-setup-progress>
         <app-toast-notifications class="hide-print"></app-toast-notifications>
       </div>
-
+      <app-help-panel *ngIf="dataInitialized"></app-help-panel>
       <div class="content w-100" *ngIf="!dataInitialized">
         <div class="loading-screen">
 

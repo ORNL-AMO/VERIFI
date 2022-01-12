@@ -41,18 +41,21 @@
 
     <div class="row">
         <div class="mb-3  col-sm-12" [ngClass]="{'col-12':inAccount, 'col-md-6':!inAccount}">
-            <label>NAICS Code</label>
-            <select formControlName="naics1" (change)="checkNAICS()">
+            <!-- <label>NAICS Code</label> -->
+            <app-label-with-tooltip [label]="'NAICS Code'" [field]="'naicsCode'" [labelId]="'naics1'"
+                [isRequired]="false">
+            </app-label-with-tooltip>
+            <select formControlName="naics1" (change)="checkNAICS()" id="naics1">
                 <option *ngFor="let naics of firstNaicsList" [ngValue]="naics.code">{{naics.code}} -
                     {{naics.industryType}}</option>
             </select>
-            <select formControlName="naics2" (change)="checkNAICS()" *ngIf="form.controls.naics1.value">
+            <select formControlName="naics2" (change)="checkNAICS()" *ngIf="form.controls.naics1.value" id="naics2">
                 <option *ngFor="let naics of secondNaicsList | naicsList:form.controls.naics1.value"
                     [ngValue]="naics.code">{{naics.code}} -
                     {{naics.industryType}}</option>
                 <option [ngValue]=null></option>
             </select>
-            <select formControlName="naics3" (change)="saveChanges()" *ngIf="form.controls.naics2.value">
+            <select formControlName="naics3" (change)="saveChanges()" *ngIf="form.controls.naics2.value" id="naics3">
                 <option *ngFor="let naics of thirdNaicsList | naicsList:form.controls.naics2.value"
                     [ngValue]="naics.code">{{naics.code}} -
                     {{naics.industryType}}</option>
@@ -61,16 +64,27 @@
         </div>
 
         <div class="mb-3 col-md-6 col-sm-12" *ngIf="!inAccount">
-            <label>Facility Area</label>
-            <div class="input-group">
-                <input type="text" class="form-control" formControlName="size" (input)="saveChanges()"
-                    onfocus="this.select();" minlength="1" maxlength="60">
-                <span class="unit" *ngIf="unitsOfMeasure === 'Imperial'">ft<sup>2</sup></span>
-                <span class="unit" *ngIf="unitsOfMeasure === 'Metric'">m<sup>2</sup></span>
+            <div class="row">
+                <div class="col-12">
+                    <label>Facility Area</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" formControlName="size" (input)="saveChanges()"
+                            onfocus="this.select();" minlength="1" maxlength="60">
+                        <span class="unit" *ngIf="unitsOfMeasure != 'Metric'">ft<sup>2</sup></span>
+                        <span class="unit" *ngIf="unitsOfMeasure === 'Metric'">m<sup>2</sup></span>
+                    </div>
+                </div>
             </div>
-            <label>Facility Color</label>
-            <input type="color" class="form-control" formControlName="color" (input)="saveChanges()"
-                [ngStyle]="{'background-color':form.controls.color.value}">
+            <div class="row pt-2">
+                <div class="col-12">
+                    <!-- <label>Facility Color</label> -->
+                    <app-label-with-tooltip [label]="'Facility Color'" [field]="'facilityColor'"
+                        [labelId]="'facilityColor'" [isRequired]="false">
+                    </app-label-with-tooltip>
+                    <input type="color" class="form-control" formControlName="color" (input)="saveChanges()"
+                        [ngStyle]="{'background-color':form.controls.color.value}" id="facilityColor">
+                </div>
+            </div>
         </div>
     </div>
 
