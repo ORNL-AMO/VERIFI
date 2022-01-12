@@ -30,4 +30,8 @@ export class AnalysisBannerComponent implements OnInit {
   setInRunAnalysis(url: string){
     this.inRunAnalysis = url.includes('run-analysis');
   }
+
+  goToDashboard(){
+    this.router.navigateByUrl('/analysis/analysis-dashboard')
+  }
 }

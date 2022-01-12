@@ -103,8 +103,8 @@ export class OverviewReportOptionsDbService {
     return this.dbService.update('overviewReportOptions', values);
   }
 
-  deleteById(facilityId: number): void {
-    this.dbService.delete('overviewReportOptions', facilityId).subscribe(() => {
+  deleteById(overviewOptionsId: number): void {
+    this.dbService.delete('overviewReportOptions', overviewOptionsId).subscribe(() => {
       this.setAccountOverviewReportOptions();
     });
   }

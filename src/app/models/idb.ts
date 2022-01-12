@@ -204,6 +204,14 @@ export interface IdbOverviewReportOptions {
     title?: string,
 }
 
+export interface IdbAnalysisItem {
+    id?: number,
+    accountId: number,
+    facilityId: number,
+    date: Date,
+    name: string
+}
+
 
 export type MeterSource = "Electricity" | "Natural Gas" | "Other Fuels" | "Other Energy" | "Water" | "Waste Water" | "Other Utility";
 export type MeterPhase = "Solid" | "Liquid" | "Gas";

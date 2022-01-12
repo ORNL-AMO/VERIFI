@@ -2,15 +2,6 @@
     background-color: #ff6000;
 }
 
-/* h3 a, .m-dash{
-    font-size: 1.75rem;
-    color: white;
-} */
-
-/* h3 a span.fa{
-    color: white !important;
-} */
-
 .nav-items a:hover .fa{
     color: black !important;
 }

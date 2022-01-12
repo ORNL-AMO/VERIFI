@@ -1,3 +1,6 @@
 .banner{
     background-color: #B9770E;
 }
+.nav-items a:hover .fa{
+    color: black !important;
+}
