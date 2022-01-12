@@ -1,0 +1,85 @@
+<div class="row">
+    <div class="col-12">
+        <div class="form-group">
+            <label>
+                Baseline Year
+            </label>
+            <select id="baselineYear" name="baselineYear" disabled class="form-control"
+                [(ngModel)]="facility.sustainabilityQuestions.energyReductionBaselineYear">
+                <option [ngValue]="facility.sustainabilityQuestions.energyReductionBaselineYear">
+                    {{facility.sustainabilityQuestions.energyReductionBaselineYear}}</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="col-6">
+        <div class="form-group">
+            <label>
+                Reporting Year
+            </label>
+            <input type="radio" class="rowToggle" [(ngModel)]="facility.fiscalYear" value="calendarYear"
+                name="calendarYear" id="calendarYear" disabled>
+            <label class="checkbox" for="calendarYear">Calendar Year</label>
+
+            <input type="radio" class="rowToggle" for="nonCalendarYear" [(ngModel)]="facility.fiscalYear"
+                value="nonCalendarYear" name="nonCalendarYear" id="nonCalendarYear" disabled>
+            <label class="checkbox">Fiscal Year</label>
+        </div>
+    </div>
+    <div class="col-6" *ngIf="facility.fiscalYear == 'nonCalendarYear'">
+        <div class="form-group">
+            <label>Start Month</label>
+            <select class="form-control" id="startMonth" name="startMonth" [(ngModel)]="facility.fiscalYearMonth"
+                disabled>
+                <option *ngFor="let month of months" [ngValue]="month.name">{{month.name}}
+                </option>
+            </select>
+        </div>
+    </div>
+    <div class="col-12" *ngIf="facility.fiscalYear == 'nonCalendarYear'">
+        <div class="form-group">
+            <input type="checkbox" class="rowToggle" name="fiscalYearCalendarEnd" id="fiscalYearCalendarEnd"
+                [(ngModel)]="facility.fiscalYearCalendarEnd" disabled>
+            <label class="checkbox" for="fiscalYearCalanderEnd">FY is denoted by the calendar year in which
+                it ends.</label>
+        </div>
+    </div>
+</div>
+<hr>
+<div class="row">
+    <div class="col-12">
+        <label>Energy displayed as site or source? </label>
+
+        <input type="radio" class="rowToggle" name="energyIsSource" [value]="true" id="sourceEnergy"
+            [(ngModel)]="facility.energyIsSource">
+        <label class="checkbox" for="sourceEnergy">Source Energy</label>
+
+        <input type="radio" class="rowToggle" name="energyIsSource" [value]="false" id="siteEnergy"
+            [(ngModel)]="facility.energyIsSource">
+        <label class="checkbox" for="siteEnergy">Site Energy</label>
+    </div>
+
+    <div class="col-12">
+        <div class="form-group">
+            <label for="energyUnit">Energy Unit</label>
+            <select class="form-control" name="energyUnit" id="energyUnit" [(ngModel)]="energyUnit">
+                <option class="form-control" *ngFor="let energyUnitOption of energyUnitOptions"
+                    [ngValue]="energyUnitOption.value">
+                    <span [innerHTML]="energyUnitOption.display"></span>
+                </option>
+            </select>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="form-group">
+            <label>
+                Report Year
+            </label>
+            <select class="form-control">
+                <option>2015</option>
+                <option>2016</option>
+            </select>
+        </div>
+    </div>
+</div>

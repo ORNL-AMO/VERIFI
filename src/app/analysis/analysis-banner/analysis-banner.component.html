@@ -5,6 +5,32 @@
         </span> -->
         {{bannerTitle}}
     </h3>
+    <div class="compNav" *ngIf="inRunAnalysis">
+        <ul>
+            <li><a routerLink="run-analysis/analysis-setup" [routerLinkActive]="['active']">Analysis Setup</a></li>
+            <!-- <li [class.disabled]="utilityMeterData.length === 0">
+                <a routerLink="monthly-meter-data" [routerLinkActive]="['active']">Monthly Meter Data</a>
+                <span class="small navigation-warning">Requires Meter Readings</span>
+            </li>
+            <li [class.disabled]="utilityMeterData.length === 0">
+                <a routerLink="meter-groups" [routerLinkActive]="['active']">Meter Grouping</a>
+                <span class="small navigation-warning">Requires Meter Readings</span>
+            </li>
+            <li [class.disabled]="utilityMeterData.length === 0">
+                <a routerLink="predictors" [routerLinkActive]="['active']">Predictors</a>
+                <span class="small navigation-warning">Requires Meter Readings</span>
+            </li>
+            <li [class.disabled]="utilityMeterData.length === 0">
+                <a routerLink="visualization" [routerLinkActive]="['active']">Data Visualization</a>
+                <span class="small navigation-warning">Requires Meter Readings</span>
+            </li> -->
+        </ul>
+
+    </div>
+
+
+
+
     <div class="pull-right nav-items">
         <h3>
             <a (click)="toggleHelpPanel()"><span class="fa fa-question-circle-o"></span></a>

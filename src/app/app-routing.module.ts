@@ -27,7 +27,7 @@ import { BasicReportComponent } from './overview-report/basic-report/basic-repor
 import { AnalysisComponent } from './analysis/analysis.component';
 import { AnalysisDashboardComponent } from './analysis/analysis-dashboard/analysis-dashboard.component';
 import { RunAnalysisComponent } from './analysis/run-analysis/run-analysis.component';
-import { FacilitySetupComponent } from './analysis/run-analysis/facility-setup/facility-setup.component';
+import { AnalysisSetupComponent } from './analysis/run-analysis/analysis-setup/analysis-setup.component';
 
 const routes: Routes = [
   {
@@ -113,8 +113,8 @@ const routes: Routes = [
         path: 'run-analysis',
         component: RunAnalysisComponent,
         children: [
-          { path: '', pathMatch: 'full', redirectTo: 'facility-setup' },
-          { path: 'facility-setup', component: FacilitySetupComponent }
+          { path: '', pathMatch: 'full', redirectTo: 'analysis-setup' },
+          { path: 'analysis-setup', component: AnalysisSetupComponent }
         ]
       }
     ]
