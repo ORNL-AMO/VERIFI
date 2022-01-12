@@ -1,0 +1,68 @@
+<div class="table-responsive">
+    <table class="table table-sm" *ngIf="facilityMeterSummaryData">
+        <thead>
+            <tr class="table-mh">
+                <th colspan="6">
+                    {{facility.name}} Meters
+                    <span class="pull-right">({{targetYearEndDate | date: 'MMM, y'}} -
+                        {{targetYearEndDate | date: 'MMM, y'}})</span>
+                </th>
+            </tr>
+            <tr>
+                <th class="w-1">Meter</th>
+                <th class="w-1">Utility</th>
+                <th class="w-1">Group</th>
+                <th class="w-2">Utility Usage<br> (<span [innerHTML]="facility.energyUnit | settingsLabel"></span>)
+                </th>
+                <th class="w-2">Utility Cost
+                <th class="w-2">
+                    Emissions<br> (tonne CO<sub>2</sub>)
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let summary of facilityMeterSummaryData.meterSummaries">
+                <td>
+                    {{summary.meter.name}}
+                </td>
+                <td>
+                    {{summary.meter.source}}
+                </td>
+                <td>
+                    {{summary.groupName}}
+                </td>
+                <td>
+                    {{summary.energyUsage | customNumber}}
+                </td>
+                <td>
+                    {{summary.energyCost | customNumber:true }}
+                </td>
+                <td>
+                    <!--/1000 for tonne-->
+                    {{summary.emissions / 1000 |customNumber }}
+                </td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <th>
+                    Total
+                </th>
+                <th>
+                </th>
+                <th>
+                </th>
+                <th>
+                    {{facilityMeterSummaryData.totalEnergyUse | customNumber}}
+                </th>
+                <th>
+                    {{facilityMeterSummaryData.totalEnergyCost | customNumber:true }}
+                </th>
+                <th>
+                    <!--/1000 for tonne-->
+                    {{facilityMeterSummaryData.totalEmissions / 1000 | customNumber }}
+                </th>
+            </tr>
+        </tfoot>
+    </table>
+</div>

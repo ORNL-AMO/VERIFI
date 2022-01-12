@@ -1,0 +1,11 @@
+.col-6{
+    min-width: 600px;
+}
+
+.section-label{
+    /* text-align: center; */
+    font-size: 24px;
+    font-weight: bold;
+    width: auto;
+    text-decoration: underline;
+}

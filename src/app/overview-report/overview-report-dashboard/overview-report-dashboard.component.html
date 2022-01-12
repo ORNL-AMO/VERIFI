@@ -1,0 +1,97 @@
+<div class="wrapper main-content p-0">
+    <div class="content-padding">
+        <h4>Reports</h4>
+
+        <div *ngIf="accountOverviewReportOptions.length === 0" class="text-center mt-5">
+            <h5>No reports found for this account.</h5>
+            <div class="meterData">
+                <button class="btn btn-primary-4 mr-2" (click)="createReport()"><i class="fa fa-plus"></i> Add New
+                    Report</button>
+            </div>
+        </div>
+
+        <div *ngIf="accountOverviewReportOptions.length > 0">
+            <div class="controls mb-2">
+                <div class="meterData item-right">
+                    <button class="btn btn-primary-4 item-right m-0 ml-2" (click)="createReport()"><i
+                            class="fa fa-plus"></i>
+                        Add New Report</button>
+                </div>
+
+                <div class="items-per-page item-right">
+                    <span>Show </span>
+                    <select [(ngModel)]="itemsPerPage">
+                        <option [ngValue]=10>10</option>
+                        <option [ngValue]=20>20</option>
+                        <option [ngValue]=30>30</option>
+                        <option [ngValue]=40>40</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-sm table-hover">
+                    <thead>
+                        <tr>
+                            <th (click)="setOrderDataField('name')" [ngClass]="{'active': orderDataField == 'name'}">
+                                Name</th>
+                            <th (click)="setOrderDataField('title')" [ngClass]="{'active': orderDataField == 'title'}">
+                                Title</th>
+                            <th (click)="setOrderDataField('baselineYear')"
+                                [ngClass]="{'active': orderDataField == 'baselineYear'}">Baseline Year
+                            </th>
+                            <th (click)="setOrderDataField('targetYear')"
+                                [ngClass]="{'active': orderDataField == 'targetYear'}">
+                                Target Year
+                            </th>
+                            <th (click)="setOrderDataField('date')" [ngClass]="{'active': orderDataField == 'date'}">
+                                Last Modified</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let report of accountOverviewReportOptions  | orderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
+                            <td>
+                                <a (click)=" selectReport(report)">
+                            {{report.name}}
+                            </a>
+                            </td>
+                            <td>
+                                {{report.title}}
+                            </td>
+                            <td>{{report.baselineYear}}</td>
+                            <td>{{report.targetYear}}</td>
+                            <td>{{report.date | date}}</td>
+                            <td class="actions">
+                                <i class="fa fa-pencil" title="Edit" (click)="editReport(report)"></i>
+                                <i class="fa fa-trash-o" title="Delete" (click)="deleteReport(report)"></i>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="tableControls overflow-hidden">
+                <div class="item-right">
+                    <ngb-pagination [collectionSize]="accountOverviewReportOptions.length" [(page)]="currentPageNumber"
+                        [pageSize]="itemsPerPage" [rotate]="true" aria-label="Default pagination"></ngb-pagination>
+                </div>
+                <p class="item-right">{{accountOverviewReportOptions.length}} entries</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="popup" [class.open]="reportToDelete">
+    <div class="popup-header" *ngIf="reportToDelete">Delete: {{reportToDelete.reportOptions.title}}
+        <button class="item-right" (click)="cancelDelete()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>WARNING: Deleting this report cannot be undone.</p>
+    </div>
+    <div class="saveCancel popup-footer text-right">
+        <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
+        <button class="btn btn-danger" (click)="confirmDelete()">Delete</button>
+    </div>
+</div>

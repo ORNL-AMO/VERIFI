@@ -1,0 +1,54 @@
+.report-card{
+    margin: 1rem;
+    background-color: white;
+    padding: .5rem;
+    width: 250px;
+    border-radius: .5rem;
+}
+
+.report-card-header{
+    font-weight: bold;
+    /* text-align: center; */
+    font-size: larger;
+}
+
+
+.no-reports{
+    margin-top: 40px;
+    background-color: white;
+    padding: 20px;
+    border-radius: .5rem;
+}
+
+.no-reports p, .no-reports .btn{
+    font-size: large;
+}
+
+.report-card.create-new{
+    width: auto;
+    text-align: center;
+    font-size: 24px;
+    text-align: center;
+}
+
+.report-card.create-new .btn .fa{
+    color: white;
+    font-size: 26px;
+}
+
+.wrapper.main-content{
+    margin: 30px;
+}
+
+.content-padding{
+    padding: 20px 30px 30px;
+}
+
+th:hover{
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+th.active{
+    text-decoration: underline;
+}

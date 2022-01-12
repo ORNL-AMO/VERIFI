@@ -15,7 +15,7 @@ export class LoadingService {
     return this.loading;
   }
 
-  setLoadingStatus(value) {
+  setLoadingStatus(value: boolean) {
     this.loading.next(value);
   }
 
@@ -23,7 +23,7 @@ export class LoadingService {
     return this.loadingMessage;
   }
 
-  setLoadingMessage(value) {
+  setLoadingMessage(value: string) {
     this.loadingMessage.next(value);
   }
 }

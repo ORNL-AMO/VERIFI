@@ -1,0 +1,85 @@
+<div class="w-100 text-center">
+    <span class="account-icon">
+        <i class="fa fa-building"></i>
+    </span>
+</div>
+<h1 class="text-center">
+    {{account.name}}
+</h1>
+<!--report info-->
+<div class="pt-1 pb-4" *ngIf="reportOptions.accountInfo">
+    <app-account-report-info [account]="account" [reportOptions]="reportOptions"></app-account-report-info>
+</div>
+<!--facility summary table-->
+<div class="pt-5" *ngIf="reportOptions.facilitySummaryTable">
+    <app-account-report-facility-summary-table [account]="account" [accountFacilitiesSummary]="accountFacilitiesSummary"
+        [accountReportUtilitySummary]="accountReportUtilitySummary"></app-account-report-facility-summary-table>
+</div>
+<!--utility usage table-->
+<div class="pt-5 print-break-after" *ngIf="reportOptions.accountUtilityTable">
+    <app-account-report-utility-usage-table [account]="account"
+        [accountReportUtilitySummary]="accountReportUtilitySummary"></app-account-report-utility-usage-table>
+</div>
+<!--facility comparison graphs (target year)-->
+<div class="row pt-5 print-break-after" *ngIf="reportOptions.accountFacilityCharts">
+    <!--costs-->
+    <div class="col-12 text-center">
+        <label class="section-label">
+            Costs ({{accountReportUtilitySummary.targetYearStart | date: 'MMM, y'}} -
+            {{accountReportUtilitySummary.targetYearEnd | date: 'MMM, y'}})
+        </label>
+    </div>
+    <div class="col-6">
+        <app-account-report-donut [account]="account" [accountFacilitiesSummary]="accountFacilitiesSummary"
+            [graphType]="'cost'">
+        </app-account-report-donut>
+    </div>
+    <div class="col-6">
+        <app-account-report-utility-usage-bar-chart [account]="account"
+            [facilitiesUtilitySummaries]="facilitiesUtilitySummaries" [reportOptions]="reportOptions"
+            [graphType]="'cost'">
+        </app-account-report-utility-usage-bar-chart>
+    </div>
+    <!--usage-->
+    <div class="col-12 pt-5 text-center">
+        <label class="section-label">
+            Consumption ({{accountReportUtilitySummary.targetYearStart | date: 'MMM, y'}} -
+            {{accountReportUtilitySummary.targetYearEnd | date: 'MMM, y'}})
+        </label>
+    </div>
+    <div class="col-6">
+        <app-account-report-donut [account]="account" [accountFacilitiesSummary]="accountFacilitiesSummary"
+            [graphType]="'usage'">
+        </app-account-report-donut>
+    </div>
+    <div class="col-6">
+        <app-account-report-utility-usage-bar-chart [account]="account"
+            [facilitiesUtilitySummaries]="facilitiesUtilitySummaries" [reportOptions]="reportOptions"
+            [graphType]="'usage'">
+        </app-account-report-utility-usage-bar-chart>
+    </div>
+    <!--emissions-->
+    <div class="col-12 pt-5 text-center">
+        <label class="section-label">
+            Emissions ({{accountReportUtilitySummary.targetYearStart | date: 'MMM, y'}} -
+            {{accountReportUtilitySummary.targetYearEnd | date: 'MMM, y'}})
+        </label>
+    </div>
+    <div class="col-6">
+        <app-account-report-donut [account]="account" [accountFacilitiesSummary]="accountFacilitiesSummary"
+            [graphType]="'emissions'">
+        </app-account-report-donut>
+    </div>
+    <div class="col-6">
+        <app-account-report-utility-usage-bar-chart [account]="account"
+            [facilitiesUtilitySummaries]="facilitiesUtilitySummaries" [reportOptions]="reportOptions"
+            [graphType]="'emissions'">
+        </app-account-report-utility-usage-bar-chart>
+    </div>
+</div>
+<!--annual summary graphs-->
+<div class="pt-5" *ngIf="reportOptions.accountFacilityAnnualBarChart">
+    <app-account-report-facility-bar-chart [account]="account" [reportOptions]="reportOptions">
+    </app-account-report-facility-bar-chart>
+</div>
+<hr class="hide-print page-spacer">

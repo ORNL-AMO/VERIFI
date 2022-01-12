@@ -1,0 +1,55 @@
+@media print {
+    /* .print-section-header {
+        font-size: 30px;
+    }
+    .output-summary .table th, .output-summary .table td {
+        font-size: 20px;
+    }
+    .print-notes {
+        font-size: 18px;
+    }
+    .show-print {
+        display: inline !important;
+    } */
+    .hide-print {
+        display: none !important;
+    }
+    /* .chart-row {
+        padding: 0px !important;
+    } */
+
+    .scroll-item{
+        overflow-y: visible;
+    }
+
+    .print-break-before{
+        page-break-before: always !important;
+    }
+
+    .print-break-avoid{
+        page-break-inside: avoid !important;
+    }
+
+    .print-break-after{
+        page-break-after: always !important;
+    }
+
+    .table-mh th, .table-mh th span{
+        background-color: white;
+        color: black;
+    }
+
+    table.table.table-sm tr th, table.table.table-sm tbody tr, .table th, .table td {
+        border-top: solid 1px black !important;
+        border-bottom: solid 1px black !important;
+        border-left: solid 1px black !important;
+        border-right: solid 1px black !important;
+        color: black;
+        background-color: white;
+    }
+
+    table.table{
+        border-collapse: inherit !important;
+        border: none;
+    }
+}

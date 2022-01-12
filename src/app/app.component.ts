@@ -1,9 +1,8 @@
 import { Component } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
-import { Subscription } from 'rxjs';
-import { HelpPanelService } from './help-panel/help-panel.service';
 import { AccountdbService } from './indexedDB/account-db.service';
 import { FacilitydbService } from './indexedDB/facility-db.service';
+import { OverviewReportOptionsDbService } from './indexedDB/overview-report-options-db.service';
 import { PredictordbService } from './indexedDB/predictors-db.service';
 import { UtilityMeterdbService } from './indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from './indexedDB/utilityMeterData-db.service';
@@ -31,7 +30,8 @@ export class AppComponent {
     private predictorsDbService: PredictordbService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     public router: Router,
-    private eGridService: EGridService) {
+    private eGridService: EGridService,
+    private overviewReportOptionsDbService: OverviewReportOptionsDbService) {
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
         gtag('config', 'G-YG1QD02XSE',
@@ -40,8 +40,7 @@ export class AppComponent {
           }
         );
       }
-    }
-    )
+    })
   }
 
 
@@ -64,6 +63,8 @@ export class AppComponent {
     await this.predictorsDbService.initializePredictorData();
     this.loadingMessage = "Loading Meter Groups..";
     await this.utilityMeterGroupDbService.initializeMeterGroups();
+    this.loadingMessage = 'Loading Reports...'
+    await this.overviewReportOptionsDbService.initializeReportsFromLocalStorage();
     this.dataInitialized = true;
   }
 }

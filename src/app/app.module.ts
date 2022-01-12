@@ -116,6 +116,25 @@ import { VisualizationHelpComponent } from './help-panel/utility/visualization-h
 import { AccountHelpComponent } from './help-panel/account-management/account-help/account-help.component';
 import { FacilityHelpComponent } from './help-panel/account-management/facility-help/facility-help.component';
 import { LabelWithTooltipComponent } from './shared/label-with-tooltip/label-with-tooltip.component';
+import { OverviewReportComponent } from './overview-report/overview-report.component';
+import { FacilityReportComponent } from './overview-report/basic-report/facility-report/facility-report.component';
+import { AccountReportComponent } from './overview-report/basic-report/account-report/account-report.component';
+import { OverviewReportMenuComponent } from './overview-report/overview-report-menu/overview-report-menu.component';
+import { OverviewReportBannerComponent } from './overview-report/overview-report-banner/overview-report-banner.component';
+import { FrontPageComponent } from './overview-report/basic-report/front-page/front-page.component';
+import { FacilityReportMetersTableComponent } from './overview-report/basic-report/facility-report/facility-report-meters-table/facility-report-meters-table.component';
+import { FacilityReportUtilityUsageTableComponent } from './overview-report/basic-report/facility-report/facility-report-utility-usage-table/facility-report-utility-usage-table.component';
+import { FacilityReportInfoComponent } from './overview-report/basic-report/facility-report/facility-report-info/facility-report-info.component';
+import { FacilityReportBarChartComponent } from './overview-report/basic-report/facility-report/facility-report-bar-chart/facility-report-bar-chart.component';
+import { AccountReportInfoComponent } from './overview-report/basic-report/account-report/account-report-info/account-report-info.component';
+import { AccountReportFacilitySummaryTableComponent } from './overview-report/basic-report/account-report/account-report-facility-summary-table/account-report-facility-summary-table.component';
+import { AccountReportUtilityUsageTableComponent } from './overview-report/basic-report/account-report/account-report-utility-usage-table/account-report-utility-usage-table.component';
+import { AccountReportDonutComponent } from './overview-report/basic-report/account-report/account-report-donut/account-report-donut.component';
+import { AccountReportUtilityUsageBarChartComponent } from './overview-report/basic-report/account-report/account-report-utility-usage-bar-chart/account-report-utility-usage-bar-chart.component';
+import { AccountReportFacilityBarChartComponent } from './overview-report/basic-report/account-report/account-report-facility-bar-chart/account-report-facility-bar-chart.component';
+import { OverviewReportDashboardComponent } from './overview-report/overview-report-dashboard/overview-report-dashboard.component';
+import { BasicReportComponent } from './overview-report/basic-report/basic-report.component';
+import { ManageReportTemplatesComponent } from './overview-report/overview-report-menu/manage-report-templates/manage-report-templates.component';
 
 @NgModule({
   declarations: [
@@ -217,7 +236,26 @@ import { LabelWithTooltipComponent } from './shared/label-with-tooltip/label-wit
     VisualizationHelpComponent,
     AccountHelpComponent,
     FacilityHelpComponent,
-    LabelWithTooltipComponent
+    LabelWithTooltipComponent,
+    OverviewReportComponent,
+    FacilityReportComponent,
+    AccountReportComponent,
+    OverviewReportMenuComponent,
+    OverviewReportBannerComponent,
+    FrontPageComponent,
+    FacilityReportMetersTableComponent,
+    FacilityReportUtilityUsageTableComponent,
+    FacilityReportInfoComponent,
+    FacilityReportBarChartComponent,
+    AccountReportInfoComponent,
+    AccountReportFacilitySummaryTableComponent,
+    AccountReportUtilityUsageTableComponent,
+    AccountReportDonutComponent,
+    AccountReportUtilityUsageBarChartComponent,
+    AccountReportFacilityBarChartComponent,
+    OverviewReportDashboardComponent,
+    BasicReportComponent,
+    ManageReportTemplatesComponent
   ],
   imports: [
     BrowserModule,

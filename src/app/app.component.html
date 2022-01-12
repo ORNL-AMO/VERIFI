@@ -1,12 +1,12 @@
 <div class="container-fluid p-0 m-0">
   <div class="d-flex flex-column h-100">
-    <app-header></app-header>
+    <app-header class="hide-print"></app-header>
     <div class="d-flex h-100">
-      <app-sidebar></app-sidebar>
+      <app-sidebar class="hide-print"></app-sidebar>
       <div class="content w-100 scroll-item" role="main" *ngIf="dataInitialized">
         <router-outlet></router-outlet>
-        <app-setup-progress></app-setup-progress>
-        <app-toast-notifications></app-toast-notifications>
+        <app-setup-progress class="hide-print"></app-setup-progress>
+        <app-toast-notifications class="hide-print"></app-toast-notifications>
       </div>
       <app-help-panel *ngIf="dataInitialized"></app-help-panel>
       <div class="content w-100" *ngIf="!dataInitialized">
@@ -24,8 +24,8 @@
         </div>
       </div>
     </div>
-    <app-footer></app-footer>
-    <app-loading></app-loading>
-    <app-electron-update></app-electron-update>
+    <app-footer class="hide-print"></app-footer>
+    <app-loading class="hide-print"></app-loading>
+    <app-electron-update class="hide-print"></app-electron-update>
   </div>
 </div>
