@@ -24,6 +24,10 @@ import { OverviewReportComponent } from './overview-report/overview-report.compo
 import { OverviewReportDashboardComponent } from './overview-report/overview-report-dashboard/overview-report-dashboard.component';
 import { OverviewReportMenuComponent } from './overview-report/overview-report-menu/overview-report-menu.component';
 import { BasicReportComponent } from './overview-report/basic-report/basic-report.component';
+import { AnalysisComponent } from './analysis/analysis.component';
+import { AnalysisDashboardComponent } from './analysis/analysis-dashboard/analysis-dashboard.component';
+import { RunAnalysisComponent } from './analysis/run-analysis/run-analysis.component';
+import { FacilitySetupComponent } from './analysis/run-analysis/facility-setup/facility-setup.component';
 
 const routes: Routes = [
   {
@@ -97,6 +101,22 @@ const routes: Routes = [
       { path: 'report-dashboard', component: OverviewReportDashboardComponent },
       { path: 'report-menu', component: OverviewReportMenuComponent },
       { path: 'basic-report', component: BasicReportComponent }
+    ]
+  },
+  {
+    path: 'analysis',
+    component: AnalysisComponent,
+    children: [
+      { path: '', pathMatch: 'full', redirectTo: 'analysis-dashboard' },
+      { path: 'analysis-dashboard', component: AnalysisDashboardComponent },
+      {
+        path: 'run-analysis',
+        component: RunAnalysisComponent,
+        children: [
+          { path: '', pathMatch: 'full', redirectTo: 'facility-setup' },
+          { path: 'facility-setup', component: FacilitySetupComponent }
+        ]
+      }
     ]
   },
   { path: "**", component: PageNotFoundComponent },
