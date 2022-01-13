@@ -143,8 +143,11 @@ import { AnalysisBannerComponent } from './analysis/analysis-banner/analysis-ban
 import { AnalysisDashboardComponent } from './analysis/analysis-dashboard/analysis-dashboard.component';
 import { RunAnalysisComponent } from './analysis/run-analysis/run-analysis.component';
 import { AnalysisSetupComponent } from './analysis/run-analysis/analysis-setup/analysis-setup.component';
-import { GroupSetupComponent } from './analysis/run-analysis/group-setup/group-setup.component';
-import { GroupAnalysisOptionsComponent } from './analysis/run-analysis/group-setup/group-analysis-options/group-analysis-options.component';
+import { GroupAnalysisOptionsComponent } from './analysis/run-analysis/group-analysis/group-analysis-options/group-analysis-options.component';
+import { GroupAnalysisComponent } from './analysis/run-analysis/group-analysis/group-analysis.component';
+import { FacilityAnalysisComponent } from './analysis/run-analysis/facility-analysis/facility-analysis.component';
+import { GroupAnnualEnergyIntensityComponent } from './analysis/run-analysis/group-analysis/group-annual-energy-intensity/group-annual-energy-intensity.component';
+import { GroupMonthlyEnergyIntensityComponent } from './analysis/run-analysis/group-analysis/group-monthly-energy-intensity/group-monthly-energy-intensity.component';
 
 @NgModule({
   declarations: [
@@ -274,8 +277,11 @@ import { GroupAnalysisOptionsComponent } from './analysis/run-analysis/group-set
     AnalysisDashboardComponent,
     RunAnalysisComponent,
     AnalysisSetupComponent,
-    GroupSetupComponent,
     GroupAnalysisOptionsComponent,
+    GroupAnalysisComponent,
+    FacilityAnalysisComponent,
+    GroupAnnualEnergyIntensityComponent,
+    GroupMonthlyEnergyIntensityComponent,
   ],
   imports: [
     BrowserModule,

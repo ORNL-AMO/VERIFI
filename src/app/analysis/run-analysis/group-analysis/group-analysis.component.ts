@@ -5,11 +5,11 @@ import { AnalysisGroup, IdbAnalysisItem } from 'src/app/models/idb';
 import { AnalysisService } from '../../analysis.service';
 
 @Component({
-  selector: 'app-group-setup',
-  templateUrl: './group-setup.component.html',
-  styleUrls: ['./group-setup.component.css']
+  selector: 'app-group-analysis',
+  templateUrl: './group-analysis.component.html',
+  styleUrls: ['./group-analysis.component.css']
 })
-export class GroupSetupComponent implements OnInit {
+export class GroupAnalysisComponent implements OnInit {
 
   analysisItem: IdbAnalysisItem;
   selectedGroup: AnalysisGroup;

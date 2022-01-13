@@ -9,11 +9,11 @@
         <ul>
             <li><a routerLink="run-analysis/analysis-setup" [routerLinkActive]="['active']">Analysis Setup</a></li>
             <li *ngFor="let group of analysisItem.groups">
-                <a routerLink="run-analysis/group-setup/{{group.idbGroup.id}}"
+                <a routerLink="run-analysis/group-analysis/{{group.idbGroup.id}}"
                     [routerLinkActive]="['active']">{{group.idbGroup.name}}</a>
             </li>
             <li>
-                <a routerLink="run-analysis/facility-summary" [routerLinkActive]="['active']">Facility Summary</a>
+                <a routerLink="run-analysis/facility-analysis" [routerLinkActive]="['active']">Facility Summary</a>
             </li>
             <!--<li [class.disabled]="utilityMeterData.length === 0">
                 <a routerLink="predictors" [routerLinkActive]="['active']">Predictors</a>
