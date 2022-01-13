@@ -117,7 +117,10 @@ export class AnalysisDbService {
       facilityId: selectedFacility.id,
       accountId: selectedAccount.id,
       date: new Date(),
-      name: 'Analysis Item'
+      name: 'Analysis Item',
+      reportYear: undefined,
+      energyIsSource: selectedFacility.energyIsSource,
+      energyUnit: selectedFacility.energyUnit
     }
   }
 }

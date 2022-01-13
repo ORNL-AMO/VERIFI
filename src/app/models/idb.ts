@@ -209,7 +209,10 @@ export interface IdbAnalysisItem {
     accountId: number,
     facilityId: number,
     date: Date,
-    name: string
+    name: string,
+    energyIsSource: boolean,
+    reportYear: number,
+    energyUnit: string
 }
 
 

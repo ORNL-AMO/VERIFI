@@ -140,11 +140,9 @@ import { OverviewReportDashboardHelpComponent } from './help-panel/overview-repo
 import { OverviewReportMenuHelpComponent } from './help-panel/overview-report/overview-report-menu-help/overview-report-menu-help.component';
 import { AnalysisComponent } from './analysis/analysis.component';
 import { AnalysisBannerComponent } from './analysis/analysis-banner/analysis-banner.component';
-import { FacilitySetupComponent } from './analysis/run-analysis/analysis-setup/facility-setup/facility-setup.component';
 import { AnalysisDashboardComponent } from './analysis/analysis-dashboard/analysis-dashboard.component';
 import { RunAnalysisComponent } from './analysis/run-analysis/run-analysis.component';
 import { AnalysisSetupComponent } from './analysis/run-analysis/analysis-setup/analysis-setup.component';
-import { AnalysisGroupSetupComponent } from './analysis/run-analysis/analysis-setup/analysis-group-setup/analysis-group-setup.component';
 
 @NgModule({
   declarations: [
@@ -271,11 +269,9 @@ import { AnalysisGroupSetupComponent } from './analysis/run-analysis/analysis-se
     OverviewReportMenuHelpComponent,
     AnalysisComponent,
     AnalysisBannerComponent,
-    FacilitySetupComponent,
     AnalysisDashboardComponent,
     RunAnalysisComponent,
     AnalysisSetupComponent,
-    AnalysisGroupSetupComponent
   ],
   imports: [
     BrowserModule,
