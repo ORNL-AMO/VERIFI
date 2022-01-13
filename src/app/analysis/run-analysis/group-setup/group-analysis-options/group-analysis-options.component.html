@@ -1,0 +1,36 @@
+<div class="row">
+    <div class="col-6">
+        <div class="form-group">
+            <label>Analysis Type </label>
+            <div>
+                <input type="radio" class="rowToggle" name="analysisType" [value]="'absoluteEnergyIntensity'"
+                    id="absoluteEnergyIntensity" [(ngModel)]="group.analysisType" (change)="saveItem()" disabled>
+                <label class="checkbox" for="absoluteEnergyIntensity">Absolute Energy Consumption</label>
+
+                <input type="radio" class="rowToggle" name="analysisType" [value]="'energyIntensity'"
+                    id="energyIntensity" [(ngModel)]="group.analysisType" (change)="saveItem()">
+                <label class="checkbox" for="energyIntensity">Energy Intensity</label>
+
+                <input type="radio" class="rowToggle" name="analysisType" [value]="'modifiedEnergyIntensity'"
+                    id="modifiedEnergyIntensity" [(ngModel)]="group.analysisType" (change)="saveItem()" disabled>
+                <label class="checkbox" for="modifiedEnergyIntensity">Modified Energy Intensity</label>
+
+                <input type="radio" class="rowToggle" name="analysisType" [value]="'regression'" id="regression"
+                    [(ngModel)]="group.analysisType" (change)="saveItem()" disabled>
+                <label class="checkbox" for="regression">Regression</label>
+            </div>
+        </div>
+    </div>
+    <div class="col-6">
+        <div class="form-group">
+            <label>Production Variables</label>
+            <div class="form-group">
+                <label *ngFor="let predictor of group.predictorVariables" for="{{'predictor_'+predictor.id}}">
+                    <input class="checkbox" type="checkbox" id="{{'predictor_'+predictor.id}}"
+                        name="{{'predictor_'+predictor.id}}" [(ngModel)]="predictor.production"
+                        (change)="saveItem()">{{predictor.name}}
+                </label>
+            </div>
+        </div>
+    </div>
+</div>

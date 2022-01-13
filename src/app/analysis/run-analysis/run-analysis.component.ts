@@ -1,4 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
+import { IdbAnalysisItem } from 'src/app/models/idb';
 
 @Component({
   selector: 'app-run-analysis',
@@ -7,9 +10,13 @@ import { Component, OnInit } from '@angular/core';
 })
 export class RunAnalysisComponent implements OnInit {
 
-  constructor() { }
+  
+  constructor(private analysisDbService: AnalysisDbService, private router: Router) { }
 
   ngOnInit(): void {
+    let analysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
+    if (!analysisItem) {
+      this.router.navigateByUrl('/analysis/analysis-dashboard')
+    }
   }
-
 }

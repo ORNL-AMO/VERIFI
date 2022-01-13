@@ -8,15 +8,14 @@
     <div class="compNav" *ngIf="inRunAnalysis">
         <ul>
             <li><a routerLink="run-analysis/analysis-setup" [routerLinkActive]="['active']">Analysis Setup</a></li>
-            <!-- <li [class.disabled]="utilityMeterData.length === 0">
-                <a routerLink="monthly-meter-data" [routerLinkActive]="['active']">Monthly Meter Data</a>
-                <span class="small navigation-warning">Requires Meter Readings</span>
+            <li *ngFor="let group of analysisItem.groups">
+                <a routerLink="run-analysis/group-setup/{{group.idbGroup.id}}"
+                    [routerLinkActive]="['active']">{{group.idbGroup.name}}</a>
             </li>
-            <li [class.disabled]="utilityMeterData.length === 0">
-                <a routerLink="meter-groups" [routerLinkActive]="['active']">Meter Grouping</a>
-                <span class="small navigation-warning">Requires Meter Readings</span>
+            <li>
+                <a routerLink="run-analysis/facility-summary" [routerLinkActive]="['active']">Facility Summary</a>
             </li>
-            <li [class.disabled]="utilityMeterData.length === 0">
+            <!--<li [class.disabled]="utilityMeterData.length === 0">
                 <a routerLink="predictors" [routerLinkActive]="['active']">Predictors</a>
                 <span class="small navigation-warning">Requires Meter Readings</span>
             </li>
@@ -25,12 +24,7 @@
                 <span class="small navigation-warning">Requires Meter Readings</span>
             </li> -->
         </ul>
-
     </div>
-
-
-
-
     <div class="pull-right nav-items">
         <h3>
             <a (click)="toggleHelpPanel()"><span class="fa fa-question-circle-o"></span></a>

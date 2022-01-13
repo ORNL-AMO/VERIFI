@@ -2,9 +2,11 @@ import { Injectable } from '@angular/core';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { LocalStorageService } from 'ngx-webstorage';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { IdbAccount, IdbAnalysisItem, IdbFacility } from '../models/idb';
+import { AnalysisGroup, IdbAccount, IdbAnalysisItem, IdbFacility, IdbUtilityMeterGroup, PredictorData } from '../models/idb';
 import { AccountdbService } from './account-db.service';
 import { FacilitydbService } from './facility-db.service';
+import { PredictordbService } from './predictors-db.service';
+import { UtilityMeterGroupdbService } from './utilityMeterGroup-db.service';
 
 @Injectable({
   providedIn: 'root'
@@ -16,7 +18,9 @@ export class AnalysisDbService {
   selectedAnalysisItem: BehaviorSubject<IdbAnalysisItem>;
 
   constructor(private dbService: NgxIndexedDBService, private localStorageService: LocalStorageService,
-    private facilityDbService: FacilitydbService, private accountDbService: AccountdbService) {
+    private facilityDbService: FacilitydbService, private accountDbService: AccountdbService,
+    private utilityMeterGroupDbService: UtilityMeterGroupdbService,
+    private predictorDbService: PredictordbService) {
     this.accountAnalysisItems = new BehaviorSubject<Array<IdbAnalysisItem>>([]);
     this.facilityAnalysisItems = new BehaviorSubject<Array<IdbAnalysisItem>>([]);
     this.selectedAnalysisItem = new BehaviorSubject<IdbAnalysisItem>(undefined);
@@ -53,7 +57,7 @@ export class AnalysisDbService {
       this.getAllByIndexRange('accountId', selectedAccount.id).subscribe((analysisItems: Array<IdbAnalysisItem>) => {
         this.accountAnalysisItems.next(analysisItems);
         let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-        let facilityAnalysisItems: Array<IdbAnalysisItem> = analysisItems.filter(item => {return item.facilityId == selectedFacility.id});
+        let facilityAnalysisItems: Array<IdbAnalysisItem> = analysisItems.filter(item => { return item.facilityId == selectedFacility.id });
         this.facilityAnalysisItems.next(facilityAnalysisItems);
       });
     }
@@ -113,6 +117,16 @@ export class AnalysisDbService {
   getNewAnalysisItem(): IdbAnalysisItem {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let facilityMeterGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.facilityMeterGroups.getValue();
+    let itemGroups: Array<AnalysisGroup> = new Array();
+    let predictors: Array<PredictorData> = this.predictorDbService.facilityPredictors.getValue();
+    facilityMeterGroups.forEach(group => {
+      itemGroups.push({
+        idbGroup: group,
+        analysisType: 'energyIntensity',
+        predictorVariables: JSON.parse(JSON.stringify(predictors))
+      });
+    });
     return {
       facilityId: selectedFacility.id,
       accountId: selectedAccount.id,
@@ -120,7 +134,8 @@ export class AnalysisDbService {
       name: 'Analysis Item',
       reportYear: undefined,
       energyIsSource: selectedFacility.energyIsSource,
-      energyUnit: selectedFacility.energyUnit
+      energyUnit: selectedFacility.energyUnit,
+      groups: itemGroups
     }
   }
 }

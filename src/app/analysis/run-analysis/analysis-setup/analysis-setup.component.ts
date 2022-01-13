@@ -21,15 +21,11 @@ export class AnalysisSetupComponent implements OnInit {
   energyUnit: string;
   analysisItem: IdbAnalysisItem;
   yearOptions: Array<number>;
-  constructor(private facilityDbService: FacilitydbService, private analysisDbService: AnalysisDbService, private router: Router,
+  constructor(private facilityDbService: FacilitydbService, private analysisDbService: AnalysisDbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService) { }
 
   ngOnInit(): void {
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
-    if (!this.analysisItem ) {
-      this.router.navigateByUrl('/analysis/analysis-dashboard')
-    }
-
     this.facility = this.facilityDbService.selectedFacility.getValue();
     this.energyUnit = this.facility.energyUnit;
     this.setYearOptions();

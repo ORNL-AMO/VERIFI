@@ -212,9 +212,16 @@ export interface IdbAnalysisItem {
     name: string,
     energyIsSource: boolean,
     reportYear: number,
-    energyUnit: string
+    energyUnit: string,
+    groups: Array<AnalysisGroup>
 }
 
+export interface AnalysisGroup {
+    idbGroup: IdbUtilityMeterGroup,
+    analysisType: AnalysisType,
+    predictorVariables: Array<PredictorData>
+}
 
+export type AnalysisType = 'absoluteEnergyIntensity' | 'energyIntensity' | 'modifiedEnergyIntensity' | 'regression';
 export type MeterSource = "Electricity" | "Natural Gas" | "Other Fuels" | "Other Energy" | "Water" | "Waste Water" | "Other Utility";
 export type MeterPhase = "Solid" | "Liquid" | "Gas";

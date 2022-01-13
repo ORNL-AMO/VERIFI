@@ -1,0 +1,14 @@
+<nav class="tabs">
+    <ul class="mb-0">
+        <li><a routerLink="/analysis/run-analysis/group-setup/{{groupId}}/options" [routerLinkActive]="['active']">Analysis
+                Options</a></li>
+        <li><a routerLink="/analysis/run-analysis/group-setup/{{groupId}}/annual-energy-intensity"
+                [routerLinkActive]="['active']">Annual Energy Intensity</a></li>
+        <li><a routerLink="/analysis/run-analysis/group-setup/{{groupId}}/monthly-energy-intensity"
+                [routerLinkActive]="['active']">Monthly Energy Intensity</a></li>
+    </ul>
+</nav>
+<div class="content-padding">
+    <h4>{{selectedGroup.idbGroup.name}} Setup</h4>
+    <router-outlet></router-outlet>
+</div>

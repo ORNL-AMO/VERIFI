@@ -28,6 +28,8 @@ import { AnalysisComponent } from './analysis/analysis.component';
 import { AnalysisDashboardComponent } from './analysis/analysis-dashboard/analysis-dashboard.component';
 import { RunAnalysisComponent } from './analysis/run-analysis/run-analysis.component';
 import { AnalysisSetupComponent } from './analysis/run-analysis/analysis-setup/analysis-setup.component';
+import { GroupSetupComponent } from './analysis/run-analysis/group-setup/group-setup.component';
+import { GroupAnalysisOptionsComponent } from './analysis/run-analysis/group-setup/group-analysis-options/group-analysis-options.component';
 
 const routes: Routes = [
   {
@@ -114,7 +116,15 @@ const routes: Routes = [
         component: RunAnalysisComponent,
         children: [
           { path: '', pathMatch: 'full', redirectTo: 'analysis-setup' },
-          { path: 'analysis-setup', component: AnalysisSetupComponent }
+          { path: 'analysis-setup', component: AnalysisSetupComponent },
+          {
+            path: 'group-setup/:id',
+            component: GroupSetupComponent,
+            children: [
+              { path: '', pathMatch: 'full', redirectTo: 'options' },
+              { path: 'options', component: GroupAnalysisOptionsComponent }
+            ]
+          }
         ]
       }
     ]
