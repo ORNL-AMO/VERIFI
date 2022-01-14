@@ -13,14 +13,15 @@ import { AnalysisGroup, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb'
 export class GroupAnnualEnergyIntensityComponent implements OnInit {
 
   annualGroupSummaries: Array<AnnualGroupSummary>;
+  analysisItem: IdbAnalysisItem;
   constructor(private energyIntensityService: EnergyIntensityService, private analysisService: AnalysisService,
     private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
-    let analysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
+    this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     let group: AnalysisGroup = this.analysisService.selectedGroup.getValue();
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.annualGroupSummaries = this.energyIntensityService.calculateAnnualGroupSummaries(analysisItem, group, selectedFacility);
+    this.annualGroupSummaries = this.energyIntensityService.calculateAnnualGroupSummaries(this.analysisItem, group, selectedFacility);
   }
 
 }

@@ -75,6 +75,54 @@ export class EnergyIntensityService {
     return annualGroupSummaries;
   }
 
+  calculateMonthlyGroupSummaries(analysisItem: IdbAnalysisItem, selectedGroup: AnalysisGroup, facility: IdbFacility): Array<MonthlyGroupSummary> {
+    let monthlyGroupSummary: Array<MonthlyGroupSummary> = new Array();
+
+    let facilityPredictorData: Array<IdbPredictorEntry> = this.predictorDbService.facilityPredictorEntries.getValue();
+    let productionPredictors: Array<PredictorData> = selectedGroup.predictorVariables.filter(variable => {
+      return variable.production;
+    });
+    let productionPredictorIds: Array<string> = productionPredictors.map(predictor => { return predictor.id });
+
+
+    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+    let groupMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.groupId == selectedGroup.idbGroup.id });
+    let calanderizedMeterData: Array<CalanderizedMeter> = this.calendarizationService.getCalanderizedMeterData(groupMeters, false);
+    let allMeterData: Array<MonthlyData> = calanderizedMeterData.flatMap(calanderizedMeter => { return calanderizedMeter.monthlyData });
+
+    let baselineDate: Date = new Date(facility.sustainabilityQuestions.energyReductionBaselineYear, 0);
+    let endDate: Date = new Date(analysisItem.reportYear + 1, 0);
+
+
+    while (baselineDate < endDate) {
+      let monthPredictorData: Array<IdbPredictorEntry> = facilityPredictorData.filter(predictorData => {
+        let predictorDate: Date = new Date(predictorData.date);
+        return predictorDate.getUTCFullYear() == baselineDate.getUTCFullYear() && predictorDate.getUTCMonth() == baselineDate.getUTCMonth();
+      });
+
+      let predictorData: Array<PredictorData> = monthPredictorData.flatMap(yearPredictor => { return yearPredictor.predictors });
+      let productionPredictors: Array<PredictorData> = predictorData.filter(data => { return productionPredictorIds.includes(data.id) });
+
+      let monthMeterData: Array<MonthlyData> = allMeterData.filter(data => {
+        let predictorDate: Date = new Date(data.date);
+        return predictorDate.getUTCFullYear() == baselineDate.getUTCFullYear() && predictorDate.getUTCMonth() == baselineDate.getUTCMonth();
+      });
+
+      let energyUse: number = _.sumBy(monthMeterData, 'energyUse');
+      let production: number = _.sumBy(productionPredictors, 'amount');
+
+      monthlyGroupSummary.push({
+        date: new Date(baselineDate),
+        energyUse: energyUse,
+        production: production,
+        energyIntensity: energyUse / production
+      })
+      baselineDate.setUTCMonth(baselineDate.getUTCMonth() + 1);
+    }
+    return monthlyGroupSummary;
+  }
+
+
 }
 
 
@@ -88,4 +136,12 @@ export interface AnnualGroupSummary {
   energyIntensity: number,
   cumulativeEnergyIntensityChange: number,
   annualEnergyIntensityChange: number
+}
+
+
+export interface MonthlyGroupSummary {
+  date: Date,
+  energyUse: number,
+  production: number,
+  energyIntensity: number
 }
