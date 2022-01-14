@@ -10,7 +10,6 @@ import { IdbAnalysisItem } from 'src/app/models/idb';
 })
 export class RunAnalysisComponent implements OnInit {
 
-  
   constructor(private analysisDbService: AnalysisDbService, private router: Router) { }
 
   ngOnInit(): void {

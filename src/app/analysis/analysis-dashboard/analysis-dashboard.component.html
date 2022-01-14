@@ -40,11 +40,11 @@
                                 Title</th>
                             <th (click)="setOrderDataField('baselineYear')"
                                 [ngClass]="{'active': orderDataField == 'baselineYear'}">Baseline Year
+                            </th>-->
+                            <th (click)="setOrderDataField('reportYear')"
+                                [ngClass]="{'active': orderDataField == 'reportYear'}">
+                                Report Year
                             </th>
-                            <th (click)="setOrderDataField('targetYear')"
-                                [ngClass]="{'active': orderDataField == 'targetYear'}">
-                                Target Year
-                            </th> -->
                             <th (click)="setOrderDataField('date')" [ngClass]="{'active': orderDataField == 'date'}">
                                 Last Modified</th>
                             <th>Actions</th>
@@ -60,8 +60,8 @@
                             <!-- <td>
                                 {{report.title}}
                             </td>
-                            <td>{{report.baselineYear}}</td>
-                            <td>{{report.targetYear}}</td> -->
+                            <td>{{report.baselineYear}}</td>-->
+                            <td>{{analysisItem.reportYear}}</td>
                             <td>{{analysisItem.date | date}}</td>
                             <td class="actions">
                                 <i class="fa fa-pencil" title="Edit" (click)="editItem(analysisItem)"></i>
