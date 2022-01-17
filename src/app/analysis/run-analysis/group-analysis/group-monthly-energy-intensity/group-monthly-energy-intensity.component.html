@@ -43,4 +43,6 @@
 <app-monthly-analysis-table *ngIf="dataDisplay == 'table'" [monthlyGroupSummaries]="monthlyGroupSummaries"
     [itemsPerPage]="itemsPerPage">
 </app-monthly-analysis-table>
-<app-monthly-analysis-graph *ngIf="dataDisplay == 'graph'"></app-monthly-analysis-graph>
+<app-monthly-analysis-graph *ngIf="dataDisplay == 'graph'" [monthlyGroupSummaries]="monthlyGroupSummaries"
+    [facility]="facility" [analysisItem]="analysisItem" [baselineEnergyIntensity]="baselineEnergyIntensity">
+</app-monthly-analysis-graph>
