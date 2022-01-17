@@ -2,9 +2,8 @@
     <table class="table table-sm">
         <thead>
             <tr>
-                <th (click)="setOrderDataField('date')" [ngClass]="{'active': orderDataField == 'date'}"
-                    class="row-year">Month</th>
-                <th (click)="setOrderDataField('energyUse')" [ngClass]="{'active': orderDataField == 'energyUse'}">
+                <th (click)="setOrderDataField('date')" [ngClass]="{'active': orderDataField == 'date'}">Month</th>
+                <th (click)=" setOrderDataField('energyUse')" [ngClass]="{'active': orderDataField == 'energyUse'}">
                     Total Energy</th>
                 <th (click)="setOrderDataField('production')" [ngClass]="{'active': orderDataField == 'production'}">
                     Total Production

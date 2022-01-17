@@ -1,0 +1,11 @@
+tr.totals{
+    border-bottom: solid;
+}
+
+th.cell-one{
+    width: 10%;
+}
+
+th:not(.cell-one){
+    width: 18%;
+}

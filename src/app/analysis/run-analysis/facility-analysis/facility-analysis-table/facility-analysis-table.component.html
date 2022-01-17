@@ -1,0 +1,60 @@
+<div class="col table-responsive">
+    <table class="table table-sm table-hover">
+        <thead>
+            <tr>
+                <th class="cell-one"></th>
+                <th>% Baseline</th>
+                <th>
+                    Cumulative Energy<br> Improvement
+                </th>
+                <th>Improvement<br> Contribution</th>
+                <th>Total Savings<br> (<span [innerHTML]="analysisItem.energyUnit | settingsLabel"></span>)
+                </th>
+                <th>New Savings<br> (<span [innerHTML]="analysisItem.energyUnit | settingsLabel"></span>)</th>
+            </tr>
+        </thead>
+        <tbody *ngFor="let groupSummary of facilityGroupSummaries">
+            <tr class="bold">
+                <td colspan="6">
+                    {{groupSummary.yearGroupSummaries[0].year}}
+                </td>
+            </tr>
+            <tr *ngFor="let summary of groupSummary.yearGroupSummaries">
+                <td class="pl-2">
+                    {{summary.group.idbGroup.name}}
+                </td>
+                <td>
+                    {{summary.percentBaseline | customNumber}} %
+                </td>
+                <td>
+                    {{summary.energyIntensityImprovement | customNumber}} %
+                </td>
+                <td>
+                    {{summary.improvementContribution | customNumber}} %
+                </td>
+                <td>
+                    {{summary.totalSavings | customNumber}}
+                </td>
+                <td>
+                    {{summary.newSavings | customNumber}}
+                </td>
+            </tr>
+            <tr class="bold totals">
+                <td>Total</td>
+                <td></td>
+                <td>
+                    {{groupSummary.totals.energyIntensityImprovement | customNumber}} %
+                </td>
+                <td>
+                    {{groupSummary.totals.improvementContribution | customNumber}} %
+                </td>
+                <td>
+                    {{groupSummary.totals.totalSavings | customNumber}}
+                </td>
+                <td>
+                    {{groupSummary.totals.newSavings | customNumber}}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

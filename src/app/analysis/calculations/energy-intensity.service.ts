@@ -66,7 +66,8 @@ export class EnergyIntensityService {
         productionChange: baselineProduction - totalProduction,
         energyIntensity: energyIntensity,
         cumulativeEnergyIntensityChange: cumulativeEnergyIntensityChange,
-        annualEnergyIntensityChange: cumulativeEnergyIntensityChange - previousYearEnergyIntensity
+        annualEnergyIntensityChange: cumulativeEnergyIntensityChange - previousYearEnergyIntensity,
+        group: selectedGroup
 
       });
       previousYearEnergyUse = totalEnergyUse;
@@ -123,6 +124,53 @@ export class EnergyIntensityService {
   }
 
 
+  calculateFacilitySummary(analysisItem: IdbAnalysisItem, facility: IdbFacility): Array<FacilityGroupSummary> {
+    let baselineYear: number = facility.sustainabilityQuestions.energyReductionBaselineYear;
+    let groupSummaries: Array<AnnualGroupSummary> = new Array();
+    analysisItem.groups.forEach(group => {
+      let groupSummary: Array<AnnualGroupSummary> = this.calculateAnnualGroupSummaries(analysisItem, group, facility);
+      groupSummaries = groupSummaries.concat(groupSummary);
+    });
+
+
+
+    let facilityGroupSummaries: Array<FacilityGroupSummary> = new Array();
+
+    for (let summaryYear: number = baselineYear + 1; summaryYear <= analysisItem.reportYear; summaryYear++) {
+      let filterYearSummaries: Array<AnnualGroupSummary> = groupSummaries.filter(summary => { return summary.year == summaryYear });
+      let totalEnergy: number = _.sumBy(filterYearSummaries, 'totalEnergy');
+      let yearGroupSummaries: Array<FacilityYearGroupSummary> = new Array();
+      
+      filterYearSummaries.forEach(summary => {
+        let percentBaseline: number = (summary.totalEnergy / totalEnergy);
+        yearGroupSummaries.push({
+          year: summary.year,
+          group: summary.group,
+          percentBaseline: percentBaseline * 100,
+          energyIntensityImprovement: summary.cumulativeEnergyIntensityChange,
+          improvementContribution: percentBaseline * summary.cumulativeEnergyIntensityChange,
+          totalSavings: summary.totalEnergySavings,
+          newSavings: summary.newEnergySavings
+        })
+      })
+
+      facilityGroupSummaries.push({
+        yearGroupSummaries: yearGroupSummaries,
+        totals: {
+          energyIntensityImprovement: _.sumBy(yearGroupSummaries, 'energyIntensityImprovement'),
+          improvementContribution: _.sumBy(yearGroupSummaries, 'improvementContribution'),
+          totalSavings: _.sumBy(yearGroupSummaries, 'totalSavings'),
+          newSavings: _.sumBy(yearGroupSummaries, 'newSavings')
+        }
+      })
+
+    }
+    return facilityGroupSummaries;
+  }
+
+
+
+
 }
 
 
@@ -135,7 +183,8 @@ export interface AnnualGroupSummary {
   productionChange: number,
   energyIntensity: number,
   cumulativeEnergyIntensityChange: number,
-  annualEnergyIntensityChange: number
+  annualEnergyIntensityChange: number,
+  group: AnalysisGroup
 }
 
 
@@ -144,4 +193,25 @@ export interface MonthlyGroupSummary {
   energyUse: number,
   production: number,
   energyIntensity: number
+}
+
+
+export interface FacilityYearGroupSummary {
+  year: number,
+  group: AnalysisGroup,
+  percentBaseline: number,
+  energyIntensityImprovement: number,
+  improvementContribution: number,
+  totalSavings: number,
+  newSavings: number
+}
+
+export interface FacilityGroupSummary {
+  yearGroupSummaries: Array<FacilityYearGroupSummary>
+  totals: {
+    improvementContribution: number,
+    totalSavings: number,
+    newSavings: number,
+    energyIntensityImprovement: number
+  }
 }
