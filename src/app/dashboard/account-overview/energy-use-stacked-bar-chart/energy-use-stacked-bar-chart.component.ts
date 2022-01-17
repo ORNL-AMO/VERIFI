@@ -53,12 +53,12 @@ export class EnergyUseStackedBarChartComponent implements OnInit {
           yaxisTitle = "Utility Costs";
           yDataProperty = "energyCost";
           tickprefix = "$";
-        } else if(this.graphDisplay == "usage") {
+        } else if (this.graphDisplay == "usage") {
           let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
           yaxisTitle = "Utility Usage (" + selectedAccount.energyUnit + ")";
           yDataProperty = "energyUse";
           tickprefix = "";
-        } else if(this.graphDisplay == "emissions") {
+        } else if (this.graphDisplay == "emissions") {
           yaxisTitle = "Emissions (kg CO<sub>2</sub>)";
           yDataProperty = "emissions";
           tickprefix = "";
@@ -157,7 +157,8 @@ export class EnergyUseStackedBarChartComponent implements OnInit {
           legend: {
             orientation: "h"
           },
-          clickmode: "none"
+          clickmode: "none",
+          margin: { t: 10 }
         };
         let config = {
           modeBarButtonsToRemove: ['autoScale2d', 'lasso2d', 'pan2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian', 'autoscale', 'zoom', 'zoomin', 'zoomout'],

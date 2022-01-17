@@ -1,78 +1,13 @@
-<table class="table table-sm">
-    <thead>
-        <tr>
-            <th>
-                Year
-            </th>
-            <th *ngFor="let summary of annualGroupSummaries">
-                {{summary.year}}
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>
-                Total Energy ({{analysisItem.energyUnit}})
-            </td>
-            <td *ngFor="let summary of annualGroupSummaries">
-                {{summary.totalEnergy | customNumber}}
-            </td>
-        </tr>
-        <tr>
-            <td>
-                Total Energy Savings
-            </td>
-            <td *ngFor="let summary of annualGroupSummaries">
-                {{summary.totalEnergySavings | customNumber}}
-            </td>
-        </tr>
-        <tr>
-            <td>
-                New Energy Savings
-            </td>
-            <td *ngFor="let summary of annualGroupSummaries">
-                {{summary.newEnergySavings | customNumber}}
-            </td>
-        </tr>
-        <tr>
-            <td>
-                Total Production
-            </td>
-            <td *ngFor="let summary of annualGroupSummaries">
-                {{summary.totalProduction | customNumber}}
-            </td>
-        </tr>
-        <tr>
-            <td>
-                Production Change
-            </td>
-            <td *ngFor="let summary of annualGroupSummaries">
-                {{summary.productionChange | customNumber}}
-            </td>
-        </tr>
-        <tr>
-            <td>
-                Energy Intensity
-            </td>
-            <td *ngFor="let summary of annualGroupSummaries">
-                {{summary.energyIntensity | customNumber}}
-            </td>
-        </tr>
-        <tr>
-            <td>
-                Cumulative EI Improvement
-            </td>
-            <td *ngFor="let summary of annualGroupSummaries">
-                {{summary.cumulativeEnergyIntensityChange | customNumber}} %
-            </td>
-        </tr>
-        <tr>
-            <td>
-                Annual EI Improvement
-            </td>
-            <td *ngFor="let summary of annualGroupSummaries">
-                {{summary.annualEnergyIntensityChange | customNumber}} %
-            </td>
-        </tr>
-    </tbody>
-</table>
+<div class="controls pb-0 col">
+    <div class="btn-group pull-right">
+        <button class="btn" [ngClass]="{'btn-solid': dataDisplay == 'table'}"
+            (click)="setDataDisplay('table')">Table</button>
+        <button class="btn" [ngClass]="{'btn-solid': dataDisplay == 'graph'}"
+            (click)="setDataDisplay('graph')">Graph</button>
+    </div>
+</div>
+<app-annual-energy-intensity-table *ngIf="dataDisplay == 'table'" [annualGroupSummaries]="annualGroupSummaries"
+    [analysisItem]="analysisItem">
+</app-annual-energy-intensity-table>
+<app-annual-energy-intensity-graph *ngIf="dataDisplay == 'graph'" [annualGroupSummaries]="annualGroupSummaries"
+    [analysisItem]="analysisItem"></app-annual-energy-intensity-graph>

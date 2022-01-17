@@ -22,6 +22,7 @@ export class GroupMonthlyEnergyIntensityComponent implements OnInit {
     private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
+    this.dataDisplay = this.analysisService.dataDisplay.getValue();
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     let group: AnalysisGroup = this.analysisService.selectedGroup.getValue();
     this.facility = this.facilityDbService.selectedFacility.getValue();
@@ -32,5 +33,6 @@ export class GroupMonthlyEnergyIntensityComponent implements OnInit {
 
   setDataDisplay(display: 'table' | 'graph') {
     this.dataDisplay = display;
+    this.analysisService.dataDisplay.next(this.dataDisplay);
   }
 }

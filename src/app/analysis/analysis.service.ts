@@ -8,7 +8,9 @@ import { AnalysisGroup } from '../models/idb';
 export class AnalysisService {
 
   selectedGroup: BehaviorSubject<AnalysisGroup>;
-  constructor() { 
+  dataDisplay: BehaviorSubject<"graph" | "table">;
+  constructor() {
     this.selectedGroup = new BehaviorSubject<AnalysisGroup>(undefined);
+    this.dataDisplay = new BehaviorSubject<"graph" | "table">("graph");
   }
 }

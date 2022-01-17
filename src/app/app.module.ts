@@ -150,6 +150,8 @@ import { GroupAnnualEnergyIntensityComponent } from './analysis/run-analysis/gro
 import { GroupMonthlyEnergyIntensityComponent } from './analysis/run-analysis/group-analysis/group-monthly-energy-intensity/group-monthly-energy-intensity.component';
 import { MonthlyAnalysisTableComponent } from './analysis/run-analysis/group-analysis/group-monthly-energy-intensity/monthly-analysis-table/monthly-analysis-table.component';
 import { MonthlyAnalysisGraphComponent } from './analysis/run-analysis/group-analysis/group-monthly-energy-intensity/monthly-analysis-graph/monthly-analysis-graph.component';
+import { AnnualEnergyIntensityTableComponent } from './analysis/run-analysis/group-analysis/group-annual-energy-intensity/annual-energy-intensity-table/annual-energy-intensity-table.component';
+import { AnnualEnergyIntensityGraphComponent } from './analysis/run-analysis/group-analysis/group-annual-energy-intensity/annual-energy-intensity-graph/annual-energy-intensity-graph.component';
 
 @NgModule({
   declarations: [
@@ -286,6 +288,8 @@ import { MonthlyAnalysisGraphComponent } from './analysis/run-analysis/group-ana
     GroupMonthlyEnergyIntensityComponent,
     MonthlyAnalysisTableComponent,
     MonthlyAnalysisGraphComponent,
+    AnnualEnergyIntensityTableComponent,
+    AnnualEnergyIntensityGraphComponent,
   ],
   imports: [
     BrowserModule,

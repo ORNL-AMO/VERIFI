@@ -12,16 +12,22 @@ import { AnalysisGroup, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb'
 })
 export class GroupAnnualEnergyIntensityComponent implements OnInit {
 
+  dataDisplay: 'table' | 'graph';
   annualGroupSummaries: Array<AnnualGroupSummary>;
   analysisItem: IdbAnalysisItem;
   constructor(private energyIntensityService: EnergyIntensityService, private analysisService: AnalysisService,
     private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
+    this.dataDisplay = this.analysisService.dataDisplay.getValue();
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     let group: AnalysisGroup = this.analysisService.selectedGroup.getValue();
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     this.annualGroupSummaries = this.energyIntensityService.calculateAnnualGroupSummaries(this.analysisItem, group, selectedFacility);
   }
 
+  setDataDisplay(display: 'table' | 'graph') {
+    this.dataDisplay = display;
+    this.analysisService.dataDisplay.next(this.dataDisplay);
+  }
 }
