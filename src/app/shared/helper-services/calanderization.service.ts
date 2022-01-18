@@ -3,7 +3,7 @@ import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
-import { CalanderizedMeter, MonthlyData, LastYearData, CalanderizationFilters } from 'src/app/models/calanderization';
+import { CalanderizedMeter, MonthlyData, LastYearData, CalanderizationFilters, CalanderizationOptions } from 'src/app/models/calanderization';
 import { BehaviorSubject } from 'rxjs';
 import { ConvertUnitsService } from '../convert-units/convert-units.service';
 import { ReportOptions } from 'src/app/models/overview-report';
@@ -29,24 +29,24 @@ export class CalanderizationService {
     });
   }
 
-  getCalanderizedMeterData(meters: Array<IdbUtilityMeter>, inAccount: boolean, monthDisplayShort?: boolean, reportOptions?: ReportOptions): Array<CalanderizedMeter> {
+  getCalanderizedMeterData(meters: Array<IdbUtilityMeter>, inAccount: boolean, monthDisplayShort?: boolean, calanderizationOptions?: CalanderizationOptions): Array<CalanderizedMeter> {
     let calanderizedMeterData: Array<CalanderizedMeter> = new Array();
     meters.forEach(meter => {
       let energyIsSource: boolean;
       let calanderizedenergyUnit: string;
       let meterData: Array<IdbUtilityMeterData>
       if (inAccount) {
-        meterData = this.utilityMeterDataDbService.getMeterDataForAccount(meter, true, reportOptions);
+        meterData = this.utilityMeterDataDbService.getMeterDataForAccount(meter, true, calanderizationOptions);
         calanderizedenergyUnit = this.energyUnitsHelperService.getMeterConsumptionUnitInAccount(meter);
         energyIsSource = this.energyUnitsHelperService.getEnergyIsSourceInAccount();
       } else {
-        meterData = this.utilityMeterDataDbService.getMeterDataForFacility(meter, true, undefined, reportOptions);
+        meterData = this.utilityMeterDataDbService.getMeterDataForFacility(meter, true, undefined, calanderizationOptions);
         calanderizedenergyUnit = this.energyUnitsHelperService.getMeterConsumptionUnitInFacility(meter);
         energyIsSource = this.energyUnitsHelperService.getEnergyIsSourceInFacility();
       }
 
-      if (reportOptions) {
-        energyIsSource = reportOptions.energyIsSource;
+      if (calanderizationOptions) {
+        energyIsSource = calanderizationOptions.energyIsSource;
       }
 
       let calanderizedMeter: Array<MonthlyData> = this.calanderizeMeterData(meter, meterData, energyIsSource, calanderizedenergyUnit, monthDisplayShort);

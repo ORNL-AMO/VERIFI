@@ -1,4 +1,4 @@
-<table class="table table-sm">
+<table class="table table-sm table-hover">
     <thead>
         <tr>
             <th class="first-col">
@@ -12,7 +12,7 @@
     <tbody>
         <tr>
             <td>
-                Total Energy ({{analysisItem.energyUnit}})
+                Total Energy (<span [innerHTML]="analysisItem.energyUnit | settingsLabel"></span>)
             </td>
             <td *ngFor="let summary of annualGroupSummaries">
                 <span *ngIf="summary.totalEnergy">

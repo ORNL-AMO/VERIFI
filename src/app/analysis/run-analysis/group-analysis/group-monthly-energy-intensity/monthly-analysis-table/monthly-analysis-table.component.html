@@ -1,10 +1,10 @@
 <div class="col table-responsive">
-    <table class="table table-sm">
+    <table class="table table-sm table-hover">
         <thead>
             <tr>
                 <th (click)="setOrderDataField('date')" [ngClass]="{'active': orderDataField == 'date'}">Month</th>
                 <th (click)=" setOrderDataField('energyUse')" [ngClass]="{'active': orderDataField == 'energyUse'}">
-                    Total Energy</th>
+                    Total Energy (<span [innerHTML]="analysisItem.energyUnit | settingsLabel"></span>)</th>
                 <th (click)="setOrderDataField('production')" [ngClass]="{'active': orderDataField == 'production'}">
                     Total Production
                 </th>

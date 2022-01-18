@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
+import { CalanderizationOptions, CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import { AnalysisGroup, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, PredictorData } from 'src/app/models/idb';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import * as _ from 'lodash';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { AnnualGroupSummary, FacilityGroupSummary, FacilityYearGroupSummary, MonthlyGroupSummary } from 'src/app/models/analysis';
+import { ConvertMeterDataService } from 'src/app/shared/helper-services/convert-meter-data.service';
 
 @Injectable({
   providedIn: 'root'
@@ -14,14 +15,21 @@ export class EnergyIntensityService {
 
   constructor(private calendarizationService: CalanderizationService,
     private utilityMeterDbService: UtilityMeterdbService,
-    private predictorDbService: PredictordbService) { }
+    private predictorDbService: PredictordbService,
+    private convertMeterDataService: ConvertMeterDataService) { }
 
   calculateAnnualGroupSummaries(analysisItem: IdbAnalysisItem, selectedGroup: AnalysisGroup, facility: IdbFacility): Array<AnnualGroupSummary> {
     let annualGroupSummaries: Array<AnnualGroupSummary> = new Array();
     let baselineYear: number = facility.sustainabilityQuestions.energyReductionBaselineYear;
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
     let groupMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.groupId == selectedGroup.idbGroup.id });
-    let calanderizedMeterData: Array<CalanderizedMeter> = this.calendarizationService.getCalanderizedMeterData(groupMeters, false);
+    let calanderizationOptions: CalanderizationOptions = {
+      energyIsSource: analysisItem.energyIsSource
+    }
+    let calanderizedMeterData: Array<CalanderizedMeter> = this.calendarizationService.getCalanderizedMeterData(groupMeters, false, false, calanderizationOptions);
+    calanderizedMeterData.forEach(calanderizedMeter => {
+      calanderizedMeter.monthlyData = this.convertMeterDataService.convertMeterDataToAnalysis(analysisItem, calanderizedMeter.monthlyData, facility, calanderizedMeter.meter);
+    });
     let allMeterData: Array<MonthlyData> = calanderizedMeterData.flatMap(calanderizedMeter => { return calanderizedMeter.monthlyData });
 
     let baselineEnergyUse: number;
@@ -89,7 +97,13 @@ export class EnergyIntensityService {
 
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
     let groupMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.groupId == selectedGroup.idbGroup.id });
-    let calanderizedMeterData: Array<CalanderizedMeter> = this.calendarizationService.getCalanderizedMeterData(groupMeters, false);
+    let calanderizationOptions: CalanderizationOptions = {
+      energyIsSource: analysisItem.energyIsSource
+    }
+    let calanderizedMeterData: Array<CalanderizedMeter> = this.calendarizationService.getCalanderizedMeterData(groupMeters, false, false, calanderizationOptions);
+    calanderizedMeterData.forEach(calanderizedMeter => {
+      calanderizedMeter.monthlyData = this.convertMeterDataService.convertMeterDataToAnalysis(analysisItem, calanderizedMeter.monthlyData, facility, calanderizedMeter.meter);
+    });
     let allMeterData: Array<MonthlyData> = calanderizedMeterData.flatMap(calanderizedMeter => { return calanderizedMeter.monthlyData });
 
     let baselineDate: Date = new Date(facility.sustainabilityQuestions.energyReductionBaselineYear, 0);
@@ -132,16 +146,13 @@ export class EnergyIntensityService {
       let groupSummary: Array<AnnualGroupSummary> = this.calculateAnnualGroupSummaries(analysisItem, group, facility);
       groupSummaries = groupSummaries.concat(groupSummary);
     });
-
-
-
     let facilityGroupSummaries: Array<FacilityGroupSummary> = new Array();
 
     for (let summaryYear: number = baselineYear + 1; summaryYear <= analysisItem.reportYear; summaryYear++) {
       let filterYearSummaries: Array<AnnualGroupSummary> = groupSummaries.filter(summary => { return summary.year == summaryYear });
       let totalEnergy: number = _.sumBy(filterYearSummaries, 'totalEnergy');
       let yearGroupSummaries: Array<FacilityYearGroupSummary> = new Array();
-      
+
       filterYearSummaries.forEach(summary => {
         let percentBaseline: number = (summary.totalEnergy / totalEnergy);
         yearGroupSummaries.push({

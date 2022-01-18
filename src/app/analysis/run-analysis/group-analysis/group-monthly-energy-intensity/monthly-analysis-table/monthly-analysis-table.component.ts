@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { MonthlyGroupSummary } from 'src/app/models/analysis';
+import { IdbAnalysisItem } from 'src/app/models/idb';
 
 @Component({
   selector: 'app-monthly-analysis-table',
@@ -11,6 +12,8 @@ export class MonthlyAnalysisTableComponent implements OnInit {
   monthlyGroupSummaries: Array<MonthlyGroupSummary>;
   @Input()
   itemsPerPage: number;
+  @Input()
+  analysisItem: IdbAnalysisItem;
 
   orderDataField: string = 'date';
   orderByDirection: string = 'desc';
