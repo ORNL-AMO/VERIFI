@@ -1,5 +1,9 @@
-th{
+.table-sm th{
     width: 33%;
+}
+
+.table-sm.four-columns th{
+    width: 25%;
 }
 
 
