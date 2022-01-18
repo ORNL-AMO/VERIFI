@@ -21,7 +21,7 @@
     </app-facility-report-utility-usage-table>
 </div>
 <!--annual data graphs-->
-<div class="pt-5" *ngIf="reportOptions.annualBarCharts">
+<div class="pt-5" *ngIf="reportOptions.annualBarCharts" [ngClass]="{'print-break-after': reportOptions.monthBarCharts}">
     <app-facility-report-bar-chart [facility]="facility" [reportOptions]="reportOptions" [sumByMonth]="false">
     </app-facility-report-bar-chart>
 </div>

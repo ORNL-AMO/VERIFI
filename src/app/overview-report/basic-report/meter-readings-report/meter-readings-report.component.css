@@ -1,10 +1,7 @@
-.w-1{
-    width: 13.3333%;
+th{
+    width: 33%;
 }
 
-.w-2{
-    width: 20%;
-}
 
 @media print {
     table.table.table-sm tr th, table.table.table-sm tbody tr, .table th, .table td {
@@ -19,4 +16,11 @@
     table.table{
         border-collapse: inherit !important;
     }
+}
+
+
+.section-label{
+    font-size: 24px;
+    font-weight: bold;
+    width: auto;
 }

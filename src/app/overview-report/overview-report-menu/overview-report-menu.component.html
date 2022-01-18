@@ -195,6 +195,11 @@
                         </label>
                     </div>
                 </div>
+                <hr>
+                <label for="meterReadings">
+                    <input class="checkbox" type="checkbox" id="meterReadings" name="meterReadings"
+                        [(ngModel)]="reportOptions.meterReadings" (change)="saveCustom()">Include Meter Readings
+                </label>
             </div>
         </div>
         <hr>

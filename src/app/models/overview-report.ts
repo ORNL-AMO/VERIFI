@@ -60,5 +60,6 @@ export interface ReportOptions {
   targetYear: number,
   monthBarCharts: boolean,
   annualBarCharts: boolean,
-  energyIsSource: boolean
+  energyIsSource: boolean,
+  meterReadings: boolean
 }

@@ -79,7 +79,8 @@ export class OverviewReportService {
       targetYear: undefined,
       annualBarCharts: true,
       monthBarCharts: false,
-      energyIsSource: selectedAccount.energyIsSource
+      energyIsSource: selectedAccount.energyIsSource,
+      meterReadings: false
     }
   }
 

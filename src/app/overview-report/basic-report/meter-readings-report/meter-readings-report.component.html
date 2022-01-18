@@ -1,0 +1,31 @@
+<div *ngFor="let readingData of meterReadingsData">
+    <label class="section-label">Facilty: {{facility.name}}</label><br>
+    <label class="section-label">Meter: {{readingData.meter.name}}</label>
+    <table class="table table-sm">
+        <thead>
+            <th>
+                Date
+            </th>
+            <th>
+                Total Energy
+            </th>
+            <th>
+                Total Cost
+            </th>
+        </thead>
+        <tbody>
+            <tr *ngFor="let reading of readingData.meterReadings">
+                <td>
+                    {{reading.readDate | date}}
+                </td>
+                <td>
+                    {{reading.totalEnergyUse}}
+                </td>
+                <td>
+                    {{reading.totalCost}}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <hr>
+</div>
