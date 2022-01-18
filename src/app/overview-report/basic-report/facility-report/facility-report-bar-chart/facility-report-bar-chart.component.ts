@@ -19,6 +19,8 @@ export class FacilityReportBarChartComponent implements OnInit {
   facility: IdbFacility;
   @Input()
   reportOptions: ReportOptions;
+  @Input()
+  sumByMonth: boolean;
 
   @ViewChild('utilityCostBarChart', { static: false }) utilityCostBarChart: ElementRef;
   @ViewChild('utilityUsageBarChart', { static: false }) utilityUsageBarChart: ElementRef;
@@ -97,7 +99,7 @@ export class FacilityReportBarChartComponent implements OnInit {
 
   getDataByUtility(utility: MeterSource, facilityMeters: Array<IdbUtilityMeter>): Array<FacilityBarChartData> {
     let filteredMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.source == utility });
-    return this.visualizationService.getFacilityBarChartData(filteredMeters, this.reportOptions.annualGraphsByMonth, true, false, this.reportOptions);
+    return this.visualizationService.getFacilityBarChartData(filteredMeters, this.sumByMonth, true, false, this.reportOptions);
   }
 
   drawEmissionsChart() {
@@ -219,7 +221,7 @@ export class FacilityReportBarChartComponent implements OnInit {
   }
 
   getXAxisValues(data: Array<FacilityBarChartData>): Array<string | number> {
-    if (this.reportOptions.annualGraphsByMonth) {
+    if (this.sumByMonth) {
       return data.map(data => { return data.time })
     } else {
       return data.map(data => { return data.year })
@@ -227,7 +229,7 @@ export class FacilityReportBarChartComponent implements OnInit {
   }
 
   getLegend(): { orientation: "h" } {
-    if (this.reportOptions.annualGraphsByMonth) {
+    if (this.sumByMonth) {
       return undefined;
     } else {
       return { orientation: "h" };

@@ -78,8 +78,12 @@
     </div>
 </div>
 <!--annual summary graphs-->
-<div class="pt-5" *ngIf="reportOptions.accountFacilityAnnualBarChart">
-    <app-account-report-facility-bar-chart [account]="account" [reportOptions]="reportOptions">
+<div class="pt-5" *ngIf="reportOptions.annualBarCharts" [ngClass]="{'print-break-after': reportOptions.monthBarCharts}">
+    <app-account-report-facility-bar-chart [account]="account" [reportOptions]="reportOptions" [sumByMonth]="false">
+    </app-account-report-facility-bar-chart>
+</div>
+<div class="pt-5" *ngIf="reportOptions.monthBarCharts">
+    <app-account-report-facility-bar-chart [account]="account" [reportOptions]="reportOptions" [sumByMonth]="true">
     </app-account-report-facility-bar-chart>
 </div>
 <hr class="hide-print page-spacer">

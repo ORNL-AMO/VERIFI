@@ -62,12 +62,10 @@ export class OverviewReportService {
       facilitySummaryTable: true,
       accountUtilityTable: true,
       accountFacilityCharts: true,
-      accountFacilityAnnualBarChart: true,
       includeFacilities: true,
       facilityMetersTable: true,
       facilityUtilityUsageTable: true,
       facilityInfo: true,
-      facilityBarCharts: true,
       templateId: undefined,
       electricity: electricity,
       naturalGas: naturalGas,
@@ -79,8 +77,10 @@ export class OverviewReportService {
       facilities: accountFacilites,
       baselineYear: undefined,
       targetYear: undefined,
-      annualGraphsByMonth: false,
-      energyIsSource: selectedAccount.energyIsSource
+      annualBarCharts: true,
+      monthBarCharts: false,
+      energyIsSource: selectedAccount.energyIsSource,
+      meterReadings: false
     }
   }
 

@@ -18,6 +18,8 @@ export class AccountReportFacilityBarChartComponent implements OnInit {
   account: IdbAccount;
   @Input()
   reportOptions: ReportOptions;
+  @Input()
+  sumByMonth: boolean;
 
   @ViewChild('facilityCostBarChart', { static: false }) facilityCostBarChart: ElementRef;
   @ViewChild('facilityUsageBarChart', { static: false }) facilityUsageBarChart: ElementRef;
@@ -171,7 +173,7 @@ export class AccountReportFacilityBarChartComponent implements OnInit {
 
 
   getXAxisValues(data: Array<FacilityBarChartData>): Array<string | number> {
-    if (this.reportOptions.annualGraphsByMonth) {
+    if (this.sumByMonth) {
       return data.map(data => { return data.time })
     } else {
       return data.map(data => { return data.year })
@@ -187,7 +189,7 @@ export class AccountReportFacilityBarChartComponent implements OnInit {
         let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => {
           return meter.facilityId == facility.id && selectedSource.includes(meter.source);
         });
-        let facilityBarChartData: Array<FacilityBarChartData> = this.visualizationService.getFacilityBarChartData(facilityMeters, this.reportOptions.annualGraphsByMonth, true, true, this.reportOptions);
+        let facilityBarChartData: Array<FacilityBarChartData> = this.visualizationService.getFacilityBarChartData(facilityMeters, this.sumByMonth, true, true, this.reportOptions);
         this.chartData.push({
           facility: facility,
           data: facilityBarChartData
@@ -198,7 +200,7 @@ export class AccountReportFacilityBarChartComponent implements OnInit {
 
 
   getLegend(): { orientation: "h" } {
-    if (this.reportOptions.annualGraphsByMonth) {
+    if (this.sumByMonth) {
       return undefined;
     } else {
       return { orientation: "h" };

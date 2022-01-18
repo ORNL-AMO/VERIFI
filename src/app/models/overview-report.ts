@@ -3,6 +3,7 @@ import { IdbFacility, MeterSource } from "./idb";
 export interface BarChartDataTrace {
   x: Array<string | number>,
   y: Array<number>,
+  width?: Array<number>
   name: string,
   type: string,
   marker: {
@@ -42,12 +43,10 @@ export interface ReportOptions {
   facilitySummaryTable: boolean,
   accountUtilityTable: boolean,
   accountFacilityCharts: boolean,
-  accountFacilityAnnualBarChart: boolean,
   includeFacilities: boolean,
   facilityMetersTable: boolean,
   facilityUtilityUsageTable: boolean,
   facilityInfo: boolean,
-  facilityBarCharts: boolean,
   templateId: number,
   electricity: boolean,
   naturalGas: boolean,
@@ -59,6 +58,8 @@ export interface ReportOptions {
   facilities: Array<IdbFacility>,
   baselineYear: number,
   targetYear: number,
-  annualGraphsByMonth: boolean,
-  energyIsSource: boolean
+  monthBarCharts: boolean,
+  annualBarCharts: boolean,
+  energyIsSource: boolean,
+  meterReadings: boolean
 }
