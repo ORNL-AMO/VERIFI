@@ -2,7 +2,7 @@
     <thead>
         <tr>
             <th class="first-col">
-                
+
             </th>
             <th *ngFor="let summary of annualGroupSummaries">
                 {{summary.year}}
@@ -12,7 +12,8 @@
     <tbody>
         <tr>
             <td>
-                Total Energy (<span [innerHTML]="analysisItem.energyUnit | settingsLabel"></span>)
+                Total Energy <span class="table-units pull-right">(<span
+                        [innerHTML]="analysisItem.energyUnit | settingsLabel"></span>)</span>
             </td>
             <td *ngFor="let summary of annualGroupSummaries">
                 <span *ngIf="summary.totalEnergy">
@@ -51,7 +52,7 @@
         </tr>
         <tr>
             <td>
-                Total Production
+                Total Production <span class="table-units pull-right">({{group.productionUnits}})</span>
             </td>
             <td *ngFor="let summary of annualGroupSummaries">
                 <span *ngIf="summary.totalProduction">
@@ -77,7 +78,8 @@
         </tr>
         <tr>
             <td>
-                Energy Intensity
+                Energy Intensity <span class="table-units pull-right">(<span
+                        [innerHTML]="analysisItem.energyUnit | settingsLabel"></span>/{{group.productionUnits}})</span>
             </td>
             <td *ngFor="let summary of annualGroupSummaries">
                 <span *ngIf="summary.energyIntensity">

@@ -6,7 +6,7 @@
                 <th (click)=" setOrderDataField('energyUse')" [ngClass]="{'active': orderDataField == 'energyUse'}">
                     Total Energy (<span [innerHTML]="analysisItem.energyUnit | settingsLabel"></span>)</th>
                 <th (click)="setOrderDataField('production')" [ngClass]="{'active': orderDataField == 'production'}">
-                    Total Production
+                    Total Production ({{group.productionUnits}})
                 </th>
                 <th (click)="setOrderDataField('energyIntensity')"
                     [ngClass]="{'active': orderDataField == 'energyIntensity'}">

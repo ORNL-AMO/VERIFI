@@ -219,7 +219,8 @@ export interface IdbAnalysisItem {
 export interface AnalysisGroup {
     idbGroup: IdbUtilityMeterGroup,
     analysisType: AnalysisType,
-    predictorVariables: Array<PredictorData>
+    predictorVariables: Array<PredictorData>,
+    productionUnits: string
 }
 
 export type AnalysisType = 'absoluteEnergyIntensity' | 'energyIntensity' | 'modifiedEnergyIntensity' | 'regression';

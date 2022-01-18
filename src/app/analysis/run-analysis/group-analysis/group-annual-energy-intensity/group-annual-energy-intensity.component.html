@@ -7,7 +7,7 @@
     </div>
 </div>
 <app-annual-energy-intensity-table *ngIf="dataDisplay == 'table'" [annualGroupSummaries]="annualGroupSummaries"
-    [analysisItem]="analysisItem">
+    [analysisItem]="analysisItem" [group]="group">
 </app-annual-energy-intensity-table>
 <app-annual-energy-intensity-graph *ngIf="dataDisplay == 'graph'" [annualGroupSummaries]="annualGroupSummaries"
     [analysisItem]="analysisItem"></app-annual-energy-intensity-graph>

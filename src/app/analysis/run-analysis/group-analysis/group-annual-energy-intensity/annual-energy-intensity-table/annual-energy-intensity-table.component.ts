@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { AnnualGroupSummary } from 'src/app/models/analysis';
-import { IdbAnalysisItem } from 'src/app/models/idb';
+import { AnalysisGroup, IdbAnalysisItem } from 'src/app/models/idb';
 
 @Component({
   selector: 'app-annual-energy-intensity-table',
@@ -12,6 +12,9 @@ export class AnnualEnergyIntensityTableComponent implements OnInit {
   annualGroupSummaries: Array<AnnualGroupSummary>;
   @Input()
   analysisItem: IdbAnalysisItem;
+  @Input()
+  group: AnalysisGroup;
+  
   constructor() { }
 
   ngOnInit(): void {

@@ -7,6 +7,7 @@ import { AccountdbService } from './account-db.service';
 import { FacilitydbService } from './facility-db.service';
 import { PredictordbService } from './predictors-db.service';
 import { UtilityMeterGroupdbService } from './utilityMeterGroup-db.service';
+import * as _ from 'lodash';
 
 @Injectable({
   providedIn: 'root'
@@ -121,10 +122,12 @@ export class AnalysisDbService {
     let itemGroups: Array<AnalysisGroup> = new Array();
     let predictors: Array<PredictorData> = this.predictorDbService.facilityPredictors.getValue();
     facilityMeterGroups.forEach(group => {
+      let predictorVariables: Array<PredictorData> = JSON.parse(JSON.stringify(predictors));
       itemGroups.push({
         idbGroup: group,
         analysisType: 'energyIntensity',
-        predictorVariables: JSON.parse(JSON.stringify(predictors))
+        predictorVariables: predictorVariables,
+        productionUnits: this.getUnits(predictorVariables)
       });
     });
     return {
@@ -137,5 +140,23 @@ export class AnalysisDbService {
       energyUnit: selectedFacility.energyUnit,
       groups: itemGroups
     }
+  }
+
+  getUnits(predictorVariables: Array<PredictorData>): string {
+    let selectedProductionVariableUnits: Array<string> = new Array();
+    predictorVariables.forEach(variable => {
+      if (variable.production && variable.unit) {
+        selectedProductionVariableUnits.push(variable.unit);
+      }
+    });
+    if (selectedProductionVariableUnits.length > 1) {
+      let uniqUnits: Array<string> = _.uniq(selectedProductionVariableUnits);
+      if (uniqUnits.length == 1) {
+        return uniqUnits[0];
+      }
+    } else if (selectedProductionVariableUnits.length == 1) {
+      return selectedProductionVariableUnits[0];
+    }
+    return 'units';
   }
 }

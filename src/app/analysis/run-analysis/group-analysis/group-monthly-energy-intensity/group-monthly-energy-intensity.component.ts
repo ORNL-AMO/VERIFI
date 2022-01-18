@@ -19,16 +19,17 @@ export class GroupMonthlyEnergyIntensityComponent implements OnInit {
   itemsPerPage: number = 6;
   facility: IdbFacility;
   baselineEnergyIntensity: number;
+  group: AnalysisGroup;
   constructor(private energyIntensityService: EnergyIntensityService, private analysisService: AnalysisService,
     private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
     this.dataDisplay = this.analysisService.dataDisplay.getValue();
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
-    let group: AnalysisGroup = this.analysisService.selectedGroup.getValue();
+    this.group = this.analysisService.selectedGroup.getValue();
     this.facility = this.facilityDbService.selectedFacility.getValue();
-    this.monthlyGroupSummaries = this.energyIntensityService.calculateMonthlyGroupSummaries(this.analysisItem, group, this.facility);
-    let annualGroupSummaries: Array<AnnualGroupSummary> = this.energyIntensityService.calculateAnnualGroupSummaries(this.analysisItem, group, this.facility);    
+    this.monthlyGroupSummaries = this.energyIntensityService.calculateMonthlyGroupSummaries(this.analysisItem, this.group, this.facility);
+    let annualGroupSummaries: Array<AnnualGroupSummary> = this.energyIntensityService.calculateAnnualGroupSummaries(this.analysisItem, this.group, this.facility);    
     this.baselineEnergyIntensity = annualGroupSummaries[0].energyIntensity;
   }
 
