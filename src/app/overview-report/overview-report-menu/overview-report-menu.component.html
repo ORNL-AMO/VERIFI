@@ -57,10 +57,15 @@
                     </div>
                     <div class="col-6">
                         <label>Graph Options</label>
-                        <label for="annualGraphsByMonth">
-                            <input class="checkbox" type="checkbox" id="annualGraphsByMonth" name="annualGraphsByMonth"
-                                [(ngModel)]="reportOptions.annualGraphsByMonth" (change)="saveCustom()">Display annual
-                            data by month
+                        <label for="annualBarCharts">
+                            <input class="checkbox" type="checkbox" id="annualBarCharts" name="annualBarCharts"
+                                [(ngModel)]="reportOptions.annualBarCharts" (change)="saveCustom()">Annual Data Bar
+                            Charts
+                        </label>
+                        <label for="monthBarCharts">
+                            <input class="checkbox" type="checkbox" id="monthBarCharts" name="monthBarCharts"
+                                [(ngModel)]="reportOptions.monthBarCharts" (change)="saveCustom()">Monthly Data Bar
+                            Charts
                         </label>
                     </div>
                 </div>
@@ -155,11 +160,6 @@
                     Facility
                     Charts
                 </label>
-                <label for="accountFacilityAnnualBarChart" *ngIf="reportOptions.includeAccount">
-                    <input class="checkbox" type="checkbox" id="accountFacilityAnnualBarChart"
-                        name="accountFacilityAnnualBarChart" [(ngModel)]="reportOptions.accountFacilityAnnualBarChart"
-                        (change)="saveCustom()">Include Annual Facility Bar Charts
-                </label>
                 <hr>
                 <label>Facilites to Include</label>
                 <div>
@@ -192,10 +192,6 @@
                             <input class="checkbox" type="checkbox" id="facilityUtilityUsageTable"
                                 name="facilityUtilityUsageTable" [(ngModel)]="reportOptions.facilityUtilityUsageTable"
                                 (change)="saveCustom()">Utility Usage Table
-                        </label>
-                        <label for="facilityBarCharts">
-                            <input class="checkbox" type="checkbox" id="facilityBarCharts" name="facilityBarCharts"
-                                [(ngModel)]="reportOptions.facilityBarCharts" (change)="saveCustom()">Bar Charts
                         </label>
                     </div>
                 </div>
