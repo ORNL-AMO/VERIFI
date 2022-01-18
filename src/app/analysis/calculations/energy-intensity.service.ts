@@ -5,6 +5,7 @@ import { AnalysisGroup, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtil
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import * as _ from 'lodash';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
+import { AnnualGroupSummary, FacilityGroupSummary, FacilityYearGroupSummary, MonthlyGroupSummary } from 'src/app/models/analysis';
 
 @Injectable({
   providedIn: 'root'
@@ -166,52 +167,5 @@ export class EnergyIntensityService {
 
     }
     return facilityGroupSummaries;
-  }
-
-
-
-
-}
-
-
-export interface AnnualGroupSummary {
-  year: number,
-  totalEnergy: number,
-  totalEnergySavings: number,
-  newEnergySavings: number,
-  totalProduction: number,
-  productionChange: number,
-  energyIntensity: number,
-  cumulativeEnergyIntensityChange: number,
-  annualEnergyIntensityChange: number,
-  group: AnalysisGroup
-}
-
-
-export interface MonthlyGroupSummary {
-  date: Date,
-  energyUse: number,
-  production: number,
-  energyIntensity: number
-}
-
-
-export interface FacilityYearGroupSummary {
-  year: number,
-  group: AnalysisGroup,
-  percentBaseline: number,
-  energyIntensityImprovement: number,
-  improvementContribution: number,
-  totalSavings: number,
-  newSavings: number
-}
-
-export interface FacilityGroupSummary {
-  yearGroupSummaries: Array<FacilityYearGroupSummary>
-  totals: {
-    improvementContribution: number,
-    totalSavings: number,
-    newSavings: number,
-    energyIntensityImprovement: number
   }
 }

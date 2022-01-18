@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { MonthlyGroupSummary } from 'src/app/analysis/calculations/energy-intensity.service';
+import { MonthlyGroupSummary } from 'src/app/models/analysis';
 
 @Component({
   selector: 'app-monthly-analysis-table',

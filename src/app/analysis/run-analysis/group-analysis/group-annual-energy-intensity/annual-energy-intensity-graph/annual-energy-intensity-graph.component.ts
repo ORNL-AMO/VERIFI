@@ -1,6 +1,6 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { AnnualGroupSummary } from 'src/app/analysis/calculations/energy-intensity.service';
+import { AnnualGroupSummary } from 'src/app/models/analysis';
 import { IdbAnalysisItem } from 'src/app/models/idb';
 
 @Component({

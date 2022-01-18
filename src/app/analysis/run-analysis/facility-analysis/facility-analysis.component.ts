@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { AnalysisGroup, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
+import { FacilityGroupSummary } from 'src/app/models/analysis';
+import { IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 import { AnalysisService } from '../../analysis.service';
-import { AnnualGroupSummary, EnergyIntensityService, FacilityGroupSummary } from '../../calculations/energy-intensity.service';
+import { EnergyIntensityService } from '../../calculations/energy-intensity.service';
 
 @Component({
   selector: 'app-facility-analysis',

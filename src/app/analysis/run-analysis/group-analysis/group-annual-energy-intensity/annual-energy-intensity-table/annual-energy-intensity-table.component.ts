@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { AnnualGroupSummary } from 'src/app/analysis/calculations/energy-intensity.service';
+import { AnnualGroupSummary } from 'src/app/models/analysis';
 import { IdbAnalysisItem } from 'src/app/models/idb';
 
 @Component({

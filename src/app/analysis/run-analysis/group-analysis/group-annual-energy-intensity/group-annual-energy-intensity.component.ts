@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { AnalysisService } from 'src/app/analysis/analysis.service';
-import { AnnualGroupSummary, EnergyIntensityService } from 'src/app/analysis/calculations/energy-intensity.service';
+import { EnergyIntensityService } from 'src/app/analysis/calculations/energy-intensity.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { AnnualGroupSummary } from 'src/app/models/analysis';
 import { AnalysisGroup, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 
 @Component({
