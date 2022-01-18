@@ -157,7 +157,7 @@ export class AccountdbService {
                 waterIsAbsolute: true
             },
             fiscalYear: 'calendarYear',
-            fiscalYearMonth: 'January',
+            fiscalYearMonth: 0,
             fiscalYearCalendarEnd: true,
             setupWizard: true,
             setupWizardComplete: false,

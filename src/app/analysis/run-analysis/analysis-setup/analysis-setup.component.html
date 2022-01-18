@@ -70,7 +70,7 @@
             <div *ngIf="facility.fiscalYear == 'nonCalendarYear'" class="form-group d-flex">
                 <label class="w-50">Start Month</label>
                 <select class="w-50" id="startMonth" name="startMonth" [(ngModel)]="facility.fiscalYearMonth" disabled>
-                    <option *ngFor="let month of months" [ngValue]="month.name">{{month.name}}
+                    <option *ngFor="let month of months" [ngValue]="month.monthNumValue">{{month.name}}
                     </option>
                 </select>
             </div>

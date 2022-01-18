@@ -43,14 +43,11 @@ export class EnergyIntensityService {
     });
     let productionPredictorIds: Array<string> = productionPredictors.map(predictor => { return predictor.id });
     for (let summaryYear: number = baselineYear; summaryYear <= analysisItem.reportYear; summaryYear++) {
-      let summaryYearData: Array<MonthlyData> = allMeterData.filter(data => {
-        return data.year == summaryYear;
-      });
+      let summaryYearData: Array<MonthlyData> = this.filterYearMeterData(allMeterData, summaryYear, facility);
+      console.log(summaryYearData);
       let totalEnergyUse: number = _.sumBy(summaryYearData, 'energyUse');
-      let summaryYearPredictors: Array<IdbPredictorEntry> = facilityPredictorData.filter(predictorData => {
-        return new Date(predictorData.date).getUTCFullYear() == summaryYear;
-      });
-
+      let summaryYearPredictors: Array<IdbPredictorEntry> = this.filterYearPredictorData(facilityPredictorData, summaryYear, facility);
+      console.log(summaryYearPredictors);
       let predictorData: Array<PredictorData> = summaryYearPredictors.flatMap(yearPredictor => { return yearPredictor.predictors });
       let productionPredictors: Array<PredictorData> = predictorData.filter(data => { return productionPredictorIds.includes(data.id) });
 
@@ -84,6 +81,40 @@ export class EnergyIntensityService {
     }
     return annualGroupSummaries;
   }
+
+  filterYearPredictorData(predictorData: Array<IdbPredictorEntry>, year: number, facility: IdbFacility): Array<IdbPredictorEntry> {
+    if (facility.fiscalYear == 'calendarYear') {
+      return predictorData.filter(predictorData => {
+        return new Date(predictorData.date).getUTCFullYear() == year;
+      });
+    } else {
+      console.log('FISCAL YEAR');
+      let startDate: Date = new Date(year, facility.fiscalYearMonth, 1)
+      let endDate: Date = new Date(year + 1, facility.fiscalYearMonth, 1)
+      return predictorData.filter(predictorDataItem => {
+        let predictorItemDate: Date = new Date(predictorDataItem.date);
+        return predictorItemDate >= startDate && predictorItemDate < endDate;
+      });
+    }
+  }
+
+  filterYearMeterData(meterData: Array<MonthlyData>, year: number, facility: IdbFacility): Array<MonthlyData> {
+    if (facility.fiscalYear == 'calendarYear') {
+      return meterData.filter(meterDataItem => {
+        return new Date(meterDataItem.date).getUTCFullYear() == year;
+      });
+    } else {
+      console.log('FISCAL YEAR METER DATA');
+      let startDate: Date = new Date(year, facility.fiscalYearMonth, 1)
+      let endDate: Date = new Date(year + 1, facility.fiscalYearMonth, 1)
+      return meterData.filter(meterDataItem => {
+        let meterItemDate: Date = new Date(meterDataItem.date);
+        return meterItemDate >= startDate && meterItemDate < endDate;
+      });
+    }
+  }
+
+
 
   calculateMonthlyGroupSummaries(analysisItem: IdbAnalysisItem, selectedGroup: AnalysisGroup, facility: IdbFacility): Array<MonthlyGroupSummary> {
     let monthlyGroupSummary: Array<MonthlyGroupSummary> = new Array();
