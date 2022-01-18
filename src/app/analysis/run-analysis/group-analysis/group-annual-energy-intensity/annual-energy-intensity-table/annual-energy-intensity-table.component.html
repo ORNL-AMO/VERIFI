@@ -1,8 +1,8 @@
 <table class="table table-sm">
     <thead>
         <tr>
-            <th>
-                Year
+            <th class="first-col">
+                
             </th>
             <th *ngFor="let summary of annualGroupSummaries">
                 {{summary.year}}
@@ -15,7 +15,12 @@
                 Total Energy ({{analysisItem.energyUnit}})
             </td>
             <td *ngFor="let summary of annualGroupSummaries">
-                {{summary.totalEnergy | customNumber}}
+                <span *ngIf="summary.totalEnergy">
+                    {{summary.totalEnergy | customNumber}}
+                </span>
+                <span *ngIf="!summary.totalEnergy">
+                    &mdash;
+                </span>
             </td>
         </tr>
         <tr>
@@ -23,7 +28,12 @@
                 Total Energy Savings
             </td>
             <td *ngFor="let summary of annualGroupSummaries">
-                {{summary.totalEnergySavings | customNumber}}
+                <span *ngIf="summary.totalEnergySavings">
+                    {{summary.totalEnergySavings | customNumber}}
+                </span>
+                <span *ngIf="!summary.totalEnergySavings">
+                    &mdash;
+                </span>
             </td>
         </tr>
         <tr>
@@ -31,7 +41,12 @@
                 New Energy Savings
             </td>
             <td *ngFor="let summary of annualGroupSummaries">
-                {{summary.newEnergySavings | customNumber}}
+                <span *ngIf="summary.newEnergySavings">
+                    {{summary.newEnergySavings | customNumber}}
+                </span>
+                <span *ngIf="!summary.newEnergySavings">
+                    &mdash;
+                </span>
             </td>
         </tr>
         <tr>
@@ -39,7 +54,12 @@
                 Total Production
             </td>
             <td *ngFor="let summary of annualGroupSummaries">
-                {{summary.totalProduction | customNumber}}
+                <span *ngIf="summary.totalProduction">
+                    {{summary.totalProduction | customNumber}}
+                </span>
+                <span *ngIf="!summary.totalProduction">
+                    &mdash;
+                </span>
             </td>
         </tr>
         <tr>
@@ -47,7 +67,12 @@
                 Production Change
             </td>
             <td *ngFor="let summary of annualGroupSummaries">
-                {{summary.productionChange | customNumber}}
+                <span *ngIf="summary.productionChange">
+                    {{summary.productionChange | customNumber}}
+                </span>
+                <span *ngIf="!summary.productionChange">
+                    &mdash;
+                </span>
             </td>
         </tr>
         <tr>
@@ -55,7 +80,12 @@
                 Energy Intensity
             </td>
             <td *ngFor="let summary of annualGroupSummaries">
-                {{summary.energyIntensity | customNumber}}
+                <span *ngIf="summary.energyIntensity">
+                    {{summary.energyIntensity | customNumber}}
+                </span>
+                <span *ngIf="!summary.energyIntensity">
+                    &mdash;
+                </span>
             </td>
         </tr>
         <tr>
@@ -63,7 +93,12 @@
                 Cumulative EI Improvement
             </td>
             <td *ngFor="let summary of annualGroupSummaries">
-                {{summary.cumulativeEnergyIntensityChange | customNumber}} %
+                <span *ngIf="summary.cumulativeEnergyIntensityChange">
+                    {{summary.cumulativeEnergyIntensityChange | customNumber}} %
+                </span>
+                <span *ngIf="!summary.cumulativeEnergyIntensityChange">
+                    &mdash;
+                </span>
             </td>
         </tr>
         <tr>
@@ -71,7 +106,12 @@
                 Annual EI Improvement
             </td>
             <td *ngFor="let summary of annualGroupSummaries">
-                {{summary.annualEnergyIntensityChange | customNumber}} %
+                <span *ngIf="summary.annualEnergyIntensityChange">
+                    {{summary.annualEnergyIntensityChange | customNumber}} %
+                </span>
+                <span *ngIf="!summary.annualEnergyIntensityChange">
+                    &mdash;
+                </span>
             </td>
         </tr>
     </tbody>
