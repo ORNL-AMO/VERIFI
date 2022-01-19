@@ -71,7 +71,7 @@ export class MonthlyAnalysisGraphComponent implements OnInit {
           x: months,
           y: yData,
           mode: 'markers',
-          name: dataItem.year,
+          name: 'FY - ' + dataItem.year,
           marker: {
             color: color,
             size: markerSize,

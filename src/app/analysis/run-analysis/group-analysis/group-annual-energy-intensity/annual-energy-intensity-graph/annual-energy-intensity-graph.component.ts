@@ -74,7 +74,7 @@ export class AnnualEnergyIntensityGraphComponent implements OnInit {
       let layout = {
         // title: 'Energy Intensity',
         xaxis: {
-          title: 'Reporting Year',
+          title: 'Reporting Fiscal Year',
           tickmode: 'linear'
         },
         yaxis: {
