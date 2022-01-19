@@ -50,7 +50,6 @@ export class MonthlyAnalysisGraphComponent implements OnInit {
 
       let xData: Array<number> = this.yearData[0].summaries.map(summary => { return new Date(summary.date).getUTCMonth() });
       let months: Array<string> = xData.map(data => { return this.getMonth(data) });
-      console.log(months);
       this.yearData.forEach((dataItem, index) => {
         let color: string;
         let markerSize: number;

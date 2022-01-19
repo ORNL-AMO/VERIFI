@@ -28,6 +28,8 @@ export interface AnnualGroupSummary {
     year: number,
     group: AnalysisGroup,
     percentBaseline: number,
+    energyIntensity: number,
+    annualEnergyIntensityChange: number,
     energyIntensityImprovement: number,
     improvementContribution: number,
     totalEnergySavings: number,
@@ -39,9 +41,12 @@ export interface AnnualGroupSummary {
   export interface FacilityGroupSummary {
     yearGroupSummaries: Array<FacilityYearGroupSummary>
     totals: {
+      year: number,
       improvementContribution: number,
       totalSavings: number,
       newSavings: number,
+      energyIntensity: number,
+      annualEnergyIntensityChange: number,
       energyIntensityImprovement: number,
       totalEnergy: number,
       totalProduction: number,

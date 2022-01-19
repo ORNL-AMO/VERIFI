@@ -232,6 +232,8 @@ export class EnergyIntensityService {
           year: summary.year,
           group: summary.group,
           percentBaseline: percentBaseline[index] * 100,
+          energyIntensity: summary.energyIntensity,
+          annualEnergyIntensityChange: summary.annualEnergyIntensityChange,
           energyIntensityImprovement: summary.annualEnergyIntensityChange,
           improvementContribution: percentBaseline[index] * summary.annualEnergyIntensityChange,
           totalEnergySavings: summary.totalEnergySavings,
@@ -244,6 +246,7 @@ export class EnergyIntensityService {
       facilityGroupSummaries.push({
         yearGroupSummaries: yearGroupSummaries,
         totals: {
+          year: summaryYear,
           energyIntensityImprovement: _.sumBy(yearGroupSummaries, 'energyIntensityImprovement'),
           improvementContribution: _.sumBy(yearGroupSummaries, 'improvementContribution'),
           totalSavings: _.sumBy(yearGroupSummaries, 'totalSavings'),
@@ -251,7 +254,9 @@ export class EnergyIntensityService {
           totalEnergy: _.sumBy(yearGroupSummaries, 'totalEnergy'),
           totalProduction: _.sumBy(yearGroupSummaries, 'totalProduction'),
           totalEnergySavings: _.sumBy(yearGroupSummaries, 'totalEnergySavings'),
-          annualEnergySavings: _.sumBy(yearGroupSummaries, 'annualEnergySavings')
+          annualEnergySavings: _.sumBy(yearGroupSummaries, 'annualEnergySavings'),
+          energyIntensity: _.sumBy(yearGroupSummaries, 'energyIntensity'),
+          annualEnergyIntensityChange: _.sumBy(yearGroupSummaries, 'annualEnergyIntensityChange')
         }
       })
 
