@@ -18,23 +18,10 @@ export class MonthlyAnalysisTableComponent implements OnInit {
   group: AnalysisGroup;
   
   orderDataField: string = 'date';
-  orderByDirection: string = 'desc';
+  orderByDirection: string = 'asc';
   currentPageNumber: number = 1;
   constructor() { }
 
   ngOnInit(): void {
-  }
-
-
-  setOrderDataField(str: string) {
-    if (str == this.orderDataField) {
-      if (this.orderByDirection == 'desc') {
-        this.orderByDirection = 'asc';
-      } else {
-        this.orderByDirection = 'desc';
-      }
-    } else {
-      this.orderDataField = str;
-    }
   }
 }

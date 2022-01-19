@@ -2,15 +2,15 @@
     <table class="table table-sm table-hover">
         <thead>
             <tr>
-                <th (click)="setOrderDataField('date')" [ngClass]="{'active': orderDataField == 'date'}">Month</th>
-                <th (click)=" setOrderDataField('energyUse')" [ngClass]="{'active': orderDataField == 'energyUse'}">
+                <th>Month</th>
+                <th>
                     Total Energy (<span [innerHTML]="analysisItem.energyUnit | settingsLabel"></span>)</th>
-                <th (click)="setOrderDataField('production')" [ngClass]="{'active': orderDataField == 'production'}">
+                <th>
                     Total Production ({{group.productionUnits}})
                 </th>
-                <th (click)="setOrderDataField('energyIntensity')"
-                    [ngClass]="{'active': orderDataField == 'energyIntensity'}">
-                    Energy Intensity</th>
+                <th>
+                    Energy Intensity (<span
+                        [innerHTML]="analysisItem.energyUnit | settingsLabel"></span>/{{group.productionUnits}})</th>
             </tr>
         </thead>
         <tbody>

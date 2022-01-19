@@ -20,7 +20,7 @@ export class EnergyIntensityService {
 
   calculateAnnualGroupSummaries(analysisItem: IdbAnalysisItem, selectedGroup: AnalysisGroup, facility: IdbFacility): Array<AnnualGroupSummary> {
     let annualGroupSummaries: Array<AnnualGroupSummary> = new Array();
-    let baselineYear: number = facility.sustainabilityQuestions.energyReductionBaselineYear;
+
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
     let groupMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.groupId == selectedGroup.idbGroup.id });
     let calanderizationOptions: CalanderizationOptions = {
@@ -43,10 +43,19 @@ export class EnergyIntensityService {
       return variable.production;
     });
     let productionPredictorIds: Array<string> = productionPredictors.map(predictor => { return predictor.id });
-    for (let summaryYear: number = baselineYear; summaryYear <= analysisItem.reportYear; summaryYear++) {
+    let baselineYear: number = facility.sustainabilityQuestions.energyReductionBaselineYear;
+    let reportYear: number = analysisItem.reportYear;
+    if (facility.fiscalYear == 'nonCalendarYear' && facility.fiscalYearCalendarEnd) {
+      baselineYear = baselineYear - 1;
+      reportYear = reportYear - 1;
+    }
+
+
+    for (let summaryYear: number = baselineYear; summaryYear <= reportYear; summaryYear++) {
       let summaryYearData: Array<MonthlyData> = this.filterYearMeterData(allMeterData, summaryYear, facility);
       let totalEnergyUse: number = _.sumBy(summaryYearData, 'energyUse');
       let summaryYearPredictors: Array<IdbPredictorEntry> = this.filterYearPredictorData(facilityPredictorData, summaryYear, facility);
+
       let predictorData: Array<PredictorData> = summaryYearPredictors.flatMap(yearPredictor => { return yearPredictor.predictors });
       let productionPredictors: Array<PredictorData> = predictorData.filter(data => { return productionPredictorIds.includes(data.id) });
 
@@ -58,18 +67,23 @@ export class EnergyIntensityService {
         previousYearEnergyUse = totalEnergyUse;
         baselineProduction = totalProduction
         baselineEnergyIntensity = energyIntensity;
+        previousYearProduction = totalProduction;
       }
 
       let cumulativeEnergyIntensityChange: number = (1 - (energyIntensity / baselineEnergyIntensity)) * 100;
 
+      let yearDisplay: number = summaryYear;
+      if (facility.fiscalYear == 'nonCalendarYear' && facility.fiscalYearCalendarEnd) {
+        yearDisplay = yearDisplay + 1;
+      }
       annualGroupSummaries.push({
-        year: summaryYear,
+        year: yearDisplay,
         totalEnergy: totalEnergyUse,
         totalEnergySavings: baselineEnergyUse - totalEnergyUse,
         annualEnergySavings: previousYearEnergyUse - totalEnergyUse,
         totalProduction: totalProduction,
         totalProductionChange: baselineProduction - totalProduction,
-        annualProductionChange: previousYearProduction,
+        annualProductionChange: previousYearProduction - totalProduction,
         energyIntensity: energyIntensity,
         totalEnergyIntensityChange: cumulativeEnergyIntensityChange,
         annualEnergyIntensityChange: cumulativeEnergyIntensityChange - previousYearEnergyIntensity,
@@ -136,9 +150,11 @@ export class EnergyIntensityService {
     });
     let allMeterData: Array<MonthlyData> = calanderizedMeterData.flatMap(calanderizedMeter => { return calanderizedMeter.monthlyData });
 
-    let baselineDate: Date = new Date(facility.sustainabilityQuestions.energyReductionBaselineYear, 0);
-    let endDate: Date = new Date(analysisItem.reportYear + 1, 0);
 
+
+    let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = this.getMonthlyStartAndEndDate(facility, analysisItem);
+    let baselineDate: Date = monthlyStartAndEndDate.baselineDate;
+    let endDate: Date = monthlyStartAndEndDate.endDate;
 
     while (baselineDate < endDate) {
       let monthPredictorData: Array<IdbPredictorEntry> = facilityPredictorData.filter(predictorData => {
@@ -163,9 +179,32 @@ export class EnergyIntensityService {
         production: production,
         energyIntensity: energyUse / production
       })
-      baselineDate.setUTCMonth(baselineDate.getUTCMonth() + 1);
+      let currentMonth: number = baselineDate.getUTCMonth()
+      let nextMonth: number = currentMonth + 1;
+      baselineDate = new Date(baselineDate.getUTCFullYear(), nextMonth, 1);
     }
     return monthlyGroupSummary;
+  }
+
+  getMonthlyStartAndEndDate(facility: IdbFacility, analysisItem: IdbAnalysisItem): { baselineDate: Date, endDate: Date } {
+    let baselineDate: Date;
+    let endDate: Date;
+    if (facility.fiscalYear == 'calendarYear') {
+      baselineDate = new Date(facility.sustainabilityQuestions.energyReductionBaselineYear, 0, 1);
+      endDate = new Date(analysisItem.reportYear + 1, 0, 1);
+    } else {
+      if (facility.fiscalYearCalendarEnd) {
+        baselineDate = new Date(facility.sustainabilityQuestions.energyReductionBaselineYear - 1, facility.fiscalYearMonth);
+        endDate = new Date(analysisItem.reportYear, facility.fiscalYearMonth);
+      } else {
+        baselineDate = new Date(facility.sustainabilityQuestions.energyReductionBaselineYear, facility.fiscalYearMonth);
+        endDate = new Date(analysisItem.reportYear + 1, facility.fiscalYearMonth);
+      }
+    }
+    return {
+      baselineDate: baselineDate,
+      endDate: endDate
+    }
   }
 
 
@@ -184,7 +223,7 @@ export class EnergyIntensityService {
       let totalEnergy: number = _.sumBy(filterYearSummaries, 'totalEnergy');
       let yearGroupSummaries: Array<FacilityYearGroupSummary> = new Array();
 
-      filterYearSummaries.forEach((summary,index) => {
+      filterYearSummaries.forEach((summary, index) => {
         if (summaryYear == baselineYear) {
           percentBaseline.push(summary.totalEnergy / totalEnergy);
         }

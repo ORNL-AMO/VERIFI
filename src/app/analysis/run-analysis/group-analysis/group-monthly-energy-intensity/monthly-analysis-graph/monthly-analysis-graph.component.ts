@@ -3,6 +3,7 @@ import { PlotlyService } from 'angular-plotly.js';
 import { IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 import { Month, Months } from 'src/app/form-data/months';
 import { MonthlyGroupSummary } from 'src/app/models/analysis';
+import { EnergyIntensityService } from 'src/app/analysis/calculations/energy-intensity.service';
 
 @Component({
   selector: 'app-monthly-analysis-graph',
@@ -30,11 +31,10 @@ export class MonthlyAnalysisGraphComponent implements OnInit {
     'blue',
     'green',
     'red',
-    'black',
     'orange',
-    'yellow'
+    'yellow',
   ]
-  constructor(private plotlyService: PlotlyService) { }
+  constructor(private plotlyService: PlotlyService, private energyIntensityService: EnergyIntensityService) { }
 
   ngOnInit(): void {
     this.yearData = this.getYearData();
@@ -50,7 +50,22 @@ export class MonthlyAnalysisGraphComponent implements OnInit {
 
       let xData: Array<number> = this.yearData[0].summaries.map(summary => { return new Date(summary.date).getUTCMonth() });
       let months: Array<string> = xData.map(data => { return this.getMonth(data) });
+      console.log(months);
       this.yearData.forEach((dataItem, index) => {
+        let color: string;
+        let markerSize: number;
+        let symbol: string;
+        if (index == 0) {
+          markerSize = 18
+          symbol = 'square';
+          color = 'black';
+        } else if (index != 0 && index != this.yearData.length - 1) {
+          markerSize = 18;
+          symbol = 'circle'
+        } else if (index == this.yearData.length - 1) {
+          markerSize = 18;
+          symbol = 'star'
+        }
         let yData: Array<number> = dataItem.summaries.map(summary => { return summary.energyIntensity });
         traceData.push({
           x: months,
@@ -58,8 +73,9 @@ export class MonthlyAnalysisGraphComponent implements OnInit {
           mode: 'markers',
           name: dataItem.year,
           marker: {
-            color: this.markerColors[index],
-            size: 16
+            color: color,
+            size: markerSize,
+            symbol: symbol
           }
         });
 
@@ -83,6 +99,7 @@ export class MonthlyAnalysisGraphComponent implements OnInit {
         },
         yaxis: {
           title: 'Energy Intensity',
+          hoverformat: ",.2f",
         }
       };
 
@@ -110,13 +127,14 @@ export class MonthlyAnalysisGraphComponent implements OnInit {
       year: number,
       summaries: Array<MonthlyGroupSummary>
     }> = new Array();
-    let startDate: Date = new Date(this.facility.sustainabilityQuestions.energyReductionBaselineYear, 0);
-    let endDate: Date = new Date(this.analysisItem.reportYear, 12);
-
-    while (startDate.getUTCFullYear() < endDate.getUTCFullYear()) {
+    let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = this.energyIntensityService.getMonthlyStartAndEndDate(this.facility, this.analysisItem);
+    let startDate: Date = monthlyStartAndEndDate.baselineDate;
+    let endDate: Date = monthlyStartAndEndDate.endDate;
+    while (startDate < endDate) {
+      let dateRangeDate: Date = new Date(startDate.getUTCFullYear() + 1, startDate.getUTCMonth());
       let yearGroupSummaries: Array<MonthlyGroupSummary> = this.monthlyGroupSummaries.filter(summary => {
         let summaryDate: Date = new Date(summary.date);
-        return summaryDate.getUTCFullYear() == startDate.getUTCFullYear();
+        return summaryDate >= startDate && summaryDate < dateRangeDate;
       });
 
       traceData.push({
