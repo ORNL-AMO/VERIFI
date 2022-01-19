@@ -25,6 +25,10 @@ export class AnalysisDbService {
     this.accountAnalysisItems = new BehaviorSubject<Array<IdbAnalysisItem>>([]);
     this.facilityAnalysisItems = new BehaviorSubject<Array<IdbAnalysisItem>>([]);
     this.selectedAnalysisItem = new BehaviorSubject<IdbAnalysisItem>(undefined);
+    
+    this.facilityDbService.selectedFacility.subscribe(() => {
+      this.setAccountAnalysisItems();
+  });
   }
 
 
