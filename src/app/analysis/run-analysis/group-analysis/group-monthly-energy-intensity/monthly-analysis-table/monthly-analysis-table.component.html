@@ -14,8 +14,8 @@
             </tr>
         </thead>
         <tbody>
-            <tr
-                *ngFor="let summary of monthlyGroupSummaries| orderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
+            <tr *ngFor="let summary of monthlyGroupSummaries| slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage"
+                [ngClass]="{'fiscal-year-end': checkFiscalYearEnd(summary.date)}">
                 <td>{{summary.date | date: 'MMMM, y'}}</td>
                 <td>
                     <span *ngIf="summary.energyUse">{{summary.energyUse | customNumber}}</span>

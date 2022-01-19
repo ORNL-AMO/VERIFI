@@ -41,7 +41,7 @@
     </div> -->
 </div>
 <app-monthly-analysis-table *ngIf="dataDisplay == 'table'" [monthlyGroupSummaries]="monthlyGroupSummaries"
-    [itemsPerPage]="itemsPerPage" [analysisItem]="analysisItem" [group]="group">
+    [itemsPerPage]="itemsPerPage" [analysisItem]="analysisItem" [group]="group" [facility]="facility">
 </app-monthly-analysis-table>
 <app-monthly-analysis-graph *ngIf="dataDisplay == 'graph'" [monthlyGroupSummaries]="monthlyGroupSummaries"
     [facility]="facility" [analysisItem]="analysisItem" [baselineEnergyIntensity]="baselineEnergyIntensity">

@@ -16,7 +16,7 @@ export class GroupMonthlyEnergyIntensityComponent implements OnInit {
   monthlyGroupSummaries: Array<MonthlyGroupSummary>;
   analysisItem: IdbAnalysisItem;
   dataDisplay: 'table' | 'graph' = 'table';
-  itemsPerPage: number = 6;
+  itemsPerPage: number = 12;
   facility: IdbFacility;
   baselineEnergyIntensity: number;
   group: AnalysisGroup;

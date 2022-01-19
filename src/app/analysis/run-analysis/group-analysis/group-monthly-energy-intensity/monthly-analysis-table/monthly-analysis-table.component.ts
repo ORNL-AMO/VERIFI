@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { MonthlyGroupSummary } from 'src/app/models/analysis';
-import { AnalysisGroup, IdbAnalysisItem } from 'src/app/models/idb';
+import { AnalysisGroup, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 
 @Component({
   selector: 'app-monthly-analysis-table',
@@ -16,12 +16,27 @@ export class MonthlyAnalysisTableComponent implements OnInit {
   analysisItem: IdbAnalysisItem;
   @Input()
   group: AnalysisGroup;
-  
-  orderDataField: string = 'date';
-  orderByDirection: string = 'asc';
+  @Input()
+  facility: IdbFacility;
+
+  // orderDataField: string = 'date';
+  // orderByDirection: string = 'asc';
   currentPageNumber: number = 1;
   constructor() { }
 
   ngOnInit(): void {
+  }
+
+
+  checkFiscalYearEnd(date: Date): boolean {
+    if (this.facility.fiscalYear == 'calendarYear') {
+      return date.getUTCMonth() == 0;
+    } else {
+      if (date.getUTCMonth() == this.facility.fiscalYearMonth) {
+        return true;
+      } else {
+        return false;
+      }
+    }
   }
 }
