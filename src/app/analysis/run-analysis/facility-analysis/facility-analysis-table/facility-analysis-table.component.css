@@ -2,10 +2,10 @@ tr.totals{
     border-bottom: solid;
 }
 
-th.cell-one{
-    width: 10%;
+th{
+    width: 8%;
 }
 
-th:not(.cell-one){
-    width: 18%;
-}
+/* th:not(.cell-one){
+    width: 12.5%;
+} */

@@ -4,11 +4,12 @@ export interface AnnualGroupSummary {
     year: number,
     totalEnergy: number,
     totalEnergySavings: number,
-    newEnergySavings: number,
+    annualEnergySavings: number,
     totalProduction: number,
-    productionChange: number,
+    annualProductionChange: number,
+    totalProductionChange: number,
     energyIntensity: number,
-    cumulativeEnergyIntensityChange: number,
+    totalEnergyIntensityChange: number,
     annualEnergyIntensityChange: number,
     group: AnalysisGroup
   }
@@ -28,8 +29,10 @@ export interface AnnualGroupSummary {
     percentBaseline: number,
     energyIntensityImprovement: number,
     improvementContribution: number,
-    totalSavings: number,
-    newSavings: number
+    totalEnergySavings: number,
+    annualEnergySavings: number,
+    totalEnergy: number,
+    totalProduction: number
   }
   
   export interface FacilityGroupSummary {
@@ -38,6 +41,10 @@ export interface AnnualGroupSummary {
       improvementContribution: number,
       totalSavings: number,
       newSavings: number,
-      energyIntensityImprovement: number
+      energyIntensityImprovement: number,
+      totalEnergy: number,
+      totalProduction: number,
+      totalEnergySavings: number,
+      annualEnergySavings: number
     }
   }

@@ -8,14 +8,17 @@
                     Cumulative Energy<br> Improvement
                 </th>
                 <th>Improvement<br> Contribution</th>
+                <th>Total Energy<br> (<span [innerHTML]="analysisItem.energyUnit | settingsLabel"></span>)</th>
                 <th>Total Savings<br> (<span [innerHTML]="analysisItem.energyUnit | settingsLabel"></span>)
                 </th>
                 <th>New Savings<br> (<span [innerHTML]="analysisItem.energyUnit | settingsLabel"></span>)</th>
+                <th>Total Production</th>
             </tr>
         </thead>
         <tbody *ngFor="let groupSummary of facilityGroupSummaries">
             <tr class="bold">
                 <td colspan="6">
+                    <span *ngIf="facility.fiscalYear == 'nonCalendarYear'">FY - </span>
                     {{groupSummary.yearGroupSummaries[0].year}}
                 </td>
             </tr>
@@ -33,10 +36,16 @@
                     {{summary.improvementContribution | customNumber}} %
                 </td>
                 <td>
-                    {{summary.totalSavings | customNumber}}
+                    {{summary.totalEnergy | customNumber}}
                 </td>
                 <td>
-                    {{summary.newSavings | customNumber}}
+                    {{summary.totalEnergySavings | customNumber}}
+                </td>
+                <td>
+                    {{summary.annualEnergySavings | customNumber}}
+                </td>
+                <td>
+                    {{summary.totalProduction | customNumber}}
                 </td>
             </tr>
             <tr class="bold totals">
@@ -49,10 +58,16 @@
                     {{groupSummary.totals.improvementContribution | customNumber}} %
                 </td>
                 <td>
-                    {{groupSummary.totals.totalSavings | customNumber}}
+                    {{groupSummary.totals.totalEnergy | customNumber}}
                 </td>
                 <td>
-                    {{groupSummary.totals.newSavings | customNumber}}
+                    {{groupSummary.totals.totalEnergySavings | customNumber}}
+                </td>
+                <td>
+                    {{groupSummary.totals.annualEnergySavings | customNumber}}
+                </td>
+                <td>
+                    {{groupSummary.totals.totalProduction | customNumber}}
                 </td>
             </tr>
         </tbody>

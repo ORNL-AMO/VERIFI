@@ -1,8 +1,17 @@
-th.first-col{
-    width: 250px;
-}
 
 .table-units, .table-units span{
     font-size: 12px;
     /* font-weight: bold; */
+}
+
+th.first-column{
+    width:10%;
+}
+
+th.th-3{
+    width: 30%;
+}
+
+tr.table-mh th.th-3 span{
+    padding: 0px !important;
 }

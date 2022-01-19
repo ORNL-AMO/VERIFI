@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FacilityGroupSummary } from 'src/app/models/analysis';
-import { IdbAnalysisItem } from 'src/app/models/idb';
+import { IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 
 @Component({
   selector: 'app-facility-analysis-table',
@@ -12,6 +12,8 @@ export class FacilityAnalysisTableComponent implements OnInit {
   facilityGroupSummaries: Array<FacilityGroupSummary>;
   @Input()
   analysisItem: IdbAnalysisItem;
+  @Input()
+  facility: IdbFacility;
 
   constructor() { }
 

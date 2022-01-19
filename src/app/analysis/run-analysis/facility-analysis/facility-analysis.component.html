@@ -10,6 +10,6 @@
     </div>
     <app-facility-analysis-graph *ngIf="dataDisplay == 'graph'"></app-facility-analysis-graph>
     <app-facility-analysis-table *ngIf="dataDisplay == 'table'" [facilityGroupSummaries]="facilityGroupSummaries"
-        [analysisItem]="analysisItem">
+        [analysisItem]="analysisItem" [facility]="facility">
     </app-facility-analysis-table>
 </div>

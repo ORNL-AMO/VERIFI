@@ -17,6 +17,7 @@ export class GroupAnnualEnergyIntensityComponent implements OnInit {
   annualGroupSummaries: Array<AnnualGroupSummary>;
   analysisItem: IdbAnalysisItem;
   group: AnalysisGroup;
+  facility: IdbFacility;
   constructor(private energyIntensityService: EnergyIntensityService, private analysisService: AnalysisService,
     private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService) { }
 
@@ -24,8 +25,8 @@ export class GroupAnnualEnergyIntensityComponent implements OnInit {
     this.dataDisplay = this.analysisService.dataDisplay.getValue();
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     this.group  = this.analysisService.selectedGroup.getValue();
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.annualGroupSummaries = this.energyIntensityService.calculateAnnualGroupSummaries(this.analysisItem, this.group, selectedFacility);
+    this.facility = this.facilityDbService.selectedFacility.getValue();
+    this.annualGroupSummaries = this.energyIntensityService.calculateAnnualGroupSummaries(this.analysisItem, this.group, this.facility);
   }
 
   setDataDisplay(display: 'table' | 'graph') {

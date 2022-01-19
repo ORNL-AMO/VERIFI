@@ -37,22 +37,19 @@ export class AnnualEnergyIntensityGraphComponent implements OnInit {
         y: summariesCopy.map(summary => { return summary.energyIntensity }),
         width: summariesCopy.map(summary => { return .3 }),
         name: "Production Energy Intensity",
-        type: 'bar'
+        type: 'bar',
+        yaxis: 'y2',
       }
       traceData.push(barTrace);
 
       let lineTrace = {
         x: summariesCopy.map(summary => { return summary.year }),
         y: summariesCopy.map((summary, index) => {
-          if (index == 0) {
-            return undefined
-          } else {
-            return summary.annualEnergyIntensityChange
-          }
+          return summary.annualEnergyIntensityChange
         }),
         name: "Annual Improvement in Energy Intensity (%)",
         type: 'lines+markers',
-        yaxis: 'y2',
+        // yaxis: 'y2',
         marker: {
           size: 16
         }
@@ -62,15 +59,11 @@ export class AnnualEnergyIntensityGraphComponent implements OnInit {
       let lineTrace2 = {
         x: summariesCopy.map(summary => { return summary.year }),
         y: summariesCopy.map((summary, index) => {
-          if (index == 0) {
-            return undefined
-          } else {
-            return summary.cumulativeEnergyIntensityChange
-          }
+          return summary.totalEnergyIntensityChange
         }),
         name: "Total Improvement in Energy Intensity (%)",
         type: 'lines+markers',
-        yaxis: 'y2',
+        // yaxis: 'y2',
         marker: {
           size: 16
         }
@@ -85,16 +78,16 @@ export class AnnualEnergyIntensityGraphComponent implements OnInit {
           tickmode: 'linear'
         },
         yaxis: {
-          title: 'Energy Intensity',
-        },
-        yaxis2: {
           title: 'Percent Improvement',
-          overlaying: 'y',
-          side: 'right',
+          overlaying: 'y2',
           ticksuffix: '%',
           hoverformat: ",.2f",
+        },
+        yaxis2: {
+          title: 'Energy Intensity',
+          side: 'right',
           showgrid: false,
-          zeroline: false
+          // zeroline: false
         },
         legend: {
           orientation: "h",
