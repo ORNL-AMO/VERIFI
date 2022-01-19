@@ -17,7 +17,7 @@
         </thead>
         <tbody *ngFor="let groupSummary of facilityGroupSummaries">
             <tr class="bold">
-                <td colspan="6">
+                <td colspan="8">
                     <span *ngIf="facility.fiscalYear == 'nonCalendarYear'">FY - </span>
                     {{groupSummary.yearGroupSummaries[0].year}}
                 </td>

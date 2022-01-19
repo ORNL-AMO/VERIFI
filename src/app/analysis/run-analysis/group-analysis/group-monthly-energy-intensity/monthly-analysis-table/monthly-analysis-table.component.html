@@ -3,13 +3,14 @@
         <thead>
             <tr>
                 <th>Month</th>
+                <th>Fiscal Year</th>
                 <th>
-                    Total Energy (<span [innerHTML]="analysisItem.energyUnit | settingsLabel"></span>)</th>
+                    Total Energy <br>(<span [innerHTML]="analysisItem.energyUnit | settingsLabel"></span>)</th>
                 <th>
-                    Total Production ({{group.productionUnits}})
+                    Total Production <br>({{group.productionUnits}})
                 </th>
                 <th>
-                    Energy Intensity (<span
+                    Energy Intensity <br>(<span
                         [innerHTML]="analysisItem.energyUnit | settingsLabel"></span>/{{group.productionUnits}})</th>
             </tr>
         </thead>
@@ -17,6 +18,7 @@
             <tr *ngFor="let summary of monthlyGroupSummaries| slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage"
                 [ngClass]="{'fiscal-year-end': checkFiscalYearEnd(summary.date)}">
                 <td>{{summary.date | date: 'MMMM, y'}}</td>
+                <td>{{summary.fiscalYear}}</td>
                 <td>
                     <span *ngIf="summary.energyUse">{{summary.energyUse | customNumber}}</span>
                     <span *ngIf="!summary.energyUse">N/A</span>

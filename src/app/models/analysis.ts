@@ -19,7 +19,8 @@ export interface AnnualGroupSummary {
     date: Date,
     energyUse: number,
     production: number,
-    energyIntensity: number
+    energyIntensity: number,
+    fiscalYear: number
   }
   
   

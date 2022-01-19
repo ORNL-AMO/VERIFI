@@ -1,15 +1,6 @@
 
-th:hover{
-    cursor: pointer;
-    text-decoration: underline;
-}
-
-th.active{
-    text-decoration: underline;
-}
-
 th{
-    width: 25%;
+    width: 20%;
 }
 
 tr.fiscal-year-end:not(:first-of-type){
