@@ -65,6 +65,18 @@ export class HelpPanelComponent implements OnInit {
       this.helpURL = 'report-menu';
     } else if (url.indexOf('basic-report') != -1) {
       this.helpURL = 'basic-report';
+    } else if (url.indexOf('analysis-dashboard') != -1) {
+      this.helpURL = 'analysis-dashboard';
+    } else if (url.indexOf('analysis-setup') != -1) {
+      this.helpURL = 'analysis-setup';
+    } else if (url.indexOf('group-analysis') != -1 && url.indexOf('options') != -1) {
+      this.helpURL = 'group-analysis-options';
+    } else if (url.indexOf('annual-energy-intensity') != -1) {
+      this.helpURL = 'annual-energy-intensity';
+    } else if (url.indexOf('monthly-energy-intensity') != -1) {
+      this.helpURL = 'monthly-energy-intensity';
+    } else if (url.indexOf('facility-analysis') != -1) {
+      this.helpURL = 'facility-analysis';
     }
   }
 

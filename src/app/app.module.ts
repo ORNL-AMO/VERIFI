@@ -154,6 +154,12 @@ import { AnnualEnergyIntensityTableComponent } from './analysis/run-analysis/gro
 import { AnnualEnergyIntensityGraphComponent } from './analysis/run-analysis/group-analysis/group-annual-energy-intensity/annual-energy-intensity-graph/annual-energy-intensity-graph.component';
 import { FacilityAnalysisTableComponent } from './analysis/run-analysis/facility-analysis/facility-analysis-table/facility-analysis-table.component';
 import { FacilityAnalysisGraphComponent } from './analysis/run-analysis/facility-analysis/facility-analysis-graph/facility-analysis-graph.component';
+import { AnalysisDashboardHelpComponent } from './help-panel/analysis/analysis-dashboard-help/analysis-dashboard-help.component';
+import { AnalysisSetupHelpComponent } from './help-panel/analysis/analysis-setup-help/analysis-setup-help.component';
+import { FacilityAnalysisHelpComponent } from './help-panel/analysis/facility-analysis-help/facility-analysis-help.component';
+import { MonthlyGroupAnalysisHelpComponent } from './help-panel/analysis/monthly-group-analysis-help/monthly-group-analysis-help.component';
+import { AnnualGroupAnalysisHelpComponent } from './help-panel/analysis/annual-group-analysis-help/annual-group-analysis-help.component';
+import { GroupAnalysisSetupHelpComponent } from './help-panel/analysis/group-analysis-setup-help/group-analysis-setup-help.component';
 
 @NgModule({
   declarations: [
@@ -294,6 +300,12 @@ import { FacilityAnalysisGraphComponent } from './analysis/run-analysis/facility
     AnnualEnergyIntensityGraphComponent,
     FacilityAnalysisTableComponent,
     FacilityAnalysisGraphComponent,
+    AnalysisDashboardHelpComponent,
+    AnalysisSetupHelpComponent,
+    FacilityAnalysisHelpComponent,
+    MonthlyGroupAnalysisHelpComponent,
+    AnnualGroupAnalysisHelpComponent,
+    GroupAnalysisSetupHelpComponent,
   ],
   imports: [
     BrowserModule,
