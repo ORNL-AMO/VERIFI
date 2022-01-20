@@ -235,4 +235,23 @@ export class AnalysisDbService {
       this.update(item);
     });
   }
+
+  async deleteAllFacilityAnalysisItems(facilityId: number){
+    let accountAnalysisItems: Array<IdbAnalysisItem> = this.accountAnalysisItems.getValue();
+    let facilityAnalysisItems: Array<IdbAnalysisItem> = accountAnalysisItems.filter(analysisItem => {return analysisItem.facilityId == facilityId});
+    await this.deleteAnalysisItems(facilityAnalysisItems);
+    this.setAccountAnalysisItems();
+  }
+
+
+  async deleteAccountAnalysisItems(){
+    let accountAnalysisItems: Array<IdbAnalysisItem> = this.accountAnalysisItems.getValue();
+    await this.deleteAnalysisItems(accountAnalysisItems);
+  }
+
+  async deleteAnalysisItems(analysisItems: Array<IdbAnalysisItem>){
+    for(let i = 0; i < analysisItems.length; i++){
+      await this.deleteWithObservable(analysisItems[i].id);
+    }
+  }
 }

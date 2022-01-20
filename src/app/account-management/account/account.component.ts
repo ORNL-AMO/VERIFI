@@ -11,6 +11,8 @@ import { UtilityMeterGroupdbService } from "../../indexedDB/utilityMeterGroup-db
 import { LoadingService } from "../../shared/loading/loading.service";
 import { BackupDataService } from '../backup-data.service';
 import { HelpPanelService } from 'src/app/help-panel/help-panel.service';
+import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
+import { OverviewReportOptionsDbService } from 'src/app/indexedDB/overview-report-options-db.service';
 
 @Component({
   selector: 'app-account',
@@ -38,7 +40,9 @@ export class AccountComponent implements OnInit {
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private loadingService: LoadingService,
     private backupDataService: BackupDataService,
-    private helpPanelService: HelpPanelService
+    private helpPanelService: HelpPanelService,
+    private analysisDbService: AnalysisDbService,
+    private overviewReportOptionsDbService: OverviewReportOptionsDbService
   ) { }
 
   ngOnInit() {
@@ -80,6 +84,10 @@ export class AccountComponent implements OnInit {
     await this.utilityMeterDbService.deleteAllFacilityMeters(this.facilityToDelete.id);
     this.loadingService.setLoadingMessage("Deleting Facility Meter Groups...");
     await this.utilityMeterGroupDbService.deleteAllFacilityMeterGroups(this.facilityToDelete.id);
+    this.loadingService.setLoadingMessage("Updating Reports...")
+    await this.overviewReportOptionsDbService.updateReportsRemoveFacility(this.facilityToDelete.id);
+    this.loadingService.setLoadingMessage("Deleting Analysis Items...")
+    await this.analysisDbService.deleteAllFacilityAnalysisItems(this.facilityToDelete.id);
     this.loadingService.setLoadingMessage("Deleting Facility...");
     await this.facilityDbService.deleteFacilitiesAsync([this.facilityToDelete]);
     let allFacilities: Array<IdbFacility> = await this.facilityDbService.getAll().toPromise();
@@ -107,7 +115,11 @@ export class AccountComponent implements OnInit {
     await this.utilityMeterGroupDbService.deleteAllSelectedAccountMeterGroups();
     this.loadingService.setLoadingMessage("Deleting Account Facilities...");
     await this.facilityDbService.deleteAllSelectedAccountFacilities();
-    
+    this.loadingService.setLoadingMessage("Deleting Reports...")
+    await this.overviewReportOptionsDbService.deleteAccountReports();
+    this.loadingService.setLoadingMessage("Deleting Analysis Items...")
+    await this.analysisDbService.deleteAccountAnalysisItems();
+
     let allFacilities: Array<IdbFacility> = await this.facilityDbService.getAll().toPromise();
     // Then navigate to another facility
     this.facilityDbService.allFacilities.next(allFacilities);
@@ -166,7 +178,7 @@ export class AccountComponent implements OnInit {
     this.showImportFile = false;
   }
 
-  toggleHelpPanel(){
+  toggleHelpPanel() {
     let helpPanelOpen: boolean = this.helpPanelService.helpPanelOpen.getValue();
     this.helpPanelService.helpPanelOpen.next(!helpPanelOpen);
   }

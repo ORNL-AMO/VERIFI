@@ -109,5 +109,25 @@ export class OverviewReportOptionsDbService {
     });
   }
 
+  async updateReportsRemoveFacility(facilityId: number) {
+    let accountReports: Array<IdbOverviewReportOptions> = this.accountOverviewReportOptions.getValue();
+    for(let i = 0; i < accountReports.length; i++){
+      let report: IdbOverviewReportOptions = accountReports[i];
+      report.reportOptions.facilities = report.reportOptions.facilities.filter(facility => {return facility.id != facilityId});
+      await this.updateWithObservable(report).toPromise();
+    }
+  }
+
+  async deleteAccountReports(){
+    let accountReports: Array<IdbOverviewReportOptions> = this.accountOverviewReportOptions.getValue();
+    await this.deleteReportsAsync(accountReports)
+  }
+
+  async deleteReportsAsync(reports: Array<IdbOverviewReportOptions>){
+    for(let i = 0; i < reports.length; i++){
+      await this.deleteWithObservable(reports[i].id).toPromise();
+    }
+  }
 
 }
+
