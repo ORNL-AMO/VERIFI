@@ -24,13 +24,14 @@
     <div class="col-md-6 col-sm-12">
         <label class="bold">Production Variables</label>
         <div class="form-group">
-            <label class="checkbox-label" *ngFor="let predictor of group.predictorVariables"
-                for="{{'predictor_'+predictor.id}}">
-                <input class="checkbox" type="checkbox" id="{{'predictor_'+predictor.id}}"
-                    name="{{'predictor_'+predictor.id}}" [(ngModel)]="predictor.production"
-                    (change)="setProductionUnits()">{{predictor.name}} <span
-                    *ngIf="predictor.unit">({{predictor.unit}})</span>
-            </label>
+            <span *ngFor="let predictor of group.predictorVariables">
+                <label class="checkbox-label" *ngIf="predictor.production" for="{{'predictor_'+predictor.id}}">
+                    <input class="checkbox" type="checkbox" id="{{'predictor_'+predictor.id}}"
+                        name="{{'predictor_'+predictor.id}}" [(ngModel)]="predictor.productionInAnalysis"
+                        (change)="setProductionUnits()">{{predictor.name}} <span
+                        *ngIf="predictor.unit">({{predictor.unit}})</span>
+                </label>
+            </span>
         </div>
         <div class="form-group">
             <label class="w-50 bold">Production Units</label>

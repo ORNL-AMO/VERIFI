@@ -1,5 +1,6 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
+import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { FacilityGroupSummary, FacilityYearGroupSummary } from 'src/app/models/analysis';
 import { IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 
@@ -20,7 +21,7 @@ export class FacilityAnalysisGraphComponent implements OnInit {
   @ViewChild('facilityAnalysisGraph', { static: false }) facilityAnalysisGraph: ElementRef;
 
 
-  constructor(private plotlyService: PlotlyService) { }
+  constructor(private plotlyService: PlotlyService, private utilityMeterGroupDbService: UtilityMeterGroupdbService) { }
 
   ngOnInit(): void {
   }
@@ -39,10 +40,11 @@ export class FacilityAnalysisGraphComponent implements OnInit {
           groupSummary.push(summary.yearGroupSummaries[index]);
         });
         groupSummary = groupSummary.splice(1);
+        let groupName: string = this.utilityMeterGroupDbService.getGroupName(groupSummary[0].group.idbGroupId)
         traceData.push({
           x: groupSummary.map(summary => { return summary.year }),
           y: groupSummary.map(summary => { return summary.improvementContribution }),
-          name: groupSummary[0].group.idbGroup.name,
+          name: groupName,
           type: 'bar',
           width: .5,
 

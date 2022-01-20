@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { LocalStorageService } from 'ngx-webstorage';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { AnalysisGroup, IdbAccount, IdbAnalysisItem, IdbFacility, IdbUtilityMeterGroup, PredictorData } from '../models/idb';
+import { AnalysisGroup, IdbAccount, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeterGroup, PredictorData } from '../models/idb';
 import { AccountdbService } from './account-db.service';
 import { FacilitydbService } from './facility-db.service';
 import { PredictordbService } from './predictors-db.service';
@@ -25,10 +25,10 @@ export class AnalysisDbService {
     this.accountAnalysisItems = new BehaviorSubject<Array<IdbAnalysisItem>>([]);
     this.facilityAnalysisItems = new BehaviorSubject<Array<IdbAnalysisItem>>([]);
     this.selectedAnalysisItem = new BehaviorSubject<IdbAnalysisItem>(undefined);
-    
+
     this.facilityDbService.selectedFacility.subscribe(() => {
       this.setAccountAnalysisItems();
-  });
+    });
   }
 
 
@@ -127,8 +127,11 @@ export class AnalysisDbService {
     let predictors: Array<PredictorData> = this.predictorDbService.facilityPredictors.getValue();
     facilityMeterGroups.forEach(group => {
       let predictorVariables: Array<PredictorData> = JSON.parse(JSON.stringify(predictors));
+      predictorVariables.forEach(variable => {
+        variable.productionInAnalysis = variable.production;
+      });
       itemGroups.push({
-        idbGroup: group,
+        idbGroupId: group.id,
         analysisType: 'energyIntensity',
         predictorVariables: predictorVariables,
         productionUnits: this.getUnits(predictorVariables)
@@ -149,7 +152,7 @@ export class AnalysisDbService {
   getUnits(predictorVariables: Array<PredictorData>): string {
     let selectedProductionVariableUnits: Array<string> = new Array();
     predictorVariables.forEach(variable => {
-      if (variable.production && variable.unit) {
+      if (variable.productionInAnalysis && variable.unit) {
         selectedProductionVariableUnits.push(variable.unit);
       }
     });
@@ -162,5 +165,74 @@ export class AnalysisDbService {
       return selectedProductionVariableUnits[0];
     }
     return 'units';
+  }
+
+
+  updateAnalysisPredictors(predictorEntries: Array<PredictorData>) {
+    let facilityAnalysisItems: Array<IdbAnalysisItem> = this.facilityAnalysisItems.getValue();
+    facilityAnalysisItems.forEach(analysisItem => {
+      analysisItem.groups.forEach(group => {
+        group.predictorVariables = this.updatePredictorVariables(group.predictorVariables, predictorEntries);
+      });
+      this.update(analysisItem);
+    });
+  }
+
+  updatePredictorVariables(predictorEntries: Array<PredictorData>, analysisPredictors: Array<PredictorData>): Array<PredictorData> {
+    let predictorIdsToRemove: Array<string> = new Array();
+    //update existing, check need remove
+    analysisPredictors.forEach(predictor => {
+      let checkExists: PredictorData = predictorEntries.find(entry => { return entry.id == predictor.id });
+      if (!checkExists) {
+        predictorIdsToRemove.push(predictor.id)
+      } else {
+        predictor.name = checkExists.name;
+        predictor.unit = checkExists.unit;
+        predictor.production = checkExists.production;
+        if (predictor.productionInAnalysis && !checkExists.production) {
+          predictor.productionInAnalysis = false;
+        }
+      }
+    });
+    //remove necessary predictors
+    analysisPredictors = analysisPredictors.filter(predictor => { return !predictorIdsToRemove.includes(predictor.id) });
+    //add new predictors
+    predictorEntries.forEach(entry => {
+      let checkExists: PredictorData = analysisPredictors.find(predictor => { return predictor.id == entry.id });
+      if (!checkExists) {
+        analysisPredictors.push(entry);
+      }
+    });
+    return analysisPredictors;
+  }
+
+
+  async deleteGroup(groupId: number) {
+    let facilityAnalysisItems: Array<IdbAnalysisItem> = this.facilityAnalysisItems.getValue();
+    for (let index = 0; index < facilityAnalysisItems.length; index++) {
+      let item: IdbAnalysisItem = facilityAnalysisItems[index];
+      item.groups = item.groups.filter(group => { return group.idbGroupId != groupId });
+      await this.updateWithObservable(item).toPromise();
+    }
+    this.setAccountAnalysisItems();
+  }
+
+  addGroup(groupId: number) {
+    let predictors: Array<PredictorData> = this.predictorDbService.facilityPredictors.getValue();
+    let predictorVariables: Array<PredictorData> = JSON.parse(JSON.stringify(predictors));
+    predictorVariables.forEach(variable => {
+      variable.productionInAnalysis = variable.production;
+    });
+    let facilityAnalysisItems: Array<IdbAnalysisItem> = this.facilityAnalysisItems.getValue();
+    facilityAnalysisItems.forEach(item => {
+      item.groups.push({
+        idbGroupId: groupId,
+        analysisType: 'energyIntensity',
+        predictorVariables: predictorVariables,
+        productionUnits: this.getUnits(predictorVariables)
+
+      });
+      this.update(item);
+    });
   }
 }

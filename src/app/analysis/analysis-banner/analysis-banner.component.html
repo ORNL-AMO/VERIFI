@@ -9,8 +9,8 @@
         <ul>
             <li><a routerLink="run-analysis/analysis-setup" [routerLinkActive]="['active']">Analysis Setup</a></li>
             <li *ngFor="let group of analysisItem.groups">
-                <a routerLink="run-analysis/group-analysis/{{group.idbGroup.id}}"
-                    [routerLinkActive]="['active']">{{group.idbGroup.name}}</a>
+                <a routerLink="run-analysis/group-analysis/{{group.idbGroupId}}"
+                    [routerLinkActive]="['active']">{{group.idbGroupId | groupName}}</a>
             </li>
             <li>
                 <a routerLink="run-analysis/facility-analysis" [routerLinkActive]="['active']">Facility Summary</a>

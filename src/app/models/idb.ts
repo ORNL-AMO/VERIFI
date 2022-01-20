@@ -188,7 +188,8 @@ export interface PredictorData {
     description?: string,
     id: string,
     importWizardName?: string,
-    production?: boolean
+    production?: boolean,
+    productionInAnalysis?: boolean
 }
 
 
@@ -217,7 +218,7 @@ export interface IdbAnalysisItem {
 }
 
 export interface AnalysisGroup {
-    idbGroup: IdbUtilityMeterGroup,
+    idbGroupId: number,
     analysisType: AnalysisType,
     predictorVariables: Array<PredictorData>,
     productionUnits: string

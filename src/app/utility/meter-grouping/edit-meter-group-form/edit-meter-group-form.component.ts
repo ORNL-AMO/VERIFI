@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { IdbUtilityMeterGroup } from 'src/app/models/idb';
 
@@ -14,9 +15,11 @@ export class EditMeterGroupFormComponent implements OnInit {
   @Output('emitClose')
   emitClose: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Input()
-  editOrAdd: string;
+  editOrAdd: 'add' | 'edit';
+
   groupForm: FormGroup;
-  constructor(private formBuilder: FormBuilder, private utilityMeterGroupDbService: UtilityMeterGroupdbService) { }
+  constructor(private formBuilder: FormBuilder, private utilityMeterGroupDbService: UtilityMeterGroupdbService,
+    private analysisDbService: AnalysisDbService) { }
 
   ngOnInit(): void {
     this.groupForm = this.formBuilder.group({
@@ -26,11 +29,14 @@ export class EditMeterGroupFormComponent implements OnInit {
   }
 
 
-  save() {
+  async save() {
     this.groupToEdit.name = this.groupForm.controls.name.value;
     this.groupToEdit.description = this.groupForm.controls.description.value;
     if (this.editOrAdd == 'add') {
-      this.utilityMeterGroupDbService.add(this.groupToEdit);
+      let groupToAdd: IdbUtilityMeterGroup = await this.utilityMeterGroupDbService.addWithObservable(this.groupToEdit).toPromise();
+      this.utilityMeterGroupDbService.setAccountMeterGroups();
+      this.utilityMeterGroupDbService.setFacilityMeterGroups();
+      this.analysisDbService.addGroup(groupToAdd.id)
     } else {
       this.utilityMeterGroupDbService.update(this.groupToEdit);
     }

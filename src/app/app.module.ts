@@ -160,6 +160,7 @@ import { FacilityAnalysisHelpComponent } from './help-panel/analysis/facility-an
 import { MonthlyGroupAnalysisHelpComponent } from './help-panel/analysis/monthly-group-analysis-help/monthly-group-analysis-help.component';
 import { AnnualGroupAnalysisHelpComponent } from './help-panel/analysis/annual-group-analysis-help/annual-group-analysis-help.component';
 import { GroupAnalysisSetupHelpComponent } from './help-panel/analysis/group-analysis-setup-help/group-analysis-setup-help.component';
+import { GroupNamePipe } from './analysis/group-name.pipe';
 
 @NgModule({
   declarations: [
@@ -306,6 +307,7 @@ import { GroupAnalysisSetupHelpComponent } from './help-panel/analysis/group-ana
     MonthlyGroupAnalysisHelpComponent,
     AnnualGroupAnalysisHelpComponent,
     GroupAnalysisSetupHelpComponent,
+    GroupNamePipe,
   ],
   imports: [
     BrowserModule,

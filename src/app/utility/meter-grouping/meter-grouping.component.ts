@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
-import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterGroup } from 'src/app/models/idb';
+import { IdbAnalysisItem, IdbFacility, IdbUtilityMeter, IdbUtilityMeterGroup } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
@@ -13,6 +13,7 @@ import { LoadingService } from 'src/app/shared/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/shared/toast-notifications/toast-notifications.service';
 import { MeterGroupingService } from './meter-grouping.service';
 import { Month, Months } from 'src/app/form-data/months';
+import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 
 @Component({
   selector: 'app-meter-grouping',
@@ -30,7 +31,7 @@ export class MeterGroupingComponent implements OnInit {
   facilityMeterGroupsSub: Subscription;
   selectedFacilitySub: Subscription;
   facilityMeters: Array<IdbUtilityMeter>;
-  editOrAdd: string;
+  editOrAdd: 'edit' | 'add';
   facilityMetersSub: Subscription;
   waterUnit: string;
   energyUnit: string;
@@ -50,7 +51,7 @@ export class MeterGroupingComponent implements OnInit {
   constructor(private utilityMeterGroupDbService: UtilityMeterGroupdbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterDbService: UtilityMeterdbService, private facilityDbService: FacilitydbService, private calanderizationService: CalanderizationService,
     private loadingService: LoadingService, private toastNoticationService: ToastNotificationsService,
-    private meterGroupingService: MeterGroupingService) { }
+    private meterGroupingService: MeterGroupingService, private analysisDbService: AnalysisDbService) { }
 
   ngOnInit(): void {
     this.dataDisplay = this.meterGroupingService.dataDisplay;
@@ -188,7 +189,8 @@ export class MeterGroupingComponent implements OnInit {
     let accountMeterGroups: Array<IdbUtilityMeterGroup> = await this.utilityMeterGroupDbService.getAllByIndexRange("accountId", selectedFacility.accountId).toPromise();
     this.utilityMeterGroupDbService.accountMeterGroups.next(accountMeterGroups);
     let facilityMeterGroups: Array<IdbUtilityMeterGroup> = accountMeterGroups.filter(group => { return group.facilityId == selectedFacility.id });
-    this.utilityMeterGroupDbService.facilityMeterGroups.next(facilityMeterGroups);
+    this.utilityMeterGroupDbService.facilityMeterGroups.next(facilityMeterGroups);  
+    await this.analysisDbService.deleteGroup(this.groupToDelete.id);
     this.closeDeleteGroup();
     this.loadingService.setLoadingStatus(false);
     this.toastNoticationService.showToast("Meter Group Deleted!", undefined, undefined, false, "success");

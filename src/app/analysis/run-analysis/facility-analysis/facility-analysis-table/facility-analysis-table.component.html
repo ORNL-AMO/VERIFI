@@ -24,7 +24,7 @@
             </tr>
             <tr *ngFor="let summary of groupSummary.yearGroupSummaries">
                 <td class="pl-2">
-                    {{summary.group.idbGroup.name}}
+                    {{summary.group.idbGroupId | groupName}}
                 </td>
                 <td>
                     {{summary.percentBaseline | customNumber}} %

@@ -30,7 +30,7 @@ export class GroupAnalysisOptionsComponent implements OnInit {
 
   saveItem() {
     let analysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
-    let groupIndex: number = analysisItem.groups.findIndex(group => { return group.idbGroup.id == this.group.idbGroup.id });
+    let groupIndex: number = analysisItem.groups.findIndex(group => { return group.idbGroupId == this.group.idbGroupId });
     analysisItem.groups[groupIndex] = this.group;
     this.analysisDbService.update(analysisItem);
     this.analysisDbService.setAccountAnalysisItems();

@@ -2,7 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AnalysisDbService } from '../indexedDB/analysis-db.service';
-import { IdbAnalysisItem } from '../models/idb';
+import { FacilitydbService } from '../indexedDB/facility-db.service';
+import { IdbAnalysisItem, IdbFacility } from '../models/idb';
 
 @Component({
   selector: 'app-analysis',
@@ -14,14 +15,10 @@ export class AnalysisComponent implements OnInit {
 
   facilityAnalysisItems: Array<IdbAnalysisItem>;
   facilityAnalysisItemsSub: Subscription;
-  constructor(private analysisDbService: AnalysisDbService, private router: Router) { }
+  constructor(private analysisDbService: AnalysisDbService) { }
 
   ngOnInit(): void {
-
     this.facilityAnalysisItemsSub = this.analysisDbService.facilityAnalysisItems.subscribe(items => {
-      if (this.facilityAnalysisItems) {
-        this.router.navigateByUrl('/analysis/analysis-dashboard');
-      }
       this.facilityAnalysisItems = items;
     });
   }

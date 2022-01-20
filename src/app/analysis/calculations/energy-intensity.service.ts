@@ -22,7 +22,7 @@ export class EnergyIntensityService {
     let annualGroupSummaries: Array<AnnualGroupSummary> = new Array();
 
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
-    let groupMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.groupId == selectedGroup.idbGroup.id });
+    let groupMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.groupId == selectedGroup.idbGroupId });
     let calanderizationOptions: CalanderizationOptions = {
       energyIsSource: analysisItem.energyIsSource
     }
@@ -40,7 +40,7 @@ export class EnergyIntensityService {
     let previousYearProduction: number = 0;
     let facilityPredictorData: Array<IdbPredictorEntry> = this.predictorDbService.facilityPredictorEntries.getValue();
     let productionPredictors: Array<PredictorData> = selectedGroup.predictorVariables.filter(variable => {
-      return variable.production;
+      return variable.productionInAnalysis;
     });
     let productionPredictorIds: Array<string> = productionPredictors.map(predictor => { return predictor.id });
     let baselineYear: number = facility.sustainabilityQuestions.energyReductionBaselineYear;
@@ -134,13 +134,13 @@ export class EnergyIntensityService {
 
     let facilityPredictorData: Array<IdbPredictorEntry> = this.predictorDbService.facilityPredictorEntries.getValue();
     let productionPredictors: Array<PredictorData> = selectedGroup.predictorVariables.filter(variable => {
-      return variable.production;
+      return variable.productionInAnalysis;
     });
     let productionPredictorIds: Array<string> = productionPredictors.map(predictor => { return predictor.id });
 
 
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
-    let groupMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.groupId == selectedGroup.idbGroup.id });
+    let groupMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.groupId == selectedGroup.idbGroupId });
     let calanderizationOptions: CalanderizationOptions = {
       energyIsSource: analysisItem.energyIsSource
     }
