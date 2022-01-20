@@ -1,48 +1,39 @@
-<div class="controls pb-0 col">
+<div *ngIf="!groupHasError">
+    <div class="controls pb-0 col">
 
-    <div class="btn-group pull-right">
-        <button class="btn" [ngClass]="{'btn-solid': dataDisplay == 'table'}"
-            (click)="setDataDisplay('table')">Table</button>
-        <button class="btn" [ngClass]="{'btn-solid': dataDisplay == 'graph'}"
-            (click)="setDataDisplay('graph')">Graph</button>
-    </div>
-
-    <!--Items Per Page-->
-    <div class="items-per-page pull-right" *ngIf="dataDisplay == 'table'">
-        <span>Show </span>
-        <select [(ngModel)]="itemsPerPage">
-            <option [ngValue]=6>6</option>
-            <option [ngValue]=12>12</option>
-            <option [ngValue]=24>24</option>
-            <option [ngValue]=36>36</option>
-            <option [ngValue]=48>48</option>
-            <option [ngValue]=60>60</option>
-            <option [ngValue]=999999999999>All</option>
-        </select>
-    </div>
-
-    <!--Chart Controls-->
-    <!-- <div *ngIf="dataDisplay == 'graph'" class="item-right">
-        <span>Utility </span>
-        <div class="btn-group pr-2 mr-2">
-            <button class="btn" [ngClass]="{'btn-solid-utility': displayGraphEnergy == 'bar'}"
-                (click)="setDisplayGraphEnergy('bar')"><span class="fa fa-bar-chart"></span></button>
-            <button class="btn" [ngClass]="{'btn-solid-utility': displayGraphEnergy == 'scatter'}"
-                (click)="setDisplayGraphEnergy('scatter')"><span class="fa fa-line-chart"></span></button>
+        <div class="btn-group pull-right">
+            <button class="btn" [ngClass]="{'btn-solid': dataDisplay == 'table'}"
+                (click)="setDataDisplay('table')">Table</button>
+            <button class="btn" [ngClass]="{'btn-solid': dataDisplay == 'graph'}"
+                (click)="setDataDisplay('graph')">Graph</button>
         </div>
 
-        <span>Cost </span>
-        <div class="btn-group pr-2 mr-2">
-            <button class="btn" [ngClass]="{'btn-solid-cost': displayGraphCost == 'bar'}"
-                (click)="setDisplayGraphCost('bar')"><span class="fa fa-bar-chart"></span></button>
-            <button class="btn" [ngClass]="{'btn-solid-cost': displayGraphCost == 'scatter'}"
-                (click)="setDisplayGraphCost('scatter')"><span class="fa fa-line-chart"></span></button>
+        <!--Items Per Page-->
+        <div class="items-per-page pull-right" *ngIf="dataDisplay == 'table'">
+            <span>Show </span>
+            <select [(ngModel)]="itemsPerPage">
+                <option [ngValue]=6>6</option>
+                <option [ngValue]=12>12</option>
+                <option [ngValue]=24>24</option>
+                <option [ngValue]=36>36</option>
+                <option [ngValue]=48>48</option>
+                <option [ngValue]=60>60</option>
+                <option [ngValue]=999999999999>All</option>
+            </select>
         </div>
-    </div> -->
+    </div>
+    <app-monthly-analysis-table *ngIf="dataDisplay == 'table'" [monthlyGroupSummaries]="monthlyGroupSummaries"
+        [itemsPerPage]="itemsPerPage" [analysisItem]="analysisItem" [group]="group" [facility]="facility">
+    </app-monthly-analysis-table>
+    <app-monthly-analysis-graph *ngIf="dataDisplay == 'graph'" [monthlyGroupSummaries]="monthlyGroupSummaries"
+        [facility]="facility" [analysisItem]="analysisItem" [baselineEnergyIntensity]="baselineEnergyIntensity">
+    </app-monthly-analysis-graph>
 </div>
-<app-monthly-analysis-table *ngIf="dataDisplay == 'table'" [monthlyGroupSummaries]="monthlyGroupSummaries"
-    [itemsPerPage]="itemsPerPage" [analysisItem]="analysisItem" [group]="group" [facility]="facility">
-</app-monthly-analysis-table>
-<app-monthly-analysis-graph *ngIf="dataDisplay == 'graph'" [monthlyGroupSummaries]="monthlyGroupSummaries"
-    [facility]="facility" [analysisItem]="analysisItem" [baselineEnergyIntensity]="baselineEnergyIntensity">
-</app-monthly-analysis-graph>
+
+<div class="p-4" *ngIf="groupHasError">
+    <div class="alert alert-danger text-center">
+        No meters found for this group. Analysis cannot be conducted on this group! Go to the <a
+            [routerLink]="'/utility/meter-groups'">Meter Grouping Page</a> to add
+        meters to this group for analysis.
+    </div>
+</div>

@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
+import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
-import { AnalysisGroup, IdbAnalysisItem } from 'src/app/models/idb';
+import { AnalysisGroup, IdbAnalysisItem, IdbUtilityMeter } from 'src/app/models/idb';
 import { AnalysisService } from '../../analysis.service';
 
 @Component({
@@ -16,34 +17,41 @@ export class GroupAnalysisComponent implements OnInit {
   selectedGroup: AnalysisGroup;
   groupId: number;
   label: string
+  groupHasError: boolean;
   constructor(private activatedRoute: ActivatedRoute, private analysisDbService: AnalysisDbService,
     private analysisService: AnalysisService, private router: Router,
-    private utilityMeterGroupDbService: UtilityMeterGroupdbService) { }
+    private utilityMeterGroupDbService: UtilityMeterGroupdbService,
+    private utilityMeterDbService: UtilityMeterdbService) { }
 
   ngOnInit(): void {
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     this.activatedRoute.params.subscribe(params => {
       this.groupId = parseInt(params['id']);
       this.selectedGroup = this.analysisItem.groups.find(group => { return group.idbGroupId == this.groupId });
+      this.setGroupError();
       this.analysisService.selectedGroup.next(this.selectedGroup);
     });
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
-        this.setLabel(event.url);
+        this.setLabel(this.router.url);
       }
     });
     this.setLabel(this.router.url);
   }
 
-
   setLabel(url: string) {
-    let groupName: string = this.utilityMeterGroupDbService.getGroupName(this.selectedGroup.idbGroupId)
-    if (url.includes('options')) {
-      this.label = groupName + ' Setup'
-    } else if (url.includes('annual-energy-intensity')) {
+    let groupName: string = this.utilityMeterGroupDbService.getGroupName(this.selectedGroup.idbGroupId);
+    if (url.includes('annual-energy-intensity')) {
       this.label = groupName + ' Annual Analysis'
     } else if (url.includes('monthly-energy-intensity')) {
       this.label = groupName + ' Monthly Analysis'
+    } else {
+      this.label = groupName + ' Setup'
     }
+  }
+
+  setGroupError() {
+    let groupMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getGroupMetersByGroupId(this.selectedGroup.idbGroupId);
+    this.groupHasError = (groupMeters.length == 0);
   }
 }

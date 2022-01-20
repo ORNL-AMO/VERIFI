@@ -16,12 +16,14 @@ export class AnalysisBannerComponent implements OnInit {
   inRunAnalysis: boolean;
   analysisItem: IdbAnalysisItem;
   analysisItemSub: Subscription;
+  analysisSetupValid: boolean;
   constructor(private helpPanelService: HelpPanelService, private router: Router,
     private analysisDbService: AnalysisDbService) { }
 
   ngOnInit(): void {
     this.analysisItemSub = this.analysisDbService.selectedAnalysisItem.subscribe(item => {
       this.analysisItem = item;
+      this.checkAnalysisSetupValid();
     })
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
@@ -46,5 +48,9 @@ export class AnalysisBannerComponent implements OnInit {
 
   goToDashboard(){
     this.router.navigateByUrl('/analysis/analysis-dashboard')
+  }
+
+  checkAnalysisSetupValid(){
+    this.analysisSetupValid = this.analysisItem.reportYear != undefined;
   }
 }

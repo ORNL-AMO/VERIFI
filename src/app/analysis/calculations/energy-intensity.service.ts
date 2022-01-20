@@ -213,8 +213,11 @@ export class EnergyIntensityService {
     let baselineYear: number = facility.sustainabilityQuestions.energyReductionBaselineYear;
     let groupSummaries: Array<AnnualGroupSummary> = new Array();
     analysisItem.groups.forEach(group => {
-      let groupSummary: Array<AnnualGroupSummary> = this.calculateAnnualGroupSummaries(analysisItem, group, facility);
-      groupSummaries = groupSummaries.concat(groupSummary);
+      let groupMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getGroupMetersByGroupId(group.idbGroupId)
+      if (groupMeters.length != 0) {
+        let groupSummary: Array<AnnualGroupSummary> = this.calculateAnnualGroupSummaries(analysisItem, group, facility);
+        groupSummaries = groupSummaries.concat(groupSummary);
+      }
     });
     let facilityGroupSummaries: Array<FacilityGroupSummary> = new Array();
 

@@ -153,6 +153,14 @@ export class HeaderComponent implements OnInit {
     }
   }
 
+  goToFacilitySettings(facility: IdbFacility) {
+    this.facilitydbService.selectedFacility.next(facility);
+    this.facilityMenu = false;
+    this.dashboardService.bannerDropdownOpen.next(false);
+    this.router.navigateByUrl('/facility-management');
+
+  }
+
   selectAllFacilities() {
     this.router.navigate(['/home/account-summary']);
     this.facilityMenu = false;

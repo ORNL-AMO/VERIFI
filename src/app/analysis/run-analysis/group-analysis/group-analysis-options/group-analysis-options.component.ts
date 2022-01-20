@@ -2,8 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AnalysisService } from 'src/app/analysis/analysis.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { AnalysisGroup, IdbAnalysisItem } from 'src/app/models/idb';
+import { AnalysisGroup, IdbAnalysisItem, IdbUtilityMeter } from 'src/app/models/idb';
 import * as _ from 'lodash';
+import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 
 @Component({
   selector: 'app-group-analysis-options',
@@ -15,11 +16,14 @@ export class GroupAnalysisOptionsComponent implements OnInit {
   group: AnalysisGroup;
   selectedGroupSub: Subscription;
   showUnitsWarning: boolean;
-  constructor(private analysisService: AnalysisService, private analysisDbService: AnalysisDbService) { }
+  groupHasError: boolean;
+  constructor(private analysisService: AnalysisService, private analysisDbService: AnalysisDbService,
+    private utilityMeterDbService: UtilityMeterdbService) { }
 
   ngOnInit(): void {
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(group => {
       this.group = group;
+      this.setGroupError();
       this.checkUnitsWarning();
     });
   }
@@ -45,5 +49,10 @@ export class GroupAnalysisOptionsComponent implements OnInit {
 
   checkUnitsWarning(){
     this.showUnitsWarning = (this.group.productionUnits == 'units');
+  }
+
+  setGroupError() {
+    let groupMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getGroupMetersByGroupId(this.group.idbGroupId);
+    this.groupHasError = (groupMeters.length == 0);
   }
 }

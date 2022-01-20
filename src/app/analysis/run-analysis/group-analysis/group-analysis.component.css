@@ -5,3 +5,8 @@
 .tabs{
     background-color: #f1f1f1;
 }
+
+
+.tabs li.error{
+    border-top-color: #bf2d00;
+}

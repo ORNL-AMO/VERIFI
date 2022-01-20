@@ -1,4 +1,4 @@
-<div class="row">
+<div class="row" *ngIf="!groupHasError">
     <div class="col-md-6 col-sm-12">
         <div class="form-group">
             <label class="bold">Analysis Type </label>
@@ -41,5 +41,13 @@
         <div class="alert alert-warning" *ngIf="showUnitsWarning">
             Make sure the production variables you have selected have the same units.
         </div>
+    </div>
+</div>
+
+<div class="p-4" *ngIf="groupHasError">
+    <div class="alert alert-danger text-center">
+        No meters found for this group. Analysis cannot be conducted on this group! Go to the <a
+            [routerLink]="'/utility/meter-groups'">Meter Grouping Page</a> to add
+        meters to this group for analysis.
     </div>
 </div>
