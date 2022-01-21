@@ -1,4 +1,4 @@
-<nav class="nav sidebar flex-column" [ngClass]="{'open': open}" (mouseenter)="hoverIn()" (mouseleave)="hoverOut()">
+<nav class="nav sidebar flex-column" [ngClass]="{'open': open}">
     <a class="nav-link pt-4" (click)="toggleSidebar(true)">
         <i class="fa" [ngClass]="{'fa-align-left': !open, 'fa-align-right': open}"></i>
     </a>
@@ -15,7 +15,7 @@
         <p>Reports</p>
     </div>
     <a class="nav-link" routerLink="/overview-report" [routerLinkActive]="['active']">
-        <i class="fa fa-th"></i> <span [hidden]="!open" class="pl-2 nav-label">Overview</span>
+        <i class="fa fa-folder"></i> <span [hidden]="!open" class="pl-2 nav-label">Utility Usage Reports</span>
     </a>
 
     <a class="nav-link">

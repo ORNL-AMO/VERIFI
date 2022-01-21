@@ -24,26 +24,6 @@ export class SidebarComponent implements OnInit {
     this.isDev = !environment.production;
   }
 
-
-  hoverIn() {
-    if (!this.open) {
-      this.isHovering = setTimeout(() => {
-        this.openFromHover = true;
-        this.toggleSidebar(false);
-      }, 1000)
-    }
-  }
-
-  hoverOut() {
-    if (this.isHovering) {
-      clearTimeout(this.isHovering);
-    }
-    if (this.openFromHover) {
-      this.toggleSidebar(false);
-    }
-  }
-
-
   toggleSidebar(fromClick: boolean) {
     if (fromClick) {
       this.openFromHover = false;

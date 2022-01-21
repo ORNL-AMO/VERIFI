@@ -52,18 +52,14 @@ export class MonthlyAnalysisGraphComponent implements OnInit {
       let months: Array<string> = xData.map(data => { return this.getMonth(data) });
       this.yearData.forEach((dataItem, index) => {
         let color: string;
-        let markerSize: number;
         let symbol: string;
-        if (index == 0) {
-          markerSize = 18
+        if (index == 0 || index == this.yearData.length - 1) {
           symbol = 'square';
-          color = 'black';
+          if (index == 0) {
+            color = 'black';
+          }
         } else if (index != 0 && index != this.yearData.length - 1) {
-          markerSize = 18;
           symbol = 'circle'
-        } else if (index == this.yearData.length - 1) {
-          markerSize = 18;
-          symbol = 'star'
         }
         let yData: Array<number> = dataItem.summaries.map(summary => { return summary.energyIntensity });
         traceData.push({
@@ -73,7 +69,7 @@ export class MonthlyAnalysisGraphComponent implements OnInit {
           name: 'FY - ' + dataItem.year,
           marker: {
             color: color,
-            size: markerSize,
+            size: 18,
             symbol: symbol
           }
         });
