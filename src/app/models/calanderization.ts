@@ -59,3 +59,8 @@ export interface CalanderizationFilters {
     meterGroupIds: Array<string>,
     totalUsage: number
   }
+
+
+  export interface CalanderizationOptions {
+    energyIsSource: boolean
+  }

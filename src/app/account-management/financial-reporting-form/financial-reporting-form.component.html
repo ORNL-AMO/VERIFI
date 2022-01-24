@@ -14,14 +14,14 @@
         <div class="col-lg-12 mb-3">
             <label>Start Month</label>
             <select formControlName="fiscalYearMonth" (change)="saveChanges()">
-                <option *ngFor="let month of months" [ngValue]="month.name">{{month.name}}
+                <option *ngFor="let month of months" [ngValue]="month.monthNumValue">{{month.name}}
                 </option>
             </select>
         </div>
         <div class="col-lg-12 mb-3">
             <input type="checkbox" class="rowToggle" name="fiscalYearCalendarEnd"
                 formControlName="fiscalYearCalendarEnd" (change)="saveChanges()" id="fiscalYearCalendarEnd">
-            <label class="checkbox" for="fiscalYearCalanderEnd">Our FY is denoted by the calendar year in which it ends.</label>
+            <label class="checkbox" for="fiscalYearCalendarEnd">Our FY is denoted by the calendar year in which it ends.</label>
         </div>
     </div>
 </form>

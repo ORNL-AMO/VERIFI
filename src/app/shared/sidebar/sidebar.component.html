@@ -1,4 +1,4 @@
-<nav class="nav sidebar flex-column" [ngClass]="{'open': open}" (mouseenter)="hoverIn()" (mouseleave)="hoverOut()">
+<nav class="nav sidebar flex-column" [ngClass]="{'open': open}">
     <a class="nav-link pt-4" (click)="toggleSidebar(true)">
         <i class="fa" [ngClass]="{'fa-align-left': !open, 'fa-align-right': open}"></i>
     </a>
@@ -7,18 +7,17 @@
         <span [hidden]="!open" class="pl-2 nav-label">Home</span></a>
     <a class="nav-link" routerLink="utility/" [routerLinkActive]="['active']"><i class="fa fa-bar-chart"></i>
         <span [hidden]="!open" class="pl-2 nav-label">Utility Data</span></a>
+    <a class="nav-link" routerLink="analysis/" [routerLinkActive]="['active']">
+        <i class="fa fa-area-chart"></i> <span [hidden]="!open" class="pl-2 nav-label">Analysis</span>
+    </a>
     <hr>
     <div class="menuHeader">
         <p>Reports</p>
     </div>
     <a class="nav-link" routerLink="/overview-report" [routerLinkActive]="['active']">
-        <i class="fa fa-th"></i> <span [hidden]="!open" class="pl-2 nav-label">Overview</span>
+        <i class="fa fa-folder"></i> <span [hidden]="!open" class="pl-2 nav-label">Utility Usage Reports</span>
     </a>
-    <a class="nav-link">
-        <i class="fa fa-area-chart"></i> <span [hidden]="!open" class="pl-2 nav-label">Regression <span
-                class="tag coming-soon">Coming
-                soon</span></span>
-    </a>
+
     <a class="nav-link">
         <i class="fa fa-list-alt"></i> <span [hidden]="!open" class="pl-2 nav-label">Scorecards <span
                 class="tag coming-soon">Coming

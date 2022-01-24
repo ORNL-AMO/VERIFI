@@ -7,6 +7,7 @@ import { AccountdbService } from './account-db.service';
 import { ConvertMeterDataService } from '../shared/helper-services/convert-meter-data.service';
 import * as _ from 'lodash';
 import { ReportOptions } from '../models/overview-report';
+import { CalanderizationOptions } from '../models/calanderization';
 
 @Injectable({
     providedIn: 'root'
@@ -211,16 +212,16 @@ export class UtilityMeterDatadbService {
         return facilityMeterData.filter(meterData => { return meterData.meterId == meterId });
     }
 
-    getMeterDataForFacility(meter: IdbUtilityMeter, convertData: boolean, isMeterReadings?: boolean, reportOptions?: ReportOptions): Array<IdbUtilityMeterData> {
+    getMeterDataForFacility(meter: IdbUtilityMeter, convertData: boolean, isMeterReadings?: boolean, calanderizationOptions?: CalanderizationOptions): Array<IdbUtilityMeterData> {
         let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
         let facility: IdbFacility = facilities.find(facility => { return facility.id == meter.facilityId });
         let meterData: Array<IdbUtilityMeterData> = this.getMeterDataFromMeterId(meter.id);
         let meterDataCopy: Array<IdbUtilityMeterData> = JSON.parse(JSON.stringify(meterData));
-        if (!reportOptions) {
+        if (!calanderizationOptions) {
             if (facility.energyIsSource && !isMeterReadings) {
                 meterDataCopy = this.convertMeterDataService.applySiteToSourceMultiplier(meter, meterDataCopy);
             }
-        } else if (reportOptions.energyIsSource) {
+        } else if (calanderizationOptions.energyIsSource) {
             meterDataCopy = this.convertMeterDataService.applySiteToSourceMultiplier(meter, meterDataCopy);
         }
         if (convertData) {
@@ -229,15 +230,15 @@ export class UtilityMeterDatadbService {
         return meterDataCopy;
     }
 
-    getMeterDataForAccount(meter: IdbUtilityMeter, convertData: boolean, reportOptions?: ReportOptions): Array<IdbUtilityMeterData> {
+    getMeterDataForAccount(meter: IdbUtilityMeter, convertData: boolean, calanderizationOptions?: CalanderizationOptions): Array<IdbUtilityMeterData> {
         let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
         let meterData: Array<IdbUtilityMeterData> = this.getMeterDataFromMeterId(meter.id);
         let meterDataCopy: Array<IdbUtilityMeterData> = JSON.parse(JSON.stringify(meterData));
-        if (!reportOptions) {
+        if (!calanderizationOptions) {
             if (account.energyIsSource) {
                 meterDataCopy = this.convertMeterDataService.applySiteToSourceMultiplier(meter, meterDataCopy);
             }
-        } else if (reportOptions.energyIsSource) {
+        } else if (calanderizationOptions.energyIsSource) {
             meterDataCopy = this.convertMeterDataService.applySiteToSourceMultiplier(meter, meterDataCopy);
         }
         if (convertData) {

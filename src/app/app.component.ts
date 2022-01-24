@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { AccountdbService } from './indexedDB/account-db.service';
+import { AnalysisDbService } from './indexedDB/analysis-db.service';
 import { FacilitydbService } from './indexedDB/facility-db.service';
 import { OverviewReportOptionsDbService } from './indexedDB/overview-report-options-db.service';
 import { PredictordbService } from './indexedDB/predictors-db.service';
@@ -31,7 +32,8 @@ export class AppComponent {
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     public router: Router,
     private eGridService: EGridService,
-    private overviewReportOptionsDbService: OverviewReportOptionsDbService) {
+    private overviewReportOptionsDbService: OverviewReportOptionsDbService,
+    private analysisDbService: AnalysisDbService) {
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
         gtag('config', 'G-YG1QD02XSE',
@@ -65,6 +67,8 @@ export class AppComponent {
     await this.utilityMeterGroupDbService.initializeMeterGroups();
     this.loadingMessage = 'Loading Reports...'
     await this.overviewReportOptionsDbService.initializeReportsFromLocalStorage();
+    this.loadingMessage = 'Loading Analysis Items...';
+    await this.analysisDbService.initializeAnalysisItems();
     this.dataInitialized = true;
   }
 }

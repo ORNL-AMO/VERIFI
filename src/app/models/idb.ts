@@ -24,8 +24,8 @@ export interface IdbAccount {
     volumeLiquidUnit: string,
     volumeGasUnit: string,
     sustainabilityQuestions: SustainabilityQuestions,
-    fiscalYear: string,
-    fiscalYearMonth: string,
+    fiscalYear: "calendarYear" | "nonCalendarYear",
+    fiscalYearMonth: number,
     fiscalYearCalendarEnd: boolean,
     setupWizard: boolean,
     setupWizardComplete: boolean,
@@ -66,8 +66,8 @@ export interface IdbFacility {
     volumeLiquidUnit: string,
     volumeGasUnit: string,
     sustainabilityQuestions: SustainabilityQuestions,
-    fiscalYear: string,
-    fiscalYearMonth: string,
+    fiscalYear: "calendarYear" | "nonCalendarYear",
+    fiscalYearMonth: number,
     fiscalYearCalendarEnd: boolean,
     energyIsSource: boolean,
     emissionsOutputRate?: number,
@@ -188,7 +188,8 @@ export interface PredictorData {
     description?: string,
     id: string,
     importWizardName?: string,
-    production?: boolean
+    production?: boolean,
+    productionInAnalysis?: boolean
 }
 
 
@@ -204,6 +205,25 @@ export interface IdbOverviewReportOptions {
     title?: string,
 }
 
+export interface IdbAnalysisItem {
+    id?: number,
+    accountId: number,
+    facilityId: number,
+    date: Date,
+    name: string,
+    energyIsSource: boolean,
+    reportYear: number,
+    energyUnit: string,
+    groups: Array<AnalysisGroup>
+}
 
+export interface AnalysisGroup {
+    idbGroupId: number,
+    analysisType: AnalysisType,
+    predictorVariables: Array<PredictorData>,
+    productionUnits: string
+}
+
+export type AnalysisType = 'absoluteEnergyIntensity' | 'energyIntensity' | 'modifiedEnergyIntensity' | 'regression';
 export type MeterSource = "Electricity" | "Natural Gas" | "Other Fuels" | "Other Energy" | "Water" | "Waste Water" | "Other Utility";
 export type MeterPhase = "Solid" | "Liquid" | "Gas";

@@ -240,6 +240,7 @@ export class PredictordbService {
             predictor.name = updatedPredictor.name;
             predictor.unit = updatedPredictor.unit;
             predictor.production = updatedPredictor.production;
+            predictor.productionInAnalysis = updatedPredictor.production;
             return predictor;
         });
         return entryPredictors;

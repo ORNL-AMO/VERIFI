@@ -146,6 +146,19 @@ export class HeaderComponent implements OnInit {
     this.facilitydbService.selectedFacility.next(facility);
     this.facilityMenu = false;
     this.dashboardService.bannerDropdownOpen.next(false);
+    if (this.router.url.includes('analysis')) {
+      this.router.navigateByUrl('/analysis/analysis-dashboard');
+    } else if (this.router.url.includes('overview-report')) {
+      this.router.navigateByUrl('/overview-report/report-dashboard');
+    }
+  }
+
+  goToFacilitySettings(facility: IdbFacility) {
+    this.facilitydbService.selectedFacility.next(facility);
+    this.facilityMenu = false;
+    this.dashboardService.bannerDropdownOpen.next(false);
+    this.router.navigateByUrl('/facility-management');
+
   }
 
   selectAllFacilities() {
@@ -168,9 +181,9 @@ export class HeaderComponent implements OnInit {
         count++;
       }
     });
-    if(count != 1){
+    if (count != 1) {
       return count + ' Facilities';
-    }else{
+    } else {
       return count + ' Facility';
     }
   }
@@ -192,9 +205,9 @@ export class HeaderComponent implements OnInit {
       this.viewingAccountPage = false;
     }
 
-    if(!this.viewingAccountPage && this.activeFacility){
+    if (!this.viewingAccountPage && this.activeFacility) {
       this.industryColor = this.activeFacility.color;
-    }else{
+    } else {
       this.industryColor = '#6abb2e';
     }
   }

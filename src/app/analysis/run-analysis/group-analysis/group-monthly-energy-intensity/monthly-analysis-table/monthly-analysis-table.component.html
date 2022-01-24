@@ -1,0 +1,47 @@
+<div class="col table-responsive">
+    <table class="table table-sm table-hover">
+        <thead>
+            <tr>
+                <th (click)="setOrderDataField('date')" [ngClass]="{'active': orderDataField == 'date'}">Month</th>
+                <th (click)="setOrderDataField('fiscalYear')" [ngClass]="{'active': orderDataField == 'fiscalYear'}">
+                    Fiscal Year</th>
+                <th (click)="setOrderDataField('energyUse')" [ngClass]="{'active': orderDataField == 'energyUse'}">
+                    Total Energy <br>(<span [innerHTML]="analysisItem.energyUnit | settingsLabel"></span>)</th>
+                <th (click)="setOrderDataField('production')" [ngClass]="{'active': orderDataField == 'production'}">
+                    Total Production <br>({{group.productionUnits}})
+                </th>
+                <th (click)="setOrderDataField('energyIntensity')"
+                    [ngClass]="{'active': orderDataField == 'energyIntensity'}">
+                    Energy Intensity <br>(<span
+                        [innerHTML]="analysisItem.energyUnit | settingsLabel"></span>/{{group.productionUnits}})</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let summary of monthlyGroupSummaries| orderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage"
+                [ngClass]="{'fiscal-year-end': checkFiscalYearEnd(summary.date)}">
+                <td>{{summary.date | date: 'MMMM, y'}}</td>
+                <td>{{summary.fiscalYear}}</td>
+                <td>
+                    <span *ngIf="summary.energyUse">{{summary.energyUse | customNumber}}</span>
+                    <span *ngIf="!summary.energyUse">N/A</span>
+                </td>
+                <td>
+                    <span *ngIf="summary.production">{{summary.production | customNumber}}</span>
+                    <span *ngIf="!summary.production">N/A</span>
+                </td>
+                <td>
+                    <span *ngIf="summary.energyIntensity">{{summary.energyIntensity | customNumber}}</span>
+                    <span *ngIf="!summary.energyIntensity">N/A</span>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="tableControls overflow-hidden">
+    <div class="item-right">
+        <ngb-pagination [collectionSize]="monthlyGroupSummaries.length" [(page)]="currentPageNumber"
+            [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Default pagination">
+        </ngb-pagination>
+    </div>
+    <p class="item-right">{{monthlyGroupSummaries.length}} entries</p>
+</div>

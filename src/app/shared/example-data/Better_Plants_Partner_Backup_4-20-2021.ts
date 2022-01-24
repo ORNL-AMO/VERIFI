@@ -46,7 +46,7 @@ export const ExampleAccount: AccountBackup = {
             "waterIsAbsolute": true
         },
         "fiscalYear": "calendarYear",
-        "fiscalYearMonth": "January",
+        "fiscalYearMonth": 0,
         "fiscalYearCalendarEnd": true,
         "setupWizard": false,
         "setupWizardComplete": true,
@@ -100,7 +100,7 @@ export const ExampleAccount: AccountBackup = {
                     "waterIsAbsolute": true
                 },
                 "fiscalYear": "calendarYear",
-                "fiscalYearMonth": "January",
+                "fiscalYearMonth": 0,
                 "fiscalYearCalendarEnd": true,
                 "energyIsSource": true,
                 "id": 9,
@@ -4572,7 +4572,7 @@ export const ExampleAccount: AccountBackup = {
                     "waterIsAbsolute": true
                 },
                 "fiscalYear": "calendarYear",
-                "fiscalYearMonth": "January",
+                "fiscalYearMonth": 0,
                 "fiscalYearCalendarEnd": true,
                 "energyIsSource": true,
                 "id": 10,

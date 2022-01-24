@@ -103,11 +103,31 @@ export class OverviewReportOptionsDbService {
     return this.dbService.update('overviewReportOptions', values);
   }
 
-  deleteById(facilityId: number): void {
-    this.dbService.delete('overviewReportOptions', facilityId).subscribe(() => {
+  deleteById(overviewOptionsId: number): void {
+    this.dbService.delete('overviewReportOptions', overviewOptionsId).subscribe(() => {
       this.setAccountOverviewReportOptions();
     });
   }
 
+  async updateReportsRemoveFacility(facilityId: number) {
+    let accountReports: Array<IdbOverviewReportOptions> = this.accountOverviewReportOptions.getValue();
+    for(let i = 0; i < accountReports.length; i++){
+      let report: IdbOverviewReportOptions = accountReports[i];
+      report.reportOptions.facilities = report.reportOptions.facilities.filter(facility => {return facility.id != facilityId});
+      await this.updateWithObservable(report).toPromise();
+    }
+  }
+
+  async deleteAccountReports(){
+    let accountReports: Array<IdbOverviewReportOptions> = this.accountOverviewReportOptions.getValue();
+    await this.deleteReportsAsync(accountReports)
+  }
+
+  async deleteReportsAsync(reports: Array<IdbOverviewReportOptions>){
+    for(let i = 0; i < reports.length; i++){
+      await this.deleteWithObservable(reports[i].id).toPromise();
+    }
+  }
 
 }
+

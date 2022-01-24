@@ -1,0 +1,20 @@
+<nav class="tabs">
+    <ul class="mb-0">
+        <li [ngClass]="{'error': groupHasError}"><a
+                routerLink="/analysis/run-analysis/group-analysis/{{groupId}}/options"
+                [routerLinkActive]="['active']">Analysis
+                Options</a></li>
+        <li [ngClass]="{'disabled': groupHasError, 'error': groupHasError}"><a
+                routerLink="/analysis/run-analysis/group-analysis/{{groupId}}/annual-energy-intensity"
+                [routerLinkActive]="['active']">Annual
+                Energy Intensity</a></li>
+        <li [ngClass]="{'disabled': groupHasError, 'error': groupHasError}"><a
+                routerLink="/analysis/run-analysis/group-analysis/{{groupId}}/monthly-energy-intensity"
+                [routerLinkActive]="['active']">Monthly
+                Energy Intensity</a></li>
+    </ul>
+</nav>
+<div class="content-padding">
+    <h4>{{label}}</h4>
+    <router-outlet></router-outlet>
+</div>

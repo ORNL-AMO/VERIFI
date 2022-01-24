@@ -138,6 +138,29 @@ import { ManageReportTemplatesComponent } from './overview-report/overview-repor
 import { BasicReportHelpComponent } from './help-panel/overview-report/basic-report-help/basic-report-help.component';
 import { OverviewReportDashboardHelpComponent } from './help-panel/overview-report/overview-report-dashboard-help/overview-report-dashboard-help.component';
 import { OverviewReportMenuHelpComponent } from './help-panel/overview-report/overview-report-menu-help/overview-report-menu-help.component';
+import { AnalysisComponent } from './analysis/analysis.component';
+import { AnalysisBannerComponent } from './analysis/analysis-banner/analysis-banner.component';
+import { AnalysisDashboardComponent } from './analysis/analysis-dashboard/analysis-dashboard.component';
+import { RunAnalysisComponent } from './analysis/run-analysis/run-analysis.component';
+import { AnalysisSetupComponent } from './analysis/run-analysis/analysis-setup/analysis-setup.component';
+import { GroupAnalysisOptionsComponent } from './analysis/run-analysis/group-analysis/group-analysis-options/group-analysis-options.component';
+import { GroupAnalysisComponent } from './analysis/run-analysis/group-analysis/group-analysis.component';
+import { FacilityAnalysisComponent } from './analysis/run-analysis/facility-analysis/facility-analysis.component';
+import { GroupAnnualEnergyIntensityComponent } from './analysis/run-analysis/group-analysis/group-annual-energy-intensity/group-annual-energy-intensity.component';
+import { GroupMonthlyEnergyIntensityComponent } from './analysis/run-analysis/group-analysis/group-monthly-energy-intensity/group-monthly-energy-intensity.component';
+import { MonthlyAnalysisTableComponent } from './analysis/run-analysis/group-analysis/group-monthly-energy-intensity/monthly-analysis-table/monthly-analysis-table.component';
+import { MonthlyAnalysisGraphComponent } from './analysis/run-analysis/group-analysis/group-monthly-energy-intensity/monthly-analysis-graph/monthly-analysis-graph.component';
+import { AnnualEnergyIntensityTableComponent } from './analysis/run-analysis/group-analysis/group-annual-energy-intensity/annual-energy-intensity-table/annual-energy-intensity-table.component';
+import { AnnualEnergyIntensityGraphComponent } from './analysis/run-analysis/group-analysis/group-annual-energy-intensity/annual-energy-intensity-graph/annual-energy-intensity-graph.component';
+import { FacilityAnalysisTableComponent } from './analysis/run-analysis/facility-analysis/facility-analysis-table/facility-analysis-table.component';
+import { FacilityAnalysisGraphComponent } from './analysis/run-analysis/facility-analysis/facility-analysis-graph/facility-analysis-graph.component';
+import { AnalysisDashboardHelpComponent } from './help-panel/analysis/analysis-dashboard-help/analysis-dashboard-help.component';
+import { AnalysisSetupHelpComponent } from './help-panel/analysis/analysis-setup-help/analysis-setup-help.component';
+import { FacilityAnalysisHelpComponent } from './help-panel/analysis/facility-analysis-help/facility-analysis-help.component';
+import { MonthlyGroupAnalysisHelpComponent } from './help-panel/analysis/monthly-group-analysis-help/monthly-group-analysis-help.component';
+import { AnnualGroupAnalysisHelpComponent } from './help-panel/analysis/annual-group-analysis-help/annual-group-analysis-help.component';
+import { GroupAnalysisSetupHelpComponent } from './help-panel/analysis/group-analysis-setup-help/group-analysis-setup-help.component';
+import { GroupNamePipe } from './analysis/group-name.pipe';
 import { MeterReadingsReportComponent } from './overview-report/basic-report/meter-readings-report/meter-readings-report.component';
 
 @NgModule({
@@ -263,6 +286,29 @@ import { MeterReadingsReportComponent } from './overview-report/basic-report/met
     BasicReportHelpComponent,
     OverviewReportDashboardHelpComponent,
     OverviewReportMenuHelpComponent,
+    AnalysisComponent,
+    AnalysisBannerComponent,
+    AnalysisDashboardComponent,
+    RunAnalysisComponent,
+    AnalysisSetupComponent,
+    GroupAnalysisOptionsComponent,
+    GroupAnalysisComponent,
+    FacilityAnalysisComponent,
+    GroupAnnualEnergyIntensityComponent,
+    GroupMonthlyEnergyIntensityComponent,
+    MonthlyAnalysisTableComponent,
+    MonthlyAnalysisGraphComponent,
+    AnnualEnergyIntensityTableComponent,
+    AnnualEnergyIntensityGraphComponent,
+    FacilityAnalysisTableComponent,
+    FacilityAnalysisGraphComponent,
+    AnalysisDashboardHelpComponent,
+    AnalysisSetupHelpComponent,
+    FacilityAnalysisHelpComponent,
+    MonthlyGroupAnalysisHelpComponent,
+    AnnualGroupAnalysisHelpComponent,
+    GroupAnalysisSetupHelpComponent,
+    GroupNamePipe,
     MeterReadingsReportComponent
   ],
   imports: [

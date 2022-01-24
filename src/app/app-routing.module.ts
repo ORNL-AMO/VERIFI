@@ -24,6 +24,15 @@ import { OverviewReportComponent } from './overview-report/overview-report.compo
 import { OverviewReportDashboardComponent } from './overview-report/overview-report-dashboard/overview-report-dashboard.component';
 import { OverviewReportMenuComponent } from './overview-report/overview-report-menu/overview-report-menu.component';
 import { BasicReportComponent } from './overview-report/basic-report/basic-report.component';
+import { AnalysisComponent } from './analysis/analysis.component';
+import { AnalysisDashboardComponent } from './analysis/analysis-dashboard/analysis-dashboard.component';
+import { RunAnalysisComponent } from './analysis/run-analysis/run-analysis.component';
+import { AnalysisSetupComponent } from './analysis/run-analysis/analysis-setup/analysis-setup.component';
+import { GroupAnalysisOptionsComponent } from './analysis/run-analysis/group-analysis/group-analysis-options/group-analysis-options.component';
+import { GroupAnalysisComponent } from './analysis/run-analysis/group-analysis/group-analysis.component';
+import { FacilityAnalysisComponent } from './analysis/run-analysis/facility-analysis/facility-analysis.component';
+import { GroupAnnualEnergyIntensityComponent } from './analysis/run-analysis/group-analysis/group-annual-energy-intensity/group-annual-energy-intensity.component';
+import { GroupMonthlyEnergyIntensityComponent } from './analysis/run-analysis/group-analysis/group-monthly-energy-intensity/group-monthly-energy-intensity.component';
 
 const routes: Routes = [
   {
@@ -97,6 +106,36 @@ const routes: Routes = [
       { path: 'report-dashboard', component: OverviewReportDashboardComponent },
       { path: 'report-menu', component: OverviewReportMenuComponent },
       { path: 'basic-report', component: BasicReportComponent }
+    ]
+  },
+  {
+    path: 'analysis',
+    component: AnalysisComponent,
+    children: [
+      { path: '', pathMatch: 'full', redirectTo: 'analysis-dashboard' },
+      { path: 'analysis-dashboard', component: AnalysisDashboardComponent },
+      {
+        path: 'run-analysis',
+        component: RunAnalysisComponent,
+        children: [
+          { path: '', pathMatch: 'full', redirectTo: 'analysis-setup' },
+          { path: 'analysis-setup', component: AnalysisSetupComponent },
+          {
+            path: 'group-analysis/:id',
+            component: GroupAnalysisComponent,
+            children: [
+              { path: '', pathMatch: 'full', redirectTo: 'options' },
+              { path: 'options', component: GroupAnalysisOptionsComponent },
+              { path: 'annual-energy-intensity', component: GroupAnnualEnergyIntensityComponent },
+              { path: 'monthly-energy-intensity', component: GroupMonthlyEnergyIntensityComponent }
+            ]
+          },
+          {
+            path: 'facility-analysis',
+            component: FacilityAnalysisComponent
+          }
+        ]
+      }
     ]
   },
   { path: "**", component: PageNotFoundComponent },

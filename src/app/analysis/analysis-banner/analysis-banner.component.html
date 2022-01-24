@@ -1,0 +1,28 @@
+<div class="banner">
+    <h3>
+        <span class="nav-items">
+            <a (click)="goToDashboard()"><span class="fa fa-area-chart"></span></a>
+        </span>
+        {{bannerTitle}}
+    </h3>
+    <div class="compNav" *ngIf="inRunAnalysis">
+        <ul>
+            <li><a routerLink="run-analysis/analysis-setup" [routerLinkActive]="['active']">Analysis Setup</a></li>
+            <li [ngClass]="{'disabled': !analysisSetupValid}" *ngFor="let group of analysisItem.groups">
+                <a routerLink="run-analysis/group-analysis/{{group.idbGroupId}}"
+                    [routerLinkActive]="['active']">{{group.idbGroupId | groupName}}</a>
+            </li>
+            <li [ngClass]="{'disabled': !analysisSetupValid}">
+                <a routerLink="run-analysis/facility-analysis" [routerLinkActive]="['active']">Facility Summary</a>
+            </li>
+        </ul>
+    </div>
+    <div class="pull-right nav-items">
+        <h3 class="pr-3">
+            <a routerLink="/facility-management"><span class="fa fa-cog"></span></a>
+        </h3>
+        <h3>
+            <a (click)="toggleHelpPanel()"><span class="fa fa-question-circle-o"></span></a>
+        </h3>
+    </div>
+</div>

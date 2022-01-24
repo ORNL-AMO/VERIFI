@@ -197,7 +197,7 @@ export class FacilitydbService {
                 waterIsAbsolute: true
             },
             fiscalYear: 'calendarYear',
-            fiscalYearMonth: 'January',
+            fiscalYearMonth: 0,
             fiscalYearCalendarEnd: true,
             energyIsSource: true
 
