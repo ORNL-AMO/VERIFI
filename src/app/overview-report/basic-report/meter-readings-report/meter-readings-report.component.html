@@ -1,0 +1,37 @@
+<div *ngFor="let readingData of meterReadingsData">
+    <label class="section-label">Facilty: {{facility.name}}</label><br>
+    <label class="section-label">Meter: {{readingData.meter.name}}</label>
+    <table class="table table-sm" [ngClass]="{'four-columns': readingData.showVolumeColumn && readingData.showEnergyColumn}">
+        <thead>
+            <th>
+                Date
+            </th>
+            <th *ngIf="readingData.showVolumeColumn">
+                Total Volume (<span [innerHTML]="readingData.meter.startingUnit"></span>)
+            </th>
+            <th *ngIf="readingData.showEnergyColumn">
+                Total Energy (<span [innerHTML]="readingData.meter.energyUnit"></span>)
+            </th>
+            <th>
+                Total Cost
+            </th>
+        </thead>
+        <tbody>
+            <tr *ngFor="let reading of readingData.meterReadings">
+                <td>
+                    {{reading.readDate | date}}
+                </td>
+                <td *ngIf="readingData.showVolumeColumn">
+                    {{reading.totalVolume}}
+                </td>
+                <td *ngIf="readingData.showEnergyColumn">
+                    {{reading.totalEnergyUse}}
+                </td>
+                <td>
+                    {{reading.totalCost}}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <hr>
+</div>

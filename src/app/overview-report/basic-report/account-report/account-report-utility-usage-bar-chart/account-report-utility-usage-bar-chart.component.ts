@@ -106,6 +106,7 @@ export class AccountReportUtilityUsageBarChartComponent implements OnInit {
     return {
       x: this.facilitiesUtilitySummaries.map(dataItem => { return dataItem.facility.name }),
       y: this.facilitiesUtilitySummaries.map(dataItem => { return dataItem.utilitySummary.utilitySummaries.find(utility => { return utility.source == source })?.[dataType] }),
+      width: this.facilitiesUtilitySummaries.map(dataItem => { return .5 }),
       name: source,
       type: 'bar',
       marker: {

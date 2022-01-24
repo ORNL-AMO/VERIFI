@@ -10,4 +10,9 @@
             </app-facility-report>
         </div>
     </div>
+    <div *ngIf="reportOptions.meterReadings" class="print-break-before">
+        <div *ngFor="let facility of reportOptions.facilities">
+            <app-meter-readings-report *ngIf="facility.selected" [facility]="facility"></app-meter-readings-report>
+        </div>
+    </div>
 </div>

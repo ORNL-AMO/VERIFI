@@ -161,6 +161,7 @@ import { MonthlyGroupAnalysisHelpComponent } from './help-panel/analysis/monthly
 import { AnnualGroupAnalysisHelpComponent } from './help-panel/analysis/annual-group-analysis-help/annual-group-analysis-help.component';
 import { GroupAnalysisSetupHelpComponent } from './help-panel/analysis/group-analysis-setup-help/group-analysis-setup-help.component';
 import { GroupNamePipe } from './analysis/group-name.pipe';
+import { MeterReadingsReportComponent } from './overview-report/basic-report/meter-readings-report/meter-readings-report.component';
 
 @NgModule({
   declarations: [
@@ -308,6 +309,7 @@ import { GroupNamePipe } from './analysis/group-name.pipe';
     AnnualGroupAnalysisHelpComponent,
     GroupAnalysisSetupHelpComponent,
     GroupNamePipe,
+    MeterReadingsReportComponent
   ],
   imports: [
     BrowserModule,

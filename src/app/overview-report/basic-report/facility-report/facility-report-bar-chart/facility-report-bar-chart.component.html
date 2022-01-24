@@ -1,27 +1,27 @@
 <div class="row justify-content-center">
-    <div class="col-6 text-center" [ngClass]="{'col-12': print || reportOptions.annualGraphsByMonth}">
-        <label class="section-label" *ngIf="!reportOptions.annualGraphsByMonth">
+    <div class="col-6 text-center" [ngClass]="{'col-12': print || sumByMonth}">
+        <label class="section-label" *ngIf="!sumByMonth">
             Annual Costs
         </label>
-        <label class="section-label" *ngIf="reportOptions.annualGraphsByMonth">
+        <label class="section-label" *ngIf="sumByMonth">
             Monthly Costs
         </label>
         <div #utilityCostBarChart id="utilityCostBarChart"></div>
     </div>
-    <div class="col-6 text-center" [ngClass]="{'col-12': print || reportOptions.annualGraphsByMonth}">
-        <label class="section-label" *ngIf="!reportOptions.annualGraphsByMonth">
+    <div class="col-6 text-center" [ngClass]="{'col-12': print || sumByMonth}">
+        <label class="section-label" *ngIf="!sumByMonth">
             Annual Consumption
         </label>
-        <label class="section-label" *ngIf="reportOptions.annualGraphsByMonth">
+        <label class="section-label" *ngIf="sumByMonth">
             Monthly Consumption
         </label>
         <div #utilityUsageBarChart id="utilityUsageBarChart"></div>
     </div>
-    <div class="col-6 text-center" [ngClass]="{'col-12': print || reportOptions.annualGraphsByMonth}">
-        <label class="section-label" *ngIf="!reportOptions.annualGraphsByMonth">
+    <div class="col-6 text-center" [ngClass]="{'col-12': print || sumByMonth}">
+        <label class="section-label" *ngIf="!sumByMonth">
             Annual Emissions
         </label>
-        <label class="section-label" *ngIf="reportOptions.annualGraphsByMonth">
+        <label class="section-label" *ngIf="sumByMonth">
             Monthly Emissions
         </label>
         <div #utilityEmissionsBarChart id="utilityEmissionsBarChart"></div>
