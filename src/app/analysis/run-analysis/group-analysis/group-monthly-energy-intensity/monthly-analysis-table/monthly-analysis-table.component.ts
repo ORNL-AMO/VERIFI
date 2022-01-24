@@ -19,24 +19,42 @@ export class MonthlyAnalysisTableComponent implements OnInit {
   @Input()
   facility: IdbFacility;
 
-  // orderDataField: string = 'date';
-  // orderByDirection: string = 'asc';
+  orderDataField: string = 'date';
+  orderByDirection: string = 'asc';
   currentPageNumber: number = 1;
   constructor() { }
 
   ngOnInit(): void {
   }
 
+  setOrderDataField(str: string) {
+    if (str == this.orderDataField) {
+      if (this.orderByDirection == 'desc') {
+        this.orderByDirection = 'asc';
+      } else {
+        this.orderByDirection = 'desc';
+      }
+    } else {
+      this.orderDataField = str;
+    }
+  }
 
   checkFiscalYearEnd(date: Date): boolean {
-    if (this.facility.fiscalYear == 'calendarYear') {
-      return date.getUTCMonth() == 0;
-    } else {
-      if (date.getUTCMonth() == this.facility.fiscalYearMonth) {
-        return true;
+    if (this.orderDataField == 'date' || this.orderDataField == 'fiscalYear') {
+      if (this.facility.fiscalYear == 'calendarYear' && this.orderByDirection == 'asc') {
+        return date.getUTCMonth() == 0;
+      } else if (this.facility.fiscalYear == 'calendarYear' && this.orderByDirection == 'desc') {
+        return date.getUTCMonth() == 11;
       } else {
-        return false;
+        if (date.getUTCMonth() == this.facility.fiscalYearMonth && this.orderByDirection == 'asc') {
+          return true;
+        } else if (date.getUTCMonth() + 1 == this.facility.fiscalYearMonth && this.orderByDirection == 'desc') {
+          return true;
+        } else {
+          return false;
+        }
       }
     }
+    return false;
   }
 }

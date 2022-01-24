@@ -2,20 +2,22 @@
     <table class="table table-sm table-hover">
         <thead>
             <tr>
-                <th>Month</th>
-                <th>Fiscal Year</th>
-                <th>
+                <th (click)="setOrderDataField('date')" [ngClass]="{'active': orderDataField == 'date'}">Month</th>
+                <th (click)="setOrderDataField('fiscalYear')" [ngClass]="{'active': orderDataField == 'fiscalYear'}">
+                    Fiscal Year</th>
+                <th (click)="setOrderDataField('energyUse')" [ngClass]="{'active': orderDataField == 'energyUse'}">
                     Total Energy <br>(<span [innerHTML]="analysisItem.energyUnit | settingsLabel"></span>)</th>
-                <th>
+                <th (click)="setOrderDataField('production')" [ngClass]="{'active': orderDataField == 'production'}">
                     Total Production <br>({{group.productionUnits}})
                 </th>
-                <th>
+                <th (click)="setOrderDataField('energyIntensity')"
+                    [ngClass]="{'active': orderDataField == 'energyIntensity'}">
                     Energy Intensity <br>(<span
                         [innerHTML]="analysisItem.energyUnit | settingsLabel"></span>/{{group.productionUnits}})</th>
             </tr>
         </thead>
         <tbody>
-            <tr *ngFor="let summary of monthlyGroupSummaries| slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage"
+            <tr *ngFor="let summary of monthlyGroupSummaries| orderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage"
                 [ngClass]="{'fiscal-year-end': checkFiscalYearEnd(summary.date)}">
                 <td>{{summary.date | date: 'MMMM, y'}}</td>
                 <td>{{summary.fiscalYear}}</td>
