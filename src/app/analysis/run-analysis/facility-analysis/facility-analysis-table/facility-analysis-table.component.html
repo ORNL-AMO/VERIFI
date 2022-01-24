@@ -1,75 +1,176 @@
 <div class="col table-responsive">
-    <table class="table table-sm table-hover">
+    <table class="table table-sm table-hover table-one">
         <thead>
-            <tr>
+            <tr class="text-center">
                 <th class="cell-one"></th>
-                <th>% Baseline</th>
                 <th>
-                    Cumulative Energy<br> Improvement
+                    Annual Energy<br> Intensity<br> Improvement
                 </th>
-                <th>Improvement<br> Contribution</th>
+                <th>
+                    Cumulative Energy<br> Intensity<br> Improvement
+                </th>
                 <th>Total Energy<br> (<span [innerHTML]="analysisItem.energyUnit | settingsLabel"></span>)</th>
                 <th>Total Savings<br> (<span [innerHTML]="analysisItem.energyUnit | settingsLabel"></span>)
                 </th>
                 <th>New Savings<br> (<span [innerHTML]="analysisItem.energyUnit | settingsLabel"></span>)</th>
-                <th>Total Production</th>
             </tr>
         </thead>
-        <tbody *ngFor="let groupSummary of facilityGroupSummaries">
-            <tr class="bold">
-                <td colspan="8">
-                    <span *ngIf="facility.fiscalYear == 'nonCalendarYear'">FY - </span>
-                    {{groupSummary.yearGroupSummaries[0].year}}
-                </td>
-            </tr>
-            <tr *ngFor="let summary of groupSummary.yearGroupSummaries">
-                <td class="pl-2">
-                    {{summary.group.idbGroupId | groupName}}
+        <tbody>
+            <tr *ngFor="let groupTotals of facilityGroupTotals">
+                <td><span *ngIf="facility.fiscalYear == 'nonCalendarYear'">FY - </span>
+                    {{groupTotals.year}}
                 </td>
                 <td>
-                    {{summary.percentBaseline | customNumber}} %
+                    <span *ngIf="groupTotals.annualEnergyIntensityChange" [ngClass]="{'red': groupTotals.annualEnergyIntensityChange < 0}">
+                        {{groupTotals.annualEnergyIntensityChange | customNumber}} %
+                    </span>
+                    <span *ngIf="!groupTotals.annualEnergyIntensityChange">
+                        &mdash;
+                    </span>
                 </td>
                 <td>
-                    {{summary.energyIntensityImprovement | customNumber}} %
+                    <span *ngIf="groupTotals.energyIntensityImprovement" [ngClass]="{'red': groupTotals.energyIntensityImprovement < 0}">
+                        {{groupTotals.energyIntensityImprovement | customNumber}} %
+                    </span>
+                    <span *ngIf="!groupTotals.energyIntensityImprovement">
+                        &mdash;
+                    </span>
                 </td>
                 <td>
-                    {{summary.improvementContribution | customNumber}} %
+                    <span *ngIf="groupTotals.totalEnergy">
+                        {{groupTotals.totalEnergy | customNumber}}
+                    </span>
+                    <span *ngIf="!groupTotals.totalEnergy">
+                        &mdash;
+                    </span>
                 </td>
                 <td>
-                    {{summary.totalEnergy | customNumber}}
+                    <span *ngIf="groupTotals.totalEnergySavings" [ngClass]="{'red': groupTotals.totalEnergySavings < 0}">
+                        {{groupTotals.totalEnergySavings | customNumber}}
+                    </span>
+                    <span *ngIf="!groupTotals.totalEnergySavings">
+                        &mdash;
+                    </span>
                 </td>
                 <td>
-                    {{summary.totalEnergySavings | customNumber}}
-                </td>
-                <td>
-                    {{summary.annualEnergySavings | customNumber}}
-                </td>
-                <td>
-                    {{summary.totalProduction | customNumber}}
-                </td>
-            </tr>
-            <tr class="bold totals">
-                <td>Total</td>
-                <td></td>
-                <td>
-                    {{groupSummary.totals.energyIntensityImprovement | customNumber}} %
-                </td>
-                <td>
-                    {{groupSummary.totals.improvementContribution | customNumber}} %
-                </td>
-                <td>
-                    {{groupSummary.totals.totalEnergy | customNumber}}
-                </td>
-                <td>
-                    {{groupSummary.totals.totalEnergySavings | customNumber}}
-                </td>
-                <td>
-                    {{groupSummary.totals.annualEnergySavings | customNumber}}
-                </td>
-                <td>
-                    {{groupSummary.totals.totalProduction | customNumber}}
+                    <span *ngIf="groupTotals.annualEnergySavings" [ngClass]="{'red': groupTotals.annualEnergySavings < 0}">
+                        {{groupTotals.annualEnergySavings | customNumber}}
+                    </span>
+                    <span *ngIf="!groupTotals.annualEnergySavings">
+                        &mdash;
+                    </span>
                 </td>
             </tr>
         </tbody>
     </table>
+    <hr>
+</div>
+<div class="col table-responsive" *ngFor="let groupSummary of facilityGroupSummaries; let index = index;">
+    <table class="table-two table table-sm table-hover">
+        <thead>
+            <tr class="table-mh">
+                <th colspan="9" (click)="toggleCollapsed(index)">
+                    <span class="fa"
+                        [ngClass]="{'fa-chevron-right': groupSummary.collapsed, 'fa-chevron-down': !groupSummary.collapsed}"></span>
+                    {{groupSummary.group.idbGroupId | groupName}}
+                    <span class="pl-2">
+                        ({{groupSummary.percentBaseline | customNumber}} %)
+                    </span>
+                </th>
+            </tr>
+            <tr class="text-center" *ngIf="!groupSummary.collapsed">
+                <th class="cell-one"></th>
+                <th>
+                    Energy <br>Intensity
+                </th>
+                <th>
+                    Annual Energy<br> Intensity<br>Improvement
+                </th>
+                <th>
+                    Total Energy<br> Intensity <br>Improvement
+                </th>
+                <th>
+                    Annual Facility <br>Improvement<br> Contribution
+                </th>
+                <th>Total Energy<br> Use<br> (<span [innerHTML]="analysisItem.energyUnit | settingsLabel"></span>)</th>
+                <th>Total Energy<br> Savings<br> (<span [innerHTML]="analysisItem.energyUnit | settingsLabel"></span>)
+                </th>
+                <th>Annual Energy<br> Savings<br> (<span [innerHTML]="analysisItem.energyUnit | settingsLabel"></span>)</th>
+                <th>
+                    Total <br>Production<br> ({{groupSummary.group.productionUnits}})
+                </th>
+            </tr>
+        </thead>
+        <tbody *ngIf="!groupSummary.collapsed">
+            <tr *ngFor="let summary of groupSummary.summaries">
+                <td><span *ngIf="facility.fiscalYear == 'nonCalendarYear'">FY - </span>
+                    {{summary.year}}</td>
+                <td>
+                    <span *ngIf="summary.energyIntensity">
+                        {{summary.energyIntensity| customNumber}}
+                    </span>
+                    <span *ngIf="!summary.energyIntensity">
+                        &mdash;
+                    </span>
+                </td>
+                <td>
+                    <span *ngIf="summary.annualEnergyIntensityChange" [ngClass]="{'red': summary.annualEnergyIntensityChange < 0}">
+                        {{summary.annualEnergyIntensityChange | customNumber}} %
+                    </span>
+                    <span *ngIf="!summary.annualEnergyIntensityChange">
+                        &mdash;
+                    </span>
+                </td>
+                <td>
+                    <span *ngIf="summary.energyIntensityImprovement" [ngClass]="{'red': summary.energyIntensityImprovement < 0}">
+                        {{summary.energyIntensityImprovement | customNumber}} %
+                    </span>
+                    <span *ngIf="!summary.energyIntensityImprovement">
+                        &mdash;
+                    </span>
+                </td>
+                <td>
+                    <span *ngIf="summary.annualImprovementContribution" [ngClass]="{'red': summary.annualImprovementContribution < 0}">
+                        {{summary.annualImprovementContribution | customNumber}} %
+                    </span>
+                    <span *ngIf="!summary.annualImprovementContribution">
+                        &mdash;
+                    </span>
+                </td>
+                <td>
+                    <span *ngIf="summary.totalEnergy">
+                        {{summary.totalEnergy | customNumber}}
+                    </span>
+                    <span *ngIf="!summary.totalEnergy">
+                        &mdash;
+                    </span>
+                </td>
+                <td>
+                    <span *ngIf="summary.totalEnergySavings" [ngClass]="{'red': summary.totalEnergySavings < 0}">
+                        {{summary.totalEnergySavings | customNumber}}
+                    </span>
+                    <span *ngIf="!summary.totalEnergySavings">
+                        &mdash;
+                    </span>
+                </td>
+                <td>
+                    <span *ngIf="summary.annualEnergySavings" [ngClass]="{'red': summary.annualEnergySavings < 0}">
+                        {{summary.annualEnergySavings | customNumber}}
+                    </span>
+                    <span *ngIf="!summary.annualEnergySavings">
+                        &mdash;
+                    </span>
+                </td>
+                <td>
+                    <span *ngIf="summary.totalProduction">
+                        {{summary.totalProduction | customNumber}}
+                    </span>
+                    <span *ngIf="!summary.totalProduction">
+                        &mdash;
+                    </span>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <hr>
 </div>
