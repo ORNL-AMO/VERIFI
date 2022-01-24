@@ -61,11 +61,6 @@ export class FacilityAnalysisGraphComponent implements OnInit {
         showlegend: false,
         marker: {
           opacity: 0.0,
-          // color: 'black',
-          // line: {
-          //   color: 'black',
-          //   width: 10
-          // }
         },
         yaxis: 'y2'
       })
@@ -77,12 +72,7 @@ export class FacilityAnalysisGraphComponent implements OnInit {
         type: 'bar',
         width: .4,
         marker: {
-          // opacity: 0.1,
           color: 'black',
-          // line: {
-          //   color: 'black',
-          //   width: 10
-          // }
         },
         yaxis: 'y2'
       })
@@ -96,8 +86,6 @@ export class FacilityAnalysisGraphComponent implements OnInit {
         yaxis: {
           title: 'Energy Intensity Improvement',
           tickprefix: '%',
-          // automargin: true,
-          // ticksuffix: ticksuffix
         },
         yaxis2: {
           overlaying: 'y',
@@ -107,14 +95,9 @@ export class FacilityAnalysisGraphComponent implements OnInit {
           showaxis: false,
         },
         xaxis: {
-          // automargin: true,
           type: 'category'
         },
-        // legend: {
-        //   orientation: "h"
-        // },
         clickmode: "none",
-        // margin: { t: 10 }
       };
       let config = {
         modeBarButtonsToRemove: ['autoScale2d', 'lasso2d', 'pan2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian', 'autoscale', 'zoom', 'zoomin', 'zoomout'],
@@ -124,12 +107,6 @@ export class FacilityAnalysisGraphComponent implements OnInit {
       this.plotlyService.newPlot(this.facilityAnalysisGraph.nativeElement, traceData, layout, config);
     }
   }
-
-
-
-
-
-
 
   drawWaterFallChart() {
     if (this.facilityAnalysisGraph) {

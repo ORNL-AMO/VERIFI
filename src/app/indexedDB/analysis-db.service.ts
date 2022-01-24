@@ -104,12 +104,14 @@ export class AnalysisDbService {
   }
 
   update(values: IdbAnalysisItem): void {
+    values.date = new Date();
     this.dbService.update('analysisItems', values).subscribe(() => {
       this.setAccountAnalysisItems();
     });
   }
 
   updateWithObservable(values: IdbAnalysisItem): Observable<Array<IdbAnalysisItem>> {
+    values.date = new Date();
     return this.dbService.update('analysisItems', values);
   }
 

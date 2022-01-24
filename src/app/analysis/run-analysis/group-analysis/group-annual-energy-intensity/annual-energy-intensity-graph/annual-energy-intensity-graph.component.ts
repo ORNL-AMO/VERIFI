@@ -43,7 +43,6 @@ export class AnnualEnergyIntensityGraphComponent implements OnInit {
       traceData.push(barTrace);
 
       let layout = {
-        // title: 'Energy Intensity',
         xaxis: {
           title: 'Reporting Fiscal Year',
           tickmode: 'linear'
@@ -110,7 +109,6 @@ export class AnnualEnergyIntensityGraphComponent implements OnInit {
 
 
       let layout = {
-        // title: 'Energy Intensity',
         xaxis: {
           title: 'Reporting Fiscal Year',
           tickmode: 'linear'

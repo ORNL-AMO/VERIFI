@@ -9,8 +9,8 @@
                     Analysis</button>
             </div>
         </div>
-        
-        
+
+
         <div *ngIf="facilityAnalysisItems.length > 0">
             <div class="controls mb-2">
                 <div class="meterData item-right">
@@ -36,11 +36,6 @@
                         <tr>
                             <th (click)="setOrderDataField('name')" [ngClass]="{'active': orderDataField == 'name'}">
                                 Name</th>
-                            <!-- <th (click)="setOrderDataField('title')" [ngClass]="{'active': orderDataField == 'title'}">
-                                Title</th>
-                            <th (click)="setOrderDataField('baselineYear')"
-                                [ngClass]="{'active': orderDataField == 'baselineYear'}">Baseline Year
-                            </th>-->
                             <th (click)="setOrderDataField('reportYear')"
                                 [ngClass]="{'active': orderDataField == 'reportYear'}">
                                 Report Year
@@ -51,16 +46,13 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr *ngFor="let analysisItem of facilityAnalysisItems  | orderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
+                        <tr
+                            *ngFor="let analysisItem of facilityAnalysisItems  | orderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
                             <td>
                                 <a (click)=" selectAnalysisItem(analysisItem)">
-                            {{analysisItem.name}}
-                            </a>
+                                    {{analysisItem.name}}
+                                </a>
                             </td>
-                            <!-- <td>
-                                {{report.title}}
-                            </td>
-                            <td>{{report.baselineYear}}</td>-->
                             <td>{{analysisItem.reportYear}}</td>
                             <td>{{analysisItem.date | date}}</td>
                             <td class="actions">

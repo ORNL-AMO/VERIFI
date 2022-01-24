@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { IdbAnalysisItem } from 'src/app/models/idb';
+import { ToastNotificationsService } from 'src/app/shared/toast-notifications/toast-notifications.service';
 
 @Component({
   selector: 'app-analysis-dashboard',
@@ -20,7 +21,7 @@ export class AnalysisDashboardComponent implements OnInit {
   orderByDirection: string = 'desc';
 
   itemToDelete: IdbAnalysisItem;
-  constructor(private router: Router, private analysisDbService: AnalysisDbService) { }
+  constructor(private router: Router, private analysisDbService: AnalysisDbService, private toastNotificationService: ToastNotificationsService) { }
 
   ngOnInit(): void {
     this.facilityAnalysisItemsSub = this.analysisDbService.facilityAnalysisItems.subscribe(items => {
@@ -58,6 +59,7 @@ export class AnalysisDashboardComponent implements OnInit {
     await this.analysisDbService.deleteWithObservable(this.itemToDelete.id).toPromise();
     this.analysisDbService.setAccountAnalysisItems();
     this.itemToDelete = undefined;
+    this.toastNotificationService.showToast('Analysis Item Deleted', undefined, undefined, false, "success");
   }
 
   editItem(item: IdbAnalysisItem) {

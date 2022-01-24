@@ -25,15 +25,7 @@ export class MonthlyAnalysisGraphComponent implements OnInit {
   yearData: Array<{
     year: number,
     summaries: Array<MonthlyGroupSummary>
-  }>
-  markerColors: Array<string> = [
-    'purple',
-    'blue',
-    'green',
-    'red',
-    'orange',
-    'yellow',
-  ]
+  }>;
   constructor(private plotlyService: PlotlyService, private energyIntensityService: EnergyIntensityService) { }
 
   ngOnInit(): void {
