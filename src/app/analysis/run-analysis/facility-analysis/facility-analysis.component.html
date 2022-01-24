@@ -9,8 +9,8 @@
         </div>
     </div>
     <app-facility-analysis-graph *ngIf="dataDisplay == 'graph'" [facilityGroupSummaries]="facilityGroupSummaries"
-        [analysisItem]="analysisItem" [facility]="facility"></app-facility-analysis-graph>
+        [analysisItem]="analysisItem" [facility]="facility" [facilityGroupTotals]="facilityGroupTotals"></app-facility-analysis-graph>
     <app-facility-analysis-table *ngIf="dataDisplay == 'table'" [facilityGroupSummaries]="facilityGroupSummaries"
-        [analysisItem]="analysisItem" [facility]="facility">
+        [analysisItem]="analysisItem" [facility]="facility" [facilityGroupTotals]="facilityGroupTotals">
     </app-facility-analysis-table>
 </div>

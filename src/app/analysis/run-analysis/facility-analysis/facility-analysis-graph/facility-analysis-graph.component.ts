@@ -1,7 +1,7 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
-import { FacilityGroupSummary, FacilityYearGroupSummary } from 'src/app/models/analysis';
+import { FacilityGroupSummary, FacilityGroupTotals, FacilityYearGroupSummary } from 'src/app/models/analysis';
 import { IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 
 @Component({
@@ -16,6 +16,9 @@ export class FacilityAnalysisGraphComponent implements OnInit {
   facility: IdbFacility;
   @Input()
   facilityGroupSummaries: Array<FacilityGroupSummary>;
+  @Input()
+  @Input()
+  facilityGroupTotals: Array<FacilityGroupTotals>;
 
 
   @ViewChild('facilityAnalysisGraph', { static: false }) facilityAnalysisGraph: ElementRef;
@@ -34,27 +37,24 @@ export class FacilityAnalysisGraphComponent implements OnInit {
   drawChart() {
     if (this.facilityAnalysisGraph) {
       let traceData = new Array();
-      for (let index = 0; index < this.analysisItem.groups.length; index++) {
-        let groupSummary: Array<FacilityYearGroupSummary> = new Array();
-        this.facilityGroupSummaries.forEach(summary => {
-          groupSummary.push(summary.yearGroupSummaries[index]);
-        });
+      this.facilityGroupSummaries.forEach(summary => {
+        let groupSummary: Array<FacilityYearGroupSummary> = JSON.parse(JSON.stringify(summary.summaries));
         groupSummary = groupSummary.splice(1);
-        let groupName: string = this.utilityMeterGroupDbService.getGroupName(groupSummary[0].group.idbGroupId)
+        let groupName: string = this.utilityMeterGroupDbService.getGroupName(summary.group.idbGroupId)
         traceData.push({
           x: groupSummary.map(summary => { return summary.year }),
-          y: groupSummary.map(summary => { return summary.improvementContribution }),
+          y: groupSummary.map(summary => { return summary.annualImprovementContribution }),
           name: groupName,
           type: 'bar',
           width: .5,
 
         });
-      }
-      let groupSummaries = JSON.parse(JSON.stringify(this.facilityGroupSummaries));
+      });
+      let groupSummaries: Array<FacilityGroupTotals> = JSON.parse(JSON.stringify(this.facilityGroupTotals));
       groupSummaries = groupSummaries.splice(1);
       traceData.push({
-        x: groupSummaries.map(summary => { return summary.totals.year }),
-        y: groupSummaries.map(summary => { return summary.totals.improvementContribution-.5 }),
+        x: groupSummaries.map(summary => { return summary.year }),
+        y: groupSummaries.map(summary => { return summary.annualEnergyIntensityChange - .5 }),
         name: 'Total',
         type: 'bar',
         width: .5,
@@ -66,11 +66,11 @@ export class FacilityAnalysisGraphComponent implements OnInit {
       })
 
       traceData.push({
-        x: groupSummaries.map(summary => { return summary.totals.year }),
+        x: groupSummaries.map(summary => { return summary.year }),
         y: groupSummaries.map(summary => { return .5 }),
         name: 'Total',
         type: 'bar',
-        width: .4,
+        width: .3,
         marker: {
           color: 'black',
         },
@@ -111,60 +111,29 @@ export class FacilityAnalysisGraphComponent implements OnInit {
   drawWaterFallChart() {
     if (this.facilityAnalysisGraph) {
 
-      let yData: Array<number> = new Array();
-      this.facilityGroupSummaries.forEach((summary, index) => {
-        if (index == 0) {
-          yData.push(summary.totals.energyIntensity);
-        } else {
-          yData.push(summary.totals.annualEnergyIntensityChange);
-        }
-      });
+      // let yData: Array<number> = new Array();
+      // this.facilityGroupSummaries.forEach((summary, index) => {
+      //   if (index == 0) {
+      //     yData.push(summary.totals.energyIntensity);
+      //   } else {
+      //     yData.push(summary.totals.annualEnergyIntensityChange);
+      //   }
+      // });
 
 
-      let eiData = [
-        {
-          name: "Facility Energy Intensity",
-          type: "waterfall",
-          orientation: "v",
-          measure: this.facilityGroupSummaries.map((summary, index) => {
-            if (index == 0) { return 'absolute' }
-            return 'relative'
-          }),
-          x: this.facilityGroupSummaries.map(summary => { return summary.totals.year }),
-          y: yData,
-          texttemplate: 'Total: %{value:,.2f}<br>Change: %{delta:,.2f}',
-          textposition: "outside"
-          // connector: {
-          //   mode: "between",
-          //   line: {
-          //     width: 4,
-          //     color: "rgb(0, 0, 0)",
-          //     dash: 0
-          //   }
-          // }
-        }
-      ]
-
-      // for (let index = 0; index < this.analysisItem.groups.length; index++) {
-      //   let groupYData: Array<number> = new Array();
-      //   let groupName: string;
-      //   this.facilityGroupSummaries.forEach((summary, summaryIndex) => {
-      //     groupName = summary.yearGroupSummaries[index].group.idbGroup.name;
-      //     if (summaryIndex == 0) {
-      //       groupYData.push(summary.yearGroupSummaries[index].energyIntensity);
-      //     } else {
-      //       groupYData.push(summary.yearGroupSummaries[index].annualEnergyIntensityChange);
-      //     }
-      //   });
-      //   eiData.push({
-      //     name: groupName,
+      // let eiData = [
+      //   {
+      //     name: "Facility Energy Intensity",
       //     type: "waterfall",
       //     orientation: "v",
-      //     measure: this.facilityGroupSummaries.map(summary => { return 'relative' }),
+      //     measure: this.facilityGroupSummaries.map((summary, index) => {
+      //       if (index == 0) { return 'absolute' }
+      //       return 'relative'
+      //     }),
       //     x: this.facilityGroupSummaries.map(summary => { return summary.totals.year }),
-      //     y: groupYData,
-      //     // text: yData,
-      //     // textposition: "outside"
+      //     y: yData,
+      //     texttemplate: 'Total: %{value:,.2f}<br>Change: %{delta:,.2f}',
+      //     textposition: "outside"
       //     // connector: {
       //     //   mode: "between",
       //     //   line: {
@@ -173,41 +142,72 @@ export class FacilityAnalysisGraphComponent implements OnInit {
       //     //     dash: 0
       //     //   }
       //     // }
-      //   })
-      // }
+      //   }
+      // ]
 
-      let layout = {
-        waterfallgroupgap: 0.5,
-        title: {
-          text: "Annual Energy Intensity Change"
-        },
-        xaxis: {
-          type: "category",
-          title: {
-            text: "Fiscal Year"
-          }
-        },
-        yaxis: {
-          type: "linear",
-          title: {
-            text: "Energy Intensity"
-          }
-        },
-        // autosize: true,
-        // showlegend: true
-        margin: {
-          r: 75,
-          l: 75,
-          t: 50,
-          b: 150
-        }
-      };
-      var config = {
-        responsive: true,
-        modeBarButtonsToRemove: ['autoScale2d', 'lasso2d', 'pan2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian', 'autoscale', 'zoom', 'zoomin', 'zoomout'],
-        displaylogo: false,
-      };
-      this.plotlyService.newPlot(this.facilityAnalysisGraph.nativeElement, eiData, layout, config);
+      // // for (let index = 0; index < this.analysisItem.groups.length; index++) {
+      // //   let groupYData: Array<number> = new Array();
+      // //   let groupName: string;
+      // //   this.facilityGroupSummaries.forEach((summary, summaryIndex) => {
+      // //     groupName = summary.yearGroupSummaries[index].group.idbGroup.name;
+      // //     if (summaryIndex == 0) {
+      // //       groupYData.push(summary.yearGroupSummaries[index].energyIntensity);
+      // //     } else {
+      // //       groupYData.push(summary.yearGroupSummaries[index].annualEnergyIntensityChange);
+      // //     }
+      // //   });
+      // //   eiData.push({
+      // //     name: groupName,
+      // //     type: "waterfall",
+      // //     orientation: "v",
+      // //     measure: this.facilityGroupSummaries.map(summary => { return 'relative' }),
+      // //     x: this.facilityGroupSummaries.map(summary => { return summary.totals.year }),
+      // //     y: groupYData,
+      // //     // text: yData,
+      // //     // textposition: "outside"
+      // //     // connector: {
+      // //     //   mode: "between",
+      // //     //   line: {
+      // //     //     width: 4,
+      // //     //     color: "rgb(0, 0, 0)",
+      // //     //     dash: 0
+      // //     //   }
+      // //     // }
+      // //   })
+      // // }
+
+      // let layout = {
+      //   waterfallgroupgap: 0.5,
+      //   title: {
+      //     text: "Annual Energy Intensity Change"
+      //   },
+      //   xaxis: {
+      //     type: "category",
+      //     title: {
+      //       text: "Fiscal Year"
+      //     }
+      //   },
+      //   yaxis: {
+      //     type: "linear",
+      //     title: {
+      //       text: "Energy Intensity"
+      //     }
+      //   },
+      //   // autosize: true,
+      //   // showlegend: true
+      //   margin: {
+      //     r: 75,
+      //     l: 75,
+      //     t: 50,
+      //     b: 150
+      //   }
+      // };
+      // var config = {
+      //   responsive: true,
+      //   modeBarButtonsToRemove: ['autoScale2d', 'lasso2d', 'pan2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian', 'autoscale', 'zoom', 'zoomin', 'zoomout'],
+      //   displaylogo: false,
+      // };
+      // this.plotlyService.newPlot(this.facilityAnalysisGraph.nativeElement, eiData, layout, config);
     }
   }
 }

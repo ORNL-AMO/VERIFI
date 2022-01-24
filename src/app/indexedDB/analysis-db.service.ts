@@ -135,7 +135,7 @@ export class AnalysisDbService {
       itemGroups.push({
         idbGroupId: group.id,
         analysisType: 'energyIntensity',
-        predictorVariables: predictorVariables,
+        predictorVariables: JSON.parse(JSON.stringify(predictorVariables)),
         productionUnits: this.getUnits(predictorVariables)
       });
     });

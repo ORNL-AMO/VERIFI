@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { FacilityGroupSummary } from 'src/app/models/analysis';
-import { IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
+import { AnnualGroupSummary, FacilityGroupSummary, FacilityGroupTotals } from 'src/app/models/analysis';
+import { AnalysisGroup, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 
 @Component({
   selector: 'app-facility-analysis-table',
@@ -14,10 +14,15 @@ export class FacilityAnalysisTableComponent implements OnInit {
   analysisItem: IdbAnalysisItem;
   @Input()
   facility: IdbFacility;
+  @Input()
+  facilityGroupTotals: Array<FacilityGroupTotals>;
 
   constructor() { }
 
   ngOnInit(): void {
   }
 
+  toggleCollapsed(index: number) {
+    this.facilityGroupSummaries[index].collapsed = !this.facilityGroupSummaries[index].collapsed;
+  }
 }

@@ -1,11 +1,13 @@
-tr.totals{
-    border-bottom: solid;
+.table-mh th:hover{
+    cursor: pointer;
+    text-decoration: underline;
 }
 
-th{
-    width: 8%;
+.table-one th:not(.cell-one){
+    width: 18%;
 }
 
-/* th:not(.cell-one){
-    width: 12.5%;
-} */
+
+.table-two th:not(.cell-one){
+    width: 11.5%;
+}

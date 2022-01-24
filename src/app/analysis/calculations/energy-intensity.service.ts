@@ -5,7 +5,7 @@ import { AnalysisGroup, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtil
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import * as _ from 'lodash';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
-import { AnnualGroupSummary, FacilityGroupSummary, FacilityYearGroupSummary, MonthlyGroupSummary } from 'src/app/models/analysis';
+import { AnnualGroupSummary, FacilityGroupSummary, FacilityGroupTotals, FacilityYearGroupSummary, MonthlyGroupSummary } from 'src/app/models/analysis';
 import { ConvertMeterDataService } from 'src/app/shared/helper-services/convert-meter-data.service';
 
 @Injectable({
@@ -221,50 +221,62 @@ export class EnergyIntensityService {
     });
     let facilityGroupSummaries: Array<FacilityGroupSummary> = new Array();
 
-    let percentBaseline: Array<number> = new Array();
-    for (let summaryYear: number = baselineYear; summaryYear <= analysisItem.reportYear; summaryYear++) {
-      let filterYearSummaries: Array<AnnualGroupSummary> = groupSummaries.filter(summary => { return summary.year == summaryYear });
-      let totalEnergy: number = _.sumBy(filterYearSummaries, 'totalEnergy');
-      let yearGroupSummaries: Array<FacilityYearGroupSummary> = new Array();
-
-      filterYearSummaries.forEach((summary, index) => {
-        if (summaryYear == baselineYear) {
-          percentBaseline.push(summary.totalEnergy / totalEnergy);
-        }
-        yearGroupSummaries.push({
-          year: summary.year,
-          group: summary.group,
-          percentBaseline: percentBaseline[index] * 100,
-          energyIntensity: summary.energyIntensity,
-          annualEnergyIntensityChange: summary.annualEnergyIntensityChange,
-          energyIntensityImprovement: summary.annualEnergyIntensityChange,
-          improvementContribution: percentBaseline[index] * summary.annualEnergyIntensityChange,
-          totalEnergySavings: summary.totalEnergySavings,
-          annualEnergySavings: summary.annualEnergySavings,
-          totalEnergy: summary.totalEnergy,
-          totalProduction: summary.totalProduction
-        })
-      })
-
-      facilityGroupSummaries.push({
-        yearGroupSummaries: yearGroupSummaries,
-        totals: {
-          year: summaryYear,
-          energyIntensityImprovement: _.sumBy(yearGroupSummaries, 'energyIntensityImprovement'),
-          improvementContribution: _.sumBy(yearGroupSummaries, 'improvementContribution'),
-          totalSavings: _.sumBy(yearGroupSummaries, 'totalSavings'),
-          newSavings: _.sumBy(yearGroupSummaries, 'newSavings'),
-          totalEnergy: _.sumBy(yearGroupSummaries, 'totalEnergy'),
-          totalProduction: _.sumBy(yearGroupSummaries, 'totalProduction'),
-          totalEnergySavings: _.sumBy(yearGroupSummaries, 'totalEnergySavings'),
-          annualEnergySavings: _.sumBy(yearGroupSummaries, 'annualEnergySavings'),
-          energyIntensity: _.sumBy(yearGroupSummaries, 'energyIntensity'),
-          annualEnergyIntensityChange: _.sumBy(yearGroupSummaries, 'annualEnergyIntensityChange')
-        }
-      })
-
-    }
+    let baselineGroupSummaries: Array<AnnualGroupSummary> = groupSummaries.filter(summary => { return summary.year == baselineYear })
+    let totalEnergy: number = _.sumBy(baselineGroupSummaries, 'totalEnergy');
+    analysisItem.groups.forEach(group => {
+      let groupMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getGroupMetersByGroupId(group.idbGroupId)
+      if (groupMeters.length != 0) {
+        let summaries: Array<FacilityYearGroupSummary> = new Array()
+        let groupSummary: Array<AnnualGroupSummary> = this.calculateAnnualGroupSummaries(analysisItem, group, facility);
+        let baselineSummary: AnnualGroupSummary = groupSummary.find(summary => { return summary.year == baselineYear });
+        let percentBaseline: number = baselineSummary.totalEnergy / totalEnergy;
+        for (let summaryYear: number = baselineYear; summaryYear <= analysisItem.reportYear; summaryYear++) {
+          let summary: AnnualGroupSummary = groupSummary.find(summary => { return summary.year == summaryYear });
+          summaries.push({
+            year: summary.year,
+            energyIntensity: summary.energyIntensity,
+            annualEnergyIntensityChange: summary.annualEnergyIntensityChange,
+            energyIntensityImprovement: summary.totalEnergyIntensityChange,
+            annualImprovementContribution: percentBaseline * summary.annualEnergyIntensityChange,
+            totalImprovementContribution: percentBaseline * summary.totalEnergyIntensityChange,
+            totalEnergySavings: summary.totalEnergySavings,
+            annualEnergySavings: summary.annualEnergySavings,
+            totalEnergy: summary.totalEnergy,
+            totalProduction: summary.totalProduction
+          })
+        };
+        facilityGroupSummaries.push({
+          group: group,
+          percentBaseline: percentBaseline * 100,
+          summaries: summaries,
+          collapsed: true
+        });
+      }
+    })
     return facilityGroupSummaries;
+  }
+
+  calculateFacilityGroupTotals(facilityGroupSummaries: Array<FacilityGroupSummary>, facility: IdbFacility, analysisItem: IdbAnalysisItem): Array<FacilityGroupTotals>{
+    let baselineYear: number = facility.sustainabilityQuestions.energyReductionBaselineYear;
+    let totals: Array<FacilityGroupTotals> = new Array();
+    let allSummaries: Array<FacilityYearGroupSummary> = facilityGroupSummaries.flatMap(summary => {return summary.summaries});
+    for (let summaryYear: number = baselineYear; summaryYear <= analysisItem.reportYear; summaryYear++) {
+      let filteredSummaries: Array<FacilityYearGroupSummary> = allSummaries.filter(summary => {return summary.year == summaryYear});
+      totals.push({
+        year: summaryYear,
+        // improvementContribution: number,
+        totalSavings: _.sumBy(filteredSummaries, 'totalEnergySavings'),
+        newSavings: _.sumBy(filteredSummaries, 'annualEnergySavings'),
+        energyIntensity: _.sumBy(filteredSummaries, 'energyIntensity'),
+        annualEnergyIntensityChange: _.sumBy(filteredSummaries, 'annualImprovementContribution'),
+        energyIntensityImprovement: _.sumBy(filteredSummaries, 'totalImprovementContribution'),
+        totalEnergy: _.sumBy(filteredSummaries, 'totalEnergy'),
+        // totalProduction: number,
+        totalEnergySavings:  _.sumBy(filteredSummaries, 'totalEnergySavings'),
+        annualEnergySavings:  _.sumBy(filteredSummaries, 'annualEnergySavings')
+      })
+    }
+    return totals;
   }
 
   getFiscalYear(date: Date, facility: IdbFacility): number {
