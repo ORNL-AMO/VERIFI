@@ -1,5 +1,5 @@
 <div class="footer" id="footer" role="footer">
-    <button class="mr-2" (click)="deleteDatabase()" *ngIf="isDev">Delete Database</button>
+    <button class="mr-2" (click)="deleteDatabase()">Reset Database</button>
     <button class="mr-2 ml-2" (click)="backupAccount()">Backup Account</button>
     <p>Last Backup: (<span *ngIf="lastBackupDate">{{lastBackupDate | date:'medium'}}</span><span
             *ngIf="!lastBackupDate">&mdash;</span>)

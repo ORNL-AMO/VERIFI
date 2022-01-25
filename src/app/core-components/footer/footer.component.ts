@@ -1,9 +1,11 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { BackupDataService } from 'src/app/account-management/backup-data.service';
 import { environment } from 'src/environments/environment';
 import { AccountdbService } from "../../indexedDB/account-db.service";
 import { FacilitydbService } from "../../indexedDB/facility-db.service";
+import { LoadingService } from '../loading/loading.service';
 
 @Component({
   selector: 'app-footer',
@@ -25,9 +27,11 @@ export class FooterComponent implements OnInit {
   lastBackupDate: Date;
   isDev: boolean;
   constructor(
-    public accountdbService: AccountdbService,
-    public facilitydbService: FacilitydbService,
-    private backupDataService: BackupDataService
+    private accountdbService: AccountdbService,
+    private facilitydbService: FacilitydbService,
+    private backupDataService: BackupDataService,
+    private loadingService: LoadingService,
+    private router: Router
   ) {
 
   }
@@ -47,7 +51,7 @@ export class FooterComponent implements OnInit {
     });
 
     this.selectedAccountSub = this.accountdbService.selectedAccount.subscribe(selectedAccount => {
-      if(selectedAccount){
+      if (selectedAccount) {
         this.lastBackupDate = selectedAccount.lastBackup;
       }
     })
@@ -60,11 +64,13 @@ export class FooterComponent implements OnInit {
     this.selectedAccountSub.unsubscribe();
   }
 
-  deleteDatabase() {
-    this.accountdbService.deleteDatabase(); 
+  async deleteDatabase() {
+    this.loadingService.setLoadingStatus(true);
+    this.loadingService.setLoadingMessage('Resetting Database, if this takes too long restart application..');
+    this.accountdbService.deleteDatabase();
   }
 
-  backupAccount(){
+  backupAccount() {
     this.backupDataService.backupAccount();
   }
 }
