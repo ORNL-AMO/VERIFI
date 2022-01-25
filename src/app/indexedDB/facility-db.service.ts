@@ -203,4 +203,13 @@ export class FacilitydbService {
 
         }
     }
+
+    getFacilityNameById(id: number): string {
+        let accountFacilites: Array<IdbFacility> = this.accountFacilities.getValue();
+        let selectedFacility: IdbFacility = accountFacilites.find(facility => { return facility.id == id });
+        if (selectedFacility) {
+            return selectedFacility.name;
+        }
+        return '';
+    }
 }

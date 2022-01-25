@@ -167,7 +167,7 @@
                         for="{{'facility_'+index}}">
                         <input class="checkbox" type="checkbox" id="{{'facility_'+index}}" name="{{'facility_'+index}}"
                             [(ngModel)]="facility.selected" (change)="saveCustom()">Include
-                        <b>{{facility.name}}</b>
+                        <b>{{facility.facilityId | facilityName}}</b>
                     </label>
                 </div>
                 <hr>

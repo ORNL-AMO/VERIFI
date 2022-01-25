@@ -55,7 +55,10 @@ export interface ReportOptions {
   water: boolean,
   wasteWater: boolean,
   otherUtility: boolean,
-  facilities: Array<IdbFacility>,
+  facilities: Array<{
+    facilityId: number,
+    selected: boolean
+  }>,
   baselineYear: number,
   targetYear: number,
   monthBarCharts: boolean,
