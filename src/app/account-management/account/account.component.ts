@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AccountdbService } from "../../indexedDB/account-db.service";
-import { IdbAccount, IdbFacility } from 'src/app/models/idb';
+import { IdbAccount, IdbFacility, IdbOverviewReportOptions } from 'src/app/models/idb';
 import { Subscription } from 'rxjs';
 import { FacilitydbService } from "../../indexedDB/facility-db.service";
 import { PredictordbService } from "../../indexedDB/predictors-db.service";
@@ -14,6 +14,7 @@ import { HelpPanelService } from 'src/app/help-panel/help-panel.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { OverviewReportOptionsDbService } from 'src/app/indexedDB/overview-report-options-db.service';
 import { ImportBackupModalService } from 'src/app/core-components/import-backup-modal/import-backup-modal.service';
+import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 
 @Component({
   selector: 'app-account',
@@ -43,7 +44,8 @@ export class AccountComponent implements OnInit {
     private helpPanelService: HelpPanelService,
     private analysisDbService: AnalysisDbService,
     private overviewReportOptionsDbService: OverviewReportOptionsDbService,
-    private importBackupModalService: ImportBackupModalService
+    private importBackupModalService: ImportBackupModalService,
+    private toastNotificationService: ToastNotificationsService
   ) { }
 
   ngOnInit() {
@@ -66,10 +68,24 @@ export class AccountComponent implements OnInit {
     this.router.navigate(['/facility-management']);
   }
 
-  addNewFacility() {
+  async addNewFacility() {
+    this.loadingService.setLoadingStatus(true);
+    this.loadingService.setLoadingMessage('Creating Facility...');
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let idbFacility: IdbFacility = this.facilityDbService.getNewIdbFacility(selectedAccount);
-    this.facilityDbService.add(idbFacility);
+    let newFacility: IdbFacility = await this.facilityDbService.addWithObservable(idbFacility).toPromise();
+    this.loadingService.setLoadingMessage('Updating Reports...');
+    let overviewReportOptions: Array<IdbOverviewReportOptions> = this.overviewReportOptionsDbService.accountOverviewReportOptions.getValue();
+    for(let index = 0; index < overviewReportOptions.length; index++){
+      overviewReportOptions[index].reportOptions.facilities.push({
+        facilityId: newFacility.id,
+        selected: false
+      });
+      await this.overviewReportOptionsDbService.updateWithObservable(overviewReportOptions[index]).toPromise();
+    }
+    this.facilityDbService.setAccountFacilities();
+    this.loadingService.setLoadingStatus(false);
+    this.toastNotificationService.showToast('New Facility Added!', undefined, undefined, false, 'success');
   }
 
 
@@ -89,6 +105,13 @@ export class AccountComponent implements OnInit {
     await this.overviewReportOptionsDbService.updateReportsRemoveFacility(this.facilityToDelete.id);
     this.loadingService.setLoadingMessage("Deleting Analysis Items...")
     await this.analysisDbService.deleteAllFacilityAnalysisItems(this.facilityToDelete.id);
+    this.loadingService.setLoadingMessage('Updating Reports...');
+    let overviewReportOptions: Array<IdbOverviewReportOptions> = this.overviewReportOptionsDbService.accountOverviewReportOptions.getValue();
+    for(let index = 0; index < overviewReportOptions.length; index++){
+      overviewReportOptions[index].reportOptions.facilities = overviewReportOptions[index].reportOptions.facilities.filter(reportFacility => {return reportFacility.facilityId != this.facilityToDelete.id});
+      await this.overviewReportOptionsDbService.updateWithObservable(overviewReportOptions[index]).toPromise();
+    }
+
     this.loadingService.setLoadingMessage("Deleting Facility...");
     await this.facilityDbService.deleteFacilitiesAsync([this.facilityToDelete]);
     let allFacilities: Array<IdbFacility> = await this.facilityDbService.getAll().toPromise();
@@ -98,6 +121,7 @@ export class AccountComponent implements OnInit {
     this.facilityDbService.accountFacilities.next(accountFacilites);
     this.facilityDbService.setSelectedFacility();
     this.loadingService.setLoadingStatus(false);
+    this.toastNotificationService.showToast('Facility Deleted!', undefined, undefined, false, 'success');
   }
 
   async confirmAccountDelete() {
@@ -140,6 +164,7 @@ export class AccountComponent implements OnInit {
     }
     this.router.navigate(['/']);
     this.loadingService.setLoadingStatus(false);
+    this.toastNotificationService.showToast('Account Deleted!', undefined, undefined, false, 'success');
   }
 
   setDeleteFacilityEntry(facility: IdbFacility) {
