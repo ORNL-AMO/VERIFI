@@ -73,10 +73,10 @@ export class MeterSummaryService {
   getAccountFacilitesSummary(reportOptions?: ReportOptions): AccountFacilitiesSummary {
     let facilitiesSummary: Array<FacilitySummary> = new Array();
     let allAccountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    let accountFacilites: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     if (!reportOptions) {
       let accountLastBill: MonthlyData = this.calanderizationService.getLastBillEntry(allAccountMeters, true, reportOptions);
-      let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-      facilities.forEach(facility => {
+      accountFacilites.forEach(facility => {
         let facilityMeterSummary: FacilitySummary = this.getFacilitySummary(facility, true, accountLastBill, reportOptions);
         facilitiesSummary.push(facilityMeterSummary);
       });
@@ -101,7 +101,8 @@ export class MeterSummaryService {
       }
       reportOptions.facilities.forEach(facility => {
         if (facility.selected) {
-          let facilityMeterSummary: FacilitySummary = this.getFacilitySummary(facility, true, accountTargetYearBill, reportOptions);
+          let selectedFacility: IdbFacility = accountFacilites.find(accountFacility => {return accountFacility.id == facility.facilityId})
+          let facilityMeterSummary: FacilitySummary = this.getFacilitySummary(selectedFacility, true, accountTargetYearBill, reportOptions);
           facilitiesSummary.push(facilityMeterSummary);
         }
       });

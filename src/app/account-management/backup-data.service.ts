@@ -5,8 +5,9 @@ import { PredictordbService } from '../indexedDB/predictors-db.service';
 import { UtilityMeterdbService } from '../indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from '../indexedDB/utilityMeterData-db.service';
 import { UtilityMeterGroupdbService } from '../indexedDB/utilityMeterGroup-db.service';
-import { IdbAccount, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from '../models/idb';
+import { IdbAccount, IdbFacility, IdbOverviewReportOptions, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from '../models/idb';
 import { LoadingService } from '../core-components/loading/loading.service';
+import { OverviewReportOptionsDbService } from '../indexedDB/overview-report-options-db.service';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +16,8 @@ export class BackupDataService {
 
   constructor(private accountDbService: AccountdbService, private facilityDbService: FacilitydbService, private predictorsDbService: PredictordbService,
     private utilityMeterDbService: UtilityMeterdbService, private uilityMeterDataDbService: UtilityMeterDatadbService,
-    private utilityMeterGroupDbService: UtilityMeterGroupdbService, private loadingService: LoadingService) { }
+    private utilityMeterGroupDbService: UtilityMeterGroupdbService, private loadingService: LoadingService,
+    private overviewReportOptionsDbService: OverviewReportOptionsDbService) { }
 
 
   backupAccount() {
@@ -137,6 +139,16 @@ export class BackupDataService {
       facilityBackup.predictors[predictorIndex].facilityId = facility.id;
       await this.predictorsDbService.addWithObservable(facilityBackup.predictors[predictorIndex]).toPromise();
     }
+    //update reports
+    this.loadingService.setLoadingMessage('Updating reports...');
+    let overviewReports: Array<IdbOverviewReportOptions> = this.overviewReportOptionsDbService.accountOverviewReportOptions.getValue();
+    for(let reportIndex = 0; reportIndex < overviewReports.length; reportIndex++){
+      overviewReports[reportIndex].reportOptions.facilities.push({
+        facilityId: facility.id,
+        selected: false
+      });
+      await this.overviewReportOptionsDbService.updateWithObservable(overviewReports[reportIndex]).toPromise();
+    }  
     let newFacility: IdbFacility = await this.facilityDbService.getById(facility.id).toPromise();
     return newFacility;
   }

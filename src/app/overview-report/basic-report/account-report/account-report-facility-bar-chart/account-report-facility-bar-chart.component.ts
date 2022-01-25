@@ -1,6 +1,7 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbAccount, IdbFacility, IdbUtilityMeter, MeterSource } from 'src/app/models/idb';
 import { ReportOptions } from 'src/app/models/overview-report';
@@ -32,7 +33,8 @@ export class AccountReportFacilityBarChartComponent implements OnInit {
   print: boolean;
   printSub: Subscription;
   constructor(private visualizationService: VisualizationService, private overviewReportService: OverviewReportService,
-    private utilityMeterDbService: UtilityMeterdbService, private plotlyService: PlotlyService) { }
+    private utilityMeterDbService: UtilityMeterdbService, private plotlyService: PlotlyService,
+    private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
     this.printSub = this.overviewReportService.print.subscribe(val => {
@@ -184,14 +186,16 @@ export class AccountReportFacilityBarChartComponent implements OnInit {
     this.chartData = new Array();
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let selectedSource: Array<MeterSource> = this.overviewReportService.getSelectedSources(this.reportOptions);
+    let accountFacilites: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     this.reportOptions.facilities.forEach(facility => {
       if (facility.selected) {
         let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => {
-          return meter.facilityId == facility.id && selectedSource.includes(meter.source);
+          return meter.facilityId == facility.facilityId && selectedSource.includes(meter.source);
         });
         let facilityBarChartData: Array<FacilityBarChartData> = this.visualizationService.getFacilityBarChartData(facilityMeters, this.sumByMonth, true, true, this.reportOptions);
+        let selectedFacility: IdbFacility = accountFacilites.find(accountFacility => { return accountFacility.id == facility.facilityId })
         this.chartData.push({
-          facility: facility,
+          facility: selectedFacility,
           data: facilityBarChartData
         });
       }

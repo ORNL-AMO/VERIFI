@@ -7,6 +7,7 @@ import { SettingsLabelPipe } from './settings-label.pipe';
 import { YearOptionsPipe } from './year-options.pipe';
 import { PredictorsOrderByPipe } from './predictors-order-by.pipe';
 import { GroupNamePipe } from './group-name.pipe';
+import { FacilityNamePipe } from './facility-name.pipe';
 
 @NgModule({
   declarations: [
@@ -16,7 +17,8 @@ import { GroupNamePipe } from './group-name.pipe';
     SettingsLabelPipe,
     YearOptionsPipe,
     PredictorsOrderByPipe,
-    GroupNamePipe
+    GroupNamePipe,
+    FacilityNamePipe
   ],
   imports: [
     CommonModule
@@ -28,7 +30,8 @@ import { GroupNamePipe } from './group-name.pipe';
     SettingsLabelPipe,
     YearOptionsPipe,
     PredictorsOrderByPipe,
-    GroupNamePipe
+    GroupNamePipe,
+    FacilityNamePipe
   ]
 })
 export class HelperPipesModule { }

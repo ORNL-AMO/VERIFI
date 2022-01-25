@@ -1,4 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { AccountFacilitiesSummary } from 'src/app/models/dashboard';
 import { IdbAccount, IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
@@ -31,7 +32,8 @@ export class AccountReportComponent implements OnInit {
     facility: IdbFacility
   }>;
   constructor(private overviewReportService: OverviewReportService,
-    private meterSummaryService: MeterSummaryService, private utilityMeterDbService: UtilityMeterdbService) { }
+    private meterSummaryService: MeterSummaryService, private utilityMeterDbService: UtilityMeterdbService,
+    private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
     this.setFacilitySummary();
@@ -49,7 +51,7 @@ export class AccountReportComponent implements OnInit {
     let removeFacilityId: Array<number> = new Array();
     this.reportOptions.facilities.forEach(facility => {
       if (!facility.selected) {
-        removeFacilityId.push(facility.id);
+        removeFacilityId.push(facility.facilityId);
       }
     })
     accountMeters = accountMeters.filter(meter => {
@@ -63,10 +65,12 @@ export class AccountReportComponent implements OnInit {
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     this.reportOptions.facilities.forEach(facility => {
       if (facility.selected) {
-        let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == facility.id });
+        let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == facility.facilityId });
         let utilitySummary: ReportUtilitySummary = this.overviewReportService.getUtilityUsageData(facilityMeters, this.reportOptions, true);
+        let accountFacilites: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+        let selectedFacility: IdbFacility = accountFacilites.find(accountFacility => { return accountFacility.id == facility.facilityId })
         this.facilitiesUtilitySummaries.push({
-          facility: facility,
+          facility: selectedFacility,
           utilitySummary: utilitySummary
         })
       }

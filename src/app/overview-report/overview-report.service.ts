@@ -53,6 +53,13 @@ export class OverviewReportService {
       } else if (meter.source == 'Water') {
         water = true;
       }
+    });
+    let facilities: Array<{facilityId: number, selected: boolean}> = new Array();
+    accountFacilites.forEach(facility =>{
+      facilities.push({
+        facilityId: facility.id,
+        selected: true
+      })
     })
     return {
       title: 'Energy Consumption Report',
@@ -74,7 +81,7 @@ export class OverviewReportService {
       water: water,
       wasteWater: wasteWater,
       otherUtility: otherUtility,
-      facilities: accountFacilites,
+      facilities: facilities,
       baselineYear: undefined,
       targetYear: undefined,
       annualBarCharts: true,

@@ -113,7 +113,7 @@ export class OverviewReportOptionsDbService {
     let accountReports: Array<IdbOverviewReportOptions> = this.accountOverviewReportOptions.getValue();
     for(let i = 0; i < accountReports.length; i++){
       let report: IdbOverviewReportOptions = accountReports[i];
-      report.reportOptions.facilities = report.reportOptions.facilities.filter(facility => {return facility.id != facilityId});
+      report.reportOptions.facilities = report.reportOptions.facilities.filter(facility => {return facility.facilityId != facilityId});
       await this.updateWithObservable(report).toPromise();
     }
   }
