@@ -9,6 +9,7 @@ import { IdbAccount, IdbFacility } from 'src/app/models/idb';
 import { Subscription } from 'rxjs';
 import * as _ from 'lodash';
 import { DashboardService } from 'src/app/dashboard/dashboard.service';
+import { ImportBackupModalService } from '../import-backup-modal/import-backup-modal.service';
 
 @Component({
   selector: 'app-header',
@@ -36,7 +37,6 @@ export class HeaderComponent implements OnInit {
   accountFacilitiesSub: Subscription;
   selectedFacilitySub: Subscription;
 
-  showImportFile: boolean = false;
   industryColor: string;
   constructor(
     private eRef: ElementRef,
@@ -46,7 +46,8 @@ export class HeaderComponent implements OnInit {
     public utilityMeterdbService: UtilityMeterdbService,
     public utilityMeterGroupdbService: UtilityMeterGroupdbService,
     public utilityMeterDatadbService: UtilityMeterDatadbService,
-    private dashboardService: DashboardService
+    private dashboardService: DashboardService,
+    private importBackupModalService: ImportBackupModalService
   ) {
     // Close menus on navigation
     router.events.subscribe((event: Event) => {
@@ -189,12 +190,9 @@ export class HeaderComponent implements OnInit {
   }
 
   openImportBackup() {
-    this.showImportFile = true;
+    this.importBackupModalService.inFacility = false;
+    this.importBackupModalService.showModal.next(true);
     this.switchAccountMenu = false;
-  }
-
-  cancelImportBackup() {
-    this.showImportFile = false;
   }
 
   checkIfAccountPage() {

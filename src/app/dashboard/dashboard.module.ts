@@ -17,9 +17,6 @@ import { AccountUtilityEnergyUseTableComponent } from './account-overview/accoun
 import { FormsModule } from '@angular/forms';
 import { HelperPipesModule } from '../shared/helper-pipes/helper-pipes.module';
 import { RouterModule } from '@angular/router';
-import { ImportBackupModalModule } from '../shared/import-backup-modal/import-backup-modal.module';
-
-
 
 @NgModule({
   declarations: [
@@ -42,8 +39,7 @@ import { ImportBackupModalModule } from '../shared/import-backup-modal/import-ba
     CommonModule,
     FormsModule,
     HelperPipesModule,
-    RouterModule,
-    ImportBackupModalModule
+    RouterModule
   ]
 })
 export class DashboardModule { }

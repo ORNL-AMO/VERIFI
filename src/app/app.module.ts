@@ -1,4 +1,5 @@
 import { BrowserModule } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AppRoutingModule } from './app-routing.module';
@@ -21,7 +22,7 @@ import { OverviewReportModule } from './overview-report/overview-report.module';
 import { StaticContentModule } from './static-content/static-content.module';
 import { UtilityDataModule } from './utility-data/utility-data.module';
 import { SetupProgressComponent } from './core-components/setup-progress/setup-progress.component';
-import { ImportBackupModalModule } from './shared/import-backup-modal/import-backup-modal.module';
+import { ImportBackupModalComponent } from './core-components/import-backup-modal/import-backup-modal.component';
 
 @NgModule({
   declarations: [
@@ -33,13 +34,14 @@ import { ImportBackupModalModule } from './shared/import-backup-modal/import-bac
     PageNotFoundComponent,
     ToastNotificationsComponent,
     ElectronUpdateComponent,
-    SetupProgressComponent
+    SetupProgressComponent,
+    ImportBackupModalComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     FormsModule,
-    CommonModule, 
+    CommonModule,
     PlotlyViaWindowModule,
     IndexedDBModule,
     AccountManagementModule,
@@ -49,7 +51,7 @@ import { ImportBackupModalModule } from './shared/import-backup-modal/import-bac
     OverviewReportModule,
     StaticContentModule,
     UtilityDataModule,
-    ImportBackupModalModule
+    BrowserAnimationsModule
   ],
   providers: [],
   bootstrap: [AppComponent]

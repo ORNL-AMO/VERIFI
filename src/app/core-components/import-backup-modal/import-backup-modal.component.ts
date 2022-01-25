@@ -1,9 +1,11 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { BackupDataService, BackupFile } from 'src/app/account-management/backup-data.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAccount, IdbFacility } from 'src/app/models/idb';
-import { LoadingService } from '../../core-components/loading/loading.service';
+import { LoadingService } from '../loading/loading.service';
+import { ImportBackupModalService } from './import-backup-modal.service';
 
 @Component({
   selector: 'app-import-backup-modal',
@@ -11,42 +13,41 @@ import { LoadingService } from '../../core-components/loading/loading.service';
   styleUrls: ['./import-backup-modal.component.css']
 })
 export class ImportBackupModalComponent implements OnInit {
-  @Output('emitClose')
-  emitClose = new EventEmitter<boolean>();
-  @Input()
-  inFacility: boolean;
 
+  inFacility: boolean;
   backupFile: any;
   backupFileError: string;
   importIsAccount: boolean;
   overwriteData: boolean = true;
-
   selectedAccount: IdbAccount;
-
-  showImportFile: boolean = false;
   accountFacilities: Array<IdbFacility>;
   overwriteFacility: IdbFacility;
   backupName: string;
   backupType: string;
+  showModalSub: Subscription;
+  showModal: boolean;
   constructor(private loadingService: LoadingService,
     private backupDataService: BackupDataService,
     private accountDbService: AccountdbService,
-    private facilityDbService: FacilitydbService) { }
+    private facilityDbService: FacilitydbService,
+    private importBackupModalService: ImportBackupModalService) { }
 
   ngOnInit(): void {
-    this.selectedAccount = this.accountDbService.selectedAccount.getValue();
-    this.accountFacilities = this.facilityDbService.accountFacilities.getValue();
-    if (!this.selectedAccount) {
-      this.overwriteData = false;
-    }
-  }
-
-  ngAfterViewInit() {
-    this.showImportFile = true;
+    this.showModalSub = this.importBackupModalService.showModal.subscribe(value => {
+      this.showModal = value;
+      this.inFacility = this.importBackupModalService.inFacility;
+      if (this.showModal == true) {
+        this.selectedAccount = this.accountDbService.selectedAccount.getValue();
+        this.accountFacilities = this.facilityDbService.accountFacilities.getValue();
+        if (!this.selectedAccount) {
+          this.overwriteData = false;
+        }
+      }
+    })
   }
 
   cancelImportBackup() {
-    this.emitClose.emit(false);
+    this.importBackupModalService.showModal.next(false);
   }
 
   setImportFile(files: FileList) {

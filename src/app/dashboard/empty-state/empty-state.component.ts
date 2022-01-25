@@ -8,6 +8,7 @@ import { LoadingService } from 'src/app/core-components/loading/loading.service'
 import { UtilityMeterdbService } from '../../indexedDB/utilityMeter-db.service';
 import { ExampleAccount } from 'src/app/shared/example-data/Better_Plants_Partner_Backup_4-20-2021';
 import { BackupDataService } from 'src/app/account-management/backup-data.service';
+import { ImportBackupModalService } from 'src/app/core-components/import-backup-modal/import-backup-modal.service';
 @Component({
   selector: 'app-empty-state',
   templateUrl: './empty-state.component.html',
@@ -21,14 +22,14 @@ export class EmptyStateComponent implements OnInit {
   selectedAccountSub: Subscription;
   selectedFacilitySub: Subscription;
   utilityDataSub: Subscription;
-  showImportFile: boolean = false;
   constructor(
     private accountdbService: AccountdbService,
     private facilityDbService: FacilitydbService,
     private utilityMeterDbService: UtilityMeterdbService,
     private router: Router,
     private loadingService: LoadingService,
-    private backupDataService: BackupDataService
+    private backupDataService: BackupDataService,
+    private importBackupModalService: ImportBackupModalService
   ) { }
 
   ngOnInit(): void {
@@ -82,10 +83,7 @@ export class EmptyStateComponent implements OnInit {
   }
 
   openImportBackup() {
-    this.showImportFile = true;
-  }
-
-  cancelImportBackup() {
-    this.showImportFile = false;
+    this.importBackupModalService.inFacility = false;
+    this.importBackupModalService.showModal.next(true);
   }
 }

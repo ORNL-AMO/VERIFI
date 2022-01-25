@@ -7,7 +7,6 @@ import { FinancialReportingFormComponent } from './financial-reporting-form/fina
 import { GeneralInformationFormComponent } from './general-information-form/general-information-form.component';
 import { SustainabilityQuestionsFormComponent } from './sustainability-questions-form/sustainability-questions-form.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { ImportBackupModalModule } from '../shared/import-backup-modal/import-backup-modal.module';
 import { LabelWithTooltipModule } from '../shared/label-with-tooltip/label-with-tooltip.module';
 import { HelperPipesModule } from '../shared/helper-pipes/helper-pipes.module';
 
@@ -25,7 +24,6 @@ import { HelperPipesModule } from '../shared/helper-pipes/helper-pipes.module';
   imports: [
     CommonModule,
     FormsModule,
-    ImportBackupModalModule,
     ReactiveFormsModule,
     LabelWithTooltipModule,
     HelperPipesModule
