@@ -1,5 +1,4 @@
 import { Component, OnInit, ElementRef, ViewChild, QueryList, ViewChildren } from '@angular/core';
-import { listAnimation } from '../../../animations';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { Subscription } from 'rxjs';
 import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData, MeterSource } from 'src/app/models/idb';
@@ -13,10 +12,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 @Component({
   selector: 'app-utility-meter-data',
   templateUrl: './utility-meter-data.component.html',
-  styleUrls: ['./utility-meter-data.component.css'],
-  animations: [
-    listAnimation
-  ]
+  styleUrls: ['./utility-meter-data.component.css']
 })
 export class UtilityMeterDataComponent implements OnInit {
 

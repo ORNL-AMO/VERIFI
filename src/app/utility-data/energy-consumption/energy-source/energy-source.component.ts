@@ -3,7 +3,6 @@ import { AccountdbService } from "../../../indexedDB/account-db.service";
 import { FacilitydbService } from "../../../indexedDB/facility-db.service";
 import { UtilityMeterDatadbService } from "../../../indexedDB/utilityMeterData-db.service";
 import { UtilityMeterdbService } from "../../../indexedDB/utilityMeter-db.service";
-import { listAnimation } from '../../../animations';
 import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { Subscription } from 'rxjs';
 import { EditMeterFormService } from './edit-meter-form/edit-meter-form.service';
@@ -16,10 +15,7 @@ import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-
 @Component({
   selector: 'app-energy-source',
   templateUrl: './energy-source.component.html',
-  styleUrls: ['./energy-source.component.css'],
-  animations: [
-    listAnimation
-  ]
+  styleUrls: ['./energy-source.component.css']
 })
 export class EnergySourceComponent implements OnInit {
 

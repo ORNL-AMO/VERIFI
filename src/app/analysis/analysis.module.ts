@@ -13,7 +13,7 @@ import { GroupMonthlyEnergyIntensityComponent } from './run-analysis/group-analy
 import { GroupAnnualEnergyIntensityComponent } from './run-analysis/group-analysis/group-annual-energy-intensity/group-annual-energy-intensity.component';
 import { AnalysisSetupComponent } from './run-analysis/analysis-setup/analysis-setup.component';
 import { FormsModule } from '@angular/forms';
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { RouterModule } from '@angular/router';
 import { HelperPipesModule } from '../shared/helper-pipes/helper-pipes.module';
 import { MonthlyAnalysisGraphComponent } from './run-analysis/group-analysis/group-monthly-energy-intensity/monthly-analysis-graph/monthly-analysis-graph.component';
@@ -43,9 +43,9 @@ import { AnnualEnergyIntensityTableComponent } from './run-analysis/group-analys
   imports: [
     CommonModule,
     FormsModule,
-    NgbModule,
     RouterModule,
-    HelperPipesModule
+    HelperPipesModule,
+    NgbPaginationModule
   ]
 })
 export class AnalysisModule { }
