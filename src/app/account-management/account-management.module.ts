@@ -6,6 +6,8 @@ import { FacilityComponent } from './facility/facility.component';
 import { FinancialReportingFormComponent } from './financial-reporting-form/financial-reporting-form.component';
 import { GeneralInformationFormComponent } from './general-information-form/general-information-form.component';
 import { SustainabilityQuestionsFormComponent } from './sustainability-questions-form/sustainability-questions-form.component';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ImportBackupModalModule } from '../shared/import-backup-modal/import-backup-modal.module';
 
 
 
@@ -19,7 +21,10 @@ import { SustainabilityQuestionsFormComponent } from './sustainability-questions
     SustainabilityQuestionsFormComponent
   ],
   imports: [
-    CommonModule
+    CommonModule,
+    FormsModule,
+    ImportBackupModalModule,
+    ReactiveFormsModule
   ]
 })
 export class AccountManagementModule { }

@@ -5,7 +5,7 @@ import { IdbUtilityMeter, IdbUtilityMeterGroup } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { BehaviorSubject } from 'rxjs';
-import { Month, Months } from 'src/app/form-data/months';
+import { Month, Months } from 'src/app/shared/form-data/months';
 @Injectable({
   providedIn: 'root'
 })

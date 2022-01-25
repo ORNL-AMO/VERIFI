@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { UtilityMeterGroupdbService } from '../indexedDB/utilityMeterGroup-db.service';
+import { UtilityMeterGroupdbService } from '../../indexedDB/utilityMeterGroup-db.service';
 
 @Pipe({
   name: 'groupName'

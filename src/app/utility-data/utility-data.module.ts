@@ -9,6 +9,7 @@ import { EnergyConsumptionModule } from './energy-consumption/energy-consumption
 import { CalanderizationModule } from './calanderization/calanderization.module';
 import { SiteToSourceOptionComponent } from './site-to-source-option/site-to-source-option.component';
 import { UtilityBannerComponent } from './utility-banner/utility-banner.component';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -23,7 +24,8 @@ import { UtilityBannerComponent } from './utility-banner/utility-banner.componen
     PredictorDataModule,
     MeterGroupingModule,
     EnergyConsumptionModule,
-    CalanderizationModule
+    CalanderizationModule,
+    FormsModule
   ]
 })
 export class UtilityDataModule { }

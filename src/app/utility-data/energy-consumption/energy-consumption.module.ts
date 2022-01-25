@@ -10,6 +10,7 @@ import { GeneralUtilityDataTableComponent } from './utility-meter-data/general-u
 import { UtilityMeterDataFilterComponent } from './utility-meter-data/utility-meter-data-filter/utility-meter-data-filter.component';
 import { UtilityMeterDataComponent } from './utility-meter-data/utility-meter-data.component';
 import { EnergyConsumptionComponent } from './energy-consumption.component';
+import { ReactiveFormsModule } from '@angular/forms';
 
 
 
@@ -27,7 +28,9 @@ import { EnergyConsumptionComponent } from './energy-consumption.component';
     EnergyConsumptionComponent
   ],
   imports: [
-    CommonModule
+    CommonModule,
+    ReactiveFormsModule,
+    ReactiveFormsModule
   ]
 })
 export class EnergyConsumptionModule { }

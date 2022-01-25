@@ -1,7 +1,7 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
-import { Month, Months } from 'src/app/form-data/months';
+import { Month, Months } from 'src/app/shared/form-data/months';
 import { MonthlyGroupSummary } from 'src/app/models/analysis';
 import { EnergyIntensityService } from 'src/app/analysis/calculations/energy-intensity.service';
 

@@ -18,6 +18,7 @@ import { PredictorsDataHelpComponent } from './utility/predictors-data-help/pred
 import { VisualizationHelpComponent } from './utility/visualization-help/visualization-help.component';
 import { AccountHelpComponent } from './account-management/account-help/account-help.component';
 import { FacilityHelpComponent } from './account-management/facility-help/facility-help.component';
+import { HelpPanelComponent } from './help-panel.component';
 
 @NgModule({
   declarations: [
@@ -42,6 +43,9 @@ import { FacilityHelpComponent } from './account-management/facility-help/facili
   ],
   imports: [
     CommonModule
+  ],
+  exports: [
+    HelpPanelComponent
   ]
 })
 export class HelpPanelModule { }

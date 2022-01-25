@@ -7,7 +7,7 @@ import { VisualizationStateService } from './visualization-state.service';
 import * as _ from 'lodash';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { MeterGroupingService } from '../meter-grouping/meter-grouping.service';
-import { Month, Months } from 'src/app/form-data/months';
+import { Month, Months } from 'src/app/shared/form-data/months';
 
 @Component({
   selector: 'app-visualization',

@@ -12,7 +12,7 @@ import { CalanderizedMeter, MeterGroupType, MonthlyData } from 'src/app/models/c
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { MeterGroupingService } from './meter-grouping.service';
-import { Month, Months } from 'src/app/form-data/months';
+import { Month, Months } from 'src/app/shared/form-data/months';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 
 @Component({

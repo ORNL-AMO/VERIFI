@@ -16,6 +16,7 @@ import { ImportPredictorsWizardComponent } from './import-predictors-wizard/impo
 import { MeterDataTableComponent } from './meter-data-table/meter-data-table.component';
 import { MeterTableComponent } from './meter-table/meter-table.component';
 import { UploadDataComponent } from './upload-data.component';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 
 
@@ -39,7 +40,9 @@ import { UploadDataComponent } from './upload-data.component';
     UploadDataComponent
   ],
   imports: [
-    CommonModule
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule
   ]
 })
 export class UploadDataModule { }

@@ -14,6 +14,7 @@ import { EnergyUseStackedBarChartComponent } from './account-overview/energy-use
 import { EnergyUseHeatMapComponent } from './account-overview/energy-use-heat-map/energy-use-heat-map.component';
 import { EnergyUseDonutComponent } from './account-overview/energy-use-donut/energy-use-donut.component';
 import { AccountUtilityEnergyUseTableComponent } from './account-overview/account-utility-energy-use-table/account-utility-energy-use-table.component';
+import { FormsModule } from '@angular/forms';
 
 
 
@@ -35,7 +36,8 @@ import { AccountUtilityEnergyUseTableComponent } from './account-overview/accoun
     AccountUtilityEnergyUseTableComponent
   ],
   imports: [
-    CommonModule
+    CommonModule,
+    FormsModule
   ]
 })
 export class DashboardModule { }

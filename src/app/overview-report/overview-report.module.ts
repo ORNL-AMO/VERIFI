@@ -20,6 +20,7 @@ import { OverviewReportDashboardComponent } from './overview-report-dashboard/ov
 import { OverviewReportMenuComponent } from './overview-report-menu/overview-report-menu.component';
 import { ManageReportTemplatesComponent } from './overview-report-menu/manage-report-templates/manage-report-templates.component';
 import { OverviewReportComponent } from './overview-report.component';
+import { FormsModule } from '@angular/forms';
 
 
 
@@ -47,7 +48,8 @@ import { OverviewReportComponent } from './overview-report.component';
     OverviewReportComponent
   ],
   imports: [
-    CommonModule
+    CommonModule,
+    FormsModule
   ]
 })
 export class OverviewReportModule { }

@@ -1,5 +1,5 @@
 import { SettingsLabelPipe } from './settings-label.pipe';
-import { ConvertUnitsService } from '../shared/convert-units/convert-units.service';
+import { ConvertUnitsService } from '../convert-units/convert-units.service';
 
 describe('SettingsLabelPipe', () => {
   it('create an instance', () => {

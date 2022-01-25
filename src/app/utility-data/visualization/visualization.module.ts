@@ -5,6 +5,7 @@ import { CorrelationMenuComponent } from './correlation-menu/correlation-menu.co
 import { CorrelationPlotComponent } from './correlation-plot/correlation-plot.component';
 import { TimeSeriesComponent } from './time-series/time-series.component';
 import { VisualizationComponent } from './visualization.component';
+import { FormsModule } from '@angular/forms';
 
 
 
@@ -17,7 +18,8 @@ import { VisualizationComponent } from './visualization.component';
     VisualizationComponent
   ],
   imports: [
-    CommonModule
+    CommonModule,
+    FormsModule
   ]
 })
 export class VisualizationModule { }

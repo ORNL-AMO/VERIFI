@@ -13,7 +13,7 @@ import { CalanderizationComponent } from './utility-data/calanderization/calande
 import { VisualizationComponent } from './utility-data/visualization/visualization.component';
 import { FacilityOverviewComponent } from './dashboard/facility-overview/facility-overview.component';
 import { AccountOverviewComponent } from './dashboard/account-overview/account-overview.component';
-import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
+import { PageNotFoundComponent } from './core-components/page-not-found/page-not-found.component';
 import { AboutComponent } from './static-content/about/about.component';
 import { AcknowledgmentsComponent } from './static-content/acknowledgments/acknowledgments.component';
 import { FeedbackComponent } from './static-content/feedback/feedback.component';

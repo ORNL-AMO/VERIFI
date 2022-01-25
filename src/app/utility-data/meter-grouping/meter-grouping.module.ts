@@ -5,6 +5,7 @@ import { EnergyUnitDropdownComponent } from './energy-unit-dropdown/energy-unit-
 import { MeterGroupChartComponent } from './meter-group-chart/meter-group-chart.component';
 import { MeterGroupTableComponent } from './meter-group-table/meter-group-table.component';
 import { MeterGroupingComponent } from './meter-grouping.component';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 
 
@@ -17,7 +18,9 @@ import { MeterGroupingComponent } from './meter-grouping.component';
     MeterGroupingComponent
   ],
   imports: [
-    CommonModule
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule
   ]
 })
 export class MeterGroupingModule { }

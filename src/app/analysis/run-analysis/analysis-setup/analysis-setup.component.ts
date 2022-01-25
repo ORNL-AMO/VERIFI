@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Month, Months } from 'src/app/form-data/months';
+import { Month, Months } from 'src/app/shared/form-data/months';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';

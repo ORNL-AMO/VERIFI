@@ -4,6 +4,7 @@ import { CalanderizationChartComponent } from './calanderization-chart/calanderi
 import { CalanderizationFilterComponent } from './calanderization-filter/calanderization-filter.component';
 import { DataApplicationMenuComponent } from './data-application-menu/data-application-menu.component';
 import { CalanderizationComponent } from './calanderization.component';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 
 
@@ -15,7 +16,9 @@ import { CalanderizationComponent } from './calanderization.component';
     CalanderizationComponent
   ],
   imports: [
-    CommonModule
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule
   ]
 })
 export class CalanderizationModule { }

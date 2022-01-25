@@ -12,6 +12,7 @@ import { GroupAnalysisOptionsComponent } from './run-analysis/group-analysis/gro
 import { GroupMonthlyEnergyIntensityComponent } from './run-analysis/group-analysis/group-monthly-energy-intensity/group-monthly-energy-intensity.component';
 import { GroupAnnualEnergyIntensityComponent } from './run-analysis/group-analysis/group-annual-energy-intensity/group-annual-energy-intensity.component';
 import { AnalysisSetupComponent } from './run-analysis/analysis-setup/analysis-setup.component';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -29,7 +30,8 @@ import { AnalysisSetupComponent } from './run-analysis/analysis-setup/analysis-s
     AnalysisSetupComponent
   ],
   imports: [
-    CommonModule
+    CommonModule,
+    FormsModule
   ]
 })
 export class AnalysisModule { }
