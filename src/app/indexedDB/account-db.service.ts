@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { IdbAccount } from '../models/idb';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { LocalStorageService } from 'ngx-webstorage';
+import { ElectronService } from '../electron/electron.service';
 
 @Injectable({
     providedIn: 'root'
@@ -11,7 +12,7 @@ export class AccountdbService {
 
     selectedAccount: BehaviorSubject<IdbAccount>;
     allAccounts: BehaviorSubject<Array<IdbAccount>>;
-    constructor(private dbService: NgxIndexedDBService, private localStorageService: LocalStorageService) {
+    constructor(private dbService: NgxIndexedDBService, private localStorageService: LocalStorageService, private electronService: ElectronService) {
         this.selectedAccount = new BehaviorSubject<IdbAccount>(undefined);
         this.allAccounts = new BehaviorSubject<Array<IdbAccount>>(new Array());
         this.selectedAccount.subscribe(account => {
@@ -29,7 +30,7 @@ export class AccountdbService {
         }
         let allAccounts: Array<IdbAccount> = await this.getAll().toPromise();
         this.allAccounts.next(allAccounts);
-        if(!localStorageAccountId){
+        if (!localStorageAccountId) {
             this.setSelectedAccount(undefined);
         }
     }
@@ -100,14 +101,30 @@ export class AccountdbService {
     //TODO: MOVE
     // *WARNING* Can not be undone
     deleteDatabase() {
-        this.dbService.deleteDatabase().subscribe(
-            () => {
-                console.log('Database deleted successfully');
-            },
-            error => {
-                console.log(error);
-            }
-        );
+        try {
+            this.dbService.deleteDatabase().subscribe(
+                () => {
+                    console.log('database deleted..');
+                    this.finishDelete();
+                },
+                error => {
+                    console.log(error);
+                    this.finishDelete();
+                }
+            );
+        } catch (err) {
+            console.log('ERROR')
+            console.log(err);
+            this.finishDelete();
+        }
+    }
+
+    finishDelete(){
+        if(this.electronService.isElectron){
+            this.electronService.sendAppRelaunch();
+        }else{
+            location.reload()
+        }
     }
 
     getNewIdbAccount(): IdbAccount {

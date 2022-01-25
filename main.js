@@ -99,6 +99,8 @@ app.on('ready', function () {
 
     Menu.setApplicationMenu(Menu.buildFromTemplate(template));
     win.setMenuBarVisibility(false)
+
+
 });
 
 // Listen for message from application (electron component) to either download updates
@@ -109,6 +111,12 @@ ipcMain.once('update', (event, arg) => {
 
 ipcMain.once('later', (event, arg) => {
     update = null;
+});
+
+ipcMain.once('relaunch', () => {
+    console.log('relaunch2')
+    app.relaunch();
+    app.exit();
 });
 
 app.on('activate', () => {
