@@ -19,6 +19,7 @@ import { VisualizationHelpComponent } from './utility/visualization-help/visuali
 import { AccountHelpComponent } from './account-management/account-help/account-help.component';
 import { FacilityHelpComponent } from './account-management/facility-help/facility-help.component';
 import { HelpPanelComponent } from './help-panel.component';
+import { AnalysisDashboardHelpComponent } from './analysis/analysis-dashboard-help/analysis-dashboard-help.component';
 
 @NgModule({
   declarations: [
@@ -39,7 +40,9 @@ import { HelpPanelComponent } from './help-panel.component';
     PredictorsDataHelpComponent,
     VisualizationHelpComponent,
     AccountHelpComponent,
-    FacilityHelpComponent
+    FacilityHelpComponent,
+    HelpPanelComponent,
+    AnalysisDashboardHelpComponent
   ],
   imports: [
     CommonModule

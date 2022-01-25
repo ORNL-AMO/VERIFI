@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { EditMeterFormComponent } from './energy-source/edit-meter-form/edit-meter-form.component';
 import { EditMeterComponent } from './energy-source/edit-meter/edit-meter.component';
 import { EnergySourceComponent } from './energy-source/energy-source.component';
 import { EditElectricityBillComponent } from './utility-meter-data/edit-electricity-bill/edit-electricity-bill.component';
@@ -10,13 +9,16 @@ import { GeneralUtilityDataTableComponent } from './utility-meter-data/general-u
 import { UtilityMeterDataFilterComponent } from './utility-meter-data/utility-meter-data-filter/utility-meter-data-filter.component';
 import { UtilityMeterDataComponent } from './utility-meter-data/utility-meter-data.component';
 import { EnergyConsumptionComponent } from './energy-consumption.component';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { NgbDatepickerModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { EditMeterFormModule } from './energy-source/edit-meter-form/edit-meter-form.module';
+import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.module';
+import { RouterModule } from '@angular/router';
 
 
 
 @NgModule({
   declarations: [
-    EditMeterFormComponent,
     EditMeterComponent,
     EnergySourceComponent,
     EditElectricityBillComponent,
@@ -29,8 +31,12 @@ import { ReactiveFormsModule } from '@angular/forms';
   ],
   imports: [
     CommonModule,
+    EditMeterFormModule,
     ReactiveFormsModule,
-    ReactiveFormsModule
+    FormsModule,
+    NgbPaginationModule,
+    HelperPipesModule,
+    RouterModule
   ]
 })
 export class EnergyConsumptionModule { }

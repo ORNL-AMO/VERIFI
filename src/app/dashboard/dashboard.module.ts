@@ -15,6 +15,9 @@ import { EnergyUseHeatMapComponent } from './account-overview/energy-use-heat-ma
 import { EnergyUseDonutComponent } from './account-overview/energy-use-donut/energy-use-donut.component';
 import { AccountUtilityEnergyUseTableComponent } from './account-overview/account-utility-energy-use-table/account-utility-energy-use-table.component';
 import { FormsModule } from '@angular/forms';
+import { HelperPipesModule } from '../shared/helper-pipes/helper-pipes.module';
+import { RouterModule } from '@angular/router';
+import { ImportBackupModalModule } from '../shared/import-backup-modal/import-backup-modal.module';
 
 
 
@@ -37,7 +40,10 @@ import { FormsModule } from '@angular/forms';
   ],
   imports: [
     CommonModule,
-    FormsModule
+    FormsModule,
+    HelperPipesModule,
+    RouterModule,
+    ImportBackupModalModule
   ]
 })
 export class DashboardModule { }

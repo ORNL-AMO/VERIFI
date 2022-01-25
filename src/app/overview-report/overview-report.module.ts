@@ -21,6 +21,9 @@ import { OverviewReportMenuComponent } from './overview-report-menu/overview-rep
 import { ManageReportTemplatesComponent } from './overview-report-menu/manage-report-templates/manage-report-templates.component';
 import { OverviewReportComponent } from './overview-report.component';
 import { FormsModule } from '@angular/forms';
+import { HelperPipesModule } from '../shared/helper-pipes/helper-pipes.module';
+import { RouterModule } from '@angular/router';
+import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 
 
 
@@ -49,7 +52,10 @@ import { FormsModule } from '@angular/forms';
   ],
   imports: [
     CommonModule,
-    FormsModule
+    FormsModule,
+    HelperPipesModule,
+    RouterModule,
+    NgbPaginationModule
   ]
 })
 export class OverviewReportModule { }

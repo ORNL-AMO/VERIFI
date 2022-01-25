@@ -6,6 +6,9 @@ import { MeterGroupChartComponent } from './meter-group-chart/meter-group-chart.
 import { MeterGroupTableComponent } from './meter-group-table/meter-group-table.component';
 import { MeterGroupingComponent } from './meter-grouping.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { DragDropModule } from '@angular/cdk/drag-drop';
+import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.module';
+import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 
 
 
@@ -20,7 +23,10 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    FormsModule
+    FormsModule,
+    DragDropModule,
+    HelperPipesModule,
+    NgbPaginationModule
   ]
 })
 export class MeterGroupingModule { }

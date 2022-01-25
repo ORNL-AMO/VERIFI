@@ -6,6 +6,7 @@ import { OrderByPipe } from './order-by.pipe';
 import { SettingsLabelPipe } from './settings-label.pipe';
 import { YearOptionsPipe } from './year-options.pipe';
 import { PredictorsOrderByPipe } from './predictors-order-by.pipe';
+import { GroupNamePipe } from './group-name.pipe';
 
 @NgModule({
   declarations: [
@@ -14,10 +15,20 @@ import { PredictorsOrderByPipe } from './predictors-order-by.pipe';
     OrderByPipe,
     SettingsLabelPipe,
     YearOptionsPipe,
-    PredictorsOrderByPipe
+    PredictorsOrderByPipe,
+    GroupNamePipe
   ],
   imports: [
     CommonModule
+  ],
+  exports: [
+    CustomNumberPipe,
+    NaicsListPipe,
+    OrderByPipe,
+    SettingsLabelPipe,
+    YearOptionsPipe,
+    PredictorsOrderByPipe,
+    GroupNamePipe
   ]
 })
 export class HelperPipesModule { }

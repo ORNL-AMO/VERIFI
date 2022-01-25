@@ -17,6 +17,8 @@ import { MeterDataTableComponent } from './meter-data-table/meter-data-table.com
 import { MeterTableComponent } from './meter-table/meter-table.component';
 import { UploadDataComponent } from './upload-data.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { DragDropModule } from '@angular/cdk/drag-drop';
+import { EditMeterFormModule } from '../energy-consumption/energy-source/edit-meter-form/edit-meter-form.module';
 
 
 
@@ -42,7 +44,9 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
   imports: [
     CommonModule,
     FormsModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    DragDropModule,
+    EditMeterFormModule
   ]
 })
 export class UploadDataModule { }

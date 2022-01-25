@@ -4,6 +4,8 @@ import { EditPredictorEntryRowComponent } from './edit-predictor-entry-row/edit-
 import { EditPredictorsComponent } from './edit-predictors/edit-predictors.component';
 import { PredictorDataComponent } from './predictor-data.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.module';
 
 
 
@@ -16,7 +18,9 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
   imports: [
     CommonModule,
     FormsModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    NgbPaginationModule,
+    HelperPipesModule
   ]
 })
 export class PredictorDataModule { }

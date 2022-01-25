@@ -8,6 +8,8 @@ import { GeneralInformationFormComponent } from './general-information-form/gene
 import { SustainabilityQuestionsFormComponent } from './sustainability-questions-form/sustainability-questions-form.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ImportBackupModalModule } from '../shared/import-backup-modal/import-backup-modal.module';
+import { LabelWithTooltipModule } from '../shared/label-with-tooltip/label-with-tooltip.module';
+import { HelperPipesModule } from '../shared/helper-pipes/helper-pipes.module';
 
 
 
@@ -24,7 +26,9 @@ import { ImportBackupModalModule } from '../shared/import-backup-modal/import-ba
     CommonModule,
     FormsModule,
     ImportBackupModalModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    LabelWithTooltipModule,
+    HelperPipesModule
   ]
 })
 export class AccountManagementModule { }
