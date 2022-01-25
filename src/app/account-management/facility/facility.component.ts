@@ -7,7 +7,7 @@ import { PredictordbService } from "../../indexedDB/predictors-db.service";
 import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db.service";
 import { UtilityMeterDatadbService } from "../../indexedDB/utilityMeterData-db.service";
 import { UtilityMeterGroupdbService } from "../../indexedDB/utilityMeterGroup-db.service";
-import { LoadingService } from "../../shared/loading/loading.service";
+import { LoadingService } from "../../core-components/loading/loading.service";
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { BackupDataService } from '../backup-data.service';
 import { HelpPanelService } from 'src/app/help-panel/help-panel.service';

@@ -6,7 +6,7 @@ import { UtilityMeterdbService } from '../indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from '../indexedDB/utilityMeterData-db.service';
 import { UtilityMeterGroupdbService } from '../indexedDB/utilityMeterGroup-db.service';
 import { IdbAccount, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from '../models/idb';
-import { LoadingService } from '../shared/loading/loading.service';
+import { LoadingService } from '../core-components/loading/loading.service';
 
 @Injectable({
   providedIn: 'root'

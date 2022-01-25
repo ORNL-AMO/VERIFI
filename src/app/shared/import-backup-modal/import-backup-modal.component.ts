@@ -3,7 +3,7 @@ import { BackupDataService, BackupFile } from 'src/app/account-management/backup
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAccount, IdbFacility } from 'src/app/models/idb';
-import { LoadingService } from '../loading/loading.service';
+import { LoadingService } from '../../core-components/loading/loading.service';
 
 @Component({
   selector: 'app-import-backup-modal',

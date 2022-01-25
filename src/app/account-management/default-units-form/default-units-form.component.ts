@@ -9,7 +9,7 @@ import { EnergyUnitOptions, MassUnitOptions, UnitOption, VolumeGasOptions, Volum
 import { AccountManagementService } from '../account-management.service';
 import * as _ from 'lodash';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { ToastNotificationsService } from 'src/app/shared/toast-notifications/toast-notifications.service';
+import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 
 @Component({
   selector: 'app-default-units-form',

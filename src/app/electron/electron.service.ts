@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { LocalStorageService } from 'ngx-webstorage';
 import { BehaviorSubject, Subscription } from 'rxjs';
-import { ToastNotificationsService } from '../shared/toast-notifications/toast-notifications.service';
+import { ToastNotificationsService } from '../core-components/toast-notifications/toast-notifications.service';
 
 @Injectable({
   providedIn: 'root'

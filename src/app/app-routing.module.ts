@@ -2,16 +2,15 @@ import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { AccountComponent } from './account-management/account/account.component';
 import { FacilityComponent } from './account-management/facility/facility.component';
-import { UtilityComponent } from './utility/utility.component';
-import { EnergyConsumptionComponent } from './utility/energy-consumption/energy-consumption.component';
+import { EnergyConsumptionComponent } from './utility-data/energy-consumption/energy-consumption.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
-import { EnergySourceComponent } from './utility/energy-consumption/energy-source/energy-source.component';
+import { EnergySourceComponent } from './utility-data/energy-consumption/energy-source/energy-source.component';
 import { StyleGuideComponent } from './static-content/style-guide/style-guide.component';
-import { UtilityMeterDataComponent } from './utility/energy-consumption/utility-meter-data/utility-meter-data.component';
-import { MeterGroupingComponent } from './utility/meter-grouping/meter-grouping.component';
-import { PredictorDataComponent } from './utility/predictor-data/predictor-data.component';
-import { CalanderizationComponent } from './utility/calanderization/calanderization.component';
-import { VisualizationComponent } from './utility/visualization/visualization.component';
+import { UtilityMeterDataComponent } from './utility-data/energy-consumption/utility-meter-data/utility-meter-data.component';
+import { MeterGroupingComponent } from './utility-data/meter-grouping/meter-grouping.component';
+import { PredictorDataComponent } from './utility-data/predictor-data/predictor-data.component';
+import { CalanderizationComponent } from './utility-data/calanderization/calanderization.component';
+import { VisualizationComponent } from './utility-data/visualization/visualization.component';
 import { FacilityOverviewComponent } from './dashboard/facility-overview/facility-overview.component';
 import { AccountOverviewComponent } from './dashboard/account-overview/account-overview.component';
 import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
@@ -19,20 +18,21 @@ import { AboutComponent } from './static-content/about/about.component';
 import { AcknowledgmentsComponent } from './static-content/acknowledgments/acknowledgments.component';
 import { FeedbackComponent } from './static-content/feedback/feedback.component';
 import { HelpComponent } from './static-content/help/help.component';
-import { UploadDataComponent } from './utility/upload-data/upload-data.component';
+import { UploadDataComponent } from './utility-data/upload-data/upload-data.component';
 import { OverviewReportComponent } from './overview-report/overview-report.component';
 import { OverviewReportDashboardComponent } from './overview-report/overview-report-dashboard/overview-report-dashboard.component';
 import { OverviewReportMenuComponent } from './overview-report/overview-report-menu/overview-report-menu.component';
 import { BasicReportComponent } from './overview-report/basic-report/basic-report.component';
+import { UtilityDataComponent } from './utility-data/utility-data.component';
 import { AnalysisComponent } from './analysis/analysis.component';
 import { AnalysisDashboardComponent } from './analysis/analysis-dashboard/analysis-dashboard.component';
 import { RunAnalysisComponent } from './analysis/run-analysis/run-analysis.component';
 import { AnalysisSetupComponent } from './analysis/run-analysis/analysis-setup/analysis-setup.component';
-import { GroupAnalysisOptionsComponent } from './analysis/run-analysis/group-analysis/group-analysis-options/group-analysis-options.component';
 import { GroupAnalysisComponent } from './analysis/run-analysis/group-analysis/group-analysis.component';
-import { FacilityAnalysisComponent } from './analysis/run-analysis/facility-analysis/facility-analysis.component';
+import { GroupAnalysisOptionsComponent } from './analysis/run-analysis/group-analysis/group-analysis-options/group-analysis-options.component';
 import { GroupAnnualEnergyIntensityComponent } from './analysis/run-analysis/group-analysis/group-annual-energy-intensity/group-annual-energy-intensity.component';
 import { GroupMonthlyEnergyIntensityComponent } from './analysis/run-analysis/group-analysis/group-monthly-energy-intensity/group-monthly-energy-intensity.component';
+import { FacilityAnalysisComponent } from './analysis/run-analysis/facility-analysis/facility-analysis.component';
 
 const routes: Routes = [
   {
@@ -69,7 +69,7 @@ const routes: Routes = [
   },
   {
     path: 'utility',
-    component: UtilityComponent,
+    component: UtilityDataComponent,
     children: [
       {
         path: 'energy-consumption', component: EnergyConsumptionComponent,
