@@ -7,10 +7,11 @@ import { PredictordbService } from "../../indexedDB/predictors-db.service";
 import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db.service";
 import { UtilityMeterDatadbService } from "../../indexedDB/utilityMeterData-db.service";
 import { UtilityMeterGroupdbService } from "../../indexedDB/utilityMeterGroup-db.service";
-import { LoadingService } from "../../shared/loading/loading.service";
+import { LoadingService } from "../../core-components/loading/loading.service";
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { BackupDataService } from '../backup-data.service';
 import { HelpPanelService } from 'src/app/help-panel/help-panel.service';
+import { ImportBackupModalService } from 'src/app/core-components/import-backup-modal/import-backup-modal.service';
 
 @Component({
   selector: 'app-facility',
@@ -23,7 +24,6 @@ export class FacilityComponent implements OnInit {
   selectedFacilitySub: Subscription;
   selectedFacility: IdbFacility;
   unitsDontMatchAccount: boolean;
-  showImportFile: boolean = false;
   constructor(
     private router: Router,
     private facilityDbService: FacilitydbService,
@@ -34,7 +34,8 @@ export class FacilityComponent implements OnInit {
     private accountDbService: AccountdbService,
     private loadingService: LoadingService,
     private backupDataService: BackupDataService,
-    private helpPanelService: HelpPanelService
+    private helpPanelService: HelpPanelService,
+    private importBackupModalService: ImportBackupModalService
   ) { }
 
   ngOnInit() {
@@ -85,19 +86,16 @@ export class FacilityComponent implements OnInit {
     this.showDeleteFacility = undefined;
   }
 
-  backupFacility(){
+  backupFacility() {
     this.backupDataService.backupFacility(this.selectedFacility);
-  }  
-  
-  openImportBackup() {
-    this.showImportFile = true;
   }
 
-  cancelImportBackup() {
-    this.showImportFile = false;
+  openImportBackup() {
+    this.importBackupModalService.inFacility = true;
+    this.importBackupModalService.showModal.next(true);
   }
-  
-  toggleHelpPanel(){
+
+  toggleHelpPanel() {
     let helpPanelOpen: boolean = this.helpPanelService.helpPanelOpen.getValue();
     this.helpPanelService.helpPanelOpen.next(!helpPanelOpen);
   }

@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { FirstNaicsList, NAICS, SecondNaicsList, ThirdNaicsList } from 'src/app/form-data/naics-data';
+import { FirstNaicsList, NAICS, SecondNaicsList, ThirdNaicsList } from 'src/app/shared/form-data/naics-data';
 import { IdbAccount } from 'src/app/models/idb';
 import { ReportOptions } from 'src/app/models/overview-report';
 

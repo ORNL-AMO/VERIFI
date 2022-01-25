@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { MonthlyData } from 'src/app/models/calanderization';
 import { IdbAccount, IdbAnalysisItem, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
-import { EditMeterFormService } from 'src/app/utility/energy-consumption/energy-source/edit-meter-form/edit-meter-form.service';
+import { EditMeterFormService } from 'src/app/utility-data/energy-consumption/energy-source/edit-meter-form/edit-meter-form.service';
 import { ConvertUnitsService } from '../convert-units/convert-units.service';
 import { EnergyUnitsHelperService } from './energy-units-helper.service';
 

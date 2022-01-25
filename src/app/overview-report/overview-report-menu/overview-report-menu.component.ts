@@ -6,7 +6,7 @@ import { OverviewReportOptionsDbService } from 'src/app/indexedDB/overview-repor
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbAccount, IdbOverviewReportOptions, IdbUtilityMeterData } from 'src/app/models/idb';
 import { ReportOptions } from 'src/app/models/overview-report';
-import { ToastNotificationsService } from 'src/app/shared/toast-notifications/toast-notifications.service';
+import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { OverviewReportService } from '../overview-report.service';
 import * as _ from 'lodash';
 

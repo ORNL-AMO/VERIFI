@@ -1,0 +1,105 @@
+<div id="header" role="header">
+    <div class="row resetmargin">
+        <div class="col-lg-2">
+            <h2>VERIFI</h2>
+        </div>
+        <div class="col">
+            <div class="searchBar">
+                <i class="fa fa-search"></i>
+                <input type="text" ng-model="searchBox" placeholder="Search Verifi (Coming Soon)" minlength="1"
+                    maxlength="100">
+            </div>
+        </div>
+        <div class="col-lg-3 facilityMenu">
+            <div class="facilityMenu" *ngIf="!activeAccount">
+                <div class="currentFacility">
+                    <i class="fa fa-building item-left"></i>
+                    <span class="accountRequired">Account Required</span>
+                </div>
+            </div>
+            <div class="facilityMenu" *ngIf="activeAccount">
+                <div class="currentFacility" (click)="toggleFacilityMenu()">
+                    <i class="fa item-left" [ngStyle]="{'color': industryColor}"
+                        [ngClass]="{'fa-building': !activeFacility || viewingAccountPage, 'fa-industry':activeFacility && !viewingAccountPage}"></i>
+                    <span>{{activeAccount.name}}</span>
+                    <p *ngIf="!activeFacility || viewingAccountPage">All Facilities <i class="fa fa-caret-down"></i></p>
+                    <p *ngIf="activeFacility && !viewingAccountPage">{{activeFacility.name}} <i
+                            class="fa fa-caret-down"></i></p>
+                </div>
+                <div class="dropdown" [class.open]="facilityMenu == true">
+                    <div class="arrow-up"></div>
+                    <div class="facilities">
+                        <p class="small">Switch Facility</p>
+                        <div>
+                            <p (click)="selectAllFacilities()">
+                                All Facilities
+                            </p>
+                            <div class="quick-links">
+                                <i class="fa fa-cog item-right" routerLink="/account-management"
+                                    title="Manage Facility Settings"></i>
+                            </div>
+                        </div>
+                        <div *ngFor="let facility of facilityList">
+                            <p (click)="switchFacility(facility)" routerLink="/home/facility-summary">{{facility.name}}
+                            </p>
+                            <div class="quick-links">
+                                <i class="fa fa-cog item-right" (click)="goToFacilitySettings(facility)"
+                                    title="Manage Facility Settings"></i>
+                                <i class="fa fa-random item-right" (click)="switchFacility(facility)"
+                                    title="Switch Facility"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <!--<hr>
+                    <button class="btn btn-link" (click)="addNewFacility()"><i class="fa fa-plus"></i> Add New Facility</button>-->
+                </div>
+            </div>
+
+            <div class="accountMenu">
+                <i class="fa fa-ellipsis-v" (click)="toggleAccountMenu()"></i>
+                <div class="dropdown" [class.open]="accountMenu == true">
+                    <div class="arrow-up"></div>
+                    <div *ngIf="!activeAccount">
+                        <div class="noAccount">
+                            <i class="fa fa-user-circle-o item-left"></i>
+                            <span>Account Required</span>
+                        </div>
+                    </div>
+                    <div *ngIf="activeAccount">
+                        <div class="currentAccount" routerLink="/account-management">
+                            <i class="fa fa-user-circle-o item-left"></i>
+                            <p>{{activeAccount.name}}</p>
+                            <span class="small">Manage Account</span>
+                            <!--<i class="fa fa-random right"></i>-->
+                            <i class="fa fa-chevron-right right"></i>
+                        </div>
+                        <hr>
+                        <a (click)="toggleSwitchAccountsMenu()">Switch Account</a>
+                        <br>
+                        <!--<a routerLink="/">Settings</a>-->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="switchAccounts" [class.open]="switchAccountMenu == true">
+    <h5>Switch Account</h5>
+    <div class="accounts" *ngIf="activeAccount">
+        <div class="account" [class.active]="activeAccount.id === account.id" (click)="switchAccount(account)"
+            *ngFor="let account of accountList">
+            <!--<i class="fa fa-user-circle-o item-left"></i>-->
+            <p class="company item-left">{{account.name}}</p>
+            <p class="facilityCount item-right">{{account.numberOfFacilities}}
+            </p>
+        </div>
+    </div>
+
+    <br>
+    <button class="btn btn-primary-2 pull-right" (click)="addNewAccount()"><i class="fa fa-plus"></i> Add
+        Account</button>
+    <button class="btn btn-outline pull-right mr-2" (click)="openImportBackup()"><i class="fa fa-upload"></i> Import
+        Account</button>
+</div>
+<div id="darkoverlay" [class.open]="switchAccountMenu == true" (click)="toggleSwitchAccountsMenu()"></div>

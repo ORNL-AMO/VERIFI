@@ -8,11 +8,12 @@ import { PredictordbService } from "../../indexedDB/predictors-db.service";
 import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db.service";
 import { UtilityMeterDatadbService } from "../../indexedDB/utilityMeterData-db.service";
 import { UtilityMeterGroupdbService } from "../../indexedDB/utilityMeterGroup-db.service";
-import { LoadingService } from "../../shared/loading/loading.service";
+import { LoadingService } from "../../core-components/loading/loading.service";
 import { BackupDataService } from '../backup-data.service';
 import { HelpPanelService } from 'src/app/help-panel/help-panel.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { OverviewReportOptionsDbService } from 'src/app/indexedDB/overview-report-options-db.service';
+import { ImportBackupModalService } from 'src/app/core-components/import-backup-modal/import-backup-modal.service';
 
 @Component({
   selector: 'app-account',
@@ -29,7 +30,6 @@ export class AccountComponent implements OnInit {
   selectedAccountSub: Subscription;
   accountFacilitiesSub: Subscription;
   selectedAccount: IdbAccount;
-  showImportFile: boolean = false;
   constructor(
     private router: Router,
     private accountDbService: AccountdbService,
@@ -42,7 +42,8 @@ export class AccountComponent implements OnInit {
     private backupDataService: BackupDataService,
     private helpPanelService: HelpPanelService,
     private analysisDbService: AnalysisDbService,
-    private overviewReportOptionsDbService: OverviewReportOptionsDbService
+    private overviewReportOptionsDbService: OverviewReportOptionsDbService,
+    private importBackupModalService: ImportBackupModalService
   ) { }
 
   ngOnInit() {
@@ -171,11 +172,8 @@ export class AccountComponent implements OnInit {
   }
 
   openImportBackup() {
-    this.showImportFile = true;
-  }
-
-  cancelImportBackup() {
-    this.showImportFile = false;
+    this.importBackupModalService.inFacility = false;
+    this.importBackupModalService.showModal.next(true);
   }
 
   toggleHelpPanel() {
