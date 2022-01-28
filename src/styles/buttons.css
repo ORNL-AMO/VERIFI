@@ -107,3 +107,25 @@
     border-top-left-radius: 0!important;
     border-bottom-left-radius: 0!important;
   }
+
+
+  .analysis .btn-primary-4{
+    color: #fff !important;
+    background-color: #7D3C98 !important;
+    border-color: #7D3C98 !important;
+  }
+
+  
+  .utility-data .btn-primary-4{
+    color: #fff !important;
+    background-color: #c53f00 !important;
+    border-color: #c53f00 !important;
+  }
+
+  
+  .overview-report .btn-primary-4{
+    color: #fff !important;
+    background-color: #ff6000 !important;
+    border-color: #ff6000 !important;
+  }
+  

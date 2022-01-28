@@ -1,7 +1,3 @@
-.banner {
-    background-color: #1e5ab3;
-}
-
 .dashboard-container{
       height: calc(100vh - 100px);
       overflow-y: auto;

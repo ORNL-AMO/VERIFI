@@ -1,7 +1,3 @@
-.banner {
-    background-color: #c53f00;
-}
-
 li.disabled:hover .navigation-warning{
     display: block;
 }
