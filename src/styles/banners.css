@@ -35,3 +35,23 @@
 .banner .nav-items h3 a:hover .fa{
     color: black !important;
 }
+
+
+.account-management .banner{
+    background-color: #1e5ab3;
+}
+
+.facility-management .banner {
+    background-color: #6abb2e;
+}
+.utility-data .banner {
+    background-color: #c53f00;
+}
+
+.analysis .banner{
+    background-color: #7D3C98;
+}
+
+.overview-report .banner{
+    background-color: #ff6000;
+}
