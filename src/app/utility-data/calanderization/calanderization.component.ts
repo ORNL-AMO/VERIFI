@@ -145,20 +145,10 @@ export class CalanderizationComponent implements OnInit {
   }
 
   checkMonthlyDataItemInRange(monthlyDataItem: MonthlyData): boolean {
-    let isInRange: boolean = true;
-    if (this.calanderizedDataFilters.selectedDateMax.year < monthlyDataItem.year) {
-      isInRange = false;
-    }
-    if (this.calanderizedDataFilters.selectedDateMax.year == monthlyDataItem.year && this.calanderizedDataFilters.selectedDateMax.month < monthlyDataItem.monthNumValue) {
-      isInRange = false;
-    }
-    if (this.calanderizedDataFilters.selectedDateMin.year > monthlyDataItem.year) {
-      isInRange = false;
-    }
-    if (this.calanderizedDataFilters.selectedDateMin.year == monthlyDataItem.year && this.calanderizedDataFilters.selectedDateMin.month > monthlyDataItem.monthNumValue) {
-      isInRange = false;
-    }
-    return isInRange;
+    let maxDate: Date = new Date(this.calanderizedDataFilters.selectedDateMax.year, this.calanderizedDataFilters.selectedDateMax.month + 1);
+    let minDate: Date = new Date(this.calanderizedDataFilters.selectedDateMin.year, this.calanderizedDataFilters.selectedDateMin.month - 1);
+    let itemDate: Date = new Date(monthlyDataItem.date);
+    return (maxDate > itemDate) && (minDate < itemDate);
   }
 
   setDataDisplay(str: "table" | "graph") {

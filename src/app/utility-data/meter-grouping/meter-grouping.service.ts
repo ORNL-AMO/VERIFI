@@ -143,8 +143,7 @@ export class MeterGroupingService {
     }
     let startDate: Date = new Date(dateRange.minDate);
     let endDate: Date = new Date(dateRange.maxDate);
-    //todo short one month
-    while (startDate < endDate) {
+    while (startDate <= endDate) {
       let filteredData: Array<MonthlyData> = allMonthlyData.filter(monthlyData => {
         let dataDate: Date = new Date(monthlyData.date);
         return (dataDate.getFullYear() == startDate.getFullYear()) && (dataDate.getMonth() == startDate.getMonth())
