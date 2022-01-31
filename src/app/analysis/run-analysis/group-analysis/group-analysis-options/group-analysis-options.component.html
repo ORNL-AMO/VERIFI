@@ -16,12 +16,13 @@
                 <label class="checkbox" for="modifiedEnergyIntensity">Modified Energy Intensity</label>
 
                 <input type="radio" class="rowToggle" name="analysisType" [value]="'regression'" id="regression"
-                    [(ngModel)]="group.analysisType" (change)="saveItem()" disabled>
+                    [(ngModel)]="group.analysisType" (change)="saveItem()">
                 <label class="checkbox" for="regression">Regression</label>
             </div>
         </div>
     </div>
-    <div class="col-md-6 col-sm-12">
+    <!--energy intensity-->
+    <div class="col-md-6 col-sm-12" *ngIf="group.analysisType == 'energyIntensity'">
         <label class="bold">Production Variables</label>
         <div class="form-group">
             <span *ngFor="let predictor of group.predictorVariables">
@@ -40,6 +41,40 @@
         </div>
         <div class="alert alert-warning" *ngIf="showUnitsWarning">
             Make sure the production variables you have selected have the same units.
+        </div>
+    </div>
+
+    <!--regression-->
+    <div class="col-md-6 col-sm-12" *ngIf="group.analysisType == 'regression'">
+        <div class="row bold mb-2">
+            <div class="col-4">
+                Predictor Variables
+            </div>
+            <div class="col-4">
+                Use for Regression
+            </div>
+            <div class="col-4">
+                Regression Coefficient
+            </div>
+        </div>
+        <div class="row" *ngFor="let predictor of group.predictorVariables">
+            <div class="col-4">
+                {{predictor.name}}
+            </div>
+            <div class="col-4">
+                <label class="switch" for="{{'predictor_'+predictor.id}}">
+                    <input class="checkbox" type="checkbox" id="{{'predictor_'+predictor.id}}"
+                        name="{{'predictor_'+predictor.id}}" [(ngModel)]="predictor.productionInAnalysis"
+                        (change)="saveItem()">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+            <div class="col-4">
+                <input *ngIf="predictor.productionInAnalysis" type="number" step="any"
+                    id="{{'regressionCoefficient_'+predictor.id}}" name="{{'regressionCoefficient_'+predictor.id}}"
+                    [(ngModel)]="predictor.regressionCoefficient" required (input)="saveItem()">
+                <span class="bold" *ngIf="!predictor.productionInAnalysis">&mdash;</span>
+            </div>
         </div>
     </div>
 </div>

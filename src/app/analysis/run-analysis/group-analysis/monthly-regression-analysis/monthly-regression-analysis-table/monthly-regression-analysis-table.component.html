@@ -1,0 +1,64 @@
+<table class="table table-sm table-hover">
+    <thead>
+        <tr>
+            <th>
+                Date
+            </th>
+            <th>
+                Model Year
+            </th>
+            <th>
+                Total Energy <br>
+                <span class="small">(<span [innerHTML]="analysisItem.energyUnit | settingsLabel"></span>)</span>
+            </th>
+            <th *ngFor="let predictorVariable of monthlyRegressionSummary.predictorVariables">
+                {{predictorVariable.name}} <br *ngIf="predictorVariable.unit">
+                <span class="small" *ngIf="predictorVariable.unit">({{predictorVariable.unit}})</span>
+            </th>
+            <th>
+                Modeled Energy
+            </th>
+            <th>
+                Cumulative Savings
+            </th>
+            <th>
+                More Savings
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr
+            *ngFor="let data of monthlyRegressionSummary.regressionSummaryData| slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
+            <td>
+                {{data.date | date: 'MMMM, y'}}
+            </td>
+            <td>
+                &mdash;
+            </td>
+            <td>
+                {{data.totalEnergy | customNumber}}
+            </td>
+            <td *ngFor="let pUsage of data.predictorUsage">
+                {{pUsage | customNumber}}
+            </td>
+            <td>
+                {{data.modeledEnergy | customNumber}}
+            </td>
+            <td>
+                {{data.cumulativeSavings | customNumber}}
+            </td>
+            <td>
+                {{data.moreSavings | customNumber}}
+            </td>
+        </tr>
+    </tbody>
+</table>
+<div class="tableControls overflow-hidden">
+    <div class="item-right">
+        <ngb-pagination [collectionSize]="monthlyRegressionSummary.regressionSummaryData.length"
+            [(page)]="currentPageNumber" [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true"
+            aria-label="Default pagination">
+        </ngb-pagination>
+    </div>
+    <p class="item-right">{{monthlyRegressionSummary.regressionSummaryData.length}} entries</p>
+</div>

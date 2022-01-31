@@ -189,7 +189,8 @@ export interface PredictorData {
     id: string,
     importWizardName?: string,
     production?: boolean,
-    productionInAnalysis?: boolean
+    productionInAnalysis?: boolean,
+    regressionCoefficient?: number
 }
 
 

@@ -4,14 +4,25 @@
                 routerLink="/analysis/run-analysis/group-analysis/{{groupId}}/options"
                 [routerLinkActive]="['active']">Analysis
                 Options</a></li>
-        <li [ngClass]="{'disabled': groupHasError, 'error': groupHasError}"><a
+        <li *ngIf="selectedGroup.analysisType == 'energyIntensity'"
+            [ngClass]="{'disabled': groupHasError, 'error': groupHasError}"><a
                 routerLink="/analysis/run-analysis/group-analysis/{{groupId}}/annual-energy-intensity"
                 [routerLinkActive]="['active']">Annual
                 Energy Intensity</a></li>
-        <li [ngClass]="{'disabled': groupHasError, 'error': groupHasError}"><a
+        <li *ngIf="selectedGroup.analysisType == 'energyIntensity'"
+            [ngClass]="{'disabled': groupHasError, 'error': groupHasError}"><a
                 routerLink="/analysis/run-analysis/group-analysis/{{groupId}}/monthly-energy-intensity"
                 [routerLinkActive]="['active']">Monthly
                 Energy Intensity</a></li>
+
+        <!-- <li *ngIf="selectedGroup.analysisType == 'regression'"
+            [ngClass]="{'disabled': groupHasError, 'error': groupHasError}"><a
+                routerLink="/analysis/run-analysis/group-analysis/{{groupId}}/regression-model-selection"
+                [routerLinkActive]="['active']">Model Selection</a></li> -->
+        <li *ngIf="selectedGroup.analysisType == 'regression'"
+            [ngClass]="{'disabled': groupHasError, 'error': groupHasError}"><a
+                routerLink="/analysis/run-analysis/group-analysis/{{groupId}}/monthly-regression-analysis"
+                [routerLinkActive]="['active']">Monthly Regression Analysis</a></li>
     </ul>
 </nav>
 <div class="content-padding">
