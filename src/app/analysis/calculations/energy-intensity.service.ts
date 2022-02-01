@@ -180,7 +180,7 @@ export class EnergyIntensityService {
         energyUse: energyUse,
         production: production,
         energyIntensity: energyUse / production,
-        fiscalYear: this.getFiscalYear(new Date(baselineDate), facility)
+        fiscalYear: this.analysisCalculationsHelperService.getFiscalYear(new Date(baselineDate), facility)
       })
       let currentMonth: number = baselineDate.getUTCMonth()
       let nextMonth: number = currentMonth + 1;
@@ -259,23 +259,5 @@ export class EnergyIntensityService {
     return totals;
   }
 
-  getFiscalYear(date: Date, facility: IdbFacility): number {
-    if (facility.fiscalYear == 'calendarYear') {
-      return date.getUTCFullYear();
-    } else {
-      if (facility.fiscalYearCalendarEnd) {
-        if (date.getUTCMonth() >= facility.fiscalYearMonth) {
-          return date.getUTCFullYear() + 1;
-        } else {
-          return date.getUTCFullYear();
-        }
-      } else {
-        if (date.getUTCMonth() >= facility.fiscalYearMonth) {
-          return date.getUTCFullYear();
-        } else {
-          return date.getUTCFullYear() - 1;
-        }
-      }
-    }
-  }
+ 
 }

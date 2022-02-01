@@ -5,7 +5,7 @@
                 Date
             </th>
             <th>
-                Model Year
+                Period
             </th>
             <th>
                 Total Energy <br>
@@ -19,21 +19,38 @@
                 Modeled Energy
             </th>
             <th>
-                Cumulative Savings
+                Monthly Savings
             </th>
             <th>
-                More Savings
+                YTD SEnPI
+            </th>
+            <th>
+                Rolling SEnPI
+            </th>
+            <th>
+                YTD Improvement<br> Over BL
+            </th>
+            <th>
+                Monthly Incremental<br> Improvement
+            </th>
+            <th>
+                YTD Improvement<br> Over FY
+            </th>
+            <th>
+                Rolling<br>
+                12-Month<br>
+                Improvement
             </th>
         </tr>
     </thead>
     <tbody>
-        <tr
-            *ngFor="let data of monthlyRegressionSummary.regressionSummaryData| slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
+        <tr *ngFor="let data of monthlyRegressionSummary.regressionSummaryData| slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage"
+            [ngClass]="{'fiscal-year-end': checkFiscalYearEnd(data.date)}">
             <td>
                 {{data.date | date: 'MMMM, y'}}
             </td>
             <td>
-                &mdash;
+                {{data.fiscalYear}}
             </td>
             <td>
                 {{data.totalEnergy | customNumber}}
@@ -45,10 +62,25 @@
                 {{data.modeledEnergy | customNumber}}
             </td>
             <td>
-                {{data.cumulativeSavings | customNumber}}
+                {{data.monthlySavings | customNumber}}
             </td>
             <td>
-                {{data.moreSavings | customNumber}}
+                {{data.yearToDateSEnPI | customNumber}}
+            </td>
+            <td>
+                {{data.rollingSEnPI | customNumber}}
+            </td>
+            <td>
+                {{data.yearToDateImprovementOverBaseline | customNumber}}%
+            </td>
+            <td>
+                {{data.monthlyIncrementalImprovement | customNumber}}%
+            </td>
+            <td>
+                {{data.yearToDateImprovementOverFiscalYear | customNumber}}%
+            </td>
+            <td>
+                {{data.rolling12MonthImprovement | customNumber}}%
             </td>
         </tr>
     </tbody>

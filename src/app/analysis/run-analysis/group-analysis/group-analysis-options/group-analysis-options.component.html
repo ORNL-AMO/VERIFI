@@ -70,10 +70,34 @@
                 </label>
             </div>
             <div class="col-4">
-                <input *ngIf="predictor.productionInAnalysis" type="number" step="any"
+                <input class="form-control" *ngIf="predictor.productionInAnalysis" type="number" step="any"
                     id="{{'regressionCoefficient_'+predictor.id}}" name="{{'regressionCoefficient_'+predictor.id}}"
                     [(ngModel)]="predictor.regressionCoefficient" required (input)="saveItem()">
                 <span class="bold" *ngIf="!predictor.productionInAnalysis">&mdash;</span>
+            </div>
+        </div>
+        <div class="row mb-2">
+            <div class="col-6">
+                <label for="regressionModelYear">
+                    Model Year
+                </label>
+            </div>
+            <div class="col-6">
+                <select required class="form-control" id="regressionModelYear" id="regressionModelYear"
+                    [(ngModel)]="group.regressionModelYear" (change)="saveItem()">
+                    <option *ngFor="let year of yearOptions" [ngValue]="year">{{year}}</option>
+                </select>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-6">
+                <label for="regressionConstant">
+                    Regression Constant
+                </label>
+            </div>
+            <div class="col-6">
+                <input class="form-control" type="number" step="any" id="regressionConstant"
+                    name="regressionConstant" [(ngModel)]="group.regressionConstant" required (input)="saveItem()">
             </div>
         </div>
     </div>

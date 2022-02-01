@@ -5,6 +5,7 @@ import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { AnalysisGroup, IdbAnalysisItem, IdbUtilityMeter } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
+import { AnalysisCalculationsHelperService } from 'src/app/analysis/calculations/analysis-calculations-helper.service';
 
 @Component({
   selector: 'app-group-analysis-options',
@@ -17,10 +18,12 @@ export class GroupAnalysisOptionsComponent implements OnInit {
   selectedGroupSub: Subscription;
   showUnitsWarning: boolean;
   groupHasError: boolean;
+  yearOptions: Array<number>;
   constructor(private analysisService: AnalysisService, private analysisDbService: AnalysisDbService,
-    private utilityMeterDbService: UtilityMeterdbService) { }
+    private utilityMeterDbService: UtilityMeterdbService, private analysisCalculationsHelperService: AnalysisCalculationsHelperService) { }
 
   ngOnInit(): void {
+    this.yearOptions = this.analysisCalculationsHelperService.getYearOptions();
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(group => {
       this.group = group;
       this.setGroupError();

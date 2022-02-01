@@ -222,7 +222,9 @@ export interface AnalysisGroup {
     idbGroupId: number,
     analysisType: AnalysisType,
     predictorVariables: Array<PredictorData>,
-    productionUnits: string
+    productionUnits: string,
+    regressionModelYear: number,
+    regressionConstant: number
 }
 
 export type AnalysisType = 'absoluteEnergyIntensity' | 'energyIntensity' | 'modifiedEnergyIntensity' | 'regression';
