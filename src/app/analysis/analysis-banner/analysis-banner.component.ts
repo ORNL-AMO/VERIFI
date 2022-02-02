@@ -4,6 +4,7 @@ import { Subscription } from 'rxjs';
 import { HelpPanelService } from 'src/app/help-panel/help-panel.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { IdbAnalysisItem } from 'src/app/models/idb';
+import { AnalysisService } from '../analysis.service';
 
 @Component({
   selector: 'app-analysis-banner',
@@ -17,8 +18,9 @@ export class AnalysisBannerComponent implements OnInit {
   analysisItem: IdbAnalysisItem;
   analysisItemSub: Subscription;
   analysisSetupValid: boolean;
+  groupHasError: boolean;
   constructor(private helpPanelService: HelpPanelService, private router: Router,
-    private analysisDbService: AnalysisDbService) { }
+    private analysisDbService: AnalysisDbService, private analysisService: AnalysisService) { }
 
   ngOnInit(): void {
     this.analysisItemSub = this.analysisDbService.selectedAnalysisItem.subscribe(item => {
@@ -32,8 +34,8 @@ export class AnalysisBannerComponent implements OnInit {
     });
     this.setInRunAnalysis(this.router.url);
   }
-  
-  ngOnDestroy(){
+
+  ngOnDestroy() {
     this.analysisItemSub.unsubscribe();
   }
 
@@ -42,15 +44,26 @@ export class AnalysisBannerComponent implements OnInit {
     this.helpPanelService.helpPanelOpen.next(!helpPanelOpen);
   }
 
-  setInRunAnalysis(url: string){
+  setInRunAnalysis(url: string) {
     this.inRunAnalysis = url.includes('run-analysis');
   }
 
-  goToDashboard(){
+  goToDashboard() {
     this.router.navigateByUrl('/analysis/analysis-dashboard')
   }
 
-  checkAnalysisSetupValid(){
-    this.analysisSetupValid = this.analysisItem.reportYear != undefined;
+  checkAnalysisSetupValid() {
+    if (this.analysisItem) {
+      this.analysisSetupValid = this.analysisItem.reportYear != undefined;
+      let groupHasError: boolean = false;
+      this.analysisItem.groups.forEach(group => {
+        if (group.groupHasError) {
+          groupHasError = true;
+        }
+      });
+      this.groupHasError = groupHasError;
+    } else {
+      this.analysisSetupValid = false;
+    }
   }
 }

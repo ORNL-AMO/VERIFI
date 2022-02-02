@@ -1,22 +1,22 @@
-<div class="row" *ngIf="!groupHasError">
+<div class="row" *ngIf="!missingGroupData">
     <div class="col-md-6 col-sm-12">
         <div class="form-group">
             <label class="bold">Analysis Type </label>
             <div>
                 <input type="radio" class="rowToggle" name="analysisType" [value]="'absoluteEnergyIntensity'"
-                    id="absoluteEnergyIntensity" [(ngModel)]="group.analysisType" (change)="saveItem()" disabled>
+                    id="absoluteEnergyIntensity" [(ngModel)]="group.analysisType" (change)="setAnalysisType()" disabled>
                 <label class="checkbox" for="absoluteEnergyIntensity">Absolute Energy Consumption</label>
 
                 <input type="radio" class="rowToggle" name="analysisType" [value]="'energyIntensity'"
-                    id="energyIntensity" [(ngModel)]="group.analysisType" (change)="saveItem()">
+                    id="energyIntensity" [(ngModel)]="group.analysisType" (change)="setAnalysisType()">
                 <label class="checkbox" for="energyIntensity">Energy Intensity</label>
 
                 <input type="radio" class="rowToggle" name="analysisType" [value]="'modifiedEnergyIntensity'"
-                    id="modifiedEnergyIntensity" [(ngModel)]="group.analysisType" (change)="saveItem()" disabled>
+                    id="modifiedEnergyIntensity" [(ngModel)]="group.analysisType" (change)="setAnalysisType()" disabled>
                 <label class="checkbox" for="modifiedEnergyIntensity">Modified Energy Intensity</label>
 
                 <input type="radio" class="rowToggle" name="analysisType" [value]="'regression'" id="regression"
-                    [(ngModel)]="group.analysisType" (change)="saveItem()">
+                    [(ngModel)]="group.analysisType" (change)="setAnalysisType()">
                 <label class="checkbox" for="regression">Regression</label>
             </div>
         </div>
@@ -103,7 +103,7 @@
     </div>
 </div>
 
-<div class="p-4" *ngIf="groupHasError">
+<div class="p-4" *ngIf="missingGroupData">
     <div class="alert alert-danger text-center">
         No meters found for this group. Analysis cannot be conducted on this group! Go to the <a
             [routerLink]="'/utility/meter-groups'">Meter Grouping Page</a> to add

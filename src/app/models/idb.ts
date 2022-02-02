@@ -224,7 +224,8 @@ export interface AnalysisGroup {
     predictorVariables: Array<PredictorData>,
     productionUnits: string,
     regressionModelYear: number,
-    regressionConstant: number
+    regressionConstant: number,
+    groupHasError: boolean
 }
 
 export type AnalysisType = 'absoluteEnergyIntensity' | 'energyIntensity' | 'modifiedEnergyIntensity' | 'regression';

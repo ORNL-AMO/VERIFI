@@ -19,6 +19,7 @@ export class GroupAnalysisOptionsComponent implements OnInit {
   showUnitsWarning: boolean;
   groupHasError: boolean;
   yearOptions: Array<number>;
+  missingGroupData: boolean;
   constructor(private analysisService: AnalysisService, private analysisDbService: AnalysisDbService,
     private utilityMeterDbService: UtilityMeterdbService, private analysisCalculationsHelperService: AnalysisCalculationsHelperService) { }
 
@@ -38,6 +39,7 @@ export class GroupAnalysisOptionsComponent implements OnInit {
   saveItem() {
     let analysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     let groupIndex: number = analysisItem.groups.findIndex(group => { return group.idbGroupId == this.group.idbGroupId });
+    this.group.groupHasError = this.analysisService.checkGroupHasError(this.group);
     analysisItem.groups[groupIndex] = this.group;
     this.analysisDbService.update(analysisItem);
     this.analysisDbService.setAccountAnalysisItems();
@@ -56,6 +58,17 @@ export class GroupAnalysisOptionsComponent implements OnInit {
 
   setGroupError() {
     let groupMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getGroupMetersByGroupId(this.group.idbGroupId);
-    this.groupHasError = (groupMeters.length == 0);
+    this.missingGroupData = (groupMeters.length == 0);
+  }
+
+  setAnalysisType(){
+    if(this.group.analysisType != 'regression'){
+      this.group.predictorVariables.forEach(variable => {
+        if(!variable.production){
+          variable.productionInAnalysis = false;
+        }
+      });
+    }
+    this.saveItem();
   }
 }

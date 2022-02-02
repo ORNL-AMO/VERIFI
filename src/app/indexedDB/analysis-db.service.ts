@@ -138,7 +138,8 @@ export class AnalysisDbService {
         predictorVariables: JSON.parse(JSON.stringify(predictorVariables)),
         productionUnits: this.getUnits(predictorVariables),
         regressionModelYear: undefined,
-        regressionConstant: undefined
+        regressionConstant: undefined,
+        groupHasError: false,
       });
     });
     return {
@@ -235,7 +236,8 @@ export class AnalysisDbService {
         predictorVariables: predictorVariables,
         productionUnits: this.getUnits(predictorVariables),
         regressionConstant: undefined,
-        regressionModelYear: undefined
+        regressionModelYear: undefined,
+        groupHasError: false,
       });
       this.update(item);
     });
