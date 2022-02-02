@@ -13,27 +13,8 @@ export class AnnualRegressionAnalysisTableComponent implements OnInit {
   @Input()
   analysisItem: IdbAnalysisItem;
 
-  
-  orderDataField: string = 'date';
-  orderByDirection: string = 'asc';
-  // currentPageNumber: number = 1;
   constructor() { }
 
   ngOnInit(): void {
-  }
-
-
-  
-
-  setOrderDataField(str: string) {
-    if (str == this.orderDataField) {
-      if (this.orderByDirection == 'desc') {
-        this.orderByDirection = 'asc';
-      } else {
-        this.orderByDirection = 'desc';
-      }
-    } else {
-      this.orderDataField = str;
-    }
   }
 }

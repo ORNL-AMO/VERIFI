@@ -238,6 +238,10 @@ export class RegressionAnalysisService {
       reportYear = reportYear - 1;
     }
     let previousYearSavings: number = 0;
+    let previousYearEnergyUse: number = 0;
+    let previousYearModeledEnergyUse: number = 0;
+    let totalEnergySavings: number = 0;
+    let totalModeledEnergySavings: number = 0;
     let baselineEnergyUse: number;
     let baselineModeledEnergy: number;
     let baselineSEnPI: number;
@@ -262,6 +266,8 @@ export class RegressionAnalysisService {
 
       if (summaryYear == baselineYear) {
         baselineSEnPI = SEnPI;
+        previousYearEnergyUse = energyUse;
+        previousYearModeledEnergyUse = modeledEnergyUse;
       } else if (summaryYear > selectedGroup.regressionModelYear) {
         cumulativeSavings = 1 - SEnPI;
         annualSavings = cumulativeSavings - previousYearSavings;
@@ -270,15 +276,25 @@ export class RegressionAnalysisService {
         annualSavings = cumulativeSavings - previousYearSavings;
       }
 
+      let annualEnergySavings: number = previousYearEnergyUse - energyUse;
+      let annualModeledEnergySavings: number = previousYearModeledEnergyUse - modeledEnergyUse;
+      totalEnergySavings = totalEnergySavings + annualEnergySavings;
+      totalModeledEnergySavings = totalModeledEnergySavings + annualModeledEnergySavings;
       annualRegressionSummary.push({
         year: summaryYear,
         energyUse: energyUse,
+        annualEnergySavings: annualEnergySavings,
+        totalEnergySavings: totalEnergySavings,
+        annualModeledEnergySavings: annualModeledEnergySavings,
+        totalModeledEnergySavings: totalModeledEnergySavings,
         modeledEnergyUse: modeledEnergyUse,
         SEnPI: SEnPI,
         cumulativeSavings: cumulativeSavings * 100,
         annualSavings: annualSavings * 100
       })
       previousYearSavings = cumulativeSavings;
+      previousYearEnergyUse = energyUse;
+      previousYearModeledEnergyUse = modeledEnergyUse;
     }
     return annualRegressionSummary;
   }
@@ -311,7 +327,11 @@ export interface RegressionSummaryData {
 export interface AnnualRegressionSummary {
   year: number,
   energyUse: number,
+  annualEnergySavings: number,
+  totalEnergySavings: number,
   modeledEnergyUse: number,
+  annualModeledEnergySavings: number,
+  totalModeledEnergySavings: number,
   SEnPI: number,
   cumulativeSavings: number,
   annualSavings: number

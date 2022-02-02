@@ -1,29 +1,52 @@
 <table class="table table-sm table-hover">
     <thead>
-        <tr>
-            <th (click)="setOrderDataField('year')" [ngClass]="{'active': orderDataField == 'year'}">
-                Year
+        <tr class="table-mh">
+            <th class="first-column"></th>
+            <th class="text-center th-3" colspan="3">
+                Energy (<span [innerHTML]="analysisItem.energyUnit | settingsLabel"></span>)
             </th>
-            <th (click)="setOrderDataField('energyUse')" [ngClass]="{'active': orderDataField == 'energyUse'}">
-                Total <br>Energy <br>
-                <span class="small">(<span [innerHTML]="analysisItem.energyUnit | settingsLabel"></span>)</span>
+            <th class="text-center th-3" colspan="3">
+                Modeled Energy
             </th>
-            <th (click)="setOrderDataField('modeledEnergyUse')" [ngClass]="{'active': orderDataField == 'modeledEnergyUse'}">
-                Modeled <br>Energy
-            </th>
-            <th (click)="setOrderDataField('SEnPI')" [ngClass]="{'active': orderDataField == 'SEnPI'}">
+            <th class="text-center th-3" colspan="3">
                 SEnPI
             </th>
-            <th (click)="setOrderDataField('cumulativeSavings')" [ngClass]="{'active': orderDataField == 'cumulativeSavings'}">
-                Cumulative<br>Savings
+        </tr>
+        <tr>
+            <th>
+                Year
             </th>
-            <th (click)="setOrderDataField('annualSavings')" [ngClass]="{'active': orderDataField == 'annualSavings'}">
-                Annual<br>Savings
+            <th>
+                Total Energy
+            </th>
+            <th>
+                Annual Savings
+            </th>
+            <th>
+                Total Savings
+            </th>
+            <th>
+                Total Energy
+            </th>
+            <th>
+                Annual Savings
+            </th>
+            <th>
+                Total Savings
+            </th>
+            <th>
+                SEnPI
+            </th>
+            <th>
+                Annual Savings
+            </th>
+            <th>
+                Total Savings
             </th>
         </tr>
     </thead>
     <tbody>
-        <tr *ngFor="let summary of annualRegressionSummary| orderBy: orderDataField: orderByDirection">
+        <tr *ngFor="let summary of annualRegressionSummary">
             <td>
                 {{summary.year}}
             </td>
@@ -31,16 +54,28 @@
                 {{summary.energyUse | customNumber}}
             </td>
             <td>
+                {{summary.annualEnergySavings | customNumber}}
+            </td>
+            <td>
+                {{summary.totalEnergySavings | customNumber}}
+            </td>
+            <td>
                 {{summary.modeledEnergyUse | customNumber}}
+            </td>
+            <td>
+                {{summary.annualModeledEnergySavings | customNumber}}
+            </td>
+            <td>
+                {{summary.totalModeledEnergySavings | customNumber}}
             </td>
             <td>
                 {{summary.SEnPI | customNumber}}
             </td>
             <td>
-                {{summary.cumulativeSavings | customNumber}}%
+                {{summary.annualSavings | customNumber}}%
             </td>
             <td>
-                {{summary.annualSavings | customNumber}}%
+                {{summary.cumulativeSavings | customNumber}}%
             </td>
         </tr>
     </tbody>

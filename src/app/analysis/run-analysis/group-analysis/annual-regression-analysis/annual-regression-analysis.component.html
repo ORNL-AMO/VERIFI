@@ -24,5 +24,6 @@
     <app-annual-regression-analysis-table *ngIf="dataDisplay == 'table'"
         [annualRegressionSummary]="annualRegressionSummary" [analysisItem]="analysisItem">
     </app-annual-regression-analysis-table>
-    <app-annual-regression-analysis-graph *ngIf="dataDisplay == 'graph'"></app-annual-regression-analysis-graph>
+    <app-annual-regression-analysis-graph *ngIf="dataDisplay == 'graph'"
+        [annualRegressionSummary]="annualRegressionSummary"></app-annual-regression-analysis-graph>
 </div>

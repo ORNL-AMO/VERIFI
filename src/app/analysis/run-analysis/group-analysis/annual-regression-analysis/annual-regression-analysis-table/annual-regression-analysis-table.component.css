@@ -1,8 +1,11 @@
-thead th.active {
-    text-decoration: underline;
+tr.table-mh th.th-3 span{
+    padding: 0px !important;
 }
 
-thead th:hover{
-    cursor: pointer;
-    text-decoration: underline;
+th.first-column{
+    width:10%;
+}
+
+th.th-3{
+    width: 30%;
 }
