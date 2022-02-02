@@ -54,9 +54,9 @@ export class EnergyIntensityService {
 
 
     for (let summaryYear: number = baselineYear; summaryYear <= reportYear; summaryYear++) {
-      let summaryYearData: Array<MonthlyData> = this.filterYearMeterData(allMeterData, summaryYear, facility);
+      let summaryYearData: Array<MonthlyData> = this.analysisCalculationsHelperService.filterYearMeterData(allMeterData, summaryYear, facility);
       let totalEnergyUse: number = _.sumBy(summaryYearData, 'energyUse');
-      let summaryYearPredictors: Array<IdbPredictorEntry> = this.filterYearPredictorData(facilityPredictorData, summaryYear, facility);
+      let summaryYearPredictors: Array<IdbPredictorEntry> = this.analysisCalculationsHelperService.filterYearPredictorData(facilityPredictorData, summaryYear, facility);
 
       let predictorData: Array<PredictorData> = summaryYearPredictors.flatMap(yearPredictor => { return yearPredictor.predictors });
       let productionPredictors: Array<PredictorData> = predictorData.filter(data => { return productionPredictorIds.includes(data.id) });
@@ -99,35 +99,7 @@ export class EnergyIntensityService {
     return annualGroupSummaries;
   }
 
-  filterYearPredictorData(predictorData: Array<IdbPredictorEntry>, year: number, facility: IdbFacility): Array<IdbPredictorEntry> {
-    if (facility.fiscalYear == 'calendarYear') {
-      return predictorData.filter(predictorData => {
-        return new Date(predictorData.date).getUTCFullYear() == year;
-      });
-    } else {
-      let startDate: Date = new Date(year, facility.fiscalYearMonth, 1)
-      let endDate: Date = new Date(year + 1, facility.fiscalYearMonth, 1)
-      return predictorData.filter(predictorDataItem => {
-        let predictorItemDate: Date = new Date(predictorDataItem.date);
-        return predictorItemDate >= startDate && predictorItemDate < endDate;
-      });
-    }
-  }
-
-  filterYearMeterData(meterData: Array<MonthlyData>, year: number, facility: IdbFacility): Array<MonthlyData> {
-    if (facility.fiscalYear == 'calendarYear') {
-      return meterData.filter(meterDataItem => {
-        return new Date(meterDataItem.date).getUTCFullYear() == year;
-      });
-    } else {
-      let startDate: Date = new Date(year, facility.fiscalYearMonth, 1)
-      let endDate: Date = new Date(year + 1, facility.fiscalYearMonth, 1)
-      return meterData.filter(meterDataItem => {
-        let meterItemDate: Date = new Date(meterDataItem.date);
-        return meterItemDate >= startDate && meterItemDate < endDate;
-      });
-    }
-  }
+ 
 
 
 

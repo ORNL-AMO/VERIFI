@@ -35,6 +35,7 @@ import { GroupMonthlyEnergyIntensityComponent } from './analysis/run-analysis/gr
 import { FacilityAnalysisComponent } from './analysis/run-analysis/facility-analysis/facility-analysis.component';
 import { RegressionModelSelectionComponent } from './analysis/run-analysis/group-analysis/regression-model-selection/regression-model-selection.component';
 import { MonthlyRegressionAnalysisComponent } from './analysis/run-analysis/group-analysis/monthly-regression-analysis/monthly-regression-analysis.component';
+import { AnnualRegressionAnalysisComponent } from './analysis/run-analysis/group-analysis/annual-regression-analysis/annual-regression-analysis.component';
 
 const routes: Routes = [
   {
@@ -131,7 +132,8 @@ const routes: Routes = [
               { path: 'annual-energy-intensity', component: GroupAnnualEnergyIntensityComponent },
               { path: 'monthly-energy-intensity', component: GroupMonthlyEnergyIntensityComponent },
               { path: 'regression-model-selection', component: RegressionModelSelectionComponent },
-              { path: 'monthly-regression-analysis', component: MonthlyRegressionAnalysisComponent }
+              { path: 'monthly-regression-analysis', component: MonthlyRegressionAnalysisComponent },
+              { path: 'annual-regression-analysis', component: AnnualRegressionAnalysisComponent }
             ]
           },
           {

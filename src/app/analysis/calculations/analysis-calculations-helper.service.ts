@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbAnalysisItem, IdbFacility, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeterData } from 'src/app/models/idb';
 import * as _ from 'lodash';
+import { MonthlyData } from 'src/app/models/calanderization';
 
 @Injectable({
   providedIn: 'root'
@@ -63,5 +64,35 @@ export class AnalysisCalculationsHelperService {
       yearOptions.push(i);
     }
     return yearOptions;
+  }
+
+  filterYearPredictorData(predictorData: Array<IdbPredictorEntry>, year: number, facility: IdbFacility): Array<IdbPredictorEntry> {
+    if (facility.fiscalYear == 'calendarYear') {
+      return predictorData.filter(predictorData => {
+        return new Date(predictorData.date).getUTCFullYear() == year;
+      });
+    } else {
+      let startDate: Date = new Date(year, facility.fiscalYearMonth, 1)
+      let endDate: Date = new Date(year + 1, facility.fiscalYearMonth, 1)
+      return predictorData.filter(predictorDataItem => {
+        let predictorItemDate: Date = new Date(predictorDataItem.date);
+        return predictorItemDate >= startDate && predictorItemDate < endDate;
+      });
+    }
+  }
+
+  filterYearMeterData(meterData: Array<MonthlyData>, year: number, facility: IdbFacility): Array<MonthlyData> {
+    if (facility.fiscalYear == 'calendarYear') {
+      return meterData.filter(meterDataItem => {
+        return new Date(meterDataItem.date).getUTCFullYear() == year;
+      });
+    } else {
+      let startDate: Date = new Date(year, facility.fiscalYearMonth, 1)
+      let endDate: Date = new Date(year + 1, facility.fiscalYearMonth, 1)
+      return meterData.filter(meterDataItem => {
+        let meterItemDate: Date = new Date(meterDataItem.date);
+        return meterItemDate >= startDate && meterItemDate < endDate;
+      });
+    }
   }
 }

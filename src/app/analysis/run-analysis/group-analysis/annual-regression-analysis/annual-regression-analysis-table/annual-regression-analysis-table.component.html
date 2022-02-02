@@ -1,0 +1,47 @@
+<table class="table table-sm table-hover">
+    <thead>
+        <tr>
+            <th (click)="setOrderDataField('year')" [ngClass]="{'active': orderDataField == 'year'}">
+                Year
+            </th>
+            <th (click)="setOrderDataField('energyUse')" [ngClass]="{'active': orderDataField == 'energyUse'}">
+                Total <br>Energy <br>
+                <span class="small">(<span [innerHTML]="analysisItem.energyUnit | settingsLabel"></span>)</span>
+            </th>
+            <th (click)="setOrderDataField('modeledEnergyUse')" [ngClass]="{'active': orderDataField == 'modeledEnergyUse'}">
+                Modeled <br>Energy
+            </th>
+            <th (click)="setOrderDataField('SEnPI')" [ngClass]="{'active': orderDataField == 'SEnPI'}">
+                SEnPI
+            </th>
+            <th (click)="setOrderDataField('cumulativeSavings')" [ngClass]="{'active': orderDataField == 'cumulativeSavings'}">
+                Cumulative<br>Savings
+            </th>
+            <th (click)="setOrderDataField('annualSavings')" [ngClass]="{'active': orderDataField == 'annualSavings'}">
+                Annual<br>Savings
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let summary of annualRegressionSummary| orderBy: orderDataField: orderByDirection">
+            <td>
+                {{summary.year}}
+            </td>
+            <td>
+                {{summary.energyUse | customNumber}}
+            </td>
+            <td>
+                {{summary.modeledEnergyUse | customNumber}}
+            </td>
+            <td>
+                {{summary.SEnPI | customNumber}}
+            </td>
+            <td>
+                {{summary.cumulativeSavings | customNumber}}%
+            </td>
+            <td>
+                {{summary.annualSavings | customNumber}}%
+            </td>
+        </tr>
+    </tbody>
+</table>

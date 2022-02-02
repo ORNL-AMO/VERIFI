@@ -24,6 +24,9 @@ import { RegressionModelSelectionComponent } from './run-analysis/group-analysis
 import { MonthlyRegressionAnalysisComponent } from './run-analysis/group-analysis/monthly-regression-analysis/monthly-regression-analysis.component';
 import { MonthlyRegressionAnalysisTableComponent } from './run-analysis/group-analysis/monthly-regression-analysis/monthly-regression-analysis-table/monthly-regression-analysis-table.component';
 import { MonthlyRegressionAnalysisGraphComponent } from './run-analysis/group-analysis/monthly-regression-analysis/monthly-regression-analysis-graph/monthly-regression-analysis-graph.component';
+import { AnnualRegressionAnalysisComponent } from './run-analysis/group-analysis/annual-regression-analysis/annual-regression-analysis.component';
+import { AnnualRegressionAnalysisTableComponent } from './run-analysis/group-analysis/annual-regression-analysis/annual-regression-analysis-table/annual-regression-analysis-table.component';
+import { AnnualRegressionAnalysisGraphComponent } from './run-analysis/group-analysis/annual-regression-analysis/annual-regression-analysis-graph/annual-regression-analysis-graph.component';
 
 @NgModule({
   declarations: [
@@ -46,7 +49,10 @@ import { MonthlyRegressionAnalysisGraphComponent } from './run-analysis/group-an
     RegressionModelSelectionComponent,
     MonthlyRegressionAnalysisComponent,
     MonthlyRegressionAnalysisTableComponent,
-    MonthlyRegressionAnalysisGraphComponent
+    MonthlyRegressionAnalysisGraphComponent,
+    AnnualRegressionAnalysisComponent,
+    AnnualRegressionAnalysisTableComponent,
+    AnnualRegressionAnalysisGraphComponent
   ],
   imports: [
     CommonModule,

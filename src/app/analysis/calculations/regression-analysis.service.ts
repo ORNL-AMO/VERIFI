@@ -20,7 +20,7 @@ export class RegressionAnalysisService {
     private analysisCalculationsHelperService: AnalysisCalculationsHelperService) { }
 
 
-  getMonthlyRegressionSummary(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility): MonthlyRegressionSummary {
+  getMonthlyRegressionSummary(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility, forAnnualSummaryCalculation?: boolean): MonthlyRegressionSummary {
     let predictorVariables: Array<PredictorData> = new Array();
     selectedGroup.predictorVariables.forEach(variable => {
       if (variable.productionInAnalysis) {
@@ -89,100 +89,104 @@ export class RegressionAnalysisService {
       //calculate monthly savings
       let fiscalYear: number = this.analysisCalculationsHelperService.getFiscalYear(new Date(baselineDate), facility);
       let monthlySavings: number = 0;
-      //if first year monthly savings = 0
-      if (fiscalYear != baselineYear) {
-        if (fiscalYear > selectedGroup.regressionModelYear) {
-          //after model year
-          monthlySavings = energyUse - modeledEnergy;
-        } else {
-          //before model year
-          monthlySavings = previousMonthlySavings + ((previousEnergyUse - previousExpectedEnergyUse) - (energyUse - modeledEnergy));
-        }
-      }
-      //track year to date energy use
-      if (fiscalYear == baselineYear) {
-        baselineActualData.push(energyUse);
-        baselineExpectedData.push(modeledEnergy);
-      }
-      //sum values for year to data
-      if (previousFiscalYear == fiscalYear) {
-        monthIndex++;
-        yearToDateEnergyUse = yearToDateEnergyUse + energyUse;
-        yearToDateExpectedEnergyUse = yearToDateExpectedEnergyUse + modeledEnergy;
-      } else {
-        //rest fiscal year values on new year
-        monthIndex = 0;
-        previousFiscalYear = fiscalYear;
-        yearToDateEnergyUse = energyUse;
-        yearToDateExpectedEnergyUse = modeledEnergy;
-      }
-
-      //year to date SEnPI calculation
-      let yearToDateSEnPI: number;
-      //calculate baseline expected and entered energy use
-      //in same months as baseline year
-      let baselineExpectedEnergy: number = 0;
-      let baselineEnergy: number = 0;
-      for (let i = 0; i <= monthIndex; i++) {
-        baselineExpectedEnergy = baselineExpectedEnergy + baselineExpectedData[i];
-        baselineEnergy = baselineEnergy + baselineActualData[i];
-      }
-      if (fiscalYear > selectedGroup.regressionModelYear) {
-        //after regression model year
-        yearToDateSEnPI = (yearToDateEnergyUse * baselineExpectedEnergy) / (yearToDateExpectedEnergyUse * baselineEnergy)
-      } else {
-        //regression model year or earlier
-        yearToDateSEnPI = (yearToDateExpectedEnergyUse / yearToDateEnergyUse);
-      }
-      //track baseline SEnPI values
-      if (fiscalYear == baselineYear) {
-        baselineSEnPI.push(yearToDateSEnPI);
-      }
-
-      //calculate rolling SEnPI using previous 12 months of calculations
+      let rolling12MonthImprovement: number = 0;
       let rollingSEnPI: number = 1;
-      if (summaryIndex > 10) {
-        let last12MonthsEnergyTotal: number = energyUse;
-        let last12MonthExpectedEnergyTotal: number = modeledEnergy;
-        for (let i = (summaryIndex - 11); i < summaryIndex; i++) {
-          last12MonthsEnergyTotal = last12MonthsEnergyTotal + regressionSummaryData[i].totalEnergy;
-          last12MonthExpectedEnergyTotal = last12MonthExpectedEnergyTotal + regressionSummaryData[i].modeledEnergy;
-        }
-        if (fiscalYear > selectedGroup.regressionModelYear) {
-          let baselineEnergyTotal: number = _.sum(baselineActualData);
-          let baselineExpectedEnergyTotal: number = _.sum(baselineExpectedData);
-          rollingSEnPI = (last12MonthsEnergyTotal * baselineExpectedEnergyTotal) / (last12MonthExpectedEnergyTotal * baselineEnergyTotal)
-        } else {
-          rollingSEnPI = (last12MonthExpectedEnergyTotal / last12MonthsEnergyTotal);
-        }
-      }
-
-      //calculate year to date improvement
+      let yearToDateSEnPI: number = 0;
       let yearToDateImprovement: number = 0;
       let yearToDateImprovementOverFiscalYear: number = 0;
       let monthlyIncrementalImprovement: number = 0;
-      if (fiscalYear > baselineYear) {
-        if (fiscalYear > selectedGroup.regressionModelYear) {
-          yearToDateImprovement = 1 - yearToDateSEnPI;
-        } else {
-          yearToDateImprovement = (1 - baselineSEnPI[monthIndex]) - (1 - yearToDateSEnPI);
+      //skip incremental calcs for annual summary
+      //just need energy calculations
+      if (!forAnnualSummaryCalculation) {
+        //if first year monthly savings = 0
+        if (fiscalYear != baselineYear) {
+          if (fiscalYear > selectedGroup.regressionModelYear) {
+            //after model year
+            monthlySavings = energyUse - modeledEnergy;
+          } else {
+            //before model year
+            monthlySavings = previousMonthlySavings + ((previousEnergyUse - previousExpectedEnergyUse) - (energyUse - modeledEnergy));
+          }
         }
-        monthlyIncrementalImprovement = yearToDateImprovement - previousYearToDateSEnPI;
-        yearToDateImprovementOverFiscalYear = monthlyIncrementalImprovement;
-        for (let i = 1; i <= monthIndex; i++) {
-          yearToDateImprovementOverFiscalYear = yearToDateImprovementOverFiscalYear + (regressionSummaryData[summaryIndex - i].monthlyIncrementalImprovement / 100)
+        //track year to date energy use
+        if (fiscalYear == baselineYear) {
+          baselineActualData.push(energyUse);
+          baselineExpectedData.push(modeledEnergy);
         }
-      }
-      //calculate rolling 12 month improvement
-      let rolling12MonthImprovement: number = 0;
-      if (fiscalYear > baselineYear) {
-        if (fiscalYear > selectedGroup.regressionModelYear) {
-          rolling12MonthImprovement = 1 - rollingSEnPI;
+        //sum values for year to data
+        if (previousFiscalYear == fiscalYear) {
+          monthIndex++;
+          yearToDateEnergyUse = yearToDateEnergyUse + energyUse;
+          yearToDateExpectedEnergyUse = yearToDateExpectedEnergyUse + modeledEnergy;
         } else {
-          let baselineEnergyTotal: number = _.sum(baselineActualData);
-          let baselineExpectedEnergyTotal: number = _.sum(baselineExpectedData);
-          let baselineAnnualSEnPI: number = baselineExpectedEnergyTotal / baselineEnergyTotal;
-          rolling12MonthImprovement = (1 - baselineAnnualSEnPI) - (1 - rollingSEnPI);
+          //rest fiscal year values on new year
+          monthIndex = 0;
+          previousFiscalYear = fiscalYear;
+          yearToDateEnergyUse = energyUse;
+          yearToDateExpectedEnergyUse = modeledEnergy;
+        }
+
+        //year to date SEnPI calculation
+        //calculate baseline expected and entered energy use
+        //in same months as baseline year
+        let baselineExpectedEnergy: number = 0;
+        let baselineEnergy: number = 0;
+        for (let i = 0; i <= monthIndex; i++) {
+          baselineExpectedEnergy = baselineExpectedEnergy + baselineExpectedData[i];
+          baselineEnergy = baselineEnergy + baselineActualData[i];
+        }
+        if (fiscalYear > selectedGroup.regressionModelYear) {
+          //after regression model year
+          yearToDateSEnPI = (yearToDateEnergyUse * baselineExpectedEnergy) / (yearToDateExpectedEnergyUse * baselineEnergy)
+        } else {
+          //regression model year or earlier
+          yearToDateSEnPI = (yearToDateExpectedEnergyUse / yearToDateEnergyUse);
+        }
+        //track baseline SEnPI values
+        if (fiscalYear == baselineYear) {
+          baselineSEnPI.push(yearToDateSEnPI);
+        }
+
+        //calculate rolling SEnPI using previous 12 months of calculations
+        if (summaryIndex > 10) {
+          let last12MonthsEnergyTotal: number = energyUse;
+          let last12MonthExpectedEnergyTotal: number = modeledEnergy;
+          for (let i = (summaryIndex - 11); i < summaryIndex; i++) {
+            last12MonthsEnergyTotal = last12MonthsEnergyTotal + regressionSummaryData[i].totalEnergy;
+            last12MonthExpectedEnergyTotal = last12MonthExpectedEnergyTotal + regressionSummaryData[i].modeledEnergy;
+          }
+          if (fiscalYear > selectedGroup.regressionModelYear) {
+            let baselineEnergyTotal: number = _.sum(baselineActualData);
+            let baselineExpectedEnergyTotal: number = _.sum(baselineExpectedData);
+            rollingSEnPI = (last12MonthsEnergyTotal * baselineExpectedEnergyTotal) / (last12MonthExpectedEnergyTotal * baselineEnergyTotal)
+          } else {
+            rollingSEnPI = (last12MonthExpectedEnergyTotal / last12MonthsEnergyTotal);
+          }
+        }
+
+        //calculate year to date improvement
+        if (fiscalYear > baselineYear) {
+          if (fiscalYear > selectedGroup.regressionModelYear) {
+            yearToDateImprovement = 1 - yearToDateSEnPI;
+          } else {
+            yearToDateImprovement = (1 - baselineSEnPI[monthIndex]) - (1 - yearToDateSEnPI);
+          }
+          monthlyIncrementalImprovement = yearToDateImprovement - previousYearToDateSEnPI;
+          yearToDateImprovementOverFiscalYear = monthlyIncrementalImprovement;
+          for (let i = 1; i <= monthIndex; i++) {
+            yearToDateImprovementOverFiscalYear = yearToDateImprovementOverFiscalYear + (regressionSummaryData[summaryIndex - i].monthlyIncrementalImprovement / 100)
+          }
+        }
+        //calculate rolling 12 month improvement
+        if (fiscalYear > baselineYear) {
+          if (fiscalYear > selectedGroup.regressionModelYear) {
+            rolling12MonthImprovement = 1 - rollingSEnPI;
+          } else {
+            let baselineEnergyTotal: number = _.sum(baselineActualData);
+            let baselineExpectedEnergyTotal: number = _.sum(baselineExpectedData);
+            let baselineAnnualSEnPI: number = baselineExpectedEnergyTotal / baselineEnergyTotal;
+            rolling12MonthImprovement = (1 - baselineAnnualSEnPI) - (1 - rollingSEnPI);
+          }
         }
       }
       //add results
@@ -220,6 +224,64 @@ export class RegressionAnalysisService {
       regressionSummaryData: regressionSummaryData
     }
   }
+
+  getAnnualRegressionSummary(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility): Array<AnnualRegressionSummary> {
+    let annualRegressionSummary: Array<AnnualRegressionSummary> = new Array();
+
+    let monthlyRegressionSummary: MonthlyRegressionSummary = this.getMonthlyRegressionSummary(selectedGroup, analysisItem, facility, true)
+
+
+    let baselineYear: number = facility.sustainabilityQuestions.energyReductionBaselineYear;
+    let reportYear: number = analysisItem.reportYear;
+    if (facility.fiscalYear == 'nonCalendarYear' && facility.fiscalYearCalendarEnd) {
+      baselineYear = baselineYear - 1;
+      reportYear = reportYear - 1;
+    }
+    let previousYearSavings: number = 0;
+    let baselineEnergyUse: number;
+    let baselineModeledEnergy: number;
+    let baselineSEnPI: number;
+    for (let summaryYear: number = baselineYear; summaryYear <= reportYear; summaryYear++) {
+      let summaryYearData: Array<RegressionSummaryData> = monthlyRegressionSummary.regressionSummaryData.filter(data => { return data.fiscalYear == summaryYear });
+      let energyUse: number = _.sumBy(summaryYearData, 'totalEnergy');
+      let modeledEnergyUse: number = _.sumBy(summaryYearData, 'modeledEnergy');
+      let SEnPI: number;
+      let cumulativeSavings: number = 0;
+      let annualSavings: number = 0;
+
+      if (summaryYear == baselineYear) {
+        baselineEnergyUse = energyUse;
+        baselineModeledEnergy = modeledEnergyUse;
+      }
+
+      if (summaryYear > selectedGroup.regressionModelYear) {
+        SEnPI = (energyUse * baselineModeledEnergy) / (modeledEnergyUse * baselineEnergyUse);
+      } else {
+        SEnPI = modeledEnergyUse / energyUse;
+      }
+
+      if (summaryYear == baselineYear) {
+        baselineSEnPI = SEnPI;
+      } else if (summaryYear > selectedGroup.regressionModelYear) {
+        cumulativeSavings = 1 - SEnPI;
+        annualSavings = cumulativeSavings - previousYearSavings;
+      } else {
+        cumulativeSavings = (1 - baselineSEnPI) - (1 - SEnPI);
+        annualSavings = cumulativeSavings - previousYearSavings;
+      }
+
+      annualRegressionSummary.push({
+        year: summaryYear,
+        energyUse: energyUse,
+        modeledEnergyUse: modeledEnergyUse,
+        SEnPI: SEnPI,
+        cumulativeSavings: cumulativeSavings * 100,
+        annualSavings: annualSavings * 100
+      })
+      previousYearSavings = cumulativeSavings;
+    }
+    return annualRegressionSummary;
+  }
 }
 
 export interface MonthlyRegressionSummary {
@@ -243,4 +305,14 @@ export interface RegressionSummaryData {
   rollingSEnPI: number,
   monthlyIncrementalImprovement: number,
   rolling12MonthImprovement: number
+}
+
+
+export interface AnnualRegressionSummary {
+  year: number,
+  energyUse: number,
+  modeledEnergyUse: number,
+  SEnPI: number,
+  cumulativeSavings: number,
+  annualSavings: number
 }

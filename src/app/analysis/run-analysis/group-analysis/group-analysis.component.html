@@ -21,6 +21,10 @@
                 [routerLinkActive]="['active']">Model Selection</a></li> -->
         <li *ngIf="selectedGroup.analysisType == 'regression'"
             [ngClass]="{'disabled': groupHasError, 'error': groupHasError}"><a
+                routerLink="/analysis/run-analysis/group-analysis/{{groupId}}/annual-regression-analysis"
+                [routerLinkActive]="['active']">Annual Regression Analysis</a></li>
+        <li *ngIf="selectedGroup.analysisType == 'regression'"
+            [ngClass]="{'disabled': groupHasError, 'error': groupHasError}"><a
                 routerLink="/analysis/run-analysis/group-analysis/{{groupId}}/monthly-regression-analysis"
                 [routerLinkActive]="['active']">Monthly Regression Analysis</a></li>
     </ul>
