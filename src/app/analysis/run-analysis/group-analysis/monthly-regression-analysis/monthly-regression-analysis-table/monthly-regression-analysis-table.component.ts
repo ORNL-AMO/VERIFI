@@ -23,9 +23,18 @@ export class MonthlyRegressionAnalysisTableComponent implements OnInit {
   constructor() { }
 
   ngOnInit(): void {
+    this.monthlyRegressionSummary.regressionSummaryData.forEach(data => {
+      let dataIndex: number = 0;
+      this.monthlyRegressionSummary.predictorVariables.forEach(variable => {
+        if (variable.productionInAnalysis) {
+          data[variable.name] = data.predictorUsage[dataIndex];
+          dataIndex++;
+        }
+      })
+    })
   }
 
-  
+
   setOrderDataField(str: string) {
     if (str == this.orderDataField) {
       if (this.orderByDirection == 'desc') {
@@ -40,7 +49,7 @@ export class MonthlyRegressionAnalysisTableComponent implements OnInit {
 
   checkFiscalYearEnd(date: Date): boolean {
     if (this.orderDataField == 'date' || this.orderDataField == 'fiscalYear') {
-      if (this.facility.fiscalYear == 'calendarYear' && this.orderByDirection == 'asc') {
+      if (this.facility.fiscalYear == 'calendarYear' && (this.orderByDirection == 'asc' || this.orderDataField == 'fiscalYear')) {
         return date.getUTCMonth() == 0;
       } else if (this.facility.fiscalYear == 'calendarYear' && this.orderByDirection == 'desc') {
         return date.getUTCMonth() == 11;

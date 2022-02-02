@@ -41,7 +41,7 @@ export class MonthlyAnalysisTableComponent implements OnInit {
 
   checkFiscalYearEnd(date: Date): boolean {
     if (this.orderDataField == 'date' || this.orderDataField == 'fiscalYear') {
-      if (this.facility.fiscalYear == 'calendarYear' && this.orderByDirection == 'asc') {
+      if (this.facility.fiscalYear == 'calendarYear' && (this.orderByDirection == 'asc' || this.orderDataField == 'fiscalYear')) {
         return date.getUTCMonth() == 0;
       } else if (this.facility.fiscalYear == 'calendarYear' && this.orderByDirection == 'desc') {
         return date.getUTCMonth() == 11;

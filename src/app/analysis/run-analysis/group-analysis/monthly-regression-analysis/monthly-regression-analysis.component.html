@@ -24,5 +24,6 @@
     <app-monthly-regression-analysis-table *ngIf="dataDisplay == 'table'" [analysisItem]="analysisItem"
         [monthlyRegressionSummary]="monthlyRegressionSummary" [itemsPerPage]="itemsPerPage" [facility]="facility">
     </app-monthly-regression-analysis-table>
-    <app-monthly-regression-analysis-graph *ngIf="dataDisplay == 'graph'"></app-monthly-regression-analysis-graph>
+    <app-monthly-regression-analysis-graph *ngIf="dataDisplay == 'graph'" [analysisItem]="analysisItem"
+    [monthlyRegressionSummary]="monthlyRegressionSummary" [facility]="facility"></app-monthly-regression-analysis-graph>
 </div>
