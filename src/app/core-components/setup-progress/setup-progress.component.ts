@@ -69,7 +69,7 @@ export class SetupProgressComponent implements OnInit {
     this.selectedAccountSub.unsubscribe();
     this.selectedFacilitySub.unsubscribe();
   }
-  
+
   updateProgress() {
     if (this.setupWizard) {
       if (this.selectedAccount && !this.selectedFacility && !this.setupWizardComplete) {
@@ -93,10 +93,11 @@ export class SetupProgressComponent implements OnInit {
     }
   }
 
-  addFacility() {
+  async addFacility() {
     if (!this.selectedFacility) {
       let newFacility: IdbFacility = this.facilitydbService.getNewIdbFacility(this.selectedAccount);
-      this.facilitydbService.add(newFacility);
+      newFacility = await this.facilitydbService.addWithObservable(newFacility).toPromise();
+      this.facilitydbService.selectedFacility.next(newFacility);
     }
     this.router.navigate(['/facility-management']);
   }
