@@ -208,4 +208,8 @@ export class AccountComponent implements OnInit {
     let helpPanelOpen: boolean = this.helpPanelService.helpPanelOpen.getValue();
     this.helpPanelService.helpPanelOpen.next(!helpPanelOpen);
   }
+
+  goHome(){
+    this.router.navigateByUrl('/home/account-summary')
+  }
 }
