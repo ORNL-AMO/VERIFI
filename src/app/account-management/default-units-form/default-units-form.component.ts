@@ -38,7 +38,7 @@ export class DefaultUnitsFormComponent implements OnInit {
     subregion: string,
     outputRate: number
   }>;
-  zipCodeSubRegionData: Array<string>;
+  zipCodeSubRegionData: Array<string> = new Array();
   currentZip: string;
   showCustomLink: boolean;
   constructor(private accountDbService: AccountdbService, private accountManagementService: AccountManagementService, private facilityDbService: FacilitydbService,
@@ -114,6 +114,8 @@ export class DefaultUnitsFormComponent implements OnInit {
       } else if (!this.inAccount && this.currentZip != this.selectedFacility.zip) {
         this.currentZip = this.selectedFacility.zip;
         this.setSubRegionData();
+      } else {
+        this.setUSAverage();
       }
     }
   }
@@ -135,22 +137,30 @@ export class DefaultUnitsFormComponent implements OnInit {
             this.setSubRegionEmissionsOutput();
           }
         } else {
-          this.clearEmissionsValues();
+          this.setUSAverage();
         }
       } else {
-        this.clearEmissionsValues();
+        this.setUSAverage();
       }
     } else {
-      this.clearEmissionsValues();
+      this.setUSAverage();
     }
   }
 
-  clearEmissionsValues() {
-    this.form.controls.eGridSubregion.patchValue(undefined);
-    this.form.patchValue({
-      emissionsOutputRate: undefined
+  setUSAverage() {
+    let subRegionData: SubRegionData = _.find(this.eGridService.subRegionsByZipcode, (val) => { return val.zip == '00000' });
+    subRegionData.subregions.forEach(subregion => {
+      if (subregion) {
+        this.zipCodeSubRegionData.push(subregion);
+      }
     });
-    this.saveChanges();
+    if (this.zipCodeSubRegionData.length > 0) {
+      let checkExists: string = this.zipCodeSubRegionData.find(val => { return this.form.controls.eGridSubregion.value === val; })
+      if (!checkExists) {
+        this.form.controls.eGridSubregion.patchValue(this.zipCodeSubRegionData[0]);
+        this.setSubRegionEmissionsOutput();
+      }
+    }
   }
 
   setSubRegionEmissionsOutput() {

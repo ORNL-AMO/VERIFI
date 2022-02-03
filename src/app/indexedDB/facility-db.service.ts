@@ -151,7 +151,7 @@ export class FacilitydbService {
         return {
             accountId: account.id,
             name: 'New Facility',
-            country: undefined,
+            country: 'US',
             city: undefined,
             state: undefined,
             zip: undefined,

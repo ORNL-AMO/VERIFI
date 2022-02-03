@@ -18,17 +18,20 @@
 <hr>
 
 <div class="row" *ngIf="importPredictors.length != 0">
-    <div class="col-6">
+    <div class="col-4">
         <p class="bold">Predictor Name</p>
     </div>
-    <div class="col-5">
+    <div class="col-4">
         <p class="bold">Units</p>
+    </div>
+    <div class="col-2">
+        <p class="bold">Production?</p>
     </div>
 </div>
 
 <form *ngIf="importPredictors.length != 0">
     <div class="row mb-3" *ngFor="let predictor of importPredictors; let index=index;">
-        <div class="col-6">
+        <div class="col-4">
             <div class="input-group w-100">
                 <div class="input-group-prepend">
                     <!-- <span class="input-group-text" id="basic-addon1">@</span> -->
@@ -36,19 +39,25 @@
                         #
                     </span>
                 </div>
-                <input class="form-control" type="text" [(ngModel)]="predictor.name"
+                <input type="text" class="form-control" type="text" [(ngModel)]="predictor.name"
                     name="{{'predictorName'+predictor.id}}" [disabled]="skippedPredictors[index]">
             </div>
         </div>
-        <div class="col-5">
-            <input class="form-control w-100" [(ngModel)]="predictor.unit" name="{{'predictorUnit'+predictor.id}}"
-                [disabled]="skippedPredictors[index]">
+        <div class="col-4">
+            <input type="text" class="form-control w-100" [(ngModel)]="predictor.unit"
+                name="{{'predictorUnit'+predictor.id}}" [disabled]="skippedPredictors[index]">
 
         </div>
+        <div class="col-2">
+            <input type="checkbox" class="form-control w-100" [(ngModel)]="predictor.production"
+                name="{{'production'+predictor.id}}" [disabled]="skippedPredictors[index]">
+        </div>
         <div class="col-1 text-center">
-            <button class="btn btn-outline m-0" (click)="toggleSkipPredictor(index)" *ngIf="!skippedPredictors[index]">Skip
+            <button class="btn btn-outline m-0" (click)="toggleSkipPredictor(index)"
+                *ngIf="!skippedPredictors[index]">Skip
             </button>
-            <button class="btn btn-outline m-0" (click)="toggleSkipPredictor(index)" *ngIf="skippedPredictors[index]">Use
+            <button class="btn btn-outline m-0" (click)="toggleSkipPredictor(index)"
+                *ngIf="skippedPredictors[index]">Use
             </button>
         </div>
     </div>

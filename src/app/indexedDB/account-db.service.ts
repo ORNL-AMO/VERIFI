@@ -133,7 +133,7 @@ export class AccountdbService {
             city: '',
             state: '',
             zip: undefined,
-            country: '',
+            country: 'US',
             address: '',
             size: 0,
             naics1: undefined,
