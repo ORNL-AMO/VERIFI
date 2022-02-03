@@ -1,4 +1,4 @@
-<div class="wrapper main-content p-0">
+<div class="wrapper main-content p-0" *ngIf="!baselineYearError">
     <div class="content-padding">
         <h4>Saved Analysis Items</h4>
 
@@ -72,6 +72,14 @@
                 <p class="item-right">{{facilityAnalysisItems.length}} entries</p>
             </div>
         </div>
+    </div>
+</div>
+
+<div class="w-100 justify-content-center p-5" *ngIf="baselineYearError">
+    <div class="alert alert-danger text-center p-2">
+        The baseline year for your reduction goal is
+        {{selectedFacility.sustainabilityQuestions.energyReductionBaselineYear}} and your data starts {{yearOptions[0]}}.
+        Fix your facility settings or add data.
     </div>
 </div>
 

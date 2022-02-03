@@ -2,8 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { IdbAnalysisItem } from 'src/app/models/idb';
+import { IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
+import { AnalysisCalculationsHelperService } from '../calculations/analysis-calculations-helper.service';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 
 @Component({
   selector: 'app-analysis-dashboard',
@@ -21,12 +23,26 @@ export class AnalysisDashboardComponent implements OnInit {
   orderByDirection: string = 'desc';
 
   itemToDelete: IdbAnalysisItem;
-  constructor(private router: Router, private analysisDbService: AnalysisDbService, private toastNotificationService: ToastNotificationsService) { }
+  baselineYearError: boolean;
+  yearOptions: Array<number>;
+  selectedFacility: IdbFacility 
+  constructor(private router: Router, private analysisDbService: AnalysisDbService, private toastNotificationService: ToastNotificationsService,
+    private analysisCalculationsHelperService: AnalysisCalculationsHelperService,
+    private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
     this.facilityAnalysisItemsSub = this.analysisDbService.facilityAnalysisItems.subscribe(items => {
       this.facilityAnalysisItems = items;
     });
+
+    this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
+    if(this.selectedFacility){
+      this.yearOptions = this.analysisCalculationsHelperService.getYearOptions();
+      this.baselineYearError = this.yearOptions[0] > this.selectedFacility.sustainabilityQuestions.energyReductionBaselineYear
+    }else{
+      this.router.navigateByUrl('/');
+    }
+
   }
 
   ngOnDestroy() {

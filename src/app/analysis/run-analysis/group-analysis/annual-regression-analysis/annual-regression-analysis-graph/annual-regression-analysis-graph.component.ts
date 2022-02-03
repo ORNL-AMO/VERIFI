@@ -1,6 +1,7 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { AnnualRegressionSummary } from 'src/app/analysis/calculations/regression-analysis.service';
+import { IdbAnalysisItem } from 'src/app/models/idb';
 
 @Component({
   selector: 'app-annual-regression-analysis-graph',
@@ -10,6 +11,8 @@ import { AnnualRegressionSummary } from 'src/app/analysis/calculations/regressio
 export class AnnualRegressionAnalysisGraphComponent implements OnInit {
   @Input()
   annualRegressionSummary: Array<AnnualRegressionSummary>;
+  @Input()
+  analysisItem: IdbAnalysisItem;
 
   @ViewChild('percentImprovementAnalysisGraph', { static: false }) percentImprovementAnalysisGraph: ElementRef;
   @ViewChild('annualEnergyIntensityAnalysisGraph', { static: false }) annualEnergyIntensityAnalysisGraph: ElementRef;
@@ -31,11 +34,27 @@ export class AnnualRegressionAnalysisGraphComponent implements OnInit {
       let summariesCopy: Array<AnnualRegressionSummary> = JSON.parse(JSON.stringify(this.annualRegressionSummary));
       let barTrace = {
         x: summariesCopy.map(summary => { return summary.year }),
-        y: summariesCopy.map(summary => { return summary.SEnPI }),
-        width: summariesCopy.map(summary => { return .3 }),
-        texttemplate: '%{value:.5f}',
-        name: "SEnPI",
+        y: summariesCopy.map(summary => { return summary.energyUse }),
+        // width: summariesCopy.map(summary => { return .75 }),
+        // texttemplate: '%{value:.5f}',
+        name: "Energy Use",
         type: 'bar',
+        marker: {
+          color: '#7F7F7F'
+        }
+      }
+      traceData.push(barTrace);
+
+      barTrace = {
+        x: summariesCopy.map(summary => { return summary.year }),
+        y: summariesCopy.map(summary => { return summary.modeledEnergyUse }),
+        // width: summariesCopy.map(summary => { return .75 }),
+        // texttemplate: '%{value:.5f}',
+        name: "Modeled Energy Use",
+        type: 'bar',
+        marker: {
+          color: '#7D3C98'
+        }
       }
       traceData.push(barTrace);
 
@@ -45,8 +64,8 @@ export class AnnualRegressionAnalysisGraphComponent implements OnInit {
           tickmode: 'linear'
         },
         yaxis: {
-          title: 'SEnPI',
-          hoverformat: ",.5f",
+          title: 'Energy Use (' + this.analysisItem.energyUnit + ')',
+          hoverformat: ",.2f",
         },
         legend: {
           orientation: "h",
@@ -57,7 +76,7 @@ export class AnnualRegressionAnalysisGraphComponent implements OnInit {
           r: 75,
           l: 75,
           t: 50,
-          b: 150
+          b: 50
         }
       };
 
@@ -82,7 +101,7 @@ export class AnnualRegressionAnalysisGraphComponent implements OnInit {
         y: summariesCopy.map((summary, index) => {
           return summary.annualSavings
         }),
-        name: "Annual Improvement in SEnPI (%)",
+        name: "Annual Energy Improvement (%)",
         type: 'lines+markers',
         texttemplate: '%{value:.5f}',
         marker: {
@@ -96,7 +115,7 @@ export class AnnualRegressionAnalysisGraphComponent implements OnInit {
         y: summariesCopy.map((summary, index) => {
           return summary.cumulativeSavings
         }),
-        name: "Total Improvement in SEnPI (%)",
+        name: "Total Energy Improvement (%)",
         type: 'lines+markers',
         marker: {
           size: 16

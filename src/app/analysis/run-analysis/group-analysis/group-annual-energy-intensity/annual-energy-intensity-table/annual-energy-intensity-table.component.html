@@ -9,8 +9,7 @@
                 Production ({{group.productionUnits}})
             </th>
             <th class="text-center th-3" colspan="3">
-                Energy Intensity (<span
-                    [innerHTML]="analysisItem.energyUnit | settingsLabel"></span>/{{group.productionUnits}})
+                Energy Improvement
             </th>
         </tr>
         <tr>
@@ -36,7 +35,10 @@
                 Total Change
             </th>
             <th>
-                Energy Intensity
+                Energy Intensity<br>
+                <span class="small">
+                    (<span [innerHTML]="analysisItem.energyUnit | settingsLabel"></span>/{{group.productionUnits}})
+                </span>
             </th>
             <th>
                 Annual Improvement

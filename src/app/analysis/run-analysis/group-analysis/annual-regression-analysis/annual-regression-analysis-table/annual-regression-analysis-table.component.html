@@ -8,8 +8,8 @@
             <th class="text-center th-3" colspan="3">
                 Modeled Energy
             </th>
-            <th class="text-center th-3" colspan="3">
-                SEnPI
+            <th class="text-center th-3" colspan="2">
+                Energy Improvement
             </th>
         </tr>
         <tr>
@@ -34,9 +34,9 @@
             <th>
                 Total Savings
             </th>
-            <th>
+            <!-- <th>
                 SEnPI
-            </th>
+            </th> -->
             <th>
                 Annual Savings
             </th>
@@ -51,31 +51,73 @@
                 {{summary.year}}
             </td>
             <td>
-                {{summary.energyUse | customNumber}}
+                <span *ngIf="summary.energyUse" [ngClass]="{'red': summary.energyUse < 0}">
+                    {{summary.energyUse | customNumber}}
+                </span>
+                <span *ngIf="!summary.energyUse">
+                    &mdash;
+                </span>
             </td>
             <td>
-                {{summary.annualEnergySavings | customNumber}}
+                <span *ngIf="summary.annualEnergySavings" [ngClass]="{'red': summary.annualEnergySavings < 0}">
+                    {{summary.annualEnergySavings | customNumber}}
+                </span>
+                <span *ngIf="!summary.annualEnergySavings">
+                    &mdash;
+                </span>
             </td>
             <td>
-                {{summary.totalEnergySavings | customNumber}}
+                <span *ngIf="summary.totalEnergySavings" [ngClass]="{'red': summary.totalEnergySavings < 0}">
+                    {{summary.totalEnergySavings | customNumber}}
+                </span>
+                <span *ngIf="!summary.totalEnergySavings">
+                    &mdash;
+                </span>
             </td>
             <td>
-                {{summary.modeledEnergyUse | customNumber}}
+                <span *ngIf="summary.modeledEnergyUse" [ngClass]="{'red': summary.modeledEnergyUse < 0}">
+                    {{summary.modeledEnergyUse | customNumber}}
+                </span>
+                <span *ngIf="!summary.modeledEnergyUse">
+                    &mdash;
+                </span>
             </td>
             <td>
-                {{summary.annualModeledEnergySavings | customNumber}}
+                <span *ngIf="summary.annualModeledEnergySavings"
+                    [ngClass]="{'red': summary.annualModeledEnergySavings < 0}">
+                    {{summary.annualModeledEnergySavings | customNumber}}
+                </span>
+                <span *ngIf="!summary.annualModeledEnergySavings">
+                    &mdash;
+                </span>
             </td>
             <td>
-                {{summary.totalModeledEnergySavings | customNumber}}
+                <span *ngIf="summary.totalModeledEnergySavings"
+                    [ngClass]="{'red': summary.totalModeledEnergySavings < 0}">
+                    {{summary.totalModeledEnergySavings | customNumber}}
+                </span>
+                <span *ngIf="!summary.totalModeledEnergySavings">
+                    &mdash;
+                </span>
             </td>
-            <td>
+            <!-- <td>
                 {{summary.SEnPI | customNumber}}
+            </td> -->
+            <td>
+                <span *ngIf="summary.annualSavings" [ngClass]="{'red': summary.annualSavings < 0}">
+                    {{summary.annualSavings | customNumber}}%
+                </span>
+                <span *ngIf="!summary.annualSavings">
+                    &mdash;
+                </span>
             </td>
             <td>
-                {{summary.annualSavings | customNumber}}%
-            </td>
-            <td>
-                {{summary.cumulativeSavings | customNumber}}%
+                <span *ngIf="summary.cumulativeSavings" [ngClass]="{'red': summary.cumulativeSavings < 0}">
+                    {{summary.cumulativeSavings | customNumber}}%
+                </span>
+                <span *ngIf="!summary.cumulativeSavings">
+                    &mdash;
+                </span>
             </td>
         </tr>
     </tbody>
