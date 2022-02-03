@@ -45,6 +45,9 @@ export class FacilityComponent implements OnInit {
   ngOnInit() {
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
       this.selectedFacility = facility;
+      if(!this.selectedFacility){
+        this.router.navigateByUrl('/');
+      }
     });
   }
 

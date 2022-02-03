@@ -52,18 +52,26 @@ export class EmptyStateComponent implements OnInit {
     this.utilityDataSub.unsubscribe();
   }
 
-  addAccount() {
+  async addAccount() {
     if (!this.selectedAccount) {
+      this.loadingService.setLoadingMessage('Creating Account..');
+      this.loadingService.setLoadingStatus(true);
       let newAccount: IdbAccount = this.accountdbService.getNewIdbAccount();
-      this.accountdbService.add(newAccount);
+      newAccount = await this.accountdbService.addWithObservable(newAccount).toPromise();
+      this.accountdbService.selectedAccount.next(newAccount);
+      this.loadingService.setLoadingStatus(false);
     }
     this.router.navigate(['/account-management']);
   }
 
-  addFacility() {
+  async addFacility() {
     if (!this.selectedFacility) {
+      this.loadingService.setLoadingMessage('Creating Facility..');
+      this.loadingService.setLoadingStatus(true);
       let newFacility: IdbFacility = this.facilityDbService.getNewIdbFacility(this.selectedAccount);
-      this.facilityDbService.add(newFacility);
+      newFacility = await this.facilityDbService.addWithObservable(newFacility).toPromise();
+      this.facilityDbService.selectedFacility.next(newFacility);
+      this.loadingService.setLoadingStatus(false);
     }
     this.router.navigate(['/facility-management']);
   }

@@ -51,6 +51,9 @@ export class AccountComponent implements OnInit {
   ngOnInit() {
     this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(val => {
       this.selectedAccount = val;
+      if(!this.selectedAccount){
+        this.router.navigateByUrl('/');
+      }
     });
 
     this.accountFacilitiesSub = this.facilityDbService.accountFacilities.subscribe(val => {
