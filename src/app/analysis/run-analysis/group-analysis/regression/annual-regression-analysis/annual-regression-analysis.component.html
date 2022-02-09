@@ -5,24 +5,11 @@
         <button class="btn" [ngClass]="{'btn-solid': dataDisplay == 'graph'}"
             (click)="setDataDisplay('graph')">Graph</button>
     </div>
-    <!--Items Per Page-->
-    <!-- <div class="items-per-page pull-right" *ngIf="dataDisplay == 'table'">
-            <span>Show </span>
-            <select [(ngModel)]="itemsPerPage">
-                <option [ngValue]=6>6</option>
-                <option [ngValue]=12>12</option>
-                <option [ngValue]=24>24</option>
-                <option [ngValue]=36>36</option>
-                <option [ngValue]=48>48</option>
-                <option [ngValue]=60>60</option>
-                <option [ngValue]=999999999999>All</option>
-            </select>
-        </div> -->
 </div>
 
-<app-annual-regression-analysis-table *ngIf="dataDisplay == 'table'" [annualRegressionSummary]="annualRegressionSummary"
+<app-annual-analysis-summary-table *ngIf="dataDisplay == 'table'" [annualAnalysisSummary]="annualRegressionSummary"
     [analysisItem]="analysisItem">
-</app-annual-regression-analysis-table>
+</app-annual-analysis-summary-table>
 <app-annual-regression-analysis-graph *ngIf="dataDisplay == 'graph'" [annualRegressionSummary]="annualRegressionSummary"
     [analysisItem]="analysisItem">
 </app-annual-regression-analysis-graph>

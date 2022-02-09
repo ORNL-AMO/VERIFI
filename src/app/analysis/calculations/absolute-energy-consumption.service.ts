@@ -6,7 +6,7 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
 import { ConvertMeterDataService } from 'src/app/shared/helper-services/convert-meter-data.service';
 import { AnalysisCalculationsHelperService } from './analysis-calculations-helper.service';
 import * as _ from 'lodash';
-import { MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
+import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 
 @Injectable({
   providedIn: 'root'
@@ -16,7 +16,7 @@ export class AbsoluteEnergyConsumptionService {
   constructor(private utilityMeterDbService: UtilityMeterdbService, private calendarizationService: CalanderizationService,
     private convertMeterDataService: ConvertMeterDataService, private analysisCalculationsHelperService: AnalysisCalculationsHelperService) { }
 
-  getMonthlyAbsoluteConsumptionGroupSummaries(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility, forAnnualSummaryCalculation?: boolean): Array<MonthlyAnalysisSummaryData> {
+  getMonthlyAbsoluteConsumptionGroupSummaries(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility): Array<MonthlyAnalysisSummaryData> {
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
     let groupMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.groupId == selectedGroup.idbGroupId });
     let calanderizationOptions: CalanderizationOptions = {
@@ -64,81 +64,79 @@ export class AbsoluteEnergyConsumptionService {
       let monthlyIncrementalImprovement: number = 0;
       //skip incremental calcs for annual summary
       //just need energy calculations
-      if (!forAnnualSummaryCalculation) {
-        if (previousFiscalYear == fiscalYear && summaryIndex != 0) {
-          monthIndex++;
-        } else {
-          monthIndex = 0;
-        }
+      if (previousFiscalYear == fiscalYear && summaryIndex != 0) {
+        monthIndex++;
+      } else {
+        monthIndex = 0;
+      }
 
-        //track year to date energy use
-        if (fiscalYear == baselineYear) {
-          baselineActualData.push(energyUse);
-        }
-        expectedEnergy = baselineActualData[monthIndex];
-        //if first year monthly savings = 0
-        if (fiscalYear != baselineYear) {
-          monthlySavings = energyUse - expectedEnergy;
-        }
-        //sum values for year to data
-        if (previousFiscalYear == fiscalYear) {
-          yearToDateEnergyUse = yearToDateEnergyUse + energyUse;
-          yearToDateExpectedEnergyUse = yearToDateExpectedEnergyUse + expectedEnergy;
-        } else {
-          //rest fiscal year values on new year
-          previousFiscalYear = fiscalYear;
-          yearToDateEnergyUse = energyUse;
-          yearToDateExpectedEnergyUse = expectedEnergy;
-        }
+      //track year to date energy use
+      if (fiscalYear == baselineYear) {
+        baselineActualData.push(energyUse);
+      }
+      expectedEnergy = baselineActualData[monthIndex];
+      //if first year monthly savings = 0
+      if (fiscalYear != baselineYear) {
+        monthlySavings = energyUse - expectedEnergy;
+      }
+      //sum values for year to data
+      if (previousFiscalYear == fiscalYear) {
+        yearToDateEnergyUse = yearToDateEnergyUse + energyUse;
+        yearToDateExpectedEnergyUse = yearToDateExpectedEnergyUse + expectedEnergy;
+      } else {
+        //rest fiscal year values on new year
+        previousFiscalYear = fiscalYear;
+        yearToDateEnergyUse = energyUse;
+        yearToDateExpectedEnergyUse = expectedEnergy;
+      }
 
-        //year to date SEnPI calculation
-        //calculate baseline expected and entered energy use
-        //in same months as baseline year
-        let baselineEnergy: number = 0;
-        for (let i = 0; i <= monthIndex; i++) {
-          baselineEnergy = baselineEnergy + baselineActualData[i];
+      //year to date SEnPI calculation
+      //calculate baseline expected and entered energy use
+      //in same months as baseline year
+      let baselineEnergy: number = 0;
+      for (let i = 0; i <= monthIndex; i++) {
+        baselineEnergy = baselineEnergy + baselineActualData[i];
+      }
+      if (fiscalYear > baselineYear) {
+        //after regression model year
+        yearToDateSEnPI = (yearToDateEnergyUse * baselineEnergy) / (yearToDateExpectedEnergyUse * baselineEnergy)
+      } else {
+        //regression model year or earlier
+        yearToDateSEnPI = (yearToDateExpectedEnergyUse / yearToDateEnergyUse);
+      }
+      //track baseline SEnPI values
+      if (fiscalYear == baselineYear) {
+        baselineSEnPI.push(yearToDateSEnPI);
+      }
+
+      //calculate rolling SEnPI using previous 12 months of calculations
+      if (summaryIndex > 10) {
+        let last12MonthsEnergyTotal: number = energyUse;
+        let last12MonthExpectedEnergyTotal: number = expectedEnergy;
+        for (let i = (summaryIndex - 11); i < summaryIndex; i++) {
+          last12MonthsEnergyTotal = last12MonthsEnergyTotal + monthlyAbsoluteSummaryData[i].totalEnergy;
+          last12MonthExpectedEnergyTotal = last12MonthExpectedEnergyTotal + monthlyAbsoluteSummaryData[i].modeledEnergy;
         }
         if (fiscalYear > baselineYear) {
-          //after regression model year
-          yearToDateSEnPI = (yearToDateEnergyUse * baselineEnergy) / (yearToDateExpectedEnergyUse * baselineEnergy)
+          let baselineEnergyTotal: number = _.sum(baselineActualData);
+          rollingSEnPI = (last12MonthsEnergyTotal * baselineEnergyTotal) / (last12MonthExpectedEnergyTotal * baselineEnergyTotal)
         } else {
-          //regression model year or earlier
-          yearToDateSEnPI = (yearToDateExpectedEnergyUse / yearToDateEnergyUse);
+          rollingSEnPI = (last12MonthExpectedEnergyTotal / last12MonthsEnergyTotal);
         }
-        //track baseline SEnPI values
-        if (fiscalYear == baselineYear) {
-          baselineSEnPI.push(yearToDateSEnPI);
-        }
+      }
 
-        //calculate rolling SEnPI using previous 12 months of calculations
-        if (summaryIndex > 10) {
-          let last12MonthsEnergyTotal: number = energyUse;
-          let last12MonthExpectedEnergyTotal: number = expectedEnergy;
-          for (let i = (summaryIndex - 11); i < summaryIndex; i++) {
-            last12MonthsEnergyTotal = last12MonthsEnergyTotal + monthlyAbsoluteSummaryData[i].totalEnergy;
-            last12MonthExpectedEnergyTotal = last12MonthExpectedEnergyTotal + monthlyAbsoluteSummaryData[i].modeledEnergy;
-          }
-          if (fiscalYear > baselineYear) {
-            let baselineEnergyTotal: number = _.sum(baselineActualData);
-            rollingSEnPI = (last12MonthsEnergyTotal * baselineEnergyTotal) / (last12MonthExpectedEnergyTotal * baselineEnergyTotal)
-          } else {
-            rollingSEnPI = (last12MonthExpectedEnergyTotal / last12MonthsEnergyTotal);
-          }
+      //calculate year to date improvement
+      if (fiscalYear > baselineYear) {
+        yearToDateImprovement = 1 - yearToDateSEnPI;
+        monthlyIncrementalImprovement = yearToDateImprovement - previousYearToDateSEnPI;
+        yearToDateImprovementOverFiscalYear = monthlyIncrementalImprovement;
+        for (let i = 1; i <= monthIndex; i++) {
+          yearToDateImprovementOverFiscalYear = yearToDateImprovementOverFiscalYear + (monthlyAbsoluteSummaryData[summaryIndex - i].monthlyIncrementalImprovement / 100)
         }
-
-        //calculate year to date improvement
-        if (fiscalYear > baselineYear) {
-          yearToDateImprovement = 1 - yearToDateSEnPI;
-          monthlyIncrementalImprovement = yearToDateImprovement - previousYearToDateSEnPI;
-          yearToDateImprovementOverFiscalYear = monthlyIncrementalImprovement;
-          for (let i = 1; i <= monthIndex; i++) {
-            yearToDateImprovementOverFiscalYear = yearToDateImprovementOverFiscalYear + (monthlyAbsoluteSummaryData[summaryIndex - i].monthlyIncrementalImprovement / 100)
-          }
-        }
-        //calculate rolling 12 month improvement
-        if (fiscalYear > baselineYear) {
-          rolling12MonthImprovement = 1 - rollingSEnPI;
-        }
+      }
+      //calculate rolling 12 month improvement
+      if (fiscalYear > baselineYear) {
+        rolling12MonthImprovement = 1 - rollingSEnPI;
       }
       //add results
       monthlyAbsoluteSummaryData.push({
@@ -169,11 +167,13 @@ export class AbsoluteEnergyConsumptionService {
   }
 
 
-
-  getAnnualAbsoluteConsumptionSummary(){
-
+  getAnnualAnalysisSummary(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility): Array<AnnualAnalysisSummary> {
+    let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = this.getMonthlyAbsoluteConsumptionGroupSummaries(selectedGroup, analysisItem, facility)
+    let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = this.analysisCalculationsHelperService.getMonthlyStartAndEndDate(facility, analysisItem);
+    let baselineDate: Date = monthlyStartAndEndDate.baselineDate;
+    let baselineYear: number = this.analysisCalculationsHelperService.getFiscalYear(baselineDate, facility);
+    return this.analysisCalculationsHelperService.getAnnualAnalysisSummary(baselineYear, analysisItem, facility, monthlyAnalysisSummaryData);
   }
-
 
 }
 
