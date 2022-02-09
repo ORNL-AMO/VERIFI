@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { MonthlyRegressionSummary } from 'src/app/analysis/calculations/regression-analysis.service';
+import { MonthlyRegressionSummary } from 'src/app/models/analysis';
 import { IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 
 @Component({

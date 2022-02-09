@@ -4,6 +4,7 @@
                 routerLink="/analysis/run-analysis/group-analysis/{{groupId}}/options"
                 [routerLinkActive]="['active']">Analysis
                 Options</a></li>
+        <!--ENERGY INTENSITY-->
         <li *ngIf="selectedGroup.analysisType == 'energyIntensity'"
             [ngClass]="{'disabled': groupHasError, 'error': groupHasError}"><a
                 routerLink="/analysis/run-analysis/group-analysis/{{groupId}}/annual-energy-intensity"
@@ -14,7 +15,7 @@
                 routerLink="/analysis/run-analysis/group-analysis/{{groupId}}/monthly-energy-intensity"
                 [routerLinkActive]="['active']">Monthly
                 Energy Intensity</a></li>
-
+        <!--REGRESSION-->
         <!-- <li *ngIf="selectedGroup.analysisType == 'regression'"
             [ngClass]="{'disabled': groupHasError, 'error': groupHasError}"><a
                 routerLink="/analysis/run-analysis/group-analysis/{{groupId}}/regression-model-selection"
@@ -27,6 +28,15 @@
             [ngClass]="{'disabled': groupHasError, 'error': groupHasError}"><a
                 routerLink="/analysis/run-analysis/group-analysis/{{groupId}}/monthly-regression-analysis"
                 [routerLinkActive]="['active']">Monthly Regression Analysis</a></li>
+        <!--ABSOLUTE ENERGY CONSUMPTION-->
+        <li *ngIf="selectedGroup.analysisType == 'absoluteEnergyConsumption'"
+            [ngClass]="{'disabled': groupHasError, 'error': groupHasError}"><a
+                routerLink="/analysis/run-analysis/group-analysis/{{groupId}}/annual-absolute-energy-consumption"
+                [routerLinkActive]="['active']">Annual Absolute Energy Consumption</a></li>
+        <li *ngIf="selectedGroup.analysisType == 'absoluteEnergyConsumption'"
+            [ngClass]="{'disabled': groupHasError, 'error': groupHasError}"><a
+                routerLink="/analysis/run-analysis/group-analysis/{{groupId}}/monthly-absolute-energy-consumption"
+                [routerLinkActive]="['active']">Monthly Absolute Energy Consumption</a></li>
     </ul>
 </nav>
 <div class="content-padding">

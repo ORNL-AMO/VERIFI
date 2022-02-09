@@ -7,6 +7,7 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
 import { ConvertMeterDataService } from 'src/app/shared/helper-services/convert-meter-data.service';
 import * as _ from 'lodash';
 import { AnalysisCalculationsHelperService } from './analysis-calculations-helper.service';
+import { AnnualRegressionSummary, MonthlyRegressionSummary, RegressionSummaryData } from 'src/app/models/analysis';
 
 @Injectable({
   providedIn: 'root'
@@ -298,41 +299,4 @@ export class RegressionAnalysisService {
     }
     return annualRegressionSummary;
   }
-}
-
-export interface MonthlyRegressionSummary {
-  predictorVariables: Array<PredictorData>,
-  modelYear: number,
-  regressionSummaryData: Array<RegressionSummaryData>
-}
-
-export interface RegressionSummaryData {
-  totalEnergy: number,
-  predictorUsage: Array<number>,
-  modeledEnergy: number,
-  date: Date,
-  monthlySavings: number,
-  yearToDateImprovementOverBaseline: number,
-  yearToDateImprovementOverFiscalYear: number,
-  rollingYearImprovement: number,
-  group: AnalysisGroup,
-  fiscalYear: number,
-  yearToDateSEnPI: number,
-  rollingSEnPI: number,
-  monthlyIncrementalImprovement: number,
-  rolling12MonthImprovement: number
-}
-
-
-export interface AnnualRegressionSummary {
-  year: number,
-  energyUse: number,
-  annualEnergySavings: number,
-  totalEnergySavings: number,
-  modeledEnergyUse: number,
-  annualModeledEnergySavings: number,
-  totalModeledEnergySavings: number,
-  SEnPI: number,
-  cumulativeSavings: number,
-  annualSavings: number
 }

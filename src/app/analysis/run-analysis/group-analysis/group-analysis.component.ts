@@ -60,6 +60,10 @@ export class GroupAnalysisComponent implements OnInit {
         this.label = groupName + ' Monthly Regression Analysis'
       } else if (url.includes('annual-regression-analysis')) {
         this.label = groupName + ' Annual Regression Analysis'
+      } else if (url.includes('annual-absolute-energy-consumption')) {
+        this.label = groupName + ' Annual Absolute Analysis'
+      } else if (url.includes('monthly-absolute-energy-consumption')) {
+        this.label = groupName + ' Monthly Absolute Analysis'
       } else {
         this.label = groupName + ' Setup'
       }
