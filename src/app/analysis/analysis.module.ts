@@ -29,6 +29,8 @@ import { AnnualRegressionAnalysisTableComponent } from './run-analysis/group-ana
 import { AnnualRegressionAnalysisGraphComponent } from './run-analysis/group-analysis/regression/annual-regression-analysis/annual-regression-analysis-graph/annual-regression-analysis-graph.component';
 import { MonthlyAbsoluteEnergyConsumptionComponent } from './run-analysis/group-analysis/absolute-energy-consumption/monthly-absolute-energy-consumption/monthly-absolute-energy-consumption.component';
 import { AnnualAbsoluteEnergyConsumptionComponent } from './run-analysis/group-analysis/absolute-energy-consumption/annual-absolute-energy-consumption/annual-absolute-energy-consumption.component';
+import { MonthlyAbsoluteConsumptionTableComponent } from './run-analysis/group-analysis/absolute-energy-consumption/monthly-absolute-energy-consumption/monthly-absolute-consumption-table/monthly-absolute-consumption-table.component';
+import { MonthlyAbsoluteConsumptionGraphComponent } from './run-analysis/group-analysis/absolute-energy-consumption/monthly-absolute-energy-consumption/monthly-absolute-consumption-graph/monthly-absolute-consumption-graph.component';
 
 @NgModule({
   declarations: [
@@ -56,7 +58,9 @@ import { AnnualAbsoluteEnergyConsumptionComponent } from './run-analysis/group-a
     AnnualRegressionAnalysisTableComponent,
     AnnualRegressionAnalysisGraphComponent,
     MonthlyAbsoluteEnergyConsumptionComponent,
-    AnnualAbsoluteEnergyConsumptionComponent
+    AnnualAbsoluteEnergyConsumptionComponent,
+    MonthlyAbsoluteConsumptionTableComponent,
+    MonthlyAbsoluteConsumptionGraphComponent
   ],
   imports: [
     CommonModule,

@@ -19,10 +19,6 @@ tbody tr.use-and-consumption td{
     width: 25%;
 }
 
-.btn-group button{
-    border: solid 1px;
-}
-
 .btn-group, .btn-group-vertical {
     display: inline-block!important;
 }

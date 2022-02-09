@@ -14,7 +14,6 @@ import { AnalysisGroup, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb'
 export class MonthlyRegressionAnalysisComponent implements OnInit {
 
   dataDisplay: 'table' | 'graph';
-  groupHasError: boolean = false;
   analysisItem: IdbAnalysisItem;
   group: AnalysisGroup;
   monthlyRegressionSummary: MonthlyRegressionSummary;

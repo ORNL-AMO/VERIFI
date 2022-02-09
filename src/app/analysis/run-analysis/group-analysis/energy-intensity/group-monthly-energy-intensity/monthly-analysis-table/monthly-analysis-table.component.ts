@@ -1,4 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { AnalysisService } from 'src/app/analysis/analysis.service';
 import { MonthlyGroupSummary } from 'src/app/models/analysis';
 import { AnalysisGroup, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 
@@ -20,9 +21,9 @@ export class MonthlyAnalysisTableComponent implements OnInit {
   facility: IdbFacility;
 
   orderDataField: string = 'date';
-  orderByDirection: string = 'asc';
+  orderByDirection: 'asc' | 'desc' = 'asc';
   currentPageNumber: number = 1;
-  constructor() { }
+  constructor(private analysisService: AnalysisService) { }
 
   ngOnInit(): void {
   }
@@ -40,21 +41,6 @@ export class MonthlyAnalysisTableComponent implements OnInit {
   }
 
   checkFiscalYearEnd(date: Date): boolean {
-    if (this.orderDataField == 'date' || this.orderDataField == 'fiscalYear') {
-      if (this.facility.fiscalYear == 'calendarYear' && (this.orderByDirection == 'asc' || this.orderDataField == 'fiscalYear')) {
-        return date.getUTCMonth() == 0;
-      } else if (this.facility.fiscalYear == 'calendarYear' && this.orderByDirection == 'desc') {
-        return date.getUTCMonth() == 11;
-      } else {
-        if (date.getUTCMonth() == this.facility.fiscalYearMonth && this.orderByDirection == 'asc') {
-          return true;
-        } else if (date.getUTCMonth() + 1 == this.facility.fiscalYearMonth && this.orderByDirection == 'desc') {
-          return true;
-        } else {
-          return false;
-        }
-      }
-    }
-    return false;
+    return this.analysisService.checkFiscalYearEnd(date, this.facility, this.orderDataField, this.orderByDirection);
   }
 }

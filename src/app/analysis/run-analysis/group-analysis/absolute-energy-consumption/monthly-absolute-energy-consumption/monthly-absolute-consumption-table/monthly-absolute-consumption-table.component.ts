@@ -1,16 +1,16 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { AnalysisService } from 'src/app/analysis/analysis.service';
-import { MonthlyRegressionSummary } from 'src/app/models/analysis';
+import { MonthlyAbsoluteSummaryData } from 'src/app/analysis/calculations/absolute-energy-consumption.service';
 import { IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 
 @Component({
-  selector: 'app-monthly-regression-analysis-table',
-  templateUrl: './monthly-regression-analysis-table.component.html',
-  styleUrls: ['./monthly-regression-analysis-table.component.css']
+  selector: 'app-monthly-absolute-consumption-table',
+  templateUrl: './monthly-absolute-consumption-table.component.html',
+  styleUrls: ['./monthly-absolute-consumption-table.component.css']
 })
-export class MonthlyRegressionAnalysisTableComponent implements OnInit {
+export class MonthlyAbsoluteConsumptionTableComponent implements OnInit {
   @Input()
-  monthlyRegressionSummary: MonthlyRegressionSummary;
+  monthlyAbsoluteSummary: Array<MonthlyAbsoluteSummaryData>;
   @Input()
   analysisItem: IdbAnalysisItem;
   @Input()
@@ -21,18 +21,10 @@ export class MonthlyRegressionAnalysisTableComponent implements OnInit {
   orderDataField: string = 'date';
   orderByDirection:  'asc' | 'desc' = 'asc';
   currentPageNumber: number = 1;
+
   constructor(private analysisService: AnalysisService) { }
 
   ngOnInit(): void {
-    this.monthlyRegressionSummary.regressionSummaryData.forEach(data => {
-      let dataIndex: number = 0;
-      this.monthlyRegressionSummary.predictorVariables.forEach(variable => {
-        if (variable.productionInAnalysis) {
-          data[variable.name] = data.predictorUsage[dataIndex];
-          dataIndex++;
-        }
-      })
-    })
   }
 
 
@@ -51,5 +43,4 @@ export class MonthlyRegressionAnalysisTableComponent implements OnInit {
   checkFiscalYearEnd(date: Date): boolean {
     return this.analysisService.checkFiscalYearEnd(date, this.facility, this.orderDataField, this.orderByDirection);
   }
-
 }
