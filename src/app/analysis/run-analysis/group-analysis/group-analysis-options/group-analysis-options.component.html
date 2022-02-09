@@ -3,9 +3,9 @@
         <div class="form-group">
             <label class="bold">Analysis Type </label>
             <div>
-                <input type="radio" class="rowToggle" name="analysisType" [value]="'absoluteEnergyIntensity'"
-                    id="absoluteEnergyIntensity" [(ngModel)]="group.analysisType" (change)="setAnalysisType()" disabled>
-                <label class="checkbox" for="absoluteEnergyIntensity">Absolute Energy Consumption</label>
+                <input type="radio" class="rowToggle" name="analysisType" [value]="'absoluteEnergyConsumption'"
+                    id="absoluteEnergyConsumption" [(ngModel)]="group.analysisType" (change)="setAnalysisType()">
+                <label class="checkbox" for="absoluteEnergyConsumption">Absolute Energy Consumption</label>
 
                 <input type="radio" class="rowToggle" name="analysisType" [value]="'energyIntensity'"
                     id="energyIntensity" [(ngModel)]="group.analysisType" (change)="setAnalysisType()">

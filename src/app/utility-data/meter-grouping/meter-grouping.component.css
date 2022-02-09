@@ -278,9 +278,6 @@ meter::-webkit-meter-even-less-good-value {
 span.date-font-size{
     letter-spacing: normal;
 }
-.btn-group button{
-    border: solid 1px;
-}
 
 .btn-group, .btn-group-vertical {
     display: inline-block!important;

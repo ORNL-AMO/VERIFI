@@ -30,12 +30,13 @@ import { RunAnalysisComponent } from './analysis/run-analysis/run-analysis.compo
 import { AnalysisSetupComponent } from './analysis/run-analysis/analysis-setup/analysis-setup.component';
 import { GroupAnalysisComponent } from './analysis/run-analysis/group-analysis/group-analysis.component';
 import { GroupAnalysisOptionsComponent } from './analysis/run-analysis/group-analysis/group-analysis-options/group-analysis-options.component';
-import { GroupAnnualEnergyIntensityComponent } from './analysis/run-analysis/group-analysis/group-annual-energy-intensity/group-annual-energy-intensity.component';
-import { GroupMonthlyEnergyIntensityComponent } from './analysis/run-analysis/group-analysis/group-monthly-energy-intensity/group-monthly-energy-intensity.component';
+import { GroupAnnualEnergyIntensityComponent } from './analysis/run-analysis/group-analysis/energy-intensity/group-annual-energy-intensity/group-annual-energy-intensity.component';
+import { GroupMonthlyEnergyIntensityComponent } from './analysis/run-analysis/group-analysis/energy-intensity/group-monthly-energy-intensity/group-monthly-energy-intensity.component';
 import { FacilityAnalysisComponent } from './analysis/run-analysis/facility-analysis/facility-analysis.component';
-import { RegressionModelSelectionComponent } from './analysis/run-analysis/group-analysis/regression-model-selection/regression-model-selection.component';
-import { MonthlyRegressionAnalysisComponent } from './analysis/run-analysis/group-analysis/monthly-regression-analysis/monthly-regression-analysis.component';
-import { AnnualRegressionAnalysisComponent } from './analysis/run-analysis/group-analysis/annual-regression-analysis/annual-regression-analysis.component';
+import { RegressionModelSelectionComponent } from './analysis/run-analysis/group-analysis/regression/regression-model-selection/regression-model-selection.component';
+import { MonthlyRegressionAnalysisComponent } from './analysis/run-analysis/group-analysis/regression/monthly-regression-analysis/monthly-regression-analysis.component';
+import { MonthlyAbsoluteEnergyConsumptionComponent } from './analysis/run-analysis/group-analysis/monthly-absolute-energy-consumption/monthly-absolute-energy-consumption.component';
+import { AnnualAnalysisSummaryComponent } from './analysis/run-analysis/group-analysis/annual-analysis-summary/annual-analysis-summary.component';
 
 const routes: Routes = [
   {
@@ -133,7 +134,8 @@ const routes: Routes = [
               { path: 'monthly-energy-intensity', component: GroupMonthlyEnergyIntensityComponent },
               { path: 'regression-model-selection', component: RegressionModelSelectionComponent },
               { path: 'monthly-regression-analysis', component: MonthlyRegressionAnalysisComponent },
-              { path: 'annual-regression-analysis', component: AnnualRegressionAnalysisComponent }
+              { path: 'annual-analysis', component: AnnualAnalysisSummaryComponent },
+              { path: 'monthly-absolute-energy-consumption', component: MonthlyAbsoluteEnergyConsumptionComponent },
             ]
           },
           {

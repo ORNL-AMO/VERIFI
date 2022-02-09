@@ -129,3 +129,7 @@
     border-color: #ff6000 !important;
   }
   
+  
+.btn-group button{
+  border: solid 1px;
+}

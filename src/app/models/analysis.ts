@@ -1,4 +1,4 @@
-import { AnalysisGroup } from "./idb";
+import { AnalysisGroup, PredictorData } from "./idb";
 
 export interface AnnualGroupSummary {
   year: number,
@@ -58,4 +58,42 @@ export interface FacilityGroupTotals {
   // totalProduction: number,
   totalEnergySavings: number,
   annualEnergySavings: number
+}
+
+
+export interface MonthlyRegressionSummary {
+  predictorVariables: Array<PredictorData>,
+  modelYear: number,
+  regressionSummaryData: Array<MonthlyAnalysisSummaryData>
+}
+
+export interface MonthlyAnalysisSummaryData {
+  totalEnergy: number,
+  predictorUsage?: Array<number>,
+  modeledEnergy: number,
+  date: Date,
+  monthlySavings: number,
+  yearToDateImprovementOverBaseline: number,
+  yearToDateImprovementOverFiscalYear: number,
+  rollingYearImprovement: number,
+  group: AnalysisGroup,
+  fiscalYear: number,
+  yearToDateSEnPI: number,
+  rollingSEnPI: number,
+  monthlyIncrementalImprovement: number,
+  rolling12MonthImprovement: number
+}
+
+
+export interface AnnualAnalysisSummary {
+  year: number,
+  energyUse: number,
+  annualEnergySavings: number,
+  totalEnergySavings: number,
+  modeledEnergyUse: number,
+  annualModeledEnergySavings: number,
+  totalModeledEnergySavings: number,
+  SEnPI: number,
+  cumulativeSavings: number,
+  annualSavings: number
 }

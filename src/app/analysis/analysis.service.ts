@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { LocalStorageService } from 'ngx-webstorage';
 import { BehaviorSubject } from 'rxjs';
-import { AnalysisGroup, PredictorData } from '../models/idb';
+import { AnalysisGroup, IdbFacility, PredictorData } from '../models/idb';
 
 @Injectable({
   providedIn: 'root'
@@ -26,26 +26,28 @@ export class AnalysisService {
   }
 
   checkGroupHasError(group: AnalysisGroup): boolean {
-    let hasProductionVariable: boolean = false;
-    group.predictorVariables.forEach(variable => {
-      if (variable.productionInAnalysis) {
-        hasProductionVariable = true;
-      }
-    });
-    if (!hasProductionVariable) {
-      return true;
-    }
-    if (group.analysisType == 'regression') {
-      if (!this.checkValueValid(group.regressionConstant)) {
+    if (group.analysisType != 'absoluteEnergyConsumption') {
+      let hasProductionVariable: boolean = false;
+      group.predictorVariables.forEach(variable => {
+        if (variable.productionInAnalysis) {
+          hasProductionVariable = true;
+        }
+      });
+      if (!hasProductionVariable) {
         return true;
       }
-      if (!this.checkValueValid(group.regressionModelYear)) {
-        return true;
-      }
-      for (let index = 0; index < group.predictorVariables.length; index++) {
-        let variable: PredictorData = group.predictorVariables[index];
-        if (variable.productionInAnalysis && !this.checkValueValid(variable.regressionCoefficient)) {
+      if (group.analysisType == 'regression') {
+        if (!this.checkValueValid(group.regressionConstant)) {
           return true;
+        }
+        if (!this.checkValueValid(group.regressionModelYear)) {
+          return true;
+        }
+        for (let index = 0; index < group.predictorVariables.length; index++) {
+          let variable: PredictorData = group.predictorVariables[index];
+          if (variable.productionInAnalysis && !this.checkValueValid(variable.regressionCoefficient)) {
+            return true;
+          }
         }
       }
     }
@@ -55,4 +57,25 @@ export class AnalysisService {
   checkValueValid(value: number): boolean {
     return (value != undefined) && (value != null) && (isNaN(value) == false);
   }
+
+  checkFiscalYearEnd(date: Date, facility: IdbFacility, orderDataField: string, orderByDirection: 'asc' | 'desc'): boolean {
+    if (orderDataField == 'date' || orderDataField == 'fiscalYear') {
+      if (facility.fiscalYear == 'calendarYear' && (orderByDirection == 'asc' || orderDataField == 'fiscalYear')) {
+        return date.getUTCMonth() == 0;
+      } else if (facility.fiscalYear == 'calendarYear' && orderByDirection == 'desc') {
+        return date.getUTCMonth() == 11;
+      } else {
+        if (date.getUTCMonth() == facility.fiscalYearMonth && orderByDirection == 'asc') {
+          return true;
+        } else if (date.getUTCMonth() + 1 == facility.fiscalYearMonth && orderByDirection == 'desc') {
+          return true;
+        } else {
+          return false;
+        }
+      }
+    }
+    return false;
+  }
+
+
 }
