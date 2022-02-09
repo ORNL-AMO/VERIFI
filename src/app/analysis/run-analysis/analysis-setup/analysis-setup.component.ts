@@ -2,10 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { Month, Months } from 'src/app/shared/form-data/months';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbAnalysisItem, IdbFacility, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 import { EnergyUnitOptions, UnitOption } from 'src/app/shared/unitOptions';
 import * as _ from 'lodash';
+import { AnalysisCalculationsHelperService } from '../../calculations/analysis-calculations-helper.service';
 @Component({
   selector: 'app-analysis-setup',
   templateUrl: './analysis-setup.component.html',
@@ -21,31 +21,17 @@ export class AnalysisSetupComponent implements OnInit {
   analysisItem: IdbAnalysisItem;
   yearOptions: Array<number>;
   constructor(private facilityDbService: FacilitydbService, private analysisDbService: AnalysisDbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService) { }
+    private analysisCalculationsHelperService: AnalysisCalculationsHelperService) { }
 
   ngOnInit(): void {
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     this.facility = this.facilityDbService.selectedFacility.getValue();
     this.energyUnit = this.facility.energyUnit;
-    this.setYearOptions();
+    this.yearOptions = this.analysisCalculationsHelperService.getYearOptions();
   }
 
   saveItem() {
     this.analysisDbService.update(this.analysisItem);
     this.analysisDbService.selectedAnalysisItem.next(this.analysisItem);
-  }
-
-
-  setYearOptions() {
-    let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
-    let orderedMeterData: Array<IdbUtilityMeterData> = _.orderBy(accountMeterData, (data) => { return new Date(data.readDate) });
-    let firstBill: IdbUtilityMeterData = orderedMeterData[0];
-    let lastBill: IdbUtilityMeterData = orderedMeterData[orderedMeterData.length - 1];
-    let yearStart: number = new Date(firstBill.readDate).getUTCFullYear();
-    let yearEnd: number = new Date(lastBill.readDate).getUTCFullYear();
-    this.yearOptions = new Array();
-    for (let i = yearStart; i <= yearEnd; i++) {
-      this.yearOptions.push(i);
-    }
   }
 }

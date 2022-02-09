@@ -189,7 +189,8 @@ export interface PredictorData {
     id: string,
     importWizardName?: string,
     production?: boolean,
-    productionInAnalysis?: boolean
+    productionInAnalysis?: boolean,
+    regressionCoefficient?: number
 }
 
 
@@ -221,7 +222,10 @@ export interface AnalysisGroup {
     idbGroupId: number,
     analysisType: AnalysisType,
     predictorVariables: Array<PredictorData>,
-    productionUnits: string
+    productionUnits: string,
+    regressionModelYear: number,
+    regressionConstant: number,
+    groupHasError: boolean
 }
 
 export type AnalysisType = 'absoluteEnergyIntensity' | 'energyIntensity' | 'modifiedEnergyIntensity' | 'regression';

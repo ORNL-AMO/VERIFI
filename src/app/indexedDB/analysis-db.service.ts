@@ -136,7 +136,10 @@ export class AnalysisDbService {
         idbGroupId: group.id,
         analysisType: 'energyIntensity',
         predictorVariables: JSON.parse(JSON.stringify(predictorVariables)),
-        productionUnits: this.getUnits(predictorVariables)
+        productionUnits: this.getUnits(predictorVariables),
+        regressionModelYear: undefined,
+        regressionConstant: undefined,
+        groupHasError: false,
       });
     });
     return {
@@ -231,8 +234,10 @@ export class AnalysisDbService {
         idbGroupId: groupId,
         analysisType: 'energyIntensity',
         predictorVariables: predictorVariables,
-        productionUnits: this.getUnits(predictorVariables)
-
+        productionUnits: this.getUnits(predictorVariables),
+        regressionConstant: undefined,
+        regressionModelYear: undefined,
+        groupHasError: false,
       });
       this.update(item);
     });

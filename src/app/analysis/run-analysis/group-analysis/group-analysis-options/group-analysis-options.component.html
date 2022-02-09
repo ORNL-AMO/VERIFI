@@ -1,50 +1,123 @@
-<div class="row" *ngIf="!groupHasError">
+<div class="row" *ngIf="!missingGroupData">
     <div class="col-md-6 col-sm-12">
         <div class="form-group">
             <label class="bold">Analysis Type </label>
             <div>
                 <input type="radio" class="rowToggle" name="analysisType" [value]="'absoluteEnergyIntensity'"
-                    id="absoluteEnergyIntensity" [(ngModel)]="group.analysisType" (change)="saveItem()" disabled>
+                    id="absoluteEnergyIntensity" [(ngModel)]="group.analysisType" (change)="setAnalysisType()" disabled>
                 <label class="checkbox" for="absoluteEnergyIntensity">Absolute Energy Consumption</label>
 
                 <input type="radio" class="rowToggle" name="analysisType" [value]="'energyIntensity'"
-                    id="energyIntensity" [(ngModel)]="group.analysisType" (change)="saveItem()">
+                    id="energyIntensity" [(ngModel)]="group.analysisType" (change)="setAnalysisType()">
                 <label class="checkbox" for="energyIntensity">Energy Intensity</label>
 
                 <input type="radio" class="rowToggle" name="analysisType" [value]="'modifiedEnergyIntensity'"
-                    id="modifiedEnergyIntensity" [(ngModel)]="group.analysisType" (change)="saveItem()" disabled>
+                    id="modifiedEnergyIntensity" [(ngModel)]="group.analysisType" (change)="setAnalysisType()" disabled>
                 <label class="checkbox" for="modifiedEnergyIntensity">Modified Energy Intensity</label>
 
                 <input type="radio" class="rowToggle" name="analysisType" [value]="'regression'" id="regression"
-                    [(ngModel)]="group.analysisType" (change)="saveItem()" disabled>
+                    [(ngModel)]="group.analysisType" (change)="setAnalysisType()">
                 <label class="checkbox" for="regression">Regression</label>
             </div>
         </div>
     </div>
-    <div class="col-md-6 col-sm-12">
-        <label class="bold">Production Variables</label>
-        <div class="form-group">
-            <span *ngFor="let predictor of group.predictorVariables">
-                <label class="checkbox-label" *ngIf="predictor.production" for="{{'predictor_'+predictor.id}}">
+    <!--energy intensity-->
+    <div class="col-md-6 col-sm-12" *ngIf="group.analysisType == 'energyIntensity'">
+        <div class="row bold mb-2">
+            <div class="col-4">
+                Production Variables
+            </div>
+            <div class="col-4">
+                Use for Analysis
+            </div>
+        </div>
+        <div class="row" *ngFor="let predictor of group.predictorVariables">
+            <div class="col-4" *ngIf="predictor.production">
+                {{predictor.name}}<span *ngIf="predictor.unit">({{predictor.unit}})</span>
+            </div>
+            <div class="col-4" *ngIf="predictor.production">
+                <label class="switch" for="{{'predictor_'+predictor.id}}">
                     <input class="checkbox" type="checkbox" id="{{'predictor_'+predictor.id}}"
                         name="{{'predictor_'+predictor.id}}" [(ngModel)]="predictor.productionInAnalysis"
-                        (change)="setProductionUnits()">{{predictor.name}} <span
-                        *ngIf="predictor.unit">({{predictor.unit}})</span>
+                        (change)="saveItem()">
+                    <span class="slider round"></span>
                 </label>
-            </span>
+            </div>
         </div>
-        <div class="form-group">
-            <label class="w-50 bold">Production Units</label>
-            <input class="w-50" type="text" name="productionUnits" [(ngModel)]="group.productionUnits"
-                id="productionUnits" disabled>
+        <div class="row">
+            <div class="col-12">
+                <div class="form-group">
+                    <label class="w-50 bold">Production Units</label>
+                    <input class="w-50" type="text" name="productionUnits" [(ngModel)]="group.productionUnits"
+                        id="productionUnits" disabled>
+                </div>
+                <div class="alert alert-warning" *ngIf="showUnitsWarning">
+                    Make sure the production variables you have selected have the same units.
+                </div>
+            </div>
         </div>
-        <div class="alert alert-warning" *ngIf="showUnitsWarning">
-            Make sure the production variables you have selected have the same units.
+    </div>
+
+    <!--regression-->
+    <div class="col-md-6 col-sm-12" *ngIf="group.analysisType == 'regression'">
+        <div class="row bold mb-2">
+            <div class="col-4">
+                Predictor Variables
+            </div>
+            <div class="col-4">
+                Use for Regression
+            </div>
+            <div class="col-4">
+                Regression Coefficient
+            </div>
+        </div>
+        <div class="row" *ngFor="let predictor of group.predictorVariables">
+            <div class="col-4">
+                {{predictor.name}}<span *ngIf="predictor.unit">({{predictor.unit}})</span>
+            </div>
+            <div class="col-4">
+                <label class="switch" for="{{'predictor_'+predictor.id}}">
+                    <input class="checkbox" type="checkbox" id="{{'predictor_'+predictor.id}}"
+                        name="{{'predictor_'+predictor.id}}" [(ngModel)]="predictor.productionInAnalysis"
+                        (change)="saveItem()">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+            <div class="col-4">
+                <input class="form-control" *ngIf="predictor.productionInAnalysis" type="number" step="any"
+                    id="{{'regressionCoefficient_'+predictor.id}}" name="{{'regressionCoefficient_'+predictor.id}}"
+                    [(ngModel)]="predictor.regressionCoefficient" required (input)="saveItem()">
+                <span class="bold" *ngIf="!predictor.productionInAnalysis">&mdash;</span>
+            </div>
+        </div>
+        <div class="row mb-2">
+            <div class="col-6">
+                <label for="regressionConstant">
+                    Regression Constant
+                </label>
+            </div>
+            <div class="col-6">
+                <input class="form-control" type="number" step="any" id="regressionConstant" name="regressionConstant"
+                    [(ngModel)]="group.regressionConstant" required (input)="saveItem()">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-6">
+                <label for="regressionModelYear">
+                    Model Year
+                </label>
+            </div>
+            <div class="col-6">
+                <select required class="form-control" id="regressionModelYear" id="regressionModelYear"
+                    [(ngModel)]="group.regressionModelYear" (change)="saveItem()">
+                    <option *ngFor="let year of yearOptions" [ngValue]="year">{{year}}</option>
+                </select>
+            </div>
         </div>
     </div>
 </div>
 
-<div class="p-4" *ngIf="groupHasError">
+<div class="p-4" *ngIf="missingGroupData">
     <div class="alert alert-danger text-center">
         No meters found for this group. Analysis cannot be conducted on this group! Go to the <a
             [routerLink]="'/utility/meter-groups'">Meter Grouping Page</a> to add

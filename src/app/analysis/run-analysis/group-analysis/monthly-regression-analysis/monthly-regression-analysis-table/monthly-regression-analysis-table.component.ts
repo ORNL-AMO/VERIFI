@@ -1,21 +1,19 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { MonthlyGroupSummary } from 'src/app/models/analysis';
-import { AnalysisGroup, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
+import { MonthlyRegressionSummary } from 'src/app/analysis/calculations/regression-analysis.service';
+import { IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 
 @Component({
-  selector: 'app-monthly-analysis-table',
-  templateUrl: './monthly-analysis-table.component.html',
-  styleUrls: ['./monthly-analysis-table.component.css']
+  selector: 'app-monthly-regression-analysis-table',
+  templateUrl: './monthly-regression-analysis-table.component.html',
+  styleUrls: ['./monthly-regression-analysis-table.component.css']
 })
-export class MonthlyAnalysisTableComponent implements OnInit {
+export class MonthlyRegressionAnalysisTableComponent implements OnInit {
   @Input()
-  monthlyGroupSummaries: Array<MonthlyGroupSummary>;
-  @Input()
-  itemsPerPage: number;
+  monthlyRegressionSummary: MonthlyRegressionSummary;
   @Input()
   analysisItem: IdbAnalysisItem;
   @Input()
-  group: AnalysisGroup;
+  itemsPerPage: number;
   @Input()
   facility: IdbFacility;
 
@@ -25,7 +23,17 @@ export class MonthlyAnalysisTableComponent implements OnInit {
   constructor() { }
 
   ngOnInit(): void {
+    this.monthlyRegressionSummary.regressionSummaryData.forEach(data => {
+      let dataIndex: number = 0;
+      this.monthlyRegressionSummary.predictorVariables.forEach(variable => {
+        if (variable.productionInAnalysis) {
+          data[variable.name] = data.predictorUsage[dataIndex];
+          dataIndex++;
+        }
+      })
+    })
   }
+
 
   setOrderDataField(str: string) {
     if (str == this.orderDataField) {
@@ -57,4 +65,5 @@ export class MonthlyAnalysisTableComponent implements OnInit {
     }
     return false;
   }
+
 }

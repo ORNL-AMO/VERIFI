@@ -5,6 +5,7 @@ import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { AnalysisGroup, IdbAnalysisItem, IdbUtilityMeter } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
+import { AnalysisCalculationsHelperService } from 'src/app/analysis/calculations/analysis-calculations-helper.service';
 
 @Component({
   selector: 'app-group-analysis-options',
@@ -17,10 +18,13 @@ export class GroupAnalysisOptionsComponent implements OnInit {
   selectedGroupSub: Subscription;
   showUnitsWarning: boolean;
   groupHasError: boolean;
+  yearOptions: Array<number>;
+  missingGroupData: boolean;
   constructor(private analysisService: AnalysisService, private analysisDbService: AnalysisDbService,
-    private utilityMeterDbService: UtilityMeterdbService) { }
+    private utilityMeterDbService: UtilityMeterdbService, private analysisCalculationsHelperService: AnalysisCalculationsHelperService) { }
 
   ngOnInit(): void {
+    this.yearOptions = this.analysisCalculationsHelperService.getYearOptions();
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(group => {
       this.group = group;
       this.setGroupError();
@@ -35,6 +39,7 @@ export class GroupAnalysisOptionsComponent implements OnInit {
   saveItem() {
     let analysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     let groupIndex: number = analysisItem.groups.findIndex(group => { return group.idbGroupId == this.group.idbGroupId });
+    this.group.groupHasError = this.analysisService.checkGroupHasError(this.group);
     analysisItem.groups[groupIndex] = this.group;
     this.analysisDbService.update(analysisItem);
     this.analysisDbService.setAccountAnalysisItems();
@@ -53,6 +58,17 @@ export class GroupAnalysisOptionsComponent implements OnInit {
 
   setGroupError() {
     let groupMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getGroupMetersByGroupId(this.group.idbGroupId);
-    this.groupHasError = (groupMeters.length == 0);
+    this.missingGroupData = (groupMeters.length == 0);
+  }
+
+  setAnalysisType(){
+    if(this.group.analysisType != 'regression'){
+      this.group.predictorVariables.forEach(variable => {
+        if(!variable.production){
+          variable.productionInAnalysis = false;
+        }
+      });
+    }
+    this.saveItem();
   }
 }

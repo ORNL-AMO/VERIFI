@@ -3,7 +3,7 @@ import { PlotlyService } from 'angular-plotly.js';
 import { IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 import { Month, Months } from 'src/app/shared/form-data/months';
 import { MonthlyGroupSummary } from 'src/app/models/analysis';
-import { EnergyIntensityService } from 'src/app/analysis/calculations/energy-intensity.service';
+import { AnalysisCalculationsHelperService } from 'src/app/analysis/calculations/analysis-calculations-helper.service';
 
 @Component({
   selector: 'app-monthly-analysis-graph',
@@ -26,7 +26,8 @@ export class MonthlyAnalysisGraphComponent implements OnInit {
     year: number,
     summaries: Array<MonthlyGroupSummary>
   }>;
-  constructor(private plotlyService: PlotlyService, private energyIntensityService: EnergyIntensityService) { }
+  constructor(private plotlyService: PlotlyService,
+    private analysisCalculationsHelperService: AnalysisCalculationsHelperService) { }
 
   ngOnInit(): void {
     this.yearData = this.getYearData();
@@ -114,7 +115,7 @@ export class MonthlyAnalysisGraphComponent implements OnInit {
       year: number,
       summaries: Array<MonthlyGroupSummary>
     }> = new Array();
-    let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = this.energyIntensityService.getMonthlyStartAndEndDate(this.facility, this.analysisItem);
+    let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = this.analysisCalculationsHelperService.getMonthlyStartAndEndDate(this.facility, this.analysisItem);
     let startDate: Date = monthlyStartAndEndDate.baselineDate;
     let endDate: Date = monthlyStartAndEndDate.endDate;
     while (startDate < endDate) {

@@ -7,6 +7,7 @@ import * as _ from 'lodash';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { AnnualGroupSummary, FacilityGroupSummary, FacilityGroupTotals, FacilityYearGroupSummary, MonthlyGroupSummary } from 'src/app/models/analysis';
 import { ConvertMeterDataService } from 'src/app/shared/helper-services/convert-meter-data.service';
+import { AnalysisCalculationsHelperService } from './analysis-calculations-helper.service';
 
 @Injectable({
   providedIn: 'root'
@@ -16,7 +17,8 @@ export class EnergyIntensityService {
   constructor(private calendarizationService: CalanderizationService,
     private utilityMeterDbService: UtilityMeterdbService,
     private predictorDbService: PredictordbService,
-    private convertMeterDataService: ConvertMeterDataService) { }
+    private convertMeterDataService: ConvertMeterDataService,
+    private analysisCalculationsHelperService: AnalysisCalculationsHelperService) { }
 
   calculateAnnualGroupSummaries(analysisItem: IdbAnalysisItem, selectedGroup: AnalysisGroup, facility: IdbFacility): Array<AnnualGroupSummary> {
     let annualGroupSummaries: Array<AnnualGroupSummary> = new Array();
@@ -52,9 +54,9 @@ export class EnergyIntensityService {
 
 
     for (let summaryYear: number = baselineYear; summaryYear <= reportYear; summaryYear++) {
-      let summaryYearData: Array<MonthlyData> = this.filterYearMeterData(allMeterData, summaryYear, facility);
+      let summaryYearData: Array<MonthlyData> = this.analysisCalculationsHelperService.filterYearMeterData(allMeterData, summaryYear, facility);
       let totalEnergyUse: number = _.sumBy(summaryYearData, 'energyUse');
-      let summaryYearPredictors: Array<IdbPredictorEntry> = this.filterYearPredictorData(facilityPredictorData, summaryYear, facility);
+      let summaryYearPredictors: Array<IdbPredictorEntry> = this.analysisCalculationsHelperService.filterYearPredictorData(facilityPredictorData, summaryYear, facility);
 
       let predictorData: Array<PredictorData> = summaryYearPredictors.flatMap(yearPredictor => { return yearPredictor.predictors });
       let productionPredictors: Array<PredictorData> = predictorData.filter(data => { return productionPredictorIds.includes(data.id) });
@@ -97,35 +99,7 @@ export class EnergyIntensityService {
     return annualGroupSummaries;
   }
 
-  filterYearPredictorData(predictorData: Array<IdbPredictorEntry>, year: number, facility: IdbFacility): Array<IdbPredictorEntry> {
-    if (facility.fiscalYear == 'calendarYear') {
-      return predictorData.filter(predictorData => {
-        return new Date(predictorData.date).getUTCFullYear() == year;
-      });
-    } else {
-      let startDate: Date = new Date(year, facility.fiscalYearMonth, 1)
-      let endDate: Date = new Date(year + 1, facility.fiscalYearMonth, 1)
-      return predictorData.filter(predictorDataItem => {
-        let predictorItemDate: Date = new Date(predictorDataItem.date);
-        return predictorItemDate >= startDate && predictorItemDate < endDate;
-      });
-    }
-  }
-
-  filterYearMeterData(meterData: Array<MonthlyData>, year: number, facility: IdbFacility): Array<MonthlyData> {
-    if (facility.fiscalYear == 'calendarYear') {
-      return meterData.filter(meterDataItem => {
-        return new Date(meterDataItem.date).getUTCFullYear() == year;
-      });
-    } else {
-      let startDate: Date = new Date(year, facility.fiscalYearMonth, 1)
-      let endDate: Date = new Date(year + 1, facility.fiscalYearMonth, 1)
-      return meterData.filter(meterDataItem => {
-        let meterItemDate: Date = new Date(meterDataItem.date);
-        return meterItemDate >= startDate && meterItemDate < endDate;
-      });
-    }
-  }
+ 
 
 
 
@@ -152,7 +126,7 @@ export class EnergyIntensityService {
 
 
 
-    let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = this.getMonthlyStartAndEndDate(facility, analysisItem);
+    let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = this.analysisCalculationsHelperService.getMonthlyStartAndEndDate(facility, analysisItem);
     let baselineDate: Date = monthlyStartAndEndDate.baselineDate;
     let endDate: Date = monthlyStartAndEndDate.endDate;
 
@@ -166,8 +140,8 @@ export class EnergyIntensityService {
       let productionPredictors: Array<PredictorData> = predictorData.filter(data => { return productionPredictorIds.includes(data.id) });
 
       let monthMeterData: Array<MonthlyData> = allMeterData.filter(data => {
-        let predictorDate: Date = new Date(data.date);
-        return predictorDate.getUTCFullYear() == baselineDate.getUTCFullYear() && predictorDate.getUTCMonth() == baselineDate.getUTCMonth();
+        let meterDataDate: Date = new Date(data.date);
+        return meterDataDate.getUTCFullYear() == baselineDate.getUTCFullYear() && meterDataDate.getUTCMonth() == baselineDate.getUTCMonth();
       });
 
       let energyUse: number = _.sumBy(monthMeterData, 'energyUse');
@@ -178,7 +152,7 @@ export class EnergyIntensityService {
         energyUse: energyUse,
         production: production,
         energyIntensity: energyUse / production,
-        fiscalYear: this.getFiscalYear(new Date(baselineDate), facility)
+        fiscalYear: this.analysisCalculationsHelperService.getFiscalYear(new Date(baselineDate), facility)
       })
       let currentMonth: number = baselineDate.getUTCMonth()
       let nextMonth: number = currentMonth + 1;
@@ -186,28 +160,6 @@ export class EnergyIntensityService {
     }
     return monthlyGroupSummary;
   }
-
-  getMonthlyStartAndEndDate(facility: IdbFacility, analysisItem: IdbAnalysisItem): { baselineDate: Date, endDate: Date } {
-    let baselineDate: Date;
-    let endDate: Date;
-    if (facility.fiscalYear == 'calendarYear') {
-      baselineDate = new Date(facility.sustainabilityQuestions.energyReductionBaselineYear, 0, 1);
-      endDate = new Date(analysisItem.reportYear + 1, 0, 1);
-    } else {
-      if (facility.fiscalYearCalendarEnd) {
-        baselineDate = new Date(facility.sustainabilityQuestions.energyReductionBaselineYear - 1, facility.fiscalYearMonth);
-        endDate = new Date(analysisItem.reportYear, facility.fiscalYearMonth);
-      } else {
-        baselineDate = new Date(facility.sustainabilityQuestions.energyReductionBaselineYear, facility.fiscalYearMonth);
-        endDate = new Date(analysisItem.reportYear + 1, facility.fiscalYearMonth);
-      }
-    }
-    return {
-      baselineDate: baselineDate,
-      endDate: endDate
-    }
-  }
-
 
   calculateFacilitySummary(analysisItem: IdbAnalysisItem, facility: IdbFacility): Array<FacilityGroupSummary> {
     let baselineYear: number = facility.sustainabilityQuestions.energyReductionBaselineYear;
@@ -279,23 +231,5 @@ export class EnergyIntensityService {
     return totals;
   }
 
-  getFiscalYear(date: Date, facility: IdbFacility): number {
-    if (facility.fiscalYear == 'calendarYear') {
-      return date.getUTCFullYear();
-    } else {
-      if (facility.fiscalYearCalendarEnd) {
-        if (date.getUTCMonth() >= facility.fiscalYearMonth) {
-          return date.getUTCFullYear() + 1;
-        } else {
-          return date.getUTCFullYear();
-        }
-      } else {
-        if (date.getUTCMonth() >= facility.fiscalYearMonth) {
-          return date.getUTCFullYear();
-        } else {
-          return date.getUTCFullYear() - 1;
-        }
-      }
-    }
-  }
+ 
 }

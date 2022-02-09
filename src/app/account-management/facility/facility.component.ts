@@ -45,7 +45,7 @@ export class FacilityComponent implements OnInit {
   ngOnInit() {
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
       this.selectedFacility = facility;
-      if(!this.selectedFacility){
+      if (!this.selectedFacility) {
         this.router.navigateByUrl('/');
       }
     });
@@ -112,5 +112,9 @@ export class FacilityComponent implements OnInit {
   toggleHelpPanel() {
     let helpPanelOpen: boolean = this.helpPanelService.helpPanelOpen.getValue();
     this.helpPanelService.helpPanelOpen.next(!helpPanelOpen);
+  }
+
+  goHome() {
+    this.router.navigateByUrl('/home/facility-summary')
   }
 }

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { LocalStorageService } from 'ngx-webstorage';
 import { BehaviorSubject } from 'rxjs';
-import { AnalysisGroup } from '../models/idb';
+import { AnalysisGroup, PredictorData } from '../models/idb';
 
 @Injectable({
   providedIn: 'root'
@@ -23,5 +23,36 @@ export class AnalysisService {
         this.localStorageService.store('analysisDataDisplay', dataDisplay);
       }
     });
+  }
+
+  checkGroupHasError(group: AnalysisGroup): boolean {
+    let hasProductionVariable: boolean = false;
+    group.predictorVariables.forEach(variable => {
+      if (variable.productionInAnalysis) {
+        hasProductionVariable = true;
+      }
+    });
+    if (!hasProductionVariable) {
+      return true;
+    }
+    if (group.analysisType == 'regression') {
+      if (!this.checkValueValid(group.regressionConstant)) {
+        return true;
+      }
+      if (!this.checkValueValid(group.regressionModelYear)) {
+        return true;
+      }
+      for (let index = 0; index < group.predictorVariables.length; index++) {
+        let variable: PredictorData = group.predictorVariables[index];
+        if (variable.productionInAnalysis && !this.checkValueValid(variable.regressionCoefficient)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  checkValueValid(value: number): boolean {
+    return (value != undefined) && (value != null) && (isNaN(value) == false);
   }
 }
