@@ -4,13 +4,13 @@ import { AnnualAnalysisSummary } from 'src/app/models/analysis';
 import { IdbAnalysisItem } from 'src/app/models/idb';
 
 @Component({
-  selector: 'app-annual-regression-analysis-graph',
-  templateUrl: './annual-regression-analysis-graph.component.html',
-  styleUrls: ['./annual-regression-analysis-graph.component.css']
+  selector: 'app-annual-analysis-summary-graph',
+  templateUrl: './annual-analysis-summary-graph.component.html',
+  styleUrls: ['./annual-analysis-summary-graph.component.css']
 })
-export class AnnualRegressionAnalysisGraphComponent implements OnInit {
+export class AnnualAnalysisSummaryGraphComponent implements OnInit {
   @Input()
-  annualRegressionSummary: Array<AnnualAnalysisSummary>;
+  annualAnalysisSummary: Array<AnnualAnalysisSummary>;
   @Input()
   analysisItem: IdbAnalysisItem;
 
@@ -31,7 +31,7 @@ export class AnnualRegressionAnalysisGraphComponent implements OnInit {
     if (this.annualEnergyIntensityAnalysisGraph) {
       let traceData = new Array();
 
-      let summariesCopy: Array<AnnualAnalysisSummary> = JSON.parse(JSON.stringify(this.annualRegressionSummary));
+      let summariesCopy: Array<AnnualAnalysisSummary> = JSON.parse(JSON.stringify(this.annualAnalysisSummary));
       let barTrace = {
         x: summariesCopy.map(summary => { return summary.year }),
         y: summariesCopy.map(summary => { return summary.energyUse }),
@@ -94,7 +94,7 @@ export class AnnualRegressionAnalysisGraphComponent implements OnInit {
     if (this.percentImprovementAnalysisGraph) {
       let traceData = new Array();
 
-      let summariesCopy: Array<AnnualAnalysisSummary> = JSON.parse(JSON.stringify(this.annualRegressionSummary));
+      let summariesCopy: Array<AnnualAnalysisSummary> = JSON.parse(JSON.stringify(this.annualAnalysisSummary));
 
       let lineTrace = {
         x: summariesCopy.map(summary => { return summary.year }),
@@ -156,5 +156,4 @@ export class AnnualRegressionAnalysisGraphComponent implements OnInit {
 
     }
   }
-
 }

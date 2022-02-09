@@ -58,10 +58,12 @@ export class GroupAnalysisComponent implements OnInit {
         this.label = groupName + ' Monthly Analysis'
       } else if (url.includes('monthly-regression-analysis')) {
         this.label = groupName + ' Monthly Regression Analysis'
-      } else if (url.includes('annual-regression-analysis')) {
-        this.label = groupName + ' Annual Regression Analysis'
-      } else if (url.includes('annual-absolute-energy-consumption')) {
-        this.label = groupName + ' Annual Absolute Analysis'
+      } else if (url.includes('annual-analysis')) {
+        if (this.selectedGroup.analysisType == 'regression') {
+          this.label = groupName + ' Annual Regression Analysis'
+        } else if (this.selectedGroup.analysisType == 'absoluteEnergyConsumption') {
+          this.label = groupName + ' Annual Absolute Analysis'
+        }
       } else if (url.includes('monthly-absolute-energy-consumption')) {
         this.label = groupName + ' Monthly Absolute Analysis'
       } else {

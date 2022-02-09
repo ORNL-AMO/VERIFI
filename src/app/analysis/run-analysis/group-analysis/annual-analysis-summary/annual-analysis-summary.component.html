@@ -7,9 +7,9 @@
     </div>
 </div>
 
-<app-annual-analysis-summary-table *ngIf="dataDisplay == 'table'" [annualAnalysisSummary]="annualRegressionSummary"
+<app-annual-analysis-summary-table *ngIf="dataDisplay == 'table'" [annualAnalysisSummary]="annualAnalysisSummary"
     [analysisItem]="analysisItem">
 </app-annual-analysis-summary-table>
-<app-annual-regression-analysis-graph *ngIf="dataDisplay == 'graph'" [annualRegressionSummary]="annualRegressionSummary"
+<app-annual-analysis-summary-graph *ngIf="dataDisplay == 'graph'" [annualAnalysisSummary]="annualAnalysisSummary"
     [analysisItem]="analysisItem">
-</app-annual-regression-analysis-graph>
+</app-annual-analysis-summary-graph>

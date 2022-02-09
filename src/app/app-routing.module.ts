@@ -35,9 +35,8 @@ import { GroupMonthlyEnergyIntensityComponent } from './analysis/run-analysis/gr
 import { FacilityAnalysisComponent } from './analysis/run-analysis/facility-analysis/facility-analysis.component';
 import { RegressionModelSelectionComponent } from './analysis/run-analysis/group-analysis/regression/regression-model-selection/regression-model-selection.component';
 import { MonthlyRegressionAnalysisComponent } from './analysis/run-analysis/group-analysis/regression/monthly-regression-analysis/monthly-regression-analysis.component';
-import { AnnualRegressionAnalysisComponent } from './analysis/run-analysis/group-analysis/regression/annual-regression-analysis/annual-regression-analysis.component';
-import { MonthlyAbsoluteEnergyConsumptionComponent } from './analysis/run-analysis/group-analysis/absolute-energy-consumption/monthly-absolute-energy-consumption/monthly-absolute-energy-consumption.component';
-import { AnnualAbsoluteEnergyConsumptionComponent } from './analysis/run-analysis/group-analysis/absolute-energy-consumption/annual-absolute-energy-consumption/annual-absolute-energy-consumption.component';
+import { MonthlyAbsoluteEnergyConsumptionComponent } from './analysis/run-analysis/group-analysis/monthly-absolute-energy-consumption/monthly-absolute-energy-consumption.component';
+import { AnnualAnalysisSummaryComponent } from './analysis/run-analysis/group-analysis/annual-analysis-summary/annual-analysis-summary.component';
 
 const routes: Routes = [
   {
@@ -135,9 +134,8 @@ const routes: Routes = [
               { path: 'monthly-energy-intensity', component: GroupMonthlyEnergyIntensityComponent },
               { path: 'regression-model-selection', component: RegressionModelSelectionComponent },
               { path: 'monthly-regression-analysis', component: MonthlyRegressionAnalysisComponent },
-              { path: 'annual-regression-analysis', component: AnnualRegressionAnalysisComponent },
+              { path: 'annual-analysis', component: AnnualAnalysisSummaryComponent },
               { path: 'monthly-absolute-energy-consumption', component: MonthlyAbsoluteEnergyConsumptionComponent },
-              { path: 'annual-absolute-energy-consumption', component: AnnualAbsoluteEnergyConsumptionComponent },
             ]
           },
           {

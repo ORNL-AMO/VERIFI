@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AnalysisService } from 'src/app/analysis/analysis.service';
+import { AbsoluteEnergyConsumptionService } from 'src/app/analysis/calculations/absolute-energy-consumption.service';
 import { RegressionAnalysisService } from 'src/app/analysis/calculations/regression-analysis.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -7,20 +8,20 @@ import { AnnualAnalysisSummary } from 'src/app/models/analysis';
 import { AnalysisGroup, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 
 @Component({
-  selector: 'app-annual-regression-analysis',
-  templateUrl: './annual-regression-analysis.component.html',
-  styleUrls: ['./annual-regression-analysis.component.css']
+  selector: 'app-annual-analysis-summary',
+  templateUrl: './annual-analysis-summary.component.html',
+  styleUrls: ['./annual-analysis-summary.component.css']
 })
-export class AnnualRegressionAnalysisComponent implements OnInit {
+export class AnnualAnalysisSummaryComponent implements OnInit {
 
   dataDisplay: 'table' | 'graph';
   analysisItem: IdbAnalysisItem;
   group: AnalysisGroup;
   facility: IdbFacility;
   // itemsPerPage: number = 12;
-  annualRegressionSummary: Array<AnnualAnalysisSummary>
+  annualAnalysisSummary: Array<AnnualAnalysisSummary>
   constructor(private analysisService: AnalysisService, private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService,
-    private regressionAnalysisService: RegressionAnalysisService) {
+    private regressionAnalysisService: RegressionAnalysisService, private absoluteEnergyConsumptionService: AbsoluteEnergyConsumptionService) {
   }
 
   ngOnInit(): void {
@@ -28,7 +29,11 @@ export class AnnualRegressionAnalysisComponent implements OnInit {
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     this.group = this.analysisService.selectedGroup.getValue();
     this.facility = this.facilityDbService.selectedFacility.getValue();
-    this.annualRegressionSummary = this.regressionAnalysisService.getAnnualRegressionSummary(this.group, this.analysisItem, this.facility);
+    if (this.group.analysisType == 'regression') {
+      this.annualAnalysisSummary = this.regressionAnalysisService.getAnnualRegressionSummary(this.group, this.analysisItem, this.facility);
+    } else if (this.group.analysisType == 'absoluteEnergyConsumption') {
+      this.annualAnalysisSummary = this.absoluteEnergyConsumptionService.getAnnualAnalysisSummary(this.group, this.analysisItem, this.facility);
+    }
   }
 
   setDataDisplay(display: 'table' | 'graph') {

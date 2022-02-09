@@ -23,13 +23,12 @@ import { AnnualEnergyIntensityTableComponent } from './run-analysis/group-analys
 import { RegressionModelSelectionComponent } from './run-analysis/group-analysis/regression/regression-model-selection/regression-model-selection.component';
 import { MonthlyRegressionAnalysisComponent } from './run-analysis/group-analysis/regression/monthly-regression-analysis/monthly-regression-analysis.component';
 import { MonthlyRegressionAnalysisGraphComponent } from './run-analysis/group-analysis/regression/monthly-regression-analysis/monthly-regression-analysis-graph/monthly-regression-analysis-graph.component';
-import { AnnualRegressionAnalysisComponent } from './run-analysis/group-analysis/regression/annual-regression-analysis/annual-regression-analysis.component';
-import { AnnualRegressionAnalysisGraphComponent } from './run-analysis/group-analysis/regression/annual-regression-analysis/annual-regression-analysis-graph/annual-regression-analysis-graph.component';
-import { MonthlyAbsoluteEnergyConsumptionComponent } from './run-analysis/group-analysis/absolute-energy-consumption/monthly-absolute-energy-consumption/monthly-absolute-energy-consumption.component';
-import { AnnualAbsoluteEnergyConsumptionComponent } from './run-analysis/group-analysis/absolute-energy-consumption/annual-absolute-energy-consumption/annual-absolute-energy-consumption.component';
-import { MonthlyAbsoluteConsumptionGraphComponent } from './run-analysis/group-analysis/absolute-energy-consumption/monthly-absolute-energy-consumption/monthly-absolute-consumption-graph/monthly-absolute-consumption-graph.component';
+import { MonthlyAbsoluteEnergyConsumptionComponent } from './run-analysis/group-analysis/monthly-absolute-energy-consumption/monthly-absolute-energy-consumption.component';
+import { MonthlyAbsoluteConsumptionGraphComponent } from './run-analysis/group-analysis/monthly-absolute-energy-consumption/monthly-absolute-consumption-graph/monthly-absolute-consumption-graph.component';
 import { MonthlyAnalysisSummaryTableComponent } from './run-analysis/group-analysis/monthly-analysis-summary-table/monthly-analysis-summary-table.component';
-import { AnnualAnalysisSummaryTableComponent } from './run-analysis/group-analysis/annual-analysis-summary-table/annual-analysis-summary-table.component';
+import { AnnualAnalysisSummaryTableComponent } from './run-analysis/group-analysis/annual-analysis-summary/annual-analysis-summary-table/annual-analysis-summary-table.component';
+import { AnnualAnalysisSummaryComponent } from './run-analysis/group-analysis/annual-analysis-summary/annual-analysis-summary.component';
+import { AnnualAnalysisSummaryGraphComponent } from './run-analysis/group-analysis/annual-analysis-summary/annual-analysis-summary-graph/annual-analysis-summary-graph.component';
 
 @NgModule({
   declarations: [
@@ -52,13 +51,12 @@ import { AnnualAnalysisSummaryTableComponent } from './run-analysis/group-analys
     RegressionModelSelectionComponent,
     MonthlyRegressionAnalysisComponent,
     MonthlyRegressionAnalysisGraphComponent,
-    AnnualRegressionAnalysisComponent,
-    AnnualRegressionAnalysisGraphComponent,
     MonthlyAbsoluteEnergyConsumptionComponent,
-    AnnualAbsoluteEnergyConsumptionComponent,
     MonthlyAbsoluteConsumptionGraphComponent,
     MonthlyAnalysisSummaryTableComponent,
-    AnnualAnalysisSummaryTableComponent
+    AnnualAnalysisSummaryTableComponent,
+    AnnualAnalysisSummaryGraphComponent,
+    AnnualAnalysisSummaryComponent
   ],
   imports: [
     CommonModule,
