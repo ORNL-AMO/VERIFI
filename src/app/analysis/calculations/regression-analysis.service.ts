@@ -7,7 +7,7 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
 import { ConvertMeterDataService } from 'src/app/shared/helper-services/convert-meter-data.service';
 import * as _ from 'lodash';
 import { AnalysisCalculationsHelperService } from './analysis-calculations-helper.service';
-import { AnnualRegressionSummary, MonthlyRegressionSummary, RegressionSummaryData } from 'src/app/models/analysis';
+import { AnnualAnalysisSummary, MonthlyRegressionSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 
 @Injectable({
   providedIn: 'root'
@@ -45,7 +45,7 @@ export class RegressionAnalysisService {
     let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = this.analysisCalculationsHelperService.getMonthlyStartAndEndDate(facility, analysisItem);
     let baselineDate: Date = monthlyStartAndEndDate.baselineDate;
     let endDate: Date = monthlyStartAndEndDate.endDate;
-    let regressionSummaryData: Array<RegressionSummaryData> = new Array();
+    let regressionSummaryData: Array<MonthlyAnalysisSummaryData> = new Array();
     let baselineYear: number = this.analysisCalculationsHelperService.getFiscalYear(baselineDate, facility);
     //variables needed for calculations
     let previousEnergyUse: number = 0;
@@ -226,8 +226,8 @@ export class RegressionAnalysisService {
     }
   }
 
-  getAnnualRegressionSummary(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility): Array<AnnualRegressionSummary> {
-    let annualRegressionSummary: Array<AnnualRegressionSummary> = new Array();
+  getAnnualRegressionSummary(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility): Array<AnnualAnalysisSummary> {
+    let annualRegressionSummary: Array<AnnualAnalysisSummary> = new Array();
 
     let monthlyRegressionSummary: MonthlyRegressionSummary = this.getMonthlyRegressionSummary(selectedGroup, analysisItem, facility, true)
 
@@ -247,7 +247,7 @@ export class RegressionAnalysisService {
     let baselineModeledEnergy: number;
     let baselineSEnPI: number;
     for (let summaryYear: number = baselineYear; summaryYear <= reportYear; summaryYear++) {
-      let summaryYearData: Array<RegressionSummaryData> = monthlyRegressionSummary.regressionSummaryData.filter(data => { return data.fiscalYear == summaryYear });
+      let summaryYearData: Array<MonthlyAnalysisSummaryData> = monthlyRegressionSummary.regressionSummaryData.filter(data => { return data.fiscalYear == summaryYear });
       let energyUse: number = _.sumBy(summaryYearData, 'totalEnergy');
       let modeledEnergyUse: number = _.sumBy(summaryYearData, 'modeledEnergy');
       let SEnPI: number;

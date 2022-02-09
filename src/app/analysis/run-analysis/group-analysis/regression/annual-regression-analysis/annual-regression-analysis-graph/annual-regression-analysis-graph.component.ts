@@ -1,6 +1,6 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { AnnualRegressionSummary } from 'src/app/models/analysis';
+import { AnnualAnalysisSummary } from 'src/app/models/analysis';
 import { IdbAnalysisItem } from 'src/app/models/idb';
 
 @Component({
@@ -10,7 +10,7 @@ import { IdbAnalysisItem } from 'src/app/models/idb';
 })
 export class AnnualRegressionAnalysisGraphComponent implements OnInit {
   @Input()
-  annualRegressionSummary: Array<AnnualRegressionSummary>;
+  annualRegressionSummary: Array<AnnualAnalysisSummary>;
   @Input()
   analysisItem: IdbAnalysisItem;
 
@@ -31,7 +31,7 @@ export class AnnualRegressionAnalysisGraphComponent implements OnInit {
     if (this.annualEnergyIntensityAnalysisGraph) {
       let traceData = new Array();
 
-      let summariesCopy: Array<AnnualRegressionSummary> = JSON.parse(JSON.stringify(this.annualRegressionSummary));
+      let summariesCopy: Array<AnnualAnalysisSummary> = JSON.parse(JSON.stringify(this.annualRegressionSummary));
       let barTrace = {
         x: summariesCopy.map(summary => { return summary.year }),
         y: summariesCopy.map(summary => { return summary.energyUse }),
@@ -94,7 +94,7 @@ export class AnnualRegressionAnalysisGraphComponent implements OnInit {
     if (this.percentImprovementAnalysisGraph) {
       let traceData = new Array();
 
-      let summariesCopy: Array<AnnualRegressionSummary> = JSON.parse(JSON.stringify(this.annualRegressionSummary));
+      let summariesCopy: Array<AnnualAnalysisSummary> = JSON.parse(JSON.stringify(this.annualRegressionSummary));
 
       let lineTrace = {
         x: summariesCopy.map(summary => { return summary.year }),

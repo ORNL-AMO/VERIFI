@@ -11,28 +11,39 @@
                 Total <br>Energy <br>
                 <span class="small">(<span [innerHTML]="analysisItem.energyUnit | settingsLabel"></span>)</span>
             </th>
-            <th (click)="setOrderDataField('modeledEnergy')" [ngClass]="{'active': orderDataField == 'modeledEnergy'}">
-                Expected <br>Energy
+            <th *ngFor="let predictorVariable of predictorVariables" (click)="setOrderDataField(predictorVariable.name)"
+                [ngClass]="{'active': orderDataField == predictorVariable.name}">
+                {{predictorVariable.name}} <br *ngIf="predictorVariable.unit">
+                <span class="small" *ngIf="predictorVariable.unit">({{predictorVariable.unit}})</span>
             </th>
-            <th (click)="setOrderDataField('monthlySavings')" [ngClass]="{'active': orderDataField == 'monthlySavings'}">
+            <th (click)="setOrderDataField('modeledEnergy')" [ngClass]="{'active': orderDataField == 'modeledEnergy'}">
+                Modeled <br>Energy
+            </th>
+            <th (click)="setOrderDataField('monthlySavings')"
+                [ngClass]="{'active': orderDataField == 'monthlySavings'}">
                 Monthly <br>Savings
             </th>
-            <th (click)="setOrderDataField('yearToDateSEnPI')" [ngClass]="{'active': orderDataField == 'yearToDateSEnPI'}">
+            <th (click)="setOrderDataField('yearToDateSEnPI')"
+                [ngClass]="{'active': orderDataField == 'yearToDateSEnPI'}">
                 YTD <br>SEnPI
             </th>
             <th (click)="setOrderDataField('rollingSEnPI')" [ngClass]="{'active': orderDataField == 'rollingSEnPI'}">
                 Rolling <br>SEnPI
             </th>
-            <th (click)="setOrderDataField('yearToDateImprovementOverBaseline')" [ngClass]="{'active': orderDataField == 'yearToDateImprovementOverBaseline'}">
+            <th (click)="setOrderDataField('yearToDateImprovementOverBaseline')"
+                [ngClass]="{'active': orderDataField == 'yearToDateImprovementOverBaseline'}">
                 YTD <br>Improvement<br> Over BL
             </th>
-            <th (click)="setOrderDataField('monthlyIncrementalImprovement')" [ngClass]="{'active': orderDataField == 'monthlyIncrementalImprovement'}">
+            <th (click)="setOrderDataField('monthlyIncrementalImprovement')"
+                [ngClass]="{'active': orderDataField == 'monthlyIncrementalImprovement'}">
                 Monthly <br>Incremental<br> Improvement
             </th>
-            <th (click)="setOrderDataField('yearToDateImprovementOverFiscalYear')" [ngClass]="{'active': orderDataField == 'yearToDateImprovementOverFiscalYear'}">
+            <th (click)="setOrderDataField('yearToDateImprovementOverFiscalYear')"
+                [ngClass]="{'active': orderDataField == 'yearToDateImprovementOverFiscalYear'}">
                 YTD <br>Improvement<br> Over PY
             </th>
-            <th (click)="setOrderDataField('rolling12MonthImprovement')" [ngClass]="{'active': orderDataField == 'rolling12MonthImprovement'}">
+            <th (click)="setOrderDataField('rolling12MonthImprovement')"
+                [ngClass]="{'active': orderDataField == 'rolling12MonthImprovement'}">
                 Rolling<br>
                 12-Month<br>
                 Improvement
@@ -40,7 +51,7 @@
         </tr>
     </thead>
     <tbody>
-        <tr *ngFor="let data of monthlyAbsoluteSummary | orderBy: orderDataField: orderByDirection |  slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage"
+        <tr *ngFor="let data of monthlyAnalysisSummaryData | orderBy: orderDataField: orderByDirection |  slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage"
             [ngClass]="{'fiscal-year-end': checkFiscalYearEnd(data.date)}">
             <td>
                 {{data.date | date: 'MMMM, y'}}
@@ -51,8 +62,11 @@
             <td>
                 {{data.totalEnergy | customNumber}}
             </td>
+            <td *ngFor="let pUsage of data.predictorUsage">
+                {{pUsage | customNumber}}
+            </td>
             <td>
-                {{data.expectedEnergy | customNumber}}
+                {{data.modeledEnergy | customNumber}}
             </td>
             <td>
                 {{data.monthlySavings | customNumber}}
@@ -80,10 +94,9 @@
 </table>
 <div class="tableControls overflow-hidden">
     <div class="item-right">
-        <ngb-pagination [collectionSize]="monthlyAbsoluteSummary.length"
-            [(page)]="currentPageNumber" [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true"
-            aria-label="Default pagination">
+        <ngb-pagination [collectionSize]="monthlyAnalysisSummaryData.length" [(page)]="currentPageNumber"
+            [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Default pagination">
         </ngb-pagination>
     </div>
-    <p class="item-right">{{monthlyAbsoluteSummary.length}} entries</p>
+    <p class="item-right">{{monthlyAnalysisSummaryData.length}} entries</p>
 </div>

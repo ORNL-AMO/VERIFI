@@ -20,8 +20,9 @@
     </div>
 </div>
 
-<app-monthly-regression-analysis-table *ngIf="dataDisplay == 'table'" [analysisItem]="analysisItem"
-    [monthlyRegressionSummary]="monthlyRegressionSummary" [itemsPerPage]="itemsPerPage" [facility]="facility">
-</app-monthly-regression-analysis-table>
+<app-monthly-analysis-summary-table *ngIf="dataDisplay == 'table'" [analysisItem]="analysisItem"
+    [monthlyAnalysisSummaryData]="monthlyRegressionSummary.regressionSummaryData" [itemsPerPage]="itemsPerPage"
+    [facility]="facility" [predictorVariables]="monthlyRegressionSummary.predictorVariables">
+</app-monthly-analysis-summary-table>
 <app-monthly-regression-analysis-graph *ngIf="dataDisplay == 'graph'" [analysisItem]="analysisItem"
     [monthlyRegressionSummary]="monthlyRegressionSummary" [facility]="facility"></app-monthly-regression-analysis-graph>

@@ -64,12 +64,12 @@ export interface FacilityGroupTotals {
 export interface MonthlyRegressionSummary {
   predictorVariables: Array<PredictorData>,
   modelYear: number,
-  regressionSummaryData: Array<RegressionSummaryData>
+  regressionSummaryData: Array<MonthlyAnalysisSummaryData>
 }
 
-export interface RegressionSummaryData {
+export interface MonthlyAnalysisSummaryData {
   totalEnergy: number,
-  predictorUsage: Array<number>,
+  predictorUsage?: Array<number>,
   modeledEnergy: number,
   date: Date,
   monthlySavings: number,
@@ -85,7 +85,7 @@ export interface RegressionSummaryData {
 }
 
 
-export interface AnnualRegressionSummary {
+export interface AnnualAnalysisSummary {
   year: number,
   energyUse: number,
   annualEnergySavings: number,

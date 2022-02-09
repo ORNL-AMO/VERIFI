@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { AnalysisService } from 'src/app/analysis/analysis.service';
-import { AbsoluteEnergyConsumptionService, MonthlyAbsoluteSummaryData } from 'src/app/analysis/calculations/absolute-energy-consumption.service';
+import { AbsoluteEnergyConsumptionService } from 'src/app/analysis/calculations/absolute-energy-consumption.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { AnalysisGroup, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 
 @Component({
@@ -16,7 +17,7 @@ export class MonthlyAbsoluteEnergyConsumptionComponent implements OnInit {
   groupHasError: boolean = false;
   analysisItem: IdbAnalysisItem;
   group: AnalysisGroup;
-  monthlyAbsoluteSummary: Array<MonthlyAbsoluteSummaryData>;
+  monthlyAbsoluteSummary: Array<MonthlyAnalysisSummaryData>;
   facility: IdbFacility;
   itemsPerPage: number = 12;
   

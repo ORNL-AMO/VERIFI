@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { MonthlyAbsoluteSummaryData } from 'src/app/analysis/calculations/absolute-energy-consumption.service';
+import { MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 
 @Component({
@@ -9,7 +9,7 @@ import { IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 })
 export class MonthlyAbsoluteConsumptionGraphComponent implements OnInit {
   @Input()
-  monthlyAbsoluteSummary: Array<MonthlyAbsoluteSummaryData>;
+  monthlyAbsoluteSummary: Array<MonthlyAnalysisSummaryData>;
   @Input()
   analysisItem: IdbAnalysisItem;
   @Input()

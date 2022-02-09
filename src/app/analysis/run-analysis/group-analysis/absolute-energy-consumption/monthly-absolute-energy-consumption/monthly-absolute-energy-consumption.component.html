@@ -20,9 +20,9 @@
     </div>
 </div>
 
-<app-monthly-absolute-consumption-table *ngIf="dataDisplay == 'table'" [analysisItem]="analysisItem"
-    [monthlyAbsoluteSummary]="monthlyAbsoluteSummary" [itemsPerPage]="itemsPerPage" [facility]="facility">
-</app-monthly-absolute-consumption-table>
+<app-monthly-analysis-summary-table *ngIf="dataDisplay == 'table'" [analysisItem]="analysisItem"
+    [monthlyAnalysisSummaryData]="monthlyAbsoluteSummary" [itemsPerPage]="itemsPerPage" [facility]="facility">
+</app-monthly-analysis-summary-table>
 <app-monthly-absolute-consumption-graph *ngIf="dataDisplay == 'graph'" [analysisItem]="analysisItem"
     [monthlyAbsoluteSummary]="monthlyAbsoluteSummary" [facility]="facility">
 </app-monthly-absolute-consumption-graph>

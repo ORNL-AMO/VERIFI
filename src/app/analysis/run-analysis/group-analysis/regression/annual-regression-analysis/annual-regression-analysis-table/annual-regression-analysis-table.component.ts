@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { AnnualRegressionSummary } from 'src/app/models/analysis';
+import { AnnualAnalysisSummary } from 'src/app/models/analysis';
 import { IdbAnalysisItem } from 'src/app/models/idb';
 
 @Component({
@@ -9,7 +9,7 @@ import { IdbAnalysisItem } from 'src/app/models/idb';
 })
 export class AnnualRegressionAnalysisTableComponent implements OnInit {
   @Input()
-  annualRegressionSummary: Array<AnnualRegressionSummary>;
+  annualRegressionSummary: Array<AnnualAnalysisSummary>;
   @Input()
   analysisItem: IdbAnalysisItem;
 

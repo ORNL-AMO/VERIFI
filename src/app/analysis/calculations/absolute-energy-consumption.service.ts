@@ -6,6 +6,7 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
 import { ConvertMeterDataService } from 'src/app/shared/helper-services/convert-meter-data.service';
 import { AnalysisCalculationsHelperService } from './analysis-calculations-helper.service';
 import * as _ from 'lodash';
+import { MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +16,7 @@ export class AbsoluteEnergyConsumptionService {
   constructor(private utilityMeterDbService: UtilityMeterdbService, private calendarizationService: CalanderizationService,
     private convertMeterDataService: ConvertMeterDataService, private analysisCalculationsHelperService: AnalysisCalculationsHelperService) { }
 
-  getMonthlyAbsoluteConsumptionGroupSummaries(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility, forAnnualSummaryCalculation?: boolean): Array<MonthlyAbsoluteSummaryData> {
+  getMonthlyAbsoluteConsumptionGroupSummaries(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility, forAnnualSummaryCalculation?: boolean): Array<MonthlyAnalysisSummaryData> {
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
     let groupMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.groupId == selectedGroup.idbGroupId });
     let calanderizationOptions: CalanderizationOptions = {
@@ -33,9 +34,6 @@ export class AbsoluteEnergyConsumptionService {
 
     let baselineYear: number = this.analysisCalculationsHelperService.getFiscalYear(baselineDate, facility);
     //variables needed for calculations
-    let previousEnergyUse: number = 0;
-    let previousExpectedEnergyUse: number = 0;
-    let previousMonthlySavings: number = 0;
     let previousFiscalYear: number = baselineYear;
     let yearToDateExpectedEnergyUse: number = 0;
     let yearToDateEnergyUse: number = 0;
@@ -45,7 +43,7 @@ export class AbsoluteEnergyConsumptionService {
     let monthIndex: number = 0;
     let previousYearToDateSEnPI: number = 0;
     let expectedEnergy: number = 0;
-    let monthlyAbsoluteSummaryData: Array<MonthlyAbsoluteSummaryData> = new Array();
+    let monthlyAbsoluteSummaryData: Array<MonthlyAnalysisSummaryData> = new Array();
     while (baselineDate < endDate) {
       //meter data for month
       let monthMeterData: Array<MonthlyData> = allMeterData.filter(data => {
@@ -118,7 +116,7 @@ export class AbsoluteEnergyConsumptionService {
           let last12MonthExpectedEnergyTotal: number = expectedEnergy;
           for (let i = (summaryIndex - 11); i < summaryIndex; i++) {
             last12MonthsEnergyTotal = last12MonthsEnergyTotal + monthlyAbsoluteSummaryData[i].totalEnergy;
-            last12MonthExpectedEnergyTotal = last12MonthExpectedEnergyTotal + monthlyAbsoluteSummaryData[i].expectedEnergy;
+            last12MonthExpectedEnergyTotal = last12MonthExpectedEnergyTotal + monthlyAbsoluteSummaryData[i].modeledEnergy;
           }
           if (fiscalYear > baselineYear) {
             let baselineEnergyTotal: number = _.sum(baselineActualData);
@@ -145,7 +143,7 @@ export class AbsoluteEnergyConsumptionService {
       //add results
       monthlyAbsoluteSummaryData.push({
         totalEnergy: energyUse,
-        expectedEnergy: expectedEnergy,
+        modeledEnergy: expectedEnergy,
         date: new Date(baselineDate),
         group: selectedGroup,
         fiscalYear: fiscalYear,
@@ -156,14 +154,12 @@ export class AbsoluteEnergyConsumptionService {
         yearToDateSEnPI: yearToDateSEnPI,
         rollingSEnPI: rollingSEnPI,
         monthlyIncrementalImprovement: monthlyIncrementalImprovement * 100,
-        rolling12MonthImprovement: rolling12MonthImprovement * 100
+        rolling12MonthImprovement: rolling12MonthImprovement * 100,
+        predictorUsage: []
       });
 
       //set values for next iterations calculations
       previousYearToDateSEnPI = yearToDateImprovement;
-      previousEnergyUse = energyUse;
-      previousExpectedEnergyUse = expectedEnergy;
-      previousMonthlySavings = monthlySavings;
       let currentMonth: number = baselineDate.getUTCMonth()
       let nextMonth: number = currentMonth + 1;
       baselineDate = new Date(baselineDate.getUTCFullYear(), nextMonth, 1);
@@ -172,21 +168,12 @@ export class AbsoluteEnergyConsumptionService {
     return monthlyAbsoluteSummaryData;
   }
 
-}
 
 
-export interface MonthlyAbsoluteSummaryData {
-  totalEnergy: number,
-  expectedEnergy: number,
-  date: Date,
-  monthlySavings: number,
-  yearToDateImprovementOverBaseline: number,
-  yearToDateImprovementOverFiscalYear: number,
-  rollingYearImprovement: number,
-  group: AnalysisGroup,
-  fiscalYear: number,
-  yearToDateSEnPI: number,
-  rollingSEnPI: number,
-  monthlyIncrementalImprovement: number,
-  rolling12MonthImprovement: number
+  getAnnualAbsoluteConsumptionSummary(){
+
+  }
+
+
 }
+
