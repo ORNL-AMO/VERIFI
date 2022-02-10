@@ -1,6 +1,6 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { MonthlyRegressionSummary } from 'src/app/models/analysis';
+import { MonthlyAnalysisSummary } from 'src/app/models/analysis';
 import { IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 
 @Component({
@@ -10,7 +10,7 @@ import { IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 })
 export class MonthlyRegressionAnalysisGraphComponent implements OnInit {
   @Input()
-  monthlyRegressionSummary: MonthlyRegressionSummary;
+  monthlyRegressionSummary: MonthlyAnalysisSummary;
   @Input()
   analysisItem: IdbAnalysisItem;
   @Input()
@@ -34,8 +34,8 @@ export class MonthlyRegressionAnalysisGraphComponent implements OnInit {
         type: "scatter",
         mode: "lines+markers",
         name: 'Total Energy Use',
-        x: this.monthlyRegressionSummary.regressionSummaryData.map(results => { return results.date }),
-        y: this.monthlyRegressionSummary.regressionSummaryData.map(results => { return results.totalEnergy }),
+        x: this.monthlyRegressionSummary.monthlyAnalysisSummaryData.map(results => { return results.date }),
+        y: this.monthlyRegressionSummary.monthlyAnalysisSummaryData.map(results => { return results.totalEnergy }),
         line: { color: '#7F7F7F', width: 4 },
         marker:{
           size: 8
@@ -46,8 +46,8 @@ export class MonthlyRegressionAnalysisGraphComponent implements OnInit {
         type: "scatter",
         mode: "lines+markers",
         name: 'Modeled Energy Use',
-        x: this.monthlyRegressionSummary.regressionSummaryData.map(results => { return results.date }),
-        y: this.monthlyRegressionSummary.regressionSummaryData.map(results => { return results.modeledEnergy }),
+        x: this.monthlyRegressionSummary.monthlyAnalysisSummaryData.map(results => { return results.date }),
+        y: this.monthlyRegressionSummary.monthlyAnalysisSummaryData.map(results => { return results.modeledEnergy }),
         line: { color: '#7D3C98', width: 4 },
         marker:{
           size: 8

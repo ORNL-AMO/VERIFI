@@ -29,6 +29,8 @@ import { MonthlyAnalysisSummaryTableComponent } from './run-analysis/group-analy
 import { AnnualAnalysisSummaryTableComponent } from './run-analysis/group-analysis/annual-analysis-summary/annual-analysis-summary-table/annual-analysis-summary-table.component';
 import { AnnualAnalysisSummaryComponent } from './run-analysis/group-analysis/annual-analysis-summary/annual-analysis-summary.component';
 import { AnnualAnalysisSummaryGraphComponent } from './run-analysis/group-analysis/annual-analysis-summary/annual-analysis-summary-graph/annual-analysis-summary-graph.component';
+import { MonthlyModifiedEnergyIntensityComponent } from './run-analysis/group-analysis/monthly-modified-energy-intensity/monthly-modified-energy-intensity.component';
+import { MonthlyModifiedEnergyIntensityGraphComponent } from './run-analysis/group-analysis/monthly-modified-energy-intensity/monthly-modified-energy-intensity-graph/monthly-modified-energy-intensity-graph.component';
 
 @NgModule({
   declarations: [
@@ -56,7 +58,9 @@ import { AnnualAnalysisSummaryGraphComponent } from './run-analysis/group-analys
     MonthlyAnalysisSummaryTableComponent,
     AnnualAnalysisSummaryTableComponent,
     AnnualAnalysisSummaryGraphComponent,
-    AnnualAnalysisSummaryComponent
+    AnnualAnalysisSummaryComponent,
+    MonthlyModifiedEnergyIntensityComponent,
+    MonthlyModifiedEnergyIntensityGraphComponent
   ],
   imports: [
     CommonModule,

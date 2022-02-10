@@ -20,9 +20,11 @@
     </div>
 </div>
 
+
 <app-monthly-analysis-summary-table *ngIf="dataDisplay == 'table'" [analysisItem]="analysisItem"
-    [monthlyAnalysisSummaryData]="monthlyRegressionSummary.monthlyAnalysisSummaryData" [itemsPerPage]="itemsPerPage"
-    [facility]="facility" [predictorVariables]="monthlyRegressionSummary.predictorVariables">
-</app-monthly-analysis-summary-table>
-<app-monthly-regression-analysis-graph *ngIf="dataDisplay == 'graph'" [analysisItem]="analysisItem"
-    [monthlyRegressionSummary]="monthlyRegressionSummary" [facility]="facility"></app-monthly-regression-analysis-graph>
+    [monthlyAnalysisSummaryData]="monthlyModifiedEnergyIntensitySummary.monthlyAnalysisSummaryData"
+    [itemsPerPage]="itemsPerPage" [facility]="facility"
+    [predictorVariables]="monthlyModifiedEnergyIntensitySummary.predictorVariables">
+    <!-- <app-monthly-absolute-consumption-graph *ngIf="dataDisplay == 'graph'" [analysisItem]="analysisItem"
+    [monthlyAbsoluteSummary]="monthlyAbsoluteSummary" [facility]="facility">
+</app-monthly-absolute-consumption-graph> -->

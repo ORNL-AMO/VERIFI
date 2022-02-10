@@ -7,7 +7,7 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
 import { ConvertMeterDataService } from 'src/app/shared/helper-services/convert-meter-data.service';
 import * as _ from 'lodash';
 import { AnalysisCalculationsHelperService } from './analysis-calculations-helper.service';
-import { AnnualAnalysisSummary, MonthlyRegressionSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
+import { AnnualAnalysisSummary, MonthlyAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 
 @Injectable({
   providedIn: 'root'
@@ -21,7 +21,7 @@ export class RegressionAnalysisService {
     private analysisCalculationsHelperService: AnalysisCalculationsHelperService) { }
 
 
-  getMonthlyRegressionSummary(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility, forAnnualSummaryCalculation?: boolean): MonthlyRegressionSummary {
+  getMonthlyRegressionSummary(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility, forAnnualSummaryCalculation?: boolean): MonthlyAnalysisSummary {
     let predictorVariables: Array<PredictorData> = new Array();
     selectedGroup.predictorVariables.forEach(variable => {
       if (variable.productionInAnalysis) {
@@ -222,80 +222,12 @@ export class RegressionAnalysisService {
     return {
       predictorVariables: predictorVariables,
       modelYear: undefined,
-      regressionSummaryData: regressionSummaryData
+      monthlyAnalysisSummaryData: regressionSummaryData
     }
   }
 
   getAnnualRegressionSummary(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility): Array<AnnualAnalysisSummary> {
-    // let annualRegressionSummary: Array<AnnualAnalysisSummary> = new Array();
-    let monthlyRegressionSummary: MonthlyRegressionSummary = this.getMonthlyRegressionSummary(selectedGroup, analysisItem, facility, true)
-    return this.analysisCalculationsHelperService.getAnnualAnalysisSummary(selectedGroup.regressionModelYear, analysisItem, facility, monthlyRegressionSummary.regressionSummaryData);
-
-    // let baselineYear: number = facility.sustainabilityQuestions.energyReductionBaselineYear;
-    // let reportYear: number = analysisItem.reportYear;
-    // if (facility.fiscalYear == 'nonCalendarYear' && facility.fiscalYearCalendarEnd) {
-    //   baselineYear = baselineYear - 1;
-    //   reportYear = reportYear - 1;
-    // }
-    // let previousYearSavings: number = 0;
-    // let previousYearEnergyUse: number = 0;
-    // let previousYearModeledEnergyUse: number = 0;
-    // let totalEnergySavings: number = 0;
-    // let totalModeledEnergySavings: number = 0;
-    // let baselineEnergyUse: number;
-    // let baselineModeledEnergy: number;
-    // let baselineSEnPI: number;
-    // for (let summaryYear: number = baselineYear; summaryYear <= reportYear; summaryYear++) {
-    //   let summaryYearData: Array<MonthlyAnalysisSummaryData> = monthlyRegressionSummary.regressionSummaryData.filter(data => { return data.fiscalYear == summaryYear });
-    //   let energyUse: number = _.sumBy(summaryYearData, 'totalEnergy');
-    //   let modeledEnergyUse: number = _.sumBy(summaryYearData, 'modeledEnergy');
-    //   let SEnPI: number;
-    //   let cumulativeSavings: number = 0;
-    //   let annualSavings: number = 0;
-
-    //   if (summaryYear == baselineYear) {
-    //     baselineEnergyUse = energyUse;
-    //     baselineModeledEnergy = modeledEnergyUse;
-    //   }
-
-    //   if (summaryYear > selectedGroup.regressionModelYear) {
-    //     SEnPI = (energyUse * baselineModeledEnergy) / (modeledEnergyUse * baselineEnergyUse);
-    //   } else {
-    //     SEnPI = modeledEnergyUse / energyUse;
-    //   }
-
-    //   if (summaryYear == baselineYear) {
-    //     baselineSEnPI = SEnPI;
-    //     previousYearEnergyUse = energyUse;
-    //     previousYearModeledEnergyUse = modeledEnergyUse;
-    //   } else if (summaryYear > selectedGroup.regressionModelYear) {
-    //     cumulativeSavings = 1 - SEnPI;
-    //     annualSavings = cumulativeSavings - previousYearSavings;
-    //   } else {
-    //     cumulativeSavings = (1 - baselineSEnPI) - (1 - SEnPI);
-    //     annualSavings = cumulativeSavings - previousYearSavings;
-    //   }
-
-    //   let annualEnergySavings: number = previousYearEnergyUse - energyUse;
-    //   let annualModeledEnergySavings: number = previousYearModeledEnergyUse - modeledEnergyUse;
-    //   totalEnergySavings = totalEnergySavings + annualEnergySavings;
-    //   totalModeledEnergySavings = totalModeledEnergySavings + annualModeledEnergySavings;
-    //   annualRegressionSummary.push({
-    //     year: summaryYear,
-    //     energyUse: energyUse,
-    //     annualEnergySavings: annualEnergySavings,
-    //     totalEnergySavings: totalEnergySavings,
-    //     annualModeledEnergySavings: annualModeledEnergySavings,
-    //     totalModeledEnergySavings: totalModeledEnergySavings,
-    //     modeledEnergyUse: modeledEnergyUse,
-    //     SEnPI: SEnPI,
-    //     cumulativeSavings: cumulativeSavings * 100,
-    //     annualSavings: annualSavings * 100
-    //   })
-    //   previousYearSavings = cumulativeSavings;
-    //   previousYearEnergyUse = energyUse;
-    //   previousYearModeledEnergyUse = modeledEnergyUse;
-    // }
-    // return annualRegressionSummary;
+    let monthlyRegressionSummary: MonthlyAnalysisSummary = this.getMonthlyRegressionSummary(selectedGroup, analysisItem, facility, true)
+    return this.analysisCalculationsHelperService.getAnnualAnalysisSummary(selectedGroup.regressionModelYear, analysisItem, facility, monthlyRegressionSummary.monthlyAnalysisSummaryData);
   }
 }

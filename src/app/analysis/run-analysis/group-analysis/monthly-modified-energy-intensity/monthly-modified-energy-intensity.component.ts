@@ -1,33 +1,35 @@
 import { Component, OnInit } from '@angular/core';
 import { AnalysisService } from 'src/app/analysis/analysis.service';
-import { RegressionAnalysisService } from 'src/app/analysis/calculations/regression-analysis.service';
+import { ModifiedEnergyIntensityService } from 'src/app/analysis/calculations/modified-energy-intensity.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { MonthlyAnalysisSummary } from 'src/app/models/analysis';
+import { MonthlyAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { AnalysisGroup, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 
 @Component({
-  selector: 'app-monthly-regression-analysis',
-  templateUrl: './monthly-regression-analysis.component.html',
-  styleUrls: ['./monthly-regression-analysis.component.css']
+  selector: 'app-monthly-modified-energy-intensity',
+  templateUrl: './monthly-modified-energy-intensity.component.html',
+  styleUrls: ['./monthly-modified-energy-intensity.component.css']
 })
-export class MonthlyRegressionAnalysisComponent implements OnInit {
+export class MonthlyModifiedEnergyIntensityComponent implements OnInit {
 
   dataDisplay: 'table' | 'graph';
+  groupHasError: boolean = false;
   analysisItem: IdbAnalysisItem;
   group: AnalysisGroup;
-  monthlyRegressionSummary: MonthlyAnalysisSummary;
+  monthlyModifiedEnergyIntensitySummary: MonthlyAnalysisSummary;
   facility: IdbFacility;
   itemsPerPage: number = 12;
+  
   constructor(private analysisService: AnalysisService, private analysisDbService: AnalysisDbService,
-    private regressionAnalysisService: RegressionAnalysisService, private facilityDbService: FacilitydbService) { }
+    private modifiedEnergyIntensityService: ModifiedEnergyIntensityService, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
     this.dataDisplay = this.analysisService.dataDisplay.getValue();
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     this.group = this.analysisService.selectedGroup.getValue();
     this.facility = this.facilityDbService.selectedFacility.getValue();
-    this.monthlyRegressionSummary = this.regressionAnalysisService.getMonthlyRegressionSummary(this.group, this.analysisItem, this.facility);
+    this.monthlyModifiedEnergyIntensitySummary = this.modifiedEnergyIntensityService.getMonthlyModifiedEnergyIntensitySummary(this.group, this.analysisItem, this.facility);
   }
 
 
@@ -35,5 +37,4 @@ export class MonthlyRegressionAnalysisComponent implements OnInit {
     this.dataDisplay = display;
     this.analysisService.dataDisplay.next(this.dataDisplay);
   }
-
 }
