@@ -12,7 +12,7 @@
                 <label class="checkbox" for="energyIntensity">Energy Intensity</label>
 
                 <input type="radio" class="rowToggle" name="analysisType" [value]="'modifiedEnergyIntensity'"
-                    id="modifiedEnergyIntensity" [(ngModel)]="group.analysisType" (change)="setAnalysisType()" disabled>
+                    id="modifiedEnergyIntensity" [(ngModel)]="group.analysisType" (change)="setAnalysisType()">
                 <label class="checkbox" for="modifiedEnergyIntensity">Modified Energy Intensity</label>
 
                 <input type="radio" class="rowToggle" name="analysisType" [value]="'regression'" id="regression"
@@ -22,7 +22,8 @@
         </div>
     </div>
     <!--energy intensity-->
-    <div class="col-md-6 col-sm-12" *ngIf="group.analysisType == 'energyIntensity'">
+    <div class="col-md-6 col-sm-12"
+        *ngIf="group.analysisType == 'energyIntensity' || group.analysisType == 'modifiedEnergyIntensity'">
         <div class="row bold mb-2">
             <div class="col-4">
                 Production Variables
@@ -44,15 +45,73 @@
                 </label>
             </div>
         </div>
-        <div class="row">
+        <div class="row mb-2">
             <div class="col-12">
                 <div class="form-group">
-                    <label class="w-50 bold">Production Units</label>
+                    <label class="w-50">Production Units</label>
                     <input class="w-50" type="text" name="productionUnits" [(ngModel)]="group.productionUnits"
                         id="productionUnits" disabled>
                 </div>
                 <div class="alert alert-warning" *ngIf="showUnitsWarning">
                     Make sure the production variables you have selected have the same units.
+                </div>
+            </div>
+        </div>
+        <!--modifiedEnergyIntensity-->
+        <div *ngIf="group.analysisType == 'modifiedEnergyIntensity'">
+            <div class="row mb-2">
+                <div class="col-6">
+                    <label for="specifiedMonthlyPercentBaseload">
+                        Specify % Baseload for each month
+                    </label>
+                </div>
+                <div class="col-6">
+                    <select required class="form-control" id="specifiedMonthlyPercentBaseload"
+                        id="specifiedMonthlyPercentBaseload" [(ngModel)]="group.specifiedMonthlyPercentBaseload"
+                        (change)="saveItem()">
+                        <option [ngValue]="true">Yes</option>
+                        <option [ngValue]="false">No</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row" *ngIf="!group.specifiedMonthlyPercentBaseload">
+                <div class="col-6">
+                    <label for="specifiedMonthlyPercentBaseload">
+                        Average % Baseload
+                    </label>
+                </div>
+                <div class="col-6">
+                    <div class="input-group">
+                        <input required type="number" name="averagePercentBaseload"
+                            [(ngModel)]="group.averagePercentBaseload" id="averagePercentBaseload" (input)="saveItem()">
+                        <span class="unit">%</span>
+                    </div>
+                </div>
+            </div>
+            <div *ngIf="group.specifiedMonthlyPercentBaseload">
+                <div class="row bold mb-2">
+
+                    <div class="col-6">
+                        Month
+                    </div>
+                    <div class="col-6">
+                        % Baseload
+                    </div>
+                </div>
+                <div class="row mb-2" *ngFor="let monthlyPercent of group.monthlyPercentBaseload">
+                    <div class="col-6">
+                        <label for="{{monthlyPercent.monthNum+'_percent'}}">
+                            {{monthlyPercent.monthNum | monthLabel}}
+                        </label>
+                    </div>
+                    <div class="col-6">
+                        <div class="input-group">
+                            <input required type="number" name="{{monthlyPercent.monthNum+'_percent'}}"
+                                [(ngModel)]="monthlyPercent.percent" id="{{monthlyPercent.monthNum+'_percent'}}"
+                                (input)="saveItem()">
+                            <span class="unit">%</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

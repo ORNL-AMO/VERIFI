@@ -225,7 +225,13 @@ export interface AnalysisGroup {
     productionUnits: string,
     regressionModelYear: number,
     regressionConstant: number,
-    groupHasError: boolean
+    groupHasError: boolean,
+    specifiedMonthlyPercentBaseload: boolean,
+    averagePercentBaseload: number,
+    monthlyPercentBaseload: Array<{
+        monthNum: number,
+        percent: number
+    }>
 }
 
 export type AnalysisType = 'absoluteEnergyConsumption' | 'energyIntensity' | 'modifiedEnergyIntensity' | 'regression';
