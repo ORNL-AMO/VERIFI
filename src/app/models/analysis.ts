@@ -95,5 +95,6 @@ export interface AnnualAnalysisSummary {
   totalModeledEnergySavings: number,
   SEnPI: number,
   cumulativeSavings: number,
-  annualSavings: number
+  annualSavings: number,
+  energyIntensity: number
 }

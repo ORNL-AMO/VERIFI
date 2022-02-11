@@ -62,16 +62,9 @@ export class ModifiedEnergyIntensityService {
     let baselineYearPredictorData: Array<IdbPredictorEntry> = this.analysisCalculationsHelperService.filterYearPredictorData(facilityPredictorData, baselineYear, facility);
     let baselineMeterData: Array<MonthlyData> = this.analysisCalculationsHelperService.filterYearMeterData(allMeterData, baselineYear, facility);
     let totalBaselineYearEnergy: number = _.sumBy(baselineMeterData, 'energyUse');
-    let totalPredictorUsage: number = 0;    
-    predictorVariables.forEach(variable => {
-      baselineYearPredictorData.forEach(data => {
-        let predictorData: PredictorData = data.predictors.find(predictor => { return predictor.id == variable.id });
-        totalPredictorUsage = totalPredictorUsage + predictorData.amount;
-      });
-    });
+    let totalPredictorUsage: number = this.getPredictorUsage(predictorVariables, baselineYearPredictorData);
 
     let baselineYearEnergyIntensity: number = totalBaselineYearEnergy / totalPredictorUsage;
-    console.log(baselineYearEnergyIntensity);
     while (baselineDate < endDate) {
       let fiscalYear: number = this.analysisCalculationsHelperService.getFiscalYear(new Date(baselineDate), facility);
       //predictor data for month
@@ -228,10 +221,117 @@ export class ModifiedEnergyIntensityService {
   }
 
   getAnnualAnalysisSummary(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility): Array<AnnualAnalysisSummary> {
-    let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = this.getMonthlyModifiedEnergyIntensitySummary(selectedGroup, analysisItem, facility).monthlyAnalysisSummaryData;
-    let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = this.analysisCalculationsHelperService.getMonthlyStartAndEndDate(facility, analysisItem);
-    let baselineDate: Date = monthlyStartAndEndDate.baselineDate;
-    let baselineYear: number = this.analysisCalculationsHelperService.getFiscalYear(baselineDate, facility);
-    return this.analysisCalculationsHelperService.getAnnualAnalysisSummary(baselineYear, analysisItem, facility, monthlyAnalysisSummaryData);
+    let annualAnalysisSummary: Array<AnnualAnalysisSummary> = new Array();
+    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+    let groupMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.groupId == selectedGroup.idbGroupId });
+    let calanderizationOptions: CalanderizationOptions = {
+      energyIsSource: analysisItem.energyIsSource
+    }
+    let calanderizedMeterData: Array<CalanderizedMeter> = this.calendarizationService.getCalanderizedMeterData(groupMeters, false, false, calanderizationOptions);
+    calanderizedMeterData.forEach(calanderizedMeter => {
+      calanderizedMeter.monthlyData = this.convertMeterDataService.convertMeterDataToAnalysis(analysisItem, calanderizedMeter.monthlyData, facility, calanderizedMeter.meter);
+    });
+    let allMeterData: Array<MonthlyData> = calanderizedMeterData.flatMap(calanderizedMeter => { return calanderizedMeter.monthlyData });
+
+    let facilityPredictorData: Array<IdbPredictorEntry> = this.predictorDbService.facilityPredictorEntries.getValue();
+    let baselineYear: number = facility.sustainabilityQuestions.energyReductionBaselineYear;
+    let reportYear: number = analysisItem.reportYear;
+    if (facility.fiscalYear == 'nonCalendarYear' && facility.fiscalYearCalendarEnd) {
+      baselineYear = baselineYear - 1;
+      reportYear = reportYear - 1;
+    }
+    let baselineYearPredictorData: Array<IdbPredictorEntry> = this.analysisCalculationsHelperService.filterYearPredictorData(facilityPredictorData, baselineYear, facility);
+    let baselineMeterData: Array<MonthlyData> = this.analysisCalculationsHelperService.filterYearMeterData(allMeterData, baselineYear, facility);
+    let predictorVariables: Array<PredictorData> = new Array();
+    selectedGroup.predictorVariables.forEach(variable => {
+      if (variable.productionInAnalysis) {
+        predictorVariables.push(variable)
+      }
+    });
+    let baselineEnergyUse: number = _.sumBy(baselineMeterData, 'energyUse');
+
+    let baselineProduction: number = this.getPredictorUsage(predictorVariables, baselineYearPredictorData);
+    let baselineEnergyIntensity: number = baselineEnergyUse / baselineProduction;
+
+    let previousYearSavings: number = 0;
+    let previousYearEnergyUse: number = baselineEnergyUse;
+    let previousYearEnergyIntensity: number = baselineEnergyIntensity;
+    let previousYearProduction: number = baselineProduction;
+    let totalEnergySavings: number = 0;
+    let totalModeledEnergySavings: number = 0;
+    let previousYearModeledEnergyUse: number;
+    let baselineModeledEnergy: number;
+    let baselineSEnPI: number;
+    for (let summaryYear: number = baselineYear; summaryYear <= reportYear; summaryYear++) {
+      //predictor data for summary year
+      let summaryYearPredictorData: Array<IdbPredictorEntry> = this.analysisCalculationsHelperService.filterYearPredictorData(facilityPredictorData, summaryYear, facility);
+      let totalPredictorUsage: number = this.getPredictorUsage(predictorVariables, summaryYearPredictorData);
+      //meter data for summary year
+      let summaryYearMeterData: Array<MonthlyData> = this.analysisCalculationsHelperService.filterYearMeterData(allMeterData, summaryYear, facility);
+      let totalMeterEnergyUse: number = _.sumBy(summaryYearMeterData, 'energyUse');
+
+
+      let energyIntensity: number = totalMeterEnergyUse / totalPredictorUsage;
+      let baseload: number = selectedGroup.averagePercentBaseload / 100;
+      let modeledEnergyUse: number = totalMeterEnergyUse / (1 - (baseload * (1 - (totalMeterEnergyUse / baselineEnergyUse)) + (1 - baseload) * (1 - (energyIntensity / baselineEnergyIntensity))));
+      if(summaryYear == baselineYear){
+        baselineModeledEnergy = modeledEnergyUse;
+      }
+
+      let SEnPI: number;
+      let cumulativeSavings: number = 0;
+      let annualSavings: number = 0;
+      if (summaryYear > baselineYear) {
+        SEnPI = (totalMeterEnergyUse * baselineModeledEnergy) / (modeledEnergyUse * baselineEnergyUse);
+      } else {
+        SEnPI = modeledEnergyUse / totalMeterEnergyUse;
+      }
+      if (summaryYear == baselineYear) {
+        baselineSEnPI = SEnPI;
+        previousYearEnergyUse = totalMeterEnergyUse;
+        previousYearModeledEnergyUse = modeledEnergyUse;
+      } else if (summaryYear > baselineYear) {
+        cumulativeSavings = 1 - SEnPI;
+        annualSavings = cumulativeSavings - previousYearSavings;
+      } else {
+        cumulativeSavings = (1 - baselineSEnPI) - (1 - SEnPI);
+        annualSavings = cumulativeSavings - previousYearSavings;
+      }
+
+      let annualEnergySavings: number = previousYearEnergyUse - totalMeterEnergyUse;
+      let annualModeledEnergySavings: number = previousYearModeledEnergyUse - modeledEnergyUse;
+      totalEnergySavings = totalEnergySavings + annualEnergySavings;
+      totalModeledEnergySavings = totalModeledEnergySavings + annualModeledEnergySavings;
+
+      annualAnalysisSummary.push({
+        year: summaryYear,
+        energyUse: totalMeterEnergyUse,
+        annualEnergySavings: annualEnergySavings,
+        totalEnergySavings: totalEnergySavings,
+        annualModeledEnergySavings: annualModeledEnergySavings,
+        totalModeledEnergySavings: totalModeledEnergySavings,
+        modeledEnergyUse: modeledEnergyUse,
+        SEnPI: SEnPI,
+        cumulativeSavings: cumulativeSavings * 100,
+        annualSavings: annualSavings * 100,
+        energyIntensity: energyIntensity
+      })
+      previousYearSavings = cumulativeSavings;
+      previousYearEnergyUse = totalMeterEnergyUse;
+      previousYearModeledEnergyUse = modeledEnergyUse;
+
+    }
+    return annualAnalysisSummary;
+  }
+
+  getPredictorUsage(predictorVariables: Array<PredictorData>, predictorData: Array<IdbPredictorEntry>): number {
+    let totalPredictorUsage: number = 0;
+    predictorVariables.forEach(variable => {
+      predictorData.forEach(data => {
+        let predictorData: PredictorData = data.predictors.find(predictor => { return predictor.id == variable.id });
+        totalPredictorUsage = totalPredictorUsage + predictorData.amount;
+      });
+    });
+    return totalPredictorUsage;
   }
 }

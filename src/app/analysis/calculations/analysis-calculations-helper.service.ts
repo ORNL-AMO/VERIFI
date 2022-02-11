@@ -158,7 +158,8 @@ export class AnalysisCalculationsHelperService {
         modeledEnergyUse: modeledEnergyUse,
         SEnPI: SEnPI,
         cumulativeSavings: cumulativeSavings * 100,
-        annualSavings: annualSavings * 100
+        annualSavings: annualSavings * 100,
+        energyIntensity: 0
       })
       previousYearSavings = cumulativeSavings;
       previousYearEnergyUse = energyUse;
