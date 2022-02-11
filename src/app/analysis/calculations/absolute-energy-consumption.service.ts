@@ -153,7 +153,8 @@ export class AbsoluteEnergyConsumptionService {
         rollingSEnPI: rollingSEnPI,
         monthlyIncrementalImprovement: monthlyIncrementalImprovement * 100,
         rolling12MonthImprovement: rolling12MonthImprovement * 100,
-        predictorUsage: []
+        predictorUsage: [],
+        energyIntensity: 0
       });
 
       //set values for next iterations calculations
@@ -172,7 +173,8 @@ export class AbsoluteEnergyConsumptionService {
     let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = this.analysisCalculationsHelperService.getMonthlyStartAndEndDate(facility, analysisItem);
     let baselineDate: Date = monthlyStartAndEndDate.baselineDate;
     let baselineYear: number = this.analysisCalculationsHelperService.getFiscalYear(baselineDate, facility);
-    return this.analysisCalculationsHelperService.getAnnualAnalysisSummary(baselineYear, analysisItem, facility, monthlyAnalysisSummaryData);
+    // return this.analysisCalculationsHelperService.getAnnualAnalysisSummary(baselineYear, analysisItem, facility, monthlyAnalysisSummaryData);
+    return;
   }
 
 }

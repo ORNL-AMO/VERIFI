@@ -5,7 +5,7 @@
                 [routerLinkActive]="['active']">Analysis
                 Options</a></li>
         <!--ENERGY INTENSITY-->
-        <li *ngIf="selectedGroup.analysisType == 'energyIntensity'"
+        <!-- <li *ngIf="selectedGroup.analysisType == 'energyIntensity'"
             [ngClass]="{'disabled': groupHasError, 'error': groupHasError}"><a
                 routerLink="/analysis/run-analysis/group-analysis/{{groupId}}/annual-energy-intensity"
                 [routerLinkActive]="['active']">Annual
@@ -14,38 +14,46 @@
             [ngClass]="{'disabled': groupHasError, 'error': groupHasError}"><a
                 routerLink="/analysis/run-analysis/group-analysis/{{groupId}}/monthly-energy-intensity"
                 [routerLinkActive]="['active']">Monthly
-                Energy Intensity</a></li>
+                Energy Intensity</a></li> -->
         <!--REGRESSION-->
         <!-- <li *ngIf="selectedGroup.analysisType == 'regression'"
             [ngClass]="{'disabled': groupHasError, 'error': groupHasError}"><a
                 routerLink="/analysis/run-analysis/group-analysis/{{groupId}}/regression-model-selection"
                 [routerLinkActive]="['active']">Model Selection</a></li> -->
-        <li *ngIf="selectedGroup.analysisType == 'regression'"
+        <!-- <li *ngIf="selectedGroup.analysisType == 'regression'"
             [ngClass]="{'disabled': groupHasError, 'error': groupHasError}"><a
                 routerLink="/analysis/run-analysis/group-analysis/{{groupId}}/annual-analysis"
                 [routerLinkActive]="['active']">Annual Regression Analysis</a></li>
         <li *ngIf="selectedGroup.analysisType == 'regression'"
             [ngClass]="{'disabled': groupHasError, 'error': groupHasError}"><a
                 routerLink="/analysis/run-analysis/group-analysis/{{groupId}}/monthly-regression-analysis"
-                [routerLinkActive]="['active']">Monthly Regression Analysis</a></li>
+                [routerLinkActive]="['active']">Monthly Regression Analysis</a></li> -->
         <!--ABSOLUTE ENERGY CONSUMPTION-->
-        <li *ngIf="selectedGroup.analysisType == 'absoluteEnergyConsumption'"
+        <!-- <li *ngIf="selectedGroup.analysisType == 'absoluteEnergyConsumption'"
             [ngClass]="{'disabled': groupHasError, 'error': groupHasError}"><a
                 routerLink="/analysis/run-analysis/group-analysis/{{groupId}}/annual-analysis"
                 [routerLinkActive]="['active']">Annual Absolute Energy Consumption</a></li>
         <li *ngIf="selectedGroup.analysisType == 'absoluteEnergyConsumption'"
             [ngClass]="{'disabled': groupHasError, 'error': groupHasError}"><a
                 routerLink="/analysis/run-analysis/group-analysis/{{groupId}}/monthly-absolute-energy-consumption"
-                [routerLinkActive]="['active']">Monthly Absolute Energy Consumption</a></li>
+                [routerLinkActive]="['active']">Monthly Absolute Energy Consumption</a></li> -->
         <!--MODIFIED ENERGY INTESNITY-->
-        <li *ngIf="selectedGroup.analysisType == 'modifiedEnergyIntensity'"
+        <!-- <li *ngIf="selectedGroup.analysisType == 'modifiedEnergyIntensity'"
         [ngClass]="{'disabled': groupHasError, 'error': groupHasError}"><a
             routerLink="/analysis/run-analysis/group-analysis/{{groupId}}/annual-analysis"
             [routerLinkActive]="['active']">Annual Modified Energy Intensity</a></li>
     <li *ngIf="selectedGroup.analysisType == 'modifiedEnergyIntensity'"
         [ngClass]="{'disabled': groupHasError, 'error': groupHasError}"><a
             routerLink="/analysis/run-analysis/group-analysis/{{groupId}}/monthly-modified-energy-intensity"
-            [routerLinkActive]="['active']">Monthly Modified Energy Intensity</a></li>
+            [routerLinkActive]="['active']">Monthly Modified Energy Intensity</a></li> -->
+
+
+        <li [ngClass]="{'disabled': groupHasError, 'error': groupHasError}"><a
+                routerLink="/analysis/run-analysis/group-analysis/{{groupId}}/annual-analysis"
+                [routerLinkActive]="['active']">Annual Analysis</a></li>
+        <li [ngClass]="{'disabled': groupHasError, 'error': groupHasError}"><a
+                routerLink="/analysis/run-analysis/group-analysis/{{groupId}}/monthly-analysis"
+                [routerLinkActive]="['active']">Monthly Analysis</a></li>
     </ul>
 </nav>
 <div class="content-padding">

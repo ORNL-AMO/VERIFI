@@ -16,6 +16,10 @@
                 {{predictorVariable.name}} <br *ngIf="predictorVariable.unit">
                 <span class="small" *ngIf="predictorVariable.unit">({{predictorVariable.unit}})</span>
             </th>
+            <th *ngIf="group.analysisType == 'energyIntensity'" (click)="setOrderDataField('energyIntensity')"
+                [ngClass]="{'active': orderDataField == 'energyIntensity'}">
+                Energy<br>Intensity
+            </th>
             <th (click)="setOrderDataField('modeledEnergy')" [ngClass]="{'active': orderDataField == 'modeledEnergy'}">
                 Modeled <br>Energy
             </th>
@@ -64,6 +68,9 @@
             </td>
             <td *ngFor="let pUsage of data.predictorUsage">
                 {{pUsage | customNumber}}
+            </td>
+            <td *ngIf="group.analysisType == 'energyIntensity'">
+                {{data.energyIntensity | customNumber}}
             </td>
             <td>
                 {{data.modeledEnergy | customNumber}}

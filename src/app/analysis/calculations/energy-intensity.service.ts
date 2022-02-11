@@ -5,7 +5,7 @@ import { AnalysisGroup, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtil
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import * as _ from 'lodash';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
-import { AnnualGroupSummary, FacilityGroupSummary, FacilityGroupTotals, FacilityYearGroupSummary, MonthlyGroupSummary } from 'src/app/models/analysis';
+import { AnnualAnalysisSummary, AnnualGroupSummary, FacilityGroupSummary, FacilityGroupTotals, FacilityYearGroupSummary, MonthlyGroupSummary } from 'src/app/models/analysis';
 import { ConvertMeterDataService } from 'src/app/shared/helper-services/convert-meter-data.service';
 import { AnalysisCalculationsHelperService } from './analysis-calculations-helper.service';
 
@@ -20,8 +20,8 @@ export class EnergyIntensityService {
     private convertMeterDataService: ConvertMeterDataService,
     private analysisCalculationsHelperService: AnalysisCalculationsHelperService) { }
 
-  calculateAnnualGroupSummaries(analysisItem: IdbAnalysisItem, selectedGroup: AnalysisGroup, facility: IdbFacility): Array<AnnualGroupSummary> {
-    let annualGroupSummaries: Array<AnnualGroupSummary> = new Array();
+  calculateAnnualGroupSummaries(analysisItem: IdbAnalysisItem, selectedGroup: AnalysisGroup, facility: IdbFacility): Array<AnnualAnalysisSummary> {
+    let annualGroupSummaries: Array<AnnualAnalysisSummary> = new Array();
 
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
     let groupMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.groupId == selectedGroup.idbGroupId });
@@ -40,6 +40,12 @@ export class EnergyIntensityService {
     let baselineEnergyIntensity: number;
     let previousYearEnergyIntensity: number = 0;
     let previousYearProduction: number = 0;
+    let previousYearSavings: number = 0;
+    let previousYearModeledEnergyUse: number = 0;
+    let totalEnergySavings: number = 0;
+    let totalModeledEnergySavings: number = 0;
+    let baselineModeledEnergy: number;
+    let baselineSEnPI: number;
     let facilityPredictorData: Array<IdbPredictorEntry> = this.predictorDbService.facilityPredictorEntries.getValue();
     let productionPredictors: Array<PredictorData> = selectedGroup.predictorVariables.filter(variable => {
       return variable.productionInAnalysis;
@@ -55,21 +61,24 @@ export class EnergyIntensityService {
 
     for (let summaryYear: number = baselineYear; summaryYear <= reportYear; summaryYear++) {
       let summaryYearData: Array<MonthlyData> = this.analysisCalculationsHelperService.filterYearMeterData(allMeterData, summaryYear, facility);
-      let totalEnergyUse: number = _.sumBy(summaryYearData, 'energyUse');
+      let energyUse: number = _.sumBy(summaryYearData, 'energyUse');
       let summaryYearPredictors: Array<IdbPredictorEntry> = this.analysisCalculationsHelperService.filterYearPredictorData(facilityPredictorData, summaryYear, facility);
 
       let predictorData: Array<PredictorData> = summaryYearPredictors.flatMap(yearPredictor => { return yearPredictor.predictors });
       let productionPredictors: Array<PredictorData> = predictorData.filter(data => { return productionPredictorIds.includes(data.id) });
 
       let totalProduction: number = _.sumBy(productionPredictors, 'amount');
-      let energyIntensity: number = totalEnergyUse / totalProduction;
+      let energyIntensity: number = energyUse / totalProduction;
 
+      let modeledEnergyUse: number = totalProduction * baselineEnergyIntensity;
       if (summaryYear == baselineYear) {
-        baselineEnergyUse = totalEnergyUse;
-        previousYearEnergyUse = totalEnergyUse;
+        baselineEnergyUse = energyUse;
+        previousYearEnergyUse = energyUse;
         baselineProduction = totalProduction
         baselineEnergyIntensity = energyIntensity;
         previousYearProduction = totalProduction;
+        previousYearModeledEnergyUse = modeledEnergyUse;
+        baselineModeledEnergy = modeledEnergyUse;
       }
 
       let cumulativeEnergyIntensityChange: number = (1 - (energyIntensity / baselineEnergyIntensity)) * 100;
@@ -78,28 +87,55 @@ export class EnergyIntensityService {
       if (facility.fiscalYear == 'nonCalendarYear' && facility.fiscalYearCalendarEnd) {
         yearDisplay = yearDisplay + 1;
       }
+
+      let SEnPI: number;
+      let cumulativeSavings: number = 0;
+      let annualSavings: number = 0;
+      if (summaryYear > baselineYear) {
+        SEnPI = (energyUse * baselineModeledEnergy) / (modeledEnergyUse * baselineEnergyUse);
+      } else {
+        SEnPI = modeledEnergyUse / energyUse;
+      }
+      if (summaryYear == baselineYear) {
+        baselineSEnPI = SEnPI;
+        previousYearEnergyUse = energyUse;
+        previousYearModeledEnergyUse = modeledEnergyUse;
+      } else if (summaryYear > baselineYear) {
+        cumulativeSavings = 1 - SEnPI;
+        annualSavings = cumulativeSavings - previousYearSavings;
+      }
+
+      let annualEnergySavings: number = previousYearEnergyUse - energyUse;
+      let annualModeledEnergySavings: number = previousYearModeledEnergyUse - modeledEnergyUse;
+      totalEnergySavings = totalEnergySavings + annualEnergySavings;
+      totalModeledEnergySavings = totalModeledEnergySavings + annualModeledEnergySavings;
       annualGroupSummaries.push({
         year: yearDisplay,
-        totalEnergy: totalEnergyUse,
-        totalEnergySavings: baselineEnergyUse - totalEnergyUse,
-        annualEnergySavings: previousYearEnergyUse - totalEnergyUse,
+        energyUse: energyUse,
+        totalEnergySavings: baselineEnergyUse - energyUse,
+        annualEnergySavings: previousYearEnergyUse - energyUse,
         totalProduction: totalProduction,
         totalProductionChange: baselineProduction - totalProduction,
         annualProductionChange: previousYearProduction - totalProduction,
         energyIntensity: energyIntensity,
         totalEnergyIntensityChange: cumulativeEnergyIntensityChange,
         annualEnergyIntensityChange: cumulativeEnergyIntensityChange - previousYearEnergyIntensity,
-        group: selectedGroup
-
+        group: selectedGroup,
+        modeledEnergyUse: modeledEnergyUse,
+        annualModeledEnergySavings: annualModeledEnergySavings,
+        totalModeledEnergySavings: totalModeledEnergySavings,
+        SEnPI: SEnPI,
+        cumulativeSavings: cumulativeSavings * 100,
+        annualSavings: annualSavings * 100,
       });
-      previousYearEnergyUse = totalEnergyUse;
+      previousYearEnergyUse = energyUse;
       previousYearEnergyIntensity = cumulativeEnergyIntensityChange;
       previousYearProduction = totalProduction;
     }
     return annualGroupSummaries;
   }
 
- 
+
 
 
 
@@ -163,27 +199,27 @@ export class EnergyIntensityService {
 
   calculateFacilitySummary(analysisItem: IdbAnalysisItem, facility: IdbFacility): Array<FacilityGroupSummary> {
     let baselineYear: number = facility.sustainabilityQuestions.energyReductionBaselineYear;
-    let groupSummaries: Array<AnnualGroupSummary> = new Array();
+    let groupSummaries: Array<AnnualAnalysisSummary> = new Array();
     analysisItem.groups.forEach(group => {
       let groupMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getGroupMetersByGroupId(group.idbGroupId)
       if (groupMeters.length != 0) {
-        let groupSummary: Array<AnnualGroupSummary> = this.calculateAnnualGroupSummaries(analysisItem, group, facility);
+        let groupSummary: Array<AnnualAnalysisSummary> = this.calculateAnnualGroupSummaries(analysisItem, group, facility);
         groupSummaries = groupSummaries.concat(groupSummary);
       }
     });
     let facilityGroupSummaries: Array<FacilityGroupSummary> = new Array();
 
-    let baselineGroupSummaries: Array<AnnualGroupSummary> = groupSummaries.filter(summary => { return summary.year == baselineYear })
+    let baselineGroupSummaries: Array<AnnualAnalysisSummary> = groupSummaries.filter(summary => { return summary.year == baselineYear })
     let totalEnergy: number = _.sumBy(baselineGroupSummaries, 'totalEnergy');
     analysisItem.groups.forEach(group => {
       let groupMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getGroupMetersByGroupId(group.idbGroupId)
       if (groupMeters.length != 0) {
         let summaries: Array<FacilityYearGroupSummary> = new Array()
-        let groupSummary: Array<AnnualGroupSummary> = this.calculateAnnualGroupSummaries(analysisItem, group, facility);
-        let baselineSummary: AnnualGroupSummary = groupSummary.find(summary => { return summary.year == baselineYear });
-        let percentBaseline: number = baselineSummary.totalEnergy / totalEnergy;
+        let groupSummary: Array<AnnualAnalysisSummary> = this.calculateAnnualGroupSummaries(analysisItem, group, facility);
+        let baselineSummary: AnnualAnalysisSummary = groupSummary.find(summary => { return summary.year == baselineYear });
+        let percentBaseline: number = baselineSummary.energyUse / totalEnergy;
         for (let summaryYear: number = baselineYear; summaryYear <= analysisItem.reportYear; summaryYear++) {
-          let summary: AnnualGroupSummary = groupSummary.find(summary => { return summary.year == summaryYear });
+          let summary: AnnualAnalysisSummary = groupSummary.find(summary => { return summary.year == summaryYear });
           summaries.push({
             year: summary.year,
             energyIntensity: summary.energyIntensity,
@@ -193,7 +229,7 @@ export class EnergyIntensityService {
             totalImprovementContribution: percentBaseline * summary.totalEnergyIntensityChange,
             totalEnergySavings: summary.totalEnergySavings,
             annualEnergySavings: summary.annualEnergySavings,
-            totalEnergy: summary.totalEnergy,
+            totalEnergy: summary.energyUse,
             totalProduction: summary.totalProduction
           })
         };
@@ -208,12 +244,12 @@ export class EnergyIntensityService {
     return facilityGroupSummaries;
   }
 
-  calculateFacilityGroupTotals(facilityGroupSummaries: Array<FacilityGroupSummary>, facility: IdbFacility, analysisItem: IdbAnalysisItem): Array<FacilityGroupTotals>{
+  calculateFacilityGroupTotals(facilityGroupSummaries: Array<FacilityGroupSummary>, facility: IdbFacility, analysisItem: IdbAnalysisItem): Array<FacilityGroupTotals> {
     let baselineYear: number = facility.sustainabilityQuestions.energyReductionBaselineYear;
     let totals: Array<FacilityGroupTotals> = new Array();
-    let allSummaries: Array<FacilityYearGroupSummary> = facilityGroupSummaries.flatMap(summary => {return summary.summaries});
+    let allSummaries: Array<FacilityYearGroupSummary> = facilityGroupSummaries.flatMap(summary => { return summary.summaries });
     for (let summaryYear: number = baselineYear; summaryYear <= analysisItem.reportYear; summaryYear++) {
-      let filteredSummaries: Array<FacilityYearGroupSummary> = allSummaries.filter(summary => {return summary.year == summaryYear});
+      let filteredSummaries: Array<FacilityYearGroupSummary> = allSummaries.filter(summary => { return summary.year == summaryYear });
       totals.push({
         year: summaryYear,
         // improvementContribution: number,
@@ -224,12 +260,12 @@ export class EnergyIntensityService {
         energyIntensityImprovement: _.sumBy(filteredSummaries, 'totalImprovementContribution'),
         totalEnergy: _.sumBy(filteredSummaries, 'totalEnergy'),
         // totalProduction: number,
-        totalEnergySavings:  _.sumBy(filteredSummaries, 'totalEnergySavings'),
-        annualEnergySavings:  _.sumBy(filteredSummaries, 'annualEnergySavings')
+        totalEnergySavings: _.sumBy(filteredSummaries, 'totalEnergySavings'),
+        annualEnergySavings: _.sumBy(filteredSummaries, 'annualEnergySavings')
       })
     }
     return totals;
   }
 
- 
+
 }

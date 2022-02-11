@@ -31,7 +31,7 @@ export class GroupAnnualEnergyIntensityComponent implements OnInit {
     this.setGroupError();
     if (!this.groupHasError) {
       this.facility = this.facilityDbService.selectedFacility.getValue();
-      this.annualGroupSummaries = this.energyIntensityService.calculateAnnualGroupSummaries(this.analysisItem, this.group, this.facility);
+      // this.annualGroupSummaries = this.energyIntensityService.calculateAnnualGroupSummaries(this.analysisItem, this.group, this.facility);
     }
   }
 

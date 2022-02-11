@@ -205,7 +205,8 @@ export class RegressionAnalysisService {
         yearToDateSEnPI: yearToDateSEnPI,
         rollingSEnPI: rollingSEnPI,
         monthlyIncrementalImprovement: monthlyIncrementalImprovement * 100,
-        rolling12MonthImprovement: rolling12MonthImprovement * 100
+        rolling12MonthImprovement: rolling12MonthImprovement * 100,
+        energyIntensity: 0
       });
 
       //set values for next iterations calculations
@@ -228,6 +229,7 @@ export class RegressionAnalysisService {
 
   getAnnualRegressionSummary(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility): Array<AnnualAnalysisSummary> {
     let monthlyRegressionSummary: MonthlyAnalysisSummary = this.getMonthlyRegressionSummary(selectedGroup, analysisItem, facility, true)
-    return this.analysisCalculationsHelperService.getAnnualAnalysisSummary(selectedGroup.regressionModelYear, analysisItem, facility, monthlyRegressionSummary.monthlyAnalysisSummaryData);
+    // return this.analysisCalculationsHelperService.getAnnualAnalysisSummary(selectedGroup.regressionModelYear, analysisItem, facility, monthlyRegressionSummary.monthlyAnalysisSummaryData);
+    return;
   }
 }

@@ -1,8 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AnalysisService } from 'src/app/analysis/analysis.service';
-import { AbsoluteEnergyConsumptionService } from 'src/app/analysis/calculations/absolute-energy-consumption.service';
+import { AnalysisCalculationsHelperService } from 'src/app/analysis/calculations/analysis-calculations-helper.service';
 import { ModifiedEnergyIntensityService } from 'src/app/analysis/calculations/modified-energy-intensity.service';
-import { RegressionAnalysisService } from 'src/app/analysis/calculations/regression-analysis.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AnnualAnalysisSummary } from 'src/app/models/analysis';
@@ -21,8 +20,7 @@ export class AnnualAnalysisSummaryComponent implements OnInit {
   facility: IdbFacility;
   annualAnalysisSummary: Array<AnnualAnalysisSummary>
   constructor(private analysisService: AnalysisService, private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService,
-    private regressionAnalysisService: RegressionAnalysisService, private absoluteEnergyConsumptionService: AbsoluteEnergyConsumptionService,
-    private modifiedEnergyIntensityService: ModifiedEnergyIntensityService) {
+    private modifiedEnergyIntensityService: ModifiedEnergyIntensityService, private analysisCalculationsHelperService: AnalysisCalculationsHelperService) {
   }
 
   ngOnInit(): void {
@@ -30,12 +28,10 @@ export class AnnualAnalysisSummaryComponent implements OnInit {
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     this.group = this.analysisService.selectedGroup.getValue();
     this.facility = this.facilityDbService.selectedFacility.getValue();
-    if (this.group.analysisType == 'regression') {
-      this.annualAnalysisSummary = this.regressionAnalysisService.getAnnualRegressionSummary(this.group, this.analysisItem, this.facility);
-    } else if (this.group.analysisType == 'absoluteEnergyConsumption') {
-      this.annualAnalysisSummary = this.absoluteEnergyConsumptionService.getAnnualAnalysisSummary(this.group, this.analysisItem, this.facility);
-    } else if (this.group.analysisType == 'modifiedEnergyIntensity') {
+    if(this.group.analysisType == 'modifiedEnergyIntensity'){
       this.annualAnalysisSummary = this.modifiedEnergyIntensityService.getAnnualAnalysisSummary(this.group, this.analysisItem, this.facility);
+    }else{
+      this.annualAnalysisSummary = this.analysisCalculationsHelperService.getAnnualAnalysisSummary(this.analysisItem, this.facility, this.group);
     }
   }
 

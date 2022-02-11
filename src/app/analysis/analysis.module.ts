@@ -25,12 +25,14 @@ import { MonthlyRegressionAnalysisComponent } from './run-analysis/group-analysi
 import { MonthlyRegressionAnalysisGraphComponent } from './run-analysis/group-analysis/regression/monthly-regression-analysis/monthly-regression-analysis-graph/monthly-regression-analysis-graph.component';
 import { MonthlyAbsoluteEnergyConsumptionComponent } from './run-analysis/group-analysis/monthly-absolute-energy-consumption/monthly-absolute-energy-consumption.component';
 import { MonthlyAbsoluteConsumptionGraphComponent } from './run-analysis/group-analysis/monthly-absolute-energy-consumption/monthly-absolute-consumption-graph/monthly-absolute-consumption-graph.component';
-import { MonthlyAnalysisSummaryTableComponent } from './run-analysis/group-analysis/monthly-analysis-summary-table/monthly-analysis-summary-table.component';
+import { MonthlyAnalysisSummaryTableComponent } from './run-analysis/group-analysis/monthly-analysis-summary/monthly-analysis-summary-table/monthly-analysis-summary-table.component';
 import { AnnualAnalysisSummaryTableComponent } from './run-analysis/group-analysis/annual-analysis-summary/annual-analysis-summary-table/annual-analysis-summary-table.component';
 import { AnnualAnalysisSummaryComponent } from './run-analysis/group-analysis/annual-analysis-summary/annual-analysis-summary.component';
 import { AnnualAnalysisSummaryGraphComponent } from './run-analysis/group-analysis/annual-analysis-summary/annual-analysis-summary-graph/annual-analysis-summary-graph.component';
 import { MonthlyModifiedEnergyIntensityComponent } from './run-analysis/group-analysis/monthly-modified-energy-intensity/monthly-modified-energy-intensity.component';
 import { MonthlyModifiedEnergyIntensityGraphComponent } from './run-analysis/group-analysis/monthly-modified-energy-intensity/monthly-modified-energy-intensity-graph/monthly-modified-energy-intensity-graph.component';
+import { MonthlyAnalysisSummaryComponent } from './run-analysis/group-analysis/monthly-analysis-summary/monthly-analysis-summary.component';
+import { MonthlyAnalysisSummaryGraphComponent } from './run-analysis/group-analysis/monthly-analysis-summary/monthly-analysis-summary-graph/monthly-analysis-summary-graph.component';
 
 @NgModule({
   declarations: [
@@ -60,7 +62,9 @@ import { MonthlyModifiedEnergyIntensityGraphComponent } from './run-analysis/gro
     AnnualAnalysisSummaryGraphComponent,
     AnnualAnalysisSummaryComponent,
     MonthlyModifiedEnergyIntensityComponent,
-    MonthlyModifiedEnergyIntensityGraphComponent
+    MonthlyModifiedEnergyIntensityGraphComponent,
+    MonthlyAnalysisSummaryComponent,
+    MonthlyAnalysisSummaryGraphComponent
   ],
   imports: [
     CommonModule,

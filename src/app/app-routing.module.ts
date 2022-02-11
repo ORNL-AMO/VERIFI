@@ -38,6 +38,7 @@ import { MonthlyRegressionAnalysisComponent } from './analysis/run-analysis/grou
 import { MonthlyAbsoluteEnergyConsumptionComponent } from './analysis/run-analysis/group-analysis/monthly-absolute-energy-consumption/monthly-absolute-energy-consumption.component';
 import { AnnualAnalysisSummaryComponent } from './analysis/run-analysis/group-analysis/annual-analysis-summary/annual-analysis-summary.component';
 import { MonthlyModifiedEnergyIntensityComponent } from './analysis/run-analysis/group-analysis/monthly-modified-energy-intensity/monthly-modified-energy-intensity.component';
+import { MonthlyAnalysisSummaryComponent } from './analysis/run-analysis/group-analysis/monthly-analysis-summary/monthly-analysis-summary.component';
 
 const routes: Routes = [
   {
@@ -131,13 +132,9 @@ const routes: Routes = [
             children: [
               { path: '', pathMatch: 'full', redirectTo: 'options' },
               { path: 'options', component: GroupAnalysisOptionsComponent },
-              { path: 'annual-energy-intensity', component: GroupAnnualEnergyIntensityComponent },
-              { path: 'monthly-energy-intensity', component: GroupMonthlyEnergyIntensityComponent },
               { path: 'regression-model-selection', component: RegressionModelSelectionComponent },
-              { path: 'monthly-regression-analysis', component: MonthlyRegressionAnalysisComponent },
               { path: 'annual-analysis', component: AnnualAnalysisSummaryComponent },
-              { path: 'monthly-absolute-energy-consumption', component: MonthlyAbsoluteEnergyConsumptionComponent },
-              { path: 'monthly-modified-energy-intensity', component: MonthlyModifiedEnergyIntensityComponent }
+              { path: 'monthly-analysis', component: MonthlyAnalysisSummaryComponent}
             ]
           },
           {

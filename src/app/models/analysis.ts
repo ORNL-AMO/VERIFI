@@ -81,7 +81,8 @@ export interface MonthlyAnalysisSummaryData {
   yearToDateSEnPI: number,
   rollingSEnPI: number,
   monthlyIncrementalImprovement: number,
-  rolling12MonthImprovement: number
+  rolling12MonthImprovement: number,
+  energyIntensity: number
 }
 
 
@@ -96,5 +97,12 @@ export interface AnnualAnalysisSummary {
   SEnPI: number,
   cumulativeSavings: number,
   annualSavings: number,
-  energyIntensity: number
+
+  totalProduction: number,
+  annualProductionChange: number,
+  totalProductionChange: number,
+  energyIntensity: number,
+  totalEnergyIntensityChange: number,
+  annualEnergyIntensityChange: number,
+  group?: AnalysisGroup
 }

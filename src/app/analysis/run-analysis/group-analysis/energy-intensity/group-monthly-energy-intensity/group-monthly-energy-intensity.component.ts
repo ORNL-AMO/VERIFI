@@ -29,8 +29,8 @@ export class GroupMonthlyEnergyIntensityComponent implements OnInit {
     this.group = this.analysisService.selectedGroup.getValue();
     this.facility = this.facilityDbService.selectedFacility.getValue();
     this.monthlyGroupSummaries = this.energyIntensityService.calculateMonthlyGroupSummaries(this.analysisItem, this.group, this.facility);
-    let annualGroupSummaries: Array<AnnualGroupSummary> = this.energyIntensityService.calculateAnnualGroupSummaries(this.analysisItem, this.group, this.facility);
-    this.baselineEnergyIntensity = annualGroupSummaries[0].energyIntensity;
+    // let annualGroupSummaries: Array<AnnualGroupSummary> = this.energyIntensityService.calculateAnnualGroupSummaries(this.analysisItem, this.group, this.facility);
+    // this.baselineEnergyIntensity = annualGroupSummaries[0].energyIntensity;
   }
 
   setDataDisplay(display: 'table' | 'graph') {

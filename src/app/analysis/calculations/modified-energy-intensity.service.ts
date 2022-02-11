@@ -200,7 +200,8 @@ export class ModifiedEnergyIntensityService {
         yearToDateSEnPI: yearToDateSEnPI,
         rollingSEnPI: rollingSEnPI,
         monthlyIncrementalImprovement: monthlyIncrementalImprovement * 100,
-        rolling12MonthImprovement: rolling12MonthImprovement * 100
+        rolling12MonthImprovement: rolling12MonthImprovement * 100,
+        energyIntensity: 0
       });
 
       //set values for next iterations calculations
@@ -314,7 +315,12 @@ export class ModifiedEnergyIntensityService {
         SEnPI: SEnPI,
         cumulativeSavings: cumulativeSavings * 100,
         annualSavings: annualSavings * 100,
-        energyIntensity: energyIntensity
+        energyIntensity: energyIntensity,
+        totalProduction: 0,
+        totalEnergyIntensityChange: 0,
+        totalProductionChange: 0,
+        annualProductionChange: 0,
+        annualEnergyIntensityChange: 0
       })
       previousYearSavings = cumulativeSavings;
       previousYearEnergyUse = totalMeterEnergyUse;

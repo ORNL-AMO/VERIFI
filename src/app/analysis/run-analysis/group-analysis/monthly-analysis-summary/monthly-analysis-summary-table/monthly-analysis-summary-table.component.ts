@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { AnalysisService } from 'src/app/analysis/analysis.service';
 import { MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
-import { IdbAnalysisItem, IdbFacility, PredictorData } from 'src/app/models/idb';
+import { AnalysisGroup, IdbAnalysisItem, IdbFacility, PredictorData } from 'src/app/models/idb';
 
 @Component({
   selector: 'app-monthly-analysis-summary-table',
@@ -18,7 +18,9 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
   @Input()
   facility: IdbFacility;
   @Input()
-  predictorVariables: Array<PredictorData>
+  predictorVariables: Array<PredictorData>;
+  @Input()
+  group: AnalysisGroup;
 
   orderDataField: string = 'date';
   orderByDirection: 'asc' | 'desc' = 'asc';
