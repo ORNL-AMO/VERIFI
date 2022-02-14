@@ -231,7 +231,6 @@ export class AnalysisCalculationsHelperService {
     let monthIndex: number = 0;
     let previousYearToDateSEnPI: number = 0;
     let modelYear: number;
-    let baselineEnergyIntensity: number;
     let baselineYearPredictorData: Array<IdbPredictorEntry> = this.filterYearPredictorData(facilityPredictorData, baselineYear, facility);
     let baselineMeterData: Array<MonthlyData> = this.filterYearMeterData(allMeterData, baselineYear, facility);
     let totalBaselineYearEnergy: number = _.sumBy(baselineMeterData, 'energyUse');
@@ -280,12 +279,9 @@ export class AnalysisCalculationsHelperService {
           }
         });
       }
-
+      
       let totalProduction: number = _.sum(productionUsage);
       let energyIntensity: number = energyUse / totalProduction;
-      if (fiscalYear == baselineYear) {
-        baselineEnergyIntensity = energyIntensity;
-      }
 
       if (selectedGroup.analysisType == 'regression') {
         modelYear = selectedGroup.regressionModelYear;
@@ -304,7 +300,7 @@ export class AnalysisCalculationsHelperService {
         modeledEnergy = baselineActualData[monthIndex];
       } else if (selectedGroup.analysisType == 'energyIntensity') {
         modelYear = baselineYear;
-        modeledEnergy = totalProduction * baselineEnergyIntensity;
+        modeledEnergy = totalProduction * baselineYearEnergyIntensity;
       } else if (selectedGroup.analysisType == 'modifiedEnergyIntensity') {
         modelYear = baselineYear;
         let baseLoad: number = selectedGroup.averagePercentBaseload / 100;
