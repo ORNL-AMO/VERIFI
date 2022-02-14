@@ -1,0 +1,4 @@
+tr.fiscal-year-end:not(:first-of-type){
+    border-top: solid;
+    border-width: 5px;
+}

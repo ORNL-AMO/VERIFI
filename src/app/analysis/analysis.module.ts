@@ -10,7 +10,6 @@ import { FacilityAnalysisTableComponent } from './run-analysis/facility-analysis
 import { GroupAnalysisComponent } from './run-analysis/group-analysis/group-analysis.component';
 import { GroupAnalysisOptionsComponent } from './run-analysis/group-analysis/group-analysis-options/group-analysis-options.component';
 import { GroupMonthlyEnergyIntensityComponent } from './run-analysis/group-analysis/energy-intensity/group-monthly-energy-intensity/group-monthly-energy-intensity.component';
-import { GroupAnnualEnergyIntensityComponent } from './run-analysis/group-analysis/energy-intensity/group-annual-energy-intensity/group-annual-energy-intensity.component';
 import { AnalysisSetupComponent } from './run-analysis/analysis-setup/analysis-setup.component';
 import { FormsModule } from '@angular/forms';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
@@ -18,8 +17,6 @@ import { RouterModule } from '@angular/router';
 import { HelperPipesModule } from '../shared/helper-pipes/helper-pipes.module';
 import { MonthlyAnalysisGraphComponent } from './run-analysis/group-analysis/energy-intensity/group-monthly-energy-intensity/monthly-analysis-graph/monthly-analysis-graph.component';
 import { MonthlyAnalysisTableComponent } from './run-analysis/group-analysis/energy-intensity/group-monthly-energy-intensity/monthly-analysis-table/monthly-analysis-table.component';
-import { AnnualEnergyIntensityGraphComponent } from './run-analysis/group-analysis/energy-intensity/group-annual-energy-intensity/annual-energy-intensity-graph/annual-energy-intensity-graph.component';
-import { AnnualEnergyIntensityTableComponent } from './run-analysis/group-analysis/energy-intensity/group-annual-energy-intensity/annual-energy-intensity-table/annual-energy-intensity-table.component';
 import { RegressionModelSelectionComponent } from './run-analysis/group-analysis/regression/regression-model-selection/regression-model-selection.component';
 import { MonthlyRegressionAnalysisComponent } from './run-analysis/group-analysis/regression/monthly-regression-analysis/monthly-regression-analysis.component';
 import { MonthlyRegressionAnalysisGraphComponent } from './run-analysis/group-analysis/regression/monthly-regression-analysis/monthly-regression-analysis-graph/monthly-regression-analysis-graph.component';
@@ -33,6 +30,12 @@ import { MonthlyModifiedEnergyIntensityComponent } from './run-analysis/group-an
 import { MonthlyModifiedEnergyIntensityGraphComponent } from './run-analysis/group-analysis/monthly-modified-energy-intensity/monthly-modified-energy-intensity-graph/monthly-modified-energy-intensity-graph.component';
 import { MonthlyAnalysisSummaryComponent } from './run-analysis/group-analysis/monthly-analysis-summary/monthly-analysis-summary.component';
 import { MonthlyAnalysisSummaryGraphComponent } from './run-analysis/group-analysis/monthly-analysis-summary/monthly-analysis-summary-graph/monthly-analysis-summary-graph.component';
+import { MonthlyFacilityAnalysisComponent } from './run-analysis/facility-analysis/monthly-facility-analysis/monthly-facility-analysis.component';
+import { MonthlyFacilityAnalysisTableComponent } from './run-analysis/facility-analysis/monthly-facility-analysis/monthly-facility-analysis-table/monthly-facility-analysis-table.component';
+import { MonthlyFacilityAnalysisGraphComponent } from './run-analysis/facility-analysis/monthly-facility-analysis/monthly-facility-analysis-graph/monthly-facility-analysis-graph.component';
+import { AnnualFacilityAnalysisComponent } from './run-analysis/facility-analysis/annual-facility-analysis/annual-facility-analysis.component';
+import { AnnualFacilityAnalysisGraphComponent } from './run-analysis/facility-analysis/annual-facility-analysis/annual-facility-analysis-graph/annual-facility-analysis-graph.component';
+import { AnnualFacilityAnalysisTableComponent } from './run-analysis/facility-analysis/annual-facility-analysis/annual-facility-analysis-table/annual-facility-analysis-table.component';
 
 @NgModule({
   declarations: [
@@ -46,12 +49,9 @@ import { MonthlyAnalysisSummaryGraphComponent } from './run-analysis/group-analy
     GroupAnalysisComponent,
     GroupAnalysisOptionsComponent,
     GroupMonthlyEnergyIntensityComponent,
-    GroupAnnualEnergyIntensityComponent,
     AnalysisSetupComponent,
     MonthlyAnalysisGraphComponent,
     MonthlyAnalysisTableComponent,
-    AnnualEnergyIntensityGraphComponent,
-    AnnualEnergyIntensityTableComponent,
     RegressionModelSelectionComponent,
     MonthlyRegressionAnalysisComponent,
     MonthlyRegressionAnalysisGraphComponent,
@@ -64,7 +64,13 @@ import { MonthlyAnalysisSummaryGraphComponent } from './run-analysis/group-analy
     MonthlyModifiedEnergyIntensityComponent,
     MonthlyModifiedEnergyIntensityGraphComponent,
     MonthlyAnalysisSummaryComponent,
-    MonthlyAnalysisSummaryGraphComponent
+    MonthlyAnalysisSummaryGraphComponent,
+    MonthlyFacilityAnalysisComponent,
+    MonthlyFacilityAnalysisTableComponent,
+    MonthlyFacilityAnalysisGraphComponent,
+    AnnualFacilityAnalysisComponent,
+    AnnualFacilityAnalysisGraphComponent,
+    AnnualFacilityAnalysisTableComponent
   ],
   imports: [
     CommonModule,

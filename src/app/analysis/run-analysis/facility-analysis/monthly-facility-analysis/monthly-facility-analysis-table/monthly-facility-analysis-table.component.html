@@ -1,0 +1,93 @@
+<table class="table table-sm table-hover">
+    <thead>
+        <tr>
+            <th (click)="setOrderDataField('date')" [ngClass]="{'active': orderDataField == 'date'}">
+                Date
+            </th>
+            <th (click)="setOrderDataField('fiscalYear')" [ngClass]="{'active': orderDataField == 'fiscalYear'}">
+                Period
+            </th>
+            <th *ngFor="let groupData of monthlyFacilityAnalysisData[0].utilityUsage">
+                {{groupData.meterGroupId | groupName}}<br>
+                Total <br>Energy <br>
+                <!-- <span class="small">({{groupData.percentUsage | customNumber}} %)</span><br> -->
+                <span class="small">(<span class="small" [innerHTML]="analysisItem.energyUnit | settingsLabel"></span>)</span>
+            </th>
+            <th *ngFor="let groupData of monthlyFacilityAnalysisData[0].utilityUsage">
+                {{groupData.meterGroupId | groupName}}<br>
+                Modeled <br>Energy <br>
+                <span class="small">(<span class="small" [innerHTML]="analysisItem.energyUnit | settingsLabel"></span>)</span>
+            </th>
+            <!-- <th *ngFor="let predictorVariable of predictorVariables" (click)="setOrderDataField(predictorVariable.name)"
+                [ngClass]="{'active': orderDataField == predictorVariable.name}">
+                {{predictorVariable.name}} <br *ngIf="predictorVariable.unit">
+                <span class="small" *ngIf="predictorVariable.unit">({{predictorVariable.unit}})</span>
+            </th> -->
+            <th *ngFor="let groupData of monthlyFacilityAnalysisData[0].yearToDateSavings">
+                {{groupData.meterGroupId | groupName}}<br>
+                YTD <br>Savings
+            </th>
+            <th *ngFor="let groupData of monthlyFacilityAnalysisData[0].rollingSavings">
+                {{groupData.meterGroupId | groupName}}<br>
+                Rolling <br>Savings
+            </th>
+            <th (click)="setOrderDataField('yearToDateImprovment')"
+                [ngClass]="{'active': orderDataField == 'yearToDateImprovment'}">
+                YTD <br> Improvement<br> Over BL
+            </th>
+            <th (click)="setOrderDataField('monthlyIncrementalImprovement')"
+                [ngClass]="{'active': orderDataField == 'monthlyIncrementalImprovement'}">
+                Monthly <br>Incremental<br> Improvement
+            </th>
+            <th (click)="setOrderDataField('rolling12MonthImprovement')"
+                [ngClass]="{'active': orderDataField == 'rolling12MonthImprovement'}">
+                Rolling<br>
+                12-Month<br>
+                Improvement
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let data of monthlyFacilityAnalysisData | orderBy: orderDataField: orderByDirection |  slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage"
+            [ngClass]="{'fiscal-year-end': checkFiscalYearEnd(data.date)}">
+            <td>
+                {{data.date | date: 'MMMM, y'}}
+            </td>
+            <td>
+                {{data.fiscalYear}}
+            </td>
+            <td *ngFor="let usageData of data.utilityUsage">
+                {{usageData.usage | customNumber}}
+            </td>
+            <td *ngFor="let usageData of data.utilityUsage">
+                {{usageData.modeledUsage | customNumber}}
+            </td>
+            <!-- <td *ngFor="let pUsage of data.predictorUsage">
+                {{pUsage | customNumber}}
+            </td> -->
+            <td *ngFor="let savingsData of data.yearToDateSavings">
+                {{savingsData.savings | customNumber}}
+            </td>
+            <td *ngFor="let savingsData of data.rollingSavings">
+                {{savingsData.savings | customNumber}}
+            </td>
+            <td>
+                {{data.yearToDateImprovment | customNumber}}
+            </td>
+            <td>
+                {{data.monthlyIncrementalImprovement | customNumber}}
+            </td>
+            <td>
+                {{data.rolling12MonthImprovement | customNumber}}
+            </td>
+        </tr>
+    </tbody>
+</table>
+<div class="tableControls overflow-hidden">
+    <div class="item-right">
+        <ngb-pagination [collectionSize]="monthlyFacilityAnalysisData.length" [(page)]="currentPageNumber"
+            [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Default pagination">
+        </ngb-pagination>
+    </div>
+    <p class="item-right">{{monthlyFacilityAnalysisData.length}} entries</p>
+</div>

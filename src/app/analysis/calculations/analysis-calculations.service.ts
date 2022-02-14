@@ -19,7 +19,7 @@ export class AnalysisCalculationsService {
     private convertMeterDataService: ConvertMeterDataService, private utilityMeterDbService: UtilityMeterdbService,
     private predictorDbService: PredictordbService, private analysisCalculationsHelperService: AnalysisCalculationsHelperService) { }
 
-  getAnnualAnalysisSummary(analysisItem: IdbAnalysisItem, facility: IdbFacility, selectedGroup: AnalysisGroup): Array<AnnualAnalysisSummary> {
+  getAnnualAnalysisSummary(analysisItem: IdbAnalysisItem, facility: IdbFacility, selectedGroup: AnalysisGroup, monthlyAnalysisSummaryData?: Array<MonthlyAnalysisSummaryData>): Array<AnnualAnalysisSummary> {
     if (selectedGroup.analysisType == 'modifiedEnergyIntensity') {
       return this.getMEIAnnualAnalysisSummary(selectedGroup, analysisItem, facility);
     } else {
@@ -28,9 +28,11 @@ export class AnalysisCalculationsService {
       if (selectedGroup.analysisType == 'regression') {
         modelYear = selectedGroup.regressionModelYear;
       }
-      let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = this.getMonthlyAnalysisSummary(selectedGroup, analysisItem, facility).monthlyAnalysisSummaryData;
+      if (!monthlyAnalysisSummaryData) {
+        monthlyAnalysisSummaryData = this.getMonthlyAnalysisSummary(selectedGroup, analysisItem, facility).monthlyAnalysisSummaryData;
+      }
 
-      let annualRegressionSummary: Array<AnnualAnalysisSummary> = new Array();
+      let annualAnalysisSummary: Array<AnnualAnalysisSummary> = new Array();
       let baselineYear: number = facility.sustainabilityQuestions.energyReductionBaselineYear;
       let reportYear: number = analysisItem.reportYear;
       if (facility.fiscalYear == 'nonCalendarYear' && facility.fiscalYearCalendarEnd) {
@@ -79,7 +81,7 @@ export class AnalysisCalculationsService {
         let annualModeledEnergySavings: number = previousYearModeledEnergyUse - modeledEnergyUse;
         totalEnergySavings = totalEnergySavings + annualEnergySavings;
         totalModeledEnergySavings = totalModeledEnergySavings + annualModeledEnergySavings;
-        annualRegressionSummary.push({
+        annualAnalysisSummary.push({
           year: summaryYear,
           energyUse: energyUse,
           annualEnergySavings: annualEnergySavings,
@@ -101,7 +103,7 @@ export class AnalysisCalculationsService {
         previousYearEnergyUse = energyUse;
         previousYearModeledEnergyUse = modeledEnergyUse;
       }
-      return annualRegressionSummary;
+      return annualAnalysisSummary;
     }
   }
 
@@ -191,8 +193,6 @@ export class AnalysisCalculationsService {
             let predictorData: PredictorData = data.predictors.find(predictor => { return predictor.id == variable.id });
             usageVal = usageVal + predictorData.amount;
           });
-          //modeleted energy = predictor usage * coefficient
-          modeledEnergy = modeledEnergy + (usageVal * variable.regressionCoefficient);
           predictorUsage.push(usageVal);
           if (variable.production) {
             productionUsage.push(usageVal);
@@ -240,7 +240,7 @@ export class AnalysisCalculationsService {
       if (fiscalYear != baselineYear) {
         if (fiscalYear > modelYear) {
           //after model year
-          monthlySavings = energyUse - modeledEnergy;
+          monthlySavings = modeledEnergy - energyUse;
         } else {
           //before model year
           monthlySavings = previousMonthlySavings + ((previousEnergyUse - previousExpectedEnergyUse) - (energyUse - modeledEnergy));
@@ -264,6 +264,9 @@ export class AnalysisCalculationsService {
       //year to date SEnPI calculation
       //calculate baseline expected and entered energy use
       //in same months as baseline year
+      // if(fiscalYear == 2014){
+      //   debugger
+      // }
       let baselineExpectedEnergy: number = 0;
       let baselineEnergy: number = 0;
       for (let i = 0; i <= monthIndex; i++) {
@@ -301,7 +304,7 @@ export class AnalysisCalculationsService {
 
       //calculate year to date improvement
       if (fiscalYear > baselineYear) {
-        if (fiscalYear > selectedGroup.regressionModelYear) {
+        if (fiscalYear > modelYear) {
           yearToDateImprovement = 1 - yearToDateSEnPI;
         } else {
           yearToDateImprovement = (1 - baselineSEnPI[monthIndex]) - (1 - yearToDateSEnPI);
