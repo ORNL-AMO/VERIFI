@@ -140,8 +140,8 @@ export class FacilityAnalysisCalculationsService {
 
 
 
-  calculateAnnualFacilitySummaryData(facility: IdbFacility, analysisItem: IdbAnalysisItem): Array<AnnualFacilitySummaryData>{
-    let annualFacilitySummaryData: Array<AnnualFacilitySummaryData> = new Array();
+  calculateAnnualFacilitySummaryData(facility: IdbFacility, analysisItem: IdbAnalysisItem): Array<AnnualAnalysisSummary> {
+    let annualFacilitySummaryData: Array<AnnualAnalysisSummary> = new Array();
     let groupSummaries: Array<FacilityGroupSummary> = this.getGroupSummaries(analysisItem, facility);
 
     // let monthlyFacilityAnalysisData: Array<MonthlyFacilityAnalysisData> = this.calculateMonthlyFacilityAnalysis(facility, analysisItem);
@@ -157,6 +157,8 @@ export class FacilityAnalysisCalculationsService {
 
     let previousYearEnergyUse: number = 0;
     let baselineYearEnergyUse: number = 0;
+    let baselineYearModeledEnergyUse: number = 0;
+    let previousYearModeledEnergyUse: number = 0;
     for (let summaryYear: number = baselineYear; summaryYear <= reportYear; summaryYear++) {
       // let filteredFacilityAnalysisData: Array<MonthlyFacilityAnalysisData> = monthlyFacilityAnalysisData.filter(data => {
       //   return data.fiscalYear == summaryYear;
@@ -165,29 +167,47 @@ export class FacilityAnalysisCalculationsService {
       let cumulativeEnergyImprovement: number = 0;
       let annualEnergyImprovement: number = 0;
       let totalEnergy: number = 0;
+      let modeledEnergy: number = 0;
+
       groupSummaries.forEach(summary => {
-        let annualAnalysisSummary: AnnualAnalysisSummary = summary.annualAnalysisSummaries.find(summary => {return summary.year == summaryYear});
+        let annualAnalysisSummary: AnnualAnalysisSummary = summary.annualAnalysisSummaries.find(summary => { return summary.year == summaryYear });
         cumulativeEnergyImprovement += annualAnalysisSummary.cumulativeSavings * summary.percentBaseline;
         annualEnergyImprovement += annualAnalysisSummary.annualSavings * summary.percentBaseline;
         totalEnergy += annualAnalysisSummary.energyUse;
+        modeledEnergy += annualAnalysisSummary.modeledEnergyUse;
       });
-      if(summaryYear == baselineYear){
+      if (summaryYear == baselineYear) {
         baselineYearEnergyUse = totalEnergy;
         previousYearEnergyUse = totalEnergy;
+        previousYearModeledEnergyUse = modeledEnergy;
+        baselineYearModeledEnergyUse = modeledEnergy;
       }
 
-      let newSavings: number = baselineYearEnergyUse - totalEnergy;
-      let totalSavings: number = previousYearEnergyUse - totalEnergy;
-
+      let annualSavings: number = previousYearEnergyUse - totalEnergy;
+      let totalSavings: number = baselineYearEnergyUse - totalEnergy;
+      let annualModeledEnergySavings: number = previousYearModeledEnergyUse - modeledEnergy;
+      let totalModeledEnergySavings: number = baselineYearModeledEnergyUse - modeledEnergy;
       annualFacilitySummaryData.push({
         year: summaryYear,
-        cumulativeEnergyImprovement: cumulativeEnergyImprovement,
-        annualEnergyImprovement: annualEnergyImprovement,
-        totalEnergy: totalEnergy,
-        newSavings: newSavings, 
-        totalSavings: totalSavings
+        energyUse: totalEnergy,
+        annualEnergySavings: annualSavings,
+        totalEnergySavings: totalSavings,
+        modeledEnergyUse: modeledEnergy,
+        annualModeledEnergySavings: annualModeledEnergySavings,
+        totalModeledEnergySavings: totalModeledEnergySavings,
+        SEnPI: undefined,
+        cumulativeSavings: cumulativeEnergyImprovement,
+        annualSavings: annualEnergyImprovement,
+
+        totalProduction: undefined,
+        annualProductionChange: undefined,
+        totalProductionChange: undefined,
+        energyIntensity: undefined,
+        totalEnergyIntensityChange: undefined,
+        annualEnergyIntensityChange: undefined,
       });
       previousYearEnergyUse = totalEnergy;
+      previousYearModeledEnergyUse = modeledEnergy;
     }
 
     return annualFacilitySummaryData;
@@ -235,6 +255,6 @@ export interface AnnualFacilitySummaryData {
   cumulativeEnergyImprovement: number,
   annualEnergyImprovement: number,
   totalEnergy: number,
-  newSavings: number, 
+  annualSavings: number,
   totalSavings: number
 }
