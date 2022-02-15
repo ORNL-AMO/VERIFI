@@ -1,9 +1,8 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { AnalysisCalculationsHelperService } from 'src/app/analysis/calculations/analysis-calculations-helper.service';
-import { FacilityGroupSummary } from 'src/app/analysis/calculations/facility-analysis-calculations.service';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
-import { AnnualAnalysisSummary } from 'src/app/models/analysis';
+import { AnnualAnalysisSummary, FacilityGroupSummary } from 'src/app/models/analysis';
 import { IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 
 @Component({

@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
-import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
-import { AnnualAnalysisSummary, AnnualGroupSummary, MonthlyAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
-import { AnalysisGroup, IdbAnalysisItem, IdbFacility, IdbPredictorEntry } from 'src/app/models/idb';
+import { AnnualAnalysisSummary, FacilityGroupSummary, MonthlyAnalysisSummary, MonthlyAnalysisSummaryData, MonthlyFacilityAnalysisData } from 'src/app/models/analysis';
+import { IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 import { AnalysisCalculationsHelperService } from './analysis-calculations-helper.service';
 import { AnalysisCalculationsService } from './analysis-calculations.service';
 import * as _ from 'lodash';
@@ -11,29 +10,19 @@ import * as _ from 'lodash';
 })
 export class FacilityAnalysisCalculationsService {
 
-  constructor(private analysisCalculationsService: AnalysisCalculationsService, private analysisCalculationsHelperService: AnalysisCalculationsHelperService,
-    private predictorDbService: PredictordbService) { }
+  constructor(private analysisCalculationsService: AnalysisCalculationsService, private analysisCalculationsHelperService: AnalysisCalculationsHelperService) { }
 
   calculateMonthlyFacilityAnalysis(facility: IdbFacility, analysisItem: IdbAnalysisItem): Array<MonthlyFacilityAnalysisData> {
     let monthlyFacilityAnalysisData: Array<MonthlyFacilityAnalysisData> = new Array();
 
     let groupSummaries: Array<FacilityGroupSummary> = this.getGroupSummaries(analysisItem, facility);
-
     groupSummaries = this.setGroupSummariesPercentBaseline(groupSummaries);
 
-    // let facilityPredictorData: Array<IdbPredictorEntry> = this.predictorDbService.facilityPredictorEntries.getValue();
     let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = this.analysisCalculationsHelperService.getMonthlyStartAndEndDate(facility, analysisItem);
     let baselineDate: Date = monthlyStartAndEndDate.baselineDate;
     let endDate: Date = monthlyStartAndEndDate.endDate;
-
-    // let summaryIndex: number = 0;
     let previousMonthImprovement: number = 0;
     while (baselineDate < endDate) {
-      //predictor data for month
-      // let monthPredictorData: Array<IdbPredictorEntry> = facilityPredictorData.filter(predictorData => {
-      //   let predictorDate: Date = new Date(predictorData.date);
-      //   return predictorDate.getUTCFullYear() == baselineDate.getUTCFullYear() && predictorDate.getUTCMonth() == baselineDate.getUTCMonth();
-      // });
       let predictorUsage: Array<{
         predictorId: string,
         usage: number
@@ -144,10 +133,8 @@ export class FacilityAnalysisCalculationsService {
     let annualFacilitySummaryData: Array<AnnualAnalysisSummary> = new Array();
     let groupSummaries: Array<FacilityGroupSummary> = this.getGroupSummaries(analysisItem, facility);
 
-    // let monthlyFacilityAnalysisData: Array<MonthlyFacilityAnalysisData> = this.calculateMonthlyFacilityAnalysis(facility, analysisItem);
     let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = this.analysisCalculationsHelperService.getMonthlyStartAndEndDate(facility, analysisItem);
     let baselineDate: Date = monthlyStartAndEndDate.baselineDate;
-    let endDate: Date = monthlyStartAndEndDate.endDate;
     let baselineYear: number = this.analysisCalculationsHelperService.getFiscalYear(baselineDate, facility);
     let reportYear: number = analysisItem.reportYear;
     if (facility.fiscalYear == 'nonCalendarYear' && facility.fiscalYearCalendarEnd) {
@@ -160,10 +147,6 @@ export class FacilityAnalysisCalculationsService {
     let baselineYearModeledEnergyUse: number = 0;
     let previousYearModeledEnergyUse: number = 0;
     for (let summaryYear: number = baselineYear; summaryYear <= reportYear; summaryYear++) {
-      // let filteredFacilityAnalysisData: Array<MonthlyFacilityAnalysisData> = monthlyFacilityAnalysisData.filter(data => {
-      //   return data.fiscalYear == summaryYear;
-      // });
-
       let cumulativeEnergyImprovement: number = 0;
       let annualEnergyImprovement: number = 0;
       let totalEnergy: number = 0;
@@ -217,49 +200,4 @@ export class FacilityAnalysisCalculationsService {
       annualAnalysisSummary: annualFacilitySummaryData
     }
   }
-}
-
-export interface FacilityGroupSummary {
-  group: AnalysisGroup,
-  monthlyGroupSummary: MonthlyAnalysisSummary,
-  baselineAnalysisSummary: AnnualAnalysisSummary,
-  percentBaseline: number,
-  annualAnalysisSummaries: Array<AnnualAnalysisSummary>
-}
-
-
-export interface MonthlyFacilityAnalysisData {
-  date: Date,
-  fiscalYear: number,
-  utilityUsage: Array<{
-    meterGroupId: number,
-    usage: number,
-    modeledUsage: number,
-    percentUsage: number
-  }>,
-  predictorUsage: Array<{
-    predictorId: string,
-    usage: number
-  }>,
-  yearToDateSavings: Array<{
-    meterGroupId: number,
-    savings: number
-  }>,
-  rollingSavings: Array<{
-    meterGroupId: number,
-    savings: number
-  }>,
-  yearToDateImprovment: number,
-  monthlyIncrementalImprovement: number,
-  rolling12MonthImprovement: number
-}
-
-
-export interface AnnualFacilitySummaryData {
-  year: number,
-  cumulativeEnergyImprovement: number,
-  annualEnergyImprovement: number,
-  totalEnergy: number,
-  annualSavings: number,
-  totalSavings: number
 }

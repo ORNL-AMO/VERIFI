@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { AnalysisService } from 'src/app/analysis/analysis.service';
-import { FacilityAnalysisCalculationsService, MonthlyFacilityAnalysisData } from 'src/app/analysis/calculations/facility-analysis-calculations.service';
+import { FacilityAnalysisCalculationsService } from 'src/app/analysis/calculations/facility-analysis-calculations.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { MonthlyFacilityAnalysisData } from 'src/app/models/analysis';
 import { IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 
 @Component({

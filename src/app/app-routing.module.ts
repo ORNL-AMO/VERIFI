@@ -31,7 +31,7 @@ import { AnalysisSetupComponent } from './analysis/run-analysis/analysis-setup/a
 import { GroupAnalysisComponent } from './analysis/run-analysis/group-analysis/group-analysis.component';
 import { GroupAnalysisOptionsComponent } from './analysis/run-analysis/group-analysis/group-analysis-options/group-analysis-options.component';
 import { FacilityAnalysisComponent } from './analysis/run-analysis/facility-analysis/facility-analysis.component';
-import { RegressionModelSelectionComponent } from './analysis/run-analysis/group-analysis/regression/regression-model-selection/regression-model-selection.component';
+import { RegressionModelSelectionComponent } from './analysis/run-analysis/group-analysis/regression-model-selection/regression-model-selection.component';
 import { AnnualAnalysisSummaryComponent } from './analysis/run-analysis/group-analysis/annual-analysis-summary/annual-analysis-summary.component';
 import { MonthlyAnalysisSummaryComponent } from './analysis/run-analysis/group-analysis/monthly-analysis-summary/monthly-analysis-summary.component';
 import { AnnualFacilityAnalysisComponent } from './analysis/run-analysis/facility-analysis/annual-facility-analysis/annual-facility-analysis.component';

@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { AnalysisGroup, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, PredictorData } from 'src/app/models/idb';
+import { AnalysisGroup, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, PredictorData } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { CalanderizationOptions, CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import { AnnualAnalysisSummary, MonthlyAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
@@ -399,8 +398,6 @@ export class AnalysisCalculationsService {
 
     let previousYearSavings: number = 0;
     let previousYearEnergyUse: number = baselineEnergyUse;
-    let previousYearEnergyIntensity: number = baselineEnergyIntensity;
-    let previousYearProduction: number = baselineProduction;
     let totalEnergySavings: number = 0;
     let totalModeledEnergySavings: number = 0;
     let previousYearModeledEnergyUse: number;

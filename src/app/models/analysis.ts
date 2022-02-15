@@ -24,42 +24,41 @@ export interface MonthlyGroupSummary {
 }
 
 
-export interface FacilityYearGroupSummary {
-  year: number,
-  // group: AnalysisGroup,
-  // percentBaseline: number,
-  energyIntensity: number,
-  annualEnergyIntensityChange: number,
-  energyIntensityImprovement: number,
-  annualImprovementContribution: number,
-  totalImprovementContribution: number,
-  totalEnergySavings: number,
-  annualEnergySavings: number,
-  totalEnergy: number,
-  totalProduction: number
-}
 
 export interface FacilityGroupSummary {
   group: AnalysisGroup,
-  collapsed: boolean,
+  monthlyGroupSummary: MonthlyAnalysisSummary,
+  baselineAnalysisSummary: AnnualAnalysisSummary,
   percentBaseline: number,
-  summaries: Array<FacilityYearGroupSummary>,
+  annualAnalysisSummaries: Array<AnnualAnalysisSummary>
 }
 
-export interface FacilityGroupTotals {
-  year: number,
-  // improvementContribution: number,
-  totalSavings: number,
-  newSavings: number,
-  energyIntensity: number,
-  annualEnergyIntensityChange: number,
-  energyIntensityImprovement: number,
-  totalEnergy: number,
-  // totalProduction: number,
-  totalEnergySavings: number,
-  annualEnergySavings: number
-}
 
+export interface MonthlyFacilityAnalysisData {
+  date: Date,
+  fiscalYear: number,
+  utilityUsage: Array<{
+    meterGroupId: number,
+    usage: number,
+    modeledUsage: number,
+    percentUsage: number
+  }>,
+  predictorUsage: Array<{
+    predictorId: string,
+    usage: number
+  }>,
+  yearToDateSavings: Array<{
+    meterGroupId: number,
+    savings: number
+  }>,
+  rollingSavings: Array<{
+    meterGroupId: number,
+    savings: number
+  }>,
+  yearToDateImprovment: number,
+  monthlyIncrementalImprovement: number,
+  rolling12MonthImprovement: number
+}
 
 export interface MonthlyAnalysisSummary {
   predictorVariables: Array<PredictorData>,
