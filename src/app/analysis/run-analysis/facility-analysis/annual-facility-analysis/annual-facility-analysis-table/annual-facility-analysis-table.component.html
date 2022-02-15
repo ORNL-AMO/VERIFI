@@ -1,1 +1,78 @@
-<p>annual-facility-analysis-table works!</p>
+<table class="table table-sm table-hover">
+    <thead>
+        <tr>
+            <th>
+                Year
+            </th>
+            <th>
+                Cumulative <br>
+                Energy<br>
+                Improvement
+            </th>
+            <th>
+                Annual <br>
+                Energy <br>
+                Improvement
+            </th>
+            <th>
+                Total <br>
+                Energy
+            </th>
+            <th>
+                New <br>
+                Savings
+            </th>
+            <th>
+                Total <br> Savings
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let summary of annualFacilitySummaryData">
+            <td>
+                {{summary.year}}
+            </td>
+            <td>
+                <span *ngIf="summary.cumulativeEnergyImprovement"
+                    [ngClass]="{'red': summary.cumulativeEnergyImprovement < 0}">
+                    {{summary.cumulativeEnergyImprovement | customNumber}} %
+                </span>
+                <span *ngIf="!summary.cumulativeEnergyImprovement">
+                    &mdash;
+                </span>
+            </td>
+            <td>
+                <span *ngIf="summary.annualEnergyImprovement" [ngClass]="{'red': summary.annualEnergyImprovement < 0}">
+                    {{summary.annualEnergyImprovement | customNumber}} %
+                </span>
+                <span *ngIf="!summary.annualEnergyImprovement">
+                    &mdash;
+                </span>
+            </td>
+            <td>
+                <span *ngIf="summary.totalEnergy" [ngClass]="{'red': summary.totalEnergy < 0}">
+                    {{summary.totalEnergy | customNumber}}
+                </span>
+                <span *ngIf="!summary.totalEnergy">
+                    &mdash;
+                </span>
+            </td>
+            <td>
+                <span *ngIf="summary.newSavings" [ngClass]="{'red': summary.newSavings < 0}">
+                    {{summary.newSavings | customNumber}}
+                </span>
+                <span *ngIf="!summary.newSavings">
+                    &mdash;
+                </span>
+            </td>
+            <td>
+                <span *ngIf="summary.totalSavings" [ngClass]="{'red': summary.totalSavings < 0}">
+                    {{summary.totalSavings | customNumber}}
+                </span>
+                <span *ngIf="!summary.totalSavings">
+                    &mdash;
+                </span>
+            </td>
+        </tr>
+    </tbody>
+</table>

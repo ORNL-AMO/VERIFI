@@ -1,5 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { AnalysisService } from 'src/app/analysis/analysis.service';
+import { AnnualFacilitySummaryData, FacilityAnalysisCalculationsService } from 'src/app/analysis/calculations/facility-analysis-calculations.service';
+import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 
 @Component({
   selector: 'app-annual-facility-analysis',
@@ -9,10 +13,17 @@ import { AnalysisService } from 'src/app/analysis/analysis.service';
 export class AnnualFacilityAnalysisComponent implements OnInit {
 
   dataDisplay: 'table' | 'graph';
-  constructor(private analysisService: AnalysisService) { }
+  annualFacilitySummaryData: Array<AnnualFacilitySummaryData>;
+  analysisItem: IdbAnalysisItem;
+  facility: IdbFacility;
+  constructor(private analysisService: AnalysisService, private facilityAnalysisCalculationsService: FacilityAnalysisCalculationsService,
+    private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
     this.dataDisplay = this.analysisService.dataDisplay.getValue();
+    this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
+    this.facility = this.facilityDbService.selectedFacility.getValue();
+    this.annualFacilitySummaryData = this.facilityAnalysisCalculationsService.calculateAnnualFacilitySummaryData(this.facility, this.analysisItem);
   }
 
   setDataDisplay(display: 'table' | 'graph') {

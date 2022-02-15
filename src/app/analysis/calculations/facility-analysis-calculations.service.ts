@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
-import { AnnualAnalysisSummary, MonthlyAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
+import { AnnualAnalysisSummary, AnnualGroupSummary, MonthlyAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { AnalysisGroup, IdbAnalysisItem, IdbFacility, IdbPredictorEntry } from 'src/app/models/idb';
 import { AnalysisCalculationsHelperService } from './analysis-calculations-helper.service';
 import { AnalysisCalculationsService } from './analysis-calculations.service';
@@ -17,17 +17,7 @@ export class FacilityAnalysisCalculationsService {
   calculateMonthlyFacilityAnalysis(facility: IdbFacility, analysisItem: IdbAnalysisItem): Array<MonthlyFacilityAnalysisData> {
     let monthlyFacilityAnalysisData: Array<MonthlyFacilityAnalysisData> = new Array();
 
-    let groupSummaries: Array<FacilityGroupSummary> = new Array();
-    analysisItem.groups.forEach(group => {
-      let monthlyGroupSummary: MonthlyAnalysisSummary = this.analysisCalculationsService.getMonthlyAnalysisSummary(group, analysisItem, facility);
-      let annualAnalysisSummary: Array<AnnualAnalysisSummary> = this.analysisCalculationsService.getAnnualAnalysisSummary(analysisItem, facility, group, monthlyGroupSummary.monthlyAnalysisSummaryData);
-      groupSummaries.push({
-        group: group,
-        monthlyGroupSummary: monthlyGroupSummary,
-        baselineAnalysisSummary: annualAnalysisSummary[0],
-        percentBaseline: 0
-      })
-    });
+    let groupSummaries: Array<FacilityGroupSummary> = this.getGroupSummaries(analysisItem, facility);
 
     groupSummaries = this.setGroupSummariesPercentBaseline(groupSummaries);
 
@@ -129,13 +119,87 @@ export class FacilityAnalysisCalculationsService {
     });
     return groupSummaries;
   }
+
+  getGroupSummaries(analysisItem: IdbAnalysisItem, facility: IdbFacility): Array<FacilityGroupSummary> {
+    let groupSummaries: Array<FacilityGroupSummary> = new Array();
+    analysisItem.groups.forEach(group => {
+      let monthlyGroupSummary: MonthlyAnalysisSummary = this.analysisCalculationsService.getMonthlyAnalysisSummary(group, analysisItem, facility);
+      let annualAnalysisSummary: Array<AnnualAnalysisSummary> = this.analysisCalculationsService.getAnnualAnalysisSummary(analysisItem, facility, group, monthlyGroupSummary.monthlyAnalysisSummaryData);
+      groupSummaries.push({
+        group: group,
+        monthlyGroupSummary: monthlyGroupSummary,
+        baselineAnalysisSummary: annualAnalysisSummary[0],
+        percentBaseline: 0,
+        annualAnalysisSummaries: annualAnalysisSummary
+      })
+    });
+
+    groupSummaries = this.setGroupSummariesPercentBaseline(groupSummaries);
+    return groupSummaries;
+  }
+
+
+
+  calculateAnnualFacilitySummaryData(facility: IdbFacility, analysisItem: IdbAnalysisItem): Array<AnnualFacilitySummaryData>{
+    let annualFacilitySummaryData: Array<AnnualFacilitySummaryData> = new Array();
+    let groupSummaries: Array<FacilityGroupSummary> = this.getGroupSummaries(analysisItem, facility);
+
+    // let monthlyFacilityAnalysisData: Array<MonthlyFacilityAnalysisData> = this.calculateMonthlyFacilityAnalysis(facility, analysisItem);
+    let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = this.analysisCalculationsHelperService.getMonthlyStartAndEndDate(facility, analysisItem);
+    let baselineDate: Date = monthlyStartAndEndDate.baselineDate;
+    let endDate: Date = monthlyStartAndEndDate.endDate;
+    let baselineYear: number = this.analysisCalculationsHelperService.getFiscalYear(baselineDate, facility);
+    let reportYear: number = analysisItem.reportYear;
+    if (facility.fiscalYear == 'nonCalendarYear' && facility.fiscalYearCalendarEnd) {
+      baselineYear = baselineYear - 1;
+      reportYear = reportYear - 1;
+    }
+
+    let previousYearEnergyUse: number = 0;
+    let baselineYearEnergyUse: number = 0;
+    for (let summaryYear: number = baselineYear; summaryYear <= reportYear; summaryYear++) {
+      // let filteredFacilityAnalysisData: Array<MonthlyFacilityAnalysisData> = monthlyFacilityAnalysisData.filter(data => {
+      //   return data.fiscalYear == summaryYear;
+      // });
+
+      let cumulativeEnergyImprovement: number = 0;
+      let annualEnergyImprovement: number = 0;
+      let totalEnergy: number = 0;
+      groupSummaries.forEach(summary => {
+        let annualAnalysisSummary: AnnualAnalysisSummary = summary.annualAnalysisSummaries.find(summary => {return summary.year == summaryYear});
+        cumulativeEnergyImprovement += annualAnalysisSummary.cumulativeSavings * summary.percentBaseline;
+        annualEnergyImprovement += annualAnalysisSummary.annualSavings * summary.percentBaseline;
+        totalEnergy += annualAnalysisSummary.energyUse;
+      });
+      if(summaryYear == baselineYear){
+        baselineYearEnergyUse = totalEnergy;
+        previousYearEnergyUse = totalEnergy;
+      }
+
+      let newSavings: number = baselineYearEnergyUse - totalEnergy;
+      let totalSavings: number = previousYearEnergyUse - totalEnergy;
+
+      annualFacilitySummaryData.push({
+        year: summaryYear,
+        cumulativeEnergyImprovement: cumulativeEnergyImprovement,
+        annualEnergyImprovement: annualEnergyImprovement,
+        totalEnergy: totalEnergy,
+        newSavings: newSavings, 
+        totalSavings: totalSavings
+      });
+      previousYearEnergyUse = totalEnergy;
+    }
+
+    return annualFacilitySummaryData;
+  }
 }
 
 export interface FacilityGroupSummary {
   group: AnalysisGroup,
   monthlyGroupSummary: MonthlyAnalysisSummary,
   baselineAnalysisSummary: AnnualAnalysisSummary,
-  percentBaseline: number
+  percentBaseline: number,
+  annualAnalysisSummaries: Array<AnnualAnalysisSummary>
 }
 
 
@@ -163,4 +227,14 @@ export interface MonthlyFacilityAnalysisData {
   yearToDateImprovment: number,
   monthlyIncrementalImprovement: number,
   rolling12MonthImprovement: number
+}
+
+
+export interface AnnualFacilitySummaryData {
+  year: number,
+  cumulativeEnergyImprovement: number,
+  annualEnergyImprovement: number,
+  totalEnergy: number,
+  newSavings: number, 
+  totalSavings: number
 }

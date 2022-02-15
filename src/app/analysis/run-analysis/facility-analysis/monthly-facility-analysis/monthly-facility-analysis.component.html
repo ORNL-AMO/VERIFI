@@ -20,7 +20,9 @@
     </div>
 </div>
 
-<app-monthly-facility-analysis-graph *ngIf="dataDisplay == 'graph'"></app-monthly-facility-analysis-graph>
+<app-monthly-facility-analysis-graph *ngIf="dataDisplay == 'graph'"
+    [monthlyFacilityAnalysisData]="monthlyFacilityAnalysisData" [analysisItem]="analysisItem" [facility]="facility">
+</app-monthly-facility-analysis-graph>
 <app-monthly-facility-analysis-table *ngIf="dataDisplay == 'table'"
     [monthlyFacilityAnalysisData]="monthlyFacilityAnalysisData" [analysisItem]="analysisItem" [facility]="facility"
     [itemsPerPage]="itemsPerPage">

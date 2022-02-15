@@ -1,4 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
+import { AnnualFacilitySummaryData } from 'src/app/analysis/calculations/facility-analysis-calculations.service';
+import { IdbAnalysisItem } from 'src/app/models/idb';
 
 @Component({
   selector: 'app-annual-facility-analysis-table',
@@ -6,6 +8,10 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./annual-facility-analysis-table.component.css']
 })
 export class AnnualFacilityAnalysisTableComponent implements OnInit {
+  @Input()
+  annualFacilitySummaryData: Array<AnnualFacilitySummaryData>;
+  @Input()
+  analysisItem: IdbAnalysisItem;
 
   constructor() { }
 

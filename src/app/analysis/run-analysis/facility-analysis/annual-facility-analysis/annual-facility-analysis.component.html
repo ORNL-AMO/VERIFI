@@ -8,4 +8,6 @@
 </div>
 
 <app-annual-facility-analysis-graph *ngIf="dataDisplay == 'graph'"></app-annual-facility-analysis-graph>
-<app-annual-facility-analysis-table *ngIf="dataDisplay == 'table'"></app-annual-facility-analysis-table>
+<app-annual-facility-analysis-table *ngIf="dataDisplay == 'table'"
+    [annualFacilitySummaryData]="annualFacilitySummaryData" [analysisItem]="analysisItem">
+</app-annual-facility-analysis-table>
