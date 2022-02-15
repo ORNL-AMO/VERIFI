@@ -1,4 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { FacilityGroupSummary } from 'src/app/analysis/calculations/facility-analysis-calculations.service';
 import { AnnualAnalysisSummary } from 'src/app/models/analysis';
 import { IdbAnalysisItem } from 'src/app/models/idb';
 
@@ -9,7 +10,7 @@ import { IdbAnalysisItem } from 'src/app/models/idb';
 })
 export class AnnualFacilityAnalysisTableComponent implements OnInit {
   @Input()
-  annualFacilitySummaryData: Array<AnnualAnalysisSummary>;
+  groupSummaries: Array<FacilityGroupSummary>;
   @Input()
   analysisItem: IdbAnalysisItem;
 

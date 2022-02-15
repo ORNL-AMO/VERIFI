@@ -140,7 +140,7 @@ export class FacilityAnalysisCalculationsService {
 
 
 
-  calculateAnnualFacilitySummaryData(facility: IdbFacility, analysisItem: IdbAnalysisItem): Array<AnnualAnalysisSummary> {
+  calculateAnnualFacilitySummaryData(facility: IdbFacility, analysisItem: IdbAnalysisItem): { annualAnalysisSummary: Array<AnnualAnalysisSummary>, groupSummaries: Array<FacilityGroupSummary> } {
     let annualFacilitySummaryData: Array<AnnualAnalysisSummary> = new Array();
     let groupSummaries: Array<FacilityGroupSummary> = this.getGroupSummaries(analysisItem, facility);
 
@@ -171,8 +171,10 @@ export class FacilityAnalysisCalculationsService {
 
       groupSummaries.forEach(summary => {
         let annualAnalysisSummary: AnnualAnalysisSummary = summary.annualAnalysisSummaries.find(summary => { return summary.year == summaryYear });
-        cumulativeEnergyImprovement += annualAnalysisSummary.cumulativeSavings * summary.percentBaseline;
-        annualEnergyImprovement += annualAnalysisSummary.annualSavings * summary.percentBaseline;
+        annualAnalysisSummary.cumulativeSavings = (annualAnalysisSummary.cumulativeSavings * summary.percentBaseline);
+        cumulativeEnergyImprovement += annualAnalysisSummary.cumulativeSavings;
+        annualAnalysisSummary.annualSavings = annualAnalysisSummary.annualSavings * summary.percentBaseline;
+        annualEnergyImprovement += annualAnalysisSummary.annualSavings;
         totalEnergy += annualAnalysisSummary.energyUse;
         modeledEnergy += annualAnalysisSummary.modeledEnergyUse;
       });
@@ -210,7 +212,10 @@ export class FacilityAnalysisCalculationsService {
       previousYearModeledEnergyUse = modeledEnergy;
     }
 
-    return annualFacilitySummaryData;
+    return {
+      groupSummaries: groupSummaries,
+      annualAnalysisSummary: annualFacilitySummaryData
+    }
   }
 }
 

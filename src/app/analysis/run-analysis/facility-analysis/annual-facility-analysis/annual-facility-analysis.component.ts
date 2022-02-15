@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AnalysisService } from 'src/app/analysis/analysis.service';
-import { AnnualFacilitySummaryData, FacilityAnalysisCalculationsService } from 'src/app/analysis/calculations/facility-analysis-calculations.service';
+import { AnnualFacilitySummaryData, FacilityAnalysisCalculationsService, FacilityGroupSummary } from 'src/app/analysis/calculations/facility-analysis-calculations.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AnnualAnalysisSummary } from 'src/app/models/analysis';
@@ -14,7 +14,7 @@ import { IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 export class AnnualFacilityAnalysisComponent implements OnInit {
 
   dataDisplay: 'table' | 'graph';
-  annualFacilitySummaryData: Array<AnnualAnalysisSummary>;
+  annualFacilitySummaryData: { annualAnalysisSummary: Array<AnnualAnalysisSummary>, groupSummaries: Array<FacilityGroupSummary> };
   analysisItem: IdbAnalysisItem;
   facility: IdbFacility;
   constructor(private analysisService: AnalysisService, private facilityAnalysisCalculationsService: FacilityAnalysisCalculationsService,
