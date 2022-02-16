@@ -1,0 +1,66 @@
+<p class="label">Account Facilities
+    <span class="pull-right" *ngIf="yearPriorDate">({{yearPriorDate | date: 'MMM, y'}} -
+        {{lastMonthsDate | date: 'MMM, y'}})</span>
+</p>
+<div class="table-responsive">
+    <table class="table table-sm">
+        <thead>
+            <tr>
+                <th class="w-1">Facility</th>
+                <th class="w-1"># of Meters</th>
+                <th class="w-1">Last Bill Entered</th>
+                <th class="w-2">Utility Usage (<span [innerHTML]="accountEnergyUnit | settingsLabel"></span>)
+                </th>
+                <th class="w-2">Utility Cost </th>
+                <th class="w-2">
+                    Emissions (tonne CO<sub>2</sub>)
+                </th>
+            </tr>
+        </thead>
+        <tbody *ngIf="accountFacilitiesSummary && accountFacilitiesSummary.facilitySummaries">
+            <tr *ngFor="let summary of accountFacilitiesSummary.facilitySummaries">
+                <td>
+                    <a (click)="selectFacility(summary.facility)">{{summary.facility.name}}</a>
+                </td>
+                <td>
+                    {{summary.numberOfMeters}}
+                </td>
+                <td>
+                    {{summary.lastBillDate | date: 'MMM, y'}}
+                </td>
+                <td>
+                    {{summary.energyUsage | customNumber}}
+
+                </td>
+                <td>
+                    {{summary.energyCost | customNumber:true }}
+                </td>
+                <td>
+                    {{summary.emissions / 1000 | customNumber}}
+                </td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <th>
+                    Total
+                </th>
+                <th>
+                    {{accountFacilitiesSummary.totalNumberOfMeters}}
+                </th>
+                <th>
+
+                </th>
+                <th>
+                    {{accountFacilitiesSummary.totalEnergyUse | customNumber}}
+                </th>
+                <th>
+                    {{accountFacilitiesSummary.totalEnergyCost | customNumber:true }}
+                </th>
+                <th>
+                    {{accountFacilitiesSummary.totalEmissions / 1000 | customNumber}}
+                </th>
+            </tr>
+        </tfoot>
+    </table>
+</div>

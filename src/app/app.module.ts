@@ -23,7 +23,8 @@ import { StaticContentModule } from './static-content/static-content.module';
 import { UtilityDataModule } from './utility-data/utility-data.module';
 import { SetupProgressComponent } from './core-components/setup-progress/setup-progress.component';
 import { ImportBackupModalComponent } from './core-components/import-backup-modal/import-backup-modal.component';
-
+import { FacilityModule } from './facility/facility.module';
+import { AccountModule } from './account/account.module';
 @NgModule({
   declarations: [
     AppComponent,
@@ -51,7 +52,9 @@ import { ImportBackupModalComponent } from './core-components/import-backup-moda
     OverviewReportModule,
     StaticContentModule,
     UtilityDataModule,
-    BrowserAnimationsModule
+    BrowserAnimationsModule,
+    FacilityModule,
+    AccountModule
   ],
   providers: [],
   bootstrap: [AppComponent]

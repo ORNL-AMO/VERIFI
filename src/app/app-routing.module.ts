@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { AccountComponent } from './account-management/account/account.component';
-import { FacilityComponent } from './account-management/facility/facility.component';
+// import { AccountComponent } from './account-management/account/account.component';
+// import { FacilityComponent } from './account-management/facility/facility.component';
 import { EnergyConsumptionComponent } from './utility-data/energy-consumption/energy-consumption.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { EnergySourceComponent } from './utility-data/energy-consumption/energy-source/energy-source.component';
@@ -36,6 +36,11 @@ import { AnnualAnalysisSummaryComponent } from './analysis/run-analysis/group-an
 import { MonthlyAnalysisSummaryComponent } from './analysis/run-analysis/group-analysis/monthly-analysis-summary/monthly-analysis-summary.component';
 import { AnnualFacilityAnalysisComponent } from './analysis/run-analysis/facility-analysis/annual-facility-analysis/annual-facility-analysis.component';
 import { MonthlyFacilityAnalysisComponent } from './analysis/run-analysis/facility-analysis/monthly-facility-analysis/monthly-facility-analysis.component';
+import { AccountDashboardComponent } from './account/account-dashboard/account-dashboard.component';
+import { FacilityDashboardComponent } from './facility/facility-dashboard/facility-dashboard.component';
+import { AccountSettingsComponent } from './account/account-settings/account-settings.component';
+import { AccountComponent } from './account/account.component';
+import { FacilityComponent } from './facility/facility.component';
 
 const routes: Routes = [
   {
@@ -63,13 +68,47 @@ const routes: Routes = [
     ]
   },
   {
-    path: 'account-management',
-    component: AccountComponent
+    path: 'account',
+    component: AccountComponent,
+    children: [
+      {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: 'home'
+      },
+      {
+        path: 'home',
+        component: AccountDashboardComponent
+      },
+      {
+        path: 'settings',
+        component: AccountSettingsComponent
+      }
+    ]
   },
   {
-    path: 'facility-management',
-    component: FacilityComponent
+    path: 'facility/:id',
+    component: FacilityComponent,
+    children: [
+      {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: 'dashboard'
+      },
+      {
+        path: 'dashboard',
+        component: FacilityDashboardComponent
+      }
+    ]
   },
+  // {
+  //   path: 'account-management',
+  //   component: AccountComponent
+  // },
+  // {
+  //   path: 'facility-management',
+  //   component: FacilityComponent
+  // },
   {
     path: 'utility',
     component: UtilityDataComponent,
