@@ -149,8 +149,6 @@ export class ImportMeterDataService {
         meterDataForm = this.utilityMeterDataService.getGeneralMeterDataForm(meterData, displayVolumeInput, displayEnergyUse);
       }
       if (meterDataForm.invalid) {
-        console.log('invalid 1');
-        console.log(meterDataForm);
         return { meterData: meterData, status: "invalid" };
       } else {
         //check exists
@@ -176,7 +174,6 @@ export class ImportMeterDataService {
         }
       }
     } else {
-      console.log('no corresponding meter');
       return { meterData: meterData, status: "invalid" };
     }
   }
