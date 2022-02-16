@@ -55,8 +55,8 @@ export class ImportMeterDataService {
     if (correspondingMeter) {
       meterId = correspondingMeter.id;
     }
-    let energyUse: number;
-    let totalVolume: number;
+    let energyUse: number = 0;
+    let totalVolume: number = 0;
     if (isTemplateElectricity) {
       energyUse = dataItem["Total Energy"];
     } else {

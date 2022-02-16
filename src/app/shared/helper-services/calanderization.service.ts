@@ -293,7 +293,7 @@ export class CalanderizationService {
       let startDate: Date = new Date(orderedMeterData[0].readDate);
       let endDate: Date = new Date(orderedMeterData[orderedMeterData.length - 1].readDate);
       endDate.setUTCMonth(endDate.getUTCMonth() + 1);
-      while (startDate.getUTCMonth() != endDate.getUTCMonth() || startDate.getUTCFullYear() != endDate.getUTCFullYear()) {
+      while (startDate < endDate) {
         let month: number = startDate.getUTCMonth();
         let year: number = startDate.getUTCFullYear();
         let currentMonthsReadings: Array<IdbUtilityMeterData> = this.getCurrentMonthsReadings(month, year, orderedMeterData);
@@ -506,7 +506,7 @@ export class CalanderizationService {
       startDate.setUTCMonth(startDate.getUTCMonth() + 1);
 
       let endDate: Date = new Date(startDate.getUTCFullYear(), startDate.getUTCMonth() + 2);
-      while (startDate.getUTCMonth() != endDate.getUTCMonth() || startDate.getUTCFullYear() != endDate.getUTCFullYear()) {
+      while (startDate < endDate) {
         let month: number = startDate.getUTCMonth();
         let year: number = startDate.getUTCFullYear();
         let previousMonthReading: IdbUtilityMeterData = this.getPreviousMonthsBill(month, year, orderedMeterData);
@@ -678,7 +678,7 @@ export class CalanderizationService {
       startDate.setUTCMonth(startDate.getUTCMonth() + 1);
 
       let endDate: Date = new Date(startDate.getUTCFullYear(), startDate.getUTCMonth() + 2);
-      while (startDate.getUTCMonth() != endDate.getUTCMonth() || startDate.getUTCFullYear() != endDate.getUTCFullYear()) {
+      while (startDate < endDate) {
         let month: number = startDate.getUTCMonth();
         let year: number = startDate.getUTCFullYear();
         let monthReadingSummaries: Array<{

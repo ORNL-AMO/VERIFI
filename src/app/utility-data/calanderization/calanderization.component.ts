@@ -183,4 +183,10 @@ export class CalanderizationComponent implements OnInit {
     this.utilityMeterDbService.update(this.dataApplicationMeter);
     this.cancelSetDataApplication();
   }
+
+  setCalanderizeData(meter: IdbUtilityMeter, calanderize: 'fullMonth' | 'backward'){
+    this.dataApplicationMeter = meter;
+    this.dataApplicationMeter.meterReadingDataApplication = calanderize;
+    this.setDataApplication();
+  }
 }
