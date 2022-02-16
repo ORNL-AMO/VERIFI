@@ -1,0 +1,73 @@
+<div class="wrapper">
+    <div class="row">
+        <div class="col">
+            <h4>Facility Information</h4>
+            <br>
+            <app-general-information-form [inAccount]="false">
+            </app-general-information-form>
+        </div>
+
+        <div class="col-lg-5">
+            <h4>Facility Units</h4>
+            <br>
+            <app-default-units-form [inAccount]="false"></app-default-units-form>
+        </div>
+    </div>
+    <br>
+
+    <div class="row">
+        <div class="col-lg-7">
+            <h4>Sustainability Questions</h4>
+            <br>
+            <app-sustainability-questions-form [inAccount]="false">
+            </app-sustainability-questions-form>
+        </div>
+        <div class="col">
+            <h4>Financial Reporting</h4>
+            <br>
+            <app-financial-reporting-form [inAccount]="false">
+            </app-financial-reporting-form>
+        </div>
+    </div>
+    <br>
+
+    <div class="row">
+        <div class="col-lg-6">
+            <h4>Delete Facility</h4>
+            <p>Once deleted, you will permanently lose all your data linked to this facility. Please make a
+                backup
+                of
+                your data before proceeding with this step.</p>
+            <button class="btn btn-danger" (click)="openDeleteFacility()">Delete Facility</button>
+        </div>
+        <div class="col-lg-6">
+            <h4>Import Backup Data</h4>
+            <p>Use the below button to import backup data files. Facilities can be imported as new data or
+                to overwrite existing data.</p>
+            <button class="btn btn-primary" (click)="openImportBackup()">Import Backup File</button>
+
+        </div>
+        <div class="col-lg-6">
+            <h4>Export Facility</h4>
+            <p>You can export this facility and it's data to be imported into other accounts or used as a backup
+                of
+                your
+                data set.</p>
+            <button class="btn btn-outline" (click)="backupFacility()">Export Facility</button>
+        </div>
+    </div>
+</div>
+
+<div class="popup" [class.open]="showDeleteFacility" *ngIf="selectedFacility">
+    <div class="popup-header">Delete Facility: {{selectedFacility.name}}
+        <button class="item-right" (click)="cancelDelete()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>WARNING: By deleting this facility, you are also deleting all of the data associated with it.
+            Are you sure you want to preform this action?</p>
+    </div>
+    <div class="popup-footer text-right">
+        <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
+        <button class="btn btn-danger" (click)="confirmDelete()">Confirm Delete</button>
+    </div>
+</div>

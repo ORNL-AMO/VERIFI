@@ -41,6 +41,7 @@ import { FacilityDashboardComponent } from './facility/facility-dashboard/facili
 import { AccountSettingsComponent } from './account/account-settings/account-settings.component';
 import { AccountComponent } from './account/account.component';
 import { FacilityComponent } from './facility/facility.component';
+import { FacilitySettingsComponent } from './facility/facility-settings/facility-settings.component';
 
 const routes: Routes = [
   {
@@ -98,6 +99,10 @@ const routes: Routes = [
       {
         path: 'home',
         component: FacilityDashboardComponent
+      },
+      {
+        path: 'settings',
+        component: FacilitySettingsComponent
       }
     ]
   },

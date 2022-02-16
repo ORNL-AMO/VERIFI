@@ -12,6 +12,8 @@ import { UtilityEnergyUseTableComponent } from './facility-dashboard/utility-ene
 import { FormsModule } from '@angular/forms';
 import { HelperPipesModule } from '../shared/helper-pipes/helper-pipes.module';
 import { FacilityDashboardMenuComponent } from './facility-dashboard/facility-dashboard-menu/facility-dashboard-menu.component';
+import { FacilitySettingsComponent } from './facility-settings/facility-settings.component';
+import { SettingsFormsModule } from '../shared/settings-forms/settings-forms.module';
 
 
 
@@ -25,13 +27,15 @@ import { FacilityDashboardMenuComponent } from './facility-dashboard/facility-da
     FacilityStackedAreaChartComponent,
     MetersTableComponent,
     UtilityEnergyUseTableComponent,
-    FacilityDashboardMenuComponent
+    FacilityDashboardMenuComponent,
+    FacilitySettingsComponent
   ],
   imports: [
     CommonModule,
     RouterModule,
     FormsModule,
-    HelperPipesModule
+    HelperPipesModule,
+    SettingsFormsModule
   ]
 })
 export class FacilityModule { }
