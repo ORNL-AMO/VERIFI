@@ -1,0 +1,9 @@
+.btn-selected{
+    background-color: #2c386b;
+    color: #fff;
+    border-color: #2c386b;
+  }
+  
+  .banner-border{
+    border-bottom: solid #145A32;
+  }

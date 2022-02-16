@@ -4,6 +4,14 @@ import { FacilityComponent } from './facility.component';
 import { FacilityDashboardComponent } from './facility-dashboard/facility-dashboard.component';
 import { FacilityBannerComponent } from './facility-banner/facility-banner.component';
 import { RouterModule } from '@angular/router';
+import { FacilityBarChartComponent } from './facility-dashboard/facility-bar-chart/facility-bar-chart.component';
+import { FacilityHeatMapComponent } from './facility-dashboard/facility-heat-map/facility-heat-map.component';
+import { FacilityStackedAreaChartComponent } from './facility-dashboard/facility-stacked-area-chart/facility-stacked-area-chart.component';
+import { MetersTableComponent } from './facility-dashboard/meters-table/meters-table.component';
+import { UtilityEnergyUseTableComponent } from './facility-dashboard/utility-energy-use-table/utility-energy-use-table.component';
+import { FormsModule } from '@angular/forms';
+import { HelperPipesModule } from '../shared/helper-pipes/helper-pipes.module';
+import { FacilityDashboardMenuComponent } from './facility-dashboard/facility-dashboard-menu/facility-dashboard-menu.component';
 
 
 
@@ -11,11 +19,19 @@ import { RouterModule } from '@angular/router';
   declarations: [
     FacilityComponent,
     FacilityDashboardComponent,
-    FacilityBannerComponent
+    FacilityBannerComponent,
+    FacilityBarChartComponent,
+    FacilityHeatMapComponent,
+    FacilityStackedAreaChartComponent,
+    MetersTableComponent,
+    UtilityEnergyUseTableComponent,
+    FacilityDashboardMenuComponent
   ],
   imports: [
     CommonModule,
-    RouterModule
+    RouterModule,
+    FormsModule,
+    HelperPipesModule
   ]
 })
 export class FacilityModule { }

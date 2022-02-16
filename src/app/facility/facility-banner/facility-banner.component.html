@@ -1,1 +1,14 @@
-<p>facility-banner works!</p>
+<div class="banner d-flex w-100 justify-content-between" [ngStyle]="{'background-color': bannerColor}">
+    <h3>
+        <a routerLink="home" [routerLinkActive]="['active']"><span class="fa fa-industry"></span></a>
+        {{label}}
+    </h3>
+    <div class="nav-items">
+        <h3 class="pr-3">
+            <a routerLink="settings" [routerLinkActive]="['active']"><span class="fa fa-cog"></span></a>
+        </h3>
+        <h3>
+            <a (click)="toggleHelpPanel()"><span class="fa fa-question-circle-o"></span></a>
+        </h3>
+    </div>
+</div>
