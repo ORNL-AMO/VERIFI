@@ -52,20 +52,10 @@ export class GroupAnalysisComponent implements OnInit {
   setLabel(url: string) {
     if (this.selectedGroup) {
       let groupName: string = this.utilityMeterGroupDbService.getGroupName(this.selectedGroup.idbGroupId);
-      if (url.includes('annual-energy-intensity')) {
+      if (url.includes('annual-analysis')) {
         this.label = groupName + ' Annual Analysis'
-      } else if (url.includes('monthly-energy-intensity')) {
+      } else if (url.includes('monthly-analysis')) {
         this.label = groupName + ' Monthly Analysis'
-      } else if (url.includes('monthly-regression-analysis')) {
-        this.label = groupName + ' Monthly Regression Analysis'
-      } else if (url.includes('annual-analysis')) {
-        if (this.selectedGroup.analysisType == 'regression') {
-          this.label = groupName + ' Annual Regression Analysis'
-        } else if (this.selectedGroup.analysisType == 'absoluteEnergyConsumption') {
-          this.label = groupName + ' Annual Absolute Analysis'
-        }
-      } else if (url.includes('monthly-absolute-energy-consumption')) {
-        this.label = groupName + ' Monthly Absolute Analysis'
       } else {
         this.label = groupName + ' Setup'
       }

@@ -140,6 +140,9 @@ export class AnalysisDbService {
         regressionModelYear: undefined,
         regressionConstant: undefined,
         groupHasError: false,
+        specifiedMonthlyPercentBaseload: false,
+        averagePercentBaseload: undefined,
+        monthlyPercentBaseload: this.getMonthlyPercentBaseload()
       });
     });
     return {
@@ -238,6 +241,9 @@ export class AnalysisDbService {
         regressionConstant: undefined,
         regressionModelYear: undefined,
         groupHasError: false,
+        specifiedMonthlyPercentBaseload: false,
+        averagePercentBaseload: undefined,
+        monthlyPercentBaseload: this.getMonthlyPercentBaseload()
       });
       this.update(item);
     });
@@ -260,5 +266,16 @@ export class AnalysisDbService {
     for (let i = 0; i < analysisItems.length; i++) {
       await this.deleteWithObservable(analysisItems[i].id);
     }
+  }
+
+  getMonthlyPercentBaseload(): Array<{monthNum: number, percent: number}>{
+    let values: Array<{monthNum: number, percent: number}> = new Array();
+    for(let i = 0; i < 12; i++){
+      values.push({
+        monthNum: i,
+        percent: undefined
+      })
+    }
+    return values;
   }
 }

@@ -1,16 +1,12 @@
+<nav class="tabs">
+    <ul class="mb-0">
+        <li><a routerLink="/analysis/run-analysis/facility-analysis/annual-analysis"
+                [routerLinkActive]="['active']">Annual Analysis</a></li>
+        <li><a routerLink="/analysis/run-analysis/facility-analysis/monthly-analysis"
+                [routerLinkActive]="['active']">Monthly Analysis</a></li>
+    </ul>
+</nav>
 <div class="content-padding">
-    <h4>Energy Intensity Summary</h4>
-    <div class="controls pb-0 col">
-        <div class="btn-group pull-right">
-            <button class="btn" [ngClass]="{'btn-solid': dataDisplay == 'table'}"
-                (click)="setDataDisplay('table')">Table</button>
-            <button class="btn" [ngClass]="{'btn-solid': dataDisplay == 'graph'}"
-                (click)="setDataDisplay('graph')">Graph</button>
-        </div>
-    </div>
-    <app-facility-analysis-graph *ngIf="dataDisplay == 'graph'" [facilityGroupSummaries]="facilityGroupSummaries"
-        [analysisItem]="analysisItem" [facility]="facility" [facilityGroupTotals]="facilityGroupTotals"></app-facility-analysis-graph>
-    <app-facility-analysis-table *ngIf="dataDisplay == 'table'" [facilityGroupSummaries]="facilityGroupSummaries"
-        [analysisItem]="analysisItem" [facility]="facility" [facilityGroupTotals]="facilityGroupTotals">
-    </app-facility-analysis-table>
+    <h4>Facility Analysis</h4>
+    <router-outlet></router-outlet>
 </div>

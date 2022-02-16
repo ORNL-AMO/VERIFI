@@ -50,6 +50,17 @@ export class AnalysisService {
           }
         }
       }
+      if (group.analysisType == 'modifiedEnergyIntensity') {
+        if (group.specifiedMonthlyPercentBaseload) {
+          for (let i = 0; i < group.monthlyPercentBaseload.length; i++) {
+            if (!this.checkValueValid(group.monthlyPercentBaseload[i].percent)) {
+              return true;
+            }
+          }
+        } else if (!this.checkValueValid(group.averagePercentBaseload)) {
+          return true;
+        }
+      }
     }
     return false;
   }
