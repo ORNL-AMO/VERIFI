@@ -55,8 +55,8 @@ export class ImportMeterDataService {
     if (correspondingMeter) {
       meterId = correspondingMeter.id;
     }
-    let energyUse: number;
-    let totalVolume: number;
+    let energyUse: number = 0;
+    let totalVolume: number = 0;
     if (isTemplateElectricity) {
       energyUse = dataItem["Total Energy"];
     } else {
@@ -149,6 +149,8 @@ export class ImportMeterDataService {
         meterDataForm = this.utilityMeterDataService.getGeneralMeterDataForm(meterData, displayVolumeInput, displayEnergyUse);
       }
       if (meterDataForm.invalid) {
+        console.log('invalid 1');
+        console.log(meterDataForm);
         return { meterData: meterData, status: "invalid" };
       } else {
         //check exists
@@ -174,6 +176,7 @@ export class ImportMeterDataService {
         }
       }
     } else {
+      console.log('no corresponding meter');
       return { meterData: meterData, status: "invalid" };
     }
   }
