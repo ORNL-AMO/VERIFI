@@ -39,9 +39,6 @@
                 <th>
                     Total Savings
                 </th>
-                <!-- <th>
-                SEnPI
-            </th> -->
                 <th>
                     Annual Savings
                 </th>
@@ -105,12 +102,9 @@
                         &mdash;
                     </span>
                 </td>
-                <!-- <td>
-                {{summary.SEnPI | customNumber}}
-            </td> -->
                 <td>
                     <span *ngIf="summary.annualSavings" [ngClass]="{'red': summary.annualSavings < 0}">
-                        {{summary.annualSavings | customNumber}}%
+                        {{summary.annualSavings | number:'1.0-2'}}%
                     </span>
                     <span *ngIf="!summary.annualSavings">
                         &mdash;
@@ -118,7 +112,7 @@
                 </td>
                 <td>
                     <span *ngIf="summary.cumulativeSavings" [ngClass]="{'red': summary.cumulativeSavings < 0}">
-                        {{summary.cumulativeSavings | customNumber}}%
+                        {{summary.cumulativeSavings | number:'1.0-2'}}%
                     </span>
                     <span *ngIf="!summary.cumulativeSavings">
                         &mdash;

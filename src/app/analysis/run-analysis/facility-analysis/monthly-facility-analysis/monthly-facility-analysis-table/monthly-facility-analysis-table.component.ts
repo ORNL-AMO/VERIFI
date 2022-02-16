@@ -21,9 +21,14 @@ export class MonthlyFacilityAnalysisTableComponent implements OnInit {
   orderDataField: string = 'date';
   orderByDirection: 'asc' | 'desc' = 'asc';
   currentPageNumber: number = 1;
+  baselineYear: number;
   constructor(private analysisService: AnalysisService) { }
 
   ngOnInit(): void {
+    this.baselineYear = this.facility.sustainabilityQuestions.energyReductionBaselineYear;
+    if (this.facility.fiscalYear == 'nonCalendarYear' && this.facility.fiscalYearCalendarEnd) {
+      this.baselineYear = this.baselineYear - 1;
+    }
   }
 
   setOrderDataField(str: string) {

@@ -11,3 +11,8 @@ thead th:hover{
     cursor: pointer;
     text-decoration: underline;
 }
+
+
+tr.table-mh th span{
+    padding: 0px !important;
+}

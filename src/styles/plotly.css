@@ -1,0 +1,3 @@
+.facility-bar-chart g.plot g.trace.bars g.points g.point:nth-of-type(even){
+    opacity: .6 !important;
+}

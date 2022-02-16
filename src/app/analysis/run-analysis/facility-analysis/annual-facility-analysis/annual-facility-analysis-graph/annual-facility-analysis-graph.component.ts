@@ -53,7 +53,7 @@ export class AnnualFacilityAnalysisGraphComponent implements OnInit {
       for (let summaryYear: number = baselineYear; summaryYear <= reportYear; summaryYear++) {
         x1.push(summaryYear)
         x1.push(summaryYear);
-        x2.push('Used');
+        x2.push('Actual');
         x2.push('Modeled');
       }
 
@@ -75,6 +75,12 @@ export class AnnualFacilityAnalysisGraphComponent implements OnInit {
           // texttemplate: '%{value:.5f}',
           name: groupName,
           type: 'bar',
+          marker: {
+            line: {
+              color: 'black',
+              width: 2
+            }
+          }
         }
         traceData.push(barTrace);
       });
