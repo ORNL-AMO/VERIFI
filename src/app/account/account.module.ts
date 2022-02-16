@@ -13,6 +13,7 @@ import { EnergyUseHeatMapComponent } from './account-dashboard/energy-use-heat-m
 import { EnergyUseStackedBarChartComponent } from './account-dashboard/energy-use-stacked-bar-chart/energy-use-stacked-bar-chart.component';
 import { FacilitiesTableComponent } from './account-dashboard/facilities-table/facilities-table.component';
 import { HelperPipesModule } from '../shared/helper-pipes/helper-pipes.module';
+import { SettingsFormsModule } from '../shared/settings-forms/settings-forms.module';
 
 
 @NgModule({
@@ -32,7 +33,8 @@ import { HelperPipesModule } from '../shared/helper-pipes/helper-pipes.module';
     CommonModule,
     RouterModule,
     FormsModule,
-    HelperPipesModule
+    HelperPipesModule,
+    SettingsFormsModule
   ]
 })
 export class AccountModule { }

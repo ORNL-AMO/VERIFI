@@ -1,0 +1,32 @@
+<form [formGroup]="form">
+
+    <label class="checkbox mb-3">When is your fiscal year? </label>
+
+    <input type="radio" class="rowToggle" name="fiscalYear" formControlName="fiscalYear" value="calendarYear"
+        (change)="saveChanges()" id="calendarYear">
+    <label class="checkbox" for="calendarYear">Calendar Year</label>
+
+    <input type="radio" class="rowToggle" name="fiscalYear" formControlName="fiscalYear" value="nonCalendarYear"
+        (change)="saveChanges()" id="nonCalendarYear">
+    <label class="checkbox" for="nonCalendarYear">Non Calendar Year</label>
+
+    <div class="row" *ngIf="form.controls.fiscalYear.value === 'nonCalendarYear'">
+        <div class="col-lg-12 mb-3">
+            <label>Start Month</label>
+            <select formControlName="fiscalYearMonth" (change)="saveChanges()">
+                <option *ngFor="let month of months" [ngValue]="month.monthNumValue">{{month.name}}
+                </option>
+            </select>
+        </div>
+        <div class="col-lg-12 mb-3">
+            <input type="checkbox" class="rowToggle" name="fiscalYearCalendarEnd"
+                formControlName="fiscalYearCalendarEnd" (change)="saveChanges()" id="fiscalYearCalendarEnd">
+            <label class="checkbox" for="fiscalYearCalendarEnd">Our FY is denoted by the calendar year in which it ends.</label>
+        </div>
+    </div>
+</form>
+<p class="alert alert-warning" *ngIf="financialReportingDoestMatchAccount">
+    Facility financial reporting is different then the what is set for the account. If you would like to use
+    the account answers for this facility click here: <a (click)="setAccountFinancialReporting()">Use Account
+        Reporting</a>
+</p>
