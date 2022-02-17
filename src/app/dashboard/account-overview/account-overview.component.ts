@@ -9,7 +9,7 @@ import { DashboardService } from '../dashboard.service';
 @Component({
   selector: 'app-account-overview',
   templateUrl: './account-overview.component.html',
-  styleUrls: ['./account-overview.component.css', '../dashboard.component.css']
+  styleUrls: ['./account-overview.component.css']
 })
 export class AccountOverviewComponent implements OnInit {
 

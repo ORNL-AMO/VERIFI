@@ -28,10 +28,10 @@
 
     <div class="d-flex justify-content-center"
         [ngClass]="{'flex-column': !open, 'icon-row': open, 'hidden': checkHideAccountLinks()}">
-        <a [hidden]="!open" class="nav-link" routerLink="/account/home" [routerLinkActive]="['active']"><i class="fa fa-home"></i>
+        <a [hidden]="!open" class="nav-link" routerLink="/account/home" [routerLinkActive]="['active']"><i
+                class="fa fa-home"></i>
         </a>
-        <a class="nav-link" routerLink="/account/reports" [routerLinkActive]="['active']"><i
-                class="fa fa-folder"></i>
+        <a class="nav-link" routerLink="/account/reports" [routerLinkActive]="['active']"><i class="fa fa-folder"></i>
         </a>
         <a class="nav-link disabled" routerLink="/account/analysis" [routerLinkActive]="['active']"><i
                 class="fa fa-area-chart"></i>
@@ -52,12 +52,13 @@
                 {{facility.name}}
             </span>
         </a>
-        <div class="d-flex icon-row justify-content-center" [ngClass]="{'flex-column': !open, 'icon-row': open, 'hidden': checkHideFacilityLinks()}">
+        <div class="d-flex icon-row justify-content-center"
+            [ngClass]="{'flex-column': !open, 'icon-row': open, 'hidden': checkHideFacilityLinks()}">
             <a [hidden]="!open" class="nav-link" routerLink="/facility/{{facility.id}}/home"
                 [routerLinkActive]="['active']"><i class="fa fa-home"></i>
             </a>
             <a class="nav-link" routerLink="/facility/{{facility.id}}/utility" [routerLinkActive]="['active']"><i
-                    class="fa fa-file"></i>
+                    class="fa fa-file-invoice"></i>
             </a>
             <a class="nav-link disabled" routerLink="/facility/{{facility.id}}/analysis"
                 [routerLinkActive]="['active']"><i class="fa fa-area-chart"></i>

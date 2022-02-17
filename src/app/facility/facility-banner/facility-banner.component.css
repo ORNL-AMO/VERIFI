@@ -1,4 +1,4 @@
-a.nav-link, a.nav-link:not(.active) .fa{
+/* a.nav-link, a.nav-link:not(.active) .fa{
     color: white;
 }
 
@@ -12,7 +12,7 @@ a.nav-link, a.nav-link:not(.active) .fa{
 }
 
 .banner{
-    /* border-bottom: solid white; */
+    /* border-bottom: solid white; *
     background-color: #34495E;
 }
 
@@ -27,4 +27,4 @@ a.nav-link .fa{
 
 .nav-link{
     font-weight: 600;
-}
+} */

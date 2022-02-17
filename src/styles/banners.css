@@ -55,3 +55,61 @@
 .overview-report .banner{
     background-color: #ff6000;
 }
+
+
+.banner .banner-title{
+    font-size: 20px;
+    font-weight: 700;
+    color: white;
+    margin-right: 2.5rem;
+}
+
+.banner .banner-title .fa{
+    font-size: 22px;
+}
+
+.banner .help-toggle .fa-circle-question {
+    font-size: 24px;
+}
+
+.banner .help-toggle .fa-circle-question:hover {
+    color: #CCCC;
+}
+
+.account.banner {
+    background-color: #145A32;
+  }
+
+.facility.banner{
+    background-color: #34495E;
+}
+
+.account.banner .fa-building{
+    color: white;
+  }
+
+.banner a.nav-link, .banner a.nav-link:not(.active) .fa{
+    color: white;
+}
+
+
+.banner .nav-tabs .nav-item{
+    margin-bottom: 0px;
+}
+
+.banner .nav-tabs{
+    border-bottom: none;
+}
+
+.banner span.fa{
+    color: white;
+}
+
+.banner a.nav-link .fa{
+    font-size: 16px;
+    padding-right: 4px;
+}
+
+.banner .nav-link{
+    font-weight: 600;
+}
