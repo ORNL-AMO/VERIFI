@@ -72,11 +72,11 @@ export class OverviewReportMenuComponent implements OnInit {
     this.overviewReportService.reportOptions.next(this.reportOptions);
     this.overviewReportOptionsDbService.setAccountOverviewReportOptions();
     this.toastNotificationsService.showToast('New Report Created', undefined, 4000, false, "success");
-    this.router.navigateByUrl('/overview-report/basic-report');
+    this.router.navigateByUrl('/account/reports/basic-report');
   }
 
   goToDashboard() {
-    this.router.navigateByUrl('/overview-report/report-dashboard');
+    this.router.navigateByUrl('/account/reports/dashboard');
   }
 
   updateReport() {
@@ -89,7 +89,7 @@ export class OverviewReportMenuComponent implements OnInit {
   }
 
   cancelChanges() {
-    this.router.navigateByUrl('/overview-report/basic-report');
+    this.router.navigateByUrl('/account/reports/basic-report');
   }
 
   getNewIdbReportOptionsItem(type: 'report' | 'template'): IdbOverviewReportOptions {

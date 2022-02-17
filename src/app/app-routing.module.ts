@@ -84,7 +84,17 @@ const routes: Routes = [
       {
         path: 'settings',
         component: AccountSettingsComponent
-      }
+      },
+      {
+        path: 'reports',
+        component: OverviewReportComponent,
+        children: [
+          { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
+          { path: 'dashboard', component: OverviewReportDashboardComponent },
+          { path: 'menu', component: OverviewReportMenuComponent },
+          { path: 'basic-report', component: BasicReportComponent }
+        ]
+      },
     ]
   },
   {
@@ -175,16 +185,16 @@ const routes: Routes = [
   { path: 'feedback', component: FeedbackComponent },
   { path: 'help', component: HelpComponent },
   { path: 'style-guide', component: StyleGuideComponent },
-  {
-    path: 'overview-report',
-    component: OverviewReportComponent,
-    children: [
-      { path: '', pathMatch: 'full', redirectTo: 'report-dashboard' },
-      { path: 'report-dashboard', component: OverviewReportDashboardComponent },
-      { path: 'report-menu', component: OverviewReportMenuComponent },
-      { path: 'basic-report', component: BasicReportComponent }
-    ]
-  },
+  // {
+  //   path: 'overview-report',
+  //   component: OverviewReportComponent,
+  //   children: [
+  //     { path: '', pathMatch: 'full', redirectTo: 'report-dashboard' },
+  //     { path: 'report-dashboard', component: OverviewReportDashboardComponent },
+  //     { path: 'report-menu', component: OverviewReportMenuComponent },
+  //     { path: 'basic-report', component: BasicReportComponent }
+  //   ]
+  // },
   {
     path: 'analysis',
     component: AnalysisComponent,

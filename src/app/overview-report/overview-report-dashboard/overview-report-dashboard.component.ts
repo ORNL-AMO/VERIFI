@@ -48,13 +48,13 @@ export class OverviewReportDashboardComponent implements OnInit {
     this.overviewReportOptionsDbService.selectedOverviewReportOptions.next(undefined);
     let newReportOptions: ReportOptions = this.overviewReportService.getInitialReportOptions();
     this.overviewReportService.reportOptions.next(newReportOptions);
-    this.router.navigateByUrl('/overview-report/report-menu');
+    this.router.navigateByUrl('/account/reports/menu');
   }
 
   selectReport(report: IdbOverviewReportOptions) {
     this.overviewReportOptionsDbService.selectedOverviewReportOptions.next(report);
     this.overviewReportService.reportOptions.next(report.reportOptions);
-    this.router.navigateByUrl('/overview-report/basic-report');
+    this.router.navigateByUrl('/account/reports/basic-report');
   }
 
   deleteReport(report: IdbOverviewReportOptions) {
@@ -74,7 +74,7 @@ export class OverviewReportDashboardComponent implements OnInit {
   editReport(report: IdbOverviewReportOptions) {
     this.overviewReportOptionsDbService.selectedOverviewReportOptions.next(report);
     this.overviewReportService.reportOptions.next(report.reportOptions);
-    this.router.navigateByUrl('/overview-report/report-menu');
+    this.router.navigateByUrl('/account/reports/menu');
   }
 
   setOrderDataField(str: string) {

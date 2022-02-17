@@ -27,11 +27,11 @@ export class OverviewReportBannerComponent implements OnInit {
   }
 
   goToDashboard() {
-    this.router.navigateByUrl('/overview-report/report-dashboard');
+    this.router.navigateByUrl('/account/reports/dashboard');
   }
 
   goToMenu() {
-    this.router.navigateByUrl('/overview-report/report-menu');
+    this.router.navigateByUrl('/accounts/reports/menu');
   }
 
   print() {
@@ -40,16 +40,6 @@ export class OverviewReportBannerComponent implements OnInit {
 
   setInBasicReport(url: string) {
     this.inBasicReport = url.includes('basic-report');
-    if(this.inBasicReport){
-      let selectedOptions: IdbOverviewReportOptions = this.overviewReportOptionsDbService.selectedOverviewReportOptions.getValue();
-      this.bannerTitle = selectedOptions.name;
-    }else{
-      if(url.includes('report-menu')){
-        this.bannerTitle = 'Report Options';
-      }else if(url.includes('report-dashboard')){
-        this.bannerTitle = 'Reports Dashboard'
-      }
-    }
   }
 
   toggleHelpPanel() {
