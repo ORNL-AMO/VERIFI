@@ -1,3 +1,28 @@
 .banner {
     background-color: #145A32;
   }
+
+  .fa-building{
+    color: white;
+  }
+
+  a.nav-link{
+    color: white;
+}
+
+
+.nav-tabs .nav-item{
+    margin-bottom: 0px;
+}
+
+.nav-tabs{
+    border-bottom: none;
+}
+
+.banner{
+    border-bottom: solid white;
+}
+
+span.fa{
+    color: white;
+}

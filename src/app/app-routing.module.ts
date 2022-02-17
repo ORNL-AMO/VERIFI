@@ -103,7 +103,37 @@ const routes: Routes = [
       {
         path: 'settings',
         component: FacilitySettingsComponent
-      }
+      },
+      {
+        path: 'utility',
+        component: UtilityDataComponent,
+        children: [
+          {
+            path: 'energy-consumption', component: EnergyConsumptionComponent,
+            children: [
+              {
+                path: '',
+                pathMatch: 'full',
+                redirectTo: 'energy-source'
+              },
+              { path: 'energy-source', component: EnergySourceComponent },
+              { path: 'electricity', component: UtilityMeterDataComponent },
+              { path: 'natural-gas', component: UtilityMeterDataComponent },
+              { path: 'other-fuels', component: UtilityMeterDataComponent },
+              { path: 'other-energy', component: UtilityMeterDataComponent },
+              { path: 'water', component: UtilityMeterDataComponent },
+              { path: 'waste-water', component: UtilityMeterDataComponent },
+              { path: 'other-utility', component: UtilityMeterDataComponent },
+            ],
+          },
+          { path: 'monthly-meter-data', component: CalanderizationComponent },
+          { path: 'meter-groups', component: MeterGroupingComponent },
+          { path: 'predictors', component: PredictorDataComponent },
+          { path: 'visualization', component: VisualizationComponent },
+          { path: 'upload-data', component: UploadDataComponent },
+          { path: '', pathMatch: 'full', redirectTo: 'energy-consumption' }
+        ]
+      },
     ]
   },
   // {
@@ -114,32 +144,32 @@ const routes: Routes = [
   //   path: 'facility-management',
   //   component: FacilityComponent
   // },
-  {
-    path: 'utility',
-    component: UtilityDataComponent,
-    children: [
-      {
-        path: 'energy-consumption', component: EnergyConsumptionComponent,
-        children: [
-          { path: '', component: EnergySourceComponent },
-          { path: 'electricity', component: UtilityMeterDataComponent },
-          { path: 'natural-gas', component: UtilityMeterDataComponent },
-          { path: 'other-fuels', component: UtilityMeterDataComponent },
-          { path: 'other-energy', component: UtilityMeterDataComponent },
-          { path: 'water', component: UtilityMeterDataComponent },
-          { path: 'waste-water', component: UtilityMeterDataComponent },
-          { path: 'other-utility', component: UtilityMeterDataComponent },
-        ],
-      },
-      { path: 'monthly-meter-data', component: CalanderizationComponent },
-      { path: 'meter-groups', component: MeterGroupingComponent },
-      { path: 'predictors', component: PredictorDataComponent },
-      { path: 'visualization', component: VisualizationComponent },
-      { path: 'upload-data', component: UploadDataComponent },
-      { path: '', pathMatch: 'full', redirectTo: 'energy-consumption' }
+  // {
+  //   path: 'utility',
+  //   component: UtilityDataComponent,
+  //   children: [
+  //     {
+  //       path: 'energy-consumption', component: EnergyConsumptionComponent,
+  //       children: [
+  //         { path: '', component: EnergySourceComponent },
+  //         { path: 'electricity', component: UtilityMeterDataComponent },
+  //         { path: 'natural-gas', component: UtilityMeterDataComponent },
+  //         { path: 'other-fuels', component: UtilityMeterDataComponent },
+  //         { path: 'other-energy', component: UtilityMeterDataComponent },
+  //         { path: 'water', component: UtilityMeterDataComponent },
+  //         { path: 'waste-water', component: UtilityMeterDataComponent },
+  //         { path: 'other-utility', component: UtilityMeterDataComponent },
+  //       ],
+  //     },
+  //     { path: 'monthly-meter-data', component: CalanderizationComponent },
+  //     { path: 'meter-groups', component: MeterGroupingComponent },
+  //     { path: 'predictors', component: PredictorDataComponent },
+  //     { path: 'visualization', component: VisualizationComponent },
+  //     { path: 'upload-data', component: UploadDataComponent },
+  //     { path: '', pathMatch: 'full', redirectTo: 'energy-consumption' }
 
-    ]
-  },
+  //   ]
+  // },
   { path: 'about', component: AboutComponent },
   { path: 'acknowledgments', component: AcknowledgmentsComponent },
   { path: 'feedback', component: FeedbackComponent },

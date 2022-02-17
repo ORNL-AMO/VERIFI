@@ -1,12 +1,30 @@
-<div class="banner d-flex w-100 justify-content-between">
+<div class="banner d-flex w-100 justify-content-between pb-0">
     <h3>
-        <a routerLink="home" [routerLinkActive]="['active']"><span class="fa fa-building"></span></a>
-        {{label}}
+        <span class="fa fa-building"></span>
+        {{selectedAccount.name}}
     </h3>
+
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <a class="nav-link" routerLink="home" [routerLinkActive]="['active']">Overview</a>
+        </li>
+        <li class="nav-item disabled">
+            <a class="nav-link" routerLink="reports" [routerLinkActive]="['active']">Reports</a>
+        </li>
+        <li class="nav-item disabled">
+            <a class="nav-link" routerLink="analysis" [routerLinkActive]="['active']">Analysis</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" routerLink="settings" [routerLinkActive]="['active']">Settings</a>
+        </li>
+    </ul>
     <div class="nav-items">
+        <!-- <h3 class="pr-3">
+            <a routerLink="home" [routerLinkActive]="['active']"><span class="fa fa-table"></span></a>
+        </h3>
         <h3 class="pr-3">
             <a routerLink="settings" [routerLinkActive]="['active']"><span class="fa fa-cog"></span></a>
-        </h3>
+        </h3> -->
         <h3>
             <a (click)="toggleHelpPanel()"><span class="fa fa-question-circle-o"></span></a>
         </h3>

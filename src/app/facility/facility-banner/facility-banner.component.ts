@@ -52,6 +52,8 @@ export class FacilityBannerComponent implements OnInit {
         this.label = this.selectedFacility.name + ' Settings'
       } else if (url.includes('home')) {
         this.label = this.selectedFacility.name + ' Overview'
+      } else if(url.includes('utility')){
+        this.label = this.selectedFacility.name + ' Utility Data'
       }
     }
   }

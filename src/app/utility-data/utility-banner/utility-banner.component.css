@@ -15,3 +15,38 @@ li.disabled:hover .navigation-warning{
     border-bottom: 10px solid #f1c3be;
 }
 
+.nav-pills .nav-item{
+    padding-right: .5rem;
+    padding-left: .5rem;
+}
+
+a.nav-link{
+    /* color: white; */
+}
+
+.banner{
+   background-color: #f5f5f5;
+    border-bottom: solid white;
+}
+
+.nav-link{
+    /* color: #fff; */
+    background-color: #CCCCCC;
+}
+
+.breadcrumbs .nav-item a.nav-link{
+    padding: .5rem;
+    font-size: 12px;
+
+}
+.nav-pills .nav-link.active, .nav-pills .show>.nav-link {
+    background-color: #34495E;
+}
+
+/* .nav-link.active{
+    background-color: #c53f00;
+} */
+
+.banner-border{
+    border-bottom: solid #34495E;
+}

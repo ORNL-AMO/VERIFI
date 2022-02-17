@@ -1,14 +1,39 @@
-<div class="banner d-flex w-100 justify-content-between" [ngStyle]="{'background-color': bannerColor}">
-    <h3>
-        <a routerLink="home" [routerLinkActive]="['active']"><span class="fa fa-industry"></span></a>
-        {{label}}
-    </h3>
-    <div class="nav-items">
-        <h3 class="pr-3">
-            <a routerLink="settings" [routerLinkActive]="['active']"><span class="fa fa-cog"></span></a>
-        </h3>
+<div class="banner d-flex w-100 justify-content-between pb-0">
+    <!-- <div class="col-4"> -->
         <h3>
-            <a (click)="toggleHelpPanel()"><span class="fa fa-question-circle-o"></span></a>
+            <span class="fa fa-industry"></span>
+            {{selectedFacility.name}}
         </h3>
-    </div>
+    <!-- </div> -->
+    <!-- <div class="col-4 justify-content-center"> -->
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <a class="nav-link" routerLink="home" [routerLinkActive]="['active']">Overview</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" routerLink="utility" [routerLinkActive]="['active']">Utility Data</a>
+            </li>
+            <li class="nav-item disabled">
+                <a class="nav-link" routerLink="analysis" [routerLinkActive]="['active']">Analysis</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" routerLink="settings" [routerLinkActive]="['active']">Settings</a>
+            </li>
+        </ul>
+    <!-- </div> -->
+
+
+    <!-- <div class="col-4 justify-content-end"> -->
+        <div class="nav-items">
+            <!-- <h3 class="pr-3">
+                <a routerLink="utility" [routerLinkActive]="['active']"><span class="fa fa-file-text"></span></a>
+            </h3>
+            <h3 class="pr-3">
+                <a routerLink="settings" [routerLinkActive]="['active']"><span class="fa fa-cog"></span></a>
+            </h3> -->
+            <h3>
+                <a (click)="toggleHelpPanel()"><span class="fa fa-question-circle-o"></span></a>
+            </h3>
+        </div>
+    <!-- </div> -->
 </div>
