@@ -54,3 +54,15 @@ hr{
     cursor: pointer;
     background-color: #efefef;
 }
+
+.icon-row .nav-link{
+    padding: .5rem;
+}
+
+div.hidden, div.d-flex.hidden{
+    display: none !important;
+}
+
+.icon-row i.fa{
+    width: auto;
+}

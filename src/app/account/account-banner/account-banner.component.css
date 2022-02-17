@@ -6,7 +6,7 @@
     color: white;
   }
 
-  a.nav-link{
+  a.nav-link, a.nav-link:not(.active) .fa{
     color: white;
 }
 
@@ -19,10 +19,19 @@
     border-bottom: none;
 }
 
-.banner{
+/* .banner{
     border-bottom: solid white;
-}
+} */
 
 span.fa{
     color: white;
+}
+
+a.nav-link .fa{
+    font-size: 16px;
+    padding-right: 4px;
+}
+
+.nav-link{
+    font-weight: 600;
 }
