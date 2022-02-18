@@ -11,7 +11,3 @@ input[type="checkbox"]{
 .alert-danger, .alert-danger a{
     font-size: larger
 }
-
-input:checked + .slider{
-    background-color: #7D3C98;
-}

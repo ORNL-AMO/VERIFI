@@ -129,10 +129,10 @@
     border-color: #ff6000 !important;
   }
   
-  .facility .btn-primary-4{
+  .facility .btn-primary-4, .facility .btn-solid{
     color: #fff !important;
-    background-color: #34495E !important;
-    border-color: #34495E !important;
+    background-color: #2c386b !important;
+    border-color: #2c386b !important;
   }
   
 .btn-group button{

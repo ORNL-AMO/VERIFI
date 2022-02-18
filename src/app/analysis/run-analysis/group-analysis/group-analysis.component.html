@@ -1,17 +1,15 @@
-<nav class="tabs">
-    <ul class="mb-0">
-        <li [ngClass]="{'error': groupHasError}"><a
-                routerLink="/analysis/run-analysis/group-analysis/{{groupId}}/options"
-                [routerLinkActive]="['active']">Analysis
-                Options</a></li>
-        <li [ngClass]="{'disabled': groupHasError, 'error': groupHasError}"><a
-                routerLink="/analysis/run-analysis/group-analysis/{{groupId}}/annual-analysis"
-                [routerLinkActive]="['active']">Annual Analysis</a></li>
-        <li [ngClass]="{'disabled': groupHasError, 'error': groupHasError}"><a
-                routerLink="/analysis/run-analysis/group-analysis/{{groupId}}/monthly-analysis"
-                [routerLinkActive]="['active']">Monthly Analysis</a></li>
-    </ul>
-</nav>
+<ul class="nav nav-tabs">
+    <li class="nav-item" [ngClass]="{'error': groupHasError}"><a class="nav-link" routerLink="options"
+            [routerLinkActive]="['active']">
+            <span class="fa fa-exclamation-circle" *ngIf="groupHasError"></span>
+            Analysis Options</a></li>
+    <li class="nav-item" [ngClass]="{'disabled': groupHasError, 'error': groupHasError}"><a class="nav-link"
+            routerLink="annual-analysis"
+            [routerLinkActive]="['active']">Annual Analysis</a></li>
+    <li class="nav-item" [ngClass]="{'disabled': groupHasError, 'error': groupHasError}"><a class="nav-link"
+            routerLink="monthly-analysis"
+            [routerLinkActive]="['active']">Monthly Analysis</a></li>
+</ul>
 <div class="content-padding">
     <h4>{{label}}</h4>
     <router-outlet></router-outlet>

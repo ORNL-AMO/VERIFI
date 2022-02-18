@@ -84,8 +84,10 @@
                     <td>{{predictorEntry.date | date:'MMM, yyyy'}}</td>
                     <td *ngFor="let predictor of predictorEntry.predictors">{{predictor.amount | customNumber}}</td>
                     <td class="actions">
-                        <i class="fa fa-pencil" title="Edit" (click)="setEditPredictorEntry(predictorEntry)"></i>
-                        <i class="fa fa-trash-o" title="Delete" (click)="setDeletePredictorEntry(predictorEntry)"></i>
+                        <div class="d-flex">
+                            <i class="fa fa-pencil" title="Edit" (click)="setEditPredictorEntry(predictorEntry)"></i>
+                            <i class="fa fa-trash" title="Delete" (click)="setDeletePredictorEntry(predictorEntry)"></i>                            
+                        </div>
                     </td>
                 </tr>
             </tbody>

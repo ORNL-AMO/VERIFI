@@ -5,6 +5,7 @@ import { ImportMeterDataFile, ImportPredictorFile, UploadDataService } from './u
 import { Subscription } from 'rxjs';
 import { ImportMeterDataFileSummary } from './import-meter-data.service';
 import { UploadDataRunnerService } from './upload-data-runner.service';
+import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 
 @Component({
   selector: 'app-upload-data',
@@ -35,21 +36,25 @@ export class UploadDataComponent implements OnInit {
   importPredictorFileWizard: ImportPredictorFile;
   importPredictorFileWizardSub: Subscription;
 
-  constructor(private uploadDataService: UploadDataService, private uploadDataRunnerService: UploadDataRunnerService) { }
+  constructor(private uploadDataService: UploadDataService, private uploadDataRunnerService: UploadDataRunnerService,
+    private sharedDataService: SharedDataService) { }
 
   ngOnInit(): void {
     this.fileReferences = new Array();
 
     this.importMeterFileWizardSub = this.uploadDataService.importMeterFileWizard.subscribe(val => {
       this.importMeterFileWizard = val;
+      this.checkModalOpen();
     });
 
     this.importMeterDataFileWizardSub = this.uploadDataService.importMeterDataFileWizard.subscribe(val => {
       this.importMeterDataFileWizard = val;
+      this.checkModalOpen();
     });
 
     this.importPredictorFileWizardSub = this.uploadDataService.importPredictorFileWizard.subscribe(val => {
       this.importPredictorFileWizard = val;
+      this.checkModalOpen();
     });
 
     this.importMeterFilesSub = this.uploadDataService.importMeterFiles.subscribe(val => {
@@ -167,6 +172,14 @@ export class UploadDataComponent implements OnInit {
           this.disableImport = false;
         }
       });
+    }
+  }
+
+  checkModalOpen(){
+    if(this.importMeterFileWizard || this.importMeterDataFileWizard || this.importPredictorFileWizard){
+      this.sharedDataService.modalOpen.next(true);
+    }else{
+      this.sharedDataService.modalOpen.next(false);
     }
   }
 }

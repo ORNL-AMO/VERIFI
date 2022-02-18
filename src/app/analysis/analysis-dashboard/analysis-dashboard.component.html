@@ -56,8 +56,10 @@
                             <td>{{analysisItem.reportYear}}</td>
                             <td>{{analysisItem.date | date}}</td>
                             <td class="actions">
-                                <i class="fa fa-pencil" title="Edit" (click)="editItem(analysisItem)"></i>
-                                <i class="fa fa-trash-o" title="Delete" (click)="deleteItem(analysisItem)"></i>
+                                <div class="d-flex">
+                                    <i class="fa fa-pencil" title="Edit" (click)="editItem(analysisItem)"></i>
+                                    <i class="fa fa-trash" title="Delete" (click)="deleteItem(analysisItem)"></i>
+                                </div>
                             </td>
                         </tr>
                     </tbody>

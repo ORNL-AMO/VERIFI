@@ -86,6 +86,7 @@ export class PredictorDataComponent implements OnInit {
   setEditPredictorEntry(predictorEntry: IdbPredictorEntry) {
     this.addOrEdit = "edit";
     this.predictorEntryToEdit = predictorEntry;
+    this.sharedDataService.modalOpen.next(true);
   }
 
   cancelEditPredictorEntry() {
