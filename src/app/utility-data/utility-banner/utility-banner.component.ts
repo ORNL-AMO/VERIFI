@@ -30,5 +30,4 @@ export class UtilityBannerComponent implements OnInit {
     let helpPanelOpen: boolean = this.helpPanelService.helpPanelOpen.getValue();
     this.helpPanelService.helpPanelOpen.next(!helpPanelOpen);
   }
-
 }

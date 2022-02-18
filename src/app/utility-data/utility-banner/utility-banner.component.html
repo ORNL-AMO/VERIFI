@@ -1,65 +1,4 @@
-<!-- <div class="banner justify-content-center pb-0"> -->
-<!-- <h3>Utility Data</h3> -->
-<!-- <div class="compNav">
-        <ul>
-            <li><a routerLink="energy-consumption" [routerLinkActive]="['active']">Utilities</a></li>
-            <li [class.disabled]="utilityMeterData.length === 0">
-                <a routerLink="monthly-meter-data" [routerLinkActive]="['active']">Monthly Meter Data</a>
-                <span class="small navigation-warning">Requires Meter Readings</span>
-            </li>
-            <li [class.disabled]="utilityMeterData.length === 0">
-                <a routerLink="meter-groups" [routerLinkActive]="['active']">Meter Grouping</a>
-                <span class="small navigation-warning">Requires Meter Readings</span>
-            </li>
-            <li [class.disabled]="utilityMeterData.length === 0">
-                <a routerLink="predictors" [routerLinkActive]="['active']">Predictors</a>
-                <span class="small navigation-warning">Requires Meter Readings</span>
-            </li>
-            <li [class.disabled]="utilityMeterData.length === 0">
-                <a routerLink="visualization" [routerLinkActive]="['active']">Data Visualization</a>
-                <span class="small navigation-warning">Requires Meter Readings</span>
-            </li>
-        </ul>
-    </div> -->
-
-
-<!-- <div class="sticky-top banner-border">
-    <div class="breadcrumbs d-flex justify-content-center">
-        <ul class="nav nav-pills">
-            <li class="nav-item">
-                <a class="nav-link" routerLink="energy-consumption" [routerLinkActive]="['active']">Utility
-                    Management</a>
-            </li>
-            <li class="nav-item" [class.disabled]="utilityMeterData.length === 0">
-                <a class="nav-link" routerLink="monthly-meter-data" [routerLinkActive]="['active']">Monthly Meter
-                    Data</a>
-            </li>
-            <li class="nav-item" [class.disabled]="utilityMeterData.length === 0">
-                <a class="nav-link" routerLink="meter-groups" [routerLinkActive]="['active']">Meter Grouping</a>
-            </li>
-            <li class="nav-item" [class.disabled]="utilityMeterData.length === 0">
-                <a class="nav-link" routerLink="predictors" [routerLinkActive]="['active']">Predictors</a>
-            </li>
-            <li class="nav-item" [class.disabled]="utilityMeterData.length === 0">
-                <a class="nav-link" routerLink="visualization" [routerLinkActive]="['active']">Data Visualization</a>
-            </li>
-        </ul>
-    </div>
-</div> -->
-<!-- <div class="pull-right nav-items">
-        <h3 class="pr-3">
-            <a routerLink="upload-data" [routerLinkActive]="['active']"><span class="fa fa-upload"></span></a>
-        </h3>
-        <h3 class="pr-3">
-            <a routerLink="/facility-management" [routerLinkActive]="['active']"><span class="fa fa-cog"></span></a>
-        </h3>
-        <h3>
-            <a (click)="toggleHelpPanel()"><span class="fa fa-question-circle-o"></span></a>
-        </h3>
-    </div> -->
-<!-- </div> -->
-
-<div class="utility banner sticky-top">
+<div class="utility banner sticky-top d-flex justify-content-between">
     <ul class="nav nav-tabs">
         <li class="nav-item">
             <a class="nav-link" routerLink="energy-consumption" [routerLinkActive]="['active']">Utility
@@ -77,6 +16,9 @@
         </li>
         <li class="nav-item" [class.disabled]="utilityMeterData.length === 0">
             <a class="nav-link" routerLink="visualization" [routerLinkActive]="['active']">Data Visualization</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" routerLink="upload-data" [routerLinkActive]="['active']">Import Data</a>
         </li>
     </ul>
 </div>

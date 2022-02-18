@@ -3,8 +3,8 @@
         (click)="toggleFilterMenu()">Filter</button>
     <div class="filter-dropdown" *ngIf="showFilterDropdown">
         <!-- <p class="small">Filter Monthly Meter Data</p> -->
-        <div class="row no-gutters">
-            <div class="col-4">
+        <div class="d-flex">
+            <div class="p-2">
                 <!--sources-->
                 <label>Sources</label>
                 <label>
@@ -19,7 +19,7 @@
 
 
             <!--date range-->
-            <div class="col-4" *ngIf="calanderizedDataFilters.selectedDateMin">
+            <div class="p-2" *ngIf="calanderizedDataFilters.selectedDateMin">
                 <label>
                     Start Date
                 </label>
@@ -34,7 +34,7 @@
                 </select>
             </div>
 
-            <div class="col-4" *ngIf="calanderizedDataFilters.selectedDateMax">
+            <div class="p-2" *ngIf="calanderizedDataFilters.selectedDateMax">
                 <label>
                     End Date
                 </label>

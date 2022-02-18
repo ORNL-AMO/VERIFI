@@ -61,3 +61,7 @@ tbody tr.use-and-consumption td{
     max-height: 90vh;
     overflow-y: auto;
 }
+
+.btn-label{
+    font-size: 16px;
+}

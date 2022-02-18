@@ -1,7 +1,7 @@
-.filter{
+/* .filter{
     width: fit-content;
-}
+} */
 
 .filter.filter-open{
-    width: 100%;
+    width: 400px;
 }

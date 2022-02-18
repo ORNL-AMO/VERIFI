@@ -48,6 +48,7 @@ export class MeterGroupingComponent implements OnInit {
   years: Array<number>;
   dateRangeSub: Subscription;
   dateRange: { maxDate: Date, minDate: Date };
+  selectedFacility: IdbFacility;
   constructor(private utilityMeterGroupDbService: UtilityMeterGroupdbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterDbService: UtilityMeterdbService, private facilityDbService: FacilitydbService, private calanderizationService: CalanderizationService,
     private loadingService: LoadingService, private toastNoticationService: ToastNotificationsService,
@@ -58,6 +59,7 @@ export class MeterGroupingComponent implements OnInit {
     this.displayGraphEnergy = this.meterGroupingService.displayGraphEnergy;
     this.displayGraphCost = this.meterGroupingService.displayGraphCost;
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(selectedFacility => {
+      this.selectedFacility = selectedFacility;
       if (selectedFacility) {
         this.waterUnit = selectedFacility.volumeLiquidUnit;
         this.energyUnit = selectedFacility.energyUnit;
@@ -226,5 +228,10 @@ export class MeterGroupingComponent implements OnInit {
     let dateRange: { minDate: Date, maxDate: Date } = this.meterGroupingService.dateRange.getValue();
     dateRange.maxDate = maxDate;
     this.meterGroupingService.dateRange.next(dateRange);
+  }
+
+  setFacilityEnergyIsSource(energyIsSource: boolean) {
+    this.selectedFacility.energyIsSource = energyIsSource;
+    this.facilityDbService.update(this.selectedFacility);
   }
 }

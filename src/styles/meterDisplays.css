@@ -22,7 +22,7 @@ Meter Displays
     position: absolute;
     top: 44px;
     left: 0;
-    width: 100%;
+    /* width: 100%; */
     background-color: #ececec;
     border: 1px solid #d2d2d2;
     z-index: 1;

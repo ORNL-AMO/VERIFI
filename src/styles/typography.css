@@ -106,3 +106,7 @@ Typography
   .overview-report h4 {
     border-bottom-color: #ff6000;
   }
+
+  .facility h4{
+    border-bottom-color: #34495E;
+  }

@@ -2,15 +2,31 @@
     padding: 20px 30px 30px;
 }
 
-.tabs{
+.nav-tabs{
     background-color: #f1f1f1;
 }
 
-.tabs li.warning{
+.nav-tabs li.warning{
     border-top-color: orange;
 }
 
 
-.tabs li.error{
+.nav-tabs li.error{
     border-top-color: #bf2d00;
+}
+
+
+.nav-tabs .nav-link.active{
+    background-color: #34495E;
+    color: white;
+}
+
+.nav-tabs .nav-link:not(.active){
+    color: #34495E;
+    background-color: white;
+}
+
+
+.nav-link{
+    font-weight: 600;
 }

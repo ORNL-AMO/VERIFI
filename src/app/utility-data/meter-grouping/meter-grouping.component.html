@@ -68,6 +68,13 @@
                 <button class="btn" [ngClass]="{'btn-solid': dataDisplay == 'graph'}"
                     (click)="setDataDisplay('graph')">Graph</button>
             </div>
+
+            <div class="btn-group pl-2">
+                <button class="btn" (click)="setFacilityEnergyIsSource(true)"
+                    [ngClass]="{'btn-solid': selectedFacility.energyIsSource == true}">Source Energy</button>
+                <button class="btn" (click)="setFacilityEnergyIsSource(false)"
+                    [ngClass]="{'btn-solid': selectedFacility.energyIsSource == false}">Site Energy</button>
+            </div>
         </div>
     </div>
 

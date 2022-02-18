@@ -1,50 +1,59 @@
 <div class="wrapper main-content">
     <h4>Monthly Meter Data</h4>
 
-    <div class="controls pb-0">
-
-        <div class="btn-group pull-right">
-            <button class="btn" [ngClass]="{'btn-solid': dataDisplay == 'table'}"
-                (click)="setDataDisplay('table')">Table</button>
-            <button class="btn" [ngClass]="{'btn-solid': dataDisplay == 'graph'}"
-                (click)="setDataDisplay('graph')">Graph</button>
-        </div>
-
-        <!--Items Per Page-->
-        <div class="items-per-page pull-right" *ngIf="dataDisplay == 'table'">
-            <span>Show </span>
-            <select [(ngModel)]="itemsPerPage">
-                <option [ngValue]=6>6</option>
-                <option [ngValue]=12>12</option>
-                <option [ngValue]=24>24</option>
-                <option [ngValue]=36>36</option>
-                <option [ngValue]=48>48</option>
-                <option [ngValue]=60>60</option>
-                <option [ngValue]=999999999999>All</option>
-            </select>
-        </div>
-
-        <!--Chart Controls-->
-        <div *ngIf="dataDisplay == 'graph'" class="item-right">
-            <span>Utility </span>
-            <div class="btn-group pr-2 mr-2">
-                <button class="btn" [ngClass]="{'btn-solid-utility': displayGraphEnergy == 'bar'}"
-                    (click)="setDisplayGraphEnergy('bar')"><span class="fa fa-bar-chart"></span></button>
-                <button class="btn" [ngClass]="{'btn-solid-utility': displayGraphEnergy == 'scatter'}"
-                    (click)="setDisplayGraphEnergy('scatter')"><span class="fa fa-line-chart"></span></button>
-            </div>
-
-            <span>Cost </span>
-            <div class="btn-group pr-2 mr-2">
-                <button class="btn" [ngClass]="{'btn-solid-cost': displayGraphCost == 'bar'}"
-                    (click)="setDisplayGraphCost('bar')"><span class="fa fa-bar-chart"></span></button>
-                <button class="btn" [ngClass]="{'btn-solid-cost': displayGraphCost == 'scatter'}"
-                    (click)="setDisplayGraphCost('scatter')"><span class="fa fa-line-chart"></span></button>
-            </div>
-        </div>
+    <div class="d-flex controls pb-0 justify-content-between">
 
         <!--Table/Chart Filters-->
         <app-calanderization-filter></app-calanderization-filter>
+
+        <div class="d-flex">
+            <!--Items Per Page-->
+            <div class="items-per-page pull-right" *ngIf="dataDisplay == 'table'">
+                <span>Show </span>
+                <select [(ngModel)]="itemsPerPage">
+                    <option [ngValue]=6>6</option>
+                    <option [ngValue]=12>12</option>
+                    <option [ngValue]=24>24</option>
+                    <option [ngValue]=36>36</option>
+                    <option [ngValue]=48>48</option>
+                    <option [ngValue]=60>60</option>
+                    <option [ngValue]=999999999999>All</option>
+                </select>
+            </div>
+            <!--Chart Controls-->
+            <div *ngIf="dataDisplay == 'graph'" class="pl-2">
+                <span class="btn-label pr-2">Utility</span>
+                <div class="btn-group pr-2 mr-2">
+                    <button class="btn" [ngClass]="{'btn-solid-utility': displayGraphEnergy == 'bar'}"
+                        (click)="setDisplayGraphEnergy('bar')"><span class="fa fa-bar-chart"></span></button>
+                    <button class="btn" [ngClass]="{'btn-solid-utility': displayGraphEnergy == 'scatter'}"
+                        (click)="setDisplayGraphEnergy('scatter')"><span class="fa fa-line-chart"></span></button>
+                </div>
+
+                <span class="btn-label pr-2">Cost</span>
+                <div class="btn-group pr-2 mr-2">
+                    <button class="btn" [ngClass]="{'btn-solid-cost': displayGraphCost == 'bar'}"
+                        (click)="setDisplayGraphCost('bar')"><span class="fa fa-bar-chart"></span></button>
+                    <button class="btn" [ngClass]="{'btn-solid-cost': displayGraphCost == 'scatter'}"
+                        (click)="setDisplayGraphCost('scatter')"><span class="fa fa-line-chart"></span></button>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn" [ngClass]="{'btn-solid': dataDisplay == 'table'}"
+                    (click)="setDataDisplay('table')">Table</button>
+                <button class="btn" [ngClass]="{'btn-solid': dataDisplay == 'graph'}"
+                    (click)="setDataDisplay('graph')">Graph</button>
+            </div>
+
+            <div class="btn-group pl-2">
+                <button class="btn" (click)="setFacilityEnergyIsSource(true)"
+                    [ngClass]="{'btn-solid': selectedFacility.energyIsSource == true}">Source Energy</button>
+                <button class="btn" (click)="setFacilityEnergyIsSource(false)"
+                    [ngClass]="{'btn-solid': selectedFacility.energyIsSource == false}">Site Energy</button>
+            </div>
+
+
+        </div>
     </div>
 
     <div *ngIf="dataDisplay == 'table'">
@@ -69,7 +78,8 @@
                                 <th (click)="setOrderDataField('energyUse')"
                                     [ngClass]="{'active': orderDataField == 'energyUse'}"
                                     *ngIf="meterData.showEnergyUse">
-                                    Total Energy<br> (<span [innerHTML]="meterData.energyUnit | settingsLabel"></span>)</th>
+                                    Total Energy<br> (<span [innerHTML]="meterData.energyUnit | settingsLabel"></span>)
+                                </th>
                                 <th (click)="setOrderDataField('emissions')"
                                     [ngClass]="{'active': orderDataField == 'emissions'}"
                                     *ngIf="meterData.showEmissions">

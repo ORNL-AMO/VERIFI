@@ -27,6 +27,12 @@ export class FacilityDashboardMenuComponent implements OnInit {
     });
   }
 
+  ngOnDestroy(){
+    this.graphDisplaySub.unsubscribe();
+    this.selectedFacilitySub.unsubscribe();
+  }
+
+
   setGraphDisplay(str: "cost" | "usage" | "emissions") {
     this.dashboardService.graphDisplay.next(str);
   }

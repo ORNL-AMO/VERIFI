@@ -3,9 +3,10 @@ import { Subscription } from 'rxjs';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { CalanderizationFilters, CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
-import { IdbUtilityMeter } from 'src/app/models/idb';
+import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
 import { CalanderizationService } from '../../shared/helper-services/calanderization.service';
 import * as _ from 'lodash';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 
 @Component({
   selector: 'app-calanderization',
@@ -31,9 +32,10 @@ export class CalanderizationComponent implements OnInit {
   displayGraphCost:  "bar" | "scatter" | null;
 
   dataApplicationMeter: IdbUtilityMeter;
-
+  selectedFacility: IdbFacility;
+  selectedFacilitySub: Subscription;
   constructor(private calanderizationService: CalanderizationService, private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService) { }
+    private utilityMeterDataDbService: UtilityMeterDatadbService, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
     this.displayGraphCost = this.calanderizationService.displayGraphCost;
@@ -53,6 +55,11 @@ export class CalanderizationComponent implements OnInit {
       this.setCalanderizedMeterData();
     });
 
+    
+    this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
+      this.selectedFacility = val;
+    });
+
   }
 
   ngOnDestroy() {
@@ -69,6 +76,7 @@ export class CalanderizationComponent implements OnInit {
     this.calanderizationService.displayGraphCost = this.displayGraphCost;
     this.calanderizationService.displayGraphEnergy = this.displayGraphEnergy;
     this.calanderizationService.dataDisplay = this.dataDisplay;
+    this.selectedFacilitySub.unsubscribe();
   }
 
   setCalanderizedMeterData() {
@@ -188,5 +196,10 @@ export class CalanderizationComponent implements OnInit {
     this.dataApplicationMeter = meter;
     this.dataApplicationMeter.meterReadingDataApplication = calanderize;
     this.setDataApplication();
+  }
+
+  setFacilityEnergyIsSource(energyIsSource: boolean) {
+    this.selectedFacility.energyIsSource = energyIsSource;
+    this.facilityDbService.update(this.selectedFacility);
   }
 }
