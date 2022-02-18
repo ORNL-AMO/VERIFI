@@ -1,20 +1,5 @@
-<div class="sticky-top banner-border hide-print" *ngIf="inBasicReport">
+<div class="sticky-top banner-border hide-print" *ngIf="inBasicReport" [ngClass]="{'modal-open': modalOpen}">
     <div class="breadcrumbs d-flex">
-        <!-- <div class="d-flex justify-content-center flex-fill">
-            <ul class="nav nav-pills align-self-center">
-                <li class="nav-item">
-                    <a class="nav-link" routerLink="dashboard" [routerLinkActive]="['active']">View All Reports</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" routerLink="menu" [routerLinkActive]="['active']">
-                        Edit Report Options
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" routerLink="basic-report" [routerLinkActive]="['active']">View Latest Report</a>
-                </li>
-            </ul>
-        </div> -->
         <div>
             <button class="btn btn-sm btn-primary-4 m-0" (click)="goToDashboard()">
                 View All Reports

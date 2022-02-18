@@ -3,6 +3,7 @@ import { Subscription } from 'rxjs';
 import { DashboardService } from 'src/app/shared/helper-services/dashboard.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idb';
+import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 
 @Component({
   selector: 'app-facility-dashboard-menu',
@@ -15,7 +16,10 @@ export class FacilityDashboardMenuComponent implements OnInit {
   graphDisplaySub: Subscription;
   selectedFacility: IdbFacility;
   selectedFacilitySub: Subscription;
-  constructor(private facilityDbService: FacilitydbService, private dashboardService: DashboardService) { }
+  modalOpen: boolean;
+  modalOpenSub: Subscription;
+  constructor(private facilityDbService: FacilitydbService, private dashboardService: DashboardService,
+    private sharedDataService: SharedDataService) { }
 
   ngOnInit(): void {
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
@@ -25,11 +29,16 @@ export class FacilityDashboardMenuComponent implements OnInit {
     this.graphDisplaySub = this.dashboardService.graphDisplay.subscribe(val => {
       this.graphDisplay = val;
     });
+
+    this.modalOpenSub = this.sharedDataService.modalOpen.subscribe(val => {
+      this.modalOpen = val;
+    })
   }
 
   ngOnDestroy(){
     this.graphDisplaySub.unsubscribe();
     this.selectedFacilitySub.unsubscribe();
+    this.modalOpenSub.unsubscribe();
   }
 
 

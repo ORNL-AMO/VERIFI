@@ -37,6 +37,7 @@ import { AccountSettingsComponent } from './account/account-settings/account-set
 import { AccountComponent } from './account/account.component';
 import { FacilityComponent } from './facility/facility.component';
 import { FacilitySettingsComponent } from './facility/facility-settings/facility-settings.component';
+import { SetupWizardComponent } from './setup-wizard/setup-wizard/setup-wizard.component';
 
 const routes: Routes = [
   {
@@ -158,6 +159,7 @@ const routes: Routes = [
       },
     ]
   },
+  { path: 'setup-wizard', component: SetupWizardComponent },
   { path: 'about', component: AboutComponent },
   { path: 'acknowledgments', component: AcknowledgmentsComponent },
   { path: 'feedback', component: FeedbackComponent },

@@ -1,4 +1,5 @@
-<div class="analysis banner sticky-top d-flex justify-content-between" *ngIf="inRunAnalysis">
+<div class="analysis banner sticky-top d-flex justify-content-between" *ngIf="inRunAnalysis"
+    [ngClass]="{'modal-open': modalOpen}">
     <div>
         <ul class="nav nav-tabs">
             <li class="nav-item">

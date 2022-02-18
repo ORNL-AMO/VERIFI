@@ -2,9 +2,7 @@ import { Injectable } from '@angular/core';
 import * as _ from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import { LocalStorageService } from 'ngx-webstorage';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { CalanderizationService } from './calanderization.service';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
 import { CalanderizedMeter, LastYearData, MonthlyData } from 'src/app/models/calanderization';
@@ -18,12 +16,9 @@ export class DashboardService {
 
 
   graphDisplay: BehaviorSubject<"usage" | "cost" | "emissions">;
-  bannerDropdownOpen: BehaviorSubject<boolean>;
-  constructor(private facilityDbService: FacilitydbService, private utilityMeterDbService: UtilityMeterdbService,
-    private calanderizationService: CalanderizationService, private utilityMeterGroupDbService: UtilityMeterGroupdbService,
+  constructor(private utilityMeterDbService: UtilityMeterdbService,
+    private calanderizationService: CalanderizationService,
     private localStorageService: LocalStorageService) {
-
-    this.bannerDropdownOpen = new BehaviorSubject<boolean>(false);
 
     let dashboardGraphDisplay: "usage" | "cost" | "emissions" = this.localStorageService.retrieve("dashboardGraphDisplay");
     if (dashboardGraphDisplay) {

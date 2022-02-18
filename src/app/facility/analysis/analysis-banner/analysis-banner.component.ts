@@ -4,7 +4,7 @@ import { Subscription } from 'rxjs';
 import { HelpPanelService } from 'src/app/help-panel/help-panel.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { AnalysisGroup, IdbAnalysisItem } from 'src/app/models/idb';
-import { AnalysisService } from '../analysis.service';
+import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 
 @Component({
   selector: 'app-analysis-banner',
@@ -20,8 +20,10 @@ export class AnalysisBannerComponent implements OnInit {
   analysisSetupValid: boolean;
   groupHasError: boolean;
   groups: Array<AnalysisGroup>;
+  modalOpen: boolean;
+  modalOpenSub: Subscription;
   constructor(private helpPanelService: HelpPanelService, private router: Router,
-    private analysisDbService: AnalysisDbService, private analysisService: AnalysisService) { }
+    private analysisDbService: AnalysisDbService, private sharedDataService: SharedDataService) { }
 
   ngOnInit(): void {
     this.analysisItemSub = this.analysisDbService.selectedAnalysisItem.subscribe(item => {
@@ -34,10 +36,14 @@ export class AnalysisBannerComponent implements OnInit {
       }
     });
     this.setInRunAnalysis(this.router.url);
+    this.modalOpenSub = this.sharedDataService.modalOpen.subscribe(val => {
+      this.modalOpen = val;
+    })
   }
 
   ngOnDestroy() {
     this.analysisItemSub.unsubscribe();
+    this.modalOpenSub.unsubscribe();
   }
 
   toggleHelpPanel() {
@@ -47,9 +53,9 @@ export class AnalysisBannerComponent implements OnInit {
 
   setInRunAnalysis(url: string) {
     this.inRunAnalysis = url.includes('run-analysis');
-    if(this.analysisItem && this.inRunAnalysis){
+    if (this.analysisItem && this.inRunAnalysis) {
       this.groups = this.analysisItem.groups;
-    }else{
+    } else {
       this.groups = new Array();
     }
   }
