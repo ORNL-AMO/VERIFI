@@ -113,3 +113,7 @@
 .banner .nav-link{
     font-weight: 600;
 }
+
+.sticky-top.modal-open{
+    z-index: inherit;
+}

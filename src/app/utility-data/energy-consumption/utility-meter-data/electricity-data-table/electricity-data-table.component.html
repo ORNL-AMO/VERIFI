@@ -167,8 +167,10 @@
                 {{meterData.basicCharge | customNumber:true}}
             </td>
             <td class="actions">
-                <i class="fa fa-pencil" title="Edit" (click)="setEditMeterData(meterData)"></i>
-                <i class="fa fa-trash-o" title="Delete" (click)="setDeleteMeterData(meterData)"></i>
+                <div class="d-flex">
+                    <i class="fa fa-pencil" title="Edit" (click)="setEditMeterData(meterData)"></i>
+                    <i class="fa fa-trash" title="Delete" (click)="setDeleteMeterData(meterData)"></i>
+                </div>
             </td>
         </tr>
     </tbody>

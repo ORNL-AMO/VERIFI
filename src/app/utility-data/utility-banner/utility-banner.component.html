@@ -1,4 +1,4 @@
-<div class="utility banner sticky-top d-flex justify-content-between">
+<div class="utility banner sticky-top d-flex justify-content-between" [ngClass]="{'modal-open': modalOpen}">
     <ul class="nav nav-tabs">
         <li class="nav-item">
             <a class="nav-link" routerLink="energy-consumption" [routerLinkActive]="['active']">Utility

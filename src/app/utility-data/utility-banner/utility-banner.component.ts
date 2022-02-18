@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { HelpPanelService } from 'src/app/help-panel/help-panel.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbUtilityMeterData } from 'src/app/models/idb';
+import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 
 @Component({
   selector: 'app-utility-banner',
@@ -13,21 +13,22 @@ export class UtilityBannerComponent implements OnInit {
 
   utilityMeterData: Array<IdbUtilityMeterData>;
   utilityDataSub: Subscription;
-  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private helpPanelService: HelpPanelService) { }
+
+  modalOpen: boolean;
+  modalOpenSub: Subscription;
+  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private sharedDataService: SharedDataService) { }
 
   ngOnInit(): void {
     this.utilityDataSub = this.utilityMeterDataDbService.facilityMeterData.subscribe(utilityMeterData => {
       this.utilityMeterData = utilityMeterData;
     });
+    this.modalOpenSub = this.sharedDataService.modalOpen.subscribe(val => {
+      this.modalOpen = val;
+    })
   }
 
   ngOnDestroy(){
     this.utilityDataSub.unsubscribe();
-  }
-
-  toggleHelpPanel() {
-    let helpPanelOpen: boolean = this.helpPanelService.helpPanelOpen.getValue();
-    this.helpPanelService.helpPanelOpen.next(!helpPanelOpen);
+    this.modalOpenSub.unsubscribe();
   }
 }

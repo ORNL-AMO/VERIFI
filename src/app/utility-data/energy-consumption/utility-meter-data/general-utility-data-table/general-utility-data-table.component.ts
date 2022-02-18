@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges } from '@angular/core';
 import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 import { UtilityMeterDataService } from '../utility-meter-data.service';
@@ -38,7 +38,7 @@ export class GeneralUtilityDataTableComponent implements OnInit {
   showEnergyColumn: boolean;
   orderDataField: string = 'readDate';
   orderByDirection: string = 'desc';
-  constructor(public utilityMeterDataService: UtilityMeterDataService, private energyUnitsHelperService: EnergyUnitsHelperService, private cd: ChangeDetectorRef) { }
+  constructor(public utilityMeterDataService: UtilityMeterDataService, private energyUnitsHelperService: EnergyUnitsHelperService) { }
 
   ngOnInit(): void {
     this.showVolumeColumn = (this.meterListItem.meterDataItems.find(dataItem => { return dataItem.totalVolume != undefined }) != undefined);

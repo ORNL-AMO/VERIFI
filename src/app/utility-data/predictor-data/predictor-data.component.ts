@@ -7,6 +7,7 @@ import { IdbFacility, IdbPredictorEntry, PredictorData } from 'src/app/models/id
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import * as _ from 'lodash';
+import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 
 @Component({
   selector: 'app-predictor-data',
@@ -36,7 +37,8 @@ export class PredictorDataComponent implements OnInit {
   orderByDirection: string = 'desc';
   hasData: boolean;
   constructor(private predictorsDbService: PredictordbService, private router: Router, private loadingService: LoadingService,
-    private facilityDbService: FacilitydbService, private toastNotificationsService: ToastNotificationsService) { }
+    private facilityDbService: FacilitydbService, private toastNotificationsService: ToastNotificationsService,
+    private sharedDataService: SharedDataService) { }
 
   ngOnInit(): void {
     this.facilityPredictorsSub = this.predictorsDbService.facilityPredictors.subscribe(predictors => {
@@ -64,6 +66,7 @@ export class PredictorDataComponent implements OnInit {
   addPredictorEntry() {
     this.addOrEdit = "add";
     this.predictorEntryToEdit = this.predictorsDbService.getNewPredictorEntry();
+    this.sharedDataService.modalOpen.next(true);
   }
 
   setDeletePredictorEntry(predictorEntry: IdbPredictorEntry) {
@@ -87,6 +90,7 @@ export class PredictorDataComponent implements OnInit {
 
   cancelEditPredictorEntry() {
     this.predictorEntryToEdit = undefined;
+    this.sharedDataService.modalOpen.next(false);
   }
 
   togglePredictorMenu() {
@@ -95,11 +99,13 @@ export class PredictorDataComponent implements OnInit {
 
   editPredictors() {
     this.showEditPredictors = true;
+    this.sharedDataService.modalOpen.next(true);
   }
 
   closeEditPredictors() {
     this.showEditPredictors = false;
     this.showPredictorMenu = false;
+    this.sharedDataService.modalOpen.next(false);
   }
 
   uploadData() {

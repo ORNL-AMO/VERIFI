@@ -8,6 +8,7 @@ import { UtilityMeterDataService } from './utility-meter-data.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 
 @Component({
   selector: 'app-utility-meter-data',
@@ -54,7 +55,8 @@ export class UtilityMeterDataComponent implements OnInit {
     private router: Router,
     private loadingService: LoadingService,
     private toastNoticationService: ToastNotificationsService,
-    private facilityDbService: FacilitydbService
+    private facilityDbService: FacilitydbService,
+    private sharedDataService: SharedDataService
   ) { }
 
   ngOnInit() {
@@ -110,7 +112,7 @@ export class UtilityMeterDataComponent implements OnInit {
       if (meterData.length != 0) {
         this.meterListHasData = true;
       }
-      let checkDate: {error: Date, warning: Date, missingMonth: Date } = this.utilityMeterDataService.checkForErrors(meterData, meter);
+      let checkDate: { error: Date, warning: Date, missingMonth: Date } = this.utilityMeterDataService.checkForErrors(meterData, meter);
       this.meterList.push({
         idbMeter: meter,
         meterDataItems: meterData,
@@ -130,12 +132,14 @@ export class UtilityMeterDataComponent implements OnInit {
     this.addOrEdit = 'edit';
     this.selectedMeter = this.facilityMeters.find(meter => { return meter.id == meterData.meterId });
     this.editMeterData = meterData;
+    this.sharedDataService.modalOpen.next(true);
   }
 
   cancelEditMeter() {
     this.addOrEdit = undefined;
     this.editMeterData = undefined;
     this.meterDataMenuOpen = undefined;
+    this.sharedDataService.modalOpen.next(false);
   }
 
   meterDataToggleMenu(meterId: number) {
@@ -143,12 +147,8 @@ export class UtilityMeterDataComponent implements OnInit {
   }
 
   uploadData() {
-    this.router.navigateByUrl('utility/upload-data');
-  }
-
-  closeImportModal() {
-    this.showImport = false;
-    this.meterDataMenuOpen = undefined;
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    this.router.navigateByUrl('facility/' + selectedFacility.id + '/utility/upload-data');
   }
 
   async bulkDelete() {
@@ -183,6 +183,7 @@ export class UtilityMeterDataComponent implements OnInit {
 
   changeSelectedMeter() {
     this.editMeterData = this.utilityMeterDataDbService.getNewIdbUtilityMeterData(this.selectedMeter);
+    this.sharedDataService.modalOpen.next(true);
   }
 
   getLastMeterBillDate(meter: IdbUtilityMeter): Date {
@@ -227,12 +228,12 @@ export class UtilityMeterDataComponent implements OnInit {
     this.showBulkDelete = false;
   }
 
-  ignoreSameMonth(meter: IdbUtilityMeter){
+  ignoreSameMonth(meter: IdbUtilityMeter) {
     meter.ignoreDuplicateMonths = true;
     this.utilityMeterDbService.update(meter);
   }
 
-  ignoreMissingMonth(meter: IdbUtilityMeter){
+  ignoreMissingMonth(meter: IdbUtilityMeter) {
     meter.ignoreMissingMonths = true;
     this.utilityMeterDbService.update(meter);
   }

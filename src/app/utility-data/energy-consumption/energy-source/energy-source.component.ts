@@ -11,6 +11,7 @@ import { Router } from '@angular/router';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
+import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 
 @Component({
   selector: 'app-energy-source',
@@ -42,7 +43,8 @@ export class EnergySourceComponent implements OnInit {
     private router: Router,
     private loadingService: LoadingService,
     private toastNoticationService: ToastNotificationsService,
-    private energyUnitsHelperService: EnergyUnitsHelperService
+    private energyUnitsHelperService: EnergyUnitsHelperService,
+    private sharedDataService: SharedDataService
   ) { }
 
   ngOnInit() {
@@ -67,19 +69,22 @@ export class EnergySourceComponent implements OnInit {
     let selectedAccount: IdbAccount = this.accountdbService.selectedAccount.getValue();
     this.addOrEdit = 'add';
     this.editMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.id, selectedAccount.id, true, selectedFacility.emissionsOutputRate, selectedFacility.energyUnit);
+    this.sharedDataService.modalOpen.next(true);
   }
 
   uploadData() {
-    this.router.navigateByUrl('utility/upload-data');
+    this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/utility/upload-data');
   }
 
   selectEditMeter(meter: IdbUtilityMeter) {
     this.addOrEdit = 'edit';
     this.editMeter = meter;
+    this.sharedDataService.modalOpen.next(true);
   }
 
   closeEditMeter() {
     this.editMeter = undefined;
+    this.sharedDataService.modalOpen.next(false);
   }
 
   async deleteMeter() {
