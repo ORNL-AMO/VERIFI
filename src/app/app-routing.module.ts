@@ -3,7 +3,6 @@ import { Routes, RouterModule } from '@angular/router';
 // import { AccountComponent } from './account-management/account/account.component';
 // import { FacilityComponent } from './account-management/facility/facility.component';
 import { EnergyConsumptionComponent } from './facility/utility-data/energy-consumption/energy-consumption.component';
-import { DashboardComponent } from './dashboard/dashboard.component';
 import { EnergySourceComponent } from './facility/utility-data/energy-consumption/energy-source/energy-source.component';
 import { StyleGuideComponent } from './static-content/style-guide/style-guide.component';
 import { UtilityMeterDataComponent } from './facility/utility-data/energy-consumption/utility-meter-data/utility-meter-data.component';
@@ -11,8 +10,6 @@ import { MeterGroupingComponent } from './facility/utility-data/meter-grouping/m
 import { PredictorDataComponent } from './facility/utility-data/predictor-data/predictor-data.component';
 import { CalanderizationComponent } from './facility/utility-data/calanderization/calanderization.component';
 import { VisualizationComponent } from './facility/utility-data/visualization/visualization.component';
-import { FacilityOverviewComponent } from './dashboard/facility-overview/facility-overview.component';
-import { AccountOverviewComponent } from './dashboard/account-overview/account-overview.component';
 import { PageNotFoundComponent } from './core-components/page-not-found/page-not-found.component';
 import { AboutComponent } from './static-content/about/about.component';
 import { AcknowledgmentsComponent } from './static-content/acknowledgments/acknowledgments.component';
@@ -48,25 +45,6 @@ const routes: Routes = [
     path: '',
     pathMatch: 'full',
     redirectTo: 'home'
-  },
-  {
-    path: 'home',
-    component: DashboardComponent,
-    children: [
-      {
-        path: '',
-        pathMatch: 'full',
-        redirectTo: 'account-summary'
-      },
-      {
-        path: 'account-summary',
-        component: AccountOverviewComponent,
-      },
-      {
-        path: 'facility-summary',
-        component: FacilityOverviewComponent,
-      }
-    ]
   },
   {
     path: 'account',

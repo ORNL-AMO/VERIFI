@@ -9,7 +9,7 @@ import { VisualizationService } from 'src/app/shared/helper-services/visualizati
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { HeatMapData } from 'src/app/models/visualization';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { DashboardService } from 'src/app/dashboard/dashboard.service';
+import { DashboardService } from 'src/app/shared/helper-services/dashboard.service';
 @Component({
   selector: 'app-energy-use-heat-map',
   templateUrl: './energy-use-heat-map.component.html',

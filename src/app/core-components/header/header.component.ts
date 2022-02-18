@@ -8,7 +8,7 @@ import { UtilityMeterDatadbService } from "../../indexedDB/utilityMeterData-db.s
 import { IdbAccount, IdbFacility } from 'src/app/models/idb';
 import { Subscription } from 'rxjs';
 import * as _ from 'lodash';
-import { DashboardService } from 'src/app/dashboard/dashboard.service';
+import { DashboardService } from 'src/app/shared/helper-services/dashboard.service';
 import { ImportBackupModalService } from '../import-backup-modal/import-backup-modal.service';
 
 @Component({

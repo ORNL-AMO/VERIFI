@@ -1,7 +1,7 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
-import { DashboardService } from 'src/app/dashboard/dashboard.service';
+import { DashboardService } from 'src/app/shared/helper-services/dashboard.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { AccountFacilitiesSummary } from 'src/app/models/dashboard';

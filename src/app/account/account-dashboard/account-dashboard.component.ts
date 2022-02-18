@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { DashboardService } from 'src/app/dashboard/dashboard.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { AccountFacilitiesSummary } from 'src/app/models/dashboard';
 import { IdbUtilityMeterData } from 'src/app/models/idb';
+import { DashboardService } from 'src/app/shared/helper-services/dashboard.service';
 import { MeterSummaryService } from 'src/app/shared/helper-services/meter-summary.service';
 
 @Component({

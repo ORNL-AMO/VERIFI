@@ -9,7 +9,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { UtilityColors } from 'src/app/shared/utilityColors';
-import { DashboardService } from 'src/app/dashboard/dashboard.service';
+import { DashboardService } from 'src/app/shared/helper-services/dashboard.service';
 
 @Component({
   selector: 'app-energy-use-stacked-bar-chart',
