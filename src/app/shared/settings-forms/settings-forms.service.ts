@@ -1,13 +1,12 @@
 import { Injectable } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { IdbAccount, IdbFacility } from '../models/idb';
-import { EnergyUnitOptions, MassUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from '../shared/unitOptions';
+import { IdbAccount, IdbFacility } from 'src/app/models/idb';
+import { EnergyUnitOptions, MassUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from '../unitOptions';
 
 @Injectable({
   providedIn: 'root'
 })
-export class AccountManagementService {
-
+export class SettingsFormsService {
   constructor(private formBuilder: FormBuilder) { }
 
   //GENERAL INFORMATION
@@ -354,6 +353,4 @@ export class AccountManagementService {
     facilityForm.controls.fiscalYearCalendarEnd.patchValue(account.fiscalYearCalendarEnd);
     return facilityForm;
   }
-
-
 }

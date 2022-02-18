@@ -14,7 +14,6 @@ import { IndexedDBModule } from './indexedDB/indexed-db.module';
 import { PageNotFoundComponent } from './core-components/page-not-found/page-not-found.component';
 import { ToastNotificationsComponent } from './core-components/toast-notifications/toast-notifications.component';
 import { ElectronUpdateComponent } from './core-components/electron-update/electron-update.component';
-import { AccountManagementModule } from './account-management/account-management.module';
 import { AnalysisModule } from './analysis/analysis.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { HelpPanelModule } from './help-panel/help-panel.module';
@@ -25,6 +24,7 @@ import { SetupProgressComponent } from './core-components/setup-progress/setup-p
 import { ImportBackupModalComponent } from './core-components/import-backup-modal/import-backup-modal.component';
 import { FacilityModule } from './facility/facility.module';
 import { AccountModule } from './account/account.module';
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -45,7 +45,6 @@ import { AccountModule } from './account/account.module';
     CommonModule,
     PlotlyViaWindowModule,
     IndexedDBModule,
-    AccountManagementModule,
     AnalysisModule,
     DashboardModule,
     HelpPanelModule,

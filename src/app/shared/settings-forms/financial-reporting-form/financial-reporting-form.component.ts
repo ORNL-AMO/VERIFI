@@ -5,7 +5,7 @@ import { Month, Months } from 'src/app/shared/form-data/months';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAccount, IdbFacility } from 'src/app/models/idb';
-import { AccountManagementService } from 'src/app/account-management/account-management.service';
+import { SettingsFormsService } from '../settings-forms.service';
 
 @Component({
   selector: 'app-financial-reporting-form',
@@ -24,14 +24,14 @@ export class FinancialReportingFormComponent implements OnInit {
   selectedFacility: IdbFacility;
   financialReportingDoestMatchAccount: boolean;
   isFormChange: boolean = false;
-  constructor(private accountDbService: AccountdbService, private accountManagementService: AccountManagementService, private facilityDbService: FacilitydbService) { }
+  constructor(private accountDbService: AccountdbService, private settingsFormsService: SettingsFormsService, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
     this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(account => {
       this.selectedAccount = account;
       if (account && this.inAccount) {
         if (this.isFormChange == false) {
-          this.form = this.accountManagementService.getFiscalYearForm(account);
+          this.form = this.settingsFormsService.getFiscalYearForm(account);
         } else {
           this.isFormChange = false;
         }
@@ -42,9 +42,9 @@ export class FinancialReportingFormComponent implements OnInit {
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
       this.selectedFacility = facility;
       if (facility && !this.inAccount) {
-        this.financialReportingDoestMatchAccount = this.accountManagementService.areAccountAndFacilityFinancialReportingDifferent(this.selectedAccount, this.selectedFacility);
+        this.financialReportingDoestMatchAccount = this.settingsFormsService.areAccountAndFacilityFinancialReportingDifferent(this.selectedAccount, this.selectedFacility);
         if (this.isFormChange == false) {
-          this.form = this.accountManagementService.getFiscalYearForm(facility);
+          this.form = this.settingsFormsService.getFiscalYearForm(facility);
         } else {
           this.isFormChange = false;
         }
@@ -60,17 +60,17 @@ export class FinancialReportingFormComponent implements OnInit {
   saveChanges() {
     this.isFormChange = true;
     if (!this.inAccount) {
-      this.selectedFacility = this.accountManagementService.updateFacilityFromFiscalForm(this.form, this.selectedFacility);
+      this.selectedFacility = this.settingsFormsService.updateFacilityFromFiscalForm(this.form, this.selectedFacility);
       this.facilityDbService.update(this.selectedFacility);
     }
     if (this.inAccount) {
-      this.selectedAccount = this.accountManagementService.updateAccountFromFiscalForm(this.form, this.selectedAccount);
+      this.selectedAccount = this.settingsFormsService.updateAccountFromFiscalForm(this.form, this.selectedAccount);
       this.accountDbService.update(this.selectedAccount);
     }
   }
 
   setAccountFinancialReporting() {
-    this.form = this.accountManagementService.setAccountFinancialReporting(this.form, this.selectedAccount);
+    this.form = this.settingsFormsService.setAccountFinancialReporting(this.form, this.selectedAccount);
     this.saveChanges();
   }
 }

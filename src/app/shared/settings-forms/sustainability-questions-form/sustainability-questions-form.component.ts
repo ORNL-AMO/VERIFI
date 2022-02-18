@@ -1,10 +1,10 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { AccountManagementService } from 'src/app/account-management/account-management.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAccount, IdbFacility } from 'src/app/models/idb';
+import { SettingsFormsService } from '../settings-forms.service';
 
 @Component({
   selector: 'app-sustainability-questions-form',
@@ -23,14 +23,14 @@ export class SustainabilityQuestionsFormComponent implements OnInit {
   sustainQuestionsDontMatchAccount: boolean;
   years: Array<number> = new Array();
   isFormChange: boolean = false;
-  constructor(private accountDbService: AccountdbService, private accountManagementService: AccountManagementService, private facilityDbService: FacilitydbService) { }
+  constructor(private accountDbService: AccountdbService, private settingsFormsService: SettingsFormsService, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
     this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(account => {
       this.selectedAccount = account;
       if (account && this.inAccount) {
         if (this.isFormChange == false) {
-          this.form = this.accountManagementService.getSustainabilityQuestionsForm(account);
+          this.form = this.settingsFormsService.getSustainabilityQuestionsForm(account);
         } else {
           this.isFormChange = false;
         }
@@ -41,9 +41,9 @@ export class SustainabilityQuestionsFormComponent implements OnInit {
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
       this.selectedFacility = facility;
       if (facility && !this.inAccount) {
-        this.sustainQuestionsDontMatchAccount = this.accountManagementService.areAccountAndFacilitySustainQuestionsDifferent(this.selectedAccount, this.selectedFacility);
+        this.sustainQuestionsDontMatchAccount = this.settingsFormsService.areAccountAndFacilitySustainQuestionsDifferent(this.selectedAccount, this.selectedFacility);
         if (this.isFormChange == false) {
-          this.form = this.accountManagementService.getSustainabilityQuestionsForm(facility);
+          this.form = this.settingsFormsService.getSustainabilityQuestionsForm(facility);
         } else {
           this.isFormChange = false;
         }
@@ -62,17 +62,17 @@ export class SustainabilityQuestionsFormComponent implements OnInit {
   saveChanges() {
     this.isFormChange = true;
     if (!this.inAccount) {
-      this.selectedFacility = this.accountManagementService.updateFacilityFromSustainabilityQuestionsForm(this.form, this.selectedFacility);
+      this.selectedFacility = this.settingsFormsService.updateFacilityFromSustainabilityQuestionsForm(this.form, this.selectedFacility);
       this.facilityDbService.update(this.selectedFacility);
     }
     if (this.inAccount) {
-      this.selectedAccount = this.accountManagementService.updateAccountFromSustainabilityQuestionsForm(this.form, this.selectedAccount);
+      this.selectedAccount = this.settingsFormsService.updateAccountFromSustainabilityQuestionsForm(this.form, this.selectedAccount);
       this.accountDbService.update(this.selectedAccount);
     }
   }
 
   setAccountSustainQuestions() {
-    this.form = this.accountManagementService.setAccountSustainQuestions(this.form, this.selectedAccount);
+    this.form = this.settingsFormsService.setAccountSustainQuestions(this.form, this.selectedAccount);
     this.saveChanges();
   }
 

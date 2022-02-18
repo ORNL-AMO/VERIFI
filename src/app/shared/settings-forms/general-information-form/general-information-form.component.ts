@@ -7,7 +7,7 @@ import { State, States } from 'src/app/shared/form-data/states';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAccount, IdbFacility } from 'src/app/models/idb';
-import { AccountManagementService } from 'src/app/account-management/account-management.service';
+import { SettingsFormsService } from '../settings-forms.service';
 
 @Component({
   selector: 'app-general-information-form',
@@ -33,7 +33,7 @@ export class GeneralInformationFormComponent implements OnInit {
   countries: Array<Country> = Countries;
   states: Array<State> = States;
   isFormChange: boolean = false;
-  constructor(private accountDbService: AccountdbService, private accountManagementService: AccountManagementService, private facilityDbService: FacilitydbService) { }
+  constructor(private accountDbService: AccountdbService, private settingsFormsService: SettingsFormsService, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
     if (this.inAccount) {
@@ -41,7 +41,7 @@ export class GeneralInformationFormComponent implements OnInit {
         this.selectedAccount = account;
         if (account && this.inAccount) {
           if (this.isFormChange == false) {
-            this.form = this.accountManagementService.getGeneralInformationForm(account);
+            this.form = this.settingsFormsService.getGeneralInformationForm(account);
             this.unitsOfMeasure = this.selectedAccount.unitsOfMeasure;
           } else {
             this.isFormChange = false;
@@ -54,7 +54,7 @@ export class GeneralInformationFormComponent implements OnInit {
         this.selectedFacility = facility;
         if (facility) {
           if (this.isFormChange == false) {
-            this.form = this.accountManagementService.getGeneralInformationForm(facility);
+            this.form = this.settingsFormsService.getGeneralInformationForm(facility);
             this.unitsOfMeasure = this.selectedFacility.unitsOfMeasure;
           } else {
             this.isFormChange = false;
@@ -81,11 +81,11 @@ export class GeneralInformationFormComponent implements OnInit {
   saveChanges() {
     this.isFormChange = true;
     if (!this.inAccount) {
-      this.selectedFacility = this.accountManagementService.updateFacilityFromGeneralInformationForm(this.form, this.selectedFacility);
+      this.selectedFacility = this.settingsFormsService.updateFacilityFromGeneralInformationForm(this.form, this.selectedFacility);
       this.facilityDbService.update(this.selectedFacility);
     }
     if (this.inAccount) {
-      this.selectedAccount = this.accountManagementService.updateAccountFromGeneralInformationForm(this.form, this.selectedAccount);
+      this.selectedAccount = this.settingsFormsService.updateAccountFromGeneralInformationForm(this.form, this.selectedAccount);
       this.accountDbService.update(this.selectedAccount);
     }
   }

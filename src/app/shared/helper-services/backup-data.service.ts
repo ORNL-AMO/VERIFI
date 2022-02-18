@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
-import { AccountdbService } from '../indexedDB/account-db.service';
-import { FacilitydbService } from '../indexedDB/facility-db.service';
-import { PredictordbService } from '../indexedDB/predictors-db.service';
-import { UtilityMeterdbService } from '../indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from '../indexedDB/utilityMeterData-db.service';
-import { UtilityMeterGroupdbService } from '../indexedDB/utilityMeterGroup-db.service';
-import { IdbAccount, IdbFacility, IdbOverviewReportOptions, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from '../models/idb';
-import { LoadingService } from '../core-components/loading/loading.service';
-import { OverviewReportOptionsDbService } from '../indexedDB/overview-report-options-db.service';
+import { AccountdbService } from '../../indexedDB/account-db.service';
+import { FacilitydbService } from '../../indexedDB/facility-db.service';
+import { PredictordbService } from '../../indexedDB/predictors-db.service';
+import { UtilityMeterdbService } from '../../indexedDB/utilityMeter-db.service';
+import { UtilityMeterDatadbService } from '../../indexedDB/utilityMeterData-db.service';
+import { UtilityMeterGroupdbService } from '../../indexedDB/utilityMeterGroup-db.service';
+import { IdbAccount, IdbFacility, IdbOverviewReportOptions, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from '../../models/idb';
+import { LoadingService } from '../../core-components/loading/loading.service';
+import { OverviewReportOptionsDbService } from '../../indexedDB/overview-report-options-db.service';
 
 @Injectable({
   providedIn: 'root'

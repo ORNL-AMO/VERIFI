@@ -1,4 +1,4 @@
-import { AccountBackup } from "src/app/account-management/backup-data.service";
+import { AccountBackup } from "src/app/shared/helper-services/backup-data.service";
 
 export const ExampleAccount: AccountBackup = {
     "account": {

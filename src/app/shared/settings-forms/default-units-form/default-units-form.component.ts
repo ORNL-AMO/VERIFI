@@ -9,7 +9,7 @@ import { EnergyUnitOptions, MassUnitOptions, UnitOption, VolumeGasOptions, Volum
 import * as _ from 'lodash';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { AccountManagementService } from 'src/app/account-management/account-management.service';
+import { SettingsFormsService } from '../settings-forms.service';
 
 @Component({
   selector: 'app-default-units-form',
@@ -41,7 +41,7 @@ export class DefaultUnitsFormComponent implements OnInit {
   zipCodeSubRegionData: Array<string> = new Array();
   currentZip: string;
   showCustomLink: boolean;
-  constructor(private accountDbService: AccountdbService, private accountManagementService: AccountManagementService, private facilityDbService: FacilitydbService,
+  constructor(private accountDbService: AccountdbService, private settingsFormsService: SettingsFormsService, private facilityDbService: FacilitydbService,
     private eGridService: EGridService, private utilityMeterDbService: UtilityMeterdbService, private toastNotificationService: ToastNotificationsService) { }
 
   ngOnInit(): void {
@@ -49,7 +49,7 @@ export class DefaultUnitsFormComponent implements OnInit {
       this.selectedAccount = account;
       if (account && this.inAccount) {
         if (this.isFormChange == false) {
-          this.form = this.accountManagementService.getUnitsForm(account);
+          this.form = this.settingsFormsService.getUnitsForm(account);
           this.setShowCustomLink();
           this.checkCurrentZip();
         } else {
@@ -63,7 +63,7 @@ export class DefaultUnitsFormComponent implements OnInit {
       if (facility && !this.inAccount) {
         this.checkUnitsDontMatch();
         if (this.isFormChange == false) {
-          this.form = this.accountManagementService.getUnitsForm(facility);
+          this.form = this.settingsFormsService.getUnitsForm(facility);
           this.setShowCustomLink();
           this.checkCurrentZip();
         } else {
@@ -79,31 +79,31 @@ export class DefaultUnitsFormComponent implements OnInit {
   }
 
   setUnitsOfMeasure() {
-    this.form = this.accountManagementService.setUnitsOfMeasure(this.form);
+    this.form = this.settingsFormsService.setUnitsOfMeasure(this.form);
     this.saveChanges();
   }
 
   saveChanges() {
-    this.form = this.accountManagementService.checkCustom(this.form);
+    this.form = this.settingsFormsService.checkCustom(this.form);
     this.isFormChange = true;
     if (this.inAccount) {
-      this.selectedAccount = this.accountManagementService.updateAccountFromUnitsForm(this.form, this.selectedAccount);
+      this.selectedAccount = this.settingsFormsService.updateAccountFromUnitsForm(this.form, this.selectedAccount);
       this.accountDbService.update(this.selectedAccount);
     }
     if (!this.inAccount) {
       this.checkMeterEmissions();
-      this.selectedFacility = this.accountManagementService.updateFacilityFromUnitsForm(this.form, this.selectedFacility);
+      this.selectedFacility = this.settingsFormsService.updateFacilityFromUnitsForm(this.form, this.selectedFacility);
       this.facilityDbService.update(this.selectedFacility);
     }
   }
 
   setAccountUnits() {
-    this.form = this.accountManagementService.setAccountUnits(this.form, this.selectedAccount);
+    this.form = this.settingsFormsService.setAccountUnits(this.form, this.selectedAccount);
     this.saveChanges();
   }
 
   checkUnitsDontMatch() {
-    this.unitsDontMatchAccount = this.accountManagementService.areAccountAndFacilityUnitsDifferent(this.selectedAccount, this.selectedFacility);
+    this.unitsDontMatchAccount = this.settingsFormsService.areAccountAndFacilityUnitsDifferent(this.selectedAccount, this.selectedFacility);
   }
 
   checkCurrentZip() {

@@ -55,8 +55,10 @@
                     <td>{{facility.size}}</td>
                     <td>{{facility.unitsOfMeasure}}</td>
                     <td class="actions">
-                        <i class="fa fa-pencil" title="Edit" (click)="switchFacility(facility)"></i>
-                        <i class="fa fa-trash-o" title="Delete" (click)="setDeleteFacilityEntry(facility)"></i>
+                        <div class="d-flex">
+                            <i class="fa fa-pencil" title="Edit" (click)="switchFacility(facility)"></i>
+                            <i class="fa fa-trash" title="Delete" (click)="setDeleteFacilityEntry(facility)"></i>
+                        </div>
                     </td>
                 </tr>
             </tbody>

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { BackupDataService } from 'src/app/account-management/backup-data.service';
+import { BackupDataService } from 'src/app/shared/helper-services/backup-data.service';
 import { environment } from 'src/environments/environment';
 import { AccountdbService } from "../../indexedDB/account-db.service";
 import { FacilitydbService } from "../../indexedDB/facility-db.service";
