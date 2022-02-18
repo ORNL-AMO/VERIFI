@@ -31,7 +31,7 @@ export class OverviewReportBannerComponent implements OnInit {
   }
 
   goToMenu() {
-    this.router.navigateByUrl('/accounts/reports/menu');
+    this.router.navigateByUrl('/account/reports/menu');
   }
 
   print() {

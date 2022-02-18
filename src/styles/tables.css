@@ -129,6 +129,11 @@ table {
     color: #ffffff;
   }
   
+  .account .table-mh th, .account .table-mh th span{
+    background-color: #145A32;
+  }
+
+
   .table-mh th span {
     border: none;
     padding: 0 5px!important;

@@ -35,5 +35,9 @@
 } */
 
 .banner-border{
-    border-bottom: solid #2c386b;
+    border-bottom: solid #145A32;
+}
+
+.btn:hover{
+    opacity: .7;
 }

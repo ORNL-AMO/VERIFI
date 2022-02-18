@@ -63,8 +63,10 @@
                             <td>{{report.targetYear}}</td>
                             <td>{{report.date | date}}</td>
                             <td class="actions">
-                                <i class="fa fa-pencil" title="Edit" (click)="editReport(report)"></i>
-                                <i class="fa fa-trash-o" title="Delete" (click)="deleteReport(report)"></i>
+                                <div class="d-flex">
+                                    <i class="fa fa-pencil" title="Edit" (click)="editReport(report)"></i>
+                                    <i class="fa fa-trash" title="Delete" (click)="deleteReport(report)"></i>
+                                </div>
                             </td>
                         </tr>
                     </tbody>

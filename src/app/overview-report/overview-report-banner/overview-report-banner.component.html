@@ -1,27 +1,6 @@
-<!-- <div class="banner">
-    <h3>
-        <span class="nav-items">
-            <a (click)="goToDashboard()"><span class="fa fa-folder"></span></a>
-        </span>
-        {{bannerTitle}}
-    </h3>
-    <div class="pull-right nav-items">
-        <h3 class="pr-3" *ngIf="inBasicReport">
-            <a (click)="goToMenu()"><span class="fa fa-edit"></span></a>
-        </h3>
-        <h3 class="pr-3" *ngIf="inBasicReport">
-            <a (click)="print()"><span class="fa fa-print"></span></a>
-        </h3>
-        <!-- <h3>
-            <a (click)="toggleHelpPanel()"><span class="fa fa-question-circle-o"></span></a>
-        </h3> --
-    </div>
-</div> -->
-
-
-<div class="sticky-top banner-border hide-print">
+<div class="sticky-top banner-border hide-print" *ngIf="inBasicReport">
     <div class="breadcrumbs d-flex">
-        <div class="d-flex justify-content-center flex-fill">
+        <!-- <div class="d-flex justify-content-center flex-fill">
             <ul class="nav nav-pills align-self-center">
                 <li class="nav-item">
                     <a class="nav-link" routerLink="dashboard" [routerLinkActive]="['active']">View All Reports</a>
@@ -35,14 +14,22 @@
                     <a class="nav-link" routerLink="basic-report" [routerLinkActive]="['active']">View Latest Report</a>
                 </li>
             </ul>
+        </div> -->
+        <div>
+            <button class="btn btn-sm btn-primary-4 m-0" (click)="goToDashboard()">
+                View All Reports
+            </button>
         </div>
-        <div class="d-flex justify-content-end">
-            <div class="pull-right">
-                <button class="btn btn-primary m-0" [disabled]="!inBasicReport" (click)="print()">
-                    <span class="fa fa-print"></span>
-                    Print Report
-                </button>
-            </div>
+        <div class="pr-2 pl-2">
+            <button class="btn btn-sm btn-primary-4 m-0" (click)="goToMenu()">
+                Edit Report Options
+            </button>
+        </div>
+        <div>
+            <button class="btn btn-sm btn-primary-4 m-0" (click)="print()">
+                <span class="fa fa-print"></span>
+                Print Report
+            </button>
         </div>
     </div>
 </div>
