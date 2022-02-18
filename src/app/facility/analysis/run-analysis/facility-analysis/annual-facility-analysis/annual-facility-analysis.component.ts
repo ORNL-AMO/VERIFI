@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { AnalysisService } from 'src/app/analysis/analysis.service';
-import { FacilityAnalysisCalculationsService } from 'src/app/analysis/calculations/facility-analysis-calculations.service';
+import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
+import { FacilityAnalysisCalculationsService } from 'src/app/facility/analysis/calculations/facility-analysis-calculations.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AnnualAnalysisSummary, FacilityGroupSummary } from 'src/app/models/analysis';

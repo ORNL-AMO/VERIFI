@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { AnalysisService } from 'src/app/analysis/analysis.service';
+import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
 import { MonthlyFacilityAnalysisData } from 'src/app/models/analysis';
 import { IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 

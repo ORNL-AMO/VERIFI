@@ -15,6 +15,7 @@ import { FacilityDashboardMenuComponent } from './facility-dashboard/facility-da
 import { FacilitySettingsComponent } from './facility-settings/facility-settings.component';
 import { SettingsFormsModule } from '../shared/settings-forms/settings-forms.module';
 import { UtilityDataModule } from './utility-data/utility-data.module';
+import { AnalysisModule } from './analysis/analysis.module';
 
 
 
@@ -37,7 +38,8 @@ import { UtilityDataModule } from './utility-data/utility-data.module';
     FormsModule,
     HelperPipesModule,
     SettingsFormsModule,
-    UtilityDataModule
+    UtilityDataModule,
+    AnalysisModule
   ]
 })
 export class FacilityModule { }

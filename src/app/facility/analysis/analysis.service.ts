@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { LocalStorageService } from 'ngx-webstorage';
 import { BehaviorSubject } from 'rxjs';
-import { AnalysisGroup, IdbFacility, PredictorData } from '../models/idb';
+import { AnalysisGroup, IdbFacility, PredictorData } from '../../models/idb';
 
 @Injectable({
   providedIn: 'root'
