@@ -66,3 +66,13 @@ div.hidden, div.d-flex.hidden{
 .icon-row i.fa{
     width: auto;
 }
+
+.not-open .nav-link.active, .open .nav-link.active-head{
+    background-color: #efefef;
+}
+
+.disabled i{
+    pointer-events: none;
+    cursor: default;
+    opacity: .7;
+}

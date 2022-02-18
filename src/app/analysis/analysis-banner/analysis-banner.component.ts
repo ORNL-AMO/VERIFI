@@ -3,7 +3,7 @@ import { NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { HelpPanelService } from 'src/app/help-panel/help-panel.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { IdbAnalysisItem } from 'src/app/models/idb';
+import { AnalysisGroup, IdbAnalysisItem } from 'src/app/models/idb';
 import { AnalysisService } from '../analysis.service';
 
 @Component({
@@ -19,6 +19,7 @@ export class AnalysisBannerComponent implements OnInit {
   analysisItemSub: Subscription;
   analysisSetupValid: boolean;
   groupHasError: boolean;
+  groups: Array<AnalysisGroup>;
   constructor(private helpPanelService: HelpPanelService, private router: Router,
     private analysisDbService: AnalysisDbService, private analysisService: AnalysisService) { }
 
@@ -46,6 +47,11 @@ export class AnalysisBannerComponent implements OnInit {
 
   setInRunAnalysis(url: string) {
     this.inRunAnalysis = url.includes('run-analysis');
+    if(this.analysisItem && this.inRunAnalysis){
+      this.groups = this.analysisItem.groups;
+    }else{
+      this.groups = new Array();
+    }
   }
 
   goToDashboard() {

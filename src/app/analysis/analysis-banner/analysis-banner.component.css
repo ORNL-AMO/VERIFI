@@ -5,3 +5,43 @@
 .fa.fa-exclamation-circle{
     color: red;
 }
+
+
+
+.analysis.banner{
+    background-color: white;
+     /* border-bottom: solid #34495E; */
+     padding-bottom: 0px;
+ }
+ 
+ .nav-link{
+     /* color: #fff; */
+     background-color: #CCCCCC;
+ }
+ 
+ .breadcrumbs .nav-item a.nav-link{
+     padding: .5rem;
+     font-size: 12px;
+ 
+ }
+ .nav-pills .nav-link.active, .nav-pills .show>.nav-link {
+     background-color: #34495E;
+ }
+ 
+ /* .nav-link.active{
+     background-color: #c53f00;
+ } */
+ 
+ .banner-border{
+     border-bottom: solid #34495E;
+ }
+ 
+ .nav-tabs .nav-link.active{
+     background-color: #34495E;
+     color: white;
+ }
+ 
+ .nav-tabs .nav-link:not(.active){
+     color: #34495E;
+     background-color: white;
+ }

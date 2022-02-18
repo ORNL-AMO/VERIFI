@@ -23,7 +23,7 @@
     </div> -->
 
 
-<div class="sticky-top banner-border">
+<!-- <div class="sticky-top banner-border">
     <div class="breadcrumbs d-flex justify-content-center">
         <ul class="nav nav-pills">
             <li class="nav-item">
@@ -45,7 +45,7 @@
             </li>
         </ul>
     </div>
-</div>
+</div> -->
 <!-- <div class="pull-right nav-items">
         <h3 class="pr-3">
             <a routerLink="upload-data" [routerLinkActive]="['active']"><span class="fa fa-upload"></span></a>
@@ -58,3 +58,25 @@
         </h3>
     </div> -->
 <!-- </div> -->
+
+<div class="utility banner sticky-top">
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <a class="nav-link" routerLink="energy-consumption" [routerLinkActive]="['active']">Utility
+                Management</a>
+        </li>
+        <li class="nav-item" [class.disabled]="utilityMeterData.length === 0">
+            <a class="nav-link" routerLink="monthly-meter-data" [routerLinkActive]="['active']">Monthly Meter
+                Data</a>
+        </li>
+        <li class="nav-item" [class.disabled]="utilityMeterData.length === 0">
+            <a class="nav-link" routerLink="meter-groups" [routerLinkActive]="['active']">Meter Grouping</a>
+        </li>
+        <li class="nav-item" [class.disabled]="utilityMeterData.length === 0">
+            <a class="nav-link" routerLink="predictors" [routerLinkActive]="['active']">Predictors</a>
+        </li>
+        <li class="nav-item" [class.disabled]="utilityMeterData.length === 0">
+            <a class="nav-link" routerLink="visualization" [routerLinkActive]="['active']">Data Visualization</a>
+        </li>
+    </ul>
+</div>

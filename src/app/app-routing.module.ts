@@ -144,6 +144,42 @@ const routes: Routes = [
           { path: '', pathMatch: 'full', redirectTo: 'energy-consumption' }
         ]
       },
+      {
+        path: 'analysis',
+        component: AnalysisComponent,
+        children: [
+          { path: '', pathMatch: 'full', redirectTo: 'analysis-dashboard' },
+          { path: 'analysis-dashboard', component: AnalysisDashboardComponent },
+          {
+            path: 'run-analysis',
+            component: RunAnalysisComponent,
+            children: [
+              { path: '', pathMatch: 'full', redirectTo: 'analysis-setup' },
+              { path: 'analysis-setup', component: AnalysisSetupComponent },
+              {
+                path: 'group-analysis/:id',
+                component: GroupAnalysisComponent,
+                children: [
+                  { path: '', pathMatch: 'full', redirectTo: 'options' },
+                  { path: 'options', component: GroupAnalysisOptionsComponent },
+                  { path: 'regression-model-selection', component: RegressionModelSelectionComponent },
+                  { path: 'annual-analysis', component: AnnualAnalysisSummaryComponent },
+                  { path: 'monthly-analysis', component: MonthlyAnalysisSummaryComponent }
+                ]
+              },
+              {
+                path: 'facility-analysis',
+                component: FacilityAnalysisComponent,
+                children: [
+                  { path: '', pathMatch: 'full', redirectTo: 'annual-analysis' },
+                  { path: 'annual-analysis', component: AnnualFacilityAnalysisComponent },
+                  { path: 'monthly-analysis', component: MonthlyFacilityAnalysisComponent }
+                ]
+              }
+            ]
+          }
+        ]
+      },
     ]
   },
   // {
@@ -195,42 +231,40 @@ const routes: Routes = [
   //     { path: 'basic-report', component: BasicReportComponent }
   //   ]
   // },
-  {
-    path: 'analysis',
-    component: AnalysisComponent,
-    children: [
-      { path: '', pathMatch: 'full', redirectTo: 'analysis-dashboard' },
-      { path: 'analysis-dashboard', component: AnalysisDashboardComponent },
-      {
-        path: 'run-analysis',
-        component: RunAnalysisComponent,
-        children: [
-          { path: '', pathMatch: 'full', redirectTo: 'analysis-setup' },
-          { path: 'analysis-setup', component: AnalysisSetupComponent },
-          {
-            path: 'group-analysis/:id',
-            component: GroupAnalysisComponent,
-            children: [
-              { path: '', pathMatch: 'full', redirectTo: 'options' },
-              { path: 'options', component: GroupAnalysisOptionsComponent },
-              { path: 'regression-model-selection', component: RegressionModelSelectionComponent },
-              { path: 'annual-analysis', component: AnnualAnalysisSummaryComponent },
-              { path: 'monthly-analysis', component: MonthlyAnalysisSummaryComponent }
-            ]
-          },
-          {
-            path: 'facility-analysis',
-            component: FacilityAnalysisComponent,
-            children: [
-              { path: '', pathMatch: 'full', redirectTo: 'annual-analysis' },
-              { path: 'annual-analysis', component: AnnualFacilityAnalysisComponent },
-              { path: 'monthly-analysis', component: MonthlyFacilityAnalysisComponent }
-            ]
-          }
-        ]
-      }
-    ]
-  },
+  // {
+  //   path: 'analysis',
+  //   component: AnalysisComponent,
+  //   children: [
+  //     { path: '', pathMatch: 'full', redirectTo: 'analysis-dashboard' },
+  //     { path: 'analysis-dashboard', component: AnalysisDashboardComponent },
+  //     {
+  //       path: 'run-analysis',
+  //       component: RunAnalysisComponent,
+  //       children: [
+  //         { path: '', pathMatch: 'full', redirectTo: 'analysis-setup' },
+  //         { path: 'analysis-setup', component: AnalysisSetupComponent },
+  //         {
+  //           path: 'group-analysis/:id',
+  //           component: GroupAnalysisComponent,
+  //           children: [
+  //             { path: '', pathMatch: 'full', redirectTo: 'options' },
+  //             { path: 'options', component: GroupAnalysisOptionsComponent },
+  //             { path: 'regression-model-selection', component: RegressionModelSelectionComponent },
+  //             { path: 'annual-analysis', component: AnnualAnalysisSummaryComponent },
+  //             { path: 'monthly-analysis', component: MonthlyAnalysisSummaryComponent }
+  //           ]
+  //         },
+  //         {
+  //           path: 'facility-analysis',
+  //           component: FacilityAnalysisComponent,
+  //           children: [
+  //             { path: '', pathMatch: 'full', redirectTo: 'annual-analysis' },
+  //             { path: 'annual-analysis', component: AnnualFacilityAnalysisComponent },
+  //             { path: 'monthly-analysis', component: MonthlyFacilityAnalysisComponent }
+  //           ]
+  //         }
+  //       ]
+  //     }
   { path: "**", component: PageNotFoundComponent },
 ];
 

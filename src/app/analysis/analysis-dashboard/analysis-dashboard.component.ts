@@ -25,7 +25,7 @@ export class AnalysisDashboardComponent implements OnInit {
   itemToDelete: IdbAnalysisItem;
   baselineYearError: boolean;
   yearOptions: Array<number>;
-  selectedFacility: IdbFacility 
+  selectedFacility: IdbFacility
   constructor(private router: Router, private analysisDbService: AnalysisDbService, private toastNotificationService: ToastNotificationsService,
     private analysisCalculationsHelperService: AnalysisCalculationsHelperService,
     private facilityDbService: FacilitydbService) { }
@@ -36,10 +36,10 @@ export class AnalysisDashboardComponent implements OnInit {
     });
 
     this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
-    if(this.selectedFacility){
+    if (this.selectedFacility) {
       this.yearOptions = this.analysisCalculationsHelperService.getYearOptions();
       this.baselineYearError = this.yearOptions[0] > this.selectedFacility.sustainabilityQuestions.energyReductionBaselineYear
-    }else{
+    } else {
       this.router.navigateByUrl('/');
     }
 
@@ -54,13 +54,13 @@ export class AnalysisDashboardComponent implements OnInit {
     let addedItem: IdbAnalysisItem = await this.analysisDbService.addWithObservable(newItem).toPromise();
     this.analysisDbService.setAccountAnalysisItems();
     this.analysisDbService.selectedAnalysisItem.next(addedItem);
-    this.router.navigateByUrl('/analysis/run-analysis');
+    this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/analysis/run-analysis');
   }
 
   selectAnalysisItem(item: IdbAnalysisItem) {
     this.analysisDbService.selectedAnalysisItem.next(item);
     //todo: route to results if item setup
-    this.router.navigateByUrl('/analysis/run-analysis');
+    this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/analysis/run-analysis');
   }
 
   deleteItem(item: IdbAnalysisItem) {
