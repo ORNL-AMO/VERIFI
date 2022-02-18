@@ -19,7 +19,6 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { HelpPanelModule } from './help-panel/help-panel.module';
 import { OverviewReportModule } from './overview-report/overview-report.module';
 import { StaticContentModule } from './static-content/static-content.module';
-import { UtilityDataModule } from './utility-data/utility-data.module';
 import { SetupProgressComponent } from './core-components/setup-progress/setup-progress.component';
 import { ImportBackupModalComponent } from './core-components/import-backup-modal/import-backup-modal.component';
 import { FacilityModule } from './facility/facility.module';
@@ -50,7 +49,6 @@ import { AccountModule } from './account/account.module';
     HelpPanelModule,
     OverviewReportModule,
     StaticContentModule,
-    UtilityDataModule,
     BrowserAnimationsModule,
     FacilityModule,
     AccountModule

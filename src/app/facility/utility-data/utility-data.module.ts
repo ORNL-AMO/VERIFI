@@ -10,9 +10,9 @@ import { CalanderizationModule } from './calanderization/calanderization.module'
 import { SiteToSourceOptionComponent } from './site-to-source-option/site-to-source-option.component';
 import { UtilityBannerComponent } from './utility-banner/utility-banner.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { HelperPipesModule } from '../shared/helper-pipes/helper-pipes.module';
+import { HelperPipesModule } from '../../shared/helper-pipes/helper-pipes.module';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { LabelWithTooltipModule } from '../shared/label-with-tooltip/label-with-tooltip.module';
+import { LabelWithTooltipModule } from '../../shared/label-with-tooltip/label-with-tooltip.module';
 import { RouterModule } from '@angular/router';
 
 @NgModule({

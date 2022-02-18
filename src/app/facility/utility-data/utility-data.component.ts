@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { AccountdbService } from '../indexedDB/account-db.service';
-import { FacilitydbService } from '../indexedDB/facility-db.service';
-import { IdbAccount, IdbFacility } from '../models/idb';
+import { AccountdbService } from '../../indexedDB/account-db.service';
+import { FacilitydbService } from '../../indexedDB/facility-db.service';
+import { IdbAccount, IdbFacility } from '../../models/idb';
 import { MeterGroupingService } from './meter-grouping/meter-grouping.service';
 
 @Component({
