@@ -39,7 +39,7 @@
     </div>
     <hr>
     <div *ngFor="let facility of facilityList"
-        [ngClass]="{'hidden': checkHideFacility(facility),'open': open, 'not-open': open}">
+        [ngClass]="{'open': open, 'not-open': open}">
         <a class="nav-link" routerLink="/facility/{{facility.id}}" [routerLinkActive]="['active-head']"><i
                 class="fa fa-industry" [ngStyle]="{color: facility.color}"></i>
             <span [hidden]="!open" class="pl-2 nav-label">
@@ -47,7 +47,7 @@
             </span>
         </a>
         <div class="d-flex icon-row justify-content-center"
-            [ngClass]="{'flex-column': !open, 'icon-row': open, 'hidden': checkHideFacilityLinks()}">
+            [ngClass]="{'flex-column': !open, 'icon-row': open, 'hidden': checkHideFacilityLinks(facility)}">
             <a class="nav-link" routerLink="/facility/{{facility.id}}/home" [routerLinkActive]="['active']"><i
                     class="fa fa-home"></i>
             </a>

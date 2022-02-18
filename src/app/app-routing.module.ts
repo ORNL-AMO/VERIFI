@@ -37,7 +37,11 @@ import { AccountSettingsComponent } from './account/account-settings/account-set
 import { AccountComponent } from './account/account.component';
 import { FacilityComponent } from './facility/facility.component';
 import { FacilitySettingsComponent } from './facility/facility-settings/facility-settings.component';
-import { SetupWizardComponent } from './setup-wizard/setup-wizard/setup-wizard.component';
+import { SetupWizardComponent } from './setup-wizard/setup-wizard.component';
+import { SetupWelcomeComponent } from './setup-wizard/setup-welcome/setup-welcome.component';
+import { SetupAccountComponent } from './setup-wizard/setup-account/setup-account.component';
+import { SetupFacilitiesComponent } from './setup-wizard/setup-facilities/setup-facilities.component';
+import { SetupConfirmationComponent } from './setup-wizard/setup-confirmation/setup-confirmation.component';
 
 const routes: Routes = [
   {
@@ -159,7 +163,18 @@ const routes: Routes = [
       },
     ]
   },
-  { path: 'setup-wizard', component: SetupWizardComponent },
+  {
+    path: 'setup-wizard',
+    component: SetupWizardComponent,
+    children: [
+      { path: '', pathMatch: 'full', redirectTo: 'welcome' },
+      { path: 'welcome', component: SetupWelcomeComponent },
+      { path: 'account-setup', component: SetupAccountComponent },
+      { path: 'facility-setup', component: SetupFacilitiesComponent },
+      { path: 'confirmation', component: SetupConfirmationComponent },
+
+    ]
+  },
   { path: 'about', component: AboutComponent },
   { path: 'acknowledgments', component: AcknowledgmentsComponent },
   { path: 'feedback', component: FeedbackComponent },

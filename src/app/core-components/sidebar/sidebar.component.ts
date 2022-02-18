@@ -77,11 +77,15 @@ export class SidebarComponent implements OnInit {
     return true;
   }
 
-  checkHideFacilityLinks(): boolean {
+  checkHideFacilityLinks(facility: IdbFacility): boolean {
     if (this.open) {
       return false;
     } else if (this.router.url.includes('account')) {
       return true;
+    }else if (this.selectedFacility) {
+      if (this.selectedFacility.id != facility.id) {
+        return true;
+      }
     }
     return false;
   }

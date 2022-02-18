@@ -20,6 +20,7 @@ import { SetupProgressComponent } from './core-components/setup-progress/setup-p
 import { ImportBackupModalComponent } from './core-components/import-backup-modal/import-backup-modal.component';
 import { FacilityModule } from './facility/facility.module';
 import { AccountModule } from './account/account.module';
+import { SetupWizardModule } from './setup-wizard/setup-wizard.module';
 
 @NgModule({
   declarations: [
@@ -45,7 +46,8 @@ import { AccountModule } from './account/account.module';
     StaticContentModule,
     BrowserAnimationsModule,
     FacilityModule,
-    AccountModule
+    AccountModule,
+    SetupWizardModule
   ],
   providers: [],
   bootstrap: [AppComponent]

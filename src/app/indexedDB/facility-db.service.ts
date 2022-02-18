@@ -55,6 +55,8 @@ export class FacilitydbService {
             this.getAllByIndexRange('accountId', selectedAccount.id).subscribe(facilities => {
                 this.accountFacilities.next(facilities);
             });
+        }else{
+            this.accountFacilities.next([]);
         }
     }
 
