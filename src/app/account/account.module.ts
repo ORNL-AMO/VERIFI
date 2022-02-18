@@ -14,6 +14,7 @@ import { EnergyUseStackedBarChartComponent } from './account-dashboard/energy-us
 import { FacilitiesTableComponent } from './account-dashboard/facilities-table/facilities-table.component';
 import { HelperPipesModule } from '../shared/helper-pipes/helper-pipes.module';
 import { SettingsFormsModule } from '../shared/settings-forms/settings-forms.module';
+import { OverviewReportModule } from './overview-report/overview-report.module';
 
 
 @NgModule({
@@ -34,7 +35,8 @@ import { SettingsFormsModule } from '../shared/settings-forms/settings-forms.mod
     RouterModule,
     FormsModule,
     HelperPipesModule,
-    SettingsFormsModule
+    SettingsFormsModule,
+    OverviewReportModule
   ]
 })
 export class AccountModule { }

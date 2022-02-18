@@ -19,10 +19,10 @@ import { AcknowledgmentsComponent } from './static-content/acknowledgments/ackno
 import { FeedbackComponent } from './static-content/feedback/feedback.component';
 import { HelpComponent } from './static-content/help/help.component';
 import { UploadDataComponent } from './facility/utility-data/upload-data/upload-data.component';
-import { OverviewReportComponent } from './overview-report/overview-report.component';
-import { OverviewReportDashboardComponent } from './overview-report/overview-report-dashboard/overview-report-dashboard.component';
-import { OverviewReportMenuComponent } from './overview-report/overview-report-menu/overview-report-menu.component';
-import { BasicReportComponent } from './overview-report/basic-report/basic-report.component';
+import { OverviewReportComponent } from './account/overview-report/overview-report.component';
+import { OverviewReportDashboardComponent } from './account/overview-report/overview-report-dashboard/overview-report-dashboard.component';
+import { OverviewReportMenuComponent } from './account/overview-report/overview-report-menu/overview-report-menu.component';
+import { BasicReportComponent } from './account/overview-report/basic-report/basic-report.component';
 import { UtilityDataComponent } from './facility/utility-data/utility-data.component';
 import { AnalysisComponent } from './facility/analysis/analysis.component';
 import { AnalysisDashboardComponent } from './facility/analysis/analysis-dashboard/analysis-dashboard.component';

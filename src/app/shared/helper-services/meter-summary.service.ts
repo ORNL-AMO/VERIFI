@@ -7,7 +7,7 @@ import { CalanderizationService } from './calanderization.service';
 import * as _ from 'lodash';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { OverviewReportService } from 'src/app/overview-report/overview-report.service';
+import { OverviewReportService } from 'src/app/account/overview-report/overview-report.service';
 import { ReportOptions } from 'src/app/models/overview-report';
 
 @Injectable({

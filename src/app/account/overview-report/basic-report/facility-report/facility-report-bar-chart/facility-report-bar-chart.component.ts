@@ -5,7 +5,7 @@ import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service
 import { IdbFacility, IdbUtilityMeter, MeterSource } from 'src/app/models/idb';
 import { BarChartDataTrace, ReportOptions } from 'src/app/models/overview-report';
 import { FacilityBarChartData } from 'src/app/models/visualization';
-import { OverviewReportService } from 'src/app/overview-report/overview-report.service';
+import { OverviewReportService } from 'src/app/account/overview-report/overview-report.service';
 import { VisualizationService } from 'src/app/shared/helper-services/visualization.service';
 import { UtilityColors } from 'src/app/shared/utilityColors';
 

@@ -16,7 +16,6 @@ import { ToastNotificationsComponent } from './core-components/toast-notificatio
 import { ElectronUpdateComponent } from './core-components/electron-update/electron-update.component';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { HelpPanelModule } from './help-panel/help-panel.module';
-import { OverviewReportModule } from './overview-report/overview-report.module';
 import { StaticContentModule } from './static-content/static-content.module';
 import { SetupProgressComponent } from './core-components/setup-progress/setup-progress.component';
 import { ImportBackupModalComponent } from './core-components/import-backup-modal/import-backup-modal.component';
@@ -45,7 +44,6 @@ import { AccountModule } from './account/account.module';
     IndexedDBModule,
     DashboardModule,
     HelpPanelModule,
-    OverviewReportModule,
     StaticContentModule,
     BrowserAnimationsModule,
     FacilityModule,
