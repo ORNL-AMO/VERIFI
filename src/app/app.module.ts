@@ -14,7 +14,6 @@ import { IndexedDBModule } from './indexedDB/indexed-db.module';
 import { PageNotFoundComponent } from './core-components/page-not-found/page-not-found.component';
 import { ToastNotificationsComponent } from './core-components/toast-notifications/toast-notifications.component';
 import { ElectronUpdateComponent } from './core-components/electron-update/electron-update.component';
-import { DashboardModule } from './dashboard/dashboard.module';
 import { HelpPanelModule } from './help-panel/help-panel.module';
 import { StaticContentModule } from './static-content/static-content.module';
 import { SetupProgressComponent } from './core-components/setup-progress/setup-progress.component';
@@ -42,7 +41,6 @@ import { AccountModule } from './account/account.module';
     CommonModule,
     PlotlyViaWindowModule,
     IndexedDBModule,
-    DashboardModule,
     HelpPanelModule,
     StaticContentModule,
     BrowserAnimationsModule,

@@ -1,7 +1,5 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-// import { AccountComponent } from './account-management/account/account.component';
-// import { FacilityComponent } from './account-management/facility/facility.component';
 import { EnergyConsumptionComponent } from './facility/utility-data/energy-consumption/energy-consumption.component';
 import { EnergySourceComponent } from './facility/utility-data/energy-consumption/energy-source/energy-source.component';
 import { StyleGuideComponent } from './static-content/style-guide/style-guide.component';
@@ -160,89 +158,11 @@ const routes: Routes = [
       },
     ]
   },
-  // {
-  //   path: 'account-management',
-  //   component: AccountComponent
-  // },
-  // {
-  //   path: 'facility-management',
-  //   component: FacilityComponent
-  // },
-  // {
-  //   path: 'utility',
-  //   component: UtilityDataComponent,
-  //   children: [
-  //     {
-  //       path: 'energy-consumption', component: EnergyConsumptionComponent,
-  //       children: [
-  //         { path: '', component: EnergySourceComponent },
-  //         { path: 'electricity', component: UtilityMeterDataComponent },
-  //         { path: 'natural-gas', component: UtilityMeterDataComponent },
-  //         { path: 'other-fuels', component: UtilityMeterDataComponent },
-  //         { path: 'other-energy', component: UtilityMeterDataComponent },
-  //         { path: 'water', component: UtilityMeterDataComponent },
-  //         { path: 'waste-water', component: UtilityMeterDataComponent },
-  //         { path: 'other-utility', component: UtilityMeterDataComponent },
-  //       ],
-  //     },
-  //     { path: 'monthly-meter-data', component: CalanderizationComponent },
-  //     { path: 'meter-groups', component: MeterGroupingComponent },
-  //     { path: 'predictors', component: PredictorDataComponent },
-  //     { path: 'visualization', component: VisualizationComponent },
-  //     { path: 'upload-data', component: UploadDataComponent },
-  //     { path: '', pathMatch: 'full', redirectTo: 'energy-consumption' }
-
-  //   ]
-  // },
   { path: 'about', component: AboutComponent },
   { path: 'acknowledgments', component: AcknowledgmentsComponent },
   { path: 'feedback', component: FeedbackComponent },
   { path: 'help', component: HelpComponent },
   { path: 'style-guide', component: StyleGuideComponent },
-  // {
-  //   path: 'overview-report',
-  //   component: OverviewReportComponent,
-  //   children: [
-  //     { path: '', pathMatch: 'full', redirectTo: 'report-dashboard' },
-  //     { path: 'report-dashboard', component: OverviewReportDashboardComponent },
-  //     { path: 'report-menu', component: OverviewReportMenuComponent },
-  //     { path: 'basic-report', component: BasicReportComponent }
-  //   ]
-  // },
-  // {
-  //   path: 'analysis',
-  //   component: AnalysisComponent,
-  //   children: [
-  //     { path: '', pathMatch: 'full', redirectTo: 'analysis-dashboard' },
-  //     { path: 'analysis-dashboard', component: AnalysisDashboardComponent },
-  //     {
-  //       path: 'run-analysis',
-  //       component: RunAnalysisComponent,
-  //       children: [
-  //         { path: '', pathMatch: 'full', redirectTo: 'analysis-setup' },
-  //         { path: 'analysis-setup', component: AnalysisSetupComponent },
-  //         {
-  //           path: 'group-analysis/:id',
-  //           component: GroupAnalysisComponent,
-  //           children: [
-  //             { path: '', pathMatch: 'full', redirectTo: 'options' },
-  //             { path: 'options', component: GroupAnalysisOptionsComponent },
-  //             { path: 'regression-model-selection', component: RegressionModelSelectionComponent },
-  //             { path: 'annual-analysis', component: AnnualAnalysisSummaryComponent },
-  //             { path: 'monthly-analysis', component: MonthlyAnalysisSummaryComponent }
-  //           ]
-  //         },
-  //         {
-  //           path: 'facility-analysis',
-  //           component: FacilityAnalysisComponent,
-  //           children: [
-  //             { path: '', pathMatch: 'full', redirectTo: 'annual-analysis' },
-  //             { path: 'annual-analysis', component: AnnualFacilityAnalysisComponent },
-  //             { path: 'monthly-analysis', component: MonthlyFacilityAnalysisComponent }
-  //           ]
-  //         }
-  //       ]
-  //     }
   { path: "**", component: PageNotFoundComponent },
 ];
 
