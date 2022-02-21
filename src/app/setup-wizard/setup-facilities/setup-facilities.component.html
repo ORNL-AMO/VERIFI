@@ -1,1 +1,57 @@
-<p>setup-facilities works!</p>
+<div class="banner sticky-top d-flex justify-content-between pb-0">
+    <div>
+        <ul class="nav nav-tabs sticky-top">
+            <li class="nav-item" *ngFor="let facility of facilities"
+                [ngClass]="{'active': facility.wizardId == selectedFacility.wizardId}"><a class="nav-link"
+                    (click)="selectFacility(facility)">{{facility.name}}</a>
+            </li>
+        </ul>
+    </div>
+
+    <div>
+        <ul class="nav nav-tabs sticky-top">
+            <li class="nav-item">
+                <a class="nav-link" (click)="addFacility()">+Add Another Facility
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+<div class="wrapper">
+    <div class="d-flex w-100 justify-content-end">
+        <div *ngIf="facilities.length > 1">
+            <button class="btn btn-sm btn-danger" (click)="deleteFacility()">Delete Facility</button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-7">
+            <h4>Facility Information</h4>
+            <br>
+            <app-general-information-form [inAccount]="false" [inWizard]="true"></app-general-information-form>
+        </div>
+
+        <div class="col-lg-5">
+            <h4>Facility Units</h4>
+            <br>
+            <app-default-units-form [inAccount]="false" [inWizard]="true"></app-default-units-form>
+        </div>
+    </div>
+    <br>
+
+    <div class="row">
+        <div class="col-lg-7">
+            <h4>Sustainability Questions</h4>
+            <br>
+            <app-sustainability-questions-form [inAccount]="false" [inWizard]="true">
+            </app-sustainability-questions-form>
+        </div>
+        <div class="col">
+            <h4>Financial Reporting</h4>
+            <br>
+            <app-financial-reporting-form [inAccount]="false" [inWizard]="true"></app-financial-reporting-form>
+        </div>
+    </div>
+
+    <br>
+    <br>
+</div>

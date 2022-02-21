@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
 import { IdbAccount, IdbFacility } from '../models/idb';
 
 @Injectable({
@@ -6,8 +7,11 @@ import { IdbAccount, IdbFacility } from '../models/idb';
 })
 export class SetupWizardService {
 
-  account: IdbAccount;
+  account: BehaviorSubject<IdbAccount>;
   facilities: Array<IdbFacility>;
-
-  constructor() { }
+  selectedFacility: BehaviorSubject<IdbFacility>;
+  constructor() { 
+    this.selectedFacility = new BehaviorSubject<IdbFacility>(undefined);
+    this.account = new BehaviorSubject<IdbAccount>(undefined);
+  }
 }

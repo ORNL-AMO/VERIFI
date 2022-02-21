@@ -77,18 +77,38 @@ export class DefaultUnitsFormComponent implements OnInit {
         }
       });
     } else {
-      this.selectedAccount = this.setupWizardService.account;
-      this.form = this.settingsFormsService.getUnitsForm(this.selectedAccount);
-      this.setShowCustomLink();
-      this.checkCurrentZip();
+      this.selectedAccountSub = this.setupWizardService.account.subscribe(account => {
+        this.selectedAccount = account;
+        if (account && this.inAccount) {
+          if (this.isFormChange == false) {
+            this.form = this.settingsFormsService.getUnitsForm(account);
+            this.setShowCustomLink();
+            this.checkCurrentZip();
+          } else {
+            this.isFormChange = false;
+          }
+        }
+      });
+
+      this.selectedFacilitySub = this.setupWizardService.selectedFacility.subscribe(facility => {
+        this.selectedFacility = facility;
+        if (facility && !this.inAccount) {
+          this.checkUnitsDontMatch();
+          if (this.isFormChange == false) {
+            this.form = this.settingsFormsService.getUnitsForm(facility);
+            this.setShowCustomLink();
+            this.checkCurrentZip();
+          } else {
+            this.isFormChange = false;
+          }
+        }
+      });
     }
   }
 
   ngOnDestroy() {
-    if (!this.inWizard) {
-      this.selectedAccountSub.unsubscribe();
-      this.selectedFacilitySub.unsubscribe();
-    }
+    this.selectedAccountSub.unsubscribe();
+    this.selectedFacilitySub.unsubscribe();
   }
 
   setUnitsOfMeasure() {
@@ -98,8 +118,8 @@ export class DefaultUnitsFormComponent implements OnInit {
 
   saveChanges() {
     this.form = this.settingsFormsService.checkCustom(this.form);
+    this.isFormChange = true;
     if (!this.inWizard) {
-      this.isFormChange = true;
       if (this.inAccount) {
         this.selectedAccount = this.settingsFormsService.updateAccountFromUnitsForm(this.form, this.selectedAccount);
         this.accountDbService.update(this.selectedAccount);
@@ -108,6 +128,16 @@ export class DefaultUnitsFormComponent implements OnInit {
         this.checkMeterEmissions();
         this.selectedFacility = this.settingsFormsService.updateFacilityFromUnitsForm(this.form, this.selectedFacility);
         this.facilityDbService.update(this.selectedFacility);
+      }
+    } else {
+      if (this.inAccount) {
+        this.selectedAccount = this.settingsFormsService.updateAccountFromUnitsForm(this.form, this.selectedAccount);
+        this.setupWizardService.account.next(this.selectedAccount);
+      }
+      if (!this.inAccount) {
+        this.checkMeterEmissions();
+        this.selectedFacility = this.settingsFormsService.updateFacilityFromUnitsForm(this.form, this.selectedFacility);
+        this.setupWizardService.selectedFacility.next(this.selectedFacility);
       }
     }
   }
@@ -219,12 +249,14 @@ export class DefaultUnitsFormComponent implements OnInit {
   }
 
   checkMeterEmissions() {
-    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
-    if (this.selectedFacility.emissionsOutputRate != this.form.controls.emissionsOutputRate.value) {
-      //check electricity meters
-      let findMeter: IdbUtilityMeter = facilityMeters.find(meter => { return meter.source == 'Electricity' });
-      if (findMeter) {
-        this.toastNotificationService.showToast("Meter Update Recommended", "One or more meter emissions factors may need to be updated. Visit the utility data page for more information.", 15000, false, "warning");
+    if (!this.inWizard) {
+      let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+      if (this.selectedFacility.emissionsOutputRate != this.form.controls.emissionsOutputRate.value) {
+        //check electricity meters
+        let findMeter: IdbUtilityMeter = facilityMeters.find(meter => { return meter.source == 'Electricity' });
+        if (findMeter) {
+          this.toastNotificationService.showToast("Meter Update Recommended", "One or more meter emissions factors may need to be updated. Visit the utility data page for more information.", 15000, false, "warning");
+        }
       }
     }
   }

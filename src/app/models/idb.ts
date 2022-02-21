@@ -74,7 +74,8 @@ export interface IdbFacility {
     eGridSubregion?: string,
     customEmissionsRate?: boolean
     color?: string,
-    selected?: boolean
+    selected?: boolean,
+    wizardId?: string
 }
 
 export interface IdbUtilityMeterGroup {

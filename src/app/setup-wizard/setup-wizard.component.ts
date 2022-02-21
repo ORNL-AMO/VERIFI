@@ -37,7 +37,8 @@ export class SetupWizardComponent implements OnInit {
 
   ngOnInit(): void {
     this.accountdbService.selectedAccount.next(undefined);
-    this.setupWizardService.account = this.accountdbService.getNewIdbAccount();
+    let newAccount: IdbAccount = this.accountdbService.getNewIdbAccount();
+    this.setupWizardService.account.next(newAccount);
 
 
     this.selectedAccountSub = this.accountdbService.selectedAccount.subscribe(selectedAccount => {

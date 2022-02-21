@@ -56,23 +56,40 @@ export class FinancialReportingFormComponent implements OnInit {
         }
       });
     } else {
-      if (this.inAccount) {
-        this.selectedAccount = this.setupWizardService.account;
-        this.form = this.settingsFormsService.getFiscalYearForm(this.selectedAccount);
-      }
+      this.selectedAccountSub = this.setupWizardService.account.subscribe(account => {
+        this.selectedAccount = account;
+        if (account && this.inAccount) {
+          if (this.isFormChange == false) {
+            this.form = this.settingsFormsService.getFiscalYearForm(account);
+          } else {
+            this.isFormChange = false;
+          }
+        }
+      });
+
+
+      this.selectedFacilitySub = this.setupWizardService.selectedFacility.subscribe(facility => {
+        this.selectedFacility = facility;
+        if (facility && !this.inAccount) {
+          this.financialReportingDoestMatchAccount = this.settingsFormsService.areAccountAndFacilityFinancialReportingDifferent(this.selectedAccount, this.selectedFacility);
+          if (this.isFormChange == false) {
+            this.form = this.settingsFormsService.getFiscalYearForm(facility);
+          } else {
+            this.isFormChange = false;
+          }
+        }
+      });
     }
   }
 
   ngOnDestroy() {
-    if (!this.inWizard) {
-      this.selectedAccountSub.unsubscribe();
-      this.selectedFacilitySub.unsubscribe();
-    }
+    this.selectedAccountSub.unsubscribe();
+    this.selectedFacilitySub.unsubscribe();
   }
 
   saveChanges() {
+    this.isFormChange = true;
     if (!this.inWizard) {
-      this.isFormChange = true;
       if (!this.inAccount) {
         this.selectedFacility = this.settingsFormsService.updateFacilityFromFiscalForm(this.form, this.selectedFacility);
         this.facilityDbService.update(this.selectedFacility);
@@ -80,6 +97,15 @@ export class FinancialReportingFormComponent implements OnInit {
       if (this.inAccount) {
         this.selectedAccount = this.settingsFormsService.updateAccountFromFiscalForm(this.form, this.selectedAccount);
         this.accountDbService.update(this.selectedAccount);
+      }
+    } else {
+      if (!this.inAccount) {
+        this.selectedFacility = this.settingsFormsService.updateFacilityFromFiscalForm(this.form, this.selectedFacility);
+        this.setupWizardService.selectedFacility.next(this.selectedFacility);
+      }
+      if (this.inAccount) {
+        this.selectedAccount = this.settingsFormsService.updateAccountFromFiscalForm(this.form, this.selectedAccount);
+        this.setupWizardService.account.next(this.selectedAccount);
       }
     }
   }

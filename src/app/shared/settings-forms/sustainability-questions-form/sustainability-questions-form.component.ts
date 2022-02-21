@@ -55,8 +55,28 @@ export class SustainabilityQuestionsFormComponent implements OnInit {
         }
       });
     } else {
-      this.selectedAccount = this.setupWizardService.account;
-      this.form = this.settingsFormsService.getSustainabilityQuestionsForm(this.selectedAccount);
+      this.selectedAccountSub = this.setupWizardService.account.subscribe(account => {
+        this.selectedAccount = account;
+        if (account && this.inAccount) {
+          if (this.isFormChange == false) {
+            this.form = this.settingsFormsService.getSustainabilityQuestionsForm(account);
+          } else {
+            this.isFormChange = false;
+          }
+        }
+      });
+
+      this.selectedFacilitySub = this.setupWizardService.selectedFacility.subscribe(facility => {
+        this.selectedFacility = facility;
+        if (facility && !this.inAccount) {
+          this.sustainQuestionsDontMatchAccount = this.settingsFormsService.areAccountAndFacilitySustainQuestionsDifferent(this.selectedAccount, this.selectedFacility);
+          if (this.isFormChange == false) {
+            this.form = this.settingsFormsService.getSustainabilityQuestionsForm(facility);
+          } else {
+            this.isFormChange = false;
+          }
+        }
+      });
     }
     for (let i = 2050; i > 2000; i--) {
       this.years.push(i);
@@ -64,10 +84,8 @@ export class SustainabilityQuestionsFormComponent implements OnInit {
   }
 
   ngOnDestroy() {
-    if (!this.inWizard) {
-      this.selectedAccountSub.unsubscribe();
-      this.selectedFacilitySub.unsubscribe();
-    }
+    this.selectedAccountSub.unsubscribe();
+    this.selectedFacilitySub.unsubscribe();
   }
 
   saveChanges() {
@@ -80,6 +98,15 @@ export class SustainabilityQuestionsFormComponent implements OnInit {
       if (this.inAccount) {
         this.selectedAccount = this.settingsFormsService.updateAccountFromSustainabilityQuestionsForm(this.form, this.selectedAccount);
         this.accountDbService.update(this.selectedAccount);
+      }
+    } else {
+      if (!this.inAccount) {
+        this.selectedFacility = this.settingsFormsService.updateFacilityFromSustainabilityQuestionsForm(this.form, this.selectedFacility);
+        this.setupWizardService.selectedFacility.next(this.selectedFacility);
+      }
+      if (this.inAccount) {
+        this.selectedAccount = this.settingsFormsService.updateAccountFromSustainabilityQuestionsForm(this.form, this.selectedAccount);
+        this.setupWizardService.account.next(this.selectedAccount);
       }
     }
   }
