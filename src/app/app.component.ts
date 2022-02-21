@@ -8,6 +8,7 @@ import { PredictordbService } from './indexedDB/predictors-db.service';
 import { UtilityMeterdbService } from './indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from './indexedDB/utilityMeterData-db.service';
 import { UtilityMeterGroupdbService } from './indexedDB/utilityMeterGroup-db.service';
+import { IdbAccount } from './models/idb';
 import { EGridService } from './shared/helper-services/e-grid.service';
 
 // declare ga as a function to access the JS code in TS
@@ -70,5 +71,10 @@ export class AppComponent {
     this.loadingMessage = 'Loading Analysis Items...';
     await this.analysisDbService.initializeAnalysisItems();
     this.dataInitialized = true;
+    let allAccounts: Array<IdbAccount> = this.accountDbService.allAccounts.getValue();
+    if (allAccounts.length == 0) {
+      console.log('nav');
+      this.router.navigateByUrl('setup-wizard');
+    }
   }
 }

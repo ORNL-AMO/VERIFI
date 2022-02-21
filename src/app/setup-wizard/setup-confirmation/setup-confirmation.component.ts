@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { IdbAccount, IdbFacility } from 'src/app/models/idb';
+import { SetupWizardService } from '../setup-wizard.service';
 
 @Component({
   selector: 'app-setup-confirmation',
@@ -7,9 +9,16 @@ import { Component, OnInit } from '@angular/core';
 })
 export class SetupConfirmationComponent implements OnInit {
 
-  constructor() { }
+  account: IdbAccount;
+  facilities: Array<IdbFacility>;
+  constructor(private setupWizardService: SetupWizardService) { }
 
   ngOnInit(): void {
+    this.account = this.setupWizardService.account.getValue();
+    this.facilities = this.setupWizardService.facilities;
   }
 
+  submit(){
+    
+  }
 }

@@ -14,26 +14,13 @@ export class FacilityBannerComponent implements OnInit {
 
   selectedFacility: IdbFacility;
   selectedFacilitySub: Subscription;
-  label: string;
-  bannerColor: string;
-  constructor(private facilityDbService: FacilitydbService, private router: Router,
+  constructor(private facilityDbService: FacilitydbService,
     private helpPanelService: HelpPanelService) { }
 
   ngOnInit(): void {
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
       this.selectedFacility = val;
-      if (this.selectedFacility && this.selectedFacility.color) {
-        this.bannerColor = this.selectedFacility.color;
-      } else {
-        this.bannerColor = '#145A32';
-      }
     });
-    this.router.events.subscribe(event => {
-      if (event instanceof NavigationEnd) {
-        this.setLabel(this.router.url);
-      }
-    });
-    this.setLabel(this.router.url);
   }
 
   ngOnDestroy() {
@@ -45,16 +32,4 @@ export class FacilityBannerComponent implements OnInit {
     this.helpPanelService.helpPanelOpen.next(!helpPanelOpen);
   }
 
-
-  setLabel(url: string) {
-    if (this.selectedFacility) {
-      if (url.includes('settings')) {
-        this.label = this.selectedFacility.name + ' Settings'
-      } else if (url.includes('home')) {
-        this.label = this.selectedFacility.name + ' Overview'
-      } else if(url.includes('utility')){
-        this.label = this.selectedFacility.name + ' Utility Data'
-      }
-    }
-  }
 }

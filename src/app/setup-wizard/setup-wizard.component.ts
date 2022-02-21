@@ -24,6 +24,8 @@ export class SetupWizardComponent implements OnInit {
   selectedAccountSub: Subscription;
   selectedFacilitySub: Subscription;
   utilityDataSub: Subscription;
+
+  submitSub: Subscription;
   constructor(
     private accountdbService: AccountdbService,
     private facilityDbService: FacilitydbService,
@@ -40,52 +42,15 @@ export class SetupWizardComponent implements OnInit {
     let newAccount: IdbAccount = this.accountdbService.getNewIdbAccount();
     this.setupWizardService.account.next(newAccount);
 
-
-    this.selectedAccountSub = this.accountdbService.selectedAccount.subscribe(selectedAccount => {
-      this.selectedAccount = selectedAccount;
-    });
-
-    this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(selectedFacility => {
-      this.selectedFacility = selectedFacility;
-    });
-
-    this.utilityDataSub = this.utilityMeterDbService.facilityMeters.subscribe(utilityMeters => {
-      this.utilityMeters = utilityMeters;
-    });
+    this.submitSub = this.setupWizardService.submit.subscribe(val => {
+      if (val) {
+        this.submitData();
+        this.setupWizardService.submit.next(false);
+      }
+    })
   }
 
   ngOnDestroy() {
-    this.selectedAccountSub.unsubscribe();
-    this.selectedFacilitySub.unsubscribe();
-    this.utilityDataSub.unsubscribe();
-  }
-
-  async addAccount() {
-    if (!this.selectedAccount) {
-      this.loadingService.setLoadingMessage('Creating Account..');
-      this.loadingService.setLoadingStatus(true);
-      let newAccount: IdbAccount = this.accountdbService.getNewIdbAccount();
-      newAccount = await this.accountdbService.addWithObservable(newAccount).toPromise();
-      this.accountdbService.selectedAccount.next(newAccount);
-      this.loadingService.setLoadingStatus(false);
-    }
-    this.router.navigate(['/account-management']);
-  }
-
-  async addFacility() {
-    if (!this.selectedFacility) {
-      this.loadingService.setLoadingMessage('Creating Facility..');
-      this.loadingService.setLoadingStatus(true);
-      let newFacility: IdbFacility = this.facilityDbService.getNewIdbFacility(this.selectedAccount);
-      newFacility = await this.facilityDbService.addWithObservable(newFacility).toPromise();
-      this.facilityDbService.selectedFacility.next(newFacility);
-      this.loadingService.setLoadingStatus(false);
-    }
-    this.router.navigate(['/facility-management']);
-  }
-
-  addUtilityData() {
-    this.router.navigate(['/utility/energy-consumption']);
   }
 
   async loadTestData() {
@@ -96,10 +61,35 @@ export class SetupWizardComponent implements OnInit {
     this.facilityDbService.setAllFacilities();
     this.accountdbService.setSelectedAccount(newAccount.id);
     this.loadingService.setLoadingStatus(false);
+    this.router.navigateByUrl('/');
   }
 
   openImportBackup() {
     this.importBackupModalService.inFacility = false;
     this.importBackupModalService.showModal.next(true);
+  }
+
+  async submitData() {
+    this.loadingService.setLoadingMessage("Creating Account...");
+    this.loadingService.setLoadingStatus(true);
+    let account: IdbAccount = this.setupWizardService.account.getValue();
+    account = await this.accountdbService.addWithObservable(account).toPromise();
+    let facilities: Array<IdbFacility> = this.setupWizardService.facilities;
+    this.loadingService.setLoadingMessage("Creating Facilities...");
+    let newFacility: IdbFacility;
+    for (let i = 0; i < facilities.length; i++) {
+      let facility: IdbFacility = facilities[i];
+      facility.accountId = account.id;
+      facility = await this.facilityDbService.addWithObservable(facility).toPromise();
+      if (i == 0) {
+        newFacility = facility;
+      }
+    }
+    this.loadingService.setLoadingMessage("Finishing up...");
+    let allAccounts: Array<IdbAccount> = await this.accountdbService.getAll().toPromise();
+    this.accountdbService.allAccounts.next(allAccounts);
+    this.accountdbService.selectedAccount.next(account);
+    this.loadingService.setLoadingStatus(false);
+    this.router.navigateByUrl('facility/' + newFacility.id + '/utility');
   }
 }

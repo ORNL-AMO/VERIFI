@@ -2,7 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { DashboardService } from 'src/app/shared/helper-services/dashboard.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbFacility, IdbUtilityMeterData } from 'src/app/models/idb';
+import { Router } from '@angular/router';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 
 @Component({
   selector: 'app-facility-dashboard',
@@ -19,7 +21,8 @@ export class FacilityDashboardComponent implements OnInit {
   heatMapShown: boolean = false;
   stackedAreaShown: boolean = true;
   barChartShown: boolean = true;
-  constructor(public utilityMeterDataDbService: UtilityMeterDatadbService, private dashboardService: DashboardService) { }
+  constructor(public utilityMeterDataDbService: UtilityMeterDatadbService, private dashboardService: DashboardService,
+    private router: Router, private facilitydbService: FacilitydbService) { }
 
   ngOnInit(): void {
     this.utilityMeterDataSub = this.utilityMeterDataDbService.facilityMeterData.subscribe(utilityMeterFacilityData => {
@@ -52,6 +55,11 @@ export class FacilityDashboardComponent implements OnInit {
 
   toggleBarChart() {
     this.barChartShown = !this.barChartShown;
+  }
+
+  goToUtilityData() {
+    let selectedFacility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
+    this.router.navigateByUrl('facility/' + selectedFacility.id + '/utility');
   }
 
 }

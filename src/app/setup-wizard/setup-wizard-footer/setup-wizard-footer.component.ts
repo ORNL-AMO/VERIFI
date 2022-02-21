@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
+import { SetupWizardService } from '../setup-wizard.service';
 
 @Component({
   selector: 'app-setup-wizard-footer',
@@ -15,7 +16,7 @@ export class SetupWizardFooterComponent implements OnInit {
   sidebarOpen: boolean;
   sidebarOpenSub: Subscription;
   showSubmit: boolean;
-  constructor(private sharedDataService: SharedDataService, private router: Router) {
+  constructor(private sharedDataService: SharedDataService, private router: Router, private setupWizardService: SetupWizardService) {
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
         this.setProgress();
@@ -76,6 +77,6 @@ export class SetupWizardFooterComponent implements OnInit {
   }
 
   submitAccount(){
-    
+    this.setupWizardService.submit.next(true);
   }
 }

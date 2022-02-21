@@ -1,6 +1,6 @@
 <div class="facility banner d-flex justify-content-between w-100 pb-0">
     <div class="d-flex">
-        <div class="banner-title">
+        <div class="banner-title" *ngIf="selectedFacility">
             <span class="fa fa-industry"></span>
             {{selectedFacility.name}}
         </div>
