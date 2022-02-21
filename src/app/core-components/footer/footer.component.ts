@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { BackupDataService } from 'src/app/shared/helper-services/backup-data.service';
 import { environment } from 'src/environments/environment';
@@ -26,6 +26,7 @@ export class FooterComponent implements OnInit {
   selectedAccountSub: Subscription;
   lastBackupDate: Date;
   isDev: boolean;
+  showFooter: boolean;
   constructor(
     private accountdbService: AccountdbService,
     private facilitydbService: FacilitydbService,
@@ -33,10 +34,15 @@ export class FooterComponent implements OnInit {
     private loadingService: LoadingService,
     private router: Router
   ) {
-
+    this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        this.setShowFooter();
+      }
+    });
   }
 
   ngOnInit() {
+    this.setShowFooter();
     this.isDev = !environment.production;
     this.allAccountsSub = this.accountdbService.allAccounts.subscribe(allAccounts => {
       this.accountCount = allAccounts.length;
@@ -72,5 +78,9 @@ export class FooterComponent implements OnInit {
 
   backupAccount() {
     this.backupDataService.backupAccount();
+  }
+
+  setShowFooter() {
+    this.showFooter = !this.router.url.includes('setup-wizard');
   }
 }

@@ -8,6 +8,7 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAccount, IdbFacility } from 'src/app/models/idb';
 import { SettingsFormsService } from '../settings-forms.service';
+import { SetupWizardService } from 'src/app/setup-wizard/setup-wizard.service';
 
 @Component({
   selector: 'app-general-information-form',
@@ -17,6 +18,8 @@ import { SettingsFormsService } from '../settings-forms.service';
 export class GeneralInformationFormComponent implements OnInit {
   @Input()
   inAccount: boolean;
+  @Input()
+  inWizard: boolean;
 
 
 
@@ -33,21 +36,28 @@ export class GeneralInformationFormComponent implements OnInit {
   countries: Array<Country> = Countries;
   states: Array<State> = States;
   isFormChange: boolean = false;
-  constructor(private accountDbService: AccountdbService, private settingsFormsService: SettingsFormsService, private facilityDbService: FacilitydbService) { }
+  constructor(private accountDbService: AccountdbService, private settingsFormsService: SettingsFormsService, private facilityDbService: FacilitydbService,
+    private setupWizardService: SetupWizardService) { }
 
   ngOnInit(): void {
     if (this.inAccount) {
-      this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(account => {
-        this.selectedAccount = account;
-        if (account && this.inAccount) {
-          if (this.isFormChange == false) {
-            this.form = this.settingsFormsService.getGeneralInformationForm(account);
-            this.unitsOfMeasure = this.selectedAccount.unitsOfMeasure;
-          } else {
-            this.isFormChange = false;
+      if (!this.inWizard) {
+        this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(account => {
+          this.selectedAccount = account;
+          if (account && this.inAccount) {
+            if (this.isFormChange == false) {
+              this.form = this.settingsFormsService.getGeneralInformationForm(account);
+              this.unitsOfMeasure = this.selectedAccount.unitsOfMeasure;
+            } else {
+              this.isFormChange = false;
+            }
           }
-        }
-      });
+        });
+      } else {
+        this.selectedAccount = this.setupWizardService.account;
+        this.form = this.settingsFormsService.getGeneralInformationForm(this.selectedAccount);
+        this.unitsOfMeasure = this.selectedAccount.unitsOfMeasure;
+      }
     }
     if (!this.inAccount) {
       this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
@@ -70,7 +80,7 @@ export class GeneralInformationFormComponent implements OnInit {
   }
 
   ngOnDestroy() {
-    if (this.inAccount) {
+    if (this.inAccount && !this.inWizard) {
       this.selectedAccountSub.unsubscribe();
     }
     if (!this.inAccount) {
@@ -85,8 +95,13 @@ export class GeneralInformationFormComponent implements OnInit {
       this.facilityDbService.update(this.selectedFacility);
     }
     if (this.inAccount) {
-      this.selectedAccount = this.settingsFormsService.updateAccountFromGeneralInformationForm(this.form, this.selectedAccount);
-      this.accountDbService.update(this.selectedAccount);
+      if (!this.inWizard) {
+        this.selectedAccount = this.settingsFormsService.updateAccountFromGeneralInformationForm(this.form, this.selectedAccount);
+        this.accountDbService.update(this.selectedAccount);
+      } else {
+        this.selectedAccount = this.settingsFormsService.updateAccountFromGeneralInformationForm(this.form, this.selectedAccount);
+        this.setupWizardService.account = this.selectedAccount;
+      }
     }
   }
 

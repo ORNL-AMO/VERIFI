@@ -1,0 +1,17 @@
+.setup-footer{
+    position:absolute;
+    bottom: 0;
+    border-top: solid;
+    width: calc(100vw - 70px);
+    z-index: 100;
+    background-color: white;
+    transition: .2s width;
+}
+
+.setup-footer.sidebar-open{
+    width: calc(100vw - 260px);
+}
+
+.progress-bar {
+    background-color: #2980b9!important;
+}

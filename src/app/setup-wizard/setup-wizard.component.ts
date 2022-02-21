@@ -9,6 +9,7 @@ import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service
 import { IdbAccount, IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
 import { ExampleAccount } from 'src/app/shared/example-data/Better_Plants_Partner_Backup_4-20-2021';
 import { BackupDataService } from 'src/app/shared/helper-services/backup-data.service';
+import { SetupWizardService } from './setup-wizard.service';
 
 @Component({
   selector: 'app-setup-wizard',
@@ -30,11 +31,15 @@ export class SetupWizardComponent implements OnInit {
     private router: Router,
     private loadingService: LoadingService,
     private backupDataService: BackupDataService,
-    private importBackupModalService: ImportBackupModalService
+    private importBackupModalService: ImportBackupModalService,
+    private setupWizardService: SetupWizardService
   ) { }
 
   ngOnInit(): void {
     this.accountdbService.selectedAccount.next(undefined);
+    this.setupWizardService.account = this.accountdbService.getNewIdbAccount();
+
+
     this.selectedAccountSub = this.accountdbService.selectedAccount.subscribe(selectedAccount => {
       this.selectedAccount = selectedAccount;
     });

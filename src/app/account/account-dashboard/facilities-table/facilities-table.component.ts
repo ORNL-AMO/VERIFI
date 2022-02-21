@@ -12,7 +12,7 @@ import { MeterSummaryService } from 'src/app/shared/helper-services/meter-summar
 @Component({
   selector: 'app-facilities-table',
   templateUrl: './facilities-table.component.html',
-  styleUrls: ['./facilities-table.component.css', '../../dashboard.component.css']
+  styleUrls: ['./facilities-table.component.css']
 })
 export class FacilitiesTableComponent implements OnInit {
 

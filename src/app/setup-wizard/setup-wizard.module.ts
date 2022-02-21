@@ -7,8 +7,8 @@ import { SetupFacilitiesComponent } from './setup-facilities/setup-facilities.co
 import { SetupConfirmationComponent } from './setup-confirmation/setup-confirmation.component';
 import { SetupWelcomeComponent } from './setup-welcome/setup-welcome.component';
 import { RouterModule } from '@angular/router';
-
-
+import { SettingsFormsModule } from '../shared/settings-forms/settings-forms.module';
+import { SetupWizardFooterComponent } from './setup-wizard-footer/setup-wizard-footer.component';
 
 @NgModule({
   declarations: [
@@ -17,11 +17,13 @@ import { RouterModule } from '@angular/router';
     SetupAccountComponent,
     SetupFacilitiesComponent,
     SetupConfirmationComponent,
-    SetupWelcomeComponent
+    SetupWelcomeComponent,
+    SetupWizardFooterComponent
   ],
   imports: [
     CommonModule,
-    RouterModule
+    RouterModule,
+    SettingsFormsModule
   ]
 })
 export class SetupWizardModule { }

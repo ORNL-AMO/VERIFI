@@ -10,6 +10,7 @@ import * as _ from 'lodash';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { SettingsFormsService } from '../settings-forms.service';
+import { SetupWizardService } from 'src/app/setup-wizard/setup-wizard.service';
 
 @Component({
   selector: 'app-default-units-form',
@@ -19,6 +20,8 @@ import { SettingsFormsService } from '../settings-forms.service';
 export class DefaultUnitsFormComponent implements OnInit {
   @Input()
   inAccount: boolean;
+  @Input()
+  inWizard: boolean;
 
 
   form: FormGroup;
@@ -42,40 +45,50 @@ export class DefaultUnitsFormComponent implements OnInit {
   currentZip: string;
   showCustomLink: boolean;
   constructor(private accountDbService: AccountdbService, private settingsFormsService: SettingsFormsService, private facilityDbService: FacilitydbService,
-    private eGridService: EGridService, private utilityMeterDbService: UtilityMeterdbService, private toastNotificationService: ToastNotificationsService) { }
+    private eGridService: EGridService, private utilityMeterDbService: UtilityMeterdbService, private toastNotificationService: ToastNotificationsService,
+    private setupWizardService: SetupWizardService) { }
 
   ngOnInit(): void {
-    this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(account => {
-      this.selectedAccount = account;
-      if (account && this.inAccount) {
-        if (this.isFormChange == false) {
-          this.form = this.settingsFormsService.getUnitsForm(account);
-          this.setShowCustomLink();
-          this.checkCurrentZip();
-        } else {
-          this.isFormChange = false;
+    if (!this.inWizard) {
+      this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(account => {
+        this.selectedAccount = account;
+        if (account && this.inAccount) {
+          if (this.isFormChange == false) {
+            this.form = this.settingsFormsService.getUnitsForm(account);
+            this.setShowCustomLink();
+            this.checkCurrentZip();
+          } else {
+            this.isFormChange = false;
+          }
         }
-      }
-    });
+      });
 
-    this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
-      this.selectedFacility = facility;
-      if (facility && !this.inAccount) {
-        this.checkUnitsDontMatch();
-        if (this.isFormChange == false) {
-          this.form = this.settingsFormsService.getUnitsForm(facility);
-          this.setShowCustomLink();
-          this.checkCurrentZip();
-        } else {
-          this.isFormChange = false;
+      this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
+        this.selectedFacility = facility;
+        if (facility && !this.inAccount) {
+          this.checkUnitsDontMatch();
+          if (this.isFormChange == false) {
+            this.form = this.settingsFormsService.getUnitsForm(facility);
+            this.setShowCustomLink();
+            this.checkCurrentZip();
+          } else {
+            this.isFormChange = false;
+          }
         }
-      }
-    });
+      });
+    } else {
+      this.selectedAccount = this.setupWizardService.account;
+      this.form = this.settingsFormsService.getUnitsForm(this.selectedAccount);
+      this.setShowCustomLink();
+      this.checkCurrentZip();
+    }
   }
 
   ngOnDestroy() {
-    this.selectedAccountSub.unsubscribe();
-    this.selectedFacilitySub.unsubscribe();
+    if (!this.inWizard) {
+      this.selectedAccountSub.unsubscribe();
+      this.selectedFacilitySub.unsubscribe();
+    }
   }
 
   setUnitsOfMeasure() {
@@ -85,15 +98,17 @@ export class DefaultUnitsFormComponent implements OnInit {
 
   saveChanges() {
     this.form = this.settingsFormsService.checkCustom(this.form);
-    this.isFormChange = true;
-    if (this.inAccount) {
-      this.selectedAccount = this.settingsFormsService.updateAccountFromUnitsForm(this.form, this.selectedAccount);
-      this.accountDbService.update(this.selectedAccount);
-    }
-    if (!this.inAccount) {
-      this.checkMeterEmissions();
-      this.selectedFacility = this.settingsFormsService.updateFacilityFromUnitsForm(this.form, this.selectedFacility);
-      this.facilityDbService.update(this.selectedFacility);
+    if (!this.inWizard) {
+      this.isFormChange = true;
+      if (this.inAccount) {
+        this.selectedAccount = this.settingsFormsService.updateAccountFromUnitsForm(this.form, this.selectedAccount);
+        this.accountDbService.update(this.selectedAccount);
+      }
+      if (!this.inAccount) {
+        this.checkMeterEmissions();
+        this.selectedFacility = this.settingsFormsService.updateFacilityFromUnitsForm(this.form, this.selectedFacility);
+        this.facilityDbService.update(this.selectedFacility);
+      }
     }
   }
 

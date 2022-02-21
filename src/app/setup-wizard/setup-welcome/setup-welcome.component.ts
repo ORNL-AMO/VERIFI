@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { ImportBackupModalService } from 'src/app/core-components/import-backup-modal/import-backup-modal.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -16,7 +17,7 @@ export class SetupWelcomeComponent implements OnInit {
 
   constructor(private loadingService: LoadingService, private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService, private backupDataService: BackupDataService,
-    private importBackupModalService: ImportBackupModalService) { }
+    private importBackupModalService: ImportBackupModalService, private router: Router) { }
 
   ngOnInit(): void {
   }
@@ -28,6 +29,7 @@ export class SetupWelcomeComponent implements OnInit {
     this.accountDbService.setAllAccounts();
     this.facilityDbService.setAllFacilities();
     this.accountDbService.setSelectedAccount(newAccount.id);
+    //navigate to dashboard
     this.loadingService.setLoadingStatus(false);
   }
 
@@ -36,4 +38,8 @@ export class SetupWelcomeComponent implements OnInit {
     this.importBackupModalService.showModal.next(true);
   }
 
+
+  addAccount(){
+    this.router.navigateByUrl('setup-wizard/account-setup');
+  }
 }

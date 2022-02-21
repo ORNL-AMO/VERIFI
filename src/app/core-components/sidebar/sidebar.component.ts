@@ -5,6 +5,7 @@ import { Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAccount, IdbFacility } from 'src/app/models/idb';
+import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { environment } from 'src/environments/environment';
 
 @Component({
@@ -27,10 +28,12 @@ export class SidebarComponent implements OnInit {
   selectedFacilitySub: Subscription;
 
   constructor(private localStorageService: LocalStorageService, private accountDbService: AccountdbService,
-    private facilityDbService: FacilitydbService, private router: Router) {
+    private facilityDbService: FacilitydbService, private router: Router,
+    private sharedDataService: SharedDataService) {
     let sidebarOpen: boolean = this.localStorageService.retrieve("sidebarOpen");
     if (sidebarOpen != undefined) {
       this.open = sidebarOpen;
+      this.sharedDataService.sidebarOpen.next(this.open);
     }
   }
 
@@ -62,6 +65,7 @@ export class SidebarComponent implements OnInit {
     this.open = !this.open;
     window.dispatchEvent(new Event("resize"));
     this.localStorageService.store('sidebarOpen', this.open);
+    this.sharedDataService.sidebarOpen.next(this.open);
   }
 
   checkHideFacility(facility: IdbFacility): boolean {
@@ -82,7 +86,7 @@ export class SidebarComponent implements OnInit {
       return false;
     } else if (this.router.url.includes('account')) {
       return true;
-    }else if (this.selectedFacility) {
+    } else if (this.selectedFacility) {
       if (this.selectedFacility.id != facility.id) {
         return true;
       }
