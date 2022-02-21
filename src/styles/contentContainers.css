@@ -16,8 +16,8 @@ Content Container
     margin-left: 0px;
   }
   .wrapper.main-content {
-    margin-right: 0px;
-    height: calc(100vh - 225px);
+    /* margin-right: 0px; */
+    height: calc(100vh - 250px);
     overflow-y: auto;
   }
   .help-panel.tab-margin {

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router, Event } from '@angular/router';
+import { Router, Event, NavigationEnd } from '@angular/router';
 import { LocalStorageService } from 'ngx-webstorage';
 import { Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -26,7 +26,7 @@ export class SidebarComponent implements OnInit {
 
   selectedFacility: IdbFacility;
   selectedFacilitySub: Subscription;
-
+  showSidebar: boolean;
   constructor(private localStorageService: LocalStorageService, private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService, private router: Router,
     private sharedDataService: SharedDataService) {
@@ -35,6 +35,11 @@ export class SidebarComponent implements OnInit {
       this.open = sidebarOpen;
       this.sharedDataService.sidebarOpen.next(this.open);
     }
+    this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        this.setShowSidebar();
+      }
+    });
   }
 
   ngOnInit() {
@@ -53,6 +58,7 @@ export class SidebarComponent implements OnInit {
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
       this.selectedFacility = val;
     })
+    this.setShowSidebar();
   }
 
   ngOnDestroy() {
@@ -103,4 +109,7 @@ export class SidebarComponent implements OnInit {
     return false;
   }
 
+  setShowSidebar() {
+    this.showSidebar = !this.router.url.includes('setup-wizard');
+  }
 }

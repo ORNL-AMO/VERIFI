@@ -36,13 +36,10 @@ export class AnalysisDashboardComponent implements OnInit {
     });
 
     this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
-    if (this.selectedFacility) {
-      this.yearOptions = this.analysisCalculationsHelperService.getYearOptions();
+    this.yearOptions = this.analysisCalculationsHelperService.getYearOptions();
+    if (this.yearOptions) {
       this.baselineYearError = this.yearOptions[0] > this.selectedFacility.sustainabilityQuestions.energyReductionBaselineYear
-    } else {
-      this.router.navigateByUrl('/');
     }
-
   }
 
   ngOnDestroy() {

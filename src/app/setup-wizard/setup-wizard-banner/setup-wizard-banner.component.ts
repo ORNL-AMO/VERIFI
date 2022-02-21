@@ -1,5 +1,8 @@
 import { Component, OnInit } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { HelpPanelService } from 'src/app/help-panel/help-panel.service';
+import { IdbAccount, IdbFacility } from 'src/app/models/idb';
+import { SetupWizardService } from '../setup-wizard.service';
 
 @Component({
   selector: 'app-setup-wizard-banner',
@@ -8,9 +11,21 @@ import { HelpPanelService } from 'src/app/help-panel/help-panel.service';
 })
 export class SetupWizardBannerComponent implements OnInit {
 
-  constructor(private helpPanelService: HelpPanelService) { }
+  facilities: Array<IdbFacility>;
+  account: IdbAccount;
+  accountSub: Subscription;
+  constructor(private helpPanelService: HelpPanelService, private setupWizardService: SetupWizardService) { }
 
   ngOnInit(): void {
+    this.facilities = this.setupWizardService.facilities;
+
+    this.accountSub = this.setupWizardService.account.subscribe(val => {
+      this.account = val;
+    });
+  }
+
+  ngOnDestroy(){
+    this.accountSub.unsubscribe();
   }
 
   toggleHelpPanel() {

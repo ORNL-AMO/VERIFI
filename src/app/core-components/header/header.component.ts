@@ -98,10 +98,11 @@ export class HeaderComponent implements OnInit {
     this.router.navigateByUrl('/setup-wizard');
   }
 
-  switchAccount(account: IdbAccount) {
+  async switchAccount(account: IdbAccount) {
     this.toggleSwitchAccountsMenu();
     this.router.navigate(['/']);
-    this.accountdbService.setSelectedAccount(account.id);
+    // this.accountdbService.setSelectedAccount(account.id);
+    this.accountdbService.selectedAccount.next(account);
     this.switchAccountMenu = false;
     this.sharedDataService.modalOpen.next(false);
   }

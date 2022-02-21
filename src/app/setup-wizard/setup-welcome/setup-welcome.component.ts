@@ -26,11 +26,12 @@ export class SetupWelcomeComponent implements OnInit {
     this.loadingService.setLoadingMessage('Loading Example Data..');
     this.loadingService.setLoadingStatus(true);
     let newAccount: IdbAccount = await this.backupDataService.importAccountBackup(ExampleAccount);
-    this.accountDbService.setAllAccounts();
-    this.facilityDbService.setAllFacilities();
-    this.accountDbService.setSelectedAccount(newAccount.id);
-    //navigate to dashboard
+    this.loadingService.setLoadingMessage("Finishing up...");
+    let allAccounts: Array<IdbAccount> = await this.accountDbService.getAll().toPromise();
+    this.accountDbService.allAccounts.next(allAccounts);
+    this.accountDbService.selectedAccount.next(newAccount);
     this.loadingService.setLoadingStatus(false);
+    this.router.navigateByUrl('/account');
   }
 
   openImportBackup() {

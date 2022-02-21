@@ -28,14 +28,12 @@
                 <i class="fa fa-ellipsis-v" (click)="toggleAccountMenu()"></i>
                 <div class="dropdown" [class.open]="accountMenu == true">
                     <div class="arrow-up"></div>
-                    <div *ngIf="!activeAccount">
-                        <div class="noAccount">
+                    <div>
+                        <div *ngIf="!activeAccount" class="noAccount">
                             <i class="fa fa-building item-left"></i>
                             <span>Account Required</span>
                         </div>
-                    </div>
-                    <div *ngIf="activeAccount">
-                        <div class="currentAccount" routerLink="/account/settings">
+                        <div *ngIf="activeAccount" class="currentAccount" routerLink="/account/settings">
                             <i class="fa fa-building item-left"></i>
                             <p>{{activeAccount.name}}</p>
                             <span class="small">Manage Account</span>
@@ -53,8 +51,8 @@
 
 <div id="switchAccounts" [class.open]="switchAccountMenu == true">
     <h5>Switch Account</h5>
-    <div class="accounts" *ngIf="activeAccount">
-        <div class="account" [class.active]="activeAccount.id === account.id" (click)="switchAccount(account)"
+    <div class="accounts">
+        <div class="account" [class.active]="activeAccount?.id === account.id" (click)="switchAccount(account)"
             *ngFor="let account of accountList">
             <p class="company item-left">{{account.name}}</p>
             <p class="facilityCount item-right">{{account.numberOfFacilities}}

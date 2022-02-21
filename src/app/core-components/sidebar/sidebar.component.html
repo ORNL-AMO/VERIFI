@@ -1,4 +1,4 @@
-<nav class="nav sidebar flex-column" [ngClass]="{'open': open}">
+<nav class="nav sidebar flex-column" [ngClass]="{'open': open}" *ngIf="showSidebar">
     <a class="nav-link pt-4" (click)="toggleSidebar()">
         <i class="fa" [ngClass]="{'fa-align-left': !open, 'fa-align-right': open}"></i>
     </a>
@@ -38,8 +38,7 @@
         </a>
     </div>
     <hr>
-    <div *ngFor="let facility of facilityList"
-        [ngClass]="{'open': open, 'not-open': open}">
+    <div *ngFor="let facility of facilityList" [ngClass]="{'open': open, 'not-open': open}">
         <a class="nav-link" routerLink="/facility/{{facility.id}}" [routerLinkActive]="['active-head']"><i
                 class="fa fa-industry" [ngStyle]="{color: facility.color}"></i>
             <span [hidden]="!open" class="pl-2 nav-label">
@@ -54,8 +53,8 @@
             <a class="nav-link" routerLink="/facility/{{facility.id}}/utility" [routerLinkActive]="['active']"><i
                     class="fa fa-file-invoice"></i>
             </a>
-            <a class="nav-link" routerLink="/facility/{{facility.id}}/analysis"
-                [routerLinkActive]="['active']"><i class="fa fa-area-chart"></i>
+            <a class="nav-link" routerLink="/facility/{{facility.id}}/analysis" [routerLinkActive]="['active']"><i
+                    class="fa fa-area-chart"></i>
             </a>
             <a class="nav-link" routerLink="/facility/{{facility.id}}/settings" [routerLinkActive]="['active']"><i
                     class="fa fa-cog"></i>

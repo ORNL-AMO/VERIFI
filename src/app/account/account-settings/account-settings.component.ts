@@ -158,10 +158,11 @@ export class AccountSettingsComponent implements OnInit {
     this.accountDbService.allAccounts.next(accounts);
     if (accounts.length != 0) {
       this.accountDbService.setSelectedAccount(accounts[0].id);
+      this.router.navigate(['/']);
     } else {
       this.accountDbService.setSelectedAccount(undefined);
+      this.router.navigateByUrl('/setup-wizard');
     }
-    this.router.navigate(['/']);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Account Deleted!', undefined, undefined, false, 'success');
   }

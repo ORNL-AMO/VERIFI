@@ -60,17 +60,21 @@ export class AnalysisCalculationsHelperService {
   }
 
   getYearOptions(): Array<number> {
-    let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
-    let orderedMeterData: Array<IdbUtilityMeterData> = _.orderBy(accountMeterData, (data) => { return new Date(data.readDate) });
-    let firstBill: IdbUtilityMeterData = orderedMeterData[0];
-    let lastBill: IdbUtilityMeterData = orderedMeterData[orderedMeterData.length - 1];
-    let yearStart: number = new Date(firstBill.readDate).getUTCFullYear();
-    let yearEnd: number = new Date(lastBill.readDate).getUTCFullYear();
-    let yearOptions: Array<number> = new Array();
-    for (let i = yearStart; i <= yearEnd; i++) {
-      yearOptions.push(i);
+    let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
+    if (facilityMeterData.length != 0) {
+      let orderedMeterData: Array<IdbUtilityMeterData> = _.orderBy(facilityMeterData, (data) => { return new Date(data.readDate) });
+      let firstBill: IdbUtilityMeterData = orderedMeterData[0];
+      let lastBill: IdbUtilityMeterData = orderedMeterData[orderedMeterData.length - 1];
+      let yearStart: number = new Date(firstBill.readDate).getUTCFullYear();
+      let yearEnd: number = new Date(lastBill.readDate).getUTCFullYear();
+      let yearOptions: Array<number> = new Array();
+      for (let i = yearStart; i <= yearEnd; i++) {
+        yearOptions.push(i);
+      }
+      return yearOptions;
+    } else {
+      return
     }
-    return yearOptions;
   }
 
   filterYearPredictorData(predictorData: Array<IdbPredictorEntry>, year: number, facility: IdbFacility): Array<IdbPredictorEntry> {
@@ -104,7 +108,7 @@ export class AnalysisCalculationsHelperService {
   }
 
 
- 
+
 
 
   getPredictorUsage(predictorVariables: Array<PredictorData>, predictorData: Array<IdbPredictorEntry>): number {

@@ -1,6 +1,6 @@
-<div class="d-flex setup-footer justify-content-between align-items-center" [ngClass]="{'sidebar-open': sidebarOpen}">
+<div class="account d-flex setup-footer justify-content-between align-items-center" [ngClass]="{'sidebar-open': sidebarOpen}">
     <div class="pl-2">
-        <button class="btn btn-sm btn-secondary" (click)="back()">Back</button>
+        <button class="btn btn-secondary" (click)="back()">Back</button>
     </div>
 
     <div class="w-50 flex-column">
@@ -13,7 +13,7 @@
         </div>
     </div>
     <div class="pr-2">
-        <button *ngIf="!showSubmit" class="btn btn-sm btn-primary" (click)="next()">Continue</button>
-        <button *ngIf="showSubmit" class="btn btn-sm btn-primary" (click)="submitAccount()">Submit New Account</button>
+        <button *ngIf="!showSubmit" class="btn btn-primary-4" (click)="next()">Continue</button>
+        <button *ngIf="showSubmit" class="btn btn-primary-4" (click)="submitAccount()">Submit New Account</button>
     </div>
 </div>

@@ -2,14 +2,10 @@
     position:absolute;
     bottom: 0;
     border-top: solid;
-    width: calc(100vw - 70px);
+    width: 100vw;
     z-index: 100;
     background-color: white;
     transition: .2s width;
-}
-
-.setup-footer.sidebar-open{
-    width: calc(100vw - 260px);
 }
 
 .progress-bar {
