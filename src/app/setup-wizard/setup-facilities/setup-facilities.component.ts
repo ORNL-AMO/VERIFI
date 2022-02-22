@@ -11,6 +11,7 @@ import { SetupWizardService } from '../setup-wizard.service';
 })
 export class SetupFacilitiesComponent implements OnInit {
 
+  facilitiesSub: Subscription;
   facilities: Array<IdbFacility>;
   selectedFacility: IdbFacility;
   selectedFacilitySub: Subscription
@@ -21,23 +22,26 @@ export class SetupFacilitiesComponent implements OnInit {
       this.selectedFacility = val;
     });
 
-    if (!this.setupWizardService.facilities) {
-      this.setupWizardService.facilities = new Array();
-      this.addFacility();
-    }
-    this.facilities = this.setupWizardService.facilities;
+    this.facilitiesSub = this.setupWizardService.facilities.subscribe(val => {
+      this.facilities = val;
+      if(this.facilities.length == 0){
+        this.addFacility();
+      }
+    });
   }
 
   ngOnDestroy() {
     this.selectedFacilitySub.unsubscribe();
+    this.facilitiesSub.unsubscribe();
   }
 
   addFacility() {
     let account: IdbAccount = this.setupWizardService.account.getValue();
     let newFacility: IdbFacility = this.facilityDbService.getNewIdbFacility(account);
     newFacility.wizardId = Math.random().toString(36).substr(2, 9);
-    newFacility.name = 'Facility ' + (this.setupWizardService.facilities.length + 1);
-    this.setupWizardService.facilities.push(newFacility);
+    newFacility.name = 'Facility ' + (this.facilities.length + 1);
+    this.facilities.push(newFacility);
+    this.setupWizardService.facilities.next(this.facilities);
     this.setupWizardService.selectedFacility.next(newFacility);
   }
 
@@ -46,8 +50,8 @@ export class SetupFacilitiesComponent implements OnInit {
   }
 
   deleteFacility() {
-    this.setupWizardService.facilities = this.setupWizardService.facilities.filter(facility => { return facility.wizardId != this.selectedFacility.wizardId });
-    this.facilities = this.setupWizardService.facilities;
+    this.facilities = this.facilities.filter(facility => { return facility.wizardId != this.selectedFacility.wizardId });
     this.setupWizardService.selectedFacility.next(this.facilities[0]);
+    this.setupWizardService.facilities.next(this.facilities);
   }
 }

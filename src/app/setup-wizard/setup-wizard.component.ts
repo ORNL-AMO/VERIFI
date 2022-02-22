@@ -49,7 +49,7 @@ export class SetupWizardComponent implements OnInit {
     this.loadingService.setLoadingStatus(true);
     let account: IdbAccount = this.setupWizardService.account.getValue();
     account = await this.accountdbService.addWithObservable(account).toPromise();
-    let facilities: Array<IdbFacility> = this.setupWizardService.facilities;
+    let facilities: Array<IdbFacility> = this.setupWizardService.facilities.getValue();
     this.loadingService.setLoadingMessage("Creating Facilities...");
     let newFacility: IdbFacility;
     for (let i = 0; i < facilities.length; i++) {

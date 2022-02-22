@@ -11,13 +11,16 @@ import { SetupWizardService } from '../setup-wizard.service';
 })
 export class SetupWizardBannerComponent implements OnInit {
 
+  facilitiesSub: Subscription;
   facilities: Array<IdbFacility>;
   account: IdbAccount;
   accountSub: Subscription;
   constructor(private helpPanelService: HelpPanelService, private setupWizardService: SetupWizardService) { }
 
   ngOnInit(): void {
-    this.facilities = this.setupWizardService.facilities;
+    this.facilitiesSub = this.setupWizardService.facilities.subscribe(val => {
+      this.facilities = val;
+    })
 
     this.accountSub = this.setupWizardService.account.subscribe(val => {
       this.account = val;
@@ -26,6 +29,7 @@ export class SetupWizardBannerComponent implements OnInit {
 
   ngOnDestroy(){
     this.accountSub.unsubscribe();
+    this.facilitiesSub.unsubscribe();
   }
 
   toggleHelpPanel() {

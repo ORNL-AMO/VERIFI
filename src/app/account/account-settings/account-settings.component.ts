@@ -64,7 +64,7 @@ export class AccountSettingsComponent implements OnInit {
 
   switchFacility(facility: IdbFacility) {
     this.facilityDbService.selectedFacility.next(facility);
-    this.router.navigate(['/facility-management']);
+    this.router.navigateByUrl('facility/' + facility.id + '/settings');
   }
 
   async addNewFacility() {
@@ -75,7 +75,7 @@ export class AccountSettingsComponent implements OnInit {
     let newFacility: IdbFacility = await this.facilityDbService.addWithObservable(idbFacility).toPromise();
     this.loadingService.setLoadingMessage('Updating Reports...');
     let overviewReportOptions: Array<IdbOverviewReportOptions> = this.overviewReportOptionsDbService.accountOverviewReportOptions.getValue();
-    for(let index = 0; index < overviewReportOptions.length; index++){
+    for (let index = 0; index < overviewReportOptions.length; index++) {
       overviewReportOptions[index].reportOptions.facilities.push({
         facilityId: newFacility.id,
         selected: false
@@ -106,8 +106,8 @@ export class AccountSettingsComponent implements OnInit {
     await this.analysisDbService.deleteAllFacilityAnalysisItems(this.facilityToDelete.id);
     this.loadingService.setLoadingMessage('Updating Reports...');
     let overviewReportOptions: Array<IdbOverviewReportOptions> = this.overviewReportOptionsDbService.accountOverviewReportOptions.getValue();
-    for(let index = 0; index < overviewReportOptions.length; index++){
-      overviewReportOptions[index].reportOptions.facilities = overviewReportOptions[index].reportOptions.facilities.filter(reportFacility => {return reportFacility.facilityId != this.facilityToDelete.id});
+    for (let index = 0; index < overviewReportOptions.length; index++) {
+      overviewReportOptions[index].reportOptions.facilities = overviewReportOptions[index].reportOptions.facilities.filter(reportFacility => { return reportFacility.facilityId != this.facilityToDelete.id });
       await this.overviewReportOptionsDbService.updateWithObservable(overviewReportOptions[index]).toPromise();
     }
 

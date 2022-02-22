@@ -15,10 +15,6 @@ export class SetupConfirmationComponent implements OnInit {
 
   ngOnInit(): void {
     this.account = this.setupWizardService.account.getValue();
-    this.facilities = this.setupWizardService.facilities;
-  }
-
-  submit(){
-    
+    this.facilities = this.setupWizardService.facilities.getValue();
   }
 }

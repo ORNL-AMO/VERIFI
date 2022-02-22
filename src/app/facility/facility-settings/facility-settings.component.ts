@@ -25,6 +25,7 @@ export class FacilitySettingsComponent implements OnInit {
   selectedFacilitySub: Subscription;
   selectedFacility: IdbFacility;
   unitsDontMatchAccount: boolean;
+  canDelete: boolean;
   constructor(
     private router: Router,
     private facilityDbService: FacilitydbService,
@@ -41,6 +42,8 @@ export class FacilitySettingsComponent implements OnInit {
   ) { }
 
   ngOnInit() {
+    let accountFacilites: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    this.canDelete = accountFacilites.length > 1;
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
       this.selectedFacility = facility;
     });
