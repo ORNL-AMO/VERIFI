@@ -2,9 +2,7 @@
     background-color: #f1f1f100;
     margin: 0px 30px;
     padding: 20px 30px 30px;
-    background-image: url('../../../assets/images/industrial-skyline.png');
-    background-position: bottom;
-    background-repeat: no-repeat;
+
     position:relative;
   }
   .wrapper.main-content {
@@ -18,9 +16,9 @@
     box-shadow: 2px 3px 10px #d6d6d6;
   }
   .empty-state {
-  max-width: 1000px;
+  /* max-width: 1000px;
   margin: 0 auto;
-  min-height: calc(100vh - 163px);
+  min-height: calc(100vh - 163px); */
   }
   .empty-state .box p {
   font-size: 22px;
@@ -29,4 +27,10 @@
   .loadData,
   .loadData a {
     font-size: 18px;
+
+  }
+
+
+  .loadData{
+    background-color: white;
   }

@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { SetupWizardService } from '../setup-wizard.service';
 
 @Component({
@@ -13,10 +12,8 @@ export class SetupWizardFooterComponent implements OnInit {
 
   progress: string = '0%';
   progressLabel: string = 'Welcome';
-  sidebarOpen: boolean;
-  sidebarOpenSub: Subscription;
   showSubmit: boolean;
-  constructor(private sharedDataService: SharedDataService, private router: Router, private setupWizardService: SetupWizardService) {
+  constructor(private router: Router, private setupWizardService: SetupWizardService) {
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
         this.setProgress();
@@ -25,16 +22,8 @@ export class SetupWizardFooterComponent implements OnInit {
    }
 
   ngOnInit(): void {
-    this.sidebarOpenSub = this.sharedDataService.sidebarOpen.subscribe(val => {
-      this.sidebarOpen = val;
-    });
     this.setProgress();
   }
-
-  ngOnDestroy() {
-    this.sidebarOpenSub.unsubscribe();
-  }
-
 
   back() {
     if (this.router.url.includes('account-setup')) {

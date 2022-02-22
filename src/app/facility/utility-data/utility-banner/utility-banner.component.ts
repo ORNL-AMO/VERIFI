@@ -24,6 +24,7 @@ export class UtilityBannerComponent implements OnInit {
     });
     this.modalOpenSub = this.sharedDataService.modalOpen.subscribe(val => {
       this.modalOpen = val;
+      console.log(this.modalOpen);
     })
   }
 

@@ -1,4 +1,7 @@
 .dashboard-container{
     height: calc(100vh - 100px);
     overflow-y: auto; 
+    background-image: url('../../assets/images/industrial-skyline.png');
+    background-position: bottom;
+    background-repeat: no-repeat;
 }

@@ -89,7 +89,6 @@ export class HeaderComponent implements OnInit {
     if (!this.eRef.nativeElement.contains(event.target)) {
       this.accountMenu = false;
       this.switchAccountMenu = false;
-      this.sharedDataService.modalOpen.next(false);
     }
   }
 
