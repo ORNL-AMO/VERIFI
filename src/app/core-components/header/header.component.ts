@@ -30,7 +30,6 @@ export class HeaderComponent implements OnInit {
   allAccountsSub: Subscription;
   selectedAccountSub: Subscription;
   allFacilitiesSub: Subscription;
-  selectedFacilitySub: Subscription;
 
   constructor(
     private eRef: ElementRef,
@@ -69,7 +68,6 @@ export class HeaderComponent implements OnInit {
   ngOnDestroy() {
     this.allAccountsSub.unsubscribe();
     this.selectedAccountSub.unsubscribe();
-    this.selectedFacilitySub.unsubscribe();
     this.allFacilitiesSub.unsubscribe();
   }
 

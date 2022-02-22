@@ -13,9 +13,6 @@ import { IdbAccount, IdbUtilityMeterData } from 'src/app/models/idb';
 })
 export class AccountBannerComponent implements OnInit {
 
-
-  label: string;
-
   selectedAccount: IdbAccount;
   selectedAccountSub: Subscription;
   meterDataSub: Subscription;
@@ -30,8 +27,7 @@ export class AccountBannerComponent implements OnInit {
 
     this.meterDataSub = this.utilityMeterDataDbService.accountMeterData.subscribe(val => {
       this.meterData = val;
-    })
-
+    });
   }
 
   ngOnDestroy() {

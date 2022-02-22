@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
 import { IdbFacility } from '../models/idb';
@@ -13,7 +13,7 @@ export class FacilityComponent implements OnInit {
 
   selectedFacility: IdbFacility;
   selectedFacilitySub: Subscription;
-  constructor(private activatedRoute: ActivatedRoute, private facilityDbService: FacilitydbService) { }
+  constructor(private activatedRoute: ActivatedRoute, private facilityDbService: FacilitydbService, private router: Router) { }
 
   ngOnInit(): void {
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
@@ -27,8 +27,14 @@ export class FacilityComponent implements OnInit {
         if (this.selectedFacility && selectedFacility.id != this.selectedFacility.id) {
           this.facilityDbService.selectedFacility.next(selectedFacility);
         }
+      }else{
+        this.router.navigateByUrl('account')
       }
     });
+  }
+
+  ngOnDestroy(){
+    this.selectedFacilitySub.unsubscribe();
   }
 
 }

@@ -46,8 +46,6 @@ export class AppComponent {
     })
   }
 
-
-
   ngOnInit() {
     this.initializeData();
     this.eGridService.parseEGridData();
@@ -73,7 +71,6 @@ export class AppComponent {
     this.dataInitialized = true;
     let allAccounts: Array<IdbAccount> = this.accountDbService.allAccounts.getValue();
     if (allAccounts.length == 0) {
-      console.log('nav');
       this.router.navigateByUrl('setup-wizard');
     }
   }
