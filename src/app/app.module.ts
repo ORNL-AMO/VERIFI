@@ -14,15 +14,12 @@ import { IndexedDBModule } from './indexedDB/indexed-db.module';
 import { PageNotFoundComponent } from './core-components/page-not-found/page-not-found.component';
 import { ToastNotificationsComponent } from './core-components/toast-notifications/toast-notifications.component';
 import { ElectronUpdateComponent } from './core-components/electron-update/electron-update.component';
-import { AccountManagementModule } from './account-management/account-management.module';
-import { AnalysisModule } from './analysis/analysis.module';
-import { DashboardModule } from './dashboard/dashboard.module';
 import { HelpPanelModule } from './help-panel/help-panel.module';
-import { OverviewReportModule } from './overview-report/overview-report.module';
 import { StaticContentModule } from './static-content/static-content.module';
-import { UtilityDataModule } from './utility-data/utility-data.module';
-import { SetupProgressComponent } from './core-components/setup-progress/setup-progress.component';
 import { ImportBackupModalComponent } from './core-components/import-backup-modal/import-backup-modal.component';
+import { FacilityModule } from './facility/facility.module';
+import { AccountModule } from './account/account.module';
+import { SetupWizardModule } from './setup-wizard/setup-wizard.module';
 
 @NgModule({
   declarations: [
@@ -34,7 +31,6 @@ import { ImportBackupModalComponent } from './core-components/import-backup-moda
     PageNotFoundComponent,
     ToastNotificationsComponent,
     ElectronUpdateComponent,
-    SetupProgressComponent,
     ImportBackupModalComponent
   ],
   imports: [
@@ -44,14 +40,12 @@ import { ImportBackupModalComponent } from './core-components/import-backup-moda
     CommonModule,
     PlotlyViaWindowModule,
     IndexedDBModule,
-    AccountManagementModule,
-    AnalysisModule,
-    DashboardModule,
     HelpPanelModule,
-    OverviewReportModule,
     StaticContentModule,
-    UtilityDataModule,
-    BrowserAnimationsModule
+    BrowserAnimationsModule,
+    FacilityModule,
+    AccountModule,
+    SetupWizardModule
   ],
   providers: [],
   bootstrap: [AppComponent]

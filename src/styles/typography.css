@@ -1,5 +1,3 @@
-@import "~font-awesome/css/font-awesome.min.css";
-
 /*
 Typography
 ======================================================== */
@@ -107,4 +105,16 @@ Typography
 
   .overview-report h4 {
     border-bottom-color: #ff6000;
+  }
+
+  .facility h4{
+    border-bottom-color: #2c386b;
+  }
+
+  .account h4{
+    border-bottom-color: #145A32;
+  }
+
+  .pull-right{
+    float: right;
   }

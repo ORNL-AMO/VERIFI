@@ -1,7 +1,8 @@
-import { Component, OnInit, Input, EventEmitter, Output } from '@angular/core';
+import { Component, OnInit, Input, EventEmitter, Output, ElementRef, ViewChild } from '@angular/core';
 import { trigger, state, style, animate, transition } from '@angular/animations';
 import { ToastNotification, ToastNotificationsService } from './toast-notifications.service';
 import { Subscription } from 'rxjs';
+import * as confetti from 'canvas-confetti';
 
 @Component({
   selector: 'app-toast-notifications',
@@ -18,6 +19,7 @@ import { Subscription } from 'rxjs';
 })
 export class ToastNotificationsComponent implements OnInit {
 
+  @ViewChild('canvasElement', { static: false }) canvasElement: ElementRef;
   showToast: string = 'hide';
   destroyToast: boolean = true;
 
@@ -32,6 +34,9 @@ export class ToastNotificationsComponent implements OnInit {
       if (this.toastNotification) {
         setTimeout(() => {
           this.showToast = 'show';
+          if(this.toastNotification.confetti){
+            this.createConfetti();
+          }
         }, 100);
 
         if (this.toastNotification.setTimeoutVal) {
@@ -70,5 +75,16 @@ export class ToastNotificationsComponent implements OnInit {
       this.toastNotificationsService.disableNotification.next(true);
       this.toastNotificationsService.hideToast();
     }, 500);
+  }
+
+  createConfetti() {
+    if (this.canvasElement) {
+      confetti.create(this.canvasElement.nativeElement)({
+        particleCount: 500,
+        spread: 90,
+        scalar: .5,
+        origin: { y: 1, x: 1 }
+      });
+    }
   }
 }

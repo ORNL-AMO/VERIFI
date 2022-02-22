@@ -55,6 +55,8 @@ export class FacilitydbService {
             this.getAllByIndexRange('accountId', selectedAccount.id).subscribe(facilities => {
                 this.accountFacilities.next(facilities);
             });
+        }else{
+            this.accountFacilities.next([]);
         }
     }
 
@@ -152,13 +154,13 @@ export class FacilitydbService {
             accountId: account.id,
             name: 'New Facility',
             country: 'US',
-            city: undefined,
-            state: undefined,
-            zip: undefined,
-            address: undefined,
-            naics1: undefined,
-            naics2: undefined,
-            naics3: undefined,
+            city: account.city,
+            state: account.state,
+            zip: account.zip,
+            address: account.address,
+            naics1: account.naics1,
+            naics2: account.naics2,
+            naics3: account.naics3,
             type: undefined,
             size: undefined,
             units: undefined,

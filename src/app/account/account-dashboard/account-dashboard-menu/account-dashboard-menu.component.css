@@ -1,0 +1,14 @@
+.btn-selected{
+    background-color: #145A32;
+    color: #fff;
+    border-color: #145A32;
+  }
+
+  .btn-outline:hover{
+    background-color: #145A32 !important;
+
+  }
+  
+  .banner-border{
+    border-bottom: solid #145A32;
+  }

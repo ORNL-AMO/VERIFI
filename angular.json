@@ -43,7 +43,7 @@
               "src/styles/buttons.css",
               "src/styles/toast.css",
               "src/styles/banners.css",
-              "node_modules/font-awesome/css/font-awesome.css",
+              "node_modules/@fortawesome/fontawesome-free/css/all.css",
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
               "src/styles/printing.css",
               "src/styles/plotly.css"
@@ -147,7 +147,6 @@
               "src/styles/buttons.css",
               "src/styles/toast.css",
               "src/styles/banners.css",
-              "node_modules/font-awesome/css/font-awesome.css",
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
               "src/styles/printing.css"
             ],

@@ -1,0 +1,11 @@
+canvas.confetti-canvas {
+    top: auto!important;
+    left: auto!important;
+    bottom: 40px!important;
+    right: 55px!important;
+    z-index: 1001!important;
+    /*height: 200px;*/
+    position: absolute;
+    /* width: 500px; */
+    /* height: 200px; */
+}

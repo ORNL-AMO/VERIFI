@@ -1,0 +1,35 @@
+li.disabled:hover .navigation-warning{
+    display: block;
+}
+.navigation-warning {
+    display: none;
+    position: absolute;
+    top: 110px;
+    padding: 3px 7px;
+    background-color: #f5d0d0e8;
+    color: #c53f00;
+    z-index: 99;
+    margin-left: 10px;
+}
+.navigation-warning .arrow-up {
+    border-bottom: 10px solid #f1c3be;
+}
+
+.utility.banner{
+   background-color: white;
+    padding-bottom: 0px;
+}
+
+.banner-border{
+    border-bottom: solid #2c386b;
+}
+
+.nav-tabs .nav-link.active{
+    background-color: #2c386b;
+    color: white;
+}
+
+.nav-tabs .nav-link:not(.active){
+    color: #2c386b;
+    background-color: white;
+}

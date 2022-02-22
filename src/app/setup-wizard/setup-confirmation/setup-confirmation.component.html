@@ -1,0 +1,60 @@
+<!--TODO: ADD VALIDATION CHECKS-->
+<div class="wrapper">
+    <table>
+        <thead>
+            <tr>
+                <th>
+
+                </th>
+                <th>
+                    General Information
+                </th>
+                <th>
+                    Units
+                </th>
+                <th>
+                    Sustainability Questions
+                </th>
+                <th>
+                    Reporting
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>
+                    Account: {{account.name}}
+                </td>
+                <td>
+                    <span class="fa fa-check"></span>
+                </td>
+                <td>
+                    <span class="fa fa-check"></span>
+                </td>
+                <td>
+                    <span class="fa fa-check"></span>
+                </td>
+                <td>
+                    <span class="fa fa-check"></span>
+                </td>
+            </tr>
+            <tr *ngFor="let facility of facilities">
+                <td>
+                    Facility: {{facility.name}}
+                </td>
+                <td>
+                    <span class="fa fa-check"></span>
+                </td>
+                <td>
+                    <span class="fa fa-check"></span>
+                </td>
+                <td>
+                    <span class="fa fa-check"></span>
+                </td>
+                <td>
+                    <span class="fa fa-check"></span>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

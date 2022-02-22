@@ -1,0 +1,18 @@
+.setup-footer{
+    position:absolute;
+    bottom: 0;
+    border-top: solid #145A32;
+    width: 100vw;
+    z-index: 100;
+    background-color: white;
+    transition: .2s width;
+}
+
+.progress-bar {
+    background-color: #145A32!important;
+}
+
+
+.text-right{
+    text-align: right;
+}

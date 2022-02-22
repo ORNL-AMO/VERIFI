@@ -1,0 +1,20 @@
+<div class="sticky-top banner-border hide-print" *ngIf="inBasicReport" [ngClass]="{'modal-open': modalOpen}">
+    <div class="breadcrumbs d-flex">
+        <div>
+            <button class="btn btn-sm btn-primary-4 m-0" (click)="goToDashboard()">
+                View All Reports
+            </button>
+        </div>
+        <div class="pr-2 pl-2">
+            <button class="btn btn-sm btn-primary-4 m-0" (click)="goToMenu()">
+                Edit Report Options
+            </button>
+        </div>
+        <div>
+            <button class="btn btn-sm btn-primary-4 m-0" (click)="print()">
+                <span class="fa fa-print"></span>
+                Print Report
+            </button>
+        </div>
+    </div>
+</div>

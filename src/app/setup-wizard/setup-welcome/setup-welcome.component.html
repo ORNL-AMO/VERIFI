@@ -1,0 +1,45 @@
+<div class="wrapper main-content h-100">
+    <div class="empty-state text-center">
+        <h1>Welcome to VERIFI Account Setup</h1>
+        <p>Use the account setup wizard to create a new account and it's corresponding facilities.</p>
+        <br>
+
+        <div class="row justify-content-center">
+            <div class="col-3">
+                <div class="box h-100">
+                    <img class="w-100" src="assets/images/emptyFile.png" alt="Account Incomplete">
+                    <!-- <img class="w-100" [hidden]="!selectedAccount" src="assets/images/completeFile.png" alt="Account Complete"> -->
+                    <br>
+                    <p>1.</p>
+                    <p>Setup Account Details</p>
+                    <!-- <button class="btn btn-primary-2" (click)="addAccount()">Setup
+                        Account</button> -->
+                </div>
+            </div>
+            <div class="col-3">
+                <div class="box h-100">
+                    <img class="w-100" src="assets/images/emptyFile.png" alt="Facility Incomplete">
+                    <!-- <img class="w-100" [hidden]="!selectedFacility" src="assets/images/completeFile.png" alt="Facility Complete"> -->
+                    <br>
+                    <p>2.</p>
+                    <p>Setup Facilities</p>
+                </div>
+            </div>
+            <div class="col-3">
+                <div class="box h-100">
+                    <img class="w-100" src="assets/images/emptyFile.png" alt="Utility Incomplete">
+                    <!-- <img class="w-100" [hidden]="utilityMeters.length === 0" src="assets/images/completeFile.png"
+                        alt="Utility Complete"> -->
+                    <br>
+                    <p>3.</p>
+                    <p>Confirm Setup and Begin Energy Tracking</p>
+                </div>
+            </div>
+        </div>
+        <br>
+        <hr>
+        <div class="text-center loadData box">Want a quick start? <a (click)="loadTestData();">Load our test data</a> or
+            <a (click)="openImportBackup();">Load Account Backup</a>
+        </div>
+    </div>
+</div>
