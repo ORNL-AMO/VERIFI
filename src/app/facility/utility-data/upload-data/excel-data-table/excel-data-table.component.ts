@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
+import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { UploadDataService } from '../upload-data.service';
 
 @Component({
@@ -14,7 +15,7 @@ export class ExcelDataTableComponent implements OnInit {
   excelFiles: Array<File>;
 
   selectedExcelFile: File;
-  constructor(private uploadDataService: UploadDataService) { }
+  constructor(private uploadDataService: UploadDataService, private sharedDataService: SharedDataService) { }
 
   ngOnInit(): void {
     this.excelFilesSub = this.uploadDataService.excelFiles.subscribe(val => {
@@ -29,9 +30,11 @@ export class ExcelDataTableComponent implements OnInit {
 
   selectExcelFile(fileReference: File) {
     this.selectedExcelFile = fileReference;
+    this.sharedDataService.modalOpen.next(true);
   }
 
   closeExcelWizard(){
     this.selectedExcelFile = undefined;
+    this.sharedDataService.modalOpen.next(false);
   }
 }

@@ -50,7 +50,10 @@
 </div>
 
 <div id="switchAccounts" [class.open]="switchAccountMenu == true">
-    <h5>Switch Account</h5>
+    <h5>
+        Switch Account
+        <button class="close item-right" (click)="closeSwitchAccount()">&times;</button>
+    </h5>
     <div class="accounts">
         <div class="account" [class.active]="activeAccount?.id === account.id" (click)="switchAccount(account)"
             *ngFor="let account of accountList">
@@ -60,7 +63,7 @@
         </div>
     </div>
 
-    <hr>
+    <!-- <hr> -->
     <div class="d-flex justify-content-between">
         <button class="btn btn-primary-2" (click)="addNewAccount()"><i class="fa fa-plus"></i> Add
             Account</button>

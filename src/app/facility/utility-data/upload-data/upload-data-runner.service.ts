@@ -238,7 +238,8 @@ export class UploadDataRunnerService {
     this.accountDbService.selectedAccount.next(selectedAccount);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationsService.showToast('Data Imported!', undefined, 3500, false, "success");
-    this.router.navigate(['/utility/energy-consumption']);
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    this.router.navigateByUrl('facility/' + selectedFacility.id + '/utility/energy-consumption');
   }
 
   setGroupIds(meters: Array<IdbUtilityMeter>): Array<IdbUtilityMeter> {

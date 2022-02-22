@@ -77,7 +77,7 @@ export class AnalysisDashboardComponent implements OnInit {
 
   editItem(item: IdbAnalysisItem) {
     this.analysisDbService.selectedAnalysisItem.next(item);
-    this.router.navigateByUrl('/analysis/run-analysis');
+    this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/analysis/run-analysis');
   }
 
   setOrderDataField(str: string) {

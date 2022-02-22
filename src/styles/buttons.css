@@ -135,7 +135,7 @@
     border-color: #2c386b !important;
   }
   
-  .account .btn-primary-4, .facility .btn-solid{
+  .account .btn-primary-4, .account .btn-solid{
     color: #fff !important;
     background-color: #145A32 !important;
     border-color: #145A32 !important;

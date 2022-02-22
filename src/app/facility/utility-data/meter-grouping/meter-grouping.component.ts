@@ -14,6 +14,7 @@ import { ToastNotificationsService } from 'src/app/core-components/toast-notific
 import { MeterGroupingService } from './meter-grouping.service';
 import { Month, Months } from 'src/app/shared/form-data/months';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
+import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 
 @Component({
   selector: 'app-meter-grouping',
@@ -52,7 +53,7 @@ export class MeterGroupingComponent implements OnInit {
   constructor(private utilityMeterGroupDbService: UtilityMeterGroupdbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterDbService: UtilityMeterdbService, private facilityDbService: FacilitydbService, private calanderizationService: CalanderizationService,
     private loadingService: LoadingService, private toastNoticationService: ToastNotificationsService,
-    private meterGroupingService: MeterGroupingService, private analysisDbService: AnalysisDbService) { }
+    private meterGroupingService: MeterGroupingService, private analysisDbService: AnalysisDbService, private sharedDataService: SharedDataService) { }
 
   ngOnInit(): void {
     this.dataDisplay = this.meterGroupingService.dataDisplay;
@@ -163,6 +164,7 @@ export class MeterGroupingComponent implements OnInit {
   closeEditGroup() {
     this.editOrAdd = undefined;
     this.groupToEdit = undefined;
+    this.sharedDataService.modalOpen.next(false);
   }
 
   closeDeleteGroup() {
@@ -181,6 +183,7 @@ export class MeterGroupingComponent implements OnInit {
     this.editOrAdd = 'add';
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     this.groupToEdit = this.utilityMeterGroupDbService.getNewIdbUtilityMeterGroup(groupType, 'New Group', facility.id, facility.accountId);
+    this.sharedDataService.modalOpen.next(true);
   }
 
   async deleteMeterGroup() {

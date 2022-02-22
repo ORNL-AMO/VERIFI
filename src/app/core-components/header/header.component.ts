@@ -86,10 +86,16 @@ export class HeaderComponent implements OnInit {
 
   // close menus when user clicks outside the dropdown
   documentClick() {
-    if (!this.eRef.nativeElement.contains(event.target)) {
+    if (!this.eRef.nativeElement.contains(event.target) && (this.accountMenu || this.switchAccountMenu)) {
       this.accountMenu = false;
       this.switchAccountMenu = false;
+      this.sharedDataService.modalOpen.next(false);
     }
+  }
+
+  closeSwitchAccount(){
+    this.switchAccountMenu = false;
+    this.sharedDataService.modalOpen.next(false);
   }
 
   addNewAccount() {
