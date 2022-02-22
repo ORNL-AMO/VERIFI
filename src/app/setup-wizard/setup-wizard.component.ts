@@ -32,7 +32,7 @@ export class SetupWizardComponent implements OnInit {
     private toastNotificationService: ToastNotificationsService
   ) { }
 
-  ngOnInit(): void {    
+  ngOnInit(): void {
     this.accountdbService.selectedAccount.next(undefined);
     this.submitSub = this.setupWizardService.submit.subscribe(val => {
       if (val) {
@@ -66,6 +66,9 @@ export class SetupWizardComponent implements OnInit {
     let allAccounts: Array<IdbAccount> = await this.accountdbService.getAll().toPromise();
     this.accountdbService.allAccounts.next(allAccounts);
     this.accountdbService.selectedAccount.next(account);
+    let allFacilities: Array<IdbFacility> = await this.facilityDbService.getAll().toPromise();
+    let accountFacilities: Array<IdbFacility> = allFacilities.filter(facility => { return facility.accountId == account.id });
+    this.facilityDbService.accountFacilities.next(accountFacilities);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast("Account and Facilities Created!", "You can now add utility data to your facilities for analysis!", 10000, false, "success", true);
     this.router.navigateByUrl('facility/' + newFacility.id + '/utility');
