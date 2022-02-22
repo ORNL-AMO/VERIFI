@@ -67,6 +67,7 @@ export class SetupWizardComponent implements OnInit {
     this.accountdbService.allAccounts.next(allAccounts);
     this.accountdbService.selectedAccount.next(account);
     let allFacilities: Array<IdbFacility> = await this.facilityDbService.getAll().toPromise();
+    this.facilityDbService.allFacilities.next(allFacilities);
     let accountFacilities: Array<IdbFacility> = allFacilities.filter(facility => { return facility.accountId == account.id });
     this.facilityDbService.accountFacilities.next(accountFacilities);
     this.loadingService.setLoadingStatus(false);
