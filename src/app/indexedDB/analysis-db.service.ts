@@ -62,8 +62,12 @@ export class AnalysisDbService {
       this.getAllByIndexRange('accountId', selectedAccount.id).subscribe((analysisItems: Array<IdbAnalysisItem>) => {
         this.accountAnalysisItems.next(analysisItems);
         let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-        let facilityAnalysisItems: Array<IdbAnalysisItem> = analysisItems.filter(item => { return item.facilityId == selectedFacility.id });
-        this.facilityAnalysisItems.next(facilityAnalysisItems);
+        if (selectedFacility) {
+          let facilityAnalysisItems: Array<IdbAnalysisItem> = analysisItems.filter(item => { return item.facilityId == selectedFacility.id });
+          this.facilityAnalysisItems.next(facilityAnalysisItems);
+        }else{
+          this.facilityAnalysisItems.next([]);
+        }
       });
     }
   }
@@ -268,9 +272,9 @@ export class AnalysisDbService {
     }
   }
 
-  getMonthlyPercentBaseload(): Array<{monthNum: number, percent: number}>{
-    let values: Array<{monthNum: number, percent: number}> = new Array();
-    for(let i = 0; i < 12; i++){
+  getMonthlyPercentBaseload(): Array<{ monthNum: number, percent: number }> {
+    let values: Array<{ monthNum: number, percent: number }> = new Array();
+    for (let i = 0; i < 12; i++) {
       values.push({
         monthNum: i,
         percent: undefined
