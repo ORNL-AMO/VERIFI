@@ -5,6 +5,7 @@ import { LoadingService } from 'src/app/core-components/loading/loading.service'
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAccount, IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
+import { ToastNotificationsService } from '../core-components/toast-notifications/toast-notifications.service';
 import { SetupWizardService } from './setup-wizard.service';
 
 @Component({
@@ -27,10 +28,11 @@ export class SetupWizardComponent implements OnInit {
     private facilityDbService: FacilitydbService,
     private router: Router,
     private loadingService: LoadingService,
-    private setupWizardService: SetupWizardService
+    private setupWizardService: SetupWizardService,
+    private toastNotificationService: ToastNotificationsService
   ) { }
 
-  ngOnInit(): void {
+  ngOnInit(): void {    
     this.accountdbService.selectedAccount.next(undefined);
     this.submitSub = this.setupWizardService.submit.subscribe(val => {
       if (val) {
@@ -65,6 +67,7 @@ export class SetupWizardComponent implements OnInit {
     this.accountdbService.allAccounts.next(allAccounts);
     this.accountdbService.selectedAccount.next(account);
     this.loadingService.setLoadingStatus(false);
+    this.toastNotificationService.showToast("Account and Facilities Created!", "You can now add utility data to your facilities for analysis!", 10000, false, "success", true);
     this.router.navigateByUrl('facility/' + newFacility.id + '/utility');
   }
 }
