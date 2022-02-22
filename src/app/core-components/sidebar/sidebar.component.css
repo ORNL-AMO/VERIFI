@@ -76,3 +76,7 @@ div.hidden, div.d-flex.hidden{
     cursor: default;
     opacity: .7;
 }
+
+.open .icon-row{
+    padding-left: 1.5rem;
+}

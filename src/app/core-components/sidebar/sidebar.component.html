@@ -9,23 +9,8 @@
             {{accountName}}
         </span>
     </a>
-    <!-- <a class="nav-link" routerLink="/account/reports" [routerLinkActive]="['active']"><i class="fa fa-folder"></i>
-        <span [hidden]="!open" class="pl-2 nav-label">
-            Reports
-        </span>
-    </a>
-    <a class="nav-link disabled" routerLink="/account/analysis" [routerLinkActive]="['active']"><i class="fa fa-area-chart"></i>
-        <span [hidden]="!open" class="pl-2 nav-label">
-            Analysis
-        </span>
-    </a>
-    <a class="nav-link" routerLink="/account/settings" [routerLinkActive]="['active']"><i class="fa fa-cog"></i>
-        <span [hidden]="!open" class="pl-2 nav-label">
-            Settings
-        </span>
-    </a> -->
 
-    <div class="d-flex justify-content-center"
+    <div class="d-flex"
         [ngClass]="{'flex-column not-open': !open, 'icon-row open': open, 'hidden': checkHideAccountLinks()}">
         <a class="nav-link" routerLink="/account/home" [routerLinkActive]="['active']"><i class="fa fa-home"></i>
         </a>
@@ -38,15 +23,15 @@
         </a>
     </div>
     <hr>
-    <div *ngFor="let facility of facilityList" [ngClass]="{'open': open, 'not-open': open}">
+    <div *ngFor="let facility of facilityList" [ngClass]="{'open': open, 'not-open': !open}">
         <a class="nav-link" routerLink="/facility/{{facility.id}}" [routerLinkActive]="['active-head']"><i
                 class="fa fa-industry" [ngStyle]="{color: facility.color}"></i>
             <span [hidden]="!open" class="pl-2 nav-label">
                 {{facility.name}}
             </span>
         </a>
-        <div class="d-flex icon-row justify-content-center"
-            [ngClass]="{'flex-column': !open, 'icon-row': open, 'hidden': checkHideFacilityLinks(facility)}">
+        <div class="d-flex icon-row"
+            [ngClass]="{'flex-column not-open': !open, 'icon-row': open, 'hidden': checkHideFacilityLinks(facility)}">
             <a class="nav-link" routerLink="/facility/{{facility.id}}/home" [routerLinkActive]="['active']"><i
                     class="fa fa-home"></i>
             </a>

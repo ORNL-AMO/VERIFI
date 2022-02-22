@@ -114,3 +114,7 @@ Typography
   .account h4{
     border-bottom-color: #145A32;
   }
+
+  .pull-right{
+    float: right;
+  }
