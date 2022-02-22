@@ -16,7 +16,6 @@ import { ToastNotificationsComponent } from './core-components/toast-notificatio
 import { ElectronUpdateComponent } from './core-components/electron-update/electron-update.component';
 import { HelpPanelModule } from './help-panel/help-panel.module';
 import { StaticContentModule } from './static-content/static-content.module';
-import { SetupProgressComponent } from './core-components/setup-progress/setup-progress.component';
 import { ImportBackupModalComponent } from './core-components/import-backup-modal/import-backup-modal.component';
 import { FacilityModule } from './facility/facility.module';
 import { AccountModule } from './account/account.module';
@@ -32,7 +31,6 @@ import { SetupWizardModule } from './setup-wizard/setup-wizard.module';
     PageNotFoundComponent,
     ToastNotificationsComponent,
     ElectronUpdateComponent,
-    SetupProgressComponent,
     ImportBackupModalComponent
   ],
   imports: [
