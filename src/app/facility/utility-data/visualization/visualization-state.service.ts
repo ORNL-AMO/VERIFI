@@ -33,18 +33,22 @@ export class VisualizationStateService {
   }
 
   setPredictorOptions(predictors: Array<PredictorData>) {
-    let existingPredictorOptions: Array<{ predictor: PredictorData, selected: boolean }> = this.predictorOptions.getValue();
-    let existingPredictorIds: Array<string> = existingPredictorOptions.map(option => { return option.predictor.id });
-    let checkMissing: PredictorData = predictors.find(predictor => { return !existingPredictorIds.includes(predictor.id) });
-    if (checkMissing) {
-      let predictorOptions: Array<{ predictor: PredictorData, selected: boolean }> = new Array();
-      predictors.forEach(predictor => {
-        predictorOptions.push({
-          predictor: predictor,
-          selected: true
+    if (predictors.length == 0) {
+      this.predictorOptions.next([]);
+    } else {
+      let existingPredictorOptions: Array<{ predictor: PredictorData, selected: boolean }> = this.predictorOptions.getValue();
+      let existingPredictorIds: Array<string> = existingPredictorOptions.map(option => { return option.predictor.id });
+      let checkMissing: PredictorData = predictors.find(predictor => { return !existingPredictorIds.includes(predictor.id) });
+      if (checkMissing) {
+        let predictorOptions: Array<{ predictor: PredictorData, selected: boolean }> = new Array();
+        predictors.forEach(predictor => {
+          predictorOptions.push({
+            predictor: predictor,
+            selected: true
+          });
         });
-      });
-      this.predictorOptions.next(predictorOptions);
+        this.predictorOptions.next(predictorOptions);
+      }
     }
   }
 
