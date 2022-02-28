@@ -5,7 +5,7 @@ import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service
 import { PlotDataItem } from 'src/app/models/visualization';
 import { VisualizationStateService } from './visualization-state.service';
 import * as _ from 'lodash';
-import { MeterGroupingService } from '../meter-grouping/meter-grouping.service';
+import { MeterGroupingService } from '../utility-data/meter-grouping/meter-grouping.service';
 import { Month, Months } from 'src/app/shared/form-data/months';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idb';

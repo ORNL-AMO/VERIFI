@@ -15,8 +15,12 @@
                     Data</a>
             </li>
             <li class="nav-item" [ngClass]="{'disabled': facilityMeterData.length == 0}">
+                <a class="nav-link" routerLink="visualization" [routerLinkActive]="['active']"><i
+                        class="fa fa-chart-line"></i>Data Visualization</a>
+            </li>
+            <li class="nav-item" [ngClass]="{'disabled': facilityMeterData.length == 0}">
                 <a class="nav-link" routerLink="analysis" [routerLinkActive]="['active']"><i
-                        class="fa fa-area-chart"></i>Analysis</a>
+                        class="fa fa-microscope"></i>Analysis</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" routerLink="settings" [routerLinkActive]="['active']"><i
