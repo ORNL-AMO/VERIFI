@@ -20,6 +20,7 @@ import { AccountHelpComponent } from './account-management/account-help/account-
 import { FacilityHelpComponent } from './account-management/facility-help/facility-help.component';
 import { HelpPanelComponent } from './help-panel.component';
 import { AnalysisDashboardHelpComponent } from './analysis/analysis-dashboard-help/analysis-dashboard-help.component';
+import { HelpPageComponent } from './help-page/help-page.component';
 
 @NgModule({
   declarations: [
@@ -42,7 +43,8 @@ import { AnalysisDashboardHelpComponent } from './analysis/analysis-dashboard-he
     AccountHelpComponent,
     FacilityHelpComponent,
     HelpPanelComponent,
-    AnalysisDashboardHelpComponent
+    AnalysisDashboardHelpComponent,
+    HelpPageComponent
   ],
   imports: [
     CommonModule

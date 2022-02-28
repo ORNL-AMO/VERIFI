@@ -1,3 +1,26 @@
 #help .banner {
     background-color: #2c386b;
 }
+
+
+.fa.fa-circle-question{
+    padding-top: 3px;
+}
+
+.help-toggle .fa.fa-circle-question{
+    /* width: 400px; */
+    animation-name: help-button;
+    animation-duration: .5s;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+  }
+  
+
+@keyframes help-button{
+    from {
+        color: white;
+    }
+    to {
+        color: #db281b;
+    }
+  }

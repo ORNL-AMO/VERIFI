@@ -7,6 +7,7 @@
             </h3>
         </div>
         <div class="help-content">
+            <app-help-page *ngIf="helpURL == 'help'"></app-help-page>
             <app-energy-consumption-help *ngIf="helpURL == 'energy-consumption'"></app-energy-consumption-help>
             <app-account-overview-help *ngIf="helpURL == 'account-summary'"></app-account-overview-help>
             <app-facility-overview-help *ngIf="helpURL == 'facility-summary'"></app-facility-overview-help>
