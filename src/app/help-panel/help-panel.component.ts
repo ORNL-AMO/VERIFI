@@ -77,6 +77,8 @@ export class HelpPanelComponent implements OnInit {
       this.helpURL = 'monthly-energy-intensity';
     } else if (url.indexOf('facility-analysis') != -1) {
       this.helpURL = 'facility-analysis';
+    } else if (url.indexOf('help') != -1) {
+      this.helpURL = 'help';
     }
   }
 

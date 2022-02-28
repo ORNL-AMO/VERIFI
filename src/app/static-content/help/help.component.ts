@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { HelpPanelService } from 'src/app/help-panel/help-panel.service';
 
 @Component({
   selector: 'app-help',
@@ -7,9 +8,15 @@ import { Component, OnInit } from '@angular/core';
 })
 export class HelpComponent implements OnInit {
 
-  constructor() { }
+  constructor(private helpPanelService: HelpPanelService) { }
 
   ngOnInit(): void {
   }
 
+
+  
+  toggleHelpPanel() {
+    let helpPanelOpen: boolean = this.helpPanelService.helpPanelOpen.getValue();
+    this.helpPanelService.helpPanelOpen.next(!helpPanelOpen);
+  }
 }
