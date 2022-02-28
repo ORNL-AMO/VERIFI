@@ -7,7 +7,7 @@ import { UtilityMeterDataComponent } from './facility/utility-data/energy-consum
 import { MeterGroupingComponent } from './facility/utility-data/meter-grouping/meter-grouping.component';
 import { PredictorDataComponent } from './facility/utility-data/predictor-data/predictor-data.component';
 import { CalanderizationComponent } from './facility/utility-data/calanderization/calanderization.component';
-import { VisualizationComponent } from './facility/utility-data/visualization/visualization.component';
+import { VisualizationComponent } from './facility/visualization/visualization.component';
 import { PageNotFoundComponent } from './core-components/page-not-found/page-not-found.component';
 import { AboutComponent } from './static-content/about/about.component';
 import { AcknowledgmentsComponent } from './static-content/acknowledgments/acknowledgments.component';
@@ -120,11 +120,11 @@ const routes: Routes = [
           { path: 'monthly-meter-data', component: CalanderizationComponent },
           { path: 'meter-groups', component: MeterGroupingComponent },
           { path: 'predictors', component: PredictorDataComponent },
-          { path: 'visualization', component: VisualizationComponent },
           { path: 'upload-data', component: UploadDataComponent },
           { path: '', pathMatch: 'full', redirectTo: 'energy-consumption' }
         ]
       },
+      { path: 'visualization', component: VisualizationComponent },
       {
         path: 'analysis',
         component: AnalysisComponent,

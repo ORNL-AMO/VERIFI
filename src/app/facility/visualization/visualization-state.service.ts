@@ -5,7 +5,7 @@ import { MeterGroupType } from 'src/app/models/calanderization';
 import { IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterGroup, PredictorData } from 'src/app/models/idb';
 import { PlotDataItem, RegressionTableDataItem } from 'src/app/models/visualization';
 import { VisualizationService } from 'src/app/shared/helper-services/visualization.service';
-import { MeterGroupingService } from '../meter-grouping/meter-grouping.service';
+import { MeterGroupingService } from '../utility-data/meter-grouping/meter-grouping.service';
 
 @Injectable({
   providedIn: 'root'

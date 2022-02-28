@@ -10,6 +10,7 @@ import { SettingsFormsModule } from '../shared/settings-forms/settings-forms.mod
 import { UtilityDataModule } from './utility-data/utility-data.module';
 import { AnalysisModule } from './analysis/analysis.module';
 import { FacilityDashboardModule } from './facility-dashboard/facility-dashboard.module';
+import { VisualizationModule } from './visualization/visualization.module';
 
 
 @NgModule({
@@ -26,7 +27,8 @@ import { FacilityDashboardModule } from './facility-dashboard/facility-dashboard
     SettingsFormsModule,
     UtilityDataModule,
     AnalysisModule,
-    FacilityDashboardModule
+    FacilityDashboardModule,
+    VisualizationModule
   ]
 })
 export class FacilityModule { }
