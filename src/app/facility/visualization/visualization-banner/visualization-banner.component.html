@@ -1,0 +1,50 @@
+<div class="sticky-top banner-border" [ngClass]="{'modal-open': modalOpen}">
+    <div class="breadcrumbs d-flex justify-content-between">
+        <div class="d-flex pr-2">
+            <select name="minMonth" [(ngModel)]="minMonth" class="form-control" (change)="setMinDate()">
+                <option class="pr-2" *ngFor="let month of months" [ngValue]="month.monthNumValue">
+                    {{month.abbreviation}}</option>
+            </select>
+
+            <select name="minYear" [(ngModel)]="minYear" class="form-control" (change)="setMinDate()">
+                <option class="pr-2" *ngFor="let year of years" [ngValue]="year">{{year}}</option>
+            </select>
+
+            <div class="pl-1 pr-1">
+                <span class="fa fa-arrow-right"></span>
+            </div>
+
+            <select name="maxMonth" [(ngModel)]="maxMonth" class="form-control" (change)="setMaxDate()">
+                <option class="pr-2" *ngFor="let month of months" [ngValue]="month.monthNumValue">
+                    {{month.abbreviation}}</option>
+            </select>
+
+            <select name="maxYear" [(ngModel)]="maxYear" class="form-control" (change)="setMaxDate()">
+                <option class="pr-2" *ngFor="let year of years" [ngValue]="year">{{year}}</option>
+            </select>
+        </div>
+
+        <div class="d-flex">
+            <div class="pr-1">
+                <div class="btn-group">
+                    <button class="btn btn-sm btn-outline" (click)="setFacilityEnergyIsSource(true)"
+                        [ngClass]="{'btn-primary-2': selectedFacility.energyIsSource == true}">Source Energy</button>
+                    <button class="btn btn-sm btn-outline" (click)="setFacilityEnergyIsSource(false)"
+                        [ngClass]="{'btn-primary-2': selectedFacility.energyIsSource == false}">Site Energy</button>
+                </div>
+            </div>
+
+            <div class="pl-1">
+                <div class="btn-group">
+                    <button class="btn btn-sm btn-outline" [ngClass]="{'btn-primary-2': selectedChart == 'splom'}"
+                        (click)="setView('splom')">Data Correlation</button>
+                    <button class="btn btn-sm btn-outline" [ngClass]="{'btn-primary-2': selectedChart == 'heatmap'}"
+                        (click)="setView('heatmap')">R<sup>2</sup> Variance</button>
+                    <button class="btn btn-sm btn-outline" [ngClass]="{'btn-primary-2': selectedChart == 'timeseries'}"
+                        (click)="setView('timeseries')">Time Series</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

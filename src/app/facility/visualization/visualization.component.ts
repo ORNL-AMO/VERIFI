@@ -29,14 +29,14 @@ export class VisualizationComponent implements OnInit {
   plotDataSub: Subscription;
   meterGroupSub: Subscription;
   numberOfOptionsSelected: number;
-  months: Array<Month> = Months;
-  minMonth: number;
-  minYear: number;
-  maxMonth: number;
-  maxYear: number;
-  years: Array<number>;
-  selectedFacility: IdbFacility;
-  selectedFacilitySub: Subscription;
+  // months: Array<Month> = Months;
+  // minMonth: number;
+  // minYear: number;
+  // maxMonth: number;
+  // maxYear: number;
+  // years: Array<number>;
+  // selectedFacility: IdbFacility;
+  // selectedFacilitySub: Subscription;
   constructor(private visualizationStateService: VisualizationStateService, private predictorDbService: PredictordbService,
     private utilityMeterDbService: UtilityMeterdbService, private facilityDbService: FacilitydbService,
     private meterGroupingService: MeterGroupingService) { }
@@ -77,14 +77,14 @@ export class VisualizationComponent implements OnInit {
 
     this.plotDataSub = this.visualizationStateService.plotData.subscribe(plotData => {
       this.numberOfOptionsSelected = plotData.length;
-      if (this.minMonth == undefined || this.minYear == undefined || this.maxMonth == undefined || this.maxYear == undefined) {
-        this.setMinMaxDate(plotData);
-      }
+      // if (this.minMonth == undefined || this.minYear == undefined || this.maxMonth == undefined || this.maxYear == undefined) {
+      //   this.setMinMaxDate(plotData);
+      // }
     });
 
-    this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(selectedFacility => {
-      this.selectedFacility = selectedFacility;
-    });
+    // this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(selectedFacility => {
+    //   this.selectedFacility = selectedFacility;
+    // });
   }
 
   ngOnDestroy() {
@@ -96,47 +96,47 @@ export class VisualizationComponent implements OnInit {
     this.plotDataSub.unsubscribe();
     this.meterGroupOptionsSub.unsubscribe();
     this.meterDataOptionSub.unsubscribe();
-    this.visualizationStateService.dateRange.next({ minDate: undefined, maxDate: undefined });
-    this.meterGroupingService.dateRange.next({minDate: undefined, maxDate: undefined});
-    this.selectedFacilitySub.unsubscribe();
+    // this.visualizationStateService.dateRange.next({ minDate: undefined, maxDate: undefined });
+    // this.meterGroupingService.dateRange.next({minDate: undefined, maxDate: undefined});
+    // this.selectedFacilitySub.unsubscribe();
   }
 
 
-  setView(str: "splom" | "heatmap" | "timeseries") {
-    this.visualizationStateService.selectedChart.next(str);
-  }
+  // setView(str: "splom" | "heatmap" | "timeseries") {
+  //   this.visualizationStateService.selectedChart.next(str);
+  // }
 
-  setMinMaxDate(plotData: Array<PlotDataItem>) {
-    let minDate: Date = new Date(_.min(plotData[0].valueDates));
-    this.minYear = minDate.getUTCFullYear();
-    this.minMonth = minDate.getUTCMonth();
-    let maxDate: Date = new Date(_.max(plotData[0].valueDates));
-    this.maxYear = maxDate.getUTCFullYear();
-    this.maxMonth = maxDate.getUTCMonth();
-    this.years = new Array();
-    for (let year = this.minYear; year <= this.maxYear; year++) {
-      this.years.push(year);
-    }
-  }
+  // setMinMaxDate(plotData: Array<PlotDataItem>) {
+  //   let minDate: Date = new Date(_.min(plotData[0].valueDates));
+  //   this.minYear = minDate.getUTCFullYear();
+  //   this.minMonth = minDate.getUTCMonth();
+  //   let maxDate: Date = new Date(_.max(plotData[0].valueDates));
+  //   this.maxYear = maxDate.getUTCFullYear();
+  //   this.maxMonth = maxDate.getUTCMonth();
+  //   this.years = new Array();
+  //   for (let year = this.minYear; year <= this.maxYear; year++) {
+  //     this.years.push(year);
+  //   }
+  // }
 
-  setMinDate() {
-    let minDate: Date = new Date(this.minYear, this.minMonth);
-    let dateRange: { minDate: Date, maxDate: Date } = this.visualizationStateService.dateRange.getValue();
-    dateRange.minDate = minDate;
-    this.visualizationStateService.dateRange.next(dateRange);
-    this.visualizationStateService.setData();
-  }
+  // setMinDate() {
+  //   let minDate: Date = new Date(this.minYear, this.minMonth);
+  //   let dateRange: { minDate: Date, maxDate: Date } = this.visualizationStateService.dateRange.getValue();
+  //   dateRange.minDate = minDate;
+  //   this.visualizationStateService.dateRange.next(dateRange);
+  //   this.visualizationStateService.setData();
+  // }
 
-  setMaxDate() {
-    let maxDate: Date = new Date(this.maxYear, this.maxMonth);
-    let dateRange: { minDate: Date, maxDate: Date } = this.visualizationStateService.dateRange.getValue();
-    dateRange.maxDate = maxDate;
-    this.visualizationStateService.dateRange.next(dateRange);
-    this.visualizationStateService.setData();
-  }
+  // setMaxDate() {
+  //   let maxDate: Date = new Date(this.maxYear, this.maxMonth);
+  //   let dateRange: { minDate: Date, maxDate: Date } = this.visualizationStateService.dateRange.getValue();
+  //   dateRange.maxDate = maxDate;
+  //   this.visualizationStateService.dateRange.next(dateRange);
+  //   this.visualizationStateService.setData();
+  // }
 
-  setFacilityEnergyIsSource(energyIsSource: boolean) {
-    this.selectedFacility.energyIsSource = energyIsSource;
-    this.facilityDbService.update(this.selectedFacility);
-  }
+  // setFacilityEnergyIsSource(energyIsSource: boolean) {
+  //   this.selectedFacility.energyIsSource = energyIsSource;
+  //   this.facilityDbService.update(this.selectedFacility);
+  // }
 }

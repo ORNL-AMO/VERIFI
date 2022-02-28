@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UtilityDataComponent } from './utility-data.component';
-import { VisualizationModule } from '../visualization/visualization.module';
 import { UploadDataModule } from './upload-data/upload-data.module';
 import { PredictorDataModule } from './predictor-data/predictor-data.module';
 import { MeterGroupingModule } from './meter-grouping/meter-grouping.module';
@@ -23,7 +22,6 @@ import { RouterModule } from '@angular/router';
   ],
   imports: [
     CommonModule,
-    VisualizationModule,
     UploadDataModule,
     PredictorDataModule,
     MeterGroupingModule,

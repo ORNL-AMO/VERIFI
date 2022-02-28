@@ -6,6 +6,7 @@ import { CorrelationPlotComponent } from './correlation-plot/correlation-plot.co
 import { TimeSeriesComponent } from './time-series/time-series.component';
 import { VisualizationComponent } from './visualization.component';
 import { FormsModule } from '@angular/forms';
+import { VisualizationBannerComponent } from './visualization-banner/visualization-banner.component';
 
 
 
@@ -15,7 +16,8 @@ import { FormsModule } from '@angular/forms';
     CorrelationMenuComponent,
     CorrelationPlotComponent,
     TimeSeriesComponent,
-    VisualizationComponent
+    VisualizationComponent,
+    VisualizationBannerComponent
   ],
   imports: [
     CommonModule,

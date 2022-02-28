@@ -1,4 +1,16 @@
+<app-visualization-banner></app-visualization-banner>
 <div class="wrapper main-content">
+    <div class="d-flex">
+        <app-correlation-plot class="flex-grow-1"
+            *ngIf="selectedChart == 'splom' || (numberOfOptionsSelected == 2 && selectedChart != 'timeseries')">
+        </app-correlation-plot>
+        <app-correlation-heatmap class="flex-grow-1" *ngIf="selectedChart == 'heatmap' && numberOfOptionsSelected > 2">
+        </app-correlation-heatmap>
+        <app-time-series class="flex-grow-1" *ngIf="selectedChart == 'timeseries'"></app-time-series>
+        <app-correlation-menu></app-correlation-menu>
+    </div>
+</div>
+<!-- <div class="wrapper main-content">
     <h4>Data Visualization
     </h4>
     <div class="d-flex w-100 justify-content-between border-bottom flex-wrap">
@@ -23,7 +35,7 @@
 
             <select name="maxYear" [(ngModel)]="maxYear" class="form-control" (change)="setMaxDate()">
                 <option class="pr-2" *ngFor="let year of years" [ngValue]="year">{{year}}</option>
-            </select>
+            </select>`
         </div>
 
         <div class="d-flex">
@@ -44,13 +56,13 @@
             </div>
         </div>
     </div>
-    <div class="d-flex w-100">
-        <app-correlation-plot class="flex-grow-1"
-            *ngIf="selectedChart == 'splom' || (numberOfOptionsSelected == 2 && selectedChart != 'timeseries')">
-        </app-correlation-plot>
-        <app-correlation-heatmap class="flex-grow-1" *ngIf="selectedChart == 'heatmap' && numberOfOptionsSelected > 2">
-        </app-correlation-heatmap>
-        <app-time-series class="flex-grow-1" *ngIf="selectedChart == 'timeseries'"></app-time-series>
-        <app-correlation-menu></app-correlation-menu>
-    </div>
+    <div class="d-flex w-100"> 
+<app-correlation-plot class="flex-grow-1"
+    *ngIf="selectedChart == 'splom' || (numberOfOptionsSelected == 2 && selectedChart != 'timeseries')">
+</app-correlation-plot>
+<app-correlation-heatmap class="flex-grow-1" *ngIf="selectedChart == 'heatmap' && numberOfOptionsSelected > 2">
+</app-correlation-heatmap>
+<app-time-series class="flex-grow-1" *ngIf="selectedChart == 'timeseries'"></app-time-series>
+<app-correlation-menu></app-correlation-menu>
 </div>
+</div>-->
