@@ -4,11 +4,8 @@ import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { VisualizationStateService } from './visualization-state.service';
 import * as _ from 'lodash';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbFacility, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbUtilityMeterData } from 'src/app/models/idb';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { Router } from '@angular/router';
-import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 
 @Component({
   selector: 'app-visualization',
