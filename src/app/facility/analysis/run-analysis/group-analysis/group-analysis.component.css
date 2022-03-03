@@ -11,16 +11,17 @@
     color: red;
 }
 
-.nav-tabs .nav-link.active{
-    background-color: #2c386b;
-    color: white;
-}
 
-.nav-tabs .nav-link:not(.active){
+.nav-tabs .nav-link.active{
     color: #2c386b;
     background-color: white;
 }
 
+.nav-tabs .nav-link:not(.active){
+    background-color: #2c386b;
+    color: white;
+    border: solid 1px white;
+}
 
 .nav-link{
     font-weight: 600;
