@@ -85,7 +85,7 @@ export class OverviewReportMenuComponent implements OnInit {
     this.overviewReportOptionsDbService.update(this.selectedReportOptions);
     this.overviewReportService.reportOptions.next(this.reportOptions);
     this.toastNotificationsService.showToast('Report Updated', undefined, 4000, false, "success");
-    this.router.navigateByUrl('/overview-report/basic-report');
+    this.router.navigateByUrl('/account/reports/basic-report');
   }
 
   cancelChanges() {
