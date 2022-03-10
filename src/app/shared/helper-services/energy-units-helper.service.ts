@@ -210,8 +210,7 @@ export class EnergyUnitsHelperService {
       unit = VolumeLiquidOptions.find(option => {
         let lowerCaseOption: string = option.value.toLocaleLowerCase();
         let lowerCaseName: string = name.toLocaleLowerCase();
-        let test = lowerCaseName.includes(lowerCaseOption);
-        return test;
+        return lowerCaseName.includes(lowerCaseOption);
       });
 
     }
@@ -224,7 +223,6 @@ export class EnergyUnitsHelperService {
 
     }
     if(unit){
-      console.log(unit);
       return unit.value;
     }else{
       return;
