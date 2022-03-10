@@ -210,7 +210,7 @@ export class EnergyUnitsHelperService {
       unit = VolumeLiquidOptions.find(option => {
         let lowerCaseOption: string = option.value.toLocaleLowerCase();
         let lowerCaseName: string = name.toLocaleLowerCase();
-        return lowerCaseName.includes(lowerCaseOption)
+        return lowerCaseName.includes(lowerCaseOption);
       });
 
     }
@@ -222,7 +222,11 @@ export class EnergyUnitsHelperService {
       });
 
     }
-    return unit.value;
+    if(unit){
+      return unit.value;
+    }else{
+      return;
+    }
   }
 
 
