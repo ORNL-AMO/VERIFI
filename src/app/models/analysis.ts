@@ -85,6 +85,31 @@ export interface MonthlyAnalysisSummaryData {
 }
 
 
+
+export interface MonthlyAnalysisSummary2 {
+  predictorVariables: Array<PredictorData>,
+  modelYear: number,
+  monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData2>
+}
+
+export interface MonthlyAnalysisSummaryData2 {
+  date: Date,
+  energyUse: number,
+  modeledEnergy: number,
+  predictorUsage?: Array<number>,
+  fiscalYear: number,
+  group: AnalysisGroup,
+  adjustedBaselineEnergyUse: number,
+  SEnPI: number,
+  savings: number,
+  percentSavingsComparedToBaseline: number,
+  yearToDateSavings: number,
+  yearToDatePercentSavings: number,
+  rollingSavings: number,
+  rolling12MonthImprovement: number
+}
+
+
 export interface AnnualAnalysisSummary {
   year: number,
   energyUse: number,

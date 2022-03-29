@@ -3,7 +3,7 @@ import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
 import { AnalysisCalculationsService } from 'src/app/facility/analysis/calculations/analysis-calculations.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { MonthlyAnalysisSummary } from 'src/app/models/analysis';
+import { MonthlyAnalysisSummary, MonthlyAnalysisSummary2 } from 'src/app/models/analysis';
 import { AnalysisGroup, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 
 @Component({
@@ -16,7 +16,7 @@ export class MonthlyAnalysisSummaryComponent implements OnInit {
   dataDisplay: 'table' | 'graph';
   analysisItem: IdbAnalysisItem;
   group: AnalysisGroup;
-  monthlyAnalysisSummary: MonthlyAnalysisSummary;
+  monthlyAnalysisSummary: MonthlyAnalysisSummary2;
   facility: IdbFacility;
   itemsPerPage: number = 12;
   constructor(private analysisService: AnalysisService, private analysisDbService: AnalysisDbService,
@@ -27,7 +27,7 @@ export class MonthlyAnalysisSummaryComponent implements OnInit {
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     this.group = this.analysisService.selectedGroup.getValue();
     this.facility = this.facilityDbService.selectedFacility.getValue();
-    this.monthlyAnalysisSummary = this.analysisCalculationsService.getMonthlyAnalysisSummary(this.group, this.analysisItem, this.facility);
+    this.monthlyAnalysisSummary = this.analysisCalculationsService.getMonthlyAnalysisSummary2(this.group, this.analysisItem, this.facility);
   }
 
 
