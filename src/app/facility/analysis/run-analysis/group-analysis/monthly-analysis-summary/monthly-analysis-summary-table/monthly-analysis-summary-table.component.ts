@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
-import { MonthlyAnalysisSummaryData, MonthlyAnalysisSummaryData2 } from 'src/app/models/analysis';
+import { MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { AnalysisGroup, IdbAnalysisItem, IdbFacility, PredictorData } from 'src/app/models/idb';
 
 @Component({
@@ -10,7 +10,7 @@ import { AnalysisGroup, IdbAnalysisItem, IdbFacility, PredictorData } from 'src/
 })
 export class MonthlyAnalysisSummaryTableComponent implements OnInit {
   @Input()
-  monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData2>;
+  monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>;
   @Input()
   analysisItem: IdbAnalysisItem;
   @Input()

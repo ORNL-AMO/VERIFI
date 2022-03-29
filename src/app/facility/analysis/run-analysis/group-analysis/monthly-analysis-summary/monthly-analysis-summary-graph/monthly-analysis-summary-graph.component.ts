@@ -33,9 +33,9 @@ export class MonthlyAnalysisSummaryGraphComponent implements OnInit {
       var trace1 = {
         type: "scatter",
         mode: "lines+markers",
-        name: 'Total Energy Use',
+        name: 'Energy Use',
         x: this.monthlyAnalysisSummary.monthlyAnalysisSummaryData.map(results => { return results.date }),
-        y: this.monthlyAnalysisSummary.monthlyAnalysisSummaryData.map(results => { return results.totalEnergy }),
+        y: this.monthlyAnalysisSummary.monthlyAnalysisSummaryData.map(results => { return results.energyUse }),
         line: { color: '#7F7F7F', width: 4 },
         marker:{
           size: 8
@@ -45,9 +45,9 @@ export class MonthlyAnalysisSummaryGraphComponent implements OnInit {
       var trace2 = {
         type: "scatter",
         mode: "lines+markers",
-        name: 'Modeled Energy Use',
+        name: 'Adjusted Energy Use',
         x: this.monthlyAnalysisSummary.monthlyAnalysisSummaryData.map(results => { return results.date }),
-        y: this.monthlyAnalysisSummary.monthlyAnalysisSummaryData.map(results => { return results.modeledEnergy }),
+        y: this.monthlyAnalysisSummary.monthlyAnalysisSummaryData.map(results => { return results.adjustedBaselineEnergyUse }),
         line: { color: '#7D3C98', width: 4 },
         marker:{
           size: 8

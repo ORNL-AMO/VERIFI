@@ -16,3 +16,7 @@ thead th:hover{
 tr.table-mh th span{
     padding: 0px !important;
 }
+
+.no-wrap{
+    white-space: nowrap;
+}
