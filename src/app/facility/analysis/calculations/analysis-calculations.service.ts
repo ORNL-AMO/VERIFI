@@ -574,6 +574,9 @@ export class AnalysisCalculationsService {
       } else if (selectedGroup.analysisType == 'modifiedEnergyIntensity') {
         modeledEnergy = this.calculateModifiedEnegyIntensityModeledEnergy(selectedGroup, baselineYearEnergyIntensity, baselineActualEnergyUse, productionUsage);
       }
+      if(modeledEnergy < 0){
+        modeledEnergy = 0;
+      }
       yearToDateModeledEnergyUse = yearToDateModeledEnergyUse + modeledEnergy;
 
       if (fiscalYear == baselineYear) {
