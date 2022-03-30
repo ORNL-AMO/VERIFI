@@ -1,18 +1,18 @@
 import { AnalysisGroup, PredictorData } from "./idb";
 
-export interface AnnualGroupSummary {
-  year: number,
-  totalEnergy: number,
-  totalEnergySavings: number,
-  annualEnergySavings: number,
-  totalProduction: number,
-  annualProductionChange: number,
-  totalProductionChange: number,
-  energyIntensity: number,
-  totalEnergyIntensityChange: number,
-  annualEnergyIntensityChange: number,
-  group: AnalysisGroup
-}
+// export interface AnnualGroupSummary {
+//   year: number,
+//   totalEnergy: number,
+//   totalEnergySavings: number,
+//   annualEnergySavings: number,
+//   totalProduction: number,
+//   annualProductionChange: number,
+//   totalProductionChange: number,
+//   energyIntensity: number,
+//   totalEnergyIntensityChange: number,
+//   annualEnergyIntensityChange: number,
+//   group: AnalysisGroup
+// }
 
 
 export interface MonthlyGroupSummary {
@@ -60,6 +60,32 @@ export interface MonthlyFacilityAnalysisData {
   rolling12MonthImprovement: number
 }
 
+// export interface MonthlyAnalysisSummary {
+//   predictorVariables: Array<PredictorData>,
+//   modelYear: number,
+//   monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>
+// }
+
+// export interface MonthlyAnalysisSummaryData {
+//   totalEnergy: number,
+//   predictorUsage?: Array<number>,
+//   modeledEnergy: number,
+//   date: Date,
+//   monthlySavings: number,
+//   yearToDateImprovementOverBaseline: number,
+//   yearToDateImprovementOverFiscalYear: number,
+//   rollingYearImprovement: number,
+//   group: AnalysisGroup,
+//   fiscalYear: number,
+//   yearToDateSEnPI: number,
+//   rollingSEnPI: number,
+//   monthlyIncrementalImprovement: number,
+//   rolling12MonthImprovement: number,
+//   energyIntensity: number
+// }
+
+
+
 export interface MonthlyAnalysisSummary {
   predictorVariables: Array<PredictorData>,
   modelYear: number,
@@ -67,41 +93,59 @@ export interface MonthlyAnalysisSummary {
 }
 
 export interface MonthlyAnalysisSummaryData {
-  totalEnergy: number,
-  predictorUsage?: Array<number>,
-  modeledEnergy: number,
   date: Date,
-  monthlySavings: number,
-  yearToDateImprovementOverBaseline: number,
-  yearToDateImprovementOverFiscalYear: number,
-  rollingYearImprovement: number,
-  group: AnalysisGroup,
+  energyUse: number,
+  modeledEnergy: number,
+  predictorUsage?: Array<number>,
   fiscalYear: number,
-  yearToDateSEnPI: number,
-  rollingSEnPI: number,
-  monthlyIncrementalImprovement: number,
+  group: AnalysisGroup,
+  adjustedBaselineEnergyUse: number,
+  SEnPI: number,
+  savings: number,
+  percentSavingsComparedToBaseline: number,
+  yearToDateSavings: number,
+  yearToDatePercentSavings: number,
+  rollingSavings: number,
   rolling12MonthImprovement: number,
-  energyIntensity: number
 }
 
+export interface FacilityMonthlyAnalysisSummaryData extends MonthlyAnalysisSummaryData  {
+  date: Date,
+  groupsSummaryData: Array<MonthlyAnalysisSummaryData>
+}
+
+
+// export interface AnnualAnalysisSummary {
+//   year: number,
+//   energyUse: number,
+//   annualEnergySavings: number,
+//   totalEnergySavings: number,
+//   modeledEnergyUse: number,
+//   annualModeledEnergySavings: number,
+//   totalModeledEnergySavings: number,
+//   SEnPI: number,
+//   cumulativeSavings: number,
+//   annualSavings: number,
+
+//   totalProduction: number,
+//   annualProductionChange: number,
+//   totalProductionChange: number,
+//   energyIntensity: number,
+//   totalEnergyIntensityChange: number,
+//   annualEnergyIntensityChange: number,
+//   group?: AnalysisGroup
+// }
 
 export interface AnnualAnalysisSummary {
   year: number,
   energyUse: number,
-  annualEnergySavings: number,
-  totalEnergySavings: number,
-  modeledEnergyUse: number,
-  annualModeledEnergySavings: number,
-  totalModeledEnergySavings: number,
+  modeledEnergy: number,
+  adjustedBaselineEnergyUse: number,
   SEnPI: number,
-  cumulativeSavings: number,
-  annualSavings: number,
-
-  totalProduction: number,
-  annualProductionChange: number,
-  totalProductionChange: number,
-  energyIntensity: number,
-  totalEnergyIntensityChange: number,
-  annualEnergyIntensityChange: number,
-  group?: AnalysisGroup
+  savings: number,
+  totalSavingsPercentImprovement: number,
+  annualSavingsPercentImprovement: number,
+  adjustmentToBaseline: number,
+  cummulativeSavings: number,
+  newSavings: number
 }

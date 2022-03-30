@@ -37,7 +37,7 @@ export class AnnualAnalysisSummaryGraphComponent implements OnInit {
         y: summariesCopy.map(summary => { return summary.energyUse }),
         // width: summariesCopy.map(summary => { return .75 }),
         // texttemplate: '%{value:.5f}',
-        name: "Energy Use",
+        name: "Actual Energy Use",
         type: 'bar',
         marker: {
           color: '#7F7F7F'
@@ -47,10 +47,10 @@ export class AnnualAnalysisSummaryGraphComponent implements OnInit {
 
       barTrace = {
         x: summariesCopy.map(summary => { return summary.year }),
-        y: summariesCopy.map(summary => { return summary.modeledEnergyUse }),
+        y: summariesCopy.map(summary => { return summary.adjustedBaselineEnergyUse }),
         // width: summariesCopy.map(summary => { return .75 }),
         // texttemplate: '%{value:.5f}',
-        name: "Modeled Energy Use",
+        name: "Adjusted Energy Use",
         type: 'bar',
         marker: {
           color: '#7D3C98'
@@ -99,7 +99,7 @@ export class AnnualAnalysisSummaryGraphComponent implements OnInit {
       let lineTrace = {
         x: summariesCopy.map(summary => { return summary.year }),
         y: summariesCopy.map((summary, index) => {
-          return summary.annualSavings
+          return summary.annualSavingsPercentImprovement
         }),
         name: "Annual Energy Improvement (%)",
         type: 'lines+markers',
@@ -113,7 +113,7 @@ export class AnnualAnalysisSummaryGraphComponent implements OnInit {
       let lineTrace2 = {
         x: summariesCopy.map(summary => { return summary.year }),
         y: summariesCopy.map((summary, index) => {
-          return summary.cumulativeSavings
+          return summary.totalSavingsPercentImprovement
         }),
         name: "Total Energy Improvement (%)",
         type: 'lines+markers',

@@ -20,10 +20,11 @@
     </div>
 </div>
 
-<app-monthly-analysis-summary-table *ngIf="dataDisplay == 'table'" [analysisItem]="analysisItem"
-    [monthlyAnalysisSummaryData]="monthlyAnalysisSummary.monthlyAnalysisSummaryData" [itemsPerPage]="itemsPerPage"
-    [facility]="facility" [predictorVariables]="monthlyAnalysisSummary.predictorVariables"
-    [group]="group">
-</app-monthly-analysis-summary-table>
-<app-monthly-analysis-summary-graph *ngIf="dataDisplay == 'graph'" [analysisItem]="analysisItem"
-    [monthlyAnalysisSummary]="monthlyAnalysisSummary" [facility]="facility"></app-monthly-analysis-summary-graph>
+<div class="w-100 x-scroll">
+    <app-monthly-analysis-summary-table *ngIf="dataDisplay == 'table'" [analysisItem]="analysisItem"
+        [monthlyAnalysisSummaryData]="monthlyAnalysisSummary.monthlyAnalysisSummaryData" [itemsPerPage]="itemsPerPage"
+        [facility]="facility" [predictorVariables]="monthlyAnalysisSummary.predictorVariables" [group]="group">
+    </app-monthly-analysis-summary-table>
+    <app-monthly-analysis-summary-graph *ngIf="dataDisplay == 'graph'" [analysisItem]="analysisItem"
+        [monthlyAnalysisSummary]="monthlyAnalysisSummary" [facility]="facility"></app-monthly-analysis-summary-graph>
+</div>

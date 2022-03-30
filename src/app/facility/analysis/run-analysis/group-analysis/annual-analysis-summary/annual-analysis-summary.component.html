@@ -7,9 +7,11 @@
     </div>
 </div>
 
-<app-annual-analysis-summary-table *ngIf="dataDisplay == 'table'" [annualAnalysisSummary]="annualAnalysisSummary"
-    [analysisItem]="analysisItem">
-</app-annual-analysis-summary-table>
-<app-annual-analysis-summary-graph *ngIf="dataDisplay == 'graph'" [annualAnalysisSummary]="annualAnalysisSummary"
-    [analysisItem]="analysisItem">
-</app-annual-analysis-summary-graph>
+<div class="w-100 x-scroll">
+    <app-annual-analysis-summary-table *ngIf="dataDisplay == 'table'" [annualAnalysisSummary]="annualAnalysisSummary"
+        [analysisItem]="analysisItem">
+    </app-annual-analysis-summary-table>
+    <app-annual-analysis-summary-graph *ngIf="dataDisplay == 'graph'" [annualAnalysisSummary]="annualAnalysisSummary"
+        [analysisItem]="analysisItem">
+    </app-annual-analysis-summary-graph>
+</div>

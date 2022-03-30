@@ -19,11 +19,12 @@
             (click)="setDataDisplay('graph')">Graph</button>
     </div>
 </div>
-
-<app-monthly-facility-analysis-graph *ngIf="dataDisplay == 'graph'"
-    [monthlyFacilityAnalysisData]="monthlyFacilityAnalysisData" [analysisItem]="analysisItem" [facility]="facility">
-</app-monthly-facility-analysis-graph>
-<app-monthly-facility-analysis-table *ngIf="dataDisplay == 'table'"
-    [monthlyFacilityAnalysisData]="monthlyFacilityAnalysisData" [analysisItem]="analysisItem" [facility]="facility"
-    [itemsPerPage]="itemsPerPage">
-</app-monthly-facility-analysis-table>
+<div class="w-100 x-scroll">
+    <app-monthly-facility-analysis-graph *ngIf="dataDisplay == 'graph'"
+        [monthlyFacilityAnalysisData]="monthlyFacilityAnalysisData" [analysisItem]="analysisItem" [facility]="facility">
+    </app-monthly-facility-analysis-graph>
+    <app-monthly-facility-analysis-table *ngIf="dataDisplay == 'table'"
+        [monthlyFacilityAnalysisData]="monthlyFacilityAnalysisData" [analysisItem]="analysisItem" [facility]="facility"
+        [itemsPerPage]="itemsPerPage">
+    </app-monthly-facility-analysis-table>
+</div>

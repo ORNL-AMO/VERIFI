@@ -107,10 +107,6 @@ export class AnalysisCalculationsHelperService {
     }
   }
 
-
-
-
-
   getPredictorUsage(predictorVariables: Array<PredictorData>, predictorData: Array<IdbPredictorEntry>): number {
     let totalPredictorUsage: number = 0;
     predictorVariables.forEach(variable => {

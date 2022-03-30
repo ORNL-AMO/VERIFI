@@ -64,10 +64,10 @@ export class AnnualFacilityAnalysisGraphComponent implements OnInit {
       this.groupSummaries.forEach(summary => {
         let groupName: string = this.utilityMeterGroupDbService.getGroupName(summary.group.idbGroupId)
         let yData = new Array();
-        summary.annualAnalysisSummaries.forEach(annualSummary => {
-          yData.push(annualSummary.energyUse);
-          yData.push(annualSummary.modeledEnergyUse);
-        });
+        // summary.annualAnalysisSummaries.forEach(annualSummary => {
+        //   yData.push(annualSummary.energyUse);
+        //   yData.push(annualSummary.modeledEnergyUse);
+        // });
         let barTrace = {
           x: x,
           y: yData,
@@ -127,32 +127,32 @@ export class AnnualFacilityAnalysisGraphComponent implements OnInit {
       this.groupSummaries.forEach(groupSummary => {
         let groupName: string = this.utilityMeterGroupDbService.getGroupName(groupSummary.group.idbGroupId)
 
-        let lineTrace = {
-          x: groupSummary.annualAnalysisSummaries.map(summary => { return summary.year }),
-          y: groupSummary.annualAnalysisSummaries.map((summary, index) => {
-            return summary.cumulativeSavings
-          }),
-          name: groupName + " Total Contribution (%)",
-          type: 'lines+markers',
-          marker: {
-            size: 16
-          }
-        }
-        traceData.push(lineTrace);
+        // let lineTrace = {
+        //   x: groupSummary.annualAnalysisSummaries.map(summary => { return summary.year }),
+        //   y: groupSummary.annualAnalysisSummaries.map((summary, index) => {
+        //     return summary.cumulativeSavings
+        //   }),
+        //   name: groupName + " Total Contribution (%)",
+        //   type: 'lines+markers',
+        //   marker: {
+        //     size: 16
+        //   }
+        // }
+        // traceData.push(lineTrace);
       })
 
-      let lineTrace2 = {
-        x: summariesCopy.map(summary => { return summary.year }),
-        y: summariesCopy.map((summary, index) => {
-          return summary.cumulativeSavings
-        }),
-        name: "Total Energy Improvement (%)",
-        type: 'lines+markers',
-        marker: {
-          size: 16
-        }
-      }
-      traceData.push(lineTrace2);
+      // let lineTrace2 = {
+      //   x: summariesCopy.map(summary => { return summary.year }),
+      //   y: summariesCopy.map((summary, index) => {
+      //     return summary.cumulativeSavings
+      //   }),
+      //   name: "Total Energy Improvement (%)",
+      //   type: 'lines+markers',
+      //   marker: {
+      //     size: 16
+      //   }
+      // }
+      // traceData.push(lineTrace2);
 
 
       let layout = {
@@ -196,35 +196,35 @@ export class AnnualFacilityAnalysisGraphComponent implements OnInit {
 
       this.groupSummaries.forEach(groupSummary => {
         let groupName: string = this.utilityMeterGroupDbService.getGroupName(groupSummary.group.idbGroupId)
-        let lineTrace = {
-          x: groupSummary.annualAnalysisSummaries.map(summary => { return summary.year }),
-          y: groupSummary.annualAnalysisSummaries.map((summary, index) => {
-            return summary.annualSavings
-          }),
-          name: groupName + " Annual Contribution (%)",
-          type: 'lines+markers',
-          texttemplate: '%{value:.5f}',
-          marker: {
-            size: 16
-          }
-        }
-        traceData.push(lineTrace);
+        // let lineTrace = {
+        //   x: groupSummary.annualAnalysisSummaries.map(summary => { return summary.year }),
+        //   y: groupSummary.annualAnalysisSummaries.map((summary, index) => {
+        //     return summary.annualSavings
+        //   }),
+        //   name: groupName + " Annual Contribution (%)",
+        //   type: 'lines+markers',
+        //   texttemplate: '%{value:.5f}',
+        //   marker: {
+        //     size: 16
+        //   }
+        // }
+        // traceData.push(lineTrace);
       })
 
 
-      let lineTrace = {
-        x: summariesCopy.map(summary => { return summary.year }),
-        y: summariesCopy.map((summary, index) => {
-          return summary.annualSavings
-        }),
-        name: "Annual Energy Improvement (%)",
-        type: 'lines+markers',
-        texttemplate: '%{value:.5f}',
-        marker: {
-          size: 16
-        }
-      }
-      traceData.push(lineTrace);
+      // let lineTrace = {
+      //   x: summariesCopy.map(summary => { return summary.year }),
+      //   y: summariesCopy.map((summary, index) => {
+      //     return summary.annualSavings
+      //   }),
+      //   name: "Annual Energy Improvement (%)",
+      //   type: 'lines+markers',
+      //   texttemplate: '%{value:.5f}',
+      //   marker: {
+      //     size: 16
+      //   }
+      // }
+      // traceData.push(lineTrace);
 
       let layout = {
         xaxis: {

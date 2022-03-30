@@ -27,7 +27,7 @@ export class AnnualAnalysisSummaryComponent implements OnInit {
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     this.group = this.analysisService.selectedGroup.getValue();
     this.facility = this.facilityDbService.selectedFacility.getValue();
-    this.annualAnalysisSummary = this.analysisCalculationsService.getAnnualAnalysisSummary(this.analysisItem, this.facility, this.group);
+    this.annualAnalysisSummary = this.analysisCalculationsService.getAnnualAnalysisSummary(this.group, this.analysisItem, this.facility);
   }
 
   setDataDisplay(display: 'table' | 'graph') {
