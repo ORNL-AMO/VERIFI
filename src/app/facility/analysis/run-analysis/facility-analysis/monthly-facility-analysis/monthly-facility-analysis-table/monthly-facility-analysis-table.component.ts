@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
-import { MonthlyFacilityAnalysisData } from 'src/app/models/analysis';
+import { FacilityMonthlyAnalysisSummaryData, MonthlyFacilityAnalysisData } from 'src/app/models/analysis';
 import { IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 
 @Component({
@@ -10,7 +10,7 @@ import { IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 })
 export class MonthlyFacilityAnalysisTableComponent implements OnInit {
   @Input()
-  monthlyFacilityAnalysisData: Array<MonthlyFacilityAnalysisData>;
+  monthlyFacilityAnalysisData: Array<FacilityMonthlyAnalysisSummaryData>;
   @Input()
   analysisItem: IdbAnalysisItem;
   @Input()
@@ -22,6 +22,7 @@ export class MonthlyFacilityAnalysisTableComponent implements OnInit {
   orderByDirection: 'asc' | 'desc' = 'asc';
   currentPageNumber: number = 1;
   baselineYear: number;
+  predictorVariables = [];
   constructor(private analysisService: AnalysisService) { }
 
   ngOnInit(): void {

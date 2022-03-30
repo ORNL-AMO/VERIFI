@@ -3,7 +3,7 @@ import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
 import { FacilityAnalysisCalculationsService } from 'src/app/facility/analysis/calculations/facility-analysis-calculations.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { MonthlyFacilityAnalysisData } from 'src/app/models/analysis';
+import { FacilityMonthlyAnalysisSummaryData, MonthlyFacilityAnalysisData } from 'src/app/models/analysis';
 import { IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 
 @Component({
@@ -14,7 +14,7 @@ import { IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 export class MonthlyFacilityAnalysisComponent implements OnInit {
 
   dataDisplay: 'table' | 'graph';
-  monthlyFacilityAnalysisData: Array<MonthlyFacilityAnalysisData>;
+  monthlyFacilityAnalysisData: Array<FacilityMonthlyAnalysisSummaryData>;
   analysisItem: IdbAnalysisItem;
   facility: IdbFacility;
   itemsPerPage: number = 12;
@@ -25,7 +25,7 @@ export class MonthlyFacilityAnalysisComponent implements OnInit {
     this.dataDisplay = this.analysisService.dataDisplay.getValue();
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     this.facility = this.facilityDbService.selectedFacility.getValue();
-    this.monthlyFacilityAnalysisData = this.facilityAnalysisCalculationsService.calculateMonthlyFacilityAnalysis(this.facility, this.analysisItem);
+    this.monthlyFacilityAnalysisData = this.facilityAnalysisCalculationsService.calculateMonthlyFacilityAnalysis2(this.analysisItem, this.facility);
   }
 
   setDataDisplay(display: 'table' | 'graph') {

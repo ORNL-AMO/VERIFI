@@ -106,7 +106,12 @@ export interface MonthlyAnalysisSummaryData {
   yearToDateSavings: number,
   yearToDatePercentSavings: number,
   rollingSavings: number,
-  rolling12MonthImprovement: number
+  rolling12MonthImprovement: number,
+}
+
+export interface FacilityMonthlyAnalysisSummaryData extends MonthlyAnalysisSummaryData  {
+  date: Date,
+  groupsSummaryData: Array<MonthlyAnalysisSummaryData>
 }
 
 
