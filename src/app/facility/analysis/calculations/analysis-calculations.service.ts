@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { AnalysisGroup, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, PredictorData } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { CalanderizationOptions, CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
-import { AnnualAnalysisSummary, MonthlyAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
+import { AnnualAnalysisSummary, FacilityMonthlyAnalysisSummaryData, MonthlyAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { ConvertMeterDataService } from 'src/app/shared/helper-services/convert-meter-data.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
@@ -677,6 +677,12 @@ export class AnalysisCalculationsService {
 
   getAnnualAnalysisSummary(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility): Array<AnnualAnalysisSummary> {
     let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = this.getMonthlyAnalysisSummary(selectedGroup, analysisItem, facility).monthlyAnalysisSummaryData;
+    let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = this.calculateAnnualAnalysisSummary(monthlyAnalysisSummaryData, analysisItem, facility);
+    return annualAnalysisSummaries;
+  }
+
+
+  calculateAnnualAnalysisSummary(monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData | FacilityMonthlyAnalysisSummaryData>, analysisItem: IdbAnalysisItem, facility: IdbFacility ): Array<AnnualAnalysisSummary>{
     let baselineYear: number = facility.sustainabilityQuestions.energyReductionBaselineYear;
     let reportYear: number = analysisItem.reportYear;
     if (facility.fiscalYear == 'nonCalendarYear' && facility.fiscalYearCalendarEnd) {

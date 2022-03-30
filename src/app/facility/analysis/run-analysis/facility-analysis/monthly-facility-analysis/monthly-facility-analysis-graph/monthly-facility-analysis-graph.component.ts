@@ -2,7 +2,7 @@ import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 import * as _ from 'lodash';
-import { MonthlyFacilityAnalysisData } from 'src/app/models/analysis';
+import { FacilityMonthlyAnalysisSummaryData, MonthlyFacilityAnalysisData } from 'src/app/models/analysis';
 
 @Component({
   selector: 'app-monthly-facility-analysis-graph',
@@ -11,7 +11,7 @@ import { MonthlyFacilityAnalysisData } from 'src/app/models/analysis';
 })
 export class MonthlyFacilityAnalysisGraphComponent implements OnInit {
   @Input()
-  monthlyFacilityAnalysisData: Array<MonthlyFacilityAnalysisData>;
+  monthlyFacilityAnalysisData: Array<FacilityMonthlyAnalysisSummaryData>;
   @Input()
   analysisItem: IdbAnalysisItem;
   @Input()
@@ -34,9 +34,9 @@ export class MonthlyFacilityAnalysisGraphComponent implements OnInit {
       var trace1 = {
         type: "scatter",
         mode: "lines+markers",
-        name: 'Total Energy Use',
+        name: 'Actual Total',
         x: this.monthlyFacilityAnalysisData.map(results => { return results.date }),
-        y: this.monthlyFacilityAnalysisData.map(results => { return _.sumBy(results.utilityUsage, 'usage') }),
+        y: this.monthlyFacilityAnalysisData.map(results => { return results.energyUse }),
         line: { color: '#7F7F7F', width: 4 },
         marker:{
           size: 8
@@ -46,9 +46,9 @@ export class MonthlyFacilityAnalysisGraphComponent implements OnInit {
       var trace2 = {
         type: "scatter",
         mode: "lines+markers",
-        name: 'Modeled Energy Use',
+        name: 'Adjusted BL',
         x: this.monthlyFacilityAnalysisData.map(results => { return results.date }),
-        y: this.monthlyFacilityAnalysisData.map(results => { return _.sumBy(results.utilityUsage, 'modeledUsage') }),
+        y: this.monthlyFacilityAnalysisData.map(results => { return results.adjustedBaselineEnergyUse }),
         line: { color: '#7D3C98', width: 4 },
         marker:{
           size: 8

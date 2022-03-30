@@ -14,9 +14,9 @@ import { IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 export class AnnualFacilityAnalysisComponent implements OnInit {
 
   dataDisplay: 'table' | 'graph';
-  annualFacilitySummaryData: { annualAnalysisSummary: Array<AnnualAnalysisSummary>, groupSummaries: Array<FacilityGroupSummary> };
   analysisItem: IdbAnalysisItem;
   facility: IdbFacility;
+  annualAnalysisSummary: Array<AnnualAnalysisSummary>;
   constructor(private analysisService: AnalysisService, private facilityAnalysisCalculationsService: FacilityAnalysisCalculationsService,
     private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService) { }
 
@@ -24,7 +24,7 @@ export class AnnualFacilityAnalysisComponent implements OnInit {
     this.dataDisplay = this.analysisService.dataDisplay.getValue();
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     this.facility = this.facilityDbService.selectedFacility.getValue();
-    this.annualFacilitySummaryData = this.facilityAnalysisCalculationsService.calculateAnnualFacilitySummaryData(this.facility, this.analysisItem);
+    this.annualAnalysisSummary = this.facilityAnalysisCalculationsService.getAnnualAnalysisSummary(this.analysisItem, this.facility);
   }
 
   setDataDisplay(display: 'table' | 'graph') {

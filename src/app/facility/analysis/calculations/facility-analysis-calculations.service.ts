@@ -12,91 +12,91 @@ export class FacilityAnalysisCalculationsService {
 
   constructor(private analysisCalculationsService: AnalysisCalculationsService, private analysisCalculationsHelperService: AnalysisCalculationsHelperService) { }
 
-  calculateMonthlyFacilityAnalysis(facility: IdbFacility, analysisItem: IdbAnalysisItem): Array<MonthlyFacilityAnalysisData> {
-    let monthlyFacilityAnalysisData: Array<MonthlyFacilityAnalysisData> = new Array();
+  // calculateMonthlyFacilityAnalysis(facility: IdbFacility, analysisItem: IdbAnalysisItem): Array<MonthlyFacilityAnalysisData> {
+  //   let monthlyFacilityAnalysisData: Array<MonthlyFacilityAnalysisData> = new Array();
 
-    let groupSummaries: Array<FacilityGroupSummary> = this.getGroupSummaries(analysisItem, facility);
-    groupSummaries = this.setGroupSummariesPercentBaseline(groupSummaries);
+  //   let groupSummaries: Array<FacilityGroupSummary> = this.getGroupSummaries(analysisItem, facility);
+  //   groupSummaries = this.setGroupSummariesPercentBaseline(groupSummaries);
 
-    let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = this.analysisCalculationsHelperService.getMonthlyStartAndEndDate(facility, analysisItem);
-    let baselineDate: Date = monthlyStartAndEndDate.baselineDate;
-    let endDate: Date = monthlyStartAndEndDate.endDate;
-    let previousMonthImprovement: number = 0;
-    while (baselineDate < endDate) {
-      let predictorUsage: Array<{
-        predictorId: string,
-        usage: number
-      }> = new Array();
+  //   let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = this.analysisCalculationsHelperService.getMonthlyStartAndEndDate(facility, analysisItem);
+  //   let baselineDate: Date = monthlyStartAndEndDate.baselineDate;
+  //   let endDate: Date = monthlyStartAndEndDate.endDate;
+  //   let previousMonthImprovement: number = 0;
+  //   while (baselineDate < endDate) {
+  //     let predictorUsage: Array<{
+  //       predictorId: string,
+  //       usage: number
+  //     }> = new Array();
 
-      // let utilityUsage: Array<{
-      //   meterGroupId: number,
-      //   usage: number,
-      //   modeledUsage: number,
-      //   percentUsage: number
-      // }> = new Array();
-
-
-      // let yearToDateSavings: Array<{
-      //   meterGroupId: number,
-      //   savings: number
-      // }> = new Array();
-
-      // let rollingSavings: Array<{
-      //   meterGroupId: number,
-      //   savings: number
-      // }> = new Array();
-      // let yearToDateImprovment: number = 0;
-      // let rolling12MonthImprovement: number = 0;
-      // groupSummaries.forEach(summary => {
-      //   let monthlyAnalysisSummaryData: MonthlyAnalysisSummaryData = summary.monthlyGroupSummary.monthlyAnalysisSummaryData.find(data => {
-      //     let dataDate: Date = new Date(data.date)
-      //     return dataDate.getUTCFullYear() == baselineDate.getUTCFullYear() && dataDate.getUTCMonth() == baselineDate.getUTCMonth();
-      //   });
-
-      //   utilityUsage.push({
-      //     meterGroupId: summary.group.idbGroupId,
-      //     usage: monthlyAnalysisSummaryData.totalEnergy,
-      //     modeledUsage: monthlyAnalysisSummaryData.modeledEnergy,
-      //     percentUsage: summary.percentBaseline * 100
-      //   });
-
-      //   yearToDateSavings.push({
-      //     meterGroupId: summary.group.idbGroupId,
-      //     savings: monthlyAnalysisSummaryData.yearToDateImprovementOverBaseline
-      //   });
-
-      //   yearToDateImprovment += (summary.percentBaseline * monthlyAnalysisSummaryData.yearToDateImprovementOverBaseline);
-
-      //   rollingSavings.push({
-      //     meterGroupId: summary.group.idbGroupId,
-      //     savings: monthlyAnalysisSummaryData.rolling12MonthImprovement
-      //   });
-
-      //   rolling12MonthImprovement += (summary.percentBaseline * monthlyAnalysisSummaryData.rolling12MonthImprovement);
-      // })
+  //     // let utilityUsage: Array<{
+  //     //   meterGroupId: number,
+  //     //   usage: number,
+  //     //   modeledUsage: number,
+  //     //   percentUsage: number
+  //     // }> = new Array();
 
 
-      // let monthlyIncrementalImprovement: number = yearToDateImprovment - previousMonthImprovement;
+  //     // let yearToDateSavings: Array<{
+  //     //   meterGroupId: number,
+  //     //   savings: number
+  //     // }> = new Array();
 
-      // monthlyFacilityAnalysisData.push({
-      //   date: new Date(baselineDate),
-      //   fiscalYear: this.analysisCalculationsHelperService.getFiscalYear(new Date(baselineDate), facility),
-      //   utilityUsage: utilityUsage,
-      //   predictorUsage: predictorUsage,
-      //   yearToDateSavings: yearToDateSavings,
-      //   rollingSavings: rollingSavings,
-      //   yearToDateImprovment: yearToDateImprovment,
-      //   monthlyIncrementalImprovement: monthlyIncrementalImprovement,
-      //   rolling12MonthImprovement: rolling12MonthImprovement
-      // });
+  //     // let rollingSavings: Array<{
+  //     //   meterGroupId: number,
+  //     //   savings: number
+  //     // }> = new Array();
+  //     // let yearToDateImprovment: number = 0;
+  //     // let rolling12MonthImprovement: number = 0;
+  //     // groupSummaries.forEach(summary => {
+  //     //   let monthlyAnalysisSummaryData: MonthlyAnalysisSummaryData = summary.monthlyGroupSummary.monthlyAnalysisSummaryData.find(data => {
+  //     //     let dataDate: Date = new Date(data.date)
+  //     //     return dataDate.getUTCFullYear() == baselineDate.getUTCFullYear() && dataDate.getUTCMonth() == baselineDate.getUTCMonth();
+  //     //   });
 
-      // let currentMonth: number = baselineDate.getUTCMonth()
-      // let nextMonth: number = currentMonth + 1;
-      // baselineDate = new Date(baselineDate.getUTCFullYear(), nextMonth, 1);
-      // previousMonthImprovement = yearToDateImprovment;
-    }
-    return monthlyFacilityAnalysisData;
-  }
+  //     //   utilityUsage.push({
+  //     //     meterGroupId: summary.group.idbGroupId,
+  //     //     usage: monthlyAnalysisSummaryData.totalEnergy,
+  //     //     modeledUsage: monthlyAnalysisSummaryData.modeledEnergy,
+  //     //     percentUsage: summary.percentBaseline * 100
+  //     //   });
+
+  //     //   yearToDateSavings.push({
+  //     //     meterGroupId: summary.group.idbGroupId,
+  //     //     savings: monthlyAnalysisSummaryData.yearToDateImprovementOverBaseline
+  //     //   });
+
+  //     //   yearToDateImprovment += (summary.percentBaseline * monthlyAnalysisSummaryData.yearToDateImprovementOverBaseline);
+
+  //     //   rollingSavings.push({
+  //     //     meterGroupId: summary.group.idbGroupId,
+  //     //     savings: monthlyAnalysisSummaryData.rolling12MonthImprovement
+  //     //   });
+
+  //     //   rolling12MonthImprovement += (summary.percentBaseline * monthlyAnalysisSummaryData.rolling12MonthImprovement);
+  //     // })
+
+
+  //     // let monthlyIncrementalImprovement: number = yearToDateImprovment - previousMonthImprovement;
+
+  //     // monthlyFacilityAnalysisData.push({
+  //     //   date: new Date(baselineDate),
+  //     //   fiscalYear: this.analysisCalculationsHelperService.getFiscalYear(new Date(baselineDate), facility),
+  //     //   utilityUsage: utilityUsage,
+  //     //   predictorUsage: predictorUsage,
+  //     //   yearToDateSavings: yearToDateSavings,
+  //     //   rollingSavings: rollingSavings,
+  //     //   yearToDateImprovment: yearToDateImprovment,
+  //     //   monthlyIncrementalImprovement: monthlyIncrementalImprovement,
+  //     //   rolling12MonthImprovement: rolling12MonthImprovement
+  //     // });
+
+  //     // let currentMonth: number = baselineDate.getUTCMonth()
+  //     // let nextMonth: number = currentMonth + 1;
+  //     // baselineDate = new Date(baselineDate.getUTCFullYear(), nextMonth, 1);
+  //     // previousMonthImprovement = yearToDateImprovment;
+  //   }
+  //   return monthlyFacilityAnalysisData;
+  // }
 
 
   setGroupSummariesPercentBaseline(groupSummaries: Array<FacilityGroupSummary>): Array<FacilityGroupSummary> {
@@ -201,7 +201,7 @@ export class FacilityAnalysisCalculationsService {
     }
   }
 
-  calculateMonthlyFacilityAnalysis2(analysisItem: IdbAnalysisItem, facility: IdbFacility): Array<FacilityMonthlyAnalysisSummaryData> {
+  calculateMonthlyFacilityAnalysis(analysisItem: IdbAnalysisItem, facility: IdbFacility): Array<FacilityMonthlyAnalysisSummaryData> {
     let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = this.analysisCalculationsHelperService.getMonthlyStartAndEndDate(facility, analysisItem);
     let baselineDate: Date = monthlyStartAndEndDate.baselineDate;
     let endDate: Date = monthlyStartAndEndDate.endDate;
@@ -314,8 +314,12 @@ export class FacilityAnalysisCalculationsService {
       let nextMonth: number = currentMonth + 1;
       baselineDate = new Date(baselineDate.getUTCFullYear(), nextMonth, 1);
     }
-
     return analysisSummaryData;
+  }
 
+  getAnnualAnalysisSummary(analysisItem: IdbAnalysisItem, facility: IdbFacility): Array<AnnualAnalysisSummary> {
+    let facilityMonthlySummaryData: Array<FacilityMonthlyAnalysisSummaryData> = this.calculateMonthlyFacilityAnalysis(analysisItem, facility);
+    let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = this.analysisCalculationsService.calculateAnnualAnalysisSummary(facilityMonthlySummaryData, analysisItem, facility);
+    return annualAnalysisSummaries;
   }
 }

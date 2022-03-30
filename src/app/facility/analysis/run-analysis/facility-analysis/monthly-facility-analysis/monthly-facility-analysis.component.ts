@@ -3,7 +3,7 @@ import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
 import { FacilityAnalysisCalculationsService } from 'src/app/facility/analysis/calculations/facility-analysis-calculations.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { FacilityMonthlyAnalysisSummaryData, MonthlyFacilityAnalysisData } from 'src/app/models/analysis';
+import { FacilityMonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 
 @Component({
@@ -25,7 +25,7 @@ export class MonthlyFacilityAnalysisComponent implements OnInit {
     this.dataDisplay = this.analysisService.dataDisplay.getValue();
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     this.facility = this.facilityDbService.selectedFacility.getValue();
-    this.monthlyFacilityAnalysisData = this.facilityAnalysisCalculationsService.calculateMonthlyFacilityAnalysis2(this.analysisItem, this.facility);
+    this.monthlyFacilityAnalysisData = this.facilityAnalysisCalculationsService.calculateMonthlyFacilityAnalysis(this.analysisItem, this.facility);
   }
 
   setDataDisplay(display: 'table' | 'graph') {
