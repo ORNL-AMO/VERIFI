@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { LocalStorageService } from 'ngx-webstorage';
 import { BehaviorSubject } from 'rxjs';
+import { MonthlyTableColumns } from 'src/app/models/analysis';
 import { AnalysisGroup, IdbFacility, PredictorData } from '../../models/idb';
 
 @Injectable({
@@ -10,6 +11,8 @@ export class AnalysisService {
 
   selectedGroup: BehaviorSubject<AnalysisGroup>;
   dataDisplay: BehaviorSubject<"graph" | "table">;
+
+  monthlyTableColumns: BehaviorSubject<MonthlyTableColumns>;
   constructor(private localStorageService: LocalStorageService) {
     let dataDisplay: "graph" | "table" = this.localStorageService.retrieve("analysisDataDisplay");
     if (!dataDisplay) {
@@ -18,11 +21,40 @@ export class AnalysisService {
     this.selectedGroup = new BehaviorSubject<AnalysisGroup>(undefined);
     this.dataDisplay = new BehaviorSubject<"graph" | "table">(dataDisplay);
 
+
+    let monthlyTableColumns: MonthlyTableColumns = this.localStorageService.retrieve("monthlyTableColumns");
+    if (!monthlyTableColumns) {
+      monthlyTableColumns = {
+        incrementalImprovement: false,
+        SEnPI: false,
+        savings: false,
+        percentSavingsComparedToBaseline: false,
+        yearToDateSavings: false,
+        yearToDatePercentSavings: false,
+        rollingSavings: false,
+        rolling12MonthImprovement: false,
+        productionVariables: true,
+        energy: true,
+        actualEnergy: true,
+        modeledEnergy: true,
+        adjustedEnergy: true
+      }
+    }
+    this.monthlyTableColumns = new BehaviorSubject<MonthlyTableColumns>(monthlyTableColumns);
+
     this.dataDisplay.subscribe(dataDisplay => {
       if (dataDisplay) {
         this.localStorageService.store('analysisDataDisplay', dataDisplay);
       }
     });
+
+
+    // this.monthlyTableColumns.subscribe(monthlyTableColumns => {
+    //   if (monthlyTableColumns) {
+    //     this.localStorageService.store('monthlyTableColumns', monthlyTableColumns);
+    //   }
+    // });
+
   }
 
   checkGroupHasError(group: AnalysisGroup): boolean {

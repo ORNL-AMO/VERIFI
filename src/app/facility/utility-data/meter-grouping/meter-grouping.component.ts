@@ -149,6 +149,7 @@ export class MeterGroupingComponent implements OnInit {
   setEditGroup(group: IdbUtilityMeterGroup) {
     this.editOrAdd = 'edit';
     this.groupToEdit = group;
+    this.sharedDataService.modalOpen.next(true);
   }
 
   setDeleteGroup(group: IdbUtilityMeterGroup) {

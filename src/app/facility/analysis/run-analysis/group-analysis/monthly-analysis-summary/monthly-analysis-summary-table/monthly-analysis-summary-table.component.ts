@@ -1,6 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
-import { MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
+import { MonthlyAnalysisSummaryData, MonthlyTableColumns } from 'src/app/models/analysis';
 import { AnalysisGroup, IdbAnalysisItem, IdbFacility, PredictorData } from 'src/app/models/idb';
 
 @Component({
@@ -25,10 +26,27 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
   orderDataField: string = 'date';
   orderByDirection: 'asc' | 'desc' = 'asc';
   currentPageNumber: number = 1;
+  monthlyTableColumns: MonthlyTableColumns;
+  monthlyTableColumnsSub: Subscription;
+  numEnergyColumns: number;
+  numImprovementColumns: number;
   constructor(private analysisService: AnalysisService) { }
 
   ngOnInit(): void {
-    if (this.predictorVariables) {
+    this.monthlyTableColumnsSub = this.analysisService.monthlyTableColumns.subscribe(columns => {
+      this.monthlyTableColumns = columns;
+      this.setNumEnergyColumns();
+      this.setNumImprovementColumns();
+      this.setPredictorVariables();
+    })
+  }
+
+  ngOnDestroy() {
+    this.monthlyTableColumnsSub.unsubscribe();
+  }
+
+  setPredictorVariables() {
+    if (this.predictorVariables && this.monthlyTableColumns.productionVariables) {
       this.monthlyAnalysisSummaryData.forEach(data => {
         let dataIndex: number = 0;
         this.predictorVariables.forEach(variable => {
@@ -42,6 +60,7 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
       this.predictorVariables = [];
     }
   }
+
 
 
   setOrderDataField(str: string) {
@@ -58,5 +77,45 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
 
   checkFiscalYearEnd(date: Date): boolean {
     return this.analysisService.checkFiscalYearEnd(date, this.facility, this.orderDataField, this.orderByDirection);
+  }
+
+  setNumEnergyColumns() {
+    let numEnergyColumns: number = 0;
+    if (this.monthlyTableColumns.actualEnergy) {
+      numEnergyColumns++;
+    }
+    if (this.monthlyTableColumns.modeledEnergy) {
+      numEnergyColumns++;
+    }
+    if (this.monthlyTableColumns.adjustedEnergy) {
+      numEnergyColumns++;
+    }
+    this.numEnergyColumns = numEnergyColumns;
+  }
+
+  setNumImprovementColumns() {
+    let numImprovementColumns: number = 0;
+    if (this.monthlyTableColumns.SEnPI) {
+      numImprovementColumns++;
+    }
+    if (this.monthlyTableColumns.savings) {
+      numImprovementColumns++;
+    }
+    if (this.monthlyTableColumns.percentSavingsComparedToBaseline) {
+      numImprovementColumns++;
+    }
+    if (this.monthlyTableColumns.yearToDateSavings) {
+      numImprovementColumns++;
+    }
+    if (this.monthlyTableColumns.yearToDatePercentSavings) {
+      numImprovementColumns++;
+    }
+    if (this.monthlyTableColumns.rollingSavings) {
+      numImprovementColumns++;
+    }
+    if (this.monthlyTableColumns.rolling12MonthImprovement) {
+      numImprovementColumns++;
+    }
+    this.numImprovementColumns = numImprovementColumns;
   }
 }

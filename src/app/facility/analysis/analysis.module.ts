@@ -25,6 +25,7 @@ import { MonthlyFacilityAnalysisGraphComponent } from './run-analysis/facility-a
 import { AnnualFacilityAnalysisComponent } from './run-analysis/facility-analysis/annual-facility-analysis/annual-facility-analysis.component';
 import { AnnualFacilityAnalysisGraphComponent } from './run-analysis/facility-analysis/annual-facility-analysis/annual-facility-analysis-graph/annual-facility-analysis-graph.component';
 import { AnnualFacilityAnalysisTableComponent } from './run-analysis/facility-analysis/annual-facility-analysis/annual-facility-analysis-table/annual-facility-analysis-table.component';
+import { MonthlyAnalysisSummaryTableFilterComponent } from './run-analysis/group-analysis/monthly-analysis-summary/monthly-analysis-summary-table-filter/monthly-analysis-summary-table-filter.component';
 
 @NgModule({
   declarations: [
@@ -48,7 +49,8 @@ import { AnnualFacilityAnalysisTableComponent } from './run-analysis/facility-an
     MonthlyFacilityAnalysisGraphComponent,
     AnnualFacilityAnalysisComponent,
     AnnualFacilityAnalysisGraphComponent,
-    AnnualFacilityAnalysisTableComponent
+    AnnualFacilityAnalysisTableComponent,
+    MonthlyAnalysisSummaryTableFilterComponent
   ],
   imports: [
     CommonModule,

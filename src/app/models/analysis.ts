@@ -149,3 +149,20 @@ export interface AnnualAnalysisSummary {
   cummulativeSavings: number,
   newSavings: number
 }
+
+
+export interface MonthlyTableColumns {
+  incrementalImprovement: boolean,
+  SEnPI: boolean,
+  savings: boolean,
+  percentSavingsComparedToBaseline: boolean,
+  yearToDateSavings: boolean,
+  yearToDatePercentSavings: boolean,
+  rollingSavings: boolean,
+  rolling12MonthImprovement: boolean,
+  productionVariables: boolean,
+  energy: boolean,
+  actualEnergy: boolean,
+  modeledEnergy: boolean,
+  adjustedEnergy: boolean
+}
