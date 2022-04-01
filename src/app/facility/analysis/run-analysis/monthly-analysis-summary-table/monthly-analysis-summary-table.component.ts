@@ -36,7 +36,6 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
   constructor(private analysisService: AnalysisService) { }
 
   ngOnInit(): void {
-    console.log(this.monthlyAnalysisSummaryData);
     this.analysisTableColumnsSub = this.analysisService.analysisTableColumns.subscribe(columns => {
       this.analysisTableColumns = columns;
       this.setNumEnergyColumns();
@@ -60,7 +59,7 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
           }
           let monthData: { predictorId: string, usage: number } = data.predictorUsage.find(usageItem => { return usageItem.predictorId == predictorItem.predictor.id });
           data[predictorItem.predictor.name] = monthData.usage;
-        }else if(data[predictorItem.predictor.name] != undefined){
+        } else if (data[predictorItem.predictor.name] != undefined) {
           delete data[predictorItem.predictor.name];
         }
       })
@@ -132,5 +131,15 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
       }
     });
     this.numPredictorColumns = numPredictorColumns;
+  }
+
+  checkIsProduction(predictorVariable: PredictorData): boolean {
+    if (this.group) {
+      let groupVariable: PredictorData = this.group.predictorVariables.find(variable => { return variable.id == predictorVariable.id })
+      if (groupVariable) {
+        return groupVariable.productionInAnalysis;
+      }
+    }
+    return false;
   }
 }

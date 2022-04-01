@@ -43,7 +43,8 @@ export class AnalysisService {
         adjustmentToBaseline: true,
         cummulativeSavings: true,
         newSavings: true,
-        predictors: []
+        predictors: [],
+        predictorGroupId: undefined
       }
     }
     this.analysisTableColumns = new BehaviorSubject<AnalysisTableColumns>(analysisTableColumns);

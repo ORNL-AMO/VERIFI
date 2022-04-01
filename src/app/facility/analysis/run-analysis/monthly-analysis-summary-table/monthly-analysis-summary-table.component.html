@@ -34,7 +34,7 @@
             </th>
             <th *ngFor="let predictorVariable of predictorColumns" (click)="setOrderDataField(predictorVariable.name)"
                 [ngClass]="{'active': orderDataField == predictorVariable.name}">
-                {{predictorVariable.name}} <span *ngIf="predictorVariable.productionInAnalysis">&#x2a;</span>
+                {{predictorVariable.name}} <span *ngIf="checkIsProduction(predictorVariable)">&#x2a;</span>
                 <br *ngIf="predictorVariable.unit">
                 <span class="small" *ngIf="predictorVariable.unit">({{predictorVariable.unit}})</span>
             </th>

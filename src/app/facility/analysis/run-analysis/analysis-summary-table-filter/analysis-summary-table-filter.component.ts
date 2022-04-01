@@ -3,6 +3,7 @@ import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { AnalysisTableColumns } from 'src/app/models/analysis';
 import { AnalysisGroup, PredictorData } from 'src/app/models/idb';
 import { AnalysisService } from '../../analysis.service';
+import * as _ from 'lodash';
 
 @Component({
   selector: 'app-analysis-summary-table-filter',
@@ -12,6 +13,8 @@ import { AnalysisService } from '../../analysis.service';
 export class AnalysisSummaryTableFilterComponent implements OnInit {
   @Input()
   tableContext: 'monthGroup' | 'annualGroup' | 'monthFacility' | 'annualFacility';
+  @Input()
+  group: AnalysisGroup;
 
 
   showFilterDropdown: boolean = false;
@@ -21,7 +24,6 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
   ngOnInit(): void {
     this.analysisTableColumns = this.analysisService.analysisTableColumns.getValue();
     this.setPredictorVariables();
-
   }
 
   toggleFilterMenu() {
@@ -36,6 +38,11 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
       this.setAnnualIncrementalImprovement();
     }
     this.setPredictorChecked();
+    if (this.group) {
+      this.analysisTableColumns.predictorGroupId = this.group.idbGroupId;
+    } else {
+      this.analysisTableColumns.predictorGroupId = undefined;
+    }
     this.analysisService.analysisTableColumns.next(this.analysisTableColumns);
   }
 
@@ -134,25 +141,34 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
     if (this.tableContext == 'monthGroup' || this.tableContext == 'annualGroup') {
       let analysisGroup: AnalysisGroup = this.analysisService.selectedGroup.getValue();
       variableCopy = JSON.parse(JSON.stringify(analysisGroup.predictorVariables));
-
     } else if (this.tableContext == 'monthFacility' || this.tableContext == 'annualFacility') {
       let predictorVariables: Array<PredictorData> = this.predictorDbService.facilityPredictors.getValue();
       variableCopy = JSON.parse(JSON.stringify(predictorVariables));
       variableCopy.forEach(variable => {
         variable.productionInAnalysis = false;
-      })
+      });
+    }
+    let updatePredictors: boolean = false;
+    if (this.group) {
+      if (this.group.idbGroupId != this.analysisTableColumns.predictorGroupId) {
+        updatePredictors = true;
+        console.log(updatePredictors);
+      }
+    } else if (this.analysisTableColumns.predictorGroupId != undefined) {
+      updatePredictors = true;
     }
 
-
-    variableCopy.forEach(variable => {
-      predictorSelections.push({
-        predictor: variable,
-        display: variable.productionInAnalysis && this.analysisTableColumns.productionVariables,
-        usedInAnalysis: variable.productionInAnalysis
+    if (updatePredictors) {
+      variableCopy.forEach(variable => {
+        predictorSelections.push({
+          predictor: variable,
+          display: variable.productionInAnalysis && this.analysisTableColumns.productionVariables,
+          usedInAnalysis: variable.productionInAnalysis
+        });
       });
-    });
-    this.analysisTableColumns.predictors = predictorSelections;
-    this.save();
+      this.analysisTableColumns.predictors = predictorSelections;
+      this.save();
+    }
   }
 
   toggleAllPredictors() {
@@ -161,5 +177,4 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
     });
     this.save();
   }
-
 }
