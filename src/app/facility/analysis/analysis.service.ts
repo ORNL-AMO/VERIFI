@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
 import { LocalStorageService } from 'ngx-webstorage';
 import { BehaviorSubject } from 'rxjs';
-import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
-import { MonthlyTableColumns } from 'src/app/models/analysis';
+import { AnalysisTableColumns } from 'src/app/models/analysis';
 import { AnalysisGroup, IdbFacility, PredictorData } from '../../models/idb';
 
 @Injectable({
@@ -13,7 +12,7 @@ export class AnalysisService {
   selectedGroup: BehaviorSubject<AnalysisGroup>;
   dataDisplay: BehaviorSubject<"graph" | "table">;
 
-  monthlyTableColumns: BehaviorSubject<MonthlyTableColumns>;
+  analysisTableColumns: BehaviorSubject<AnalysisTableColumns>;
   constructor(private localStorageService: LocalStorageService) {
     let dataDisplay: "graph" | "table" = this.localStorageService.retrieve("analysisDataDisplay");
     if (!dataDisplay) {
@@ -23,9 +22,9 @@ export class AnalysisService {
     this.dataDisplay = new BehaviorSubject<"graph" | "table">(dataDisplay);
 
 
-    let monthlyTableColumns: MonthlyTableColumns = this.localStorageService.retrieve("monthlyTableColumns");
-    if (!monthlyTableColumns) {
-      monthlyTableColumns = {
+    let analysisTableColumns: AnalysisTableColumns = this.localStorageService.retrieve("analysisTableColumns");
+    if (!analysisTableColumns) {
+      analysisTableColumns = {
         incrementalImprovement: false,
         SEnPI: false,
         savings: false,
@@ -39,10 +38,16 @@ export class AnalysisService {
         actualEnergy: true,
         modeledEnergy: true,
         adjustedEnergy: true,
+        totalSavingsPercentImprovement: true,
+        annualSavingsPercentImprovement: true,
+        adjustmentToBaseline: true,
+        cummulativeSavings: true,
+        newSavings: true,
         predictors: []
       }
     }
-    this.monthlyTableColumns = new BehaviorSubject<MonthlyTableColumns>(monthlyTableColumns);
+    this.analysisTableColumns = new BehaviorSubject<AnalysisTableColumns>(analysisTableColumns);
+
 
     this.dataDisplay.subscribe(dataDisplay => {
       if (dataDisplay) {
@@ -50,12 +55,18 @@ export class AnalysisService {
       }
     });
 
-
-    this.monthlyTableColumns.subscribe(monthlyTableColumns => {
-      if (monthlyTableColumns) {
-        this.localStorageService.store('monthlyTableColumns', monthlyTableColumns);
+    this.analysisTableColumns.subscribe(analysisTableColumns => {
+      if (analysisTableColumns) {
+        this.localStorageService.store('analysisTableColumns', analysisTableColumns);
       }
     });
+
+    
+    // this.monthlyTableColumns.subscribe(annualTableColumns => {
+    //   if (annualTableColumns) {
+    //     this.localStorageService.store('annualTableColumns', monthlyTableColumns);
+    //   }
+    // });
   }
 
   checkGroupHasError(group: AnalysisGroup): boolean {

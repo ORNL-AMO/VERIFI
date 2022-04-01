@@ -627,8 +627,7 @@ export class AnalysisCalculationsService {
         yearToDateSavings: yearToDateSavings,
         yearToDatePercentSavings: yearToDatePercentSavings * 100,
         rollingSavings: rollingSavings,
-        rolling12MonthImprovement: rolling12MonthImprovement * 100,
-        monthPredictorData: monthPredictorData
+        rolling12MonthImprovement: rolling12MonthImprovement * 100
       });
       summaryDataIndex++;
       let currentMonth: number = baselineDate.getUTCMonth()
@@ -696,6 +695,10 @@ export class AnalysisCalculationsService {
       baselineYear = baselineYear - 1;
       reportYear = reportYear - 1;
     }
+
+    let facilityPredictorData: Array<IdbPredictorEntry> = this.predictorDbService.facilityPredictorEntries.getValue();
+    let predictorVariables: Array<PredictorData> = this.predictorDbService.facilityPredictors.getValue();
+
     let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = new Array();
     let baselineEnergyUse: number;
     let baselineModeledEnergyUse: number;
@@ -706,6 +709,26 @@ export class AnalysisCalculationsService {
       let yearData: Array<MonthlyAnalysisSummaryData> = _.filter(monthlyAnalysisSummaryData, (data) => {
         return data.fiscalYear == baselineYear;
       });
+
+      let summaryYearPredictorData: Array<IdbPredictorEntry> = this.analysisCalculationsHelperService.filterYearPredictorData(facilityPredictorData, baselineYear, facility);
+
+
+      let predictorUsage: Array<{
+        usage: number,
+        predictorId: string
+      }> = new Array();
+      predictorVariables.forEach(variable => {
+        let usageVal: number = 0;
+        summaryYearPredictorData.forEach(data => {
+          let predictorData: PredictorData = data.predictors.find(predictor => { return predictor.id == variable.id });
+          usageVal = usageVal + predictorData.amount;
+        });
+        predictorUsage.push({
+          usage: usageVal,
+          predictorId: variable.id
+        });
+      });
+
       let energyUse: number = _.sumBy(yearData, 'energyUse');
       let modeledEnergy: number = _.sumBy(yearData, 'modeledEnergy');
       let adjustedBaselineEnergyUse: number = _.sumBy(yearData, 'adjustedBaselineEnergyUse');
@@ -721,7 +744,6 @@ export class AnalysisCalculationsService {
       cummulativeSavings = cummulativeSavings + savings;
       let newSavings: number = savings - previousYearSavings;
       annualAnalysisSummaries.push({
-
         year: baselineYear,
         energyUse: energyUse,
         modeledEnergy: modeledEnergy,
@@ -732,7 +754,8 @@ export class AnalysisCalculationsService {
         annualSavingsPercentImprovement: annualSavingsPercentImprovement * 100,
         adjustmentToBaseline: adjustmentToBaseline,
         cummulativeSavings: cummulativeSavings,
-        newSavings: newSavings
+        newSavings: newSavings,
+        predictorUsage: predictorUsage
       })
       previousYearPercentSavings = totalSavingsPercentImprovement;
       previousYearSavings = savings;

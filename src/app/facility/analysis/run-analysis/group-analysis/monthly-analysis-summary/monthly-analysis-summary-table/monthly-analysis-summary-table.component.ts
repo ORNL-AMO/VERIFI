@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
-import { MonthlyAnalysisSummaryData, MonthlyTableColumns } from 'src/app/models/analysis';
+import { AnalysisTableColumns, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { AnalysisGroup, IdbAnalysisItem, IdbFacility, PredictorData } from 'src/app/models/idb';
 
 @Component({
@@ -26,8 +26,8 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
   orderDataField: string = 'date';
   orderByDirection: 'asc' | 'desc' = 'asc';
   currentPageNumber: number = 1;
-  monthlyTableColumns: MonthlyTableColumns;
-  monthlyTableColumnsSub: Subscription;
+  analysisTableColumns: AnalysisTableColumns;
+  analysisTableColumnsSub: Subscription;
   numEnergyColumns: number;
   numImprovementColumns: number;
   numPredictorColumns: number;
@@ -36,8 +36,8 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
   constructor(private analysisService: AnalysisService) { }
 
   ngOnInit(): void {
-    this.monthlyTableColumnsSub = this.analysisService.monthlyTableColumns.subscribe(columns => {
-      this.monthlyTableColumns = columns;
+    this.analysisTableColumnsSub = this.analysisService.analysisTableColumns.subscribe(columns => {
+      this.analysisTableColumns = columns;
       this.setNumEnergyColumns();
       this.setNumImprovementColumns();
       this.setNumPredictorColumns();
@@ -46,13 +46,13 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
   }
 
   ngOnDestroy() {
-    this.monthlyTableColumnsSub.unsubscribe();
+    this.analysisTableColumnsSub.unsubscribe();
   }
 
   setPredictorVariables() {
     let predictorColumns: Array<PredictorData> = new Array();
     this.monthlyAnalysisSummaryData.forEach((data, index) => {
-      this.monthlyTableColumns.predictors.forEach(predictorItem => {
+      this.analysisTableColumns.predictors.forEach(predictorItem => {
         if (predictorItem.display) {
           if (index == 0) {
             predictorColumns.push(predictorItem.predictor)
@@ -85,13 +85,13 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
 
   setNumEnergyColumns() {
     let numEnergyColumns: number = 0;
-    if (this.monthlyTableColumns.actualEnergy) {
+    if (this.analysisTableColumns.actualEnergy) {
       numEnergyColumns++;
     }
-    if (this.monthlyTableColumns.modeledEnergy) {
+    if (this.analysisTableColumns.modeledEnergy) {
       numEnergyColumns++;
     }
-    if (this.monthlyTableColumns.adjustedEnergy) {
+    if (this.analysisTableColumns.adjustedEnergy) {
       numEnergyColumns++;
     }
     this.numEnergyColumns = numEnergyColumns;
@@ -99,25 +99,25 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
 
   setNumImprovementColumns() {
     let numImprovementColumns: number = 0;
-    if (this.monthlyTableColumns.SEnPI) {
+    if (this.analysisTableColumns.SEnPI) {
       numImprovementColumns++;
     }
-    if (this.monthlyTableColumns.savings) {
+    if (this.analysisTableColumns.savings) {
       numImprovementColumns++;
     }
-    if (this.monthlyTableColumns.percentSavingsComparedToBaseline) {
+    if (this.analysisTableColumns.percentSavingsComparedToBaseline) {
       numImprovementColumns++;
     }
-    if (this.monthlyTableColumns.yearToDateSavings) {
+    if (this.analysisTableColumns.yearToDateSavings) {
       numImprovementColumns++;
     }
-    if (this.monthlyTableColumns.yearToDatePercentSavings) {
+    if (this.analysisTableColumns.yearToDatePercentSavings) {
       numImprovementColumns++;
     }
-    if (this.monthlyTableColumns.rollingSavings) {
+    if (this.analysisTableColumns.rollingSavings) {
       numImprovementColumns++;
     }
-    if (this.monthlyTableColumns.rolling12MonthImprovement) {
+    if (this.analysisTableColumns.rolling12MonthImprovement) {
       numImprovementColumns++;
     }
     this.numImprovementColumns = numImprovementColumns;
@@ -125,7 +125,7 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
 
   setNumPredictorColumns() {
     let numPredictorColumns: number = 0;
-    this.monthlyTableColumns.predictors.forEach(predictor => {
+    this.analysisTableColumns.predictors.forEach(predictor => {
       if (predictor.display) {
         numPredictorColumns++;
       }

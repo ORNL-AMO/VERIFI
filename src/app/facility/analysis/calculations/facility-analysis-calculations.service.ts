@@ -306,8 +306,7 @@ export class FacilityAnalysisCalculationsService {
         yearToDateSavings: yearToDateSavings,
         yearToDatePercentSavings: yearToDatePercentSavings * 100,
         rollingSavings: rollingSavings,
-        rolling12MonthImprovement: rolling12MonthImprovement * 100,
-        monthPredictorData: []
+        rolling12MonthImprovement: rolling12MonthImprovement * 100
       })
 
       summaryDataIndex++;

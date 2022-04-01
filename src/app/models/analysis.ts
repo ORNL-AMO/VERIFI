@@ -109,8 +109,7 @@ export interface MonthlyAnalysisSummaryData {
   yearToDateSavings: number,
   yearToDatePercentSavings: number,
   rollingSavings: number,
-  rolling12MonthImprovement: number,
-  monthPredictorData: Array<IdbPredictorEntry>
+  rolling12MonthImprovement: number
 }
 
 export interface FacilityMonthlyAnalysisSummaryData extends MonthlyAnalysisSummaryData  {
@@ -151,11 +150,15 @@ export interface AnnualAnalysisSummary {
   annualSavingsPercentImprovement: number,
   adjustmentToBaseline: number,
   cummulativeSavings: number,
-  newSavings: number
+  newSavings: number,
+  predictorUsage?: Array<{
+    usage: number,
+    predictorId: string
+  }>,
 }
 
 
-export interface MonthlyTableColumns {
+export interface AnalysisTableColumns {
   incrementalImprovement: boolean,
   SEnPI: boolean,
   savings: boolean,
@@ -169,6 +172,11 @@ export interface MonthlyTableColumns {
   actualEnergy: boolean,
   modeledEnergy: boolean,
   adjustedEnergy: boolean,
+  totalSavingsPercentImprovement: boolean,
+  annualSavingsPercentImprovement: boolean,
+  adjustmentToBaseline: boolean,
+  cummulativeSavings: boolean,
+  newSavings: boolean,
   predictors: Array<{
     predictor: PredictorData,
     display: boolean,

@@ -6,6 +6,14 @@ th.first-column{
     width:10%;
 }
 
-th.th-3{
+/* th.th-3{
     width: 30%;
+} */
+thead th.active {
+    text-decoration: underline;
+}
+
+thead tr:not(.table-mh) th:hover{
+    cursor: pointer;
+    text-decoration: underline;
 }
