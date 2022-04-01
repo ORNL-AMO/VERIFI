@@ -109,35 +109,9 @@ export interface MonthlyAnalysisSummaryData {
   yearToDateSavings: number,
   yearToDatePercentSavings: number,
   rollingSavings: number,
-  rolling12MonthImprovement: number
+  rolling12MonthImprovement: number,  
+  groupsSummaryData?: Array<MonthlyAnalysisSummaryData>
 }
-
-export interface FacilityMonthlyAnalysisSummaryData extends MonthlyAnalysisSummaryData  {
-  date: Date,
-  groupsSummaryData: Array<MonthlyAnalysisSummaryData>
-}
-
-
-// export interface AnnualAnalysisSummary {
-//   year: number,
-//   energyUse: number,
-//   annualEnergySavings: number,
-//   totalEnergySavings: number,
-//   modeledEnergyUse: number,
-//   annualModeledEnergySavings: number,
-//   totalModeledEnergySavings: number,
-//   SEnPI: number,
-//   cumulativeSavings: number,
-//   annualSavings: number,
-
-//   totalProduction: number,
-//   annualProductionChange: number,
-//   totalProductionChange: number,
-//   energyIntensity: number,
-//   totalEnergyIntensityChange: number,
-//   annualEnergyIntensityChange: number,
-//   group?: AnalysisGroup
-// }
 
 export interface AnnualAnalysisSummary {
   year: number,

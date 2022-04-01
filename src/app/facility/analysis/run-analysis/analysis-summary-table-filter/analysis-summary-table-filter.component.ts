@@ -1,4 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { AnalysisTableColumns } from 'src/app/models/analysis';
 import { AnalysisGroup, PredictorData } from 'src/app/models/idb';
 import { AnalysisService } from '../../analysis.service';
@@ -10,17 +11,16 @@ import { AnalysisService } from '../../analysis.service';
 })
 export class AnalysisSummaryTableFilterComponent implements OnInit {
   @Input()
-  tableContext: 'groupMonth' | 'groupAnnual';
+  tableContext: 'monthGroup' | 'annualGroup' | 'monthFacility' | 'annualFacility';
 
 
   showFilterDropdown: boolean = false;
   analysisTableColumns: AnalysisTableColumns;
-  constructor(private analysisService: AnalysisService) { }
+  constructor(private analysisService: AnalysisService, private predictorDbService: PredictordbService) { }
 
   ngOnInit(): void {
     this.analysisTableColumns = this.analysisService.analysisTableColumns.getValue();
-    let analysisGroup: AnalysisGroup = this.analysisService.selectedGroup.getValue();
-    this.setPredictorVariables(analysisGroup);
+    this.setPredictorVariables();
 
   }
 
@@ -30,9 +30,9 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
 
   save() {
     this.setEnergyColumns();
-    if (this.tableContext == 'groupMonth') {
+    if (this.tableContext == 'monthGroup' || this.tableContext == 'monthFacility') {
       this.setMonthIncrementalImprovement();
-    } else if (this.tableContext == 'groupAnnual') {
+    } else if (this.tableContext == 'annualGroup' || this.tableContext == 'annualFacility') {
       this.setAnnualIncrementalImprovement();
     }
     this.setPredictorChecked();
@@ -62,10 +62,10 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
       this.analysisTableColumns.yearToDatePercentSavings = false;
       this.analysisTableColumns.rollingSavings = false;
       this.analysisTableColumns.rolling12MonthImprovement = false;
-      this.analysisTableColumns.totalSavingsPercentImprovement  = false;
-      this.analysisTableColumns.annualSavingsPercentImprovement  = false;
-      this.analysisTableColumns.adjustmentToBaseline  = false;
-      this.analysisTableColumns.cummulativeSavings  = false;
+      this.analysisTableColumns.totalSavingsPercentImprovement = false;
+      this.analysisTableColumns.annualSavingsPercentImprovement = false;
+      this.analysisTableColumns.adjustmentToBaseline = false;
+      this.analysisTableColumns.cummulativeSavings = false;
       this.analysisTableColumns.newSavings = false;
     } else {
       this.analysisTableColumns.SEnPI = true;
@@ -75,13 +75,12 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
       this.analysisTableColumns.yearToDatePercentSavings = true;
       this.analysisTableColumns.rollingSavings = true;
       this.analysisTableColumns.rolling12MonthImprovement = true;
-      this.analysisTableColumns.totalSavingsPercentImprovement  = true;
-      this.analysisTableColumns.annualSavingsPercentImprovement  = true;
-      this.analysisTableColumns.adjustmentToBaseline  = true;
-      this.analysisTableColumns.cummulativeSavings  = true;
+      this.analysisTableColumns.totalSavingsPercentImprovement = true;
+      this.analysisTableColumns.annualSavingsPercentImprovement = true;
+      this.analysisTableColumns.adjustmentToBaseline = true;
+      this.analysisTableColumns.cummulativeSavings = true;
       this.analysisTableColumns.newSavings = true;
     }
-    console.log(this.analysisTableColumns);
     this.save();
   }
 
@@ -124,13 +123,26 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
     this.analysisTableColumns.productionVariables = hasPredictorChecked;
   }
 
-  setPredictorVariables(analysisGroup: AnalysisGroup) {
+  setPredictorVariables() {
     let predictorSelections: Array<{
       predictor: PredictorData,
       display: boolean,
       usedInAnalysis: boolean
     }> = new Array();
-    let variableCopy: Array<PredictorData> = JSON.parse(JSON.stringify(analysisGroup.predictorVariables));
+
+    let variableCopy: Array<PredictorData>;
+    if (this.tableContext == 'monthGroup' || this.tableContext == 'annualGroup') {
+      let analysisGroup: AnalysisGroup = this.analysisService.selectedGroup.getValue();
+      variableCopy = JSON.parse(JSON.stringify(analysisGroup.predictorVariables));
+
+    } else if (this.tableContext == 'monthFacility' || this.tableContext == 'annualFacility') {
+      let predictorVariables: Array<PredictorData> = this.predictorDbService.facilityPredictors.getValue();
+      variableCopy = JSON.parse(JSON.stringify(predictorVariables));
+      variableCopy.forEach(variable => {
+        variable.productionInAnalysis = false;
+      })
+    }
+
 
     variableCopy.forEach(variable => {
       predictorSelections.push({

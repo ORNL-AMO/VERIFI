@@ -1,37 +1,29 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
-import { AnalysisTableColumns, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
-import { AnalysisGroup, IdbAnalysisItem, IdbFacility, PredictorData } from 'src/app/models/idb';
+import { AnalysisTableColumns, AnnualAnalysisSummary } from 'src/app/models/analysis';
+import { IdbAnalysisItem, PredictorData } from 'src/app/models/idb';
 
 @Component({
-  selector: 'app-monthly-analysis-summary-table',
-  templateUrl: './monthly-analysis-summary-table.component.html',
-  styleUrls: ['./monthly-analysis-summary-table.component.css']
+  selector: 'app-annual-analysis-summary-table',
+  templateUrl: './annual-analysis-summary-table.component.html',
+  styleUrls: ['./annual-analysis-summary-table.component.css']
 })
-export class MonthlyAnalysisSummaryTableComponent implements OnInit {
+export class AnnualAnalysisSummaryTableComponent implements OnInit {
   @Input()
-  monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>;
+  annualAnalysisSummary: Array<AnnualAnalysisSummary>;
   @Input()
   analysisItem: IdbAnalysisItem;
-  @Input()
-  itemsPerPage: number;
-  @Input()
-  facility: IdbFacility;
-  @Input()
-  predictorVariables: Array<PredictorData>;
-  @Input()
-  group: AnalysisGroup;
 
-  orderDataField: string = 'date';
-  orderByDirection: 'asc' | 'desc' = 'asc';
-  currentPageNumber: number = 1;
   analysisTableColumns: AnalysisTableColumns;
   analysisTableColumnsSub: Subscription;
   numEnergyColumns: number;
   numImprovementColumns: number;
   numPredictorColumns: number;
 
+  
+  orderDataField: string = 'year';
+  orderByDirection: 'asc' | 'desc' = 'asc';
   predictorColumns: Array<PredictorData>;
   constructor(private analysisService: AnalysisService) { }
 
@@ -40,6 +32,7 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
       this.analysisTableColumns = columns;
       this.setNumEnergyColumns();
       this.setNumImprovementColumns();
+
       this.setNumPredictorColumns();
       this.setPredictorVariables();
     })
@@ -51,7 +44,7 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
 
   setPredictorVariables() {
     let predictorColumns: Array<PredictorData> = new Array();
-    this.monthlyAnalysisSummaryData.forEach((data, index) => {
+    this.annualAnalysisSummary.forEach((data, index) => {
       this.analysisTableColumns.predictors.forEach(predictorItem => {
         if (predictorItem.display) {
           if (index == 0) {
@@ -79,9 +72,6 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
     }
   }
 
-  checkFiscalYearEnd(date: Date): boolean {
-    return this.analysisService.checkFiscalYearEnd(date, this.facility, this.orderDataField, this.orderByDirection);
-  }
 
   setNumEnergyColumns() {
     let numEnergyColumns: number = 0;
@@ -105,19 +95,19 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
     if (this.analysisTableColumns.savings) {
       numImprovementColumns++;
     }
-    if (this.analysisTableColumns.percentSavingsComparedToBaseline) {
+    if (this.analysisTableColumns.totalSavingsPercentImprovement) {
       numImprovementColumns++;
     }
-    if (this.analysisTableColumns.yearToDateSavings) {
+    if (this.analysisTableColumns.annualSavingsPercentImprovement) {
       numImprovementColumns++;
     }
-    if (this.analysisTableColumns.yearToDatePercentSavings) {
+    if (this.analysisTableColumns.adjustmentToBaseline) {
       numImprovementColumns++;
     }
-    if (this.analysisTableColumns.rollingSavings) {
+    if (this.analysisTableColumns.cummulativeSavings) {
       numImprovementColumns++;
     }
-    if (this.analysisTableColumns.rolling12MonthImprovement) {
+    if (this.analysisTableColumns.newSavings) {
       numImprovementColumns++;
     }
     this.numImprovementColumns = numImprovementColumns;
@@ -132,4 +122,5 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
     });
     this.numPredictorColumns = numPredictorColumns;
   }
+
 }

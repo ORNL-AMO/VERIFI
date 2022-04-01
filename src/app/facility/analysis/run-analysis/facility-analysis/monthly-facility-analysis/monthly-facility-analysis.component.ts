@@ -3,7 +3,7 @@ import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
 import { FacilityAnalysisCalculationsService } from 'src/app/facility/analysis/calculations/facility-analysis-calculations.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { FacilityMonthlyAnalysisSummaryData } from 'src/app/models/analysis';
+import { MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 
 @Component({
@@ -14,7 +14,7 @@ import { IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 export class MonthlyFacilityAnalysisComponent implements OnInit {
 
   dataDisplay: 'table' | 'graph';
-  monthlyFacilityAnalysisData: Array<FacilityMonthlyAnalysisSummaryData>;
+  monthlyFacilityAnalysisData: Array<MonthlyAnalysisSummaryData>;
   analysisItem: IdbAnalysisItem;
   facility: IdbFacility;
   itemsPerPage: number = 12;
