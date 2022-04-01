@@ -1,4 +1,4 @@
-import { AnalysisGroup, PredictorData } from "./idb";
+import { AnalysisGroup, IdbPredictorEntry, PredictorData } from "./idb";
 
 // export interface AnnualGroupSummary {
 //   year: number,
@@ -96,7 +96,10 @@ export interface MonthlyAnalysisSummaryData {
   date: Date,
   energyUse: number,
   modeledEnergy: number,
-  predictorUsage?: Array<number>,
+  predictorUsage?: Array<{
+    usage: number,
+    predictorId: string
+  }>,
   fiscalYear: number,
   group: AnalysisGroup,
   adjustedBaselineEnergyUse: number,
@@ -107,6 +110,7 @@ export interface MonthlyAnalysisSummaryData {
   yearToDatePercentSavings: number,
   rollingSavings: number,
   rolling12MonthImprovement: number,
+  monthPredictorData: Array<IdbPredictorEntry>
 }
 
 export interface FacilityMonthlyAnalysisSummaryData extends MonthlyAnalysisSummaryData  {
@@ -164,5 +168,10 @@ export interface MonthlyTableColumns {
   energy: boolean,
   actualEnergy: boolean,
   modeledEnergy: boolean,
-  adjustedEnergy: boolean
+  adjustedEnergy: boolean,
+  predictors: Array<{
+    predictor: PredictorData,
+    display: boolean,
+    usedInAnalysis: boolean
+  }>
 }

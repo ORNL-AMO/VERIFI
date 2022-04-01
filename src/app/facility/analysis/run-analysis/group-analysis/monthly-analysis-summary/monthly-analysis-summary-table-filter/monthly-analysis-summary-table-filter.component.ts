@@ -1,6 +1,7 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
 import { MonthlyTableColumns } from 'src/app/models/analysis';
+import { AnalysisGroup, PredictorData } from 'src/app/models/idb';
 
 @Component({
   selector: 'app-monthly-analysis-summary-table-filter',
@@ -11,10 +12,13 @@ export class MonthlyAnalysisSummaryTableFilterComponent implements OnInit {
 
   showFilterDropdown: boolean = false;
   monthlyTableColumns: MonthlyTableColumns;
-  constructor(private analysisService: AnalysisService, private cd: ChangeDetectorRef) { }
+  constructor(private analysisService: AnalysisService) { }
 
   ngOnInit(): void {
     this.monthlyTableColumns = this.analysisService.monthlyTableColumns.getValue();
+    let analysisGroup: AnalysisGroup = this.analysisService.selectedGroup.getValue();
+    this.setPredictorVariables(analysisGroup);
+
   }
 
   toggleFilterMenu() {
@@ -32,6 +36,7 @@ export class MonthlyAnalysisSummaryTableFilterComponent implements OnInit {
   save() {
     this.setEnergyColumns();
     this.setIncrementalImprovement();
+    this.setPredictorChecked();
     this.analysisService.monthlyTableColumns.next(this.monthlyTableColumns);
   }
 
@@ -49,8 +54,8 @@ export class MonthlyAnalysisSummaryTableFilterComponent implements OnInit {
     this.save();
   }
 
-  toggleIncrementalImprovement(){
-    if(this.monthlyTableColumns.incrementalImprovement == false){
+  toggleIncrementalImprovement() {
+    if (this.monthlyTableColumns.incrementalImprovement == false) {
       this.monthlyTableColumns.SEnPI = false;
       this.monthlyTableColumns.savings = false;
       this.monthlyTableColumns.percentSavingsComparedToBaseline = false;
@@ -58,7 +63,7 @@ export class MonthlyAnalysisSummaryTableFilterComponent implements OnInit {
       this.monthlyTableColumns.yearToDatePercentSavings = false;
       this.monthlyTableColumns.rollingSavings = false;
       this.monthlyTableColumns.rolling12MonthImprovement = false;
-    }else{
+    } else {
       this.monthlyTableColumns.SEnPI = true;
       this.monthlyTableColumns.savings = true;
       this.monthlyTableColumns.percentSavingsComparedToBaseline = true;
@@ -75,7 +80,7 @@ export class MonthlyAnalysisSummaryTableFilterComponent implements OnInit {
     this.monthlyTableColumns.energy = this.monthlyTableColumns.actualEnergy || this.monthlyTableColumns.modeledEnergy || this.monthlyTableColumns.adjustedEnergy;
   }
 
-  setIncrementalImprovement(){
+  setIncrementalImprovement() {
     this.monthlyTableColumns.incrementalImprovement = (
       this.monthlyTableColumns.SEnPI ||
       this.monthlyTableColumns.savings ||
@@ -86,4 +91,44 @@ export class MonthlyAnalysisSummaryTableFilterComponent implements OnInit {
       this.monthlyTableColumns.rolling12MonthImprovement
     )
   }
+
+  setPredictorChecked() {
+    let hasPredictorChecked: boolean = false;
+    this.monthlyTableColumns.predictors.forEach(predictor => {
+      if (predictor.display == true) {
+        hasPredictorChecked = true;
+      }
+    });
+    this.monthlyTableColumns.productionVariables = hasPredictorChecked;
+  }
+
+  setPredictorVariables(analysisGroup: AnalysisGroup) {
+    let predictorSelections: Array<{
+      predictor: PredictorData,
+      display: boolean,
+      usedInAnalysis: boolean
+    }> = new Array();
+    let variableCopy: Array<PredictorData> = JSON.parse(JSON.stringify(analysisGroup.predictorVariables));
+
+    variableCopy.forEach(variable => {
+      // if (analysisGroup.analysisType == 'absoluteEnergyConsumption') {
+      //   variable.productionInAnalysis = false;
+      // }
+      predictorSelections.push({
+        predictor: variable,
+        display: variable.productionInAnalysis && this.monthlyTableColumns.productionVariables,
+        usedInAnalysis: variable.productionInAnalysis
+      });
+    });
+    this.monthlyTableColumns.predictors = predictorSelections;
+    this.save();
+  }
+
+  toggleAllPredictors() {
+    this.monthlyTableColumns.predictors.forEach(predictor => {
+      predictor.display = this.monthlyTableColumns.productionVariables;
+    });
+    this.save();
+  }
+
 }

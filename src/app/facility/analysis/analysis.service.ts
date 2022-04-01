@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { LocalStorageService } from 'ngx-webstorage';
 import { BehaviorSubject } from 'rxjs';
+import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { MonthlyTableColumns } from 'src/app/models/analysis';
 import { AnalysisGroup, IdbFacility, PredictorData } from '../../models/idb';
 
@@ -37,7 +38,8 @@ export class AnalysisService {
         energy: true,
         actualEnergy: true,
         modeledEnergy: true,
-        adjustedEnergy: true
+        adjustedEnergy: true,
+        predictors: []
       }
     }
     this.monthlyTableColumns = new BehaviorSubject<MonthlyTableColumns>(monthlyTableColumns);
@@ -49,12 +51,11 @@ export class AnalysisService {
     });
 
 
-    // this.monthlyTableColumns.subscribe(monthlyTableColumns => {
-    //   if (monthlyTableColumns) {
-    //     this.localStorageService.store('monthlyTableColumns', monthlyTableColumns);
-    //   }
-    // });
-
+    this.monthlyTableColumns.subscribe(monthlyTableColumns => {
+      if (monthlyTableColumns) {
+        this.localStorageService.store('monthlyTableColumns', monthlyTableColumns);
+      }
+    });
   }
 
   checkGroupHasError(group: AnalysisGroup): boolean {

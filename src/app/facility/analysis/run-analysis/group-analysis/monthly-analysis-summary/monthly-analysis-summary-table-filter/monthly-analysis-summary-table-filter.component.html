@@ -7,7 +7,7 @@
         <p class="small">Choose Table Columns</p>
         <div class="row">
             <div class="col">
-                <label>
+                <label class="bold">
                     <input type="checkbox" name="energy" [(ngModel)]="monthlyTableColumns.energy"
                         (change)="toggleEnergyColumns()">Energy Columns
                 </label>
@@ -27,15 +27,22 @@
 
             </div>
             <div class="col">
-                <label>
+                <label class="bold">
                     <input type="checkbox" name="productionVariables"
-                        [(ngModel)]="monthlyTableColumns.productionVariables" (change)="save()">Production Variables
+                        [(ngModel)]="monthlyTableColumns.productionVariables"
+                        (change)="toggleAllPredictors()">Production Variables
+                </label>
+                <label *ngFor="let predictorOption of monthlyTableColumns.predictors">
+                    <input type="checkbox" name="productionVariables" [(ngModel)]="predictorOption.display"
+                        (change)="save()">{{predictorOption.predictor.name}} <span
+                        *ngIf="predictorOption.usedInAnalysis">&#42;</span>
                 </label>
             </div>
             <div class="col">
-                <label>
+                <label class="bold">
                     <input type="checkbox" name="incrementalImprovement"
-                        [(ngModel)]="monthlyTableColumns.incrementalImprovement" (change)="toggleIncrementalImprovement()">All
+                        [(ngModel)]="monthlyTableColumns.incrementalImprovement"
+                        (change)="toggleIncrementalImprovement()">
                     Incremental Improvement
                 </label>
                 <label>

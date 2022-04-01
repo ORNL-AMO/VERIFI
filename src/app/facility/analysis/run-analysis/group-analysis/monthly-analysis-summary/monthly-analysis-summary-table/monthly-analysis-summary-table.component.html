@@ -5,7 +5,7 @@
             <th *ngIf="monthlyTableColumns.energy" class="text-center th-3" [attr.colspan]="numEnergyColumns">
                 Energy (<span [innerHTML]="analysisItem.energyUnit | settingsLabel"></span>)
             </th>
-            <th *ngIf="predictorVariables.length != 0" class="text-center" [attr.colspan]="predictorVariables.length">
+            <th *ngIf="predictorColumns.length != 0" class="text-center" [attr.colspan]="predictorColumns.length">
                 Production Variables
             </th>
             <th *ngIf="monthlyTableColumns.incrementalImprovement" class="text-center"
@@ -32,9 +32,10 @@
                 [ngClass]="{'active': orderDataField == 'adjustedBaselineEnergyUse'}">
                 Adjusted
             </th>
-            <th *ngFor="let predictorVariable of predictorVariables" (click)="setOrderDataField(predictorVariable.name)"
+            <th *ngFor="let predictorVariable of predictorColumns" (click)="setOrderDataField(predictorVariable.name)"
                 [ngClass]="{'active': orderDataField == predictorVariable.name}">
-                {{predictorVariable.name}} <br *ngIf="predictorVariable.unit">
+                {{predictorVariable.name}} <span *ngIf="predictorVariable.productionInAnalysis">&#x2a;</span>
+                <br *ngIf="predictorVariable.unit">
                 <span class="small" *ngIf="predictorVariable.unit">({{predictorVariable.unit}})</span>
             </th>
             <th *ngIf="monthlyTableColumns.SEnPI" (click)="setOrderDataField('SEnPI')"
@@ -103,11 +104,11 @@
                     &mdash;
                 </span>
             </td>
-            <td *ngFor="let pUsage of data.predictorUsage">
-                <span *ngIf="pUsage">
-                    {{pUsage | customNumber}}
+            <td *ngFor="let predictorVariable of predictorColumns">
+                <span *ngIf="data[predictorVariable.name]">
+                    {{data[predictorVariable.name] | customNumber}}
                 </span>
-                <span *ngIf="!pUsage">
+                <span *ngIf="!data[predictorVariable.name]">
                     &mdash;
                 </span>
             </td>

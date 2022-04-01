@@ -477,17 +477,14 @@ export class AnalysisCalculationsService {
     let endDate: Date = monthlyStartAndEndDate.endDate;
 
     let predictorVariables: Array<PredictorData> = new Array();
-    let productionVariables: Array<PredictorData> = new Array();
-    if (selectedGroup.analysisType != 'absoluteEnergyConsumption') {
-      selectedGroup.predictorVariables.forEach(variable => {
-        if (variable.productionInAnalysis) {
-          predictorVariables.push(variable);
-          if (variable.production) {
-            productionVariables.push(variable);
-          }
-        }
-      });
-    }
+    selectedGroup.predictorVariables.forEach(variable => {
+      if (selectedGroup.analysisType == 'absoluteEnergyConsumption') {
+        variable.productionInAnalysis = false;
+      }
+      if (variable.productionInAnalysis) {
+        predictorVariables.push(variable);
+      }
+    });
 
     let facilityPredictorData: Array<IdbPredictorEntry> = this.predictorDbService.facilityPredictorEntries.getValue();
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
@@ -548,16 +545,22 @@ export class AnalysisCalculationsService {
       }
 
 
-      let predictorUsage: Array<number> = new Array();
+      let predictorUsage: Array<{
+        usage: number,
+        predictorId: string
+      }> = new Array();
       let productionUsage: Array<number> = new Array();
-      predictorVariables.forEach(variable => {
+      selectedGroup.predictorVariables.forEach(variable => {
         let usageVal: number = 0;
         monthPredictorData.forEach(data => {
           let predictorData: PredictorData = data.predictors.find(predictor => { return predictor.id == variable.id });
           usageVal = usageVal + predictorData.amount;
         });
-        predictorUsage.push(usageVal);
-        if (variable.production) {
+        predictorUsage.push({
+          usage: usageVal,
+          predictorId: variable.id
+        });
+        if (variable.productionInAnalysis) {
           productionUsage.push(usageVal);
         }
       });
@@ -574,7 +577,7 @@ export class AnalysisCalculationsService {
       } else if (selectedGroup.analysisType == 'modifiedEnergyIntensity') {
         modeledEnergy = this.calculateModifiedEnegyIntensityModeledEnergy(selectedGroup, baselineYearEnergyIntensity, baselineActualEnergyUse, productionUsage);
       }
-      if(modeledEnergy < 0){
+      if (modeledEnergy < 0) {
         modeledEnergy = 0;
       }
       yearToDateModeledEnergyUse = yearToDateModeledEnergyUse + modeledEnergy;
@@ -624,7 +627,8 @@ export class AnalysisCalculationsService {
         yearToDateSavings: yearToDateSavings,
         yearToDatePercentSavings: yearToDatePercentSavings * 100,
         rollingSavings: rollingSavings,
-        rolling12MonthImprovement: rolling12MonthImprovement * 100
+        rolling12MonthImprovement: rolling12MonthImprovement * 100,
+        monthPredictorData: monthPredictorData
       });
       summaryDataIndex++;
       let currentMonth: number = baselineDate.getUTCMonth()
@@ -633,7 +637,7 @@ export class AnalysisCalculationsService {
     }
 
     return {
-      predictorVariables: predictorVariables,
+      predictorVariables: selectedGroup.predictorVariables,
       modelYear: undefined,
       monthlyAnalysisSummaryData: analysisSummaryData
     }
@@ -685,7 +689,7 @@ export class AnalysisCalculationsService {
   }
 
 
-  calculateAnnualAnalysisSummary(monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData | FacilityMonthlyAnalysisSummaryData>, analysisItem: IdbAnalysisItem, facility: IdbFacility ): Array<AnnualAnalysisSummary>{
+  calculateAnnualAnalysisSummary(monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData | FacilityMonthlyAnalysisSummaryData>, analysisItem: IdbAnalysisItem, facility: IdbFacility): Array<AnnualAnalysisSummary> {
     let baselineYear: number = facility.sustainabilityQuestions.energyReductionBaselineYear;
     let reportYear: number = analysisItem.reportYear;
     if (facility.fiscalYear == 'nonCalendarYear' && facility.fiscalYearCalendarEnd) {

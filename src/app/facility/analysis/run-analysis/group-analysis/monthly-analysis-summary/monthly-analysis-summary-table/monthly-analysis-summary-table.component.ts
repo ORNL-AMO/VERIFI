@@ -30,6 +30,9 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
   monthlyTableColumnsSub: Subscription;
   numEnergyColumns: number;
   numImprovementColumns: number;
+  numPredictorColumns: number;
+
+  predictorColumns: Array<PredictorData>;
   constructor(private analysisService: AnalysisService) { }
 
   ngOnInit(): void {
@@ -37,6 +40,7 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
       this.monthlyTableColumns = columns;
       this.setNumEnergyColumns();
       this.setNumImprovementColumns();
+      this.setNumPredictorColumns();
       this.setPredictorVariables();
     })
   }
@@ -46,22 +50,22 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
   }
 
   setPredictorVariables() {
-    if (this.predictorVariables && this.monthlyTableColumns.productionVariables) {
-      this.monthlyAnalysisSummaryData.forEach(data => {
-        let dataIndex: number = 0;
-        this.predictorVariables.forEach(variable => {
-          if (variable.productionInAnalysis) {
-            data[variable.name] = data.predictorUsage[dataIndex];
-            dataIndex++;
+    let predictorColumns: Array<PredictorData> = new Array();
+    this.monthlyAnalysisSummaryData.forEach((data, index) => {
+      this.monthlyTableColumns.predictors.forEach(predictorItem => {
+        if (predictorItem.display) {
+          if (index == 0) {
+            predictorColumns.push(predictorItem.predictor)
           }
-        })
-      });
-    } else {
-      this.predictorVariables = [];
-    }
+          let monthData: { predictorId: string, usage: number } = data.predictorUsage.find(usageItem => { return usageItem.predictorId == predictorItem.predictor.id });
+          data[predictorItem.predictor.name] = monthData.usage;
+        }else if(data[predictorItem.predictor.name] != undefined){
+          delete data[predictorItem.predictor.name];
+        }
+      })
+    })
+    this.predictorColumns = predictorColumns;
   }
-
-
 
   setOrderDataField(str: string) {
     if (str == this.orderDataField) {
@@ -117,5 +121,15 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
       numImprovementColumns++;
     }
     this.numImprovementColumns = numImprovementColumns;
+  }
+
+  setNumPredictorColumns() {
+    let numPredictorColumns: number = 0;
+    this.monthlyTableColumns.predictors.forEach(predictor => {
+      if (predictor.display) {
+        numPredictorColumns++;
+      }
+    });
+    this.numPredictorColumns = numPredictorColumns;
   }
 }
