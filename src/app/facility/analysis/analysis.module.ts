@@ -21,9 +21,9 @@ import { MonthlyFacilityAnalysisComponent } from './run-analysis/facility-analys
 import { MonthlyFacilityAnalysisGraphComponent } from './run-analysis/facility-analysis/monthly-facility-analysis/monthly-facility-analysis-graph/monthly-facility-analysis-graph.component';
 import { AnnualFacilityAnalysisComponent } from './run-analysis/facility-analysis/annual-facility-analysis/annual-facility-analysis.component';
 import { AnnualFacilityAnalysisGraphComponent } from './run-analysis/facility-analysis/annual-facility-analysis/annual-facility-analysis-graph/annual-facility-analysis-graph.component';
-import { AnalysisSummaryTableFilterComponent } from './run-analysis/analysis-summary-table-filter/analysis-summary-table-filter.component';
-import { AnnualAnalysisSummaryTableComponent } from './run-analysis/annual-analysis-summary-table/annual-analysis-summary-table.component';
-import { MonthlyAnalysisSummaryTableComponent } from './run-analysis/monthly-analysis-summary-table/monthly-analysis-summary-table.component';
+import { SharedAnalysisModule } from 'src/app/shared/shared-analysis/shared-analysis.module';
+
+
 
 @NgModule({
   declarations: [
@@ -44,16 +44,14 @@ import { MonthlyAnalysisSummaryTableComponent } from './run-analysis/monthly-ana
     MonthlyFacilityAnalysisGraphComponent,
     AnnualFacilityAnalysisComponent,
     AnnualFacilityAnalysisGraphComponent,
-    AnalysisSummaryTableFilterComponent,
-    AnnualAnalysisSummaryTableComponent,
-    MonthlyAnalysisSummaryTableComponent
   ],
   imports: [
     CommonModule,
     FormsModule,
     RouterModule,
     HelperPipesModule,
-    NgbPaginationModule
+    NgbPaginationModule,
+    SharedAnalysisModule
   ]
 })
 export class AnalysisModule { }

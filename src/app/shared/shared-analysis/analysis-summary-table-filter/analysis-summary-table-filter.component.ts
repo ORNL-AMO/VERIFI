@@ -2,8 +2,8 @@ import { Component, Input, OnInit } from '@angular/core';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { AnalysisTableColumns } from 'src/app/models/analysis';
 import { AnalysisGroup, PredictorData } from 'src/app/models/idb';
-import { AnalysisService } from '../../analysis.service';
 import * as _ from 'lodash';
+import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
 
 @Component({
   selector: 'app-analysis-summary-table-filter',
