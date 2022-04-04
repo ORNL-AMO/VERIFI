@@ -1,30 +1,34 @@
-<div class="controls d-flex justify-content-end">
-    <!--Items Per Page-->
-    <div class="items-per-page" *ngIf="dataDisplay == 'table'">
-        <span>Show </span>
-        <select [(ngModel)]="itemsPerPage">
-            <option [ngValue]=6>6</option>
-            <option [ngValue]=12>12</option>
-            <option [ngValue]=24>24</option>
-            <option [ngValue]=36>36</option>
-            <option [ngValue]=48>48</option>
-            <option [ngValue]=60>60</option>
-            <option [ngValue]=999999999999>All</option>
-        </select>
-    </div>
-    <div class="btn-group">
-        <button class="btn" [ngClass]="{'btn-solid': dataDisplay == 'table'}"
-            (click)="setDataDisplay('table')">Table</button>
-        <button class="btn" [ngClass]="{'btn-solid': dataDisplay == 'graph'}"
-            (click)="setDataDisplay('graph')">Graph</button>
+<div class="controls d-flex justify-content-between">
+    <app-analysis-summary-table-filter [tableContext]="'monthFacility'"></app-analysis-summary-table-filter>
+
+    <div class="d-flex">
+        <!--Items Per Page-->
+        <div class="items-per-page" *ngIf="dataDisplay == 'table'">
+            <span>Show </span>
+            <select [(ngModel)]="itemsPerPage">
+                <option [ngValue]=6>6</option>
+                <option [ngValue]=12>12</option>
+                <option [ngValue]=24>24</option>
+                <option [ngValue]=36>36</option>
+                <option [ngValue]=48>48</option>
+                <option [ngValue]=60>60</option>
+                <option [ngValue]=999999999999>All</option>
+            </select>
+        </div>
+        <div class="btn-group">
+            <button class="btn" [ngClass]="{'btn-solid': dataDisplay == 'table'}"
+                (click)="setDataDisplay('table')">Table</button>
+            <button class="btn" [ngClass]="{'btn-solid': dataDisplay == 'graph'}"
+                (click)="setDataDisplay('graph')">Graph</button>
+        </div>
     </div>
 </div>
 <div class="w-100 x-scroll">
     <app-monthly-facility-analysis-graph *ngIf="dataDisplay == 'graph'"
         [monthlyFacilityAnalysisData]="monthlyFacilityAnalysisData" [analysisItem]="analysisItem" [facility]="facility">
     </app-monthly-facility-analysis-graph>
-    <app-monthly-facility-analysis-table *ngIf="dataDisplay == 'table'"
-        [monthlyFacilityAnalysisData]="monthlyFacilityAnalysisData" [analysisItem]="analysisItem" [facility]="facility"
+    <app-monthly-analysis-summary-table *ngIf="dataDisplay == 'table'"
+        [monthlyAnalysisSummaryData]="monthlyFacilityAnalysisData" [analysisItem]="analysisItem" [facility]="facility"
         [itemsPerPage]="itemsPerPage">
-    </app-monthly-facility-analysis-table>
+    </app-monthly-analysis-summary-table>
 </div>

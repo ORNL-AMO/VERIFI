@@ -7,7 +7,7 @@ thead th.active {
     text-decoration: underline;
 }
 
-thead th:hover{
+thead tr:not(.table-mh) th:hover{
     cursor: pointer;
     text-decoration: underline;
 }

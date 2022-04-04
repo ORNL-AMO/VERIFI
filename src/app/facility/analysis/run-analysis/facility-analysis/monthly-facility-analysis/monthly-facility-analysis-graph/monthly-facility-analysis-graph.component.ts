@@ -2,7 +2,7 @@ import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 import * as _ from 'lodash';
-import { FacilityMonthlyAnalysisSummaryData, MonthlyFacilityAnalysisData } from 'src/app/models/analysis';
+import { MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 
 @Component({
   selector: 'app-monthly-facility-analysis-graph',
@@ -11,7 +11,7 @@ import { FacilityMonthlyAnalysisSummaryData, MonthlyFacilityAnalysisData } from 
 })
 export class MonthlyFacilityAnalysisGraphComponent implements OnInit {
   @Input()
-  monthlyFacilityAnalysisData: Array<FacilityMonthlyAnalysisSummaryData>;
+  monthlyFacilityAnalysisData: Array<MonthlyAnalysisSummaryData>;
   @Input()
   analysisItem: IdbAnalysisItem;
   @Input()

@@ -1,4 +1,4 @@
-import { AnalysisGroup, PredictorData } from "./idb";
+import { AnalysisGroup, IdbPredictorEntry, PredictorData } from "./idb";
 
 // export interface AnnualGroupSummary {
 //   year: number,
@@ -96,7 +96,10 @@ export interface MonthlyAnalysisSummaryData {
   date: Date,
   energyUse: number,
   modeledEnergy: number,
-  predictorUsage?: Array<number>,
+  predictorUsage?: Array<{
+    usage: number,
+    predictorId: string
+  }>,
   fiscalYear: number,
   group: AnalysisGroup,
   adjustedBaselineEnergyUse: number,
@@ -106,35 +109,9 @@ export interface MonthlyAnalysisSummaryData {
   yearToDateSavings: number,
   yearToDatePercentSavings: number,
   rollingSavings: number,
-  rolling12MonthImprovement: number,
+  rolling12MonthImprovement: number,  
+  groupsSummaryData?: Array<MonthlyAnalysisSummaryData>
 }
-
-export interface FacilityMonthlyAnalysisSummaryData extends MonthlyAnalysisSummaryData  {
-  date: Date,
-  groupsSummaryData: Array<MonthlyAnalysisSummaryData>
-}
-
-
-// export interface AnnualAnalysisSummary {
-//   year: number,
-//   energyUse: number,
-//   annualEnergySavings: number,
-//   totalEnergySavings: number,
-//   modeledEnergyUse: number,
-//   annualModeledEnergySavings: number,
-//   totalModeledEnergySavings: number,
-//   SEnPI: number,
-//   cumulativeSavings: number,
-//   annualSavings: number,
-
-//   totalProduction: number,
-//   annualProductionChange: number,
-//   totalProductionChange: number,
-//   energyIntensity: number,
-//   totalEnergyIntensityChange: number,
-//   annualEnergyIntensityChange: number,
-//   group?: AnalysisGroup
-// }
 
 export interface AnnualAnalysisSummary {
   year: number,
@@ -147,5 +124,37 @@ export interface AnnualAnalysisSummary {
   annualSavingsPercentImprovement: number,
   adjustmentToBaseline: number,
   cummulativeSavings: number,
-  newSavings: number
+  newSavings: number,
+  predictorUsage?: Array<{
+    usage: number,
+    predictorId: string
+  }>,
+}
+
+
+export interface AnalysisTableColumns {
+  incrementalImprovement: boolean,
+  SEnPI: boolean,
+  savings: boolean,
+  percentSavingsComparedToBaseline: boolean,
+  yearToDateSavings: boolean,
+  yearToDatePercentSavings: boolean,
+  rollingSavings: boolean,
+  rolling12MonthImprovement: boolean,
+  productionVariables: boolean,
+  energy: boolean,
+  actualEnergy: boolean,
+  modeledEnergy: boolean,
+  adjustedEnergy: boolean,
+  totalSavingsPercentImprovement: boolean,
+  annualSavingsPercentImprovement: boolean,
+  adjustmentToBaseline: boolean,
+  cummulativeSavings: boolean,
+  newSavings: boolean,
+  predictors: Array<{
+    predictor: PredictorData,
+    display: boolean,
+    usedInAnalysis: boolean
+  }>,
+  predictorGroupId: number
 }

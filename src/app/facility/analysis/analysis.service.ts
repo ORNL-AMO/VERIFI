@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { LocalStorageService } from 'ngx-webstorage';
 import { BehaviorSubject } from 'rxjs';
+import { AnalysisTableColumns } from 'src/app/models/analysis';
 import { AnalysisGroup, IdbFacility, PredictorData } from '../../models/idb';
 
 @Injectable({
@@ -10,6 +11,8 @@ export class AnalysisService {
 
   selectedGroup: BehaviorSubject<AnalysisGroup>;
   dataDisplay: BehaviorSubject<"graph" | "table">;
+
+  analysisTableColumns: BehaviorSubject<AnalysisTableColumns>;
   constructor(private localStorageService: LocalStorageService) {
     let dataDisplay: "graph" | "table" = this.localStorageService.retrieve("analysisDataDisplay");
     if (!dataDisplay) {
@@ -18,11 +21,53 @@ export class AnalysisService {
     this.selectedGroup = new BehaviorSubject<AnalysisGroup>(undefined);
     this.dataDisplay = new BehaviorSubject<"graph" | "table">(dataDisplay);
 
+
+    let analysisTableColumns: AnalysisTableColumns = this.localStorageService.retrieve("analysisTableColumns");
+    if (!analysisTableColumns) {
+      analysisTableColumns = {
+        incrementalImprovement: false,
+        SEnPI: false,
+        savings: false,
+        percentSavingsComparedToBaseline: false,
+        yearToDateSavings: false,
+        yearToDatePercentSavings: false,
+        rollingSavings: false,
+        rolling12MonthImprovement: false,
+        productionVariables: true,
+        energy: true,
+        actualEnergy: true,
+        modeledEnergy: true,
+        adjustedEnergy: true,
+        totalSavingsPercentImprovement: true,
+        annualSavingsPercentImprovement: true,
+        adjustmentToBaseline: true,
+        cummulativeSavings: true,
+        newSavings: true,
+        predictors: [],
+        predictorGroupId: undefined
+      }
+    }
+    this.analysisTableColumns = new BehaviorSubject<AnalysisTableColumns>(analysisTableColumns);
+
+
     this.dataDisplay.subscribe(dataDisplay => {
       if (dataDisplay) {
         this.localStorageService.store('analysisDataDisplay', dataDisplay);
       }
     });
+
+    this.analysisTableColumns.subscribe(analysisTableColumns => {
+      if (analysisTableColumns) {
+        this.localStorageService.store('analysisTableColumns', analysisTableColumns);
+      }
+    });
+
+    
+    // this.monthlyTableColumns.subscribe(annualTableColumns => {
+    //   if (annualTableColumns) {
+    //     this.localStorageService.store('annualTableColumns', monthlyTableColumns);
+    //   }
+    // });
   }
 
   checkGroupHasError(group: AnalysisGroup): boolean {

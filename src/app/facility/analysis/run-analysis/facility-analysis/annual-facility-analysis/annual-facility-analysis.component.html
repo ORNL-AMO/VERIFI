@@ -1,4 +1,6 @@
-<div class="controls d-flex justify-content-end">
+<div class="controls d-flex justify-content-between">
+    <app-analysis-summary-table-filter [tableContext]="'annualFacility'"></app-analysis-summary-table-filter>
+
     <div class="btn-group">
         <button class="btn" [ngClass]="{'btn-solid': dataDisplay == 'table'}"
             (click)="setDataDisplay('table')">Table</button>
@@ -7,16 +9,6 @@
     </div>
 </div>
 
-<!-- <app-annual-facility-analysis-graph *ngIf="dataDisplay == 'graph'"
-    [groupSummaries]="annualFacilitySummaryData.groupSummaries" [analysisItem]="analysisItem"
-    [annualAnalysisSummary]="annualFacilitySummaryData.annualAnalysisSummary" [facility]="facility"></app-annual-facility-analysis-graph>
-<app-annual-analysis-summary-table *ngIf="dataDisplay == 'table'"
-    [annualAnalysisSummary]="annualFacilitySummaryData.annualAnalysisSummary" [analysisItem]="analysisItem">
-</app-annual-analysis-summary-table>
-<hr *ngIf="dataDisplay == 'table'">
-<app-annual-facility-analysis-table *ngIf="dataDisplay == 'table'"
-    [groupSummaries]="annualFacilitySummaryData.groupSummaries" [analysisItem]="analysisItem">
-</app-annual-facility-analysis-table> -->
 <div class="w-100 x-scroll">
     <app-annual-analysis-summary-table *ngIf="dataDisplay == 'table'" [annualAnalysisSummary]="annualAnalysisSummary"
         [analysisItem]="analysisItem">
