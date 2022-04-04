@@ -59,10 +59,15 @@ export class AnalysisCalculationsHelperService {
     }
   }
 
-  getYearOptions(): Array<number> {
-    let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
-    if (facilityMeterData.length != 0) {
-      let orderedMeterData: Array<IdbUtilityMeterData> = _.orderBy(facilityMeterData, (data) => { return new Date(data.readDate) });
+  getYearOptions(inAccount?: boolean): Array<number> {
+    let meterData: Array<IdbUtilityMeterData>
+    if (!inAccount) {
+      meterData = this.utilityMeterDataDbService.facilityMeterData.getValue();
+    } else {
+      meterData = this.utilityMeterDataDbService.accountMeterData.getValue();
+    }
+    if (meterData.length != 0) {
+      let orderedMeterData: Array<IdbUtilityMeterData> = _.orderBy(meterData, (data) => { return new Date(data.readDate) });
       let firstBill: IdbUtilityMeterData = orderedMeterData[0];
       let lastBill: IdbUtilityMeterData = orderedMeterData[orderedMeterData.length - 1];
       let yearStart: number = new Date(firstBill.readDate).getUTCFullYear();

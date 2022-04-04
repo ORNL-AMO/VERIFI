@@ -42,6 +42,9 @@ import { SetupWelcomeComponent } from './setup-wizard/setup-welcome/setup-welcom
 import { SetupAccountComponent } from './setup-wizard/setup-account/setup-account.component';
 import { SetupFacilitiesComponent } from './setup-wizard/setup-facilities/setup-facilities.component';
 import { SetupConfirmationComponent } from './setup-wizard/setup-confirmation/setup-confirmation.component';
+import { AccountAnalysisComponent } from './account/account-analysis/account-analysis.component';
+import { AccountAnalysisDashboardComponent } from './account/account-analysis/account-analysis-dashboard/account-analysis-dashboard.component';
+import { AccountAnalysisSetupComponent } from './account/account-analysis/account-analysis-setup/account-analysis-setup.component';
 
 const routes: Routes = [
   {
@@ -76,6 +79,15 @@ const routes: Routes = [
           { path: 'basic-report', component: BasicReportComponent }
         ]
       },
+      {
+        path: 'analysis',
+        component: AccountAnalysisComponent,
+        children: [
+          { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
+          { path: 'dashboard', component: AccountAnalysisDashboardComponent },
+          { path: 'setup', component: AccountAnalysisSetupComponent }
+        ]
+      }
     ]
   },
   {
