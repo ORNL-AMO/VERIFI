@@ -1,0 +1,47 @@
+<h5><i class="fa fa-industry" [ngStyle]="{color: facility.color}"></i>{{facility.name}}</h5>
+
+<div class="table-responsive">
+    <table class="table table-sm table-hover">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Analysis Item</th>
+                <th>
+                    Report Year
+                </th>
+                <th>Last Modified</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let analysisItem of facilityAnalysisItems">
+                <td>
+                    <input type="radio" class="rowToggle" [(ngModel)]="selectedFacilityItemId"
+                        [value]="analysisItem.id" name="{{analysisItem.id+'_selectedFacilityItemId'}}"
+                        id="{{analysisItem.id+'_selectedFacilityItemId'}}" (change)="save()">
+                </td>
+                <td>
+                    {{analysisItem.name}}
+                </td>
+                <td>{{analysisItem.reportYear}}</td>
+                <td>{{analysisItem.date | date}}</td>
+                <td class="actions">
+                    <div class="d-flex">
+                        <!-- <i class="fa fa-pencil" title="Edit" (click)="editItem(analysisItem)"></i>
+                        <i class="fa fa-trash" title="Delete" (click)="deleteItem(analysisItem)"></i> -->
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <input type="radio" class="rowToggle" [(ngModel)]="selectedFacilityItemId"
+                        [value]="undefined" name="{{facility.name+'undefined'}}"
+                        id="{{facility.name+'undefined'}}" (change)="save()">
+                </td>
+                <td colspan="4">
+                    Skip Facility
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

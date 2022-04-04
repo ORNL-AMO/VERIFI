@@ -45,6 +45,7 @@ import { SetupConfirmationComponent } from './setup-wizard/setup-confirmation/se
 import { AccountAnalysisComponent } from './account/account-analysis/account-analysis.component';
 import { AccountAnalysisDashboardComponent } from './account/account-analysis/account-analysis-dashboard/account-analysis-dashboard.component';
 import { AccountAnalysisSetupComponent } from './account/account-analysis/account-analysis-setup/account-analysis-setup.component';
+import { SelectFacilityAnalysisItemsComponent } from './account/account-analysis/select-facility-analysis-items/select-facility-analysis-items.component';
 
 const routes: Routes = [
   {
@@ -85,7 +86,8 @@ const routes: Routes = [
         children: [
           { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
           { path: 'dashboard', component: AccountAnalysisDashboardComponent },
-          { path: 'setup', component: AccountAnalysisSetupComponent }
+          { path: 'setup', component: AccountAnalysisSetupComponent },
+          { path: 'select-items', component: SelectFacilityAnalysisItemsComponent }
         ]
       }
     ]

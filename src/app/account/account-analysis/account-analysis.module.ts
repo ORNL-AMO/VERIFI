@@ -8,6 +8,8 @@ import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { FormsModule } from '@angular/forms';
 import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.module';
 import { AccountAnalysisSetupComponent } from './account-analysis-setup/account-analysis-setup.component';
+import { SelectFacilityAnalysisItemsComponent } from './select-facility-analysis-items/select-facility-analysis-items.component';
+import { SelectItemTableComponent } from './select-facility-analysis-items/select-item-table/select-item-table.component';
 
 
 
@@ -16,7 +18,9 @@ import { AccountAnalysisSetupComponent } from './account-analysis-setup/account-
     AccountAnalysisComponent,
     AccountAnalysisDashboardComponent,
     AccountAnalysisBannerComponent,
-    AccountAnalysisSetupComponent
+    AccountAnalysisSetupComponent,
+    SelectFacilityAnalysisItemsComponent,
+    SelectItemTableComponent
   ],
   imports: [
     CommonModule,

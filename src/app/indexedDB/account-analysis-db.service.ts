@@ -5,7 +5,6 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { IdbAccount, IdbAccountAnalysisItem, IdbFacility } from '../models/idb';
 import { AccountdbService } from './account-db.service';
 import { FacilitydbService } from './facility-db.service';
-import { UtilityMeterGroupdbService } from './utilityMeterGroup-db.service';
 
 @Injectable({
   providedIn: 'root'
@@ -142,5 +141,15 @@ export class AccountAnalysisDbService {
     for (let i = 0; i < analysisItems.length; i++) {
       await this.deleteWithObservable(analysisItems[i].id);
     }
+  }
+
+  updateFacilityItemSelection(analysiItem: IdbAccountAnalysisItem, analysisItemId: number, facilityId: number){
+    analysiItem.facilityAnalysisItems.forEach(item => {
+      if(item.facilityId == facilityId){
+        item.analysisItemId = analysisItemId;
+      }
+    });
+    this.update(analysiItem);
+    this.selectedAnalysisItem.next(analysiItem);
   }
 }
