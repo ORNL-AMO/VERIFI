@@ -10,6 +10,9 @@ import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.modu
 import { AccountAnalysisSetupComponent } from './account-analysis-setup/account-analysis-setup.component';
 import { SelectFacilityAnalysisItemsComponent } from './select-facility-analysis-items/select-facility-analysis-items.component';
 import { SelectItemTableComponent } from './select-facility-analysis-items/select-item-table/select-item-table.component';
+import { AccountAnalysisResultsComponent } from './account-analysis-results/account-analysis-results.component';
+import { MonthlyAccountAnalysisComponent } from './account-analysis-results/monthly-account-analysis/monthly-account-analysis.component';
+import { AnnualAccountAnalysisComponent } from './account-analysis-results/annual-account-analysis/annual-account-analysis.component';
 
 
 
@@ -20,7 +23,10 @@ import { SelectItemTableComponent } from './select-facility-analysis-items/selec
     AccountAnalysisBannerComponent,
     AccountAnalysisSetupComponent,
     SelectFacilityAnalysisItemsComponent,
-    SelectItemTableComponent
+    SelectItemTableComponent,
+    AccountAnalysisResultsComponent,
+    MonthlyAccountAnalysisComponent,
+    AnnualAccountAnalysisComponent
   ],
   imports: [
     CommonModule,

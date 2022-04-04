@@ -1,11 +1,11 @@
 
-/* .wrapper.main-content{
+.wrapper.main-content{
     margin: 30px;
-} */
+} 
 
-/* .content-padding{
+.content-padding{
     padding: 20px 30px 30px;
-} */
+}
 
 th:hover{
     cursor: pointer;

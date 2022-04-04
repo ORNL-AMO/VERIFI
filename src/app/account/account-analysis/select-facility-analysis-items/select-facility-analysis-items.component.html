@@ -1,8 +1,12 @@
-<h4>Facility Analysis Items</h4>
-<div class="d-flex flex-column">
-    <div class="p-2" *ngFor="let facility of facilities">
-        <app-select-item-table [facility]="facility" [selectedAnalysisItem]="selectedAnalysisItem"
-            [accountAnalysisItems]="accountAnalysisItems"></app-select-item-table>
-        <hr>
+<div class="wrapper main-content p-0">
+    <div class="content-padding">
+        <h4>Facility Analysis Items</h4>
+        <div class="d-flex flex-column">
+            <div class="p-2" *ngFor="let facility of facilities">
+                <app-select-item-table [facility]="facility" [selectedAnalysisItem]="selectedAnalysisItem"
+                    [accountAnalysisItems]="accountAnalysisItems"></app-select-item-table>
+                <hr>
+            </div>
+        </div>
     </div>
 </div>

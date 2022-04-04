@@ -46,6 +46,9 @@ import { AccountAnalysisComponent } from './account/account-analysis/account-ana
 import { AccountAnalysisDashboardComponent } from './account/account-analysis/account-analysis-dashboard/account-analysis-dashboard.component';
 import { AccountAnalysisSetupComponent } from './account/account-analysis/account-analysis-setup/account-analysis-setup.component';
 import { SelectFacilityAnalysisItemsComponent } from './account/account-analysis/select-facility-analysis-items/select-facility-analysis-items.component';
+import { AccountAnalysisResultsComponent } from './account/account-analysis/account-analysis-results/account-analysis-results.component';
+import { MonthlyAccountAnalysisComponent } from './account/account-analysis/account-analysis-results/monthly-account-analysis/monthly-account-analysis.component';
+import { AnnualAccountAnalysisComponent } from './account/account-analysis/account-analysis-results/annual-account-analysis/annual-account-analysis.component';
 
 const routes: Routes = [
   {
@@ -87,7 +90,16 @@ const routes: Routes = [
           { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
           { path: 'dashboard', component: AccountAnalysisDashboardComponent },
           { path: 'setup', component: AccountAnalysisSetupComponent },
-          { path: 'select-items', component: SelectFacilityAnalysisItemsComponent }
+          { path: 'select-items', component: SelectFacilityAnalysisItemsComponent },
+          {
+            path: 'results', 
+            component: AccountAnalysisResultsComponent,
+            children: [
+              { path: '', pathMatch: 'full', redirectTo: 'annual-analysis' },
+              { path: 'monthly-analysis', component: MonthlyAccountAnalysisComponent },
+              { path: 'annual-analysis', component: AnnualAccountAnalysisComponent }
+            ]
+          }
         ]
       }
     ]

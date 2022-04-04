@@ -1,0 +1,25 @@
+.content-padding{
+    padding: 20px 30px 30px;
+}
+
+.nav-tabs{
+    background-color: #f1f1f1;
+}
+
+
+.nav-tabs .nav-link.active{
+    color: #145A32;
+    background-color: white;
+}
+
+.nav-tabs .nav-link:not(.active){
+    background-color: #145A32;
+    color: white;
+    border: solid 1px white;
+}
+
+
+.nav-link{
+    font-weight: 600;
+}
+
