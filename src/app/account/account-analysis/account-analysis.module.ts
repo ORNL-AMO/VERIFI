@@ -13,6 +13,7 @@ import { SelectItemTableComponent } from './select-facility-analysis-items/selec
 import { AccountAnalysisResultsComponent } from './account-analysis-results/account-analysis-results.component';
 import { MonthlyAccountAnalysisComponent } from './account-analysis-results/monthly-account-analysis/monthly-account-analysis.component';
 import { AnnualAccountAnalysisComponent } from './account-analysis-results/annual-account-analysis/annual-account-analysis.component';
+import { SharedAnalysisModule } from 'src/app/shared/shared-analysis/shared-analysis.module';
 
 
 
@@ -33,7 +34,8 @@ import { AnnualAccountAnalysisComponent } from './account-analysis-results/annua
     RouterModule,
     NgbPaginationModule,
     FormsModule,
-    HelperPipesModule
+    HelperPipesModule,
+    SharedAnalysisModule
   ]
 })
 export class AccountAnalysisModule { }

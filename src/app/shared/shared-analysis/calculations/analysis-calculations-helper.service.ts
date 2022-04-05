@@ -1,36 +1,30 @@
 import { Injectable } from '@angular/core';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { AnalysisGroup, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, PredictorData } from 'src/app/models/idb';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeterData, PredictorData } from 'src/app/models/idb';
 import * as _ from 'lodash';
-import { CalanderizationOptions, CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
-import { AnnualAnalysisSummary, MonthlyAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
-import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
-import { ConvertMeterDataService } from 'src/app/shared/helper-services/convert-meter-data.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
+import { MonthlyData } from 'src/app/models/calanderization';
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class AnalysisCalculationsHelperService {
 
-  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private calendarizationService: CalanderizationService,
-    private convertMeterDataService: ConvertMeterDataService, private utilityMeterDbService: UtilityMeterdbService,
-    private predictorDbService: PredictordbService) { }
+  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService) { }
 
-  getMonthlyStartAndEndDate(facility: IdbFacility, analysisItem: IdbAnalysisItem): { baselineDate: Date, endDate: Date } {
+  getMonthlyStartAndEndDate(facilityOrAccount: IdbFacility | IdbAccount, analysisItem: IdbAnalysisItem | IdbAccountAnalysisItem): { baselineDate: Date, endDate: Date } {
     let baselineDate: Date;
     let endDate: Date;
-    if (facility.fiscalYear == 'calendarYear') {
-      baselineDate = new Date(facility.sustainabilityQuestions.energyReductionBaselineYear, 0, 1);
+    if (facilityOrAccount.fiscalYear == 'calendarYear') {
+      baselineDate = new Date(facilityOrAccount.sustainabilityQuestions.energyReductionBaselineYear, 0, 1);
       endDate = new Date(analysisItem.reportYear + 1, 0, 1);
     } else {
-      if (facility.fiscalYearCalendarEnd) {
-        baselineDate = new Date(facility.sustainabilityQuestions.energyReductionBaselineYear - 1, facility.fiscalYearMonth);
-        endDate = new Date(analysisItem.reportYear, facility.fiscalYearMonth);
+      if (facilityOrAccount.fiscalYearCalendarEnd) {
+        baselineDate = new Date(facilityOrAccount.sustainabilityQuestions.energyReductionBaselineYear - 1, facilityOrAccount.fiscalYearMonth);
+        endDate = new Date(analysisItem.reportYear, facilityOrAccount.fiscalYearMonth);
       } else {
-        baselineDate = new Date(facility.sustainabilityQuestions.energyReductionBaselineYear, facility.fiscalYearMonth);
-        endDate = new Date(analysisItem.reportYear + 1, facility.fiscalYearMonth);
+        baselineDate = new Date(facilityOrAccount.sustainabilityQuestions.energyReductionBaselineYear, facilityOrAccount.fiscalYearMonth);
+        endDate = new Date(analysisItem.reportYear + 1, facilityOrAccount.fiscalYearMonth);
       }
     }
     return {
@@ -39,18 +33,18 @@ export class AnalysisCalculationsHelperService {
     }
   }
 
-  getFiscalYear(date: Date, facility: IdbFacility): number {
-    if (facility.fiscalYear == 'calendarYear') {
+  getFiscalYear(date: Date, facilityOrAccount: IdbFacility | IdbAccount): number {
+    if (facilityOrAccount.fiscalYear == 'calendarYear') {
       return date.getUTCFullYear();
     } else {
-      if (facility.fiscalYearCalendarEnd) {
-        if (date.getUTCMonth() >= facility.fiscalYearMonth) {
+      if (facilityOrAccount.fiscalYearCalendarEnd) {
+        if (date.getUTCMonth() >= facilityOrAccount.fiscalYearMonth) {
           return date.getUTCFullYear() + 1;
         } else {
           return date.getUTCFullYear();
         }
       } else {
-        if (date.getUTCMonth() >= facility.fiscalYearMonth) {
+        if (date.getUTCMonth() >= facilityOrAccount.fiscalYearMonth) {
           return date.getUTCFullYear();
         } else {
           return date.getUTCFullYear() - 1;

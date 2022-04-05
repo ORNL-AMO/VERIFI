@@ -34,8 +34,13 @@ export class AnalysisCalculationsService {
       }
     });
 
-    let facilityPredictorData: Array<IdbPredictorEntry> = this.predictorDbService.facilityPredictorEntries.getValue();
-    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+    let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
+    let facilityPredictorData: Array<IdbPredictorEntry> = accountPredictorEntries.filter(entry => {
+      return entry.facilityId == facility.id;
+    });
+    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == facility.id });
+
     let groupMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.groupId == selectedGroup.idbGroupId });
     let calanderizationOptions: CalanderizationOptions = {
       energyIsSource: analysisItem.energyIsSource
@@ -244,8 +249,14 @@ export class AnalysisCalculationsService {
       reportYear = reportYear - 1;
     }
 
-    let facilityPredictorData: Array<IdbPredictorEntry> = this.predictorDbService.facilityPredictorEntries.getValue();
-    let predictorVariables: Array<PredictorData> = this.predictorDbService.facilityPredictors.getValue();
+    let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
+    let facilityPredictorData: Array<IdbPredictorEntry> = accountPredictorEntries.filter(entry => {
+      return entry.facilityId == facility.id;
+    });
+    let predictorVariables: Array<PredictorData> = new Array();
+    if (facilityPredictorData.length > 0) {
+      predictorVariables = facilityPredictorData[0].predictors
+    }
 
     let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = new Array();
     let baselineEnergyUse: number;

@@ -2,7 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
 import { AnalysisTableColumns, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
-import { AnalysisGroup, IdbAnalysisItem, IdbFacility, PredictorData } from 'src/app/models/idb';
+import { AnalysisGroup, IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, PredictorData } from 'src/app/models/idb';
 
 @Component({
   selector: 'app-monthly-analysis-summary-table',
@@ -13,11 +13,11 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
   @Input()
   monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>;
   @Input()
-  analysisItem: IdbAnalysisItem;
+  analysisItem: IdbAnalysisItem | IdbAccountAnalysisItem;
   @Input()
   itemsPerPage: number;
   @Input()
-  facility: IdbFacility;
+  facilityOrAccount: IdbFacility | IdbAccount;
   @Input()
   predictorVariables: Array<PredictorData>;
   @Input()
@@ -80,7 +80,7 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
   }
 
   checkFiscalYearEnd(date: Date): boolean {
-    return this.analysisService.checkFiscalYearEnd(date, this.facility, this.orderDataField, this.orderByDirection);
+    return this.analysisService.checkFiscalYearEnd(date, this.facilityOrAccount, this.orderDataField, this.orderByDirection);
   }
 
   setNumEnergyColumns() {

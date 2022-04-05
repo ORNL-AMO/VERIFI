@@ -8,7 +8,6 @@ import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { HelperPipesModule } from '../helper-pipes/helper-pipes.module';
 
 
-
 @NgModule({
   declarations: [
     AnalysisSummaryTableFilterComponent,

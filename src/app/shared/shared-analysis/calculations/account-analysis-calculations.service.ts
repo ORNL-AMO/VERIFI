@@ -1,46 +1,44 @@
 import { Injectable } from '@angular/core';
-import { AnnualAnalysisSummary, FacilityGroupSummary, MonthlyAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
-import { IdbAnalysisItem, IdbFacility, IdbPredictorEntry, PredictorData } from 'src/app/models/idb';
+import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 import { AnalysisCalculationsHelperService } from './analysis-calculations-helper.service';
-import { AnalysisCalculationsService } from './analysis-calculations.service';
+import { FacilityAnalysisCalculationsService } from './facility-analysis-calculations.service';
 import * as _ from 'lodash';
-import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 
 @Injectable({
   providedIn: 'root'
 })
-export class FacilityAnalysisCalculationsService {
+export class AccountAnalysisCalculationsService {
 
-  constructor(private analysisCalculationsService: AnalysisCalculationsService, private analysisCalculationsHelperService: AnalysisCalculationsHelperService,
-    private predictorDbService: PredictordbService) { }
+  constructor(private analysisCalculationsHelperService: AnalysisCalculationsHelperService,
+    private facilityAnalysisCalculationsService: FacilityAnalysisCalculationsService,
+    private analysisDbService: AnalysisDbService,
+    private facilityDbService: FacilitydbService) { }
 
-
-
-  calculateMonthlyFacilityAnalysis(analysisItem: IdbAnalysisItem, facility: IdbFacility): Array<MonthlyAnalysisSummaryData> {
-    let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = this.analysisCalculationsHelperService.getMonthlyStartAndEndDate(facility, analysisItem);
+  calculatMonthlyAccountAnalysis(accountAnalysisItem: IdbAccountAnalysisItem, account: IdbAccount): Array<MonthlyAnalysisSummaryData>{
+    let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = this.analysisCalculationsHelperService.getMonthlyStartAndEndDate(account, accountAnalysisItem);
     let baselineDate: Date = monthlyStartAndEndDate.baselineDate;
     let endDate: Date = monthlyStartAndEndDate.endDate;
 
     let analysisSummaryData: Array<MonthlyAnalysisSummaryData> = new Array();
 
-    let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
-    let facilityPredictorData: Array<IdbPredictorEntry> = accountPredictorEntries.filter(entry => {
-      return entry.facilityId == facility.id;
-    });
-    let predictorVariables: Array<PredictorData> = new Array();
-    if (facilityPredictorData.length > 0) {
-      predictorVariables = facilityPredictorData[0].predictors
-    }
+    let allAccountAnalysisDbItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
+    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = new Array();
+    accountAnalysisItem.facilityAnalysisItems.forEach(item => {
+      let analysisItem: IdbAnalysisItem = allAccountAnalysisDbItems.find(dbItem => {return dbItem.id == item.analysisItemId});
+      //update items with account options
+      analysisItem.energyUnit = accountAnalysisItem.energyUnit;
 
-    let groupSummaries: Array<MonthlyAnalysisSummary> = new Array();
-    analysisItem.groups.forEach(group => {
-      let summaryData: MonthlyAnalysisSummary = this.analysisCalculationsService.getMonthlyAnalysisSummary(group, analysisItem, facility);
-      groupSummaries.push(summaryData);
-    });
+      let facility: IdbFacility = accountFacilities.find(facility => {return facility.id == item.facilityId});
+      let facilityItemSummary: Array<MonthlyAnalysisSummaryData> = this.facilityAnalysisCalculationsService.calculateMonthlyFacilityAnalysis(analysisItem, facility);
+      monthlyAnalysisSummaryData = monthlyAnalysisSummaryData.concat(facilityItemSummary);
+    })
 
-    let baselineYear: number = this.analysisCalculationsHelperService.getFiscalYear(baselineDate, facility);
+    let baselineYear: number = this.analysisCalculationsHelperService.getFiscalYear(baselineDate, account);
 
-    let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = groupSummaries.flatMap(summary => { return summary.monthlyAnalysisSummaryData });
 
     let baselineActualEnergyUseData: Array<number> = new Array();
     let baselineModeledEnergyUseData: Array<number> = new Array();
@@ -53,7 +51,7 @@ export class FacilityAnalysisCalculationsService {
     let yearToDateAdjustedEnergyUse: number = 0;
     let summaryDataIndex: number = 0;
     while (baselineDate < endDate) {
-      let fiscalYear: number = this.analysisCalculationsHelperService.getFiscalYear(new Date(baselineDate), facility);
+      let fiscalYear: number = this.analysisCalculationsHelperService.getFiscalYear(new Date(baselineDate), account);
       if (previousFiscalYear == fiscalYear && summaryDataIndex != 0) {
         monthIndex++;
       } else {
@@ -69,29 +67,6 @@ export class FacilityAnalysisCalculationsService {
         let summaryDataDate: Date = new Date(summaryData.date);
         return summaryDataDate.getUTCMonth() == baselineDate.getUTCMonth() && summaryDataDate.getUTCFullYear() == baselineDate.getUTCFullYear();
       });
-      //predictor data for month
-      let monthPredictorData: Array<IdbPredictorEntry> = facilityPredictorData.filter(predictorData => {
-        let predictorDate: Date = new Date(predictorData.date);
-        return predictorDate.getUTCFullYear() == baselineDate.getUTCFullYear() && predictorDate.getUTCMonth() == baselineDate.getUTCMonth();
-      });
-
-      let predictorUsage: Array<{
-        usage: number,
-        predictorId: string
-      }> = new Array();
-      predictorVariables.forEach(variable => {
-        let usageVal: number = 0;
-        monthPredictorData.forEach(data => {
-          let predictorData: PredictorData = data.predictors.find(predictor => { return predictor.id == variable.id });
-          usageVal = usageVal + predictorData.amount;
-        });
-        predictorUsage.push({
-          usage: usageVal,
-          predictorId: variable.id
-        });
-      });
-
-
 
       let energyUse: number = _.sumBy(currentMonthData, 'energyUse');
       yearToDateActualEnergyUse = yearToDateActualEnergyUse + energyUse;
@@ -142,7 +117,7 @@ export class FacilityAnalysisCalculationsService {
         groupsSummaryData: currentMonthData,
         energyUse: energyUse,
         modeledEnergy: modeledEnergy,
-        predictorUsage: predictorUsage,
+        predictorUsage: [],
         fiscalYear: fiscalYear,
         group: undefined,
         adjustedBaselineEnergyUse: adjustedBaselineEnergyUse,
@@ -161,11 +136,5 @@ export class FacilityAnalysisCalculationsService {
       baselineDate = new Date(baselineDate.getUTCFullYear(), nextMonth, 1);
     }
     return analysisSummaryData;
-  }
-
-  getAnnualAnalysisSummary(analysisItem: IdbAnalysisItem, facility: IdbFacility): Array<AnnualAnalysisSummary> {
-    let facilityMonthlySummaryData: Array<MonthlyAnalysisSummaryData> = this.calculateMonthlyFacilityAnalysis(analysisItem, facility);
-    let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = this.analysisCalculationsService.calculateAnnualAnalysisSummary(facilityMonthlySummaryData, analysisItem, facility);
-    return annualAnalysisSummaries;
   }
 }
