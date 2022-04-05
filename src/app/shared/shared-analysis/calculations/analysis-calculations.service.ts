@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { AnalysisGroup, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, PredictorData } from 'src/app/models/idb';
+import { AnalysisGroup, IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, PredictorData } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { CalanderizationOptions, CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import { AnnualAnalysisSummary, MonthlyAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
@@ -241,21 +241,24 @@ export class AnalysisCalculationsService {
   }
 
 
-  calculateAnnualAnalysisSummary(monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>, analysisItem: IdbAnalysisItem, facility: IdbFacility): Array<AnnualAnalysisSummary> {
-    let baselineYear: number = facility.sustainabilityQuestions.energyReductionBaselineYear;
+  calculateAnnualAnalysisSummary(monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>, analysisItem: IdbAnalysisItem | IdbAccountAnalysisItem, facilityOrAccount: IdbFacility | IdbAccount, inAccount?: boolean): Array<AnnualAnalysisSummary> {
+    let baselineYear: number = facilityOrAccount.sustainabilityQuestions.energyReductionBaselineYear;
     let reportYear: number = analysisItem.reportYear;
-    if (facility.fiscalYear == 'nonCalendarYear' && facility.fiscalYearCalendarEnd) {
+    if (facilityOrAccount.fiscalYear == 'nonCalendarYear' && facilityOrAccount.fiscalYearCalendarEnd) {
       baselineYear = baselineYear - 1;
       reportYear = reportYear - 1;
     }
-
-    let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
-    let facilityPredictorData: Array<IdbPredictorEntry> = accountPredictorEntries.filter(entry => {
-      return entry.facilityId == facility.id;
-    });
+    let facilityPredictorData: Array<IdbPredictorEntry> = new Array();
     let predictorVariables: Array<PredictorData> = new Array();
-    if (facilityPredictorData.length > 0) {
-      predictorVariables = facilityPredictorData[0].predictors
+    if (!inAccount) {
+      let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
+      facilityPredictorData = accountPredictorEntries.filter(entry => {
+        return entry.facilityId == facilityOrAccount.id;
+      });
+      if (facilityPredictorData.length > 0) {
+        predictorVariables = facilityPredictorData[0].predictors
+      }
+
     }
 
     let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = new Array();
@@ -269,29 +272,32 @@ export class AnalysisCalculationsService {
         return data.fiscalYear == baselineYear;
       });
 
-      let summaryYearPredictorData: Array<IdbPredictorEntry> = this.analysisCalculationsHelperService.filterYearPredictorData(facilityPredictorData, baselineYear, facility);
 
 
       let predictorUsage: Array<{
         usage: number,
         predictorId: string
       }> = new Array();
-      predictorVariables.forEach(variable => {
-        let usageVal: number = 0;
-        summaryYearPredictorData.forEach(data => {
-          let predictorData: PredictorData = data.predictors.find(predictor => { return predictor.id == variable.id });
-          usageVal = usageVal + predictorData.amount;
+      if (!inAccount) {      
+        let summaryYearPredictorData: Array<IdbPredictorEntry> = this.analysisCalculationsHelperService.filterYearPredictorData(facilityPredictorData, baselineYear, facilityOrAccount);
+
+        predictorVariables.forEach(variable => {
+          let usageVal: number = 0;
+          summaryYearPredictorData.forEach(data => {
+            let predictorData: PredictorData = data.predictors.find(predictor => { return predictor.id == variable.id });
+            usageVal = usageVal + predictorData.amount;
+          });
+          predictorUsage.push({
+            usage: usageVal,
+            predictorId: variable.id
+          });
         });
-        predictorUsage.push({
-          usage: usageVal,
-          predictorId: variable.id
-        });
-      });
+      }
 
       let energyUse: number = _.sumBy(yearData, 'energyUse');
       let modeledEnergy: number = _.sumBy(yearData, 'modeledEnergy');
       let adjustedBaselineEnergyUse: number = _.sumBy(yearData, 'adjustedBaselineEnergyUse');
-      if (baselineYear == facility.sustainabilityQuestions.energyReductionBaselineYear) {
+      if (baselineYear == facilityOrAccount.sustainabilityQuestions.energyReductionBaselineYear) {
         baselineEnergyUse = energyUse;
         baselineModeledEnergyUse = modeledEnergy;
       }

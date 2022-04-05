@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
+import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 import { AnalysisCalculationsHelperService } from './analysis-calculations-helper.service';
 import { FacilityAnalysisCalculationsService } from './facility-analysis-calculations.service';
 import * as _ from 'lodash';
+import { AnalysisCalculationsService } from './analysis-calculations.service';
 
 @Injectable({
   providedIn: 'root'
@@ -15,9 +16,10 @@ export class AccountAnalysisCalculationsService {
   constructor(private analysisCalculationsHelperService: AnalysisCalculationsHelperService,
     private facilityAnalysisCalculationsService: FacilityAnalysisCalculationsService,
     private analysisDbService: AnalysisDbService,
-    private facilityDbService: FacilitydbService) { }
+    private facilityDbService: FacilitydbService,
+    private analysisCalculationsService: AnalysisCalculationsService) { }
 
-  calculatMonthlyAccountAnalysis(accountAnalysisItem: IdbAccountAnalysisItem, account: IdbAccount): Array<MonthlyAnalysisSummaryData>{
+    calculateMonthlyAccountAnalysis(accountAnalysisItem: IdbAccountAnalysisItem, account: IdbAccount): Array<MonthlyAnalysisSummaryData>{
     let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = this.analysisCalculationsHelperService.getMonthlyStartAndEndDate(account, accountAnalysisItem);
     let baselineDate: Date = monthlyStartAndEndDate.baselineDate;
     let endDate: Date = monthlyStartAndEndDate.endDate;
@@ -136,5 +138,11 @@ export class AccountAnalysisCalculationsService {
       baselineDate = new Date(baselineDate.getUTCFullYear(), nextMonth, 1);
     }
     return analysisSummaryData;
+  }
+
+  getAnnualAnalysisSummary(analysisItem: IdbAccountAnalysisItem, account: IdbAccount): Array<AnnualAnalysisSummary> {
+    let facilityMonthlySummaryData: Array<MonthlyAnalysisSummaryData> = this.calculateMonthlyAccountAnalysis(analysisItem, account);
+    let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = this.analysisCalculationsService.calculateAnnualAnalysisSummary(facilityMonthlySummaryData, analysisItem, account);
+    return annualAnalysisSummaries;
   }
 }

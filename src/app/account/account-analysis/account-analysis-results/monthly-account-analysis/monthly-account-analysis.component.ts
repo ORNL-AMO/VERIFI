@@ -25,7 +25,7 @@ export class MonthlyAccountAnalysisComponent implements OnInit {
     this.dataDisplay = this.analysisService.dataDisplay.getValue();
     this.accountAnalysisItem = this.accoundAnalysisDbService.selectedAnalysisItem.getValue();
     this.account = this.accountDbService.selectedAccount.getValue();
-    this.monthlyAccountAnalysisData = this.accountAnalysisCalculationsService.calculatMonthlyAccountAnalysis(this.accountAnalysisItem, this.account);
+    this.monthlyAccountAnalysisData = this.accountAnalysisCalculationsService.calculateMonthlyAccountAnalysis(this.accountAnalysisItem, this.account);
   }
 
   setDataDisplay(display: 'table' | 'graph') {

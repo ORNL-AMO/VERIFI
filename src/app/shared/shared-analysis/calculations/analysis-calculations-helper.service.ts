@@ -76,14 +76,14 @@ export class AnalysisCalculationsHelperService {
     }
   }
 
-  filterYearPredictorData(predictorData: Array<IdbPredictorEntry>, year: number, facility: IdbFacility): Array<IdbPredictorEntry> {
-    if (facility.fiscalYear == 'calendarYear') {
+  filterYearPredictorData(predictorData: Array<IdbPredictorEntry>, year: number, facilityOrAccount: IdbFacility | IdbAccount): Array<IdbPredictorEntry> {
+    if (facilityOrAccount.fiscalYear == 'calendarYear') {
       return predictorData.filter(predictorData => {
         return new Date(predictorData.date).getUTCFullYear() == year;
       });
     } else {
-      let startDate: Date = new Date(year, facility.fiscalYearMonth, 1)
-      let endDate: Date = new Date(year + 1, facility.fiscalYearMonth, 1)
+      let startDate: Date = new Date(year, facilityOrAccount.fiscalYearMonth, 1)
+      let endDate: Date = new Date(year + 1, facilityOrAccount.fiscalYearMonth, 1)
       return predictorData.filter(predictorDataItem => {
         let predictorItemDate: Date = new Date(predictorDataItem.date);
         return predictorItemDate >= startDate && predictorItemDate < endDate;
