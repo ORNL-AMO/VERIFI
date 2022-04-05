@@ -4,7 +4,7 @@ import { Subscription } from 'rxjs';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { AnalysisCalculationsHelperService } from '../calculations/analysis-calculations-helper.service';
+import { AnalysisCalculationsHelperService } from 'src/app/shared/shared-analysis/calculations/analysis-calculations-helper.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 
 @Component({
