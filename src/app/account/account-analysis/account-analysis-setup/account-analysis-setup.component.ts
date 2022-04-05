@@ -40,7 +40,7 @@ export class AccountAnalysisSetupComponent implements OnInit {
     this.accountAnalysisDbService.selectedAnalysisItem.next(this.analysisItem);
   }
 
-  changeReportYear(){
+  resetFacilityItems(){
     this.analysisItem.facilityAnalysisItems.forEach(item => {
       item.analysisItemId = undefined;
     });

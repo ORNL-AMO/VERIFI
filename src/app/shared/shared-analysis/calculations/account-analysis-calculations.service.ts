@@ -19,7 +19,7 @@ export class AccountAnalysisCalculationsService {
     private facilityDbService: FacilitydbService,
     private analysisCalculationsService: AnalysisCalculationsService) { }
 
-    calculateMonthlyAccountAnalysis(accountAnalysisItem: IdbAccountAnalysisItem, account: IdbAccount): Array<MonthlyAnalysisSummaryData>{
+  calculateMonthlyAccountAnalysis(accountAnalysisItem: IdbAccountAnalysisItem, account: IdbAccount): Array<MonthlyAnalysisSummaryData> {
     let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = this.analysisCalculationsHelperService.getMonthlyStartAndEndDate(account, accountAnalysisItem);
     let baselineDate: Date = monthlyStartAndEndDate.baselineDate;
     let endDate: Date = monthlyStartAndEndDate.endDate;
@@ -30,13 +30,15 @@ export class AccountAnalysisCalculationsService {
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = new Array();
     accountAnalysisItem.facilityAnalysisItems.forEach(item => {
-      let analysisItem: IdbAnalysisItem = allAccountAnalysisDbItems.find(dbItem => {return dbItem.id == item.analysisItemId});
-      //update items with account options
-      analysisItem.energyUnit = accountAnalysisItem.energyUnit;
+      if (item.analysisItemId != undefined) {
+        let analysisItem: IdbAnalysisItem = allAccountAnalysisDbItems.find(dbItem => { return dbItem.id == item.analysisItemId });
+        //update items with account options
+        analysisItem.energyUnit = accountAnalysisItem.energyUnit;
 
-      let facility: IdbFacility = accountFacilities.find(facility => {return facility.id == item.facilityId});
-      let facilityItemSummary: Array<MonthlyAnalysisSummaryData> = this.facilityAnalysisCalculationsService.calculateMonthlyFacilityAnalysis(analysisItem, facility);
-      monthlyAnalysisSummaryData = monthlyAnalysisSummaryData.concat(facilityItemSummary);
+        let facility: IdbFacility = accountFacilities.find(facility => { return facility.id == item.facilityId });
+        let facilityItemSummary: Array<MonthlyAnalysisSummaryData> = this.facilityAnalysisCalculationsService.calculateMonthlyFacilityAnalysis(analysisItem, facility);
+        monthlyAnalysisSummaryData = monthlyAnalysisSummaryData.concat(facilityItemSummary);
+      }
     })
 
     let baselineYear: number = this.analysisCalculationsHelperService.getFiscalYear(baselineDate, account);

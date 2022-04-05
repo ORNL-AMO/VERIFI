@@ -9,6 +9,12 @@
                 <th>
                     Report Year
                 </th>
+                <th>
+                    Site or Source Energy?
+                </th>
+                <th>
+                    Group Analysis
+                </th>
                 <th>Last Modified</th>
                 <th>Actions</th>
             </tr>
@@ -24,6 +30,20 @@
                     {{analysisItem.name}}
                 </td>
                 <td>{{analysisItem.reportYear}}</td>
+                <td>
+                    <span *ngIf="analysisItem.energyIsSource">Source</span>
+                    <span *ngIf="!analysisItem.energyIsSource">Site</span>
+                </td>
+                <td>
+                    <span *ngFor="let group of analysisItem.groups">
+                        {{group.idbGroupId | groupName}}: 
+                            <span *ngIf="group.analysisType == 'absoluteEnergyConsumption'">Absolute Energy Consumption</span>
+                            <span *ngIf="group.analysisType == 'energyIntensity'">Energy Intensity</span>
+                            <span *ngIf="group.analysisType == 'modifiedEnergyIntensity'">Modified Energy Intensity</span>
+                            <span *ngIf="group.analysisType == 'regression'">Regression</span>
+                        <br>
+                    </span>
+                </td>
                 <td>{{analysisItem.date | date}}</td>
                 <td class="actions">
                     <div class="d-flex">
@@ -32,13 +52,18 @@
                     </div>
                 </td>
             </tr>
+            <tr *ngIf="facilityAnalysisItems.length == 0">
+                <td colspan="7" class="text-center">
+                    No analysis items found matching the selected report year!
+                </td>
+            </tr>
             <tr>
                 <td>
                     <input type="radio" class="rowToggle" [(ngModel)]="selectedFacilityItemId"
                         [value]="undefined" name="{{facility.name+'undefined'}}"
                         id="{{facility.name+'undefined'}}" (change)="save()">
                 </td>
-                <td colspan="4">
+                <td colspan="6">
                     Skip Facility
                 </td>
             </tr>

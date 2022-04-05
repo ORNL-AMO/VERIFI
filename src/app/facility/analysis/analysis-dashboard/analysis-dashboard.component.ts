@@ -2,10 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
+import { IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { AnalysisCalculationsHelperService } from 'src/app/shared/shared-analysis/calculations/analysis-calculations-helper.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 
 @Component({
   selector: 'app-analysis-dashboard',
@@ -28,7 +29,8 @@ export class AnalysisDashboardComponent implements OnInit {
   selectedFacility: IdbFacility
   constructor(private router: Router, private analysisDbService: AnalysisDbService, private toastNotificationService: ToastNotificationsService,
     private analysisCalculationsHelperService: AnalysisCalculationsHelperService,
-    private facilityDbService: FacilitydbService) { }
+    private facilityDbService: FacilitydbService,
+    private accountAnalysisDbService: AccountAnalysisDbService) { }
 
   ngOnInit(): void {
     this.facilityAnalysisItemsSub = this.analysisDbService.facilityAnalysisItems.subscribe(items => {
@@ -70,6 +72,20 @@ export class AnalysisDashboardComponent implements OnInit {
 
   async confirmDelete() {
     await this.analysisDbService.deleteWithObservable(this.itemToDelete.id).toPromise();
+    //update account analysis items
+    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
+    for (let index = 0; index < accountAnalysisItems.length; index++) {
+      let updated: boolean = false;
+      accountAnalysisItems[index].facilityAnalysisItems.forEach(item => {
+        if (item.facilityId == this.selectedFacility.id && item.analysisItemId == this.itemToDelete.id) {
+          item.analysisItemId = undefined;
+          updated = true;
+        }
+      });
+      if (updated) {
+        this.accountAnalysisDbService.update(accountAnalysisItems[index]);
+      }
+    }
     this.analysisDbService.setAccountAnalysisItems();
     this.itemToDelete = undefined;
     this.toastNotificationService.showToast('Analysis Item Deleted', undefined, undefined, false, "success");

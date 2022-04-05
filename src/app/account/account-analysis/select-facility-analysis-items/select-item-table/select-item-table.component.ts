@@ -20,7 +20,9 @@ export class SelectItemTableComponent implements OnInit {
   constructor(private accountAnalysisDbService: AccountAnalysisDbService) { }
 
   ngOnInit(): void {
-    this.facilityAnalysisItems = this.accountAnalysisItems.filter(item => { return item.facilityId == this.facility.id && item.reportYear == this.selectedAnalysisItem.reportYear });
+    this.facilityAnalysisItems = this.accountAnalysisItems.filter(item => { 
+      return item.facilityId == this.facility.id && item.reportYear == this.selectedAnalysisItem.reportYear && item.energyIsSource == this.selectedAnalysisItem.energyIsSource
+    });
     this.setSelectedFacilityItemId();
   }
 

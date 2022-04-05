@@ -240,7 +240,7 @@ export interface IdbAccountAnalysisItem {
     accountId: number,
     date: Date,
     name: string,
-    // energyIsSource: boolean,
+    energyIsSource: boolean,
     reportYear: number,
     energyUnit: string,
     facilityAnalysisItems: Array<{
