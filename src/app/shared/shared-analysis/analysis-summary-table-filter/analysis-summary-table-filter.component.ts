@@ -12,7 +12,7 @@ import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
 })
 export class AnalysisSummaryTableFilterComponent implements OnInit {
   @Input()
-  tableContext: 'monthGroup' | 'annualGroup' | 'monthFacility' | 'annualFacility';
+  tableContext: 'monthGroup' | 'annualGroup' | 'monthFacility' | 'annualFacility' | 'monthAccount' | 'annualAccount';
   @Input()
   group: AnalysisGroup;
 
@@ -32,9 +32,9 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
 
   save() {
     this.setEnergyColumns();
-    if (this.tableContext == 'monthGroup' || this.tableContext == 'monthFacility') {
+    if (this.tableContext == 'monthGroup' || this.tableContext == 'monthFacility' || this.tableContext == 'monthAccount') {
       this.setMonthIncrementalImprovement();
-    } else if (this.tableContext == 'annualGroup' || this.tableContext == 'annualFacility') {
+    } else if (this.tableContext == 'annualGroup' || this.tableContext == 'annualFacility' || this.tableContext == 'annualAccount') {
       this.setAnnualIncrementalImprovement();
     }
     this.setPredictorChecked();

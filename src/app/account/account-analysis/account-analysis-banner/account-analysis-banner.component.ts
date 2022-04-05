@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { HelpPanelService } from 'src/app/help-panel/help-panel.service';
+import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
+import { IdbAccountAnalysisItem } from 'src/app/models/idb';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 
 @Component({
@@ -14,8 +16,13 @@ export class AccountAnalysisBannerComponent implements OnInit {
   inDashboard: boolean;
   modalOpenSub: Subscription;
   modalOpen: boolean;
+
+  accountAnalysisItem: IdbAccountAnalysisItem;
+  accountAnalysisItemSub: Subscription;
+  setupValid: boolean;
+  facilitySelectionValid: boolean;
   constructor(private router: Router, private helpPanelService: HelpPanelService,
-    private sharedDataService: SharedDataService) { }
+    private sharedDataService: SharedDataService, private accountAnalysisDbService: AccountAnalysisDbService) { }
 
   ngOnInit(): void {    
     this.router.events.subscribe(event => {
@@ -26,11 +33,17 @@ export class AccountAnalysisBannerComponent implements OnInit {
     this.setInDashboard(this.router.url);
     this.modalOpenSub = this.sharedDataService.modalOpen.subscribe(val => {
       this.modalOpen = val;
+    });
+
+    this.accountAnalysisItemSub = this.accountAnalysisDbService.selectedAnalysisItem.subscribe(val => {
+      this.accountAnalysisItem = val;
+      this.setValidation();
     })
+    
   }
 
   ngOnDestroy() {
-    // this.analysisItemSub.unsubscribe();
+    this.accountAnalysisItemSub.unsubscribe();
     this.modalOpenSub.unsubscribe();
   }
 
@@ -45,5 +58,17 @@ export class AccountAnalysisBannerComponent implements OnInit {
 
   goToDashboard() {
     this.router.navigateByUrl('/analysis/dashboard')
+  }
+
+  setValidation(){
+    //TODO: Check that report year is within data entry range
+    this.setupValid = this.accountAnalysisItem.energyUnit != undefined && this.accountAnalysisItem.reportYear != undefined;
+    let facilitySelectionValid: boolean = false;
+    this.accountAnalysisItem.facilityAnalysisItems.forEach(item => {
+      if(item.analysisItemId != undefined){
+        facilitySelectionValid = true;
+      }
+    });
+    this.facilitySelectionValid = facilitySelectionValid;
   }
 }
