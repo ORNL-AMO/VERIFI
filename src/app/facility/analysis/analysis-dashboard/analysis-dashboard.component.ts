@@ -7,6 +7,7 @@ import { ToastNotificationsService } from 'src/app/core-components/toast-notific
 import { AnalysisCalculationsHelperService } from 'src/app/shared/shared-analysis/calculations/analysis-calculations-helper.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 
 @Component({
   selector: 'app-analysis-dashboard',
@@ -26,26 +27,32 @@ export class AnalysisDashboardComponent implements OnInit {
   itemToDelete: IdbAnalysisItem;
   baselineYearError: boolean;
   yearOptions: Array<number>;
-  selectedFacility: IdbFacility
+  selectedFacility: IdbFacility;
+  selectedFacilityMeterDataSub: Subscription;
+
   constructor(private router: Router, private analysisDbService: AnalysisDbService, private toastNotificationService: ToastNotificationsService,
     private analysisCalculationsHelperService: AnalysisCalculationsHelperService,
     private facilityDbService: FacilitydbService,
-    private accountAnalysisDbService: AccountAnalysisDbService) { }
+    private accountAnalysisDbService: AccountAnalysisDbService,
+    private utilityMeterDataDbService: UtilityMeterDatadbService) { }
 
   ngOnInit(): void {
     this.facilityAnalysisItemsSub = this.analysisDbService.facilityAnalysisItems.subscribe(items => {
       this.facilityAnalysisItems = items;
     });
 
-    this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
-    this.yearOptions = this.analysisCalculationsHelperService.getYearOptions();
-    if (this.yearOptions) {
-      this.baselineYearError = this.yearOptions[0] > this.selectedFacility.sustainabilityQuestions.energyReductionBaselineYear
-    }
+    this.selectedFacilityMeterDataSub = this.utilityMeterDataDbService.facilityMeterData.subscribe(val => {
+      this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
+      this.yearOptions = this.analysisCalculationsHelperService.getYearOptions();
+      if (this.yearOptions) {
+        this.baselineYearError = this.yearOptions[0] > this.selectedFacility.sustainabilityQuestions.energyReductionBaselineYear
+      }
+    });
   }
 
   ngOnDestroy() {
     this.facilityAnalysisItemsSub.unsubscribe();
+    this.selectedFacilityMeterDataSub.unsubscribe();
   }
 
   async createAnalysis() {
