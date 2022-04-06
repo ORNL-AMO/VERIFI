@@ -6,7 +6,7 @@
     position:relative;
   }
   .wrapper.main-content {
-    margin-right: 30px;
+    margin-right: 25px 40px;
   }
   .box {
     background-color: white;
@@ -15,11 +15,7 @@
     border-radius: 4px;
     box-shadow: 2px 3px 10px #d6d6d6;
   }
-  .empty-state {
-  /* max-width: 1000px;
-  margin: 0 auto;
-  min-height: calc(100vh - 163px); */
-  }
+
   .empty-state .box p {
   font-size: 22px;
   }

@@ -1,5 +1,8 @@
 .content-padding{
-    padding: 20px 30px 30px;
+    padding: 20px 30px;
+    height: calc(100vh - 290px);
+    overflow-y: auto;
+
 }
 
 .nav-tabs{
