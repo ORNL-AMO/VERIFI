@@ -18,9 +18,9 @@
             </select>
         </div>
         <div class="btn-group">
-            <button class="btn" [ngClass]="{'btn-solid': dataDisplay == 'table'}"
+            <button class="btn" [ngClass]="{'btn-active': dataDisplay == 'table'}"
                 (click)="setDataDisplay('table')">Table</button>
-            <button class="btn" [ngClass]="{'btn-solid': dataDisplay == 'graph'}"
+            <button class="btn" [ngClass]="{'btn-active': dataDisplay == 'graph'}"
                 (click)="setDataDisplay('graph')">Graph</button>
         </div>
     </div>

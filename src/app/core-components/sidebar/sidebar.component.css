@@ -80,3 +80,8 @@ div.hidden, div.d-flex.hidden{
 .open .icon-row{
     padding-left: 1.5rem;
 }
+
+.nav{
+    flex-wrap: nowrap;
+    overflow-y: auto;
+}

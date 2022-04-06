@@ -28,17 +28,13 @@
      background-color: #2c386b;
  }
  
- /* .nav-link.active{
-     background-color: #c53f00;
- } */
- 
  .banner-border{
      border-bottom: solid #2c386b;
  }
  
 
  .nav-tabs .nav-link.active{
-    color: #2c386b;
+    color: #ff6000;
     background-color: white;
 }
 
