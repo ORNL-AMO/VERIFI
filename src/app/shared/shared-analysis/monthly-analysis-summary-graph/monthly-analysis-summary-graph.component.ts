@@ -1,21 +1,20 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
-import * as _ from 'lodash';
-import { MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
+import { MonthlyAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 
 @Component({
-  selector: 'app-monthly-facility-analysis-graph',
-  templateUrl: './monthly-facility-analysis-graph.component.html',
-  styleUrls: ['./monthly-facility-analysis-graph.component.css']
+  selector: 'app-monthly-analysis-summary-graph',
+  templateUrl: './monthly-analysis-summary-graph.component.html',
+  styleUrls: ['./monthly-analysis-summary-graph.component.css']
 })
-export class MonthlyFacilityAnalysisGraphComponent implements OnInit {
+export class MonthlyAnalysisSummaryGraphComponent implements OnInit {
   @Input()
-  monthlyFacilityAnalysisData: Array<MonthlyAnalysisSummaryData>;
+  monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>;
   @Input()
-  analysisItem: IdbAnalysisItem;
+  analysisItem: IdbAnalysisItem | IdbAccountAnalysisItem;
   @Input()
-  facility: IdbFacility;
+  facilityOrAccount: IdbFacility | IdbAccount;
 
   @ViewChild('monthlyAnalysisGraph', { static: false }) monthlyAnalysisGraph: ElementRef;
 
@@ -34,9 +33,9 @@ export class MonthlyFacilityAnalysisGraphComponent implements OnInit {
       var trace1 = {
         type: "scatter",
         mode: "lines+markers",
-        name: 'Actual Total',
-        x: this.monthlyFacilityAnalysisData.map(results => { return results.date }),
-        y: this.monthlyFacilityAnalysisData.map(results => { return results.energyUse }),
+        name: 'Energy Use',
+        x: this.monthlyAnalysisSummaryData.map(results => { return results.date }),
+        y: this.monthlyAnalysisSummaryData.map(results => { return results.energyUse }),
         line: { color: '#7F7F7F', width: 4 },
         marker:{
           size: 8
@@ -46,9 +45,9 @@ export class MonthlyFacilityAnalysisGraphComponent implements OnInit {
       var trace2 = {
         type: "scatter",
         mode: "lines+markers",
-        name: 'Adjusted BL',
-        x: this.monthlyFacilityAnalysisData.map(results => { return results.date }),
-        y: this.monthlyFacilityAnalysisData.map(results => { return results.adjustedBaselineEnergyUse }),
+        name: 'Adjusted Energy Use',
+        x: this.monthlyAnalysisSummaryData.map(results => { return results.date }),
+        y: this.monthlyAnalysisSummaryData.map(results => { return results.adjustedBaselineEnergyUse }),
         line: { color: '#7D3C98', width: 4 },
         marker:{
           size: 8
@@ -99,5 +98,4 @@ export class MonthlyFacilityAnalysisGraphComponent implements OnInit {
       this.plotlyService.newPlot(this.monthlyAnalysisGraph.nativeElement, data, layout, config);
     }
   }
-
 }

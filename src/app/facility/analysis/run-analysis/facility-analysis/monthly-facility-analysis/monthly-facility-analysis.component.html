@@ -24,9 +24,9 @@
     </div>
 </div>
 <div class="w-100 x-scroll">
-    <app-monthly-facility-analysis-graph *ngIf="dataDisplay == 'graph'"
-        [monthlyFacilityAnalysisData]="monthlyFacilityAnalysisData" [analysisItem]="analysisItem" [facility]="facility">
-    </app-monthly-facility-analysis-graph>
+    <app-monthly-analysis-summary-graph *ngIf="dataDisplay == 'graph'"
+        [monthlyAnalysisSummaryData]="monthlyFacilityAnalysisData" [analysisItem]="analysisItem" [facilityOrAccount]="facility">
+    </app-monthly-analysis-summary-graph>
     <app-monthly-analysis-summary-table *ngIf="dataDisplay == 'table'"
         [monthlyAnalysisSummaryData]="monthlyFacilityAnalysisData" [analysisItem]="analysisItem" [facilityOrAccount]="facility"
         [itemsPerPage]="itemsPerPage">

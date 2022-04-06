@@ -1,7 +1,7 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { AnnualAnalysisSummary } from 'src/app/models/analysis';
-import { IdbAnalysisItem } from 'src/app/models/idb';
+import { IdbAccountAnalysisItem, IdbAnalysisItem } from 'src/app/models/idb';
 
 @Component({
   selector: 'app-annual-analysis-summary-graph',
@@ -12,7 +12,7 @@ export class AnnualAnalysisSummaryGraphComponent implements OnInit {
   @Input()
   annualAnalysisSummary: Array<AnnualAnalysisSummary>;
   @Input()
-  analysisItem: IdbAnalysisItem;
+  analysisItem: IdbAnalysisItem | IdbAccountAnalysisItem;
 
   @ViewChild('percentImprovementAnalysisGraph', { static: false }) percentImprovementAnalysisGraph: ElementRef;
   @ViewChild('annualEnergyIntensityAnalysisGraph', { static: false }) annualEnergyIntensityAnalysisGraph: ElementRef;

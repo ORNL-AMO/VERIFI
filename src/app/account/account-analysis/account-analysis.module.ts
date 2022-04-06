@@ -16,7 +16,6 @@ import { AnnualAccountAnalysisComponent } from './account-analysis-results/annua
 import { SharedAnalysisModule } from 'src/app/shared/shared-analysis/shared-analysis.module';
 
 
-
 @NgModule({
   declarations: [
     AccountAnalysisComponent,

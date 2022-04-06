@@ -24,11 +24,12 @@
     </div>
 </div>
 <div class="w-100 x-scroll">
-    <!-- <app-monthly-facility-analysis-graph *ngIf="dataDisplay == 'graph'"
-        [monthlyFacilityAnalysisData]="monthlyFacilityAnalysisData" [analysisItem]="analysisItem" [facility]="facility">
-    </app-monthly-facility-analysis-graph> -->
+    <app-monthly-analysis-summary-graph *ngIf="dataDisplay == 'graph'"
+        [monthlyAnalysisSummaryData]="monthlyAccountAnalysisData" [analysisItem]="accountAnalysisItem"
+        [facilityOrAccount]="account">
+    </app-monthly-analysis-summary-graph>
     <app-monthly-analysis-summary-table *ngIf="dataDisplay == 'table'"
-        [monthlyAnalysisSummaryData]="monthlyAccountAnalysisData" [analysisItem]="accountAnalysisItem" [facilityOrAccount]="account"
-        [itemsPerPage]="itemsPerPage">
+        [monthlyAnalysisSummaryData]="monthlyAccountAnalysisData" [analysisItem]="accountAnalysisItem"
+        [facilityOrAccount]="account" [itemsPerPage]="itemsPerPage">
     </app-monthly-analysis-summary-table>
 </div>

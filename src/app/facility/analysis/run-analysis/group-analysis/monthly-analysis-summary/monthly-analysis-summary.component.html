@@ -32,5 +32,5 @@
         [facilityOrAccount]="facility" [predictorVariables]="monthlyAnalysisSummary.predictorVariables" [group]="group">
     </app-monthly-analysis-summary-table>
     <app-monthly-analysis-summary-graph *ngIf="dataDisplay == 'graph'" [analysisItem]="analysisItem"
-        [monthlyAnalysisSummary]="monthlyAnalysisSummary" [facility]="facility"></app-monthly-analysis-summary-graph>
+        [monthlyAnalysisSummaryData]="monthlyAnalysisSummary.monthlyAnalysisSummaryData" [facilityOrAccount]="facility"></app-monthly-analysis-summary-graph>
 </div>

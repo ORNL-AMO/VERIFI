@@ -14,13 +14,9 @@ import { RouterModule } from '@angular/router';
 import { HelperPipesModule } from '../../shared/helper-pipes/helper-pipes.module';
 import { RegressionModelSelectionComponent } from './run-analysis/group-analysis/regression-model-selection/regression-model-selection.component';
 import { AnnualAnalysisSummaryComponent } from './run-analysis/group-analysis/annual-analysis-summary/annual-analysis-summary.component';
-import { AnnualAnalysisSummaryGraphComponent } from './run-analysis/group-analysis/annual-analysis-summary/annual-analysis-summary-graph/annual-analysis-summary-graph.component';
 import { MonthlyAnalysisSummaryComponent } from './run-analysis/group-analysis/monthly-analysis-summary/monthly-analysis-summary.component';
-import { MonthlyAnalysisSummaryGraphComponent } from './run-analysis/group-analysis/monthly-analysis-summary/monthly-analysis-summary-graph/monthly-analysis-summary-graph.component';
 import { MonthlyFacilityAnalysisComponent } from './run-analysis/facility-analysis/monthly-facility-analysis/monthly-facility-analysis.component';
-import { MonthlyFacilityAnalysisGraphComponent } from './run-analysis/facility-analysis/monthly-facility-analysis/monthly-facility-analysis-graph/monthly-facility-analysis-graph.component';
 import { AnnualFacilityAnalysisComponent } from './run-analysis/facility-analysis/annual-facility-analysis/annual-facility-analysis.component';
-import { AnnualFacilityAnalysisGraphComponent } from './run-analysis/facility-analysis/annual-facility-analysis/annual-facility-analysis-graph/annual-facility-analysis-graph.component';
 import { SharedAnalysisModule } from 'src/app/shared/shared-analysis/shared-analysis.module';
 
 
@@ -36,14 +32,10 @@ import { SharedAnalysisModule } from 'src/app/shared/shared-analysis/shared-anal
     GroupAnalysisOptionsComponent,
     AnalysisSetupComponent,
     RegressionModelSelectionComponent,
-    AnnualAnalysisSummaryGraphComponent,
     AnnualAnalysisSummaryComponent,
     MonthlyAnalysisSummaryComponent,
-    MonthlyAnalysisSummaryGraphComponent,
     MonthlyFacilityAnalysisComponent,
-    MonthlyFacilityAnalysisGraphComponent,
-    AnnualFacilityAnalysisComponent,
-    AnnualFacilityAnalysisGraphComponent,
+    AnnualFacilityAnalysisComponent
   ],
   imports: [
     CommonModule,
