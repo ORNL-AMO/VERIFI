@@ -63,3 +63,16 @@
 .container-fluid{
     height: 100vh;
 }
+
+
+.header-height{
+    height: 67px;
+}
+
+.footer-height{
+    height: 35px;
+}
+
+.content-height{
+    height: calc(100vh - 102px);
+}
