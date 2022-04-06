@@ -1,8 +1,7 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { Subscription } from 'rxjs';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { MeterGroupType } from 'src/app/models/calanderization';
 import { IdbUtilityMeterGroup } from 'src/app/models/idb';
+import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
 
 @Component({
   selector: 'app-meter-group-table',
@@ -27,7 +26,11 @@ export class MeterGroupTableComponent implements OnInit {
   orderByDirection: string = 'desc';
   tablePageNumbers: Array<number>;
   consumptionUnit: string;
-  constructor() { }
+  @ViewChild('meterGroupTable', { static: false }) meterGroupTable: ElementRef;
+
+
+
+  constructor(private copyTableService: CopyTableService) { }
 
   ngOnInit(): void {
     if (this.meterGroup.combinedMonthlyData) {
@@ -45,5 +48,10 @@ export class MeterGroupTableComponent implements OnInit {
     } else {
       this.orderDataField = str;
     }
+  }
+
+
+  copyTable(){
+    this.copyTableService.copyTable(this.meterGroupTable);
   }
 }
