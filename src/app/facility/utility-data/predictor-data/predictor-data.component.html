@@ -54,7 +54,7 @@
     </div>
 
     <div *ngIf="hasData">
-        <table class="table table-sm">
+        <table class="table table-sm" #predictorTable>
             <thead>
                 <tr>
                     <th class="input">
@@ -94,6 +94,7 @@
         </table>
     </div>
     <div class="tableControls overflow-hidden" *ngIf="hasData">
+        <a class="click-link" (click)="copyTable()"><span class="fa fa-copy"></span> Copy Table</a>
         <div class="item-right">
             <ngb-pagination [collectionSize]="facilityPredictorEntries.length" [(page)]="currentPageNumber"
                 [pageSize]="itemsPerPage" [rotate]="true" aria-label="Default pagination" [maxSize]="5">
