@@ -1,5 +1,8 @@
 .content-padding{
-    padding: 20px 30px 30px;
+    padding: 20px 30px;
+    height: calc(100vh - 290px);
+    overflow-y: auto;
+
 }
 
 .nav-tabs{
@@ -13,7 +16,7 @@
 
 
 .nav-tabs .nav-link.active{
-    color: #2c386b;
+    color: #ff6000;
     background-color: white;
 }
 

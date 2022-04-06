@@ -25,7 +25,7 @@ li.disabled:hover .navigation-warning{
 }
 
 .nav-tabs .nav-link.active{
-    color: #2c386b;
+    color: #ff6000;
     background-color: white;
 }
 
