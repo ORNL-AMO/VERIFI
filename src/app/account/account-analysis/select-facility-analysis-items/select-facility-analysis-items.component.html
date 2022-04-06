@@ -1,12 +1,12 @@
 <div class="wrapper main-content p-0">
+    <ul class="nav nav-tabs">
+        <li class="nav-item" *ngFor="let facility of facilities"><a class="nav-link" (click)="selectFacility(facility)"
+            [ngClass]="{'active': facility.id == selectedFacility.id}">{{facility.name}}</a></li>
+    </ul>
     <div class="content-padding">
-        <h4>Facility Analysis Items</h4>
-        <div class="d-flex flex-column">
-            <div class="p-2" *ngFor="let facility of facilities">
-                <app-select-item-table [facility]="facility" [selectedAnalysisItem]="selectedAnalysisItem"
-                    [accountAnalysisItems]="accountAnalysisItems"></app-select-item-table>
-                <hr>
-            </div>
-        </div>
+        <h4><i class="fa fa-industry pr-2" [ngStyle]="{color: selectedFacility.color}"></i>{{selectedFacility.name}} Analysis Items</h4>
+
+        <app-select-item-table [facility]="selectedFacility" [selectedAnalysisItem]="selectedAnalysisItem"
+            [facilityAnalysisItems]="facilityAnalysisItems"></app-select-item-table>
     </div>
 </div>

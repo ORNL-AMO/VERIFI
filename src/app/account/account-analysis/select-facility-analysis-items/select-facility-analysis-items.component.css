@@ -4,6 +4,35 @@
     overflow-y: auto;
 }
 
+.nav-tabs{
+    background-color: #f1f1f1;
+}
+
+
+.nav-tabs a:not([href]).nav-link.active{
+    color: #ff6000 !important;
+    background-color: white;
+}
+
+.nav-tabs .nav-link:not(.active){
+    background-color: #145A32;
+    color: white;
+    border: solid 1px white;
+}
+
 .wrapper.main-content{
     margin: 25px 40px;
+}
+
+
+.nav-link{
+    font-weight: 600;
+}
+
+a:not([href]){
+    color: white !important;
+}
+
+h4 i.fa-industry{
+    font-size: 16px;
 }
