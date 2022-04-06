@@ -24,7 +24,7 @@ export class AccountAnalysisBannerComponent implements OnInit {
   constructor(private router: Router, private helpPanelService: HelpPanelService,
     private sharedDataService: SharedDataService, private accountAnalysisDbService: AccountAnalysisDbService) { }
 
-  ngOnInit(): void {    
+  ngOnInit(): void {
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
         this.setInDashboard(event.url);
@@ -39,7 +39,7 @@ export class AccountAnalysisBannerComponent implements OnInit {
       this.accountAnalysisItem = val;
       this.setValidation();
     })
-    
+
   }
 
   ngOnDestroy() {
@@ -60,15 +60,17 @@ export class AccountAnalysisBannerComponent implements OnInit {
     this.router.navigateByUrl('/analysis/dashboard')
   }
 
-  setValidation(){
-    //TODO: Check that report year is within data entry range
-    this.setupValid = this.accountAnalysisItem.energyUnit != undefined && this.accountAnalysisItem.reportYear != undefined;
-    let facilitySelectionValid: boolean = false;
-    this.accountAnalysisItem.facilityAnalysisItems.forEach(item => {
-      if(item.analysisItemId != undefined){
-        facilitySelectionValid = true;
-      }
-    });
-    this.facilitySelectionValid = facilitySelectionValid;
+  setValidation() {
+    if (this.accountAnalysisItem) {
+      //TODO: Check that report year is within data entry range
+      this.setupValid = this.accountAnalysisItem.energyUnit != undefined && this.accountAnalysisItem.reportYear != undefined;
+      let facilitySelectionValid: boolean = false;
+      this.accountAnalysisItem.facilityAnalysisItems.forEach(item => {
+        if (item.analysisItemId != undefined) {
+          facilitySelectionValid = true;
+        }
+      });
+      this.facilitySelectionValid = facilitySelectionValid;
+    }
   }
 }

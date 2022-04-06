@@ -5,6 +5,7 @@ import { ToastNotificationsService } from 'src/app/core-components/toast-notific
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount, IdbAccountAnalysisItem } from 'src/app/models/idb';
+import { AnalysisCalculationsHelperService } from 'src/app/shared/shared-analysis/calculations/analysis-calculations-helper.service';
 
 @Component({
   selector: 'app-account-analysis-dashboard',
@@ -22,12 +23,11 @@ export class AccountAnalysisDashboardComponent implements OnInit {
   orderByDirection: string = 'desc';
 
   itemToDelete: IdbAccountAnalysisItem;
-  // baselineYearError: boolean;
-  // yearOptions: Array<number>;
-  // selectedFacility: IdbFacility
+  baselineYearError: boolean;
+  yearOptions: Array<number>;
   selectedAccount: IdbAccount;
   constructor(private router: Router, private accountAnalysisDbService: AccountAnalysisDbService, private toastNotificationService: ToastNotificationsService,
-    private accountDbService: AccountdbService) { }
+    private accountDbService: AccountdbService, private analysisCalculationsHelperService: AnalysisCalculationsHelperService) { }
 
   ngOnInit(): void {
     this.selectedAccount = this.accountDbService.selectedAccount.getValue();
@@ -35,11 +35,10 @@ export class AccountAnalysisDashboardComponent implements OnInit {
       this.accountAnalysisItems = items;
     });
 
-    // this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
-    // this.yearOptions = this.analysisCalculationsHelperService.getYearOptions();
-    // if (this.yearOptions) {
-    //   this.baselineYearError = this.yearOptions[0] > this.selectedFacility.sustainabilityQuestions.energyReductionBaselineYear
-    // }
+    this.yearOptions = this.analysisCalculationsHelperService.getYearOptions(true);
+    if (this.yearOptions) {
+      this.baselineYearError = this.yearOptions[0] > this.selectedAccount.sustainabilityQuestions.energyReductionBaselineYear
+    }
   }
 
   ngOnDestroy() {
