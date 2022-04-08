@@ -1,0 +1,30 @@
+<div class="analysis banner sticky-top d-flex justify-content-between" *ngIf="inRunAnalysis"
+    [ngClass]="{'modal-open': modalOpen}">
+    <div>
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <a class="nav-link" routerLink="run-analysis/analysis-setup" [routerLinkActive]="['active']">Analysis
+                    Setup</a>
+            </li>
+            <li class="nav-item" *ngFor="let group of groups" [ngClass]="{'disabled': !analysisSetupValid}">
+                <a class="nav-link" routerLink="run-analysis/group-analysis/{{group.idbGroupId}}"
+                    [routerLinkActive]="['active']">
+                    <span class="fa fa-exclamation-circle" *ngIf="group.groupHasError"></span>
+                    {{group.idbGroupId | groupName}}
+                </a>
+            </li>
+            <li class="nav-item" [ngClass]="{'disabled': !analysisSetupValid || groupHasError}">
+                <a class="nav-link" routerLink="run-analysis/facility-analysis" [routerLinkActive]="['active']">Facility
+                    Summary</a>
+            </li>
+        </ul>
+    </div>
+    <div>
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <a class="nav-link" routerLink="analysis-dashboard" [routerLinkActive]="['active']">Return to
+                    Dashboard</a>
+            </li>
+        </ul>
+    </div>
+</div>

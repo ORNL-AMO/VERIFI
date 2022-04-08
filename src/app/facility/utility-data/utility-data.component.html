@@ -1,0 +1,9 @@
+<div class="facility">
+    <app-utility-banner *ngIf="selectedAccount && selectedFacility"></app-utility-banner>
+
+    <div class="row no-margin flex-grow-1" *ngIf="(selectedAccount && selectedFacility)">
+        <div class="col">
+            <router-outlet></router-outlet>
+        </div>
+    </div>
+</div>

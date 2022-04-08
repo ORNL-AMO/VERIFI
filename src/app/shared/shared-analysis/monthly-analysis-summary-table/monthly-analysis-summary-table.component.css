@@ -1,0 +1,22 @@
+tr.fiscal-year-end:not(:first-of-type){
+    border-top: solid;
+    border-width: 5px;
+}
+
+thead th.active {
+    text-decoration: underline;
+}
+
+thead tr:not(.table-mh) th:hover{
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+
+tr.table-mh th span{
+    padding: 0px !important;
+}
+
+.no-wrap{
+    white-space: nowrap;
+}

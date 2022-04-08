@@ -55,6 +55,8 @@ export class FacilitydbService {
             this.getAllByIndexRange('accountId', selectedAccount.id).subscribe(facilities => {
                 this.accountFacilities.next(facilities);
             });
+        }else{
+            this.accountFacilities.next([]);
         }
     }
 
@@ -151,14 +153,14 @@ export class FacilitydbService {
         return {
             accountId: account.id,
             name: 'New Facility',
-            country: undefined,
-            city: undefined,
-            state: undefined,
-            zip: undefined,
-            address: undefined,
-            naics1: undefined,
-            naics2: undefined,
-            naics3: undefined,
+            country: 'US',
+            city: account.city,
+            state: account.state,
+            zip: account.zip,
+            address: account.address,
+            naics1: account.naics1,
+            naics2: account.naics2,
+            naics3: account.naics3,
             type: undefined,
             size: undefined,
             units: undefined,
@@ -197,10 +199,19 @@ export class FacilitydbService {
                 waterIsAbsolute: true
             },
             fiscalYear: 'calendarYear',
-            fiscalYearMonth: 'January',
+            fiscalYearMonth: 0,
             fiscalYearCalendarEnd: true,
             energyIsSource: true
 
         }
+    }
+
+    getFacilityNameById(id: number): string {
+        let accountFacilites: Array<IdbFacility> = this.accountFacilities.getValue();
+        let selectedFacility: IdbFacility = accountFacilites.find(facility => { return facility.id == id });
+        if (selectedFacility) {
+            return selectedFacility.name;
+        }
+        return '';
     }
 }

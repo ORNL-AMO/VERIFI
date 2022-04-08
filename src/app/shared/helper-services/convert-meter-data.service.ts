@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
-import { EditMeterFormService } from 'src/app/utility/energy-consumption/energy-source/edit-meter-form/edit-meter-form.service';
+import { MonthlyData } from 'src/app/models/calanderization';
+import { IdbAccount, IdbAnalysisItem, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { EditMeterFormService } from 'src/app/facility/utility-data/energy-consumption/energy-source/edit-meter-form/edit-meter-form.service';
 import { ConvertUnitsService } from '../convert-units/convert-units.service';
 import { EnergyUnitsHelperService } from './energy-units-helper.service';
 
@@ -47,6 +48,17 @@ export class ConvertMeterDataService {
     if (showSiteToSource && meter.siteToSource) {
       for (let index = 0; index < meterData.length; index++) {
         meterData[index].totalEnergyUse = meterData[index].totalEnergyUse * meter.siteToSource;
+      }
+    }
+    return meterData;
+  }
+
+
+  convertMeterDataToAnalysis(analysisItem: IdbAnalysisItem, meterData: Array<MonthlyData>, facility: IdbFacility, meter: IdbUtilityMeter): Array<MonthlyData> {
+    let isEnergyMeter: boolean = this.energyUnitsHelperService.isEnergyMeter(meter.source);
+    if (isEnergyMeter) {
+      for (let index: number = 0; index < meterData.length; index++) {
+        meterData[index].energyUse = this.convertUnitsService.value(meterData[index].energyUse).from(facility.energyUnit).to(analysisItem.energyUnit);
       }
     }
     return meterData;

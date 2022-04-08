@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAccount, IdbFacility, IdbUtilityMeter, MeterPhase, MeterSource } from 'src/app/models/idb';
-import { FuelTypeOption, GasOptions, LiquidOptions, OtherEnergyOptions, SolidOptions, SourceOptions } from 'src/app/utility/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
+import { FuelTypeOption, GasOptions, LiquidOptions, OtherEnergyOptions, SolidOptions, SourceOptions } from 'src/app/facility/utility-data/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
 import { ChilledWaterUnitOptions, EnergyUnitOptions, MassUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from '../unitOptions';
 
 @Injectable({
@@ -210,7 +210,7 @@ export class EnergyUnitsHelperService {
       unit = VolumeLiquidOptions.find(option => {
         let lowerCaseOption: string = option.value.toLocaleLowerCase();
         let lowerCaseName: string = name.toLocaleLowerCase();
-        return lowerCaseName.includes(lowerCaseOption)
+        return lowerCaseName.includes(lowerCaseOption);
       });
 
     }
@@ -222,7 +222,11 @@ export class EnergyUnitsHelperService {
       });
 
     }
-    return unit.value;
+    if(unit){
+      return unit.value;
+    }else{
+      return;
+    }
   }
 
 

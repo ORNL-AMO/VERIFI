@@ -1,0 +1,85 @@
+<div class="table-responsive">
+    <table class="table table-sm table-hover">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Analysis Item</th>
+                <th>
+                    Report Year
+                </th>
+                <th>
+                    Site or Source Energy?
+                </th>
+                <th>
+                    Group Analysis
+                </th>
+                <th>Last Modified</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let analysisItem of facilityAnalysisItems">
+                <td>
+                    <input type="radio" class="rowToggle" [(ngModel)]="selectedFacilityItemId" [value]="analysisItem.id"
+                        name="{{analysisItem.id+'_selectedFacilityItemId'}}"
+                        id="{{analysisItem.id+'_selectedFacilityItemId'}}" (change)="save()">
+                </td>
+                <td>
+                    {{analysisItem.name}}
+                </td>
+                <td>{{analysisItem.reportYear}}</td>
+                <td>
+                    <span *ngIf="analysisItem.energyIsSource">Source</span>
+                    <span *ngIf="!analysisItem.energyIsSource">Site</span>
+                </td>
+                <td>
+                    <span *ngFor="let group of analysisItem.groups">
+                        {{group.idbGroupId | groupName}}:
+                        <span *ngIf="group.analysisType == 'absoluteEnergyConsumption'">Absolute Energy
+                            Consumption</span>
+                        <span *ngIf="group.analysisType == 'energyIntensity'">Energy Intensity</span>
+                        <span *ngIf="group.analysisType == 'modifiedEnergyIntensity'">Modified Energy Intensity</span>
+                        <span *ngIf="group.analysisType == 'regression'">Regression</span>
+                        <br>
+                    </span>
+                </td>
+                <td>{{analysisItem.date | date}}</td>
+                <td class="actions">
+                    <!-- <div class="d-flex">
+                        <i class="fa fa-pencil" title="Edit" (click)="editItem(analysisItem)"></i>
+                    </div> -->
+                    <a class="click-link" (click)="editItem(analysisItem)">View Analysis</a>
+                </td>
+            </tr>
+            <tr *ngIf="facilityAnalysisItems.length == 0">
+                <td colspan="7" class="text-center">
+                    No analysis items found matching the selected report year!
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <input type="radio" class="rowToggle" [(ngModel)]="selectedFacilityItemId" [value]="undefined"
+                        name="{{facility.name+'undefined'}}" id="{{facility.name+'undefined'}}" (change)="save()">
+                </td>
+                <td colspan="6">
+                    Skip Facility
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+
+<div class="popup" [class.open]="itemToEdit">
+    <div class="popup-header" *ngIf="itemToEdit">Go To: {{itemToEdit.name}}
+        <button class="item-right" (click)="cancelEditItem()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>WARNING: Are you sure you want to go to this analysis item? Your progress will be saved and you will leave
+            this screen.</p>
+    </div>
+    <div class="saveCancel popup-footer text-right">
+        <button class="btn btn-secondary" (click)="cancelEditItem()">Cancel</button>
+        <button class="btn btn-outline" (click)="confirmEditItem()">Go To Facility Analysis</button>
+    </div>
+</div>

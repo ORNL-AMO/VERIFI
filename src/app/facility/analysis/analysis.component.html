@@ -1,0 +1,8 @@
+<app-analysis-banner *ngIf="utilityMeterData.length != 0"></app-analysis-banner>
+<router-outlet *ngIf="utilityMeterData.length != 0"></router-outlet>
+
+<div class="p-5" *ngIf="utilityMeterData.length == 0">
+    <div class="alert alert-danger text-center">
+        No Meter Data Found! Go to Utility Data tab to add meter data.
+    </div>
+</div>

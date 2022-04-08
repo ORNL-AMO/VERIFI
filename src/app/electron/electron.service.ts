@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { LocalStorageService } from 'ngx-webstorage';
 import { BehaviorSubject, Subscription } from 'rxjs';
-import { ToastNotificationsService } from '../shared/toast-notifications/toast-notifications.service';
+import { ToastNotificationsService } from '../core-components/toast-notifications/toast-notifications.service';
 
 @Injectable({
   providedIn: 'root'
@@ -12,12 +12,14 @@ export class ElectronService {
   updateAvailable: BehaviorSubject<boolean>;
   updateInfo: BehaviorSubject<{ releaseName: string, releaseNotes: string }>;
   updateError: BehaviorSubject<boolean>;
+  isElectron: boolean;
   constructor(private localStorageService: LocalStorageService, private toastNotificationService: ToastNotificationsService) {
 
     this.updateAvailable = new BehaviorSubject<boolean>(false);
     this.updateInfo = new BehaviorSubject<{ releaseName: string, releaseNotes: string }>(undefined);
     this.updateError = new BehaviorSubject<boolean>(false);
-    if (window["electronAPI"]) {
+    this.isElectron = window["electronAPI"]
+    if (this.isElectron) {
       this.listen();
     } else {
       console.warn('Electron\'s IPC was not loaded');
@@ -69,6 +71,14 @@ export class ElectronService {
       return;
     }
     window["electronAPI"].send("update");
+  }
+
+  sendAppRelaunch(){
+    if(!window["electronAPI"]){
+      return;
+    }
+    console.log('relaunch1');
+    window["electronAPI"].send("relaunch");
   }
 
   showWebDisclaimer() {

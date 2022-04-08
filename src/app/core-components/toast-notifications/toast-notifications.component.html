@@ -1,0 +1,20 @@
+<div class="card toast" [@toast]="showToast" *ngIf="!destroyToast" [ngClass]="[toastNotification.toastClass]">
+  <div class="header">
+    <i *ngIf="toastNotification.toastClass === 'success'" class="fa fa-check-circle item-left mr-2"></i>
+    <i *ngIf="toastNotification.toastClass === 'warning'" class="fa fa-exclamation-circle item-left mr-2"></i>
+    <i *ngIf="toastNotification.toastClass === 'info'" class="fa fa-info-circle item-left mr-2"></i>
+    <i *ngIf="toastNotification.toastClass === 'error'" class="fa fa-times-circle item-left mr-2"></i>
+    <i *ngIf="toastNotification.toastClass === 'comment'" class="fa fa-commenting item-left mr-2"></i>
+
+    <p class="item-left toast-title" [ngClass]="{'mb-0': !toastNotification.body}">{{toastNotification.title}}</p>
+    <button class="close item-right" (click)="closeToast()">&times;</button>
+  </div>
+  <div class="body" *ngIf="toastNotification.body">
+    <p class="mb-0" [innerHTML]="toastNotification.body"></p>
+  </div>
+  <div class="footer text-right" *ngIf="toastNotification.showDisableFooter">
+    <hr>
+    <a class="click-link" (click)="disable()">Disable</a>
+  </div>
+</div>
+<canvas *ngIf="!destroyToast && toastNotification?.confetti" class="confetti-canvas" #canvasElement></canvas>

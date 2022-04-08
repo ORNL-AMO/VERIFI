@@ -1,0 +1,124 @@
+.banner h3 a{
+    font-size: 1.75rem;
+    color: white;
+    padding: 5px 7px;
+}
+
+.banner h3 a span.fa{
+    color: white !important;
+}
+
+
+.banner h3 a.active{
+    background-color: white;
+    color: black;
+    padding: 5px 7px;
+    border-radius: 3px;
+    font-weight: bold;
+}
+
+
+.banner h3 a.active span.fa{
+    color: black !important;
+}
+
+
+.banner .nav-items a:hover{
+    cursor: pointer;
+    background-color: white;
+    color: black;
+    /* padding: 5px 7px; */
+    border-radius: 3px;
+    font-weight: bold;
+}
+
+.banner .nav-items h3 a:hover .fa{
+    color: black !important;
+}
+
+
+.account-management .banner{
+    background-color: #1e5ab3;
+}
+
+.facility-management .banner {
+    background-color: #6abb2e;
+}
+.utility-data .banner {
+    background-color: #c53f00;
+}
+
+.analysis .banner{
+    background-color: #7D3C98;
+}
+
+.overview-report .banner{
+    background-color: #ff6000;
+}
+
+
+.banner .banner-title{
+    font-size: 20px;
+    font-weight: 700;
+    color: white;
+    margin-right: 2.5rem;
+}
+
+.banner .banner-title .fa{
+    font-size: 22px;
+}
+
+.banner .help-toggle .fa-circle-question {
+    font-size: 24px;
+}
+
+.banner .help-toggle .fa-circle-question:hover {
+    color: #CCCC;
+}
+
+.account.banner {
+    background-color: #145A32;
+  }
+
+.facility.banner{
+    background-color: #2c386b;
+}
+
+.account.banner .fa-building{
+    color: white;
+  }
+
+.banner a.nav-link, .banner a.nav-link:not(.active) .fa{
+    color: white;
+}
+
+
+.banner .nav-tabs .nav-item{
+    margin-bottom: 0px;
+}
+
+.banner .nav-tabs{
+    border-bottom: none;
+}
+
+.banner span.fa{
+    color: white;
+}
+
+.banner a.nav-link .fa{
+    font-size: 16px;
+    padding-right: 4px;
+}
+
+.banner .nav-link{
+    font-weight: 600;
+}
+
+.sticky-top.modal-open{
+    z-index: inherit;
+}
+
+
+a.nav-link .fa.fa-exclamation-circle, .banner a.nav-link:not(.active) .fa.fa-exclamation-circle{
+    color: red;
+}

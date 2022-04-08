@@ -1,0 +1,32 @@
+<div class="h-100 text-center">
+    <span class="facility-icon">
+        <i class="fa fa-industry" [ngStyle]="{'color': selectedFacility.color}"></i>
+    </span>
+</div>
+<h1 class="text-center">
+    {{selectedFacility.name}}
+</h1>
+<!--facility info-->
+<div class="pt-1 pb-4" *ngIf="reportOptions.facilityInfo">
+    <app-facility-report-info [facility]="selectedFacility" [reportOptions]="reportOptions"></app-facility-report-info>
+</div>
+<!--meter summary table-->
+<div class="pt-5" *ngIf="reportOptions.facilityMetersTable">
+    <app-facility-report-meters-table [facility]="selectedFacility" [reportOptions]="reportOptions">
+    </app-facility-report-meters-table>
+</div>
+<!--utlity summary table-->
+<div class="pt-5 print-break-after" *ngIf="reportOptions.facilityUtilityUsageTable">
+    <app-facility-report-utility-usage-table [facility]="selectedFacility" [reportOptions]="reportOptions">
+    </app-facility-report-utility-usage-table>
+</div>
+<!--annual data graphs-->
+<div class="pt-5" *ngIf="reportOptions.annualBarCharts" [ngClass]="{'print-break-after': reportOptions.monthBarCharts}">
+    <app-facility-report-bar-chart [facility]="selectedFacility" [reportOptions]="reportOptions" [sumByMonth]="false">
+    </app-facility-report-bar-chart>
+</div>
+<div class="pt-5" *ngIf="reportOptions.annualBarCharts">
+    <app-facility-report-bar-chart [facility]="selectedFacility" [reportOptions]="reportOptions" [sumByMonth]="true">
+    </app-facility-report-bar-chart>
+</div>
+<hr class="page-spacer hide-print">

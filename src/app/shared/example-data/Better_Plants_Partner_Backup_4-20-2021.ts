@@ -1,4 +1,4 @@
-import { AccountBackup } from "src/app/account-management/backup-data.service";
+import { AccountBackup } from "src/app/shared/helper-services/backup-data.service";
 
 export const ExampleAccount: AccountBackup = {
     "account": {
@@ -9,9 +9,9 @@ export const ExampleAccount: AccountBackup = {
         "country": "US",
         "address": "123 First St.",
         "size": 0,
-        "naics1": -28,
-        "naics2": -282,
-        "naics3": -2828,
+        "naics1": "-28",
+        "naics2": "-282",
+        "naics3": "-2828",
         "notes": "",
         "img": "https://placehold.it/50x50",
         "unitsOfMeasure": "Custom",
@@ -46,7 +46,7 @@ export const ExampleAccount: AccountBackup = {
             "waterIsAbsolute": true
         },
         "fiscalYear": "calendarYear",
-        "fiscalYearMonth": "January",
+        "fiscalYearMonth": 0,
         "fiscalYearCalendarEnd": true,
         "setupWizard": false,
         "setupWizardComplete": true,
@@ -64,9 +64,9 @@ export const ExampleAccount: AccountBackup = {
                 "state": "WISCONSIN",
                 "zip": "54180",
                 "address": "456 Second St.",
-                "naics1": -28,
-                "naics2": -282,
-                "naics3": -2828,
+                "naics1": '-28',
+                "naics2": '-282',
+                "naics3": '-2828',
                 "notes": null,
                 "unitsOfMeasure": "Custom",
                 "energyUnit": "MMBtu",
@@ -100,7 +100,7 @@ export const ExampleAccount: AccountBackup = {
                     "waterIsAbsolute": true
                 },
                 "fiscalYear": "calendarYear",
-                "fiscalYearMonth": "January",
+                "fiscalYearMonth": 0,
                 "fiscalYearCalendarEnd": true,
                 "energyIsSource": true,
                 "id": 9,
@@ -4536,9 +4536,9 @@ export const ExampleAccount: AccountBackup = {
                 "state": "MINNESOTA",
                 "zip": "55343",
                 "address": "789 Third St.",
-                "naics1": -28,
-                "naics2": -282,
-                "naics3": -2828,
+                "naics1": '-28',
+                "naics2": '-282',
+                "naics3": '-2828',
                 "notes": null,
                 "unitsOfMeasure": "Custom",
                 "energyUnit": "MMBtu",
@@ -4572,7 +4572,7 @@ export const ExampleAccount: AccountBackup = {
                     "waterIsAbsolute": true
                 },
                 "fiscalYear": "calendarYear",
-                "fiscalYearMonth": "January",
+                "fiscalYearMonth": 0,
                 "fiscalYearCalendarEnd": true,
                 "energyIsSource": true,
                 "id": 10,

@@ -1,0 +1,43 @@
+.nav-items a:hover .fa{
+    color: black !important;
+}
+
+
+.nav-pills .nav-item{
+    padding-right: .5rem;
+    padding-left: .5rem;
+}
+
+.fa-print{
+    color: white;
+}
+
+.banner{
+   background-color: #f5f5f5;
+}
+
+.nav-link{
+    /* color: #fff; */
+    background-color: #CCCCCC;
+}
+
+.breadcrumbs .nav-item a.nav-link{
+    padding: .5rem;
+    font-size: 12px;
+
+}
+.nav-pills .nav-link.active, .nav-pills .show>.nav-link {
+    background-color: #145A32;
+}
+
+/* .nav-link.active{
+    background-color: #c53f00;
+} */
+
+.banner-border{
+    border-bottom: solid #145A32;
+}
+
+.btn:hover{
+    opacity: .7;
+}

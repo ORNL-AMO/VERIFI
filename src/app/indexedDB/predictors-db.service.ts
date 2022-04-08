@@ -40,6 +40,8 @@ export class PredictordbService {
                 this.facilityPredictorEntries.next(facilityPredictorEntries);
                 if (facilityPredictorEntries.length != 0) {
                     this.facilityPredictors.next(facilityPredictorEntries[0].predictors);
+                } else {
+                    this.facilityPredictors.next([]);
                 }
             }
         }
@@ -54,6 +56,8 @@ export class PredictordbService {
                     this.facilityPredictorEntries.next(facilityPredictorEntries);
                     if (facilityPredictorEntries.length != 0) {
                         this.facilityPredictors.next(facilityPredictorEntries[0].predictors);
+                    } else {
+                        this.facilityPredictors.next([]);
                     }
                 }
             });
@@ -66,6 +70,8 @@ export class PredictordbService {
             this.getAllByIndexRange('accountId', selectedAccount.id).subscribe(accountPredictorEntries => {
                 if (accountPredictorEntries.length != 0) {
                     this.accountPredictorEntries.next(accountPredictorEntries);
+                } else {
+                    this.accountPredictorEntries.next([]);
                 }
             });
         }
@@ -223,7 +229,7 @@ export class PredictordbService {
         let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
         let accountPredictorEntries: Array<IdbPredictorEntry> = await this.getAllByIndexRange('accountId', selectedFacility.accountId).toPromise()
         this.accountPredictorEntries.next(accountPredictorEntries);
-        let updatedFacilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(predictor => {return predictor.facilityId == selectedFacility.id});
+        let updatedFacilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(predictor => { return predictor.facilityId == selectedFacility.id });
         this.facilityPredictorEntries.next(updatedFacilityPredictorEntries);
         this.facilityPredictors.next(updatedPredictors);
     }
@@ -235,10 +241,12 @@ export class PredictordbService {
             return newPredictorIds.includes(predictor.id);
         });
         //update name and unit
-        entryPredictors = _.map(entryPredictors, (predictor) => {
+        entryPredictors = _.map(entryPredictors, (predictor: PredictorData) => {
             let updatedPredictor: PredictorData = updatedPredictors.find(val => { return val.id == predictor.id });
             predictor.name = updatedPredictor.name;
             predictor.unit = updatedPredictor.unit;
+            predictor.production = updatedPredictor.production;
+            predictor.productionInAnalysis = updatedPredictor.production;
             return predictor;
         });
         return entryPredictors;

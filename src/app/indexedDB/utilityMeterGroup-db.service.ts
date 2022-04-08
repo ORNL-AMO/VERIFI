@@ -145,7 +145,16 @@ export class UtilityMeterGroupdbService {
     }
 
     getGroupById(groupId: number): IdbUtilityMeterGroup {
-        let groups: Array<IdbUtilityMeterGroup> = this.facilityMeterGroups.getValue();
+        let groups: Array<IdbUtilityMeterGroup> = this.accountMeterGroups.getValue();
         return groups.find(group => { return group.id == groupId });
+    }
+
+    getGroupName(id: number) {
+        let group: IdbUtilityMeterGroup = this.getGroupById(id)
+        if (group) {
+            return group.name;
+        } else {
+            return;
+        }
     }
 }

@@ -1,0 +1,19 @@
+<div class="controls d-flex justify-content-between">
+    <app-analysis-summary-table-filter [tableContext]="'annualFacility'"></app-analysis-summary-table-filter>
+
+    <div class="btn-group">
+        <button class="btn" [ngClass]="{'btn-solid': dataDisplay == 'table'}"
+            (click)="setDataDisplay('table')">Table</button>
+        <button class="btn" [ngClass]="{'btn-solid': dataDisplay == 'graph'}"
+            (click)="setDataDisplay('graph')">Graph</button>
+    </div>
+</div>
+
+<div class="w-100 x-scroll">
+    <app-annual-analysis-summary-table *ngIf="dataDisplay == 'table'" [annualAnalysisSummary]="annualAnalysisSummary"
+        [analysisItem]="analysisItem">
+    </app-annual-analysis-summary-table>
+    <app-annual-analysis-summary-graph *ngIf="dataDisplay == 'graph'" [annualAnalysisSummary]="annualAnalysisSummary"
+        [analysisItem]="analysisItem">
+    </app-annual-analysis-summary-graph>
+</div>

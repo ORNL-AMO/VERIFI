@@ -1,0 +1,35 @@
+<div class="controls d-flex justify-content-between">
+    <app-analysis-summary-table-filter [tableContext]="'monthAccount'"></app-analysis-summary-table-filter>
+
+    <div class="d-flex">
+        <!--Items Per Page-->
+        <div class="items-per-page" *ngIf="dataDisplay == 'table'">
+            <span>Show </span>
+            <select [(ngModel)]="itemsPerPage">
+                <option [ngValue]=6>6</option>
+                <option [ngValue]=12>12</option>
+                <option [ngValue]=24>24</option>
+                <option [ngValue]=36>36</option>
+                <option [ngValue]=48>48</option>
+                <option [ngValue]=60>60</option>
+                <option [ngValue]=999999999999>All</option>
+            </select>
+        </div>
+        <div class="btn-group">
+            <button class="btn" [ngClass]="{'btn-solid': dataDisplay == 'table'}"
+                (click)="setDataDisplay('table')">Table</button>
+            <button class="btn" [ngClass]="{'btn-solid': dataDisplay == 'graph'}"
+                (click)="setDataDisplay('graph')">Graph</button>
+        </div>
+    </div>
+</div>
+<div class="w-100 x-scroll">
+    <app-monthly-analysis-summary-graph *ngIf="dataDisplay == 'graph'"
+        [monthlyAnalysisSummaryData]="monthlyAccountAnalysisData" [analysisItem]="accountAnalysisItem"
+        [facilityOrAccount]="account">
+    </app-monthly-analysis-summary-graph>
+    <app-monthly-analysis-summary-table *ngIf="dataDisplay == 'table'"
+        [monthlyAnalysisSummaryData]="monthlyAccountAnalysisData" [analysisItem]="accountAnalysisItem"
+        [facilityOrAccount]="account" [itemsPerPage]="itemsPerPage">
+    </app-monthly-analysis-summary-table>
+</div>

@@ -1,0 +1,44 @@
+<h4>Edit/Delete Templates</h4>
+<br>
+
+<div class="row" *ngIf="!templateToDelete">
+    <div class="col">
+        <p class="bold">Template Name</p>
+    </div>
+    <div class="col-1">
+        <!-- <p class="bold">Delete</p> -->
+    </div>
+</div>
+<form *ngIf="!templateToDelete">
+    <div class="row" *ngFor="let template of reportTemplates">
+        <div class="col">
+            <label>
+                <input class="full-width" type="text" [(ngModel)]="template.name"
+                    name="{{'template'+template.id}}" onfocus="this.select();" minlength="0" maxlength="100">
+            </label>
+        </div>
+        <div class="col-1">
+            <button class="btn btn-small btn-danger m-0 item-right" (click)="deleteTemplate(template)"><i
+                    class="fa fa-trash red pointer"></i>
+            </button>
+        </div>
+    </div>
+</form>
+
+<div class="saveCancel item-right" *ngIf="!templateToDelete">
+    <button class="btn btn-secondary" (click)="cancel()">Cancel</button>
+    <button class="btn btn-primary" (click)="save()">Save</button>
+</div>
+
+
+
+
+<div *ngIf="templateToDelete">
+    <p class="alert-danger p-2 text-center">
+        Are you sure you want to delete {{templateToDelete.name}}? This cannot be undone.
+    </p>
+    <div class="saveCancel item-right">
+        <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
+        <button class="btn btn-small btn-danger" (click)="confirmDelete()">Confirm Delete</button>
+    </div>
+</div>

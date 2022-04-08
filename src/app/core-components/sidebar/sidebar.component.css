@@ -1,0 +1,87 @@
+/*
+Sidebar
+=============================================== */
+.menuHeader {
+    height: 22px;
+    padding-left: 2rem;
+}
+.menuHeader p {
+    font-weight: bold;
+    text-transform: uppercase;
+}
+.active i {
+    color: #ff6000;
+}
+i.fa {    
+    font-size: 1.25rem;
+    width: 1.5rem;
+}
+.nav-link{
+    padding-left: 2rem;
+}
+
+nav.sidebar.open{
+    width: 260px;
+}
+
+nav.sidebar{
+    width: 70px;
+    transition: .2s width;
+    box-shadow: 2px 3px 5px 0px #77777759;
+    height: 100%;
+}
+
+.nav-link .nav-label{
+    animation: fadeInAnimation .7s ease;
+}
+
+.open .nav-link span {
+    width: 100%;
+    transition: .6s width;
+}
+
+.nav-link span {
+    width: 0px;
+    transition: .6s width;
+}
+
+hr{
+    margin-right: 15px;
+    margin-left: 15px;
+}
+
+.nav-link:hover{
+    cursor: pointer;
+    background-color: #efefef;
+}
+
+.icon-row .nav-link{
+    padding: .5rem;
+}
+
+div.hidden, div.d-flex.hidden{
+    display: none !important;
+}
+
+.icon-row i.fa{
+    width: auto;
+}
+
+.not-open .nav-link.active, .open .nav-link.active-head{
+    background-color: #efefef;
+}
+
+.disabled i{
+    pointer-events: none;
+    cursor: default;
+    opacity: .7;
+}
+
+.open .icon-row{
+    padding-left: 1.5rem;
+}
+
+.nav{
+    flex-wrap: nowrap;
+    overflow-y: auto;
+}

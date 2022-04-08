@@ -1,0 +1,23 @@
+select.form-control{
+    height: min-content !important;
+    /* margin-top: 10px; */
+}
+
+.btn{
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+.fa-arrow-right{
+    padding-top: 6px;
+    padding-right: .25rem;
+    padding-left: .25rem;
+}
+
+.banner-border{
+    border-bottom: solid #2c386b;
+  }
+
+  .breadcrumbs select{
+      background-color: white;
+  }

@@ -1,5 +1,3 @@
-@import "~font-awesome/css/font-awesome.min.css";
-
 /*
 Typography
 ======================================================== */
@@ -88,3 +86,35 @@ Typography
     cursor: pointer;
   }
   
+
+  .account-management h4{
+    border-bottom-color: #1e5ab3;
+  }
+
+  .facility-management h4 {
+    border-bottom-color: #6abb2e;
+  }
+
+  .utility-data h4{
+    border-bottom-color: #c53f00;
+  }
+
+  .analysis h4{
+    border-bottom-color: #7D3C98;
+  }
+
+  .overview-report h4 {
+    border-bottom-color: #ff6000;
+  }
+
+  .facility h4{
+    border-bottom-color: #2c386b;
+  }
+
+  .account h4{
+    border-bottom-color: #145A32;
+  }
+
+  .pull-right{
+    float: right;
+  }

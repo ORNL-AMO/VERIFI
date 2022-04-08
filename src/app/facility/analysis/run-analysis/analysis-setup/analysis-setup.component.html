@@ -1,0 +1,88 @@
+<div class="content-padding">
+    <h4>Analysis Setup</h4>
+    <div class="row">
+        <div class="col-6">
+            <div class="form-group">
+                <label class="w-50" for="analysisName">Name</label>
+                <input class="w-50" type="text" id="analysisName" name="analysisName" [(ngModel)]="analysisItem.name"
+                    (input)="saveItem()">
+            </div>
+            <div class="form-group d-flex">
+                <label class="w-50">Energy displayed as site or source? </label>
+                <div class="w-50">
+                    <input type="radio" class="rowToggle" name="energyIsSource" [value]="true" id="sourceEnergy"
+                        [(ngModel)]="analysisItem.energyIsSource" (change)="saveItem()">
+                    <label class="checkbox" for="sourceEnergy">Source Energy</label>
+
+                    <input type="radio" class="rowToggle" name="energyIsSource" [value]="false" id="siteEnergy"
+                        [(ngModel)]="analysisItem.energyIsSource" (change)="saveItem()">
+                    <label class="checkbox" for="siteEnergy">Site Energy</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="w-50" for="energyUnit">Energy Unit</label>
+                <select class="w-50" name="energyUnit" id="energyUnit" [(ngModel)]="analysisItem.energyUnit"
+                    (change)="saveItem()">
+                    <option class="form-control" *ngFor="let energyUnitOption of energyUnitOptions"
+                        [ngValue]="energyUnitOption.value">
+                        <span [innerHTML]="energyUnitOption.display"></span>
+                    </option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="reportYear" class="w-50">
+                    Report Year
+                </label>
+                <select required class="w-50" id="reportYear" id="reportYear" [(ngModel)]="analysisItem.reportYear"
+                    (change)="saveItem()">
+                    <option *ngFor="let year of yearOptions" [ngValue]="year">{{year}}</option>
+                </select>
+            </div>
+            <hr>
+        </div>
+        <div class="col-6">
+            <div class="form-group">
+                <label class="w-50">
+                    Baseline Year
+                </label>
+                <select id="baselineYear" name="baselineYear" disabled class="w-50"
+                    [(ngModel)]="facility.sustainabilityQuestions.energyReductionBaselineYear">
+                    <option [ngValue]="facility.sustainabilityQuestions.energyReductionBaselineYear">
+                        {{facility.sustainabilityQuestions.energyReductionBaselineYear}}</option>
+                </select>
+            </div>
+            <div class="form-group d-flex">
+                <label class="w-50">
+                    Reporting Year
+                </label>
+                <div class="w-50">
+                    <input type="radio" class="rowToggle" [(ngModel)]="facility.fiscalYear" value="calendarYear"
+                        name="calendarYear" id="calendarYear" disabled>
+                    <label class="checkbox" for="calendarYear">Calendar Year</label>
+
+                    <input type="radio" class="rowToggle" for="nonCalendarYear" [(ngModel)]="facility.fiscalYear"
+                        value="nonCalendarYear" name="nonCalendarYear" id="nonCalendarYear" disabled>
+                    <label class="checkbox">Fiscal Year</label>
+
+                </div>
+            </div>
+            <div *ngIf="facility.fiscalYear == 'nonCalendarYear'" class="form-group d-flex">
+                <label class="w-50">Start Month</label>
+                <select class="w-50" id="startMonth" name="startMonth" [(ngModel)]="facility.fiscalYearMonth" disabled>
+                    <option *ngFor="let month of months" [ngValue]="month.monthNumValue">{{month.name}}
+                    </option>
+                </select>
+            </div>
+            <div class="form-group" *ngIf="facility.fiscalYear == 'nonCalendarYear'">
+                <input type="checkbox" class="rowToggle" name="fiscalYearCalendarEnd" id="fiscalYearCalendarEnd"
+                    [(ngModel)]="facility.fiscalYearCalendarEnd" disabled>
+                <label class="checkbox" for="fiscalYearCalanderEnd">FY is denoted by the calendar year in which
+                    it ends.</label>
+            </div>
+            <div class="alert alert-info text-center">
+                Fields set in "<span class="fa fa-gear"></span> Settings" tab.
+            </div>
+            <hr>
+        </div>
+    </div>
+</div>

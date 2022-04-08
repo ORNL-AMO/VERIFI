@@ -1,0 +1,40 @@
+<div class="w-100 text-center">
+    <!--ADDRESS-->
+    <span *ngIf="account.address">{{account.address}}, {{account.city}}, {{account.state}} {{account.zip}}
+        {{account.country}}</span>
+    <!--NAICS CODE-->
+    <span *ngIf="naics">
+        <br>
+        NAICS: {{naics}}
+    </span>
+    <!--GLOBAL WARMING POTENTIAL-->
+    <span *ngIf="account.eGridSubregion && !account.customEmissionsRate">
+        <br>
+        eGridSubregion: {{account.eGridSubregion}}
+    </span>
+    <span *ngIf="account.emissionsOutputRate">
+        <br>
+        Electrical Emissions Output Rate: {{account.emissionsOutputRate}} kg CO<sub>2</sub>/kWh
+    </span>
+    <!--SITE/SOURCE-->
+    <br>
+    <span class="bold" *ngIf="reportOptions.energyIsSource">
+        &#x2a; Energy is source
+    </span>
+    <span class="bold" *ngIf="!reportOptions.energyIsSource">
+        &#x2a; Energy is site
+    </span>
+
+    <!--NOTES-->
+    <div *ngIf="account.notes" class="pt-3">
+        <br>
+        <span [innerHTML]="account.notes"></span>
+    </div>
+
+
+    <!--ADD NEXT TWO AT LATER DATE WHEN USED-->
+    <!--SUSTAINABILITY QUESTIONS-->
+
+    <!--FISCAL YEAR-->
+
+</div>

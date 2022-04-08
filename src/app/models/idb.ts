@@ -1,5 +1,6 @@
 import { CalanderizedMeter, MonthlyData } from './calanderization';
 import { ElectricityDataFilters } from './electricityFilter';
+import { ReportOptions } from './overview-report';
 import { SustainabilityQuestions } from './sustainabilityQuestions';
 
 export interface IdbAccount {
@@ -12,9 +13,9 @@ export interface IdbAccount {
     zip: string,
     address: string,
     size?: number,
-    naics1: number,
-    naics2: number,
-    naics3: number,
+    naics1: string,
+    naics2: string,
+    naics3: string,
     notes: string,
     img: string
     unitsOfMeasure: string,
@@ -23,8 +24,8 @@ export interface IdbAccount {
     volumeLiquidUnit: string,
     volumeGasUnit: string,
     sustainabilityQuestions: SustainabilityQuestions,
-    fiscalYear: string,
-    fiscalYearMonth: string,
+    fiscalYear: "calendarYear" | "nonCalendarYear",
+    fiscalYearMonth: number,
     fiscalYearCalendarEnd: boolean,
     setupWizard: boolean,
     setupWizardComplete: boolean,
@@ -48,9 +49,9 @@ export interface IdbFacility {
     state: string,
     zip: string,
     address: string,
-    naics1: number,
-    naics2: number,
-    naics3: number,
+    naics1: string,
+    naics2: string,
+    naics3: string,
     type?: string,
     size?: number,
     units?: string,
@@ -65,14 +66,16 @@ export interface IdbFacility {
     volumeLiquidUnit: string,
     volumeGasUnit: string,
     sustainabilityQuestions: SustainabilityQuestions,
-    fiscalYear: string,
-    fiscalYearMonth: string,
+    fiscalYear: "calendarYear" | "nonCalendarYear",
+    fiscalYearMonth: number,
     fiscalYearCalendarEnd: boolean,
     energyIsSource: boolean,
     emissionsOutputRate?: number,
     eGridSubregion?: string,
     customEmissionsRate?: boolean
-    color?: string
+    color?: string,
+    selected?: boolean,
+    wizardId?: string
 }
 
 export interface IdbUtilityMeterGroup {
@@ -185,9 +188,69 @@ export interface PredictorData {
     unit?: string,
     description?: string,
     id: string,
-    importWizardName?: string
+    importWizardName?: string,
+    production?: boolean,
+    productionInAnalysis?: boolean,
+    regressionCoefficient?: number
 }
 
 
+export interface IdbOverviewReportOptions {
+    id?: number,
+    accountId: number,
+    reportOptions: ReportOptions,
+    date: Date,
+    type: 'report' | 'template',
+    name: string,
+    baselineYear?: number,
+    targetYear?: number,
+    title?: string,
+}
+
+export interface IdbAnalysisItem {
+    id?: number,
+    accountId: number,
+    facilityId: number,
+    date: Date,
+    name: string,
+    energyIsSource: boolean,
+    reportYear: number,
+    energyUnit: string,
+    groups: Array<AnalysisGroup>
+}
+
+export interface AnalysisGroup {
+    idbGroupId: number,
+    analysisType: AnalysisType,
+    predictorVariables: Array<PredictorData>,
+    productionUnits: string,
+    regressionModelYear: number,
+    regressionConstant: number,
+    groupHasError: boolean,
+    specifiedMonthlyPercentBaseload: boolean,
+    averagePercentBaseload: number,
+    monthlyPercentBaseload: Array<{
+        monthNum: number,
+        percent: number
+    }>
+}
+
+export interface IdbAccountAnalysisItem {
+    id?: number,
+    accountId: number,
+    date: Date,
+    name: string,
+    energyIsSource: boolean,
+    reportYear: number,
+    energyUnit: string,
+    facilityAnalysisItems: Array<{
+        facilityId: number,
+        analysisItemId: number
+    }>
+}
+
+
+
+export type AnalysisType = 'absoluteEnergyConsumption' | 'energyIntensity' | 'modifiedEnergyIntensity' | 'regression';
 export type MeterSource = "Electricity" | "Natural Gas" | "Other Fuels" | "Other Energy" | "Water" | "Waste Water" | "Other Utility";
 export type MeterPhase = "Solid" | "Liquid" | "Gas";

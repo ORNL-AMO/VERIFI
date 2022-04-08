@@ -1,5 +1,3 @@
-@import "~font-awesome/css/font-awesome.min.css";
-
 /*
 Meter Displays
 =============================================== */
@@ -24,7 +22,7 @@ Meter Displays
     position: absolute;
     top: 44px;
     left: 0;
-    width: 100%;
+    /* width: 100%; */
     background-color: #ececec;
     border: 1px solid #d2d2d2;
     z-index: 1;
@@ -35,7 +33,7 @@ Meter Displays
   .filter .filter-dropdown label {
     margin: 0px 10px 0 0;
   }
-  .filter .filter-dropdown input {
+  .filter .filter-dropdown input[type="checkbox"] {
     float: left;
     width: auto;
     margin: 0px 10px 0 0;

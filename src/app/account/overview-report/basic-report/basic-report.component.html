@@ -1,0 +1,18 @@
+<div class="report" [ngClass]="{'print': print}" *ngIf="reportOptions">
+    <app-front-page [reportOptions]="reportOptions"></app-front-page>
+    <hr class="print-break-after page-spacer page-break">
+    <app-account-report class="print-break-after report-item" *ngIf="reportOptions.includeAccount"
+        [reportOptions]="reportOptions" [account]="account">
+    </app-account-report>
+    <div *ngIf="reportOptions.includeFacilities">
+        <div *ngFor="let facility of reportOptions.facilities" class="print-break-before report-item">
+            <app-facility-report *ngIf="facility.selected" [facility]="facility" [reportOptions]="reportOptions">
+            </app-facility-report>
+        </div>
+    </div>
+    <div *ngIf="reportOptions.meterReadings" class="print-break-before">
+        <div *ngFor="let facility of reportOptions.facilities">
+            <app-meter-readings-report *ngIf="facility.selected" [facility]="facility"></app-meter-readings-report>
+        </div>
+    </div>
+</div>

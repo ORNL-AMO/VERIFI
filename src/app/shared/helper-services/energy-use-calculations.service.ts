@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility, IdbUtilityMeter, MeterPhase, MeterSource } from 'src/app/models/idb';
-import { FuelTypeOption, GasOptions, LiquidOptions, OtherEnergyOptions, SolidOptions } from 'src/app/utility/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
+import { FuelTypeOption, GasOptions, LiquidOptions, OtherEnergyOptions, SolidOptions } from 'src/app/facility/utility-data/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
 import { ConvertUnitsService } from '../convert-units/convert-units.service';
 
 @Injectable({

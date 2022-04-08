@@ -1,0 +1,34 @@
+<div class="facility banner d-flex justify-content-between w-100 pb-0">
+    <div class="d-flex">
+        <div class="banner-title" *ngIf="selectedFacility">
+            <span class="fa fa-industry"></span>
+            {{selectedFacility.name}}
+        </div>
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <a class="nav-link" routerLink="home" [routerLinkActive]="['active']"><i
+                        class="fa fa-home"></i>Overview</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" routerLink="utility" [routerLinkActive]="['active']"><i
+                        class="fa fa-file-invoice"></i>Utility
+                    Data</a>
+            </li>
+            <li class="nav-item" [ngClass]="{'disabled': facilityMeterData.length == 0}">
+                <a class="nav-link" routerLink="visualization" [routerLinkActive]="['active']"><i
+                        class="fa fa-chart-line"></i>Data Visualization</a>
+            </li>
+            <li class="nav-item" [ngClass]="{'disabled': facilityMeterData.length == 0}">
+                <a class="nav-link" routerLink="analysis" [routerLinkActive]="['active']"><i
+                        class="fa fa-microscope"></i>Analysis</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" routerLink="settings" [routerLinkActive]="['active']"><i
+                        class="fa fa-cog"></i>Settings</a>
+            </li>
+        </ul>
+    </div>
+    <div class="help-toggle">
+        <a (click)="toggleHelpPanel()"><span class="fa fa-circle-question"></span></a>
+    </div>
+</div>

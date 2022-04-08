@@ -1,0 +1,30 @@
+.table-sm th{
+    width: 33%;
+}
+
+.table-sm.four-columns th{
+    width: 25%;
+}
+
+
+@media print {
+    table.table.table-sm tr th, table.table.table-sm tbody tr, .table th, .table td {
+        border-top: solid 1px black !important;
+        border-bottom: solid 1px black !important;
+        border-left: solid 1px black !important;
+        border-right: solid 1px black !important;
+        color: black;
+        background-color: white;
+    }
+
+    table.table{
+        border-collapse: inherit !important;
+    }
+}
+
+
+.section-label{
+    font-size: 24px;
+    font-weight: bold;
+    width: auto;
+}

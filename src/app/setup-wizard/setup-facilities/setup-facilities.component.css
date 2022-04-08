@@ -1,0 +1,12 @@
+.banner{
+    background-color: white;
+}
+
+.wrapper{
+    margin-bottom: 100px;
+}
+
+.nav-item.active a{
+    background-color: #145A32;
+    color: white !important;
+}

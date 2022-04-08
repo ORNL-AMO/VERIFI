@@ -1,0 +1,32 @@
+.wrapper {
+    background-color: #f1f1f100;
+    margin: 0px 30px;
+    padding: 20px 30px 30px;
+
+    position:relative;
+  }
+  .wrapper.main-content {
+    margin-right: 25px 40px;
+  }
+  .box {
+    background-color: white;
+    margin: 3px;
+    padding: 20px;
+    border-radius: 4px;
+    box-shadow: 2px 3px 10px #d6d6d6;
+  }
+
+  .empty-state .box p {
+  font-size: 22px;
+  }
+  
+  .loadData,
+  .loadData a {
+    font-size: 18px;
+
+  }
+
+
+  .loadData{
+    background-color: white;
+  }
