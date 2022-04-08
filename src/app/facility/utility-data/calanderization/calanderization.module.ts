@@ -15,7 +15,7 @@ import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.modu
     CalanderizationChartComponent,
     CalanderizationFilterComponent,
     DataApplicationMenuComponent,
-    CalanderizationComponent
+    CalanderizationComponent,
   ],
   imports: [
     CommonModule,

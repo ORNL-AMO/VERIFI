@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { LocalStorageService } from 'ngx-webstorage';
 import { BehaviorSubject } from 'rxjs';
 import { AnalysisTableColumns } from 'src/app/models/analysis';
-import { AnalysisGroup, IdbFacility, PredictorData } from '../../models/idb';
+import { AnalysisGroup, IdbAccount, IdbFacility, PredictorData } from '../../models/idb';
 
 @Injectable({
   providedIn: 'root'
@@ -114,16 +114,16 @@ export class AnalysisService {
     return (value != undefined) && (value != null) && (isNaN(value) == false);
   }
 
-  checkFiscalYearEnd(date: Date, facility: IdbFacility, orderDataField: string, orderByDirection: 'asc' | 'desc'): boolean {
+  checkFiscalYearEnd(date: Date, facilityOrAccount: IdbFacility | IdbAccount, orderDataField: string, orderByDirection: 'asc' | 'desc'): boolean {
     if (orderDataField == 'date' || orderDataField == 'fiscalYear') {
-      if (facility.fiscalYear == 'calendarYear' && (orderByDirection == 'asc' || orderDataField == 'fiscalYear')) {
+      if (facilityOrAccount.fiscalYear == 'calendarYear' && (orderByDirection == 'asc' || orderDataField == 'fiscalYear')) {
         return date.getUTCMonth() == 0;
-      } else if (facility.fiscalYear == 'calendarYear' && orderByDirection == 'desc') {
+      } else if (facilityOrAccount.fiscalYear == 'calendarYear' && orderByDirection == 'desc') {
         return date.getUTCMonth() == 11;
       } else {
-        if (date.getUTCMonth() == facility.fiscalYearMonth && orderByDirection == 'asc') {
+        if (date.getUTCMonth() == facilityOrAccount.fiscalYearMonth && orderByDirection == 'asc') {
           return true;
-        } else if (date.getUTCMonth() + 1 == facility.fiscalYearMonth && orderByDirection == 'desc') {
+        } else if (date.getUTCMonth() + 1 == facilityOrAccount.fiscalYearMonth && orderByDirection == 'desc') {
           return true;
         } else {
           return false;

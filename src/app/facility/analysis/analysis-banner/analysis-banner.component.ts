@@ -13,7 +13,6 @@ import { SharedDataService } from 'src/app/shared/helper-services/shared-data.se
 })
 export class AnalysisBannerComponent implements OnInit {
 
-  bannerTitle: string = 'Analysis';
   inRunAnalysis: boolean;
   analysisItem: IdbAnalysisItem;
   analysisItemSub: Subscription;

@@ -1,0 +1,104 @@
+<div class="filter">
+    <button class="btn" [ngClass]="{'btn-solid' : !showFilterDropdown, 'btn-outline' : showFilterDropdown}"
+        (click)="toggleFilterMenu()">
+        Choose Columns
+    </button>
+    <div class="filter-dropdown" *ngIf="showFilterDropdown">
+        <p class="small">Choose Table Columns</p>
+        <div class="row">
+            <div class="col">
+                <label class="bold">
+                    <input type="checkbox" name="energy" [(ngModel)]="analysisTableColumns.energy"
+                        (change)="toggleEnergyColumns()">Energy Columns
+                </label>
+                <label>
+                    <input type="checkbox" name="actualEnergy" [(ngModel)]="analysisTableColumns.actualEnergy"
+                        (change)="save()">Actual Energy Use
+                </label>
+                <label>
+                    <input type="checkbox" name="modeledEnergy" [(ngModel)]="analysisTableColumns.modeledEnergy"
+                        (change)="save()">Modeled Energy Use
+                </label>
+                <label>
+                    <input type="checkbox" name="adjustedEnergy" [(ngModel)]="analysisTableColumns.adjustedEnergy"
+                        (change)="save()">Adjusted Energy Use
+                </label>
+
+
+            </div>
+            <div class="col" *ngIf="tableContext != 'monthAccount' && tableContext != 'annualAccount'">
+                <label class="bold">
+                    <input type="checkbox" name="productionVariables"
+                        [(ngModel)]="analysisTableColumns.productionVariables"
+                        (change)="toggleAllPredictors()">Production Variables
+                </label>
+                <label *ngFor="let predictorOption of analysisTableColumns.predictors">
+                    <input type="checkbox" name="productionVariables" [(ngModel)]="predictorOption.display"
+                        (change)="save()">{{predictorOption.predictor.name}} <span
+                        *ngIf="predictorOption.usedInAnalysis">&#42;</span>
+                </label>
+            </div>
+            <div class="col">
+                <label class="bold">
+                    <input type="checkbox" name="incrementalImprovement"
+                        [(ngModel)]="analysisTableColumns.incrementalImprovement"
+                        (change)="toggleIncrementalImprovement()">
+                    Incremental Improvement
+                </label>
+                <label>
+                    <input type="checkbox" name="SEnPI" [(ngModel)]="analysisTableColumns.SEnPI" (change)="save()">SEnPI
+                </label>
+                <label>
+                    <input type="checkbox" name="savings" [(ngModel)]="analysisTableColumns.savings"
+                        (change)="save()">Savings
+                </label>
+                <!--groupMonth-->
+                <label *ngIf="tableContext == 'monthGroup' || tableContext == 'monthFacility' || tableContext == 'monthAccount'">
+                    <input type="checkbox" name="percentSavingsComparedToBaseline"
+                        [(ngModel)]="analysisTableColumns.percentSavingsComparedToBaseline" (change)="save()">% Savings
+                </label>
+                <label *ngIf="tableContext == 'monthGroup' || tableContext == 'monthFacility' || tableContext == 'monthAccount'">
+                    <input type="checkbox" name="yearToDateSavings" [(ngModel)]="analysisTableColumns.yearToDateSavings"
+                        (change)="save()">YTD Savings
+                </label>
+                <label *ngIf="tableContext == 'monthGroup' || tableContext == 'monthFacility' || tableContext == 'monthAccount'">
+                    <input type="checkbox" name="yearToDatePercentSavings"
+                        [(ngModel)]="analysisTableColumns.yearToDatePercentSavings" (change)="save()">YTD % Savings
+                </label>
+                <label *ngIf="tableContext == 'monthGroup' || tableContext == 'monthFacility' || tableContext == 'monthAccount'">
+                    <input type="checkbox" name="rollingSavings" [(ngModel)]="analysisTableColumns.rollingSavings"
+                        (change)="save()">Rolling Savings
+                </label>
+                <label *ngIf="tableContext == 'monthGroup' || tableContext == 'monthFacility'">
+                    <input type="checkbox" name="rolling12MonthImprovement"
+                        [(ngModel)]="analysisTableColumns.rolling12MonthImprovement" (change)="save()">Rolling 12-Month
+                    Improvement
+                </label>
+                <!--groupAnnual-->
+                <label *ngIf="tableContext == 'annualGroup' || tableContext == 'annualFacility' || tableContext == 'annualAccount'">
+                    <input type="checkbox" name="totalSavingsPercentImprovement"
+                        [(ngModel)]="analysisTableColumns.totalSavingsPercentImprovement" (change)="save()">Total
+                    Savings % Improvement
+                </label>
+                <label *ngIf="tableContext == 'annualGroup' || tableContext == 'annualFacility' || tableContext == 'annualAccount'">
+                    <input type="checkbox" name="annualSavingsPercentImprovement"
+                        [(ngModel)]="analysisTableColumns.annualSavingsPercentImprovement" (change)="save()">Annual
+                    Savings % Improvement
+                </label>
+                <label *ngIf="tableContext == 'annualGroup' || tableContext == 'annualFacility' || tableContext == 'annualAccount'">
+                    <input type="checkbox" name="adjustmentToBaseline"
+                        [(ngModel)]="analysisTableColumns.adjustmentToBaseline" (change)="save()">Adjustment to
+                    Baseline
+                </label>
+                <label *ngIf="tableContext == 'annualGroup' || tableContext == 'annualFacility' || tableContext == 'annualAccount'">
+                    <input type="checkbox" name="cummulativeSavings"
+                        [(ngModel)]="analysisTableColumns.cummulativeSavings" (change)="save()">Cumulative Savings
+                </label>
+                <label *ngIf="tableContext == 'annualGroup' || tableContext == 'annualFacility' || tableContext == 'annualAccount'">
+                    <input type="checkbox" name="newSavings" [(ngModel)]="analysisTableColumns.newSavings"
+                        (change)="save()">New Savings
+                </label>
+            </div>
+        </div>
+    </div>
+</div>

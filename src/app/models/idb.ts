@@ -235,6 +235,22 @@ export interface AnalysisGroup {
     }>
 }
 
+export interface IdbAccountAnalysisItem {
+    id?: number,
+    accountId: number,
+    date: Date,
+    name: string,
+    energyIsSource: boolean,
+    reportYear: number,
+    energyUnit: string,
+    facilityAnalysisItems: Array<{
+        facilityId: number,
+        analysisItemId: number
+    }>
+}
+
+
+
 export type AnalysisType = 'absoluteEnergyConsumption' | 'energyIntensity' | 'modifiedEnergyIntensity' | 'regression';
 export type MeterSource = "Electricity" | "Natural Gas" | "Other Fuels" | "Other Energy" | "Water" | "Waste Water" | "Other Utility";
 export type MeterPhase = "Solid" | "Liquid" | "Gas";

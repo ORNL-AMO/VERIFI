@@ -9,6 +9,7 @@ import { HelperPipesModule } from '../shared/helper-pipes/helper-pipes.module';
 import { SettingsFormsModule } from '../shared/settings-forms/settings-forms.module';
 import { OverviewReportModule } from './overview-report/overview-report.module';
 import { AccountDashboardModule } from './account-dashboard/account-dashboard.module';
+import { AccountAnalysisModule } from './account-analysis/account-analysis.module';
 
 
 @NgModule({
@@ -24,7 +25,8 @@ import { AccountDashboardModule } from './account-dashboard/account-dashboard.mo
     HelperPipesModule,
     SettingsFormsModule,
     OverviewReportModule,
-    AccountDashboardModule
+    AccountDashboardModule,
+    AccountAnalysisModule
   ]
 })
 export class AccountModule { }
