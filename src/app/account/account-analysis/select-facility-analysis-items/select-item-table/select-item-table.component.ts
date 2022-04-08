@@ -1,5 +1,9 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
+import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 
 @Component({
@@ -16,12 +20,14 @@ export class SelectItemTableComponent implements OnInit {
   facilityAnalysisItems: Array<IdbAnalysisItem>;
 
   selectedFacilityItemId: number;
-  constructor(private accountAnalysisDbService: AccountAnalysisDbService) { }
+  itemToEdit: IdbAnalysisItem;
+  constructor(private accountAnalysisDbService: AccountAnalysisDbService, private router: Router,
+    private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
   }
 
-  ngOnChanges(){
+  ngOnChanges() {
     this.setSelectedFacilityItemId();
 
   }
@@ -36,6 +42,21 @@ export class SelectItemTableComponent implements OnInit {
 
   save() {
     this.accountAnalysisDbService.updateFacilityItemSelection(this.selectedAnalysisItem, this.selectedFacilityItemId, this.facility.id);
+  }
+
+
+  editItem(analysisItem: IdbAnalysisItem) {
+    this.itemToEdit = analysisItem;
+  }
+
+  cancelEditItem() {
+    this.itemToEdit = undefined;
+  }
+
+  confirmEditItem() {
+    this.facilityDbService.selectedFacility.next(this.facility);
+    this.analysisDbService.selectedAnalysisItem.next(this.itemToEdit);
+    this.router.navigateByUrl('facility/' + this.itemToEdit.facilityId + '/analysis/run-analysis');
   }
 
 }
