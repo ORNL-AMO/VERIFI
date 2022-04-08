@@ -115,8 +115,12 @@ export class AccountSettingsComponent implements OnInit {
     await this.overviewReportOptionsDbService.updateReportsRemoveFacility(this.facilityToDelete.id);
     this.loadingService.setLoadingMessage("Deleting Analysis Items...")
     await this.analysisDbService.deleteAllFacilityAnalysisItems(this.facilityToDelete.id);
-    //TODO: Update Account Analysis Items..
-
+    this.loadingService.setLoadingMessage('Updating Analysis Items...');
+    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
+    for (let index = 0; index < accountAnalysisItems.length; index++) {
+      accountAnalysisItems[index].facilityAnalysisItems = accountAnalysisItems[index].facilityAnalysisItems.filter(facilityItem => { return facilityItem.facilityId != this.facilityToDelete.id });
+      await this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[index]).toPromise();
+    }
 
     this.loadingService.setLoadingMessage('Updating Reports...');
     let overviewReportOptions: Array<IdbOverviewReportOptions> = this.overviewReportOptionsDbService.accountOverviewReportOptions.getValue();
@@ -157,7 +161,7 @@ export class AccountSettingsComponent implements OnInit {
     await this.overviewReportOptionsDbService.deleteAccountReports();
     this.loadingService.setLoadingMessage("Deleting Analysis Items...")
     await this.analysisDbService.deleteAccountAnalysisItems();
-    //TODO: Delete Account Analysis DB Items...
+    await this.accountAnalysisDbService.deleteAccountAnalysisItems();
 
     let allFacilities: Array<IdbFacility> = await this.facilityDbService.getAll().toPromise();
     // Then navigate to another facility
