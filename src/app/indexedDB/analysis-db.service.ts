@@ -99,8 +99,8 @@ export class AnalysisDbService {
     });
   }
 
-  addWithObservable(facility: IdbAnalysisItem): Observable<IdbAnalysisItem> {
-    return this.dbService.add('analysisItems', facility);
+  addWithObservable(analysisItem: IdbAnalysisItem): Observable<IdbAnalysisItem> {
+    return this.dbService.add('analysisItems', analysisItem);
   }
 
   deleteWithObservable(id: number): Observable<any> {

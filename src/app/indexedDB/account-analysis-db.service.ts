@@ -1,0 +1,156 @@
+import { Injectable } from '@angular/core';
+import { NgxIndexedDBService } from 'ngx-indexed-db';
+import { LocalStorageService } from 'ngx-webstorage';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { IdbAccount, IdbAccountAnalysisItem, IdbFacility } from '../models/idb';
+import { AccountdbService } from './account-db.service';
+import { FacilitydbService } from './facility-db.service';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class AccountAnalysisDbService {
+
+  accountAnalysisItems: BehaviorSubject<Array<IdbAccountAnalysisItem>>;
+  selectedAnalysisItem: BehaviorSubject<IdbAccountAnalysisItem>;
+
+  constructor(private dbService: NgxIndexedDBService, private localStorageService: LocalStorageService,
+    private accountDbService: AccountdbService,
+    private facilityDbService: FacilitydbService) {
+    this.accountAnalysisItems = new BehaviorSubject<Array<IdbAccountAnalysisItem>>([]);
+    this.selectedAnalysisItem = new BehaviorSubject<IdbAccountAnalysisItem>(undefined);
+
+    this.accountDbService.selectedAccount.subscribe(() => {
+      this.setAccountAnalysisItems();
+    });
+  }
+
+  async initializeAnalysisItems() {
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    if (selectedAccount) {
+      let accountAnalysisItems: Array<IdbAccountAnalysisItem> = await this.getAllByIndexRange('accountId', selectedAccount.id).toPromise();
+      this.accountAnalysisItems.next(accountAnalysisItems);
+
+      let storedAnalysisId: number = this.localStorageService.retrieve("accountAnalysisItemsId");
+      if (storedAnalysisId) {
+        let selectedAnalysisItem: IdbAccountAnalysisItem = accountAnalysisItems.find(item => { return item.id == storedAnalysisId });
+        this.selectedAnalysisItem.next(selectedAnalysisItem);
+      }
+    }
+    //subscribe after initialization
+    this.selectedAnalysisItem.subscribe(analysisItem => {
+      if (analysisItem) {
+        this.localStorageService.store('accountAnalysisItemsId', analysisItem.id);
+      }
+    });
+  }
+
+  setAccountAnalysisItems() {
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    if (selectedAccount) {
+      this.getAllByIndexRange('accountId', selectedAccount.id).subscribe((analysisItems: Array<IdbAccountAnalysisItem>) => {
+        this.accountAnalysisItems.next(analysisItems);
+      });
+    }
+  }
+
+  getAll(): Observable<Array<IdbAccountAnalysisItem>> {
+    return this.dbService.getAll('accountAnalysisItems');
+  }
+
+  getById(id: number): Observable<IdbAccountAnalysisItem> {
+    return this.dbService.getByKey('accountAnalysisItems', id);
+  }
+
+  getByIndex(indexName: string, indexValue: number): Observable<IdbAccountAnalysisItem> {
+    return this.dbService.getByIndex('accountAnalysisItems', indexName, indexValue);
+  }
+
+  getAllByIndexRange(indexName: string, indexValue: number | string): Observable<Array<IdbAccountAnalysisItem>> {
+    let idbKeyRange: IDBKeyRange = IDBKeyRange.only(indexValue);
+    return this.dbService.getAllByIndex('accountAnalysisItems', indexName, idbKeyRange);
+  }
+
+  count() {
+    return this.dbService.count('accountAnalysisItems');
+  }
+
+  add(analysisItems: IdbAccountAnalysisItem): void {
+    this.dbService.add('accountAnalysisItems', analysisItems).subscribe(() => {
+      this.setAccountAnalysisItems();
+    });
+  }
+
+  addWithObservable(analysisItem: IdbAccountAnalysisItem): Observable<IdbAccountAnalysisItem> {
+    return this.dbService.add('accountAnalysisItems', analysisItem);
+  }
+
+  deleteWithObservable(id: number): Observable<any> {
+    return this.dbService.delete('accountAnalysisItems', id);
+  }
+
+  update(values: IdbAccountAnalysisItem): void {
+    values.date = new Date();
+    this.dbService.update('accountAnalysisItems', values).subscribe(() => {
+      this.setAccountAnalysisItems();
+    });
+  }
+
+  updateWithObservable(values: IdbAccountAnalysisItem): Observable<Array<IdbAccountAnalysisItem>> {
+    values.date = new Date();
+    return this.dbService.update('accountAnalysisItems', values);
+  }
+
+  deleteById(analysisItemId: number): void {
+    this.dbService.delete('accountAnalysisItems', analysisItemId).subscribe(() => {
+      this.setAccountAnalysisItems();
+    });
+  }
+
+  getNewAccountAnalysisItem(): IdbAccountAnalysisItem {
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let facilityAnalysisItems: Array<{
+      facilityId: number,
+      analysisItemId: number
+    }> = new Array();
+    accountFacilities.forEach(facility => {
+      facilityAnalysisItems.push({
+        facilityId: facility.id,
+        analysisItemId: undefined
+      })
+    })
+    return {
+      accountId: selectedAccount.id,
+      date: new Date(),
+      name: 'Account Analysis',
+      // energyIsSource: selectedAccount.energyIsSource,
+      reportYear: selectedAccount.sustainabilityQuestions.energyReductionTargetYear,
+      energyUnit: selectedAccount.energyUnit,
+      facilityAnalysisItems: facilityAnalysisItems,
+      energyIsSource: selectedAccount.energyIsSource
+    }
+  }
+
+
+  async deleteAccountAnalysisItems() {
+    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisItems.getValue();
+    await this.deleteAnalysisItems(accountAnalysisItems);
+  }
+
+  async deleteAnalysisItems(analysisItems: Array<IdbAccountAnalysisItem>) {
+    for (let i = 0; i < analysisItems.length; i++) {
+      await this.deleteWithObservable(analysisItems[i].id);
+    }
+  }
+
+  updateFacilityItemSelection(analysiItem: IdbAccountAnalysisItem, analysisItemId: number, facilityId: number){
+    analysiItem.facilityAnalysisItems.forEach(item => {
+      if(item.facilityId == facilityId){
+        item.analysisItemId = analysisItemId;
+      }
+    });
+    this.update(analysiItem);
+    this.selectedAnalysisItem.next(analysiItem);
+  }
+}

@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
+import { AccountAnalysisDbService } from './indexedDB/account-analysis-db.service';
 import { AccountdbService } from './indexedDB/account-db.service';
 import { AnalysisDbService } from './indexedDB/analysis-db.service';
 import { FacilitydbService } from './indexedDB/facility-db.service';
@@ -34,7 +35,8 @@ export class AppComponent {
     public router: Router,
     private eGridService: EGridService,
     private overviewReportOptionsDbService: OverviewReportOptionsDbService,
-    private analysisDbService: AnalysisDbService) {
+    private analysisDbService: AnalysisDbService,
+    private accountAnalysisDbService: AccountAnalysisDbService) {
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
         gtag('config', 'G-YG1QD02XSE',
@@ -66,8 +68,10 @@ export class AppComponent {
     await this.utilityMeterGroupDbService.initializeMeterGroups();
     this.loadingMessage = 'Loading Reports...'
     await this.overviewReportOptionsDbService.initializeReportsFromLocalStorage();
-    this.loadingMessage = 'Loading Analysis Items...';
+    this.loadingMessage = 'Loading Facility Analysis Items...';
     await this.analysisDbService.initializeAnalysisItems();
+    this.loadingMessage = 'Loading Account Analysis Items...';
+    await this.accountAnalysisDbService.initializeAnalysisItems();
     this.dataInitialized = true;
     let allAccounts: Array<IdbAccount> = this.accountDbService.allAccounts.getValue();
     if (allAccounts.length == 0) {

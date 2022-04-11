@@ -1,0 +1,58 @@
+<table class="table table-sm">
+    <thead>
+        <tr class="table-mh">
+            <th colspan=5>{{calanderizedMeter.meter.name}}
+                <span class="item-right small">{{calanderizedMeter.meter.source}}</span>
+            </th>
+        </tr>
+        <tr>
+            <th (click)="setOrderDataField('date')" [ngClass]="{'active': orderDataField == 'date'}" class="row-year">
+                Month</th>
+            <th (click)="setOrderDataField('energyConsumption')"
+                [ngClass]="{'active': orderDataField == 'energyConsumption'}" *ngIf="calanderizedMeter.showConsumption">
+                Total Consumption<br> (<span [innerHTML]="calanderizedMeter.consumptionUnit | settingsLabel"></span>)
+            </th>
+            <th (click)="setOrderDataField('energyUse')" [ngClass]="{'active': orderDataField == 'energyUse'}"
+                *ngIf="calanderizedMeter.showEnergyUse">
+                Total Energy<br> (<span [innerHTML]="calanderizedMeter.energyUnit | settingsLabel"></span>)
+            </th>
+            <th (click)="setOrderDataField('emissions')" [ngClass]="{'active': orderDataField == 'emissions'}"
+                *ngIf="calanderizedMeter.showEmissions">
+                Total Emissions<br> (kg CO<sub>2</sub>)
+            </th>
+            <th (click)="setOrderDataField('energyCost')" [ngClass]="{'active': orderDataField == 'energyCost'}">Total
+                Cost</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let data of calanderizedMeter.monthlyData| orderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage"
+            [ngClass]="{'use-and-consumption': data.energyConsumption && data.energyUse}">
+            <td>{{data.date | date: 'MMMM, y'}}</td>
+            <td *ngIf="calanderizedMeter.showConsumption">
+                <span *ngIf="data.energyConsumption">{{data.energyConsumption |customNumber}}</span>
+                <span *ngIf="!data.energyConsumption">N/A</span>
+            </td>
+            <td *ngIf="calanderizedMeter.showEnergyUse">
+                <span *ngIf="data.energyUse">{{data.energyUse | customNumber}}</span>
+                <span *ngIf="!data.energyUse">N/A</span>
+            </td>
+            <td *ngIf="calanderizedMeter.showEmissions">
+                <span *ngIf="data.emissions">{{data.emissions | number:'1.0-0'}}</span>
+                <span *ngIf="!data.emissions">N/A</span>
+            </td>
+            <td>
+                <span *ngIf="data.energyCost">{{data.energyCost | customNumber:true}}</span>
+                <span *ngIf="!data.energyCost">N/A</span>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<div class="tableControls overflow-hidden">
+    <div class="item-right">
+        <ngb-pagination [collectionSize]="calanderizedMeter.monthlyData.length" [(page)]="currentPageNumber"
+            [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Default pagination">
+        </ngb-pagination>
+    </div>
+    <p class="item-right">{{calanderizedMeter.monthlyData.length}} entries</p>
+</div>

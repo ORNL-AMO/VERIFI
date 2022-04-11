@@ -17,36 +17,23 @@ import { SharedDataService } from 'src/app/shared/helper-services/shared-data.se
 })
 export class UtilityMeterDataComponent implements OnInit {
 
-  @ViewChildren("masterCheckbox") masterCheckbox: QueryList<ElementRef>;
-  @ViewChild('inputFile') myInputVariable: ElementRef;
-
-  meterList: Array<{
-    idbMeter: IdbUtilityMeter,
-    meterDataItems: Array<IdbUtilityMeterData>,
-    errorDate: Date,
-    warningDate: Date,
-    missingMonth: Date
-  }>;
 
   itemsPerPage: number = 6;
   tablePageNumbers: Array<number> = [];
+  selectedMeter: IdbUtilityMeter;
+  meterData: Array<IdbUtilityMeterData>;
 
-  accountMeterDataSub: Subscription;
-  facilityMetersSub: Subscription;
+  editMeter: IdbUtilityMeter;
   editMeterData: IdbUtilityMeterData;
   utilityMeters: Array<IdbUtilityMeter>;
-  facilityMeterData: Array<IdbUtilityMeterData>;
-  meterDataMenuOpen: number;
-  showImport: boolean;
+
   addOrEdit: string;
-  selectedSource: MeterSource;
   hasCheckedItems: boolean;
   meterDataToDelete: IdbUtilityMeterData;
   showDeleteModal: boolean = false;
   showBulkDelete: boolean = false;
   facilityMeters: Array<IdbUtilityMeter>;
-  selectedMeter: IdbUtilityMeter;
-  meterListHasData: boolean = false;
+  accountMeterDataSub: Subscription;
   constructor(
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
@@ -60,77 +47,30 @@ export class UtilityMeterDataComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.activatedRoute.url.subscribe(url => {
-      this.setUtilitySource(url[0].path);
+    this.activatedRoute.params.subscribe(params => {
+      let meterId: number = parseInt(params['id']);
+      this.facilityMeters = this.utilityMeterDbService.facilityMeters.getValue();
+      this.selectedMeter = this.facilityMeters.find(meter => { return meter.id == meterId });
+      this.setData();
+    });
+
+    this.accountMeterDataSub = this.utilityMeterDataDbService.accountMeterData.subscribe(data => {
       this.setData();
     })
-    this.facilityMetersSub = this.utilityMeterDbService.facilityMeters.subscribe(val => {
-      this.facilityMeters = val;
-      this.setData();
-    });
-    this.accountMeterDataSub = this.utilityMeterDataDbService.accountMeterData.subscribe(() => {
-      this.setData();
-    });
   }
 
   ngOnDestroy() {
     this.accountMeterDataSub.unsubscribe();
-    this.facilityMetersSub.unsubscribe();
-  }
-
-  setUtilitySource(urlPath: string) {
-    if (urlPath == 'electricity') {
-      this.selectedSource = 'Electricity';
-    } else if (urlPath == 'natural-gas') {
-      this.selectedSource = 'Natural Gas';
-    } else if (urlPath == 'other-fuels') {
-      this.selectedSource = 'Other Fuels';
-    } else if (urlPath == 'other-energy') {
-      this.selectedSource = 'Other Energy';
-    } else if (urlPath == 'water') {
-      this.selectedSource = 'Water';
-    } else if (urlPath == 'waste-water') {
-      this.selectedSource = 'Waste Water';
-    } else if (urlPath == 'other-utility') {
-      this.selectedSource = 'Other Utility';
-    }
   }
 
   setData() {
-    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
-    this.utilityMeters = facilityMeters.filter(meter => { return meter.source == this.selectedSource });
-    this.setMeterList();
-    this.tablePageNumbers = this.meterList.map(() => { return 1 });
-  }
+    this.meterData = this.utilityMeterDataDbService.getMeterDataForFacility(this.selectedMeter, false, true);
 
-
-  setMeterList() {
-    this.meterListHasData = false;
-    this.meterList = new Array();
-    this.utilityMeters.forEach(meter => {
-      let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataForFacility(meter, false, true);
-      if (meterData.length != 0) {
-        this.meterListHasData = true;
-      }
-      let checkDate: { error: Date, warning: Date, missingMonth: Date } = this.utilityMeterDataService.checkForErrors(meterData, meter);
-      this.meterList.push({
-        idbMeter: meter,
-        meterDataItems: meterData,
-        errorDate: checkDate.error,
-        warningDate: checkDate.warning,
-        missingMonth: checkDate.missingMonth
-      });
-    });
-    this.setHasCheckedItems();
-  }
-
-  resetImport() {
-    this.myInputVariable.nativeElement.value = '';
   }
 
   setEditMeterData(meterData: IdbUtilityMeterData) {
     this.addOrEdit = 'edit';
-    this.selectedMeter = this.facilityMeters.find(meter => { return meter.id == meterData.meterId });
+    this.editMeter = this.facilityMeters.find(meter => { return meter.id == meterData.meterId });
     this.editMeterData = meterData;
     this.sharedDataService.modalOpen.next(true);
   }
@@ -138,12 +78,7 @@ export class UtilityMeterDataComponent implements OnInit {
   cancelEditMeter() {
     this.addOrEdit = undefined;
     this.editMeterData = undefined;
-    this.meterDataMenuOpen = undefined;
     this.sharedDataService.modalOpen.next(false);
-  }
-
-  meterDataToggleMenu(meterId: number) {
-    this.meterDataMenuOpen = meterId;
   }
 
   uploadData() {
@@ -155,12 +90,10 @@ export class UtilityMeterDataComponent implements OnInit {
     this.loadingService.setLoadingMessage("Deleting Meter Data...");
     this.loadingService.setLoadingStatus(true);
     let meterDataItemsToDelete: Array<IdbUtilityMeterData> = new Array();
-    this.meterList.forEach(meterListItem => {
-      meterListItem.meterDataItems.forEach(meterDataItem => {
-        if (meterDataItem.checked) {
-          meterDataItemsToDelete.push(meterDataItem);
-        }
-      })
+    this.meterData.forEach(dataItem => {
+      if (dataItem.checked) {
+        meterDataItemsToDelete.push(dataItem);
+      }
     });
     for (let index = 0; index < meterDataItemsToDelete.length; index++) {
       await this.utilityMeterDataDbService.deleteWithObservable(meterDataItemsToDelete[index].id).toPromise();
@@ -177,12 +110,12 @@ export class UtilityMeterDataComponent implements OnInit {
 
   meterDataAdd() {
     this.addOrEdit = 'add';
-    this.selectedMeter = this.facilityMeters.find(meter => { return meter.source == this.selectedSource });
+    this.editMeter = this.facilityMeters.find(meter => { return meter.id == this.selectedMeter.id });
     this.changeSelectedMeter();
   }
 
   changeSelectedMeter() {
-    this.editMeterData = this.utilityMeterDataDbService.getNewIdbUtilityMeterData(this.selectedMeter);
+    this.editMeterData = this.utilityMeterDataDbService.getNewIdbUtilityMeterData(this.editMeter);
     this.sharedDataService.modalOpen.next(true);
   }
 
@@ -191,23 +124,15 @@ export class UtilityMeterDataComponent implements OnInit {
   }
 
   setHasCheckedItems() {
-    if (this.meterList.length != 0) {
-      let findCheckedItem: { idbMeter: IdbUtilityMeter, meterDataItems: Array<IdbUtilityMeterData> } = this.meterList.find(meterItem => {
-        return meterItem.meterDataItems.find(meterDataItem => { return meterDataItem.checked == true });
-      });
-      this.hasCheckedItems = (findCheckedItem != undefined);
-    } else {
-      this.hasCheckedItems = false;
-    }
+    this.hasCheckedItems = this.meterData.find(dataItem => { return dataItem.checked == true }) != undefined;
   }
 
-  setDeleteMeterData(meter: IdbUtilityMeterData) {
-    this.meterDataToDelete = meter;
+  setDeleteMeterData(meterData: IdbUtilityMeterData) {
+    this.meterDataToDelete = meterData;
   }
 
   cancelDelete() {
     this.meterDataToDelete = undefined;
-    this.meterDataMenuOpen = undefined;
   }
 
   deleteMeterData() {

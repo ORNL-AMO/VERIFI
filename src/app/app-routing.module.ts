@@ -42,6 +42,13 @@ import { SetupWelcomeComponent } from './setup-wizard/setup-welcome/setup-welcom
 import { SetupAccountComponent } from './setup-wizard/setup-account/setup-account.component';
 import { SetupFacilitiesComponent } from './setup-wizard/setup-facilities/setup-facilities.component';
 import { SetupConfirmationComponent } from './setup-wizard/setup-confirmation/setup-confirmation.component';
+import { AccountAnalysisComponent } from './account/account-analysis/account-analysis.component';
+import { AccountAnalysisDashboardComponent } from './account/account-analysis/account-analysis-dashboard/account-analysis-dashboard.component';
+import { AccountAnalysisSetupComponent } from './account/account-analysis/account-analysis-setup/account-analysis-setup.component';
+import { SelectFacilityAnalysisItemsComponent } from './account/account-analysis/select-facility-analysis-items/select-facility-analysis-items.component';
+import { AccountAnalysisResultsComponent } from './account/account-analysis/account-analysis-results/account-analysis-results.component';
+import { MonthlyAccountAnalysisComponent } from './account/account-analysis/account-analysis-results/monthly-account-analysis/monthly-account-analysis.component';
+import { AnnualAccountAnalysisComponent } from './account/account-analysis/account-analysis-results/annual-account-analysis/annual-account-analysis.component';
 
 const routes: Routes = [
   {
@@ -76,6 +83,25 @@ const routes: Routes = [
           { path: 'basic-report', component: BasicReportComponent }
         ]
       },
+      {
+        path: 'analysis',
+        component: AccountAnalysisComponent,
+        children: [
+          { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
+          { path: 'dashboard', component: AccountAnalysisDashboardComponent },
+          { path: 'setup', component: AccountAnalysisSetupComponent },
+          { path: 'select-items', component: SelectFacilityAnalysisItemsComponent },
+          {
+            path: 'results', 
+            component: AccountAnalysisResultsComponent,
+            children: [
+              { path: '', pathMatch: 'full', redirectTo: 'annual-analysis' },
+              { path: 'monthly-analysis', component: MonthlyAccountAnalysisComponent },
+              { path: 'annual-analysis', component: AnnualAccountAnalysisComponent }
+            ]
+          }
+        ]
+      }
     ]
   },
   {
@@ -108,6 +134,7 @@ const routes: Routes = [
                 redirectTo: 'energy-source'
               },
               { path: 'energy-source', component: EnergySourceComponent },
+              { path: 'utility-meter/:id', component: UtilityMeterDataComponent },
               { path: 'electricity', component: UtilityMeterDataComponent },
               { path: 'natural-gas', component: UtilityMeterDataComponent },
               { path: 'other-fuels', component: UtilityMeterDataComponent },

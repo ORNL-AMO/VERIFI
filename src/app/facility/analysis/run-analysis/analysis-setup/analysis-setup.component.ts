@@ -5,7 +5,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 import { EnergyUnitOptions, UnitOption } from 'src/app/shared/unitOptions';
 import * as _ from 'lodash';
-import { AnalysisCalculationsHelperService } from '../../calculations/analysis-calculations-helper.service';
+import { AnalysisCalculationsHelperService } from 'src/app/shared/shared-analysis/calculations/analysis-calculations-helper.service';
 @Component({
   selector: 'app-analysis-setup',
   templateUrl: './analysis-setup.component.html',

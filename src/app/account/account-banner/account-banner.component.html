@@ -14,7 +14,7 @@
                 <a class="nav-link" routerLink="reports" [routerLinkActive]="['active']"><i
                         class="fa fa-folder"></i>Reports</a>
             </li>
-            <li class="nav-item disabled">
+            <li class="nav-item" [ngClass]="{'disabled': meterData.length == 0}">
                 <a class="nav-link" routerLink="analysis" [routerLinkActive]="['active']"><i
                         class="fa fa-microscope"></i>Analysis</a>
             </li>
