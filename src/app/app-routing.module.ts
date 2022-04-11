@@ -134,6 +134,7 @@ const routes: Routes = [
                 redirectTo: 'energy-source'
               },
               { path: 'energy-source', component: EnergySourceComponent },
+              { path: 'utility-meter/:id', component: UtilityMeterDataComponent },
               { path: 'electricity', component: UtilityMeterDataComponent },
               { path: 'natural-gas', component: UtilityMeterDataComponent },
               { path: 'other-fuels', component: UtilityMeterDataComponent },

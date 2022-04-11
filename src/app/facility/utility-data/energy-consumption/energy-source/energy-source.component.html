@@ -66,7 +66,9 @@
             <tbody>
                 <tr
                     *ngFor="let meter of meterList  | orderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
-                    <td [ngClass]="{'invalid': isMeterInvalid(meter)}">{{meter.name}}</td>
+                    <td [ngClass]="{'invalid': isMeterInvalid(meter)}">
+                        <a routerLink="/facility/{{selectedFacility.id}}/utility/energy-consumption/utility-meter/{{meter.id}}">{{meter.name}}</a>  
+                    </td>
                     <td>{{meter.source}}</td>
                     <!--<td>{{meter.group}}</td>-->
                     <td>{{meter.meterNumber}}</td>
