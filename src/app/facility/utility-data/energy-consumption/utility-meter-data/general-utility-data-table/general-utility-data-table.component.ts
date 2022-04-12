@@ -1,8 +1,9 @@
-import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 import { UtilityMeterDataService } from '../utility-meter-data.service';
 import * as _ from 'lodash';
+import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
 
 @Component({
   selector: 'app-general-utility-data-table',
@@ -22,6 +23,8 @@ export class GeneralUtilityDataTableComponent implements OnInit {
   setEdit: EventEmitter<IdbUtilityMeterData> = new EventEmitter<IdbUtilityMeterData>();
   @Output('setDelete')
   setDelete: EventEmitter<IdbUtilityMeterData> = new EventEmitter<IdbUtilityMeterData>();
+  
+  @ViewChild('meterTable', { static: false }) meterTable: ElementRef;
 
   allChecked: boolean;
   energyUnit: string;
@@ -31,7 +34,9 @@ export class GeneralUtilityDataTableComponent implements OnInit {
   orderDataField: string = 'readDate';
   orderByDirection: string = 'desc';
   currentPageNumber: number = 1;
-  constructor(public utilityMeterDataService: UtilityMeterDataService, private energyUnitsHelperService: EnergyUnitsHelperService) { }
+  copyingTable: boolean = false;
+  constructor(public utilityMeterDataService: UtilityMeterDataService, private energyUnitsHelperService: EnergyUnitsHelperService,
+    private copyTableService: CopyTableService) { }
 
   ngOnInit(): void {
     this.showVolumeColumn = (this.selectedMeterData.find(dataItem => { return dataItem.totalVolume != undefined }) != undefined);
@@ -113,5 +118,14 @@ export class GeneralUtilityDataTableComponent implements OnInit {
     //   }
     // }
     return undefined;
+  }
+
+  
+  copyTable(){
+    this.copyingTable = true;
+    setTimeout(() => {
+      this.copyTableService.copyTable(this.meterTable);
+      this.copyingTable = false;
+    }, 200)
   }
 }

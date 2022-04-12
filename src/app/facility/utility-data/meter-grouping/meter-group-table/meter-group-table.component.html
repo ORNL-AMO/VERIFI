@@ -1,5 +1,5 @@
 <div *ngIf="meterGroup.combinedMonthlyData && meterGroup.combinedMonthlyData.length > 0">
-    <table class="table table-sm">
+    <table class="table table-sm" #meterGroupTable>
         <thead>
             <tr class="table-mh">
                 <th colspan=5>{{meterGroup.name}}
@@ -47,12 +47,20 @@
             </tr>
         </tbody>
     </table>
-    <div class="item-right">
-        <ngb-pagination [collectionSize]="meterGroup.combinedMonthlyData.length" [(page)]="tablePageNumbers[index]"
-            [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Default pagination">
-        </ngb-pagination>
+    <div class="d-flex justify-content-between">
+        <div>
+            <a class="click-link" (click)="copyTable()"><span class="fa fa-copy"></span> Copy Table</a>
+        </div>
+        <div>
+            <div class="item-right">
+                <ngb-pagination [collectionSize]="meterGroup.combinedMonthlyData.length"
+                    [(page)]="tablePageNumbers[index]" [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true"
+                    aria-label="Default pagination">
+                </ngb-pagination>
+            </div>
+            <p class="item-right">{{meterGroup.combinedMonthlyData.length}} entries</p>
+        </div>
     </div>
-    <p class="item-right">{{meterGroup.combinedMonthlyData.length}} entries</p>
 </div>
 
 <div *ngIf="!meterGroup.combinedMonthlyData || meterGroup.combinedMonthlyData.length == 0">
@@ -64,7 +72,7 @@
             </tr>
         </thead>
         <tbody>
-            <div class="alert alert-info text-center" >
+            <div class="alert alert-info text-center">
                 No meter data found for {{meterGroup.name}}.
             </div>
         </tbody>

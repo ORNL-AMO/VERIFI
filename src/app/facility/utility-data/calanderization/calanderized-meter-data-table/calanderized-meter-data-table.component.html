@@ -1,8 +1,8 @@
-<table class="table table-sm">
+<table class="table table-sm" #meterDataTable [ngClass]="{'copying-table': copyingTable}">
     <thead>
         <tr class="table-mh">
             <th colspan=5>{{calanderizedMeter.meter.name}}
-                <span class="item-right small">{{calanderizedMeter.meter.source}}</span>
+                <span class="item-right small source-label">{{calanderizedMeter.meter.source}}</span>
             </th>
         </tr>
         <tr>
@@ -49,6 +49,7 @@
 </table>
 
 <div class="tableControls overflow-hidden">
+    <a class="click-link" (click)="copyTable()"><span class="fa fa-copy"></span> Copy Table</a>
     <div class="item-right">
         <ngb-pagination [collectionSize]="calanderizedMeter.monthlyData.length" [(page)]="currentPageNumber"
             [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Default pagination">

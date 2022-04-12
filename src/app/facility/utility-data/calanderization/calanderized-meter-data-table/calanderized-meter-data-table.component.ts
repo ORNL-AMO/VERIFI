@@ -1,5 +1,6 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
+import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
 
 @Component({
   selector: 'app-calanderized-meter-data-table',
@@ -12,10 +13,12 @@ export class CalanderizedMeterDataTableComponent implements OnInit {
   @Input()
   itemsPerPage: number;
 
+  @ViewChild('meterDataTable', { static: false }) meterDataTable: ElementRef;
   orderDataField: string = 'date';
   orderByDirection: string = 'desc';
   currentPageNumber: number = 1;
-  constructor() { }
+  copyingTable: boolean = false
+  constructor(private copyTableService: CopyTableService) { }
 
   ngOnInit(): void {
   }
@@ -33,4 +36,11 @@ export class CalanderizedMeterDataTableComponent implements OnInit {
     }
   }
 
+  copyTable(){
+    this.copyingTable = true;
+    setTimeout(() => {
+      this.copyTableService.copyTable(this.meterDataTable);
+      this.copyingTable = false;
+    }, 200)
+  }
 }

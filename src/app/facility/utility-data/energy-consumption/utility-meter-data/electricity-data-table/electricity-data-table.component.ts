@@ -1,9 +1,10 @@
-import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { SupplyDemandChargeFilters, TaxAndOtherFilters } from 'src/app/models/electricityFilter';
 import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { UtilityMeterDataService } from '../utility-meter-data.service';
 import * as _ from 'lodash';
+import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
 
 @Component({
   selector: 'app-electricity-data-table',
@@ -24,6 +25,8 @@ export class ElectricityDataTableComponent implements OnInit {
   @Output('setDelete')
   setDelete: EventEmitter<IdbUtilityMeterData> = new EventEmitter<IdbUtilityMeterData>();
 
+  @ViewChild('meterTable', { static: false }) meterTable: ElementRef;
+
   supplyDemandCharge: SupplyDemandChargeFilters;
   taxAndOther: TaxAndOtherFilters;
   showTotalDemand: boolean;
@@ -34,7 +37,8 @@ export class ElectricityDataTableComponent implements OnInit {
   orderDataField: string = 'readDate';
   orderByDirection: string = 'desc';
   currentPageNumber: number = 1;
-  constructor(private utilityMeterDataService: UtilityMeterDataService) { }
+  copyingTable: boolean = false;
+  constructor(private utilityMeterDataService: UtilityMeterDataService, private copyTableService: CopyTableService) { }
 
   ngOnInit(): void {
     this.energyUnit = this.selectedMeter.startingUnit;
@@ -54,10 +58,6 @@ export class ElectricityDataTableComponent implements OnInit {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (changes.currentPageNumber && !changes.currentPageNumber.firstChange) {
-      this.allChecked = false;
-      this.checkAll();
-    }
     if (changes.itemsPerPage && !changes.itemsPerPage.firstChange) {
       this.allChecked = false;
       this.checkAll();
@@ -124,5 +124,13 @@ export class ElectricityDataTableComponent implements OnInit {
     //   }
     // }
     return undefined;
+  }
+  
+  copyTable(){
+    this.copyingTable = true;
+    setTimeout(() => {
+      this.copyTableService.copyTable(this.meterTable);
+      this.copyingTable = false;
+    }, 200)
   }
 }

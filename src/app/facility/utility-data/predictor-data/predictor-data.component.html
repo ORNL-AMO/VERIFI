@@ -54,10 +54,10 @@
     </div>
 
     <div *ngIf="hasData">
-        <table class="table table-sm">
+        <table class="table table-sm" #predictorTable [ngClass]="{'copying-table': copyingTable}">
             <thead>
                 <tr>
-                    <th class="input">
+                    <th class="input" *ngIf="!copyingTable">
                         <input #masterCheckbox type="checkbox" (change)="checkAll()" [(ngModel)]="allChecked">
                     </th>
                     <th (click)="setOrderDataField('date')" [ngClass]="{'active': orderDataField == 'date'}">Date</th>
@@ -69,7 +69,7 @@
                         <br *ngIf="predictor.unit">
                         <span class="small block" *ngIf="predictor.unit">({{predictor.unit}})</span>
                     </th>
-                    <td class="actions">
+                    <td class="actions" *ngIf="!copyingTable">
 
                     </td>
                 </tr>
@@ -77,13 +77,13 @@
             <tbody>
                 <tr
                     *ngFor="let predictorEntry of facilityPredictorEntries | predictorsOrderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
-                    <td class="input">
+                    <td class="input" *ngIf="!copyingTable">
                         <input type="checkbox" name="predictorEntry" (change)="setHasChecked()"
                             [(ngModel)]="predictorEntry.checked">
                     </td>
                     <td>{{predictorEntry.date | date:'MMM, yyyy'}}</td>
                     <td *ngFor="let predictor of predictorEntry.predictors">{{predictor.amount | customNumber}}</td>
-                    <td class="actions">
+                    <td class="actions" *ngIf="!copyingTable">
                         <div class="d-flex">
                             <i class="fa fa-pencil" title="Edit" (click)="setEditPredictorEntry(predictorEntry)"></i>
                             <i class="fa fa-trash" title="Delete" (click)="setDeletePredictorEntry(predictorEntry)"></i>                            
@@ -94,6 +94,7 @@
         </table>
     </div>
     <div class="tableControls overflow-hidden" *ngIf="hasData">
+        <a class="click-link" (click)="copyTable()"><span class="fa fa-copy"></span> Copy Table</a>
         <div class="item-right">
             <ngb-pagination [collectionSize]="facilityPredictorEntries.length" [(page)]="currentPageNumber"
                 [pageSize]="itemsPerPage" [rotate]="true" aria-label="Default pagination" [maxSize]="5">

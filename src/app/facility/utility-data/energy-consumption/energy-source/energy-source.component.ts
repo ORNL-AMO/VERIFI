@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { AccountdbService } from "../../../../indexedDB/account-db.service";
 import { FacilitydbService } from "../../../../indexedDB/facility-db.service";
 import { UtilityMeterDatadbService } from "../../../../indexedDB/utilityMeterData-db.service";
@@ -12,6 +12,7 @@ import { LoadingService } from 'src/app/core-components/loading/loading.service'
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
+import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
 
 @Component({
   selector: 'app-energy-source',
@@ -20,6 +21,7 @@ import { SharedDataService } from 'src/app/shared/helper-services/shared-data.se
 })
 export class EnergySourceComponent implements OnInit {
 
+  @ViewChild('meterTable', { static: false }) meterTable: ElementRef;
   meterList: Array<IdbUtilityMeter>;
   meterListSub: Subscription;
 
@@ -34,6 +36,7 @@ export class EnergySourceComponent implements OnInit {
   addOrEdit: string = 'add';
   orderDataField: string = 'name';
   orderByDirection: string = 'desc';
+  copyingTable: boolean = false;
   constructor(
     private accountdbService: AccountdbService,
     private facilitydbService: FacilitydbService,
@@ -44,7 +47,8 @@ export class EnergySourceComponent implements OnInit {
     private loadingService: LoadingService,
     private toastNoticationService: ToastNotificationsService,
     private energyUnitsHelperService: EnergyUnitsHelperService,
-    private sharedDataService: SharedDataService
+    private sharedDataService: SharedDataService,
+    private copyTableService: CopyTableService
   ) { }
 
   ngOnInit() {
@@ -146,6 +150,14 @@ export class EnergySourceComponent implements OnInit {
       meter.unitsDifferent = differentUnits.emissionsOutputRate;
     });
     return meters;
+  }
+
+  copyTable(){
+    this.copyingTable = true;
+    setTimeout(() => {
+      this.copyTableService.copyTable(this.meterTable);
+      this.copyingTable = false;
+    }, 200)
   }
 
 }
