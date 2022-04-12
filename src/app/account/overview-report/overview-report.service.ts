@@ -8,6 +8,7 @@ import { CalanderizationService } from '../../shared/helper-services/calanderiza
 import * as _ from 'lodash';
 import { ReportOptions, ReportUtilitySummary, UtilitySummary } from '../../models/overview-report';
 import { AccountdbService } from '../../indexedDB/account-db.service';
+import { FirstNaicsList, NAICS, SecondNaicsList, ThirdNaicsList } from 'src/app/shared/form-data/naics-data';
 
 @Injectable({
   providedIn: 'root'
@@ -16,7 +17,7 @@ export class OverviewReportService {
 
   reportOptions: BehaviorSubject<ReportOptions>;
   print: BehaviorSubject<boolean>;
-  constructor(private facilityDbService: FacilitydbService, private utilityMeterDbService: UtilityMeterdbService, 
+  constructor(private facilityDbService: FacilitydbService, private utilityMeterDbService: UtilityMeterdbService,
     private calanderizationService: CalanderizationService,
     private accountDbService: AccountdbService) {
     this.reportOptions = new BehaviorSubject<ReportOptions>(undefined);
@@ -54,8 +55,8 @@ export class OverviewReportService {
         water = true;
       }
     });
-    let facilities: Array<{facilityId: number, selected: boolean}> = new Array();
-    accountFacilites.forEach(facility =>{
+    let facilities: Array<{ facilityId: number, selected: boolean }> = new Array();
+    accountFacilites.forEach(facility => {
       facilities.push({
         facilityId: facility.id,
         selected: true
@@ -224,6 +225,23 @@ export class OverviewReportService {
       sources.push('Other Utility');
     }
     return sources;
+  }
+
+
+  getNAICS(accountOrFacility: IdbAccount | IdbFacility): string {
+    let matchingNAICS: NAICS;
+    if (accountOrFacility.naics3) {
+      matchingNAICS = ThirdNaicsList.find(item => { return item.code == accountOrFacility.naics3 });
+    } else if (accountOrFacility.naics2) {
+      matchingNAICS = SecondNaicsList.find(item => { return item.code == accountOrFacility.naics2 });
+    } else if (accountOrFacility.naics1) {
+      matchingNAICS = FirstNaicsList.find(item => { return item.code == accountOrFacility.naics1 });
+    }
+
+    if (matchingNAICS) {
+      return matchingNAICS.code + ' - ' + matchingNAICS.industryType;
+    }
+    return;
   }
 
 }

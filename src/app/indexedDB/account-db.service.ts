@@ -178,7 +178,10 @@ export class AccountdbService {
             fiscalYearCalendarEnd: true,
             setupWizard: true,
             setupWizardComplete: false,
-            energyIsSource: true
+            energyIsSource: true,
+            contactName: undefined,
+            contactEmail: undefined,
+            contactPhone: undefined
         }
     }
 }

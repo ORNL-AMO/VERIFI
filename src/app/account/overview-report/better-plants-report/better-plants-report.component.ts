@@ -18,6 +18,7 @@ export class BetterPlantsReportComponent implements OnInit {
   printSub: Subscription;
   print: boolean;
   account: IdbAccount;
+  naics: string;
   constructor(private overviewReportService: OverviewReportService, private overviewReportOptionsDbService: OverviewReportOptionsDbService,
     private router: Router, private accountDbService: AccountdbService) { }
 
@@ -38,6 +39,7 @@ export class BetterPlantsReportComponent implements OnInit {
       }
     }
     this.account = this.accountDbService.selectedAccount.getValue();
+    this.naics = this.overviewReportService.getNAICS(this.account);
   }
 
   ngOnDestroy() {

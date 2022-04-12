@@ -40,3 +40,8 @@ hr.page-spacer{
 .report-item{
     margin-top: 150px;
 }
+
+
+td:first-of-type{
+    text-align: right;
+}

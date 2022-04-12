@@ -19,6 +19,8 @@
                             </td>
                             <td>
 
+                                <span *ngIf="account.contactName">{{account.contactName}}</span>
+                                <span *ngIf="!account.contactName">&mdash;</span>
                             </td>
                         </tr>
                         <tr>
@@ -26,7 +28,10 @@
                                 Address
                             </td>
                             <td>
-
+                                <span *ngIf="account.address">{{account.address}}, {{account.city}}, {{account.state}}
+                                    {{account.zip}}
+                                    {{account.country}}</span>
+                                <span *ngIf="!account.address">&mdash;</span>
                             </td>
                         </tr>
                         <tr>
@@ -34,7 +39,8 @@
                                 Phone
                             </td>
                             <td>
-
+                                <span *ngIf="account.contactPhone">{{account.contactPhone}}</span>
+                                <span *ngIf="!account.contactPhone">&mdash;</span>
                             </td>
                         </tr>
                         <tr>
@@ -42,7 +48,8 @@
                                 E-mail Address
                             </td>
                             <td>
-
+                                <span *ngIf="account.contactEmail">{{account.contactEmail}}</span>
+                                <span *ngIf="!account.contactEmail">&mdash;</span>
                             </td>
                         </tr>
                         <tr>
@@ -50,7 +57,8 @@
                                 NAICs of Participating Plants
                             </td>
                             <td>
-
+                                <span *ngIf="naics">{{naics}}</span>
+                                <span *ngIf="!naics">&mdash;</span>
                             </td>
                         </tr>
                         <tr>

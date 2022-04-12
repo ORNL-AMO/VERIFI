@@ -52,7 +52,10 @@ export const ExampleAccount: AccountBackup = {
         "setupWizardComplete": true,
         "energyIsSource": true,
         "id": 7,
-        "emissionsOutputRate": 955.587
+        "emissionsOutputRate": 955.587,
+        "contactEmail": undefined,
+        "contactName": undefined,
+        "contactPhone": undefined
     },
     "facilities": [
         {
@@ -105,7 +108,10 @@ export const ExampleAccount: AccountBackup = {
                 "energyIsSource": true,
                 "id": 9,
                 "emissionsOutputRate": 681.57,
-                "color": "#0c7e0e"
+                "color": "#0c7e0e",
+                "contactEmail": undefined,
+                "contactName": undefined,
+                "contactPhone": undefined
             },
             "meters": [
                 {
@@ -4577,7 +4583,10 @@ export const ExampleAccount: AccountBackup = {
                 "energyIsSource": true,
                 "id": 10,
                 "emissionsOutputRate": 498.23,
-                "color": "#6012a1"
+                "color": "#6012a1",
+                "contactEmail": undefined,
+                "contactName": undefined,
+                "contactPhone": undefined
             },
             "meters": [
                 {

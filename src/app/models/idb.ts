@@ -35,7 +35,10 @@ export interface IdbAccount {
     emissionsOutputRate?: number,
     eGridSubregion?: string,
     customEmissionsRate?: boolean,
-    color?: string
+    color?: string,
+    contactName: string,
+    contactEmail: string,
+    contactPhone: string
 }
 
 export interface IdbFacility {
@@ -75,7 +78,10 @@ export interface IdbFacility {
     customEmissionsRate?: boolean
     color?: string,
     selected?: boolean,
-    wizardId?: string
+    wizardId?: string,
+    contactName: string,
+    contactEmail: string,
+    contactPhone: string
 }
 
 export interface IdbUtilityMeterGroup {

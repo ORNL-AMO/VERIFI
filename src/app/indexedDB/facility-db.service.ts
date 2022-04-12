@@ -201,7 +201,10 @@ export class FacilitydbService {
             fiscalYear: 'calendarYear',
             fiscalYearMonth: 0,
             fiscalYearCalendarEnd: true,
-            energyIsSource: true
+            energyIsSource: true,
+            contactName: undefined,
+            contactEmail: undefined,
+            contactPhone: undefined
 
         }
     }
