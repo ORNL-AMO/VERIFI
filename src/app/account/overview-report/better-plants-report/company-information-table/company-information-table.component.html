@@ -1,0 +1,78 @@
+<div class="table-responsive">
+    <table class="table table-sm table-hover">
+        <tbody>
+            <tr>
+                <td class="w-50">
+                    Company Name
+                </td>
+                <td>
+                    {{account.name}}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Company Contact Name
+                </td>
+                <td>
+
+                    <span *ngIf="account.contactName">{{account.contactName}}</span>
+                    <span *ngIf="!account.contactName">&mdash;</span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Address
+                </td>
+                <td>
+                    <span *ngIf="account.address">{{account.address}}, {{account.city}}, {{account.state}}
+                        {{account.zip}}
+                        {{account.country}}</span>
+                    <span *ngIf="!account.address">&mdash;</span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Phone
+                </td>
+                <td>
+                    <span *ngIf="account.contactPhone">{{account.contactPhone}}</span>
+                    <span *ngIf="!account.contactPhone">&mdash;</span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    E-mail Address
+                </td>
+                <td>
+                    <span *ngIf="account.contactEmail">{{account.contactEmail}}</span>
+                    <span *ngIf="!account.contactEmail">&mdash;</span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    NAICs of Participating Plants
+                </td>
+                <td>
+                    <span *ngIf="naics">{{naics}}</span>
+                    <span *ngIf="!naics">&mdash;</span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Year of Reported Data
+                </td>
+                <td>
+                    {{reportOptions.targetYear}}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Base Year
+                </td>
+                <td>
+                    {{reportOptions.baselineYear}}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

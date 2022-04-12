@@ -42,6 +42,7 @@ hr.page-spacer{
 }
 
 
-td:first-of-type{
-    text-align: right;
+.disclaimer-text p{
+    font-style: italic;
+    font-size: xx-small;
 }

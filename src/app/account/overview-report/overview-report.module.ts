@@ -26,6 +26,8 @@ import { RouterModule } from '@angular/router';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { BetterPlantsReportMenuComponent } from './better-plants-report-menu/better-plants-report-menu.component';
 import { BetterPlantsReportComponent } from './better-plants-report/better-plants-report.component';
+import { CompanyInformationTableComponent } from './better-plants-report/company-information-table/company-information-table.component';
+import { PrimaryEnergyConsumptionTableComponent } from './better-plants-report/primary-energy-consumption-table/primary-energy-consumption-table.component';
 
 
 
@@ -52,7 +54,9 @@ import { BetterPlantsReportComponent } from './better-plants-report/better-plant
     ManageReportTemplatesComponent,
     OverviewReportComponent,
     BetterPlantsReportMenuComponent,
-    BetterPlantsReportComponent
+    BetterPlantsReportComponent,
+    CompanyInformationTableComponent,
+    PrimaryEnergyConsumptionTableComponent
   ],
   imports: [
     CommonModule,
