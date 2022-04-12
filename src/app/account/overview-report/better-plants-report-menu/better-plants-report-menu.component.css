@@ -17,3 +17,7 @@
 .fa-close{
     font-size: large;
 }
+
+label{
+    font-weight: 600;
+}

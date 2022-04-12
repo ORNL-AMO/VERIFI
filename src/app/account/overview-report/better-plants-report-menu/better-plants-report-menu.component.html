@@ -32,9 +32,9 @@
                     </div>
                     <div class="col-6">
                         <div class="form-group">
-                            <label for="targetYear">Target Year</label>
+                            <label for="targetYear">Report Year</label>
                             <select id="targetYear" name="targetYear" [(ngModel)]="reportOptions.targetYear"
-                                class="form-control" required>
+                                class="form-control" required (change)="setAnalysisOptions()">
                                 <option *ngFor="let year of targetYears" [ngValue]="year">{{year}}</option>
                             </select>
                         </div>
@@ -43,77 +43,76 @@
                         </div>
                     </div>
                 </div>
-                <hr>
-                <!-- <div class="row">
-                    <div class="col-6">
-                        <label>Site or Source Energy?</label>
-                        <input type="radio" class="rowToggle" name="energyIsSource"
-                            [(ngModel)]="reportOptions.energyIsSource" [value]="true" id="sourceEnergy">
-                        <label class="checkbox" for="sourceEnergy">Source Energy</label>
-
-                        <input type="radio" class="rowToggle" name="energyIsSource"
-                            [(ngModel)]="reportOptions.energyIsSource" [value]="false" id="siteEnergy">
-                        <label class="checkbox" for="siteEnergy">Site Energy</label>
-                    </div>
-                    <div class="col-6">
-                        <label>Graph Options</label>
-                        <label for="annualBarCharts">
-                            <input class="checkbox" type="checkbox" id="annualBarCharts" name="annualBarCharts"
-                                [(ngModel)]="reportOptions.annualBarCharts" (change)="saveCustom()">Annual Data Bar
-                            Charts
-                        </label>
-                        <label for="monthBarCharts">
-                            <input class="checkbox" type="checkbox" id="monthBarCharts" name="monthBarCharts"
-                                [(ngModel)]="reportOptions.monthBarCharts" (change)="saveCustom()">Monthly Data Bar
-                            Charts
-                        </label>
-                    </div>
-                </div>
-
-                <hr>
-                <div class="row">
-                    <div class="col-6">
-                        <label>Include Utility Types</label>
-                        <label for="electricity">
-                            <input class="checkbox" type="checkbox" id="electricity" name="electricity"
-                                [(ngModel)]="reportOptions.electricity" (change)="saveCustom()">Electricity
-                        </label>
-                        <label for="naturalGas">
-                            <input class="checkbox" type="checkbox" id="naturalGas" name="naturalGas"
-                                [(ngModel)]="reportOptions.naturalGas" (change)="saveCustom()">Natural
-                            Gas
-                        </label>
-                        <label for="otherFuels">
-                            <input class="checkbox" type="checkbox" id="otherFuels" name="otherFuels"
-                                [(ngModel)]="reportOptions.otherFuels" (change)="saveCustom()">Other
-                            Fuels
-                        </label>
-                    </div>
-                    <div class="col-6">
-                        <label for="otherEnergy">
-                            <input class="checkbox" type="checkbox" id="otherEnergy" name="otherEnergy"
-                                [(ngModel)]="reportOptions.otherEnergy" (change)="saveCustom()">Other
-                            Energy
-                        </label>
-                        <label for="water">
-                            <input class="checkbox" type="checkbox" id="water" name="water"
-                                [(ngModel)]="reportOptions.water" (change)="saveCustom()">Water
-                        </label>
-                        <label for="wasteWater">
-                            <input class="checkbox" type="checkbox" id="wasteWater" name="wasteWater"
-                                [(ngModel)]="reportOptions.wasteWater" (change)="saveCustom()">Waste
-                            Water
-                        </label>
-                        <label for="otherUtility">
-                            <input class="checkbox" type="checkbox" id="otherUtility" name="otherUtility"
-                                [(ngModel)]="reportOptions.otherUtility" (change)="saveCustom()">Other
-                            Utility
-                        </label>
-                    </div>
-                </div>-->
             </div>
             <div class="col-6">
-                
+                <label>Select Account Analysis</label>
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead>
+                            <td>
+
+                            </td>
+                            <td>
+                                Item Name
+                            </td>
+                            <td>
+                                Facilities Included
+                            </td>
+                            <td>
+                                Report Year
+                            </td>
+                        </thead>
+
+                        <tbody>
+                            <tr *ngFor="let analysisItem of accountAnalysisItems">
+                                <td>
+                                    <input type="radio" class="rowToggle" [(ngModel)]="reportOptions.analysisItemId"
+                                        [value]="analysisItem.id" name="{{analysisItem.id+'_selectedAccountItemId'}}"
+                                        id="{{analysisItem.id+'_selectedAccountItemId'}}" (change)="save()">
+                                </td>
+                                <td>
+                                    {{analysisItem.name}}
+                                </td>
+                                <td>
+                                    <span *ngFor="let facilityItem of analysisItem.facilityAnalysisItems">
+                                        <span *ngIf="facilityItem.analysisItemId">
+                                            {{facilityItem.facilityId | facilityName}}<br>
+                                        </span>
+                                    </span>
+                                </td>
+                                <td>{{analysisItem.reportYear}}</td>
+                            </tr>
+                            <tr *ngIf="accountAnalysisItems.length == 0">
+                                <td colspan="4" class="alert alert-warning">
+                                    No analysis items matching selected report year.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="alert alert-danger" *ngIf="!reportOptions.analysisItemId">
+                    Analysis Item Required
+                </div>
+            </div>
+        </div>
+        <hr>
+        <div class="row">
+            <div class="col-12">
+                <label>Please describe any methods undertaken to normalize energy intensity data or adjust baseline data
+                    to account for economic and other factors that affect energy use:</label>
+                <textarea class="form-control" name="baselineAdjustmentNotes" id="baselineAdjustmentNotes"
+                    [(ngModel)]="reportOptions.baselineAdjustmentNotes"></textarea>
+            </div>
+        </div>
+        <hr>
+        <div class="row">
+            <div class="col-12">
+                <label>Please describe the energy efficient technologies, strategies, and practices employed during the
+                    previous year to decrease intensity. Please identify systems impacted and approximate savings from
+                    projects. (Ex: Furnace insulation project-12,000 MMBtu/yr savings, compressor controls upgrade-6,000
+                    MMBtu/yr, energy awareness campaign, etc):</label>
+                <textarea class="form-control" name="modificationNotes" id="modificationNotes"
+                    [(ngModel)]="reportOptions.modificationNotes"></textarea>
             </div>
         </div>
         <hr>
@@ -123,13 +122,13 @@
             </div>
             <div class="col text-right">
                 <button *ngIf="!selectedReportOptions" class="btn btn-primary" (click)="createReport()"
-                    [disabled]="!reportOptions.targetYear || !reportOptions.baselineYear"><span
+                    [disabled]="!reportOptions.targetYear || !reportOptions.baselineYear || !reportOptions.analysisItemId"><span
                         class="fa fa-save"></span> Create
                     Report</button>
                 <button *ngIf="selectedReportOptions" class="btn btn-secondary mr-2" (click)="cancelChanges()">Discard
                     Changes</button>
                 <button *ngIf="selectedReportOptions" class="btn btn-primary" (click)="updateReport()"
-                    [disabled]="!reportOptions.targetYear || !reportOptions.baselineYear"><span
+                    [disabled]="!reportOptions.targetYear || !reportOptions.baselineYear || !reportOptions.analysisItemId"><span
                         class="fa fa-save"></span> Update
                     Report</button>
             </div>

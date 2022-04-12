@@ -205,6 +205,7 @@ export interface IdbOverviewReportOptions {
     baselineYear?: number,
     targetYear?: number,
     title?: string,
+    reportOptionsType?: 'betterPlants' | 'data'
 }
 
 export interface IdbAnalysisItem {

@@ -65,5 +65,8 @@ export interface ReportOptions {
   annualBarCharts: boolean,
   energyIsSource: boolean,
   meterReadings: boolean,
-  reportType: 'data' | 'betterPlants'
+  reportType: 'data' | 'betterPlants',
+  analysisItemId: number,
+  baselineAdjustmentNotes: string,
+  modificationNotes: string
 }

@@ -36,8 +36,8 @@
                         <tr>
                             <th (click)="setOrderDataField('name')" [ngClass]="{'active': orderDataField == 'name'}">
                                 Name</th>
-                            <th (click)="setOrderDataField('title')" [ngClass]="{'active': orderDataField == 'title'}">
-                                Title</th>
+                            <th (click)="setOrderDataField('reportOptionsType')" [ngClass]="{'active': orderDataField == 'reportOptionsType'}">
+                                Report Type</th>
                             <th (click)="setOrderDataField('baselineYear')"
                                 [ngClass]="{'active': orderDataField == 'baselineYear'}">Baseline Year
                             </th>
@@ -59,7 +59,12 @@
                                 </a>
                             </td>
                             <td>
-                                {{report.title}}
+                                <span *ngIf="report.reportOptionsType == 'betterPlants'">
+                                    Better Plants Report
+                                </span>
+                                <span *ngIf="report.reportOptionsType == 'data'">
+                                    Basic Overview Report
+                                </span>
                             </td>
                             <td>{{report.baselineYear}}</td>
                             <td>{{report.targetYear}}</td>

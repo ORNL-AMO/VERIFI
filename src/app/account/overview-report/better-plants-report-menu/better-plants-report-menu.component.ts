@@ -4,10 +4,11 @@ import { ToastNotificationsService } from 'src/app/core-components/toast-notific
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { OverviewReportOptionsDbService } from 'src/app/indexedDB/overview-report-options-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbAccount, IdbOverviewReportOptions, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbAccount, IdbAccountAnalysisItem, IdbOverviewReportOptions, IdbUtilityMeterData } from 'src/app/models/idb';
 import { ReportOptions } from 'src/app/models/overview-report';
 import { OverviewReportService } from '../overview-report.service';
 import * as _ from 'lodash';
+import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 
 @Component({
   selector: 'app-better-plants-report-menu',
@@ -25,14 +26,17 @@ export class BetterPlantsReportMenuComponent implements OnInit {
   baselineYears: Array<number>;
   targetYears: Array<number>;
 
+  accountAnalysisItems: Array<IdbAccountAnalysisItem>;
   constructor(private overviewReportService: OverviewReportService, private router: Router,
     private overviewReportOptionsDbService: OverviewReportOptionsDbService,
     private accountDbService: AccountdbService,
     private toastNotificationsService: ToastNotificationsService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService) { }
+    private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private accountAnalysisDbService: AccountAnalysisDbService) { }
 
   ngOnInit(): void {
     this.selectedReportOptions = this.overviewReportOptionsDbService.selectedOverviewReportOptions.getValue();
+    console.log(this.selectedReportOptions);
     if (this.selectedReportOptions) {
       this.name = this.selectedReportOptions.name;
     }
@@ -47,6 +51,7 @@ export class BetterPlantsReportMenuComponent implements OnInit {
       this.reportOptions = JSON.parse(JSON.stringify(reportOptions));
     }
     this.setYearOptions();
+    this.setAnalysisOptions();
   }
 
 
@@ -61,7 +66,7 @@ export class BetterPlantsReportMenuComponent implements OnInit {
     this.overviewReportService.reportOptions.next(this.reportOptions);
     this.overviewReportOptionsDbService.setAccountOverviewReportOptions();
     this.toastNotificationsService.showToast('New Report Created', undefined, 4000, false, "success");
-    this.router.navigateByUrl('/account/reports/basic-report');
+    this.router.navigateByUrl('/account/reports/better-plants-report');
   }
 
   goToDashboard() {
@@ -74,11 +79,11 @@ export class BetterPlantsReportMenuComponent implements OnInit {
     this.overviewReportOptionsDbService.update(this.selectedReportOptions);
     this.overviewReportService.reportOptions.next(this.reportOptions);
     this.toastNotificationsService.showToast('Report Updated', undefined, 4000, false, "success");
-    this.router.navigateByUrl('/account/reports/basic-report');
+    this.router.navigateByUrl('/account/reports/better-plants-report');
   }
 
   cancelChanges() {
-    this.router.navigateByUrl('/account/reports/basic-report');
+    this.router.navigateByUrl('/account/reports/better-plants-report');
   }
 
   getNewIdbReportOptionsItem(type: 'report' | 'template'): IdbOverviewReportOptions {
@@ -93,7 +98,7 @@ export class BetterPlantsReportMenuComponent implements OnInit {
     return newIdbReportOptionsItem;
   }
 
-  
+
 
   setYearOptions() {
     let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
@@ -107,6 +112,15 @@ export class BetterPlantsReportMenuComponent implements OnInit {
     for (let i = yearStart; i <= yearEnd; i++) {
       this.targetYears.push(i);
       this.baselineYears.push(i);
+    }
+  }
+
+  setAnalysisOptions() {
+    let analysisOptions: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
+    this.accountAnalysisItems = analysisOptions.filter(option => { return option.reportYear == this.reportOptions.targetYear && option.energyIsSource});
+    let selectedAnalysisItem: IdbAccountAnalysisItem = this.accountAnalysisItems.find(item => { return item.id == this.reportOptions.analysisItemId });
+    if (!selectedAnalysisItem) {
+      this.reportOptions.analysisItemId = undefined;
     }
   }
 

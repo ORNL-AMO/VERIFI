@@ -60,7 +60,8 @@ export class OverviewReportService {
         facilityId: facility.id,
         selected: true
       })
-    })
+    });
+
     return {
       title: 'Energy Consumption Report',
       notes: '',
@@ -82,13 +83,16 @@ export class OverviewReportService {
       wasteWater: wasteWater,
       otherUtility: otherUtility,
       facilities: facilities,
-      baselineYear: undefined,
-      targetYear: undefined,
+      baselineYear: selectedAccount.sustainabilityQuestions.energyReductionBaselineYear,
+      targetYear: selectedAccount.sustainabilityQuestions.energyReductionTargetYear,
       annualBarCharts: true,
       monthBarCharts: false,
       energyIsSource: selectedAccount.energyIsSource,
       meterReadings: false,
-      reportType: reportType
+      reportType: reportType,
+      analysisItemId: undefined,
+      modificationNotes: '',
+      baselineAdjustmentNotes: ''
     }
   }
 

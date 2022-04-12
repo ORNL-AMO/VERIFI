@@ -25,6 +25,7 @@ import { HelperPipesModule } from '../../shared/helper-pipes/helper-pipes.module
 import { RouterModule } from '@angular/router';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { BetterPlantsReportMenuComponent } from './better-plants-report-menu/better-plants-report-menu.component';
+import { BetterPlantsReportComponent } from './better-plants-report/better-plants-report.component';
 
 
 
@@ -50,7 +51,8 @@ import { BetterPlantsReportMenuComponent } from './better-plants-report-menu/bet
     OverviewReportMenuComponent,
     ManageReportTemplatesComponent,
     OverviewReportComponent,
-    BetterPlantsReportMenuComponent
+    BetterPlantsReportMenuComponent,
+    BetterPlantsReportComponent
   ],
   imports: [
     CommonModule,

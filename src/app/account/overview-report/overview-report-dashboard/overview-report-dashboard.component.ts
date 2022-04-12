@@ -40,7 +40,8 @@ export class OverviewReportDashboardComponent implements OnInit {
     options.forEach(option => {
       option.baselineYear = option.reportOptions.baselineYear;
       option.targetYear = option.reportOptions.targetYear;
-      option.title = option.reportOptions.title
+      option.title = option.reportOptions.title,
+      option.reportOptionsType = option.reportOptions.reportType
     });
     return options;
   }
@@ -56,7 +57,11 @@ export class OverviewReportDashboardComponent implements OnInit {
   selectReport(report: IdbOverviewReportOptions) {
     this.overviewReportOptionsDbService.selectedOverviewReportOptions.next(report);
     this.overviewReportService.reportOptions.next(report.reportOptions);
-    this.router.navigateByUrl('/account/reports/basic-report');
+    if(report.reportOptions.reportType == 'data'){
+      this.router.navigateByUrl('/account/reports/basic-report');
+    }else if(report.reportOptions.reportType == 'betterPlants'){
+      this.router.navigateByUrl('/account/reports/better-plants-report');
+    }
   }
 
   deleteReport(report: IdbOverviewReportOptions) {
@@ -76,7 +81,11 @@ export class OverviewReportDashboardComponent implements OnInit {
   editReport(report: IdbOverviewReportOptions) {
     this.overviewReportOptionsDbService.selectedOverviewReportOptions.next(report);
     this.overviewReportService.reportOptions.next(report.reportOptions);
-    this.router.navigateByUrl('/account/reports/menu');
+    if(report.reportOptions.reportType == 'data'){
+      this.router.navigateByUrl('/account/reports/menu');
+    }else if(report.reportOptions.reportType == 'betterPlants'){
+      this.router.navigateByUrl('/account/reports/better-plants-menu');
+    }
   }
 
   setOrderDataField(str: string) {

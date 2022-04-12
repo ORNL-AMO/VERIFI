@@ -50,6 +50,7 @@ import { AccountAnalysisResultsComponent } from './account/account-analysis/acco
 import { MonthlyAccountAnalysisComponent } from './account/account-analysis/account-analysis-results/monthly-account-analysis/monthly-account-analysis.component';
 import { AnnualAccountAnalysisComponent } from './account/account-analysis/account-analysis-results/annual-account-analysis/annual-account-analysis.component';
 import { BetterPlantsReportMenuComponent } from './account/overview-report/better-plants-report-menu/better-plants-report-menu.component';
+import { BetterPlantsReportComponent } from './account/overview-report/better-plants-report/better-plants-report.component';
 
 const routes: Routes = [
   {
@@ -81,8 +82,9 @@ const routes: Routes = [
           { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
           { path: 'dashboard', component: OverviewReportDashboardComponent },
           { path: 'menu', component: OverviewReportMenuComponent },
-          { path: 'better-plants-menu', component: BetterPlantsReportMenuComponent },
           { path: 'basic-report', component: BasicReportComponent },
+          { path: 'better-plants-menu', component: BetterPlantsReportMenuComponent },
+          { path: 'better-plants-report', component: BetterPlantsReportComponent }
         ]
       },
       {

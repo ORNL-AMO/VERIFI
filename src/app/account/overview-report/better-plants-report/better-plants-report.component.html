@@ -1,0 +1,77 @@
+<div class="report" [ngClass]="{'print': print}" *ngIf="reportOptions">
+    <img src="assets/images/better-plants-report-banner.jpg" class="w-100">
+    <div class="row justify-content-center">
+        <div class="col-6">
+            <div class="table-responsive">
+                <table class="table table-sm table-hover">
+                    <tbody>
+                        <tr>
+                            <td class="w-50">
+                                Company Name
+                            </td>
+                            <td>
+                                {{account.name}}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Company Contact Name
+                            </td>
+                            <td>
+
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Address
+                            </td>
+                            <td>
+
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Phone
+                            </td>
+                            <td>
+
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                E-mail Address
+                            </td>
+                            <td>
+
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                NAICs of Participating Plants
+                            </td>
+                            <td>
+
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Year of Reported Data
+                            </td>
+                            <td>
+                                {{reportOptions.targetYear}}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Base Year
+                            </td>
+                            <td>
+                                {{reportOptions.baselineYear}}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
