@@ -64,5 +64,6 @@ export interface ReportOptions {
   monthBarCharts: boolean,
   annualBarCharts: boolean,
   energyIsSource: boolean,
-  meterReadings: boolean
+  meterReadings: boolean,
+  reportType: 'data' | 'betterPlants'
 }

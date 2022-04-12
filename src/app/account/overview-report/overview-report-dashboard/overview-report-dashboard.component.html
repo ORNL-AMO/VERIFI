@@ -5,7 +5,8 @@
         <div *ngIf="accountOverviewReportOptions.length === 0" class="text-center mt-5">
             <h5>No reports found for this account.</h5>
             <div class="meterData">
-                <button class="btn btn-primary-4 mr-2" (click)="createReport()"><i class="fa fa-plus"></i> Add New
+                <button class="btn btn-primary-4 mr-2" (click)="openAddNewReportModal()"><i class="fa fa-plus"></i> Add
+                    New
                     Report</button>
             </div>
         </div>
@@ -13,7 +14,7 @@
         <div *ngIf="accountOverviewReportOptions.length > 0">
             <div class="controls mb-2">
                 <div class="meterData item-right">
-                    <button class="btn btn-primary-4 item-right m-0 ml-2" (click)="createReport()"><i
+                    <button class="btn btn-primary-4 item-right m-0 ml-2" (click)="openAddNewReportModal()"><i
                             class="fa fa-plus"></i>
                         Add New Report</button>
                 </div>
@@ -50,11 +51,12 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr *ngFor="let report of accountOverviewReportOptions  | orderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
+                        <tr
+                            *ngFor="let report of accountOverviewReportOptions  | orderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
                             <td>
                                 <a (click)=" selectReport(report)">
-                            {{report.name}}
-                            </a>
+                                    {{report.name}}
+                                </a>
                             </td>
                             <td>
                                 {{report.title}}
@@ -95,5 +97,33 @@
     <div class="saveCancel popup-footer text-right">
         <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
         <button class="btn btn-danger" (click)="confirmDelete()">Delete</button>
+    </div>
+</div>
+
+
+<div class="popup report-type-menu" [class.open]="showNewReportModal">
+    <div class="popup-header">Select New Report Type
+        <button class="item-right" (click)="cancelNewReport()">x</button>
+    </div>
+    <div class="popup-body">
+        <div class="d-flex flex-column">
+            <div>
+
+                <label (click)="setReportType('betterPlants')">
+                    <i class="pr-2"
+                        [ngClass]="{'fa fa-square': reportType != 'betterPlants', 'fa-solid fa-square-check': reportType == 'betterPlants'}"></i>Better
+                    Plants</label>
+            </div>
+            <div>
+
+                <label (click)="setReportType('data')"><i class="pr-2"
+                        [ngClass]="{'fa fa-square': reportType != 'data', 'fa-solid fa-square-check': reportType == 'data'}"></i>Data
+                    Overview</label>
+            </div>
+        </div>
+    </div>
+    <div class="saveCancel popup-footer text-right">
+        <button class="btn btn-secondary" (click)="cancelNewReport()">Cancel</button>
+        <button class="btn btn-success" (click)="createNewReport()">Create New Report</button>
     </div>
 </div>

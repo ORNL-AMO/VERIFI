@@ -21,6 +21,8 @@ export class OverviewReportDashboardComponent implements OnInit {
   itemsPerPage: number = 10;
   orderDataField: string = 'name';
   orderByDirection: string = 'desc';
+  showNewReportModal: boolean = false;
+  reportType: 'data' | 'betterPlants' = 'betterPlants';
   constructor(private overviewReportService: OverviewReportService, private router: Router, private overviewReportOptionsDbService: OverviewReportOptionsDbService) { }
 
   ngOnInit(): void {
@@ -44,12 +46,12 @@ export class OverviewReportDashboardComponent implements OnInit {
   }
 
 
-  createReport() {
-    this.overviewReportOptionsDbService.selectedOverviewReportOptions.next(undefined);
-    let newReportOptions: ReportOptions = this.overviewReportService.getInitialReportOptions();
-    this.overviewReportService.reportOptions.next(newReportOptions);
-    this.router.navigateByUrl('/account/reports/menu');
-  }
+  // createReport() {
+  //   this.overviewReportOptionsDbService.selectedOverviewReportOptions.next(undefined);
+  //   let newReportOptions: ReportOptions = this.overviewReportService.getInitialReportOptions();
+  //   this.overviewReportService.reportOptions.next(newReportOptions);
+  //   this.router.navigateByUrl('/account/reports/report-type');
+  // }
 
   selectReport(report: IdbOverviewReportOptions) {
     this.overviewReportOptionsDbService.selectedOverviewReportOptions.next(report);
@@ -87,5 +89,29 @@ export class OverviewReportDashboardComponent implements OnInit {
     } else {
       this.orderDataField = str;
     }
+  }
+
+
+  openAddNewReportModal() {
+    this.showNewReportModal = true;
+  }
+
+  createNewReport() {
+    this.overviewReportOptionsDbService.selectedOverviewReportOptions.next(undefined);
+    let newReportOptions: ReportOptions = this.overviewReportService.getInitialReportOptions(this.reportType);
+    this.overviewReportService.reportOptions.next(newReportOptions);
+    if (this.reportType == 'betterPlants') {
+      this.router.navigateByUrl('/account/reports/better-plants-menu');
+    } else {
+      this.router.navigateByUrl('/account/reports/menu');
+    }
+  }
+
+  cancelNewReport() {
+    this.showNewReportModal = false;
+  }
+
+  setReportType(reportType: 'betterPlants' | 'data') {
+    this.reportType = reportType;
   }
 }

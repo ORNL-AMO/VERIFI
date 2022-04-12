@@ -23,7 +23,7 @@ export class OverviewReportService {
     this.print = new BehaviorSubject<boolean>(false);
   }
 
-  getInitialReportOptions(): ReportOptions {
+  getInitialReportOptions(reportType: 'data' | 'betterPlants'): ReportOptions {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let accountFacilites: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     accountFacilites.forEach(facility => {
@@ -87,7 +87,8 @@ export class OverviewReportService {
       annualBarCharts: true,
       monthBarCharts: false,
       energyIsSource: selectedAccount.energyIsSource,
-      meterReadings: false
+      meterReadings: false,
+      reportType: reportType
     }
   }
 

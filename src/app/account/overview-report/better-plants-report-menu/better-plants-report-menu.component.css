@@ -1,0 +1,19 @@
+.filter-dropdown{
+    position: inherit;
+    top: inherit;
+    left: inherit;
+    background-color: white;
+}
+
+
+.filter{
+    margin: 10px 40px 0px;
+}
+
+.filter input.form-control{
+    width: 100%;
+}
+
+.fa-close{
+    font-size: large;
+}
