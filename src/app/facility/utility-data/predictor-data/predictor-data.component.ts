@@ -40,6 +40,7 @@ export class PredictorDataComponent implements OnInit {
   orderDataField: string = 'date';
   orderByDirection: string = 'desc';
   hasData: boolean;
+  copyingTable: boolean = false;
   constructor(private predictorsDbService: PredictordbService, private router: Router, private loadingService: LoadingService,
     private facilityDbService: FacilitydbService, private toastNotificationsService: ToastNotificationsService,
     private sharedDataService: SharedDataService, private copyTableService: CopyTableService) { }
@@ -205,6 +206,10 @@ export class PredictorDataComponent implements OnInit {
 
 
   copyTable(){
-    this.copyTableService.copyTable(this.predictorTable);
+    this.copyingTable = true;
+    setTimeout(() => {
+      this.copyTableService.copyTable(this.predictorTable);
+      this.copyingTable = false;
+    }, 200)
   }
 }

@@ -1,4 +1,4 @@
-<table class="table table-sm table-hover">
+<table class="table table-sm table-hover" #dataTable [ngClass]="{'copying-table': copyingTable}">
     <thead>
         <tr class="table-mh">
             <th class="first-column"></th>
@@ -166,3 +166,4 @@
         </tr>
     </tbody>
 </table>
+<a class="click-link" (click)="copyTable()"><span class="fa fa-copy"></span> Copy Table</a>

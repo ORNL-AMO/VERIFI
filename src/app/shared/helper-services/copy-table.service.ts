@@ -10,6 +10,8 @@ export class CopyTableService {
 
   copyTable(tableRef: ElementRef){
     if(tableRef){
+      console.log(tableRef);
+      // let tableStr: string = tableRef.nativeElement.innerText.replace("\n", ",")
       navigator.clipboard.writeText(tableRef.nativeElement.innerText).then(() => {
         this.toastNotificationService.showToast('Data Copied To Clipboard!', undefined, undefined, false, "success");
       });

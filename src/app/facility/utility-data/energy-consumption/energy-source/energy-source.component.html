@@ -35,7 +35,7 @@
     </div>
 
     <div class="table-responsive">
-        <table class="table table-sm">
+        <table class="table table-sm" #meterTable>
             <thead>
                 <tr>
                     <th (click)="setOrderDataField('name')" [ngClass]="{'active': orderDataField == 'name'}">Name</th>
@@ -60,7 +60,7 @@
                         [ngClass]="{'active': orderDataField == 'heatCapacity'}">Heat Capacity</th>
                     <th (click)="setOrderDataField('siteToSource')"
                         [ngClass]="{'active': orderDataField == 'siteToSource'}">STS</th>
-                    <th>Actions</th>
+                    <th *ngIf="!copyingTable">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -81,7 +81,7 @@
                     </td>
                     <td>{{meter.heatCapacity}}</td>
                     <td>{{meter.siteToSource}}</td>
-                    <td class="actions">
+                    <td class="actions" *ngIf="!copyingTable">
                         <div class="d-flex">
                             <i [ngClass]="{'highlight': meter.unitsDifferent}" class="fa fa-pencil" title="Edit"
                                 (click)="selectEditMeter(meter)"></i>
@@ -94,6 +94,7 @@
     </div>
 
     <div class="tableControls overflow-hidden">
+        <a class="click-link" (click)="copyTable()"><span class="fa fa-copy"></span> Copy Table</a>
         <div class="item-right">
             <ngb-pagination [collectionSize]="meterList.length" [(page)]="currentPageNumber" [pageSize]="itemsPerPage"
                 [rotate]="true" aria-label="Default pagination"></ngb-pagination>

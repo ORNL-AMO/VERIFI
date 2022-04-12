@@ -131,43 +131,45 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
   }
 
   setPredictorVariables() {
-    let predictorSelections: Array<{
-      predictor: PredictorData,
-      display: boolean,
-      usedInAnalysis: boolean
-    }> = new Array();
+    if (this.tableContext != 'annualAccount' && this.tableContext != 'monthAccount') {
+      let predictorSelections: Array<{
+        predictor: PredictorData,
+        display: boolean,
+        usedInAnalysis: boolean
+      }> = new Array();
 
-    let variableCopy: Array<PredictorData>;
-    if (this.tableContext == 'monthGroup' || this.tableContext == 'annualGroup') {
-      let analysisGroup: AnalysisGroup = this.analysisService.selectedGroup.getValue();
-      variableCopy = JSON.parse(JSON.stringify(analysisGroup.predictorVariables));
-    } else if (this.tableContext == 'monthFacility' || this.tableContext == 'annualFacility') {
-      let predictorVariables: Array<PredictorData> = this.predictorDbService.facilityPredictors.getValue();
-      variableCopy = JSON.parse(JSON.stringify(predictorVariables));
-      variableCopy.forEach(variable => {
-        variable.productionInAnalysis = false;
-      });
-    }
-    let updatePredictors: boolean = false;
-    if (this.group) {
-      if (this.group.idbGroupId != this.analysisTableColumns.predictorGroupId) {
-        updatePredictors = true;
-        console.log(updatePredictors);
-      }
-    } else if (this.analysisTableColumns.predictorGroupId != undefined) {
-      updatePredictors = true;
-    }
-
-    if (updatePredictors) {
-      variableCopy.forEach(variable => {
-        predictorSelections.push({
-          predictor: variable,
-          display: variable.productionInAnalysis && this.analysisTableColumns.productionVariables,
-          usedInAnalysis: variable.productionInAnalysis
+      let variableCopy: Array<PredictorData>;
+      if (this.tableContext == 'monthGroup' || this.tableContext == 'annualGroup') {
+        let analysisGroup: AnalysisGroup = this.analysisService.selectedGroup.getValue();
+        variableCopy = JSON.parse(JSON.stringify(analysisGroup.predictorVariables));
+      } else if (this.tableContext == 'monthFacility' || this.tableContext == 'annualFacility') {
+        let predictorVariables: Array<PredictorData> = this.predictorDbService.facilityPredictors.getValue();
+        variableCopy = JSON.parse(JSON.stringify(predictorVariables));
+        variableCopy.forEach(variable => {
+          variable.productionInAnalysis = false;
         });
-      });
-      this.analysisTableColumns.predictors = predictorSelections;
-      this.save();
+      }
+      let updatePredictors: boolean = false;
+      if (this.group) {
+        if (this.group.idbGroupId != this.analysisTableColumns.predictorGroupId) {
+          updatePredictors = true;
+          console.log(updatePredictors);
+        }
+      } else if (this.analysisTableColumns.predictorGroupId != undefined) {
+        updatePredictors = true;
+      }
+
+      if (updatePredictors) {
+        variableCopy.forEach(variable => {
+          predictorSelections.push({
+            predictor: variable,
+            display: variable.productionInAnalysis && this.analysisTableColumns.productionVariables,
+            usedInAnalysis: variable.productionInAnalysis
+          });
+        });
+        this.analysisTableColumns.predictors = predictorSelections;
+        this.save();
+      }
     }
   }
 
