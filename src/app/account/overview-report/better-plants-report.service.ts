@@ -2,12 +2,13 @@ import { Injectable } from '@angular/core';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
-import { IdbAccount, IdbAccountAnalysisItem, IdbUtilityMeter } from 'src/app/models/idb';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbUtilityMeter } from 'src/app/models/idb';
 import { BetterPlantsSummary, ReportOptions } from 'src/app/models/overview-report';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import * as _ from 'lodash';
 import { AccountAnalysisCalculationsService } from 'src/app/shared/shared-analysis/calculations/account-analysis-calculations.service';
 import { AnnualAnalysisSummary } from 'src/app/models/analysis';
+import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 
 @Injectable({
   providedIn: 'root'
@@ -15,27 +16,39 @@ import { AnnualAnalysisSummary } from 'src/app/models/analysis';
 export class BetterPlantsReportService {
 
   constructor(private accountAnalysisDbService: AccountAnalysisDbService, private calanderizationService: CalanderizationService,
-    private utilityMeterDbService: UtilityMeterdbService, private accountAnalysisCalculationsService: AccountAnalysisCalculationsService) { }
+    private utilityMeterDbService: UtilityMeterdbService, private accountAnalysisCalculationsService: AccountAnalysisCalculationsService,
+    private analysisDbService: AnalysisDbService) { }
 
 
   getBetterPlantsSummary(reportOptions: ReportOptions, account: IdbAccount): BetterPlantsSummary {
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
     let selectedAnalysisItem: IdbAccountAnalysisItem = accountAnalysisItems.find(item => { return item.id == reportOptions.analysisItemId });
+    let baselineAdjustment: number = 0;
+    if (selectedAnalysisItem.baselineAdjustment) {
+      baselineAdjustment = baselineAdjustment + selectedAnalysisItem.baselineAdjustment;
+    }
 
+    let facilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
     let includedFacilityIds: Array<number> = new Array();
     selectedAnalysisItem.facilityAnalysisItems.forEach(item => {
       if (item.analysisItemId) {
         includedFacilityIds.push(item.facilityId);
+        let facilityAnalysisItem: IdbAnalysisItem = facilityAnalysisItems.find(facilityItem => { return facilityItem.id == item.analysisItemId });
+        if (facilityAnalysisItem.baselineAdjustment) {
+          baselineAdjustment = baselineAdjustment + facilityAnalysisItem.baselineAdjustment;
+        }
       }
     });
 
-    let annualAnalysisSummary: Array<AnnualAnalysisSummary>  = this.accountAnalysisCalculationsService.getAnnualAnalysisSummary(selectedAnalysisItem, account);
-    let reportYearAnalysisSummary: AnnualAnalysisSummary = annualAnalysisSummary.find(summary => {return summary.year == reportOptions.targetYear});
-    let baselineYearAnalysisSummary: AnnualAnalysisSummary = annualAnalysisSummary.find(summary => {return summary.year == reportOptions.baselineYear});
+    let annualAnalysisSummary: Array<AnnualAnalysisSummary> = this.accountAnalysisCalculationsService.getAnnualAnalysisSummary(selectedAnalysisItem, account);
+    let reportYearAnalysisSummary: AnnualAnalysisSummary = annualAnalysisSummary.find(summary => { return summary.year == reportOptions.targetYear });
+    let baselineYearAnalysisSummary: AnnualAnalysisSummary = annualAnalysisSummary.find(summary => { return summary.year == reportOptions.baselineYear });
 
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let includedFacilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return includedFacilityIds.includes(meter.facilityId) });
     let calanderizedMeters: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMeterData(includedFacilityMeters, true, true, { energyIsSource: true });
+
+
 
 
     let baselineYearElectricityUse: number = 0;
@@ -136,10 +149,14 @@ export class BetterPlantsReportService {
       }
     });
 
-
-
-
+    let adjustedBaselinePrimaryEnergy: number = baselineAdjustment + baselineTotalEnergyUse + reportYearAnalysisSummary.adjustmentToBaseline;
+    let percentAnnualImprovement: number = (reportYearAnalysisSummary.newSavings / adjustedBaselinePrimaryEnergy) * 100;
+    let percentTotalImprovement: number =  (reportYearAnalysisSummary.cummulativeSavings / adjustedBaselinePrimaryEnergy) * 100; 
     return {
+      percentAnnualImprovement: percentAnnualImprovement,
+      percentTotalImprovement: percentTotalImprovement,
+      adjustedBaselinePrimaryEnergy: adjustedBaselinePrimaryEnergy,
+      baselineAdjustment: baselineAdjustment,
       reportYearAnalysisSummary: reportYearAnalysisSummary,
       baselineYearAnalysisSummary: baselineYearAnalysisSummary,
       baselineYearResults: {

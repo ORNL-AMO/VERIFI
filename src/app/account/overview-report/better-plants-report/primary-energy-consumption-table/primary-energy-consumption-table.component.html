@@ -204,7 +204,7 @@
                     Baseline Year or Other Operational Changes, (+/- MMBtu)
                 </td>
                 <td>
-
+                    {{betterPlantsSummary.baselineAdjustment | customNumber}}
                 </td>
             </tr>
             <tr>
@@ -212,7 +212,7 @@
                     Adjusted Baseline of Primary Energy (MMBtu)
                 </td>
                 <td>
-
+                    {{betterPlantsSummary.adjustedBaselinePrimaryEnergy | customNumber}}
                 </td>
             </tr>
             <tr>
@@ -238,7 +238,7 @@
                     Annual Improvement In Energy Intensity for Current Year (%)**
                 </td>
                 <td>
-                    {{betterPlantsSummary.reportYearAnalysisSummary.annualSavingsPercentImprovement | number:'1.0-2'}} %
+                    {{betterPlantsSummary.percentAnnualImprovement | number:'1.0-2'}} %
                 </td>
             </tr>
             <tr>
@@ -246,7 +246,7 @@
                     Total Improvement In Energy Intensity (%)**
                 </td>
                 <td>
-                    {{betterPlantsSummary.reportYearAnalysisSummary.totalSavingsPercentImprovement | number:'1.0-2'}} %
+                    {{betterPlantsSummary.percentTotalImprovement | number:'1.0-2'}} %
                 </td>
             </tr>
         </tbody>

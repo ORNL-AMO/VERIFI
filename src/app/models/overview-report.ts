@@ -74,6 +74,10 @@ export interface ReportOptions {
 
 
 export interface BetterPlantsSummary {
+  percentAnnualImprovement: number,
+  percentTotalImprovement: number,
+  adjustedBaselinePrimaryEnergy: number,
+  baselineAdjustment: number,
   baselineYearResults: BetterPlantsEnergySummary,
   reportYearResults: BetterPlantsEnergySummary,
   reportYearAnalysisSummary: AnnualAnalysisSummary,

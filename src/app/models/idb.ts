@@ -223,6 +223,7 @@ export interface IdbAnalysisItem {
     energyIsSource: boolean,
     reportYear: number,
     energyUnit: string,
+    baselineAdjustment: number,
     groups: Array<AnalysisGroup>
 }
 
@@ -250,6 +251,7 @@ export interface IdbAccountAnalysisItem {
     energyIsSource: boolean,
     reportYear: number,
     energyUnit: string,
+    baselineAdjustment: number,
     facilityAnalysisItems: Array<{
         facilityId: number,
         analysisItemId: number

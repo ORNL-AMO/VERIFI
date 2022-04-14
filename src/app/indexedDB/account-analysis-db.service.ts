@@ -128,7 +128,8 @@ export class AccountAnalysisDbService {
       reportYear: selectedAccount.sustainabilityQuestions.energyReductionTargetYear,
       energyUnit: selectedAccount.energyUnit,
       facilityAnalysisItems: facilityAnalysisItems,
-      energyIsSource: selectedAccount.energyIsSource
+      energyIsSource: selectedAccount.energyIsSource,
+      baselineAdjustment: 0
     }
   }
 
