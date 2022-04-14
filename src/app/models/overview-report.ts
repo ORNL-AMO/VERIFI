@@ -1,3 +1,4 @@
+import { AnnualAnalysisSummary } from "./analysis";
 import { IdbFacility, MeterSource } from "./idb";
 
 export interface BarChartDataTrace {
@@ -69,4 +70,32 @@ export interface ReportOptions {
   analysisItemId: number,
   baselineAdjustmentNotes: string,
   modificationNotes: string
+}
+
+
+export interface BetterPlantsSummary {
+  baselineYearResults: BetterPlantsEnergySummary,
+  reportYearResults: BetterPlantsEnergySummary,
+  reportYearAnalysisSummary: AnnualAnalysisSummary,
+  baselineYearAnalysisSummary: AnnualAnalysisSummary
+}
+
+
+export interface BetterPlantsEnergySummary {
+  numberOfFacilities: number,
+  electricityUse: number,
+  naturalGasUse: number,
+  distilateFuelUse: number,
+  residualFuelUse: number,
+  coalUse: number,
+  cokeEnergyUse: number,
+  blastFurnaceEnergyUse: number,
+  woodWasteEnergyUse: number,
+  otherGasFuels: Array<string>,
+  otherGasUse: number,
+  otherSolidFuels: Array<string>,
+  otherSolidUse: number,
+  otherLiquidFuels: Array<string>,
+  otherLiquidUse: number,
+  totalEnergyUse: number
 }
