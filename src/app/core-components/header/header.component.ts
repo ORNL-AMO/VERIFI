@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { Router, Event, NavigationStart, NavigationEnd } from '@angular/router';
 import { AccountdbService } from "../../indexedDB/account-db.service";
 import { FacilitydbService } from "../../indexedDB/facility-db.service";
@@ -10,6 +10,8 @@ import { Subscription } from 'rxjs';
 import * as _ from 'lodash';
 import { ImportBackupModalService } from '../import-backup-modal/import-backup-modal.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
+import { environment } from 'src/environments/environment';
+import { BackupDataService } from 'src/app/shared/helper-services/backup-data.service';
 
 @Component({
   selector: 'app-header',
@@ -21,6 +23,7 @@ import { SharedDataService } from 'src/app/shared/helper-services/shared-data.se
 })
 export class HeaderComponent implements OnInit {
 
+  version: string = environment.version;
   accountMenu: boolean = false;
   switchAccountMenu: boolean;
   accountList: Array<IdbAccount>;
@@ -30,7 +33,11 @@ export class HeaderComponent implements OnInit {
   allAccountsSub: Subscription;
   selectedAccountSub: Subscription;
   allFacilitiesSub: Subscription;
-
+  showDropdown: boolean = false;
+  showSearch: boolean = false;
+  lastBackupDate: Date;
+  
+  @ViewChild('header', { static: false }) header: ElementRef;
   constructor(
     private eRef: ElementRef,
     private router: Router,
@@ -40,7 +47,8 @@ export class HeaderComponent implements OnInit {
     public utilityMeterGroupdbService: UtilityMeterGroupdbService,
     public utilityMeterDatadbService: UtilityMeterDatadbService,
     private importBackupModalService: ImportBackupModalService,
-    private sharedDataService: SharedDataService
+    private sharedDataService: SharedDataService,
+    private backupDataService: BackupDataService
   ) {
     // Close menus on navigation
     router.events.subscribe((event: Event) => {
@@ -57,12 +65,21 @@ export class HeaderComponent implements OnInit {
 
     this.selectedAccountSub = this.accountdbService.selectedAccount.subscribe(selectedAccount => {
       this.activeAccount = selectedAccount;
+      if (selectedAccount) {
+        this.lastBackupDate = selectedAccount.lastBackup;
+      } else {
+        this.lastBackupDate = undefined;
+      }
     });
 
     this.allFacilitiesSub = this.facilitydbService.allFacilities.subscribe(allFacilities => {
       this.allFacilities = allFacilities;
       this.getAccountFacilityCount();
     });
+  }
+
+  ngAfterViewInit(){
+    this.setHeaderHeight()
   }
 
   ngOnDestroy() {
@@ -91,13 +108,14 @@ export class HeaderComponent implements OnInit {
     }
   }
 
-  closeSwitchAccount(){
+  closeSwitchAccount() {
     this.switchAccountMenu = false;
     this.sharedDataService.modalOpen.next(false);
   }
 
   addNewAccount() {
     this.switchAccountMenu = false;
+    this.toggleDropdown();
     this.router.navigateByUrl('/setup-wizard');
   }
 
@@ -107,7 +125,7 @@ export class HeaderComponent implements OnInit {
     // this.accountdbService.setSelectedAccount(account.id);
     this.accountdbService.selectedAccount.next(account);
     this.switchAccountMenu = false;
-    this.sharedDataService.modalOpen.next(false);
+    this.toggleDropdown();
   }
 
 
@@ -135,5 +153,25 @@ export class HeaderComponent implements OnInit {
     this.importBackupModalService.inFacility = false;
     this.importBackupModalService.showModal.next(true);
     this.switchAccountMenu = false;
+  }
+
+  toggleDropdown() {
+    this.showDropdown = !this.showDropdown;
+    this.sharedDataService.modalOpen.next(this.showDropdown);
+  }
+
+  toggleSearch() {
+    this.showSearch = !this.showSearch;
+  }
+
+  backupAccount() {
+    this.backupDataService.backupAccount();
+  }
+
+
+  setHeaderHeight(){
+    if(this.header){
+      this.sharedDataService.headerHeight.next(this.header.nativeElement.clientHeight);
+    }
   }
 }

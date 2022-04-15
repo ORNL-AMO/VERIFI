@@ -1,3 +1,23 @@
+.navbar{
+    background-color: white;
+}
+
+.navbar-brand:first-letter, .dropdown-toggle span.active{
+    color: #ff6000;
+}
+
+a:not([href]).dropdown-item.active {
+    color: #ff6000 !important;
+    background-color: #efefef;
+
+}
+
+.navbar-brand{
+    font-weight: 500;
+    font-size: 30px;
+    color: black;
+}
+
 /*
 Header
 =============================================== */
@@ -177,7 +197,7 @@ Facility
 /*
 Dropdown Menu
 =============================================== */
-.dropdown {
+/* .dropdown {
     position: absolute;
     background-color: white;
     padding: 20px;
@@ -188,7 +208,7 @@ Dropdown Menu
     list-style: none;
     text-align: left;
     border-radius: 2px;
-    /*box-shadow: -3px 4px 8px #0000001c;*/
+    /*box-shadow: -3px 4px 8px #0000001c;*
     box-shadow: 0px 8px 10px #0000001c;
     transform: scale(0);
     transform-origin: top;
@@ -205,7 +225,7 @@ Dropdown Menu
     color: #307100;
     background-color: #f3f3f3;
     cursor: pointer;
-}
+} */
 /*
 Manage Accounts
 =============================================== */
@@ -322,4 +342,21 @@ Responsive
 .account-name{
     font-size: 20px;
     font-weight: 500;
+}
+
+.backup-account.btn{
+    font-size: 12px;
+}
+
+.backup-account.btn span.small{
+    font-size: 10px;
+}
+
+.account-required{
+    font-style: italic;
+}
+
+.dropdown-toggle:hover{
+    cursor: pointer;
+    text-decoration: underline;
 }

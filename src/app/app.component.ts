@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { AccountAnalysisDbService } from './indexedDB/account-analysis-db.service';
 import { AccountdbService } from './indexedDB/account-db.service';
@@ -11,6 +11,7 @@ import { UtilityMeterDatadbService } from './indexedDB/utilityMeterData-db.servi
 import { UtilityMeterGroupdbService } from './indexedDB/utilityMeterGroup-db.service';
 import { IdbAccount } from './models/idb';
 import { EGridService } from './shared/helper-services/e-grid.service';
+import { SharedDataService } from './shared/helper-services/shared-data.service';
 
 // declare ga as a function to access the JS code in TS
 declare let gtag: Function;
@@ -22,9 +23,11 @@ declare let gtag: Function;
 })
 export class AppComponent {
 
+  @ViewChild('header', { static: false }) header: ElementRef;
 
   dataInitialized: boolean = false;
   loadingMessage: string = "Loading Accounts...";
+  contentHeight: number;
   constructor(
     private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
@@ -36,7 +39,8 @@ export class AppComponent {
     private eGridService: EGridService,
     private overviewReportOptionsDbService: OverviewReportOptionsDbService,
     private analysisDbService: AnalysisDbService,
-    private accountAnalysisDbService: AccountAnalysisDbService) {
+    private accountAnalysisDbService: AccountAnalysisDbService,
+    private sharedDataService: SharedDataService) {
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
         gtag('config', 'G-YG1QD02XSE',
@@ -51,7 +55,9 @@ export class AppComponent {
   ngOnInit() {
     this.initializeData();
     this.eGridService.parseEGridData();
-
+    this.sharedDataService.headerHeight.subscribe(val => {
+      this.contentHeight = window.innerHeight - val;
+    })
   }
 
   async initializeData() {
