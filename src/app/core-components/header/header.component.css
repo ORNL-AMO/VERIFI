@@ -360,3 +360,8 @@ Responsive
     cursor: pointer;
     text-decoration: underline;
 }
+
+.dropdown-toggle{
+    font-size: 12px;
+    padding: 5.2px 10px;
+}

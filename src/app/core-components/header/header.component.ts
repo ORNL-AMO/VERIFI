@@ -1,5 +1,5 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { Router, Event, NavigationStart, NavigationEnd } from '@angular/router';
+import { Component, ElementRef, OnInit } from '@angular/core';
+import { Router, Event, NavigationStart } from '@angular/router';
 import { AccountdbService } from "../../indexedDB/account-db.service";
 import { FacilitydbService } from "../../indexedDB/facility-db.service";
 import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db.service";
@@ -17,27 +17,26 @@ import { BackupDataService } from 'src/app/shared/helper-services/backup-data.se
   selector: 'app-header',
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.css'],
-  host: {
-    '(document:click)': 'documentClick($event)',
-  }
+  // host: {
+  //   '(document:click)': 'documentClick($event)',
+  // }
 })
 export class HeaderComponent implements OnInit {
 
   version: string = environment.version;
-  accountMenu: boolean = false;
-  switchAccountMenu: boolean;
+  // accountMenu: boolean = false;
+  // switchAccountMenu: boolean;
   accountList: Array<IdbAccount>;
-  allFacilities: Array<IdbFacility>;
+  // allFacilities: Array<IdbFacility>;
   activeAccount: IdbAccount;
 
   allAccountsSub: Subscription;
   selectedAccountSub: Subscription;
-  allFacilitiesSub: Subscription;
+  // allFacilitiesSub: Subscription;
   showDropdown: boolean = false;
   showSearch: boolean = false;
   lastBackupDate: Date;
   
-  @ViewChild('header', { static: false }) header: ElementRef;
   constructor(
     private eRef: ElementRef,
     private router: Router,
@@ -51,11 +50,11 @@ export class HeaderComponent implements OnInit {
     private backupDataService: BackupDataService
   ) {
     // Close menus on navigation
-    router.events.subscribe((event: Event) => {
-      if (event instanceof NavigationStart) {
-        this.accountMenu = false;
-      }
-    });
+    // router.events.subscribe((event: Event) => {
+    //   if (event instanceof NavigationStart) {
+    //     this.accountMenu = false;
+    //   }
+    // });
   }
 
   ngOnInit() {
@@ -72,83 +71,83 @@ export class HeaderComponent implements OnInit {
       }
     });
 
-    this.allFacilitiesSub = this.facilitydbService.allFacilities.subscribe(allFacilities => {
-      this.allFacilities = allFacilities;
-      this.getAccountFacilityCount();
-    });
+    // this.allFacilitiesSub = this.facilitydbService.allFacilities.subscribe(allFacilities => {
+    //   this.allFacilities = allFacilities;
+    //   this.getAccountFacilityCount();
+    // });
   }
 
   ngOnDestroy() {
     this.allAccountsSub.unsubscribe();
     this.selectedAccountSub.unsubscribe();
-    this.allFacilitiesSub.unsubscribe();
+    // this.allFacilitiesSub.unsubscribe();
   }
 
-  toggleAccountMenu() {
-    this.accountMenu = !this.accountMenu;
-    this.sharedDataService.modalOpen.next(this.accountMenu);
-  }
+  // toggleAccountMenu() {
+  //   this.accountMenu = !this.accountMenu;
+  //   this.sharedDataService.modalOpen.next(this.accountMenu);
+  // }
 
-  toggleSwitchAccountsMenu() {
-    this.switchAccountMenu = !this.switchAccountMenu;
-    this.accountMenu = false;
-    this.sharedDataService.modalOpen.next(this.switchAccountMenu);
-  }
+  // toggleSwitchAccountsMenu() {
+  //   this.switchAccountMenu = !this.switchAccountMenu;
+  //   this.accountMenu = false;
+  //   this.sharedDataService.modalOpen.next(this.switchAccountMenu);
+  // }
 
-  // close menus when user clicks outside the dropdown
-  documentClick() {
-    if (!this.eRef.nativeElement.contains(event.target) && (this.accountMenu || this.switchAccountMenu)) {
-      this.accountMenu = false;
-      this.switchAccountMenu = false;
-      this.sharedDataService.modalOpen.next(false);
-    }
-  }
+  // // close menus when user clicks outside the dropdown
+  // documentClick() {
+  //   if (!this.eRef.nativeElement.contains(event.target) && (this.accountMenu || this.switchAccountMenu)) {
+  //     this.accountMenu = false;
+  //     this.switchAccountMenu = false;
+  //     this.sharedDataService.modalOpen.next(false);
+  //   }
+  // }
 
-  closeSwitchAccount() {
-    this.switchAccountMenu = false;
-    this.sharedDataService.modalOpen.next(false);
-  }
+  // closeSwitchAccount() {
+  //   this.switchAccountMenu = false;
+  //   this.sharedDataService.modalOpen.next(false);
+  // }
 
   addNewAccount() {
-    this.switchAccountMenu = false;
+    // this.switchAccountMenu = false;
     this.toggleDropdown();
     this.router.navigateByUrl('/setup-wizard');
   }
 
   async switchAccount(account: IdbAccount) {
-    this.toggleSwitchAccountsMenu();
+    // this.toggleSwitchAccountsMenu();
     this.router.navigate(['/']);
     // this.accountdbService.setSelectedAccount(account.id);
     this.accountdbService.selectedAccount.next(account);
-    this.switchAccountMenu = false;
+    // this.switchAccountMenu = false;
     this.toggleDropdown();
   }
 
 
-  getAccountFacilityCount() {
-    this.accountList.forEach(account => {
-      account.numberOfFacilities = this.getNumberOfFacilities(account.id);
-    });
-  }
+  // getAccountFacilityCount() {
+  //   this.accountList.forEach(account => {
+  //     account.numberOfFacilities = this.getNumberOfFacilities(account.id);
+  //   });
+  // }
 
-  getNumberOfFacilities(accountId: number): string {
-    let count: number = 0;
-    this.allFacilities.forEach(facility => {
-      if (facility.accountId == accountId) {
-        count++;
-      }
-    });
-    if (count != 1) {
-      return count + ' Facilities';
-    } else {
-      return count + ' Facility';
-    }
-  }
+  // getNumberOfFacilities(accountId: number): string {
+  //   let count: number = 0;
+  //   this.allFacilities.forEach(facility => {
+  //     if (facility.accountId == accountId) {
+  //       count++;
+  //     }
+  //   });
+  //   if (count != 1) {
+  //     return count + ' Facilities';
+  //   } else {
+  //     return count + ' Facility';
+  //   }
+  // }
 
   openImportBackup() {
     this.importBackupModalService.inFacility = false;
     this.importBackupModalService.showModal.next(true);
-    this.switchAccountMenu = false;
+    // this.switchAccountMenu = false;
   }
 
   toggleDropdown() {

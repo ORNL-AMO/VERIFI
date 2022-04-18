@@ -21,18 +21,18 @@
                 </div>
             </li>
         </ul>
-        <div class="pl-2">Last Backup: (<span *ngIf="lastBackupDate">{{lastBackupDate | date:'medium'}}</span><span
-            *ngIf="!lastBackupDate">&mdash;</span>)</div>
-        <div class="pl-2 pr-2">
+        <div class="pl-2">
             <button class="btn btn-dark backup-account" (click)="backupAccount()">Backup Account
             </button>
         </div>
-        <form class="form-inline my-2 my-lg-0">
+        <div class="pl-2">Last Backup: (<span *ngIf="lastBackupDate">{{lastBackupDate | date:'medium'}}</span><span
+            *ngIf="!lastBackupDate">&mdash;</span>)</div>
+        <!-- <form class="form-inline my-2 my-lg-0">
             <input class="form-control mr-sm-2" type="search" placeholder="Search (coming soon)" aria-label="Search"
                 [ngClass]="{'collapse': !showSearch}">
             <button class="btn btn-outline my-2 my-sm-0" (click)="toggleSearch()"><span
                     class="fa fa-search"></span></button>
-        </form>
+        </form> -->
 
     </div>
 </nav>
