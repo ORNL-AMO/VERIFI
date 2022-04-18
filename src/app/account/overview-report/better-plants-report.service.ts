@@ -9,6 +9,8 @@ import * as _ from 'lodash';
 import { AccountAnalysisCalculationsService } from 'src/app/shared/shared-analysis/calculations/account-analysis-calculations.service';
 import { AnnualAnalysisSummary } from 'src/app/models/analysis';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
+import { ConvertMeterDataService } from 'src/app/shared/helper-services/convert-meter-data.service';
+import { ConvertUnitsService } from 'src/app/shared/convert-units/convert-units.service';
 
 @Injectable({
   providedIn: 'root'
@@ -17,7 +19,8 @@ export class BetterPlantsReportService {
 
   constructor(private accountAnalysisDbService: AccountAnalysisDbService, private calanderizationService: CalanderizationService,
     private utilityMeterDbService: UtilityMeterdbService, private accountAnalysisCalculationsService: AccountAnalysisCalculationsService,
-    private analysisDbService: AnalysisDbService) { }
+    private analysisDbService: AnalysisDbService, private convertMeterDataService: ConvertMeterDataService,
+    private convertUnitsService: ConvertUnitsService) { }
 
 
   getBetterPlantsSummary(reportOptions: ReportOptions, account: IdbAccount): BetterPlantsSummary {
@@ -25,8 +28,12 @@ export class BetterPlantsReportService {
     let selectedAnalysisItem: IdbAccountAnalysisItem = accountAnalysisItems.find(item => { return item.id == reportOptions.analysisItemId });
     let baselineAdjustment: number = 0;
     if (selectedAnalysisItem.baselineAdjustment) {
-      baselineAdjustment = baselineAdjustment + selectedAnalysisItem.baselineAdjustment;
+      let convertedAdjustment: number = this.convertUnitsService.value(selectedAnalysisItem.baselineAdjustment).from(selectedAnalysisItem.energyUnit).to('MMBtu');
+      baselineAdjustment = baselineAdjustment + convertedAdjustment;
     }
+
+    //Better Plants = MMBtu
+    selectedAnalysisItem.energyUnit = 'MMBtu';
 
     let facilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
     let includedFacilityIds: Array<number> = new Array();
@@ -35,7 +42,8 @@ export class BetterPlantsReportService {
         includedFacilityIds.push(item.facilityId);
         let facilityAnalysisItem: IdbAnalysisItem = facilityAnalysisItems.find(facilityItem => { return facilityItem.id == item.analysisItemId });
         if (facilityAnalysisItem.baselineAdjustment) {
-          baselineAdjustment = baselineAdjustment + facilityAnalysisItem.baselineAdjustment;
+          let convertedAdjustment: number = this.convertUnitsService.value(selectedAnalysisItem.baselineAdjustment).from(facilityAnalysisItem.energyUnit).to('MMBtu');
+          baselineAdjustment = baselineAdjustment + convertedAdjustment;
         }
       }
     });
@@ -47,7 +55,9 @@ export class BetterPlantsReportService {
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let includedFacilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return includedFacilityIds.includes(meter.facilityId) });
     let calanderizedMeters: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMeterData(includedFacilityMeters, true, true, { energyIsSource: true });
-
+    calanderizedMeters.forEach(calanderizedMeter => {
+      calanderizedMeter.monthlyData = this.convertMeterDataService.convertMeterDataToAnalysis(selectedAnalysisItem, calanderizedMeter.monthlyData, account, calanderizedMeter.meter);
+    });
 
 
 
