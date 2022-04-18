@@ -3,7 +3,7 @@
     <div #header *ngIf="dataInitialized">
       <app-header class="hide-print"></app-header>
     </div>
-    <div class="d-flex" [ngStyle]="{'height.px': contentHeight}">
+    <div class="d-flex h-100">
       <app-sidebar class="hide-print" *ngIf="dataInitialized"></app-sidebar>
       <div class="content w-100" role="main" *ngIf="dataInitialized">
         <router-outlet></router-outlet>

@@ -27,7 +27,6 @@ export class AppComponent {
 
   dataInitialized: boolean = false;
   loadingMessage: string = "Loading Accounts...";
-  contentHeight: number;
   constructor(
     private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
@@ -55,9 +54,6 @@ export class AppComponent {
   ngOnInit() {
     this.initializeData();
     this.eGridService.parseEGridData();
-    this.sharedDataService.headerHeight.subscribe(val => {
-      this.contentHeight = window.innerHeight - val;
-    })
   }
 
   async initializeData() {

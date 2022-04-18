@@ -78,10 +78,6 @@ export class HeaderComponent implements OnInit {
     });
   }
 
-  ngAfterViewInit(){
-    this.setHeaderHeight()
-  }
-
   ngOnDestroy() {
     this.allAccountsSub.unsubscribe();
     this.selectedAccountSub.unsubscribe();
@@ -166,12 +162,5 @@ export class HeaderComponent implements OnInit {
 
   backupAccount() {
     this.backupDataService.backupAccount();
-  }
-
-
-  setHeaderHeight(){
-    if(this.header){
-      this.sharedDataService.headerHeight.next(this.header.nativeElement.clientHeight);
-    }
   }
 }
