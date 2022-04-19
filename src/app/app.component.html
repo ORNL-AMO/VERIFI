@@ -1,8 +1,10 @@
 <div class="container-fluid p-0 m-0">
   <div class="d-flex flex-column h-100">
-    <app-header class="hide-print header-height"></app-header>
-    <div class="d-flex content-height">
-      <app-sidebar class="hide-print"></app-sidebar>
+    <div #header *ngIf="dataInitialized">
+      <app-header class="hide-print"></app-header>
+    </div>
+    <div class="d-flex h-100">
+      <app-sidebar class="hide-print" *ngIf="dataInitialized"></app-sidebar>
       <div class="content w-100" role="main" *ngIf="dataInitialized">
         <router-outlet></router-outlet>
         <app-toast-notifications class="hide-print"></app-toast-notifications>
@@ -24,7 +26,7 @@
         </div>
       </div>
     </div>
-    <app-footer class="hide-print footer-height"></app-footer>
+    <!-- <app-footer class="hide-print footer-height"></app-footer> -->
     <app-loading class="hide-print"></app-loading>
     <app-electron-update class="hide-print"></app-electron-update>
   </div>
