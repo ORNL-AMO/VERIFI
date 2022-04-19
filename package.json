@@ -6,7 +6,7 @@
   "author": "Advanced Manufacturing Office",
   "repository": "https://github.com/ORNL-AMO/VERIFI.git",
   "build": {
-    "appId": "com.ornl.verifi",
+    "appId": "gov.ornl.amo",
     "copyright": "Copyright 2021 ORNL. All rights reserved.",
     "productName": "VERIFI",
     "directories": {
