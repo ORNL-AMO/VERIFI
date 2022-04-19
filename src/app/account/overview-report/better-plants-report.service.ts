@@ -158,10 +158,10 @@ export class BetterPlantsReportService {
         }
       }
     });
-
     let adjustedBaselinePrimaryEnergy: number = baselineAdjustment + baselineTotalEnergyUse + reportYearAnalysisSummary.adjustmentToBaseline;
+    let totalEnergySavings: number = adjustedBaselinePrimaryEnergy - reportYearTotalEnergyUse;
     let percentAnnualImprovement: number = (reportYearAnalysisSummary.newSavings / adjustedBaselinePrimaryEnergy) * 100;
-    let percentTotalImprovement: number =  (reportYearAnalysisSummary.cummulativeSavings / adjustedBaselinePrimaryEnergy) * 100; 
+    let percentTotalImprovement: number =  (totalEnergySavings / adjustedBaselinePrimaryEnergy) * 100; 
     return {
       percentAnnualImprovement: percentAnnualImprovement,
       percentTotalImprovement: percentTotalImprovement,
@@ -169,6 +169,7 @@ export class BetterPlantsReportService {
       baselineAdjustment: baselineAdjustment,
       reportYearAnalysisSummary: reportYearAnalysisSummary,
       baselineYearAnalysisSummary: baselineYearAnalysisSummary,
+      totalEnergySavings: totalEnergySavings,
       baselineYearResults: {
         numberOfFacilities: includedFacilityIds.length,
         electricityUse: baselineYearElectricityUse,
