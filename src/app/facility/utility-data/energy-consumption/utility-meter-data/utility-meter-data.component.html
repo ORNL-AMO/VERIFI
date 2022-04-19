@@ -39,7 +39,7 @@
 
         <!--Bulk Delete-->
         <div class="bulk-delete item-right" [class.show]="hasCheckedItems">
-            <button class="btn btn-danger" (click)='openBulkDelete()'>Bulk Delete</button>
+            <button class="btn btn-danger" (click)='openBulkDelete()' [disabled]="!hasCheckedItems">Bulk Delete</button>
         </div>
 
         <!--Column Filters-->
