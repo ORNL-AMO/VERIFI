@@ -29,8 +29,6 @@
                 minlength="0" maxlength="100">
         </div>
         <div class="col-2 text-center">
-            <!-- <input type="checkbox" [(ngModel)]="predictor.production" name="{{'production'+predictor.id}}"
-                onfocus="this.select();"> -->
             <label class="switch" for="{{'predictor_'+predictor.id}}">
                 <input class="checkbox" type="checkbox" id="{{'predictor_'+predictor.id}}"
                     name="{{'predictor_'+predictor.id}}" [(ngModel)]="predictor.production">
