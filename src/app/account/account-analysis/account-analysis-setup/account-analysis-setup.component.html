@@ -46,7 +46,7 @@
                     <div class="input-group w-50">
                         <input type="number" id="baselineAdjustment" id="baselineAdjustment"
                             [(ngModel)]="analysisItem.baselineAdjustment" (change)="saveItem()" min="0">
-                        <span class="unit" [innerHTML]="analysisItem.energyUnit | settingsLabel"></span>
+                        <span class="unit" [innerHTML]="analysisItem.energyUnit | settingsLabel:'/yr'"></span>
                     </div>
                 </div>
                 <hr>

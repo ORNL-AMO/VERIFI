@@ -42,7 +42,7 @@ export class BetterPlantsReportService {
         includedFacilityIds.push(item.facilityId);
         let facilityAnalysisItem: IdbAnalysisItem = facilityAnalysisItems.find(facilityItem => { return facilityItem.id == item.analysisItemId });
         if (facilityAnalysisItem.baselineAdjustment) {
-          let convertedAdjustment: number = this.convertUnitsService.value(selectedAnalysisItem.baselineAdjustment).from(facilityAnalysisItem.energyUnit).to('MMBtu');
+          let convertedAdjustment: number = this.convertUnitsService.value(facilityAnalysisItem.baselineAdjustment).from(facilityAnalysisItem.energyUnit).to('MMBtu');
           baselineAdjustment = baselineAdjustment + convertedAdjustment;
         }
       }
