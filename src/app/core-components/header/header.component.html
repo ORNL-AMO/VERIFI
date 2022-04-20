@@ -1,74 +1,39 @@
-<div id="header" role="header">
-    <div class="row m-0">
-        <div class="col-lg-2">
-            <h2>VERIFI</h2>
-        </div>
-        <div class="col">
-            <div class="searchBar">
-                <i class="fa fa-search"></i>
-                <input type="text" ng-model="searchBox" placeholder="Search Verifi (Coming Soon)" minlength="1"
-                    maxlength="100">
-            </div>
-        </div>
-        <div class="col-lg-4 facilityMenu">
-            <div class="facilityMenu" *ngIf="!activeAccount">
-                <div class="currentFacility">
-                    <i class="fa fa-building item-left"></i>
-                    <span class="accountRequired">Account Required</span>
-                </div>
-            </div>
-            <div class="facilityMenu" *ngIf="activeAccount">
-                <div class="currentFacility d-flex align-items-baseline">
-                    <i class="fa fa-building"></i>
-                    <div class="account-name">{{activeAccount.name}}</div>
-                </div>
-            </div>
+<nav class="navbar navbar-expand-sm" #header>
+    <a class="navbar-brand" routerLink="/account">VERIFI</a>
+    <span class="badge badge-secondary">v{{version}}</span>
 
-            <div class="accountMenu">
-                <i class="fa fa-ellipsis-v" (click)="toggleAccountMenu()"></i>
-                <div class="dropdown" [class.open]="accountMenu == true">
-                    <div class="arrow-up"></div>
-                    <div>
-                        <div *ngIf="!activeAccount" class="noAccount">
-                            <i class="fa fa-building item-left"></i>
-                            <span>Account Required</span>
-                        </div>
-                        <div *ngIf="activeAccount" class="currentAccount" routerLink="/account/settings">
-                            <i class="fa fa-building item-left"></i>
-                            <p>{{activeAccount.name}}</p>
-                            <span class="small">Manage Account</span>
-                            <i class="fa fa-chevron-right right"></i>
-                        </div>
-                        <hr>
-                        <a (click)="toggleSwitchAccountsMenu()">Switch Account</a>
-                        <br>
-                    </div>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item dropdown">
+                <button *ngIf="activeAccount" class="btn btn-outline nav-link dropdown-toggle"
+                    (click)="toggleDropdown()">
+                    {{activeAccount.name}}
+                </button>
+                <div *ngIf="!activeAccount" class="nav-link dropdown-toggle account-required"
+                    (click)="toggleDropdown()">Account Required
                 </div>
-            </div>
+                <div class="dropdown-menu" [ngClass]="{'show':showDropdown}">
+                    <a *ngFor="let account of accountList" [class.active]="activeAccount?.id === account.id"
+                        class="dropdown-item" (click)="switchAccount(account)">{{account.name}}</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" (click)="addNewAccount()"><i class="fa fa-plus"></i> Add New
+                        Account</a>
+                    <a class="dropdown-item" (click)="addNewAccount()"><i class="fa fa-upload"></i> Import Backup</a>
+                </div>
+            </li>
+        </ul>
+        <div class="pl-2">
+            <button class="btn btn-dark backup-account" (click)="backupAccount()">Backup Account
+            </button>
         </div>
-    </div>
-</div>
+        <div class="pl-2">Last Backup: (<span *ngIf="lastBackupDate">{{lastBackupDate | date:'medium'}}</span><span
+                *ngIf="!lastBackupDate">&mdash;</span>)</div>
+        <!-- <form class="form-inline my-2 my-lg-0">
+            <input class="form-control mr-sm-2" type="search" placeholder="Search (coming soon)" aria-label="Search"
+                [ngClass]="{'collapse': !showSearch}">
+            <button class="btn btn-outline my-2 my-sm-0" (click)="toggleSearch()"><span
+                    class="fa fa-search"></span></button>
+        </form> -->
 
-<div id="switchAccounts" [class.open]="switchAccountMenu == true">
-    <h5>
-        Switch Account
-        <button class="close item-right" (click)="closeSwitchAccount()">&times;</button>
-    </h5>
-    <div class="accounts">
-        <div class="account" [class.active]="activeAccount?.id === account.id" (click)="switchAccount(account)"
-            *ngFor="let account of accountList">
-            <p class="company item-left">{{account.name}}</p>
-            <p class="facilityCount item-right">{{account.numberOfFacilities}}
-            </p>
-        </div>
     </div>
-
-    <!-- <hr> -->
-    <div class="d-flex justify-content-between">
-        <button class="btn btn-primary-2" (click)="addNewAccount()"><i class="fa fa-plus"></i> Add
-            Account</button>
-        <button class="btn btn-outline" (click)="openImportBackup()"><i class="fa fa-upload"></i> Import
-            Account</button>
-    </div>
-</div>
-<div id="darkoverlay" [class.open]="switchAccountMenu == true" (click)="toggleSwitchAccountsMenu()"></div>
+</nav>

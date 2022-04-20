@@ -65,14 +65,9 @@
 }
 
 
-.header-height{
-    height: 67px;
-}
-
-.footer-height{
-    height: 35px;
-}
-
-.content-height{
-    height: calc(100vh - 102px);
+.content{
+  background-image: url('src/assets/images/industrial-skyline.png');
+  background-position: bottom;
+  background-repeat: no-repeat;
+  background-size: 100%;
 }
