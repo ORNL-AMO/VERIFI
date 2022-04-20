@@ -4,7 +4,8 @@ import { Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { OverviewReportOptionsDbService } from 'src/app/indexedDB/overview-report-options-db.service';
 import { IdbAccount, IdbOverviewReportOptions } from 'src/app/models/idb';
-import { ReportOptions } from 'src/app/models/overview-report';
+import { BetterPlantsSummary, ReportOptions } from 'src/app/models/overview-report';
+import { BetterPlantsReportService } from '../better-plants-report.service';
 import { OverviewReportService } from '../overview-report.service';
 
 @Component({
@@ -18,8 +19,9 @@ export class BetterPlantsReportComponent implements OnInit {
   printSub: Subscription;
   print: boolean;
   account: IdbAccount;
+  betterPlantsSummary: BetterPlantsSummary;
   constructor(private overviewReportService: OverviewReportService, private overviewReportOptionsDbService: OverviewReportOptionsDbService,
-    private router: Router, private accountDbService: AccountdbService) { }
+    private router: Router, private accountDbService: AccountdbService, private betterPlantsReportService: BetterPlantsReportService) { }
 
   ngOnInit(): void {
     this.printSub = this.overviewReportService.print.subscribe(print => {
@@ -38,6 +40,7 @@ export class BetterPlantsReportComponent implements OnInit {
       }
     }
     this.account = this.accountDbService.selectedAccount.getValue();
+    this.betterPlantsSummary = this.betterPlantsReportService.getBetterPlantsSummary(this.reportOptions, this.account);
   }
 
   ngOnDestroy() {

@@ -8,7 +8,8 @@
     </div>
     <div class="row justify-content-center pt-2">
         <div class="col-8">
-            <app-primary-energy-consumption-table [account]="account" [reportOptions]="reportOptions">
+            <app-primary-energy-consumption-table [betterPlantsSummary]="betterPlantsSummary" [account]="account"
+                [reportOptions]="reportOptions">
             </app-primary-energy-consumption-table>
         </div>
     </div>
@@ -31,7 +32,8 @@
                 account for economic and other factors that affect energy use:
             </p>
             <p>
-                {{reportOptions.baselineAdjustmentNotes}}
+                <span *ngIf="reportOptions.baselineAdjustmentNotes">{{reportOptions.baselineAdjustmentNotes}}</span>
+                <span *ngIf="!reportOptions.baselineAdjustmentNotes">N/A</span>
             </p>
         </div>
     </div>
@@ -44,8 +46,23 @@
                 MMBtu/yr, energy awareness campaign, etc):
             </p>
             <p>
-                {{reportOptions.modificationNotes}}
+                <span *ngIf="reportOptions.modificationNotes">{{reportOptions.modificationNotes}}</span>
+                <span *ngIf="!reportOptions.modificationNotes">N/A</span>
             </p>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-10">
+            <hr>
+            <p class="bold">
+                Facility-level Energy Performance (Applies to Companies with Multiple Plants)
+            </p>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-6">
+            <app-facility-performance-table [betterPlantsSummary]="betterPlantsSummary">
+            </app-facility-performance-table>
         </div>
     </div>
     <div class="row justify-content-center">

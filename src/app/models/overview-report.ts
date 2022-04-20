@@ -82,8 +82,13 @@ export interface BetterPlantsSummary {
   baselineYearResults: BetterPlantsEnergySummary,
   reportYearResults: BetterPlantsEnergySummary,
   reportYearAnalysisSummary: AnnualAnalysisSummary,
-  baselineYearAnalysisSummary: AnnualAnalysisSummary
+  baselineYearAnalysisSummary: AnnualAnalysisSummary,
+  facilityPerformance: Array<{
+    facility: IdbFacility,
+    performance: number
+  }>
 }
+
 
 
 export interface BetterPlantsEnergySummary {

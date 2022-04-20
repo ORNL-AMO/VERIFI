@@ -28,6 +28,7 @@ import { BetterPlantsReportMenuComponent } from './better-plants-report-menu/bet
 import { BetterPlantsReportComponent } from './better-plants-report/better-plants-report.component';
 import { CompanyInformationTableComponent } from './better-plants-report/company-information-table/company-information-table.component';
 import { PrimaryEnergyConsumptionTableComponent } from './better-plants-report/primary-energy-consumption-table/primary-energy-consumption-table.component';
+import { FacilityPerformanceTableComponent } from './better-plants-report/facility-performance-table/facility-performance-table.component';
 
 
 
@@ -56,7 +57,8 @@ import { PrimaryEnergyConsumptionTableComponent } from './better-plants-report/p
     BetterPlantsReportMenuComponent,
     BetterPlantsReportComponent,
     CompanyInformationTableComponent,
-    PrimaryEnergyConsumptionTableComponent
+    PrimaryEnergyConsumptionTableComponent,
+    FacilityPerformanceTableComponent
   ],
   imports: [
     CommonModule,

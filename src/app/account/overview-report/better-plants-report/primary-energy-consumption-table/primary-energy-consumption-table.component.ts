@@ -1,7 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { IdbAccount } from 'src/app/models/idb';
 import { BetterPlantsSummary, ReportOptions } from 'src/app/models/overview-report';
-import { BetterPlantsReportService } from '../../better-plants-report.service';
 
 @Component({
   selector: 'app-primary-energy-consumption-table',
@@ -13,13 +12,14 @@ export class PrimaryEnergyConsumptionTableComponent implements OnInit {
   reportOptions: ReportOptions;
   @Input()
   account:IdbAccount;
+  @Input()
+  betterPlantsSummary: BetterPlantsSummary;
   
 
-  betterPlantsSummary: BetterPlantsSummary;
-  constructor(private betterPlantsReportService: BetterPlantsReportService) { }
+
+  constructor() { }
 
   ngOnInit(): void {
-    this.betterPlantsSummary = this.betterPlantsReportService.getBetterPlantsSummary(this.reportOptions, this.account);
   }
 
 }

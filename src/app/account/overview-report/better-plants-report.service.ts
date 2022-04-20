@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbUtilityMeter } from 'src/app/models/idb';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
 import { BetterPlantsSummary, ReportOptions } from 'src/app/models/overview-report';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import * as _ from 'lodash';
@@ -11,6 +11,9 @@ import { AnnualAnalysisSummary } from 'src/app/models/analysis';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { ConvertMeterDataService } from 'src/app/shared/helper-services/convert-meter-data.service';
 import { ConvertUnitsService } from 'src/app/shared/convert-units/convert-units.service';
+import { AnalysisCalculationsHelperService } from 'src/app/shared/shared-analysis/calculations/analysis-calculations-helper.service';
+import { FacilityAnalysisCalculationsService } from 'src/app/shared/shared-analysis/calculations/facility-analysis-calculations.service';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 
 @Injectable({
   providedIn: 'root'
@@ -20,7 +23,8 @@ export class BetterPlantsReportService {
   constructor(private accountAnalysisDbService: AccountAnalysisDbService, private calanderizationService: CalanderizationService,
     private utilityMeterDbService: UtilityMeterdbService, private accountAnalysisCalculationsService: AccountAnalysisCalculationsService,
     private analysisDbService: AnalysisDbService, private convertMeterDataService: ConvertMeterDataService,
-    private convertUnitsService: ConvertUnitsService) { }
+    private convertUnitsService: ConvertUnitsService, private analysisCalculationsHelperService: AnalysisCalculationsHelperService,
+    private facilityAnalysisCalculationsService: FacilityAnalysisCalculationsService, private facilityDbService: FacilitydbService) { }
 
 
   getBetterPlantsSummary(reportOptions: ReportOptions, account: IdbAccount): BetterPlantsSummary {
@@ -36,7 +40,9 @@ export class BetterPlantsReportService {
     selectedAnalysisItem.energyUnit = 'MMBtu';
 
     let facilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
+    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     let includedFacilityIds: Array<number> = new Array();
+    let facilityPerformance: Array<{facility: IdbFacility, performance: number}> = new Array();
     selectedAnalysisItem.facilityAnalysisItems.forEach(item => {
       if (item.analysisItemId) {
         includedFacilityIds.push(item.facilityId);
@@ -45,6 +51,13 @@ export class BetterPlantsReportService {
           let convertedAdjustment: number = this.convertUnitsService.value(facilityAnalysisItem.baselineAdjustment).from(facilityAnalysisItem.energyUnit).to('MMBtu');
           baselineAdjustment = baselineAdjustment + convertedAdjustment;
         }
+        let facility: IdbFacility = facilities.find(f => { return f.id == item.facilityId });
+        let annualAnalysisSummary: Array<AnnualAnalysisSummary> = this.facilityAnalysisCalculationsService.getAnnualAnalysisSummary(facilityAnalysisItem, facility)
+        let reportYearAnalysisSummary: AnnualAnalysisSummary = annualAnalysisSummary.find(summary => {return summary.year == selectedAnalysisItem.reportYear});
+        facilityPerformance.push({
+          facility: facility,
+          performance: reportYearAnalysisSummary.totalSavingsPercentImprovement
+        })
       }
     });
 
@@ -92,12 +105,14 @@ export class BetterPlantsReportService {
 
     calanderizedMeters.forEach(calanderizedMeter => {
       let baselineYearData: Array<MonthlyData> = calanderizedMeter.monthlyData.filter(dataItem => {
-        return dataItem.year == reportOptions.baselineYear
+        let fiscalYear: number = this.analysisCalculationsHelperService.getFiscalYear(new Date(dataItem.date), account);
+        return fiscalYear == reportOptions.baselineYear
       });
 
 
       let reportYearData: Array<MonthlyData> = calanderizedMeter.monthlyData.filter(dataItem => {
-        return dataItem.year == reportOptions.targetYear
+        let fiscalYear: number = this.analysisCalculationsHelperService.getFiscalYear(new Date(dataItem.date), account);
+        return fiscalYear == reportOptions.targetYear
       });
 
       let baselineEnergyUse: number = _.sumBy(baselineYearData, 'energyUse');
@@ -161,8 +176,9 @@ export class BetterPlantsReportService {
     let adjustedBaselinePrimaryEnergy: number = baselineAdjustment + baselineTotalEnergyUse + reportYearAnalysisSummary.adjustmentToBaseline;
     let totalEnergySavings: number = adjustedBaselinePrimaryEnergy - reportYearTotalEnergyUse;
     let percentAnnualImprovement: number = (reportYearAnalysisSummary.newSavings / adjustedBaselinePrimaryEnergy) * 100;
-    let percentTotalImprovement: number =  (totalEnergySavings / adjustedBaselinePrimaryEnergy) * 100; 
+    let percentTotalImprovement: number = (totalEnergySavings / adjustedBaselinePrimaryEnergy) * 100;
     return {
+      facilityPerformance: facilityPerformance,
       percentAnnualImprovement: percentAnnualImprovement,
       percentTotalImprovement: percentTotalImprovement,
       adjustedBaselinePrimaryEnergy: adjustedBaselinePrimaryEnergy,
