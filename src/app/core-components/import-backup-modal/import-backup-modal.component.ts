@@ -67,7 +67,7 @@ export class ImportBackupModalComponent implements OnInit {
               if (!this.importIsAccount) {
                 this.backupType = "Facility";
                 if (this.selectedAccount) {
-                  this.backupName = testBackup.facilityBackup.facility.name;
+                  this.backupName = testBackup.facility.name;
                   if (this.accountFacilities.length != 0) {
                     let testFacility: IdbFacility = this.accountFacilities.find(facility => { return testBackup.facilityBackup.facility.name == facility.name });
                     if (testFacility) {
@@ -85,7 +85,7 @@ export class ImportBackupModalComponent implements OnInit {
               else if (this.importIsAccount) {
                 if (!this.inFacility) {
                   this.backupType = "Account"
-                  this.backupName = testBackup.accountBackup.account.name;
+                  this.backupName = testBackup.account.name;
                   this.backupFileError = undefined;
                 } else {
                   this.backupFileError = "You are trying to import an account in the facility management page. Please use the account management section to import accounts.";
@@ -124,7 +124,7 @@ export class ImportBackupModalComponent implements OnInit {
   }
 
   async importNewAccount(backupFile: BackupFile) {
-    let newAccount: IdbAccount = await this.backupDataService.importAccountBackup(backupFile.accountBackup);
+    let newAccount: IdbAccount = await this.backupDataService.importAccountBackupFile(backupFile);
     this.accountDbService.setSelectedAccount(newAccount.id);
   }
 
@@ -135,7 +135,7 @@ export class ImportBackupModalComponent implements OnInit {
   }
 
   async importNewFacility(backupFile: BackupFile) {
-    let newFacility: IdbFacility = await this.backupDataService.importFacilityBackup(backupFile.facilityBackup, this.selectedAccount.guid);
+    let newFacility: IdbFacility = await this.backupDataService.importFacilityBackupFile(backupFile, this.selectedAccount.guid);
     this.accountDbService.setSelectedAccount(this.selectedAccount.id);
   }
 

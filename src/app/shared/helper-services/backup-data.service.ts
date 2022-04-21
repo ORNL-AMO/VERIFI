@@ -5,9 +5,11 @@ import { PredictordbService } from '../../indexedDB/predictors-db.service';
 import { UtilityMeterdbService } from '../../indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from '../../indexedDB/utilityMeterData-db.service';
 import { UtilityMeterGroupdbService } from '../../indexedDB/utilityMeterGroup-db.service';
-import { IdbAccount, IdbFacility, IdbOverviewReportOptions, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from '../../models/idb';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, IdbOverviewReportOptions, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from '../../models/idb';
 import { LoadingService } from '../../core-components/loading/loading.service';
 import { OverviewReportOptionsDbService } from '../../indexedDB/overview-report-options-db.service';
+import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
+import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 
 @Injectable({
   providedIn: 'root'
@@ -15,31 +17,66 @@ import { OverviewReportOptionsDbService } from '../../indexedDB/overview-report-
 export class BackupDataService {
 
   constructor(private accountDbService: AccountdbService, private facilityDbService: FacilitydbService, private predictorsDbService: PredictordbService,
-    private utilityMeterDbService: UtilityMeterdbService, private uilityMeterDataDbService: UtilityMeterDatadbService,
+    private utilityMeterDbService: UtilityMeterdbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService, private loadingService: LoadingService,
-    private overviewReportOptionsDbService: OverviewReportOptionsDbService) { }
+    private overviewReportOptionsDbService: OverviewReportOptionsDbService, private accountAnalysisDbService: AccountAnalysisDbService,
+    private analysisDbService: AnalysisDbService) { }
 
 
   backupAccount() {
-    let accountBackup: AccountBackup = this.getAccountBackup();
     let backupFile: BackupFile = {
-      accountBackup: accountBackup,
+      account: this.accountDbService.selectedAccount.getValue(),
+      facilities: this.facilityDbService.accountFacilities.getValue(),
+      meters: this.utilityMeterDbService.accountMeters.getValue(),
+      meterData: this.utilityMeterDataDbService.accountMeterData.getValue(),
+      groups: this.utilityMeterGroupDbService.accountMeterGroups.getValue(),
+      reports: this.overviewReportOptionsDbService.accountOverviewReportOptions.getValue(),
+      accountAnalysisItems: this.accountAnalysisDbService.accountAnalysisItems.getValue(),
+      facilityAnalysisItems: this.analysisDbService.accountAnalysisItems.getValue(),
+      predictorData: this.predictorsDbService.accountPredictorEntries.getValue(),
+      facility: undefined,
       backupFileType: "Account",
       origin: "VERIFI"
     };
 
-    let backupName: string = accountBackup.account.name.split(' ').join('_') + '_Backup_';
+    let backupName: string = backupFile.account.name.split(' ').join('_') + '_Backup_';
     this.downloadBackup(backupFile, backupName);
   }
 
   backupFacility(facility: IdbFacility) {
-    let facilityBackup: FacilityBackup = this.getFacilityBackup(facility);
+    //TODO: filter data by facility
+    let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    let facilityMeters: Array<IdbUtilityMeter> = meters.filter(meter => {return meter.facilityId == facility.guid});
+   
+    let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+    let facilityMeterData: Array<IdbUtilityMeterData> = meterData.filter(meter => {return meter.facilityId == facility.guid});
+   
+    let groups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
+    let facilityGroups: Array<IdbUtilityMeterGroup> = groups.filter(meter => {return meter.facilityId == facility.guid});
+   
+    let analysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
+    let facilityAnalysisItems: Array<IdbAnalysisItem> = analysisItems.filter(meter => {return meter.facilityId == facility.guid});
+   
+    let predictorData: Array<IdbPredictorEntry> = this.predictorsDbService.accountPredictorEntries.getValue();
+    let facilityPredictorData: Array<IdbPredictorEntry> = predictorData.filter(meter => {return meter.facilityId == facility.guid});
+
+
+    
     let backupFile: BackupFile = {
-      facilityBackup: facilityBackup,
+      account: undefined,
+      facilities: undefined,
+      facility: facility,
+      meters: facilityMeters,
+      meterData: facilityMeterData,
+      groups: facilityGroups,
+      reports: undefined,
+      accountAnalysisItems: undefined,
+      facilityAnalysisItems: facilityAnalysisItems,
+      predictorData: facilityPredictorData,
       backupFileType: "Facility",
       origin: "VERIFI"
     }
-    let backupName: string = facilityBackup.facility.name.split(' ').join('_') + '_Backup_';
+    let backupName: string = backupFile.facility.name.split(' ').join('_') + '_Backup_';
     this.downloadBackup(backupFile, backupName);
   }
 
@@ -55,58 +92,192 @@ export class BackupDataService {
     dlLink.click();
   }
 
-  getAccountBackup(): AccountBackup {
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    account.lastBackup = new Date();
-    this.accountDbService.update(account);
-    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+  // getAccountBackup(): AccountBackup {
+  //   let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+  //   account.lastBackup = new Date();
+  //   this.accountDbService.update(account);
+  //   let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
 
-    let facilitiesBackups: Array<FacilityBackup> = new Array();
-    facilities.forEach(facility => {
-      let facilityBackup: FacilityBackup = this.getFacilityBackup(facility);
-      facilitiesBackups.push(facilityBackup);
-    });
-    return {
-      account: account,
-      facilities: facilitiesBackups
-    }
+  //   let facilitiesBackups: Array<FacilityBackup> = new Array();
+  //   facilities.forEach(facility => {
+  //     let facilityBackup: FacilityBackup = this.getFacilityBackup(facility);
+  //     facilitiesBackups.push(facilityBackup);
+  //   });
+  //   return {
+  //     account: account,
+  //     facilities: facilitiesBackups
+  //   }
+  // }
+
+  // getFacilityBackup(facility: IdbFacility): FacilityBackup {
+  //   let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+  //   let predictors: Array<IdbPredictorEntry> = this.predictorsDbService.accountPredictorEntries.getValue();
+
+  //   let meterBackups: Array<MeterBackup> = new Array();
+  //   meters.forEach(meter => {
+  //     if (meter.facilityId == facility.guid) {
+  //       let meterBackup: MeterBackup = this.getMeterBackup(meter);
+  //       meterBackups.push(meterBackup);
+  //     }
+  //   });
+  //   let facilityPredictors: Array<IdbPredictorEntry> = predictors.filter(predictor => { return predictor.facilityId == facility.guid });
+  //   return {
+  //     facility: facility,
+  //     meters: meterBackups,
+  //     predictors: facilityPredictors
+  //   }
+  // }
+
+
+  // getMeterBackup(meter: IdbUtilityMeter): MeterBackup {
+  //   let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+  //   let meterData: Array<IdbUtilityMeterData> = accountMeterData.filter(dataItem => { return dataItem.meterId == meter.guid });
+  //   let meterGroup: IdbUtilityMeterGroup;
+  //   if (meter.groupId) {
+  //     let accountMeterGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
+  //     meterGroup = accountMeterGroups.find(meterGroupItem => { return meterGroupItem.guid == meter.groupId });
+  //   }
+  //   return {
+  //     meter: meter,
+  //     meterData: meterData,
+  //     meterGroup: meterGroup
+  //   }
+  // }
+
+  getGUID():string {
+    return Math.random().toString(36).substr(2, 9);
   }
 
-  getFacilityBackup(facility: IdbFacility): FacilityBackup {
-    let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    let predictors: Array<IdbPredictorEntry> = this.predictorsDbService.accountPredictorEntries.getValue();
-
-    let meterBackups: Array<MeterBackup> = new Array();
-    meters.forEach(meter => {
-      if (meter.facilityId == facility.guid) {
-        let meterBackup: MeterBackup = this.getMeterBackup(meter);
-        meterBackups.push(meterBackup);
-      }
-    });
-    let facilityPredictors: Array<IdbPredictorEntry> = predictors.filter(predictor => { return predictor.facilityId == facility.guid });
-    return {
-      facility: facility,
-      meters: meterBackups,
-      predictors: facilityPredictors
+  async importAccountBackupFile(backupFile: BackupFile): Promise<IdbAccount> {
+    this.loadingService.setLoadingMessage('Adding Account...');
+    delete backupFile.account.id;
+    backupFile.account.guid = this.getGUID();
+    let newAccount: IdbAccount = await this.accountDbService.addWithObservable(backupFile.account).toPromise();
+    this.loadingService.setLoadingMessage('Adding Facilities...');
+    for (let i = 0; i < backupFile.facilities.length; i++) {
+      let facility: IdbFacility = backupFile.facilities[i];
+      delete facility.id;
+      await this.facilityDbService.addWithObservable(facility).toPromise();
     }
+    this.loadingService.setLoadingMessage('Adding Meters...');
+    for (let i = 0; i < backupFile.meters.length; i++) {
+      let meter: IdbUtilityMeter = backupFile.meters[i];
+      delete meter.id;
+      await this.utilityMeterDbService.addWithObservable(meter).toPromise();
+    }
+    this.loadingService.setLoadingMessage('Adding Meter Data...');
+    for (let i = 0; i < backupFile.meterData.length; i++) {
+      let meterData: IdbUtilityMeterData = backupFile.meterData[i];
+      delete meterData.id;
+      await this.utilityMeterDataDbService.addWithObservable(meterData).toPromise();
+    }
+
+    this.loadingService.setLoadingMessage('Adding Meter Groups...');
+    for (let i = 0; i < backupFile.groups.length; i++) {
+      let group: IdbUtilityMeterGroup = backupFile.groups[i];
+      delete group.id;
+      await this.utilityMeterGroupDbService.addWithObservable(group).toPromise();
+    }
+
+    this.loadingService.setLoadingMessage('Adding Predictors...');
+    for (let i = 0; i < backupFile.predictorData.length; i++) {
+      let predictorEntry: IdbPredictorEntry = backupFile.predictorData[i];
+      delete predictorEntry.id;
+      await this.predictorsDbService.addWithObservable(predictorEntry).toPromise();
+    }
+
+    this.loadingService.setLoadingMessage('Adding Facility Analysis Items...');
+    for (let i = 0; i < backupFile.facilityAnalysisItems.length; i++) {
+      let facilityAnalysisItem: IdbAnalysisItem = backupFile.facilityAnalysisItems[i];
+      delete facilityAnalysisItem.id;
+      await this.analysisDbService.addWithObservable(facilityAnalysisItem).toPromise();
+    }
+
+
+    this.loadingService.setLoadingMessage('Adding Account Analysis Items...');
+    for (let i = 0; i < backupFile.accountAnalysisItems.length; i++) {
+      let accountAnalysisItem: IdbAccountAnalysisItem = backupFile.accountAnalysisItems[i];
+      delete accountAnalysisItem.id;
+      await this.accountAnalysisDbService.addWithObservable(accountAnalysisItem).toPromise();
+    }
+
+    this.loadingService.setLoadingMessage('Adding Account Reports...');
+    for (let i = 0; i < backupFile.reports.length; i++) {
+      let reportOptions: IdbOverviewReportOptions = backupFile.reports[i];
+      delete reportOptions.id;
+      await this.overviewReportOptionsDbService.addWithObservable(reportOptions).toPromise();
+    }
+    return newAccount;
   }
 
+  async importFacilityBackupFile(backupFile: BackupFile, accountGUID: string): Promise<IdbFacility> {
+    this.loadingService.setLoadingMessage('Adding Facility...');
+    delete backupFile.facility.id;
+    backupFile.facility.accountId = accountGUID;
+    let newFacility: IdbFacility = await this.facilityDbService.addWithObservable(backupFile.facility).toPromise();
 
-  getMeterBackup(meter: IdbUtilityMeter): MeterBackup {
-    let accountMeterData: Array<IdbUtilityMeterData> = this.uilityMeterDataDbService.accountMeterData.getValue();
-    let meterData: Array<IdbUtilityMeterData> = accountMeterData.filter(dataItem => { return dataItem.meterId == meter.guid });
-    let meterGroup: IdbUtilityMeterGroup;
-    if (meter.groupId) {
-      let accountMeterGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
-      meterGroup = accountMeterGroups.find(meterGroupItem => { return meterGroupItem.guid == meter.groupId });
+    this.loadingService.setLoadingMessage('Adding Meters...');
+    for (let i = 0; i < backupFile.meters.length; i++) {
+      let meter: IdbUtilityMeter = backupFile.meters[i];
+      delete meter.id;
+      meter.accountId = accountGUID;
+      await this.utilityMeterDbService.addWithObservable(meter).toPromise();
     }
-    return {
-      meter: meter,
-      meterData: meterData,
-      meterGroup: meterGroup
+    this.loadingService.setLoadingMessage('Adding Meter Data...');
+    for (let i = 0; i < backupFile.meterData.length; i++) {
+      let meterData: IdbUtilityMeterData = backupFile.meterData[i];
+      delete meterData.id;
+      meterData.accountId = accountGUID;
+      await this.utilityMeterDataDbService.addWithObservable(meterData).toPromise();
     }
+
+    this.loadingService.setLoadingMessage('Adding Meter Groups...');
+    for (let i = 0; i < backupFile.groups.length; i++) {
+      let group: IdbUtilityMeterGroup = backupFile.groups[i];
+      delete group.id;
+      group.accountId = accountGUID;
+      await this.utilityMeterGroupDbService.addWithObservable(group).toPromise();
+    }
+
+    this.loadingService.setLoadingMessage('Adding Facility Analysis Items...');
+    for (let i = 0; i < backupFile.facilityAnalysisItems.length; i++) {
+      let facilityAnalysisItem: IdbAnalysisItem = backupFile.facilityAnalysisItems[i];
+      delete facilityAnalysisItem.id;
+      facilityAnalysisItem.accountId = accountGUID;
+      await this.analysisDbService.addWithObservable(facilityAnalysisItem).toPromise();
+    }
+
+    this.loadingService.setLoadingMessage('Adding Predictors...');
+    for (let i = 0; i < backupFile.predictorData.length; i++) {
+      let predictorEntry: IdbPredictorEntry = backupFile.predictorData[i];
+      delete predictorEntry.id;
+      predictorEntry.accountId = accountGUID;
+      await this.predictorsDbService.addWithObservable(predictorEntry).toPromise();
+    }
+
+
+    this.loadingService.setLoadingMessage('Updating Account Analysis Items...');
+    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
+    for (let i = 0; i < accountAnalysisItems.length; i++) {
+      accountAnalysisItems[i].facilityAnalysisItems.push({
+        facilityId: backupFile.facility.guid,
+        analysisItemId: undefined
+      });
+      await this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[i]).toPromise();
+    }
+
+    this.loadingService.setLoadingMessage('Updating Account Reports...');
+    let overviewReports: Array<IdbOverviewReportOptions> = this.overviewReportOptionsDbService.accountOverviewReportOptions.getValue();
+    for (let reportIndex = 0; reportIndex < overviewReports.length; reportIndex++) {
+      overviewReports[reportIndex].reportOptions.facilities.push({
+        facilityId: backupFile.facility.guid,
+        selected: false
+      });
+      await this.overviewReportOptionsDbService.updateWithObservable(overviewReports[reportIndex]).toPromise();
+    }
+
+    return newFacility;
   }
-
 
   async importAccountBackup(accountBackup: AccountBackup): Promise<IdbAccount> {
     this.loadingService.setLoadingMessage('Adding account..');
@@ -142,13 +313,13 @@ export class BackupDataService {
     //update reports
     this.loadingService.setLoadingMessage('Updating reports...');
     let overviewReports: Array<IdbOverviewReportOptions> = this.overviewReportOptionsDbService.accountOverviewReportOptions.getValue();
-    for(let reportIndex = 0; reportIndex < overviewReports.length; reportIndex++){
+    for (let reportIndex = 0; reportIndex < overviewReports.length; reportIndex++) {
       overviewReports[reportIndex].reportOptions.facilities.push({
         facilityId: facility.guid,
         selected: false
       });
       await this.overviewReportOptionsDbService.updateWithObservable(overviewReports[reportIndex]).toPromise();
-    }  
+    }
     let newFacility: IdbFacility = await this.facilityDbService.getById(facility.id).toPromise();
     return newFacility;
   }
@@ -184,7 +355,7 @@ export class BackupDataService {
       meterBackup.meterData[meterDataIndex].meterId = newMeter.guid;
       meterBackup.meterData[meterDataIndex].accountId = accountId;
       meterBackup.meterData[meterDataIndex].facilityId = facilityId;
-      await this.uilityMeterDataDbService.addWithObservable(meterBackup.meterData[meterDataIndex]).toPromise()
+      await this.utilityMeterDataDbService.addWithObservable(meterBackup.meterData[meterDataIndex]).toPromise()
     }
   }
 
@@ -202,9 +373,9 @@ export class BackupDataService {
       await this.utilityMeterDbService.deleteIndexWithObservable(accountMeters[i].id).toPromise();
     }
     //delete meter data
-    let accountMeterData: Array<IdbUtilityMeterData> = this.uilityMeterDataDbService.accountMeterData.getValue();
+    let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
     for (let i = 0; i < accountMeterData.length; i++) {
-      await this.uilityMeterDataDbService.deleteWithObservable(accountMeterData[i].id).toPromise();
+      await this.utilityMeterDataDbService.deleteWithObservable(accountMeterData[i].id).toPromise();
     }
     //delete predictors
     let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorsDbService.accountPredictorEntries.getValue();
@@ -227,10 +398,10 @@ export class BackupDataService {
       await this.utilityMeterDbService.deleteIndexWithObservable(facilityMeters[i].id).toPromise();
     }
     //delete meter data
-    let accountMeterData: Array<IdbUtilityMeterData> = this.uilityMeterDataDbService.accountMeterData.getValue();
+    let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
     let facilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.filter(meterData => { return meterData.facilityId == facility.guid });
     for (let i = 0; i < facilityMeterData.length; i++) {
-      await this.uilityMeterDataDbService.deleteWithObservable(facilityMeterData[i].id).toPromise();
+      await this.utilityMeterDataDbService.deleteWithObservable(facilityMeterData[i].id).toPromise();
     }
     //delete predictors
     let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorsDbService.accountPredictorEntries.getValue();
@@ -248,8 +419,18 @@ export class BackupDataService {
 }
 
 export interface BackupFile {
-  accountBackup?: AccountBackup,
-  facilityBackup?: FacilityBackup,
+  account: IdbAccount,
+  facilities: Array<IdbFacility>,
+  facility: IdbFacility,
+  meters: Array<IdbUtilityMeter>,
+  meterData: Array<IdbUtilityMeterData>,
+  groups: Array<IdbUtilityMeterGroup>,
+  reports: Array<IdbOverviewReportOptions>,
+  accountAnalysisItems: Array<IdbAccountAnalysisItem>,
+  facilityAnalysisItems: Array<IdbAnalysisItem>,
+  predictorData: Array<IdbPredictorEntry>,
+  // accountBackup?: AccountBackup,
+  // facilityBackup?: FacilityBackup,
   origin: "VERIFI",
   backupFileType: "Account" | "Facility"
 }
@@ -257,13 +438,16 @@ export interface BackupFile {
 
 export interface AccountBackup {
   account: IdbAccount,
+  accountAnalysisItems: Array<IdbAccountAnalysisItem>,
+  accountReports: Array<IdbOverviewReportOptions>,
   facilities: Array<FacilityBackup>,
 }
 
 export interface FacilityBackup {
   facility: IdbFacility,
   meters: Array<MeterBackup>,
-  predictors: Array<IdbPredictorEntry>
+  predictors: Array<IdbPredictorEntry>,
+
 }
 
 export interface MeterBackup {
