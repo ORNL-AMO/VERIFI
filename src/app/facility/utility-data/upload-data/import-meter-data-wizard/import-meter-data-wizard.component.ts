@@ -117,7 +117,7 @@ export class ImportMeterDataWizardComponent implements OnInit {
   getCorrespondingMeter(meterData: IdbUtilityMeterData): IdbUtilityMeter {
     let correspondingMeter: IdbUtilityMeter;
     if (meterData.meterId) {
-      correspondingMeter = this.facilityMeters.find(meter => { return meter.id == meterData.meterId });
+      correspondingMeter = this.facilityMeters.find(meter => { return meter.guid == meterData.meterId });
     }
     if (!correspondingMeter) {
       correspondingMeter = this.invalidImportMeters.find(meter => { return meter.meterNumber == meterData.meterNumber || meter.name == meterData.meterNumber });
@@ -212,7 +212,7 @@ export class ImportMeterDataWizardComponent implements OnInit {
     let counts = _.countBy(existingReadingsExistingMeters, 'meterId');
     Object.keys(counts).forEach((key, index) => {
       let meter: IdbUtilityMeter = this.facilityMeters.find(meter => { return meter.id == Number(key) })
-      let meterData: Array<IdbUtilityMeterData> = existingReadingsExistingMeters.filter(reading => { return reading.meterId == meter.id });
+      let meterData: Array<IdbUtilityMeterData> = existingReadingsExistingMeters.filter(reading => { return reading.meterId == meter.guid });
       let startDate: IdbUtilityMeterData = _.minBy(meterData, 'readDate');
       let endDate: IdbUtilityMeterData = _.maxBy(meterData, 'readDate');
       this.existingData.push({
@@ -255,7 +255,7 @@ export class ImportMeterDataWizardComponent implements OnInit {
     let counts = _.countBy(newReadingsExistingMeters, 'meterId');
     Object.keys(counts).forEach((key, index) => {
       let meter: IdbUtilityMeter = this.facilityMeters.find(meter => { return meter.id == Number(key) })
-      let meterData: Array<IdbUtilityMeterData> = newReadingsExistingMeters.filter(reading => { return reading.meterId == meter.id });
+      let meterData: Array<IdbUtilityMeterData> = newReadingsExistingMeters.filter(reading => { return reading.meterId == meter.guid });
       let startDate: IdbUtilityMeterData = _.minBy(meterData, 'readDate');
       let endDate: IdbUtilityMeterData = _.maxBy(meterData, 'readDate');
       this.newData.push({

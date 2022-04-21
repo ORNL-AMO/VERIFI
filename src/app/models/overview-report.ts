@@ -56,7 +56,7 @@ export interface ReportOptions {
   wasteWater: boolean,
   otherUtility: boolean,
   facilities: Array<{
-    facilityId: number,
+    facilityId: string,
     selected: boolean
   }>,
   baselineYear: number,

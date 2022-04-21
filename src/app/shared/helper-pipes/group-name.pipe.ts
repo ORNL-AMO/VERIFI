@@ -9,8 +9,8 @@ export class GroupNamePipe implements PipeTransform {
   constructor(private utilityMeterGroupDbService: UtilityMeterGroupdbService) {
   }
 
-  transform(id: number): string {
-    let name: string = this.utilityMeterGroupDbService.getGroupName(id);
+  transform(guid: string): string {
+    let name: string = this.utilityMeterGroupDbService.getGroupName(guid);
     return name;
   }
 

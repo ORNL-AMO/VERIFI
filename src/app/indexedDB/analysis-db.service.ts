@@ -35,11 +35,11 @@ export class AnalysisDbService {
   async initializeAnalysisItems() {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     if (selectedAccount) {
-      let accounAnalysisItems: Array<IdbAnalysisItem> = await this.getAllByIndexRange('accountId', selectedAccount.id).toPromise();
+      let accounAnalysisItems: Array<IdbAnalysisItem> = await this.getAllByIndexRange('accountId', selectedAccount.guid).toPromise();
       this.accountAnalysisItems.next(accounAnalysisItems);
       let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
       if (selectedFacility) {
-        let facilityAnalysisItems: Array<IdbAnalysisItem> = accounAnalysisItems.filter(meter => { return meter.facilityId == selectedFacility.id });
+        let facilityAnalysisItems: Array<IdbAnalysisItem> = accounAnalysisItems.filter(meter => { return meter.facilityId == selectedFacility.guid });
         this.facilityAnalysisItems.next(facilityAnalysisItems);
         let storedAnalysisId: number = this.localStorageService.retrieve("analysisItemId");
         if (storedAnalysisId) {
@@ -59,11 +59,11 @@ export class AnalysisDbService {
   setAccountAnalysisItems() {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     if (selectedAccount) {
-      this.getAllByIndexRange('accountId', selectedAccount.id).subscribe((analysisItems: Array<IdbAnalysisItem>) => {
+      this.getAllByIndexRange('accountId', selectedAccount.guid).subscribe((analysisItems: Array<IdbAnalysisItem>) => {
         this.accountAnalysisItems.next(analysisItems);
         let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
         if (selectedFacility) {
-          let facilityAnalysisItems: Array<IdbAnalysisItem> = analysisItems.filter(item => { return item.facilityId == selectedFacility.id });
+          let facilityAnalysisItems: Array<IdbAnalysisItem> = analysisItems.filter(item => { return item.facilityId == selectedFacility.guid });
           this.facilityAnalysisItems.next(facilityAnalysisItems);
         }else{
           this.facilityAnalysisItems.next([]);
@@ -137,7 +137,7 @@ export class AnalysisDbService {
         variable.productionInAnalysis = variable.production;
       });
       itemGroups.push({
-        idbGroupId: group.id,
+        idbGroupId: group.guid,
         analysisType: 'energyIntensity',
         predictorVariables: JSON.parse(JSON.stringify(predictorVariables)),
         productionUnits: this.getUnits(predictorVariables),
@@ -150,8 +150,9 @@ export class AnalysisDbService {
       });
     });
     return {
-      facilityId: selectedFacility.id,
-      accountId: selectedAccount.id,
+      facilityId: selectedFacility.guid,
+      accountId: selectedAccount.guid,
+      guid: Math.random().toString(36).substr(2, 9),
       date: new Date(),
       name: 'Analysis Item',
       reportYear: undefined,
@@ -219,7 +220,7 @@ export class AnalysisDbService {
   }
 
 
-  async deleteGroup(groupId: number) {
+  async deleteGroup(groupId: string) {
     let facilityAnalysisItems: Array<IdbAnalysisItem> = this.facilityAnalysisItems.getValue();
     for (let index = 0; index < facilityAnalysisItems.length; index++) {
       let item: IdbAnalysisItem = facilityAnalysisItems[index];
@@ -229,7 +230,7 @@ export class AnalysisDbService {
     this.setAccountAnalysisItems();
   }
 
-  addGroup(groupId: number) {
+  addGroup(groupId: string) {
     let predictors: Array<PredictorData> = this.predictorDbService.facilityPredictors.getValue();
     let predictorVariables: Array<PredictorData> = JSON.parse(JSON.stringify(predictors));
     predictorVariables.forEach(variable => {
@@ -253,7 +254,7 @@ export class AnalysisDbService {
     });
   }
 
-  async deleteAllFacilityAnalysisItems(facilityId: number) {
+  async deleteAllFacilityAnalysisItems(facilityId: string) {
     let accountAnalysisItems: Array<IdbAnalysisItem> = this.accountAnalysisItems.getValue();
     let facilityAnalysisItems: Array<IdbAnalysisItem> = accountAnalysisItems.filter(analysisItem => { return analysisItem.facilityId == facilityId });
     await this.deleteAnalysisItems(facilityAnalysisItems);

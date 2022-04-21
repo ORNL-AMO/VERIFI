@@ -32,7 +32,7 @@ export class MeterGroupingService {
       }
     }).value();
 
-    let meterGroupIds: Array<number> = meterGroups.map(meterGroup => { return meterGroup.id });
+    let meterGroupIds: Array<string> = meterGroups.map(meterGroup => { return meterGroup.guid });
     //set no groups
     let metersWithoutGroups: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return !meterGroupIds.includes(meter.groupId) });
     //Energy (Electricity/Natural Gas)
@@ -64,7 +64,7 @@ export class MeterGroupingService {
 
   setGroupDataSummary(meterGroups: Array<IdbUtilityMeterGroup>, facilityMeters: Array<IdbUtilityMeter>): Array<IdbUtilityMeterGroup> {
     meterGroups.forEach(group => {
-      let groupMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.groupId == group.id });
+      let groupMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.groupId == group.guid });
       if (groupMeters.length != 0) {
         let calanderizedMeterData: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMeterData(groupMeters, false);
         group.combinedMonthlyData = this.combineCalanderizedMeterData(calanderizedMeterData);
@@ -102,6 +102,7 @@ export class MeterGroupingService {
     let meterGroup: IdbUtilityMeterGroup = {
       //randon number id for unsaved
       id: 1000000000000000 * Math.random(),
+      guid: Math.random().toString(36).substr(2, 9),
       facilityId: undefined,
       accountId: undefined,
       groupType: groupType,

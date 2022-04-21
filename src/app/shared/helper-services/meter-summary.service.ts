@@ -101,7 +101,7 @@ export class MeterSummaryService {
       }
       reportOptions.facilities.forEach(facility => {
         if (facility.selected) {
-          let selectedFacility: IdbFacility = accountFacilites.find(accountFacility => {return accountFacility.id == facility.facilityId})
+          let selectedFacility: IdbFacility = accountFacilites.find(accountFacility => {return accountFacility.guid == facility.facilityId})
           let facilityMeterSummary: FacilitySummary = this.getFacilitySummary(selectedFacility, true, accountTargetYearBill, reportOptions);
           facilitiesSummary.push(facilityMeterSummary);
         }
@@ -120,7 +120,7 @@ export class MeterSummaryService {
   getFacilitySummary(facility: IdbFacility, inAccount: boolean, accountMetersLastBill: MonthlyData, reportOptions?: ReportOptions): FacilitySummary {
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let accountMetersCopy: Array<IdbUtilityMeter> = JSON.parse(JSON.stringify(accountMeters));
-    let facilityMeters: Array<IdbUtilityMeter> = accountMetersCopy.filter(meter => { return meter.facilityId == facility.id });
+    let facilityMeters: Array<IdbUtilityMeter> = accountMetersCopy.filter(meter => { return meter.facilityId == facility.guid });
     if (reportOptions) {
       let selectedSources: Array<MeterSource> = this.overviewReportService.getSelectedSources(reportOptions);
       facilityMeters = facilityMeters.filter(meter => { return selectedSources.includes(meter.source) });

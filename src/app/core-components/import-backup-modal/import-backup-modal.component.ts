@@ -135,7 +135,7 @@ export class ImportBackupModalComponent implements OnInit {
   }
 
   async importNewFacility(backupFile: BackupFile) {
-    let newFacility: IdbFacility = await this.backupDataService.importFacilityBackup(backupFile.facilityBackup, this.selectedAccount.id);
+    let newFacility: IdbFacility = await this.backupDataService.importFacilityBackup(backupFile.facilityBackup, this.selectedAccount.guid);
     this.accountDbService.setSelectedAccount(this.selectedAccount.id);
   }
 

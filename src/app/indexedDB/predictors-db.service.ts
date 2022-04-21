@@ -32,11 +32,11 @@ export class PredictordbService {
     async initializePredictorData() {
         let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
         if (selectedAccount) {
-            let accountPredictorEntries: Array<IdbPredictorEntry> = await this.getAllByIndexRange('accountId', selectedAccount.id).toPromise();
+            let accountPredictorEntries: Array<IdbPredictorEntry> = await this.getAllByIndexRange('accountId', selectedAccount.guid).toPromise();
             this.accountPredictorEntries.next(accountPredictorEntries);
             let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
             if (selectedFacility) {
-                let facilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(predictor => { return predictor.facilityId == selectedFacility.id });
+                let facilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(predictor => { return predictor.facilityId == selectedFacility.guid });
                 this.facilityPredictorEntries.next(facilityPredictorEntries);
                 if (facilityPredictorEntries.length != 0) {
                     this.facilityPredictors.next(facilityPredictorEntries[0].predictors);
@@ -51,7 +51,7 @@ export class PredictordbService {
     setFacilityPredictors() {
         let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
         if (selectedFacility) {
-            this.getAllByIndexRange('facilityId', selectedFacility.id).subscribe(facilityPredictorEntries => {
+            this.getAllByIndexRange('facilityId', selectedFacility.guid).subscribe(facilityPredictorEntries => {
                 if (facilityPredictorEntries.length != 0) {
                     this.facilityPredictorEntries.next(facilityPredictorEntries);
                     if (facilityPredictorEntries.length != 0) {
@@ -67,7 +67,7 @@ export class PredictordbService {
     setAccountPredictors() {
         let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
         if (selectedAccount) {
-            this.getAllByIndexRange('accountId', selectedAccount.id).subscribe(accountPredictorEntries => {
+            this.getAllByIndexRange('accountId', selectedAccount.guid).subscribe(accountPredictorEntries => {
                 if (accountPredictorEntries.length != 0) {
                     this.accountPredictorEntries.next(accountPredictorEntries);
                 } else {
@@ -128,7 +128,7 @@ export class PredictordbService {
         });
     }
 
-    async deleteAllFacilityPredictors(facilityId: number) {
+    async deleteAllFacilityPredictors(facilityId: string) {
         let accountPredictorEntries: Array<IdbPredictorEntry> = this.accountPredictorEntries.getValue();
         let facilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(entry => { return entry.facilityId == facilityId });
         await this.deletePredictorsAsync(facilityPredictorEntries);
@@ -145,10 +145,11 @@ export class PredictordbService {
         }
     }
 
-    getNewIdbPredictorEntry(facilityId: number, accountId: number, date: Date): IdbPredictorEntry {
+    getNewIdbPredictorEntry(facilityId: string, accountId: string, date: Date): IdbPredictorEntry {
         return {
             facilityId: facilityId,
             accountId: accountId,
+            guid: Math.random().toString(36).substr(2, 9),
             date: date,
             predictors: new Array(),
         }
@@ -192,8 +193,9 @@ export class PredictordbService {
         });
 
         let newPredictorEntry: IdbPredictorEntry = {
-            facilityId: selectedFacility.id,
+            facilityId: selectedFacility.guid,
             accountId: selectedFacility.accountId,
+            guid: Math.random().toString(36).substr(2, 9),
             predictors: predictors,
             date: newPredictorDate
         };
@@ -229,7 +231,7 @@ export class PredictordbService {
         let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
         let accountPredictorEntries: Array<IdbPredictorEntry> = await this.getAllByIndexRange('accountId', selectedFacility.accountId).toPromise()
         this.accountPredictorEntries.next(accountPredictorEntries);
-        let updatedFacilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(predictor => { return predictor.facilityId == selectedFacility.id });
+        let updatedFacilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(predictor => { return predictor.facilityId == selectedFacility.guid });
         this.facilityPredictorEntries.next(updatedFacilityPredictorEntries);
         this.facilityPredictors.next(updatedPredictors);
     }
