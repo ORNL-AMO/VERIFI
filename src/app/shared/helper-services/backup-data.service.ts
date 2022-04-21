@@ -148,63 +148,157 @@ export class BackupDataService {
     return Math.random().toString(36).substr(2, 9);
   }
 
+  getNewId(oldId: string, GUIDs: Array<{oldId: string, newId: string}>): string{
+    let GUID: string = GUIDs.find(id => {return id.oldId == oldId})?.newId;
+    return GUID;
+  }
+
   async importAccountBackupFile(backupFile: BackupFile): Promise<IdbAccount> {
     this.loadingService.setLoadingMessage('Adding Account...');
+    let accountGUIDs: {oldId: string, newId: string} = {
+      oldId: backupFile.account.guid,
+      newId: this.getGUID()
+    }
     delete backupFile.account.id;
-    backupFile.account.guid = this.getGUID();
+    backupFile.account.guid = accountGUIDs.newId;
     let newAccount: IdbAccount = await this.accountDbService.addWithObservable(backupFile.account).toPromise();
+    
     this.loadingService.setLoadingMessage('Adding Facilities...');
+    let facilityGUIDs: Array<{oldId: string, newId: string}> = new Array();
     for (let i = 0; i < backupFile.facilities.length; i++) {
       let facility: IdbFacility = backupFile.facilities[i];
+      let newGUID: string = this.getGUID();
+      facilityGUIDs.push({
+        oldId: facility.guid,
+        newId: newGUID
+      });
+      facility.guid = newGUID;
       delete facility.id;
+      facility.accountId = accountGUIDs.newId;
       await this.facilityDbService.addWithObservable(facility).toPromise();
     }
-    this.loadingService.setLoadingMessage('Adding Meters...');
-    for (let i = 0; i < backupFile.meters.length; i++) {
-      let meter: IdbUtilityMeter = backupFile.meters[i];
-      delete meter.id;
-      await this.utilityMeterDbService.addWithObservable(meter).toPromise();
-    }
-    this.loadingService.setLoadingMessage('Adding Meter Data...');
-    for (let i = 0; i < backupFile.meterData.length; i++) {
-      let meterData: IdbUtilityMeterData = backupFile.meterData[i];
-      delete meterData.id;
-      await this.utilityMeterDataDbService.addWithObservable(meterData).toPromise();
-    }
-
+    
     this.loadingService.setLoadingMessage('Adding Meter Groups...');
+    let meterGroupGUIDs: Array<{oldId: string, newId: string}> = new Array();
     for (let i = 0; i < backupFile.groups.length; i++) {
       let group: IdbUtilityMeterGroup = backupFile.groups[i];
+      let newGUID: string = this.getGUID();
+      meterGroupGUIDs.push({
+        newId: newGUID,
+        oldId: group.guid
+      });
       delete group.id;
+      group.accountId = accountGUIDs.newId;
+      group.facilityId = this.getNewId(group.facilityId, facilityGUIDs);
+      group.guid = newGUID;
       await this.utilityMeterGroupDbService.addWithObservable(group).toPromise();
     }
 
+    this.loadingService.setLoadingMessage('Adding Meters...');
+    let meterGUIDs: Array<{oldId: string, newId: string}> = new Array();
+    for (let i = 0; i < backupFile.meters.length; i++) {
+      let meter: IdbUtilityMeter = backupFile.meters[i];
+      let newGUID: string = this.getGUID();
+      meterGUIDs.push({
+        newId: newGUID,
+        oldId: meter.guid
+      });
+      delete meter.id;
+      meter.accountId = accountGUIDs.newId;
+      meter.facilityId = this.getNewId(meter.facilityId, facilityGUIDs);
+      meter.guid = newGUID;
+      meter.groupId = this.getNewId(meter.groupId, meterGroupGUIDs);
+      await this.utilityMeterDbService.addWithObservable(meter).toPromise();
+    }
+
+    this.loadingService.setLoadingMessage('Adding Meter Data...');
+    let meterDataGUIDs:  Array<{oldId: string, newId: string}> = new Array();
+    for (let i = 0; i < backupFile.meterData.length; i++) {
+      let meterData: IdbUtilityMeterData = backupFile.meterData[i];
+      let newGUID: string = this.getGUID();
+      meterDataGUIDs.push({
+        newId: newGUID,
+        oldId: meterData.guid
+      });
+      delete meterData.id;
+      meterData.guid = newGUID;
+      meterData.accountId = accountGUIDs.newId;
+      meterData.facilityId = this.getNewId(meterData.facilityId, facilityGUIDs);
+      meterData.meterId = this.getNewId(meterData.meterId, meterGUIDs);
+      await this.utilityMeterDataDbService.addWithObservable(meterData).toPromise();
+    }
+
+
     this.loadingService.setLoadingMessage('Adding Predictors...');
+    let predictorDataGUIDs:  Array<{oldId: string, newId: string}> = new Array();
     for (let i = 0; i < backupFile.predictorData.length; i++) {
       let predictorEntry: IdbPredictorEntry = backupFile.predictorData[i];
+      let newGUID: string = this.getGUID();
+      predictorDataGUIDs.push({
+        newId: newGUID,
+        oldId: predictorEntry.guid
+      });
       delete predictorEntry.id;
+      predictorEntry.guid = newGUID;
+      predictorEntry.accountId = accountGUIDs.newId;
+      predictorEntry.facilityId = this.getNewId(predictorEntry.facilityId, facilityGUIDs);
       await this.predictorsDbService.addWithObservable(predictorEntry).toPromise();
     }
 
     this.loadingService.setLoadingMessage('Adding Facility Analysis Items...');
+    let facilityAnalysisGUIDs:  Array<{oldId: string, newId: string}> = new Array();
     for (let i = 0; i < backupFile.facilityAnalysisItems.length; i++) {
       let facilityAnalysisItem: IdbAnalysisItem = backupFile.facilityAnalysisItems[i];
+      let newGUID: string = this.getGUID();
+      facilityAnalysisGUIDs.push({
+        newId: newGUID,
+        oldId: facilityAnalysisItem.guid
+      });
       delete facilityAnalysisItem.id;
+      facilityAnalysisItem.guid = newGUID;
+      facilityAnalysisItem.accountId = accountGUIDs.newId;
+      facilityAnalysisItem.facilityId = this.getNewId(facilityAnalysisItem.facilityId, facilityGUIDs);
+      facilityAnalysisItem.groups.forEach(group => {
+        group.idbGroupId = this.getNewId(group.idbGroupId, meterGroupGUIDs);
+        // group.predictorVariables.forEach(variable => {
+        //   variable.id = this.getNewId(variable.id, predictorDataGUIDs);
+        // });
+      });
       await this.analysisDbService.addWithObservable(facilityAnalysisItem).toPromise();
     }
 
 
     this.loadingService.setLoadingMessage('Adding Account Analysis Items...');
+    let accountAnalysisGUIDs:  Array<{oldId: string, newId: string}> = new Array();
     for (let i = 0; i < backupFile.accountAnalysisItems.length; i++) {
       let accountAnalysisItem: IdbAccountAnalysisItem = backupFile.accountAnalysisItems[i];
+      let newGUID: string = this.getGUID();
+      accountAnalysisGUIDs.push({
+        newId: newGUID,
+        oldId: accountAnalysisItem.guid
+      });
       delete accountAnalysisItem.id;
+      accountAnalysisItem.guid = newGUID;
+      accountAnalysisItem.accountId = accountGUIDs.newId;
+      accountAnalysisItem.facilityAnalysisItems.forEach(item => {
+        item.facilityId = this.getNewId(item.facilityId, facilityGUIDs);
+        if(item.analysisItemId){
+          item.analysisItemId = this.getNewId(item.analysisItemId, facilityAnalysisGUIDs);
+        }
+      });
       await this.accountAnalysisDbService.addWithObservable(accountAnalysisItem).toPromise();
     }
 
     this.loadingService.setLoadingMessage('Adding Account Reports...');
     for (let i = 0; i < backupFile.reports.length; i++) {
       let reportOptions: IdbOverviewReportOptions = backupFile.reports[i];
+      reportOptions.guid = this.getGUID();
       delete reportOptions.id;
+      reportOptions.accountId = accountGUIDs.newId;
+      reportOptions.reportOptions.facilities.forEach(facility => {
+        facility.facilityId = this.getNewId(facility.facilityId, facilityGUIDs);
+      });
+      //TODO: Update with better plants
       await this.overviewReportOptionsDbService.addWithObservable(reportOptions).toPromise();
     }
     return newAccount;
@@ -214,44 +308,93 @@ export class BackupDataService {
     this.loadingService.setLoadingMessage('Adding Facility...');
     delete backupFile.facility.id;
     backupFile.facility.accountId = accountGUID;
+    let newFacilityGUID: string = this.getGUID();
+    backupFile.facility.guid = newFacilityGUID;
     let newFacility: IdbFacility = await this.facilityDbService.addWithObservable(backupFile.facility).toPromise();
 
-    this.loadingService.setLoadingMessage('Adding Meters...');
-    for (let i = 0; i < backupFile.meters.length; i++) {
-      let meter: IdbUtilityMeter = backupFile.meters[i];
-      delete meter.id;
-      meter.accountId = accountGUID;
-      await this.utilityMeterDbService.addWithObservable(meter).toPromise();
-    }
-    this.loadingService.setLoadingMessage('Adding Meter Data...');
-    for (let i = 0; i < backupFile.meterData.length; i++) {
-      let meterData: IdbUtilityMeterData = backupFile.meterData[i];
-      delete meterData.id;
-      meterData.accountId = accountGUID;
-      await this.utilityMeterDataDbService.addWithObservable(meterData).toPromise();
-    }
-
     this.loadingService.setLoadingMessage('Adding Meter Groups...');
+    let meterGroupGUIDs: Array<{oldId: string, newId: string}> = new Array();
     for (let i = 0; i < backupFile.groups.length; i++) {
       let group: IdbUtilityMeterGroup = backupFile.groups[i];
+      let newGUID: string = this.getGUID();
+      meterGroupGUIDs.push({
+        newId: newGUID,
+        oldId: group.guid
+      });
       delete group.id;
       group.accountId = accountGUID;
+      group.facilityId = newFacilityGUID;
+      group.guid = newGUID;
       await this.utilityMeterGroupDbService.addWithObservable(group).toPromise();
     }
 
+    this.loadingService.setLoadingMessage('Adding Meters...');
+    let meterGUIDs: Array<{oldId: string, newId: string}> = new Array();
+    for (let i = 0; i < backupFile.meters.length; i++) {
+      let meter: IdbUtilityMeter = backupFile.meters[i];
+      let newGUID: string = this.getGUID();
+      meterGUIDs.push({
+        newId: newGUID,
+        oldId: meter.guid
+      });
+      delete meter.id;
+      meter.accountId = accountGUID;
+      meter.facilityId = newFacilityGUID;
+      meter.guid = newGUID;
+      meter.groupId = this.getNewId(meter.groupId, meterGroupGUIDs);
+      await this.utilityMeterDbService.addWithObservable(meter).toPromise();
+    }
+
+    this.loadingService.setLoadingMessage('Adding Meter Data...');
+    let meterDataGUIDs:  Array<{oldId: string, newId: string}> = new Array();
+    for (let i = 0; i < backupFile.meterData.length; i++) {
+      let meterData: IdbUtilityMeterData = backupFile.meterData[i];
+      let newGUID: string = this.getGUID();
+      meterDataGUIDs.push({
+        newId: newGUID,
+        oldId: meterData.guid
+      });
+      delete meterData.id;
+      meterData.guid = newGUID;
+      meterData.accountId = accountGUID;
+      meterData.facilityId = newFacilityGUID;
+      meterData.meterId = this.getNewId(meterData.meterId, meterGUIDs);
+      await this.utilityMeterDataDbService.addWithObservable(meterData).toPromise();
+    }
+
     this.loadingService.setLoadingMessage('Adding Facility Analysis Items...');
+    let facilityAnalysisGUIDs:  Array<{oldId: string, newId: string}> = new Array();
     for (let i = 0; i < backupFile.facilityAnalysisItems.length; i++) {
       let facilityAnalysisItem: IdbAnalysisItem = backupFile.facilityAnalysisItems[i];
+      let newGUID: string = this.getGUID();
+      facilityAnalysisGUIDs.push({
+        newId: newGUID,
+        oldId: facilityAnalysisItem.guid
+      });
       delete facilityAnalysisItem.id;
+      facilityAnalysisItem.guid = newGUID;
       facilityAnalysisItem.accountId = accountGUID;
+      facilityAnalysisItem.facilityId = newFacilityGUID;
+      facilityAnalysisItem.groups.forEach(group => {
+        group.idbGroupId = this.getNewId(group.idbGroupId, meterGroupGUIDs);
+      });
       await this.analysisDbService.addWithObservable(facilityAnalysisItem).toPromise();
     }
 
+
     this.loadingService.setLoadingMessage('Adding Predictors...');
+    let predictorDataGUIDs:  Array<{oldId: string, newId: string}> = new Array();
     for (let i = 0; i < backupFile.predictorData.length; i++) {
       let predictorEntry: IdbPredictorEntry = backupFile.predictorData[i];
+      let newGUID: string = this.getGUID();
+      predictorDataGUIDs.push({
+        newId: newGUID,
+        oldId: predictorEntry.guid
+      });
       delete predictorEntry.id;
+      predictorEntry.guid = newGUID;
       predictorEntry.accountId = accountGUID;
+      predictorEntry.facilityId = newFacilityGUID;
       await this.predictorsDbService.addWithObservable(predictorEntry).toPromise();
     }
 
@@ -260,7 +403,7 @@ export class BackupDataService {
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
     for (let i = 0; i < accountAnalysisItems.length; i++) {
       accountAnalysisItems[i].facilityAnalysisItems.push({
-        facilityId: backupFile.facility.guid,
+        facilityId: newFacilityGUID,
         analysisItemId: undefined
       });
       await this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[i]).toPromise();
@@ -270,9 +413,10 @@ export class BackupDataService {
     let overviewReports: Array<IdbOverviewReportOptions> = this.overviewReportOptionsDbService.accountOverviewReportOptions.getValue();
     for (let reportIndex = 0; reportIndex < overviewReports.length; reportIndex++) {
       overviewReports[reportIndex].reportOptions.facilities.push({
-        facilityId: backupFile.facility.guid,
+        facilityId: newFacilityGUID,
         selected: false
       });
+      //TODO: update better plants reports items..
       await this.overviewReportOptionsDbService.updateWithObservable(overviewReports[reportIndex]).toPromise();
     }
 

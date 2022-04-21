@@ -69,7 +69,7 @@ export class ImportBackupModalComponent implements OnInit {
                 if (this.selectedAccount) {
                   this.backupName = testBackup.facility.name;
                   if (this.accountFacilities.length != 0) {
-                    let testFacility: IdbFacility = this.accountFacilities.find(facility => { return testBackup.facilityBackup.facility.name == facility.name });
+                    let testFacility: IdbFacility = this.accountFacilities.find(facility => { return this.backupName == facility.name });
                     if (testFacility) {
                       this.overwriteFacility = testFacility;
                     } else {
@@ -101,6 +101,7 @@ export class ImportBackupModalComponent implements OnInit {
   }
 
   async importBackupFile() {
+    this.cancelImportBackup();
     this.loadingService.setLoadingStatus(true);
     this.loadingService.setLoadingMessage("Importing backup file...")
     let tmpBackupFile: BackupFile = JSON.parse(this.backupFile);
@@ -120,7 +121,6 @@ export class ImportBackupModalComponent implements OnInit {
     this.facilityDbService.setAllFacilities();
     this.accountDbService.setAllAccounts();
     this.loadingService.setLoadingStatus(false);
-    this.cancelImportBackup();
   }
 
   async importNewAccount(backupFile: BackupFile) {
