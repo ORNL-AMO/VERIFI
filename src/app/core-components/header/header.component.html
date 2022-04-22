@@ -3,7 +3,7 @@
     <span class="badge badge-secondary">v{{version}}</span>
 
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav ml-auto">
+        <ul class="navbar-nav ml-auto" *ngIf="dataInitialized">
             <li class="nav-item dropdown">
                 <button *ngIf="activeAccount" class="btn btn-outline nav-link dropdown-toggle"
                     (click)="toggleDropdown()">
@@ -22,12 +22,17 @@
                 </div>
             </li>
         </ul>
-        <div class="pl-2">
+        <div class="pl-2" *ngIf="dataInitialized">
             <button class="btn btn-dark backup-account" (click)="backupAccount()">Backup Account
             </button>
         </div>
-        <div class="pl-2">Last Backup: (<span *ngIf="lastBackupDate">{{lastBackupDate | date:'medium'}}</span><span
+        <div class="pl-2" *ngIf="dataInitialized">Last Backup: (<span *ngIf="lastBackupDate">{{lastBackupDate | date:'medium'}}</span><span
                 *ngIf="!lastBackupDate">&mdash;</span>)</div>
+        <!--TODO: Remove For Production-->
+        <div class="pl-2">
+            <button class="btn btn-danger backup-account" (click)="deleteDatabase()">Reset Database
+            </button>
+        </div>
         <!-- <form class="form-inline my-2 my-lg-0">
             <input class="form-control mr-sm-2" type="search" placeholder="Search (coming soon)" aria-label="Search"
                 [ngClass]="{'collapse': !showSearch}">

@@ -1,7 +1,7 @@
 <div class="container-fluid p-0 m-0">
   <div class="d-flex flex-column h-100">
-    <div #header *ngIf="dataInitialized">
-      <app-header class="hide-print"></app-header>
+    <div #header>
+      <app-header class="hide-print" [dataInitialized]="dataInitialized"></app-header>
     </div>
     <div class="d-flex h-100">
       <app-sidebar class="hide-print" *ngIf="dataInitialized"></app-sidebar>
