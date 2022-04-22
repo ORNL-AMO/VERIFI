@@ -50,6 +50,7 @@ export class MeterGroupingComponent implements OnInit {
   dateRangeSub: Subscription;
   dateRange: { maxDate: Date, minDate: Date };
   selectedFacility: IdbFacility;
+  facilityMeterGroups: Array<IdbUtilityMeterGroup>;
   constructor(private utilityMeterGroupDbService: UtilityMeterGroupdbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterDbService: UtilityMeterdbService, private facilityDbService: FacilitydbService, private calanderizationService: CalanderizationService,
     private loadingService: LoadingService, private toastNoticationService: ToastNotificationsService,
@@ -67,7 +68,8 @@ export class MeterGroupingComponent implements OnInit {
       }
     });
 
-    this.facilityMeterGroupsSub = this.utilityMeterGroupDbService.facilityMeterGroups.subscribe(() => {
+    this.facilityMeterGroupsSub = this.utilityMeterGroupDbService.facilityMeterGroups.subscribe(groups => {
+      this.facilityMeterGroups = groups;
       if (this.facilityMeters) {
         this.setGroupTypes();
       }
@@ -174,8 +176,8 @@ export class MeterGroupingComponent implements OnInit {
 
   drop(event: CdkDragDrop<string[]>) {
     let draggedMeter: IdbUtilityMeter = this.facilityMeters.find(meter => { return meter.id == event.item.data.id });
-    let newGroupId: number = Number(event.container.id);
-    // draggedMeter.groupId = newGroupId;
+    let group: IdbUtilityMeterGroup = this.facilityMeterGroups.find(group => {return group.id == Number(event.container.id)})
+    draggedMeter.groupId = group.guid;
     this.setGroupTypes();
     this.utilityMeterDbService.update(draggedMeter);
   }
