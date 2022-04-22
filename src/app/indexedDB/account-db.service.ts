@@ -131,6 +131,7 @@ export class AccountdbService {
         let baselineYear: number = new Date().getUTCFullYear();
         let targetYear: number = baselineYear + 10;
         return {
+            guid: Math.random().toString(36).substr(2, 9),
             name: 'New Account',
             city: '',
             state: '',

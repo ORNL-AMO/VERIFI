@@ -6,6 +6,7 @@ import { SustainabilityQuestions } from './sustainabilityQuestions';
 export interface IdbAccount {
     //keys (id primary)
     id?: number,
+    guid: string,
     name: string,
     country: string,
     city: string,
@@ -41,7 +42,8 @@ export interface IdbAccount {
 export interface IdbFacility {
     //keys (id primary)
     id?: number,
-    accountId: number,
+    guid: string,
+    accountId: string,
     //data
     name: string,
     country: string,
@@ -81,8 +83,9 @@ export interface IdbFacility {
 export interface IdbUtilityMeterGroup {
     //keys (id primary)
     id?: number,
-    facilityId: number,
-    accountId: number,
+    guid: string,
+    facilityId: string,
+    accountId: string,
     //data
     groupType: string,
     name: string,
@@ -99,9 +102,10 @@ export interface IdbUtilityMeterGroup {
 export interface IdbUtilityMeter {
     //keys (id primary)
     id?: number,
-    facilityId: number,
-    accountId: number,
-    groupId: number,
+    guid: string,
+    facilityId: string,
+    accountId: string,
+    groupId: string,
     //data
     meterNumber: string,
     accountNumber: number,
@@ -131,9 +135,10 @@ export interface IdbUtilityMeter {
 export interface IdbUtilityMeterData {
     //keys (id primary)
     id?: number,
-    meterId: number,
-    facilityId: number,
-    accountId: number,
+    guid: string,
+    meterId: string,
+    facilityId: string,
+    accountId: string,
     //data
     readDate: Date,
     totalVolume?: number,
@@ -169,8 +174,9 @@ export interface IdbUtilityMeterData {
 export interface IdbPredictorEntry {
     //keys (id primary)
     id?: number,
-    facilityId: number,
-    accountId: number,
+    guid: string,    
+    facilityId: string,
+    accountId: string,
     //data
     // name: string,
     // description: string,
@@ -197,7 +203,8 @@ export interface PredictorData {
 
 export interface IdbOverviewReportOptions {
     id?: number,
-    accountId: number,
+    guid: string,
+    accountId: string,
     reportOptions: ReportOptions,
     date: Date,
     type: 'report' | 'template',
@@ -209,8 +216,9 @@ export interface IdbOverviewReportOptions {
 
 export interface IdbAnalysisItem {
     id?: number,
-    accountId: number,
-    facilityId: number,
+    guid: string,
+    accountId: string,
+    facilityId: string,
     date: Date,
     name: string,
     energyIsSource: boolean,
@@ -220,7 +228,7 @@ export interface IdbAnalysisItem {
 }
 
 export interface AnalysisGroup {
-    idbGroupId: number,
+    idbGroupId: string,
     analysisType: AnalysisType,
     predictorVariables: Array<PredictorData>,
     productionUnits: string,
@@ -237,15 +245,16 @@ export interface AnalysisGroup {
 
 export interface IdbAccountAnalysisItem {
     id?: number,
-    accountId: number,
+    guid: string,
+    accountId: string,
     date: Date,
     name: string,
     energyIsSource: boolean,
     reportYear: number,
     energyUnit: string,
     facilityAnalysisItems: Array<{
-        facilityId: number,
-        analysisItemId: number
+        facilityId: string,
+        analysisItemId: string
     }>
 }
 

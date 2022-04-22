@@ -32,11 +32,11 @@ export class UtilityMeterDatadbService {
     async initializeMeterData() {
         let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
         if (selectedAccount) {
-            let accountMeterData: Array<IdbUtilityMeterData> = await this.getAllByIndexRange('accountId', selectedAccount.id).toPromise();
+            let accountMeterData: Array<IdbUtilityMeterData> = await this.getAllByIndexRange('accountId', selectedAccount.guid).toPromise();
             this.accountMeterData.next(accountMeterData);
             let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
             if (selectedFacility) {
-                let facilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.filter(meterData => { return meterData.facilityId == selectedFacility.id });
+                let facilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.filter(meterData => { return meterData.facilityId == selectedFacility.guid });
                 this.facilityMeterData.next(facilityMeterData);
             }
         }
@@ -45,7 +45,7 @@ export class UtilityMeterDatadbService {
     setFacilityMeterData() {
         let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
         if (facility) {
-            this.getAllByIndexRange('facilityId', facility.id).subscribe(meterData => {
+            this.getAllByIndexRange('facilityId', facility.guid).subscribe(meterData => {
                 this.facilityMeterData.next(meterData);
             });
         }
@@ -54,7 +54,7 @@ export class UtilityMeterDatadbService {
     setAccountMeterData() {
         let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
         if (account) {
-            this.getAllByIndexRange('accountId', account.id).subscribe(meterData => {
+            this.getAllByIndexRange('accountId', account.guid).subscribe(meterData => {
                 this.accountMeterData.next(meterData);
             });
         }
@@ -110,7 +110,7 @@ export class UtilityMeterDatadbService {
         });
     }
 
-    deleteMeterDataByMeterId(meterId: number): void {
+    deleteMeterDataByMeterId(meterId: string): void {
         this.getAllByIndexRange('meterId', meterId).subscribe(meterData => {
             meterData.forEach(dataItem => {
                 this.deleteIndex(dataItem.id);
@@ -122,7 +122,7 @@ export class UtilityMeterDatadbService {
         return this.dbService.delete('utilityMeterData', meterDataId);
     }
 
-    async deleteAllFacilityMeterData(facilityId: number) {
+    async deleteAllFacilityMeterData(facilityId: string) {
         let accountMeterDataEntries: Array<IdbUtilityMeterData> = this.accountMeterData.getValue();
         let facilityMeterDataEntries: Array<IdbUtilityMeterData> = accountMeterDataEntries.filter(meterData => { return meterData.facilityId == facilityId });
         await this.deleteMeterDataEntriesAsync(facilityMeterDataEntries);
@@ -149,7 +149,8 @@ export class UtilityMeterDatadbService {
 
         return {
             // id: undefined,
-            meterId: meter.id,
+            meterId: meter.guid,
+            guid: Math.random().toString(36).substr(2, 9),
             facilityId: meter.facilityId,
             accountId: meter.accountId,
             readDate: newDate,
@@ -207,15 +208,15 @@ export class UtilityMeterDatadbService {
         return (dataItemDate.getUTCMonth() == date.getUTCMonth()) && (dataItemDate.getUTCFullYear() == date.getUTCFullYear()) && (dataItemDate.getUTCDate() == date.getUTCDate());
     }
 
-    private getMeterDataFromMeterId(meterId: number): Array<IdbUtilityMeterData> {
+    private getMeterDataFromMeterId(meterId: string): Array<IdbUtilityMeterData> {
         let facilityMeterData: Array<IdbUtilityMeterData> = this.accountMeterData.getValue();
         return facilityMeterData.filter(meterData => { return meterData.meterId == meterId });
     }
 
     getMeterDataForFacility(meter: IdbUtilityMeter, convertData: boolean, isMeterReadings?: boolean, calanderizationOptions?: CalanderizationOptions): Array<IdbUtilityMeterData> {
         let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-        let facility: IdbFacility = facilities.find(facility => { return facility.id == meter.facilityId });
-        let meterData: Array<IdbUtilityMeterData> = this.getMeterDataFromMeterId(meter.id);
+        let facility: IdbFacility = facilities.find(facility => { return facility.guid == meter.facilityId });
+        let meterData: Array<IdbUtilityMeterData> = this.getMeterDataFromMeterId(meter.guid);
         let meterDataCopy: Array<IdbUtilityMeterData> = JSON.parse(JSON.stringify(meterData));
         if (!calanderizationOptions) {
             if (facility.energyIsSource && !isMeterReadings) {
@@ -232,7 +233,7 @@ export class UtilityMeterDatadbService {
 
     getMeterDataForAccount(meter: IdbUtilityMeter, convertData: boolean, calanderizationOptions?: CalanderizationOptions): Array<IdbUtilityMeterData> {
         let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-        let meterData: Array<IdbUtilityMeterData> = this.getMeterDataFromMeterId(meter.id);
+        let meterData: Array<IdbUtilityMeterData> = this.getMeterDataFromMeterId(meter.guid);
         let meterDataCopy: Array<IdbUtilityMeterData> = JSON.parse(JSON.stringify(meterData));
         if (!calanderizationOptions) {
             if (account.energyIsSource) {

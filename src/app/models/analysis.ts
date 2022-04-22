@@ -156,5 +156,5 @@ export interface AnalysisTableColumns {
     display: boolean,
     usedInAnalysis: boolean
   }>,
-  predictorGroupId: number
+  predictorGroupId: string
 }

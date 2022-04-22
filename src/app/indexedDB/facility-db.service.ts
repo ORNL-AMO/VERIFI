@@ -30,7 +30,7 @@ export class FacilitydbService {
         let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
         if (selectedAccount) {
             let allFacilities: Array<IdbFacility> = await this.getAll().toPromise();
-            let accountFacilities: Array<IdbFacility> = allFacilities.filter(facility => { return facility.accountId == selectedAccount.id });
+            let accountFacilities: Array<IdbFacility> = allFacilities.filter(facility => { return facility.accountId == selectedAccount.guid });
             let storedFacilityId: number = this.localStorageService.retrieve("facilityId");
             if (storedFacilityId) {
                 let selectedFacility: IdbFacility = accountFacilities.find(facility => { return facility.id == storedFacilityId });
@@ -52,7 +52,7 @@ export class FacilitydbService {
     setAccountFacilities() {
         let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
         if (selectedAccount) {
-            this.getAllByIndexRange('accountId', selectedAccount.id).subscribe(facilities => {
+            this.getAllByIndexRange('accountId', selectedAccount.guid).subscribe(facilities => {
                 this.accountFacilities.next(facilities);
             });
         }else{
@@ -153,7 +153,8 @@ export class FacilitydbService {
         let baselineYear: number = new Date().getUTCFullYear();
         let targetYear: number = baselineYear + 10;
         return {
-            accountId: account.id,
+            accountId: account.guid,
+            guid: Math.random().toString(36).substr(2, 9),
             name: 'New Facility',
             country: 'US',
             city: account.city,

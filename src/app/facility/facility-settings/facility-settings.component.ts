@@ -59,17 +59,17 @@ export class FacilitySettingsComponent implements OnInit {
     this.loadingService.setLoadingStatus(true);
     this.loadingService.setLoadingMessage("Deleting Facility Predictors...");
     // Delete all info associated with account
-    await this.predictorDbService.deleteAllFacilityPredictors(this.selectedFacility.id);
+    await this.predictorDbService.deleteAllFacilityPredictors(this.selectedFacility.guid);
     this.loadingService.setLoadingMessage("Deleting Facility Meter Data...");
-    await this.utilityMeterDataDbService.deleteAllFacilityMeterData(this.selectedFacility.id);
+    await this.utilityMeterDataDbService.deleteAllFacilityMeterData(this.selectedFacility.guid);
     this.loadingService.setLoadingMessage("Deleting Facility Meters...");
-    await this.utilityMeterDbService.deleteAllFacilityMeters(this.selectedFacility.id);
+    await this.utilityMeterDbService.deleteAllFacilityMeters(this.selectedFacility.guid);
     this.loadingService.setLoadingMessage("Deleting Facility Meter Groups...");
-    await this.utilityMeterGroupDbService.deleteAllFacilityMeterGroups(this.selectedFacility.id);
+    await this.utilityMeterGroupDbService.deleteAllFacilityMeterGroups(this.selectedFacility.guid);
     this.loadingService.setLoadingMessage('Updating Reports...');
     let overviewReportOptions: Array<IdbOverviewReportOptions> = this.overviewReportOptionsDbService.accountOverviewReportOptions.getValue();
     for (let index = 0; index < overviewReportOptions.length; index++) {
-      overviewReportOptions[index].reportOptions.facilities = overviewReportOptions[index].reportOptions.facilities.filter(reportFacility => { return reportFacility.facilityId != this.selectedFacility.id });
+      overviewReportOptions[index].reportOptions.facilities = overviewReportOptions[index].reportOptions.facilities.filter(reportFacility => { return reportFacility.facilityId != this.selectedFacility.guid });
       await this.overviewReportOptionsDbService.updateWithObservable(overviewReportOptions[index]).toPromise();
     }
     this.loadingService.setLoadingMessage("Deleting Facility...");
@@ -77,7 +77,7 @@ export class FacilitySettingsComponent implements OnInit {
     // Then navigate to another facility
     let allFacilities: Array<IdbFacility> = await this.facilityDbService.getAll().toPromise();
     this.facilityDbService.allFacilities.next(allFacilities);
-    let accountFacilites: Array<IdbFacility> = allFacilities.filter(facility => { return facility.accountId == selectedAccount.id });
+    let accountFacilites: Array<IdbFacility> = allFacilities.filter(facility => { return facility.accountId == selectedAccount.guid });
     this.facilityDbService.accountFacilities.next(accountFacilites);
     this.facilityDbService.setSelectedFacility();
     this.loadingService.setLoadingStatus(false);

@@ -54,10 +54,10 @@ export class OverviewReportService {
         water = true;
       }
     });
-    let facilities: Array<{facilityId: number, selected: boolean}> = new Array();
+    let facilities: Array<{facilityId: string, selected: boolean}> = new Array();
     accountFacilites.forEach(facility =>{
       facilities.push({
-        facilityId: facility.id,
+        facilityId: facility.guid,
         selected: true
       })
     })

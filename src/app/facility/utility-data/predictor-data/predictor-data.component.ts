@@ -185,7 +185,7 @@ export class PredictorDataComponent implements OnInit {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let accountPredictors: Array<IdbPredictorEntry> = await this.predictorsDbService.getAllByIndexRange("accountId", selectedFacility.accountId).toPromise();
     this.predictorsDbService.accountPredictorEntries.next(accountPredictors);
-    let facilityPredictors: Array<IdbPredictorEntry> = accountPredictors.filter(predictor => { return predictor.facilityId == selectedFacility.id });
+    let facilityPredictors: Array<IdbPredictorEntry> = accountPredictors.filter(predictor => { return predictor.facilityId == selectedFacility.guid });
     this.predictorsDbService.facilityPredictorEntries.next(facilityPredictors);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationsService.showToast("Predictor Data Deleted!", undefined, undefined, false, "success");

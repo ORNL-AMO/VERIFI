@@ -19,7 +19,7 @@ export class SelectItemTableComponent implements OnInit {
   @Input()
   facilityAnalysisItems: Array<IdbAnalysisItem>;
 
-  selectedFacilityItemId: number;
+  selectedFacilityItemId: string;
   itemToEdit: IdbAnalysisItem;
   constructor(private accountAnalysisDbService: AccountAnalysisDbService, private router: Router,
     private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService) { }
@@ -34,14 +34,14 @@ export class SelectItemTableComponent implements OnInit {
 
   setSelectedFacilityItemId() {
     this.selectedAnalysisItem.facilityAnalysisItems.forEach(item => {
-      if (item.facilityId == this.facility.id) {
+      if (item.facilityId == this.facility.guid) {
         this.selectedFacilityItemId = item.analysisItemId;
       }
     });
   }
 
   save() {
-    this.accountAnalysisDbService.updateFacilityItemSelection(this.selectedAnalysisItem, this.selectedFacilityItemId, this.facility.id);
+    this.accountAnalysisDbService.updateFacilityItemSelection(this.selectedAnalysisItem, this.selectedFacilityItemId, this.facility.guid);
   }
 
 
