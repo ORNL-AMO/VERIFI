@@ -90,8 +90,9 @@ export class BetterPlantsReportMenuComponent implements OnInit {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let newIdbReportOptionsItem: IdbOverviewReportOptions = {
       date: new Date(),
+      guid: Math.random().toString(36).substr(2, 9),
       reportOptions: this.reportOptions,
-      accountId: selectedAccount.id,
+      accountId: selectedAccount.guid,
       type: type,
       name: this.name
     }
@@ -118,7 +119,7 @@ export class BetterPlantsReportMenuComponent implements OnInit {
   setAnalysisOptions() {
     let analysisOptions: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
     this.accountAnalysisItems = analysisOptions.filter(option => { return option.reportYear == this.reportOptions.targetYear && option.energyIsSource});
-    let selectedAnalysisItem: IdbAccountAnalysisItem = this.accountAnalysisItems.find(item => { return item.id == this.reportOptions.analysisItemId });
+    let selectedAnalysisItem: IdbAccountAnalysisItem = this.accountAnalysisItems.find(item => { return item.guid == this.reportOptions.analysisItemId });
     if (!selectedAnalysisItem) {
       this.reportOptions.analysisItemId = undefined;
     }

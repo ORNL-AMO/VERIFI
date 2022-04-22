@@ -67,8 +67,8 @@
                             <tr *ngFor="let analysisItem of accountAnalysisItems">
                                 <td>
                                     <input type="radio" class="rowToggle" [(ngModel)]="reportOptions.analysisItemId"
-                                        [value]="analysisItem.id" name="{{analysisItem.id+'_selectedAccountItemId'}}"
-                                        id="{{analysisItem.id+'_selectedAccountItemId'}}" (change)="save()">
+                                        [value]="analysisItem.guid" name="{{analysisItem.guid+'_selectedAccountItemId'}}"
+                                        id="{{analysisItem.guid+'_selectedAccountItemId'}}" (change)="save()">
                                 </td>
                                 <td>
                                     {{analysisItem.name}}

@@ -67,7 +67,7 @@ export interface ReportOptions {
   energyIsSource: boolean,
   meterReadings: boolean,
   reportType: 'data' | 'betterPlants',
-  analysisItemId: number,
+  analysisItemId: string,
   baselineAdjustmentNotes: string,
   modificationNotes: string
 }

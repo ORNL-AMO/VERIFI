@@ -48,7 +48,7 @@ export class AccountAnalysisDbService {
   setAccountAnalysisItems() {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     if (selectedAccount) {
-      this.getAllByIndexRange('accountId', selectedAccount.id).subscribe((analysisItems: Array<IdbAccountAnalysisItem>) => {
+      this.getAllByIndexRange('accountId', selectedAccount.guid).subscribe((analysisItems: Array<IdbAccountAnalysisItem>) => {
         this.accountAnalysisItems.next(analysisItems);
       });
     }

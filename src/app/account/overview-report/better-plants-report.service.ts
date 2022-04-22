@@ -29,7 +29,7 @@ export class BetterPlantsReportService {
 
   getBetterPlantsSummary(reportOptions: ReportOptions, account: IdbAccount): BetterPlantsSummary {
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
-    let selectedAnalysisItem: IdbAccountAnalysisItem = accountAnalysisItems.find(item => { return item.id == reportOptions.analysisItemId });
+    let selectedAnalysisItem: IdbAccountAnalysisItem = accountAnalysisItems.find(item => { return item.guid == reportOptions.analysisItemId });
     let baselineAdjustment: number = 0;
     if (selectedAnalysisItem.baselineAdjustment) {
       let convertedAdjustment: number = this.convertUnitsService.value(selectedAnalysisItem.baselineAdjustment).from(selectedAnalysisItem.energyUnit).to('MMBtu');
@@ -41,17 +41,17 @@ export class BetterPlantsReportService {
 
     let facilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
     let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-    let includedFacilityIds: Array<number> = new Array();
+    let includedFacilityIds: Array<string> = new Array();
     let facilityPerformance: Array<{facility: IdbFacility, performance: number}> = new Array();
     selectedAnalysisItem.facilityAnalysisItems.forEach(item => {
       if (item.analysisItemId) {
         includedFacilityIds.push(item.facilityId);
-        let facilityAnalysisItem: IdbAnalysisItem = facilityAnalysisItems.find(facilityItem => { return facilityItem.id == item.analysisItemId });
+        let facilityAnalysisItem: IdbAnalysisItem = facilityAnalysisItems.find(facilityItem => { return facilityItem.guid == item.analysisItemId });
         if (facilityAnalysisItem.baselineAdjustment) {
           let convertedAdjustment: number = this.convertUnitsService.value(facilityAnalysisItem.baselineAdjustment).from(facilityAnalysisItem.energyUnit).to('MMBtu');
           baselineAdjustment = baselineAdjustment + convertedAdjustment;
         }
-        let facility: IdbFacility = facilities.find(f => { return f.id == item.facilityId });
+        let facility: IdbFacility = facilities.find(f => { return f.guid == item.facilityId });
         let annualAnalysisSummary: Array<AnnualAnalysisSummary> = this.facilityAnalysisCalculationsService.getAnnualAnalysisSummary(facilityAnalysisItem, facility)
         let reportYearAnalysisSummary: AnnualAnalysisSummary = annualAnalysisSummary.find(summary => {return summary.year == selectedAnalysisItem.reportYear});
         facilityPerformance.push({
