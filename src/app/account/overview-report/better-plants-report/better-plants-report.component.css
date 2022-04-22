@@ -1,0 +1,48 @@
+.report{
+    /* height: 100%; */
+    background-color: white;
+    margin: 30px 40px;
+    padding: 20px;
+    /* max-height: 100%;
+    overflow-y: auto; */
+}
+
+.report.print{
+    width: 1200px;
+}
+
+hr.page-spacer{
+    margin-top: 3rem;
+    margin-bottom: 3rem;
+    border: solid;
+}
+
+.print hr.page-spacer{
+    border: none;
+}
+
+.report-container{
+    margin-bottom: 100px;
+}
+
+@media print {
+    .report{
+        margin: 0px;
+        padding: 0px;
+    }
+
+    .report-item{
+        margin-top: 40px;
+    }
+}
+
+
+.report-item{
+    margin-top: 150px;
+}
+
+
+.disclaimer-text p{
+    font-style: italic;
+    font-size: xx-small;
+}

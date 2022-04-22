@@ -114,7 +114,6 @@ ipcMain.once('later', (event, arg) => {
 });
 
 ipcMain.once('relaunch', () => {
-    console.log('relaunch2')
     app.relaunch();
     app.exit();
 });

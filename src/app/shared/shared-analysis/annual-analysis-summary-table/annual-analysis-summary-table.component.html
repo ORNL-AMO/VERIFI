@@ -1,4 +1,4 @@
-<table class="table table-sm table-hover">
+<table class="table table-sm table-hover" #dataTable [ngClass]="{'copying-table': copyingTable}">
     <thead>
         <tr class="table-mh">
             <th class="first-column"></th>
@@ -27,7 +27,8 @@
             </th>
             <th *ngIf="analysisTableColumns.adjustedEnergy" (click)="setOrderDataField('adjustedBaselineEnergyUse')"
                 [ngClass]="{'active': orderDataField == 'adjustedBaselineEnergyUse'}">
-                Adjusted
+                Adjusted for <br>
+                Normalization
             </th>
             <th *ngFor="let predictorVariable of predictorColumns" (click)="setOrderDataField(predictorVariable.name)"
                 [ngClass]="{'active': orderDataField == predictorVariable.name}">
@@ -55,7 +56,7 @@
             </th>
             <th *ngIf="analysisTableColumns.adjustmentToBaseline" (click)="setOrderDataField('adjustmentToBaseline')"
                 [ngClass]="{'active': orderDataField == 'adjustmentToBaseline'}">
-                Adjustment to <br> Baseline
+                Baseline Adjustment <br> for Normalization
             </th>
             <th *ngIf="analysisTableColumns.cummulativeSavings" (click)="setOrderDataField('cummulativeSavings')"
                 [ngClass]="{'active': orderDataField == 'cummulativeSavings'}">
@@ -166,3 +167,4 @@
         </tr>
     </tbody>
 </table>
+<a class="click-link" (click)="copyTable()"><span class="fa fa-copy"></span> Copy Table</a>

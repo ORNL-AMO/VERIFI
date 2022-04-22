@@ -169,4 +169,14 @@ export class ImportMeterWizardComponent implements OnInit {
     this.updateImportMeterFileWizard();
     this.emitContinue.emit(true);
   }
+
+  nextMeter(){
+    this.selectedMeterIndex++;
+    this.selectMeter(this.importMeters[this.selectedMeterIndex], this.selectedMeterIndex);
+  }
+
+  previousMeter(){
+    this.selectedMeterIndex--;
+    this.selectMeter(this.importMeters[this.selectedMeterIndex], this.selectedMeterIndex);
+  }
 }
