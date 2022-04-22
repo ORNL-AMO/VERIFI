@@ -34,7 +34,7 @@ export class SelectFacilityAnalysisItemsComponent implements OnInit {
     this.selectedFacilitySub = this.accountAnalysisService.selectedFacility.subscribe(val => {
       if(val){
         this.selectedFacility = val;
-        let checkExists = this.selectedAnalysisItem.facilityAnalysisItems.find(facility => {return this.selectedFacility.id == facility.facilityId});
+        let checkExists = this.selectedAnalysisItem.facilityAnalysisItems.find(facility => {return this.selectedFacility.guid == facility.facilityId});
         if(!checkExists){
           this.initSelectedFacility();
         }else{
@@ -63,7 +63,7 @@ export class SelectFacilityAnalysisItemsComponent implements OnInit {
   setFacilityAnlaysisItems(){
     let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
     this.facilityAnalysisItems = accountAnalysisItems.filter(item => { 
-      return item.facilityId == this.selectedFacility.id && item.reportYear == this.selectedAnalysisItem.reportYear && item.energyIsSource == this.selectedAnalysisItem.energyIsSource
+      return item.facilityId == this.selectedFacility.guid && item.reportYear == this.selectedAnalysisItem.reportYear && item.energyIsSource == this.selectedAnalysisItem.energyIsSource
     });
   }
 }

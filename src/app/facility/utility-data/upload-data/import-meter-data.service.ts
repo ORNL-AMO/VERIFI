@@ -49,11 +49,11 @@ export class ImportMeterDataService {
     if (dataItem["Read Date"]) {
       date = new Date(dataItem["Read Date"]);
     }
-    let meterId: number;
+    let meterId: string;
     let meterNumber: string = dataItem["Meter Number"]
     let correspondingMeter: IdbUtilityMeter = this.getCorrespondingMeter(meterNumber, facilityMeters);
     if (correspondingMeter) {
-      meterId = correspondingMeter.id;
+      meterId = correspondingMeter.guid;
     }
     let energyUse: number = 0;
     let totalVolume: number = 0;
@@ -76,7 +76,8 @@ export class ImportMeterDataService {
     return {
       //keys (id primary)
       meterId: meterId,
-      facilityId: facility.id,
+      guid: Math.random().toString(36).substr(2, 9),      
+      facilityId: facility.guid,
       accountId: facility.accountId,
       //data
       readDate: date,
@@ -123,7 +124,7 @@ export class ImportMeterDataService {
     let correspondingMeter: IdbUtilityMeter;
 
     if (meterData.meterId || meterData.meterNumber) {
-      correspondingMeter = facilityMeters.find(meter => { return meter.id == meterData.meterId || meter.meterNumber == meterData.meterNumber })
+      correspondingMeter = facilityMeters.find(meter => { return meter.guid == meterData.meterId || meter.meterNumber == meterData.meterNumber })
     }
     if (!correspondingMeter) {
       correspondingMeter = metersToImport.find(meter => { return meter.meterNumber == meterData.meterNumber || meter.name == meterData.meterNumber });

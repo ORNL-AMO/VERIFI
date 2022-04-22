@@ -28,7 +28,7 @@ export class AccountAnalysisDbService {
   async initializeAnalysisItems() {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     if (selectedAccount) {
-      let accountAnalysisItems: Array<IdbAccountAnalysisItem> = await this.getAllByIndexRange('accountId', selectedAccount.id).toPromise();
+      let accountAnalysisItems: Array<IdbAccountAnalysisItem> = await this.getAllByIndexRange('accountId', selectedAccount.guid).toPromise();
       this.accountAnalysisItems.next(accountAnalysisItems);
 
       let storedAnalysisId: number = this.localStorageService.retrieve("accountAnalysisItemsId");
@@ -111,17 +111,18 @@ export class AccountAnalysisDbService {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     let facilityAnalysisItems: Array<{
-      facilityId: number,
-      analysisItemId: number
+      facilityId: string,
+      analysisItemId: string
     }> = new Array();
     accountFacilities.forEach(facility => {
       facilityAnalysisItems.push({
-        facilityId: facility.id,
+        facilityId: facility.guid,
         analysisItemId: undefined
       })
     })
     return {
-      accountId: selectedAccount.id,
+      accountId: selectedAccount.guid,
+      guid: Math.random().toString(36).substr(2, 9),
       date: new Date(),
       name: 'Account Analysis',
       // energyIsSource: selectedAccount.energyIsSource,
@@ -145,7 +146,7 @@ export class AccountAnalysisDbService {
     }
   }
 
-  updateFacilityItemSelection(analysiItem: IdbAccountAnalysisItem, analysisItemId: number, facilityId: number){
+  updateFacilityItemSelection(analysiItem: IdbAccountAnalysisItem, analysisItemId: string, facilityId: string){
     analysiItem.facilityAnalysisItems.forEach(item => {
       if(item.facilityId == facilityId){
         item.analysisItemId = analysisItemId;

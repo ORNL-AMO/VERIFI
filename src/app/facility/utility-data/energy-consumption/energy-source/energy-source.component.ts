@@ -72,7 +72,7 @@ export class EnergySourceComponent implements OnInit {
     let selectedFacility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
     let selectedAccount: IdbAccount = this.accountdbService.selectedAccount.getValue();
     this.addOrEdit = 'add';
-    this.editMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.id, selectedAccount.id, true, selectedFacility.emissionsOutputRate, selectedFacility.energyUnit);
+    this.editMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.guid, selectedAccount.guid, true, selectedFacility.emissionsOutputRate, selectedFacility.energyUnit);
     this.sharedDataService.modalOpen.next(true);
   }
 
@@ -99,7 +99,7 @@ export class EnergySourceComponent implements OnInit {
 
 
     //delete meter data
-    let meterData: Array<IdbUtilityMeterData> = await this.utilityMeterDatadbService.getAllByIndexRange('meterId', this.meterToDelete.id).toPromise();
+    let meterData: Array<IdbUtilityMeterData> = await this.utilityMeterDatadbService.getAllByIndexRange('meterId', this.meterToDelete.guid).toPromise();
     for (let index = 0; index < meterData.length; index++) {
       await this.utilityMeterDatadbService.deleteWithObservable(meterData[index].id).toPromise();
     }
@@ -107,12 +107,12 @@ export class EnergySourceComponent implements OnInit {
     //set meters
     let accountMeters: Array<IdbUtilityMeter> = await this.utilityMeterdbService.getAllByIndexRange("accountId", selectedFacility.accountId).toPromise();
     this.utilityMeterdbService.accountMeters.next(accountMeters);
-    let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == selectedFacility.id });
+    let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == selectedFacility.guid });
     this.utilityMeterdbService.facilityMeters.next(facilityMeters);
     //set meter data
     let accountMeterData: Array<IdbUtilityMeterData> = await this.utilityMeterDatadbService.getAllByIndexRange("accountId", selectedFacility.accountId).toPromise();
     this.utilityMeterDatadbService.accountMeterData.next(accountMeterData);
-    let facilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.filter(meterData => { return meterData.facilityId == selectedFacility.id });
+    let facilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.filter(meterData => { return meterData.facilityId == selectedFacility.guid });
     this.utilityMeterDatadbService.facilityMeterData.next(facilityMeterData);
     this.cancelDelete();
     this.loadingService.setLoadingStatus(false);

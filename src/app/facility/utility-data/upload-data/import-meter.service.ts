@@ -69,7 +69,7 @@ export class ImportMeterService {
 
 
   getNewMeterFromImportMeter(importMeter: ImportMeter, selectedFacility: IdbFacility): IdbUtilityMeter {
-    let newMeter: IdbUtilityMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.id, selectedFacility.accountId, false, undefined, selectedFacility.energyUnit);
+    let newMeter: IdbUtilityMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.guid, selectedFacility.accountId, false, undefined, selectedFacility.energyUnit);
     newMeter.meterNumber = importMeter.meterNumber;
     newMeter.accountNumber = importMeter.accountNumber;
     newMeter.source = this.checkImportSource(importMeter.source);
@@ -171,7 +171,7 @@ export class ImportMeterService {
   }
 
   getNewMeterFromExcelColumn(groupItem: ColumnItem, selectedFacility: IdbFacility): IdbUtilityMeter {
-    let newMeter: IdbUtilityMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.id, selectedFacility.accountId, false, undefined, selectedFacility.energyUnit);
+    let newMeter: IdbUtilityMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.guid, selectedFacility.accountId, false, undefined, selectedFacility.energyUnit);
     let fuelType: { phase: MeterPhase, fuelTypeOption: FuelTypeOption } = this.energyUnitsHelperService.parseFuelType(groupItem.value);
     if (fuelType) {
       newMeter.source = "Other Fuels";

@@ -56,7 +56,7 @@ export class SetupWizardComponent implements OnInit {
     let newFacility: IdbFacility;
     for (let i = 0; i < facilities.length; i++) {
       let facility: IdbFacility = facilities[i];
-      facility.accountId = account.id;
+      facility.accountId = account.guid;
       facility = await this.facilityDbService.addWithObservable(facility).toPromise();
       if (i == 0) {
         newFacility = facility;
@@ -68,7 +68,7 @@ export class SetupWizardComponent implements OnInit {
     this.accountdbService.selectedAccount.next(account);
     let allFacilities: Array<IdbFacility> = await this.facilityDbService.getAll().toPromise();
     this.facilityDbService.allFacilities.next(allFacilities);
-    let accountFacilities: Array<IdbFacility> = allFacilities.filter(facility => { return facility.accountId == account.id });
+    let accountFacilities: Array<IdbFacility> = allFacilities.filter(facility => { return facility.accountId == account.guid });
     this.facilityDbService.accountFacilities.next(accountFacilities);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast("Account and Facilities Created!", "You can now add utility data to your facilities for analysis!", 10000, false, "success", true);

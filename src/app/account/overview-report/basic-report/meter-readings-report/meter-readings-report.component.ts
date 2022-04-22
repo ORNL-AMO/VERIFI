@@ -25,7 +25,7 @@ export class MeterReadingsReportComponent implements OnInit {
   ngOnInit(): void {
     this.meterReadingsData = new Array();
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == this.facility.id });
+    let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == this.facility.guid });
     facilityMeters.forEach(meter => {
       let meterReadings: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataForFacility(meter, false, true);
       let showVolumeColumn: boolean = meterReadings.find(reading => {return reading.totalVolume != 0 && reading.totalVolume != undefined}) != undefined;

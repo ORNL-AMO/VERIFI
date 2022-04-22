@@ -70,7 +70,7 @@ export class UtilityMeterDataComponent implements OnInit {
 
   setEditMeterData(meterData: IdbUtilityMeterData) {
     this.addOrEdit = 'edit';
-    this.editMeter = this.facilityMeters.find(meter => { return meter.id == meterData.meterId });
+    this.editMeter = this.facilityMeters.find(meter => { return meter.guid == meterData.meterId });
     this.editMeterData = meterData;
     this.sharedDataService.modalOpen.next(true);
   }
@@ -101,7 +101,7 @@ export class UtilityMeterDataComponent implements OnInit {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let accountMeterData: Array<IdbUtilityMeterData> = await this.utilityMeterDataDbService.getAllByIndexRange("accountId", selectedFacility.accountId).toPromise();
     this.utilityMeterDataDbService.accountMeterData.next(accountMeterData);
-    let facilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.filter(dataItem => { return dataItem.facilityId == selectedFacility.id });
+    let facilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.filter(dataItem => { return dataItem.facilityId == selectedFacility.guid });
     this.utilityMeterDataDbService.facilityMeterData.next(facilityMeterData);
     this.loadingService.setLoadingStatus(false);
     this.toastNoticationService.showToast("Meter Data Deleted!", undefined, undefined, false, "success");

@@ -43,7 +43,7 @@ export class EnergyConsumptionComponent implements OnInit {
  
 
   checkHasErrors(meter: IdbUtilityMeter, facilityMeterData: Array<IdbUtilityMeterData>): string {
-    let meterData: Array<IdbUtilityMeterData> = facilityMeterData.filter(data => { return data.meterId == meter.id });
+    let meterData: Array<IdbUtilityMeterData> = facilityMeterData.filter(data => { return data.meterId == meter.guid });
     let checkDate: { error: Date, warning: Date, missingMonth: Date } = this.utilityMeterDataService.checkForErrors(meterData, meter);
     if (checkDate.error || meterData.length == 0) {
       return 'error';
