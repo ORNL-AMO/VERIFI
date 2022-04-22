@@ -1,0 +1,16 @@
+thead th.active {
+    text-decoration: underline;
+}
+
+thead th:hover{
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.copying-table br{
+    display: none;
+}
+
+.copying-table .source-label{
+    display: none;
+}

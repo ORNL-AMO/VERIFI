@@ -1,8 +1,9 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
 import { AnalysisTableColumns, AnnualAnalysisSummary } from 'src/app/models/analysis';
 import { IdbAnalysisItem, PredictorData } from 'src/app/models/idb';
+import { CopyTableService } from '../../helper-services/copy-table.service';
 
 @Component({
   selector: 'app-annual-analysis-summary-table',
@@ -15,6 +16,8 @@ export class AnnualAnalysisSummaryTableComponent implements OnInit {
   @Input()
   analysisItem: IdbAnalysisItem;
 
+  @ViewChild('dataTable', { static: false }) dataTable: ElementRef;
+
   analysisTableColumns: AnalysisTableColumns;
   analysisTableColumnsSub: Subscription;
   numEnergyColumns: number;
@@ -25,7 +28,8 @@ export class AnnualAnalysisSummaryTableComponent implements OnInit {
   orderDataField: string = 'year';
   orderByDirection: 'asc' | 'desc' = 'asc';
   predictorColumns: Array<PredictorData>;
-  constructor(private analysisService: AnalysisService) { }
+  copyingTable: boolean = false;
+  constructor(private analysisService: AnalysisService, private copyTableService: CopyTableService) { }
 
   ngOnInit(): void {
     this.analysisTableColumnsSub = this.analysisService.analysisTableColumns.subscribe(columns => {
@@ -123,4 +127,11 @@ export class AnnualAnalysisSummaryTableComponent implements OnInit {
     this.numPredictorColumns = numPredictorColumns;
   }
 
+  copyTable(){
+    this.copyingTable = true;
+    setTimeout(() => {
+      this.copyTableService.copyTable(this.dataTable);
+      this.copyingTable = false;
+    }, 200)
+  }
 }

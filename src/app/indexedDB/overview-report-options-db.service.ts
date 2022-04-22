@@ -18,13 +18,17 @@ export class OverviewReportOptionsDbService {
     this.accountOverviewReportOptions = new BehaviorSubject<Array<IdbOverviewReportOptions>>(new Array());
     this.overviewReportOptionsTemplates = new BehaviorSubject<Array<IdbOverviewReportOptions>>(new Array());
     this.selectedOverviewReportOptions = new BehaviorSubject<IdbOverviewReportOptions>(undefined);
+
+    this.accountDbService.selectedAccount.subscribe(() => {
+      this.setAccountOverviewReportOptions();
+    });
   }
 
   async initializeReportsFromLocalStorage() {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     if (selectedAccount) {
       let allOverviewReportOptions: Array<IdbOverviewReportOptions> = await this.getAll().toPromise();
-      let accountOverviewReportOptions: Array<IdbOverviewReportOptions> = allOverviewReportOptions.filter(reportOption => { return reportOption.accountId == selectedAccount.id && reportOption.type == 'report' });
+      let accountOverviewReportOptions: Array<IdbOverviewReportOptions> = allOverviewReportOptions.filter(reportOption => { return reportOption.accountId == selectedAccount.guid && reportOption.type == 'report' });
       let templates: Array<IdbOverviewReportOptions> = allOverviewReportOptions.filter(report => { return report.type == 'template' });
       let storedOptionsId: number = this.localStorageService.retrieve("overviewReportOptionsId");
       if (storedOptionsId) {
@@ -47,7 +51,7 @@ export class OverviewReportOptionsDbService {
   setAccountOverviewReportOptions() {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     if (selectedAccount) {
-      this.getAllByIndexRange('accountId', selectedAccount.id).subscribe(accountReports => {
+      this.getAllByIndexRange('accountId', selectedAccount.guid).subscribe(accountReports => {
         let report: Array<IdbOverviewReportOptions> = accountReports.filter(report => { return report.type == 'report' });
         this.accountOverviewReportOptions.next(report);
       });
@@ -109,7 +113,7 @@ export class OverviewReportOptionsDbService {
     });
   }
 
-  async updateReportsRemoveFacility(facilityId: number) {
+  async updateReportsRemoveFacility(facilityId: string) {
     let accountReports: Array<IdbOverviewReportOptions> = this.accountOverviewReportOptions.getValue();
     for(let i = 0; i < accountReports.length; i++){
       let report: IdbOverviewReportOptions = accountReports[i];

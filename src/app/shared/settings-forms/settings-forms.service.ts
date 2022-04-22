@@ -23,14 +23,18 @@ export class SettingsFormsService {
       naics3: [generalInformation.naics3],
       size: [generalInformation.size],
       notes: [generalInformation.notes],
-      color: [generalInformation.color]
+      color: [generalInformation.color],
+      contactName: [generalInformation.contactName],
+      contactEmail: [generalInformation.contactEmail],
+      contactPhone: [generalInformation.contactPhone]
+
     });
     return form;
   }
 
   updateAccountFromGeneralInformationForm(form: FormGroup, account: IdbAccount): IdbAccount {
     account.name = form.controls.name.value;
-    if(!account.name){
+    if (!account.name) {
       account.name = 'Account: ' + account.id;
     }
     account.country = form.controls.country.value;
@@ -43,12 +47,15 @@ export class SettingsFormsService {
     account.naics3 = form.controls.naics3.value;
     account.notes = form.controls.notes.value;
     account.color = form.controls.color.value;
+    account.contactName = form.controls.contactName.value;
+    account.contactEmail = form.controls.contactEmail.value;
+    account.contactPhone = form.controls.contactPhone.value;
     return account;
   }
 
   updateFacilityFromGeneralInformationForm(form: FormGroup, facility: IdbFacility): IdbFacility {
     facility.name = form.controls.name.value;
-    if(!facility.name){
+    if (!facility.name) {
       facility.name = 'Facility: ' + facility.id;
     }
     facility.country = form.controls.country.value;
@@ -61,6 +68,9 @@ export class SettingsFormsService {
     facility.naics3 = form.controls.naics3.value;
     facility.notes = form.controls.notes.value;
     facility.color = form.controls.color.value;
+    facility.contactName = form.controls.contactName.value;
+    facility.contactEmail = form.controls.contactEmail.value;
+    facility.contactPhone = form.controls.contactPhone.value;
     return facility;
   }
 
@@ -256,7 +266,7 @@ export class SettingsFormsService {
         account.massUnit != facility.massUnit ||
         account.energyUnit != facility.energyUnit ||
         account.volumeGasUnit != facility.volumeGasUnit ||
-        account.volumeLiquidUnit != facility.volumeLiquidUnit || 
+        account.volumeLiquidUnit != facility.volumeLiquidUnit ||
         account.energyIsSource != facility.energyIsSource
       )
     } else {

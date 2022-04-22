@@ -32,7 +32,9 @@ export class EnergyUseCalculationsService {
         heatCapacity = selectedFuelTypeOptionsCpy.heatCapacityValue;
       }
     }
-    heatCapacity = Number((heatCapacity).toLocaleString(undefined, { maximumSignificantDigits: 5 }));
+    if (heatCapacity) {
+      heatCapacity = Number((heatCapacity).toLocaleString(undefined, { maximumSignificantDigits: 5 }));
+    }
     return heatCapacity;
   }
 
@@ -81,7 +83,7 @@ export class EnergyUseCalculationsService {
     return 0;
   }
 
-  getEmissionsOutputRate(source: MeterSource, fuel: string, phase: MeterPhase, energyUnit: string): number{
+  getEmissionsOutputRate(source: MeterSource, fuel: string, phase: MeterPhase, energyUnit: string): number {
     let emissionsRate: number;
     if (source == 'Electricity') {
       let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
@@ -91,8 +93,10 @@ export class EnergyUseCalculationsService {
     } else if (source == 'Other Fuels') {
       let fuelTypeOptions: Array<FuelTypeOption> = this.getFuelTypeOptions(source, phase);
       let selectedFuel: FuelTypeOption = fuelTypeOptions.find(option => { return option.value == fuel })
-      emissionsRate = selectedFuel.emissionsOutputRate;
-      emissionsRate = this.convertEmissions(emissionsRate, energyUnit);
+      if (selectedFuel) {
+        emissionsRate = selectedFuel.emissionsOutputRate;
+        emissionsRate = this.convertEmissions(emissionsRate, energyUnit);
+      }
     }
     return emissionsRate;
   }

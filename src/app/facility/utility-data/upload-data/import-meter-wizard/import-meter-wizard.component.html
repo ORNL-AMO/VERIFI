@@ -45,20 +45,41 @@
 </div>
 
 <hr>
-<div class="row">
+<div class="row" *ngIf="importMeters && hasInvalidMeter()">
+
     <div class="col">
-        <p *ngIf="importMeters && hasInvalidMeter()" class="alert alert-danger p-2 text-center">One or more of the
+        <p class="alert alert-danger p-2 text-center">One or more of the
             meters has invalid data. These meters will be skipped on import.
         </p>
     </div>
+</div>
+<div class="row">
     <div class="col">
-        <div class="saveCancel item-right text-right" *ngIf="wizardContext == 'template'">
-            <button class="btn btn-secondary" (click)="cancel()">Cancel</button>
-            <button class="btn btn-primary" (click)="submit()">Submit</button>
+        <div class="d-flex w-100 justify-content-between" *ngIf="wizardContext == 'template'">
+            <div>
+                <button class="btn btn-secondary" (click)="cancel()">Cancel</button>
+            </div>
+            <div>
+                <button class="btn btn-secondary" (click)="previousMeter()" *ngIf="selectedMeterIndex != 0">Previous
+                    Meter</button>
+                <button class="btn btn-primary ml-2" (click)="nextMeter()"
+                    *ngIf="selectedMeterIndex != (importMeters.length - 1)">Next Meter</button>
+                <button class="btn btn-primary ml-2" (click)="submit()"
+                    *ngIf="selectedMeterIndex == (importMeters.length - 1)">Submit Meters</button>
+            </div>
         </div>
-        <div class="saveCancel item-right text-right" *ngIf="wizardContext == 'excel'">
-            <button class="btn btn-secondary" (click)="back()">Back to Setup Data</button>
-            <button class="btn btn-primary" (click)="continue()">Submit Meters & Continue</button>
+        <div class="d-flex w-100 justify-content-between" *ngIf="wizardContext == 'excel'">
+            <div>
+                <button class="btn btn-secondary" (click)="back()">Back to Setup Data</button>
+            </div>
+            <div>
+                <button class="btn btn-secondary" (click)="previousMeter()" *ngIf="selectedMeterIndex != 0">Previous
+                    Meter</button>
+                <button class="btn btn-primary ml-2" (click)="nextMeter()"
+                    *ngIf="selectedMeterIndex != (importMeters.length - 1)">Next Meter</button>
+                <button class="btn btn-primary ml-2" (click)="continue()"
+                    *ngIf="selectedMeterIndex == (importMeters.length - 1)">Submit Meters</button>
+            </div>
         </div>
     </div>
 </div>

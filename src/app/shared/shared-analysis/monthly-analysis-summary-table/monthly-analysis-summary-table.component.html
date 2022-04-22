@@ -1,4 +1,4 @@
-<table class="table table-sm table-hover">
+<table class="table table-sm table-hover" #dataTable [ngClass]="{'copying-table': copyingTable}">
     <thead>
         <tr class="table-mh">
             <th class="first-column" colspan="2"></th>
@@ -173,6 +173,7 @@
     </tbody>
 </table>
 <div class="tableControls overflow-hidden">
+    <a class="click-link" (click)="copyTable()"><span class="fa fa-copy"></span> Copy Table</a>
     <div class="item-right">
         <ngb-pagination [collectionSize]="monthlyAnalysisSummaryData.length" [(page)]="currentPageNumber"
             [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Default pagination">

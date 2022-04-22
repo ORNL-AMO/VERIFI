@@ -1,0 +1,11 @@
+td:first-of-type{
+    text-align: right;
+    font-weight: 500;
+}
+
+table tbody tr:nth-child(even){
+    background-color: white;
+}
+table tbody tr:nth-child(even):hover{
+    background-color: rgba(0,0,0,.075);
+}

@@ -59,7 +59,7 @@ export class FacilityReportBarChartComponent implements OnInit {
 
   setUtilityData() {
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == this.facility.id });
+    let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == this.facility.guid });
     if (this.reportOptions.electricity) {
       this.electricityData = this.getDataByUtility('Electricity', facilityMeters);
     } else {

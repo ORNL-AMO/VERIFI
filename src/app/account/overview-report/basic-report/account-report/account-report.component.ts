@@ -48,7 +48,7 @@ export class AccountReportComponent implements OnInit {
 
   setFacilitySummary() {
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    let removeFacilityId: Array<number> = new Array();
+    let removeFacilityId: Array<string> = new Array();
     this.reportOptions.facilities.forEach(facility => {
       if (!facility.selected) {
         removeFacilityId.push(facility.facilityId);
@@ -68,7 +68,7 @@ export class AccountReportComponent implements OnInit {
         let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == facility.facilityId });
         let utilitySummary: ReportUtilitySummary = this.overviewReportService.getUtilityUsageData(facilityMeters, this.reportOptions, true);
         let accountFacilites: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-        let selectedFacility: IdbFacility = accountFacilites.find(accountFacility => { return accountFacility.id == facility.facilityId })
+        let selectedFacility: IdbFacility = accountFacilites.find(accountFacility => { return accountFacility.guid == facility.facilityId })
         this.facilitiesUtilitySummaries.push({
           facility: selectedFacility,
           utilitySummary: utilitySummary

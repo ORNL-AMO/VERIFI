@@ -31,11 +31,11 @@ export class AccountAnalysisCalculationsService {
     let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = new Array();
     accountAnalysisItem.facilityAnalysisItems.forEach(item => {
       if (item.analysisItemId != undefined) {
-        let analysisItem: IdbAnalysisItem = allAccountAnalysisDbItems.find(dbItem => { return dbItem.id == item.analysisItemId });
+        let analysisItem: IdbAnalysisItem = allAccountAnalysisDbItems.find(dbItem => { return dbItem.guid == item.analysisItemId });
         //update items with account options
         analysisItem.energyUnit = accountAnalysisItem.energyUnit;
 
-        let facility: IdbFacility = accountFacilities.find(facility => { return facility.id == item.facilityId });
+        let facility: IdbFacility = accountFacilities.find(facility => { return facility.guid == item.facilityId });
         let facilityItemSummary: Array<MonthlyAnalysisSummaryData> = this.facilityAnalysisCalculationsService.calculateMonthlyFacilityAnalysis(analysisItem, facility);
         monthlyAnalysisSummaryData = monthlyAnalysisSummaryData.concat(facilityItemSummary);
       }
@@ -131,7 +131,7 @@ export class AccountAnalysisCalculationsService {
         yearToDateSavings: yearToDateSavings,
         yearToDatePercentSavings: yearToDatePercentSavings * 100,
         rollingSavings: rollingSavings,
-        rolling12MonthImprovement: rolling12MonthImprovement * 100
+        rolling12MonthImprovement: rolling12MonthImprovement * 100,
       })
 
       summaryDataIndex++;
@@ -143,8 +143,8 @@ export class AccountAnalysisCalculationsService {
   }
 
   getAnnualAnalysisSummary(analysisItem: IdbAccountAnalysisItem, account: IdbAccount): Array<AnnualAnalysisSummary> {
-    let facilityMonthlySummaryData: Array<MonthlyAnalysisSummaryData> = this.calculateMonthlyAccountAnalysis(analysisItem, account);
-    let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = this.analysisCalculationsService.calculateAnnualAnalysisSummary(facilityMonthlySummaryData, analysisItem, account);
+    let accountMonthlySummaryData: Array<MonthlyAnalysisSummaryData> = this.calculateMonthlyAccountAnalysis(analysisItem, account);
+    let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = this.analysisCalculationsService.calculateAnnualAnalysisSummary(accountMonthlySummaryData, analysisItem, account);
     return annualAnalysisSummaries;
   }
 }

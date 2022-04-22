@@ -92,4 +92,22 @@
         <label class="">Notes</label>
         <textarea formControlName="notes" (input)="saveChanges()"></textarea>
     </div>
+
+    <div class="row">
+        <div class="mb-3 col-md-6 col-sm-12">
+            <label>Contact Name</label>
+            <input type="text" class="form-control" formControlName="contactName" (input)="saveChanges()"
+                onfocus="this.select();" minlength="1" maxlength="60">
+        </div>
+        <div class="mb-3 col-md-6 col-sm-12">
+            <label>Contact Phone</label>
+            <input type="text" class="form-control" formControlName="contactPhone" (input)="saveChanges()"
+                onfocus="this.select();" minlength="1" maxlength="10">
+        </div>
+        <div class="mb-3 col-md-6 col-sm-12">
+            <label>Contact Email</label>
+            <input type="email" class="form-control" formControlName="contactEmail" (input)="saveChanges()"
+                onfocus="this.select();" minlength="1" maxlength="85">
+        </div>
+    </div>
 </form>

@@ -38,6 +38,16 @@
                     <option *ngFor="let year of yearOptions" [ngValue]="year">{{year}}</option>
                 </select>
             </div>
+            <div class="form-group d-flex">
+                <label for="reportYear" class="w-50">
+                    Facility-level Baseline Adjustement
+                </label>
+                <div class="input-group w-50">
+                    <input type="number" id="baselineAdjustment" id="baselineAdjustment"
+                        [(ngModel)]="analysisItem.baselineAdjustment" (change)="saveItem()" min="0">
+                    <span class="unit" [innerHTML]="analysisItem.energyUnit | settingsLabel:'/yr'"></span>
+                </div>
+            </div>
             <hr>
         </div>
         <div class="col-6">

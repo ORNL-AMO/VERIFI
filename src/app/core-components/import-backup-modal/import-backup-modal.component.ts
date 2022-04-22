@@ -67,9 +67,9 @@ export class ImportBackupModalComponent implements OnInit {
               if (!this.importIsAccount) {
                 this.backupType = "Facility";
                 if (this.selectedAccount) {
-                  this.backupName = testBackup.facilityBackup.facility.name;
+                  this.backupName = testBackup.facility.name;
                   if (this.accountFacilities.length != 0) {
-                    let testFacility: IdbFacility = this.accountFacilities.find(facility => { return testBackup.facilityBackup.facility.name == facility.name });
+                    let testFacility: IdbFacility = this.accountFacilities.find(facility => { return this.backupName == facility.name });
                     if (testFacility) {
                       this.overwriteFacility = testFacility;
                     } else {
@@ -85,7 +85,7 @@ export class ImportBackupModalComponent implements OnInit {
               else if (this.importIsAccount) {
                 if (!this.inFacility) {
                   this.backupType = "Account"
-                  this.backupName = testBackup.accountBackup.account.name;
+                  this.backupName = testBackup.account.name;
                   this.backupFileError = undefined;
                 } else {
                   this.backupFileError = "You are trying to import an account in the facility management page. Please use the account management section to import accounts.";
@@ -101,6 +101,7 @@ export class ImportBackupModalComponent implements OnInit {
   }
 
   async importBackupFile() {
+    this.cancelImportBackup();
     this.loadingService.setLoadingStatus(true);
     this.loadingService.setLoadingMessage("Importing backup file...")
     let tmpBackupFile: BackupFile = JSON.parse(this.backupFile);
@@ -120,11 +121,10 @@ export class ImportBackupModalComponent implements OnInit {
     this.facilityDbService.setAllFacilities();
     this.accountDbService.setAllAccounts();
     this.loadingService.setLoadingStatus(false);
-    this.cancelImportBackup();
   }
 
   async importNewAccount(backupFile: BackupFile) {
-    let newAccount: IdbAccount = await this.backupDataService.importAccountBackup(backupFile.accountBackup);
+    let newAccount: IdbAccount = await this.backupDataService.importAccountBackupFile(backupFile);
     this.accountDbService.setSelectedAccount(newAccount.id);
   }
 
@@ -135,7 +135,7 @@ export class ImportBackupModalComponent implements OnInit {
   }
 
   async importNewFacility(backupFile: BackupFile) {
-    let newFacility: IdbFacility = await this.backupDataService.importFacilityBackup(backupFile.facilityBackup, this.selectedAccount.id);
+    let newFacility: IdbFacility = await this.backupDataService.importFacilityBackupFile(backupFile, this.selectedAccount.guid);
     this.accountDbService.setSelectedAccount(this.selectedAccount.id);
   }
 
