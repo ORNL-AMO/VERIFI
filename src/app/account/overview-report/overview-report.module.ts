@@ -24,11 +24,6 @@ import { FormsModule } from '@angular/forms';
 import { HelperPipesModule } from '../../shared/helper-pipes/helper-pipes.module';
 import { RouterModule } from '@angular/router';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
-import { BetterPlantsReportMenuComponent } from './better-plants-report-menu/better-plants-report-menu.component';
-import { BetterPlantsReportComponent } from './better-plants-report/better-plants-report.component';
-import { CompanyInformationTableComponent } from './better-plants-report/company-information-table/company-information-table.component';
-import { PrimaryEnergyConsumptionTableComponent } from './better-plants-report/primary-energy-consumption-table/primary-energy-consumption-table.component';
-import { FacilityPerformanceTableComponent } from './better-plants-report/facility-performance-table/facility-performance-table.component';
 
 
 
@@ -53,12 +48,7 @@ import { FacilityPerformanceTableComponent } from './better-plants-report/facili
     OverviewReportDashboardComponent,
     OverviewReportMenuComponent,
     ManageReportTemplatesComponent,
-    OverviewReportComponent,
-    BetterPlantsReportMenuComponent,
-    BetterPlantsReportComponent,
-    CompanyInformationTableComponent,
-    PrimaryEnergyConsumptionTableComponent,
-    FacilityPerformanceTableComponent
+    OverviewReportComponent
   ],
   imports: [
     CommonModule,

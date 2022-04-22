@@ -1,7 +1,7 @@
-<table class="table table-sm" #meterTable [ngClass]="{'copying-table': copyingTable}">
+<table class="table table-sm">
     <thead>
         <tr>
-            <th *ngIf="!copyingTable" class="input">
+            <th class="input">
                 <input #masterCheckbox type="checkbox" (change)="checkAll()" [(ngModel)]="allChecked">
             </th>
             <th (click)="setOrderDataField('readDate')" [ngClass]="{'active': orderDataField == 'readDate'}"
@@ -95,13 +95,13 @@
                 *ngIf="taxAndOther.basicCharge">
                 Basic Charge
             </th>
-            <th *ngIf="!copyingTable">Actions</th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
         <tr
-            *ngFor="let meterData of selectedMeterData | orderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
-            <td *ngIf="!copyingTable" class="input">
+            *ngFor="let meterData of meterListItem.meterDataItems | orderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
+            <td class="input">
                 <input type="checkbox" name="metersSelected" (change)="toggleChecked()" [(ngModel)]="meterData.checked">
             </td>
             <td [ngClass]="checkError(meterData.readDate)">{{meterData.readDate | date}}</td>
@@ -166,7 +166,7 @@
             <td *ngIf="taxAndOther.basicCharge">
                 {{meterData.basicCharge | customNumber:true}}
             </td>
-            <td *ngIf="!copyingTable" class="actions">
+            <td class="actions">
                 <div class="d-flex">
                     <i class="fa fa-pencil" title="Edit" (click)="setEditMeterData(meterData)"></i>
                     <i class="fa fa-trash" title="Delete" (click)="setDeleteMeterData(meterData)"></i>
@@ -175,13 +175,3 @@
         </tr>
     </tbody>
 </table>
-
-<div class="tableControls overflow-hidden">
-    <a class="click-link" (click)="copyTable()"><span class="fa fa-copy"></span> Copy Table</a>
-    <div class="item-right">
-        <ngb-pagination [collectionSize]="selectedMeterData.length" [(page)]="currentPageNumber"
-            [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Default pagination">
-        </ngb-pagination>
-    </div>
-    <p class="item-right">{{selectedMeterData.length}} entries</p>
-</div>

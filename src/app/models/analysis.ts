@@ -110,7 +110,7 @@ export interface MonthlyAnalysisSummaryData {
   yearToDatePercentSavings: number,
   rollingSavings: number,
   rolling12MonthImprovement: number,  
-  groupsSummaryData?: Array<MonthlyAnalysisSummaryData>,
+  groupsSummaryData?: Array<MonthlyAnalysisSummaryData>
 }
 
 export interface AnnualAnalysisSummary {
@@ -156,5 +156,5 @@ export interface AnalysisTableColumns {
     display: boolean,
     usedInAnalysis: boolean
   }>,
-  predictorGroupId: string
+  predictorGroupId: number
 }

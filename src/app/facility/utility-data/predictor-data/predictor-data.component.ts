@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -8,7 +8,6 @@ import { LoadingService } from 'src/app/core-components/loading/loading.service'
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import * as _ from 'lodash';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
-import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
 
 @Component({
   selector: 'app-predictor-data',
@@ -16,9 +15,6 @@ import { CopyTableService } from 'src/app/shared/helper-services/copy-table.serv
   styleUrls: ['./predictor-data.component.css']
 })
 export class PredictorDataComponent implements OnInit {
-
-  @ViewChild('predictorTable', { static: false }) predictorTable: ElementRef;
-
 
   itemsPerPage: number = 6;
   currentPageNumber: number = 1;
@@ -40,10 +36,9 @@ export class PredictorDataComponent implements OnInit {
   orderDataField: string = 'date';
   orderByDirection: string = 'desc';
   hasData: boolean;
-  copyingTable: boolean = false;
   constructor(private predictorsDbService: PredictordbService, private router: Router, private loadingService: LoadingService,
     private facilityDbService: FacilitydbService, private toastNotificationsService: ToastNotificationsService,
-    private sharedDataService: SharedDataService, private copyTableService: CopyTableService) { }
+    private sharedDataService: SharedDataService) { }
 
   ngOnInit(): void {
     this.facilityPredictorsSub = this.predictorsDbService.facilityPredictors.subscribe(predictors => {
@@ -185,7 +180,7 @@ export class PredictorDataComponent implements OnInit {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let accountPredictors: Array<IdbPredictorEntry> = await this.predictorsDbService.getAllByIndexRange("accountId", selectedFacility.accountId).toPromise();
     this.predictorsDbService.accountPredictorEntries.next(accountPredictors);
-    let facilityPredictors: Array<IdbPredictorEntry> = accountPredictors.filter(predictor => { return predictor.facilityId == selectedFacility.guid });
+    let facilityPredictors: Array<IdbPredictorEntry> = accountPredictors.filter(predictor => { return predictor.facilityId == selectedFacility.id });
     this.predictorsDbService.facilityPredictorEntries.next(facilityPredictors);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationsService.showToast("Predictor Data Deleted!", undefined, undefined, false, "success");
@@ -202,14 +197,5 @@ export class PredictorDataComponent implements OnInit {
     } else {
       this.orderDataField = str;
     }
-  }
-
-
-  copyTable(){
-    this.copyingTable = true;
-    setTimeout(() => {
-      this.copyTableService.copyTable(this.predictorTable);
-      this.copyingTable = false;
-    }, 200)
   }
 }

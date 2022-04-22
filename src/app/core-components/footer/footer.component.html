@@ -1,0 +1,13 @@
+<div class="footer" id="footer" role="footer" *ngIf="showFooter">
+    <button class="mr-2" (click)="deleteDatabase()">Reset Database</button>
+    <button class="mr-2 ml-2" (click)="backupAccount()">Backup Account</button>
+    <p>Last Backup: (<span *ngIf="lastBackupDate">{{lastBackupDate | date:'medium'}}</span><span
+            *ngIf="!lastBackupDate">&mdash;</span>)
+    <p>
+    <div class="action-items">
+        <!-- <button routerLink="/account-management"><i class="fa fa-cog"></i> Settings</button> -->
+        <p><i class="fa fa-building-o"></i> Facilities {{facilityCount}}/{{facilityCountTotal}}</p>
+        <p><i class="fa fa-user-circle-o"></i> Accounts {{accountCount}}</p>
+        <p>v{{version}}</p>
+    </div>
+</div>

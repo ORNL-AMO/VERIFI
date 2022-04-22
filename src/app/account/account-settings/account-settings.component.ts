@@ -79,7 +79,7 @@ export class AccountSettingsComponent implements OnInit {
     let overviewReportOptions: Array<IdbOverviewReportOptions> = this.overviewReportOptionsDbService.accountOverviewReportOptions.getValue();
     for (let index = 0; index < overviewReportOptions.length; index++) {
       overviewReportOptions[index].reportOptions.facilities.push({
-        facilityId: newFacility.guid,
+        facilityId: newFacility.id,
         selected: false
       });
       await this.overviewReportOptionsDbService.updateWithObservable(overviewReportOptions[index]).toPromise();
@@ -88,7 +88,7 @@ export class AccountSettingsComponent implements OnInit {
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
     for(let index = 0; index < accountAnalysisItems.length; index++){
       accountAnalysisItems[index].facilityAnalysisItems.push({
-        facilityId: newFacility.guid,
+        facilityId: newFacility.id,
         analysisItemId: undefined
       });
     }
@@ -104,28 +104,28 @@ export class AccountSettingsComponent implements OnInit {
 
     // Delete all info associated with account
     this.loadingService.setLoadingMessage("Deleting Facility Predictors...");
-    await this.predictorDbService.deleteAllFacilityPredictors(this.facilityToDelete.guid);
+    await this.predictorDbService.deleteAllFacilityPredictors(this.facilityToDelete.id);
     this.loadingService.setLoadingMessage("Deleting Facility Meter Data...");
-    await this.utilityMeterDataDbService.deleteAllFacilityMeterData(this.facilityToDelete.guid);
+    await this.utilityMeterDataDbService.deleteAllFacilityMeterData(this.facilityToDelete.id);
     this.loadingService.setLoadingMessage("Deleting Facility Meters...");
-    await this.utilityMeterDbService.deleteAllFacilityMeters(this.facilityToDelete.guid);
+    await this.utilityMeterDbService.deleteAllFacilityMeters(this.facilityToDelete.id);
     this.loadingService.setLoadingMessage("Deleting Facility Meter Groups...");
-    await this.utilityMeterGroupDbService.deleteAllFacilityMeterGroups(this.facilityToDelete.guid);
+    await this.utilityMeterGroupDbService.deleteAllFacilityMeterGroups(this.facilityToDelete.id);
     this.loadingService.setLoadingMessage("Updating Reports...")
-    await this.overviewReportOptionsDbService.updateReportsRemoveFacility(this.facilityToDelete.guid);
+    await this.overviewReportOptionsDbService.updateReportsRemoveFacility(this.facilityToDelete.id);
     this.loadingService.setLoadingMessage("Deleting Analysis Items...")
-    await this.analysisDbService.deleteAllFacilityAnalysisItems(this.facilityToDelete.guid);
+    await this.analysisDbService.deleteAllFacilityAnalysisItems(this.facilityToDelete.id);
     this.loadingService.setLoadingMessage('Updating Analysis Items...');
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
     for (let index = 0; index < accountAnalysisItems.length; index++) {
-      accountAnalysisItems[index].facilityAnalysisItems = accountAnalysisItems[index].facilityAnalysisItems.filter(facilityItem => { return facilityItem.facilityId != this.facilityToDelete.guid });
+      accountAnalysisItems[index].facilityAnalysisItems = accountAnalysisItems[index].facilityAnalysisItems.filter(facilityItem => { return facilityItem.facilityId != this.facilityToDelete.id });
       await this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[index]).toPromise();
     }
 
     this.loadingService.setLoadingMessage('Updating Reports...');
     let overviewReportOptions: Array<IdbOverviewReportOptions> = this.overviewReportOptionsDbService.accountOverviewReportOptions.getValue();
     for (let index = 0; index < overviewReportOptions.length; index++) {
-      overviewReportOptions[index].reportOptions.facilities = overviewReportOptions[index].reportOptions.facilities.filter(reportFacility => { return reportFacility.facilityId != this.facilityToDelete.guid });
+      overviewReportOptions[index].reportOptions.facilities = overviewReportOptions[index].reportOptions.facilities.filter(reportFacility => { return reportFacility.facilityId != this.facilityToDelete.id });
       await this.overviewReportOptionsDbService.updateWithObservable(overviewReportOptions[index]).toPromise();
     }
 
@@ -134,7 +134,7 @@ export class AccountSettingsComponent implements OnInit {
     let allFacilities: Array<IdbFacility> = await this.facilityDbService.getAll().toPromise();
     // Then navigate to another facility
     this.facilityDbService.allFacilities.next(allFacilities);
-    let accountFacilites: Array<IdbFacility> = allFacilities.filter(facility => { return facility.accountId == this.selectedAccount.guid });
+    let accountFacilites: Array<IdbFacility> = allFacilities.filter(facility => { return facility.accountId == this.selectedAccount.id });
     this.facilityDbService.accountFacilities.next(accountFacilites);
     this.facilityDbService.setSelectedFacility();
     this.loadingService.setLoadingStatus(false);
@@ -218,13 +218,5 @@ export class AccountSettingsComponent implements OnInit {
   openImportBackup() {
     this.importBackupModalService.inFacility = false;
     this.importBackupModalService.showModal.next(true);
-  }
-
-
-  //TODO: Add button
-  async deleteDatabase() {
-    this.loadingService.setLoadingStatus(true);
-    this.loadingService.setLoadingMessage('Resetting Database, if this takes too long restart application..');
-    this.accountDbService.deleteDatabase();
   }
 }

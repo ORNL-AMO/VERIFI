@@ -1,10 +1,38 @@
 <div class="wrapper main-content p-0">
+    <!-- <nav class="nav nav-tabs"> -->
     <ul class="nav nav-tabs">
         <li class="nav-item"><a class="nav-link" routerLink="energy-source" [routerLinkActive]="['active']"
                 [routerLinkActiveOptions]="{ exact: true }">Energy Source</a></li>
-        <li class="nav-item" *ngFor="let meter of utilityMeters"><a class="nav-link"
-                routerLink="utility-meter/{{meter.id}}" [routerLinkActive]="['active']">{{meter.name}}</a></li>
+        <li class="nav-item" [hidden]="!electricity" [ngClass]="electricityTabClass">
+            <a class="nav-link" routerLink="electricity" [routerLinkActive]="['active']">Electricity
+            </a>
+        </li>
+        <li class="nav-item" [hidden]="!naturalGas" [ngClass]="naturalGasTabClass">
+            <a class="nav-link" routerLink="natural-gas" [routerLinkActive]="['active']">Natural Gas
+            </a>
+        </li>
+        <li class="nav-item" [hidden]="!otherFuels" [ngClass]="otherFuelsTabClass">
+            <a class="nav-link" routerLink="other-fuels" [routerLinkActive]="['active']">Other Fuels
+            </a>
+        </li>
+        <li class="nav-item" [hidden]="!otherEnergy" [ngClass]="otherEnergyTabClass">
+            <a class="nav-link" routerLink="other-energy" [routerLinkActive]="['active']">Other Energy
+            </a>
+        </li>
+        <li class="nav-item" [hidden]="!water" [ngClass]="waterTabClass">
+            <a class="nav-link" routerLink="water" [routerLinkActive]="['active']">Water
+            </a>
+        </li>
+        <li class="nav-item" [hidden]="!wasteWater" [ngClass]="wasteWaterTabClass">
+            <a class="nav-link" routerLink="waste-water" [routerLinkActive]="['active']">Waste Water
+            </a>
+        </li>
+        <li class="nav-item" [hidden]="!otherUtility" [ngClass]="otherUtilityTabClass">
+            <a class="nav-link" routerLink="other-utility" [routerLinkActive]="['active']">Other Utility
+            </a>
+        </li>
     </ul>
+    <!-- </nav> -->
     <div class="content-padding">
         <router-outlet></router-outlet>
     </div>

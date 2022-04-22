@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { CalanderizationFilters, CalanderizationOptions, CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
+import { CalanderizationFilters, CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
 import { CalanderizationService } from '../../../shared/helper-services/calanderization.service';
 import * as _ from 'lodash';
@@ -17,7 +17,8 @@ export class CalanderizationComponent implements OnInit {
 
 
   itemsPerPage = 12;
-  calanderizedMeter: CalanderizedMeter;
+  tablePageNumbers: Array<number>;
+  calanderizedMeterData: Array<CalanderizedMeter>
   facilityMetersSub: Subscription;
   facilityMeterDataSub: Subscription;
   facilityMeters: Array<IdbUtilityMeter>;
@@ -28,13 +29,11 @@ export class CalanderizationComponent implements OnInit {
   calanderizedDataFiltersSub: Subscription;
   dataDisplay: "table" | "graph";
   displayGraphEnergy: "bar" | "scatter" | null;
-  displayGraphCost: "bar" | "scatter" | null;
+  displayGraphCost:  "bar" | "scatter" | null;
 
   dataApplicationMeter: IdbUtilityMeter;
-
-  selectedMeter: IdbUtilityMeter;
   selectedFacility: IdbFacility;
-
+  selectedFacilitySub: Subscription;
   constructor(private calanderizationService: CalanderizationService, private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService, private facilityDbService: FacilitydbService) { }
 
@@ -42,21 +41,23 @@ export class CalanderizationComponent implements OnInit {
     this.displayGraphCost = this.calanderizationService.displayGraphCost;
     this.displayGraphEnergy = this.calanderizationService.displayGraphEnergy;
     this.dataDisplay = this.calanderizationService.dataDisplay;
-    this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
-    this.facilityMetersSub = this.utilityMeterDbService.facilityMeters.subscribe(facilityMeters => {
-      this.facilityMeters = facilityMeters;
-      this.initializeSelectedMeter();
-      this.setCalanderizedMeterData();
-    });
-
     this.calanderizedDataFiltersSub = this.calanderizationService.calanderizedDataFilters.subscribe(val => {
       this.calanderizedDataFilters = val;
       this.setCalanderizedMeterData();
     });
 
+    this.facilityMetersSub = this.utilityMeterDbService.facilityMeters.subscribe(facilityMeters => {
+      this.facilityMeters = facilityMeters;
+      this.setCalanderizedMeterData();
+    });
 
     this.facilityMeterDataSub = this.utilityMeterDataDbService.accountMeterData.subscribe(() => {
       this.setCalanderizedMeterData();
+    });
+
+    
+    this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
+      this.selectedFacility = val;
     });
 
   }
@@ -75,28 +76,16 @@ export class CalanderizationComponent implements OnInit {
     this.calanderizationService.displayGraphCost = this.displayGraphCost;
     this.calanderizationService.displayGraphEnergy = this.displayGraphEnergy;
     this.calanderizationService.dataDisplay = this.dataDisplay;
-  }
-
-  initializeSelectedMeter() {
-    if (!this.selectedMeter) {
-      this.selectedMeter = this.facilityMeters[0];
-    } else {
-      let meterInFacility: IdbUtilityMeter = this.facilityMeters.find(meter => { return meter.id == this.selectedMeter.id });
-      if (!meterInFacility) {
-        this.selectedMeter = this.facilityMeters[0];
-      }
-    }
+    this.selectedFacilitySub.unsubscribe();
   }
 
   setCalanderizedMeterData() {
-    if (this.selectedMeter && this.calanderizedDataFilters) {
-      let calanderizationOptions: CalanderizationOptions = {
-        energyIsSource:  this.selectedFacility.energyIsSource
-      }
-      let calanderizedMeterData: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMeterData([this.selectedMeter], false, false, calanderizationOptions);
-      this.setDateRange(calanderizedMeterData);
-      calanderizedMeterData = this.filterMeterDataDateRanges(calanderizedMeterData);
-      this.calanderizedMeter = calanderizedMeterData[0];
+    if (this.facilityMeters) {
+      let filteredMeters: Array<IdbUtilityMeter> = this.filterMeters(this.facilityMeters);
+      this.calanderizedMeterData = this.calanderizationService.getCalanderizedMeterData(filteredMeters, false);
+      this.setDateRange();
+      this.calanderizedMeterData = this.filterMeterDataDateRanges(this.calanderizedMeterData);
+      this.tablePageNumbers = this.calanderizedMeterData.map(() => { return 1 });
     }
   }
 
@@ -112,9 +101,26 @@ export class CalanderizationComponent implements OnInit {
     }
   }
 
-  setDateRange(calanderizedMeterData: Array<CalanderizedMeter>) {
+  filterMeters(meters: Array<IdbUtilityMeter>): Array<IdbUtilityMeter> {
+    let filteredMeters: Array<IdbUtilityMeter> = meters;
+    //filter by source
+    if (this.calanderizedDataFilters) {
+      if (!this.calanderizedDataFilters.showAllSources) {
+        let selectedSources: Array<string> = new Array();
+        this.calanderizedDataFilters.selectedSources.forEach(sourceOption => {
+          if (sourceOption.selected) {
+            selectedSources.push(sourceOption.source);
+          }
+        })
+        filteredMeters = filteredMeters.filter(meter => { return selectedSources.includes(meter.source) });
+      }
+    }
+    return filteredMeters;
+  }
+
+  setDateRange() {
     if (!this.calanderizedDataFilters.selectedDateMax || !this.calanderizedDataFilters.selectedDateMin) {
-      let allMeterData: Array<MonthlyData> = calanderizedMeterData.flatMap(calanderizedMeter => { return calanderizedMeter.monthlyData });
+      let allMeterData: Array<MonthlyData> = this.calanderizedMeterData.flatMap(calanderizedMeter => { return calanderizedMeter.monthlyData });
       let maxDateEntry: MonthlyData = _.maxBy(allMeterData, 'date');
       let minDateEntry: MonthlyData = _.minBy(allMeterData, 'date');
       if (minDateEntry && maxDateEntry) {
@@ -158,37 +164,36 @@ export class CalanderizationComponent implements OnInit {
   }
 
   setDisplayGraphEnergy(str: "bar" | "scatter") {
-    if (str == this.displayGraphEnergy) {
+    if(str == this.displayGraphEnergy){
       this.displayGraphEnergy = undefined;
-    } else {
-      this.displayGraphEnergy = str;
+    }else{
+      this.displayGraphEnergy = str;      
     }
   }
 
-  setDisplayGraphCost(str: "bar" | "scatter") {
-    if (str == this.displayGraphCost) {
+  setDisplayGraphCost(str:  "bar" | "scatter") {
+    if(str == this.displayGraphCost){
       this.displayGraphCost = undefined;
-    } else {
-      this.displayGraphCost = str;
+    }else{
+      this.displayGraphCost = str;      
     }
   }
 
-  showDataApplicationModal() {
-    this.dataApplicationMeter = JSON.parse(JSON.stringify(this.selectedMeter));
+  showDataApplicationModal(meter: IdbUtilityMeter){
+    this.dataApplicationMeter = JSON.parse(JSON.stringify(meter));
   }
 
-  cancelSetDataApplication() {
+  cancelSetDataApplication(){
     this.dataApplicationMeter = undefined;
   }
 
-  setDataApplication() {
+  setDataApplication(){
     this.utilityMeterDbService.update(this.dataApplicationMeter);
-    this.selectedMeter = this.dataApplicationMeter;
     this.cancelSetDataApplication();
   }
 
-  setCalanderizeData(calanderize: 'fullMonth' | 'backward') {
-    this.dataApplicationMeter = this.selectedMeter;
+  setCalanderizeData(meter: IdbUtilityMeter, calanderize: 'fullMonth' | 'backward'){
+    this.dataApplicationMeter = meter;
     this.dataApplicationMeter.meterReadingDataApplication = calanderize;
     this.setDataApplication();
   }
@@ -196,10 +201,5 @@ export class CalanderizationComponent implements OnInit {
   setFacilityEnergyIsSource(energyIsSource: boolean) {
     this.selectedFacility.energyIsSource = energyIsSource;
     this.facilityDbService.update(this.selectedFacility);
-  }
-
-  selectMeter(meter: IdbUtilityMeter) {
-    this.selectedMeter = meter;
-    this.setCalanderizedMeterData();
   }
 }

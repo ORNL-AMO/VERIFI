@@ -53,7 +53,7 @@ export class AccountAnalysisBannerComponent implements OnInit {
   }
 
   setInDashboard(url: string) {
-    this.inDashboard = url.includes('dashboard') || (url == '/account/analysis');
+    this.inDashboard = !url.includes('dashboard');
   }
 
   goToDashboard() {

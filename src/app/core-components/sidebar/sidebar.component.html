@@ -3,7 +3,7 @@
         <i class="fa" [ngClass]="{'fa-align-left': !open, 'fa-align-right': open}"></i>
     </a>
     <hr>
-    <a title="Account Overview" class="nav-link" routerLink="/account" [routerLinkActive]="['active-head']" [ngClass]="{'open': open}"><i
+    <a class="nav-link" routerLink="/account" [routerLinkActive]="['active-head']" [ngClass]="{'open': open}"><i
             class="fa fa-building"></i>
         <span [hidden]="!open" class="pl-2 nav-label">
             {{accountName}}
@@ -12,19 +12,19 @@
 
     <div class="d-flex"
         [ngClass]="{'flex-column not-open': !open, 'icon-row open': open, 'hidden': checkHideAccountLinks()}">
-        <a title="Account Overview" class="nav-link" routerLink="/account/home" [routerLinkActive]="['active']"><i class="fa fa-home"></i>
+        <a class="nav-link" routerLink="/account/home" [routerLinkActive]="['active']"><i class="fa fa-home"></i>
         </a>
-        <a title="Account Analysis" class="nav-link" routerLink="/account/analysis" [routerLinkActive]="['active']"><i
+        <a class="nav-link" routerLink="/account/reports" [routerLinkActive]="['active']"><i class="fa fa-folder"></i>
+        </a>
+        <a class="nav-link" routerLink="/account/analysis" [routerLinkActive]="['active']"><i
                 class="fa fa-microscope"></i>
         </a>
-        <a title="Account Reports" class="nav-link" routerLink="/account/reports" [routerLinkActive]="['active']"><i class="fa fa-folder"></i>
-        </a>
-        <a title="Account Settings" class="nav-link" routerLink="/account/settings" [routerLinkActive]="['active']"><i class="fa fa-cog"></i>
+        <a class="nav-link" routerLink="/account/settings" [routerLinkActive]="['active']"><i class="fa fa-cog"></i>
         </a>
     </div>
     <hr>
     <div *ngFor="let facility of facilityList" [ngClass]="{'open': open, 'not-open': !open}">
-        <a title="Facility Overview" class="nav-link" routerLink="/facility/{{facility.id}}" [routerLinkActive]="['active-head']"><i
+        <a class="nav-link" routerLink="/facility/{{facility.id}}" [routerLinkActive]="['active-head']"><i
                 class="fa fa-industry" [ngStyle]="{color: facility.color}"></i>
             <span [hidden]="!open" class="pl-2 nav-label">
                 {{facility.name}}
@@ -32,19 +32,19 @@
         </a>
         <div class="d-flex icon-row"
             [ngClass]="{'flex-column not-open': !open, 'icon-row': open, 'hidden': checkHideFacilityLinks(facility)}">
-            <a title="Facility Overview" class="nav-link" routerLink="/facility/{{facility.id}}/home" [routerLinkActive]="['active']"><i
+            <a class="nav-link" routerLink="/facility/{{facility.id}}/home" [routerLinkActive]="['active']"><i
                     class="fa fa-home"></i>
             </a>
-            <a title="Facility Utility Data" class="nav-link" routerLink="/facility/{{facility.id}}/utility" [routerLinkActive]="['active']"><i
+            <a class="nav-link" routerLink="/facility/{{facility.id}}/utility" [routerLinkActive]="['active']"><i
                     class="fa fa-file-invoice"></i>
             </a>
-            <a title="Facility Data Visualization" class="nav-link" routerLink="/facility/{{facility.id}}/visualization" [routerLinkActive]="['active']"><i
+            <a class="nav-link" routerLink="/facility/{{facility.id}}/visualization" [routerLinkActive]="['active']"><i
                     class="fa fa-chart-line"></i>
             </a>
-            <a title="Facility Analysis" class="nav-link" routerLink="/facility/{{facility.id}}/analysis" [routerLinkActive]="['active']"><i
+            <a class="nav-link" routerLink="/facility/{{facility.id}}/analysis" [routerLinkActive]="['active']"><i
                     class="fa fa-microscope"></i>
             </a>
-            <a title="Facility Settings" class="nav-link" routerLink="/facility/{{facility.id}}/settings" [routerLinkActive]="['active']"><i
+            <a class="nav-link" routerLink="/facility/{{facility.id}}/settings" [routerLinkActive]="['active']"><i
                     class="fa fa-cog"></i>
             </a>
         </div>

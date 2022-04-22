@@ -52,7 +52,7 @@ export class UploadDataRunnerService {
     await this.addMeterGroups(newMeters);
 
     //update groups behavior subject, set groupId's for meters
-    let meterGroups: Array<IdbUtilityMeterGroup> = await this.utilityMeterGroupdbService.getAllByIndexRange('facilityId', selectedFacility.guid).toPromise();
+    let meterGroups: Array<IdbUtilityMeterGroup> = await this.utilityMeterGroupdbService.getAllByIndexRange('facilityId', selectedFacility.id).toPromise();
     this.utilityMeterGroupdbService.facilityMeterGroups.next(meterGroups);
     newMeters = this.setGroupIds(newMeters);
     existingMeters = this.setGroupIds(existingMeters);
@@ -63,7 +63,7 @@ export class UploadDataRunnerService {
     //update meter behavior subjects, updated meters needed for meter data import
     let accountMeters: Array<IdbUtilityMeter> = await this.utilityMeterdbService.getAllByIndexRange('accountId', selectedFacility.accountId).toPromise();
     this.utilityMeterdbService.accountMeters.next(accountMeters);
-    let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == selectedFacility.guid });
+    let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == selectedFacility.id });
     this.utilityMeterdbService.facilityMeters.next(facilityMeters);
 
     //add meter data
@@ -192,7 +192,7 @@ export class UploadDataRunnerService {
     for (let newEntryIndex = 0; newEntryIndex < newPredictorEntries.length; newEntryIndex++) {
       let newEntryDate: Date = new Date(newPredictorEntries[newEntryIndex]["Date"]);
       //get new entry
-      let newEntry: IdbPredictorEntry = this.predictorDbService.getNewIdbPredictorEntry(selectedFacility.guid, selectedFacility.accountId, newEntryDate);
+      let newEntry: IdbPredictorEntry = this.predictorDbService.getNewIdbPredictorEntry(selectedFacility.id, selectedFacility.accountId, newEntryDate);
       //add new predictor data to entry
       for (let i = 0; i < newPredictors.length; i++) {
         let predictorToAdd: PredictorData = JSON.parse(JSON.stringify(newPredictors[i]));
@@ -247,7 +247,7 @@ export class UploadDataRunnerService {
     meters.forEach(meter => {
       let existingGroup: IdbUtilityMeterGroup = facilityGroups.find(meterGroup => { return meterGroup.name == meter.group });
       if (existingGroup) {
-        meter.groupId = existingGroup.guid;
+        meter.groupId = existingGroup.id;
       }
     });
     return meters;
@@ -273,7 +273,7 @@ export class UploadDataRunnerService {
     } else {
       let facilityMeter: IdbUtilityMeter = facilityMeters.find(meter => { return meter.meterNumber == meterData.meterNumber || meter.name == meterData.meterNumber });
       if (facilityMeter) {
-        meterData.meterId = facilityMeter.guid;
+        meterData.meterId = facilityMeter.id;
         return meterData;
       } else {
         return meterData;

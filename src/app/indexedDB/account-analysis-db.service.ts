@@ -28,7 +28,7 @@ export class AccountAnalysisDbService {
   async initializeAnalysisItems() {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     if (selectedAccount) {
-      let accountAnalysisItems: Array<IdbAccountAnalysisItem> = await this.getAllByIndexRange('accountId', selectedAccount.guid).toPromise();
+      let accountAnalysisItems: Array<IdbAccountAnalysisItem> = await this.getAllByIndexRange('accountId', selectedAccount.id).toPromise();
       this.accountAnalysisItems.next(accountAnalysisItems);
 
       let storedAnalysisId: number = this.localStorageService.retrieve("accountAnalysisItemsId");
@@ -48,7 +48,7 @@ export class AccountAnalysisDbService {
   setAccountAnalysisItems() {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     if (selectedAccount) {
-      this.getAllByIndexRange('accountId', selectedAccount.guid).subscribe((analysisItems: Array<IdbAccountAnalysisItem>) => {
+      this.getAllByIndexRange('accountId', selectedAccount.id).subscribe((analysisItems: Array<IdbAccountAnalysisItem>) => {
         this.accountAnalysisItems.next(analysisItems);
       });
     }
@@ -111,26 +111,24 @@ export class AccountAnalysisDbService {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     let facilityAnalysisItems: Array<{
-      facilityId: string,
-      analysisItemId: string
+      facilityId: number,
+      analysisItemId: number
     }> = new Array();
     accountFacilities.forEach(facility => {
       facilityAnalysisItems.push({
-        facilityId: facility.guid,
+        facilityId: facility.id,
         analysisItemId: undefined
       })
     })
     return {
-      accountId: selectedAccount.guid,
-      guid: Math.random().toString(36).substr(2, 9),
+      accountId: selectedAccount.id,
       date: new Date(),
       name: 'Account Analysis',
       // energyIsSource: selectedAccount.energyIsSource,
       reportYear: selectedAccount.sustainabilityQuestions.energyReductionTargetYear,
       energyUnit: selectedAccount.energyUnit,
       facilityAnalysisItems: facilityAnalysisItems,
-      energyIsSource: selectedAccount.energyIsSource,
-      baselineAdjustment: 0
+      energyIsSource: selectedAccount.energyIsSource
     }
   }
 
@@ -146,7 +144,7 @@ export class AccountAnalysisDbService {
     }
   }
 
-  updateFacilityItemSelection(analysiItem: IdbAccountAnalysisItem, analysisItemId: string, facilityId: string){
+  updateFacilityItemSelection(analysiItem: IdbAccountAnalysisItem, analysisItemId: number, facilityId: number){
     analysiItem.facilityAnalysisItems.forEach(item => {
       if(item.facilityId == facilityId){
         item.analysisItemId = analysisItemId;

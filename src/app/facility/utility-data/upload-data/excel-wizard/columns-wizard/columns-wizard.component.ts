@@ -102,7 +102,7 @@ export class ColumnsWizardComponent implements OnInit {
     let dateGroup = this.columnGroups.find(group => {
       return group.groupLabel == 'Date';
     });
-    if (dateGroup && dateGroup.groupItems.length != 0) {
+    if (dateGroup.groupItems.length != 0) {
       let dateColumn: ColumnItem = dateGroup.groupItems[0];
       let datesColumnData: Array<string> = selectedWorksheetDataHeaderMap.map(data => { return data[dateColumn.value] });
       datesColumnData = datesColumnData.filter(item => { return item != undefined });

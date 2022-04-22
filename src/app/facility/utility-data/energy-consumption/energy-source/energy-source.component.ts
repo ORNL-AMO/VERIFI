@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { AccountdbService } from "../../../../indexedDB/account-db.service";
 import { FacilitydbService } from "../../../../indexedDB/facility-db.service";
 import { UtilityMeterDatadbService } from "../../../../indexedDB/utilityMeterData-db.service";
@@ -12,7 +12,6 @@ import { LoadingService } from 'src/app/core-components/loading/loading.service'
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
-import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
 
 @Component({
   selector: 'app-energy-source',
@@ -21,7 +20,6 @@ import { CopyTableService } from 'src/app/shared/helper-services/copy-table.serv
 })
 export class EnergySourceComponent implements OnInit {
 
-  @ViewChild('meterTable', { static: false }) meterTable: ElementRef;
   meterList: Array<IdbUtilityMeter>;
   meterListSub: Subscription;
 
@@ -36,7 +34,6 @@ export class EnergySourceComponent implements OnInit {
   addOrEdit: string = 'add';
   orderDataField: string = 'name';
   orderByDirection: string = 'desc';
-  copyingTable: boolean = false;
   constructor(
     private accountdbService: AccountdbService,
     private facilitydbService: FacilitydbService,
@@ -47,8 +44,7 @@ export class EnergySourceComponent implements OnInit {
     private loadingService: LoadingService,
     private toastNoticationService: ToastNotificationsService,
     private energyUnitsHelperService: EnergyUnitsHelperService,
-    private sharedDataService: SharedDataService,
-    private copyTableService: CopyTableService
+    private sharedDataService: SharedDataService
   ) { }
 
   ngOnInit() {
@@ -72,7 +68,7 @@ export class EnergySourceComponent implements OnInit {
     let selectedFacility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
     let selectedAccount: IdbAccount = this.accountdbService.selectedAccount.getValue();
     this.addOrEdit = 'add';
-    this.editMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.guid, selectedAccount.guid, true, selectedFacility.emissionsOutputRate, selectedFacility.energyUnit);
+    this.editMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.id, selectedAccount.id, true, selectedFacility.emissionsOutputRate, selectedFacility.energyUnit);
     this.sharedDataService.modalOpen.next(true);
   }
 
@@ -99,7 +95,7 @@ export class EnergySourceComponent implements OnInit {
 
 
     //delete meter data
-    let meterData: Array<IdbUtilityMeterData> = await this.utilityMeterDatadbService.getAllByIndexRange('meterId', this.meterToDelete.guid).toPromise();
+    let meterData: Array<IdbUtilityMeterData> = await this.utilityMeterDatadbService.getAllByIndexRange('meterId', this.meterToDelete.id).toPromise();
     for (let index = 0; index < meterData.length; index++) {
       await this.utilityMeterDatadbService.deleteWithObservable(meterData[index].id).toPromise();
     }
@@ -107,12 +103,12 @@ export class EnergySourceComponent implements OnInit {
     //set meters
     let accountMeters: Array<IdbUtilityMeter> = await this.utilityMeterdbService.getAllByIndexRange("accountId", selectedFacility.accountId).toPromise();
     this.utilityMeterdbService.accountMeters.next(accountMeters);
-    let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == selectedFacility.guid });
+    let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == selectedFacility.id });
     this.utilityMeterdbService.facilityMeters.next(facilityMeters);
     //set meter data
     let accountMeterData: Array<IdbUtilityMeterData> = await this.utilityMeterDatadbService.getAllByIndexRange("accountId", selectedFacility.accountId).toPromise();
     this.utilityMeterDatadbService.accountMeterData.next(accountMeterData);
-    let facilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.filter(meterData => { return meterData.facilityId == selectedFacility.guid });
+    let facilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.filter(meterData => { return meterData.facilityId == selectedFacility.id });
     this.utilityMeterDatadbService.facilityMeterData.next(facilityMeterData);
     this.cancelDelete();
     this.loadingService.setLoadingStatus(false);
@@ -150,14 +146,6 @@ export class EnergySourceComponent implements OnInit {
       meter.unitsDifferent = differentUnits.emissionsOutputRate;
     });
     return meters;
-  }
-
-  copyTable(){
-    this.copyingTable = true;
-    setTimeout(() => {
-      this.copyTableService.copyTable(this.meterTable);
-      this.copyingTable = false;
-    }, 200)
   }
 
 }

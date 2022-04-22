@@ -96,9 +96,8 @@ export class OverviewReportMenuComponent implements OnInit {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let newIdbReportOptionsItem: IdbOverviewReportOptions = {
       date: new Date(),
-      guid: Math.random().toString(36).substr(2, 9),
       reportOptions: this.reportOptions,
-      accountId: selectedAccount.guid,
+      accountId: selectedAccount.id,
       type: type,
       name: this.name
     }

@@ -11,7 +11,3 @@ thead th:hover{
     color: green;
     font-size: larger;
 }
-
-.copying-table .actions .fa, .copying-table input, .copying-table br{
-    display: none;
-}

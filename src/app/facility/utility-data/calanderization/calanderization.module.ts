@@ -7,7 +7,6 @@ import { CalanderizationComponent } from './calanderization.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgbDatepickerModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.module';
-import { CalanderizedMeterDataTableComponent } from './calanderized-meter-data-table/calanderized-meter-data-table.component';
 
 
 
@@ -17,7 +16,6 @@ import { CalanderizedMeterDataTableComponent } from './calanderized-meter-data-t
     CalanderizationFilterComponent,
     DataApplicationMenuComponent,
     CalanderizationComponent,
-    CalanderizedMeterDataTableComponent,
   ],
   imports: [
     CommonModule,

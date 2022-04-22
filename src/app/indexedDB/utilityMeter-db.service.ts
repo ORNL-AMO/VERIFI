@@ -26,11 +26,11 @@ export class UtilityMeterdbService {
     async initializeMeterData() {
         let selectedAccount: IdbAccount = this.accountdbService.selectedAccount.getValue();
         if (selectedAccount) {
-            let accountMeters: Array<IdbUtilityMeter> = await this.getAllByIndexRange('accountId', selectedAccount.guid).toPromise();
+            let accountMeters: Array<IdbUtilityMeter> = await this.getAllByIndexRange('accountId', selectedAccount.id).toPromise();
             this.accountMeters.next(accountMeters);
             let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
             if (selectedFacility) {
-                let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == selectedFacility.guid });
+                let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == selectedFacility.id });
                 this.facilityMeters.next(facilityMeters);
             }
         }
@@ -39,7 +39,7 @@ export class UtilityMeterdbService {
     setFacilityMeters() {
         let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
         if (selectedFacility) {
-            this.getAllByIndexRange('facilityId', selectedFacility.guid).subscribe(facilityMeters => {
+            this.getAllByIndexRange('facilityId', selectedFacility.id).subscribe(facilityMeters => {
                 this.facilityMeters.next(facilityMeters);
             });
         }
@@ -48,7 +48,7 @@ export class UtilityMeterdbService {
     setAccountMeters() {
         let selectedAccount: IdbAccount = this.accountdbService.selectedAccount.getValue();
         if (selectedAccount) {
-            this.getAllByIndexRange('accountId', selectedAccount.guid).subscribe(facilityMeters => {
+            this.getAllByIndexRange('accountId', selectedAccount.id).subscribe(facilityMeters => {
                 this.accountMeters.next(facilityMeters);
             });
         }
@@ -112,7 +112,7 @@ export class UtilityMeterdbService {
         return this.dbService.delete('utilityMeter', utilityMeterId)
     }
 
-    async deleteAllFacilityMeters(facilityId: string) {
+    async deleteAllFacilityMeters(facilityId: number) {
         let accountMeterEntries: Array<IdbUtilityMeter> = this.accountMeters.getValue();
         let facilityMeterEntries: Array<IdbUtilityMeter> = accountMeterEntries.filter(meter => { return meter.facilityId == facilityId });
         await this.deleteMeterEntriesAsync(facilityMeterEntries);
@@ -130,7 +130,7 @@ export class UtilityMeterdbService {
         }
     }
 
-    getNewIdbUtilityMeter(facilityId: string, accountId: string, setDefaults: boolean, emissionsOutputRate: number, energyUnit: string): IdbUtilityMeter {
+    getNewIdbUtilityMeter(facilityId: number, accountId: number, setDefaults: boolean, emissionsOutputRate: number, energyUnit: string): IdbUtilityMeter {
         let source: MeterSource;
         let startingUnit: string;
         if (setDefaults) {
@@ -141,7 +141,6 @@ export class UtilityMeterdbService {
         return {
             facilityId: facilityId,
             accountId: accountId,
-            guid: Math.random().toString(36).substr(2, 9),
             // id: undefined,
             groupId: undefined,
             meterNumber: undefined,
@@ -162,13 +161,13 @@ export class UtilityMeterdbService {
         }
     }
 
-    getGroupMetersByGroupId(groupId: string): Array<IdbUtilityMeter> {
+    getGroupMetersByGroupId(groupId: number): Array<IdbUtilityMeter> {
         let facilityMeters: Array<IdbUtilityMeter> = this.accountMeters.getValue();
         return facilityMeters.filter(meter => { return meter.groupId == groupId });
     }
 
-    getFacilityMeterById(meterGuid: string): IdbUtilityMeter {
+    getFacilityMeterById(id: number): IdbUtilityMeter {
         let facilityMeters: Array<IdbUtilityMeter> = this.accountMeters.getValue();
-        return facilityMeters.find(meter => { return meter.guid == meterGuid });
+        return facilityMeters.find(meter => { return meter.id == id });
     }
 }
