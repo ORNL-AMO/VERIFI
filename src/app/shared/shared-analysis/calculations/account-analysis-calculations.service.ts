@@ -131,7 +131,7 @@ export class AccountAnalysisCalculationsService {
         yearToDateSavings: yearToDateSavings,
         yearToDatePercentSavings: yearToDatePercentSavings * 100,
         rollingSavings: rollingSavings,
-        rolling12MonthImprovement: rolling12MonthImprovement * 100
+        rolling12MonthImprovement: rolling12MonthImprovement * 100,
       })
 
       summaryDataIndex++;
@@ -143,8 +143,8 @@ export class AccountAnalysisCalculationsService {
   }
 
   getAnnualAnalysisSummary(analysisItem: IdbAccountAnalysisItem, account: IdbAccount): Array<AnnualAnalysisSummary> {
-    let facilityMonthlySummaryData: Array<MonthlyAnalysisSummaryData> = this.calculateMonthlyAccountAnalysis(analysisItem, account);
-    let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = this.analysisCalculationsService.calculateAnnualAnalysisSummary(facilityMonthlySummaryData, analysisItem, account);
+    let accountMonthlySummaryData: Array<MonthlyAnalysisSummaryData> = this.calculateMonthlyAccountAnalysis(analysisItem, account);
+    let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = this.analysisCalculationsService.calculateAnnualAnalysisSummary(accountMonthlySummaryData, analysisItem, account);
     return annualAnalysisSummaries;
   }
 }

@@ -18,6 +18,10 @@ export class OverviewReportOptionsDbService {
     this.accountOverviewReportOptions = new BehaviorSubject<Array<IdbOverviewReportOptions>>(new Array());
     this.overviewReportOptionsTemplates = new BehaviorSubject<Array<IdbOverviewReportOptions>>(new Array());
     this.selectedOverviewReportOptions = new BehaviorSubject<IdbOverviewReportOptions>(undefined);
+
+    this.accountDbService.selectedAccount.subscribe(() => {
+      this.setAccountOverviewReportOptions();
+    });
   }
 
   async initializeReportsFromLocalStorage() {

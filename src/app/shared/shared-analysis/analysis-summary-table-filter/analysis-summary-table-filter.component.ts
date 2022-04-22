@@ -153,7 +153,6 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
       if (this.group) {
         if (this.group.idbGroupId != this.analysisTableColumns.predictorGroupId) {
           updatePredictors = true;
-          console.log(updatePredictors);
         }
       } else if (this.analysisTableColumns.predictorGroupId != undefined) {
         updatePredictors = true;

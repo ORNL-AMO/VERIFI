@@ -246,6 +246,7 @@ export class BackupDataService {
         facility.facilityId = this.getNewId(facility.facilityId, facilityGUIDs);
       });
       //TODO: Update with better plants
+      reportOptions.reportOptions.analysisItemId = this.getNewId(reportOptions.reportOptions.analysisItemId, accountAnalysisGUIDs);
       await this.overviewReportOptionsDbService.addWithObservable(reportOptions).toPromise();
     }
     return newAccount;

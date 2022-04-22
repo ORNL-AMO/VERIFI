@@ -36,7 +36,10 @@ export interface IdbAccount {
     emissionsOutputRate?: number,
     eGridSubregion?: string,
     customEmissionsRate?: boolean,
-    color?: string
+    color?: string,
+    contactName: string,
+    contactEmail: string,
+    contactPhone: string
 }
 
 export interface IdbFacility {
@@ -77,7 +80,10 @@ export interface IdbFacility {
     customEmissionsRate?: boolean
     color?: string,
     selected?: boolean,
-    wizardId?: string
+    wizardId?: string,
+    contactName: string,
+    contactEmail: string,
+    contactPhone: string
 }
 
 export interface IdbUtilityMeterGroup {
@@ -212,6 +218,7 @@ export interface IdbOverviewReportOptions {
     baselineYear?: number,
     targetYear?: number,
     title?: string,
+    reportOptionsType?: 'betterPlants' | 'data'
 }
 
 export interface IdbAnalysisItem {
@@ -224,6 +231,7 @@ export interface IdbAnalysisItem {
     energyIsSource: boolean,
     reportYear: number,
     energyUnit: string,
+    baselineAdjustment: number,
     groups: Array<AnalysisGroup>
 }
 
@@ -252,6 +260,7 @@ export interface IdbAccountAnalysisItem {
     energyIsSource: boolean,
     reportYear: number,
     energyUnit: string,
+    baselineAdjustment: number,
     facilityAnalysisItems: Array<{
         facilityId: string,
         analysisItemId: string

@@ -49,6 +49,8 @@ import { SelectFacilityAnalysisItemsComponent } from './account/account-analysis
 import { AccountAnalysisResultsComponent } from './account/account-analysis/account-analysis-results/account-analysis-results.component';
 import { MonthlyAccountAnalysisComponent } from './account/account-analysis/account-analysis-results/monthly-account-analysis/monthly-account-analysis.component';
 import { AnnualAccountAnalysisComponent } from './account/account-analysis/account-analysis-results/annual-account-analysis/annual-account-analysis.component';
+import { BetterPlantsReportMenuComponent } from './account/overview-report/better-plants-report-menu/better-plants-report-menu.component';
+import { BetterPlantsReportComponent } from './account/overview-report/better-plants-report/better-plants-report.component';
 
 const routes: Routes = [
   {
@@ -80,7 +82,9 @@ const routes: Routes = [
           { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
           { path: 'dashboard', component: OverviewReportDashboardComponent },
           { path: 'menu', component: OverviewReportMenuComponent },
-          { path: 'basic-report', component: BasicReportComponent }
+          { path: 'basic-report', component: BasicReportComponent },
+          { path: 'better-plants-menu', component: BetterPlantsReportMenuComponent },
+          { path: 'better-plants-report', component: BetterPlantsReportComponent }
         ]
       },
       {
@@ -92,7 +96,7 @@ const routes: Routes = [
           { path: 'setup', component: AccountAnalysisSetupComponent },
           { path: 'select-items', component: SelectFacilityAnalysisItemsComponent },
           {
-            path: 'results', 
+            path: 'results',
             component: AccountAnalysisResultsComponent,
             children: [
               { path: '', pathMatch: 'full', redirectTo: 'annual-analysis' },

@@ -158,7 +158,8 @@ export class AnalysisDbService {
       reportYear: undefined,
       energyIsSource: selectedFacility.energyIsSource,
       energyUnit: selectedFacility.energyUnit,
-      groups: itemGroups
+      groups: itemGroups,
+      baselineAdjustment: 0
     }
   }
 
