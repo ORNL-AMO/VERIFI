@@ -144,11 +144,11 @@ export class EnergyUseHeatMapComponent implements OnInit {
     let accountFacilites: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     if (accountMeters.length != 0 && accountFacilites.length != 0 && this.graphDisplay) {
       //filter by facility
-      let facilityIds: Array<string> = accountMeters.map(meter => { return meter.facilityId });
+      let facilityIds: Array<number> = accountMeters.map(meter => { return meter.facilityId });
       facilityIds = _.uniq(facilityIds);
       facilityIds.forEach(id => {
         let facilityMeters: Array<IdbUtilityMeter> = accountMetersCopy.filter(meter => { return meter.facilityId == id });
-        let facility: IdbFacility = accountFacilites.find(facility => { return facility.guid == id });
+        let facility: IdbFacility = accountFacilites.find(facility => { return facility.id == id });
         let facilityHeatMapData: HeatMapData = this.visualizationService.getMeterHeatMapData(facilityMeters, facility.name, true);
         this.facilityHeatMapData.push(facilityHeatMapData);
       });

@@ -20,7 +20,7 @@
         <tbody>
             <tr *ngFor="let analysisItem of facilityAnalysisItems">
                 <td>
-                    <input type="radio" class="rowToggle" [(ngModel)]="selectedFacilityItemId" [value]="analysisItem.guid"
+                    <input type="radio" class="rowToggle" [(ngModel)]="selectedFacilityItemId" [value]="analysisItem.id"
                         name="{{analysisItem.id+'_selectedFacilityItemId'}}"
                         id="{{analysisItem.id+'_selectedFacilityItemId'}}" (change)="save()">
                 </td>

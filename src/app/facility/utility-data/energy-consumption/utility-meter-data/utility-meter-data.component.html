@@ -1,7 +1,7 @@
-<h4>{{selectedMeter.name}} Bills</h4>
+<h4>{{selectedSource}} Bills</h4>
 
-<div *ngIf="meterData.length == 0" class="text-center mt-5">
-    <h5>No {{selectedMeter.name}} bills found for this facility.</h5>
+<div *ngIf="meterList.length != 0 && !meterListHasData" class="text-center mt-5">
+    <h5>No {{selectedSource}} bills found for this facility.</h5>
     <p>Please <i class="fa fa-plus"></i> Add New Bill or <i class="fa fa-upload"></i> Import multiple bills from excel.
     </p>
     <div class="meterData">
@@ -9,7 +9,7 @@
         <button class="btn btn-outline" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
     </div>
 </div>
-<div *ngIf="meterData.length != 0">
+<div *ngIf="meterList.length != 0 && meterListHasData">
     <div class="controls mb-2">
 
         <div class="meterData item-right">
@@ -39,28 +39,32 @@
 
         <!--Bulk Delete-->
         <div class="bulk-delete item-right" [class.show]="hasCheckedItems">
-            <button class="btn btn-danger" (click)='openBulkDelete()' [disabled]="!hasCheckedItems">Bulk Delete</button>
+            <button class="btn btn-danger" (click)='openBulkDelete()'>Bulk Delete</button>
         </div>
 
         <!--Column Filters-->
-        <app-utility-meter-data-filter *ngIf="selectedMeter.source == 'Electricity'" [filterType]="'table'">
+        <app-utility-meter-data-filter *ngIf="selectedSource == 'Electricity'" [filterType]="'table'">
         </app-utility-meter-data-filter>
     </div>
 
 
 
-    <div class="meter">
-        <!--<div class="meterData">
+    <div class="meter" *ngFor="let meterListItem of meterList; let index=index;"
+        [class.collapsed]="!meterListItem.idbMeter.visible">
+        <div class="meterData">
 
             <p class="section-name bold">
-                {{meterListItem.idbMeter.name}}
+                <span class="pointer" (click)="setToggleView(meterListItem.idbMeter)">
+                    <i class="fa fa-caret-right" *ngIf="!meterListItem.idbMeter.visible"></i>
+                    <i class="fa fa-caret-down" *ngIf="meterListItem.idbMeter.visible"></i>
+                    {{meterListItem.idbMeter.name}}
+                </span>
                 <span class="alert-danger" *ngIf="meterListItem.errorDate">
                     {{meterListItem.errorDate | date}} has multiple data entries.
                 </span>
                 <span class="alert-warning" *ngIf="meterListItem.warningDate">
                     {{meterListItem.warningDate | date:'MMM, y'}} has multiple data entries. <a
-                        (click)="ignoreSameMonth(meterListItem.idbMeter)">Ignore <b>duplicate</b> months for this
-                        meter</a>
+                        (click)="ignoreSameMonth(meterListItem.idbMeter)">Ignore <b>duplicate</b> months for this meter</a>
                 </span>
                 <span class="alert-warning" *ngIf="meterListItem.missingMonth">
                     {{meterListItem.missingMonth | date:'MMMM, y'}} is missing a data entry. <a
@@ -69,21 +73,31 @@
             </p>
             <p *ngIf="meterListItem.idbMeter.visible">{{meterListItem.idbMeter.notes}}</p>
         </div>
-    -->
+
 
         <div class="row no-margin">
-            <div class="col no-margin table-responsive">
-                <app-electricity-data-table *ngIf="selectedMeter.source == 'Electricity'"
-                    [selectedMeter]="selectedMeter" [selectedMeterData]="meterData" [itemsPerPage]="itemsPerPage"
+            <div class="col no-margin table-responsive" *ngIf="meterListItem.idbMeter.visible">
+                <app-electricity-data-table *ngIf="selectedSource == 'Electricity'" [meterListItem]="meterListItem"
+                    [currentPageNumber]="tablePageNumbers[index]" [itemsPerPage]="itemsPerPage" [meterIndex]="index"
                     (setChecked)="setHasCheckedItems()" (setEdit)="setEditMeterData($event)"
                     (setDelete)="setDeleteMeterData($event)">
                 </app-electricity-data-table>
-                <app-general-utility-data-table *ngIf="selectedMeter.source != 'Electricity'"
-                    [selectedMeter]="selectedMeter" [selectedMeterData]="meterData" [itemsPerPage]="itemsPerPage"
+                <app-general-utility-data-table *ngIf="selectedSource != 'Electricity'" [meterListItem]="meterListItem"
+                    [currentPageNumber]="tablePageNumbers[index]" [itemsPerPage]="itemsPerPage" [meterIndex]="index"
                     (setChecked)="setHasCheckedItems()" (setEdit)="setEditMeterData($event)"
                     (setDelete)="setDeleteMeterData($event)">
                 </app-general-utility-data-table>
             </div>
+        </div>
+
+        <div class="tableControls overflow-hidden" *ngIf="meterListItem.idbMeter.visible">
+            <div class="item-right">
+                <ngb-pagination [collectionSize]="meterListItem.meterDataItems.length"
+                    [(page)]="tablePageNumbers[index]" [pageSize]="itemsPerPage" [rotate]="true"
+                    aria-label="Default pagination" [maxSize]="5">
+                </ngb-pagination>
+            </div>
+            <p class="item-right">{{meterListItem.meterDataItems.length}} entries</p>
         </div>
     </div>
 </div>
@@ -91,13 +105,13 @@
 <div class="window" [class.open]="editMeterData || addOrEdit == 'add'">
     <div class="windowOverlay"></div>
     <div class="windowContent windowContentXLg" *ngIf="(editMeterData || addOrEdit == 'add')">
-        <h4 *ngIf="addOrEdit == 'add'">Add {{editMeter.name}} Bill</h4>
-        <h4 *ngIf="addOrEdit == 'edit'">Edit {{editMeter.name}} Bill</h4>
+        <h4 *ngIf="addOrEdit == 'add'">Add {{selectedMeter.source}} Bill</h4>
+        <h4 *ngIf="addOrEdit == 'edit'">Edit {{selectedSource}} Bill</h4>
         <div class="row" *ngIf="addOrEdit == 'add'">
             <div class="col">
                 <form>
                     <label class="bold">Select Meter</label>
-                    <select name="editMeter" [(ngModel)]="editMeter" class="form-control"
+                    <select name="selectedMeter" [(ngModel)]="selectedMeter" class="form-control"
                         (change)="changeSelectedMeter()">
                         <option *ngFor="let facilityMeter of facilityMeters" [ngValue]="facilityMeter">
                             {{facilityMeter.name}} (Last Bill: {{getLastMeterBillDate(facilityMeter) | date}})</option>
@@ -105,10 +119,10 @@
                 </form>
             </div>
         </div>
-        <app-edit-electricity-bill *ngIf="editMeter.source == 'Electricity'" [editMeterData]="editMeterData"
+        <app-edit-electricity-bill *ngIf="selectedMeter.source == 'Electricity'" [editMeterData]="editMeterData"
             (emitClose)="cancelEditMeter()" [addOrEdit]="addOrEdit">
         </app-edit-electricity-bill>
-        <app-edit-utility-bill *ngIf="editMeter.source != 'Electricity'" [editMeterData]="editMeterData"
+        <app-edit-utility-bill *ngIf="selectedMeter.source != 'Electricity'" [editMeterData]="editMeterData"
             (emitClose)="cancelEditMeter()" [addOrEdit]="addOrEdit">
         </app-edit-utility-bill>
     </div>

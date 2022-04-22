@@ -221,14 +221,6 @@ export const volume = {
             }
             , to_anchor: 957.506 / 1000
         }
-        , MCF: {
-            name: {
-                singular: 'Thousand Cubic foot',
-                plural: 'Thousand Cubic feet',
-                display: '(MCF)'
-            }
-            , to_anchor: 957.506 / 1000
-        }
         , yd3: {
             name: {
                 singular: 'Cubic yard',

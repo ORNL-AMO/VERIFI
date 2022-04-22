@@ -193,7 +193,7 @@ export class AccountReportFacilityBarChartComponent implements OnInit {
           return meter.facilityId == facility.facilityId && selectedSource.includes(meter.source);
         });
         let facilityBarChartData: Array<FacilityBarChartData> = this.visualizationService.getFacilityBarChartData(facilityMeters, this.sumByMonth, true, true, this.reportOptions);
-        let selectedFacility: IdbFacility = accountFacilites.find(accountFacility => { return accountFacility.guid == facility.facilityId })
+        let selectedFacility: IdbFacility = accountFacilites.find(accountFacility => { return accountFacility.id == facility.facilityId })
         this.chartData.push({
           facility: selectedFacility,
           data: facilityBarChartData

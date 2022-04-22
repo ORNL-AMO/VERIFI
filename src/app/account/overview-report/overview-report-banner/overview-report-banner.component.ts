@@ -19,7 +19,7 @@ export class OverviewReportBannerComponent implements OnInit {
   modalOpen: boolean;
   modalOpenSub: Subscription;
   constructor(private overviewReportService: OverviewReportService, private router: Router,
-    private sharedDataService: SharedDataService) { }
+    private helpPanelService: HelpPanelService, private sharedDataService: SharedDataService) { }
 
   ngOnInit(): void {
     this.modalOpenSub = this.sharedDataService.modalOpen.subscribe(val => {
@@ -33,7 +33,7 @@ export class OverviewReportBannerComponent implements OnInit {
     this.setInBasicReport(this.router.url);
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(){
     this.modalOpenSub.unsubscribe();
   }
 
@@ -42,11 +42,7 @@ export class OverviewReportBannerComponent implements OnInit {
   }
 
   goToMenu() {
-    if (this.router.url.includes('basic-report')) {
-      this.router.navigateByUrl('/account/reports/menu');
-    } else {
-      this.router.navigateByUrl('/account/reports/better-plants-menu');
-    }
+    this.router.navigateByUrl('/account/reports/menu');
   }
 
   print() {
@@ -54,7 +50,12 @@ export class OverviewReportBannerComponent implements OnInit {
   }
 
   setInBasicReport(url: string) {
-    this.inBasicReport = url.includes('basic-report') || url.includes('better-plants-report');
+    this.inBasicReport = url.includes('basic-report');
+  }
+
+  toggleHelpPanel() {
+    let helpPanelOpen: boolean = this.helpPanelService.helpPanelOpen.getValue();
+    this.helpPanelService.helpPanelOpen.next(!helpPanelOpen);
   }
 
 }

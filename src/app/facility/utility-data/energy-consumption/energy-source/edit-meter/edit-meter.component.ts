@@ -81,7 +81,7 @@ export class EditMeterComponent implements OnInit {
       let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
       let accountMeterData: Array<IdbUtilityMeterData> = await this.utilityMeterDataDbService.getAllByIndexRange("accountId", selectedFacility.accountId).toPromise();
       this.utilityMeterDataDbService.accountMeterData.next(accountMeterData);
-      let facilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.filter(meterData => { return meterData.facilityId == selectedFacility.guid });
+      let facilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.filter(meterData => { return meterData.facilityId == selectedFacility.id });
       this.utilityMeterDataDbService.facilityMeterData.next(facilityMeterData);
       this.loadingService.setLoadingStatus(false);
       this.toastNoticationService.showToast("Meter and Meter Data Updated", undefined, undefined, false, "success");

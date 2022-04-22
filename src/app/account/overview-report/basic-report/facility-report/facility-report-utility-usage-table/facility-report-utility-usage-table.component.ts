@@ -24,7 +24,7 @@ export class FacilityReportUtilityUsageTableComponent implements OnInit {
 
   setFacilitySummary() {
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == this.facility.guid });
+    let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == this.facility.id });
     if (!this.reportOptions.electricity) {
       facilityMeters = facilityMeters.filter(meter => { return meter.source != 'Electricity' });
     }

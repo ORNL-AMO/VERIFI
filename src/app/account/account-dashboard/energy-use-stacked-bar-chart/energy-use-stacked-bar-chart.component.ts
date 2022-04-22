@@ -182,7 +182,7 @@ export class EnergyUseStackedBarChartComponent implements OnInit {
       accountMeterData = accountMeterData.concat(meterData)
     })
 
-    let facilityIds: Array<string> = accountMeterData.map(data => { return data.facilityId });
+    let facilityIds: Array<number> = accountMeterData.map(data => { return data.facilityId });
     facilityIds = _.uniq(facilityIds);
 
     let accountFacilites: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
@@ -233,7 +233,7 @@ export class EnergyUseStackedBarChartComponent implements OnInit {
           }
         }
       });
-      let facility: IdbFacility = accountFacilites.find(facility => { return facility.guid == id });
+      let facility: IdbFacility = accountFacilites.find(facility => { return facility.id == id });
       if (facility) {
         this.barChartData.push({
           facilityName: facility.name,

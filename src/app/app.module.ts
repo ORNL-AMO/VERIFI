@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { HeaderComponent } from './core-components/header/header.component';
+import { FooterComponent } from './core-components/footer/footer.component';
 import { SidebarComponent } from './core-components/sidebar/sidebar.component';
 import { CommonModule } from '@angular/common';
 import { PlotlyViaWindowModule } from 'angular-plotly.js';
@@ -24,6 +25,7 @@ import { SetupWizardModule } from './setup-wizard/setup-wizard.module';
   declarations: [
     AppComponent,
     HeaderComponent,
+    FooterComponent,
     SidebarComponent,
     LoadingComponent,
     PageNotFoundComponent,

@@ -14,7 +14,7 @@ import { ReportOptions } from 'src/app/models/overview-report';
 export class CalanderizationService {
 
 
-  calanderizedDataFilters: BehaviorSubject<CalanderizationFilters>;
+  calanderizedDataFilters: BehaviorSubject<CalanderizationFilters>
   displayGraphEnergy: "bar" | "scatter" | null = "bar";
   displayGraphCost: "bar" | "scatter" | null = "bar";
   dataDisplay: "table" | "graph" = 'table';

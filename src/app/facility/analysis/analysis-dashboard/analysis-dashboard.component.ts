@@ -84,7 +84,7 @@ export class AnalysisDashboardComponent implements OnInit {
     for (let index = 0; index < accountAnalysisItems.length; index++) {
       let updated: boolean = false;
       accountAnalysisItems[index].facilityAnalysisItems.forEach(item => {
-        if (item.facilityId == this.selectedFacility.guid && item.analysisItemId == this.itemToDelete.guid) {
+        if (item.facilityId == this.selectedFacility.id && item.analysisItemId == this.itemToDelete.id) {
           item.analysisItemId = undefined;
           updated = true;
         }

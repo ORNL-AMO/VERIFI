@@ -25,7 +25,7 @@ export class FacilityAnalysisCalculationsService {
 
     let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
     let facilityPredictorData: Array<IdbPredictorEntry> = accountPredictorEntries.filter(entry => {
-      return entry.facilityId == facility.guid;
+      return entry.facilityId == facility.id;
     });
     let predictorVariables: Array<PredictorData> = new Array();
     if (facilityPredictorData.length > 0) {

@@ -28,11 +28,11 @@ export class UtilityMeterGroupdbService {
     async initializeMeterGroups() {
         let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
         if (selectedAccount) {
-            let accountMeterGroups: Array<IdbUtilityMeterGroup> = await this.getAllByIndexRange('accountId', selectedAccount.guid).toPromise();
+            let accountMeterGroups: Array<IdbUtilityMeterGroup> = await this.getAllByIndexRange('accountId', selectedAccount.id).toPromise();
             this.accountMeterGroups.next(accountMeterGroups);
             let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
             if (selectedFacility) {
-                let facilityMeterGroups: Array<IdbUtilityMeterGroup> = accountMeterGroups.filter(meterData => { return meterData.facilityId == selectedFacility.guid });
+                let facilityMeterGroups: Array<IdbUtilityMeterGroup> = accountMeterGroups.filter(meterData => { return meterData.facilityId == selectedFacility.id });
                 this.facilityMeterGroups.next(facilityMeterGroups);
             }
         }
@@ -42,20 +42,20 @@ export class UtilityMeterGroupdbService {
     setFacilityMeterGroups() {
         let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
         if (facility) {
-            this.getAllByIndexRange('facilityId', facility.guid).subscribe(meterGroups => {
+            this.getAllByIndexRange('facilityId', facility.id).subscribe(meterGroups => {
                 this.facilityMeterGroups.next(meterGroups);
             });
         }
     }
 
-    getAllByFacilityWithObservable(facilityId: string): Observable<Array<IdbUtilityMeterGroup>> {
+    getAllByFacilityWithObservable(facilityId: number): Observable<Array<IdbUtilityMeterGroup>> {
         return this.getAllByIndexRange('facilityId', facilityId);
     }
 
     setAccountMeterGroups() {
         let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
         if (selectedAccount) {
-            this.getAllByIndexRange('accountId', selectedAccount.guid).subscribe(meterGroups => {
+            this.getAllByIndexRange('accountId', selectedAccount.id).subscribe(meterGroups => {
                 this.accountMeterGroups.next(meterGroups);
             });
         }
@@ -112,7 +112,7 @@ export class UtilityMeterGroupdbService {
         return this.dbService.delete('utilityMeterGroups', meterGroupId);
     }
 
-    deleteAllFacilityMeterGroups(facilityId: string): void {
+    deleteAllFacilityMeterGroups(facilityId: number): void {
         let accountMeterGroups: Array<IdbUtilityMeterGroup> = this.accountMeterGroups.getValue();
         let facilityGroupEntries: Array<IdbUtilityMeterGroup> = accountMeterGroups.filter(group => { return group.facilityId == facilityId });
         this.deleteMeterGroupAsync(facilityGroupEntries);
@@ -130,11 +130,10 @@ export class UtilityMeterGroupdbService {
     }
 
 
-    getNewIdbUtilityMeterGroup(type: string, name: string, facilityId: string, accountId: string): IdbUtilityMeterGroup {
+    getNewIdbUtilityMeterGroup(type: string, name: string, facilityId: number, accountId: number): IdbUtilityMeterGroup {
         return {
             facilityId: facilityId,
             accountId: accountId,
-            guid: Math.random().toString(36).substr(2, 9),
             groupType: type,
             name: name,
             description: undefined,
@@ -145,13 +144,13 @@ export class UtilityMeterGroupdbService {
         }
     }
 
-    getGroupById(groupId: string): IdbUtilityMeterGroup {
+    getGroupById(groupId: number): IdbUtilityMeterGroup {
         let groups: Array<IdbUtilityMeterGroup> = this.accountMeterGroups.getValue();
-        return groups.find(group => { return group.guid == groupId });
+        return groups.find(group => { return group.id == groupId });
     }
 
-    getGroupName(guid: string) {
-        let group: IdbUtilityMeterGroup = this.getGroupById(guid)
+    getGroupName(id: number) {
+        let group: IdbUtilityMeterGroup = this.getGroupById(id)
         if (group) {
             return group.name;
         } else {

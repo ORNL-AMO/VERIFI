@@ -36,7 +36,7 @@ export class EditMeterGroupFormComponent implements OnInit {
       let groupToAdd: IdbUtilityMeterGroup = await this.utilityMeterGroupDbService.addWithObservable(this.groupToEdit).toPromise();
       this.utilityMeterGroupDbService.setAccountMeterGroups();
       this.utilityMeterGroupDbService.setFacilityMeterGroups();
-      this.analysisDbService.addGroup(groupToAdd.guid)
+      this.analysisDbService.addGroup(groupToAdd.id)
     } else {
       this.utilityMeterGroupDbService.update(this.groupToEdit);
     }

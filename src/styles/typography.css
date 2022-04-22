@@ -37,7 +37,7 @@ Typography
     text-transform: uppercase;
     letter-spacing: 1px;
   }
-  a:not([href]), a:not([href]) .fa.fa-copy {
+  a:not([href]) {
     color: #007bff !important;
   }
   a:not([href]):hover {

@@ -36,10 +36,10 @@ export class AnalysisCalculationsService {
 
     let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
     let facilityPredictorData: Array<IdbPredictorEntry> = accountPredictorEntries.filter(entry => {
-      return entry.facilityId == facility.guid;
+      return entry.facilityId == facility.id;
     });
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == facility.guid });
+    let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == facility.id });
 
     let groupMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.groupId == selectedGroup.idbGroupId });
     let calanderizationOptions: CalanderizationOptions = {
@@ -253,7 +253,7 @@ export class AnalysisCalculationsService {
     if (!inAccount) {
       let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
       facilityPredictorData = accountPredictorEntries.filter(entry => {
-        return entry.facilityId == facilityOrAccount.guid;
+        return entry.facilityId == facilityOrAccount.id;
       });
       if (facilityPredictorData.length > 0) {
         predictorVariables = facilityPredictorData[0].predictors
