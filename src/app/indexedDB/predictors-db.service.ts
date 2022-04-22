@@ -106,6 +106,7 @@ export class PredictordbService {
     }
 
     update(values: IdbPredictorEntry): void {
+        values.date = new Date(values.date);
         this.dbService.update('predictors', values).subscribe(() => {
             this.setFacilityPredictors();
             this.setAccountPredictors();
