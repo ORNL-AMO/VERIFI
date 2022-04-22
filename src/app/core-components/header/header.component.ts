@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit } from '@angular/core';
+import { Component, ElementRef, Input, OnInit } from '@angular/core';
 import { Router, Event, NavigationStart } from '@angular/router';
 import { AccountdbService } from "../../indexedDB/account-db.service";
 import { FacilitydbService } from "../../indexedDB/facility-db.service";
@@ -20,6 +20,8 @@ import { LoadingService } from '../loading/loading.service';
   styleUrls: ['./header.component.css'],
 })
 export class HeaderComponent implements OnInit {
+  @Input()
+  dataInitialized: boolean;
 
   version: string = environment.version;
   accountList: Array<IdbAccount>;
@@ -92,5 +94,11 @@ export class HeaderComponent implements OnInit {
 
   backupAccount() {
     this.backupDataService.backupAccount();
+  }
+
+  async deleteDatabase() {
+    this.loadingService.setLoadingStatus(true);
+    this.loadingService.setLoadingMessage('Resetting Database, if this takes too long restart application..');
+    this.accountdbService.deleteDatabase();
   }
 }

@@ -3,6 +3,7 @@ import { Subscription } from 'rxjs';
 import { ElectronService } from '../../electron/electron.service';
 import { trigger, state, style, animate, transition } from '@angular/animations';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
+import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 
 @Component({
   selector: 'app-electron-update',
@@ -31,7 +32,8 @@ export class ElectronUpdateComponent implements OnInit {
 
   updateError: boolean;
   updateErrorSub: Subscription;
-  constructor(private electronService: ElectronService, private cd: ChangeDetectorRef, private loadingService: LoadingService) {
+  constructor(private electronService: ElectronService, private cd: ChangeDetectorRef, private loadingService: LoadingService,
+    private sharedDataService: SharedDataService) {
   }
 
   ngOnInit() {
@@ -40,6 +42,7 @@ export class ElectronUpdateComponent implements OnInit {
       this.updateAvailable = val;
       this.cd.detectChanges();
       if (this.updateAvailable) {
+        this.sharedDataService.modalOpen.next(true);
         setTimeout(() => {
           this.showUpdateAvailable = 'show';
           this.cd.detectChanges();
@@ -73,6 +76,7 @@ export class ElectronUpdateComponent implements OnInit {
   }
 
   closeUpdateAvailable() {
+    this.sharedDataService.modalOpen.next(false);
     this.showUpdateAvailable = 'hide';
     setTimeout(() => {
       this.updateAvailable = false;
