@@ -15,3 +15,16 @@ th:hover{
 th.active{
     text-decoration: underline;
 }
+
+
+.report-type-menu .fa-square-check, .report-type-menu .fa-square, .report-type-menu label {
+    font-size: 20px;
+}
+
+.report-type-menu .fa-solid.fa-square-check{
+    color: #2c386b;
+}
+
+.report-type-menu .fa-square-check:hover, .report-type-menu label:hover, .report-type-menu .fa-square:hover{
+    cursor: pointer;
+}

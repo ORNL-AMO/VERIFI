@@ -1,13 +1,14 @@
-<table class="table table-sm">
+<table class="table table-sm" #meterTable [ngClass]="{'copying-table': copyingTable}">
     <thead>
         <tr>
-            <th class="input">
+            <th *ngIf="!copyingTable" class="input">
                 <input #masterCheckbox type="checkbox" (change)="checkAll()" [(ngModel)]="allChecked">
             </th>
             <th (click)="setOrderDataField('readDate')" [ngClass]="{'active': orderDataField == 'readDate'}"
                 class="row-year">Meter Read Date</th>
             <th (click)="setOrderDataField('totalVolume')" [ngClass]="{'active': orderDataField == 'totalVolume'}"
-                *ngIf="showVolumeColumn">Total Consumption<br> (<span [innerHTML]="volumeUnit | settingsLabel"></span>)</th>
+                *ngIf="showVolumeColumn">Total Consumption<br> (<span [innerHTML]="volumeUnit | settingsLabel"></span>)
+            </th>
             <th (click)="setOrderDataField('totalEnergyUse')" [ngClass]="{'active': orderDataField == 'totalEnergyUse'}"
                 *ngIf="showEnergyColumn">Total Energy<br> (<span [innerHTML]="energyUnit | settingsLabel"></span>)</th>
             <th (click)="setOrderDataField('totalCost')" [ngClass]="{'active': orderDataField == 'totalCost'}">Total
@@ -18,13 +19,13 @@
                 [ngClass]="{'active': orderDataField == 'deliveryCharge'}">Delivery Charge</th>
             <th (click)="setOrderDataField('otherCharge')" [ngClass]="{'active': orderDataField == 'otherCharge'}">Other
                 Charges</th>
-            <th>Actions</th>
+            <th *ngIf="!copyingTable">Actions</th>
         </tr>
     </thead>
     <tbody>
         <tr
-            *ngFor="let meterData of meterListItem.meterDataItems | orderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
-            <td class="input">
+            *ngFor="let meterData of selectedMeterData | orderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
+            <td *ngIf="!copyingTable" class="input">
                 <input type="checkbox" name="metersSelected" (change)="toggleChecked()" [(ngModel)]="meterData.checked">
             </td>
             <td [ngClass]="checkError(meterData.readDate)">{{meterData.readDate | date}}</td>
@@ -34,7 +35,7 @@
             <td>{{meterData.commodityCharge | customNumber:true}}</td>
             <td>{{meterData.deliveryCharge | customNumber:true}}</td>
             <td>{{meterData.otherCharge | customNumber:true}}</td>
-            <td class="actions">
+            <td class="actions" *ngIf="!copyingTable">
                 <div class="d-flex">
                     <i class="fa fa-pencil" title="Edit" (click)="setEditMeterData(meterData)"></i>
                     <i class="fa fa-trash" title="Delete" (click)="setDeleteMeterData(meterData)"></i>
@@ -43,3 +44,13 @@
         </tr>
     </tbody>
 </table>
+
+<div class="tableControls overflow-hidden">
+    <a class="click-link" (click)="copyTable()"><span class="fa fa-copy"></span> Copy Table</a>
+    <div class="item-right">
+        <ngb-pagination [collectionSize]="selectedMeterData.length" [(page)]="currentPageNumber"
+            [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Default pagination">
+        </ngb-pagination>
+    </div>
+    <p class="item-right">{{selectedMeterData.length}} entries</p>
+</div>

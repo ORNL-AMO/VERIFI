@@ -50,6 +50,7 @@ export class MeterGroupingComponent implements OnInit {
   dateRangeSub: Subscription;
   dateRange: { maxDate: Date, minDate: Date };
   selectedFacility: IdbFacility;
+  facilityMeterGroups: Array<IdbUtilityMeterGroup>;
   constructor(private utilityMeterGroupDbService: UtilityMeterGroupdbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterDbService: UtilityMeterdbService, private facilityDbService: FacilitydbService, private calanderizationService: CalanderizationService,
     private loadingService: LoadingService, private toastNoticationService: ToastNotificationsService,
@@ -67,7 +68,8 @@ export class MeterGroupingComponent implements OnInit {
       }
     });
 
-    this.facilityMeterGroupsSub = this.utilityMeterGroupDbService.facilityMeterGroups.subscribe(() => {
+    this.facilityMeterGroupsSub = this.utilityMeterGroupDbService.facilityMeterGroups.subscribe(groups => {
+      this.facilityMeterGroups = groups;
       if (this.facilityMeters) {
         this.setGroupTypes();
       }
@@ -153,7 +155,7 @@ export class MeterGroupingComponent implements OnInit {
   }
 
   setDeleteGroup(group: IdbUtilityMeterGroup) {
-    let groupMeters: Array<IdbUtilityMeter> = this.facilityMeters.filter(meter => { return meter.groupId == group.id });
+    let groupMeters: Array<IdbUtilityMeter> = this.facilityMeters.filter(meter => { return meter.groupId == group.guid });
     // Check if group has data
     if (groupMeters.length != 0) {
       alert("Group must be empty before deleting.");
@@ -174,8 +176,8 @@ export class MeterGroupingComponent implements OnInit {
 
   drop(event: CdkDragDrop<string[]>) {
     let draggedMeter: IdbUtilityMeter = this.facilityMeters.find(meter => { return meter.id == event.item.data.id });
-    let newGroupId: number = Number(event.container.id);
-    draggedMeter.groupId = newGroupId;
+    let group: IdbUtilityMeterGroup = this.facilityMeterGroups.find(group => {return group.id == Number(event.container.id)})
+    draggedMeter.groupId = group.guid;
     this.setGroupTypes();
     this.utilityMeterDbService.update(draggedMeter);
   }
@@ -183,7 +185,7 @@ export class MeterGroupingComponent implements OnInit {
   groupAdd(groupType: string) {
     this.editOrAdd = 'add';
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.groupToEdit = this.utilityMeterGroupDbService.getNewIdbUtilityMeterGroup(groupType, 'New Group', facility.id, facility.accountId);
+    this.groupToEdit = this.utilityMeterGroupDbService.getNewIdbUtilityMeterGroup(groupType, 'New Group', facility.guid, facility.accountId);
     this.sharedDataService.modalOpen.next(true);
   }
 
@@ -194,9 +196,9 @@ export class MeterGroupingComponent implements OnInit {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let accountMeterGroups: Array<IdbUtilityMeterGroup> = await this.utilityMeterGroupDbService.getAllByIndexRange("accountId", selectedFacility.accountId).toPromise();
     this.utilityMeterGroupDbService.accountMeterGroups.next(accountMeterGroups);
-    let facilityMeterGroups: Array<IdbUtilityMeterGroup> = accountMeterGroups.filter(group => { return group.facilityId == selectedFacility.id });
+    let facilityMeterGroups: Array<IdbUtilityMeterGroup> = accountMeterGroups.filter(group => { return group.facilityId == selectedFacility.guid });
     this.utilityMeterGroupDbService.facilityMeterGroups.next(facilityMeterGroups);  
-    await this.analysisDbService.deleteGroup(this.groupToDelete.id);
+    await this.analysisDbService.deleteGroup(this.groupToDelete.guid);
     this.closeDeleteGroup();
     this.loadingService.setLoadingStatus(false);
     this.toastNoticationService.showToast("Meter Group Deleted!", undefined, undefined, false, "success");

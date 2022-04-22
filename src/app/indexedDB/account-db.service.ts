@@ -128,7 +128,10 @@ export class AccountdbService {
     }
 
     getNewIdbAccount(): IdbAccount {
+        let baselineYear: number = new Date().getUTCFullYear();
+        let targetYear: number = baselineYear + 10;
         return {
+            guid: Math.random().toString(36).substr(2, 9),
             name: 'New Account',
             city: '',
             state: '',
@@ -140,37 +143,37 @@ export class AccountdbService {
             naics2: undefined,
             naics3: undefined,
             notes: '',
-            img: 'https://placehold.it/50x50',
+            img: '',
             // id: undefined,            
             unitsOfMeasure: 'Imperial',
-            energyUnit: 'kWh',
+            energyUnit: 'MMBtu',
             volumeLiquidUnit: 'gal',
             volumeGasUnit: 'SCF',
             massUnit: 'lb',
             sustainabilityQuestions: {
-                energyReductionGoal: false,
+                energyReductionGoal: true,
                 energyReductionPercent: 0,
-                energyReductionBaselineYear: 0,
-                energyReductionTargetYear: 0,
+                energyReductionBaselineYear: baselineYear,
+                energyReductionTargetYear: targetYear,
                 energyIsAbsolute: true,
                 greenhouseReductionGoal: false,
                 greenhouseReductionPercent: 0,
-                greenhouseReductionBaselineYear: 0,
-                greenhouseReductionTargetYear: 0,
+                greenhouseReductionBaselineYear: baselineYear,
+                greenhouseReductionTargetYear: targetYear,
                 greenhouseIsAbsolute: true,
                 renewableEnergyGoal: false,
                 renewableEnergyPercent: 0,
-                renewableEnergyBaselineYear: 0,
-                renewableEnergyTargetYear: 0,
+                renewableEnergyBaselineYear: baselineYear,
+                renewableEnergyTargetYear: targetYear,
                 wasteReductionGoal: false,
                 wasteReductionPercent: 0,
-                wasteReductionBaselineYear: 0,
-                wasteReductionTargetYear: 0,
+                wasteReductionBaselineYear: baselineYear,
+                wasteReductionTargetYear: targetYear,
                 wasteIsAbsolute: true,
                 waterReductionGoal: false,
                 waterReductionPercent: 0,
-                waterReductionBaselineYear: 0,
-                waterReductionTargetYear: 0,
+                waterReductionBaselineYear: baselineYear,
+                waterReductionTargetYear: targetYear,
                 waterIsAbsolute: true
             },
             fiscalYear: 'calendarYear',
@@ -178,7 +181,10 @@ export class AccountdbService {
             fiscalYearCalendarEnd: true,
             setupWizard: true,
             setupWizardComplete: false,
-            energyIsSource: true
+            energyIsSource: true,
+            contactName: undefined,
+            contactEmail: undefined,
+            contactPhone: undefined
         }
     }
 }

@@ -30,7 +30,7 @@ export class FacilitydbService {
         let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
         if (selectedAccount) {
             let allFacilities: Array<IdbFacility> = await this.getAll().toPromise();
-            let accountFacilities: Array<IdbFacility> = allFacilities.filter(facility => { return facility.accountId == selectedAccount.id });
+            let accountFacilities: Array<IdbFacility> = allFacilities.filter(facility => { return facility.accountId == selectedAccount.guid });
             let storedFacilityId: number = this.localStorageService.retrieve("facilityId");
             if (storedFacilityId) {
                 let selectedFacility: IdbFacility = accountFacilities.find(facility => { return facility.id == storedFacilityId });
@@ -52,7 +52,7 @@ export class FacilitydbService {
     setAccountFacilities() {
         let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
         if (selectedAccount) {
-            this.getAllByIndexRange('accountId', selectedAccount.id).subscribe(facilities => {
+            this.getAllByIndexRange('accountId', selectedAccount.guid).subscribe(facilities => {
                 this.accountFacilities.next(facilities);
             });
         }else{
@@ -150,8 +150,11 @@ export class FacilitydbService {
     }
 
     getNewIdbFacility(account: IdbAccount): IdbFacility {
+        let baselineYear: number = new Date().getUTCFullYear();
+        let targetYear: number = baselineYear + 10;
         return {
-            accountId: account.id,
+            accountId: account.guid,
+            guid: Math.random().toString(36).substr(2, 9),
             name: 'New Facility',
             country: 'US',
             city: account.city,
@@ -173,35 +176,38 @@ export class FacilitydbService {
             volumeGasUnit: account.volumeGasUnit,
             massUnit: account.massUnit,
             sustainabilityQuestions: {
-                energyReductionGoal: false,
+                energyReductionGoal: true,
                 energyReductionPercent: 0,
-                energyReductionBaselineYear: 0,
-                energyReductionTargetYear: 0,
+                energyReductionBaselineYear: baselineYear,
+                energyReductionTargetYear: targetYear,
                 energyIsAbsolute: true,
                 greenhouseReductionGoal: false,
                 greenhouseReductionPercent: 0,
-                greenhouseReductionBaselineYear: 0,
-                greenhouseReductionTargetYear: 0,
+                greenhouseReductionBaselineYear: baselineYear,
+                greenhouseReductionTargetYear: targetYear,
                 greenhouseIsAbsolute: true,
                 renewableEnergyGoal: false,
                 renewableEnergyPercent: 0,
-                renewableEnergyBaselineYear: 0,
-                renewableEnergyTargetYear: 0,
+                renewableEnergyBaselineYear: baselineYear,
+                renewableEnergyTargetYear: targetYear,
                 wasteReductionGoal: false,
                 wasteReductionPercent: 0,
-                wasteReductionBaselineYear: 0,
-                wasteReductionTargetYear: 0,
+                wasteReductionBaselineYear: baselineYear,
+                wasteReductionTargetYear: targetYear,
                 wasteIsAbsolute: true,
                 waterReductionGoal: false,
                 waterReductionPercent: 0,
-                waterReductionBaselineYear: 0,
-                waterReductionTargetYear: 0,
+                waterReductionBaselineYear: baselineYear,
+                waterReductionTargetYear: targetYear,
                 waterIsAbsolute: true
             },
             fiscalYear: 'calendarYear',
             fiscalYearMonth: 0,
             fiscalYearCalendarEnd: true,
-            energyIsSource: true
+            energyIsSource: true,
+            contactName: undefined,
+            contactEmail: undefined,
+            contactPhone: undefined
 
         }
     }

@@ -1,0 +1,99 @@
+<div class="report" [ngClass]="{'print': print}" *ngIf="reportOptions">
+    <img src="assets/images/better-plants-report-banner.jpg" class="w-100">
+    <div class="row justify-content-center pt-3">
+        <div class="col-8">
+            <app-company-information-table [account]="account" [reportOptions]="reportOptions">
+            </app-company-information-table>
+        </div>
+    </div>
+    <div class="row justify-content-center pt-2">
+        <div class="col-8">
+            <app-primary-energy-consumption-table [betterPlantsSummary]="betterPlantsSummary" [account]="account"
+                [reportOptions]="reportOptions">
+            </app-primary-energy-consumption-table>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-10">
+            <p>
+                *Participating plants should be only include those located in the United States
+            </p>
+            <p>
+                **Please refer to the DOE's Energy Baseline Guidance document to determine changes in intensity.
+                Improvement in performance should be reported as a positive number.
+            </p>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-10">
+            <hr>
+            <p class="bold">
+                Please describe any methods undertaken to normalize energy intensity data or adjust baseline data to
+                account for economic and other factors that affect energy use:
+            </p>
+            <p>
+                <span *ngIf="reportOptions.baselineAdjustmentNotes">{{reportOptions.baselineAdjustmentNotes}}</span>
+                <span *ngIf="!reportOptions.baselineAdjustmentNotes">N/A</span>
+            </p>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-10">
+            <p class="bold">
+                Please describe the energy efficient technologies, strategies, and practices employed during the
+                previous year to decrease intensity. Please identify systems impacted and approximate savings from
+                projects. (Ex: Furnace insulation project-12,000 MMBtu/yr savings, compressor controls upgrade-6,000
+                MMBtu/yr, energy awareness campaign, etc):
+            </p>
+            <p>
+                <span *ngIf="reportOptions.modificationNotes">{{reportOptions.modificationNotes}}</span>
+                <span *ngIf="!reportOptions.modificationNotes">N/A</span>
+            </p>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-10">
+            <hr>
+            <p class="bold">
+                Facility-level Energy Performance (Applies to Companies with Multiple Plants)
+            </p>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-6">
+            <app-facility-performance-table [betterPlantsSummary]="betterPlantsSummary">
+            </app-facility-performance-table>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-10 disclaimer-text">
+            <hr>
+            <p>
+                This data is being collected to support the Department of Energy Better Buildings Initiative. The data
+                you supply will be used for developing best practices to facilitate reductions in energy intensity by
+                commercial, manufacturing, and community organizations.
+            </p>
+            <p>
+                Public reporting burden for this collection of information is estimated to average 4 hours per response
+                for those with data collection systems in place, and 48 hours for those without data collection systems
+                in pace. These estimates include the time for reviewing instructions, searching existing data sources,
+                gathering and maintaining the data needed, and completing and reviewing the collection of information.
+                Send comments regarding this burden estimate or any other aspect of this collection of information,
+                including suggestions for reducing this burden, to Office of the Chief Information Officer, Enterprise
+                Policy Development & Implementation Office, IM-22, Paperwork Reduction Project (1910-5141), U.S.
+                Department of Energy, 1000 Independence Ave SW, Washington, DC, 20585-1290; and to the Office of
+                Management and Budget (OMB), OIRA, Paperwork Reduction Project (1910-5141), Washington, DC 20503.
+            </p>
+            <p>
+                Notwithstanding any other provision of the law, no person is required to respond to, nor shall any
+                person be subject to a penalty for failure to comply with a collection of information subject to the
+                requirements of the Paperwork Reduction Act unless that collection of information displays a currently
+                valid OMB control number.
+            </p>
+            <p>
+                Submission of this data is voluntary.
+            </p>
+        </div>
+    </div>
+    <img src="assets/images/better-plants-report-footer.jpg" class="w-100">
+</div>

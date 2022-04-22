@@ -34,7 +34,6 @@
         <div class="col-4">
             <div class="input-group w-100">
                 <div class="input-group-prepend">
-                    <!-- <span class="input-group-text" id="basic-addon1">@</span> -->
                     <span class="input-gorup-text badge" [ngClass]="getPredictorClass(predictor, index)">
                         #
                     </span>
@@ -46,11 +45,13 @@
         <div class="col-4">
             <input type="text" class="form-control w-100" [(ngModel)]="predictor.unit"
                 name="{{'predictorUnit'+predictor.id}}" [disabled]="skippedPredictors[index]">
-
         </div>
         <div class="col-2">
-            <input type="checkbox" class="form-control w-100" [(ngModel)]="predictor.production"
-                name="{{'production'+predictor.id}}" [disabled]="skippedPredictors[index]">
+            <label class="switch" for="{{'predictor_'+predictor.id}}" *ngIf="!skippedPredictors[index]">
+                <input class="checkbox" type="checkbox" id="{{'predictor_'+predictor.id}}"
+                    name="{{'predictor_'+predictor.id}}" [(ngModel)]="predictor.production">
+                <span class="slider round"></span>
+            </label>
         </div>
         <div class="col-1 text-center">
             <button class="btn btn-outline m-0" (click)="toggleSkipPredictor(index)"
@@ -67,11 +68,15 @@
     No import predictors selected.
 </div>
 <hr>
-<div class="saveCancel item-right text-right" *ngIf="wizardContext == 'template'">
-    <button class="btn btn-secondary" (click)="cancel()">Cancel</button>
-    <button class="btn btn-primary" (click)="submit()">Submit</button>
-</div>
-<div class="saveCancel item-right text-right" *ngIf="wizardContext == 'excel'">
-    <button class="btn btn-secondary" (click)="back()">Back to Meter Setup</button>
-    <button class="btn btn-primary" (click)="continue()">Submit & Continue</button>
+<div class="row">
+    <div class="col">
+        <div class="d-flex w-100 justify-content-between" *ngIf="wizardContext == 'template'">
+            <button class="btn btn-secondary" (click)="cancel()">Cancel</button>
+            <button class="btn btn-primary" (click)="submit()">Submit</button>
+        </div>
+        <div class="d-flex w-100 justify-content-between" *ngIf="wizardContext == 'excel'">
+            <button class="btn btn-secondary" (click)="back()">Back to Meter Setup</button>
+            <button class="btn btn-primary" (click)="continue()">Submit & Continue</button>
+        </div>
+    </div>
 </div>

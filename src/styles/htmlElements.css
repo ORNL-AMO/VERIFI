@@ -32,3 +32,8 @@ body {
 .spacer {
   margin: 0px 10px;
 }
+
+
+.copying-table br{
+  display: none;
+}

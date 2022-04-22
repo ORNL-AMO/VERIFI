@@ -1,9 +1,10 @@
-import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { SupplyDemandChargeFilters, TaxAndOtherFilters } from 'src/app/models/electricityFilter';
 import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { UtilityMeterDataService } from '../utility-meter-data.service';
 import * as _ from 'lodash';
+import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
 
 @Component({
   selector: 'app-electricity-data-table',
@@ -12,25 +13,19 @@ import * as _ from 'lodash';
 })
 export class ElectricityDataTableComponent implements OnInit {
   @Input()
-  meterListItem: {
-    idbMeter: IdbUtilityMeter,
-    meterDataItems: Array<IdbUtilityMeterData>,
-    errorDate: Date,
-    warningDate: Date,
-    missingMonth: Date
-  };
+  selectedMeter: IdbUtilityMeter;
   @Input()
-  currentPageNumber: number;
+  selectedMeterData: Array<IdbUtilityMeterData>;
   @Input()
   itemsPerPage: number;
-  @Input()
-  meterIndex: number;
   @Output('setChecked')
   setChecked: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Output('setEdit')
   setEdit: EventEmitter<IdbUtilityMeterData> = new EventEmitter<IdbUtilityMeterData>();
   @Output('setDelete')
   setDelete: EventEmitter<IdbUtilityMeterData> = new EventEmitter<IdbUtilityMeterData>();
+
+  @ViewChild('meterTable', { static: false }) meterTable: ElementRef;
 
   supplyDemandCharge: SupplyDemandChargeFilters;
   taxAndOther: TaxAndOtherFilters;
@@ -41,12 +36,14 @@ export class ElectricityDataTableComponent implements OnInit {
 
   orderDataField: string = 'readDate';
   orderByDirection: string = 'desc';
-  constructor(private utilityMeterDataService: UtilityMeterDataService) { }
+  currentPageNumber: number = 1;
+  copyingTable: boolean = false;
+  constructor(private utilityMeterDataService: UtilityMeterDataService, private copyTableService: CopyTableService) { }
 
   ngOnInit(): void {
-    this.energyUnit = this.meterListItem.idbMeter.startingUnit;
-    if (this.meterListItem.meterDataItems.length != 0) {
-      let hasFalseChecked: IdbUtilityMeterData = this.meterListItem.meterDataItems.find(meterDataItem => { return meterDataItem.checked == false });
+    this.energyUnit = this.selectedMeter.startingUnit;
+    if (this.selectedMeterData.length != 0) {
+      let hasFalseChecked: IdbUtilityMeterData = this.selectedMeterData.find(meterDataItem => { return meterDataItem.checked == false });
       this.allChecked = (hasFalseChecked == undefined);
     }
     this.electricityDataFilterSub = this.utilityMeterDataService.tableElectricityFilters.subscribe(electricityDataFilters => {
@@ -61,10 +58,6 @@ export class ElectricityDataTableComponent implements OnInit {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (changes.currentPageNumber && !changes.currentPageNumber.firstChange) {
-      this.allChecked = false;
-      this.checkAll();
-    }
     if (changes.itemsPerPage && !changes.itemsPerPage.firstChange) {
       this.allChecked = false;
       this.checkAll();
@@ -73,13 +66,13 @@ export class ElectricityDataTableComponent implements OnInit {
 
   checkAll() {
     if (this.allChecked) {
-      this.meterListItem.meterDataItems = _.orderBy(this.meterListItem.meterDataItems, this.orderDataField, this.orderByDirection)
-      let displayedItems = this.meterListItem.meterDataItems.slice(((this.currentPageNumber - 1) * this.itemsPerPage), (this.currentPageNumber * this.itemsPerPage))
+      this.selectedMeterData = _.orderBy(this.selectedMeterData, this.orderDataField, this.orderByDirection)
+      let displayedItems = this.selectedMeterData.slice(((this.currentPageNumber - 1) * this.itemsPerPage), (this.currentPageNumber * this.itemsPerPage))
       displayedItems.forEach(item => {
         item.checked = this.allChecked;
       });
     } else {
-      this.meterListItem.meterDataItems.forEach(item => {
+      this.selectedMeterData.forEach(item => {
         item.checked = false;
       });
     }
@@ -112,24 +105,32 @@ export class ElectricityDataTableComponent implements OnInit {
 
   checkError(readDate: Date): string {
     let readDateItem: Date = new Date(readDate);
-    if (this.meterListItem.errorDate) {
-      if (readDateItem.getUTCFullYear() == this.meterListItem.errorDate.getUTCFullYear() && readDateItem.getUTCMonth() == this.meterListItem.errorDate.getUTCMonth() && readDateItem.getUTCDate() == this.meterListItem.errorDate.getUTCDate()) {
-        return 'alert-danger';
-      }
-    } else if (this.meterListItem.warningDate) {
-      if (readDateItem.getUTCFullYear() == this.meterListItem.warningDate.getUTCFullYear() && readDateItem.getUTCMonth() == this.meterListItem.warningDate.getUTCMonth()) {
-        return 'alert-warning';
-      }
-    } else if (this.meterListItem.missingMonth) {
-      let testDate1: Date = new Date(readDateItem.getUTCFullYear(), readDateItem.getUTCMonth() - 1);
-      let testDate2: Date = new Date(readDateItem.getUTCFullYear(), readDateItem.getUTCMonth() + 1);
-      if (testDate1.getUTCFullYear() == this.meterListItem.missingMonth.getUTCFullYear() && testDate1.getUTCMonth() == this.meterListItem.missingMonth.getUTCMonth()) {
-        return 'alert-warning';
-      }
-      if (testDate2.getUTCFullYear() == this.meterListItem.missingMonth.getUTCFullYear() && testDate2.getUTCMonth() == this.meterListItem.missingMonth.getUTCMonth()) {
-        return 'alert-warning';
-      }
-    }
+    // if (this.meterListItem.errorDate) {
+    //   if (readDateItem.getUTCFullYear() == this.meterListItem.errorDate.getUTCFullYear() && readDateItem.getUTCMonth() == this.meterListItem.errorDate.getUTCMonth() && readDateItem.getUTCDate() == this.meterListItem.errorDate.getUTCDate()) {
+    //     return 'alert-danger';
+    //   }
+    // } else if (this.meterListItem.warningDate) {
+    //   if (readDateItem.getUTCFullYear() == this.meterListItem.warningDate.getUTCFullYear() && readDateItem.getUTCMonth() == this.meterListItem.warningDate.getUTCMonth()) {
+    //     return 'alert-warning';
+    //   }
+    // } else if (this.meterListItem.missingMonth) {
+    //   let testDate1: Date = new Date(readDateItem.getUTCFullYear(), readDateItem.getUTCMonth() - 1);
+    //   let testDate2: Date = new Date(readDateItem.getUTCFullYear(), readDateItem.getUTCMonth() + 1);
+    //   if (testDate1.getUTCFullYear() == this.meterListItem.missingMonth.getUTCFullYear() && testDate1.getUTCMonth() == this.meterListItem.missingMonth.getUTCMonth()) {
+    //     return 'alert-warning';
+    //   }
+    //   if (testDate2.getUTCFullYear() == this.meterListItem.missingMonth.getUTCFullYear() && testDate2.getUTCMonth() == this.meterListItem.missingMonth.getUTCMonth()) {
+    //     return 'alert-warning';
+    //   }
+    // }
     return undefined;
+  }
+  
+  copyTable(){
+    this.copyingTable = true;
+    setTimeout(() => {
+      this.copyTableService.copyTable(this.meterTable);
+      this.copyingTable = false;
+    }, 200)
   }
 }

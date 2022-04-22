@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { FirstNaicsList, NAICS, SecondNaicsList, ThirdNaicsList } from 'src/app/shared/form-data/naics-data';
 import { IdbAccount } from 'src/app/models/idb';
 import { ReportOptions } from 'src/app/models/overview-report';
+import { OverviewReportService } from '../../../overview-report.service';
 
 @Component({
   selector: 'app-account-report-info',
@@ -15,25 +15,9 @@ export class AccountReportInfoComponent implements OnInit {
   reportOptions: ReportOptions;
 
   naics: string;
-  constructor() { }
+  constructor(private overviewReportService: OverviewReportService) { }
 
   ngOnInit(): void {
-    this.setNAICS();
-  }
-
-
-  setNAICS() {
-    let matchingNAICS: NAICS;
-    if (this.account.naics3) {
-      matchingNAICS = ThirdNaicsList.find(item => { return item.code == this.account.naics3 });
-    } else if (this.account.naics2) {
-      matchingNAICS = SecondNaicsList.find(item => { return item.code == this.account.naics2 });
-    } else if (this.account.naics1) {
-      matchingNAICS = FirstNaicsList.find(item => { return item.code == this.account.naics1 });
-    }
-
-    if (matchingNAICS) {
-      this.naics = matchingNAICS.code + ' - ' + matchingNAICS.industryType;
-    }
+    this.naics = this.overviewReportService.getNAICS(this.account);
   }
 }

@@ -70,7 +70,7 @@ export class VisualizationStateService {
 
   setMeterGroupOptions(facilityMeters: Array<IdbUtilityMeter>) {
     let existingGroupOptions: Array<{ meterGroup: IdbUtilityMeterGroup, selected: boolean }> = this.meterGroupOptions.getValue();
-    let existingMeterIds: Array<number> = existingGroupOptions.map(option => { return option.meterGroup.id });
+    let existingMeterIds: Array<string> = existingGroupOptions.map(option => { return option.meterGroup.guid });
     let checkMissing: IdbUtilityMeter = facilityMeters.find(meter => { return !existingMeterIds.includes(meter.groupId) });
     if (checkMissing) {
       let meterGroupOptions: Array<{ meterGroup: IdbUtilityMeterGroup, selected: boolean }> = new Array();

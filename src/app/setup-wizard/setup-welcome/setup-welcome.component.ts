@@ -3,9 +3,8 @@ import { Router } from '@angular/router';
 import { ImportBackupModalService } from 'src/app/core-components/import-backup-modal/import-backup-modal.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAccount } from 'src/app/models/idb';
-import { ExampleAccount } from 'src/app/shared/example-data/Better_Plants_Partner_Backup_4-20-2021';
+import { ExampleAccount } from 'src/app/shared/example-data/Better_Plants_Example';
 import { BackupDataService } from 'src/app/shared/helper-services/backup-data.service';
 
 @Component({
@@ -16,7 +15,7 @@ import { BackupDataService } from 'src/app/shared/helper-services/backup-data.se
 export class SetupWelcomeComponent implements OnInit {
 
   constructor(private loadingService: LoadingService, private accountDbService: AccountdbService,
-    private facilityDbService: FacilitydbService, private backupDataService: BackupDataService,
+    private backupDataService: BackupDataService,
     private importBackupModalService: ImportBackupModalService, private router: Router) { }
 
   ngOnInit(): void {
@@ -25,7 +24,7 @@ export class SetupWelcomeComponent implements OnInit {
   async loadTestData() {
     this.loadingService.setLoadingMessage('Loading Example Data..');
     this.loadingService.setLoadingStatus(true);
-    let newAccount: IdbAccount = await this.backupDataService.importAccountBackup(ExampleAccount);
+    let newAccount: IdbAccount = await this.backupDataService.importAccountBackupFile(ExampleAccount);
     this.loadingService.setLoadingMessage("Finishing up...");
     let allAccounts: Array<IdbAccount> = await this.accountDbService.getAll().toPromise();
     this.accountDbService.allAccounts.next(allAccounts);
@@ -40,7 +39,7 @@ export class SetupWelcomeComponent implements OnInit {
   }
 
 
-  addAccount(){
+  addAccount() {
     this.router.navigateByUrl('setup-wizard/account-setup');
   }
 }
