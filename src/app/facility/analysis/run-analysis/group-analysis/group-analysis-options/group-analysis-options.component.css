@@ -11,3 +11,9 @@ input[type="checkbox"]{
 .alert-danger, .alert-danger a{
     font-size: larger
 }
+
+
+
+label.baseline-label{
+    width: auto;
+}

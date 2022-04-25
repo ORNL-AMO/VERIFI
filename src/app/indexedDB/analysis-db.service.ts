@@ -146,7 +146,9 @@ export class AnalysisDbService {
         groupHasError: false,
         specifiedMonthlyPercentBaseload: false,
         averagePercentBaseload: undefined,
-        monthlyPercentBaseload: this.getMonthlyPercentBaseload()
+        monthlyPercentBaseload: this.getMonthlyPercentBaseload(),
+        hasBaselineAdjustement: false,
+        baselineAdjustments: []
       });
     });
     return {
@@ -159,7 +161,6 @@ export class AnalysisDbService {
       energyIsSource: selectedFacility.energyIsSource,
       energyUnit: selectedFacility.energyUnit,
       groups: itemGroups,
-      baselineAdjustment: 0
     }
   }
 
@@ -249,7 +250,9 @@ export class AnalysisDbService {
         groupHasError: false,
         specifiedMonthlyPercentBaseload: false,
         averagePercentBaseload: undefined,
-        monthlyPercentBaseload: this.getMonthlyPercentBaseload()
+        monthlyPercentBaseload: this.getMonthlyPercentBaseload(),
+        hasBaselineAdjustement: false,
+        baselineAdjustments: []
       });
       this.update(item);
     });

@@ -47,10 +47,10 @@ export class BetterPlantsReportService {
       if (item.analysisItemId) {
         includedFacilityIds.push(item.facilityId);
         let facilityAnalysisItem: IdbAnalysisItem = facilityAnalysisItems.find(facilityItem => { return facilityItem.guid == item.analysisItemId });
-        if (facilityAnalysisItem.baselineAdjustment) {
-          let convertedAdjustment: number = this.convertUnitsService.value(facilityAnalysisItem.baselineAdjustment).from(facilityAnalysisItem.energyUnit).to('MMBtu');
-          baselineAdjustment = baselineAdjustment + convertedAdjustment;
-        }
+        // if (facilityAnalysisItem.baselineAdjustment) {
+        //   let convertedAdjustment: number = this.convertUnitsService.value(facilityAnalysisItem.baselineAdjustment).from(facilityAnalysisItem.energyUnit).to('MMBtu');
+        //   baselineAdjustment = baselineAdjustment + convertedAdjustment;
+        // }
         let facility: IdbFacility = facilities.find(f => { return f.guid == item.facilityId });
         let annualAnalysisSummary: Array<AnnualAnalysisSummary> = this.facilityAnalysisCalculationsService.getAnnualAnalysisSummary(facilityAnalysisItem, facility)
         let reportYearAnalysisSummary: AnnualAnalysisSummary = annualAnalysisSummary.find(summary => {return summary.year == selectedAnalysisItem.reportYear});

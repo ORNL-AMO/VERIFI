@@ -34,4 +34,20 @@ export class AnalysisSetupComponent implements OnInit {
     this.analysisDbService.update(this.analysisItem);
     this.analysisDbService.selectedAnalysisItem.next(this.analysisItem);
   }
+
+  changeReportYear() {
+    if (this.facility.sustainabilityQuestions.energyReductionBaselineYear < this.analysisItem.reportYear) {
+      let yearAdjustments: Array<{ year: number, amount: number }> = new Array();
+      for (let year: number = this.facility.sustainabilityQuestions.energyReductionBaselineYear + 1; year <= this.analysisItem.reportYear; year++) {
+        yearAdjustments.push({
+          year: year,
+          amount: 0
+        })
+      }
+      this.analysisItem.groups.forEach(group => {
+        group.baselineAdjustments = yearAdjustments;
+      });
+    }
+    this.saveItem();
+  }
 }

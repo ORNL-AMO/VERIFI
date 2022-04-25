@@ -20,6 +20,35 @@
                 <label class="checkbox" for="regression">Regression</label>
             </div>
         </div>
+        <hr>
+        <div class="form-group d-flex">
+            <label for="reportYear" class="w-50 bold">
+                Has Baseline Adjustement
+            </label>
+            <label class="switch" for="hasBaselineAdjustement">
+                <input class="checkbox" type="checkbox" id="hasBaselineAdjustement" name="hasBaselineAdjustement"
+                    [(ngModel)]="group.hasBaselineAdjustement" (change)="saveItem()">
+                <span class="slider round"></span>
+            </label>
+            <!-- <div class="input-group w-50">
+                <input type="number" id="baselineAdjustment" id="baselineAdjustment"
+                    [(ngModel)]="analysisItem.baselineAdjustment" (change)="saveItem()" min="0">
+                <span class="unit" [innerHTML]="analysisItem.energyUnit | settingsLabel:'/yr'"></span>
+            </div> -->
+        </div>
+        <div class="d-flex flex-column" *ngIf="group.hasBaselineAdjustement">
+            <div class="row form-group" *ngFor="let baselineAdjustment of group.baselineAdjustments">
+                <div class="col-12 d-flex">
+
+                    <label class="w-50 bold">{{baselineAdjustment.year}}</label>
+                    <div class="input-group w-50">
+                        <input type="number" id="baselineAdjustment" id="baselineAdjustment"
+                            [(ngModel)]="baselineAdjustment.amount" (change)="saveItem()" min="0">
+                        <span class="unit" [innerHTML]="analysisItem.energyUnit | settingsLabel:'/yr'"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     <!--energy intensity-->
     <div class="col-md-6 col-sm-12"

@@ -9777,6 +9777,8 @@ export const ExampleAccount: BackupFile = {
         "energyIsSource": true,
         "energyUnit": "MMBtu",
         "groups": [{
+            "baselineAdjustments": [],
+            "hasBaselineAdjustement": false,
             "idbGroupId": "0imij1slg",
             "analysisType": "regression",
             "predictorVariables": [{
@@ -9818,32 +9820,58 @@ export const ExampleAccount: BackupFile = {
             "groupHasError": false,
             "specifiedMonthlyPercentBaseload": false,
             "averagePercentBaseload": 0,
-            "monthlyPercentBaseload": [{ "percent": 0, 
-            "monthNum": 0 },
-            { "percent": 0, 
-            "monthNum": 1 },
-            { "percent": 0, 
-            "monthNum": 2 },
-            { "percent": 0, 
-            "monthNum": 3 },
-            { "percent": 0, 
-            "monthNum": 4 },
-            { "percent": 0, 
-            "monthNum": 5 },
-            { "percent": 0, 
-            "monthNum": 6 },
-            { "percent": 0, 
-            "monthNum": 7 },
-            { "percent": 0, 
-            "monthNum": 8 },
-            { "percent": 0, 
-            "monthNum": 9 },
-            { "percent": 0, 
-            "monthNum": 10 },
-            { "percent": 0, 
-            "monthNum": 11 }]
+            "monthlyPercentBaseload": [{
+                "percent": 0,
+                "monthNum": 0
+            },
+            {
+                "percent": 0,
+                "monthNum": 1
+            },
+            {
+                "percent": 0,
+                "monthNum": 2
+            },
+            {
+                "percent": 0,
+                "monthNum": 3
+            },
+            {
+                "percent": 0,
+                "monthNum": 4
+            },
+            {
+                "percent": 0,
+                "monthNum": 5
+            },
+            {
+                "percent": 0,
+                "monthNum": 6
+            },
+            {
+                "percent": 0,
+                "monthNum": 7
+            },
+            {
+                "percent": 0,
+                "monthNum": 8
+            },
+            {
+                "percent": 0,
+                "monthNum": 9
+            },
+            {
+                "percent": 0,
+                "monthNum": 10
+            },
+            {
+                "percent": 0,
+                "monthNum": 11
+            }]
         },
         {
+            "baselineAdjustments": [],
+            "hasBaselineAdjustement": false,
             "idbGroupId": "agcirb4u9",
             "analysisType": "regression",
             "predictorVariables": [{
@@ -9884,32 +9912,58 @@ export const ExampleAccount: BackupFile = {
             "groupHasError": false,
             "specifiedMonthlyPercentBaseload": false,
             "averagePercentBaseload": 0,
-            "monthlyPercentBaseload": [{ "percent": 0, 
-            "monthNum": 0 },
-            { "percent": 0, 
-            "monthNum": 1 },
-            { "percent": 0, 
-            "monthNum": 2 },
-            { "percent": 0, 
-            "monthNum": 3 },
-            { "percent": 0, 
-            "monthNum": 4 },
-            { "percent": 0, 
-            "monthNum": 5 },
-            { "percent": 0, 
-            "monthNum": 6 },
-            { "percent": 0, 
-            "monthNum": 7 },
-            { "percent": 0, 
-            "monthNum": 8 },
-            { "percent": 0, 
-            "monthNum": 9 },
-            { "percent": 0, 
-            "monthNum": 10 },
-            { "percent": 0, 
-            "monthNum": 11 }]
+            "monthlyPercentBaseload": [{
+                "percent": 0,
+                "monthNum": 0
+            },
+            {
+                "percent": 0,
+                "monthNum": 1
+            },
+            {
+                "percent": 0,
+                "monthNum": 2
+            },
+            {
+                "percent": 0,
+                "monthNum": 3
+            },
+            {
+                "percent": 0,
+                "monthNum": 4
+            },
+            {
+                "percent": 0,
+                "monthNum": 5
+            },
+            {
+                "percent": 0,
+                "monthNum": 6
+            },
+            {
+                "percent": 0,
+                "monthNum": 7
+            },
+            {
+                "percent": 0,
+                "monthNum": 8
+            },
+            {
+                "percent": 0,
+                "monthNum": 9
+            },
+            {
+                "percent": 0,
+                "monthNum": 10
+            },
+            {
+                "percent": 0,
+                "monthNum": 11
+            }]
         },
         {
+            "baselineAdjustments": [],
+            "hasBaselineAdjustement": false,
             "idbGroupId": "x2w0omiph",
             "analysisType": "regression",
             "predictorVariables": [{
@@ -9948,32 +10002,55 @@ export const ExampleAccount: BackupFile = {
             "groupHasError": false,
             "specifiedMonthlyPercentBaseload": false,
             "averagePercentBaseload": 0,
-            "monthlyPercentBaseload": [{ "percent": 0, 
-            "monthNum": 0 },
-            { "percent": 0, 
-            "monthNum": 1 },
-            { "percent": 0, 
-            "monthNum": 2 },
-            { "percent": 0, 
-            "monthNum": 3 },
-            { "percent": 0, 
-            "monthNum": 4 },
-            { "percent": 0, 
-            "monthNum": 5 },
-            { "percent": 0, 
-            "monthNum": 6 },
-            { "percent": 0, 
-            "monthNum": 7 },
-            { "percent": 0, 
-            "monthNum": 8 },
-            { "percent": 0, 
-            "monthNum": 9 },
-            { "percent": 0, 
-            "monthNum": 10 },
-            { "percent": 0, 
-            "monthNum": 11 }]
+            "monthlyPercentBaseload": [{
+                "percent": 0,
+                "monthNum": 0
+            },
+            {
+                "percent": 0,
+                "monthNum": 1
+            },
+            {
+                "percent": 0,
+                "monthNum": 2
+            },
+            {
+                "percent": 0,
+                "monthNum": 3
+            },
+            {
+                "percent": 0,
+                "monthNum": 4
+            },
+            {
+                "percent": 0,
+                "monthNum": 5
+            },
+            {
+                "percent": 0,
+                "monthNum": 6
+            },
+            {
+                "percent": 0,
+                "monthNum": 7
+            },
+            {
+                "percent": 0,
+                "monthNum": 8
+            },
+            {
+                "percent": 0,
+                "monthNum": 9
+            },
+            {
+                "percent": 0,
+                "monthNum": 10
+            },
+            {
+                "percent": 0,
+                "monthNum": 11
+            }]
         }],
-        "baselineAdjustment": 0,
         "id": 1
     },
     {
@@ -9986,6 +10063,8 @@ export const ExampleAccount: BackupFile = {
         "energyIsSource": true,
         "energyUnit": "MMBtu",
         "groups": [{
+            "baselineAdjustments": [],
+            "hasBaselineAdjustement": false,
             "idbGroupId": "1bosyous0",
             "analysisType": "energyIntensity",
             "predictorVariables": [{
@@ -10012,34 +10091,60 @@ export const ExampleAccount: BackupFile = {
             "groupHasError": false,
             "specifiedMonthlyPercentBaseload": false,
             "averagePercentBaseload": 0,
-            "monthlyPercentBaseload": [{ "percent": 0, 
-            "monthNum": 0 },
-            { "percent": 0, 
-            "monthNum": 1 },
-            { "percent": 0, 
-            "monthNum": 2 },
-            { "percent": 0, 
-            "monthNum": 3 },
-            { "percent": 0, 
-            "monthNum": 4 },
-            { "percent": 0, 
-            "monthNum": 5 },
-            { "percent": 0, 
-            "monthNum": 6 },
-            { "percent": 0, 
-            "monthNum": 7 },
-            { "percent": 0, 
-            "monthNum": 8 },
-            { "percent": 0, 
-            "monthNum": 9 },
-            { "percent": 0, 
-            "monthNum": 10 },
-            { "percent": 0, 
-            "monthNum": 11 }],
+            "monthlyPercentBaseload": [{
+                "percent": 0,
+                "monthNum": 0
+            },
+            {
+                "percent": 0,
+                "monthNum": 1
+            },
+            {
+                "percent": 0,
+                "monthNum": 2
+            },
+            {
+                "percent": 0,
+                "monthNum": 3
+            },
+            {
+                "percent": 0,
+                "monthNum": 4
+            },
+            {
+                "percent": 0,
+                "monthNum": 5
+            },
+            {
+                "percent": 0,
+                "monthNum": 6
+            },
+            {
+                "percent": 0,
+                "monthNum": 7
+            },
+            {
+                "percent": 0,
+                "monthNum": 8
+            },
+            {
+                "percent": 0,
+                "monthNum": 9
+            },
+            {
+                "percent": 0,
+                "monthNum": 10
+            },
+            {
+                "percent": 0,
+                "monthNum": 11
+            }],
             "regressionConstant": undefined,
             "regressionModelYear": undefined
         },
         {
+            "baselineAdjustments": [],
+            "hasBaselineAdjustement": false,
             "idbGroupId": "6n9cdj5wr",
             "analysisType": "regression",
             "predictorVariables": [{
@@ -10071,32 +10176,55 @@ export const ExampleAccount: BackupFile = {
             "groupHasError": false,
             "specifiedMonthlyPercentBaseload": false,
             "averagePercentBaseload": 0,
-            "monthlyPercentBaseload": [{ "percent": 0, 
-            "monthNum": 0 },
-            { "percent": 0, 
-            "monthNum": 1 },
-            { "percent": 0, 
-            "monthNum": 2 },
-            { "percent": 0, 
-            "monthNum": 3 },
-            { "percent": 0, 
-            "monthNum": 4 },
-            { "percent": 0, 
-            "monthNum": 5 },
-            { "percent": 0, 
-            "monthNum": 6 },
-            { "percent": 0, 
-            "monthNum": 7 },
-            { "percent": 0, 
-            "monthNum": 8 },
-            { "percent": 0, 
-            "monthNum": 9 },
-            { "percent": 0, 
-            "monthNum": 10 },
-            { "percent": 0, 
-            "monthNum": 11 }]
+            "monthlyPercentBaseload": [{
+                "percent": 0,
+                "monthNum": 0
+            },
+            {
+                "percent": 0,
+                "monthNum": 1
+            },
+            {
+                "percent": 0,
+                "monthNum": 2
+            },
+            {
+                "percent": 0,
+                "monthNum": 3
+            },
+            {
+                "percent": 0,
+                "monthNum": 4
+            },
+            {
+                "percent": 0,
+                "monthNum": 5
+            },
+            {
+                "percent": 0,
+                "monthNum": 6
+            },
+            {
+                "percent": 0,
+                "monthNum": 7
+            },
+            {
+                "percent": 0,
+                "monthNum": 8
+            },
+            {
+                "percent": 0,
+                "monthNum": 9
+            },
+            {
+                "percent": 0,
+                "monthNum": 10
+            },
+            {
+                "percent": 0,
+                "monthNum": 11
+            }]
         }],
-        "baselineAdjustment": 0,
         "id": 2
     },
     {
@@ -10109,6 +10237,8 @@ export const ExampleAccount: BackupFile = {
         "energyIsSource": true,
         "energyUnit": "MMBtu",
         "groups": [{
+            "baselineAdjustments": [],
+            "hasBaselineAdjustement": false,
             "idbGroupId": "ohcdhw6wr",
             "analysisType": "energyIntensity",
             "predictorVariables": [{
@@ -10135,34 +10265,60 @@ export const ExampleAccount: BackupFile = {
             "groupHasError": false,
             "specifiedMonthlyPercentBaseload": false,
             "averagePercentBaseload": 0,
-            "monthlyPercentBaseload": [{ "percent": 0, 
-            "monthNum": 0 },
-            { "percent": 0, 
-            "monthNum": 1 },
-            { "percent": 0, 
-            "monthNum": 2 },
-            { "percent": 0, 
-            "monthNum": 3 },
-            { "percent": 0, 
-            "monthNum": 4 },
-            { "percent": 0, 
-            "monthNum": 5 },
-            { "percent": 0, 
-            "monthNum": 6 },
-            { "percent": 0, 
-            "monthNum": 7 },
-            { "percent": 0, 
-            "monthNum": 8 },
-            { "percent": 0, 
-            "monthNum": 9 },
-            { "percent": 0, 
-            "monthNum": 10 },
-            { "percent": 0, 
-            "monthNum": 11 }],
+            "monthlyPercentBaseload": [{
+                "percent": 0,
+                "monthNum": 0
+            },
+            {
+                "percent": 0,
+                "monthNum": 1
+            },
+            {
+                "percent": 0,
+                "monthNum": 2
+            },
+            {
+                "percent": 0,
+                "monthNum": 3
+            },
+            {
+                "percent": 0,
+                "monthNum": 4
+            },
+            {
+                "percent": 0,
+                "monthNum": 5
+            },
+            {
+                "percent": 0,
+                "monthNum": 6
+            },
+            {
+                "percent": 0,
+                "monthNum": 7
+            },
+            {
+                "percent": 0,
+                "monthNum": 8
+            },
+            {
+                "percent": 0,
+                "monthNum": 9
+            },
+            {
+                "percent": 0,
+                "monthNum": 10
+            },
+            {
+                "percent": 0,
+                "monthNum": 11
+            }],
             "regressionConstant": undefined,
             "regressionModelYear": undefined
         },
         {
+            "baselineAdjustments": [],
+            "hasBaselineAdjustement": false,
             "idbGroupId": "o20z760l3",
             "analysisType": "modifiedEnergyIntensity",
             "predictorVariables": [{
@@ -10191,2672 +10347,3987 @@ export const ExampleAccount: BackupFile = {
             "groupHasError": false,
             "specifiedMonthlyPercentBaseload": false,
             "averagePercentBaseload": 70,
-            "monthlyPercentBaseload": [{ "percent": 0, 
-            "monthNum": 0 },
-            { "percent": 0, 
-            "monthNum": 1 },
-            { "percent": 0, 
-            "monthNum": 2 },
-            { "percent": 0, 
-            "monthNum": 3 },
-            { "percent": 0, 
-            "monthNum": 4 },
-            { "percent": 0, 
-            "monthNum": 5 },
-            { "percent": 0, 
-            "monthNum": 6 },
-            { "percent": 0, 
-            "monthNum": 7 },
-            { "percent": 0, 
-            "monthNum": 8 },
-            { "percent": 0, 
-            "monthNum": 9 },
-            { "percent": 0, 
-            "monthNum": 10 },
-            { "percent": 0, 
-            "monthNum": 11 }],
+            "monthlyPercentBaseload": [{
+                "percent": 0,
+                "monthNum": 0
+            },
+            {
+                "percent": 0,
+                "monthNum": 1
+            },
+            {
+                "percent": 0,
+                "monthNum": 2
+            },
+            {
+                "percent": 0,
+                "monthNum": 3
+            },
+            {
+                "percent": 0,
+                "monthNum": 4
+            },
+            {
+                "percent": 0,
+                "monthNum": 5
+            },
+            {
+                "percent": 0,
+                "monthNum": 6
+            },
+            {
+                "percent": 0,
+                "monthNum": 7
+            },
+            {
+                "percent": 0,
+                "monthNum": 8
+            },
+            {
+                "percent": 0,
+                "monthNum": 9
+            },
+            {
+                "percent": 0,
+                "monthNum": 10
+            },
+            {
+                "percent": 0,
+                "monthNum": 11
+            }],
             "regressionConstant": undefined,
             "regressionModelYear": undefined
         }],
-        "baselineAdjustment": 0,
         "id": 3
     }],
     predictorData: [
-        { "facilityId": "cbd6z90jq", 
-        "accountId": "u0woqoszr", 
-        "guid": "j59g5a7wa", 
-        "date": new Date("2017-12-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "zlxb9t9ve", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "42bluyhb7", 
-        "importWizardName": "HDD", 
-        "amount": 1200 }, { "name": "Product 1", 
-        "id": "5d8dnn98y", 
-        "importWizardName": "Product 1", 
-        "amount": 38908, 
-        "production": true, 
-        "productionInAnalysis": true }, { "name": "Product 2", 
-        "id": "uup46zw3w", 
-        "importWizardName": "Product 2", 
-        "amount": 1274, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 1 }, { "facilityId": "cbd6z90jq", 
-        "accountId": "u0woqoszr", 
-        "guid": "9i8uamyyq", 
-        "date": new Date("2018-01-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "zlxb9t9ve", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "42bluyhb7", 
-        "importWizardName": "HDD", 
-        "amount": 1172 }, { "name": "Product 1", 
-        "id": "5d8dnn98y", 
-        "importWizardName": "Product 1", 
-        "amount": 39393, 
-        "production": true, 
-        "productionInAnalysis": true }, { "name": "Product 2", 
-        "id": "uup46zw3w", 
-        "importWizardName": "Product 2", 
-        "amount": 1394, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 2 }, { "facilityId": "cbd6z90jq", 
-        "accountId": "u0woqoszr", 
-        "guid": "abctxa5a2", 
-        "date": new Date("2018-02-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "zlxb9t9ve", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "42bluyhb7", 
-        "importWizardName": "HDD", 
-        "amount": 1009 }, { "name": "Product 1", 
-        "id": "5d8dnn98y", 
-        "importWizardName": "Product 1", 
-        "amount": 39575, 
-        "production": true, 
-        "productionInAnalysis": true }, { "name": "Product 2", 
-        "id": "uup46zw3w", 
-        "importWizardName": "Product 2", 
-        "amount": 1125, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 3 }, { "facilityId": "cbd6z90jq", 
-        "accountId": "u0woqoszr", 
-        "guid": "my5xczxyv", 
-        "date": new Date("2018-03-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "zlxb9t9ve", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "42bluyhb7", 
-        "importWizardName": "HDD", 
-        "amount": 812 }, { "name": "Product 1", 
-        "id": "5d8dnn98y", 
-        "importWizardName": "Product 1", 
-        "amount": 41394, 
-        "production": true, 
-        "productionInAnalysis": true }, { "name": "Product 2", 
-        "id": "uup46zw3w", 
-        "importWizardName": "Product 2", 
-        "amount": 1164, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 4 }, { "facilityId": "cbd6z90jq", 
-        "accountId": "u0woqoszr", 
-        "guid": "dwlz9h97g", 
-        "date": new Date("2018-04-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "zlxb9t9ve", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "42bluyhb7", 
-        "importWizardName": "HDD", 
-        "amount": 689 }, { "name": "Product 1", 
-        "id": "5d8dnn98y", 
-        "importWizardName": "Product 1", 
-        "amount": 38813, 
-        "production": true, 
-        "productionInAnalysis": true }, { "name": "Product 2", 
-        "id": "uup46zw3w", 
-        "importWizardName": "Product 2", 
-        "amount": 1287, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 5 }, { "facilityId": "cbd6z90jq", 
-        "accountId": "u0woqoszr", 
-        "guid": "9aa4xjphl", 
-        "date": new Date("2018-05-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "zlxb9t9ve", 
-        "importWizardName": "CDD", 
-        "amount": 167 }, { "name": "HDD", 
-        "id": "42bluyhb7", 
-        "importWizardName": "HDD", 
-        "amount": 66 }, { "name": "Product 1", 
-        "id": "5d8dnn98y", 
-        "importWizardName": "Product 1", 
-        "amount": 35627, 
-        "production": true, 
-        "productionInAnalysis": true }, { "name": "Product 2", 
-        "id": "uup46zw3w", 
-        "importWizardName": "Product 2", 
-        "amount": 1161, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 6 }, { "facilityId": "cbd6z90jq", 
-        "accountId": "u0woqoszr", 
-        "guid": "s5ksygwqt", 
-        "date": new Date("2018-06-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "zlxb9t9ve", 
-        "importWizardName": "CDD", 
-        "amount": 248 }, { "name": "HDD", 
-        "id": "42bluyhb7", 
-        "importWizardName": "HDD", 
-        "amount": 4 }, { "name": "Product 1", 
-        "id": "5d8dnn98y", 
-        "importWizardName": "Product 1", 
-        "amount": 34319, 
-        "production": true, 
-        "productionInAnalysis": true }, { "name": "Product 2", 
-        "id": "uup46zw3w", 
-        "importWizardName": "Product 2", 
-        "amount": 991, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 7 }, { "facilityId": "cbd6z90jq", 
-        "accountId": "u0woqoszr", 
-        "guid": "y7qvrv8oz", 
-        "date": new Date("2018-07-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "zlxb9t9ve", 
-        "importWizardName": "CDD", 
-        "amount": 366 }, { "name": "HDD", 
-        "id": "42bluyhb7", 
-        "importWizardName": "HDD", 
-        "amount": 0 }, { "name": "Product 1", 
-        "id": "5d8dnn98y", 
-        "importWizardName": "Product 1", 
-        "amount": 33810, 
-        "production": true, 
-        "productionInAnalysis": true }, { "name": "Product 2", 
-        "id": "uup46zw3w", 
-        "importWizardName": "Product 2", 
-        "amount": 1078, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 8 }, { "facilityId": "cbd6z90jq", 
-        "accountId": "u0woqoszr", 
-        "guid": "rpt5xc9m9", 
-        "date": new Date("2018-08-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "zlxb9t9ve", 
-        "importWizardName": "CDD", 
-        "amount": 328 }, { "name": "HDD", 
-        "id": "42bluyhb7", 
-        "importWizardName": "HDD", 
-        "amount": 0 }, { "name": "Product 1", 
-        "id": "5d8dnn98y", 
-        "importWizardName": "Product 1", 
-        "amount": 36148, 
-        "production": true, 
-        "productionInAnalysis": true }, { "name": "Product 2", 
-        "id": "uup46zw3w", 
-        "importWizardName": "Product 2", 
-        "amount": 1136, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 9 }, { "facilityId": "cbd6z90jq", 
-        "accountId": "u0woqoszr", 
-        "guid": "3qj0ofqsw", 
-        "date": new Date("2018-09-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "zlxb9t9ve", 
-        "importWizardName": "CDD", 
-        "amount": 168 }, { "name": "HDD", 
-        "id": "42bluyhb7", 
-        "importWizardName": "HDD", 
-        "amount": 64 }, { "name": "Product 1", 
-        "id": "5d8dnn98y", 
-        "importWizardName": "Product 1", 
-        "amount": 29495, 
-        "production": true, 
-        "productionInAnalysis": true }, { "name": "Product 2", 
-        "id": "uup46zw3w", 
-        "importWizardName": "Product 2", 
-        "amount": 972, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 10 }, { "facilityId": "cbd6z90jq", 
-        "accountId": "u0woqoszr", 
-        "guid": "n6eorvf0k", 
-        "date": new Date("2018-10-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "zlxb9t9ve", 
-        "importWizardName": "CDD", 
-        "amount": 28 }, { "name": "HDD", 
-        "id": "42bluyhb7", 
-        "importWizardName": "HDD", 
-        "amount": 380 }, { "name": "Product 1", 
-        "id": "5d8dnn98y", 
-        "importWizardName": "Product 1", 
-        "amount": 36162, 
-        "production": true, 
-        "productionInAnalysis": true }, { "name": "Product 2", 
-        "id": "uup46zw3w", 
-        "importWizardName": "Product 2", 
-        "amount": 1215, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 11 }, { "facilityId": "cbd6z90jq", 
-        "accountId": "u0woqoszr", 
-        "guid": "vqc2uxjgh", 
-        "date": new Date("2018-11-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "zlxb9t9ve", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "42bluyhb7", 
-        "importWizardName": "HDD", 
-        "amount": 822 }, { "name": "Product 1", 
-        "id": "5d8dnn98y", 
-        "importWizardName": "Product 1", 
-        "amount": 30363, 
-        "production": true, 
-        "productionInAnalysis": true }, { "name": "Product 2", 
-        "id": "uup46zw3w", 
-        "importWizardName": "Product 2", 
-        "amount": 1005, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 12 }, { "facilityId": "cbd6z90jq", 
-        "accountId": "u0woqoszr", 
-        "guid": "kpln17lp8", 
-        "date": new Date("2018-12-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "zlxb9t9ve", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "42bluyhb7", 
-        "importWizardName": "HDD", 
-        "amount": 922 }, { "name": "Product 1", 
-        "id": "5d8dnn98y", 
-        "importWizardName": "Product 1", 
-        "amount": 27991, 
-        "production": true, 
-        "productionInAnalysis": true }, { "name": "Product 2", 
-        "id": "uup46zw3w", 
-        "importWizardName": "Product 2", 
-        "amount": 1087, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 13 }, { "facilityId": "cbd6z90jq", 
-        "accountId": "u0woqoszr", 
-        "guid": "3d91bc95v", 
-        "date": new Date("2019-01-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "zlxb9t9ve", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "42bluyhb7", 
-        "importWizardName": "HDD", 
-        "amount": 1370 }, { "name": "Product 1", 
-        "id": "5d8dnn98y", 
-        "importWizardName": "Product 1", 
-        "amount": 36602, 
-        "production": true, 
-        "productionInAnalysis": true }, { "name": "Product 2", 
-        "id": "uup46zw3w", 
-        "importWizardName": "Product 2", 
-        "amount": 1175, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 14 }, { "facilityId": "cbd6z90jq", 
-        "accountId": "u0woqoszr", 
-        "guid": "bpk265gie", 
-        "date": new Date("2019-02-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "zlxb9t9ve", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "42bluyhb7", 
-        "importWizardName": "HDD", 
-        "amount": 1108 }, { "name": "Product 1", 
-        "id": "5d8dnn98y", 
-        "importWizardName": "Product 1", 
-        "amount": 38346, 
-        "production": true, 
-        "productionInAnalysis": true }, { "name": "Product 2", 
-        "id": "uup46zw3w", 
-        "importWizardName": "Product 2", 
-        "amount": 1129, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 15 }, { "facilityId": "cbd6z90jq", 
-        "accountId": "u0woqoszr", 
-        "guid": "n71v6zows", 
-        "date": new Date("2019-03-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "zlxb9t9ve", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "42bluyhb7", 
-        "importWizardName": "HDD", 
-        "amount": 944 }, { "name": "Product 1", 
-        "id": "5d8dnn98y", 
-        "importWizardName": "Product 1", 
-        "amount": 40297, 
-        "production": true, 
-        "productionInAnalysis": true }, { "name": "Product 2", 
-        "id": "uup46zw3w", 
-        "importWizardName": "Product 2", 
-        "amount": 1121, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 16 }, { "facilityId": "cbd6z90jq", 
-        "accountId": "u0woqoszr", 
-        "guid": "onzp2l5dt", 
-        "date": new Date("2019-04-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "zlxb9t9ve", 
-        "importWizardName": "CDD", 
-        "amount": 1 }, { "name": "HDD", 
-        "id": "42bluyhb7", 
-        "importWizardName": "HDD", 
-        "amount": 429 }, { "name": "Product 1", 
-        "id": "5d8dnn98y", 
-        "importWizardName": "Product 1", 
-        "amount": 34612, 
-        "production": true, 
-        "productionInAnalysis": true }, { "name": "Product 2", 
-        "id": "uup46zw3w", 
-        "importWizardName": "Product 2", 
-        "amount": 1212, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 17 }, { "facilityId": "cbd6z90jq", 
-        "accountId": "u0woqoszr", 
-        "guid": "9r166bss4", 
-        "date": new Date("2019-05-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "zlxb9t9ve", 
-        "importWizardName": "CDD", 
-        "amount": 38 }, { "name": "HDD", 
-        "id": "42bluyhb7", 
-        "importWizardName": "HDD", 
-        "amount": 223 }, { "name": "Product 1", 
-        "id": "5d8dnn98y", 
-        "importWizardName": "Product 1", 
-        "amount": 32862, 
-        "production": true, 
-        "productionInAnalysis": true }, { "name": "Product 2", 
-        "id": "uup46zw3w", 
-        "importWizardName": "Product 2", 
-        "amount": 1264, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 18 }, { "facilityId": "cbd6z90jq", 
-        "accountId": "u0woqoszr", 
-        "guid": "z8ygheuwq", 
-        "date": new Date("2019-06-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "zlxb9t9ve", 
-        "importWizardName": "CDD", 
-        "amount": 157 }, { "name": "HDD", 
-        "id": "42bluyhb7", 
-        "importWizardName": "HDD", 
-        "amount": 15 }, { "name": "Product 1", 
-        "id": "5d8dnn98y", 
-        "importWizardName": "Product 1", 
-        "amount": 30658, 
-        "production": true, 
-        "productionInAnalysis": true }, { "name": "Product 2", 
-        "id": "uup46zw3w", 
-        "importWizardName": "Product 2", 
-        "amount": 1178, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 19 }, { "facilityId": "cbd6z90jq", 
-        "accountId": "u0woqoszr", 
-        "guid": "5euiqfvrz", 
-        "date": new Date("2019-07-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "zlxb9t9ve", 
-        "importWizardName": "CDD", 
-        "amount": 406 }, { "name": "HDD", 
-        "id": "42bluyhb7", 
-        "importWizardName": "HDD", 
-        "amount": 0 }, { "name": "Product 1", 
-        "id": "5d8dnn98y", 
-        "importWizardName": "Product 1", 
-        "amount": 32011, 
-        "production": true, 
-        "productionInAnalysis": true }, { "name": "Product 2", 
-        "id": "uup46zw3w", 
-        "importWizardName": "Product 2", 
-        "amount": 1176, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 20 }, { "facilityId": "cbd6z90jq", 
-        "accountId": "u0woqoszr", 
-        "guid": "cjorckwsa", 
-        "date": new Date("2019-08-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "zlxb9t9ve", 
-        "importWizardName": "CDD", 
-        "amount": 238 }, { "name": "HDD", 
-        "id": "42bluyhb7", 
-        "importWizardName": "HDD", 
-        "amount": 0 }, { "name": "Product 1", 
-        "id": "5d8dnn98y", 
-        "importWizardName": "Product 1", 
-        "amount": 32835, 
-        "production": true, 
-        "productionInAnalysis": true }, { "name": "Product 2", 
-        "id": "uup46zw3w", 
-        "importWizardName": "Product 2", 
-        "amount": 1101, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 21 }, { "facilityId": "cbd6z90jq", 
-        "accountId": "u0woqoszr", 
-        "guid": "d2lf3yhn9", 
-        "date": new Date("2019-09-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "zlxb9t9ve", 
-        "importWizardName": "CDD", 
-        "amount": 160 }, { "name": "HDD", 
-        "id": "42bluyhb7", 
-        "importWizardName": "HDD", 
-        "amount": 10 }, { "name": "Product 1", 
-        "id": "5d8dnn98y", 
-        "importWizardName": "Product 1", 
-        "amount": 30601, 
-        "production": true, 
-        "productionInAnalysis": true }, { "name": "Product 2", 
-        "id": "uup46zw3w", 
-        "importWizardName": "Product 2", 
-        "amount": 1078, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 22 }, { "facilityId": "cbd6z90jq", 
-        "accountId": "u0woqoszr", 
-        "guid": "nt19vyk86", 
-        "date": new Date("2019-10-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "zlxb9t9ve", 
-        "importWizardName": "CDD", 
-        "amount": 6 }, { "name": "HDD", 
-        "id": "42bluyhb7", 
-        "importWizardName": "HDD", 
-        "amount": 393 }, { "name": "Product 1", 
-        "id": "5d8dnn98y", 
-        "importWizardName": "Product 1", 
-        "amount": 36526, 
-        "production": true, 
-        "productionInAnalysis": true }, { "name": "Product 2", 
-        "id": "uup46zw3w", 
-        "importWizardName": "Product 2", 
-        "amount": 1125, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 23 }, { "facilityId": "cbd6z90jq", 
-        "accountId": "u0woqoszr", 
-        "guid": "c2q5z7ao1", 
-        "date": new Date("2019-11-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "zlxb9t9ve", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "42bluyhb7", 
-        "importWizardName": "HDD", 
-        "amount": 863 }, { "name": "Product 1", 
-        "id": "5d8dnn98y", 
-        "importWizardName": "Product 1", 
-        "amount": 30157, 
-        "production": true, 
-        "productionInAnalysis": true }, { "name": "Product 2", 
-        "id": "uup46zw3w", 
-        "importWizardName": "Product 2", 
-        "amount": 1003, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 24 }, { "facilityId": "cbd6z90jq", 
-        "accountId": "u0woqoszr", 
-        "guid": "nqvt9um6b", 
-        "date": new Date("2019-12-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "zlxb9t9ve", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "42bluyhb7", 
-        "importWizardName": "HDD", 
-        "amount": 927 }, { "name": "Product 1", 
-        "id": "5d8dnn98y", 
-        "importWizardName": "Product 1", 
-        "amount": 35243, 
-        "production": true, 
-        "productionInAnalysis": true }, { "name": "Product 2", 
-        "id": "uup46zw3w", 
-        "importWizardName": "Product 2", 
-        "amount": 1000, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 25 }, { "facilityId": "cbd6z90jq", 
-        "accountId": "u0woqoszr", 
-        "guid": "u6bi4z36p", 
-        "date": new Date("2020-01-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "zlxb9t9ve", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "42bluyhb7", 
-        "importWizardName": "HDD", 
-        "amount": 1039 }, { "name": "Product 1", 
-        "id": "5d8dnn98y", 
-        "importWizardName": "Product 1", 
-        "amount": 35141, 
-        "production": true, 
-        "productionInAnalysis": true }, { "name": "Product 2", 
-        "id": "uup46zw3w", 
-        "importWizardName": "Product 2", 
-        "amount": 1501, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 26 }, { "facilityId": "cbd6z90jq", 
-        "accountId": "u0woqoszr", 
-        "guid": "rrj7e4zpy", 
-        "date": new Date("2020-02-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "zlxb9t9ve", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "42bluyhb7", 
-        "importWizardName": "HDD", 
-        "amount": 1068 }, { "name": "Product 1", 
-        "id": "5d8dnn98y", 
-        "importWizardName": "Product 1", 
-        "amount": 35718, 
-        "production": true, 
-        "productionInAnalysis": true }, { "name": "Product 2", 
-        "id": "uup46zw3w", 
-        "importWizardName": "Product 2", 
-        "amount": 1351, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 27 }, { "facilityId": "cbd6z90jq", 
-        "accountId": "u0woqoszr", 
-        "guid": "3lnrqi94w", 
-        "date": new Date("2020-03-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "zlxb9t9ve", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "42bluyhb7", 
-        "importWizardName": "HDD", 
-        "amount": 714 }, { "name": "Product 1", 
-        "id": "5d8dnn98y", 
-        "importWizardName": "Product 1", 
-        "amount": 37551, 
-        "production": true, 
-        "productionInAnalysis": true }, { "name": "Product 2", 
-        "id": "uup46zw3w", 
-        "importWizardName": "Product 2", 
-        "amount": 1434, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 28 }, { "facilityId": "cbd6z90jq", 
-        "accountId": "u0woqoszr", 
-        "guid": "c8t1g5wl7", 
-        "date": new Date("2020-04-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "zlxb9t9ve", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "42bluyhb7", 
-        "importWizardName": "HDD", 
-        "amount": 497 }, { "name": "Product 1", 
-        "id": "5d8dnn98y", 
-        "importWizardName": "Product 1", 
-        "amount": 32899, 
-        "production": true, 
-        "productionInAnalysis": true }, { "name": "Product 2", 
-        "id": "uup46zw3w", 
-        "importWizardName": "Product 2", 
-        "amount": 1538, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 29 }, { "facilityId": "cbd6z90jq", 
-        "accountId": "u0woqoszr", 
-        "guid": "l02yyixoi", 
-        "date": new Date("2020-05-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "zlxb9t9ve", 
-        "importWizardName": "CDD", 
-        "amount": 65 }, { "name": "HDD", 
-        "id": "42bluyhb7", 
-        "importWizardName": "HDD", 
-        "amount": 210 }, { "name": "Product 1", 
-        "id": "5d8dnn98y", 
-        "importWizardName": "Product 1", 
-        "amount": 30920, 
-        "production": true, 
-        "productionInAnalysis": true }, { "name": "Product 2", 
-        "id": "uup46zw3w", 
-        "importWizardName": "Product 2", 
-        "amount": 1228, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 30 }, { "facilityId": "cbd6z90jq", 
-        "accountId": "u0woqoszr", 
-        "guid": "xb7y66cll", 
-        "date": new Date("2020-06-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "zlxb9t9ve", 
-        "importWizardName": "CDD", 
-        "amount": 253 }, { "name": "HDD", 
-        "id": "42bluyhb7", 
-        "importWizardName": "HDD", 
-        "amount": 11 }, { "name": "Product 1", 
-        "id": "5d8dnn98y", 
-        "importWizardName": "Product 1", 
-        "amount": 29729, 
-        "production": true, 
-        "productionInAnalysis": true }, { "name": "Product 2", 
-        "id": "uup46zw3w", 
-        "importWizardName": "Product 2", 
-        "amount": 1360, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 31 }, { "facilityId": "cbd6z90jq", 
-        "accountId": "u0woqoszr", 
-        "guid": "7jdur0ina", 
-        "date": new Date("2020-07-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "zlxb9t9ve", 
-        "importWizardName": "CDD", 
-        "amount": 387 }, { "name": "HDD", 
-        "id": "42bluyhb7", 
-        "importWizardName": "HDD", 
-        "amount": 0 }, { "name": "Product 1", 
-        "id": "5d8dnn98y", 
-        "importWizardName": "Product 1", 
-        "amount": 31357, 
-        "production": true, 
-        "productionInAnalysis": true }, { "name": "Product 2", 
-        "id": "uup46zw3w", 
-        "importWizardName": "Product 2", 
-        "amount": 1508, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 32 }, { "facilityId": "cbd6z90jq", 
-        "accountId": "u0woqoszr", 
-        "guid": "idgsk0nwx", 
-        "date": new Date("2020-08-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "zlxb9t9ve", 
-        "importWizardName": "CDD", 
-        "amount": 279 }, { "name": "HDD", 
-        "id": "42bluyhb7", 
-        "importWizardName": "HDD", 
-        "amount": 1 }, { "name": "Product 1", 
-        "id": "5d8dnn98y", 
-        "importWizardName": "Product 1", 
-        "amount": 30893, 
-        "production": true, 
-        "productionInAnalysis": true }, { "name": "Product 2", 
-        "id": "uup46zw3w", 
-        "importWizardName": "Product 2", 
-        "amount": 1405, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 33 }, { "facilityId": "cbd6z90jq", 
-        "accountId": "u0woqoszr", 
-        "guid": "jgs1lh3ee", 
-        "date": new Date("2020-09-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "zlxb9t9ve", 
-        "importWizardName": "CDD", 
-        "amount": 78 }, { "name": "HDD", 
-        "id": "42bluyhb7", 
-        "importWizardName": "HDD", 
-        "amount": 86 }, { "name": "Product 1", 
-        "id": "5d8dnn98y", 
-        "importWizardName": "Product 1", 
-        "amount": 29379, 
-        "production": true, 
-        "productionInAnalysis": true }, { "name": "Product 2", 
-        "id": "uup46zw3w", 
-        "importWizardName": "Product 2", 
-        "amount": 1139, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 34 }, { "facilityId": "cbd6z90jq", 
-        "accountId": "u0woqoszr", 
-        "guid": "4juiz9xe6", 
-        "date": new Date("2020-10-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "zlxb9t9ve", 
-        "importWizardName": "CDD", 
-        "amount": 3 }, { "name": "HDD", 
-        "id": "42bluyhb7", 
-        "importWizardName": "HDD", 
-        "amount": 470 }, { "name": "Product 1", 
-        "id": "5d8dnn98y", 
-        "importWizardName": "Product 1", 
-        "amount": 34036, 
-        "production": true, 
-        "productionInAnalysis": true }, { "name": "Product 2", 
-        "id": "uup46zw3w", 
-        "importWizardName": "Product 2", 
-        "amount": 1322, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 35 }, { "facilityId": "cbd6z90jq", 
-        "accountId": "u0woqoszr", 
-        "guid": "ric6ify70", 
-        "date": new Date("2020-11-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "zlxb9t9ve", 
-        "importWizardName": "CDD", 
-        "amount": 14 }, { "name": "HDD", 
-        "id": "42bluyhb7", 
-        "importWizardName": "HDD", 
-        "amount": 527 }, { "name": "Product 1", 
-        "id": "5d8dnn98y", 
-        "importWizardName": "Product 1", 
-        "amount": 28664, 
-        "production": true, 
-        "productionInAnalysis": true }, { "name": "Product 2", 
-        "id": "uup46zw3w", 
-        "importWizardName": "Product 2", 
-        "amount": 1057, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 36 }, { "facilityId": "cbd6z90jq", 
-        "accountId": "u0woqoszr", 
-        "guid": "sby6q0n9t", 
-        "date": new Date("2020-12-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "zlxb9t9ve", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "42bluyhb7", 
-        "importWizardName": "HDD", 
-        "amount": 1007 }, { "name": "Product 1", 
-        "id": "5d8dnn98y", 
-        "importWizardName": "Product 1", 
-        "amount": 33836, 
-        "production": true, 
-        "productionInAnalysis": true }, { "name": "Product 2", 
-        "id": "uup46zw3w", 
-        "importWizardName": "Product 2", 
-        "amount": 1239, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 37 }, { "facilityId": "cbd6z90jq", 
-        "accountId": "u0woqoszr", 
-        "guid": "lqy6rt665", 
-        "date": new Date("2021-01-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "zlxb9t9ve", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "42bluyhb7", 
-        "importWizardName": "HDD", 
-        "amount": 1145 }, { "name": "Product 1", 
-        "id": "5d8dnn98y", 
-        "importWizardName": "Product 1", 
-        "amount": 35070, 
-        "production": true, 
-        "productionInAnalysis": true }, { "name": "Product 2", 
-        "id": "uup46zw3w", 
-        "importWizardName": "Product 2", 
-        "amount": 1411, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 38 }, { "facilityId": "cbd6z90jq", 
-        "accountId": "u0woqoszr", 
-        "guid": "4klrhwfd2", 
-        "date": new Date("2021-02-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "zlxb9t9ve", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "42bluyhb7", 
-        "importWizardName": "HDD", 
-        "amount": 1258 }, { "name": "Product 1", 
-        "id": "5d8dnn98y", 
-        "importWizardName": "Product 1", 
-        "amount": 34301, 
-        "production": true, 
-        "productionInAnalysis": true }, { "name": "Product 2", 
-        "id": "uup46zw3w", 
-        "importWizardName": "Product 2", 
-        "amount": 1191, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 39 }, { "facilityId": "cbd6z90jq", 
-        "accountId": "u0woqoszr", 
-        "guid": "ckwf714pt", 
-        "date": new Date("2021-03-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "zlxb9t9ve", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "42bluyhb7", 
-        "importWizardName": "HDD", 
-        "amount": 634 }, { "name": "Product 1", 
-        "id": "5d8dnn98y", 
-        "importWizardName": "Product 1", 
-        "amount": 39656, 
-        "production": true, 
-        "productionInAnalysis": true }, { "name": "Product 2", 
-        "id": "uup46zw3w", 
-        "importWizardName": "Product 2", 
-        "amount": 1519, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 40 }, { "facilityId": "cbd6z90jq", 
-        "accountId": "u0woqoszr", 
-        "guid": "2c4u2artr", 
-        "date": new Date("2021-04-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "zlxb9t9ve", 
-        "importWizardName": "CDD", 
-        "amount": 19 }, { "name": "HDD", 
-        "id": "42bluyhb7", 
-        "importWizardName": "HDD", 
-        "amount": 382 }, { "name": "Product 1", 
-        "id": "5d8dnn98y", 
-        "importWizardName": "Product 1", 
-        "amount": 34406, 
-        "production": true, 
-        "productionInAnalysis": true }, { "name": "Product 2", 
-        "id": "uup46zw3w", 
-        "importWizardName": "Product 2", 
-        "amount": 1430, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 41 }, { "facilityId": "cbd6z90jq", 
-        "accountId": "u0woqoszr", 
-        "guid": "ue3yeljo7", 
-        "date": new Date("2021-05-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "zlxb9t9ve", 
-        "importWizardName": "CDD", 
-        "amount": 81 }, { "name": "HDD", 
-        "id": "42bluyhb7", 
-        "importWizardName": "HDD", 
-        "amount": 184 }, { "name": "Product 1", 
-        "id": "5d8dnn98y", 
-        "importWizardName": "Product 1", 
-        "amount": 31808, 
-        "production": true, 
-        "productionInAnalysis": true }, { "name": "Product 2", 
-        "id": "uup46zw3w", 
-        "importWizardName": "Product 2", 
-        "amount": 1296, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 42 }, { "facilityId": "cbd6z90jq", 
-        "accountId": "u0woqoszr", 
-        "guid": "hspvhyqdu", 
-        "date": new Date("2021-06-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "zlxb9t9ve", 
-        "importWizardName": "CDD", 
-        "amount": 328 }, { "name": "HDD", 
-        "id": "42bluyhb7", 
-        "importWizardName": "HDD", 
-        "amount": 6 }, { "name": "Product 1", 
-        "id": "5d8dnn98y", 
-        "importWizardName": "Product 1", 
-        "amount": 36037, 
-        "production": true, 
-        "productionInAnalysis": true }, { "name": "Product 2", 
-        "id": "uup46zw3w", 
-        "importWizardName": "Product 2", 
-        "amount": 1591, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 43 }, { "facilityId": "cbd6z90jq", 
-        "accountId": "u0woqoszr", 
-        "guid": "yf2efyhyw", 
-        "date": new Date("2021-07-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "zlxb9t9ve", 
-        "importWizardName": "CDD", 
-        "amount": 305 }, { "name": "HDD", 
-        "id": "42bluyhb7", 
-        "importWizardName": "HDD", 
-        "amount": 1 }, { "name": "Product 1", 
-        "id": "5d8dnn98y", 
-        "importWizardName": "Product 1", 
-        "amount": 32448, 
-        "production": true, 
-        "productionInAnalysis": true }, { "name": "Product 2", 
-        "id": "uup46zw3w", 
-        "importWizardName": "Product 2", 
-        "amount": 1365, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 44 }, { "facilityId": "cbd6z90jq", 
-        "accountId": "u0woqoszr", 
-        "guid": "3wg2lwqdn", 
-        "date": new Date("2021-08-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "zlxb9t9ve", 
-        "importWizardName": "CDD", 
-        "amount": 353 }, { "name": "HDD", 
-        "id": "42bluyhb7", 
-        "importWizardName": "HDD", 
-        "amount": 0 }, { "name": "Product 1", 
-        "id": "5d8dnn98y", 
-        "importWizardName": "Product 1", 
-        "amount": 31835, 
-        "production": true, 
-        "productionInAnalysis": true }, { "name": "Product 2", 
-        "id": "uup46zw3w", 
-        "importWizardName": "Product 2", 
-        "amount": 1491, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 45 }, { "facilityId": "cbd6z90jq", 
-        "accountId": "u0woqoszr", 
-        "guid": "9zwaeifhq", 
-        "date": new Date("2021-09-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "zlxb9t9ve", 
-        "importWizardName": "CDD", 
-        "amount": 117 }, { "name": "HDD", 
-        "id": "42bluyhb7", 
-        "importWizardName": "HDD", 
-        "amount": 10 }, { "name": "Product 1", 
-        "id": "5d8dnn98y", 
-        "importWizardName": "Product 1", 
-        "amount": 29718, 
-        "production": true, 
-        "productionInAnalysis": true }, { "name": "Product 2", 
-        "id": "uup46zw3w", 
-        "importWizardName": "Product 2", 
-        "amount": 1417, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 46 }, { "facilityId": "cbd6z90jq", 
-        "accountId": "u0woqoszr", 
-        "guid": "garoqf93z", 
-        "date": new Date("2021-10-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "zlxb9t9ve", 
-        "importWizardName": "CDD", 
-        "amount": 70 }, { "name": "HDD", 
-        "id": "42bluyhb7", 
-        "importWizardName": "HDD", 
-        "amount": 198 }, { "name": "Product 1", 
-        "id": "5d8dnn98y", 
-        "importWizardName": "Product 1", 
-        "amount": 30338, 
-        "production": true, 
-        "productionInAnalysis": true }, { "name": "Product 2", 
-        "id": "uup46zw3w", 
-        "importWizardName": "Product 2", 
-        "amount": 1581, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 47 }, { "facilityId": "cbd6z90jq", 
-        "accountId": "u0woqoszr", 
-        "guid": "q0oeogx9g", 
-        "date": new Date("2021-11-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "zlxb9t9ve", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "42bluyhb7", 
-        "importWizardName": "HDD", 
-        "amount": 691 }, { "name": "Product 1", 
-        "id": "5d8dnn98y", 
-        "importWizardName": "Product 1", 
-        "amount": 29282, 
-        "production": true, 
-        "productionInAnalysis": true }, { "name": "Product 2", 
-        "id": "uup46zw3w", 
-        "importWizardName": "Product 2", 
-        "amount": 1485, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 48 }, { "facilityId": "cbd6z90jq", 
-        "accountId": "u0woqoszr", 
-        "guid": "zo6ikeuha", 
-        "date": new Date("2021-12-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "zlxb9t9ve", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "42bluyhb7", 
-        "importWizardName": "HDD", 
-        "amount": 884 }, { "name": "Product 1", 
-        "id": "5d8dnn98y", 
-        "importWizardName": "Product 1", 
-        "amount": 37360, 
-        "production": true, 
-        "productionInAnalysis": true }, { "name": "Product 2", 
-        "id": "uup46zw3w", 
-        "importWizardName": "Product 2", 
-        "amount": 1417, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 49 }, { "facilityId": "cbd6z90jq", 
-        "accountId": "u0woqoszr", 
-        "guid": "3557g97d8", 
-        "date": new Date("2022-01-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "zlxb9t9ve", 
-        "importWizardName": "CDD",
-        "amount": 0 }, { "name": "HDD", 
-        "id": "42bluyhb7", 
-        "importWizardName": "HDD", 
-        "amount": 0 }, { "name": "Product 1", 
-        "id": "5d8dnn98y", 
-        "importWizardName": "Product 1", 
-        "amount": 1107677.49, 
-        "production": true, 
-        "productionInAnalysis": true }, { "name": "Product 2", 
-        "id": "uup46zw3w", 
-        "importWizardName": "Product 2", 
-        "amount": 1221, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 50 }, { "facilityId": "m9oodo6nk", 
-        "accountId": "u0woqoszr", 
-        "guid": "f5b8rbu2u", 
-        "date": new Date("2018-01-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "d9w074lbp", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "uo91bd5d4", 
-        "importWizardName": "HDD", 
-        "amount": 777 }, { "name": "Production", 
-        "id": "r6uvq2q70", 
-        "importWizardName": "Production", 
-        "amount": 39247, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 51 }, { "facilityId": "m9oodo6nk", 
-        "accountId": "u0woqoszr", 
-        "guid": "lfevppt3w", 
-        "date": new Date("2018-02-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "d9w074lbp", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "uo91bd5d4", 
-        "importWizardName": "HDD", 
-        "amount": 896 }, { "name": "Production", 
-        "id": "r6uvq2q70", 
-        "importWizardName": "Production", 
-        "amount": 48145, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 52 }, { "facilityId": "m9oodo6nk", 
-        "accountId": "u0woqoszr", 
-        "guid": "wj6ar56wt", 
-        "date": new Date("2018-03-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "d9w074lbp", 
-        "importWizardName": "CDD", 
-        "amount": 13 }, { "name": "HDD", 
-        "id": "uo91bd5d4", 
-        "importWizardName": "HDD", 
-        "amount": 526 }, { "name": "Production", 
-        "id": "r6uvq2q70", 
-        "importWizardName": "Production", 
-        "amount": 43914, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 53 }, { "facilityId": "m9oodo6nk", 
-        "accountId": "u0woqoszr", 
-        "guid": "qovwb1j2l", 
-        "date": new Date("2018-04-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "d9w074lbp", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "uo91bd5d4", 
-        "importWizardName": "HDD", 
-        "amount": 655 }, { "name": "Production", 
-        "id": "r6uvq2q70", 
-        "importWizardName": "Production", 
-        "amount": 49053, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 54 }, { "facilityId": "m9oodo6nk", 
-        "accountId": "u0woqoszr", 
-        "guid": "f7j2kz0rl", 
-        "date": new Date("2018-05-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "d9w074lbp", 
-        "importWizardName": "CDD", 
-        "amount": 18 }, { "name": "HDD", 
-        "id": "uo91bd5d4", 
-        "importWizardName": "HDD", 
-        "amount": 337 }, { "name": "Production", 
-        "id": "r6uvq2q70", 
-        "importWizardName": "Production", 
-        "amount": 47562, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 55 }, { "facilityId": "m9oodo6nk", 
-        "accountId": "u0woqoszr", 
-        "guid": "o6ir5s5ay", 
-        "date": new Date("2018-06-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "d9w074lbp", 
-        "importWizardName": "CDD", 
-        "amount": 217 }, { "name": "HDD", 
-        "id": "uo91bd5d4", 
-        "importWizardName": "HDD", 
-        "amount": 11 }, { "name": "Production", 
-        "id": "r6uvq2q70", 
-        "importWizardName": "Production", 
-        "amount": 40576, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 56 }, { "facilityId": "m9oodo6nk", 
-        "accountId": "u0woqoszr", 
-        "guid": "61cvawmg2", 
-        "date": new Date("2018-07-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "d9w074lbp", 
-        "importWizardName": "CDD", 
-        "amount": 315 }, { "name": "HDD", 
-        "id": "uo91bd5d4", 
-        "importWizardName": "HDD", 
-        "amount": 0 }, { "name": "Production", 
-        "id": "r6uvq2q70", 
-        "importWizardName": "Production", 
-        "amount": 39755, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 57 }, { "facilityId": "m9oodo6nk", 
-        "accountId": "u0woqoszr", 
-        "guid": "7zlzjxzo4", 
-        "date": new Date("2018-08-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "d9w074lbp", 
-        "importWizardName": "CDD", 
-        "amount": 510 }, { "name": "HDD", 
-        "id": "uo91bd5d4", 
-        "importWizardName": "HDD", 
-        "amount": 0 }, { "name": "Production", 
-        "id": "r6uvq2q70", 
-        "importWizardName": "Production", 
-        "amount": 37552, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 58 }, { "facilityId": "m9oodo6nk", 
-        "accountId": "u0woqoszr", 
-        "guid": "wdrf0n09i", 
-        "date": new Date("2018-09-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "d9w074lbp", 
-        "importWizardName": "CDD", 
-        "amount": 539 }, { "name": "HDD", 
-        "id": "uo91bd5d4", 
-        "importWizardName": "HDD", 
-        "amount": 0 }, { "name": "Production", 
-        "id": "r6uvq2q70", 
-        "importWizardName": "Production", 
-        "amount": 46192, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 59 }, { "facilityId": "m9oodo6nk", 
-        "accountId": "u0woqoszr", 
-        "guid": "gjxgtk3x4", 
-        "date": new Date("2018-10-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "d9w074lbp", 
-        "importWizardName": "CDD", 
-        "amount": 342 }, { "name": "HDD", 
-        "id": "uo91bd5d4", 
-        "importWizardName": "HDD", 
-        "amount": 1 }, { "name": "Production", 
-        "id": "r6uvq2q70", 
-        "importWizardName": "Production", 
-        "amount": 35150, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 60 }, { "facilityId": "m9oodo6nk", 
-        "accountId": "u0woqoszr", 
-        "guid": "ob2pddhfw", 
-        "date": new Date("2018-11-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "d9w074lbp", 
-        "importWizardName": "CDD", 
-        "amount": 130 }, { "name": "HDD", 
-        "id": "uo91bd5d4", 
-        "importWizardName": "HDD", 
-        "amount": 192 }, { "name": "Production", 
-        "id": "r6uvq2q70", 
-        "importWizardName": "Production", 
-        "amount": 46471, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 61 }, { "facilityId": "m9oodo6nk", 
-        "accountId": "u0woqoszr", 
-        "guid": "214ogpnm2", 
-        "date": new Date("2018-12-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "d9w074lbp", 
-        "importWizardName": "CDD", 
-        "amount": 9 }, { "name": "HDD", 
-        "id": "uo91bd5d4", 
-        "importWizardName": "HDD", 
-        "amount": 492 }, { "name": "Production", 
-        "id": "r6uvq2q70", 
-        "importWizardName": "Production", 
-        "amount": 42949, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 62 }, { "facilityId": "m9oodo6nk", 
-        "accountId": "u0woqoszr", 
-        "guid": "ydbe36h31", 
-        "date": new Date("2019-01-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "d9w074lbp", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "uo91bd5d4", 
-        "importWizardName": "HDD", 
-        "amount": 656 }, { "name": "Production", 
-        "id": "r6uvq2q70", 
-        "importWizardName": "Production", 
-        "amount": 30956, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 63 }, { "facilityId": "m9oodo6nk", 
-        "accountId": "u0woqoszr", 
-        "guid": "e81je3sy4", 
-        "date": new Date("2019-02-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "d9w074lbp", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "uo91bd5d4", 
-        "importWizardName": "HDD", 
-        "amount": 848 }, { "name": "Production", 
-        "id": "r6uvq2q70", 
-        "importWizardName": "Production", 
-        "amount": 42843, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 64 }, { "facilityId": "m9oodo6nk", 
-        "accountId": "u0woqoszr", 
-        "guid": "uyf6uc4nz", 
-        "date": new Date("2019-03-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "d9w074lbp", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "uo91bd5d4", 
-        "importWizardName": "HDD", 
-        "amount": 672 }, { "name": "Production", 
-        "id": "r6uvq2q70", 
-        "importWizardName": "Production", 
-        "amount": 37213, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 65 }, { "facilityId": "m9oodo6nk", 
-        "accountId": "u0woqoszr", 
-        "guid": "w5104t4ex", 
-        "date": new Date("2019-04-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "d9w074lbp", 
-        "importWizardName": "CDD", 
-        "amount": 10 }, { "name": "HDD", 
-        "id": "uo91bd5d4", 
-        "importWizardName": "HDD", 
-        "amount": 592 }, { "name": "Production", 
-        "id": "r6uvq2q70", 
-        "importWizardName": "Production", 
-        "amount": 37146, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 66 }, { "facilityId": "m9oodo6nk", 
-        "accountId": "u0woqoszr", 
-        "guid": "daeo6jihd", 
-        "date": new Date("2019-05-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "d9w074lbp", 
-        "importWizardName": "CDD", 
-        "amount": 47 }, { "name": "HDD", 
-        "id": "uo91bd5d4", 
-        "importWizardName": "HDD", 
-        "amount": 137 }, { "name": "Production", 
-        "id": "r6uvq2q70", 
-        "importWizardName": "Production", 
-        "amount": 48552, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 67 }, { "facilityId": "m9oodo6nk", 
-        "accountId": "u0woqoszr", 
-        "guid": "b8vymm559", 
-        "date": new Date("2019-06-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "d9w074lbp", 
-        "importWizardName": "CDD", 
-        "amount": 190 }, { "name": "HDD", 
-        "id": "uo91bd5d4", 
-        "importWizardName": "HDD", 
-        "amount": 51 }, { "name": "Production", 
-        "id": "r6uvq2q70", 
-        "importWizardName": "Production", 
-        "amount": 46238, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 68 }, { "facilityId": "m9oodo6nk", 
-        "accountId": "u0woqoszr", 
-        "guid": "r6p6yevsw", 
-        "date": new Date("2019-07-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "d9w074lbp", 
-        "importWizardName": "CDD", 
-        "amount": 365 }, { "name": "HDD", 
-        "id": "uo91bd5d4", 
-        "importWizardName": "HDD", 
-        "amount": 0 }, { "name": "Production", 
-        "id": "r6uvq2q70", 
-        "importWizardName": "Production", 
-        "amount": 44893, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 69 }, { "facilityId": "m9oodo6nk", 
-        "accountId": "u0woqoszr", 
-        "guid": "08a8f5rc9", 
-        "date": new Date("2019-08-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "d9w074lbp", 
-        "importWizardName": "CDD", 
-        "amount": 583 }, { "name": "HDD", 
-        "id": "uo91bd5d4", 
-        "importWizardName": "HDD", 
-        "amount": 0 }, { "name": "Production", 
-        "id": "r6uvq2q70", 
-        "importWizardName": "Production", 
-        "amount": 48654, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 70 }, { "facilityId": "m9oodo6nk", 
-        "accountId": "u0woqoszr", 
-        "guid": "vht4jmhzr", 
-        "date": new Date("2019-09-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "d9w074lbp", 
-        "importWizardName": "CDD", 
-        "amount": 492 }, { "name": "HDD", 
-        "id": "uo91bd5d4", 
-        "importWizardName": "HDD", 
-        "amount": 0 }, { "name": "Production", 
-        "id": "r6uvq2q70", 
-        "importWizardName": "Production", 
-        "amount": 39996, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 71 }, { "facilityId": "m9oodo6nk", 
-        "accountId": "u0woqoszr", 
-        "guid": "l77xoea1n", 
-        "date": new Date("2019-10-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "d9w074lbp", 
-        "importWizardName": "CDD", 
-        "amount": 306 }, { "name": "HDD", 
-        "id": "uo91bd5d4", 
-        "importWizardName": "HDD", 
-        "amount": 0 }, { "name": "Production", 
-        "id": "r6uvq2q70", 
-        "importWizardName": "Production", 
-        "amount": 38938, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 72 }, { "facilityId": "m9oodo6nk", 
-        "accountId": "u0woqoszr", 
-        "guid": "6tjz89qx6", 
-        "date": new Date("2019-11-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "d9w074lbp", 
-        "importWizardName": "CDD", 
-        "amount": 71 }, { "name": "HDD", 
-        "id": "uo91bd5d4", 
-        "importWizardName": "HDD", 
-        "amount": 82 }, { "name": "Production", 
-        "id": "r6uvq2q70", 
-        "importWizardName": "Production", 
-        "amount": 54851, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 73 }, { "facilityId": "m9oodo6nk", 
-        "accountId": "u0woqoszr", 
-        "guid": "ye7xemnkf", 
-        "date": new Date("2019-12-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "d9w074lbp", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "uo91bd5d4", 
-        "importWizardName": "HDD", 
-        "amount": 535 }, { "name": "Production", 
-        "id": "r6uvq2q70", 
-        "importWizardName": "Production", 
-        "amount": 43061, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 74 }, { "facilityId": "m9oodo6nk", 
-        "accountId": "u0woqoszr", 
-        "guid": "b9uvrplc8", 
-        "date": new Date("2020-01-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "d9w074lbp", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "uo91bd5d4", 
-        "importWizardName": "HDD", 
-        "amount": 700 }, { "name": "Production", 
-        "id": "r6uvq2q70", 
-        "importWizardName": "Production", 
-        "amount": 30471, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 75 }, { "facilityId": "m9oodo6nk", 
-        "accountId": "u0woqoszr", 
-        "guid": "xpd8vfgm4", 
-        "date": new Date("2020-02-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "d9w074lbp", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "uo91bd5d4", 
-        "importWizardName": "HDD", 
-        "amount": 675 }, { "name": "Production", 
-        "id": "r6uvq2q70", 
-        "importWizardName": "Production", 
-        "amount": 44895, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 76 }, { "facilityId": "m9oodo6nk", 
-        "accountId": "u0woqoszr", 
-        "guid": "sk54r8361", 
-        "date": new Date("2020-03-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "d9w074lbp", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "uo91bd5d4", 
-        "importWizardName": "HDD", 
-        "amount": 571 }, { "name": "Production", 
-        "id": "r6uvq2q70", 
-        "importWizardName": "Production", 
-        "amount": 44687, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 77 }, { "facilityId": "m9oodo6nk", 
-        "accountId": "u0woqoszr", 
-        "guid": "vyi8a86ib", 
-        "date": new Date("2020-04-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "d9w074lbp", 
-        "importWizardName": "CDD", 
-        "amount": 3 }, { "name": "HDD", 
-        "id": "uo91bd5d4", 
-        "importWizardName": "HDD", 
-        "amount": 380 }, { "name": "Production", 
-        "id": "r6uvq2q70", 
-        "importWizardName": "Production", 
-        "amount": 28306, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 78 }, { "facilityId": "m9oodo6nk", 
-        "accountId": "u0woqoszr", 
-        "guid": "j7nbxdqvu", 
-        "date": new Date("2020-05-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "d9w074lbp", 
-        "importWizardName": "CDD", 
-        "amount": 4 }, { "name": "HDD", 
-        "id": "uo91bd5d4", 
-        "importWizardName": "HDD", 
-        "amount": 299 }, { "name": "Production", 
-        "id": "r6uvq2q70", 
-        "importWizardName": "Production", 
-        "amount": 0, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 79 }, { "facilityId": "m9oodo6nk", 
-        "accountId": "u0woqoszr", 
-        "guid": "gydu8btgx", 
-        "date": new Date("2020-06-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "d9w074lbp", 
-        "importWizardName": "CDD", 
-        "amount": 117 }, { "name": "HDD", 
-        "id": "uo91bd5d4", 
-        "importWizardName": "HDD", 
-        "amount": 109 }, { "name": "Production", 
-        "id": "r6uvq2q70", 
-        "importWizardName": "Production", 
-        "amount": 12376, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 80 }, { "facilityId": "m9oodo6nk", 
-        "accountId": "u0woqoszr", 
-        "guid": "scgeo9qkk", 
-        "date": new Date("2020-07-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "d9w074lbp", 
-        "importWizardName": "CDD", 
-        "amount": 407 }, { "name": "HDD", 
-        "id": "uo91bd5d4", 
-        "importWizardName": "HDD", 
-        "amount": 1 }, { "name": "Production", 
-        "id": "r6uvq2q70", 
-        "importWizardName": "Production", 
-        "amount": 26493, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 81 }, { "facilityId": "m9oodo6nk", 
-        "accountId": "u0woqoszr", 
-        "guid": "yjf8003r1", 
-        "date": new Date("2020-08-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "d9w074lbp", 
-        "importWizardName": "CDD", 
-        "amount": 649 }, { "name": "HDD", 
-        "id": "uo91bd5d4", 
-        "importWizardName": "HDD", 
-        "amount": 0 }, { "name": "Production", 
-        "id": "r6uvq2q70", 
-        "importWizardName": "Production", 
-        "amount": 24239, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 82 }, { "facilityId": "m9oodo6nk", 
-        "accountId": "u0woqoszr", 
-        "guid": "gwmahm39r", 
-        "date": new Date("2020-09-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "d9w074lbp", 
-        "importWizardName": "CDD", 
-        "amount": 508 }, { "name": "HDD", 
-        "id": "uo91bd5d4", 
-        "importWizardName": "HDD", 
-        "amount": 0 }, { "name": "Production", 
-        "id": "r6uvq2q70", 
-        "importWizardName": "Production", 
-        "amount": 29235, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 83 }, { "facilityId": "m9oodo6nk", 
-        "accountId": "u0woqoszr", 
-        "guid": "re7u1lhfu", 
-        "date": new Date("2020-10-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "d9w074lbp", 
-        "importWizardName": "CDD", 
-        "amount": 266 }, { "name": "HDD", 
-        "id": "uo91bd5d4", 
-        "importWizardName": "HDD", 
-        "amount": 19 }, { "name": "Production", 
-        "id": "r6uvq2q70", 
-        "importWizardName": "Production", 
-        "amount": 27889, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 84 }, { "facilityId": "m9oodo6nk", 
-        "accountId": "u0woqoszr", 
-        "guid": "y1x881j7a", 
-        "date": new Date("2020-11-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "d9w074lbp", 
-        "importWizardName": "CDD", 
-        "amount": 49 }, { "name": "HDD", 
-        "id": "uo91bd5d4", 
-        "importWizardName": "HDD", 
-        "amount": 114 }, { "name": "Production", 
-        "id": "r6uvq2q70", 
-        "importWizardName": "Production", 
-        "amount": 31813, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 85 }, { "facilityId": "m9oodo6nk", 
-        "accountId": "u0woqoszr", 
-        "guid": "do30k1ja9", 
-        "date": new Date("2020-12-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "d9w074lbp", 
-        "importWizardName": "CDD", 
-        "amount": 6 }, { "name": "HDD", 
-        "id": "uo91bd5d4", 
-        "importWizardName": "HDD", 
-        "amount": 289 }, { "name": "Production", 
-        "id": "r6uvq2q70", 
-        "importWizardName": "Production", 
-        "amount": 26575, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 86 }, { "facilityId": "m9oodo6nk", 
-        "accountId": "u0woqoszr", 
-        "guid": "fbygt67t8", 
-        "date": new Date("2021-01-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "d9w074lbp", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "uo91bd5d4", 
-        "importWizardName": "HDD", 
-        "amount": 676 }, { "name": "Production", 
-        "id": "r6uvq2q70", 
-        "importWizardName": "Production", 
-        "amount": 20712, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 87 }, { "facilityId": "m9oodo6nk", 
-        "accountId": "u0woqoszr", 
-        "guid": "31kcdh7sr", 
-        "date": new Date("2021-02-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "d9w074lbp", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "uo91bd5d4", 
-        "importWizardName": "HDD", 
-        "amount": 798 }, { "name": "Production", 
-        "id": "r6uvq2q70", 
-        "importWizardName": "Production", 
-        "amount": 25475, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 88 }, { "facilityId": "m9oodo6nk", 
-        "accountId": "u0woqoszr", 
-        "guid": "y1jbpklag", 
-        "date": new Date("2021-03-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "d9w074lbp", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "uo91bd5d4", 
-        "importWizardName": "HDD", 
-        "amount": 745 }, { "name": "Production", 
-        "id": "r6uvq2q70", 
-        "importWizardName": "Production", 
-        "amount": 20275, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 89 }, { "facilityId": "m9oodo6nk", 
-        "accountId": "u0woqoszr", 
-        "guid": "2nm9ykn4s", 
-        "date": new Date("2021-04-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "d9w074lbp", 
-        "importWizardName": "CDD", 
-        "amount": 14 }, { "name": "HDD", 
-        "id": "uo91bd5d4", 
-        "importWizardName": "HDD", 
-        "amount": 452 }, { "name": "Production", 
-        "id": "r6uvq2q70", 
-        "importWizardName": "Production", 
-        "amount": 25647, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 90 }, { "facilityId": "m9oodo6nk", 
-        "accountId": "u0woqoszr", 
-        "guid": "q94uef4qn", 
-        "date": new Date("2021-05-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "d9w074lbp", 
-        "importWizardName": "CDD", 
-        "amount": 24 }, { "name": "HDD", 
-        "id": "uo91bd5d4", 
-        "importWizardName": "HDD", 
-        "amount": 200 }, { "name": "Production", 
-        "id": "r6uvq2q70", 
-        "importWizardName": "Production", 
-        "amount": 36449, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 91 }, { "facilityId": "m9oodo6nk", 
-        "accountId": "u0woqoszr", 
-        "guid": "6rimh3u6d", 
-        "date": new Date("2021-06-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "d9w074lbp", 
-        "importWizardName": "CDD", 
-        "amount": 141 }, { "name": "HDD", 
-        "id": "uo91bd5d4", 
-        "importWizardName": "HDD", 
-        "amount": 71 }, { "name": "Production", 
-        "id": "r6uvq2q70", 
-        "importWizardName": "Production", 
-        "amount": 32746, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 92 }, { "facilityId": "m9oodo6nk", 
-        "accountId": "u0woqoszr", 
-        "guid": "x5yi4aci4", 
-        "date": new Date("2021-07-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "d9w074lbp", 
-        "importWizardName": "CDD", 
-        "amount": 412 }, { "name": "HDD", 
-        "id": "uo91bd5d4", 
-        "importWizardName": "HDD", 
-        "amount": 0 }, { "name": "Production", 
-        "id": "r6uvq2q70", 
-        "importWizardName": "Production", 
-        "amount": 35588, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 93 }, { "facilityId": "m9oodo6nk", 
-        "accountId": "u0woqoszr", 
-        "guid": "p9o4kltao", 
-        "date": new Date("2021-08-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "d9w074lbp", 
-        "importWizardName": "CDD", 
-        "amount": 529 }, { "name": "HDD", 
-        "id": "uo91bd5d4", 
-        "importWizardName": "HDD", 
-        "amount": 0 }, { "name": "Production", 
-        "id": "r6uvq2q70", 
-        "importWizardName": "Production", 
-        "amount": 30282, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 94 }, { "facilityId": "m9oodo6nk", 
-        "accountId": "u0woqoszr", 
-        "guid": "9bu9q87f6", 
-        "date": new Date("2021-09-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "d9w074lbp", 
-        "importWizardName": "CDD", 
-        "amount": 532 }, { "name": "HDD", 
-        "id": "uo91bd5d4", 
-        "importWizardName": "HDD", 
-        "amount": 0 }, { "name": "Production", 
-        "id": "r6uvq2q70", 
-        "importWizardName": "Production", 
-        "amount": 35576, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 95 }, { "facilityId": "m9oodo6nk", 
-        "accountId": "u0woqoszr", 
-        "guid": "8301x6qf8", 
-        "date": new Date("2021-10-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "d9w074lbp", 
-        "importWizardName": "CDD", 
-        "amount": 292 }, { "name": "HDD", 
-        "id": "uo91bd5d4", 
-        "importWizardName": "HDD", 
-        "amount": 0 }, { "name": "Production", 
-        "id": "r6uvq2q70", 
-        "importWizardName": "Production", 
-        "amount": 38071, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 96 }, { "facilityId": "m9oodo6nk", 
-        "accountId": "u0woqoszr", 
-        "guid": "bgekgfwgg", 
-        "date": new Date("2021-11-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "d9w074lbp", 
-        "importWizardName": "CDD", 
-        "amount": 124 }, { "name": "HDD", 
-        "id": "uo91bd5d4", 
-        "importWizardName": "HDD", 
-        "amount": 45 }, { "name": "Production", 
-        "id": "r6uvq2q70", 
-        "importWizardName": "Production", 
-        "amount": 30715, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 97 }, { "facilityId": "m9oodo6nk", 
-        "accountId": "u0woqoszr", 
-        "guid": "kkoe9jks6", 
-        "date": new Date("2021-12-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "d9w074lbp", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "uo91bd5d4", 
-        "importWizardName": "HDD", 
-        "amount": 466 }, { "name": "Production", 
-        "id": "r6uvq2q70", 
-        "importWizardName": "Production", 
-        "amount": 26517, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 98 }, { "facilityId": "m9oodo6nk", 
-        "accountId": "u0woqoszr", 
-        "guid": "s54gbj8j5", 
-        "date": new Date("2022-01-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "d9w074lbp", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "uo91bd5d4", 
-        "importWizardName": "HDD", 
-        "amount": 524 }, { "name": "Production", 
-        "id": "r6uvq2q70", 
-        "importWizardName": "Production", 
-        "amount": 30333, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 99 }, { "facilityId": "e8mj9zt10", 
-        "accountId": "u0woqoszr", 
-        "guid": "qwt5a5n0i", 
-        "date": new Date("2017-12-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "5jsihtofv", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "9nzo5kyrs", 
-        "importWizardName": "HDD", 
-        "amount": 1274 }, { "name": "Production", 
-        "id": "5kd5ke369", 
-        "importWizardName": "Production", 
-        "amount": 1146531.87, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 100 }, { "facilityId": "e8mj9zt10", 
-        "accountId": "u0woqoszr", 
-        "guid": "tcjmxplk0", 
-        "date": new Date("2018-01-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "5jsihtofv", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "9nzo5kyrs", 
-        "importWizardName": "HDD", 
-        "amount": 1332 }, { "name": "Production", 
-        "id": "5kd5ke369", 
-        "importWizardName": "Production", 
-        "amount": 1185326.56, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 101 }, { "facilityId": "e8mj9zt10", 
-        "accountId": "u0woqoszr", 
-        "guid": "0bhthkpl5", 
-        "date": new Date("2018-02-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "5jsihtofv", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "9nzo5kyrs", 
-        "importWizardName": "HDD", 
-        "amount": 1211 }, { "name": "Production", 
-        "id": "5kd5ke369", 
-        "importWizardName": "Production", 
-        "amount": 1185100.5, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 102 }, { "facilityId": "e8mj9zt10", 
-        "accountId": "u0woqoszr", 
-        "guid": "i59ydmhlo", 
-        "date": new Date("2018-03-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "5jsihtofv", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "9nzo5kyrs", 
-        "importWizardName": "HDD", 
-        "amount": 846 }, { "name": "Production", 
-        "id": "5kd5ke369", 
-        "importWizardName": "Production", 
-        "amount": 1245443.28, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 103 }, { "facilityId": "e8mj9zt10", 
-        "accountId": "u0woqoszr", 
-        "guid": "i8chlpqwj", 
-        "date": new Date("2018-04-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "5jsihtofv", 
-        "importWizardName": "CDD", 
-        "amount": 8 }, { "name": "HDD", 
-        "id": "9nzo5kyrs", 
-        "importWizardName": "HDD", 
-        "amount": 676 }, { "name": "Production", 
-        "id": "5kd5ke369", 
-        "importWizardName": "Production", 
-        "amount": 1165940.01, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 104 }, { "facilityId": "e8mj9zt10", 
-        "accountId": "u0woqoszr", 
-        "guid": "7pihai1p3", 
-        "date": new Date("2018-05-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "5jsihtofv", 
-        "importWizardName": "CDD", 
-        "amount": 241 }, { "name": "HDD", 
-        "id": "9nzo5kyrs", 
-        "importWizardName": "HDD", 
-        "amount": 33 }, { "name": "Production", 
-        "id": "5kd5ke369", 
-        "importWizardName": "Production", 
-        "amount": 1313323.51, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 105 }, { "facilityId": "e8mj9zt10", 
-        "accountId": "u0woqoszr", 
-        "guid": "d8yw6jkaf", 
-        "date": new Date("2018-06-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "5jsihtofv", 
-        "importWizardName": "CDD", 
-        "amount": 352 }, { "name": "HDD", 
-        "id": "9nzo5kyrs", 
-        "importWizardName": "HDD", 
-        "amount": 0 }, { "name": "Production", 
-        "id": "5kd5ke369", 
-        "importWizardName": "Production", 
-        "amount": 1468443.85, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 106 }, { "facilityId": "e8mj9zt10", 
-        "accountId": "u0woqoszr", 
-        "guid": "vanzf7l5a", 
-        "date": new Date("2018-07-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "5jsihtofv", 
-        "importWizardName": "CDD", 
-        "amount": 426 }, { "name": "HDD", 
-        "id": "9nzo5kyrs", 
-        "importWizardName": "HDD", 
-        "amount": 0 }, { "name": "Production", 
-        "id": "5kd5ke369", 
-        "importWizardName": "Production", 
-        "amount": 1159935.45, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 107 }, { "facilityId": "e8mj9zt10", 
-        "accountId": "u0woqoszr", 
-        "guid": "hht17btwy", 
-        "date": new Date("2018-08-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "5jsihtofv", 
-        "importWizardName": "CDD", 
-        "amount": 375 }, { "name": "HDD", 
-        "id": "9nzo5kyrs", 
-        "importWizardName": "HDD", 
-        "amount": 0 }, { "name": "Production", 
-        "id": "5kd5ke369", 
-        "importWizardName": "Production", 
-        "amount": 1313491.15, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 108 }, { "facilityId": "e8mj9zt10", 
-        "accountId": "u0woqoszr", 
-        "guid": "nszp3j1n7", 
-        "date": new Date("2018-09-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "5jsihtofv", 
-        "importWizardName": "CDD", 
-        "amount": 188 }, { "name": "HDD", 
-        "id": "9nzo5kyrs", 
-        "importWizardName": "HDD", 
-        "amount": 77 }, { "name": "Production", 
-        "id": "5kd5ke369", 
-        "importWizardName": "Production", 
-        "amount": 1406138.92, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 109 }, { "facilityId": "e8mj9zt10", 
-        "accountId": "u0woqoszr", 
-        "guid": "7uv31opti", 
-        "date": new Date("2018-10-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "5jsihtofv", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "9nzo5kyrs", 
-        "importWizardName": "HDD", 
-        "amount": 465 }, { "name": "Production", 
-        "id": "5kd5ke369", 
-        "importWizardName": "Production", 
-        "amount": 1910777.23, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 110 }, { "facilityId": "e8mj9zt10", 
-        "accountId": "u0woqoszr", 
-        "guid": "0a0sdghrs", 
-        "date": new Date("2018-11-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "5jsihtofv", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "9nzo5kyrs", 
-        "importWizardName": "HDD", 
-        "amount": 930 }, { "name": "Production", 
-        "id": "5kd5ke369", 
-        "importWizardName": "Production", 
-        "amount": 1806322.27, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 111 }, { "facilityId": "e8mj9zt10", 
-        "accountId": "u0woqoszr", 
-        "guid": "ylifr0rjr", 
-        "date": new Date("2018-12-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "5jsihtofv", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "9nzo5kyrs", 
-        "importWizardName": "HDD", 
-        "amount": 1057 }, { "name": "Production", 
-        "id": "5kd5ke369", 
-        "importWizardName": "Production", 
-        "amount": 1917627.61, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 112 }, { "facilityId": "e8mj9zt10", 
-        "accountId": "u0woqoszr", 
-        "guid": "ypg2co7as", 
-        "date": new Date("2019-01-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "5jsihtofv", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "9nzo5kyrs", 
-        "importWizardName": "HDD", 
-        "amount": 1451 }, { "name": "Production", 
-        "id": "5kd5ke369", 
-        "importWizardName": "Production", 
-        "amount": 1875228.66, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 113 }, { "facilityId": "e8mj9zt10", 
-        "accountId": "u0woqoszr", 
-        "guid": "54zg84lq9", 
-        "date": new Date("2019-02-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "5jsihtofv", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "9nzo5kyrs", 
-        "importWizardName": "HDD", 
-        "amount": 1299 }, { "name": "Production", 
-        "id": "5kd5ke369", 
-        "importWizardName": "Production", 
-        "amount": 1710801.76, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 114 }, { "facilityId": "e8mj9zt10", 
-        "accountId": "u0woqoszr", 
-        "guid": "pd977lybb", 
-        "date": new Date("2019-03-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "5jsihtofv", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "9nzo5kyrs", 
-        "importWizardName": "HDD", 
-        "amount": 968 }, { "name": "Production", 
-        "id": "5kd5ke369", 
-        "importWizardName": "Production", 
-        "amount": 1732564.48, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 115 }, { "facilityId": "e8mj9zt10", 
-        "accountId": "u0woqoszr", 
-        "guid": "i6739ssqp", 
-        "date": new Date("2019-04-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "5jsihtofv", 
-        "importWizardName": "CDD", 
-        "amount": 4 }, { "name": "HDD", 
-        "id": "9nzo5kyrs", 
-        "importWizardName": "HDD", 
-        "amount": 439 }, { "name": "Production", 
-        "id": "5kd5ke369", 
-        "importWizardName": "Production", 
-        "amount": 1654841.75, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 116 }, { "facilityId": "e8mj9zt10", 
-        "accountId": "u0woqoszr", 
-        "guid": "h2kc6pu28", 
-        "date": new Date("2019-05-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "5jsihtofv", 
-        "importWizardName": "CDD", 
-        "amount": 33 }, { "name": "HDD", 
-        "id": "9nzo5kyrs", 
-        "importWizardName": "HDD", 
-        "amount": 229 }, { "name": "Production", 
-        "id": "5kd5ke369", 
-        "importWizardName": "Production", 
-        "amount": 1623827.08, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 117 }, { "facilityId": "e8mj9zt10", 
-        "accountId": "u0woqoszr", 
-        "guid": "vmvmclqfl", 
-        "date": new Date("2019-06-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "5jsihtofv", 
-        "importWizardName": "CDD", 
-        "amount": 219 }, { "name": "HDD", 
-        "id": "9nzo5kyrs", 
-        "importWizardName": "HDD", 
-        "amount": 7 }, { "name": "Production", 
-        "id": "5kd5ke369", 
-        "importWizardName": "Production", 
-        "amount": 1475588.87, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 118 }, { "facilityId": "e8mj9zt10", 
-        "accountId": "u0woqoszr", 
-        "guid": "k7ygajlje", 
-        "date": new Date("2019-07-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "5jsihtofv", 
-        "importWizardName": "CDD", 
-        "amount": 406 }, { "name": "HDD", 
-        "id": "9nzo5kyrs", 
-        "importWizardName": "HDD", 
-        "amount": 0 }, { "name": "Production", 
-        "id": "5kd5ke369", 
-        "importWizardName": "Production", 
-        "amount": 1187575.73, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 119 }, { "facilityId": "e8mj9zt10", 
-        "accountId": "u0woqoszr", 
-        "guid": "w3rr4r8tf", 
-        "date": new Date("2019-08-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "5jsihtofv", 
-        "importWizardName": "CDD", 
-        "amount": 270 }, { "name": "HDD", 
-        "id": "9nzo5kyrs", 
-        "importWizardName": "HDD", 
-        "amount": 0 }, { "name": "Production", 
-        "id": "5kd5ke369", 
-        "importWizardName": "Production", 
-        "amount": 1299745.94, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 120 }, { "facilityId": "e8mj9zt10", 
-        "accountId": "u0woqoszr", 
-        "guid": "wyixvp1wr", 
-        "date": new Date("2019-09-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "5jsihtofv", 
-        "importWizardName": "CDD", 
-        "amount": 163 }, { "name": "HDD", 
-        "id": "9nzo5kyrs", 
-        "importWizardName": "HDD", 
-        "amount": 30 }, { "name": "Production", 
-        "id": "5kd5ke369", 
-        "importWizardName": "Production", 
-        "amount": 1299357.32, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 121 }, { "facilityId": "e8mj9zt10", 
-        "accountId": "u0woqoszr", 
-        "guid": "4suda92hz", 
-        "date": new Date("2019-10-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "5jsihtofv", 
-        "importWizardName": "CDD", 
-        "amount": 2 }, { "name": "HDD", 
-        "id": "9nzo5kyrs", 
-        "importWizardName": "HDD", 
-        "amount": 468 }, { "name": "Production", 
-        "id": "5kd5ke369", 
-        "importWizardName": "Production", 
-        "amount": 1761757.97, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 122 }, { "facilityId": "e8mj9zt10", 
-        "accountId": "u0woqoszr", 
-        "guid": "fq7frrhbv", 
-        "date": new Date("2019-11-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "5jsihtofv", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "9nzo5kyrs", 
-        "importWizardName": "HDD", 
-        "amount": 880 }, { "name": "Production", 
-        "id": "5kd5ke369", 
-        "importWizardName": "Production", 
-        "amount": 1291130.26, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 123 }, { "facilityId": "e8mj9zt10", 
-        "accountId": "u0woqoszr", 
-        "guid": "ociv7rnin", 
-        "date": new Date("2019-12-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "5jsihtofv", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "9nzo5kyrs", 
-        "importWizardName": "HDD", 
-        "amount": 1165 }, { "name": "Production", 
-        "id": "5kd5ke369", 
-        "importWizardName": "Production", 
-        "amount": 1096548.48, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 124 }, { "facilityId": "e8mj9zt10", 
-        "accountId": "u0woqoszr", 
-        "guid": "exs30qcoe", 
-        "date": new Date("2020-01-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "5jsihtofv", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "9nzo5kyrs", 
-        "importWizardName": "HDD", 
-        "amount": 1238 }, { "name": "Production", 
-        "id": "5kd5ke369", 
-        "importWizardName": "Production", 
-        "amount": 1432556.19, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 125 }, { "facilityId": "e8mj9zt10", 
-        "accountId": "u0woqoszr", 
-        "guid": "9pub2poyt", 
-        "date": new Date("2020-02-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "5jsihtofv", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "9nzo5kyrs", 
-        "importWizardName": "HDD", 
-        "amount": 1159 }, { "name": "Production", 
-        "id": "5kd5ke369", 
-        "importWizardName": "Production", 
-        "amount": 1336362.58, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 126 }, { "facilityId": "e8mj9zt10", 
-        "accountId": "u0woqoszr", 
-        "guid": "9fky26zgr", 
-        "date": new Date("2020-03-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "5jsihtofv", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "9nzo5kyrs", 
-        "importWizardName": "HDD", 
-        "amount": 696 }, { "name": "Production", 
-        "id": "5kd5ke369", 
-        "importWizardName": "Production", 
-        "amount": 1217250.55, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 127 }, { "facilityId": "e8mj9zt10", 
-        "accountId": "u0woqoszr", 
-        "guid": "xmrb6kdy5", 
-        "date": new Date("2020-04-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "5jsihtofv", 
-        "importWizardName": "CDD", 
-        "amount": 2 }, { "name": "HDD", 
-        "id": "9nzo5kyrs", 
-        "importWizardName": "HDD", 
-        "amount": 454 }, { "name": "Production", 
-        "id": "5kd5ke369", 
-        "importWizardName": "Production", 
-        "amount": 824951.36, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 128 }, { "facilityId": "e8mj9zt10", 
-        "accountId": "u0woqoszr", 
-        "guid": "y9lag7ito", 
-        "date": new Date("2020-05-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "5jsihtofv", 
-        "importWizardName": "CDD", 
-        "amount": 81 }, { "name": "HDD", 
-        "id": "9nzo5kyrs", 
-        "importWizardName": "HDD", 
-        "amount": 152 }, { "name": "Production", 
-        "id": "5kd5ke369", 
-        "importWizardName": "Production", 
-        "amount": 909276.8200000001, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 129 }, { "facilityId": "e8mj9zt10", 
-        "accountId": "u0woqoszr", 
-        "guid": "otbq4ujnw", 
-        "date": new Date("2020-06-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "5jsihtofv", 
-        "importWizardName": "CDD", 
-        "amount": 343 }, { "name": "HDD", 
-        "id": "9nzo5kyrs", 
-        "importWizardName": "HDD", 
-        "amount": 1 }, { "name": "Production", 
-        "id": "5kd5ke369", 
-        "importWizardName": "Production", 
-        "amount": 1134670.07, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 130 }, { "facilityId": "e8mj9zt10", 
-        "accountId": "u0woqoszr", 
-        "guid": "sh1emwkq5", 
-        "date": new Date("2020-07-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "5jsihtofv", 
-        "importWizardName": "CDD", 
-        "amount": 468 }, { "name": "HDD", 
-        "id": "9nzo5kyrs", 
-        "importWizardName": "HDD", 
-        "amount": 0 }, { "name": "Production", 
-        "id": "5kd5ke369", 
-        "importWizardName": "Production", 
-        "amount": 1317895.51, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 131 }, { "facilityId": "e8mj9zt10", 
-        "accountId": "u0woqoszr", 
-        "guid": "ps5qh6iyo", 
-        "date": new Date("2020-08-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "5jsihtofv", 
-        "importWizardName": "CDD", 
-        "amount": 371 }, { "name": "HDD", 
-        "id": "9nzo5kyrs", 
-        "importWizardName": "HDD", 
-        "amount": 0 }, { "name": "Production", 
-        "id": "5kd5ke369", 
-        "importWizardName": "Production", 
-        "amount": 1427883.86, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 132 }, { "facilityId": "e8mj9zt10", 
-        "accountId": "u0woqoszr", 
-        "guid": "rc9x3cf3m", 
-        "date": new Date("2020-09-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "5jsihtofv", 
-        "importWizardName": "CDD", 
-        "amount": 106 }, { "name": "HDD", 
-        "id": "9nzo5kyrs", 
-        "importWizardName": "HDD", 
-        "amount": 110 }, { "name": "Production", 
-        "id": "5kd5ke369", 
-        "importWizardName": "Production", 
-        "amount": 1421028.4, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 133 }, { "facilityId": "e8mj9zt10", 
-        "accountId": "u0woqoszr", 
-        "guid": "dbm0w9gzi", 
-        "date": new Date("2020-10-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "5jsihtofv", 
-        "importWizardName": "CDD", 
-        "amount": 12 }, { "name": "HDD", 
-        "id": "9nzo5kyrs", 
-        "importWizardName": "HDD", 
-        "amount": 555 }, { "name": "Production", 
-        "id": "5kd5ke369", 
-        "importWizardName": "Production", 
-        "amount": 1523377.7, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 134 }, { "facilityId": "e8mj9zt10", 
-        "accountId": "u0woqoszr", 
-        "guid": "8yhhiieqo", 
-        "date": new Date("2020-11-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "5jsihtofv", 
-        "importWizardName": "CDD", 
-        "amount": 13 }, { "name": "HDD", 
-        "id": "9nzo5kyrs", 
-        "importWizardName": "HDD", 
-        "amount": 688 }, { "name": "Production", 
-        "id": "5kd5ke369", 
-        "importWizardName": "Production", 
-        "amount": 1235688.41, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 135 }, { "facilityId": "e8mj9zt10", 
-        "accountId": "u0woqoszr", 
-        "guid": "951al5nwx", 
-        "date": new Date("2020-12-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "5jsihtofv", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "9nzo5kyrs", 
-        "importWizardName": "HDD", 
-        "amount": 1102 }, { "name": "Production", 
-        "id": "5kd5ke369", 
-        "importWizardName": "Production", 
-        "amount": 1067147.98, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 136 }, { "facilityId": "e8mj9zt10", 
-        "accountId": "u0woqoszr", 
-        "guid": "8bxd2c4x9", 
-        "date": new Date("2021-01-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "5jsihtofv", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "9nzo5kyrs", 
-        "importWizardName": "HDD", 
-        "amount": 1225 }, { "name": "Production", 
-        "id": "5kd5ke369", 
-        "importWizardName": "Production", 
-        "amount": 1311722.04, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 137 }, { "facilityId": "e8mj9zt10", 
-        "accountId": "u0woqoszr", 
-        "guid": "1ng5dvq5f", 
-        "date": new Date("2021-02-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "5jsihtofv", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "9nzo5kyrs", 
-        "importWizardName": "HDD", 
-        "amount": 1389 }, { "name": "Production", 
-        "id": "5kd5ke369", 
-        "importWizardName": "Production", 
-        "amount": 1330341.51, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 138 }, { "facilityId": "e8mj9zt10", 
-        "accountId": "u0woqoszr", 
-        "guid": "ibi0y7zs7", 
-        "date": new Date("2021-03-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "5jsihtofv", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "9nzo5kyrs", 
-        "importWizardName": "HDD", 
-        "amount": 631 }, { "name": "Production", 
-        "id": "5kd5ke369", 
-        "importWizardName": "Production", 
-        "amount": 1558085.53, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 139 }, { "facilityId": "e8mj9zt10", 
-        "accountId": "u0woqoszr", 
-        "guid": "gbtjtzb7u", 
-        "date": new Date("2021-04-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "5jsihtofv", 
-        "importWizardName": "CDD", 
-        "amount": 7 }, { "name": "HDD", 
-        "id": "9nzo5kyrs", 
-        "importWizardName": "HDD", 
-        "amount": 415 }, { "name": "Production", 
-        "id": "5kd5ke369", 
-        "importWizardName": "Production", 
-        "amount": 1337207.1300000001, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 140 }, { "facilityId": "e8mj9zt10", 
-        "accountId": "u0woqoszr", 
-        "guid": "y8ctrvgj1", 
-        "date": new Date("2021-05-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "5jsihtofv", 
-        "importWizardName": "CDD", 
-        "amount": 109 }, { "name": "HDD", 
-        "id": "9nzo5kyrs", 
-        "importWizardName": "HDD", 
-        "amount": 156 }, { "name": "Production", 
-        "id": "5kd5ke369", 
-        "importWizardName": "Production", 
-        "amount": 1416978.37, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 141 }, { "facilityId": "e8mj9zt10", 
-        "accountId": "u0woqoszr", 
-        "guid": "9dnwxeoh0", 
-        "date": new Date("2021-06-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "5jsihtofv", 
-        "importWizardName": "CDD", 
-        "amount": 447 }, { "name": "HDD", 
-        "id": "9nzo5kyrs", 
-        "importWizardName": "HDD", 
-        "amount": 1 }, { "name": "Production", 
-        "id": "5kd5ke369", 
-        "importWizardName": "Production", 
-        "amount": 1230462.36, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 142 }, { "facilityId": "e8mj9zt10", 
-        "accountId": "u0woqoszr", 
-        "guid": "dzkm91ggm", 
-        "date": new Date("2021-07-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "5jsihtofv", 
-        "importWizardName": "CDD", 
-        "amount": 422 }, { "name": "HDD", 
-        "id": "9nzo5kyrs", 
-        "importWizardName": "HDD", 
-        "amount": 1 }, { "name": "Production", 
-        "id": "5kd5ke369", 
-        "importWizardName": "Production", 
-        "amount": 1396042.42, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 143 }, { "facilityId": "e8mj9zt10", 
-        "accountId": "u0woqoszr", 
-        "guid": "e99xiuis2", 
-        "date": new Date("2021-08-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "5jsihtofv", 
-        "importWizardName": "CDD", 
-        "amount": 392 }, { "name": "HDD", 
-        "id": "9nzo5kyrs", 
-        "importWizardName": "HDD", 
-        "amount": 0 }, { "name": "Production", 
-        "id": "5kd5ke369", 
-        "importWizardName": "Production", 
-        "amount": 1487291.92, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 144 }, { "facilityId": "e8mj9zt10", 
-        "accountId": "u0woqoszr", 
-        "guid": "huiawbrlw", 
-        "date": new Date("2021-09-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "5jsihtofv", 
-        "importWizardName": "CDD", 
-        "amount": 159 }, { "name": "HDD", 
-        "id": "9nzo5kyrs", 
-        "importWizardName": "HDD", 
-        "amount": 17 }, { "name": "Production", 
-        "id": "5kd5ke369", 
-        "importWizardName": "Production", 
-        "amount": 1394399.04, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 145 }, { "facilityId": "e8mj9zt10", 
-        "accountId": "u0woqoszr", 
-        "guid": "8hl34vxvn", 
-        "date": new Date("2021-10-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "5jsihtofv", 
-        "importWizardName": "CDD", 
-        "amount": 49 }, { "name": "HDD", 
-        "id": "9nzo5kyrs", 
-        "importWizardName": "HDD", 
-        "amount": 227 }, { "name": "Production", 
-        "id": "5kd5ke369", 
-        "importWizardName": "Production", 
-        "amount": 1348936.85, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 146 }, { "facilityId": "e8mj9zt10", 
-        "accountId": "u0woqoszr", 
-        "guid": "rmd1lckb7", 
-        "date": new Date("2021-11-01T05:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "5jsihtofv", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "9nzo5kyrs", 
-        "importWizardName": "HDD", 
-        "amount": 706 }, { "name": "Production", 
-        "id": "5kd5ke369", 
-        "importWizardName": "Production", 
-        "amount": 1125021.8800000001, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 147 }, { "facilityId": "e8mj9zt10", 
-        "accountId": "u0woqoszr", 
-        "guid": "3dymnesmk", 
-        "date": new Date("2021-12-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "5jsihtofv", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "9nzo5kyrs", 
-        "importWizardName": "HDD", 
-        "amount": 1136 }, { "name": "Production", 
-        "id": "5kd5ke369", 
-        "importWizardName": "Production", 
-        "amount": 1125021.8800000001, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 148 }, { "facilityId": "e8mj9zt10", 
-        "accountId": "u0woqoszr", 
-        "guid": "9mjx32x7f", 
-        "date": new Date("2022-01-01T06:00:00.000Z"), 
-        "predictors": [{ "name": "CDD", 
-        "id": "5jsihtofv", 
-        "importWizardName": "CDD", 
-        "amount": 0 }, { "name": "HDD", 
-        "id": "9nzo5kyrs", 
-        "importWizardName": "HDD", 
-        "amount": 1221 }, { "name": "Production", 
-        "id": "5kd5ke369", 
-        "importWizardName": "Production", 
-        "amount": 1107677.49, 
-        "production": true, 
-        "productionInAnalysis": true }], 
-        "id": 149 }
+        {
+            "facilityId": "cbd6z90jq",
+            "accountId": "u0woqoszr",
+            "guid": "j59g5a7wa",
+            "date": new Date("2017-12-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "zlxb9t9ve",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "42bluyhb7",
+                "importWizardName": "HDD",
+                "amount": 1200
+            }, {
+                "name": "Product 1",
+                "id": "5d8dnn98y",
+                "importWizardName": "Product 1",
+                "amount": 38908,
+                "production": true,
+                "productionInAnalysis": true
+            }, {
+                "name": "Product 2",
+                "id": "uup46zw3w",
+                "importWizardName": "Product 2",
+                "amount": 1274,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 1
+        }, {
+            "facilityId": "cbd6z90jq",
+            "accountId": "u0woqoszr",
+            "guid": "9i8uamyyq",
+            "date": new Date("2018-01-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "zlxb9t9ve",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "42bluyhb7",
+                "importWizardName": "HDD",
+                "amount": 1172
+            }, {
+                "name": "Product 1",
+                "id": "5d8dnn98y",
+                "importWizardName": "Product 1",
+                "amount": 39393,
+                "production": true,
+                "productionInAnalysis": true
+            }, {
+                "name": "Product 2",
+                "id": "uup46zw3w",
+                "importWizardName": "Product 2",
+                "amount": 1394,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 2
+        }, {
+            "facilityId": "cbd6z90jq",
+            "accountId": "u0woqoszr",
+            "guid": "abctxa5a2",
+            "date": new Date("2018-02-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "zlxb9t9ve",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "42bluyhb7",
+                "importWizardName": "HDD",
+                "amount": 1009
+            }, {
+                "name": "Product 1",
+                "id": "5d8dnn98y",
+                "importWizardName": "Product 1",
+                "amount": 39575,
+                "production": true,
+                "productionInAnalysis": true
+            }, {
+                "name": "Product 2",
+                "id": "uup46zw3w",
+                "importWizardName": "Product 2",
+                "amount": 1125,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 3
+        }, {
+            "facilityId": "cbd6z90jq",
+            "accountId": "u0woqoszr",
+            "guid": "my5xczxyv",
+            "date": new Date("2018-03-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "zlxb9t9ve",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "42bluyhb7",
+                "importWizardName": "HDD",
+                "amount": 812
+            }, {
+                "name": "Product 1",
+                "id": "5d8dnn98y",
+                "importWizardName": "Product 1",
+                "amount": 41394,
+                "production": true,
+                "productionInAnalysis": true
+            }, {
+                "name": "Product 2",
+                "id": "uup46zw3w",
+                "importWizardName": "Product 2",
+                "amount": 1164,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 4
+        }, {
+            "facilityId": "cbd6z90jq",
+            "accountId": "u0woqoszr",
+            "guid": "dwlz9h97g",
+            "date": new Date("2018-04-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "zlxb9t9ve",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "42bluyhb7",
+                "importWizardName": "HDD",
+                "amount": 689
+            }, {
+                "name": "Product 1",
+                "id": "5d8dnn98y",
+                "importWizardName": "Product 1",
+                "amount": 38813,
+                "production": true,
+                "productionInAnalysis": true
+            }, {
+                "name": "Product 2",
+                "id": "uup46zw3w",
+                "importWizardName": "Product 2",
+                "amount": 1287,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 5
+        }, {
+            "facilityId": "cbd6z90jq",
+            "accountId": "u0woqoszr",
+            "guid": "9aa4xjphl",
+            "date": new Date("2018-05-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "zlxb9t9ve",
+                "importWizardName": "CDD",
+                "amount": 167
+            }, {
+                "name": "HDD",
+                "id": "42bluyhb7",
+                "importWizardName": "HDD",
+                "amount": 66
+            }, {
+                "name": "Product 1",
+                "id": "5d8dnn98y",
+                "importWizardName": "Product 1",
+                "amount": 35627,
+                "production": true,
+                "productionInAnalysis": true
+            }, {
+                "name": "Product 2",
+                "id": "uup46zw3w",
+                "importWizardName": "Product 2",
+                "amount": 1161,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 6
+        }, {
+            "facilityId": "cbd6z90jq",
+            "accountId": "u0woqoszr",
+            "guid": "s5ksygwqt",
+            "date": new Date("2018-06-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "zlxb9t9ve",
+                "importWizardName": "CDD",
+                "amount": 248
+            }, {
+                "name": "HDD",
+                "id": "42bluyhb7",
+                "importWizardName": "HDD",
+                "amount": 4
+            }, {
+                "name": "Product 1",
+                "id": "5d8dnn98y",
+                "importWizardName": "Product 1",
+                "amount": 34319,
+                "production": true,
+                "productionInAnalysis": true
+            }, {
+                "name": "Product 2",
+                "id": "uup46zw3w",
+                "importWizardName": "Product 2",
+                "amount": 991,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 7
+        }, {
+            "facilityId": "cbd6z90jq",
+            "accountId": "u0woqoszr",
+            "guid": "y7qvrv8oz",
+            "date": new Date("2018-07-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "zlxb9t9ve",
+                "importWizardName": "CDD",
+                "amount": 366
+            }, {
+                "name": "HDD",
+                "id": "42bluyhb7",
+                "importWizardName": "HDD",
+                "amount": 0
+            }, {
+                "name": "Product 1",
+                "id": "5d8dnn98y",
+                "importWizardName": "Product 1",
+                "amount": 33810,
+                "production": true,
+                "productionInAnalysis": true
+            }, {
+                "name": "Product 2",
+                "id": "uup46zw3w",
+                "importWizardName": "Product 2",
+                "amount": 1078,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 8
+        }, {
+            "facilityId": "cbd6z90jq",
+            "accountId": "u0woqoszr",
+            "guid": "rpt5xc9m9",
+            "date": new Date("2018-08-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "zlxb9t9ve",
+                "importWizardName": "CDD",
+                "amount": 328
+            }, {
+                "name": "HDD",
+                "id": "42bluyhb7",
+                "importWizardName": "HDD",
+                "amount": 0
+            }, {
+                "name": "Product 1",
+                "id": "5d8dnn98y",
+                "importWizardName": "Product 1",
+                "amount": 36148,
+                "production": true,
+                "productionInAnalysis": true
+            }, {
+                "name": "Product 2",
+                "id": "uup46zw3w",
+                "importWizardName": "Product 2",
+                "amount": 1136,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 9
+        }, {
+            "facilityId": "cbd6z90jq",
+            "accountId": "u0woqoszr",
+            "guid": "3qj0ofqsw",
+            "date": new Date("2018-09-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "zlxb9t9ve",
+                "importWizardName": "CDD",
+                "amount": 168
+            }, {
+                "name": "HDD",
+                "id": "42bluyhb7",
+                "importWizardName": "HDD",
+                "amount": 64
+            }, {
+                "name": "Product 1",
+                "id": "5d8dnn98y",
+                "importWizardName": "Product 1",
+                "amount": 29495,
+                "production": true,
+                "productionInAnalysis": true
+            }, {
+                "name": "Product 2",
+                "id": "uup46zw3w",
+                "importWizardName": "Product 2",
+                "amount": 972,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 10
+        }, {
+            "facilityId": "cbd6z90jq",
+            "accountId": "u0woqoszr",
+            "guid": "n6eorvf0k",
+            "date": new Date("2018-10-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "zlxb9t9ve",
+                "importWizardName": "CDD",
+                "amount": 28
+            }, {
+                "name": "HDD",
+                "id": "42bluyhb7",
+                "importWizardName": "HDD",
+                "amount": 380
+            }, {
+                "name": "Product 1",
+                "id": "5d8dnn98y",
+                "importWizardName": "Product 1",
+                "amount": 36162,
+                "production": true,
+                "productionInAnalysis": true
+            }, {
+                "name": "Product 2",
+                "id": "uup46zw3w",
+                "importWizardName": "Product 2",
+                "amount": 1215,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 11
+        }, {
+            "facilityId": "cbd6z90jq",
+            "accountId": "u0woqoszr",
+            "guid": "vqc2uxjgh",
+            "date": new Date("2018-11-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "zlxb9t9ve",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "42bluyhb7",
+                "importWizardName": "HDD",
+                "amount": 822
+            }, {
+                "name": "Product 1",
+                "id": "5d8dnn98y",
+                "importWizardName": "Product 1",
+                "amount": 30363,
+                "production": true,
+                "productionInAnalysis": true
+            }, {
+                "name": "Product 2",
+                "id": "uup46zw3w",
+                "importWizardName": "Product 2",
+                "amount": 1005,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 12
+        }, {
+            "facilityId": "cbd6z90jq",
+            "accountId": "u0woqoszr",
+            "guid": "kpln17lp8",
+            "date": new Date("2018-12-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "zlxb9t9ve",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "42bluyhb7",
+                "importWizardName": "HDD",
+                "amount": 922
+            }, {
+                "name": "Product 1",
+                "id": "5d8dnn98y",
+                "importWizardName": "Product 1",
+                "amount": 27991,
+                "production": true,
+                "productionInAnalysis": true
+            }, {
+                "name": "Product 2",
+                "id": "uup46zw3w",
+                "importWizardName": "Product 2",
+                "amount": 1087,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 13
+        }, {
+            "facilityId": "cbd6z90jq",
+            "accountId": "u0woqoszr",
+            "guid": "3d91bc95v",
+            "date": new Date("2019-01-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "zlxb9t9ve",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "42bluyhb7",
+                "importWizardName": "HDD",
+                "amount": 1370
+            }, {
+                "name": "Product 1",
+                "id": "5d8dnn98y",
+                "importWizardName": "Product 1",
+                "amount": 36602,
+                "production": true,
+                "productionInAnalysis": true
+            }, {
+                "name": "Product 2",
+                "id": "uup46zw3w",
+                "importWizardName": "Product 2",
+                "amount": 1175,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 14
+        }, {
+            "facilityId": "cbd6z90jq",
+            "accountId": "u0woqoszr",
+            "guid": "bpk265gie",
+            "date": new Date("2019-02-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "zlxb9t9ve",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "42bluyhb7",
+                "importWizardName": "HDD",
+                "amount": 1108
+            }, {
+                "name": "Product 1",
+                "id": "5d8dnn98y",
+                "importWizardName": "Product 1",
+                "amount": 38346,
+                "production": true,
+                "productionInAnalysis": true
+            }, {
+                "name": "Product 2",
+                "id": "uup46zw3w",
+                "importWizardName": "Product 2",
+                "amount": 1129,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 15
+        }, {
+            "facilityId": "cbd6z90jq",
+            "accountId": "u0woqoszr",
+            "guid": "n71v6zows",
+            "date": new Date("2019-03-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "zlxb9t9ve",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "42bluyhb7",
+                "importWizardName": "HDD",
+                "amount": 944
+            }, {
+                "name": "Product 1",
+                "id": "5d8dnn98y",
+                "importWizardName": "Product 1",
+                "amount": 40297,
+                "production": true,
+                "productionInAnalysis": true
+            }, {
+                "name": "Product 2",
+                "id": "uup46zw3w",
+                "importWizardName": "Product 2",
+                "amount": 1121,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 16
+        }, {
+            "facilityId": "cbd6z90jq",
+            "accountId": "u0woqoszr",
+            "guid": "onzp2l5dt",
+            "date": new Date("2019-04-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "zlxb9t9ve",
+                "importWizardName": "CDD",
+                "amount": 1
+            }, {
+                "name": "HDD",
+                "id": "42bluyhb7",
+                "importWizardName": "HDD",
+                "amount": 429
+            }, {
+                "name": "Product 1",
+                "id": "5d8dnn98y",
+                "importWizardName": "Product 1",
+                "amount": 34612,
+                "production": true,
+                "productionInAnalysis": true
+            }, {
+                "name": "Product 2",
+                "id": "uup46zw3w",
+                "importWizardName": "Product 2",
+                "amount": 1212,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 17
+        }, {
+            "facilityId": "cbd6z90jq",
+            "accountId": "u0woqoszr",
+            "guid": "9r166bss4",
+            "date": new Date("2019-05-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "zlxb9t9ve",
+                "importWizardName": "CDD",
+                "amount": 38
+            }, {
+                "name": "HDD",
+                "id": "42bluyhb7",
+                "importWizardName": "HDD",
+                "amount": 223
+            }, {
+                "name": "Product 1",
+                "id": "5d8dnn98y",
+                "importWizardName": "Product 1",
+                "amount": 32862,
+                "production": true,
+                "productionInAnalysis": true
+            }, {
+                "name": "Product 2",
+                "id": "uup46zw3w",
+                "importWizardName": "Product 2",
+                "amount": 1264,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 18
+        }, {
+            "facilityId": "cbd6z90jq",
+            "accountId": "u0woqoszr",
+            "guid": "z8ygheuwq",
+            "date": new Date("2019-06-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "zlxb9t9ve",
+                "importWizardName": "CDD",
+                "amount": 157
+            }, {
+                "name": "HDD",
+                "id": "42bluyhb7",
+                "importWizardName": "HDD",
+                "amount": 15
+            }, {
+                "name": "Product 1",
+                "id": "5d8dnn98y",
+                "importWizardName": "Product 1",
+                "amount": 30658,
+                "production": true,
+                "productionInAnalysis": true
+            }, {
+                "name": "Product 2",
+                "id": "uup46zw3w",
+                "importWizardName": "Product 2",
+                "amount": 1178,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 19
+        }, {
+            "facilityId": "cbd6z90jq",
+            "accountId": "u0woqoszr",
+            "guid": "5euiqfvrz",
+            "date": new Date("2019-07-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "zlxb9t9ve",
+                "importWizardName": "CDD",
+                "amount": 406
+            }, {
+                "name": "HDD",
+                "id": "42bluyhb7",
+                "importWizardName": "HDD",
+                "amount": 0
+            }, {
+                "name": "Product 1",
+                "id": "5d8dnn98y",
+                "importWizardName": "Product 1",
+                "amount": 32011,
+                "production": true,
+                "productionInAnalysis": true
+            }, {
+                "name": "Product 2",
+                "id": "uup46zw3w",
+                "importWizardName": "Product 2",
+                "amount": 1176,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 20
+        }, {
+            "facilityId": "cbd6z90jq",
+            "accountId": "u0woqoszr",
+            "guid": "cjorckwsa",
+            "date": new Date("2019-08-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "zlxb9t9ve",
+                "importWizardName": "CDD",
+                "amount": 238
+            }, {
+                "name": "HDD",
+                "id": "42bluyhb7",
+                "importWizardName": "HDD",
+                "amount": 0
+            }, {
+                "name": "Product 1",
+                "id": "5d8dnn98y",
+                "importWizardName": "Product 1",
+                "amount": 32835,
+                "production": true,
+                "productionInAnalysis": true
+            }, {
+                "name": "Product 2",
+                "id": "uup46zw3w",
+                "importWizardName": "Product 2",
+                "amount": 1101,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 21
+        }, {
+            "facilityId": "cbd6z90jq",
+            "accountId": "u0woqoszr",
+            "guid": "d2lf3yhn9",
+            "date": new Date("2019-09-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "zlxb9t9ve",
+                "importWizardName": "CDD",
+                "amount": 160
+            }, {
+                "name": "HDD",
+                "id": "42bluyhb7",
+                "importWizardName": "HDD",
+                "amount": 10
+            }, {
+                "name": "Product 1",
+                "id": "5d8dnn98y",
+                "importWizardName": "Product 1",
+                "amount": 30601,
+                "production": true,
+                "productionInAnalysis": true
+            }, {
+                "name": "Product 2",
+                "id": "uup46zw3w",
+                "importWizardName": "Product 2",
+                "amount": 1078,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 22
+        }, {
+            "facilityId": "cbd6z90jq",
+            "accountId": "u0woqoszr",
+            "guid": "nt19vyk86",
+            "date": new Date("2019-10-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "zlxb9t9ve",
+                "importWizardName": "CDD",
+                "amount": 6
+            }, {
+                "name": "HDD",
+                "id": "42bluyhb7",
+                "importWizardName": "HDD",
+                "amount": 393
+            }, {
+                "name": "Product 1",
+                "id": "5d8dnn98y",
+                "importWizardName": "Product 1",
+                "amount": 36526,
+                "production": true,
+                "productionInAnalysis": true
+            }, {
+                "name": "Product 2",
+                "id": "uup46zw3w",
+                "importWizardName": "Product 2",
+                "amount": 1125,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 23
+        }, {
+            "facilityId": "cbd6z90jq",
+            "accountId": "u0woqoszr",
+            "guid": "c2q5z7ao1",
+            "date": new Date("2019-11-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "zlxb9t9ve",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "42bluyhb7",
+                "importWizardName": "HDD",
+                "amount": 863
+            }, {
+                "name": "Product 1",
+                "id": "5d8dnn98y",
+                "importWizardName": "Product 1",
+                "amount": 30157,
+                "production": true,
+                "productionInAnalysis": true
+            }, {
+                "name": "Product 2",
+                "id": "uup46zw3w",
+                "importWizardName": "Product 2",
+                "amount": 1003,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 24
+        }, {
+            "facilityId": "cbd6z90jq",
+            "accountId": "u0woqoszr",
+            "guid": "nqvt9um6b",
+            "date": new Date("2019-12-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "zlxb9t9ve",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "42bluyhb7",
+                "importWizardName": "HDD",
+                "amount": 927
+            }, {
+                "name": "Product 1",
+                "id": "5d8dnn98y",
+                "importWizardName": "Product 1",
+                "amount": 35243,
+                "production": true,
+                "productionInAnalysis": true
+            }, {
+                "name": "Product 2",
+                "id": "uup46zw3w",
+                "importWizardName": "Product 2",
+                "amount": 1000,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 25
+        }, {
+            "facilityId": "cbd6z90jq",
+            "accountId": "u0woqoszr",
+            "guid": "u6bi4z36p",
+            "date": new Date("2020-01-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "zlxb9t9ve",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "42bluyhb7",
+                "importWizardName": "HDD",
+                "amount": 1039
+            }, {
+                "name": "Product 1",
+                "id": "5d8dnn98y",
+                "importWizardName": "Product 1",
+                "amount": 35141,
+                "production": true,
+                "productionInAnalysis": true
+            }, {
+                "name": "Product 2",
+                "id": "uup46zw3w",
+                "importWizardName": "Product 2",
+                "amount": 1501,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 26
+        }, {
+            "facilityId": "cbd6z90jq",
+            "accountId": "u0woqoszr",
+            "guid": "rrj7e4zpy",
+            "date": new Date("2020-02-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "zlxb9t9ve",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "42bluyhb7",
+                "importWizardName": "HDD",
+                "amount": 1068
+            }, {
+                "name": "Product 1",
+                "id": "5d8dnn98y",
+                "importWizardName": "Product 1",
+                "amount": 35718,
+                "production": true,
+                "productionInAnalysis": true
+            }, {
+                "name": "Product 2",
+                "id": "uup46zw3w",
+                "importWizardName": "Product 2",
+                "amount": 1351,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 27
+        }, {
+            "facilityId": "cbd6z90jq",
+            "accountId": "u0woqoszr",
+            "guid": "3lnrqi94w",
+            "date": new Date("2020-03-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "zlxb9t9ve",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "42bluyhb7",
+                "importWizardName": "HDD",
+                "amount": 714
+            }, {
+                "name": "Product 1",
+                "id": "5d8dnn98y",
+                "importWizardName": "Product 1",
+                "amount": 37551,
+                "production": true,
+                "productionInAnalysis": true
+            }, {
+                "name": "Product 2",
+                "id": "uup46zw3w",
+                "importWizardName": "Product 2",
+                "amount": 1434,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 28
+        }, {
+            "facilityId": "cbd6z90jq",
+            "accountId": "u0woqoszr",
+            "guid": "c8t1g5wl7",
+            "date": new Date("2020-04-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "zlxb9t9ve",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "42bluyhb7",
+                "importWizardName": "HDD",
+                "amount": 497
+            }, {
+                "name": "Product 1",
+                "id": "5d8dnn98y",
+                "importWizardName": "Product 1",
+                "amount": 32899,
+                "production": true,
+                "productionInAnalysis": true
+            }, {
+                "name": "Product 2",
+                "id": "uup46zw3w",
+                "importWizardName": "Product 2",
+                "amount": 1538,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 29
+        }, {
+            "facilityId": "cbd6z90jq",
+            "accountId": "u0woqoszr",
+            "guid": "l02yyixoi",
+            "date": new Date("2020-05-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "zlxb9t9ve",
+                "importWizardName": "CDD",
+                "amount": 65
+            }, {
+                "name": "HDD",
+                "id": "42bluyhb7",
+                "importWizardName": "HDD",
+                "amount": 210
+            }, {
+                "name": "Product 1",
+                "id": "5d8dnn98y",
+                "importWizardName": "Product 1",
+                "amount": 30920,
+                "production": true,
+                "productionInAnalysis": true
+            }, {
+                "name": "Product 2",
+                "id": "uup46zw3w",
+                "importWizardName": "Product 2",
+                "amount": 1228,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 30
+        }, {
+            "facilityId": "cbd6z90jq",
+            "accountId": "u0woqoszr",
+            "guid": "xb7y66cll",
+            "date": new Date("2020-06-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "zlxb9t9ve",
+                "importWizardName": "CDD",
+                "amount": 253
+            }, {
+                "name": "HDD",
+                "id": "42bluyhb7",
+                "importWizardName": "HDD",
+                "amount": 11
+            }, {
+                "name": "Product 1",
+                "id": "5d8dnn98y",
+                "importWizardName": "Product 1",
+                "amount": 29729,
+                "production": true,
+                "productionInAnalysis": true
+            }, {
+                "name": "Product 2",
+                "id": "uup46zw3w",
+                "importWizardName": "Product 2",
+                "amount": 1360,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 31
+        }, {
+            "facilityId": "cbd6z90jq",
+            "accountId": "u0woqoszr",
+            "guid": "7jdur0ina",
+            "date": new Date("2020-07-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "zlxb9t9ve",
+                "importWizardName": "CDD",
+                "amount": 387
+            }, {
+                "name": "HDD",
+                "id": "42bluyhb7",
+                "importWizardName": "HDD",
+                "amount": 0
+            }, {
+                "name": "Product 1",
+                "id": "5d8dnn98y",
+                "importWizardName": "Product 1",
+                "amount": 31357,
+                "production": true,
+                "productionInAnalysis": true
+            }, {
+                "name": "Product 2",
+                "id": "uup46zw3w",
+                "importWizardName": "Product 2",
+                "amount": 1508,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 32
+        }, {
+            "facilityId": "cbd6z90jq",
+            "accountId": "u0woqoszr",
+            "guid": "idgsk0nwx",
+            "date": new Date("2020-08-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "zlxb9t9ve",
+                "importWizardName": "CDD",
+                "amount": 279
+            }, {
+                "name": "HDD",
+                "id": "42bluyhb7",
+                "importWizardName": "HDD",
+                "amount": 1
+            }, {
+                "name": "Product 1",
+                "id": "5d8dnn98y",
+                "importWizardName": "Product 1",
+                "amount": 30893,
+                "production": true,
+                "productionInAnalysis": true
+            }, {
+                "name": "Product 2",
+                "id": "uup46zw3w",
+                "importWizardName": "Product 2",
+                "amount": 1405,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 33
+        }, {
+            "facilityId": "cbd6z90jq",
+            "accountId": "u0woqoszr",
+            "guid": "jgs1lh3ee",
+            "date": new Date("2020-09-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "zlxb9t9ve",
+                "importWizardName": "CDD",
+                "amount": 78
+            }, {
+                "name": "HDD",
+                "id": "42bluyhb7",
+                "importWizardName": "HDD",
+                "amount": 86
+            }, {
+                "name": "Product 1",
+                "id": "5d8dnn98y",
+                "importWizardName": "Product 1",
+                "amount": 29379,
+                "production": true,
+                "productionInAnalysis": true
+            }, {
+                "name": "Product 2",
+                "id": "uup46zw3w",
+                "importWizardName": "Product 2",
+                "amount": 1139,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 34
+        }, {
+            "facilityId": "cbd6z90jq",
+            "accountId": "u0woqoszr",
+            "guid": "4juiz9xe6",
+            "date": new Date("2020-10-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "zlxb9t9ve",
+                "importWizardName": "CDD",
+                "amount": 3
+            }, {
+                "name": "HDD",
+                "id": "42bluyhb7",
+                "importWizardName": "HDD",
+                "amount": 470
+            }, {
+                "name": "Product 1",
+                "id": "5d8dnn98y",
+                "importWizardName": "Product 1",
+                "amount": 34036,
+                "production": true,
+                "productionInAnalysis": true
+            }, {
+                "name": "Product 2",
+                "id": "uup46zw3w",
+                "importWizardName": "Product 2",
+                "amount": 1322,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 35
+        }, {
+            "facilityId": "cbd6z90jq",
+            "accountId": "u0woqoszr",
+            "guid": "ric6ify70",
+            "date": new Date("2020-11-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "zlxb9t9ve",
+                "importWizardName": "CDD",
+                "amount": 14
+            }, {
+                "name": "HDD",
+                "id": "42bluyhb7",
+                "importWizardName": "HDD",
+                "amount": 527
+            }, {
+                "name": "Product 1",
+                "id": "5d8dnn98y",
+                "importWizardName": "Product 1",
+                "amount": 28664,
+                "production": true,
+                "productionInAnalysis": true
+            }, {
+                "name": "Product 2",
+                "id": "uup46zw3w",
+                "importWizardName": "Product 2",
+                "amount": 1057,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 36
+        }, {
+            "facilityId": "cbd6z90jq",
+            "accountId": "u0woqoszr",
+            "guid": "sby6q0n9t",
+            "date": new Date("2020-12-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "zlxb9t9ve",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "42bluyhb7",
+                "importWizardName": "HDD",
+                "amount": 1007
+            }, {
+                "name": "Product 1",
+                "id": "5d8dnn98y",
+                "importWizardName": "Product 1",
+                "amount": 33836,
+                "production": true,
+                "productionInAnalysis": true
+            }, {
+                "name": "Product 2",
+                "id": "uup46zw3w",
+                "importWizardName": "Product 2",
+                "amount": 1239,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 37
+        }, {
+            "facilityId": "cbd6z90jq",
+            "accountId": "u0woqoszr",
+            "guid": "lqy6rt665",
+            "date": new Date("2021-01-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "zlxb9t9ve",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "42bluyhb7",
+                "importWizardName": "HDD",
+                "amount": 1145
+            }, {
+                "name": "Product 1",
+                "id": "5d8dnn98y",
+                "importWizardName": "Product 1",
+                "amount": 35070,
+                "production": true,
+                "productionInAnalysis": true
+            }, {
+                "name": "Product 2",
+                "id": "uup46zw3w",
+                "importWizardName": "Product 2",
+                "amount": 1411,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 38
+        }, {
+            "facilityId": "cbd6z90jq",
+            "accountId": "u0woqoszr",
+            "guid": "4klrhwfd2",
+            "date": new Date("2021-02-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "zlxb9t9ve",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "42bluyhb7",
+                "importWizardName": "HDD",
+                "amount": 1258
+            }, {
+                "name": "Product 1",
+                "id": "5d8dnn98y",
+                "importWizardName": "Product 1",
+                "amount": 34301,
+                "production": true,
+                "productionInAnalysis": true
+            }, {
+                "name": "Product 2",
+                "id": "uup46zw3w",
+                "importWizardName": "Product 2",
+                "amount": 1191,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 39
+        }, {
+            "facilityId": "cbd6z90jq",
+            "accountId": "u0woqoszr",
+            "guid": "ckwf714pt",
+            "date": new Date("2021-03-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "zlxb9t9ve",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "42bluyhb7",
+                "importWizardName": "HDD",
+                "amount": 634
+            }, {
+                "name": "Product 1",
+                "id": "5d8dnn98y",
+                "importWizardName": "Product 1",
+                "amount": 39656,
+                "production": true,
+                "productionInAnalysis": true
+            }, {
+                "name": "Product 2",
+                "id": "uup46zw3w",
+                "importWizardName": "Product 2",
+                "amount": 1519,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 40
+        }, {
+            "facilityId": "cbd6z90jq",
+            "accountId": "u0woqoszr",
+            "guid": "2c4u2artr",
+            "date": new Date("2021-04-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "zlxb9t9ve",
+                "importWizardName": "CDD",
+                "amount": 19
+            }, {
+                "name": "HDD",
+                "id": "42bluyhb7",
+                "importWizardName": "HDD",
+                "amount": 382
+            }, {
+                "name": "Product 1",
+                "id": "5d8dnn98y",
+                "importWizardName": "Product 1",
+                "amount": 34406,
+                "production": true,
+                "productionInAnalysis": true
+            }, {
+                "name": "Product 2",
+                "id": "uup46zw3w",
+                "importWizardName": "Product 2",
+                "amount": 1430,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 41
+        }, {
+            "facilityId": "cbd6z90jq",
+            "accountId": "u0woqoszr",
+            "guid": "ue3yeljo7",
+            "date": new Date("2021-05-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "zlxb9t9ve",
+                "importWizardName": "CDD",
+                "amount": 81
+            }, {
+                "name": "HDD",
+                "id": "42bluyhb7",
+                "importWizardName": "HDD",
+                "amount": 184
+            }, {
+                "name": "Product 1",
+                "id": "5d8dnn98y",
+                "importWizardName": "Product 1",
+                "amount": 31808,
+                "production": true,
+                "productionInAnalysis": true
+            }, {
+                "name": "Product 2",
+                "id": "uup46zw3w",
+                "importWizardName": "Product 2",
+                "amount": 1296,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 42
+        }, {
+            "facilityId": "cbd6z90jq",
+            "accountId": "u0woqoszr",
+            "guid": "hspvhyqdu",
+            "date": new Date("2021-06-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "zlxb9t9ve",
+                "importWizardName": "CDD",
+                "amount": 328
+            }, {
+                "name": "HDD",
+                "id": "42bluyhb7",
+                "importWizardName": "HDD",
+                "amount": 6
+            }, {
+                "name": "Product 1",
+                "id": "5d8dnn98y",
+                "importWizardName": "Product 1",
+                "amount": 36037,
+                "production": true,
+                "productionInAnalysis": true
+            }, {
+                "name": "Product 2",
+                "id": "uup46zw3w",
+                "importWizardName": "Product 2",
+                "amount": 1591,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 43
+        }, {
+            "facilityId": "cbd6z90jq",
+            "accountId": "u0woqoszr",
+            "guid": "yf2efyhyw",
+            "date": new Date("2021-07-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "zlxb9t9ve",
+                "importWizardName": "CDD",
+                "amount": 305
+            }, {
+                "name": "HDD",
+                "id": "42bluyhb7",
+                "importWizardName": "HDD",
+                "amount": 1
+            }, {
+                "name": "Product 1",
+                "id": "5d8dnn98y",
+                "importWizardName": "Product 1",
+                "amount": 32448,
+                "production": true,
+                "productionInAnalysis": true
+            }, {
+                "name": "Product 2",
+                "id": "uup46zw3w",
+                "importWizardName": "Product 2",
+                "amount": 1365,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 44
+        }, {
+            "facilityId": "cbd6z90jq",
+            "accountId": "u0woqoszr",
+            "guid": "3wg2lwqdn",
+            "date": new Date("2021-08-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "zlxb9t9ve",
+                "importWizardName": "CDD",
+                "amount": 353
+            }, {
+                "name": "HDD",
+                "id": "42bluyhb7",
+                "importWizardName": "HDD",
+                "amount": 0
+            }, {
+                "name": "Product 1",
+                "id": "5d8dnn98y",
+                "importWizardName": "Product 1",
+                "amount": 31835,
+                "production": true,
+                "productionInAnalysis": true
+            }, {
+                "name": "Product 2",
+                "id": "uup46zw3w",
+                "importWizardName": "Product 2",
+                "amount": 1491,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 45
+        }, {
+            "facilityId": "cbd6z90jq",
+            "accountId": "u0woqoszr",
+            "guid": "9zwaeifhq",
+            "date": new Date("2021-09-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "zlxb9t9ve",
+                "importWizardName": "CDD",
+                "amount": 117
+            }, {
+                "name": "HDD",
+                "id": "42bluyhb7",
+                "importWizardName": "HDD",
+                "amount": 10
+            }, {
+                "name": "Product 1",
+                "id": "5d8dnn98y",
+                "importWizardName": "Product 1",
+                "amount": 29718,
+                "production": true,
+                "productionInAnalysis": true
+            }, {
+                "name": "Product 2",
+                "id": "uup46zw3w",
+                "importWizardName": "Product 2",
+                "amount": 1417,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 46
+        }, {
+            "facilityId": "cbd6z90jq",
+            "accountId": "u0woqoszr",
+            "guid": "garoqf93z",
+            "date": new Date("2021-10-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "zlxb9t9ve",
+                "importWizardName": "CDD",
+                "amount": 70
+            }, {
+                "name": "HDD",
+                "id": "42bluyhb7",
+                "importWizardName": "HDD",
+                "amount": 198
+            }, {
+                "name": "Product 1",
+                "id": "5d8dnn98y",
+                "importWizardName": "Product 1",
+                "amount": 30338,
+                "production": true,
+                "productionInAnalysis": true
+            }, {
+                "name": "Product 2",
+                "id": "uup46zw3w",
+                "importWizardName": "Product 2",
+                "amount": 1581,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 47
+        }, {
+            "facilityId": "cbd6z90jq",
+            "accountId": "u0woqoszr",
+            "guid": "q0oeogx9g",
+            "date": new Date("2021-11-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "zlxb9t9ve",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "42bluyhb7",
+                "importWizardName": "HDD",
+                "amount": 691
+            }, {
+                "name": "Product 1",
+                "id": "5d8dnn98y",
+                "importWizardName": "Product 1",
+                "amount": 29282,
+                "production": true,
+                "productionInAnalysis": true
+            }, {
+                "name": "Product 2",
+                "id": "uup46zw3w",
+                "importWizardName": "Product 2",
+                "amount": 1485,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 48
+        }, {
+            "facilityId": "cbd6z90jq",
+            "accountId": "u0woqoszr",
+            "guid": "zo6ikeuha",
+            "date": new Date("2021-12-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "zlxb9t9ve",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "42bluyhb7",
+                "importWizardName": "HDD",
+                "amount": 884
+            }, {
+                "name": "Product 1",
+                "id": "5d8dnn98y",
+                "importWizardName": "Product 1",
+                "amount": 37360,
+                "production": true,
+                "productionInAnalysis": true
+            }, {
+                "name": "Product 2",
+                "id": "uup46zw3w",
+                "importWizardName": "Product 2",
+                "amount": 1417,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 49
+        }, {
+            "facilityId": "cbd6z90jq",
+            "accountId": "u0woqoszr",
+            "guid": "3557g97d8",
+            "date": new Date("2022-01-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "zlxb9t9ve",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "42bluyhb7",
+                "importWizardName": "HDD",
+                "amount": 0
+            }, {
+                "name": "Product 1",
+                "id": "5d8dnn98y",
+                "importWizardName": "Product 1",
+                "amount": 1107677.49,
+                "production": true,
+                "productionInAnalysis": true
+            }, {
+                "name": "Product 2",
+                "id": "uup46zw3w",
+                "importWizardName": "Product 2",
+                "amount": 1221,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 50
+        }, {
+            "facilityId": "m9oodo6nk",
+            "accountId": "u0woqoszr",
+            "guid": "f5b8rbu2u",
+            "date": new Date("2018-01-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "d9w074lbp",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "uo91bd5d4",
+                "importWizardName": "HDD",
+                "amount": 777
+            }, {
+                "name": "Production",
+                "id": "r6uvq2q70",
+                "importWizardName": "Production",
+                "amount": 39247,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 51
+        }, {
+            "facilityId": "m9oodo6nk",
+            "accountId": "u0woqoszr",
+            "guid": "lfevppt3w",
+            "date": new Date("2018-02-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "d9w074lbp",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "uo91bd5d4",
+                "importWizardName": "HDD",
+                "amount": 896
+            }, {
+                "name": "Production",
+                "id": "r6uvq2q70",
+                "importWizardName": "Production",
+                "amount": 48145,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 52
+        }, {
+            "facilityId": "m9oodo6nk",
+            "accountId": "u0woqoszr",
+            "guid": "wj6ar56wt",
+            "date": new Date("2018-03-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "d9w074lbp",
+                "importWizardName": "CDD",
+                "amount": 13
+            }, {
+                "name": "HDD",
+                "id": "uo91bd5d4",
+                "importWizardName": "HDD",
+                "amount": 526
+            }, {
+                "name": "Production",
+                "id": "r6uvq2q70",
+                "importWizardName": "Production",
+                "amount": 43914,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 53
+        }, {
+            "facilityId": "m9oodo6nk",
+            "accountId": "u0woqoszr",
+            "guid": "qovwb1j2l",
+            "date": new Date("2018-04-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "d9w074lbp",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "uo91bd5d4",
+                "importWizardName": "HDD",
+                "amount": 655
+            }, {
+                "name": "Production",
+                "id": "r6uvq2q70",
+                "importWizardName": "Production",
+                "amount": 49053,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 54
+        }, {
+            "facilityId": "m9oodo6nk",
+            "accountId": "u0woqoszr",
+            "guid": "f7j2kz0rl",
+            "date": new Date("2018-05-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "d9w074lbp",
+                "importWizardName": "CDD",
+                "amount": 18
+            }, {
+                "name": "HDD",
+                "id": "uo91bd5d4",
+                "importWizardName": "HDD",
+                "amount": 337
+            }, {
+                "name": "Production",
+                "id": "r6uvq2q70",
+                "importWizardName": "Production",
+                "amount": 47562,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 55
+        }, {
+            "facilityId": "m9oodo6nk",
+            "accountId": "u0woqoszr",
+            "guid": "o6ir5s5ay",
+            "date": new Date("2018-06-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "d9w074lbp",
+                "importWizardName": "CDD",
+                "amount": 217
+            }, {
+                "name": "HDD",
+                "id": "uo91bd5d4",
+                "importWizardName": "HDD",
+                "amount": 11
+            }, {
+                "name": "Production",
+                "id": "r6uvq2q70",
+                "importWizardName": "Production",
+                "amount": 40576,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 56
+        }, {
+            "facilityId": "m9oodo6nk",
+            "accountId": "u0woqoszr",
+            "guid": "61cvawmg2",
+            "date": new Date("2018-07-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "d9w074lbp",
+                "importWizardName": "CDD",
+                "amount": 315
+            }, {
+                "name": "HDD",
+                "id": "uo91bd5d4",
+                "importWizardName": "HDD",
+                "amount": 0
+            }, {
+                "name": "Production",
+                "id": "r6uvq2q70",
+                "importWizardName": "Production",
+                "amount": 39755,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 57
+        }, {
+            "facilityId": "m9oodo6nk",
+            "accountId": "u0woqoszr",
+            "guid": "7zlzjxzo4",
+            "date": new Date("2018-08-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "d9w074lbp",
+                "importWizardName": "CDD",
+                "amount": 510
+            }, {
+                "name": "HDD",
+                "id": "uo91bd5d4",
+                "importWizardName": "HDD",
+                "amount": 0
+            }, {
+                "name": "Production",
+                "id": "r6uvq2q70",
+                "importWizardName": "Production",
+                "amount": 37552,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 58
+        }, {
+            "facilityId": "m9oodo6nk",
+            "accountId": "u0woqoszr",
+            "guid": "wdrf0n09i",
+            "date": new Date("2018-09-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "d9w074lbp",
+                "importWizardName": "CDD",
+                "amount": 539
+            }, {
+                "name": "HDD",
+                "id": "uo91bd5d4",
+                "importWizardName": "HDD",
+                "amount": 0
+            }, {
+                "name": "Production",
+                "id": "r6uvq2q70",
+                "importWizardName": "Production",
+                "amount": 46192,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 59
+        }, {
+            "facilityId": "m9oodo6nk",
+            "accountId": "u0woqoszr",
+            "guid": "gjxgtk3x4",
+            "date": new Date("2018-10-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "d9w074lbp",
+                "importWizardName": "CDD",
+                "amount": 342
+            }, {
+                "name": "HDD",
+                "id": "uo91bd5d4",
+                "importWizardName": "HDD",
+                "amount": 1
+            }, {
+                "name": "Production",
+                "id": "r6uvq2q70",
+                "importWizardName": "Production",
+                "amount": 35150,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 60
+        }, {
+            "facilityId": "m9oodo6nk",
+            "accountId": "u0woqoszr",
+            "guid": "ob2pddhfw",
+            "date": new Date("2018-11-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "d9w074lbp",
+                "importWizardName": "CDD",
+                "amount": 130
+            }, {
+                "name": "HDD",
+                "id": "uo91bd5d4",
+                "importWizardName": "HDD",
+                "amount": 192
+            }, {
+                "name": "Production",
+                "id": "r6uvq2q70",
+                "importWizardName": "Production",
+                "amount": 46471,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 61
+        }, {
+            "facilityId": "m9oodo6nk",
+            "accountId": "u0woqoszr",
+            "guid": "214ogpnm2",
+            "date": new Date("2018-12-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "d9w074lbp",
+                "importWizardName": "CDD",
+                "amount": 9
+            }, {
+                "name": "HDD",
+                "id": "uo91bd5d4",
+                "importWizardName": "HDD",
+                "amount": 492
+            }, {
+                "name": "Production",
+                "id": "r6uvq2q70",
+                "importWizardName": "Production",
+                "amount": 42949,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 62
+        }, {
+            "facilityId": "m9oodo6nk",
+            "accountId": "u0woqoszr",
+            "guid": "ydbe36h31",
+            "date": new Date("2019-01-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "d9w074lbp",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "uo91bd5d4",
+                "importWizardName": "HDD",
+                "amount": 656
+            }, {
+                "name": "Production",
+                "id": "r6uvq2q70",
+                "importWizardName": "Production",
+                "amount": 30956,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 63
+        }, {
+            "facilityId": "m9oodo6nk",
+            "accountId": "u0woqoszr",
+            "guid": "e81je3sy4",
+            "date": new Date("2019-02-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "d9w074lbp",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "uo91bd5d4",
+                "importWizardName": "HDD",
+                "amount": 848
+            }, {
+                "name": "Production",
+                "id": "r6uvq2q70",
+                "importWizardName": "Production",
+                "amount": 42843,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 64
+        }, {
+            "facilityId": "m9oodo6nk",
+            "accountId": "u0woqoszr",
+            "guid": "uyf6uc4nz",
+            "date": new Date("2019-03-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "d9w074lbp",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "uo91bd5d4",
+                "importWizardName": "HDD",
+                "amount": 672
+            }, {
+                "name": "Production",
+                "id": "r6uvq2q70",
+                "importWizardName": "Production",
+                "amount": 37213,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 65
+        }, {
+            "facilityId": "m9oodo6nk",
+            "accountId": "u0woqoszr",
+            "guid": "w5104t4ex",
+            "date": new Date("2019-04-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "d9w074lbp",
+                "importWizardName": "CDD",
+                "amount": 10
+            }, {
+                "name": "HDD",
+                "id": "uo91bd5d4",
+                "importWizardName": "HDD",
+                "amount": 592
+            }, {
+                "name": "Production",
+                "id": "r6uvq2q70",
+                "importWizardName": "Production",
+                "amount": 37146,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 66
+        }, {
+            "facilityId": "m9oodo6nk",
+            "accountId": "u0woqoszr",
+            "guid": "daeo6jihd",
+            "date": new Date("2019-05-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "d9w074lbp",
+                "importWizardName": "CDD",
+                "amount": 47
+            }, {
+                "name": "HDD",
+                "id": "uo91bd5d4",
+                "importWizardName": "HDD",
+                "amount": 137
+            }, {
+                "name": "Production",
+                "id": "r6uvq2q70",
+                "importWizardName": "Production",
+                "amount": 48552,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 67
+        }, {
+            "facilityId": "m9oodo6nk",
+            "accountId": "u0woqoszr",
+            "guid": "b8vymm559",
+            "date": new Date("2019-06-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "d9w074lbp",
+                "importWizardName": "CDD",
+                "amount": 190
+            }, {
+                "name": "HDD",
+                "id": "uo91bd5d4",
+                "importWizardName": "HDD",
+                "amount": 51
+            }, {
+                "name": "Production",
+                "id": "r6uvq2q70",
+                "importWizardName": "Production",
+                "amount": 46238,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 68
+        }, {
+            "facilityId": "m9oodo6nk",
+            "accountId": "u0woqoszr",
+            "guid": "r6p6yevsw",
+            "date": new Date("2019-07-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "d9w074lbp",
+                "importWizardName": "CDD",
+                "amount": 365
+            }, {
+                "name": "HDD",
+                "id": "uo91bd5d4",
+                "importWizardName": "HDD",
+                "amount": 0
+            }, {
+                "name": "Production",
+                "id": "r6uvq2q70",
+                "importWizardName": "Production",
+                "amount": 44893,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 69
+        }, {
+            "facilityId": "m9oodo6nk",
+            "accountId": "u0woqoszr",
+            "guid": "08a8f5rc9",
+            "date": new Date("2019-08-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "d9w074lbp",
+                "importWizardName": "CDD",
+                "amount": 583
+            }, {
+                "name": "HDD",
+                "id": "uo91bd5d4",
+                "importWizardName": "HDD",
+                "amount": 0
+            }, {
+                "name": "Production",
+                "id": "r6uvq2q70",
+                "importWizardName": "Production",
+                "amount": 48654,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 70
+        }, {
+            "facilityId": "m9oodo6nk",
+            "accountId": "u0woqoszr",
+            "guid": "vht4jmhzr",
+            "date": new Date("2019-09-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "d9w074lbp",
+                "importWizardName": "CDD",
+                "amount": 492
+            }, {
+                "name": "HDD",
+                "id": "uo91bd5d4",
+                "importWizardName": "HDD",
+                "amount": 0
+            }, {
+                "name": "Production",
+                "id": "r6uvq2q70",
+                "importWizardName": "Production",
+                "amount": 39996,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 71
+        }, {
+            "facilityId": "m9oodo6nk",
+            "accountId": "u0woqoszr",
+            "guid": "l77xoea1n",
+            "date": new Date("2019-10-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "d9w074lbp",
+                "importWizardName": "CDD",
+                "amount": 306
+            }, {
+                "name": "HDD",
+                "id": "uo91bd5d4",
+                "importWizardName": "HDD",
+                "amount": 0
+            }, {
+                "name": "Production",
+                "id": "r6uvq2q70",
+                "importWizardName": "Production",
+                "amount": 38938,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 72
+        }, {
+            "facilityId": "m9oodo6nk",
+            "accountId": "u0woqoszr",
+            "guid": "6tjz89qx6",
+            "date": new Date("2019-11-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "d9w074lbp",
+                "importWizardName": "CDD",
+                "amount": 71
+            }, {
+                "name": "HDD",
+                "id": "uo91bd5d4",
+                "importWizardName": "HDD",
+                "amount": 82
+            }, {
+                "name": "Production",
+                "id": "r6uvq2q70",
+                "importWizardName": "Production",
+                "amount": 54851,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 73
+        }, {
+            "facilityId": "m9oodo6nk",
+            "accountId": "u0woqoszr",
+            "guid": "ye7xemnkf",
+            "date": new Date("2019-12-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "d9w074lbp",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "uo91bd5d4",
+                "importWizardName": "HDD",
+                "amount": 535
+            }, {
+                "name": "Production",
+                "id": "r6uvq2q70",
+                "importWizardName": "Production",
+                "amount": 43061,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 74
+        }, {
+            "facilityId": "m9oodo6nk",
+            "accountId": "u0woqoszr",
+            "guid": "b9uvrplc8",
+            "date": new Date("2020-01-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "d9w074lbp",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "uo91bd5d4",
+                "importWizardName": "HDD",
+                "amount": 700
+            }, {
+                "name": "Production",
+                "id": "r6uvq2q70",
+                "importWizardName": "Production",
+                "amount": 30471,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 75
+        }, {
+            "facilityId": "m9oodo6nk",
+            "accountId": "u0woqoszr",
+            "guid": "xpd8vfgm4",
+            "date": new Date("2020-02-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "d9w074lbp",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "uo91bd5d4",
+                "importWizardName": "HDD",
+                "amount": 675
+            }, {
+                "name": "Production",
+                "id": "r6uvq2q70",
+                "importWizardName": "Production",
+                "amount": 44895,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 76
+        }, {
+            "facilityId": "m9oodo6nk",
+            "accountId": "u0woqoszr",
+            "guid": "sk54r8361",
+            "date": new Date("2020-03-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "d9w074lbp",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "uo91bd5d4",
+                "importWizardName": "HDD",
+                "amount": 571
+            }, {
+                "name": "Production",
+                "id": "r6uvq2q70",
+                "importWizardName": "Production",
+                "amount": 44687,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 77
+        }, {
+            "facilityId": "m9oodo6nk",
+            "accountId": "u0woqoszr",
+            "guid": "vyi8a86ib",
+            "date": new Date("2020-04-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "d9w074lbp",
+                "importWizardName": "CDD",
+                "amount": 3
+            }, {
+                "name": "HDD",
+                "id": "uo91bd5d4",
+                "importWizardName": "HDD",
+                "amount": 380
+            }, {
+                "name": "Production",
+                "id": "r6uvq2q70",
+                "importWizardName": "Production",
+                "amount": 28306,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 78
+        }, {
+            "facilityId": "m9oodo6nk",
+            "accountId": "u0woqoszr",
+            "guid": "j7nbxdqvu",
+            "date": new Date("2020-05-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "d9w074lbp",
+                "importWizardName": "CDD",
+                "amount": 4
+            }, {
+                "name": "HDD",
+                "id": "uo91bd5d4",
+                "importWizardName": "HDD",
+                "amount": 299
+            }, {
+                "name": "Production",
+                "id": "r6uvq2q70",
+                "importWizardName": "Production",
+                "amount": 0,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 79
+        }, {
+            "facilityId": "m9oodo6nk",
+            "accountId": "u0woqoszr",
+            "guid": "gydu8btgx",
+            "date": new Date("2020-06-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "d9w074lbp",
+                "importWizardName": "CDD",
+                "amount": 117
+            }, {
+                "name": "HDD",
+                "id": "uo91bd5d4",
+                "importWizardName": "HDD",
+                "amount": 109
+            }, {
+                "name": "Production",
+                "id": "r6uvq2q70",
+                "importWizardName": "Production",
+                "amount": 12376,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 80
+        }, {
+            "facilityId": "m9oodo6nk",
+            "accountId": "u0woqoszr",
+            "guid": "scgeo9qkk",
+            "date": new Date("2020-07-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "d9w074lbp",
+                "importWizardName": "CDD",
+                "amount": 407
+            }, {
+                "name": "HDD",
+                "id": "uo91bd5d4",
+                "importWizardName": "HDD",
+                "amount": 1
+            }, {
+                "name": "Production",
+                "id": "r6uvq2q70",
+                "importWizardName": "Production",
+                "amount": 26493,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 81
+        }, {
+            "facilityId": "m9oodo6nk",
+            "accountId": "u0woqoszr",
+            "guid": "yjf8003r1",
+            "date": new Date("2020-08-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "d9w074lbp",
+                "importWizardName": "CDD",
+                "amount": 649
+            }, {
+                "name": "HDD",
+                "id": "uo91bd5d4",
+                "importWizardName": "HDD",
+                "amount": 0
+            }, {
+                "name": "Production",
+                "id": "r6uvq2q70",
+                "importWizardName": "Production",
+                "amount": 24239,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 82
+        }, {
+            "facilityId": "m9oodo6nk",
+            "accountId": "u0woqoszr",
+            "guid": "gwmahm39r",
+            "date": new Date("2020-09-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "d9w074lbp",
+                "importWizardName": "CDD",
+                "amount": 508
+            }, {
+                "name": "HDD",
+                "id": "uo91bd5d4",
+                "importWizardName": "HDD",
+                "amount": 0
+            }, {
+                "name": "Production",
+                "id": "r6uvq2q70",
+                "importWizardName": "Production",
+                "amount": 29235,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 83
+        }, {
+            "facilityId": "m9oodo6nk",
+            "accountId": "u0woqoszr",
+            "guid": "re7u1lhfu",
+            "date": new Date("2020-10-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "d9w074lbp",
+                "importWizardName": "CDD",
+                "amount": 266
+            }, {
+                "name": "HDD",
+                "id": "uo91bd5d4",
+                "importWizardName": "HDD",
+                "amount": 19
+            }, {
+                "name": "Production",
+                "id": "r6uvq2q70",
+                "importWizardName": "Production",
+                "amount": 27889,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 84
+        }, {
+            "facilityId": "m9oodo6nk",
+            "accountId": "u0woqoszr",
+            "guid": "y1x881j7a",
+            "date": new Date("2020-11-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "d9w074lbp",
+                "importWizardName": "CDD",
+                "amount": 49
+            }, {
+                "name": "HDD",
+                "id": "uo91bd5d4",
+                "importWizardName": "HDD",
+                "amount": 114
+            }, {
+                "name": "Production",
+                "id": "r6uvq2q70",
+                "importWizardName": "Production",
+                "amount": 31813,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 85
+        }, {
+            "facilityId": "m9oodo6nk",
+            "accountId": "u0woqoszr",
+            "guid": "do30k1ja9",
+            "date": new Date("2020-12-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "d9w074lbp",
+                "importWizardName": "CDD",
+                "amount": 6
+            }, {
+                "name": "HDD",
+                "id": "uo91bd5d4",
+                "importWizardName": "HDD",
+                "amount": 289
+            }, {
+                "name": "Production",
+                "id": "r6uvq2q70",
+                "importWizardName": "Production",
+                "amount": 26575,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 86
+        }, {
+            "facilityId": "m9oodo6nk",
+            "accountId": "u0woqoszr",
+            "guid": "fbygt67t8",
+            "date": new Date("2021-01-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "d9w074lbp",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "uo91bd5d4",
+                "importWizardName": "HDD",
+                "amount": 676
+            }, {
+                "name": "Production",
+                "id": "r6uvq2q70",
+                "importWizardName": "Production",
+                "amount": 20712,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 87
+        }, {
+            "facilityId": "m9oodo6nk",
+            "accountId": "u0woqoszr",
+            "guid": "31kcdh7sr",
+            "date": new Date("2021-02-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "d9w074lbp",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "uo91bd5d4",
+                "importWizardName": "HDD",
+                "amount": 798
+            }, {
+                "name": "Production",
+                "id": "r6uvq2q70",
+                "importWizardName": "Production",
+                "amount": 25475,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 88
+        }, {
+            "facilityId": "m9oodo6nk",
+            "accountId": "u0woqoszr",
+            "guid": "y1jbpklag",
+            "date": new Date("2021-03-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "d9w074lbp",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "uo91bd5d4",
+                "importWizardName": "HDD",
+                "amount": 745
+            }, {
+                "name": "Production",
+                "id": "r6uvq2q70",
+                "importWizardName": "Production",
+                "amount": 20275,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 89
+        }, {
+            "facilityId": "m9oodo6nk",
+            "accountId": "u0woqoszr",
+            "guid": "2nm9ykn4s",
+            "date": new Date("2021-04-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "d9w074lbp",
+                "importWizardName": "CDD",
+                "amount": 14
+            }, {
+                "name": "HDD",
+                "id": "uo91bd5d4",
+                "importWizardName": "HDD",
+                "amount": 452
+            }, {
+                "name": "Production",
+                "id": "r6uvq2q70",
+                "importWizardName": "Production",
+                "amount": 25647,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 90
+        }, {
+            "facilityId": "m9oodo6nk",
+            "accountId": "u0woqoszr",
+            "guid": "q94uef4qn",
+            "date": new Date("2021-05-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "d9w074lbp",
+                "importWizardName": "CDD",
+                "amount": 24
+            }, {
+                "name": "HDD",
+                "id": "uo91bd5d4",
+                "importWizardName": "HDD",
+                "amount": 200
+            }, {
+                "name": "Production",
+                "id": "r6uvq2q70",
+                "importWizardName": "Production",
+                "amount": 36449,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 91
+        }, {
+            "facilityId": "m9oodo6nk",
+            "accountId": "u0woqoszr",
+            "guid": "6rimh3u6d",
+            "date": new Date("2021-06-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "d9w074lbp",
+                "importWizardName": "CDD",
+                "amount": 141
+            }, {
+                "name": "HDD",
+                "id": "uo91bd5d4",
+                "importWizardName": "HDD",
+                "amount": 71
+            }, {
+                "name": "Production",
+                "id": "r6uvq2q70",
+                "importWizardName": "Production",
+                "amount": 32746,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 92
+        }, {
+            "facilityId": "m9oodo6nk",
+            "accountId": "u0woqoszr",
+            "guid": "x5yi4aci4",
+            "date": new Date("2021-07-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "d9w074lbp",
+                "importWizardName": "CDD",
+                "amount": 412
+            }, {
+                "name": "HDD",
+                "id": "uo91bd5d4",
+                "importWizardName": "HDD",
+                "amount": 0
+            }, {
+                "name": "Production",
+                "id": "r6uvq2q70",
+                "importWizardName": "Production",
+                "amount": 35588,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 93
+        }, {
+            "facilityId": "m9oodo6nk",
+            "accountId": "u0woqoszr",
+            "guid": "p9o4kltao",
+            "date": new Date("2021-08-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "d9w074lbp",
+                "importWizardName": "CDD",
+                "amount": 529
+            }, {
+                "name": "HDD",
+                "id": "uo91bd5d4",
+                "importWizardName": "HDD",
+                "amount": 0
+            }, {
+                "name": "Production",
+                "id": "r6uvq2q70",
+                "importWizardName": "Production",
+                "amount": 30282,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 94
+        }, {
+            "facilityId": "m9oodo6nk",
+            "accountId": "u0woqoszr",
+            "guid": "9bu9q87f6",
+            "date": new Date("2021-09-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "d9w074lbp",
+                "importWizardName": "CDD",
+                "amount": 532
+            }, {
+                "name": "HDD",
+                "id": "uo91bd5d4",
+                "importWizardName": "HDD",
+                "amount": 0
+            }, {
+                "name": "Production",
+                "id": "r6uvq2q70",
+                "importWizardName": "Production",
+                "amount": 35576,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 95
+        }, {
+            "facilityId": "m9oodo6nk",
+            "accountId": "u0woqoszr",
+            "guid": "8301x6qf8",
+            "date": new Date("2021-10-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "d9w074lbp",
+                "importWizardName": "CDD",
+                "amount": 292
+            }, {
+                "name": "HDD",
+                "id": "uo91bd5d4",
+                "importWizardName": "HDD",
+                "amount": 0
+            }, {
+                "name": "Production",
+                "id": "r6uvq2q70",
+                "importWizardName": "Production",
+                "amount": 38071,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 96
+        }, {
+            "facilityId": "m9oodo6nk",
+            "accountId": "u0woqoszr",
+            "guid": "bgekgfwgg",
+            "date": new Date("2021-11-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "d9w074lbp",
+                "importWizardName": "CDD",
+                "amount": 124
+            }, {
+                "name": "HDD",
+                "id": "uo91bd5d4",
+                "importWizardName": "HDD",
+                "amount": 45
+            }, {
+                "name": "Production",
+                "id": "r6uvq2q70",
+                "importWizardName": "Production",
+                "amount": 30715,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 97
+        }, {
+            "facilityId": "m9oodo6nk",
+            "accountId": "u0woqoszr",
+            "guid": "kkoe9jks6",
+            "date": new Date("2021-12-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "d9w074lbp",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "uo91bd5d4",
+                "importWizardName": "HDD",
+                "amount": 466
+            }, {
+                "name": "Production",
+                "id": "r6uvq2q70",
+                "importWizardName": "Production",
+                "amount": 26517,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 98
+        }, {
+            "facilityId": "m9oodo6nk",
+            "accountId": "u0woqoszr",
+            "guid": "s54gbj8j5",
+            "date": new Date("2022-01-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "d9w074lbp",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "uo91bd5d4",
+                "importWizardName": "HDD",
+                "amount": 524
+            }, {
+                "name": "Production",
+                "id": "r6uvq2q70",
+                "importWizardName": "Production",
+                "amount": 30333,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 99
+        }, {
+            "facilityId": "e8mj9zt10",
+            "accountId": "u0woqoszr",
+            "guid": "qwt5a5n0i",
+            "date": new Date("2017-12-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "5jsihtofv",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "9nzo5kyrs",
+                "importWizardName": "HDD",
+                "amount": 1274
+            }, {
+                "name": "Production",
+                "id": "5kd5ke369",
+                "importWizardName": "Production",
+                "amount": 1146531.87,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 100
+        }, {
+            "facilityId": "e8mj9zt10",
+            "accountId": "u0woqoszr",
+            "guid": "tcjmxplk0",
+            "date": new Date("2018-01-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "5jsihtofv",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "9nzo5kyrs",
+                "importWizardName": "HDD",
+                "amount": 1332
+            }, {
+                "name": "Production",
+                "id": "5kd5ke369",
+                "importWizardName": "Production",
+                "amount": 1185326.56,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 101
+        }, {
+            "facilityId": "e8mj9zt10",
+            "accountId": "u0woqoszr",
+            "guid": "0bhthkpl5",
+            "date": new Date("2018-02-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "5jsihtofv",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "9nzo5kyrs",
+                "importWizardName": "HDD",
+                "amount": 1211
+            }, {
+                "name": "Production",
+                "id": "5kd5ke369",
+                "importWizardName": "Production",
+                "amount": 1185100.5,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 102
+        }, {
+            "facilityId": "e8mj9zt10",
+            "accountId": "u0woqoszr",
+            "guid": "i59ydmhlo",
+            "date": new Date("2018-03-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "5jsihtofv",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "9nzo5kyrs",
+                "importWizardName": "HDD",
+                "amount": 846
+            }, {
+                "name": "Production",
+                "id": "5kd5ke369",
+                "importWizardName": "Production",
+                "amount": 1245443.28,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 103
+        }, {
+            "facilityId": "e8mj9zt10",
+            "accountId": "u0woqoszr",
+            "guid": "i8chlpqwj",
+            "date": new Date("2018-04-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "5jsihtofv",
+                "importWizardName": "CDD",
+                "amount": 8
+            }, {
+                "name": "HDD",
+                "id": "9nzo5kyrs",
+                "importWizardName": "HDD",
+                "amount": 676
+            }, {
+                "name": "Production",
+                "id": "5kd5ke369",
+                "importWizardName": "Production",
+                "amount": 1165940.01,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 104
+        }, {
+            "facilityId": "e8mj9zt10",
+            "accountId": "u0woqoszr",
+            "guid": "7pihai1p3",
+            "date": new Date("2018-05-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "5jsihtofv",
+                "importWizardName": "CDD",
+                "amount": 241
+            }, {
+                "name": "HDD",
+                "id": "9nzo5kyrs",
+                "importWizardName": "HDD",
+                "amount": 33
+            }, {
+                "name": "Production",
+                "id": "5kd5ke369",
+                "importWizardName": "Production",
+                "amount": 1313323.51,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 105
+        }, {
+            "facilityId": "e8mj9zt10",
+            "accountId": "u0woqoszr",
+            "guid": "d8yw6jkaf",
+            "date": new Date("2018-06-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "5jsihtofv",
+                "importWizardName": "CDD",
+                "amount": 352
+            }, {
+                "name": "HDD",
+                "id": "9nzo5kyrs",
+                "importWizardName": "HDD",
+                "amount": 0
+            }, {
+                "name": "Production",
+                "id": "5kd5ke369",
+                "importWizardName": "Production",
+                "amount": 1468443.85,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 106
+        }, {
+            "facilityId": "e8mj9zt10",
+            "accountId": "u0woqoszr",
+            "guid": "vanzf7l5a",
+            "date": new Date("2018-07-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "5jsihtofv",
+                "importWizardName": "CDD",
+                "amount": 426
+            }, {
+                "name": "HDD",
+                "id": "9nzo5kyrs",
+                "importWizardName": "HDD",
+                "amount": 0
+            }, {
+                "name": "Production",
+                "id": "5kd5ke369",
+                "importWizardName": "Production",
+                "amount": 1159935.45,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 107
+        }, {
+            "facilityId": "e8mj9zt10",
+            "accountId": "u0woqoszr",
+            "guid": "hht17btwy",
+            "date": new Date("2018-08-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "5jsihtofv",
+                "importWizardName": "CDD",
+                "amount": 375
+            }, {
+                "name": "HDD",
+                "id": "9nzo5kyrs",
+                "importWizardName": "HDD",
+                "amount": 0
+            }, {
+                "name": "Production",
+                "id": "5kd5ke369",
+                "importWizardName": "Production",
+                "amount": 1313491.15,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 108
+        }, {
+            "facilityId": "e8mj9zt10",
+            "accountId": "u0woqoszr",
+            "guid": "nszp3j1n7",
+            "date": new Date("2018-09-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "5jsihtofv",
+                "importWizardName": "CDD",
+                "amount": 188
+            }, {
+                "name": "HDD",
+                "id": "9nzo5kyrs",
+                "importWizardName": "HDD",
+                "amount": 77
+            }, {
+                "name": "Production",
+                "id": "5kd5ke369",
+                "importWizardName": "Production",
+                "amount": 1406138.92,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 109
+        }, {
+            "facilityId": "e8mj9zt10",
+            "accountId": "u0woqoszr",
+            "guid": "7uv31opti",
+            "date": new Date("2018-10-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "5jsihtofv",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "9nzo5kyrs",
+                "importWizardName": "HDD",
+                "amount": 465
+            }, {
+                "name": "Production",
+                "id": "5kd5ke369",
+                "importWizardName": "Production",
+                "amount": 1910777.23,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 110
+        }, {
+            "facilityId": "e8mj9zt10",
+            "accountId": "u0woqoszr",
+            "guid": "0a0sdghrs",
+            "date": new Date("2018-11-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "5jsihtofv",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "9nzo5kyrs",
+                "importWizardName": "HDD",
+                "amount": 930
+            }, {
+                "name": "Production",
+                "id": "5kd5ke369",
+                "importWizardName": "Production",
+                "amount": 1806322.27,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 111
+        }, {
+            "facilityId": "e8mj9zt10",
+            "accountId": "u0woqoszr",
+            "guid": "ylifr0rjr",
+            "date": new Date("2018-12-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "5jsihtofv",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "9nzo5kyrs",
+                "importWizardName": "HDD",
+                "amount": 1057
+            }, {
+                "name": "Production",
+                "id": "5kd5ke369",
+                "importWizardName": "Production",
+                "amount": 1917627.61,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 112
+        }, {
+            "facilityId": "e8mj9zt10",
+            "accountId": "u0woqoszr",
+            "guid": "ypg2co7as",
+            "date": new Date("2019-01-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "5jsihtofv",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "9nzo5kyrs",
+                "importWizardName": "HDD",
+                "amount": 1451
+            }, {
+                "name": "Production",
+                "id": "5kd5ke369",
+                "importWizardName": "Production",
+                "amount": 1875228.66,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 113
+        }, {
+            "facilityId": "e8mj9zt10",
+            "accountId": "u0woqoszr",
+            "guid": "54zg84lq9",
+            "date": new Date("2019-02-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "5jsihtofv",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "9nzo5kyrs",
+                "importWizardName": "HDD",
+                "amount": 1299
+            }, {
+                "name": "Production",
+                "id": "5kd5ke369",
+                "importWizardName": "Production",
+                "amount": 1710801.76,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 114
+        }, {
+            "facilityId": "e8mj9zt10",
+            "accountId": "u0woqoszr",
+            "guid": "pd977lybb",
+            "date": new Date("2019-03-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "5jsihtofv",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "9nzo5kyrs",
+                "importWizardName": "HDD",
+                "amount": 968
+            }, {
+                "name": "Production",
+                "id": "5kd5ke369",
+                "importWizardName": "Production",
+                "amount": 1732564.48,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 115
+        }, {
+            "facilityId": "e8mj9zt10",
+            "accountId": "u0woqoszr",
+            "guid": "i6739ssqp",
+            "date": new Date("2019-04-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "5jsihtofv",
+                "importWizardName": "CDD",
+                "amount": 4
+            }, {
+                "name": "HDD",
+                "id": "9nzo5kyrs",
+                "importWizardName": "HDD",
+                "amount": 439
+            }, {
+                "name": "Production",
+                "id": "5kd5ke369",
+                "importWizardName": "Production",
+                "amount": 1654841.75,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 116
+        }, {
+            "facilityId": "e8mj9zt10",
+            "accountId": "u0woqoszr",
+            "guid": "h2kc6pu28",
+            "date": new Date("2019-05-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "5jsihtofv",
+                "importWizardName": "CDD",
+                "amount": 33
+            }, {
+                "name": "HDD",
+                "id": "9nzo5kyrs",
+                "importWizardName": "HDD",
+                "amount": 229
+            }, {
+                "name": "Production",
+                "id": "5kd5ke369",
+                "importWizardName": "Production",
+                "amount": 1623827.08,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 117
+        }, {
+            "facilityId": "e8mj9zt10",
+            "accountId": "u0woqoszr",
+            "guid": "vmvmclqfl",
+            "date": new Date("2019-06-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "5jsihtofv",
+                "importWizardName": "CDD",
+                "amount": 219
+            }, {
+                "name": "HDD",
+                "id": "9nzo5kyrs",
+                "importWizardName": "HDD",
+                "amount": 7
+            }, {
+                "name": "Production",
+                "id": "5kd5ke369",
+                "importWizardName": "Production",
+                "amount": 1475588.87,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 118
+        }, {
+            "facilityId": "e8mj9zt10",
+            "accountId": "u0woqoszr",
+            "guid": "k7ygajlje",
+            "date": new Date("2019-07-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "5jsihtofv",
+                "importWizardName": "CDD",
+                "amount": 406
+            }, {
+                "name": "HDD",
+                "id": "9nzo5kyrs",
+                "importWizardName": "HDD",
+                "amount": 0
+            }, {
+                "name": "Production",
+                "id": "5kd5ke369",
+                "importWizardName": "Production",
+                "amount": 1187575.73,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 119
+        }, {
+            "facilityId": "e8mj9zt10",
+            "accountId": "u0woqoszr",
+            "guid": "w3rr4r8tf",
+            "date": new Date("2019-08-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "5jsihtofv",
+                "importWizardName": "CDD",
+                "amount": 270
+            }, {
+                "name": "HDD",
+                "id": "9nzo5kyrs",
+                "importWizardName": "HDD",
+                "amount": 0
+            }, {
+                "name": "Production",
+                "id": "5kd5ke369",
+                "importWizardName": "Production",
+                "amount": 1299745.94,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 120
+        }, {
+            "facilityId": "e8mj9zt10",
+            "accountId": "u0woqoszr",
+            "guid": "wyixvp1wr",
+            "date": new Date("2019-09-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "5jsihtofv",
+                "importWizardName": "CDD",
+                "amount": 163
+            }, {
+                "name": "HDD",
+                "id": "9nzo5kyrs",
+                "importWizardName": "HDD",
+                "amount": 30
+            }, {
+                "name": "Production",
+                "id": "5kd5ke369",
+                "importWizardName": "Production",
+                "amount": 1299357.32,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 121
+        }, {
+            "facilityId": "e8mj9zt10",
+            "accountId": "u0woqoszr",
+            "guid": "4suda92hz",
+            "date": new Date("2019-10-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "5jsihtofv",
+                "importWizardName": "CDD",
+                "amount": 2
+            }, {
+                "name": "HDD",
+                "id": "9nzo5kyrs",
+                "importWizardName": "HDD",
+                "amount": 468
+            }, {
+                "name": "Production",
+                "id": "5kd5ke369",
+                "importWizardName": "Production",
+                "amount": 1761757.97,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 122
+        }, {
+            "facilityId": "e8mj9zt10",
+            "accountId": "u0woqoszr",
+            "guid": "fq7frrhbv",
+            "date": new Date("2019-11-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "5jsihtofv",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "9nzo5kyrs",
+                "importWizardName": "HDD",
+                "amount": 880
+            }, {
+                "name": "Production",
+                "id": "5kd5ke369",
+                "importWizardName": "Production",
+                "amount": 1291130.26,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 123
+        }, {
+            "facilityId": "e8mj9zt10",
+            "accountId": "u0woqoszr",
+            "guid": "ociv7rnin",
+            "date": new Date("2019-12-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "5jsihtofv",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "9nzo5kyrs",
+                "importWizardName": "HDD",
+                "amount": 1165
+            }, {
+                "name": "Production",
+                "id": "5kd5ke369",
+                "importWizardName": "Production",
+                "amount": 1096548.48,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 124
+        }, {
+            "facilityId": "e8mj9zt10",
+            "accountId": "u0woqoszr",
+            "guid": "exs30qcoe",
+            "date": new Date("2020-01-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "5jsihtofv",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "9nzo5kyrs",
+                "importWizardName": "HDD",
+                "amount": 1238
+            }, {
+                "name": "Production",
+                "id": "5kd5ke369",
+                "importWizardName": "Production",
+                "amount": 1432556.19,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 125
+        }, {
+            "facilityId": "e8mj9zt10",
+            "accountId": "u0woqoszr",
+            "guid": "9pub2poyt",
+            "date": new Date("2020-02-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "5jsihtofv",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "9nzo5kyrs",
+                "importWizardName": "HDD",
+                "amount": 1159
+            }, {
+                "name": "Production",
+                "id": "5kd5ke369",
+                "importWizardName": "Production",
+                "amount": 1336362.58,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 126
+        }, {
+            "facilityId": "e8mj9zt10",
+            "accountId": "u0woqoszr",
+            "guid": "9fky26zgr",
+            "date": new Date("2020-03-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "5jsihtofv",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "9nzo5kyrs",
+                "importWizardName": "HDD",
+                "amount": 696
+            }, {
+                "name": "Production",
+                "id": "5kd5ke369",
+                "importWizardName": "Production",
+                "amount": 1217250.55,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 127
+        }, {
+            "facilityId": "e8mj9zt10",
+            "accountId": "u0woqoszr",
+            "guid": "xmrb6kdy5",
+            "date": new Date("2020-04-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "5jsihtofv",
+                "importWizardName": "CDD",
+                "amount": 2
+            }, {
+                "name": "HDD",
+                "id": "9nzo5kyrs",
+                "importWizardName": "HDD",
+                "amount": 454
+            }, {
+                "name": "Production",
+                "id": "5kd5ke369",
+                "importWizardName": "Production",
+                "amount": 824951.36,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 128
+        }, {
+            "facilityId": "e8mj9zt10",
+            "accountId": "u0woqoszr",
+            "guid": "y9lag7ito",
+            "date": new Date("2020-05-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "5jsihtofv",
+                "importWizardName": "CDD",
+                "amount": 81
+            }, {
+                "name": "HDD",
+                "id": "9nzo5kyrs",
+                "importWizardName": "HDD",
+                "amount": 152
+            }, {
+                "name": "Production",
+                "id": "5kd5ke369",
+                "importWizardName": "Production",
+                "amount": 909276.8200000001,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 129
+        }, {
+            "facilityId": "e8mj9zt10",
+            "accountId": "u0woqoszr",
+            "guid": "otbq4ujnw",
+            "date": new Date("2020-06-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "5jsihtofv",
+                "importWizardName": "CDD",
+                "amount": 343
+            }, {
+                "name": "HDD",
+                "id": "9nzo5kyrs",
+                "importWizardName": "HDD",
+                "amount": 1
+            }, {
+                "name": "Production",
+                "id": "5kd5ke369",
+                "importWizardName": "Production",
+                "amount": 1134670.07,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 130
+        }, {
+            "facilityId": "e8mj9zt10",
+            "accountId": "u0woqoszr",
+            "guid": "sh1emwkq5",
+            "date": new Date("2020-07-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "5jsihtofv",
+                "importWizardName": "CDD",
+                "amount": 468
+            }, {
+                "name": "HDD",
+                "id": "9nzo5kyrs",
+                "importWizardName": "HDD",
+                "amount": 0
+            }, {
+                "name": "Production",
+                "id": "5kd5ke369",
+                "importWizardName": "Production",
+                "amount": 1317895.51,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 131
+        }, {
+            "facilityId": "e8mj9zt10",
+            "accountId": "u0woqoszr",
+            "guid": "ps5qh6iyo",
+            "date": new Date("2020-08-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "5jsihtofv",
+                "importWizardName": "CDD",
+                "amount": 371
+            }, {
+                "name": "HDD",
+                "id": "9nzo5kyrs",
+                "importWizardName": "HDD",
+                "amount": 0
+            }, {
+                "name": "Production",
+                "id": "5kd5ke369",
+                "importWizardName": "Production",
+                "amount": 1427883.86,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 132
+        }, {
+            "facilityId": "e8mj9zt10",
+            "accountId": "u0woqoszr",
+            "guid": "rc9x3cf3m",
+            "date": new Date("2020-09-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "5jsihtofv",
+                "importWizardName": "CDD",
+                "amount": 106
+            }, {
+                "name": "HDD",
+                "id": "9nzo5kyrs",
+                "importWizardName": "HDD",
+                "amount": 110
+            }, {
+                "name": "Production",
+                "id": "5kd5ke369",
+                "importWizardName": "Production",
+                "amount": 1421028.4,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 133
+        }, {
+            "facilityId": "e8mj9zt10",
+            "accountId": "u0woqoszr",
+            "guid": "dbm0w9gzi",
+            "date": new Date("2020-10-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "5jsihtofv",
+                "importWizardName": "CDD",
+                "amount": 12
+            }, {
+                "name": "HDD",
+                "id": "9nzo5kyrs",
+                "importWizardName": "HDD",
+                "amount": 555
+            }, {
+                "name": "Production",
+                "id": "5kd5ke369",
+                "importWizardName": "Production",
+                "amount": 1523377.7,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 134
+        }, {
+            "facilityId": "e8mj9zt10",
+            "accountId": "u0woqoszr",
+            "guid": "8yhhiieqo",
+            "date": new Date("2020-11-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "5jsihtofv",
+                "importWizardName": "CDD",
+                "amount": 13
+            }, {
+                "name": "HDD",
+                "id": "9nzo5kyrs",
+                "importWizardName": "HDD",
+                "amount": 688
+            }, {
+                "name": "Production",
+                "id": "5kd5ke369",
+                "importWizardName": "Production",
+                "amount": 1235688.41,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 135
+        }, {
+            "facilityId": "e8mj9zt10",
+            "accountId": "u0woqoszr",
+            "guid": "951al5nwx",
+            "date": new Date("2020-12-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "5jsihtofv",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "9nzo5kyrs",
+                "importWizardName": "HDD",
+                "amount": 1102
+            }, {
+                "name": "Production",
+                "id": "5kd5ke369",
+                "importWizardName": "Production",
+                "amount": 1067147.98,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 136
+        }, {
+            "facilityId": "e8mj9zt10",
+            "accountId": "u0woqoszr",
+            "guid": "8bxd2c4x9",
+            "date": new Date("2021-01-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "5jsihtofv",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "9nzo5kyrs",
+                "importWizardName": "HDD",
+                "amount": 1225
+            }, {
+                "name": "Production",
+                "id": "5kd5ke369",
+                "importWizardName": "Production",
+                "amount": 1311722.04,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 137
+        }, {
+            "facilityId": "e8mj9zt10",
+            "accountId": "u0woqoszr",
+            "guid": "1ng5dvq5f",
+            "date": new Date("2021-02-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "5jsihtofv",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "9nzo5kyrs",
+                "importWizardName": "HDD",
+                "amount": 1389
+            }, {
+                "name": "Production",
+                "id": "5kd5ke369",
+                "importWizardName": "Production",
+                "amount": 1330341.51,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 138
+        }, {
+            "facilityId": "e8mj9zt10",
+            "accountId": "u0woqoszr",
+            "guid": "ibi0y7zs7",
+            "date": new Date("2021-03-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "5jsihtofv",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "9nzo5kyrs",
+                "importWizardName": "HDD",
+                "amount": 631
+            }, {
+                "name": "Production",
+                "id": "5kd5ke369",
+                "importWizardName": "Production",
+                "amount": 1558085.53,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 139
+        }, {
+            "facilityId": "e8mj9zt10",
+            "accountId": "u0woqoszr",
+            "guid": "gbtjtzb7u",
+            "date": new Date("2021-04-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "5jsihtofv",
+                "importWizardName": "CDD",
+                "amount": 7
+            }, {
+                "name": "HDD",
+                "id": "9nzo5kyrs",
+                "importWizardName": "HDD",
+                "amount": 415
+            }, {
+                "name": "Production",
+                "id": "5kd5ke369",
+                "importWizardName": "Production",
+                "amount": 1337207.1300000001,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 140
+        }, {
+            "facilityId": "e8mj9zt10",
+            "accountId": "u0woqoszr",
+            "guid": "y8ctrvgj1",
+            "date": new Date("2021-05-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "5jsihtofv",
+                "importWizardName": "CDD",
+                "amount": 109
+            }, {
+                "name": "HDD",
+                "id": "9nzo5kyrs",
+                "importWizardName": "HDD",
+                "amount": 156
+            }, {
+                "name": "Production",
+                "id": "5kd5ke369",
+                "importWizardName": "Production",
+                "amount": 1416978.37,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 141
+        }, {
+            "facilityId": "e8mj9zt10",
+            "accountId": "u0woqoszr",
+            "guid": "9dnwxeoh0",
+            "date": new Date("2021-06-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "5jsihtofv",
+                "importWizardName": "CDD",
+                "amount": 447
+            }, {
+                "name": "HDD",
+                "id": "9nzo5kyrs",
+                "importWizardName": "HDD",
+                "amount": 1
+            }, {
+                "name": "Production",
+                "id": "5kd5ke369",
+                "importWizardName": "Production",
+                "amount": 1230462.36,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 142
+        }, {
+            "facilityId": "e8mj9zt10",
+            "accountId": "u0woqoszr",
+            "guid": "dzkm91ggm",
+            "date": new Date("2021-07-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "5jsihtofv",
+                "importWizardName": "CDD",
+                "amount": 422
+            }, {
+                "name": "HDD",
+                "id": "9nzo5kyrs",
+                "importWizardName": "HDD",
+                "amount": 1
+            }, {
+                "name": "Production",
+                "id": "5kd5ke369",
+                "importWizardName": "Production",
+                "amount": 1396042.42,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 143
+        }, {
+            "facilityId": "e8mj9zt10",
+            "accountId": "u0woqoszr",
+            "guid": "e99xiuis2",
+            "date": new Date("2021-08-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "5jsihtofv",
+                "importWizardName": "CDD",
+                "amount": 392
+            }, {
+                "name": "HDD",
+                "id": "9nzo5kyrs",
+                "importWizardName": "HDD",
+                "amount": 0
+            }, {
+                "name": "Production",
+                "id": "5kd5ke369",
+                "importWizardName": "Production",
+                "amount": 1487291.92,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 144
+        }, {
+            "facilityId": "e8mj9zt10",
+            "accountId": "u0woqoszr",
+            "guid": "huiawbrlw",
+            "date": new Date("2021-09-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "5jsihtofv",
+                "importWizardName": "CDD",
+                "amount": 159
+            }, {
+                "name": "HDD",
+                "id": "9nzo5kyrs",
+                "importWizardName": "HDD",
+                "amount": 17
+            }, {
+                "name": "Production",
+                "id": "5kd5ke369",
+                "importWizardName": "Production",
+                "amount": 1394399.04,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 145
+        }, {
+            "facilityId": "e8mj9zt10",
+            "accountId": "u0woqoszr",
+            "guid": "8hl34vxvn",
+            "date": new Date("2021-10-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "5jsihtofv",
+                "importWizardName": "CDD",
+                "amount": 49
+            }, {
+                "name": "HDD",
+                "id": "9nzo5kyrs",
+                "importWizardName": "HDD",
+                "amount": 227
+            }, {
+                "name": "Production",
+                "id": "5kd5ke369",
+                "importWizardName": "Production",
+                "amount": 1348936.85,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 146
+        }, {
+            "facilityId": "e8mj9zt10",
+            "accountId": "u0woqoszr",
+            "guid": "rmd1lckb7",
+            "date": new Date("2021-11-01T05:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "5jsihtofv",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "9nzo5kyrs",
+                "importWizardName": "HDD",
+                "amount": 706
+            }, {
+                "name": "Production",
+                "id": "5kd5ke369",
+                "importWizardName": "Production",
+                "amount": 1125021.8800000001,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 147
+        }, {
+            "facilityId": "e8mj9zt10",
+            "accountId": "u0woqoszr",
+            "guid": "3dymnesmk",
+            "date": new Date("2021-12-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "5jsihtofv",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "9nzo5kyrs",
+                "importWizardName": "HDD",
+                "amount": 1136
+            }, {
+                "name": "Production",
+                "id": "5kd5ke369",
+                "importWizardName": "Production",
+                "amount": 1125021.8800000001,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 148
+        }, {
+            "facilityId": "e8mj9zt10",
+            "accountId": "u0woqoszr",
+            "guid": "9mjx32x7f",
+            "date": new Date("2022-01-01T06:00:00.000Z"),
+            "predictors": [{
+                "name": "CDD",
+                "id": "5jsihtofv",
+                "importWizardName": "CDD",
+                "amount": 0
+            }, {
+                "name": "HDD",
+                "id": "9nzo5kyrs",
+                "importWizardName": "HDD",
+                "amount": 1221
+            }, {
+                "name": "Production",
+                "id": "5kd5ke369",
+                "importWizardName": "Production",
+                "amount": 1107677.49,
+                "production": true,
+                "productionInAnalysis": true
+            }],
+            "id": 149
+        }
     ],
     origin: "VERIFI",
     backupFileType: "Account"
