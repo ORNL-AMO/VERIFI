@@ -50,6 +50,7 @@ export class AccountAnalysisDashboardComponent implements OnInit {
     let addedItem: IdbAccountAnalysisItem = await this.accountAnalysisDbService.addWithObservable(newItem).toPromise();
     this.accountAnalysisDbService.setAccountAnalysisItems();
     this.accountAnalysisDbService.selectedAnalysisItem.next(addedItem);
+    this.toastNotificationService.showToast('Analysis Item Created', undefined, undefined, false, "success");
     this.router.navigateByUrl('account/analysis/setup');
   }
 
@@ -89,6 +90,18 @@ export class AccountAnalysisDashboardComponent implements OnInit {
     } else {
       this.orderDataField = str;
     }
+  }
+
+  async createCopy(analysisItem: IdbAccountAnalysisItem){
+    let newItem: IdbAccountAnalysisItem = JSON.parse(JSON.stringify(analysisItem));
+    delete newItem.id;
+    newItem.name = newItem.name + ' (Copy)';
+    let addedItem: IdbAccountAnalysisItem = await this.accountAnalysisDbService.addWithObservable(newItem).toPromise();
+    this.accountAnalysisDbService.setAccountAnalysisItems();
+    this.accountAnalysisDbService.selectedAnalysisItem.next(addedItem);
+    this.toastNotificationService.showToast('Analysis Item Copy Created', undefined, undefined, false, "success");
+    this.router.navigateByUrl('account/analysis/setup');
+
   }
 
 }

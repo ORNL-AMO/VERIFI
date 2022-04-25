@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { OverviewReportOptionsDbService } from 'src/app/indexedDB/overview-report-options-db.service';
 import { IdbOverviewReportOptions } from 'src/app/models/idb';
 import { ReportOptions } from 'src/app/models/overview-report';
@@ -23,7 +24,8 @@ export class OverviewReportDashboardComponent implements OnInit {
   orderByDirection: string = 'desc';
   showNewReportModal: boolean = false;
   reportType: 'data' | 'betterPlants' = 'betterPlants';
-  constructor(private overviewReportService: OverviewReportService, private router: Router, private overviewReportOptionsDbService: OverviewReportOptionsDbService) { }
+  constructor(private overviewReportService: OverviewReportService, private router: Router, private overviewReportOptionsDbService: OverviewReportOptionsDbService,
+    private toastNotificationService: ToastNotificationsService) { }
 
   ngOnInit(): void {
     this.accountOverviewReportOptionsSub = this.overviewReportOptionsDbService.accountOverviewReportOptions.subscribe(options => {
@@ -45,14 +47,6 @@ export class OverviewReportDashboardComponent implements OnInit {
     });
     return options;
   }
-
-
-  // createReport() {
-  //   this.overviewReportOptionsDbService.selectedOverviewReportOptions.next(undefined);
-  //   let newReportOptions: ReportOptions = this.overviewReportService.getInitialReportOptions();
-  //   this.overviewReportService.reportOptions.next(newReportOptions);
-  //   this.router.navigateByUrl('/account/reports/report-type');
-  // }
 
   selectReport(report: IdbOverviewReportOptions) {
     this.overviewReportOptionsDbService.selectedOverviewReportOptions.next(report);
@@ -76,6 +70,7 @@ export class OverviewReportDashboardComponent implements OnInit {
     await this.overviewReportOptionsDbService.deleteWithObservable(this.reportToDelete.id).toPromise();
     this.overviewReportOptionsDbService.setAccountOverviewReportOptions();
     this.reportToDelete = undefined;
+    this.toastNotificationService.showToast('Report Deleted', undefined, undefined, false, "success");
   }
 
   editReport(report: IdbOverviewReportOptions) {
@@ -100,7 +95,6 @@ export class OverviewReportDashboardComponent implements OnInit {
     }
   }
 
-
   openAddNewReportModal() {
     this.showNewReportModal = true;
   }
@@ -122,5 +116,15 @@ export class OverviewReportDashboardComponent implements OnInit {
 
   setReportType(reportType: 'betterPlants' | 'data') {
     this.reportType = reportType;
+  }
+
+  createCopy(report: IdbOverviewReportOptions){
+    this.overviewReportOptionsDbService.selectedOverviewReportOptions.next(undefined);
+    this.overviewReportService.reportOptions.next(report.reportOptions);
+    if(report.reportOptions.reportType == 'data'){
+      this.router.navigateByUrl('/account/reports/menu');
+    }else if(report.reportOptions.reportType == 'betterPlants'){
+      this.router.navigateByUrl('/account/reports/better-plants-menu');
+    }
   }
 }
