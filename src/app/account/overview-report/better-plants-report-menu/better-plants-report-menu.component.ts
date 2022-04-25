@@ -36,7 +36,6 @@ export class BetterPlantsReportMenuComponent implements OnInit {
 
   ngOnInit(): void {
     this.selectedReportOptions = this.overviewReportOptionsDbService.selectedOverviewReportOptions.getValue();
-    console.log(this.selectedReportOptions);
     if (this.selectedReportOptions) {
       this.name = this.selectedReportOptions.name;
     }

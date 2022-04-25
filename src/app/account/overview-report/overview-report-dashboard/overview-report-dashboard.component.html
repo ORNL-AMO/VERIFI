@@ -71,8 +71,9 @@
                             <td>{{report.date | date}}</td>
                             <td class="actions">
                                 <div class="d-flex">
-                                    <i class="fa fa-pencil" title="Edit" (click)="editReport(report)"></i>
+                                    <!-- <i class="fa fa-pencil" title="Edit" (click)="editReport(report)"></i> -->
                                     <i class="fa fa-trash" title="Delete" (click)="deleteReport(report)"></i>
+                                    <i class="fa fa-copy" title="Copy" (click)="createCopy(report)"></i>
                                 </div>
                             </td>
                         </tr>
