@@ -50,10 +50,15 @@ export class AnalysisCalculationsService {
       calanderizedMeter.monthlyData = this.convertMeterDataService.convertMeterDataToAnalysis(analysisItem, calanderizedMeter.monthlyData, facility, calanderizedMeter.meter);
     });
     let allMeterData: Array<MonthlyData> = calanderizedMeterData.flatMap(calanderizedMeter => { return calanderizedMeter.monthlyData });
+    let baselineYear: number = this.analysisCalculationsHelperService.getFiscalYear(baselineDate, facility);
+    let annualMeterDataUsage: Array<{ year: number, usage: number }> = new Array();
+    for (let year = baselineYear + 1; year <= endDate.getUTCFullYear(); year++) {
+      let yearMeterData: Array<MonthlyData> = allMeterData.filter(data => { return data.year == year });
+      let totalUsage: number = _.sumBy(yearMeterData, 'energyUse');
+      annualMeterDataUsage.push({ year: year, usage: totalUsage });
+    }
 
     let analysisSummaryData: Array<MonthlyAnalysisSummaryData> = new Array();
-
-    let baselineYear: number = this.analysisCalculationsHelperService.getFiscalYear(baselineDate, facility);
     let baselineYearEnergyIntensity: number = this.getBaselineEnergyIntensity(selectedGroup, facility, allMeterData, baselineYear, predictorVariables, facilityPredictorData);
 
 
@@ -135,25 +140,37 @@ export class AnalysisCalculationsService {
       }
       yearToDateModeledEnergyUse = yearToDateModeledEnergyUse + modeledEnergy;
 
+      let annualEnergyUse: number = 0;
       if (fiscalYear == baselineYear) {
         baselineModeledEnergyUseData.push(modeledEnergy);
+      } else {
+        annualEnergyUse = annualMeterDataUsage.find(annualUsage => { return annualUsage.year == baselineDate.getUTCFullYear() }).usage;
       }
 
       if (previousFiscalYear != fiscalYear) {
         previousFiscalYear = fiscalYear;
       }
-
+      let baselineAdjustmentForOther: number = 0;
       let baselineModeledEnergyUse: number = baselineModeledEnergyUseData[monthIndex];
       yearToDateBaselineModeledEnergyUse = yearToDateBaselineModeledEnergyUse + baselineModeledEnergyUse;
-      let adjustedBaselineEnergyUse: number = modeledEnergy + baselineActualEnergyUse - baselineModeledEnergyUse;
-      yearToDateAdjustedEnergyUse = yearToDateAdjustedEnergyUse + adjustedBaselineEnergyUse;
-      let SEnPI: number = energyUse / adjustedBaselineEnergyUse;
+      let adjustedForNormalization: number = modeledEnergy + baselineActualEnergyUse - baselineModeledEnergyUse;
+      yearToDateAdjustedEnergyUse = yearToDateAdjustedEnergyUse + adjustedForNormalization;
+      let SEnPI: number = energyUse / adjustedForNormalization;
       let savings: number = (baselineActualEnergyUse - baselineModeledEnergyUse) - (energyUse - modeledEnergy);
-      let percentSavingsComparedToBaseline: number = savings / adjustedBaselineEnergyUse;
+      let percentSavingsComparedToBaseline: number = savings / adjustedForNormalization;
       let yearToDateSavings: number = (yearToDateBaselineActualEnergyUse - yearToDateBaselineModeledEnergyUse) - (yearToDateActualEnergyUse - yearToDateModeledEnergyUse);
       let yearToDatePercentSavings: number = (yearToDateSavings / yearToDateAdjustedEnergyUse);
       let rollingSavings: number = 0;
       let rolling12MonthImprovement: number = 0;
+      if (selectedGroup.hasBaselineAdjustement && fiscalYear != baselineYear) {
+        let yearAdjustment: { year: number, amount: number } = selectedGroup.baselineAdjustments.find(bAdjustement => { return bAdjustement.year == baselineDate.getUTCFullYear(); })
+        if (yearAdjustment.amount) {
+          baselineAdjustmentForOther = (energyUse / annualEnergyUse) * yearAdjustment.amount;
+        }
+      }
+      let baselineAdjustment: number = 0;
+      let baselineAdjustmentForNormalization: number = 0;
+      let adjusted: number = adjustedForNormalization + baselineAdjustmentForOther;
       if (summaryDataIndex >= 11) {
         let totalBaselineModeledEnergy: number = _.sum(baselineModeledEnergyUseData);
         let totalBaselineEnergy: number = _.sum(baselineActualEnergyUseData);
@@ -162,8 +179,11 @@ export class AnalysisCalculationsService {
         let total12MonthsEnergyUse: number = _.sumBy(last11MonthsData, 'energyUse') + energyUse;
         let total12MonthsModeledEnergy: number = _.sumBy(last11MonthsData, 'modeledEnergy') + modeledEnergy;
         rollingSavings = (totalBaselineEnergy - totalBaselineModeledEnergy) - (total12MonthsEnergyUse - total12MonthsModeledEnergy);
-        let total12MonthsAdjusedBaseline: number = _.sumBy(last11MonthsData, 'adjustedBaselineEnergyUse') + adjustedBaselineEnergyUse;
+        let total12MonthsAdjusedBaseline: number = _.sumBy(last11MonthsData, 'adjusted') + adjusted;
         rolling12MonthImprovement = rollingSavings / total12MonthsAdjusedBaseline;
+
+        baselineAdjustmentForNormalization = baselineActualEnergyUse - adjustedForNormalization;
+        baselineAdjustment = baselineAdjustmentForNormalization + baselineAdjustmentForOther;
       }
 
       analysisSummaryData.push({
@@ -173,7 +193,11 @@ export class AnalysisCalculationsService {
         date: new Date(baselineDate),
         group: selectedGroup,
         fiscalYear: fiscalYear,
-        adjustedBaselineEnergyUse: adjustedBaselineEnergyUse,
+        adjustedForNormalization: adjustedForNormalization,
+        adjusted: adjusted,
+        baselineAdjustmentForNormalization: baselineAdjustmentForNormalization,
+        baselineAdjustmentForOther: baselineAdjustmentForOther,
+        baselineAdjustment: baselineAdjustment,
         SEnPI: SEnPI,
         savings: savings,
         percentSavingsComparedToBaseline: percentSavingsComparedToBaseline * 100,
@@ -278,7 +302,7 @@ export class AnalysisCalculationsService {
         usage: number,
         predictorId: string
       }> = new Array();
-      if (!inAccount) {      
+      if (!inAccount) {
         let summaryYearPredictorData: Array<IdbPredictorEntry> = this.analysisCalculationsHelperService.filterYearPredictorData(facilityPredictorData, baselineYear, facilityOrAccount);
 
         predictorVariables.forEach(variable => {

@@ -85,7 +85,10 @@ export class AnnualAnalysisSummaryTableComponent implements OnInit {
     if (this.analysisTableColumns.modeledEnergy) {
       numEnergyColumns++;
     }
-    if (this.analysisTableColumns.adjustedEnergy) {
+    if (this.analysisTableColumns.adjusted) {
+      numEnergyColumns++;
+    }
+    if(this.analysisTableColumns.adjustmentToBaseline){
       numEnergyColumns++;
     }
     this.numEnergyColumns = numEnergyColumns;
@@ -105,9 +108,9 @@ export class AnnualAnalysisSummaryTableComponent implements OnInit {
     if (this.analysisTableColumns.annualSavingsPercentImprovement) {
       numImprovementColumns++;
     }
-    if (this.analysisTableColumns.adjustmentToBaseline) {
-      numImprovementColumns++;
-    }
+    // if (this.analysisTableColumns.adjustmentToBaseline) {
+    //   numImprovementColumns++;
+    // }
     if (this.analysisTableColumns.cummulativeSavings) {
       numImprovementColumns++;
     }

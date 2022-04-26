@@ -96,13 +96,22 @@ export interface MonthlyAnalysisSummaryData {
   date: Date,
   energyUse: number,
   modeledEnergy: number,
+  adjustedForNormalization: number,
+  adjusted: number,
+  baselineAdjustmentForNormalization: number,
+  baselineAdjustmentForOther: number,
+  baselineAdjustment: number,
+  // adjustedBaselineEnergyUse: number,
+
+
+
+
   predictorUsage?: Array<{
     usage: number,
     predictorId: string
   }>,
   fiscalYear: number,
   group: AnalysisGroup,
-  adjustedBaselineEnergyUse: number,
   SEnPI: number,
   savings: number,
   percentSavingsComparedToBaseline: number,
@@ -145,7 +154,11 @@ export interface AnalysisTableColumns {
   energy: boolean,
   actualEnergy: boolean,
   modeledEnergy: boolean,
-  adjustedEnergy: boolean,
+  adjustedForNormalization: boolean,
+  adjusted: boolean,
+  baselineAdjustmentForNormalization: boolean,
+  baselineAdjustmentForOther: boolean,
+  baselineAdjustment: boolean,
   totalSavingsPercentImprovement: boolean,
   annualSavingsPercentImprovement: boolean,
   adjustmentToBaseline: boolean,

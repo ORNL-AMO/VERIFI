@@ -51,11 +51,19 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
     if (this.analysisTableColumns.energy == false) {
       this.analysisTableColumns.actualEnergy = false;
       this.analysisTableColumns.modeledEnergy = false;
-      this.analysisTableColumns.adjustedEnergy = false;
+      this.analysisTableColumns.adjustedForNormalization = true;
+      this.analysisTableColumns.adjusted = true;
+      this.analysisTableColumns.baselineAdjustmentForNormalization = true;
+      this.analysisTableColumns.baselineAdjustmentForOther = true;
+      this.analysisTableColumns.baselineAdjustment = true;
     } else {
       this.analysisTableColumns.actualEnergy = true;
       this.analysisTableColumns.modeledEnergy = true;
-      this.analysisTableColumns.adjustedEnergy = true;
+      this.analysisTableColumns.adjustedForNormalization = true;
+      this.analysisTableColumns.adjusted = true;
+      this.analysisTableColumns.baselineAdjustmentForNormalization = true;
+      this.analysisTableColumns.baselineAdjustmentForOther = true;
+      this.analysisTableColumns.baselineAdjustment = true;
     }
     this.save();
   }
@@ -93,7 +101,13 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
 
 
   setEnergyColumns() {
-    this.analysisTableColumns.energy = this.analysisTableColumns.actualEnergy || this.analysisTableColumns.modeledEnergy || this.analysisTableColumns.adjustedEnergy;
+    this.analysisTableColumns.energy = (this.analysisTableColumns.actualEnergy 
+      || this.analysisTableColumns.modeledEnergy 
+      || this.analysisTableColumns.adjustedForNormalization 
+      || this.analysisTableColumns.adjusted 
+      || this.analysisTableColumns.baselineAdjustmentForNormalization 
+      || this.analysisTableColumns.baselineAdjustmentForOther 
+      || this.analysisTableColumns.baselineAdjustment);
   }
 
   setMonthIncrementalImprovement() {
