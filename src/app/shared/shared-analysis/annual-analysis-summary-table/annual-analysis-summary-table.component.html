@@ -27,12 +27,25 @@
             </th>
             <th *ngIf="analysisTableColumns.adjustedForNormalization" (click)="setOrderDataField('adjustedForNormalization')"
                 [ngClass]="{'active': orderDataField == 'adjustedForNormalization'}">
-                Adjusted for <br>
-                Normalization
+                Adjusted for<br> Normalization
             </th>
-            <th *ngIf="analysisTableColumns.adjustmentToBaseline" (click)="setOrderDataField('adjustmentToBaseline')"
-                [ngClass]="{'active': orderDataField == 'adjustmentToBaseline'}">
-                Baseline Adjustment <br> for Normalization
+            <th *ngIf="analysisTableColumns.adjusted" (click)="setOrderDataField('adjusted')"
+                [ngClass]="{'active': orderDataField == 'adjusted'}">
+                Adjusted
+            </th>
+            <th *ngIf="analysisTableColumns.baselineAdjustmentForNormalization" (click)="setOrderDataField('baselineAdjustmentForNormalization')"
+                [ngClass]="{'active': orderDataField == 'baselineAdjustmentForNormalization'}">
+                Baseline<br> Adjustment<br> for Normalization
+            </th>
+            
+            <th *ngIf="analysisTableColumns.baselineAdjustmentForOther" (click)="setOrderDataField('baselineAdjustmentForOther')"
+                [ngClass]="{'active': orderDataField == 'baselineAdjustmentForOther'}">
+                Baseline<br> Adjustment<br> for Other
+            </th>
+            
+            <th *ngIf="analysisTableColumns.baselineAdjustment" (click)="setOrderDataField('baselineAdjustment')"
+                [ngClass]="{'active': orderDataField == 'baselineAdjustment'}">
+                Baseline<br> Adjustment
             </th>
             <th *ngFor="let predictorVariable of predictorColumns" (click)="setOrderDataField(predictorVariable.name)"
                 [ngClass]="{'active': orderDataField == predictorVariable.name}">
@@ -89,23 +102,50 @@
                     &mdash;
                 </span>
             </td>
+           
+            
             <td *ngIf="analysisTableColumns.adjustedForNormalization">
-                <span *ngIf="summary.adjustedForNormalization"
-                    [ngClass]="{'red': summary.adjustedForNormalization < 0}">
+                <span *ngIf="summary.adjustedForNormalization" [ngClass]="{'red': summary.adjustedForNormalization < 0}">
                     {{summary.adjustedForNormalization | customNumber}}
                 </span>
                 <span *ngIf="!summary.adjustedForNormalization">
                     &mdash;
                 </span>
             </td>
-            <td *ngIf="analysisTableColumns.adjustmentToBaseline">
-                <span *ngIf="summary.adjustmentToBaseline" [ngClass]="{'red': summary.adjustmentToBaseline < 0}">
-                    {{summary.adjustmentToBaseline | customNumber}}
+            <td *ngIf="analysisTableColumns.adjusted">
+                <span *ngIf="summary.adjusted" [ngClass]="{'red': summary.adjusted < 0}">
+                    {{summary.adjusted | customNumber}}
                 </span>
-                <span *ngIf="!summary.adjustmentToBaseline">
+                <span *ngIf="!summary.adjusted">
                     &mdash;
                 </span>
             </td>
+
+            <td *ngIf="analysisTableColumns.baselineAdjustmentForNormalization">
+                <span *ngIf="summary.baselineAdjustmentForNormalization" [ngClass]="{'red': summary.baselineAdjustmentForNormalization < 0}">
+                    {{summary.baselineAdjustmentForNormalization | customNumber}}
+                </span>
+                <span *ngIf="!summary.baselineAdjustmentForNormalization">
+                    &mdash;
+                </span>
+            </td>
+            <td *ngIf="analysisTableColumns.baselineAdjustmentForOther">
+                <span *ngIf="summary.baselineAdjustmentForOther" [ngClass]="{'red': summary.baselineAdjustmentForOther < 0}">
+                    {{summary.baselineAdjustmentForOther | customNumber}}
+                </span>
+                <span *ngIf="!summary.baselineAdjustmentForOther">
+                    &mdash;
+                </span>
+            </td>
+            <td *ngIf="analysisTableColumns.baselineAdjustment">
+                <span *ngIf="summary.baselineAdjustment" [ngClass]="{'red': summary.baselineAdjustment < 0}">
+                    {{summary.baselineAdjustment | customNumber}}
+                </span>
+                <span *ngIf="!summary.baselineAdjustment">
+                    &mdash;
+                </span>
+            </td>
+
             <td *ngFor="let predictorVariable of predictorColumns">
                 <span *ngIf="summary[predictorVariable.name]">
                     {{summary[predictorVariable.name] | customNumber}}

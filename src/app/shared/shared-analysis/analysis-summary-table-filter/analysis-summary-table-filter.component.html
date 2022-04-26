@@ -40,7 +40,7 @@
                         (change)="save()">Baseline Adjustment
                 </label>
 
-                <label *ngIf="tableContext == 'annualGroup' || tableContext == 'annualFacility' || tableContext == 'annualAccount'">
+                <label>
                     <input type="checkbox" name="adjustmentToBaseline"
                         [(ngModel)]="analysisTableColumns.adjustmentToBaseline" (change)="save()">Adjustment to
                     Baseline

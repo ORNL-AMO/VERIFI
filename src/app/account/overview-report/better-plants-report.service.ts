@@ -173,7 +173,7 @@ export class BetterPlantsReportService {
         }
       }
     });
-    let adjustedBaselinePrimaryEnergy: number = baselineAdjustment + baselineTotalEnergyUse + reportYearAnalysisSummary.adjustmentToBaseline;
+    let adjustedBaselinePrimaryEnergy: number = baselineAdjustment + baselineTotalEnergyUse + reportYearAnalysisSummary.adjusted;
     let totalEnergySavings: number = adjustedBaselinePrimaryEnergy - reportYearTotalEnergyUse;
     let percentAnnualImprovement: number = (reportYearAnalysisSummary.newSavings / adjustedBaselinePrimaryEnergy) * 100;
     let percentTotalImprovement: number = (totalEnergySavings / adjustedBaselinePrimaryEnergy) * 100;
