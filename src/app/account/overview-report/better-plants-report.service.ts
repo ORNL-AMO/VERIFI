@@ -30,7 +30,7 @@ export class BetterPlantsReportService {
   getBetterPlantsSummary(reportOptions: ReportOptions, account: IdbAccount): BetterPlantsSummary {
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
     let selectedAnalysisItem: IdbAccountAnalysisItem = accountAnalysisItems.find(item => { return item.guid == reportOptions.analysisItemId });
-    let baselineAdjustment: number = 0;
+
     // if (selectedAnalysisItem.baselineAdjustment) {
     //   let convertedAdjustment: number = this.convertUnitsService.value(selectedAnalysisItem.baselineAdjustment).from(selectedAnalysisItem.energyUnit).to('MMBtu');
     //   baselineAdjustment = baselineAdjustment + convertedAdjustment;
@@ -173,16 +173,18 @@ export class BetterPlantsReportService {
         }
       }
     });
-    let adjustedBaselinePrimaryEnergy: number = baselineAdjustment + baselineTotalEnergyUse + reportYearAnalysisSummary.adjusted;
+    let adjustedBaselinePrimaryEnergy: number = reportYearAnalysisSummary.baselineAdjustmentForOther + baselineTotalEnergyUse + reportYearAnalysisSummary.baselineAdjustmentForNormalization;
     let totalEnergySavings: number = adjustedBaselinePrimaryEnergy - reportYearTotalEnergyUse;
-    let percentAnnualImprovement: number = (reportYearAnalysisSummary.newSavings / adjustedBaselinePrimaryEnergy) * 100;
+
+    // let percentAnnualImprovement: number = (reportYearAnalysisSummary.newSavings / adjustedBaselinePrimaryEnergy) * 100;
     let percentTotalImprovement: number = (totalEnergySavings / adjustedBaselinePrimaryEnergy) * 100;
+
     return {
       facilityPerformance: facilityPerformance,
-      percentAnnualImprovement: percentAnnualImprovement,
+      percentAnnualImprovement: reportYearAnalysisSummary.annualSavingsPercentImprovement,
       percentTotalImprovement: percentTotalImprovement,
       adjustedBaselinePrimaryEnergy: adjustedBaselinePrimaryEnergy,
-      baselineAdjustment: baselineAdjustment,
+      // baselineAdjustment: reportYearAnalysisSummary.baselineAdjustmentForOther,
       reportYearAnalysisSummary: reportYearAnalysisSummary,
       baselineYearAnalysisSummary: baselineYearAnalysisSummary,
       totalEnergySavings: totalEnergySavings,

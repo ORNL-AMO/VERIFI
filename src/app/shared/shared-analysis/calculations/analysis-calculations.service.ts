@@ -153,8 +153,8 @@ export class AnalysisCalculationsService {
       let baselineAdjustmentForOther: number = 0;
       let baselineModeledEnergyUse: number = baselineModeledEnergyUseData[monthIndex];
       yearToDateBaselineModeledEnergyUse = yearToDateBaselineModeledEnergyUse + baselineModeledEnergyUse;
-      let adjustedForNormalization: number = modeledEnergy + baselineActualEnergyUse - baselineModeledEnergyUse;
 
+      let adjustedForNormalization: number = modeledEnergy + baselineActualEnergyUse - baselineModeledEnergyUse;
       if (selectedGroup.hasBaselineAdjustement && fiscalYear != baselineYear) {
         let yearAdjustment: { year: number, amount: number } = selectedGroup.baselineAdjustments.find(bAdjustement => { return bAdjustement.year == baselineDate.getUTCFullYear(); })
         if (yearAdjustment.amount) {
@@ -165,8 +165,10 @@ export class AnalysisCalculationsService {
       let baselineAdjustmentForNormalization: number = 0;
       let adjusted: number = adjustedForNormalization + baselineAdjustmentForOther;
       yearToDateAdjustedEnergyUse = yearToDateAdjustedEnergyUse + adjusted;
+      
+      
       let SEnPI: number = energyUse / adjusted;
-      let savings: number = (baselineActualEnergyUse - baselineModeledEnergyUse) - (energyUse - modeledEnergy);
+      let savings: number = adjusted - energyUse;
       let percentSavingsComparedToBaseline: number = savings / adjusted;
       let yearToDateSavings: number = (yearToDateBaselineActualEnergyUse - yearToDateBaselineModeledEnergyUse) - (yearToDateActualEnergyUse - yearToDateModeledEnergyUse);
       let yearToDatePercentSavings: number = (yearToDateSavings / yearToDateAdjustedEnergyUse);
@@ -321,15 +323,13 @@ export class AnalysisCalculationsService {
 
       let energyUse: number = _.sumBy(yearData, 'energyUse');
       let modeledEnergy: number = _.sumBy(yearData, 'modeledEnergy');
-      // let adjustedBaselineEnergyUse: number = _.sumBy(yearData, 'adjustedBaselineEnergyUse');
       if (baselineYear == facilityOrAccount.sustainabilityQuestions.energyReductionBaselineYear) {
         baselineEnergyUse = energyUse;
         baselineModeledEnergyUse = modeledEnergy;
       }
       let adjustedForNormalization: number = modeledEnergy + baselineEnergyUse - baselineModeledEnergyUse;
-
-
       let baselineAdjustmentForOther: number = _.sumBy(yearData, 'baselineAdjustmentForOther')
+
       let baselineAdjustment: number = 0;
       let baselineAdjustmentForNormalization: number = 0;
       if (baselineYear != facilityOrAccount.sustainabilityQuestions.energyReductionBaselineYear) {
@@ -337,18 +337,12 @@ export class AnalysisCalculationsService {
         baselineAdjustment = baselineAdjustmentForNormalization + baselineAdjustmentForOther;
       }
       let adjusted: number = adjustedForNormalization + baselineAdjustmentForOther;
-
-
-
-      let SEnPI: number = energyUse / (modeledEnergy + (baselineEnergyUse - baselineModeledEnergyUse));
-      let savings: number = (baselineEnergyUse - baselineModeledEnergyUse) - (energyUse - modeledEnergy);
+      let SEnPI: number = energyUse / adjusted;
+      let savings: number = adjusted - energyUse;
       let totalSavingsPercentImprovement: number = (savings / adjusted);
       let annualSavingsPercentImprovement: number = totalSavingsPercentImprovement - previousYearPercentSavings;
-      // let adjustmentToBaseline: number = adjusted - baselineEnergyUse;
       cummulativeSavings = cummulativeSavings + savings;
       let newSavings: number = savings - previousYearSavings;
-
-
 
       annualAnalysisSummaries.push({
         year: baselineYear,

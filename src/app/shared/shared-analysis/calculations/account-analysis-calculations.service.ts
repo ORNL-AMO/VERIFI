@@ -122,7 +122,7 @@ export class AccountAnalysisCalculationsService {
 
 
       let SEnPI: number = energyUse / adjusted;
-      let savings: number = (baselineActualEnergyUse - baselineModeledEnergyUse) - (energyUse - modeledEnergy);
+      let savings: number = adjusted - energyUse;
       let percentSavingsComparedToBaseline: number = savings / adjusted;
       let yearToDateSavings: number = (yearToDateBaselineActualEnergyUse - yearToDateBaselineModeledEnergyUse) - (yearToDateActualEnergyUse - yearToDateModeledEnergyUse);
       let yearToDatePercentSavings: number = (yearToDateSavings / yearToDateAdjustedEnergyUse);
@@ -138,7 +138,7 @@ export class AccountAnalysisCalculationsService {
         rollingSavings = (totalBaselineEnergy - totalBaselineModeledEnergy) - (total12MonthsEnergyUse - total12MonthsModeledEnergy);
         let total12MonthsAdjusedBaseline: number = _.sumBy(last11MonthsData, 'adjusted') + adjusted;
         rolling12MonthImprovement = rollingSavings / total12MonthsAdjusedBaseline;
-        
+
         baselineAdjustmentForNormalization = adjustedForNormalization - baselineActualEnergyUse;
         baselineAdjustment = baselineAdjustmentForNormalization + baselineAdjustmentForOther;
       }

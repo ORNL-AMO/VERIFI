@@ -125,15 +125,8 @@ export class FacilityAnalysisCalculationsService {
       let adjusted: number = adjustedForNormalization + baselineAdjustmentForOther;
       yearToDateBaselineModeledEnergyUse = yearToDateBaselineModeledEnergyUse + baselineModeledEnergyUse;
       yearToDateAdjustedEnergyUse = yearToDateAdjustedEnergyUse + adjusted;
-
-
-
-
-
-
-
       let SEnPI: number = energyUse / adjusted;
-      let savings: number = (baselineActualEnergyUse - baselineModeledEnergyUse) - (energyUse - modeledEnergy);
+      let savings: number = adjusted - energyUse;
       let percentSavingsComparedToBaseline: number = savings / adjusted;
       let yearToDateSavings: number = (yearToDateBaselineActualEnergyUse - yearToDateBaselineModeledEnergyUse) - (yearToDateActualEnergyUse - yearToDateModeledEnergyUse);
       let yearToDatePercentSavings: number = (yearToDateSavings / yearToDateAdjustedEnergyUse);
