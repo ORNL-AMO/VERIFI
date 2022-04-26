@@ -77,7 +77,7 @@ export interface BetterPlantsSummary {
   percentAnnualImprovement: number,
   percentTotalImprovement: number,
   adjustedBaselinePrimaryEnergy: number,
-  baselineAdjustment: number,
+  // baselineAdjustment: number,
   totalEnergySavings: number,
   baselineYearResults: BetterPlantsEnergySummary,
   reportYearResults: BetterPlantsEnergySummary,

@@ -114,12 +114,20 @@ export class FacilityAnalysisCalculationsService {
       }
 
       let baselineModeledEnergyUse: number = baselineModeledEnergyUseData[monthIndex];
+      let adjustedForNormalization: number = modeledEnergy + baselineActualEnergyUse - baselineModeledEnergyUse;
+      let baselineAdjustmentForOther: number = _.sumBy(currentMonthData, 'baselineAdjustmentForOther')
+      let baselineAdjustment: number = 0;
+      let baselineAdjustmentForNormalization: number = 0;
+      if (fiscalYear != facility.sustainabilityQuestions.energyReductionBaselineYear) {
+        baselineAdjustmentForNormalization = adjustedForNormalization - baselineActualEnergyUse;
+        baselineAdjustment = baselineAdjustmentForNormalization + baselineAdjustmentForOther;
+      }
+      let adjusted: number = adjustedForNormalization + baselineAdjustmentForOther;
       yearToDateBaselineModeledEnergyUse = yearToDateBaselineModeledEnergyUse + baselineModeledEnergyUse;
-      let adjustedBaselineEnergyUse: number = modeledEnergy + baselineActualEnergyUse - baselineModeledEnergyUse;
-      yearToDateAdjustedEnergyUse = yearToDateAdjustedEnergyUse + adjustedBaselineEnergyUse;
-      let SEnPI: number = energyUse / adjustedBaselineEnergyUse;
-      let savings: number = (baselineActualEnergyUse - baselineModeledEnergyUse) - (energyUse - modeledEnergy);
-      let percentSavingsComparedToBaseline: number = savings / adjustedBaselineEnergyUse;
+      yearToDateAdjustedEnergyUse = yearToDateAdjustedEnergyUse + adjusted;
+      let SEnPI: number = energyUse / adjusted;
+      let savings: number = adjusted - energyUse;
+      let percentSavingsComparedToBaseline: number = savings / adjusted;
       let yearToDateSavings: number = (yearToDateBaselineActualEnergyUse - yearToDateBaselineModeledEnergyUse) - (yearToDateActualEnergyUse - yearToDateModeledEnergyUse);
       let yearToDatePercentSavings: number = (yearToDateSavings / yearToDateAdjustedEnergyUse);
       let rollingSavings: number = 0;
@@ -132,7 +140,7 @@ export class FacilityAnalysisCalculationsService {
         let total12MonthsEnergyUse: number = _.sumBy(last11MonthsData, 'energyUse') + energyUse;
         let total12MonthsModeledEnergy: number = _.sumBy(last11MonthsData, 'modeledEnergy') + modeledEnergy;
         rollingSavings = (totalBaselineEnergy - totalBaselineModeledEnergy) - (total12MonthsEnergyUse - total12MonthsModeledEnergy);
-        let total12MonthsAdjusedBaseline: number = _.sumBy(last11MonthsData, 'adjustedBaselineEnergyUse') + adjustedBaselineEnergyUse;
+        let total12MonthsAdjusedBaseline: number = _.sumBy(last11MonthsData, 'adjusted') + adjusted;
         rolling12MonthImprovement = rollingSavings / total12MonthsAdjusedBaseline;
       }
 
@@ -145,7 +153,11 @@ export class FacilityAnalysisCalculationsService {
         predictorUsage: predictorUsage,
         fiscalYear: fiscalYear,
         group: undefined,
-        adjustedBaselineEnergyUse: adjustedBaselineEnergyUse,
+        adjustedForNormalization: adjustedForNormalization,
+        adjusted: adjusted,
+        baselineAdjustmentForNormalization: baselineAdjustmentForNormalization,
+        baselineAdjustmentForOther: baselineAdjustmentForOther,
+        baselineAdjustment: baselineAdjustment,
         SEnPI: SEnPI,
         savings: savings,
         percentSavingsComparedToBaseline: percentSavingsComparedToBaseline * 100,
