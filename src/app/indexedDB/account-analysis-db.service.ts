@@ -130,7 +130,8 @@ export class AccountAnalysisDbService {
       energyUnit: selectedAccount.energyUnit,
       facilityAnalysisItems: facilityAnalysisItems,
       energyIsSource: selectedAccount.energyIsSource,
-      baselineAdjustment: 0
+      hasBaselineAdjustement: false,
+      baselineAdjustments: []
     }
   }
 

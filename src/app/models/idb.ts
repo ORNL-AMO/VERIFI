@@ -264,10 +264,14 @@ export interface IdbAccountAnalysisItem {
     energyIsSource: boolean,
     reportYear: number,
     energyUnit: string,
-    baselineAdjustment: number,
     facilityAnalysisItems: Array<{
         facilityId: string,
         analysisItemId: string
+    }>,
+    hasBaselineAdjustement: boolean,
+    baselineAdjustments: Array<{
+        year: number,
+        amount: number
     }>
 }
 

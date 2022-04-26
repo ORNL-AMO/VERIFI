@@ -9764,7 +9764,8 @@ export const ExampleAccount: BackupFile = {
             "analysisItemId": "pu22q4yt4"
         }],
         "energyIsSource": true,
-        "baselineAdjustment": 0,
+        "hasBaselineAdjustement": false,
+        "baselineAdjustments": [],
         "id": 1
     }],
     facilityAnalysisItems: [{

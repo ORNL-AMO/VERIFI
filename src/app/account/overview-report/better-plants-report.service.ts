@@ -31,10 +31,10 @@ export class BetterPlantsReportService {
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
     let selectedAnalysisItem: IdbAccountAnalysisItem = accountAnalysisItems.find(item => { return item.guid == reportOptions.analysisItemId });
     let baselineAdjustment: number = 0;
-    if (selectedAnalysisItem.baselineAdjustment) {
-      let convertedAdjustment: number = this.convertUnitsService.value(selectedAnalysisItem.baselineAdjustment).from(selectedAnalysisItem.energyUnit).to('MMBtu');
-      baselineAdjustment = baselineAdjustment + convertedAdjustment;
-    }
+    // if (selectedAnalysisItem.baselineAdjustment) {
+    //   let convertedAdjustment: number = this.convertUnitsService.value(selectedAnalysisItem.baselineAdjustment).from(selectedAnalysisItem.energyUnit).to('MMBtu');
+    //   baselineAdjustment = baselineAdjustment + convertedAdjustment;
+    // }
 
     //Better Plants = MMBtu
     selectedAnalysisItem.energyUnit = 'MMBtu';
