@@ -43,6 +43,21 @@
                         </div>
                     </div>
                 </div>
+                <div class="row">
+                    <div class="col-12">
+                        <hr>
+                        <div class="form-group d-flex">
+                            <label for="includeFacilityNames" class="w-50 bold">
+                                Include Facility Names in Performance Table
+                            </label>
+                            <label class="switch" for="includeFacilityNames">
+                                <input class="checkbox" type="checkbox" id="includeFacilityNames" name="includeFacilityNames"
+                                    [(ngModel)]="reportOptions.includeFacilityNames">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="col-6">
                 <label>Select Account Analysis</label>

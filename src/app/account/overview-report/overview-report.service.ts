@@ -93,7 +93,8 @@ export class OverviewReportService {
       reportType: reportType,
       analysisItemId: undefined,
       modificationNotes: '',
-      baselineAdjustmentNotes: ''
+      baselineAdjustmentNotes: '',
+      includeFacilityNames: true,
     }
   }
 
