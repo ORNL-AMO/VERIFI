@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { IdbFacility } from 'src/app/models/idb';
-import { BetterPlantsSummary } from 'src/app/models/overview-report';
+import { BetterPlantsSummary, ReportOptions } from 'src/app/models/overview-report';
 
 @Component({
   selector: 'app-facility-performance-table',
@@ -10,6 +10,8 @@ import { BetterPlantsSummary } from 'src/app/models/overview-report';
 export class FacilityPerformanceTableComponent implements OnInit {
   @Input()
   betterPlantsSummary: BetterPlantsSummary;
+  @Input()
+  reportOptions: ReportOptions;
 
 
   performanceLevels: Array<{ performanceVal: string, numberOfFacilites: number, facilities: Array<IdbFacility> }>;

@@ -9692,6 +9692,7 @@ export const ExampleAccount: BackupFile = {
             "date": new Date("2022-04-22T17:06:12.184Z"),
             "guid": "tchwkkwtb",
             "reportOptions": {
+                "includeFacilityNames": true,
                 "templateId": undefined,
                 "title": "Energy Consumption Report",
                 "notes": "",

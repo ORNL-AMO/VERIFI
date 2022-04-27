@@ -69,7 +69,8 @@ export interface ReportOptions {
   reportType: 'data' | 'betterPlants',
   analysisItemId: string,
   baselineAdjustmentNotes: string,
-  modificationNotes: string
+  modificationNotes: string,
+  includeFacilityNames: boolean
 }
 
 
