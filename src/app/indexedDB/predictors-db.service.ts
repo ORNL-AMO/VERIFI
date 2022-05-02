@@ -18,15 +18,15 @@ export class PredictordbService {
         this.facilityPredictorEntries = new BehaviorSubject<Array<IdbPredictorEntry>>(new Array());
         this.facilityPredictors = new BehaviorSubject<Array<PredictorData>>(new Array());
         this.accountPredictorEntries = new BehaviorSubject<Array<IdbPredictorEntry>>(new Array());
-        this.facilityDbService.selectedFacility.subscribe(() => {
-            this.facilityPredictors.next(new Array());
-            this.facilityPredictorEntries.next(new Array());
-            this.setFacilityPredictors();
-        });
-        this.accountDbService.selectedAccount.subscribe(() => {
-            this.accountPredictorEntries.next(new Array());
-            this.setAccountPredictors();
-        });
+        // this.facilityDbService.selectedFacility.subscribe(() => {
+        //     this.facilityPredictors.next(new Array());
+        //     this.facilityPredictorEntries.next(new Array());
+        //     this.setFacilityPredictors();
+        // });
+        // this.accountDbService.selectedAccount.subscribe(() => {
+        //     this.accountPredictorEntries.next(new Array());
+        //     this.setAccountPredictors();
+        // });
     }
 
     async initializePredictorData() {

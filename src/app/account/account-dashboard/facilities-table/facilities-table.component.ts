@@ -34,6 +34,7 @@ export class FacilitiesTableComponent implements OnInit {
     private router: Router, private accountdbService: AccountdbService, private meterSummaryService: MeterSummaryService) { }
 
   ngOnInit(): void {
+    
     this.selectedAccountSub = this.accountdbService.selectedAccount.subscribe(val => {
       if (val) {
         this.accountEnergyUnit = val.energyUnit;
@@ -71,6 +72,7 @@ export class FacilitiesTableComponent implements OnInit {
   }
 
   setAccountFacilities() {
+    console.log('SET FACILITIES SUMMARY')
     this.accountFacilitiesSummary = this.meterSummaryService.getAccountFacilitesSummary();
     if (this.accountFacilitiesSummary.allMetersLastBill) {
       this.lastMonthsDate = new Date(this.accountFacilitiesSummary.allMetersLastBill.year, this.accountFacilitiesSummary.allMetersLastBill.monthNumValue);

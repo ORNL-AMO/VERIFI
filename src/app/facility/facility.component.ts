@@ -36,5 +36,4 @@ export class FacilityComponent implements OnInit {
   ngOnDestroy(){
     this.selectedFacilitySub.unsubscribe();
   }
-
 }

@@ -19,9 +19,15 @@ export class OverviewReportOptionsDbService {
     this.overviewReportOptionsTemplates = new BehaviorSubject<Array<IdbOverviewReportOptions>>(new Array());
     this.selectedOverviewReportOptions = new BehaviorSubject<IdbOverviewReportOptions>(undefined);
 
-    this.accountDbService.selectedAccount.subscribe(() => {
-      this.setAccountOverviewReportOptions();
+    //subscribe after initialization
+    this.selectedOverviewReportOptions.subscribe(overviewReportOptions => {
+      if (overviewReportOptions) {
+        this.localStorageService.store('overviewReportOptionsId', overviewReportOptions.id);
+      }
     });
+    // this.accountDbService.selectedAccount.subscribe(() => {
+    //   this.setAccountOverviewReportOptions();
+    // });
   }
 
   async initializeReportsFromLocalStorage() {
@@ -40,12 +46,6 @@ export class OverviewReportOptionsDbService {
       this.accountOverviewReportOptions.next(accountOverviewReportOptions);
       this.overviewReportOptionsTemplates.next(templates);
     }
-    //subscribe after initialization
-    this.selectedOverviewReportOptions.subscribe(overviewReportOptions => {
-      if (overviewReportOptions) {
-        this.localStorageService.store('overviewReportOptionsId', overviewReportOptions.id);
-      }
-    });
   }
 
   setAccountOverviewReportOptions() {

@@ -18,11 +18,17 @@ export class FacilitydbService {
         this.accountFacilities = new BehaviorSubject<Array<IdbFacility>>(new Array());
         this.allFacilities = new BehaviorSubject<Array<IdbFacility>>(new Array());
         this.selectedFacility = new BehaviorSubject<IdbFacility>(undefined);
-        this.accountDbService.selectedAccount.subscribe(() => {
-            this.setAccountFacilities();
-        });
-        this.accountFacilities.subscribe(() => {
-            this.setSelectedFacility();
+        // this.accountDbService.selectedAccount.subscribe(() => {
+        //     this.setAccountFacilities();
+        // });
+        // this.accountFacilities.subscribe(() => {
+        //     this.setSelectedFacility();
+        // });
+        //subscribe after initialization
+        this.selectedFacility.subscribe(facility => {
+            if (facility) {
+                this.localStorageService.store('facilityId', facility.id);
+            }
         });
     }
 
@@ -41,12 +47,6 @@ export class FacilitydbService {
             this.allFacilities.next(allFacilities);
             this.accountFacilities.next(accountFacilities);
         }
-        //subscribe after initialization
-        this.selectedFacility.subscribe(facility => {
-            if (facility) {
-                this.localStorageService.store('facilityId', facility.id);
-            }
-        });
     }
 
     setAccountFacilities() {

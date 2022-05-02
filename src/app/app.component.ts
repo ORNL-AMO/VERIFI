@@ -9,7 +9,7 @@ import { PredictordbService } from './indexedDB/predictors-db.service';
 import { UtilityMeterdbService } from './indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from './indexedDB/utilityMeterData-db.service';
 import { UtilityMeterGroupdbService } from './indexedDB/utilityMeterGroup-db.service';
-import { IdbAccount } from './models/idb';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, IdbOverviewReportOptions, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from './models/idb';
 import { EGridService } from './shared/helper-services/e-grid.service';
 import { SharedDataService } from './shared/helper-services/shared-data.service';
 
@@ -57,27 +57,74 @@ export class AppComponent {
   }
 
   async initializeData() {
-    await this.accountDbService.initializeAccountFromLocalStorage();
-    this.loadingMessage = "Loading Facilities..";
-    await this.facilityDbService.initializeFacilityFromLocalStorage();
-    this.loadingMessage = "Loading Meters..";
-    await this.utilityMeterDbService.initializeMeterData();
-    this.loadingMessage = "Loading Meter Data..";
-    await this.utilityMeterDataDbService.initializeMeterData();
-    this.loadingMessage = "Loading Predictors..";
-    await this.predictorsDbService.initializePredictorData();
-    this.loadingMessage = "Loading Meter Groups..";
-    await this.utilityMeterGroupDbService.initializeMeterGroups();
-    this.loadingMessage = 'Loading Reports...'
-    await this.overviewReportOptionsDbService.initializeReportsFromLocalStorage();
-    this.loadingMessage = 'Loading Facility Analysis Items...';
-    await this.analysisDbService.initializeAnalysisItems();
-    this.loadingMessage = 'Loading Account Analysis Items...';
-    await this.accountAnalysisDbService.initializeAnalysisItems();
-    this.dataInitialized = true;
-    let allAccounts: Array<IdbAccount> = this.accountDbService.allAccounts.getValue();
-    if (allAccounts.length == 0) {
+    let accounts: Array<IdbAccount> = await this.accountDbService.getAll().toPromise();
+    this.accountDbService.allAccounts.next(accounts);
+    let localStorageAccountId: number = this.accountDbService.getInitialAccount();
+    let account: IdbAccount;
+    if (localStorageAccountId) {
+      account = accounts.find(account => { return account.id == localStorageAccountId });
+    } else if (accounts.length != 0) {
+      account = accounts[0];
+    }
+    if (account) {
+      this.accountDbService.selectedAccount.next(account);
+      this.loadingMessage = "Loading Facilities..";
+      //set account facilities
+      let accountFacilites: Array<IdbFacility> = await this.facilityDbService.getAllByIndexRange('accountId', account.guid).toPromise();
+      this.facilityDbService.accountFacilities.next(accountFacilites);
+      //set account analysis
+      this.loadingMessage = "Loading Analysis Items..";
+      let accountAnalysisItems: Array<IdbAccountAnalysisItem> = await this.accountAnalysisDbService.getAllByIndexRange('accountId', account.guid).toPromise();
+      this.accountAnalysisDbService.accountAnalysisItems.next(accountAnalysisItems);
+      //set analysis
+      let analysisItems: Array<IdbAnalysisItem> = await this.analysisDbService.getAllByIndexRange('accountId', account.guid).toPromise();
+      this.analysisDbService.accountAnalysisItems.next(analysisItems);
+      //set overview reports
+      this.loadingMessage = "Loading Reports..";
+      let overviewReportOptions: Array<IdbOverviewReportOptions> = await this.overviewReportOptionsDbService.getAllByIndexRange('accountId', account.guid).toPromise();
+      this.overviewReportOptionsDbService.accountOverviewReportOptions.next(overviewReportOptions);
+      //set predictors
+      this.loadingMessage = "Loading Predictors..";
+      let predictors: Array<IdbPredictorEntry> = await this.predictorsDbService.getAllByIndexRange('accountId', account.guid).toPromise();
+      this.predictorsDbService.accountPredictorEntries.next(predictors);
+      //set meters
+      this.loadingMessage = "Loading Meters..";
+      let meters: Array<IdbUtilityMeter> = await this.utilityMeterDbService.getAllByIndexRange('accountId', account.guid).toPromise();
+      this.utilityMeterDbService.accountMeters.next(meters);
+      //set meter data
+      this.loadingMessage = "Loading Meter Data..";
+      let meterData: Array<IdbUtilityMeterData> = await this.utilityMeterDataDbService.getAllByIndexRange('accountId', account.guid).toPromise();
+      this.utilityMeterDataDbService.accountMeterData.next(meterData)
+      //set meter groups
+      this.loadingMessage = "Loading Groups..";
+      let meterGroups: Array<IdbUtilityMeterGroup> = await this.utilityMeterGroupDbService.getAllByIndexRange('accountId', account.guid).toPromise();
+      this.utilityMeterGroupDbService.accountMeterGroups.next(meterGroups);
+      this.dataInitialized = true;
+    }else{
+      this.dataInitialized = true;
       this.router.navigateByUrl('setup-wizard');
     }
+    // await this.accountDbService.initializeAccountFromLocalStorage();
+    // this.loadingMessage = "Loading Facilities..";
+    // await this.facilityDbService.initializeFacilityFromLocalStorage();
+    // this.loadingMessage = "Loading Meters..";
+    // await this.utilityMeterDbService.initializeMeterData();
+    // this.loadingMessage = "Loading Meter Data..";
+    // await this.utilityMeterDataDbService.initializeMeterData();
+    // this.loadingMessage = "Loading Predictors..";
+    // await this.predictorsDbService.initializePredictorData();
+    // this.loadingMessage = "Loading Meter Groups..";
+    // await this.utilityMeterGroupDbService.initializeMeterGroups();
+    // this.loadingMessage = 'Loading Reports...'
+    // await this.overviewReportOptionsDbService.initializeReportsFromLocalStorage();
+    // this.loadingMessage = 'Loading Facility Analysis Items...';
+    // await this.analysisDbService.initializeAnalysisItems();
+    // this.loadingMessage = 'Loading Account Analysis Items...';
+    // await this.accountAnalysisDbService.initializeAnalysisItems();
+    // this.dataInitialized = true;
+    // let allAccounts: Array<IdbAccount> = this.accountDbService.allAccounts.getValue();
+    // if (allAccounts.length == 0) {
+    //   this.router.navigateByUrl('setup-wizard');
+    // }
   }
 }

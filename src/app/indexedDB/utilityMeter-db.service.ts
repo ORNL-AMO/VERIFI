@@ -13,14 +13,14 @@ export class UtilityMeterdbService {
     facilityMeters: BehaviorSubject<Array<IdbUtilityMeter>>;
     accountMeters: BehaviorSubject<Array<IdbUtilityMeter>>;
     constructor(private dbService: NgxIndexedDBService, private facilityDbService: FacilitydbService, private accountdbService: AccountdbService) {
-        this.facilityMeters = new BehaviorSubject<Array<IdbUtilityMeter>>(new Array());
+        // this.facilityMeters = new BehaviorSubject<Array<IdbUtilityMeter>>(new Array());
         this.accountMeters = new BehaviorSubject<Array<IdbUtilityMeter>>(new Array());
-        this.accountdbService.selectedAccount.subscribe(() => {
-            this.setAccountMeters();
-        })
-        this.facilityDbService.selectedFacility.subscribe(() => {
-            this.setFacilityMeters();
-        });
+        // this.accountdbService.selectedAccount.subscribe(() => {
+        //     this.setAccountMeters();
+        // })
+        // this.facilityDbService.selectedFacility.subscribe(() => {
+        //     this.setFacilityMeters();
+        // });
     }
 
     async initializeMeterData() {

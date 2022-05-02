@@ -71,6 +71,7 @@ export class AccountUtilityEnergyUseTableComponent implements OnInit {
   }
 
   setUsageValues() {
+    console.log('SET USAGE VALUES')
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     this.utilityUsageSummaryData = this.dashboardService.getFacilitiesUtilityUsageSummaryData(accountFacilities, true);
     if (this.utilityUsageSummaryData.allMetersLastBill) {

@@ -15,13 +15,13 @@ export class UtilityMeterGroupdbService {
     constructor(private dbService: NgxIndexedDBService, private facilityDbService: FacilitydbService, private accountDbService: AccountdbService) {
         this.facilityMeterGroups = new BehaviorSubject<Array<IdbUtilityMeterGroup>>(new Array());
         this.accountMeterGroups = new BehaviorSubject<Array<IdbUtilityMeterGroup>>(new Array());
-        this.facilityDbService.selectedFacility.subscribe(() => {
-            this.setFacilityMeterGroups();
-        });
+        // this.facilityDbService.selectedFacility.subscribe(() => {
+        //     this.setFacilityMeterGroups();
+        // });
 
-        this.accountDbService.selectedAccount.subscribe(() => {
-            this.setAccountMeterGroups();
-        });
+        // this.accountDbService.selectedAccount.subscribe(() => {
+        //     this.setAccountMeterGroups();
+        // });
 
     }
 

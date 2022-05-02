@@ -13,6 +13,7 @@ import { SharedDataService } from 'src/app/shared/helper-services/shared-data.se
 import { environment } from 'src/environments/environment';
 import { BackupDataService } from 'src/app/shared/helper-services/backup-data.service';
 import { LoadingService } from '../loading/loading.service';
+import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 
 @Component({
   selector: 'app-header',
@@ -43,7 +44,8 @@ export class HeaderComponent implements OnInit {
     private importBackupModalService: ImportBackupModalService,
     private sharedDataService: SharedDataService,
     private backupDataService: BackupDataService,
-    private loadingService: LoadingService
+    private loadingService: LoadingService,
+    private dbChangesService: DbChangesService
   ) {
   }
 
@@ -74,7 +76,8 @@ export class HeaderComponent implements OnInit {
 
   async switchAccount(account: IdbAccount) {
     this.router.navigate(['/']);
-    this.accountdbService.selectedAccount.next(account);
+    // this.accountdbService.selectedAccount.next(account);
+    this.dbChangesService.selectAccount(account);
     this.toggleDropdown();
   }
 

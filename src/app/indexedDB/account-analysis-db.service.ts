@@ -20,9 +20,9 @@ export class AccountAnalysisDbService {
     this.accountAnalysisItems = new BehaviorSubject<Array<IdbAccountAnalysisItem>>([]);
     this.selectedAnalysisItem = new BehaviorSubject<IdbAccountAnalysisItem>(undefined);
 
-    this.accountDbService.selectedAccount.subscribe(() => {
-      this.setAccountAnalysisItems();
-    });
+    // this.accountDbService.selectedAccount.subscribe(() => {
+    //   this.setAccountAnalysisItems();
+    // });
   }
 
   async initializeAnalysisItems() {

@@ -71,6 +71,7 @@ export class MeterSummaryService {
 
 
   getAccountFacilitesSummary(reportOptions?: ReportOptions): AccountFacilitiesSummary {
+    console.log('GET ACCOUNT FACILITIES SUMMARY')
     let facilitiesSummary: Array<FacilitySummary> = new Array();
     let allAccountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let accountFacilites: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();

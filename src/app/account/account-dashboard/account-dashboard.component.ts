@@ -29,6 +29,7 @@ export class AccountDashboardComponent implements OnInit {
   ngOnInit(): void {
 
     this.accountMeterDataSub = this.utilityMeterDataDbService.accountMeterData.subscribe(utilityMeterAccountData => {
+      console.log('CHANGE CALC')
       this.utilityMeterAccountData = utilityMeterAccountData;
 
       let accountFacilitiesSummary: AccountFacilitiesSummary = this.meterSummaryService.getAccountFacilitesSummary();

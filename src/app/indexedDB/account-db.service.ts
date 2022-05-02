@@ -35,6 +35,11 @@ export class AccountdbService {
         }
     }
 
+    getInitialAccount(): number {
+        let localStorageAccountId: number = this.localStorageService.retrieve("accountId");
+        return localStorageAccountId;
+    }
+
     setSelectedAccount(accountId: number) {
         if (accountId) {
             this.getById(accountId).subscribe(account => {
@@ -87,6 +92,10 @@ export class AccountdbService {
         });
     }
 
+    updateWithObservable(account: IdbAccount): Observable<Array<IdbAccount>> {
+        return this.dbService.update('accounts', account);
+    }
+
     deleteById(accountId: number): void {
         this.dbService.delete('accounts', accountId).subscribe(() => {
             this.setAllAccounts();
@@ -119,10 +128,10 @@ export class AccountdbService {
         }
     }
 
-    finishDelete(){
-        if(this.electronService.isElectron){
+    finishDelete() {
+        if (this.electronService.isElectron) {
             this.electronService.sendAppRelaunch();
-        }else{
+        } else {
             location.reload()
         }
     }

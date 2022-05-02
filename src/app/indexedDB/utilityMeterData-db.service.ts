@@ -21,12 +21,12 @@ export class UtilityMeterDatadbService {
         this.facilityMeterData = new BehaviorSubject<Array<IdbUtilityMeterData>>(new Array());
         this.accountMeterData = new BehaviorSubject<Array<IdbUtilityMeterData>>(new Array());
 
-        this.accountDbService.selectedAccount.subscribe(() => {
-            this.setAccountMeterData();
-        });
-        this.facilityDbService.selectedFacility.subscribe(() => {
-            this.setFacilityMeterData();
-        });
+        // this.accountDbService.selectedAccount.subscribe(() => {
+        //     this.setAccountMeterData();
+        // });
+        // this.facilityDbService.selectedFacility.subscribe(() => {
+        //     this.setFacilityMeterData();
+        // });
     }
 
     async initializeMeterData() {
