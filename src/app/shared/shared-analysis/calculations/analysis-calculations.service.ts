@@ -19,7 +19,7 @@ export class AnalysisCalculationsService {
     private predictorDbService: PredictordbService, private analysisCalculationsHelperService: AnalysisCalculationsHelperService) { }
 
 
-  getMonthlyAnalysisSummary(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility): MonthlyAnalysisSummary {
+  getMonthlyAnalysisSummary(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility, inAccount: boolean): MonthlyAnalysisSummary {
     let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = this.analysisCalculationsHelperService.getMonthlyStartAndEndDate(facility, analysisItem);
     let baselineDate: Date = monthlyStartAndEndDate.baselineDate;
     let endDate: Date = monthlyStartAndEndDate.endDate;
@@ -45,7 +45,7 @@ export class AnalysisCalculationsService {
     let calanderizationOptions: CalanderizationOptions = {
       energyIsSource: analysisItem.energyIsSource
     }
-    let calanderizedMeterData: Array<CalanderizedMeter> = this.calendarizationService.getCalanderizedMeterData(groupMeters, false, false, calanderizationOptions);
+    let calanderizedMeterData: Array<CalanderizedMeter> = this.calendarizationService.getCalanderizedMeterData(groupMeters, inAccount, false, calanderizationOptions);
     calanderizedMeterData.forEach(calanderizedMeter => {
       calanderizedMeter.monthlyData = this.convertMeterDataService.convertMeterDataToAnalysis(analysisItem, calanderizedMeter.monthlyData, facility, calanderizedMeter.meter);
     });
@@ -261,8 +261,8 @@ export class AnalysisCalculationsService {
   }
 
 
-  getAnnualAnalysisSummary(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility): Array<AnnualAnalysisSummary> {
-    let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = this.getMonthlyAnalysisSummary(selectedGroup, analysisItem, facility).monthlyAnalysisSummaryData;
+  getAnnualAnalysisSummary(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility, inAccount: boolean): Array<AnnualAnalysisSummary> {
+    let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = this.getMonthlyAnalysisSummary(selectedGroup, analysisItem, facility, inAccount).monthlyAnalysisSummaryData;
     let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = this.calculateAnnualAnalysisSummary(monthlyAnalysisSummaryData, analysisItem, facility);
     return annualAnalysisSummaries;
   }

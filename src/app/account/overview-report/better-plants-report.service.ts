@@ -52,7 +52,7 @@ export class BetterPlantsReportService {
         //   baselineAdjustment = baselineAdjustment + convertedAdjustment;
         // }
         let facility: IdbFacility = facilities.find(f => { return f.guid == item.facilityId });
-        let annualAnalysisSummary: Array<AnnualAnalysisSummary> = this.facilityAnalysisCalculationsService.getAnnualAnalysisSummary(facilityAnalysisItem, facility)
+        let annualAnalysisSummary: Array<AnnualAnalysisSummary> = this.facilityAnalysisCalculationsService.getAnnualAnalysisSummary(facilityAnalysisItem, facility, true)
         let reportYearAnalysisSummary: AnnualAnalysisSummary = annualAnalysisSummary.find(summary => {return summary.year == selectedAnalysisItem.reportYear});
         facilityPerformance.push({
           facility: facility,

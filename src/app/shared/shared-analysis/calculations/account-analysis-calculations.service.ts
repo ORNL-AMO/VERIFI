@@ -34,9 +34,8 @@ export class AccountAnalysisCalculationsService {
         let analysisItem: IdbAnalysisItem = allAccountAnalysisDbItems.find(dbItem => { return dbItem.guid == item.analysisItemId });
         //update items with account options
         analysisItem.energyUnit = accountAnalysisItem.energyUnit;
-
         let facility: IdbFacility = accountFacilities.find(facility => { return facility.guid == item.facilityId });
-        let facilityItemSummary: Array<MonthlyAnalysisSummaryData> = this.facilityAnalysisCalculationsService.calculateMonthlyFacilityAnalysis(analysisItem, facility);
+        let facilityItemSummary: Array<MonthlyAnalysisSummaryData> = this.facilityAnalysisCalculationsService.calculateMonthlyFacilityAnalysis(analysisItem, facility, true);
         monthlyAnalysisSummaryData = monthlyAnalysisSummaryData.concat(facilityItemSummary);
       }
     })

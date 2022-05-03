@@ -41,6 +41,7 @@ export class CalanderizationService {
         calanderizedenergyUnit = this.energyUnitsHelperService.getMeterConsumptionUnitInAccount(meter);
         energyIsSource = this.energyUnitsHelperService.getEnergyIsSourceInAccount();
       } else {
+        debugger
         meterData = this.utilityMeterDataDbService.getMeterDataForFacility(meter, true, undefined, calanderizationOptions);
         calanderizedenergyUnit = this.energyUnitsHelperService.getMeterConsumptionUnitInFacility(meter);
         energyIsSource = this.energyUnitsHelperService.getEnergyIsSourceInFacility();

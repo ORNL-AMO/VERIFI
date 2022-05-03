@@ -23,6 +23,12 @@ export class AccountAnalysisDbService {
     // this.accountDbService.selectedAccount.subscribe(() => {
     //   this.setAccountAnalysisItems();
     // });
+    //subscribe after initialization
+    this.selectedAnalysisItem.subscribe(analysisItem => {
+      if (analysisItem) {
+        this.localStorageService.store('accountAnalysisItemsId', analysisItem.id);
+      }
+    });
   }
 
   async initializeAnalysisItems() {
@@ -37,12 +43,6 @@ export class AccountAnalysisDbService {
         this.selectedAnalysisItem.next(selectedAnalysisItem);
       }
     }
-    //subscribe after initialization
-    this.selectedAnalysisItem.subscribe(analysisItem => {
-      if (analysisItem) {
-        this.localStorageService.store('accountAnalysisItemsId', analysisItem.id);
-      }
-    });
   }
 
   setAccountAnalysisItems() {

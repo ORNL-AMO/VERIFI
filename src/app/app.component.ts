@@ -66,7 +66,11 @@ export class AppComponent {
     } else if (accounts.length != 0) {
       account = accounts[0];
     }
+
     if (account) {
+      //TODO: SET LOCAL STORAGE VALUES FOR INITIALIZATION
+
+
       this.loadingMessage = "Loading Facilities..";
       //set account facilities
       let accountFacilites: Array<IdbFacility> = await this.facilityDbService.getAllByIndexRange('accountId', account.guid).toPromise();

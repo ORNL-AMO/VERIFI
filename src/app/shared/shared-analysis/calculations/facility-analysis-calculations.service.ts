@@ -16,7 +16,7 @@ export class FacilityAnalysisCalculationsService {
 
 
 
-  calculateMonthlyFacilityAnalysis(analysisItem: IdbAnalysisItem, facility: IdbFacility): Array<MonthlyAnalysisSummaryData> {
+  calculateMonthlyFacilityAnalysis(analysisItem: IdbAnalysisItem, facility: IdbFacility, inAccount: boolean): Array<MonthlyAnalysisSummaryData> {
     let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = this.analysisCalculationsHelperService.getMonthlyStartAndEndDate(facility, analysisItem);
     let baselineDate: Date = monthlyStartAndEndDate.baselineDate;
     let endDate: Date = monthlyStartAndEndDate.endDate;
@@ -34,7 +34,7 @@ export class FacilityAnalysisCalculationsService {
 
     let groupSummaries: Array<MonthlyAnalysisSummary> = new Array();
     analysisItem.groups.forEach(group => {
-      let summaryData: MonthlyAnalysisSummary = this.analysisCalculationsService.getMonthlyAnalysisSummary(group, analysisItem, facility);
+      let summaryData: MonthlyAnalysisSummary = this.analysisCalculationsService.getMonthlyAnalysisSummary(group, analysisItem, facility, inAccount);
       groupSummaries.push(summaryData);
     });
 
@@ -175,8 +175,8 @@ export class FacilityAnalysisCalculationsService {
     return analysisSummaryData;
   }
 
-  getAnnualAnalysisSummary(analysisItem: IdbAnalysisItem, facility: IdbFacility): Array<AnnualAnalysisSummary> {
-    let facilityMonthlySummaryData: Array<MonthlyAnalysisSummaryData> = this.calculateMonthlyFacilityAnalysis(analysisItem, facility);
+  getAnnualAnalysisSummary(analysisItem: IdbAnalysisItem, facility: IdbFacility, inAccount: boolean): Array<AnnualAnalysisSummary> {
+    let facilityMonthlySummaryData: Array<MonthlyAnalysisSummaryData> = this.calculateMonthlyFacilityAnalysis(analysisItem, facility, inAccount);
     let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = this.analysisCalculationsService.calculateAnnualAnalysisSummary(facilityMonthlySummaryData, analysisItem, facility);
     return annualAnalysisSummaries;
   }
