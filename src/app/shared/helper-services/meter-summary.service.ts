@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
-import { LastYearData, MonthlyData } from 'src/app/models/calanderization';
+import { CalanderizedMeter, LastYearData, MonthlyData } from 'src/app/models/calanderization';
 import { AccountFacilitiesSummary, FacilityMeterSummaryData, FacilitySummary, MeterSummary } from 'src/app/models/dashboard';
 import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterGroup, MeterSource } from 'src/app/models/idb';
 import { CalanderizationService } from './calanderization.service';
@@ -69,6 +69,45 @@ export class MeterSummaryService {
     }
   }
 
+  getDashboardAccountFacilitiesSummary(calanderizedMeters: Array<CalanderizedMeter>,): AccountFacilitiesSummary {
+    let facilitiesSummary: Array<FacilitySummary> = new Array();
+    let accountLastBill: MonthlyData = this.calanderizationService.getLastBillEntryFromCalanderizedMeterData(calanderizedMeters);
+    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    facilities.forEach(facility => {
+      let facilityMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return cMeter.meter.facilityId == facility.guid });
+      if (facilityMeters.length != 0) {
+        let facilityLastBill: MonthlyData = this.calanderizationService.getLastBillEntryFromCalanderizedMeterData(facilityMeters);
+        let facilityMetersDataSummary: Array<{ time: string, energyUse: number, energyCost: number }> = this.calanderizationService.getPastYearData(undefined, true, accountLastBill, facilityMeters, undefined);
+        facilitiesSummary.push({
+          facility: facility,
+          energyUsage: _.sumBy(facilityMetersDataSummary, (data) => { return this.getSumValue(data.energyUse) }),
+          energyCost: _.sumBy(facilityMetersDataSummary, (data) => { return this.getSumValue(data.energyCost) }),
+          emissions: _.sumBy(facilityMetersDataSummary, (data) => { return this.getSumValue(data.emissions) }),
+          numberOfMeters: facilityMeters.length,
+          lastBillDate: new Date(facilityLastBill.year, (facilityLastBill.monthNumValue + 1))
+        })
+      }
+    })
+    return {
+      facilitySummaries: facilitiesSummary,
+      totalEnergyUse: _.sumBy(facilitiesSummary, (data) => { return this.getSumValue(data.energyUsage) }),
+      totalEnergyCost: _.sumBy(facilitiesSummary, (data) => { return this.getSumValue(data.energyCost) }),
+      totalNumberOfMeters: _.sumBy(facilitiesSummary, (data) => { return this.getSumValue(data.numberOfMeters) }),
+      totalEmissions: _.sumBy(facilitiesSummary, (data) => { return this.getSumValue(data.emissions) }),
+      allMetersLastBill: accountLastBill
+    };
+
+  }
+
+
+  getSumValue(val: number): number {
+    if (isNaN(val) == false) {
+      return val;
+    } else {
+      return 0;
+    }
+  }
+
 
   getAccountFacilitesSummary(reportOptions?: ReportOptions): AccountFacilitiesSummary {
     console.log('GET ACCOUNT FACILITIES SUMMARY')
@@ -102,7 +141,7 @@ export class MeterSummaryService {
       }
       reportOptions.facilities.forEach(facility => {
         if (facility.selected) {
-          let selectedFacility: IdbFacility = accountFacilites.find(accountFacility => {return accountFacility.guid == facility.facilityId})
+          let selectedFacility: IdbFacility = accountFacilites.find(accountFacility => { return accountFacility.guid == facility.facilityId })
           let facilityMeterSummary: FacilitySummary = this.getFacilitySummary(selectedFacility, true, accountTargetYearBill, reportOptions);
           facilitiesSummary.push(facilityMeterSummary);
         }

@@ -45,8 +45,9 @@ export class AccountDashboardMenuComponent implements OnInit {
     this.dashboardService.graphDisplay.next(str);
   }
 
-  setAccountEnergyIsSource(energyIsSource: boolean) {
+  async setAccountEnergyIsSource(energyIsSource: boolean) {
     this.selectedAccount.energyIsSource = energyIsSource;
-    this.accountDbService.update(this.selectedAccount);
+    await this.accountDbService.updateWithObservable(this.selectedAccount).toPromise();
+    this.accountDbService.selectedAccount.next(this.selectedAccount);
   }
 }

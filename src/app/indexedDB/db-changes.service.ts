@@ -30,7 +30,6 @@ export class DbChangesService {
 
 
   async selectAccount(account: IdbAccount) {
-    this.accountDbService.selectedAccount.next(account);
     //set account facilities
     let accountFacilites: Array<IdbFacility> = await this.facilityDbService.getAllByIndexRange('accountId', account.guid).toPromise();
     this.facilityDbService.accountFacilities.next(accountFacilites);
@@ -55,6 +54,7 @@ export class DbChangesService {
     //set meter groups
     let meterGroups: Array<IdbUtilityMeterGroup> = await this.utilityMeterGroupDbService.getAllByIndexRange('accountId', account.guid).toPromise();
     this.utilityMeterGroupDbService.accountMeterGroups.next(meterGroups);
+    this.accountDbService.selectedAccount.next(account);
   }
 
   selectFacility(facility: IdbFacility) {

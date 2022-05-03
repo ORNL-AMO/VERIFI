@@ -67,7 +67,6 @@ export class AppComponent {
       account = accounts[0];
     }
     if (account) {
-      this.accountDbService.selectedAccount.next(account);
       this.loadingMessage = "Loading Facilities..";
       //set account facilities
       let accountFacilites: Array<IdbFacility> = await this.facilityDbService.getAllByIndexRange('accountId', account.guid).toPromise();
@@ -99,6 +98,7 @@ export class AppComponent {
       this.loadingMessage = "Loading Groups..";
       let meterGroups: Array<IdbUtilityMeterGroup> = await this.utilityMeterGroupDbService.getAllByIndexRange('accountId', account.guid).toPromise();
       this.utilityMeterGroupDbService.accountMeterGroups.next(meterGroups);
+      this.accountDbService.selectedAccount.next(account);
       this.dataInitialized = true;
     }else{
       this.dataInitialized = true;
