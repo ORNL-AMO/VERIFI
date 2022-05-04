@@ -133,7 +133,7 @@ export class AccountSettingsComponent implements OnInit {
     await this.facilityDbService.deleteFacilitiesAsync([this.facilityToDelete]);
     let allFacilities: Array<IdbFacility> = await this.facilityDbService.getAll().toPromise();
     // Then navigate to another facility
-    this.facilityDbService.allFacilities.next(allFacilities);
+    // this.facilityDbService.allFacilities.next(allFacilities);
     let accountFacilites: Array<IdbFacility> = allFacilities.filter(facility => { return facility.accountId == this.selectedAccount.guid });
     this.facilityDbService.accountFacilities.next(accountFacilites);
     this.facilityDbService.setSelectedFacility();
@@ -163,9 +163,9 @@ export class AccountSettingsComponent implements OnInit {
     await this.analysisDbService.deleteAccountAnalysisItems();
     await this.accountAnalysisDbService.deleteAccountAnalysisItems();
 
-    let allFacilities: Array<IdbFacility> = await this.facilityDbService.getAll().toPromise();
+    // let allFacilities: Array<IdbFacility> = await this.facilityDbService.getAll().toPromise();
     // Then navigate to another facility
-    this.facilityDbService.allFacilities.next(allFacilities);
+    // this.facilityDbService.allFacilities.next(allFacilities);
     this.facilityDbService.accountFacilities.next([]);
     this.facilityDbService.setSelectedFacility();
 

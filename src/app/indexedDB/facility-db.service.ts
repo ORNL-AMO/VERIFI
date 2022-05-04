@@ -10,13 +10,13 @@ import { AccountdbService } from './account-db.service';
 })
 export class FacilitydbService {
 
-    allFacilities: BehaviorSubject<Array<IdbFacility>>;
+    // allFacilities: BehaviorSubject<Array<IdbFacility>>;
     accountFacilities: BehaviorSubject<Array<IdbFacility>>;
     selectedFacility: BehaviorSubject<IdbFacility>;
 
     constructor(private dbService: NgxIndexedDBService, private localStorageService: LocalStorageService, private accountDbService: AccountdbService) {
         this.accountFacilities = new BehaviorSubject<Array<IdbFacility>>(new Array());
-        this.allFacilities = new BehaviorSubject<Array<IdbFacility>>(new Array());
+        // this.allFacilities = new BehaviorSubject<Array<IdbFacility>>(new Array());
         this.selectedFacility = new BehaviorSubject<IdbFacility>(undefined);
         // this.accountDbService.selectedAccount.subscribe(() => {
         //     this.setAccountFacilities();
@@ -32,6 +32,11 @@ export class FacilitydbService {
         });
     }
 
+    getInitialFacility(): number {
+        let localStorageFacilityId: number = this.localStorageService.retrieve("facilityId");
+        return localStorageFacilityId;
+    }
+
     async initializeFacilityFromLocalStorage() {
         let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
         if (selectedAccount) {
@@ -44,7 +49,7 @@ export class FacilitydbService {
             } else if (accountFacilities.length != 0) {
                 this.selectedFacility.next(accountFacilities[0]);
             }
-            this.allFacilities.next(allFacilities);
+            // this.allFacilities.next(allFacilities);
             this.accountFacilities.next(accountFacilities);
         }
     }
@@ -83,11 +88,11 @@ export class FacilitydbService {
     }
 
 
-    setAllFacilities() {
-        this.getAll().subscribe(allFacilities => {
-            this.allFacilities.next(allFacilities);
-        });
-    }
+    // setAllFacilities() {
+    //     this.getAll().subscribe(allFacilities => {
+    //         this.allFacilities.next(allFacilities);
+    //     });
+    // }
 
     getAll(): Observable<Array<IdbFacility>> {
         return this.dbService.getAll('facilities');
@@ -112,7 +117,7 @@ export class FacilitydbService {
 
     add(facility: IdbFacility): void {
         this.dbService.add('facilities', facility).subscribe(() => {
-            this.setAllFacilities();
+            // this.setAllFacilities();
             this.setAccountFacilities();
         });
     }
@@ -127,7 +132,7 @@ export class FacilitydbService {
 
     update(values: IdbFacility): void {
         this.dbService.update('facilities', values).subscribe(() => {
-            this.setAllFacilities();
+            // this.setAllFacilities();
             this.setAccountFacilities();
         });
     }

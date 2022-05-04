@@ -29,8 +29,17 @@ export class AnalysisDbService {
     // this.facilityDbService.selectedFacility.subscribe(() => {
     //   this.setAccountAnalysisItems();
     // });
+    this.selectedAnalysisItem.subscribe(analysisItem => {
+      if (analysisItem) {
+        this.localStorageService.store('analysisItemId', analysisItem.id);
+      }
+    });
   }
 
+  getInitialAnalysisItem(): number {
+    let analysisItemId: number = this.localStorageService.retrieve("analysisItemId");
+    return analysisItemId;
+  }
 
   async initializeAnalysisItems() {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
@@ -48,12 +57,6 @@ export class AnalysisDbService {
         }
       }
     }
-    //subscribe after initialization
-    this.selectedAnalysisItem.subscribe(analysisItem => {
-      if (analysisItem) {
-        this.localStorageService.store('analysisItemId', analysisItem.id);
-      }
-    });
   }
 
   setAccountAnalysisItems() {

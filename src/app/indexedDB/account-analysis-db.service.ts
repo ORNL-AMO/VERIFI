@@ -31,6 +31,11 @@ export class AccountAnalysisDbService {
     });
   }
 
+  getInitialAnalysisItem(): number {
+    let analysisItemId: number = this.localStorageService.retrieve("accountAnalysisItemsId");
+    return analysisItemId;
+  }
+
   async initializeAnalysisItems() {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     if (selectedAccount) {
@@ -147,9 +152,9 @@ export class AccountAnalysisDbService {
     }
   }
 
-  updateFacilityItemSelection(analysiItem: IdbAccountAnalysisItem, analysisItemId: string, facilityId: string){
+  updateFacilityItemSelection(analysiItem: IdbAccountAnalysisItem, analysisItemId: string, facilityId: string) {
     analysiItem.facilityAnalysisItems.forEach(item => {
-      if(item.facilityId == facilityId){
+      if (item.facilityId == facilityId) {
         item.analysisItemId = analysisItemId;
       }
     });

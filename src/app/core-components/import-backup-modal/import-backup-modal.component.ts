@@ -118,7 +118,7 @@ export class ImportBackupModalComponent implements OnInit {
         await this.importNewFacility(tmpBackupFile)
       }
     }
-    this.facilityDbService.setAllFacilities();
+    // this.facilityDbService.setAllFacilities();
     this.accountDbService.setAllAccounts();
     this.loadingService.setLoadingStatus(false);
   }

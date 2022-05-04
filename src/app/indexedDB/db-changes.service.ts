@@ -58,7 +58,7 @@ export class DbChangesService {
   }
 
   selectFacility(facility: IdbFacility) {
-    this.facilityDbService.selectedFacility.next(facility);
+    console.log('DB Changes Select Facility');
     //set analaysis
     let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
     let facilityAnalysisItems: Array<IdbAnalysisItem> = accountAnalysisItems.filter(item => { return item.facilityId == facility.guid });
@@ -75,7 +75,7 @@ export class DbChangesService {
     //set meters
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(item => { return item.facilityId == facility.guid });
-    // this.utilityMeterDbService.facilityMeters.next(facilityMeters);
+    this.utilityMeterDbService.facilityMeters.next(facilityMeters);
 
     //set meter data
     let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
@@ -86,6 +86,7 @@ export class DbChangesService {
     let accountMeterGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
     let facilityMeterGroups: Array<IdbUtilityMeterGroup> = accountMeterGroups.filter(item => { return item.facilityId == facility.guid });
     this.utilityMeterGroupDbService.facilityMeterGroups.next(facilityMeterGroups);
+    this.facilityDbService.selectedFacility.next(facility);
   }
 
 

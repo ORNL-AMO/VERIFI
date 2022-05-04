@@ -30,6 +30,11 @@ export class OverviewReportOptionsDbService {
     // });
   }
 
+  getInitialReport(): number {
+    let overviewReportOptionsId: number = this.localStorageService.retrieve("overviewReportOptionsId");
+    return overviewReportOptionsId;
+  }
+
   async initializeReportsFromLocalStorage() {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     if (selectedAccount) {

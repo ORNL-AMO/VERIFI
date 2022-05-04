@@ -76,7 +76,7 @@ export class FacilitySettingsComponent implements OnInit {
     await this.facilityDbService.deleteFacilitiesAsync([this.selectedFacility]);
     // Then navigate to another facility
     let allFacilities: Array<IdbFacility> = await this.facilityDbService.getAll().toPromise();
-    this.facilityDbService.allFacilities.next(allFacilities);
+    // this.facilityDbService.allFacilities.next(allFacilities);
     let accountFacilites: Array<IdbFacility> = allFacilities.filter(facility => { return facility.accountId == selectedAccount.guid });
     this.facilityDbService.accountFacilities.next(accountFacilites);
     this.facilityDbService.setSelectedFacility();
