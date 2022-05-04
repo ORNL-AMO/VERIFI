@@ -4,10 +4,8 @@ import { Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { AccountFacilitiesSummary } from 'src/app/models/dashboard';
 import { IdbFacility, IdbUtilityMeterData } from 'src/app/models/idb';
 import { DashboardService } from 'src/app/shared/helper-services/dashboard.service';
-import { MeterSummaryService } from 'src/app/shared/helper-services/meter-summary.service';
 
 @Component({
   selector: 'app-account-dashboard',
@@ -26,7 +24,7 @@ export class AccountDashboardComponent implements OnInit {
 
   selectedAccountSub: Subscription;
   accountFacilitiesSummarySub: Subscription;
-  constructor(public utilityMeterDataDbService: UtilityMeterDatadbService, private dashboardService: DashboardService, private meterSummaryService: MeterSummaryService,
+  constructor(public utilityMeterDataDbService: UtilityMeterDatadbService, private dashboardService: DashboardService,
     private facilityDbService: FacilitydbService, private router: Router,
     private accountDbService: AccountdbService) { }
 

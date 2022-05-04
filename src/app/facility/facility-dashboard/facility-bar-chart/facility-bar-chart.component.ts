@@ -4,12 +4,11 @@ import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
 import { DashboardService } from 'src/app/shared/helper-services/dashboard.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbFacility, IdbUtilityMeter, MeterSource } from 'src/app/models/idb';
+import { IdbFacility, MeterSource } from 'src/app/models/idb';
 import { FacilityBarChartData } from 'src/app/models/visualization';
 import { UtilityColors } from 'src/app/shared/utilityColors';
 import { VisualizationService } from '../../../shared/helper-services/visualization.service';
+import { CalanderizedMeter } from 'src/app/models/calanderization';
 
 @Component({
   selector: 'app-facility-bar-chart',
@@ -26,59 +25,37 @@ export class FacilityBarChartComponent implements OnInit {
 
   @ViewChild('utilityBarChart', { static: false }) utilityBarChart: ElementRef;
 
-
-
   electricityData: Array<FacilityBarChartData>;
   naturalGasData: Array<FacilityBarChartData>;
   otherFuelsData: Array<FacilityBarChartData>;
   waterData: Array<FacilityBarChartData>;
   wasteWaterData: Array<FacilityBarChartData>;
   otherUtilityData: Array<FacilityBarChartData>;
-  facilityMeters: Array<IdbUtilityMeter>;
   sumByMonth: boolean = false;
   removeIncompleteYears: boolean = true;
-
-  selectedFacility: IdbFacility;
-  selectedFacilitySub: Subscription;
-  accountMeterDataSub: Subscription;
-  accountMeters: Array<IdbUtilityMeter>;
-  accountMetersSub: Subscription;
+  calanderizedMeters: Array<CalanderizedMeter>;
+  calanderizedMetersSub: Subscription;
 
   graphDisplay: "cost" | "usage" | "emissions";
   graphDisplaySub: Subscription;
 
-  constructor(private plotlyService: PlotlyService, private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService, private vizualizationService: VisualizationService,
+  constructor(private plotlyService: PlotlyService, private vizualizationService: VisualizationService,
     private facilityDbService: FacilitydbService, private dashboardService: DashboardService) { }
 
   ngOnInit(): void {
-    this.accountMetersSub = this.utilityMeterDbService.accountMeters.subscribe(accountMeters => {
-      this.accountMeters = accountMeters;
+    this.calanderizedMetersSub = this.dashboardService.calanderizedFacilityMeters.subscribe(cMeters => {
+      this.calanderizedMeters = cMeters;
       this.setUtilityData();
-    });
-    this.selectedFacilitySub = this.utilityMeterDbService.facilityMeters.subscribe(facilityMeters => {
-      this.facilityMeters = JSON.parse(JSON.stringify(facilityMeters));
-      this.setUtilityData();
-    });
-
-    this.accountMeterDataSub = this.utilityMeterDataDbService.accountMeterData.subscribe(accountMeterData => {
-      if (accountMeterData && accountMeterData.length != 0) {
-        this.setUtilityData();
-      }
-    });
+    })
 
     this.graphDisplaySub = this.dashboardService.graphDisplay.subscribe(value => {
       this.graphDisplay = value;
       this.setUtilityData();
     });
-
-
   }
 
   ngOnDestroy() {
-    this.accountMeterDataSub.unsubscribe();
-    this.selectedFacilitySub.unsubscribe();
-    this.accountMetersSub.unsubscribe();
+    this.calanderizedMetersSub.unsubscribe();
     this.graphDisplaySub.unsubscribe();
   }
 
@@ -87,15 +64,15 @@ export class FacilityBarChartComponent implements OnInit {
   }
 
   setUtilityData() {
-    if (this.facilityMeters && this.facilityMeters.length != 0 && this.accountMeters && this.accountMeters.length != 0 && this.graphDisplay) {
-      this.electricityData = this.getDataByUtility('Electricity', this.facilityMeters);
-      this.naturalGasData = this.getDataByUtility('Natural Gas', this.facilityMeters);
-      this.otherFuelsData = this.getDataByUtility('Other Fuels', this.facilityMeters);
-      this.waterData = this.getDataByUtility('Water', this.facilityMeters);
-      this.wasteWaterData = this.getDataByUtility('Waste Water', this.facilityMeters);
-      this.otherUtilityData = this.getDataByUtility('Other Utility', this.facilityMeters);
+    if (this.calanderizedMeters && this.calanderizedMeters.length != 0 && this.graphDisplay && this.utilityBarChart) {
+      this.electricityData = this.getDataByUtility('Electricity', this.calanderizedMeters);
+      this.naturalGasData = this.getDataByUtility('Natural Gas', this.calanderizedMeters);
+      this.otherFuelsData = this.getDataByUtility('Other Fuels', this.calanderizedMeters);
+      this.waterData = this.getDataByUtility('Water', this.calanderizedMeters);
+      this.wasteWaterData = this.getDataByUtility('Waste Water', this.calanderizedMeters);
+      this.otherUtilityData = this.getDataByUtility('Other Utility', this.calanderizedMeters);
       this.drawChart();
-    } 
+    }
   }
 
 
@@ -113,13 +90,13 @@ export class FacilityBarChartComponent implements OnInit {
         yaxisTitle = 'Utility Cost';
         yDataProperty = "energyCost";
         tickprefix = "$";
-      } else if(this.graphDisplay == "usage") {
+      } else if (this.graphDisplay == "usage") {
         let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
         yaxisTitle = "Utility Usage (" + selectedFacility.energyUnit + ")";
         yDataProperty = "energyUse";
         tickprefix = "";
         hoverformat = ",.2f";
-      }else if(this.graphDisplay == "emissions"){
+      } else if (this.graphDisplay == "emissions") {
         // let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
         yaxisTitle = "Emissions (kg CO<sub>2</sub>)";
         yDataProperty = "emissions";
@@ -246,8 +223,8 @@ export class FacilityBarChartComponent implements OnInit {
     }
   }
 
-  getDataByUtility(utility: MeterSource, facilityMeters: Array<IdbUtilityMeter>): Array<FacilityBarChartData> {
-    let filteredMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.source == utility });
-    return this.vizualizationService.getFacilityBarChartData(filteredMeters, this.sumByMonth, this.removeIncompleteYears, false);
+  getDataByUtility(utility: MeterSource, calanderizedMeters: Array<CalanderizedMeter>): Array<FacilityBarChartData> {
+    let filteredMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return cMeter.meter.source == utility });
+    return this.vizualizationService.getFacilityDashboardBarChartData(filteredMeters, this.sumByMonth, this.removeIncompleteYears);
   }
 }

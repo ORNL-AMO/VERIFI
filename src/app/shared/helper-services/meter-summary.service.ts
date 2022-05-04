@@ -69,7 +69,46 @@ export class MeterSummaryService {
     }
   }
 
-  getDashboardAccountFacilitiesSummary(calanderizedMeters: Array<CalanderizedMeter>,): AccountFacilitiesSummary {
+  getDashboardFacilityMeterSummary(calanderizedMeters: Array<CalanderizedMeter>, lastBill: MonthlyData): FacilityMeterSummaryData {
+    let facilityMetersSummary: Array<MeterSummary> = new Array();
+    // let lastBill: MonthlyData = this.calanderizationService.getLastBillEntryFromCalanderizedMeterData(calanderizedMeters);
+    calanderizedMeters.forEach(cMeter => {
+      let summary: MeterSummary = this.getDashboardMeterSummary(cMeter, false, lastBill);
+      facilityMetersSummary.push(summary);
+    });
+    return {
+      meterSummaries: facilityMetersSummary,
+      totalEnergyUse: _.sumBy(facilityMetersSummary, (data) => { return this.getSumValue(data.energyUsage) }),
+      totalEnergyCost: _.sumBy(facilityMetersSummary, (data) => { return this.getSumValue(data.energyCost) }),
+      totalEmissions: _.sumBy(facilityMetersSummary, (data) => { return this.getSumValue(data.emissions) }),
+      allMetersLastBill: lastBill
+    };
+  }
+
+  getDashboardMeterSummary(cMeter: CalanderizedMeter, inAccount: boolean, allMetersLastBill: MonthlyData, reportOptions?: ReportOptions): MeterSummary {
+    let lastBill: MonthlyData = this.calanderizationService.getLastBillEntryFromCalanderizedMeterData([cMeter]);
+    let lastYearData: Array<LastYearData> = this.calanderizationService.getPastYearData(undefined, inAccount, allMetersLastBill, [cMeter], reportOptions);
+    let group: IdbUtilityMeterGroup = this.utilityMeterGroupDbService.getGroupById(cMeter.meter.groupId);
+    let groupName: string = 'Ungrouped';
+    if (group) {
+      groupName = group.name;
+    }
+    let lastBillDate: Date;
+    if (lastBill) {
+      lastBillDate = new Date(lastBill.year, lastBill.monthNumValue + 1);
+    }
+    return {
+      meter: cMeter.meter,
+      energyUsage: _.sumBy(lastYearData, (data) => { return this.getSumValue(data.energyUse) }),
+      energyCost: _.sumBy(lastYearData, (data) => { return this.getSumValue(data.energyCost) }),
+      emissions: _.sumBy(lastYearData, (data) => { return this.getSumValue(data.emissions) }),
+      lastBill: lastBill,
+      groupName: groupName,
+      lastBillDate: lastBillDate
+    }
+  }
+
+  getDashboardAccountFacilitiesSummary(calanderizedMeters: Array<CalanderizedMeter>): AccountFacilitiesSummary {
     let facilitiesSummary: Array<FacilitySummary> = new Array();
     let accountLastBill: MonthlyData = this.calanderizationService.getLastBillEntryFromCalanderizedMeterData(calanderizedMeters);
     let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
