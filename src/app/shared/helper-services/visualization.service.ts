@@ -203,10 +203,9 @@ export class VisualizationService {
 
 
 
-  getMeterHeatMapData(meters: Array<IdbUtilityMeter>, facilityName: string, inAccount: boolean): HeatMapData {
+  getMeterHeatMapData(calanderizedMeterData: Array<CalanderizedMeter>, facilityName: string): HeatMapData {
+    // console.log(calanderizedMeterData)
     let months: Array<string> = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-    //calanderize meters
-    let calanderizedMeterData: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMeterData(meters, inAccount, false);
     //create array of just the meter data
     let combindedCalanderizedMeterData: Array<MonthlyData> = calanderizedMeterData.flatMap(meterData => {
       return meterData.monthlyData;
@@ -216,10 +215,6 @@ export class VisualizationService {
     yearMonths = _.uniqWith(yearMonths, (a, b) => {
       return (a.year == b.year && a.month == b.month)
     });
-    //remove data without 12 months for the year
-    // let counts = _.countBy(yearMonths, 'year');
-    // yearMonths = yearMonths.filter(yearMonthItem => { return counts[yearMonthItem.year] == 12 })
-    // }
     //create array of the uniq months and years
     let years: Array<number> = yearMonths.map(data => { return data.year });
     years = _.uniq(years);
@@ -232,21 +227,21 @@ export class VisualizationService {
           if (meterData.year == year && meterData.month == month) {
             return meterData.energyCost;
           } else {
-            return undefined;
+            return 0;
           }
         });
         let totalEnergy: number = _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
           if (meterData.year == year && meterData.month == month) {
             return meterData.energyUse;
           } else {
-            return undefined;
+            return 0;
           }
         });
         let totalEmissions: number =  _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
           if (meterData.year == year && meterData.month == month) {
             return meterData.emissions;
           } else {
-            return undefined;
+            return 0;
           }
         });
         yearData.monthlyCost.push(totalCost)

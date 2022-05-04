@@ -38,7 +38,7 @@ export class FacilityDashboardComponent implements OnInit {
       } else if (value == "emissions") {
         this.chartsLabel = "Emissions";
       }
-    })
+    });
   }
 
   ngOnDestroy() {

@@ -23,6 +23,7 @@ export class DashboardService {
   facilityMeterSummaryData: BehaviorSubject<FacilityMeterSummaryData>;
   facilityUtilityUsageSummaryData: BehaviorSubject<UtilityUsageSummaryData>;
   calanderizedFacilityMeters: BehaviorSubject<Array<CalanderizedMeter>>;
+  calanderizedAccountMeters:  BehaviorSubject<Array<CalanderizedMeter>>;
   constructor(private utilityMeterDbService: UtilityMeterdbService,
     private calanderizationService: CalanderizationService,
     private localStorageService: LocalStorageService,
@@ -33,6 +34,7 @@ export class DashboardService {
     this.facilityMeterSummaryData = new BehaviorSubject<FacilityMeterSummaryData>(undefined);
     this.facilityUtilityUsageSummaryData = new BehaviorSubject<UtilityUsageSummaryData>(undefined);
     this.calanderizedFacilityMeters = new BehaviorSubject<Array<CalanderizedMeter>>([]);
+    this.calanderizedAccountMeters = new BehaviorSubject<Array<CalanderizedMeter>>([]);
 
     let dashboardGraphDisplay: "usage" | "cost" | "emissions" = this.localStorageService.retrieve("dashboardGraphDisplay");
     if (dashboardGraphDisplay) {
@@ -48,10 +50,11 @@ export class DashboardService {
 
   setAccountFacilitiesSummary() {
     let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    let calanderizedMeters: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMeterData(meters, true, true);
-    let accountFacilitiesSummary: AccountFacilitiesSummary = this.meterSummaryService.getDashboardAccountFacilitiesSummary(calanderizedMeters)
+    let calanderizedMeters: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMeterData(meters, true, false);
+    this.calanderizedAccountMeters.next(JSON.parse(JSON.stringify(calanderizedMeters)))
+    let accountFacilitiesSummary: AccountFacilitiesSummary = this.meterSummaryService.getDashboardAccountFacilitiesSummary(JSON.parse(JSON.stringify(calanderizedMeters)))
     this.accountFacilitiesSummary.next(accountFacilitiesSummary);
-    let accountUtilityUsageSummaryData: UtilityUsageSummaryData = this.getAccountUtilityUsageSummary(calanderizedMeters, accountFacilitiesSummary.allMetersLastBill, true);
+    let accountUtilityUsageSummaryData: UtilityUsageSummaryData = this.getAccountUtilityUsageSummary(JSON.parse(JSON.stringify(calanderizedMeters)), accountFacilitiesSummary.allMetersLastBill, true);
     this.accountUtilityUsageSummaryData.next(accountUtilityUsageSummaryData);
   }
 
@@ -123,7 +126,7 @@ export class DashboardService {
 
   setFacilityDashboardSummary(){
     let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
-    let calanderizedMeters: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMeterData(meters, false, true);
+    let calanderizedMeters: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMeterData(meters, false, false);
     this.calanderizedFacilityMeters.next(calanderizedMeters);
     let lastBill: MonthlyData = this.calanderizationService.getLastBillEntryFromCalanderizedMeterData(calanderizedMeters);
     let facilityMeterSummaryData: FacilityMeterSummaryData = this.meterSummaryService.getDashboardFacilityMeterSummary(calanderizedMeters, lastBill);

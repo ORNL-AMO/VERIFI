@@ -1,15 +1,14 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbAccount, IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
+import { IdbAccount, IdbFacility } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { VisualizationService } from 'src/app/shared/helper-services/visualization.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { HeatMapData } from 'src/app/models/visualization';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DashboardService } from 'src/app/shared/helper-services/dashboard.service';
+import { CalanderizedMeter } from 'src/app/models/calanderization';
 @Component({
   selector: 'app-energy-use-heat-map',
   templateUrl: './energy-use-heat-map.component.html',
@@ -18,18 +17,24 @@ import { DashboardService } from 'src/app/shared/helper-services/dashboard.servi
 export class EnergyUseHeatMapComponent implements OnInit {
 
   @ViewChild('energyUseHeatMap', { static: false }) energyUseHeatMap: ElementRef;
-  accountFacilitiesSub: Subscription;
+  calanderizedAccountMetersSub: Subscription;
+  calanderizedAccountMeters: Array<CalanderizedMeter>;
   facilityHeatMapData: Array<HeatMapData>;
+
+
+
+
   graphDisplay: "cost" | "usage" | "emissions";
   graphDisplaySub: Subscription;
 
-  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private visualizationService: VisualizationService,
-    private plotlyService: PlotlyService, private utilityMeterDbService: UtilityMeterdbService,
+  constructor(private visualizationService: VisualizationService,
+    private plotlyService: PlotlyService,
     private facilityDbService: FacilitydbService, private dashboardService: DashboardService,
     private accountdbService: AccountdbService) { }
 
   ngOnInit(): void {
-    this.accountFacilitiesSub = this.utilityMeterDataDbService.accountMeterData.subscribe(val => {
+    this.calanderizedAccountMetersSub = this.dashboardService.calanderizedAccountMeters.subscribe(val => {
+      this.calanderizedAccountMeters = val;
       this.setData();
     });
 
@@ -40,7 +45,7 @@ export class EnergyUseHeatMapComponent implements OnInit {
   }
 
   ngOnDestroy() {
-    this.accountFacilitiesSub.unsubscribe();
+    this.calanderizedAccountMetersSub.unsubscribe();
     this.graphDisplaySub.unsubscribe();
   }
 
@@ -139,19 +144,18 @@ export class EnergyUseHeatMapComponent implements OnInit {
 
   setData() {
     this.facilityHeatMapData = new Array();
-    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    let accountMetersCopy: Array<IdbUtilityMeter> = JSON.parse(JSON.stringify(accountMeters));
-    let accountFacilites: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-    if (accountMeters.length != 0 && accountFacilites.length != 0 && this.graphDisplay) {
+    if (this.calanderizedAccountMeters && this.calanderizedAccountMeters.length != 0 && this.graphDisplay && this.energyUseHeatMap) {
+      let accountFacilites: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
       //filter by facility
-      let facilityIds: Array<string> = accountMeters.map(meter => { return meter.facilityId });
+      let facilityIds: Array<string> = this.calanderizedAccountMeters.map(cMeter => { return cMeter.meter.facilityId });
       facilityIds = _.uniq(facilityIds);
       facilityIds.forEach(id => {
-        let facilityMeters: Array<IdbUtilityMeter> = accountMetersCopy.filter(meter => { return meter.facilityId == id });
+        let facilityMeters: Array<CalanderizedMeter> = this.calanderizedAccountMeters.filter(cMeter => { return cMeter.meter.facilityId == id });
         let facility: IdbFacility = accountFacilites.find(facility => { return facility.guid == id });
-        let facilityHeatMapData: HeatMapData = this.visualizationService.getMeterHeatMapData(facilityMeters, facility.name, true);
+        let facilityHeatMapData: HeatMapData = this.visualizationService.getMeterHeatMapData(facilityMeters, facility.name);
         this.facilityHeatMapData.push(facilityHeatMapData);
       });
+      
       this.drawChart();
     }
   }
