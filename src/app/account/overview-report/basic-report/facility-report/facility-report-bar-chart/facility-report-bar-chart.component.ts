@@ -1,13 +1,13 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { IdbFacility, IdbUtilityMeter, MeterSource } from 'src/app/models/idb';
+import { IdbFacility, MeterSource } from 'src/app/models/idb';
 import { BarChartDataTrace, ReportOptions } from 'src/app/models/overview-report';
 import { FacilityBarChartData } from 'src/app/models/visualization';
 import { OverviewReportService } from 'src/app/account/overview-report/overview-report.service';
 import { VisualizationService } from 'src/app/shared/helper-services/visualization.service';
 import { UtilityColors } from 'src/app/shared/utilityColors';
+import { CalanderizedMeter } from 'src/app/models/calanderization';
 
 @Component({
   selector: 'app-facility-report-bar-chart',
@@ -21,6 +21,8 @@ export class FacilityReportBarChartComponent implements OnInit {
   reportOptions: ReportOptions;
   @Input()
   sumByMonth: boolean;
+  @Input()
+  calanderizedMeters: Array<CalanderizedMeter>;
 
   @ViewChild('utilityCostBarChart', { static: false }) utilityCostBarChart: ElementRef;
   @ViewChild('utilityUsageBarChart', { static: false }) utilityUsageBarChart: ElementRef;
@@ -37,7 +39,7 @@ export class FacilityReportBarChartComponent implements OnInit {
   print: boolean;
   printSub: Subscription;
   constructor(private visualizationService: VisualizationService,
-    private utilityMeterDbService: UtilityMeterdbService, private plotlyService: PlotlyService,
+    private plotlyService: PlotlyService,
     private overviewReportService: OverviewReportService) { }
 
   ngOnInit(): void {
@@ -47,7 +49,7 @@ export class FacilityReportBarChartComponent implements OnInit {
     this.setUtilityData();
   }
 
-  ngOnDestroy(){
+  ngOnDestroy() {
     this.printSub.unsubscribe();
   }
 
@@ -58,48 +60,46 @@ export class FacilityReportBarChartComponent implements OnInit {
   }
 
   setUtilityData() {
-    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == this.facility.guid });
     if (this.reportOptions.electricity) {
-      this.electricityData = this.getDataByUtility('Electricity', facilityMeters);
+      this.electricityData = this.getDataByUtility('Electricity', this.calanderizedMeters);
     } else {
       this.electricityData = [];
     }
     if (this.reportOptions.naturalGas) {
-      this.naturalGasData = this.getDataByUtility('Natural Gas', facilityMeters);
+      this.naturalGasData = this.getDataByUtility('Natural Gas', this.calanderizedMeters);
     } else {
       this.naturalGasData = [];
     }
     if (this.reportOptions.otherFuels) {
-      this.otherFuelsData = this.getDataByUtility('Other Fuels', facilityMeters);
+      this.otherFuelsData = this.getDataByUtility('Other Fuels', this.calanderizedMeters);
     } else {
       this.otherFuelsData = [];
     }
     if (this.reportOptions.otherEnergy) {
-      this.otherEnergyData = this.getDataByUtility('Other Energy', facilityMeters);
+      this.otherEnergyData = this.getDataByUtility('Other Energy', this.calanderizedMeters);
     } else {
       this.otherEnergyData = [];
     }
     if (this.reportOptions.water) {
-      this.waterData = this.getDataByUtility('Water', facilityMeters);
+      this.waterData = this.getDataByUtility('Water', this.calanderizedMeters);
     } else {
       this.waterData = [];
     }
     if (this.reportOptions.wasteWater) {
-      this.wasteWaterData = this.getDataByUtility('Waste Water', facilityMeters);
+      this.wasteWaterData = this.getDataByUtility('Waste Water', this.calanderizedMeters);
     } else {
       this.wasteWaterData = [];
     }
     if (this.reportOptions.otherUtility) {
-      this.otherUtilityData = this.getDataByUtility('Other Utility', facilityMeters);
+      this.otherUtilityData = this.getDataByUtility('Other Utility', this.calanderizedMeters);
     } else {
       this.otherUtilityData = [];
     }
   }
 
-  getDataByUtility(utility: MeterSource, facilityMeters: Array<IdbUtilityMeter>): Array<FacilityBarChartData> {
-    let filteredMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.source == utility });
-    return this.visualizationService.getFacilityBarChartData(filteredMeters, this.sumByMonth, true, false, this.reportOptions);
+  getDataByUtility(utility: MeterSource, calanderizedMeters: Array<CalanderizedMeter>): Array<FacilityBarChartData> {
+    let calanderizedMeter: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return cMeter.meter.source == utility });
+    return this.visualizationService.getFacilityDashboardBarChartData(calanderizedMeter, this.sumByMonth, true);
   }
 
   drawEmissionsChart() {

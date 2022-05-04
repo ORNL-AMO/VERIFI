@@ -9,7 +9,7 @@ export class FacilityNamePipe implements PipeTransform {
   constructor(private facilityDbService: FacilitydbService) {
   }
   
-  transform(facilityId: number): string {
+  transform(facilityId: string): string {
     return this.facilityDbService.getFacilityNameById(facilityId);
   }
 

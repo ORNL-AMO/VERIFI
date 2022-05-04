@@ -46,6 +46,6 @@ export class FacilityReportUtilityUsageTableComponent implements OnInit {
     if (!this.reportOptions.otherUtility) {
       facilityMeters = facilityMeters.filter(meter => { return meter.source != 'Other Utility' });
     }
-    this.facilityReportUtilitySummary = this.overviewReportService.getUtilityUsageData(facilityMeters, this.reportOptions, false);
+    // this.facilityReportUtilitySummary = this.overviewReportService.getUtilityUsageData(facilityMeters, this.reportOptions, false);
   }
 }

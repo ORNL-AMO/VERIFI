@@ -38,7 +38,10 @@ export class DbChangesService {
     this.accountAnalysisDbService.accountAnalysisItems.next(accountAnalysisItems);
     //set overview reports
     let overviewReportOptions: Array<IdbOverviewReportOptions> = await this.overviewReportOptionsDbService.getAllByIndexRange('accountId', account.guid).toPromise();
-    this.overviewReportOptionsDbService.accountOverviewReportOptions.next(overviewReportOptions);
+    let templates: Array<IdbOverviewReportOptions> = overviewReportOptions.filter(option => {return option.type == 'template'});
+    let nonTemplates: Array<IdbOverviewReportOptions> = overviewReportOptions.filter(option => {return option.type != 'template'});
+    this.overviewReportOptionsDbService.accountOverviewReportOptions.next(nonTemplates);
+    this.overviewReportOptionsDbService.overviewReportOptionsTemplates.next(templates);
     //set analysis
     let analysisItems: Array<IdbAnalysisItem> = await this.analysisDbService.getAllByIndexRange('accountId', account.guid).toPromise();
     this.analysisDbService.accountAnalysisItems.next(analysisItems);

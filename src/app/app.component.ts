@@ -123,7 +123,10 @@ export class AppComponent {
     //set overview reports
     this.loadingMessage = "Loading Reports..";
     let overviewReportOptions: Array<IdbOverviewReportOptions> = await this.overviewReportOptionsDbService.getAllByIndexRange('accountId', account.guid).toPromise();
-    this.overviewReportOptionsDbService.accountOverviewReportOptions.next(overviewReportOptions);
+    let templates: Array<IdbOverviewReportOptions> = overviewReportOptions.filter(option => {return option.type == 'template'});
+    let nonTemplates: Array<IdbOverviewReportOptions> = overviewReportOptions.filter(option => {return option.type != 'template'});
+    this.overviewReportOptionsDbService.accountOverviewReportOptions.next(nonTemplates);
+    this.overviewReportOptionsDbService.overviewReportOptionsTemplates.next(templates);
     let overviewReportId: number = this.overviewReportOptionsDbService.getInitialReport();
     if (overviewReportId) {
       let reportOptions: IdbOverviewReportOptions = overviewReportOptions.find(item => { return item.id == overviewReportId });
