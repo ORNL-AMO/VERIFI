@@ -25,7 +25,7 @@ export class FacilityDashboardMenuComponent implements OnInit {
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
       this.selectedFacility = val;
     });
-    
+
     this.graphDisplaySub = this.dashboardService.graphDisplay.subscribe(val => {
       this.graphDisplay = val;
     });
@@ -35,7 +35,7 @@ export class FacilityDashboardMenuComponent implements OnInit {
     })
   }
 
-  ngOnDestroy(){
+  ngOnDestroy() {
     this.graphDisplaySub.unsubscribe();
     this.selectedFacilitySub.unsubscribe();
     this.modalOpenSub.unsubscribe();
@@ -45,8 +45,14 @@ export class FacilityDashboardMenuComponent implements OnInit {
   setGraphDisplay(str: "cost" | "usage" | "emissions") {
     this.dashboardService.graphDisplay.next(str);
   }
-  setFacilityEnergyIsSource(energyIsSource: boolean) {
-    this.selectedFacility.energyIsSource = energyIsSource;
-    this.facilityDbService.update(this.selectedFacility);
+
+  async setFacilityEnergyIsSource(energyIsSource: boolean) {
+    if (this.selectedFacility.energyIsSource != energyIsSource) {
+      this.selectedFacility.energyIsSource = energyIsSource;
+      let facilities: Array<IdbFacility> = await this.facilityDbService.updateWithObservable(this.selectedFacility).toPromise();
+      let accountFacilites: Array<IdbFacility> = facilities.filter(facility => { return facility.accountId == this.selectedFacility.accountId });
+      this.facilityDbService.accountFacilities.next(accountFacilites);
+      this.facilityDbService.selectedFacility.next(this.selectedFacility);
+    }
   }
 }

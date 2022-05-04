@@ -60,7 +60,7 @@ export class FacilitydbService {
             this.getAllByIndexRange('accountId', selectedAccount.guid).subscribe(facilities => {
                 this.accountFacilities.next(facilities);
             });
-        }else{
+        } else {
             this.accountFacilities.next([]);
         }
     }
@@ -136,6 +136,11 @@ export class FacilitydbService {
             this.setAccountFacilities();
         });
     }
+
+    updateWithObservable(values: IdbFacility): Observable<Array<IdbFacility>> {
+        return this.dbService.update('facilities', values);
+    }
+
 
     deleteById(facilityId: number): void {
         this.dbService.delete('facilities', facilityId).subscribe(() => {

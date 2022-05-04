@@ -205,7 +205,7 @@ export class VisualizationService {
 
   getMeterHeatMapData(calanderizedMeterData: Array<CalanderizedMeter>, facilityName: string): HeatMapData {
     // console.log(calanderizedMeterData)
-    let months: Array<string> = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    let months: Array<string> = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     //create array of just the meter data
     let combindedCalanderizedMeterData: Array<MonthlyData> = calanderizedMeterData.flatMap(meterData => {
       return meterData.monthlyData;
