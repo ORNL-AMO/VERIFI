@@ -94,8 +94,13 @@ export class VisualizationBannerComponent implements OnInit {
     this.visualizationStateService.setData();
   }
 
-  setFacilityEnergyIsSource(energyIsSource: boolean) {
-    this.selectedFacility.energyIsSource = energyIsSource;
-    this.facilityDbService.update(this.selectedFacility);
+  async setFacilityEnergyIsSource(energyIsSource: boolean) {
+    if (this.selectedFacility.energyIsSource != energyIsSource) {
+      this.selectedFacility.energyIsSource = energyIsSource;
+      let facilities: Array<IdbFacility> = await this.facilityDbService.updateWithObservable(this.selectedFacility).toPromise();
+      let accountFacilites: Array<IdbFacility> = facilities.filter(facility => { return facility.accountId == this.selectedFacility.accountId });
+      this.facilityDbService.accountFacilities.next(accountFacilites);
+      this.facilityDbService.selectedFacility.next(this.selectedFacility);
+    }
   }
 }

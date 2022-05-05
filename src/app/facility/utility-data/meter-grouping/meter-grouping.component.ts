@@ -144,7 +144,7 @@ export class MeterGroupingComponent implements OnInit {
 
   setGroupTypes() {
     if (this.dateRange && this.dateRange.maxDate) {
-      this.meterGroupTypes = this.meterGroupingService.getMeterGroupTypes(this.facilityMeters);
+      // this.meterGroupTypes = this.meterGroupingService.getMeterGroupTypes(this.facilityMeters);
     }
   }
 

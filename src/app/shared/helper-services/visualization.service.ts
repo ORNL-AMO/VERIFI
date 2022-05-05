@@ -50,7 +50,7 @@ export class VisualizationService {
           } else {
             return 0;
           }
-        }); 
+        });
         return {
           time: yearMonth.month + ', ' + yearMonth.year,
           energyUse: totalEnergyUse,
@@ -142,7 +142,7 @@ export class VisualizationService {
           } else {
             return 0;
           }
-        }); 
+        });
         return {
           time: yearMonth.month + ', ' + yearMonth.year,
           energyUse: totalEnergyUse,
@@ -237,7 +237,7 @@ export class VisualizationService {
             return 0;
           }
         });
-        let totalEmissions: number =  _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
+        let totalEmissions: number = _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
           if (meterData.year == year && meterData.month == month) {
             return meterData.emissions;
           } else {
@@ -265,11 +265,12 @@ export class VisualizationService {
     facilityPredictorEntries: Array<IdbPredictorEntry>,
     dateRange: { minDate: Date, maxDate: Date },
     meterGroupOptions: Array<{ meterGroup: IdbUtilityMeterGroup, selected: boolean }>,
-    meterDataOption: string): Array<PlotDataItem> {
+    meterDataOption: string,
+    calanderizedMeters: Array<CalanderizedMeter>): Array<PlotDataItem> {
 
-    let facilityMeters: Array<IdbUtilityMeter> = new Array();
+    let selectedMeters: Array<CalanderizedMeter> = new Array();
     let selectedGroups: Array<IdbUtilityMeterGroup> = new Array();
-    let calanderizedMeterData: Array<CalanderizedMeter>;
+    // let calanderizedMeterData: Array<CalanderizedMeter>;
     let lastBillEntry: MonthlyData;
     let firstBillEntry: MonthlyData;
     let plotData: Array<PlotDataItem> = new Array();
@@ -277,12 +278,13 @@ export class VisualizationService {
     if (meterDataOption == 'meters') {
       meterOptions.forEach(meterOption => {
         if (meterOption.selected) {
-          facilityMeters.push(meterOption.meter);
+          let cMeter: CalanderizedMeter = calanderizedMeters.find(cMeter => { return cMeter.meter.id == meterOption.meter.id });
+          selectedMeters.push(cMeter);
         }
       });
-      calanderizedMeterData = this.calanderizationService.getCalanderizedMeterData(facilityMeters, false);
-      lastBillEntry = this.calanderizationService.getLastBillEntryFromCalanderizedMeterData(calanderizedMeterData);
-      firstBillEntry = this.calanderizationService.getFirstBillEntryFromCalanderizedMeterData(calanderizedMeterData);
+      // calanderizedMeterData = this.calanderizationService.getCalanderizedMeterData(facilityMeters, false);
+      lastBillEntry = this.calanderizationService.getLastBillEntryFromCalanderizedMeterData(selectedMeters);
+      firstBillEntry = this.calanderizationService.getFirstBillEntryFromCalanderizedMeterData(selectedMeters);
     } else {
       meterGroupOptions.forEach(groupOption => {
         if (groupOption.selected) {
@@ -290,8 +292,8 @@ export class VisualizationService {
         }
       })
       let combindedMonthlyData: Array<MonthlyData> = selectedGroups.flatMap(group => { return group.combinedMonthlyData });
-      lastBillEntry = this.calanderizationService.getLastBillEntryFromCalanderizedMeterData(calanderizedMeterData, combindedMonthlyData);
-      firstBillEntry = this.calanderizationService.getFirstBillEntryFromCalanderizedMeterData(calanderizedMeterData, combindedMonthlyData);
+      lastBillEntry = this.calanderizationService.getLastBillEntryFromCalanderizedMeterData(undefined, combindedMonthlyData);
+      firstBillEntry = this.calanderizationService.getFirstBillEntryFromCalanderizedMeterData(undefined, combindedMonthlyData);
     }
 
     let lastPredictorEntry: IdbPredictorEntry = _.maxBy(facilityPredictorEntries, (data: IdbPredictorEntry) => {
@@ -313,7 +315,7 @@ export class VisualizationService {
     }
 
     if (meterDataOption == 'meters') {
-      calanderizedMeterData.forEach(calanderizedMeter => {
+      selectedMeters.forEach(calanderizedMeter => {
         let startDate: Date = this.getLastDate(firstBillEntry, firstPredictorEntry);
         if (dateRange && dateRange.minDate) {
           startDate = _.max([startDate, new Date(dateRange.minDate)]);
@@ -397,7 +399,9 @@ export class VisualizationService {
           });
           if (facilityPredictor) {
             let predictorData: PredictorData = facilityPredictor.predictors.find(predictorEntry => { return predictorEntry.id == predictor.id });
-            predictorPlotData.values.push(predictorData.amount);
+            if (predictorData) {
+              predictorPlotData.values.push(predictorData.amount);
+            }
           } else {
             predictorPlotData.values.push(0);
           }

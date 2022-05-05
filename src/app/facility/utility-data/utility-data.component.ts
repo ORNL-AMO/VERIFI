@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AccountdbService } from '../../indexedDB/account-db.service';
 import { FacilitydbService } from '../../indexedDB/facility-db.service';
@@ -18,12 +17,10 @@ export class UtilityDataComponent implements OnInit {
 
   selectedAccountSub: Subscription;
   selectedFacilitySub: Subscription;
-  showSiteToSourceOption: boolean;
   constructor(
     private accountdbService: AccountdbService,
     private facilityDbService: FacilitydbService,
-    private meterGroupingService: MeterGroupingService,
-    private router: Router
+    private meterGroupingService: MeterGroupingService
   ) {
   }
 
@@ -35,26 +32,11 @@ export class UtilityDataComponent implements OnInit {
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(selectedFacility => {
       this.selectedFacility = selectedFacility;
     });
-
-    this.router.events.subscribe((val) => {
-      if (val instanceof NavigationEnd) {
-        this.setShowSiteToSourceOption(val.url);
-      }
-    });
-    this.setShowSiteToSourceOption(this.router.url);
   }
 
   ngOnDestroy() {
     this.selectedAccountSub.unsubscribe();
     this.selectedFacilitySub.unsubscribe();
     this.meterGroupingService.dateRange.next({ minDate: undefined, maxDate: undefined })
-  }
-
-  setShowSiteToSourceOption(url: string) {
-    if (url.includes('monthly-meter-data') || url.includes('meter-groups') || url.includes('visualization')) {
-      this.showSiteToSourceOption = true;
-    } else {
-      this.showSiteToSourceOption = false;
-    }
   }
 }
