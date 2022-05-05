@@ -101,6 +101,10 @@ export class UtilityMeterGroupdbService {
         });
     }
 
+    updateWithObservable(utilityMeterGroup: IdbUtilityMeterGroup): Observable<Array<IdbUtilityMeterGroup>> {
+        return this.dbService.update('utilityMeterGroups', utilityMeterGroup);
+    }
+
     deleteIndex(meterGroupId: number): void {
         this.dbService.delete('utilityMeterGroups', meterGroupId).subscribe(() => {
             this.setFacilityMeterGroups();

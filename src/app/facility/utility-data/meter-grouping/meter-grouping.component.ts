@@ -1,9 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
-import { IdbAnalysisItem, IdbFacility, IdbUtilityMeter, IdbUtilityMeterGroup } from 'src/app/models/idb';
+import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterGroup } from 'src/app/models/idb';
 import * as _ from 'lodash';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -28,12 +27,9 @@ export class MeterGroupingComponent implements OnInit {
   months: Array<Month> = Months;
   groupToEdit: IdbUtilityMeterGroup;
   groupToDelete: IdbUtilityMeterGroup;
-  facilityMeterDataSub: Subscription;
-  facilityMeterGroupsSub: Subscription;
   selectedFacilitySub: Subscription;
   facilityMeters: Array<IdbUtilityMeter>;
   editOrAdd: 'edit' | 'add';
-  facilityMetersSub: Subscription;
   waterUnit: string;
   energyUnit: string;
   lastBillDate: Date;
@@ -51,7 +47,8 @@ export class MeterGroupingComponent implements OnInit {
   dateRange: { maxDate: Date, minDate: Date };
   selectedFacility: IdbFacility;
   facilityMeterGroups: Array<IdbUtilityMeterGroup>;
-  constructor(private utilityMeterGroupDbService: UtilityMeterGroupdbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
+  calanderizedMeters: Array<CalanderizedMeter>;
+  constructor(private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private utilityMeterDbService: UtilityMeterdbService, private facilityDbService: FacilitydbService, private calanderizationService: CalanderizationService,
     private loadingService: LoadingService, private toastNoticationService: ToastNotificationsService,
     private meterGroupingService: MeterGroupingService, private analysisDbService: AnalysisDbService, private sharedDataService: SharedDataService) { }
@@ -62,29 +59,13 @@ export class MeterGroupingComponent implements OnInit {
     this.displayGraphCost = this.meterGroupingService.displayGraphCost;
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(selectedFacility => {
       this.selectedFacility = selectedFacility;
+      this.facilityMeters = this.utilityMeterDbService.facilityMeters.getValue();
+      this.facilityMeterGroups = this.utilityMeterGroupDbService.facilityMeterGroups.getValue();
+      this.setCalanderizedMeters();
+      this.setGroupTypes();
       if (selectedFacility) {
         this.waterUnit = selectedFacility.volumeLiquidUnit;
         this.energyUnit = selectedFacility.energyUnit;
-      }
-    });
-
-    this.facilityMeterGroupsSub = this.utilityMeterGroupDbService.facilityMeterGroups.subscribe(groups => {
-      this.facilityMeterGroups = groups;
-      if (this.facilityMeters) {
-        this.setGroupTypes();
-      }
-    });
-
-    this.facilityMeterDataSub = this.utilityMeterDataDbService.facilityMeterData.subscribe(() => {
-      if (this.facilityMeters) {
-        this.setGroupTypes();
-      }
-    });
-
-    this.facilityMetersSub = this.utilityMeterDbService.facilityMeters.subscribe(val => {
-      this.facilityMeters = val;
-      if (this.facilityMeters) {
-        this.setGroupTypes();
       }
     });
 
@@ -108,9 +89,6 @@ export class MeterGroupingComponent implements OnInit {
   }
 
   ngOnDestroy() {
-    this.facilityMeterGroupsSub.unsubscribe();
-    this.facilityMeterDataSub.unsubscribe();
-    this.facilityMetersSub.unsubscribe();
     this.selectedFacilitySub.unsubscribe();
     this.dateRangeSub.unsubscribe();
     this.meterGroupingService.dataDisplay = this.dataDisplay;
@@ -118,10 +96,13 @@ export class MeterGroupingComponent implements OnInit {
     this.meterGroupingService.displayGraphCost = this.displayGraphCost;
   }
 
+  setCalanderizedMeters() {
+    this.calanderizedMeters = this.calanderizationService.getCalanderizedMeterData(this.facilityMeters, false);
+  }
+
   initializeDateRange() {
-    let calanderizedMeterData: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMeterData(this.facilityMeters, false);
-    let startDateData: MonthlyData = this.calanderizationService.getFirstBillEntryFromCalanderizedMeterData(calanderizedMeterData);
-    let endDateData: MonthlyData = this.calanderizationService.getLastBillEntryFromCalanderizedMeterData(calanderizedMeterData);
+    let startDateData: MonthlyData = this.calanderizationService.getFirstBillEntryFromCalanderizedMeterData(this.calanderizedMeters);
+    let endDateData: MonthlyData = this.calanderizationService.getLastBillEntryFromCalanderizedMeterData(this.calanderizedMeters);
     let startDate: Date = new Date(startDateData.date);
     let endDate: Date = new Date(endDateData.date);
     this.setYears(startDate, endDate);
@@ -130,9 +111,8 @@ export class MeterGroupingComponent implements OnInit {
 
   setYears(startDate?: Date, endDate?: Date) {
     if (!startDate || !endDate) {
-      let calanderizedMeterData: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMeterData(this.facilityMeters, false);
-      let startDateData: MonthlyData = this.calanderizationService.getFirstBillEntryFromCalanderizedMeterData(calanderizedMeterData);
-      let endDateData: MonthlyData = this.calanderizationService.getLastBillEntryFromCalanderizedMeterData(calanderizedMeterData);
+      let startDateData: MonthlyData = this.calanderizationService.getFirstBillEntryFromCalanderizedMeterData(this.calanderizedMeters);
+      let endDateData: MonthlyData = this.calanderizationService.getLastBillEntryFromCalanderizedMeterData(this.calanderizedMeters);
       startDate = new Date(startDateData.date);
       endDate = new Date(endDateData.date);
     }
@@ -144,7 +124,7 @@ export class MeterGroupingComponent implements OnInit {
 
   setGroupTypes() {
     if (this.dateRange && this.dateRange.maxDate) {
-      // this.meterGroupTypes = this.meterGroupingService.getMeterGroupTypes(this.facilityMeters);
+      this.meterGroupTypes = this.meterGroupingService.getMeterGroupTypes(this.calanderizedMeters);
     }
   }
 
@@ -164,28 +144,37 @@ export class MeterGroupingComponent implements OnInit {
     }
   }
 
-  closeEditGroup() {
+  closeEditGroup(needUpdate: boolean) {
     this.editOrAdd = undefined;
     this.groupToEdit = undefined;
     this.sharedDataService.modalOpen.next(false);
+    if(needUpdate){
+      this.facilityMeterGroups = this.utilityMeterGroupDbService.facilityMeterGroups.getValue();
+      this.setGroupTypes();
+    }
   }
 
   closeDeleteGroup() {
     this.groupToDelete = undefined;
   }
 
-  drop(event: CdkDragDrop<string[]>) {
+  async drop(event: CdkDragDrop<string[]>) {
     let draggedMeter: IdbUtilityMeter = this.facilityMeters.find(meter => { return meter.id == event.item.data.id });
-    let group: IdbUtilityMeterGroup = this.facilityMeterGroups.find(group => {return group.id == Number(event.container.id)})
+    let group: IdbUtilityMeterGroup = this.facilityMeterGroups.find(group => { return group.id == Number(event.container.id) })
     draggedMeter.groupId = group.guid;
+    let allMeters: Array<IdbUtilityMeter> = await this.utilityMeterDbService.updateWithObservable(draggedMeter).toPromise();
+    let accountMeters: Array<IdbUtilityMeter> = allMeters.filter(meter => { return meter.accountId == this.selectedFacility.accountId });
+    this.utilityMeterDbService.accountMeters.next(accountMeters);
+    this.facilityMeters = accountMeters.filter(meter => { return meter.facilityId == this.selectedFacility.guid });
+    this.utilityMeterDbService.facilityMeters.next(this.facilityMeters);
+    this.setCalanderizedMeters();
     this.setGroupTypes();
     this.utilityMeterDbService.update(draggedMeter);
   }
 
   groupAdd(groupType: string) {
     this.editOrAdd = 'add';
-    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.groupToEdit = this.utilityMeterGroupDbService.getNewIdbUtilityMeterGroup(groupType, 'New Group', facility.guid, facility.accountId);
+    this.groupToEdit = this.utilityMeterGroupDbService.getNewIdbUtilityMeterGroup(groupType, 'New Group', this.selectedFacility.guid, this.selectedFacility.accountId);
     this.sharedDataService.modalOpen.next(true);
   }
 
@@ -193,15 +182,16 @@ export class MeterGroupingComponent implements OnInit {
     this.loadingService.setLoadingMessage("Deleting Meter Group...");
     this.loadingService.setLoadingStatus(true);
     await this.utilityMeterGroupDbService.deleteWithObservable(this.groupToDelete.id).toPromise();
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    let accountMeterGroups: Array<IdbUtilityMeterGroup> = await this.utilityMeterGroupDbService.getAllByIndexRange("accountId", selectedFacility.accountId).toPromise();
+    let accountMeterGroups: Array<IdbUtilityMeterGroup> = await this.utilityMeterGroupDbService.getAllByIndexRange("accountId", this.selectedFacility.accountId).toPromise();
     this.utilityMeterGroupDbService.accountMeterGroups.next(accountMeterGroups);
-    let facilityMeterGroups: Array<IdbUtilityMeterGroup> = accountMeterGroups.filter(group => { return group.facilityId == selectedFacility.guid });
-    this.utilityMeterGroupDbService.facilityMeterGroups.next(facilityMeterGroups);  
+    this.facilityMeterGroups = accountMeterGroups.filter(group => { return group.facilityId == this.selectedFacility.guid });
+    this.utilityMeterGroupDbService.facilityMeterGroups.next(this.facilityMeterGroups);
     await this.analysisDbService.deleteGroup(this.groupToDelete.guid);
     this.closeDeleteGroup();
     this.loadingService.setLoadingStatus(false);
     this.toastNoticationService.showToast("Meter Group Deleted!", undefined, undefined, false, "success");
+
+    this.setGroupTypes();
   }
 
   setToggleView(meterGroup) {
@@ -236,8 +226,13 @@ export class MeterGroupingComponent implements OnInit {
     this.meterGroupingService.dateRange.next(dateRange);
   }
 
-  setFacilityEnergyIsSource(energyIsSource: boolean) {
-    this.selectedFacility.energyIsSource = energyIsSource;
-    this.facilityDbService.update(this.selectedFacility);
+  async setFacilityEnergyIsSource(energyIsSource: boolean) {
+    if (this.selectedFacility.energyIsSource != energyIsSource) {
+      this.selectedFacility.energyIsSource = energyIsSource;
+      let facilities: Array<IdbFacility> = await this.facilityDbService.updateWithObservable(this.selectedFacility).toPromise();
+      let accountFacilites: Array<IdbFacility> = facilities.filter(facility => { return facility.accountId == this.selectedFacility.accountId });
+      this.facilityDbService.accountFacilities.next(accountFacilites);
+      this.facilityDbService.selectedFacility.next(this.selectedFacility);
+    }
   }
 }
