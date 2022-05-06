@@ -20,10 +20,12 @@ export class GroupAnalysisOptionsComponent implements OnInit {
   groupHasError: boolean;
   yearOptions: Array<number>;
   missingGroupData: boolean;
+  analysisItem: IdbAnalysisItem;
   constructor(private analysisService: AnalysisService, private analysisDbService: AnalysisDbService,
     private utilityMeterDbService: UtilityMeterdbService, private analysisCalculationsHelperService: AnalysisCalculationsHelperService) { }
 
   ngOnInit(): void {
+    this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     this.yearOptions = this.analysisCalculationsHelperService.getYearOptions();
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(group => {
       this.group = group;

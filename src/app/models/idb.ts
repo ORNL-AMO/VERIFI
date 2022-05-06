@@ -231,7 +231,6 @@ export interface IdbAnalysisItem {
     energyIsSource: boolean,
     reportYear: number,
     energyUnit: string,
-    baselineAdjustment: number,
     groups: Array<AnalysisGroup>
 }
 
@@ -248,6 +247,11 @@ export interface AnalysisGroup {
     monthlyPercentBaseload: Array<{
         monthNum: number,
         percent: number
+    }>,
+    hasBaselineAdjustement: boolean,
+    baselineAdjustments: Array<{
+        year: number,
+        amount: number
     }>
 }
 
@@ -260,10 +264,14 @@ export interface IdbAccountAnalysisItem {
     energyIsSource: boolean,
     reportYear: number,
     energyUnit: string,
-    baselineAdjustment: number,
     facilityAnalysisItems: Array<{
         facilityId: string,
         analysisItemId: string
+    }>,
+    hasBaselineAdjustement: boolean,
+    baselineAdjustments: Array<{
+        year: number,
+        amount: number
     }>
 }
 

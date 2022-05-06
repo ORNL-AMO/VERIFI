@@ -211,7 +211,7 @@ export class ImportMeterDataWizardComponent implements OnInit {
 
     let counts = _.countBy(existingReadingsExistingMeters, 'meterId');
     Object.keys(counts).forEach((key, index) => {
-      let meter: IdbUtilityMeter = this.facilityMeters.find(meter => { return meter.id == Number(key) })
+      let meter: IdbUtilityMeter = this.facilityMeters.find(meter => { return meter.guid == key })
       let meterData: Array<IdbUtilityMeterData> = existingReadingsExistingMeters.filter(reading => { return reading.meterId == meter.guid });
       let startDate: IdbUtilityMeterData = _.minBy(meterData, 'readDate');
       let endDate: IdbUtilityMeterData = _.maxBy(meterData, 'readDate');
@@ -254,7 +254,7 @@ export class ImportMeterDataWizardComponent implements OnInit {
 
     let counts = _.countBy(newReadingsExistingMeters, 'meterId');
     Object.keys(counts).forEach((key, index) => {
-      let meter: IdbUtilityMeter = this.facilityMeters.find(meter => { return meter.id == Number(key) })
+      let meter: IdbUtilityMeter = this.facilityMeters.find(meter => { return meter.guid == key })
       let meterData: Array<IdbUtilityMeterData> = newReadingsExistingMeters.filter(reading => { return reading.meterId == meter.guid });
       let startDate: IdbUtilityMeterData = _.minBy(meterData, 'readDate');
       let endDate: IdbUtilityMeterData = _.maxBy(meterData, 'readDate');

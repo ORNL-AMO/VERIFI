@@ -26,7 +26,7 @@ export class AccountAnalysisSetupComponent implements OnInit {
     private router: Router) { }
 
   ngOnInit(): void {
-    this.analysisItem = this.accountAnalysisDbService.selectedAnalysisItem.getValue();    
+    this.analysisItem = this.accountAnalysisDbService.selectedAnalysisItem.getValue();
     if (!this.analysisItem) {
       this.router.navigateByUrl('/account/analysis/dashboard')
     }
@@ -40,7 +40,21 @@ export class AccountAnalysisSetupComponent implements OnInit {
     this.accountAnalysisDbService.selectedAnalysisItem.next(this.analysisItem);
   }
 
-  resetFacilityItems(){
+  changeReportYear() {
+    if (this.account.sustainabilityQuestions.energyReductionBaselineYear < this.analysisItem.reportYear) {
+      let yearAdjustments: Array<{ year: number, amount: number }> = new Array();
+      for (let year: number = this.account.sustainabilityQuestions.energyReductionBaselineYear + 1; year <= this.analysisItem.reportYear; year++) {
+        yearAdjustments.push({
+          year: year,
+          amount: 0
+        })
+      }
+      this.analysisItem.baselineAdjustments = yearAdjustments;
+    }
+    this.resetFacilityItems();
+  }
+
+  resetFacilityItems() {
     this.analysisItem.facilityAnalysisItems.forEach(item => {
       item.analysisItemId = undefined;
     });

@@ -35,21 +35,39 @@
                         Report Year
                     </label>
                     <select required class="w-50" id="reportYear" id="reportYear" [(ngModel)]="analysisItem.reportYear"
-                        (change)="resetFacilityItems()">
+                        (change)="changeReportYear()">
                         <option *ngFor="let year of yearOptions" [ngValue]="year">{{year}}</option>
                     </select>
                 </div>
-                <div class="form-group d-flex w-100">
-                    <label for="reportYear" class="w-50">
-                        Corporate-level Baseline Adjustement
+                <hr>
+                <div class="form-group d-flex">
+                    <label for="hasBaselineAdjustement" class="w-50 bold">
+                        Has Baseline Adjustement
                     </label>
-                    <div class="input-group w-50">
+                    <label class="switch" for="hasBaselineAdjustement">
+                        <input class="checkbox" type="checkbox" id="hasBaselineAdjustement" name="hasBaselineAdjustement"
+                            [(ngModel)]="analysisItem.hasBaselineAdjustement" (change)="saveItem()">
+                        <span class="slider round"></span>
+                    </label>
+                    <!-- <div class="input-group w-50">
                         <input type="number" id="baselineAdjustment" id="baselineAdjustment"
                             [(ngModel)]="analysisItem.baselineAdjustment" (change)="saveItem()" min="0">
                         <span class="unit" [innerHTML]="analysisItem.energyUnit | settingsLabel:'/yr'"></span>
+                    </div> -->
+                </div>
+                <div class="d-flex flex-column" *ngIf="analysisItem.hasBaselineAdjustement">
+                    <div class="row form-group" *ngFor="let baselineAdjustment of analysisItem.baselineAdjustments">
+                        <div class="col-12 d-flex">
+        
+                            <label class="w-50 bold">{{baselineAdjustment.year}}</label>
+                            <div class="input-group w-50">
+                                <input type="number" id="baselineAdjustment" id="baselineAdjustment"
+                                    [(ngModel)]="baselineAdjustment.amount" (change)="saveItem()" min="0">
+                                <span class="unit" [innerHTML]="analysisItem.energyUnit | settingsLabel:'/yr'"></span>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <hr>
             </div>
             <div class="col-6">
                 <div class="form-group">

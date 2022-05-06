@@ -85,7 +85,21 @@ export class AnnualAnalysisSummaryTableComponent implements OnInit {
     if (this.analysisTableColumns.modeledEnergy) {
       numEnergyColumns++;
     }
-    if (this.analysisTableColumns.adjustedEnergy) {
+    if (this.analysisTableColumns.adjustedForNormalization) {
+      numEnergyColumns++;
+    }
+    if (this.analysisTableColumns.adjusted) {
+      numEnergyColumns++;
+    }
+    
+    if (this.analysisTableColumns.baselineAdjustmentForNormalization) {
+      numEnergyColumns++;
+    }
+    
+    if (this.analysisTableColumns.baselineAdjustmentForOther) {
+      numEnergyColumns++;
+    }
+    if (this.analysisTableColumns.baselineAdjustment) {
       numEnergyColumns++;
     }
     this.numEnergyColumns = numEnergyColumns;
@@ -105,9 +119,9 @@ export class AnnualAnalysisSummaryTableComponent implements OnInit {
     if (this.analysisTableColumns.annualSavingsPercentImprovement) {
       numImprovementColumns++;
     }
-    if (this.analysisTableColumns.adjustmentToBaseline) {
-      numImprovementColumns++;
-    }
+    // if (this.analysisTableColumns.adjustmentToBaseline) {
+    //   numImprovementColumns++;
+    // }
     if (this.analysisTableColumns.cummulativeSavings) {
       numImprovementColumns++;
     }

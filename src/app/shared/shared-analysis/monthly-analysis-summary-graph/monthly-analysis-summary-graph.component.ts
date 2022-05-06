@@ -47,7 +47,7 @@ export class MonthlyAnalysisSummaryGraphComponent implements OnInit {
         mode: "lines+markers",
         name: 'Adjusted Energy Use',
         x: this.monthlyAnalysisSummaryData.map(results => { return results.date }),
-        y: this.monthlyAnalysisSummaryData.map(results => { return results.adjustedBaselineEnergyUse }),
+        y: this.monthlyAnalysisSummaryData.map(results => { return results.adjusted }),
         line: { color: '#7D3C98', width: 4 },
         marker:{
           size: 8

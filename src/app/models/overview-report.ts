@@ -69,7 +69,8 @@ export interface ReportOptions {
   reportType: 'data' | 'betterPlants',
   analysisItemId: string,
   baselineAdjustmentNotes: string,
-  modificationNotes: string
+  modificationNotes: string,
+  includeFacilityNames: boolean
 }
 
 
@@ -77,7 +78,7 @@ export interface BetterPlantsSummary {
   percentAnnualImprovement: number,
   percentTotalImprovement: number,
   adjustedBaselinePrimaryEnergy: number,
-  baselineAdjustment: number,
+  // baselineAdjustment: number,
   totalEnergySavings: number,
   baselineYearResults: BetterPlantsEnergySummary,
   reportYearResults: BetterPlantsEnergySummary,

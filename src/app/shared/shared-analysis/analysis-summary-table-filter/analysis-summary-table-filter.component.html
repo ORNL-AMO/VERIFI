@@ -20,10 +20,31 @@
                         (change)="save()">Modeled Energy Use
                 </label>
                 <label>
-                    <input type="checkbox" name="adjustedEnergy" [(ngModel)]="analysisTableColumns.adjustedEnergy"
-                        (change)="save()">Adjusted Energy Use
+                    <input type="checkbox" name="adjustedForNormalization" [(ngModel)]="analysisTableColumns.adjustedForNormalization"
+                        (change)="save()">Adjusted for Normalization
+                </label>
+                <label>
+                    <input type="checkbox" name="adjusted" [(ngModel)]="analysisTableColumns.adjusted"
+                        (change)="save()">Adjusted
+                </label>
+                <label>
+                    <input type="checkbox" name="baselineAdjustmentForNormalization" [(ngModel)]="analysisTableColumns.baselineAdjustmentForNormalization"
+                        (change)="save()">Baseline Adjustment for Normalization
+                </label>
+                <label>
+                    <input type="checkbox" name="baselineAdjustmentForOther" [(ngModel)]="analysisTableColumns.baselineAdjustmentForOther"
+                        (change)="save()">Baseline Adjustment for Other
+                </label>
+                <label>
+                    <input type="checkbox" name="baselineAdjustment" [(ngModel)]="analysisTableColumns.baselineAdjustment"
+                        (change)="save()">Baseline Adjustment
                 </label>
 
+                <label>
+                    <input type="checkbox" name="adjustmentToBaseline"
+                        [(ngModel)]="analysisTableColumns.adjustmentToBaseline" (change)="save()">Adjustment to
+                    Baseline
+                </label>
 
             </div>
             <div class="col" *ngIf="tableContext != 'monthAccount' && tableContext != 'annualAccount'">
@@ -84,11 +105,6 @@
                     <input type="checkbox" name="annualSavingsPercentImprovement"
                         [(ngModel)]="analysisTableColumns.annualSavingsPercentImprovement" (change)="save()">Annual
                     Savings % Improvement
-                </label>
-                <label *ngIf="tableContext == 'annualGroup' || tableContext == 'annualFacility' || tableContext == 'annualAccount'">
-                    <input type="checkbox" name="adjustmentToBaseline"
-                        [(ngModel)]="analysisTableColumns.adjustmentToBaseline" (change)="save()">Adjustment to
-                    Baseline
                 </label>
                 <label *ngIf="tableContext == 'annualGroup' || tableContext == 'annualFacility' || tableContext == 'annualAccount'">
                     <input type="checkbox" name="cummulativeSavings"

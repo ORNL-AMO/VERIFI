@@ -47,7 +47,7 @@ export class AnnualAnalysisSummaryGraphComponent implements OnInit {
 
       barTrace = {
         x: summariesCopy.map(summary => { return summary.year }),
-        y: summariesCopy.map(summary => { return summary.adjustedBaselineEnergyUse }),
+        y: summariesCopy.map(summary => { return summary.adjusted }),
         // width: summariesCopy.map(summary => { return .75 }),
         // texttemplate: '%{value:.5f}',
         name: "Adjusted Energy Use",
