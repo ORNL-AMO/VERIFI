@@ -38,22 +38,34 @@ export class BetterPlantsReportService {
 
     //Better Plants = MMBtu
     selectedAnalysisItem.energyUnit = 'MMBtu';
-
-    let facilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
-    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     let includedFacilityIds: Array<string> = new Array();
-    let facilityPerformance: Array<{facility: IdbFacility, performance: number}> = new Array();
     selectedAnalysisItem.facilityAnalysisItems.forEach(item => {
       if (item.analysisItemId) {
         includedFacilityIds.push(item.facilityId);
+      }
+    });
+    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    let includedFacilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return includedFacilityIds.includes(meter.facilityId) });
+    let calanderizedMeters: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMeterData(includedFacilityMeters, true, true, { energyIsSource: true });
+    calanderizedMeters.forEach(calanderizedMeter => {
+      calanderizedMeter.monthlyData = this.convertMeterDataService.convertMeterDataToAnalysis(selectedAnalysisItem, calanderizedMeter.monthlyData, account, calanderizedMeter.meter);
+    });
+
+
+    let facilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
+    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+
+    let facilityPerformance: Array<{ facility: IdbFacility, performance: number }> = new Array();
+    selectedAnalysisItem.facilityAnalysisItems.forEach(item => {
+      if (item.analysisItemId) {
         let facilityAnalysisItem: IdbAnalysisItem = facilityAnalysisItems.find(facilityItem => { return facilityItem.guid == item.analysisItemId });
         // if (facilityAnalysisItem.baselineAdjustment) {
         //   let convertedAdjustment: number = this.convertUnitsService.value(facilityAnalysisItem.baselineAdjustment).from(facilityAnalysisItem.energyUnit).to('MMBtu');
         //   baselineAdjustment = baselineAdjustment + convertedAdjustment;
         // }
         let facility: IdbFacility = facilities.find(f => { return f.guid == item.facilityId });
-        let annualAnalysisSummary: Array<AnnualAnalysisSummary> = this.facilityAnalysisCalculationsService.getAnnualAnalysisSummary(facilityAnalysisItem, facility, true)
-        let reportYearAnalysisSummary: AnnualAnalysisSummary = annualAnalysisSummary.find(summary => {return summary.year == selectedAnalysisItem.reportYear});
+        let annualAnalysisSummary: Array<AnnualAnalysisSummary> = this.facilityAnalysisCalculationsService.getAnnualAnalysisSummary(facilityAnalysisItem, facility, calanderizedMeters)
+        let reportYearAnalysisSummary: AnnualAnalysisSummary = annualAnalysisSummary.find(summary => { return summary.year == selectedAnalysisItem.reportYear });
         facilityPerformance.push({
           facility: facility,
           performance: reportYearAnalysisSummary.totalSavingsPercentImprovement
@@ -61,16 +73,11 @@ export class BetterPlantsReportService {
       }
     });
 
-    let annualAnalysisSummary: Array<AnnualAnalysisSummary> = this.accountAnalysisCalculationsService.getAnnualAnalysisSummary(selectedAnalysisItem, account);
+    let annualAnalysisSummary: Array<AnnualAnalysisSummary> = this.accountAnalysisCalculationsService.getAnnualAnalysisSummary(selectedAnalysisItem, account, calanderizedMeters);
     let reportYearAnalysisSummary: AnnualAnalysisSummary = annualAnalysisSummary.find(summary => { return summary.year == reportOptions.targetYear });
     let baselineYearAnalysisSummary: AnnualAnalysisSummary = annualAnalysisSummary.find(summary => { return summary.year == reportOptions.baselineYear });
 
-    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    let includedFacilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return includedFacilityIds.includes(meter.facilityId) });
-    let calanderizedMeters: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMeterData(includedFacilityMeters, true, true, { energyIsSource: true });
-    calanderizedMeters.forEach(calanderizedMeter => {
-      calanderizedMeter.monthlyData = this.convertMeterDataService.convertMeterDataToAnalysis(selectedAnalysisItem, calanderizedMeter.monthlyData, account, calanderizedMeter.meter);
-    });
+
 
 
 

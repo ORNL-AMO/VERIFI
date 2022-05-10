@@ -7,6 +7,7 @@ import { AnalysisCalculationsHelperService } from './analysis-calculations-helpe
 import { FacilityAnalysisCalculationsService } from './facility-analysis-calculations.service';
 import * as _ from 'lodash';
 import { AnalysisCalculationsService } from './analysis-calculations.service';
+import { CalanderizedMeter } from 'src/app/models/calanderization';
 
 @Injectable({
   providedIn: 'root'
@@ -19,7 +20,7 @@ export class AccountAnalysisCalculationsService {
     private facilityDbService: FacilitydbService,
     private analysisCalculationsService: AnalysisCalculationsService) { }
 
-  calculateMonthlyAccountAnalysis(accountAnalysisItem: IdbAccountAnalysisItem, account: IdbAccount): Array<MonthlyAnalysisSummaryData> {
+  calculateMonthlyAccountAnalysis(accountAnalysisItem: IdbAccountAnalysisItem, account: IdbAccount, calanderizedMeters: Array<CalanderizedMeter>): Array<MonthlyAnalysisSummaryData> {
     let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = this.analysisCalculationsHelperService.getMonthlyStartAndEndDate(account, accountAnalysisItem);
     let baselineDate: Date = monthlyStartAndEndDate.baselineDate;
     let endDate: Date = monthlyStartAndEndDate.endDate;
@@ -35,7 +36,7 @@ export class AccountAnalysisCalculationsService {
         //update items with account options
         analysisItem.energyUnit = accountAnalysisItem.energyUnit;
         let facility: IdbFacility = accountFacilities.find(facility => { return facility.guid == item.facilityId });
-        let facilityItemSummary: Array<MonthlyAnalysisSummaryData> = this.facilityAnalysisCalculationsService.calculateMonthlyFacilityAnalysis(analysisItem, facility, true);
+        let facilityItemSummary: Array<MonthlyAnalysisSummaryData> = this.facilityAnalysisCalculationsService.calculateMonthlyFacilityAnalysis(analysisItem, facility, calanderizedMeters);
         monthlyAnalysisSummaryData = monthlyAnalysisSummaryData.concat(facilityItemSummary);
       }
     })
@@ -173,8 +174,8 @@ export class AccountAnalysisCalculationsService {
     return analysisSummaryData;
   }
 
-  getAnnualAnalysisSummary(analysisItem: IdbAccountAnalysisItem, account: IdbAccount): Array<AnnualAnalysisSummary> {
-    let accountMonthlySummaryData: Array<MonthlyAnalysisSummaryData> = this.calculateMonthlyAccountAnalysis(analysisItem, account);
+  getAnnualAnalysisSummary(analysisItem: IdbAccountAnalysisItem, account: IdbAccount, calanderizedMeters: Array<CalanderizedMeter>): Array<AnnualAnalysisSummary> {
+    let accountMonthlySummaryData: Array<MonthlyAnalysisSummaryData> = this.calculateMonthlyAccountAnalysis(analysisItem, account, calanderizedMeters);
     let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = this.analysisCalculationsService.calculateAnnualAnalysisSummary(accountMonthlySummaryData, analysisItem, account);
     return annualAnalysisSummaries;
   }

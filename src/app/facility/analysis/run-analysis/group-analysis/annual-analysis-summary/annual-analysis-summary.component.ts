@@ -5,6 +5,7 @@ import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AnnualAnalysisSummary } from 'src/app/models/analysis';
 import { AnalysisGroup, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
+import { CalanderizedMeter } from 'src/app/models/calanderization';
 
 @Component({
   selector: 'app-annual-analysis-summary',
@@ -27,7 +28,8 @@ export class AnnualAnalysisSummaryComponent implements OnInit {
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     this.group = this.analysisService.selectedGroup.getValue();
     this.facility = this.facilityDbService.selectedFacility.getValue();
-    this.annualAnalysisSummary = this.analysisCalculationsService.getAnnualAnalysisSummary(this.group, this.analysisItem, this.facility, false);
+    let calanderizedMeters: Array<CalanderizedMeter> = this.analysisService.calanderizedMeters;
+    this.annualAnalysisSummary = this.analysisCalculationsService.getAnnualAnalysisSummary(this.group, this.analysisItem, this.facility, calanderizedMeters);
   }
 
   setDataDisplay(display: 'table' | 'graph') {

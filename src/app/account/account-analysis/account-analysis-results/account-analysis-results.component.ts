@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { AccountAnalysisService } from '../account-analysis.service';
 
 @Component({
   selector: 'app-account-analysis-results',
@@ -7,9 +8,10 @@ import { Component, OnInit } from '@angular/core';
 })
 export class AccountAnalysisResultsComponent implements OnInit {
 
-  constructor() { }
+  constructor(private accountAnalysisService: AccountAnalysisService) { }
 
   ngOnInit(): void {
+    this.accountAnalysisService.setCalanderizedMeters();
   }
 
 }

@@ -6,6 +6,7 @@ import { IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 import { EnergyUnitOptions, UnitOption } from 'src/app/shared/unitOptions';
 import * as _ from 'lodash';
 import { AnalysisCalculationsHelperService } from 'src/app/shared/shared-analysis/calculations/analysis-calculations-helper.service';
+import { AnalysisService } from '../../analysis.service';
 @Component({
   selector: 'app-analysis-setup',
   templateUrl: './analysis-setup.component.html',
@@ -21,7 +22,8 @@ export class AnalysisSetupComponent implements OnInit {
   analysisItem: IdbAnalysisItem;
   yearOptions: Array<number>;
   constructor(private facilityDbService: FacilitydbService, private analysisDbService: AnalysisDbService,
-    private analysisCalculationsHelperService: AnalysisCalculationsHelperService) { }
+    private analysisCalculationsHelperService: AnalysisCalculationsHelperService,
+    private analysisService: AnalysisService) { }
 
   ngOnInit(): void {
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
@@ -30,8 +32,8 @@ export class AnalysisSetupComponent implements OnInit {
     this.yearOptions = this.analysisCalculationsHelperService.getYearOptions();
   }
 
-  saveItem() {
-    this.analysisDbService.update(this.analysisItem);
+  async saveItem() {
+    await this.analysisDbService.updateWithObservable(this.analysisItem).toPromise();
     this.analysisDbService.selectedAnalysisItem.next(this.analysisItem);
   }
 
@@ -49,5 +51,10 @@ export class AnalysisSetupComponent implements OnInit {
       });
     }
     this.saveItem();
+  }
+
+  async setSiteSource(){
+    await this.saveItem();
+    this.analysisService.setCalanderizedMeters();
   }
 }

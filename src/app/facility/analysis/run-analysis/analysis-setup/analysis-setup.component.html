@@ -11,11 +11,11 @@
                 <label class="w-50">Energy displayed as site or source? </label>
                 <div class="w-50">
                     <input type="radio" class="rowToggle" name="energyIsSource" [value]="true" id="sourceEnergy"
-                        [(ngModel)]="analysisItem.energyIsSource" (change)="saveItem()">
+                        [(ngModel)]="analysisItem.energyIsSource" (change)="setSiteSource()">
                     <label class="checkbox" for="sourceEnergy">Source Energy</label>
 
                     <input type="radio" class="rowToggle" name="energyIsSource" [value]="false" id="siteEnergy"
-                        [(ngModel)]="analysisItem.energyIsSource" (change)="saveItem()">
+                        [(ngModel)]="analysisItem.energyIsSource" (change)="setSiteSource()">
                     <label class="checkbox" for="siteEnergy">Site Energy</label>
                 </div>
             </div>

@@ -5,6 +5,7 @@ import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
+import { CalanderizedMeter } from 'src/app/models/calanderization';
 
 @Component({
   selector: 'app-monthly-facility-analysis',
@@ -25,7 +26,8 @@ export class MonthlyFacilityAnalysisComponent implements OnInit {
     this.dataDisplay = this.analysisService.dataDisplay.getValue();
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     this.facility = this.facilityDbService.selectedFacility.getValue();
-    this.monthlyFacilityAnalysisData = this.facilityAnalysisCalculationsService.calculateMonthlyFacilityAnalysis(this.analysisItem, this.facility, false);
+    let calanderizedMeters: Array<CalanderizedMeter> = this.analysisService.calanderizedMeters;
+    this.monthlyFacilityAnalysisData = this.facilityAnalysisCalculationsService.calculateMonthlyFacilityAnalysis(this.analysisItem, this.facility, calanderizedMeters);
   }
 
   setDataDisplay(display: 'table' | 'graph') {

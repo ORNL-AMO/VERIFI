@@ -1,8 +1,14 @@
 import { Injectable } from '@angular/core';
 import { LocalStorageService } from 'ngx-webstorage';
 import { BehaviorSubject } from 'rxjs';
+import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { AnalysisTableColumns } from 'src/app/models/analysis';
-import { AnalysisGroup, IdbAccount, IdbFacility, PredictorData } from '../../models/idb';
+import { CalanderizationOptions, CalanderizedMeter } from 'src/app/models/calanderization';
+import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
+import { ConvertMeterDataService } from 'src/app/shared/helper-services/convert-meter-data.service';
+import { AnalysisGroup, IdbAccount, IdbAnalysisItem, IdbFacility, IdbUtilityMeter, PredictorData } from '../../models/idb';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +19,10 @@ export class AnalysisService {
   dataDisplay: BehaviorSubject<"graph" | "table">;
 
   analysisTableColumns: BehaviorSubject<AnalysisTableColumns>;
-  constructor(private localStorageService: LocalStorageService) {
+  calanderizedMeters: Array<CalanderizedMeter>;
+  constructor(private localStorageService: LocalStorageService, private calendarizationService: CalanderizationService,
+    private convertMeterDataService: ConvertMeterDataService, private facilityDbService: FacilitydbService,
+    private utilityMeterDbService: UtilityMeterdbService, private analysisDbService: AnalysisDbService) {
     let dataDisplay: "graph" | "table" = this.localStorageService.retrieve("analysisDataDisplay");
     if (!dataDisplay) {
       dataDisplay = "table";
@@ -66,7 +75,7 @@ export class AnalysisService {
       }
     });
 
-    
+
     // this.monthlyTableColumns.subscribe(annualTableColumns => {
     //   if (annualTableColumns) {
     //     this.localStorageService.store('annualTableColumns', monthlyTableColumns);
@@ -138,4 +147,18 @@ export class AnalysisService {
   }
 
 
+  setCalanderizedMeters() {
+    let analysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+    let calanderizationOptions: CalanderizationOptions = {
+      energyIsSource: analysisItem.energyIsSource
+    }
+    console.log(calanderizationOptions.energyIsSource);
+    let calanderizedMeterData: Array<CalanderizedMeter> = this.calendarizationService.getCalanderizedMeterData(facilityMeters, false, false, calanderizationOptions);
+    calanderizedMeterData.forEach(calanderizedMeter => {
+      calanderizedMeter.monthlyData = this.convertMeterDataService.convertMeterDataToAnalysis(analysisItem, calanderizedMeter.monthlyData, selectedFacility, calanderizedMeter.meter);
+    });
+    this.calanderizedMeters = calanderizedMeterData;
+  }
 }
