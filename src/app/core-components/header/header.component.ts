@@ -75,9 +75,11 @@ export class HeaderComponent implements OnInit {
   }
 
   async switchAccount(account: IdbAccount) {
+    this.loadingService.setLoadingMessage("Switching accounts...");
+    this.loadingService.setLoadingStatus(true);
+    await this.dbChangesService.selectAccount(account);
     this.router.navigate(['/']);
-    // this.accountdbService.selectedAccount.next(account);
-    this.dbChangesService.selectAccount(account);
+    this.loadingService.setLoadingStatus(false);
     this.toggleDropdown();
   }
 

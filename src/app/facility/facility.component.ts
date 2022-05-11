@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { LoadingService } from '../core-components/loading/loading.service';
 import { DbChangesService } from '../indexedDB/db-changes.service';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
 import { IdbFacility } from '../models/idb';
@@ -27,9 +28,6 @@ export class FacilityComponent implements OnInit {
       let selectedFacility: IdbFacility = facilities.find(facility => { return facility.id == facilityId });
       if (selectedFacility) {
         this.dbChangesService.selectFacility(selectedFacility);
-        // if (this.selectedFacility && selectedFacility.id != this.selectedFacility.id) {
-        //   // this.facilityDbService.selectedFacility.next(selectedFacility);
-        // }
       }else{
         this.router.navigateByUrl('account')
       }
