@@ -7,6 +7,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAccount, IdbFacility } from 'src/app/models/idb';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { environment } from 'src/environments/environment';
+import * as _ from 'lodash';
 
 @Component({
   selector: 'app-sidebar',
@@ -17,11 +18,10 @@ export class SidebarComponent implements OnInit {
   open: boolean = true;
   isDev: boolean;
 
-  account: IdbAccount;
   accountName: string;
   accountSub: Subscription;
 
-  facilityList: Array<IdbFacility>;
+  facilityList: Array<{ guid: string, color: string, id: number }>;
   facilityListSub: Subscription;
 
   selectedFacility: IdbFacility;
@@ -44,15 +44,14 @@ export class SidebarComponent implements OnInit {
 
   ngOnInit() {
     this.isDev = !environment.production;
-    this.accountSub = this.accountDbService.selectedAccount.subscribe(val => {
-      this.account = val;
-      if (this.account) {
-        this.accountName = this.account.name;
+    this.accountSub = this.accountDbService.selectedAccount.subscribe(account => {
+      if (account) {
+        this.accountName = account.name;
       }
     });
 
     this.facilityListSub = this.facilityDbService.accountFacilities.subscribe(val => {
-      this.facilityList = val;
+      this.setFacilityList(val);
     });
 
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
@@ -74,26 +73,14 @@ export class SidebarComponent implements OnInit {
     this.sharedDataService.sidebarOpen.next(this.open);
   }
 
-  checkHideFacility(facility: IdbFacility): boolean {
-    if (this.open) {
-      return false;
-    } else if (this.router.url.includes('account')) {
-      return false;
-    } else if (this.selectedFacility) {
-      if (this.selectedFacility == facility) {
-        return false;
-      }
-    }
-    return true;
-  }
 
-  checkHideFacilityLinks(facility: IdbFacility): boolean {
+  checkHideFacilityLinks(facilityId: string): boolean {
     if (this.open) {
       return false;
     } else if (this.router.url.includes('account')) {
       return true;
     } else if (this.selectedFacility) {
-      if (this.selectedFacility.id != facility.id) {
+      if (this.selectedFacility.guid != facilityId) {
         return true;
       }
     }
@@ -111,5 +98,27 @@ export class SidebarComponent implements OnInit {
 
   setShowSidebar() {
     this.showSidebar = !this.router.url.includes('setup-wizard');
+  }
+
+  setFacilityList(accountFacilities: Array<IdbFacility>) {
+    if (!this.facilityList) {
+      this.facilityList = accountFacilities.map(facility => { return { guid: facility.guid, color: facility.color, id: facility.id } });
+    } else {
+      let tmpList: Array<string> = accountFacilities.map(facility => { return facility.guid });
+      let currentIdList: Array<string> = this.facilityList.map(listItem => { return listItem.guid });
+      let missingVals: Array<string> = _.xor(tmpList, currentIdList);
+      if (missingVals.length != 0) {
+        this.facilityList = accountFacilities.map(facility => { return { guid: facility.guid, color: facility.color, id: facility.id } });
+      } else {
+        let tmpList: Array<string> = accountFacilities.map(facility => { return facility.color });
+        let currentIdList: Array<string> = this.facilityList.map(listItem => { return listItem.color });
+        let missingVals: Array<string> = _.xor(tmpList, currentIdList);
+        if (missingVals.length != 0) {
+          this.facilityList.forEach(item => {
+            item.color = accountFacilities.find(facility => {return facility.guid == item.guid}).color;
+          })
+        }
+      }
+    }
   }
 }

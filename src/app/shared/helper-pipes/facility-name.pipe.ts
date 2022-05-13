@@ -2,6 +2,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 
 @Pipe({
+  pure: false,
   name: 'facilityName'
 })
 export class FacilityNamePipe implements PipeTransform {
