@@ -97,8 +97,12 @@ export class HeaderComponent implements OnInit {
     this.showSearch = !this.showSearch;
   }
 
-  backupAccount() {
+  async backupAccount() {
     this.backupDataService.backupAccount();
+    let selectedAccount: IdbAccount = this.accountdbService.selectedAccount.getValue();
+    selectedAccount.lastBackup = new Date();
+    await this.accountdbService.updateWithObservable(selectedAccount).toPromise();
+    this.accountdbService.selectedAccount.next(selectedAccount);
   }
 
   async deleteDatabase() {
