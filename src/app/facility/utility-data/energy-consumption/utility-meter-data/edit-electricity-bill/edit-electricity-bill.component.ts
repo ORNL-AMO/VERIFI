@@ -1,6 +1,8 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
+import { LoadingService } from 'src/app/core-components/loading/loading.service';
+import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -37,7 +39,8 @@ export class EditElectricityBillComponent implements OnInit {
   facilityMeter: IdbUtilityMeter;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private utilityMeterDataService: UtilityMeterDataService,
     private utilityMeterDbService: UtilityMeterdbService, private dbChangesService: DbChangesService, private facilityDbService: FacilitydbService,
-    private accountDbService: AccountdbService) { }
+    private accountDbService: AccountdbService, private loadingService: LoadingService,
+    private toastNotificationService: ToastNotificationsService) { }
 
   ngOnInit(): void {
     this.electricityDataFiltersSub = this.utilityMeterDataService.electricityInputFilters.subscribe(dataFilters => {
@@ -63,6 +66,8 @@ export class EditElectricityBillComponent implements OnInit {
   }
 
   async saveAndQuit() {
+    this.loadingService.setLoadingMessage('Saving Reading...');
+    this.loadingService.setLoadingStatus(true);
     let meterDataToSave: IdbUtilityMeterData = this.utilityMeterDataService.updateElectricityMeterDataFromForm(this.editMeterData, this.meterDataForm);
     if (this.addOrEdit == 'edit') {
       await this.utilityMeterDataDbService.updateWithObservable(meterDataToSave).toPromise();
@@ -74,9 +79,13 @@ export class EditElectricityBillComponent implements OnInit {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setMeterData(selectedAccount, selectedFacility);
     this.cancel();
+    this.loadingService.setLoadingStatus(false);
+    this.toastNotificationService.showToast('Reading Saved!', undefined, undefined, false, "success");
   }
 
   async saveAndAddAnother() {
+    this.loadingService.setLoadingMessage('Saving Reading...');
+    this.loadingService.setLoadingStatus(true);
     let meterDataToSave: IdbUtilityMeterData = this.utilityMeterDataService.updateElectricityMeterDataFromForm(this.editMeterData, this.meterDataForm);
     delete meterDataToSave.id;
     meterDataToSave = await this.utilityMeterDataDbService.addWithObservable(meterDataToSave).toPromise();
@@ -87,6 +96,8 @@ export class EditElectricityBillComponent implements OnInit {
     this.editMeterData.readDate = new Date(meterDataToSave.readDate);
     this.editMeterData.readDate.setMonth(this.editMeterData.readDate.getUTCMonth() + 1);
     this.meterDataForm = this.utilityMeterDataService.getElectricityMeterDataForm(this.editMeterData);
+    this.loadingService.setLoadingStatus(false);
+    this.toastNotificationService.showToast('Reading Saved!', undefined, undefined, false, "success");
   }
 
   setDisplayColumns() {

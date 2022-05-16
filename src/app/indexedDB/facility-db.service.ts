@@ -100,6 +100,7 @@ export class FacilitydbService {
             guid: Math.random().toString(36).substr(2, 9),
             name: 'New Facility',
             country: 'US',
+            color: '#'+(Math.random() * 0xFFFFFF << 0).toString(16).padStart(6, '0'),
             city: account.city,
             state: account.state,
             zip: account.zip,

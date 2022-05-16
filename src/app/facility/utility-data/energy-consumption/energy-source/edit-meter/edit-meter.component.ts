@@ -29,7 +29,7 @@ export class EditMeterComponent implements OnInit {
   constructor(private utilityMeterDbService: UtilityMeterdbService, private facilityDbService: FacilitydbService,
     private energyUnitsHelperService: EnergyUnitsHelperService, private editMeterFormService: EditMeterFormService,
     private utilityMeterDataDbService: UtilityMeterDatadbService, private loadingService: LoadingService,
-    private toastNoticationService: ToastNotificationsService, private accountDbService: AccountdbService,
+    private toastNotificationService: ToastNotificationsService, private accountDbService: AccountdbService,
     private dbChangesService: DbChangesService) { }
 
   ngOnInit(): void {
@@ -47,6 +47,8 @@ export class EditMeterComponent implements OnInit {
   }
 
   async saveChanges() {
+    this.loadingService.setLoadingMessage('Saving Meter...');
+    this.loadingService.setLoadingStatus(true);
     //if data exists. See if you need to re-calculate energy
     if (this.meterDataExists && (this.editMeter.startingUnit != this.meterForm.controls.startingUnit.value) || (this.editMeter.heatCapacity != this.meterForm.controls.heatCapacity.value)) {
       await this.checkMeterData();
@@ -63,6 +65,8 @@ export class EditMeterComponent implements OnInit {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     await this.dbChangesService.setMeters(selectedAccount, selectedFacility);
     this.cancel();
+    this.loadingService.setLoadingStatus(false);
+    this.toastNotificationService.showToast('Meter Saved!', undefined, undefined, false, "success");
   }
 
   cancel() {
@@ -90,8 +94,7 @@ export class EditMeterComponent implements OnInit {
       this.utilityMeterDataDbService.accountMeterData.next(accountMeterData);
       let facilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.filter(meterData => { return meterData.facilityId == selectedFacility.guid });
       this.utilityMeterDataDbService.facilityMeterData.next(facilityMeterData);
-      this.loadingService.setLoadingStatus(false);
-      this.toastNoticationService.showToast("Meter and Meter Data Updated", undefined, undefined, false, "success");
+      this.toastNotificationService.showToast("Meter and Meter Data Updated", undefined, undefined, false, "success");
     }
   }
 }
