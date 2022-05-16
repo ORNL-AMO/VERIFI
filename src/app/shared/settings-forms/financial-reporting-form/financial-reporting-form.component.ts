@@ -87,16 +87,21 @@ export class FinancialReportingFormComponent implements OnInit {
     this.selectedFacilitySub.unsubscribe();
   }
 
-  saveChanges() {
+  async saveChanges() {
     this.isFormChange = true;
     if (!this.inWizard) {
       if (!this.inAccount) {
         this.selectedFacility = this.settingsFormsService.updateFacilityFromFiscalForm(this.form, this.selectedFacility);
-        this.facilityDbService.update(this.selectedFacility);
+        let allFacilities: Array<IdbFacility> = await this.facilityDbService.updateWithObservable(this.selectedFacility).toPromise();
+        this.facilityDbService.selectedFacility.next(this.selectedFacility);
+        let accountFacilities: Array<IdbFacility> = allFacilities.filter(facility => { return facility.accountId == this.selectedFacility.accountId });
+        this.facilityDbService.accountFacilities.next(accountFacilities);
       }
       if (this.inAccount) {
         this.selectedAccount = this.settingsFormsService.updateAccountFromFiscalForm(this.form, this.selectedAccount);
-        this.accountDbService.update(this.selectedAccount);
+        let allAccount: Array<IdbAccount> = await this.accountDbService.updateWithObservable(this.selectedAccount).toPromise();
+        this.accountDbService.selectedAccount.next(this.selectedAccount);
+        this.accountDbService.allAccounts.next(allAccount);
       }
     } else {
       if (!this.inAccount) {

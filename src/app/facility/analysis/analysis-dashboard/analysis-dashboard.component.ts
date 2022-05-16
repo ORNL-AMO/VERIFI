@@ -2,12 +2,14 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { AnalysisCalculationsHelperService } from 'src/app/shared/shared-analysis/calculations/analysis-calculations-helper.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 
 @Component({
   selector: 'app-analysis-dashboard',
@@ -34,7 +36,9 @@ export class AnalysisDashboardComponent implements OnInit {
     private analysisCalculationsHelperService: AnalysisCalculationsHelperService,
     private facilityDbService: FacilitydbService,
     private accountAnalysisDbService: AccountAnalysisDbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService) { }
+    private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private dbChangesService: DbChangesService,
+    private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
     this.facilityAnalysisItemsSub = this.analysisDbService.facilityAnalysisItems.subscribe(items => {
@@ -58,7 +62,8 @@ export class AnalysisDashboardComponent implements OnInit {
   async createAnalysis() {
     let newItem: IdbAnalysisItem = this.analysisDbService.getNewAnalysisItem();
     let addedItem: IdbAnalysisItem = await this.analysisDbService.addWithObservable(newItem).toPromise();
-    this.analysisDbService.setAccountAnalysisItems();
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    await this.dbChangesService.setAnalysisItems(selectedAccount, this.selectedFacility);
     this.analysisDbService.selectedAnalysisItem.next(addedItem);
     this.toastNotificationService.showToast('New Analysis Created', undefined, undefined, false, "success");
     this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/analysis/run-analysis');
@@ -91,10 +96,12 @@ export class AnalysisDashboardComponent implements OnInit {
         }
       });
       if (updated) {
-        this.accountAnalysisDbService.update(accountAnalysisItems[index]);
+        await this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[index]).toPromise();
       }
     }
-    this.analysisDbService.setAccountAnalysisItems();
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    await this.dbChangesService.setAccountAnalysisItems(selectedAccount)
+    await this.dbChangesService.setAnalysisItems(selectedAccount, this.selectedFacility);
     this.itemToDelete = undefined;
     this.toastNotificationService.showToast('Analysis Item Deleted', undefined, undefined, false, "success");
   }
@@ -116,12 +123,13 @@ export class AnalysisDashboardComponent implements OnInit {
     }
   }
 
-  async createCopy(analysisItem: IdbAnalysisItem){
+  async createCopy(analysisItem: IdbAnalysisItem) {
     let newItem: IdbAnalysisItem = JSON.parse(JSON.stringify(analysisItem));
     delete newItem.id;
     newItem.name = newItem.name + " (Copy)";
     let addedItem: IdbAnalysisItem = await this.analysisDbService.addWithObservable(newItem).toPromise();
-    this.analysisDbService.setAccountAnalysisItems();
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    await this.dbChangesService.setAnalysisItems(selectedAccount, this.selectedFacility);
     this.analysisDbService.selectedAnalysisItem.next(addedItem);
     this.toastNotificationService.showToast('Analysis Copy Created', undefined, undefined, false, "success");
     this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/analysis/run-analysis');

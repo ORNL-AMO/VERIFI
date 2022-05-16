@@ -14,7 +14,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 export class FacilityDashboardComponent implements OnInit {
 
   utilityMeterFacilityData: Array<IdbUtilityMeterData>;
-  utilityMeterDataSub: Subscription;
+  selectedFacilitySub: Subscription;
 
   graphDisplaySub: Subscription;
   chartsLabel: "Costs" | "Usage" | "Emissions";
@@ -25,8 +25,9 @@ export class FacilityDashboardComponent implements OnInit {
     private router: Router, private facilitydbService: FacilitydbService) { }
 
   ngOnInit(): void {
-    this.utilityMeterDataSub = this.utilityMeterDataDbService.facilityMeterData.subscribe(utilityMeterFacilityData => {
-      this.utilityMeterFacilityData = utilityMeterFacilityData;
+    this.selectedFacilitySub = this.facilitydbService.selectedFacility.subscribe(value => {
+      this.utilityMeterFacilityData = this.utilityMeterDataDbService.facilityMeterData.getValue();
+      this.dashboardService.setFacilityDashboardSummary();
     });
 
     this.graphDisplaySub = this.dashboardService.graphDisplay.subscribe(value => {
@@ -37,11 +38,11 @@ export class FacilityDashboardComponent implements OnInit {
       } else if (value == "emissions") {
         this.chartsLabel = "Emissions";
       }
-    })
+    });
   }
 
   ngOnDestroy() {
-    this.utilityMeterDataSub.unsubscribe();
+    this.selectedFacilitySub.unsubscribe();
     this.graphDisplaySub.unsubscribe();
   }
 

@@ -3,11 +3,10 @@ import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
 import { DashboardService } from 'src/app/shared/helper-services/dashboard.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
+import { IdbFacility } from 'src/app/models/idb';
 import { HeatMapData } from 'src/app/models/visualization';
 import { VisualizationService } from '../../../shared/helper-services/visualization.service';
+import { CalanderizedMeter } from 'src/app/models/calanderization';
 
 @Component({
   selector: 'app-facility-heat-map',
@@ -20,35 +19,20 @@ export class FacilityHeatMapComponent implements OnInit {
   resultData: Array<{ monthlyEnergy: Array<number>, monthlyCost: Array<number>, monthlyEmissions: Array<number> }>;
   months: Array<string>;
   years: Array<number>;
-  selectedFacility: IdbFacility;
-  selectedFacilitySub: Subscription;
-  accountMeterDataSub: Subscription;
-  facilityMeters: Array<IdbUtilityMeter>;
-  accountMeters: Array<IdbUtilityMeter>;
   accountMetersSub: Subscription;
   graphDisplay: "cost" | "usage" | "emissions";
   graphDisplaySub: Subscription;
-  constructor(private plotlyService: PlotlyService, private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private utilityMeterDbService: UtilityMeterdbService, private vizualizationService: VisualizationService,
+
+  calanderizedMeters: Array<CalanderizedMeter>;
+  calanderizedMetersSub: Subscription;
+  constructor(private plotlyService: PlotlyService, private vizualizationService: VisualizationService,
     private facilityDbService: FacilitydbService, private dashboardService: DashboardService) { }
 
   ngOnInit(): void {
-    this.accountMetersSub = this.utilityMeterDbService.accountMeters.subscribe(accountMeters => {
-      this.accountMeters = accountMeters;
+    this.calanderizedMetersSub = this.dashboardService.calanderizedFacilityMeters.subscribe(cMeters => {
+      this.calanderizedMeters = JSON.parse(JSON.stringify(cMeters));
       this.setGraphData();
-    });
-
-
-    this.selectedFacilitySub = this.utilityMeterDbService.facilityMeters.subscribe(facilityMeters => {
-      this.facilityMeters = JSON.parse(JSON.stringify(facilityMeters));
-      this.setGraphData();
-    });
-
-    this.accountMeterDataSub = this.utilityMeterDataDbService.accountMeterData.subscribe(accountMeterData => {
-      if (accountMeterData && accountMeterData.length != 0) {
-        this.setGraphData();
-      }
-    });
+    })
 
     this.graphDisplaySub = this.dashboardService.graphDisplay.subscribe(value => {
       this.graphDisplay = value;
@@ -62,15 +46,14 @@ export class FacilityHeatMapComponent implements OnInit {
   }
 
   ngOnDestroy() {
-    this.accountMeterDataSub.unsubscribe();
-    this.selectedFacilitySub.unsubscribe();
-    this.accountMetersSub.unsubscribe();
+    this.calanderizedMetersSub.unsubscribe();
+    this.graphDisplaySub.unsubscribe();
   }
 
   setGraphData() {
-    if (this.facilityMeters && this.facilityMeters.length != 0 && this.accountMeters && this.accountMeters.length != 0 && this.graphDisplay) {
+    if (this.calanderizedMeters && this.calanderizedMeters.length != 0 && this.graphDisplay && this.facilityHeatMap) {
       let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-      let heatMapData: HeatMapData = this.vizualizationService.getMeterHeatMapData(this.facilityMeters, selectedFacility.name, false);
+      let heatMapData: HeatMapData = this.vizualizationService.getMeterHeatMapData(this.calanderizedMeters, selectedFacility.name);
       this.resultData = heatMapData.resultData;
       this.months = heatMapData.months;
       this.years = heatMapData.years;

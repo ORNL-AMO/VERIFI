@@ -4,6 +4,7 @@ import { DashboardService } from 'src/app/shared/helper-services/dashboard.servi
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idb';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
+import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 
 @Component({
   selector: 'app-facility-dashboard-menu',
@@ -19,13 +20,13 @@ export class FacilityDashboardMenuComponent implements OnInit {
   modalOpen: boolean;
   modalOpenSub: Subscription;
   constructor(private facilityDbService: FacilitydbService, private dashboardService: DashboardService,
-    private sharedDataService: SharedDataService) { }
+    private sharedDataService: SharedDataService, private dbChangesService: DbChangesService) { }
 
   ngOnInit(): void {
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
       this.selectedFacility = val;
     });
-    
+
     this.graphDisplaySub = this.dashboardService.graphDisplay.subscribe(val => {
       this.graphDisplay = val;
     });
@@ -35,7 +36,7 @@ export class FacilityDashboardMenuComponent implements OnInit {
     })
   }
 
-  ngOnDestroy(){
+  ngOnDestroy() {
     this.graphDisplaySub.unsubscribe();
     this.selectedFacilitySub.unsubscribe();
     this.modalOpenSub.unsubscribe();
@@ -45,8 +46,11 @@ export class FacilityDashboardMenuComponent implements OnInit {
   setGraphDisplay(str: "cost" | "usage" | "emissions") {
     this.dashboardService.graphDisplay.next(str);
   }
-  setFacilityEnergyIsSource(energyIsSource: boolean) {
-    this.selectedFacility.energyIsSource = energyIsSource;
-    this.facilityDbService.update(this.selectedFacility);
+
+  async setFacilityEnergyIsSource(energyIsSource: boolean) {
+    if (this.selectedFacility.energyIsSource != energyIsSource) {
+      this.selectedFacility.energyIsSource = energyIsSource;
+      await this.dbChangesService.updateFacilities(this.selectedFacility);
+    }
   }
 }

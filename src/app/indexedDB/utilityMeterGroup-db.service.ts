@@ -1,9 +1,7 @@
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { Injectable } from '@angular/core';
-import { IdbAccount, IdbFacility, IdbUtilityMeterGroup } from '../models/idb';
+import { IdbUtilityMeterGroup } from '../models/idb';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { FacilitydbService } from './facility-db.service';
-import { AccountdbService } from './account-db.service';
 
 @Injectable({
     providedIn: 'root'
@@ -12,55 +10,15 @@ export class UtilityMeterGroupdbService {
 
     facilityMeterGroups: BehaviorSubject<Array<IdbUtilityMeterGroup>>;
     accountMeterGroups: BehaviorSubject<Array<IdbUtilityMeterGroup>>;
-    constructor(private dbService: NgxIndexedDBService, private facilityDbService: FacilitydbService, private accountDbService: AccountdbService) {
+    constructor(private dbService: NgxIndexedDBService) {
         this.facilityMeterGroups = new BehaviorSubject<Array<IdbUtilityMeterGroup>>(new Array());
         this.accountMeterGroups = new BehaviorSubject<Array<IdbUtilityMeterGroup>>(new Array());
-        this.facilityDbService.selectedFacility.subscribe(() => {
-            this.setFacilityMeterGroups();
-        });
-
-        this.accountDbService.selectedAccount.subscribe(() => {
-            this.setAccountMeterGroups();
-        });
-
     }
 
-    async initializeMeterGroups() {
-        let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-        if (selectedAccount) {
-            let accountMeterGroups: Array<IdbUtilityMeterGroup> = await this.getAllByIndexRange('accountId', selectedAccount.guid).toPromise();
-            this.accountMeterGroups.next(accountMeterGroups);
-            let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-            if (selectedFacility) {
-                let facilityMeterGroups: Array<IdbUtilityMeterGroup> = accountMeterGroups.filter(meterData => { return meterData.facilityId == selectedFacility.guid });
-                this.facilityMeterGroups.next(facilityMeterGroups);
-            }
-        }
-    }
-
-
-    setFacilityMeterGroups() {
-        let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-        if (facility) {
-            this.getAllByIndexRange('facilityId', facility.guid).subscribe(meterGroups => {
-                this.facilityMeterGroups.next(meterGroups);
-            });
-        }
-    }
 
     getAllByFacilityWithObservable(facilityId: string): Observable<Array<IdbUtilityMeterGroup>> {
         return this.getAllByIndexRange('facilityId', facilityId);
     }
-
-    setAccountMeterGroups() {
-        let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-        if (selectedAccount) {
-            this.getAllByIndexRange('accountId', selectedAccount.guid).subscribe(meterGroups => {
-                this.accountMeterGroups.next(meterGroups);
-            });
-        }
-    }
-
 
     getAll(): Observable<Array<IdbUtilityMeterGroup>> {
         return this.dbService.getAll('utilityMeterGroups');
@@ -83,29 +41,12 @@ export class UtilityMeterGroupdbService {
         return this.dbService.count('utilityMeterGroups');
     }
 
-    add(utilityMeterGroup: IdbUtilityMeterGroup): void {
-        this.dbService.add('utilityMeterGroups', utilityMeterGroup).subscribe(() => {
-            this.setFacilityMeterGroups();
-            this.setAccountMeterGroups();
-        });
-    }
-
     addWithObservable(utilityMeterGroup: IdbUtilityMeterGroup): Observable<IdbUtilityMeterGroup> {
         return this.dbService.add('utilityMeterGroups', utilityMeterGroup);
     }
 
-    update(utilityMeterGroup: IdbUtilityMeterGroup): void {
-        this.dbService.update('utilityMeterGroups', utilityMeterGroup).subscribe(() => {
-            this.setFacilityMeterGroups();
-            this.setAccountMeterGroups();
-        });
-    }
-
-    deleteIndex(meterGroupId: number): void {
-        this.dbService.delete('utilityMeterGroups', meterGroupId).subscribe(() => {
-            this.setFacilityMeterGroups();
-            this.setAccountMeterGroups();
-        });
+    updateWithObservable(utilityMeterGroup: IdbUtilityMeterGroup): Observable<Array<IdbUtilityMeterGroup>> {
+        return this.dbService.update('utilityMeterGroups', utilityMeterGroup);
     }
 
     deleteWithObservable(meterGroupId: number): Observable<any> {

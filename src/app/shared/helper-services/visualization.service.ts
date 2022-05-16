@@ -50,7 +50,7 @@ export class VisualizationService {
           } else {
             return 0;
           }
-        }); 
+        });
         return {
           time: yearMonth.month + ', ' + yearMonth.year,
           energyUse: totalEnergyUse,
@@ -107,10 +107,105 @@ export class VisualizationService {
     return resultData;
   }
 
-  getMeterHeatMapData(meters: Array<IdbUtilityMeter>, facilityName: string, inAccount: boolean): HeatMapData {
-    let months: Array<string> = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-    //calanderize meters
-    let calanderizedMeterData: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMeterData(meters, inAccount, false);
+
+  getFacilityDashboardBarChartData(calanderizedMeterData: Array<CalanderizedMeter>, sumByMonth: boolean, removeIncompleteYears: boolean): Array<FacilityBarChartData> {
+    //create array of just the meter data
+    let combindedCalanderizedMeterData: Array<MonthlyData> = calanderizedMeterData.flatMap(meterData => {
+      return meterData.monthlyData;
+    });
+    //create array of the uniq months and years
+    let yearMonths: Array<{ year: number, month: string }> = combindedCalanderizedMeterData.map(data => { return { year: data.year, month: data.month } });
+    let resultData: Array<FacilityBarChartData> = new Array();
+    //iterate array of uniq months and years and sum energy/cost
+    if (sumByMonth) {
+      yearMonths = _.uniqWith(yearMonths, (a, b) => {
+        return (a.year == b.year && a.month == b.month)
+      });
+      resultData = yearMonths.map(yearMonth => {
+        let totalEnergyUse: number = _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
+          if (meterData.month == yearMonth.month && meterData.year == yearMonth.year) {
+            return meterData.energyUse;
+          } else {
+            return 0;
+          }
+        });
+        let totalEnergyCost: number = _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
+          if (meterData.month == yearMonth.month && meterData.year == yearMonth.year) {
+            return meterData.energyCost;
+          } else {
+            return 0;
+          }
+        });
+        let totalEmissions: number = _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
+          if (meterData.month == yearMonth.month && meterData.year == yearMonth.year) {
+            return meterData.emissions;
+          } else {
+            return 0;
+          }
+        });
+        return {
+          time: yearMonth.month + ', ' + yearMonth.year,
+          energyUse: totalEnergyUse,
+          energyCost: totalEnergyCost,
+          emissions: totalEmissions,
+          year: yearMonth.year
+        }
+
+      });
+    } else {
+      if (removeIncompleteYears) {
+        yearMonths = _.uniqWith(yearMonths, (a, b) => {
+          return (a.year == b.year && a.month == b.month)
+        });
+        //remove data without 12 months for the year
+        let counts = _.countBy(yearMonths, 'year');
+        yearMonths = yearMonths.filter(yearMonthItem => { return counts[yearMonthItem.year] == 12 })
+      }
+      yearMonths = _.uniqWith(yearMonths, (a, b) => {
+        return (a.year == b.year)
+      });
+      resultData = yearMonths.map(yearMonth => {
+        let totalEnergyUse: number = _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
+          if (meterData.year == yearMonth.year) {
+            return meterData.energyUse;
+          } else {
+            return 0;
+          }
+        });
+        let totalEnergyCost: number = _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
+          if (meterData.year == yearMonth.year) {
+            return meterData.energyCost;
+          } else {
+            return 0;
+          }
+        });
+
+        let totalEmissions: number = _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
+          if (meterData.year == yearMonth.year) {
+            return meterData.emissions;
+          } else {
+            return 0;
+          }
+        });
+        return {
+          time: String(yearMonth.year),
+          energyUse: totalEnergyUse,
+          energyCost: totalEnergyCost,
+          emissions: totalEmissions,
+          year: yearMonth.year
+        }
+      });
+    }
+    return resultData;
+  }
+
+
+
+
+
+  getMeterHeatMapData(calanderizedMeterData: Array<CalanderizedMeter>, facilityName: string): HeatMapData {
+    // console.log(calanderizedMeterData)
+    let months: Array<string> = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     //create array of just the meter data
     let combindedCalanderizedMeterData: Array<MonthlyData> = calanderizedMeterData.flatMap(meterData => {
       return meterData.monthlyData;
@@ -120,10 +215,6 @@ export class VisualizationService {
     yearMonths = _.uniqWith(yearMonths, (a, b) => {
       return (a.year == b.year && a.month == b.month)
     });
-    //remove data without 12 months for the year
-    // let counts = _.countBy(yearMonths, 'year');
-    // yearMonths = yearMonths.filter(yearMonthItem => { return counts[yearMonthItem.year] == 12 })
-    // }
     //create array of the uniq months and years
     let years: Array<number> = yearMonths.map(data => { return data.year });
     years = _.uniq(years);
@@ -136,21 +227,21 @@ export class VisualizationService {
           if (meterData.year == year && meterData.month == month) {
             return meterData.energyCost;
           } else {
-            return undefined;
+            return 0;
           }
         });
         let totalEnergy: number = _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
           if (meterData.year == year && meterData.month == month) {
             return meterData.energyUse;
           } else {
-            return undefined;
+            return 0;
           }
         });
-        let totalEmissions: number =  _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
+        let totalEmissions: number = _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
           if (meterData.year == year && meterData.month == month) {
             return meterData.emissions;
           } else {
-            return undefined;
+            return 0;
           }
         });
         yearData.monthlyCost.push(totalCost)
@@ -174,11 +265,12 @@ export class VisualizationService {
     facilityPredictorEntries: Array<IdbPredictorEntry>,
     dateRange: { minDate: Date, maxDate: Date },
     meterGroupOptions: Array<{ meterGroup: IdbUtilityMeterGroup, selected: boolean }>,
-    meterDataOption: string): Array<PlotDataItem> {
+    meterDataOption: string,
+    calanderizedMeters: Array<CalanderizedMeter>): Array<PlotDataItem> {
 
-    let facilityMeters: Array<IdbUtilityMeter> = new Array();
+    let selectedMeters: Array<CalanderizedMeter> = new Array();
     let selectedGroups: Array<IdbUtilityMeterGroup> = new Array();
-    let calanderizedMeterData: Array<CalanderizedMeter>;
+    // let calanderizedMeterData: Array<CalanderizedMeter>;
     let lastBillEntry: MonthlyData;
     let firstBillEntry: MonthlyData;
     let plotData: Array<PlotDataItem> = new Array();
@@ -186,12 +278,13 @@ export class VisualizationService {
     if (meterDataOption == 'meters') {
       meterOptions.forEach(meterOption => {
         if (meterOption.selected) {
-          facilityMeters.push(meterOption.meter);
+          let cMeter: CalanderizedMeter = calanderizedMeters.find(cMeter => { return cMeter.meter.id == meterOption.meter.id });
+          selectedMeters.push(cMeter);
         }
       });
-      calanderizedMeterData = this.calanderizationService.getCalanderizedMeterData(facilityMeters, false);
-      lastBillEntry = this.calanderizationService.getLastBillEntryFromCalanderizedMeterData(calanderizedMeterData);
-      firstBillEntry = this.calanderizationService.getFirstBillEntryFromCalanderizedMeterData(calanderizedMeterData);
+      // calanderizedMeterData = this.calanderizationService.getCalanderizedMeterData(facilityMeters, false);
+      lastBillEntry = this.calanderizationService.getLastBillEntryFromCalanderizedMeterData(selectedMeters);
+      firstBillEntry = this.calanderizationService.getFirstBillEntryFromCalanderizedMeterData(selectedMeters);
     } else {
       meterGroupOptions.forEach(groupOption => {
         if (groupOption.selected) {
@@ -199,8 +292,8 @@ export class VisualizationService {
         }
       })
       let combindedMonthlyData: Array<MonthlyData> = selectedGroups.flatMap(group => { return group.combinedMonthlyData });
-      lastBillEntry = this.calanderizationService.getLastBillEntryFromCalanderizedMeterData(calanderizedMeterData, combindedMonthlyData);
-      firstBillEntry = this.calanderizationService.getFirstBillEntryFromCalanderizedMeterData(calanderizedMeterData, combindedMonthlyData);
+      lastBillEntry = this.calanderizationService.getLastBillEntryFromCalanderizedMeterData(undefined, combindedMonthlyData);
+      firstBillEntry = this.calanderizationService.getFirstBillEntryFromCalanderizedMeterData(undefined, combindedMonthlyData);
     }
 
     let lastPredictorEntry: IdbPredictorEntry = _.maxBy(facilityPredictorEntries, (data: IdbPredictorEntry) => {
@@ -222,7 +315,7 @@ export class VisualizationService {
     }
 
     if (meterDataOption == 'meters') {
-      calanderizedMeterData.forEach(calanderizedMeter => {
+      selectedMeters.forEach(calanderizedMeter => {
         let startDate: Date = this.getLastDate(firstBillEntry, firstPredictorEntry);
         if (dateRange && dateRange.minDate) {
           startDate = _.max([startDate, new Date(dateRange.minDate)]);
@@ -306,7 +399,9 @@ export class VisualizationService {
           });
           if (facilityPredictor) {
             let predictorData: PredictorData = facilityPredictor.predictors.find(predictorEntry => { return predictorEntry.id == predictor.id });
-            predictorPlotData.values.push(predictorData.amount);
+            if (predictorData) {
+              predictorPlotData.values.push(predictorData.amount);
+            }
           } else {
             predictorPlotData.values.push(0);
           }

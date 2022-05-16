@@ -8,6 +8,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { VisualizationStateService } from '../visualization-state.service';
 import { IdbFacility } from 'src/app/models/idb';
 import { MeterGroupingService } from '../../utility-data/meter-grouping/meter-grouping.service';
+import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 
 @Component({
   selector: 'app-visualization-banner',
@@ -31,7 +32,7 @@ export class VisualizationBannerComponent implements OnInit {
   modalOpenSub: Subscription;
   constructor(private visualizationStateService: VisualizationStateService,
     private facilityDbService: FacilitydbService, private meterGroupingService: MeterGroupingService,
-    private sharedDataService: SharedDataService) { }
+    private sharedDataService: SharedDataService, private dbChangesService: DbChangesService) { }
 
   ngOnInit(): void {
     this.selectedChartSub = this.visualizationStateService.selectedChart.subscribe(val => {
@@ -94,8 +95,10 @@ export class VisualizationBannerComponent implements OnInit {
     this.visualizationStateService.setData();
   }
 
-  setFacilityEnergyIsSource(energyIsSource: boolean) {
-    this.selectedFacility.energyIsSource = energyIsSource;
-    this.facilityDbService.update(this.selectedFacility);
+  async setFacilityEnergyIsSource(energyIsSource: boolean) {
+    if (this.selectedFacility.energyIsSource != energyIsSource) {
+      this.selectedFacility.energyIsSource = energyIsSource;
+      await this.dbChangesService.updateFacilities(this.selectedFacility);
+    }
   }
 }

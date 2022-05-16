@@ -12,7 +12,8 @@
 </div>
 <!--meter summary table-->
 <div class="pt-5" *ngIf="reportOptions.facilityMetersTable">
-    <app-facility-report-meters-table [facility]="selectedFacility" [reportOptions]="reportOptions">
+    <app-facility-report-meters-table [facility]="selectedFacility" [reportOptions]="reportOptions"
+        [calanderizedMeters]="calanderizedMeters">
     </app-facility-report-meters-table>
 </div>
 <!--utlity summary table-->
@@ -22,11 +23,13 @@
 </div>
 <!--annual data graphs-->
 <div class="pt-5" *ngIf="reportOptions.annualBarCharts" [ngClass]="{'print-break-after': reportOptions.monthBarCharts}">
-    <app-facility-report-bar-chart [facility]="selectedFacility" [reportOptions]="reportOptions" [sumByMonth]="false">
+    <app-facility-report-bar-chart [facility]="selectedFacility" [reportOptions]="reportOptions" [sumByMonth]="false"
+        [calanderizedMeters]="calanderizedMeters">
     </app-facility-report-bar-chart>
 </div>
 <div class="pt-5" *ngIf="reportOptions.annualBarCharts">
-    <app-facility-report-bar-chart [facility]="selectedFacility" [reportOptions]="reportOptions" [sumByMonth]="true">
+    <app-facility-report-bar-chart [facility]="selectedFacility" [reportOptions]="reportOptions" [sumByMonth]="true"
+        [calanderizedMeters]="calanderizedMeters">
     </app-facility-report-bar-chart>
 </div>
 <hr class="page-spacer hide-print">

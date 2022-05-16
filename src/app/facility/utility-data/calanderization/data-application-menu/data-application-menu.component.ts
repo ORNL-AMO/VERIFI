@@ -32,7 +32,7 @@ export class DataApplicationMenuComponent implements OnInit {
   ngOnInit(): void {
     let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataForFacility(this.meter, false);
     this.utilityMeterData = _.orderBy(meterData, (data) => { return new Date(data.readDate) }, 'asc');
-    if (this.utilityMeterData.length != 0) {
+    if (this.utilityMeterData.length > 2) {
       if (!this.meter.meterReadingDataApplication) {
         this.meter.meterReadingDataApplication = 'fullMonth';
       }

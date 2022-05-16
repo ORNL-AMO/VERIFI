@@ -121,7 +121,6 @@
                         <select id="selectTemplate" [(ngModel)]="reportOptions.templateId" name="templateId"
                             class="form-control" (change)="selectTemplate()">
                             <option [ngValue]=undefined>Custom</option>
-                            <option [ngValue]="99999">Better Plants Report</option>
                             <option *ngFor="let template of reportTemplates" [ngValue]="template.id">{{template.name}}
                             </option>
                         </select>
