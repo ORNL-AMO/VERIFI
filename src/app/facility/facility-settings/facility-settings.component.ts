@@ -13,6 +13,7 @@ import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { IdbAccount, IdbFacility, IdbOverviewReportOptions } from 'src/app/models/idb';
+import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 
 @Component({
   selector: 'app-facility-settings',
@@ -38,7 +39,8 @@ export class FacilitySettingsComponent implements OnInit {
     private backupDataService: BackupDataService,
     private importBackupModalService: ImportBackupModalService,
     private overviewReportOptionsDbService: OverviewReportOptionsDbService,
-    private toastNotificationService: ToastNotificationsService
+    private toastNotificationService: ToastNotificationsService,
+    private dbChangesService: DbChangesService
   ) { }
 
   ngOnInit() {
@@ -79,7 +81,6 @@ export class FacilitySettingsComponent implements OnInit {
     // this.facilityDbService.allFacilities.next(allFacilities);
     let accountFacilites: Array<IdbFacility> = allFacilities.filter(facility => { return facility.accountId == selectedAccount.guid });
     this.facilityDbService.accountFacilities.next(accountFacilites);
-    this.facilityDbService.setSelectedFacility();
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Facility Deleted!', undefined, undefined, false, "success");
     this.router.navigate(['/']);

@@ -18,63 +18,6 @@ export class PredictordbService {
         this.facilityPredictorEntries = new BehaviorSubject<Array<IdbPredictorEntry>>(new Array());
         this.facilityPredictors = new BehaviorSubject<Array<PredictorData>>(new Array());
         this.accountPredictorEntries = new BehaviorSubject<Array<IdbPredictorEntry>>(new Array());
-        // this.facilityDbService.selectedFacility.subscribe(() => {
-        //     this.facilityPredictors.next(new Array());
-        //     this.facilityPredictorEntries.next(new Array());
-        //     this.setFacilityPredictors();
-        // });
-        // this.accountDbService.selectedAccount.subscribe(() => {
-        //     this.accountPredictorEntries.next(new Array());
-        //     this.setAccountPredictors();
-        // });
-    }
-
-    async initializePredictorData() {
-        let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-        if (selectedAccount) {
-            let accountPredictorEntries: Array<IdbPredictorEntry> = await this.getAllByIndexRange('accountId', selectedAccount.guid).toPromise();
-            this.accountPredictorEntries.next(accountPredictorEntries);
-            let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-            if (selectedFacility) {
-                let facilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(predictor => { return predictor.facilityId == selectedFacility.guid });
-                this.facilityPredictorEntries.next(facilityPredictorEntries);
-                if (facilityPredictorEntries.length != 0) {
-                    this.facilityPredictors.next(facilityPredictorEntries[0].predictors);
-                } else {
-                    this.facilityPredictors.next([]);
-                }
-            }
-        }
-    }
-
-
-    setFacilityPredictors() {
-        let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-        if (selectedFacility) {
-            this.getAllByIndexRange('facilityId', selectedFacility.guid).subscribe(facilityPredictorEntries => {
-                if (facilityPredictorEntries.length != 0) {
-                    this.facilityPredictorEntries.next(facilityPredictorEntries);
-                    if (facilityPredictorEntries.length != 0) {
-                        this.facilityPredictors.next(facilityPredictorEntries[0].predictors);
-                    } else {
-                        this.facilityPredictors.next([]);
-                    }
-                }
-            });
-        }
-    }
-
-    setAccountPredictors() {
-        let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-        if (selectedAccount) {
-            this.getAllByIndexRange('accountId', selectedAccount.guid).subscribe(accountPredictorEntries => {
-                if (accountPredictorEntries.length != 0) {
-                    this.accountPredictorEntries.next(accountPredictorEntries);
-                } else {
-                    this.accountPredictorEntries.next([]);
-                }
-            });
-        }
     }
 
     getAll(): Observable<Array<IdbPredictorEntry>> {
@@ -98,35 +41,12 @@ export class PredictordbService {
         return this.dbService.count('predictors');
     }
 
-    add(predictor: IdbPredictorEntry): void {
-        this.dbService.add('predictors', predictor).subscribe(() => {
-            this.setFacilityPredictors();
-            this.setAccountPredictors();
-        });
-    }
-
-    update(values: IdbPredictorEntry): void {
-        values.date = new Date(values.date);
-        this.dbService.update('predictors', values).subscribe(() => {
-            this.setFacilityPredictors();
-            this.setAccountPredictors();
-        });
-    }
-
     updateOnImport(values: IdbPredictorEntry): Observable<any> {
         return this.dbService.update('predictors', values);
     }
 
     deleteIndexWithObservable(predictorId: number): Observable<any> {
         return this.dbService.delete('predictors', predictorId)
-    }
-
-
-    deleteById(predictorId: number): void {
-        this.dbService.delete('predictors', predictorId).subscribe(() => {
-            this.setFacilityPredictors();
-            this.setAccountPredictors();
-        });
     }
 
     async deleteAllFacilityPredictors(facilityId: string) {
@@ -203,10 +123,11 @@ export class PredictordbService {
         return newPredictorEntry;
     }
 
-    importNewPredictorEntries(entries: Array<IdbPredictorEntry>) {
-        entries.forEach(entry => {
-            this.add(entry);
-        });
+    async importNewPredictorEntries(entries: Array<IdbPredictorEntry>) {
+        for(let index = 0; index < entries.length; index++){
+            let entry: IdbPredictorEntry = entries[index];
+            await this.addWithObservable(entry).toPromise();
+        }
     }
 
     async updateFacilityPredictorEntries(updatedPredictors: Array<PredictorData>) {

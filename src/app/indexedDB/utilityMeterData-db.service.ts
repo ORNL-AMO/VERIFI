@@ -20,44 +20,6 @@ export class UtilityMeterDatadbService {
         private convertMeterDataService: ConvertMeterDataService) {
         this.facilityMeterData = new BehaviorSubject<Array<IdbUtilityMeterData>>(new Array());
         this.accountMeterData = new BehaviorSubject<Array<IdbUtilityMeterData>>(new Array());
-
-        // this.accountDbService.selectedAccount.subscribe(() => {
-        //     this.setAccountMeterData();
-        // });
-        // this.facilityDbService.selectedFacility.subscribe(() => {
-        //     this.setFacilityMeterData();
-        // });
-    }
-
-    async initializeMeterData() {
-        let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-        if (selectedAccount) {
-            let accountMeterData: Array<IdbUtilityMeterData> = await this.getAllByIndexRange('accountId', selectedAccount.guid).toPromise();
-            this.accountMeterData.next(accountMeterData);
-            let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-            if (selectedFacility) {
-                let facilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.filter(meterData => { return meterData.facilityId == selectedFacility.guid });
-                this.facilityMeterData.next(facilityMeterData);
-            }
-        }
-    }
-
-    setFacilityMeterData() {
-        let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-        if (facility) {
-            this.getAllByIndexRange('facilityId', facility.guid).subscribe(meterData => {
-                this.facilityMeterData.next(meterData);
-            });
-        }
-    }
-
-    setAccountMeterData() {
-        let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-        if (account) {
-            this.getAllByIndexRange('accountId', account.guid).subscribe(meterData => {
-                this.accountMeterData.next(meterData);
-            });
-        }
     }
 
     getAll(): Observable<Array<IdbUtilityMeterData>> {
@@ -81,41 +43,12 @@ export class UtilityMeterDatadbService {
         return this.dbService.count('utilityMeterData');
     }
 
-    add(meterData: IdbUtilityMeterData): void {
-        this.dbService.add('utilityMeterData', meterData).subscribe(() => {
-            this.setFacilityMeterData();
-            this.setAccountMeterData();
-        });
-    }
-
     addWithObservable(meterData: IdbUtilityMeterData): Observable<IdbUtilityMeterData> {
         return this.dbService.add('utilityMeterData', meterData);
     }
 
-    update(meterData: IdbUtilityMeterData): void {
-        this.dbService.update('utilityMeterData', meterData).subscribe(() => {
-            this.setFacilityMeterData();
-            this.setAccountMeterData();
-        });
-    }
-
     updateWithObservable(meterData: IdbUtilityMeterData): Observable<any> {
         return this.dbService.update('utilityMeterData', meterData);
-    }
-
-    deleteIndex(meterDataId: number): void {
-        this.dbService.delete('utilityMeterData', meterDataId).subscribe(() => {
-            this.setFacilityMeterData();
-            this.setAccountMeterData();
-        });
-    }
-
-    deleteMeterDataByMeterId(meterId: string): void {
-        this.getAllByIndexRange('meterId', meterId).subscribe(meterData => {
-            meterData.forEach(dataItem => {
-                this.deleteIndex(dataItem.id);
-            });
-        });
     }
 
     deleteWithObservable(meterDataId: number): Observable<any> {

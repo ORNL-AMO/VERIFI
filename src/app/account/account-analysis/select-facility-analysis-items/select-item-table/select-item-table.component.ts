@@ -38,8 +38,8 @@ export class SelectItemTableComponent implements OnInit {
     });
   }
 
-  save() {
-    this.accountAnalysisDbService.updateFacilityItemSelection(this.selectedAnalysisItem, this.selectedFacilityItemId, this.facility.guid);
+  async save() {
+    await this.accountAnalysisDbService.updateFacilityItemSelection(this.selectedAnalysisItem, this.selectedFacilityItemId, this.facility.guid);
   }
 
 

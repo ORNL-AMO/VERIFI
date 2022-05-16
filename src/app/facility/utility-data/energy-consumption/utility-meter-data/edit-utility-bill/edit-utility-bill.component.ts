@@ -1,8 +1,11 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormGroup } from '@angular/forms';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbUtilityMeter, IdbUtilityMeterData, MeterSource } from 'src/app/models/idb';
+import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData, MeterSource } from 'src/app/models/idb';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 import { UtilityMeterDataService } from '../utility-meter-data.service';
 
@@ -29,7 +32,8 @@ export class EditUtilityBillComponent implements OnInit {
   volumeUnit: string;
   invalidDate: boolean;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private utilityMeterDataService: UtilityMeterDataService,
-    private utilityMeterDbService: UtilityMeterdbService, private energyUnitsHelperService: EnergyUnitsHelperService) { }
+    private utilityMeterDbService: UtilityMeterdbService, private energyUnitsHelperService: EnergyUnitsHelperService,
+    private dbChangesService: DbChangesService, private facilityDbService: FacilitydbService, private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
   }
@@ -52,21 +56,27 @@ export class EditUtilityBillComponent implements OnInit {
     this.emitClose.emit(true);
   }
 
-  saveAndQuit() {
+  async saveAndQuit() {
     let meterDataToSave: IdbUtilityMeterData = this.utilityMeterDataService.updateGeneralMeterDataFromForm(this.editMeterData, this.meterDataForm);
     if (this.addOrEdit == 'edit') {
-      this.utilityMeterDataDbService.update(meterDataToSave);
+      await this.utilityMeterDataDbService.updateWithObservable(meterDataToSave).toPromise();
     } else {
       delete meterDataToSave.id;
-      this.utilityMeterDataDbService.add(meterDataToSave);
+      meterDataToSave = await this.utilityMeterDataDbService.addWithObservable(meterDataToSave).toPromise();
     }
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    await this.dbChangesService.setMeterData(selectedAccount, selectedFacility);
     this.cancel();
   }
 
-  saveAndAddAnother() {
+  async saveAndAddAnother() {
     let meterDataToSave: IdbUtilityMeterData = this.utilityMeterDataService.updateGeneralMeterDataFromForm(this.editMeterData, this.meterDataForm);
     delete meterDataToSave.id;
-    this.utilityMeterDataDbService.add(meterDataToSave);
+    meterDataToSave = await this.utilityMeterDataDbService.addWithObservable(meterDataToSave).toPromise();
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    await this.dbChangesService.setMeterData(selectedAccount, selectedFacility);
     this.editMeterData = this.utilityMeterDataDbService.getNewIdbUtilityMeterData(this.facilityMeter);
     this.editMeterData.readDate = new Date(meterDataToSave.readDate);
     this.editMeterData.readDate.setMonth(this.editMeterData.readDate.getUTCMonth() + 1);

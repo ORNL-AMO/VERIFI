@@ -4,6 +4,7 @@ import { Subscription } from 'rxjs';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { IdbAccount, IdbAccountAnalysisItem } from 'src/app/models/idb';
 import { AnalysisCalculationsHelperService } from 'src/app/shared/shared-analysis/calculations/analysis-calculations-helper.service';
 
@@ -27,7 +28,8 @@ export class AccountAnalysisDashboardComponent implements OnInit {
   yearOptions: Array<number>;
   selectedAccount: IdbAccount;
   constructor(private router: Router, private accountAnalysisDbService: AccountAnalysisDbService, private toastNotificationService: ToastNotificationsService,
-    private accountDbService: AccountdbService, private analysisCalculationsHelperService: AnalysisCalculationsHelperService) { }
+    private accountDbService: AccountdbService, private analysisCalculationsHelperService: AnalysisCalculationsHelperService,
+    private dbChangesService: DbChangesService) { }
 
   ngOnInit(): void {
     this.selectedAccount = this.accountDbService.selectedAccount.getValue();
@@ -48,7 +50,7 @@ export class AccountAnalysisDashboardComponent implements OnInit {
   async createAnalysis() {
     let newItem: IdbAccountAnalysisItem = this.accountAnalysisDbService.getNewAccountAnalysisItem();
     let addedItem: IdbAccountAnalysisItem = await this.accountAnalysisDbService.addWithObservable(newItem).toPromise();
-    this.accountAnalysisDbService.setAccountAnalysisItems();
+    await this.dbChangesService.setAccountAnalysisItems(this.selectedAccount);
     this.accountAnalysisDbService.selectedAnalysisItem.next(addedItem);
     this.toastNotificationService.showToast('Analysis Item Created', undefined, undefined, false, "success");
     this.router.navigateByUrl('account/analysis/setup');
@@ -70,7 +72,7 @@ export class AccountAnalysisDashboardComponent implements OnInit {
 
   async confirmDelete() {
     await this.accountAnalysisDbService.deleteWithObservable(this.itemToDelete.id).toPromise();
-    this.accountAnalysisDbService.setAccountAnalysisItems();
+    await this.dbChangesService.setAccountAnalysisItems(this.selectedAccount);
     this.itemToDelete = undefined;
     this.toastNotificationService.showToast('Analysis Item Deleted', undefined, undefined, false, "success");
   }
@@ -97,7 +99,7 @@ export class AccountAnalysisDashboardComponent implements OnInit {
     delete newItem.id;
     newItem.name = newItem.name + ' (Copy)';
     let addedItem: IdbAccountAnalysisItem = await this.accountAnalysisDbService.addWithObservable(newItem).toPromise();
-    this.accountAnalysisDbService.setAccountAnalysisItems();
+    await this.dbChangesService.setAccountAnalysisItems(this.selectedAccount);
     this.accountAnalysisDbService.selectedAnalysisItem.next(addedItem);
     this.toastNotificationService.showToast('Analysis Item Copy Created', undefined, undefined, false, "success");
     this.router.navigateByUrl('account/analysis/setup');

@@ -3,10 +3,12 @@ import { Subscription } from 'rxjs';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { CalanderizationFilters, CalanderizationOptions, CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
-import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
+import { IdbAccount, IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
 import { CalanderizationService } from '../../../shared/helper-services/calanderization.service';
 import * as _ from 'lodash';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 
 @Component({
   selector: 'app-calanderization',
@@ -36,7 +38,8 @@ export class CalanderizationComponent implements OnInit {
   selectedFacility: IdbFacility;
 
   constructor(private calanderizationService: CalanderizationService, private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService, private facilityDbService: FacilitydbService) { }
+    private utilityMeterDataDbService: UtilityMeterDatadbService, private facilityDbService: FacilitydbService,
+    private dbChangesService: DbChangesService, private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
     this.displayGraphCost = this.calanderizationService.displayGraphCost;
@@ -91,7 +94,7 @@ export class CalanderizationComponent implements OnInit {
   setCalanderizedMeterData() {
     if (this.selectedMeter && this.calanderizedDataFilters) {
       let calanderizationOptions: CalanderizationOptions = {
-        energyIsSource:  this.selectedFacility.energyIsSource
+        energyIsSource: this.selectedFacility.energyIsSource
       }
       let calanderizedMeterData: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMeterData([this.selectedMeter], false, false, calanderizationOptions);
       this.setDateRange(calanderizedMeterData);
@@ -181,21 +184,25 @@ export class CalanderizationComponent implements OnInit {
     this.dataApplicationMeter = undefined;
   }
 
-  setDataApplication() {
-    this.utilityMeterDbService.update(this.dataApplicationMeter);
+  async setDataApplication() {
+    await this.utilityMeterDbService.updateWithObservable(this.dataApplicationMeter);
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    await this.dbChangesService.setMeters(selectedAccount, this.selectedFacility)
     this.selectedMeter = this.dataApplicationMeter;
     this.cancelSetDataApplication();
   }
 
-  setCalanderizeData(calanderize: 'fullMonth' | 'backward') {
+  async setCalanderizeData(calanderize: 'fullMonth' | 'backward') {
     this.dataApplicationMeter = this.selectedMeter;
     this.dataApplicationMeter.meterReadingDataApplication = calanderize;
-    this.setDataApplication();
+    await this.setDataApplication();
   }
 
-  setFacilityEnergyIsSource(energyIsSource: boolean) {
-    this.selectedFacility.energyIsSource = energyIsSource;
-    this.facilityDbService.update(this.selectedFacility);
+  async setFacilityEnergyIsSource(energyIsSource: boolean) {
+    if (this.selectedFacility.energyIsSource != energyIsSource) {
+      this.selectedFacility.energyIsSource = energyIsSource;
+      await this.dbChangesService.updateFacilities(this.selectedFacility);
+    }
   }
 
   selectMeter(meter: IdbUtilityMeter) {

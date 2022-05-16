@@ -8,6 +8,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { VisualizationStateService } from '../visualization-state.service';
 import { IdbFacility } from 'src/app/models/idb';
 import { MeterGroupingService } from '../../utility-data/meter-grouping/meter-grouping.service';
+import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 
 @Component({
   selector: 'app-visualization-banner',
@@ -31,7 +32,7 @@ export class VisualizationBannerComponent implements OnInit {
   modalOpenSub: Subscription;
   constructor(private visualizationStateService: VisualizationStateService,
     private facilityDbService: FacilitydbService, private meterGroupingService: MeterGroupingService,
-    private sharedDataService: SharedDataService) { }
+    private sharedDataService: SharedDataService, private dbChangesService: DbChangesService) { }
 
   ngOnInit(): void {
     this.selectedChartSub = this.visualizationStateService.selectedChart.subscribe(val => {
@@ -97,10 +98,7 @@ export class VisualizationBannerComponent implements OnInit {
   async setFacilityEnergyIsSource(energyIsSource: boolean) {
     if (this.selectedFacility.energyIsSource != energyIsSource) {
       this.selectedFacility.energyIsSource = energyIsSource;
-      let facilities: Array<IdbFacility> = await this.facilityDbService.updateWithObservable(this.selectedFacility).toPromise();
-      let accountFacilites: Array<IdbFacility> = facilities.filter(facility => { return facility.accountId == this.selectedFacility.accountId });
-      this.facilityDbService.accountFacilities.next(accountFacilites);
-      this.facilityDbService.selectedFacility.next(this.selectedFacility);
+      await this.dbChangesService.updateFacilities(this.selectedFacility);
     }
   }
 }

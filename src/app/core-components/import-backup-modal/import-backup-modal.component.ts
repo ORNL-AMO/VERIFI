@@ -6,6 +6,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAccount, IdbFacility } from 'src/app/models/idb';
 import { LoadingService } from '../loading/loading.service';
 import { ImportBackupModalService } from './import-backup-modal.service';
+import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 
 @Component({
   selector: 'app-import-backup-modal',
@@ -30,7 +31,8 @@ export class ImportBackupModalComponent implements OnInit {
     private backupDataService: BackupDataService,
     private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
-    private importBackupModalService: ImportBackupModalService) { }
+    private importBackupModalService: ImportBackupModalService,
+    private dbChangesService: DbChangesService) { }
 
   ngOnInit(): void {
     this.showModalSub = this.importBackupModalService.showModal.subscribe(value => {
@@ -118,30 +120,32 @@ export class ImportBackupModalComponent implements OnInit {
         await this.importNewFacility(tmpBackupFile)
       }
     }
-    // this.facilityDbService.setAllFacilities();
-    this.accountDbService.setAllAccounts();
     this.loadingService.setLoadingStatus(false);
   }
 
   async importNewAccount(backupFile: BackupFile) {
     let newAccount: IdbAccount = await this.backupDataService.importAccountBackupFile(backupFile);
-    this.accountDbService.setSelectedAccount(newAccount.id);
+    await this.dbChangesService.updateAccount(newAccount);
+    await this.dbChangesService.selectAccount(newAccount);
   }
 
   async importExistingAccount(backupFile: BackupFile) {
     //delete existing account and data
     await this.backupDataService.deleteAccountData(this.selectedAccount);
-    this.importNewAccount(backupFile);
+    await this.importNewAccount(backupFile);
   }
 
   async importNewFacility(backupFile: BackupFile) {
     let newFacility: IdbFacility = await this.backupDataService.importFacilityBackupFile(backupFile, this.selectedAccount.guid);
-    this.accountDbService.setSelectedAccount(this.selectedAccount.id);
+    let currentAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    await this.dbChangesService.selectAccount(currentAccount);
+    this.dbChangesService.selectFacility(newFacility);
+
   }
 
   async importExistingFacility(backupFile: BackupFile) {
     //delete selected facility and data
     await this.backupDataService.deleteFacilityData(this.overwriteFacility);
-    this.importNewFacility(backupFile)
+    await this.importNewFacility(backupFile)
   }
 }

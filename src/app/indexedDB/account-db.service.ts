@@ -22,43 +22,9 @@ export class AccountdbService {
         });
     }
 
-    async initializeAccountFromLocalStorage() {
-        let localStorageAccountId: number = this.localStorageService.retrieve("accountId");
-        if (localStorageAccountId) {
-            let selectedAcount: IdbAccount = await this.getById(localStorageAccountId).toPromise();
-            this.selectedAccount.next(selectedAcount);
-        }
-        let allAccounts: Array<IdbAccount> = await this.getAll().toPromise();
-        this.allAccounts.next(allAccounts);
-        if (!localStorageAccountId) {
-            this.setSelectedAccount(undefined);
-        }
-    }
-
     getInitialAccount(): number {
         let localStorageAccountId: number = this.localStorageService.retrieve("accountId");
         return localStorageAccountId;
-    }
-
-    setSelectedAccount(accountId: number) {
-        if (accountId) {
-            this.getById(accountId).subscribe(account => {
-                this.selectedAccount.next(account);
-            });
-        } else {
-            let allAccounts: Array<IdbAccount> = this.allAccounts.getValue();
-            if (allAccounts.length != 0) {
-                this.setSelectedAccount(allAccounts[0].id);
-            } else {
-                this.selectedAccount.next(undefined);
-            }
-        }
-    }
-
-    setAllAccounts() {
-        this.getAll().subscribe(allAccounts => {
-            this.allAccounts.next(allAccounts);
-        });
     }
 
     getAll(): Observable<Array<IdbAccount>> {
@@ -73,33 +39,12 @@ export class AccountdbService {
         return this.dbService.count('accounts');
     }
 
-    add(account: IdbAccount): void {
-        this.dbService.add('accounts', account).subscribe(newAccount => {
-            this.setAllAccounts();
-            this.setSelectedAccount(newAccount.id);
-        });
-    }
-
     addWithObservable(account: IdbAccount): Observable<IdbAccount> {
         return this.dbService.add('accounts', account);
     }
 
-
-    update(account: IdbAccount): void {
-        this.dbService.update('accounts', account).subscribe(() => {
-            this.setAllAccounts();
-            this.setSelectedAccount(account.id);
-        });
-    }
-
     updateWithObservable(account: IdbAccount): Observable<Array<IdbAccount>> {
         return this.dbService.update('accounts', account);
-    }
-
-    deleteById(accountId: number): void {
-        this.dbService.delete('accounts', accountId).subscribe(() => {
-            this.setAllAccounts();
-        });
     }
 
     deleteAccountWithObservable(accountId: number): Observable<any> {

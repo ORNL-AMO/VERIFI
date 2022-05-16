@@ -1,6 +1,9 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
-import { IdbPredictorEntry } from 'src/app/models/idb';
+import { IdbAccount, IdbFacility, IdbPredictorEntry } from 'src/app/models/idb';
 
 @Component({
   selector: 'app-edit-predictor-entry-row',
@@ -17,18 +20,22 @@ export class EditPredictorEntryRowComponent implements OnInit {
 
 
   predictorEntryCopy: IdbPredictorEntry;
-  constructor(private predictorDbService: PredictordbService) { }
+  constructor(private predictorDbService: PredictordbService, private dbChangesService: DbChangesService,
+    private accountDbService: AccountdbService, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
     this.predictorEntryCopy = JSON.parse(JSON.stringify(this.predictorEntry));
   }
 
-  saveChanges() {
+  async saveChanges() {
     if (this.addOrEdit == "edit") {
-      this.predictorDbService.update(this.predictorEntryCopy);
+      await this.predictorDbService.updateWithObservable(this.predictorEntryCopy).toPromise();
     } else {
-      this.predictorDbService.add(this.predictorEntryCopy);
+      await this.predictorDbService.addWithObservable(this.predictorEntryCopy).toPromise();
     }
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    await this.dbChangesService.setPredictors(selectedAccount, selectedFacility);
     this.cancel();
   }
 

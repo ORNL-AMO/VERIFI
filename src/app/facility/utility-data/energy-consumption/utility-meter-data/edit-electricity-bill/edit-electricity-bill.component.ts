@@ -1,11 +1,13 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { ElectricityDataFilters, SupplyDemandChargeFilters, TaxAndOtherFilters } from 'src/app/models/electricityFilter';
-import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { UtilityMeterDataService } from '../utility-meter-data.service';
 
 @Component({
@@ -34,7 +36,8 @@ export class EditElectricityBillComponent implements OnInit {
   invalidDate: boolean;
   facilityMeter: IdbUtilityMeter;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private utilityMeterDataService: UtilityMeterDataService,
-    private facilityDbService: FacilitydbService, private utilityMeterDbService: UtilityMeterdbService) { }
+    private utilityMeterDbService: UtilityMeterdbService, private dbChangesService: DbChangesService, private facilityDbService: FacilitydbService,
+    private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
     this.electricityDataFiltersSub = this.utilityMeterDataService.electricityInputFilters.subscribe(dataFilters => {
@@ -59,61 +62,32 @@ export class EditElectricityBillComponent implements OnInit {
     this.emitClose.emit(true);
   }
 
-  saveAndQuit() {
+  async saveAndQuit() {
     let meterDataToSave: IdbUtilityMeterData = this.utilityMeterDataService.updateElectricityMeterDataFromForm(this.editMeterData, this.meterDataForm);
     if (this.addOrEdit == 'edit') {
-      this.utilityMeterDataDbService.update(meterDataToSave);
+      await this.utilityMeterDataDbService.updateWithObservable(meterDataToSave).toPromise();
     } else {
       delete meterDataToSave.id;
-      this.utilityMeterDataDbService.add(meterDataToSave);
+      meterDataToSave = await this.utilityMeterDataDbService.addWithObservable(meterDataToSave).toPromise();
     }
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    await this.dbChangesService.setMeterData(selectedAccount, selectedFacility);
     this.cancel();
   }
 
-  saveAndAddAnother() {
+  async saveAndAddAnother() {
     let meterDataToSave: IdbUtilityMeterData = this.utilityMeterDataService.updateElectricityMeterDataFromForm(this.editMeterData, this.meterDataForm);
     delete meterDataToSave.id;
-    this.utilityMeterDataDbService.add(meterDataToSave);
+    meterDataToSave = await this.utilityMeterDataDbService.addWithObservable(meterDataToSave).toPromise();
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    await this.dbChangesService.setMeterData(selectedAccount, selectedFacility);
     this.editMeterData = this.utilityMeterDataDbService.getNewIdbUtilityMeterData(this.facilityMeter);
     this.editMeterData.readDate = new Date(meterDataToSave.readDate);
     this.editMeterData.readDate.setMonth(this.editMeterData.readDate.getUTCMonth() + 1);
     this.meterDataForm = this.utilityMeterDataService.getElectricityMeterDataForm(this.editMeterData);
   }
-
-  showAllFields() {
-    this.electricityDataFilters = {
-      showTotalDemand: true,
-      supplyDemandCharge: {
-        showSection: true,
-        supplyBlockAmount: true,
-        supplyBlockCharge: true,
-        flatRateAmount: true,
-        flatRateCharge: true,
-        peakAmount: true,
-        peakCharge: true,
-        offPeakAmount: true,
-        offPeakCharge: true,
-        demandBlockAmount: true,
-        demandBlockCharge: true,
-      },
-      taxAndOther: {
-        showSection: true,
-        utilityTax: true,
-        latePayment: true,
-        otherCharge: true,
-        basicCharge: true,
-        generationTransmissionCharge: true,
-        deliveryCharge: true,
-        transmissionCharge: true,
-        powerFactorCharge: true,
-        businessCharge: true
-      }
-    }
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    selectedFacility.electricityInputFilters = this.electricityDataFilters;
-    this.facilityDbService.update(selectedFacility);
-  }
-
 
   setDisplayColumns() {
     this.displaySupplyDemandColumnOne = (

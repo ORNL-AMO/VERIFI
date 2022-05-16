@@ -4,6 +4,7 @@ import { DashboardService } from 'src/app/shared/helper-services/dashboard.servi
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idb';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
+import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 
 @Component({
   selector: 'app-facility-dashboard-menu',
@@ -19,7 +20,7 @@ export class FacilityDashboardMenuComponent implements OnInit {
   modalOpen: boolean;
   modalOpenSub: Subscription;
   constructor(private facilityDbService: FacilitydbService, private dashboardService: DashboardService,
-    private sharedDataService: SharedDataService) { }
+    private sharedDataService: SharedDataService, private dbChangesService: DbChangesService) { }
 
   ngOnInit(): void {
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
@@ -49,10 +50,7 @@ export class FacilityDashboardMenuComponent implements OnInit {
   async setFacilityEnergyIsSource(energyIsSource: boolean) {
     if (this.selectedFacility.energyIsSource != energyIsSource) {
       this.selectedFacility.energyIsSource = energyIsSource;
-      let facilities: Array<IdbFacility> = await this.facilityDbService.updateWithObservable(this.selectedFacility).toPromise();
-      let accountFacilites: Array<IdbFacility> = facilities.filter(facility => { return facility.accountId == this.selectedFacility.accountId });
-      this.facilityDbService.accountFacilities.next(accountFacilites);
-      this.facilityDbService.selectedFacility.next(this.selectedFacility);
+      await this.dbChangesService.updateFacilities(this.selectedFacility);
     }
   }
 }

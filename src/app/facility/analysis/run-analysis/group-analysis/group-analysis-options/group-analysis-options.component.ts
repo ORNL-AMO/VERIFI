@@ -2,10 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { AnalysisGroup, IdbAnalysisItem, IdbUtilityMeter } from 'src/app/models/idb';
+import { AnalysisGroup, IdbAccount, IdbAnalysisItem, IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { AnalysisCalculationsHelperService } from 'src/app/shared/shared-analysis/calculations/analysis-calculations-helper.service';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 
 @Component({
   selector: 'app-group-analysis-options',
@@ -22,7 +25,9 @@ export class GroupAnalysisOptionsComponent implements OnInit {
   missingGroupData: boolean;
   analysisItem: IdbAnalysisItem;
   constructor(private analysisService: AnalysisService, private analysisDbService: AnalysisDbService,
-    private utilityMeterDbService: UtilityMeterdbService, private analysisCalculationsHelperService: AnalysisCalculationsHelperService) { }
+    private utilityMeterDbService: UtilityMeterdbService, private analysisCalculationsHelperService: AnalysisCalculationsHelperService,
+    private accountDbService: AccountdbService, private facilityDbService: FacilitydbService,
+    private dbChangesService: DbChangesService) { }
 
   ngOnInit(): void {
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
@@ -38,13 +43,15 @@ export class GroupAnalysisOptionsComponent implements OnInit {
     this.selectedGroupSub.unsubscribe();
   }
 
-  saveItem() {
+  async saveItem() {
     let analysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     let groupIndex: number = analysisItem.groups.findIndex(group => { return group.idbGroupId == this.group.idbGroupId });
     this.group.groupHasError = this.analysisService.checkGroupHasError(this.group);
     analysisItem.groups[groupIndex] = this.group;
-    this.analysisDbService.update(analysisItem);
-    this.analysisDbService.setAccountAnalysisItems();
+    await this.analysisDbService.updateWithObservable(analysisItem).toPromise();
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    this.dbChangesService.setAnalysisItems(selectedAccount, selectedFacility);
     this.analysisDbService.selectedAnalysisItem.next(analysisItem);
   }
 

@@ -15,6 +15,7 @@ import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { IdbAccount, IdbAccountAnalysisItem, IdbFacility, IdbOverviewReportOptions } from 'src/app/models/idb';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
+import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 
 @Component({
   selector: 'app-account-settings',
@@ -46,7 +47,8 @@ export class AccountSettingsComponent implements OnInit {
     private overviewReportOptionsDbService: OverviewReportOptionsDbService,
     private importBackupModalService: ImportBackupModalService,
     private toastNotificationService: ToastNotificationsService,
-    private accountAnalysisDbService: AccountAnalysisDbService
+    private accountAnalysisDbService: AccountAnalysisDbService,
+    private dbChangesService: DbChangesService
   ) { }
 
   ngOnInit() {
@@ -86,14 +88,14 @@ export class AccountSettingsComponent implements OnInit {
     }
     this.loadingService.setLoadingMessage('Updating Analysis Items...');
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
-    for(let index = 0; index < accountAnalysisItems.length; index++){
+    for (let index = 0; index < accountAnalysisItems.length; index++) {
       accountAnalysisItems[index].facilityAnalysisItems.push({
         facilityId: newFacility.guid,
         analysisItemId: undefined
       });
     }
 
-    this.facilityDbService.setAccountFacilities();
+    await this.dbChangesService.selectAccount(this.selectedAccount);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('New Facility Added!', undefined, undefined, false, 'success');
   }
@@ -131,12 +133,7 @@ export class AccountSettingsComponent implements OnInit {
 
     this.loadingService.setLoadingMessage("Deleting Facility...");
     await this.facilityDbService.deleteFacilitiesAsync([this.facilityToDelete]);
-    let allFacilities: Array<IdbFacility> = await this.facilityDbService.getAll().toPromise();
-    // Then navigate to another facility
-    // this.facilityDbService.allFacilities.next(allFacilities);
-    let accountFacilites: Array<IdbFacility> = allFacilities.filter(facility => { return facility.accountId == this.selectedAccount.guid });
-    this.facilityDbService.accountFacilities.next(accountFacilites);
-    this.facilityDbService.setSelectedFacility();
+    await this.dbChangesService.selectAccount(this.selectedAccount);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Facility Deleted!', undefined, undefined, false, 'success');
   }
@@ -162,13 +159,6 @@ export class AccountSettingsComponent implements OnInit {
     this.loadingService.setLoadingMessage("Deleting Analysis Items...")
     await this.analysisDbService.deleteAccountAnalysisItems();
     await this.accountAnalysisDbService.deleteAccountAnalysisItems();
-
-    // let allFacilities: Array<IdbFacility> = await this.facilityDbService.getAll().toPromise();
-    // Then navigate to another facility
-    // this.facilityDbService.allFacilities.next(allFacilities);
-    this.facilityDbService.accountFacilities.next([]);
-    this.facilityDbService.setSelectedFacility();
-
     this.loadingService.setLoadingMessage("Deleting Account...");
     await this.accountDbService.deleteAccountWithObservable(selectedAccount.id).toPromise();
 
@@ -176,10 +166,10 @@ export class AccountSettingsComponent implements OnInit {
     let accounts: Array<IdbAccount> = await this.accountDbService.getAll().toPromise();
     this.accountDbService.allAccounts.next(accounts);
     if (accounts.length != 0) {
-      this.accountDbService.setSelectedAccount(accounts[0].id);
+      await this.dbChangesService.selectAccount(accounts[0]);
       this.router.navigate(['/']);
     } else {
-      this.accountDbService.setSelectedAccount(undefined);
+      this.accountDbService.selectedAccount.next(undefined);
       this.router.navigateByUrl('/setup-wizard');
     }
     this.loadingService.setLoadingStatus(false);
