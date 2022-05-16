@@ -25,6 +25,7 @@ export class HeaderComponent implements OnInit {
   dataInitialized: boolean;
 
   version: string = environment.version;
+  isProduction: boolean = environment.production;
   accountList: Array<IdbAccount>;
   activeAccount: IdbAccount;
 
@@ -33,7 +34,7 @@ export class HeaderComponent implements OnInit {
   showDropdown: boolean = false;
   showSearch: boolean = false;
   lastBackupDate: Date;
-  
+  resetDatabase: boolean = false;
   constructor(
     private router: Router,
     public accountdbService: AccountdbService,
@@ -55,6 +56,7 @@ export class HeaderComponent implements OnInit {
     });
 
     this.selectedAccountSub = this.accountdbService.selectedAccount.subscribe(selectedAccount => {
+      this.resetDatabase = false;
       this.activeAccount = selectedAccount;
       if (selectedAccount) {
         this.lastBackupDate = selectedAccount.lastBackup;
@@ -109,5 +111,9 @@ export class HeaderComponent implements OnInit {
     this.loadingService.setLoadingStatus(true);
     this.loadingService.setLoadingMessage('Resetting Database, if this takes too long restart application..');
     this.accountdbService.deleteDatabase();
+  }
+
+  toggleResetDatabase(){
+    this.resetDatabase = !this.resetDatabase;
   }
 }
