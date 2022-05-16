@@ -1,10 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import * as _ from 'lodash';
 import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { FacilityMeterSummaryData } from 'src/app/models/dashboard';
 import { MeterSummaryService } from 'src/app/shared/helper-services/meter-summary.service';
 import { DashboardService } from 'src/app/shared/helper-services/dashboard.service';
@@ -17,8 +15,6 @@ export class MetersTableComponent implements OnInit {
 
   facilityMeterSummaryData: FacilityMeterSummaryData;
   facilityMeterSummaryDataSub: Subscription;
-  // facilityMetersSub: Subscription;
-  // accountMeterDataSub: Subscription;
   selectedFacilitySub: Subscription;
 
   facilityMeters: Array<IdbUtilityMeter>;
@@ -26,7 +22,7 @@ export class MetersTableComponent implements OnInit {
   lastMonthsDate: Date;
   yearPriorDate: Date;
   facilityEnergyUnit: string;
-  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private utilityMeterDbService: UtilityMeterdbService,
+  constructor(
     private facilityDbService: FacilitydbService, private meterSummaryService: MeterSummaryService,
     private dashboardService: DashboardService) { }
 
@@ -44,22 +40,11 @@ export class MetersTableComponent implements OnInit {
         this.yearPriorDate = new Date(this.facilityMeterSummaryData.allMetersLastBill.year - 1, this.facilityMeterSummaryData.allMetersLastBill.monthNumValue + 1);
       }
     });
-
-    // this.facilityMetersSub = this.utilityMeterDbService.facilityMeters.subscribe(val => {
-    //   this.facilityMeters = val;
-    //   this.getSummary();
-    // });
-
-    // this.accountMeterDataSub = this.utilityMeterDataDbService.accountMeterData.subscribe(accountMeterData => {
-    //   this.accountMeterData = accountMeterData;
-    //   this.getSummary();
-    // });
   }
 
   ngOnDestroy() {
     this.selectedFacilitySub.unsubscribe();
     this.facilityMeterSummaryDataSub.unsubscribe();
-    // this.accountMeterDataSub.unsubscribe();
   }
 
   getSummary() {
