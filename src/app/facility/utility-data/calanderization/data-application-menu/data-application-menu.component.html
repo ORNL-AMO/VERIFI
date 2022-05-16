@@ -1,4 +1,4 @@
-<div class="row no-gutters justify-content-center" *ngIf="utilityMeterData.length != 0">
+<div class="row no-gutters justify-content-center" *ngIf="utilityMeterData.length > 2">
     <div class="col-md-12 col-lg-8">
         <div class="d-flex pb-2">
             <div class="pl-0 w-50 calanderization-label" for="dataApplication">Calendarization Method</div>
@@ -94,6 +94,6 @@
 </div>
 
 
-<p class="alert alert-info" *ngIf="utilityMeterData.length == 0">
+<p class="alert alert-info" *ngIf="utilityMeterData.length < 3">
     Three meter readings are needed to calendarize meter data.
 </p>

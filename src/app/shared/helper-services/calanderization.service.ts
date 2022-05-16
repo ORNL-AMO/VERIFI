@@ -30,6 +30,7 @@ export class CalanderizationService {
   }
 
   getCalanderizedMeterData(meters: Array<IdbUtilityMeter>, inAccount: boolean, monthDisplayShort?: boolean, calanderizationOptions?: CalanderizationOptions): Array<CalanderizedMeter> {
+    console.log('calanderize');
     let calanderizedMeterData: Array<CalanderizedMeter> = new Array();
     meters.forEach(meter => {
       let energyIsSource: boolean;

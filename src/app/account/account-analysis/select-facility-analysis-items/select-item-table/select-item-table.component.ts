@@ -1,9 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 
 @Component({
@@ -22,7 +20,7 @@ export class SelectItemTableComponent implements OnInit {
   selectedFacilityItemId: string;
   itemToEdit: IdbAnalysisItem;
   constructor(private accountAnalysisDbService: AccountAnalysisDbService, private router: Router,
-    private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService) { }
+    private analysisDbService: AnalysisDbService) { }
 
   ngOnInit(): void {
   }
@@ -40,8 +38,8 @@ export class SelectItemTableComponent implements OnInit {
     });
   }
 
-  save() {
-    this.accountAnalysisDbService.updateFacilityItemSelection(this.selectedAnalysisItem, this.selectedFacilityItemId, this.facility.guid);
+  async save() {
+    await this.accountAnalysisDbService.updateFacilityItemSelection(this.selectedAnalysisItem, this.selectedFacilityItemId, this.facility.guid);
   }
 
 
@@ -54,9 +52,8 @@ export class SelectItemTableComponent implements OnInit {
   }
 
   confirmEditItem() {
-    this.facilityDbService.selectedFacility.next(this.facility);
     this.analysisDbService.selectedAnalysisItem.next(this.itemToEdit);
-    this.router.navigateByUrl('facility/' + this.itemToEdit.facilityId + '/analysis/run-analysis');
+    this.router.navigateByUrl('facility/' + this.facility.id + '/analysis/run-analysis');
   }
 
 }

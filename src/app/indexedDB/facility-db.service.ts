@@ -10,37 +10,12 @@ import { AccountdbService } from './account-db.service';
 })
 export class FacilitydbService {
 
-    allFacilities: BehaviorSubject<Array<IdbFacility>>;
     accountFacilities: BehaviorSubject<Array<IdbFacility>>;
     selectedFacility: BehaviorSubject<IdbFacility>;
 
     constructor(private dbService: NgxIndexedDBService, private localStorageService: LocalStorageService, private accountDbService: AccountdbService) {
         this.accountFacilities = new BehaviorSubject<Array<IdbFacility>>(new Array());
-        this.allFacilities = new BehaviorSubject<Array<IdbFacility>>(new Array());
         this.selectedFacility = new BehaviorSubject<IdbFacility>(undefined);
-        this.accountDbService.selectedAccount.subscribe(() => {
-            this.setAccountFacilities();
-        });
-        this.accountFacilities.subscribe(() => {
-            this.setSelectedFacility();
-        });
-    }
-
-    async initializeFacilityFromLocalStorage() {
-        let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-        if (selectedAccount) {
-            let allFacilities: Array<IdbFacility> = await this.getAll().toPromise();
-            let accountFacilities: Array<IdbFacility> = allFacilities.filter(facility => { return facility.accountId == selectedAccount.guid });
-            let storedFacilityId: number = this.localStorageService.retrieve("facilityId");
-            if (storedFacilityId) {
-                let selectedFacility: IdbFacility = accountFacilities.find(facility => { return facility.id == storedFacilityId });
-                this.selectedFacility.next(selectedFacility);
-            } else if (accountFacilities.length != 0) {
-                this.selectedFacility.next(accountFacilities[0]);
-            }
-            this.allFacilities.next(allFacilities);
-            this.accountFacilities.next(accountFacilities);
-        }
         //subscribe after initialization
         this.selectedFacility.subscribe(facility => {
             if (facility) {
@@ -49,45 +24,27 @@ export class FacilitydbService {
         });
     }
 
-    setAccountFacilities() {
-        let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-        if (selectedAccount) {
-            this.getAllByIndexRange('accountId', selectedAccount.guid).subscribe(facilities => {
-                this.accountFacilities.next(facilities);
-            });
-        }else{
-            this.accountFacilities.next([]);
-        }
+    getInitialFacility(): number {
+        let localStorageFacilityId: number = this.localStorageService.retrieve("facilityId");
+        return localStorageFacilityId;
     }
 
-    setSelectedFacility() {
-        let accountFacilities: Array<IdbFacility> = this.accountFacilities.getValue();
-        let selectedFacility: IdbFacility = this.selectedFacility.getValue();
-        if (selectedFacility) {
-            let updatedFacility: IdbFacility = accountFacilities.find(facility => { return facility.id == selectedFacility.id });
-            if (!updatedFacility) {
-                if (accountFacilities.length != 0) {
-                    this.selectedFacility.next(accountFacilities[0]);
-                } else {
-                    this.selectedFacility.next(undefined);
-                }
-            } else {
-                this.selectedFacility.next(updatedFacility);
-            }
-        }
-        else if (accountFacilities.length != 0) {
-            this.selectedFacility.next(accountFacilities[0]);
-        } else {
-            this.selectedFacility.next(undefined);
-        }
-    }
-
-
-    setAllFacilities() {
-        this.getAll().subscribe(allFacilities => {
-            this.allFacilities.next(allFacilities);
-        });
-    }
+    // async initializeFacilityFromLocalStorage() {
+    //     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    //     if (selectedAccount) {
+    //         let allFacilities: Array<IdbFacility> = await this.getAll().toPromise();
+    //         let accountFacilities: Array<IdbFacility> = allFacilities.filter(facility => { return facility.accountId == selectedAccount.guid });
+    //         let storedFacilityId: number = this.localStorageService.retrieve("facilityId");
+    //         if (storedFacilityId) {
+    //             let selectedFacility: IdbFacility = accountFacilities.find(facility => { return facility.id == storedFacilityId });
+    //             this.selectedFacility.next(selectedFacility);
+    //         } else if (accountFacilities.length != 0) {
+    //             this.selectedFacility.next(accountFacilities[0]);
+    //         }
+    //         // this.allFacilities.next(allFacilities);
+    //         this.accountFacilities.next(accountFacilities);
+    //     }
+    // }
 
     getAll(): Observable<Array<IdbFacility>> {
         return this.dbService.getAll('facilities');
@@ -110,12 +67,6 @@ export class FacilitydbService {
         return this.dbService.count('facilities');
     }
 
-    add(facility: IdbFacility): void {
-        this.dbService.add('facilities', facility).subscribe(() => {
-            this.setAllFacilities();
-            this.setAccountFacilities();
-        });
-    }
 
     addWithObservable(facility: IdbFacility): Observable<IdbFacility> {
         return this.dbService.add('facilities', facility);
@@ -125,17 +76,9 @@ export class FacilitydbService {
         return this.dbService.delete('facilities', facilityId);
     }
 
-    update(values: IdbFacility): void {
-        this.dbService.update('facilities', values).subscribe(() => {
-            this.setAllFacilities();
-            this.setAccountFacilities();
-        });
-    }
 
-    deleteById(facilityId: number): void {
-        this.dbService.delete('facilities', facilityId).subscribe(() => {
-            this.setAccountFacilities();
-        });
+    updateWithObservable(values: IdbFacility): Observable<Array<IdbFacility>> {
+        return this.dbService.update('facilities', values);
     }
 
     async deleteAllSelectedAccountFacilities() {
@@ -157,6 +100,7 @@ export class FacilitydbService {
             guid: Math.random().toString(36).substr(2, 9),
             name: 'New Facility',
             country: 'US',
+            color: '#'+(Math.random() * 0xFFFFFF << 0).toString(16).padStart(6, '0'),
             city: account.city,
             state: account.state,
             zip: account.zip,
@@ -212,9 +156,9 @@ export class FacilitydbService {
         }
     }
 
-    getFacilityNameById(id: number): string {
+    getFacilityNameById(id: string): string {
         let accountFacilites: Array<IdbFacility> = this.accountFacilities.getValue();
-        let selectedFacility: IdbFacility = accountFacilites.find(facility => { return facility.id == id });
+        let selectedFacility: IdbFacility = accountFacilites.find(facility => { return facility.guid == id });
         if (selectedFacility) {
             return selectedFacility.name;
         }

@@ -34,6 +34,7 @@ export class SetupWizardComponent implements OnInit {
 
   ngOnInit(): void {
     this.accountdbService.selectedAccount.next(undefined);
+    this.setupWizardService.initializeData();
     this.submitSub = this.setupWizardService.submit.subscribe(val => {
       if (val) {
         this.submitData();
@@ -67,7 +68,7 @@ export class SetupWizardComponent implements OnInit {
     this.accountdbService.allAccounts.next(allAccounts);
     this.accountdbService.selectedAccount.next(account);
     let allFacilities: Array<IdbFacility> = await this.facilityDbService.getAll().toPromise();
-    this.facilityDbService.allFacilities.next(allFacilities);
+    // this.facilityDbService.allFacilities.next(allFacilities);
     let accountFacilities: Array<IdbFacility> = allFacilities.filter(facility => { return facility.accountId == account.guid });
     this.facilityDbService.accountFacilities.next(accountFacilities);
     this.loadingService.setLoadingStatus(false);

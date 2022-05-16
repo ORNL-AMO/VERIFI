@@ -1,9 +1,11 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
-import { MeterGroupType } from 'src/app/models/calanderization';
+import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
+import { CalanderizedMeter, MeterGroupType } from 'src/app/models/calanderization';
 import { IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterGroup, PredictorData } from 'src/app/models/idb';
 import { PlotDataItem, RegressionTableDataItem } from 'src/app/models/visualization';
+import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { VisualizationService } from 'src/app/shared/helper-services/visualization.service';
 import { MeterGroupingService } from '../utility-data/meter-grouping/meter-grouping.service';
 
@@ -20,8 +22,13 @@ export class VisualizationStateService {
   plotData: BehaviorSubject<Array<PlotDataItem>>;
   dateRange: BehaviorSubject<{ minDate: Date, maxDate: Date }>;
   meterDataOption: BehaviorSubject<'meters' | 'groups'>;
+
+
+  calanderizedMeters: Array<CalanderizedMeter>;
+
   constructor(private visualizationService: VisualizationService, private predictorDbService: PredictordbService,
-    private meterGroupingService: MeterGroupingService) {
+    private meterGroupingService: MeterGroupingService, private utilityMeterDbService: UtilityMeterdbService,
+    private calanderizationService: CalanderizationService) {
     this.selectedChart = new BehaviorSubject<"splom" | "heatmap" | "timeseries">("splom");
     this.meterOptions = new BehaviorSubject<Array<{ meter: IdbUtilityMeter, selected: boolean }>>([]);
     this.predictorOptions = new BehaviorSubject<Array<{ predictor: PredictorData, selected: boolean }>>([]);
@@ -30,6 +37,12 @@ export class VisualizationStateService {
     this.dateRange = new BehaviorSubject<{ minDate: Date, maxDate: Date }>({ minDate: undefined, maxDate: undefined });
     this.meterDataOption = new BehaviorSubject<'meters' | 'groups'>('meters');
     this.meterGroupOptions = new BehaviorSubject<Array<{ meterGroup: IdbUtilityMeterGroup, selected: boolean }>>([]);
+  }
+
+
+  setCalanderizedMeters(){
+    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+    this.calanderizedMeters = this.calanderizationService.getCalanderizedMeterData(facilityMeters, false, true);
   }
 
   setPredictorOptions(predictors: Array<PredictorData>) {
@@ -52,15 +65,15 @@ export class VisualizationStateService {
     }
   }
 
-  setMeterOptions(facilityMeters: Array<IdbUtilityMeter>) {
+  setMeterOptions() {
     let existingMeterOotions: Array<{ meter: IdbUtilityMeter, selected: boolean }> = this.meterOptions.getValue();
     let existingMeterIds: Array<number> = existingMeterOotions.map(option => { return option.meter.id });
-    let checkMissing: IdbUtilityMeter = facilityMeters.find(meter => { return !existingMeterIds.includes(meter.id) });
+    let checkMissing: CalanderizedMeter = this.calanderizedMeters.find(cMeter => { return !existingMeterIds.includes(cMeter.meter.id) });
     if (checkMissing) {
       let meterOptions: Array<{ meter: IdbUtilityMeter, selected: boolean }> = new Array();
-      facilityMeters.forEach(meter => {
+      this.calanderizedMeters.forEach(cMeter => {
         meterOptions.push({
-          meter: meter,
+          meter: cMeter.meter,
           selected: true
         });
       });
@@ -68,13 +81,13 @@ export class VisualizationStateService {
     }
   }
 
-  setMeterGroupOptions(facilityMeters: Array<IdbUtilityMeter>) {
+  setMeterGroupOptions() {
     let existingGroupOptions: Array<{ meterGroup: IdbUtilityMeterGroup, selected: boolean }> = this.meterGroupOptions.getValue();
     let existingMeterIds: Array<string> = existingGroupOptions.map(option => { return option.meterGroup.guid });
-    let checkMissing: IdbUtilityMeter = facilityMeters.find(meter => { return !existingMeterIds.includes(meter.groupId) });
+    let checkMissing: CalanderizedMeter = this.calanderizedMeters.find(cMeter => { return !existingMeterIds.includes(cMeter.meter.groupId) });
     if (checkMissing) {
       let meterGroupOptions: Array<{ meterGroup: IdbUtilityMeterGroup, selected: boolean }> = new Array();
-      let meterGroupTypes: Array<MeterGroupType> = this.meterGroupingService.getMeterGroupTypes(facilityMeters);
+      let meterGroupTypes: Array<MeterGroupType> = this.meterGroupingService.getMeterGroupTypes(this.calanderizedMeters);
       let allMeterGroups: Array<IdbUtilityMeterGroup> = meterGroupTypes.flatMap(groupType => { return groupType.meterGroups });
       allMeterGroups.forEach(group => {
         meterGroupOptions.push({
@@ -93,7 +106,7 @@ export class VisualizationStateService {
     let dateRange: { minDate: Date, maxDate: Date } = this.dateRange.getValue();
     let meterGroupOptions: Array<{ meterGroup: IdbUtilityMeterGroup, selected: boolean }> = this.meterGroupOptions.getValue();
     let meterDataOption: "groups" | "meters" = this.meterDataOption.getValue();
-    let plotData: Array<PlotDataItem> = this.visualizationService.getPlotData(predictorOptions, meterOptions, facilityPredictorEntries, dateRange, meterGroupOptions, meterDataOption);
+    let plotData: Array<PlotDataItem> = this.visualizationService.getPlotData(predictorOptions, meterOptions, facilityPredictorEntries, dateRange, meterGroupOptions, meterDataOption, this.calanderizedMeters);
     let regressionTableData: Array<RegressionTableDataItem> = this.visualizationService.getRegressionTableData(plotData);
     this.plotData.next(plotData);
     this.regressionTableData.next(regressionTableData);

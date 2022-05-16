@@ -9,6 +9,7 @@ import { ReportOptions } from 'src/app/models/overview-report';
 import { OverviewReportService } from '../overview-report.service';
 import * as _ from 'lodash';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
+import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 
 @Component({
   selector: 'app-better-plants-report-menu',
@@ -32,7 +33,8 @@ export class BetterPlantsReportMenuComponent implements OnInit {
     private accountDbService: AccountdbService,
     private toastNotificationsService: ToastNotificationsService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private accountAnalysisDbService: AccountAnalysisDbService) { }
+    private accountAnalysisDbService: AccountAnalysisDbService,
+    private dbChangesService: DbChangesService) { }
 
   ngOnInit(): void {
     this.selectedReportOptions = this.overviewReportOptionsDbService.selectedOverviewReportOptions.getValue();
@@ -63,7 +65,8 @@ export class BetterPlantsReportMenuComponent implements OnInit {
     let createdReport: IdbOverviewReportOptions = await this.overviewReportOptionsDbService.addWithObservable(newIdbReportOptionsItem).toPromise();
     this.overviewReportOptionsDbService.selectedOverviewReportOptions.next(createdReport);
     this.overviewReportService.reportOptions.next(this.reportOptions);
-    this.overviewReportOptionsDbService.setAccountOverviewReportOptions();
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    await this.dbChangesService.setAccountOverviewReportOptions(selectedAccount);
     this.toastNotificationsService.showToast('New Report Created', undefined, 4000, false, "success");
     this.router.navigateByUrl('/account/reports/better-plants-report');
   }
@@ -72,11 +75,13 @@ export class BetterPlantsReportMenuComponent implements OnInit {
     this.router.navigateByUrl('/account/reports/dashboard');
   }
 
-  updateReport() {
+  async updateReport() {
     this.selectedReportOptions.reportOptions = this.reportOptions;
     this.selectedReportOptions.name = this.name;
-    this.overviewReportOptionsDbService.update(this.selectedReportOptions);
+    await this.overviewReportOptionsDbService.updateWithObservable(this.selectedReportOptions);
     this.overviewReportService.reportOptions.next(this.reportOptions);
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    await this.dbChangesService.setAccountOverviewReportOptions(selectedAccount);
     this.toastNotificationsService.showToast('Report Updated', undefined, 4000, false, "success");
     this.router.navigateByUrl('/account/reports/better-plants-report');
   }
@@ -117,7 +122,7 @@ export class BetterPlantsReportMenuComponent implements OnInit {
 
   setAnalysisOptions() {
     let analysisOptions: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
-    this.accountAnalysisItems = analysisOptions.filter(option => { return option.reportYear == this.reportOptions.targetYear && option.energyIsSource});
+    this.accountAnalysisItems = analysisOptions.filter(option => { return option.reportYear == this.reportOptions.targetYear && option.energyIsSource });
     let selectedAnalysisItem: IdbAccountAnalysisItem = this.accountAnalysisItems.find(item => { return item.guid == this.reportOptions.analysisItemId });
     if (!selectedAnalysisItem) {
       this.reportOptions.analysisItemId = undefined;

@@ -20,23 +20,6 @@ export class AccountAnalysisDbService {
     this.accountAnalysisItems = new BehaviorSubject<Array<IdbAccountAnalysisItem>>([]);
     this.selectedAnalysisItem = new BehaviorSubject<IdbAccountAnalysisItem>(undefined);
 
-    this.accountDbService.selectedAccount.subscribe(() => {
-      this.setAccountAnalysisItems();
-    });
-  }
-
-  async initializeAnalysisItems() {
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    if (selectedAccount) {
-      let accountAnalysisItems: Array<IdbAccountAnalysisItem> = await this.getAllByIndexRange('accountId', selectedAccount.guid).toPromise();
-      this.accountAnalysisItems.next(accountAnalysisItems);
-
-      let storedAnalysisId: number = this.localStorageService.retrieve("accountAnalysisItemsId");
-      if (storedAnalysisId) {
-        let selectedAnalysisItem: IdbAccountAnalysisItem = accountAnalysisItems.find(item => { return item.id == storedAnalysisId });
-        this.selectedAnalysisItem.next(selectedAnalysisItem);
-      }
-    }
     //subscribe after initialization
     this.selectedAnalysisItem.subscribe(analysisItem => {
       if (analysisItem) {
@@ -45,13 +28,9 @@ export class AccountAnalysisDbService {
     });
   }
 
-  setAccountAnalysisItems() {
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    if (selectedAccount) {
-      this.getAllByIndexRange('accountId', selectedAccount.guid).subscribe((analysisItems: Array<IdbAccountAnalysisItem>) => {
-        this.accountAnalysisItems.next(analysisItems);
-      });
-    }
+  getInitialAnalysisItem(): number {
+    let analysisItemId: number = this.localStorageService.retrieve("accountAnalysisItemsId");
+    return analysisItemId;
   }
 
   getAll(): Observable<Array<IdbAccountAnalysisItem>> {
@@ -75,12 +54,6 @@ export class AccountAnalysisDbService {
     return this.dbService.count('accountAnalysisItems');
   }
 
-  add(analysisItems: IdbAccountAnalysisItem): void {
-    this.dbService.add('accountAnalysisItems', analysisItems).subscribe(() => {
-      this.setAccountAnalysisItems();
-    });
-  }
-
   addWithObservable(analysisItem: IdbAccountAnalysisItem): Observable<IdbAccountAnalysisItem> {
     return this.dbService.add('accountAnalysisItems', analysisItem);
   }
@@ -89,22 +62,9 @@ export class AccountAnalysisDbService {
     return this.dbService.delete('accountAnalysisItems', id);
   }
 
-  update(values: IdbAccountAnalysisItem): void {
-    values.date = new Date();
-    this.dbService.update('accountAnalysisItems', values).subscribe(() => {
-      this.setAccountAnalysisItems();
-    });
-  }
-
   updateWithObservable(values: IdbAccountAnalysisItem): Observable<Array<IdbAccountAnalysisItem>> {
     values.date = new Date();
     return this.dbService.update('accountAnalysisItems', values);
-  }
-
-  deleteById(analysisItemId: number): void {
-    this.dbService.delete('accountAnalysisItems', analysisItemId).subscribe(() => {
-      this.setAccountAnalysisItems();
-    });
   }
 
   getNewAccountAnalysisItem(): IdbAccountAnalysisItem {
@@ -147,13 +107,13 @@ export class AccountAnalysisDbService {
     }
   }
 
-  updateFacilityItemSelection(analysiItem: IdbAccountAnalysisItem, analysisItemId: string, facilityId: string){
+ async updateFacilityItemSelection(analysiItem: IdbAccountAnalysisItem, analysisItemId: string, facilityId: string) {
     analysiItem.facilityAnalysisItems.forEach(item => {
-      if(item.facilityId == facilityId){
+      if (item.facilityId == facilityId) {
         item.analysisItemId = analysisItemId;
       }
     });
-    this.update(analysiItem);
+    await this.updateWithObservable(analysiItem).toPromise();
     this.selectedAnalysisItem.next(analysiItem);
   }
 }

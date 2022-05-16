@@ -3,11 +3,13 @@ import { FormGroup } from '@angular/forms';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { EditMeterFormService } from '../edit-meter-form/edit-meter-form.service';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 
 @Component({
   selector: 'app-edit-meter',
@@ -27,7 +29,8 @@ export class EditMeterComponent implements OnInit {
   constructor(private utilityMeterDbService: UtilityMeterdbService, private facilityDbService: FacilitydbService,
     private energyUnitsHelperService: EnergyUnitsHelperService, private editMeterFormService: EditMeterFormService,
     private utilityMeterDataDbService: UtilityMeterDatadbService, private loadingService: LoadingService,
-    private toastNoticationService: ToastNotificationsService) { }
+    private toastNotificationService: ToastNotificationsService, private accountDbService: AccountdbService,
+    private dbChangesService: DbChangesService) { }
 
   ngOnInit(): void {
     this.meterForm = this.editMeterFormService.getFormFromMeter(this.editMeter);
@@ -44,18 +47,26 @@ export class EditMeterComponent implements OnInit {
   }
 
   async saveChanges() {
+    this.loadingService.setLoadingMessage('Saving Meter...');
+    this.loadingService.setLoadingStatus(true);
     //if data exists. See if you need to re-calculate energy
     if (this.meterDataExists && (this.editMeter.startingUnit != this.meterForm.controls.startingUnit.value) || (this.editMeter.heatCapacity != this.meterForm.controls.heatCapacity.value)) {
       await this.checkMeterData();
     }
     let meterToSave: IdbUtilityMeter = this.editMeterFormService.updateMeterFromForm(this.editMeter, this.meterForm);
     if (this.addOrEdit == 'edit') {
-      this.utilityMeterDbService.update(meterToSave);
+      await this.utilityMeterDbService.updateWithObservable(meterToSave).toPromise();
     } else if (this.addOrEdit == 'add') {
       delete meterToSave.id;
-      this.utilityMeterDbService.add(meterToSave);
+      meterToSave = await this.utilityMeterDbService.addWithObservable(meterToSave).toPromise();
     }
+    await this.utilityMeterDbService.updateWithObservable(meterToSave);
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    await this.dbChangesService.setMeters(selectedAccount, selectedFacility);
     this.cancel();
+    this.loadingService.setLoadingStatus(false);
+    this.toastNotificationService.showToast('Meter Saved!', undefined, undefined, false, "success");
   }
 
   cancel() {
@@ -83,8 +94,7 @@ export class EditMeterComponent implements OnInit {
       this.utilityMeterDataDbService.accountMeterData.next(accountMeterData);
       let facilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.filter(meterData => { return meterData.facilityId == selectedFacility.guid });
       this.utilityMeterDataDbService.facilityMeterData.next(facilityMeterData);
-      this.loadingService.setLoadingStatus(false);
-      this.toastNoticationService.showToast("Meter and Meter Data Updated", undefined, undefined, false, "success");
+      this.toastNotificationService.showToast("Meter and Meter Data Updated", undefined, undefined, false, "success");
     }
   }
 }

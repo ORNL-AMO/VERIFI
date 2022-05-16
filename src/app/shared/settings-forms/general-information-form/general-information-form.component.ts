@@ -105,12 +105,15 @@ export class GeneralInformationFormComponent implements OnInit {
     }
   }
 
-  saveChanges() {
+  async saveChanges() {
     this.isFormChange = true;
     if (!this.inAccount) {
       if (!this.inWizard) {
         this.selectedFacility = this.settingsFormsService.updateFacilityFromGeneralInformationForm(this.form, this.selectedFacility);
-        this.facilityDbService.update(this.selectedFacility);
+        let allFacilities: Array<IdbFacility> = await this.facilityDbService.updateWithObservable(this.selectedFacility).toPromise();
+        this.facilityDbService.selectedFacility.next(this.selectedFacility);
+        let accountFacilities: Array<IdbFacility> = allFacilities.filter(facility => { return facility.accountId == this.selectedFacility.accountId });
+        this.facilityDbService.accountFacilities.next(accountFacilities);
       } else {
         this.selectedFacility = this.settingsFormsService.updateFacilityFromGeneralInformationForm(this.form, this.selectedFacility);
         this.setupWizardService.selectedFacility.next(this.selectedFacility);
@@ -119,7 +122,9 @@ export class GeneralInformationFormComponent implements OnInit {
     if (this.inAccount) {
       if (!this.inWizard) {
         this.selectedAccount = this.settingsFormsService.updateAccountFromGeneralInformationForm(this.form, this.selectedAccount);
-        this.accountDbService.update(this.selectedAccount);
+        let allAccount: Array<IdbAccount> = await this.accountDbService.updateWithObservable(this.selectedAccount).toPromise();
+        this.accountDbService.selectedAccount.next(this.selectedAccount);
+        this.accountDbService.allAccounts.next(allAccount);
       } else {
         this.selectedAccount = this.settingsFormsService.updateAccountFromGeneralInformationForm(this.form, this.selectedAccount);
         this.setupWizardService.account.next(this.selectedAccount);

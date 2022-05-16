@@ -1,12 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { AccountFacilitiesSummary } from 'src/app/models/dashboard';
 import { IdbFacility, IdbUtilityMeterData } from 'src/app/models/idb';
 import { DashboardService } from 'src/app/shared/helper-services/dashboard.service';
-import { MeterSummaryService } from 'src/app/shared/helper-services/meter-summary.service';
 
 @Component({
   selector: 'app-account-dashboard',
@@ -18,21 +17,29 @@ export class AccountDashboardComponent implements OnInit {
   lastMonthsDate: Date;
   yearPriorDate: Date;
   utilityMeterAccountData: Array<IdbUtilityMeterData>;
-  accountMeterDataSub: Subscription;
 
   graphDisplaySub: Subscription;
   chartsLabel: "Costs" | "Usage" | "Emissions";
   heatMapShown: boolean = false;
-  constructor(public utilityMeterDataDbService: UtilityMeterDatadbService, private dashboardService: DashboardService, private meterSummaryService: MeterSummaryService,
-    private facilityDbService: FacilitydbService, private router: Router) { }
+
+  selectedAccountSub: Subscription;
+  accountFacilitiesSummarySub: Subscription;
+  constructor(public utilityMeterDataDbService: UtilityMeterDatadbService, private dashboardService: DashboardService,
+    private facilityDbService: FacilitydbService, private router: Router,
+    private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
 
-    this.accountMeterDataSub = this.utilityMeterDataDbService.accountMeterData.subscribe(utilityMeterAccountData => {
-      this.utilityMeterAccountData = utilityMeterAccountData;
+    this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(val => {
+      this.utilityMeterAccountData = this.utilityMeterDataDbService.accountMeterData.getValue();
+      if (this.utilityMeterAccountData.length != 0) {
+        this.dashboardService.setAccountFacilitiesSummary();
+      }
 
-      let accountFacilitiesSummary: AccountFacilitiesSummary = this.meterSummaryService.getAccountFacilitesSummary();
-      if (accountFacilitiesSummary.allMetersLastBill) {
+    });
+
+    this.accountFacilitiesSummarySub = this.dashboardService.accountFacilitiesSummary.subscribe(accountFacilitiesSummary => {
+      if (accountFacilitiesSummary && accountFacilitiesSummary.allMetersLastBill) {
         this.lastMonthsDate = new Date(accountFacilitiesSummary.allMetersLastBill.year, accountFacilitiesSummary.allMetersLastBill.monthNumValue);
         this.yearPriorDate = new Date(accountFacilitiesSummary.allMetersLastBill.year - 1, accountFacilitiesSummary.allMetersLastBill.monthNumValue);
       }
@@ -50,7 +57,8 @@ export class AccountDashboardComponent implements OnInit {
   }
 
   ngOnDestroy() {
-    this.accountMeterDataSub.unsubscribe();
+    this.selectedAccountSub.unsubscribe();
+    this.accountFacilitiesSummarySub.unsubscribe();
     this.graphDisplaySub.unsubscribe();
   }
 
@@ -59,6 +67,7 @@ export class AccountDashboardComponent implements OnInit {
   }
 
   addUtilityData() {
+    //TODO: Update select facility call
     let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     if (facilities.length > 0) {
       this.router.navigateByUrl('facility/' + facilities[0].id + '/utility');

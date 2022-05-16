@@ -3,10 +3,8 @@ import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
 import { DashboardService } from 'src/app/shared/helper-services/dashboard.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { AccountFacilitiesSummary } from 'src/app/models/dashboard';
 import { IdbAccount } from 'src/app/models/idb';
-import { MeterSummaryService } from 'src/app/shared/helper-services/meter-summary.service';
 
 @Component({
   selector: 'app-energy-use-donut',
@@ -18,21 +16,21 @@ export class EnergyUseDonutComponent implements OnInit {
 
   @ViewChild('energyUseDonut', { static: false }) energyUseDonut: ElementRef;
   facilitiesSummary: AccountFacilitiesSummary;
-  accountFacilitiesSub: Subscription;
+  facilitiesSummarySub: Subscription;
 
   graphDisplay: "cost" | "usage" | "emissions";
   graphDisplaySub: Subscription;
 
 
-  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService,
+  constructor(
     private dashboardService: DashboardService, private plotlyService: PlotlyService,
-    private accountDbService: AccountdbService, private meterSummaryService: MeterSummaryService) { }
+    private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
-    this.accountFacilitiesSub = this.utilityMeterDataDbService.accountMeterData.subscribe(val => {
-      this.facilitiesSummary = this.meterSummaryService.getAccountFacilitesSummary();
+    this.facilitiesSummarySub = this.dashboardService.accountFacilitiesSummary.subscribe(val => {
+      this.facilitiesSummary = val;
       this.drawChart();
-    });
+    })
 
     this.graphDisplaySub = this.dashboardService.graphDisplay.subscribe(val => {
       this.graphDisplay = val;
@@ -41,7 +39,7 @@ export class EnergyUseDonutComponent implements OnInit {
   }
 
   ngOnDestroy() {
-    this.accountFacilitiesSub.unsubscribe();
+    this.facilitiesSummarySub.unsubscribe();
     this.graphDisplaySub.unsubscribe();
   }
 

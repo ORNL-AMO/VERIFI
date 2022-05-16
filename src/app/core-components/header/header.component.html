@@ -6,7 +6,7 @@
         <ul class="navbar-nav ml-auto" *ngIf="dataInitialized">
             <li class="nav-item dropdown">
                 <button *ngIf="activeAccount" class="btn btn-outline nav-link dropdown-toggle"
-                    (click)="toggleDropdown()">
+                    (click)="toggleDropdown()"><span class="fa fa-building"></span>
                     {{activeAccount.name}}
                 </button>
                 <div *ngIf="!activeAccount" class="nav-link dropdown-toggle account-required"
@@ -14,7 +14,7 @@
                 </div>
                 <div class="dropdown-menu" [ngClass]="{'show':showDropdown}">
                     <a *ngFor="let account of accountList" [class.active]="activeAccount?.id === account.id"
-                        class="dropdown-item" (click)="switchAccount(account)">{{account.name}}</a>
+                        class="dropdown-item" (click)="switchAccount(account)"> {{account.name}}</a>
                     <div class="dropdown-divider"></div>
                     <a class="dropdown-item" (click)="addNewAccount()"><i class="fa fa-plus"></i> Add New
                         Account</a>
@@ -22,15 +22,17 @@
                 </div>
             </li>
         </ul>
-        <div class="pl-2" *ngIf="dataInitialized">
+        <div class="pl-2" *ngIf="dataInitialized && activeAccount">
             <button class="btn btn-dark backup-account" (click)="backupAccount()">Backup Account
             </button>
         </div>
-        <div class="pl-2" *ngIf="dataInitialized">Last Backup: (<span *ngIf="lastBackupDate">{{lastBackupDate | date:'medium'}}</span><span
+        <div class="pl-2" *ngIf="dataInitialized && activeAccount">Last Backup: (<span *ngIf="lastBackupDate">{{lastBackupDate | date:'medium'}}</span><span
                 *ngIf="!lastBackupDate">&mdash;</span>)</div>
         <!--TODO: Remove For Production-->
-        <div class="pl-2">
-            <button class="btn btn-danger backup-account" (click)="deleteDatabase()">Reset Database
+        <div class="pl-2" *ngIf="!isProduction">
+            <button *ngIf="!resetDatabase" class="btn btn-danger backup-account" (click)="toggleResetDatabase()">Reset Database
+            </button>
+            <button *ngIf="resetDatabase" class="btn btn-danger backup-account" (click)="deleteDatabase()">Are you sure you want to reset the database?
             </button>
         </div>
         <!-- <form class="form-inline my-2 my-lg-0">

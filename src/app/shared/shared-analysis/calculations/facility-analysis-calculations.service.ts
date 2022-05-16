@@ -5,6 +5,7 @@ import { AnalysisCalculationsHelperService } from './analysis-calculations-helpe
 import { AnalysisCalculationsService } from './analysis-calculations.service';
 import * as _ from 'lodash';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
+import { CalanderizedMeter } from 'src/app/models/calanderization';
 
 @Injectable({
   providedIn: 'root'
@@ -16,7 +17,7 @@ export class FacilityAnalysisCalculationsService {
 
 
 
-  calculateMonthlyFacilityAnalysis(analysisItem: IdbAnalysisItem, facility: IdbFacility): Array<MonthlyAnalysisSummaryData> {
+  calculateMonthlyFacilityAnalysis(analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>): Array<MonthlyAnalysisSummaryData> {
     let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = this.analysisCalculationsHelperService.getMonthlyStartAndEndDate(facility, analysisItem);
     let baselineDate: Date = monthlyStartAndEndDate.baselineDate;
     let endDate: Date = monthlyStartAndEndDate.endDate;
@@ -34,7 +35,7 @@ export class FacilityAnalysisCalculationsService {
 
     let groupSummaries: Array<MonthlyAnalysisSummary> = new Array();
     analysisItem.groups.forEach(group => {
-      let summaryData: MonthlyAnalysisSummary = this.analysisCalculationsService.getMonthlyAnalysisSummary(group, analysisItem, facility);
+      let summaryData: MonthlyAnalysisSummary = this.analysisCalculationsService.getMonthlyAnalysisSummary(group, analysisItem, facility, calanderizedMeters);
       groupSummaries.push(summaryData);
     });
 
@@ -175,8 +176,8 @@ export class FacilityAnalysisCalculationsService {
     return analysisSummaryData;
   }
 
-  getAnnualAnalysisSummary(analysisItem: IdbAnalysisItem, facility: IdbFacility): Array<AnnualAnalysisSummary> {
-    let facilityMonthlySummaryData: Array<MonthlyAnalysisSummaryData> = this.calculateMonthlyFacilityAnalysis(analysisItem, facility);
+  getAnnualAnalysisSummary(analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>): Array<AnnualAnalysisSummary> {
+    let facilityMonthlySummaryData: Array<MonthlyAnalysisSummaryData> = this.calculateMonthlyFacilityAnalysis(analysisItem, facility, calanderizedMeters);
     let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = this.analysisCalculationsService.calculateAnnualAnalysisSummary(facilityMonthlySummaryData, analysisItem, facility);
     return annualAnalysisSummaries;
   }

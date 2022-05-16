@@ -1,4 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { ElectricityDataFilters, SupplyDemandChargeFilters, TaxAndOtherFilters } from 'src/app/models/electricityFilter';
 import { IdbFacility } from 'src/app/models/idb';
@@ -18,7 +19,8 @@ export class UtilityMeterDataFilterComponent implements OnInit {
   supplyDemandCharge: SupplyDemandChargeFilters;
   taxAndOther: TaxAndOtherFilters;
   showTotalDemand: boolean;
-  constructor(private utilityMeterDataService: UtilityMeterDataService, private facilityDbService: FacilitydbService) { }
+  constructor(private utilityMeterDataService: UtilityMeterDataService, private facilityDbService: FacilitydbService,
+    private dbChangesService: DbChangesService) { }
 
   ngOnInit(): void {
 
@@ -39,7 +41,7 @@ export class UtilityMeterDataFilterComponent implements OnInit {
     this.showFilterDropdown = !this.showFilterDropdown;
   }
 
-  save() {
+  async save() {
     this.checkShowSection();
     let electricityDataFilters: ElectricityDataFilters = {
       showTotalDemand: this.showTotalDemand,
@@ -52,10 +54,10 @@ export class UtilityMeterDataFilterComponent implements OnInit {
     } else {
       selectedFacility.electricityInputFilters = electricityDataFilters;
     }
-    this.facilityDbService.update(selectedFacility);
+    await this.dbChangesService.updateFacilities(selectedFacility);
   }
 
-  showAllColumns() {
+  async showAllColumns() {
     this.showTotalDemand = true;
     this.supplyDemandCharge = {
       showSection: true,
@@ -82,10 +84,10 @@ export class UtilityMeterDataFilterComponent implements OnInit {
       powerFactorCharge: true,
       businessCharge: true
     }
-    this.save();
+    await this.save();
   }
 
-  hideAllColumns() {
+  async hideAllColumns() {
     this.showTotalDemand = false;
     this.supplyDemandCharge = {
       showSection: false,
@@ -112,7 +114,7 @@ export class UtilityMeterDataFilterComponent implements OnInit {
         powerFactorCharge: false,
         businessCharge: false
       }
-    this.save();
+    await this.save();
   }
 
   checkShowSection() {

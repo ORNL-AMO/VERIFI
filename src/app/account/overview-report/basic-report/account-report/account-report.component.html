@@ -79,11 +79,13 @@
 </div>
 <!--annual summary graphs-->
 <div class="pt-5" *ngIf="reportOptions.annualBarCharts" [ngClass]="{'print-break-after': reportOptions.monthBarCharts}">
-    <app-account-report-facility-bar-chart [account]="account" [reportOptions]="reportOptions" [sumByMonth]="false">
+    <app-account-report-facility-bar-chart [account]="account" [reportOptions]="reportOptions" [sumByMonth]="false"
+        [calanderizedMeters]="calanderizedAccountMeters">
     </app-account-report-facility-bar-chart>
 </div>
 <div class="pt-5" *ngIf="reportOptions.monthBarCharts">
-    <app-account-report-facility-bar-chart [account]="account" [reportOptions]="reportOptions" [sumByMonth]="true">
+    <app-account-report-facility-bar-chart [account]="account" [reportOptions]="reportOptions" [sumByMonth]="true"
+    [calanderizedMeters]="calanderizedAccountMeters">
     </app-account-report-facility-bar-chart>
 </div>
 <hr class="hide-print page-spacer">

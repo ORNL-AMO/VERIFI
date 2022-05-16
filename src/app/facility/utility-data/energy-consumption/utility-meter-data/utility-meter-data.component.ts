@@ -1,7 +1,7 @@
 import { Component, OnInit, ElementRef, ViewChild, QueryList, ViewChildren } from '@angular/core';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { Subscription } from 'rxjs';
-import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData, MeterSource } from 'src/app/models/idb';
+import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData, MeterSource } from 'src/app/models/idb';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UtilityMeterDataService } from './utility-meter-data.service';
@@ -9,6 +9,8 @@ import { LoadingService } from 'src/app/core-components/loading/loading.service'
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 
 @Component({
   selector: 'app-utility-meter-data',
@@ -38,12 +40,13 @@ export class UtilityMeterDataComponent implements OnInit {
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private activatedRoute: ActivatedRoute,
-    private utilityMeterDataService: UtilityMeterDataService,
     private router: Router,
     private loadingService: LoadingService,
     private toastNoticationService: ToastNotificationsService,
     private facilityDbService: FacilitydbService,
-    private sharedDataService: SharedDataService
+    private sharedDataService: SharedDataService,
+    private accountDbService: AccountdbService,
+    private dbChangesService: DbChangesService
   ) { }
 
   ngOnInit() {
@@ -99,10 +102,8 @@ export class UtilityMeterDataComponent implements OnInit {
       await this.utilityMeterDataDbService.deleteWithObservable(meterDataItemsToDelete[index].id).toPromise();
     }
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    let accountMeterData: Array<IdbUtilityMeterData> = await this.utilityMeterDataDbService.getAllByIndexRange("accountId", selectedFacility.accountId).toPromise();
-    this.utilityMeterDataDbService.accountMeterData.next(accountMeterData);
-    let facilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.filter(dataItem => { return dataItem.facilityId == selectedFacility.guid });
-    this.utilityMeterDataDbService.facilityMeterData.next(facilityMeterData);
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    await this.dbChangesService.setMeterData(selectedAccount, selectedFacility);
     this.loadingService.setLoadingStatus(false);
     this.toastNoticationService.showToast("Meter Data Deleted!", undefined, undefined, false, "success");
     this.cancelBulkDelete();
@@ -135,14 +136,20 @@ export class UtilityMeterDataComponent implements OnInit {
     this.meterDataToDelete = undefined;
   }
 
-  deleteMeterData() {
-    this.utilityMeterDataDbService.deleteIndex(this.meterDataToDelete.id);
+  async deleteMeterData() {
+    await this.utilityMeterDataDbService.deleteWithObservable(this.meterDataToDelete.id).toPromise();
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    await this.dbChangesService.setMeterData(selectedAccount, selectedFacility);
     this.cancelDelete();
   }
 
-  setToggleView(idbMeter) {
+  async setToggleView(idbMeter) {
     idbMeter.visible = !idbMeter.visible
-    this.utilityMeterDbService.update(idbMeter);
+    await this.utilityMeterDbService.updateWithObservable(idbMeter);
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    await this.dbChangesService.setMeters(selectedAccount, selectedFacility);
   }
 
   openBulkDelete() {
@@ -153,13 +160,19 @@ export class UtilityMeterDataComponent implements OnInit {
     this.showBulkDelete = false;
   }
 
-  ignoreSameMonth(meter: IdbUtilityMeter) {
+  async ignoreSameMonth(meter: IdbUtilityMeter) {
     meter.ignoreDuplicateMonths = true;
-    this.utilityMeterDbService.update(meter);
+    await this.utilityMeterDbService.updateWithObservable(meter);
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    await this.dbChangesService.setMeters(selectedAccount, selectedFacility);
   }
 
-  ignoreMissingMonth(meter: IdbUtilityMeter) {
+  async ignoreMissingMonth(meter: IdbUtilityMeter) {
     meter.ignoreMissingMonths = true;
-    this.utilityMeterDbService.update(meter);
+    await this.utilityMeterDbService.updateWithObservable(meter);
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    await this.dbChangesService.setMeters(selectedAccount, selectedFacility);
   }
 }

@@ -6,7 +6,6 @@ import { PredictorDataModule } from './predictor-data/predictor-data.module';
 import { MeterGroupingModule } from './meter-grouping/meter-grouping.module';
 import { EnergyConsumptionModule } from './energy-consumption/energy-consumption.module';
 import { CalanderizationModule } from './calanderization/calanderization.module';
-import { SiteToSourceOptionComponent } from './site-to-source-option/site-to-source-option.component';
 import { UtilityBannerComponent } from './utility-banner/utility-banner.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HelperPipesModule } from '../../shared/helper-pipes/helper-pipes.module';
@@ -17,7 +16,6 @@ import { RouterModule } from '@angular/router';
 @NgModule({
   declarations: [
     UtilityDataComponent,
-    SiteToSourceOptionComponent,
     UtilityBannerComponent
   ],
   imports: [

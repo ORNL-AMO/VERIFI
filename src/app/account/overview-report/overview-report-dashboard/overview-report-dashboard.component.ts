@@ -2,8 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { OverviewReportOptionsDbService } from 'src/app/indexedDB/overview-report-options-db.service';
-import { IdbOverviewReportOptions } from 'src/app/models/idb';
+import { IdbAccount, IdbOverviewReportOptions } from 'src/app/models/idb';
 import { ReportOptions } from 'src/app/models/overview-report';
 import { OverviewReportService } from '../overview-report.service';
 
@@ -25,7 +27,8 @@ export class OverviewReportDashboardComponent implements OnInit {
   showNewReportModal: boolean = false;
   reportType: 'data' | 'betterPlants' = 'betterPlants';
   constructor(private overviewReportService: OverviewReportService, private router: Router, private overviewReportOptionsDbService: OverviewReportOptionsDbService,
-    private toastNotificationService: ToastNotificationsService) { }
+    private toastNotificationService: ToastNotificationsService, private dbChangesService: DbChangesService,
+    private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
     this.accountOverviewReportOptionsSub = this.overviewReportOptionsDbService.accountOverviewReportOptions.subscribe(options => {
@@ -68,7 +71,8 @@ export class OverviewReportDashboardComponent implements OnInit {
 
   async confirmDelete() {
     await this.overviewReportOptionsDbService.deleteWithObservable(this.reportToDelete.id).toPromise();
-    this.overviewReportOptionsDbService.setAccountOverviewReportOptions();
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    await this.dbChangesService.setAccountOverviewReportOptions(selectedAccount);
     this.reportToDelete = undefined;
     this.toastNotificationService.showToast('Report Deleted', undefined, undefined, false, "success");
   }

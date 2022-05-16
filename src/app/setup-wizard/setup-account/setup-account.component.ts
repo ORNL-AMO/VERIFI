@@ -13,8 +13,10 @@ export class SetupAccountComponent implements OnInit {
   constructor(private accountdbService: AccountdbService, private setupWizardService: SetupWizardService) { }
 
   ngOnInit(): void {
-    let newAccount: IdbAccount = this.accountdbService.getNewIdbAccount();
-    this.setupWizardService.account.next(newAccount);
+    if(this.setupWizardService.account.getValue() == undefined){
+      let newAccount: IdbAccount = this.accountdbService.getNewIdbAccount();
+      this.setupWizardService.account.next(newAccount);
+    }
   }
 
 }

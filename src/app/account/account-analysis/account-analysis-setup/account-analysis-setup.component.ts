@@ -6,6 +6,7 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount, IdbAccountAnalysisItem } from 'src/app/models/idb';
 import { Month, Months } from 'src/app/shared/form-data/months';
 import { EnergyUnitOptions, UnitOption } from 'src/app/shared/unitOptions';
+import { AccountAnalysisService } from '../account-analysis.service';
 
 @Component({
   selector: 'app-account-analysis-setup',
@@ -23,7 +24,7 @@ export class AccountAnalysisSetupComponent implements OnInit {
   yearOptions: Array<number>;
   constructor(private accountDbService: AccountdbService, private accountAnalysisDbService: AccountAnalysisDbService,
     private analysisCalculationsHelperService: AnalysisCalculationsHelperService,
-    private router: Router) { }
+    private router: Router, private accountAnalysisService: AccountAnalysisService) { }
 
   ngOnInit(): void {
     this.analysisItem = this.accountAnalysisDbService.selectedAnalysisItem.getValue();
@@ -35,8 +36,8 @@ export class AccountAnalysisSetupComponent implements OnInit {
     this.yearOptions = this.analysisCalculationsHelperService.getYearOptions(true);
   }
 
-  saveItem() {
-    this.accountAnalysisDbService.update(this.analysisItem);
+  async saveItem() {
+    await this.accountAnalysisDbService.updateWithObservable(this.analysisItem).toPromise();
     this.accountAnalysisDbService.selectedAnalysisItem.next(this.analysisItem);
   }
 
@@ -60,4 +61,10 @@ export class AccountAnalysisSetupComponent implements OnInit {
     });
     this.saveItem();
   }
+
+  changeSiteSource(){
+    this.resetFacilityItems();
+    this.accountAnalysisService.setCalanderizedMeters();
+  }
+
 }

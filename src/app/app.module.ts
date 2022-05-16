@@ -19,6 +19,7 @@ import { ImportBackupModalComponent } from './core-components/import-backup-moda
 import { FacilityModule } from './facility/facility.module';
 import { AccountModule } from './account/account.module';
 import { SetupWizardModule } from './setup-wizard/setup-wizard.module';
+import { HelperPipesModule } from './shared/helper-pipes/helper-pipes.module';
 
 @NgModule({
   declarations: [
@@ -43,7 +44,8 @@ import { SetupWizardModule } from './setup-wizard/setup-wizard.module';
     BrowserAnimationsModule,
     FacilityModule,
     AccountModule,
-    SetupWizardModule
+    SetupWizardModule,
+    HelperPipesModule
   ],
   providers: [],
   bootstrap: [AppComponent]

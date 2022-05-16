@@ -25,12 +25,17 @@ export class AnalysisDbService {
     this.accountAnalysisItems = new BehaviorSubject<Array<IdbAnalysisItem>>([]);
     this.facilityAnalysisItems = new BehaviorSubject<Array<IdbAnalysisItem>>([]);
     this.selectedAnalysisItem = new BehaviorSubject<IdbAnalysisItem>(undefined);
-
-    this.facilityDbService.selectedFacility.subscribe(() => {
-      this.setAccountAnalysisItems();
+    this.selectedAnalysisItem.subscribe(analysisItem => {
+      if (analysisItem) {
+        this.localStorageService.store('analysisItemId', analysisItem.id);
+      }
     });
   }
 
+  getInitialAnalysisItem(): number {
+    let analysisItemId: number = this.localStorageService.retrieve("analysisItemId");
+    return analysisItemId;
+  }
 
   async initializeAnalysisItems() {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
@@ -48,29 +53,23 @@ export class AnalysisDbService {
         }
       }
     }
-    //subscribe after initialization
-    this.selectedAnalysisItem.subscribe(analysisItem => {
-      if (analysisItem) {
-        this.localStorageService.store('analysisItemId', analysisItem.id);
-      }
-    });
   }
 
-  setAccountAnalysisItems() {
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    if (selectedAccount) {
-      this.getAllByIndexRange('accountId', selectedAccount.guid).subscribe((analysisItems: Array<IdbAnalysisItem>) => {
-        this.accountAnalysisItems.next(analysisItems);
-        let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-        if (selectedFacility) {
-          let facilityAnalysisItems: Array<IdbAnalysisItem> = analysisItems.filter(item => { return item.facilityId == selectedFacility.guid });
-          this.facilityAnalysisItems.next(facilityAnalysisItems);
-        }else{
-          this.facilityAnalysisItems.next([]);
-        }
-      });
-    }
-  }
+  // setAccountAnalysisItems() {
+  //   let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+  //   if (selectedAccount) {
+  //     this.getAllByIndexRange('accountId', selectedAccount.guid).subscribe((analysisItems: Array<IdbAnalysisItem>) => {
+  //       this.accountAnalysisItems.next(analysisItems);
+  //       let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+  //       if (selectedFacility) {
+  //         let facilityAnalysisItems: Array<IdbAnalysisItem> = analysisItems.filter(item => { return item.facilityId == selectedFacility.guid });
+  //         this.facilityAnalysisItems.next(facilityAnalysisItems);
+  //       }else{
+  //         this.facilityAnalysisItems.next([]);
+  //       }
+  //     });
+  //   }
+  // }
 
   getAll(): Observable<Array<IdbAnalysisItem>> {
     return this.dbService.getAll('analysisItems');
@@ -93,11 +92,11 @@ export class AnalysisDbService {
     return this.dbService.count('analysisItems');
   }
 
-  add(analysisItems: IdbAnalysisItem): void {
-    this.dbService.add('analysisItems', analysisItems).subscribe(() => {
-      this.setAccountAnalysisItems();
-    });
-  }
+  // add(analysisItems: IdbAnalysisItem): void {
+  //   this.dbService.add('analysisItems', analysisItems).subscribe(() => {
+  //     this.setAccountAnalysisItems();
+  //   });
+  // }
 
   addWithObservable(analysisItem: IdbAnalysisItem): Observable<IdbAnalysisItem> {
     return this.dbService.add('analysisItems', analysisItem);
@@ -107,23 +106,23 @@ export class AnalysisDbService {
     return this.dbService.delete('analysisItems', id);
   }
 
-  update(values: IdbAnalysisItem): void {
-    values.date = new Date();
-    this.dbService.update('analysisItems', values).subscribe(() => {
-      this.setAccountAnalysisItems();
-    });
-  }
+  // update(values: IdbAnalysisItem): void {
+  //   values.date = new Date();
+  //   this.dbService.update('analysisItems', values).subscribe(() => {
+  //     this.setAccountAnalysisItems();
+  //   });
+  // }
 
   updateWithObservable(values: IdbAnalysisItem): Observable<Array<IdbAnalysisItem>> {
     values.date = new Date();
     return this.dbService.update('analysisItems', values);
   }
 
-  deleteById(analysisItemId: number): void {
-    this.dbService.delete('analysisItems', analysisItemId).subscribe(() => {
-      this.setAccountAnalysisItems();
-    });
-  }
+  // deleteById(analysisItemId: number): void {
+  //   this.dbService.delete('analysisItems', analysisItemId).subscribe(() => {
+  //     this.setAccountAnalysisItems();
+  //   });
+  // }
 
   getNewAnalysisItem(): IdbAnalysisItem {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
@@ -183,14 +182,15 @@ export class AnalysisDbService {
   }
 
 
-  updateAnalysisPredictors(predictorEntries: Array<PredictorData>) {
+  async updateAnalysisPredictors(predictorEntries: Array<PredictorData>) {
     let facilityAnalysisItems: Array<IdbAnalysisItem> = this.facilityAnalysisItems.getValue();
-    facilityAnalysisItems.forEach(analysisItem => {
+    for (let index = 0; index < facilityAnalysisItems.length; index++) {
+      let analysisItem: IdbAnalysisItem = facilityAnalysisItems[index];
       analysisItem.groups.forEach(group => {
         group.predictorVariables = this.updatePredictorVariables(predictorEntries, group.predictorVariables);
       });
-      this.update(analysisItem);
-    });
+      await this.updateWithObservable(analysisItem).toPromise();
+    };
   }
 
   updatePredictorVariables(predictorEntries: Array<PredictorData>, analysisPredictors: Array<PredictorData>): Array<PredictorData> {
@@ -229,17 +229,17 @@ export class AnalysisDbService {
       item.groups = item.groups.filter(group => { return group.idbGroupId != groupId });
       await this.updateWithObservable(item).toPromise();
     }
-    this.setAccountAnalysisItems();
   }
 
-  addGroup(groupId: string) {
+  async addGroup(groupId: string) {
     let predictors: Array<PredictorData> = this.predictorDbService.facilityPredictors.getValue();
     let predictorVariables: Array<PredictorData> = JSON.parse(JSON.stringify(predictors));
     predictorVariables.forEach(variable => {
       variable.productionInAnalysis = variable.production;
     });
     let facilityAnalysisItems: Array<IdbAnalysisItem> = this.facilityAnalysisItems.getValue();
-    facilityAnalysisItems.forEach(item => {
+    for (let index = 0; index < facilityAnalysisItems.length; index++) {
+      let item: IdbAnalysisItem = facilityAnalysisItems[index];
       item.groups.push({
         idbGroupId: groupId,
         analysisType: 'energyIntensity',
@@ -254,15 +254,14 @@ export class AnalysisDbService {
         hasBaselineAdjustement: false,
         baselineAdjustments: []
       });
-      this.update(item);
-    });
+      await this.updateWithObservable(item).toPromise();
+    };
   }
 
   async deleteAllFacilityAnalysisItems(facilityId: string) {
     let accountAnalysisItems: Array<IdbAnalysisItem> = this.accountAnalysisItems.getValue();
     let facilityAnalysisItems: Array<IdbAnalysisItem> = accountAnalysisItems.filter(analysisItem => { return analysisItem.facilityId == facilityId });
     await this.deleteAnalysisItems(facilityAnalysisItems);
-    this.setAccountAnalysisItems();
   }
 
 
@@ -273,7 +272,7 @@ export class AnalysisDbService {
 
   async deleteAnalysisItems(analysisItems: Array<IdbAnalysisItem>) {
     for (let i = 0; i < analysisItems.length; i++) {
-      await this.deleteWithObservable(analysisItems[i].id);
+      await this.deleteWithObservable(analysisItems[i].id).toPromise();
     }
   }
 

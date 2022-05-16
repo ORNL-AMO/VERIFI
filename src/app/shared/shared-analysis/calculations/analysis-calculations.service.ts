@@ -19,7 +19,7 @@ export class AnalysisCalculationsService {
     private predictorDbService: PredictordbService, private analysisCalculationsHelperService: AnalysisCalculationsHelperService) { }
 
 
-  getMonthlyAnalysisSummary(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility): MonthlyAnalysisSummary {
+  getMonthlyAnalysisSummary(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>): MonthlyAnalysisSummary {
     let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = this.analysisCalculationsHelperService.getMonthlyStartAndEndDate(facility, analysisItem);
     let baselineDate: Date = monthlyStartAndEndDate.baselineDate;
     let endDate: Date = monthlyStartAndEndDate.endDate;
@@ -38,18 +38,18 @@ export class AnalysisCalculationsService {
     let facilityPredictorData: Array<IdbPredictorEntry> = accountPredictorEntries.filter(entry => {
       return entry.facilityId == facility.guid;
     });
-    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == facility.guid });
+    // let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    // let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == facility.guid });
 
-    let groupMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.groupId == selectedGroup.idbGroupId });
-    let calanderizationOptions: CalanderizationOptions = {
-      energyIsSource: analysisItem.energyIsSource
-    }
-    let calanderizedMeterData: Array<CalanderizedMeter> = this.calendarizationService.getCalanderizedMeterData(groupMeters, false, false, calanderizationOptions);
-    calanderizedMeterData.forEach(calanderizedMeter => {
-      calanderizedMeter.monthlyData = this.convertMeterDataService.convertMeterDataToAnalysis(analysisItem, calanderizedMeter.monthlyData, facility, calanderizedMeter.meter);
-    });
-    let allMeterData: Array<MonthlyData> = calanderizedMeterData.flatMap(calanderizedMeter => { return calanderizedMeter.monthlyData });
+    let groupMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return cMeter.meter.groupId == selectedGroup.idbGroupId });
+    // let calanderizationOptions: CalanderizationOptions = {
+    //   energyIsSource: analysisItem.energyIsSource
+    // }
+    // let calanderizedMeterData: Array<CalanderizedMeter> = this.calendarizationService.getCalanderizedMeterData(groupMeters, inAccount, false, calanderizationOptions);
+    // calanderizedMeterData.forEach(calanderizedMeter => {
+    //   calanderizedMeter.monthlyData = this.convertMeterDataService.convertMeterDataToAnalysis(analysisItem, calanderizedMeter.monthlyData, facility, calanderizedMeter.meter);
+    // });
+    let allMeterData: Array<MonthlyData> = groupMeters.flatMap(calanderizedMeter => { return calanderizedMeter.monthlyData });
     let baselineYear: number = this.analysisCalculationsHelperService.getFiscalYear(baselineDate, facility);
     let annualMeterDataUsage: Array<{ year: number, usage: number }> = new Array();
     for (let year = baselineYear + 1; year <= endDate.getUTCFullYear(); year++) {
@@ -261,8 +261,8 @@ export class AnalysisCalculationsService {
   }
 
 
-  getAnnualAnalysisSummary(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility): Array<AnnualAnalysisSummary> {
-    let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = this.getMonthlyAnalysisSummary(selectedGroup, analysisItem, facility).monthlyAnalysisSummaryData;
+  getAnnualAnalysisSummary(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>): Array<AnnualAnalysisSummary> {
+    let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = this.getMonthlyAnalysisSummary(selectedGroup, analysisItem, facility, calanderizedMeters).monthlyAnalysisSummaryData;
     let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = this.calculateAnnualAnalysisSummary(monthlyAnalysisSummaryData, analysisItem, facility);
     return annualAnalysisSummaries;
   }
