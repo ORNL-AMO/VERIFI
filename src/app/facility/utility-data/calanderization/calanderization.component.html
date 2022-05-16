@@ -99,12 +99,12 @@
     </div>
 </div>
 
-<div class="popup calanderization" [class.open]="dataApplicationMeter">
+<div class="popup calanderization" [class.open]="displayDataApplicationModal">
     <div class="popup-header" *ngIf="dataApplicationMeter">Select Calendarization Method:
         {{dataApplicationMeter.name}}
         <button class="item-right" (click)="cancelSetDataApplication()">x</button>
     </div>
-    <div class="popup-body" *ngIf="dataApplicationMeter">
+    <div class="popup-body" *ngIf="displayDataApplicationModal">
         <app-data-application-menu [meter]="dataApplicationMeter"></app-data-application-menu>
     </div>
     <div class="saveCancel popup-footer text-right">

@@ -36,7 +36,7 @@ export class CalanderizationComponent implements OnInit {
 
   selectedMeter: IdbUtilityMeter;
   selectedFacility: IdbFacility;
-
+  displayDataApplicationModal: boolean = false;
   constructor(private calanderizationService: CalanderizationService, private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService, private facilityDbService: FacilitydbService,
     private dbChangesService: DbChangesService, private accountDbService: AccountdbService) { }
@@ -178,14 +178,16 @@ export class CalanderizationComponent implements OnInit {
 
   showDataApplicationModal() {
     this.dataApplicationMeter = JSON.parse(JSON.stringify(this.selectedMeter));
+    this.displayDataApplicationModal = true;
   }
 
   cancelSetDataApplication() {
+    this.displayDataApplicationModal = false;
     this.dataApplicationMeter = undefined;
   }
 
   async setDataApplication() {
-    await this.utilityMeterDbService.updateWithObservable(this.dataApplicationMeter);
+    await this.utilityMeterDbService.updateWithObservable(this.dataApplicationMeter).toPromise();
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setMeters(selectedAccount, this.selectedFacility)
     this.selectedMeter = this.dataApplicationMeter;

@@ -16,6 +16,7 @@ import { ImportPredictorsService } from './import-predictors.service';
 import { ImportMeterDataFile, ImportPredictorFile, UploadDataService } from './upload-data.service';
 import * as _ from 'lodash';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 @Injectable({
   providedIn: 'root'
 })
@@ -33,7 +34,8 @@ export class UploadDataRunnerService {
     private router: Router,
     private energyUnitsHelperService: EnergyUnitsHelperService,
     private importPredictorsService: ImportPredictorsService,
-    private accountDbService: AccountdbService) { }
+    private accountDbService: AccountdbService,
+    private dbChangesService: DbChangesService) { }
 
   async importData() {
     this.loadingService.setLoadingMessage("Importing Meters..");
@@ -69,7 +71,7 @@ export class UploadDataRunnerService {
     //add meter data
     await this.addMeterData();
     await this.addPredictors(selectedFacility);
-    this.finishUpload();
+    await this.finishUpload();
   }
 
   async addMeterGroups(newMeters: Array<IdbUtilityMeter>) {
@@ -232,13 +234,15 @@ export class UploadDataRunnerService {
     }
   }
 
-  finishUpload() {
+  async finishUpload() {
     //update behavior subjects and reset import
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    this.accountDbService.selectedAccount.next(selectedAccount);
+    // this.accountDbService.selectedAccount.next(selectedAccount);
+    await this.dbChangesService.selectAccount(selectedAccount);
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    this.dbChangesService.selectFacility(selectedFacility);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationsService.showToast('Data Imported!', undefined, 3500, false, "success");
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     this.router.navigateByUrl('facility/' + selectedFacility.id + '/utility/energy-consumption');
   }
 
