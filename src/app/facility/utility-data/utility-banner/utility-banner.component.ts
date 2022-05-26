@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbUtilityMeterData } from 'src/app/models/idb';
+import { ExportToExcelTemplateService } from 'src/app/shared/helper-services/export-to-excel-template.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 
 @Component({
@@ -16,7 +17,8 @@ export class UtilityBannerComponent implements OnInit {
 
   modalOpen: boolean;
   modalOpenSub: Subscription;
-  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private sharedDataService: SharedDataService) { }
+  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private sharedDataService: SharedDataService,
+    private exportToExcelTemplateService: ExportToExcelTemplateService) { }
 
   ngOnInit(): void {
     this.utilityDataSub = this.utilityMeterDataDbService.facilityMeterData.subscribe(utilityMeterData => {
@@ -30,5 +32,9 @@ export class UtilityBannerComponent implements OnInit {
   ngOnDestroy(){
     this.utilityDataSub.unsubscribe();
     this.modalOpenSub.unsubscribe();
+  }
+
+  exportData(){
+    this.exportToExcelTemplateService.exportFacilityData();
   }
 }
