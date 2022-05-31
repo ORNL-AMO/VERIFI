@@ -77,7 +77,7 @@ export class ExportToExcelTemplateService {
       worksheet.getCell('E' + index).value = meter.supplier;
       worksheet.getCell('F' + index).value = meter.notes;
       worksheet.getCell('G' + index).value = meter.location;
-      worksheet.getCell('H' + index).value = meter.groupId;
+      worksheet.getCell('H' + index).value = meter.group;
       worksheet.getCell('I' + index).value = meter.phase;
       worksheet.getCell('J' + index).value = meter.fuel;
       worksheet.getCell('K' + index).value = meter.startingUnit;
