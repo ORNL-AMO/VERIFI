@@ -20,7 +20,6 @@ import { FacilityModule } from './facility/facility.module';
 import { AccountModule } from './account/account.module';
 import { SetupWizardModule } from './setup-wizard/setup-wizard.module';
 import { HelperPipesModule } from './shared/helper-pipes/helper-pipes.module';
-import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
   declarations: [
@@ -46,8 +45,7 @@ import { HttpClientModule } from '@angular/common/http';
     FacilityModule,
     AccountModule,
     SetupWizardModule,
-    HelperPipesModule,
-    HttpClientModule
+    HelperPipesModule
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -18,7 +18,6 @@ export class UtilityBannerComponent implements OnInit {
   modalOpen: boolean;
   modalOpenSub: Subscription;
 
-  showExportModal: boolean;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private sharedDataService: SharedDataService,
     private exportToExcelTemplateService: ExportToExcelTemplateService) { }
 
