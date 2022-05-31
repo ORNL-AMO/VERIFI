@@ -1,10 +1,11 @@
 import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import * as ExcelJS from 'exceljs';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +14,8 @@ export class ExportToExcelTemplateService {
 
   constructor(private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private predictorDbService: PredictordbService) { }
+    private predictorDbService: PredictordbService,
+    private facilityDbService: FacilitydbService) { }
 
 
   exportFacilityData() {
@@ -25,7 +27,10 @@ export class ExportToExcelTemplateService {
       a.href = url;
       let date = new Date();
       let datePipe = new DatePipe('en-us');
-      a.download = "VERIFI-Data-" + datePipe.transform(date, 'MM-dd-yyyy');
+      let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+      let facilityName: string = facility.name;
+
+      a.download = facilityName.replaceAll(' ', '-') + "-" + datePipe.transform(date, 'MM-dd-yyyy');
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -194,7 +199,7 @@ export class ExportToExcelTemplateService {
         let letter: string = alphabet[alphaIndex];
         worksheet.getCell(letter + index).value = predictor.amount;
         alphaIndex++;
-      });      
+      });
       index++;
     })
     return worksheet;
