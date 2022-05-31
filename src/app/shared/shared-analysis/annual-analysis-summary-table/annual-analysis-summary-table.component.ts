@@ -1,4 +1,5 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
 import { AnalysisTableColumns, AnnualAnalysisSummary } from 'src/app/models/analysis';
@@ -24,12 +25,13 @@ export class AnnualAnalysisSummaryTableComponent implements OnInit {
   numImprovementColumns: number;
   numPredictorColumns: number;
 
-  
+
   orderDataField: string = 'year';
   orderByDirection: 'asc' | 'desc' = 'asc';
   predictorColumns: Array<PredictorData>;
   copyingTable: boolean = false;
-  constructor(private analysisService: AnalysisService, private copyTableService: CopyTableService) { }
+  constructor(private analysisService: AnalysisService, private copyTableService: CopyTableService,
+    private router: Router) { }
 
   ngOnInit(): void {
     this.analysisTableColumnsSub = this.analysisService.analysisTableColumns.subscribe(columns => {
@@ -47,21 +49,28 @@ export class AnnualAnalysisSummaryTableComponent implements OnInit {
   }
 
   setPredictorVariables() {
-    let predictorColumns: Array<PredictorData> = new Array();
-    this.annualAnalysisSummary.forEach((data, index) => {
-      this.analysisTableColumns.predictors.forEach(predictorItem => {
-        if (predictorItem.display) {
-          if (index == 0) {
-            predictorColumns.push(predictorItem.predictor)
+    let inAccount: boolean = this.router.url.includes('account');
+    if (!inAccount) {
+      let predictorColumns: Array<PredictorData> = new Array();
+      this.annualAnalysisSummary.forEach((data, index) => {
+        this.analysisTableColumns.predictors.forEach(predictorItem => {
+          if (predictorItem.display) {
+            if (index == 0) {
+              predictorColumns.push(predictorItem.predictor)
+            }
+            let monthData: { predictorId: string, usage: number } = data.predictorUsage.find(usageItem => { return usageItem.predictorId == predictorItem.predictor.id });
+            if (monthData) {
+              data[predictorItem.predictor.name] = monthData.usage;
+            }
+          } else if (data[predictorItem.predictor.name] != undefined) {
+            delete data[predictorItem.predictor.name];
           }
-          let monthData: { predictorId: string, usage: number } = data.predictorUsage.find(usageItem => { return usageItem.predictorId == predictorItem.predictor.id });
-          data[predictorItem.predictor.name] = monthData.usage;
-        }else if(data[predictorItem.predictor.name] != undefined){
-          delete data[predictorItem.predictor.name];
-        }
-      })
-    })
-    this.predictorColumns = predictorColumns;
+        })
+      });
+      this.predictorColumns = predictorColumns;
+    } else {
+      this.predictorColumns = [];
+    }
   }
 
   setOrderDataField(str: string) {
@@ -91,11 +100,11 @@ export class AnnualAnalysisSummaryTableComponent implements OnInit {
     if (this.analysisTableColumns.adjusted) {
       numEnergyColumns++;
     }
-    
+
     if (this.analysisTableColumns.baselineAdjustmentForNormalization) {
       numEnergyColumns++;
     }
-    
+
     if (this.analysisTableColumns.baselineAdjustmentForOther) {
       numEnergyColumns++;
     }
@@ -141,7 +150,7 @@ export class AnnualAnalysisSummaryTableComponent implements OnInit {
     this.numPredictorColumns = numPredictorColumns;
   }
 
-  copyTable(){
+  copyTable() {
     this.copyingTable = true;
     setTimeout(() => {
       this.copyTableService.copyTable(this.dataTable);
