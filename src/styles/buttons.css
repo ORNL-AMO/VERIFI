@@ -144,3 +144,7 @@
 .btn-group button{
   border: solid 1px;
 }
+
+.btn.btn-dark:hover{
+  background-color: gray;
+}

@@ -1,9 +1,11 @@
+import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import * as ExcelJS from 'exceljs';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -21,9 +23,13 @@ export class ExportToExcelTemplateService {
       let a = document.createElement("a");
       let url = window.URL.createObjectURL(blob);
       a.href = url;
-      a.download = "dataTemplate";
+      let date = new Date();
+      let datePipe = new DatePipe('en-us');
+      a.download = "VERIFI-Data-" + datePipe.transform(date, 'MM-dd-yyyy');
+      document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
     });
   }
 
