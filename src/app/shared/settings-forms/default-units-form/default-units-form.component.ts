@@ -186,24 +186,26 @@ export class DefaultUnitsFormComponent implements OnInit {
             this.form.controls.eGridSubregion.patchValue(this.zipCodeSubRegionData[0]);
             this.setSubRegionEmissionsOutput();
           }
-        } else {
-          this.setUSAverage();
         }
-      } else {
-        this.setUSAverage();
       }
-    } else {
-      this.setUSAverage();
     }
+    this.setUSAverage();
   }
 
   setUSAverage() {
     let subRegionData: SubRegionData = _.find(this.eGridService.subRegionsByZipcode, (val) => { return val.zip == '00000' });
-    subRegionData.subregions.forEach(subregion => {
-      if (subregion) {
-        this.zipCodeSubRegionData.push(subregion);
-      }
-    });
+    if (subRegionData) {
+      subRegionData.subregions.forEach(subregion => {
+        if (subregion) {
+          let checkHasRegion = this.zipCodeSubRegionData.find(region => {
+            return region == subregion;
+          });
+          if (!checkHasRegion) {
+            this.zipCodeSubRegionData.push(subregion);
+          }
+        }
+      });
+    }
     if (this.zipCodeSubRegionData.length > 0) {
       let checkExists: string = this.zipCodeSubRegionData.find(val => { return this.form.controls.eGridSubregion.value === val; })
       if (!checkExists) {
