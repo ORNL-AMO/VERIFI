@@ -189,7 +189,9 @@ export class DefaultUnitsFormComponent implements OnInit {
         }
       }
     }
-    this.setUSAverage();
+    if (!this.form.controls.customEmissionsRate.value) {
+      this.setUSAverage();
+    }
   }
 
   setUSAverage() {

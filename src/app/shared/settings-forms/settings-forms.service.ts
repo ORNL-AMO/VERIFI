@@ -98,6 +98,7 @@ export class SettingsFormsService {
     account.energyIsSource = form.controls.energyIsSource.value;
     account.emissionsOutputRate = form.controls.emissionsOutputRate.value;
     account.eGridSubregion = form.controls.eGridSubregion.value;
+    account.customEmissionsRate = form.controls.customEmissionsRate.value;
     return account;
   }
 
@@ -109,6 +110,7 @@ export class SettingsFormsService {
     facility.energyIsSource = form.controls.energyIsSource.value;
     facility.emissionsOutputRate = form.controls.emissionsOutputRate.value;
     facility.eGridSubregion = form.controls.eGridSubregion.value;
+    facility.customEmissionsRate = form.controls.customEmissionsRate.value;
     return facility;
   }
 
