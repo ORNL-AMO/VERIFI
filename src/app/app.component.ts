@@ -12,6 +12,7 @@ import { UtilityMeterGroupdbService } from './indexedDB/utilityMeterGroup-db.ser
 import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, IdbOverviewReportOptions, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from './models/idb';
 import { EGridService } from './shared/helper-services/e-grid.service';
 import { SharedDataService } from './shared/helper-services/shared-data.service';
+import { RegressionService } from './shared/shared-analysis/calculations/regression.service';
 
 // declare ga as a function to access the JS code in TS
 declare let gtag: Function;
@@ -38,7 +39,8 @@ export class AppComponent {
     private eGridService: EGridService,
     private overviewReportOptionsDbService: OverviewReportOptionsDbService,
     private analysisDbService: AnalysisDbService,
-    private accountAnalysisDbService: AccountAnalysisDbService) {
+    private accountAnalysisDbService: AccountAnalysisDbService,
+    private regressionService: RegressionService) {
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
         gtag('config', 'G-YG1QD02XSE',
@@ -53,6 +55,7 @@ export class AppComponent {
   ngOnInit() {
     this.initializeData();
     this.eGridService.parseEGridData();
+    this.regressionService.test();
   }
 
   async initializeData() {
