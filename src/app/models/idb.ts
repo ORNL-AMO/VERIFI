@@ -1,3 +1,4 @@
+import { JStatRegressionModel } from './analysis';
 import { CalanderizedMeter, MonthlyData } from './calanderization';
 import { ElectricityDataFilters } from './electricityFilter';
 import { ReportOptions } from './overview-report';
@@ -253,7 +254,9 @@ export interface AnalysisGroup {
         year: number,
         amount: number
     }>,
-    userDefinedModel: boolean
+    userDefinedModel: boolean,
+    models?: Array<JStatRegressionModel>,
+    selectedModelId?: string
 }
 
 export interface IdbAccountAnalysisItem {

@@ -106,6 +106,7 @@ export class RegressionModelsService {
       model['modelYear'] = baselineYear;
       model['predictorVariables'] = predictorVariables;
       model['isValid'] = this.checkModelValid(model);
+      model['modelId'] = Math.random().toString(36).substr(2, 9);
       models.push(model);
       baselineYear++;
     }

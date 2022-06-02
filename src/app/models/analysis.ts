@@ -148,5 +148,7 @@ export interface JStatRegressionModel {
     F_statistic: number
   },
   modelYear: number,
-  predictorVariables: Array<PredictorData>
+  predictorVariables: Array<PredictorData>,
+  modelId: string,
+  isValid: boolean
 }
