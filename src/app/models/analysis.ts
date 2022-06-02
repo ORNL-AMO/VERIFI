@@ -1,20 +1,5 @@
 import { AnalysisGroup, IdbPredictorEntry, PredictorData } from "./idb";
 
-// export interface AnnualGroupSummary {
-//   year: number,
-//   totalEnergy: number,
-//   totalEnergySavings: number,
-//   annualEnergySavings: number,
-//   totalProduction: number,
-//   annualProductionChange: number,
-//   totalProductionChange: number,
-//   energyIntensity: number,
-//   totalEnergyIntensityChange: number,
-//   annualEnergyIntensityChange: number,
-//   group: AnalysisGroup
-// }
-
-
 export interface MonthlyGroupSummary {
   date: Date,
   energyUse: number,
@@ -22,8 +7,6 @@ export interface MonthlyGroupSummary {
   energyIntensity: number,
   fiscalYear: number
 }
-
-
 
 export interface FacilityGroupSummary {
   group: AnalysisGroup,
@@ -60,32 +43,6 @@ export interface MonthlyFacilityAnalysisData {
   rolling12MonthImprovement: number
 }
 
-// export interface MonthlyAnalysisSummary {
-//   predictorVariables: Array<PredictorData>,
-//   modelYear: number,
-//   monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>
-// }
-
-// export interface MonthlyAnalysisSummaryData {
-//   totalEnergy: number,
-//   predictorUsage?: Array<number>,
-//   modeledEnergy: number,
-//   date: Date,
-//   monthlySavings: number,
-//   yearToDateImprovementOverBaseline: number,
-//   yearToDateImprovementOverFiscalYear: number,
-//   rollingYearImprovement: number,
-//   group: AnalysisGroup,
-//   fiscalYear: number,
-//   yearToDateSEnPI: number,
-//   rollingSEnPI: number,
-//   monthlyIncrementalImprovement: number,
-//   rolling12MonthImprovement: number,
-//   energyIntensity: number
-// }
-
-
-
 export interface MonthlyAnalysisSummary {
   predictorVariables: Array<PredictorData>,
   modelYear: number,
@@ -101,11 +58,6 @@ export interface MonthlyAnalysisSummaryData {
   baselineAdjustmentForNormalization: number,
   baselineAdjustmentForOther: number,
   baselineAdjustment: number,
-  // adjustedBaselineEnergyUse: number,
-
-
-
-
   predictorUsage?: Array<{
     usage: number,
     predictorId: string
@@ -173,4 +125,28 @@ export interface AnalysisTableColumns {
     usedInAnalysis: boolean
   }>,
   predictorGroupId: string
+}
+
+
+export interface JStatRegressionModel {
+  coef: Array<number>,
+  R2: number,
+  SSE: number,
+  SSR: number,
+  SST: number,
+  adjust_R2: number,
+  df_model: number,
+  df_resid: number,
+  ybar: number,
+  t: {
+    se: Array<number>,
+    sigmaHat: number
+    p: Array<number>
+  },
+  f: {
+    pvalue: number,
+    F_statistic: number
+  },
+  modelYear: number,
+  predictorVariables: Array<PredictorData>
 }

@@ -174,7 +174,7 @@ const routes: Routes = [
                 children: [
                   { path: '', pathMatch: 'full', redirectTo: 'options' },
                   { path: 'options', component: GroupAnalysisOptionsComponent },
-                  { path: 'regression-model-selection', component: RegressionModelSelectionComponent },
+                  { path: 'model-selection', component: RegressionModelSelectionComponent },
                   { path: 'annual-analysis', component: AnnualAnalysisSummaryComponent },
                   { path: 'monthly-analysis', component: MonthlyAnalysisSummaryComponent }
                 ]

@@ -252,7 +252,8 @@ export interface AnalysisGroup {
     baselineAdjustments: Array<{
         year: number,
         amount: number
-    }>
+    }>,
+    userDefinedModel: boolean
 }
 
 export interface IdbAccountAnalysisItem {

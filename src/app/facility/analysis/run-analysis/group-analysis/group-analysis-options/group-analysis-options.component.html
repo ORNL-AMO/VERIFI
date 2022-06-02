@@ -148,6 +148,21 @@
 
     <!--regression-->
     <div class="col-md-6 col-sm-12" *ngIf="group.analysisType == 'regression'">
+        <div class="row mb-2 bold">
+            <div class="col-6">
+                <label for="userDefinedModel">
+                    User Defined Model?
+                </label>
+            </div>
+            <div class="col-6">
+                <label class="switch" for="userDefinedModel">
+                    <input class="checkbox" type="checkbox" id="userDefinedModel" name="userDefinedModel"
+                        [(ngModel)]="group.userDefinedModel" (change)="saveItem()">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+        </div>
+
         <div class="row bold mb-2">
             <div class="col-4">
                 Predictor Variables
@@ -155,7 +170,7 @@
             <div class="col-4">
                 Use for Regression
             </div>
-            <div class="col-4">
+            <div class="col-4" *ngIf="!group.userDefinedModel">
                 Regression Coefficient
             </div>
         </div>
@@ -171,14 +186,14 @@
                     <span class="slider round"></span>
                 </label>
             </div>
-            <div class="col-4">
+            <div class="col-4" *ngIf="!group.userDefinedModel">
                 <input class="form-control" *ngIf="predictor.productionInAnalysis" type="number" step="any"
                     id="{{'regressionCoefficient_'+predictor.id}}" name="{{'regressionCoefficient_'+predictor.id}}"
                     [(ngModel)]="predictor.regressionCoefficient" required (input)="saveItem()">
                 <span class="bold" *ngIf="!predictor.productionInAnalysis">&mdash;</span>
             </div>
         </div>
-        <div class="row mb-2">
+        <div class="row mb-2" *ngIf="!group.userDefinedModel">
             <div class="col-6">
                 <label for="regressionConstant">
                     Regression Constant
@@ -189,7 +204,7 @@
                     [(ngModel)]="group.regressionConstant" required (input)="saveItem()">
             </div>
         </div>
-        <div class="row">
+        <div class="row" *ngIf="!group.userDefinedModel">
             <div class="col-6">
                 <label for="regressionModelYear">
                     Model Year

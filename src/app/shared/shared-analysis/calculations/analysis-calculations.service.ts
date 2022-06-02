@@ -38,17 +38,8 @@ export class AnalysisCalculationsService {
     let facilityPredictorData: Array<IdbPredictorEntry> = accountPredictorEntries.filter(entry => {
       return entry.facilityId == facility.guid;
     });
-    // let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    // let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == facility.guid });
-
+    
     let groupMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return cMeter.meter.groupId == selectedGroup.idbGroupId });
-    // let calanderizationOptions: CalanderizationOptions = {
-    //   energyIsSource: analysisItem.energyIsSource
-    // }
-    // let calanderizedMeterData: Array<CalanderizedMeter> = this.calendarizationService.getCalanderizedMeterData(groupMeters, inAccount, false, calanderizationOptions);
-    // calanderizedMeterData.forEach(calanderizedMeter => {
-    //   calanderizedMeter.monthlyData = this.convertMeterDataService.convertMeterDataToAnalysis(analysisItem, calanderizedMeter.monthlyData, facility, calanderizedMeter.meter);
-    // });
     let allMeterData: Array<MonthlyData> = groupMeters.flatMap(calanderizedMeter => { return calanderizedMeter.monthlyData });
     let baselineYear: number = this.analysisCalculationsHelperService.getFiscalYear(baselineDate, facility);
     let annualMeterDataUsage: Array<{ year: number, usage: number }> = new Array();
