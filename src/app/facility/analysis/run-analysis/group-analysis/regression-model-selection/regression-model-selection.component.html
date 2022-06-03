@@ -1,21 +1,31 @@
-<button class="btn btn-info" (click)="generateModels()" *ngIf="!selectedGroup.models">Generate Models</button>
+<button class="btn btn-info" (click)="generateModels()">Generate Models</button>
 
 
 <div class="table-responsive" *ngIf="selectedGroup.models">
+    <div class="row no-gutters justify-content-end">
+        <div class="col-11 text-right">
+            <label class="bold pr-3" for="showInvalid">
+                Show Invalid Models
+            </label>
+        </div>
+        <div class="col">
+            <label class="switch" for="showInvalid">
+                <input class="checkbox" type="checkbox" id="showInvalid" name="showInvalid" [(ngModel)]="showInvalid">
+                <span class="slider round"></span>
+            </label>
+        </div>
+    </div>
     <table class="table table-sm table-hover">
         <thead>
             <tr>
                 <th>
-                    Select Model
+                    Select<br> Model
                 </th>
                 <!-- <th>
                     Model ID
                 </th> -->
                 <th>
                     Model Year
-                </th>
-                <th>
-                    Valid
                 </th>
                 <th>
                     Variable p-Values
@@ -32,23 +42,24 @@
                 <th>
                     Formula
                 </th>
+                <th *ngIf="showInvalid">
+                    Valid
+                </th>
             </tr>
         </thead>
         <tbody>
-            <tr *ngFor="let model of selectedGroup.models; let modelIndex = index;">
+            <tr *ngFor="let model of selectedGroup.models | modelFilter:showInvalid; let modelIndex = index;">
                 <td>
-                    <input [disabled]="!model.isValid" type="radio" class="rowToggle" [(ngModel)]="selectedGroup.selectedModelId"
-                        [value]="model.modelId" name="{{modelIndex+'_selectedModelId'}}"
-                        id="{{modelIndex+'_selectedModelId'}}" (change)="selectModel()">
+                    <input type="radio" class="rowToggle"
+                        [(ngModel)]="selectedGroup.selectedModelId" [value]="model.modelId"
+                        name="{{modelIndex+'_selectedModelId'}}" id="{{modelIndex+'_selectedModelId'}}"
+                        (change)="selectModel()">
                 </td>
                 <!-- <td>
                     {{model.modelId}}
                 </td> -->
                 <td>
                     {{model.modelYear}}
-                </td>
-                <td>
-                    {{model.isValid}}
                 </td>
                 <td>
                     <span *ngFor="let pVal of model.t.p; let index = index">
@@ -69,10 +80,13 @@
                 </td>
                 <td>
                     <span *ngFor="let coefVal of model.coef; let index = index;">
-                        {{coefVal| customNumber}}
-                        <span *ngIf="index != 0">*({{model.predictorVariables[index-1].name}})</span> <span
+                        <span *ngIf="index == 0">{{coefVal| customNumber}}</span>
+                        <span *ngIf="index != 0">({{coefVal| customNumber}}*{{model.predictorVariables[index-1].name}})</span> <span
                             *ngIf="index != model.coef.length-1"> +</span>
                     </span>
+                </td>
+                <td *ngIf="showInvalid">
+                    {{model.isValid}}
                 </td>
             </tr>
         </tbody>

@@ -11,6 +11,7 @@ import * as _ from 'lodash';
 })
 export class RegressionModelsService {
 
+  allResults: Array<Array<number>>;
   constructor(private analysisCalculationsHelperService: AnalysisCalculationsHelperService, private predictorDbService: PredictordbService) { }
 
   test() {
@@ -84,11 +85,15 @@ export class RegressionModelsService {
       reportYear = reportYear - 1;
     }
     let predictorVariables: Array<PredictorData> = new Array();
+    let predictorVariableIds: Array<string> = new Array();
     analysisGroup.predictorVariables.forEach(variable => {
       if (variable.productionInAnalysis) {
         predictorVariables.push(variable);
+        predictorVariableIds.push(variable.id);
       }
     });
+    let allPredictorVariableCombos: Array<Array<string>> = this.getPredictorCombos(predictorVariableIds);
+    console.log(allPredictorVariableCombos);
 
     let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
     let facilityPredictorData: Array<IdbPredictorEntry> = accountPredictorEntries.filter(entry => {
@@ -101,19 +106,30 @@ export class RegressionModelsService {
     let models: Array<JStatRegressionModel> = new Array();
     while (baselineYear <= reportYear) {
       let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = this.getMonthlyStartAndEndDate(facility, baselineYear);
-      let regressionData: { endog: Array<number>, exog: Array<Array<number>> } = this.getRegressionData(monthlyStartAndEndDate.baselineDate, monthlyStartAndEndDate.endDate, allMeterData, facilityPredictorData, predictorVariables);
-      let model: JStatRegressionModel = jStat.models.ols(regressionData.endog, regressionData.exog);
-      model['modelYear'] = baselineYear;
-      model['predictorVariables'] = predictorVariables;
-      model['isValid'] = this.checkModelValid(model);
-      model['modelId'] = Math.random().toString(36).substr(2, 9);
-      models.push(model);
+      console.log(monthlyStartAndEndDate.baselineDate);
+      allPredictorVariableCombos.forEach(variableIdCombo => {
+        let regressionData: { endog: Array<number>, exog: Array<Array<number>> } = this.getRegressionData(monthlyStartAndEndDate.baselineDate, monthlyStartAndEndDate.endDate, allMeterData, facilityPredictorData, variableIdCombo);
+        console.log(regressionData.exog);
+
+        let model: JStatRegressionModel = jStat.models.ols(regressionData.endog, regressionData.exog);
+        model['modelYear'] = baselineYear;
+        let modelPredictorVariables: Array<PredictorData> = new Array();
+        variableIdCombo.forEach(variableId => {
+          let variable: PredictorData = predictorVariables.find(variable => { return variable.id == variableId });
+          modelPredictorVariables.push(variable);
+        });
+        model['predictorVariables'] = modelPredictorVariables;
+        model['isValid'] = this.checkModelValid(model);
+        model['modelId'] = Math.random().toString(36).substr(2, 9);
+        models.push(model);
+      })
+
       baselineYear++;
     }
     return models;
   }
 
-  getRegressionData(startDate: Date, endDate: Date, allMeterData: Array<MonthlyData>, facilityPredictorData: Array<IdbPredictorEntry>, predictorVariables: Array<PredictorData>): { endog: Array<number>, exog: Array<Array<number>> } {
+  getRegressionData(startDate: Date, endDate: Date, allMeterData: Array<MonthlyData>, facilityPredictorData: Array<IdbPredictorEntry>, predictorVariablesIds: Array<string>): { endog: Array<number>, exog: Array<Array<number>> } {
     let endog: Array<number> = new Array();
     let exog: Array<Array<number>> = new Array();
     while (startDate < endDate) {
@@ -130,10 +146,10 @@ export class RegressionModelsService {
 
       //need 1 for constants
       let usageArr: Array<number> = [1];
-      predictorVariables.forEach(variable => {
+      predictorVariablesIds.forEach(variableId => {
         let totalUsage: number = 0;
         monthPredictorData.forEach(pData => {
-          let predictorUsage = pData.predictors.find(predictor => { return predictor.id == variable.id });
+          let predictorUsage = pData.predictors.find(predictor => { return predictor.id == variableId });
           totalUsage = totalUsage + predictorUsage.amount;
         });
         usageArr.push(totalUsage);
@@ -183,6 +199,51 @@ export class RegressionModelsService {
       isValid = false;
     }
     return isValid;
+  }
+
+
+  // getCombonations(predictorVariables: Array<PredictorData>): Array<Array<PredictorData>>{
+
+  //   let combos: Array<Array<PredictorData>> = new Array();
+  //   for(let i = 0; i < predictorVariables.length; i++){
+  //     let pCombos: Array<PredictorData> = new Array();
+  //     pCombos.push(predictorVariables[i]);
+  //   }
+  // }
+
+  // getAllCombos(predictorVariables: Array<PredictorData>): Array<Array<PredictorData>>{
+  //   for(let i = 0; i < predictorVariables.length; i++){
+  //     let pCombos: Array<PredictorData> = new Array();
+  //     pCombos.push(predictorVariables[i]);
+  //   }
+  // }
+
+
+  getPredictorCombos(predictorIds: Array<string>): Array<Array<string>> {
+    let allCombos: Array<Array<string>> = [];
+    for (let i = 1; i < 5; i++) {
+      this.getCombinations(predictorIds, i, allCombos);
+    }
+    return allCombos;
+  }
+
+  getCombinations(values: Array<string>, size: number, allResults: Array<Array<string>>) {
+    let result = new Array(size);
+    this.combinations(values, size, 0, result, allResults);
+    console.log(allResults);
+
+  }
+
+  combinations(values: Array<string>, size: number, startPosition: number, result: Array<string>, allResults: Array<Array<string>>) {
+    if (size == 0) {
+      console.log(result);
+      allResults.push(JSON.parse(JSON.stringify(result)));
+      return;
+    }
+    for (let i = startPosition; i <= values.length - size; i++) {
+      result[result.length - size] = values[i];
+      this.combinations(values, size - 1, i + 1, result, allResults);
+    }
   }
 
 }

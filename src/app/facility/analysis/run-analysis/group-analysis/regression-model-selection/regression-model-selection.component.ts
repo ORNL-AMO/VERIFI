@@ -17,12 +17,13 @@ export class RegressionModelSelectionComponent implements OnInit {
 
   selectedGroup: AnalysisGroup;
   // models: Array<JStatRegressionModel>;
+  showInvalid: boolean = false;
   constructor(private regressionsModelsService: RegressionModelsService, private analysisService: AnalysisService,
     private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService, private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
-    // this.regressionsModelsService.test();
+    // this.regressionsModelsService.testCombos();
     this.selectedGroup = this.analysisService.selectedGroup.getValue();
   }
 
