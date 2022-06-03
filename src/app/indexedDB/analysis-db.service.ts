@@ -147,7 +147,8 @@ export class AnalysisDbService {
         averagePercentBaseload: undefined,
         monthlyPercentBaseload: this.getMonthlyPercentBaseload(),
         hasBaselineAdjustement: false,
-        baselineAdjustments: []
+        baselineAdjustments: [],
+        userDefinedModel: false
       });
     });
     return {
@@ -252,7 +253,8 @@ export class AnalysisDbService {
         averagePercentBaseload: undefined,
         monthlyPercentBaseload: this.getMonthlyPercentBaseload(),
         hasBaselineAdjustement: false,
-        baselineAdjustments: []
+        baselineAdjustments: [],
+        userDefinedModel: false
       });
       await this.updateWithObservable(item).toPromise();
     };

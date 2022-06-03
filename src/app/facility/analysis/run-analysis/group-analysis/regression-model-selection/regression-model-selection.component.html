@@ -1,1 +1,94 @@
-<p>regression-model-selection works!</p>
+<button class="btn btn-info" (click)="generateModels()">Generate Models</button>
+
+
+<div class="table-responsive" *ngIf="selectedGroup.models">
+    <div class="row no-gutters justify-content-end">
+        <div class="col-11 text-right">
+            <label class="bold pr-3" for="showInvalid">
+                Show Invalid Models
+            </label>
+        </div>
+        <div class="col">
+            <label class="switch" for="showInvalid">
+                <input class="checkbox" type="checkbox" id="showInvalid" name="showInvalid" [(ngModel)]="showInvalid">
+                <span class="slider round"></span>
+            </label>
+        </div>
+    </div>
+    <table class="table table-sm table-hover">
+        <thead>
+            <tr>
+                <th>
+                    Select<br> Model
+                </th>
+                <!-- <th>
+                    Model ID
+                </th> -->
+                <th class="can-click" (click)="setOrderDataField('modelYear')" [ngClass]="{'active': orderDataField == 'modelYear'}">
+                    Model Year
+                </th>
+                <th>
+                    Variable p-Values
+                </th>
+                <th class="can-click" (click)="setOrderDataField('R2')" [ngClass]="{'active': orderDataField == 'R2'}">
+                    R2
+                </th>
+                <th class="can-click" (click)="setOrderDataField('adjust_R2')" [ngClass]="{'active': orderDataField == 'adjust_R2'}">
+                    Adjusted R2
+                </th>
+                <th class="can-click" (click)="setOrderDataField('modelPValue')" [ngClass]="{'active': orderDataField == 'modelPValue'}">
+                    Model p-Value
+                </th>
+                <th>
+                    Formula
+                </th>
+                <th *ngIf="showInvalid">
+                    Valid
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let model of selectedGroup.models | orderBy: orderDataField: orderByDirection | modelFilter:showInvalid; let modelIndex = index;">
+                <td>
+                    <input type="radio" class="rowToggle"
+                        [(ngModel)]="selectedGroup.selectedModelId" [value]="model.modelId"
+                        name="{{modelIndex+'_selectedModelId'}}" id="{{modelIndex+'_selectedModelId'}}"
+                        (change)="selectModel()">
+                </td>
+                <!-- <td>
+                    {{model.modelId}}
+                </td> -->
+                <td>
+                    {{model.modelYear}}
+                </td>
+                <td>
+                    <span *ngFor="let pVal of model.t.p; let index = index">
+                        <span *ngIf="index != 0">{{model.predictorVariables[index-1].name}}: {{pVal | customNumber}}
+                            <br>
+                        </span>
+                        <!-- {{model.predictorVariables[index].name}} -->
+                    </span>
+                </td>
+                <td>
+                    {{model.R2| customNumber}}
+                </td>
+                <td>
+                    {{model.adjust_R2| customNumber}}
+                </td>
+                <td>
+                    {{model.modelPValue| customNumber}}
+                </td>
+                <td>
+                    <span *ngFor="let coefVal of model.coef; let index = index;">
+                        <span *ngIf="index == 0">{{coefVal| customNumber}}</span>
+                        <span *ngIf="index != 0">({{coefVal| customNumber}}*{{model.predictorVariables[index-1].name}})</span> <span
+                            *ngIf="index != model.coef.length-1"> +</span>
+                    </span>
+                </td>
+                <td *ngIf="showInvalid">
+                    {{model.isValid}}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

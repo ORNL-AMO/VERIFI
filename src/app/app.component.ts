@@ -11,7 +11,6 @@ import { UtilityMeterDatadbService } from './indexedDB/utilityMeterData-db.servi
 import { UtilityMeterGroupdbService } from './indexedDB/utilityMeterGroup-db.service';
 import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, IdbOverviewReportOptions, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from './models/idb';
 import { EGridService } from './shared/helper-services/e-grid.service';
-import { SharedDataService } from './shared/helper-services/shared-data.service';
 
 // declare ga as a function to access the JS code in TS
 declare let gtag: Function;

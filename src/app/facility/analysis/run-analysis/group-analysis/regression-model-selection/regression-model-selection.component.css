@@ -1,0 +1,8 @@
+thead th.active {
+    text-decoration: underline;
+}
+
+thead tr:not(.table-mh) th.can-click:hover{
+    cursor: pointer;
+    text-decoration: underline;
+}
