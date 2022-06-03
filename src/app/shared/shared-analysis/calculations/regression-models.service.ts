@@ -121,6 +121,7 @@ export class RegressionModelsService {
         model['predictorVariables'] = modelPredictorVariables;
         model['isValid'] = this.checkModelValid(model);
         model['modelId'] = Math.random().toString(36).substr(2, 9);
+        model['modelPValue'] = model.f.pvalue;
         models.push(model);
       })
 
@@ -201,24 +202,6 @@ export class RegressionModelsService {
     return isValid;
   }
 
-
-  // getCombonations(predictorVariables: Array<PredictorData>): Array<Array<PredictorData>>{
-
-  //   let combos: Array<Array<PredictorData>> = new Array();
-  //   for(let i = 0; i < predictorVariables.length; i++){
-  //     let pCombos: Array<PredictorData> = new Array();
-  //     pCombos.push(predictorVariables[i]);
-  //   }
-  // }
-
-  // getAllCombos(predictorVariables: Array<PredictorData>): Array<Array<PredictorData>>{
-  //   for(let i = 0; i < predictorVariables.length; i++){
-  //     let pCombos: Array<PredictorData> = new Array();
-  //     pCombos.push(predictorVariables[i]);
-  //   }
-  // }
-
-
   getPredictorCombos(predictorIds: Array<string>): Array<Array<string>> {
     let allCombos: Array<Array<string>> = [];
     for (let i = 1; i < 5; i++) {
@@ -227,22 +210,19 @@ export class RegressionModelsService {
     return allCombos;
   }
 
-  getCombinations(values: Array<string>, size: number, allResults: Array<Array<string>>) {
+  getCombinations(values: Array<string>, size: number, allCombos: Array<Array<string>>) {
     let result = new Array(size);
-    this.combinations(values, size, 0, result, allResults);
-    console.log(allResults);
-
+    this.combinations(values, size, 0, result, allCombos);
   }
 
-  combinations(values: Array<string>, size: number, startPosition: number, result: Array<string>, allResults: Array<Array<string>>) {
+  combinations(values: Array<string>, size: number, startPosition: number, result: Array<string>, allCombos: Array<Array<string>>) {
     if (size == 0) {
-      console.log(result);
-      allResults.push(JSON.parse(JSON.stringify(result)));
+      allCombos.push(JSON.parse(JSON.stringify(result)));
       return;
     }
     for (let i = startPosition; i <= values.length - size; i++) {
       result[result.length - size] = values[i];
-      this.combinations(values, size - 1, i + 1, result, allResults);
+      this.combinations(values, size - 1, i + 1, result, allCombos);
     }
   }
 

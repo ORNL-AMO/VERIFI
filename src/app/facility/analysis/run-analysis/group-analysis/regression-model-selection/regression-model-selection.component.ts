@@ -18,6 +18,8 @@ export class RegressionModelSelectionComponent implements OnInit {
   selectedGroup: AnalysisGroup;
   // models: Array<JStatRegressionModel>;
   showInvalid: boolean = false;
+  orderDataField: string = 'modelYear';
+  orderByDirection: 'asc' | 'desc' = 'asc';
   constructor(private regressionsModelsService: RegressionModelsService, private analysisService: AnalysisService,
     private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService, private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService) { }
@@ -45,8 +47,6 @@ export class RegressionModelSelectionComponent implements OnInit {
     this.selectedGroup.predictorVariables.forEach(variable => {
       let coefIndex: number = selectedModel.predictorVariables.findIndex(pVariable => { return pVariable.id == variable.id });
       variable.regressionCoefficient = selectedModel.coef[coefIndex + 1];
-      console.log(variable.name);
-      console.log(variable.regressionCoefficient);
     });
     this.saveItem();
   }
@@ -61,5 +61,17 @@ export class RegressionModelSelectionComponent implements OnInit {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     this.dbChangesService.setAnalysisItems(selectedAccount, selectedFacility);
     this.analysisDbService.selectedAnalysisItem.next(analysisItem);
+  }
+
+  setOrderDataField(str: string) {
+    if (str == this.orderDataField) {
+      if (this.orderByDirection == 'desc') {
+        this.orderByDirection = 'asc';
+      } else {
+        this.orderByDirection = 'desc';
+      }
+    } else {
+      this.orderDataField = str;
+    }
   }
 }

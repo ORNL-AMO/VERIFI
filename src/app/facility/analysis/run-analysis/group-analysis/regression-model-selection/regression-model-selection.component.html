@@ -24,19 +24,19 @@
                 <!-- <th>
                     Model ID
                 </th> -->
-                <th>
+                <th class="can-click" (click)="setOrderDataField('modelYear')" [ngClass]="{'active': orderDataField == 'modelYear'}">
                     Model Year
                 </th>
                 <th>
                     Variable p-Values
                 </th>
-                <th>
+                <th class="can-click" (click)="setOrderDataField('R2')" [ngClass]="{'active': orderDataField == 'R2'}">
                     R2
                 </th>
-                <th>
+                <th class="can-click" (click)="setOrderDataField('adjust_R2')" [ngClass]="{'active': orderDataField == 'adjust_R2'}">
                     Adjusted R2
                 </th>
-                <th>
+                <th class="can-click" (click)="setOrderDataField('modelPValue')" [ngClass]="{'active': orderDataField == 'modelPValue'}">
                     Model p-Value
                 </th>
                 <th>
@@ -48,7 +48,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr *ngFor="let model of selectedGroup.models | modelFilter:showInvalid; let modelIndex = index;">
+            <tr *ngFor="let model of selectedGroup.models | orderBy: orderDataField: orderByDirection | modelFilter:showInvalid; let modelIndex = index;">
                 <td>
                     <input type="radio" class="rowToggle"
                         [(ngModel)]="selectedGroup.selectedModelId" [value]="model.modelId"
@@ -76,7 +76,7 @@
                     {{model.adjust_R2| customNumber}}
                 </td>
                 <td>
-                    {{model.f.pvalue| customNumber}}
+                    {{model.modelPValue| customNumber}}
                 </td>
                 <td>
                     <span *ngFor="let coefVal of model.coef; let index = index;">
