@@ -44,10 +44,12 @@ export class UtilityMeterDatadbService {
     }
 
     addWithObservable(meterData: IdbUtilityMeterData): Observable<IdbUtilityMeterData> {
+        meterData.dbDate = new Date();
         return this.dbService.add('utilityMeterData', meterData);
     }
 
     updateWithObservable(meterData: IdbUtilityMeterData): Observable<any> {
+        meterData.dbDate = new Date();
         return this.dbService.update('utilityMeterData', meterData);
     }
 

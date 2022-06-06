@@ -107,6 +107,10 @@ export class AnalysisService {
             return true;
           }
         }
+
+        if (group.userDefinedModel && !group.selectedModelId) {
+          return true;
+        }
       }
       if (group.analysisType == 'modifiedEnergyIntensity') {
         if (group.specifiedMonthlyPercentBaseload) {
@@ -154,7 +158,6 @@ export class AnalysisService {
     let calanderizationOptions: CalanderizationOptions = {
       energyIsSource: analysisItem.energyIsSource
     }
-    console.log(calanderizationOptions.energyIsSource);
     let calanderizedMeterData: Array<CalanderizedMeter> = this.calendarizationService.getCalanderizedMeterData(facilityMeters, false, false, calanderizationOptions);
     calanderizedMeterData.forEach(calanderizedMeter => {
       calanderizedMeter.monthlyData = this.convertMeterDataService.convertMeterDataToAnalysis(analysisItem, calanderizedMeter.monthlyData, selectedFacility, calanderizedMeter.meter);

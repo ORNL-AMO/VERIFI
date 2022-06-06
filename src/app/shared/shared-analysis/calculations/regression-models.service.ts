@@ -48,7 +48,6 @@ export class RegressionModelsService {
         let regressionData: { endog: Array<number>, exog: Array<Array<number>> } = this.getRegressionData(monthlyStartAndEndDate.baselineDate, monthlyStartAndEndDate.endDate, allMeterData, facilityPredictorData, variableIdCombo);
 
         let model: JStatRegressionModel = jStat.models.ols(regressionData.endog, regressionData.exog);
-        console.log(model);
         model['modelYear'] = baselineYear;
         let modelPredictorVariables: Array<PredictorData> = new Array();
         variableIdCombo.forEach(variableId => {
