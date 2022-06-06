@@ -5,11 +5,14 @@
                         Analysis Options</a></li>
         <li class="nav-item" *ngIf="showModelSelection"><a class="nav-link" routerLink="model-selection"
                         [routerLinkActive]="['active']">
+                        <span class="fa fa-exclamation-circle" *ngIf="regressionModelNeeded"></span>
                         Regression Model Selection</a></li>
-        <li class="nav-item" [ngClass]="{'disabled': groupHasError, 'error': groupHasError}"><a class="nav-link"
-                        routerLink="annual-analysis" [routerLinkActive]="['active']">Annual Analysis</a></li>
-        <li class="nav-item" [ngClass]="{'disabled': groupHasError, 'error': groupHasError}"><a class="nav-link"
-                        routerLink="monthly-analysis" [routerLinkActive]="['active']">Monthly Analysis</a></li>
+        <li class="nav-item" [ngClass]="{'disabled': groupHasError || regressionModelNeeded, 'error': groupHasError}"><a
+                        class="nav-link" routerLink="annual-analysis" [routerLinkActive]="['active']">Annual
+                        Analysis</a></li>
+        <li class="nav-item" [ngClass]="{'disabled': groupHasError || regressionModelNeeded, 'error': groupHasError}"><a
+                        class="nav-link" routerLink="monthly-analysis" [routerLinkActive]="['active']">Monthly
+                        Analysis</a></li>
 </ul>
 <div class="content-padding">
         <h4>{{label}}</h4>

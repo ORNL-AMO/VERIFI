@@ -19,6 +19,7 @@ export class GroupAnalysisComponent implements OnInit {
   groupId: string;
   label: string
   groupHasError: boolean;
+  regressionModelNeeded: boolean;
   analysisItemSub: Subscription;
   showModelSelection: boolean;
   constructor(private activatedRoute: ActivatedRoute, private analysisDbService: AnalysisDbService,
@@ -80,6 +81,15 @@ export class GroupAnalysisComponent implements OnInit {
       this.groupHasError = (groupMeters.length == 0);
       if (!this.groupHasError) {
         this.groupHasError = this.selectedGroup.groupHasError;
+      }
+      if(this.selectedGroup.analysisType == 'regression' && this.selectedGroup.userDefinedModel){
+        if(!this.selectedGroup.selectedModelId){
+          this.regressionModelNeeded = true;
+        }else{
+          this.regressionModelNeeded = false;
+        }
+      }else{
+        this.regressionModelNeeded = false;
       }
     }
   }
