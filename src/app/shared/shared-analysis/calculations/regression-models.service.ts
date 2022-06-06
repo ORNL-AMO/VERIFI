@@ -14,70 +14,9 @@ export class RegressionModelsService {
   allResults: Array<Array<number>>;
   constructor(private analysisCalculationsHelperService: AnalysisCalculationsHelperService, private predictorDbService: PredictordbService) { }
 
-  test() {
-    // var A = [[1, 2, 3],
-    // [1, 1, 0],
-    // [1, -2, 3],
-    // [1, 3, 4],
-    // [1, -10, 2],
-    // [1, 4, 4],
-    // [1, 10, 2],
-    // [1, 3, 2],
-    // [1, 4, -1]];
-    // var b = [1, -2, 3, 4, -5, 6, 7, -8, 9];
-
-    var A = [[1, 1394],
-    [1, 1125],
-    [1, 1164],
-    [1, 1287],
-    [1, 1161],
-    [1, 991],
-    [1, 1078],
-    [1, 1136],
-    [1, 972],
-    [1, 1215],
-    [1, 1005],
-    [1, 1087]
-    ]
-
-    var b = [3755.830381423515,
-      3197.5862290367977,
-      3399.46675896127,
-      3233.961309603572,
-      3392.2102967505684,
-      3434.8330758440275,
-      3701.3038042615,
-      3592.4381061511776,
-      3201.3656781735567,
-      3132.9828341189295,
-      3096.691299316677,
-      3248.523027281516
-    ]
-
-    var model = jStat.models.ols(b, A);
-    console.log(model);
-    // coefficient estimated
-    console.log('coef')
-    console.log(model.coef) // -> [0.662197222856431, 0.5855663255775336, 0.013512111085743017]
-
-    // R2
-    console.log('R2')
-    console.log(model.R2) // -> 0.309
-
-    // t test P-value
-    console.log('t test P-value')
-    console.log(model.t.p) // -> [0.8377444317889267, 0.15296736158442314, 0.9909627983826583]
-
-    // f test P-value
-    console.log('f test P-value')
-    console.log(model.f.pvalue) // -> 0.3306363671859872
-  }
-
-
   getModels(analysisGroup: AnalysisGroup, calanderizedMeters: Array<CalanderizedMeter>, facility: IdbFacility, analysisItem: IdbAnalysisItem): Array<JStatRegressionModel> {
     let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = this.analysisCalculationsHelperService.getMonthlyStartAndEndDate(facility, analysisItem);
     let baselineDate: Date = monthlyStartAndEndDate.baselineDate;
-    let endDate: Date = monthlyStartAndEndDate.endDate;
     let reportYear: number = analysisItem.reportYear;
     let baselineYear: number = this.analysisCalculationsHelperService.getFiscalYear(baselineDate, facility);
     if (facility.fiscalYear == 'nonCalendarYear' && facility.fiscalYearCalendarEnd) {
@@ -93,7 +32,6 @@ export class RegressionModelsService {
       }
     });
     let allPredictorVariableCombos: Array<Array<string>> = this.getPredictorCombos(predictorVariableIds);
-    console.log(allPredictorVariableCombos);
 
     let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
     let facilityPredictorData: Array<IdbPredictorEntry> = accountPredictorEntries.filter(entry => {
@@ -106,12 +44,11 @@ export class RegressionModelsService {
     let models: Array<JStatRegressionModel> = new Array();
     while (baselineYear <= reportYear) {
       let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = this.getMonthlyStartAndEndDate(facility, baselineYear);
-      console.log(monthlyStartAndEndDate.baselineDate);
       allPredictorVariableCombos.forEach(variableIdCombo => {
         let regressionData: { endog: Array<number>, exog: Array<Array<number>> } = this.getRegressionData(monthlyStartAndEndDate.baselineDate, monthlyStartAndEndDate.endDate, allMeterData, facilityPredictorData, variableIdCombo);
-        console.log(regressionData.exog);
 
         let model: JStatRegressionModel = jStat.models.ols(regressionData.endog, regressionData.exog);
+        console.log(model);
         model['modelYear'] = baselineYear;
         let modelPredictorVariables: Array<PredictorData> = new Array();
         variableIdCombo.forEach(variableId => {
@@ -119,7 +56,8 @@ export class RegressionModelsService {
           modelPredictorVariables.push(variable);
         });
         model['predictorVariables'] = modelPredictorVariables;
-        model['isValid'] = this.checkModelValid(model);
+        // model['isValid'] = this.checkModelValid(model);
+        model = this.setModelVaildAndNotes(model);
         model['modelId'] = Math.random().toString(36).substr(2, 9);
         model['modelPValue'] = model.f.pvalue;
         models.push(model);
@@ -200,6 +138,56 @@ export class RegressionModelsService {
       isValid = false;
     }
     return isValid;
+  }
+
+  setModelVaildAndNotes(model: JStatRegressionModel): JStatRegressionModel {
+    let modelNotes: Array<string> = new Array();
+    model['isValid'] = true;
+
+    model.coef.forEach((coef, index) => {
+      if(coef < 0){
+        if(index == 0){
+          modelNotes.push('Intercept is < 0')
+        }else{
+          modelNotes.push(model.predictorVariables[index-1].name + ' coef < 0');
+        }
+      }
+    })
+
+    if (model.f.pvalue > .1) {
+      model['isValid'] = false;
+      modelNotes.push('Model p-Value > .1');
+    } 
+    
+    model.t.p.forEach((val, index) => {
+      if (val > .2 ) {
+        if(index != 0){
+          modelNotes.push(model.predictorVariables[index-1].name + ' p-Value > .2')
+        }
+        model['isValid'] = false;
+      } 
+    })
+    
+    if (!model.t.p.find(val => { return val < .1 })) {
+      model['isValid'] = false;
+      modelNotes.push('No variable p-Value < 0.1')
+    }
+    
+    if (model.R2 < .5) {
+      model['isValid'] = false;
+      modelNotes.push('R2 < .5');
+    }
+
+    if(model.adjust_R2 < .5){
+      modelNotes.push('Adjusted R2 < .5');
+    }
+
+    let productionVariable: PredictorData =    model.predictorVariables.find(variable => {return variable.production});
+    if(!productionVariable){
+      modelNotes.push('No production variable in model');
+    }
+    model['modelNotes'] = modelNotes;
+    return model;
   }
 
   getPredictorCombos(predictorIds: Array<string>): Array<Array<string>> {

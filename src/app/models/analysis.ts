@@ -151,5 +151,6 @@ export interface JStatRegressionModel {
   predictorVariables: Array<PredictorData>,
   modelId: string,
   isValid: boolean,
-  modelPValue: number
+  modelPValue: number,
+  modelNotes: Array<string>
 }
