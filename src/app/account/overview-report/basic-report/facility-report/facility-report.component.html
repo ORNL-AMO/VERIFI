@@ -27,7 +27,7 @@
         [calanderizedMeters]="calanderizedMeters">
     </app-facility-report-bar-chart>
 </div>
-<div class="pt-5" *ngIf="reportOptions.annualBarCharts">
+<div class="pt-5 print-break-before" *ngIf="reportOptions.annualBarCharts">
     <app-facility-report-bar-chart [facility]="selectedFacility" [reportOptions]="reportOptions" [sumByMonth]="true"
         [calanderizedMeters]="calanderizedMeters">
     </app-facility-report-bar-chart>
