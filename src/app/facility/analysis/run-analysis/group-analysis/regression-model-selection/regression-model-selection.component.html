@@ -1,46 +1,65 @@
-<button class="btn btn-info" (click)="generateModels()">Generate Models</button>
+<div class="row no-gutters justify-content-end">
+    <div class="col">
+        <button class="mt-0 btn btn-info" (click)="generateModels()" *ngIf="selectedGroup.models.length == 0">Generate
+            Models</button>
 
-
-<div class="table-responsive" *ngIf="selectedGroup.models">
-    <div class="row no-gutters justify-content-end">
-        <div class="col-11 text-right">
-            <label class="bold pr-3" for="showInvalid">
+        <button class="mt-0 btn btn-info" (click)="updateModels()" *ngIf="selectedGroup.models.length != 0">
+            Update Models</button>
+        <span class="pl-3" *ngIf="selectedGroup.dateModelsGenerated">Current Models Generated:
+            {{selectedGroup.dateModelsGenerated | date}}</span>
+    </div>
+    <div class="col-2 text-right" *ngIf="selectedGroup.models">
+        <div class="d-flex">
+            <label class="show-models-label bold pr-3" for="showInvalid">
                 Show Invalid Models
             </label>
-        </div>
-        <div class="col">
+
             <label class="switch" for="showInvalid">
                 <input class="checkbox" type="checkbox" id="showInvalid" name="showInvalid" [(ngModel)]="showInvalid">
                 <span class="slider round"></span>
             </label>
         </div>
     </div>
+</div>
+<div class="row no-gutters justify-content-center" *ngIf="hasLaterDate">
+    <div class="col">
+        <div class="alert alert-warning p-2">
+            New data has been entered or modified since these models were generated. You may want to update your models.
+        </div>
+    </div>
+</div>
+<div class="row no-gutters justify-content-center" *ngIf="noValidModels">
+    <div class="col">
+        <div class="alert alert-danger p-2">
+            No valid models have been found.
+        </div>
+    </div>
+</div>
+<div class="table-responsive" *ngIf="selectedGroup.models">
+
     <table class="table table-sm table-hover">
         <thead>
             <tr>
                 <th>
                     Select<br> Model
                 </th>
-                <!-- <th>
-                    Model ID
-                </th> -->
                 <th class="can-click" (click)="setOrderDataField('modelYear')"
                     [ngClass]="{'active': orderDataField == 'modelYear'}">
-                    Model Year
+                    Model<br> Year
                 </th>
                 <th>
-                    Variable p-Values
+                    Variable<br> p-Values
                 </th>
                 <th class="can-click" (click)="setOrderDataField('R2')" [ngClass]="{'active': orderDataField == 'R2'}">
                     R2
                 </th>
                 <th class="can-click" (click)="setOrderDataField('adjust_R2')"
                     [ngClass]="{'active': orderDataField == 'adjust_R2'}">
-                    Adjusted R2
+                    Adjusted<br> R2
                 </th>
                 <th class="can-click" (click)="setOrderDataField('modelPValue')"
                     [ngClass]="{'active': orderDataField == 'modelPValue'}">
-                    Model p-Value
+                    Model<br> p-Value
                 </th>
                 <th>
                     Formula
@@ -61,9 +80,6 @@
                         [value]="model.modelId" name="{{modelIndex+'_selectedModelId'}}"
                         id="{{modelIndex+'_selectedModelId'}}" (change)="selectModel()">
                 </td>
-                <!-- <td>
-                    {{model.modelId}}
-                </td> -->
                 <td>
                     {{model.modelYear}}
                 </td>
@@ -72,7 +88,6 @@
                         <span *ngIf="index != 0">{{model.predictorVariables[index-1].name}}: {{pVal | customNumber}}
                             <br>
                         </span>
-                        <!-- {{model.predictorVariables[index].name}} -->
                     </span>
                 </td>
                 <td>
@@ -108,3 +123,17 @@
         </tbody>
     </table>
 </div>
+
+<div class="popup" [class.open]="showUpdateModelsModal">
+    <div class="popup-header">Are you sure you want to update the models?
+        <button class="item-right" (click)="closeUpdateModelsModal()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>WARNING: Updated models will replace existing models. This cannot be undone.</p>
+    </div>
+    <div class="saveCancel popup-footer text-right">
+        <button class="btn btn-secondary" (click)="closeUpdateModelsModal()">Cancel</button>
+        <button class="btn btn-success" (click)="confirmUpdateModals()">Update Models</button>
+    </div>
+</div>
+

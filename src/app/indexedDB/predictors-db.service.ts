@@ -42,6 +42,7 @@ export class PredictordbService {
     }
 
     updateOnImport(values: IdbPredictorEntry): Observable<any> {
+        values.dbDate = new Date();
         return this.dbService.update('predictors', values);
     }
 
@@ -178,10 +179,12 @@ export class PredictordbService {
 
 
     updateWithObservable(values: IdbPredictorEntry): Observable<any> {
+        values.dbDate = new Date();
         return this.dbService.update('predictors', values)
     }
 
     addWithObservable(predictor: IdbPredictorEntry): Observable<IdbPredictorEntry> {
+        predictor.dbDate = new Date();
         return this.dbService.add('predictors', predictor);
     }
 

@@ -3,9 +3,12 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
+import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { JStatRegressionModel } from 'src/app/models/analysis';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
-import { AnalysisGroup, IdbAccount, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
+import { AnalysisGroup, IdbAccount, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { RegressionModelsService } from 'src/app/shared/shared-analysis/calculations/regression-models.service';
 import { AnalysisService } from '../../../analysis.service';
 @Component({
@@ -16,17 +19,23 @@ import { AnalysisService } from '../../../analysis.service';
 export class RegressionModelSelectionComponent implements OnInit {
 
   selectedGroup: AnalysisGroup;
-  // models: Array<JStatRegressionModel>;
   showInvalid: boolean = false;
-  orderDataField: string = 'modelYear';
-  orderByDirection: 'asc' | 'desc' = 'asc';
+  orderDataField: string = 'R2';
+  orderByDirection: 'asc' | 'desc' = 'desc';
+  hasLaterDate: boolean;
+  showUpdateModelsModal: boolean = false;
+  noValidModels: boolean;
   constructor(private regressionsModelsService: RegressionModelsService, private analysisService: AnalysisService,
     private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService, private dbChangesService: DbChangesService,
-    private accountDbService: AccountdbService) { }
+    private accountDbService: AccountdbService, private predictorDbService: PredictordbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private utilityMeterDbService: UtilityMeterdbService) { }
 
   ngOnInit(): void {
-    // this.regressionsModelsService.testCombos();
     this.selectedGroup = this.analysisService.selectedGroup.getValue();
+    if (this.selectedGroup.models.length != 0) {
+      this.checkModelData();
+      this.checkHasValidModels();
+    }
   }
 
 
@@ -35,7 +44,10 @@ export class RegressionModelSelectionComponent implements OnInit {
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let calanderizedMeters: Array<CalanderizedMeter> = this.analysisService.calanderizedMeters;
     this.selectedGroup.models = this.regressionsModelsService.getModels(this.selectedGroup, calanderizedMeters, facility, analysisItem);
-    console.log(this.selectedGroup.models);
+    this.checkHasValidModels();
+    this.hasLaterDate = false;
+    this.selectedGroup.dateModelsGenerated = new Date();
+    this.selectedGroup.selectedModelId = undefined;
     this.saveItem();
   }
 
@@ -72,6 +84,50 @@ export class RegressionModelSelectionComponent implements OnInit {
       }
     } else {
       this.orderDataField = str;
+    }
+  }
+
+  checkModelData() {
+    this.hasLaterDate = false;
+    let modelDate: Date = new Date(this.selectedGroup.dateModelsGenerated);
+    let facilityPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.facilityPredictorEntries.getValue();
+    let hasLaterDate = facilityPredictorEntries.find(predictor => {
+      return new Date(predictor.dbDate) > modelDate
+    });
+    if (hasLaterDate) {
+      this.hasLaterDate = true;
+    } else {
+      let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
+      let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+      let groupMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.groupId == this.selectedGroup.idbGroupId });
+      let groupMeterIds: Array<string> = groupMeters.map(meter => { return meter.guid });
+      let groupMeterData: Array<IdbUtilityMeterData> = facilityMeterData.filter(meterData => { return groupMeterIds.includes(meterData.meterId) })
+      let hasLaterDate = groupMeterData.find(meterData => {
+        return new Date(meterData.dbDate) > modelDate;
+      });
+      if (hasLaterDate) {
+        this.hasLaterDate = true;
+      }
+    }
+  }
+
+  updateModels() {
+    this.showUpdateModelsModal = true;
+  }
+
+  closeUpdateModelsModal() {
+    this.showUpdateModelsModal = false;
+  }
+
+  confirmUpdateModals() {
+    this.generateModels();
+    this.closeUpdateModelsModal();
+  }
+
+  checkHasValidModels() {
+    this.noValidModels = this.selectedGroup.models.find(model => { return model.isValid == true }) == undefined;
+    if(!this.showInvalid && this.noValidModels){
+      this.showInvalid = true;
     }
   }
 }
