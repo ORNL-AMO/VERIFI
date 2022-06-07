@@ -39,8 +39,11 @@ export class EditPredictorEntryRowComponent implements OnInit {
     this.cancel();
   }
 
-  setDate(eventData) {
-    this.predictorEntryCopy.date = new Date(eventData);
+  setDate(eventData: string) {
+    //eventData format = yyyy-mm = 2022-06
+    let yearMonth: Array<string> = eventData.split('-');
+    //-1 on month
+    this.predictorEntryCopy.date = new Date(Number(yearMonth[0]), Number(yearMonth[1])-1, 1);
   }
 
   cancel() {
