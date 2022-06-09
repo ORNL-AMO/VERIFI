@@ -4,13 +4,8 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { JStatRegressionModel } from 'src/app/models/analysis';
-import { CalanderizedMeter } from 'src/app/models/calanderization';
-import { AnalysisGroup, IdbAccount, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
-import { RegressionModelsService } from 'src/app/shared/shared-analysis/calculations/regression-models.service';
+import { AnalysisGroup, IdbAccount, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 import { AnalysisService } from '../../../analysis.service';
 @Component({
   selector: 'app-regression-model-selection',
@@ -20,46 +15,29 @@ import { AnalysisService } from '../../../analysis.service';
 export class RegressionModelSelectionComponent implements OnInit {
 
   selectedGroup: AnalysisGroup;
-  showInvalid: boolean = false;
-  orderDataField: string = 'R2';
-  orderByDirection: 'asc' | 'desc' = 'desc';
-  hasLaterDate: boolean;
-  showUpdateModelsModal: boolean = false;
-  noValidModels: boolean;
+  showInvalid: boolean;
+  showInvalidSub: Subscription;
+  orderDataField: string = 'modelPValue';
+  orderByDirection: 'asc' | 'desc' = 'asc';
   selectedGroupSub: Subscription;
-  constructor(private regressionsModelsService: RegressionModelsService, private analysisService: AnalysisService,
+  constructor(private analysisService: AnalysisService,
     private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService, private dbChangesService: DbChangesService,
-    private accountDbService: AccountdbService, private predictorDbService: PredictordbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private utilityMeterDbService: UtilityMeterdbService) { }
+    private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(group => {
       this.selectedGroup = group;
-      // if (this.selectedGroup.models && this.selectedGroup.models.length != 0) {
-      //   this.checkModelData();
-      //   this.checkHasValidModels();
-      // }else{
-      //   this.noValidModels = false;
-      // }
     });
+
+    this.showInvalidSub = this.analysisService.showInvalidModels.subscribe(val => {
+      this.showInvalid = val;
+    })
 
   }
   ngOnDestroy(){
     this.selectedGroupSub.unsubscribe();
+    this.showInvalidSub.unsubscribe();
   }
-
-  // generateModels() {
-  //   let analysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
-  //   let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-  //   let calanderizedMeters: Array<CalanderizedMeter> = this.analysisService.calanderizedMeters;
-  //   this.selectedGroup.models = this.regressionsModelsService.getModels(this.selectedGroup, calanderizedMeters, facility, analysisItem);
-  //   this.checkHasValidModels();
-  //   this.hasLaterDate = false;
-  //   this.selectedGroup.dateModelsGenerated = new Date();
-  //   this.selectedGroup.selectedModelId = undefined;
-  //   this.saveItem();
-  // }
-
 
   selectModel() {
     let selectedModel: JStatRegressionModel = this.selectedGroup.models.find(model => { return model.modelId == this.selectedGroup.selectedModelId });
@@ -86,6 +64,7 @@ export class RegressionModelSelectionComponent implements OnInit {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     this.dbChangesService.setAnalysisItems(selectedAccount, selectedFacility);
     this.analysisDbService.selectedAnalysisItem.next(analysisItem);
+    this.analysisService.selectedGroup.next(this.selectedGroup)
   }
 
   setOrderDataField(str: string) {
@@ -99,48 +78,4 @@ export class RegressionModelSelectionComponent implements OnInit {
       this.orderDataField = str;
     }
   }
-
-  // checkModelData() {
-  //   this.hasLaterDate = false;
-  //   let modelDate: Date = new Date(this.selectedGroup.dateModelsGenerated);
-  //   let facilityPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.facilityPredictorEntries.getValue();
-  //   let hasLaterDate = facilityPredictorEntries.find(predictor => {
-  //     return new Date(predictor.dbDate) > modelDate
-  //   });
-  //   if (hasLaterDate) {
-  //     this.hasLaterDate = true;
-  //   } else {
-  //     let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
-  //     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
-  //     let groupMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.groupId == this.selectedGroup.idbGroupId });
-  //     let groupMeterIds: Array<string> = groupMeters.map(meter => { return meter.guid });
-  //     let groupMeterData: Array<IdbUtilityMeterData> = facilityMeterData.filter(meterData => { return groupMeterIds.includes(meterData.meterId) })
-  //     let hasLaterDate = groupMeterData.find(meterData => {
-  //       return new Date(meterData.dbDate) > modelDate;
-  //     });
-  //     if (hasLaterDate) {
-  //       this.hasLaterDate = true;
-  //     }
-  //   }
-  // }
-
-  // updateModels() {
-  //   this.showUpdateModelsModal = true;
-  // }
-
-  // closeUpdateModelsModal() {
-  //   this.showUpdateModelsModal = false;
-  // }
-
-  // confirmUpdateModals() {
-  //   this.generateModels();
-  //   this.closeUpdateModelsModal();
-  // }
-
-  // checkHasValidModels() {
-  //   this.noValidModels = this.selectedGroup.models.find(model => { return model.isValid == true }) == undefined;
-  //   if(!this.showInvalid && this.noValidModels){
-  //     this.showInvalid = true;
-  //   }
-  // }
 }
