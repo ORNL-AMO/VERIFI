@@ -31,40 +31,44 @@ export class RegressionModelsService {
         predictorVariableIds.push(variable.id);
       }
     });
-    let allPredictorVariableCombos: Array<Array<string>> = this.getPredictorCombos(predictorVariableIds);
+    if (predictorVariableIds.length != 0) {
+      let allPredictorVariableCombos: Array<Array<string>> = this.getPredictorCombos(predictorVariableIds);
 
-    let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
-    let facilityPredictorData: Array<IdbPredictorEntry> = accountPredictorEntries.filter(entry => {
-      return entry.facilityId == facility.guid;
-    });
+      let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
+      let facilityPredictorData: Array<IdbPredictorEntry> = accountPredictorEntries.filter(entry => {
+        return entry.facilityId == facility.guid;
+      });
 
-    let groupMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return cMeter.meter.groupId == analysisGroup.idbGroupId });
-    let allMeterData: Array<MonthlyData> = groupMeters.flatMap(calanderizedMeter => { return calanderizedMeter.monthlyData });
+      let groupMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return cMeter.meter.groupId == analysisGroup.idbGroupId });
+      let allMeterData: Array<MonthlyData> = groupMeters.flatMap(calanderizedMeter => { return calanderizedMeter.monthlyData });
 
-    let models: Array<JStatRegressionModel> = new Array();
-    while (baselineYear <= reportYear) {
-      let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = this.getMonthlyStartAndEndDate(facility, baselineYear);
-      allPredictorVariableCombos.forEach(variableIdCombo => {
-        let regressionData: { endog: Array<number>, exog: Array<Array<number>> } = this.getRegressionData(monthlyStartAndEndDate.baselineDate, monthlyStartAndEndDate.endDate, allMeterData, facilityPredictorData, variableIdCombo);
+      let models: Array<JStatRegressionModel> = new Array();
+      while (baselineYear <= reportYear) {
+        let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = this.getMonthlyStartAndEndDate(facility, baselineYear);
+        allPredictorVariableCombos.forEach(variableIdCombo => {
+          let regressionData: { endog: Array<number>, exog: Array<Array<number>> } = this.getRegressionData(monthlyStartAndEndDate.baselineDate, monthlyStartAndEndDate.endDate, allMeterData, facilityPredictorData, variableIdCombo);
 
-        let model: JStatRegressionModel = jStat.models.ols(regressionData.endog, regressionData.exog);
-        model['modelYear'] = baselineYear;
-        let modelPredictorVariables: Array<PredictorData> = new Array();
-        variableIdCombo.forEach(variableId => {
-          let variable: PredictorData = predictorVariables.find(variable => { return variable.id == variableId });
-          modelPredictorVariables.push(variable);
-        });
-        model['predictorVariables'] = modelPredictorVariables;
-        // model['isValid'] = this.checkModelValid(model);
-        model = this.setModelVaildAndNotes(model);
-        model['modelId'] = Math.random().toString(36).substr(2, 9);
-        model['modelPValue'] = model.f.pvalue;
-        models.push(model);
-      })
+          let model: JStatRegressionModel = jStat.models.ols(regressionData.endog, regressionData.exog);
+          model['modelYear'] = baselineYear;
+          let modelPredictorVariables: Array<PredictorData> = new Array();
+          variableIdCombo.forEach(variableId => {
+            let variable: PredictorData = predictorVariables.find(variable => { return variable.id == variableId });
+            modelPredictorVariables.push(variable);
+          });
+          model['predictorVariables'] = modelPredictorVariables;
+          // model['isValid'] = this.checkModelValid(model);
+          model = this.setModelVaildAndNotes(model);
+          model['modelId'] = Math.random().toString(36).substr(2, 9);
+          model['modelPValue'] = model.f.pvalue;
+          models.push(model);
+        })
 
-      baselineYear++;
+        baselineYear++;
+      }
+      return models;
+    } else {
+      return;
     }
-    return models;
   }
 
   getRegressionData(startDate: Date, endDate: Date, allMeterData: Array<MonthlyData>, facilityPredictorData: Array<IdbPredictorEntry>, predictorVariablesIds: Array<string>): { endog: Array<number>, exog: Array<Array<number>> } {
@@ -144,11 +148,11 @@ export class RegressionModelsService {
     model['isValid'] = true;
 
     model.coef.forEach((coef, index) => {
-      if(coef < 0){
-        if(index == 0){
+      if (coef < 0) {
+        if (index == 0) {
           modelNotes.push('Intercept is < 0')
-        }else{
-          modelNotes.push(model.predictorVariables[index-1].name + ' coef < 0');
+        } else {
+          modelNotes.push(model.predictorVariables[index - 1].name + ' coef < 0');
         }
       }
     })
@@ -156,33 +160,33 @@ export class RegressionModelsService {
     if (model.f.pvalue > .1) {
       model['isValid'] = false;
       modelNotes.push('Model p-Value > .1');
-    } 
-    
+    }
+
     model.t.p.forEach((val, index) => {
-      if (val > .2 ) {
-        if(index != 0){
-          modelNotes.push(model.predictorVariables[index-1].name + ' p-Value > .2')
+      if (val > .2) {
+        if (index != 0) {
+          modelNotes.push(model.predictorVariables[index - 1].name + ' p-Value > .2')
         }
         model['isValid'] = false;
-      } 
+      }
     })
-    
+
     if (!model.t.p.find(val => { return val < .1 })) {
       model['isValid'] = false;
       modelNotes.push('No variable p-Value < 0.1')
     }
-    
+
     if (model.R2 < .5) {
       model['isValid'] = false;
       modelNotes.push('R2 < .5');
     }
 
-    if(model.adjust_R2 < .5){
+    if (model.adjust_R2 < .5) {
       modelNotes.push('Adjusted R2 < .5');
     }
 
-    let productionVariable: PredictorData =    model.predictorVariables.find(variable => {return variable.production});
-    if(!productionVariable){
+    let productionVariable: PredictorData = model.predictorVariables.find(variable => { return variable.production });
+    if (!productionVariable) {
       modelNotes.push('No production variable in model');
     }
     model['modelNotes'] = modelNotes;

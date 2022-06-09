@@ -29,6 +29,7 @@ export class RegressionModelMenuComponent implements OnInit {
   showUpdateModelsModal: boolean = false;
   noValidModels: boolean;
   showConfirmPredictorChangeModel: boolean = false;
+  modelingError: boolean = false;
   constructor(private analysisDbService: AnalysisDbService, private analysisService: AnalysisService,
     private dbChangesService: DbChangesService, private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService, private analysisCalculationsHelperService: AnalysisCalculationsHelperService,
@@ -71,7 +72,7 @@ export class RegressionModelMenuComponent implements OnInit {
     this.group.models = undefined;
     this.group.selectedModelId = undefined;
     this.group.dateModelsGenerated = undefined;
-    if(this.group.userDefinedModel){
+    if (this.group.userDefinedModel) {
       this.group.predictorVariables.forEach(variable => {
         variable.regressionCoefficient = undefined;
       });
@@ -86,21 +87,26 @@ export class RegressionModelMenuComponent implements OnInit {
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let calanderizedMeters: Array<CalanderizedMeter> = this.analysisService.calanderizedMeters;
     this.group.models = this.regressionsModelsService.getModels(this.group, calanderizedMeters, facility, analysisItem);
-    this.checkHasValidModels();
-    this.hasLaterDate = false;
-    this.group.dateModelsGenerated = new Date();
-    let minPValModel: JStatRegressionModel = _.minBy(this.group.models, 'modelPValue');
-    this.group.selectedModelId = minPValModel.modelId;
-    this.group.regressionConstant = minPValModel.coef[0];
-    this.group.regressionModelYear = minPValModel.modelYear;
-    this.group.predictorVariables.forEach(variable => {
-      let coefIndex: number = minPValModel.predictorVariables.findIndex(pVariable => { return pVariable.id == variable.id });
-      if (coefIndex != -1) {
-        variable.regressionCoefficient = minPValModel.coef[coefIndex + 1];
-      } else {
-        variable.regressionCoefficient = 0;
-      }
-    });
+    if (this.group.models) {
+      this.modelingError = false;
+      this.checkHasValidModels();
+      this.hasLaterDate = false;
+      this.group.dateModelsGenerated = new Date();
+      let minPValModel: JStatRegressionModel = _.minBy(this.group.models, 'modelPValue');
+      this.group.selectedModelId = minPValModel.modelId;
+      this.group.regressionConstant = minPValModel.coef[0];
+      this.group.regressionModelYear = minPValModel.modelYear;
+      this.group.predictorVariables.forEach(variable => {
+        let coefIndex: number = minPValModel.predictorVariables.findIndex(pVariable => { return pVariable.id == variable.id });
+        if (coefIndex != -1) {
+          variable.regressionCoefficient = minPValModel.coef[coefIndex + 1];
+        } else {
+          variable.regressionCoefficient = 0;
+        }
+      });
+    } else {
+      this.modelingError = true;
+    }
     this.saveItem();
   }
 
@@ -178,7 +184,7 @@ export class RegressionModelMenuComponent implements OnInit {
     this.group.dateModelsGenerated = undefined;
     this.group.regressionModelYear = undefined;
     this.group.regressionConstant = undefined;
-    this.generateModels();
+    this.saveItem();
     this.showConfirmPredictorChangeModel = false;
   }
 }
