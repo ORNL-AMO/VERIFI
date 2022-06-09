@@ -1,3 +1,251 @@
+<div class="p-4" *ngIf="missingGroupData">
+    <div class="alert alert-danger text-center">
+        No meters found for this group. Analysis cannot be conducted on this group! Go to the <a
+            [routerLink]="'/utility/meter-groups'">Meter Grouping Page</a> to add
+        meters to this group for analysis.
+    </div>
+</div>
+
+<div class="row" *ngIf="!missingGroupData">
+    <div class="col-md-6 col-sm-12">
+        <div class="row">
+            <div class="col-md-6 col-sm-12">
+                <div class="form-group">
+                    <label class="bold">1. Select Analysis Type </label>
+                    <div>
+                        <input type="radio" class="rowToggle" name="analysisType" [value]="'absoluteEnergyConsumption'"
+                            id="absoluteEnergyConsumption" [(ngModel)]="group.analysisType"
+                            (change)="setAnalysisType()">
+                        <label class="checkbox" for="absoluteEnergyConsumption">Absolute Energy Consumption</label>
+
+                        <input type="radio" class="rowToggle" name="analysisType" [value]="'energyIntensity'"
+                            id="energyIntensity" [(ngModel)]="group.analysisType" (change)="setAnalysisType()">
+                        <label class="checkbox" for="energyIntensity">Energy Intensity</label>
+
+                        <input type="radio" class="rowToggle" name="analysisType" [value]="'modifiedEnergyIntensity'"
+                            id="modifiedEnergyIntensity" [(ngModel)]="group.analysisType" (change)="setAnalysisType()">
+                        <label class="checkbox" for="modifiedEnergyIntensity">Modified Energy Intensity</label>
+
+                        <input type="radio" class="rowToggle" name="analysisType" [value]="'regression'" id="regression"
+                            [(ngModel)]="group.analysisType" (change)="setAnalysisType()">
+                        <label class="checkbox" for="regression">Regression</label>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-sm-12"
+        *ngIf="group.analysisType == 'energyIntensity' || group.analysisType == 'modifiedEnergyIntensity'">
+        <!--energyIntensity or modifiedEnergyIntensity production variables-->
+        <div class="row">
+            <div class="col-12">
+                <label class="bold">2. Select Production Variables</label>
+                <div class="row sub-column mb-2 bold">
+                    <div class="col-6">
+                        Production Variables
+                    </div>
+                    <div class="col-6">
+                        Use For Analysis
+                    </div>
+                </div>
+                <div class="row sub-column" *ngFor="let predictor of group.predictorVariables">
+                    <div class="col-6" *ngIf="predictor.production">
+                        {{predictor.name}}<span *ngIf="predictor.unit">({{predictor.unit}})</span>
+                    </div>
+                    <div class="col-6" *ngIf="predictor.production">
+                        <label class="switch" for="{{'predictor_'+predictor.id}}">
+                            <input class="checkbox" type="checkbox" id="{{'predictor_'+predictor.id}}"
+                                name="{{'predictor_'+predictor.id}}" [(ngModel)]="predictor.productionInAnalysis"
+                                (change)="saveItem()">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-sm-12" *ngIf="group.analysisType == 'modifiedEnergyIntensity'">
+        <div class="row">
+            <!--modifiedEnergyIntensity-->
+            <div class="col-12">
+                <label class="bold">3. Set Baseload</label>
+                <div class="row sub-column">
+                    <div class="col-6">
+                        <label for="specifiedMonthlyPercentBaseload">
+                            Baseload Method
+                        </label>
+                    </div>
+                    <div class="col-6">
+                        <select required class="form-control" id="specifiedMonthlyPercentBaseload"
+                            id="specifiedMonthlyPercentBaseload" [(ngModel)]="group.specifiedMonthlyPercentBaseload"
+                            (change)="saveItem()">
+                            <option [ngValue]="true">% Baseload by Month</option>
+                            <option [ngValue]="false">Average % Baseload</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row sub-column" *ngIf="!group.specifiedMonthlyPercentBaseload">
+                    <div class="col-6">
+                        <label for="specifiedMonthlyPercentBaseload">
+                            Average % Baseload
+                        </label>
+                    </div>
+                    <div class="col-6">
+                        <div class="input-group">
+                            <input required type="number" name="averagePercentBaseload"
+                                [(ngModel)]="group.averagePercentBaseload" id="averagePercentBaseload"
+                                (input)="saveItem()">
+                            <span class="unit">%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" *ngIf="group.specifiedMonthlyPercentBaseload">
+                    <div class="col-12">
+                        <div class="row sub-column" *ngFor="let monthlyPercent of group.monthlyPercentBaseload">
+                            <div class="col-6">
+                                <label for="{{monthlyPercent.monthNum+'_percent'}}">
+                                    {{monthlyPercent.monthNum | monthLabel}}
+                                </label>
+                            </div>
+                            <div class="col-6">
+                                <div class="input-group">
+                                    <input required type="number" name="{{monthlyPercent.monthNum+'_percent'}}"
+                                        [(ngModel)]="monthlyPercent.percent" id="{{monthlyPercent.monthNum+'_percent'}}"
+                                        (input)="saveItem()">
+                                    <span class="unit">%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-sm-12">
+        <label class="bold">
+            <span *ngIf="group.analysisType == 'regression' || group.analysisType == 'absoluteEnergyConsumption'">2.</span>
+            <span *ngIf="group.analysisType == 'energyIntensity'">3.</span>
+            <span *ngIf="group.analysisType == 'modifiedEnergyIntensity'">4.</span>
+            Add Baseline Adjustment</label>
+        <div class="row sub-column">
+            <div class="col-6">
+                <label for="reportYear">
+                    Has Baseline Adjustement
+                </label>
+            </div>
+            <div class="col-6">
+                <label class="switch" for="hasBaselineAdjustement">
+                    <input class="checkbox" type="checkbox" id="hasBaselineAdjustement" name="hasBaselineAdjustement"
+                        [(ngModel)]="group.hasBaselineAdjustement" (change)="saveItem()">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+        </div>
+        <div class="row sub-column" *ngIf="group.hasBaselineAdjustement">
+            <div class="col-12" *ngFor="let baselineAdjustment of group.baselineAdjustments">
+                <div class="row">
+                    <div class="col-6">
+                        <label class="w-50">{{baselineAdjustment.year}}</label>
+                    </div>
+                    <div class="col-6">
+                        <div class="input-group">
+                            <input type="number" id="baselineAdjustment" id="baselineAdjustment"
+                                [(ngModel)]="baselineAdjustment.amount" (change)="saveItem()" min="0">
+                            <span class="unit" [innerHTML]="analysisItem.energyUnit | settingsLabel:'/yr'"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!--regression-->
+<div class="row mb-2" *ngIf="group.analysisType == 'regression'">
+    <div class="col-md-6 col-sm-12">
+        <label class="bold">3. Regression Model</label>
+        <div class="alert alert-info text-center">
+            Use "Regression Model" tab to setup the regression model for this group.
+        </div>
+        
+        
+        <!-- <label class="bold">2. Select Modeling Method</label>
+        <div class="row sub-column">
+            <div class="col-6">
+                <select required class="form-control" id="userDefinedModel" id="userDefinedModel"
+                    [(ngModel)]="group.userDefinedModel" (change)="changeModelType()">
+                    <option [ngValue]="true">Generate Models</option>
+                    <option [ngValue]="false">User Defined Model</option>
+                </select>
+            </div>
+        </div> -->
+    </div>
+</div>
+<!-- <div class="row" *ngIf="group.analysisType == 'regression'">
+    <div class="col-md-6 col-sm-12">
+        <label class="bold">3. Select Production Variables</label>
+        <div class="row sub-column mb-2 bold">
+            <div class="col-4">
+                Production Variables
+            </div>
+            <div class="col-4">
+                Use For Analysis
+            </div>
+            <div class="col-4" *ngIf="!group.userDefinedModel">
+                Regression Coefficient
+            </div>
+        </div>
+        <div class="row sub-column" *ngFor="let predictor of group.predictorVariables">
+            <div class="col-4">
+                {{predictor.name}}<span *ngIf="predictor.unit">({{predictor.unit}})</span>
+            </div>
+            <div class="col-4">
+                <label class="switch" for="{{'predictor_'+predictor.id}}">
+                    <input class="checkbox" type="checkbox" id="{{'predictor_'+predictor.id}}"
+                        name="{{'predictor_'+predictor.id}}" [(ngModel)]="predictor.productionInAnalysis"
+                        (change)="saveItem()">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+            <div class="col-4" *ngIf="!group.userDefinedModel">
+                <input class="form-control" *ngIf="predictor.productionInAnalysis" type="number" step="any"
+                    id="{{'regressionCoefficient_'+predictor.id}}" name="{{'regressionCoefficient_'+predictor.id}}"
+                    [(ngModel)]="predictor.regressionCoefficient" required (input)="changeModelType()">
+                <span class="bold" *ngIf="!predictor.productionInAnalysis">&mdash;</span>
+            </div>
+        </div>
+        <div class="row mb-2 sub-column" *ngIf="!group.userDefinedModel">
+            <div class="col-6">
+                <label for="regressionConstant">
+                    Regression Constant
+                </label>
+            </div>
+            <div class="col-6">
+                <input class="form-control" type="number" step="any" id="regressionConstant" name="regressionConstant"
+                    [(ngModel)]="group.regressionConstant" required (input)="changeModelType()">
+            </div>
+        </div>
+        <div class="row sub-column" *ngIf="!group.userDefinedModel">
+            <div class="col-6">
+                <label for="regressionModelYear">
+                    Model Year
+                </label>
+            </div>
+            <div class="col-6">
+                <select required class="form-control" id="regressionModelYear" id="regressionModelYear"
+                    [(ngModel)]="group.regressionModelYear" (change)="changeModelType()">
+                    <option *ngFor="let year of yearOptions" [ngValue]="year">{{year}}</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div> -->
+
+
+<!-- 
 <div class="row" *ngIf="!missingGroupData">
     <div class="col-md-6 col-sm-12">
         <div class="form-group">
@@ -30,11 +278,6 @@
                     [(ngModel)]="group.hasBaselineAdjustement" (change)="saveItem()">
                 <span class="slider round"></span>
             </label>
-            <!-- <div class="input-group w-50">
-                <input type="number" id="baselineAdjustment" id="baselineAdjustment"
-                    [(ngModel)]="analysisItem.baselineAdjustment" (change)="saveItem()" min="0">
-                <span class="unit" [innerHTML]="analysisItem.energyUnit | settingsLabel:'/yr'"></span>
-            </div> -->
         </div>
         <div class="d-flex flex-column" *ngIf="group.hasBaselineAdjustement">
             <div class="row form-group" *ngFor="let baselineAdjustment of group.baselineAdjustments">
@@ -50,7 +293,7 @@
             </div>
         </div>
     </div>
-    <!--energy intensity-->
+    <!--energy intensity--
     <div class="col-md-6 col-sm-12"
         *ngIf="group.analysisType == 'energyIntensity' || group.analysisType == 'modifiedEnergyIntensity'">
         <div class="row bold mb-2">
@@ -86,7 +329,7 @@
                 </div>
             </div>
         </div>
-        <!--modifiedEnergyIntensity-->
+        <!--modifiedEnergyIntensity--
         <div *ngIf="group.analysisType == 'modifiedEnergyIntensity'">
             <div class="row mb-2">
                 <div class="col-6">
@@ -146,7 +389,7 @@
         </div>
     </div>
 
-    <!--regression-->
+    <!--regression--
     <div class="col-md-6 col-sm-12" *ngIf="group.analysisType == 'regression'">
         <div class="row mb-2 bold">
             <div class="col-6">
@@ -157,7 +400,7 @@
             <div class="col-6">
                 <label class="switch" for="userDefinedModel">
                     <input class="checkbox" type="checkbox" id="userDefinedModel" name="userDefinedModel"
-                        [(ngModel)]="group.userDefinedModel" (change)="saveItem()">
+                        [(ngModel)]="group.userDefinedModel" (change)="changeModelType()">
                     <span class="slider round"></span>
                 </label>
             </div>
@@ -182,14 +425,14 @@
                 <label class="switch" for="{{'predictor_'+predictor.id}}">
                     <input class="checkbox" type="checkbox" id="{{'predictor_'+predictor.id}}"
                         name="{{'predictor_'+predictor.id}}" [(ngModel)]="predictor.productionInAnalysis"
-                        (change)="saveItem()">
+                        (change)="changeModelType()">
                     <span class="slider round"></span>
                 </label>
             </div>
             <div class="col-4" *ngIf="!group.userDefinedModel">
                 <input class="form-control" *ngIf="predictor.productionInAnalysis" type="number" step="any"
                     id="{{'regressionCoefficient_'+predictor.id}}" name="{{'regressionCoefficient_'+predictor.id}}"
-                    [(ngModel)]="predictor.regressionCoefficient" required (input)="saveItem()">
+                    [(ngModel)]="predictor.regressionCoefficient" required (input)="changeModelType()">
                 <span class="bold" *ngIf="!predictor.productionInAnalysis">&mdash;</span>
             </div>
         </div>
@@ -201,7 +444,7 @@
             </div>
             <div class="col-6">
                 <input class="form-control" type="number" step="any" id="regressionConstant" name="regressionConstant"
-                    [(ngModel)]="group.regressionConstant" required (input)="saveItem()">
+                    [(ngModel)]="group.regressionConstant" required (input)="changeModelType()">
             </div>
         </div>
         <div class="row" *ngIf="!group.userDefinedModel">
@@ -212,18 +455,10 @@
             </div>
             <div class="col-6">
                 <select required class="form-control" id="regressionModelYear" id="regressionModelYear"
-                    [(ngModel)]="group.regressionModelYear" (change)="saveItem()">
+                    [(ngModel)]="group.regressionModelYear" (change)="changeModelType()">
                     <option *ngFor="let year of yearOptions" [ngValue]="year">{{year}}</option>
                 </select>
             </div>
         </div>
     </div>
-</div>
-
-<div class="p-4" *ngIf="missingGroupData">
-    <div class="alert alert-danger text-center">
-        No meters found for this group. Analysis cannot be conducted on this group! Go to the <a
-            [routerLink]="'/utility/meter-groups'">Meter Grouping Page</a> to add
-        meters to this group for analysis.
-    </div>
-</div>
+</div> -->
