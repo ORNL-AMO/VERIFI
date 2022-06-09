@@ -19,7 +19,9 @@ export class GroupAnalysisComponent implements OnInit {
   groupId: string;
   label: string
   groupHasError: boolean;
+  regressionModelNeeded: boolean;
   analysisItemSub: Subscription;
+  showModelSelection: boolean;
   constructor(private activatedRoute: ActivatedRoute, private analysisDbService: AnalysisDbService,
     private analysisService: AnalysisService, private router: Router,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
@@ -54,6 +56,7 @@ export class GroupAnalysisComponent implements OnInit {
       let accountGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
       let idbGroup: IdbUtilityMeterGroup = accountGroups.find(group => { return group.guid == this.groupId });
       this.selectedGroup = this.analysisItem.groups.find(group => { return group.idbGroupId == idbGroup.guid });
+      this.showModelSelection = this.selectedGroup.analysisType == 'regression';
     }
   }
 
@@ -61,9 +64,11 @@ export class GroupAnalysisComponent implements OnInit {
     if (this.selectedGroup) {
       let groupName: string = this.utilityMeterGroupDbService.getGroupName(this.selectedGroup.idbGroupId);
       if (url.includes('annual-analysis')) {
-        this.label = groupName + ' Annual Analysis'
+        this.label = groupName + ' Annual Analysis';
       } else if (url.includes('monthly-analysis')) {
-        this.label = groupName + ' Monthly Analysis'
+        this.label = groupName + ' Monthly Analysis';
+      } else if (url.includes('model-selection')) {
+        this.label = groupName + ' Regression Model';
       } else {
         this.label = groupName + ' Setup'
       }
@@ -76,6 +81,15 @@ export class GroupAnalysisComponent implements OnInit {
       this.groupHasError = (groupMeters.length == 0);
       if (!this.groupHasError) {
         this.groupHasError = this.selectedGroup.groupHasError;
+      }
+      if(this.selectedGroup.analysisType == 'regression' && this.selectedGroup.userDefinedModel){
+        if(!this.selectedGroup.selectedModelId){
+          this.regressionModelNeeded = true;
+        }else{
+          this.regressionModelNeeded = false;
+        }
+      }else{
+        this.regressionModelNeeded = false;
       }
     }
   }

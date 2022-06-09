@@ -18,6 +18,8 @@ import { MonthlyAnalysisSummaryComponent } from './run-analysis/group-analysis/m
 import { MonthlyFacilityAnalysisComponent } from './run-analysis/facility-analysis/monthly-facility-analysis/monthly-facility-analysis.component';
 import { AnnualFacilityAnalysisComponent } from './run-analysis/facility-analysis/annual-facility-analysis/annual-facility-analysis.component';
 import { SharedAnalysisModule } from 'src/app/shared/shared-analysis/shared-analysis.module';
+import { ModelFilterPipe } from './run-analysis/group-analysis/regression-model-selection/model-filter.pipe';
+import { RegressionModelMenuComponent } from './run-analysis/group-analysis/regression-model-selection/regression-model-menu/regression-model-menu.component';
 
 
 
@@ -35,7 +37,9 @@ import { SharedAnalysisModule } from 'src/app/shared/shared-analysis/shared-anal
     AnnualAnalysisSummaryComponent,
     MonthlyAnalysisSummaryComponent,
     MonthlyFacilityAnalysisComponent,
-    AnnualFacilityAnalysisComponent
+    AnnualFacilityAnalysisComponent,
+    ModelFilterPipe,
+    RegressionModelMenuComponent
   ],
   imports: [
     CommonModule,

@@ -14299,6 +14299,7 @@ export const ExampleAccount: BackupFile = {
                 "hasBaselineAdjustement": false,
                 "idbGroupId": "4tzr49sld",
                 "analysisType": "regression",
+                "userDefinedModel": false,
                 "predictorVariables": [{
                     "name": "CDD",
                     "id": "zlxb9t9ve",
@@ -14392,6 +14393,7 @@ export const ExampleAccount: BackupFile = {
                 "hasBaselineAdjustement": false,
                 "idbGroupId": "qrsb01gxc",
                 "analysisType": "regression",
+                "userDefinedModel": false,
                 "predictorVariables": [{
                     "name": "CDD",
                     "id": "zlxb9t9ve",
@@ -14484,6 +14486,7 @@ export const ExampleAccount: BackupFile = {
                 "hasBaselineAdjustement": false,
                 "idbGroupId": "0afckb2in",
                 "analysisType": "regression",
+                "userDefinedModel": false,
                 "predictorVariables": [{
                     "name": "CDD",
                     "id": "zlxb9t9ve",
@@ -14587,6 +14590,7 @@ export const ExampleAccount: BackupFile = {
                 "hasBaselineAdjustement": false,
                 "idbGroupId": "lftmtnynr",
                 "analysisType": "energyIntensity",
+                "userDefinedModel": false,
                 "predictorVariables": [{
                     "name": "CDD",
                     "id": "d9w074lbp",
@@ -14665,6 +14669,7 @@ export const ExampleAccount: BackupFile = {
                 "hasBaselineAdjustement": false,
                 "idbGroupId": "7ubk7ni6x",
                 "analysisType": "regression",
+                "userDefinedModel": false,
                 "predictorVariables": [{
                     "name": "CDD",
                     "id": "d9w074lbp",
@@ -14761,6 +14766,7 @@ export const ExampleAccount: BackupFile = {
                 "hasBaselineAdjustement": false,
                 "idbGroupId": "14klfpknm",
                 "analysisType": "energyIntensity",
+                "userDefinedModel": false,
                 "predictorVariables": [{
                     "name": "CDD",
                     "id": "5jsihtofv",
@@ -14841,6 +14847,7 @@ export const ExampleAccount: BackupFile = {
                 "hasBaselineAdjustement": false,
                 "idbGroupId": "g04llpvs2",
                 "analysisType": "modifiedEnergyIntensity",
+                "userDefinedModel": false,
                 "predictorVariables": [{
                     "name": "CDD",
                     "id": "5jsihtofv",

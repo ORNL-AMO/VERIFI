@@ -84,6 +84,7 @@ export class CalanderizationService {
     if (orderedMeterData.length > 3) {
       let startDate: Date = new Date(orderedMeterData[0].readDate);
       startDate.setUTCMonth(startDate.getUTCMonth() + 1);
+      startDate.setUTCDate(1);
       let endDate: Date = new Date(orderedMeterData[orderedMeterData.length - 1].readDate);
       while (startDate.getUTCMonth() != endDate.getUTCMonth() || startDate.getUTCFullYear() != endDate.getUTCFullYear()) {
         let month: number = startDate.getUTCMonth();

@@ -1,3 +1,4 @@
+import { JStatRegressionModel } from './analysis';
 import { CalanderizedMeter, MonthlyData } from './calanderization';
 import { ElectricityDataFilters } from './electricityFilter';
 import { ReportOptions } from './overview-report';
@@ -147,6 +148,7 @@ export interface IdbUtilityMeterData {
     accountId: string,
     //data
     readDate: Date,
+    dbDate?: Date,
     totalVolume?: number,
     totalEnergyUse: number,
     totalCost: number,
@@ -190,7 +192,8 @@ export interface IdbPredictorEntry {
     // amount: number,
     date: Date,
     predictors: Array<PredictorData>,
-    checked?: boolean
+    checked?: boolean,
+    dbDate?: Date
 }
 
 
@@ -252,7 +255,11 @@ export interface AnalysisGroup {
     baselineAdjustments: Array<{
         year: number,
         amount: number
-    }>
+    }>,
+    userDefinedModel: boolean,
+    models?: Array<JStatRegressionModel>,
+    selectedModelId?: string,
+    dateModelsGenerated?: Date
 }
 
 export interface IdbAccountAnalysisItem {
