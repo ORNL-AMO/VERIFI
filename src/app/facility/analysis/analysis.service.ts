@@ -20,6 +20,7 @@ export class AnalysisService {
 
   analysisTableColumns: BehaviorSubject<AnalysisTableColumns>;
   calanderizedMeters: Array<CalanderizedMeter>;
+  showInvalidModels: BehaviorSubject<boolean>;
   constructor(private localStorageService: LocalStorageService, private calendarizationService: CalanderizationService,
     private convertMeterDataService: ConvertMeterDataService, private facilityDbService: FacilitydbService,
     private utilityMeterDbService: UtilityMeterdbService, private analysisDbService: AnalysisDbService) {
@@ -29,6 +30,7 @@ export class AnalysisService {
     }
     this.selectedGroup = new BehaviorSubject<AnalysisGroup>(undefined);
     this.dataDisplay = new BehaviorSubject<"graph" | "table">(dataDisplay);
+    this.showInvalidModels = new BehaviorSubject<boolean>(false);
 
 
     let analysisTableColumns: AnalysisTableColumns = this.localStorageService.retrieve("analysisTableColumns");

@@ -1,0 +1,155 @@
+<div class="row">
+    <div class="col-md-4 col-sm-12">
+        <label class="bold">Select Modeling Method</label>
+        <select required class="form-control" id="userDefinedModel" id="userDefinedModel"
+            [(ngModel)]="group.userDefinedModel" (change)="changeModelType()">
+            <option [ngValue]="true">Calculate Models</option>
+            <option [ngValue]="false">User Defined Model</option>
+        </select>
+        <div class="d-flex flex-fill justify-content-center align-items-center">
+            <div class="p-0" *ngIf="group.userDefinedModel">
+                <div class="p-2" *ngIf="!group.models || group.models.length == 0">
+                    <div class="alert alert-info">
+                        Select production variables and click "Generate Models" to calculate regression models. A table
+                        with detailed models will appear to select from.
+                    </div>
+                </div>
+                <div class="p-2" *ngIf="hasLaterDate">
+                    <div class="alert alert-warning">
+                        Data has been entered since these models were generated. You may want to update your models.
+                    </div>
+                </div>
+
+                <div class="p-2" *ngIf="noValidModels">
+                    <div class="alert alert-danger">
+                        No valid models found for selected production variables.
+                    </div>
+                </div>
+
+                <div class="p-2 d-flex flex-column justify-content-center align-items-center">
+                    <div class="p-0">
+                        <button class="mt-0 btn btn-info" (click)="generateModels()"
+                            *ngIf="!group.models || group.models.length == 0">Generate
+                            Models</button>
+                    </div>
+
+                    <div class="p-0">
+                        <button class="mt-0 btn btn-info" (click)="updateModels()"
+                            *ngIf="group.models && group.models.length != 0">
+                            Update Models</button>
+                    </div>
+                    <div class="p-0" *ngIf="group.dateModelsGenerated">
+                        Current Models Generated:
+                        {{group.dateModelsGenerated | date}}
+                    </div>
+                </div>
+
+
+                <div class="d-flex" *ngIf="group.models">
+                    <label class="show-models-label bold pr-3" for="showInvalid">
+                        Show Invalid Models
+                    </label>
+
+                    <label class="switch" for="showInvalid">
+                        <input class="checkbox" type="checkbox" id="showInvalid" name="showInvalid"
+                            [(ngModel)]="showInvalid" (change)="saveInvalidChange()">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+            </div>
+            <div class="p-2" *ngIf="!group.userDefinedModel">
+                <div class="alert alert-info">
+                    Manually select production variables and define model coefficients and constants.
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8 col-sm-12">
+        <label class="bold">Regression Model</label>
+        <div class="row sub-column mb-2 bold">
+            <div class="col-4">
+                Production Variables
+            </div>
+            <div class="col-4">
+                Use For Analysis
+            </div>
+            <div class="col-4">
+                Regression Coefficient
+            </div>
+        </div>
+        <div class="row sub-column" *ngFor="let predictor of group.predictorVariables">
+            <div class="col-4">
+                {{predictor.name}}<span *ngIf="predictor.unit">({{predictor.unit}})</span>
+            </div>
+            <div class="col-4">
+                <label class="switch" for="{{'predictor_'+predictor.id}}">
+                    <input class="checkbox" type="checkbox" id="{{'predictor_'+predictor.id}}"
+                        name="{{'predictor_'+predictor.id}}" [(ngModel)]="predictor.productionInAnalysis"
+                        (change)="togglePredictor()">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+            <div class="col-4">
+                <input class="form-control" *ngIf="predictor.productionInAnalysis" type="number" step="any"
+                    id="{{'regressionCoefficient_'+predictor.id}}" name="{{'regressionCoefficient_'+predictor.id}}"
+                    [(ngModel)]="predictor.regressionCoefficient" required (input)="saveItem()"
+                    [disabled]="group.userDefinedModel">
+                <span class="bold" *ngIf="!predictor.productionInAnalysis">&mdash;</span>
+            </div>
+        </div>
+        <div class="row mb-2 sub-column">
+            <div class="col-6">
+                <label for="regressionConstant">
+                    Regression Constant
+                </label>
+            </div>
+            <div class="col-6">
+                <input class="form-control" type="number" step="any" id="regressionConstant" name="regressionConstant"
+                    [(ngModel)]="group.regressionConstant" required (input)="saveItem()"
+                    [disabled]="group.userDefinedModel">
+            </div>
+        </div>
+        <div class="row sub-column">
+            <div class="col-6">
+                <label for="regressionModelYear">
+                    Model Year
+                </label>
+            </div>
+            <div class="col-6">
+                <select required class="form-control" id="regressionModelYear" id="regressionModelYear"
+                    [(ngModel)]="group.regressionModelYear" (change)="saveItem()"
+                    [disabled]="group.userDefinedModel">
+                    <option *ngFor="let year of yearOptions" [ngValue]="year">{{year}}</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="popup" [class.open]="showUpdateModelsModal">
+    <div class="popup-header">Are you sure you want to update the models?
+        <button class="item-right" (click)="closeUpdateModelsModal()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>WARNING: Updated models will replace existing models. This cannot be undone.</p>
+    </div>
+    <div class="saveCancel popup-footer text-right">
+        <button class="btn btn-secondary" (click)="closeUpdateModelsModal()">Cancel</button>
+        <button class="btn btn-success" (click)="confirmUpdateModals()">Update Models</button>
+    </div>
+</div>
+
+<div class="popup" [class.open]="showConfirmPredictorChangeModel">
+    <div class="popup-header">Are you sure you want to change predictor variables?
+        <button class="item-right" (click)="cancelTogglePredictor()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>WARNING: Changing predictor variables will remove existing models. This cannot be undone.</p>
+    </div>
+    <div class="saveCancel popup-footer text-right">
+        <button class="btn btn-secondary" (click)="cancelTogglePredictor()">Cancel</button>
+        <button class="btn btn-success" (click)="confirmTogglePredictor()">Update Models</button>
+    </div>
+</div>

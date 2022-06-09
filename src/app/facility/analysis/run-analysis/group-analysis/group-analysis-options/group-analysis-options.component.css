@@ -17,3 +17,11 @@ input[type="checkbox"]{
 label.baseline-label{
     width: auto;
 }
+
+.variable-names{
+    width: 200px;
+}
+
+.sub-column{
+    margin-left: 7px;
+}

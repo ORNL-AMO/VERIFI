@@ -56,7 +56,7 @@ export class GroupAnalysisComponent implements OnInit {
       let accountGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
       let idbGroup: IdbUtilityMeterGroup = accountGroups.find(group => { return group.guid == this.groupId });
       this.selectedGroup = this.analysisItem.groups.find(group => { return group.idbGroupId == idbGroup.guid });
-      this.showModelSelection = this.selectedGroup.userDefinedModel;
+      this.showModelSelection = this.selectedGroup.analysisType == 'regression';
     }
   }
 
@@ -68,7 +68,7 @@ export class GroupAnalysisComponent implements OnInit {
       } else if (url.includes('monthly-analysis')) {
         this.label = groupName + ' Monthly Analysis';
       } else if (url.includes('model-selection')) {
-        this.label = groupName + ' Model Selection';
+        this.label = groupName + ' Regression Model';
       } else {
         this.label = groupName + ' Setup'
       }
