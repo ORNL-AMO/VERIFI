@@ -179,11 +179,13 @@ export class PredictordbService {
 
 
     updateWithObservable(values: IdbPredictorEntry): Observable<any> {
+        values.date = new Date(values.date);
         values.dbDate = new Date();
         return this.dbService.update('predictors', values)
     }
 
     addWithObservable(predictor: IdbPredictorEntry): Observable<IdbPredictorEntry> {
+        predictor.date = new Date(predictor.date);
         predictor.dbDate = new Date();
         return this.dbService.add('predictors', predictor);
     }

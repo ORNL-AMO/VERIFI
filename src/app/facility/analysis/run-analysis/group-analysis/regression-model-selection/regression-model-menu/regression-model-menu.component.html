@@ -19,7 +19,11 @@
                         Data has been entered since these models were generated. You may want to update your models.
                     </div>
                 </div>
-
+                <div class="p-2" *ngIf="modelingError">
+                    <div class="alert alert-warning">
+                        Something went wrong generating models. Make sure predictors are selected.
+                    </div>
+                </div>
                 <div class="p-2" *ngIf="noValidModels">
                     <div class="alert alert-danger">
                         No valid models found for selected production variables.
@@ -150,6 +154,6 @@
     </div>
     <div class="saveCancel popup-footer text-right">
         <button class="btn btn-secondary" (click)="cancelTogglePredictor()">Cancel</button>
-        <button class="btn btn-success" (click)="confirmTogglePredictor()">Update Models</button>
+        <button class="btn btn-success" (click)="confirmTogglePredictor()">Clear Models</button>
     </div>
 </div>
