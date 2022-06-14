@@ -159,13 +159,13 @@ export class FacilityAnalysisCalculationsService {
         baselineAdjustmentForNormalization: baselineAdjustmentForNormalization,
         baselineAdjustmentForOther: baselineAdjustmentForOther,
         baselineAdjustment: baselineAdjustment,
-        SEnPI: SEnPI,
-        savings: savings,
-        percentSavingsComparedToBaseline: percentSavingsComparedToBaseline * 100,
-        yearToDateSavings: yearToDateSavings,
-        yearToDatePercentSavings: yearToDatePercentSavings * 100,
-        rollingSavings: rollingSavings,
-        rolling12MonthImprovement: rolling12MonthImprovement * 100
+        SEnPI: this.analysisCalculationsHelperService.checkValue(SEnPI),
+        savings: this.analysisCalculationsHelperService.checkValue(savings),
+        percentSavingsComparedToBaseline: this.analysisCalculationsHelperService.checkValue(percentSavingsComparedToBaseline) * 100,
+        yearToDateSavings: this.analysisCalculationsHelperService.checkValue(yearToDateSavings),
+        yearToDatePercentSavings: this.analysisCalculationsHelperService.checkValue(yearToDatePercentSavings) * 100,
+        rollingSavings: this.analysisCalculationsHelperService.checkValue(rollingSavings),
+        rolling12MonthImprovement: this.analysisCalculationsHelperService.checkValue(rolling12MonthImprovement) * 100
       })
 
       summaryDataIndex++;
