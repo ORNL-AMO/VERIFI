@@ -128,9 +128,6 @@ export class CorrelationPlotComponent implements OnInit {
 
     let yMinRegressionValue: number = this.regressionTableData[0].jstatModel.coef[0] + (this.regressionTableData[0].jstatModel.coef[1] * xMin);
     let yMaxRegressionValue: number = this.regressionTableData[0].jstatModel.coef[0] + (this.regressionTableData[0].jstatModel.coef[1] * xMax);
-
-    // let yMinRegressionValue: number = this.regressionTableData[0].regressionResult.predict(xMin)[1];
-    // let yMaxRegressionValue: number = this.regressionTableData[0].regressionResult.predict(xMax)[1];
     let bestFit: string = coefStr[0] + ' + ' + '(' + coefStr[1] + ' * ' + this.regressionTableData[0].optionOne + ')';
 
     let trace2 = {
@@ -141,8 +138,6 @@ export class CorrelationPlotComponent implements OnInit {
       name: "Best Fit: " + bestFit,
       hoverinfo: 'none'
     }
-
-
 
     let data = [trace1, trace2];
     let layout = {
