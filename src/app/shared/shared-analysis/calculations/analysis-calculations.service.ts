@@ -192,13 +192,13 @@ export class AnalysisCalculationsService {
         baselineAdjustmentForNormalization: baselineAdjustmentForNormalization,
         baselineAdjustmentForOther: baselineAdjustmentForOther,
         baselineAdjustment: baselineAdjustment,
-        SEnPI: SEnPI,
-        savings: savings,
-        percentSavingsComparedToBaseline: percentSavingsComparedToBaseline * 100,
-        yearToDateSavings: yearToDateSavings,
-        yearToDatePercentSavings: yearToDatePercentSavings * 100,
-        rollingSavings: rollingSavings,
-        rolling12MonthImprovement: rolling12MonthImprovement * 100
+        SEnPI: this.analysisCalculationsHelperService.checkValue(SEnPI),
+        savings: this.analysisCalculationsHelperService.checkValue(savings),
+        percentSavingsComparedToBaseline: this.analysisCalculationsHelperService.checkValue(percentSavingsComparedToBaseline) * 100,
+        yearToDateSavings: this.analysisCalculationsHelperService.checkValue(yearToDateSavings),
+        yearToDatePercentSavings: this.analysisCalculationsHelperService.checkValue(yearToDatePercentSavings) * 100,
+        rollingSavings: this.analysisCalculationsHelperService.checkValue(rollingSavings),
+        rolling12MonthImprovement: this.analysisCalculationsHelperService.checkValue(rolling12MonthImprovement) * 100
       });
       summaryDataIndex++;
       let currentMonth: number = baselineDate.getUTCMonth()
@@ -344,12 +344,12 @@ export class AnalysisCalculationsService {
         baselineAdjustmentForNormalization: baselineAdjustmentForNormalization,
         baselineAdjustmentForOther: baselineAdjustmentForOther,
         baselineAdjustment: baselineAdjustment,
-        SEnPI: SEnPI,
-        savings: savings,
-        totalSavingsPercentImprovement: totalSavingsPercentImprovement * 100,
-        annualSavingsPercentImprovement: annualSavingsPercentImprovement * 100,
-        cummulativeSavings: cummulativeSavings,
-        newSavings: newSavings,
+        SEnPI: this.analysisCalculationsHelperService.checkValue(SEnPI),
+        savings: this.analysisCalculationsHelperService.checkValue( savings),
+        totalSavingsPercentImprovement: this.analysisCalculationsHelperService.checkValue(totalSavingsPercentImprovement) * 100,
+        annualSavingsPercentImprovement: this.analysisCalculationsHelperService.checkValue(annualSavingsPercentImprovement) * 100,
+        cummulativeSavings: this.analysisCalculationsHelperService.checkValue(cummulativeSavings),
+        newSavings: this.analysisCalculationsHelperService.checkValue(newSavings),
         predictorUsage: predictorUsage
       })
       previousYearPercentSavings = totalSavingsPercentImprovement;

@@ -116,4 +116,12 @@ export class AnalysisCalculationsHelperService {
     });
     return totalPredictorUsage;
   }
+
+  checkValue(val: number): number{
+    if(Math.abs(val) < .0000001){
+      return 0
+    }else{
+      return val;
+    }
+  }
 }
