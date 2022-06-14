@@ -62,7 +62,7 @@ export class CorrelationHeatmapComponent implements OnInit {
       for (let x = 0; x < xValues.length; x++) {
         let zValue = this.regressionTableData.find(tableItem => { return tableItem.optionOne == xValues[x] && tableItem.optionTwo == yValues[y] });
         if (zValue) {
-          valuesArr.push(zValue.r2Value);
+          valuesArr.push(this.getSigFigs(zValue.r2Value));
         }
       }
       zValues.push(valuesArr);
@@ -118,4 +118,8 @@ export class CorrelationHeatmapComponent implements OnInit {
     this.plotlyService.newPlot(this.heatMapPlot.nativeElement, data, layout, config);
   }
 
+  
+  getSigFigs(val: number): number {
+    return Number((val).toLocaleString(undefined, { maximumSignificantDigits: 5 }));
+  }
 }

@@ -54,7 +54,6 @@
             "allowedCommonJsDependencies": [
               "lodash",
               "xlsx",
-              "regression",
               "exceljs",
               "jstat"
             ]

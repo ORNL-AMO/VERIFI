@@ -4,8 +4,9 @@ import { CalanderizationService } from './calanderization.service';
 import * as _ from 'lodash';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import { FacilityBarChartData, HeatMapData, PlotDataItem, RegressionTableDataItem } from 'src/app/models/visualization';
-import * as regression from 'regression';
 import { ReportOptions } from 'src/app/models/overview-report';
+import * as jStat from 'jstat';
+import { JStatRegressionModel } from 'src/app/models/analysis';
 @Injectable({
   providedIn: 'root'
 })
@@ -430,15 +431,15 @@ export class VisualizationService {
     let regressionTableData = new Array<RegressionTableDataItem>();
     for (let x = 0; x < plotData.length; x++) {
       for (let y = (x + 1); y < plotData.length; y++) {
-        let regressionDataPairs: Array<Array<number>> = plotData[x].values.map((value, index) => { return [value, plotData[y].values[index]] });
-        let regressionResult = regression.linear(regressionDataPairs);
-        //TODO: Calculate P Value
+        let endog: Array<number> = plotData[y].values.map(val => {return val});
+        let exog: Array<Array<number>> = plotData[x].values.map(val => {return [1, val]});
+        let model: JStatRegressionModel = jStat.models.ols(endog, exog);
         regressionTableData.push({
           optionOne: plotData[x].label,
           optionTwo: plotData[y].label,
-          r2Value: regressionResult.r2,
-          regressionResult: regressionResult,
-          pValue: 0
+          r2Value: model.R2,
+          pValue: model.f.pvalue,
+          jstatModel: model
         });
       }
     }
