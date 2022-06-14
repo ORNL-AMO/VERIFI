@@ -1,15 +1,15 @@
 <div class="utility banner sticky-top d-flex justify-content-between" [ngClass]="{'modal-open': modalOpen}">
     <ul class="nav nav-tabs">
         <li class="nav-item">
-            <a class="nav-link" routerLink="energy-consumption" [routerLinkActive]="['active']">Utility
+            <a class="nav-link" routerLink="energy-consumption" [routerLinkActive]="['active']">Meter
                 Management</a>
         </li>
         <li class="nav-item" [class.disabled]="utilityMeterData.length === 0">
-            <a class="nav-link" routerLink="monthly-meter-data" [routerLinkActive]="['active']">Monthly Meter
+            <a class="nav-link" routerLink="monthly-meter-data" [routerLinkActive]="['active']">Monthly
                 Data</a>
         </li>
         <li class="nav-item" [class.disabled]="utilityMeterData.length === 0">
-            <a class="nav-link" routerLink="meter-groups" [routerLinkActive]="['active']">Meter Grouping</a>
+            <a class="nav-link" routerLink="meter-groups" [routerLinkActive]="['active']">Analysis Groups</a>
         </li>
         <li class="nav-item" [class.disabled]="utilityMeterData.length === 0">
             <a class="nav-link" routerLink="predictors" [routerLinkActive]="['active']">Predictors</a>
