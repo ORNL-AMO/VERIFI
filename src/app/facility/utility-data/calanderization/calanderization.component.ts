@@ -135,6 +135,26 @@ export class CalanderizationComponent implements OnInit {
         }
         this.calanderizationService.calanderizedDataFilters.next(this.calanderizedDataFilters);
       }
+    } else {
+      let allMeterData: Array<MonthlyData> = calanderizedMeterData.flatMap(calanderizedMeter => { return calanderizedMeter.monthlyData });
+      let maxDateEntry: MonthlyData = _.maxBy(allMeterData, 'date');
+      let minDateEntry: MonthlyData = _.minBy(allMeterData, 'date');
+      if (minDateEntry && this.calanderizedDataFilters.dataDateRange.maxDate < minDateEntry.date || this.calanderizedDataFilters.dataDateRange.minDate > maxDateEntry.date) {
+        this.calanderizedDataFilters.selectedDateMax = {
+          year: maxDateEntry.year,
+          month: maxDateEntry.monthNumValue
+        };
+        this.calanderizedDataFilters.selectedDateMin = {
+          year: minDateEntry.year,
+          month: minDateEntry.monthNumValue
+        };
+        this.calanderizedDataFilters.dataDateRange = {
+          minDate: minDateEntry.date,
+          maxDate: maxDateEntry.date
+        }
+        this.calanderizationService.calanderizedDataFilters.next(this.calanderizedDataFilters);
+      }
+
     }
   }
 
