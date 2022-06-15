@@ -145,3 +145,15 @@ li.disabled a{
   cursor: default;
   opacity: .7;
 }
+
+ngb-typeahead-window.dropdown-menu{
+  z-index: 100000;
+}
+
+ngb-typeahead-window.dropdown-menu .dropdown-item.active{
+  background-color: lightgray;
+}
+
+ngb-typeahead-window.dropdown-menu .badge, ngb-typeahead-window.dropdown-menu .template-text{
+  font-size: 16px;
+}

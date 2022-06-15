@@ -20,6 +20,8 @@ import { FacilityModule } from './facility/facility.module';
 import { AccountModule } from './account/account.module';
 import { SetupWizardModule } from './setup-wizard/setup-wizard.module';
 import { HelperPipesModule } from './shared/helper-pipes/helper-pipes.module';
+import { SearchBarComponent } from './core-components/header/search-bar/search-bar.component';
+import { NgbTypeaheadModule } from '@ng-bootstrap/ng-bootstrap';
 
 @NgModule({
   declarations: [
@@ -30,7 +32,8 @@ import { HelperPipesModule } from './shared/helper-pipes/helper-pipes.module';
     PageNotFoundComponent,
     ToastNotificationsComponent,
     ElectronUpdateComponent,
-    ImportBackupModalComponent
+    ImportBackupModalComponent,
+    SearchBarComponent
   ],
   imports: [
     BrowserModule,
@@ -45,7 +48,9 @@ import { HelperPipesModule } from './shared/helper-pipes/helper-pipes.module';
     FacilityModule,
     AccountModule,
     SetupWizardModule,
-    HelperPipesModule
+    HelperPipesModule,
+    NgbTypeaheadModule,
+
   ],
   providers: [],
   bootstrap: [AppComponent]
