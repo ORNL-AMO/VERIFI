@@ -3,6 +3,10 @@
     <span class="badge badge-secondary">v{{version}}</span>
 
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="pl-2" *ngIf="dataInitialized">
+            <app-search-bar></app-search-bar>
+        </div>
+
         <ul class="navbar-nav ml-auto" *ngIf="dataInitialized">
             <li class="nav-item dropdown">
                 <button *ngIf="activeAccount" class="btn btn-outline nav-link dropdown-toggle"
@@ -26,21 +30,18 @@
             <button class="btn btn-dark backup-account" (click)="backupAccount()">Backup Account
             </button>
         </div>
-        <div class="pl-2" *ngIf="dataInitialized && activeAccount">Last Backup: (<span *ngIf="lastBackupDate">{{lastBackupDate | date:'medium'}}</span><span
+        <div class="pl-2" *ngIf="dataInitialized && activeAccount">Last Backup: (<span
+                *ngIf="lastBackupDate">{{lastBackupDate | date:'medium'}}</span><span
                 *ngIf="!lastBackupDate">&mdash;</span>)</div>
         <!--TODO: Remove For Production-->
         <div class="pl-2" *ngIf="!isProduction">
-            <button *ngIf="!resetDatabase" class="btn btn-danger backup-account" (click)="toggleResetDatabase()">Reset Database
+            <button *ngIf="!resetDatabase" class="btn btn-danger backup-account" (click)="toggleResetDatabase()">Reset
+                Database
             </button>
-            <button *ngIf="resetDatabase" class="btn btn-danger backup-account" (click)="deleteDatabase()">Are you sure you want to reset the database?
+            <button *ngIf="resetDatabase" class="btn btn-danger backup-account" (click)="deleteDatabase()">Are you sure
+                you want to reset the database?
             </button>
         </div>
-        <!-- <form class="form-inline my-2 my-lg-0">
-            <input class="form-control mr-sm-2" type="search" placeholder="Search (coming soon)" aria-label="Search"
-                [ngClass]="{'collapse': !showSearch}">
-            <button class="btn btn-outline my-2 my-sm-0" (click)="toggleSearch()"><span
-                    class="fa fa-search"></span></button>
-        </form> -->
 
     </div>
 </nav>

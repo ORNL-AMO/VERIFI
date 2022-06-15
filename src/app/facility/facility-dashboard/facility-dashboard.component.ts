@@ -27,7 +27,9 @@ export class FacilityDashboardComponent implements OnInit {
   ngOnInit(): void {
     this.selectedFacilitySub = this.facilitydbService.selectedFacility.subscribe(value => {
       this.utilityMeterFacilityData = this.utilityMeterDataDbService.facilityMeterData.getValue();
-      this.dashboardService.setFacilityDashboardSummary();
+      if (this.utilityMeterFacilityData.length != 0) {
+        this.dashboardService.setFacilityDashboardSummary();
+      }
     });
 
     this.graphDisplaySub = this.dashboardService.graphDisplay.subscribe(value => {
