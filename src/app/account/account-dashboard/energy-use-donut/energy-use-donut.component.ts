@@ -49,7 +49,7 @@ export class EnergyUseDonutComponent implements OnInit {
   }
 
   drawChart() {
-    if (this.energyUseDonut && this.facilitiesSummary && this.facilitiesSummary.facilitySummaries.length != 0 && this.graphDisplay) {
+    if (this.energyUseDonut && this.facilitiesSummary && this.graphDisplay) {
       let yDataProperty: string = "energyCost";
       let hovertemplate: string = '%{label}: %{value:$,.0f} <extra></extra>';
       if (this.graphDisplay == "usage") {

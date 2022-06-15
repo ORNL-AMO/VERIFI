@@ -483,11 +483,15 @@ export class CalanderizationService {
     let monthlyData: Array<MonthlyData> = calanderizedMeterData.flatMap(data => {
       return data.monthlyData;
     });
-    let yearPrior: number = lastBill.year - 1;
-    let yearPriorBill: Array<MonthlyData> = monthlyData.filter(dataItem => {
-      return (dataItem.year == yearPrior) && (dataItem.monthNumValue == lastBill.monthNumValue);
-    });
-    return yearPriorBill;
+    if (lastBill) {
+      let yearPrior: number = lastBill.year - 1;
+      let yearPriorBill: Array<MonthlyData> = monthlyData.filter(dataItem => {
+        return (dataItem.year == yearPrior) && (dataItem.monthNumValue == lastBill.monthNumValue);
+      });
+      return yearPriorBill;
+    } else {
+      return undefined;
+    }
   }
 
 
