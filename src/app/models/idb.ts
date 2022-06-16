@@ -84,7 +84,8 @@ export interface IdbFacility {
     wizardId?: string,
     contactName: string,
     contactEmail: string,
-    contactPhone: string
+    contactPhone: string,
+    modifiedDate?: Date
 }
 
 export interface IdbUtilityMeterGroup {

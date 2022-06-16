@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { LoadingService } from '../core-components/loading/loading.service';
 import { DbChangesService } from '../indexedDB/db-changes.service';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
 import { IdbFacility } from '../models/idb';

@@ -1,10 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { Router, Event, NavigationEnd } from '@angular/router';
+import { Router, NavigationEnd } from '@angular/router';
 import { LocalStorageService } from 'ngx-webstorage';
 import { Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbAccount, IdbFacility } from 'src/app/models/idb';
+import { IdbFacility } from 'src/app/models/idb';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { environment } from 'src/environments/environment';
 import * as _ from 'lodash';
@@ -21,12 +21,13 @@ export class SidebarComponent implements OnInit {
   accountName: string;
   accountSub: Subscription;
 
-  facilityList: Array<{ guid: string, color: string, id: number }>;
+  facilityList: Array<FacilityListItem>;
   facilityListSub: Subscription;
 
   selectedFacility: IdbFacility;
   selectedFacilitySub: Subscription;
   showSidebar: boolean;
+  showAllFacilities: boolean = false;
   constructor(private localStorageService: LocalStorageService, private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService, private router: Router,
     private sharedDataService: SharedDataService) {
@@ -102,23 +103,40 @@ export class SidebarComponent implements OnInit {
 
   setFacilityList(accountFacilities: Array<IdbFacility>) {
     if (!this.facilityList) {
-      this.facilityList = accountFacilities.map(facility => { return { guid: facility.guid, color: facility.color, id: facility.id } });
+      this.facilityList = accountFacilities.map(facility => { return { guid: facility.guid, color: facility.color, id: facility.id, modifiedDate: facility.modifiedDate } });
     } else {
       let tmpList: Array<string> = accountFacilities.map(facility => { return facility.guid });
       let currentIdList: Array<string> = this.facilityList.map(listItem => { return listItem.guid });
       let missingVals: Array<string> = _.xor(tmpList, currentIdList);
       if (missingVals.length != 0) {
-        this.facilityList = accountFacilities.map(facility => { return { guid: facility.guid, color: facility.color, id: facility.id } });
+        this.facilityList = accountFacilities.map(facility => { return { guid: facility.guid, color: facility.color, id: facility.id, modifiedDate: facility.modifiedDate } });
       } else {
         let tmpList: Array<string> = accountFacilities.map(facility => { return facility.color });
-        let currentIdList: Array<string> = this.facilityList.map(listItem => { return listItem.color });
-        let missingVals: Array<string> = _.xor(tmpList, currentIdList);
+        let currentColorList: Array<string> = this.facilityList.map(listItem => { return listItem.color });
+        let missingVals: Array<string> = _.xor(tmpList, currentColorList);
         if (missingVals.length != 0) {
           this.facilityList.forEach(item => {
-            item.color = accountFacilities.find(facility => {return facility.guid == item.guid}).color;
+            item.color = accountFacilities.find(facility => { return facility.guid == item.guid }).color;
           })
+        } else {
+          let tmpList: Array<Date> = accountFacilities.map(facility => { return facility.modifiedDate });
+          let currentColorList: Array<Date> = this.facilityList.map(listItem => { return listItem.modifiedDate });
+          let missingVals: Array<Date> = _.xor(tmpList, currentColorList);
+          if (missingVals.length != 0) {
+            this.facilityList.forEach(item => {
+              item.modifiedDate = accountFacilities.find(facility => { return facility.guid == item.guid }).modifiedDate;
+            })
+          }
         }
       }
     }
   }
+
+  toggleShowAllFacilities() {
+    this.showAllFacilities = !this.showAllFacilities;
+  }
+}
+
+export interface FacilityListItem {
+  guid: string, color: string, id: number, modifiedDate: Date
 }

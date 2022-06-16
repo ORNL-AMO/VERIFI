@@ -32,7 +32,7 @@ nav.sidebar{
 }
 
 .nav-link .nav-label{
-    animation: fadeInAnimation .7s ease;
+    /* animation: fadeInAnimation .7s ease; */
 }
 
 .open .nav-link span {
@@ -48,6 +48,8 @@ nav.sidebar{
 hr{
     margin-right: 15px;
     margin-left: 15px;
+    margin-top: .5rem;
+    margin-bottom: .5rem;
 }
 
 .nav-link:hover{
