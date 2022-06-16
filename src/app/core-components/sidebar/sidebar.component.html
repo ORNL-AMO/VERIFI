@@ -2,7 +2,7 @@
     <a class="nav-link pt-4" (click)="toggleSidebar()">
         <i class="fa" [ngClass]="{'fa-align-left': !open, 'fa-align-right': open}"></i>
     </a>
-    <hr class="bold-hr">
+    <hr>
     <a title="Account Overview" class="nav-link" routerLink="/account" [routerLinkActive]="['active-head']"
         [ngClass]="{'open': open}"><i class="fa fa-building"></i>
         <span [hidden]="!open" class="pl-2 nav-label bold">
@@ -26,7 +26,7 @@
         </a>
     </div>
     <hr class="bold-hr">
-    <div *ngFor="let facility of facilityList | facilityList:(showAllFacilities && open)" [ngClass]="{'open': open, 'not-open': !open}">
+    <div *ngFor="let facility of facilityList | facilityList:(showAllFacilities && open); let index = index;" [ngClass]="{'open': open, 'not-open': !open}">
         <a title="Facility Overview" class="nav-link" routerLink="/facility/{{facility.id}}"
             [routerLinkActive]="['active-head']"><i class="fa fa-industry" [ngStyle]="{color: facility.color}"></i>
             <span [hidden]="!open" class="pl-2 nav-label">
@@ -34,7 +34,7 @@
             </span>
         </a>
         <div class="d-flex icon-row"
-            [ngClass]="{'flex-column not-open': !open, 'icon-row': open, 'hidden': checkHideFacilityLinks(facility.guid)}">
+            [ngClass]="{'flex-column not-open': !open, 'icon-row': open, 'hidden': checkHideFacilityLinks(facility.guid, index)}">
             <a title="Facility Overview" class="nav-link" routerLink="/facility/{{facility.id}}/home"
                 [routerLinkActive]="['active']"><i class="fa fa-home"></i>
             </a>
@@ -57,7 +57,7 @@
         <span *ngIf="!showAllFacilities"><i class="fa fa-chevron-down"></i> Show All Facilities</span>
         <span *ngIf="showAllFacilities"><i class="fa fa-chevron-up"></i> Show Last Four Edited</span>
     </a>
-    <hr class="bold-hr" *ngIf="facilityList.length > 4 && open">
+    <hr *ngIf="facilityList.length > 4 && open">
 
     <a class="nav-link" routerLink="/help" [routerLinkActive]="['active']"
         [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-question"></i> <span [hidden]="!open"
@@ -71,7 +71,7 @@
     <a class="nav-link" routerLink="/acknowledgments" [routerLinkActive]="['active']"
         [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-trophy"></i>
         <span [hidden]="!open" class="pl-2 nav-label">Acknowledgments</span></a>
-    <hr class="bold-hr">
+    <hr>
     <a class="nav-link" *ngIf="isDev" routerLink="style-guide" [routerLinkActive]="['active']"
         [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-star"></i> <span [hidden]="!open"
             class="pl-2 nav-label">Style

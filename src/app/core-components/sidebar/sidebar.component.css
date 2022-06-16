@@ -87,3 +87,8 @@ div.hidden, div.d-flex.hidden{
     flex-wrap: nowrap;
     overflow-y: auto;
 }
+
+
+.bold-hr{
+    border-top: 4px solid rgba(0,0,0,.4);
+}

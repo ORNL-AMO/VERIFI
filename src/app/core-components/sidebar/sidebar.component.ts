@@ -75,14 +75,18 @@ export class SidebarComponent implements OnInit {
   }
 
 
-  checkHideFacilityLinks(facilityId: string): boolean {
-    if (this.open) {
-      return false;
-    } else if (this.router.url.includes('account')) {
+  checkHideFacilityLinks(facilityId: string, index: number): boolean {
+    if (this.showAllFacilities && index > 0) {
       return true;
-    } else if (this.selectedFacility) {
-      if (this.selectedFacility.guid != facilityId) {
+    } else {
+      if (this.open && !this.showAllFacilities) {
+        return false;
+      } else if (this.router.url.includes('account')) {
         return true;
+      } else if (this.selectedFacility) {
+        if (this.selectedFacility.guid != facilityId) {
+          return true;
+        }
       }
     }
     return false;
