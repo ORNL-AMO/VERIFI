@@ -52,6 +52,7 @@ export class DbChangesService {
   }
 
   selectFacility(facility: IdbFacility) {
+    this.updateFacilities(facility);
     console.log('DB Changes Select Facility');
     //set analaysis
     this.setFacilityAnalysisItems(facility);

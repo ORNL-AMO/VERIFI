@@ -114,7 +114,7 @@ export class SearchBarComponent implements OnInit {
       debounceTime(200),
       distinctUntilChanged(),
       map(term => term.length < 2 ? []
-        : this.dropdownOptions.filter(v => v.name.toLowerCase().indexOf(term.toLowerCase()) > -1).slice(0, 10))
+        : this.dropdownOptions.filter(v => v.name.toLowerCase().indexOf(term.toLowerCase()) > -1))
     )
 
   formatter = (x: { name: string }) => x.name;
