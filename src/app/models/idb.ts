@@ -126,7 +126,7 @@ export interface IdbUtilityMeter {
     notes?: string,
     source: MeterSource,
     //group = groupName
-    group: string
+    group?: string
 
     startingUnit: string,
     energyUnit: string,
