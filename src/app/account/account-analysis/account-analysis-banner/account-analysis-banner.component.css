@@ -47,3 +47,7 @@
     color: white;
     border: solid 1px white;
 }
+
+.nav-tabs .nav-link.active, .nav-tabs .nav-link.active i.fa{
+    color: #ff6000;
+}

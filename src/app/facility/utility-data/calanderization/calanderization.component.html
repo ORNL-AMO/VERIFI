@@ -1,7 +1,9 @@
 <div class="wrapper main-content p-0">
     <ul class="nav nav-tabs">
         <li class="nav-item" *ngFor="let meter of facilityMeters"><a class="nav-link" (click)="selectMeter(meter)"
-                [ngClass]="{'active': selectedMeter.id == meter.id}">{{meter.name}}</a></li>
+                [ngClass]="{'active': selectedMeter.id == meter.id}">
+                <i class="fa fa-calendar-days"></i>
+                {{meter.name}}</a></li>
     </ul>
     <div class="content-padding">
         <h4>{{selectedMeter.name}} Calanderized Data</h4>
