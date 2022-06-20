@@ -36,3 +36,7 @@ a:not([href]){
 h4 i.fa-industry{
     font-size: 16px;
 }
+
+.nav-tabs .nav-link.active, .nav-tabs .nav-link.active i.fa{
+    color: #ff6000;
+}

@@ -1,9 +1,13 @@
-<ul class="nav nav-tabs">
-    <li class="nav-item"><a class="nav-link" routerLink="annual-analysis" [routerLinkActive]="['active']">Annual
-            Analysis</a></li>
-    <li class="nav-item"><a class="nav-link" routerLink="monthly-analysis" [routerLinkActive]="['active']">Monthly
-            Analysis</a></li>
-</ul>
+<div class="banner p-0">
+    <ul class="nav nav-tabs">
+        <li class="nav-item"><a class="nav-link" routerLink="annual-analysis" [routerLinkActive]="['active']"><i
+                    class="fa fa-magnifying-glass-chart"></i>Annual
+                Analysis</a></li>
+        <li class="nav-item"><a class="nav-link" routerLink="monthly-analysis" [routerLinkActive]="['active']"><i
+                    class="fa fa-magnifying-glass-chart"></i>Monthly
+                Analysis</a></li>
+    </ul>
+</div>
 <div class="content-padding">
     <h4>Facility Analysis</h4>
     <router-outlet></router-outlet>

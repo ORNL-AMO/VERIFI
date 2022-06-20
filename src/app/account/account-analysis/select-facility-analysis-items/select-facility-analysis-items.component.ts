@@ -27,6 +27,7 @@ export class SelectFacilityAnalysisItemsComponent implements OnInit {
 
   ngOnInit(): void {
     this.selectedAnalysisItem = this.accountAnalysisDbService.selectedAnalysisItem.getValue();
+    console.log(this.selectedAnalysisItem);
     if (!this.selectedAnalysisItem) {
       this.router.navigateByUrl('/account/analysis/dashboard')
     }
@@ -65,5 +66,14 @@ export class SelectFacilityAnalysisItemsComponent implements OnInit {
     this.facilityAnalysisItems = accountAnalysisItems.filter(item => { 
       return item.facilityId == this.selectedFacility.guid && item.reportYear == this.selectedAnalysisItem.reportYear && item.energyIsSource == this.selectedAnalysisItem.energyIsSource
     });
+  }
+
+  getClass(facility: IdbFacility): 'fa fa-square-minus' | 'fa fa-square-check' {
+    let facilityItem: {facilityId: string, analysisItemId: string} = this.selectedAnalysisItem.facilityAnalysisItems.find(item => {return item.facilityId == facility.guid});
+    if(facilityItem && facilityItem.analysisItemId){
+      return 'fa fa-square-check';
+    }else{
+      return 'fa fa-square-minus';
+    }
   }
 }
