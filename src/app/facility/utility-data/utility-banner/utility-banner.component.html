@@ -1,24 +1,34 @@
 <div class="utility banner sticky-top d-flex justify-content-between" [ngClass]="{'modal-open': modalOpen}">
     <ul class="nav nav-tabs">
         <li class="nav-item">
-            <a class="nav-link" routerLink="energy-consumption" [routerLinkActive]="['active']">Meter
+            <a class="nav-link" routerLink="energy-consumption" [routerLinkActive]="['active']">
+                <i class="fa fa-file-pen"></i>
+                Meter
                 Management</a>
         </li>
         <li class="nav-item" [class.disabled]="utilityMeterData.length === 0">
-            <a class="nav-link" routerLink="monthly-meter-data" [routerLinkActive]="['active']">Monthly
-                Data</a>
+            <a class="nav-link" routerLink="monthly-meter-data" [routerLinkActive]="['active']">
+                <i class="fa fa-calendar-days"></i>
+                Monthly Data</a>
         </li>
         <li class="nav-item" [class.disabled]="utilityMeterData.length === 0">
-            <a class="nav-link" routerLink="meter-groups" [routerLinkActive]="['active']">Analysis Groups</a>
+            <a class="nav-link" routerLink="meter-groups" [routerLinkActive]="['active']">
+                <i class="fa fa-layer-group"></i>
+                Analysis Groups</a>
         </li>
         <li class="nav-item" [class.disabled]="utilityMeterData.length === 0">
-            <a class="nav-link" routerLink="predictors" [routerLinkActive]="['active']">Predictors</a>
+            <a class="nav-link" routerLink="predictors" [routerLinkActive]="['active']">
+                <i class="fa fa-boxes-stacked"></i>
+                Predictors</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" routerLink="upload-data" [routerLinkActive]="['active']">Import Data</a>
+            <a class="nav-link" routerLink="upload-data" [routerLinkActive]="['active']">
+                <i class="fa fa-file-arrow-up"></i>
+                Import Data</a>
         </li>
     </ul>
     <div>
-        <button class="btn btn-dark m-0" (click)="exportData()" title="Export Data"><span class="fa fa-download"></span></button>
+        <button class="btn btn-dark m-0" (click)="exportData()" title="Export Data"><span
+                class="fa fa-download"></span></button>
     </div>
 </div>
