@@ -14,6 +14,7 @@ import { NgbDatepickerModule, NgbPaginationModule } from '@ng-bootstrap/ng-boots
 import { EditMeterFormModule } from './energy-source/edit-meter-form/edit-meter-form.module';
 import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.module';
 import { RouterModule } from '@angular/router';
+import { UtilityMetersTableComponent } from './energy-source/utility-meters-table/utility-meters-table.component';
 
 
 
@@ -27,7 +28,8 @@ import { RouterModule } from '@angular/router';
     GeneralUtilityDataTableComponent,
     UtilityMeterDataFilterComponent,
     UtilityMeterDataComponent,
-    EnergyConsumptionComponent
+    EnergyConsumptionComponent,
+    UtilityMetersTableComponent
   ],
   imports: [
     CommonModule,
