@@ -152,5 +152,6 @@ export interface JStatRegressionModel {
   modelId: string,
   isValid: boolean,
   modelPValue: number,
-  modelNotes: Array<string>
+  modelNotes: Array<string>,
+  errorModeling?: boolean
 }
