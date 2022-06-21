@@ -197,6 +197,7 @@ export class VisualizationService {
         }
       });
     }
+    resultData = _.orderBy(resultData, (data) => { return new Date(data.time) });
     return resultData;
   }
 
