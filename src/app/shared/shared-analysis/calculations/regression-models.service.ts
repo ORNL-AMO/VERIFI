@@ -101,7 +101,6 @@ export class RegressionModelsService {
 
         baselineYear++;
       }
-      console.log(models);
       return models;
     } else {
       return;
