@@ -47,20 +47,56 @@ export class RegressionModelsService {
         let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = this.getMonthlyStartAndEndDate(facility, baselineYear);
         allPredictorVariableCombos.forEach(variableIdCombo => {
           let regressionData: { endog: Array<number>, exog: Array<Array<number>> } = this.getRegressionData(monthlyStartAndEndDate.baselineDate, monthlyStartAndEndDate.endDate, allMeterData, facilityPredictorData, variableIdCombo);
-
-          let model: JStatRegressionModel = jStat.models.ols(regressionData.endog, regressionData.exog);
-          model['modelYear'] = baselineYear;
-          let modelPredictorVariables: Array<PredictorData> = new Array();
-          variableIdCombo.forEach(variableId => {
-            let variable: PredictorData = predictorVariables.find(variable => { return variable.id == variableId });
-            modelPredictorVariables.push(variable);
-          });
-          model['predictorVariables'] = modelPredictorVariables;
-          // model['isValid'] = this.checkModelValid(model);
-          model = this.setModelVaildAndNotes(model);
-          model['modelId'] = Math.random().toString(36).substr(2, 9);
-          model['modelPValue'] = model.f.pvalue;
-          models.push(model);
+          try {
+            let model: JStatRegressionModel = jStat.models.ols(regressionData.endog, regressionData.exog);
+            model['modelYear'] = baselineYear;
+            let modelPredictorVariables: Array<PredictorData> = new Array();
+            variableIdCombo.forEach(variableId => {
+              let variable: PredictorData = predictorVariables.find(variable => { return variable.id == variableId });
+              modelPredictorVariables.push(variable);
+            });
+            model['predictorVariables'] = modelPredictorVariables;
+            // model['isValid'] = this.checkModelValid(model);
+            model = this.setModelVaildAndNotes(model);
+            model['modelId'] = Math.random().toString(36).substr(2, 9);
+            model['modelPValue'] = model.f.pvalue;
+            model['errorModeling'] = false;
+            models.push(model);
+          } catch (err) {
+            console.log(err);
+            let modelPredictorVariables: Array<PredictorData> = new Array();
+            variableIdCombo.forEach(variableId => {
+              let variable: PredictorData = predictorVariables.find(variable => { return variable.id == variableId });
+              modelPredictorVariables.push(variable);
+            });
+            models.push({
+              coef: [],
+              R2: undefined,
+              SSE: undefined,
+              SSR: undefined,
+              SST: undefined,
+              adjust_R2: undefined,
+              df_model: undefined,
+              df_resid: undefined,
+              ybar: undefined,
+              t: {
+                se: [],
+                sigmaHat: undefined,
+                p: []
+              },
+              f: {
+                pvalue: undefined,
+                F_statistic: undefined
+              },
+              modelYear: baselineYear,
+              predictorVariables: modelPredictorVariables,
+              modelId: undefined,
+              isValid: false,
+              modelPValue: undefined,
+              modelNotes: ['Model could not be calculated.'],
+              errorModeling: true
+            })
+          }
         })
 
         baselineYear++;

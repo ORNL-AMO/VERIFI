@@ -44,31 +44,31 @@
         <tbody>
             <tr
                 *ngFor="let model of selectedGroup.models | orderBy: orderDataField: orderByDirection | modelFilter:showInvalid; let modelIndex = index;">
-                <td>
+                <td *ngIf="!model.errorModeling">
                     <input type="radio" class="rowToggle" [(ngModel)]="selectedGroup.selectedModelId"
                         [value]="model.modelId" name="{{modelIndex+'_selectedModelId'}}"
                         id="{{modelIndex+'_selectedModelId'}}" (change)="selectModel()">
                 </td>
-                <td>
+                <td *ngIf="!model.errorModeling">
                     {{model.modelYear}}
                 </td>
-                <td>
+                <td *ngIf="!model.errorModeling">
                     <span *ngFor="let pVal of model.t.p; let index = index">
                         <span *ngIf="index != 0">{{model.predictorVariables[index-1].name}}: {{pVal | customNumber}}
                             <br>
                         </span>
                     </span>
                 </td>
-                <td>
+                <td *ngIf="!model.errorModeling">
                     {{model.R2| customNumber}}
                 </td>
-                <td>
+                <td *ngIf="!model.errorModeling">
                     {{model.adjust_R2| customNumber}}
                 </td>
-                <td>
+                <td *ngIf="!model.errorModeling">
                     {{model.modelPValue| customNumber}}
                 </td>
-                <td>
+                <td *ngIf="!model.errorModeling">
                     <span *ngFor="let coefVal of model.coef; let index = index;">
                         <span *ngIf="index == 0">{{coefVal| customNumber}}</span>
                         <span *ngIf="index != 0">({{coefVal|
@@ -76,7 +76,7 @@
                             *ngIf="index != model.coef.length-1"> +</span>
                     </span>
                 </td>
-                <td>
+                <td *ngIf="!model.errorModeling">
                     <span *ngFor="let notes of model.modelNotes">
                         {{notes}}<br>
                     </span>
@@ -84,9 +84,13 @@
                         &mdash;
                     </span>
                 </td>
-                <td *ngIf="showInvalid">
+                <td *ngIf="showInvalid && !model.errorModeling">
                     <span *ngIf="model.isValid">Valid</span>
                     <span *ngIf="!model.isValid">Invalid</span>
+                </td>
+                <!--error modeling-->
+                <td class="alert-danger" *ngIf="model.errorModeling" colspan="9">
+                    There was an error when generating model for {{model.modelYear}}: <span class="pr-1" *ngFor="let variable of model.predictorVariables">{{variable.name}}</span>.
                 </td>
             </tr>
         </tbody>
