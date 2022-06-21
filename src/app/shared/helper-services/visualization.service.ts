@@ -431,16 +431,20 @@ export class VisualizationService {
     let regressionTableData = new Array<RegressionTableDataItem>();
     for (let x = 0; x < plotData.length; x++) {
       for (let y = (x + 1); y < plotData.length; y++) {
-        let endog: Array<number> = plotData[y].values.map(val => {return val});
-        let exog: Array<Array<number>> = plotData[x].values.map(val => {return [1, val]});
-        let model: JStatRegressionModel = jStat.models.ols(endog, exog);
-        regressionTableData.push({
-          optionOne: plotData[x].label,
-          optionTwo: plotData[y].label,
-          r2Value: model.R2,
-          pValue: model.f.pvalue,
-          jstatModel: model
-        });
+        let endog: Array<number> = plotData[y].values.map(val => { return val });
+        let exog: Array<Array<number>> = plotData[x].values.map(val => { return [1, val] });
+        try {
+          let model: JStatRegressionModel = jStat.models.ols(endog, exog);
+          regressionTableData.push({
+            optionOne: plotData[x].label,
+            optionTwo: plotData[y].label,
+            r2Value: model.R2,
+            pValue: model.f.pvalue,
+            jstatModel: model
+          });
+        } catch (err) {
+
+        }
       }
     }
     return regressionTableData;
