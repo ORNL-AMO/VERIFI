@@ -1,8 +1,7 @@
 <div class="wrapper main-content p-0">
     <div class="banner p-0">
         <ul class="nav nav-tabs">
-            <li class="nav-item"><a class="nav-link" routerLink="energy-source" [routerLinkActive]="['active']"
-                    [routerLinkActiveOptions]="{ exact: true }">
+            <li class="nav-item"><a class="nav-link" routerLink="energy-source" [routerLinkActive]="['active']">
                     <i class="fa fa-gauge-high"></i>
                     Meters</a></li>
             <li class="nav-item" *ngFor="let meter of utilityMeters"><a class="nav-link"
