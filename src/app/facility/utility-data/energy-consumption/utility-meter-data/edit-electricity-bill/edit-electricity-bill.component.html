@@ -1,5 +1,3 @@
-<!-- <br>
-<div class="windowContentScroll"> -->
 <p class="bold">General Information</p>
 <form class="meterForm" [formGroup]="meterDataForm">
 
@@ -65,9 +63,7 @@
     </div>
   </div>
 
-  <br>
   <hr>
-  <br>
 
   <div *ngIf="supplyDemandFilters.showSection">
     <p class="bold">Supply / Demand Charge</p>
@@ -137,11 +133,7 @@
         </div>
       </div>
     </div>
-
-    <br>
     <hr>
-    <br>
-
   </div>
 
   <div *ngIf="taxAndOtherFilters.showSection">
@@ -234,18 +226,7 @@
         </div>
       </div>
     </div>
-    <br>
     <hr>
-    <br>
 
   </div>
 </form>
-<!-- </div> -->
-
-<!-- <div class="saveCancel item-right">
-  <button class="btn btn-secondary" (click)="cancel()">Cancel</button>
-  <button *ngIf="addOrEdit == 'edit'" class="btn btn-primary" (click)="saveAndQuit()" [disabled]="meterDataForm.invalid || invalidDate">Save</button>
-  <button *ngIf="addOrEdit == 'add'" class="btn btn-primary mr-2" (click)="saveAndQuit()" [disabled]="meterDataForm.invalid || invalidDate">Save + Quit</button>
-  <button *ngIf="addOrEdit == 'add'" class="btn btn-primary" (click)="saveAndAddAnother()" [disabled]="meterDataForm.invalid || invalidDate">Save +
-    Add Another</button>
-</div> -->

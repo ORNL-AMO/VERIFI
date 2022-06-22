@@ -6,7 +6,9 @@
                 {{meter.name}}</a></li>
     </ul>
     <div class="content-padding">
-        <h4>{{selectedMeter.name}} Calanderized Data</h4>
+        <h4>{{selectedMeter.name}} Calanderized Data
+            <span class="badge float-right" [ngStyle]="{'background-color': getColor()}">{{selectedMeter.source}}</span>
+        </h4>
 
         <div class="p-2 text-center" *ngIf="!selectedMeter.meterReadingDataApplication">
             <p>
