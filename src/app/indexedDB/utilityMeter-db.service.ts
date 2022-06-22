@@ -87,7 +87,7 @@ export class UtilityMeterdbService {
             accountNumber: undefined,
             phase: "Gas",
             heatCapacity: undefined,
-            siteToSource: undefined,
+            siteToSource: 3,
             name: "New Meter",
             location: undefined,
             supplier: undefined,
@@ -97,7 +97,8 @@ export class UtilityMeterdbService {
             startingUnit: startingUnit,
             energyUnit: energyUnit,
             fuel: undefined,
-            emissionsOutputRate: emissionsOutputRate
+            emissionsOutputRate: emissionsOutputRate,
+            scope: 3
         }
     }
 

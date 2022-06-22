@@ -31,8 +31,8 @@
                         required</span>
                 </div>
                 <div class="col-6" *ngIf="displaySiteToSource">
-                    <app-label-with-tooltip [label]="'Site to source'" [field]="'siteToSource'" [labelId]="'siteToSource'"
-                        [isRequired]="true"></app-label-with-tooltip>
+                    <app-label-with-tooltip [label]="'Site to source'" [field]="'siteToSource'"
+                        [labelId]="'siteToSource'" [isRequired]="true"></app-label-with-tooltip>
                     <!-- <label for="siteToSource">Site to source <span class="required">*</span> </label> -->
                     <div class="mb-3">
                         <input id="siteToSource" class="form-control" type="number" formControlName="siteToSource"
@@ -73,8 +73,8 @@
                 </div>
                 <div class="col-6">
                     <!-- <label for="startingUnit">Collection Unit <span class="required">*</span> </label> -->
-                    <app-label-with-tooltip [label]="'Collection Unit'" [field]="'startingUnit'" [labelId]="'startingUnit'"
-                        [isRequired]="true">
+                    <app-label-with-tooltip [label]="'Collection Unit'" [field]="'startingUnit'"
+                        [labelId]="'startingUnit'" [isRequired]="true">
                     </app-label-with-tooltip>
                     <div class="mb-3">
                         <select class="form-control" id="startingUnit" type="text" formControlName="startingUnit"
@@ -143,6 +143,16 @@
                         Electrical emissions for this facility have changed since this meter was created. <a
                             (click)="setEmissionsOutputRate()">Click here to
                             update emissions output rate to match facility.</a>
+                    </div>
+                </div>
+                <div class="col-6" *ngIf="displayScope">
+                    <label for="scope">Scope</label>
+                    <div class="mb-3">
+                        <select class="form-control" id="scope" type="text" formControlName="scope">
+                            <option *ngFor="let scopeOption of scopeOptions" [ngValue]="scopeOption.value">
+                                {{scopeOption.scope}}: {{scopeOption.optionLabel}}
+                            </option>
+                        </select>
                     </div>
                 </div>
             </div>

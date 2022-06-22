@@ -31,7 +31,8 @@ export class EditMeterFormService {
       fuel: [meter.fuel, fuelValidators],
       startingUnit: [meter.startingUnit, Validators.required],
       emissionsOutputRate: [meter.emissionsOutputRate, emissionsOutputRateValidators],
-      energyUnit: [meter.energyUnit, Validators.required]
+      energyUnit: [meter.energyUnit, Validators.required],
+      scope: [meter.scope]
     });
     if(form.controls.source.value == 'Electricity'){
       form.controls.startingUnit.disable();
@@ -56,6 +57,7 @@ export class EditMeterFormService {
     meter.startingUnit = form.controls.startingUnit.value;
     meter.emissionsOutputRate = form.controls.emissionsOutputRate.value;
     meter.energyUnit = form.controls.energyUnit.value;
+    meter.scope = form.controls.scope.value;
     return meter;
   }
 

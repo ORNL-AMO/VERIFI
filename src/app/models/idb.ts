@@ -137,7 +137,9 @@ export interface IdbUtilityMeter {
     emissionsOutputRate?: number,
     unitsDifferent?: boolean,
     ignoreDuplicateMonths?: boolean,
-    ignoreMissingMonths?: boolean
+    ignoreMissingMonths?: boolean,
+    scope?: number
+
 }
 
 export interface IdbUtilityMeterData {
@@ -288,3 +290,4 @@ export interface IdbAccountAnalysisItem {
 export type AnalysisType = 'absoluteEnergyConsumption' | 'energyIntensity' | 'modifiedEnergyIntensity' | 'regression';
 export type MeterSource = "Electricity" | "Natural Gas" | "Other Fuels" | "Other Energy" | "Water" | "Waste Water" | "Other Utility";
 export type MeterPhase = "Solid" | "Liquid" | "Gas";
+ 
