@@ -1,15 +1,7 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { LoadingService } from 'src/app/core-components/loading/loading.service';
-import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData, MeterSource } from 'src/app/models/idb';
-import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
-import { UtilityMeterDataService } from '../utility-meter-data.service';
+import { IdbUtilityMeter, IdbUtilityMeterData, MeterSource } from 'src/app/models/idb';
 
 @Component({
   selector: 'app-edit-utility-bill',
@@ -21,8 +13,6 @@ export class EditUtilityBillComponent implements OnInit {
   editMeterData: IdbUtilityMeterData;
   @Input()
   addOrEdit: string;
-  // @Output('emitClose')
-  // emitClose: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Input()
   meterDataForm: FormGroup;
   @Input()
@@ -36,69 +26,18 @@ export class EditUtilityBillComponent implements OnInit {
 
   energyUnit: string;
   source: MeterSource;
-  // facilityMeter: IdbUtilityMeter;
   volumeUnit: string;
-  // invalidDate: boolean;
-  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private utilityMeterDataService: UtilityMeterDataService,
-    private utilityMeterDbService: UtilityMeterdbService, private energyUnitsHelperService: EnergyUnitsHelperService,
-    private dbChangesService: DbChangesService, private facilityDbService: FacilitydbService, private accountDbService: AccountdbService,
-    private toastNotificationService: ToastNotificationsService, private loadingService: LoadingService) { }
+  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService) { }
 
   ngOnInit(): void {
   }
 
   ngOnChanges(){
-    // this.facilityMeter = this.utilityMeterDbService.getFacilityMeterById(this.editMeterData.meterId);
-    // this.displayVolumeInput = (this.energyUnitsHelperService.isEnergyUnit(this.facilityMeter.startingUnit) == false);
     this.source = this.editMeter.source;
     this.energyUnit = this.editMeter.energyUnit;
     this.volumeUnit = this.editMeter.startingUnit;
-    // this.displayEnergyUse = this.energyUnitsHelperService.isEnergyMeter(this.source);
-    // this.meterDataForm = this.utilityMeterDataService.getGeneralMeterDataForm(this.editMeterData, this.displayVolumeInput, this.displayEnergyUse);
-    // if (this.displayVolumeInput) {
-    //   this.meterDataForm.controls.totalEnergyUse.disable();
-    // }
     this.checkDate();
   }
-
-  // cancel() {
-  //   this.emitClose.emit(true);
-  // }
-
-  // async saveAndQuit() {
-  //   this.loadingService.setLoadingMessage('Saving Reading...');
-  //   this.loadingService.setLoadingStatus(true);
-  //   let meterDataToSave: IdbUtilityMeterData = this.utilityMeterDataService.updateGeneralMeterDataFromForm(this.editMeterData, this.meterDataForm);
-  //   if (this.addOrEdit == 'edit') {
-  //     await this.utilityMeterDataDbService.updateWithObservable(meterDataToSave).toPromise();
-  //   } else {
-  //     delete meterDataToSave.id;
-  //     meterDataToSave = await this.utilityMeterDataDbService.addWithObservable(meterDataToSave).toPromise();
-  //   }
-  //   let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-  //   let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-  //   await this.dbChangesService.setMeterData(selectedAccount, selectedFacility);
-  //   this.cancel();
-  //   this.loadingService.setLoadingStatus(false);
-  //   this.toastNotificationService.showToast('Reading Saved!', undefined, undefined, false, "success");
-  // }
-
-  // async saveAndAddAnother() {
-  //   this.loadingService.setLoadingMessage('Saving Reading...');
-  //   this.loadingService.setLoadingStatus(true);
-  //   let meterDataToSave: IdbUtilityMeterData = this.utilityMeterDataService.updateGeneralMeterDataFromForm(this.editMeterData, this.meterDataForm);
-  //   delete meterDataToSave.id;
-  //   meterDataToSave = await this.utilityMeterDataDbService.addWithObservable(meterDataToSave).toPromise();
-  //   let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-  //   let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-  //   await this.dbChangesService.setMeterData(selectedAccount, selectedFacility);
-  //   this.editMeterData = this.utilityMeterDataDbService.getNewIdbUtilityMeterData(this.facilityMeter);
-  //   this.editMeterData.readDate = new Date(meterDataToSave.readDate);
-  //   this.editMeterData.readDate.setMonth(this.editMeterData.readDate.getUTCMonth() + 1);
-  //   this.meterDataForm = this.utilityMeterDataService.getGeneralMeterDataForm(this.editMeterData, this.displayVolumeInput, this.displayEnergyUse);
-  //   this.loadingService.setLoadingStatus(false);
-  //   this.toastNotificationService.showToast('Reading Saved!', undefined, undefined, false, "success");
-  // }
 
   calculateTotalEnergyUse() {
     let totalEnergyUse: number = this.meterDataForm.controls.totalVolume.value * this.editMeter.heatCapacity;

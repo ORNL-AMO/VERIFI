@@ -26,7 +26,7 @@ export class UtilityMeterDataTableComponent implements OnInit {
   meterDataToDelete: IdbUtilityMeterData;
   showDeleteModal: boolean = false;
   showBulkDelete: boolean = false;
-
+  showIndividualDelete: boolean = false;
   constructor(
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
@@ -58,6 +58,7 @@ export class UtilityMeterDataTableComponent implements OnInit {
 
   setData() {
     this.meterData = this.utilityMeterDataDbService.getMeterDataForFacility(this.selectedMeter, false, true);
+    this.setHasCheckedItems();
   }
 
   uploadData() {
@@ -66,6 +67,7 @@ export class UtilityMeterDataTableComponent implements OnInit {
   }
 
   async bulkDelete() {
+    this.cancelBulkDelete();
     this.loadingService.setLoadingMessage("Deleting Meter Data...");
     this.loadingService.setLoadingStatus(true);
     let meterDataItemsToDelete: Array<IdbUtilityMeterData> = new Array();
@@ -82,22 +84,28 @@ export class UtilityMeterDataTableComponent implements OnInit {
     await this.dbChangesService.setMeterData(selectedAccount, selectedFacility);
     this.loadingService.setLoadingStatus(false);
     this.toastNoticationService.showToast("Meter Data Deleted!", undefined, undefined, false, "success");
-    this.cancelBulkDelete();
   }
 
   setDeleteMeterData(meterData: IdbUtilityMeterData) {
     this.meterDataToDelete = meterData;
+    this.showIndividualDelete = true;
   }
 
   cancelDelete() {
+    this.showIndividualDelete = false;
     this.meterDataToDelete = undefined;
   }
 
   async deleteMeterData() {
+    this.loadingService.setLoadingMessage("Deleting Meter Data...");
+    this.loadingService.setLoadingStatus(true);
+    this.showIndividualDelete = false;
     await this.utilityMeterDataDbService.deleteWithObservable(this.meterDataToDelete.id).toPromise();
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setMeterData(selectedAccount, selectedFacility);
+    this.loadingService.setLoadingStatus(false);
+    this.toastNoticationService.showToast("Meter Data Deleted!", undefined, undefined, false, "success");
     this.cancelDelete();
   }
 

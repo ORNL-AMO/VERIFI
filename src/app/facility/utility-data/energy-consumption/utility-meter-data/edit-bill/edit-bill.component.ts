@@ -56,8 +56,8 @@ export class EditBillComponent implements OnInit {
   }
 
 
-  cancel() {
-    if(!this.meterDataForm.dirty){
+  cancel(onSave?: boolean) {
+    if(!this.meterDataForm.dirty || onSave){
       this.confirmCancel();
     }else{
       this.showConfirmCancel = true;
@@ -87,7 +87,7 @@ export class EditBillComponent implements OnInit {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setMeterData(selectedAccount, selectedFacility);
-    this.cancel();
+    this.cancel(true);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Reading Saved!', undefined, undefined, false, "success");
   }

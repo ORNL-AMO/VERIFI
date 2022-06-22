@@ -89,7 +89,7 @@
 
 
 <!--individual delete-->
-<div class="popup" [class.open]="meterDataToDelete">
+<div class="popup" [class.open]="showIndividualDelete">
     <div class="popup-header" *ngIf="meterDataToDelete">Delete Meter Data
         <button class="item-right" (click)="cancelDelete()">x</button>
     </div>
