@@ -26,3 +26,37 @@ export interface ScopeOption {
     value: number, 
     scope: 'Scope 1' | 'Scope 2'
 }
+
+
+export const AgreementTypes: Array<AgreementType> = [
+    {
+        typeLabel: 'Grid',
+        value: 1
+    },
+    {
+        typeLabel: 'Self-generated',
+        value: 2
+    },
+    {
+        typeLabel: 'Physical Power Purchase Agreement (PPPA)',
+        value: 3
+    },
+    {
+        typeLabel: 'Virtual Power Purchase Agreement (VPPA)',
+        value: 4
+    },
+    {
+        typeLabel: 'Utility Green Product',
+        value: 5
+    },
+    {
+        typeLabel: 'Renewable Energy Credits (RECs)',
+        value: 6
+    }
+]
+
+
+export interface AgreementType {
+    typeLabel: string,
+    value: number
+}

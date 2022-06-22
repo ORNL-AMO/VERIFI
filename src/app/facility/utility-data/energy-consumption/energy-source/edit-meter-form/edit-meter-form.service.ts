@@ -32,7 +32,11 @@ export class EditMeterFormService {
       startingUnit: [meter.startingUnit, Validators.required],
       emissionsOutputRate: [meter.emissionsOutputRate, emissionsOutputRateValidators],
       energyUnit: [meter.energyUnit, Validators.required],
-      scope: [meter.scope]
+      scope: [meter.scope],
+      agreementType: [meter.agreementType],
+      includeInEnergy: [meter.includeInEnergy],
+      retainRECs: [meter.retainRECs],
+      directConnection: [meter.directConnection]
     });
     if(form.controls.source.value == 'Electricity'){
       form.controls.startingUnit.disable();
@@ -58,6 +62,10 @@ export class EditMeterFormService {
     meter.emissionsOutputRate = form.controls.emissionsOutputRate.value;
     meter.energyUnit = form.controls.energyUnit.value;
     meter.scope = form.controls.scope.value;
+    meter.agreementType = form.controls.agreementType.value;
+    meter.includeInEnergy = form.controls.includeInEnergy.value;
+    meter.retainRECs = form.controls.retainRECs.value;
+    meter.directConnection = form.controls.directConnection.value;
     return meter;
   }
 
