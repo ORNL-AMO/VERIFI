@@ -21,18 +21,24 @@ export class EditUtilityBillComponent implements OnInit {
   editMeterData: IdbUtilityMeterData;
   @Input()
   addOrEdit: string;
-  @Output('emitClose')
-  emitClose: EventEmitter<boolean> = new EventEmitter<boolean>();
-
+  // @Output('emitClose')
+  // emitClose: EventEmitter<boolean> = new EventEmitter<boolean>();
+  @Input()
   meterDataForm: FormGroup;
+  @Input()
+  editMeter: IdbUtilityMeter;
+  @Input()
+  displayVolumeInput: boolean;
+  @Input()
+  displayEnergyUse: boolean;
+  @Input()
+  invalidDate: boolean;
 
   energyUnit: string;
   source: MeterSource;
-  facilityMeter: IdbUtilityMeter;
-  displayVolumeInput: boolean;
-  displayEnergyUse: boolean;
+  // facilityMeter: IdbUtilityMeter;
   volumeUnit: string;
-  invalidDate: boolean;
+  // invalidDate: boolean;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private utilityMeterDataService: UtilityMeterDataService,
     private utilityMeterDbService: UtilityMeterdbService, private energyUnitsHelperService: EnergyUnitsHelperService,
     private dbChangesService: DbChangesService, private facilityDbService: FacilitydbService, private accountDbService: AccountdbService,
@@ -42,67 +48,67 @@ export class EditUtilityBillComponent implements OnInit {
   }
 
   ngOnChanges(){
-    this.facilityMeter = this.utilityMeterDbService.getFacilityMeterById(this.editMeterData.meterId);
-    this.displayVolumeInput = (this.energyUnitsHelperService.isEnergyUnit(this.facilityMeter.startingUnit) == false);
-    this.source = this.facilityMeter.source;
-    this.energyUnit = this.facilityMeter.energyUnit;
-    this.volumeUnit = this.facilityMeter.startingUnit;
-    this.displayEnergyUse = this.energyUnitsHelperService.isEnergyMeter(this.source);
-    this.meterDataForm = this.utilityMeterDataService.getGeneralMeterDataForm(this.editMeterData, this.displayVolumeInput, this.displayEnergyUse);
-    if (this.displayVolumeInput) {
-      this.meterDataForm.controls.totalEnergyUse.disable();
-    }
+    // this.facilityMeter = this.utilityMeterDbService.getFacilityMeterById(this.editMeterData.meterId);
+    // this.displayVolumeInput = (this.energyUnitsHelperService.isEnergyUnit(this.facilityMeter.startingUnit) == false);
+    this.source = this.editMeter.source;
+    this.energyUnit = this.editMeter.energyUnit;
+    this.volumeUnit = this.editMeter.startingUnit;
+    // this.displayEnergyUse = this.energyUnitsHelperService.isEnergyMeter(this.source);
+    // this.meterDataForm = this.utilityMeterDataService.getGeneralMeterDataForm(this.editMeterData, this.displayVolumeInput, this.displayEnergyUse);
+    // if (this.displayVolumeInput) {
+    //   this.meterDataForm.controls.totalEnergyUse.disable();
+    // }
     this.checkDate();
   }
 
-  cancel() {
-    this.emitClose.emit(true);
-  }
+  // cancel() {
+  //   this.emitClose.emit(true);
+  // }
 
-  async saveAndQuit() {
-    this.loadingService.setLoadingMessage('Saving Reading...');
-    this.loadingService.setLoadingStatus(true);
-    let meterDataToSave: IdbUtilityMeterData = this.utilityMeterDataService.updateGeneralMeterDataFromForm(this.editMeterData, this.meterDataForm);
-    if (this.addOrEdit == 'edit') {
-      await this.utilityMeterDataDbService.updateWithObservable(meterDataToSave).toPromise();
-    } else {
-      delete meterDataToSave.id;
-      meterDataToSave = await this.utilityMeterDataDbService.addWithObservable(meterDataToSave).toPromise();
-    }
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.setMeterData(selectedAccount, selectedFacility);
-    this.cancel();
-    this.loadingService.setLoadingStatus(false);
-    this.toastNotificationService.showToast('Reading Saved!', undefined, undefined, false, "success");
-  }
+  // async saveAndQuit() {
+  //   this.loadingService.setLoadingMessage('Saving Reading...');
+  //   this.loadingService.setLoadingStatus(true);
+  //   let meterDataToSave: IdbUtilityMeterData = this.utilityMeterDataService.updateGeneralMeterDataFromForm(this.editMeterData, this.meterDataForm);
+  //   if (this.addOrEdit == 'edit') {
+  //     await this.utilityMeterDataDbService.updateWithObservable(meterDataToSave).toPromise();
+  //   } else {
+  //     delete meterDataToSave.id;
+  //     meterDataToSave = await this.utilityMeterDataDbService.addWithObservable(meterDataToSave).toPromise();
+  //   }
+  //   let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+  //   let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+  //   await this.dbChangesService.setMeterData(selectedAccount, selectedFacility);
+  //   this.cancel();
+  //   this.loadingService.setLoadingStatus(false);
+  //   this.toastNotificationService.showToast('Reading Saved!', undefined, undefined, false, "success");
+  // }
 
-  async saveAndAddAnother() {
-    this.loadingService.setLoadingMessage('Saving Reading...');
-    this.loadingService.setLoadingStatus(true);
-    let meterDataToSave: IdbUtilityMeterData = this.utilityMeterDataService.updateGeneralMeterDataFromForm(this.editMeterData, this.meterDataForm);
-    delete meterDataToSave.id;
-    meterDataToSave = await this.utilityMeterDataDbService.addWithObservable(meterDataToSave).toPromise();
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.setMeterData(selectedAccount, selectedFacility);
-    this.editMeterData = this.utilityMeterDataDbService.getNewIdbUtilityMeterData(this.facilityMeter);
-    this.editMeterData.readDate = new Date(meterDataToSave.readDate);
-    this.editMeterData.readDate.setMonth(this.editMeterData.readDate.getUTCMonth() + 1);
-    this.meterDataForm = this.utilityMeterDataService.getGeneralMeterDataForm(this.editMeterData, this.displayVolumeInput, this.displayEnergyUse);
-    this.loadingService.setLoadingStatus(false);
-    this.toastNotificationService.showToast('Reading Saved!', undefined, undefined, false, "success");
-  }
+  // async saveAndAddAnother() {
+  //   this.loadingService.setLoadingMessage('Saving Reading...');
+  //   this.loadingService.setLoadingStatus(true);
+  //   let meterDataToSave: IdbUtilityMeterData = this.utilityMeterDataService.updateGeneralMeterDataFromForm(this.editMeterData, this.meterDataForm);
+  //   delete meterDataToSave.id;
+  //   meterDataToSave = await this.utilityMeterDataDbService.addWithObservable(meterDataToSave).toPromise();
+  //   let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+  //   let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+  //   await this.dbChangesService.setMeterData(selectedAccount, selectedFacility);
+  //   this.editMeterData = this.utilityMeterDataDbService.getNewIdbUtilityMeterData(this.facilityMeter);
+  //   this.editMeterData.readDate = new Date(meterDataToSave.readDate);
+  //   this.editMeterData.readDate.setMonth(this.editMeterData.readDate.getUTCMonth() + 1);
+  //   this.meterDataForm = this.utilityMeterDataService.getGeneralMeterDataForm(this.editMeterData, this.displayVolumeInput, this.displayEnergyUse);
+  //   this.loadingService.setLoadingStatus(false);
+  //   this.toastNotificationService.showToast('Reading Saved!', undefined, undefined, false, "success");
+  // }
 
   calculateTotalEnergyUse() {
-    let totalEnergyUse: number = this.meterDataForm.controls.totalVolume.value * this.facilityMeter.heatCapacity;
+    let totalEnergyUse: number = this.meterDataForm.controls.totalVolume.value * this.editMeter.heatCapacity;
     this.meterDataForm.controls.totalEnergyUse.patchValue(totalEnergyUse);
   }
   
   checkDate() {
     if (this.addOrEdit == 'add') {
       //new meter entry should have any year/month combo of existing meter reading
-      this.invalidDate = this.utilityMeterDataDbService.checkMeterReadingExistForDate(this.meterDataForm.controls.readDate.value, this.facilityMeter) != undefined;
+      this.invalidDate = this.utilityMeterDataDbService.checkMeterReadingExistForDate(this.meterDataForm.controls.readDate.value, this.editMeter) != undefined;
     } else {
       //edit meter needs to allow year/month combo of the meter being edited
       let currentMeterItemDate: Date = new Date(this.editMeterData.readDate);
@@ -110,7 +116,7 @@ export class EditUtilityBillComponent implements OnInit {
       if (currentMeterItemDate.getUTCFullYear() == changeDate.getUTCFullYear() && currentMeterItemDate.getUTCMonth() == changeDate.getUTCMonth() && currentMeterItemDate.getUTCDate() == changeDate.getUTCDate()) {
         this.invalidDate = false;
       } else {
-        this.invalidDate = this.utilityMeterDataDbService.checkMeterReadingExistForDate(this.meterDataForm.controls.readDate.value, this.facilityMeter) != undefined;
+        this.invalidDate = this.utilityMeterDataDbService.checkMeterReadingExistForDate(this.meterDataForm.controls.readDate.value, this.editMeter) != undefined;
       }
     }
   }

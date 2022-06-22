@@ -53,6 +53,8 @@ import { BetterPlantsReportMenuComponent } from './account/overview-report/bette
 import { BetterPlantsReportComponent } from './account/overview-report/better-plants-report/better-plants-report.component';
 import { EditMeterComponent } from './facility/utility-data/energy-consumption/energy-source/edit-meter/edit-meter.component';
 import { UtilityMetersTableComponent } from './facility/utility-data/energy-consumption/energy-source/utility-meters-table/utility-meters-table.component';
+import { UtilityMeterDataTableComponent } from './facility/utility-data/energy-consumption/utility-meter-data/utility-meter-data-table/utility-meter-data-table.component';
+import { EditBillComponent } from './facility/utility-data/energy-consumption/utility-meter-data/edit-bill/edit-bill.component';
 
 const routes: Routes = [
   {
@@ -162,7 +164,29 @@ const routes: Routes = [
                   }
                 ]
               },
-              { path: 'utility-meter/:id', component: UtilityMeterDataComponent },
+              { 
+                path: 'utility-meter/:id', 
+                component: UtilityMeterDataComponent,
+                children: [
+                  {
+                    path: '',
+                    pathMatch: 'full',
+                    redirectTo: 'data-table'
+                  },
+                  {
+                    path: 'data-table',
+                    component: UtilityMeterDataTableComponent
+                  },
+                  {
+                    path: 'edit-bill/:id',
+                    component: EditBillComponent
+                  },
+                  {
+                    path: 'new-bill',
+                    component: EditBillComponent
+                  }
+                ]
+              },
             ],
           },
           { path: 'monthly-meter-data', component: CalanderizationComponent },

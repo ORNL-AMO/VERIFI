@@ -1,0 +1,29 @@
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex w-100 justify-content-between controls">
+            <app-utility-meter-data-filter class="flex-fill" *ngIf="editMeter.source == 'Electricity'">
+            </app-utility-meter-data-filter>
+
+            <div class="saveCancel item-right">
+                <button *ngIf="!showConfirmCancel" class="btn btn-secondary" (click)="cancel()">Cancel</button>
+                <button *ngIf="showConfirmCancel" class="btn btn-secondary" (click)="confirmCancel()">Are you sure? Changes
+                    will be lost.</button>
+                <button *ngIf="addOrEdit == 'edit'" class="btn btn-primary" (click)="saveAndQuit()"
+                    [disabled]="meterDataForm.invalid || invalidDate">Save</button>
+                <button *ngIf="addOrEdit == 'add'" class="btn btn-primary mr-2" (click)="saveAndQuit()"
+                    [disabled]="meterDataForm.invalid || invalidDate">Save + Quit</button>
+                <button *ngIf="addOrEdit == 'add'" class="btn btn-primary" (click)="saveAndAddAnother()"
+                    [disabled]="meterDataForm.invalid || invalidDate">Save +
+                    Add Another</button>
+            </div>
+        </div>
+        <hr>
+    </div>
+</div>
+<app-edit-electricity-bill *ngIf="editMeter.source == 'Electricity'" [editMeterData]="editMeterData"
+    [addOrEdit]="addOrEdit" [editMeter]="editMeter" [(meterDataForm)]="meterDataForm" [(invalidDate)]="invalidDate">
+</app-edit-electricity-bill>
+<app-edit-utility-bill *ngIf="editMeter.source != 'Electricity'" [editMeterData]="editMeterData" [addOrEdit]="addOrEdit"
+    [editMeter]="editMeter" [displayVolumeInput]="displayVolumeInput" [displayEnergyUse]="displayEnergyUse"
+    [(meterDataForm)]="meterDataForm" [(invalidDate)]="invalidDate">
+</app-edit-utility-bill>

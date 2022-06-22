@@ -1,69 +1,140 @@
-<app-utility-meter-data-filter></app-utility-meter-data-filter>
+<!-- <br>
+<div class="windowContentScroll"> -->
+<p class="bold">General Information</p>
+<form class="meterForm" [formGroup]="meterDataForm">
 
-<br>
-<div class="windowContentScroll">
-  <p class="bold">General Information</p>
-  <form class="meterForm" [formGroup]="meterDataForm">
-
-    <div class="row">
-      <div class="col-6">
-        <label for="readDate">
-          Meter Read Date
-          <span class="required">*</span>
-        </label>
-        <div class="input-group mb-3">
-          <input id="readDate" class="form-control" type="date" formControlName="readDate" (change)="checkDate()"
-            [ngClass]="{'error': invalidDate}">
-        </div>
-        <span class="inputError" *ngIf="meterDataForm.get('readDate').hasError('required')">Meter read date is
-          required</span>
-        <span class="inputError" *ngIf="invalidDate">Meter already has data entered for selected date</span>
-
-
-        <label for="totalEnergyUse">
-          Total Energy Use
-          <span class="required">*</span>
-        </label>
-        <div class="input-group mb-3">
-          <input id="totalEnergyUse" class="form-control" type="number" formControlName="totalEnergyUse"
-            [class.warning]="meterDataForm.controls.totalEnergyUse.value === 0" onfocus="this.select();" min="0">
-          <span class="unit" [innerHTML]="energyUnit | settingsLabel"></span>
-        </div>
-        <span class="inputError" *ngIf="meterDataForm.get('totalEnergyUse').hasError('required')">Total energy use is
-          required</span>
-        <span class="inputError" *ngIf="meterDataForm.get('totalEnergyUse').hasError('min')">Can't be less than 0</span>
-        <span class="inputWarning" *ngIf="meterDataForm.controls.totalEnergyUse.value === 0">Total energy use should be
-          greater than 0</span>
+  <div class="row">
+    <div class="col-6">
+      <label for="readDate">
+        Meter Read Date
+        <span class="required">*</span>
+      </label>
+      <div class="input-group mb-3">
+        <input id="readDate" class="form-control" type="date" formControlName="readDate" (change)="checkDate()"
+          [ngClass]="{'error': invalidDate}">
       </div>
-      <div class="col">
-        <label for="totalDemand">
-          Total Demand
-        </label>
-        <div class="input-group mb-3">
-          <input id="totalDemand" class="form-control" type="number" formControlName="totalDemand"
-            [class.warning]="meterDataForm.controls.totalDemand.value === 0" onfocus="this.select();" min="0">
-          <span class="unit">$</span>
-        </div>
-        <span class="inputError" *ngIf="meterDataForm.get('totalDemand').hasError('required')">Total demand is
-          required</span>
-        <span class="inputError" *ngIf="meterDataForm.get('totalDemand').hasError('min')">Can't be less than 0</span>
-        <span class="inputWarning" *ngIf="meterDataForm.controls.totalDemand.value === 0">Total demand should be greater
-          than 0</span>
+      <span class="inputError" *ngIf="meterDataForm.get('readDate').hasError('required')">Meter read date is
+        required</span>
+      <span class="inputError" *ngIf="invalidDate">Meter already has data entered for selected date</span>
 
-        <label for="totalCost">
-          Total Cost
-        </label>
-        <div class="input-group mb-3">
-          <input id="totalCost" class="form-control" type="number" formControlName="totalCost"
-            [class.warning]="meterDataForm.controls.totalCost.value === 0" onfocus="this.select();" min="0">
-          <span class="unit">$</span>
-        </div>
-        <span class="inputError" *ngIf="meterDataForm.get('totalCost').hasError('required')">Total cost is
-          required</span>
-        <span class="inputError" *ngIf="meterDataForm.get('totalCost').hasError('min')">Can't be less than 0</span>
-        <span class="inputWarning" *ngIf="meterDataForm.controls.totalCost.value === 0">Total cost should be greater
-          than 0</span>
 
+      <label for="totalEnergyUse">
+        Total Energy Use
+        <span class="required">*</span>
+      </label>
+      <div class="input-group mb-3">
+        <input id="totalEnergyUse" class="form-control" type="number" formControlName="totalEnergyUse"
+          [class.warning]="meterDataForm.controls.totalEnergyUse.value === 0" onfocus="this.select();" min="0">
+        <span class="unit" [innerHTML]="energyUnit | settingsLabel"></span>
+      </div>
+      <span class="inputError" *ngIf="meterDataForm.get('totalEnergyUse').hasError('required')">Total energy use is
+        required</span>
+      <span class="inputError" *ngIf="meterDataForm.get('totalEnergyUse').hasError('min')">Can't be less than 0</span>
+      <span class="inputWarning" *ngIf="meterDataForm.controls.totalEnergyUse.value === 0">Total energy use should be
+        greater than 0</span>
+    </div>
+    <div class="col">
+      <label for="totalDemand">
+        Total Demand
+      </label>
+      <div class="input-group mb-3">
+        <input id="totalDemand" class="form-control" type="number" formControlName="totalDemand"
+          [class.warning]="meterDataForm.controls.totalDemand.value === 0" onfocus="this.select();" min="0">
+        <span class="unit">$</span>
+      </div>
+      <span class="inputError" *ngIf="meterDataForm.get('totalDemand').hasError('required')">Total demand is
+        required</span>
+      <span class="inputError" *ngIf="meterDataForm.get('totalDemand').hasError('min')">Can't be less than 0</span>
+      <span class="inputWarning" *ngIf="meterDataForm.controls.totalDemand.value === 0">Total demand should be greater
+        than 0</span>
+
+      <label for="totalCost">
+        Total Cost
+      </label>
+      <div class="input-group mb-3">
+        <input id="totalCost" class="form-control" type="number" formControlName="totalCost"
+          [class.warning]="meterDataForm.controls.totalCost.value === 0" onfocus="this.select();" min="0">
+        <span class="unit">$</span>
+      </div>
+      <span class="inputError" *ngIf="meterDataForm.get('totalCost').hasError('required')">Total cost is
+        required</span>
+      <span class="inputError" *ngIf="meterDataForm.get('totalCost').hasError('min')">Can't be less than 0</span>
+      <span class="inputWarning" *ngIf="meterDataForm.controls.totalCost.value === 0">Total cost should be greater
+        than 0</span>
+
+    </div>
+  </div>
+
+  <br>
+  <hr>
+  <br>
+
+  <div *ngIf="supplyDemandFilters.showSection">
+    <p class="bold">Supply / Demand Charge</p>
+    <div class="row">
+      <!--supply demand column one-->
+      <div class="col" *ngIf="displaySupplyDemandColumnOne">
+        <div *ngIf="supplyDemandFilters.peakAmount ||  supplyDemandFilters.peakCharge">
+          <label for="peakAmount">On-Peak Demand</label>
+          <div class="input-group mb-3">
+            <input id="peakAmount" *ngIf="supplyDemandFilters.peakAmount" class="form-control" type="number"
+              formControlName="peakAmount" onfocus="this.select();" min="0">
+            <span *ngIf="supplyDemandFilters.peakAmount" class="unit">kWh</span>
+            <input id="peakCharge" *ngIf="supplyDemandFilters.peakCharge" class="form-control" type="number"
+              formControlName="peakCharge" min="0">
+            <span *ngIf="supplyDemandFilters.peakCharge" class="unit">$</span>
+          </div>
+        </div>
+        <div *ngIf="supplyDemandFilters.offPeakAmount || supplyDemandFilters.offPeakCharge">
+          <label for="offPeakAmount">Off-Peak Demand</label>
+          <div class="input-group mb-3">
+            <input id="offPeakAmount" *ngIf="supplyDemandFilters.offPeakAmount" class="form-control" type="number"
+              formControlName="offPeakAmount" onfocus="this.select();" min="0">
+            <span *ngIf="supplyDemandFilters.offPeakAmount" class="unit">kWh</span>
+            <input id="offPeakCharge" *ngIf="supplyDemandFilters.offPeakCharge" class="form-control" type="number"
+              formControlName="offPeakCharge" min="0">
+            <span *ngIf="supplyDemandFilters.offPeakCharge" class="unit">$</span>
+          </div>
+        </div>
+
+        <div *ngIf="supplyDemandFilters.demandBlockAmount || supplyDemandFilters.demandBlockCharge">
+          <label for="demandBlockAmount">Block Rates
+            Demand</label>
+          <div class="input-group mb-3">
+            <input id="demandBlockAmount" *ngIf="supplyDemandFilters.demandBlockAmount" class="form-control"
+              type="number" formControlName="demandBlockAmount" onfocus="this.select();" min="0">
+            <span *ngIf="supplyDemandFilters.demandBlockAmount" class="unit">kWh</span>
+            <input id="demandBlockCharge" *ngIf="supplyDemandFilters.demandBlockCharge" class="form-control"
+              type="number" formControlName="demandBlockCharge" min="0">
+            <span *ngIf="supplyDemandFilters.demandBlockCharge" class="unit">$</span>
+          </div>
+        </div>
+      </div>
+      <!--supply demand column two-->
+      <div class="col" *ngIf="displaySupplyDemandColumnTwo">
+        <div *ngIf="supplyDemandFilters.supplyBlockAmount || supplyDemandFilters.supplyBlockCharge">
+          <label for="supplyBlockAmount">Block Rates Supply</label>
+          <div class="input-group mb-3">
+            <input id="supplyBlockAmount" *ngIf="supplyDemandFilters.supplyBlockAmount" class="form-control"
+              type="number" formControlName="supplyBlockAmount" onfocus="this.select();" min="0">
+            <span *ngIf="supplyDemandFilters.supplyBlockAmount" class="unit">kWh</span>
+            <input id="supplyBlockCharge" *ngIf="supplyDemandFilters.supplyBlockCharge" class="form-control"
+              type="number" formControlName="supplyBlockCharge" min="0">
+            <span *ngIf="supplyDemandFilters.supplyBlockCharge" class="unit">$</span>
+          </div>
+        </div>
+
+        <div *ngIf="supplyDemandFilters.flatRateAmount || supplyDemandFilters.flatRateCharge">
+          <label for="flatRateAmount">Flat Rates Supply</label>
+          <div class="input-group mb-3">
+            <input id="flatRateAmount" *ngIf="supplyDemandFilters.flatRateAmount" class="form-control" type="number"
+              formControlName="flatRateAmount" onfocus="this.select();" min="0">
+            <span *ngIf="supplyDemandFilters.flatRateAmount" class="unit">kWh</span>
+            <input id="flatRateCharge" *ngIf="supplyDemandFilters.flatRateCharge" class="form-control" type="number"
+              formControlName="flatRateCharge" min="0">
+            <span *ngIf="supplyDemandFilters.flatRateCharge" class="unit">$</span>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -71,184 +142,110 @@
     <hr>
     <br>
 
-    <div *ngIf="supplyDemandFilters.showSection">
-      <p class="bold">Supply / Demand Charge</p>
-      <div class="row">
-        <!--supply demand column one-->
-        <div class="col" *ngIf="displaySupplyDemandColumnOne">
-          <div *ngIf="supplyDemandFilters.peakAmount ||  supplyDemandFilters.peakCharge">
-            <label for="peakAmount">On-Peak Demand</label>
-            <div class="input-group mb-3">
-              <input id="peakAmount" *ngIf="supplyDemandFilters.peakAmount" class="form-control" type="number"
-                formControlName="peakAmount" onfocus="this.select();" min="0">
-              <span *ngIf="supplyDemandFilters.peakAmount" class="unit">kWh</span>
-              <input id="peakCharge" *ngIf="supplyDemandFilters.peakCharge" class="form-control" type="number"
-                formControlName="peakCharge" min="0">
-              <span *ngIf="supplyDemandFilters.peakCharge" class="unit">$</span>
-            </div>
-          </div>
-          <div *ngIf="supplyDemandFilters.offPeakAmount || supplyDemandFilters.offPeakCharge">
-            <label for="offPeakAmount">Off-Peak Demand</label>
-            <div class="input-group mb-3">
-              <input id="offPeakAmount" *ngIf="supplyDemandFilters.offPeakAmount" class="form-control" type="number"
-                formControlName="offPeakAmount" onfocus="this.select();" min="0">
-              <span *ngIf="supplyDemandFilters.offPeakAmount" class="unit">kWh</span>
-              <input id="offPeakCharge" *ngIf="supplyDemandFilters.offPeakCharge" class="form-control" type="number"
-                formControlName="offPeakCharge" min="0">
-              <span *ngIf="supplyDemandFilters.offPeakCharge" class="unit">$</span>
-            </div>
-          </div>
+  </div>
 
-          <div *ngIf="supplyDemandFilters.demandBlockAmount || supplyDemandFilters.demandBlockCharge">
-            <label for="demandBlockAmount">Block Rates
-              Demand</label>
-            <div class="input-group mb-3">
-              <input id="demandBlockAmount" *ngIf="supplyDemandFilters.demandBlockAmount" class="form-control"
-                type="number" formControlName="demandBlockAmount" onfocus="this.select();" min="0">
-              <span *ngIf="supplyDemandFilters.demandBlockAmount" class="unit">kWh</span>
-              <input id="demandBlockCharge" *ngIf="supplyDemandFilters.demandBlockCharge" class="form-control"
-                type="number" formControlName="demandBlockCharge" min="0">
-              <span *ngIf="supplyDemandFilters.demandBlockCharge" class="unit">$</span>
-            </div>
+  <div *ngIf="taxAndOtherFilters.showSection">
+    <p class="bold">Tax and other</p>
+    <div class="row">
+      <div class="col" *ngIf="displayTaxAndOthersColumnOne">
+        <div *ngIf="taxAndOtherFilters.businessCharge">
+          <label for="businessCharge">Local Business and Occupation
+            Charge</label>
+          <div class="input-group mb-3">
+            <input id="businessCharge" class="form-control" type="number" formControlName="businessCharge"
+              onfocus="this.select();" min="0">
+            <span class="unit">$</span>
           </div>
         </div>
-        <!--supply demand column two-->
-        <div class="col" *ngIf="displaySupplyDemandColumnTwo">
-          <div *ngIf="supplyDemandFilters.supplyBlockAmount || supplyDemandFilters.supplyBlockCharge">
-            <label for="supplyBlockAmount">Block Rates Supply</label>
-            <div class="input-group mb-3">
-              <input id="supplyBlockAmount" *ngIf="supplyDemandFilters.supplyBlockAmount" class="form-control"
-                type="number" formControlName="supplyBlockAmount" onfocus="this.select();" min="0">
-              <span *ngIf="supplyDemandFilters.supplyBlockAmount" class="unit">kWh</span>
-              <input id="supplyBlockCharge" *ngIf="supplyDemandFilters.supplyBlockCharge" class="form-control"
-                type="number" formControlName="supplyBlockCharge" min="0">
-              <span *ngIf="supplyDemandFilters.supplyBlockCharge" class="unit">$</span>
-            </div>
-          </div>
 
-          <div *ngIf="supplyDemandFilters.flatRateAmount || supplyDemandFilters.flatRateCharge">
-            <label for="flatRateAmount">Flat Rates Supply</label>
-            <div class="input-group mb-3">
-              <input id="flatRateAmount" *ngIf="supplyDemandFilters.flatRateAmount" class="form-control" type="number"
-                formControlName="flatRateAmount" onfocus="this.select();" min="0">
-              <span *ngIf="supplyDemandFilters.flatRateAmount" class="unit">kWh</span>
-              <input id="flatRateCharge" *ngIf="supplyDemandFilters.flatRateCharge" class="form-control" type="number"
-                formControlName="flatRateCharge" min="0">
-              <span *ngIf="supplyDemandFilters.flatRateCharge" class="unit">$</span>
-            </div>
+        <div *ngIf="taxAndOtherFilters.utilityTax">
+          <label for="utilityTax">Local Utility Tax</label>
+          <div class="input-group mb-3">
+            <input id="utilityTax" class="form-control" type="number" formControlName="utilityTax"
+              onfocus="this.select();" min="0">
+            <span class="unit">$</span>
+          </div>
+        </div>
+        <div *ngIf="taxAndOtherFilters.latePayment">
+          <label for="latePayment">Late Payment Charge</label>
+          <div class="input-group mb-3">
+            <input id="latePayment" class="form-control" type="number" formControlName="latePayment"
+              onfocus="this.select();" min="0">
+            <span class="unit">$</span>
+          </div>
+        </div>
+
+        <div *ngIf="taxAndOtherFilters.otherCharge">
+          <label for="otherCharge">Other Charge</label>
+          <div class="input-group mb-3">
+            <input id="otherCharge" class="form-control" type="number" formControlName="otherCharge"
+              onfocus="this.select();" min="0">
+            <span class="unit">$</span>
+          </div>
+        </div>
+
+        <div *ngIf="taxAndOtherFilters.basicCharge">
+          <label for="basicCharge">Basic Charge/fixed fee</label>
+          <div class="input-group mb-3">
+            <input id="basicCharge" class="form-control" type="text" formControlName="basicCharge"
+              onfocus="this.select();" min="0">
+            <span class="unit">$</span>
           </div>
         </div>
       </div>
 
-      <br>
-      <hr>
-      <br>
-
-    </div>
-
-    <div *ngIf="taxAndOtherFilters.showSection">
-      <p class="bold">Tax and other</p>
-      <div class="row">
-        <div class="col" *ngIf="displayTaxAndOthersColumnOne">
-          <div *ngIf="taxAndOtherFilters.businessCharge">
-            <label for="businessCharge">Local Business and Occupation
-              Charge</label>
-            <div class="input-group mb-3">
-              <input id="businessCharge" class="form-control" type="number" formControlName="businessCharge" onfocus="this.select();" 
-              min="0">
-              <span class="unit">$</span>
-            </div>
-          </div>
-
-          <div *ngIf="taxAndOtherFilters.utilityTax">
-            <label for="utilityTax">Local Utility Tax</label>
-            <div class="input-group mb-3">
-              <input id="utilityTax" class="form-control" type="number" formControlName="utilityTax" onfocus="this.select();" 
-              min="0">
-              <span class="unit">$</span>
-            </div>
-          </div>
-          <div *ngIf="taxAndOtherFilters.latePayment">
-            <label for="latePayment">Late Payment Charge</label>
-            <div class="input-group mb-3">
-              <input id="latePayment" class="form-control" type="number" formControlName="latePayment" onfocus="this.select();" 
-              min="0">
-              <span class="unit">$</span>
-            </div>
-          </div>
-
-          <div *ngIf="taxAndOtherFilters.otherCharge">
-            <label for="otherCharge">Other Charge</label>
-            <div class="input-group mb-3">
-              <input id="otherCharge" class="form-control" type="number" formControlName="otherCharge" onfocus="this.select();" 
-              min="0">
-              <span class="unit">$</span>
-            </div>
-          </div>
-
-          <div *ngIf="taxAndOtherFilters.basicCharge">
-            <label for="basicCharge">Basic Charge/fixed fee</label>
-            <div class="input-group mb-3">
-              <input id="basicCharge" class="form-control" type="text" formControlName="basicCharge" onfocus="this.select();" 
-              min="0">
-              <span class="unit">$</span>
-            </div>
+      <div class="col" *ngIf="displayTaxAndOthersColumnTwo">
+        <div *ngIf="taxAndOtherFilters.generationTransmissionCharge">
+          <label for="generationTransmissionCharge">Generation and
+            Transmission Charge</label>
+          <div class="input-group mb-3">
+            <input id="generationTransmissionCharge" class="form-control" type="number"
+              formControlName="generationTransmissionCharge" onfocus="this.select();" min="0">
+            <span class="unit">$</span>
           </div>
         </div>
 
-        <div class="col" *ngIf="displayTaxAndOthersColumnTwo">
-          <div *ngIf="taxAndOtherFilters.generationTransmissionCharge">
-            <label for="generationTransmissionCharge">Generation and
-              Transmission Charge</label>
-            <div class="input-group mb-3">
-              <input id="generationTransmissionCharge" class="form-control" type="number"
-                formControlName="generationTransmissionCharge" onfocus="this.select();" 
-                min="0">
-              <span class="unit">$</span>
-            </div>
+        <div *ngIf="taxAndOtherFilters.deliveryCharge">
+
+          <label for="deliveryCharge">Delivery Charge</label>
+          <div class="input-group mb-3">
+            <input id="deliveryCharge" class="form-control" type="number" formControlName="deliveryCharge"
+              onfocus="this.select();" min="0">
+            <span class="unit">$</span>
           </div>
+        </div>
 
-          <div *ngIf="taxAndOtherFilters.deliveryCharge">
 
-            <label for="deliveryCharge">Delivery Charge</label>
-            <div class="input-group mb-3">
-              <input id="deliveryCharge" class="form-control" type="number" formControlName="deliveryCharge" onfocus="this.select();" 
-              min="0">
-              <span class="unit">$</span>
-            </div>
+        <div *ngIf="taxAndOtherFilters.transmissionCharge">
+          <label for="transmissionCharge">Transmission Charge</label>
+          <div class="input-group mb-3">
+            <input id="transmissionCharge" class="form-control" type="number" formControlName="transmissionCharge"
+              onfocus="this.select();" min="0">
+            <span class="unit">$</span>
           </div>
-
-
-          <div *ngIf="taxAndOtherFilters.transmissionCharge">
-            <label for="transmissionCharge">Transmission Charge</label>
-            <div class="input-group mb-3">
-              <input id="transmissionCharge" class="form-control" type="number" formControlName="transmissionCharge" onfocus="this.select();" 
-              min="0">
-              <span class="unit">$</span>
-            </div>
-          </div>
-          <div *ngIf="taxAndOtherFilters.powerFactorCharge">
-            <label for="powerFactorCharge">Power factor Charge</label>
-            <div class="input-group mb-3">
-              <input id="powerFactorCharge" class="form-control" type="number" formControlName="powerFactorCharge" onfocus="this.select();" 
-              min="0">
-              <span class="unit">$</span>
-            </div>
+        </div>
+        <div *ngIf="taxAndOtherFilters.powerFactorCharge">
+          <label for="powerFactorCharge">Power factor Charge</label>
+          <div class="input-group mb-3">
+            <input id="powerFactorCharge" class="form-control" type="number" formControlName="powerFactorCharge"
+              onfocus="this.select();" min="0">
+            <span class="unit">$</span>
           </div>
         </div>
       </div>
-      <br>
-      <hr>
-      <br>
-
     </div>
-  </form>
-</div>
+    <br>
+    <hr>
+    <br>
 
-<div class="saveCancel item-right">
+  </div>
+</form>
+<!-- </div> -->
+
+<!-- <div class="saveCancel item-right">
   <button class="btn btn-secondary" (click)="cancel()">Cancel</button>
   <button *ngIf="addOrEdit == 'edit'" class="btn btn-primary" (click)="saveAndQuit()" [disabled]="meterDataForm.invalid || invalidDate">Save</button>
   <button *ngIf="addOrEdit == 'add'" class="btn btn-primary mr-2" (click)="saveAndQuit()" [disabled]="meterDataForm.invalid || invalidDate">Save + Quit</button>
   <button *ngIf="addOrEdit == 'add'" class="btn btn-primary" (click)="saveAndAddAnother()" [disabled]="meterDataForm.invalid || invalidDate">Save +
     Add Another</button>
-</div>
+</div> -->

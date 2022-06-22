@@ -1,94 +1,8 @@
 <h4>{{selectedMeter.name}} Bills</h4>
-
-<div *ngIf="meterData.length == 0" class="text-center mt-5">
-    <h5>No {{selectedMeter.name}} bills found for this facility.</h5>
-    <p>Please <i class="fa fa-plus"></i> Add New Bill or <i class="fa fa-upload"></i> Import multiple bills from excel.
-    </p>
-    <div class="meterData">
-        <button class="btn btn-primary-4 mr-2" (click)="meterDataAdd()"><i class="fa fa-plus"></i> Add New Bill</button>
-        <button class="btn btn-outline" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
-    </div>
-</div>
-<div *ngIf="meterData.length != 0">
-    <div class="controls mb-2">
-
-        <div class="meterData item-right">
-            <button class="btn btn-primary-4 item-right m-0 ml-2" (click)="meterDataAdd()"><i class="fa fa-plus"></i>
-                Add New Bill</button>
-        </div>
-
-        <!--Import/Export-->
-        <div class="importExport item-right">
-            <button class="btn btn-outline" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
-            <!-- <button class="btn btn-outline" (click)="meterExport()">Export</button> -->
-        </div>
-
-        <!--Items Per Page-->
-        <div class="items-per-page item-right">
-            <span>Show </span>
-            <select [(ngModel)]="itemsPerPage">
-                <option [ngValue]=6>6</option>
-                <option [ngValue]=12>12</option>
-                <option [ngValue]=24>24</option>
-                <option [ngValue]=36>36</option>
-                <option [ngValue]=48>48</option>
-                <option [ngValue]=60>60</option>
-                <option [ngValue]=999999999999>All</option>
-            </select>
-        </div>
-
-        <!--Bulk Delete-->
-        <div class="bulk-delete item-right" [class.show]="hasCheckedItems">
-            <button class="btn btn-danger" (click)='openBulkDelete()' [disabled]="!hasCheckedItems">Bulk Delete</button>
-        </div>
-
-        <!--Column Filters-->
-        <app-utility-meter-data-filter *ngIf="selectedMeter.source == 'Electricity'" [filterType]="'table'">
-        </app-utility-meter-data-filter>
-    </div>
+<router-outlet></router-outlet>
 
 
-
-    <div class="meter">
-        <!--<div class="meterData">
-
-            <p class="section-name bold">
-                {{meterListItem.idbMeter.name}}
-                <span class="alert-danger" *ngIf="meterListItem.errorDate">
-                    {{meterListItem.errorDate | date}} has multiple data entries.
-                </span>
-                <span class="alert-warning" *ngIf="meterListItem.warningDate">
-                    {{meterListItem.warningDate | date:'MMM, y'}} has multiple data entries. <a
-                        (click)="ignoreSameMonth(meterListItem.idbMeter)">Ignore <b>duplicate</b> months for this
-                        meter</a>
-                </span>
-                <span class="alert-warning" *ngIf="meterListItem.missingMonth">
-                    {{meterListItem.missingMonth | date:'MMMM, y'}} is missing a data entry. <a
-                        (click)="ignoreMissingMonth(meterListItem.idbMeter)">Ignore <b>missing</b> months this meter</a>
-                </span>
-            </p>
-            <p *ngIf="meterListItem.idbMeter.visible">{{meterListItem.idbMeter.notes}}</p>
-        </div>
-    -->
-
-        <div class="row no-margin">
-            <div class="col no-margin table-responsive">
-                <app-electricity-data-table *ngIf="selectedMeter.source == 'Electricity'"
-                    [selectedMeter]="selectedMeter" [selectedMeterData]="meterData" [itemsPerPage]="itemsPerPage"
-                    (setChecked)="setHasCheckedItems()" (setEdit)="setEditMeterData($event)"
-                    (setDelete)="setDeleteMeterData($event)">
-                </app-electricity-data-table>
-                <app-general-utility-data-table *ngIf="selectedMeter.source != 'Electricity'"
-                    [selectedMeter]="selectedMeter" [selectedMeterData]="meterData" [itemsPerPage]="itemsPerPage"
-                    (setChecked)="setHasCheckedItems()" (setEdit)="setEditMeterData($event)"
-                    (setDelete)="setDeleteMeterData($event)">
-                </app-general-utility-data-table>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="window" [class.open]="editMeterData || addOrEdit == 'add'">
+<!-- <div class="window" [class.open]="editMeterData || addOrEdit == 'add'">
     <div class="windowOverlay"></div>
     <div class="windowContent windowContentXLg" *ngIf="(editMeterData || addOrEdit == 'add')">
         <h4 *ngIf="addOrEdit == 'add'">Add {{editMeter.name}} Bill</h4>
@@ -112,33 +26,4 @@
             (emitClose)="cancelEditMeter()" [addOrEdit]="addOrEdit">
         </app-edit-utility-bill>
     </div>
-</div>
-
-<!--individual delete-->
-<div class="popup" [class.open]="meterDataToDelete">
-    <div class="popup-header" *ngIf="meterDataToDelete">Delete Meter Data
-        <button class="item-right" (click)="cancelDelete()">x</button>
-    </div>
-    <div class="popup-body">
-        <p>WARNING: Deleting meter data cannot be undone.
-            Are you sure you want to preform this action?</p>
-    </div>
-    <div class="saveCancel popup-footer text-right">
-        <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
-        <button class="btn btn-danger" (click)="deleteMeterData()">Delete</button>
-    </div>
-</div>
-<!--bulk delete-->
-<div class="popup" [class.open]="showBulkDelete">
-    <div class="popup-header" *ngIf="showBulkDelete">Delete Meter Data Items
-        <button class="item-right" (click)="cancelBulkDelete()">x</button>
-    </div>
-    <div class="popup-body">
-        <p>WARNING: Deleting meter data cannot be undone.
-            Are you sure you want to preform this action?</p>
-    </div>
-    <div class="saveCancel popup-footer text-right">
-        <button class="btn btn-secondary" (click)="cancelBulkDelete()">Cancel</button>
-        <button class="btn btn-danger" (click)="bulkDelete()">Delete</button>
-    </div>
-</div>
+</div> -->
