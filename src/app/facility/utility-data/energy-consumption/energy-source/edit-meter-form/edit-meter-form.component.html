@@ -221,7 +221,8 @@
                 <div class="col-6">
                     <label for="scope">Agreement Type</label>
                     <div class="mb-3">
-                        <select class="form-control" id="agreementType" type="text" formControlName="agreementType">
+                        <select class="form-control" id="agreementType" type="text" formControlName="agreementType"
+                            (change)="changeAgreementType()">
                             <option *ngFor="let agreementType of agreementTypes" [ngValue]="agreementType.value">
                                 {{agreementType.typeLabel}}
                             </option>

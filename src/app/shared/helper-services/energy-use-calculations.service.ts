@@ -39,12 +39,19 @@ export class EnergyUseCalculationsService {
   }
 
 
-  getSiteToSource(source: MeterSource, startingUnit: string, selectedFuelTypeOption?: FuelTypeOption): number {
+  getSiteToSource(source: MeterSource, selectedFuelTypeOption?: FuelTypeOption, agreementType?: number): number {
     let siteToSource: number;
     if (source == 'Electricity') {
+      //grid or utility green product
       siteToSource = 3;
-      //TODO: "On-site Renewable Electricity" has siteToSource = 1;
-      //don't have any way to currently set "On-site"
+      //self or PPPA
+      if(agreementType == 2 || agreementType == 3){
+        siteToSource = 1
+      }
+      //VPPA or RECs
+      else if(agreementType == 4 || agreementType == 6){
+        siteToSource = 0
+      }
     }
     else if (source == 'Natural Gas') {
       siteToSource = 1;

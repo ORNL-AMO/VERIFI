@@ -98,7 +98,12 @@ export class UtilityMeterdbService {
             energyUnit: energyUnit,
             fuel: undefined,
             emissionsOutputRate: emissionsOutputRate,
-            scope: 3
+            scope: 3,
+            agreementType: 1,
+            includeInEnergy: true,
+            retainRECs: false,
+            directConnection: false,
+
         }
     }
 
