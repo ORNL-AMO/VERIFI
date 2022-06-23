@@ -138,7 +138,11 @@ export interface IdbUtilityMeter {
     unitsDifferent?: boolean,
     ignoreDuplicateMonths?: boolean,
     ignoreMissingMonths?: boolean,
-    scope?: number
+    scope?: number,
+    agreementType?: number,
+    includeInEnergy?: boolean,
+    retainRECs?: boolean,
+    directConnection?: boolean
 
 }
 
@@ -185,7 +189,7 @@ export interface IdbUtilityMeterData {
 export interface IdbPredictorEntry {
     //keys (id primary)
     id?: number,
-    guid: string,    
+    guid: string,
     facilityId: string,
     accountId: string,
     //data
@@ -290,4 +294,3 @@ export interface IdbAccountAnalysisItem {
 export type AnalysisType = 'absoluteEnergyConsumption' | 'energyIntensity' | 'modifiedEnergyIntensity' | 'regression';
 export type MeterSource = "Electricity" | "Natural Gas" | "Other Fuels" | "Other Energy" | "Water" | "Waste Water" | "Other Utility";
 export type MeterPhase = "Solid" | "Liquid" | "Gas";
- 
