@@ -101,6 +101,7 @@ export class FacilitydbService {
             // id: undefined
             unitsOfMeasure: account.unitsOfMeasure,
             energyUnit: account.energyUnit,
+            electricityUnit: account.electricityUnit,
             volumeLiquidUnit: account.volumeLiquidUnit,
             volumeGasUnit: account.volumeGasUnit,
             massUnit: account.massUnit,
