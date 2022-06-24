@@ -341,7 +341,7 @@ export class EditMeterFormComponent implements OnInit {
   changeAgreementType(){
     this.setSiteToSource();
     //RECs or VPPA
-    if(this.meterForm.controls.agreementType.value != 4 || this.meterForm.controls.agreementType.value != 6){
+    if(this.meterForm.controls.agreementType.value != 4 && this.meterForm.controls.agreementType.value != 6){
       this.meterForm.controls.includeInEnergy.patchValue(true);
     }else{
       this.meterForm.controls.includeInEnergy.patchValue(false);
