@@ -739,13 +739,13 @@ export class CalanderizationService {
       if (energyIsSource) {
         energyUse = energyUse / meter.siteToSource;
       }
-      if (meter.source != 'Electricity') {
-        let convertedEnergyUse: number = this.convertUnitsService.value(energyUse).from(energyUnit).to(meter.energyUnit);
-        return convertedEnergyUse * meter.emissionsOutputRate
-      } else {
-        let convertedEnergyUse: number = this.convertUnitsService.value(energyUse).from(energyUnit).to('kWh');
-        return convertedEnergyUse * meter.emissionsOutputRate
-      }
+      // if (meter.source != 'Electricity') {
+      let convertedEnergyUse: number = this.convertUnitsService.value(energyUse).from(energyUnit).to(meter.energyUnit);
+      return convertedEnergyUse * meter.emissionsOutputRate
+      // } else {
+      //   let convertedEnergyUse: number = this.convertUnitsService.value(energyUse).from(energyUnit).to('kWh');
+      //   return convertedEnergyUse * meter.emissionsOutputRate
+      // }
     }
     return 0;
   }

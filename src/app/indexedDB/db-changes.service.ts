@@ -66,9 +66,9 @@ export class DbChangesService {
     this.accountDbService.selectedAccount.next(account);
   }
 
-  async selectFacility(facility: IdbFacility) {
+  selectFacility(facility: IdbFacility) {
     facility = this.updateDbEntryService.updateFacility(facility).facility;
-    await this.updateFacilities(facility);
+    this.updateFacilities(facility);
     console.log('DB Changes Select Facility');
     //set analaysis
     this.setFacilityAnalysisItems(facility);

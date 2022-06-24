@@ -74,8 +74,9 @@ export class UtilityMeterdbService {
         let startingUnit: string;
         if (setDefaults) {
             source = 'Electricity';
-            startingUnit = 'kWh';
-            energyUnit = 'kWh';
+            startingUnit = energyUnit;
+            // startingUnit = 'kWh';
+            // energyUnit = 'kWh';
         }
         return {
             facilityId: facilityId,

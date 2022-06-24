@@ -38,9 +38,9 @@ export class EditMeterFormService {
       retainRECs: [meter.retainRECs],
       directConnection: [meter.directConnection]
     });
-    if(form.controls.source.value == 'Electricity'){
-      form.controls.startingUnit.disable();
-    }
+    // if(form.controls.source.value == 'Electricity'){
+    //   form.controls.startingUnit.disable();
+    // }
     return form;
   }
 

@@ -123,6 +123,7 @@ export class EditMeterFormComponent implements OnInit {
     this.checkShowSiteToSource();
     this.setHeatCapacity();
     this.setSiteToSource();
+    this.setEmissionsOutputRate();
     this.checkHasDifferentUnits();
     this.cd.detectChanges();
   }
@@ -233,7 +234,7 @@ export class EditMeterFormComponent implements OnInit {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let facilityUnit: string;
     if (this.meterForm.controls.source.value == 'Electricity') {
-      facilityUnit = 'kWh';
+      facilityUnit = selectedFacility.electricityUnit;
     } else if (this.meterForm.controls.source.value == 'Natural Gas') {
       facilityUnit = selectedFacility.volumeGasUnit;
     } else if (this.meterForm.controls.source.value == 'Other Fuels') {

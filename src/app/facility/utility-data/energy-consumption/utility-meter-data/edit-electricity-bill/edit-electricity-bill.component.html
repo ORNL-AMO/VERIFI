@@ -75,7 +75,7 @@
           <div class="input-group mb-3">
             <input id="peakAmount" *ngIf="supplyDemandFilters.peakAmount" class="form-control" type="number"
               formControlName="peakAmount" onfocus="this.select();" min="0">
-            <span *ngIf="supplyDemandFilters.peakAmount" class="unit">kWh</span>
+            <span *ngIf="supplyDemandFilters.peakAmount" class="unit" [innerHTML]="energyUnit | settingsLabel"></span>
             <input id="peakCharge" *ngIf="supplyDemandFilters.peakCharge" class="form-control" type="number"
               formControlName="peakCharge" min="0">
             <span *ngIf="supplyDemandFilters.peakCharge" class="unit">$</span>
@@ -86,7 +86,7 @@
           <div class="input-group mb-3">
             <input id="offPeakAmount" *ngIf="supplyDemandFilters.offPeakAmount" class="form-control" type="number"
               formControlName="offPeakAmount" onfocus="this.select();" min="0">
-            <span *ngIf="supplyDemandFilters.offPeakAmount" class="unit">kWh</span>
+            <span *ngIf="supplyDemandFilters.offPeakAmount" class="unit" [innerHTML]="energyUnit | settingsLabel"></span>
             <input id="offPeakCharge" *ngIf="supplyDemandFilters.offPeakCharge" class="form-control" type="number"
               formControlName="offPeakCharge" min="0">
             <span *ngIf="supplyDemandFilters.offPeakCharge" class="unit">$</span>
@@ -99,7 +99,7 @@
           <div class="input-group mb-3">
             <input id="demandBlockAmount" *ngIf="supplyDemandFilters.demandBlockAmount" class="form-control"
               type="number" formControlName="demandBlockAmount" onfocus="this.select();" min="0">
-            <span *ngIf="supplyDemandFilters.demandBlockAmount" class="unit">kWh</span>
+            <span *ngIf="supplyDemandFilters.demandBlockAmount" class="unit" [innerHTML]="energyUnit | settingsLabel"></span>
             <input id="demandBlockCharge" *ngIf="supplyDemandFilters.demandBlockCharge" class="form-control"
               type="number" formControlName="demandBlockCharge" min="0">
             <span *ngIf="supplyDemandFilters.demandBlockCharge" class="unit">$</span>
@@ -113,7 +113,7 @@
           <div class="input-group mb-3">
             <input id="supplyBlockAmount" *ngIf="supplyDemandFilters.supplyBlockAmount" class="form-control"
               type="number" formControlName="supplyBlockAmount" onfocus="this.select();" min="0">
-            <span *ngIf="supplyDemandFilters.supplyBlockAmount" class="unit">kWh</span>
+            <span *ngIf="supplyDemandFilters.supplyBlockAmount" class="unit" [innerHTML]="energyUnit | settingsLabel"></span>
             <input id="supplyBlockCharge" *ngIf="supplyDemandFilters.supplyBlockCharge" class="form-control"
               type="number" formControlName="supplyBlockCharge" min="0">
             <span *ngIf="supplyDemandFilters.supplyBlockCharge" class="unit">$</span>
@@ -125,7 +125,7 @@
           <div class="input-group mb-3">
             <input id="flatRateAmount" *ngIf="supplyDemandFilters.flatRateAmount" class="form-control" type="number"
               formControlName="flatRateAmount" onfocus="this.select();" min="0">
-            <span *ngIf="supplyDemandFilters.flatRateAmount" class="unit">kWh</span>
+            <span *ngIf="supplyDemandFilters.flatRateAmount" class="unit" [innerHTML]="energyUnit | settingsLabel"></span>
             <input id="flatRateCharge" *ngIf="supplyDemandFilters.flatRateCharge" class="form-control" type="number"
               formControlName="flatRateCharge" min="0">
             <span *ngIf="supplyDemandFilters.flatRateCharge" class="unit">$</span>
