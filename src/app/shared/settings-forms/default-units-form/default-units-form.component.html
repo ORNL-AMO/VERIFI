@@ -11,8 +11,18 @@
     </div>
 
     <div class="row">
+        
         <div class="mb-3 col">
-            <label>Energy Unit</label>
+            <label>Electricity Unit</label>
+            <select formControlName="electricityUnit" (change)="saveChanges()">
+                <option *ngFor="let energyUnitOption of energyUnitOptions" [ngValue]="energyUnitOption.value">
+                    <span [innerHTML]="energyUnitOption.display"></span>
+                </option>
+            </select>
+        </div>
+        
+        <div class="mb-3 col">
+            <label>Result Energy Unit</label>
             <select formControlName="energyUnit" (change)="saveChanges()">
                 <option *ngFor="let energyUnitOption of energyUnitOptions" [ngValue]="energyUnitOption.value">
                     <span [innerHTML]="energyUnitOption.display"></span>
@@ -20,6 +30,9 @@
             </select>
         </div>
 
+    </div>
+
+    <div class="row">
         <div class="mb-3 col">
             <label>Liquid Volume Unit</label>
             <select formControlName="volumeLiquidUnit" (change)="saveChanges()">
@@ -28,9 +41,7 @@
                 </option>
             </select>
         </div>
-    </div>
-
-    <div class="row">
+        
         <div class="mb-3 col">
             <label>Gas Volume Unit</label>
             <select formControlName="volumeGasUnit" (change)="saveChanges()">

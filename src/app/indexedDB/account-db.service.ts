@@ -101,6 +101,7 @@ export class AccountdbService {
             // id: undefined,            
             unitsOfMeasure: 'Imperial',
             energyUnit: 'MMBtu',
+            electricityUnit: 'kWh',
             volumeLiquidUnit: 'gal',
             volumeGasUnit: 'SCF',
             massUnit: 'lb',

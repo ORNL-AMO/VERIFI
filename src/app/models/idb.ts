@@ -22,6 +22,7 @@ export interface IdbAccount {
     img: string
     unitsOfMeasure: string,
     energyUnit: string,
+    electricityUnit: string,
     massUnit: string,
     volumeLiquidUnit: string,
     volumeGasUnit: string,
@@ -68,6 +69,7 @@ export interface IdbFacility {
     //units
     unitsOfMeasure: string,
     energyUnit: string,
+    electricityUnit: string,
     massUnit: string,
     volumeLiquidUnit: string,
     volumeGasUnit: string,

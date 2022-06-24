@@ -94,7 +94,7 @@ export class EnergyUseCalculationsService {
     let emissionsRate: number;
     if (source == 'Electricity') {
       let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-      emissionsRate = selectedFacility.emissionsOutputRate;
+      emissionsRate = this.convertElectricityEmissions(selectedFacility.emissionsOutputRate, energyUnit);
     } else if (source == 'Natural Gas') {
       emissionsRate = this.convertEmissions(53.06, energyUnit);
     } else if (source == 'Other Fuels') {
@@ -117,5 +117,12 @@ export class EnergyUseCalculationsService {
     return emissionsRate;
   }
 
-
+  convertElectricityEmissions(emissionsRate: number, energyUnit: string): number {
+    if (energyUnit != 'kWh') {
+      let conversionHelper: number = this.convertUnitsService.value(1).from('kWh').to(energyUnit);
+      emissionsRate = emissionsRate / conversionHelper;
+      emissionsRate = Number((emissionsRate).toLocaleString(undefined, { maximumSignificantDigits: 5 }));
+    }
+    return emissionsRate;
+  }
 }
