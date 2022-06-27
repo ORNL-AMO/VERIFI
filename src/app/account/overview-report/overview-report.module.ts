@@ -29,6 +29,7 @@ import { BetterPlantsReportComponent } from './better-plants-report/better-plant
 import { CompanyInformationTableComponent } from './better-plants-report/company-information-table/company-information-table.component';
 import { PrimaryEnergyConsumptionTableComponent } from './better-plants-report/primary-energy-consumption-table/primary-energy-consumption-table.component';
 import { FacilityPerformanceTableComponent } from './better-plants-report/facility-performance-table/facility-performance-table.component';
+import { LabelWithTooltipModule } from 'src/app/shared/label-with-tooltip/label-with-tooltip.module';
 
 
 
@@ -65,7 +66,8 @@ import { FacilityPerformanceTableComponent } from './better-plants-report/facili
     FormsModule,
     HelperPipesModule,
     RouterModule,
-    NgbPaginationModule
+    NgbPaginationModule,
+    LabelWithTooltipModule
   ]
 })
 export class OverviewReportModule { }
