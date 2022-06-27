@@ -4,13 +4,15 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAccount, IdbFacility, IdbUtilityMeter, MeterPhase, MeterSource } from 'src/app/models/idb';
 import { FuelTypeOption, GasOptions, LiquidOptions, OtherEnergyOptions, SolidOptions, SourceOptions } from 'src/app/facility/utility-data/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
 import { ChilledWaterUnitOptions, EnergyUnitOptions, MassUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from '../unitOptions';
+import { EnergyUseCalculationsService } from './energy-use-calculations.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class EnergyUnitsHelperService {
 
-  constructor(private facilityDbService: FacilitydbService, private accountDbService: AccountdbService) { }
+  constructor(private facilityDbService: FacilitydbService, private accountDbService: AccountdbService,
+    private energyUseCalculationsService: EnergyUseCalculationsService) { }
 
   getMeterConsumptionUnitInAccount(meter: IdbUtilityMeter): string {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
@@ -263,7 +265,8 @@ export class EnergyUnitsHelperService {
     let hasDifferentEnergyUnits: boolean = false;
     let hasDifferentEmissions: boolean = false;
     if (source == 'Electricity') {
-      if (emissionsOutputRate != selectedFacility.emissionsOutputRate) {
+      let convertedOutputRate: number = this.energyUseCalculationsService.convertElectricityEmissions(selectedFacility.emissionsOutputRate, startingUnit);
+      if (emissionsOutputRate != convertedOutputRate) {
         hasDifferentEmissions = true;
       }
     }

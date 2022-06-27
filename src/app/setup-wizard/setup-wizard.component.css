@@ -1,7 +1,9 @@
 .dashboard-container{
     height: calc(100vh - 100px);
-    overflow-y: auto; 
-    background-image: url('../../assets/images/industrial-skyline.png');
-    background-position: bottom;
+    overflow-y: auto;
+    background-image: url('../../assets/images/industrial-skyline.svg');
+    background-position: bottom 60px right 0px;
     background-repeat: no-repeat;
+    background-size: contain;
+    background-color: #f1f1f1;
 }

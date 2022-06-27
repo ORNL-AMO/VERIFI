@@ -120,14 +120,22 @@ export class CorrelationPlotComponent implements OnInit {
     let xMin: number = _.min(this.plotData[0].values);
     let xMax: number = _.max(this.plotData[0].values);
 
-    let yMinRegressionValue: number = this.regressionTableData[0].regressionResult.predict(xMin)[1];
-    let yMaxRegressionValue: number = this.regressionTableData[0].regressionResult.predict(xMax)[1];
+    let coefStr: Array<string> = new Array();
+    this.regressionTableData[0].jstatModel.coef.forEach(coef => {
+      let str: string = this.getSigFigs(coef);
+      coefStr.push(str);
+    })
+
+    let yMinRegressionValue: number = this.regressionTableData[0].jstatModel.coef[0] + (this.regressionTableData[0].jstatModel.coef[1] * xMin);
+    let yMaxRegressionValue: number = this.regressionTableData[0].jstatModel.coef[0] + (this.regressionTableData[0].jstatModel.coef[1] * xMax);
+    let bestFit: string = coefStr[0] + ' + ' + '(' + coefStr[1] + ' * ' + this.regressionTableData[0].optionOne + ')';
+
     let trace2 = {
       x: [xMin, xMax],
       y: [yMinRegressionValue, yMaxRegressionValue],
       mode: "lines",
       type: "scatter",
-      name: "Best Fit: " + this.regressionTableData[0].regressionResult.string,
+      name: "Best Fit: " + bestFit,
       hoverinfo: 'none'
     }
 
@@ -150,7 +158,7 @@ export class CorrelationPlotComponent implements OnInit {
         xanchor: 'left',
         yanchor: 'top',
         showarrow: false,
-        text: "Best Fit:<br>" + this.regressionTableData[0].regressionResult.string + "<br>R&#178;: " + this.regressionTableData[0].r2Value + "<br>P-value: " + this.regressionTableData[0].pValue,
+        text: "Best Fit:<br>" + bestFit + "<br>R&#178;: " + this.getSigFigs(this.regressionTableData[0].r2Value) + "<br>P-value: " + this.getSigFigs(this.regressionTableData[0].pValue),
         borderwidth: 2,
         borderpad: 4,
         bgcolor: '#fff',
@@ -163,5 +171,9 @@ export class CorrelationPlotComponent implements OnInit {
       responsive: true
     };
     this.plotlyService.newPlot(this.matrixPlot.nativeElement, data, layout, config);
+  }
+
+  getSigFigs(val: number): string {
+    return (val).toLocaleString(undefined, { maximumSignificantDigits: 5 });
   }
 }

@@ -93,17 +93,19 @@ export class RegressionModelMenuComponent implements OnInit {
       this.hasLaterDate = false;
       this.group.dateModelsGenerated = new Date();
       let minPValModel: JStatRegressionModel = _.minBy(this.group.models, 'modelPValue');
-      this.group.selectedModelId = minPValModel.modelId;
-      this.group.regressionConstant = minPValModel.coef[0];
-      this.group.regressionModelYear = minPValModel.modelYear;
-      this.group.predictorVariables.forEach(variable => {
-        let coefIndex: number = minPValModel.predictorVariables.findIndex(pVariable => { return pVariable.id == variable.id });
-        if (coefIndex != -1) {
-          variable.regressionCoefficient = minPValModel.coef[coefIndex + 1];
-        } else {
-          variable.regressionCoefficient = 0;
-        }
-      });
+      if (minPValModel) {
+        this.group.selectedModelId = minPValModel.modelId;
+        this.group.regressionConstant = minPValModel.coef[0];
+        this.group.regressionModelYear = minPValModel.modelYear;
+        this.group.predictorVariables.forEach(variable => {
+          let coefIndex: number = minPValModel.predictorVariables.findIndex(pVariable => { return pVariable.id == variable.id });
+          if (coefIndex != -1) {
+            variable.regressionCoefficient = minPValModel.coef[coefIndex + 1];
+          } else {
+            variable.regressionCoefficient = 0;
+          }
+        });
+      }
     } else {
       this.modelingError = true;
     }

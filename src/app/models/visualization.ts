@@ -1,3 +1,4 @@
+import { JStatRegressionModel } from "./analysis"
 
 
 export interface HeatMapData {
@@ -20,8 +21,8 @@ export interface RegressionTableDataItem {
   optionTwo: string,
   r2Value: number,
   //result from regression library
-  regressionResult: any,
-  pValue: number
+  pValue: number,
+  jstatModel: JStatRegressionModel
 }
 
 

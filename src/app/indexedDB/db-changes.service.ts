@@ -6,6 +6,7 @@ import { AnalysisDbService } from './analysis-db.service';
 import { FacilitydbService } from './facility-db.service';
 import { OverviewReportOptionsDbService } from './overview-report-options-db.service';
 import { PredictordbService } from './predictors-db.service';
+import { UpdateDbEntryService } from './update-db-entry.service';
 import { UtilityMeterdbService } from './utilityMeter-db.service';
 import { UtilityMeterDatadbService } from './utilityMeterData-db.service';
 import { UtilityMeterGroupdbService } from './utilityMeterGroup-db.service';
@@ -20,7 +21,8 @@ export class DbChangesService {
     private overviewReportOptionsDbService: OverviewReportOptionsDbService,
     private predictorsDbService: PredictordbService, private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private utilityMeterGroupDbService: UtilityMeterGroupdbService) { }
+    private utilityMeterGroupDbService: UtilityMeterGroupdbService,
+    private updateDbEntryService: UpdateDbEntryService) { }
 
   async updateAccount(account: IdbAccount) {
     let accounts: Array<IdbAccount> = await this.accountDbService.updateWithObservable(account).toPromise();
@@ -30,8 +32,21 @@ export class DbChangesService {
 
 
   async selectAccount(account: IdbAccount) {
+    let updateAccount: { account: IdbAccount, isChanged: boolean } = this.updateDbEntryService.updateAccount(account);
+    if (updateAccount.isChanged) {
+      account = updateAccount.account;
+      await this.updateAccount(account)
+    }
     //set account facilities
     let accountFacilites: Array<IdbFacility> = await this.facilityDbService.getAllByIndexRange('accountId', account.guid).toPromise();
+    for (let i = 0; i < accountFacilites.length; i++) {
+      let facility: IdbFacility = accountFacilites[i];
+      let updatedFacility: { facility: IdbFacility, isChanged: boolean } = this.updateDbEntryService.updateFacility(facility);
+      if (updatedFacility.isChanged) {
+        accountFacilites[i] = updatedFacility.facility;
+        await this.facilityDbService.updateWithObservable(updatedFacility.facility).toPromise();
+      }
+    }
     this.facilityDbService.accountFacilities.next(accountFacilites);
     //set account analysis
     await this.setAccountAnalysisItems(account);
@@ -52,6 +67,8 @@ export class DbChangesService {
   }
 
   selectFacility(facility: IdbFacility) {
+    facility = this.updateDbEntryService.updateFacility(facility).facility;
+    this.updateFacilities(facility);
     console.log('DB Changes Select Facility');
     //set analaysis
     this.setFacilityAnalysisItems(facility);

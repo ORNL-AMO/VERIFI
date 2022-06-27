@@ -85,7 +85,8 @@ export class SettingsFormsService {
       energyIsSource: [units.energyIsSource],
       emissionsOutputRate: [units.emissionsOutputRate],
       eGridSubregion: [units.eGridSubregion],
-      customEmissionsRate: [units.customEmissionsRate]
+      customEmissionsRate: [units.customEmissionsRate],
+      electricityUnit: [units.electricityUnit]
     });
     return form;
   }
@@ -99,6 +100,7 @@ export class SettingsFormsService {
     account.emissionsOutputRate = form.controls.emissionsOutputRate.value;
     account.eGridSubregion = form.controls.eGridSubregion.value;
     account.customEmissionsRate = form.controls.customEmissionsRate.value;
+    account.electricityUnit = form.controls.electricityUnit.value;
     return account;
   }
 
@@ -111,6 +113,7 @@ export class SettingsFormsService {
     facility.emissionsOutputRate = form.controls.emissionsOutputRate.value;
     facility.eGridSubregion = form.controls.eGridSubregion.value;
     facility.customEmissionsRate = form.controls.customEmissionsRate.value;
+    facility.electricityUnit = form.controls.electricityUnit.value;
     return facility;
   }
 

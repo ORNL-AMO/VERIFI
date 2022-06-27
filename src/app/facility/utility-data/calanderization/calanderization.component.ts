@@ -9,6 +9,7 @@ import * as _ from 'lodash';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { UtilityColors } from 'src/app/shared/utilityColors';
 
 @Component({
   selector: 'app-calanderization',
@@ -135,6 +136,26 @@ export class CalanderizationComponent implements OnInit {
         }
         this.calanderizationService.calanderizedDataFilters.next(this.calanderizedDataFilters);
       }
+    } else {
+      let allMeterData: Array<MonthlyData> = calanderizedMeterData.flatMap(calanderizedMeter => { return calanderizedMeter.monthlyData });
+      let maxDateEntry: MonthlyData = _.maxBy(allMeterData, 'date');
+      let minDateEntry: MonthlyData = _.minBy(allMeterData, 'date');
+      if (minDateEntry && this.calanderizedDataFilters.dataDateRange.maxDate < minDateEntry.date || this.calanderizedDataFilters.dataDateRange.minDate > maxDateEntry.date) {
+        this.calanderizedDataFilters.selectedDateMax = {
+          year: maxDateEntry.year,
+          month: maxDateEntry.monthNumValue
+        };
+        this.calanderizedDataFilters.selectedDateMin = {
+          year: minDateEntry.year,
+          month: minDateEntry.monthNumValue
+        };
+        this.calanderizedDataFilters.dataDateRange = {
+          minDate: minDateEntry.date,
+          maxDate: maxDateEntry.date
+        }
+        this.calanderizationService.calanderizedDataFilters.next(this.calanderizedDataFilters);
+      }
+
     }
   }
 
@@ -210,5 +231,10 @@ export class CalanderizationComponent implements OnInit {
   selectMeter(meter: IdbUtilityMeter) {
     this.selectedMeter = meter;
     this.setCalanderizedMeterData();
+  }
+
+  
+  getColor(): string {
+    return UtilityColors[this.selectedMeter.source].color
   }
 }

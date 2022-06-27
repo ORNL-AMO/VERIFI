@@ -1,10 +1,14 @@
 <div class="wrapper main-content p-0">
     <ul class="nav nav-tabs">
         <li class="nav-item" *ngFor="let meter of facilityMeters"><a class="nav-link" (click)="selectMeter(meter)"
-                [ngClass]="{'active': selectedMeter.id == meter.id}">{{meter.name}}</a></li>
+                [ngClass]="{'active': selectedMeter.id == meter.id}">
+                <i class="fa fa-calendar-days"></i>
+                {{meter.name}}</a></li>
     </ul>
     <div class="content-padding">
-        <h4>{{selectedMeter.name}} Calanderized Data</h4>
+        <h4>{{selectedMeter.name}} Calanderized Data
+            <span class="badge float-right" [ngStyle]="{'background-color': getColor()}">{{selectedMeter.source}}</span>
+        </h4>
 
         <div class="p-2 text-center" *ngIf="!selectedMeter.meterReadingDataApplication">
             <p>

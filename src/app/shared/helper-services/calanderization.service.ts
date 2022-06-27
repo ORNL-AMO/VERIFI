@@ -30,7 +30,6 @@ export class CalanderizationService {
   }
 
   getCalanderizedMeterData(meters: Array<IdbUtilityMeter>, inAccount: boolean, monthDisplayShort?: boolean, calanderizationOptions?: CalanderizationOptions): Array<CalanderizedMeter> {
-    console.log('calanderize');
     let calanderizedMeterData: Array<CalanderizedMeter> = new Array();
     meters.forEach(meter => {
       let energyIsSource: boolean;
@@ -483,11 +482,15 @@ export class CalanderizationService {
     let monthlyData: Array<MonthlyData> = calanderizedMeterData.flatMap(data => {
       return data.monthlyData;
     });
-    let yearPrior: number = lastBill.year - 1;
-    let yearPriorBill: Array<MonthlyData> = monthlyData.filter(dataItem => {
-      return (dataItem.year == yearPrior) && (dataItem.monthNumValue == lastBill.monthNumValue);
-    });
-    return yearPriorBill;
+    if (lastBill) {
+      let yearPrior: number = lastBill.year - 1;
+      let yearPriorBill: Array<MonthlyData> = monthlyData.filter(dataItem => {
+        return (dataItem.year == yearPrior) && (dataItem.monthNumValue == lastBill.monthNumValue);
+      });
+      return yearPriorBill;
+    } else {
+      return undefined;
+    }
   }
 
 
@@ -736,13 +739,13 @@ export class CalanderizationService {
       if (energyIsSource) {
         energyUse = energyUse / meter.siteToSource;
       }
-      if (meter.source != 'Electricity') {
-        let convertedEnergyUse: number = this.convertUnitsService.value(energyUse).from(energyUnit).to(meter.energyUnit);
-        return convertedEnergyUse * meter.emissionsOutputRate
-      } else {
-        let convertedEnergyUse: number = this.convertUnitsService.value(energyUse).from(energyUnit).to('kWh');
-        return convertedEnergyUse * meter.emissionsOutputRate
-      }
+      // if (meter.source != 'Electricity') {
+      let convertedEnergyUse: number = this.convertUnitsService.value(energyUse).from(energyUnit).to(meter.energyUnit);
+      return convertedEnergyUse * meter.emissionsOutputRate
+      // } else {
+      //   let convertedEnergyUse: number = this.convertUnitsService.value(energyUse).from(energyUnit).to('kWh');
+      //   return convertedEnergyUse * meter.emissionsOutputRate
+      // }
     }
     return 0;
   }

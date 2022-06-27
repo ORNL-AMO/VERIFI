@@ -29,23 +29,6 @@ export class FacilitydbService {
         return localStorageFacilityId;
     }
 
-    // async initializeFacilityFromLocalStorage() {
-    //     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    //     if (selectedAccount) {
-    //         let allFacilities: Array<IdbFacility> = await this.getAll().toPromise();
-    //         let accountFacilities: Array<IdbFacility> = allFacilities.filter(facility => { return facility.accountId == selectedAccount.guid });
-    //         let storedFacilityId: number = this.localStorageService.retrieve("facilityId");
-    //         if (storedFacilityId) {
-    //             let selectedFacility: IdbFacility = accountFacilities.find(facility => { return facility.id == storedFacilityId });
-    //             this.selectedFacility.next(selectedFacility);
-    //         } else if (accountFacilities.length != 0) {
-    //             this.selectedFacility.next(accountFacilities[0]);
-    //         }
-    //         // this.allFacilities.next(allFacilities);
-    //         this.accountFacilities.next(accountFacilities);
-    //     }
-    // }
-
     getAll(): Observable<Array<IdbFacility>> {
         return this.dbService.getAll('facilities');
     }
@@ -69,6 +52,7 @@ export class FacilitydbService {
 
 
     addWithObservable(facility: IdbFacility): Observable<IdbFacility> {
+        facility.modifiedDate = new Date();
         return this.dbService.add('facilities', facility);
     }
 
@@ -78,6 +62,7 @@ export class FacilitydbService {
 
 
     updateWithObservable(values: IdbFacility): Observable<Array<IdbFacility>> {
+        values.modifiedDate = new Date();
         return this.dbService.update('facilities', values);
     }
 
@@ -116,6 +101,7 @@ export class FacilitydbService {
             // id: undefined
             unitsOfMeasure: account.unitsOfMeasure,
             energyUnit: account.energyUnit,
+            electricityUnit: account.electricityUnit,
             volumeLiquidUnit: account.volumeLiquidUnit,
             volumeGasUnit: account.volumeGasUnit,
             massUnit: account.massUnit,

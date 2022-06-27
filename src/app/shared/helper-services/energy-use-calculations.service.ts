@@ -39,12 +39,19 @@ export class EnergyUseCalculationsService {
   }
 
 
-  getSiteToSource(source: MeterSource, startingUnit: string, selectedFuelTypeOption?: FuelTypeOption): number {
+  getSiteToSource(source: MeterSource, selectedFuelTypeOption?: FuelTypeOption, agreementType?: number): number {
     let siteToSource: number;
     if (source == 'Electricity') {
+      //grid or utility green product
       siteToSource = 3;
-      //TODO: "On-site Renewable Electricity" has siteToSource = 1;
-      //don't have any way to currently set "On-site"
+      //self or PPPA
+      if(agreementType == 2 || agreementType == 3){
+        siteToSource = 1
+      }
+      //VPPA or RECs
+      else if(agreementType == 4 || agreementType == 6){
+        siteToSource = 0
+      }
     }
     else if (source == 'Natural Gas') {
       siteToSource = 1;
@@ -87,7 +94,7 @@ export class EnergyUseCalculationsService {
     let emissionsRate: number;
     if (source == 'Electricity') {
       let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-      emissionsRate = selectedFacility.emissionsOutputRate;
+      emissionsRate = this.convertElectricityEmissions(selectedFacility.emissionsOutputRate, energyUnit);
     } else if (source == 'Natural Gas') {
       emissionsRate = this.convertEmissions(53.06, energyUnit);
     } else if (source == 'Other Fuels') {
@@ -110,5 +117,12 @@ export class EnergyUseCalculationsService {
     return emissionsRate;
   }
 
-
+  convertElectricityEmissions(emissionsRate: number, energyUnit: string): number {
+    if (energyUnit != 'kWh') {
+      let conversionHelper: number = this.convertUnitsService.value(1).from('kWh').to(energyUnit);
+      emissionsRate = emissionsRate / conversionHelper;
+      emissionsRate = Number((emissionsRate).toLocaleString(undefined, { maximumSignificantDigits: 5 }));
+    }
+    return emissionsRate;
+  }
 }

@@ -1,0 +1,47 @@
+.popup {
+    transform: scale(0);
+    position: fixed;
+    width: 500px;
+    left: calc(50% - 250px);
+    top: 31%;
+    background-color: white;
+    transition: .2s transform;
+}
+.popup.open {
+    transform: scale(1);
+}
+
+.invalid{
+    background-color: red;
+}
+
+thead th.active {
+    text-decoration: underline;
+}
+
+thead th:hover{
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+
+
+.highlight{
+    /* border: solid 4px; */
+    animation-name: highlight-border;
+    animation-duration: .5s;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+  }
+  
+  
+  @keyframes highlight-border{
+    from {
+        background-color: #db281b;
+        /* border-color: #db281b; */
+    }
+    to {
+        background-color: #d4d9de;
+        /* border-color: #F97A1F; */
+    }
+  }

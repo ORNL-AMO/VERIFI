@@ -1,0 +1,44 @@
+<form class="form-inline">
+    <div class="input-group">
+        <span class="unit">
+            <span class="fa fa-search"></span>
+        </span>
+        <input class="form-control" type="search" placeholder="Search Account" aria-label="Search"
+            [(ngModel)]="searchModel" [ngbTypeahead]="search" name="search" [resultTemplate]="resultTemplate"
+            [inputFormatter]="formatter" (selectItem)="selectItem($event)" [popupClass]="'custom-search'"
+            (focus)="setOptions()">
+    </div>
+</form>
+
+
+<ng-template #resultTemplate let-r="result" let-t="term">
+    <div class="w-100 d-flex justify-content-between" (click)="selectValue(r)">
+        <div class="d-flex pr-5 template-text">
+            {{r.name}}
+        </div>
+        <div class="d-flex" *ngIf="r.type == 'facility'">
+            <span class="badge facility-badge" [ngStyle]="{'background-color' : r.facilityColor}">Facility</span>
+        </div>
+        <div class="d-flex" *ngIf="r.type == 'meter'">
+            <span class="badge facility-badge" [ngStyle]="{'background-color' : r.facilityColor}">{{r.facilityGuid |
+                facilityName}}
+                Meter</span>
+        </div>
+        <div class="d-flex" *ngIf="r.type == 'accountAnalysis'">
+            <span class="badge account-badge">Account Analysis</span>
+        </div>
+        <div class="d-flex" *ngIf="r.type == 'facilityAnalysis'">
+            <span class="badge facility-badge" [ngStyle]="{'background-color' : r.facilityColor}">{{r.facilityGuid |
+                facilityName}}
+                Analysis</span>
+        </div>
+        <div class="d-flex" *ngIf="r.type == 'report'">
+            <span class="badge account-badge" *ngIf="r.idbReportOptions.reportOptions.reportType == 'data'">
+                Account Overview Report
+            </span>
+            <span class="badge account-badge" *ngIf="r.idbReportOptions.reportOptions.reportType == 'betterPlants'">
+                Account BP Report: {{r.idbReportOptions.reportOptions.targetYear}}
+            </span>
+        </div>
+    </div>
+</ng-template>

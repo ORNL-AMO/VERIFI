@@ -154,7 +154,7 @@ export class UtilityMeterDatadbService {
         let meterData: Array<IdbUtilityMeterData> = this.getMeterDataFromMeterId(meter.guid);
         let meterDataCopy: Array<IdbUtilityMeterData> = JSON.parse(JSON.stringify(meterData));
         if (!calanderizationOptions) {
-            if (facility.energyIsSource && !isMeterReadings) {
+            if (facility && facility.energyIsSource && !isMeterReadings) {
                 meterDataCopy = this.convertMeterDataService.applySiteToSourceMultiplier(meter, meterDataCopy);
             }
         } else if (calanderizationOptions.energyIsSource) {

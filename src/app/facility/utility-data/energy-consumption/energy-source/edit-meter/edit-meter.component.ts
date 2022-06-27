@@ -10,6 +10,8 @@ import { ToastNotificationsService } from 'src/app/core-components/toast-notific
 import { EditMeterFormService } from '../edit-meter-form/edit-meter-form.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
+import { ActivatedRoute, Router } from '@angular/router';
+import { EnergyUseCalculationsService } from 'src/app/shared/helper-services/energy-use-calculations.service';
 
 @Component({
   selector: 'app-edit-meter',
@@ -17,33 +19,46 @@ import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
   styleUrls: ['./edit-meter.component.css']
 })
 export class EditMeterComponent implements OnInit {
-  @Input()
-  editMeter: IdbUtilityMeter;
-  @Output('emitClose')
-  emitClose: EventEmitter<boolean> = new EventEmitter<boolean>();
-  @Input()
-  addOrEdit: string;
+
 
   meterForm: FormGroup;
   meterDataExists: boolean;
+  editMeter: IdbUtilityMeter;
+  addOrEdit: 'add' | 'edit';
   constructor(private utilityMeterDbService: UtilityMeterdbService, private facilityDbService: FacilitydbService,
     private energyUnitsHelperService: EnergyUnitsHelperService, private editMeterFormService: EditMeterFormService,
     private utilityMeterDataDbService: UtilityMeterDatadbService, private loadingService: LoadingService,
     private toastNotificationService: ToastNotificationsService, private accountDbService: AccountdbService,
-    private dbChangesService: DbChangesService) { }
+    private dbChangesService: DbChangesService, private activatedRoute: ActivatedRoute,
+    private router: Router, private energyUseCalculationsService: EnergyUseCalculationsService) { }
 
   ngOnInit(): void {
-    this.meterForm = this.editMeterFormService.getFormFromMeter(this.editMeter);
-    let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataForFacility(this.editMeter, false);
-    if (meterData.length != 0) {
-      this.meterDataExists = true;
-      this.meterForm.controls.source.disable();
-      this.meterForm.controls.startingUnit.disable();
-      this.meterForm.controls.phase.disable();
-      this.meterForm.controls.fuel.disable();
-      this.meterForm.controls.heatCapacity.disable();
-      this.meterForm.controls.energyUnit.disable();
-    }
+    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+    this.activatedRoute.params.subscribe(params => {
+      let meterId: string = params['id'];
+      if (meterId) {
+        this.addOrEdit = 'edit';
+        this.editMeter = facilityMeters.find(meter => { return meter.guid == meterId });
+        this.meterForm = this.editMeterFormService.getFormFromMeter(this.editMeter);
+        let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataForFacility(this.editMeter, false);
+        if (meterData.length != 0) {
+          this.meterDataExists = true;
+          this.meterForm.controls.source.disable();
+          this.meterForm.controls.startingUnit.disable();
+          this.meterForm.controls.phase.disable();
+          this.meterForm.controls.fuel.disable();
+          this.meterForm.controls.heatCapacity.disable();
+          this.meterForm.controls.energyUnit.disable();
+        }
+      } else {
+        this.addOrEdit = 'add';
+        let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+        let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+        let emissionsOutputRate: number = this.energyUseCalculationsService.getEmissionsOutputRate('Electricity', undefined, undefined, selectedFacility.electricityUnit);
+        this.editMeter = this.utilityMeterDbService.getNewIdbUtilityMeter(selectedFacility.guid, selectedAccount.guid, true, emissionsOutputRate, selectedFacility.electricityUnit);
+        this.meterForm = this.editMeterFormService.getFormFromMeter(this.editMeter);
+      }
+    });
   }
 
   async saveChanges() {
@@ -70,11 +85,8 @@ export class EditMeterComponent implements OnInit {
   }
 
   cancel() {
-    this.emitClose.emit(true);
-  }
-
-  meterFormChanges(form: FormGroup) {
-    this.meterForm = form;
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    this.router.navigateByUrl('/facility/' + selectedFacility.id + '/utility/energy-consumption/energy-source/meters')
   }
 
   async checkMeterData() {

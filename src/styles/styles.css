@@ -108,7 +108,7 @@ input.unitDollar {
   margin: 0px 30px;
   padding: 20px 30px 30px;
   /* min-height: calc(100vh - 172px); */
-  /* background-image: url('../assets/images/industrial-skyline.png');
+  /* background-image: url('../assets/images/industrial-skyline.svg');
   background-position: bottom;
   background-repeat: no-repeat;
   position:relative; */
@@ -144,4 +144,16 @@ li.disabled a{
   pointer-events: none;
   cursor: default;
   opacity: .7;
+}
+
+ngb-typeahead-window.dropdown-menu{
+  z-index: 100000;
+}
+
+ngb-typeahead-window.dropdown-menu .dropdown-item.active{
+  background-color: lightgray;
+}
+
+ngb-typeahead-window.dropdown-menu .badge, ngb-typeahead-window.dropdown-menu .template-text{
+  font-size: 16px;
 }

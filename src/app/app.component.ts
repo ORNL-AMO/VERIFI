@@ -6,6 +6,7 @@ import { AnalysisDbService } from './indexedDB/analysis-db.service';
 import { FacilitydbService } from './indexedDB/facility-db.service';
 import { OverviewReportOptionsDbService } from './indexedDB/overview-report-options-db.service';
 import { PredictordbService } from './indexedDB/predictors-db.service';
+import { UpdateDbEntryService } from './indexedDB/update-db-entry.service';
 import { UtilityMeterdbService } from './indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from './indexedDB/utilityMeterData-db.service';
 import { UtilityMeterGroupdbService } from './indexedDB/utilityMeterGroup-db.service';
@@ -37,7 +38,8 @@ export class AppComponent {
     private eGridService: EGridService,
     private overviewReportOptionsDbService: OverviewReportOptionsDbService,
     private analysisDbService: AnalysisDbService,
-    private accountAnalysisDbService: AccountAnalysisDbService) {
+    private accountAnalysisDbService: AccountAnalysisDbService,
+    private updateDbEntryService: UpdateDbEntryService) {
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
         gtag('config', 'G-YG1QD02XSE',
@@ -74,8 +76,13 @@ export class AppComponent {
       await this.initializeMeters(account);
       await this.initializeMeterData(account);
       await this.initilizeMeterGroups(account);
-
-      this.accountDbService.selectedAccount.next(account);
+      let updatedAccount: { account: IdbAccount, isChanged: boolean } = this.updateDbEntryService.updateAccount(account);
+      if(updatedAccount.isChanged){
+        await this.accountDbService.updateWithObservable(updatedAccount.account).toPromise();
+        this.accountDbService.selectedAccount.next(updatedAccount.account);
+      }else{
+        this.accountDbService.selectedAccount.next(account);
+      }
       this.dataInitialized = true;
     } else {
       this.dataInitialized = true;
@@ -122,8 +129,8 @@ export class AppComponent {
     //set overview reports
     this.loadingMessage = "Loading Reports..";
     let overviewReportOptions: Array<IdbOverviewReportOptions> = await this.overviewReportOptionsDbService.getAllByIndexRange('accountId', account.guid).toPromise();
-    let templates: Array<IdbOverviewReportOptions> = overviewReportOptions.filter(option => {return option.type == 'template'});
-    let nonTemplates: Array<IdbOverviewReportOptions> = overviewReportOptions.filter(option => {return option.type != 'template'});
+    let templates: Array<IdbOverviewReportOptions> = overviewReportOptions.filter(option => { return option.type == 'template' });
+    let nonTemplates: Array<IdbOverviewReportOptions> = overviewReportOptions.filter(option => { return option.type != 'template' });
     this.overviewReportOptionsDbService.accountOverviewReportOptions.next(nonTemplates);
     this.overviewReportOptionsDbService.overviewReportOptionsTemplates.next(templates);
     let overviewReportId: number = this.overviewReportOptionsDbService.getInitialReport();

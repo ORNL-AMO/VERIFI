@@ -1,0 +1,35 @@
+.form-inline .btn{
+    font-size: 12px;
+    padding: 5.2px 10px;
+}
+
+.unit{
+    border-left: 1px solid #9b9b9b;
+    border-top-left-radius: .25rem !important;
+    border-bottom-left-radius: .25rem !important;
+    border-right: none;
+}
+
+.dropdown-item.active{
+    background-color: inherit;
+}
+
+
+.dropdown-menu{
+    z-index: 10000;
+}
+
+
+input.form-control{
+    border-top-right-radius: .25rem !important;
+    border-bottom-right-radius: .25rem !important;
+}
+
+.facility-badge{
+    color: white;
+}
+
+.account-badge{
+    background-color: #145A32;
+    color: white;
+}

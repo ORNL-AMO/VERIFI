@@ -23,7 +23,7 @@ export class DashboardService {
   facilityMeterSummaryData: BehaviorSubject<FacilityMeterSummaryData>;
   facilityUtilityUsageSummaryData: BehaviorSubject<UtilityUsageSummaryData>;
   calanderizedFacilityMeters: BehaviorSubject<Array<CalanderizedMeter>>;
-  calanderizedAccountMeters:  BehaviorSubject<Array<CalanderizedMeter>>;
+  calanderizedAccountMeters: BehaviorSubject<Array<CalanderizedMeter>>;
   constructor(private utilityMeterDbService: UtilityMeterdbService,
     private calanderizationService: CalanderizationService,
     private localStorageService: LocalStorageService,
@@ -67,31 +67,32 @@ export class DashboardService {
         let pastYearData: Array<LastYearData> = this.calanderizationService.getPastYearData(undefined, inAccount, allMetersLastBill, sourceMeters, undefined);
         let yearPriorBill: Array<MonthlyData> = this.calanderizationService.getYearPriorBillEntryFromCalanderizedMeterData(sourceMeters, allMetersLastBill);
         let lastBill: MonthlyData = this.calanderizationService.getLastBillEntryFromCalanderizedMeterData(sourceMeters)
+        if (lastBill) {
+          let previousMonthData: LastYearData = _.maxBy(pastYearData, 'date');
+          let totalEnergyUseFromLastYear: number = _.sumBy(pastYearData, (data) => { return this.getSumValue(data.energyUse) });
+          let totalEnergyCostFromLastYear: number = _.sumBy(pastYearData, (data) => { return this.getSumValue(data.energyCost) });
+          let totalEmissionsFromLastYear: number = _.sumBy(pastYearData, (data) => { return this.getSumValue(data.emissions) });
+          let yearPriorEnergyCost: number = _.sumBy(yearPriorBill, (data) => { return this.getSumValue(data.energyCost) });
+          let yearPriorEnergyUse: number = _.sumBy(yearPriorBill, (data) => { return this.getSumValue(data.energyUse) });
+          let yearPriorEmissions: number = _.sumBy(yearPriorBill, (data) => { return this.getSumValue(data.emissions) });
 
-        let previousMonthData: LastYearData = _.maxBy(pastYearData, 'date');
-        let totalEnergyUseFromLastYear: number = _.sumBy(pastYearData, (data) => { return this.getSumValue(data.energyUse) });
-        let totalEnergyCostFromLastYear: number = _.sumBy(pastYearData, (data) => { return this.getSumValue(data.energyCost) });
-        let totalEmissionsFromLastYear: number = _.sumBy(pastYearData, (data) => { return this.getSumValue(data.emissions) });
-        let yearPriorEnergyCost: number = _.sumBy(yearPriorBill, (data) => { return this.getSumValue(data.energyCost) });
-        let yearPriorEnergyUse: number = _.sumBy(yearPriorBill, (data) => { return this.getSumValue(data.energyUse) });
-        let yearPriorEmissions: number = _.sumBy(yearPriorBill, (data) => { return this.getSumValue(data.emissions) });
-
-        accountUtilitySummaries.push({
-          lastBillDate: new Date(lastBill.date),
-          previousMonthEnergyUse: previousMonthData.energyUse,
-          previousMonthEnergyCost: previousMonthData.energyCost,
-          previousMonthEmissions: previousMonthData.emissions,
-          averageEnergyUse: (totalEnergyUseFromLastYear / pastYearData.length),
-          averageEnergyCost: (totalEnergyCostFromLastYear / pastYearData.length),
-          averageEmissions: (totalEmissionsFromLastYear / pastYearData.length),
-          yearPriorEnergyCost: yearPriorEnergyCost,
-          yearPriorEnergyUse: yearPriorEnergyUse,
-          yearPriorEmissions: yearPriorEmissions,
-          energyCostChangeSinceLastYear: previousMonthData.energyCost - yearPriorEnergyCost,
-          energyUseChangeSinceLastYear: previousMonthData.energyUse - yearPriorEnergyUse,
-          emissionsChangeSinceLastYear: previousMonthData.emissions - yearPriorEmissions,
-          utility: source
-        });
+          accountUtilitySummaries.push({
+            lastBillDate: new Date(lastBill.date),
+            previousMonthEnergyUse: previousMonthData.energyUse,
+            previousMonthEnergyCost: previousMonthData.energyCost,
+            previousMonthEmissions: previousMonthData.emissions,
+            averageEnergyUse: (totalEnergyUseFromLastYear / pastYearData.length),
+            averageEnergyCost: (totalEnergyCostFromLastYear / pastYearData.length),
+            averageEmissions: (totalEmissionsFromLastYear / pastYearData.length),
+            yearPriorEnergyCost: yearPriorEnergyCost,
+            yearPriorEnergyUse: yearPriorEnergyUse,
+            yearPriorEmissions: yearPriorEmissions,
+            energyCostChangeSinceLastYear: previousMonthData.energyCost - yearPriorEnergyCost,
+            energyUseChangeSinceLastYear: previousMonthData.energyUse - yearPriorEnergyUse,
+            emissionsChangeSinceLastYear: previousMonthData.emissions - yearPriorEmissions,
+            utility: source
+          });
+        }
       }
     });
 
@@ -124,7 +125,7 @@ export class DashboardService {
     }
   }
 
-  setFacilityDashboardSummary(){
+  setFacilityDashboardSummary() {
     let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
     let calanderizedMeters: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMeterData(meters, false, true);
     this.calanderizedFacilityMeters.next(calanderizedMeters);

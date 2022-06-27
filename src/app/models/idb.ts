@@ -22,6 +22,7 @@ export interface IdbAccount {
     img: string
     unitsOfMeasure: string,
     energyUnit: string,
+    electricityUnit: string,
     massUnit: string,
     volumeLiquidUnit: string,
     volumeGasUnit: string,
@@ -68,6 +69,7 @@ export interface IdbFacility {
     //units
     unitsOfMeasure: string,
     energyUnit: string,
+    electricityUnit: string,
     massUnit: string,
     volumeLiquidUnit: string,
     volumeGasUnit: string,
@@ -84,7 +86,8 @@ export interface IdbFacility {
     wizardId?: string,
     contactName: string,
     contactEmail: string,
-    contactPhone: string
+    contactPhone: string,
+    modifiedDate?: Date
 }
 
 export interface IdbUtilityMeterGroup {
@@ -125,7 +128,7 @@ export interface IdbUtilityMeter {
     notes?: string,
     source: MeterSource,
     //group = groupName
-    group: string
+    group?: string
 
     startingUnit: string,
     energyUnit: string,
@@ -136,7 +139,13 @@ export interface IdbUtilityMeter {
     emissionsOutputRate?: number,
     unitsDifferent?: boolean,
     ignoreDuplicateMonths?: boolean,
-    ignoreMissingMonths?: boolean
+    ignoreMissingMonths?: boolean,
+    scope?: number,
+    agreementType?: number,
+    includeInEnergy?: boolean,
+    retainRECs?: boolean,
+    directConnection?: boolean
+
 }
 
 export interface IdbUtilityMeterData {
@@ -182,7 +191,7 @@ export interface IdbUtilityMeterData {
 export interface IdbPredictorEntry {
     //keys (id primary)
     id?: number,
-    guid: string,    
+    guid: string,
     facilityId: string,
     accountId: string,
     //data

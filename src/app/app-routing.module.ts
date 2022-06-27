@@ -51,6 +51,10 @@ import { MonthlyAccountAnalysisComponent } from './account/account-analysis/acco
 import { AnnualAccountAnalysisComponent } from './account/account-analysis/account-analysis-results/annual-account-analysis/annual-account-analysis.component';
 import { BetterPlantsReportMenuComponent } from './account/overview-report/better-plants-report-menu/better-plants-report-menu.component';
 import { BetterPlantsReportComponent } from './account/overview-report/better-plants-report/better-plants-report.component';
+import { EditMeterComponent } from './facility/utility-data/energy-consumption/energy-source/edit-meter/edit-meter.component';
+import { UtilityMetersTableComponent } from './facility/utility-data/energy-consumption/energy-source/utility-meters-table/utility-meters-table.component';
+import { UtilityMeterDataTableComponent } from './facility/utility-data/energy-consumption/utility-meter-data/utility-meter-data-table/utility-meter-data-table.component';
+import { EditBillComponent } from './facility/utility-data/energy-consumption/utility-meter-data/edit-bill/edit-bill.component';
 
 const routes: Routes = [
   {
@@ -137,15 +141,52 @@ const routes: Routes = [
                 pathMatch: 'full',
                 redirectTo: 'energy-source'
               },
-              { path: 'energy-source', component: EnergySourceComponent },
-              { path: 'utility-meter/:id', component: UtilityMeterDataComponent },
-              { path: 'electricity', component: UtilityMeterDataComponent },
-              { path: 'natural-gas', component: UtilityMeterDataComponent },
-              { path: 'other-fuels', component: UtilityMeterDataComponent },
-              { path: 'other-energy', component: UtilityMeterDataComponent },
-              { path: 'water', component: UtilityMeterDataComponent },
-              { path: 'waste-water', component: UtilityMeterDataComponent },
-              { path: 'other-utility', component: UtilityMeterDataComponent },
+              {
+                path: 'energy-source',
+                component: EnergySourceComponent,
+                children: [
+                  {
+                    path: '',
+                    pathMatch: 'full',
+                    redirectTo: 'meters'
+                  },
+                  {
+                    path: 'meters',
+                    component: UtilityMetersTableComponent
+                  },
+                  {
+                    path: 'edit-meter/:id',
+                    component: EditMeterComponent
+                  },
+                  {
+                    path: 'new-meter',
+                    component: EditMeterComponent
+                  }
+                ]
+              },
+              { 
+                path: 'utility-meter/:id', 
+                component: UtilityMeterDataComponent,
+                children: [
+                  {
+                    path: '',
+                    pathMatch: 'full',
+                    redirectTo: 'data-table'
+                  },
+                  {
+                    path: 'data-table',
+                    component: UtilityMeterDataTableComponent
+                  },
+                  {
+                    path: 'edit-bill/:id',
+                    component: EditBillComponent
+                  },
+                  {
+                    path: 'new-bill',
+                    component: EditBillComponent
+                  }
+                ]
+              },
             ],
           },
           { path: 'monthly-meter-data', component: CalanderizationComponent },

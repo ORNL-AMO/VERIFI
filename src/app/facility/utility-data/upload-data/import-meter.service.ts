@@ -214,7 +214,7 @@ export class ImportMeterService {
         }
         let showSiteToSource: boolean = this.editMeterFormService.checkShowSiteToSource(newMeter.source, newMeter.startingUnit);
         if (showSiteToSource) {
-          newMeter.siteToSource = this.energyUseCalculationsService.getSiteToSource(newMeter.source, newMeter.startingUnit);
+          newMeter.siteToSource = this.energyUseCalculationsService.getSiteToSource(newMeter.source);
         }
         newMeter.emissionsOutputRate = this.energyUseCalculationsService.getEmissionsOutputRate(newMeter.source, undefined, undefined, newMeter.energyUnit);
       }

@@ -40,7 +40,7 @@ a:not([href]).dropdown-item.active {
     text-decoration: underline;
 }
 
-.dropdown-toggle{
+.dropdown-toggle, .form-inline .btn{
     font-size: 12px;
     padding: 5.2px 10px;
 }
