@@ -27,6 +27,11 @@ table {
     background-color: rgb(0 0 0 / 15%);
     -webkit-box-shadow: 0 0 1px rgba(255, 255, 255, 0.5);
   }
+  body {
+    /* Firefox */
+    scrollbar-color: rgb(0 0 0 / 15%) transparent;
+    scrollbar-width: thin;
+  }
   tfoot {
     border-top: 3px double #c9d3e0;
   }
