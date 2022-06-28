@@ -7,6 +7,8 @@
 
 .help-panel.open{
     width: 260px;
+    height: 100%;
+    overflow-y: auto;
 }
 
 h3 a{
