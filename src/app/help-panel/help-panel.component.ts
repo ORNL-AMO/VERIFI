@@ -39,7 +39,7 @@ export class HelpPanelComponent implements OnInit {
   }
 
   setHelpURL(url: string) {
-    // <component name>: <URL component> or ['and': <URL component 1>, <URL component 2>, ...] or ['or': <URL component 1>, <URL component 2>, ...]
+    // <component name>: <URL component> or [<URL component 1>, <URL component 2>, ...]
     const helpUrlComponents = {
       'energy-consumption': 'energy-consumption',
       'account-summary': 'account-summary',
