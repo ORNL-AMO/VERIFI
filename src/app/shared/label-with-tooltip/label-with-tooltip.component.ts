@@ -17,6 +17,8 @@ export class LabelWithTooltipComponent implements OnInit {
   labelId: string;
   @Input()
   isBold: boolean;
+  @Input()
+  isSemiBold: boolean;
 
   helpTooltip: { tooltip: string };
   showTooltipHover: boolean = false;
