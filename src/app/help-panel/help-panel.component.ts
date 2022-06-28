@@ -39,46 +39,51 @@ export class HelpPanelComponent implements OnInit {
   }
 
   setHelpURL(url: string) {
-    if (url.indexOf('energy-consumption') != -1) {
-      this.helpURL = 'energy-consumption';
-    } else if (url.indexOf('account-summary') != -1) {
-      this.helpURL = 'account-summary';
-    } else if (url.indexOf('facility-summary') != -1) {
-      this.helpURL = 'facility-summary';
-    } else if (url.indexOf('monthly-meter-data') != -1) {
-      this.helpURL = 'monthly-meter-data';
-    } else if (url.indexOf('meter-groups') != -1) {
-      this.helpURL = 'meter-groups';
-    } else if (url.indexOf('predictors') != -1) {
-      this.helpURL = 'predictors';
-    } else if (url.indexOf('visualization') != -1) {
-      this.helpURL = 'visualization';
-    } else if (url.indexOf('upload-data') != -1) {
-      this.helpURL = 'upload-data';
-    } else if (url.indexOf('facility-management') != -1) {
-      this.helpURL = 'facility-management';
-    } else if (url.indexOf('account-management') != -1) {
-      this.helpURL = 'account-management';
-    } else if (url.indexOf('report-dashboard') != -1) {
-      this.helpURL = 'report-dashboard';
-    } else if (url.indexOf('report-menu') != -1) {
-      this.helpURL = 'report-menu';
-    } else if (url.indexOf('basic-report') != -1) {
-      this.helpURL = 'basic-report';
-    } else if (url.indexOf('analysis-dashboard') != -1) {
-      this.helpURL = 'analysis-dashboard';
-    } else if (url.indexOf('analysis-setup') != -1) {
-      this.helpURL = 'analysis-setup';
-    } else if (url.indexOf('group-analysis') != -1 && url.indexOf('options') != -1) {
-      this.helpURL = 'group-analysis-options';
-    } else if (url.indexOf('annual-energy-intensity') != -1) {
-      this.helpURL = 'annual-energy-intensity';
-    } else if (url.indexOf('monthly-energy-intensity') != -1) {
-      this.helpURL = 'monthly-energy-intensity';
-    } else if (url.indexOf('facility-analysis') != -1) {
-      this.helpURL = 'facility-analysis';
-    } else if (url.indexOf('help') != -1) {
-      this.helpURL = 'help';
+    // <component name>: <URL component> or [<URL component 1>, <URL component 2>, ...]
+    const helpUrlComponents = {
+      'energy-consumption': 'energy-consumption',
+      'account-summary': 'account-summary',
+      'facility-summary': 'facility-summary',
+      'monthly-meter-data': 'monthly-meter-data',
+      'meter-groups': 'meter-groups',
+      'predictors': 'predictors',
+      'visualization': 'visualization',
+      'upload-data': 'upload-data',
+      'facility-management': 'facility-management',
+      'account-management': 'account-management',
+      'report-dashboard': 'report-dashboard',
+      'report-menu': 'report-menu',
+      'basic-report': 'basic-report',
+      'account-analysis-dashboard': 'account/analysis/dashboard',
+      'account-analysis-setup': 'account/analysis',
+      'analysis-dashboard': 'analysis-dashboard',
+      'analysis-setup': 'analysis-setup',
+      'group-analysis-options': ['and', 'group-analysis', 'options'],
+      'annual-energy-intensity': 'annual-energy-intensity',
+      'monthly-energy-intensity': 'monthly-energy-intensity',
+      'facility-analysis': 'facility-analysis',
+      'help': 'help',
+      '': ''
+    }
+    for (let helpUrl of Object.keys(helpUrlComponents)) {
+      let urlComponent = helpUrlComponents[helpUrl];
+      if (typeof urlComponent === 'string') {
+        if (url.indexOf(urlComponent) !== -1) {
+          this.helpURL = helpUrl;
+          return;
+        }
+      }
+      else {
+        let allStringsMatch = true;
+        for (let string of urlComponent) {
+          allStringsMatch = allStringsMatch && (url.indexOf(string) !== -1);
+        }
+        // if (url.indexOf(string1) != -1 && url.indexOf(string2) != -1, ...)
+        if (allStringsMatch) {
+          this.helpURL = helpUrl;
+          return;
+        }
+      }
     }
   }
 
