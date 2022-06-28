@@ -4,10 +4,12 @@ import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 import { EditMeterFormService } from '../edit-meter-form/edit-meter-form.service';
@@ -38,7 +40,9 @@ export class UtilityMetersTableComponent implements OnInit {
     private utilityMeterDatadbService: UtilityMeterDatadbService,
     private energyUnitsHelperService: EnergyUnitsHelperService,
     private toastNotificationsService: ToastNotificationsService,
-    private editMeterFormService: EditMeterFormService) { }
+    private editMeterFormService: EditMeterFormService,
+    private dbChangesService: DbChangesService,
+    private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
     this.selectedFacilitySub = this.facilitydbService.selectedFacility.subscribe(facility => {
@@ -136,5 +140,17 @@ export class UtilityMetersTableComponent implements OnInit {
 
   selectEditMeter(meter: IdbUtilityMeter) {
     this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/utility/energy-consumption/energy-source/edit-meter/' + meter.guid);
+  }
+
+  async createCopy(meter: IdbUtilityMeter) {
+    let copyMeter: IdbUtilityMeter = JSON.parse(JSON.stringify(meter));
+    delete copyMeter.id;
+    copyMeter.guid = Math.random().toString(36).substr(2, 9);
+    copyMeter.name = copyMeter.name + ' (copy)';
+    copyMeter = await this.utilityMeterdbService.addWithObservable(copyMeter).toPromise();
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let facility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
+    await this.dbChangesService.setMeters(account, facility);
+    this.selectEditMeter(copyMeter);
   }
 }
