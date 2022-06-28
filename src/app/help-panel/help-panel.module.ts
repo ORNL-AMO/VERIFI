@@ -21,6 +21,8 @@ import { FacilityHelpComponent } from './account-management/facility-help/facili
 import { HelpPanelComponent } from './help-panel.component';
 import { AnalysisDashboardHelpComponent } from './analysis/analysis-dashboard-help/analysis-dashboard-help.component';
 import { HelpPageComponent } from './help-page/help-page.component';
+import { AccountAnalysisDashboardHelpComponent } from './analysis/account-analysis-dashboard-help/account-analysis-dashboard-help.component';
+import { AccountAnalysisSetupHelpComponent } from './analysis/account-analysis-setup-help/account-analysis-setup-help.component';
 
 @NgModule({
   declarations: [
@@ -44,7 +46,9 @@ import { HelpPageComponent } from './help-page/help-page.component';
     FacilityHelpComponent,
     HelpPanelComponent,
     AnalysisDashboardHelpComponent,
-    HelpPageComponent
+    HelpPageComponent,
+    AccountAnalysisDashboardHelpComponent,
+    AccountAnalysisSetupHelpComponent
   ],
   imports: [
     CommonModule
