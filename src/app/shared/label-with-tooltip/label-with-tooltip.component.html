@@ -1,6 +1,6 @@
 <label for={{labelId}} [ngClass]="{'bold': isBold, 'semibold': isSemiBold}"> {{label}}
     <span *ngIf="isRequired" class="required">*</span>
-    <span class="fa fa-question-circle-o pull-right" (mouseenter)="displayTooltipHover()"
+    <span class="fa fa-question-circle pull-right" (mouseenter)="displayTooltipHover()"
         (mouseleave)="hideTooltipHover()" (click)="toggleClickTooltip()"></span>
 </label>
 
