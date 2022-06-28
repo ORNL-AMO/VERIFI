@@ -1,4 +1,3 @@
-
 <div *ngIf="meterList.length === 0" class="text-center mt-5">
     <h5>No utility meters found for this facility.</h5>
     <p>Please <i class="fa fa-plus"></i> Add New Meter or <i class="fa fa-upload"></i> Import multiple meters from
@@ -66,7 +65,8 @@
                 <tr
                     *ngFor="let meter of meterList  | orderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
                     <td [ngClass]="{'invalid': isMeterInvalid(meter)}">
-                        <a routerLink="/facility/{{selectedFacility.id}}/utility/energy-consumption/utility-meter/{{meter.id}}">{{meter.name}}</a>  
+                        <a
+                            routerLink="/facility/{{selectedFacility.id}}/utility/energy-consumption/utility-meter/{{meter.id}}">{{meter.name}}</a>
                     </td>
                     <td>{{meter.source}}</td>
                     <!--<td>{{meter.group}}</td>-->
@@ -85,6 +85,7 @@
                             <i [ngClass]="{'highlight': meter.unitsDifferent}" class="fa fa-pencil" title="Edit"
                                 (click)="selectEditMeter(meter)"></i>
                             <i class="fa fa-trash" title="Delete" (click)="selectDeleteMeter(meter)"></i>
+                            <i class="fa fa-copy" title="Copy" (click)="createCopy(meter)"></i>
                         </div>
                     </td>
                 </tr>
