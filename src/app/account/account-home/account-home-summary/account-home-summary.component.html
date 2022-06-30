@@ -1,0 +1,57 @@
+<div class="card">
+    <div class="card-body">
+        <div class="row">
+            <div class="col">
+                <h1 class="card-title"><span class="fa fa-building"></span> {{account.name}}</h1>
+                <p class="card-text" *ngIf="account.address">{{account.address}}, {{account.city}}, {{account.state}}
+                    {{account.zip}}
+                    {{account.country}}
+                </p>
+                <hr>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <div class="d-flex">
+                    <div class="pr-2">
+                        <button class="btn btn-outline m-0">
+                            <span class="fa fa-chart-column"></span><br>
+                            View Account <br> Data Overview
+                        </button>
+                    </div>
+                    <div class="pr-2">
+                        <button class="btn btn-outline m-0">
+                            <span class="fa fa-microscope"></span><br>
+                            Conduct Account <br> Analysis
+                        </button>
+                    </div>
+                    <div class="pr-2">
+                        <button class="btn btn-outline m-0">
+                            <span class="fa fa-folder"></span><br>
+                            Generate Account <br> Reports
+                        </button>
+                    </div>
+                    <div class="pr-2">
+                        <button class="btn btn-outline m-0">
+                            <span class="fa fa-gear"></span><br>
+                            Manage Account <br> Settings
+                        </button>
+                    </div>
+                    <div class="pr-2">
+                        <button class="btn btn-outline m-0">
+                            <span class="fa fa-upload"></span><br>
+                            Upload Utility <br> Data
+                        </button>
+                    </div>
+                    <div class="pr-2">
+                        <button class="btn btn-outline m-0">
+                            <span class="fa fa-plus"></span><br>
+                            Add New <br> Facility
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

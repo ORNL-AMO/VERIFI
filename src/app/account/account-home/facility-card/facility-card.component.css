@@ -1,0 +1,36 @@
+.fa-industry {
+    font-size: 24.5px;
+}
+
+button span.fa {
+    font-size: 14px;
+}
+
+.card-header,
+.card-footer {
+    background-color: white;
+}
+
+.fa-check-circle {
+    color: green;
+}
+
+.fa-circle {
+    color: red;
+}
+
+.icon-row .fa {
+    color: rgb(29, 95, 216);
+}
+
+.nav-link:hover {
+    background-color: #efefef;
+}
+
+.list-group-item {
+    padding: 0px !important;
+}
+
+.list-group-item .nav-link {
+    padding: .75rem 1.25rem;
+}
