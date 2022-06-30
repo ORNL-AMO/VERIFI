@@ -56,6 +56,7 @@ import { UtilityMetersTableComponent } from './facility/utility-data/energy-cons
 import { UtilityMeterDataTableComponent } from './facility/utility-data/energy-consumption/utility-meter-data/utility-meter-data-table/utility-meter-data-table.component';
 import { EditBillComponent } from './facility/utility-data/energy-consumption/utility-meter-data/edit-bill/edit-bill.component';
 import { AccountHomeComponent } from './account/account-home/account-home.component';
+import { FacilityHomeComponent } from './facility/facility-home/facility-home.component';
 
 const routes: Routes = [
   {
@@ -128,6 +129,10 @@ const routes: Routes = [
       },
       {
         path: 'home',
+        component: FacilityHomeComponent
+      },
+      {
+        path: 'overview',
         component: FacilityDashboardComponent
       },
       {

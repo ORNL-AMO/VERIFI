@@ -15,6 +15,9 @@
         <a title="Account Overview" class="nav-link" routerLink="/account/home" [routerLinkActive]="['active']"><i
                 class="fa fa-home"></i>
         </a>
+        <a title="Account Overview" class="nav-link" routerLink="/account/overview"
+            [routerLinkActive]="['active']"><i class="fa fa-chart-column"></i>
+        </a>
         <a title="Account Analysis" class="nav-link" routerLink="/account/analysis" [routerLinkActive]="['active']"><i
                 class="fa fa-microscope"></i>
         </a>
@@ -37,8 +40,11 @@
         </a>
         <div class="d-flex icon-row"
             [ngClass]="{'flex-column not-open': !open, 'icon-row': open, 'hidden': checkHideFacilityLinks(facility.guid, index)}">
-            <a title="Facility Overview" class="nav-link" routerLink="/facility/{{facility.id}}/home"
+            <a title="Facility Home" class="nav-link" routerLink="/facility/{{facility.id}}/home"
                 [routerLinkActive]="['active']"><i class="fa fa-home"></i>
+            </a>
+            <a title="Facility Overview" class="nav-link" routerLink="/facility/{{facility.id}}/overview"
+                [routerLinkActive]="['active']"><i class="fa fa-chart-column"></i>
             </a>
             <a title="Facility Utility Data" class="nav-link" routerLink="/facility/{{facility.id}}/utility"
                 [routerLinkActive]="['active']"><i class="fa fa-book"></i>

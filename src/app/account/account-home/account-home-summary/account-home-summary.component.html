@@ -7,12 +7,61 @@
                     {{account.zip}}
                     {{account.country}}
                 </p>
-                <hr>
+            </div>
+            <div class="col">
+                <div class="row">
+                    <div class="col-2 text-center">
+                        Baseline
+                    </div>
+                    <div class="col-8 text-center">
+                        Energy Reduction Goal
+                    </div>
+                    <div class="col-2 text-center">
+                        Goal
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-2 text-center">
+                        2018
+                    </div>
+                    <div class="col-8">
+                        <div class="progress">
+                            <div class="progress-bar" role="progressbar" [style.width.%]="25" aria-valuemin="0"
+                                aria-valuemax="20">
+                                <span class="progress-bar-data">5%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-2 text-center">
+                        2027 (20%)
+                    </div>
+                </div>
             </div>
         </div>
         <div class="row">
             <div class="col">
-                <div class="d-flex">
+                <hr>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-4">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <a class="nav-link pl-0" routerLink="/account/analysis">
+                            <span class="fa pr-2 fa-check-circle"></span>
+                            <span>Plant Analysis 2022</span>
+                        </a>
+                    </li>
+                    <li class="list-group-item">
+                        <a class="nav-link pl-0" routerLink="/account/reports">
+                            <span class="fa pr-2 fa-circle"></span>
+                            <span>Better Plants Report 2022</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div class="col">
+                <div class="d-flex justify-content-end">
                     <div class="pr-2">
                         <button class="btn btn-outline m-0">
                             <span class="fa fa-chart-column"></span><br>

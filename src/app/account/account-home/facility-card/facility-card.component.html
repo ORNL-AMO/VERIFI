@@ -1,7 +1,10 @@
 <div class="card">
     <div class="card-header">
-        <h3 class="card-title"> <span class="fa fa-industry pr-2"
-                [ngStyle]="{color: facility.color}"></span>{{facility.name}}</h3>
+        <h3 class="card-title"> <span class="fa fa-industry pr-2" [ngStyle]="{color: facility.color}"></span>
+            <a routerLink="/facility/{{facility.id}}">
+                {{facility.name}}
+            </a>
+        </h3>
 
         <p class="card-text" *ngIf="facility.address">{{facility.address}}, {{facility.city}},
             {{facility.state}}
@@ -52,56 +55,4 @@
             </a>
         </div>
     </div>
-    <!--actions options-->
-    <!--<div class="card-body">
-        <div class="row">
-            <div class="col">
-                <h3 class="card-title"><span class="fa fa-industry" [ngStyle]="{color: facility.color}"></span>
-                    {{facility.name}}</h3>
-                <p class="card-text" *ngIf="facility.address">{{facility.address}}, {{facility.city}},
-                    {{facility.state}}
-                    {{facility.zip}}
-                    {{facility.country}}
-                </p>
-                <hr>
-            </div>
-        </div>
-         <div class="row">
-            <div class="col">
-                <div class="d-flex flex-wrap">
-                    <div class="p-2">
-                        <button class="btn btn-outline m-0">
-                            <span class="fa fa-chart-column"></span><br>
-                            View <br> Facility Overview
-                        </button>
-                    </div>
-                    <div class="p-2">
-                        <button class="btn btn-outline m-0">
-                            <span class="fa fa-book"></span><br>
-                            Manage Facility <br> Utility Data
-                        </button>
-                    </div>
-                    <div class="p-2">
-                        <button class="btn btn-outline m-0">
-                            <span class="fa fa-line-chart"></span><br>
-                            Visualize Facility <br> Data
-                        </button>
-                    </div>
-                    <div class="p-2">
-                        <button class="btn btn-outline m-0">
-                            <span class="fa fa-microscope"></span><br>
-                            Conduct Facility <br> Analysis
-                        </button>
-                    </div>
-                    <div class="p-2">
-                        <button class="btn btn-outline m-0">
-                            <span class="fa fa-gear"></span><br>
-                            Manage Facility <br> Settings
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>-->
-
 </div>
