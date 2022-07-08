@@ -1,8 +1,10 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbAnalysisItem, IdbFacility, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbAnalysisItem, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData, MeterSource } from 'src/app/models/idb';
 import * as _ from 'lodash';
+import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
+import { UtilityColors } from 'src/app/shared/utilityColors';
 @Component({
   selector: 'app-facility-card',
   templateUrl: './facility-card.component.html',
@@ -17,7 +19,9 @@ export class FacilityCardComponent implements OnInit {
   meterDataUpToDate: boolean;
   hasCurrentYearAnalysis: IdbAnalysisItem;
   lastYear: number;
-  constructor(private analysisDbService: AnalysisDbService, private utilityMeterDataDbService: UtilityMeterDatadbService) { }
+  sources: Array<MeterSource>;
+  constructor(private analysisDbService: AnalysisDbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private utilityMeterDbService: UtilityMeterdbService) { }
 
   ngOnInit(): void {
     this.lastYear = new Date().getUTCFullYear() - 1;
@@ -30,7 +34,7 @@ export class FacilityCardComponent implements OnInit {
     this.hasCurrentYearAnalysis = facilityAnalysisItems.find(item => {
       return item.reportYear == this.lastYear;
     })
-
+    this.setSources();
   }
 
 
@@ -47,6 +51,18 @@ export class FacilityCardComponent implements OnInit {
     } else {
       this.meterDataUpToDate = false;
     }
+  }
+
+
+  setSources() {
+    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == this.facility.guid });
+    let sources: Array<MeterSource> = facilityMeters.map(meter => { return meter.source });
+    this.sources = _.uniq(sources);
+  }
+
+  getColor(source: MeterSource): string {
+    return UtilityColors[source].color
   }
 
 }

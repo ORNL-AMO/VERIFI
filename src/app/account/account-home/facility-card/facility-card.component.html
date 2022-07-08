@@ -4,6 +4,7 @@
             <a routerLink="/facility/{{facility.id}}">
                 {{facility.name}}
             </a>
+            <span class="badge ml-3 float-right" *ngFor="let source of sources" [ngStyle]="{'background-color': getColor(source)}">{{source}}</span>  
         </h3>
 
         <p class="card-text" *ngIf="facility.address">{{facility.address}}, {{facility.city}},

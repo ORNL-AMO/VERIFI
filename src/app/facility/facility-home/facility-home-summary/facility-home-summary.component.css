@@ -1,18 +1,23 @@
-.fa-industry {
-    font-size: 24.5px;
+.fa-industry{
+    font-size: 35px;
 }
 
-button span.fa {
-    font-size: 14px;
+.btn span.fa{
+    font-size: 24px
 }
 
-h3.card-title a{
-    font-size: 20px;
+.progress {
+    margin: 7px 0px;
+    /* height: 8px; */
 }
-
-.card-header,
-.card-footer {
-    background-color: white;
+.progress-bar {
+    background-color: #2c386b;
+}
+.progress-bar-data {
+    position: absolute;
+    right: 50%;
+    top: 35px;
+    font-weight: bold;
 }
 
 .fa-check-circle {
@@ -37,8 +42,4 @@ h3.card-title a{
 
 .list-group-item .nav-link {
     padding: .75rem 1.25rem;
-}
-
-h3 .badge{
-    font-size: 12px;
 }

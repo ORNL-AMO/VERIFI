@@ -2,10 +2,10 @@
     <div class="card-body">
         <div class="row">
             <div class="col">
-                <h1 class="card-title"><span class="fa fa-building"></span> {{account.name}}</h1>
-                <p class="card-text" *ngIf="account.address">{{account.address}}, {{account.city}}, {{account.state}}
-                    {{account.zip}}
-                    {{account.country}}
+                <h1 class="card-title"><span class="fa fa-industry" [ngStyle]="{color: facility.color}"></span> {{facility.name}}</h1>
+                <p class="card-text" *ngIf="facility.address">{{facility.address}}, {{facility.city}}, {{facility.state}}
+                    {{facility.zip}}
+                    {{facility.country}}
                 </p>
             </div>
             <div class="col">
@@ -44,19 +44,28 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-4">
-                <!-- <h5>Account Status</h5> -->
+            <div class="col-6">
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item">
-                        <a class="nav-link" routerLink="/account/analysis">
-                            <span class="fa pr-2 fa-check-circle"></span>
-                            <span>Plant Analysis 2022</span>
+                        <a class="nav-link" routerLink="/facility/{{facility.id}}/utility">
+                            <span class="fa pr-2"
+                                [ngClass]="{'fa-check-circle': meterDataUpToDate, 'fa-circle': !meterDataUpToDate}"></span>
+                            <span *ngIf="meterDataUpToDate">Utility Data Up-to Date</span>
+                            <span *ngIf="!meterDataUpToDate">No Meter Data for Last Month</span>
+                            <span class="float-right" *ngIf="lastBill">
+                                Last Reading: {{lastBill.readDate | date}}
+                            </span>
+                            <span class="float-right" *ngIf="!lastBill">
+                                No Readings Found
+                            </span>
                         </a>
                     </li>
                     <li class="list-group-item">
-                        <a class="nav-link" routerLink="/account/reports">
-                            <span class="fa pr-2 fa-circle"></span>
-                            <span>Better Plants Report 2022</span>
+                        <a class="nav-link" routerLink="/facility/{{facility.id}}/analysis">
+                            <span class="fa pr-2"
+                                [ngClass]="{'fa-check-circle': hasCurrentYearAnalysis, 'fa-circle': !hasCurrentYearAnalysis}"></span>
+                            <span *ngIf="hasCurrentYearAnalysis">Annual Analysis Found For {{lastYear}}</span>
+                            <span *ngIf="!hasCurrentYearAnalysis">No Analysis Found For {{lastYear}}</span>
                         </a>
                     </li>
                 </ul>
@@ -66,37 +75,31 @@
                     <div class="pr-2">
                         <button class="btn btn-outline m-0">
                             <span class="fa fa-chart-column"></span><br>
-                            View Account <br> Data Overview
+                            View Facility <br> Data Overview
+                        </button>
+                    </div>
+                    <div class="pr-2">
+                        <button class="btn btn-outline m-0">
+                            <span class="fa fa-book"></span><br>
+                            Manage Utility <br> Data
                         </button>
                     </div>
                     <div class="pr-2">
                         <button class="btn btn-outline m-0">
                             <span class="fa fa-microscope"></span><br>
-                            Conduct Account <br> Analysis
+                            Conduct Facility <br> Analysis
                         </button>
                     </div>
                     <div class="pr-2">
                         <button class="btn btn-outline m-0">
-                            <span class="fa fa-folder"></span><br>
-                            Generate Account <br> Reports
+                            <span class="fa fa-line-chart"></span><br>
+                            Visualize Facility <br> Data
                         </button>
                     </div>
                     <div class="pr-2">
                         <button class="btn btn-outline m-0">
                             <span class="fa fa-gear"></span><br>
-                            Manage Account <br> Settings
-                        </button>
-                    </div>
-                    <div class="pr-2">
-                        <button class="btn btn-outline m-0">
-                            <span class="fa fa-upload"></span><br>
-                            Upload Utility <br> Data
-                        </button>
-                    </div>
-                    <div class="pr-2">
-                        <button class="btn btn-outline m-0">
-                            <span class="fa fa-plus"></span><br>
-                            Add New <br> Facility
+                            Manage Facility <br> Settings
                         </button>
                     </div>
                 </div>
