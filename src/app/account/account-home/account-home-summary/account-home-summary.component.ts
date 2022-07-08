@@ -1,7 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { IdbAccount } from 'src/app/models/idb';
+import { OverviewReportOptionsDbService } from 'src/app/indexedDB/overview-report-options-db.service';
+import { AnnualAnalysisSummary } from 'src/app/models/analysis';
+import { IdbAccount, IdbOverviewReportOptions } from 'src/app/models/idb';
+import { AccountHomeService } from '../account-home.service';
+import * as _ from 'lodash';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-account-home-summary',
@@ -12,16 +17,61 @@ export class AccountHomeSummaryComponent implements OnInit {
 
   account: IdbAccount;
   accountSub: Subscription;
-  constructor(private accountDbService: AccountdbService) { }
+  latestAnalysisSummary: AnnualAnalysisSummary;
+  latestSummarySub: Subscription;
+  percentSavings: number;
+  percentGoal: number;
+  percentTowardsGoal: number;
+  goalYear: number;
+  baselineYear: number;
+
+  betterPlantsReportYear: number;
+  accountAnalysisYear: number;
+
+  overviewReportOptionsSub: Subscription;
+  constructor(private accountDbService: AccountdbService, private accountHomeService: AccountHomeService,
+    private overviewReportOptionsDbService: OverviewReportOptionsDbService, private router: Router) { }
 
   ngOnInit(): void {
     this.accountSub = this.accountDbService.selectedAccount.subscribe(val => {
       this.account = val;
     });
+    this.latestSummarySub = this.accountHomeService.latestAnalysisSummary.subscribe(val => {
+      this.latestAnalysisSummary = val;
+      if (this.latestAnalysisSummary) {
+        this.accountAnalysisYear = this.latestAnalysisSummary.year;
+        this.setProgressPercentages();
+      } else {
+        this.accountAnalysisYear = undefined;
+      }
+    });
+
+    this.overviewReportOptionsSub = this.overviewReportOptionsDbService.accountOverviewReportOptions.subscribe(accountOverviewReportOptions => {
+      let betterPlantsReports: Array<IdbOverviewReportOptions> = accountOverviewReportOptions.filter(options => { return options.type == 'report' && options.reportOptionsType == "betterPlants" });
+      let latestReport: IdbOverviewReportOptions = _.maxBy(betterPlantsReports, 'targetYear');
+      if (latestReport) {
+        this.betterPlantsReportYear = latestReport.targetYear;
+      } else {
+        this.betterPlantsReportYear = undefined;
+      }
+    })
   }
 
-  ngOnDestroy(){
+  ngOnDestroy() {
     this.accountSub.unsubscribe();
+    this.latestSummarySub.unsubscribe();
+    this.overviewReportOptionsSub.unsubscribe();
   }
 
+  setProgressPercentages() {
+    this.percentSavings = this.latestAnalysisSummary.totalSavingsPercentImprovement;
+    this.percentGoal = this.account.sustainabilityQuestions.energyReductionPercent;
+    this.goalYear = this.account.sustainabilityQuestions.energyReductionTargetYear;
+    this.baselineYear = this.account.sustainabilityQuestions.energyReductionBaselineYear;
+    this.percentTowardsGoal = (this.percentSavings / this.percentGoal) * 100;
+  }
+
+  navigateTo(urlStr: string){
+    this.router.navigateByUrl('account/'+urlStr);
+  }
 }

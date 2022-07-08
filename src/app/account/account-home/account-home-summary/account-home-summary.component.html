@@ -8,7 +8,7 @@
                     {{account.country}}
                 </p>
             </div>
-            <div class="col">
+            <div class="col" *ngIf="latestAnalysisSummary">
                 <div class="row">
                     <div class="col-2 text-center">
                         Baseline
@@ -22,18 +22,18 @@
                 </div>
                 <div class="row">
                     <div class="col-2 text-center">
-                        2018
+                        {{baselineYear}}
                     </div>
                     <div class="col-8">
                         <div class="progress">
-                            <div class="progress-bar" role="progressbar" [style.width.%]="25" aria-valuemin="0"
-                                aria-valuemax="20">
-                                <span class="progress-bar-data">5%</span>
+                            <div class="progress-bar" role="progressbar" [style.width.%]="percentTowardsGoal"
+                                aria-valuemin="0" aria-valuemax="percentGoal">
+                                <span class="progress-bar-data">{{percentSavings | number:'1.0-0'}}%</span>
                             </div>
                         </div>
                     </div>
                     <div class="col-2 text-center">
-                        2027 (20%)
+                        {{goalYear}} ({{percentGoal}}%)
                     </div>
                 </div>
             </div>
@@ -49,14 +49,19 @@
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item">
                         <a class="nav-link" routerLink="/account/analysis">
-                            <span class="fa pr-2 fa-check-circle"></span>
-                            <span>Plant Analysis 2022</span>
+                            <span class="fa fa-chevron-right pr-2"></span>
+                            <span>Last Plant Analysis:
+                                <span *ngIf="accountAnalysisYear">{{accountAnalysisYear}}</span>
+                                <span *ngIf="!accountAnalysisYear">&mdash;</span></span>
                         </a>
                     </li>
                     <li class="list-group-item">
                         <a class="nav-link" routerLink="/account/reports">
-                            <span class="fa pr-2 fa-circle"></span>
-                            <span>Better Plants Report 2022</span>
+                            <span class="fa fa-chevron-right pr-2"></span>
+                            <span>Last Better Plants Report:
+                                <span *ngIf="betterPlantsReportYear">{{betterPlantsReportYear}}</span>
+                                <span *ngIf="!betterPlantsReportYear">&mdash;</span>
+                            </span>
                         </a>
                     </li>
                 </ul>
@@ -64,30 +69,31 @@
             <div class="col">
                 <div class="d-flex justify-content-end">
                     <div class="pr-2">
-                        <button class="btn btn-outline m-0">
+                        <button class="btn btn-outline m-0" (click)="navigateTo('overview')">
                             <span class="fa fa-chart-column"></span><br>
                             View Account <br> Data Overview
                         </button>
                     </div>
                     <div class="pr-2">
-                        <button class="btn btn-outline m-0">
+                        <button class="btn btn-outline m-0" (click)="navigateTo('analysis')">
                             <span class="fa fa-microscope"></span><br>
                             Conduct Account <br> Analysis
                         </button>
                     </div>
                     <div class="pr-2">
-                        <button class="btn btn-outline m-0">
+                        <button class="btn btn-outline m-0" (click)="navigateTo('reports')">
                             <span class="fa fa-folder"></span><br>
                             Generate Account <br> Reports
                         </button>
                     </div>
                     <div class="pr-2">
-                        <button class="btn btn-outline m-0">
+                        <button class="btn btn-outline m-0" (click)="navigateTo('settings')">
                             <span class="fa fa-gear"></span><br>
                             Manage Account <br> Settings
                         </button>
                     </div>
-                    <div class="pr-2">
+                    <!--TODO: Add functionality-->
+                    <!-- <div class="pr-2">
                         <button class="btn btn-outline m-0">
                             <span class="fa fa-upload"></span><br>
                             Upload Utility <br> Data
@@ -98,7 +104,7 @@
                             <span class="fa fa-plus"></span><br>
                             Add New <br> Facility
                         </button>
-                    </div>
+                    </div> -->
                 </div>
             </div>
         </div>
