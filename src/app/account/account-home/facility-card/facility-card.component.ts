@@ -1,10 +1,11 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbAnalysisItem, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData, MeterSource } from 'src/app/models/idb';
+import { IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, MeterSource, PredictorData } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityColors } from 'src/app/shared/utilityColors';
+import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 @Component({
   selector: 'app-facility-card',
   templateUrl: './facility-card.component.html',
@@ -17,24 +18,28 @@ export class FacilityCardComponent implements OnInit {
 
   lastBill: IdbUtilityMeterData;
   meterDataUpToDate: boolean;
-  hasCurrentYearAnalysis: IdbAnalysisItem;
-  lastYear: number;
+  latestAnalysisItem: IdbAnalysisItem;
   sources: Array<MeterSource>;
+  facilityPredictors: Array<PredictorData>;
+  latestPredictorEntry: IdbPredictorEntry;
   constructor(private analysisDbService: AnalysisDbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private utilityMeterDbService: UtilityMeterdbService) { }
+    private utilityMeterDbService: UtilityMeterdbService, private predictorDbService: PredictordbService) { }
 
   ngOnInit(): void {
-    this.lastYear = new Date().getUTCFullYear() - 1;
     let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
     let facilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.filter(meterData => { return meterData.facilityId == this.facility.guid });
     this.lastBill = _.maxBy(facilityMeterData, (data: IdbUtilityMeterData) => { return new Date(data.readDate) });
-    this.checkMeterDataUpToDate();
+    // this.checkMeterDataUpToDate();
     let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
     let facilityAnalysisItems: Array<IdbAnalysisItem> = accountAnalysisItems.filter(item => { return item.facilityId == this.facility.guid });
-    this.hasCurrentYearAnalysis = facilityAnalysisItems.find(item => {
-      return item.reportYear == this.lastYear;
-    })
+    this.latestAnalysisItem = _.maxBy(facilityAnalysisItems, 'reportYear');
     this.setSources();
+    let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
+    let facilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(entry => {return entry.facilityId == this.facility.guid});
+    this.latestPredictorEntry = _.maxBy(facilityPredictorEntries, (entry) => {return new Date(entry.date)});
+    if(this.latestPredictorEntry){
+      this.facilityPredictors = this.latestPredictorEntry.predictors;
+    }
   }
 
 
