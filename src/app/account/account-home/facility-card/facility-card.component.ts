@@ -22,23 +22,27 @@ export class FacilityCardComponent implements OnInit {
   sources: Array<MeterSource>;
   facilityPredictors: Array<PredictorData>;
   latestPredictorEntry: IdbPredictorEntry;
+  noMeterData: boolean;
   constructor(private analysisDbService: AnalysisDbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterDbService: UtilityMeterdbService, private predictorDbService: PredictordbService) { }
 
   ngOnInit(): void {
     let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
     let facilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.filter(meterData => { return meterData.facilityId == this.facility.guid });
-    this.lastBill = _.maxBy(facilityMeterData, (data: IdbUtilityMeterData) => { return new Date(data.readDate) });
-    // this.checkMeterDataUpToDate();
-    let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
-    let facilityAnalysisItems: Array<IdbAnalysisItem> = accountAnalysisItems.filter(item => { return item.facilityId == this.facility.guid });
-    this.latestAnalysisItem = _.maxBy(facilityAnalysisItems, 'reportYear');
-    this.setSources();
-    let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
-    let facilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(entry => {return entry.facilityId == this.facility.guid});
-    this.latestPredictorEntry = _.maxBy(facilityPredictorEntries, (entry) => {return new Date(entry.date)});
-    if(this.latestPredictorEntry){
-      this.facilityPredictors = this.latestPredictorEntry.predictors;
+    this.noMeterData = facilityMeterData.length == 0;
+    if (!this.noMeterData) {
+      this.lastBill = _.maxBy(facilityMeterData, (data: IdbUtilityMeterData) => { return new Date(data.readDate) });
+      // this.checkMeterDataUpToDate();
+      let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
+      let facilityAnalysisItems: Array<IdbAnalysisItem> = accountAnalysisItems.filter(item => { return item.facilityId == this.facility.guid });
+      this.latestAnalysisItem = _.maxBy(facilityAnalysisItems, 'reportYear');
+      this.setSources();
+      let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
+      let facilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(entry => { return entry.facilityId == this.facility.guid });
+      this.latestPredictorEntry = _.maxBy(facilityPredictorEntries, (entry) => { return new Date(entry.date) });
+      if (this.latestPredictorEntry) {
+        this.facilityPredictors = this.latestPredictorEntry.predictors;
+      }
     }
   }
 

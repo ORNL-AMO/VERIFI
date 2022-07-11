@@ -6,17 +6,16 @@
         </div>
         <ul class="nav nav-tabs">
             <li class="nav-item">
-                <a class="nav-link" routerLink="home" [routerLinkActive]="['active']"><i
-                        class="fa fa-home"></i>Home</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" routerLink="overview" [routerLinkActive]="['active']"><i
-                        class="fa fa-chart-column"></i>Overview</a>
+                <a class="nav-link" routerLink="home" [routerLinkActive]="['active']"><i class="fa fa-home"></i>Home</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" routerLink="utility" [routerLinkActive]="['active']"><i
                         class="fa fa-book"></i>Utility
                     Data</a>
+            </li>
+            <li class="nav-item" [ngClass]="{'disabled': facilityMeterData.length == 0}">
+                <a class="nav-link" routerLink="overview" [routerLinkActive]="['active']"><i
+                        class="fa fa-chart-column"></i>Overview</a>
             </li>
             <li class="nav-item" [ngClass]="{'disabled': facilityMeterData.length == 0}">
                 <a class="nav-link" routerLink="visualization" [routerLinkActive]="['active']"><i

@@ -46,3 +46,8 @@
 button:hover span.fa{
     color: white;
 }
+
+
+.alert-warning{
+    width: auto;
+}

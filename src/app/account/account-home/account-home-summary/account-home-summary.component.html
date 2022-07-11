@@ -69,25 +69,28 @@
             <div class="col">
                 <div class="d-flex justify-content-end">
                     <div class="pr-2">
-                        <button class="btn btn-outline m-0" (click)="navigateTo('overview')">
+                        <button class="btn btn-outline m-0" (click)="navigateTo('overview')"
+                            [disabled]="disableButtons">
                             <span class="fa fa-chart-column"></span><br>
                             View Account <br> Data Overview
                         </button>
                     </div>
                     <div class="pr-2">
-                        <button class="btn btn-outline m-0" (click)="navigateTo('analysis')">
+                        <button class="btn btn-outline m-0" (click)="navigateTo('analysis')"
+                            [disabled]="disableButtons">
                             <span class="fa fa-microscope"></span><br>
                             Conduct Account <br> Analysis
                         </button>
                     </div>
                     <div class="pr-2">
-                        <button class="btn btn-outline m-0" (click)="navigateTo('reports')">
+                        <button class="btn btn-outline m-0" (click)="navigateTo('reports')" [disabled]="disableButtons">
                             <span class="fa fa-folder"></span><br>
                             Generate Account <br> Reports
                         </button>
                     </div>
                     <div class="pr-2">
-                        <button class="btn btn-outline m-0" (click)="navigateTo('settings')">
+                        <button class="btn btn-outline m-0" (click)="navigateTo('settings')"
+                            [disabled]="disableButtons">
                             <span class="fa fa-gear"></span><br>
                             Manage Account <br> Settings
                         </button>
@@ -105,6 +108,17 @@
                             Add New <br> Facility
                         </button>
                     </div> -->
+                </div>
+            </div>
+        </div>
+        <div class="row" *ngIf="disableButtons">
+            <div class="col-12">
+                <hr>
+                <div class="d-flex justify-content-center">
+                    <div class="alert alert-warning">
+                        No meter data found for this account. Please add meter data to facilities within this account to
+                        begin.
+                    </div>
                 </div>
             </div>
         </div>

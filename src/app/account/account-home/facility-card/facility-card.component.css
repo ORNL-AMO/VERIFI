@@ -42,3 +42,7 @@ h3.card-title a{
 h3 .badge{
     font-size: 12px;
 }
+.card-body.no-meter-data:hover{
+    cursor: pointer;
+    background-color: #efefef;
+}

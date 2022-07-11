@@ -90,7 +90,7 @@
                     </li>
                     <!--analysis-->
 
-                    <li class="list-group-item">
+                    <li class="list-group-item" *ngIf="lastBill">
                         <a class="nav-link" routerLink="/facility/{{facility.id}}/analysis">
                             <span class="fa fa-chevron-right pr-2"></span>
                             <span *ngIf="latestAnalysisItem">Latest Facility Analysis:
@@ -103,34 +103,45 @@
             <div class="col">
                 <div class="d-flex justify-content-end">
                     <div class="pr-2">
-                        <button class="btn btn-outline m-0" (click)="navigateTo('overview')">
-                            <span class="fa fa-chart-column"></span><br>
-                            View Facility <br> Data Overview
-                        </button>
-                    </div>
-                    <div class="pr-2">
                         <button class="btn btn-outline m-0" (click)="navigateTo('utility')">
                             <span class="fa fa-book"></span><br>
                             Manage Utility <br> Data
                         </button>
                     </div>
                     <div class="pr-2">
-                        <button class="btn btn-outline m-0" (click)="navigateTo('visualization')">
+                        <button class="btn btn-outline m-0" (click)="navigateTo('overview')" [disabled]="!lastBill">
+                            <span class="fa fa-chart-column"></span><br>
+                            View Facility <br> Data Overview
+                        </button>
+                    </div>
+                    <div class="pr-2">
+                        <button class="btn btn-outline m-0" (click)="navigateTo('visualization')"
+                            [disabled]="!lastBill">
                             <span class="fa fa-line-chart"></span><br>
                             Visualize Facility <br> Data
                         </button>
                     </div>
                     <div class="pr-2">
-                        <button class="btn btn-outline m-0" (click)="navigateTo('analysis')">
+                        <button class="btn btn-outline m-0" (click)="navigateTo('analysis')" [disabled]="!lastBill">
                             <span class="fa fa-microscope"></span><br>
                             Conduct Facility <br> Analysis
                         </button>
                     </div>
                     <div class="pr-2">
-                        <button class="btn btn-outline m-0" (click)="navigateTo('settings')">
+                        <button class="btn btn-outline m-0" (click)="navigateTo('settings')" [disabled]="!lastBill">
                             <span class="fa fa-gear"></span><br>
                             Manage Facility <br> Settings
                         </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row" *ngIf="!lastBill">
+            <div class="col-12">
+                <hr>
+                <div class="d-flex justify-content-center">
+                    <div class="alert alert-warning">
+                        No meter data found for this facility. Please add meter data to this facility to begin.
                     </div>
                 </div>
             </div>

@@ -16,6 +16,14 @@
         <div class="col-4 mt-3" *ngFor="let meter of facilityMeters">
             <app-meter-card [meter]="meter"></app-meter-card>
         </div>
+        <div class="col-4 mt-3" *ngIf="facilityMeters.length == 0">
+            <div class="card no-data-card" (click)="navigateToMeters()">
+                <div class="card-body text-center">
+                    <h5>No utility meters found for this facility.</h5>
+                    <p>Please click here to <i class="fa fa-book"></i> Manage Utility Data.</p>
+                </div>
+            </div>
+        </div>
         <div class="col-12">
             <hr>
         </div>

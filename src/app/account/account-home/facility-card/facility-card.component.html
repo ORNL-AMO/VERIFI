@@ -11,7 +11,7 @@
             {{facility.country}}
         </p>
     </div>
-    <ul class="list-group list-group-flush">
+    <ul class="list-group list-group-flush" *ngIf="!noMeterData">
         <!--meters-->
         <li class="list-group-item">
             <a class="nav-link" routerLink="/facility/{{facility.id}}/utility">
@@ -61,6 +61,13 @@
             </a>
         </li>
     </ul>
+    <!--No Meter Data for Facility-->
+    <div *ngIf="noMeterData" class="card-body text-center no-meter-data" routerLink="/facility/{{facility.id}}/utility">
+        <h5>No utility meters found for this facility.</h5>
+        <p>Please click here to <i class="fa fa-book"></i> Manage Utility Data.</p>
+    </div>
+
+
     <div class="card-footer">
         <div class="d-flex icon-row">
             <a title="Facility Overview" class="nav-link" routerLink="/facility/{{facility.id}}/home"><i
@@ -69,11 +76,11 @@
             <a title="Facility Utility Data" class="nav-link" routerLink="/facility/{{facility.id}}/utility"><i
                     class="fa fa-book"></i>
             </a>
-            <a title="Facility Data Visualization" class="nav-link"
-                routerLink="/facility/{{facility.id}}/visualization"><i class="fa fa-chart-line"></i>
+            <a title="Facility Data Visualization" class="nav-link" routerLink="/facility/{{facility.id}}/visualization"
+                *ngIf="!noMeterData"><i class="fa fa-chart-line"></i>
             </a>
-            <a title="Facility Analysis" class="nav-link" routerLink="/facility/{{facility.id}}/analysis"><i
-                    class="fa fa-microscope"></i>
+            <a title="Facility Analysis" class="nav-link" routerLink="/facility/{{facility.id}}/analysis"
+                *ngIf="!noMeterData"><i class="fa fa-microscope"></i>
             </a>
             <a title="Facility Settings" class="nav-link" routerLink="/facility/{{facility.id}}/settings"><i
                     class="fa fa-cog"></i>
