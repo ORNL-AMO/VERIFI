@@ -5,6 +5,7 @@ import { FacilityHomeSummaryComponent } from './facility-home-summary/facility-h
 import { RouterModule } from '@angular/router';
 import { ScorecardStatusComponent } from './scorecard-status/scorecard-status.component';
 import { MeterCardComponent } from './meter-card/meter-card.component';
+import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.module';
 
 
 
@@ -17,7 +18,8 @@ import { MeterCardComponent } from './meter-card/meter-card.component';
   ],
   imports: [
     CommonModule,
-    RouterModule
+    RouterModule,
+    HelperPipesModule
   ]
 })
 export class FacilityHomeModule { }

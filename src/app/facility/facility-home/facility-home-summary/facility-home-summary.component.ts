@@ -11,6 +11,7 @@ import { Router } from '@angular/router';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityColors } from 'src/app/shared/utilityColors';
+import { OverviewReportService } from 'src/app/account/overview-report/overview-report.service';
 
 @Component({
   selector: 'app-facility-home-summary',
@@ -42,14 +43,17 @@ export class FacilityHomeSummaryComponent implements OnInit {
   facilityPredictors: Array<PredictorData>;
   latestPredictorEntry: IdbPredictorEntry;
 
-
+  naics: string;
   constructor(private analysisDbService: AnalysisDbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private facilityDbService: FacilitydbService, private facilityHomeService: FacilityHomeService,
-    private router: Router, private predictorDbService: PredictordbService, private utilityMeterDbService: UtilityMeterdbService) { }
+    private router: Router, private predictorDbService: PredictordbService, 
+    private utilityMeterDbService: UtilityMeterdbService,
+    private overviewReportService: OverviewReportService) { }
 
   ngOnInit(): void {
     this.latestSummarySub = this.facilityHomeService.latestAnalysisSummary.subscribe(val => {
       this.facility = this.facilityDbService.selectedFacility.getValue();
+      this.setNAICS();
       this.latestAnalysisSummary = val;
       if (this.latestAnalysisSummary) {
         this.facilityAnalysisYear = this.latestAnalysisSummary.year;
@@ -121,6 +125,10 @@ export class FacilityHomeSummaryComponent implements OnInit {
 
   getColor(source: MeterSource): string {
     return UtilityColors[source].color
+  }
+
+  setNAICS(){
+    this.naics = this.overviewReportService.getNAICS(this.facility);
   }
 
 }

@@ -6,6 +6,7 @@ import * as _ from 'lodash';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityColors } from 'src/app/shared/utilityColors';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
+import { OverviewReportService } from '../../overview-report/overview-report.service';
 @Component({
   selector: 'app-facility-card',
   templateUrl: './facility-card.component.html',
@@ -23,8 +24,10 @@ export class FacilityCardComponent implements OnInit {
   facilityPredictors: Array<PredictorData>;
   latestPredictorEntry: IdbPredictorEntry;
   noMeterData: boolean;
+  naics: string;
   constructor(private analysisDbService: AnalysisDbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private utilityMeterDbService: UtilityMeterdbService, private predictorDbService: PredictordbService) { }
+    private utilityMeterDbService: UtilityMeterdbService, private predictorDbService: PredictordbService,
+    private overviewReportService: OverviewReportService) { }
 
   ngOnInit(): void {
     let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
@@ -44,6 +47,7 @@ export class FacilityCardComponent implements OnInit {
         this.facilityPredictors = this.latestPredictorEntry.predictors;
       }
     }
+    this.setNAICS();
   }
 
 
@@ -72,6 +76,10 @@ export class FacilityCardComponent implements OnInit {
 
   getColor(source: MeterSource): string {
     return UtilityColors[source].color
+  }
+
+  setNAICS(){
+    this.naics = this.overviewReportService.getNAICS(this.facility);
   }
 
 }

@@ -4,6 +4,7 @@ import { AccountHomeComponent } from './account-home.component';
 import { AccountHomeSummaryComponent } from './account-home-summary/account-home-summary.component';
 import { FacilityCardComponent } from './facility-card/facility-card.component';
 import { RouterModule } from '@angular/router';
+import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.module';
 
 
 
@@ -15,7 +16,8 @@ import { RouterModule } from '@angular/router';
   ],
   imports: [
     CommonModule,
-    RouterModule
+    RouterModule,
+    HelperPipesModule
   ]
 })
 export class AccountHomeModule { }

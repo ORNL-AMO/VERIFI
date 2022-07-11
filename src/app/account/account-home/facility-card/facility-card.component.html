@@ -5,10 +5,26 @@
                 {{facility.name}}
             </a>
         </h3>
-        <p class="card-text" *ngIf="facility.address">{{facility.address}}, {{facility.city}},
-            {{facility.state}}
-            {{facility.zip}}
-            {{facility.country}}
+        <p class="card-text">
+            <span *ngIf="facility.address"> {{facility.address}}, {{facility.city}},
+                {{facility.state}}
+                {{facility.zip}}
+                {{facility.country}}
+            </span>
+            <span *ngIf="!facility.address">
+                Address: &mdash;
+            </span>
+        </p>
+        <p>
+            Contact:
+            <span *ngIf="facility.contactName" class="pr-2">{{facility.contactName}},</span>
+            <span *ngIf="facility.contactEmail" class="pr-2">{{facility.contactEmail}},</span>
+            <span *ngIf="facility.contactPhone">{{facility.contactPhone | phoneNumber}}</span>
+            <span *ngIf="!facility.contactPhone && !facility.contactEmail && !facility.contactName">&mdash;</span>
+        </p>
+        <p class="card-text">NAICS:
+            <span *ngIf="naics">{{naics}}</span>
+            <span *ngIf="!naics">&mdash;</span>
         </p>
     </div>
     <ul class="list-group list-group-flush" *ngIf="!noMeterData">

@@ -9,6 +9,17 @@
                     {{facility.zip}}
                     {{facility.country}}
                 </p>
+                <p>
+                    Contact:
+                    <span *ngIf="facility.contactName" class="pr-2">{{facility.contactName}},</span>
+                    <span *ngIf="facility.contactEmail" class="pr-2">{{facility.contactEmail}},</span>
+                    <span *ngIf="facility.contactPhone">{{facility.contactPhone | phoneNumber}}</span>
+                    <span *ngIf="!facility.contactPhone && !facility.contactEmail && !facility.contactName">&mdash;</span>
+                </p>
+                <p class="card-text">NAICS:
+                    <span *ngIf="naics">{{naics}}</span>
+                    <span *ngIf="!naics">&mdash;</span>
+                </p>
             </div>
             <div class="col" *ngIf="latestAnalysisSummary">
                 <div class="row">
