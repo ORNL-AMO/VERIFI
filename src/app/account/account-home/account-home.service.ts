@@ -52,6 +52,5 @@ export class AccountHomeService {
     } else {
       this.latestAnalysisSummary.next(undefined);
     }
-
   }
 }

@@ -43,3 +43,6 @@
 .list-group-item .nav-link {
     padding: .75rem 1.25rem;
 }
+button:hover span.fa{
+    color: white;
+}
