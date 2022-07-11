@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbFacility } from 'src/app/models/idb';
+import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
 import { FacilityHomeService } from './facility-home.service';
 
 @Component({
@@ -13,14 +15,18 @@ import { FacilityHomeService } from './facility-home.service';
 export class FacilityHomeComponent implements OnInit {
 
   facilityMeterDataSub: Subscription;
+  facilityMeters: Array<IdbUtilityMeter>;
+  facility: IdbFacility;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private facilityDbService: FacilitydbService,
-    private facilityHomeService: FacilityHomeService) { }
+    private facilityHomeService: FacilityHomeService, private utilityMeterDbService: UtilityMeterdbService,
+    private router: Router) { }
 
   ngOnInit(): void {
     this.facilityMeterDataSub = this.facilityDbService.selectedFacility.subscribe(val => {
-      let selectedFacility: IdbFacility = val;
-      this.facilityHomeService.setCalanderizedMeters(selectedFacility);
-      this.facilityHomeService.setAnalysisSummary(selectedFacility);
+      this.facility = val;
+      this.facilityHomeService.setCalanderizedMeters(this.facility);
+      this.facilityHomeService.setAnalysisSummary(this.facility);
+      this.facilityMeters = this.utilityMeterDbService.facilityMeters.getValue();
     })
   }
 
@@ -28,4 +34,8 @@ export class FacilityHomeComponent implements OnInit {
     this.facilityMeterDataSub.unsubscribe();
   }
 
+
+  navigateToMeters() {
+    this.router.navigateByUrl('facility/' + this.facility.id + '/utility');
+  }
 }

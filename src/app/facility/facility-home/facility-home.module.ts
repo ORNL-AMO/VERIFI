@@ -4,6 +4,7 @@ import { FacilityHomeComponent } from './facility-home.component';
 import { FacilityHomeSummaryComponent } from './facility-home-summary/facility-home-summary.component';
 import { RouterModule } from '@angular/router';
 import { ScorecardStatusComponent } from './scorecard-status/scorecard-status.component';
+import { MeterCardComponent } from './meter-card/meter-card.component';
 
 
 
@@ -11,7 +12,8 @@ import { ScorecardStatusComponent } from './scorecard-status/scorecard-status.co
   declarations: [
     FacilityHomeComponent,
     FacilityHomeSummaryComponent,
-    ScorecardStatusComponent
+    ScorecardStatusComponent,
+    MeterCardComponent
   ],
   imports: [
     CommonModule,

@@ -1,10 +1,23 @@
 <div class="measur-wrapper main-content">
     <app-facility-home-summary></app-facility-home-summary>
     <hr>
-    <!-- <div class="row">
-        <div class="col-6">
-            <app-scorecard-status></app-scorecard-status>
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title mb-0">
+                        <a (click)="navigateToMeters()">
+                            Meters
+                        </a>
+                    </h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-4 mt-3" *ngFor="let meter of facilityMeters">
+            <app-meter-card [meter]="meter"></app-meter-card>
+        </div>
+        <div class="col-12">
             <hr>
         </div>
-    </div> -->
+    </div>
 </div>
