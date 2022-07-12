@@ -28,6 +28,7 @@ export class SidebarComponent implements OnInit {
   selectedFacilitySub: Subscription;
   showSidebar: boolean;
   showAllFacilities: boolean = false;
+  hoverIndex: number;
   constructor(private localStorageService: LocalStorageService, private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService, private router: Router,
     private sharedDataService: SharedDataService) {
@@ -76,7 +77,7 @@ export class SidebarComponent implements OnInit {
 
 
   checkHideFacilityLinks(facilityId: string, index: number): boolean {
-    if (this.showAllFacilities && index > 0) {
+    if (this.showAllFacilities && index > 0 && index != this.hoverIndex) {
       return true;
     } else {
       if (this.open && !this.showAllFacilities) {
@@ -84,7 +85,9 @@ export class SidebarComponent implements OnInit {
       } else if (this.router.url.includes('account')) {
         return true;
       } else if (this.selectedFacility) {
-        if (this.selectedFacility.guid != facilityId) {
+        if(index == this.hoverIndex){
+          return false;
+        }else  if (this.selectedFacility.guid != facilityId) {
           return true;
         }
       }
@@ -138,6 +141,10 @@ export class SidebarComponent implements OnInit {
 
   toggleShowAllFacilities() {
     this.showAllFacilities = !this.showAllFacilities;
+  }
+
+  setHoverIndex(index: number){
+    this.hoverIndex = index;
   }
 }
 

@@ -11,6 +11,7 @@ import { UtilityDataModule } from './utility-data/utility-data.module';
 import { AnalysisModule } from './analysis/analysis.module';
 import { FacilityDashboardModule } from './facility-dashboard/facility-dashboard.module';
 import { VisualizationModule } from './visualization/visualization.module';
+import { FacilityHomeModule } from './facility-home/facility-home.module';
 
 
 @NgModule({
@@ -28,7 +29,8 @@ import { VisualizationModule } from './visualization/visualization.module';
     UtilityDataModule,
     AnalysisModule,
     FacilityDashboardModule,
-    VisualizationModule
+    VisualizationModule,
+    FacilityHomeModule
   ]
 })
 export class FacilityModule { }

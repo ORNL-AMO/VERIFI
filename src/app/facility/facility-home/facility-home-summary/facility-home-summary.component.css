@@ -1,0 +1,53 @@
+.fa-industry{
+    font-size: 35px;
+}
+
+.btn span.fa{
+    font-size: 24px
+}
+
+.progress {
+    margin: 7px 0px;
+    /* height: 8px; */
+}
+.progress-bar {
+    background-color: #2c386b;
+}
+.progress-bar-data {
+    position: absolute;
+    right: 50%;
+    top: 35px;
+    font-weight: bold;
+}
+
+.fa-check-circle {
+    color: green;
+}
+
+.fa-circle {
+    color: red;
+}
+
+.icon-row .fa {
+    color: rgb(29, 95, 216);
+}
+
+.nav-link:hover {
+    background-color: #efefef;
+}
+
+.list-group-item {
+    padding: 0px !important;
+}
+
+.list-group-item .nav-link {
+    padding: .75rem 1.25rem;
+}
+button:hover span.fa{
+    color: white;
+}
+
+
+.alert-warning{
+    width: auto;
+}

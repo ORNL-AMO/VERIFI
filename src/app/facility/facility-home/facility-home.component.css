@@ -1,0 +1,12 @@
+.card-header{
+    background-color: white;
+}
+
+h2 a {
+    font-size: 28px;
+}
+
+.card.no-data-card:hover{
+    cursor: pointer;
+    background-color: #efefef;
+}
