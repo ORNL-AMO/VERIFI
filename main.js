@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, Menu } = require('electron');
+const { app, BrowserWindow, ipcMain, Menu, shell } = require('electron');
 const path = require('path');
 const url = require('url');
 const log = require('electron-log');
@@ -100,6 +100,15 @@ app.on('ready', function () {
     Menu.setApplicationMenu(Menu.buildFromTemplate(template));
     win.setMenuBarVisibility(false)
 
+    win.webContents.on('new-window', function (e, url) {
+        // make sure local urls stay in electron perimeter
+        if ('file://' === url.substr(0, 'file://'.length)) {
+            return;
+        }
+        
+        e.preventDefault();
+        shell.openExternal(url);
+    });
 
 });
 
