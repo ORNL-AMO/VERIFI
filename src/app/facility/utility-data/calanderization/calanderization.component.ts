@@ -225,6 +225,7 @@ export class CalanderizationComponent implements OnInit {
     if (this.selectedFacility.energyIsSource != energyIsSource) {
       this.selectedFacility.energyIsSource = energyIsSource;
       await this.dbChangesService.updateFacilities(this.selectedFacility);
+      this.setCalanderizedMeterData();
     }
   }
 
