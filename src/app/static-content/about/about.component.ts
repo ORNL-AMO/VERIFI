@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ElectronService } from 'src/app/electron/electron.service';
 
 @Component({
   selector: 'app-about',
@@ -7,9 +8,11 @@ import { Component, OnInit } from '@angular/core';
 })
 export class AboutComponent implements OnInit {
 
-  constructor() { }
+  isElectron: boolean;
+  constructor(private electronService: ElectronService) { }
 
   ngOnInit(): void {
+    this.isElectron = this.electronService.isElectron;
   }
 
 }
