@@ -39,13 +39,18 @@
             </li>
             <li class="list-group-item">
                 Scope:
-                <span *ngIf="meter.scope">{{meter.scope}}</span>
+                <span *ngIf="meter.scope">{{meter.scope | scopeLabel}}</span>
                 <span *ngIf="!meter.scope">&mdash;</span>
             </li>
             <li class="list-group-item">
                 Agreement Type:
-                <span *ngIf="meter.agreementType">{{meter.agreementType}}</span>
+                <span *ngIf="meter.agreementType">{{meter.agreementType | agreementTypeLabel}}</span>
                 <span *ngIf="!meter.agreementType">&mdash;</span>
+            </li>
+            <li class="list-group-item">
+                Meter Group:
+                <span *ngIf="meter.groupId">{{meter.groupId | groupName}}</span>
+                <span *ngIf="!meter.groupId">&mdash;</span>
             </li>
         </ul>
     </div>

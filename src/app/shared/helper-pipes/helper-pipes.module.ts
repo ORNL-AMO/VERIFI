@@ -10,6 +10,8 @@ import { GroupNamePipe } from './group-name.pipe';
 import { FacilityNamePipe } from './facility-name.pipe';
 import { MonthLabelPipe } from './month-label.pipe';
 import { PhoneNumberPipe } from './phone-number.pipe';
+import { ScopeLabelPipe } from './scope-label.pipe';
+import { AgreementTypeLabelPipe } from './agreement-type-label.pipe';
 
 @NgModule({
   declarations: [
@@ -22,7 +24,9 @@ import { PhoneNumberPipe } from './phone-number.pipe';
     GroupNamePipe,
     FacilityNamePipe,
     MonthLabelPipe,
-    PhoneNumberPipe
+    PhoneNumberPipe,
+    ScopeLabelPipe,
+    AgreementTypeLabelPipe
   ],
   imports: [
     CommonModule
@@ -37,7 +41,9 @@ import { PhoneNumberPipe } from './phone-number.pipe';
     GroupNamePipe,
     FacilityNamePipe,
     MonthLabelPipe,
-    PhoneNumberPipe
+    PhoneNumberPipe,
+    ScopeLabelPipe,
+    AgreementTypeLabelPipe
   ]
 })
 export class HelperPipesModule { }

@@ -54,8 +54,12 @@
                     </th>
                     <th (click)="setOrderDataField('startingUnit')"
                         [ngClass]="{'active': orderDataField == 'startingUnit'}">Collection Units</th>
-                    <th (click)="setOrderDataField('heatCapacity')"
-                        [ngClass]="{'active': orderDataField == 'heatCapacity'}">Heat Capacity</th>
+                    <!-- <th (click)="setOrderDataField('heatCapacity')"
+                        [ngClass]="{'active': orderDataField == 'heatCapacity'}">Heat Capacity</th> -->
+                    <th (click)="setOrderDataField('scope')" [ngClass]="{'active': orderDataField == 'scope'}">Scope
+                    </th>
+                    <th (click)="setOrderDataField('agreementType')"
+                        [ngClass]="{'active': orderDataField == 'agreementType'}">Agreement Type</th>
                     <th (click)="setOrderDataField('siteToSource')"
                         [ngClass]="{'active': orderDataField == 'siteToSource'}">STS</th>
                     <th *ngIf="!copyingTable">Actions</th>
@@ -78,7 +82,9 @@
                     <td>
                         <span [innerHTML]="meter.startingUnit | settingsLabel"></span>
                     </td>
-                    <td>{{meter.heatCapacity}}</td>
+                    <!-- <td>{{meter.heatCapacity}}</td> -->
+                    <td>{{meter.scope | scopeLabel}}</td>
+                    <td>{{meter.agreementType | agreementTypeLabel}}</td>
                     <td>{{meter.siteToSource}}</td>
                     <td class="actions" *ngIf="!copyingTable">
                         <div class="d-flex">
