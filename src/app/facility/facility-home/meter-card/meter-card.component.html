@@ -1,0 +1,57 @@
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title mb-0">
+            <a (click)="navigateToMeter()">
+                {{meter.name}}
+            </a>
+            <span class="badge ml-2 float-right" [ngStyle]="{'background-color': sourceColor}">
+                {{meter.source}}</span>
+        </h3>
+    </div>
+    <div class="card-body p-0">
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item">
+                Latest Reading:
+                <span *ngIf="lastBill">{{lastBill.readDate | date}}</span>
+                <span *ngIf="!lastBill">
+                    No Meter Readings Found For Facility
+                </span>
+            </li>
+            <li class="list-group-item">
+                Meter #:
+                <span *ngIf="meter.meterNumber">{{meter.meterNumber}}</span>
+                <span *ngIf="!meter.meterNumber">&mdash;</span>
+            </li>
+            <li class="list-group-item">
+                Account #:
+                <span *ngIf="meter.accountNumber">{{meter.accountNumber}}</span>
+                <span *ngIf="!meter.accountNumber">&mdash;</span>
+            </li>
+            <li class="list-group-item">
+                Building / Location:
+                <span *ngIf="meter.location">{{meter.location}}</span>
+                <span *ngIf="!meter.location">&mdash;</span>
+            </li>
+            <li class="list-group-item">
+                Utility Supplier:
+                <span *ngIf="meter.supplier">{{meter.supplier}}</span>
+                <span *ngIf="!meter.supplier">&mdash;</span>
+            </li>
+            <li class="list-group-item">
+                Scope:
+                <span *ngIf="meter.scope">{{meter.scope | scopeLabel}}</span>
+                <span *ngIf="!meter.scope">&mdash;</span>
+            </li>
+            <li class="list-group-item">
+                Agreement Type:
+                <span *ngIf="meter.agreementType">{{meter.agreementType | agreementTypeLabel}}</span>
+                <span *ngIf="!meter.agreementType">&mdash;</span>
+            </li>
+            <li class="list-group-item">
+                Meter Group:
+                <span *ngIf="meter.groupId">{{meter.groupId | groupName}}</span>
+                <span *ngIf="!meter.groupId">&mdash;</span>
+            </li>
+        </ul>
+    </div>
+</div>

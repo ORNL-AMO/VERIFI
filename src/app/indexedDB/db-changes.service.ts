@@ -68,7 +68,7 @@ export class DbChangesService {
 
   selectFacility(facility: IdbFacility) {
     facility = this.updateDbEntryService.updateFacility(facility).facility;
-    this.updateFacilities(facility);
+    this.updateFacilities(facility, true);
     console.log('DB Changes Select Facility');
     //set analaysis
     this.setFacilityAnalysisItems(facility);
@@ -102,11 +102,13 @@ export class DbChangesService {
     this.analysisDbService.facilityAnalysisItems.next(facilityAnalysisItems);
   }
 
-  async updateFacilities(selectedFacility: IdbFacility) {
+  async updateFacilities(selectedFacility: IdbFacility, onSelect?: boolean) {
     let facilities: Array<IdbFacility> = await this.facilityDbService.updateWithObservable(selectedFacility).toPromise();
     let accountFacilites: Array<IdbFacility> = facilities.filter(facility => { return facility.accountId == selectedFacility.accountId });
     this.facilityDbService.accountFacilities.next(accountFacilites);
-    this.facilityDbService.selectedFacility.next(selectedFacility);
+    if (!onSelect) {
+      this.facilityDbService.selectedFacility.next(selectedFacility);
+    }
   }
 
 

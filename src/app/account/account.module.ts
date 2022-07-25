@@ -10,6 +10,7 @@ import { SettingsFormsModule } from '../shared/settings-forms/settings-forms.mod
 import { OverviewReportModule } from './overview-report/overview-report.module';
 import { AccountDashboardModule } from './account-dashboard/account-dashboard.module';
 import { AccountAnalysisModule } from './account-analysis/account-analysis.module';
+import { AccountHomeModule } from './account-home/account-home.module';
 
 
 @NgModule({
@@ -26,7 +27,8 @@ import { AccountAnalysisModule } from './account-analysis/account-analysis.modul
     SettingsFormsModule,
     OverviewReportModule,
     AccountDashboardModule,
-    AccountAnalysisModule
+    AccountAnalysisModule,
+    AccountHomeModule
   ]
 })
 export class AccountModule { }

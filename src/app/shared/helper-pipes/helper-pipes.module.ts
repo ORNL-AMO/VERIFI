@@ -9,6 +9,9 @@ import { PredictorsOrderByPipe } from './predictors-order-by.pipe';
 import { GroupNamePipe } from './group-name.pipe';
 import { FacilityNamePipe } from './facility-name.pipe';
 import { MonthLabelPipe } from './month-label.pipe';
+import { PhoneNumberPipe } from './phone-number.pipe';
+import { ScopeLabelPipe } from './scope-label.pipe';
+import { AgreementTypeLabelPipe } from './agreement-type-label.pipe';
 
 @NgModule({
   declarations: [
@@ -20,7 +23,10 @@ import { MonthLabelPipe } from './month-label.pipe';
     PredictorsOrderByPipe,
     GroupNamePipe,
     FacilityNamePipe,
-    MonthLabelPipe
+    MonthLabelPipe,
+    PhoneNumberPipe,
+    ScopeLabelPipe,
+    AgreementTypeLabelPipe
   ],
   imports: [
     CommonModule
@@ -34,7 +40,10 @@ import { MonthLabelPipe } from './month-label.pipe';
     PredictorsOrderByPipe,
     GroupNamePipe,
     FacilityNamePipe,
-    MonthLabelPipe
+    MonthLabelPipe,
+    PhoneNumberPipe,
+    ScopeLabelPipe,
+    AgreementTypeLabelPipe
   ]
 })
 export class HelperPipesModule { }

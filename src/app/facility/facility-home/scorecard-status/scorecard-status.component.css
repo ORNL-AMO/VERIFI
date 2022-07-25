@@ -1,0 +1,11 @@
+.card-header, thead tr{
+    background-color: white;
+}
+
+th, td{
+    text-align: center;
+}
+
+.fa-check-circle{
+    color: green;
+}
