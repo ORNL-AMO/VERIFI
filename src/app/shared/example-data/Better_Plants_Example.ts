@@ -378,7 +378,12 @@ export const ExampleAccount: BackupFile = {
         "heatCapacity": null,
         "notes": null,
         "fuel": null,
-        "id": 1
+        "id": 1,
+        "scope": 1,
+        "agreementType": 1,
+        "includeInEnergy": true,
+        "retainRECs": false,
+        "directConnection": false
     }, {
         "facilityId": "lloxg8thm",
         "accountId": "7u3rax079",
@@ -402,7 +407,12 @@ export const ExampleAccount: BackupFile = {
         "heatCapacity": null,
         "notes": null,
         "fuel": null,
-        "id": 2
+        "id": 2,
+        "scope": 1,
+        "agreementType": 1,
+        "includeInEnergy": true,
+        "retainRECs": false,
+        "directConnection": false
     }, {
         "facilityId": "lloxg8thm",
         "accountId": "7u3rax079",
@@ -426,7 +436,12 @@ export const ExampleAccount: BackupFile = {
         "heatCapacity": null,
         "notes": null,
         "fuel": null,
-        "id": 3
+        "id": 3,
+        "scope": 1,
+        "agreementType": 1,
+        "includeInEnergy": true,
+        "retainRECs": false,
+        "directConnection": false
     }, {
         "facilityId": "lloxg8thm",
         "accountId": "7u3rax079",
@@ -450,7 +465,12 @@ export const ExampleAccount: BackupFile = {
         "heatCapacity": null,
         "notes": null,
         "fuel": null,
-        "id": 4
+        "id": 4,
+        "scope": 1,
+        "agreementType": 1,
+        "includeInEnergy": true,
+        "retainRECs": false,
+        "directConnection": false
     }, {
         "facilityId": "lloxg8thm",
         "accountId": "7u3rax079",
@@ -474,7 +494,12 @@ export const ExampleAccount: BackupFile = {
         "location": null,
         "notes": null,
         "fuel": null,
-        "id": 5
+        "id": 5,
+        "scope": 1,
+        "agreementType": 1,
+        "includeInEnergy": true,
+        "retainRECs": false,
+        "directConnection": false
     }, {
         "facilityId": "lloxg8thm",
         "accountId": "7u3rax079",
@@ -498,7 +523,12 @@ export const ExampleAccount: BackupFile = {
         "location": null,
         "notes": null,
         "fuel": null,
-        "id": 6
+        "id": 6,
+        "scope": 1,
+        "agreementType": 1,
+        "includeInEnergy": true,
+        "retainRECs": false,
+        "directConnection": false
     }, {
         "facilityId": "a707n579s",
         "accountId": "7u3rax079",
@@ -519,7 +549,12 @@ export const ExampleAccount: BackupFile = {
         "visible": true,
         "unitsDifferent": false,
         "meterReadingDataApplication": "backward",
-        "id": 7
+        "id": 7,
+        "scope": 1,
+        "agreementType": 1,
+        "includeInEnergy": true,
+        "retainRECs": false,
+        "directConnection": false
     }, {
         "facilityId": "a707n579s",
         "accountId": "7u3rax079",
@@ -538,7 +573,12 @@ export const ExampleAccount: BackupFile = {
         "emissionsOutputRate": 53.06,
         "visible": true,
         "meterReadingDataApplication": "backward",
-        "id": 8
+        "id": 8,
+        "scope": 1,
+        "agreementType": 1,
+        "includeInEnergy": true,
+        "retainRECs": false,
+        "directConnection": false
     }, {
         "facilityId": "w6vezy41e",
         "accountId": "7u3rax079",
@@ -559,7 +599,12 @@ export const ExampleAccount: BackupFile = {
         "visible": true,
         "unitsDifferent": false,
         "meterReadingDataApplication": "backward",
-        "id": 9
+        "id": 9,
+        "scope": 1,
+        "agreementType": 1,
+        "includeInEnergy": true,
+        "retainRECs": false,
+        "directConnection": false
     }, {
         "facilityId": "w6vezy41e",
         "accountId": "7u3rax079",
@@ -578,7 +623,12 @@ export const ExampleAccount: BackupFile = {
         "emissionsOutputRate": 53.06,
         "visible": true,
         "meterReadingDataApplication": "backward",
-        "id": 10
+        "id": 10,
+        "scope": 1,
+        "agreementType": 1,
+        "includeInEnergy": true,
+        "retainRECs": false,
+        "directConnection": false
     }, {
         "facilityId": "w6vezy41e",
         "accountId": "7u3rax079",
@@ -598,7 +648,12 @@ export const ExampleAccount: BackupFile = {
         "emissionsOutputRate": 0.43078,
         "visible": true,
         "meterReadingDataApplication": "backward",
-        "id": 11
+        "id": 11,
+        "scope": 1,
+        "agreementType": 1,
+        "includeInEnergy": true,
+        "retainRECs": false,
+        "directConnection": false
     }, {
         "facilityId": "ec78jbgxy",
         "accountId": "7u3rax079",
@@ -616,7 +671,12 @@ export const ExampleAccount: BackupFile = {
         "unitsDifferent": false,
         "meterReadingDataApplication": "backward",
         "groupId": "fdezk5ox8",
-        "id": 12
+        "id": 12,
+        "scope": 1,
+        "agreementType": 1,
+        "includeInEnergy": true,
+        "retainRECs": false,
+        "directConnection": false
     }, {
         "facilityId": "ec78jbgxy",
         "accountId": "7u3rax079",
@@ -634,7 +694,12 @@ export const ExampleAccount: BackupFile = {
         "emissionsOutputRate": 53.06,
         "visible": true,
         "meterReadingDataApplication": "backward",
-        "id": 13
+        "id": 13,
+        "scope": 1,
+        "agreementType": 1,
+        "includeInEnergy": true,
+        "retainRECs": false,
+        "directConnection": false
     }],
     "meterData": [{
         "meterId": "xj4miz2s2",
@@ -15424,7 +15489,12 @@ export const ExampleAccount: BackupFile = {
             "id": 103,
             "unitsDifferent": false,
             "meterReadingDataApplication": "backward",
-            "groupId": "8dswweqdb"
+            "groupId": "8dswweqdb",            
+            "scope": 3,
+            "agreementType": 1,
+            "includeInEnergy": true,
+            "retainRECs": false,
+            "directConnection": false,
         }],
         "totalConsumption": 250181.81676871455,
         "totalEnergyUse": 250181.81676871455,
@@ -15780,7 +15850,13 @@ export const ExampleAccount: BackupFile = {
             "emissionsOutputRate": 53.06,
             "visible": true,
             "id": 104,
-            "meterReadingDataApplication": "backward"
+            "meterReadingDataApplication": "backward",
+            
+            "scope": 3,
+            "agreementType": 1,
+            "includeInEnergy": true,
+            "retainRECs": false,
+            "directConnection": false,
         }],
         "totalConsumption": 845186.1037837118,
         "totalEnergyUse": 86800.61285858722,
@@ -22303,9 +22379,9 @@ export const ExampleAccount: BackupFile = {
             "production": true,
             "productionInAnalysis": true
         }],
-        "dbDate":new Date("2022-06-20T18:46:06.871Z"),
-        "id":185
+        "dbDate": new Date("2022-06-20T18:46:06.871Z"),
+        "id": 185
     }],
-    "backupFileType":"Account",
-    "origin":"VERIFI"
+    "backupFileType": "Account",
+    "origin": "VERIFI"
 }

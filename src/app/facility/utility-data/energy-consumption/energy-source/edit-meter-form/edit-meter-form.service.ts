@@ -14,7 +14,7 @@ export class EditMeterFormService {
     let fuelValidators: Array<ValidatorFn> = this.getFuelValidation(meter.source);
     let phaseValidators: Array<ValidatorFn> = this.getPhaseValidation(meter.source);
     let heatCapacityValidators: Array<ValidatorFn> = this.getHeatCapacitValidation(meter.source, meter.startingUnit);
-    let siteToSourceValidators: Array<ValidatorFn> = this.getSiteToSourceValidation(meter.source, meter.startingUnit);
+    let siteToSourceValidators: Array<ValidatorFn> = this.getSiteToSourceValidation(meter.source, meter.startingUnit, meter.includeInEnergy);
     let emissionsOutputRateValidators: Array<ValidatorFn> = this.getEmissionsOutputRateValidation(meter.source);
     let form: FormGroup = this.formBuilder.group({
       meterNumber: [meter.meterNumber],
@@ -94,8 +94,8 @@ export class EditMeterFormService {
     }
   }
 
-  getSiteToSourceValidation(source: MeterSource, startingUnit: string): Array<ValidatorFn> {
-    let checkShowSiteToSource: boolean = this.checkShowSiteToSource(source, startingUnit);
+  getSiteToSourceValidation(source: MeterSource, startingUnit: string, includeInEnergy: boolean): Array<ValidatorFn> {
+    let checkShowSiteToSource: boolean = this.checkShowSiteToSource(source, startingUnit, includeInEnergy);
     if (checkShowSiteToSource) {
       return [Validators.required, Validators.min(0)];
     } else {
@@ -121,8 +121,10 @@ export class EditMeterFormService {
     }
   }
 
-  checkShowSiteToSource(source: MeterSource, startingUnit: string): boolean {
-    if (source == "Electricity" || source == "Natural Gas") {
+  checkShowSiteToSource(source: MeterSource, startingUnit: string, includeInEnergy: boolean): boolean {
+    if(!includeInEnergy){
+      return false;
+    }else if (source == "Electricity" || source == "Natural Gas") {
       return true;
     } else if (source != 'Waste Water' && source != 'Water' && source != 'Other Utility' && startingUnit) {
       return (this.energyUnitsHelperService.isEnergyUnit(startingUnit) == false);

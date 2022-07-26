@@ -173,7 +173,7 @@ export class EditMeterFormComponent implements OnInit {
     let heatCapacityValidators: Array<ValidatorFn> = this.editMeterFormService.getHeatCapacitValidation(this.meterForm.controls.source.value, this.meterForm.controls.startingUnit.value);
     this.meterForm.controls.heatCapacity.setValidators(heatCapacityValidators);
     this.meterForm.controls.heatCapacity.updateValueAndValidity();
-    let siteToSourceValidation: Array<ValidatorFn> = this.editMeterFormService.getSiteToSourceValidation(this.meterForm.controls.source.value, this.meterForm.controls.startingUnit.value);
+    let siteToSourceValidation: Array<ValidatorFn> = this.editMeterFormService.getSiteToSourceValidation(this.meterForm.controls.source.value, this.meterForm.controls.startingUnit.value, this.meterForm.controls.includeInEnergy.value);
     this.meterForm.controls.siteToSource.setValidators(siteToSourceValidation);
     this.meterForm.controls.siteToSource.updateValueAndValidity();
   }
@@ -214,7 +214,7 @@ export class EditMeterFormComponent implements OnInit {
   }
 
   checkShowSiteToSource() {
-    this.displaySiteToSource = this.editMeterFormService.checkShowSiteToSource(this.meterForm.controls.source.value, this.meterForm.controls.startingUnit.value);
+    this.displaySiteToSource = this.editMeterFormService.checkShowSiteToSource(this.meterForm.controls.source.value, this.meterForm.controls.startingUnit.value, this.meterForm.controls.includeInEnergy.value);
   }
 
   checkShowEmissionsOutputRate() {
@@ -352,5 +352,14 @@ export class EditMeterFormComponent implements OnInit {
     }else{
       this.meterForm.controls.retainRECs.patchValue(true);
     }
+  }
+
+  setIncludeEnergy(){
+    if(this.meterForm.controls.includeInEnergy.value == false){
+      this.meterForm.controls.siteToSource.patchValue(1);
+    }else{
+      this.setSiteToSource();
+    }
+    this.checkShowSiteToSource();
   }
 }

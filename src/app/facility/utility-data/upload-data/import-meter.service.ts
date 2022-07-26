@@ -212,7 +212,7 @@ export class ImportMeterService {
         if (showHeatCapacity) {
           newMeter.heatCapacity = this.energyUseCalculationsService.getHeatingCapacity(newMeter.source, newMeter.startingUnit, newMeter.energyUnit);
         }
-        let showSiteToSource: boolean = this.editMeterFormService.checkShowSiteToSource(newMeter.source, newMeter.startingUnit);
+        let showSiteToSource: boolean = this.editMeterFormService.checkShowSiteToSource(newMeter.source, newMeter.startingUnit, newMeter.includeInEnergy);
         if (showSiteToSource) {
           newMeter.siteToSource = this.energyUseCalculationsService.getSiteToSource(newMeter.source);
         }
