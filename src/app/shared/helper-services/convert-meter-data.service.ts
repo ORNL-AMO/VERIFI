@@ -44,7 +44,7 @@ export class ConvertMeterDataService {
   }
 
   applySiteToSourceMultiplier(meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData>): Array<IdbUtilityMeterData> {
-    let showSiteToSource: boolean = this.editMeterFormService.checkShowSiteToSource(meter.source, meter.startingUnit);
+    let showSiteToSource: boolean = this.editMeterFormService.checkShowSiteToSource(meter.source, meter.startingUnit, meter.includeInEnergy);
     if (showSiteToSource && meter.siteToSource) {
       for (let index = 0; index < meterData.length; index++) {
         meterData[index].totalEnergyUse = meterData[index].totalEnergyUse * meter.siteToSource;

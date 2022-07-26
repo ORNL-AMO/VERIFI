@@ -140,11 +140,11 @@ export interface IdbUtilityMeter {
     unitsDifferent?: boolean,
     ignoreDuplicateMonths?: boolean,
     ignoreMissingMonths?: boolean,
-    scope?: number,
-    agreementType?: number,
-    includeInEnergy?: boolean,
-    retainRECs?: boolean,
-    directConnection?: boolean
+    scope: number,
+    agreementType: number,
+    includeInEnergy: boolean,
+    retainRECs: boolean,
+    directConnection: boolean
 
 }
 
