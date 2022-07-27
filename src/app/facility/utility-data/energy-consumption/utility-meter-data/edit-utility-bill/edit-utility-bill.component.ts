@@ -1,7 +1,10 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbUtilityMeter, IdbUtilityMeterData, MeterSource } from 'src/app/models/idb';
+import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData, MeterSource } from 'src/app/models/idb';
+import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
+import { EditMeterFormService } from '../../energy-source/edit-meter-form/edit-meter-form.service';
 
 @Component({
   selector: 'app-edit-utility-bill',
@@ -27,9 +30,16 @@ export class EditUtilityBillComponent implements OnInit {
   energyUnit: string;
   source: MeterSource;
   volumeUnit: string;
-  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService) { }
+  totalEmissions: number = 0;
+  facility: IdbFacility;
+  showEmissions: boolean;
+  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private facilityDbService: FacilitydbService,
+     private calanderizationService: CalanderizationService, private editMeterFormService: EditMeterFormService) { }
 
   ngOnInit(): void {
+    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    this.facility = accountFacilities.find(facility => {return facility.guid == this.editMeter.facilityId});
+    this.showEmissions = this.editMeterFormService.checkShowEmissionsOutputRate(this.editMeter.source);
   }
 
   ngOnChanges(){
@@ -37,11 +47,13 @@ export class EditUtilityBillComponent implements OnInit {
     this.energyUnit = this.editMeter.energyUnit;
     this.volumeUnit = this.editMeter.startingUnit;
     this.checkDate();
+    this.setTotalEmissions();
   }
 
   calculateTotalEnergyUse() {
     let totalEnergyUse: number = this.meterDataForm.controls.totalVolume.value * this.editMeter.heatCapacity;
     this.meterDataForm.controls.totalEnergyUse.patchValue(totalEnergyUse);
+    this.setTotalEmissions();
   }
   
   checkDate() {
@@ -57,6 +69,14 @@ export class EditUtilityBillComponent implements OnInit {
       } else {
         this.invalidDate = this.utilityMeterDataDbService.checkMeterReadingExistForDate(this.meterDataForm.controls.readDate.value, this.editMeter) != undefined;
       }
+    }
+  }
+
+  setTotalEmissions(){
+    if(this.meterDataForm.controls.totalEnergyUse.value && this.showEmissions){
+      this.totalEmissions = this.calanderizationService.getEmissions(this.editMeter, this.meterDataForm.controls.totalEnergyUse.value, this.editMeter.energyUnit, this.facility.energyIsSource)
+    }else{
+      this.totalEmissions = 0;
     }
   }
 

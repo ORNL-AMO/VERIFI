@@ -1,10 +1,12 @@
 import { Component, ElementRef, EventEmitter, Input, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { SupplyDemandChargeFilters, TaxAndOtherFilters } from 'src/app/models/electricityFilter';
-import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { UtilityMeterDataService } from '../utility-meter-data.service';
 import * as _ from 'lodash';
 import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
+import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 
 @Component({
   selector: 'app-electricity-data-table',
@@ -38,7 +40,8 @@ export class ElectricityDataTableComponent implements OnInit {
   orderByDirection: string = 'desc';
   currentPageNumber: number = 1;
   copyingTable: boolean = false;
-  constructor(private utilityMeterDataService: UtilityMeterDataService, private copyTableService: CopyTableService) { }
+  constructor(private utilityMeterDataService: UtilityMeterDataService, private copyTableService: CopyTableService,
+    private calanderizationService: CalanderizationService, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
     this.energyUnit = this.selectedMeter.startingUnit;
@@ -51,6 +54,7 @@ export class ElectricityDataTableComponent implements OnInit {
       this.supplyDemandCharge = electricityDataFilters.supplyDemandCharge;
       this.showTotalDemand = electricityDataFilters.showTotalDemand;
     });
+    this.setEmissions();
   }
 
   ngOnDestroy() {
@@ -125,12 +129,20 @@ export class ElectricityDataTableComponent implements OnInit {
     // }
     return undefined;
   }
-  
-  copyTable(){
+
+  copyTable() {
     this.copyingTable = true;
     setTimeout(() => {
       this.copyTableService.copyTable(this.meterTable);
       this.copyingTable = false;
     }, 200)
+  }
+
+  setEmissions() {
+    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let facility: IdbFacility = accountFacilities.find(facility => { return facility.guid == this.selectedMeter.facilityId });
+    this.selectedMeterData.forEach(dataItem => {
+      dataItem.totalEmissions = this.calanderizationService.getEmissions(this.selectedMeter, dataItem.totalEnergyUse, this.selectedMeter.energyUnit, facility.energyIsSource);
+    })
   }
 }

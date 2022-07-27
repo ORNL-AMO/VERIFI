@@ -3,8 +3,10 @@ import { FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { ElectricityDataFilters, SupplyDemandChargeFilters, TaxAndOtherFilters } from 'src/app/models/electricityFilter';
-import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { UtilityMeterDataService } from '../utility-meter-data.service';
+import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 
 @Component({
   selector: 'app-edit-electricity-bill',
@@ -32,7 +34,10 @@ export class EditElectricityBillComponent implements OnInit {
   supplyDemandFilters: SupplyDemandChargeFilters;
   taxAndOtherFilters: TaxAndOtherFilters;
   energyUnit: string;
-  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private utilityMeterDataService: UtilityMeterDataService) { }
+  totalEmissions: number = 0;
+  facility: IdbFacility;
+  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private utilityMeterDataService: UtilityMeterDataService,
+    private calanderizationService: CalanderizationService, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
     this.electricityDataFiltersSub = this.utilityMeterDataService.electricityInputFilters.subscribe(dataFilters => {
@@ -40,11 +45,14 @@ export class EditElectricityBillComponent implements OnInit {
       this.taxAndOtherFilters = dataFilters.taxAndOther
       this.setDisplayColumns();
     });
+    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    this.facility = accountFacilities.find(facility => {return facility.guid == this.editMeter.facilityId});
   }
 
   ngOnChanges() {
     this.energyUnit = this.editMeter.startingUnit;
     this.checkDate();
+    this.setTotalEmissions();
   }
 
   ngOnDestroy() {
@@ -84,6 +92,14 @@ export class EditElectricityBillComponent implements OnInit {
       } else {
         this.invalidDate = this.utilityMeterDataDbService.checkMeterReadingExistForDate(this.meterDataForm.controls.readDate.value, this.editMeter) != undefined;
       }
+    }
+  }
+
+  setTotalEmissions(){
+    if(this.meterDataForm.controls.totalEnergyUse.value){
+      this.totalEmissions = this.calanderizationService.getEmissions(this.editMeter, this.meterDataForm.controls.totalEnergyUse.value, this.editMeter.energyUnit, this.facility.energyIsSource)
+    }else{
+      this.totalEmissions = 0;
     }
   }
 
