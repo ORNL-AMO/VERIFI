@@ -30,7 +30,9 @@ export class MeterSummaryService {
         energyUse: undefined,
         energyCost: undefined,
         date: new Date(reportOptions.targetYear, 11),
-        emissions: undefined
+        emissions: undefined,
+        GHGOffsets: undefined,
+        RECs: undefined
       }
     }
     facilityMeters.forEach(meter => {
@@ -178,7 +180,9 @@ export class MeterSummaryService {
         energyUse: undefined,
         energyCost: undefined,
         date: new Date(reportOptions.targetYear, 11),
-        emissions: undefined
+        emissions: undefined,
+        GHGOffsets: undefined,
+        RECs: undefined
       }
       reportOptions.facilities.forEach(facility => {
         if (facility.selected) {

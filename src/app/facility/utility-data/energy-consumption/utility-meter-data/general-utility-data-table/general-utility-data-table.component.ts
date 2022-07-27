@@ -142,7 +142,10 @@ export class GeneralUtilityDataTableComponent implements OnInit {
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     let facility: IdbFacility = accountFacilities.find(facility => { return facility.guid == this.selectedMeter.facilityId });
     this.selectedMeterData.forEach(dataItem => {
-      dataItem.totalEmissions = this.calanderizationService.getEmissions(this.selectedMeter, dataItem.totalEnergyUse, this.selectedMeter.energyUnit, facility.energyIsSource);
+      let emissionsValues: { RECs: number, totalEmissions: number, GHGOffsets: number } = this.calanderizationService.getEmissions(this.selectedMeter, dataItem.totalEnergyUse, this.selectedMeter.energyUnit, facility.energyIsSource);
+      dataItem.totalEmissions = emissionsValues.totalEmissions;
+      dataItem.RECs = emissionsValues.RECs;
+      dataItem.GHGOffsets = emissionsValues.GHGOffsets;
     })
   }
 }

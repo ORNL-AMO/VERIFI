@@ -34,15 +34,15 @@ export class EditUtilityBillComponent implements OnInit {
   facility: IdbFacility;
   showEmissions: boolean;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private facilityDbService: FacilitydbService,
-     private calanderizationService: CalanderizationService, private editMeterFormService: EditMeterFormService) { }
+    private calanderizationService: CalanderizationService, private editMeterFormService: EditMeterFormService) { }
 
   ngOnInit(): void {
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-    this.facility = accountFacilities.find(facility => {return facility.guid == this.editMeter.facilityId});
+    this.facility = accountFacilities.find(facility => { return facility.guid == this.editMeter.facilityId });
     this.showEmissions = this.editMeterFormService.checkShowEmissionsOutputRate(this.editMeter.source);
   }
 
-  ngOnChanges(){
+  ngOnChanges() {
     this.source = this.editMeter.source;
     this.energyUnit = this.editMeter.energyUnit;
     this.volumeUnit = this.editMeter.startingUnit;
@@ -55,7 +55,7 @@ export class EditUtilityBillComponent implements OnInit {
     this.meterDataForm.controls.totalEnergyUse.patchValue(totalEnergyUse);
     this.setTotalEmissions();
   }
-  
+
   checkDate() {
     if (this.addOrEdit == 'add') {
       //new meter entry should have any year/month combo of existing meter reading
@@ -72,10 +72,11 @@ export class EditUtilityBillComponent implements OnInit {
     }
   }
 
-  setTotalEmissions(){
-    if(this.meterDataForm.controls.totalEnergyUse.value && this.showEmissions){
-      this.totalEmissions = this.calanderizationService.getEmissions(this.editMeter, this.meterDataForm.controls.totalEnergyUse.value, this.editMeter.energyUnit, this.facility.energyIsSource)
-    }else{
+  setTotalEmissions() {
+    if (this.meterDataForm.controls.totalEnergyUse.value && this.showEmissions) {
+      let emissionsValues: { RECs: number, totalEmissions: number, GHGOffsets: number } = this.calanderizationService.getEmissions(this.editMeter, this.meterDataForm.controls.totalEnergyUse.value, this.editMeter.energyUnit, this.facility.energyIsSource);
+      this.totalEmissions = emissionsValues.totalEmissions;
+    } else {
       this.totalEmissions = 0;
     }
   }

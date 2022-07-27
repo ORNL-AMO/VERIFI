@@ -37,7 +37,7 @@ export class EditMeterFormService {
       includeInEnergy: [meter.includeInEnergy],
       retainRECs: [meter.retainRECs],
       directConnection: [meter.directConnection],
-      greenPurchaseFraction: [meter.greenPurchaseFraction, [Validators.min(0), Validators.max(100)]]
+      greenPurchaseFraction: [meter.greenPurchaseFraction * 100, [Validators.min(0), Validators.max(100)]]
     });
     // if(form.controls.source.value == 'Electricity'){
     //   form.controls.startingUnit.disable();
@@ -67,22 +67,27 @@ export class EditMeterFormService {
     meter.includeInEnergy = form.controls.includeInEnergy.value;
     meter.retainRECs = form.controls.retainRECs.value;
     meter.directConnection = form.controls.directConnection.value;
-    meter.greenPurchaseFraction = form.controls.greenPurchaseFraction.value;
+    meter.greenPurchaseFraction = form.controls.greenPurchaseFraction.value / 100;
 
     //set multipliers
-    let greenPurchaseFraction: number;
-    if(meter.agreementType == 5){
-      //Green Product
-      greenPurchaseFraction = meter.greenPurchaseFraction;
+    if (meter.source == 'Electricity') {
+      let greenPurchaseFraction: number;
+      if (meter.agreementType == 5) {
+        //Green Product
+        greenPurchaseFraction = meter.greenPurchaseFraction;
+      }
+
+      let multipliers: {
+        GHGMultiplier: number,
+        recsMultiplier: number
+      } = this.getMultipliers(meter.includeInEnergy, meter.retainRECs, greenPurchaseFraction);
+
+      meter.GHGMultiplier = multipliers.GHGMultiplier;
+      meter.recsMultiplier = multipliers.recsMultiplier;
+    }else{
+      meter.GHGMultiplier = 1;
+      meter.recsMultiplier = 0;
     }
-
-    let multipliers: {
-      GHGMultiplier: number,
-      recsMultiplier: number
-    }  = this.getMultipliers(meter.includeInEnergy, meter.retainRECs, greenPurchaseFraction);
-
-    meter.GHGMultiplier = multipliers.GHGMultiplier;
-    meter.recsMultiplier = multipliers.recsMultiplier;
     return meter;
   }
 
@@ -165,17 +170,18 @@ export class EditMeterFormService {
     let GHGMultiplier: number = 1;
     let recsMultiplier: number = 0;
 
-    if(retainRECs){
+    if (retainRECs) {
       GHGMultiplier = 0;
       recsMultiplier = 1;
     }
 
-    if(!includeInEnergy){
+    if (!includeInEnergy) {
       GHGMultiplier = 0;
     }
 
-    if(greenPurchaseFraction != undefined){
-      recsMultiplier = greenPurchaseFraction / 100;
+    if (greenPurchaseFraction != undefined) {
+      recsMultiplier = greenPurchaseFraction;
+      GHGMultiplier = 1;
     }
 
     return {

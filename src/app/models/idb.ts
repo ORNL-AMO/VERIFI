@@ -188,7 +188,9 @@ export interface IdbUtilityMeterData {
     latePayment?: number,
     meterNumber?: string,
     totalImportConsumption?: number
-    totalEmissions?: number
+    totalEmissions?: number,
+    RECs?: number,
+    GHGOffsets?: number
 }
 
 export interface IdbPredictorEntry {
