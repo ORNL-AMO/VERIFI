@@ -383,7 +383,10 @@ export const ExampleAccount: BackupFile = {
         "agreementType": 1,
         "includeInEnergy": true,
         "retainRECs": false,
-        "directConnection": false
+        "directConnection": false,
+        "GHGMultiplier": 1,
+        "recsMultiplier": 0,
+        "greenPurchaseFraction": .5
     }, {
         "facilityId": "lloxg8thm",
         "accountId": "7u3rax079",
@@ -412,7 +415,10 @@ export const ExampleAccount: BackupFile = {
         "agreementType": 1,
         "includeInEnergy": true,
         "retainRECs": false,
-        "directConnection": false
+        "directConnection": false,
+        "GHGMultiplier": 1,
+        "recsMultiplier": 0,
+        "greenPurchaseFraction": .5
     }, {
         "facilityId": "lloxg8thm",
         "accountId": "7u3rax079",
@@ -441,7 +447,10 @@ export const ExampleAccount: BackupFile = {
         "agreementType": 1,
         "includeInEnergy": true,
         "retainRECs": false,
-        "directConnection": false
+        "directConnection": false,
+        "GHGMultiplier": 1,
+        "recsMultiplier": 0,
+        "greenPurchaseFraction": .5
     }, {
         "facilityId": "lloxg8thm",
         "accountId": "7u3rax079",
@@ -470,7 +479,10 @@ export const ExampleAccount: BackupFile = {
         "agreementType": 1,
         "includeInEnergy": true,
         "retainRECs": false,
-        "directConnection": false
+        "directConnection": false,
+        "GHGMultiplier": 1,
+        "recsMultiplier": 0,
+        "greenPurchaseFraction": .5
     }, {
         "facilityId": "lloxg8thm",
         "accountId": "7u3rax079",
@@ -499,7 +511,10 @@ export const ExampleAccount: BackupFile = {
         "agreementType": 1,
         "includeInEnergy": true,
         "retainRECs": false,
-        "directConnection": false
+        "directConnection": false,
+        "GHGMultiplier": 1,
+        "recsMultiplier": 0,
+        "greenPurchaseFraction": .5
     }, {
         "facilityId": "lloxg8thm",
         "accountId": "7u3rax079",
@@ -528,7 +543,10 @@ export const ExampleAccount: BackupFile = {
         "agreementType": 1,
         "includeInEnergy": true,
         "retainRECs": false,
-        "directConnection": false
+        "directConnection": false,
+        "GHGMultiplier": 1,
+        "recsMultiplier": 0,
+        "greenPurchaseFraction": .5
     }, {
         "facilityId": "a707n579s",
         "accountId": "7u3rax079",
@@ -554,7 +572,10 @@ export const ExampleAccount: BackupFile = {
         "agreementType": 1,
         "includeInEnergy": true,
         "retainRECs": false,
-        "directConnection": false
+        "directConnection": false,
+        "GHGMultiplier": 1,
+        "recsMultiplier": 0,
+        "greenPurchaseFraction": .5
     }, {
         "facilityId": "a707n579s",
         "accountId": "7u3rax079",
@@ -578,7 +599,10 @@ export const ExampleAccount: BackupFile = {
         "agreementType": 1,
         "includeInEnergy": true,
         "retainRECs": false,
-        "directConnection": false
+        "directConnection": false,
+        "GHGMultiplier": 1,
+        "recsMultiplier": 0,
+        "greenPurchaseFraction": .5
     }, {
         "facilityId": "w6vezy41e",
         "accountId": "7u3rax079",
@@ -604,7 +628,10 @@ export const ExampleAccount: BackupFile = {
         "agreementType": 1,
         "includeInEnergy": true,
         "retainRECs": false,
-        "directConnection": false
+        "directConnection": false,
+        "GHGMultiplier": 1,
+        "recsMultiplier": 0,
+        "greenPurchaseFraction": .5
     }, {
         "facilityId": "w6vezy41e",
         "accountId": "7u3rax079",
@@ -628,7 +655,10 @@ export const ExampleAccount: BackupFile = {
         "agreementType": 1,
         "includeInEnergy": true,
         "retainRECs": false,
-        "directConnection": false
+        "directConnection": false,
+        "GHGMultiplier": 1,
+        "recsMultiplier": 0,
+        "greenPurchaseFraction": .5
     }, {
         "facilityId": "w6vezy41e",
         "accountId": "7u3rax079",
@@ -653,7 +683,10 @@ export const ExampleAccount: BackupFile = {
         "agreementType": 1,
         "includeInEnergy": true,
         "retainRECs": false,
-        "directConnection": false
+        "directConnection": false,
+        "GHGMultiplier": 1,
+        "recsMultiplier": 0,
+        "greenPurchaseFraction": .5
     }, {
         "facilityId": "ec78jbgxy",
         "accountId": "7u3rax079",
@@ -676,7 +709,10 @@ export const ExampleAccount: BackupFile = {
         "agreementType": 1,
         "includeInEnergy": true,
         "retainRECs": false,
-        "directConnection": false
+        "directConnection": false,
+        "GHGMultiplier": 1,
+        "recsMultiplier": 0,
+        "greenPurchaseFraction": .5
     }, {
         "facilityId": "ec78jbgxy",
         "accountId": "7u3rax079",
@@ -699,7 +735,10 @@ export const ExampleAccount: BackupFile = {
         "agreementType": 1,
         "includeInEnergy": true,
         "retainRECs": false,
-        "directConnection": false
+        "directConnection": false,
+        "GHGMultiplier": 1,
+        "recsMultiplier": 0,
+        "greenPurchaseFraction": .5
     }],
     "meterData": [{
         "meterId": "xj4miz2s2",
@@ -15495,6 +15534,9 @@ export const ExampleAccount: BackupFile = {
             "includeInEnergy": true,
             "retainRECs": false,
             "directConnection": false,
+            "GHGMultiplier": 1,
+            "recsMultiplier": 0,
+            "greenPurchaseFraction": .5
         }],
         "totalConsumption": 250181.81676871455,
         "totalEnergyUse": 250181.81676871455,
@@ -15857,6 +15899,9 @@ export const ExampleAccount: BackupFile = {
             "includeInEnergy": true,
             "retainRECs": false,
             "directConnection": false,
+            "GHGMultiplier": 1,
+            "recsMultiplier": 0,
+            "greenPurchaseFraction": .5
         }],
         "totalConsumption": 845186.1037837118,
         "totalEnergyUse": 86800.61285858722,

@@ -144,8 +144,10 @@ export interface IdbUtilityMeter {
     agreementType: number,
     includeInEnergy: boolean,
     retainRECs: boolean,
-    directConnection: boolean
-
+    directConnection: boolean,
+    GHGMultiplier: number,
+    recsMultiplier: number,
+    greenPurchaseFraction: number
 }
 
 export interface IdbUtilityMeterData {
