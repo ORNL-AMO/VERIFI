@@ -36,7 +36,8 @@ export class EditMeterFormService {
       agreementType: [meter.agreementType],
       includeInEnergy: [meter.includeInEnergy],
       retainRECs: [meter.retainRECs],
-      directConnection: [meter.directConnection]
+      directConnection: [meter.directConnection],
+      greenPurchaseFraction: [meter.greenPurchaseFraction * 100, [Validators.min(0), Validators.max(100)]]
     });
     // if(form.controls.source.value == 'Electricity'){
     //   form.controls.startingUnit.disable();
@@ -66,6 +67,27 @@ export class EditMeterFormService {
     meter.includeInEnergy = form.controls.includeInEnergy.value;
     meter.retainRECs = form.controls.retainRECs.value;
     meter.directConnection = form.controls.directConnection.value;
+    meter.greenPurchaseFraction = form.controls.greenPurchaseFraction.value / 100;
+
+    //set multipliers
+    if (meter.source == 'Electricity') {
+      let greenPurchaseFraction: number;
+      if (meter.agreementType == 5) {
+        //Green Product
+        greenPurchaseFraction = meter.greenPurchaseFraction;
+      }
+
+      let multipliers: {
+        GHGMultiplier: number,
+        recsMultiplier: number
+      } = this.getMultipliers(meter.includeInEnergy, meter.retainRECs, greenPurchaseFraction);
+
+      meter.GHGMultiplier = multipliers.GHGMultiplier;
+      meter.recsMultiplier = multipliers.recsMultiplier;
+    }else{
+      meter.GHGMultiplier = 1;
+      meter.recsMultiplier = 0;
+    }
     return meter;
   }
 
@@ -103,7 +125,7 @@ export class EditMeterFormService {
     }
   }
 
-  getEmissionsOutputRateValidation(source: MeterSource):Array<ValidatorFn> {
+  getEmissionsOutputRateValidation(source: MeterSource): Array<ValidatorFn> {
     let showEmissionsOutputRate: boolean = this.checkShowEmissionsOutputRate(source);
     if (showEmissionsOutputRate) {
       return [Validators.required, Validators.min(0)];
@@ -122,9 +144,9 @@ export class EditMeterFormService {
   }
 
   checkShowSiteToSource(source: MeterSource, startingUnit: string, includeInEnergy: boolean): boolean {
-    if(!includeInEnergy){
+    if (!includeInEnergy) {
       return false;
-    }else if (source == "Electricity" || source == "Natural Gas") {
+    } else if (source == "Electricity" || source == "Natural Gas") {
       return true;
     } else if (source != 'Waste Water' && source != 'Water' && source != 'Other Utility' && startingUnit) {
       return (this.energyUnitsHelperService.isEnergyUnit(startingUnit) == false);
@@ -138,6 +160,33 @@ export class EditMeterFormService {
       return true;
     } else {
       return false;
+    }
+  }
+
+  getMultipliers(includeInEnergy: boolean, retainRECs: boolean, greenPurchaseFraction?: number): {
+    GHGMultiplier: number,
+    recsMultiplier: number
+  } {
+    let GHGMultiplier: number = 1;
+    let recsMultiplier: number = 0;
+
+    if (retainRECs) {
+      GHGMultiplier = 0;
+      recsMultiplier = 1;
+    }
+
+    if (!includeInEnergy) {
+      GHGMultiplier = 0;
+    }
+
+    if (greenPurchaseFraction != undefined) {
+      recsMultiplier = greenPurchaseFraction;
+      GHGMultiplier = 1;
+    }
+
+    return {
+      GHGMultiplier: GHGMultiplier,
+      recsMultiplier: recsMultiplier
     }
   }
 }

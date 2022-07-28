@@ -1,7 +1,7 @@
 <table class="table table-sm" #meterDataTable [ngClass]="{'copying-table': copyingTable}">
     <thead>
         <tr class="table-mh">
-            <th colspan=5>{{calanderizedMeter.meter.name}}
+            <th colspan=6>{{calanderizedMeter.meter.name}}
                 <span class="item-right small source-label">{{calanderizedMeter.meter.source}}</span>
             </th>
         </tr>
@@ -19,6 +19,14 @@
             <th (click)="setOrderDataField('emissions')" [ngClass]="{'active': orderDataField == 'emissions'}"
                 *ngIf="calanderizedMeter.showEmissions">
                 Total Emissions<br> (kg CO<sub>2</sub>)
+            </th>
+            <th (click)="setOrderDataField('GHGOffsets')" [ngClass]="{'active': orderDataField == 'GHGOffsets'}"
+                *ngIf="calanderizedMeter.showEmissions">
+                Total Emissions Used <br>For Summation<br> (kg CO<sub>2</sub>)
+            </th>
+            <th (click)="setOrderDataField('RECs')" [ngClass]="{'active': orderDataField == 'RECs'}"
+                *ngIf="calanderizedMeter.showEmissions">
+                RECs<br> (<span [innerHTML]="calanderizedMeter.energyUnit | settingsLabel"></span>)
             </th>
             <th (click)="setOrderDataField('energyCost')" [ngClass]="{'active': orderDataField == 'energyCost'}">Total
                 Cost</th>
@@ -39,6 +47,14 @@
             <td *ngIf="calanderizedMeter.showEmissions">
                 <span *ngIf="data.emissions">{{data.emissions | number:'1.0-0'}}</span>
                 <span *ngIf="!data.emissions">N/A</span>
+            </td>
+            <td *ngIf="calanderizedMeter.showEmissions">
+                <span *ngIf="data.GHGOffsets">{{data.GHGOffsets | number:'1.0-0'}}</span>
+                <span *ngIf="!data.GHGOffsets">N/A</span>
+            </td>
+            <td *ngIf="calanderizedMeter.showEmissions">
+                <span *ngIf="data.RECs">{{data.RECs | number:'1.0-0'}}</span>
+                <span *ngIf="!data.RECs">N/A</span>
             </td>
             <td>
                 <span *ngIf="data.energyCost">{{data.energyCost | customNumber:true}}</span>

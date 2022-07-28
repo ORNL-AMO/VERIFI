@@ -13,6 +13,8 @@
                 *ngIf="showEnergyColumn">Total Energy<br> (<span [innerHTML]="energyUnit | settingsLabel"></span>)</th>
             <th (click)="setOrderDataField('totalCost')" [ngClass]="{'active': orderDataField == 'totalCost'}">Total
                 Cost</th>
+            <th *ngIf="showEmissions" (click)="setOrderDataField('totalEmissions')"
+                [ngClass]="{'active': orderDataField == 'totalEmissions'}">Total Emissions <br>(kg CO<sub>2</sub>)</th>
             <th (click)="setOrderDataField('commodityCharge')"
                 [ngClass]="{'active': orderDataField == 'commodityCharge'}">Commodity Charge</th>
             <th (click)="setOrderDataField('deliveryCharge')"
@@ -32,6 +34,7 @@
             <td *ngIf="showVolumeColumn">{{meterData.totalVolume | customNumber}}</td>
             <td *ngIf="showEnergyColumn">{{meterData.totalEnergyUse | customNumber}}</td>
             <td>{{meterData.totalCost | customNumber:true}}</td>
+            <td *ngIf="showEmissions">{{meterData.totalEmissions | customNumber}}</td>
             <td>{{meterData.commodityCharge | customNumber:true}}</td>
             <td>{{meterData.deliveryCharge | customNumber:true}}</td>
             <td>{{meterData.otherCharge | customNumber:true}}</td>

@@ -383,7 +383,10 @@ export const ExampleAccount: BackupFile = {
         "agreementType": 1,
         "includeInEnergy": true,
         "retainRECs": false,
-        "directConnection": false
+        "directConnection": false,
+        "GHGMultiplier": 1,
+        "recsMultiplier": 0,
+        "greenPurchaseFraction": .5
     }, {
         "facilityId": "lloxg8thm",
         "accountId": "7u3rax079",
@@ -412,7 +415,10 @@ export const ExampleAccount: BackupFile = {
         "agreementType": 1,
         "includeInEnergy": true,
         "retainRECs": false,
-        "directConnection": false
+        "directConnection": false,
+        "GHGMultiplier": 1,
+        "recsMultiplier": 0,
+        "greenPurchaseFraction": .5
     }, {
         "facilityId": "lloxg8thm",
         "accountId": "7u3rax079",
@@ -441,7 +447,10 @@ export const ExampleAccount: BackupFile = {
         "agreementType": 1,
         "includeInEnergy": true,
         "retainRECs": false,
-        "directConnection": false
+        "directConnection": false,
+        "GHGMultiplier": 1,
+        "recsMultiplier": 0,
+        "greenPurchaseFraction": .5
     }, {
         "facilityId": "lloxg8thm",
         "accountId": "7u3rax079",
@@ -470,7 +479,10 @@ export const ExampleAccount: BackupFile = {
         "agreementType": 1,
         "includeInEnergy": true,
         "retainRECs": false,
-        "directConnection": false
+        "directConnection": false,
+        "GHGMultiplier": 1,
+        "recsMultiplier": 0,
+        "greenPurchaseFraction": .5
     }, {
         "facilityId": "lloxg8thm",
         "accountId": "7u3rax079",
@@ -499,7 +511,10 @@ export const ExampleAccount: BackupFile = {
         "agreementType": 1,
         "includeInEnergy": true,
         "retainRECs": false,
-        "directConnection": false
+        "directConnection": false,
+        "GHGMultiplier": 1,
+        "recsMultiplier": 0,
+        "greenPurchaseFraction": .5
     }, {
         "facilityId": "lloxg8thm",
         "accountId": "7u3rax079",
@@ -528,7 +543,10 @@ export const ExampleAccount: BackupFile = {
         "agreementType": 1,
         "includeInEnergy": true,
         "retainRECs": false,
-        "directConnection": false
+        "directConnection": false,
+        "GHGMultiplier": 1,
+        "recsMultiplier": 0,
+        "greenPurchaseFraction": .5
     }, {
         "facilityId": "a707n579s",
         "accountId": "7u3rax079",
@@ -554,7 +572,10 @@ export const ExampleAccount: BackupFile = {
         "agreementType": 1,
         "includeInEnergy": true,
         "retainRECs": false,
-        "directConnection": false
+        "directConnection": false,
+        "GHGMultiplier": 1,
+        "recsMultiplier": 0,
+        "greenPurchaseFraction": .5
     }, {
         "facilityId": "a707n579s",
         "accountId": "7u3rax079",
@@ -578,7 +599,10 @@ export const ExampleAccount: BackupFile = {
         "agreementType": 1,
         "includeInEnergy": true,
         "retainRECs": false,
-        "directConnection": false
+        "directConnection": false,
+        "GHGMultiplier": 1,
+        "recsMultiplier": 0,
+        "greenPurchaseFraction": .5
     }, {
         "facilityId": "w6vezy41e",
         "accountId": "7u3rax079",
@@ -604,7 +628,10 @@ export const ExampleAccount: BackupFile = {
         "agreementType": 1,
         "includeInEnergy": true,
         "retainRECs": false,
-        "directConnection": false
+        "directConnection": false,
+        "GHGMultiplier": 1,
+        "recsMultiplier": 0,
+        "greenPurchaseFraction": .5
     }, {
         "facilityId": "w6vezy41e",
         "accountId": "7u3rax079",
@@ -628,7 +655,10 @@ export const ExampleAccount: BackupFile = {
         "agreementType": 1,
         "includeInEnergy": true,
         "retainRECs": false,
-        "directConnection": false
+        "directConnection": false,
+        "GHGMultiplier": 1,
+        "recsMultiplier": 0,
+        "greenPurchaseFraction": .5
     }, {
         "facilityId": "w6vezy41e",
         "accountId": "7u3rax079",
@@ -653,7 +683,10 @@ export const ExampleAccount: BackupFile = {
         "agreementType": 1,
         "includeInEnergy": true,
         "retainRECs": false,
-        "directConnection": false
+        "directConnection": false,
+        "GHGMultiplier": 1,
+        "recsMultiplier": 0,
+        "greenPurchaseFraction": .5
     }, {
         "facilityId": "ec78jbgxy",
         "accountId": "7u3rax079",
@@ -676,7 +709,10 @@ export const ExampleAccount: BackupFile = {
         "agreementType": 1,
         "includeInEnergy": true,
         "retainRECs": false,
-        "directConnection": false
+        "directConnection": false,
+        "GHGMultiplier": 1,
+        "recsMultiplier": 0,
+        "greenPurchaseFraction": .5
     }, {
         "facilityId": "ec78jbgxy",
         "accountId": "7u3rax079",
@@ -699,7 +735,10 @@ export const ExampleAccount: BackupFile = {
         "agreementType": 1,
         "includeInEnergy": true,
         "retainRECs": false,
-        "directConnection": false
+        "directConnection": false,
+        "GHGMultiplier": 1,
+        "recsMultiplier": 0,
+        "greenPurchaseFraction": .5
     }],
     "meterData": [{
         "meterId": "xj4miz2s2",
@@ -15495,334 +15534,12 @@ export const ExampleAccount: BackupFile = {
             "includeInEnergy": true,
             "retainRECs": false,
             "directConnection": false,
+            "GHGMultiplier": 1,
+            "recsMultiplier": 0,
+            "greenPurchaseFraction": .5
         }],
         "totalConsumption": 250181.81676871455,
         "totalEnergyUse": 250181.81676871455,
-        "combinedMonthlyData": [{
-            "month": "Jan",
-            "monthNumValue": 0,
-            "year": 2019,
-            "energyConsumption": 5963.84053987451,
-            "energyUse": 5963.84053987451,
-            "energyCost": 47784.23946119999,
-            "date": new Date("2019-01-01T05:00:00.000Z"),
-            "emissions": 290274.7767599999
-        }, {
-            "month": "Feb",
-            "monthNumValue": 1,
-            "year": 2019,
-            "energyConsumption": 6836.615168805566,
-            "energyUse": 6836.615168805566,
-            "energyCost": 59816.355437399994,
-            "date": new Date("2019-02-01T05:00:00.000Z"),
-            "emissions": 332754.86302
-        }, {
-            "month": "Mar",
-            "monthNumValue": 2,
-            "year": 2019,
-            "energyConsumption": 7967.438818645384,
-            "energyUse": 7967.438818645384,
-            "energyCost": 67485.8617095,
-            "date": new Date("2019-03-01T05:00:00.000Z"),
-            "emissions": 387794.82934999996
-        }, {
-            "month": "Apr",
-            "monthNumValue": 3,
-            "year": 2019,
-            "energyConsumption": 6841.323905749437,
-            "energyUse": 6841.323905749437,
-            "energyCost": 59901.3939834,
-            "date": new Date("2019-04-01T04:00:00.000Z"),
-            "emissions": 332984.0488200001
-        }, {
-            "month": "May",
-            "monthNumValue": 4,
-            "year": 2019,
-            "energyConsumption": 6496.204196917712,
-            "energyUse": 6496.204196917712,
-            "energyCost": 54778.630986899996,
-            "date": new Date("2019-05-01T04:00:00.000Z"),
-            "emissions": 316186.22437
-        }, {
-            "month": "Jun",
-            "monthNumValue": 5,
-            "year": 2019,
-            "energyConsumption": 8025.346046670331,
-            "energyUse": 8025.346046670331,
-            "energyCost": 65531.5598502,
-            "date": new Date("2019-06-01T04:00:00.000Z"),
-            "emissions": 390613.31646
-        }, {
-            "month": "Jul",
-            "monthNumValue": 6,
-            "year": 2019,
-            "energyConsumption": 7846.260497033344,
-            "energyUse": 7846.260497033344,
-            "energyCost": 67463.3129757,
-            "date": new Date("2019-07-01T04:00:00.000Z"),
-            "emissions": 381896.78261
-        }, {
-            "month": "Aug",
-            "monthNumValue": 7,
-            "year": 2019,
-            "energyConsumption": 7916.68682349819,
-            "energyUse": 7916.68682349819,
-            "energyCost": 68232.25916369999,
-            "date": new Date("2019-08-01T04:00:00.000Z"),
-            "emissions": 385324.60501000006
-        }, {
-            "month": "Sept",
-            "monthNumValue": 8,
-            "year": 2019,
-            "energyConsumption": 7126.826910317897,
-            "energyUse": 7126.826910317897,
-            "energyCost": 61782.73899749999,
-            "date": new Date("2019-09-01T04:00:00.000Z"),
-            "emissions": 346880.18175000005
-        }, {
-            "month": "Oct",
-            "monthNumValue": 9,
-            "year": 2019,
-            "energyConsumption": 6545.686880366993,
-            "energyUse": 6545.686880366993,
-            "energyCost": 55941.77112029999,
-            "date": new Date("2019-10-01T04:00:00.000Z"),
-            "emissions": 318594.66818999994
-        }, {
-            "month": "Nov",
-            "monthNumValue": 10,
-            "year": 2019,
-            "energyConsumption": 6106.801888044282,
-            "energyUse": 6106.801888044282,
-            "energyCost": 53177.401207799994,
-            "date": new Date("2019-11-01T04:00:00.000Z"),
-            "emissions": 297233.05694000004
-        }, {
-            "month": "Dec",
-            "monthNumValue": 11,
-            "year": 2019,
-            "energyConsumption": 6164.535097529999,
-            "energyUse": 6164.535097529999,
-            "energyCost": 53541.0407718,
-            "date": new Date("2019-12-01T05:00:00.000Z"),
-            "emissions": 300043.07414000004
-        }, {
-            "month": "Jan",
-            "monthNumValue": 0,
-            "year": 2020,
-            "energyConsumption": 5558.356870699297,
-            "energyUse": 5558.356870699297,
-            "energyCost": 49722.9543,
-            "date": new Date("2020-01-01T05:00:00.000Z"),
-            "emissions": 270538.8900000001
-        }, {
-            "month": "Feb",
-            "monthNumValue": 1,
-            "year": 2020,
-            "energyConsumption": 6510.954827213618,
-            "energyUse": 6510.954827213618,
-            "energyCost": 55723.007106,
-            "date": new Date("2020-02-01T05:00:00.000Z"),
-            "emissions": 316904.17379999993
-        }, {
-            "month": "Mar",
-            "monthNumValue": 2,
-            "year": 2020,
-            "energyConsumption": 7753.539324777737,
-            "energyUse": 7753.539324777737,
-            "energyCost": 67073.1275199,
-            "date": new Date("2020-03-01T05:00:00.000Z"),
-            "emissions": 377383.81527
-        }, {
-            "month": "Apr",
-            "monthNumValue": 3,
-            "year": 2020,
-            "energyConsumption": 7581.301916478684,
-            "energyUse": 7581.301916478684,
-            "energyCost": 65579.8419873,
-            "date": new Date("2020-04-01T04:00:00.000Z"),
-            "emissions": 369000.59729
-        }, {
-            "month": "May",
-            "monthNumValue": 4,
-            "year": 2020,
-            "energyConsumption": 6125.3502170492675,
-            "energyUse": 6125.3502170492675,
-            "energyCost": 53294.230089,
-            "date": new Date("2020-05-01T04:00:00.000Z"),
-            "emissions": 298135.84969999996
-        }, {
-            "month": "Jun",
-            "monthNumValue": 5,
-            "year": 2020,
-            "energyConsumption": 8628.238394024984,
-            "energyUse": 8628.238394024984,
-            "energyCost": 70014.27731489998,
-            "date": new Date("2020-06-01T04:00:00.000Z"),
-            "emissions": 419957.56876999995
-        }, {
-            "month": "Jul",
-            "monthNumValue": 6,
-            "year": 2020,
-            "energyConsumption": 8453.001725020378,
-            "energyUse": 8453.001725020378,
-            "energyCost": 67955.223078,
-            "date": new Date("2020-07-01T04:00:00.000Z"),
-            "emissions": 411428.3694
-        }, {
-            "month": "Aug",
-            "monthNumValue": 7,
-            "year": 2020,
-            "energyConsumption": 8456.062404033893,
-            "energyUse": 8456.062404033893,
-            "energyCost": 70355.84113290001,
-            "date": new Date("2020-08-01T04:00:00.000Z"),
-            "emissions": 411577.3401699999
-        }, {
-            "month": "Sept",
-            "monthNumValue": 8,
-            "year": 2020,
-            "energyConsumption": 6292.182814247531,
-            "energyUse": 6292.182814247531,
-            "energyCost": 54241.20776879999,
-            "date": new Date("2020-09-01T04:00:00.000Z"),
-            "emissions": 306256.00223999994
-        }, {
-            "month": "Oct",
-            "monthNumValue": 9,
-            "year": 2020,
-            "energyConsumption": 6400.330218186644,
-            "energyUse": 6400.330218186644,
-            "energyCost": 56722.2372003,
-            "date": new Date("2020-10-01T04:00:00.000Z"),
-            "emissions": 311519.8021900001
-        }, {
-            "month": "Nov",
-            "monthNumValue": 10,
-            "year": 2020,
-            "energyConsumption": 7073.341800466324,
-            "energyUse": 7073.341800466324,
-            "energyCost": 64353.3066,
-            "date": new Date("2020-11-01T04:00:00.000Z"),
-            "emissions": 344276.92999999993
-        }, {
-            "month": "Dec",
-            "monthNumValue": 11,
-            "year": 2020,
-            "energyConsumption": 5470.027107463083,
-            "energyUse": 5470.027107463083,
-            "energyCost": 50315.73366209999,
-            "date": new Date("2020-12-01T05:00:00.000Z"),
-            "emissions": 266239.66333
-        }, {
-            "month": "Jan",
-            "monthNumValue": 0,
-            "year": 2021,
-            "energyConsumption": 5712.209732147935,
-            "energyUse": 5712.209732147935,
-            "energyCost": 51841.150053,
-            "date": new Date("2021-01-01T05:00:00.000Z"),
-            "emissions": 278027.2869
-        }, {
-            "month": "Feb",
-            "monthNumValue": 1,
-            "year": 2021,
-            "energyConsumption": 6607.24849771577,
-            "energyUse": 6607.24849771577,
-            "energyCost": 57478.6593717,
-            "date": new Date("2021-02-01T05:00:00.000Z"),
-            "emissions": 321591.02341
-        }, {
-            "month": "Mar",
-            "monthNumValue": 2,
-            "year": 2021,
-            "energyConsumption": 5882.410099899532,
-            "energyUse": 5882.410099899532,
-            "energyCost": 52913.177540699995,
-            "date": new Date("2021-03-01T05:00:00.000Z"),
-            "emissions": 286311.35711
-        }, {
-            "month": "Apr",
-            "monthNumValue": 3,
-            "year": 2021,
-            "energyConsumption": 6975.9835459594715,
-            "energyUse": 6975.9835459594715,
-            "energyCost": 65117.66142389998,
-            "date": new Date("2021-04-01T04:00:00.000Z"),
-            "emissions": 339538.26447
-        }, {
-            "month": "May",
-            "monthNumValue": 4,
-            "year": 2021,
-            "energyConsumption": 7221.4418137357125,
-            "energyUse": 7221.4418137357125,
-            "energyCost": 62447.90734679999,
-            "date": new Date("2021-05-01T04:00:00.000Z"),
-            "emissions": 351485.32164
-        }, {
-            "month": "Jun",
-            "monthNumValue": 5,
-            "year": 2021,
-            "energyConsumption": 7712.153621594981,
-            "energyUse": 7712.153621594981,
-            "energyCost": 70301.39469059998,
-            "date": new Date("2021-06-01T04:00:00.000Z"),
-            "emissions": 375369.47138
-        }, {
-            "month": "Jul",
-            "monthNumValue": 6,
-            "year": 2021,
-            "energyConsumption": 8121.424753094611,
-            "energyUse": 8121.424753094611,
-            "energyCost": 68552.67563879999,
-            "date": new Date("2021-07-01T04:00:00.000Z"),
-            "emissions": 395289.70324
-        }, {
-            "month": "Aug",
-            "monthNumValue": 7,
-            "year": 2021,
-            "energyConsumption": 8519.057115235153,
-            "energyUse": 8519.057115235153,
-            "energyCost": 71057.21089829999,
-            "date": new Date("2021-08-01T04:00:00.000Z"),
-            "emissions": 414643.44759
-        }, {
-            "month": "Sept",
-            "monthNumValue": 8,
-            "year": 2021,
-            "energyConsumption": 6671.993630693989,
-            "energyUse": 6671.993630693989,
-            "energyCost": 59423.2593792,
-            "date": new Date("2021-09-01T04:00:00.000Z"),
-            "emissions": 324742.32816
-        }, {
-            "month": "Oct",
-            "monthNumValue": 9,
-            "year": 2021,
-            "energyConsumption": 6658.870585559115,
-            "energyUse": 6658.870585559115,
-            "energyCost": 59340.60230099999,
-            "date": new Date("2021-10-01T04:00:00.000Z"),
-            "emissions": 324103.59729999996
-        }, {
-            "month": "Nov",
-            "monthNumValue": 10,
-            "year": 2021,
-            "energyConsumption": 6302.337307830834,
-            "energyUse": 6302.337307830834,
-            "energyCost": 57094.93456799999,
-            "date": new Date("2021-11-01T04:00:00.000Z"),
-            "emissions": 306750.2464
-        }, {
-            "month": "Dec",
-            "monthNumValue": 11,
-            "year": 2021,
-            "energyConsumption": 5656.431672132391,
-            "energyUse": 5656.431672132391,
-            "energyCost": 53026.620233099995,
-            "date": new Date("2021-12-01T05:00:00.000Z"),
-            "emissions": 275312.43163000006
-        }],
         "id": 8
     }, {
         "facilityId": "ec78jbgxy",
@@ -15857,334 +15574,12 @@ export const ExampleAccount: BackupFile = {
             "includeInEnergy": true,
             "retainRECs": false,
             "directConnection": false,
+            "GHGMultiplier": 1,
+            "recsMultiplier": 0,
+            "greenPurchaseFraction": .5
         }],
         "totalConsumption": 845186.1037837118,
         "totalEnergyUse": 86800.61285858722,
-        "combinedMonthlyData": [{
-            "month": "Jan",
-            "monthNumValue": 0,
-            "year": 2019,
-            "energyConsumption": 60203.97299907625,
-            "energyUse": 6182.948027005131,
-            "energyCost": 27341.787849584314,
-            "date": new Date("2019-01-01T05:00:00.000Z"),
-            "emissions": 328067.22231289226
-        }, {
-            "month": "Feb",
-            "monthNumValue": 1,
-            "year": 2019,
-            "energyConsumption": 52677.90344884338,
-            "energyUse": 5410.020684196215,
-            "energyCost": 23955.056551979524,
-            "date": new Date("2019-02-01T05:00:00.000Z"),
-            "emissions": 287055.6975034512
-        }, {
-            "month": "Mar",
-            "monthNumValue": 2,
-            "year": 2019,
-            "energyConsumption": 39813.564503932175,
-            "energyUse": 4088.853074553834,
-            "energyCost": 18166.10402676948,
-            "date": new Date("2019-03-01T05:00:00.000Z"),
-            "emissions": 216954.54413582647
-        }, {
-            "month": "Apr",
-            "monthNumValue": 3,
-            "year": 2019,
-            "energyConsumption": 19983.586646083517,
-            "energyUse": 2052.314348552777,
-            "energyCost": 9242.613990737582,
-            "date": new Date("2019-04-01T04:00:00.000Z"),
-            "emissions": 108895.79933421036
-        }, {
-            "month": "May",
-            "monthNumValue": 4,
-            "year": 2019,
-            "energyConsumption": 9924.76092017194,
-            "energyUse": 1019.2729465016585,
-            "energyCost": 4716.142414077373,
-            "date": new Date("2019-05-01T04:00:00.000Z"),
-            "emissions": 54082.622541378
-        }, {
-            "month": "Jun",
-            "monthNumValue": 5,
-            "year": 2019,
-            "energyConsumption": 3504.12541211204,
-            "energyUse": 359.8736798239065,
-            "energyCost": 1826.856435450418,
-            "date": new Date("2019-06-01T04:00:00.000Z"),
-            "emissions": 19094.89745145648
-        }, {
-            "month": "Jul",
-            "monthNumValue": 6,
-            "year": 2019,
-            "energyConsumption": 4282.177606395423,
-            "energyUse": 439.77964017680995,
-            "energyCost": 2176.97992287794,
-            "date": new Date("2019-07-01T04:00:00.000Z"),
-            "emissions": 23334.707707781537
-        }, {
-            "month": "Aug",
-            "monthNumValue": 7,
-            "year": 2019,
-            "energyConsumption": 1177.5550140551204,
-            "energyUse": 120.93489994346086,
-            "energyCost": 779.8997563248042,
-            "date": new Date("2019-08-01T04:00:00.000Z"),
-            "emissions": 6416.805791000033
-        }, {
-            "month": "Sept",
-            "monthNumValue": 8,
-            "year": 2019,
-            "energyConsumption": 3564.364257085767,
-            "energyUse": 366.0602092027083,
-            "energyCost": 1853.963915688595,
-            "date": new Date("2019-09-01T04:00:00.000Z"),
-            "emissions": 19423.1547002957
-        }, {
-            "month": "Oct",
-            "monthNumValue": 9,
-            "year": 2019,
-            "energyConsumption": 19790.682021542023,
-            "energyUse": 2032.5030436123657,
-            "energyCost": 9155.80690969391,
-            "date": new Date("2019-10-01T04:00:00.000Z"),
-            "emissions": 107844.61149407213
-        }, {
-            "month": "Nov",
-            "monthNumValue": 10,
-            "year": 2019,
-            "energyConsumption": 35599.95635793278,
-            "energyUse": 3656.1155179596967,
-            "energyCost": 16269.980361069749,
-            "date": new Date("2019-11-01T04:00:00.000Z"),
-            "emissions": 193993.4893829415
-        }, {
-            "month": "Dec",
-            "monthNumValue": 11,
-            "year": 2019,
-            "energyConsumption": 48953.63804395991,
-            "energyUse": 5027.538627114683,
-            "energyCost": 22279.13711978196,
-            "date": new Date("2019-12-01T05:00:00.000Z"),
-            "emissions": 266761.19955470506
-        }, {
-            "month": "Jan",
-            "monthNumValue": 0,
-            "year": 2020,
-            "energyConsumption": 50763.09673276238,
-            "energyUse": 5213.370034454696,
-            "energyCost": 23093.393529743073,
-            "date": new Date("2020-01-01T05:00:00.000Z"),
-            "emissions": 276621.41402816615
-        }, {
-            "month": "Feb",
-            "monthNumValue": 1,
-            "year": 2020,
-            "energyConsumption": 47309.83720508432,
-            "energyUse": 4858.720280962159,
-            "energyCost": 21539.426742287942,
-            "date": new Date("2020-02-01T05:00:00.000Z"),
-            "emissions": 257803.6981078522
-        }, {
-            "month": "Mar",
-            "monthNumValue": 2,
-            "year": 2020,
-            "energyConsumption": 28100.08785916983,
-            "energyUse": 2885.8790231367416,
-            "energyCost": 12895.039536626424,
-            "date": new Date("2020-03-01T05:00:00.000Z"),
-            "emissions": 153124.7409676355
-        }, {
-            "month": "Apr",
-            "monthNumValue": 3,
-            "year": 2020,
-            "energyConsumption": 20863.660348612073,
-            "energyUse": 2142.69791780246,
-            "energyCost": 9638.647156875431,
-            "date": new Date("2020-04-01T04:00:00.000Z"),
-            "emissions": 113691.55151859853
-        }, {
-            "month": "May",
-            "monthNumValue": 4,
-            "year": 2020,
-            "energyConsumption": 9761.656374831553,
-            "energyUse": 1002.5221096952004,
-            "energyCost": 4642.745368674199,
-            "date": new Date("2020-05-01T04:00:00.000Z"),
-            "emissions": 53193.82314042733
-        }, {
-            "month": "Jun",
-            "monthNumValue": 5,
-            "year": 2020,
-            "energyConsumption": 1925.791510174898,
-            "energyUse": 197.778788094962,
-            "energyCost": 1116.606179578704,
-            "date": new Date("2020-06-01T04:00:00.000Z"),
-            "emissions": 10494.142496318686
-        }, {
-            "month": "Jul",
-            "monthNumValue": 6,
-            "year": 2020,
-            "energyConsumption": 3373.338315398783,
-            "energyUse": 346.441844991455,
-            "energyCost": 1768.0022419294523,
-            "date": new Date("2020-07-01T04:00:00.000Z"),
-            "emissions": 18382.204295246604
-        }, {
-            "month": "Aug",
-            "monthNumValue": 7,
-            "year": 2020,
-            "energyConsumption": 2485.6792728107234,
-            "energyUse": 255.2792613176613,
-            "energyCost": 1368.5556727648257,
-            "date": new Date("2020-08-01T04:00:00.000Z"),
-            "emissions": 13545.11760551511
-        }, {
-            "month": "Sept",
-            "monthNumValue": 8,
-            "year": 2020,
-            "energyConsumption": 9206.432336737234,
-            "energyUse": 945.500600982914,
-            "energyCost": 4392.8945515317555,
-            "date": new Date("2020-09-01T04:00:00.000Z"),
-            "emissions": 50168.261888153414
-        }, {
-            "month": "Oct",
-            "monthNumValue": 9,
-            "year": 2020,
-            "energyConsumption": 24312.806613855897,
-            "energyUse": 2496.9252392430008,
-            "energyCost": 11190.762976235153,
-            "date": new Date("2020-10-01T04:00:00.000Z"),
-            "emissions": 132486.8531942336
-        }, {
-            "month": "Nov",
-            "monthNumValue": 10,
-            "year": 2020,
-            "energyConsumption": 30455.33824709267,
-            "energyUse": 3127.7632379764173,
-            "energyCost": 13954.9022111917,
-            "date": new Date("2020-11-01T04:00:00.000Z"),
-            "emissions": 165959.1174070287
-        }, {
-            "month": "Dec",
-            "monthNumValue": 11,
-            "year": 2020,
-            "energyConsumption": 44199.9844771029,
-            "energyUse": 4539.338405798468,
-            "energyCost": 20139.993014696305,
-            "date": new Date("2020-12-01T05:00:00.000Z"),
-            "emissions": 240857.2958116667
-        }, {
-            "month": "Jan",
-            "monthNumValue": 0,
-            "year": 2021,
-            "energyConsumption": 52050.73957151213,
-            "energyUse": 5345.610953994295,
-            "energyCost": 23672.83280718046,
-            "date": new Date("2021-01-01T05:00:00.000Z"),
-            "emissions": 283638.1172189373
-        }, {
-            "month": "Feb",
-            "monthNumValue": 1,
-            "year": 2021,
-            "energyConsumption": 57077.063483073325,
-            "energyUse": 5861.814419711631,
-            "energyCost": 25934.678567382995,
-            "date": new Date("2021-02-01T05:00:00.000Z"),
-            "emissions": 311027.87310989917
-        }, {
-            "month": "Mar",
-            "monthNumValue": 2,
-            "year": 2021,
-            "energyConsumption": 27505.059830039263,
-            "energyUse": 2824.7696445450324,
-            "energyCost": 12627.27692351767,
-            "date": new Date("2021-03-01T05:00:00.000Z"),
-            "emissions": 149882.27733955943
-        }, {
-            "month": "Apr",
-            "monthNumValue": 3,
-            "year": 2021,
-            "energyConsumption": 17644.71180945302,
-            "energyUse": 1812.111902830825,
-            "energyCost": 8190.12031425386,
-            "date": new Date("2021-04-01T04:00:00.000Z"),
-            "emissions": 96150.65756420359
-        }, {
-            "month": "May",
-            "monthNumValue": 4,
-            "year": 2021,
-            "energyConsumption": 8629.415945557901,
-            "energyUse": 886.2410176087965,
-            "energyCost": 4133.237175501055,
-            "date": new Date("2021-05-01T04:00:00.000Z"),
-            "emissions": 47023.948394322746
-        }, {
-            "month": "Jun",
-            "monthNumValue": 5,
-            "year": 2021,
-            "energyConsumption": 5766.051862547592,
-            "energyUse": 592.1735262836377,
-            "energyCost": 2844.723338146416,
-            "date": new Date("2021-06-01T04:00:00.000Z"),
-            "emissions": 31420.727304609816
-        }, {
-            "month": "Jul",
-            "monthNumValue": 6,
-            "year": 2021,
-            "energyConsumption": 1541.3570068242425,
-            "energyUse": 158.2973646008497,
-            "energyCost": 943.6106530709092,
-            "date": new Date("2021-07-01T04:00:00.000Z"),
-            "emissions": 8399.258165721085
-        }, {
-            "month": "Aug",
-            "monthNumValue": 7,
-            "year": 2021,
-            "energyConsumption": 2978.158781747855,
-            "energyUse": 305.8569068855047,
-            "energyCost": 1590.1714517865346,
-            "date": new Date("2021-08-01T04:00:00.000Z"),
-            "emissions": 16228.76747934488
-        }, {
-            "month": "Sept",
-            "monthNumValue": 8,
-            "year": 2021,
-            "energyConsumption": 5958.076795099158,
-            "energyUse": 611.8944868566834,
-            "energyCost": 2931.134557794621,
-            "date": new Date("2021-09-01T04:00:00.000Z"),
-            "emissions": 32467.121472615625
-        }, {
-            "month": "Oct",
-            "monthNumValue": 9,
-            "year": 2021,
-            "energyConsumption": 12591.98426344487,
-            "energyUse": 1293.1967838557882,
-            "energyCost": 5916.392918550192,
-            "date": new Date("2021-10-01T04:00:00.000Z"),
-            "emissions": 68617.02135138813
-        }, {
-            "month": "Nov",
-            "monthNumValue": 10,
-            "year": 2021,
-            "energyConsumption": 32956.33164542413,
-            "energyUse": 3384.615259985058,
-            "energyCost": 15080.349240440857,
-            "date": new Date("2021-11-01T04:00:00.000Z"),
-            "emissions": 179587.68569480718
-        }, {
-            "month": "Dec",
-            "monthNumValue": 11,
-            "year": 2021,
-            "energyConsumption": 48253.15626416466,
-            "energyUse": 4955.59914832971,
-            "energyCost": 21963.920318874098,
-            "date": new Date("2021-12-01T05:00:00.000Z"),
-            "emissions": 262944.0908103744
-        }],
         "id": 9
     }],
     "reports": [{

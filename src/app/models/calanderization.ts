@@ -18,7 +18,9 @@ export interface MonthlyData {
     energyUse: number,
     energyCost: number,
     date: Date,
-    emissions: number
+    emissions: number,
+    RECs: number,
+    GHGOffsets: number
 }
 
 

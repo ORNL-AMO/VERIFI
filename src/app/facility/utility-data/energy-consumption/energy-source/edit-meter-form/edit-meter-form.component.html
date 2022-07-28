@@ -214,11 +214,12 @@
                 <textarea id="notes" class="form-control" formControlName="notes"></textarea>
             </div>
         </div>
-        <div class="col-lg-6 col-md-12 col-sm-12" *ngIf="meterForm.controls.source.value == 'Electricity'">
+
+        <div class="col-lg-7 col-md-12 col-sm-12" *ngIf="meterForm.controls.source.value == 'Electricity'">
             <hr>
             <p class="bold">Contract Agreement</p>
             <div class="row">
-                <div class="col-6">
+                <div class="col-lg-6 col-md-12 col-sm-12">
                     <label for="scope">Agreement Type</label>
                     <div class="mb-3">
                         <select class="form-control" id="agreementType" type="text" formControlName="agreementType"
@@ -227,6 +228,14 @@
                                 {{agreementType.typeLabel}}
                             </option>
                         </select>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-12 col-sm-12" *ngIf="meterForm.controls.agreementType.value == 5">
+                    <label for="greenPurchaseFraction">Fraction of Green Electricity </label>
+                    <div class="input-group mb-3">
+                        <input id="greenPurchaseFraction" class="form-control" type="number"
+                            formControlName="greenPurchaseFraction" onfocus="this.select();">
+                        <span class="unit">%</span>
                     </div>
                 </div>
             </div>
