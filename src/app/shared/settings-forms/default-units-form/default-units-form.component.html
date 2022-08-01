@@ -7,11 +7,33 @@
                 <option [ngValue]="'Metric'">Metric</option>
                 <option [ngValue]="'Custom'">Custom</option>
             </select>
+            <label class="mt-3">Result Energy Unit</label>
+            <select formControlName="energyUnit" (change)="saveChanges()">
+                <option *ngFor="let energyUnitOption of energyUnitOptions" [ngValue]="energyUnitOption.value">
+                    <span [innerHTML]="energyUnitOption.display"></span>
+                </option>
+            </select>
+        </div>
+        <div class="mb-3 col">
+            <label class="checkbox mb-3">Energy displayed as site or source? </label>
+
+            <input type="radio" class="rowToggle" name="energyIsSource" formControlName="energyIsSource" [value]="true"
+                (change)="saveChanges()" id="sourceEnergy">
+            <label class="checkbox" for="sourceEnergy">Source Energy</label>
+
+            <input type="radio" class="rowToggle" name="energyIsSource" formControlName="energyIsSource" [value]="false"
+                (change)="saveChanges()" id="siteEnergy">
+            <label class="checkbox" for="siteEnergy">Site Energy</label>
         </div>
     </div>
 
     <div class="row">
-        
+        <div class="col">
+            <hr>
+        </div>
+    </div>
+
+    <div class="row">
         <div class="mb-3 col">
             <label>Electricity Unit</label>
             <select formControlName="electricityUnit" (change)="saveChanges()">
@@ -20,19 +42,6 @@
                 </option>
             </select>
         </div>
-        
-        <div class="mb-3 col">
-            <label>Result Energy Unit</label>
-            <select formControlName="energyUnit" (change)="saveChanges()">
-                <option *ngFor="let energyUnitOption of energyUnitOptions" [ngValue]="energyUnitOption.value">
-                    <span [innerHTML]="energyUnitOption.display"></span>
-                </option>
-            </select>
-        </div>
-
-    </div>
-
-    <div class="row">
         <div class="mb-3 col">
             <label>Liquid Volume Unit</label>
             <select formControlName="volumeLiquidUnit" (change)="saveChanges()">
@@ -41,6 +50,9 @@
                 </option>
             </select>
         </div>
+    </div>
+
+    <div class="row">
         
         <div class="mb-3 col">
             <label>Gas Volume Unit</label>
@@ -60,7 +72,7 @@
             </select>
         </div>
     </div>
-    <div class="row">
+    <!-- <div class="row">
         <div class="mb-3 col">
             <hr>
             <label class="checkbox mb-3">Energy displayed as site or source? </label>
@@ -73,7 +85,7 @@
                 (change)="saveChanges()" id="siteEnergy">
             <label class="checkbox" for="siteEnergy">Site Energy</label>
         </div>
-    </div>
+    </div> -->
     <div class="row">
         <div class="col">
             <hr>
