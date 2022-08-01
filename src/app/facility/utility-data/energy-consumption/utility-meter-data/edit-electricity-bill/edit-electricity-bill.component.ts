@@ -7,6 +7,7 @@ import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/model
 import { UtilityMeterDataService } from '../utility-meter-data.service';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { ThisReceiver } from '@angular/compiler';
 
 @Component({
   selector: 'app-edit-electricity-bill',
@@ -35,6 +36,8 @@ export class EditElectricityBillComponent implements OnInit {
   taxAndOtherFilters: TaxAndOtherFilters;
   energyUnit: string;
   totalEmissions: number = 0;
+  RECs: number = 0;
+  GHGOffsets: number = 0;
   facility: IdbFacility;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private utilityMeterDataService: UtilityMeterDataService,
     private calanderizationService: CalanderizationService, private facilityDbService: FacilitydbService) { }
@@ -47,6 +50,7 @@ export class EditElectricityBillComponent implements OnInit {
     });
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     this.facility = accountFacilities.find(facility => {return facility.guid == this.editMeter.facilityId});
+    this.setTotalEmissions();
   }
 
   ngOnChanges() {
@@ -96,11 +100,15 @@ export class EditElectricityBillComponent implements OnInit {
   }
 
   setTotalEmissions(){
-    if(this.meterDataForm.controls.totalEnergyUse.value){
+    if(this.meterDataForm.controls.totalEnergyUse.value && this.facility){
       let emissionsValues: { RECs: number, totalEmissions: number, GHGOffsets: number } = this.calanderizationService.getEmissions(this.editMeter, this.meterDataForm.controls.totalEnergyUse.value, this.editMeter.energyUnit, this.facility.energyIsSource);
       this.totalEmissions = emissionsValues.totalEmissions;
+      this.RECs = emissionsValues.RECs;
+      this.GHGOffsets = emissionsValues.GHGOffsets;
     }else{
       this.totalEmissions = 0;
+      this.RECs = 0;
+      this.GHGOffsets = 0;
     }
   }
 
