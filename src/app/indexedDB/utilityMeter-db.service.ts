@@ -104,7 +104,8 @@ export class UtilityMeterdbService {
             includeInEnergy: true,
             retainRECs: false,
             directConnection: false,
-            GHGMultiplier: 1,
+            locationGHGMultiplier: 1,
+            marketGHGMultiplier: 1,
             recsMultiplier: 0,
             greenPurchaseFraction: .5
         }

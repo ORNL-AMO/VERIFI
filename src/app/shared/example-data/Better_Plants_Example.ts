@@ -384,7 +384,8 @@ export const ExampleAccount: BackupFile = {
         "includeInEnergy": true,
         "retainRECs": false,
         "directConnection": false,
-        "GHGMultiplier": 1,
+        "marketGHGMultiplier": 1,
+        "locationGHGMultiplier": 1,
         "recsMultiplier": 0,
         "greenPurchaseFraction": .5
     }, {
@@ -416,7 +417,8 @@ export const ExampleAccount: BackupFile = {
         "includeInEnergy": true,
         "retainRECs": false,
         "directConnection": false,
-        "GHGMultiplier": 1,
+        "marketGHGMultiplier": 1,
+        "locationGHGMultiplier": 1,
         "recsMultiplier": 0,
         "greenPurchaseFraction": .5
     }, {
@@ -448,7 +450,8 @@ export const ExampleAccount: BackupFile = {
         "includeInEnergy": true,
         "retainRECs": false,
         "directConnection": false,
-        "GHGMultiplier": 1,
+        "marketGHGMultiplier": 1,
+        "locationGHGMultiplier": 1,
         "recsMultiplier": 0,
         "greenPurchaseFraction": .5
     }, {
@@ -480,7 +483,8 @@ export const ExampleAccount: BackupFile = {
         "includeInEnergy": true,
         "retainRECs": false,
         "directConnection": false,
-        "GHGMultiplier": 1,
+        "marketGHGMultiplier": 1,
+        "locationGHGMultiplier": 1,
         "recsMultiplier": 0,
         "greenPurchaseFraction": .5
     }, {
@@ -512,7 +516,8 @@ export const ExampleAccount: BackupFile = {
         "includeInEnergy": true,
         "retainRECs": false,
         "directConnection": false,
-        "GHGMultiplier": 1,
+        "marketGHGMultiplier": 1,
+        "locationGHGMultiplier": 1,
         "recsMultiplier": 0,
         "greenPurchaseFraction": .5
     }, {
@@ -544,7 +549,8 @@ export const ExampleAccount: BackupFile = {
         "includeInEnergy": true,
         "retainRECs": false,
         "directConnection": false,
-        "GHGMultiplier": 1,
+        "marketGHGMultiplier": 1,
+        "locationGHGMultiplier": 1,
         "recsMultiplier": 0,
         "greenPurchaseFraction": .5
     }, {
@@ -573,7 +579,8 @@ export const ExampleAccount: BackupFile = {
         "includeInEnergy": true,
         "retainRECs": false,
         "directConnection": false,
-        "GHGMultiplier": 1,
+        "marketGHGMultiplier": 1,
+        "locationGHGMultiplier": 1,
         "recsMultiplier": 0,
         "greenPurchaseFraction": .5
     }, {
@@ -600,7 +607,8 @@ export const ExampleAccount: BackupFile = {
         "includeInEnergy": true,
         "retainRECs": false,
         "directConnection": false,
-        "GHGMultiplier": 1,
+        "marketGHGMultiplier": 1,
+        "locationGHGMultiplier": 1,
         "recsMultiplier": 0,
         "greenPurchaseFraction": .5
     }, {
@@ -629,7 +637,8 @@ export const ExampleAccount: BackupFile = {
         "includeInEnergy": true,
         "retainRECs": false,
         "directConnection": false,
-        "GHGMultiplier": 1,
+        "marketGHGMultiplier": 1,
+        "locationGHGMultiplier": 1,
         "recsMultiplier": 0,
         "greenPurchaseFraction": .5
     }, {
@@ -656,7 +665,8 @@ export const ExampleAccount: BackupFile = {
         "includeInEnergy": true,
         "retainRECs": false,
         "directConnection": false,
-        "GHGMultiplier": 1,
+        "marketGHGMultiplier": 1,
+        "locationGHGMultiplier": 1,
         "recsMultiplier": 0,
         "greenPurchaseFraction": .5
     }, {
@@ -684,7 +694,8 @@ export const ExampleAccount: BackupFile = {
         "includeInEnergy": true,
         "retainRECs": false,
         "directConnection": false,
-        "GHGMultiplier": 1,
+        "marketGHGMultiplier": 1,
+        "locationGHGMultiplier": 1,
         "recsMultiplier": 0,
         "greenPurchaseFraction": .5
     }, {
@@ -710,7 +721,8 @@ export const ExampleAccount: BackupFile = {
         "includeInEnergy": true,
         "retainRECs": false,
         "directConnection": false,
-        "GHGMultiplier": 1,
+        "marketGHGMultiplier": 1,
+        "locationGHGMultiplier": 1,
         "recsMultiplier": 0,
         "greenPurchaseFraction": .5
     }, {
@@ -736,7 +748,8 @@ export const ExampleAccount: BackupFile = {
         "includeInEnergy": true,
         "retainRECs": false,
         "directConnection": false,
-        "GHGMultiplier": 1,
+        "marketGHGMultiplier": 1,
+        "locationGHGMultiplier": 1,
         "recsMultiplier": 0,
         "greenPurchaseFraction": .5
     }],
@@ -15534,7 +15547,8 @@ export const ExampleAccount: BackupFile = {
             "includeInEnergy": true,
             "retainRECs": false,
             "directConnection": false,
-            "GHGMultiplier": 1,
+            "marketGHGMultiplier": 1,
+            "locationGHGMultiplier": 1,
             "recsMultiplier": 0,
             "greenPurchaseFraction": .5
         }],
@@ -15574,7 +15588,8 @@ export const ExampleAccount: BackupFile = {
             "includeInEnergy": true,
             "retainRECs": false,
             "directConnection": false,
-            "GHGMultiplier": 1,
+            "marketGHGMultiplier": 1,
+            "locationGHGMultiplier": 1,
             "recsMultiplier": 0,
             "greenPurchaseFraction": .5
         }],

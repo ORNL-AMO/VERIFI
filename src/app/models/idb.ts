@@ -145,9 +145,11 @@ export interface IdbUtilityMeter {
     includeInEnergy: boolean,
     retainRECs: boolean,
     directConnection: boolean,
-    GHGMultiplier: number,
+    // GHGMultiplier: number,
     recsMultiplier: number,
-    greenPurchaseFraction: number
+    greenPurchaseFraction: number,
+    marketGHGMultiplier: number,
+    locationGHGMultiplier: number
 }
 
 export interface IdbUtilityMeterData {
@@ -188,7 +190,8 @@ export interface IdbUtilityMeterData {
     latePayment?: number,
     meterNumber?: string,
     totalImportConsumption?: number
-    totalEmissions?: number,
+    totalMarketEmissions?: number,
+    totalLocationEmissions?: number,
     RECs?: number,
     GHGOffsets?: number
 }

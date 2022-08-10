@@ -32,11 +32,17 @@
       <span class="inputWarning" *ngIf="meterDataForm.controls.totalEnergyUse.value === 0">Total energy use should be
         greater than 0</span>
 
-      <label for="totalEmissions">
-        Total Emissions
+      <label for="totalMarketEmissions">
+        Total Market Emissions
       </label>
       <div class="input-group mb-3">
-        {{totalEmissions | number:'1.0-0'}} kg CO<sub>2</sub>
+        {{totalMarketEmissions | number:'1.0-0'}} kg CO<sub>2</sub>
+      </div>
+      <label for="totalLocationEmissions">
+        Total Location Emissions
+      </label>
+      <div class="input-group mb-3">
+        {{totalLocationEmissions | number:'1.0-0'}} kg CO<sub>2</sub>
       </div>
     </div>
     <div class="col">

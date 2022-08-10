@@ -65,12 +65,13 @@ export class AccountReportDonutComponent implements OnInit {
   }
 
   getValues(): Array<number> {
+    //TODO: market vs location emissions
     if (this.graphType == 'cost') {
       return this.accountFacilitiesSummary.facilitySummaries.map(summary => { return summary.energyCost });
     } else if (this.graphType == 'usage') {
       return this.accountFacilitiesSummary.facilitySummaries.map(summary => { return summary.energyUsage });
     } else if (this.graphType == 'emissions') {
-      return this.accountFacilitiesSummary.facilitySummaries.map(summary => { return summary.emissions / 1000 });
+      return this.accountFacilitiesSummary.facilitySummaries.map(summary => { return summary.marketEmissions / 1000 });
     }
   }
 

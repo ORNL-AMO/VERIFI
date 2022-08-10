@@ -30,6 +30,7 @@ export interface FacilityBarChartData {
   time: string, 
   energyUse: number, 
   energyCost: number, 
-  emissions: number,
+  marketEmissions: number,
+  locationEmissions: number,
   year: number
 }

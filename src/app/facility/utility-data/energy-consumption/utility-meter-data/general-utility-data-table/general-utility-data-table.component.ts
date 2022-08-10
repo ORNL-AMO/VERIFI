@@ -6,7 +6,7 @@ import * as _ from 'lodash';
 import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { EditMeterFormService } from '../../energy-source/edit-meter-form/edit-meter-form.service';
-import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
+import { CalanderizationService, EmissionsResults } from 'src/app/shared/helper-services/calanderization.service';
 
 @Component({
   selector: 'app-general-utility-data-table',
@@ -142,8 +142,9 @@ export class GeneralUtilityDataTableComponent implements OnInit {
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     let facility: IdbFacility = accountFacilities.find(facility => { return facility.guid == this.selectedMeter.facilityId });
     this.selectedMeterData.forEach(dataItem => {
-      let emissionsValues: { RECs: number, totalEmissions: number, GHGOffsets: number } = this.calanderizationService.getEmissions(this.selectedMeter, dataItem.totalEnergyUse, this.selectedMeter.energyUnit, facility.energyIsSource);
-      dataItem.totalEmissions = emissionsValues.totalEmissions;
+      let emissionsValues: EmissionsResults = this.calanderizationService.getEmissions(this.selectedMeter, dataItem.totalEnergyUse, this.selectedMeter.energyUnit, facility.energyIsSource);
+      dataItem.totalMarketEmissions = emissionsValues.marketEmissions;
+      dataItem.totalLocationEmissions = emissionsValues.locationEmissions;
       dataItem.RECs = emissionsValues.RECs;
       dataItem.GHGOffsets = emissionsValues.GHGOffsets;
     })
