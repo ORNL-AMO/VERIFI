@@ -138,11 +138,12 @@ export class AccountReportFacilityBarChartComponent implements OnInit {
 
   drawEmissionsBarChart() {
     if (this.facilityEmissionsDonut) {
+      //TODO: Market vs location emissions options
       let traceData = new Array();
       this.chartData.forEach(dataItem => {
         let trace = {
           x: this.getXAxisValues(dataItem.data),
-          y: dataItem.data.map(data => { return data.emissions / 1000 }),
+          y: dataItem.data.map(data => { return data.marketEmissions / 1000 }),
           name: dataItem.facility.name,
           type: 'bar',
           marker: {

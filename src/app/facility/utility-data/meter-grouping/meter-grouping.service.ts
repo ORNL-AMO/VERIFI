@@ -159,7 +159,8 @@ export class MeterGroupingService {
         energyUse: _.sumBy(filteredData, 'energyUse'),
         energyCost: _.sumBy(filteredData, 'energyCost'),
         date: startDate,
-        emissions: _.sumBy(filteredData, 'emissions'),
+        marketEmissions: _.sumBy(filteredData, 'marketEmissions'),
+        locationEmissions: _.sumBy(filteredData, 'locationEmissions'),
         RECs: _.sumBy(filteredData, 'RECs'),
         GHGOffsets: _.sumBy(filteredData, 'GHGOffsets')
       })

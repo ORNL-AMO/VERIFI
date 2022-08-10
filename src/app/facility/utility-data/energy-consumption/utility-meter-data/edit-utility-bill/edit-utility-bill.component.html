@@ -39,11 +39,19 @@
         greater than 0</span>
     </div>
     <div *ngIf="showEmissions" class="col-md-6 col-sm-12">
-      <label for="totalEmissions">
-        Total Emissions
+      <label for="marketEmissions">
+        Total Market Emissions
       </label>
       <div class="input-group mb-3">
-        {{totalEmissions | number:'1.0-0'}} kg CO<sub>2</sub>
+        {{marketEmissions | number:'1.0-0'}} kg CO<sub>2</sub>
+      </div>
+    </div>
+    <div *ngIf="showEmissions" class="col-md-6 col-sm-12">
+      <label for="locationEmissions">
+        Total Location Emissions
+      </label>
+      <div class="input-group mb-3">
+        {{locationEmissions | number:'1.0-0'}} kg CO<sub>2</sub>
       </div>
     </div>
   </div>

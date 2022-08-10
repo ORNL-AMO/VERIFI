@@ -3,7 +3,7 @@ import { FormGroup } from '@angular/forms';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData, MeterSource } from 'src/app/models/idb';
-import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
+import { CalanderizationService, EmissionsResults } from 'src/app/shared/helper-services/calanderization.service';
 import { EditMeterFormService } from '../../energy-source/edit-meter-form/edit-meter-form.service';
 
 @Component({
@@ -30,7 +30,8 @@ export class EditUtilityBillComponent implements OnInit {
   energyUnit: string;
   source: MeterSource;
   volumeUnit: string;
-  totalEmissions: number = 0;
+  marketEmissions: number = 0;
+  locationEmissions: number = 0;
   facility: IdbFacility;
   showEmissions: boolean;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private facilityDbService: FacilitydbService,
@@ -74,10 +75,12 @@ export class EditUtilityBillComponent implements OnInit {
 
   setTotalEmissions() {
     if (this.meterDataForm.controls.totalEnergyUse.value && this.showEmissions) {
-      let emissionsValues: { RECs: number, totalEmissions: number, GHGOffsets: number } = this.calanderizationService.getEmissions(this.editMeter, this.meterDataForm.controls.totalEnergyUse.value, this.editMeter.energyUnit, this.facility.energyIsSource);
-      this.totalEmissions = emissionsValues.totalEmissions;
+      let emissionsValues: EmissionsResults = this.calanderizationService.getEmissions(this.editMeter, this.meterDataForm.controls.totalEnergyUse.value, this.editMeter.energyUnit, this.facility.energyIsSource);
+      this.marketEmissions = emissionsValues.marketEmissions;
+      this.locationEmissions = emissionsValues.locationEmissions;
     } else {
-      this.totalEmissions = 0;
+      this.marketEmissions = 0;
+      this.locationEmissions = 0;
     }
   }
 

@@ -78,14 +78,17 @@ export class EditMeterFormService {
       }
 
       let multipliers: {
-        GHGMultiplier: number,
-        recsMultiplier: number
-      } = this.getMultipliers(meter.includeInEnergy, meter.retainRECs, greenPurchaseFraction);
+        recsMultiplier: number,
+        marketGHGMultiplier: number,
+        locationGHGMultiplier: number
+      } = this.getMultipliers(meter.includeInEnergy, meter.retainRECs, meter.directConnection, greenPurchaseFraction);
 
-      meter.GHGMultiplier = multipliers.GHGMultiplier;
+      meter.locationGHGMultiplier = multipliers.locationGHGMultiplier;
+      meter.marketGHGMultiplier = multipliers.marketGHGMultiplier;
       meter.recsMultiplier = multipliers.recsMultiplier;
     }else{
-      meter.GHGMultiplier = 1;
+      meter.locationGHGMultiplier = 1;
+      meter.marketGHGMultiplier = 1;
       meter.recsMultiplier = 0;
     }
     return meter;
@@ -163,29 +166,56 @@ export class EditMeterFormService {
     }
   }
 
-  getMultipliers(includeInEnergy: boolean, retainRECs: boolean, greenPurchaseFraction?: number): {
-    GHGMultiplier: number,
-    recsMultiplier: number
+  getMultipliers(includeInEnergy: boolean, retainRECs: boolean, directConnection: boolean, greenPurchaseFraction?: number): {
+    // GHGMultiplier: number,
+    recsMultiplier: number,
+    marketGHGMultiplier: number,
+    locationGHGMultiplier: number
   } {
-    let GHGMultiplier: number = 1;
+    let marketGHGMultiplier: number = 1;
+    let locationGHGMultiplier: number = 1;
     let recsMultiplier: number = 0;
 
     if (retainRECs) {
-      GHGMultiplier = 0;
+      // GHGMultiplier = 0;
       recsMultiplier = 1;
     }
 
-    if (!includeInEnergy) {
-      GHGMultiplier = 0;
-    }
+    // if (!includeInEnergy) {
+    //   GHGMultiplier = 0;
+    // }
 
     if (greenPurchaseFraction != undefined) {
       recsMultiplier = greenPurchaseFraction;
-      GHGMultiplier = 1;
+      // GHGMultiplier = 1;
+    }
+
+
+
+    if(includeInEnergy){
+      if(directConnection && retainRECs){
+        locationGHGMultiplier = 0;
+      }else{
+        locationGHGMultiplier = 1;
+      }
+    }else{
+      locationGHGMultiplier = 1;
+    }
+
+
+    if(greenPurchaseFraction){
+      marketGHGMultiplier = 1 - greenPurchaseFraction;
+    }else{
+      if(retainRECs){
+        marketGHGMultiplier = 0;
+      }else{
+        marketGHGMultiplier = 1;
+      }
     }
 
     return {
-      GHGMultiplier: GHGMultiplier,
+      marketGHGMultiplier: marketGHGMultiplier,
+      locationGHGMultiplier: locationGHGMultiplier,
       recsMultiplier: recsMultiplier
     }
   }

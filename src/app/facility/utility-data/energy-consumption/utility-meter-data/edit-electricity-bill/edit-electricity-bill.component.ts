@@ -5,9 +5,8 @@ import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db
 import { ElectricityDataFilters, SupplyDemandChargeFilters, TaxAndOtherFilters } from 'src/app/models/electricityFilter';
 import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { UtilityMeterDataService } from '../utility-meter-data.service';
-import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
+import { CalanderizationService, EmissionsResults } from 'src/app/shared/helper-services/calanderization.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { ThisReceiver } from '@angular/compiler';
 
 @Component({
   selector: 'app-edit-electricity-bill',
@@ -35,7 +34,8 @@ export class EditElectricityBillComponent implements OnInit {
   supplyDemandFilters: SupplyDemandChargeFilters;
   taxAndOtherFilters: TaxAndOtherFilters;
   energyUnit: string;
-  totalEmissions: number = 0;
+  totalLocationEmissions: number = 0;
+  totalMarketEmissions: number = 0;
   RECs: number = 0;
   GHGOffsets: number = 0;
   facility: IdbFacility;
@@ -101,12 +101,14 @@ export class EditElectricityBillComponent implements OnInit {
 
   setTotalEmissions(){
     if(this.meterDataForm.controls.totalEnergyUse.value && this.facility){
-      let emissionsValues: { RECs: number, totalEmissions: number, GHGOffsets: number } = this.calanderizationService.getEmissions(this.editMeter, this.meterDataForm.controls.totalEnergyUse.value, this.editMeter.energyUnit, this.facility.energyIsSource);
-      this.totalEmissions = emissionsValues.totalEmissions;
+      let emissionsValues: EmissionsResults = this.calanderizationService.getEmissions(this.editMeter, this.meterDataForm.controls.totalEnergyUse.value, this.editMeter.energyUnit, this.facility.energyIsSource);
+      this.totalLocationEmissions = emissionsValues.locationEmissions;
+      this.totalMarketEmissions = emissionsValues.marketEmissions;
       this.RECs = emissionsValues.RECs;
       this.GHGOffsets = emissionsValues.GHGOffsets;
     }else{
-      this.totalEmissions = 0;
+      this.totalLocationEmissions = 0;
+      this.totalMarketEmissions = 0;
       this.RECs = 0;
       this.GHGOffsets = 0;
     }

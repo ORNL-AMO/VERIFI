@@ -183,7 +183,7 @@ export class CalanderizationService {
         } else {
           monthStr = new Date(year, month).toLocaleString('default', { month: 'long' });
         }
-        let emissionsValues: { RECs: number, totalEmissions: number, GHGOffsets: number } = this.getEmissions(meter, totals.totalEnergyUse, calanderizedEnergyUnit, energyIsSource);
+        let emissionsValues: EmissionsResults = this.getEmissions(meter, totals.totalEnergyUse, calanderizedEnergyUnit, energyIsSource);
         calanderizeData.push({
           month: monthStr,
           monthNumValue: month,
@@ -192,7 +192,8 @@ export class CalanderizationService {
           energyUse: totals.totalEnergyUse,
           energyCost: totals.totalCost,
           date: new Date(year, month),
-          emissions: emissionsValues.totalEmissions,
+          marketEmissions: emissionsValues.marketEmissions,
+          locationEmissions: emissionsValues.locationEmissions,
           RECs: emissionsValues.RECs,
           GHGOffsets: emissionsValues.GHGOffsets
         });
@@ -337,7 +338,7 @@ export class CalanderizationService {
         } else {
           monthStr = new Date(year, month).toLocaleString('default', { month: 'long' });
         }
-        let emissionsValues: { RECs: number, totalEmissions: number, GHGOffsets: number } = this.getEmissions(meter, totalEnergyUse, calanderizedEnergyUnit, energyIsSource)
+        let emissionsValues: EmissionsResults = this.getEmissions(meter, totalEnergyUse, calanderizedEnergyUnit, energyIsSource)
 
         calanderizeData.push({
           month: monthStr,
@@ -347,7 +348,8 @@ export class CalanderizationService {
           energyUse: totalEnergyUse,
           energyCost: totalCost,
           date: new Date(year, month),
-          emissions: emissionsValues.totalEmissions,
+          marketEmissions: emissionsValues.marketEmissions,
+          locationEmissions: emissionsValues.locationEmissions,
           RECs: emissionsValues.RECs,
           GHGOffsets: emissionsValues.GHGOffsets
         });
@@ -407,9 +409,16 @@ export class CalanderizationService {
             return 0;
           }
         });
-        let totalEmissions: number = _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
+        let totalLocationEmissions: number = _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
           if (meterData.monthNumValue == yearMonth.month && meterData.year == yearMonth.year) {
-            return meterData.emissions;
+            return meterData.locationEmissions;
+          } else {
+            return 0;
+          }
+        });
+        let totalMarketEmissions: number = _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
+          if (meterData.monthNumValue == yearMonth.month && meterData.year == yearMonth.year) {
+            return meterData.marketEmissions;
           } else {
             return 0;
           }
@@ -422,7 +431,8 @@ export class CalanderizationService {
           year: yearMonth.year,
           month: yearMonth.month,
           date: new Date(yearMonth.year, yearMonth.month),
-          emissions: totalEmissions
+          marketEmissions: totalMarketEmissions,
+          locationEmissions: totalLocationEmissions
         }
 
       });
@@ -480,7 +490,8 @@ export class CalanderizationService {
         energyUse: 0,
         energyCost: 0,
         date: undefined,
-        emissions: 0,
+        marketEmissions: 0,
+        locationEmissions: 0,
         RECs: 0,
         GHGOffsets: 0
       }]
@@ -743,7 +754,7 @@ export class CalanderizationService {
     return calanderizationSummary;
   }
 
-  getEmissions(meter: IdbUtilityMeter, energyUse: number, energyUnit: string, energyIsSource: boolean): { RECs: number, totalEmissions: number, GHGOffsets: number } {
+  getEmissions(meter: IdbUtilityMeter, energyUse: number, energyUnit: string, energyIsSource: boolean): EmissionsResults {
     if (meter.source == 'Electricity' || meter.source == 'Natural Gas' || meter.source == 'Other Fuels') {
       if (energyIsSource) {
         energyUse = energyUse / meter.siteToSource;
@@ -751,12 +762,14 @@ export class CalanderizationService {
       let convertedEnergyUse: number = this.convertUnitsService.value(energyUse).from(energyUnit).to(meter.energyUnit);
       let emissions: number = convertedEnergyUse * meter.emissionsOutputRate
 
-      let totalEmissions: number = emissions * meter.GHGMultiplier;
+      // let totalEmissions: number = emissions * meter.GHGMultiplier;
+      let locationEmissions: number = emissions * meter.locationGHGMultiplier;
+      let marketEmissions: number = emissions * meter.marketGHGMultiplier;
       let RECs: number = energyUse * meter.recsMultiplier;
       let GHGOffsets: number = -1 * RECs * meter.emissionsOutputRate;
-      return { RECs: RECs, totalEmissions: totalEmissions, GHGOffsets: GHGOffsets };
+      return { RECs: RECs, locationEmissions: locationEmissions, marketEmissions: marketEmissions, GHGOffsets: GHGOffsets };
     } else {
-      return { RECs: 0, totalEmissions: 0, GHGOffsets: 0 };
+      return { RECs: 0, locationEmissions: 0, marketEmissions: 0, GHGOffsets: 0 };
     }
   }
 }
@@ -772,4 +785,8 @@ export interface CalendarizationSummaryItem {
     totalEnergyFromBill: number
   }>
   totalEnergyUse: number
+}
+
+export interface EmissionsResults {
+  RECs: number, locationEmissions: number, marketEmissions: number, GHGOffsets: number 
 }

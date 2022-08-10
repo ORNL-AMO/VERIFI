@@ -13,7 +13,10 @@
                 </th>
                 <th class="w-2">Utility Cost </th>
                 <th class="w-2">
-                    Emissions (tonne CO<sub>2</sub>)
+                    Market Emissions (tonne CO<sub>2</sub>)
+                </th>
+                <th class="w-2">
+                    Location Emissions (tonne CO<sub>2</sub>)
                 </th>
             </tr>
         </thead>
@@ -36,7 +39,10 @@
                     {{summary.energyCost | customNumber:true }}
                 </td>
                 <td>
-                    {{summary.emissions / 1000 | customNumber}}
+                    {{summary.marketEmissions / 1000 | customNumber}}
+                </td>
+                <td>
+                    {{summary.locationEmissions / 1000 | customNumber}}
                 </td>
             </tr>
         </tbody>
@@ -58,7 +64,10 @@
                     {{accountFacilitiesSummary.totalEnergyCost | customNumber:true }}
                 </th>
                 <th>
-                    {{accountFacilitiesSummary.totalEmissions / 1000 | customNumber}}
+                    {{accountFacilitiesSummary.totalMarketEmissions / 1000 | customNumber}}
+                </th>
+                <th>
+                    {{accountFacilitiesSummary.totalLocationEmissions / 1000 | customNumber}}
                 </th>
             </tr>
         </tfoot>
