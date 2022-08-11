@@ -55,18 +55,71 @@ export class EGridService {
 
 
   setCo2Emissions(csvResults: Array<any>) {
-    let co2Emissions = new Array<SubregionEmissions>();
+    let subregionEmissions = new Array<SubregionEmissions>();
     csvResults.forEach(result => {
-      if (result['SUBRGN']) {
-        co2Emissions.push({
-          subregion: result['SUBRGN'],
-          co2Emissions: Number(result['CO2e']),
-        })
+      let subregion: string = result['SUBRGN'];
+      if (subregion) {
+        let co2Emissions: number = Number(result['CO2e']);
+        let year: number = Number(result['YEAR']);
+        let category: 'LocationMix' | 'ResidualMix' = result['CATEGORY'];
+
+        // co2Emissions.push({
+        //   subregion: result['SUBRGN'],
+        //   co2Emissions: Number(result['CO2e']),
+        //   year: Number(result['YEAR']),
+        //   category: result['CATEGORY']
+        // })
+        subregionEmissions = this.addEmissionRate(subregion, co2Emissions, year, category, subregionEmissions);
       }
     });
 
-    this.co2Emissions = co2Emissions;
+    this.co2Emissions = subregionEmissions;
+    console.log(this.co2Emissions);
   }
+
+
+  addEmissionRate(subregion: string, co2Emissions: number, year: number, category: 'LocationMix' | 'ResidualMix', subregionEmissions: Array<SubregionEmissions>): Array<SubregionEmissions> {
+    let subregionIndex: number = subregionEmissions.findIndex(sEmissions => { return sEmissions.subregion == subregion });
+    if (subregionIndex != -1) {
+      if (category == 'LocationMix') {
+        subregionEmissions[subregionIndex].locationEmissionRates.push({
+          year: year,
+          co2Emissions: co2Emissions
+        })
+      } else {
+        subregionEmissions[subregionIndex].residualEmissionRates.push({
+          year: year,
+          co2Emissions: co2Emissions
+        })
+      }
+    } else {
+      if (category == 'LocationMix') {
+
+        subregionEmissions.push({
+          subregion: subregion,
+          locationEmissionRates: [{
+            year: year,
+            co2Emissions: co2Emissions
+          }],
+          residualEmissionRates: new Array()
+        })
+      } else {
+        subregionEmissions.push({
+          subregion: subregion,
+          locationEmissionRates: new Array(),
+          residualEmissionRates: [{
+            year: year,
+            co2Emissions: co2Emissions
+          }]
+        })
+      }
+    }
+
+
+    return subregionEmissions;
+  }
+
+
 }
 
 export interface SubRegionData {
@@ -78,5 +131,9 @@ export interface SubRegionData {
 
 export interface SubregionEmissions {
   subregion: string,
-  co2Emissions: number
+  locationEmissionRates: Array<{ co2Emissions: number, year: number }>,
+  residualEmissionRates: Array<{ co2Emissions: number, year: number }>,
+  // co2Emissions: number,
+  // year: number,
+  // category: 'LocationMix' | 'ResidualMix'
 }

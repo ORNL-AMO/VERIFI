@@ -265,10 +265,10 @@ export class EnergyUnitsHelperService {
     let hasDifferentEnergyUnits: boolean = false;
     let hasDifferentEmissions: boolean = false;
     if (source == 'Electricity') {
-      let convertedOutputRate: number = this.energyUseCalculationsService.convertElectricityEmissions(selectedFacility.emissionsOutputRate, startingUnit);
-      if (emissionsOutputRate != convertedOutputRate) {
-        hasDifferentEmissions = true;
-      }
+      // let convertedOutputRate: number = this.energyUseCalculationsService.convertElectricityEmissions(selectedFacility.emissionsOutputRate, startingUnit);
+      // if (emissionsOutputRate != convertedOutputRate) {
+      //   hasDifferentEmissions = true;
+      // }
     }
     let isEnergyMeter: boolean = this.isEnergyMeter(source);
     if (isEnergyMeter) {

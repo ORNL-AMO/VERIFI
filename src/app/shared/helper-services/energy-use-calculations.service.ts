@@ -94,7 +94,8 @@ export class EnergyUseCalculationsService {
     let emissionsRate: number;
     if (source == 'Electricity') {
       let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-      emissionsRate = this.convertElectricityEmissions(selectedFacility.emissionsOutputRate, energyUnit);
+      // emissionsRate = this.convertElectricityEmissions(selectedFacility.emissionsOutputRate, energyUnit);
+      //TODO: need year, market/location and lookup in emissions
     } else if (source == 'Natural Gas') {
       emissionsRate = this.convertEmissions(53.06, energyUnit);
     } else if (source == 'Other Fuels') {
