@@ -223,7 +223,8 @@ export class ImportMeterService {
     //start with random meter number
     newMeter.meterNumber = Math.random().toString(36).substr(2, 9);
 
-    //TODO: set emissions output rate
+    //set emissions mulitpliers
+    newMeter = this.editMeterFormService.setMultipliers(newMeter);
     return newMeter;
   }
 

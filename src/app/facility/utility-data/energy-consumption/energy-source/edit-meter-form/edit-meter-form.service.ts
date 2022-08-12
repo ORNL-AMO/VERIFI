@@ -67,6 +67,11 @@ export class EditMeterFormService {
     meter.greenPurchaseFraction = form.controls.greenPurchaseFraction.value / 100;
 
     //set multipliers
+    meter = this.setMultipliers(meter);
+    return meter;
+  }
+
+  setMultipliers(meter: IdbUtilityMeter): IdbUtilityMeter {
     if (meter.source == 'Electricity') {
       let greenPurchaseFraction: number;
       if (meter.agreementType == 5) {
@@ -90,6 +95,7 @@ export class EditMeterFormService {
     }
     return meter;
   }
+
 
   getFuelValidation(source: MeterSource): Array<ValidatorFn> {
     if (source == 'Other Fuels' || source == 'Other Energy') {
