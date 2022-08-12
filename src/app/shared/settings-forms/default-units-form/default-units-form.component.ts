@@ -3,12 +3,10 @@ import { FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbAccount, IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
+import { IdbAccount, IdbFacility } from 'src/app/models/idb';
 import { EGridService, SubRegionData, SubregionEmissions } from 'src/app/shared/helper-services/e-grid.service';
 import { EnergyUnitOptions, MassUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from 'src/app/shared/unitOptions';
 import * as _ from 'lodash';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { SettingsFormsService } from '../settings-forms.service';
 import { SetupWizardService } from 'src/app/setup-wizard/setup-wizard.service';
 

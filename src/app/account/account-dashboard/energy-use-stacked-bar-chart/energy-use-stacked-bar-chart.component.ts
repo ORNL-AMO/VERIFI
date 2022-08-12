@@ -199,7 +199,7 @@ export class EnergyUseStackedBarChartComponent implements OnInit {
       let facilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.filter(meterData => { return meterData.facilityId == id });
       facilityMeterData.forEach(dataItem => {
         let meter: IdbUtilityMeter = this.utilityMeterDbService.getFacilityMeterById(dataItem.meterId);
-        let emissions: EmissionsResults = this.calanderizationService.getEmissions(meter, dataItem.totalEnergyUse, selectedAccount.energyUnit, selectedAccount.energyIsSource);
+        let emissions: EmissionsResults = this.calanderizationService.getEmissions(meter, dataItem.totalEnergyUse, selectedAccount.energyUnit, selectedAccount.energyIsSource, new Date(dataItem.readDate).getFullYear());
         if (meter) {
           if (meter.source == 'Electricity') {
             electricity.energyUse = (electricity.energyUse + Number(dataItem.totalEnergyUse));

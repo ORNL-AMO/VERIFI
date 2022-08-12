@@ -3,13 +3,15 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility, IdbUtilityMeter, MeterPhase, MeterSource } from 'src/app/models/idb';
 import { FuelTypeOption, GasOptions, LiquidOptions, OtherEnergyOptions, SolidOptions } from 'src/app/facility/utility-data/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
 import { ConvertUnitsService } from '../convert-units/convert-units.service';
+import { EGridService } from './e-grid.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class EnergyUseCalculationsService {
 
-  constructor(private convertUnitsService: ConvertUnitsService, private facilityDbService: FacilitydbService) { }
+  constructor(private convertUnitsService: ConvertUnitsService, private facilityDbService: FacilitydbService,
+    private eGridService: EGridService) { }
 
   getHeatingCapacity(source: MeterSource, startingUnit: string, meterEnergyUnit: string, selectedFuelTypeOption?: FuelTypeOption): number {
     let heatCapacity: number;
@@ -45,11 +47,11 @@ export class EnergyUseCalculationsService {
       //grid or utility green product
       siteToSource = 3;
       //self or PPPA
-      if(agreementType == 2 || agreementType == 3){
+      if (agreementType == 2 || agreementType == 3) {
         siteToSource = 1
       }
       //VPPA or RECs
-      else if(agreementType == 4 || agreementType == 6){
+      else if (agreementType == 4 || agreementType == 6) {
         siteToSource = 0
       }
     }
@@ -90,13 +92,9 @@ export class EnergyUseCalculationsService {
     return 0;
   }
 
-  getEmissionsOutputRate(source: MeterSource, fuel: string, phase: MeterPhase, energyUnit: string): number {
+  getFuelEmissionsOutputRate(source: MeterSource, fuel: string, phase: MeterPhase, energyUnit: string): number {
     let emissionsRate: number;
-    if (source == 'Electricity') {
-      let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-      // emissionsRate = this.convertElectricityEmissions(selectedFacility.emissionsOutputRate, energyUnit);
-      //TODO: need year, market/location and lookup in emissions
-    } else if (source == 'Natural Gas') {
+    if (source == 'Natural Gas') {
       emissionsRate = this.convertEmissions(53.06, energyUnit);
     } else if (source == 'Other Fuels') {
       let fuelTypeOptions: Array<FuelTypeOption> = this.getFuelTypeOptions(source, phase);

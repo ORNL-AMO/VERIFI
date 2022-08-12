@@ -162,7 +162,8 @@ export class MeterGroupingService {
         marketEmissions: _.sumBy(filteredData, 'marketEmissions'),
         locationEmissions: _.sumBy(filteredData, 'locationEmissions'),
         RECs: _.sumBy(filteredData, 'RECs'),
-        GHGOffsets: _.sumBy(filteredData, 'GHGOffsets')
+        excessRECs: _.sumBy(filteredData, 'excessRECs'), 
+        excessRECsEmissions: _.sumBy(filteredData, 'excessRECsEmissions')
       })
       startDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1);
     }

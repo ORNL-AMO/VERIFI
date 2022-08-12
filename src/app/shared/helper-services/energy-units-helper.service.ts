@@ -260,7 +260,7 @@ export class EnergyUnitsHelperService {
     return undefined;
   }
 
-  checkHasDifferentUnits(source: MeterSource, phase: MeterPhase, emissionsOutputRate: number, startingUnit: string, fuel: string, selectedFacility: IdbFacility, energyUnit: string): { differentEnergyUnit: boolean, emissionsOutputRate: boolean, differentCollectionUnit: boolean } {
+  checkHasDifferentUnits(source: MeterSource, phase: MeterPhase, startingUnit: string, fuel: string, selectedFacility: IdbFacility, energyUnit: string): { differentEnergyUnit: boolean, emissionsOutputRate: boolean, differentCollectionUnit: boolean } {
     let hasDifferentCollectionUnits: boolean = false;
     let hasDifferentEnergyUnits: boolean = false;
     let hasDifferentEmissions: boolean = false;

@@ -32,7 +32,8 @@ export class MeterSummaryService {
         date: new Date(reportOptions.targetYear, 11),
         marketEmissions: undefined,
         locationEmissions: undefined,
-        GHGOffsets: undefined,
+        excessRECs: undefined, 
+        excessRECsEmissions: undefined,
         RECs: undefined
       }
     }
@@ -190,7 +191,8 @@ export class MeterSummaryService {
         date: new Date(reportOptions.targetYear, 11),
         marketEmissions: undefined,
         locationEmissions: undefined,
-        GHGOffsets: undefined,
+        excessRECs: undefined, 
+        excessRECsEmissions: undefined,
         RECs: undefined
       }
       reportOptions.facilities.forEach(facility => {

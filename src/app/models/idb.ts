@@ -132,7 +132,6 @@ export interface IdbUtilityMeter {
     visible?: boolean
     importWizardName?: string
     meterReadingDataApplication?: "backward" | "fullMonth",
-    emissionsOutputRate?: number,
     unitsDifferent?: boolean,
     ignoreDuplicateMonths?: boolean,
     ignoreMissingMonths?: boolean,
@@ -189,7 +188,8 @@ export interface IdbUtilityMeterData {
     totalMarketEmissions?: number,
     totalLocationEmissions?: number,
     RECs?: number,
-    GHGOffsets?: number
+    excessRECs?: number,
+    excessRECsEmissions?: number
 }
 
 export interface IdbPredictorEntry {
