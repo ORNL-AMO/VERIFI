@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
@@ -7,6 +7,9 @@ import { CalanderizedMeter, MonthlyData, LastYearData, CalanderizationFilters, C
 import { BehaviorSubject } from 'rxjs';
 import { ConvertUnitsService } from '../convert-units/convert-units.service';
 import { ReportOptions } from 'src/app/models/overview-report';
+import { EGridService } from './e-grid.service';
+import { EnergyUseCalculationsService } from './energy-use-calculations.service';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 
 @Injectable({
   providedIn: 'root'
@@ -19,7 +22,8 @@ export class CalanderizationService {
   displayGraphCost: "bar" | "scatter" | null = "bar";
   dataDisplay: "table" | "graph" = 'table';
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private energyUnitsHelperService: EnergyUnitsHelperService,
-    private convertUnitsService: ConvertUnitsService) {
+    private convertUnitsService: ConvertUnitsService, private eGridService: EGridService, private energyUseCalculationsService: EnergyUseCalculationsService,
+    private facilityDbService: FacilitydbService) {
     this.calanderizedDataFilters = new BehaviorSubject({
       selectedSources: [],
       showAllSources: true,
@@ -183,7 +187,7 @@ export class CalanderizationService {
         } else {
           monthStr = new Date(year, month).toLocaleString('default', { month: 'long' });
         }
-        let emissionsValues: EmissionsResults = this.getEmissions(meter, totals.totalEnergyUse, calanderizedEnergyUnit, energyIsSource);
+        let emissionsValues: EmissionsResults = this.getEmissions(meter, totals.totalEnergyUse, calanderizedEnergyUnit, energyIsSource, year);
         calanderizeData.push({
           month: monthStr,
           monthNumValue: month,
@@ -195,7 +199,8 @@ export class CalanderizationService {
           marketEmissions: emissionsValues.marketEmissions,
           locationEmissions: emissionsValues.locationEmissions,
           RECs: emissionsValues.RECs,
-          GHGOffsets: emissionsValues.GHGOffsets
+          excessRECs: emissionsValues.excessRECs,
+          excessRECsEmissions: emissionsValues.excessRECsEmissions
         });
         startDate.setUTCMonth(startDate.getUTCMonth() + 1);
       }
@@ -338,7 +343,7 @@ export class CalanderizationService {
         } else {
           monthStr = new Date(year, month).toLocaleString('default', { month: 'long' });
         }
-        let emissionsValues: EmissionsResults = this.getEmissions(meter, totalEnergyUse, calanderizedEnergyUnit, energyIsSource)
+        let emissionsValues: EmissionsResults = this.getEmissions(meter, totalEnergyUse, calanderizedEnergyUnit, energyIsSource, year)
 
         calanderizeData.push({
           month: monthStr,
@@ -351,7 +356,8 @@ export class CalanderizationService {
           marketEmissions: emissionsValues.marketEmissions,
           locationEmissions: emissionsValues.locationEmissions,
           RECs: emissionsValues.RECs,
-          GHGOffsets: emissionsValues.GHGOffsets
+          excessRECs: emissionsValues.excessRECs,
+          excessRECsEmissions: emissionsValues.excessRECsEmissions
         });
         startDate.setUTCMonth(startDate.getUTCMonth() + 1);
       }
@@ -493,7 +499,8 @@ export class CalanderizationService {
         marketEmissions: 0,
         locationEmissions: 0,
         RECs: 0,
-        GHGOffsets: 0
+        excessRECs: 0,
+        excessRECsEmissions: 0
       }]
     }
   }
@@ -754,22 +761,41 @@ export class CalanderizationService {
     return calanderizationSummary;
   }
 
-  getEmissions(meter: IdbUtilityMeter, energyUse: number, energyUnit: string, energyIsSource: boolean): EmissionsResults {
+  getEmissions(meter: IdbUtilityMeter, energyUse: number, energyUnit: string, energyIsSource: boolean, year: number): EmissionsResults {
     if (meter.source == 'Electricity' || meter.source == 'Natural Gas' || meter.source == 'Other Fuels') {
       if (energyIsSource) {
         energyUse = energyUse / meter.siteToSource;
       }
       let convertedEnergyUse: number = this.convertUnitsService.value(energyUse).from(energyUnit).to(meter.energyUnit);
-      let emissions: number = convertedEnergyUse * meter.emissionsOutputRate
+      let locationEmissions: number;
+      let marketEmissions: number;
 
-      // let totalEmissions: number = emissions * meter.GHGMultiplier;
-      let locationEmissions: number = emissions * meter.locationGHGMultiplier;
-      let marketEmissions: number = emissions * meter.marketGHGMultiplier;
+
+      let marketEmissionsOutputRate: number;
+      if (meter.source == 'Electricity') {
+        let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+        let meterFacility: IdbFacility = accountFacilities.find(facility => {return facility.guid == meter.facilityId});
+        let emissionsRates: {marketRate: number, locationRate: number} = this.eGridService.getEmissionsRate(meterFacility.eGridSubregion, year);
+        marketEmissionsOutputRate = emissionsRates.marketRate;
+        locationEmissions = convertedEnergyUse * emissionsRates.locationRate * meter.locationGHGMultiplier;
+        marketEmissions = convertedEnergyUse * emissionsRates.marketRate * meter.marketGHGMultiplier;
+      } else {
+        marketEmissionsOutputRate = this.energyUseCalculationsService.getFuelEmissionsOutputRate(meter.source, meter.fuel, meter.phase, energyUnit);
+        locationEmissions = convertedEnergyUse * marketEmissionsOutputRate;
+        marketEmissions = convertedEnergyUse * marketEmissionsOutputRate;
+      }
+
       let RECs: number = energyUse * meter.recsMultiplier;
-      let GHGOffsets: number = -1 * RECs * meter.emissionsOutputRate;
-      return { RECs: RECs, locationEmissions: locationEmissions, marketEmissions: marketEmissions, GHGOffsets: GHGOffsets };
+      let excessRECs: number;
+      if(RECs - energyUse <= 0){
+        excessRECs = 0;
+      }else{
+        excessRECs = RECs;
+      }
+      let excessRECsEmissions: number = excessRECs * marketEmissionsOutputRate;
+      return { RECs: RECs, locationEmissions: locationEmissions, marketEmissions: marketEmissions, excessRECs: excessRECs, excessRECsEmissions: excessRECsEmissions};
     } else {
-      return { RECs: 0, locationEmissions: 0, marketEmissions: 0, GHGOffsets: 0 };
+      return { RECs: 0, locationEmissions: 0, marketEmissions: 0, excessRECs: 0, excessRECsEmissions: 0 };
     }
   }
 }
@@ -788,5 +814,5 @@ export interface CalendarizationSummaryItem {
 }
 
 export interface EmissionsResults {
-  RECs: number, locationEmissions: number, marketEmissions: number, GHGOffsets: number 
+  RECs: number, locationEmissions: number, marketEmissions: number, excessRECs: number, excessRECsEmissions: number
 }

@@ -35,9 +35,7 @@ export interface IdbAccount {
     numberOfFacilities?: string,
     energyIsSource: boolean,
     lastBackup?: Date,
-    emissionsOutputRate?: number,
     eGridSubregion?: string,
-    customEmissionsRate?: boolean,
     color?: string,
     contactName: string,
     contactEmail: string,
@@ -78,9 +76,7 @@ export interface IdbFacility {
     fiscalYearMonth: number,
     fiscalYearCalendarEnd: boolean,
     energyIsSource: boolean,
-    emissionsOutputRate?: number,
     eGridSubregion?: string,
-    customEmissionsRate?: boolean
     color?: string,
     selected?: boolean,
     wizardId?: string,
@@ -136,7 +132,6 @@ export interface IdbUtilityMeter {
     visible?: boolean
     importWizardName?: string
     meterReadingDataApplication?: "backward" | "fullMonth",
-    emissionsOutputRate?: number,
     unitsDifferent?: boolean,
     ignoreDuplicateMonths?: boolean,
     ignoreMissingMonths?: boolean,
@@ -193,7 +188,8 @@ export interface IdbUtilityMeterData {
     totalMarketEmissions?: number,
     totalLocationEmissions?: number,
     RECs?: number,
-    GHGOffsets?: number
+    excessRECs?: number,
+    excessRECsEmissions?: number
 }
 
 export interface IdbPredictorEntry {

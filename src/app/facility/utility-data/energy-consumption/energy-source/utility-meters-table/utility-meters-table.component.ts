@@ -70,7 +70,7 @@ export class UtilityMetersTableComponent implements OnInit {
 
   checkMeterUnits(meters: Array<IdbUtilityMeter>): Array<IdbUtilityMeter> {
     meters.forEach(meter => {
-      let differentUnits: { differentEnergyUnit: boolean, emissionsOutputRate: boolean, differentCollectionUnit: boolean } = this.energyUnitsHelperService.checkHasDifferentUnits(meter.source, meter.phase, meter.emissionsOutputRate, meter.startingUnit, meter.fuel, this.selectedFacility, meter.energyUnit);
+      let differentUnits: { differentEnergyUnit: boolean, emissionsOutputRate: boolean, differentCollectionUnit: boolean } = this.energyUnitsHelperService.checkHasDifferentUnits(meter.source, meter.phase, meter.startingUnit, meter.fuel, this.selectedFacility, meter.energyUnit);
       meter.unitsDifferent = differentUnits.emissionsOutputRate;
     });
     return meters;

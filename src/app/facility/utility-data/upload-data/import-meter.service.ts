@@ -69,7 +69,7 @@ export class ImportMeterService {
 
 
   getNewMeterFromImportMeter(importMeter: ImportMeter, selectedFacility: IdbFacility): IdbUtilityMeter {
-    let newMeter: IdbUtilityMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.guid, selectedFacility.accountId, false, undefined, selectedFacility.energyUnit);
+    let newMeter: IdbUtilityMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.guid, selectedFacility.accountId, false, selectedFacility.energyUnit);
     newMeter.meterNumber = importMeter.meterNumber;
     newMeter.accountNumber = importMeter.accountNumber;
     newMeter.source = this.checkImportSource(importMeter.source);
@@ -91,7 +91,6 @@ export class ImportMeterService {
       }
     }
     newMeter.siteToSource = importMeter.siteToSource;
-    newMeter.emissionsOutputRate = this.energyUseCalculationsService.getEmissionsOutputRate(newMeter.source, newMeter.fuel, newMeter.phase, newMeter.energyUnit);
     return newMeter;
   }
 
@@ -171,7 +170,7 @@ export class ImportMeterService {
   }
 
   getNewMeterFromExcelColumn(groupItem: ColumnItem, selectedFacility: IdbFacility): IdbUtilityMeter {
-    let newMeter: IdbUtilityMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.guid, selectedFacility.accountId, false, undefined, selectedFacility.energyUnit);
+    let newMeter: IdbUtilityMeter = this.utilityMeterdbService.getNewIdbUtilityMeter(selectedFacility.guid, selectedFacility.accountId, false, selectedFacility.energyUnit);
     let fuelType: { phase: MeterPhase, fuelTypeOption: FuelTypeOption } = this.energyUnitsHelperService.parseFuelType(groupItem.value);
     if (fuelType) {
       newMeter.source = "Other Fuels";
@@ -179,7 +178,6 @@ export class ImportMeterService {
       newMeter.fuel = fuelType.fuelTypeOption.value;
       newMeter.heatCapacity = fuelType.fuelTypeOption.heatCapacityValue;
       newMeter.siteToSource = fuelType.fuelTypeOption.siteToSourceMultiplier;
-      newMeter.emissionsOutputRate = fuelType.fuelTypeOption.emissionsOutputRate;
       //check if unit is in name
       let startingUnit: string = this.energyUnitsHelperService.parseStartingUnit(groupItem.value);
       if (startingUnit) {
@@ -216,7 +214,6 @@ export class ImportMeterService {
         if (showSiteToSource) {
           newMeter.siteToSource = this.energyUseCalculationsService.getSiteToSource(newMeter.source);
         }
-        newMeter.emissionsOutputRate = this.energyUseCalculationsService.getEmissionsOutputRate(newMeter.source, undefined, undefined, newMeter.energyUnit);
       }
     }
     newMeter.name = groupItem.value;
@@ -226,7 +223,8 @@ export class ImportMeterService {
     //start with random meter number
     newMeter.meterNumber = Math.random().toString(36).substr(2, 9);
 
-    //TODO: set emissions output rate
+    //set emissions mulitpliers
+    newMeter = this.editMeterFormService.setMultipliers(newMeter);
     return newMeter;
   }
 

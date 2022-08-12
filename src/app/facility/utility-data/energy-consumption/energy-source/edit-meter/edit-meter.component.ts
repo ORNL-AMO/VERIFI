@@ -11,7 +11,6 @@ import { EditMeterFormService } from '../edit-meter-form/edit-meter-form.service
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { EnergyUseCalculationsService } from 'src/app/shared/helper-services/energy-use-calculations.service';
 
 @Component({
   selector: 'app-edit-meter',
@@ -30,7 +29,7 @@ export class EditMeterComponent implements OnInit {
     private utilityMeterDataDbService: UtilityMeterDatadbService, private loadingService: LoadingService,
     private toastNotificationService: ToastNotificationsService, private accountDbService: AccountdbService,
     private dbChangesService: DbChangesService, private activatedRoute: ActivatedRoute,
-    private router: Router, private energyUseCalculationsService: EnergyUseCalculationsService) { }
+    private router: Router) { }
 
   ngOnInit(): void {
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
@@ -54,8 +53,7 @@ export class EditMeterComponent implements OnInit {
         this.addOrEdit = 'add';
         let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
         let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-        let emissionsOutputRate: number = this.energyUseCalculationsService.getEmissionsOutputRate('Electricity', undefined, undefined, selectedFacility.electricityUnit);
-        this.editMeter = this.utilityMeterDbService.getNewIdbUtilityMeter(selectedFacility.guid, selectedAccount.guid, true, emissionsOutputRate, selectedFacility.electricityUnit);
+        this.editMeter = this.utilityMeterDbService.getNewIdbUtilityMeter(selectedFacility.guid, selectedAccount.guid, true, selectedFacility.electricityUnit);
         this.meterForm = this.editMeterFormService.getFormFromMeter(this.editMeter);
       }
     });

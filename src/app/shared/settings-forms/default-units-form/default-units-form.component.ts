@@ -3,12 +3,10 @@ import { FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbAccount, IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
+import { IdbAccount, IdbFacility } from 'src/app/models/idb';
 import { EGridService, SubRegionData, SubregionEmissions } from 'src/app/shared/helper-services/e-grid.service';
 import { EnergyUnitOptions, MassUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from 'src/app/shared/unitOptions';
 import * as _ from 'lodash';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { SettingsFormsService } from '../settings-forms.service';
 import { SetupWizardService } from 'src/app/setup-wizard/setup-wizard.service';
 
@@ -43,9 +41,11 @@ export class DefaultUnitsFormComponent implements OnInit {
   }>;
   zipCodeSubRegionData: Array<string> = new Array();
   currentZip: string;
-  showCustomLink: boolean;
-  constructor(private accountDbService: AccountdbService, private settingsFormsService: SettingsFormsService, private facilityDbService: FacilitydbService,
-    private eGridService: EGridService, private utilityMeterDbService: UtilityMeterdbService, private toastNotificationService: ToastNotificationsService,
+  selectedSubregionEmissions: SubregionEmissions;
+  openEmissionsRates: boolean = false;
+  constructor(private accountDbService: AccountdbService, private settingsFormsService: SettingsFormsService, 
+    private facilityDbService: FacilitydbService,
+    private eGridService: EGridService,
     private setupWizardService: SetupWizardService) { }
 
   ngOnInit(): void {
@@ -55,7 +55,6 @@ export class DefaultUnitsFormComponent implements OnInit {
         if (account && this.inAccount) {
           if (this.isFormChange == false) {
             this.form = this.settingsFormsService.getUnitsForm(account);
-            this.setShowCustomLink();
             this.checkCurrentZip();
           } else {
             this.isFormChange = false;
@@ -69,7 +68,6 @@ export class DefaultUnitsFormComponent implements OnInit {
           this.checkUnitsDontMatch();
           if (this.isFormChange == false) {
             this.form = this.settingsFormsService.getUnitsForm(facility);
-            this.setShowCustomLink();
             this.checkCurrentZip();
           } else {
             this.isFormChange = false;
@@ -82,7 +80,6 @@ export class DefaultUnitsFormComponent implements OnInit {
         if (account && this.inAccount) {
           if (this.isFormChange == false) {
             this.form = this.settingsFormsService.getUnitsForm(account);
-            this.setShowCustomLink();
             this.checkCurrentZip();
           } else {
             this.isFormChange = false;
@@ -96,7 +93,6 @@ export class DefaultUnitsFormComponent implements OnInit {
           this.checkUnitsDontMatch();
           if (this.isFormChange == false) {
             this.form = this.settingsFormsService.getUnitsForm(facility);
-            this.setShowCustomLink();
             this.checkCurrentZip();
           } else {
             this.isFormChange = false;
@@ -127,7 +123,6 @@ export class DefaultUnitsFormComponent implements OnInit {
         this.accountDbService.allAccounts.next(allAccount);
       }
       if (!this.inAccount) {
-        this.checkMeterEmissions();
         this.selectedFacility = this.settingsFormsService.updateFacilityFromUnitsForm(this.form, this.selectedFacility);
         let allFacilities: Array<IdbFacility> = await this.facilityDbService.updateWithObservable(this.selectedFacility).toPromise();
         this.facilityDbService.selectedFacility.next(this.selectedFacility);
@@ -140,7 +135,6 @@ export class DefaultUnitsFormComponent implements OnInit {
         this.setupWizardService.account.next(this.selectedAccount);
       }
       if (!this.inAccount) {
-        this.checkMeterEmissions();
         this.selectedFacility = this.settingsFormsService.updateFacilityFromUnitsForm(this.form, this.selectedFacility);
         this.setupWizardService.selectedFacility.next(this.selectedFacility);
       }
@@ -157,16 +151,14 @@ export class DefaultUnitsFormComponent implements OnInit {
   }
 
   checkCurrentZip() {
-    if (!this.form.controls.customEmissionsRate.value) {
-      if (this.inAccount && this.currentZip != this.selectedAccount.zip) {
-        this.currentZip = this.selectedAccount.zip;
-        this.setSubRegionData();
-      } else if (!this.inAccount && this.currentZip != this.selectedFacility.zip) {
-        this.currentZip = this.selectedFacility.zip;
-        this.setSubRegionData();
-      } else {
-        this.setUSAverage();
-      }
+    if (this.inAccount && this.currentZip != this.selectedAccount.zip) {
+      this.currentZip = this.selectedAccount.zip;
+      this.setSubRegionData();
+    } else if (!this.inAccount && this.currentZip != this.selectedFacility.zip) {
+      this.currentZip = this.selectedFacility.zip;
+      this.setSubRegionData();
+    } else {
+      this.setUSAverage();
     }
   }
 
@@ -189,9 +181,7 @@ export class DefaultUnitsFormComponent implements OnInit {
         }
       }
     }
-    if (!this.form.controls.customEmissionsRate.value) {
-      this.setUSAverage();
-    }
+    this.setUSAverage();
   }
 
   setUSAverage() {
@@ -218,55 +208,14 @@ export class DefaultUnitsFormComponent implements OnInit {
   }
 
   setSubRegionEmissionsOutput() {
-    let subregionEmissions: SubregionEmissions = _.find(this.eGridService.co2Emissions, (val) => { return this.form.controls.eGridSubregion.value === val.subregion; });
-    if (subregionEmissions) {
-      this.form.patchValue({
-        emissionsOutputRate: subregionEmissions.co2Emissions
-      });
-      this.saveChanges();
-    }
+    this.selectedSubregionEmissions = this.eGridService.co2Emissions.find(region => { return this.form.controls.eGridSubregion.value === region.subregion; });
   }
 
-  toggleCustomEmissionsRate() {
-    if (this.form.controls.customEmissionsRate.value) {
-      this.form.controls.customEmissionsRate.patchValue(false);
-      this.form.controls.eGridSubregion.patchValue(undefined);
-      this.setSubRegionData();
-    } else {
-      this.form.controls.customEmissionsRate.patchValue(true);
-      this.saveChanges();
-    }
+  showEmissionsRates(){
+    this.openEmissionsRates = true;
   }
 
-  setShowCustomLink() {
-    if (this.inAccount) {
-      if (this.selectedAccount.country != 'US') {
-        this.showCustomLink = false;
-      } else {
-        this.showCustomLink = true;
-      }
-    } else {
-      if (this.selectedFacility.country != 'US') {
-        this.showCustomLink = false;
-      } else {
-        this.showCustomLink = true;
-      }
-    }
-    if (!this.form.controls.customEmissionsRate.value && !this.showCustomLink) {
-      this.form.controls.customEmissionsRate.patchValue(true);
-    }
-  }
-
-  checkMeterEmissions() {
-    if (!this.inWizard) {
-      let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
-      if (this.selectedFacility.emissionsOutputRate != this.form.controls.emissionsOutputRate.value) {
-        //check electricity meters
-        let findMeter: IdbUtilityMeter = facilityMeters.find(meter => { return meter.source == 'Electricity' });
-        if (findMeter) {
-          this.toastNotificationService.showToast("Meter Update Recommended", "One or more meter emissions factors may need to be updated. Visit the utility data page for more information.", 15000, false, "warning");
-        }
-      }
-    }
+  closeEmissionsRates(){
+    this.openEmissionsRates = false;
   }
 }

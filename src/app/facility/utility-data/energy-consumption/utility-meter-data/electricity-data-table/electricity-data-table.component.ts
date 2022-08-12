@@ -142,11 +142,12 @@ export class ElectricityDataTableComponent implements OnInit {
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     let facility: IdbFacility = accountFacilities.find(facility => { return facility.guid == this.selectedMeter.facilityId });
     this.selectedMeterData.forEach(dataItem => {
-      let emissionsValues: EmissionsResults = this.calanderizationService.getEmissions(this.selectedMeter, dataItem.totalEnergyUse, this.selectedMeter.energyUnit, facility.energyIsSource);
+      let emissionsValues: EmissionsResults = this.calanderizationService.getEmissions(this.selectedMeter, dataItem.totalEnergyUse, this.selectedMeter.energyUnit, facility.energyIsSource, new Date(dataItem.readDate).getFullYear());
       dataItem.totalMarketEmissions = emissionsValues.marketEmissions;
       dataItem.totalLocationEmissions = emissionsValues.locationEmissions;
       dataItem.RECs = emissionsValues.RECs;
-      dataItem.GHGOffsets = emissionsValues.GHGOffsets;
+      dataItem.excessRECs = emissionsValues.excessRECs;
+      dataItem.excessRECsEmissions = emissionsValues.excessRECsEmissions;
     })
   }
 }

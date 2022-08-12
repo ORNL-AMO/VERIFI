@@ -21,7 +21,8 @@ export interface MonthlyData {
     locationEmissions: number, 
     marketEmissions: number,    
     RECs: number,
-    GHGOffsets: number
+    excessRECs: number, 
+    excessRECsEmissions: number
 }
 
 

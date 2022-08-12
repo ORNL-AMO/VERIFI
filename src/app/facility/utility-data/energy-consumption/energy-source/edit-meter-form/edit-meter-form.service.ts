@@ -15,7 +15,6 @@ export class EditMeterFormService {
     let phaseValidators: Array<ValidatorFn> = this.getPhaseValidation(meter.source);
     let heatCapacityValidators: Array<ValidatorFn> = this.getHeatCapacitValidation(meter.source, meter.startingUnit);
     let siteToSourceValidators: Array<ValidatorFn> = this.getSiteToSourceValidation(meter.source, meter.startingUnit, meter.includeInEnergy);
-    let emissionsOutputRateValidators: Array<ValidatorFn> = this.getEmissionsOutputRateValidation(meter.source);
     let form: FormGroup = this.formBuilder.group({
       meterNumber: [meter.meterNumber],
       accountNumber: [meter.accountNumber],
@@ -30,7 +29,6 @@ export class EditMeterFormService {
       group: [meter.group],
       fuel: [meter.fuel, fuelValidators],
       startingUnit: [meter.startingUnit, Validators.required],
-      emissionsOutputRate: [meter.emissionsOutputRate, emissionsOutputRateValidators],
       energyUnit: [meter.energyUnit, Validators.required],
       scope: [meter.scope],
       agreementType: [meter.agreementType],
@@ -60,7 +58,6 @@ export class EditMeterFormService {
     meter.group = form.controls.group.value;
     meter.fuel = form.controls.fuel.value;
     meter.startingUnit = form.controls.startingUnit.value;
-    meter.emissionsOutputRate = form.controls.emissionsOutputRate.value;
     meter.energyUnit = form.controls.energyUnit.value;
     meter.scope = form.controls.scope.value;
     meter.agreementType = form.controls.agreementType.value;
@@ -70,6 +67,11 @@ export class EditMeterFormService {
     meter.greenPurchaseFraction = form.controls.greenPurchaseFraction.value / 100;
 
     //set multipliers
+    meter = this.setMultipliers(meter);
+    return meter;
+  }
+
+  setMultipliers(meter: IdbUtilityMeter): IdbUtilityMeter {
     if (meter.source == 'Electricity') {
       let greenPurchaseFraction: number;
       if (meter.agreementType == 5) {
@@ -93,6 +95,7 @@ export class EditMeterFormService {
     }
     return meter;
   }
+
 
   getFuelValidation(source: MeterSource): Array<ValidatorFn> {
     if (source == 'Other Fuels' || source == 'Other Energy') {
@@ -126,16 +129,6 @@ export class EditMeterFormService {
     } else {
       return [];
     }
-  }
-
-  getEmissionsOutputRateValidation(source: MeterSource): Array<ValidatorFn> {
-    let showEmissionsOutputRate: boolean = this.checkShowEmissionsOutputRate(source);
-    if (showEmissionsOutputRate) {
-      return [Validators.required, Validators.min(0)];
-    } else {
-      return [];
-    }
-
   }
 
   checkShowHeatCapacity(source: MeterSource, startingUnit: string): boolean {
@@ -177,20 +170,12 @@ export class EditMeterFormService {
     let recsMultiplier: number = 0;
 
     if (retainRECs) {
-      // GHGMultiplier = 0;
       recsMultiplier = 1;
     }
 
-    // if (!includeInEnergy) {
-    //   GHGMultiplier = 0;
-    // }
-
     if (greenPurchaseFraction != undefined) {
       recsMultiplier = greenPurchaseFraction;
-      // GHGMultiplier = 1;
     }
-
-
 
     if(includeInEnergy){
       if(directConnection && retainRECs){
@@ -199,7 +184,11 @@ export class EditMeterFormService {
         locationGHGMultiplier = 1;
       }
     }else{
-      locationGHGMultiplier = 1;
+      if(retainRECs){
+        locationGHGMultiplier = 0;
+      }else{
+        locationGHGMultiplier = 1;
+      }
     }
 
 

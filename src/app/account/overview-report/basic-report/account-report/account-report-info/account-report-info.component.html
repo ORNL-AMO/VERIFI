@@ -8,13 +8,9 @@
         NAICS: {{naics}}
     </span>
     <!--GLOBAL WARMING POTENTIAL-->
-    <span *ngIf="account.eGridSubregion && !account.customEmissionsRate">
+    <span *ngIf="account.eGridSubregion">
         <br>
         eGridSubregion: {{account.eGridSubregion}}
-    </span>
-    <span *ngIf="account.emissionsOutputRate">
-        <br>
-        Electrical Emissions Output Rate: {{account.emissionsOutputRate}} kg CO<sub>2</sub>/kWh
     </span>
     <!--SITE/SOURCE-->
     <br>

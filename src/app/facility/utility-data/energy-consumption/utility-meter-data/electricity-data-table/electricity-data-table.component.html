@@ -20,9 +20,13 @@
             <th (click)="setOrderDataField('totalLocationEmissions')"
                 [ngClass]="{'active': orderDataField == 'totalLocationEmissions'}">Total Location <br>Emissions (kg
                 CO<sub>2</sub>)</th>
-            <th (click)="setOrderDataField('RECs')" [ngClass]="{'active': orderDataField == 'RECs'}">RECs</th>
-            <th (click)="setOrderDataField('GHGOffsets')" [ngClass]="{'active': orderDataField == 'GHGOffsets'}">GHG
-                Offsets <br>(kg CO<sub>2</sub>)</th>
+            <th (click)="setOrderDataField('RECs')" [ngClass]="{'active': orderDataField == 'RECs'}">RECs<br> (<span
+                    [innerHTML]="energyUnit | settingsLabel"></span>)</th>
+            <th (click)="setOrderDataField('excessRECs')" [ngClass]="{'active': orderDataField == 'excessRECs'}">Excess
+                RECs<br> (<span [innerHTML]="energyUnit | settingsLabel"></span>)</th>
+            <th (click)="setOrderDataField('excessRECsEmissions')"
+                [ngClass]="{'active': orderDataField == 'excessRECsEmissions'}">Excess
+                RECs<br> (kg CO<sub>2</sub>)</th>
             <th (click)="setOrderDataField('supplyBlockAmount')"
                 [ngClass]="{'active': orderDataField == 'supplyBlockAmount'}"
                 *ngIf="supplyDemandCharge.supplyBlockAmount">
@@ -120,7 +124,8 @@
             <td>{{meterData.totalMarketEmissions | customNumber}}</td>
             <td>{{meterData.totalLocationEmissions | customNumber}}</td>
             <td>{{meterData.RECs | customNumber}}</td>
-            <td>{{meterData.GHGOffsets | customNumber}}</td>
+            <td>{{meterData.excessRECs | customNumber}}</td>
+            <td>{{meterData.excessRECsEmissions | customNumber}}</td>
             <td *ngIf="supplyDemandCharge.supplyBlockAmount">
                 {{meterData.supplyBlockAmount | customNumber}}
             </td>
