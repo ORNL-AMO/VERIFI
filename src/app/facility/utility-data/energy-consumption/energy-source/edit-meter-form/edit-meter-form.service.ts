@@ -131,15 +131,6 @@ export class EditMeterFormService {
     }
   }
 
-  // getEmissionsOutputRateValidation(source: MeterSource): Array<ValidatorFn> {
-  //   let showEmissionsOutputRate: boolean = this.checkShowEmissionsOutputRate(source);
-  //   if (showEmissionsOutputRate) {
-  //     return [Validators.required, Validators.min(0)];
-  //   } else {
-  //     return [];
-  //   }
-  // }
-
   checkShowHeatCapacity(source: MeterSource, startingUnit: string): boolean {
     if (source != 'Waste Water' && source != 'Water' && source != 'Other Utility' && startingUnit) {
       return (this.energyUnitsHelperService.isEnergyUnit(startingUnit) == false);

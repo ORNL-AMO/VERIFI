@@ -149,7 +149,4 @@ export interface SubregionEmissions {
   subregion: string,
   locationEmissionRates: Array<{ co2Emissions: number, year: number }>,
   residualEmissionRates: Array<{ co2Emissions: number, year: number }>,
-  // co2Emissions: number,
-  // year: number,
-  // category: 'LocationMix' | 'ResidualMix'
 }

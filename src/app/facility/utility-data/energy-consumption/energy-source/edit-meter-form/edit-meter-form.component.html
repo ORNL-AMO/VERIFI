@@ -137,26 +137,6 @@
                     <span class="inputWarning" *ngIf="meterForm.controls.heatCapacity.value === 0">Heat capacity
                         should be greater than 0</span>
                 </div>
-                <!-- <div class="col-6" *ngIf="displayEmissionsOutputRate">
-                    <label for="emissionsOutputRate">Emissions Output Rate
-
-                    </label>
-                    <span *ngIf="meterForm.controls.emissionsOutputRate.value">
-                        {{meterForm.controls.emissionsOutputRate.value}} kg CO<sub>2</sub>/<span
-                            [innerHTML]="meterForm.controls.energyUnit.value | settingsLabel"></span>
-                    </span>
-                    <div class="alert alert-info"
-                        *ngIf="!meterForm.controls.emissionsOutputRate.value && meterForm.controls.source.value == 'Electricity'">
-                        Electrical emissions output rate is set in the facility settings. No output rate found. <a
-                            routerLink="/facility-management">Change Settings</a>
-                    </div>
-                    <div class="alert alert-info" *ngIf="hasDifferentEmissions">
-                        Electrical emissions for this facility have changed since this meter was created. <a
-                            (click)="setEmissionsOutputRate()">Click here to
-                            update emissions output rate to match facility.</a>
-                    </div>
-                </div> -->
-
             </div>
 
             <p class="alert alert-warning"

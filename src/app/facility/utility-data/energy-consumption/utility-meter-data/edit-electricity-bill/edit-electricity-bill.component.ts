@@ -37,7 +37,6 @@ export class EditElectricityBillComponent implements OnInit {
   totalLocationEmissions: number = 0;
   totalMarketEmissions: number = 0;
   RECs: number = 0;
-  // GHGOffsets: number = 0;
   facility: IdbFacility;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private utilityMeterDataService: UtilityMeterDataService,
     private calanderizationService: CalanderizationService, private facilityDbService: FacilitydbService) { }
@@ -105,12 +104,10 @@ export class EditElectricityBillComponent implements OnInit {
       this.totalLocationEmissions = emissionsValues.locationEmissions;
       this.totalMarketEmissions = emissionsValues.marketEmissions;
       this.RECs = emissionsValues.RECs;
-      // this.GHGOffsets = emissionsValues.GHGOffsets;
     }else{
       this.totalLocationEmissions = 0;
       this.totalMarketEmissions = 0;
       this.RECs = 0;
-      // this.GHGOffsets = 0;
     }
   }
 

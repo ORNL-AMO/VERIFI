@@ -264,12 +264,6 @@ export class EnergyUnitsHelperService {
     let hasDifferentCollectionUnits: boolean = false;
     let hasDifferentEnergyUnits: boolean = false;
     let hasDifferentEmissions: boolean = false;
-    if (source == 'Electricity') {
-      // let convertedOutputRate: number = this.energyUseCalculationsService.convertElectricityEmissions(selectedFacility.emissionsOutputRate, startingUnit);
-      // if (emissionsOutputRate != convertedOutputRate) {
-      //   hasDifferentEmissions = true;
-      // }
-    }
     let isEnergyMeter: boolean = this.isEnergyMeter(source);
     if (isEnergyMeter) {
       let isEnergyUnit: boolean = this.isEnergyUnit(startingUnit);
@@ -302,11 +296,6 @@ export class EnergyUnitsHelperService {
               hasDifferentCollectionUnits = true;
             }
           }
-          // else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Chilled Water') {
-          //   facilityUnit = selectedFacility.energyUnit;
-          // } else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Hot Water') {
-          //   facilityUnit = selectedFacility.energyUnit;
-          // }
         } else if ((source == 'Water' || source == 'Waste Water') && (startingUnit != selectedFacility.volumeLiquidUnit)) {
           // facilityUnit = selectedFacility.volumeLiquidUnit;
           hasDifferentCollectionUnits = true;
