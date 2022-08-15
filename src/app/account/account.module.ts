@@ -11,6 +11,7 @@ import { OverviewReportModule } from './overview-report/overview-report.module';
 import { AccountDashboardModule } from './account-dashboard/account-dashboard.module';
 import { AccountAnalysisModule } from './account-analysis/account-analysis.module';
 import { AccountHomeModule } from './account-home/account-home.module';
+import { CustomDatabaseModule } from './custom-database/custom-database.module';
 
 
 @NgModule({
@@ -28,7 +29,8 @@ import { AccountHomeModule } from './account-home/account-home.module';
     OverviewReportModule,
     AccountDashboardModule,
     AccountAnalysisModule,
-    AccountHomeModule
+    AccountHomeModule,
+    CustomDatabaseModule
   ]
 })
 export class AccountModule { }

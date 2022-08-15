@@ -1,0 +1,18 @@
+<div class="utility banner sticky-top d-flex justify-content-between" [ngClass]="{'modal-open': modalOpen}">
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <a class="nav-link" routerLink="emissions" [routerLinkActive]="['active']">
+                <i class="fa fa-file-pen"></i>
+                Emissions Factors
+            </a>
+        </li>
+    </ul>
+    <!-- <div>
+        <button class="btn btn-dark m-0" (click)="exportData()" title="Export Data"><span
+                class="fa fa-download"></span></button>
+    </div> -->
+</div>
+
+<div class="measur-wrapper main-content">
+    <router-outlet></router-outlet>
+</div>

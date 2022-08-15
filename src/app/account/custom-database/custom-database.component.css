@@ -1,0 +1,23 @@
+.utility.banner{
+   background-color: white;
+    padding-bottom: 0px;
+}
+
+.banner-border{
+    border-bottom: solid #2c386b;
+}
+
+.nav-tabs .nav-link.active{
+    color: #ff6000;
+    background-color: white;
+}
+
+.nav-tabs .nav-link:not(.active){
+    background-color: #2c386b;
+    color: white;
+    border: solid 1px white;
+}
+
+.nav-tabs .nav-link.active, .nav-tabs .nav-link.active i.fa{
+    color: #ff6000;
+}

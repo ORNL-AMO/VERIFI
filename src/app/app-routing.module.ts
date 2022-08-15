@@ -57,6 +57,8 @@ import { UtilityMeterDataTableComponent } from './facility/utility-data/energy-c
 import { EditBillComponent } from './facility/utility-data/energy-consumption/utility-meter-data/edit-bill/edit-bill.component';
 import { AccountHomeComponent } from './account/account-home/account-home.component';
 import { FacilityHomeComponent } from './facility/facility-home/facility-home.component';
+import { CustomDatabaseComponent } from './account/custom-database/custom-database.component';
+import { RegionalEmissionsDataComponent } from './account/custom-database/regional-emissions-data/regional-emissions-data.component';
 
 const routes: Routes = [
   {
@@ -114,6 +116,14 @@ const routes: Routes = [
               { path: 'annual-analysis', component: AnnualAccountAnalysisComponent }
             ]
           }
+        ]
+      },
+      {
+        path: 'custom-data',
+        component: CustomDatabaseComponent,
+        children: [
+          { path: '', pathMatch: 'full', redirectTo: 'emissions' },
+          { path: 'emissions', component: RegionalEmissionsDataComponent },
         ]
       }
     ]

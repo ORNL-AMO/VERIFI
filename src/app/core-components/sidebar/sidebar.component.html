@@ -27,6 +27,9 @@
         <a title="Account Settings" class="nav-link" routerLink="/account/settings" [routerLinkActive]="['active']"><i
                 class="fa fa-cog"></i>
         </a>
+        <a title="Custom Data" class="nav-link" routerLink="/account/custom-data" [routerLinkActive]="['active']"><i
+                class="fa fa-database"></i>
+        </a>
     </div>
     <hr class="bold-hr">
     <div *ngFor="let facility of facilityList | facilityList:(showAllFacilities && open); let index = index;"
