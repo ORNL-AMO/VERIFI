@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, IdbOverviewReportOptions, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from '../models/idb';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbCustomEmissionsItem, IdbFacility, IdbOverviewReportOptions, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from '../models/idb';
 import { AccountAnalysisDbService } from './account-analysis-db.service';
 import { AccountdbService } from './account-db.service';
 import { AnalysisDbService } from './analysis-db.service';
+import { CustomEmissionsDbService } from './custom-emissions-db.service';
 import { FacilitydbService } from './facility-db.service';
 import { OverviewReportOptionsDbService } from './overview-report-options-db.service';
 import { PredictordbService } from './predictors-db.service';
@@ -22,7 +23,8 @@ export class DbChangesService {
     private predictorsDbService: PredictordbService, private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
-    private updateDbEntryService: UpdateDbEntryService) { }
+    private updateDbEntryService: UpdateDbEntryService,
+    private customEmissionsDbService: CustomEmissionsDbService) { }
 
   async updateAccount(account: IdbAccount) {
     let accounts: Array<IdbAccount> = await this.accountDbService.updateWithObservable(account).toPromise();
@@ -62,6 +64,8 @@ export class DbChangesService {
     await this.setMeterData(account);
     //set meter groups
     await this.setMeterGroups(account);
+    //set custom emissions
+    await this.setCustomEmissions(account);
 
     this.accountDbService.selectedAccount.next(account);
   }
@@ -180,5 +184,16 @@ export class DbChangesService {
     let accountMeterGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
     let facilityMeterGroups: Array<IdbUtilityMeterGroup> = accountMeterGroups.filter(item => { return item.facilityId == facility.guid });
     this.utilityMeterGroupDbService.facilityMeterGroups.next(facilityMeterGroups);
+  }
+
+
+  async setCustomEmissions(account: IdbAccount) {
+    let customEmissionsItems: Array<IdbCustomEmissionsItem> = await this.customEmissionsDbService.getAllByIndexRange('accountId', account.guid).toPromise();
+    if (customEmissionsItems.length == 0) {
+      let uSAverageItem: IdbCustomEmissionsItem = this.customEmissionsDbService.getUSAverage(account);
+      uSAverageItem = await this.customEmissionsDbService.addWithObservable(uSAverageItem).toPromise();
+      customEmissionsItems.push(uSAverageItem);
+    }
+    this.customEmissionsDbService.accountEmissionsItems.next(customEmissionsItems);
   }
 }

@@ -1,4 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { Subscription } from 'rxjs';
+import { CustomEmissionsDbService } from 'src/app/indexedDB/custom-emissions-db.service';
+import { IdbCustomEmissionsItem } from 'src/app/models/idb';
 
 @Component({
   selector: 'app-regional-emissions-data',
@@ -7,9 +10,18 @@ import { Component, OnInit } from '@angular/core';
 })
 export class RegionalEmissionsDataComponent implements OnInit {
 
-  constructor() { }
+  customEmissionsItems: Array<IdbCustomEmissionsItem>;
+  customEmissionsItemsSub: Subscription;
+  constructor(private customEmissionsDbService: CustomEmissionsDbService) { }
 
   ngOnInit(): void {
+    this.customEmissionsItemsSub = this.customEmissionsDbService.accountEmissionsItems.subscribe(val => {
+      this.customEmissionsItems = val;
+    });
+  }
+
+  ngOnDestroy(){
+    this.customEmissionsItemsSub.unsubscribe();
   }
 
 }

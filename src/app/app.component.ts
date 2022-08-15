@@ -3,6 +3,7 @@ import { NavigationEnd, Router } from '@angular/router';
 import { AccountAnalysisDbService } from './indexedDB/account-analysis-db.service';
 import { AccountdbService } from './indexedDB/account-db.service';
 import { AnalysisDbService } from './indexedDB/analysis-db.service';
+import { CustomEmissionsDbService } from './indexedDB/custom-emissions-db.service';
 import { FacilitydbService } from './indexedDB/facility-db.service';
 import { OverviewReportOptionsDbService } from './indexedDB/overview-report-options-db.service';
 import { PredictordbService } from './indexedDB/predictors-db.service';
@@ -10,7 +11,7 @@ import { UpdateDbEntryService } from './indexedDB/update-db-entry.service';
 import { UtilityMeterdbService } from './indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from './indexedDB/utilityMeterData-db.service';
 import { UtilityMeterGroupdbService } from './indexedDB/utilityMeterGroup-db.service';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, IdbOverviewReportOptions, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from './models/idb';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbCustomEmissionsItem, IdbFacility, IdbOverviewReportOptions, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from './models/idb';
 import { EGridService } from './shared/helper-services/e-grid.service';
 
 // declare ga as a function to access the JS code in TS
@@ -39,7 +40,8 @@ export class AppComponent {
     private overviewReportOptionsDbService: OverviewReportOptionsDbService,
     private analysisDbService: AnalysisDbService,
     private accountAnalysisDbService: AccountAnalysisDbService,
-    private updateDbEntryService: UpdateDbEntryService) {
+    private updateDbEntryService: UpdateDbEntryService,
+    private customEmissionsDbService: CustomEmissionsDbService) {
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
         gtag('config', 'G-YG1QD02XSE',
@@ -76,6 +78,7 @@ export class AppComponent {
       await this.initializeMeters(account);
       await this.initializeMeterData(account);
       await this.initilizeMeterGroups(account);
+      await this.initializeCustomEmissions(account);
       let updatedAccount: { account: IdbAccount, isChanged: boolean } = this.updateDbEntryService.updateAccount(account);
       if(updatedAccount.isChanged){
         await this.accountDbService.updateWithObservable(updatedAccount.account).toPromise();
@@ -166,5 +169,17 @@ export class AppComponent {
     this.loadingMessage = "Loading Groups..";
     let meterGroups: Array<IdbUtilityMeterGroup> = await this.utilityMeterGroupDbService.getAllByIndexRange('accountId', account.guid).toPromise();
     this.utilityMeterGroupDbService.accountMeterGroups.next(meterGroups);
+  }
+
+
+  async initializeCustomEmissions(account: IdbAccount) {
+    this.loadingMessage = 'Loading Emissions Rates...';
+    let customEmissionsItems: Array<IdbCustomEmissionsItem> = await this.customEmissionsDbService.getAllByIndexRange('accountId', account.guid).toPromise();
+    if (customEmissionsItems.length == 0) {
+      let uSAverageItem: IdbCustomEmissionsItem = this.customEmissionsDbService.getUSAverage(account);
+      uSAverageItem = await this.customEmissionsDbService.addWithObservable(uSAverageItem).toPromise();
+      customEmissionsItems.push(uSAverageItem);
+    }
+    this.customEmissionsDbService.accountEmissionsItems.next(customEmissionsItems);
   }
 }
