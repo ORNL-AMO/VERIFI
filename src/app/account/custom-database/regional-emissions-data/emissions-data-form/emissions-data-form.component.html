@@ -1,0 +1,98 @@
+<div class="card">
+    <div class="card-body">
+        <form>
+            <div class="row">
+                <div class="col-6">
+                    <div class="form-group">
+                        <label for="subregion">Subregion Name</label>
+                        <input class="form-control" id="subregion" type="text"
+                            [(ngModel)]="editCustomEmissions.subregion" name="subregion">
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="d-flex justify-content-end align-items-center h-100">
+                        <button class="btn btn-secondary mr-2">Cancel</button>
+                        <button class="btn btn-success">Save</button>
+                    </div>
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-6">
+                    <label>Location Emission Rates</label>
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th class="w-50">
+                                    Year
+                                </th>
+                                <th class="w-50">
+                                    Emissions Rate <br>(kg CO<sub>2</sub>/kWh)
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr
+                                *ngFor="let emissionRate of editCustomEmissions.locationEmissionRates  | orderBy: 'year': 'asc'; let index = index;">
+                                <td>
+                                    <select [(ngModel)]="emissionRate.year" name="{{'locationYear_'+index}}"
+                                        id="{{'locationYear_'+index}}">
+                                        <option *ngFor="let year of years" [ngValue]="year">{{year}}</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <div class="input-group">
+                                        <input class="form-control" type="number"
+                                            [(ngModel)]="emissionRate.co2Emissions"
+                                            name="{{'locationCo2Emissions_'+index}}"
+                                            id="{{'locationCo2Emissions_'+index}}">
+                                        <span class="unit">kg CO<sub>2</sub>/kWh</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <a class="click-link pull-right" (click)="addLocationEmissionRate()">+Add Location Emissions
+                        Rate</a>
+                </div>
+                <div class="col-6">
+                    <label>Residual Emission Rates</label>
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th class="w-50">
+                                    Year
+                                </th>
+                                <th class="w-50">
+                                    Emissions Rate <br>(kg CO<sub>2</sub>/kWh)
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr
+                                *ngFor="let emissionRate of editCustomEmissions.residualEmissionRates  | orderBy: 'year': 'asc'; let index = index;">
+                                <td>
+                                    <select [(ngModel)]="emissionRate.year" name="{{'residualYear_'+index}}"
+                                        id="{{'residualYear_'+index}}">
+                                        <option *ngFor="let year of years" [ngValue]="year">{{year}}</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <div class="input-group">
+                                        <input class="form-control" type="number"
+                                            [(ngModel)]="emissionRate.co2Emissions"
+                                            name="{{'residualCo2Emissions_'+index}}"
+                                            id="{{'residualCo2Emissions_'+index}}">
+                                        <span class="unit">kg CO<sub>2</sub>/kWh</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <a class="click-link pull-right" (click)="addResidualEmissionRate()">+Add Residual Emissions
+                        Rate</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

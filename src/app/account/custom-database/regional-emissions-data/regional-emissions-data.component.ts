@@ -24,4 +24,8 @@ export class RegionalEmissionsDataComponent implements OnInit {
     this.customEmissionsItemsSub.unsubscribe();
   }
 
+
+  addNewItem(){
+    
+  }
 }

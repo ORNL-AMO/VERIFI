@@ -1,0 +1,104 @@
+<div class="row mt-4">
+    <div class="col-12 pl-0">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Manage Custom Electrical Emissions Factors</h5>
+                <p class="card-text">
+                    A database has been provided in VERIFI that pulls emissions output rates from eGrid Subregions based
+                    on the "EPA Emissions & Generation Resource Integration Database (2021)". Use this section of VERIFI
+                    to manage
+                    the custom emissions factors used for calculations regarding local and market emissions.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-2">
+    <div class="col-4">
+        <div class="card add-card">
+            <div class="card-body" (click)="addNewItem()">
+                <h5 class="card-title text-center">
+                    Add New Emissions Subregion
+                </h5>
+                <div class="w-100 text-center">
+                    <span class="fa fa-plus-circle"></span>
+                </div>
+                <p class="card-text text-center">
+                    Create custom subregion and corresponding emissions to be used in any facility within this account.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-4" *ngFor="let customEmissionsItem of customEmissionsItems">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{{customEmissionsItem.subregion}}</h5>
+                <table class="table table-hover" *ngIf="customEmissionsItem.locationEmissionRates.length != 0">
+                    <thead>
+                        <tr>
+                            <th colspan="2">
+                                Location Emissions Rates
+                            </th>
+                        </tr>
+                        <tr>
+                            <th>
+                                Year
+                            </th>
+                            <th>
+                                Emissions Rate <br>(kg CO<sub>2</sub>/kWh)
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr
+                            *ngFor="let emissionRate of customEmissionsItem.locationEmissionRates  | orderBy: 'year': 'asc'">
+                            <td>
+                                {{emissionRate.year}}
+                            </td>
+                            <td>
+                                {{emissionRate.co2Emissions | number}}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="alert alert-warning" *ngIf="customEmissionsItem.locationEmissionRates.length == 0">
+                    No Location Emissions Rates Found For Subregion
+                </div>
+                <hr>
+                <table class="table" *ngIf="customEmissionsItem.residualEmissionRates.length != 0">
+                    <thead>
+                        <tr>
+                            <th colspan="2">
+                                Residual Emissions Rates
+                            </th>
+                        </tr>
+                        <tr>
+                            <th>
+                                Year
+                            </th>
+                            <th>
+                                Emissions Rate (kg CO<sub>2</sub>/kWh)
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr
+                            *ngFor="let emissionRate of customEmissionsItem.residualEmissionRates  | orderBy: 'year': 'asc'">
+                            <td>
+                                {{emissionRate.year}}
+                            </td>
+                            <td>
+                                {{emissionRate.co2Emissions | number}}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="alert alert-warning" *ngIf="customEmissionsItem.residualEmissionRates.length == 0">
+                    No Residual Emissions Rates Found For Subregion
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
