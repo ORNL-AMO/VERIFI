@@ -37,11 +37,14 @@
                                 <th class="w-50">
                                     Emissions Rate <br>(kg CO<sub>2</sub>/kWh)
                                 </th>
+                                <th *ngIf="editCustomEmissions.locationEmissionRates.length != 1">
+
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr
-                                *ngFor="let emissionRate of editCustomEmissions.locationEmissionRates  | orderBy: 'year': 'asc'; let index = index;">
+                                *ngFor="let emissionRate of editCustomEmissions.locationEmissionRates; let index = index;">
                                 <td>
                                     <select [(ngModel)]="emissionRate.year" name="{{'locationYear_'+index}}"
                                         id="{{'locationYear_'+index}}" (change)="checkInvalid()" required>
@@ -57,6 +60,11 @@
                                             min="0">
                                         <span class="unit">kg CO<sub>2</sub>/kWh</span>
                                     </div>
+                                </td>
+                                <td class="p-0" *ngIf="editCustomEmissions.locationEmissionRates.length != 1">
+                                    <button class="btn btn-secondary delete-button" (click)="deleteLocationEmissions(index)">
+                                        <span class="fa fa-trash"></span>
+                                    </button>
                                 </td>
                             </tr>
                         </tbody>
@@ -80,11 +88,14 @@
                                 <th class="w-50">
                                     Emissions Rate <br>(kg CO<sub>2</sub>/kWh)
                                 </th>
+                                <th *ngIf="editCustomEmissions.residualEmissionRates.length != 1">
+
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr
-                                *ngFor="let emissionRate of editCustomEmissions.residualEmissionRates  | orderBy: 'year': 'asc'; let index = index;">
+                                *ngFor="let emissionRate of editCustomEmissions.residualEmissionRates; let index = index;">
                                 <td>
                                     <select [(ngModel)]="emissionRate.year" name="{{'residualYear_'+index}}"
                                         id="{{'residualYear_'+index}}" (change)="checkInvalid()" required>
@@ -100,6 +111,11 @@
                                             min="0">
                                         <span class="unit">kg CO<sub>2</sub>/kWh</span>
                                     </div>
+                                </td>
+                                <td class="p-0" *ngIf="editCustomEmissions.residualEmissionRates.length != 1">
+                                    <button class="btn btn-secondary delete-button" (click)="deleteResidualEmissions(index)">
+                                        <span class="fa fa-trash"></span>
+                                    </button>
                                 </td>
                             </tr>
                         </tbody>

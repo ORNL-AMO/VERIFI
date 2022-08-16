@@ -90,7 +90,7 @@
                     <span (click)="showEmissionsRates()" class="float-right click-link">View Emission Rates</span>
                 </label>
                 <select *ngIf="zipCodeSubRegionData.length > 1" name="eGridSubregion" class="form-control"
-                    id="eGridSubregion" formControlName="eGridSubregion" (change)="setSubRegionEmissionsOutput()">
+                    id="eGridSubregion" formControlName="eGridSubregion" (change)="setSelectedSubregionEmissions()">
                     <option *ngFor="let subregion of zipCodeSubRegionData" [ngValue]="subregion">{{subregion}}</option>
                 </select>
                 <span *ngIf="zipCodeSubRegionData.length == 1">
@@ -108,8 +108,11 @@
     based on your zipcode and the <a target="_blank"
         href="https://www.epa.gov/sites/default/files/2021-04/documents/emission-factors_apr2021.pdf">EPA
         Emissions & Generation
-        Resource Integrated Database (2021)</a></p>
-
+        Resource Integrated Database (2021)</a>
+    <br>
+    <br>
+    Custom emssions rates can be added and managed in the <a (click)="goToCustomData()">Account Custom Data</a> page.
+</p>
 <p class="alert alert-warning" *ngIf="unitsDontMatchAccount">
     The Facility units are different then the units that are set for the account. If you would like to use the
     account units for this facility click here: <a (click)="setAccountUnits()">Use Account Units</a>
@@ -125,18 +128,20 @@
             </div>
         </div>
         <div class="row">
-            <div class="col">
-                <label>
-                    {{form.controls.eGridSubregion.value}} Location Emission Rates
-                </label>
-                <table class="table" *ngIf="selectedSubregionEmissions">
+            <div class="col" *ngIf="selectedSubregionEmissions">
+                <table class="table" *ngIf="selectedSubregionEmissions.locationEmissionRates.length != 0">
                     <thead>
                         <tr>
-                            <th>
+                            <th colspan="2">
+                                {{form.controls.eGridSubregion.value}} Location Emission Rates
+                            </th>
+                        </tr>
+                        <tr>
+                            <th class="w-50">
                                 Year
                             </th>
-                            <th>
-                                Emissions Rate (kg CO<sub>2</sub>/kWh)
+                            <th class="w-50">
+                                Emissions Rate <br>(kg CO<sub>2</sub>/kWh)
                             </th>
                         </tr>
                     </thead>
@@ -152,22 +157,27 @@
                         </tr>
                     </tbody>
                 </table>
+                <div class="alert alert-warning" *ngIf="selectedSubregionEmissions.locationEmissionRates.length == 0">
+                    No location emissions found for this region.
+                </div>
             </div>
         </div>
         <hr>
         <div class="row">
-            <div class="col">
-                <label>
-                    {{form.controls.eGridSubregion.value}} Residual Emission Rates
-                </label>
-                <table class="table" *ngIf="selectedSubregionEmissions">
+            <div class="col" *ngIf="selectedSubregionEmissions">
+                <table class="table" *ngIf="selectedSubregionEmissions.residualEmissionRates.length != 0">
                     <thead>
                         <tr>
-                            <th>
+                            <th colspan="2">
+                                {{form.controls.eGridSubregion.value}} Residual Emission Rates
+                            </th>
+                        </tr>
+                        <tr>
+                            <th class="w-50">
                                 Year
                             </th>
-                            <th>
-                                Emissions Rate (kg CO<sub>2</sub>/kWh)
+                            <th class="w-50">
+                                Emissions Rate <br>(kg CO<sub>2</sub>/kWh)
                             </th>
                         </tr>
                     </thead>
@@ -183,6 +193,9 @@
                         </tr>
                     </tbody>
                 </table>
+                <div class="alert alert-warning" *ngIf="selectedSubregionEmissions.residualEmissionRates.length == 0">
+                    No residual emissions found for this region.
+                </div>
             </div>
         </div>
     </div>

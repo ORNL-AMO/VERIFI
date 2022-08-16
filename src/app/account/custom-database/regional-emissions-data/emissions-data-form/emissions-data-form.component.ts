@@ -44,6 +44,8 @@ export class EmissionsDataFormComponent implements OnInit {
         let selectedItem: IdbCustomEmissionsItem = customEmissionsItems.find(item => { return item.guid == elementId });
         this.previousSubregion = selectedItem.subregion;
         this.editCustomEmissions = JSON.parse(JSON.stringify(selectedItem));
+        this.editCustomEmissions.residualEmissionRates = _.orderBy(this.editCustomEmissions.residualEmissionRates, 'year', 'asc');
+        this.editCustomEmissions.locationEmissionRates = _.orderBy(this.editCustomEmissions.locationEmissionRates, 'year', 'asc');
         this.checkInvalid();
       });
     }
@@ -78,7 +80,6 @@ export class EmissionsDataFormComponent implements OnInit {
     this.checkLocationInvalid();
     this.checkResidualInvalid();
     this.isInvalid = (this.invalidLocation != undefined || this.invalidResidual != undefined || this.subregionInvalid != undefined);
-    // this.cd.detectChanges();
   }
 
   checkSubregionInvalid() {
@@ -86,9 +87,11 @@ export class EmissionsDataFormComponent implements OnInit {
     if (!this.editCustomEmissions.subregion) {
       subregionInvalid = 'Subregion name required.';
     } else {
-      let checkExists: SubregionEmissions = this.eGridService.co2Emissions.find(emissions => { return emissions.subregion == this.editCustomEmissions.subregion });
+      let checkExists: SubregionEmissions = this.eGridService.co2Emissions.find(emissions => { return emissions.subregion.toLowerCase() == this.editCustomEmissions.subregion.toLowerCase() });
       if (checkExists) {
-        subregionInvalid = 'Unique name required for subregion. Current name already exists.';
+        if (this.isAdd || (this.previousSubregion != checkExists.subregion)) {
+          subregionInvalid = 'Unique name required for subregion. Current name already exists.';
+        }
       }
     }
     this.subregionInvalid = subregionInvalid;
@@ -159,11 +162,19 @@ export class EmissionsDataFormComponent implements OnInit {
     let customEmissionsItems: Array<IdbCustomEmissionsItem> = await this.customEmissionsDbService.getAllByIndexRange('accountId', this.editCustomEmissions.accountId).toPromise();
     this.customEmissionsDbService.accountEmissionsItems.next(customEmissionsItems);
     this.loadingService.setLoadingStatus(false);
-    this.toastNotificationService.showToast(successMessage, undefined, undefined, true, 'success');
+    this.toastNotificationService.showToast(successMessage, undefined, undefined, false, 'success');
     this.navigateHome();
   }
 
   navigateHome() {
     this.router.navigateByUrl('/account/custom-data/emissions');
+  }
+
+  deleteLocationEmissions(index: number) {
+    this.editCustomEmissions.locationEmissionRates.splice(index, 1);
+  }
+
+  deleteResidualEmissions(index: number) {
+    this.editCustomEmissions.residualEmissionRates.splice(index, 1);
   }
 }

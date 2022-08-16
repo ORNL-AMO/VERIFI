@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import * as XLSX from 'xlsx';
 import * as _ from 'lodash';
+import { CustomEmissionsDbService } from 'src/app/indexedDB/custom-emissions-db.service';
+import { IdbCustomEmissionsItem } from 'src/app/models/idb';
 
 @Injectable({
   providedIn: 'root'
@@ -8,9 +10,15 @@ import * as _ from 'lodash';
 export class EGridService {
 
   subRegionsByZipcode: Array<SubRegionData>;
+
+  excelCo2Emissions: Array<SubregionEmissions>;
   co2Emissions: Array<SubregionEmissions>;
 
-  constructor() { }
+  constructor(private customEmissionsDbService: CustomEmissionsDbService) {
+    this.customEmissionsDbService.accountEmissionsItems.subscribe(emissions => {
+      this.combineExcelAndCustomEmissions();
+    });
+  }
 
   async parseEGridData() {
     await fetch('assets/eGrid_data/eGrid_zipcode_lookup.xlsx')
@@ -67,7 +75,23 @@ export class EGridService {
       }
     });
 
-    this.co2Emissions = subregionEmissions;
+    this.excelCo2Emissions = subregionEmissions;
+    this.combineExcelAndCustomEmissions();
+  }
+
+  combineExcelAndCustomEmissions() {
+    if (this.excelCo2Emissions) {
+      let customEmissions: Array<IdbCustomEmissionsItem> = this.customEmissionsDbService.accountEmissionsItems.getValue();
+      this.co2Emissions = this.excelCo2Emissions.map(emissions => { return emissions });
+      customEmissions.forEach(customEmission => {
+        this.co2Emissions.push({
+          subregion: customEmission.subregion,
+          locationEmissionRates: customEmission.locationEmissionRates,
+          residualEmissionRates: customEmission.residualEmissionRates,
+          isCustom: true
+        });
+      });
+    }
   }
 
 
@@ -149,4 +173,5 @@ export interface SubregionEmissions {
   subregion: string,
   locationEmissionRates: Array<{ co2Emissions: number, year: number }>,
   residualEmissionRates: Array<{ co2Emissions: number, year: number }>,
+  isCustom?: boolean
 }
