@@ -55,7 +55,6 @@ export class AppComponent {
 
   ngOnInit() {
     this.initializeData();
-    this.eGridService.parseEGridData();
   }
 
   async initializeData() {
@@ -180,6 +179,7 @@ export class AppComponent {
       uSAverageItem = await this.customEmissionsDbService.addWithObservable(uSAverageItem).toPromise();
       customEmissionsItems.push(uSAverageItem);
     }
+    await this.eGridService.parseEGridData();
     this.customEmissionsDbService.accountEmissionsItems.next(customEmissionsItems);
   }
 }

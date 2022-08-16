@@ -131,7 +131,7 @@ const routes: Routes = [
             children: [
               { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
               { path: 'dashboard', component: EmissionsDataDashboardComponent },
-              { path: 'edit:/id', component: EmissionsDataFormComponent },
+              { path: 'edit/:id', component: EmissionsDataFormComponent },
               { path: 'add', component: EmissionsDataFormComponent }
 
             ]

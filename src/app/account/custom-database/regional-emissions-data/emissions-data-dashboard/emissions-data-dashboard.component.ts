@@ -21,13 +21,20 @@ export class EmissionsDataDashboardComponent implements OnInit {
     });
   }
 
-  ngOnDestroy(){
+  ngOnDestroy() {
     this.customEmissionsItemsSub.unsubscribe();
   }
 
 
-  addNewItem(){
-    // let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+  addNewItem() {
     this.router.navigateByUrl('account/custom-data/emissions/add');
+  }
+
+  deleteItem(customEmissionsItem: IdbCustomEmissionsItem) {
+
+  }
+
+  editItem(customEmissionsItem: IdbCustomEmissionsItem) {
+    this.router.navigateByUrl('account/custom-data/emissions/edit/' + customEmissionsItem.guid);
   }
 }

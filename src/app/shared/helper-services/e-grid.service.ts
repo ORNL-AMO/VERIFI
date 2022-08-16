@@ -12,8 +12,8 @@ export class EGridService {
 
   constructor() { }
 
-  parseEGridData() {
-    fetch('assets/eGrid_data/eGrid_zipcode_lookup.xlsx')
+  async parseEGridData() {
+    await fetch('assets/eGrid_data/eGrid_zipcode_lookup.xlsx')
       .then(response => response.arrayBuffer())
       .then(buffer => {
         let wb: XLSX.WorkBook = XLSX.read(new Uint8Array(buffer), { type: "array", raw: false });

@@ -1,5 +1,5 @@
 <div class="row mt-4">
-    <div class="col-12 pl-0">
+    <div class="col-12">
         <div class="card">
             <div class="card-body">
                 <h5 class="card-title">Manage Custom Electrical Emissions Factors</h5>
@@ -34,7 +34,19 @@
     <div class="col-4" *ngFor="let customEmissionsItem of customEmissionsItems">
         <div class="card">
             <div class="card-body">
-                <h5 class="card-title">{{customEmissionsItem.subregion}}</h5>
+                <div class="d-flex justify-content-between">
+                    <div class="emissions-title">
+                        <h5 class="card-title">{{customEmissionsItem.subregion}}</h5>
+                    </div>
+                    <div>
+                        <button class="btn btn-sm btn-secondary mr-2"
+                            *ngIf="customEmissionsItem.subregion != 'U.S. AVERAGE'"
+                            (click)="deleteItem(customEmissionsItem)"><span class="fa fa-trash"></span></button>
+                        <button class="btn btn-sm btn-secondary" (click)="editItem(customEmissionsItem)"><span
+                                class="fa fa-edit"></span></button>
+                    </div>
+                </div>
+                <hr>
                 <table class="table table-hover" *ngIf="customEmissionsItem.locationEmissionRates.length != 0">
                     <thead>
                         <tr>
@@ -43,10 +55,10 @@
                             </th>
                         </tr>
                         <tr>
-                            <th>
+                            <th class="w-50">
                                 Year
                             </th>
-                            <th>
+                            <th class="w-50">
                                 Emissions Rate <br>(kg CO<sub>2</sub>/kWh)
                             </th>
                         </tr>
@@ -75,11 +87,11 @@
                             </th>
                         </tr>
                         <tr>
-                            <th>
+                            <th class="w-50">
                                 Year
                             </th>
-                            <th>
-                                Emissions Rate (kg CO<sub>2</sub>/kWh)
+                            <th class="w-50">
+                                Emissions Rate <br>(kg CO<sub>2</sub>/kWh)
                             </th>
                         </tr>
                     </thead>
