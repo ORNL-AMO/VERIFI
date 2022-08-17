@@ -186,22 +186,24 @@ export class ExportToExcelTemplateService {
     worksheet.getCell('A1').value = 'Date';
     let alphaIndex: number = 1;
     let predictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.facilityPredictorEntries.getValue();
-    predictorEntries[0].predictors.forEach(predictor => {
-      let letter: string = alphabet[alphaIndex];
-      worksheet.getCell(letter + '1').value = predictor.name;
-      alphaIndex++;
-    });
-    let index: number = 2;
-    predictorEntries.forEach(entry => {
-      worksheet.getCell('A' + index).value = entry.date;
-      alphaIndex = 1;
-      entry.predictors.forEach(predictor => {
+    if (predictorEntries.length != 0) {
+      predictorEntries[0].predictors.forEach(predictor => {
         let letter: string = alphabet[alphaIndex];
-        worksheet.getCell(letter + index).value = predictor.amount;
+        worksheet.getCell(letter + '1').value = predictor.name;
         alphaIndex++;
       });
-      index++;
-    })
+      let index: number = 2;
+      predictorEntries.forEach(entry => {
+        worksheet.getCell('A' + index).value = entry.date;
+        alphaIndex = 1;
+        entry.predictors.forEach(predictor => {
+          let letter: string = alphabet[alphaIndex];
+          worksheet.getCell(letter + index).value = predictor.amount;
+          alphaIndex++;
+        });
+        index++;
+      });
+    }
     return worksheet;
   }
 
