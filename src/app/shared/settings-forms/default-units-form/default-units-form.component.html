@@ -72,6 +72,16 @@
             </select>
         </div>
     </div>
+    <div class="row" *ngIf="unitsDontMatchAccount">
+        <div class="col">
+            <p class="alert alert-warning">
+                The Facility units are different then the units that are set for the account. If you would like to use
+                the
+                account units for this facility click here: <a (click)="setAccountUnits()">Use Account Units</a>
+            </p>
+        </div>
+    </div>
+
     <div class="row">
         <div class="col">
             <hr>
@@ -113,11 +123,6 @@
     <br>
     Custom emssions rates can be added and managed in the <a (click)="goToCustomData()">Account Custom Data</a> page.
 </p>
-<p class="alert alert-warning" *ngIf="unitsDontMatchAccount">
-    The Facility units are different then the units that are set for the account. If you would like to use the
-    account units for this facility click here: <a (click)="setAccountUnits()">Use Account Units</a>
-</p>
-
 
 <div class="window" [class.open]="openEmissionsRates">
     <div class="windowOverlay"></div>

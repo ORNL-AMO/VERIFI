@@ -1,24 +1,27 @@
 <div class="row mt-4">
-    <div class="col-12">
-        <div class="card">
+    <div class="col-9">
+        <div class="card h-100">
             <div class="card-body">
                 <h5 class="card-title">Manage Custom Electrical Emissions Factors</h5>
                 <p class="card-text">
-                    A database has been provided in VERIFI that pulls emissions output rates from eGrid Subregions based
+                    A database has been provided by VERIFI that pulls emissions output rates from eGrid Subregions based
                     on the <a target="_blank"
                     href="https://www.epa.gov/sites/default/files/2021-04/documents/emission-factors_apr2021.pdf">EPA
                     Emissions & Generation
-                    Resource Integrated Database (2021)</a>. Use this section of VERIFI
-                    to manage
-                    the custom emissions factors used for calculations regarding local and market emissions.
+                    Resource Integrated Database (2021)</a>.
+                </p>
+                <hr>
+                <p class="card-text">
+
+                    
+                    Use this section of VERIFI
+                    to create and manage
+                    custom emissions factors that can be used for calculations regarding local and market emissions.
                 </p>
             </div>
         </div>
     </div>
-</div>
-
-<div class="row mt-2">
-    <div class="col-4">
+    <div class="col-3">
         <div class="card add-card">
             <div class="card-body" (click)="addNewItem()">
                 <h5 class="card-title text-center">
@@ -28,11 +31,14 @@
                     <span class="fa fa-plus-circle"></span>
                 </div>
                 <p class="card-text text-center">
-                    Create a custom subregion and corresponding emissions to be used in any facility within this account.
+                    Create a custom subregion and corresponding emissions that can be used in any facility within this account.
                 </p>
             </div>
         </div>
     </div>
+</div>
+
+<div class="row mt-2">
 
     <div class="col-4" *ngFor="let customEmissionsItem of customEmissionsItems">
         <div class="card">
