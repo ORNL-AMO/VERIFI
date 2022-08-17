@@ -296,6 +296,17 @@ export interface IdbAccountAnalysisItem {
 }
 
 
+export interface IdbCustomEmissionsItem {
+    id?: number,
+    accountId: string,
+    date: Date,
+    guid: string,
+    subregion: string,
+    locationEmissionRates: Array<{ co2Emissions: number, year: number }>,
+    residualEmissionRates: Array<{ co2Emissions: number, year: number }>,
+}
+
+
 
 export type AnalysisType = 'absoluteEnergyConsumption' | 'energyIntensity' | 'modifiedEnergyIntensity' | 'regression';
 export type MeterSource = "Electricity" | "Natural Gas" | "Other Fuels" | "Other Energy" | "Water" | "Waste Water" | "Other Utility";

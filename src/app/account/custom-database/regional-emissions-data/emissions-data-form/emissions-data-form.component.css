@@ -1,0 +1,16 @@
+table input{
+    margin: 0px !important;
+}
+
+label{
+    font-size: 17.5px;
+}
+.fa-save{
+    color: white;
+}
+
+.delete-button{
+    font-size: x-small;
+    margin-left: .2rem;
+    margin-right: .2rem;
+}

@@ -3,12 +3,14 @@ import { FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbAccount, IdbFacility } from 'src/app/models/idb';
+import { IdbAccount, IdbCustomEmissionsItem, IdbFacility } from 'src/app/models/idb';
 import { EGridService, SubRegionData, SubregionEmissions } from 'src/app/shared/helper-services/e-grid.service';
 import { EnergyUnitOptions, MassUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from 'src/app/shared/unitOptions';
 import * as _ from 'lodash';
 import { SettingsFormsService } from '../settings-forms.service';
 import { SetupWizardService } from 'src/app/setup-wizard/setup-wizard.service';
+import { CustomEmissionsDbService } from 'src/app/indexedDB/custom-emissions-db.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-default-units-form',
@@ -35,18 +37,16 @@ export class DefaultUnitsFormComponent implements OnInit {
   selectedFacility: IdbFacility;
   unitsDontMatchAccount: boolean = false;
   isFormChange: boolean = false
-  subregions: Array<{
-    subregion: string,
-    outputRate: number
-  }>;
   zipCodeSubRegionData: Array<string> = new Array();
   currentZip: string;
   selectedSubregionEmissions: SubregionEmissions;
   openEmissionsRates: boolean = false;
-  constructor(private accountDbService: AccountdbService, private settingsFormsService: SettingsFormsService, 
+  constructor(private accountDbService: AccountdbService, private settingsFormsService: SettingsFormsService,
     private facilityDbService: FacilitydbService,
     private eGridService: EGridService,
-    private setupWizardService: SetupWizardService) { }
+    private setupWizardService: SetupWizardService,
+    private customEmissionsDbService: CustomEmissionsDbService,
+    private router: Router) { }
 
   ngOnInit(): void {
     if (!this.inWizard) {
@@ -157,65 +157,50 @@ export class DefaultUnitsFormComponent implements OnInit {
     } else if (!this.inAccount && this.currentZip != this.selectedFacility.zip) {
       this.currentZip = this.selectedFacility.zip;
       this.setSubRegionData();
-    } else {
-      this.setUSAverage();
     }
   }
 
   setSubRegionData() {
     this.zipCodeSubRegionData = new Array();
+    this.addCustomSubregions();
     if (this.currentZip.length == 5) {
       let subRegionData: SubRegionData = _.find(this.eGridService.subRegionsByZipcode, (val) => { return val.zip == this.currentZip });
       if (subRegionData) {
         subRegionData.subregions.forEach(subregion => {
           if (subregion) {
-            this.zipCodeSubRegionData.push(subregion);
+            this.zipCodeSubRegionData.unshift(subregion);
           }
         });
-        if (this.zipCodeSubRegionData.length > 0) {
-          let checkExists: string = this.zipCodeSubRegionData.find(val => { return this.form.controls.eGridSubregion.value === val; })
-          if (!checkExists) {
-            this.form.controls.eGridSubregion.patchValue(this.zipCodeSubRegionData[0]);
-            this.setSubRegionEmissionsOutput();
-          }
-        }
       }
     }
-    this.setUSAverage();
+    let checkExists: string = this.zipCodeSubRegionData.find(val => { return this.form.controls.eGridSubregion.value === val; })
+    if (!checkExists || checkExists == 'U.S. AVERAGE') {
+      this.form.controls.eGridSubregion.patchValue(this.zipCodeSubRegionData[0]);
+    }
+    this.setSelectedSubregionEmissions();
   }
 
-  setUSAverage() {
-    let subRegionData: SubRegionData = _.find(this.eGridService.subRegionsByZipcode, (val) => { return val.zip == '00000' });
-    if (subRegionData) {
-      subRegionData.subregions.forEach(subregion => {
-        if (subregion) {
-          let checkHasRegion = this.zipCodeSubRegionData.find(region => {
-            return region == subregion;
-          });
-          if (!checkHasRegion) {
-            this.zipCodeSubRegionData.push(subregion);
-          }
-        }
-      });
-    }
-    if (this.zipCodeSubRegionData.length > 0) {
-      let checkExists: string = this.zipCodeSubRegionData.find(val => { return this.form.controls.eGridSubregion.value === val; })
-      if (!checkExists) {
-        this.form.controls.eGridSubregion.patchValue(this.zipCodeSubRegionData[0]);
-        this.setSubRegionEmissionsOutput();
-      }
-    }
+  addCustomSubregions() {
+    let customSubRegions: Array<IdbCustomEmissionsItem> = this.customEmissionsDbService.accountEmissionsItems.getValue();
+    customSubRegions.forEach(customSubregion => {
+      this.zipCodeSubRegionData.push(customSubregion.subregion)
+    });
   }
 
-  setSubRegionEmissionsOutput() {
+  setSelectedSubregionEmissions() {
     this.selectedSubregionEmissions = this.eGridService.co2Emissions.find(region => { return this.form.controls.eGridSubregion.value === region.subregion; });
+    this.saveChanges();
   }
 
-  showEmissionsRates(){
+  showEmissionsRates() {
     this.openEmissionsRates = true;
   }
 
-  closeEmissionsRates(){
+  closeEmissionsRates() {
     this.openEmissionsRates = false;
+  }
+
+  goToCustomData(){
+    this.router.navigateByUrl('/account/custom-data/emissions')
   }
 }

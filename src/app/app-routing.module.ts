@@ -57,6 +57,10 @@ import { UtilityMeterDataTableComponent } from './facility/utility-data/energy-c
 import { EditBillComponent } from './facility/utility-data/energy-consumption/utility-meter-data/edit-bill/edit-bill.component';
 import { AccountHomeComponent } from './account/account-home/account-home.component';
 import { FacilityHomeComponent } from './facility/facility-home/facility-home.component';
+import { CustomDatabaseComponent } from './account/custom-database/custom-database.component';
+import { RegionalEmissionsDataComponent } from './account/custom-database/regional-emissions-data/regional-emissions-data.component';
+import { EmissionsDataDashboardComponent } from './account/custom-database/regional-emissions-data/emissions-data-dashboard/emissions-data-dashboard.component';
+import { EmissionsDataFormComponent } from './account/custom-database/regional-emissions-data/emissions-data-form/emissions-data-form.component';
 
 const routes: Routes = [
   {
@@ -114,6 +118,24 @@ const routes: Routes = [
               { path: 'annual-analysis', component: AnnualAccountAnalysisComponent }
             ]
           }
+        ]
+      },
+      {
+        path: 'custom-data',
+        component: CustomDatabaseComponent,
+        children: [
+          { path: '', pathMatch: 'full', redirectTo: 'emissions' },
+          {
+            path: 'emissions',
+            component: RegionalEmissionsDataComponent,
+            children: [
+              { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
+              { path: 'dashboard', component: EmissionsDataDashboardComponent },
+              { path: 'edit/:id', component: EmissionsDataFormComponent },
+              { path: 'add', component: EmissionsDataFormComponent }
+
+            ]
+          },
         ]
       }
     ]
@@ -174,8 +196,8 @@ const routes: Routes = [
                   }
                 ]
               },
-              { 
-                path: 'utility-meter/:id', 
+              {
+                path: 'utility-meter/:id',
                 component: UtilityMeterDataComponent,
                 children: [
                   {
