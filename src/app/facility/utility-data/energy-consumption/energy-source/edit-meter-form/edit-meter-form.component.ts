@@ -54,6 +54,7 @@ export class EditMeterFormComponent implements OnInit {
     this.checkDisplayFuel();
     this.checkDisplayPhase();
     this.checkDisplaySource();
+    this.setScopeOptions();
     this.setStartingUnitOptions();
     this.setUnitBooleans();
     this.checkShowHeatCapacity();
@@ -73,6 +74,7 @@ export class EditMeterFormComponent implements OnInit {
     this.checkDisplayFuel();
     this.checkDisplayPhase();
     this.checkDisplaySource();
+    this.setScopeOptions();
     this.setStartingUnitOptions();
     this.setStartingUnit();
     this.updatePhaseAndFuelValidation();
@@ -313,28 +315,41 @@ export class EditMeterFormComponent implements OnInit {
   }
 
 
-  changeAgreementType(){
+  changeAgreementType() {
     this.setSiteToSource();
     //RECs or VPPA
-    if(this.meterForm.controls.agreementType.value != 4 && this.meterForm.controls.agreementType.value != 6){
+    if (this.meterForm.controls.agreementType.value != 4 && this.meterForm.controls.agreementType.value != 6) {
       this.meterForm.controls.includeInEnergy.patchValue(true);
-    }else{
+    } else {
       this.meterForm.controls.includeInEnergy.patchValue(false);
     }
 
-    if(this.meterForm.controls.agreementType.value == 1){
+    if (this.meterForm.controls.agreementType.value == 1) {
       this.meterForm.controls.retainRECs.patchValue(false);
-    }else{
+    } else {
       this.meterForm.controls.retainRECs.patchValue(true);
     }
   }
 
-  setIncludeEnergy(){
-    if(this.meterForm.controls.includeInEnergy.value == false){
+  setIncludeEnergy() {
+    if (this.meterForm.controls.includeInEnergy.value == false) {
       this.meterForm.controls.siteToSource.patchValue(1);
-    }else{
+    } else {
       this.setSiteToSource();
     }
     this.checkShowSiteToSource();
+  }
+
+  setScopeOptions() {
+    if (this.meterForm.controls.source.value == 'Electricity') {
+      //purchased electricity
+      this.scopeOptions = [ScopeOptions[2]]
+    } else if (this.meterForm.controls.source.value == 'Other Energy') {
+      //all options
+      this.scopeOptions = ScopeOptions;
+    } else if (this.meterForm.controls.source.value == 'Natural Gas' || this.meterForm.controls.source.value == 'Other Fuels') {
+      //Scope 1
+      this.scopeOptions = ScopeOptions.filter(option => { return option.scope == 'Scope 1' });
+    }
   }
 }
