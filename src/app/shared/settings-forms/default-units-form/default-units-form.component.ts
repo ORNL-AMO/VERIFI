@@ -174,7 +174,7 @@ export class DefaultUnitsFormComponent implements OnInit {
       }
     }
     let checkExists: string = this.zipCodeSubRegionData.find(val => { return this.form.controls.eGridSubregion.value === val; })
-    if (!checkExists || checkExists == 'U.S. AVERAGE') {
+    if (!checkExists || checkExists == 'U.S. Average') {
       this.form.controls.eGridSubregion.patchValue(this.zipCodeSubRegionData[0]);
     }
     this.setSelectedSubregionEmissions();

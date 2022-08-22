@@ -65,7 +65,7 @@ export class CustomEmissionsDbService {
 
   getUSAverage(selectedAccount: IdbAccount): IdbCustomEmissionsItem {
     let uSAverageItem: IdbCustomEmissionsItem = this.getNewAccountEmissionsItem(selectedAccount);
-    uSAverageItem.subregion = 'U.S. AVERAGE';
+    uSAverageItem.subregion = 'U.S. Average';
     uSAverageItem.locationEmissionRates = [
       {
         year: 2022,

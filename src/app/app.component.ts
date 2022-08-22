@@ -87,6 +87,7 @@ export class AppComponent {
       }
       this.dataInitialized = true;
     } else {
+      await this.eGridService.parseEGridData();
       this.dataInitialized = true;
       this.router.navigateByUrl('setup-wizard');
     }
