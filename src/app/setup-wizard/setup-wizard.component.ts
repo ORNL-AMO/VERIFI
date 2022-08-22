@@ -69,10 +69,6 @@ export class SetupWizardComponent implements OnInit {
     let allAccounts: Array<IdbAccount> = await this.accountdbService.getAll().toPromise();
     this.accountdbService.allAccounts.next(allAccounts);
     await this.dbChangesService.selectAccount(account);
-    // let allFacilities: Array<IdbFacility> = await this.facilityDbService.getAll().toPromise();
-    // this.facilityDbService.allFacilities.next(allFacilities);
-    // let accountFacilities: Array<IdbFacility> = allFacilities.filter(facility => { return facility.accountId == account.guid });
-    // this.facilityDbService.accountFacilities.next(accountFacilities);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast("Account and Facilities Created!", "You can now add utility data to your facilities for analysis!", 10000, false, "success", true);
     this.router.navigateByUrl('facility/' + newFacility.id + '/utility');
