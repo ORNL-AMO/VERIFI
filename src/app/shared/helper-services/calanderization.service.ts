@@ -429,6 +429,27 @@ export class CalanderizationService {
             return 0;
           }
         });
+        let RECs: number = _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
+          if (meterData.monthNumValue == yearMonth.month && meterData.year == yearMonth.year) {
+            return meterData.RECs;
+          } else {
+            return 0;
+          }
+        });
+        let excessRECsEmissions: number = _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
+          if (meterData.monthNumValue == yearMonth.month && meterData.year == yearMonth.year) {
+            return meterData.excessRECsEmissions;
+          } else {
+            return 0;
+          }
+        });
+        let excessRECs: number = _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
+          if (meterData.monthNumValue == yearMonth.month && meterData.year == yearMonth.year) {
+            return meterData.excessRECs;
+          } else {
+            return 0;
+          }
+        });
         return {
           time: yearMonth.month + ', ' + yearMonth.year,
           energyUse: totalEnergyUse,
@@ -438,7 +459,10 @@ export class CalanderizationService {
           month: yearMonth.month,
           date: new Date(yearMonth.year, yearMonth.month),
           marketEmissions: totalMarketEmissions,
-          locationEmissions: totalLocationEmissions
+          locationEmissions: totalLocationEmissions,
+          RECs: RECs,
+          excessRECs: excessRECs,
+          excessRECsEmissions: excessRECsEmissions
         }
 
       });
@@ -784,7 +808,6 @@ export class CalanderizationService {
         locationEmissions = convertedEnergyUse * marketEmissionsOutputRate;
         marketEmissions = convertedEnergyUse * marketEmissionsOutputRate;
       }
-
       let RECs: number = energyUse * meter.recsMultiplier;
       let excessRECs: number;
       if(RECs - energyUse <= 0){
