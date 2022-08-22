@@ -1,7 +1,7 @@
 <table class="table table-sm" #meterDataTable [ngClass]="{'copying-table': copyingTable}">
     <thead>
         <tr class="table-mh">
-            <th colspan=6>{{calanderizedMeter.meter.name}}
+            <th colspan=9>{{calanderizedMeter.meter.name}}
                 <span class="item-right small source-label">{{calanderizedMeter.meter.source}}</span>
             </th>
         </tr>
@@ -16,18 +16,19 @@
                 *ngIf="calanderizedMeter.showEnergyUse">
                 Total Energy<br> (<span [innerHTML]="calanderizedMeter.energyUnit | settingsLabel"></span>)
             </th>
-            <th (click)="setOrderDataField('emissions')" [ngClass]="{'active': orderDataField == 'emissions'}"
-                *ngIf="calanderizedMeter.showEmissions">
-                Total Emissions<br> (kg CO<sub>2</sub>)
-            </th>
-            <th (click)="setOrderDataField('GHGOffsets')" [ngClass]="{'active': orderDataField == 'GHGOffsets'}"
-                *ngIf="calanderizedMeter.showEmissions">
-                GHG Offsets<br> (kg CO<sub>2</sub>)
-            </th>
-            <th (click)="setOrderDataField('RECs')" [ngClass]="{'active': orderDataField == 'RECs'}"
-                *ngIf="calanderizedMeter.showEmissions">
-                RECs<br> (<span [innerHTML]="calanderizedMeter.energyUnit | settingsLabel"></span>)
-            </th>
+            <th (click)="setOrderDataField('marketEmissions')"
+                [ngClass]="{'active': orderDataField == 'marketEmissions'}">Total Market <br>Emissions (kg
+                CO<sub>2</sub>)</th>
+            <th (click)="setOrderDataField('locationEmissions')"
+                [ngClass]="{'active': orderDataField == 'locationEmissions'}">Total Location <br>Emissions (kg
+                CO<sub>2</sub>)</th>
+            <th (click)="setOrderDataField('RECs')" [ngClass]="{'active': orderDataField == 'RECs'}">RECs<br> (<span
+                    [innerHTML]="calanderizedMeter.energyUnit  | settingsLabel"></span>)</th>
+            <th (click)="setOrderDataField('excessRECs')" [ngClass]="{'active': orderDataField == 'excessRECs'}">Excess
+                RECs<br> (<span [innerHTML]="calanderizedMeter.energyUnit  | settingsLabel"></span>)</th>
+            <th (click)="setOrderDataField('excessRECsEmissions')"
+                [ngClass]="{'active': orderDataField == 'excessRECsEmissions'}">Excess
+                RECs Emissions<br> (kg CO<sub>2</sub>)</th>
             <th (click)="setOrderDataField('energyCost')" [ngClass]="{'active': orderDataField == 'energyCost'}">Total
                 Cost</th>
         </tr>
@@ -45,16 +46,24 @@
                 <span *ngIf="!data.energyUse">N/A</span>
             </td>
             <td *ngIf="calanderizedMeter.showEmissions">
-                <span *ngIf="data.emissions">{{data.emissions | number:'1.0-0'}}</span>
-                <span *ngIf="!data.emissions">N/A</span>
+                <span *ngIf="data.marketEmissions">{{data.marketEmissions | number:'1.0-0'}}</span>
+                <span *ngIf="!data.marketEmissions">N/A</span>
             </td>
             <td *ngIf="calanderizedMeter.showEmissions">
-                <span *ngIf="data.GHGOffsets">{{data.GHGOffsets | number:'1.0-0'}}</span>
-                <span *ngIf="!data.GHGOffsets">N/A</span>
+                <span *ngIf="data.locationEmissions">{{data.locationEmissions | number:'1.0-0'}}</span>
+                <span *ngIf="!data.locationEmissions">N/A</span>
             </td>
             <td *ngIf="calanderizedMeter.showEmissions">
                 <span *ngIf="data.RECs">{{data.RECs | number:'1.0-0'}}</span>
                 <span *ngIf="!data.RECs">N/A</span>
+            </td>
+            <td *ngIf="calanderizedMeter.showEmissions">
+                <span *ngIf="data.excessRECs">{{data.excessRECs | number:'1.0-0'}}</span>
+                <span *ngIf="!data.excessRECs">N/A</span>
+            </td>
+            <td *ngIf="calanderizedMeter.showEmissions">
+                <span *ngIf="data.excessRECsEmissions">{{data.excessRECsEmissions | number:'1.0-0'}}</span>
+                <span *ngIf="!data.excessRECsEmissions">N/A</span>
             </td>
             <td>
                 <span *ngIf="data.energyCost">{{data.energyCost | customNumber:true}}</span>
