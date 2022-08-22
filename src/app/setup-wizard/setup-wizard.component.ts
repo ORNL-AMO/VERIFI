@@ -6,6 +6,7 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAccount, IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
 import { ToastNotificationsService } from '../core-components/toast-notifications/toast-notifications.service';
+import { DbChangesService } from '../indexedDB/db-changes.service';
 import { SetupWizardService } from './setup-wizard.service';
 
 @Component({
@@ -29,7 +30,8 @@ export class SetupWizardComponent implements OnInit {
     private router: Router,
     private loadingService: LoadingService,
     private setupWizardService: SetupWizardService,
-    private toastNotificationService: ToastNotificationsService
+    private toastNotificationService: ToastNotificationsService,
+    private dbChangesService: DbChangesService
   ) { }
 
   ngOnInit(): void {
@@ -66,11 +68,11 @@ export class SetupWizardComponent implements OnInit {
     this.loadingService.setLoadingMessage("Finishing up...");
     let allAccounts: Array<IdbAccount> = await this.accountdbService.getAll().toPromise();
     this.accountdbService.allAccounts.next(allAccounts);
-    this.accountdbService.selectedAccount.next(account);
-    let allFacilities: Array<IdbFacility> = await this.facilityDbService.getAll().toPromise();
+    await this.dbChangesService.selectAccount(account);
+    // let allFacilities: Array<IdbFacility> = await this.facilityDbService.getAll().toPromise();
     // this.facilityDbService.allFacilities.next(allFacilities);
-    let accountFacilities: Array<IdbFacility> = allFacilities.filter(facility => { return facility.accountId == account.guid });
-    this.facilityDbService.accountFacilities.next(accountFacilities);
+    // let accountFacilities: Array<IdbFacility> = allFacilities.filter(facility => { return facility.accountId == account.guid });
+    // this.facilityDbService.accountFacilities.next(accountFacilities);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast("Account and Facilities Created!", "You can now add utility data to your facilities for analysis!", 10000, false, "success", true);
     this.router.navigateByUrl('facility/' + newFacility.id + '/utility');
