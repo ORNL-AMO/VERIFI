@@ -16,11 +16,11 @@
                 *ngIf="calanderizedMeter.showEnergyUse">
                 Total Energy<br> (<span [innerHTML]="calanderizedMeter.energyUnit | settingsLabel"></span>)
             </th>
-            <th (click)="setOrderDataField('totalMarketEmissions')"
-                [ngClass]="{'active': orderDataField == 'totalMarketEmissions'}">Total Market <br>Emissions (kg
+            <th (click)="setOrderDataField('marketEmissions')"
+                [ngClass]="{'active': orderDataField == 'marketEmissions'}">Total Market <br>Emissions (kg
                 CO<sub>2</sub>)</th>
-            <th (click)="setOrderDataField('totalLocationEmissions')"
-                [ngClass]="{'active': orderDataField == 'totalLocationEmissions'}">Total Location <br>Emissions (kg
+            <th (click)="setOrderDataField('locationEmissions')"
+                [ngClass]="{'active': orderDataField == 'locationEmissions'}">Total Location <br>Emissions (kg
                 CO<sub>2</sub>)</th>
             <th (click)="setOrderDataField('RECs')" [ngClass]="{'active': orderDataField == 'RECs'}">RECs<br> (<span
                     [innerHTML]="calanderizedMeter.energyUnit  | settingsLabel"></span>)</th>
