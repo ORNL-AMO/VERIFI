@@ -26,13 +26,16 @@ export interface UtilitySummary {
   source: MeterSource,
   consumptionTargetYear: number,
   costTargetYear: number,
-  emissionsTargetYear: number,
+  marketEmissionsTargetYear: number,
+  locationEmissionsTargetYear: number,
   consumptionBaselineYear: number,
   costBaselineYear: number,
-  emissionsBaselineYear: number,
+  marketEmissionsBaselineYear: number,
+  locationEmissionsBaselineYear: number,
   consumptionChange: number,
   costChange: number,
-  emissionsChange: number
+  marketEmissionsChange: number,
+  locationEmissionsChange: number
 }
 
 

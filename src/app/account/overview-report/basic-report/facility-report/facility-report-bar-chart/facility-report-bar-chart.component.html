@@ -19,11 +19,20 @@
     </div>
     <div class="col-6 text-center" [ngClass]="{'col-12': print || sumByMonth}">
         <label class="section-label" *ngIf="!sumByMonth">
-            Annual Emissions
+            Annual Location Emissions
         </label>
         <label class="section-label" *ngIf="sumByMonth">
-            Monthly Emissions
+            Monthly Location Emissions
         </label>
-        <div #utilityEmissionsBarChart id="utilityEmissionsBarChart"></div>
+        <div #utilityLocationEmissionsBarChart id="utilityLocationEmissionsBarChart"></div>
+    </div>
+    <div class="col-6 text-center" [ngClass]="{'col-12': print || sumByMonth}">
+        <label class="section-label" *ngIf="!sumByMonth">
+            Annual Market Emissions
+        </label>
+        <label class="section-label" *ngIf="sumByMonth">
+            Monthly Market Emissions
+        </label>
+        <div #utilityMarketEmissionsBarChart id="utilityMarketEmissionsBarChart"></div>
     </div>
 </div>

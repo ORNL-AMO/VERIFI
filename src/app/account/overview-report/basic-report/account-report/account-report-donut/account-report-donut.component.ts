@@ -14,7 +14,7 @@ export class AccountReportDonutComponent implements OnInit {
   @Input()
   accountFacilitiesSummary: AccountFacilitiesSummary;
   @Input()
-  graphType: 'cost' | 'emissions' | 'usage';
+  graphType: 'cost' | 'marketEmissions' | 'usage' | 'locationEmissions';
 
 
   @ViewChild('utilityDonut', { static: false }) utilityDonut: ElementRef;
@@ -27,7 +27,7 @@ export class AccountReportDonutComponent implements OnInit {
   ngAfterViewInit() {
     this.drawUtilityDonut();
   }
-  
+
   drawUtilityDonut() {
     if (this.utilityDonut) {
       var data = [{
@@ -65,13 +65,14 @@ export class AccountReportDonutComponent implements OnInit {
   }
 
   getValues(): Array<number> {
-    //TODO: market vs location emissions
     if (this.graphType == 'cost') {
       return this.accountFacilitiesSummary.facilitySummaries.map(summary => { return summary.energyCost });
     } else if (this.graphType == 'usage') {
       return this.accountFacilitiesSummary.facilitySummaries.map(summary => { return summary.energyUsage });
-    } else if (this.graphType == 'emissions') {
+    } else if (this.graphType == 'marketEmissions') {
       return this.accountFacilitiesSummary.facilitySummaries.map(summary => { return summary.marketEmissions / 1000 });
+    } else if (this.graphType == 'locationEmissions') {
+      return this.accountFacilitiesSummary.facilitySummaries.map(summary => { return summary.locationEmissions / 1000 });
     }
   }
 
@@ -80,7 +81,7 @@ export class AccountReportDonutComponent implements OnInit {
       return '%{label}: %{value:$,.0f} <extra></extra>';
     } else if (this.graphType == 'usage') {
       return '%{label}: %{value:,.0f} ' + this.account.energyUnit + ' <extra></extra>';
-    } else if (this.graphType == 'emissions') {
+    } else if (this.graphType == 'marketEmissions' || this.graphType == 'locationEmissions') {
       return '%{label}: %{value:,.0f} tonne CO<sub>2</sub> <extra></extra>';
     }
   }

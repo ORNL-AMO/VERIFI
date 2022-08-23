@@ -26,7 +26,8 @@ export class FacilityReportBarChartComponent implements OnInit {
 
   @ViewChild('utilityCostBarChart', { static: false }) utilityCostBarChart: ElementRef;
   @ViewChild('utilityUsageBarChart', { static: false }) utilityUsageBarChart: ElementRef;
-  @ViewChild('utilityEmissionsBarChart', { static: false }) utilityEmissionsBarChart: ElementRef;
+  @ViewChild('utilityLocationEmissionsBarChart', { static: false }) utilityLocationEmissionsBarChart: ElementRef;
+  @ViewChild('utilityMarketEmissionsBarChart', { static: false }) utilityMarketEmissionsBarChart: ElementRef;
 
   electricityData: Array<FacilityBarChartData>;
   naturalGasData: Array<FacilityBarChartData>;
@@ -54,7 +55,8 @@ export class FacilityReportBarChartComponent implements OnInit {
   }
 
   ngAfterViewInit() {
-    this.drawEmissionsChart();
+    this.drawLocationEmissionsChart();
+    this.drawMarketEmissionsChart();
     this.drawCostChart();
     this.drawUsageChart();
   }
@@ -102,9 +104,9 @@ export class FacilityReportBarChartComponent implements OnInit {
     return this.visualizationService.getFacilityDashboardBarChartData(calanderizedMeter, this.sumByMonth, true);
   }
 
-  drawEmissionsChart() {
-    if (this.utilityEmissionsBarChart) {
-      let traceData = this.getDataTraces('emissions');
+  drawLocationEmissionsChart() {
+    if (this.utilityLocationEmissionsBarChart) {
+      let traceData = this.getDataTraces('locationEmissions');
       var layout = {
         barmode: 'group',
         yaxis: {
@@ -123,7 +125,32 @@ export class FacilityReportBarChartComponent implements OnInit {
         responsive: true,
       };
 
-      this.plotlyService.newPlot(this.utilityEmissionsBarChart.nativeElement, traceData, layout, config);
+      this.plotlyService.newPlot(this.utilityLocationEmissionsBarChart.nativeElement, traceData, layout, config);
+    }
+  }
+
+  drawMarketEmissionsChart() {
+    if (this.utilityMarketEmissionsBarChart) {
+      let traceData = this.getDataTraces('marketEmissions');
+      var layout = {
+        barmode: 'group',
+        yaxis: {
+          hoverformat: ",.2f",
+          title: {
+            text: 'tonne CO<sub>2</sub>'
+          }
+        },
+        margin: { t: 10 },
+        legend: this.getLegend(),
+      };
+
+      let config = {
+        modeBarButtonsToRemove: ['autoScale2d', 'lasso2d', 'pan2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian', 'autoscale', 'zoom', 'zoomin', 'zoomout'],
+        displaylogo: false,
+        responsive: true,
+      };
+
+      this.plotlyService.newPlot(this.utilityMarketEmissionsBarChart.nativeElement, traceData, layout, config);
     }
   }
 
@@ -175,7 +202,7 @@ export class FacilityReportBarChartComponent implements OnInit {
     }
   }
 
-  getDataTraces(dataObj: 'energyUse' | 'emissions' | 'energyCost'): Array<BarChartDataTrace> {
+  getDataTraces(dataObj: 'energyUse' | 'marketEmissions' | 'locationEmissions' | 'energyCost'): Array<BarChartDataTrace> {
     let traceData: Array<BarChartDataTrace> = new Array();
     if (this.electricityData.length != 0) {
       let trace: BarChartDataTrace = this.getDataTrace(this.electricityData, 'Electricity', dataObj);
@@ -208,7 +235,7 @@ export class FacilityReportBarChartComponent implements OnInit {
     return traceData;
   }
 
-  getDataTrace(chartData: Array<FacilityBarChartData>, source: MeterSource, dataObj: 'energyUse' | 'emissions' | 'energyCost'): BarChartDataTrace {
+  getDataTrace(chartData: Array<FacilityBarChartData>, source: MeterSource, dataObj: 'energyUse' | 'locationEmissions' | 'marketEmissions' | 'energyCost'): BarChartDataTrace {
     return {
       x: this.getXAxisValues(chartData),
       y: chartData.map(data => { return data[dataObj] }),

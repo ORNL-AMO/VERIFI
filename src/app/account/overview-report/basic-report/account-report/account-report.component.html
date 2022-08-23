@@ -58,22 +58,40 @@
             [graphType]="'usage'">
         </app-account-report-utility-usage-bar-chart>
     </div>
-    <!--emissions-->
+    <!--location emissions-->
     <div class="col-12 pt-5 text-center">
         <label class="section-label">
-            Emissions ({{accountReportUtilitySummary.targetYearStart | date: 'MMM, y'}} -
+            Location Emissions ({{accountReportUtilitySummary.targetYearStart | date: 'MMM, y'}} -
             {{accountReportUtilitySummary.targetYearEnd | date: 'MMM, y'}})
         </label>
     </div>
     <div class="col-6">
         <app-account-report-donut [account]="account" [accountFacilitiesSummary]="accountFacilitiesSummary"
-            [graphType]="'emissions'">
+            [graphType]="'locationEmissions'">
         </app-account-report-donut>
     </div>
     <div class="col-6">
         <app-account-report-utility-usage-bar-chart [account]="account"
             [facilitiesUtilitySummaries]="facilitiesUtilitySummaries" [reportOptions]="reportOptions"
-            [graphType]="'emissions'">
+            [graphType]="'locationEmissions'">
+        </app-account-report-utility-usage-bar-chart>
+    </div>
+     <!--market emissions-->
+     <div class="col-12 pt-5 text-center">
+        <label class="section-label">
+            Market Emissions ({{accountReportUtilitySummary.targetYearStart | date: 'MMM, y'}} -
+            {{accountReportUtilitySummary.targetYearEnd | date: 'MMM, y'}})
+        </label>
+    </div>
+    <div class="col-6">
+        <app-account-report-donut [account]="account" [accountFacilitiesSummary]="accountFacilitiesSummary"
+            [graphType]="'marketEmissions'">
+        </app-account-report-donut>
+    </div>
+    <div class="col-6">
+        <app-account-report-utility-usage-bar-chart [account]="account"
+            [facilitiesUtilitySummaries]="facilitiesUtilitySummaries" [reportOptions]="reportOptions"
+            [graphType]="'marketEmissions'">
         </app-account-report-utility-usage-bar-chart>
     </div>
 </div>
