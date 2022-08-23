@@ -22,6 +22,8 @@ export class EnergyUseDonutComponent implements OnInit {
   graphDisplaySub: Subscription;
 
 
+  emissionsDisplay: "location" | "market";
+  emissionsDisplaySub: Subscription;
   constructor(
     private dashboardService: DashboardService, private plotlyService: PlotlyService,
     private accountDbService: AccountdbService) { }
@@ -35,12 +37,21 @@ export class EnergyUseDonutComponent implements OnInit {
     this.graphDisplaySub = this.dashboardService.graphDisplay.subscribe(val => {
       this.graphDisplay = val;
       this.drawChart();
+    });
+
+
+    this.emissionsDisplaySub = this.dashboardService.emissionsDisplay.subscribe(val => {
+      this.emissionsDisplay = val;
+      if (this.graphDisplay == 'emissions') {
+        this.drawChart();
+      }
     })
   }
 
   ngOnDestroy() {
     this.facilitiesSummarySub.unsubscribe();
     this.graphDisplaySub.unsubscribe();
+    this.emissionsDisplaySub.unsubscribe();
   }
 
 
@@ -49,7 +60,8 @@ export class EnergyUseDonutComponent implements OnInit {
   }
 
   drawChart() {
-    if (this.energyUseDonut && this.facilitiesSummary && this.graphDisplay) {
+    let graphDisplayValid: boolean = this.checkGraphDisplay();
+    if (this.energyUseDonut && this.facilitiesSummary && graphDisplayValid) {
       let yDataProperty: string = "energyCost";
       let hovertemplate: string = '%{label}: %{value:$,.0f} <extra></extra>';
       if (this.graphDisplay == "usage") {
@@ -57,10 +69,13 @@ export class EnergyUseDonutComponent implements OnInit {
         yDataProperty = "energyUsage";
         hovertemplate = '%{label}: %{value:,.0f} ' + selectedAccout.energyUnit + ' <extra></extra>'
       } else if (this.graphDisplay == "emissions") {
-        yDataProperty = "emissions";
+        if (this.emissionsDisplay == 'location') {
+          yDataProperty = "locationEmissions";
+        } else {
+          yDataProperty = "marketEmissions";
+        }
         hovertemplate = '%{label}: %{value:,.0f} kg CO<sub>2</sub> <extra></extra>'
       }
-
       var data = [{
         values: this.facilitiesSummary.facilitySummaries.map(summary => { return summary[yDataProperty] }),
         labels: this.facilitiesSummary.facilitySummaries.map(summary => { return summary.facility.name }),
@@ -88,6 +103,17 @@ export class EnergyUseDonutComponent implements OnInit {
       }
       this.plotlyService.newPlot(this.energyUseDonut.nativeElement, data, layout, config);
     }
+  }
+
+  checkGraphDisplay(): boolean {
+    if (this.graphDisplay) {
+      if (this.graphDisplay != 'emissions') {
+        return true;
+      } else if (this.emissionsDisplay) {
+        return true;
+      }
+    }
+    return false;
   }
 
 }

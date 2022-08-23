@@ -20,6 +20,8 @@ export class AccountUtilityEnergyUseTableComponent implements OnInit {
   yearPriorLastMonth: Date;
   yearPriorDate: Date;
 
+  emissionsDisplay: "location" | "market";
+  emissionsDisplaySub: Subscription;
   constructor(private dashboardService: DashboardService,
     private accountdbService: AccountdbService) { }
 
@@ -33,6 +35,7 @@ export class AccountUtilityEnergyUseTableComponent implements OnInit {
 
     this.accountUtilityUsageSummaryDataSub = this.dashboardService.accountUtilityUsageSummaryData.subscribe(val => {
       this.utilityUsageSummaryData = val;
+      console.log(this.utilityUsageSummaryData);
       if (this.utilityUsageSummaryData && this.utilityUsageSummaryData.allMetersLastBill) {
         this.lastMonthsDate = new Date(this.utilityUsageSummaryData.allMetersLastBill.year, this.utilityUsageSummaryData.allMetersLastBill.monthNumValue);
         this.yearPriorDate = new Date(this.utilityUsageSummaryData.allMetersLastBill.year - 1, this.utilityUsageSummaryData.allMetersLastBill.monthNumValue + 1);
@@ -40,10 +43,14 @@ export class AccountUtilityEnergyUseTableComponent implements OnInit {
       }
     })
 
+    this.emissionsDisplaySub = this.dashboardService.emissionsDisplay.subscribe(val => {
+      this.emissionsDisplay = val;
+    })
   }
 
   ngOnDestroy() {
     this.accountUtilityUsageSummaryDataSub.unsubscribe();
     this.selectedAccountSub.unsubscribe();
+    this.emissionsDisplaySub.unsubscribe();
   }
 }

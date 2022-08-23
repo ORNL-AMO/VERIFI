@@ -24,6 +24,8 @@ export class EnergyUseStackedBarChartComponent implements OnInit {
   barChartData: Array<StackedBarChartData>;
   graphDisplay: "cost" | "usage" | "emissions";
   graphDisplaySub: Subscription;
+  emissionsDisplay: "location" | "market";
+  emissionsDisplaySub: Subscription;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private utilityMeterDbService: UtilityMeterdbService,
     private facilityDbService: FacilitydbService, private plotlyService: PlotlyService, private dashboardService: DashboardService,
     private accountDbService: AccountdbService, private calanderizationService: CalanderizationService) { }
@@ -38,14 +40,30 @@ export class EnergyUseStackedBarChartComponent implements OnInit {
       this.setBarChartData();
       this.drawChart();
     })
+
+    this.emissionsDisplaySub = this.dashboardService.emissionsDisplay.subscribe(val => {
+      this.emissionsDisplay = val;
+      if (this.graphDisplay == 'emissions') {
+        this.drawChart();
+      }
+    })
   }
+
+  ngOnDestroy(){
+    this.graphDisplaySub.unsubscribe();
+    this.accountFacilitiesSub.unsubscribe();
+    this.emissionsDisplaySub.unsubscribe();
+  }
+
+
   ngAfterViewInit() {
     this.drawChart();
   }
 
   drawChart() {
     if (this.energyUseStackedBarChart) {
-      if (this.barChartData && this.barChartData.length != 0 && this.graphDisplay) {
+      let graphDisplayValid: boolean = this.checkGraphDisplay();
+      if (this.barChartData && this.barChartData.length != 0 && graphDisplayValid) {
         let yDataProperty: "energyCost" | "energyUse" | "marketEmissions" | 'locationEmissions';
         let tickprefix: string;
         let yaxisTitle: string;
@@ -61,7 +79,11 @@ export class EnergyUseStackedBarChartComponent implements OnInit {
         } else if (this.graphDisplay == "emissions") {
           //TOD: check market/location toggle
           yaxisTitle = "Emissions (kg CO<sub>2</sub>)";
-          yDataProperty = "marketEmissions";
+          if(this.emissionsDisplay == 'location'){
+            yDataProperty = "locationEmissions";
+          }else{
+            yDataProperty = "marketEmissions";
+          }
           tickprefix = "";
         }
         let data = new Array();
@@ -205,7 +227,7 @@ export class EnergyUseStackedBarChartComponent implements OnInit {
             electricity.energyUse = (electricity.energyUse + Number(dataItem.totalEnergyUse));
             electricity.energyCost = (electricity.energyCost + Number(dataItem.totalCost));
             electricity.marketEmissions = (electricity.marketEmissions + emissions.marketEmissions);
-            electricity.locationEmissions = (electricity.locationEmissions + electricity.locationEmissions);
+            electricity.locationEmissions = (electricity.locationEmissions + emissions.locationEmissions);
           }
           else if (meter.source == 'Natural Gas') {
             naturalGas.energyUse = (naturalGas.energyUse + Number(dataItem.totalEnergyUse));
@@ -251,6 +273,17 @@ export class EnergyUseStackedBarChartComponent implements OnInit {
         });
       }
     });
+  }
+
+  checkGraphDisplay(): boolean {
+    if (this.graphDisplay) {
+      if (this.graphDisplay != 'emissions') {
+        return true;
+      } else if (this.emissionsDisplay) {
+        return true;
+      }
+    }
+    return false;
   }
 
 }

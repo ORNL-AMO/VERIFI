@@ -32,6 +32,8 @@ export class FacilityStackedAreaChartComponent implements OnInit {
   calanderizedMetersSub: Subscription;
   graphDisplaySub: Subscription;
   graphDisplay: "cost" | "usage" | "emissions";
+  emissionsDisplay: "location" | "market";
+  emissionsDisplaySub: Subscription;
   constructor(private plotlyService: PlotlyService, private vizualizationService: VisualizationService,
     private dashboardService: DashboardService, private facilityDbService: FacilitydbService) { }
 
@@ -44,11 +46,18 @@ export class FacilityStackedAreaChartComponent implements OnInit {
       this.graphDisplay = value;
       this.setUtilityData();
     });
+    this.emissionsDisplaySub = this.dashboardService.emissionsDisplay.subscribe(val => {
+      this.emissionsDisplay = val;
+      if(this.graphDisplay == 'emissions'){
+        this.setUtilityData();
+      }
+    })
   }
 
   ngOnDestroy() {
     this.calanderizedMetersSub.unsubscribe();
     this.graphDisplaySub.unsubscribe();
+    this.emissionsDisplaySub.unsubscribe();
   }
 
   ngAfterViewInit() {
@@ -56,7 +65,8 @@ export class FacilityStackedAreaChartComponent implements OnInit {
   }
 
   setUtilityData() {
-    if (this.calanderizedMeters && this.calanderizedMeters.length != 0 && this.graphDisplay && this.stackedAreaChart) {
+    let isGraphDisplayValid: boolean = this.checkGraphDisplay();
+    if (this.calanderizedMeters && this.calanderizedMeters.length != 0 && isGraphDisplayValid && this.stackedAreaChart) {
       this.electricityData = this.getDataByUtility('Electricity', this.calanderizedMeters);
       this.naturalGasData = this.getDataByUtility('Natural Gas', this.calanderizedMeters);
       this.otherFuelsData = this.getDataByUtility('Other Fuels', this.calanderizedMeters);
@@ -70,7 +80,7 @@ export class FacilityStackedAreaChartComponent implements OnInit {
   drawChart() {
     if (this.stackedAreaChart) {
       let traceData = new Array();
-      let yDataProperty: "energyCost" | "energyUse" | "emissions";
+      let yDataProperty: "energyCost" | "energyUse" | "marketEmissions" | "locationEmissions";
       let yaxisTitle: string;
       let tickprefix: string;
       let hoverformat: string;
@@ -86,8 +96,12 @@ export class FacilityStackedAreaChartComponent implements OnInit {
         tickprefix = "";
         hoverformat = ",.2f";
       } else if (this.graphDisplay == "emissions") {
+        if(this.emissionsDisplay == 'location'){
+          yDataProperty = "marketEmissions";
+        }else{
+          yDataProperty = "locationEmissions";
+        }
         yaxisTitle = "Emissions (kg CO<sub>2</sub>)";
-        yDataProperty = "emissions";
         tickprefix = "";
         hoverformat = ",.2f";
       }
@@ -207,5 +221,17 @@ export class FacilityStackedAreaChartComponent implements OnInit {
   getDataByUtility(utility: MeterSource, calanderizedMeters: Array<CalanderizedMeter>): Array<FacilityBarChartData> {
     let filteredMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return cMeter.meter.source == utility });
     return this.vizualizationService.getFacilityDashboardBarChartData(filteredMeters, this.sumByMonth, this.removeIncompleteYears);
+  }
+
+  
+  checkGraphDisplay(): boolean {
+    if (this.graphDisplay) {
+      if (this.graphDisplay != 'emissions') {
+        return true;
+      } else if (this.emissionsDisplay) {
+        return true;
+      }
+    }
+    return false;
   }
 }

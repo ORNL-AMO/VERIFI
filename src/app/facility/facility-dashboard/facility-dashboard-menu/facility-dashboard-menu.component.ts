@@ -19,6 +19,8 @@ export class FacilityDashboardMenuComponent implements OnInit {
   selectedFacilitySub: Subscription;
   modalOpen: boolean;
   modalOpenSub: Subscription;
+  emissionsDisplay: "location" | "market";
+  emissionsDisplaySub: Subscription;
   constructor(private facilityDbService: FacilitydbService, private dashboardService: DashboardService,
     private sharedDataService: SharedDataService, private dbChangesService: DbChangesService) { }
 
@@ -34,12 +36,16 @@ export class FacilityDashboardMenuComponent implements OnInit {
     this.modalOpenSub = this.sharedDataService.modalOpen.subscribe(val => {
       this.modalOpen = val;
     })
+    this.emissionsDisplaySub = this.dashboardService.emissionsDisplay.subscribe(val => {
+      this.emissionsDisplay = val;
+    })
   }
 
   ngOnDestroy() {
     this.graphDisplaySub.unsubscribe();
     this.selectedFacilitySub.unsubscribe();
     this.modalOpenSub.unsubscribe();
+    this.emissionsDisplaySub.unsubscribe();
   }
 
 
@@ -52,5 +58,8 @@ export class FacilityDashboardMenuComponent implements OnInit {
       this.selectedFacility.energyIsSource = energyIsSource;
       await this.dbChangesService.updateFacilities(this.selectedFacility);
     }
+  }
+  setEmissions(str: "location" | "market"){
+    this.dashboardService.emissionsDisplay.next(str);
   }
 }
