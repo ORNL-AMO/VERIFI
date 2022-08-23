@@ -20,6 +20,14 @@
                         [ngClass]="{'btn-outline': graphDisplay != 'emissions'}">Emissions</button>
                 </div>
             </div>
+            <div class="pl-1">
+                <div class="btn-group">
+                    <button class="btn btn-sm m-0 btn-selected" (click)="setEmissions('location')"
+                        [ngClass]="{'btn-outline': emissionsDisplay != 'location'}">Location</button>
+                    <button class="btn btn-sm btn-selected m-0" (click)="setEmissions('market')"
+                        [ngClass]="{'btn-outline': emissionsDisplay != 'market'}">Market</button>
+                </div>
+            </div>
         </div>
     </div>
 </div>
