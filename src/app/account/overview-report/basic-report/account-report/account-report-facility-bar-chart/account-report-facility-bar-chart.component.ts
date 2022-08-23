@@ -140,7 +140,6 @@ export class AccountReportFacilityBarChartComponent implements OnInit {
 
   drawMarketEmissionsBarChart() {
     if (this.facilityMarketEmissionsBarChart) {
-      //TODO: Market vs location emissions options
       let traceData = new Array();
       this.chartData.forEach(dataItem => {
         let trace = {
@@ -180,7 +179,6 @@ export class AccountReportFacilityBarChartComponent implements OnInit {
 
   drawLocationEmissionsBarChart() {
     if (this.facilityLocationEmissionsBarChart) {
-      //TODO: Market vs location emissions options
       let traceData = new Array();
       this.chartData.forEach(dataItem => {
         let trace = {

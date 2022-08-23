@@ -80,7 +80,6 @@ export class DashboardService {
         let yearPriorBill: Array<MonthlyData> = this.calanderizationService.getYearPriorBillEntryFromCalanderizedMeterData(sourceMeters, allMetersLastBill);
         let lastBill: MonthlyData = this.calanderizationService.getLastBillEntryFromCalanderizedMeterData(sourceMeters)
         if (lastBill) {
-          //TODO: market vs location emissions
           let previousMonthData: LastYearData = _.maxBy(pastYearData, 'date');
           let totalEnergyUseFromLastYear: number = _.sumBy(pastYearData, (data) => { return this.getSumValue(data.energyUse) });
           let totalEnergyCostFromLastYear: number = _.sumBy(pastYearData, (data) => { return this.getSumValue(data.energyCost) });
@@ -367,7 +366,6 @@ export class DashboardService {
       if (lastBillForTheseMeters) {
         let yearPriorBill: Array<MonthlyData> = this.calanderizationService.getYearPriorBillEntry(utilityMeters, inAccount, lastBillForTheseMeters);
         if (lastYearData.length != 0) {
-          //TODO: Market vs Location Emissions
           let previousMonthData: LastYearData = _.maxBy(lastYearData, 'date');
           let totalEnergyUseFromLastYear: number = _.sumBy(lastYearData, 'energyUse');
           let totalEnergyCostFromLastYear: number = _.sumBy(lastYearData, 'energyCost');
