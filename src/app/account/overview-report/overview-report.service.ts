@@ -136,23 +136,28 @@ export class OverviewReportService {
     }
     let consumptionTargetYear: number = _.sumBy(utilitySummaries, (data) => { return this.getSumValue(data.consumptionTargetYear) });
     let costTargetYear: number = _.sumBy(utilitySummaries, (data) => { return this.getSumValue(data.costTargetYear) });
-    let emissionsTargetYear: number = _.sumBy(utilitySummaries, (data) => { return this.getSumValue(data.emissionsTargetYear) });
+    let marketEmissionsTargetYear: number = _.sumBy(utilitySummaries, (data) => { return this.getSumValue(data.marketEmissionsTargetYear) });
+    let locationEmissionsTargetYear: number = _.sumBy(utilitySummaries, (data) => { return this.getSumValue(data.locationEmissionsTargetYear) });
     let consumptionBaselineYear: number = _.sumBy(utilitySummaries, (data) => { return this.getSumValue(data.consumptionBaselineYear) });
     let costBaselineYear: number = _.sumBy(utilitySummaries, (data) => { return this.getSumValue(data.costBaselineYear) });
-    let emissionsBaselineYear: number = _.sumBy(utilitySummaries, (data) => { return this.getSumValue(data.emissionsBaselineYear) });
+    let marketEmissionsBaselineYear: number = _.sumBy(utilitySummaries, (data) => { return this.getSumValue(data.marketEmissionsBaselineYear) });
+    let locationEmissionsBaselineYear: number = _.sumBy(utilitySummaries, (data) => { return this.getSumValue(data.locationEmissionsBaselineYear) });
     return {
       utilitySummaries: utilitySummaries,
       totals: {
         source: undefined,
         consumptionTargetYear: consumptionTargetYear,
         costTargetYear: costTargetYear,
-        emissionsTargetYear: emissionsTargetYear,
+        marketEmissionsTargetYear: marketEmissionsTargetYear,
+        locationEmissionsTargetYear: locationEmissionsTargetYear,
         consumptionBaselineYear: consumptionBaselineYear,
         costBaselineYear: costBaselineYear,
-        emissionsBaselineYear: emissionsBaselineYear,
+        marketEmissionsBaselineYear: marketEmissionsBaselineYear,
+        locationEmissionsBaselineYear: locationEmissionsBaselineYear,
         consumptionChange: consumptionTargetYear - consumptionBaselineYear,
         costChange: costTargetYear - costBaselineYear,
-        emissionsChange: emissionsTargetYear - emissionsBaselineYear
+        marketEmissionsChange: marketEmissionsTargetYear - marketEmissionsBaselineYear,
+        locationEmissionsChange: locationEmissionsTargetYear - locationEmissionsBaselineYear
       },
       targetYearStart: targetYearStart,
       targetYearEnd: targetYearEnd,
@@ -184,21 +189,26 @@ export class OverviewReportService {
     //divide emissions by /1000 for tonne
     let consumptionTargetYear: number = _.sumBy(targetYearData, (data) => { return this.getSumValue(data.energyUse) });
     let costTargetYear: number = _.sumBy(targetYearData, (data) => { return this.getSumValue(data.energyCost) });
-    let emissionsTargetYear: number = _.sumBy(targetYearData, (data) => { return this.getSumValue(data.emissions) }) / 1000;
+    let marketEmissionsTargetYear: number = _.sumBy(targetYearData, (data) => { return this.getSumValue(data.marketEmissions) }) / 1000;
+    let locationEmissionsTargetYear: number = _.sumBy(targetYearData, (data) => { return this.getSumValue(data.locationEmissions) }) / 1000;
     let consumptionBaselineYear: number = _.sumBy(baselineYearData, (data) => { return this.getSumValue(data.energyUse) });
     let costBaselineYear: number = _.sumBy(baselineYearData, (data) => { return this.getSumValue(data.energyCost) });
-    let emissionsBaselineYear: number = _.sumBy(baselineYearData, (data) => { return this.getSumValue(data.emissions) }) / 1000;
+    let marketEmissionsBaselineYear: number = _.sumBy(baselineYearData, (data) => { return this.getSumValue(data.marketEmissions) }) / 1000;
+    let locationEmissionsBaselineYear: number = _.sumBy(baselineYearData, (data) => { return this.getSumValue(data.locationEmissions) }) / 1000;
     return {
       source: source,
       consumptionTargetYear: consumptionTargetYear,
       costTargetYear: costTargetYear,
-      emissionsTargetYear: emissionsTargetYear,
+      marketEmissionsTargetYear: marketEmissionsTargetYear,
+      locationEmissionsTargetYear: locationEmissionsTargetYear,
       consumptionBaselineYear: consumptionBaselineYear,
       costBaselineYear: costBaselineYear,
-      emissionsBaselineYear: emissionsBaselineYear,
+      marketEmissionsBaselineYear: marketEmissionsBaselineYear,
+      locationEmissionsBaselineYear: locationEmissionsBaselineYear,
       consumptionChange: consumptionTargetYear - consumptionBaselineYear,
       costChange: costTargetYear - costBaselineYear,
-      emissionsChange: emissionsTargetYear - emissionsBaselineYear
+      marketEmissionsChange: marketEmissionsTargetYear - marketEmissionsBaselineYear,
+      locationEmissionsChange: locationEmissionsTargetYear - locationEmissionsBaselineYear
     }
   }
 
