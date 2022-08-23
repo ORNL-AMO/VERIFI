@@ -85,7 +85,7 @@ export class OverviewReportMenuComponent implements OnInit {
   async updateReport() {
     this.selectedReportOptions.reportOptions = this.reportOptions;
     this.selectedReportOptions.name = this.name;
-    await this.overviewReportOptionsDbService.updateWithObservable(this.selectedReportOptions);
+    await this.overviewReportOptionsDbService.updateWithObservable(this.selectedReportOptions).toPromise();
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setAccountOverviewReportOptions(selectedAccount);
     this.overviewReportService.reportOptions.next(this.reportOptions);
