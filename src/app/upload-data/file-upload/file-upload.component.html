@@ -1,0 +1,45 @@
+<div class="wrapper main-content">
+    <h4>Import Data From .XLSX Files</h4>
+    <div class="alert alert-info">
+        Select the files you wish to upload data from into facilities. .XLSX and .CSV files are supported. Once the
+        files have been selected we will work through parsing out the relevant data into the correct places.
+    </div>
+    <hr>
+    <input type="file" #importFile id="importFile" (input)="setImportFile($event.target.files)" multiple accept=".xlsx">
+    <div *ngIf="fileReferences.length != 0">
+        <hr>
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>
+                        Files
+                    </th>
+                    <th>
+                        <!-- Remove -->
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let reference of fileReferences; let index = index;">
+                    <td>
+                        {{reference.name}}
+                    </td>
+                    <td class="text-center">
+                        <a class="click-link danger" (click)="removeReference(index)">Remove</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="data-template-div" *ngIf="fileReferences.length == 0">
+        <hr>
+        <p>An excel tamplate can be used to make uploading your data easier, use this link to download the template:<br>
+            <a href="assets/csv_templates/VERIFI-Import-Data.xlsx">Download Data Template</a>
+        </p>
+    </div>
+    <div class="d-flex justify-content-end mt-auto" *ngIf="fileReferences.length != 0">
+        <div class="d-flex">
+            <button class="btn btn-success" (click)="continue()">Continue</button>
+        </div>
+    </div>
+</div>
