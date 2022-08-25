@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import { WorkBook } from 'xlsx';
 
 @Injectable({
   providedIn: 'root'
@@ -18,7 +19,9 @@ export class UploadDataService {
 export interface FileReference {
   name: string,
   // type: '.csv' | '.xlsx',
-  file: any,
+  file: File,
   dataSet: boolean,
-  id: number
+  id: string,
+  workbook: WorkBook,
+  isTemplate: boolean
 }

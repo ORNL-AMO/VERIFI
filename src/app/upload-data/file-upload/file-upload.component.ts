@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { FileReference, UploadDataService } from '../upload-data.service';
+import * as XLSX from 'xlsx';
 
 @Component({
   selector: 'app-file-upload',
@@ -24,12 +25,8 @@ export class FileUploadComponent implements OnInit {
         let regex3 = /.xlsx$/;
         for (let index = 0; index < files.length; index++) {
           if (regex3.test(files[index].name)) {
-            this.fileReferences.push({
-              name: files[index].name,
-              file: files[index],
-              dataSet: false,
-              id: Math.floor(Math.random() * 100)
-            });
+            
+            this.addFile(files[index]);
           }
         }
       }
@@ -43,5 +40,31 @@ export class FileUploadComponent implements OnInit {
   continue() {
     this.uploadDataService.fileReferences = this.fileReferences;
     this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReferences[0].id);
+  }
+
+  addFile(file: File) {
+    const reader: FileReader = new FileReader();
+    reader.onload = (e: any) => {
+      const bstr: string = e.target.result;
+      let workBook: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary', cellDates: true });
+      let isTemplate: boolean = this.checkSheetNamesForTemplate(workBook.SheetNames);
+      this.fileReferences.push({
+        name: file.name,
+        file: file,
+        dataSet: false,
+        id: Math.random().toString(36).substr(2, 9),
+        workbook: workBook,
+        isTemplate: isTemplate
+      });
+    };
+    reader.readAsBinaryString(file);
+  }
+
+  checkSheetNamesForTemplate(sheetNames: Array<string>): boolean {
+    if (sheetNames[0] == "Help" && sheetNames[1] == "Meters-Utilities" && sheetNames[2] == "Electricity" && sheetNames[3] == "Non-electricity" && sheetNames[4] == "Predictors") {
+      return true;
+    } else {
+      return false;
+    }
   }
 }
