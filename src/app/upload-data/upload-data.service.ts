@@ -23,5 +23,22 @@ export interface FileReference {
   dataSet: boolean,
   id: string,
   workbook: WorkBook,
-  isTemplate: boolean
+  isTemplate: boolean,
+  selectedWorksheetName: string,
+  selectedWorksheetData: Array<Array<string>>,
+  columnGroups: Array<ColumnGroup>,
+  headerMap: Array<any>
+}
+
+export interface ColumnGroup {
+  groupLabel: string,
+  groupItems: Array<ColumnItem>,
+  id: string
+}
+
+
+export interface ColumnItem {
+  index: number,
+  value: string,
+  id: string
 }

@@ -1,0 +1,29 @@
+<div class="d-flex justify-content-end">
+    <div class="d-flex">
+        <button class="btn btn-success" (click)="continue()">Continue</button>
+    </div>
+</div>
+<label for="worksheetName">Select Worksheet</label>
+<select class="form-control" name="worksheetName" [(ngModel)]="fileReference.selectedWorksheetName"
+    (change)="setSelectedWorksheetName()">
+    <option class="form-control" *ngFor="let name of fileReference.workbook?.SheetNames" [ngValue]="name">{{name}}
+    </option>
+</select>
+<br>
+<table *ngIf="fileReference.selectedWorksheetData">
+    <thead>
+        <tr>
+            <th *ngFor="let header of fileReference.selectedWorksheetData[0]">
+                {{header}}
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let worksheetData of fileReference.selectedWorksheetData; let index = index;"
+            [ngClass]="{'hidden': index == 0}">
+            <td *ngFor="let data of worksheetData">
+                {{data}}
+            </td>
+        </tr>
+    </tbody>
+</table>

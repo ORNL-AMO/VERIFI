@@ -10,14 +10,15 @@ import * as XLSX from 'xlsx';
 })
 export class FileSetupComponent implements OnInit {
 
+  fileReference: FileReference;
   constructor(private activatedRoute: ActivatedRoute, private uploadDataService: UploadDataService) { }
 
   ngOnInit(): void {
     this.activatedRoute.params.subscribe(param => {
       let id: string = param['id'];
-      let fileReference: FileReference = this.uploadDataService.fileReferences.find(ref => { return ref.id == id });
-      console.log(fileReference);
-    })
+      this.fileReference = this.uploadDataService.fileReferences.find(ref => { return ref.id == id });
+      
+    });
   }
 
 }

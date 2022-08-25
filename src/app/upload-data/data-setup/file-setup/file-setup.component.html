@@ -1,1 +1,22 @@
-<p>file-setup works!</p>
+<div class="wrapper main-content p-0" *ngIf="fileReference">
+    <div class="banner p-0">
+        <ul class="nav nav-tabs">
+            <li class="nav-item"><a class="nav-link"
+                    routerLink="select-worksheet"
+                    [routerLinkActive]="['active']">
+                    <i class="fa fa-gauge-high"></i>
+                    Select Worksheet</a></li>
+            <li class="nav-item"><a class="nav-link"
+                    routerLink="identify-columns"
+                    [routerLinkActive]="['active']">
+                    <i class="fa fa-file-invoice"></i>
+                    Identify Columns</a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="content-padding">
+        <!-- <app-select-worksheet [fileReference]="fileReference"></app-select-worksheet> -->
+        <router-outlet></router-outlet>
+    </div>
+</div>

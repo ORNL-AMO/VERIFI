@@ -65,6 +65,8 @@ import { UploadDataComponent } from './upload-data/upload-data.component';
 import { FileUploadComponent } from './upload-data/file-upload/file-upload.component';
 import { DataSetupComponent } from './upload-data/data-setup/data-setup.component';
 import { FileSetupComponent } from './upload-data/data-setup/file-setup/file-setup.component';
+import { SelectWorksheetComponent } from './upload-data/data-setup/file-setup/select-worksheet/select-worksheet.component';
+import { IdentifyColumnsComponent } from './upload-data/data-setup/file-setup/identify-columns/identify-columns.component';
 
 const routes: Routes = [
   {
@@ -298,7 +300,15 @@ const routes: Routes = [
         path: 'data-setup',
         component: DataSetupComponent,
         children: [
-          { path: 'file-setup/:id', component: FileSetupComponent }
+          { 
+            path: 'file-setup/:id', 
+            component: FileSetupComponent,
+            children: [
+              { path: '', pathMatch: 'full', redirectTo: 'select-worksheet' },
+              { path: 'select-worksheet', component: SelectWorksheetComponent },
+              { path: 'identify-columns', component: IdentifyColumnsComponent }
+            ]
+          }
         ]
       },
 

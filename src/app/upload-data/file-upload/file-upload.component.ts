@@ -54,7 +54,11 @@ export class FileUploadComponent implements OnInit {
         dataSet: false,
         id: Math.random().toString(36).substr(2, 9),
         workbook: workBook,
-        isTemplate: isTemplate
+        isTemplate: isTemplate,
+        selectedWorksheetName: workBook.Workbook.Sheets[0].name,
+        selectedWorksheetData: [],
+        columnGroups: [],
+        headerMap: []
       });
     };
     reader.readAsBinaryString(file);

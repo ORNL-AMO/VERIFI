@@ -1,7 +1,7 @@
 <div class="banner sticky-top d-flex justify-content-between">
     <ul class="nav nav-tabs">
-        <li class="nav-item">
-            <a class="nav-link" *ngFor="let reference of fileReferences" routerLink="/upload/data-setup/file-setup/{{reference.id}}"
+        <li class="nav-item" *ngFor="let reference of fileReferences">
+            <a class="nav-link" routerLink="/upload/data-setup/file-setup/{{reference.id}}"
             [routerLinkActive]="['active']">
                 <i class="fa fa-file"></i>{{reference.name}}</a>
         </li>
