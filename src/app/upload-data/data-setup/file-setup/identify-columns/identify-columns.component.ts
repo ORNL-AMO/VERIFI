@@ -1,6 +1,6 @@
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ColumnItem, FileReference, UploadDataService } from 'src/app/upload-data/upload-data.service';
 import * as _ from 'lodash';
 @Component({
@@ -9,7 +9,7 @@ import * as _ from 'lodash';
   styleUrls: ['./identify-columns.component.css']
 })
 export class IdentifyColumnsComponent implements OnInit {
-  
+
   fileReference: FileReference = {
     name: '',
     file: undefined,
@@ -25,13 +25,14 @@ export class IdentifyColumnsComponent implements OnInit {
   minDate: Date;
   maxDate: Date;
   columnGroupItemIds: Array<string>;
-  constructor(private activatedRoute: ActivatedRoute, private uploadDataService: UploadDataService) { }
+  constructor(private activatedRoute: ActivatedRoute, private uploadDataService: UploadDataService,
+    private router: Router) { }
 
   ngOnInit(): void {
     this.activatedRoute.parent.params.subscribe(param => {
       let id: string = param['id'];
       this.fileReference = this.uploadDataService.fileReferences.find(ref => { return ref.id == id });
-      if(this.fileReference.columnGroups.length == 0){
+      if (this.fileReference.columnGroups.length == 0) {
         this.setColumnGroups(this.fileReference.selectedWorksheetData[0]);
       }
       this.columnGroupItemIds = this.fileReference.columnGroups.map(group => { return group.id });
@@ -129,4 +130,31 @@ export class IdentifyColumnsComponent implements OnInit {
     this.fileReference.columnGroups = columnGroups;
   }
 
+
+  continue() {
+    let fileReferenceIndex: number = this.uploadDataService.fileReferences.findIndex(ref => { return this.fileReference.id == ref.id });
+    if (fileReferenceIndex == this.uploadDataService.fileReferences.length - 1) {
+      //continue to meters
+      this.router.navigateByUrl('/upload/data-setup/set-facility-meters');
+    } else {
+      //go to next file
+      let nextFile: FileReference = this.uploadDataService.fileReferences[fileReferenceIndex + 1];
+      this.router.navigateByUrl('/upload/data-setup/file-setup/' + nextFile.id + '/select-worksheet');
+    }
+  }
+
+  getColumnClass(columnName: string): string {
+    if (this.fileReference.columnGroups) {
+      let columnClass: string;
+      this.fileReference.columnGroups.forEach(group => {
+        group.groupItems.forEach(item => {
+          if (item.value == columnName) {
+            columnClass = group.groupLabel;
+          }
+        })
+      });
+      return columnClass;
+    }
+    return;
+  }
 }

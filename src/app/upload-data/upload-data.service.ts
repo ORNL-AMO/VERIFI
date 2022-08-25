@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { WorkBook } from 'xlsx';
+import { IdbUtilityMeter } from '../models/idb';
 
 @Injectable({
   providedIn: 'root'
@@ -9,9 +10,11 @@ export class UploadDataService {
 
   fileReferences: Array<FileReference>;
   allFilesSet: BehaviorSubject<boolean>;
+  uploadMeters: Array<IdbUtilityMeter>;
   constructor() { 
     this.allFilesSet = new BehaviorSubject<boolean>(false);
     this.fileReferences = new Array();
+    this.uploadMeters = new Array();
   }
 }
 
@@ -40,5 +43,6 @@ export interface ColumnGroup {
 export interface ColumnItem {
   index: number,
   value: string,
-  id: string
+  id: string,
+  facilityId?: string
 }

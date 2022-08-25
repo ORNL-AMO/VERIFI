@@ -10,6 +10,9 @@ import { SelectWorksheetComponent } from './data-setup/file-setup/select-workshe
 import { FormsModule } from '@angular/forms';
 import { IdentifyColumnsComponent } from './data-setup/file-setup/identify-columns/identify-columns.component';
 import { DragDropModule } from '@angular/cdk/drag-drop';
+import { ManageMetersComponent } from './data-setup/manage-meters/manage-meters.component';
+import { SetFacilityPredictorsComponent } from './data-setup/set-facility-predictors/set-facility-predictors.component';
+import { SetFacilityMetersComponent } from './data-setup/set-facility-meters/set-facility-meters.component';
 
 
 
@@ -21,7 +24,10 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
     DataSetupBannerComponent,
     FileSetupComponent,
     SelectWorksheetComponent,
-    IdentifyColumnsComponent
+    IdentifyColumnsComponent,
+    ManageMetersComponent,
+    SetFacilityPredictorsComponent,
+    SetFacilityMetersComponent
   ],
   imports: [
     CommonModule,

@@ -2,16 +2,22 @@
     <ul class="nav nav-tabs">
         <li class="nav-item" *ngFor="let reference of fileReferences">
             <a class="nav-link" routerLink="/upload/data-setup/file-setup/{{reference.id}}"
-            [routerLinkActive]="['active']">
+                [routerLinkActive]="['active']">
                 <i class="fa fa-file"></i>{{reference.name}}</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link">
-                <i class="fa fa-gauge-high"></i>Meters</a>
+            <a class="nav-link" routerLink="/upload/data-setup/set-facility-meters"
+            [routerLinkActive]="['active']">
+                <i class="fa fa-industry"></i>Set Facility Meters</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link">
-                <i class="fa fa-industry"></i>Facilities</a>
+            <a class="nav-link" routerLink="/upload/data-setup/set-facility-predictors"
+            [routerLinkActive]="['active']">
+                <i class="fa fa-industry"></i>Set Facility Predictors</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" routerLink="/upload/data-setup/manage-meters" [routerLinkActive]="['active']">
+                <i class="fa fa-gauge-high"></i>Meters</a>
         </li>
     </ul>
 
