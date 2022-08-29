@@ -20,7 +20,9 @@ export class SelectWorksheetComponent implements OnInit {
     selectedWorksheetName: '',
     selectedWorksheetData: [],
     columnGroups: [],
-    headerMap: []
+    headerMap: [],
+    meterFacilityGroups: [],
+    predictorFacilityGroups: []
   };
   constructor(private activatedRoute: ActivatedRoute, private uploadDataService: UploadDataService,
     private router: Router) { }

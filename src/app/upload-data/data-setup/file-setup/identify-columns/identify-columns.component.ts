@@ -20,6 +20,8 @@ export class IdentifyColumnsComponent implements OnInit {
     selectedWorksheetName: '',
     selectedWorksheetData: [],
     columnGroups: [],
+    meterFacilityGroups: [],
+    predictorFacilityGroups: [],
     headerMap: []
   };
   minDate: Date;
@@ -132,15 +134,8 @@ export class IdentifyColumnsComponent implements OnInit {
 
 
   continue() {
-    let fileReferenceIndex: number = this.uploadDataService.fileReferences.findIndex(ref => { return this.fileReference.id == ref.id });
-    if (fileReferenceIndex == this.uploadDataService.fileReferences.length - 1) {
-      //continue to meters
-      this.router.navigateByUrl('/upload/data-setup/set-facility-meters');
-    } else {
-      //go to next file
-      let nextFile: FileReference = this.uploadDataService.fileReferences[fileReferenceIndex + 1];
-      this.router.navigateByUrl('/upload/data-setup/file-setup/' + nextFile.id + '/select-worksheet');
-    }
+    this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/set-facility-meters');
+
   }
 
   getColumnClass(columnName: string): string {

@@ -1,36 +1,56 @@
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idb';
-import { ColumnItem, FacilityGroup, UploadDataService } from '../../upload-data.service';
+import { ColumnItem, FacilityGroup, FileReference, UploadDataService } from '../../../upload-data.service';
 
 @Component({
-  selector: 'app-set-facility-predictors',
-  templateUrl: './set-facility-predictors.component.html',
-  styleUrls: ['./set-facility-predictors.component.css']
+  selector: 'app-set-facility-meters',
+  templateUrl: './set-facility-meters.component.html',
+  styleUrls: ['./set-facility-meters.component.css']
 })
-export class SetFacilityPredictorsComponent implements OnInit {
+export class SetFacilityMetersComponent implements OnInit {
 
-  facilityGroups: Array<FacilityGroup>;
   facilityGroupIds: Array<string>;
-  constructor(private uploadDataService: UploadDataService, private facilityDbService: FacilitydbService, private router: Router) { }
+  fileReference: FileReference = {
+    name: '',
+    file: undefined,
+    dataSet: false,
+    id: undefined,
+    workbook: undefined,
+    isTemplate: false,
+    selectedWorksheetName: '',
+    selectedWorksheetData: [],
+    columnGroups: [],
+    headerMap: [],
+    meterFacilityGroups: [],
+    predictorFacilityGroups: []
+  };
+  constructor(private uploadDataService: UploadDataService, private facilityDbService: FacilitydbService,
+    private router: Router, private activatedRoute: ActivatedRoute) { }
 
   ngOnInit(): void {
-    this.setFacilityGroups();
-    this.facilityGroupIds = this.facilityGroups.map(group => { return group.facilityId });
+    this.activatedRoute.parent.params.subscribe(param => {
+      let id: string = param['id'];
+      this.fileReference = this.uploadDataService.fileReferences.find(ref => { return ref.id == id });
+      if (this.fileReference.meterFacilityGroups.length == 0) {
+        this.setFacilityGroups();
+      }
+      this.facilityGroupIds = this.fileReference.meterFacilityGroups.map(group => { return group.facilityId });
+    });
   }
 
 
   setFacilityGroups() {
     let facilityGroups: Array<FacilityGroup> = new Array();
     let meterIndex: number = 0;
-    let unmappedPredictors: Array<ColumnItem> = new Array();
+    let unmappedMeters: Array<ColumnItem> = new Array();
     this.uploadDataService.fileReferences.forEach(ref => {
       ref.columnGroups.forEach(group => {
-        if (group.groupLabel == 'Predictors') {
+        if (group.groupLabel == 'Meters') {
           group.groupItems.forEach(item => {
-            unmappedPredictors.push({
+            unmappedMeters.push({
               index: meterIndex,
               value: item.value,
               id: item.id,
@@ -43,8 +63,8 @@ export class SetFacilityPredictorsComponent implements OnInit {
     });
     facilityGroups.push({
       facilityId: Math.random().toString(36).substr(2, 9),
-      groupItems: unmappedPredictors,
-      facilityName: 'Unmapped Predictors',
+      groupItems: unmappedMeters,
+      facilityName: 'Unmapped Meters',
       color: ''
     })
     let idbFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
@@ -56,11 +76,11 @@ export class SetFacilityPredictorsComponent implements OnInit {
         color: facility.color
       });
     });
-    this.facilityGroups = facilityGroups;
+    this.fileReference.meterFacilityGroups = facilityGroups;
   }
 
   dropColumn(dropData: CdkDragDrop<string[]>) {
-    this.facilityGroups.forEach(group => {
+    this.fileReference.meterFacilityGroups.forEach(group => {
       if (group.facilityId == dropData.previousContainer.id) {
         //remove
         let itemIndex: number = group.groupItems.findIndex(groupItem => { return groupItem.id == dropData.item.data.id });
@@ -76,6 +96,7 @@ export class SetFacilityPredictorsComponent implements OnInit {
   }
 
   continue() {
+    this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/set-facility-predictors');
     // this.router.navigateByUrl('/upload/data-setup/set-facility-predictors');
   }
 }

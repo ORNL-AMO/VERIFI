@@ -58,6 +58,8 @@ export class FileUploadComponent implements OnInit {
         selectedWorksheetName: workBook.Workbook.Sheets[0].name,
         selectedWorksheetData: [],
         columnGroups: [],
+        meterFacilityGroups: [],
+        predictorFacilityGroups: [],
         headerMap: []
       });
     };

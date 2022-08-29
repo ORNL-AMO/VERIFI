@@ -68,8 +68,8 @@ import { FileSetupComponent } from './upload-data/data-setup/file-setup/file-set
 import { SelectWorksheetComponent } from './upload-data/data-setup/file-setup/select-worksheet/select-worksheet.component';
 import { IdentifyColumnsComponent } from './upload-data/data-setup/file-setup/identify-columns/identify-columns.component';
 import { ManageMetersComponent } from './upload-data/data-setup/manage-meters/manage-meters.component';
-import { SetFacilityMetersComponent } from './upload-data/data-setup/set-facility-meters/set-facility-meters.component';
-import { SetFacilityPredictorsComponent } from './upload-data/data-setup/set-facility-predictors/set-facility-predictors.component';
+import { SetFacilityMetersComponent } from './upload-data/data-setup/file-setup/set-facility-meters/set-facility-meters.component';
+import { SetFacilityPredictorsComponent } from './upload-data/data-setup/file-setup/set-facility-predictors/set-facility-predictors.component';
 
 const routes: Routes = [
   {
@@ -309,12 +309,12 @@ const routes: Routes = [
             children: [
               { path: '', pathMatch: 'full', redirectTo: 'select-worksheet' },
               { path: 'select-worksheet', component: SelectWorksheetComponent },
-              { path: 'identify-columns', component: IdentifyColumnsComponent }
+              { path: 'identify-columns', component: IdentifyColumnsComponent },
+              { path: 'set-facility-meters', component: SetFacilityMetersComponent },
+              { path: 'set-facility-predictors', component: SetFacilityPredictorsComponent },
             ]
           },
           { path: 'manage-meters', component: ManageMetersComponent },
-          { path: 'set-facility-meters', component: SetFacilityMetersComponent },
-          { path: 'set-facility-predictors', component: SetFacilityPredictorsComponent },
         ]
       },
 

@@ -31,6 +31,8 @@ export interface FileReference {
   selectedWorksheetName: string,
   selectedWorksheetData: Array<Array<string>>,
   columnGroups: Array<ColumnGroup>,
+  meterFacilityGroups: Array<FacilityGroup>,
+  predictorFacilityGroups: Array<FacilityGroup>,
   headerMap: Array<any>
 }
 
