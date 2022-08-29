@@ -11,7 +11,8 @@ export class UploadDataService {
   fileReferences: Array<FileReference>;
   allFilesSet: BehaviorSubject<boolean>;
   uploadMeters: Array<IdbUtilityMeter>;
-  constructor() { 
+  facilityGroups: Array<FacilityGroup>;
+  constructor() {
     this.allFilesSet = new BehaviorSubject<boolean>(false);
     this.fileReferences = new Array();
     this.uploadMeters = new Array();
@@ -39,10 +40,16 @@ export interface ColumnGroup {
   id: string
 }
 
+export interface FacilityGroup {
+  facilityId: string,
+  groupItems: Array<ColumnItem>,
+  facilityName: string,
+  color: string
+}
 
 export interface ColumnItem {
   index: number,
   value: string,
   id: string,
-  facilityId?: string
+  fileName?: string
 }

@@ -27,6 +27,7 @@
     Row data will be used as data entries associated with the corresponding date column and meter or predictor.<br>
     Please use site energy data when possible.
 </h6>
+<hr>
 <div class="row no-gutters">
     <div cdkDropList [cdkDropListData]="fileReference.columnGroups" class="card col-md-3 col-sm-6"
         *ngFor="let columnGroup of fileReference.columnGroups" (cdkDropListDropped)="dropColumn($event)" id={{columnGroup.id}}

@@ -1,7 +1,7 @@
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ColumnItem, FileReference, UploadDataService } from 'src/app/upload-data/upload-data.service';
+import { ColumnGroup, ColumnItem, FileReference, UploadDataService } from 'src/app/upload-data/upload-data.service';
 import * as _ from 'lodash';
 @Component({
   selector: 'app-identify-columns',
@@ -36,7 +36,7 @@ export class IdentifyColumnsComponent implements OnInit {
         this.setColumnGroups(this.fileReference.selectedWorksheetData[0]);
       }
       this.columnGroupItemIds = this.fileReference.columnGroups.map(group => { return group.id });
-      console.log(this.fileReference);
+      this.setMinMaxDate();
     });
   }
 
@@ -93,7 +93,7 @@ export class IdentifyColumnsComponent implements OnInit {
   }
 
   setColumnGroups(headers: Array<string>) {
-    let columnGroups: Array<{ groupLabel: string, groupItems: Array<ColumnItem>, id: string }> = new Array();
+    let columnGroups: Array<ColumnGroup> = new Array();
     let dateGroupItems: Array<ColumnItem> = new Array();
     let unusedColumns: Array<ColumnItem> = new Array();
     headers.forEach((header, index) => {
