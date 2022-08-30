@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { FileReference, UploadDataService } from 'src/app/upload-data/upload-data.service';
 import * as XLSX from 'xlsx';
 
@@ -24,20 +25,22 @@ export class SelectWorksheetComponent implements OnInit {
     meterFacilityGroups: [],
     predictorFacilityGroups: []
   };
+  paramsSub: Subscription;
   constructor(private activatedRoute: ActivatedRoute, private uploadDataService: UploadDataService,
     private router: Router) { }
 
   ngOnInit(): void {
-    this.activatedRoute.parent.params.subscribe(param => {
+    this.paramsSub = this.activatedRoute.parent.params.subscribe(param => {
       let id: string = param['id'];
-      console.log(id);
-      console.log(this.uploadDataService.fileReferences);
       this.fileReference = this.uploadDataService.fileReferences.find(ref => { return ref.id == id });
-      console.log(this.fileReference)
-      if(this.fileReference.selectedWorksheetData.length == 0){
+      if (this.fileReference.selectedWorksheetData.length == 0) {
         this.setSelectedWorksheetName();
       }
     });
+  }
+
+  ngOnDestroy(){
+    this.paramsSub.unsubscribe();
   }
 
   setSelectedWorksheetName() {

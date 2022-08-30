@@ -15,12 +15,12 @@
         <div class="card-header">
             <i *ngIf="index != 0" class="fa fa-industry" [ngStyle]="{color: facilityGroup.color}"></i>
             {{facilityGroup.facilityName}}
+            <a *ngIf="index != 0" class="click-link float-right" (click)="setFacility(facilityGroup.facilityId)">+Add All</a>
         </div>
         <div class="card-body">
             <div class="list-item mt-2 mb-2 p-2" [cdkDragData]="groupItem"
                 *ngFor="let groupItem of facilityGroup.groupItems" cdkDrag>
                 <span class="fa fa-arrows-alt"></span>{{groupItem.value}} <br>
-                {{groupItem.fileName}}
             </div>
         </div>
     </div>

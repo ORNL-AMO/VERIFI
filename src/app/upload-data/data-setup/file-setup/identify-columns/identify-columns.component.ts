@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ColumnGroup, ColumnItem, FileReference, UploadDataService } from 'src/app/upload-data/upload-data.service';
 import * as _ from 'lodash';
+import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-identify-columns',
   templateUrl: './identify-columns.component.html',
@@ -27,11 +28,12 @@ export class IdentifyColumnsComponent implements OnInit {
   minDate: Date;
   maxDate: Date;
   columnGroupItemIds: Array<string>;
+  paramsSub: Subscription;
   constructor(private activatedRoute: ActivatedRoute, private uploadDataService: UploadDataService,
     private router: Router) { }
 
   ngOnInit(): void {
-    this.activatedRoute.parent.params.subscribe(param => {
+    this.paramsSub =  this.activatedRoute.parent.params.subscribe(param => {
       let id: string = param['id'];
       this.fileReference = this.uploadDataService.fileReferences.find(ref => { return ref.id == id });
       if (this.fileReference.columnGroups.length == 0) {
@@ -40,6 +42,10 @@ export class IdentifyColumnsComponent implements OnInit {
       this.columnGroupItemIds = this.fileReference.columnGroups.map(group => { return group.id });
       this.setMinMaxDate();
     });
+  }
+
+  ngOnDestroy(){
+    this.paramsSub.unsubscribe();
   }
 
   dropColumn(dropData: CdkDragDrop<string[]>) {

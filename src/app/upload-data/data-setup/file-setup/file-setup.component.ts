@@ -1,7 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { FileReference, UploadDataService } from '../../upload-data.service';
-import * as XLSX from 'xlsx';
 
 @Component({
   selector: 'app-file-setup',
@@ -10,15 +7,9 @@ import * as XLSX from 'xlsx';
 })
 export class FileSetupComponent implements OnInit {
 
-  fileReference: FileReference;
-  constructor(private activatedRoute: ActivatedRoute, private uploadDataService: UploadDataService) { }
+  constructor() { }
 
   ngOnInit(): void {
-    this.activatedRoute.params.subscribe(param => {
-      let id: string = param['id'];
-      this.fileReference = this.uploadDataService.fileReferences.find(ref => { return ref.id == id });
-      
-    });
   }
 
 }

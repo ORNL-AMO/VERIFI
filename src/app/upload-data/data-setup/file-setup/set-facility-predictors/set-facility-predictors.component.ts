@@ -1,6 +1,7 @@
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idb';
 import { ColumnItem, FacilityGroup, FileReference, UploadDataService } from '../../../upload-data.service';
@@ -28,11 +29,12 @@ export class SetFacilityPredictorsComponent implements OnInit {
     meterFacilityGroups: [],
     predictorFacilityGroups: []
   };
+  paramsSub: Subscription;
   constructor(private uploadDataService: UploadDataService, private facilityDbService: FacilitydbService, private router: Router,
     private activatedRoute: ActivatedRoute) { }
 
   ngOnInit(): void {
-    this.activatedRoute.parent.params.subscribe(param => {
+   this.paramsSub = this.activatedRoute.parent.params.subscribe(param => {
       let id: string = param['id'];
       this.fileReference = this.uploadDataService.fileReferences.find(ref => { return ref.id == id });
       if (this.fileReference.predictorFacilityGroups.length == 0) {
@@ -40,32 +42,15 @@ export class SetFacilityPredictorsComponent implements OnInit {
       }
       this.facilityGroupIds = this.fileReference.predictorFacilityGroups.map(group => { return group.facilityId });
     });
-
-
-    // this.setFacilityGroups();
-    // this.facilityGroupIds = this.facilityGroups.map(group => { return group.facilityId });
   }
 
+  ngOnDestroy(){
+    this.paramsSub.unsubscribe();
+  }
 
   setFacilityGroups() {
     let facilityGroups: Array<FacilityGroup> = new Array();
-    let meterIndex: number = 0;
-    let unmappedPredictors: Array<ColumnItem> = new Array();
-    this.uploadDataService.fileReferences.forEach(ref => {
-      ref.columnGroups.forEach(group => {
-        if (group.groupLabel == 'Predictors') {
-          group.groupItems.forEach(item => {
-            unmappedPredictors.push({
-              index: meterIndex,
-              value: item.value,
-              id: item.id,
-              fileName: ref.name
-            });
-            meterIndex++;
-          })
-        }
-      });
-    });
+    let unmappedPredictors: Array<ColumnItem> = this.getFacilityPredictors();
     facilityGroups.push({
       facilityId: Math.random().toString(36).substr(2, 9),
       groupItems: unmappedPredictors,
@@ -101,6 +86,7 @@ export class SetFacilityPredictorsComponent implements OnInit {
   }
 
   continue() {
+    console.log('continue predictors')
     // this.router.navigateByUrl('/upload/data-setup/set-facility-predictors');
     let fileReferenceIndex: number = this.uploadDataService.fileReferences.findIndex(ref => { return this.fileReference.id == ref.id });
     if (fileReferenceIndex == this.uploadDataService.fileReferences.length - 1) {
@@ -111,5 +97,55 @@ export class SetFacilityPredictorsComponent implements OnInit {
       let nextFile: FileReference = this.uploadDataService.fileReferences[fileReferenceIndex + 1];
       this.router.navigateByUrl('/upload/data-setup/file-setup/' + nextFile.id + '/select-worksheet');
     }
+  }
+
+  setFacility(facilityId: string) {
+    let facilityGroups: Array<FacilityGroup> = new Array();
+    let facilityPredictors: Array<ColumnItem> = this.getFacilityPredictors();
+    facilityGroups.push({
+      facilityId: Math.random().toString(36).substr(2, 9),
+      groupItems: [],
+      facilityName: 'Unmapped Predictors',
+      color: ''
+    })
+    let idbFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    idbFacilities.forEach(facility => {
+      if (facility.guid == facilityId) {
+        facilityGroups.push({
+          facilityId: facility.guid,
+          groupItems: facilityPredictors,
+          facilityName: facility.name,
+          color: facility.color
+        });
+      } else {
+        facilityGroups.push({
+          facilityId: facility.guid,
+          groupItems: [],
+          facilityName: facility.name,
+          color: facility.color
+        });
+      }
+    });
+    this.fileReference.predictorFacilityGroups = facilityGroups;
+    this.facilityGroupIds = this.fileReference.predictorFacilityGroups.map(group => { return group.facilityId });
+  }
+
+  getFacilityPredictors(): Array<ColumnItem> {
+    let meterIndex: number = 0;
+    let facilityPredictors: Array<ColumnItem> = new Array();
+    this.fileReference.columnGroups.forEach(group => {
+      if (group.groupLabel == 'Predictors') {
+        group.groupItems.forEach(item => {
+          facilityPredictors.push({
+            index: meterIndex,
+            value: item.value,
+            id: item.id,
+            // fileName: ref.name
+          });
+          meterIndex++;
+        })
+      }
+    });
+    return facilityPredictors;
   }
 }
