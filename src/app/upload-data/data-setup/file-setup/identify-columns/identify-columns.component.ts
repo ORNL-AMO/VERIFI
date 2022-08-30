@@ -23,7 +23,8 @@ export class IdentifyColumnsComponent implements OnInit {
     columnGroups: [],
     meterFacilityGroups: [],
     predictorFacilityGroups: [],
-    headerMap: []
+    headerMap: [],
+    importFacilities: []
   };
   minDate: Date;
   maxDate: Date;
@@ -33,18 +34,20 @@ export class IdentifyColumnsComponent implements OnInit {
     private router: Router) { }
 
   ngOnInit(): void {
-    this.paramsSub =  this.activatedRoute.parent.params.subscribe(param => {
+    this.paramsSub = this.activatedRoute.parent.params.subscribe(param => {
       let id: string = param['id'];
       this.fileReference = this.uploadDataService.fileReferences.find(ref => { return ref.id == id });
-      if (this.fileReference.columnGroups.length == 0) {
-        this.setColumnGroups(this.fileReference.selectedWorksheetData[0]);
+      if (!this.fileReference.isTemplate) {
+        if (this.fileReference.columnGroups.length == 0) {
+          this.setColumnGroups(this.fileReference.selectedWorksheetData[0]);
+        }
+        this.columnGroupItemIds = this.fileReference.columnGroups.map(group => { return group.id });
+        this.setMinMaxDate();
       }
-      this.columnGroupItemIds = this.fileReference.columnGroups.map(group => { return group.id });
-      this.setMinMaxDate();
     });
   }
 
-  ngOnDestroy(){
+  ngOnDestroy() {
     this.paramsSub.unsubscribe();
   }
 

@@ -23,7 +23,8 @@ export class SelectWorksheetComponent implements OnInit {
     columnGroups: [],
     headerMap: [],
     meterFacilityGroups: [],
-    predictorFacilityGroups: []
+    predictorFacilityGroups: [],
+    importFacilities: []
   };
   paramsSub: Subscription;
   constructor(private activatedRoute: ActivatedRoute, private uploadDataService: UploadDataService,
@@ -33,13 +34,15 @@ export class SelectWorksheetComponent implements OnInit {
     this.paramsSub = this.activatedRoute.parent.params.subscribe(param => {
       let id: string = param['id'];
       this.fileReference = this.uploadDataService.fileReferences.find(ref => { return ref.id == id });
-      if (this.fileReference.selectedWorksheetData.length == 0) {
-        this.setSelectedWorksheetName();
+      if (!this.fileReference.isTemplate) {
+        if (this.fileReference.selectedWorksheetData.length == 0) {
+          this.setSelectedWorksheetName();
+        }
       }
     });
   }
 
-  ngOnDestroy(){
+  ngOnDestroy() {
     this.paramsSub.unsubscribe();
   }
 

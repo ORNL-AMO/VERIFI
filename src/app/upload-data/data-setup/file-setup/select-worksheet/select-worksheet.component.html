@@ -3,27 +3,34 @@
         <button class="btn btn-success" (click)="continue()">Submit &amp; Continue</button>
     </div>
 </div>
-<label for="worksheetName">Select Worksheet</label>
-<select class="form-control" name="worksheetName" [(ngModel)]="fileReference.selectedWorksheetName"
-    (change)="setSelectedWorksheetName()">
-    <option class="form-control" *ngFor="let name of fileReference.workbook?.SheetNames" [ngValue]="name">{{name}}
-    </option>
-</select>
-<br>
-<table *ngIf="fileReference.selectedWorksheetData">
-    <thead>
-        <tr>
-            <th *ngFor="let header of fileReference.selectedWorksheetData[0]">
-                {{header}}
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr *ngFor="let worksheetData of fileReference.selectedWorksheetData; let index = index;"
-            [ngClass]="{'hidden': index == 0}">
-            <td *ngFor="let data of worksheetData">
-                {{data}}
-            </td>
-        </tr>
-    </tbody>
-</table>
+<div *ngIf="!fileReference.isTemplate">
+    <label for="worksheetName">Select Worksheet</label>
+    <select class="form-control" name="worksheetName" [(ngModel)]="fileReference.selectedWorksheetName"
+        (change)="setSelectedWorksheetName()">
+        <option class="form-control" *ngFor="let name of fileReference.workbook?.SheetNames" [ngValue]="name">{{name}}
+        </option>
+    </select>
+    <br>
+    <table *ngIf="fileReference.selectedWorksheetData">
+        <thead>
+            <tr>
+                <th *ngFor="let header of fileReference.selectedWorksheetData[0]">
+                    {{header}}
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let worksheetData of fileReference.selectedWorksheetData; let index = index;"
+                [ngClass]="{'hidden': index == 0}">
+                <td *ngFor="let data of worksheetData">
+                    {{data}}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="alert alert-warning" *ngIf="fileReference.isTemplate">
+    This is a template file and data worksheets are already parced. Continue to confirm meters and predictors are mapped
+    correctly.
+</div>
+<hr>

@@ -3,7 +3,11 @@
         <button class="btn btn-success" (click)="continue()">Submit &amp; Continue</button>
     </div>
 </div>
-<div class="worksheet-data-table">
+<div class="alert alert-warning" *ngIf="fileReference.isTemplate">
+    This is a template file and columns are already parced. Continue to confirm meters and predictors are mapped
+    correctly.
+</div>
+<div class="worksheet-data-table" *ngIf="!fileReference.isTemplate">
     <table *ngIf="fileReference.selectedWorksheetData">
         <thead>
             <tr>
@@ -13,7 +17,8 @@
             </tr>
         </thead>
         <tbody>
-            <tr *ngFor="let worksheetData of fileReference.selectedWorksheetData; let index = index;" [ngClass]="{'hidden': index == 0}">
+            <tr *ngFor="let worksheetData of fileReference.selectedWorksheetData; let index = index;"
+                [ngClass]="{'hidden': index == 0}">
                 <td *ngFor="let data of worksheetData">
                     {{data}}
                 </td>
@@ -22,16 +27,17 @@
     </table>
 </div>
 <hr>
-<h6 class="map-columns-label">Map the data columns from the excel file to the appropriate data type. <br>
+<h6 class="map-columns-label" *ngIf="!fileReference.isTemplate">Map the data columns from the excel file to the
+    appropriate data type. <br>
     Column headers will be used to create meters or predictors.<br>
     Row data will be used as data entries associated with the corresponding date column and meter or predictor.<br>
     Please use site energy data when possible.
 </h6>
-<hr>
-<div class="row no-gutters">
+<hr *ngIf="!fileReference.isTemplate">
+<div class="row no-gutters" *ngIf="!fileReference.isTemplate">
     <div cdkDropList [cdkDropListData]="fileReference.columnGroups" class="card col-md-3 col-sm-6"
-        *ngFor="let columnGroup of fileReference.columnGroups" (cdkDropListDropped)="dropColumn($event)" id={{columnGroup.id}}
-        [cdkDropListConnectedTo]="columnGroupItemIds" [ngClass]="columnGroup.groupLabel">
+        *ngFor="let columnGroup of fileReference.columnGroups" (cdkDropListDropped)="dropColumn($event)"
+        id={{columnGroup.id}} [cdkDropListConnectedTo]="columnGroupItemIds" [ngClass]="columnGroup.groupLabel">
         <div class="card-header">
             {{columnGroup.groupLabel}}
         </div>
