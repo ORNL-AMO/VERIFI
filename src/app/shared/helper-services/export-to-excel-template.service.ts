@@ -1,11 +1,13 @@
 import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import * as ExcelJS from 'exceljs';
+import { AgreementType, AgreementTypes, ScopeOption, ScopeOptions } from 'src/app/facility/utility-data/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbAccount, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +17,8 @@ export class ExportToExcelTemplateService {
   constructor(private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private predictorDbService: PredictordbService,
-    private facilityDbService: FacilitydbService) { }
+    private facilityDbService: FacilitydbService,
+    private accountDbService: AccountdbService) { }
 
 
   exportFacilityData() {
@@ -27,10 +30,10 @@ export class ExportToExcelTemplateService {
       a.href = url;
       let date = new Date();
       let datePipe = new DatePipe('en-us');
-      let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-      let facilityName: string = facility.name;
+      let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+      let accountName: string = account.name;
 
-      a.download = facilityName.replaceAll(' ', '-') + "-" + datePipe.transform(date, 'MM-dd-yyyy');
+      a.download = accountName.replaceAll(' ', '-') + "-" + datePipe.transform(date, 'MM-dd-yyyy');
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -43,79 +46,143 @@ export class ExportToExcelTemplateService {
     workbook.properties.date1904 = true;
     workbook.calcProperties.fullCalcOnLoad = true;
     workbook.addWorksheet('Help');
-    workbook.worksheets[1] = this.getMetersWorksheet(workbook);
-    workbook.worksheets[2] = this.getElectricityWorksheet(workbook);
-    workbook.worksheets[3] = this.getNonElectricityWorksheet(workbook);
-    workbook.worksheets[4] = this.getPredictorWorksheet(workbook);
+    workbook.worksheets[1] = this.getFacilityWorksheet(workbook);
+    workbook.worksheets[2] = this.getMetersWorksheet(workbook);
+    workbook.worksheets[3] = this.getElectricityWorksheet(workbook);
+    workbook.worksheets[4] = this.getNonElectricityWorksheet(workbook);
+    workbook.worksheets[5] = this.getPredictorWorksheet(workbook);
 
     return workbook;
   }
 
-  getMetersWorksheet(workbook: ExcelJS.Workbook): ExcelJS.Worksheet {
-    let worksheet: ExcelJS.Worksheet = workbook.addWorksheet('Meters-Utilities');
-    worksheet.getCell('A1').value = 'Meter Number';
-    worksheet.getCell('B1').value = 'Account Number';
-    worksheet.getCell('C1').value = 'Source';
-    worksheet.getCell('D1').value = 'Meter Name';
-    worksheet.getCell('E1').value = 'Utility Supplier';
-    worksheet.getCell('F1').value = 'Notes';
-    worksheet.getCell('G1').value = 'Building / Location';
-    worksheet.getCell('H1').value = 'Meter Group';
-    worksheet.getCell('I1').value = 'Phase';
-    worksheet.getCell('J1').value = 'Fuel';
-    worksheet.getCell('K1').value = 'Collection Unit';
-    worksheet.getCell('L1').value = 'Heat Capacity';
-    worksheet.getCell('M1').value = 'Site To Source';
+  getFacilityWorksheet(workbook: ExcelJS.Workbook): ExcelJS.Worksheet {
+    let worksheet: ExcelJS.Worksheet = workbook.addWorksheet('Facilities');
+    worksheet.getCell('A1').value = 'Facility Name';
+    worksheet.getCell('B1').value = 'Address';
+    worksheet.getCell('C1').value = 'Country';
+    worksheet.getCell('D1').value = 'State';
+    worksheet.getCell('E1').value = 'City';
+    worksheet.getCell('F1').value = 'Zip';
+    worksheet.getCell('G1').value = 'NAICS Code 2';
+    worksheet.getCell('H1').value = 'NAICS Code 3';
+    worksheet.getCell('I1').value = 'Contact Name';
+    worksheet.getCell('J1').value = 'Contact Phone';
+    worksheet.getCell('K1').value = 'Contact Email';
 
-    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     let index: number = 2;
-    facilityMeters.forEach(meter => {
-      worksheet.getCell('A' + index).value = meter.meterNumber;
-      worksheet.getCell('B' + index).value = meter.accountNumber;
-      worksheet.getCell('C' + index).value = meter.source;
-      worksheet.getCell('D' + index).value = meter.name;
-      worksheet.getCell('E' + index).value = meter.supplier;
-      worksheet.getCell('F' + index).value = meter.notes;
-      worksheet.getCell('G' + index).value = meter.location;
-      worksheet.getCell('H' + index).value = meter.group;
-      worksheet.getCell('I' + index).value = meter.phase;
-      worksheet.getCell('J' + index).value = meter.fuel;
-      worksheet.getCell('K' + index).value = meter.startingUnit;
-      worksheet.getCell('L' + index).value = meter.heatCapacity;
-      worksheet.getCell('M' + index).value = meter.siteToSource;
+    accountFacilities.forEach(facility => {
+      worksheet.getCell('A' + index).value = facility.name;
+      worksheet.getCell('B' + index).value = facility.address;
+      worksheet.getCell('C' + index).value = facility.country;
+      worksheet.getCell('D' + index).value = facility.state;
+      worksheet.getCell('E' + index).value = facility.city;
+      worksheet.getCell('F' + index).value = facility.zip;
+      worksheet.getCell('G' + index).value = facility.naics2;
+      worksheet.getCell('H' + index).value = facility.naics3;
+      worksheet.getCell('I' + index).value = facility.contactName;
+      worksheet.getCell('J' + index).value = facility.contactPhone;
+      worksheet.getCell('K' + index).value = facility.contactEmail;
       index++;
     })
-
     return worksheet;
+  }
+
+  getMetersWorksheet(workbook: ExcelJS.Workbook): ExcelJS.Worksheet {
+    let worksheet: ExcelJS.Worksheet = workbook.addWorksheet('Meters-Utilities');
+    worksheet.getCell('A1').value = 'Facility Name';
+    worksheet.getCell('B1').value = 'Meter Number';
+    worksheet.getCell('C1').value = 'Account Number';
+    worksheet.getCell('D1').value = 'Source';
+    worksheet.getCell('E1').value = 'Meter Name';
+    worksheet.getCell('F1').value = 'Utility Supplier';
+    worksheet.getCell('G1').value = 'Notes';
+    worksheet.getCell('H1').value = 'Building / Location';
+    worksheet.getCell('I1').value = 'Meter Group';
+    worksheet.getCell('J1').value = 'Phase';
+    worksheet.getCell('K1').value = 'Fuel';
+    worksheet.getCell('L1').value = 'Collection Unit';
+    worksheet.getCell('M1').value = 'Heat Capacity';
+    worksheet.getCell('N1').value = 'Site To Source';
+    worksheet.getCell('O1').value = 'Scope';
+    worksheet.getCell('P1').value = 'Agreement Type';
+    worksheet.getCell('Q1').value = 'Include In Energy';
+    worksheet.getCell('R1').value = 'Retain RECS';
+
+    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let index: number = 2;
+    facilityMeters.forEach(meter => {
+      let facilityName: string = accountFacilities.find(facility => { return facility.guid == meter.facilityId }).name;
+      worksheet.getCell('A' + index).value = facilityName;
+      worksheet.getCell('B' + index).value = meter.meterNumber;
+      worksheet.getCell('C' + index).value = meter.accountNumber;
+      worksheet.getCell('D' + index).value = meter.source;
+      worksheet.getCell('E' + index).value = meter.name;
+      worksheet.getCell('F' + index).value = meter.supplier;
+      worksheet.getCell('G' + index).value = meter.notes;
+      worksheet.getCell('H' + index).value = meter.location;
+      worksheet.getCell('I' + index).value = meter.group;
+      worksheet.getCell('J' + index).value = meter.phase;
+      worksheet.getCell('K' + index).value = meter.fuel;
+      worksheet.getCell('L' + index).value = meter.startingUnit;
+      worksheet.getCell('M' + index).value = meter.heatCapacity;
+      worksheet.getCell('N' + index).value = meter.siteToSource;
+      worksheet.getCell('O' + index).value = this.getScope(meter.scope);
+      worksheet.getCell('P' + index).value = this.getAgreementType(meter.agreementType);
+      worksheet.getCell('Q' + index).value = this.getYesNo(meter.includeInEnergy);
+      worksheet.getCell('R' + index).value = this.getYesNo(meter.retainRECs);
+      index++;
+    })
+    return worksheet;
+  }
+
+  getYesNo(bool: boolean): 'Yes' | 'No'{
+    if(bool){
+      return 'Yes';
+    }
+    return 'No';
+  }
+
+  getScope(scope: number): string{
+    let selectedScope: ScopeOption = ScopeOptions.find(option => {return option.value == scope});
+    return selectedScope.scope + ': ' + selectedScope.optionLabel;
+  }
+
+  getAgreementType(agreementType: number): string {
+    let selectedType: AgreementType = AgreementTypes.find(type => {return agreementType == type.value});
+    return selectedType.typeLabel;
   }
 
   getElectricityWorksheet(workbook: ExcelJS.Workbook): ExcelJS.Worksheet {
     let worksheet: ExcelJS.Worksheet = workbook.addWorksheet('Electricity');
     worksheet.getCell('A1').value = 'Meter Number';
     worksheet.getCell('B1').value = 'Read Date';
-    worksheet.getCell('C1').value = 'Total Energy';
-    worksheet.getCell('D1').value = 'Total Demand';
-    worksheet.getCell('E1').value = 'Total Cost';
-    worksheet.getCell('F1').value = 'Basic Charge';
-    worksheet.getCell('G1').value = 'Supply Block Amount';
-    worksheet.getCell('H1').value = 'Supply Block Charge';
-    worksheet.getCell('I1').value = 'Flat Rate Amount';
-    worksheet.getCell('J1').value = 'Flat Rate Charge';
-    worksheet.getCell('K1').value = 'Peak Amount';
-    worksheet.getCell('L1').value = 'Peak Charge';
-    worksheet.getCell('M1').value = 'Off Peak Amount';
-    worksheet.getCell('N1').value = 'Off Peak Charge';
-    worksheet.getCell('O1').value = 'Demand Block Amount';
-    worksheet.getCell('P1').value = 'Demand Block Charge';
-    worksheet.getCell('Q1').value = 'Generation and Transmission Charge';
-    worksheet.getCell('R1').value = 'Delivery Charge';
-    worksheet.getCell('S1').value = 'Transmission Charge';
-    worksheet.getCell('T1').value = 'Power Factor Charge';
-    worksheet.getCell('U1').value = 'Local Business Charge';
-    worksheet.getCell('V1').value = 'Local Utility Tax';
-    worksheet.getCell('W1').value = 'Late Payment';
-    worksheet.getCell('X1').value = 'Other Charge';
-    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+    worksheet.getCell('C1').value = 'Total Consumption';
+    worksheet.getCell('D1').value = 'Total Real Demand';
+    worksheet.getCell('E1').value = 'Total Billed Demand';
+    worksheet.getCell('F1').value = 'Total Cost';
+    worksheet.getCell('G1').value = 'Non-energy Charge';
+    worksheet.getCell('H1').value = 'Block 1 Consumption';
+    worksheet.getCell('I1').value = 'Block 1 Consumption Charge';
+    worksheet.getCell('J1').value = 'Block 2 Consumption';
+    worksheet.getCell('K1').value = 'Block 2 Consumption Charge';
+    worksheet.getCell('L1').value = 'Block 3 Consumption';
+    worksheet.getCell('M1').value = 'Block 3 Consumption Charge';
+    worksheet.getCell('N1').value = 'Other Consumption';
+    worksheet.getCell('O1').value = 'Other Consumption Charge';
+    worksheet.getCell('P1').value = 'On Peak Amount';
+    worksheet.getCell('Q1').value = 'On Peak Charge';
+    worksheet.getCell('R1').value = 'Off Peak Amount';
+    worksheet.getCell('S1').value = 'Off Peak Charge';
+    worksheet.getCell('T1').value = 'Transmission & Delivery Charge';
+    worksheet.getCell('U1').value = 'Power Factor';
+    worksheet.getCell('V1').value = 'Power Factor Charge';
+    worksheet.getCell('W1').value = 'Local Sales Tax';
+    worksheet.getCell('X1').value = 'State Sales Tax';
+    worksheet.getCell('Y1').value = 'Late Payment';
+    worksheet.getCell('Z1').value = 'Other Charge';
+    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let electricityMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.source == 'Electricity' });
     let index: number = 2;
     electricityMeters.forEach(meter => {
@@ -124,27 +191,30 @@ export class ExportToExcelTemplateService {
         worksheet.getCell('A' + index).value = meter.meterNumber;
         worksheet.getCell('B' + index).value = dataReading.readDate;
         worksheet.getCell('C' + index).value = dataReading.totalEnergyUse;
+        //TODO: update '0' when new fields added and names changed
         worksheet.getCell('D' + index).value = dataReading.totalDemand;
-        worksheet.getCell('E' + index).value = dataReading.totalCost;
-        worksheet.getCell('F' + index).value = dataReading.basicCharge;
-        worksheet.getCell('G' + index).value = dataReading.supplyBlockAmount;
-        worksheet.getCell('H' + index).value = dataReading.supplyBlockCharge;
-        worksheet.getCell('I' + index).value = dataReading.flatRateAmount;
-        worksheet.getCell('J' + index).value = dataReading.flatRateCharge;
-        worksheet.getCell('K' + index).value = dataReading.peakAmount;
-        worksheet.getCell('L' + index).value = dataReading.peakCharge;
-        worksheet.getCell('M' + index).value = dataReading.offPeakAmount;
-        worksheet.getCell('N' + index).value = dataReading.offPeakCharge;
-        worksheet.getCell('O' + index).value = dataReading.demandBlockAmount;
-        worksheet.getCell('P' + index).value = dataReading.demandBlockCharge;
-        worksheet.getCell('Q' + index).value = dataReading.generationTransmissionCharge;
-        worksheet.getCell('R' + index).value = dataReading.deliveryCharge;
-        worksheet.getCell('S' + index).value = dataReading.transmissionCharge;
-        worksheet.getCell('T' + index).value = dataReading.powerFactorCharge;
-        worksheet.getCell('U' + index).value = dataReading.businessCharge;
-        worksheet.getCell('V' + index).value = dataReading.utilityTax;
-        worksheet.getCell('W' + index).value = dataReading.latePayment;
-        worksheet.getCell('X' + index).value = dataReading.otherCharge;
+        worksheet.getCell('E' + index).value = 0;
+        worksheet.getCell('F' + index).value = dataReading.totalCost;
+        worksheet.getCell('G' + index).value = 0;
+        worksheet.getCell('H' + index).value = 0;
+        worksheet.getCell('I' + index).value = 0;
+        worksheet.getCell('J' + index).value = 0;
+        worksheet.getCell('K' + index).value = 0;
+        worksheet.getCell('L' + index).value = 0;
+        worksheet.getCell('M' + index).value = 0;
+        worksheet.getCell('N' + index).value = 0;
+        worksheet.getCell('O' + index).value = 0;
+        worksheet.getCell('P' + index).value = dataReading.peakAmount;
+        worksheet.getCell('Q' + index).value = dataReading.peakCharge;
+        worksheet.getCell('R' + index).value = dataReading.offPeakAmount;
+        worksheet.getCell('S' + index).value = dataReading.offPeakCharge;
+        worksheet.getCell('T' + index).value = 0;
+        worksheet.getCell('U' + index).value = 0;
+        worksheet.getCell('V' + index).value = dataReading.powerFactorCharge;
+        worksheet.getCell('W' + index).value = 0;
+        worksheet.getCell('X' + index).value = 0;
+        worksheet.getCell('Y' + index).value = dataReading.latePayment;
+        worksheet.getCell('Z' + index).value = dataReading.otherCharge;
         index++;
       })
     })
@@ -160,7 +230,12 @@ export class ExportToExcelTemplateService {
     worksheet.getCell('E1').value = 'Commodity Charge';
     worksheet.getCell('F1').value = 'Delivery Charge';
     worksheet.getCell('G1').value = 'Other Charge';
-    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+    worksheet.getCell('H1').value = 'Demand Usage';
+    worksheet.getCell('I1').value = 'Demand Charge';
+    worksheet.getCell('J1').value = 'Local Sales Tax';
+    worksheet.getCell('K1').value = 'State Sales Tax';
+    worksheet.getCell('L1').value = 'Late Payment';
+    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let electricityMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.source != 'Electricity' });
     let index: number = 2;
     electricityMeters.forEach(meter => {
@@ -173,6 +248,11 @@ export class ExportToExcelTemplateService {
         worksheet.getCell('E' + index).value = dataReading.commodityCharge;
         worksheet.getCell('F' + index).value = dataReading.deliveryCharge;
         worksheet.getCell('G' + index).value = dataReading.otherCharge;
+        worksheet.getCell('H' + index).value = 0;
+        worksheet.getCell('I' + index).value = 0;
+        worksheet.getCell('J' + index).value = 0;
+        worksheet.getCell('K' + index).value = 0;
+        worksheet.getCell('L' + index).value = 0;
         index++;
       })
     })
@@ -180,6 +260,7 @@ export class ExportToExcelTemplateService {
   }
 
   getPredictorWorksheet(workbook: ExcelJS.Workbook): ExcelJS.Worksheet {
+    //TODO: Figure out account predictors logic..
     let worksheet: ExcelJS.Worksheet = workbook.addWorksheet('Predictors');
     let alpha = Array.from(Array(26)).map((e, i) => i + 65);
     let alphabet = alpha.map(x => { return String.fromCharCode(x) });
