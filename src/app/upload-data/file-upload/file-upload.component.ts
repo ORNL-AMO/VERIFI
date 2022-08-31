@@ -163,8 +163,6 @@ export class FileUploadComponent implements OnInit {
     // let electricityData = XLSX.utils.sheet_to_json(workbook.Sheets['Electricity'], { header: 1 });
     // let noElectricityData = XLSX.utils.sheet_to_json(workbook.Sheets['Non-electricity'], { header: 1 });
     let predictorsData = XLSX.utils.sheet_to_json(workbook.Sheets['Predictors']);
-    console.log(predictorsData)
-
     let predictorEntries: Array<IdbPredictorEntry> = new Array();
     importFacilities.forEach(facility => {
       let facilityPredictorEntry: IdbPredictorEntry = this.predictorDbService.getNewIdbPredictorEntry(facility.guid, selectedAccount.guid, new Date());

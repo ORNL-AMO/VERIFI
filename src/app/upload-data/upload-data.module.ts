@@ -10,7 +10,7 @@ import { SelectWorksheetComponent } from './data-setup/file-setup/select-workshe
 import { FormsModule } from '@angular/forms';
 import { IdentifyColumnsComponent } from './data-setup/file-setup/identify-columns/identify-columns.component';
 import { DragDropModule } from '@angular/cdk/drag-drop';
-import { ManageMetersComponent } from './data-setup/manage-meters/manage-meters.component';
+import { ManageMetersComponent } from './data-setup/file-setup/manage-meters/manage-meters.component';
 import { SetFacilityPredictorsComponent } from './data-setup/file-setup/set-facility-predictors/set-facility-predictors.component';
 import { SetFacilityMetersComponent } from './data-setup/file-setup/set-facility-meters/set-facility-meters.component';
 

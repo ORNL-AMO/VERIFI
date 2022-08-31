@@ -67,7 +67,7 @@ import { DataSetupComponent } from './upload-data/data-setup/data-setup.componen
 import { FileSetupComponent } from './upload-data/data-setup/file-setup/file-setup.component';
 import { SelectWorksheetComponent } from './upload-data/data-setup/file-setup/select-worksheet/select-worksheet.component';
 import { IdentifyColumnsComponent } from './upload-data/data-setup/file-setup/identify-columns/identify-columns.component';
-import { ManageMetersComponent } from './upload-data/data-setup/manage-meters/manage-meters.component';
+import { ManageMetersComponent } from './upload-data/data-setup/file-setup/manage-meters/manage-meters.component';
 import { SetFacilityMetersComponent } from './upload-data/data-setup/file-setup/set-facility-meters/set-facility-meters.component';
 import { SetFacilityPredictorsComponent } from './upload-data/data-setup/file-setup/set-facility-predictors/set-facility-predictors.component';
 
@@ -312,9 +312,9 @@ const routes: Routes = [
               { path: 'identify-columns', component: IdentifyColumnsComponent },
               { path: 'set-facility-meters', component: SetFacilityMetersComponent },
               { path: 'set-facility-predictors', component: SetFacilityPredictorsComponent },
+              { path: 'manage-meters', component: ManageMetersComponent },
             ]
           },
-          { path: 'manage-meters', component: ManageMetersComponent },
         ]
       },
 
