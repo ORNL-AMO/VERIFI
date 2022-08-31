@@ -29,17 +29,11 @@
   }
 
   .card{
-      border-top: none;
-      border-left: none;
-      border-bottom: none;
-      border-right: none;
       border-radius: 0px;
       background: #efefef;
+      border: 3px solid #2c386b;
   }
 
-  .card:not(:last-child){
-      border-right: 2px solid orange;
-  }
   
   .cdk-drag-animating {
     transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);

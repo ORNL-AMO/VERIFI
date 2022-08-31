@@ -2,10 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ColumnItem, FacilityGroup, FileReference, UploadDataService } from '../upload-data.service';
 import * as XLSX from 'xlsx';
-import { IdbAccount, IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
+import { IdbAccount, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, PredictorData } from 'src/app/models/idb';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
+import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 
 @Component({
   selector: 'app-file-upload',
@@ -18,7 +19,8 @@ export class FileUploadComponent implements OnInit {
   disableImport: boolean = false;
   filesUploaded: boolean = false;
   constructor(private router: Router, private uploadDataService: UploadDataService, private facilityDbService: FacilitydbService,
-    private accountDbService: AccountdbService, private utilityMeterDbService: UtilityMeterdbService) { }
+    private accountDbService: AccountdbService, private utilityMeterDbService: UtilityMeterdbService,
+    private predictorDbService: PredictordbService) { }
 
   ngOnInit(): void {
     this.fileReferences = new Array();
@@ -71,8 +73,9 @@ export class FileUploadComponent implements OnInit {
         });
       } else {
         //parse template
-        let templateData: { importFacilities: Array<IdbFacility>, importMeters: Array<IdbUtilityMeter> } = this.parseTemplate(workBook);
+        let templateData: { importFacilities: Array<IdbFacility>, importMeters: Array<IdbUtilityMeter>, predictorEntries: Array<IdbPredictorEntry> } = this.parseTemplate(workBook);
         let meterFacilityGroups: Array<FacilityGroup> = this.getMeterFacilityGroups(templateData);
+        let predictorFacilityGroups: Array<FacilityGroup> = this.getPredictorFacilityGroups(templateData);
         this.fileReferences.push({
           name: file.name,
           file: file,
@@ -84,7 +87,7 @@ export class FileUploadComponent implements OnInit {
           selectedWorksheetData: [],
           columnGroups: [],
           meterFacilityGroups: meterFacilityGroups,
-          predictorFacilityGroups: [],
+          predictorFacilityGroups: predictorFacilityGroups,
           headerMap: [],
           importFacilities: templateData.importFacilities
         });
@@ -101,7 +104,7 @@ export class FileUploadComponent implements OnInit {
     }
   }
 
-  parseTemplate(workbook: XLSX.WorkBook): { importFacilities: Array<IdbFacility>, importMeters: Array<IdbUtilityMeter> } {
+  parseTemplate(workbook: XLSX.WorkBook): { importFacilities: Array<IdbFacility>, importMeters: Array<IdbUtilityMeter>, predictorEntries: Array<IdbPredictorEntry> } {
     let facilitiesData = XLSX.utils.sheet_to_json(workbook.Sheets['Facilities']);
     let importFacilities: Array<IdbFacility> = new Array();
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
@@ -159,9 +162,29 @@ export class FileUploadComponent implements OnInit {
     })
     // let electricityData = XLSX.utils.sheet_to_json(workbook.Sheets['Electricity'], { header: 1 });
     // let noElectricityData = XLSX.utils.sheet_to_json(workbook.Sheets['Non-electricity'], { header: 1 });
-    // let predictorsData = XLSX.utils.sheet_to_json(workbook.Sheets['Predictors'], { header: 1 });
+    let predictorsData = XLSX.utils.sheet_to_json(workbook.Sheets['Predictors']);
+    console.log(predictorsData)
 
-    return { importFacilities: importFacilities, importMeters: importMeters }
+    let predictorEntries: Array<IdbPredictorEntry> = new Array();
+    importFacilities.forEach(facility => {
+      let facilityPredictorEntry: IdbPredictorEntry = this.predictorDbService.getNewIdbPredictorEntry(facility.guid, selectedAccount.guid, new Date());
+      let facilityPredictorData = predictorsData.filter(data => { return data['Facility Name'] == facility.name });
+      if (facilityPredictorData.length != 0) {
+        Object.keys(facilityPredictorData[0]).forEach((key) => {
+          if (key != 'Facility Name' && key != 'Date') {
+            let newPredictor: PredictorData = this.predictorDbService.getNewPredictor([]);
+            newPredictor.name = key;
+            facilityPredictorEntry.predictors.push(newPredictor);
+          }
+        });
+        if (facilityPredictorEntry.predictors.length != 0) {
+          predictorEntries.push(facilityPredictorEntry);
+        }
+      }
+    })
+
+
+    return { importFacilities: importFacilities, importMeters: importMeters, predictorEntries: predictorEntries }
   }
 
   getMeterFacilityGroups(templateData: { importFacilities: Array<IdbFacility>, importMeters: Array<IdbUtilityMeter> }): Array<FacilityGroup> {
@@ -184,6 +207,38 @@ export class FileUploadComponent implements OnInit {
           id: meter.guid,
         });
         meterIndex++;
+      })
+      facilityGroups.push({
+        facilityId: facility.guid,
+        groupItems: groupItems,
+        facilityName: facility.name,
+        color: facility.color
+      });
+    });
+    return facilityGroups;
+  }
+
+
+  getPredictorFacilityGroups(templateData: { importFacilities: Array<IdbFacility>, predictorEntries: Array<IdbPredictorEntry> }): Array<FacilityGroup> {
+    let facilityGroups: Array<FacilityGroup> = new Array();
+    let predictorIndex: number = 0;
+
+    facilityGroups.push({
+      facilityId: Math.random().toString(36).substr(2, 9),
+      groupItems: [],
+      facilityName: 'Unmapped Predictors',
+      color: ''
+    })
+    templateData.importFacilities.forEach(facility => {
+      let facilityPredictorEntry: IdbPredictorEntry = templateData.predictorEntries.find(entry => { return entry.facilityId == facility.guid });
+      let groupItems: Array<ColumnItem> = new Array();
+      facilityPredictorEntry.predictors.forEach(predictor => {
+        groupItems.push({
+          index: predictorIndex,
+          value: predictor.name,
+          id: predictor.id,
+        });
+        predictorIndex++;
       })
       facilityGroups.push({
         facilityId: facility.guid,
