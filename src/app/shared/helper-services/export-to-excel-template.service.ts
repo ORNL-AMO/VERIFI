@@ -8,6 +8,7 @@ import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbAccount, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import * as _ from 'lodash';
 
 @Injectable({
   providedIn: 'root'
@@ -137,20 +138,20 @@ export class ExportToExcelTemplateService {
     return worksheet;
   }
 
-  getYesNo(bool: boolean): 'Yes' | 'No'{
-    if(bool){
+  getYesNo(bool: boolean): 'Yes' | 'No' {
+    if (bool) {
       return 'Yes';
     }
     return 'No';
   }
 
-  getScope(scope: number): string{
-    let selectedScope: ScopeOption = ScopeOptions.find(option => {return option.value == scope});
+  getScope(scope: number): string {
+    let selectedScope: ScopeOption = ScopeOptions.find(option => { return option.value == scope });
     return selectedScope.scope + ': ' + selectedScope.optionLabel;
   }
 
   getAgreementType(agreementType: number): string {
-    let selectedType: AgreementType = AgreementTypes.find(type => {return agreementType == type.value});
+    let selectedType: AgreementType = AgreementTypes.find(type => { return agreementType == type.value });
     return selectedType.typeLabel;
   }
 
@@ -264,28 +265,56 @@ export class ExportToExcelTemplateService {
     let worksheet: ExcelJS.Worksheet = workbook.addWorksheet('Predictors');
     let alpha = Array.from(Array(26)).map((e, i) => i + 65);
     let alphabet = alpha.map(x => { return String.fromCharCode(x) });
-    worksheet.getCell('A1').value = 'Date';
-    let alphaIndex: number = 1;
-    let predictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.facilityPredictorEntries.getValue();
+    worksheet.getCell('A1').value = 'Facility Name';
+    worksheet.getCell('B1').value = 'Date';
+    let alphaIndex: number = 2;
+
+    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let predictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
+    let predictorCellMap: Array<{ letter: string, predictorName: string }> = new Array();
     if (predictorEntries.length != 0) {
-      predictorEntries[0].predictors.forEach(predictor => {
+      // predictorEntries[0].predictors.forEach(predictor => {
+      let predictorNames: Array<string> = this.getAllPredictorNames(predictorEntries, facilities);
+      predictorNames.forEach(name => {
         let letter: string = alphabet[alphaIndex];
-        worksheet.getCell(letter + '1').value = predictor.name;
+        worksheet.getCell(letter + '1').value = name;
+        predictorCellMap.push({
+          letter: letter,
+          predictorName: name
+        })
         alphaIndex++;
       });
       let index: number = 2;
       predictorEntries.forEach(entry => {
-        worksheet.getCell('A' + index).value = entry.date;
-        alphaIndex = 1;
+        let facilityName: string = facilities.find(facility => { return facility.guid == entry.facilityId }).name;
+        worksheet.getCell('A' + index).value = facilityName;
+        worksheet.getCell('B' + index).value = entry.date;
+        // alphaIndex = 1;
         entry.predictors.forEach(predictor => {
-          let letter: string = alphabet[alphaIndex];
+          // let letter: string = alphabet[alphaIndex];
+          let letter = predictorCellMap.find(mapObj => { return mapObj.predictorName == predictor.name }).letter;
           worksheet.getCell(letter + index).value = predictor.amount;
-          alphaIndex++;
+          // alphaIndex++;
         });
         index++;
       });
     }
     return worksheet;
+  }
+
+
+  getAllPredictorNames(predictorEntries: Array<IdbPredictorEntry>, facilities: Array<IdbFacility>): Array<string> {
+    let predictorNames: Array<string> = new Array();
+    facilities.forEach(facility => {
+      let facilityPredictors: Array<IdbPredictorEntry> = predictorEntries.filter(entry => { return entry.facilityId == facility.guid });
+      if (facilityPredictors.length > 0) {
+        let facilityPredictorNames: Array<string> = facilityPredictors[0].predictors.map(predictor => { return predictor.name })
+        // debugger
+        predictorNames = _.union(predictorNames, facilityPredictorNames)
+      }
+    });
+    console.log(predictorNames)
+    return predictorNames;
   }
 
 }
