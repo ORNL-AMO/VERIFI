@@ -3,11 +3,14 @@
         <button class="btn btn-success" (click)="continue()">Submit &amp; Continue</button>
     </div>
 </div>
-<h6 class="map-columns-label">Map the predictors to their corresponding facilities by dragging and dropping them
+<h6 class="map-columns-label" *ngIf="!fileReference.isTemplate">Map the predictors to their corresponding facilities by dragging and dropping them
     into the correct columns.
 </h6>
+<h6 class="map-columns-label" *ngIf="fileReference.isTemplate">Predictors have been mapped to their corresponding facilities
+    based on template data.
+</h6>
 <hr>
-<div class="row no-gutters">
+<div class="row no-gutters" *ngIf="!fileReference.isTemplate">
     <div cdkDropList [cdkDropListData]="fileReference.predictorFacilityGroups" class="card col-md-3 col-sm-6"
         *ngFor="let facilityGroup of fileReference.predictorFacilityGroups; let index = index"
         (cdkDropListDropped)="dropColumn($event)" id={{facilityGroup.facilityId}}
@@ -21,6 +24,22 @@
             <div class="list-item mt-2 mb-2 p-2" [cdkDragData]="groupItem"
                 *ngFor="let groupItem of facilityGroup.groupItems" cdkDrag>
                 <span class="fa fa-arrows-alt"></span>{{groupItem.value}} <br>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row no-gutters" *ngIf="fileReference.isTemplate">
+    <div class="card col-md-3 col-sm-6"
+        *ngFor="let facilityGroup of fileReference.predictorFacilityGroups; let index = index">
+        <div class="card-header">
+            <i class="fa fa-industry" [ngStyle]="{color: facilityGroup.color}"></i>
+            {{facilityGroup.facilityName}}
+
+        </div>
+        <div class="card-body">
+            <div class="list-item template mt-2 mb-2 p-2" *ngFor="let groupItem of facilityGroup.groupItems">
+                {{groupItem.value}} <br>
             </div>
         </div>
     </div>

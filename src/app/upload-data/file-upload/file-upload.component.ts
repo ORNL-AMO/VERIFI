@@ -189,12 +189,12 @@ export class FileUploadComponent implements OnInit {
     let facilityGroups: Array<FacilityGroup> = new Array();
     let meterIndex: number = 0;
 
-    facilityGroups.push({
-      facilityId: Math.random().toString(36).substr(2, 9),
-      groupItems: [],
-      facilityName: 'Unmapped Meters',
-      color: ''
-    })
+    // facilityGroups.push({
+    //   facilityId: Math.random().toString(36).substr(2, 9),
+    //   groupItems: [],
+    //   facilityName: 'Unmapped Meters',
+    //   color: ''
+    // })
     templateData.importFacilities.forEach(facility => {
       let facilityMeters: Array<IdbUtilityMeter> = templateData.importMeters.filter(meter => { return meter.facilityId == facility.guid });
       let groupItems: Array<ColumnItem> = new Array();
@@ -221,12 +221,12 @@ export class FileUploadComponent implements OnInit {
     let facilityGroups: Array<FacilityGroup> = new Array();
     let predictorIndex: number = 0;
 
-    facilityGroups.push({
-      facilityId: Math.random().toString(36).substr(2, 9),
-      groupItems: [],
-      facilityName: 'Unmapped Predictors',
-      color: ''
-    })
+    // facilityGroups.push({
+    //   facilityId: Math.random().toString(36).substr(2, 9),
+    //   groupItems: [],
+    //   facilityName: 'Unmapped Predictors',
+    //   color: ''
+    // })
     templateData.importFacilities.forEach(facility => {
       let facilityPredictorEntry: IdbPredictorEntry = templateData.predictorEntries.find(entry => { return entry.facilityId == facility.guid });
       let groupItems: Array<ColumnItem> = new Array();
