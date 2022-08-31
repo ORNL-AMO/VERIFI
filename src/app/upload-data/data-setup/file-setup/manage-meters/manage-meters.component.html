@@ -1,1 +1,63 @@
-<p>manage-meters works!</p>
+<div class="d-flex justify-content-end" *ngIf="!editMeterForm">
+    <div class="d-flex">
+        <button class="btn btn-success" (click)="continue()">Submit &amp; Continue</button>
+    </div>
+</div>
+<table *ngIf="!editMeterForm">
+    <thead>
+        <tr>
+            <th>
+                Facility Name
+            </th>
+            <th>
+                Meter Name
+            </th>
+            <th>
+                Source
+            </th>
+            <th>
+                Is Valid?
+            </th>
+            <th>
+                New / Existing
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let meter of fileReference.meters">
+            <td>
+                {{getFacilityName(meter.facilityId)}}
+            </td>
+            <td>
+                <a class="click-link" (click)="editMeter(meter)">{{meter.name}}</a>
+            </td>
+            <td>
+                {{meter.source}}
+            </td>
+            <td>
+                <span *ngIf="meter.isValid">
+                    Yes
+                </span>
+                <span *ngIf="!meter.isValid">
+                    No
+                </span>
+            </td>
+            <td>
+                <span *ngIf="meter.id">
+                    Existing
+                </span>
+                <span *ngIf="!meter.id">
+                    New
+                </span>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<div class="d-flex justify-content-between" *ngIf="editMeterForm">
+    <div class="d-flex">
+        <button class="btn btn-secondary" (click)="cancelEdit()">Cancel</button>
+        <button class="btn btn-success ml-2" (click)="submitMeter()">Submit</button>
+    </div>
+</div>
+<app-edit-meter-form *ngIf="editMeterForm" [meterForm]="editMeterForm"></app-edit-meter-form>

@@ -27,7 +27,8 @@ export class SetFacilityMetersComponent implements OnInit {
     headerMap: [],
     meterFacilityGroups: [],
     predictorFacilityGroups: [],
-    importFacilities: []
+    importFacilities: [],
+    meters: []
   };
   paramsSub: Subscription;
   constructor(private uploadDataService: UploadDataService, private facilityDbService: FacilitydbService,

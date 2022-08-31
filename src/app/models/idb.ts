@@ -144,7 +144,8 @@ export interface IdbUtilityMeter {
     recsMultiplier: number,
     greenPurchaseFraction: number,
     marketGHGMultiplier: number,
-    locationGHGMultiplier: number
+    locationGHGMultiplier: number,
+    isValid?: boolean
 }
 
 export interface IdbUtilityMeterData {

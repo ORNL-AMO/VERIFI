@@ -14,6 +14,7 @@ import { ManageMetersComponent } from './data-setup/file-setup/manage-meters/man
 import { SetFacilityPredictorsComponent } from './data-setup/file-setup/set-facility-predictors/set-facility-predictors.component';
 import { SetFacilityMetersComponent } from './data-setup/file-setup/set-facility-meters/set-facility-meters.component';
 import { TemplateFacilitiesComponent } from './data-setup/file-setup/template-facilities/template-facilities.component';
+import { EditMeterFormModule } from '../facility/utility-data/energy-consumption/energy-source/edit-meter-form/edit-meter-form.module';
 
 
 
@@ -35,7 +36,8 @@ import { TemplateFacilitiesComponent } from './data-setup/file-setup/template-fa
     CommonModule,
     RouterModule,
     FormsModule,
-    DragDropModule
+    DragDropModule,
+    EditMeterFormModule
   ]
 })
 export class UploadDataModule { }

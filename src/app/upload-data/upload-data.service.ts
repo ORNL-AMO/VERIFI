@@ -33,7 +33,8 @@ export interface FileReference {
   meterFacilityGroups: Array<FacilityGroup>,
   predictorFacilityGroups: Array<FacilityGroup>,
   headerMap: Array<any>,
-  importFacilities: Array<IdbFacility>
+  importFacilities: Array<IdbFacility>,
+  meters: Array<IdbUtilityMeter>
 }
 
 export interface ColumnGroup {

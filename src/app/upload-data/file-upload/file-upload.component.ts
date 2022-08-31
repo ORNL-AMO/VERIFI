@@ -7,6 +7,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
+import { AgreementType, AgreementTypes, ScopeOption, ScopeOptions } from 'src/app/facility/utility-data/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
 
 @Component({
   selector: 'app-file-upload',
@@ -69,7 +70,8 @@ export class FileUploadComponent implements OnInit {
           meterFacilityGroups: [],
           predictorFacilityGroups: [],
           headerMap: [],
-          importFacilities: []
+          importFacilities: [],
+          meters: []
         });
       } else {
         //parse template
@@ -89,7 +91,8 @@ export class FileUploadComponent implements OnInit {
           meterFacilityGroups: meterFacilityGroups,
           predictorFacilityGroups: predictorFacilityGroups,
           headerMap: [],
-          importFacilities: templateData.importFacilities
+          importFacilities: templateData.importFacilities,
+          meters: templateData.importMeters
         });
       }
     };
@@ -154,11 +157,11 @@ export class FileUploadComponent implements OnInit {
       meter.heatCapacity = meterData['Heat Capacity'];
       meter.siteToSource = meterData['Site To Source'];
       //TODO: scope, agreementType
-      meter.scope = meterData['Scope']
-      meter.agreementType = meterData['Agreement Type'];
+      meter.scope = this.getScope(meterData['Scope']);
+      meter.agreementType = this.getAgreementType(meterData['Agreement Type']);
       //TODO: yes/no
-      meter.includeInEnergy = meterData['Include In Energy'];
-      meter.retainRECs = meterData['Retain RECS'];
+      meter.includeInEnergy = this.getYesNoBool(meterData['Include In Energy']);
+      meter.retainRECs = this.getYesNoBool(meterData['Retain RECS']);
       importMeters.push(meter);
     })
     // let electricityData = XLSX.utils.sheet_to_json(workbook.Sheets['Electricity'], { header: 1 });
@@ -181,9 +184,33 @@ export class FileUploadComponent implements OnInit {
         }
       }
     })
-
-
     return { importFacilities: importFacilities, importMeters: importMeters, predictorEntries: predictorEntries }
+  }
+
+  getScope(formScope: string): number {
+    let scopeOption: ScopeOption = ScopeOptions.find(option => { return (option.scope + ': ' + option.optionLabel) == formScope });
+    if (scopeOption) {
+      return scopeOption.value;
+    } else {
+      return undefined
+    }
+  }
+
+  getYesNoBool(val: string): boolean {
+    if (val == 'Yes') {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  getAgreementType(formAgreementType: string): number {
+    let agreementType: AgreementType = AgreementTypes.find(type => { return type.typeLabel == formAgreementType });
+    if (agreementType) {
+      return agreementType.value;
+    } else {
+      return undefined;
+    }
   }
 
   getMeterFacilityGroups(templateData: { importFacilities: Array<IdbFacility>, importMeters: Array<IdbUtilityMeter> }): Array<FacilityGroup> {
