@@ -114,6 +114,7 @@ export class FileUploadComponent implements OnInit {
       let facility: IdbFacility = accountFacilities.find(facility => { return facility.name == facilityName });
       if (!facility) {
         facility = this.facilityDbService.getNewIdbFacility(selectedAccount);
+        facility.name = facilityName;
       }
       facility.address = facilityDataRow['Address'];
       facility.country = facilityDataRow['Country'];

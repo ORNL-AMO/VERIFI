@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { FileReference, UploadDataService } from '../../upload-data.service';
-import * as XLSX from 'xlsx';
 import { Subscription } from 'rxjs';
 
 @Component({

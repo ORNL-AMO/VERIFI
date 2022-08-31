@@ -13,6 +13,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 import { ManageMetersComponent } from './data-setup/file-setup/manage-meters/manage-meters.component';
 import { SetFacilityPredictorsComponent } from './data-setup/file-setup/set-facility-predictors/set-facility-predictors.component';
 import { SetFacilityMetersComponent } from './data-setup/file-setup/set-facility-meters/set-facility-meters.component';
+import { TemplateFacilitiesComponent } from './data-setup/file-setup/template-facilities/template-facilities.component';
 
 
 
@@ -27,7 +28,8 @@ import { SetFacilityMetersComponent } from './data-setup/file-setup/set-facility
     IdentifyColumnsComponent,
     ManageMetersComponent,
     SetFacilityPredictorsComponent,
-    SetFacilityMetersComponent
+    SetFacilityMetersComponent,
+    TemplateFacilitiesComponent
   ],
   imports: [
     CommonModule,

@@ -70,6 +70,7 @@ import { IdentifyColumnsComponent } from './upload-data/data-setup/file-setup/id
 import { ManageMetersComponent } from './upload-data/data-setup/file-setup/manage-meters/manage-meters.component';
 import { SetFacilityMetersComponent } from './upload-data/data-setup/file-setup/set-facility-meters/set-facility-meters.component';
 import { SetFacilityPredictorsComponent } from './upload-data/data-setup/file-setup/set-facility-predictors/set-facility-predictors.component';
+import { TemplateFacilitiesComponent } from './upload-data/data-setup/file-setup/template-facilities/template-facilities.component';
 
 const routes: Routes = [
   {
@@ -313,6 +314,7 @@ const routes: Routes = [
               { path: 'set-facility-meters', component: SetFacilityMetersComponent },
               { path: 'set-facility-predictors', component: SetFacilityPredictorsComponent },
               { path: 'manage-meters', component: ManageMetersComponent },
+              { path: 'template-facilities', component: TemplateFacilitiesComponent }
             ]
           },
         ]
