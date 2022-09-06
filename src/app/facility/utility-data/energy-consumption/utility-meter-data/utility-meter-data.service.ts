@@ -75,27 +75,30 @@ export class UtilityMeterDataService {
     return this.formBuilder.group({
       readDate: [dateString, Validators.required],
       totalEnergyUse: [meterData.totalEnergyUse, [Validators.required, Validators.min(0)]],
-      totalCost: [meterData.totalCost],
-      deliveryCharge: [meterData.deliveryCharge],
-      otherCharge: [meterData.otherCharge],
-      totalDemand: [meterData.totalDemand],
-      basicCharge: [meterData.basicCharge],
-      supplyBlockAmount: [meterData.supplyBlockAmount],
-      supplyBlockCharge: [meterData.supplyBlockCharge],
-      flatRateAmount: [meterData.flatRateAmount],
-      flatRateCharge: [meterData.flatRateCharge],
-      peakAmount: [meterData.peakAmount],
-      peakCharge: [meterData.peakCharge],
-      offPeakAmount: [meterData.offPeakAmount],
-      offPeakCharge: [meterData.offPeakCharge],
-      demandBlockAmount: [meterData.demandBlockAmount],
-      demandBlockCharge: [meterData.demandBlockCharge],
-      generationTransmissionCharge: [meterData.generationTransmissionCharge],
-      transmissionCharge: [meterData.transmissionCharge],
-      powerFactorCharge: [meterData.powerFactorCharge],
-      businessCharge: [meterData.businessCharge],
-      utilityTax: [meterData.utilityTax],
-      latePayment: [meterData.latePayment]
+      totalCost: [meterData.totalCost, [Validators.min(0)]],
+      deliveryCharge: [meterData.deliveryCharge, [Validators.min(0)]],
+      totalRealDemand: [meterData.totalRealDemand, [Validators.min(0)]],
+      totalBilledDemand: [meterData.totalBilledDemand, [Validators.min(0)]],
+      nonEnergyCharge: [meterData.nonEnergyCharge, [Validators.min(0)]],
+      block1Consumption: [meterData.block1Consumption, [Validators.min(0)]],
+      block1ConsumptionCharge: [meterData.block1ConsumptionCharge, [Validators.min(0)]],
+      block2Consumption: [meterData.block2Consumption, [Validators.min(0)]],
+      block2ConsumptionCharge: [meterData.block2ConsumptionCharge, [Validators.min(0)]],
+      block3Consumption: [meterData.block3Consumption, [Validators.min(0)]],
+      block3ConsumptionCharge: [meterData.block3ConsumptionCharge, [Validators.min(0)]],
+      otherConsumption: [meterData.otherConsumption, [Validators.min(0)]],
+      otherConsumptionCharge: [meterData.otherConsumptionCharge, [Validators.min(0)]],
+      onPeakAmount: [meterData.onPeakAmount, [Validators.min(0)]],
+      onPeakCharge: [meterData.onPeakCharge, [Validators.min(0)]],
+      offPeakAmount: [meterData.offPeakAmount, [Validators.min(0)]],
+      offPeakCharge: [meterData.offPeakCharge, [Validators.min(0)]],
+      transmissionAndDeliveryCharge: [meterData.transmissionAndDeliveryCharge, [Validators.min(0)]],
+      powerFactor: [meterData.powerFactor, [Validators.min(0)]],
+      powerFactorCharge: [meterData.powerFactorCharge, [Validators.min(0)]],
+      localSalesTax: [meterData.localSalesTax, [Validators.min(0)]],
+      stateSalesTax: [meterData.stateSalesTax, [Validators.min(0)]],
+      latePayment: [meterData.latePayment, [Validators.min(0)]],
+      otherCharge: [meterData.otherCharge, [Validators.min(0)]]
     })
   }
 
@@ -107,25 +110,28 @@ export class UtilityMeterDataService {
     meterData.totalEnergyUse = form.controls.totalEnergyUse.value;
     meterData.totalCost = form.controls.totalCost.value;
     meterData.deliveryCharge = form.controls.deliveryCharge.value;
-    meterData.otherCharge = form.controls.otherCharge.value;
-    meterData.totalDemand = form.controls.totalDemand.value;
-    meterData.basicCharge = form.controls.basicCharge.value;
-    meterData.supplyBlockAmount = form.controls.supplyBlockAmount.value;
-    meterData.supplyBlockCharge = form.controls.supplyBlockCharge.value;
-    meterData.flatRateAmount = form.controls.flatRateAmount.value;
-    meterData.flatRateCharge = form.controls.flatRateCharge.value;
-    meterData.peakAmount = form.controls.peakAmount.value;
-    meterData.peakCharge = form.controls.peakCharge.value;
+    meterData.totalRealDemand = form.controls.totalRealDemand.value;
+    meterData.totalBilledDemand = form.controls.totalBilledDemand.value;
+    meterData.nonEnergyCharge = form.controls.nonEnergyCharge.value;
+    meterData.block1Consumption = form.controls.block1Consumption.value;
+    meterData.block1ConsumptionCharge = form.controls.block1ConsumptionCharge.value;
+    meterData.block2Consumption = form.controls.block2Consumption.value;
+    meterData.block2ConsumptionCharge = form.controls.block2ConsumptionCharge.value;
+    meterData.block3Consumption = form.controls.block3Consumption.value;
+    meterData.block3ConsumptionCharge = form.controls.block3ConsumptionCharge.value;
+    meterData.otherConsumption = form.controls.otherConsumption.value;
+    meterData.otherConsumptionCharge = form.controls.otherConsumptionCharge.value;
+    meterData.onPeakAmount = form.controls.onPeakAmount.value;
+    meterData.onPeakCharge = form.controls.onPeakCharge.value;
     meterData.offPeakAmount = form.controls.offPeakAmount.value;
     meterData.offPeakCharge = form.controls.offPeakCharge.value;
-    meterData.demandBlockAmount = form.controls.demandBlockAmount.value;
-    meterData.demandBlockCharge = form.controls.demandBlockCharge.value;
-    meterData.generationTransmissionCharge = form.controls.generationTransmissionCharge.value;
-    meterData.transmissionCharge = form.controls.transmissionCharge.value;
+    meterData.transmissionAndDeliveryCharge = form.controls.transmissionAndDeliveryCharge.value;
+    meterData.powerFactor = form.controls.powerFactor.value;
     meterData.powerFactorCharge = form.controls.powerFactorCharge.value;
-    meterData.businessCharge = form.controls.businessCharge.value;
-    meterData.utilityTax = form.controls.utilityTax.value;
+    meterData.localSalesTax = form.controls.localSalesTax.value;
+    meterData.stateSalesTax = form.controls.stateSalesTax.value;
     meterData.latePayment = form.controls.latePayment.value;
+    meterData.otherCharge = form.controls.otherCharge.value;
     return meterData;
   }
 

@@ -32,33 +32,40 @@
       <span class="inputWarning" *ngIf="meterDataForm.controls.totalEnergyUse.value === 0">Total energy use should be
         greater than 0</span>
 
-      <label for="totalMarketEmissions">
-        Total Market Emissions
-      </label>
-      <div class="input-group mb-3">
-        {{totalMarketEmissions | number:'1.0-0'}} kg CO<sub>2</sub>
-      </div>
-      <label for="totalLocationEmissions">
-        Total Location Emissions
-      </label>
-      <div class="input-group mb-3">
-        {{totalLocationEmissions | number:'1.0-0'}} kg CO<sub>2</sub>
-      </div>
+
     </div>
     <div class="col">
-      <label for="totalDemand">
-        Total Demand
+      <label for="totalRealDemand">
+        Total Real Demand
       </label>
       <div class="input-group mb-3">
-        <input id="totalDemand" class="form-control" type="number" formControlName="totalDemand"
-          [class.warning]="meterDataForm.controls.totalDemand.value === 0" onfocus="this.select();" min="0">
+        <input id="totalRealDemand" class="form-control" type="number" formControlName="totalRealDemand"
+          [class.warning]="meterDataForm.controls.totalRealDemand.value === 0" onfocus="this.select();" min="0">
         <span class="unit">$</span>
       </div>
-      <span class="inputError" *ngIf="meterDataForm.get('totalDemand').hasError('required')">Total demand is
+      <span class="inputError" *ngIf="meterDataForm.get('totalRealDemand').hasError('required')">Total demand is
         required</span>
-      <span class="inputError" *ngIf="meterDataForm.get('totalDemand').hasError('min')">Can't be less than 0</span>
-      <span class="inputWarning" *ngIf="meterDataForm.controls.totalDemand.value === 0">Total demand should be greater
+      <span class="inputError" *ngIf="meterDataForm.get('totalRealDemand').hasError('min')">Can't be less than 0</span>
+      <span class="inputWarning" *ngIf="meterDataForm.controls.totalRealDemand.value === 0">Total demand should be
+        greater
         than 0</span>
+
+      <label for="totalBilledDemand">
+        Total Billed Demand
+      </label>
+      <div class="input-group mb-3">
+        <input id="totalBilledDemand" class="form-control" type="number" formControlName="totalBilledDemand"
+          [class.warning]="meterDataForm.controls.totalBilledDemand.value === 0" onfocus="this.select();" min="0">
+        <span class="unit">$</span>
+      </div>
+      <span class="inputError" *ngIf="meterDataForm.get('totalBilledDemand').hasError('required')">Total demand is
+        required</span>
+      <span class="inputError" *ngIf="meterDataForm.get('totalBilledDemand').hasError('min')">Can't be less than
+        0</span>
+      <span class="inputWarning" *ngIf="meterDataForm.controls.totalBilledDemand.value === 0">Total demand should be
+        greater
+        than 0</span>
+
 
       <label for="totalCost">
         Total Cost
@@ -78,12 +85,32 @@
     </div>
   </div>
 
-  <hr>
+  <div class="row">
+    <div class="col-6">
+      <label for="totalMarketEmissions">
+        Total Market Emissions
+      </label>
+      <div class="input-group mb-3">
+        {{totalMarketEmissions | number:'1.0-0'}} kg CO<sub>2</sub>
+      </div>
+    </div>
+    <div class="col-6">
+      <label for="totalLocationEmissions">
+        Total Location Emissions
+      </label>
+      <div class="input-group mb-3">
+        {{totalLocationEmissions | number:'1.0-0'}} kg CO<sub>2</sub>
+      </div>
+    </div>
+  </div>
 
-  <div *ngIf="supplyDemandFilters.showSection">
+
+  <hr>
+  <!--TODO: Update forms with new fields-->
+  <!-- <div *ngIf="supplyDemandFilters.showSection">
     <p class="bold">Supply / Demand Charge</p>
     <div class="row">
-      <!--supply demand column one-->
+      <!--supply demand column one--
       <div class="col" *ngIf="displaySupplyDemandColumnOne">
         <div *ngIf="supplyDemandFilters.peakAmount ||  supplyDemandFilters.peakCharge">
           <label for="peakAmount">On-Peak Demand</label>
@@ -123,7 +150,7 @@
           </div>
         </div>
       </div>
-      <!--supply demand column two-->
+      <!--supply demand column two--
       <div class="col" *ngIf="displaySupplyDemandColumnTwo">
         <div *ngIf="supplyDemandFilters.supplyBlockAmount || supplyDemandFilters.supplyBlockCharge">
           <label for="supplyBlockAmount">Block Rates Supply</label>
@@ -245,7 +272,7 @@
         </div>
       </div>
     </div>
-    <hr>
+    <hr> -->
 
-  </div>
+  <!-- </div> -->
 </form>

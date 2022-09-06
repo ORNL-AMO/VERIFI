@@ -163,27 +163,7 @@ export interface IdbUtilityMeterData {
     totalCost: number,
     commodityCharge?: number,
     deliveryCharge?: number,
-    otherCharge?: number,
     checked: boolean,
-    totalDemand?: number,
-    basicCharge?: number,
-    supplyBlockAmount?: number,
-    supplyBlockCharge?: number,
-    flatRateAmount?: number,
-    flatRateCharge?: number,
-    peakAmount?: number,
-    peakCharge?: number,
-    offPeakAmount?: number,
-    offPeakCharge?: number,
-    demandBlockAmount?: number,
-    demandBlockCharge?: number,
-    //trans?
-    generationTransmissionCharge?: number,
-    transmissionCharge?: number,
-    powerFactorCharge?: number,
-    businessCharge?: number,
-    utilityTax?: number,
-    latePayment?: number,
     meterNumber?: string,
     totalImportConsumption?: number
     totalMarketEmissions?: number,
@@ -191,6 +171,34 @@ export interface IdbUtilityMeterData {
     RECs?: number,
     excessRECs?: number,
     excessRECsEmissions?: number
+
+
+    //electricity
+    totalRealDemand?: number,
+    totalBilledDemand? :number,
+    nonEnergyCharge?: number,
+    block1Consumption?: number,
+    block1ConsumptionCharge?: number,
+    block2Consumption?: number,
+    block2ConsumptionCharge?: number,
+    block3Consumption?: number,
+    block3ConsumptionCharge?: number,
+    otherConsumption?: number,
+    otherConsumptionCharge?: number,
+    onPeakAmount?: number,
+    onPeakCharge?: number,
+    offPeakAmount?: number,
+    offPeakCharge?: number,
+    transmissionAndDeliveryCharge?: number,
+    powerFactor?: number,
+    powerFactorCharge?: number,
+    localSalesTax?: number,
+    stateSalesTax?: number,
+    latePayment?: number,
+    otherCharge?: number
+    //non-electricity
+    demandUsage?: number,
+    demandCharge?: number
 }
 
 export interface IdbPredictorEntry {

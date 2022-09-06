@@ -2,12 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ColumnItem, FacilityGroup, FileReference, UploadDataService } from '../upload-data.service';
 import * as XLSX from 'xlsx';
-import { IdbAccount, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, PredictorData } from 'src/app/models/idb';
+import { IdbAccount, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, PredictorData } from 'src/app/models/idb';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { AgreementType, AgreementTypes, ScopeOption, ScopeOptions } from 'src/app/facility/utility-data/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 
 @Component({
   selector: 'app-file-upload',
@@ -21,7 +22,7 @@ export class FileUploadComponent implements OnInit {
   filesUploaded: boolean = false;
   constructor(private router: Router, private uploadDataService: UploadDataService, private facilityDbService: FacilitydbService,
     private accountDbService: AccountdbService, private utilityMeterDbService: UtilityMeterdbService,
-    private predictorDbService: PredictordbService) { }
+    private predictorDbService: PredictordbService, private utilityMeterDataDbService: UtilityMeterDatadbService) { }
 
   ngOnInit(): void {
     this.fileReferences = new Array();
@@ -164,8 +165,44 @@ export class FileUploadComponent implements OnInit {
       meter.retainRECs = this.getYesNoBool(meterData['Retain RECS']);
       importMeters.push(meter);
     })
-    // let electricityData = XLSX.utils.sheet_to_json(workbook.Sheets['Electricity'], { header: 1 });
+    //electricity readings
+    let electricityData = XLSX.utils.sheet_to_json(workbook.Sheets['Electricity']);
+    electricityData.forEach(dataPoint => {
+      let meterNumber: string = dataPoint['Meter Number'];
+      let meter: IdbUtilityMeter = importMeters.find(meter => {return meter.meterNumber == meterNumber});
+      let dbDataPoint: IdbUtilityMeterData = this.utilityMeterDataDbService.getNewIdbUtilityMeterData(meter);
+      dbDataPoint.readDate = new Date(dataPoint['Read Date']);
+      dbDataPoint.totalEnergyUse = dataPoint['Total Consumption'];
+      dbDataPoint.totalEnergyUse = dataPoint['Total Real Demand'];
+      dbDataPoint.totalEnergyUse = dataPoint['Total Billed Demand'];
+      dbDataPoint.totalEnergyUse = dataPoint['Total Cost'];
+      dbDataPoint.totalEnergyUse = dataPoint['Non-energy Charge'];
+      dbDataPoint.totalEnergyUse = dataPoint['Block 1 Consumption'];
+      dbDataPoint.totalEnergyUse = dataPoint['Block 1 Consumption Charge'];
+      dbDataPoint.totalEnergyUse = dataPoint['Block 2 Consumption'];
+      dbDataPoint.totalEnergyUse = dataPoint['Block 2 Consumption Charge'];
+      dbDataPoint.totalEnergyUse = dataPoint['Block 3 Consumption'];
+      dbDataPoint.totalEnergyUse = dataPoint['Block 3 Consumption Charge'];
+      dbDataPoint.totalEnergyUse = dataPoint['Other Consumption'];
+      dbDataPoint.totalEnergyUse = dataPoint['Other Consumption Charge'];
+      dbDataPoint.totalEnergyUse = dataPoint['On Peak Amount'];
+      dbDataPoint.totalEnergyUse = dataPoint['On Peak Charge'];
+      dbDataPoint.totalEnergyUse = dataPoint['Off Peak Amount'];
+      dbDataPoint.totalEnergyUse = dataPoint['Off Peak Charge'];
+      dbDataPoint.totalEnergyUse = dataPoint['Transmission & Delivery Charge'];
+      dbDataPoint.totalEnergyUse = dataPoint['Power Factor'];
+      dbDataPoint.totalEnergyUse = dataPoint['Power Factor Charge'];
+      dbDataPoint.totalEnergyUse = dataPoint['Local Sales Tax'];
+      dbDataPoint.totalEnergyUse = dataPoint['State Sales Tax'];
+      dbDataPoint.totalEnergyUse = dataPoint['Late Payment'];
+      dbDataPoint.totalEnergyUse = dataPoint['Other Charge'];
+    })    
+
+
     // let noElectricityData = XLSX.utils.sheet_to_json(workbook.Sheets['Non-electricity'], { header: 1 });
+    
+    //predictors
+    
     let predictorsData = XLSX.utils.sheet_to_json(workbook.Sheets['Predictors']);
     let predictorEntries: Array<IdbPredictorEntry> = new Array();
     importFacilities.forEach(facility => {
@@ -274,5 +311,9 @@ export class FileUploadComponent implements OnInit {
       });
     });
     return facilityGroups;
+  }
+
+  getMeterReadings(){
+
   }
 }
