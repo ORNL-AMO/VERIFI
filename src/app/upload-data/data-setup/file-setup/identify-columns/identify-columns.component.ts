@@ -25,7 +25,8 @@ export class IdentifyColumnsComponent implements OnInit {
     predictorFacilityGroups: [],
     headerMap: [],
     importFacilities: [],
-    meters: []
+    meters: [],
+    meterData: []
   };
   minDate: Date;
   maxDate: Date;

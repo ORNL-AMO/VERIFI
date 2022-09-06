@@ -27,7 +27,8 @@ export class ManageMetersComponent implements OnInit {
     meterFacilityGroups: [],
     predictorFacilityGroups: [],
     importFacilities: [],
-    meters: []
+    meters: [],
+    meterData: []
   };
   paramsSub: Subscription;
   editMeterForm: FormGroup;
@@ -39,6 +40,7 @@ export class ManageMetersComponent implements OnInit {
     this.paramsSub = this.activatedRoute.parent.params.subscribe(param => {
       let id: string = param['id'];
       this.fileReference = this.uploadDataService.fileReferences.find(ref => { return ref.id == id });
+      console.log(this.fileReference);
       this.fileReference.meters.forEach(meter => {
         let form: FormGroup = this.editMeterFormService.getFormFromMeter(meter);
         meter.isValid = form.valid;

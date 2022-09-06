@@ -26,7 +26,8 @@ export class TemplateFacilitiesComponent implements OnInit {
     meterFacilityGroups: [],
     predictorFacilityGroups: [],
     importFacilities: [],
-    meters: []
+    meters: [],
+    meterData: []
   };
   paramsSub: Subscription;
   accountFacilities: Array<IdbFacility>;

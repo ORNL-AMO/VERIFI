@@ -1,0 +1,45 @@
+<div class="d-flex justify-content-end">
+    <div class="d-flex">
+        <button class="btn btn-success" (click)="continue()">Submit &amp; Continue</button>
+    </div>
+</div>
+<table>
+    <thead>
+        <tr>
+            <th>
+                Facility Name
+            </th>
+            <th>
+                Meter Name
+            </th>
+            <th>
+                Existing Readings
+            </th>
+            <th>
+                New Readings
+            </th>
+            <th>
+                Invalid Readings
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let summary of meterDataSummaries">
+            <td>
+                {{summary.facilityName}}
+            </td>
+            <td>
+                {{summary.meterName}}
+            </td>
+            <td>
+                {{summary.existingEntries}}
+            </td>
+            <td>
+                {{summary.newEntries}}
+            </td>
+            <td>
+                {{summary.invalidEntries}}
+            </td>
+        </tr>
+    </tbody>
+</table>

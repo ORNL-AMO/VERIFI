@@ -9,6 +9,7 @@ import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { AgreementType, AgreementTypes, ScopeOption, ScopeOptions } from 'src/app/facility/utility-data/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 
 @Component({
   selector: 'app-file-upload',
@@ -22,7 +23,9 @@ export class FileUploadComponent implements OnInit {
   filesUploaded: boolean = false;
   constructor(private router: Router, private uploadDataService: UploadDataService, private facilityDbService: FacilitydbService,
     private accountDbService: AccountdbService, private utilityMeterDbService: UtilityMeterdbService,
-    private predictorDbService: PredictordbService, private utilityMeterDataDbService: UtilityMeterDatadbService) { }
+    private predictorDbService: PredictordbService, 
+    private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private energyUnitsHelperService: EnergyUnitsHelperService) { }
 
   ngOnInit(): void {
     this.fileReferences = new Array();
@@ -72,11 +75,12 @@ export class FileUploadComponent implements OnInit {
           predictorFacilityGroups: [],
           headerMap: [],
           importFacilities: [],
-          meters: []
+          meters: [],
+          meterData: []
         });
       } else {
         //parse template
-        let templateData: { importFacilities: Array<IdbFacility>, importMeters: Array<IdbUtilityMeter>, predictorEntries: Array<IdbPredictorEntry> } = this.parseTemplate(workBook);
+        let templateData: ParsedTemplate = this.parseTemplate(workBook);
         let meterFacilityGroups: Array<FacilityGroup> = this.getMeterFacilityGroups(templateData);
         let predictorFacilityGroups: Array<FacilityGroup> = this.getPredictorFacilityGroups(templateData);
         this.fileReferences.push({
@@ -93,7 +97,8 @@ export class FileUploadComponent implements OnInit {
           predictorFacilityGroups: predictorFacilityGroups,
           headerMap: [],
           importFacilities: templateData.importFacilities,
-          meters: templateData.importMeters
+          meters: templateData.importMeters,
+          meterData: templateData.meterData
         });
       }
     };
@@ -108,7 +113,7 @@ export class FileUploadComponent implements OnInit {
     }
   }
 
-  parseTemplate(workbook: XLSX.WorkBook): { importFacilities: Array<IdbFacility>, importMeters: Array<IdbUtilityMeter>, predictorEntries: Array<IdbPredictorEntry> } {
+  parseTemplate(workbook: XLSX.WorkBook): ParsedTemplate {
     let facilitiesData = XLSX.utils.sheet_to_json(workbook.Sheets['Facilities']);
     let importFacilities: Array<IdbFacility> = new Array();
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
@@ -135,6 +140,7 @@ export class FileUploadComponent implements OnInit {
     let metersData = XLSX.utils.sheet_to_json(workbook.Sheets['Meters-Utilities']);
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let importMeters: Array<IdbUtilityMeter> = new Array();
+    let importMeterData: Array<IdbUtilityMeterData> = new Array();
     metersData.forEach(meterData => {
       let facilityName: string = meterData['Facility Name'];
       let facility: IdbFacility = importFacilities.find(facility => { return facility.name == facilityName });
@@ -167,42 +173,105 @@ export class FileUploadComponent implements OnInit {
     })
     //electricity readings
     let electricityData = XLSX.utils.sheet_to_json(workbook.Sheets['Electricity']);
+    let utilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
     electricityData.forEach(dataPoint => {
       let meterNumber: string = dataPoint['Meter Number'];
-      let meter: IdbUtilityMeter = importMeters.find(meter => {return meter.meterNumber == meterNumber});
-      let dbDataPoint: IdbUtilityMeterData = this.utilityMeterDataDbService.getNewIdbUtilityMeterData(meter);
-      dbDataPoint.readDate = new Date(dataPoint['Read Date']);
-      dbDataPoint.totalEnergyUse = dataPoint['Total Consumption'];
-      dbDataPoint.totalEnergyUse = dataPoint['Total Real Demand'];
-      dbDataPoint.totalEnergyUse = dataPoint['Total Billed Demand'];
-      dbDataPoint.totalEnergyUse = dataPoint['Total Cost'];
-      dbDataPoint.totalEnergyUse = dataPoint['Non-energy Charge'];
-      dbDataPoint.totalEnergyUse = dataPoint['Block 1 Consumption'];
-      dbDataPoint.totalEnergyUse = dataPoint['Block 1 Consumption Charge'];
-      dbDataPoint.totalEnergyUse = dataPoint['Block 2 Consumption'];
-      dbDataPoint.totalEnergyUse = dataPoint['Block 2 Consumption Charge'];
-      dbDataPoint.totalEnergyUse = dataPoint['Block 3 Consumption'];
-      dbDataPoint.totalEnergyUse = dataPoint['Block 3 Consumption Charge'];
-      dbDataPoint.totalEnergyUse = dataPoint['Other Consumption'];
-      dbDataPoint.totalEnergyUse = dataPoint['Other Consumption Charge'];
-      dbDataPoint.totalEnergyUse = dataPoint['On Peak Amount'];
-      dbDataPoint.totalEnergyUse = dataPoint['On Peak Charge'];
-      dbDataPoint.totalEnergyUse = dataPoint['Off Peak Amount'];
-      dbDataPoint.totalEnergyUse = dataPoint['Off Peak Charge'];
-      dbDataPoint.totalEnergyUse = dataPoint['Transmission & Delivery Charge'];
-      dbDataPoint.totalEnergyUse = dataPoint['Power Factor'];
-      dbDataPoint.totalEnergyUse = dataPoint['Power Factor Charge'];
-      dbDataPoint.totalEnergyUse = dataPoint['Local Sales Tax'];
-      dbDataPoint.totalEnergyUse = dataPoint['State Sales Tax'];
-      dbDataPoint.totalEnergyUse = dataPoint['Late Payment'];
-      dbDataPoint.totalEnergyUse = dataPoint['Other Charge'];
-    })    
+      let readDate: Date = new Date(dataPoint['Read Date']);
+      let meter: IdbUtilityMeter = importMeters.find(meter => { return meter.meterNumber == meterNumber });
+      if (meter) {
+        let dbDataPoint: IdbUtilityMeterData = utilityMeterData.find(meterDataItem => {
+          if (meterDataItem.meterId == meter.guid) {
+            let dateItemDate: Date = new Date(meterDataItem.readDate);
+            return this.checkSameDay(dateItemDate, readDate);
+          } else {
+            return false;
+          }
+        })
+        if (!dbDataPoint) {
+          dbDataPoint = this.utilityMeterDataDbService.getNewIdbUtilityMeterData(meter);
+        }
+        dbDataPoint.readDate = readDate;
+        dbDataPoint.totalEnergyUse = dataPoint['Total Consumption'];
+        dbDataPoint.totalRealDemand = dataPoint['Total Real Demand'];
+        dbDataPoint.totalBilledDemand = dataPoint['Total Billed Demand'];
+        dbDataPoint.totalCost = dataPoint['Total Cost'];
+        dbDataPoint.nonEnergyCharge = dataPoint['Non-energy Charge'];
+        dbDataPoint.block1Consumption = dataPoint['Block 1 Consumption'];
+        dbDataPoint.block1ConsumptionCharge = dataPoint['Block 1 Consumption Charge'];
+        dbDataPoint.block2Consumption = dataPoint['Block 2 Consumption'];
+        dbDataPoint.block2ConsumptionCharge = dataPoint['Block 2 Consumption Charge'];
+        dbDataPoint.block3Consumption = dataPoint['Block 3 Consumption'];
+        dbDataPoint.block3ConsumptionCharge = dataPoint['Block 3 Consumption Charge'];
+        dbDataPoint.otherConsumption = dataPoint['Other Consumption'];
+        dbDataPoint.otherConsumptionCharge = dataPoint['Other Consumption Charge'];
+        dbDataPoint.onPeakAmount = dataPoint['On Peak Amount'];
+        dbDataPoint.onPeakCharge = dataPoint['On Peak Charge'];
+        dbDataPoint.offPeakAmount = dataPoint['Off Peak Amount'];
+        dbDataPoint.offPeakCharge = dataPoint['Off Peak Charge'];
+        dbDataPoint.transmissionAndDeliveryCharge = dataPoint['Transmission & Delivery Charge'];
+        dbDataPoint.powerFactor = dataPoint['Power Factor'];
+        dbDataPoint.powerFactorCharge = dataPoint['Power Factor Charge'];
+        dbDataPoint.localSalesTax = dataPoint['Local Sales Tax'];
+        dbDataPoint.stateSalesTax = dataPoint['State Sales Tax'];
+        dbDataPoint.latePayment = dataPoint['Late Payment'];
+        dbDataPoint.otherCharge = dataPoint['Other Charge'];
+        importMeterData.push(dbDataPoint);
+      } else {
+        console.log('no meter');
+      }
+    })
 
 
-    // let noElectricityData = XLSX.utils.sheet_to_json(workbook.Sheets['Non-electricity'], { header: 1 });
-    
+    let noElectricityData = XLSX.utils.sheet_to_json(workbook.Sheets['Non-electricity']);
+    noElectricityData.forEach(dataPoint => {
+      let meterNumber: string = dataPoint['Meter Number'];
+      let readDate: Date = new Date(dataPoint['Read Date']);
+      let meter: IdbUtilityMeter = importMeters.find(meter => { return meter.meterNumber == meterNumber });
+      if (meter) {
+        let dbDataPoint: IdbUtilityMeterData = utilityMeterData.find(meterDataItem => {
+          if (meterDataItem.meterId == meter.guid) {
+            let dateItemDate: Date = new Date(meterDataItem.readDate);
+            return this.checkSameDay(dateItemDate, readDate);
+          } else {
+            return false;
+          }
+        })
+        if (!dbDataPoint) {
+          dbDataPoint = this.utilityMeterDataDbService.getNewIdbUtilityMeterData(meter);
+        }
+        let totalVolume: number = 0;
+        let energyUse: number = 0;
+        let totalConsumption: number = dataPoint['Total Consumption'];
+        let displayVolumeInput: boolean = (this.energyUnitsHelperService.isEnergyUnit(meter.startingUnit) == false);
+        let displayEnergyUse: boolean = this.energyUnitsHelperService.isEnergyMeter(meter.source);
+        if (!displayVolumeInput) {
+          energyUse = totalConsumption;
+        } else {
+          totalVolume = totalConsumption;
+          if (displayEnergyUse && totalVolume) {
+            energyUse = totalVolume * meter.heatCapacity;
+          }
+        }
+
+        dbDataPoint.readDate = readDate;
+        dbDataPoint.totalVolume = totalVolume;
+        dbDataPoint.totalEnergyUse = energyUse;
+        dbDataPoint.totalCost = dataPoint['Total Cost'];
+        dbDataPoint.commodityCharge = dataPoint['Commodity Charge'];
+        dbDataPoint.deliveryCharge = dataPoint['Delivery Charge'];
+        dbDataPoint.otherCharge = dataPoint['Other Charge'];
+        dbDataPoint.demandUsage = dataPoint['Demand Usage'];
+        dbDataPoint.demandCharge = dataPoint['Demand Charge'];
+        dbDataPoint.localSalesTax = dataPoint['Local Sales Tax'];
+        dbDataPoint.stateSalesTax = dataPoint['State Sales Tax'];
+        dbDataPoint.latePayment = dataPoint['Late Payment'];
+        importMeterData.push(dbDataPoint);
+      }else{
+        console.log('no meter');
+      }
+    });
     //predictors
-    
+
     let predictorsData = XLSX.utils.sheet_to_json(workbook.Sheets['Predictors']);
     let predictorEntries: Array<IdbPredictorEntry> = new Array();
     importFacilities.forEach(facility => {
@@ -221,7 +290,11 @@ export class FileUploadComponent implements OnInit {
         }
       }
     })
-    return { importFacilities: importFacilities, importMeters: importMeters, predictorEntries: predictorEntries }
+    return { importFacilities: importFacilities, importMeters: importMeters, predictorEntries: predictorEntries, meterData: importMeterData }
+  }
+
+  checkSameDay(date1: Date, date2: Date): boolean {
+    return date1.getUTCFullYear() == date2.getUTCFullYear() && date1.getUTCMonth() == date2.getUTCMonth() && date1.getUTCDate() == date2.getUTCDate();
   }
 
   getScope(formScope: string): number {
@@ -313,7 +386,11 @@ export class FileUploadComponent implements OnInit {
     return facilityGroups;
   }
 
-  getMeterReadings(){
+  getMeterReadings() {
 
   }
 }
+
+
+
+export interface ParsedTemplate { importFacilities: Array<IdbFacility>, importMeters: Array<IdbUtilityMeter>, predictorEntries: Array<IdbPredictorEntry>, meterData: Array<IdbUtilityMeterData> }

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { WorkBook } from 'xlsx';
-import { IdbFacility, IdbUtilityMeter } from '../models/idb';
+import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from '../models/idb';
 
 @Injectable({
   providedIn: 'root'
@@ -34,7 +34,8 @@ export interface FileReference {
   predictorFacilityGroups: Array<FacilityGroup>,
   headerMap: Array<any>,
   importFacilities: Array<IdbFacility>,
-  meters: Array<IdbUtilityMeter>
+  meters: Array<IdbUtilityMeter>,
+  meterData: Array<IdbUtilityMeterData>
 }
 
 export interface ColumnGroup {
