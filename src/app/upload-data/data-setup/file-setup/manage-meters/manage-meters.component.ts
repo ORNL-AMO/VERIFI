@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { EditMeterFormService } from 'src/app/facility/utility-data/energy-consumption/energy-source/edit-meter-form/edit-meter-form.service';
 import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
@@ -34,7 +34,7 @@ export class ManageMetersComponent implements OnInit {
   editMeterForm: FormGroup;
   editMeterIndex: number;
   constructor(private activatedRoute: ActivatedRoute, private uploadDataService: UploadDataService,
-    private editMeterFormService: EditMeterFormService) { }
+    private editMeterFormService: EditMeterFormService, private router: Router) { }
 
   ngOnInit(): void {
     this.paramsSub = this.activatedRoute.parent.params.subscribe(param => {
@@ -53,7 +53,7 @@ export class ManageMetersComponent implements OnInit {
   }
 
   continue() {
-
+    this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/confirm-readings');
   }
 
   getFacilityName(facilityId: string): string {

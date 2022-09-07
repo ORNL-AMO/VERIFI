@@ -89,7 +89,6 @@ export class SetFacilityPredictorsComponent implements OnInit {
   }
 
   continue() {
-    console.log('continue predictors')
     // this.router.navigateByUrl('/upload/data-setup/set-facility-predictors');
     let fileReferenceIndex: number = this.uploadDataService.fileReferences.findIndex(ref => { return this.fileReference.id == ref.id });
     if (fileReferenceIndex == this.uploadDataService.fileReferences.length - 1) {

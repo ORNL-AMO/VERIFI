@@ -1,12 +1,12 @@
 <div class="wrapper main-content p-0" *ngIf="fileReference">
     <div class="banner p-0">
         <ul class="nav nav-tabs">
-            <li class="nav-item">
+            <li class="nav-item" *ngIf="!fileReference.isTemplate">
                 <a class="nav-link" routerLink="select-worksheet" [routerLinkActive]="['active']">
                     <i class="fa fa-gauge-high"></i>
                     Select Worksheet</a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item" *ngIf="!fileReference.isTemplate">
                 <a class="nav-link" routerLink="identify-columns" [routerLinkActive]="['active']">
                     <i class="fa fa-file-invoice"></i>
                     Identify Columns</a>
@@ -17,19 +17,19 @@
                     Template Facilities    
                 </a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item" *ngIf="!fileReference.isTemplate">
                 <a class="nav-link" routerLink="set-facility-meters" [routerLinkActive]="['active']">
                     <i class="fa fa-gauge-high"></i>Map Facility Meters</a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item" *ngIf="fileReference.isTemplate">
                 <a class="nav-link" routerLink="manage-meters" [routerLinkActive]="['active']">
                     <i class="fa fa-gauge-high"></i>Confirm Meters</a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item" *ngIf="fileReference.isTemplate">
                 <a class="nav-link" routerLink="confirm-readings" [routerLinkActive]="['active']">
                     <i class="fa fa-gauge-high"></i>Confirm Readings</a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item" *ngIf="!fileReference.isTemplate">
                 <a class="nav-link" routerLink="set-facility-predictors" [routerLinkActive]="['active']">
                     <i class="fa fa-boxes-stacked"></i>Map Facility Predictors</a>
             </li>

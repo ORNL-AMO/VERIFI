@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idb';
@@ -32,7 +32,7 @@ export class TemplateFacilitiesComponent implements OnInit {
   paramsSub: Subscription;
   accountFacilities: Array<IdbFacility>;
   constructor(private activatedRoute: ActivatedRoute, private uploadDataService: UploadDataService,
-    private facilityDbService: FacilitydbService) { }
+    private facilityDbService: FacilitydbService, private router: Router) { }
 
   ngOnInit(): void {
     this.accountFacilities = this.facilityDbService.accountFacilities.getValue();
@@ -48,7 +48,7 @@ export class TemplateFacilitiesComponent implements OnInit {
 
 
   continue(){
-
+    this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/manage-meters');
   }
 
 }

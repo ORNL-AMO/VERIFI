@@ -51,7 +51,11 @@ export class FileUploadComponent implements OnInit {
 
   continue() {
     this.uploadDataService.fileReferences = this.fileReferences;
-    this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReferences[0].id);
+    if(this.fileReferences[0].isTemplate){
+      this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReferences[0].id + '/template-facilities');
+    }else{
+      this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReferences[0].id);
+    }
   }
 
   addFile(file: File) {
@@ -384,10 +388,6 @@ export class FileUploadComponent implements OnInit {
       });
     });
     return facilityGroups;
-  }
-
-  getMeterReadings() {
-
   }
 }
 
