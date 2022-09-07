@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { UtilityMeterDataService } from 'src/app/facility/utility-data/energy-consumption/utility-meter-data/utility-meter-data.service';
-import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbFacility, IdbUtilityMeterData } from 'src/app/models/idb';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 import { FileReference, UploadDataService } from 'src/app/upload-data/upload-data.service';
 
@@ -35,7 +35,8 @@ export class ConfirmReadingsComponent implements OnInit {
   paramsSub: Subscription;
   meterDataSummaries: Array<MeterDataSummary>;
   constructor(private activatedRoute: ActivatedRoute, private uploadDataService: UploadDataService,
-    private utilityMeterDataService: UtilityMeterDataService, private energyUnitsHelperService: EnergyUnitsHelperService) { }
+    private utilityMeterDataService: UtilityMeterDataService, private energyUnitsHelperService: EnergyUnitsHelperService,
+    private router: Router) { }
 
   ngOnInit(): void {
     this.paramsSub = this.activatedRoute.parent.params.subscribe(param => {
@@ -50,7 +51,7 @@ export class ConfirmReadingsComponent implements OnInit {
   }
 
   continue() {
-
+    this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/confirm-predictors');
   }
 
   getFacilityName(facilityId: string): string {

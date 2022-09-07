@@ -73,6 +73,7 @@ export class ManageMetersComponent implements OnInit {
 
   submitMeter() {
     this.fileReference.meters[this.editMeterIndex] = this.editMeterFormService.updateMeterFromForm(this.fileReference.meters[this.editMeterIndex], this.editMeterForm);
+    this.fileReference.meterData = this.uploadDataService.getMeterDataEntries(this.fileReference.workbook, this.fileReference.meters);
     this.cancelEdit();
   }
 }

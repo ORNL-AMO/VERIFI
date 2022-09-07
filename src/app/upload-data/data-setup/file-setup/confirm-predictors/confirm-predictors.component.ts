@@ -1,8 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
-import { IdbFacility, IdbPredictorEntry } from 'src/app/models/idb';
+import { IdbPredictorEntry } from 'src/app/models/idb';
 import { FileReference, UploadDataService } from 'src/app/upload-data/upload-data.service';
 
 @Component({
@@ -32,13 +31,13 @@ export class ConfirmPredictorsComponent implements OnInit {
   };
   paramsSub: Subscription;
   predictorDataSummaries: Array<PredictorDataSummary>;
-  constructor(private activatedRoute: ActivatedRoute, private uploadDataService: UploadDataService) { }
+  constructor(private activatedRoute: ActivatedRoute, private uploadDataService: UploadDataService,
+    private router: Router) { }
 
   ngOnInit(): void {
     this.paramsSub = this.activatedRoute.parent.params.subscribe(param => {
       let id: string = param['id'];
       this.fileReference = this.uploadDataService.fileReferences.find(ref => { return ref.id == id });
-      console.log(this.fileReference.predictorEntries);
       this.setSummary();
     });
   }
@@ -48,7 +47,7 @@ export class ConfirmPredictorsComponent implements OnInit {
   }
 
   continue() {
-
+    this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/submit');
   }
 
   setSummary() {
