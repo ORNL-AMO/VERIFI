@@ -288,7 +288,7 @@ export class ExportToExcelTemplateService {
       predictorEntries.forEach(entry => {
         let facilityName: string = facilities.find(facility => { return facility.guid == entry.facilityId }).name;
         worksheet.getCell('A' + index).value = facilityName;
-        worksheet.getCell('B' + index).value = entry.date;
+        worksheet.getCell('B' + index).value = new Date(entry.date).toISOString()
         // alphaIndex = 1;
         entry.predictors.forEach(predictor => {
           // let letter: string = alphabet[alphaIndex];

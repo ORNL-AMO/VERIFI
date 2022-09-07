@@ -16,6 +16,7 @@ import { SetFacilityMetersComponent } from './data-setup/file-setup/set-facility
 import { TemplateFacilitiesComponent } from './data-setup/file-setup/template-facilities/template-facilities.component';
 import { EditMeterFormModule } from '../facility/utility-data/energy-consumption/energy-source/edit-meter-form/edit-meter-form.module';
 import { ConfirmReadingsComponent } from './data-setup/file-setup/confirm-readings/confirm-readings.component';
+import { ConfirmPredictorsComponent } from './data-setup/file-setup/confirm-predictors/confirm-predictors.component';
 
 
 
@@ -32,7 +33,8 @@ import { ConfirmReadingsComponent } from './data-setup/file-setup/confirm-readin
     SetFacilityPredictorsComponent,
     SetFacilityMetersComponent,
     TemplateFacilitiesComponent,
-    ConfirmReadingsComponent
+    ConfirmReadingsComponent,
+    ConfirmPredictorsComponent
   ],
   imports: [
     CommonModule,

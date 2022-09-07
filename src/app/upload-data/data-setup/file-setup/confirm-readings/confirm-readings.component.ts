@@ -29,7 +29,8 @@ export class ConfirmReadingsComponent implements OnInit {
     predictorFacilityGroups: [],
     importFacilities: [],
     meters: [],
-    meterData: []
+    meterData: [],
+    predictorEntries: []
   };
   paramsSub: Subscription;
   meterDataSummaries: Array<MeterDataSummary>;

@@ -1,0 +1,33 @@
+<div class="d-flex justify-content-end">
+    <div class="d-flex">
+        <button class="btn btn-success" (click)="continue()">Continue</button>
+    </div>
+</div>
+<table>
+    <thead>
+        <tr>
+            <th>
+                Facility Name
+            </th>
+            <th>
+                Existing Predictors
+            </th>
+            <th>
+                New Predictors
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let summary of predictorDataSummaries">
+            <td>
+                {{summary.facilityName}}
+            </td>
+            <td>
+                {{summary.existingEntries}}
+            </td>
+            <td>
+                {{summary.newEntries}}
+            </td>
+        </tr>
+    </tbody>
+</table>

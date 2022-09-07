@@ -23,7 +23,7 @@ export class FileUploadComponent implements OnInit {
   filesUploaded: boolean = false;
   constructor(private router: Router, private uploadDataService: UploadDataService, private facilityDbService: FacilitydbService,
     private accountDbService: AccountdbService, private utilityMeterDbService: UtilityMeterdbService,
-    private predictorDbService: PredictordbService, 
+    private predictorDbService: PredictordbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private energyUnitsHelperService: EnergyUnitsHelperService) { }
 
@@ -51,9 +51,9 @@ export class FileUploadComponent implements OnInit {
 
   continue() {
     this.uploadDataService.fileReferences = this.fileReferences;
-    if(this.fileReferences[0].isTemplate){
+    if (this.fileReferences[0].isTemplate) {
       this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReferences[0].id + '/template-facilities');
-    }else{
+    } else {
       this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReferences[0].id);
     }
   }
@@ -63,6 +63,7 @@ export class FileUploadComponent implements OnInit {
     reader.onload = (e: any) => {
       const bstr: string = e.target.result;
       let workBook: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary', cellDates: true });
+      console.log(workBook)
       let isTemplate: boolean = this.checkSheetNamesForTemplate(workBook.SheetNames);
       if (!isTemplate) {
         this.fileReferences.push({
@@ -80,13 +81,14 @@ export class FileUploadComponent implements OnInit {
           headerMap: [],
           importFacilities: [],
           meters: [],
-          meterData: []
+          meterData: [],
+          predictorEntries: []
         });
       } else {
         //parse template
         let templateData: ParsedTemplate = this.parseTemplate(workBook);
-        let meterFacilityGroups: Array<FacilityGroup> = this.getMeterFacilityGroups(templateData);
-        let predictorFacilityGroups: Array<FacilityGroup> = this.getPredictorFacilityGroups(templateData);
+        // let meterFacilityGroups: Array<FacilityGroup> = this.getMeterFacilityGroups(templateData);
+        // let predictorFacilityGroups: Array<FacilityGroup> = this.getPredictorFacilityGroups(templateData);
         this.fileReferences.push({
           name: file.name,
           file: file,
@@ -97,12 +99,13 @@ export class FileUploadComponent implements OnInit {
           selectedWorksheetName: undefined,
           selectedWorksheetData: [],
           columnGroups: [],
-          meterFacilityGroups: meterFacilityGroups,
-          predictorFacilityGroups: predictorFacilityGroups,
+          meterFacilityGroups: [],
+          predictorFacilityGroups: [],
           headerMap: [],
           importFacilities: templateData.importFacilities,
           meters: templateData.importMeters,
-          meterData: templateData.meterData
+          meterData: templateData.meterData,
+          predictorEntries: templateData.predictorEntries
         });
       }
     };
@@ -270,35 +273,80 @@ export class FileUploadComponent implements OnInit {
         dbDataPoint.stateSalesTax = dataPoint['State Sales Tax'];
         dbDataPoint.latePayment = dataPoint['Late Payment'];
         importMeterData.push(dbDataPoint);
-      }else{
+      } else {
         console.log('no meter');
       }
     });
     //predictors
 
     let predictorsData = XLSX.utils.sheet_to_json(workbook.Sheets['Predictors']);
+    // debugger
     let predictorEntries: Array<IdbPredictorEntry> = new Array();
+    let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
     importFacilities.forEach(facility => {
-      let facilityPredictorEntry: IdbPredictorEntry = this.predictorDbService.getNewIdbPredictorEntry(facility.guid, selectedAccount.guid, new Date());
       let facilityPredictorData = predictorsData.filter(data => { return data['Facility Name'] == facility.name });
-      if (facilityPredictorData.length != 0) {
-        Object.keys(facilityPredictorData[0]).forEach((key) => {
+      let facilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(entry => { return entry.facilityId == facility.guid });
+      facilityPredictorData.forEach(dataItem => {
+        let dataItemDate: Date = new Date(dataItem['Date']);
+        let facilityPredictorEntry: IdbPredictorEntry = facilityPredictorEntries.find(entry => {
+          return this.checkSameMonth(dataItemDate, new Date(entry.date))
+        });
+        if (!facilityPredictorEntry) {
+          facilityPredictorEntry = this.predictorDbService.getNewIdbPredictorEntry(facility.guid, selectedAccount.guid, new Date());
+        }
+        Object.keys(dataItem).forEach((key) => {
           if (key != 'Facility Name' && key != 'Date') {
-            let newPredictor: PredictorData = this.predictorDbService.getNewPredictor([]);
-            newPredictor.name = key;
-            facilityPredictorEntry.predictors.push(newPredictor);
+            let predictorIndex: number = facilityPredictorEntry.predictors.findIndex(predictor => { return predictor.name == key });
+            if (predictorIndex != -1) {
+              facilityPredictorEntry.predictors[predictorIndex].amount = dataItem[key];
+            } else {
+              let newPredictor: PredictorData = this.predictorDbService.getNewPredictor([]);
+              newPredictor.name = key;
+              newPredictor.amount = dataItem[key];
+              facilityPredictorEntry.predictors.push(newPredictor);
+            }
           }
         });
         if (facilityPredictorEntry.predictors.length != 0) {
           predictorEntries.push(facilityPredictorEntry);
         }
-      }
+      });
+
+
+
+
+
+
+      // let facilityPredictorEntry: IdbPredictorEntry = this.predictorDbService.getNewIdbPredictorEntry(facility.guid, selectedAccount.guid, new Date());
+
+      // console.log(facility.name)
+      // console.log(facilityPredictorData);
+      // console.log('===');
+      // if (facilityPredictorData.length != 0) {
+      //   Object.keys(facilityPredictorData[0]).forEach((key) => {
+      //     if (key != 'Facility Name' && key != 'Date') {
+      //       let newPredictor: PredictorData = this.predictorDbService.getNewPredictor([]);
+      //       newPredictor.name = key;
+      //       facilityPredictorEntry.predictors.push(newPredictor);
+      //     }
+      //   });
+      //   if (facilityPredictorEntry.predictors.length != 0) {
+      //     predictorEntries.push(facilityPredictorEntry);
+      //   }
+      // }
     })
     return { importFacilities: importFacilities, importMeters: importMeters, predictorEntries: predictorEntries, meterData: importMeterData }
   }
 
   checkSameDay(date1: Date, date2: Date): boolean {
     return date1.getUTCFullYear() == date2.getUTCFullYear() && date1.getUTCMonth() == date2.getUTCMonth() && date1.getUTCDate() == date2.getUTCDate();
+  }
+
+  checkSameMonth(date1: Date, date2: Date): boolean {
+    // console.log('date1: ' + date1);
+    // console.log('date2: ' + date2);
+    // console.log('====');
+    return date1.getUTCFullYear() == date2.getUTCFullYear() && date1.getUTCMonth() == date2.getUTCMonth();
   }
 
   getScope(formScope: string): number {
@@ -393,4 +441,9 @@ export class FileUploadComponent implements OnInit {
 
 
 
-export interface ParsedTemplate { importFacilities: Array<IdbFacility>, importMeters: Array<IdbUtilityMeter>, predictorEntries: Array<IdbPredictorEntry>, meterData: Array<IdbUtilityMeterData> }
+export interface ParsedTemplate {
+  importFacilities: Array<IdbFacility>,
+  importMeters: Array<IdbUtilityMeter>,
+  predictorEntries: Array<IdbPredictorEntry>,
+  meterData: Array<IdbUtilityMeterData>
+}

@@ -26,7 +26,8 @@ export class SelectWorksheetComponent implements OnInit {
     predictorFacilityGroups: [],
     importFacilities: [],
     meters: [],
-    meterData: []
+    meterData: [],
+    predictorEntries: []
   };
   paramsSub: Subscription;
   constructor(private activatedRoute: ActivatedRoute, private uploadDataService: UploadDataService,

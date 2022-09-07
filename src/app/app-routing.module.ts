@@ -72,6 +72,7 @@ import { SetFacilityMetersComponent } from './upload-data/data-setup/file-setup/
 import { SetFacilityPredictorsComponent } from './upload-data/data-setup/file-setup/set-facility-predictors/set-facility-predictors.component';
 import { TemplateFacilitiesComponent } from './upload-data/data-setup/file-setup/template-facilities/template-facilities.component';
 import { ConfirmReadingsComponent } from './upload-data/data-setup/file-setup/confirm-readings/confirm-readings.component';
+import { ConfirmPredictorsComponent } from './upload-data/data-setup/file-setup/confirm-predictors/confirm-predictors.component';
 
 const routes: Routes = [
   {
@@ -316,7 +317,8 @@ const routes: Routes = [
               { path: 'set-facility-predictors', component: SetFacilityPredictorsComponent },
               { path: 'manage-meters', component: ManageMetersComponent },
               { path: 'template-facilities', component: TemplateFacilitiesComponent },
-              { path: 'confirm-readings', component: ConfirmReadingsComponent }
+              { path: 'confirm-readings', component: ConfirmReadingsComponent },
+              { path: 'confirm-predictors', component: ConfirmPredictorsComponent }
             ]
           },
         ]
