@@ -1,15 +1,17 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { WorkBook } from 'xlsx';
-import { IdbAccount, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, PredictorData } from '../models/idb';
+import { IdbAccount, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, MeterPhase, PredictorData } from '../models/idb';
 import * as XLSX from 'xlsx';
-import { AgreementType, AgreementTypes, ScopeOption, ScopeOptions } from '../facility/utility-data/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
+import { AgreementType, AgreementTypes, FuelTypeOption, ScopeOption, ScopeOptions } from '../facility/utility-data/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
 import { AccountdbService } from '../indexedDB/account-db.service';
 import { UtilityMeterdbService } from '../indexedDB/utilityMeter-db.service';
 import { PredictordbService } from '../indexedDB/predictors-db.service';
 import { UtilityMeterDatadbService } from '../indexedDB/utilityMeterData-db.service';
 import { EnergyUnitsHelperService } from '../shared/helper-services/energy-units-helper.service';
+import { EditMeterFormService } from '../facility/utility-data/energy-consumption/energy-source/edit-meter-form/edit-meter-form.service';
+import { EnergyUseCalculationsService } from '../shared/helper-services/energy-use-calculations.service';
 @Injectable({
   providedIn: 'root'
 })
@@ -22,7 +24,9 @@ export class UploadDataService {
     private accountDbService: AccountdbService, private utilityMeterDbService: UtilityMeterdbService,
     private predictorDbService: PredictordbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private energyUnitsHelperService: EnergyUnitsHelperService) {
+    private energyUnitsHelperService: EnergyUnitsHelperService,
+    private editMeterFormService: EditMeterFormService,
+    private energyUseCalculationsService: EnergyUseCalculationsService) {
     this.allFilesSet = new BehaviorSubject<boolean>(false);
     this.fileReferences = new Array();
     this.uploadMeters = new Array();
@@ -32,6 +36,7 @@ export class UploadDataService {
   getFileReference(file: File, workBook: XLSX.WorkBook): FileReference {
     let isTemplate: boolean = this.checkSheetNamesForTemplate(workBook.SheetNames);
     if (!isTemplate) {
+      let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
       return {
         name: file.name,
         file: file,
@@ -45,7 +50,7 @@ export class UploadDataService {
         meterFacilityGroups: [],
         predictorFacilityGroups: [],
         headerMap: [],
-        importFacilities: [],
+        importFacilities: accountFacilities,
         meters: [],
         meterData: [],
         predictorEntries: []
@@ -381,6 +386,93 @@ export class UploadDataService {
       });
     });
     return facilityGroups;
+  }
+
+
+  parseMeterDataFromGroups(fileReference: FileReference): Array<IdbUtilityMeter> {
+    let meters: Array<IdbUtilityMeter> = new Array();
+    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    // let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    fileReference.meterFacilityGroups.forEach(group => {
+      if (group.facilityName != 'Unmapped Meters') {
+        let facility: IdbFacility = fileReference.importFacilities.find(facility => { return group.facilityId == facility.guid });
+        group.groupItems.forEach(groupItem => {
+          let meter: IdbUtilityMeter = accountMeters.find(accMeter => { return accMeter.name == groupItem.value && accMeter.facilityId == facility.guid });
+          if (!meter) {
+            //TODO: parse meter source/units
+            meter = this.getNewMeterFromExcelColumn(groupItem, facility);
+          }
+          meters.push(meter);
+        });
+      };
+    });
+    return meters;
+  }
+
+
+  getNewMeterFromExcelColumn(groupItem: ColumnItem, selectedFacility: IdbFacility): IdbUtilityMeter {
+    let newMeter: IdbUtilityMeter = this.utilityMeterDbService.getNewIdbUtilityMeter(selectedFacility.guid, selectedFacility.accountId, false, selectedFacility.energyUnit);
+    let fuelType: { phase: MeterPhase, fuelTypeOption: FuelTypeOption } = this.energyUnitsHelperService.parseFuelType(groupItem.value);
+    if (fuelType) {
+      newMeter.source = "Other Fuels";
+      newMeter.phase = fuelType.phase;
+      newMeter.scope = 1;
+      newMeter.fuel = fuelType.fuelTypeOption.value;
+      newMeter.heatCapacity = fuelType.fuelTypeOption.heatCapacityValue;
+      newMeter.siteToSource = fuelType.fuelTypeOption.siteToSourceMultiplier;
+      //check if unit is in name
+      let startingUnit: string = this.energyUnitsHelperService.parseStartingUnit(groupItem.value);
+      if (startingUnit) {
+        newMeter.startingUnit = startingUnit;
+      } else {
+        //use fuel option
+        newMeter.startingUnit = fuelType.fuelTypeOption.startingUnit;
+      }
+      let isEnergyUnit: boolean = this.energyUnitsHelperService.isEnergyUnit(startingUnit);
+      if (isEnergyUnit) {
+        newMeter.energyUnit = startingUnit;
+      } else {
+        newMeter.energyUnit = selectedFacility.energyUnit;
+      }
+    } else {
+      newMeter.source = this.energyUnitsHelperService.parseSource(groupItem.value);
+      newMeter.startingUnit = this.energyUnitsHelperService.parseStartingUnit(groupItem.value);
+      if (newMeter.source == 'Electricity') {
+        newMeter.scope = 3
+        newMeter.startingUnit = 'kWh';
+        newMeter.energyUnit = 'kWh';
+      } else if (newMeter.source == 'Natural Gas') {
+        newMeter.scope = 1;
+      } else if (newMeter.source == 'Other Energy') {
+        newMeter.scope = 4;
+      }
+      if (newMeter.startingUnit && newMeter.source) {
+        let isEnergyUnit: boolean = this.energyUnitsHelperService.isEnergyUnit(newMeter.startingUnit);
+        if (isEnergyUnit) {
+          newMeter.energyUnit = newMeter.startingUnit;
+        } else {
+          newMeter.energyUnit = selectedFacility.energyUnit;
+        }
+        let showHeatCapacity: boolean = this.editMeterFormService.checkShowHeatCapacity(newMeter.source, newMeter.startingUnit);
+        if (showHeatCapacity) {
+          newMeter.heatCapacity = this.energyUseCalculationsService.getHeatingCapacity(newMeter.source, newMeter.startingUnit, newMeter.energyUnit);
+        }
+        let showSiteToSource: boolean = this.editMeterFormService.checkShowSiteToSource(newMeter.source, newMeter.startingUnit, newMeter.includeInEnergy);
+        if (showSiteToSource) {
+          newMeter.siteToSource = this.energyUseCalculationsService.getSiteToSource(newMeter.source);
+        }
+      }
+    }
+    newMeter.name = groupItem.value;
+    //use import wizard name so that the name of the meter can be changed but 
+    //we can still access the data using this value
+    newMeter.importWizardName = groupItem.value;
+    //start with random meter number
+    newMeter.meterNumber = Math.random().toString(36).substr(2, 9);
+
+    //set emissions mulitpliers
+    newMeter = this.editMeterFormService.setMultipliers(newMeter);
+    return newMeter;
   }
 }
 

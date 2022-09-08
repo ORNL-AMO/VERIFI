@@ -37,7 +37,7 @@ export class SetFacilityMetersComponent implements OnInit {
     private router: Router, private activatedRoute: ActivatedRoute) { }
 
   ngOnInit(): void {
-    this.paramsSub =  this.activatedRoute.parent.params.subscribe(param => {
+    this.paramsSub = this.activatedRoute.parent.params.subscribe(param => {
       let id: string = param['id'];
       this.fileReference = this.uploadDataService.fileReferences.find(ref => { return ref.id == id });
       if (this.fileReference.meterFacilityGroups.length == 0) {
@@ -47,7 +47,7 @@ export class SetFacilityMetersComponent implements OnInit {
     });
   }
 
-  ngOnDestroy(){
+  ngOnDestroy() {
     this.paramsSub.unsubscribe();
   }
 
@@ -104,9 +104,10 @@ export class SetFacilityMetersComponent implements OnInit {
   }
 
   continue() {
-    console.log('continue')
-    this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/set-facility-predictors');
-    // this.router.navigateByUrl('/upload/data-setup/set-facility-predictors');
+    this.fileReference.meters = this.uploadDataService.parseMeterDataFromGroups(this.fileReference);
+    let fileReferenceIndex: number = this.uploadDataService.fileReferences.findIndex(file => { return file.id == this.fileReference.id });
+    this.uploadDataService.fileReferences[fileReferenceIndex] = this.fileReference;
+    this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/manage-meters');
   }
 
   setFacility(facilityId: string) {
@@ -152,5 +153,9 @@ export class SetFacilityMetersComponent implements OnInit {
     });
     this.fileReference.meterFacilityGroups = facilityGroups;
     this.facilityGroupIds = this.fileReference.meterFacilityGroups.map(group => { return group.facilityId });
+  }
+
+  goBack() {
+    this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/identify-columns');
   }
 }

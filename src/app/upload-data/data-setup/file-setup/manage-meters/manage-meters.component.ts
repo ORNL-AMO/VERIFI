@@ -34,6 +34,7 @@ export class ManageMetersComponent implements OnInit {
   paramsSub: Subscription;
   editMeterForm: FormGroup;
   editMeterIndex: number;
+  editMeterFacility: IdbFacility;
   constructor(private activatedRoute: ActivatedRoute, private uploadDataService: UploadDataService,
     private editMeterFormService: EditMeterFormService, private router: Router) { }
 
@@ -63,11 +64,13 @@ export class ManageMetersComponent implements OnInit {
 
   editMeter(meter: IdbUtilityMeter) {
     this.editMeterIndex = this.fileReference.meters.findIndex(fileMeter => { return fileMeter.guid == meter.guid });
+    this.editMeterFacility = this.fileReference.importFacilities.find(facility => { return facility.guid == meter.facilityId });
     this.editMeterForm = this.editMeterFormService.getFormFromMeter(meter);
   }
 
   cancelEdit() {
     this.editMeterForm = undefined;
+    this.editMeterFacility = undefined;
     this.editMeterIndex = undefined;
   }
 
@@ -77,7 +80,7 @@ export class ManageMetersComponent implements OnInit {
     this.cancelEdit();
   }
 
-  goBack(){
+  goBack() {
     this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/template-facilities');
   }
 }

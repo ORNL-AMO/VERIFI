@@ -1,13 +1,13 @@
-<div class="d-flex justify-content-end">
+<div class="d-flex justify-content-between">
+    <div class="d-flex">
+        <button class="btn btn-secondary" (click)="goBack()">Back</button>
+    </div>
     <div class="d-flex">
         <button class="btn btn-success" (click)="continue()">Submit &amp; Continue</button>
     </div>
 </div>
-<div class="alert alert-warning" *ngIf="fileReference.isTemplate">
-    This is a template file and columns are already parced. Continue to confirm meters and predictors are mapped
-    correctly.
-</div>
-<div class="worksheet-data-table" *ngIf="!fileReference.isTemplate">
+<hr>
+<div class="worksheet-data-table">
     <table *ngIf="fileReference.selectedWorksheetData">
         <thead>
             <tr>
@@ -27,14 +27,14 @@
     </table>
 </div>
 <hr>
-<h6 class="map-columns-label" *ngIf="!fileReference.isTemplate">Map the data columns from the excel file to the
+<h6 class="map-columns-label">Map the data columns from the excel file to the
     appropriate data type. <br>
     Column headers will be used to create meters or predictors.<br>
     Row data will be used as data entries associated with the corresponding date column and meter or predictor.<br>
     Please use site energy data when possible.
 </h6>
-<hr *ngIf="!fileReference.isTemplate">
-<div class="row no-gutters" *ngIf="!fileReference.isTemplate">
+<hr>
+<div class="row no-gutters">
     <div cdkDropList [cdkDropListData]="fileReference.columnGroups" class="card col-md-3 col-sm-6"
         *ngFor="let columnGroup of fileReference.columnGroups" (cdkDropListDropped)="dropColumn($event)"
         id={{columnGroup.id}} [cdkDropListConnectedTo]="columnGroupItemIds" [ngClass]="columnGroup.groupLabel">

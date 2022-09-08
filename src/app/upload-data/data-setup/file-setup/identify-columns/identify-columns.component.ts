@@ -164,4 +164,8 @@ export class IdentifyColumnsComponent implements OnInit {
     }
     return;
   }
+
+  goBack(){
+    this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/select-worksheet')
+  }
 }
