@@ -1,6 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { LoadingService } from 'src/app/core-components/loading/loading.service';
+import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
+import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { IdbAccount, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { FileReference, UploadDataService } from 'src/app/upload-data/upload-data.service';
 
 @Component({
@@ -12,8 +21,16 @@ export class ConfirmAndSubmitComponent implements OnInit {
 
   fileReference: FileReference;
   paramsSub: Subscription;
+  hasNextFile: boolean = false;
   constructor(private activatedRoute: ActivatedRoute, private uploadDataService: UploadDataService,
-    private router: Router) { }
+    private router: Router, private facilityDbService: FacilitydbService,
+    private loadingService: LoadingService,
+    private utilityMeterDbService: UtilityMeterdbService,
+    private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private predictorDbService: PredictordbService,
+    private toastNotificationService: ToastNotificationsService,
+    private dbChangesService: DbChangesService,
+    private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
     this.paramsSub = this.activatedRoute.parent.params.subscribe(param => {
@@ -26,11 +43,80 @@ export class ConfirmAndSubmitComponent implements OnInit {
     this.paramsSub.unsubscribe();
   }
 
-  goBack(){
+  goBack() {
     this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/confirm-predictors');
   }
 
-  submit(){
+  async submit() {
+    this.loadingService.setLoadingMessage('Submitting File Data..');
+    this.loadingService.setLoadingStatus(true);
 
+    this.loadingService.setLoadingMessage('Uploading Facilities..');
+    for (let i = 0; i < this.fileReference.importFacilities.length; i++) {
+      let facility: IdbFacility = this.fileReference.importFacilities[i];
+      if (facility.id) {
+        await this.facilityDbService.updateWithObservable(facility).toPromise();
+      } else {
+        await this.facilityDbService.addWithObservable(facility).toPromise();
+      }
+    }
+
+    this.loadingService.setLoadingMessage('Uploading Meters..');
+    for (let i = 0; i < this.fileReference.meters.length; i++) {
+      let meter: IdbUtilityMeter = this.fileReference.meters[i];
+      if (meter.id) {
+        await this.utilityMeterDbService.updateWithObservable(meter).toPromise();
+      } else {
+        await this.utilityMeterDbService.addWithObservable(meter).toPromise();
+      }
+    }
+
+    this.loadingService.setLoadingMessage('Uploading Meter Data...');
+    for (let i = 0; i < this.fileReference.meterData.length; i++) {
+      let meterData: IdbUtilityMeterData = this.fileReference.meterData[i];
+      if (meterData.id) {
+        await this.utilityMeterDataDbService.updateWithObservable(meterData).toPromise();
+      } else {
+        await this.utilityMeterDataDbService.addWithObservable(meterData).toPromise();
+      }
+    }
+
+    this.loadingService.setLoadingMessage('Uploading Predictors..');
+    for (let i = 0; i < this.fileReference.predictorEntries.length; i++) {
+      let predictorEntry: IdbPredictorEntry = this.fileReference.predictorEntries[i];
+      if (predictorEntry.id) {
+        await this.predictorDbService.updateWithObservable(predictorEntry).toPromise();
+      } else {
+        await this.predictorDbService.addWithObservable(predictorEntry).toPromise();
+      }
+    }
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    this.loadingService.setLoadingMessage('Finishing Up...');
+    await this.dbChangesService.selectAccount(selectedAccount)
+    this.fileReference.dataSubmitted = true;
+    let fileReferenceIndex: number = this.uploadDataService.fileReferences.findIndex(ref => { return ref.id == this.fileReference.id });
+    this.uploadDataService.fileReferences[fileReferenceIndex] = this.fileReference;
+    this.hasNextFile = fileReferenceIndex < (this.uploadDataService.fileReferences.length - 1);
+    this.loadingService.setLoadingStatus(false);
+    this.toastNotificationService.showToast(this.fileReference.name + ' Data Submitted', undefined, undefined, false, "success");
+  }
+
+  goToNext() {
+    let fileReferenceIndex: number = this.uploadDataService.fileReferences.findIndex(ref => { return ref.id == this.fileReference.id });
+    let nextFile: FileReference = this.uploadDataService.fileReferences[fileReferenceIndex + 1];
+    if (nextFile.isTemplate) {
+      this.router.navigateByUrl('/upload/data-setup/file-setup/' + nextFile.id + '/template-facilities');
+    } else {
+      this.router.navigateByUrl('/upload/data-setup/file-setup/' + nextFile.id);
+    }
+  }
+
+
+  goToUpload() {
+    this.router.navigateByUrl('/upload');
+  }
+
+  goToAccountDashboard() {
+    this.router.navigateByUrl('/account');
   }
 }

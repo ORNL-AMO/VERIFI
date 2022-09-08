@@ -15,7 +15,7 @@ export class TemplateFacilitiesComponent implements OnInit {
   fileReference: FileReference = {
     name: '',
     file: undefined,
-    dataSet: false,
+    dataSubmitted: false,
     id: undefined,
     workbook: undefined,
     isTemplate: false,

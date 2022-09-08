@@ -35,7 +35,7 @@ export class UploadDataService {
       return {
         name: file.name,
         file: file,
-        dataSet: false,
+        dataSubmitted: false,
         id: Math.random().toString(36).substr(2, 9),
         workbook: workBook,
         isTemplate: isTemplate,
@@ -58,7 +58,7 @@ export class UploadDataService {
       return {
         name: file.name,
         file: file,
-        dataSet: false,
+        dataSubmitted: false,
         id: Math.random().toString(36).substr(2, 9),
         workbook: workBook,
         isTemplate: isTemplate,
@@ -389,7 +389,7 @@ export interface FileReference {
   name: string,
   // type: '.csv' | '.xlsx',
   file: File,
-  dataSet: boolean,
+  dataSubmitted: boolean,
   id: string,
   workbook: WorkBook,
   isTemplate: boolean,
