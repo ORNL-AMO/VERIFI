@@ -6,6 +6,7 @@ import { UtilityMeterDataService } from 'src/app/facility/utility-data/energy-co
 import { IdbFacility, IdbUtilityMeterData } from 'src/app/models/idb';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 import { FileReference, UploadDataService } from 'src/app/upload-data/upload-data.service';
+import * as _ from 'lodash';
 
 @Component({
   selector: 'app-confirm-readings',
@@ -86,18 +87,47 @@ export class ConfirmReadingsComponent implements OnInit {
         }
 
       });
+      let existingStart: Date;
+      let existingEnd: Date;
+      if (existingReadings.length != 0) {
+        existingStart = _.minBy(existingReadings, (entry) => { return entry.readDate }).readDate
+        existingEnd = _.maxBy(existingReadings, (entry) => { return entry.readDate }).readDate
+      }
+
+      let newStart: Date;
+      let newEnd: Date;
+      if (newReadings.length != 0) {
+        newStart = _.minBy(newReadings, (entry) => { return entry.readDate }).readDate
+        newEnd = _.maxBy(newReadings, (entry) => { return entry.readDate }).readDate
+      }
+
+      let invalidStart: Date;
+      let invalidEnd: Date;
+      if (invalidReadings.length != 0) {
+        invalidStart = _.minBy(invalidReadings, (entry) => { return entry.readDate }).readDate
+        invalidEnd = _.maxBy(invalidReadings, (entry) => { return entry.readDate }).readDate
+      }
+
       dataSummaries.push({
         meterName: meter.name,
         facilityName: this.getFacilityName(meter.facilityId),
         existingEntries: existingReadings.length,
+        existingEnd: existingEnd,
+        existingStart: existingStart,
         invalidEntries: invalidReadings.length,
-        newEntries: newReadings.length
+        invalidEnd: invalidEnd,
+        invalidStart: invalidStart,
+        newEntries: newReadings.length,
+        newStart: newStart,
+        newEnd: newEnd
       })
     })
     this.meterDataSummaries = dataSummaries;
   }
 
-
+  goBack(){
+    this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/manage-meters');
+  }
 
 }
 
@@ -106,6 +136,12 @@ export interface MeterDataSummary {
   meterName: string,
   facilityName: string,
   existingEntries: number,
+  existingStart: Date,
+  existingEnd: Date,
   invalidEntries: number,
+  invalidStart: Date,
+  invalidEnd: Date,
   newEntries: number
+  newStart: Date,
+  newEnd: Date
 }

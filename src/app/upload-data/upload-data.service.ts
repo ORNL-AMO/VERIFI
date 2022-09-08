@@ -54,7 +54,7 @@ export class UploadDataService {
       //parse template
       let templateData: ParsedTemplate = this.parseTemplate(workBook);
       // let meterFacilityGroups: Array<FacilityGroup> = this.getMeterFacilityGroups(templateData);
-      // let predictorFacilityGroups: Array<FacilityGroup> = this.getPredictorFacilityGroups(templateData);
+      let predictorFacilityGroups: Array<FacilityGroup> = this.getPredictorFacilityGroups(templateData);
       return {
         name: file.name,
         file: file,
@@ -66,7 +66,7 @@ export class UploadDataService {
         selectedWorksheetData: [],
         columnGroups: [],
         meterFacilityGroups: [],
-        predictorFacilityGroups: [],
+        predictorFacilityGroups: predictorFacilityGroups,
         headerMap: [],
         importFacilities: templateData.importFacilities,
         meters: templateData.importMeters,
@@ -158,7 +158,7 @@ export class UploadDataService {
           return this.checkSameMonth(dataItemDate, new Date(entry.date))
         });
         if (!facilityPredictorEntry) {
-          facilityPredictorEntry = this.predictorDbService.getNewIdbPredictorEntry(facility.guid, selectedAccount.guid, new Date());
+          facilityPredictorEntry = this.predictorDbService.getNewIdbPredictorEntry(facility.guid, selectedAccount.guid, dataItemDate);
         }
         Object.keys(dataItem).forEach((key) => {
           if (key != 'Facility Name' && key != 'Date') {

@@ -76,4 +76,8 @@ export class ManageMetersComponent implements OnInit {
     this.fileReference.meterData = this.uploadDataService.getMeterDataEntries(this.fileReference.workbook, this.fileReference.meters);
     this.cancelEdit();
   }
+
+  goBack(){
+    this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/template-facilities');
+  }
 }

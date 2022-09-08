@@ -2,40 +2,56 @@
     <div class="banner p-0">
         <ul class="nav nav-tabs">
             <li class="nav-item" *ngIf="!fileReference.isTemplate">
-                <a class="nav-link" routerLink="select-worksheet" [routerLinkActive]="['active']">
+                <a class="nav-link disabled" routerLink="select-worksheet" [routerLinkActive]="['active']">
                     <i class="fa fa-gauge-high"></i>
                     Select Worksheet</a>
             </li>
             <li class="nav-item" *ngIf="!fileReference.isTemplate">
-                <a class="nav-link" routerLink="identify-columns" [routerLinkActive]="['active']">
+                <a class="nav-link disabled" routerLink="identify-columns" [routerLinkActive]="['active']">
                     <i class="fa fa-file-invoice"></i>
                     Identify Columns</a>
             </li>
             <li class="nav-item" *ngIf="fileReference.isTemplate">
-                <a class="nav-link" routerLink="template-facilities" [routerLinkActive]="['active']">
-                    <i class="fa fa-industry"></i>
-                    Template Facilities    
+                <a class="nav-link disabled" routerLink="template-facilities" [routerLinkActive]="['active']">
+                    <span class="badge">1</span>
+                    <!-- <i class="fa fa-industry"></i> -->
+                    Template Facilities
                 </a>
             </li>
             <li class="nav-item" *ngIf="!fileReference.isTemplate">
-                <a class="nav-link" routerLink="set-facility-meters" [routerLinkActive]="['active']">
+                <a class="nav-link disabled" routerLink="set-facility-meters" [routerLinkActive]="['active']">
                     <i class="fa fa-gauge-high"></i>Map Facility Meters</a>
             </li>
             <li class="nav-item" *ngIf="fileReference.isTemplate">
-                <a class="nav-link" routerLink="manage-meters" [routerLinkActive]="['active']">
-                    <i class="fa fa-gauge-high"></i>Confirm Meters</a>
+                <a class="nav-link disabled" routerLink="manage-meters" [routerLinkActive]="['active']">
+                    <span class="badge">2</span>
+                    <!-- <i class="fa fa-gauge-high"></i> -->
+                    Confirm Meters</a>
             </li>
             <li class="nav-item" *ngIf="fileReference.isTemplate">
-                <a class="nav-link" routerLink="confirm-readings" [routerLinkActive]="['active']">
-                    <i class="fa fa-gauge-high"></i>Confirm Readings</a>
+                <a class="nav-link disabled" routerLink="confirm-readings" [routerLinkActive]="['active']">
+
+                    <span class="badge">3</span>
+                    <!-- <i class="fa fa-gauge-high"></i> -->
+                    Confirm Readings</a>
             </li>
             <li class="nav-item" *ngIf="fileReference.isTemplate">
-                <a class="nav-link" routerLink="confirm-predictors" [routerLinkActive]="['active']">
-                    <i class="fa fa-boxes-stacked"></i>Confirm Predictors</a>
+                <a class="nav-link disabled" routerLink="confirm-predictors" [routerLinkActive]="['active']">
+                    <span class="badge">4</span>
+                    <!-- <i class="fa fa-boxes-stacked"></i> -->
+                    Confirm Predictors
+                </a>
             </li>
             <li class="nav-item" *ngIf="!fileReference.isTemplate">
-                <a class="nav-link" routerLink="set-facility-predictors" [routerLinkActive]="['active']">
+                <a class="nav-link disabled" routerLink="set-facility-predictors" [routerLinkActive]="['active']">
                     <i class="fa fa-boxes-stacked"></i>Map Facility Predictors</a>
+            </li>
+            <li class="nav-item" *ngIf="fileReference.isTemplate">
+                <a class="nav-link disabled" routerLink="submit" [routerLinkActive]="['active']">
+                    <span class="badge">5</span>
+                    <!-- <i class="fa fa-boxes-stacked"></i> -->
+                    Submit File
+                </a>
             </li>
         </ul>
     </div>

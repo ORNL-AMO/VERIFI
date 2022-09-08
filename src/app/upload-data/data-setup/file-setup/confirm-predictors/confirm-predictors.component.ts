@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { IdbPredictorEntry } from 'src/app/models/idb';
 import { FileReference, UploadDataService } from 'src/app/upload-data/upload-data.service';
+import * as _ from 'lodash';
 
 @Component({
   selector: 'app-confirm-predictors',
@@ -63,19 +64,46 @@ export class ConfirmPredictorsComponent implements OnInit {
           newEntries.push(entry);
         }
       });
+
+      let existingStart: Date;
+      let existingEnd: Date;
+      if (existingEntries.length != 0) {
+        existingStart = _.minBy(existingEntries, (entry) => { return entry.date }).date
+        existingEnd = _.maxBy(existingEntries, (entry) => { return entry.date }).date
+      }
+
+      let newStart: Date;
+      let newEnd: Date;
+      if (newEntries.length != 0) {
+        newStart = _.minBy(newEntries, (entry) => { return entry.date }).date
+        newEnd = _.maxBy(newEntries, (entry) => { return entry.date }).date
+      }
+
       dataSummaries.push({
         facilityName: facility.name,
         existingEntries: existingEntries.length,
-        newEntries: newEntries.length
+        existingStart: existingStart,
+        existingEnd: existingEnd,
+        newEntries: newEntries.length,
+        newStart: newStart,
+        newEnd: newEnd
       })
     })
     this.predictorDataSummaries = dataSummaries;
   }
 
+
+  goBack(){
+    this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/confirm-readings');
+  }
 }
 
 export interface PredictorDataSummary {
   facilityName: string,
   existingEntries: number,
-  newEntries: number
+  existingStart: Date,
+  existingEnd: Date,
+  newEntries: number,
+  newStart: Date,
+  newEnd: Date
 }
