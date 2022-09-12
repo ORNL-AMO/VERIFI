@@ -65,7 +65,9 @@ export class ConfirmAndSubmitComponent implements OnInit {
     for (let i = 0; i < this.fileReference.meters.length; i++) {
       let meter: IdbUtilityMeter = this.fileReference.meters[i];
       if (meter.id) {
-        await this.utilityMeterDbService.updateWithObservable(meter).toPromise();
+        if (!meter.skipImport) {
+          await this.utilityMeterDbService.updateWithObservable(meter).toPromise();
+        }
       } else {
         await this.utilityMeterDbService.addWithObservable(meter).toPromise();
       }
@@ -75,7 +77,15 @@ export class ConfirmAndSubmitComponent implements OnInit {
     for (let i = 0; i < this.fileReference.meterData.length; i++) {
       let meterData: IdbUtilityMeterData = this.fileReference.meterData[i];
       if (meterData.id) {
-        await this.utilityMeterDataDbService.updateWithObservable(meterData).toPromise();
+        let skipMeterData: boolean = false;
+        for (let x = 0; x < this.fileReference.skipExistingReadingsMeterIds.length; x++) {
+          if (this.fileReference.skipExistingReadingsMeterIds[x] == meterData.meterId) {
+            skipMeterData = true;
+          }
+        }
+        if (!skipMeterData) {
+          await this.utilityMeterDataDbService.updateWithObservable(meterData).toPromise();
+        }
       } else {
         await this.utilityMeterDataDbService.addWithObservable(meterData).toPromise();
       }
@@ -85,7 +95,15 @@ export class ConfirmAndSubmitComponent implements OnInit {
     for (let i = 0; i < this.fileReference.predictorEntries.length; i++) {
       let predictorEntry: IdbPredictorEntry = this.fileReference.predictorEntries[i];
       if (predictorEntry.id) {
-        await this.predictorDbService.updateWithObservable(predictorEntry).toPromise();
+        let skipPredictorData: boolean = false;
+        for (let x = 0; x < this.fileReference.skipExistingPredictorFacilityIds.length; x++) {
+          if (this.fileReference.skipExistingPredictorFacilityIds[x] == predictorEntry.facilityId) {
+            skipPredictorData = true;
+          }
+        }
+        if (!skipPredictorData) {
+          await this.predictorDbService.updateWithObservable(predictorEntry).toPromise();
+        }
       } else {
         await this.predictorDbService.addWithObservable(predictorEntry).toPromise();
       }

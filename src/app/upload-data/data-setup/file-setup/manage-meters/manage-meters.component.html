@@ -33,15 +33,19 @@
             <th>
                 New / Existing
             </th>
+            <th>
+                Skip Import
+            </th>
         </tr>
     </thead>
     <tbody>
-        <tr *ngFor="let meter of fileReference.meters">
+        <tr *ngFor="let meter of fileReference.meters" [ngClass]="{'skip': meter.skipImport}">
             <td>
                 {{getFacilityName(meter.facilityId)}}
             </td>
             <td>
-                <a class="click-link" (click)="editMeter(meter)">{{meter.name}}</a>
+                <a class="click-link" (click)="editMeter(meter)" *ngIf="!meter.skipImport">{{meter.name}}</a>
+                <span *ngIf="meter.skipImport">{{meter.name}}</span>
             </td>
             <td>
                 {{meter.source}}
@@ -61,6 +65,9 @@
                 <span *ngIf="!meter.id">
                     New
                 </span>
+            </td>
+            <td>
+                <input type="checkbox" class="form-control" [(ngModel)]="meter.skipImport">
             </td>
         </tr>
     </tbody>

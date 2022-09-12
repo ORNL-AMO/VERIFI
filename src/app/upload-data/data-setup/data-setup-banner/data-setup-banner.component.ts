@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { Subscription } from 'rxjs';
+import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { UploadDataService } from '../../upload-data.service';
 
 @Component({
@@ -13,10 +15,19 @@ export class DataSetupBannerComponent implements OnInit {
     // type: '.csv' | '.xlsx',
     file: any
   }>;
-  constructor(private uploadDataService: UploadDataService) { }
+  modalOpen: boolean;
+  modalOpenSub: Subscription;
+  constructor(private uploadDataService: UploadDataService, private sharedDataService: SharedDataService) { }
 
   ngOnInit(): void {
     this.fileReferences = this.uploadDataService.fileReferences;
+    this.modalOpenSub = this.sharedDataService.modalOpen.subscribe(val => {
+      this.modalOpen = val;
+    })
+  }
+
+  ngOnDestroy(){
+    this.modalOpenSub.unsubscribe();
   }
 
 }

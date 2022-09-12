@@ -31,7 +31,9 @@ export class ConfirmReadingsComponent implements OnInit {
     importFacilities: [],
     meters: [],
     meterData: [],
-    predictorEntries: []
+    predictorEntries: [],
+    skipExistingReadingsMeterIds: [],
+    skipExistingPredictorFacilityIds: []
   };
   paramsSub: Subscription;
   meterDataSummaries: Array<MeterDataSummary>;
@@ -52,9 +54,16 @@ export class ConfirmReadingsComponent implements OnInit {
   }
 
   continue() {
-    if(this.fileReference.isTemplate){
+    let skipExistingReadingsMeterIds: Array<string> = new Array();
+    this.meterDataSummaries.forEach(summary => {
+      if(summary.skipExisting){
+        skipExistingReadingsMeterIds.push(summary.meterId);
+      }
+    })
+    this.fileReference.skipExistingReadingsMeterIds = skipExistingReadingsMeterIds;
+    if (this.fileReference.isTemplate) {
       this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/confirm-predictors');
-    }else{
+    } else {
       this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/set-facility-predictors');
     }
   }
@@ -67,69 +76,75 @@ export class ConfirmReadingsComponent implements OnInit {
   setSummary() {
     let dataSummaries: Array<MeterDataSummary> = new Array();
     this.fileReference.meters.forEach(meter => {
-      let meterReadings: Array<IdbUtilityMeterData> = this.fileReference.meterData.filter(data => { return data.meterId == meter.guid });
-      let invalidReadings: Array<IdbUtilityMeterData> = new Array()
-      let existingReadings: Array<IdbUtilityMeterData> = new Array()
-      let newReadings: Array<IdbUtilityMeterData> = new Array()
-      meterReadings.forEach(reading => {
-        let form: FormGroup;
-        if (meter.source == 'Electricity') {
-          form = this.utilityMeterDataService.getElectricityMeterDataForm(reading);
-        } else {
-          let displayVolumeInput: boolean = (this.energyUnitsHelperService.isEnergyUnit(meter.startingUnit) == false);
-          let displayEnergyUse: boolean = this.energyUnitsHelperService.isEnergyMeter(meter.source);
-          form = this.utilityMeterDataService.getGeneralMeterDataForm(reading, displayVolumeInput, displayEnergyUse);
-        }
-        if (form.invalid) {
-          invalidReadings.push(reading);
-        } else {
-          if (reading.id) {
-            existingReadings.push(reading);
+      if (!meter.skipImport) {
+        let meterReadings: Array<IdbUtilityMeterData> = this.fileReference.meterData.filter(data => { return data.meterId == meter.guid });
+        let invalidReadings: Array<IdbUtilityMeterData> = new Array()
+        let existingReadings: Array<IdbUtilityMeterData> = new Array()
+        let newReadings: Array<IdbUtilityMeterData> = new Array()
+        meterReadings.forEach(reading => {
+          let form: FormGroup;
+          if (meter.source == 'Electricity') {
+            form = this.utilityMeterDataService.getElectricityMeterDataForm(reading);
           } else {
-            newReadings.push(reading);
+            let displayVolumeInput: boolean = (this.energyUnitsHelperService.isEnergyUnit(meter.startingUnit) == false);
+            let displayEnergyUse: boolean = this.energyUnitsHelperService.isEnergyMeter(meter.source);
+            form = this.utilityMeterDataService.getGeneralMeterDataForm(reading, displayVolumeInput, displayEnergyUse);
           }
+          if (form.invalid) {
+            invalidReadings.push(reading);
+          } else {
+            if (reading.id) {
+              existingReadings.push(reading);
+            } else {
+              newReadings.push(reading);
+            }
+          }
+
+        });
+        let existingStart: Date;
+        let existingEnd: Date;
+        if (existingReadings.length != 0) {
+          existingStart = _.minBy(existingReadings, (entry) => { return entry.readDate }).readDate
+          existingEnd = _.maxBy(existingReadings, (entry) => { return entry.readDate }).readDate
         }
 
-      });
-      let existingStart: Date;
-      let existingEnd: Date;
-      if (existingReadings.length != 0) {
-        existingStart = _.minBy(existingReadings, (entry) => { return entry.readDate }).readDate
-        existingEnd = _.maxBy(existingReadings, (entry) => { return entry.readDate }).readDate
-      }
+        let newStart: Date;
+        let newEnd: Date;
+        if (newReadings.length != 0) {
+          newStart = _.minBy(newReadings, (entry) => { return entry.readDate }).readDate
+          newEnd = _.maxBy(newReadings, (entry) => { return entry.readDate }).readDate
+        }
 
-      let newStart: Date;
-      let newEnd: Date;
-      if (newReadings.length != 0) {
-        newStart = _.minBy(newReadings, (entry) => { return entry.readDate }).readDate
-        newEnd = _.maxBy(newReadings, (entry) => { return entry.readDate }).readDate
+        let invalidStart: Date;
+        let invalidEnd: Date;
+        if (invalidReadings.length != 0) {
+          invalidStart = _.minBy(invalidReadings, (entry) => { return entry.readDate }).readDate
+          invalidEnd = _.maxBy(invalidReadings, (entry) => { return entry.readDate }).readDate
+        }
+        let skipExisting: string = this.fileReference.skipExistingReadingsMeterIds.find(id => {return id == meter.guid});
+        console.log(meter.name);
+        console.log(existingReadings);
+        dataSummaries.push({
+          meterName: meter.name,
+          meterId: meter.guid,
+          facilityName: this.getFacilityName(meter.facilityId),
+          existingEntries: existingReadings.length,
+          existingEnd: existingEnd,
+          existingStart: existingStart,
+          invalidEntries: invalidReadings.length,
+          invalidEnd: invalidEnd,
+          invalidStart: invalidStart,
+          newEntries: newReadings.length,
+          newStart: newStart,
+          newEnd: newEnd,
+          skipExisting: skipExisting != undefined
+        })
       }
-
-      let invalidStart: Date;
-      let invalidEnd: Date;
-      if (invalidReadings.length != 0) {
-        invalidStart = _.minBy(invalidReadings, (entry) => { return entry.readDate }).readDate
-        invalidEnd = _.maxBy(invalidReadings, (entry) => { return entry.readDate }).readDate
-      }
-
-      dataSummaries.push({
-        meterName: meter.name,
-        facilityName: this.getFacilityName(meter.facilityId),
-        existingEntries: existingReadings.length,
-        existingEnd: existingEnd,
-        existingStart: existingStart,
-        invalidEntries: invalidReadings.length,
-        invalidEnd: invalidEnd,
-        invalidStart: invalidStart,
-        newEntries: newReadings.length,
-        newStart: newStart,
-        newEnd: newEnd
-      })
     })
     this.meterDataSummaries = dataSummaries;
   }
 
-  goBack(){
+  goBack() {
     this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/manage-meters');
   }
 
@@ -138,6 +153,7 @@ export class ConfirmReadingsComponent implements OnInit {
 
 export interface MeterDataSummary {
   meterName: string,
+  meterId: string,
   facilityName: string,
   existingEntries: number,
   existingStart: Date,
@@ -147,5 +163,6 @@ export interface MeterDataSummary {
   invalidEnd: Date,
   newEntries: number
   newStart: Date,
-  newEnd: Date
+  newEnd: Date,
+  skipExisting: boolean
 }

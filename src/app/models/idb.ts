@@ -145,7 +145,8 @@ export interface IdbUtilityMeter {
     greenPurchaseFraction: number,
     marketGHGMultiplier: number,
     locationGHGMultiplier: number,
-    isValid?: boolean
+    isValid?: boolean,
+    skipImport?: boolean
 }
 
 export interface IdbUtilityMeterData {

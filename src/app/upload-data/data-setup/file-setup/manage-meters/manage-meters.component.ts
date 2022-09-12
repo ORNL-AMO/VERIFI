@@ -29,7 +29,9 @@ export class ManageMetersComponent implements OnInit {
     importFacilities: [],
     meters: [],
     meterData: [],
-    predictorEntries: []
+    predictorEntries: [],
+    skipExistingReadingsMeterIds: [],
+    skipExistingPredictorFacilityIds: []
   };
   paramsSub: Subscription;
   editMeterForm: FormGroup;

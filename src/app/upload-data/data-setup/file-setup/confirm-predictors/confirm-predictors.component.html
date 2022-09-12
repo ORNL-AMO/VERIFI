@@ -30,10 +30,13 @@
                 Facility Name
             </th>
             <th>
+                New Predictors Entries
+            </th>
+            <th>
                 Existing Predictors Entries
             </th>
             <th>
-                New Predictors Entries
+                Skip Existing?
             </th>
         </tr>
     </thead>
@@ -43,16 +46,19 @@
                 {{summary.facilityName}}
             </td>
             <td>
+                {{summary.newEntries}}
+                <span *ngIf="summary.newStart">
+                    ({{summary.newStart | date}} - {{summary.newEnd | date}})
+                </span>
+            </td>
+            <td [ngClass]="{'skip': summary.skipExisting}">
                 {{summary.existingEntries}}
                 <span *ngIf="summary.existingStart">
                     ({{summary.existingStart | date}} - {{summary.existingEnd | date}})
                 </span>
             </td>
             <td>
-                {{summary.newEntries}}
-                <span *ngIf="summary.newStart">
-                    ({{summary.newStart | date}} - {{summary.newEnd | date}})
-                </span>
+                <input type="checkbox" class="form-control" [(ngModel)]="summary.skipExisting">                
             </td>
         </tr>
     </tbody>

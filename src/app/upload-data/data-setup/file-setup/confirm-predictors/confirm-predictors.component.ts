@@ -28,7 +28,9 @@ export class ConfirmPredictorsComponent implements OnInit {
     importFacilities: [],
     meters: [],
     meterData: [],
-    predictorEntries: []
+    predictorEntries: [],
+    skipExistingReadingsMeterIds: [],
+    skipExistingPredictorFacilityIds: []
   };
   paramsSub: Subscription;
   predictorDataSummaries: Array<PredictorDataSummary>;
@@ -55,48 +57,52 @@ export class ConfirmPredictorsComponent implements OnInit {
     let dataSummaries: Array<PredictorDataSummary> = new Array();
     this.fileReference.importFacilities.forEach(facility => {
       let predictorEntries: Array<IdbPredictorEntry> = this.fileReference.predictorEntries.filter(data => { return data.facilityId == facility.guid });
-      let existingEntries: Array<IdbPredictorEntry> = new Array()
-      let newEntries: Array<IdbPredictorEntry> = new Array()
-      predictorEntries.forEach(entry => {
-        if (entry.id) {
-          existingEntries.push(entry);
-        } else {
-          newEntries.push(entry);
+      if (predictorEntries.length != 0) {
+        let existingEntries: Array<IdbPredictorEntry> = new Array()
+        let newEntries: Array<IdbPredictorEntry> = new Array()
+        predictorEntries.forEach(entry => {
+          if (entry.id) {
+            existingEntries.push(entry);
+          } else {
+            newEntries.push(entry);
+          }
+        });
+
+        let existingStart: Date;
+        let existingEnd: Date;
+        if (existingEntries.length != 0) {
+          existingStart = _.minBy(existingEntries, (entry) => { return entry.date }).date
+          existingEnd = _.maxBy(existingEntries, (entry) => { return entry.date }).date
         }
-      });
 
-      let existingStart: Date;
-      let existingEnd: Date;
-      if (existingEntries.length != 0) {
-        existingStart = _.minBy(existingEntries, (entry) => { return entry.date }).date
-        existingEnd = _.maxBy(existingEntries, (entry) => { return entry.date }).date
+        let newStart: Date;
+        let newEnd: Date;
+        if (newEntries.length != 0) {
+          newStart = _.minBy(newEntries, (entry) => { return entry.date }).date
+          newEnd = _.maxBy(newEntries, (entry) => { return entry.date }).date
+        }
+
+        let skipExisting: string = this.fileReference.skipExistingPredictorFacilityIds.find(facilityId => { return facilityId == facility.guid })
+        dataSummaries.push({
+          facilityName: facility.name,
+          existingEntries: existingEntries.length,
+          existingStart: existingStart,
+          existingEnd: existingEnd,
+          newEntries: newEntries.length,
+          newStart: newStart,
+          newEnd: newEnd,
+          skipExisting: skipExisting != undefined
+        })
       }
-
-      let newStart: Date;
-      let newEnd: Date;
-      if (newEntries.length != 0) {
-        newStart = _.minBy(newEntries, (entry) => { return entry.date }).date
-        newEnd = _.maxBy(newEntries, (entry) => { return entry.date }).date
-      }
-
-      dataSummaries.push({
-        facilityName: facility.name,
-        existingEntries: existingEntries.length,
-        existingStart: existingStart,
-        existingEnd: existingEnd,
-        newEntries: newEntries.length,
-        newStart: newStart,
-        newEnd: newEnd
-      })
     })
     this.predictorDataSummaries = dataSummaries;
   }
 
 
-  goBack(){
-    if(this.fileReference.isTemplate){
+  goBack() {
+    if (this.fileReference.isTemplate) {
       this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/confirm-readings');
-    }else{
+    } else {
       this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/set-facility-predictors');
     }
 
@@ -111,5 +117,6 @@ export interface PredictorDataSummary {
   existingEnd: Date,
   newEntries: number,
   newStart: Date,
-  newEnd: Date
+  newEnd: Date,
+  skipExisting: boolean
 }

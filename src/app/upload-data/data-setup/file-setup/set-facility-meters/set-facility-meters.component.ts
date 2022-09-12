@@ -30,7 +30,9 @@ export class SetFacilityMetersComponent implements OnInit {
     importFacilities: [],
     meters: [],
     meterData: [],
-    predictorEntries: []
+    predictorEntries: [],
+    skipExistingReadingsMeterIds: [],
+    skipExistingPredictorFacilityIds: []
   };
   paramsSub: Subscription;
   constructor(private uploadDataService: UploadDataService, private facilityDbService: FacilitydbService,

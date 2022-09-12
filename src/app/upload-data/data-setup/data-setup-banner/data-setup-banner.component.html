@@ -1,4 +1,4 @@
-<div class="banner sticky-top d-flex justify-content-between">
+<div class="banner sticky-top d-flex justify-content-between" [ngClass]="{'modal-open': modalOpen}">
     <ul class="nav nav-tabs">
         <li class="nav-item" *ngFor="let reference of fileReferences">
             <a class="nav-link disabled" routerLink="/upload/data-setup/file-setup/{{reference.id}}"

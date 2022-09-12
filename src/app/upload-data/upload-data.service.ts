@@ -53,7 +53,9 @@ export class UploadDataService {
         importFacilities: accountFacilities,
         meters: [],
         meterData: [],
-        predictorEntries: []
+        predictorEntries: [],
+        skipExistingReadingsMeterIds: [],
+        skipExistingPredictorFacilityIds: []
       };
     } else {
       //parse template
@@ -76,7 +78,9 @@ export class UploadDataService {
         importFacilities: templateData.importFacilities,
         meters: templateData.importMeters,
         meterData: templateData.meterData,
-        predictorEntries: templateData.predictorEntries
+        predictorEntries: templateData.predictorEntries,
+        skipExistingReadingsMeterIds: [],
+        skipExistingPredictorFacilityIds: []
       };
     }
   }
@@ -484,19 +488,21 @@ export class UploadDataService {
 
     let utilityData: Array<IdbUtilityMeterData> = new Array();
     fileReference.meters.forEach(meter => {
-      fileReference.headerMap.forEach(dataRow => {
-        let readDate: Date = new Date(dataRow[dateColumnVal]);
-        let dataItem: IdbUtilityMeterData = accountUtilityData.find(accountDataItem => {
-          return accountDataItem.facilityId == meter.facilityId && this.checkSameDay(new Date(accountDataItem.readDate), readDate);
-        })
-        if (!dataItem) {
-          dataItem = this.utilityMeterDataDbService.getNewIdbUtilityMeterData(meter);
-        }
-        dataItem.readDate = readDate;
-        //TODO: volume energy use math..
-        dataItem.totalEnergyUse = dataRow[meter.importWizardName];
-        utilityData.push(dataItem);
-      });
+      if (!meter.skipImport) {
+        fileReference.headerMap.forEach(dataRow => {
+          let readDate: Date = new Date(dataRow[dateColumnVal]);
+          let dataItem: IdbUtilityMeterData = accountUtilityData.find(accountDataItem => {
+            return accountDataItem.facilityId == meter.facilityId && this.checkSameDay(new Date(accountDataItem.readDate), readDate) && accountDataItem.meterId == meter.guid;
+          })
+          if (!dataItem) {
+            dataItem = this.utilityMeterDataDbService.getNewIdbUtilityMeterData(meter);
+          }
+          dataItem.readDate = readDate;
+          //TODO: volume energy use math..
+          dataItem.totalEnergyUse = dataRow[meter.importWizardName];
+          utilityData.push(dataItem);
+        });
+      }
     });
     return utilityData;
   }
@@ -524,13 +530,14 @@ export class UploadDataService {
             predictorEntry = this.predictorDbService.getNewIdbPredictorEntry(group.facilityId, selectedAccount.guid, readDate);
           }
           group.groupItems.forEach(item => {
-            let entryData: PredictorData = predictorEntry.predictors.find(predictor => { return predictor.name == item.value });
-            if (entryData) {
-              entryData.amount = dataRow[item.value];
+            let entryDataIndex: number = predictorEntry.predictors.findIndex(predictor => { return predictor.name == item.value });
+            if (entryDataIndex != -1) {
+              predictorEntry.predictors[entryDataIndex].amount = dataRow[item.value];
             } else {
-              entryData = this.predictorDbService.getNewPredictor([]);
+              let entryData: PredictorData = this.predictorDbService.getNewPredictor([]);
               entryData.name = item.value;
               entryData.amount = dataRow[item.value];
+              predictorEntry.predictors.push(entryData);
             }
           });
           predictorData.push(predictorEntry);
@@ -559,7 +566,9 @@ export interface FileReference {
   importFacilities: Array<IdbFacility>,
   meters: Array<IdbUtilityMeter>,
   meterData: Array<IdbUtilityMeterData>,
-  predictorEntries: Array<IdbPredictorEntry>
+  predictorEntries: Array<IdbPredictorEntry>,
+  skipExistingReadingsMeterIds: Array<string>
+  skipExistingPredictorFacilityIds: Array<string>
 }
 
 export interface ColumnGroup {
