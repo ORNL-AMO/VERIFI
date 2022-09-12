@@ -104,7 +104,7 @@ export class SetFacilityMetersComponent implements OnInit {
   }
 
   continue() {
-    this.fileReference.meters = this.uploadDataService.parseMeterDataFromGroups(this.fileReference);
+    this.fileReference.meters = this.uploadDataService.parseMetersFromGroups(this.fileReference);
     let fileReferenceIndex: number = this.uploadDataService.fileReferences.findIndex(file => { return file.id == this.fileReference.id });
     this.uploadDataService.fileReferences[fileReferenceIndex] = this.fileReference;
     this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/manage-meters');

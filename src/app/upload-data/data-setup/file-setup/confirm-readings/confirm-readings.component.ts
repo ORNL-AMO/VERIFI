@@ -52,7 +52,11 @@ export class ConfirmReadingsComponent implements OnInit {
   }
 
   continue() {
-    this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/confirm-predictors');
+    if(this.fileReference.isTemplate){
+      this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/confirm-predictors');
+    }else{
+      this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/set-facility-predictors');
+    }
   }
 
   getFacilityName(facilityId: string): string {

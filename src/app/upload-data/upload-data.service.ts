@@ -389,7 +389,7 @@ export class UploadDataService {
   }
 
 
-  parseMeterDataFromGroups(fileReference: FileReference): Array<IdbUtilityMeter> {
+  parseMetersFromGroups(fileReference: FileReference): Array<IdbUtilityMeter> {
     let meters: Array<IdbUtilityMeter> = new Array();
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     // let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
@@ -473,6 +473,32 @@ export class UploadDataService {
     //set emissions mulitpliers
     newMeter = this.editMeterFormService.setMultipliers(newMeter);
     return newMeter;
+  }
+
+
+  parseExcelMeterData(fileReference: FileReference): Array<IdbUtilityMeterData> {
+    let dateColumnGroup: ColumnGroup = fileReference.columnGroups.find(group => { return group.groupLabel == 'Date' });
+    let dateColumnVal: string = dateColumnGroup.groupItems[0].value;
+
+    let accountUtilityData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+
+    let utilityData: Array<IdbUtilityMeterData> = new Array();
+    fileReference.meters.forEach(meter => {
+      fileReference.headerMap.forEach(dataRow => {
+        let readDate: Date = new Date(dataRow[dateColumnVal]);
+        let dataItem: IdbUtilityMeterData = accountUtilityData.find(accountDataItem => {
+          return accountDataItem.facilityId == meter.facilityId && this.checkSameDay(new Date(accountDataItem.readDate), readDate);
+        })
+        if (!dataItem) {
+          dataItem = this.utilityMeterDataDbService.getNewIdbUtilityMeterData(meter);
+        }
+        dataItem.readDate = readDate;
+        //TODO: volume energy use math..
+        dataItem.totalEnergyUse = dataRow[meter.importWizardName];
+        utilityData.push(dataItem);
+      });
+    });
+    return utilityData;
   }
 }
 
