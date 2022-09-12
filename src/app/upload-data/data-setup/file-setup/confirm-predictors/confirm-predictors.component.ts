@@ -94,7 +94,13 @@ export class ConfirmPredictorsComponent implements OnInit {
 
 
   goBack(){
-    this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/confirm-readings');
+    if(this.fileReference.isTemplate){
+      this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/confirm-readings');
+    }else{
+      this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/set-facility-predictors');
+    }
+
+
   }
 }
 

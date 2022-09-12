@@ -500,6 +500,45 @@ export class UploadDataService {
     });
     return utilityData;
   }
+
+
+  parseExcelPredictorsData(fileReference: FileReference): Array<IdbPredictorEntry> {
+    let dateColumnGroup: ColumnGroup = fileReference.columnGroups.find(group => { return group.groupLabel == 'Date' });
+    let dateColumnVal: string = dateColumnGroup.groupItems[0].value;
+
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+
+    let predictorData: Array<IdbPredictorEntry> = new Array();
+    let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
+    fileReference.predictorFacilityGroups.forEach(group => {
+      if (group.facilityName != 'Unmapped Predictors' && group.groupItems.length != 0) {
+        let facilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(entry => {
+          return entry.facilityId == group.facilityId;
+        });
+        fileReference.headerMap.forEach(dataRow => {
+          let readDate: Date = new Date(dataRow[dateColumnVal]);
+          let predictorEntry: IdbPredictorEntry = facilityPredictorEntries.find(entry => {
+            return this.checkSameMonth(new Date(entry.date), readDate);
+          });
+          if (!predictorEntry) {
+            predictorEntry = this.predictorDbService.getNewIdbPredictorEntry(group.facilityId, selectedAccount.guid, readDate);
+          }
+          group.groupItems.forEach(item => {
+            let entryData: PredictorData = predictorEntry.predictors.find(predictor => { return predictor.name == item.value });
+            if (entryData) {
+              entryData.amount = dataRow[item.value];
+            } else {
+              entryData = this.predictorDbService.getNewPredictor([]);
+              entryData.name = item.value;
+              entryData.amount = dataRow[item.value];
+            }
+          });
+          predictorData.push(predictorEntry);
+        });
+      }
+    });
+    return predictorData;
+  }
 }
 
 

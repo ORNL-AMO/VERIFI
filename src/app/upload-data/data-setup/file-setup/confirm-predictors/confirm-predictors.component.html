@@ -7,7 +7,7 @@
     </div>
 </div>
 <hr>
-<div class="row no-gutters">
+<div class="row no-gutters" *ngIf="fileReference.isTemplate">
     <div class="card col-md-3 col-sm-6"
         *ngFor="let facilityGroup of fileReference.predictorFacilityGroups; let index = index">
         <div class="card-header">
@@ -22,7 +22,7 @@
         </div>
     </div>
 </div>
-<hr>
+<hr *ngIf="fileReference.isTemplate">
 <table>
     <thead>
         <tr>

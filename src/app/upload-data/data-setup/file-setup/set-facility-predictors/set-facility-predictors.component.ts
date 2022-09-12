@@ -38,7 +38,7 @@ export class SetFacilityPredictorsComponent implements OnInit {
     private activatedRoute: ActivatedRoute) { }
 
   ngOnInit(): void {
-   this.paramsSub = this.activatedRoute.parent.params.subscribe(param => {
+    this.paramsSub = this.activatedRoute.parent.params.subscribe(param => {
       let id: string = param['id'];
       this.fileReference = this.uploadDataService.fileReferences.find(ref => { return ref.id == id });
       if (this.fileReference.predictorFacilityGroups.length == 0) {
@@ -48,7 +48,7 @@ export class SetFacilityPredictorsComponent implements OnInit {
     });
   }
 
-  ngOnDestroy(){
+  ngOnDestroy() {
     this.paramsSub.unsubscribe();
   }
 
@@ -90,16 +90,8 @@ export class SetFacilityPredictorsComponent implements OnInit {
   }
 
   continue() {
-    // this.router.navigateByUrl('/upload/data-setup/set-facility-predictors');
-    let fileReferenceIndex: number = this.uploadDataService.fileReferences.findIndex(ref => { return this.fileReference.id == ref.id });
-    if (fileReferenceIndex == this.uploadDataService.fileReferences.length - 1) {
-      //continue to meters
-      this.router.navigateByUrl('/upload/data-setup/set-facility-meters');
-    } else {
-      //go to next file
-      let nextFile: FileReference = this.uploadDataService.fileReferences[fileReferenceIndex + 1];
-      this.router.navigateByUrl('/upload/data-setup/file-setup/' + nextFile.id + '/select-worksheet');
-    }
+    this.fileReference.predictorEntries = this.uploadDataService.parseExcelPredictorsData(this.fileReference);
+    this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/confirm-predictors');
   }
 
   setFacility(facilityId: string) {
@@ -150,5 +142,9 @@ export class SetFacilityPredictorsComponent implements OnInit {
       }
     });
     return facilityPredictors;
+  }
+
+  goBack() {
+    this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/confirm-readings');
   }
 }
