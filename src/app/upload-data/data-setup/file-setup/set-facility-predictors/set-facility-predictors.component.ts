@@ -36,6 +36,7 @@ export class SetFacilityPredictorsComponent implements OnInit {
     skipExistingPredictorFacilityIds: []
   };
   paramsSub: Subscription;
+  predictorsIncluded: boolean;
   constructor(private uploadDataService: UploadDataService, private facilityDbService: FacilitydbService, private router: Router,
     private activatedRoute: ActivatedRoute) { }
 
@@ -43,10 +44,13 @@ export class SetFacilityPredictorsComponent implements OnInit {
     this.paramsSub = this.activatedRoute.parent.params.subscribe(param => {
       let id: string = param['id'];
       this.fileReference = this.uploadDataService.fileReferences.find(ref => { return ref.id == id });
-      if (this.fileReference.predictorFacilityGroups.length == 0) {
-        this.setFacilityGroups();
+      this.setPredictorsIncluded();
+      if (this.predictorsIncluded) {
+        if (this.fileReference.predictorFacilityGroups.length == 0) {
+          this.setFacilityGroups();
+        }
+        this.facilityGroupIds = this.fileReference.predictorFacilityGroups.map(group => { return group.facilityId });
       }
-      this.facilityGroupIds = this.fileReference.predictorFacilityGroups.map(group => { return group.facilityId });
     });
   }
 
@@ -92,7 +96,9 @@ export class SetFacilityPredictorsComponent implements OnInit {
   }
 
   continue() {
-    this.fileReference.predictorEntries = this.uploadDataService.parseExcelPredictorsData(this.fileReference);
+    if (this.predictorsIncluded) {
+      this.fileReference.predictorEntries = this.uploadDataService.parseExcelPredictorsData(this.fileReference);
+    }
     this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/confirm-predictors');
   }
 
@@ -148,5 +154,15 @@ export class SetFacilityPredictorsComponent implements OnInit {
 
   goBack() {
     this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/confirm-readings');
+  }
+
+  setPredictorsIncluded() {
+    let predictorsIncluded: boolean = false;
+    this.fileReference.columnGroups.forEach(group => {
+      if (group.groupLabel == 'Predictors' && group.groupItems.length != 0) {
+        predictorsIncluded = true;
+      }
+    });
+    this.predictorsIncluded = predictorsIncluded;
   }
 }

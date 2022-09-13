@@ -34,6 +34,7 @@ export class ConfirmPredictorsComponent implements OnInit {
   };
   paramsSub: Subscription;
   predictorDataSummaries: Array<PredictorDataSummary>;
+  predictorsExist: boolean;
   constructor(private activatedRoute: ActivatedRoute, private uploadDataService: UploadDataService,
     private router: Router) { }
 
@@ -41,6 +42,7 @@ export class ConfirmPredictorsComponent implements OnInit {
     this.paramsSub = this.activatedRoute.parent.params.subscribe(param => {
       let id: string = param['id'];
       this.fileReference = this.uploadDataService.fileReferences.find(ref => { return ref.id == id });
+      this.predictorsExist = this.fileReference.predictorEntries.length != 0;
       this.setSummary();
     });
   }

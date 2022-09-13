@@ -7,59 +7,70 @@
     </div>
 </div>
 <hr>
-<div class="row no-gutters" *ngIf="fileReference.isTemplate">
-    <div class="card col-md-3 col-sm-6"
-        *ngFor="let facilityGroup of fileReference.predictorFacilityGroups; let index = index">
-        <div class="card-header">
-            <i class="fa fa-industry" [ngStyle]="{color: facilityGroup.color}"></i>
-            {{facilityGroup.facilityName}}
+<ng-container *ngIf="predictorsExist">
+    <div class="row no-gutters" *ngIf="fileReference.isTemplate">
+        <div class="card col-md-3 col-sm-6"
+            *ngFor="let facilityGroup of fileReference.predictorFacilityGroups; let index = index">
+            <div class="card-header">
+                <i class="fa fa-industry" [ngStyle]="{color: facilityGroup.color}"></i>
+                {{facilityGroup.facilityName}}
 
-        </div>
-        <div class="card-body">
-            <div class="list-item template mt-2 mb-2 p-2" *ngFor="let groupItem of facilityGroup.groupItems">
-                {{groupItem.value}} <br>
+            </div>
+            <div class="card-body">
+                <div class="list-item template mt-2 mb-2 p-2" *ngFor="let groupItem of facilityGroup.groupItems">
+                    {{groupItem.value}} <br>
+                </div>
             </div>
         </div>
     </div>
+    <hr *ngIf="fileReference.isTemplate">
+    <table>
+        <thead>
+            <tr>
+                <th>
+                    Facility Name
+                </th>
+                <th>
+                    New Predictors Entries
+                </th>
+                <th>
+                    Existing Predictors Entries
+                </th>
+                <th>
+                    Skip Existing?
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let summary of predictorDataSummaries">
+                <td>
+                    {{summary.facilityName}}
+                </td>
+                <td>
+                    {{summary.newEntries}}
+                    <span *ngIf="summary.newStart">
+                        ({{summary.newStart | date}} - {{summary.newEnd | date}})
+                    </span>
+                </td>
+                <td [ngClass]="{'skip': summary.skipExisting}">
+                    {{summary.existingEntries}}
+                    <span *ngIf="summary.existingStart">
+                        ({{summary.existingStart | date}} - {{summary.existingEnd | date}})
+                    </span>
+                </td>
+                <td>
+                    <input type="checkbox" class="form-control" [(ngModel)]="summary.skipExisting">
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</ng-container>
+
+<div class="alert alert-warning p-2" *ngIf="!predictorsExist">
+    <ng-container *ngIf="!fileReference.isTemplate">
+        No predictors found. Go back to column selection and include predictors or click continue to upload included meter data.
+    </ng-container>
+    <ng-container *ngIf="fileReference.isTemplate">
+        No predictor data included in template. Click continue to upload included meter and facility data.
+    </ng-container>
 </div>
-<hr *ngIf="fileReference.isTemplate">
-<table>
-    <thead>
-        <tr>
-            <th>
-                Facility Name
-            </th>
-            <th>
-                New Predictors Entries
-            </th>
-            <th>
-                Existing Predictors Entries
-            </th>
-            <th>
-                Skip Existing?
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr *ngFor="let summary of predictorDataSummaries">
-            <td>
-                {{summary.facilityName}}
-            </td>
-            <td>
-                {{summary.newEntries}}
-                <span *ngIf="summary.newStart">
-                    ({{summary.newStart | date}} - {{summary.newEnd | date}})
-                </span>
-            </td>
-            <td [ngClass]="{'skip': summary.skipExisting}">
-                {{summary.existingEntries}}
-                <span *ngIf="summary.existingStart">
-                    ({{summary.existingStart | date}} - {{summary.existingEnd | date}})
-                </span>
-            </td>
-            <td>
-                <input type="checkbox" class="form-control" [(ngModel)]="summary.skipExisting">                
-            </td>
-        </tr>
-    </tbody>
-</table>

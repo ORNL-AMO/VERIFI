@@ -37,6 +37,7 @@ export class ManageMetersComponent implements OnInit {
   editMeterForm: FormGroup;
   editMeterIndex: number;
   editMeterFacility: IdbFacility;
+  metersIncluded: boolean;
   constructor(private activatedRoute: ActivatedRoute, private uploadDataService: UploadDataService,
     private editMeterFormService: EditMeterFormService, private router: Router) { }
 
@@ -44,6 +45,7 @@ export class ManageMetersComponent implements OnInit {
     this.paramsSub = this.activatedRoute.parent.params.subscribe(param => {
       let id: string = param['id'];
       this.fileReference = this.uploadDataService.fileReferences.find(ref => { return ref.id == id });
+      this.metersIncluded = this.fileReference.meters.length != 0;
       this.fileReference.meters.forEach(meter => {
         let form: FormGroup = this.editMeterFormService.getFormFromMeter(meter);
         meter.isValid = form.valid;

@@ -35,6 +35,7 @@ export class SetFacilityMetersComponent implements OnInit {
     skipExistingPredictorFacilityIds: []
   };
   paramsSub: Subscription;
+  importMetersFound: boolean;
   constructor(private uploadDataService: UploadDataService, private facilityDbService: FacilitydbService,
     private router: Router, private activatedRoute: ActivatedRoute) { }
 
@@ -42,10 +43,13 @@ export class SetFacilityMetersComponent implements OnInit {
     this.paramsSub = this.activatedRoute.parent.params.subscribe(param => {
       let id: string = param['id'];
       this.fileReference = this.uploadDataService.fileReferences.find(ref => { return ref.id == id });
-      if (this.fileReference.meterFacilityGroups.length == 0) {
-        this.setFacilityGroups();
+      this.setMeterGroupsFound();
+      if (this.importMetersFound) {
+        if (this.fileReference.meterFacilityGroups.length == 0) {
+          this.setFacilityGroups();
+        }
+        this.facilityGroupIds = this.fileReference.meterFacilityGroups.map(group => { return group.facilityId });
       }
-      this.facilityGroupIds = this.fileReference.meterFacilityGroups.map(group => { return group.facilityId });
     });
   }
 
@@ -159,5 +163,15 @@ export class SetFacilityMetersComponent implements OnInit {
 
   goBack() {
     this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/identify-columns');
+  }
+
+  setMeterGroupsFound() {
+    let importMetersFound: boolean = false;
+    this.fileReference.columnGroups.forEach(group => {
+      if (group.groupLabel == 'Meters' && group.groupItems.length != 0) {
+        importMetersFound = true;
+      }
+    });
+    this.importMetersFound = importMetersFound;
   }
 }

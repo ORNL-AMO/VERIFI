@@ -7,7 +7,7 @@
     </div>
 </div>
 <hr>
-<table>
+<table *ngIf="metersIncluded">
     <thead>
         <tr>
             <th>
@@ -57,8 +57,18 @@
                 </span>
             </td>
             <td>
-                <input type="checkbox" class="form-control" [(ngModel)]="summary.skipExisting">                
+                <input type="checkbox" class="form-control" [(ngModel)]="summary.skipExisting">
             </td>
         </tr>
     </tbody>
 </table>
+
+<div class="alert alert-warning p-2" *ngIf="!metersIncluded">
+    <ng-container *ngIf="!fileReference.isTemplate">
+        No import meters found. Go back to column selection and include meters or click continue to move on to
+        predictors.
+    </ng-container>
+    <ng-container *ngIf="fileReference.isTemplate">
+        No import meters found. Click continue to move on to predictors.
+    </ng-container>
+</div>

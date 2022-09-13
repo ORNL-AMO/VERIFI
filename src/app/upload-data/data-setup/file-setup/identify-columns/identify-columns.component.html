@@ -2,8 +2,19 @@
     <div class="d-flex">
         <button class="btn btn-secondary" (click)="goBack()">Back</button>
     </div>
-    <div class="d-flex">
-        <button class="btn btn-success" (click)="continue()">Submit &amp; Continue</button>
+    <div class="d-flex flex-column">
+        <button class="btn btn-success" (click)="continue()" [disabled]="noPredictorsOrMeters || noDateColumn">Submit
+            &amp; Continue</button>
+    </div>
+</div>
+<div class="d-flex justify-content-end" *ngIf="noPredictorsOrMeters || noDateColumn">
+    <div class="d-flex flex-column">
+        <div *ngIf="noPredictorsOrMeters" class="alert alert-danger p-2">
+            No predictors or meters selected.
+        </div>
+        <div *ngIf="noDateColumn" class="alert alert-danger p-2">
+            Date column required.
+        </div>
     </div>
 </div>
 <hr>

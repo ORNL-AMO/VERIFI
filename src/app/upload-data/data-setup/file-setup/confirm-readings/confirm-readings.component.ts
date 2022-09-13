@@ -37,6 +37,7 @@ export class ConfirmReadingsComponent implements OnInit {
   };
   paramsSub: Subscription;
   meterDataSummaries: Array<MeterDataSummary>;
+  metersIncluded: boolean;
   constructor(private activatedRoute: ActivatedRoute, private uploadDataService: UploadDataService,
     private utilityMeterDataService: UtilityMeterDataService, private energyUnitsHelperService: EnergyUnitsHelperService,
     private router: Router) { }
@@ -45,7 +46,10 @@ export class ConfirmReadingsComponent implements OnInit {
     this.paramsSub = this.activatedRoute.parent.params.subscribe(param => {
       let id: string = param['id'];
       this.fileReference = this.uploadDataService.fileReferences.find(ref => { return ref.id == id });
-      this.setSummary();
+      this.metersIncluded = this.fileReference.meters.length != 0
+      if (this.metersIncluded) {
+        this.setSummary();
+      }
     });
   }
 
@@ -54,13 +58,15 @@ export class ConfirmReadingsComponent implements OnInit {
   }
 
   continue() {
-    let skipExistingReadingsMeterIds: Array<string> = new Array();
-    this.meterDataSummaries.forEach(summary => {
-      if(summary.skipExisting){
-        skipExistingReadingsMeterIds.push(summary.meterId);
-      }
-    })
-    this.fileReference.skipExistingReadingsMeterIds = skipExistingReadingsMeterIds;
+    if (this.metersIncluded) {
+      let skipExistingReadingsMeterIds: Array<string> = new Array();
+      this.meterDataSummaries.forEach(summary => {
+        if (summary.skipExisting) {
+          skipExistingReadingsMeterIds.push(summary.meterId);
+        }
+      })
+      this.fileReference.skipExistingReadingsMeterIds = skipExistingReadingsMeterIds;
+    }
     if (this.fileReference.isTemplate) {
       this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/confirm-predictors');
     } else {
@@ -121,9 +127,7 @@ export class ConfirmReadingsComponent implements OnInit {
           invalidStart = _.minBy(invalidReadings, (entry) => { return entry.readDate }).readDate
           invalidEnd = _.maxBy(invalidReadings, (entry) => { return entry.readDate }).readDate
         }
-        let skipExisting: string = this.fileReference.skipExistingReadingsMeterIds.find(id => {return id == meter.guid});
-        console.log(meter.name);
-        console.log(existingReadings);
+        let skipExisting: string = this.fileReference.skipExistingReadingsMeterIds.find(id => { return id == meter.guid });
         dataSummaries.push({
           meterName: meter.name,
           meterId: meter.guid,

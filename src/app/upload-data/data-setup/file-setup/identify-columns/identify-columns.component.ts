@@ -35,6 +35,8 @@ export class IdentifyColumnsComponent implements OnInit {
   maxDate: Date;
   columnGroupItemIds: Array<string>;
   paramsSub: Subscription;
+  noPredictorsOrMeters: boolean;
+  noDateColumn: boolean;
   constructor(private activatedRoute: ActivatedRoute, private uploadDataService: UploadDataService,
     private router: Router) { }
 
@@ -48,6 +50,7 @@ export class IdentifyColumnsComponent implements OnInit {
         }
         this.columnGroupItemIds = this.fileReference.columnGroups.map(group => { return group.id });
         this.setMinMaxDate();
+        this.setValidation();
       }
     });
   }
@@ -89,6 +92,9 @@ export class IdentifyColumnsComponent implements OnInit {
         }
       }
     });
+    this.fileReference.meterFacilityGroups = [];
+    this.fileReference.predictorFacilityGroups = [];
+    this.setValidation();
   }
 
 
@@ -144,6 +150,8 @@ export class IdentifyColumnsComponent implements OnInit {
       id: Math.random().toString(36).substr(2, 9)
     });
     this.fileReference.columnGroups = columnGroups;
+    this.fileReference.meterFacilityGroups = [];
+    this.fileReference.predictorFacilityGroups = [];
   }
 
 
@@ -169,5 +177,21 @@ export class IdentifyColumnsComponent implements OnInit {
 
   goBack(){
     this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/select-worksheet')
+  }
+
+  setValidation(){
+    let noDateColumn: boolean = true;
+    let noPredictorsOrMeters: boolean = true;
+    this.fileReference.columnGroups.forEach(group => {
+      if(group.groupLabel != 'Date' && group.groupLabel != 'Unused'){
+        if(group.groupItems.length != 0){
+          noPredictorsOrMeters = false;
+        }
+      }else if(group.groupLabel == 'Date' && group.groupItems.length != 0){
+        noDateColumn = false;
+      }
+    });
+    this.noDateColumn = noDateColumn;
+    this.noPredictorsOrMeters = noPredictorsOrMeters;
   }
 }
