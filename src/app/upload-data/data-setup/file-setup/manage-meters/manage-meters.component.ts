@@ -68,19 +68,21 @@ export class ManageMetersComponent implements OnInit {
   }
 
   continue() {
-    let meterData: Array<IdbUtilityMeterData> = this.uploadDataService.parseExcelMeterData(this.fileReference);
-    this.fileReference.meterData = meterData;
-    let newGroups: Array<IdbUtilityMeterGroup> = new Array();
-    this.fileReference.meters.forEach(meter => {
-      if(meter.groupId){
-        let facilityGroups: Array<IdbUtilityMeterGroup> = this.getFacilityMeterGroups(meter.facilityId);
-        let selectedGroup: IdbUtilityMeterGroup = facilityGroups.find(group => {return group.guid == meter.groupId});
-        if(!selectedGroup.id){
-          newGroups.push(selectedGroup);
+    if (!this.fileReference.isTemplate) {
+      let meterData: Array<IdbUtilityMeterData> = this.uploadDataService.parseExcelMeterData(this.fileReference);
+      this.fileReference.meterData = meterData;
+      let newGroups: Array<IdbUtilityMeterGroup> = new Array();
+      this.fileReference.meters.forEach(meter => {
+        if (meter.groupId) {
+          let facilityGroups: Array<IdbUtilityMeterGroup> = this.getFacilityMeterGroups(meter.facilityId);
+          let selectedGroup: IdbUtilityMeterGroup = facilityGroups.find(group => { return group.guid == meter.groupId });
+          if (!selectedGroup.id) {
+            newGroups.push(selectedGroup);
+          }
         }
-      }
-    });
-    this.fileReference.newMeterGroups = newGroups;
+      });
+      this.fileReference.newMeterGroups = newGroups;
+    }
     this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/confirm-readings');
   }
 
@@ -130,7 +132,8 @@ export class ManageMetersComponent implements OnInit {
     }> = new Array();
     this.fileReference.importFacilities.forEach(importFacility => {
       let facilityMeterGroups: Array<IdbUtilityMeterGroup> = accountMeterGroups.filter(accountGroup => { return accountGroup.facilityId == importFacility.guid });
-
+      let newImportGroups: Array<IdbUtilityMeterGroup> = this.fileReference.newMeterGroups.filter(newGroup => { return newGroup.facilityId == importFacility.guid });
+      facilityMeterGroups = facilityMeterGroups.concat(newImportGroups);
       let electricityGroup: IdbUtilityMeterGroup = facilityMeterGroups.find(group => { return group.name == 'Electricity' });
       if (!electricityGroup) {
         electricityGroup = this.utilityMeterGroupDbService.getNewIdbUtilityMeterGroup("Energy", "Electricity", importFacility.guid, importFacility.accountId);

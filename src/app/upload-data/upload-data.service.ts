@@ -12,6 +12,7 @@ import { UtilityMeterDatadbService } from '../indexedDB/utilityMeterData-db.serv
 import { EnergyUnitsHelperService } from '../shared/helper-services/energy-units-helper.service';
 import { EditMeterFormService } from '../facility/utility-data/energy-consumption/energy-source/edit-meter-form/edit-meter-form.service';
 import { EnergyUseCalculationsService } from '../shared/helper-services/energy-use-calculations.service';
+import { UtilityMeterGroupdbService } from '../indexedDB/utilityMeterGroup-db.service';
 @Injectable({
   providedIn: 'root'
 })
@@ -26,7 +27,8 @@ export class UploadDataService {
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private energyUnitsHelperService: EnergyUnitsHelperService,
     private editMeterFormService: EditMeterFormService,
-    private energyUseCalculationsService: EnergyUseCalculationsService) {
+    private energyUseCalculationsService: EnergyUseCalculationsService,
+    private utilityMeterGroupDbService: UtilityMeterGroupdbService) {
     this.allFilesSet = new BehaviorSubject<boolean>(false);
     this.fileReferences = new Array();
     this.uploadMeters = new Array();
@@ -82,7 +84,7 @@ export class UploadDataService {
         predictorEntries: templateData.predictorEntries,
         skipExistingReadingsMeterIds: [],
         skipExistingPredictorFacilityIds: [],
-        newMeterGroups: []
+        newMeterGroups: templateData.newGroups
       };
     }
   }
@@ -122,6 +124,7 @@ export class UploadDataService {
     let metersData = XLSX.utils.sheet_to_json(workbook.Sheets['Meters-Utilities']);
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let importMeters: Array<IdbUtilityMeter> = new Array();
+    let newGroups: Array<IdbUtilityMeterGroup> = new Array();
     metersData.forEach(meterData => {
       let facilityName: string = meterData['Facility Name'];
       let facility: IdbFacility = importFacilities.find(facility => { return facility.name == facilityName });
@@ -138,7 +141,11 @@ export class UploadDataService {
       meter.notes = meterData['Notes'];
       meter.location = meterData['Building / Location'];
       //TODO: group, phase, fuel
-      meter.group = meterData['Meter Group'];
+      let groupData: { group: IdbUtilityMeterGroup, newGroups: Array<IdbUtilityMeterGroup> } = this.getMeterGroup(meterData['Meter Group'], facility.guid, newGroups);
+      newGroups = groupData.newGroups;
+      if (groupData.group) {
+        meter.groupId = groupData.group.guid;
+      }
       meter.phase = meterData['Phase'];
       meter.fuel = meterData['Fuel'];
       meter.startingUnit = meterData['Collection Unit'];
@@ -189,8 +196,39 @@ export class UploadDataService {
         }
       });
     })
-    return { importFacilities: importFacilities, importMeters: importMeters, predictorEntries: predictorEntries, meterData: importMeterData }
+    return { importFacilities: importFacilities, importMeters: importMeters, predictorEntries: predictorEntries, meterData: importMeterData, newGroups: newGroups }
   }
+
+
+  getMeterGroup(groupName: string, facilityId: string, newGroups: Array<IdbUtilityMeterGroup>): { group: IdbUtilityMeterGroup, newGroups: Array<IdbUtilityMeterGroup> } {
+    let accountGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
+    let facilityGroups: Array<IdbUtilityMeterGroup> = accountGroups.filter(accountGroup => { return accountGroup.facilityId == facilityId });
+    let dbGroup: IdbUtilityMeterGroup = facilityGroups.find(group => { return group.name == groupName || group.guid == groupName });
+    if (dbGroup) {
+      return { group: dbGroup, newGroups: newGroups }
+    } else {
+      let newFacilityGroups: Array<IdbUtilityMeterGroup> = newGroups.filter(group => { return group.facilityId == facilityId });
+      dbGroup = newFacilityGroups.find(newGroup => { return newGroup.name == groupName });
+      if (dbGroup) {
+        return { group: dbGroup, newGroups: newGroups }
+      } else if (groupName) {
+        let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+        dbGroup = this.utilityMeterGroupDbService.getNewIdbUtilityMeterGroup("Energy", groupName, facilityId, account.guid);
+        newGroups.push(dbGroup);
+        return { group: dbGroup, newGroups: newGroups }
+      } else {
+        return { group: undefined, newGroups: newGroups }
+      }
+    }
+  }
+
+  // getPhaseEnum(phase: string): number {
+
+  // }
+
+  // getFuelEnum(fuel: string): number {
+
+  // }
 
 
   getMeterDataEntries(workbook: XLSX.WorkBook, importMeters: Array<IdbUtilityMeter>): Array<IdbUtilityMeterData> {
@@ -599,5 +637,6 @@ export interface ParsedTemplate {
   importFacilities: Array<IdbFacility>,
   importMeters: Array<IdbUtilityMeter>,
   predictorEntries: Array<IdbPredictorEntry>,
-  meterData: Array<IdbUtilityMeterData>
+  meterData: Array<IdbUtilityMeterData>,
+  newGroups: Array<IdbUtilityMeterGroup>
 }
