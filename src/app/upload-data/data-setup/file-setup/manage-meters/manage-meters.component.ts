@@ -3,7 +3,8 @@ import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { EditMeterFormService } from 'src/app/facility/utility-data/energy-consumption/energy-source/edit-meter-form/edit-meter-form.service';
-import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
+import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from 'src/app/models/idb';
 import { FileReference, UploadDataService } from 'src/app/upload-data/upload-data.service';
 
 @Component({
@@ -31,25 +32,34 @@ export class ManageMetersComponent implements OnInit {
     meterData: [],
     predictorEntries: [],
     skipExistingReadingsMeterIds: [],
-    skipExistingPredictorFacilityIds: []
+    skipExistingPredictorFacilityIds: [],
+    newMeterGroups: []
   };
   paramsSub: Subscription;
   editMeterForm: FormGroup;
   editMeterIndex: number;
   editMeterFacility: IdbFacility;
   metersIncluded: boolean;
+  facilityGroups: Array<{
+    facilityId: string,
+    groupOptions: Array<IdbUtilityMeterGroup>
+  }>;
   constructor(private activatedRoute: ActivatedRoute, private uploadDataService: UploadDataService,
-    private editMeterFormService: EditMeterFormService, private router: Router) { }
+    private editMeterFormService: EditMeterFormService, private router: Router,
+    private utilityMeterGroupDbService: UtilityMeterGroupdbService) { }
 
   ngOnInit(): void {
     this.paramsSub = this.activatedRoute.parent.params.subscribe(param => {
       let id: string = param['id'];
       this.fileReference = this.uploadDataService.fileReferences.find(ref => { return ref.id == id });
       this.metersIncluded = this.fileReference.meters.length != 0;
-      this.fileReference.meters.forEach(meter => {
-        let form: FormGroup = this.editMeterFormService.getFormFromMeter(meter);
-        meter.isValid = form.valid;
-      });
+      if (this.metersIncluded) {
+        this.setFacilityMeterGroups();
+        this.fileReference.meters.forEach(meter => {
+          let form: FormGroup = this.editMeterFormService.getFormFromMeter(meter);
+          meter.isValid = form.valid;
+        });
+      }
     });
   }
 
@@ -60,6 +70,17 @@ export class ManageMetersComponent implements OnInit {
   continue() {
     let meterData: Array<IdbUtilityMeterData> = this.uploadDataService.parseExcelMeterData(this.fileReference);
     this.fileReference.meterData = meterData;
+    let newGroups: Array<IdbUtilityMeterGroup> = new Array();
+    this.fileReference.meters.forEach(meter => {
+      if(meter.groupId){
+        let facilityGroups: Array<IdbUtilityMeterGroup> = this.getFacilityMeterGroups(meter.facilityId);
+        let selectedGroup: IdbUtilityMeterGroup = facilityGroups.find(group => {return group.guid == meter.groupId});
+        if(!selectedGroup.id){
+          newGroups.push(selectedGroup);
+        }
+      }
+    });
+    this.fileReference.newMeterGroups = newGroups;
     this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/confirm-readings');
   }
 
@@ -87,10 +108,59 @@ export class ManageMetersComponent implements OnInit {
   }
 
   goBack() {
-    if(this.fileReference.isTemplate){
+    if (this.fileReference.isTemplate) {
       this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/template-facilities');
-    }else{
+    } else {
       this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/set-facility-meters');
     }
   }
+
+  getFacilityMeterGroups(facilityId: string): Array<IdbUtilityMeterGroup> {
+    let facilityGroups: Array<IdbUtilityMeterGroup> = this.facilityGroups.find(group => {
+      return group.facilityId == facilityId;
+    }).groupOptions;
+    return facilityGroups;
+  }
+
+  setFacilityMeterGroups() {
+    let accountMeterGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
+    let facilityGroups: Array<{
+      facilityId: string,
+      groupOptions: Array<IdbUtilityMeterGroup>
+    }> = new Array();
+    this.fileReference.importFacilities.forEach(importFacility => {
+      let facilityMeterGroups: Array<IdbUtilityMeterGroup> = accountMeterGroups.filter(accountGroup => { return accountGroup.facilityId == importFacility.guid });
+
+      let electricityGroup: IdbUtilityMeterGroup = facilityMeterGroups.find(group => { return group.name == 'Electricity' });
+      if (!electricityGroup) {
+        electricityGroup = this.utilityMeterGroupDbService.getNewIdbUtilityMeterGroup("Energy", "Electricity", importFacility.guid, importFacility.accountId);
+        facilityMeterGroups.push(electricityGroup);
+      }
+      let naturalGasGroup: IdbUtilityMeterGroup = facilityMeterGroups.find(group => { return group.name == 'Natural Gas' });
+      if (!naturalGasGroup) {
+        naturalGasGroup = this.utilityMeterGroupDbService.getNewIdbUtilityMeterGroup("Energy", "Natural Gas", importFacility.guid, importFacility.accountId);
+        facilityMeterGroups.push(naturalGasGroup);
+      }
+      let otherFuelGroup: IdbUtilityMeterGroup = facilityMeterGroups.find(group => { return group.name == 'Other Fuel' });
+      if (!otherFuelGroup) {
+        otherFuelGroup = this.utilityMeterGroupDbService.getNewIdbUtilityMeterGroup("Energy", "Other Fuel", importFacility.guid, importFacility.accountId);
+        facilityMeterGroups.push(otherFuelGroup);
+      }
+
+      facilityMeterGroups.push({
+        guid: undefined,
+        facilityId: undefined,
+        accountId: undefined,
+        //data
+        groupType: undefined,
+        name: "No Group",
+      });
+      facilityGroups.push({
+        facilityId: importFacility.guid,
+        groupOptions: facilityMeterGroups
+      });
+    });
+    this.facilityGroups = facilityGroups;
+  }
+
 }

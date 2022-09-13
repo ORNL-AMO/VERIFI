@@ -29,6 +29,9 @@
                 Source
             </th>
             <th>
+                Group
+            </th>
+            <th>
                 Is Valid?
             </th>
             <th>
@@ -50,6 +53,13 @@
             </td>
             <td>
                 {{meter.source}}
+            </td>
+            <td>
+                <!-- {{meter.groupId}} -->
+                <select class="form-control" id="meterGroup" [(ngModel)]="meter.groupId">
+                    <option *ngFor="let group of getFacilityMeterGroups(meter.facilityId)" [ngValue]="group.guid">
+                        {{group.name}}</option>
+                </select>
             </td>
             <td>
                 <span *ngIf="meter.isValid">

@@ -30,7 +30,8 @@ export class ConfirmPredictorsComponent implements OnInit {
     meterData: [],
     predictorEntries: [],
     skipExistingReadingsMeterIds: [],
-    skipExistingPredictorFacilityIds: []
+    skipExistingPredictorFacilityIds: [],
+    newMeterGroups: []
   };
   paramsSub: Subscription;
   predictorDataSummaries: Array<PredictorDataSummary>;

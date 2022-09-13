@@ -29,7 +29,8 @@ export class SelectWorksheetComponent implements OnInit {
     meterData: [],
     predictorEntries: [],
     skipExistingReadingsMeterIds: [],
-    skipExistingPredictorFacilityIds: []
+    skipExistingPredictorFacilityIds: [],
+    newMeterGroups: []
   };
   paramsSub: Subscription;
   constructor(private activatedRoute: ActivatedRoute, private uploadDataService: UploadDataService,
@@ -61,5 +62,7 @@ export class SelectWorksheetComponent implements OnInit {
     this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/identify-columns');
   }
 
-
+  goBack(){
+    this.router.navigateByUrl('/upload');
+  }
 }

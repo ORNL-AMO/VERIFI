@@ -33,7 +33,8 @@ export class SetFacilityPredictorsComponent implements OnInit {
     meterData: [],
     predictorEntries: [],
     skipExistingReadingsMeterIds: [],
-    skipExistingPredictorFacilityIds: []
+    skipExistingPredictorFacilityIds: [],
+    newMeterGroups: []
   };
   paramsSub: Subscription;
   predictorsIncluded: boolean;

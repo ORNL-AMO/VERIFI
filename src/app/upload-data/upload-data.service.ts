@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { WorkBook } from 'xlsx';
-import { IdbAccount, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, MeterPhase, PredictorData } from '../models/idb';
+import { IdbAccount, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup, MeterPhase, PredictorData } from '../models/idb';
 import * as XLSX from 'xlsx';
 import { AgreementType, AgreementTypes, FuelTypeOption, ScopeOption, ScopeOptions } from '../facility/utility-data/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
@@ -55,7 +55,8 @@ export class UploadDataService {
         meterData: [],
         predictorEntries: [],
         skipExistingReadingsMeterIds: [],
-        skipExistingPredictorFacilityIds: []
+        skipExistingPredictorFacilityIds: [],
+        newMeterGroups: []
       };
     } else {
       //parse template
@@ -80,7 +81,8 @@ export class UploadDataService {
         meterData: templateData.meterData,
         predictorEntries: templateData.predictorEntries,
         skipExistingReadingsMeterIds: [],
-        skipExistingPredictorFacilityIds: []
+        skipExistingPredictorFacilityIds: [],
+        newMeterGroups: []
       };
     }
   }
@@ -568,7 +570,8 @@ export interface FileReference {
   meterData: Array<IdbUtilityMeterData>,
   predictorEntries: Array<IdbPredictorEntry>,
   skipExistingReadingsMeterIds: Array<string>
-  skipExistingPredictorFacilityIds: Array<string>
+  skipExistingPredictorFacilityIds: Array<string>,
+  newMeterGroups: Array<IdbUtilityMeterGroup>
 }
 
 export interface ColumnGroup {

@@ -9,7 +9,8 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbAccount, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
+import { IdbAccount, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from 'src/app/models/idb';
 import { FileReference, UploadDataService } from 'src/app/upload-data/upload-data.service';
 
 @Component({
@@ -30,7 +31,8 @@ export class ConfirmAndSubmitComponent implements OnInit {
     private predictorDbService: PredictordbService,
     private toastNotificationService: ToastNotificationsService,
     private dbChangesService: DbChangesService,
-    private accountDbService: AccountdbService) { }
+    private accountDbService: AccountdbService,
+    private utilityMeterGroupDbService: UtilityMeterGroupdbService) { }
 
   ngOnInit(): void {
     this.paramsSub = this.activatedRoute.parent.params.subscribe(param => {
@@ -71,6 +73,12 @@ export class ConfirmAndSubmitComponent implements OnInit {
       } else {
         await this.utilityMeterDbService.addWithObservable(meter).toPromise();
       }
+    }
+
+    this.loadingService.setLoadingMessage('Creating Meter Groups..');
+    for (let i = 0; i < this.fileReference.newMeterGroups.length; i++) {
+      let meterGroup: IdbUtilityMeterGroup = this.fileReference.newMeterGroups[i];
+      await this.utilityMeterGroupDbService.addWithObservable(meterGroup).toPromise();
     }
 
     this.loadingService.setLoadingMessage('Uploading Meter Data...');
