@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { WorkBook } from 'xlsx';
-import { IdbAccount, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup, MeterPhase, PredictorData } from '../models/idb';
+import { IdbAccount, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup, MeterPhase, MeterSource, PredictorData } from '../models/idb';
 import * as XLSX from 'xlsx';
-import { AgreementType, AgreementTypes, FuelTypeOption, ScopeOption, ScopeOptions } from '../facility/utility-data/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
+import { AgreementType, AgreementTypes, FuelTypeOption, ScopeOption, ScopeOptions, SourceOptions } from '../facility/utility-data/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
 import { AccountdbService } from '../indexedDB/account-db.service';
 import { UtilityMeterdbService } from '../indexedDB/utilityMeter-db.service';
@@ -135,26 +135,23 @@ export class UploadDataService {
       }
       meter.meterNumber = meterNumber;
       meter.accountNumber = meterData['Account Number'];
-      meter.source = meterData['Source'];
+      meter.source =  this.getMeterSource(meterData['Source']);
       meter.name = meterData['Meter Name'];
       meter.supplier = meterData['Utility Supplier'];
       meter.notes = meterData['Notes'];
       meter.location = meterData['Building / Location'];
-      //TODO: group, phase, fuel
       let groupData: { group: IdbUtilityMeterGroup, newGroups: Array<IdbUtilityMeterGroup> } = this.getMeterGroup(meterData['Meter Group'], facility.guid, newGroups);
       newGroups = groupData.newGroups;
       if (groupData.group) {
         meter.groupId = groupData.group.guid;
       }
-      meter.phase = meterData['Phase'];
-      meter.fuel = meterData['Fuel'];
+      meter.phase = this.getPhase(meterData['Phase']);
+      meter.fuel = this.getFuelEnum(meterData['Fuel'], meter.source, meter.phase);
       meter.startingUnit = meterData['Collection Unit'];
       meter.heatCapacity = meterData['Heat Capacity'];
       meter.siteToSource = meterData['Site To Source'];
-      //TODO: scope, agreementType
       meter.scope = this.getScope(meterData['Scope']);
       meter.agreementType = this.getAgreementType(meterData['Agreement Type']);
-      //TODO: yes/no
       meter.includeInEnergy = this.getYesNoBool(meterData['Include In Energy']);
       meter.retainRECs = this.getYesNoBool(meterData['Retain RECS']);
       importMeters.push(meter);
@@ -222,13 +219,26 @@ export class UploadDataService {
     }
   }
 
-  // getPhaseEnum(phase: string): number {
+  getPhase(phase: string): MeterPhase {
+    if (phase == 'Gas' || phase == 'Liquid' || phase == 'Solid') {
+      return phase;
+    }
+    return undefined;
+  }
 
-  // }
+  getFuelEnum(fuel: string, source: MeterSource, phase: MeterPhase): string {
+    let fuelTypeOptions = this.energyUseCalculationsService.getFuelTypeOptions(source, phase);
+    let selectedEnergyOption: FuelTypeOption = fuelTypeOptions.find(option => { return option.value == fuel });
+    if (selectedEnergyOption) {
+      return selectedEnergyOption.value;
+    }
+    return undefined;
+  }
 
-  // getFuelEnum(fuel: string): number {
-
-  // }
+  getMeterSource(source: string): MeterSource {
+    let selectedSource: MeterSource = SourceOptions.find(sourceOption => { return sourceOption == source });
+    return selectedSource;
+  }
 
 
   getMeterDataEntries(workbook: XLSX.WorkBook, importMeters: Array<IdbUtilityMeter>): Array<IdbUtilityMeterData> {
@@ -419,6 +429,8 @@ export class UploadDataService {
           index: predictorIndex,
           value: predictor.name,
           id: predictor.id,
+          isExisting: predictor.id != undefined,
+          isProductionPredictor: predictor.production
         });
         predictorIndex++;
       })
@@ -629,6 +641,8 @@ export interface ColumnItem {
   index: number,
   value: string,
   id: string,
+  isProductionPredictor?: boolean,
+  isExisting?: boolean
   // fileName?: string
 }
 

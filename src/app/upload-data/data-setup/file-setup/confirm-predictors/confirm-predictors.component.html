@@ -18,7 +18,24 @@
             </div>
             <div class="card-body">
                 <div class="list-item template mt-2 mb-2 p-2" *ngFor="let groupItem of facilityGroup.groupItems">
-                    {{groupItem.value}} <br>
+                    <div class="d-flex flex-column text-center">
+                        {{groupItem.value}} 
+                        <span *ngIf="groupItem.isExisting">(existing)</span>
+                        <span *ngIf="!groupItem.isExisting">(new)</span>
+
+                        <!-- <hr> -->
+                        <div class="d-flex justify-content-center">
+                            <div class="pr-2">
+                                Production Variable?
+                            </div>
+                            <label class="switch" for="{{'isProductionPredictor_'+groupItem.id}}">
+                                <input class="checkbox" type="checkbox" id="{{'isProductionPredictor_'+groupItem.id}}"
+                                    name="{{'isProductionPredictor_'+groupItem.id}}"
+                                    [(ngModel)]="groupItem.isProductionPredictor">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -68,7 +85,8 @@
 
 <div class="alert alert-warning p-2" *ngIf="!predictorsExist">
     <ng-container *ngIf="!fileReference.isTemplate">
-        No predictors found. Go back to column selection and include predictors or click continue to upload included meter data.
+        No predictors found. Go back to column selection and include predictors or click continue to upload included
+        meter data.
     </ng-container>
     <ng-container *ngIf="fileReference.isTemplate">
         No predictor data included in template. Click continue to upload included meter and facility data.
