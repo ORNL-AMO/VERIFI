@@ -44,6 +44,7 @@ export class ManageMetersComponent implements OnInit {
     facilityId: string,
     groupOptions: Array<IdbUtilityMeterGroup>
   }>;
+  allMetersValid: boolean;
   constructor(private activatedRoute: ActivatedRoute, private uploadDataService: UploadDataService,
     private editMeterFormService: EditMeterFormService, private router: Router,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService) { }
@@ -59,6 +60,9 @@ export class ManageMetersComponent implements OnInit {
           let form: FormGroup = this.editMeterFormService.getFormFromMeter(meter);
           meter.isValid = form.valid;
         });
+        this.setValidMeters();
+      }else{
+        this.allMetersValid = true;
       }
     });
   }
@@ -68,7 +72,7 @@ export class ManageMetersComponent implements OnInit {
   }
 
   continue() {
-    if (!this.fileReference.isTemplate) {
+    if (!this.fileReference.isTemplate && this.metersIncluded) {
       let meterData: Array<IdbUtilityMeterData> = this.uploadDataService.parseExcelMeterData(this.fileReference);
       this.fileReference.meterData = meterData;
       let newGroups: Array<IdbUtilityMeterGroup> = new Array();
@@ -107,6 +111,7 @@ export class ManageMetersComponent implements OnInit {
     this.fileReference.meters[this.editMeterIndex] = this.editMeterFormService.updateMeterFromForm(this.fileReference.meters[this.editMeterIndex], this.editMeterForm);
     this.fileReference.meterData = this.uploadDataService.getMeterDataEntries(this.fileReference.workbook, this.fileReference.meters);
     this.cancelEdit();
+    this.setValidMeters();
   }
 
   goBack() {
@@ -164,6 +169,16 @@ export class ManageMetersComponent implements OnInit {
       });
     });
     this.facilityGroups = facilityGroups;
+  }
+
+  setValidMeters(){
+    let isAllValid: boolean = true;
+    this.fileReference.meters.forEach(meter => {
+      if(!meter.isValid && !meter.skipImport){
+        isAllValid = false;
+      }
+    });
+    this.allMetersValid = isAllValid;
   }
 
 }
