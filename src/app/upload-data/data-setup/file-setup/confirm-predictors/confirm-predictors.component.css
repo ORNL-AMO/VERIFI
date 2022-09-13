@@ -25,9 +25,9 @@
 }
 
 
-.list-item, .cdk-drag-preview{
-  background-color: #ffa500;
-  color: white;
+.list-item{
+  border: #ffa500 solid 2px;
+  /* color: white; */
 }
 
 

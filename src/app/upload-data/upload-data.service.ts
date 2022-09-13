@@ -13,6 +13,7 @@ import { EnergyUnitsHelperService } from '../shared/helper-services/energy-units
 import { EditMeterFormService } from '../facility/utility-data/energy-consumption/energy-source/edit-meter-form/edit-meter-form.service';
 import { EnergyUseCalculationsService } from '../shared/helper-services/energy-use-calculations.service';
 import { UtilityMeterGroupdbService } from '../indexedDB/utilityMeterGroup-db.service';
+import { UnitOption } from '../shared/unitOptions';
 @Injectable({
   providedIn: 'root'
 })
@@ -130,12 +131,14 @@ export class UploadDataService {
       let facility: IdbFacility = importFacilities.find(facility => { return facility.name == facilityName });
       let meterNumber: string = meterData['Meter Number'];
       let meter: IdbUtilityMeter = accountMeters.find(aMeter => { return aMeter.meterNumber == meterNumber });
+      //TODO: check collection units is energy..
       if (!meter) {
-        meter = this.utilityMeterDbService.getNewIdbUtilityMeter(facility.guid, selectedAccount.guid, true, meterData['Collection Unit']);
+        meter = this.utilityMeterDbService.getNewIdbUtilityMeter(facility.guid, selectedAccount.guid, true, facility.energyUnit);
       }
+
       meter.meterNumber = meterNumber;
       meter.accountNumber = meterData['Account Number'];
-      meter.source =  this.getMeterSource(meterData['Source']);
+      meter.source = this.getMeterSource(meterData['Source']);
       meter.name = meterData['Meter Name'];
       meter.supplier = meterData['Utility Supplier'];
       meter.notes = meterData['Notes'];
@@ -147,8 +150,17 @@ export class UploadDataService {
       }
       meter.phase = this.getPhase(meterData['Phase']);
       meter.fuel = this.getFuelEnum(meterData['Fuel'], meter.source, meter.phase);
-      meter.startingUnit = meterData['Collection Unit'];
+      meter.startingUnit = this.checkImportStartingUnit(meterData['Collection Unit'], meter.source, meter.phase, meter.fuel);
       meter.heatCapacity = meterData['Heat Capacity'];
+      if (!meter.heatCapacity) {
+        let isEnergyUnit: boolean = this.energyUnitsHelperService.isEnergyUnit(meter.startingUnit);
+        if (!isEnergyUnit) {
+          let fuelTypeOptions: Array<FuelTypeOption> = this.energyUseCalculationsService.getFuelTypeOptions(meter.source, meter.phase);
+          let fuel: FuelTypeOption = fuelTypeOptions.find(option => { return option.value == meter.fuel });
+          meter.heatCapacity = this.energyUseCalculationsService.getHeatingCapacity(meter.source, meter.startingUnit, meter.energyUnit, fuel);
+        }
+      }
+      // meter.heatCapacity = meterData['Heat Capacity'];
       meter.siteToSource = meterData['Site To Source'];
       meter.scope = this.getScope(meterData['Scope']);
       meter.agreementType = this.getAgreementType(meterData['Agreement Type']);
@@ -167,6 +179,22 @@ export class UploadDataService {
     importFacilities.forEach(facility => {
       let facilityPredictorData = predictorsData.filter(data => { return data['Facility Name'] == facility.name });
       let facilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(entry => { return entry.facilityId == facility.guid });
+      let existingFacilityPredictorData: Array<PredictorData> = new Array();
+      if (facilityPredictorEntries.length != 0) {
+        existingFacilityPredictorData = facilityPredictorEntries[0].predictors;
+      }
+      if (facilityPredictorData.length != 0) {
+        Object.keys(facilityPredictorData[0]).forEach((key) => {
+          if (key != 'Facility Name' && key != 'Date') {
+            let predictorIndex: number = existingFacilityPredictorData.findIndex(predictor => { return predictor.name == key });
+            if (predictorIndex == -1) {
+              let newPredictor: PredictorData = this.predictorDbService.getNewPredictor([]);
+              newPredictor.name = key;
+              existingFacilityPredictorData.push(newPredictor);
+            }
+          }
+        });
+      }
       facilityPredictorData.forEach(dataItem => {
         let dataItemDate: Date = new Date(dataItem['Date']);
         let facilityPredictorEntry: IdbPredictorEntry = facilityPredictorEntries.find(entry => {
@@ -174,17 +202,13 @@ export class UploadDataService {
         });
         if (!facilityPredictorEntry) {
           facilityPredictorEntry = this.predictorDbService.getNewIdbPredictorEntry(facility.guid, selectedAccount.guid, dataItemDate);
+          facilityPredictorEntry.predictors = JSON.parse(JSON.stringify(existingFacilityPredictorData));
         }
         Object.keys(dataItem).forEach((key) => {
           if (key != 'Facility Name' && key != 'Date') {
             let predictorIndex: number = facilityPredictorEntry.predictors.findIndex(predictor => { return predictor.name == key });
             if (predictorIndex != -1) {
               facilityPredictorEntry.predictors[predictorIndex].amount = dataItem[key];
-            } else {
-              let newPredictor: PredictorData = this.predictorDbService.getNewPredictor([]);
-              newPredictor.name = key;
-              newPredictor.amount = dataItem[key];
-              facilityPredictorEntry.predictors.push(newPredictor);
             }
           }
         });
@@ -573,6 +597,20 @@ export class UploadDataService {
         let facilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(entry => {
           return entry.facilityId == group.facilityId;
         });
+        let existingFacilityPredictorData: Array<PredictorData> = new Array();
+        if (facilityPredictorEntries.length != 0) {
+          existingFacilityPredictorData = facilityPredictorEntries[0].predictors;
+        }
+        if (group.groupItems.length != 0) {
+          group.groupItems.forEach((predictorItem) => {
+            let predictorIndex: number = existingFacilityPredictorData.findIndex(predictor => { return predictor.name == predictorItem.value });
+            if (predictorIndex == -1) {
+              let newPredictor: PredictorData = this.predictorDbService.getNewPredictor([]);
+              newPredictor.name = predictorItem.value;
+              existingFacilityPredictorData.push(newPredictor);
+            }
+          });
+        }
         fileReference.headerMap.forEach(dataRow => {
           let readDate: Date = new Date(dataRow[dateColumnVal]);
           let predictorEntry: IdbPredictorEntry = facilityPredictorEntries.find(entry => {
@@ -580,16 +618,13 @@ export class UploadDataService {
           });
           if (!predictorEntry) {
             predictorEntry = this.predictorDbService.getNewIdbPredictorEntry(group.facilityId, selectedAccount.guid, readDate);
+            predictorEntry.predictors = JSON.parse(JSON.stringify(existingFacilityPredictorData));
           }
           group.groupItems.forEach(item => {
+
             let entryDataIndex: number = predictorEntry.predictors.findIndex(predictor => { return predictor.name == item.value });
             if (entryDataIndex != -1) {
               predictorEntry.predictors[entryDataIndex].amount = dataRow[item.value];
-            } else {
-              let entryData: PredictorData = this.predictorDbService.getNewPredictor([]);
-              entryData.name = item.value;
-              entryData.amount = dataRow[item.value];
-              predictorEntry.predictors.push(entryData);
             }
           });
           predictorData.push(predictorEntry);
@@ -597,6 +632,35 @@ export class UploadDataService {
       }
     });
     return predictorData;
+  }
+
+
+  updateProductionPredictorData(fileReference: FileReference): Array<IdbPredictorEntry> {
+    fileReference.predictorFacilityGroups.forEach(group => {
+      let facilityPredictorEntries: Array<IdbPredictorEntry> = fileReference.predictorEntries.filter(entry => { return entry.facilityId == group.facilityId });
+      group.groupItems.forEach(groupItem => {
+        facilityPredictorEntries.forEach(predictorEntry => {
+          predictorEntry.predictors.forEach(predictor => {
+            if (predictor.name == groupItem.value) {
+              predictor.production = groupItem.isProductionPredictor;
+              predictor.productionInAnalysis = groupItem.isProductionPredictor;
+            }
+          })
+        })
+      })
+    });
+    return fileReference.predictorEntries;
+  }
+
+  checkImportStartingUnit(importUnit: string, source: MeterSource, phase: MeterPhase, fuel: string): string {
+    if (source) {
+      let startingUnitOptions: Array<UnitOption> = this.energyUnitsHelperService.getStartingUnitOptions(source, phase, fuel);
+      let selectedUnitOption: UnitOption = startingUnitOptions.find(unitOption => { return unitOption.value == importUnit });
+      if (selectedUnitOption) {
+        return selectedUnitOption.value;
+      }
+    }
+    return undefined;
   }
 }
 

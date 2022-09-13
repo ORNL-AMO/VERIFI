@@ -53,6 +53,7 @@ export class ConfirmPredictorsComponent implements OnInit {
   }
 
   continue() {
+    this.fileReference.predictorEntries = this.uploadDataService.updateProductionPredictorData(this.fileReference);
     this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/submit');
   }
 

@@ -100,6 +100,7 @@ export class ConfirmAndSubmitComponent implements OnInit {
     }
 
     this.loadingService.setLoadingMessage('Uploading Predictors..');
+    //TODO: make sure old predictor entries have new predictor data.
     for (let i = 0; i < this.fileReference.predictorEntries.length; i++) {
       let predictorEntry: IdbPredictorEntry = this.fileReference.predictorEntries[i];
       if (predictorEntry.id) {
