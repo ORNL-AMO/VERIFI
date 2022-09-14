@@ -133,7 +133,6 @@ export class UploadDataService {
       let facility: IdbFacility = importFacilities.find(facility => { return facility.name == facilityName });
       let meterNumber: string = meterData['Meter Number'];
       let meter: IdbUtilityMeter = accountMeters.find(aMeter => { return aMeter.meterNumber == meterNumber });
-      //TODO: check collection units is energy..
       if (!meter) {
         meter = this.utilityMeterDbService.getNewIdbUtilityMeter(facility.guid, selectedAccount.guid, true, facility.energyUnit);
       }
@@ -470,18 +469,15 @@ export class UploadDataService {
     return facilityGroups;
   }
 
-
   parseMetersFromGroups(fileReference: FileReference): Array<IdbUtilityMeter> {
     let meters: Array<IdbUtilityMeter> = new Array();
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    // let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     fileReference.meterFacilityGroups.forEach(group => {
       if (group.facilityName != 'Unmapped Meters') {
         let facility: IdbFacility = fileReference.importFacilities.find(facility => { return group.facilityId == facility.guid });
         group.groupItems.forEach(groupItem => {
           let meter: IdbUtilityMeter = accountMeters.find(accMeter => { return accMeter.name == groupItem.value && accMeter.facilityId == facility.guid });
           if (!meter) {
-            //TODO: parse meter source/units
             meter = this.getNewMeterFromExcelColumn(groupItem, facility);
           }
           meters.push(meter);
@@ -490,7 +486,6 @@ export class UploadDataService {
     });
     return meters;
   }
-
 
   getNewMeterFromExcelColumn(groupItem: ColumnItem, selectedFacility: IdbFacility): IdbUtilityMeter {
     let newMeter: IdbUtilityMeter = this.utilityMeterDbService.getNewIdbUtilityMeter(selectedFacility.guid, selectedFacility.accountId, false, selectedFacility.energyUnit);
@@ -576,8 +571,23 @@ export class UploadDataService {
             dataItem = this.utilityMeterDataDbService.getNewIdbUtilityMeterData(meter);
           }
           dataItem.readDate = readDate;
-          //TODO: volume energy use math..
-          dataItem.totalEnergyUse = dataRow[meter.importWizardName];
+
+          let totalVolume: number = 0;
+          let energyUse: number = 0;
+          let totalConsumption: number = dataRow[meter.importWizardName];
+          let displayVolumeInput: boolean = (this.energyUnitsHelperService.isEnergyUnit(meter.startingUnit) == false);
+          let displayEnergyUse: boolean = this.energyUnitsHelperService.isEnergyMeter(meter.source);
+          if (!displayVolumeInput) {
+            energyUse = totalConsumption;
+          } else {
+            totalVolume = totalConsumption;
+            if (displayEnergyUse && totalVolume) {
+              energyUse = totalVolume * meter.heatCapacity;
+            }
+          }
+          dataItem.totalEnergyUse = energyUse;
+          dataItem.totalImportConsumption = totalConsumption;
+          dataItem.totalVolume = totalVolume;
           utilityData.push(dataItem);
         });
       }
