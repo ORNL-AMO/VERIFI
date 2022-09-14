@@ -33,7 +33,8 @@ export class SetFacilityMetersComponent implements OnInit {
     predictorEntries: [],
     skipExistingReadingsMeterIds: [],
     skipExistingPredictorFacilityIds: [],
-    newMeterGroups: []
+    newMeterGroups: [],
+    selectedFacilityId: undefined
   };
   paramsSub: Subscription;
   importMetersFound: boolean;
@@ -63,10 +64,11 @@ export class SetFacilityMetersComponent implements OnInit {
     let facilityGroups: Array<FacilityGroup> = new Array();
     let meterIndex: number = 0;
     let unmappedMeters: Array<ColumnItem> = new Array();
+    let initialMeterMap: Array<ColumnItem> = new Array();
     this.fileReference.columnGroups.forEach(group => {
       if (group.groupLabel == 'Meters') {
         group.groupItems.forEach(item => {
-          unmappedMeters.push({
+          initialMeterMap.push({
             index: meterIndex,
             value: item.value,
             id: item.id,
@@ -76,6 +78,9 @@ export class SetFacilityMetersComponent implements OnInit {
         })
       }
     });
+    if (this.fileReference.selectedFacilityId == undefined) {
+      unmappedMeters = initialMeterMap;
+    }
     facilityGroups.push({
       facilityId: Math.random().toString(36).substr(2, 9),
       groupItems: unmappedMeters,
@@ -84,9 +89,13 @@ export class SetFacilityMetersComponent implements OnInit {
     })
     let idbFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     idbFacilities.forEach(facility => {
+      let groupItems: Array<ColumnItem> = new Array();
+      if (facility.guid == this.fileReference.selectedFacilityId) {
+        groupItems = initialMeterMap;
+      }
       facilityGroups.push({
         facilityId: facility.guid,
-        groupItems: [],
+        groupItems: groupItems,
         facilityName: facility.name,
         color: facility.color
       });

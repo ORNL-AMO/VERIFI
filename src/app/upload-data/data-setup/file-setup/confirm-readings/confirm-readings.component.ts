@@ -34,7 +34,8 @@ export class ConfirmReadingsComponent implements OnInit {
     predictorEntries: [],
     skipExistingReadingsMeterIds: [],
     skipExistingPredictorFacilityIds: [],
-    newMeterGroups: []
+    newMeterGroups: [],
+    selectedFacilityId: undefined
   };
   paramsSub: Subscription;
   meterDataSummaries: Array<MeterDataSummary>;

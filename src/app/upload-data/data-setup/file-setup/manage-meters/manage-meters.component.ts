@@ -33,7 +33,8 @@ export class ManageMetersComponent implements OnInit {
     predictorEntries: [],
     skipExistingReadingsMeterIds: [],
     skipExistingPredictorFacilityIds: [],
-    newMeterGroups: []
+    newMeterGroups: [],
+    selectedFacilityId: undefined
   };
   paramsSub: Subscription;
   editMeterForm: FormGroup;

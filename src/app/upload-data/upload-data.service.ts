@@ -59,7 +59,8 @@ export class UploadDataService {
         predictorEntries: [],
         skipExistingReadingsMeterIds: [],
         skipExistingPredictorFacilityIds: [],
-        newMeterGroups: []
+        newMeterGroups: [],
+        selectedFacilityId: undefined
       };
     } else {
       //parse template
@@ -85,7 +86,8 @@ export class UploadDataService {
         predictorEntries: templateData.predictorEntries,
         skipExistingReadingsMeterIds: [],
         skipExistingPredictorFacilityIds: [],
-        newMeterGroups: templateData.newGroups
+        newMeterGroups: templateData.newGroups,
+        selectedFacilityId: undefined
       };
     }
   }
@@ -685,7 +687,8 @@ export interface FileReference {
   predictorEntries: Array<IdbPredictorEntry>,
   skipExistingReadingsMeterIds: Array<string>
   skipExistingPredictorFacilityIds: Array<string>,
-  newMeterGroups: Array<IdbUtilityMeterGroup>
+  newMeterGroups: Array<IdbUtilityMeterGroup>,
+  selectedFacilityId: string
 }
 
 export interface ColumnGroup {

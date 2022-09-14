@@ -7,12 +7,29 @@
     </div>
 </div>
 <hr>
-<label for="worksheetName">Select Worksheet</label>
-<select class="form-control" name="worksheetName" [(ngModel)]="fileReference.selectedWorksheetName"
-    (change)="setSelectedWorksheetName()">
-    <option class="form-control" *ngFor="let name of fileReference.workbook?.SheetNames" [ngValue]="name">{{name}}
-    </option>
-</select>
+<div class="row">
+    <div class="col-6">
+        <label for="worksheetName">Select Worksheet</label>
+        <select class="form-control" name="worksheetName" [(ngModel)]="fileReference.selectedWorksheetName"
+            (change)="setSelectedWorksheetName()">
+            <option class="form-control" *ngFor="let name of fileReference.workbook?.SheetNames" [ngValue]="name">
+                {{name}}
+            </option>
+        </select>
+    </div>
+    <div class="col-6">
+        <label for="selectedFacilityId">Select Import Facility</label>
+        <select class="form-control" name="selectedFacilityId" [(ngModel)]="fileReference.selectedFacilityId"
+            (change)="setImportFacility()">
+            <option class="form-control" [ngValue]="undefined">
+                Multiple Facilities
+            </option>
+            <option class="form-control" *ngFor="let facility of facilityOptions" [ngValue]="facility.guid">
+                {{facility.name}}
+            </option>
+        </select>
+    </div>
+</div>
 <br>
 <table *ngIf="fileReference.selectedWorksheetData">
     <thead>

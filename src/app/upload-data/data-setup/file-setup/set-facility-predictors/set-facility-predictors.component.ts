@@ -34,7 +34,8 @@ export class SetFacilityPredictorsComponent implements OnInit {
     predictorEntries: [],
     skipExistingReadingsMeterIds: [],
     skipExistingPredictorFacilityIds: [],
-    newMeterGroups: []
+    newMeterGroups: [],
+    selectedFacilityId: undefined
   };
   paramsSub: Subscription;
   predictorsIncluded: boolean;
@@ -61,7 +62,11 @@ export class SetFacilityPredictorsComponent implements OnInit {
 
   setFacilityGroups() {
     let facilityGroups: Array<FacilityGroup> = new Array();
-    let unmappedPredictors: Array<ColumnItem> = this.getFacilityPredictors();
+    let unmappedPredictors: Array<ColumnItem> = new Array();
+    let initialPredictorMap: Array<ColumnItem> = this.getFacilityPredictors();
+    if(this.fileReference.selectedFacilityId == undefined){
+      unmappedPredictors = initialPredictorMap;
+    }
     facilityGroups.push({
       facilityId: Math.random().toString(36).substr(2, 9),
       groupItems: unmappedPredictors,
@@ -70,9 +75,13 @@ export class SetFacilityPredictorsComponent implements OnInit {
     })
     let idbFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     idbFacilities.forEach(facility => {
+      let groupItems: Array<ColumnItem> = new Array();
+      if(this.fileReference.selectedFacilityId == facility.guid){
+        groupItems = initialPredictorMap;
+      }
       facilityGroups.push({
         facilityId: facility.guid,
-        groupItems: [],
+        groupItems: groupItems,
         facilityName: facility.name,
         color: facility.color
       });

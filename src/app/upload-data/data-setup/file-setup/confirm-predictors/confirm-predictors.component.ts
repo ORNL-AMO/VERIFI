@@ -31,7 +31,8 @@ export class ConfirmPredictorsComponent implements OnInit {
     predictorEntries: [],
     skipExistingReadingsMeterIds: [],
     skipExistingPredictorFacilityIds: [],
-    newMeterGroups: []
+    newMeterGroups: [],
+    selectedFacilityId: undefined
   };
   paramsSub: Subscription;
   predictorDataSummaries: Array<PredictorDataSummary>;
