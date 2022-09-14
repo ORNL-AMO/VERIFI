@@ -35,31 +35,24 @@ export class UtilityMeterDataService {
 
   getDefaultFilters(): ElectricityDataFilters {
     return {
-      showTotalDemand: true,
-      supplyDemandCharge: {
+      detailedCharges: {
         showSection: false,
-        supplyBlockAmount: false,
-        supplyBlockCharge: false,
-        flatRateAmount: false,
-        flatRateCharge: false,
-        peakAmount: false,
-        peakCharge: false,
-        offPeakAmount: false,
-        offPeakCharge: false,
-        demandBlockAmount: false,
-        demandBlockCharge: false,
+        block1: false,
+        block2: false,
+        block3: false,
+        other: false,
+        onPeak: false,
+        offPeak: false,
+        powerFactor: false
       },
-      taxAndOther: {
-        showSection: true,
-        utilityTax: true,
-        latePayment: true,
-        otherCharge: true,
-        basicCharge: true,
-        generationTransmissionCharge: false,
-        deliveryCharge: false,
-        transmissionCharge: false,
-        powerFactorCharge: false,
-        businessCharge: false
+      additionalCharges: {
+        showSection: false,
+        nonEnergyCharge: false,
+        transmissionAndDelivery: false,
+        localSalesTax: false,
+        stateSalesTax: false,
+        latePayment: false,
+        otherCharge: false,
       }
     }
   }

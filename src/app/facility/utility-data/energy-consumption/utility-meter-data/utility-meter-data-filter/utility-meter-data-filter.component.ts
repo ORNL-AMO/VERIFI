@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { ElectricityDataFilters, SupplyDemandChargeFilters, TaxAndOtherFilters } from 'src/app/models/electricityFilter';
+import { AdditionalChargesFilters, DetailedChargesFilters, ElectricityDataFilters } from 'src/app/models/electricityFilter';
 import { IdbFacility } from 'src/app/models/idb';
 import { UtilityMeterDataService } from '../utility-meter-data.service';
 
@@ -16,9 +16,8 @@ export class UtilityMeterDataFilterComponent implements OnInit {
 
   // electricityDataFilters: ElectricityDataFilters;
   showFilterDropdown: boolean = false;
-  supplyDemandCharge: SupplyDemandChargeFilters;
-  taxAndOther: TaxAndOtherFilters;
-  showTotalDemand: boolean;
+  detailedChargesFilters: DetailedChargesFilters;
+  additionalChargesFilters: AdditionalChargesFilters;
   constructor(private utilityMeterDataService: UtilityMeterDataService, private facilityDbService: FacilitydbService,
     private dbChangesService: DbChangesService) { }
 
@@ -34,9 +33,8 @@ export class UtilityMeterDataFilterComponent implements OnInit {
       } else {
         electricityDataFilters = this.utilityMeterDataService.electricityInputFilters.getValue();
       }
-      this.supplyDemandCharge = electricityDataFilters.supplyDemandCharge;
-      this.taxAndOther = electricityDataFilters.taxAndOther;
-      this.showTotalDemand = electricityDataFilters.showTotalDemand;
+      this.additionalChargesFilters = electricityDataFilters.additionalCharges;
+      this.detailedChargesFilters = electricityDataFilters.detailedCharges;
     }
     this.showFilterDropdown = !this.showFilterDropdown;
   }
@@ -44,9 +42,8 @@ export class UtilityMeterDataFilterComponent implements OnInit {
   async save() {
     this.checkShowSection();
     let electricityDataFilters: ElectricityDataFilters = {
-      showTotalDemand: this.showTotalDemand,
-      supplyDemandCharge: this.supplyDemandCharge,
-      taxAndOther: this.taxAndOther
+      detailedCharges: this.detailedChargesFilters,
+      additionalCharges: this.additionalChargesFilters
     }
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     if (this.filterType == 'table') {
@@ -58,74 +55,62 @@ export class UtilityMeterDataFilterComponent implements OnInit {
   }
 
   async showAllColumns() {
-    this.showTotalDemand = true;
-    this.supplyDemandCharge = {
+    this.detailedChargesFilters = {
       showSection: true,
-      supplyBlockAmount: true,
-      supplyBlockCharge: true,
-      flatRateAmount: true,
-      flatRateCharge: true,
-      peakAmount: true,
-      peakCharge: true,
-      offPeakAmount: true,
-      offPeakCharge: true,
-      demandBlockAmount: true,
-      demandBlockCharge: true,
+      block1: true,
+      block2: true,
+      block3: true,
+      other: true,
+      onPeak: true,
+      offPeak: true,
+      powerFactor: true
     };
-    this.taxAndOther = {
+    this.additionalChargesFilters = {
       showSection: true,
-      utilityTax: true,
+      nonEnergyCharge: true,
+      transmissionAndDelivery: true,
+      localSalesTax: true,
+      stateSalesTax: true,
       latePayment: true,
       otherCharge: true,
-      basicCharge: true,
-      generationTransmissionCharge: true,
-      deliveryCharge: true,
-      transmissionCharge: true,
-      powerFactorCharge: true,
-      businessCharge: true
     }
     await this.save();
   }
 
   async hideAllColumns() {
-    this.showTotalDemand = false;
-    this.supplyDemandCharge = {
+    this.detailedChargesFilters = {
       showSection: false,
-      supplyBlockAmount: false,
-      supplyBlockCharge: false,
-      flatRateAmount: false,
-      flatRateCharge: false,
-      peakAmount: false,
-      peakCharge: false,
-      offPeakAmount: false,
-      offPeakCharge: false,
-      demandBlockAmount: false,
-      demandBlockCharge: false,
-    },
-      this.taxAndOther = {
-        showSection: false,
-        utilityTax: false,
-        latePayment: false,
-        otherCharge: false,
-        basicCharge: false,
-        generationTransmissionCharge: false,
-        deliveryCharge: false,
-        transmissionCharge: false,
-        powerFactorCharge: false,
-        businessCharge: false
-      }
+      block1: false,
+      block2: false,
+      block3: false,
+      other: false,
+      onPeak: false,
+      offPeak: false,
+      powerFactor: false
+    };
+    this.additionalChargesFilters = {
+      showSection: false,
+      nonEnergyCharge: false,
+      transmissionAndDelivery: false,
+      localSalesTax: false,
+      stateSalesTax: false,
+      latePayment: false,
+      otherCharge: false,
+    }
     await this.save();
   }
 
   checkShowSection() {
-    this.taxAndOther.showSection = (
-      this.taxAndOther.utilityTax || this.taxAndOther.latePayment || this.taxAndOther.otherCharge || this.taxAndOther.basicCharge || this.taxAndOther.generationTransmissionCharge
-      || this.taxAndOther.deliveryCharge || this.taxAndOther.transmissionCharge || this.taxAndOther.powerFactorCharge || this.taxAndOther.businessCharge
+    this.additionalChargesFilters.showSection = (
+      this.additionalChargesFilters.nonEnergyCharge || this.additionalChargesFilters.latePayment 
+      || this.additionalChargesFilters.otherCharge || this.additionalChargesFilters.transmissionAndDelivery 
+      || this.additionalChargesFilters.localSalesTax
+      || this.additionalChargesFilters.stateSalesTax || this.additionalChargesFilters.latePayment 
+      || this.additionalChargesFilters.otherCharge
     );
-    this.supplyDemandCharge.showSection = (
-      this.supplyDemandCharge.supplyBlockAmount || this.supplyDemandCharge.supplyBlockCharge || this.supplyDemandCharge.flatRateAmount || this.supplyDemandCharge.flatRateCharge
-      || this.supplyDemandCharge.peakAmount || this.supplyDemandCharge.peakCharge || this.supplyDemandCharge.offPeakAmount
-      || this.supplyDemandCharge.offPeakCharge || this.supplyDemandCharge.demandBlockAmount || this.supplyDemandCharge.demandBlockCharge
+    this.detailedChargesFilters.showSection = (
+      this.detailedChargesFilters.block1 || this.detailedChargesFilters.block2 || this.detailedChargesFilters.block3 || this.detailedChargesFilters.other ||
+      this.detailedChargesFilters.onPeak || this.detailedChargesFilters.offPeak || this.detailedChargesFilters.powerFactor
     );
   }
 }

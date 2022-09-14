@@ -27,7 +27,7 @@
             <th (click)="setOrderDataField('excessRECsEmissions')"
                 [ngClass]="{'active': orderDataField == 'excessRECsEmissions'}">Excess
                 RECs Emissions<br> (kg CO<sub>2</sub>)</th>
-            <th (click)="setOrderDataField('supplyBlockAmount')"
+            <!-- <th (click)="setOrderDataField('supplyBlockAmount')"
                 [ngClass]="{'active': orderDataField == 'supplyBlockAmount'}"
                 *ngIf="supplyDemandCharge.supplyBlockAmount">
                 Block Rates Supply Amt
@@ -107,7 +107,7 @@
             <th (click)="setOrderDataField('basicCharge')" [ngClass]="{'active': orderDataField == 'basicCharge'}"
                 *ngIf="taxAndOther.basicCharge">
                 Basic Charge
-            </th>
+            </th> -->
             <th *ngIf="!copyingTable">Actions</th>
         </tr>
     </thead>
@@ -126,7 +126,7 @@
             <td>{{meterData.RECs | customNumber}}</td>
             <td>{{meterData.excessRECs | customNumber}}</td>
             <td>{{meterData.excessRECsEmissions | customNumber}}</td>
-            <td *ngIf="supplyDemandCharge.supplyBlockAmount">
+            <!-- <td *ngIf="supplyDemandCharge.supplyBlockAmount">
                 {{meterData.supplyBlockAmount | customNumber}}
             </td>
             <td *ngIf="supplyDemandCharge.supplyBlockCharge">
@@ -183,7 +183,7 @@
             </td>
             <td *ngIf="taxAndOther.basicCharge">
                 {{meterData.basicCharge | customNumber:true}}
-            </td>
+            </td> -->
             <td *ngIf="!copyingTable" class="actions">
                 <div class="d-flex">
                     <i class="fa fa-pencil" title="Edit" (click)="setEditMeterData(meterData)"></i>

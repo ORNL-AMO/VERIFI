@@ -1,6 +1,5 @@
 import { Component, ElementRef, EventEmitter, Input, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { SupplyDemandChargeFilters, TaxAndOtherFilters } from 'src/app/models/electricityFilter';
 import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { UtilityMeterDataService } from '../utility-meter-data.service';
 import * as _ from 'lodash';
@@ -29,8 +28,7 @@ export class ElectricityDataTableComponent implements OnInit {
 
   @ViewChild('meterTable', { static: false }) meterTable: ElementRef;
 
-  supplyDemandCharge: SupplyDemandChargeFilters;
-  taxAndOther: TaxAndOtherFilters;
+
   showTotalDemand: boolean;
   electricityDataFilterSub: Subscription;
   allChecked: boolean;
@@ -50,9 +48,9 @@ export class ElectricityDataTableComponent implements OnInit {
       this.allChecked = (hasFalseChecked == undefined);
     }
     this.electricityDataFilterSub = this.utilityMeterDataService.tableElectricityFilters.subscribe(electricityDataFilters => {
-      this.taxAndOther = electricityDataFilters.taxAndOther;
-      this.supplyDemandCharge = electricityDataFilters.supplyDemandCharge;
-      this.showTotalDemand = electricityDataFilters.showTotalDemand;
+      // this.taxAndOther = electricityDataFilters.taxAndOther;
+      // this.supplyDemandCharge = electricityDataFilters.supplyDemandCharge;
+      // this.showTotalDemand = electricityDataFilters.showTotalDemand;
     });
   }
 
