@@ -1,0 +1,86 @@
+<div class="wrapper main-content p-0" *ngIf="fileReference">
+    <div class="banner p-0">
+        <ul class="nav nav-tabs">
+            <!--not template-->
+            <li class="nav-item" *ngIf="!fileReference.isTemplate">
+                <a class="nav-link disabled" routerLink="select-worksheet" [routerLinkActive]="['active']">
+                    <span class="badge">1</span>
+                    Select Worksheet</a>
+            </li>
+            <li class="nav-item" *ngIf="!fileReference.isTemplate">
+                <a class="nav-link disabled" routerLink="identify-columns" [routerLinkActive]="['active']">
+                    <span class="badge">2</span>
+                    Identify Columns</a>
+            </li>
+            <li class="nav-item" *ngIf="!fileReference.isTemplate">
+                <a class="nav-link disabled" routerLink="set-facility-meters" [routerLinkActive]="['active']">
+                    <span class="badge">3</span>
+                    Map Facility Meters
+                </a>
+            </li>
+            <li class="nav-item" *ngIf="!fileReference.isTemplate">
+                <a class="nav-link disabled" routerLink="manage-meters" [routerLinkActive]="['active']">
+                    <span class="badge">4</span>
+                    Confirm Meters</a>
+            </li>
+            <li class="nav-item" *ngIf="!fileReference.isTemplate">
+                <a class="nav-link disabled" routerLink="confirm-readings" [routerLinkActive]="['active']">
+                    <span class="badge">5</span>
+                    Confirm Meter Readings</a>
+            </li>
+            <li class="nav-item" *ngIf="!fileReference.isTemplate">
+                <a class="nav-link disabled" routerLink="set-facility-predictors" [routerLinkActive]="['active']">
+                    <span class="badge">6</span>
+                    Map Facility Predictors
+                </a>
+            </li>
+            <li class="nav-item" *ngIf="!fileReference.isTemplate">
+                <a class="nav-link disabled" routerLink="confirm-predictors" [routerLinkActive]="['active']">
+                    <span class="badge">7</span>
+                    Confirm Predictors
+                </a>
+            </li>
+            <li class="nav-item" *ngIf="!fileReference.isTemplate">
+                <a class="nav-link disabled" routerLink="submit" [routerLinkActive]="['active']">
+                    <span class="badge">8</span>
+                    Submit File
+                </a>
+            </li>
+
+            <!--template-->
+            <li class="nav-item" *ngIf="fileReference.isTemplate">
+                <a class="nav-link disabled" routerLink="template-facilities" [routerLinkActive]="['active']">
+                    <span class="badge">1</span>
+                    Template Facilities
+                </a>
+            </li>
+            <li class="nav-item" *ngIf="fileReference.isTemplate">
+                <a class="nav-link disabled" routerLink="manage-meters" [routerLinkActive]="['active']">
+                    <span class="badge">2</span>
+                    Confirm Meters</a>
+            </li>
+            <li class="nav-item" *ngIf="fileReference.isTemplate">
+                <a class="nav-link disabled" routerLink="confirm-readings" [routerLinkActive]="['active']">
+
+                    <span class="badge">3</span>
+                    Confirm Readings</a>
+            </li>
+            <li class="nav-item" *ngIf="fileReference.isTemplate">
+                <a class="nav-link disabled" routerLink="confirm-predictors" [routerLinkActive]="['active']">
+                    <span class="badge">4</span>
+                    Confirm Predictors
+                </a>
+            </li>
+            <li class="nav-item" *ngIf="fileReference.isTemplate">
+                <a class="nav-link disabled" routerLink="submit" [routerLinkActive]="['active']">
+                    <span class="badge">5</span>
+                    Submit File
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="content-padding">
+        <router-outlet></router-outlet>
+    </div>
+</div>

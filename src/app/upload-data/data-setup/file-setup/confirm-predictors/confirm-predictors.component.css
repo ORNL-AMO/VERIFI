@@ -1,0 +1,37 @@
+.card-header{
+    background-color: #fff;
+    border-bottom: 2px solid orange;
+    border-radius: 0px;
+    font-size: 15px;
+    padding: .5rem;
+    font-weight: bold;
+}
+
+.card{
+  border: 3px solid #2c386b;
+   border-radius: 0px;
+   background: #efefef;
+}
+
+.card:not(:last-child){
+    border-right: 2px solid orange;
+}
+
+.list-item{
+  transition: background-color 1s ease;
+  font-size: 14px;
+  font-weight: bold;
+  background-color: #fff;
+}
+
+
+.list-item{
+  border: #ffa500 solid 2px;
+  /* color: white; */
+}
+
+
+
+td.skip{
+  text-decoration: line-through;
+}

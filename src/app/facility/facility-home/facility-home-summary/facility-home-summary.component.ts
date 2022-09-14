@@ -12,6 +12,7 @@ import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityColors } from 'src/app/shared/utilityColors';
 import { OverviewReportService } from 'src/app/account/overview-report/overview-report.service';
+import { ExportToExcelTemplateService } from 'src/app/shared/helper-services/export-to-excel-template.service';
 
 @Component({
   selector: 'app-facility-home-summary',
@@ -46,9 +47,10 @@ export class FacilityHomeSummaryComponent implements OnInit {
   naics: string;
   constructor(private analysisDbService: AnalysisDbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private facilityDbService: FacilitydbService, private facilityHomeService: FacilityHomeService,
-    private router: Router, private predictorDbService: PredictordbService, 
+    private router: Router, private predictorDbService: PredictordbService,
     private utilityMeterDbService: UtilityMeterdbService,
-    private overviewReportService: OverviewReportService) { }
+    private overviewReportService: OverviewReportService,
+    private exportToExcelTemplateService: ExportToExcelTemplateService) { }
 
   ngOnInit(): void {
     this.latestSummarySub = this.facilityHomeService.latestAnalysisSummary.subscribe(val => {
@@ -97,7 +99,11 @@ export class FacilityHomeSummaryComponent implements OnInit {
   }
 
   navigateTo(urlStr: string) {
-    this.router.navigateByUrl('facility/' + this.facility.id + '/' + urlStr);
+    if (urlStr != 'upload') {
+      this.router.navigateByUrl('facility/' + this.facility.id + '/' + urlStr);
+    } else {
+      this.router.navigateByUrl('/' + urlStr);
+    }
   }
 
   setFacilityStatus() {
@@ -127,8 +133,14 @@ export class FacilityHomeSummaryComponent implements OnInit {
     return UtilityColors[source].color
   }
 
-  setNAICS(){
+  setNAICS() {
     this.naics = this.overviewReportService.getNAICS(this.facility);
   }
+
+  exportData() {
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    this.exportToExcelTemplateService.exportFacilityData(selectedFacility.guid);
+  }
+
 
 }

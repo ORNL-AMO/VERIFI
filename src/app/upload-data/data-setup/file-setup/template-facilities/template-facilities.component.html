@@ -1,0 +1,89 @@
+<div class="d-flex justify-content-end">
+    <div class="d-flex">
+        <button class="btn btn-success" (click)="continue()">Continue</button>
+    </div>
+</div>
+<hr>
+<table>
+    <thead>
+        <tr>
+            <th>
+                Facility Name
+            </th>
+            <th>
+                Address
+            </th>
+            <th>
+                Country
+            </th>
+            <th>
+                State
+            </th>
+            <th>
+                City
+            </th>
+            <th>
+                Zip
+            </th>
+            <th>
+                NAICS Code 2
+            </th>
+            <th>
+                NAICS Code 3
+            </th>
+            <th>
+                Contact Name
+            </th>
+            <th>
+                Contact Phone
+            </th>
+            <th>
+                Contact Email
+            </th>
+            <th>
+                New / Existing
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let facility of fileReference.importFacilities">
+            <td>
+                {{facility.name}}
+            </td>
+            <td>
+                {{facility.address}}
+            </td>
+            <td>
+                {{facility.country}}
+            </td>
+            <td>
+                {{facility.state}}
+            </td>
+            <td>
+                {{facility.city}}
+            </td>
+            <td>
+                {{facility.zip}}
+            </td>
+            <td>
+                {{facility.naics2}}
+            </td>
+            <td>
+                {{facility.naics3}}
+            </td>
+            <td>
+                {{facility.contactName}}
+            </td>
+            <td>
+                {{facility.contactPhone}}
+            </td>
+            <td>
+                {{facility.contactEmail}}
+            </td>
+            <td>
+                <span *ngIf="facility.id">Existing</span>
+                <span *ngIf="!facility.id">New</span>
+            </td>
+        </tr>
+    </tbody>
+</table>

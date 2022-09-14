@@ -1,0 +1,32 @@
+<div class="banner sticky-top d-flex justify-content-between" [ngClass]="{'modal-open': modalOpen}">
+    <ul class="nav nav-tabs">
+        <li class="nav-item" *ngFor="let reference of fileReferences">
+            <a class="nav-link disabled" routerLink="/upload/data-setup/file-setup/{{reference.id}}"
+                [routerLinkActive]="['active']">
+                <i class="fa fa-file"></i>{{reference.name}}</a>
+        </li>
+        <!-- <li class="nav-item">
+            <a class="nav-link" routerLink="/upload/data-setup/set-facility-meters"
+            [routerLinkActive]="['active']">
+                <i class="fa fa-industry"></i>Set Facility Meters</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" routerLink="/upload/data-setup/set-facility-predictors"
+            [routerLinkActive]="['active']">
+                <i class="fa fa-industry"></i>Set Facility Predictors</a>
+        </li> -->
+        <!-- <li class="nav-item">
+            <a class="nav-link" routerLink="/upload/data-setup/manage-meters" [routerLinkActive]="['active']">
+                <i class="fa fa-gauge-high"></i>Meters</a>
+        </li> -->
+    </ul>
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <a class="nav-link" routerLink="/upload" [routerLinkActive]="['active']">
+                Start Over
+            </a>
+        </li>
+
+    </ul>
+
+</div>

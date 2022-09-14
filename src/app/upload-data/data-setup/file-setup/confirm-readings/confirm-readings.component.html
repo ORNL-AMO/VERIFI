@@ -1,0 +1,74 @@
+<div class="d-flex justify-content-between">
+    <div class="d-flex">
+        <button class="btn btn-secondary" (click)="goBack()">Back</button>
+    </div>
+    <div class="d-flex">
+        <button class="btn btn-success" (click)="continue()">Submit &amp; Continue</button>
+    </div>
+</div>
+<hr>
+<table *ngIf="metersIncluded">
+    <thead>
+        <tr>
+            <th>
+                Facility Name
+            </th>
+            <th>
+                Meter Name
+            </th>
+            <th>
+                New Readings
+            </th>
+            <th>
+                Invalid Readings
+            </th>
+            <th>
+                Existing Readings
+            </th>
+            <th>
+                Skip Existing?
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let summary of meterDataSummaries">
+            <td>
+                {{summary.facilityName}}
+            </td>
+            <td>
+                {{summary.meterName}}
+            </td>
+            <td>
+                {{summary.newEntries}}
+                <span *ngIf="summary.newStart">
+                    ({{summary.newStart | date}} - {{summary.newEnd | date}})
+                </span>
+            </td>
+            <td>
+                {{summary.invalidEntries}}
+                <span *ngIf="summary.invalidStart">
+                    ({{summary.invalidStart | date}} - {{summary.invalidEnd | date}})
+                </span>
+            </td>
+            <td [ngClass]="{'skip': summary.skipExisting}">
+                {{summary.existingEntries}}
+                <span *ngIf="summary.existingStart">
+                    ({{summary.existingStart | date}} - {{summary.existingEnd | date}})
+                </span>
+            </td>
+            <td>
+                <input type="checkbox" class="form-control" [(ngModel)]="summary.skipExisting">
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<div class="alert alert-warning p-2" *ngIf="!metersIncluded">
+    <ng-container *ngIf="!fileReference.isTemplate">
+        No import meters found. Go back to column selection and include meters or click continue to move on to
+        predictors.
+    </ng-container>
+    <ng-container *ngIf="fileReference.isTemplate">
+        No import meters found. Click continue to move on to predictors.
+    </ng-container>
+</div>

@@ -1,0 +1,114 @@
+<div class="d-flex justify-content-between" *ngIf="!editMeterForm">
+    <div class="d-flex">
+        <button class="btn btn-secondary" (click)="goBack()">Back</button>
+    </div>
+    <div class="d-flex">
+        <button class="btn btn-success" [disabled]="!allMetersValid" (click)="continue()">Submit &amp; Continue</button>
+    </div>
+</div>
+<div class="d-flex justify-content-between" *ngIf="editMeterForm">
+    <div class="d-flex">
+        <button class="btn btn-secondary" (click)="cancelEdit()">Cancel</button>
+    </div>
+    <div class="d-flex">
+        <button class="btn btn-success ml-2" (click)="submitMeter()">Submit</button>
+    </div>
+</div>
+<div class="d-flex justify-content-end" *ngIf="!allMetersValid">
+    <div class="d-flex flex-column">
+        <div class="alert alert-danger p-2">
+            One or more meters are invalid. Please fix the meter by clicking on it's name or selecting to skip importing
+            that meter.
+        </div>
+    </div>
+</div>
+<hr>
+
+<table *ngIf="!editMeterForm && metersIncluded">
+    <thead>
+        <tr>
+            <th>
+                Facility Name
+            </th>
+            <th>
+                Meter Name
+            </th>
+            <th>
+                Is Valid?
+            </th>
+            <th>
+                Source
+            </th>
+            <th>
+                Group
+            </th>
+            <th>
+                Calanderize?
+            </th>
+            <th>
+                New / Existing
+            </th>
+            <th>
+                Skip Import
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let meter of fileReference.meters" [ngClass]="{'skip': meter.skipImport}">
+            <td>
+                {{getFacilityName(meter.facilityId)}}
+            </td>
+            <td>
+                <a class="click-link" (click)="editMeter(meter)" *ngIf="!meter.skipImport">{{meter.name}}</a>
+                <span *ngIf="meter.skipImport">{{meter.name}}</span>
+            </td>
+            <td>
+                <span *ngIf="meter.isValid">
+                    Yes
+                </span>
+                <span *ngIf="!meter.isValid">
+                    No
+                </span>
+            </td>
+            <td>
+                {{meter.source}}
+            </td>
+            <td>
+                <select class="form-control" id="meterGroup" [(ngModel)]="meter.groupId">
+                    <option *ngFor="let group of getFacilityMeterGroups(meter.facilityId)" [ngValue]="group.guid">
+                        {{group.name}}</option>
+                </select>
+            </td>
+            <td>
+                <!-- {{meter.groupId}} -->
+                <select class="form-control" id="meterReadingDataApplication"
+                    [(ngModel)]="meter.meterReadingDataApplication">
+                    <option [ngValue]="'backward'">Calanderize</option>
+                    <option [ngValue]="'fullMonth'">Do Not Calanderize</option>
+                    <option [ngValue]="undefined">Unselected</option>
+                </select>
+            </td>
+            <td>
+                <span *ngIf="meter.id">
+                    Existing
+                </span>
+                <span *ngIf="!meter.id">
+                    New
+                </span>
+            </td>
+            <td>
+                <input type="checkbox" class="form-control" [(ngModel)]="meter.skipImport" (change)="setValidMeters()">
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+
+<app-edit-meter-form *ngIf="editMeterForm" [meterForm]="editMeterForm" [facility]="editMeterFacility">
+</app-edit-meter-form>
+
+
+
+<div class="alert alert-warning p-2" *ngIf="!metersIncluded">
+    No import meters found. Go back to column selection and include meters or click continue to move on to predictors.
+</div>

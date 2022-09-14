@@ -73,42 +73,43 @@ export class ImportMeterDataService {
         }
       }
     }
-    return {
-      //keys (id primary)
-      meterId: meterId,
-      guid: Math.random().toString(36).substr(2, 9),      
-      facilityId: facility.guid,
-      accountId: facility.accountId,
-      //data
-      readDate: date,
-      totalVolume: totalVolume,
-      totalEnergyUse: energyUse,
-      totalCost: dataItem["Total Cost"],
-      commodityCharge: dataItem["Commodity Charge"],
-      deliveryCharge: dataItem["Delivery Charge"],
-      otherCharge: dataItem["Other Charge"],
-      checked: false,
-      totalDemand: dataItem["Total Demand"],
-      basicCharge: dataItem["Basic Charge"],
-      supplyBlockAmount: dataItem["Supply Block Amount"],
-      supplyBlockCharge: dataItem["Supply Block Charge"],
-      flatRateAmount: dataItem["Flat Rate Amount"],
-      flatRateCharge: dataItem["Flat Rate Charge"],
-      peakAmount: dataItem["Peak Amount"],
-      peakCharge: dataItem["Peak Charge"],
-      offPeakAmount: dataItem["Off Peak Amount"],
-      offPeakCharge: dataItem["Off Peak charge"],
-      demandBlockAmount: dataItem["Demand Block Amount"],
-      demandBlockCharge: dataItem["Demand Block Charge"],
-      generationTransmissionCharge: dataItem["Generation and Transmission Charge"],
-      transmissionCharge: dataItem["Transmission Charge"],
-      powerFactorCharge: dataItem["Power Factor Charge"],
-      businessCharge: dataItem["Local Business Charge"],
-      utilityTax: dataItem["Local Utility Tax"],
-      latePayment: dataItem["Late Payment"],
-      meterNumber: meterNumber,
-      totalImportConsumption: dataItem["Total Consumption"]
-    }
+    return
+    // return {
+    //   //keys (id primary)
+    //   meterId: meterId,
+    //   guid: Math.random().toString(36).substr(2, 9),      
+    //   facilityId: facility.guid,
+    //   accountId: facility.accountId,
+    //   //data
+    //   readDate: date,
+    //   totalVolume: totalVolume,
+    //   totalEnergyUse: energyUse,
+    //   totalCost: dataItem["Total Cost"],
+    //   commodityCharge: dataItem["Commodity Charge"],
+    //   deliveryCharge: dataItem["Delivery Charge"],
+    //   otherCharge: dataItem["Other Charge"],
+    //   checked: false,
+    //   totalDemand: dataItem["Total Demand"],
+    //   basicCharge: dataItem["Basic Charge"],
+    //   supplyBlockAmount: dataItem["Supply Block Amount"],
+    //   supplyBlockCharge: dataItem["Supply Block Charge"],
+    //   flatRateAmount: dataItem["Flat Rate Amount"],
+    //   flatRateCharge: dataItem["Flat Rate Charge"],
+    //   peakAmount: dataItem["Peak Amount"],
+    //   peakCharge: dataItem["Peak Charge"],
+    //   offPeakAmount: dataItem["Off Peak Amount"],
+    //   offPeakCharge: dataItem["Off Peak charge"],
+    //   demandBlockAmount: dataItem["Demand Block Amount"],
+    //   demandBlockCharge: dataItem["Demand Block Charge"],
+    //   generationTransmissionCharge: dataItem["Generation and Transmission Charge"],
+    //   transmissionCharge: dataItem["Transmission Charge"],
+    //   powerFactorCharge: dataItem["Power Factor Charge"],
+    //   businessCharge: dataItem["Local Business Charge"],
+    //   utilityTax: dataItem["Local Utility Tax"],
+    //   latePayment: dataItem["Late Payment"],
+    //   meterNumber: meterNumber,
+    //   totalImportConsumption: dataItem["Total Consumption"]
+    // }
   }
 
   //TODO: Include import meters?

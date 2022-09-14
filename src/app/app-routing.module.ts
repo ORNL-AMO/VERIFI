@@ -13,7 +13,7 @@ import { AboutComponent } from './static-content/about/about.component';
 import { AcknowledgmentsComponent } from './static-content/acknowledgments/acknowledgments.component';
 import { FeedbackComponent } from './static-content/feedback/feedback.component';
 import { HelpComponent } from './static-content/help/help.component';
-import { UploadDataComponent } from './facility/utility-data/upload-data/upload-data.component';
+// import { UploadDataComponent } from './facility/utility-data/upload-data/upload-data.component';
 import { OverviewReportComponent } from './account/overview-report/overview-report.component';
 import { OverviewReportDashboardComponent } from './account/overview-report/overview-report-dashboard/overview-report-dashboard.component';
 import { OverviewReportMenuComponent } from './account/overview-report/overview-report-menu/overview-report-menu.component';
@@ -61,6 +61,19 @@ import { CustomDatabaseComponent } from './account/custom-database/custom-databa
 import { RegionalEmissionsDataComponent } from './account/custom-database/regional-emissions-data/regional-emissions-data.component';
 import { EmissionsDataDashboardComponent } from './account/custom-database/regional-emissions-data/emissions-data-dashboard/emissions-data-dashboard.component';
 import { EmissionsDataFormComponent } from './account/custom-database/regional-emissions-data/emissions-data-form/emissions-data-form.component';
+import { UploadDataComponent } from './upload-data/upload-data.component';
+import { FileUploadComponent } from './upload-data/file-upload/file-upload.component';
+import { DataSetupComponent } from './upload-data/data-setup/data-setup.component';
+import { FileSetupComponent } from './upload-data/data-setup/file-setup/file-setup.component';
+import { SelectWorksheetComponent } from './upload-data/data-setup/file-setup/select-worksheet/select-worksheet.component';
+import { IdentifyColumnsComponent } from './upload-data/data-setup/file-setup/identify-columns/identify-columns.component';
+import { ManageMetersComponent } from './upload-data/data-setup/file-setup/manage-meters/manage-meters.component';
+import { SetFacilityMetersComponent } from './upload-data/data-setup/file-setup/set-facility-meters/set-facility-meters.component';
+import { SetFacilityPredictorsComponent } from './upload-data/data-setup/file-setup/set-facility-predictors/set-facility-predictors.component';
+import { TemplateFacilitiesComponent } from './upload-data/data-setup/file-setup/template-facilities/template-facilities.component';
+import { ConfirmReadingsComponent } from './upload-data/data-setup/file-setup/confirm-readings/confirm-readings.component';
+import { ConfirmPredictorsComponent } from './upload-data/data-setup/file-setup/confirm-predictors/confirm-predictors.component';
+import { ConfirmAndSubmitComponent } from './upload-data/data-setup/file-setup/confirm-and-submit/confirm-and-submit.component';
 
 const routes: Routes = [
   {
@@ -224,7 +237,7 @@ const routes: Routes = [
           { path: 'monthly-meter-data', component: CalanderizationComponent },
           { path: 'meter-groups', component: MeterGroupingComponent },
           { path: 'predictors', component: PredictorDataComponent },
-          { path: 'upload-data', component: UploadDataComponent },
+          // { path: 'upload-data', component: UploadDataComponent },
           { path: '', pathMatch: 'full', redirectTo: 'energy-consumption' }
         ]
       },
@@ -284,6 +297,38 @@ const routes: Routes = [
   { path: 'feedback', component: FeedbackComponent },
   { path: 'help', component: HelpComponent },
   { path: 'style-guide', component: StyleGuideComponent },
+  {
+    path: 'upload',
+    component: UploadDataComponent,
+    children: [
+      { path: '', pathMatch: 'full', redirectTo: 'file-upload' },
+      { path: 'file-upload', component: FileUploadComponent },
+      {
+        path: 'data-setup',
+        component: DataSetupComponent,
+        children: [
+          { 
+            path: 'file-setup/:id', 
+            component: FileSetupComponent,
+            children: [
+              { path: '', pathMatch: 'full', redirectTo: 'select-worksheet' },
+              { path: 'select-worksheet', component: SelectWorksheetComponent },
+              { path: 'identify-columns', component: IdentifyColumnsComponent },
+              { path: 'set-facility-meters', component: SetFacilityMetersComponent },
+              { path: 'set-facility-predictors', component: SetFacilityPredictorsComponent },
+              { path: 'manage-meters', component: ManageMetersComponent },
+              { path: 'template-facilities', component: TemplateFacilitiesComponent },
+              { path: 'confirm-readings', component: ConfirmReadingsComponent },
+              { path: 'confirm-predictors', component: ConfirmPredictorsComponent },
+              { path: 'submit', component: ConfirmAndSubmitComponent}
+            ]
+          },
+        ]
+      },
+
+    ]
+  },
+  //wildcard/page not found needs to be last route
   { path: "**", component: PageNotFoundComponent },
 ];
 
