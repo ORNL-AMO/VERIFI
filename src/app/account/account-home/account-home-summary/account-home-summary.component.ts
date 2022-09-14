@@ -8,6 +8,7 @@ import { AccountHomeService } from '../account-home.service';
 import * as _ from 'lodash';
 import { Router } from '@angular/router';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { ExportToExcelTemplateService } from 'src/app/shared/helper-services/export-to-excel-template.service';
 
 @Component({
   selector: 'app-account-home-summary',
@@ -33,7 +34,8 @@ export class AccountHomeSummaryComponent implements OnInit {
   disableButtons: boolean;
   constructor(private accountDbService: AccountdbService, private accountHomeService: AccountHomeService,
     private overviewReportOptionsDbService: OverviewReportOptionsDbService, private router: Router,
-    private utilityMeterDataDbService: UtilityMeterDatadbService) { }
+    private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private exportToExcelTemplateService: ExportToExcelTemplateService) { }
 
   ngOnInit(): void {
     this.accountSub = this.accountDbService.selectedAccount.subscribe(val => {
@@ -76,7 +78,15 @@ export class AccountHomeSummaryComponent implements OnInit {
     this.percentTowardsGoal = (this.percentSavings / this.percentGoal) * 100;
   }
 
-  navigateTo(urlStr: string){
-    this.router.navigateByUrl('account/'+urlStr);
+  navigateTo(urlStr: string) {
+    if (urlStr != 'upload') {
+      this.router.navigateByUrl('account/' + urlStr);
+    } else {
+      this.router.navigateByUrl('/' + urlStr);
+    }
+  }
+
+  exportData(){
+    this.exportToExcelTemplateService.exportFacilityData();
   }
 }

@@ -60,7 +60,7 @@ export class UtilityMetersTableComponent implements OnInit {
   }
 
   uploadData() {
-    this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/utility/upload-data');
+    this.router.navigateByUrl('/upload');
   }
 
   addMeter() {

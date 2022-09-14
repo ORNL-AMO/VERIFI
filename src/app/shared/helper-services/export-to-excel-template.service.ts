@@ -22,7 +22,7 @@ export class ExportToExcelTemplateService {
     private accountDbService: AccountdbService) { }
 
 
-  exportFacilityData() {
+  exportFacilityData(facilityId?: string) {
     let workbook: ExcelJS.Workbook = this.getWorkBook();
     workbook.xlsx.writeBuffer().then(excelData => {
       let blob: Blob = new Blob([excelData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
@@ -42,21 +42,21 @@ export class ExportToExcelTemplateService {
     });
   }
 
-  getWorkBook(): ExcelJS.Workbook {
+  getWorkBook(facilityId?: string): ExcelJS.Workbook {
     let workbook: ExcelJS.Workbook = new ExcelJS.Workbook();
     workbook.properties.date1904 = true;
     workbook.calcProperties.fullCalcOnLoad = true;
     workbook.addWorksheet('Help');
-    workbook.worksheets[1] = this.getFacilityWorksheet(workbook);
-    workbook.worksheets[2] = this.getMetersWorksheet(workbook);
-    workbook.worksheets[3] = this.getElectricityWorksheet(workbook);
-    workbook.worksheets[4] = this.getNonElectricityWorksheet(workbook);
-    workbook.worksheets[5] = this.getPredictorWorksheet(workbook);
+    workbook.worksheets[1] = this.getFacilityWorksheet(workbook, facilityId);
+    workbook.worksheets[2] = this.getMetersWorksheet(workbook, facilityId);
+    workbook.worksheets[3] = this.getElectricityWorksheet(workbook, facilityId);
+    workbook.worksheets[4] = this.getNonElectricityWorksheet(workbook, facilityId);
+    workbook.worksheets[5] = this.getPredictorWorksheet(workbook, facilityId);
 
     return workbook;
   }
 
-  getFacilityWorksheet(workbook: ExcelJS.Workbook): ExcelJS.Worksheet {
+  getFacilityWorksheet(workbook: ExcelJS.Workbook, facilityId?: string): ExcelJS.Worksheet {
     let worksheet: ExcelJS.Worksheet = workbook.addWorksheet('Facilities');
     worksheet.getCell('A1').value = 'Facility Name';
     worksheet.getCell('B1').value = 'Address';
@@ -71,6 +71,9 @@ export class ExportToExcelTemplateService {
     worksheet.getCell('K1').value = 'Contact Email';
 
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    if (facilityId) {
+      accountFacilities = accountFacilities.filter(facility => { return facility.guid == facilityId });
+    }
     let index: number = 2;
     accountFacilities.forEach(facility => {
       worksheet.getCell('A' + index).value = facility.name;
@@ -89,7 +92,7 @@ export class ExportToExcelTemplateService {
     return worksheet;
   }
 
-  getMetersWorksheet(workbook: ExcelJS.Workbook): ExcelJS.Worksheet {
+  getMetersWorksheet(workbook: ExcelJS.Workbook, facilityId?: string): ExcelJS.Worksheet {
     let worksheet: ExcelJS.Worksheet = workbook.addWorksheet('Meters-Utilities');
     worksheet.getCell('A1').value = 'Facility Name';
     worksheet.getCell('B1').value = 'Meter Number';
@@ -111,6 +114,9 @@ export class ExportToExcelTemplateService {
     worksheet.getCell('R1').value = 'Retain RECS';
 
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    if(facilityId){
+      facilityMeters = facilityMeters.filter(meter => {return meter.facilityId == facilityId});
+    }
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     let index: number = 2;
     facilityMeters.forEach(meter => {
@@ -155,7 +161,7 @@ export class ExportToExcelTemplateService {
     return selectedType.typeLabel;
   }
 
-  getElectricityWorksheet(workbook: ExcelJS.Workbook): ExcelJS.Worksheet {
+  getElectricityWorksheet(workbook: ExcelJS.Workbook, facilityId?: string): ExcelJS.Worksheet {
     let worksheet: ExcelJS.Worksheet = workbook.addWorksheet('Electricity');
     worksheet.getCell('A1').value = 'Meter Number';
     worksheet.getCell('B1').value = 'Read Date';
@@ -184,6 +190,9 @@ export class ExportToExcelTemplateService {
     worksheet.getCell('Y1').value = 'Late Payment';
     worksheet.getCell('Z1').value = 'Other Charge';
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    if(facilityId){
+      facilityMeters = facilityMeters.filter(meter => {return meter.facilityId == facilityId});
+    }
     let electricityMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.source == 'Electricity' });
     let index: number = 2;
     electricityMeters.forEach(meter => {
@@ -222,7 +231,7 @@ export class ExportToExcelTemplateService {
     return worksheet;
   }
 
-  getNonElectricityWorksheet(workbook: ExcelJS.Workbook): ExcelJS.Worksheet {
+  getNonElectricityWorksheet(workbook: ExcelJS.Workbook, facilityId?: string): ExcelJS.Worksheet {
     let worksheet: ExcelJS.Worksheet = workbook.addWorksheet('Non-electricity');
     worksheet.getCell('A1').value = 'Meter Number';
     worksheet.getCell('B1').value = 'Read Date';
@@ -237,6 +246,9 @@ export class ExportToExcelTemplateService {
     worksheet.getCell('K1').value = 'State Sales Tax';
     worksheet.getCell('L1').value = 'Late Payment';
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    if(facilityId){
+      facilityMeters = facilityMeters.filter(meter => {return meter.facilityId == facilityId});
+    }
     let electricityMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.source != 'Electricity' });
     let index: number = 2;
     electricityMeters.forEach(meter => {
@@ -260,8 +272,7 @@ export class ExportToExcelTemplateService {
     return worksheet;
   }
 
-  getPredictorWorksheet(workbook: ExcelJS.Workbook): ExcelJS.Worksheet {
-    //TODO: Figure out account predictors logic..
+  getPredictorWorksheet(workbook: ExcelJS.Workbook, facilityId?: string): ExcelJS.Worksheet {
     let worksheet: ExcelJS.Worksheet = workbook.addWorksheet('Predictors');
     let alpha = Array.from(Array(26)).map((e, i) => i + 65);
     let alphabet = alpha.map(x => { return String.fromCharCode(x) });
@@ -270,7 +281,13 @@ export class ExportToExcelTemplateService {
     let alphaIndex: number = 2;
 
     let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    if(facilityId){
+      facilities = facilities.filter(facility => {return facility.guid == facilityId});
+    }
     let predictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
+    if(facilityId){
+      predictorEntries = predictorEntries.filter(entry => {return entry.facilityId == facilityId});
+    }
     let predictorCellMap: Array<{ letter: string, predictorName: string }> = new Array();
     if (predictorEntries.length != 0) {
       // predictorEntries[0].predictors.forEach(predictor => {
@@ -313,7 +330,6 @@ export class ExportToExcelTemplateService {
         predictorNames = _.union(predictorNames, facilityPredictorNames)
       }
     });
-    console.log(predictorNames)
     return predictorNames;
   }
 

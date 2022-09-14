@@ -67,42 +67,47 @@
                 </ul>
             </div>
             <div class="col">
-                <div class="d-flex justify-content-end">
-                    <div class="pr-2">
+                <div class="d-flex justify-content-end flex-wrap">
+                    <div class="p-1">
                         <button class="btn btn-outline m-0" (click)="navigateTo('overview')"
                             [disabled]="disableButtons">
                             <span class="fa fa-chart-column"></span><br>
                             View Account <br> Data Overview
                         </button>
                     </div>
-                    <div class="pr-2">
+                    <div class="p-1">
                         <button class="btn btn-outline m-0" (click)="navigateTo('analysis')"
                             [disabled]="disableButtons">
                             <span class="fa fa-microscope"></span><br>
                             Conduct Account <br> Analysis
                         </button>
                     </div>
-                    <div class="pr-2">
+                    <div class="p-1">
                         <button class="btn btn-outline m-0" (click)="navigateTo('reports')" [disabled]="disableButtons">
                             <span class="fa fa-folder"></span><br>
                             Generate Account <br> Reports
                         </button>
                     </div>
-                    <div class="pr-2">
-                        <button class="btn btn-outline m-0" (click)="navigateTo('settings')"
-                            [disabled]="disableButtons">
+                    <div class="p-1">
+                        <button class="btn btn-outline m-0" (click)="navigateTo('settings')">
                             <span class="fa fa-gear"></span><br>
                             Manage Account <br> Settings
                         </button>
                     </div>
-                    <!--TODO: Add functionality-->
-                    <!-- <div class="pr-2">
-                        <button class="btn btn-outline m-0">
+                    <div class="p-1">
+                        <button class="btn btn-outline m-0" (click)="navigateTo('upload')">
                             <span class="fa fa-upload"></span><br>
                             Upload Utility <br> Data
                         </button>
                     </div>
-                    <div class="pr-2">
+                    <div class="p-1">
+                        <button class="btn btn-outline m-0" (click)="exportData()">
+                            <span class="fa fa-download"></span><br>
+                            Export Account <br> Utility Data
+                        </button>
+                    </div>
+                    <!--TODO: Add functionality-->
+                    <!--<div class="pr-2">
                         <button class="btn btn-outline m-0">
                             <span class="fa fa-plus"></span><br>
                             Add New <br> Facility
