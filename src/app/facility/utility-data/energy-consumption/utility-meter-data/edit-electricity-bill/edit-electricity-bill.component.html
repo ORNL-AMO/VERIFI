@@ -3,6 +3,7 @@
 
   <div class="row">
     <div class="col-6">
+      <!--read date-->
       <label for="readDate">
         Meter Read Date
         <span class="required">*</span>
@@ -15,7 +16,7 @@
         required</span>
       <span class="inputError" *ngIf="invalidDate">Meter already has data entered for selected date</span>
 
-
+      <!--energy use-->
       <label for="totalEnergyUse">
         Total Energy Use
         <span class="required">*</span>
@@ -32,9 +33,30 @@
       <span class="inputWarning" *ngIf="meterDataForm.controls.totalEnergyUse.value === 0">Total energy use should be
         greater than 0</span>
 
+      <!--calculated emissions-->
+      <div class="row">
+        <div class="col-6">
+          <label for="totalMarketEmissions">
+            Total Market Emissions
+          </label>
+          <div class="input-group mb-3">
+            {{totalMarketEmissions | number:'1.0-0'}} kg CO<sub>2</sub>
+          </div>
+        </div>
+        <div class="col-6">
+          <label for="totalLocationEmissions">
+            Total Location Emissions
+          </label>
+          <div class="input-group mb-3">
+            {{totalLocationEmissions | number:'1.0-0'}} kg CO<sub>2</sub>
+          </div>
+        </div>
+      </div>
 
     </div>
+
     <div class="col">
+      <!--real demand-->
       <label for="totalRealDemand">
         Total Real Demand
       </label>
@@ -50,6 +72,7 @@
         greater
         than 0</span>
 
+      <!--billed demand-->
       <label for="totalBilledDemand">
         Total Billed Demand
       </label>
@@ -66,7 +89,7 @@
         greater
         than 0</span>
 
-
+      <!--total cost-->
       <label for="totalCost">
         Total Cost
       </label>
@@ -81,31 +104,192 @@
       <span class="inputWarning" *ngIf="meterDataForm.controls.totalCost.value === 0">Total cost should be greater
         than 0</span>
 
-
     </div>
   </div>
 
-  <div class="row">
-    <div class="col-6">
-      <label for="totalMarketEmissions">
-        Total Market Emissions
-      </label>
-      <div class="input-group mb-3">
-        {{totalMarketEmissions | number:'1.0-0'}} kg CO<sub>2</sub>
-      </div>
-    </div>
-    <div class="col-6">
-      <label for="totalLocationEmissions">
-        Total Location Emissions
-      </label>
-      <div class="input-group mb-3">
-        {{totalLocationEmissions | number:'1.0-0'}} kg CO<sub>2</sub>
-      </div>
-    </div>
-  </div>
 
 
   <hr>
+  <p class="bold">Detailed Charges</p>
+  <!--detailed charges-->
+  <div class="row">
+    <div class="col-6">
+      <!--block 1-->
+      <div>
+        <label for="block1Consumption">Block 1 Consumption</label>
+        <div class="input-group mb-3">
+          <input id="block1Consumption" class="form-control" type="number" formControlName="block1Consumption"
+            onfocus="this.select();" min="0">
+          <span class="unit" [innerHTML]="energyUnit | settingsLabel"></span>
+          <input id="block1ConsumptionCharge" class="form-control" type="number"
+            formControlName="block1ConsumptionCharge" min="0">
+          <span class="unit">$</span>
+        </div>
+      </div>
+      <!--block 2-->
+      <div>
+        <label for="block2Consumption">Block 3 Consumption</label>
+        <div class="input-group mb-3">
+          <input id="block2Consumption" class="form-control" type="number" formControlName="block2Consumption"
+            onfocus="this.select();" min="0">
+          <span class="unit" [innerHTML]="energyUnit | settingsLabel"></span>
+          <input id="block2ConsumptionCharge" class="form-control" type="number"
+            formControlName="block2ConsumptionCharge" min="0">
+          <span class="unit">$</span>
+        </div>
+      </div>
+
+      <!--block 3-->
+      <div>
+        <label for="block3Consumption">Block 3 Consumption</label>
+        <div class="input-group mb-3">
+          <input id="block3Consumption" class="form-control" type="number" formControlName="block3Consumption"
+            onfocus="this.select();" min="0">
+          <span class="unit" [innerHTML]="energyUnit | settingsLabel"></span>
+          <input id="block3ConsumptionCharge" class="form-control" type="number"
+            formControlName="block3ConsumptionCharge" min="0">
+          <span class="unit">$</span>
+        </div>
+      </div>
+
+      <!--other consumption-->
+      <div>
+        <label for="otherConsumption">Other Consumption</label>
+        <div class="input-group mb-3">
+          <input id="otherConsumption" class="form-control" type="number" formControlName="otherConsumption"
+            onfocus="this.select();" min="0">
+          <span class="unit" [innerHTML]="energyUnit | settingsLabel"></span>
+          <input id="otherConsumptionCharge" class="form-control" type="number" formControlName="otherConsumptionCharge"
+            min="0">
+          <span class="unit">$</span>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="col-6">
+      <!--on peak amount-->
+      <div>
+        <label for="onPeakAmount">On Peak Amount</label>
+        <div class="input-group mb-3">
+          <input id="onPeakAmount" class="form-control" type="number" formControlName="onPeakAmount"
+            onfocus="this.select();" min="0">
+          <span class="unit" [innerHTML]="energyUnit | settingsLabel"></span>
+          <input id="onPeakCharge" class="form-control" type="number" formControlName="onPeakCharge" min="0">
+          <span class="unit">$</span>
+        </div>
+      </div>
+
+      <!--off peak amount-->
+      <div>
+        <label for="offPeakAmount">Off Peak Amount</label>
+        <div class="input-group mb-3">
+          <input id="offPeakAmount" class="form-control" type="number" formControlName="offPeakAmount"
+            onfocus="this.select();" min="0">
+          <span class="unit" [innerHTML]="energyUnit | settingsLabel"></span>
+          <input id="offPeakCharge" class="form-control" type="number" formControlName="offPeakCharge" min="0">
+          <span class="unit">$</span>
+        </div>
+      </div>
+
+      <!--power factor-->
+      <div>
+        <label for="powerFactor">Power Factor</label>
+        <div class="input-group mb-3">
+          <input id="powerFactor" class="form-control" type="number" formControlName="powerFactor"
+            onfocus="this.select();" min="0">
+          <span class="unit"></span>
+          <input id="powerFactorCharge" class="form-control" type="number" formControlName="powerFactorCharge" min="0">
+          <span class="unit">$</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <hr>
+
+  <!--additional charges-->
+  <p class="bold">Additional Charges</p>
+  <div class="row">
+    <div class="col-4">
+      <!--non energy charge-->
+      <label for="nonEnergyCharge">
+        Non-energy Charge
+      </label>
+      <div class="input-group mb-3">
+        <input id="nonEnergyCharge" class="form-control" type="number" formControlName="nonEnergyCharge"
+          onfocus="this.select();" min="0">
+        <span class="unit">$</span>
+      </div>
+    </div>
+
+    <div class="col-4">
+      <!--transmission and delivery charge-->
+      <label for="transmissionAndDeliveryCharge">
+        Transmission and Delivery Charge
+      </label>
+      <div class="input-group mb-3">
+        <input id="transmissionAndDeliveryCharge" class="form-control" type="number"
+          formControlName="transmissionAndDeliveryCharge" onfocus="this.select();" min="0">
+        <span class="unit">$</span>
+      </div>
+    </div>
+
+    <div class="col-4">
+      <!--local sales tax-->
+      <label for="localSalesTax">
+        Local Sales Tax
+      </label>
+      <div class="input-group mb-3">
+        <input id="localSalesTax" class="form-control" type="number" formControlName="localSalesTax"
+          onfocus="this.select();" min="0">
+        <span class="unit">$</span>
+      </div>
+    </div>
+
+    <div class="col-4">
+      <!--state sales tax-->
+      <label for="stateSalesTax">
+        State Sales Tax
+      </label>
+      <div class="input-group mb-3">
+        <input id="stateSalesTax" class="form-control" type="number" formControlName="stateSalesTax"
+          onfocus="this.select();" min="0">
+        <span class="unit">$</span>
+      </div>
+    </div>
+
+    <div class="col-4">
+      <!--state sales tax-->
+      <label for="latePayment">
+        Late Payment
+      </label>
+      <div class="input-group mb-3">
+        <input id="latePayment" class="form-control" type="number" formControlName="latePayment"
+          onfocus="this.select();" min="0">
+        <span class="unit">$</span>
+      </div>
+    </div>
+
+    <div class="col-4">
+      <!--other payment-->
+      <label for="otherCharge">
+        Other Charge
+      </label>
+      <div class="input-group mb-3">
+        <input id="otherCharge" class="form-control" type="number" formControlName="otherCharge"
+          onfocus="this.select();" min="0">
+        <span class="unit">$</span>
+      </div>
+    </div>
+
+  </div>
+
+
+
+
+
+
+
   <!--TODO: Update forms with new fields-->
   <!-- <div *ngIf="supplyDemandFilters.showSection">
     <p class="bold">Supply / Demand Charge</p>
