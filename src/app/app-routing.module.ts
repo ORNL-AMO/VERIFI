@@ -74,6 +74,10 @@ import { TemplateFacilitiesComponent } from './upload-data/data-setup/file-setup
 import { ConfirmReadingsComponent } from './upload-data/data-setup/file-setup/confirm-readings/confirm-readings.component';
 import { ConfirmPredictorsComponent } from './upload-data/data-setup/file-setup/confirm-predictors/confirm-predictors.component';
 import { ConfirmAndSubmitComponent } from './upload-data/data-setup/file-setup/confirm-and-submit/confirm-and-submit.component';
+import { CorporateInformationSetupComponent } from './setup-wizard/setup-account/corporate-information-setup/corporate-information-setup.component';
+import { CorporateUnitsSetupComponent } from './setup-wizard/setup-account/corporate-units-setup/corporate-units-setup.component';
+import { CorporateQuestionsSetupComponent } from './setup-wizard/setup-account/corporate-questions-setup/corporate-questions-setup.component';
+import { CorporateReportingSetupComponent } from './setup-wizard/setup-account/corporate-reporting-setup/corporate-reporting-setup.component';
 
 const routes: Routes = [
   {
@@ -286,7 +290,18 @@ const routes: Routes = [
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'welcome' },
       { path: 'welcome', component: SetupWelcomeComponent },
-      { path: 'account-setup', component: SetupAccountComponent },
+      { 
+        path: 'account-setup', 
+        component: SetupAccountComponent,
+        children: [
+          { path: '', pathMatch: 'full', redirectTo: 'information-setup' },
+          { path: 'information-setup', component: CorporateInformationSetupComponent },
+          { path: 'units-setup', component: CorporateUnitsSetupComponent },
+          { path: 'questions-setup', component: CorporateQuestionsSetupComponent },
+          { path: 'reporting-setup', component: CorporateReportingSetupComponent },
+
+        ]
+      },
       { path: 'facility-setup', component: SetupFacilitiesComponent },
       { path: 'confirmation', component: SetupConfirmationComponent },
 

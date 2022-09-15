@@ -19,7 +19,7 @@ export class SetupWizardFooterComponent implements OnInit {
         this.setProgress();
       }
     });
-   }
+  }
 
   ngOnInit(): void {
     this.setProgress();
@@ -27,25 +27,38 @@ export class SetupWizardFooterComponent implements OnInit {
 
   back() {
     if (this.router.url.includes('account-setup')) {
-      this.router.navigateByUrl('setup-wizard/welcome');
+
+      if (this.router.url.includes('information-setup')) {
+        this.router.navigateByUrl('setup-wizard/welcome')
+      } else if (this.router.url.includes('units-setup')) {
+        this.router.navigateByUrl('setup-wizard/account-setup/information-setup')
+      } else if (this.router.url.includes('questions-setup')) {
+        this.router.navigateByUrl('setup-wizard/account-setup/units-setup')
+      }
     } else if (this.router.url.includes('facility-setup')) {
       this.router.navigateByUrl('setup-wizard/account-setup');
     } else if (this.router.url.includes('confirmation')) {
       this.router.navigateByUrl('setup-wizard/facility-setup');
-    } 
+    }
   }
 
   next() {
     if (this.router.url.includes('welcome')) {
       this.router.navigateByUrl('setup-wizard/account-setup')
     } else if (this.router.url.includes('account-setup')) {
-      this.router.navigateByUrl('setup-wizard/facility-setup')
+      if (this.router.url.includes('information-setup')) {
+        this.router.navigateByUrl('setup-wizard/account-setup/units-setup')
+      } else if (this.router.url.includes('units-setup')) {
+        this.router.navigateByUrl('setup-wizard/account-setup/questions-setup')
+      } else if (this.router.url.includes('questions-setup')) {
+        this.router.navigateByUrl('setup-wizard/facility-setup')
+      }
     } else if (this.router.url.includes('facility-setup')) {
       this.router.navigateByUrl('setup-wizard/confirmation')
     }
   }
 
-  setProgress(){
+  setProgress() {
     if (this.router.url.includes('welcome')) {
       this.showSubmit = false;
       this.progressLabel = 'Welcome to VERIFI'
@@ -58,14 +71,14 @@ export class SetupWizardFooterComponent implements OnInit {
       this.showSubmit = false;
       this.progressLabel = 'Step 2. Add Facilities';
       this.progress = '66%';
-    } else if(this.router.url.includes('confirmation')){
+    } else if (this.router.url.includes('confirmation')) {
       this.showSubmit = true;
       this.progressLabel = 'Step 3. Confirm Account Setup';
       this.progress = '100%';
     }
   }
 
-  submitAccount(){
+  submitAccount() {
     this.setupWizardService.submit.next(true);
   }
 }

@@ -1,3 +1,31 @@
 .wrapper{
     margin-bottom: 100px;
+    padding: 0px;
+}
+
+.nav{
+    border-right: solid #145A32;
+    width: 210px;
+}
+
+.nav-item{
+    border-bottom: groove 1px;
+}
+
+.badge{
+    background-color: #145A32;
+    color: white;
+}
+
+.nav-link{
+    font-size: 16px;
+}
+
+.nav-link.active{
+    background-color: #efefef;
+}
+
+.nav-link:hover{
+    cursor: pointer;
+    background-color: #efefef;
 }
