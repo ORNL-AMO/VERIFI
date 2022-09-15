@@ -78,6 +78,9 @@ import { CorporateInformationSetupComponent } from './setup-wizard/setup-account
 import { CorporateUnitsSetupComponent } from './setup-wizard/setup-account/corporate-units-setup/corporate-units-setup.component';
 import { CorporateQuestionsSetupComponent } from './setup-wizard/setup-account/corporate-questions-setup/corporate-questions-setup.component';
 import { CorporateReportingSetupComponent } from './setup-wizard/setup-account/corporate-reporting-setup/corporate-reporting-setup.component';
+import { FacilityInformationSetupComponent } from './setup-wizard/setup-facilities/facility-information-setup/facility-information-setup.component';
+import { FacilityUnitsSetupComponent } from './setup-wizard/setup-facilities/facility-units-setup/facility-units-setup.component';
+import { FacilityReportingSetupComponent } from './setup-wizard/setup-facilities/facility-reporting-setup/facility-reporting-setup.component';
 
 const routes: Routes = [
   {
@@ -290,19 +293,30 @@ const routes: Routes = [
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'welcome' },
       { path: 'welcome', component: SetupWelcomeComponent },
-      { 
-        path: 'account-setup', 
+      {
+        path: 'account-setup',
         component: SetupAccountComponent,
         children: [
           { path: '', pathMatch: 'full', redirectTo: 'information-setup' },
           { path: 'information-setup', component: CorporateInformationSetupComponent },
           { path: 'units-setup', component: CorporateUnitsSetupComponent },
-          { path: 'questions-setup', component: CorporateQuestionsSetupComponent },
+          // { path: 'questions-setup', component: CorporateQuestionsSetupComponent },
           { path: 'reporting-setup', component: CorporateReportingSetupComponent },
 
         ]
       },
-      { path: 'facility-setup', component: SetupFacilitiesComponent },
+      {
+        path: 'facility-setup',
+        component: SetupFacilitiesComponent,
+        children: [
+          { path: '', pathMatch: 'full', redirectTo: 'information-setup' },
+          { path: 'information-setup', component: FacilityInformationSetupComponent },
+          { path: 'units-setup', component: FacilityUnitsSetupComponent },
+          // { path: 'questions-setup', component: CorporateQuestionsSetupComponent },
+          { path: 'reporting-setup', component: FacilityReportingSetupComponent },
+
+        ]
+      },
       { path: 'confirmation', component: SetupConfirmationComponent },
 
     ]
@@ -322,8 +336,8 @@ const routes: Routes = [
         path: 'data-setup',
         component: DataSetupComponent,
         children: [
-          { 
-            path: 'file-setup/:id', 
+          {
+            path: 'file-setup/:id',
             component: FileSetupComponent,
             children: [
               { path: '', pathMatch: 'full', redirectTo: 'select-worksheet' },
@@ -335,7 +349,7 @@ const routes: Routes = [
               { path: 'template-facilities', component: TemplateFacilitiesComponent },
               { path: 'confirm-readings', component: ConfirmReadingsComponent },
               { path: 'confirm-predictors', component: ConfirmPredictorsComponent },
-              { path: 'submit', component: ConfirmAndSubmitComponent}
+              { path: 'submit', component: ConfirmAndSubmitComponent }
             ]
           },
         ]

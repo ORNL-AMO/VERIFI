@@ -179,6 +179,29 @@
 
             </div>
         </div>
+        <ng-container *ngIf="!inAccount">
+            <hr>
+            <!--facility only-->
+            <div class="row">
+                <div class="col-6">
+                    <label>Facility Area</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" formControlName="size" (input)="saveChanges()"
+                            onfocus="this.select();" minlength="1" maxlength="60">
+                        <span class="unit" *ngIf="unitsOfMeasure != 'Metric'">ft<sup>2</sup></span>
+                        <span class="unit" *ngIf="unitsOfMeasure === 'Metric'">m<sup>2</sup></span>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <!-- <label>Facility Color</label> -->
+                    <app-label-with-tooltip [label]="'Facility Color'" [field]="'facilityColor'"
+                        [labelId]="'facilityColor'" [isRequired]="false">
+                    </app-label-with-tooltip>
+                    <input type="color" class="form-control" formControlName="color" (input)="saveChanges()"
+                        [ngStyle]="{'background-color':form.controls.color.value}" id="facilityColor">
+                </div>
+            </div>
+        </ng-container>
         <hr>
         <div class="row">
             <div class="mb-3 col-6">
@@ -211,28 +234,6 @@
                 <textarea formControlName="notes" (input)="saveChanges()"></textarea>
             </div>
         </div>
-        <ng-container *ngIf="!inAccount">
-            <hr>
-            <!--facility only-->
-            <div class="row">
-                <div class="col-6">
-                    <label>Facility Area</label>
-                    <div class="input-group">
-                        <input type="text" class="form-control" formControlName="size" (input)="saveChanges()"
-                            onfocus="this.select();" minlength="1" maxlength="60">
-                        <span class="unit" *ngIf="unitsOfMeasure != 'Metric'">ft<sup>2</sup></span>
-                        <span class="unit" *ngIf="unitsOfMeasure === 'Metric'">m<sup>2</sup></span>
-                    </div>
-                    <div class="col-6">
-                        <!-- <label>Facility Color</label> -->
-                        <app-label-with-tooltip [label]="'Facility Color'" [field]="'facilityColor'"
-                            [labelId]="'facilityColor'" [isRequired]="false">
-                        </app-label-with-tooltip>
-                        <input type="color" class="form-control" formControlName="color" (input)="saveChanges()"
-                            [ngStyle]="{'background-color':form.controls.color.value}" id="facilityColor">
-                    </div>
-                </div>
-            </div>
-        </ng-container>
+
     </ng-container>
 </form>

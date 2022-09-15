@@ -27,16 +27,23 @@ export class SetupWizardFooterComponent implements OnInit {
 
   back() {
     if (this.router.url.includes('account-setup')) {
-
       if (this.router.url.includes('information-setup')) {
         this.router.navigateByUrl('setup-wizard/welcome')
       } else if (this.router.url.includes('units-setup')) {
         this.router.navigateByUrl('setup-wizard/account-setup/information-setup')
-      } else if (this.router.url.includes('questions-setup')) {
+      } else if (this.router.url.includes('reporting-setup')) {
         this.router.navigateByUrl('setup-wizard/account-setup/units-setup')
       }
+
     } else if (this.router.url.includes('facility-setup')) {
-      this.router.navigateByUrl('setup-wizard/account-setup');
+      if (this.router.url.includes('information-setup')) {
+        this.router.navigateByUrl('setup-wizard/account-setup/reporting-setup')
+      } else if (this.router.url.includes('units-setup')) {
+        this.router.navigateByUrl('setup-wizard/facility-setup/information-setup')
+      } else if (this.router.url.includes('reporting-setup')) {
+        this.router.navigateByUrl('setup-wizard/facility-setup/units-setup')
+      }
+      // this.router.navigateByUrl('setup-wizard/account-setup');
     } else if (this.router.url.includes('confirmation')) {
       this.router.navigateByUrl('setup-wizard/facility-setup');
     }
@@ -49,12 +56,18 @@ export class SetupWizardFooterComponent implements OnInit {
       if (this.router.url.includes('information-setup')) {
         this.router.navigateByUrl('setup-wizard/account-setup/units-setup')
       } else if (this.router.url.includes('units-setup')) {
-        this.router.navigateByUrl('setup-wizard/account-setup/questions-setup')
-      } else if (this.router.url.includes('questions-setup')) {
+        this.router.navigateByUrl('setup-wizard/account-setup/reporting-setup')
+      } else if (this.router.url.includes('reporting-setup')) {
         this.router.navigateByUrl('setup-wizard/facility-setup')
       }
     } else if (this.router.url.includes('facility-setup')) {
-      this.router.navigateByUrl('setup-wizard/confirmation')
+      if (this.router.url.includes('information-setup')) {
+        this.router.navigateByUrl('setup-wizard/facility-setup/units-setup')
+      } else if (this.router.url.includes('units-setup')) {
+        this.router.navigateByUrl('setup-wizard/facility-setup/reporting-setup')
+      } else if (this.router.url.includes('reporting-setup')) {
+        this.router.navigateByUrl('setup-wizard/confirmation')
+      }
     }
   }
 

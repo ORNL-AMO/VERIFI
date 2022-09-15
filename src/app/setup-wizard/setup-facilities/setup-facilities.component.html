@@ -17,7 +17,7 @@
         </ul>
     </div>
 </div>
-<div class="wrapper">
+<!-- <div class="wrapper">
     <div class="d-flex w-100 justify-content-end">
         <div *ngIf="facilities.length > 1">
             <button class="btn btn-sm btn-danger" (click)="deleteFacility()">Delete Facility</button>
@@ -54,4 +54,30 @@
 
     <br>
     <br>
+</div> -->
+
+
+<div class="wrapper">
+    <div class="d-flex w-100">
+        <div class="d-flex flex-column p-2 nav page-sidebar">
+            <div class="nav-item">
+                <a class="nav-link" routerLink="/setup-wizard/facility-setup/information-setup" [routerLinkActive]="['active']">
+                    <span class="badge">1</span> General Information
+                </a>
+            </div>
+            <div class="nav-item">
+                <a class="nav-link" routerLink="/setup-wizard/facility-setup/units-setup" [routerLinkActive]="['active']">
+                    <span class="badge">2</span> Units
+                </a>
+            </div>
+            <div class="nav-item">
+                <a class="nav-link" routerLink="/setup-wizard/facility-setup/reporting-setup" [routerLinkActive]="['active']">
+                    <span class="badge">3</span> Reporting
+                </a>
+            </div>
+        </div>
+        <div class="flex-fill pt-2 pl-4 pr-4 pb-4">
+            <router-outlet></router-outlet>
+        </div>
+    </div>
 </div>

@@ -4,9 +4,38 @@
 
 .wrapper{
     margin-bottom: 100px;
+    padding: 0px;
 }
 
-.nav-item.active a{
+.banner .nav-item.active a{
     background-color: #145A32;
     color: white !important;
+}
+
+
+.page-sidebar.nav{
+    border-right: solid #145A32;
+    width: 210px;
+}
+
+.page-sidebar .nav-item{
+    border-bottom: groove 1px;
+}
+
+.page-sidebar .badge{
+    background-color: #145A32;
+    color: white;
+}
+
+.page-sidebar .nav-link{
+    font-size: 16px;
+}
+
+.page-sidebar .nav-link.active{
+    background-color: #efefef;
+}
+
+.page-sidebar .nav-link:hover{
+    cursor: pointer;
+    background-color: #efefef;
 }
