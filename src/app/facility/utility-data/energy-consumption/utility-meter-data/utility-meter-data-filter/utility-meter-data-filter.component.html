@@ -8,6 +8,41 @@
     <div class="filter-dropdown" *ngIf="showFilterDropdown">
         <p class="small">Choose Table Columns</p>
         <div class="row">
+            <div class="col" *ngIf="filterType == 'table'">
+                <label>
+                    <input type="checkbox" name="totalCost" [(ngModel)]="generalInformationFilters.totalCost"
+                        (change)="save()">Total Cost
+                </label>
+                <label>
+                    <input type="checkbox" name="realDemand" [(ngModel)]="generalInformationFilters.realDemand"
+                        (change)="save()">Real Demand
+                </label>
+                <label>
+                    <input type="checkbox" name="billedDemand" [(ngModel)]="generalInformationFilters.billedDemand"
+                        (change)="save()">Billed Demand
+                </label>
+            </div>
+            <div class="col" *ngIf="filterType == 'table'">
+                <label>
+                    <input type="checkbox" name="marketEmissions" [(ngModel)]="emissionsFilters.marketEmissions"
+                        (change)="save()">Market Emissions
+                </label>
+                <label>
+                    <input type="checkbox" name="locationEmissions" [(ngModel)]="emissionsFilters.locationEmissions"
+                        (change)="save()">Location Emissions
+                </label>
+                <label>
+                    <input type="checkbox" name="recs" [(ngModel)]="emissionsFilters.recs" (change)="save()">RECs
+                </label>
+                <label>
+                    <input type="checkbox" name="excessRecs" [(ngModel)]="emissionsFilters.excessRecs"
+                        (change)="save()">Excess RECs
+                </label>
+                <label>
+                    <input type="checkbox" name="excessRecsEmissions" [(ngModel)]="emissionsFilters.excessRecsEmissions"
+                        (change)="save()">Excess RECs Emissions
+                </label>
+            </div>
             <div class="col">
                 <label>
                     <input type="checkbox" name="block1" [(ngModel)]="detailedChargesFilters.block1"
@@ -25,8 +60,6 @@
                     <input type="checkbox" name="other" [(ngModel)]="detailedChargesFilters.other"
                         (change)="save()">Other Consumption
                 </label>
-            </div>
-            <div class="col">
                 <label>
                     <input type="checkbox" name="onPeak" [(ngModel)]="detailedChargesFilters.onPeak"
                         (change)="save()">On-Peak Consumption
@@ -39,7 +72,6 @@
                     <input type="checkbox" name="powerFactor" [(ngModel)]="detailedChargesFilters.powerFactor"
                         (change)="save()">Power Factor
                 </label>
-                
             </div>
             <div class="col">
                 <label>
@@ -47,8 +79,9 @@
                         (change)="save()">Non-Energy Charge
                 </label>
                 <label>
-                    <input type="checkbox" name="transmissionAndDelivery" [(ngModel)]="additionalChargesFilters.transmissionAndDelivery"
-                        (change)="save()">Transmission and Delivery Charge
+                    <input type="checkbox" name="transmissionAndDelivery"
+                        [(ngModel)]="additionalChargesFilters.transmissionAndDelivery" (change)="save()">Transmission
+                    and Delivery Charge
                 </label>
                 <label>
                     <input type="checkbox" name="localSalesTax" [(ngModel)]="additionalChargesFilters.localSalesTax"

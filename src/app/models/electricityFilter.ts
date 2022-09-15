@@ -1,6 +1,8 @@
 export interface ElectricityDataFilters {
   detailedCharges: DetailedChargesFilters,
-  additionalCharges: AdditionalChargesFilters
+  additionalCharges: AdditionalChargesFilters,
+  emissionsFilters: EmissionsFilters,
+  generalInformationFilters: GeneralInformationFilters
 }
 
 export interface DetailedChargesFilters {
@@ -22,4 +24,21 @@ export interface AdditionalChargesFilters {
   stateSalesTax: boolean,
   latePayment: boolean,
   otherCharge: boolean,
+}
+
+
+export interface EmissionsFilters {
+  showSection: boolean,
+  marketEmissions: boolean,
+  locationEmissions: boolean,
+  recs: boolean,
+  excessRecs: boolean,
+  excessRecsEmissions: boolean
+}
+
+export interface GeneralInformationFilters {
+  showSection: boolean,
+  totalCost: boolean,
+  realDemand: boolean,
+  billedDemand: boolean
 }

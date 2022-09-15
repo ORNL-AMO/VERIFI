@@ -2,10 +2,10 @@
     <thead>
         <tr class="table-mh">
             <th></th>
-            <th colspan="5">
+            <th [attr.colspan]="numGeneralInformation">
                 General Information
             </th>
-            <th colspan="5">
+            <th *ngIf="emissionsFilters.showSection" [attr.colspan]="numEmissions">
                 Emissions
             </th>
             <th *ngIf="detailedChargesFilters.showSection" [attr.colspan]="numDetailedCharges">
@@ -27,28 +27,30 @@
             <th (click)="setOrderDataField('totalEnergyUse')"
                 [ngClass]="{'active': orderDataField == 'totalEnergyUse'}">Total Energy<br> (<span
                     [innerHTML]="energyUnit | settingsLabel"></span>)</th>
-            <th (click)="setOrderDataField('totalCost')" [ngClass]="{'active': orderDataField == 'totalCost'}">Total
+            <th *ngIf="generalInformationFilters.totalCost" (click)="setOrderDataField('totalCost')"
+                [ngClass]="{'active': orderDataField == 'totalCost'}">Total
                 Cost</th>
             <!-- totalRealDemand -->
-            <th (click)="setOrderDataField('totalRealDemand')"
+            <th *ngIf="generalInformationFilters.realDemand" (click)="setOrderDataField('totalRealDemand')"
                 [ngClass]="{'active': orderDataField == 'totalRealDemand'}">Total
                 Real<br> Demand (kW)</th>
             <!-- totalBilledDemand -->
-
-            <th (click)="setOrderDataField('totalBilledDemand')"
+            <th *ngIf="generalInformationFilters.billedDemand" (click)="setOrderDataField('totalBilledDemand')"
                 [ngClass]="{'active': orderDataField == 'totalBilledDemand'}">Total
                 Billed<br> Demand (kW)</th>
-            <th (click)="setOrderDataField('totalMarketEmissions')"
+            <th *ngIf="emissionsFilters.marketEmissions" (click)="setOrderDataField('totalMarketEmissions')"
                 [ngClass]="{'active': orderDataField == 'totalMarketEmissions'}">Total Market <br>Emissions (kg
                 CO<sub>2</sub>)</th>
-            <th (click)="setOrderDataField('totalLocationEmissions')"
+            <th *ngIf="emissionsFilters.locationEmissions" (click)="setOrderDataField('totalLocationEmissions')"
                 [ngClass]="{'active': orderDataField == 'totalLocationEmissions'}">Total Location <br>Emissions (kg
                 CO<sub>2</sub>)</th>
-            <th (click)="setOrderDataField('RECs')" [ngClass]="{'active': orderDataField == 'RECs'}">RECs<br> (<span
+            <th *ngIf="emissionsFilters.recs" (click)="setOrderDataField('RECs')"
+                [ngClass]="{'active': orderDataField == 'RECs'}">RECs<br> (<span
                     [innerHTML]="energyUnit | settingsLabel"></span>)</th>
-            <th (click)="setOrderDataField('excessRECs')" [ngClass]="{'active': orderDataField == 'excessRECs'}">Excess
+            <th *ngIf="emissionsFilters.excessRecs" (click)="setOrderDataField('excessRECs')"
+                [ngClass]="{'active': orderDataField == 'excessRECs'}">Excess
                 RECs<br> (<span [innerHTML]="energyUnit | settingsLabel"></span>)</th>
-            <th (click)="setOrderDataField('excessRECsEmissions')"
+            <th *ngIf="emissionsFilters.excessRecsEmissions" (click)="setOrderDataField('excessRECsEmissions')"
                 [ngClass]="{'active': orderDataField == 'excessRECsEmissions'}">Excess
                 RECs<br> Emissions (kg CO<sub>2</sub>)</th>
 
@@ -141,15 +143,15 @@
             </td>
             <td [ngClass]="checkError(meterData.readDate)">{{meterData.readDate | date}}</td>
             <td>{{meterData.totalEnergyUse | customNumber}}</td>
-            <td>{{meterData.totalCost | customNumber:true}}</td>
-            <td>{{meterData.totalRealDemand | customNumber}}</td>
-            <td>{{meterData.totalBilledDemand | customNumber}}</td>
+            <td *ngIf="generalInformationFilters.totalCost">{{meterData.totalCost | customNumber:true}}</td>
+            <td *ngIf="generalInformationFilters.realDemand">{{meterData.totalRealDemand | customNumber}}</td>
+            <td *ngIf="generalInformationFilters.billedDemand">{{meterData.totalBilledDemand | customNumber}}</td>
 
-            <td>{{meterData.totalMarketEmissions | customNumber}}</td>
-            <td>{{meterData.totalLocationEmissions | customNumber}}</td>
-            <td>{{meterData.RECs | customNumber}}</td>
-            <td>{{meterData.excessRECs | customNumber}}</td>
-            <td>{{meterData.excessRECsEmissions | customNumber}}</td>
+            <td *ngIf="emissionsFilters.marketEmissions">{{meterData.totalMarketEmissions | customNumber}}</td>
+            <td *ngIf="emissionsFilters.locationEmissions">{{meterData.totalLocationEmissions | customNumber}}</td>
+            <td *ngIf="emissionsFilters.recs">{{meterData.RECs | customNumber}}</td>
+            <td *ngIf="emissionsFilters.excessRecs">{{meterData.excessRECs | customNumber}}</td>
+            <td *ngIf="emissionsFilters.excessRecsEmissions">{{meterData.excessRECsEmissions | customNumber}}</td>
 
             <td *ngIf="detailedChargesFilters.block1">{{meterData.block1Consumption | customNumber}}</td>
             <td *ngIf="detailedChargesFilters.block1">{{meterData.block1ConsumptionCharge | customNumber:true}}</td>

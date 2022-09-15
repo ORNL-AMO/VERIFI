@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { AdditionalChargesFilters, DetailedChargesFilters, ElectricityDataFilters } from 'src/app/models/electricityFilter';
+import { AdditionalChargesFilters, DetailedChargesFilters, ElectricityDataFilters, EmissionsFilters, GeneralInformationFilters } from 'src/app/models/electricityFilter';
 import { IdbFacility } from 'src/app/models/idb';
 import { UtilityMeterDataService } from '../utility-meter-data.service';
 
@@ -18,6 +18,8 @@ export class UtilityMeterDataFilterComponent implements OnInit {
   showFilterDropdown: boolean = false;
   detailedChargesFilters: DetailedChargesFilters;
   additionalChargesFilters: AdditionalChargesFilters;
+  generalInformationFilters: GeneralInformationFilters;
+  emissionsFilters: EmissionsFilters;
   constructor(private utilityMeterDataService: UtilityMeterDataService, private facilityDbService: FacilitydbService,
     private dbChangesService: DbChangesService) { }
 
@@ -35,6 +37,8 @@ export class UtilityMeterDataFilterComponent implements OnInit {
       }
       this.additionalChargesFilters = electricityDataFilters.additionalCharges;
       this.detailedChargesFilters = electricityDataFilters.detailedCharges;
+      this.emissionsFilters = electricityDataFilters.emissionsFilters;
+      this.generalInformationFilters = electricityDataFilters.generalInformationFilters;
     }
     this.showFilterDropdown = !this.showFilterDropdown;
   }
@@ -43,7 +47,9 @@ export class UtilityMeterDataFilterComponent implements OnInit {
     this.checkShowSection();
     let electricityDataFilters: ElectricityDataFilters = {
       detailedCharges: this.detailedChargesFilters,
-      additionalCharges: this.additionalChargesFilters
+      additionalCharges: this.additionalChargesFilters,
+      emissionsFilters: this.emissionsFilters,
+      generalInformationFilters: this.generalInformationFilters
     }
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     if (this.filterType == 'table') {
@@ -74,6 +80,22 @@ export class UtilityMeterDataFilterComponent implements OnInit {
       latePayment: true,
       otherCharge: true,
     }
+    this.emissionsFilters = {
+      showSection: true,
+      marketEmissions: true,
+      locationEmissions: true,
+      recs: true,
+      excessRecs: true,
+      excessRecsEmissions: true
+
+    }
+    this.generalInformationFilters = {
+      showSection: true,
+      totalCost: true,
+      realDemand: true,
+      billedDemand: true
+
+    }
     await this.save();
   }
 
@@ -97,20 +119,44 @@ export class UtilityMeterDataFilterComponent implements OnInit {
       latePayment: false,
       otherCharge: false,
     }
+    this.emissionsFilters = {
+      showSection: false,
+      marketEmissions: false,
+      locationEmissions: false,
+      recs: false,
+      excessRecs: false,
+      excessRecsEmissions: false
+
+    }
+    this.generalInformationFilters = {
+      showSection: false,
+      totalCost: false,
+      realDemand: false,
+      billedDemand: false
+
+    }
     await this.save();
   }
 
   checkShowSection() {
     this.additionalChargesFilters.showSection = (
-      this.additionalChargesFilters.nonEnergyCharge || this.additionalChargesFilters.latePayment 
-      || this.additionalChargesFilters.otherCharge || this.additionalChargesFilters.transmissionAndDelivery 
+      this.additionalChargesFilters.nonEnergyCharge || this.additionalChargesFilters.latePayment
+      || this.additionalChargesFilters.otherCharge || this.additionalChargesFilters.transmissionAndDelivery
       || this.additionalChargesFilters.localSalesTax
-      || this.additionalChargesFilters.stateSalesTax || this.additionalChargesFilters.latePayment 
+      || this.additionalChargesFilters.stateSalesTax || this.additionalChargesFilters.latePayment
       || this.additionalChargesFilters.otherCharge
     );
     this.detailedChargesFilters.showSection = (
       this.detailedChargesFilters.block1 || this.detailedChargesFilters.block2 || this.detailedChargesFilters.block3 || this.detailedChargesFilters.other ||
       this.detailedChargesFilters.onPeak || this.detailedChargesFilters.offPeak || this.detailedChargesFilters.powerFactor
     );
-  }
+
+    this.generalInformationFilters.showSection = (
+      this.generalInformationFilters.totalCost || this.generalInformationFilters.realDemand || this.generalInformationFilters.billedDemand);
+
+    this.emissionsFilters.showSection = (
+      this.emissionsFilters.marketEmissions || this.emissionsFilters.locationEmissions || this.emissionsFilters.recs ||
+      this.emissionsFilters.excessRecs || this.emissionsFilters.excessRecsEmissions
+    )
+  };
 }

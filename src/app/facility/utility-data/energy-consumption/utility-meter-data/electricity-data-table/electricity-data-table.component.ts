@@ -6,7 +6,8 @@ import * as _ from 'lodash';
 import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
 import { CalanderizationService, EmissionsResults } from 'src/app/shared/helper-services/calanderization.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { AdditionalChargesFilters, DetailedChargesFilters } from 'src/app/models/electricityFilter';
+import { AdditionalChargesFilters, DetailedChargesFilters, EmissionsFilters, GeneralInformationFilters } from 'src/app/models/electricityFilter';
+import { EmissionsDataFormComponent } from 'src/app/account/custom-database/regional-emissions-data/emissions-data-form/emissions-data-form.component';
 
 @Component({
   selector: 'app-electricity-data-table',
@@ -33,6 +34,8 @@ export class ElectricityDataTableComponent implements OnInit {
   electricityDataFilterSub: Subscription;
   detailedChargesFilters: DetailedChargesFilters;
   additionalChargesFilters: AdditionalChargesFilters;
+  generalInformationFilters: GeneralInformationFilters;
+  emissionsFilters: EmissionsFilters;
   allChecked: boolean;
   energyUnit: string;
 
@@ -42,6 +45,8 @@ export class ElectricityDataTableComponent implements OnInit {
   copyingTable: boolean = false;
   numDetailedCharges: number;
   numAdditionalCharges: number;
+  numGeneralInformation: number;
+  numEmissions: number;
   constructor(private utilityMeterDataService: UtilityMeterDataService, private copyTableService: CopyTableService,
     private calanderizationService: CalanderizationService, private facilityDbService: FacilitydbService) { }
 
@@ -54,6 +59,8 @@ export class ElectricityDataTableComponent implements OnInit {
     this.electricityDataFilterSub = this.utilityMeterDataService.tableElectricityFilters.subscribe(electricityDataFilters => {
       this.detailedChargesFilters = electricityDataFilters.detailedCharges;
       this.additionalChargesFilters = electricityDataFilters.additionalCharges;
+      this.generalInformationFilters = electricityDataFilters.generalInformationFilters;
+      this.emissionsFilters = electricityDataFilters.emissionsFilters;
       this.setColumnNumbers();
     });
   }
@@ -168,5 +175,22 @@ export class ElectricityDataTableComponent implements OnInit {
       }
     });
     this.numDetailedCharges = detailedChargesCount * 2;
+
+    let emissionCount: number = 0;
+    Object.keys(this.emissionsFilters).forEach(key => {
+      if (key != 'showSection' && this.emissionsFilters[key] == true) {
+        emissionCount++;
+      }
+    });
+    this.numEmissions = emissionCount;
+
+    let generalInfoCount: number = 0;
+    Object.keys(this.generalInformationFilters).forEach(key => {
+      if (key != 'showSection' && this.generalInformationFilters[key] == true) {
+        generalInfoCount++;
+      }
+    });
+    this.numGeneralInformation = generalInfoCount + 2;
+
   }
 }
