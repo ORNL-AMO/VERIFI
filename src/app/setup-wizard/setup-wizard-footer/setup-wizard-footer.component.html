@@ -13,8 +13,8 @@
         </div>
     </div>
     <div class="col-2 text-right">
-            <button *ngIf="!showSubmit" class="btn btn-primary-4" (click)="next()">Continue</button>
-            <button *ngIf="showSubmit" class="btn btn-primary-4" (click)="submitAccount()">Submit New Account</button>
-
+        <button *ngIf="showAddFacility" class="btn btn-secondary mr-2" (click)="addfacility()">Add Another Facility</button>
+        <button *ngIf="!showSubmit" class="btn btn-primary-4" (click)="next()">Continue</button>
+        <button *ngIf="showSubmit" class="btn btn-primary-4" (click)="submitAccount()">Submit New Account</button>
     </div>
 </div>
