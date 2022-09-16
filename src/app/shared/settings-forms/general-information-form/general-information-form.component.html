@@ -122,10 +122,10 @@
                     <label>{{formNameLabel}} Name <span class="required">*</span></label>
                     <input type="text" class="form-control" formControlName="name" (input)="saveChanges()"
                         onfocus="this.select();" minlength="1" maxlength="42" required>
-
-                    <span class="inputError" *ngIf="form.get('name').hasError('required')">{{formNameLabel}} name is
-                        required</span>
                 </div>
+
+                <span class="inputError" *ngIf="form.get('name').hasError('required')">{{formNameLabel}} name is
+                    required</span>
                 <div class="mb-3">
                     <label>Contact Name</label>
                     <input type="text" class="form-control" formControlName="contactName" (input)="saveChanges()"
@@ -153,8 +153,6 @@
                 <div class="row">
                     <div class="mb-3 col-md-6 col-sm-12">
                         <label>Country</label>
-                        <!-- <input type="text" class="form-control" formControlName="country" (input)="saveChanges()"
-                        onfocus="this.select();" minlength="1" maxlength="60"> -->
                         <select formControlName="country" (change)="saveChanges()">
                             <option *ngFor="let country of countries" [ngValue]="country.code">{{country.name}}</option>
                         </select>

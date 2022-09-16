@@ -1,69 +1,24 @@
-<!-- <div class="wrapper">
- <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body d-flex flex-column p-2">
-                    <h4>Important Account Information</h4>
-                    <ul class="mb-0">
-                        <li>Account Name</li>
-                        <li>Account Zip Code</li>
-                        <li>Energy Reduction Goal</li>
-                    </ul>
-                </div>
-            </div>
-            <hr>
-        </div>
-    </div>-->
-<!-- <div class="row">
-        <div class="col-lg-7">
-            <h4>Corporate Information</h4>
-            <br>
-            <app-general-information-form [inAccount]="true" [inWizard]="true"></app-general-information-form>
-        </div>
-
-        <div class="col-lg-5">
-            <h4>Corporate Units</h4>
-            <br>
-            <app-default-units-form [inAccount]="true" [inWizard]="true"></app-default-units-form>
-        </div>
-    </div>
-    <br>
-
-    <div class="row">
-        <div class="col-lg-7">
-            <h4>Sustainability Questions</h4>
-            <br>
-            <app-sustainability-questions-form [inAccount]="true" [inWizard]="true">
-            </app-sustainability-questions-form>
-        </div>
-        <div class="col">
-            <h4>Financial Reporting</h4>
-            <br>
-            <app-financial-reporting-form [inAccount]="true" [inWizard]="true"></app-financial-reporting-form>
-        </div>
-    </div>
-
-    <br>
-    <br> 
-</div>-->
-
-
 <div class="wrapper">
     <div class="d-flex w-100">
         <div class="d-flex flex-column p-2 nav">
             <div class="nav-item">
-                <a class="nav-link" routerLink="/setup-wizard/account-setup/information-setup" [routerLinkActive]="['active']">
-                    <span class="badge">1</span> General Information
+                <a class="nav-link" routerLink="/setup-wizard/account-setup/information-setup"
+                    [routerLinkActive]="['active']">
+                    <span class="badge"
+                        [ngClass]="{'badge-danger':generalInformationInvalid, 'badge-success': !generalInformationInvalid}">1</span>
+                    General Information
                 </a>
             </div>
             <div class="nav-item">
-                <a class="nav-link" routerLink="/setup-wizard/account-setup/units-setup" [routerLinkActive]="['active']">
-                    <span class="badge">2</span> Units
+                <a class="nav-link" routerLink="/setup-wizard/account-setup/units-setup"
+                    [routerLinkActive]="['active']">
+                    <span class="badge badge-success">2</span> Units
                 </a>
             </div>
             <div class="nav-item">
-                <a class="nav-link" routerLink="/setup-wizard/account-setup/reporting-setup" [routerLinkActive]="['active']">
-                    <span class="badge">3</span> Reporting
+                <a class="nav-link" routerLink="/setup-wizard/account-setup/reporting-setup"
+                    [routerLinkActive]="['active']">
+                    <span class="badge badge-success">3</span> Reporting
                 </a>
             </div>
         </div>

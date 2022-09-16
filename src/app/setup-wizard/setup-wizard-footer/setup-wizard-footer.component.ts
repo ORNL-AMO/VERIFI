@@ -15,6 +15,8 @@ export class SetupWizardFooterComponent implements OnInit {
   progressLabel: string = 'Welcome';
   showSubmit: boolean;
   showAddFacility: boolean;
+  canContinue: boolean;
+  canContinueSub: Subscription;
   constructor(private router: Router, private setupWizardService: SetupWizardService) {
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
@@ -25,6 +27,14 @@ export class SetupWizardFooterComponent implements OnInit {
 
   ngOnInit(): void {
     this.setProgress();
+
+    // this.canContinueSub = this.setupWizardService.canContinue.subscribe(val => {
+    //   this.canContinue = val;
+    // })
+  }
+
+  ngOnDestroy() {
+    // this.canContinueSub.unsubscribe();
   }
 
   back() {
