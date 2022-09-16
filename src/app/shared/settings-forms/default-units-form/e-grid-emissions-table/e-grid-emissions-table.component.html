@@ -1,0 +1,78 @@
+<div class="row">
+    <div class="col">
+        <button class="close item-right" (click)="closeEmissionsRates()">&times;</button>
+    </div>
+</div>
+<div class="row">
+    <div class="col" *ngIf="selectedSubregionEmissions">
+
+
+        <table class="table" *ngIf="selectedSubregionEmissions.locationEmissionRates.length != 0">
+            <thead>
+                <tr>
+                    <th colspan="2">
+                        {{eGridSubregion}} Location Emission Rates
+                    </th>
+                </tr>
+                <tr>
+                    <th class="w-50">
+                        Year
+                    </th>
+                    <th class="w-50">
+                        Emissions Rate <br>(kg CO<sub>2</sub>/kWh)
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr
+                    *ngFor="let emissionRate of selectedSubregionEmissions.locationEmissionRates  | orderBy: 'year': 'asc'">
+                    <td>
+                        {{emissionRate.year}}
+                    </td>
+                    <td>
+                        {{emissionRate.co2Emissions | number}}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="alert alert-warning" *ngIf="selectedSubregionEmissions.locationEmissionRates.length == 0">
+            No location emissions found for this region.
+        </div>
+    </div>
+</div>
+<hr>
+<div class="row">
+    <div class="col" *ngIf="selectedSubregionEmissions">
+        <table class="table" *ngIf="selectedSubregionEmissions.residualEmissionRates.length != 0">
+            <thead>
+                <tr>
+                    <th colspan="2">
+                        {{eGridSubregion}} Residual Emission Rates
+                    </th>
+                </tr>
+                <tr>
+                    <th class="w-50">
+                        Year
+                    </th>
+                    <th class="w-50">
+                        Emissions Rate <br>(kg CO<sub>2</sub>/kWh)
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr
+                    *ngFor="let emissionRate of selectedSubregionEmissions.residualEmissionRates  | orderBy: 'year': 'asc'">
+                    <td>
+                        {{emissionRate.year}}
+                    </td>
+                    <td>
+                        {{emissionRate.co2Emissions | number}}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="alert alert-warning" *ngIf="selectedSubregionEmissions.residualEmissionRates.length == 0">
+            No residual emissions found for this region.
+        </div>
+    </div>
+</div>

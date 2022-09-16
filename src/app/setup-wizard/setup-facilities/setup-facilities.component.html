@@ -1,4 +1,4 @@
-<div class="banner sticky-top d-flex justify-content-between pb-0">
+<div class="banner sticky-top d-flex justify-content-between pb-0" [ngClass]="{'modal-open': modalOpen}">
     <div>
         <ul class="nav nav-tabs sticky-top">
             <li class="nav-item" *ngFor="let facility of facilities"
@@ -18,40 +18,34 @@
     </div>
 </div>
 <div class="wrapper">
-    <div class="d-flex w-100 justify-content-end">
-        <div *ngIf="facilities.length > 1">
-            <button class="btn btn-sm btn-danger" (click)="deleteFacility()">Delete Facility</button>
+    <div class="d-flex w-100">
+        <div class="d-flex flex-column p-2 nav page-sidebar">
+            <div class="nav-item">
+                <a class="nav-link" routerLink="/setup-wizard/facility-setup/information-setup"
+                    [routerLinkActive]="['active']">
+                    <span class="badge badge-success">1</span> General Information
+                </a>
+            </div>
+            <div class="nav-item">
+                <a class="nav-link" routerLink="/setup-wizard/facility-setup/units-setup"
+                    [routerLinkActive]="['active']">
+                    <span class="badge badge-success">2</span> Units
+                </a>
+            </div>
+            <div class="nav-item">
+                <a class="nav-link" routerLink="/setup-wizard/facility-setup/reporting-setup"
+                    [routerLinkActive]="['active']">
+                    <span class="badge badge-success">3</span> Reporting
+                </a>
+            </div>
+        </div>
+        <div class="flex-fill pt-2 pl-4 pr-4 pb-4">
+            <div class="d-flex w-100 justify-content-end">
+                <div *ngIf="facilities.length > 1">
+                    <button class="btn btn-sm btn-danger" (click)="deleteFacility()">Delete Facility</button>
+                </div>
+            </div>
+            <router-outlet></router-outlet>
         </div>
     </div>
-    <div class="row">
-        <div class="col-lg-7">
-            <h4>Facility Information</h4>
-            <br>
-            <app-general-information-form [inAccount]="false" [inWizard]="true"></app-general-information-form>
-        </div>
-
-        <div class="col-lg-5">
-            <h4>Facility Units</h4>
-            <br>
-            <app-default-units-form [inAccount]="false" [inWizard]="true"></app-default-units-form>
-        </div>
-    </div>
-    <br>
-
-    <div class="row">
-        <div class="col-lg-7">
-            <h4>Sustainability Questions</h4>
-            <br>
-            <app-sustainability-questions-form [inAccount]="false" [inWizard]="true">
-            </app-sustainability-questions-form>
-        </div>
-        <div class="col">
-            <h4>Financial Reporting</h4>
-            <br>
-            <app-financial-reporting-form [inAccount]="false" [inWizard]="true"></app-financial-reporting-form>
-        </div>
-    </div>
-
-    <br>
-    <br>
 </div>

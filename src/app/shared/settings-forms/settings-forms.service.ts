@@ -34,9 +34,9 @@ export class SettingsFormsService {
 
   updateAccountFromGeneralInformationForm(form: FormGroup, account: IdbAccount): IdbAccount {
     account.name = form.controls.name.value;
-    if (!account.name) {
-      account.name = 'Account: ' + account.id;
-    }
+    // if (!account.name) {
+    //   account.name = 'Account: ' + account.id;
+    // }
     account.country = form.controls.country.value;
     account.city = form.controls.city.value;
     account.state = form.controls.state.value;

@@ -9,6 +9,13 @@ import { SetupWelcomeComponent } from './setup-welcome/setup-welcome.component';
 import { RouterModule } from '@angular/router';
 import { SettingsFormsModule } from '../shared/settings-forms/settings-forms.module';
 import { SetupWizardFooterComponent } from './setup-wizard-footer/setup-wizard-footer.component';
+import { CorporateInformationSetupComponent } from './setup-account/corporate-information-setup/corporate-information-setup.component';
+import { CorporateUnitsSetupComponent } from './setup-account/corporate-units-setup/corporate-units-setup.component';
+import { CorporateQuestionsSetupComponent } from './setup-account/corporate-questions-setup/corporate-questions-setup.component';
+import { CorporateReportingSetupComponent } from './setup-account/corporate-reporting-setup/corporate-reporting-setup.component';
+import { FacilityInformationSetupComponent } from './setup-facilities/facility-information-setup/facility-information-setup.component';
+import { FacilityUnitsSetupComponent } from './setup-facilities/facility-units-setup/facility-units-setup.component';
+import { FacilityReportingSetupComponent } from './setup-facilities/facility-reporting-setup/facility-reporting-setup.component';
 
 @NgModule({
   declarations: [
@@ -18,7 +25,14 @@ import { SetupWizardFooterComponent } from './setup-wizard-footer/setup-wizard-f
     SetupFacilitiesComponent,
     SetupConfirmationComponent,
     SetupWelcomeComponent,
-    SetupWizardFooterComponent
+    SetupWizardFooterComponent,
+    CorporateInformationSetupComponent,
+    CorporateUnitsSetupComponent,
+    CorporateQuestionsSetupComponent,
+    CorporateReportingSetupComponent,
+    FacilityInformationSetupComponent,
+    FacilityUnitsSetupComponent,
+    FacilityReportingSetupComponent
   ],
   imports: [
     CommonModule,
