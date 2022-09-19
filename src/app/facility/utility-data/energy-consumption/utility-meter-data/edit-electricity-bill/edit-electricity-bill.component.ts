@@ -2,9 +2,11 @@ import { Component, Input, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { ElectricityDataFilters, SupplyDemandChargeFilters, TaxAndOtherFilters } from 'src/app/models/electricityFilter';
-import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { AdditionalChargesFilters, DetailedChargesFilters, ElectricityDataFilters } from 'src/app/models/electricityFilter';
+import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { UtilityMeterDataService } from '../utility-meter-data.service';
+import { CalanderizationService, EmissionsResults } from 'src/app/shared/helper-services/calanderization.service';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 
 @Component({
   selector: 'app-edit-electricity-bill',
@@ -25,26 +27,35 @@ export class EditElectricityBillComponent implements OnInit {
 
   electricityDataFilters: ElectricityDataFilters;
   electricityDataFiltersSub: Subscription;
-  displaySupplyDemandColumnOne: boolean;
-  displaySupplyDemandColumnTwo: boolean;
-  displayTaxAndOthersColumnOne: boolean;
-  displayTaxAndOthersColumnTwo: boolean;
-  supplyDemandFilters: SupplyDemandChargeFilters;
-  taxAndOtherFilters: TaxAndOtherFilters;
+  showDetailsColumnOne: boolean;
+  showDetailsColumnTwo: boolean;
+  detailedChargesFilter: DetailedChargesFilters;
+  additionalChargesFilter: AdditionalChargesFilters;
+  
+  
   energyUnit: string;
-  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private utilityMeterDataService: UtilityMeterDataService) { }
+  totalLocationEmissions: number = 0;
+  totalMarketEmissions: number = 0;
+  RECs: number = 0;
+  facility: IdbFacility;
+  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private utilityMeterDataService: UtilityMeterDataService,
+    private calanderizationService: CalanderizationService, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
     this.electricityDataFiltersSub = this.utilityMeterDataService.electricityInputFilters.subscribe(dataFilters => {
-      this.supplyDemandFilters = dataFilters.supplyDemandCharge;
-      this.taxAndOtherFilters = dataFilters.taxAndOther
+      this.detailedChargesFilter = dataFilters.detailedCharges;
+      this.additionalChargesFilter = dataFilters.additionalCharges;
       this.setDisplayColumns();
     });
+    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    this.facility = accountFacilities.find(facility => {return facility.guid == this.editMeter.facilityId});
+    this.setTotalEmissions();
   }
 
   ngOnChanges() {
     this.energyUnit = this.editMeter.startingUnit;
     this.checkDate();
+    this.setTotalEmissions();
   }
 
   ngOnDestroy() {
@@ -52,22 +63,12 @@ export class EditElectricityBillComponent implements OnInit {
   }
 
   setDisplayColumns() {
-    this.displaySupplyDemandColumnOne = (
-      this.supplyDemandFilters.peakAmount || this.supplyDemandFilters.peakCharge || this.supplyDemandFilters.offPeakAmount || this.supplyDemandFilters.offPeakCharge
-      || this.supplyDemandFilters.demandBlockAmount || this.supplyDemandFilters.demandBlockCharge
+    this.showDetailsColumnOne = (
+      this.detailedChargesFilter.block1 || this.detailedChargesFilter.block2 || this.detailedChargesFilter.block3 || this.detailedChargesFilter.other
     );
 
-    this.displaySupplyDemandColumnTwo = (
-      this.supplyDemandFilters.supplyBlockAmount || this.supplyDemandFilters.supplyBlockCharge || this.supplyDemandFilters.flatRateAmount || this.supplyDemandFilters.flatRateCharge
-    );
-
-    this.displayTaxAndOthersColumnOne = (
-      this.taxAndOtherFilters.businessCharge || this.taxAndOtherFilters.utilityTax || this.taxAndOtherFilters.latePayment ||
-      this.taxAndOtherFilters.otherCharge || this.taxAndOtherFilters.basicCharge
-    );
-
-    this.displayTaxAndOthersColumnTwo = (
-      this.taxAndOtherFilters.generationTransmissionCharge || this.taxAndOtherFilters.deliveryCharge || this.taxAndOtherFilters.powerFactorCharge
+    this.showDetailsColumnTwo = (
+      this.detailedChargesFilter.onPeak || this.detailedChargesFilter.offPeak || this.detailedChargesFilter.powerFactor
     );
   }
 
@@ -84,6 +85,19 @@ export class EditElectricityBillComponent implements OnInit {
       } else {
         this.invalidDate = this.utilityMeterDataDbService.checkMeterReadingExistForDate(this.meterDataForm.controls.readDate.value, this.editMeter) != undefined;
       }
+    }
+  }
+
+  setTotalEmissions(){
+    if(this.meterDataForm.controls.totalEnergyUse.value && this.facility){
+      let emissionsValues: EmissionsResults = this.calanderizationService.getEmissions(this.editMeter, this.meterDataForm.controls.totalEnergyUse.value, this.editMeter.energyUnit, this.facility.energyIsSource, new Date(this.meterDataForm.controls.readDate.value).getFullYear());
+      this.totalLocationEmissions = emissionsValues.locationEmissions;
+      this.totalMarketEmissions = emissionsValues.marketEmissions;
+      this.RECs = emissionsValues.RECs;
+    }else{
+      this.totalLocationEmissions = 0;
+      this.totalMarketEmissions = 0;
+      this.RECs = 0;
     }
   }
 

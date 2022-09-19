@@ -23,6 +23,7 @@ import { HelperPipesModule } from './shared/helper-pipes/helper-pipes.module';
 import { SearchBarComponent } from './core-components/header/search-bar/search-bar.component';
 import { NgbTypeaheadModule } from '@ng-bootstrap/ng-bootstrap';
 import { FacilityListPipe } from './core-components/sidebar/facility-list.pipe';
+import { UploadDataModule } from './upload-data/upload-data.module';
 
 @NgModule({
   declarations: [
@@ -52,7 +53,7 @@ import { FacilityListPipe } from './core-components/sidebar/facility-list.pipe';
     SetupWizardModule,
     HelperPipesModule,
     NgbTypeaheadModule,
-
+    UploadDataModule
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbFacility, IdbUtilityMeterData } from 'src/app/models/idb';
 import { ExportToExcelTemplateService } from 'src/app/shared/helper-services/export-to-excel-template.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 
@@ -19,7 +20,7 @@ export class UtilityBannerComponent implements OnInit {
   modalOpenSub: Subscription;
 
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private sharedDataService: SharedDataService,
-    private exportToExcelTemplateService: ExportToExcelTemplateService) { }
+    private exportToExcelTemplateService: ExportToExcelTemplateService, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
     this.utilityDataSub = this.utilityMeterDataDbService.facilityMeterData.subscribe(utilityMeterData => {
@@ -30,12 +31,13 @@ export class UtilityBannerComponent implements OnInit {
     })
   }
 
-  ngOnDestroy(){
+  ngOnDestroy() {
     this.utilityDataSub.unsubscribe();
     this.modalOpenSub.unsubscribe();
   }
 
-  exportData(){
-    this.exportToExcelTemplateService.exportFacilityData();
+  exportData() {
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    this.exportToExcelTemplateService.exportFacilityData(selectedFacility.guid);
   }
 }

@@ -7,8 +7,7 @@
 
         <ul class="nav nav-tabs">
             <li class="nav-item">
-                <a class="nav-link" routerLink="home" [routerLinkActive]="['active']"><i
-                        class="fa fa-home"></i>Home</a>
+                <a class="nav-link" routerLink="home" [routerLinkActive]="['active']"><i class="fa fa-home"></i>Home</a>
             </li>
             <li class="nav-item" [ngClass]="{'disabled': meterData.length == 0}">
                 <a class="nav-link" routerLink="overview" [routerLinkActive]="['active']"><i
@@ -25,6 +24,10 @@
             <li class="nav-item">
                 <a class="nav-link" routerLink="settings" [routerLinkActive]="['active']"><i
                         class="fa fa-cog"></i>Settings</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" routerLink="custom-data" [routerLinkActive]="['active']"><i
+                        class="fa fa-database"></i>Custom Data</a>
             </li>
         </ul>
     </div>

@@ -35,9 +35,7 @@ export interface IdbAccount {
     numberOfFacilities?: string,
     energyIsSource: boolean,
     lastBackup?: Date,
-    emissionsOutputRate?: number,
     eGridSubregion?: string,
-    customEmissionsRate?: boolean,
     color?: string,
     contactName: string,
     contactEmail: string,
@@ -78,9 +76,7 @@ export interface IdbFacility {
     fiscalYearMonth: number,
     fiscalYearCalendarEnd: boolean,
     energyIsSource: boolean,
-    emissionsOutputRate?: number,
     eGridSubregion?: string,
-    customEmissionsRate?: boolean
     color?: string,
     selected?: boolean,
     wizardId?: string,
@@ -136,16 +132,21 @@ export interface IdbUtilityMeter {
     visible?: boolean
     importWizardName?: string
     meterReadingDataApplication?: "backward" | "fullMonth",
-    emissionsOutputRate?: number,
     unitsDifferent?: boolean,
     ignoreDuplicateMonths?: boolean,
     ignoreMissingMonths?: boolean,
-    scope?: number,
-    agreementType?: number,
-    includeInEnergy?: boolean,
-    retainRECs?: boolean,
-    directConnection?: boolean
-
+    scope: number,
+    agreementType: number,
+    includeInEnergy: boolean,
+    retainRECs: boolean,
+    directConnection: boolean,
+    // GHGMultiplier: number,
+    recsMultiplier: number,
+    greenPurchaseFraction: number,
+    marketGHGMultiplier: number,
+    locationGHGMultiplier: number,
+    isValid?: boolean,
+    skipImport?: boolean
 }
 
 export interface IdbUtilityMeterData {
@@ -163,29 +164,42 @@ export interface IdbUtilityMeterData {
     totalCost: number,
     commodityCharge?: number,
     deliveryCharge?: number,
-    otherCharge?: number,
     checked: boolean,
-    totalDemand?: number,
-    basicCharge?: number,
-    supplyBlockAmount?: number,
-    supplyBlockCharge?: number,
-    flatRateAmount?: number,
-    flatRateCharge?: number,
-    peakAmount?: number,
-    peakCharge?: number,
-    offPeakAmount?: number,
-    offPeakCharge?: number,
-    demandBlockAmount?: number,
-    demandBlockCharge?: number,
-    //trans?
-    generationTransmissionCharge?: number,
-    transmissionCharge?: number,
-    powerFactorCharge?: number,
-    businessCharge?: number,
-    utilityTax?: number,
-    latePayment?: number,
     meterNumber?: string,
     totalImportConsumption?: number
+    totalMarketEmissions?: number,
+    totalLocationEmissions?: number,
+    RECs?: number,
+    excessRECs?: number,
+    excessRECsEmissions?: number
+
+
+    //electricity
+    totalRealDemand?: number,
+    totalBilledDemand? :number,
+    nonEnergyCharge?: number,
+    block1Consumption?: number,
+    block1ConsumptionCharge?: number,
+    block2Consumption?: number,
+    block2ConsumptionCharge?: number,
+    block3Consumption?: number,
+    block3ConsumptionCharge?: number,
+    otherConsumption?: number,
+    otherConsumptionCharge?: number,
+    onPeakAmount?: number,
+    onPeakCharge?: number,
+    offPeakAmount?: number,
+    offPeakCharge?: number,
+    transmissionAndDeliveryCharge?: number,
+    powerFactor?: number,
+    powerFactorCharge?: number,
+    localSalesTax?: number,
+    stateSalesTax?: number,
+    latePayment?: number,
+    otherCharge?: number
+    //non-electricity
+    demandUsage?: number,
+    demandCharge?: number
 }
 
 export interface IdbPredictorEntry {
@@ -289,6 +303,17 @@ export interface IdbAccountAnalysisItem {
         year: number,
         amount: number
     }>
+}
+
+
+export interface IdbCustomEmissionsItem {
+    id?: number,
+    accountId: string,
+    date: Date,
+    guid: string,
+    subregion: string,
+    locationEmissionRates: Array<{ co2Emissions: number, year: number }>,
+    residualEmissionRates: Array<{ co2Emissions: number, year: number }>,
 }
 
 

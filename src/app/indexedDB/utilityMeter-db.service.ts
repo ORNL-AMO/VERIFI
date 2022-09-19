@@ -69,7 +69,7 @@ export class UtilityMeterdbService {
         }
     }
 
-    getNewIdbUtilityMeter(facilityId: string, accountId: string, setDefaults: boolean, emissionsOutputRate: number, energyUnit: string): IdbUtilityMeter {
+    getNewIdbUtilityMeter(facilityId: string, accountId: string, setDefaults: boolean, energyUnit: string): IdbUtilityMeter {
         let source: MeterSource;
         let startingUnit: string;
         if (setDefaults) {
@@ -98,13 +98,15 @@ export class UtilityMeterdbService {
             startingUnit: startingUnit,
             energyUnit: energyUnit,
             fuel: undefined,
-            emissionsOutputRate: emissionsOutputRate,
             scope: 3,
             agreementType: 1,
             includeInEnergy: true,
             retainRECs: false,
             directConnection: false,
-
+            locationGHGMultiplier: 1,
+            marketGHGMultiplier: 1,
+            recsMultiplier: 0,
+            greenPurchaseFraction: .5
         }
     }
 

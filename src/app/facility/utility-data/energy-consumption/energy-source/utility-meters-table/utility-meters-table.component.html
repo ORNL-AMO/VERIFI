@@ -33,7 +33,7 @@
     </div>
 
     <div class="table-responsive">
-        <table class="table table-sm" #meterTable>
+        <table class="table table-hover table-sm" #meterTable>
             <thead>
                 <tr>
                     <th (click)="setOrderDataField('name')" [ngClass]="{'active': orderDataField == 'name'}">Name</th>
@@ -90,8 +90,8 @@
                         <div class="d-flex">
                             <i [ngClass]="{'highlight': meter.unitsDifferent}" class="fa fa-pencil" title="Edit"
                                 (click)="selectEditMeter(meter)"></i>
-                            <i class="fa fa-trash" title="Delete" (click)="selectDeleteMeter(meter)"></i>
                             <i class="fa fa-copy" title="Copy" (click)="createCopy(meter)"></i>
+                            <i class="fa fa-trash" title="Delete" (click)="selectDeleteMeter(meter)"></i>
                         </div>
                     </td>
                 </tr>

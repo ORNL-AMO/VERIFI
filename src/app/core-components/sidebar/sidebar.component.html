@@ -15,8 +15,8 @@
         <a title="Account Overview" class="nav-link" routerLink="/account/home" [routerLinkActive]="['active']"><i
                 class="fa fa-home"></i>
         </a>
-        <a title="Account Overview" class="nav-link" routerLink="/account/overview"
-            [routerLinkActive]="['active']"><i class="fa fa-chart-column"></i>
+        <a title="Account Overview" class="nav-link" routerLink="/account/overview" [routerLinkActive]="['active']"><i
+                class="fa fa-chart-column"></i>
         </a>
         <a title="Account Analysis" class="nav-link" routerLink="/account/analysis" [routerLinkActive]="['active']"><i
                 class="fa fa-microscope"></i>
@@ -26,6 +26,9 @@
         </a>
         <a title="Account Settings" class="nav-link" routerLink="/account/settings" [routerLinkActive]="['active']"><i
                 class="fa fa-cog"></i>
+        </a>
+        <a title="Custom Data" class="nav-link" routerLink="/account/custom-data" [routerLinkActive]="['active']"><i
+                class="fa fa-database"></i>
         </a>
     </div>
     <hr class="bold-hr">
@@ -66,7 +69,8 @@
         <span *ngIf="showAllFacilities"><i class="fa fa-chevron-up"></i> Show Last Four Edited</span>
     </a>
     <hr *ngIf="facilityList.length > 4 && open">
-
+    <a class="nav-link" routerLink="/upload" [routerLinkActive]="['active']"><i class="fa fa-upload"></i> <span
+            [hidden]="!open" class="pl-2 nav-label">Upload Data</span> </a>
     <a class="nav-link" routerLink="/help" [routerLinkActive]="['active']"
         [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-question"></i> <span [hidden]="!open"
             class="pl-2 nav-label">Help</span> </a>

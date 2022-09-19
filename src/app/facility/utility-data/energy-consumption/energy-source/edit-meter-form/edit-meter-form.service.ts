@@ -14,8 +14,7 @@ export class EditMeterFormService {
     let fuelValidators: Array<ValidatorFn> = this.getFuelValidation(meter.source);
     let phaseValidators: Array<ValidatorFn> = this.getPhaseValidation(meter.source);
     let heatCapacityValidators: Array<ValidatorFn> = this.getHeatCapacitValidation(meter.source, meter.startingUnit);
-    let siteToSourceValidators: Array<ValidatorFn> = this.getSiteToSourceValidation(meter.source, meter.startingUnit);
-    let emissionsOutputRateValidators: Array<ValidatorFn> = this.getEmissionsOutputRateValidation(meter.source);
+    let siteToSourceValidators: Array<ValidatorFn> = this.getSiteToSourceValidation(meter.source, meter.startingUnit, meter.includeInEnergy);
     let form: FormGroup = this.formBuilder.group({
       meterNumber: [meter.meterNumber],
       accountNumber: [meter.accountNumber],
@@ -30,13 +29,13 @@ export class EditMeterFormService {
       group: [meter.group],
       fuel: [meter.fuel, fuelValidators],
       startingUnit: [meter.startingUnit, Validators.required],
-      emissionsOutputRate: [meter.emissionsOutputRate, emissionsOutputRateValidators],
       energyUnit: [meter.energyUnit, Validators.required],
       scope: [meter.scope],
       agreementType: [meter.agreementType],
       includeInEnergy: [meter.includeInEnergy],
       retainRECs: [meter.retainRECs],
-      directConnection: [meter.directConnection]
+      directConnection: [meter.directConnection],
+      greenPurchaseFraction: [meter.greenPurchaseFraction * 100, [Validators.min(0), Validators.max(100)]]
     });
     // if(form.controls.source.value == 'Electricity'){
     //   form.controls.startingUnit.disable();
@@ -59,15 +58,44 @@ export class EditMeterFormService {
     meter.group = form.controls.group.value;
     meter.fuel = form.controls.fuel.value;
     meter.startingUnit = form.controls.startingUnit.value;
-    meter.emissionsOutputRate = form.controls.emissionsOutputRate.value;
     meter.energyUnit = form.controls.energyUnit.value;
     meter.scope = form.controls.scope.value;
     meter.agreementType = form.controls.agreementType.value;
     meter.includeInEnergy = form.controls.includeInEnergy.value;
     meter.retainRECs = form.controls.retainRECs.value;
     meter.directConnection = form.controls.directConnection.value;
+    meter.greenPurchaseFraction = form.controls.greenPurchaseFraction.value / 100;
+
+    //set multipliers
+    meter = this.setMultipliers(meter);
     return meter;
   }
+
+  setMultipliers(meter: IdbUtilityMeter): IdbUtilityMeter {
+    if (meter.source == 'Electricity') {
+      let greenPurchaseFraction: number;
+      if (meter.agreementType == 5) {
+        //Green Product
+        greenPurchaseFraction = meter.greenPurchaseFraction;
+      }
+
+      let multipliers: {
+        recsMultiplier: number,
+        marketGHGMultiplier: number,
+        locationGHGMultiplier: number
+      } = this.getMultipliers(meter.includeInEnergy, meter.retainRECs, meter.directConnection, greenPurchaseFraction);
+
+      meter.locationGHGMultiplier = multipliers.locationGHGMultiplier;
+      meter.marketGHGMultiplier = multipliers.marketGHGMultiplier;
+      meter.recsMultiplier = multipliers.recsMultiplier;
+    }else{
+      meter.locationGHGMultiplier = 1;
+      meter.marketGHGMultiplier = 1;
+      meter.recsMultiplier = 0;
+    }
+    return meter;
+  }
+
 
   getFuelValidation(source: MeterSource): Array<ValidatorFn> {
     if (source == 'Other Fuels' || source == 'Other Energy') {
@@ -94,23 +122,13 @@ export class EditMeterFormService {
     }
   }
 
-  getSiteToSourceValidation(source: MeterSource, startingUnit: string): Array<ValidatorFn> {
-    let checkShowSiteToSource: boolean = this.checkShowSiteToSource(source, startingUnit);
+  getSiteToSourceValidation(source: MeterSource, startingUnit: string, includeInEnergy: boolean): Array<ValidatorFn> {
+    let checkShowSiteToSource: boolean = this.checkShowSiteToSource(source, startingUnit, includeInEnergy);
     if (checkShowSiteToSource) {
       return [Validators.required, Validators.min(0)];
     } else {
       return [];
     }
-  }
-
-  getEmissionsOutputRateValidation(source: MeterSource):Array<ValidatorFn> {
-    let showEmissionsOutputRate: boolean = this.checkShowEmissionsOutputRate(source);
-    if (showEmissionsOutputRate) {
-      return [Validators.required, Validators.min(0)];
-    } else {
-      return [];
-    }
-
   }
 
   checkShowHeatCapacity(source: MeterSource, startingUnit: string): boolean {
@@ -121,8 +139,10 @@ export class EditMeterFormService {
     }
   }
 
-  checkShowSiteToSource(source: MeterSource, startingUnit: string): boolean {
-    if (source == "Electricity" || source == "Natural Gas") {
+  checkShowSiteToSource(source: MeterSource, startingUnit: string, includeInEnergy: boolean): boolean {
+    if (!includeInEnergy) {
+      return false;
+    } else if (source == "Electricity" || source == "Natural Gas") {
       return true;
     } else if (source != 'Waste Water' && source != 'Water' && source != 'Other Utility' && startingUnit) {
       return (this.energyUnitsHelperService.isEnergyUnit(startingUnit) == false);
@@ -136,6 +156,56 @@ export class EditMeterFormService {
       return true;
     } else {
       return false;
+    }
+  }
+
+  getMultipliers(includeInEnergy: boolean, retainRECs: boolean, directConnection: boolean, greenPurchaseFraction?: number): {
+    // GHGMultiplier: number,
+    recsMultiplier: number,
+    marketGHGMultiplier: number,
+    locationGHGMultiplier: number
+  } {
+    let marketGHGMultiplier: number = 1;
+    let locationGHGMultiplier: number = 1;
+    let recsMultiplier: number = 0;
+
+    if (retainRECs) {
+      recsMultiplier = 1;
+    }
+
+    if (greenPurchaseFraction != undefined) {
+      recsMultiplier = greenPurchaseFraction;
+    }
+
+    if(includeInEnergy){
+      if(directConnection && retainRECs){
+        locationGHGMultiplier = 0;
+      }else{
+        locationGHGMultiplier = 1;
+      }
+    }else{
+      if(retainRECs){
+        locationGHGMultiplier = 0;
+      }else{
+        locationGHGMultiplier = 1;
+      }
+    }
+
+
+    if(greenPurchaseFraction){
+      marketGHGMultiplier = 1 - greenPurchaseFraction;
+    }else{
+      if(retainRECs){
+        marketGHGMultiplier = 0;
+      }else{
+        marketGHGMultiplier = 1;
+      }
+    }
+
+    return {
+      marketGHGMultiplier: marketGHGMultiplier,
+      locationGHGMultiplier: locationGHGMultiplier,
+      recsMultiplier: recsMultiplier
     }
   }
 }

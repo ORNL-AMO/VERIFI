@@ -1,0 +1,64 @@
+<div class="d-flex justify-content-between">
+    <div class="d-flex">
+        <button class="btn btn-secondary" (click)="goBack()">Back</button>
+    </div>
+    <div class="d-flex flex-column">
+        <button class="btn btn-success" (click)="continue()" [disabled]="noPredictorsOrMeters || noDateColumn">Submit
+            &amp; Continue</button>
+    </div>
+</div>
+<div class="d-flex justify-content-end" *ngIf="noPredictorsOrMeters || noDateColumn">
+    <div class="d-flex flex-column">
+        <div *ngIf="noPredictorsOrMeters" class="alert alert-danger p-2">
+            No predictors or meters selected.
+        </div>
+        <div *ngIf="noDateColumn" class="alert alert-danger p-2">
+            Date column required.
+        </div>
+    </div>
+</div>
+<hr>
+<div class="worksheet-data-table">
+    <table *ngIf="fileReference.selectedWorksheetData">
+        <thead>
+            <tr>
+                <th *ngFor="let header of fileReference.selectedWorksheetData[0]" [ngClass]="getColumnClass(header)">
+                    {{header}}
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let worksheetData of fileReference.selectedWorksheetData; let index = index;"
+                [ngClass]="{'hidden': index == 0}">
+                <td *ngFor="let data of worksheetData">
+                    {{data}}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<hr>
+<h6 class="map-columns-label">Map the data columns from the excel file to the
+    appropriate data type. <br>
+    Column headers will be used to create meters or predictors.<br>
+    Row data will be used as data entries associated with the corresponding date column and meter or predictor.<br>
+    Please use site energy data when possible.
+</h6>
+<hr>
+<div class="row no-gutters">
+    <div cdkDropList [cdkDropListData]="fileReference.columnGroups" class="card col-md-3 col-sm-6"
+        *ngFor="let columnGroup of fileReference.columnGroups" (cdkDropListDropped)="dropColumn($event)"
+        id={{columnGroup.id}} [cdkDropListConnectedTo]="columnGroupItemIds" [ngClass]="columnGroup.groupLabel">
+        <div class="card-header">
+            {{columnGroup.groupLabel}}
+        </div>
+        <div class="card-body">
+            <div class="list-item mt-2 mb-2 p-2" [cdkDragData]="groupItem"
+                *ngFor="let groupItem of columnGroup.groupItems" cdkDrag>
+                <span class="fa fa-arrows-alt"></span>{{groupItem.value}}
+            </div>
+            <p class="alert alert-warning" *ngIf="columnGroup.groupLabel == 'Date'">Date range based on selection:
+                ({{minDate | date}} - {{maxDate | date}})</p>
+        </div>
+    </div>
+</div>

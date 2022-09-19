@@ -137,26 +137,6 @@
                     <span class="inputWarning" *ngIf="meterForm.controls.heatCapacity.value === 0">Heat capacity
                         should be greater than 0</span>
                 </div>
-                <div class="col-6" *ngIf="displayEmissionsOutputRate">
-                    <label for="emissionsOutputRate">Emissions Output Rate
-
-                    </label>
-                    <span *ngIf="meterForm.controls.emissionsOutputRate.value">
-                        {{meterForm.controls.emissionsOutputRate.value}} kg CO<sub>2</sub>/<span
-                            [innerHTML]="meterForm.controls.energyUnit.value | settingsLabel"></span>
-                    </span>
-                    <div class="alert alert-info"
-                        *ngIf="!meterForm.controls.emissionsOutputRate.value && meterForm.controls.source.value == 'Electricity'">
-                        Electrical emissions output rate is set in the facility settings. No output rate found. <a
-                            routerLink="/facility-management">Change Settings</a>
-                    </div>
-                    <div class="alert alert-info" *ngIf="hasDifferentEmissions">
-                        Electrical emissions for this facility have changed since this meter was created. <a
-                            (click)="setEmissionsOutputRate()">Click here to
-                            update emissions output rate to match facility.</a>
-                    </div>
-                </div>
-
             </div>
 
             <p class="alert alert-warning"
@@ -214,12 +194,13 @@
                 <textarea id="notes" class="form-control" formControlName="notes"></textarea>
             </div>
         </div>
-        <div class="col-lg-6 col-md-12 col-sm-12" *ngIf="meterForm.controls.source.value == 'Electricity'">
+
+        <div class="col-lg-7 col-md-12 col-sm-12" *ngIf="meterForm.controls.source.value == 'Electricity'">
             <hr>
             <p class="bold">Contract Agreement</p>
             <div class="row">
-                <div class="col-6">
-                    <label for="scope">Agreement Type</label>
+                <div class="col-lg-6 col-md-12 col-sm-12">
+                    <label for="agreementType">Agreement Type</label>
                     <div class="mb-3">
                         <select class="form-control" id="agreementType" type="text" formControlName="agreementType"
                             (change)="changeAgreementType()">
@@ -229,13 +210,21 @@
                         </select>
                     </div>
                 </div>
+                <div class="col-lg-6 col-md-12 col-sm-12" *ngIf="meterForm.controls.agreementType.value == 5">
+                    <label for="greenPurchaseFraction">Fraction of Green Electricity </label>
+                    <div class="input-group mb-3">
+                        <input id="greenPurchaseFraction" class="form-control" type="number"
+                            formControlName="greenPurchaseFraction" onfocus="this.select();">
+                        <span class="unit">%</span>
+                    </div>
+                </div>
             </div>
             <div class="row">
                 <div class="col align-items-center">
                     <div class="d-flex">
                         <label class="switch" for="includeInEnergy">
                             <input class="checkbox" type="checkbox" id="includeInEnergy" name="includeInEnergy"
-                                formControlName="includeInEnergy">
+                                formControlName="includeInEnergy" (change)="setIncludeEnergy()">
                             <span class="slider round"></span>
                         </label>
                         <div class="pl-2">

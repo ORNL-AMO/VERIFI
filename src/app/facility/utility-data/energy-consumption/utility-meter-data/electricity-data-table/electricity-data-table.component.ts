@@ -1,10 +1,13 @@
 import { Component, ElementRef, EventEmitter, Input, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { SupplyDemandChargeFilters, TaxAndOtherFilters } from 'src/app/models/electricityFilter';
-import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { UtilityMeterDataService } from '../utility-meter-data.service';
 import * as _ from 'lodash';
 import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
+import { CalanderizationService, EmissionsResults } from 'src/app/shared/helper-services/calanderization.service';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { AdditionalChargesFilters, DetailedChargesFilters, EmissionsFilters, GeneralInformationFilters } from 'src/app/models/electricityFilter';
+import { EmissionsDataFormComponent } from 'src/app/account/custom-database/regional-emissions-data/emissions-data-form/emissions-data-form.component';
 
 @Component({
   selector: 'app-electricity-data-table',
@@ -27,10 +30,12 @@ export class ElectricityDataTableComponent implements OnInit {
 
   @ViewChild('meterTable', { static: false }) meterTable: ElementRef;
 
-  supplyDemandCharge: SupplyDemandChargeFilters;
-  taxAndOther: TaxAndOtherFilters;
-  showTotalDemand: boolean;
+
   electricityDataFilterSub: Subscription;
+  detailedChargesFilters: DetailedChargesFilters;
+  additionalChargesFilters: AdditionalChargesFilters;
+  generalInformationFilters: GeneralInformationFilters;
+  emissionsFilters: EmissionsFilters;
   allChecked: boolean;
   energyUnit: string;
 
@@ -38,7 +43,12 @@ export class ElectricityDataTableComponent implements OnInit {
   orderByDirection: string = 'desc';
   currentPageNumber: number = 1;
   copyingTable: boolean = false;
-  constructor(private utilityMeterDataService: UtilityMeterDataService, private copyTableService: CopyTableService) { }
+  numDetailedCharges: number;
+  numAdditionalCharges: number;
+  numGeneralInformation: number;
+  numEmissions: number;
+  constructor(private utilityMeterDataService: UtilityMeterDataService, private copyTableService: CopyTableService,
+    private calanderizationService: CalanderizationService, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
     this.energyUnit = this.selectedMeter.startingUnit;
@@ -47,9 +57,11 @@ export class ElectricityDataTableComponent implements OnInit {
       this.allChecked = (hasFalseChecked == undefined);
     }
     this.electricityDataFilterSub = this.utilityMeterDataService.tableElectricityFilters.subscribe(electricityDataFilters => {
-      this.taxAndOther = electricityDataFilters.taxAndOther;
-      this.supplyDemandCharge = electricityDataFilters.supplyDemandCharge;
-      this.showTotalDemand = electricityDataFilters.showTotalDemand;
+      this.detailedChargesFilters = electricityDataFilters.detailedCharges;
+      this.additionalChargesFilters = electricityDataFilters.additionalCharges;
+      this.generalInformationFilters = electricityDataFilters.generalInformationFilters;
+      this.emissionsFilters = electricityDataFilters.emissionsFilters;
+      this.setColumnNumbers();
     });
   }
 
@@ -62,6 +74,7 @@ export class ElectricityDataTableComponent implements OnInit {
       this.allChecked = false;
       this.checkAll();
     }
+    this.setEmissions();
   }
 
   checkAll() {
@@ -125,12 +138,59 @@ export class ElectricityDataTableComponent implements OnInit {
     // }
     return undefined;
   }
-  
-  copyTable(){
+
+  copyTable() {
     this.copyingTable = true;
     setTimeout(() => {
       this.copyTableService.copyTable(this.meterTable);
       this.copyingTable = false;
     }, 200)
+  }
+
+  setEmissions() {
+    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let facility: IdbFacility = accountFacilities.find(facility => { return facility.guid == this.selectedMeter.facilityId });
+    this.selectedMeterData.forEach(dataItem => {
+      let emissionsValues: EmissionsResults = this.calanderizationService.getEmissions(this.selectedMeter, dataItem.totalEnergyUse, this.selectedMeter.energyUnit, facility.energyIsSource, new Date(dataItem.readDate).getFullYear());
+      dataItem.totalMarketEmissions = emissionsValues.marketEmissions;
+      dataItem.totalLocationEmissions = emissionsValues.locationEmissions;
+      dataItem.RECs = emissionsValues.RECs;
+      dataItem.excessRECs = emissionsValues.excessRECs;
+      dataItem.excessRECsEmissions = emissionsValues.excessRECsEmissions;
+    })
+  }
+
+  setColumnNumbers() {
+    let additionalChargesCount: number = 0;
+    Object.keys(this.additionalChargesFilters).forEach(key => {
+      if (key != 'showSection' && this.additionalChargesFilters[key] == true) {
+        additionalChargesCount++;
+      }
+    });
+    this.numAdditionalCharges = additionalChargesCount;
+    let detailedChargesCount: number = 0;
+    Object.keys(this.detailedChargesFilters).forEach(key => {
+      if (key != 'showSection' && this.detailedChargesFilters[key] == true) {
+        detailedChargesCount++;
+      }
+    });
+    this.numDetailedCharges = detailedChargesCount * 2;
+
+    let emissionCount: number = 0;
+    Object.keys(this.emissionsFilters).forEach(key => {
+      if (key != 'showSection' && this.emissionsFilters[key] == true) {
+        emissionCount++;
+      }
+    });
+    this.numEmissions = emissionCount;
+
+    let generalInfoCount: number = 0;
+    Object.keys(this.generalInformationFilters).forEach(key => {
+      if (key != 'showSection' && this.generalInformationFilters[key] == true) {
+        generalInfoCount++;
+      }
+    });
+    this.numGeneralInformation = generalInfoCount + 2;
+
   }
 }

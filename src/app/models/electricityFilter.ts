@@ -1,33 +1,44 @@
 export interface ElectricityDataFilters {
-  showTotalDemand: boolean,
-  supplyDemandCharge: SupplyDemandChargeFilters,
-  taxAndOther: TaxAndOtherFilters
+  detailedCharges: DetailedChargesFilters,
+  additionalCharges: AdditionalChargesFilters,
+  emissionsFilters: EmissionsFilters,
+  generalInformationFilters: GeneralInformationFilters
 }
 
-export interface SupplyDemandChargeFilters {
+export interface DetailedChargesFilters {
   showSection: boolean,
-  supplyBlockAmount: boolean,
-  supplyBlockCharge: boolean,
-  flatRateAmount: boolean,
-  flatRateCharge: boolean,
-  peakAmount: boolean,
-  peakCharge: boolean,
-  offPeakAmount: boolean,
-  offPeakCharge: boolean,
-  demandBlockAmount: boolean,
-  demandBlockCharge: boolean,
-
+  block1: boolean,
+  block2: boolean,
+  block3: boolean,
+  other: boolean,
+  onPeak: boolean,
+  offPeak: boolean,
+  powerFactor: boolean
 }
 
-export interface TaxAndOtherFilters {
+export interface AdditionalChargesFilters {
   showSection: boolean,
-  utilityTax: boolean,
+  nonEnergyCharge: boolean,
+  transmissionAndDelivery: boolean,
+  localSalesTax: boolean,
+  stateSalesTax: boolean,
   latePayment: boolean,
   otherCharge: boolean,
-  basicCharge: boolean,
-  generationTransmissionCharge: boolean,
-  deliveryCharge: boolean,
-  transmissionCharge: boolean,
-  powerFactorCharge: boolean,
-  businessCharge: boolean
+}
+
+
+export interface EmissionsFilters {
+  showSection: boolean,
+  marketEmissions: boolean,
+  locationEmissions: boolean,
+  recs: boolean,
+  excessRecs: boolean,
+  excessRecsEmissions: boolean
+}
+
+export interface GeneralInformationFilters {
+  showSection: boolean,
+  totalCost: boolean,
+  realDemand: boolean,
+  billedDemand: boolean
 }

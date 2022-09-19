@@ -1,9 +1,12 @@
 import { Component, ElementRef, EventEmitter, Input, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
-import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData, MeterSource } from 'src/app/models/idb';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 import { UtilityMeterDataService } from '../utility-meter-data.service';
 import * as _ from 'lodash';
 import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { CalanderizationService, EmissionsResults } from 'src/app/shared/helper-services/calanderization.service';
+import { EditMeterFormService } from '../../energy-source/edit-meter-form/edit-meter-form.service';
 
 @Component({
   selector: 'app-general-utility-data-table',
@@ -23,7 +26,7 @@ export class GeneralUtilityDataTableComponent implements OnInit {
   setEdit: EventEmitter<IdbUtilityMeterData> = new EventEmitter<IdbUtilityMeterData>();
   @Output('setDelete')
   setDelete: EventEmitter<IdbUtilityMeterData> = new EventEmitter<IdbUtilityMeterData>();
-  
+
   @ViewChild('meterTable', { static: false }) meterTable: ElementRef;
 
   allChecked: boolean;
@@ -35,13 +38,19 @@ export class GeneralUtilityDataTableComponent implements OnInit {
   orderByDirection: string = 'desc';
   currentPageNumber: number = 1;
   copyingTable: boolean = false;
+  showEmissions: boolean;
   constructor(public utilityMeterDataService: UtilityMeterDataService, private energyUnitsHelperService: EnergyUnitsHelperService,
-    private copyTableService: CopyTableService) { }
+    private copyTableService: CopyTableService, private facilityDbService: FacilitydbService,
+    private calanderizationService: CalanderizationService, private editMeterFormService: EditMeterFormService) { }
 
   ngOnInit(): void {
     this.showVolumeColumn = (this.selectedMeterData.find(dataItem => { return dataItem.totalVolume != undefined }) != undefined);
     this.volumeUnit = this.selectedMeter.startingUnit;
     this.showEnergyColumn = this.energyUnitsHelperService.isEnergyMeter(this.selectedMeter.source);
+    this.showEmissions = this.editMeterFormService.checkShowEmissionsOutputRate(this.selectedMeter.source);
+    if (this.showEmissions) {
+      this.setEmissions();
+    }
     if (this.showEnergyColumn) {
       this.energyUnit = this.selectedMeter.energyUnit;
     }
@@ -120,12 +129,25 @@ export class GeneralUtilityDataTableComponent implements OnInit {
     return undefined;
   }
 
-  
-  copyTable(){
+
+  copyTable() {
     this.copyingTable = true;
     setTimeout(() => {
       this.copyTableService.copyTable(this.meterTable);
       this.copyingTable = false;
     }, 200)
+  }
+
+  setEmissions() {
+    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let facility: IdbFacility = accountFacilities.find(facility => { return facility.guid == this.selectedMeter.facilityId });
+    this.selectedMeterData.forEach(dataItem => {
+      let emissionsValues: EmissionsResults = this.calanderizationService.getEmissions(this.selectedMeter, dataItem.totalEnergyUse, this.selectedMeter.energyUnit, facility.energyIsSource, new Date(dataItem.readDate).getFullYear());
+      dataItem.totalMarketEmissions = emissionsValues.marketEmissions;
+      dataItem.totalLocationEmissions = emissionsValues.locationEmissions;
+      dataItem.RECs = emissionsValues.RECs;
+      dataItem.excessRECs = emissionsValues.excessRECs;
+      dataItem.excessRECsEmissions = emissionsValues.excessRECsEmissions;
+    })
   }
 }

@@ -18,7 +18,11 @@ export interface MonthlyData {
     energyUse: number,
     energyCost: number,
     date: Date,
-    emissions: number
+    locationEmissions: number, 
+    marketEmissions: number,    
+    RECs: number,
+    excessRECs: number, 
+    excessRECsEmissions: number
 }
 
 
@@ -27,7 +31,11 @@ export interface LastYearData {
     energyUse: number,
     energyCost: number,
     energyConsumption: number,
-    emissions: number,
+    locationEmissions: number, 
+    marketEmissions: number, 
+    RECs: number,
+    excessRECs: number, 
+    excessRECsEmissions: number,   
     date: Date
 }
 

@@ -1,0 +1,135 @@
+.worksheet-data-table{
+    max-height: 150px;
+    overflow-y: scroll;
+}
+
+/* .card-header{
+    color: #2980b9;
+    text-transform: uppercase;
+    letter-spacing: 1px; 
+}*/
+
+.cdk-drag-preview {
+    box-sizing: border-box;
+    border-radius: 4px;
+    box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
+                0 8px 10px 1px rgba(0, 0, 0, 0.14),
+                0 3px 14px 2px rgba(0, 0, 0, 0.12);
+    background-color: #fff;
+    transition: background-color 1s ease;
+  }
+
+  .card-header{
+      background-color: #fff;
+      border-bottom: 2px solid orange;
+      border-radius: 0px;
+      font-size: 15px;
+      padding: .5rem;
+      font-weight: bold;
+  }
+
+  .card{
+      border-top: none;
+      border-left: none;
+      border-bottom: none;
+      border-right: none;
+      border-radius: 0px;
+      background: #efefef;
+  }
+
+  .card:not(:last-child){
+      border-right: 2px solid orange;
+  }
+  
+  .cdk-drag-animating {
+    transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+  }
+
+  label{
+      font-size: 14px;
+  }
+
+  .list-item{
+    transition: background-color 1s ease;
+    font-size: 14px;
+    font-weight: bold;
+    background-color: #fff;
+  }
+
+  .list-item:hover{
+      cursor: grab;
+      box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
+                  0 8px 10px 1px rgba(0, 0, 0, 0.14),
+                  0 3px 14px 2px rgba(0, 0, 0, 0.12);
+    }
+
+
+    .list-item:active{
+        cursor: grabbing;
+    }
+
+.Unused .list-item, .Unused .cdk-drag-preview{
+    background-color: #929292;
+    color: white;
+}
+
+.Date .list-item, .Date .cdk-drag-preview{
+    background-color: #2c3e50;
+    color: white;
+}
+
+.Meters .list-item, .Meters .cdk-drag-preview{
+    background-color: #2a80b9;
+    color: white;
+}
+
+.Predictors .list-item, .Predictors .cdk-drag-preview{
+    background-color: #ffa500;
+    color: white;
+}
+
+.fa-arrows-alt{
+    color: white;
+    font-size: 14px;
+    padding-right: .4rem;
+}
+
+.cdk-drag-preview .fa-arrows-alt{
+    color: black;
+}
+
+
+.map-columns-label{
+    color: inherit;
+    width: 100%;
+    text-align: center;
+    text-transform: none;
+}
+
+.th{
+    transition: background-color 1s ease;
+  }
+
+th.Unused{
+    background-color: #929292;
+    color: white;
+}
+
+th.Date{
+    background-color: #2c3e50;
+    color: white;
+}
+
+th.Meters{
+    background-color: #2980b9;
+    color: white;
+}
+
+th.Predictors{
+    background-color: #ffa500;
+    color: white;
+}
+
+tr.hidden{
+    display: none;
+}

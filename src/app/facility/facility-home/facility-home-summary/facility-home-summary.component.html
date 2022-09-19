@@ -112,36 +112,48 @@
                 </ul>
             </div>
             <div class="col">
-                <div class="d-flex justify-content-end">
-                    <div class="pr-2">
+                <div class="d-flex justify-content-end flex-wrap">
+                    <div class="p-1">
                         <button class="btn btn-outline m-0" (click)="navigateTo('utility')">
                             <span class="fa fa-book"></span><br>
                             Manage Utility <br> Data
                         </button>
                     </div>
-                    <div class="pr-2">
+                    <div class="p-1">
                         <button class="btn btn-outline m-0" (click)="navigateTo('overview')" [disabled]="!lastBill">
                             <span class="fa fa-chart-column"></span><br>
                             View Facility <br> Data Overview
                         </button>
                     </div>
-                    <div class="pr-2">
+                    <div class="p-1">
                         <button class="btn btn-outline m-0" (click)="navigateTo('visualization')"
                             [disabled]="!lastBill">
                             <span class="fa fa-line-chart"></span><br>
                             Visualize Facility <br> Data
                         </button>
                     </div>
-                    <div class="pr-2">
+                    <div class="p-1">
                         <button class="btn btn-outline m-0" (click)="navigateTo('analysis')" [disabled]="!lastBill">
                             <span class="fa fa-microscope"></span><br>
                             Conduct Facility <br> Analysis
                         </button>
                     </div>
-                    <div class="pr-2">
+                    <div class="p-1">
                         <button class="btn btn-outline m-0" (click)="navigateTo('settings')" [disabled]="!lastBill">
                             <span class="fa fa-gear"></span><br>
                             Manage Facility <br> Settings
+                        </button>
+                    </div>
+                    <div class="p-1">
+                        <button class="btn btn-outline m-0" (click)="navigateTo('upload')">
+                            <span class="fa fa-upload"></span><br>
+                            Upload Utility <br> Data
+                        </button>
+                    </div>
+                    <div class="p-1">
+                        <button class="btn btn-outline m-0" (click)="exportData()">
+                            <span class="fa fa-download"></span><br>
+                            Export Facility <br> Utility Data
                         </button>
                     </div>
                 </div>

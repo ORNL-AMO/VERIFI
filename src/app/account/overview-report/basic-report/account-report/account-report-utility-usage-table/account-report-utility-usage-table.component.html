@@ -3,11 +3,11 @@
         <thead>
             <tr class="table-mh">
                 <th></th>
-                <th class="text-center" colspan="3">
+                <th class="text-center" colspan="4">
                     Target Year: {{accountReportUtilitySummary.targetYearStart | date: 'MMM, y'}} -
                     {{accountReportUtilitySummary.targetYearEnd | date: 'MMM, y'}}
                 </th>
-                <th class="text-center" colspan="3">
+                <th class="text-center" colspan="4">
                     Baseline Year: {{accountReportUtilitySummary.baselineYearStart | date: 'MMM, y'}} -
                     {{accountReportUtilitySummary.baselineYearEnd | date: 'MMM, y'}}
                 </th>
@@ -16,10 +16,12 @@
                 <th class="w-1">Utility</th>
                 <th class="w-2">Utility Use <br> (<span [innerHTML]="account.energyUnit | settingsLabel"></span>)</th>
                 <th class="w-2">Utility Cost</th>
-                <th class="w-2">Emissions <br> (<span>tonne CO<sub>2</sub></span>)</th>
+                <th class="w-2">Market Emissions <br> (<span>tonne CO<sub>2</sub></span>)</th>
+                <th class="w-2">Location Emissions <br> (<span>tonne CO<sub>2</sub></span>)</th>
                 <th class="w-2">Utility Use <br> (<span [innerHTML]="account.energyUnit | settingsLabel"></span>)</th>
                 <th class="w-2">Utility Cost</th>
-                <th class="w-2">Emissions <br> (<span>tonne CO<sub>2</sub></span>)</th>
+                <th class="w-2">Market Emissions <br> (<span>tonne CO<sub>2</sub></span>)</th>
+                <th class="w-2">Location Emissions <br> (<span>tonne CO<sub>2</sub></span>)</th>
             </tr>
         </thead>
         <tbody>
@@ -54,16 +56,29 @@
                     </span>
                 </td>
                 <td>
-                    <span *ngIf="utilityUsageSummary.emissionsTargetYear">
-                        {{utilityUsageSummary.emissionsTargetYear | customNumber }}
+                    <span *ngIf="utilityUsageSummary.marketEmissionsTargetYear">
+                        {{utilityUsageSummary.marketEmissionsTargetYear | customNumber }}
                     </span>
-                    <span *ngIf="!utilityUsageSummary.emissionsTargetYear">
+                    <span *ngIf="!utilityUsageSummary.marketEmissionsTargetYear">
                         &mdash;
                     </span>
 
-                    <span *ngIf="utilityUsageSummary.emissionsChange" class="small pl-2 pull-right green"
-                        [ngClass]="{'red': utilityUsageSummary.emissionsChange > 0}">
-                        ({{utilityUsageSummary.emissionsChange | customNumber}})
+                    <span *ngIf="utilityUsageSummary.marketEmissionsChange" class="small pl-2 pull-right green"
+                        [ngClass]="{'red': utilityUsageSummary.marketEmissionsChange > 0}">
+                        ({{utilityUsageSummary.marketEmissionsChange | customNumber}})
+                    </span>
+                </td>
+                <td>
+                    <span *ngIf="utilityUsageSummary.locationEmissionsTargetYear">
+                        {{utilityUsageSummary.locationEmissionsTargetYear | customNumber }}
+                    </span>
+                    <span *ngIf="!utilityUsageSummary.locationEmissionsTargetYear">
+                        &mdash;
+                    </span>
+
+                    <span *ngIf="utilityUsageSummary.locationEmissionsChange" class="small pl-2 pull-right green"
+                        [ngClass]="{'red': utilityUsageSummary.locationEmissionsChange > 0}">
+                        ({{utilityUsageSummary.locationEmissionsChange | customNumber}})
                     </span>
                 </td>
 
@@ -86,10 +101,18 @@
                     </span>
                 </td>
                 <td>
-                    <span *ngIf="utilityUsageSummary.emissionsBaselineYear">
-                        {{utilityUsageSummary.emissionsBaselineYear | customNumber}}
+                    <span *ngIf="utilityUsageSummary.marketEmissionsBaselineYear">
+                        {{utilityUsageSummary.marketEmissionsBaselineYear | customNumber}}
                     </span>
-                    <span *ngIf="!utilityUsageSummary.emissionsBaselineYear">
+                    <span *ngIf="!utilityUsageSummary.marketEmissionsBaselineYear">
+                        &mdash;
+                    </span>
+                </td>
+                <td>
+                    <span *ngIf="utilityUsageSummary.locationEmissionsBaselineYear">
+                        {{utilityUsageSummary.locationEmissionsBaselineYear | customNumber}}
+                    </span>
+                    <span *ngIf="!utilityUsageSummary.locationEmissionsBaselineYear">
                         &mdash;
                     </span>
                 </td>
@@ -128,15 +151,27 @@
                     </span>
                 </th>
                 <th>
-                    <span *ngIf="accountReportUtilitySummary.totals.emissionsTargetYear">
-                        {{accountReportUtilitySummary.totals.emissionsTargetYear | customNumber}}
+                    <span *ngIf="accountReportUtilitySummary.totals.marketEmissionsTargetYear">
+                        {{accountReportUtilitySummary.totals.marketEmissionsTargetYear | customNumber}}
                     </span>
-                    <span *ngIf="!accountReportUtilitySummary.totals.emissionsTargetYear">
+                    <span *ngIf="!accountReportUtilitySummary.totals.marketEmissionsTargetYear">
                         &mdash;
                     </span>
-                    <span *ngIf="accountReportUtilitySummary.totals.emissionsChange" class="small pl-2 pull-right green"
-                        [ngClass]="{'red': accountReportUtilitySummary.totals.emissionsChange > 0}">
-                        ({{accountReportUtilitySummary.totals.emissionsChange | customNumber}})
+                    <span *ngIf="accountReportUtilitySummary.totals.marketEmissionsChange" class="small pl-2 pull-right green"
+                        [ngClass]="{'red': accountReportUtilitySummary.totals.marketEmissionsChange > 0}">
+                        ({{accountReportUtilitySummary.totals.marketEmissionsChange | customNumber}})
+                    </span>
+                </th>
+                <th>
+                    <span *ngIf="accountReportUtilitySummary.totals.locationEmissionsTargetYear">
+                        {{accountReportUtilitySummary.totals.locationEmissionsTargetYear | customNumber}}
+                    </span>
+                    <span *ngIf="!accountReportUtilitySummary.totals.locationEmissionsTargetYear">
+                        &mdash;
+                    </span>
+                    <span *ngIf="accountReportUtilitySummary.totals.locationEmissionsChange" class="small pl-2 pull-right green"
+                        [ngClass]="{'red': accountReportUtilitySummary.totals.locationEmissionsChange > 0}">
+                        ({{accountReportUtilitySummary.totals.locationEmissionsChange | customNumber}})
                     </span>
                 </th>
                 <!--baseline year-->
@@ -158,10 +193,19 @@
                     </span>
                 </th>
                 <th>
-                    <span *ngIf="accountReportUtilitySummary.totals.emissionsBaselineYear">
-                        {{accountReportUtilitySummary.totals.emissionsBaselineYear | customNumber}}
+                    <span *ngIf="accountReportUtilitySummary.totals.marketEmissionsBaselineYear">
+                        {{accountReportUtilitySummary.totals.marketEmissionsBaselineYear | customNumber}}
                     </span>
-                    <span *ngIf="!accountReportUtilitySummary.totals.emissionsBaselineYear">
+                    <span *ngIf="!accountReportUtilitySummary.totals.marketEmissionsBaselineYear">
+                        &mdash;
+                    </span>
+
+                </th>
+                <th>
+                    <span *ngIf="accountReportUtilitySummary.totals.locationEmissionsBaselineYear">
+                        {{accountReportUtilitySummary.totals.locationEmissionsBaselineYear | customNumber}}
+                    </span>
+                    <span *ngIf="!accountReportUtilitySummary.totals.locationEmissionsBaselineYear">
                         &mdash;
                     </span>
 

@@ -20,7 +20,7 @@ export class AccountReportUtilityUsageBarChartComponent implements OnInit {
   @Input()
   reportOptions: ReportOptions;
   @Input()
-  graphType: 'cost' | 'emissions' | 'usage';
+  graphType: 'cost' | 'locationEmissions' | 'usage' | 'marketEmissions';
 
   @ViewChild('utilityBarChart', { static: false }) utilityBarChart: ElementRef;
   constructor(private plotlyService: PlotlyService) { }
@@ -61,13 +61,15 @@ export class AccountReportUtilityUsageBarChartComponent implements OnInit {
   }
 
   getData(): Array<BarChartDataTrace> {
-    let dataType: 'consumptionTargetYear' | 'costTargetYear' | 'emissionsTargetYear';
+    let dataType: 'consumptionTargetYear' | 'costTargetYear' | 'locationEmissionsTargetYear' | 'marketEmissionsTargetYear';
     if (this.graphType == 'cost') {
       dataType = 'costTargetYear'
     } else if (this.graphType == 'usage') {
       dataType = 'consumptionTargetYear';
-    } else if (this.graphType == 'emissions') {
-      dataType = 'emissionsTargetYear';
+    } else if (this.graphType == 'locationEmissions') {
+      dataType = 'locationEmissionsTargetYear';
+    } else if (this.graphType == 'marketEmissions') {
+      dataType = 'marketEmissionsTargetYear';
     }
 
     let data: Array<BarChartDataTrace> = new Array();
@@ -120,7 +122,7 @@ export class AccountReportUtilityUsageBarChartComponent implements OnInit {
       return undefined;
     } else if (this.graphType == 'usage') {
       return this.account.energyUnit;
-    } else if (this.graphType == 'emissions') {
+    } else if (this.graphType == 'locationEmissions' || this.graphType == 'marketEmissions') {
       return "tonne CO<sub>2</sub>";
     }
   }

@@ -7,7 +7,8 @@ export interface AccountFacilitiesSummary {
     totalEnergyUse: number,
     totalEnergyCost: number,
     totalNumberOfMeters: number,
-    totalEmissions: number,
+    totalMarketEmissions: number,
+    totalLocationEmissions: number,
     allMetersLastBill: MonthlyData
 }
 
@@ -15,7 +16,8 @@ export interface FacilitySummary {
     facility: IdbFacility,
     energyUsage: number,
     energyCost: number,
-    emissions: number,
+    marketEmissions: number,
+    locationEmissions: number,
     numberOfMeters: number,
     lastBillDate: Date
 }
@@ -25,7 +27,8 @@ export interface FacilityMeterSummaryData {
     meterSummaries: Array<MeterSummary>,
     totalEnergyUse: number,
     totalEnergyCost: number,
-    totalEmissions: number,
+    totalMarketEmissions: number,
+    totalLocationEmissions: number,
     allMetersLastBill: MonthlyData
 }
 
@@ -34,7 +37,8 @@ export interface MeterSummary {
     meter: IdbUtilityMeter,
     energyUsage: number,
     energyCost: number,
-    emissions: number,
+    marketEmissions: number,
+    locationEmissions: number,
     lastBill: MonthlyData,
     groupName: string,
     lastBillDate: Date
@@ -51,15 +55,19 @@ export interface SummaryData {
     lastBillDate: Date,
     previousMonthEnergyUse: number,
     previousMonthEnergyCost: number,
-    previousMonthEmissions: number,
+    previousMonthLocationEmissions: number,
+    previousMonthMarketEmissions: number,
     averageEnergyUse: number,
     averageEnergyCost: number,
-    averageEmissions: number,
+    averageLocationEmissions: number,
+    averageMarketEmissions: number,
     yearPriorEnergyUse: number,
     yearPriorEnergyCost: number,
-    yearPriorEmissions: number,
+    yearPriorLocationEmissions: number,
+    yearPriorMarketEmissions: number,
     energyUseChangeSinceLastYear: number,
     energyCostChangeSinceLastYear: number,
-    emissionsChangeSinceLastYear: number,
+    locationEmissionsChangeSinceLastYear: number,
+    marketEmissionsChangeSinceLastYear: number,
     utility: string
 }

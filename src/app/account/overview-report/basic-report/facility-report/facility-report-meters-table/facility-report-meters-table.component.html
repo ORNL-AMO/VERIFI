@@ -2,7 +2,7 @@
     <table class="table table-sm" *ngIf="facilityMeterSummaryData">
         <thead>
             <tr class="table-mh">
-                <th colspan="6">
+                <th colspan="7">
                     {{facility.name}} Meters
                     <span class="pull-right">({{targetYearStartDate | date: 'MMM, y'}} -
                         {{targetYearEndDate | date: 'MMM, y'}})</span>
@@ -16,7 +16,10 @@
                 </th>
                 <th class="w-2">Utility Cost
                 <th class="w-2">
-                    Emissions<br> (tonne CO<sub>2</sub>)
+                    Market Emissions<br> (tonne CO<sub>2</sub>)
+                </th>
+                <th class="w-2">
+                    Location Emissions<br> (tonne CO<sub>2</sub>)
                 </th>
             </tr>
         </thead>
@@ -39,7 +42,11 @@
                 </td>
                 <td>
                     <!--/1000 for tonne-->
-                    {{summary.emissions / 1000 |customNumber }}
+                    {{summary.marketEmissions / 1000 |customNumber }}
+                </td>
+                <td>
+                    <!--/1000 for tonne-->
+                    {{summary.locationEmissions / 1000 |customNumber }}
                 </td>
             </tr>
         </tbody>
@@ -60,7 +67,11 @@
                 </th>
                 <th>
                     <!--/1000 for tonne-->
-                    {{facilityMeterSummaryData.totalEmissions / 1000 | customNumber }}
+                    {{facilityMeterSummaryData.totalMarketEmissions / 1000 | customNumber }}
+                </th>
+                <th>
+                    <!--/1000 for tonne-->
+                    {{facilityMeterSummaryData.totalLocationEmissions / 1000 | customNumber }}
                 </th>
             </tr>
         </tfoot>

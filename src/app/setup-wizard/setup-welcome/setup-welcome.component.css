@@ -13,7 +13,7 @@
     margin: 3px;
     padding: 20px;
     border-radius: 4px;
-    box-shadow: 2px 3px 10px #d6d6d6;
+    /* box-shadow: 2px 3px 10px #d6d6d6; */
   }
 
   .empty-state .box p {
@@ -29,4 +29,9 @@
 
   .loadData{
     background-color: white;
+  }
+
+
+  .verifi:first-letter{
+      color: #ff6000;
   }

@@ -18,6 +18,8 @@ export class AccountDashboardMenuComponent implements OnInit {
   selectedAccountSub: Subscription;
   modalOpen: boolean;
   modalOpenSub: Subscription;
+  emissionsDisplay: "location" | "market";
+  emissionsDisplaySub: Subscription;
   constructor(private dashboardService: DashboardService,
     private accountDbService: AccountdbService,
     private sharedDataService: SharedDataService) { }
@@ -32,6 +34,10 @@ export class AccountDashboardMenuComponent implements OnInit {
 
     this.modalOpenSub = this.sharedDataService.modalOpen.subscribe(val => {
       this.modalOpen = val;
+    });
+
+    this.emissionsDisplaySub = this.dashboardService.emissionsDisplay.subscribe(val => {
+      this.emissionsDisplay = val;
     })
   }
 
@@ -39,6 +45,7 @@ export class AccountDashboardMenuComponent implements OnInit {
     this.selectedAccountSub.unsubscribe();
     this.graphDisplaySub.unsubscribe();
     this.modalOpenSub.unsubscribe();
+    this.emissionsDisplaySub.unsubscribe();
   }
 
   setGraphDisplay(str: "cost" | "usage" | "emissions") {
@@ -52,5 +59,9 @@ export class AccountDashboardMenuComponent implements OnInit {
       this.accountDbService.allAccounts.next(allAccounts);
       this.accountDbService.selectedAccount.next(this.selectedAccount);
     }
+  }
+
+  setEmissions(str: "location" | "market"){
+    this.dashboardService.emissionsDisplay.next(str);
   }
 }

@@ -1,0 +1,39 @@
+<div class="d-flex justify-content-between">
+    <div class="d-flex">
+        <button class="btn btn-secondary" (click)="goBack()">Back</button>
+    </div>
+    <div class="d-flex">
+        <button class="btn btn-success" (click)="continue()">Submit &amp; Continue</button>
+    </div>
+</div>
+<hr>
+<ng-container *ngIf="predictorsIncluded">
+    <h6 class="map-columns-label">Map the predictors to their corresponding facilities by dragging and dropping them
+        into the correct columns.
+    </h6>
+    <hr>
+    <div class="row no-gutters">
+        <div cdkDropList [cdkDropListData]="fileReference.predictorFacilityGroups" class="card col-md-3 col-sm-6"
+            *ngFor="let facilityGroup of fileReference.predictorFacilityGroups; let index = index"
+            (cdkDropListDropped)="dropColumn($event)" id={{facilityGroup.facilityId}}
+            [cdkDropListConnectedTo]="facilityGroupIds">
+            <div class="card-header">
+                <i *ngIf="index != 0" class="fa fa-industry" [ngStyle]="{color: facilityGroup.color}"></i>
+                {{facilityGroup.facilityName}}
+                <a *ngIf="index != 0" class="click-link float-right"
+                    (click)="setFacility(facilityGroup.facilityId)">+Add
+                    All</a>
+            </div>
+            <div class="card-body">
+                <div class="list-item mt-2 mb-2 p-2" [cdkDragData]="groupItem"
+                    *ngFor="let groupItem of facilityGroup.groupItems" cdkDrag>
+                    <span class="fa fa-arrows-alt"></span>{{groupItem.value}} <br>
+                </div>
+            </div>
+        </div>
+    </div>
+</ng-container>
+<div class="alert alert-warning p-2" *ngIf="!predictorsIncluded">
+    No predictors found. Go back to column selection and include predictors or click continue to upload included meter
+    data.
+</div>

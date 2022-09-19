@@ -14,8 +14,8 @@
       <label for="totalVolume">Total Volume <span class="required">*</span> </label>
       <div class="input-group mb-3">
         <input id="totalVolume" class="form-control" type="number" formControlName="totalVolume"
-          (input)="calculateTotalEnergyUse()" [class.warning]="meterDataForm.controls.totalVolume.value === 0" onfocus="this.select();" 
-          min="0" max ="999999999999999">
+          (input)="calculateTotalEnergyUse()" [class.warning]="meterDataForm.controls.totalVolume.value === 0"
+          onfocus="this.select();" min="0" max="999999999999999">
         <span class="unit" [innerHTML]="volumeUnit | settingsLabel"></span>
       </div>
       <span class="inputError" *ngIf="meterDataForm.get('totalVolume').hasError('required')">Total volume use is
@@ -28,8 +28,8 @@
     <div *ngIf="displayEnergyUse" class="col-md-6 col-sm-12">
       <label for="totalEnergyUse">Total Energy Use <span class="required">*</span></label>
       <div class="input-group mb-3">
-        <input id="totalEnergyUse" class="form-control" type="number" formControlName="totalEnergyUse" onfocus="this.select();"
-        min="0" max ="999999999999999">
+        <input id="totalEnergyUse" class="form-control" type="number" formControlName="totalEnergyUse"
+          onfocus="this.select();" min="0" max="999999999999999" (input)="setTotalEmissions()">
         <span class="unit" [innerHTML]="energyUnit | settingsLabel"></span>
       </div>
       <span class="inputError" *ngIf="meterDataForm.get('totalEnergyUse').hasError('required')">Total energy use is
@@ -38,12 +38,28 @@
       <span class="inputWarning" *ngIf="meterDataForm.controls.totalEnergyUse.value === 0">Total energy use should be
         greater than 0</span>
     </div>
+    <div *ngIf="showEmissions" class="col-md-6 col-sm-12">
+      <label for="marketEmissions">
+        Total Market Emissions
+      </label>
+      <div class="input-group mb-3">
+        {{marketEmissions | number:'1.0-0'}} kg CO<sub>2</sub>
+      </div>
+    </div>
+    <div *ngIf="showEmissions" class="col-md-6 col-sm-12">
+      <label for="locationEmissions">
+        Total Location Emissions
+      </label>
+      <div class="input-group mb-3">
+        {{locationEmissions | number:'1.0-0'}} kg CO<sub>2</sub>
+      </div>
+    </div>
   </div>
 
   <label for="totalCost">Total Cost</label>
   <div class="input-group mb-3">
-    <input id="totalCost" class="form-control" type="number" formControlName="totalCost" onfocus="this.select();" 
-    min="0" max ="999999999999999">
+    <input id="totalCost" class="form-control" type="number" formControlName="totalCost" onfocus="this.select();"
+      min="0" max="999999999999999">
     <span class="unit">$</span>
   </div>
   <span class="inputError" *ngIf="meterDataForm.get('totalCost').hasError('required')">Total cost is required</span>
@@ -54,22 +70,22 @@
 
   <label for="commodityCharge">Commodity Charge</label>
   <div class="input-group mb-3">
-    <input id="commodityCharge" class="form-control" type="number" formControlName="commodityCharge" onfocus="this.select();"
-    min="0" max ="999999999999999">
+    <input id="commodityCharge" class="form-control" type="number" formControlName="commodityCharge"
+      onfocus="this.select();" min="0" max="999999999999999">
     <span class="unit">$</span>
   </div>
 
   <label for="deliveryCharge">Delivery Charges</label>
   <div class="input-group mb-3">
-    <input id="deliveryCharge" class="form-control" type="number" formControlName="deliveryCharge" onfocus="this.select();"
-    min="0" max ="999999999999999">
+    <input id="deliveryCharge" class="form-control" type="number" formControlName="deliveryCharge"
+      onfocus="this.select();" min="0" max="999999999999999">
     <span class="unit">$</span>
   </div>
 
   <label for="otherCharge">Other Charges</label>
   <div class="input-group mb-3">
     <input id="otherCharge" class="form-control" type="number" formControlName="otherCharge" onfocus="this.select();"
-    min="0" max ="999999999999999">
+      min="0" max="999999999999999">
     <span class="unit">$</span>
   </div>
 </form>

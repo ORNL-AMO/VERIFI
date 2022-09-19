@@ -8,119 +8,98 @@
     <div class="filter-dropdown" *ngIf="showFilterDropdown">
         <p class="small">Choose Table Columns</p>
         <div class="row">
-            <div class="col">
-                <label *ngIf="filterType == 'table'">
-                    <input type="checkbox" name="showTotalDemand" [(ngModel)]="showTotalDemand"
-                        (change)="save()">Total Demand
+            <div class="col" *ngIf="filterType == 'table'">
+                <label>
+                    <input type="checkbox" name="totalCost" [(ngModel)]="generalInformationFilters.totalCost"
+                        (change)="save()">Total Cost
                 </label>
                 <label>
-                    <input type="checkbox" name="supplyBlockAmount" [(ngModel)]="supplyDemandCharge.supplyBlockAmount"
-                        (change)="save()">Block Rates Supply Amt
+                    <input type="checkbox" name="realDemand" [(ngModel)]="generalInformationFilters.realDemand"
+                        (change)="save()">Real Demand
                 </label>
                 <label>
-                    <input type="checkbox" name="supplyBlockCharge" [(ngModel)]="supplyDemandCharge.supplyBlockCharge"
-                        (change)="save()">Block Rates Supply Charge
+                    <input type="checkbox" name="billedDemand" [(ngModel)]="generalInformationFilters.billedDemand"
+                        (change)="save()">Billed Demand
+                </label>
+            </div>
+            <div class="col" *ngIf="filterType == 'table'">
+                <label>
+                    <input type="checkbox" name="marketEmissions" [(ngModel)]="emissionsFilters.marketEmissions"
+                        (change)="save()">Market Emissions
                 </label>
                 <label>
-                    <input type="checkbox" name="flatRateAmount" [(ngModel)]="supplyDemandCharge.flatRateAmount"
-                        (change)="save()">Flat Rate Amt
+                    <input type="checkbox" name="locationEmissions" [(ngModel)]="emissionsFilters.locationEmissions"
+                        (change)="save()">Location Emissions
                 </label>
                 <label>
-                    <input type="checkbox" name="flatRateCharge" [(ngModel)]="supplyDemandCharge.flatRateCharge"
-                        (change)="save()">Flat Rate Charge
+                    <input type="checkbox" name="recs" [(ngModel)]="emissionsFilters.recs" (change)="save()">RECs
                 </label>
                 <label>
-                    <input type="checkbox" name="peakAmount" [(ngModel)]="supplyDemandCharge.peakAmount"
-                        (change)="save()">On-Peak Amt
+                    <input type="checkbox" name="excessRecs" [(ngModel)]="emissionsFilters.excessRecs"
+                        (change)="save()">Excess RECs
                 </label>
                 <label>
-                    <input type="checkbox" name="peakCharge" [(ngModel)]="supplyDemandCharge.peakCharge"
-                        (change)="save()">On-Peak Charge
+                    <input type="checkbox" name="excessRecsEmissions" [(ngModel)]="emissionsFilters.excessRecsEmissions"
+                        (change)="save()">Excess RECs Emissions
                 </label>
             </div>
             <div class="col">
                 <label>
-                    <input type="checkbox" name="offPeakAmount" [(ngModel)]="supplyDemandCharge.offPeakAmount"
-                        (change)="save()">Off-Peak Amt
+                    <input type="checkbox" name="block1" [(ngModel)]="detailedChargesFilters.block1"
+                        (change)="save()">Block 1 Consumption
                 </label>
                 <label>
-                    <input type="checkbox" name="offPeakCharge" [(ngModel)]="supplyDemandCharge.offPeakCharge"
-                        (change)="save()">Off-Peak Charge
+                    <input type="checkbox" name="block2" [(ngModel)]="detailedChargesFilters.block2"
+                        (change)="save()">Block 2 Consumption
                 </label>
                 <label>
-                    <input type="checkbox" name="demandBlockAmount" [(ngModel)]="supplyDemandCharge.demandBlockAmount"
-                        (change)="save()">Block Rates Demand Amt
+                    <input type="checkbox" name="block3" [(ngModel)]="detailedChargesFilters.block3"
+                        (change)="save()">Block 3 Consumption
                 </label>
                 <label>
-                    <input type="checkbox" name="demandBlockCharge" [(ngModel)]="supplyDemandCharge.demandBlockCharge"
-                        (change)="save()">Block Rates Demand Charge
+                    <input type="checkbox" name="other" [(ngModel)]="detailedChargesFilters.other"
+                        (change)="save()">Other Consumption
                 </label>
                 <label>
-                    <input type="checkbox" name="generationTransmissionCharge"
-                        [(ngModel)]="taxAndOther.generationTransmissionCharge" (change)="save()">Generation and
-                    Transmission Charge
+                    <input type="checkbox" name="onPeak" [(ngModel)]="detailedChargesFilters.onPeak"
+                        (change)="save()">On-Peak Consumption
                 </label>
                 <label>
-                    <input type="checkbox" name="deliveryCharge" [(ngModel)]="taxAndOther.deliveryCharge"
-                        (change)="save()">Delivery Charge
+                    <input type="checkbox" name="offPeak" [(ngModel)]="detailedChargesFilters.offPeak"
+                        (change)="save()">Off-Peak Consumption
+                </label>
+                <label>
+                    <input type="checkbox" name="powerFactor" [(ngModel)]="detailedChargesFilters.powerFactor"
+                        (change)="save()">Power Factor
                 </label>
             </div>
             <div class="col">
                 <label>
-                    <input type="checkbox" name="transmissionCharge" [(ngModel)]="taxAndOther.transmissionCharge"
-                        (change)="save()">Transmission Charge
+                    <input type="checkbox" name="nonEnergyCharge" [(ngModel)]="additionalChargesFilters.nonEnergyCharge"
+                        (change)="save()">Non-Energy Charge
                 </label>
                 <label>
-                    <input type="checkbox" name="powerFactorCharge" [(ngModel)]="taxAndOther.powerFactorCharge"
-                        (change)="save()">Power Factor Charge
+                    <input type="checkbox" name="transmissionAndDelivery"
+                        [(ngModel)]="additionalChargesFilters.transmissionAndDelivery" (change)="save()">Transmission
+                    and Delivery Charge
                 </label>
                 <label>
-                    <input type="checkbox" name="businessCharge" [(ngModel)]="taxAndOther.businessCharge"
-                        (change)="save()">Local Business Charge
+                    <input type="checkbox" name="localSalesTax" [(ngModel)]="additionalChargesFilters.localSalesTax"
+                        (change)="save()">Local Sales Tax
                 </label>
                 <label>
-                    <input type="checkbox" name="utilityTax" [(ngModel)]="taxAndOther.utilityTax"
-                        (change)="save()">Local Utility Tax
+                    <input type="checkbox" name="stateSalesTax" [(ngModel)]="additionalChargesFilters.stateSalesTax"
+                        (change)="save()">State Sales Tax
                 </label>
                 <label>
-                    <input type="checkbox" name="latePayment" [(ngModel)]="taxAndOther.latePayment"
+                    <input type="checkbox" name="latePayment" [(ngModel)]="additionalChargesFilters.latePayment"
                         (change)="save()">Late Payment
                 </label>
                 <label>
-                    <input type="checkbox" name="otherCharge" [(ngModel)]="taxAndOther.otherCharge"
+                    <input type="checkbox" name="otherCharge" [(ngModel)]="additionalChargesFilters.otherCharge"
                         (change)="save()">Other Charge
                 </label>
-                <label>
-                    <input type="checkbox" name="basicCharge" [(ngModel)]="taxAndOther.basicCharge"
-                        (change)="save()">Basic Charge
-                </label>
             </div>
-
-
-            <!-- <div class="col">
-                <div *ngFor="let electricityDataFilter of electricityDataFilters; let ind = index;">
-                    <label *ngIf="ind < electricityDataFilters.length/3">
-                        <input type="checkbox" name="electricityDataFilter.name" [(ngModel)]="electricityDataFilter.filter"
-                            (change)="save()">{{electricityDataFilter.display}}
-                    </label>
-                </div>
-            </div>
-            <div class="col">
-                <div *ngFor="let electricityDataFilter of electricityDataFilters; let ind = index;">
-                    <label *ngIf="ind < (electricityDataFilters.length/3 * 2) && ind > electricityDataFilters.length/3">
-                        <input type="checkbox" name="electricityDataFilter.name" [(ngModel)]="electricityDataFilter.filter"
-                            (change)="save()">{{electricityDataFilter.display}}
-                    </label>
-                </div>
-            </div>
-            <div class="col">
-                <div *ngFor="let electricityDataFilter of electricityDataFilters; let ind = index;">
-                    <label *ngIf="ind > electricityDataFilters.length/3 * 2">
-                        <input type="checkbox" name="electricityDataFilter.name" [(ngModel)]="electricityDataFilter.filter"
-                            (change)="save()">{{electricityDataFilter.display}}
-                    </label>
-                </div>
-            </div> -->
         </div>
         <br>
         <a (click)="showAllColumns();">Show All</a>

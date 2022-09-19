@@ -2,13 +2,14 @@
     <div class="col-12">
         <div class="saveCancel item-right">
             <button class="btn btn-secondary" (click)="cancel()">Cancel</button>
-            <button class="btn btn-primary" (click)="saveChanges()" [disabled]="meterForm.invalid">                
+            <button class="btn btn-primary" (click)="saveChanges()" [disabled]="meterForm.invalid">
                 <span *ngIf="addOrEdit == 'add'">Add Meter</span>
                 <span *ngIf="addOrEdit == 'edit'">Save Changes</span>
             </button>
         </div>
     </div>
     <div class="col-12">
-        <app-edit-meter-form [(meterForm)]="meterForm" [meterDataExists]="meterDataExists"></app-edit-meter-form>
+        <app-edit-meter-form [(meterForm)]="meterForm" [meterDataExists]="meterDataExists"
+            [facility]="selectedFacility"></app-edit-meter-form>
     </div>
 </div>

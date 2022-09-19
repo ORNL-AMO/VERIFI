@@ -22,6 +22,8 @@ export class UtilityEnergyUseTableComponent implements OnInit {
   yearPriorDate: Date;
   yearPriorLastMonth: Date;
   facilityEnergyUnit: string;
+  emissionsDisplay: "location" | "market";
+  emissionsDisplaySub: Subscription;
   constructor(private dashboardService: DashboardService, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
@@ -40,10 +42,14 @@ export class UtilityEnergyUseTableComponent implements OnInit {
         this.yearPriorLastMonth = new Date(this.utilityUsageSummaryData.allMetersLastBill.year - 1, this.utilityUsageSummaryData.allMetersLastBill.monthNumValue);
       }
     });
+    this.emissionsDisplaySub = this.dashboardService.emissionsDisplay.subscribe(val => {
+      this.emissionsDisplay = val;
+    })
   }
 
   ngOnDestroy() {
     this.utilityUsageSummaryDataSub.unsubscribe();
     this.selectedFacilitySub.unsubscribe();
+    this.emissionsDisplaySub.unsubscribe();
   }
 }
