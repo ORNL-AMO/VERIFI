@@ -163,7 +163,6 @@ export class DefaultUnitsFormComponent implements OnInit {
   }
 
   setSubRegionData() {
-    console.log('set')
     this.zipCodeSubRegionData = new Array();
     this.addCustomSubregions();
     if (this.currentZip && this.currentZip.length == 5) {
