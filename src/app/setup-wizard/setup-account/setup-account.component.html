@@ -10,15 +10,18 @@
                 </a>
             </div>
             <div class="nav-item">
-                <a class="nav-link" routerLink="/setup-wizard/account-setup/units-setup"
-                    [routerLinkActive]="['active']">
-                    <span class="badge badge-success">2</span> Units
+                <a class="nav-link" routerLink="/setup-wizard/account-setup/units-setup" [routerLinkActive]="['active']"
+                    [ngClass]="{'disabled': generalInformationInvalid}">
+                    <span class="badge" [ngClass]="getUnitsClass()">2</span>
+                    Units
                 </a>
             </div>
             <div class="nav-item">
                 <a class="nav-link" routerLink="/setup-wizard/account-setup/reporting-setup"
-                    [routerLinkActive]="['active']">
-                    <span class="badge badge-success">3</span> Reporting
+                    [routerLinkActive]="['active']" [ngClass]="{'disabled': generalInformationInvalid || unitsInvalid}">
+                    <span class="badge"
+                        [ngClass]="{'badge-danger':reportingInvalid, 'badge-success': !reportingInvalid}">3</span>
+                    Reporting
                 </a>
             </div>
         </div>

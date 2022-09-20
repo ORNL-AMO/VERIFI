@@ -3,7 +3,7 @@
     <span class="badge badge-secondary">v{{version}}</span>
 
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <div class="pl-2" *ngIf="dataInitialized">
+        <div class="pl-2" *ngIf="dataInitialized && activeAccount">
             <app-search-bar></app-search-bar>
         </div>
 
