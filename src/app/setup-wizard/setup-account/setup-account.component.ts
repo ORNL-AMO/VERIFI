@@ -4,6 +4,7 @@ import { IdbAccount } from 'src/app/models/idb';
 import { SettingsFormsService } from 'src/app/shared/settings-forms/settings-forms.service';
 import { SetupWizardService } from '../setup-wizard.service';
 import { Subscription } from 'rxjs';
+import { Router } from '@angular/router';
 @Component({
   selector: 'app-setup-account',
   templateUrl: './setup-account.component.html',
@@ -13,11 +14,12 @@ export class SetupAccountComponent implements OnInit {
 
 
   generalInformationInvalid: boolean;
-  unitsValid: boolean;
-  reportingValid: boolean;
+  unitsInvalid: boolean;
+  reportingInvalid: boolean;
+  missingEmissions: boolean;
   accountSub: Subscription
   constructor(private accountdbService: AccountdbService, private setupWizardService: SetupWizardService,
-    private settingsFormService: SettingsFormsService) { }
+    private settingsFormService: SettingsFormsService, private router: Router) { }
 
   ngOnInit(): void {
     if (this.setupWizardService.account.getValue() == undefined) {
@@ -25,24 +27,37 @@ export class SetupAccountComponent implements OnInit {
       this.setupWizardService.account.next(newAccount);
     }
 
-    // this.accountSub = this.setupWizardService.account.subscribe(val => {
-    //   this.setValidation(val);
-    // })
+    this.accountSub = this.setupWizardService.account.subscribe(val => {
+      this.setValidation(val);
+    })
   }
 
-  // ngOnDestroy() {
-  //   this.accountSub.unsubscribe();
-  // }
+  ngOnDestroy() {
+    this.accountSub.unsubscribe();
+  }
 
   setValidation(account: IdbAccount) {
-    // this.settingsFormService.getUnitsForm(account);
-    console.log(account);
+    this.unitsInvalid = this.settingsFormService.getUnitsForm(account).invalid;
+    this.reportingInvalid = this.settingsFormService.getSustainabilityQuestionsForm(account).invalid;
     this.generalInformationInvalid = this.settingsFormService.getGeneralInformationForm(account).invalid;
-    // this.settingsFormService.getSustainabilityQuestionsForm(account);
-    console.log(this.generalInformationInvalid);
+    this.missingEmissions = !account.eGridSubregion;
+    if (this.router.url.includes('information-setup')) {
+      this.setupWizardService.canContinue.next(!this.generalInformationInvalid);
+    } else if (this.router.url.includes('units-setup')) {
+      this.setupWizardService.canContinue.next(!this.unitsInvalid);
+    } else if (this.router.url.includes('reporting-setup')) {
+      this.setupWizardService.canContinue.next(!this.reportingInvalid);
+    }
+  }
 
-    let canContinue: boolean = (this.generalInformationInvalid && this.unitsValid && this.reportingValid);
-    this.setupWizardService.canContinue.next(canContinue);
+  getUnitsClass(): 'badge-danger' | 'badge-success' | 'badge-warning'{
+    let badgeClass: 'badge-danger' | 'badge-success' | 'badge-warning' = 'badge-success';
+    if(this.unitsInvalid){
+      badgeClass = 'badge-danger';
+    }else if(this.missingEmissions){
+      badgeClass = 'badge-warning';
+    }
+    return badgeClass;
   }
 
 

@@ -32,6 +32,8 @@
   }
 
 
-  .verifi:first-letter{
+  h1.verifi:first-letter{
       color: #ff6000;
   }
+
+  

@@ -94,10 +94,11 @@
         </div>
     </div>
     <div class="row">
-        <div class="col">
+        <div class="col-md-6 col-sm-12">
             <div class="form-group">
                 <label>eGRID Subregion
-                    <span (click)="showEmissionsRates()" class="float-right click-link">View Emission Rates</span>
+                    <span (click)="showEmissionsRates()" class="float-right click-link"
+                        *ngIf="zipCodeSubRegionData.length != 0">View Emission Rates</span>
                 </label>
                 <select *ngIf="zipCodeSubRegionData.length > 1" name="eGridSubregion" class="form-control"
                     id="eGridSubregion" formControlName="eGridSubregion" (change)="setSelectedSubregionEmissions()">
@@ -107,7 +108,7 @@
                     {{form.controls.eGridSubregion.value}}
                 </span>
                 <span class="alert alert-warning" *ngIf="zipCodeSubRegionData.length == 0">
-                    No subregion matching zip code
+                    No subregion matching zip code. U.S. Average will be used.
                 </span>
             </div>
         </div>

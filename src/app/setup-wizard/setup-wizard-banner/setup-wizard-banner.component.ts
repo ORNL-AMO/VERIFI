@@ -3,6 +3,7 @@ import { Subscription } from 'rxjs';
 import { HelpPanelService } from 'src/app/help-panel/help-panel.service';
 import { IdbAccount, IdbFacility } from 'src/app/models/idb';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
+import { SettingsFormsService } from 'src/app/shared/settings-forms/settings-forms.service';
 import { SetupWizardService } from '../setup-wizard.service';
 
 @Component({
@@ -18,8 +19,9 @@ export class SetupWizardBannerComponent implements OnInit {
   accountSub: Subscription;
   modalOpen: boolean;
   modalOpenSub: Subscription;
+  accountInvalid: boolean;
   constructor(private helpPanelService: HelpPanelService, private setupWizardService: SetupWizardService,
-    private sharedDataService: SharedDataService) { }
+    private sharedDataService: SharedDataService, private settingsFormService: SettingsFormsService) { }
 
   ngOnInit(): void {
     this.facilitiesSub = this.setupWizardService.facilities.subscribe(val => {
@@ -28,6 +30,9 @@ export class SetupWizardBannerComponent implements OnInit {
 
     this.accountSub = this.setupWizardService.account.subscribe(val => {
       this.account = val;
+      if(this.account){
+        this.setAccountInvalid(this.account);
+      }
     });
 
     this.modalOpenSub = this.sharedDataService.modalOpen.subscribe(val => {
@@ -35,7 +40,7 @@ export class SetupWizardBannerComponent implements OnInit {
     })
   }
 
-  ngOnDestroy(){
+  ngOnDestroy() {
     this.accountSub.unsubscribe();
     this.facilitiesSub.unsubscribe();
     this.modalOpenSub.unsubscribe();
@@ -44,5 +49,13 @@ export class SetupWizardBannerComponent implements OnInit {
   toggleHelpPanel() {
     let helpPanelOpen: boolean = this.helpPanelService.helpPanelOpen.getValue();
     this.helpPanelService.helpPanelOpen.next(!helpPanelOpen);
+  }
+
+  setAccountInvalid(account: IdbAccount) {
+    let unitsInvalid: boolean = this.settingsFormService.getUnitsForm(account).invalid;
+    let reportingInvalid: boolean = this.settingsFormService.getSustainabilityQuestionsForm(account).invalid;
+    let generalInformationInvalid: boolean = this.settingsFormService.getGeneralInformationForm(account).invalid;
+    this.accountInvalid = (unitsInvalid || reportingInvalid || generalInformationInvalid);
+
   }
 }
