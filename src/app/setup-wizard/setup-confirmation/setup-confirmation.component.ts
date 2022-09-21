@@ -11,10 +11,12 @@ export class SetupConfirmationComponent implements OnInit {
 
   account: IdbAccount;
   facilities: Array<IdbFacility>;
+  hasTemplate: boolean;
   constructor(private setupWizardService: SetupWizardService) { }
 
   ngOnInit(): void {
     this.account = this.setupWizardService.account.getValue();
     this.facilities = this.setupWizardService.facilities.getValue();
+    this.hasTemplate = this.setupWizardService.facilityTemplateWorkbook.getValue() != undefined;
   }
 }
