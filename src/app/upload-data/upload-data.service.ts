@@ -14,6 +14,10 @@ import { EditMeterFormService } from '../facility/utility-data/energy-consumptio
 import { EnergyUseCalculationsService } from '../shared/helper-services/energy-use-calculations.service';
 import { UtilityMeterGroupdbService } from '../indexedDB/utilityMeterGroup-db.service';
 import { UnitOption } from '../shared/unitOptions';
+import { Countries, Country } from '../shared/form-data/countries';
+import { EGridService, SubRegionData } from '../shared/helper-services/e-grid.service';
+import * as _ from 'lodash';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -29,7 +33,8 @@ export class UploadDataService {
     private energyUnitsHelperService: EnergyUnitsHelperService,
     private editMeterFormService: EditMeterFormService,
     private energyUseCalculationsService: EnergyUseCalculationsService,
-    private utilityMeterGroupDbService: UtilityMeterGroupdbService) {
+    private utilityMeterGroupDbService: UtilityMeterGroupdbService,
+    private eGridService: EGridService) {
     this.allFilesSet = new BehaviorSubject<boolean>(false);
     this.fileReferences = new Array();
     this.uploadMeters = new Array();
@@ -113,15 +118,27 @@ export class UploadDataService {
         facility.name = facilityName;
       }
       facility.address = facilityDataRow['Address'];
-      facility.country = facilityDataRow['Country'];
+      facility.country = this.getCountryCode(facilityDataRow['Country']);
       facility.state = facilityDataRow['State'];
       facility.city = facilityDataRow['City'];
-      facility.zip = facilityDataRow['Zip'];
+      facility.zip = facilityDataRow['Zip'].toString();
       facility.naics2 = facilityDataRow['NAICS Code 2'];
       facility.naics3 = facilityDataRow['NAICS Code 3'];
       facility.contactName = facilityDataRow['Contact Name'];
       facility.contactPhone = facilityDataRow['Contact Phone'];
       facility.contactEmail = facilityDataRow['Contact Email'];
+      if(facility.zip.length == 5) {
+        let subRegionData: SubRegionData = _.find(this.eGridService.subRegionsByZipcode, (val) => { return val.zip == facility.zip });
+        if (subRegionData) {
+          if(subRegionData.subregions.length != 0){
+            facility.eGridSubregion = subRegionData.subregions[0]
+          }
+        }
+      }
+
+
+
+
       importFacilities.push(facility);
     })
     let metersData = XLSX.utils.sheet_to_json(workbook.Sheets['Meters-Utilities']);
@@ -263,6 +280,16 @@ export class UploadDataService {
   getMeterSource(source: string): MeterSource {
     let selectedSource: MeterSource = SourceOptions.find(sourceOption => { return sourceOption == source });
     return selectedSource;
+  }
+
+  getCountryCode(country: string): string {
+    if (country) {
+      let findCountry: Country = Countries.find(countryOption => { return countryOption.name == country });
+      if (findCountry) {
+        return findCountry.code
+      }
+    }
+    return;
   }
 
 
