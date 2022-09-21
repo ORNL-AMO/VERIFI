@@ -156,7 +156,7 @@ export class DefaultUnitsFormComponent implements OnInit {
     if (this.inAccount && ((this.currentZip != this.selectedAccount.zip) || !this.selectedAccount.zip)) {
       this.currentZip = this.selectedAccount.zip;
       this.setSubRegionData();
-    } else if (!this.inAccount && ((this.currentZip != this.selectedFacility.zip) || !this.selectedAccount.zip)) {
+    } else if (!this.inAccount && ((this.currentZip != this.selectedFacility.zip) || !this.selectedFacility.zip)) {
       this.currentZip = this.selectedFacility.zip;
       this.setSubRegionData();
     }
