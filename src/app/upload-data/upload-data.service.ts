@@ -127,18 +127,14 @@ export class UploadDataService {
       facility.contactName = facilityDataRow['Contact Name'];
       facility.contactPhone = facilityDataRow['Contact Phone'];
       facility.contactEmail = facilityDataRow['Contact Email'];
-      if(facility.zip.length == 5) {
+      if (facility.zip.length == 5) {
         let subRegionData: SubRegionData = _.find(this.eGridService.subRegionsByZipcode, (val) => { return val.zip == facility.zip });
         if (subRegionData) {
-          if(subRegionData.subregions.length != 0){
+          if (subRegionData.subregions.length != 0) {
             facility.eGridSubregion = subRegionData.subregions[0]
           }
         }
       }
-
-
-
-
       importFacilities.push(facility);
     })
     let metersData = XLSX.utils.sheet_to_json(workbook.Sheets['Meters-Utilities']);
@@ -184,6 +180,7 @@ export class UploadDataService {
       meter.agreementType = this.getAgreementType(meterData['Agreement Type']);
       meter.includeInEnergy = this.getYesNoBool(meterData['Include In Energy']);
       meter.retainRECs = this.getYesNoBool(meterData['Retain RECS']);
+      meter.meterReadingDataApplication = this.getMeterReadingDataApplication(meterData['Calendarize Data?']);
       importMeters.push(meter);
     })
     //electricity readings
@@ -292,6 +289,15 @@ export class UploadDataService {
     return;
   }
 
+  getMeterReadingDataApplication(yesOrNo: 'Yes' | 'No'): 'backward' | 'fullMonth' {
+    if (yesOrNo == 'Yes') {
+      return 'backward'
+    } else if ('No') {
+      return 'fullMonth';
+    } else {
+      return;
+    }
+  }
 
   getMeterDataEntries(workbook: XLSX.WorkBook, importMeters: Array<IdbUtilityMeter>): Array<IdbUtilityMeterData> {
     //electricity readings
