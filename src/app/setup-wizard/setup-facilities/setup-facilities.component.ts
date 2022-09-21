@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { IdbFacility } from 'src/app/models/idb';
@@ -26,18 +26,25 @@ export class SetupFacilitiesComponent implements OnInit {
   unitsInvalid: boolean;
   reportingInvalid: boolean;
   missingEmissions: boolean;
+  missingEnergyReductionGoal: boolean;
+
   fileUploadError: string;
   templateSub: Subscription;
   hasTemplate: boolean;
+  unitsClass: 'badge-danger' | 'badge-success' | 'badge-warning';
+  reportingClass: 'badge-danger' | 'badge-success' | 'badge-warning';
   constructor(private setupWizardService: SetupWizardService, private sharedDataService: SharedDataService,
     private router: Router, private settingsFormService: SettingsFormsService,
-    private uploadDataService: UploadDataService) { }
+    private uploadDataService: UploadDataService,
+    private cd: ChangeDetectorRef) { }
 
   ngOnInit(): void {
     this.selectedFacilitySub = this.setupWizardService.selectedFacility.subscribe(val => {
       this.selectedFacility = val;
       if (this.selectedFacility) {
         this.setValidation(this.selectedFacility);
+        this.setUnitsClass();
+        this.setReportsClass();
       }else{
         this.setupWizardService.canContinue.next(false);
       }
@@ -45,9 +52,6 @@ export class SetupFacilitiesComponent implements OnInit {
 
     this.facilitiesSub = this.setupWizardService.facilities.subscribe(val => {
       this.facilities = val;
-      // if (this.facilities.length == 0) {
-      //   this.addFacility();
-      // }
     });
 
     this.modalOpenSub = this.sharedDataService.modalOpen.subscribe(val => {
@@ -92,6 +96,7 @@ export class SetupFacilitiesComponent implements OnInit {
     this.reportingInvalid = this.settingsFormService.getSustainabilityQuestionsForm(facility).invalid;
     this.generalInformationInvalid = this.settingsFormService.getGeneralInformationForm(facility).invalid;
     this.missingEmissions = !facility.eGridSubregion;
+    this.missingEnergyReductionGoal = !facility.sustainabilityQuestions.energyReductionGoal;
     if (this.router.url.includes('information-setup')) {
       this.setupWizardService.canContinue.next(!this.generalInformationInvalid);
     } else if (this.router.url.includes('units-setup')) {
@@ -101,14 +106,27 @@ export class SetupFacilitiesComponent implements OnInit {
     }
   }
 
-  getUnitsClass(): 'badge-danger' | 'badge-success' | 'badge-warning' {
+
+  setUnitsClass() {
     let badgeClass: 'badge-danger' | 'badge-success' | 'badge-warning' = 'badge-success';
     if (this.unitsInvalid) {
       badgeClass = 'badge-danger';
     } else if (this.missingEmissions) {
       badgeClass = 'badge-warning';
     }
-    return badgeClass;
+    this.unitsClass = badgeClass;
+    this.cd.detectChanges();
+  }
+
+  setReportsClass() {
+    let badgeClass: 'badge-danger' | 'badge-success' | 'badge-warning' = 'badge-success';
+    if (this.reportingInvalid) {
+      badgeClass = 'badge-danger';
+    } else if (this.missingEnergyReductionGoal) {
+      badgeClass = 'badge-warning';
+    }
+    this.reportingClass = badgeClass;
+    this.cd.detectChanges();
   }
 
   setImportFile(files: FileList) {

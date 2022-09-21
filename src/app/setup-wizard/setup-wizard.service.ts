@@ -32,7 +32,7 @@ export class SetupWizardService {
   addFacility(){
     let facilities: Array<IdbFacility> = this.facilities.getValue();
     let account: IdbAccount = this.account.getValue();
-    let newFacility: IdbFacility = this.facilityDbService.getNewIdbFacility(account);
+    let newFacility: IdbFacility = this.facilityDbService.getNewIdbFacility(JSON.parse(JSON.stringify(account)));
     newFacility.wizardId = Math.random().toString(36).substr(2, 9);
     newFacility.name = 'Facility ' + (facilities.length + 1);
     facilities.push(newFacility);

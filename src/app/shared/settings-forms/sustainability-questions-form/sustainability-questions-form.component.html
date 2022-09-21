@@ -3,6 +3,7 @@
     <input type="checkbox" class="rowToggle" name="energyReductionGoal" formControlName="energyReductionGoal"
         (change)="saveChanges()" id="energyReductionGoal">
     <label class="checkbox mb-3" for="energyReductionGoal">1. Do you have Energy Reduction goal? </label>
+
     <div class="row" [hidden]="!form.controls.energyReductionGoal.value">
         <div class="col-6">
             <label>Reduction Goal</label>
@@ -38,7 +39,9 @@
             </select>
         </div>
     </div>
-
+    <div class="alert alert-warning mb-2" [hidden]="form.controls.energyReductionGoal.value">
+        Energy Reduction goal needed to perform analysis.
+    </div>
     <!--Greenhouse reduction-->
     <input type="checkbox" class="rowToggle" name="greenhouseReductionGoal" formControlName="greenhouseReductionGoal"
         (change)="saveChanges()" id="greenhouseReductionGoal">
@@ -74,7 +77,8 @@
         <div class="col-6">
             <label>Target Year</label>
             <select formControlName="greenhouseReductionTargetYear" (change)="saveChanges()">
-                <option *ngFor="let year of years | yearOptions: form.controls.greenhouseReductionBaselineYear.value" [ngValue]="year">{{year}}</option>
+                <option *ngFor="let year of years | yearOptions: form.controls.greenhouseReductionBaselineYear.value"
+                    [ngValue]="year">{{year}}</option>
             </select>
         </div>
     </div>
