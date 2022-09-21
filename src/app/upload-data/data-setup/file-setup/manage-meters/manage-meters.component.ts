@@ -62,7 +62,7 @@ export class ManageMetersComponent implements OnInit {
           meter.isValid = form.valid;
         });
         this.setValidMeters();
-      }else{
+      } else {
         this.allMetersValid = true;
       }
     });
@@ -110,6 +110,7 @@ export class ManageMetersComponent implements OnInit {
 
   submitMeter() {
     this.fileReference.meters[this.editMeterIndex] = this.editMeterFormService.updateMeterFromForm(this.fileReference.meters[this.editMeterIndex], this.editMeterForm);
+    this.fileReference.meters[this.editMeterIndex].isValid = this.editMeterFormService.getFormFromMeter(this.fileReference.meters[this.editMeterIndex]).valid;
     this.fileReference.meterData = this.uploadDataService.getMeterDataEntries(this.fileReference.workbook, this.fileReference.meters);
     this.cancelEdit();
     this.setValidMeters();
@@ -172,10 +173,10 @@ export class ManageMetersComponent implements OnInit {
     this.facilityGroups = facilityGroups;
   }
 
-  setValidMeters(){
+  setValidMeters() {
     let isAllValid: boolean = true;
     this.fileReference.meters.forEach(meter => {
-      if(!meter.isValid && !meter.skipImport){
+      if (!meter.isValid && !meter.skipImport) {
         isAllValid = false;
       }
     });
