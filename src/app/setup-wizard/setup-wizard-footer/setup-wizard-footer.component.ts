@@ -28,13 +28,13 @@ export class SetupWizardFooterComponent implements OnInit {
   ngOnInit(): void {
     this.setProgress();
 
-    // this.canContinueSub = this.setupWizardService.canContinue.subscribe(val => {
-    //   this.canContinue = val;
-    // })
+    this.canContinueSub = this.setupWizardService.canContinue.subscribe(val => {
+      this.canContinue = val;
+    })
   }
 
   ngOnDestroy() {
-    // this.canContinueSub.unsubscribe();
+    this.canContinueSub.unsubscribe();
   }
 
   back() {
@@ -102,6 +102,7 @@ export class SetupWizardFooterComponent implements OnInit {
 
   setProgress() {
     if (this.router.url.includes('welcome')) {
+      this.setupWizardService.canContinue.next(true);
       this.showAddFacility = false;
       this.showSubmit = false;
       this.progressLabel = 'Welcome to VERIFI'

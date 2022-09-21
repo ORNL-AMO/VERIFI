@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { IdbFacility } from 'src/app/models/idb';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
+import { SettingsFormsService } from 'src/app/shared/settings-forms/settings-forms.service';
 import { SetupWizardService } from '../setup-wizard.service';
 
 @Component({
@@ -18,12 +19,20 @@ export class SetupFacilitiesComponent implements OnInit {
   selectedFacilitySub: Subscription
   modalOpen: boolean;
   modalOpenSub: Subscription;
+
+  generalInformationInvalid: boolean;
+  unitsInvalid: boolean;
+  reportingInvalid: boolean;
+  missingEmissions: boolean;
   constructor(private setupWizardService: SetupWizardService, private sharedDataService: SharedDataService,
-    private router: Router) { }
+    private router: Router, private settingsFormService: SettingsFormsService) { }
 
   ngOnInit(): void {
     this.selectedFacilitySub = this.setupWizardService.selectedFacility.subscribe(val => {
       this.selectedFacility = val;
+      if (this.selectedFacility) {
+        this.setValidation(this.selectedFacility);
+      }
     });
 
     this.facilitiesSub = this.setupWizardService.facilities.subscribe(val => {
@@ -58,5 +67,30 @@ export class SetupFacilitiesComponent implements OnInit {
     this.setupWizardService.selectedFacility.next(this.facilities[0]);
     this.setupWizardService.facilities.next(this.facilities);
     this.router.navigateByUrl('setup-wizard/facility-setup/information-setup');
+  }
+
+  setValidation(facility: IdbFacility) {
+    console.log('set');
+    this.unitsInvalid = this.settingsFormService.getUnitsForm(facility).invalid;
+    this.reportingInvalid = this.settingsFormService.getSustainabilityQuestionsForm(facility).invalid;
+    this.generalInformationInvalid = this.settingsFormService.getGeneralInformationForm(facility).invalid;
+    this.missingEmissions = !facility.eGridSubregion;
+    if (this.router.url.includes('information-setup')) {
+      this.setupWizardService.canContinue.next(!this.generalInformationInvalid);
+    } else if (this.router.url.includes('units-setup')) {
+      this.setupWizardService.canContinue.next(!this.unitsInvalid);
+    } else if (this.router.url.includes('reporting-setup')) {
+      this.setupWizardService.canContinue.next(!this.reportingInvalid);
+    }
+  }
+
+  getUnitsClass(): 'badge-danger' | 'badge-success' | 'badge-warning' {
+    let badgeClass: 'badge-danger' | 'badge-success' | 'badge-warning' = 'badge-success';
+    if (this.unitsInvalid) {
+      badgeClass = 'badge-danger';
+    } else if (this.missingEmissions) {
+      badgeClass = 'badge-warning';
+    }
+    return badgeClass;
   }
 }

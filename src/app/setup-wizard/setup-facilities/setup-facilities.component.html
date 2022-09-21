@@ -23,19 +23,23 @@
             <div class="nav-item">
                 <a class="nav-link" routerLink="/setup-wizard/facility-setup/information-setup"
                     [routerLinkActive]="['active']">
-                    <span class="badge badge-success">1</span> General Information
+                    <span class="badge"
+                        [ngClass]="{'badge-danger':generalInformationInvalid, 'badge-success': !generalInformationInvalid}">1</span>
+                    General Information
                 </a>
             </div>
             <div class="nav-item">
                 <a class="nav-link" routerLink="/setup-wizard/facility-setup/units-setup"
-                    [routerLinkActive]="['active']">
-                    <span class="badge badge-success">2</span> Units
+                    [routerLinkActive]="['active']" [ngClass]="{'disabled': generalInformationInvalid}">
+                    <span class="badge" [ngClass]="getUnitsClass()">2</span> Units
                 </a>
             </div>
             <div class="nav-item">
                 <a class="nav-link" routerLink="/setup-wizard/facility-setup/reporting-setup"
-                    [routerLinkActive]="['active']">
-                    <span class="badge badge-success">3</span> Reporting
+                    [routerLinkActive]="['active']" [ngClass]="{'disabled': generalInformationInvalid || unitsInvalid}">
+                    <span class="badge"
+                        [ngClass]="{'badge-danger':reportingInvalid, 'badge-success': !reportingInvalid}">3</span>
+                    Reporting
                 </a>
             </div>
         </div>

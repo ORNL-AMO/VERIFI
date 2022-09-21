@@ -172,6 +172,9 @@
                         <label>Zip</label>
                         <input type="text" class="form-control" formControlName="zip" (input)="saveChanges()"
                             autocomplete="postal-code" onfocus="this.select();" minlength="1" maxlength="12">
+                        <div class="alert alert-warning">
+                            Zip code used for electrical emissions calculations.
+                        </div>
                     </div>
                 </div>
 
