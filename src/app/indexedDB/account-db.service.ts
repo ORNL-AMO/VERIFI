@@ -107,7 +107,7 @@ export class AccountdbService {
             massUnit: 'lb',
             sustainabilityQuestions: {
                 energyReductionGoal: true,
-                energyReductionPercent: 0,
+                energyReductionPercent: 25,
                 energyReductionBaselineYear: baselineYear,
                 energyReductionTargetYear: targetYear,
                 energyIsAbsolute: true,
