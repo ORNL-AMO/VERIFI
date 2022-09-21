@@ -55,9 +55,9 @@ export class SettingsFormsService {
 
   updateFacilityFromGeneralInformationForm(form: FormGroup, facility: IdbFacility): IdbFacility {
     facility.name = form.controls.name.value;
-    if (!facility.name) {
-      facility.name = 'Facility: ' + facility.id;
-    }
+    // if (!facility.name) {
+    //   facility.name = 'Facility: ' + facility.id;
+    // }
     facility.country = form.controls.country.value;
     facility.city = form.controls.city.value;
     facility.state = form.controls.state.value;

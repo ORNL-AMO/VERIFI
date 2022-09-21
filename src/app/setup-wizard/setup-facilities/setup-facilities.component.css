@@ -35,3 +35,7 @@
     cursor: pointer;
     background-color: #efefef;
 }
+
+.disabled .badge {
+    background-color: #efefef !important;
+}
