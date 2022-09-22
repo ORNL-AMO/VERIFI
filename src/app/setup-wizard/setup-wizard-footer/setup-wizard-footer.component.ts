@@ -15,6 +15,8 @@ export class SetupWizardFooterComponent implements OnInit {
   progressLabel: string = 'Welcome';
   showSubmit: boolean;
   showAddFacility: boolean;
+  facilities: Array<IdbFacility>;
+  facilitiesSub: Subscription;
   canContinue: boolean;
   canContinueSub: Subscription;
   constructor(private router: Router, private setupWizardService: SetupWizardService) {
@@ -28,13 +30,18 @@ export class SetupWizardFooterComponent implements OnInit {
   ngOnInit(): void {
     this.setProgress();
 
-    // this.canContinueSub = this.setupWizardService.canContinue.subscribe(val => {
-    //   this.canContinue = val;
-    // })
+    this.canContinueSub = this.setupWizardService.canContinue.subscribe(val => {
+      this.canContinue = val;
+    });
+
+    this.facilitiesSub = this.setupWizardService.facilities.subscribe(val => {
+      this.facilities = val;
+    })
   }
 
   ngOnDestroy() {
-    // this.canContinueSub.unsubscribe();
+    this.canContinueSub.unsubscribe();
+    this.facilitiesSub.unsubscribe();
   }
 
   back() {
@@ -52,7 +59,7 @@ export class SetupWizardFooterComponent implements OnInit {
         let selectedFacility: IdbFacility = this.setupWizardService.selectedFacility.getValue();
         let setupFacilities: Array<IdbFacility> = this.setupWizardService.facilities.getValue();
         let facilityIndex: number = setupFacilities.findIndex(facility => { return facility.wizardId == selectedFacility.wizardId });
-        if (facilityIndex == 0) {
+        if (facilityIndex == 0 || setupFacilities.length == 0) {
           this.router.navigateByUrl('setup-wizard/account-setup/reporting-setup')
         } else {
           this.setupWizardService.selectedFacility.next(setupFacilities[facilityIndex - 1]);
@@ -81,20 +88,25 @@ export class SetupWizardFooterComponent implements OnInit {
         this.router.navigateByUrl('setup-wizard/facility-setup')
       }
     } else if (this.router.url.includes('facility-setup')) {
-      if (this.router.url.includes('information-setup')) {
-        this.router.navigateByUrl('setup-wizard/facility-setup/units-setup')
-      } else if (this.router.url.includes('units-setup')) {
-        this.router.navigateByUrl('setup-wizard/facility-setup/reporting-setup')
-      } else if (this.router.url.includes('reporting-setup')) {
+      let templateExists: boolean = this.setupWizardService.facilityTemplateWorkbook.getValue() != undefined;
+      if (templateExists) {
+        this.router.navigateByUrl('setup-wizard/confirmation')
+      } else {
+        if (this.router.url.includes('information-setup')) {
+          this.router.navigateByUrl('setup-wizard/facility-setup/units-setup')
+        } else if (this.router.url.includes('units-setup')) {
+          this.router.navigateByUrl('setup-wizard/facility-setup/reporting-setup')
+        } else if (this.router.url.includes('reporting-setup')) {
 
-        let selectedFacility: IdbFacility = this.setupWizardService.selectedFacility.getValue();
-        let setupFacilities: Array<IdbFacility> = this.setupWizardService.facilities.getValue();
-        let facilityIndex: number = setupFacilities.findIndex(facility => { return facility.wizardId == selectedFacility.wizardId });
-        if (facilityIndex == setupFacilities.length - 1) {
-          this.router.navigateByUrl('setup-wizard/confirmation')
-        } else {
-          this.setupWizardService.selectedFacility.next(setupFacilities[facilityIndex + 1]);
-          this.router.navigateByUrl('setup-wizard/facility-setup/information-setup');
+          let selectedFacility: IdbFacility = this.setupWizardService.selectedFacility.getValue();
+          let setupFacilities: Array<IdbFacility> = this.setupWizardService.facilities.getValue();
+          let facilityIndex: number = setupFacilities.findIndex(facility => { return facility.wizardId == selectedFacility.wizardId });
+          if (facilityIndex == setupFacilities.length - 1) {
+            this.router.navigateByUrl('setup-wizard/confirmation')
+          } else {
+            this.setupWizardService.selectedFacility.next(setupFacilities[facilityIndex + 1]);
+            this.router.navigateByUrl('setup-wizard/facility-setup/information-setup');
+          }
         }
       }
     }
@@ -102,6 +114,7 @@ export class SetupWizardFooterComponent implements OnInit {
 
   setProgress() {
     if (this.router.url.includes('welcome')) {
+      this.setupWizardService.canContinue.next(true);
       this.showAddFacility = false;
       this.showSubmit = false;
       this.progressLabel = 'Welcome to VERIFI'
@@ -130,5 +143,10 @@ export class SetupWizardFooterComponent implements OnInit {
 
   addfacility() {
     this.setupWizardService.addFacility();
+  }
+
+  resetFacilities() {
+    this.setupWizardService.facilities.next([]);
+    this.setupWizardService.selectedFacility.next(undefined);
   }
 }

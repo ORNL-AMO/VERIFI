@@ -11,6 +11,7 @@ import { SettingsFormsService } from '../settings-forms.service';
 import { SetupWizardService } from 'src/app/setup-wizard/setup-wizard.service';
 import { CustomEmissionsDbService } from 'src/app/indexedDB/custom-emissions-db.service';
 import { Router } from '@angular/router';
+import { SharedDataService } from '../../helper-services/shared-data.service';
 
 @Component({
   selector: 'app-default-units-form',
@@ -46,7 +47,8 @@ export class DefaultUnitsFormComponent implements OnInit {
     private eGridService: EGridService,
     private setupWizardService: SetupWizardService,
     private customEmissionsDbService: CustomEmissionsDbService,
-    private router: Router) { }
+    private router: Router,
+    private sharedDataService: SharedDataService) { }
 
   ngOnInit(): void {
     if (!this.inWizard) {
@@ -151,10 +153,10 @@ export class DefaultUnitsFormComponent implements OnInit {
   }
 
   checkCurrentZip() {
-    if (this.inAccount && this.currentZip != this.selectedAccount.zip) {
+    if (this.inAccount && ((this.currentZip != this.selectedAccount.zip) || !this.selectedAccount.zip)) {
       this.currentZip = this.selectedAccount.zip;
       this.setSubRegionData();
-    } else if (!this.inAccount && this.currentZip != this.selectedFacility.zip) {
+    } else if (!this.inAccount && ((this.currentZip != this.selectedFacility.zip) || !this.selectedFacility.zip)) {
       this.currentZip = this.selectedFacility.zip;
       this.setSubRegionData();
     }
@@ -163,7 +165,7 @@ export class DefaultUnitsFormComponent implements OnInit {
   setSubRegionData() {
     this.zipCodeSubRegionData = new Array();
     this.addCustomSubregions();
-    if (this.currentZip.length == 5) {
+    if (this.currentZip && this.currentZip.length == 5) {
       let subRegionData: SubRegionData = _.find(this.eGridService.subRegionsByZipcode, (val) => { return val.zip == this.currentZip });
       if (subRegionData) {
         subRegionData.subregions.forEach(subregion => {
@@ -194,10 +196,12 @@ export class DefaultUnitsFormComponent implements OnInit {
 
   showEmissionsRates() {
     this.openEmissionsRates = true;
+    this.sharedDataService.modalOpen.next(true);
   }
 
   closeEmissionsRates() {
     this.openEmissionsRates = false;
+    this.sharedDataService.modalOpen.next(false);
   }
 
   goToCustomData(){

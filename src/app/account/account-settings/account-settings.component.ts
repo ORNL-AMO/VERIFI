@@ -27,12 +27,12 @@ export class AccountSettingsComponent implements OnInit {
   facilityList: Array<IdbFacility> = [];
   facilityMenuOpen: number;
   showDeleteAccount: boolean;
-  facilityToEdit: IdbFacility;
   facilityToDelete: IdbFacility;
 
   selectedAccountSub: Subscription;
   accountFacilitiesSub: Subscription;
   selectedAccount: IdbAccount;
+  displayDeleteFacility: boolean;
   constructor(
     private router: Router,
     private accountDbService: AccountdbService,
@@ -139,6 +139,7 @@ export class AccountSettingsComponent implements OnInit {
   }
 
   async confirmAccountDelete() {
+    this.showDeleteAccount = false;
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
 
     this.loadingService.setLoadingStatus(true);
@@ -178,10 +179,7 @@ export class AccountSettingsComponent implements OnInit {
 
   setDeleteFacilityEntry(facility: IdbFacility) {
     this.facilityToDelete = facility;
-  }
-
-  closeEditFacility() {
-    this.facilityToEdit = undefined;
+    this.displayDeleteFacility = true;
   }
 
   editAccount() {
@@ -189,6 +187,7 @@ export class AccountSettingsComponent implements OnInit {
   }
 
   async confirmFacilityDelete() {
+    this.displayDeleteFacility = false;
     await this.facilityDelete();
     this.facilityToDelete = undefined;
   }
@@ -198,6 +197,7 @@ export class AccountSettingsComponent implements OnInit {
   }
 
   cancelFacilityDelete() {
+    this.displayDeleteFacility = false;
     this.facilityToDelete = undefined;
   }
 
