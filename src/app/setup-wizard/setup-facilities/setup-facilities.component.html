@@ -80,6 +80,9 @@
                         <div class="box h-100">
                             <input type="file" #importFile id="importFile" (input)="setImportFile($event.target.files)"
                                 accept=".xlsx">
+                            <div class="alert alert-danger" *ngIf="fileUploadError">
+                                {{fileUploadError}}
+                            </div>
                             <br>
                             <p>Upload Template Data</p>
                         </div>

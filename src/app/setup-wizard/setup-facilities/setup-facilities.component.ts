@@ -144,6 +144,7 @@ export class SetupFacilitiesComponent implements OnInit {
               if (!isTemplate) {
                 this.fileUploadError = 'File selected is not a VERIFI template. Please upload template file.'
               }else{
+                this.fileUploadError = undefined;
                 this.setupWizardService.facilityTemplateWorkbook.next(workBook);
               }
             };
