@@ -112,8 +112,8 @@ export class FacilitydbService {
             energyIsSource: account.energyIsSource,
             contactName: undefined,
             contactEmail: undefined,
-            contactPhone: undefined
-
+            contactPhone: undefined,
+            facilityOrder: undefined
         }
     }
 
