@@ -9,17 +9,17 @@ import * as _ from 'lodash';
 export class FacilityListPipe implements PipeTransform {
 
   transform(facilityList: Array<FacilityListItem>, showAll?: boolean): Array<FacilityListItem> {
+    let orderedList: Array<FacilityListItem> = _.orderBy(facilityList, (facilityListItem: FacilityListItem) => {
+      return facilityListItem.facilityOrder;
+    }, ['asc']);
     if (facilityList.length > 4) {
-      let orderedList: Array<FacilityListItem> = _.orderBy(facilityList, (facilityListItem: FacilityListItem) => {
-          return facilityListItem.facilityOrder;
-      }, ['asc']);
       if (!showAll) {
         return orderedList.splice(0, 4)
       } else {
         return orderedList;
       }
     } else {
-      return facilityList;
+      return orderedList;
     }
   }
 
