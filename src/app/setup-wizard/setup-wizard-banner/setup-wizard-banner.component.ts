@@ -20,6 +20,8 @@ export class SetupWizardBannerComponent implements OnInit {
   modalOpen: boolean;
   modalOpenSub: Subscription;
   accountInvalid: boolean;
+  facilityTemplateAdded: boolean;
+  facilityTemplateSub: Subscription;
   constructor(private helpPanelService: HelpPanelService, private setupWizardService: SetupWizardService,
     private sharedDataService: SharedDataService, private settingsFormService: SettingsFormsService) { }
 
@@ -37,6 +39,10 @@ export class SetupWizardBannerComponent implements OnInit {
 
     this.modalOpenSub = this.sharedDataService.modalOpen.subscribe(val => {
       this.modalOpen = val;
+    });
+
+    this.facilityTemplateSub = this.setupWizardService.facilityTemplateWorkbook.subscribe(val => {
+      this.facilityTemplateAdded = (val != undefined);
     })
   }
 
@@ -44,6 +50,7 @@ export class SetupWizardBannerComponent implements OnInit {
     this.accountSub.unsubscribe();
     this.facilitiesSub.unsubscribe();
     this.modalOpenSub.unsubscribe();
+    this.facilityTemplateSub.unsubscribe();
   }
 
   toggleHelpPanel() {

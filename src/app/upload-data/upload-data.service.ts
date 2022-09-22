@@ -73,7 +73,7 @@ export class UploadDataService {
       // let meterFacilityGroups: Array<FacilityGroup> = this.getMeterFacilityGroups(templateData);
       let predictorFacilityGroups: Array<FacilityGroup> = this.getPredictorFacilityGroups(templateData);
       return {
-        name: file.name,
+        name: file?.name,
         file: file,
         dataSubmitted: false,
         id: Math.random().toString(36).substr(2, 9),

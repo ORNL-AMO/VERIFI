@@ -98,7 +98,7 @@
     </div>
 </div>
 
-<div class="popup" [class.open]="showDeleteAccount" *ngIf="selectedAccount">
+<div class="popup" [class.open]="showDeleteAccount" *ngIf="showDeleteAccount">
     <div class="popup-header">Delete Account: {{selectedAccount.name}}
         <button class="item-right" (click)="cancelAccountDelete()">x</button>
     </div>
@@ -112,7 +112,7 @@
     </div>
 </div>
 
-<div class="popup" [class.open]="facilityToDelete" *ngIf="facilityToDelete">
+<div class="popup" [class.open]="displayDeleteFacility" *ngIf="displayDeleteFacility">
     <div class="popup-header">Delete Facility: {{facilityToDelete.name}}
         <button class="item-right" (click)="cancelFacilityDelete()">x</button>
     </div>

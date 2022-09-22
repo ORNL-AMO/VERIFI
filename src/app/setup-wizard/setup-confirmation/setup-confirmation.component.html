@@ -13,48 +13,50 @@
                     Units
                 </th>
                 <th>
-                    Sustainability Questions
-                </th>
-                <th>
                     Reporting
                 </th>
             </tr>
         </thead>
         <tbody>
-            <tr>
+            <tr *ngFor="let summary of setupSummaries">
                 <td>
-                    Account: {{account.name}}
+                    {{summary.label}}
                 </td>
                 <td>
-                    <span class="fa fa-check"></span>
+                    <span *ngIf="summary.generalInformationValid && summary.generalInformationErrors.length == 0"
+                        class="fa fa-check"></span>
+                    <span class="alert alert-warning p-0" *ngFor="let error of summary.generalInformationErrors">
+                        {{error}}
+                        <br>
+                    </span>
                 </td>
                 <td>
-                    <span class="fa fa-check"></span>
+                    <span *ngIf="summary.unitsValid && summary.unitsErrors.length == 0" class="fa fa-check"></span>
+                    <span class="alert alert-warning p-0" *ngFor="let error of summary.unitsErrors">
+                        {{error}}
+                        <br>
+                    </span>
                 </td>
                 <td>
-                    <span class="fa fa-check"></span>
-                </td>
-                <td>
-                    <span class="fa fa-check"></span>
-                </td>
-            </tr>
-            <tr *ngFor="let facility of facilities">
-                <td>
-                    Facility: {{facility.name}}
-                </td>
-                <td>
-                    <span class="fa fa-check"></span>
-                </td>
-                <td>
-                    <span class="fa fa-check"></span>
-                </td>
-                <td>
-                    <span class="fa fa-check"></span>
-                </td>
-                <td>
-                    <span class="fa fa-check"></span>
+                    <span *ngIf="summary.reportingValid && summary.reportingErrors.length == 0"
+                        class="fa fa-check"></span>
+                    <span class="alert alert-warning p-0" *ngFor="let error of summary.reportingErrors">
+                        {{error}}
+                        <br>
+                    </span>
                 </td>
             </tr>
         </tbody>
     </table>
+    <div class="row justify-content-center" *ngIf="hasTemplate">
+        <div class="col-12">
+            <hr>
+        </div>
+        <div class="col-8">
+            <div class="alert alert-info text-center">
+                Facility template file found. You will be brought to the upload data page upon the creation of this
+                account.
+            </div>
+        </div>
+    </div>
 </div>

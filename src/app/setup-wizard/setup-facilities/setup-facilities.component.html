@@ -1,55 +1,119 @@
-<div class="banner sticky-top d-flex justify-content-between pb-0" [ngClass]="{'modal-open': modalOpen}">
-    <div>
-        <ul class="nav nav-tabs sticky-top">
-            <li class="nav-item" *ngFor="let facility of facilities"
-                [ngClass]="{'active': facility.wizardId == selectedFacility.wizardId}"><a class="nav-link"
-                    (click)="selectFacility(facility)">{{facility.name}}</a>
-            </li>
-        </ul>
-    </div>
-
-    <div>
-        <ul class="nav nav-tabs sticky-top">
-            <li class="nav-item">
-                <a class="nav-link" (click)="addFacility()">+Add Another Facility
-                </a>
-            </li>
-        </ul>
-    </div>
-</div>
-<div class="wrapper">
-    <div class="d-flex w-100">
-        <div class="d-flex flex-column p-2 nav page-sidebar">
-            <div class="nav-item">
-                <a class="nav-link" routerLink="/setup-wizard/facility-setup/information-setup"
-                    [routerLinkActive]="['active']">
-                    <span class="badge"
-                        [ngClass]="{'badge-danger':generalInformationInvalid, 'badge-success': !generalInformationInvalid}">1</span>
-                    General Information
-                </a>
-            </div>
-            <div class="nav-item">
-                <a class="nav-link" routerLink="/setup-wizard/facility-setup/units-setup"
-                    [routerLinkActive]="['active']" [ngClass]="{'disabled': generalInformationInvalid}">
-                    <span class="badge" [ngClass]="getUnitsClass()">2</span> Units
-                </a>
-            </div>
-            <div class="nav-item">
-                <a class="nav-link" routerLink="/setup-wizard/facility-setup/reporting-setup"
-                    [routerLinkActive]="['active']" [ngClass]="{'disabled': generalInformationInvalid || unitsInvalid}">
-                    <span class="badge"
-                        [ngClass]="{'badge-danger':reportingInvalid, 'badge-success': !reportingInvalid}">3</span>
-                    Reporting
-                </a>
-            </div>
+<ng-container *ngIf="facilities && facilities.length != 0 && !hasTemplate">
+    <div class="banner sticky-top d-flex justify-content-between pb-0" [ngClass]="{'modal-open': modalOpen}">
+        <div>
+            <ul class="nav nav-tabs sticky-top">
+                <li class="nav-item" *ngFor="let facility of facilities"
+                    [ngClass]="{'active': facility.wizardId == selectedFacility.wizardId}"><a class="nav-link"
+                        (click)="selectFacility(facility)">{{facility.name}}</a>
+                </li>
+            </ul>
         </div>
-        <div class="flex-fill pt-2 pl-4 pr-4 pb-4">
-            <div class="d-flex w-100 justify-content-end">
-                <div *ngIf="facilities.length > 1">
-                    <button class="btn btn-sm btn-danger" (click)="deleteFacility()">Delete Facility</button>
+
+        <div>
+            <ul class="nav nav-tabs sticky-top">
+                <li class="nav-item">
+                    <a class="nav-link" (click)="addFacility()">+Add Another Facility
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="wrapper">
+        <div class="d-flex w-100">
+            <div class="d-flex flex-column p-2 nav page-sidebar">
+                <div class="nav-item">
+                    <a class="nav-link" routerLink="/setup-wizard/facility-setup/information-setup"
+                        [routerLinkActive]="['active']">
+                        <span class="badge"
+                            [ngClass]="{'badge-danger':generalInformationInvalid, 'badge-success': !generalInformationInvalid}">1</span>
+                        General Information
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a class="nav-link" routerLink="/setup-wizard/facility-setup/units-setup"
+                        [routerLinkActive]="['active']" [ngClass]="{'disabled': generalInformationInvalid}">
+                        <span class="badge" [ngClass]="unitsClass">2</span> Units
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a class="nav-link" routerLink="/setup-wizard/facility-setup/reporting-setup"
+                        [routerLinkActive]="['active']"
+                        [ngClass]="{'disabled': generalInformationInvalid || unitsInvalid}">
+                        <span class="badge" [ngClass]="reportingClass">3</span>
+                        Reporting
+                    </a>
                 </div>
             </div>
-            <router-outlet></router-outlet>
+            <div class="flex-fill pt-2 pl-4 pr-4 pb-4">
+                <div class="d-flex w-100 justify-content-end">
+                    <div *ngIf="facilities.length > 1">
+                        <button class="btn btn-sm btn-danger" (click)="deleteFacility()">Delete Facility</button>
+                    </div>
+                </div>
+                <router-outlet></router-outlet>
+            </div>
         </div>
     </div>
-</div>
+</ng-container>
+
+<ng-container *ngIf="facilities && facilities.length == 0">
+
+    <div class="options wrapper main-content h-100">
+        <div class="empty-state text-center">
+            <div class="d-flex justify-content-center">
+                <h1>Select Facility Setup Method </h1>
+            </div>
+            <p>Facilities can either be added manually or our excel template can be used to upload facilities and data
+                all at once.</p>
+            <br>
+
+            <ng-container *ngIf="!hasTemplate">
+                <div class="row justify-content-center">
+                    <div class="col-3">
+                        <div class="box h-100 select-box" (click)="addFacility()">
+                            <span class="fa fa-file-edit"></span>
+                            <br>
+                            <p>Add Facilities Manually</p>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="box h-100">
+                            <input type="file" #importFile id="importFile" (input)="setImportFile($event.target.files)"
+                                accept=".xlsx">
+                            <div class="alert alert-danger" *ngIf="fileUploadError">
+                                {{fileUploadError}}
+                            </div>
+                            <br>
+                            <p>Upload Template Data</p>
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <hr>
+
+                <div class="text-center loadData box">An excel tamplate can be used to make uploading your data easier,
+                    use
+                    this link to download the template:<br>
+                    <a href="assets/csv_templates/VERIFI-Import-Data.xlsx">Download Data Template</a>
+                </div>
+            </ng-container>
+            <ng-container *ngIf="hasTemplate">
+                <div class="row justify-content-center">
+                    <div class="col-3">
+                        <div class="box h-100">
+                            <span class="fa fa-file-circle-check"></span>
+                            <p>Facilities will be add from template file!</p>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                <div class="row justify-content-center">
+                    <div class="col-3">
+                        <button class="btn btn-danger" (click)="resetOption()">Choose Different Method</button>
+                    </div>
+                </div>
+
+            </ng-container>
+        </div>
+    </div>
+</ng-container>

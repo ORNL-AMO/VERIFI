@@ -8,6 +8,8 @@ import { IdbAccount, IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
 import { ToastNotificationsService } from '../core-components/toast-notifications/toast-notifications.service';
 import { DbChangesService } from '../indexedDB/db-changes.service';
 import { SetupWizardService } from './setup-wizard.service';
+import * as XLSX from 'xlsx';
+import { FileReference, UploadDataService } from '../upload-data/upload-data.service';
 
 @Component({
   selector: 'app-setup-wizard',
@@ -31,7 +33,8 @@ export class SetupWizardComponent implements OnInit {
     private loadingService: LoadingService,
     private setupWizardService: SetupWizardService,
     private toastNotificationService: ToastNotificationsService,
-    private dbChangesService: DbChangesService
+    private dbChangesService: DbChangesService,
+    private uploadDataService: UploadDataService
   ) { }
 
   ngOnInit(): void {
@@ -54,23 +57,41 @@ export class SetupWizardComponent implements OnInit {
     this.loadingService.setLoadingStatus(true);
     let account: IdbAccount = this.setupWizardService.account.getValue();
     account = await this.accountdbService.addWithObservable(account).toPromise();
-    let facilities: Array<IdbFacility> = this.setupWizardService.facilities.getValue();
-    this.loadingService.setLoadingMessage("Creating Facilities...");
-    let newFacility: IdbFacility;
-    for (let i = 0; i < facilities.length; i++) {
-      let facility: IdbFacility = facilities[i];
-      facility.accountId = account.guid;
-      facility = await this.facilityDbService.addWithObservable(facility).toPromise();
-      if (i == 0) {
-        newFacility = facility;
+
+    let workbook: XLSX.WorkBook = this.setupWizardService.facilityTemplateWorkbook.getValue();
+    if (workbook) {
+      this.loadingService.setLoadingMessage("Parsing Template Data...")
+      let allAccounts: Array<IdbAccount> = await this.accountdbService.getAll().toPromise();
+      this.accountdbService.allAccounts.next(allAccounts);
+      await this.dbChangesService.selectAccount(account);
+      let fileReference: FileReference = this.uploadDataService.getFileReference(undefined, workbook);
+      this.uploadDataService.fileReferences = [fileReference];
+      this.loadingService.setLoadingStatus(false);
+      this.toastNotificationService.showToast("Account Created!", "Use the upload data wizard to finish uploading facility data!", 10000, false, "success", true);
+      this.router.navigateByUrl('upload/data-setup/file-setup/' + fileReference.id + '/template-facilities');
+
+    } else {
+      let facilities: Array<IdbFacility> = this.setupWizardService.facilities.getValue();
+      this.loadingService.setLoadingMessage("Creating Facilities...");
+      let newFacility: IdbFacility;
+      for (let i = 0; i < facilities.length; i++) {
+        let facility: IdbFacility = facilities[i];
+        facility.accountId = account.guid;
+        facility = await this.facilityDbService.addWithObservable(facility).toPromise();
+        if (i == 0) {
+          newFacility = facility;
+        }
       }
+      this.loadingService.setLoadingMessage("Finishing up...");
+      let allAccounts: Array<IdbAccount> = await this.accountdbService.getAll().toPromise();
+      this.accountdbService.allAccounts.next(allAccounts);
+      await this.dbChangesService.selectAccount(account);
+      this.loadingService.setLoadingStatus(false);
+      this.toastNotificationService.showToast("Account and Facilities Created!", "You can now add utility data to your facilities for analysis!", 10000, false, "success", true);
+      this.router.navigateByUrl('facility/' + newFacility.id + '/utility');
     }
-    this.loadingService.setLoadingMessage("Finishing up...");
-    let allAccounts: Array<IdbAccount> = await this.accountdbService.getAll().toPromise();
-    this.accountdbService.allAccounts.next(allAccounts);
-    await this.dbChangesService.selectAccount(account);
-    this.loadingService.setLoadingStatus(false);
-    this.toastNotificationService.showToast("Account and Facilities Created!", "You can now add utility data to your facilities for analysis!", 10000, false, "success", true);
-    this.router.navigateByUrl('facility/' + newFacility.id + '/utility');
+
+
+
   }
 }

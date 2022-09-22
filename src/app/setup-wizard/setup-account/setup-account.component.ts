@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idb';
 import { SettingsFormsService } from 'src/app/shared/settings-forms/settings-forms.service';
@@ -17,9 +17,12 @@ export class SetupAccountComponent implements OnInit {
   unitsInvalid: boolean;
   reportingInvalid: boolean;
   missingEmissions: boolean;
-  accountSub: Subscription
+  missingEnergyReductionGoal: boolean;
+  accountSub: Subscription;
+  unitsClass: 'badge-danger' | 'badge-success' | 'badge-warning';
+  reportingClass: 'badge-danger' | 'badge-success' | 'badge-warning';
   constructor(private accountdbService: AccountdbService, private setupWizardService: SetupWizardService,
-    private settingsFormService: SettingsFormsService, private router: Router) { }
+    private settingsFormService: SettingsFormsService, private router: Router, private cd: ChangeDetectorRef) { }
 
   ngOnInit(): void {
     if (this.setupWizardService.account.getValue() == undefined) {
@@ -29,6 +32,9 @@ export class SetupAccountComponent implements OnInit {
 
     this.accountSub = this.setupWizardService.account.subscribe(val => {
       this.setValidation(val);
+      this.setUnitsClass();
+      this.setReportsClass();
+
     })
   }
 
@@ -41,6 +47,7 @@ export class SetupAccountComponent implements OnInit {
     this.reportingInvalid = this.settingsFormService.getSustainabilityQuestionsForm(account).invalid;
     this.generalInformationInvalid = this.settingsFormService.getGeneralInformationForm(account).invalid;
     this.missingEmissions = !account.eGridSubregion;
+    this.missingEnergyReductionGoal = !account.sustainabilityQuestions.energyReductionGoal;
     if (this.router.url.includes('information-setup')) {
       this.setupWizardService.canContinue.next(!this.generalInformationInvalid);
     } else if (this.router.url.includes('units-setup')) {
@@ -50,14 +57,26 @@ export class SetupAccountComponent implements OnInit {
     }
   }
 
-  getUnitsClass(): 'badge-danger' | 'badge-success' | 'badge-warning'{
+  setUnitsClass() {
     let badgeClass: 'badge-danger' | 'badge-success' | 'badge-warning' = 'badge-success';
-    if(this.unitsInvalid){
+    if (this.unitsInvalid) {
       badgeClass = 'badge-danger';
-    }else if(this.missingEmissions){
+    } else if (this.missingEmissions) {
       badgeClass = 'badge-warning';
     }
-    return badgeClass;
+    this.unitsClass = badgeClass;
+    this.cd.detectChanges();
+  }
+
+  setReportsClass() {
+    let badgeClass: 'badge-danger' | 'badge-success' | 'badge-warning' = 'badge-success';
+    if (this.reportingInvalid) {
+      badgeClass = 'badge-danger';
+    } else if (this.missingEnergyReductionGoal) {
+      badgeClass = 'badge-warning';
+    }
+    this.reportingClass = badgeClass;
+    this.cd.detectChanges();
   }
 
 

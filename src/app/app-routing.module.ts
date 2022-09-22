@@ -76,7 +76,6 @@ import { ConfirmPredictorsComponent } from './upload-data/data-setup/file-setup/
 import { ConfirmAndSubmitComponent } from './upload-data/data-setup/file-setup/confirm-and-submit/confirm-and-submit.component';
 import { CorporateInformationSetupComponent } from './setup-wizard/setup-account/corporate-information-setup/corporate-information-setup.component';
 import { CorporateUnitsSetupComponent } from './setup-wizard/setup-account/corporate-units-setup/corporate-units-setup.component';
-import { CorporateQuestionsSetupComponent } from './setup-wizard/setup-account/corporate-questions-setup/corporate-questions-setup.component';
 import { CorporateReportingSetupComponent } from './setup-wizard/setup-account/corporate-reporting-setup/corporate-reporting-setup.component';
 import { FacilityInformationSetupComponent } from './setup-wizard/setup-facilities/facility-information-setup/facility-information-setup.component';
 import { FacilityUnitsSetupComponent } from './setup-wizard/setup-facilities/facility-units-setup/facility-units-setup.component';
@@ -312,7 +311,6 @@ const routes: Routes = [
           { path: '', pathMatch: 'full', redirectTo: 'information-setup' },
           { path: 'information-setup', component: FacilityInformationSetupComponent },
           { path: 'units-setup', component: FacilityUnitsSetupComponent },
-          // { path: 'questions-setup', component: CorporateQuestionsSetupComponent },
           { path: 'reporting-setup', component: FacilityReportingSetupComponent },
 
         ]
