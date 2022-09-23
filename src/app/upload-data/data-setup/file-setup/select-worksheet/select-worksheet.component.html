@@ -9,16 +9,18 @@
 <hr>
 <div class="row">
     <div class="col-6">
-        <label for="worksheetName">Select Worksheet</label>
+        <app-label-with-tooltip [field]="'selectWorksheet'" [label]="'Select Worksheet'" [isBold]="true"
+            [labelId]="'worksheetName'"></app-label-with-tooltip>
         <select class="form-control" name="worksheetName" [(ngModel)]="fileReference.selectedWorksheetName"
-            (change)="setSelectedWorksheetName()">
+            (change)="setSelectedWorksheetName()" id="worksheetName">
             <option class="form-control" *ngFor="let name of fileReference.workbook?.SheetNames" [ngValue]="name">
                 {{name}}
             </option>
         </select>
     </div>
     <div class="col-6">
-        <label for="selectedFacilityId">Select Import Facility</label>
+        <app-label-with-tooltip [field]="'selectImportFacility'" [label]="'Select Import Facility'" [isBold]="true"
+            [labelId]="'selectedFacilityId'"></app-label-with-tooltip>
         <select class="form-control" name="selectedFacilityId" [(ngModel)]="fileReference.selectedFacilityId"
             (change)="setImportFacility()">
             <option class="form-control" [ngValue]="undefined">
