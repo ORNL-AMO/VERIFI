@@ -11,9 +11,7 @@ describe('UploadDataHelpComponent', () => {
       declarations: [ UploadDataHelpComponent ]
     })
     .compileComponents();
-  });
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(UploadDataHelpComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

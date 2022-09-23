@@ -13,7 +13,6 @@ import { AccountOverviewHelpComponent } from './dashboard/account-overview-help/
 import { FacilityOverviewHelpComponent } from './dashboard/facility-overview-help/facility-overview-help.component';
 import { MeterGroupingHelpComponent } from './utility/meter-grouping-help/meter-grouping-help.component';
 import { CalanderizationHelpComponent } from './utility/calanderization-help/calanderization-help.component';
-import { UploadDataHelpComponent } from './utility/upload-data-help/upload-data-help.component';
 import { PredictorsDataHelpComponent } from './utility/predictors-data-help/predictors-data-help.component';
 import { VisualizationHelpComponent } from './utility/visualization-help/visualization-help.component';
 import { AccountHelpComponent } from './account-management/account-help/account-help.component';
@@ -23,6 +22,7 @@ import { AnalysisDashboardHelpComponent } from './analysis/analysis-dashboard-he
 import { HelpPageComponent } from './help-page/help-page.component';
 import { AccountAnalysisDashboardHelpComponent } from './analysis/account-analysis-dashboard-help/account-analysis-dashboard-help.component';
 import { AccountAnalysisSetupHelpComponent } from './analysis/account-analysis-setup-help/account-analysis-setup-help.component';
+import { UploadDataHelpModule } from './upload-data-help/upload-data-help.module';
 
 @NgModule({
   declarations: [
@@ -39,7 +39,6 @@ import { AccountAnalysisSetupHelpComponent } from './analysis/account-analysis-s
     FacilityOverviewHelpComponent,
     MeterGroupingHelpComponent,
     CalanderizationHelpComponent,
-    UploadDataHelpComponent,
     PredictorsDataHelpComponent,
     VisualizationHelpComponent,
     AccountHelpComponent,
@@ -48,10 +47,11 @@ import { AccountAnalysisSetupHelpComponent } from './analysis/account-analysis-s
     AnalysisDashboardHelpComponent,
     HelpPageComponent,
     AccountAnalysisDashboardHelpComponent,
-    AccountAnalysisSetupHelpComponent
+    AccountAnalysisSetupHelpComponent,
   ],
   imports: [
-    CommonModule
+    CommonModule,
+    UploadDataHelpModule
   ],
   exports: [
     HelpPanelComponent
