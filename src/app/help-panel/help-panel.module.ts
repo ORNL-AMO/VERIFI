@@ -23,7 +23,7 @@ import { HelpPageComponent } from './help-page/help-page.component';
 import { AccountAnalysisDashboardHelpComponent } from './analysis/account-analysis-dashboard-help/account-analysis-dashboard-help.component';
 import { AccountAnalysisSetupHelpComponent } from './analysis/account-analysis-setup-help/account-analysis-setup-help.component';
 import { UploadDataHelpModule } from './upload-data-help/upload-data-help.module';
-
+import { SetupWizardHelpModule } from './setup-wizard-help/setup-wizard-help.module';
 @NgModule({
   declarations: [
     BasicReportHelpComponent,
@@ -51,7 +51,8 @@ import { UploadDataHelpModule } from './upload-data-help/upload-data-help.module
   ],
   imports: [
     CommonModule,
-    UploadDataHelpModule
+    UploadDataHelpModule,
+    SetupWizardHelpModule
   ],
   exports: [
     HelpPanelComponent
