@@ -1,0 +1,7 @@
+<h4>Account Setup</h4>
+<p>Follow the steps to create a new account.</p>
+<hr>
+<app-welcome-help *ngIf="helpURL == 'welcome'"></app-welcome-help>
+<app-account-setup-help *ngIf="helpURL == 'account-setup'"></app-account-setup-help>
+<app-facility-setup-help *ngIf="helpURL == 'facility-setup'"></app-facility-setup-help>
+<app-confirm-new-account-help *ngIf="helpURL == 'confirmation'"></app-confirm-new-account-help>

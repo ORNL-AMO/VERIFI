@@ -40,7 +40,8 @@ export class HelpPanelComponent implements OnInit {
 
   setHelpURL(url: string) {
     let componentOptions: Array<string> = [
-      'upload'
+      'upload',
+      'setup-wizard'
     ]
     this.helpURL = componentOptions.find(option => {
       return url.includes(option);
