@@ -11,7 +11,7 @@ import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-
 })
 export class MeterReadingsReportComponent implements OnInit {
   @Input()
-  facility: IdbFacility;
+  facility: {facilityId: string, selected: boolean};
 
   meterReadingsData: Array<{
     meter: IdbUtilityMeter,
@@ -25,7 +25,7 @@ export class MeterReadingsReportComponent implements OnInit {
   ngOnInit(): void {
     this.meterReadingsData = new Array();
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == this.facility.guid });
+    let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == this.facility.facilityId });
     facilityMeters.forEach(meter => {
       let meterReadings: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataForFacility(meter, false, true);
       let showVolumeColumn: boolean = meterReadings.find(reading => {return reading.totalVolume != 0 && reading.totalVolume != undefined}) != undefined;

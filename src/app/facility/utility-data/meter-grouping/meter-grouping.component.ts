@@ -161,7 +161,7 @@ export class MeterGroupingComponent implements OnInit {
     this.groupToDelete = undefined;
   }
 
-  async drop(event: CdkDragDrop<string[]>) {
+  async drop(event: CdkDragDrop<IdbUtilityMeterGroup[]>) {
     let draggedMeter: IdbUtilityMeter = this.facilityMeters.find(meter => { return meter.id == event.item.data.id });
     let group: IdbUtilityMeterGroup = this.facilityMeterGroups.find(group => { return group.id == Number(event.container.id) })
     draggedMeter.groupId = group.guid;

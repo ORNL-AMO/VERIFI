@@ -5,7 +5,7 @@
         files have been selected we will work through parsing out the relevant data into the correct places.
     </div>
     <hr>
-    <input type="file" #importFile id="importFile" (input)="setImportFile($event.target.files)" multiple accept=".xlsx">
+    <input type="file" #importFile id="importFile" (input)="setImportFile($event.target)" multiple accept=".xlsx">
     <div *ngIf="fileReferences.length != 0">
         <hr>
         <table class="table table-hover">

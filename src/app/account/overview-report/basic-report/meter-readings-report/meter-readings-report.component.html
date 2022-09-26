@@ -1,5 +1,5 @@
 <div *ngFor="let readingData of meterReadingsData">
-    <label class="section-label">Facilty: {{facility.name}}</label><br>
+    <label class="section-label">Facilty: {{facility.facilityId | facilityName}}</label><br>
     <label class="section-label">Meter: {{readingData.meter.name}}</label>
     <table class="table table-sm" [ngClass]="{'four-columns': readingData.showVolumeColumn && readingData.showEnergyColumn}">
         <thead>

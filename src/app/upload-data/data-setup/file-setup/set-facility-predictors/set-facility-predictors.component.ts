@@ -89,7 +89,7 @@ export class SetFacilityPredictorsComponent implements OnInit {
     this.fileReference.predictorFacilityGroups = facilityGroups;
   }
 
-  dropColumn(dropData: CdkDragDrop<string[]>) {
+  dropColumn(dropData: CdkDragDrop<FacilityGroup[]>) {
     this.fileReference.predictorFacilityGroups.forEach(group => {
       if (group.facilityId == dropData.previousContainer.id) {
         //remove
