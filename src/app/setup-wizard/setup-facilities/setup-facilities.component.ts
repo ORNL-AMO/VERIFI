@@ -129,7 +129,8 @@ export class SetupFacilitiesComponent implements OnInit {
     this.cd.detectChanges();
   }
 
-  setImportFile(files: FileList) {
+  setImportFile(event: EventTarget) {
+    let files: FileList = (event as HTMLInputElement).files;
     if (files) {
       if (files.length !== 0) {
         let regex3 = /.xlsx$/;

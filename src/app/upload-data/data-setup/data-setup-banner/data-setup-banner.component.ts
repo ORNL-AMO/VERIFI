@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
-import { UploadDataService } from '../../upload-data.service';
+import { FileReference, UploadDataService } from '../../upload-data.service';
 
 @Component({
   selector: 'app-data-setup-banner',
@@ -10,11 +10,7 @@ import { UploadDataService } from '../../upload-data.service';
 })
 export class DataSetupBannerComponent implements OnInit {
 
-  fileReferences: Array<{
-    name: string,
-    // type: '.csv' | '.xlsx',
-    file: any
-  }>;
+  fileReferences: Array<FileReference>;
   modalOpen: boolean;
   modalOpenSub: Subscription;
   constructor(private uploadDataService: UploadDataService, private sharedDataService: SharedDataService) { }

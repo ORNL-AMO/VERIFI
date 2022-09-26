@@ -103,7 +103,7 @@ export class SetFacilityMetersComponent implements OnInit {
     this.fileReference.meterFacilityGroups = facilityGroups;
   }
 
-  dropColumn(dropData: CdkDragDrop<string[]>) {
+  dropColumn(dropData: CdkDragDrop<FacilityGroup[]>) {
     this.fileReference.meterFacilityGroups.forEach(group => {
       if (group.facilityId == dropData.previousContainer.id) {
         //remove

@@ -4,7 +4,7 @@
     </div>
     <div class="popup-body">
         <p>Select backup .json file you previously exported from VERIFI application.</p>
-        <input type="file" #importFile id="importFile" (input)="setImportFile($event.target.files)" accept=".json">
+        <input type="file" #importFile id="importFile" (input)="setImportFile($event.target)" accept=".json">
         <p class="alert alert-danger" *ngIf="backupFileError">
             {{backupFileError}}
         </p>
