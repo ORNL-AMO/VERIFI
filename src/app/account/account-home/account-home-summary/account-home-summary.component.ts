@@ -32,6 +32,8 @@ export class AccountHomeSummaryComponent implements OnInit {
 
   overviewReportOptionsSub: Subscription;
   disableButtons: boolean;
+
+  percentSavingsSub: Subscription;
   constructor(private accountDbService: AccountdbService, private accountHomeService: AccountHomeService,
     private overviewReportOptionsDbService: OverviewReportOptionsDbService, private router: Router,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
@@ -47,7 +49,7 @@ export class AccountHomeSummaryComponent implements OnInit {
       this.latestAnalysisSummary = val;
       if (this.latestAnalysisSummary) {
         this.accountAnalysisYear = this.latestAnalysisSummary.year;
-        this.setProgressPercentages();
+        // this.setProgressPercentages();
       } else {
         this.accountAnalysisYear = undefined;
       }
@@ -61,6 +63,11 @@ export class AccountHomeSummaryComponent implements OnInit {
       } else {
         this.betterPlantsReportYear = undefined;
       }
+    });
+
+    this.percentSavingsSub = this.accountHomeService.percentSavings.subscribe(val => {
+      console.log('set');
+      this.setProgressPercentages(val);
     })
   }
 
@@ -68,10 +75,11 @@ export class AccountHomeSummaryComponent implements OnInit {
     this.accountSub.unsubscribe();
     this.latestSummarySub.unsubscribe();
     this.overviewReportOptionsSub.unsubscribe();
+    this.percentSavingsSub.unsubscribe();
   }
 
-  setProgressPercentages() {
-    this.percentSavings = this.latestAnalysisSummary.totalSavingsPercentImprovement;
+  setProgressPercentages(percentSavings: number) {
+    this.percentSavings = percentSavings;
     this.percentGoal = this.account.sustainabilityQuestions.energyReductionPercent;
     this.goalYear = this.account.sustainabilityQuestions.energyReductionTargetYear;
     this.baselineYear = this.account.sustainabilityQuestions.energyReductionBaselineYear;
