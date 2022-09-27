@@ -61,7 +61,7 @@ export class FacilitydbService {
     }
 
 
-    updateWithObservable(values: IdbFacility): Observable<Array<IdbFacility>> {
+    updateWithObservable(values: IdbFacility): Observable<IdbFacility> {
         values.modifiedDate = new Date();
         return this.dbService.update('facilities', values);
     }

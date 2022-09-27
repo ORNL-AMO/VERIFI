@@ -62,7 +62,7 @@ export class AccountAnalysisDbService {
     return this.dbService.delete('accountAnalysisItems', id);
   }
 
-  updateWithObservable(values: IdbAccountAnalysisItem): Observable<Array<IdbAccountAnalysisItem>> {
+  updateWithObservable(values: IdbAccountAnalysisItem): Observable<IdbAccountAnalysisItem> {
     values.date = new Date();
     return this.dbService.update('accountAnalysisItems', values);
   }
