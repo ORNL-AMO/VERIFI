@@ -53,12 +53,13 @@
                     <label class="show-models-label bold pr-3" for="showInvalid">
                         Show Invalid Models
                     </label>
-
-                    <label class="switch" for="showInvalid">
-                        <input class="checkbox" type="checkbox" id="showInvalid" name="showInvalid"
-                            [(ngModel)]="showInvalid" (change)="saveInvalidChange()">
-                        <span class="slider round"></span>
-                    </label>
+                    <div>
+                        <label class="switch" for="showInvalid">
+                            <input class="checkbox" type="checkbox" id="showInvalid" name="showInvalid"
+                                [(ngModel)]="showInvalid" (change)="saveInvalidChange()">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
                 </div>
             </div>
             <div class="p-2" *ngIf="!group.userDefinedModel">
