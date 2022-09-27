@@ -110,8 +110,9 @@ export class GeneralInformationFormComponent implements OnInit {
     if (!this.inAccount) {
       if (!this.inWizard) {
         this.selectedFacility = this.settingsFormsService.updateFacilityFromGeneralInformationForm(this.form, this.selectedFacility);
-        let allFacilities: Array<IdbFacility> = await this.facilityDbService.updateWithObservable(this.selectedFacility).toPromise();
-        this.facilityDbService.selectedFacility.next(this.selectedFacility);
+        let updatedFacility: IdbFacility = await this.facilityDbService.updateWithObservable(this.selectedFacility).toPromise();
+        let allFacilities: Array<IdbFacility> = await this.facilityDbService.getAll().toPromise();
+        this.facilityDbService.selectedFacility.next(updatedFacility);
         let accountFacilities: Array<IdbFacility> = allFacilities.filter(facility => { return facility.accountId == this.selectedFacility.accountId });
         this.facilityDbService.accountFacilities.next(accountFacilities);
       } else {
@@ -122,9 +123,10 @@ export class GeneralInformationFormComponent implements OnInit {
     if (this.inAccount) {
       if (!this.inWizard) {
         this.selectedAccount = this.settingsFormsService.updateAccountFromGeneralInformationForm(this.form, this.selectedAccount);
-        let allAccount: Array<IdbAccount> = await this.accountDbService.updateWithObservable(this.selectedAccount).toPromise();
-        this.accountDbService.selectedAccount.next(this.selectedAccount);
-        this.accountDbService.allAccounts.next(allAccount);
+        let updatedAccount: IdbAccount = await this.accountDbService.updateWithObservable(this.selectedAccount).toPromise();
+        let allAccounts: Array<IdbAccount> = await this.accountDbService.getAll().toPromise();
+        this.accountDbService.selectedAccount.next(updatedAccount);
+        this.accountDbService.allAccounts.next(allAccounts);
       } else {
         this.selectedAccount = this.settingsFormsService.updateAccountFromGeneralInformationForm(this.form, this.selectedAccount);
         this.setupWizardService.account.next(this.selectedAccount);

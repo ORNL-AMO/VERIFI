@@ -113,7 +113,7 @@ export class AnalysisDbService {
   //   });
   // }
 
-  updateWithObservable(values: IdbAnalysisItem): Observable<Array<IdbAnalysisItem>> {
+  updateWithObservable(values: IdbAnalysisItem): Observable<IdbAnalysisItem> {
     values.date = new Date();
     return this.dbService.update('analysisItems', values);
   }

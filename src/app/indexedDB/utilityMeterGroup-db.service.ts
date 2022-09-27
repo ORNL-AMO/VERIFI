@@ -45,7 +45,7 @@ export class UtilityMeterGroupdbService {
         return this.dbService.add('utilityMeterGroups', utilityMeterGroup);
     }
 
-    updateWithObservable(utilityMeterGroup: IdbUtilityMeterGroup): Observable<Array<IdbUtilityMeterGroup>> {
+    updateWithObservable(utilityMeterGroup: IdbUtilityMeterGroup): Observable<IdbUtilityMeterGroup> {
         return this.dbService.update('utilityMeterGroups', utilityMeterGroup);
     }
 

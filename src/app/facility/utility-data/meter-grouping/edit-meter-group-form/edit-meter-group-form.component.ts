@@ -48,7 +48,8 @@ export class EditMeterGroupFormComponent implements OnInit {
       await this.dbChangesService.setAnalysisItems(selectedAccount, selectedFacility);
       this.toastNotificationService.showToast("Meter Group Added!", undefined, undefined, false, "success");
     } else {
-      allGroups = await this.utilityMeterGroupDbService.updateWithObservable(this.groupToEdit).toPromise();
+      await this.utilityMeterGroupDbService.updateWithObservable(this.groupToEdit).toPromise();
+      allGroups = await this.utilityMeterGroupDbService.getAllByIndexRange('accountId', this.groupToEdit.accountId).toPromise();
       await this.dbChangesService.setMeterGroups(selectedAccount, selectedFacility)
       this.toastNotificationService.showToast("Meter Group Updated!", undefined, undefined, false, "success");
     }

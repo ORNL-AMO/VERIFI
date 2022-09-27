@@ -46,7 +46,7 @@ export class CustomEmissionsDbService {
     return this.dbService.delete('customEmissionsItems', id);
   }
 
-  updateWithObservable(values: IdbCustomEmissionsItem): Observable<Array<IdbCustomEmissionsItem>> {
+  updateWithObservable(values: IdbCustomEmissionsItem): Observable<IdbCustomEmissionsItem> {
     values.date = new Date();
     return this.dbService.update('customEmissionsItems', values);
   }

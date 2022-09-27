@@ -55,7 +55,8 @@ export class AccountDashboardMenuComponent implements OnInit {
   async setAccountEnergyIsSource(energyIsSource: boolean) {
     if (this.selectedAccount.energyIsSource != energyIsSource) {
       this.selectedAccount.energyIsSource = energyIsSource;
-      let allAccounts: Array<IdbAccount> = await this.accountDbService.updateWithObservable(this.selectedAccount).toPromise();
+      let updatedAccount: IdbAccount = await this.accountDbService.updateWithObservable(this.selectedAccount).toPromise();
+      let allAccounts: Array<IdbAccount> = await this.accountDbService.getAll().toPromise();
       this.accountDbService.allAccounts.next(allAccounts);
       this.accountDbService.selectedAccount.next(this.selectedAccount);
     }
