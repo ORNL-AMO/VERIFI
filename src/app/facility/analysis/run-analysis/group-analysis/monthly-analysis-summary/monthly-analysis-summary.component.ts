@@ -42,7 +42,6 @@ export class MonthlyAnalysisSummaryComponent implements OnInit {
       this.worker.onmessage = ({ data }) => {
         console.log('onmessage');
         console.log(data);
-        // this.accountHomeService.percentSavings.next(12);
         this.monthlyAnalysisSummary = data;
         this.calculating = false;
       };
