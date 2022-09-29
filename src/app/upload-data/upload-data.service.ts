@@ -169,13 +169,16 @@ export class UploadDataService {
       meter.fuel = this.getFuelEnum(meterData['Fuel'], meter.source, meter.phase);
       meter.startingUnit = this.checkImportStartingUnit(meterData['Collection Unit'], meter.source, meter.phase, meter.fuel);
       meter.heatCapacity = meterData['Heat Capacity'];
+      let isEnergyUnit: boolean = this.energyUnitsHelperService.isEnergyUnit(meter.startingUnit);
+      if(isEnergyUnit){
+        meter.energyUnit = meter.startingUnit;
+      }
       if (!meter.heatCapacity) {
-        let isEnergyUnit: boolean = this.energyUnitsHelperService.isEnergyUnit(meter.startingUnit);
         if (!isEnergyUnit) {
           let fuelTypeOptions: Array<FuelTypeOption> = this.energyUseCalculationsService.getFuelTypeOptions(meter.source, meter.phase);
           let fuel: FuelTypeOption = fuelTypeOptions.find(option => { return option.value == meter.fuel });
           meter.heatCapacity = this.energyUseCalculationsService.getHeatingCapacity(meter.source, meter.startingUnit, meter.energyUnit, fuel);
-        }
+        } 
       }
       // meter.heatCapacity = meterData['Heat Capacity'];
       meter.siteToSource = meterData['Site To Source'];
