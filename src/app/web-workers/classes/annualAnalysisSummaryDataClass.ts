@@ -1,0 +1,180 @@
+
+import { MonthlyAnalysisSummaryData } from "src/app/models/analysis";
+import * as _ from 'lodash';
+import { HelperService } from "./helperService";
+import { IdbAccount, IdbFacility, IdbPredictorEntry, PredictorData } from "src/app/models/idb";
+
+export class AnnualAnalysisSummaryDataClass {
+
+    year: number;
+    energyUse: number;
+    modeledEnergy: number;
+    adjustedForNormalization: number;
+    adjusted: number;
+    baselineAdjustmentForNormalization: number;
+    baselineAdjustmentForOther: number;
+    baselineAdjustment: number;
+    SEnPI: number;
+    savings: number;
+    totalSavingsPercentImprovement: number;
+    annualSavingsPercentImprovement: number;
+    cummulativeSavings: number;
+    newSavings: number;
+    predictorUsage: Array<{
+        usage: number;
+        predictorId: string
+    }>;
+
+
+    yearAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>;
+    helperService: HelperService;
+    baselineEnergyUse: number;
+    baselineModeledEnergyUse: number;
+    previousYearPercentSavings: number;
+    previousYearSavings: number;
+    constructor(
+        monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
+        year: number,
+        accountPredictorEntries: Array<IdbPredictorEntry>,
+        facility: IdbFacility,
+        previousYearsSummaryData: Array<AnnualAnalysisSummaryDataClass>
+    ) {
+        this.helperService = new HelperService();
+        this.year = year;
+        this.setYearAnalysisSummaryData(monthlyAnalysisSummaryData);
+        this.setPredictorUsage(accountPredictorEntries, facility);
+        this.setEnergyUse();
+        this.setModeledEnergy();
+        this.setBaselineEnergyUse(previousYearsSummaryData);
+        this.setBaselineModeledEnergy(previousYearsSummaryData);
+        this.setAdjustedForNormalization();
+        this.setBaselineAdjustmentForOther();
+        this.setBaselineAdjustmentForNormalization(previousYearsSummaryData);
+        this.setBaselineAdjustment(previousYearsSummaryData);
+        this.setAdjusted();
+        this.setSEnPI();
+        this.setSavings();
+        this.setTotalSavingsPercentImprovement();
+        this.setPreviousYearSavings(previousYearsSummaryData);
+        this.setAnnualSavingsPercentImprovement();
+        this.setCummulativeSavings(previousYearsSummaryData);
+        this.setNewSavings();
+    }
+
+    setYearAnalysisSummaryData(monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>) {
+        this.yearAnalysisSummaryData = _.filter(monthlyAnalysisSummaryData, (data) => {
+            return data.fiscalYear == this.year;
+        });
+    }
+
+    setEnergyUse() {
+        this.energyUse = _.sumBy(this.yearAnalysisSummaryData, 'energyUse');
+    }
+
+    setModeledEnergy() {
+        this.modeledEnergy = _.sumBy(this.yearAnalysisSummaryData, 'modeledEnergy');
+    }
+
+    setBaselineEnergyUse(previousYearsSummaryData: Array<AnnualAnalysisSummaryDataClass>) {
+        if (previousYearsSummaryData.length != 0) {
+            this.baselineEnergyUse = previousYearsSummaryData[0].baselineEnergyUse;
+        } else {
+            this.baselineEnergyUse = 0;
+        }
+    }
+
+    setBaselineModeledEnergy(previousYearsSummaryData: Array<AnnualAnalysisSummaryDataClass>) {
+        if (previousYearsSummaryData.length != 0) {
+            this.baselineModeledEnergyUse = previousYearsSummaryData[0].baselineModeledEnergyUse;
+        } else {
+            this.baselineModeledEnergyUse = 0;
+        }
+    }
+
+    setAdjustedForNormalization() {
+        this.adjustedForNormalization = this.modeledEnergy + this.baselineEnergyUse - this.baselineModeledEnergyUse;
+    }
+
+    setBaselineAdjustmentForOther() {
+        this.baselineAdjustmentForOther = _.sumBy(this.yearAnalysisSummaryData, 'baselineAdjustmentForOther')
+    }
+
+    setBaselineAdjustmentForNormalization(previousYearsSummaryData: Array<AnnualAnalysisSummaryDataClass>) {
+        if (previousYearsSummaryData.length != 0) {
+            this.baselineAdjustmentForNormalization = this.adjustedForNormalization - this.baselineEnergyUse;
+        } else {
+            this.baselineAdjustmentForNormalization = 0;
+        }
+    }
+
+    setBaselineAdjustment(previousYearsSummaryData: Array<AnnualAnalysisSummaryDataClass>) {
+        if (previousYearsSummaryData.length != 0) {
+            this.baselineAdjustment = this.baselineAdjustmentForNormalization + this.baselineAdjustmentForOther;
+        } else {
+            this.baselineAdjustment = 0;
+        }
+    }
+
+    setAdjusted() {
+        this.adjusted = this.adjustedForNormalization + this.baselineAdjustmentForOther;
+    }
+
+    setSEnPI() {
+        this.SEnPI = this.energyUse / this.adjusted;
+    }
+
+    setSavings() {
+        this.savings = this.adjusted - this.energyUse;
+    }
+
+    setTotalSavingsPercentImprovement() {
+        this.totalSavingsPercentImprovement = this.savings / this.adjusted;
+    }
+
+    setPreviousYearSavings(previousYearsSummaryData: Array<AnnualAnalysisSummaryDataClass>) {
+        if (previousYearsSummaryData.length != 0) {
+            this.previousYearSavings = previousYearsSummaryData[0].savings;
+            this.previousYearPercentSavings = previousYearsSummaryData[0].totalSavingsPercentImprovement;
+        } else {
+            this.previousYearSavings = 0;
+            this.previousYearPercentSavings = 0;
+        }
+    }
+
+    setAnnualSavingsPercentImprovement() {
+        this.annualSavingsPercentImprovement = this.totalSavingsPercentImprovement - this.previousYearPercentSavings;
+    }
+
+    setCummulativeSavings(previousYearsSummaryData: Array<AnnualAnalysisSummaryDataClass>) {
+        if (previousYearsSummaryData.length != 0) {
+            this.cummulativeSavings = previousYearsSummaryData[0].cummulativeSavings + this.savings;
+        } else {
+            this.cummulativeSavings = 0;
+        }
+    }
+
+    setNewSavings() {
+        this.newSavings = this.savings - this.previousYearSavings;
+    }
+
+    setPredictorUsage(accountPredictorEntries: Array<IdbPredictorEntry>, facility: IdbFacility) {
+        this.predictorUsage = new Array();
+        let facilityPredictorData: Array<IdbPredictorEntry> = accountPredictorEntries.filter(entry => { return entry.facilityId == facility.guid });
+        let summaryYearPredictorData: Array<IdbPredictorEntry> = this.helperService.filterYearPredictorData(facilityPredictorData, this.year, facility);
+        if (summaryYearPredictorData.length > 0) {
+            let predictorVariables: Array<PredictorData> = summaryYearPredictorData[0].predictors;
+            predictorVariables.forEach(variable => {
+                let usageVal: number = 0;
+                summaryYearPredictorData.forEach(data => {
+                    let predictorData: PredictorData = data.predictors.find(predictor => { return predictor.id == variable.id });
+                    usageVal = usageVal + predictorData.amount;
+                });
+                this.predictorUsage.push({
+                    usage: usageVal,
+                    predictorId: variable.id
+                });
+            });
+        }
+    }
+
+}
