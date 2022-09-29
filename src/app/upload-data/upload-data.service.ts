@@ -127,7 +127,7 @@ export class UploadDataService {
       facility.contactName = facilityDataRow['Contact Name'];
       facility.contactPhone = facilityDataRow['Contact Phone'];
       facility.contactEmail = facilityDataRow['Contact Email'];
-      if (facility.zip.length == 5) {
+      if (facility.zip && facility.zip.length == 5) {
         let subRegionData: SubRegionData = _.find(this.eGridService.subRegionsByZipcode, (val) => { return val.zip == facility.zip });
         if (subRegionData) {
           if (subRegionData.subregions.length != 0) {
@@ -154,6 +154,9 @@ export class UploadDataService {
       meter.accountNumber = meterData['Account Number'];
       meter.source = this.getMeterSource(meterData['Source']);
       meter.name = meterData['Meter Name'];
+      if(!meter.name){
+        meter.name = 'Meter ' + meterNumber;
+      }
       meter.supplier = meterData['Utility Supplier'];
       meter.notes = meterData['Notes'];
       meter.location = meterData['Building / Location'];
