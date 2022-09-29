@@ -157,7 +157,6 @@ export class DashboardService {
 
   setFacilityDashboardSummary() {
     let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
-    console.log(meters);
     let calanderizedMeters: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMeterData(meters, false, true);
     this.calanderizedFacilityMeters.next(calanderizedMeters);
     let lastBill: MonthlyData = this.calanderizationService.getLastBillEntryFromCalanderizedMeterData(calanderizedMeters);
