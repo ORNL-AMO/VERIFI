@@ -121,7 +121,7 @@ export class UploadDataService {
       facility.country = this.getCountryCode(facilityDataRow['Country']);
       facility.state = facilityDataRow['State'];
       facility.city = facilityDataRow['City'];
-      facility.zip = facilityDataRow['Zip'].toString();
+      facility.zip = facilityDataRow['Zip']?.toString();
       facility.naics2 = facilityDataRow['NAICS Code 2'];
       facility.naics3 = facilityDataRow['NAICS Code 3'];
       facility.contactName = facilityDataRow['Contact Name'];
