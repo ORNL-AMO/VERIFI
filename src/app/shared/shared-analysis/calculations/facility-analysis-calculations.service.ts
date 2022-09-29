@@ -148,7 +148,7 @@ export class FacilityAnalysisCalculationsService {
 
       analysisSummaryData.push({
         date: new Date(baselineDate),
-        groupsSummaryData: currentMonthData,
+        // groupsSummaryData: currentMonthData,
         energyUse: energyUse,
         modeledEnergy: modeledEnergy,
         predictorUsage: predictorUsage,

@@ -1,13 +1,10 @@
 /// <reference lib="webworker" />
 
-import { MonthlyAnalysisSummary } from "../models/analysis";
-import { MonthlyFacilityAnalysis } from "./classes/monthlyFacilityAnalysis";
+import { MonthlyAnalysisSummary, MonthlyAnalysisSummaryData } from "../models/analysis";
+import { MonthlyAnalysisSummaryClass } from "./classes/monthlyAnalysisSummaryClass";
 
 addEventListener('message', ({ data }) => {
-  console.log('called')
-  let monthlyFacilityAnalysis: MonthlyFacilityAnalysis = new MonthlyFacilityAnalysis()
-  let monthlyAnalysisSummary: MonthlyAnalysisSummary = monthlyFacilityAnalysis.getMonthlyAnalysisSummary(data.selectedGroup, data.analysisItem, data.facility, data.calanderizedMeters, data.accountPredictorEntries);
-  console.log('calculation completed');
-  // const response = `worker response to ${data}`;
+  let monthlyAnalysisSummaryClass: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(data.selectedGroup, data.analysisItem, data.facility, data.calanderizedMeters, data.accountPredictorEntries);
+  let monthlyAnalysisSummary: MonthlyAnalysisSummary = monthlyAnalysisSummaryClass.getResults();
   postMessage(monthlyAnalysisSummary);
 });
