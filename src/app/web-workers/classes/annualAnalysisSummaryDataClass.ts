@@ -53,7 +53,7 @@ export class AnnualAnalysisSummaryDataClass {
         this.setBaselineAdjustment(previousYearsSummaryData);
         this.setAdjusted();
         this.setSEnPI();
-        this.setSavings();
+        this.setSavings(previousYearsSummaryData);
         this.setTotalSavingsPercentImprovement();
         this.setPreviousYearSavings(previousYearsSummaryData);
         this.setAnnualSavingsPercentImprovement();
@@ -79,7 +79,7 @@ export class AnnualAnalysisSummaryDataClass {
         if (previousYearsSummaryData.length != 0) {
             this.baselineEnergyUse = previousYearsSummaryData[0].baselineEnergyUse;
         } else {
-            this.baselineEnergyUse = 0;
+            this.baselineEnergyUse = this.energyUse;
         }
     }
 
@@ -87,7 +87,7 @@ export class AnnualAnalysisSummaryDataClass {
         if (previousYearsSummaryData.length != 0) {
             this.baselineModeledEnergyUse = previousYearsSummaryData[0].baselineModeledEnergyUse;
         } else {
-            this.baselineModeledEnergyUse = 0;
+            this.baselineModeledEnergyUse = this.modeledEnergy;
         }
     }
 
@@ -123,8 +123,12 @@ export class AnnualAnalysisSummaryDataClass {
         this.SEnPI = this.energyUse / this.adjusted;
     }
 
-    setSavings() {
-        this.savings = this.adjusted - this.energyUse;
+    setSavings(previousYearsSummaryData: Array<AnnualAnalysisSummaryDataClass>) {
+        if (previousYearsSummaryData.length != 0) {
+            this.savings = this.adjusted - this.energyUse;
+        } else {
+            this.savings = 0;
+        }
     }
 
     setTotalSavingsPercentImprovement() {
@@ -133,8 +137,9 @@ export class AnnualAnalysisSummaryDataClass {
 
     setPreviousYearSavings(previousYearsSummaryData: Array<AnnualAnalysisSummaryDataClass>) {
         if (previousYearsSummaryData.length != 0) {
-            this.previousYearSavings = previousYearsSummaryData[0].savings;
-            this.previousYearPercentSavings = previousYearsSummaryData[0].totalSavingsPercentImprovement;
+            let previousYearData: AnnualAnalysisSummaryDataClass = previousYearsSummaryData.find(data => { return data.year == (this.year - 1) })
+            this.previousYearSavings = previousYearData.savings;
+            this.previousYearPercentSavings = previousYearData.totalSavingsPercentImprovement;
         } else {
             this.previousYearSavings = 0;
             this.previousYearPercentSavings = 0;
@@ -147,7 +152,8 @@ export class AnnualAnalysisSummaryDataClass {
 
     setCummulativeSavings(previousYearsSummaryData: Array<AnnualAnalysisSummaryDataClass>) {
         if (previousYearsSummaryData.length != 0) {
-            this.cummulativeSavings = previousYearsSummaryData[0].cummulativeSavings + this.savings;
+            let previousYearData: AnnualAnalysisSummaryDataClass = previousYearsSummaryData.find(data => { return data.year == (this.year - 1) })
+            this.cummulativeSavings = previousYearData.cummulativeSavings + this.savings;
         } else {
             this.cummulativeSavings = 0;
         }
