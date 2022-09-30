@@ -35,7 +35,6 @@ export class AccountUtilityEnergyUseTableComponent implements OnInit {
 
     this.accountUtilityUsageSummaryDataSub = this.dashboardService.accountUtilityUsageSummaryData.subscribe(val => {
       this.utilityUsageSummaryData = val;
-      console.log(this.utilityUsageSummaryData);
       if (this.utilityUsageSummaryData && this.utilityUsageSummaryData.allMetersLastBill) {
         this.lastMonthsDate = new Date(this.utilityUsageSummaryData.allMetersLastBill.year, this.utilityUsageSummaryData.allMetersLastBill.monthNumValue);
         this.yearPriorDate = new Date(this.utilityUsageSummaryData.allMetersLastBill.year - 1, this.utilityUsageSummaryData.allMetersLastBill.monthNumValue + 1);

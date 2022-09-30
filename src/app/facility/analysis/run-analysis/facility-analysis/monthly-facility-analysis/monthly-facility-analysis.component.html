@@ -23,12 +23,15 @@
         </div>
     </div>
 </div>
-<div class="w-100 x-scroll">
+<div class="w-100 x-scroll" *ngIf="!calculating">
     <app-monthly-analysis-summary-graph *ngIf="dataDisplay == 'graph'"
-        [monthlyAnalysisSummaryData]="monthlyFacilityAnalysisData" [analysisItem]="analysisItem" [facilityOrAccount]="facility">
+        [monthlyAnalysisSummaryData]="monthlyFacilityAnalysisData" [analysisItem]="analysisItem"
+        [facilityOrAccount]="facility">
     </app-monthly-analysis-summary-graph>
     <app-monthly-analysis-summary-table *ngIf="dataDisplay == 'table'"
-        [monthlyAnalysisSummaryData]="monthlyFacilityAnalysisData" [analysisItem]="analysisItem" [facilityOrAccount]="facility"
-        [itemsPerPage]="itemsPerPage">
+        [monthlyAnalysisSummaryData]="monthlyFacilityAnalysisData" [analysisItem]="analysisItem"
+        [facilityOrAccount]="facility" [itemsPerPage]="itemsPerPage">
     </app-monthly-analysis-summary-table>
 </div>
+
+<app-calculating-spinner *ngIf="calculating"></app-calculating-spinner>

@@ -14,8 +14,7 @@ import { AccountHomeService } from './account-home.service';
 export class AccountHomeComponent implements OnInit {
 
   accountFacilities: Array<IdbFacility>;
-  accountMeterDataSub: Subscription
-  selectedAccountSub: Subscription;
+  accountMeterDataSub: Subscription;
   constructor(private facilityDbService: FacilitydbService, private accountDbService: AccountdbService,
     private accountHomeService: AccountHomeService, private utilityMeterDataDbService: UtilityMeterDatadbService) { }
 
