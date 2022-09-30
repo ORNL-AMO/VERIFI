@@ -54,12 +54,15 @@
         </tr>
     </thead>
     <tbody>
-        <tr *ngFor="let meter of fileReference.meters" [ngClass]="{'skip': meter.skipImport}">
+        <tr *ngFor="let meter of fileReference.meters | orderBy: 'isValid': 'asc'"
+            [ngClass]="{'skip': meter.skipImport, 'alert-danger': !meter.isValid}">
             <td>
                 {{getFacilityName(meter.facilityId)}}
             </td>
             <td>
-                <a class="click-link" (click)="editMeter(meter)" *ngIf="!meter.skipImport">{{meter.name}}</a>
+                <a class="click-link" (click)="editMeter(meter)" *ngIf="!meter.skipImport">{{meter.name}}
+                    <span *ngIf="!meter.isValid">(click to edit)</span>
+                </a>
                 <span *ngIf="meter.skipImport">{{meter.name}}</span>
             </td>
             <td>
