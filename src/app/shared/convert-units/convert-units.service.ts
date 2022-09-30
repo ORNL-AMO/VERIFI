@@ -43,8 +43,8 @@ import { thermalConductivity } from './definitions/thermalConductivity';
 
 
 import * as _ from 'lodash';
-import * as keys from 'lodash.keys';
-import * as each from 'lodash.foreach';
+// import * as keys from 'lodash.keys';
+// import * as each from 'lodash.foreach';
 
 @Injectable({
   providedIn: 'root'
@@ -55,7 +55,6 @@ export class ConvertUnitsService {
     area: area,
     mass: mass,
     volume: volume,
-    each: each,
     temperature: temperature,
     time: time,
     digital: digital,
@@ -190,12 +189,12 @@ export class ConvertUnitsService {
   getUnit(abbr: string) {
     var found;
 
-    each(this._measures, function (systems, measure) {
-      each(systems, function (units, system) {
+    _.each(this._measures, function (systems, measure) {
+      _.each(systems, function (units, system) {
         if (system === '_anchors')
           return false;
 
-        each(units, function (unit, testAbbr) {
+          _.each(units, function (unit, testAbbr) {
           if (testAbbr === abbr) {
             found = {
               abbr: abbr
@@ -220,12 +219,12 @@ export class ConvertUnitsService {
 
   throwUnsupportedUnitError(what: any) {
     var validUnits = [];
-    each(this._measures, function (systems, measure) {
-      each(systems, function (units, system) {
+    _.each(this._measures, function (systems, measure) {
+      _.each(systems, function (units, system) {
         if (system === '_anchors')
           return false;
 
-        validUnits = validUnits.concat(keys(units));
+        validUnits = validUnits.concat(_.keys(units));
       });
     });
 
@@ -235,21 +234,21 @@ export class ConvertUnitsService {
   possibilities(measure) {
     var possibilities = [];
     if (!this.origin && !measure) {
-      each(keys(this._measures), function (measure) {
-        each(this._measures[measure], function (units, system) {
+      _.each(_.keys(this._measures), function (measure) {
+        _.each(this._measures[measure], function (units, system) {
           if (system === '_anchors')
             return false;
 
-          possibilities = possibilities.concat(keys(units));
+          possibilities = possibilities.concat(_.keys(units));
         });
       });
     } else {
       measure = measure || this.origin.measure;
-      each(this._measures[measure], function (units, system) {
+      _.each(this._measures[measure], function (units, system) {
         if (system === '_anchors')
           return false;
 
-        possibilities = possibilities.concat(keys(units));
+        possibilities = possibilities.concat(_.keys(units));
       });
     }
 
@@ -286,6 +285,6 @@ export class ConvertUnitsService {
   // }
 
   measures() {
-    return keys(this._measures);
+    return _.keys(this._measures);
   }
 }

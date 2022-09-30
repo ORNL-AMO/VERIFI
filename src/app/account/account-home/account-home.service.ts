@@ -22,7 +22,7 @@ export class AccountHomeService {
   constructor(private accountAnalysisDbService: AccountAnalysisDbService, private utilityMeterDbService: UtilityMeterdbService,
     private accountDbService: AccountdbService, private calendarizationService: CalanderizationService, private convertMeterDataService: ConvertMeterDataService,
     private accountAnalysisCalculationsService: AccountAnalysisCalculationsService) { 
-      this.latestAnalysisSummary = new BehaviorSubject<AnnualAnalysisSummary>(undefined)
+      this.latestAnalysisSummary = new BehaviorSubject<AnnualAnalysisSummary>(undefined);
     }
 
   setCalanderizedMeters() {

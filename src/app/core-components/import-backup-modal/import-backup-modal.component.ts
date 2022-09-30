@@ -52,7 +52,8 @@ export class ImportBackupModalComponent implements OnInit {
     this.importBackupModalService.showModal.next(false);
   }
 
-  setImportFile(files: FileList) {
+  setImportFile(event: EventTarget) {
+    let files: FileList = (event as HTMLInputElement).files;
     if (files) {
       if (files.length !== 0) {
         let fr: FileReader = new FileReader();

@@ -27,9 +27,10 @@ export class DbChangesService {
     private customEmissionsDbService: CustomEmissionsDbService) { }
 
   async updateAccount(account: IdbAccount) {
-    let accounts: Array<IdbAccount> = await this.accountDbService.updateWithObservable(account).toPromise();
+    let updatedAccount: IdbAccount = await this.accountDbService.updateWithObservable(account).toPromise();
+    let accounts: Array<IdbAccount> = await this.accountDbService.getAll().toPromise();
     this.accountDbService.allAccounts.next(accounts);
-    this.accountDbService.selectedAccount.next(account);
+    this.accountDbService.selectedAccount.next(updatedAccount);
   }
 
 
@@ -107,11 +108,12 @@ export class DbChangesService {
   }
 
   async updateFacilities(selectedFacility: IdbFacility, onSelect?: boolean) {
-    let facilities: Array<IdbFacility> = await this.facilityDbService.updateWithObservable(selectedFacility).toPromise();
-    let accountFacilites: Array<IdbFacility> = facilities.filter(facility => { return facility.accountId == selectedFacility.accountId });
+    let updatedFacility: IdbFacility = await this.facilityDbService.updateWithObservable(selectedFacility).toPromise();
+    let facilities: Array<IdbFacility> = await this.facilityDbService.getAll().toPromise();
+    let accountFacilites: Array<IdbFacility> = facilities.filter(facility => { return facility.accountId == updatedFacility.accountId });
     this.facilityDbService.accountFacilities.next(accountFacilites);
     if (!onSelect) {
-      this.facilityDbService.selectedFacility.next(selectedFacility);
+      this.facilityDbService.selectedFacility.next(updatedFacility);
     }
   }
 

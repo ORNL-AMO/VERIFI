@@ -121,13 +121,13 @@ export class UploadDataService {
       facility.country = this.getCountryCode(facilityDataRow['Country']);
       facility.state = facilityDataRow['State'];
       facility.city = facilityDataRow['City'];
-      facility.zip = facilityDataRow['Zip'].toString();
+      facility.zip = facilityDataRow['Zip']?.toString();
       facility.naics2 = facilityDataRow['NAICS Code 2'];
       facility.naics3 = facilityDataRow['NAICS Code 3'];
       facility.contactName = facilityDataRow['Contact Name'];
       facility.contactPhone = facilityDataRow['Contact Phone'];
       facility.contactEmail = facilityDataRow['Contact Email'];
-      if (facility.zip.length == 5) {
+      if (facility.zip && facility.zip.length == 5) {
         let subRegionData: SubRegionData = _.find(this.eGridService.subRegionsByZipcode, (val) => { return val.zip == facility.zip });
         if (subRegionData) {
           if (subRegionData.subregions.length != 0) {
@@ -154,6 +154,9 @@ export class UploadDataService {
       meter.accountNumber = meterData['Account Number'];
       meter.source = this.getMeterSource(meterData['Source']);
       meter.name = meterData['Meter Name'];
+      if(!meter.name){
+        meter.name = 'Meter ' + meterNumber;
+      }
       meter.supplier = meterData['Utility Supplier'];
       meter.notes = meterData['Notes'];
       meter.location = meterData['Building / Location'];
@@ -166,13 +169,16 @@ export class UploadDataService {
       meter.fuel = this.getFuelEnum(meterData['Fuel'], meter.source, meter.phase);
       meter.startingUnit = this.checkImportStartingUnit(meterData['Collection Unit'], meter.source, meter.phase, meter.fuel);
       meter.heatCapacity = meterData['Heat Capacity'];
+      let isEnergyUnit: boolean = this.energyUnitsHelperService.isEnergyUnit(meter.startingUnit);
+      if(isEnergyUnit){
+        meter.energyUnit = meter.startingUnit;
+      }
       if (!meter.heatCapacity) {
-        let isEnergyUnit: boolean = this.energyUnitsHelperService.isEnergyUnit(meter.startingUnit);
         if (!isEnergyUnit) {
           let fuelTypeOptions: Array<FuelTypeOption> = this.energyUseCalculationsService.getFuelTypeOptions(meter.source, meter.phase);
           let fuel: FuelTypeOption = fuelTypeOptions.find(option => { return option.value == meter.fuel });
           meter.heatCapacity = this.energyUseCalculationsService.getHeatingCapacity(meter.source, meter.startingUnit, meter.energyUnit, fuel);
-        }
+        } 
       }
       // meter.heatCapacity = meterData['Heat Capacity'];
       meter.siteToSource = meterData['Site To Source'];

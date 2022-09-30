@@ -21,9 +21,9 @@
     </div>
 </div>
 <app-edit-electricity-bill *ngIf="editMeter.source == 'Electricity'" [editMeterData]="editMeterData"
-    [addOrEdit]="addOrEdit" [editMeter]="editMeter" [(meterDataForm)]="meterDataForm" [(invalidDate)]="invalidDate">
+    [addOrEdit]="addOrEdit" [editMeter]="editMeter" [meterDataForm]="meterDataForm" [invalidDate]="invalidDate">
 </app-edit-electricity-bill>
 <app-edit-utility-bill *ngIf="editMeter.source != 'Electricity'" [editMeterData]="editMeterData" [addOrEdit]="addOrEdit"
     [editMeter]="editMeter" [displayVolumeInput]="displayVolumeInput" [displayEnergyUse]="displayEnergyUse"
-    [(meterDataForm)]="meterDataForm" [(invalidDate)]="invalidDate">
+    [meterDataForm]="meterDataForm" [invalidDate]="invalidDate">
 </app-edit-utility-bill>

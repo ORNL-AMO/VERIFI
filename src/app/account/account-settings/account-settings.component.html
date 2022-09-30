@@ -37,6 +37,7 @@
         <table class="table table-sm table-hover">
             <thead>
                 <tr>
+                    <th></th>
                     <th>Facilities</th>
                     <th>NAICS</th>
                     <th>State</th>
@@ -48,6 +49,12 @@
             </thead>
             <tbody>
                 <tr *ngFor="let facility of facilityList">
+                    <th>
+                        <select [(ngModel)]="facility.facilityOrder" class="form-control" id="facilityOrder"
+                            name="facilityOrder" (change)="setFacilityOrder(facility)">
+                            <option *ngFor="let option of orderOptions" [ngValue]="option">{{option}}</option>
+                        </select>
+                    </th>
                     <td><a (click)="switchFacility(facility)">{{facility.name}}</a></td>
                     <td>{{facility.naics3}}</td>
                     <td>{{facility.state}}</td>

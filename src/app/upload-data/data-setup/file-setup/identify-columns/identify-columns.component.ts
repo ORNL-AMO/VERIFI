@@ -61,7 +61,7 @@ export class IdentifyColumnsComponent implements OnInit {
     this.paramsSub.unsubscribe();
   }
 
-  dropColumn(dropData: CdkDragDrop<string[]>) {
+  dropColumn(dropData: CdkDragDrop<ColumnGroup[]>) {
     this.fileReference.columnGroups.forEach(group => {
       if (group.id == dropData.previousContainer.id) {
         //remove

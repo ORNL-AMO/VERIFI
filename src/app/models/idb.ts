@@ -83,7 +83,8 @@ export interface IdbFacility {
     contactName: string,
     contactEmail: string,
     contactPhone: string,
-    modifiedDate?: Date
+    modifiedDate?: Date,
+    facilityOrder?: number
 }
 
 export interface IdbUtilityMeterGroup {

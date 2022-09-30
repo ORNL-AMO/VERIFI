@@ -19,4 +19,26 @@ export class HelpPanelService {
       this.localStorageService.store('helpPanelOpen', helpPanelOpen);
     });
   }
+
+
+  getHelpURL(url: string, helpUrlComponents): string {
+    for (let helpUrl of Object.keys(helpUrlComponents)) {
+      let urlComponent = helpUrlComponents[helpUrl];
+      if (typeof urlComponent === 'string') {
+        if (url.indexOf(urlComponent) !== -1) {
+          return helpUrl;
+        }
+      }
+      else {
+        let allStringsMatch = true;
+        for (let string of urlComponent) {
+          allStringsMatch = allStringsMatch && (url.indexOf(string) !== -1);
+        }
+        if (allStringsMatch) {
+          return helpUrl;
+        }
+      }
+    }
+    return '';
+  }
 }

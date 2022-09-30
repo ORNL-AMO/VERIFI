@@ -20,6 +20,7 @@ import { AnnualFacilityAnalysisComponent } from './run-analysis/facility-analysi
 import { SharedAnalysisModule } from 'src/app/shared/shared-analysis/shared-analysis.module';
 import { ModelFilterPipe } from './run-analysis/group-analysis/regression-model-selection/model-filter.pipe';
 import { RegressionModelMenuComponent } from './run-analysis/group-analysis/regression-model-selection/regression-model-menu/regression-model-menu.component';
+import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/calculating-spinner.module';
 
 
 
@@ -47,7 +48,8 @@ import { RegressionModelMenuComponent } from './run-analysis/group-analysis/regr
     RouterModule,
     HelperPipesModule,
     NgbPaginationModule,
-    SharedAnalysisModule
+    SharedAnalysisModule,
+    CalculatingSpinnerModule
   ]
 })
 export class AnalysisModule { }

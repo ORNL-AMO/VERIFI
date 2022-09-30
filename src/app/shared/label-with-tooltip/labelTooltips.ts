@@ -31,5 +31,11 @@ export const LabelTooltips = {
     },
     "reportYearNotes": {
         "tooltip": "Enter notes on anything you did to save energy in the report year."
+    },
+    "selectWorksheet": {
+        "tooltip": "Select the Excel worksheet corresponding to the data you want to upload."
+    },
+    "selectImportFacility": {
+        "tooltip": "Predictors and meters will be automatically mapped to selected facility."
     }
 }

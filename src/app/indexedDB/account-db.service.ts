@@ -43,7 +43,7 @@ export class AccountdbService {
         return this.dbService.add('accounts', account);
     }
 
-    updateWithObservable(account: IdbAccount): Observable<Array<IdbAccount>> {
+    updateWithObservable(account: IdbAccount): Observable<IdbAccount> {
         return this.dbService.update('accounts', account);
     }
 

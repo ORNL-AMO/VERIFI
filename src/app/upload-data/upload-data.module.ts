@@ -18,6 +18,8 @@ import { EditMeterFormModule } from '../facility/utility-data/energy-consumption
 import { ConfirmReadingsComponent } from './data-setup/file-setup/confirm-readings/confirm-readings.component';
 import { ConfirmPredictorsComponent } from './data-setup/file-setup/confirm-predictors/confirm-predictors.component';
 import { ConfirmAndSubmitComponent } from './data-setup/file-setup/confirm-and-submit/confirm-and-submit.component';
+import { LabelWithTooltipModule } from '../shared/label-with-tooltip/label-with-tooltip.module';
+import { HelperPipesModule } from '../shared/helper-pipes/helper-pipes.module';
 
 
 
@@ -43,7 +45,9 @@ import { ConfirmAndSubmitComponent } from './data-setup/file-setup/confirm-and-s
     RouterModule,
     FormsModule,
     DragDropModule,
-    EditMeterFormModule
+    EditMeterFormModule,
+    LabelWithTooltipModule,
+    HelperPipesModule
   ]
 })
 export class UploadDataModule { }

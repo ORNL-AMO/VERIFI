@@ -68,9 +68,10 @@ export class SetupConfirmationComponent implements OnInit {
       reportingValid: reportingValid,
       reportingErrors: reportingErrors
     }
-
-
-
+  }
+  
+  submitAccount() {
+    this.setupWizardService.submit.next(true);
   }
 }
 

@@ -83,11 +83,15 @@ export class SidebarComponent implements OnInit {
       if (this.open && !this.showAllFacilities) {
         return false;
       } else if (this.router.url.includes('account')) {
-        return true;
-      } else if (this.selectedFacility) {
-        if(index == this.hoverIndex){
+        if (index == this.hoverIndex) {
           return false;
-        }else  if (this.selectedFacility.guid != facilityId) {
+        }else{
+          return true;
+        }
+      } else if (this.selectedFacility) {
+        if (index == this.hoverIndex) {
+          return false;
+        } else if (this.selectedFacility.guid != facilityId) {
           return true;
         }
       }
@@ -110,13 +114,13 @@ export class SidebarComponent implements OnInit {
 
   setFacilityList(accountFacilities: Array<IdbFacility>) {
     if (!this.facilityList) {
-      this.facilityList = accountFacilities.map(facility => { return { guid: facility.guid, color: facility.color, id: facility.id, modifiedDate: facility.modifiedDate } });
+      this.facilityList = accountFacilities.map(facility => { return { guid: facility.guid, color: facility.color, id: facility.id, modifiedDate: facility.modifiedDate, facilityOrder: facility.facilityOrder } });
     } else {
       let tmpList: Array<string> = accountFacilities.map(facility => { return facility.guid });
       let currentIdList: Array<string> = this.facilityList.map(listItem => { return listItem.guid });
       let missingVals: Array<string> = _.xor(tmpList, currentIdList);
       if (missingVals.length != 0) {
-        this.facilityList = accountFacilities.map(facility => { return { guid: facility.guid, color: facility.color, id: facility.id, modifiedDate: facility.modifiedDate } });
+        this.facilityList = accountFacilities.map(facility => { return { guid: facility.guid, color: facility.color, id: facility.id, modifiedDate: facility.modifiedDate, facilityOrder: facility.facilityOrder } });
       } else {
         let tmpList: Array<string> = accountFacilities.map(facility => { return facility.color });
         let currentColorList: Array<string> = this.facilityList.map(listItem => { return listItem.color });
@@ -131,7 +135,7 @@ export class SidebarComponent implements OnInit {
           let missingVals: Array<Date> = _.xor(tmpList, currentColorList);
           if (missingVals.length != 0) {
             this.facilityList.forEach(item => {
-              item.modifiedDate = accountFacilities.find(facility => { return facility.guid == item.guid }).modifiedDate;
+              item.facilityOrder = accountFacilities.find(facility => { return facility.guid == item.guid }).facilityOrder;
             })
           }
         }
@@ -143,11 +147,12 @@ export class SidebarComponent implements OnInit {
     this.showAllFacilities = !this.showAllFacilities;
   }
 
-  setHoverIndex(index: number){
+  setHoverIndex(index: number) {
     this.hoverIndex = index;
   }
 }
 
 export interface FacilityListItem {
-  guid: string, color: string, id: number, modifiedDate: Date
+  guid: string, color: string, id: number, modifiedDate: Date,
+  facilityOrder: number
 }

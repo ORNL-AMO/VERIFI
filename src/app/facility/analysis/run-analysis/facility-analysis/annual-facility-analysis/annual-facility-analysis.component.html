@@ -9,7 +9,7 @@
     </div>
 </div>
 
-<div class="w-100 x-scroll">
+<div class="w-100 x-scroll" *ngIf="!calculating">
     <app-annual-analysis-summary-table *ngIf="dataDisplay == 'table'" [annualAnalysisSummary]="annualAnalysisSummary"
         [analysisItem]="analysisItem">
     </app-annual-analysis-summary-table>
@@ -17,3 +17,4 @@
         [analysisItem]="analysisItem">
     </app-annual-analysis-summary-graph>
 </div>
+<app-calculating-spinner *ngIf="calculating"></app-calculating-spinner>

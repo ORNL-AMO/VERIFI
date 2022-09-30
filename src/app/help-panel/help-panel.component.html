@@ -8,13 +8,17 @@
         </div>
         <div class="help-content">
             <app-help-page *ngIf="helpURL == 'help'"></app-help-page>
+
+            <app-upload-data-help *ngIf="helpURL == 'upload'"></app-upload-data-help>
+            <app-setup-wizard-help *ngIf="helpURL == 'setup-wizard'"></app-setup-wizard-help>
+
+
             <app-energy-consumption-help *ngIf="helpURL == 'energy-consumption'"></app-energy-consumption-help>
             <app-account-overview-help *ngIf="helpURL == 'account-summary'"></app-account-overview-help>
             <app-facility-overview-help *ngIf="helpURL == 'facility-summary'"></app-facility-overview-help>
             <app-calanderization-help *ngIf="helpURL == 'monthly-meter-data'"></app-calanderization-help>
             <app-meter-grouping-help *ngIf="helpURL == 'meter-groups'"></app-meter-grouping-help>
             <app-predictors-data-help *ngIf="helpURL == 'predictors'"></app-predictors-data-help>
-            <app-upload-data-help *ngIf="helpURL == 'upload-data'"></app-upload-data-help>
             <app-visualization-help *ngIf="helpURL == 'visualization'"></app-visualization-help>
             <app-account-help *ngIf="helpURL == 'account-management'"></app-account-help>
             <app-facility-help *ngIf="helpURL == 'facility-management'"></app-facility-help>

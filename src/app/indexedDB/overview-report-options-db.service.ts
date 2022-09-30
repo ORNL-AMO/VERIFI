@@ -59,7 +59,7 @@ export class OverviewReportOptionsDbService {
     return this.dbService.delete('overviewReportOptions', id);
   }
 
-  updateWithObservable(values: IdbOverviewReportOptions): Observable<Array<IdbOverviewReportOptions>> {
+  updateWithObservable(values: IdbOverviewReportOptions): Observable<IdbOverviewReportOptions> {
     return this.dbService.update('overviewReportOptions', values);
   }
 

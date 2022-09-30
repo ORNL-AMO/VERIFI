@@ -32,6 +32,7 @@ export class AccountHomeSummaryComponent implements OnInit {
 
   overviewReportOptionsSub: Subscription;
   disableButtons: boolean;
+
   constructor(private accountDbService: AccountdbService, private accountHomeService: AccountHomeService,
     private overviewReportOptionsDbService: OverviewReportOptionsDbService, private router: Router,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
@@ -61,7 +62,8 @@ export class AccountHomeSummaryComponent implements OnInit {
       } else {
         this.betterPlantsReportYear = undefined;
       }
-    })
+    });
+
   }
 
   ngOnDestroy() {

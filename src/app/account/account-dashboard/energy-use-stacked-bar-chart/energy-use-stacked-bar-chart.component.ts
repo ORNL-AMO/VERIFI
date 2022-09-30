@@ -31,7 +31,7 @@ export class EnergyUseStackedBarChartComponent implements OnInit {
     private accountDbService: AccountdbService, private calanderizationService: CalanderizationService) { }
 
   ngOnInit(): void {
-    this.accountFacilitiesSub = this.utilityMeterDataDbService.accountMeterData.subscribe(val => {
+    this.accountFacilitiesSub = this.dashboardService.accountFacilitiesSummary.subscribe(val => {
       this.setBarChartData();
       this.drawChart();
     });

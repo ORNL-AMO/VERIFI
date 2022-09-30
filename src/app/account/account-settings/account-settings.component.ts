@@ -33,6 +33,7 @@ export class AccountSettingsComponent implements OnInit {
   accountFacilitiesSub: Subscription;
   selectedAccount: IdbAccount;
   displayDeleteFacility: boolean;
+  orderOptions: Array<number>;
   constructor(
     private router: Router,
     private accountDbService: AccountdbService,
@@ -58,6 +59,7 @@ export class AccountSettingsComponent implements OnInit {
 
     this.accountFacilitiesSub = this.facilityDbService.accountFacilities.subscribe(val => {
       this.facilityList = val;
+      this.setOrderOptions();
     });
   }
 
@@ -216,5 +218,27 @@ export class AccountSettingsComponent implements OnInit {
     this.loadingService.setLoadingStatus(true);
     this.loadingService.setLoadingMessage('Resetting Database, if this takes too long restart application..');
     this.accountDbService.deleteDatabase();
+  }
+
+  setOrderOptions() {
+    let orderOptions: Array<number> = new Array();
+    let index: number = 1;
+    this.facilityList.forEach(item => {
+      orderOptions.push(index);
+      index++;
+    })
+    this.orderOptions = orderOptions;
+  }
+
+  async setFacilityOrder(facility: IdbFacility) {
+    await this.dbChangesService.updateFacilities(facility, true);
+    for (let i = 0; i < this.facilityList.length; i++) {
+      if (this.facilityList[i].guid != facility.guid) {
+        if (this.facilityList[i].facilityOrder && this.facilityList[i].facilityOrder == facility.facilityOrder) {
+          this.facilityList[i].facilityOrder = undefined;
+          await this.dbChangesService.updateFacilities(this.facilityList[i], true);
+        }
+      }
+    };
   }
 }

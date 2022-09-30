@@ -43,7 +43,7 @@ export class UtilityMeterdbService {
         return this.dbService.add('utilityMeter', utilityMeter);
     }
 
-    updateWithObservable(utilityMeter: IdbUtilityMeter): Observable<any> {
+    updateWithObservable(utilityMeter: IdbUtilityMeter): Observable<IdbUtilityMeter> {
         return this.dbService.update('utilityMeter', utilityMeter);
     }
     
