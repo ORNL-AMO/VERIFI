@@ -14,7 +14,7 @@ import { AccountHomeService } from './account-home.service';
 export class AccountHomeComponent implements OnInit {
 
   accountFacilities: Array<IdbFacility>;
-  accountMeterDataSub: Subscription
+  accountMeterDataSub: Subscription;
   constructor(private facilityDbService: FacilitydbService, private accountDbService: AccountdbService,
     private accountHomeService: AccountHomeService, private utilityMeterDataDbService: UtilityMeterDatadbService) { }
 
@@ -23,6 +23,7 @@ export class AccountHomeComponent implements OnInit {
       let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
       this.accountHomeService.setCalanderizedMeters();
       this.accountHomeService.setAnalysisSummary(selectedAccount);
+      this.accountFacilities = this.facilityDbService.accountFacilities.getValue();
     })
   }
 
