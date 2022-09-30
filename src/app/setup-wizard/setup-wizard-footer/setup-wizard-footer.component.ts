@@ -137,10 +137,6 @@ export class SetupWizardFooterComponent implements OnInit {
     }
   }
 
-  submitAccount() {
-    this.setupWizardService.submit.next(true);
-  }
-
   addfacility() {
     this.setupWizardService.addFacility();
   }
