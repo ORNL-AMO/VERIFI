@@ -59,6 +59,12 @@ export class AnnualAnalysisSummaryComponent implements OnInit {
 
   }
 
+  ngOnDestroy(){
+    if(this.worker){
+      this.worker.terminate();
+    }
+  }
+  
   setDataDisplay(display: 'table' | 'graph') {
     this.dataDisplay = display;
     this.analysisService.dataDisplay.next(this.dataDisplay);
