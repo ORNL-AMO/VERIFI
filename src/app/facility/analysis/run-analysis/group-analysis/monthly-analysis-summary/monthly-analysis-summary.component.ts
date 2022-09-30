@@ -35,7 +35,7 @@ export class MonthlyAnalysisSummaryComponent implements OnInit {
     let calanderizedMeters: Array<CalanderizedMeter> = this.analysisService.calanderizedMeters;
     let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
     if (typeof Worker !== 'undefined') {
-      this.worker = new Worker(new URL('src/app/web-workers/monthly-facility-analysis.worker', import.meta.url));
+      this.worker = new Worker(new URL('src/app/web-workers/monthly-group-analysis.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
         this.monthlyAnalysisSummary = data;
         this.calculating = false;

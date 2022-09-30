@@ -36,7 +36,7 @@ export class AnnualAnalysisSummaryComponent implements OnInit {
     let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
 
     if (typeof Worker !== 'undefined') {
-      this.worker = new Worker(new URL('src/app/web-workers/annual-facility-analysis.worker', import.meta.url));
+      this.worker = new Worker(new URL('src/app/web-workers/annual-group-analysis.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
         this.annualAnalysisSummary = data;
         this.calculating = false;
