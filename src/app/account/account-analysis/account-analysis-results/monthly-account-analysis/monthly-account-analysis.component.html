@@ -23,7 +23,7 @@
         </div>
     </div>
 </div>
-<div class="w-100 x-scroll">
+<div class="w-100 x-scroll" *ngIf="!calculating">
     <app-monthly-analysis-summary-graph *ngIf="dataDisplay == 'graph'"
         [monthlyAnalysisSummaryData]="monthlyAccountAnalysisData" [analysisItem]="accountAnalysisItem"
         [facilityOrAccount]="account">
@@ -33,3 +33,5 @@
         [facilityOrAccount]="account" [itemsPerPage]="itemsPerPage">
     </app-monthly-analysis-summary-table>
 </div>
+
+<app-calculating-spinner *ngIf="calculating"></app-calculating-spinner>
