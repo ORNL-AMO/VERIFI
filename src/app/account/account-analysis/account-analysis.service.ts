@@ -29,7 +29,6 @@ export class AccountAnalysisService {
     let calanderizationOptions: CalanderizationOptions = {
       energyIsSource: analysisItem.energyIsSource
     }
-    console.log(calanderizationOptions.energyIsSource);
     let calanderizedMeterData: Array<CalanderizedMeter> = this.calendarizationService.getCalanderizedMeterData(accountMeters, true, false, calanderizationOptions);
     calanderizedMeterData.forEach(calanderizedMeter => {
       calanderizedMeter.monthlyData = this.convertMeterDataService.convertMeterDataToAnalysis(analysisItem, calanderizedMeter.monthlyData, selectedAccount, calanderizedMeter.meter);

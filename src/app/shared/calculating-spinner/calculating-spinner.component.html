@@ -7,7 +7,8 @@
             <div class="bounce2"></div>
             <div class="bounce3"></div>
         </div>
-        <h3>Calculating Results...</h3>
+        <h3 *ngIf="!message">Calculating Results...</h3>
+        <h3 *ngIf="message">{{message}}</h3>
         <!-- </div> -->
 
     </div>
