@@ -296,7 +296,7 @@ export const SolidOptions: Array<FuelTypeOption> = [
     {
         startingUnit: 'lb',
         heatCapacityValue: .004125,
-        value: 'Biomass - Agricultural Byproducts',
+        value: 'Biomass',
         siteToSourceMultiplier: 1,
         emissionsOutputRate: 118.17
     },
