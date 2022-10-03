@@ -1,7 +1,10 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbUtilityMeterData } from 'src/app/models/idb';
+import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
+import { IdbFacility, IdbUtilityMeterData, IdbUtilityMeterGroup } from 'src/app/models/idb';
 
 @Component({
   selector: 'app-analysis',
@@ -12,16 +15,35 @@ export class AnalysisComponent implements OnInit {
 
   utilityMeterDataSub: Subscription;
   utilityMeterData: Array<IdbUtilityMeterData>;
-  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService) { }
+  utilityMeterGroups: Array<IdbUtilityMeterGroup>;
+  utilityMeterGroupsSub: Subscription;
+  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private utilityMeterGroupDbService: UtilityMeterGroupdbService,
+    private router: Router,
+    private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
     this.utilityMeterDataSub = this.utilityMeterDataDbService.facilityMeterData.subscribe(val => {
       this.utilityMeterData = val;
     });
+
+    this.utilityMeterGroupsSub = this.utilityMeterGroupDbService.facilityMeterGroups.subscribe(val => {
+      this.utilityMeterGroups = val;
+    })
   }
 
-  ngOnDestroy(){
+  ngOnDestroy() {
     this.utilityMeterDataSub.unsubscribe();
+    this.utilityMeterGroupsSub.unsubscribe();
   }
 
+  goToMeterGroups() {
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    this.router.navigateByUrl('/facility/' + selectedFacility.id + '/utility/meter-groups')
+  }
+
+  goToUtilityData(){
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    this.router.navigateByUrl('/facility/' + selectedFacility.id + '/utility')
+  }
 }

@@ -27,7 +27,8 @@ export class AnalysisDashboardComponent implements OnInit {
   orderByDirection: string = 'desc';
 
   itemToDelete: IdbAnalysisItem;
-  baselineYearError: boolean;
+  baselineYearErrorMin: boolean;
+  baselineYearErrorMax: boolean;
   yearOptions: Array<number>;
   selectedFacility: IdbFacility;
   selectedFacilityMeterDataSub: Subscription;
@@ -49,7 +50,8 @@ export class AnalysisDashboardComponent implements OnInit {
       this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
       this.yearOptions = this.analysisCalculationsHelperService.getYearOptions();
       if (this.yearOptions) {
-        this.baselineYearError = this.yearOptions[0] > this.selectedFacility.sustainabilityQuestions.energyReductionBaselineYear
+        this.baselineYearErrorMin = this.yearOptions[0] > this.selectedFacility.sustainabilityQuestions.energyReductionBaselineYear;
+        this.baselineYearErrorMax = this.yearOptions[this.yearOptions.length - 1] < this.selectedFacility.sustainabilityQuestions.energyReductionBaselineYear
       }
     });
   }

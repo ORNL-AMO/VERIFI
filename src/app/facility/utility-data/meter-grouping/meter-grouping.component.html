@@ -177,7 +177,7 @@
     <div class="windowOverlay"></div>
     <div class="windowContent">
         <app-edit-meter-group-form *ngIf="groupToEdit" [groupToEdit]="groupToEdit" (emitClose)="closeEditGroup($event)"
-            [editOrAdd]="editOrAdd">
+            [editOrAdd]="editOrAdd" [meterGroupTypes]="meterGroupTypes">
         </app-edit-meter-group-form>
     </div>
 </div>

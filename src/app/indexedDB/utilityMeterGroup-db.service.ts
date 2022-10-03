@@ -71,7 +71,7 @@ export class UtilityMeterGroupdbService {
     }
 
 
-    getNewIdbUtilityMeterGroup(type: string, name: string, facilityId: string, accountId: string): IdbUtilityMeterGroup {
+    getNewIdbUtilityMeterGroup(type: 'Energy' | 'Water' | 'Other', name: string, facilityId: string, accountId: string): IdbUtilityMeterGroup {
         return {
             facilityId: facilityId,
             accountId: accountId,
