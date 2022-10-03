@@ -165,21 +165,23 @@ export class AnnualAnalysisSummaryDataClass {
 
     setPredictorUsage(accountPredictorEntries: Array<IdbPredictorEntry>, facility: IdbFacility) {
         this.predictorUsage = new Array();
-        let facilityPredictorData: Array<IdbPredictorEntry> = accountPredictorEntries.filter(entry => { return entry.facilityId == facility.guid });
-        let summaryYearPredictorData: Array<IdbPredictorEntry> = this.helperService.filterYearPredictorData(facilityPredictorData, this.year, facility);
-        if (summaryYearPredictorData.length > 0) {
-            let predictorVariables: Array<PredictorData> = summaryYearPredictorData[0].predictors;
-            predictorVariables.forEach(variable => {
-                let usageVal: number = 0;
-                summaryYearPredictorData.forEach(data => {
-                    let predictorData: PredictorData = data.predictors.find(predictor => { return predictor.id == variable.id });
-                    usageVal = usageVal + predictorData.amount;
+        if (facility) {
+            let facilityPredictorData: Array<IdbPredictorEntry> = accountPredictorEntries.filter(entry => { return entry.facilityId == facility.guid });
+            let summaryYearPredictorData: Array<IdbPredictorEntry> = this.helperService.filterYearPredictorData(facilityPredictorData, this.year, facility);
+            if (summaryYearPredictorData.length > 0) {
+                let predictorVariables: Array<PredictorData> = summaryYearPredictorData[0].predictors;
+                predictorVariables.forEach(variable => {
+                    let usageVal: number = 0;
+                    summaryYearPredictorData.forEach(data => {
+                        let predictorData: PredictorData = data.predictors.find(predictor => { return predictor.id == variable.id });
+                        usageVal = usageVal + predictorData.amount;
+                    });
+                    this.predictorUsage.push({
+                        usage: usageVal,
+                        predictorId: variable.id
+                    });
                 });
-                this.predictorUsage.push({
-                    usage: usageVal,
-                    predictorId: variable.id
-                });
-            });
+            }
         }
     }
 

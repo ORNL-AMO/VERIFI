@@ -14,6 +14,7 @@ import { AccountAnalysisResultsComponent } from './account-analysis-results/acco
 import { MonthlyAccountAnalysisComponent } from './account-analysis-results/monthly-account-analysis/monthly-account-analysis.component';
 import { AnnualAccountAnalysisComponent } from './account-analysis-results/annual-account-analysis/annual-account-analysis.component';
 import { SharedAnalysisModule } from 'src/app/shared/shared-analysis/shared-analysis.module';
+import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/calculating-spinner.module';
 
 
 @NgModule({
@@ -34,7 +35,8 @@ import { SharedAnalysisModule } from 'src/app/shared/shared-analysis/shared-anal
     NgbPaginationModule,
     FormsModule,
     HelperPipesModule,
-    SharedAnalysisModule
+    SharedAnalysisModule,
+    CalculatingSpinnerModule
   ]
 })
 export class AccountAnalysisModule { }
