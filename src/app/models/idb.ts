@@ -94,7 +94,7 @@ export interface IdbUtilityMeterGroup {
     facilityId: string,
     accountId: string,
     //data
-    groupType: string,
+    groupType: 'Energy' | 'Water' | 'Other',
     name: string,
     description?: string,
     dateModified?: Date,

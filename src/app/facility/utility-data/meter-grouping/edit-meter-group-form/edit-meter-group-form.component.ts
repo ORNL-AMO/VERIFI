@@ -6,6 +6,7 @@ import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
+import { MeterGroupType } from 'src/app/models/calanderization';
 import { IdbAccount, IdbFacility, IdbUtilityMeterGroup } from 'src/app/models/idb';
 
 @Component({
@@ -20,6 +21,8 @@ export class EditMeterGroupFormComponent implements OnInit {
   emitClose: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Input()
   editOrAdd: 'add' | 'edit';
+  @Input()
+  meterGroupTypes: Array<MeterGroupType>;
 
   groupForm: FormGroup;
   constructor(private formBuilder: FormBuilder, private utilityMeterGroupDbService: UtilityMeterGroupdbService,
@@ -29,6 +32,7 @@ export class EditMeterGroupFormComponent implements OnInit {
   ngOnInit(): void {
     this.groupForm = this.formBuilder.group({
       name: [this.groupToEdit.name, Validators.required],
+      groupType: [this.groupToEdit.groupType, Validators.required],
       description: [this.groupToEdit.description]
     });
   }
