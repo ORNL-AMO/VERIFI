@@ -299,17 +299,8 @@ export class EditMeterFormComponent implements OnInit {
   }
 
   setDefaultScope() {
-    if (this.meterForm.controls.source.value == 'Electricity') {
-      this.meterForm.controls.scope.patchValue(3)
-    } else if (this.meterForm.controls.source.value == 'Other Energy') {
-      this.meterForm.controls.scope.patchValue(4)
-    } else if (this.meterForm.controls.source.value == 'Natural Gas') {
-      this.meterForm.controls.scope.patchValue(1)
-    } else if (this.meterForm.controls.source.value == 'Other Fuels') {
-      this.meterForm.controls.scope.patchValue(1)
-    } else {
-      this.meterForm.controls.scope.patchValue(undefined)
-    }
+    let defaultScope: number = this.editMeterFormService.getDefaultScope(this.meterForm.controls.source.value);
+    this.meterForm.controls.scope.patchValue(defaultScope)
   }
 
 
