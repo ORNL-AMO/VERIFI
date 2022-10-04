@@ -2,9 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
+import { CalanderizedMeter } from 'src/app/models/calanderization';
+import { IdbFacility, IdbPredictorEntry, IdbUtilityMeter } from 'src/app/models/idb';
 import { FacilityHomeService } from './facility-home.service';
 
 @Component({
@@ -17,25 +18,85 @@ export class FacilityHomeComponent implements OnInit {
   facilityMeterDataSub: Subscription;
   facilityMeters: Array<IdbUtilityMeter>;
   facility: IdbFacility;
-  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private facilityDbService: FacilitydbService,
+  monthlyAnalysisWorker: Worker;
+  annualAnalysisWorker: Worker;
+  constructor(private facilityDbService: FacilitydbService,
     private facilityHomeService: FacilityHomeService, private utilityMeterDbService: UtilityMeterdbService,
-    private router: Router) { }
+    private router: Router, private predictorDbService: PredictordbService) { }
 
   ngOnInit(): void {
     this.facilityMeterDataSub = this.facilityDbService.selectedFacility.subscribe(val => {
       this.facility = val;
       this.facilityHomeService.setCalanderizedMeters(this.facility);
-      this.facilityHomeService.setAnalysisSummary(this.facility);
       this.facilityMeters = this.utilityMeterDbService.facilityMeters.getValue();
+      if (this.facilityHomeService.latestAnalysisItem) {
+        this.setMonthlyAnalysisSummary();
+        this.setAnnualAnalysisSummary();
+      } else {
+        this.facilityHomeService.monthlyFacilityAnalysisData.next(undefined);
+        this.facilityHomeService.annualAnalysisSummary.next(undefined);
+      }
     })
   }
 
   ngOnDestroy() {
     this.facilityMeterDataSub.unsubscribe();
+    if (this.monthlyAnalysisWorker) {
+      this.monthlyAnalysisWorker.terminate();
+    }
+    if (this.annualAnalysisWorker) {
+      this.annualAnalysisWorker.terminate();
+    }
+    this.facilityHomeService.monthlyFacilityAnalysisData.next(undefined);
+    this.facilityHomeService.annualAnalysisSummary.next(undefined);
   }
 
 
   navigateToMeters() {
     this.router.navigateByUrl('facility/' + this.facility.id + '/utility');
+  }
+
+  setMonthlyAnalysisSummary() {
+    let calanderizedMeters: Array<CalanderizedMeter> = this.facilityHomeService.calanderizedMeters;
+    let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
+    if (typeof Worker !== 'undefined') {
+      this.monthlyAnalysisWorker = new Worker(new URL('src/app/web-workers/monthly-facility-analysis.worker', import.meta.url));
+      this.monthlyAnalysisWorker.onmessage = ({ data }) => {
+        this.facilityHomeService.monthlyFacilityAnalysisData.next(data);
+      };
+      this.monthlyAnalysisWorker.postMessage({
+        analysisItem: this.facilityHomeService.latestAnalysisItem,
+        facility: this.facility,
+        calanderizedMeters: calanderizedMeters,
+        accountPredictorEntries: accountPredictorEntries
+      });
+    } else {
+      console.log('nopee')
+
+      // Web Workers are not supported in this environment.
+      // You should add a fallback so that your program still executes correctly.
+    }
+  }
+
+  setAnnualAnalysisSummary() {
+    let calanderizedMeters: Array<CalanderizedMeter> = this.facilityHomeService.calanderizedMeters;
+    let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
+    if (typeof Worker !== 'undefined') {
+      this.annualAnalysisWorker = new Worker(new URL('src/app/web-workers/annual-facility-analysis.worker', import.meta.url));
+      this.annualAnalysisWorker.onmessage = ({ data }) => {
+        this.facilityHomeService.annualAnalysisSummary.next(data);
+      };
+      this.annualAnalysisWorker.postMessage({
+        analysisItem: this.facilityHomeService.latestAnalysisItem,
+        facility: this.facility,
+        calanderizedMeters: calanderizedMeters,
+        accountPredictorEntries: accountPredictorEntries
+      });
+    } else {
+      console.log('nopee')
+
+      // Web Workers are not supported in this environment.
+      // You should add a fallback so that your program still executes correctly.
+    }
   }
 }

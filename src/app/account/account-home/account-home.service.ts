@@ -7,8 +7,7 @@ import { IdbAccount, IdbAccountAnalysisItem, IdbUtilityMeter } from 'src/app/mod
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { ConvertMeterDataService } from 'src/app/shared/helper-services/convert-meter-data.service';
 import * as _ from 'lodash';
-import { AnnualAnalysisSummary } from 'src/app/models/analysis';
-import { AccountAnalysisCalculationsService } from 'src/app/shared/shared-analysis/calculations/account-analysis-calculations.service';
+import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
@@ -18,11 +17,12 @@ export class AccountHomeService {
 
   calanderizedMeters: Array<CalanderizedMeter>;
   latestAnalysisItem: IdbAccountAnalysisItem;
-  latestAnalysisSummary: BehaviorSubject<AnnualAnalysisSummary>;
+  annualAnalysisSummary: BehaviorSubject<Array<AnnualAnalysisSummary>>;
+  monthlyFacilityAnalysisData: BehaviorSubject<Array<MonthlyAnalysisSummaryData>>;
   constructor(private accountAnalysisDbService: AccountAnalysisDbService, private utilityMeterDbService: UtilityMeterdbService,
-    private accountDbService: AccountdbService, private calendarizationService: CalanderizationService, private convertMeterDataService: ConvertMeterDataService,
-    private accountAnalysisCalculationsService: AccountAnalysisCalculationsService) { 
-      this.latestAnalysisSummary = new BehaviorSubject<AnnualAnalysisSummary>(undefined);
+    private accountDbService: AccountdbService, private calendarizationService: CalanderizationService, private convertMeterDataService: ConvertMeterDataService) { 
+      this.annualAnalysisSummary = new BehaviorSubject<Array<AnnualAnalysisSummary>>(undefined);
+      this.monthlyFacilityAnalysisData = new BehaviorSubject<Array<MonthlyAnalysisSummaryData>>(undefined);
     }
 
   setCalanderizedMeters() {
@@ -41,16 +41,6 @@ export class AccountHomeService {
       this.calanderizedMeters = calanderizedMeterData;
     } else {
       this.calanderizedMeters = undefined;
-    }
-  }
-
-  setAnalysisSummary(account: IdbAccount) {
-    if (this.latestAnalysisItem) {
-      let analysisSummaries: Array<AnnualAnalysisSummary> = this.accountAnalysisCalculationsService.getAnnualAnalysisSummary(this.latestAnalysisItem, account, this.calanderizedMeters);
-      let latestSummary: AnnualAnalysisSummary = _.maxBy(analysisSummaries, 'year');
-      this.latestAnalysisSummary.next(latestSummary)
-    } else {
-      this.latestAnalysisSummary.next(undefined);
     }
   }
 }

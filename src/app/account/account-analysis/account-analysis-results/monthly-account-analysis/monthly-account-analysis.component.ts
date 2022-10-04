@@ -8,7 +8,6 @@ import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, IdbPredictorEntry } from 'src/app/models/idb';
-import { AccountAnalysisCalculationsService } from 'src/app/shared/shared-analysis/calculations/account-analysis-calculations.service';
 import { AccountAnalysisService } from '../../account-analysis.service';
 
 @Component({
@@ -25,7 +24,7 @@ export class MonthlyAccountAnalysisComponent implements OnInit {
   itemsPerPage: number = 12;
   worker: Worker;
   calculating: boolean;
-  constructor(private analysisService: AnalysisService, private accountAnalysisCalculationsService: AccountAnalysisCalculationsService,
+  constructor(private analysisService: AnalysisService,
     private accoundAnalysisDbService: AccountAnalysisDbService, private accountDbService: AccountdbService,
     private accountAnalysisService: AccountAnalysisService,
     private predictorDbService: PredictordbService,
@@ -39,7 +38,6 @@ export class MonthlyAccountAnalysisComponent implements OnInit {
     let calanderizedMeters: Array<CalanderizedMeter> = this.accountAnalysisService.calanderizedMeters;
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
 
-    // this.monthlyAccountAnalysisData = this.accountAnalysisCalculationsService.calculateMonthlyAccountAnalysis(this.accountAnalysisItem, this.account, calanderizedMeters);
     let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
     let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
     if (typeof Worker !== 'undefined') {

@@ -23,9 +23,9 @@ export class FacilityHomeSummaryComponent implements OnInit {
 
   latestAnalysisSummary: AnnualAnalysisSummary;
   latestSummarySub: Subscription;
-  percentSavings: number;
+  percentSavings: number = 0;
   percentGoal: number;
-  percentTowardsGoal: number;
+  percentTowardsGoal: number = 0;
   goalYear: number;
   baselineYear: number;
   facilityAnalysisYear: number;
@@ -45,6 +45,8 @@ export class FacilityHomeSummaryComponent implements OnInit {
   latestPredictorEntry: IdbPredictorEntry;
 
   naics: string;
+
+  selectedFacilitySub: Subscription;
   constructor(private analysisDbService: AnalysisDbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private facilityDbService: FacilitydbService, private facilityHomeService: FacilityHomeService,
     private router: Router, private predictorDbService: PredictordbService,
@@ -53,22 +55,28 @@ export class FacilityHomeSummaryComponent implements OnInit {
     private exportToExcelTemplateService: ExportToExcelTemplateService) { }
 
   ngOnInit(): void {
-    this.latestSummarySub = this.facilityHomeService.latestAnalysisSummary.subscribe(val => {
+    this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
       this.facility = this.facilityDbService.selectedFacility.getValue();
+      this.setGoalYears()
       this.setNAICS();
-      this.latestAnalysisSummary = val;
+      this.setFacilityStatus();
+    });
+    this.latestSummarySub = this.facilityHomeService.annualAnalysisSummary.subscribe(val => {
+      this.latestAnalysisSummary = _.maxBy(val, 'year');
       if (this.latestAnalysisSummary) {
         this.facilityAnalysisYear = this.latestAnalysisSummary.year;
         this.setProgressPercentages();
       } else {
         this.facilityAnalysisYear = undefined;
+        this.percentSavings = 0;
+        this.percentTowardsGoal = 0;
       }
-      this.setFacilityStatus();
     });
   }
 
   ngOnDestroy() {
     this.latestSummarySub.unsubscribe();
+    this.selectedFacilitySub.unsubscribe();
   }
 
   checkMeterDataUpToDate() {
@@ -86,12 +94,16 @@ export class FacilityHomeSummaryComponent implements OnInit {
     }
   }
 
+  setGoalYears() {
+    if (this.facility && this.facility.sustainabilityQuestions) {
+      this.percentGoal = this.facility.sustainabilityQuestions.energyReductionPercent;
+      this.goalYear = this.facility.sustainabilityQuestions.energyReductionTargetYear;
+      this.baselineYear = this.facility.sustainabilityQuestions.energyReductionBaselineYear;
+    }
+  }
 
   setProgressPercentages() {
     this.percentSavings = this.latestAnalysisSummary.totalSavingsPercentImprovement;
-    this.percentGoal = this.facility.sustainabilityQuestions.energyReductionPercent;
-    this.goalYear = this.facility.sustainabilityQuestions.energyReductionTargetYear;
-    this.baselineYear = this.facility.sustainabilityQuestions.energyReductionBaselineYear;
     this.percentTowardsGoal = (this.percentSavings / this.percentGoal) * 100;
     if (this.percentTowardsGoal < 0) {
       this.percentTowardsGoal = 0;
