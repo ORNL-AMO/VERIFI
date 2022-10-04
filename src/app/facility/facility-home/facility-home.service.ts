@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { AnnualAnalysisSummary } from 'src/app/models/analysis';
+import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { CalanderizationOptions, CalanderizedMeter } from 'src/app/models/calanderization';
 import { IdbAnalysisItem, IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
 import * as _ from 'lodash';
@@ -19,12 +19,14 @@ export class FacilityHomeService {
 
   calanderizedMeters: Array<CalanderizedMeter>;
   latestAnalysisItem: IdbAnalysisItem;
-  latestAnalysisSummary: BehaviorSubject<AnnualAnalysisSummary>;
+  annualAnalysisSummary: BehaviorSubject<Array<AnnualAnalysisSummary>>;
+  monthlyFacilityAnalysisData: BehaviorSubject<Array<MonthlyAnalysisSummaryData>>;
   constructor(private analysisDbService: AnalysisDbService, private utilityMeterDbService: UtilityMeterdbService,
     private facilitydbService: FacilitydbService, private calendarizationService: CalanderizationService,
     private convertMeterDataService: ConvertMeterDataService,
     private facilityAnalysisCalculationsService: FacilityAnalysisCalculationsService) {
-    this.latestAnalysisSummary = new BehaviorSubject<AnnualAnalysisSummary>(undefined);
+    this.annualAnalysisSummary = new BehaviorSubject<Array<AnnualAnalysisSummary>>(undefined);
+    this.monthlyFacilityAnalysisData = new BehaviorSubject<Array<MonthlyAnalysisSummaryData>>(undefined);
   }
 
 
@@ -48,14 +50,14 @@ export class FacilityHomeService {
       this.calanderizedMeters = undefined;
     }
   }
-  
-  setAnalysisSummary(facility: IdbFacility) {
-    if (this.latestAnalysisItem) {
-      let analysisSummaries: Array<AnnualAnalysisSummary> = this.facilityAnalysisCalculationsService.getAnnualAnalysisSummary(this.latestAnalysisItem, facility, this.calanderizedMeters);
-      let latestSummary: AnnualAnalysisSummary = _.maxBy(analysisSummaries, 'year');
-      this.latestAnalysisSummary.next(latestSummary)
-    } else {
-      this.latestAnalysisSummary.next(undefined);
-    }
-  }
+
+  // setAnalysisSummary(facility: IdbFacility) {
+  //   if (this.latestAnalysisItem) {
+  //     let analysisSummaries: Array<AnnualAnalysisSummary> = this.facilityAnalysisCalculationsService.getAnnualAnalysisSummary(this.latestAnalysisItem, facility, this.calanderizedMeters);
+  //     let latestSummary: AnnualAnalysisSummary = _.maxBy(analysisSummaries, 'year');
+  //     this.latestAnalysisSummary.next(latestSummary)
+  //   } else {
+  //     this.latestAnalysisSummary.next(undefined);
+  //   }
+  // }
 }

@@ -21,9 +21,9 @@ export class AccountHomeSummaryComponent implements OnInit {
   accountSub: Subscription;
   latestAnalysisSummary: AnnualAnalysisSummary;
   latestSummarySub: Subscription;
-  percentSavings: number;
+  percentSavings: number = 0;
   percentGoal: number;
-  percentTowardsGoal: number;
+  percentTowardsGoal: number = 0;
   goalYear: number;
   baselineYear: number;
 
@@ -41,16 +41,19 @@ export class AccountHomeSummaryComponent implements OnInit {
   ngOnInit(): void {
     this.accountSub = this.accountDbService.selectedAccount.subscribe(val => {
       this.account = val;
+      this.setGoalYears();
       let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
       this.disableButtons = (accountMeterData.length == 0);
     });
-    this.latestSummarySub = this.accountHomeService.latestAnalysisSummary.subscribe(val => {
-      this.latestAnalysisSummary = val;
+    this.latestSummarySub = this.accountHomeService.annualAnalysisSummary.subscribe(val => {
+      this.latestAnalysisSummary = _.maxBy(val, 'year');
       if (this.latestAnalysisSummary) {
         this.accountAnalysisYear = this.latestAnalysisSummary.year;
         this.setProgressPercentages();
       } else {
         this.accountAnalysisYear = undefined;
+        this.percentSavings = 0;
+        this.percentTowardsGoal = 0;
       }
     });
 
@@ -72,11 +75,16 @@ export class AccountHomeSummaryComponent implements OnInit {
     this.overviewReportOptionsSub.unsubscribe();
   }
 
+  setGoalYears(){
+    if(this.account && this.account.sustainabilityQuestions){
+      this.percentGoal = this.account.sustainabilityQuestions.energyReductionPercent;
+      this.goalYear = this.account.sustainabilityQuestions.energyReductionTargetYear;
+      this.baselineYear = this.account.sustainabilityQuestions.energyReductionBaselineYear;
+    }
+  }
+
   setProgressPercentages() {
     this.percentSavings = this.latestAnalysisSummary.totalSavingsPercentImprovement;
-    this.percentGoal = this.account.sustainabilityQuestions.energyReductionPercent;
-    this.goalYear = this.account.sustainabilityQuestions.energyReductionTargetYear;
-    this.baselineYear = this.account.sustainabilityQuestions.energyReductionBaselineYear;
     this.percentTowardsGoal = (this.percentSavings / this.percentGoal) * 100;
   }
 
@@ -88,7 +96,7 @@ export class AccountHomeSummaryComponent implements OnInit {
     }
   }
 
-  exportData(){
+  exportData() {
     this.exportToExcelTemplateService.exportFacilityData();
   }
 }
