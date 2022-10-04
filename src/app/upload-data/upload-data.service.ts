@@ -154,7 +154,7 @@ export class UploadDataService {
       meter.accountNumber = meterData['Account Number'];
       meter.source = this.getMeterSource(meterData['Source']);
       meter.name = meterData['Meter Name'];
-      if(!meter.name){
+      if (!meter.name) {
         meter.name = 'Meter ' + meterNumber;
       }
       meter.supplier = meterData['Utility Supplier'];
@@ -170,7 +170,7 @@ export class UploadDataService {
       meter.startingUnit = this.checkImportStartingUnit(meterData['Collection Unit'], meter.source, meter.phase, meter.fuel);
       meter.heatCapacity = meterData['Heat Capacity'];
       let isEnergyUnit: boolean = this.energyUnitsHelperService.isEnergyUnit(meter.startingUnit);
-      if(isEnergyUnit){
+      if (isEnergyUnit) {
         meter.energyUnit = meter.startingUnit;
       }
       if (!meter.heatCapacity) {
@@ -178,14 +178,43 @@ export class UploadDataService {
           let fuelTypeOptions: Array<FuelTypeOption> = this.energyUseCalculationsService.getFuelTypeOptions(meter.source, meter.phase);
           let fuel: FuelTypeOption = fuelTypeOptions.find(option => { return option.value == meter.fuel });
           meter.heatCapacity = this.energyUseCalculationsService.getHeatingCapacity(meter.source, meter.startingUnit, meter.energyUnit, fuel);
-        } 
+        }
       }
       // meter.heatCapacity = meterData['Heat Capacity'];
       meter.siteToSource = meterData['Site To Source'];
       meter.scope = this.getScope(meterData['Scope']);
+      if (meter.scope == undefined) {
+        meter.scope = this.editMeterFormService.getDefaultScope(meter.source);
+      }
       meter.agreementType = this.getAgreementType(meterData['Agreement Type']);
+      if (meter.agreementType == undefined && meter.source == 'Electricity') {
+        meter.agreementType = 1;
+      }
       meter.includeInEnergy = this.getYesNoBool(meterData['Include In Energy']);
+      if (meter.includeInEnergy == undefined) {
+        if (meter.agreementType != 4 && meter.agreementType != 6) {
+          meter.includeInEnergy = true;
+        } else {
+          meter.includeInEnergy = false;
+        }
+      }
       meter.retainRECs = this.getYesNoBool(meterData['Retain RECS']);
+      if (meter.retainRECs == undefined && meter.source == 'Electricity') {
+        if (meter.agreementType == 1) {
+          meter.retainRECs = false;
+        } else {
+          meter.retainRECs = true;
+        }
+      }
+      if (meter.siteToSource == undefined) {
+        let selectedFuelTypeOption: FuelTypeOption;
+        if (meter.fuel != undefined) {
+          let fuelTypeOptions: Array<FuelTypeOption> = this.energyUseCalculationsService.getFuelTypeOptions(meter.source, meter.phase);
+          selectedFuelTypeOption = fuelTypeOptions.find(option => { return option.value == meter.fuel });
+        }
+        let siteToSource: number = this.energyUseCalculationsService.getSiteToSource(meter.source, selectedFuelTypeOption, meter.agreementType);
+        meter.siteToSource = siteToSource;
+      }
       meter.meterReadingDataApplication = this.getMeterReadingDataApplication(meterData['Calendarize Data?']);
       importMeters.push(meter);
     })
@@ -429,7 +458,7 @@ export class UploadDataService {
   getYesNoBool(val: string): boolean {
     if (val == 'Yes') {
       return true;
-    } else {
+    } else if(val == 'No'){
       return false;
     }
   }

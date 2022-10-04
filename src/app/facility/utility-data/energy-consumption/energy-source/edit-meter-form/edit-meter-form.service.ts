@@ -88,7 +88,7 @@ export class EditMeterFormService {
       meter.locationGHGMultiplier = multipliers.locationGHGMultiplier;
       meter.marketGHGMultiplier = multipliers.marketGHGMultiplier;
       meter.recsMultiplier = multipliers.recsMultiplier;
-    }else{
+    } else {
       meter.locationGHGMultiplier = 1;
       meter.marketGHGMultiplier = 1;
       meter.recsMultiplier = 0;
@@ -177,27 +177,27 @@ export class EditMeterFormService {
       recsMultiplier = greenPurchaseFraction;
     }
 
-    if(includeInEnergy){
-      if(directConnection && retainRECs){
+    if (includeInEnergy) {
+      if (directConnection && retainRECs) {
         locationGHGMultiplier = 0;
-      }else{
+      } else {
         locationGHGMultiplier = 1;
       }
-    }else{
-      if(retainRECs){
+    } else {
+      if (retainRECs) {
         locationGHGMultiplier = 0;
-      }else{
+      } else {
         locationGHGMultiplier = 1;
       }
     }
 
 
-    if(greenPurchaseFraction){
+    if (greenPurchaseFraction) {
       marketGHGMultiplier = 1 - greenPurchaseFraction;
-    }else{
-      if(retainRECs){
+    } else {
+      if (retainRECs) {
         marketGHGMultiplier = 0;
-      }else{
+      } else {
         marketGHGMultiplier = 1;
       }
     }
@@ -206,6 +206,20 @@ export class EditMeterFormService {
       marketGHGMultiplier: marketGHGMultiplier,
       locationGHGMultiplier: locationGHGMultiplier,
       recsMultiplier: recsMultiplier
+    }
+  }
+
+  getDefaultScope(source: MeterSource) {
+    if (source == 'Electricity') {
+      return 3;
+    } else if (source == 'Other Energy') {
+      return 4;
+    } else if (source == 'Natural Gas') {
+      return 1;
+    } else if (source == 'Other Fuels') {
+      return 1;
+    } else {
+      return undefined;
     }
   }
 }
