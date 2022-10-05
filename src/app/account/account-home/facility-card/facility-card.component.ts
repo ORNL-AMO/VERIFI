@@ -7,6 +7,9 @@ import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service
 import { UtilityColors } from 'src/app/shared/utilityColors';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { OverviewReportService } from '../../overview-report/overview-report.service';
+import { AccountHomeService } from '../account-home.service';
+import { CalanderizedMeter } from 'src/app/models/calanderization';
+import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 @Component({
   selector: 'app-facility-card',
   templateUrl: './facility-card.component.html',
@@ -25,9 +28,22 @@ export class FacilityCardComponent implements OnInit {
   latestPredictorEntry: IdbPredictorEntry;
   noMeterData: boolean;
   naics: string;
+  worker: Worker;
+  calculating: boolean = true;
+  annualAnalysisSummary: Array<AnnualAnalysisSummary>;
+  monthlyFacilityAnalysisData: Array<MonthlyAnalysisSummaryData>;
+
+  latestAnalysisYear: number;
+  percentSavings: number = 0;
+  percentGoal: number;
+  percentTowardsGoal: number = 0;
+  goalYear: number;
+  baselineYear: number;
+
+  showContent: boolean = true;
   constructor(private analysisDbService: AnalysisDbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterDbService: UtilityMeterdbService, private predictorDbService: PredictordbService,
-    private overviewReportService: OverviewReportService) { }
+    private overviewReportService: OverviewReportService, private accountHomeService: AccountHomeService) { }
 
   ngOnInit(): void {
     let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
@@ -48,6 +64,9 @@ export class FacilityCardComponent implements OnInit {
       }
     }
     this.setNAICS();
+    this.setGoalYears();
+    this.setFacilityAnalysisSummary();
+    this.setMonthlyAnalysisSummary();
   }
 
 
@@ -78,8 +97,80 @@ export class FacilityCardComponent implements OnInit {
     return UtilityColors[source].color
   }
 
-  setNAICS(){
+  setNAICS() {
     this.naics = this.overviewReportService.getNAICS(this.facility);
+  }
+
+  setFacilityAnalysisSummary() {
+    // this.facility = this.facilityDbService.selectedFacility.getValue();
+    let calanderizedMeters: Array<CalanderizedMeter> = this.accountHomeService.calanderizedMeters;
+    // this.annualAnalysisSummary = this.facilityAnalysisCalculationsService.getAnnualAnalysisSummary(this.analysisItem, this.facility, calanderizedMeters);
+    let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
+    if (typeof Worker !== 'undefined') {
+      this.worker = new Worker(new URL('src/app/web-workers/annual-facility-analysis.worker', import.meta.url));
+      this.worker.onmessage = ({ data }) => {
+        this.annualAnalysisSummary = data;
+        this.setProgressPercentages();
+        // this.calculating = false;
+      };
+      // this.calculating = true;
+      this.worker.postMessage({
+        analysisItem: this.latestAnalysisItem,
+        facility: this.facility,
+        calanderizedMeters: calanderizedMeters,
+        accountPredictorEntries: accountPredictorEntries
+      });
+    } else {
+      console.log('nopee')
+
+      // Web Workers are not supported in this environment.
+      // You should add a fallback so that your program still executes correctly.
+    }
+  }
+
+  setGoalYears() {
+    if (this.facility && this.facility.sustainabilityQuestions) {
+      this.percentGoal = this.facility.sustainabilityQuestions.energyReductionPercent;
+      this.goalYear = this.facility.sustainabilityQuestions.energyReductionTargetYear;
+      this.baselineYear = this.facility.sustainabilityQuestions.energyReductionBaselineYear;
+    }
+  }
+
+  setProgressPercentages() {
+    let latestAnalysisSummary: AnnualAnalysisSummary = _.maxBy(this.annualAnalysisSummary, 'year');
+    this.percentSavings = latestAnalysisSummary.totalSavingsPercentImprovement;
+    this.latestAnalysisYear = latestAnalysisSummary.year;
+    this.percentTowardsGoal = (this.percentSavings / this.percentGoal) * 100;
+  }
+
+  toggleShowContent() {
+    this.showContent = !this.showContent;
+  }
+
+  setMonthlyAnalysisSummary(){
+    let calanderizedMeters: Array<CalanderizedMeter> = this.accountHomeService.calanderizedMeters;
+    let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
+    if (typeof Worker !== 'undefined') {
+      this.worker = new Worker(new URL('src/app/web-workers/monthly-facility-analysis.worker', import.meta.url));
+      this.worker.onmessage = ({ data }) => {
+        this.monthlyFacilityAnalysisData = data;
+        console.log(this.facility.name);
+        console.log(this.monthlyFacilityAnalysisData);
+        this.calculating = false;
+      };
+      this.calculating = true;
+      this.worker.postMessage({
+        analysisItem: this.latestAnalysisItem,
+        facility: this.facility,
+        calanderizedMeters: calanderizedMeters,
+        accountPredictorEntries: accountPredictorEntries
+      });
+    } else {
+      console.log('nopee')
+
+      // Web Workers are not supported in this environment.
+      // You should add a fallback so that your program still executes correctly.
+    }
   }
 
 }

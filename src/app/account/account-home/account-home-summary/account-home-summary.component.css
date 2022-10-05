@@ -11,7 +11,7 @@
     /* height: 8px; */
 }
 .progress-bar {
-    background-color: #2c386b;
+    background-color: #145A32;
 }
 .progress-bar-data {
     position: absolute;
@@ -50,4 +50,11 @@ button:hover span.fa{
 
 .alert-warning{
     width: auto;
+}
+
+.progress-bar-data-year{
+    top: 50px;
+    right: 48%;
+    font-weight: bold;
+    position: absolute;
 }

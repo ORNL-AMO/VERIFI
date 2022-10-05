@@ -17,7 +17,7 @@ import { AccountHomeService } from './account-home.service';
 export class AccountHomeComponent implements OnInit {
 
   accountFacilities: Array<IdbFacility>;
-  accountMeterDataSub: Subscription;
+  selectedAccountSub: Subscription;
   monthlyAnalysisWorker: Worker;
   annualAnalysisWorker: Worker;
   account: IdbAccount;
@@ -27,8 +27,8 @@ export class AccountHomeComponent implements OnInit {
     private analysisDbService: AnalysisDbService) { }
 
   ngOnInit(): void {
-    this.accountMeterDataSub = this.utilityMeterDataDbService.accountMeterData.subscribe(val => {
-      this.account = this.accountDbService.selectedAccount.getValue();
+    this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(val => {
+      this.account = val
       this.accountHomeService.setCalanderizedMeters();
       this.accountFacilities = this.facilityDbService.accountFacilities.getValue();
       if (this.accountHomeService.latestAnalysisItem) {
@@ -42,7 +42,7 @@ export class AccountHomeComponent implements OnInit {
   }
 
   ngOnDestroy() {
-    this.accountMeterDataSub.unsubscribe();
+    this.selectedAccountSub.unsubscribe();
     if (this.monthlyAnalysisWorker) {
       this.monthlyAnalysisWorker.terminate();
     }
@@ -63,8 +63,10 @@ export class AccountHomeComponent implements OnInit {
       this.monthlyAnalysisWorker = new Worker(new URL('src/app/web-workers/monthly-account-analysis.worker', import.meta.url));
       this.monthlyAnalysisWorker.onmessage = ({ data }) => {
         this.accountHomeService.monthlyFacilityAnalysisData.next(data);
+        this.accountHomeService.calculating.next(false);
 
       };
+      this.accountHomeService.calculating.next(true);
       this.monthlyAnalysisWorker.postMessage({
         accountAnalysisItem: this.accountHomeService.latestAnalysisItem,
         account: this.account,
