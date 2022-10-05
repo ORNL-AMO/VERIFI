@@ -78,9 +78,9 @@ export class FacilityBarChartComponent implements OnInit {
       this.electricityData = this.getDataByUtility('Electricity', this.calanderizedMeters);
       this.naturalGasData = this.getDataByUtility('Natural Gas', this.calanderizedMeters);
       this.otherFuelsData = this.getDataByUtility('Other Fuels', this.calanderizedMeters);
-      this.waterData = this.getDataByUtility('Water', this.calanderizedMeters);
-      this.wasteWaterData = this.getDataByUtility('Waste Water', this.calanderizedMeters);
-      this.otherUtilityData = this.getDataByUtility('Other Utility', this.calanderizedMeters);
+      // this.waterData = this.getDataByUtility('Water', this.calanderizedMeters);
+      // this.wasteWaterData = this.getDataByUtility('Waste Water', this.calanderizedMeters);
+      // this.otherUtilityData = this.getDataByUtility('Other Utility', this.calanderizedMeters);
       this.drawChart();
     }
   }
@@ -155,42 +155,42 @@ export class FacilityBarChartComponent implements OnInit {
         };
         traceData.push(trace);
       }
-      if (this.waterData.length != 0) {
-        let trace = {
-          x: this.waterData.map(data => { return data.time }),
-          y: this.waterData.map(data => { return data[yDataProperty] }),
-          name: 'Water',
-          type: 'bar',
-          marker: {
-            color: UtilityColors['Water'].color
-          }
-        };
-        traceData.push(trace);
-      }
-      if (this.wasteWaterData.length != 0) {
-        let trace = {
-          x: this.wasteWaterData.map(data => { return data.time }),
-          y: this.wasteWaterData.map(data => { return data[yDataProperty] }),
-          name: 'Waste Water',
-          type: 'bar',
-          marker: {
-            color: UtilityColors['Waste Water'].color
-          }
-        };
-        traceData.push(trace);
-      }
-      if (this.otherUtilityData.length != 0) {
-        let trace = {
-          x: this.otherUtilityData.map(data => { return data.time }),
-          y: this.otherUtilityData.map(data => { return data[yDataProperty] }),
-          name: 'Other Utility',
-          type: 'bar',
-          marker: {
-            color: UtilityColors['Other Utility'].color
-          }
-        };
-        traceData.push(trace);
-      }
+      // if (this.waterData.length != 0) {
+      //   let trace = {
+      //     x: this.waterData.map(data => { return data.time }),
+      //     y: this.waterData.map(data => { return data[yDataProperty] }),
+      //     name: 'Water',
+      //     type: 'bar',
+      //     marker: {
+      //       color: UtilityColors['Water'].color
+      //     }
+      //   };
+      //   traceData.push(trace);
+      // }
+      // if (this.wasteWaterData.length != 0) {
+      //   let trace = {
+      //     x: this.wasteWaterData.map(data => { return data.time }),
+      //     y: this.wasteWaterData.map(data => { return data[yDataProperty] }),
+      //     name: 'Waste Water',
+      //     type: 'bar',
+      //     marker: {
+      //       color: UtilityColors['Waste Water'].color
+      //     }
+      //   };
+      //   traceData.push(trace);
+      // }
+      // if (this.otherUtilityData.length != 0) {
+      //   let trace = {
+      //     x: this.otherUtilityData.map(data => { return data.time }),
+      //     y: this.otherUtilityData.map(data => { return data[yDataProperty] }),
+      //     name: 'Other Utility',
+      //     type: 'bar',
+      //     marker: {
+      //       color: UtilityColors['Other Utility'].color
+      //     }
+      //   };
+      //   traceData.push(trace);
+      // }
       let xAxisTitle: string = 'Year';
       if (this.sumByMonth) {
         xAxisTitle = 'Month';
