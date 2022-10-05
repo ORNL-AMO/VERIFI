@@ -46,6 +46,7 @@ export class ManageMetersComponent implements OnInit {
     groupOptions: Array<IdbUtilityMeterGroup>
   }>;
   allMetersValid: boolean;
+  calanderizeAllOnToggle: boolean = false;
   constructor(private activatedRoute: ActivatedRoute, private uploadDataService: UploadDataService,
     private editMeterFormService: EditMeterFormService, private router: Router,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService) { }
@@ -76,6 +77,8 @@ export class ManageMetersComponent implements OnInit {
     if (!this.fileReference.isTemplate && this.metersIncluded) {
       let meterData: Array<IdbUtilityMeterData> = this.uploadDataService.parseExcelMeterData(this.fileReference);
       this.fileReference.meterData = meterData;
+    }
+    if (this.metersIncluded) {
       let newGroups: Array<IdbUtilityMeterGroup> = new Array();
       this.fileReference.meters.forEach(meter => {
         if (meter.groupId) {
@@ -88,6 +91,7 @@ export class ManageMetersComponent implements OnInit {
       });
       this.fileReference.newMeterGroups = newGroups;
     }
+
     this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/confirm-readings');
   }
 
@@ -157,6 +161,18 @@ export class ManageMetersComponent implements OnInit {
         facilityMeterGroups.push(otherFuelGroup);
       }
 
+      let waterGroup: IdbUtilityMeterGroup = facilityMeterGroups.find(group => { return group.name == 'Water' });
+      if (!waterGroup) {
+        waterGroup = this.utilityMeterGroupDbService.getNewIdbUtilityMeterGroup("Water", "Water", importFacility.guid, importFacility.accountId);
+        facilityMeterGroups.push(waterGroup);
+      }
+      let otherGroup: IdbUtilityMeterGroup = facilityMeterGroups.find(group => { return group.name == 'Other' });
+      if (!otherGroup) {
+        otherGroup = this.utilityMeterGroupDbService.getNewIdbUtilityMeterGroup("Other", "Other", importFacility.guid, importFacility.accountId);
+        facilityMeterGroups.push(otherGroup);
+      }
+
+
       facilityMeterGroups.push({
         guid: undefined,
         facilityId: undefined,
@@ -183,4 +199,33 @@ export class ManageMetersComponent implements OnInit {
     this.allMetersValid = isAllValid;
   }
 
+  toggleCalanderizeAll() {
+    this.calanderizeAllOnToggle = !this.calanderizeAllOnToggle;
+    this.fileReference.meters.forEach(meter => {
+      if (this.calanderizeAllOnToggle) {
+        meter.meterReadingDataApplication = 'backward';
+      } else {
+        meter.meterReadingDataApplication = 'fullMonth';
+      }
+    });
+  }
+
+  autoGroup() {
+    this.fileReference.meters.forEach(meter => {
+      if (!meter.groupId) {
+        let groupOptions: Array<IdbUtilityMeterGroup> = this.getFacilityMeterGroups(meter.facilityId);
+        let findGroup: IdbUtilityMeterGroup = groupOptions.find(group => {
+          return group.name == meter.source;
+        });
+        if (findGroup) {
+          meter.groupId = findGroup.guid;
+        } else {
+          findGroup = groupOptions.find(group => {
+            return group.name == 'Other';
+          });
+          meter.groupId = findGroup.guid;
+        }
+      }
+    });
+  }
 }
