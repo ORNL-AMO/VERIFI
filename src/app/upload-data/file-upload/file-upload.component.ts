@@ -13,6 +13,7 @@ export class FileUploadComponent implements OnInit {
   fileReferences: Array<FileReference>;
   disableImport: boolean = false;
   filesUploaded: boolean = false;
+  fileUploadError: boolean = false;
   constructor(private router: Router, private uploadDataService: UploadDataService) { }
 
   ngOnInit(): void {
@@ -52,8 +53,12 @@ export class FileUploadComponent implements OnInit {
     reader.onload = (e: any) => {
       const bstr: string = e.target.result;
       let workBook: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary', cellDates: true });
-      let fileReference: FileReference = this.uploadDataService.getFileReference(file, workBook);
-      this.fileReferences.push(fileReference);
+      try{
+        let fileReference: FileReference = this.uploadDataService.getFileReference(file, workBook);
+        this.fileReferences.push(fileReference);
+      }catch (err){
+        this.fileUploadError = true;
+      }
     };
     reader.readAsBinaryString(file);
   }

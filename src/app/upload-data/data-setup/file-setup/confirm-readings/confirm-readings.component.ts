@@ -78,7 +78,10 @@ export class ConfirmReadingsComponent implements OnInit {
 
   getFacilityName(facilityId: string): string {
     let facility: IdbFacility = this.fileReference.importFacilities.find(facility => { return facility.guid == facilityId });
-    return facility.name;
+    if(facility){
+      return facility.name;
+    }
+    return;
   }
 
   setSummary() {
