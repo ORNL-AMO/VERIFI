@@ -131,25 +131,27 @@ export class AnalysisDbService {
     let itemGroups: Array<AnalysisGroup> = new Array();
     let predictors: Array<PredictorData> = this.predictorDbService.facilityPredictors.getValue();
     facilityMeterGroups.forEach(group => {
-      let predictorVariables: Array<PredictorData> = JSON.parse(JSON.stringify(predictors));
-      predictorVariables.forEach(variable => {
-        variable.productionInAnalysis = variable.production;
-      });
-      itemGroups.push({
-        idbGroupId: group.guid,
-        analysisType: 'energyIntensity',
-        predictorVariables: JSON.parse(JSON.stringify(predictorVariables)),
-        productionUnits: this.getUnits(predictorVariables),
-        regressionModelYear: undefined,
-        regressionConstant: undefined,
-        groupHasError: false,
-        specifiedMonthlyPercentBaseload: false,
-        averagePercentBaseload: undefined,
-        monthlyPercentBaseload: this.getMonthlyPercentBaseload(),
-        hasBaselineAdjustement: false,
-        baselineAdjustments: [],
-        userDefinedModel: false
-      });
+      if (group.groupType == 'Energy') {
+        let predictorVariables: Array<PredictorData> = JSON.parse(JSON.stringify(predictors));
+        predictorVariables.forEach(variable => {
+          variable.productionInAnalysis = variable.production;
+        });
+        itemGroups.push({
+          idbGroupId: group.guid,
+          analysisType: 'energyIntensity',
+          predictorVariables: JSON.parse(JSON.stringify(predictorVariables)),
+          productionUnits: this.getUnits(predictorVariables),
+          regressionModelYear: undefined,
+          regressionConstant: undefined,
+          groupHasError: false,
+          specifiedMonthlyPercentBaseload: false,
+          averagePercentBaseload: undefined,
+          monthlyPercentBaseload: this.getMonthlyPercentBaseload(),
+          hasBaselineAdjustement: false,
+          baselineAdjustments: [],
+          userDefinedModel: false
+        });
+      }
     });
     return {
       facilityId: selectedFacility.guid,

@@ -35,6 +35,9 @@ export class EditMeterGroupFormComponent implements OnInit {
       groupType: [this.groupToEdit.groupType, Validators.required],
       description: [this.groupToEdit.description]
     });
+    if(this.editOrAdd == 'edit'){
+      this.groupForm.controls.groupType.disable();
+    }
   }
 
 
@@ -48,7 +51,9 @@ export class EditMeterGroupFormComponent implements OnInit {
       let groupToAdd: IdbUtilityMeterGroup = await this.utilityMeterGroupDbService.addWithObservable(this.groupToEdit).toPromise();
       allGroups = await this.utilityMeterGroupDbService.getAllByIndexRange('accountId', this.groupToEdit.accountId).toPromise();
       await this.dbChangesService.setMeterGroups(selectedAccount, selectedFacility)
-      await this.analysisDbService.addGroup(groupToAdd.guid);
+      if(groupToAdd.groupType == 'Energy'){
+        await this.analysisDbService.addGroup(groupToAdd.guid);
+      }
       await this.dbChangesService.setAnalysisItems(selectedAccount, selectedFacility);
       this.toastNotificationService.showToast("Meter Group Added!", undefined, undefined, false, "success");
     } else {
