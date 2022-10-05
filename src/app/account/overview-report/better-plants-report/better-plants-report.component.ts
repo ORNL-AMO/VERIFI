@@ -13,7 +13,6 @@ import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, IdbOv
 import { BetterPlantsSummary, ReportOptions } from 'src/app/models/overview-report';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { ConvertMeterDataService } from 'src/app/shared/helper-services/convert-meter-data.service';
-import { BetterPlantsReportService } from '../better-plants-report.service';
 import { OverviewReportService } from '../overview-report.service';
 
 @Component({
@@ -31,7 +30,7 @@ export class BetterPlantsReportComponent implements OnInit {
   calculating: boolean;
   worker: Worker;
   constructor(private overviewReportService: OverviewReportService, private overviewReportOptionsDbService: OverviewReportOptionsDbService,
-    private router: Router, private accountDbService: AccountdbService, private betterPlantsReportService: BetterPlantsReportService,
+    private router: Router, private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
     private predictorDbService: PredictordbService,
     private analysisDbService: AnalysisDbService,
@@ -57,7 +56,6 @@ export class BetterPlantsReportComponent implements OnInit {
       }
     }
     this.account = this.accountDbService.selectedAccount.getValue();
-    // this.betterPlantsSummary = this.betterPlantsReportService.getBetterPlantsSummary(this.reportOptions, this.account);
     this.setBetterPlantsSummary();
   }
 
