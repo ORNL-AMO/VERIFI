@@ -65,8 +65,10 @@ export class FacilityCardComponent implements OnInit {
     }
     this.setNAICS();
     this.setGoalYears();
-    this.setFacilityAnalysisSummary();
-    this.setMonthlyAnalysisSummary();
+    if(this.latestAnalysisItem){
+      this.setFacilityAnalysisSummary();
+      this.setMonthlyAnalysisSummary();
+    }
   }
 
 
@@ -154,8 +156,6 @@ export class FacilityCardComponent implements OnInit {
       this.worker = new Worker(new URL('src/app/web-workers/monthly-facility-analysis.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
         this.monthlyFacilityAnalysisData = data;
-        console.log(this.facility.name);
-        console.log(this.monthlyFacilityAnalysisData);
         this.calculating = false;
       };
       this.calculating = true;

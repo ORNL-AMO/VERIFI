@@ -30,19 +30,22 @@ export class AccountHomeService {
   setCalanderizedMeters() {
     let analysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
     this.latestAnalysisItem = _.maxBy(analysisItems, 'reportYear');
+
     if (this.latestAnalysisItem) {
-      let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
       let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
       let calanderizationOptions: CalanderizationOptions = {
         energyIsSource: this.latestAnalysisItem.energyIsSource
       }
+      let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
       let calanderizedMeterData: Array<CalanderizedMeter> = this.calendarizationService.getCalanderizedMeterData(accountMeters, true, false, calanderizationOptions);
+
       calanderizedMeterData.forEach(calanderizedMeter => {
         calanderizedMeter.monthlyData = this.convertMeterDataService.convertMeterDataToAnalysis(this.latestAnalysisItem, calanderizedMeter.monthlyData, selectedAccount, calanderizedMeter.meter);
       });
       this.calanderizedMeters = calanderizedMeterData;
     } else {
-      this.calanderizedMeters = undefined;
+      let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+      this.calanderizedMeters =  this.calendarizationService.getCalanderizedMeterData(accountMeters, true, false, undefined);
     }
   }
 }

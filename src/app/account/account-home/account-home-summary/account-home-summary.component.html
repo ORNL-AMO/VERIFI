@@ -8,7 +8,7 @@
                     {{account.country}}
                 </p>
             </div>
-            <div class="col">
+            <div class="col" *ngIf="goalYear">
                 <div class="row">
                     <div class="col-2 text-center">
                         Baseline
@@ -125,12 +125,17 @@
                 </ul>
             </div>
             <div class="col-8">
-                <app-monthly-analysis-summary-graph *ngIf="!calculating && monthlyFacilityAnalysisData"
-                    [monthlyAnalysisSummaryData]="monthlyFacilityAnalysisData" [analysisItem]="latestAnalysisItem"
-                    [facilityOrAccount]="account">
-                </app-monthly-analysis-summary-graph>
-                <app-calculating-spinner *ngIf="calculating" [message]="'Calculating Monthly Results...'">
-                </app-calculating-spinner>
+                <ng-container *ngIf="latestAnalysisItem">
+                    <app-monthly-analysis-summary-graph *ngIf="!calculating && monthlyFacilityAnalysisData"
+                        [monthlyAnalysisSummaryData]="monthlyFacilityAnalysisData" [analysisItem]="latestAnalysisItem"
+                        [facilityOrAccount]="account">
+                    </app-monthly-analysis-summary-graph>
+                    <app-calculating-spinner *ngIf="calculating" [message]="'Calculating Monthly Results...'">
+                    </app-calculating-spinner>
+                </ng-container>
+                <ng-container *ngIf="!latestAnalysisItem">
+                    No analysis item found!
+                </ng-container>
             </div>
         </div>
 

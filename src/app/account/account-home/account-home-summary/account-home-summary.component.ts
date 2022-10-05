@@ -47,6 +47,7 @@ export class AccountHomeSummaryComponent implements OnInit {
     this.accountSub = this.accountDbService.selectedAccount.subscribe(val => {
       this.account = val;
       this.setGoalYears();
+      this.latestAnalysisItem = this.accountHomeService.latestAnalysisItem;
       let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
       this.disableButtons = (accountMeterData.length == 0);
     });
@@ -71,7 +72,6 @@ export class AccountHomeSummaryComponent implements OnInit {
     this.calculatingSub = this.accountHomeService.calculating.subscribe(val => {
       this.calculating = val;
       if(!this.calculating){
-        this.latestAnalysisItem = this.accountHomeService.latestAnalysisItem;
         this.monthlyFacilityAnalysisData = this.accountHomeService.monthlyFacilityAnalysisData.getValue();
       }
     })
