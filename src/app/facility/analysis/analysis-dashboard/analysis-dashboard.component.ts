@@ -31,13 +31,12 @@ export class AnalysisDashboardComponent implements OnInit {
   baselineYearErrorMax: boolean;
   yearOptions: Array<number>;
   selectedFacility: IdbFacility;
-  selectedFacilityMeterDataSub: Subscription;
+  selectedFacilitySub: Subscription;
 
   constructor(private router: Router, private analysisDbService: AnalysisDbService, private toastNotificationService: ToastNotificationsService,
     private analysisCalculationsHelperService: AnalysisCalculationsHelperService,
     private facilityDbService: FacilitydbService,
     private accountAnalysisDbService: AccountAnalysisDbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService) { }
 
@@ -46,8 +45,8 @@ export class AnalysisDashboardComponent implements OnInit {
       this.facilityAnalysisItems = items;
     });
 
-    this.selectedFacilityMeterDataSub = this.utilityMeterDataDbService.facilityMeterData.subscribe(val => {
-      this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
+    this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
+      this.selectedFacility = val;
       this.yearOptions = this.analysisCalculationsHelperService.getYearOptions();
       if (this.yearOptions) {
         this.baselineYearErrorMin = this.yearOptions[0] > this.selectedFacility.sustainabilityQuestions.energyReductionBaselineYear;
@@ -58,7 +57,7 @@ export class AnalysisDashboardComponent implements OnInit {
 
   ngOnDestroy() {
     this.facilityAnalysisItemsSub.unsubscribe();
-    this.selectedFacilityMeterDataSub.unsubscribe();
+    this.selectedFacilitySub.unsubscribe();
   }
 
   async createAnalysis() {

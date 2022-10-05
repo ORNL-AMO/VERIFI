@@ -1,10 +1,18 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { OverviewReportOptionsDbService } from 'src/app/indexedDB/overview-report-options-db.service';
-import { IdbAccount, IdbOverviewReportOptions } from 'src/app/models/idb';
+import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
+import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
+import { CalanderizedMeter } from 'src/app/models/calanderization';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, IdbOverviewReportOptions, IdbPredictorEntry, IdbUtilityMeter } from 'src/app/models/idb';
 import { BetterPlantsSummary, ReportOptions } from 'src/app/models/overview-report';
+import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
+import { ConvertMeterDataService } from 'src/app/shared/helper-services/convert-meter-data.service';
 import { BetterPlantsReportService } from '../better-plants-report.service';
 import { OverviewReportService } from '../overview-report.service';
 
@@ -20,8 +28,17 @@ export class BetterPlantsReportComponent implements OnInit {
   print: boolean;
   account: IdbAccount;
   betterPlantsSummary: BetterPlantsSummary;
+  calculating: boolean;
+  worker: Worker;
   constructor(private overviewReportService: OverviewReportService, private overviewReportOptionsDbService: OverviewReportOptionsDbService,
-    private router: Router, private accountDbService: AccountdbService, private betterPlantsReportService: BetterPlantsReportService) { }
+    private router: Router, private accountDbService: AccountdbService, private betterPlantsReportService: BetterPlantsReportService,
+    private facilityDbService: FacilitydbService,
+    private predictorDbService: PredictordbService,
+    private analysisDbService: AnalysisDbService,
+    private accountAnalysisDbService: AccountAnalysisDbService,
+    private convertMeterDataService: ConvertMeterDataService,
+    private calanderizationService: CalanderizationService,
+    private utilityMeterDbService: UtilityMeterdbService) { }
 
   ngOnInit(): void {
     this.printSub = this.overviewReportService.print.subscribe(print => {
@@ -40,11 +57,15 @@ export class BetterPlantsReportComponent implements OnInit {
       }
     }
     this.account = this.accountDbService.selectedAccount.getValue();
-    this.betterPlantsSummary = this.betterPlantsReportService.getBetterPlantsSummary(this.reportOptions, this.account);
+    // this.betterPlantsSummary = this.betterPlantsReportService.getBetterPlantsSummary(this.reportOptions, this.account);
+    this.setBetterPlantsSummary();
   }
 
   ngOnDestroy() {
     this.printSub.unsubscribe();
+    if(this.worker){
+      this.worker.terminate();
+    }
   }
 
   printReport() {
@@ -55,5 +76,53 @@ export class BetterPlantsReportComponent implements OnInit {
         this.overviewReportService.print.next(false)
       }, 100)
     }, 100)
+  }
+
+
+  setBetterPlantsSummary(){
+    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+
+    let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
+    let accountFacilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
+    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
+    let selectedAnalysisItem: IdbAccountAnalysisItem = accountAnalysisItems.find(item => { return item.guid == this.reportOptions.analysisItemId });
+    selectedAnalysisItem.energyUnit = 'MMBtu';
+    let includedFacilityIds: Array<string> = new Array();
+    selectedAnalysisItem.facilityAnalysisItems.forEach(item => {
+      if (item.analysisItemId) {
+        includedFacilityIds.push(item.facilityId);
+      }
+    });
+    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    let includedFacilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return includedFacilityIds.includes(meter.facilityId) });
+    let calanderizedMeters: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMeterData(includedFacilityMeters, true, true, { energyIsSource: true });
+    calanderizedMeters.forEach(calanderizedMeter => {
+      calanderizedMeter.monthlyData = this.convertMeterDataService.convertMeterDataToAnalysis(selectedAnalysisItem, calanderizedMeter.monthlyData, this.account, calanderizedMeter.meter);
+    });
+
+
+
+    if (typeof Worker !== 'undefined') {
+      this.worker = new Worker(new URL('src/app/web-workers/better-plants-report.worker', import.meta.url));
+      this.worker.onmessage = ({ data }) => {
+        this.betterPlantsSummary = data;
+        this.calculating = false;
+      };
+      this.calculating = true;
+      this.worker.postMessage({
+        reportOptions: this.reportOptions,
+        selectedAnalysisItem: selectedAnalysisItem,
+        calanderizedMeters: calanderizedMeters,
+        accountPredictorEntries: accountPredictorEntries,
+        account: this.account,
+        facilities: accountFacilities,
+        accountAnalysisItems: accountFacilityAnalysisItems
+      });
+    } else {
+      console.log('nopee')
+
+      // Web Workers are not supported in this environment.
+      // You should add a fallback so that your program still executes correctly.
+    }
   }
 }

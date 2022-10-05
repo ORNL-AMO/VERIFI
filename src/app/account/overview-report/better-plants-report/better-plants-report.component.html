@@ -1,4 +1,4 @@
-<div class="report" [ngClass]="{'print': print}" *ngIf="reportOptions">
+<div class="report" [ngClass]="{'print': print}" *ngIf="reportOptions && !calculating">
     <img src="assets/images/better-plants-report-banner.jpg" class="w-100">
     <div class="row justify-content-center pt-3">
         <div class="col-12">
@@ -66,4 +66,10 @@
         </div>
     </div>
     <img src="assets/images/better-plants-report-footer.jpg" class="w-100 pt-4">
+</div>
+
+<div class="w-100 justify-content-center" *ngIf="calculating">
+    <div class="pt-5">
+        <app-calculating-spinner [message]="'Generating Better Plants Report...'"></app-calculating-spinner>
+    </div>
 </div>
