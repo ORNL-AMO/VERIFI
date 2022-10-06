@@ -11,6 +11,7 @@ export class MonthlyAccountAnalysisClass {
 
     allAccountAnalysisData: Array<MonthlyAnalysisSummaryDataClass>;
     accountMonthSummaries: Array<MonthlyAccountAnalysisDataClass>;
+    monthlyFacilityAnalysisClasses: Array<MonthlyFacilityAnalysisClass>
     startDate: Date;
     endDate: Date;
     helperService: HelperService;
@@ -49,7 +50,7 @@ export class MonthlyAccountAnalysisClass {
         accountFacilities: Array<IdbFacility>,
         accountPredictorEntries: Array<IdbPredictorEntry>,
         allAccountAnalysisItems: Array<IdbAnalysisItem>) {
-        let monthlyFacilityAnalysisClasses: Array<MonthlyFacilityAnalysisClass> = new Array();
+        this.monthlyFacilityAnalysisClasses = new Array();
         accountAnalysisItem.facilityAnalysisItems.forEach(item => {
             if (item.analysisItemId != undefined) {
                 let analysisItem: IdbAnalysisItem = allAccountAnalysisItems.find(accountItem => { return item.analysisItemId == accountItem.guid });
@@ -61,10 +62,10 @@ export class MonthlyAccountAnalysisClass {
                     calanderizedMeters,
                     accountPredictorEntries
                 );
-                monthlyFacilityAnalysisClasses.push(monthlyFacilityAnalysisClass);
+                this.monthlyFacilityAnalysisClasses.push(monthlyFacilityAnalysisClass);
             }
         });
-        this.allAccountAnalysisData = monthlyFacilityAnalysisClasses.flatMap(analysisClass => { return analysisClass.allFacilityAnalysisData });
+        this.allAccountAnalysisData = this.monthlyFacilityAnalysisClasses.flatMap(analysisClass => { return analysisClass.allFacilityAnalysisData });
     }
 
     setAnnualUsageValues(){

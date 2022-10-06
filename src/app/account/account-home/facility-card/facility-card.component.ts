@@ -10,6 +10,7 @@ import { OverviewReportService } from '../../overview-report/overview-report.ser
 import { AccountHomeService } from '../account-home.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
+import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-facility-card',
   templateUrl: './facility-card.component.html',
@@ -28,7 +29,6 @@ export class FacilityCardComponent implements OnInit {
   latestPredictorEntry: IdbPredictorEntry;
   noMeterData: boolean;
   naics: string;
-  worker: Worker;
   calculating: boolean = true;
   annualAnalysisSummary: Array<AnnualAnalysisSummary>;
   monthlyFacilityAnalysisData: Array<MonthlyAnalysisSummaryData>;
@@ -41,6 +41,7 @@ export class FacilityCardComponent implements OnInit {
   baselineYear: number;
 
   showContent: boolean = true;
+  facilityAnalysisSummariesSub: Subscription;
   constructor(private analysisDbService: AnalysisDbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterDbService: UtilityMeterdbService, private predictorDbService: PredictordbService,
     private overviewReportService: OverviewReportService, private accountHomeService: AccountHomeService) { }
@@ -65,12 +66,30 @@ export class FacilityCardComponent implements OnInit {
     }
     this.setNAICS();
     this.setGoalYears();
-    if(this.latestAnalysisItem){
-      this.setFacilityAnalysisSummary();
-      this.setMonthlyAnalysisSummary();
+    if (this.latestAnalysisItem) {
+      this.facilityAnalysisSummariesSub = this.accountHomeService.facilityAnalysisSummaries.subscribe(summaries => {
+        let facilitySummary: {
+          facilityId: string,
+          annualAnalysisSummary: Array<AnnualAnalysisSummary>,
+          monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
+        } = summaries.find(summary => { return summary.facilityId == this.facility.guid });
+        if (facilitySummary) {
+          this.annualAnalysisSummary = facilitySummary.annualAnalysisSummary;
+          this.monthlyFacilityAnalysisData = facilitySummary.monthlyAnalysisSummaryData;
+          this.setProgressPercentages();
+          this.calculating = false;
+        }
+      })
     }
+
+
   }
 
+  ngOnDestroy() {
+    if (this.facilityAnalysisSummariesSub) {
+      this.facilityAnalysisSummariesSub.unsubscribe();
+    }
+  }
 
   checkMeterDataUpToDate() {
     if (this.lastBill) {
@@ -103,33 +122,6 @@ export class FacilityCardComponent implements OnInit {
     this.naics = this.overviewReportService.getNAICS(this.facility);
   }
 
-  setFacilityAnalysisSummary() {
-    // this.facility = this.facilityDbService.selectedFacility.getValue();
-    let calanderizedMeters: Array<CalanderizedMeter> = this.accountHomeService.calanderizedMeters;
-    // this.annualAnalysisSummary = this.facilityAnalysisCalculationsService.getAnnualAnalysisSummary(this.analysisItem, this.facility, calanderizedMeters);
-    let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
-    if (typeof Worker !== 'undefined') {
-      this.worker = new Worker(new URL('src/app/web-workers/annual-facility-analysis.worker', import.meta.url));
-      this.worker.onmessage = ({ data }) => {
-        this.annualAnalysisSummary = data;
-        this.setProgressPercentages();
-        // this.calculating = false;
-      };
-      // this.calculating = true;
-      this.worker.postMessage({
-        analysisItem: this.latestAnalysisItem,
-        facility: this.facility,
-        calanderizedMeters: calanderizedMeters,
-        accountPredictorEntries: accountPredictorEntries
-      });
-    } else {
-      console.log('nopee')
-
-      // Web Workers are not supported in this environment.
-      // You should add a fallback so that your program still executes correctly.
-    }
-  }
-
   setGoalYears() {
     if (this.facility && this.facility.sustainabilityQuestions) {
       this.percentGoal = this.facility.sustainabilityQuestions.energyReductionPercent;
@@ -148,29 +140,4 @@ export class FacilityCardComponent implements OnInit {
   toggleShowContent() {
     this.showContent = !this.showContent;
   }
-
-  setMonthlyAnalysisSummary(){
-    let calanderizedMeters: Array<CalanderizedMeter> = this.accountHomeService.calanderizedMeters;
-    let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
-    if (typeof Worker !== 'undefined') {
-      this.worker = new Worker(new URL('src/app/web-workers/monthly-facility-analysis.worker', import.meta.url));
-      this.worker.onmessage = ({ data }) => {
-        this.monthlyFacilityAnalysisData = data;
-        this.calculating = false;
-      };
-      this.calculating = true;
-      this.worker.postMessage({
-        analysisItem: this.latestAnalysisItem,
-        facility: this.facility,
-        calanderizedMeters: calanderizedMeters,
-        accountPredictorEntries: accountPredictorEntries
-      });
-    } else {
-      console.log('nopee')
-
-      // Web Workers are not supported in this environment.
-      // You should add a fallback so that your program still executes correctly.
-    }
-  }
-
 }

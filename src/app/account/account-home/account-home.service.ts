@@ -18,14 +18,20 @@ export class AccountHomeService {
   calanderizedMeters: Array<CalanderizedMeter>;
   latestAnalysisItem: IdbAccountAnalysisItem;
   annualAnalysisSummary: BehaviorSubject<Array<AnnualAnalysisSummary>>;
-  monthlyFacilityAnalysisData: BehaviorSubject<Array<MonthlyAnalysisSummaryData>>;
+  monthlyAccountAnalysisData: BehaviorSubject<Array<MonthlyAnalysisSummaryData>>;
   calculating: BehaviorSubject<boolean>;
+  facilityAnalysisSummaries: BehaviorSubject<Array<{
+    facilityId: string,
+    annualAnalysisSummary: Array<AnnualAnalysisSummary>,
+    monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
+  }>>;
   constructor(private accountAnalysisDbService: AccountAnalysisDbService, private utilityMeterDbService: UtilityMeterdbService,
-    private accountDbService: AccountdbService, private calendarizationService: CalanderizationService, private convertMeterDataService: ConvertMeterDataService) { 
-      this.annualAnalysisSummary = new BehaviorSubject<Array<AnnualAnalysisSummary>>(undefined);
-      this.monthlyFacilityAnalysisData = new BehaviorSubject<Array<MonthlyAnalysisSummaryData>>(undefined);
-      this.calculating = new BehaviorSubject<boolean>(true);
-    }
+    private accountDbService: AccountdbService, private calendarizationService: CalanderizationService, private convertMeterDataService: ConvertMeterDataService) {
+    this.annualAnalysisSummary = new BehaviorSubject<Array<AnnualAnalysisSummary>>(undefined);
+    this.monthlyAccountAnalysisData = new BehaviorSubject<Array<MonthlyAnalysisSummaryData>>(undefined);
+    this.calculating = new BehaviorSubject<boolean>(true);
+    this.facilityAnalysisSummaries = new BehaviorSubject([]);
+  }
 
   setCalanderizedMeters() {
     let analysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
@@ -45,7 +51,7 @@ export class AccountHomeService {
       this.calanderizedMeters = calanderizedMeterData;
     } else {
       let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-      this.calanderizedMeters =  this.calendarizationService.getCalanderizedMeterData(accountMeters, true, false, undefined);
+      this.calanderizedMeters = this.calendarizationService.getCalanderizedMeterData(accountMeters, true, false, undefined);
     }
   }
 }

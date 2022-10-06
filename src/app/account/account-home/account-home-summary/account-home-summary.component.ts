@@ -63,16 +63,10 @@ export class AccountHomeSummaryComponent implements OnInit {
       }
     });
 
-
-    // this.monthlyDataSub = this.accountHomeService.monthlyFacilityAnalysisData.subscribe(val => {
-    //   this.latestAnalysisItem = this.accountHomeService.latestAnalysisItem;
-    //   this.monthlyFacilityAnalysisData = val;
-    // })
-
     this.calculatingSub = this.accountHomeService.calculating.subscribe(val => {
       this.calculating = val;
       if(!this.calculating){
-        this.monthlyFacilityAnalysisData = this.accountHomeService.monthlyFacilityAnalysisData.getValue();
+        this.monthlyFacilityAnalysisData = this.accountHomeService.monthlyAccountAnalysisData.getValue();
       }
     })
 
