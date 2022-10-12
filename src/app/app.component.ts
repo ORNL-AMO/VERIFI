@@ -22,6 +22,8 @@ declare let gtag: Function;
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
+
+
 export class AppComponent {
 
   @ViewChild('header', { static: false }) header: ElementRef;
@@ -79,10 +81,10 @@ export class AppComponent {
       await this.initilizeMeterGroups(account);
       await this.initializeCustomEmissions(account);
       let updatedAccount: { account: IdbAccount, isChanged: boolean } = this.updateDbEntryService.updateAccount(account);
-      if(updatedAccount.isChanged){
+      if (updatedAccount.isChanged) {
         await this.accountDbService.updateWithObservable(updatedAccount.account).toPromise();
         this.accountDbService.selectedAccount.next(updatedAccount.account);
-      }else{
+      } else {
         this.accountDbService.selectedAccount.next(account);
       }
       this.dataInitialized = true;

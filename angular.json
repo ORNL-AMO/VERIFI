@@ -20,7 +20,12 @@
             "tsConfig": "tsconfig.app.json",
             "aot": true,
             "assets": [
-              "src/assets"
+              "src/assets",
+              {
+                "glob": "**/*",
+                "input": "./wasm/bin/",
+                "output": "./assets/"
+              }
             ],
             "styles": [
               "src/styles/styles.css",
@@ -126,7 +131,12 @@
             "tsConfig": "tsconfig.spec.json",
             "karmaConfig": "karma.conf.js",
             "assets": [
-              "src/assets"
+              "src/assets",
+              {
+                "glob": "**/*",
+                "input": "./wasm/bin/",
+                "output": "./assets/"
+              }
             ],
             "styles": [
               "src/styles/styles.css",

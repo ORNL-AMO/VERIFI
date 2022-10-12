@@ -4,7 +4,6 @@ import { AnalysisGroup, IdbAnalysisItem, IdbFacility, IdbPredictorEntry } from "
 import { HelperService } from "./helperService";
 import { MonthlyAnalysisSummaryDataClass } from "./monthlyAnalysisSummaryDataClass";
 import { MonthlyGroupAnalysisClass } from "./monthlyGroupAnalysisClass";
-
 export class MonthlyAnalysisSummaryClass {
 
     monthlyGroupAnalysisClass: MonthlyGroupAnalysisClass;

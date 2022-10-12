@@ -6,6 +6,20 @@
   <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'none'"> -->
   <title>VERIFI</title>
   <base href="/">
+
+  <script>
+		var Module = {
+			onRuntimeInitialized: function () {
+				console.log('WASM Initialized');
+        console.log(Module);
+			}
+		}
+	</script>
+	<script src="assets/wasm-analysis.js"></script>
+
+
+
+
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/x-icon" href="assets/electron-icons/icon-256x256.png">
   <!-- <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500&display=swap" rel="stylesheet">

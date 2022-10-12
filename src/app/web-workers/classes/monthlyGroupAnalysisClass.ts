@@ -2,7 +2,7 @@ import { CalanderizedMeter, MonthlyData } from "src/app/models/calanderization";
 import { AnalysisGroup, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, PredictorData } from "src/app/models/idb";
 import { HelperService } from "./helperService";
 import * as _ from 'lodash';
-
+// declare var Module: any;
 export class MonthlyGroupAnalysisClass {
 
   selectedGroup: AnalysisGroup;

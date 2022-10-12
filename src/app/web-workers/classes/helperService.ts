@@ -96,3 +96,49 @@ export class HelperService {
         }
       }
 }
+
+
+export function checkNull(val: any){
+  if(val == undefined){
+    return null;
+  }else{
+    return val;
+  }
+}
+
+export function checkNullDouble(val: any){
+  if(val == undefined){
+    return 0;
+  }else{
+    return val;
+  }
+}
+
+export function getMonthlyStartAndEndDate(facilityOrAccount: IdbFacility | IdbAccount, analysisItem: IdbAnalysisItem | IdbAccountAnalysisItem): { baselineDate: Date, endDate: Date } {
+  let baselineDate: Date;
+  let endDate: Date;
+  if (facilityOrAccount.fiscalYear == 'calendarYear') {
+    baselineDate = new Date(facilityOrAccount.sustainabilityQuestions.energyReductionBaselineYear, 0, 1);
+    endDate = new Date(analysisItem.reportYear + 1, 0, 1);
+  } else {
+    if (facilityOrAccount.fiscalYearCalendarEnd) {
+      baselineDate = new Date(facilityOrAccount.sustainabilityQuestions.energyReductionBaselineYear - 1, facilityOrAccount.fiscalYearMonth);
+      endDate = new Date(analysisItem.reportYear, facilityOrAccount.fiscalYearMonth);
+    } else {
+      baselineDate = new Date(facilityOrAccount.sustainabilityQuestions.energyReductionBaselineYear, facilityOrAccount.fiscalYearMonth);
+      endDate = new Date(analysisItem.reportYear + 1, facilityOrAccount.fiscalYearMonth);
+    }
+  }
+  return {
+    baselineDate: baselineDate,
+    endDate: endDate
+  }
+}
+
+export function checkValue(val: number): number{
+  if(Math.abs(val) < .0000001){
+    return 0
+  }else{
+    return val;
+  }
+}

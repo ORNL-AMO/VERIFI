@@ -1,0 +1,4 @@
+C:/Users/mroot/Documents/ORNL/VERIFI/wasm/CMakeFiles/verifi_analysis.dir
+C:/Users/mroot/Documents/ORNL/VERIFI/wasm/CMakeFiles/wasm-analysis.dir
+C:/Users/mroot/Documents/ORNL/VERIFI/wasm/CMakeFiles/edit_cache.dir
+C:/Users/mroot/Documents/ORNL/VERIFI/wasm/CMakeFiles/rebuild_cache.dir
