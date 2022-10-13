@@ -22,9 +22,8 @@ public:
         Facility facility,
         std::vector<AnnualAnalysisSummaryData> previousYearsSummaryData) : year(year)
     {
-        std::cout << monthlyAnalysisSummaryData.size() << std::endl;
         setYearAnalysisSummaryData(monthlyAnalysisSummaryData);
-        setPredictorUsage(accountPredictorEntries, facility);
+        setPredictorUsage(monthlyAnalysisSummaryData);
         setEnergyUse();
         setModeledEnergy();
         setBaselineEnergyUse(previousYearsSummaryData);
@@ -67,7 +66,7 @@ public:
     double previousYearSavings;
 
     void setYearAnalysisSummaryData(std::vector<MonthlyAnalysisSummaryData> monthlyAnalysisSummaryData);
-    void setPredictorUsage(std::vector<PredictorEntry> accountPredictorEntries, Facility facility);
+    void setPredictorUsage(std::vector<MonthlyAnalysisSummaryData> monthlyAnalysisSummaryData);
     void setEnergyUse();
     void setModeledEnergy();
     void setBaselineEnergyUse(std::vector<AnnualAnalysisSummaryData> previousYearsSummaryData);

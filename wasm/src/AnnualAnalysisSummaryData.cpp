@@ -152,38 +152,26 @@ void AnnualAnalysisSummaryData::setNewSavings()
     newSavings = savings - previousYearSavings;
 };
 
-void AnnualAnalysisSummaryData::setPredictorUsage(std::vector<PredictorEntry> accountPredictorEntries, Facility facility)
+void AnnualAnalysisSummaryData::setPredictorUsage(std::vector<MonthlyAnalysisSummaryData> monthlyAnalysisSummaryData)
 {
-    std::vector<PredictorEntry> facilityPredictorData;
-    for (int i = 0; i < accountPredictorEntries.size(); i++)
+    for (int i = 0; i < monthlyAnalysisSummaryData.size(); i++)
     {
-        if (accountPredictorEntries[i].facilityId == facility.guid)
+        if (monthlyAnalysisSummaryData[i].fiscalYear == year)
         {
-            if (checkEntry(accountPredictorEntries[i], facility))
+            if (predictorUsage.size() == 0)
             {
-                facilityPredictorData.push_back(accountPredictorEntries[i]);
-            }
-        }
-    }
-
-    if (facilityPredictorData.size() != 0)
-    {
-        std::vector<PredictorData> predictorVariables = facilityPredictorData[0].predictors;
-        for (int p = 0; p < predictorVariables.size(); p++)
-        {
-            double usageVal = 0;
-            for (int i = 0; i < facilityPredictorData.size(); i++)
-            {
-                for (int x = 0; x < facilityPredictorData[i].predictors.size(); x++)
+                for (int p = 0; p < monthlyAnalysisSummaryData[i].predictorUsage.size(); p++)
                 {
-                    if (predictorVariables[p].id == facilityPredictorData[i].predictors[x].id)
-                    {
-                        usageVal += facilityPredictorData[i].predictors[x].amount;
-                    }
+                    predictorUsage.push_back(monthlyAnalysisSummaryData[i].predictorUsage[p]);
                 }
             }
-            PredictorUsage predictorUsageVar = PredictorUsage(usageVal, predictorVariables[p].id);
-            predictorUsage.push_back(predictorUsageVar);
+            else
+            {
+                for (int p = 0; p < monthlyAnalysisSummaryData[i].predictorUsage.size(); p++)
+                {
+                    predictorUsage[p].usage += monthlyAnalysisSummaryData[i].predictorUsage[p].usage;
+                }
+            }
         }
     }
 };

@@ -6,7 +6,7 @@ std::vector<AnnualAnalysisSummaryData> AnnualAnalysisSummary::getAnnualAnalysisS
     std::vector<AnnualAnalysisSummaryData> annualAnalysisSummaryData;
     std::vector<MonthlyAnalysisSummaryData> monthlyAnalysisSummaryData = monthlyAnalysisSummary.getMonthlyAnalysisSummaryData();
     int year = baselineDate.year;
-    while (year <= endDate.year)
+    while (year < endDate.year)
     {
         AnnualAnalysisSummaryData annualAnalysisSummary = AnnualAnalysisSummaryData(
             monthlyAnalysisSummaryData,
