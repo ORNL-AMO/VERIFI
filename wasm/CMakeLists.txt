@@ -23,10 +23,12 @@ set(SOURCE_FILES
   src/MonthlyAnalysisCalculatedValues.cpp
   src/MonthlyAnalysisSummary.cpp
   src/MonthlyAnalysisSummaryData.cpp
-  src/MonthlyGroupAnalysis.cpp)
+  src/MonthlyGroupAnalysis.cpp
+  src/AnnualAnalysisSummary.cpp
+  src/AnnualAnalysisSummaryData.cpp)
 
 set(SOURCE_FILES_WASM
-  bindings/MonthlyAnalysisSummaryWASM.cpp)
+  bindings/AnalysisSummaryWASM.cpp)
 
 set(INCLUDE_FILES
   include/MonthlyAnalysisCalculatedValues.h
@@ -40,6 +42,8 @@ set(INCLUDE_FILES
   include/Helper.h
   include/MonthlyData.h
   include/PredictorEntry.h
+  include/AnnualAnalysisSummary.h
+  include/AnnualAnalysisSummaryData.h
 )
 
 

@@ -112,19 +112,47 @@ CMakeFiles/verifi_analysis.dir/src/MonthlyGroupAnalysis.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/verifi_analysis.dir/src/MonthlyGroupAnalysis.cpp.s"
 	C:\Users\mroot\Documents\ORNL\emsdk\upstream\emscripten\em++.bat $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\mroot\Documents\ORNL\VERIFI\wasm\src\MonthlyGroupAnalysis.cpp -o CMakeFiles\verifi_analysis.dir\src\MonthlyGroupAnalysis.cpp.s
 
-CMakeFiles/verifi_analysis.dir/bindings/MonthlyAnalysisSummaryWASM.cpp.o: CMakeFiles/verifi_analysis.dir/flags.make
-CMakeFiles/verifi_analysis.dir/bindings/MonthlyAnalysisSummaryWASM.cpp.o: CMakeFiles/verifi_analysis.dir/includes_CXX.rsp
-CMakeFiles/verifi_analysis.dir/bindings/MonthlyAnalysisSummaryWASM.cpp.o: bindings/MonthlyAnalysisSummaryWASM.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=C:\Users\mroot\Documents\ORNL\VERIFI\wasm\CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/verifi_analysis.dir/bindings/MonthlyAnalysisSummaryWASM.cpp.o"
-	C:\Users\mroot\Documents\ORNL\emsdk\upstream\emscripten\em++.bat  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles\verifi_analysis.dir\bindings\MonthlyAnalysisSummaryWASM.cpp.o -c C:\Users\mroot\Documents\ORNL\VERIFI\wasm\bindings\MonthlyAnalysisSummaryWASM.cpp
+CMakeFiles/verifi_analysis.dir/src/AnnualAnalysisSummary.cpp.o: CMakeFiles/verifi_analysis.dir/flags.make
+CMakeFiles/verifi_analysis.dir/src/AnnualAnalysisSummary.cpp.o: CMakeFiles/verifi_analysis.dir/includes_CXX.rsp
+CMakeFiles/verifi_analysis.dir/src/AnnualAnalysisSummary.cpp.o: src/AnnualAnalysisSummary.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=C:\Users\mroot\Documents\ORNL\VERIFI\wasm\CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/verifi_analysis.dir/src/AnnualAnalysisSummary.cpp.o"
+	C:\Users\mroot\Documents\ORNL\emsdk\upstream\emscripten\em++.bat  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles\verifi_analysis.dir\src\AnnualAnalysisSummary.cpp.o -c C:\Users\mroot\Documents\ORNL\VERIFI\wasm\src\AnnualAnalysisSummary.cpp
 
-CMakeFiles/verifi_analysis.dir/bindings/MonthlyAnalysisSummaryWASM.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/verifi_analysis.dir/bindings/MonthlyAnalysisSummaryWASM.cpp.i"
-	C:\Users\mroot\Documents\ORNL\emsdk\upstream\emscripten\em++.bat $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\mroot\Documents\ORNL\VERIFI\wasm\bindings\MonthlyAnalysisSummaryWASM.cpp > CMakeFiles\verifi_analysis.dir\bindings\MonthlyAnalysisSummaryWASM.cpp.i
+CMakeFiles/verifi_analysis.dir/src/AnnualAnalysisSummary.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/verifi_analysis.dir/src/AnnualAnalysisSummary.cpp.i"
+	C:\Users\mroot\Documents\ORNL\emsdk\upstream\emscripten\em++.bat $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\mroot\Documents\ORNL\VERIFI\wasm\src\AnnualAnalysisSummary.cpp > CMakeFiles\verifi_analysis.dir\src\AnnualAnalysisSummary.cpp.i
 
-CMakeFiles/verifi_analysis.dir/bindings/MonthlyAnalysisSummaryWASM.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/verifi_analysis.dir/bindings/MonthlyAnalysisSummaryWASM.cpp.s"
-	C:\Users\mroot\Documents\ORNL\emsdk\upstream\emscripten\em++.bat $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\mroot\Documents\ORNL\VERIFI\wasm\bindings\MonthlyAnalysisSummaryWASM.cpp -o CMakeFiles\verifi_analysis.dir\bindings\MonthlyAnalysisSummaryWASM.cpp.s
+CMakeFiles/verifi_analysis.dir/src/AnnualAnalysisSummary.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/verifi_analysis.dir/src/AnnualAnalysisSummary.cpp.s"
+	C:\Users\mroot\Documents\ORNL\emsdk\upstream\emscripten\em++.bat $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\mroot\Documents\ORNL\VERIFI\wasm\src\AnnualAnalysisSummary.cpp -o CMakeFiles\verifi_analysis.dir\src\AnnualAnalysisSummary.cpp.s
+
+CMakeFiles/verifi_analysis.dir/src/AnnualAnalysisSummaryData.cpp.o: CMakeFiles/verifi_analysis.dir/flags.make
+CMakeFiles/verifi_analysis.dir/src/AnnualAnalysisSummaryData.cpp.o: CMakeFiles/verifi_analysis.dir/includes_CXX.rsp
+CMakeFiles/verifi_analysis.dir/src/AnnualAnalysisSummaryData.cpp.o: src/AnnualAnalysisSummaryData.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=C:\Users\mroot\Documents\ORNL\VERIFI\wasm\CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/verifi_analysis.dir/src/AnnualAnalysisSummaryData.cpp.o"
+	C:\Users\mroot\Documents\ORNL\emsdk\upstream\emscripten\em++.bat  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles\verifi_analysis.dir\src\AnnualAnalysisSummaryData.cpp.o -c C:\Users\mroot\Documents\ORNL\VERIFI\wasm\src\AnnualAnalysisSummaryData.cpp
+
+CMakeFiles/verifi_analysis.dir/src/AnnualAnalysisSummaryData.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/verifi_analysis.dir/src/AnnualAnalysisSummaryData.cpp.i"
+	C:\Users\mroot\Documents\ORNL\emsdk\upstream\emscripten\em++.bat $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\mroot\Documents\ORNL\VERIFI\wasm\src\AnnualAnalysisSummaryData.cpp > CMakeFiles\verifi_analysis.dir\src\AnnualAnalysisSummaryData.cpp.i
+
+CMakeFiles/verifi_analysis.dir/src/AnnualAnalysisSummaryData.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/verifi_analysis.dir/src/AnnualAnalysisSummaryData.cpp.s"
+	C:\Users\mroot\Documents\ORNL\emsdk\upstream\emscripten\em++.bat $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\mroot\Documents\ORNL\VERIFI\wasm\src\AnnualAnalysisSummaryData.cpp -o CMakeFiles\verifi_analysis.dir\src\AnnualAnalysisSummaryData.cpp.s
+
+CMakeFiles/verifi_analysis.dir/bindings/AnalysisSummaryWASM.cpp.o: CMakeFiles/verifi_analysis.dir/flags.make
+CMakeFiles/verifi_analysis.dir/bindings/AnalysisSummaryWASM.cpp.o: CMakeFiles/verifi_analysis.dir/includes_CXX.rsp
+CMakeFiles/verifi_analysis.dir/bindings/AnalysisSummaryWASM.cpp.o: bindings/AnalysisSummaryWASM.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=C:\Users\mroot\Documents\ORNL\VERIFI\wasm\CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/verifi_analysis.dir/bindings/AnalysisSummaryWASM.cpp.o"
+	C:\Users\mroot\Documents\ORNL\emsdk\upstream\emscripten\em++.bat  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles\verifi_analysis.dir\bindings\AnalysisSummaryWASM.cpp.o -c C:\Users\mroot\Documents\ORNL\VERIFI\wasm\bindings\AnalysisSummaryWASM.cpp
+
+CMakeFiles/verifi_analysis.dir/bindings/AnalysisSummaryWASM.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/verifi_analysis.dir/bindings/AnalysisSummaryWASM.cpp.i"
+	C:\Users\mroot\Documents\ORNL\emsdk\upstream\emscripten\em++.bat $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\mroot\Documents\ORNL\VERIFI\wasm\bindings\AnalysisSummaryWASM.cpp > CMakeFiles\verifi_analysis.dir\bindings\AnalysisSummaryWASM.cpp.i
+
+CMakeFiles/verifi_analysis.dir/bindings/AnalysisSummaryWASM.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/verifi_analysis.dir/bindings/AnalysisSummaryWASM.cpp.s"
+	C:\Users\mroot\Documents\ORNL\emsdk\upstream\emscripten\em++.bat $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\mroot\Documents\ORNL\VERIFI\wasm\bindings\AnalysisSummaryWASM.cpp -o CMakeFiles\verifi_analysis.dir\bindings\AnalysisSummaryWASM.cpp.s
 
 # Object files for target verifi_analysis
 verifi_analysis_OBJECTS = \
@@ -132,7 +160,9 @@ verifi_analysis_OBJECTS = \
 "CMakeFiles/verifi_analysis.dir/src/MonthlyAnalysisSummary.cpp.o" \
 "CMakeFiles/verifi_analysis.dir/src/MonthlyAnalysisSummaryData.cpp.o" \
 "CMakeFiles/verifi_analysis.dir/src/MonthlyGroupAnalysis.cpp.o" \
-"CMakeFiles/verifi_analysis.dir/bindings/MonthlyAnalysisSummaryWASM.cpp.o"
+"CMakeFiles/verifi_analysis.dir/src/AnnualAnalysisSummary.cpp.o" \
+"CMakeFiles/verifi_analysis.dir/src/AnnualAnalysisSummaryData.cpp.o" \
+"CMakeFiles/verifi_analysis.dir/bindings/AnalysisSummaryWASM.cpp.o"
 
 # External object files for target verifi_analysis
 verifi_analysis_EXTERNAL_OBJECTS =
@@ -141,10 +171,12 @@ libverifi_analysis.a: CMakeFiles/verifi_analysis.dir/src/MonthlyAnalysisCalculat
 libverifi_analysis.a: CMakeFiles/verifi_analysis.dir/src/MonthlyAnalysisSummary.cpp.o
 libverifi_analysis.a: CMakeFiles/verifi_analysis.dir/src/MonthlyAnalysisSummaryData.cpp.o
 libverifi_analysis.a: CMakeFiles/verifi_analysis.dir/src/MonthlyGroupAnalysis.cpp.o
-libverifi_analysis.a: CMakeFiles/verifi_analysis.dir/bindings/MonthlyAnalysisSummaryWASM.cpp.o
+libverifi_analysis.a: CMakeFiles/verifi_analysis.dir/src/AnnualAnalysisSummary.cpp.o
+libverifi_analysis.a: CMakeFiles/verifi_analysis.dir/src/AnnualAnalysisSummaryData.cpp.o
+libverifi_analysis.a: CMakeFiles/verifi_analysis.dir/bindings/AnalysisSummaryWASM.cpp.o
 libverifi_analysis.a: CMakeFiles/verifi_analysis.dir/build.make
 libverifi_analysis.a: CMakeFiles/verifi_analysis.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=C:\Users\mroot\Documents\ORNL\VERIFI\wasm\CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Linking CXX static library libverifi_analysis.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=C:\Users\mroot\Documents\ORNL\VERIFI\wasm\CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Linking CXX static library libverifi_analysis.a"
 	$(CMAKE_COMMAND) -P CMakeFiles\verifi_analysis.dir\cmake_clean_target.cmake
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles\verifi_analysis.dir\link.txt --verbose=$(VERBOSE)
 

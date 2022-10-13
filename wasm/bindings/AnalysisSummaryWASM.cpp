@@ -1,6 +1,7 @@
 
 
 #include "MonthlyAnalysisSummary.h"
+#include "AnnualAnalysisSummary.h"
 #include <emscripten/bind.h>
 using namespace emscripten;
 
@@ -13,6 +14,7 @@ EMSCRIPTEN_BINDINGS(monthly_analysis_summary)
     register_vector<MonthlyData>("MonthlyDataVector");
     register_vector<MonthlyAnalysisSummaryData>("MonthlyAnalysisSummaryDataVector");
     register_vector<PredictorUsage>("PredictorUsageVector");
+    register_vector<AnnualAnalysisSummaryData>("AnnualAnalysisSummaryDataVector");
 
     class_<MonthlyAnalysisSummary>("MonthlyAnalysisSummary")
         .constructor<AnalysisGroup, AnalysisDate, AnalysisDate, Facility, std::vector<CalanderizedMeter>, std::vector<PredictorEntry>>()
@@ -39,6 +41,27 @@ EMSCRIPTEN_BINDINGS(monthly_analysis_summary)
         .property("yearToDatePercentSavings", &MonthlyAnalysisCalculatedValues::yearToDatePercentSavings)
         .property("rollingSavings", &MonthlyAnalysisCalculatedValues::rollingSavings)
         .property("rolling12MonthImprovement", &MonthlyAnalysisCalculatedValues::rolling12MonthImprovement);
+
+    class_<AnnualAnalysisSummary>("AnnualAnalysisSummary")
+        .constructor<AnalysisGroup, AnalysisDate, AnalysisDate, Facility, std::vector<CalanderizedMeter>, std::vector<PredictorEntry>>()
+        .function("getAnnualAnalysisSummaryData", &AnnualAnalysisSummary::getAnnualAnalysisSummaryData);
+
+    class_<AnnualAnalysisSummaryData>("AnnualAnalysisSummaryData")
+        .property("year", &AnnualAnalysisSummaryData::year)
+        .property("energyUse", &AnnualAnalysisSummaryData::energyUse)
+        .property("modeledEnergy", &AnnualAnalysisSummaryData::modeledEnergy)
+        .property("adjustedForNormalization", &AnnualAnalysisSummaryData::adjustedForNormalization)
+        .property("adjusted", &AnnualAnalysisSummaryData::adjusted)
+        .property("baselineAdjustmentForNormalization", &AnnualAnalysisSummaryData::baselineAdjustmentForNormalization)
+        .property("baselineAdjustmentForOther", &AnnualAnalysisSummaryData::baselineAdjustmentForOther)
+        .property("baselineAdjustment", &AnnualAnalysisSummaryData::baselineAdjustment)
+        .property("SEnPI", &AnnualAnalysisSummaryData::SEnPI)
+        .property("savings", &AnnualAnalysisSummaryData::savings)
+        .property("totalSavingsPercentImprovement", &AnnualAnalysisSummaryData::totalSavingsPercentImprovement)
+        .property("annualSavingsPercentImprovement", &AnnualAnalysisSummaryData::annualSavingsPercentImprovement)
+        .property("cummulativeSavings", &AnnualAnalysisSummaryData::cummulativeSavings)
+        .property("newSavings", &AnnualAnalysisSummaryData::newSavings)
+        .property("predictorUsage", &AnnualAnalysisSummaryData::predictorUsage);
 
     class_<AnalysisDate>("AnalysisDate")
         .property("year", &AnalysisDate::year)

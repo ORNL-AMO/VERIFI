@@ -7,7 +7,7 @@ import { MonthlyAnalysisSummary } from 'src/app/models/analysis';
 import { AnalysisGroup, IdbAnalysisItem, IdbFacility, IdbPredictorEntry } from 'src/app/models/idb';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
-import { MonthlyGroupAnalysisWASM } from 'src/app/web-workers/classes/monthlyGroupAnalysisWASM';
+import { MonthlyGroupAnalysisWASM } from 'src/app/web-workers/classes/wasm-api/monthlyGroupAnalysisWASM';
 declare var Module: any;
 
 @Component({

@@ -6,11 +6,9 @@
 
 #IncludeRegexTransform: 
 
-C:/Users/mroot/Documents/ORNL/VERIFI/wasm/bindings/MonthlyAnalysisSummaryWASM.cpp
-MonthlyAnalysisSummary.h
-C:/Users/mroot/Documents/ORNL/VERIFI/wasm/bindings/MonthlyAnalysisSummary.h
-emscripten/bind.h
--
+C:/Users/mroot/Documents/ORNL/VERIFI/wasm/src/AnnualAnalysisSummaryData.cpp
+AnnualAnalysisSummaryData.h
+C:/Users/mroot/Documents/ORNL/VERIFI/wasm/src/AnnualAnalysisSummaryData.h
 
 include/AnalysisDate.h
 
@@ -22,6 +20,18 @@ string
 vector
 -
 
+include/AnnualAnalysisSummaryData.h
+Helper.h
+include/Helper.h
+PredictorEntry.h
+include/PredictorEntry.h
+Facility.h
+include/Facility.h
+MonthlyAnalysisSummaryData.h
+include/MonthlyAnalysisSummaryData.h
+vector
+-
+
 include/CalanderizedMeter.h
 MonthlyData.h
 include/MonthlyData.h
@@ -29,27 +39,11 @@ include/MonthlyData.h
 include/Facility.h
 
 include/Helper.h
+string
+-
 
 include/MonthlyAnalysisCalculatedValues.h
 vector
--
-
-include/MonthlyAnalysisSummary.h
-MonthlyGroupAnalysis.h
-include/MonthlyGroupAnalysis.h
-AnalysisGroup.h
-include/AnalysisGroup.h
-AnalysisDate.h
-include/AnalysisDate.h
-Facility.h
-include/Facility.h
-CalanderizedMeter.h
-include/CalanderizedMeter.h
-PredictorEntry.h
-include/PredictorEntry.h
-MonthlyAnalysisSummaryData.h
-include/MonthlyAnalysisSummaryData.h
-iostream
 -
 
 include/MonthlyAnalysisSummaryData.h

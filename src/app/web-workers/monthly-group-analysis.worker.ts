@@ -2,7 +2,7 @@
 
 import { MonthlyAnalysisSummary, MonthlyAnalysisSummaryData } from "../models/analysis";
 import { MonthlyAnalysisSummaryClass } from "./classes/monthlyAnalysisSummaryClass";
-import { MonthlyGroupAnalysisWASM } from "./classes/monthlyGroupAnalysisWASM";
+import { MonthlyGroupAnalysisWASM } from "./classes/wasm-api/monthlyGroupAnalysisWASM";
 // declare var Module: any;
 addEventListener('message', ({ data }) => {
   console.log(self['Module']);

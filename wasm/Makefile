@@ -135,35 +135,95 @@ wasm-analysis/fast:
 	$(MAKE) -f CMakeFiles\wasm-analysis.dir\build.make CMakeFiles/wasm-analysis.dir/build
 .PHONY : wasm-analysis/fast
 
-bindings/MonthlyAnalysisSummaryWASM.o: bindings/MonthlyAnalysisSummaryWASM.cpp.o
+bindings/AnalysisSummaryWASM.o: bindings/AnalysisSummaryWASM.cpp.o
 
-.PHONY : bindings/MonthlyAnalysisSummaryWASM.o
+.PHONY : bindings/AnalysisSummaryWASM.o
 
 # target to build an object file
-bindings/MonthlyAnalysisSummaryWASM.cpp.o:
-	$(MAKE) -f CMakeFiles\verifi_analysis.dir\build.make CMakeFiles/verifi_analysis.dir/bindings/MonthlyAnalysisSummaryWASM.cpp.o
-	$(MAKE) -f CMakeFiles\wasm-analysis.dir\build.make CMakeFiles/wasm-analysis.dir/bindings/MonthlyAnalysisSummaryWASM.cpp.o
-.PHONY : bindings/MonthlyAnalysisSummaryWASM.cpp.o
+bindings/AnalysisSummaryWASM.cpp.o:
+	$(MAKE) -f CMakeFiles\verifi_analysis.dir\build.make CMakeFiles/verifi_analysis.dir/bindings/AnalysisSummaryWASM.cpp.o
+	$(MAKE) -f CMakeFiles\wasm-analysis.dir\build.make CMakeFiles/wasm-analysis.dir/bindings/AnalysisSummaryWASM.cpp.o
+.PHONY : bindings/AnalysisSummaryWASM.cpp.o
 
-bindings/MonthlyAnalysisSummaryWASM.i: bindings/MonthlyAnalysisSummaryWASM.cpp.i
+bindings/AnalysisSummaryWASM.i: bindings/AnalysisSummaryWASM.cpp.i
 
-.PHONY : bindings/MonthlyAnalysisSummaryWASM.i
+.PHONY : bindings/AnalysisSummaryWASM.i
 
 # target to preprocess a source file
-bindings/MonthlyAnalysisSummaryWASM.cpp.i:
-	$(MAKE) -f CMakeFiles\verifi_analysis.dir\build.make CMakeFiles/verifi_analysis.dir/bindings/MonthlyAnalysisSummaryWASM.cpp.i
-	$(MAKE) -f CMakeFiles\wasm-analysis.dir\build.make CMakeFiles/wasm-analysis.dir/bindings/MonthlyAnalysisSummaryWASM.cpp.i
-.PHONY : bindings/MonthlyAnalysisSummaryWASM.cpp.i
+bindings/AnalysisSummaryWASM.cpp.i:
+	$(MAKE) -f CMakeFiles\verifi_analysis.dir\build.make CMakeFiles/verifi_analysis.dir/bindings/AnalysisSummaryWASM.cpp.i
+	$(MAKE) -f CMakeFiles\wasm-analysis.dir\build.make CMakeFiles/wasm-analysis.dir/bindings/AnalysisSummaryWASM.cpp.i
+.PHONY : bindings/AnalysisSummaryWASM.cpp.i
 
-bindings/MonthlyAnalysisSummaryWASM.s: bindings/MonthlyAnalysisSummaryWASM.cpp.s
+bindings/AnalysisSummaryWASM.s: bindings/AnalysisSummaryWASM.cpp.s
 
-.PHONY : bindings/MonthlyAnalysisSummaryWASM.s
+.PHONY : bindings/AnalysisSummaryWASM.s
 
 # target to generate assembly for a file
-bindings/MonthlyAnalysisSummaryWASM.cpp.s:
-	$(MAKE) -f CMakeFiles\verifi_analysis.dir\build.make CMakeFiles/verifi_analysis.dir/bindings/MonthlyAnalysisSummaryWASM.cpp.s
-	$(MAKE) -f CMakeFiles\wasm-analysis.dir\build.make CMakeFiles/wasm-analysis.dir/bindings/MonthlyAnalysisSummaryWASM.cpp.s
-.PHONY : bindings/MonthlyAnalysisSummaryWASM.cpp.s
+bindings/AnalysisSummaryWASM.cpp.s:
+	$(MAKE) -f CMakeFiles\verifi_analysis.dir\build.make CMakeFiles/verifi_analysis.dir/bindings/AnalysisSummaryWASM.cpp.s
+	$(MAKE) -f CMakeFiles\wasm-analysis.dir\build.make CMakeFiles/wasm-analysis.dir/bindings/AnalysisSummaryWASM.cpp.s
+.PHONY : bindings/AnalysisSummaryWASM.cpp.s
+
+src/AnnualAnalysisSummary.o: src/AnnualAnalysisSummary.cpp.o
+
+.PHONY : src/AnnualAnalysisSummary.o
+
+# target to build an object file
+src/AnnualAnalysisSummary.cpp.o:
+	$(MAKE) -f CMakeFiles\verifi_analysis.dir\build.make CMakeFiles/verifi_analysis.dir/src/AnnualAnalysisSummary.cpp.o
+	$(MAKE) -f CMakeFiles\wasm-analysis.dir\build.make CMakeFiles/wasm-analysis.dir/src/AnnualAnalysisSummary.cpp.o
+.PHONY : src/AnnualAnalysisSummary.cpp.o
+
+src/AnnualAnalysisSummary.i: src/AnnualAnalysisSummary.cpp.i
+
+.PHONY : src/AnnualAnalysisSummary.i
+
+# target to preprocess a source file
+src/AnnualAnalysisSummary.cpp.i:
+	$(MAKE) -f CMakeFiles\verifi_analysis.dir\build.make CMakeFiles/verifi_analysis.dir/src/AnnualAnalysisSummary.cpp.i
+	$(MAKE) -f CMakeFiles\wasm-analysis.dir\build.make CMakeFiles/wasm-analysis.dir/src/AnnualAnalysisSummary.cpp.i
+.PHONY : src/AnnualAnalysisSummary.cpp.i
+
+src/AnnualAnalysisSummary.s: src/AnnualAnalysisSummary.cpp.s
+
+.PHONY : src/AnnualAnalysisSummary.s
+
+# target to generate assembly for a file
+src/AnnualAnalysisSummary.cpp.s:
+	$(MAKE) -f CMakeFiles\verifi_analysis.dir\build.make CMakeFiles/verifi_analysis.dir/src/AnnualAnalysisSummary.cpp.s
+	$(MAKE) -f CMakeFiles\wasm-analysis.dir\build.make CMakeFiles/wasm-analysis.dir/src/AnnualAnalysisSummary.cpp.s
+.PHONY : src/AnnualAnalysisSummary.cpp.s
+
+src/AnnualAnalysisSummaryData.o: src/AnnualAnalysisSummaryData.cpp.o
+
+.PHONY : src/AnnualAnalysisSummaryData.o
+
+# target to build an object file
+src/AnnualAnalysisSummaryData.cpp.o:
+	$(MAKE) -f CMakeFiles\verifi_analysis.dir\build.make CMakeFiles/verifi_analysis.dir/src/AnnualAnalysisSummaryData.cpp.o
+	$(MAKE) -f CMakeFiles\wasm-analysis.dir\build.make CMakeFiles/wasm-analysis.dir/src/AnnualAnalysisSummaryData.cpp.o
+.PHONY : src/AnnualAnalysisSummaryData.cpp.o
+
+src/AnnualAnalysisSummaryData.i: src/AnnualAnalysisSummaryData.cpp.i
+
+.PHONY : src/AnnualAnalysisSummaryData.i
+
+# target to preprocess a source file
+src/AnnualAnalysisSummaryData.cpp.i:
+	$(MAKE) -f CMakeFiles\verifi_analysis.dir\build.make CMakeFiles/verifi_analysis.dir/src/AnnualAnalysisSummaryData.cpp.i
+	$(MAKE) -f CMakeFiles\wasm-analysis.dir\build.make CMakeFiles/wasm-analysis.dir/src/AnnualAnalysisSummaryData.cpp.i
+.PHONY : src/AnnualAnalysisSummaryData.cpp.i
+
+src/AnnualAnalysisSummaryData.s: src/AnnualAnalysisSummaryData.cpp.s
+
+.PHONY : src/AnnualAnalysisSummaryData.s
+
+# target to generate assembly for a file
+src/AnnualAnalysisSummaryData.cpp.s:
+	$(MAKE) -f CMakeFiles\verifi_analysis.dir\build.make CMakeFiles/verifi_analysis.dir/src/AnnualAnalysisSummaryData.cpp.s
+	$(MAKE) -f CMakeFiles\wasm-analysis.dir\build.make CMakeFiles/wasm-analysis.dir/src/AnnualAnalysisSummaryData.cpp.s
+.PHONY : src/AnnualAnalysisSummaryData.cpp.s
 
 src/MonthlyAnalysisCalculatedValues.o: src/MonthlyAnalysisCalculatedValues.cpp.o
 
@@ -295,9 +355,15 @@ help:
 	@echo ... wasm-analysis
 	@echo ... edit_cache
 	@echo ... rebuild_cache
-	@echo ... bindings/MonthlyAnalysisSummaryWASM.o
-	@echo ... bindings/MonthlyAnalysisSummaryWASM.i
-	@echo ... bindings/MonthlyAnalysisSummaryWASM.s
+	@echo ... bindings/AnalysisSummaryWASM.o
+	@echo ... bindings/AnalysisSummaryWASM.i
+	@echo ... bindings/AnalysisSummaryWASM.s
+	@echo ... src/AnnualAnalysisSummary.o
+	@echo ... src/AnnualAnalysisSummary.i
+	@echo ... src/AnnualAnalysisSummary.s
+	@echo ... src/AnnualAnalysisSummaryData.o
+	@echo ... src/AnnualAnalysisSummaryData.i
+	@echo ... src/AnnualAnalysisSummaryData.s
 	@echo ... src/MonthlyAnalysisCalculatedValues.o
 	@echo ... src/MonthlyAnalysisCalculatedValues.i
 	@echo ... src/MonthlyAnalysisCalculatedValues.s
