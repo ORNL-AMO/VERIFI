@@ -63,6 +63,7 @@ export class FacilityHomeComponent implements OnInit {
       this.monthlyAnalysisWorker = new Worker(new URL('src/app/web-workers/monthly-facility-analysis.worker', import.meta.url));
       this.monthlyAnalysisWorker.onmessage = ({ data }) => {
         this.facilityHomeService.monthlyFacilityAnalysisData.next(data);
+        this.monthlyAnalysisWorker.terminate();
       };
       this.monthlyAnalysisWorker.postMessage({
         analysisItem: this.facilityHomeService.latestAnalysisItem,
@@ -85,6 +86,7 @@ export class FacilityHomeComponent implements OnInit {
       this.annualAnalysisWorker = new Worker(new URL('src/app/web-workers/annual-facility-analysis.worker', import.meta.url));
       this.annualAnalysisWorker.onmessage = ({ data }) => {
         this.facilityHomeService.annualAnalysisSummary.next(data);
+        this.annualAnalysisWorker.terminate();
       };
       this.annualAnalysisWorker.postMessage({
         analysisItem: this.facilityHomeService.latestAnalysisItem,
