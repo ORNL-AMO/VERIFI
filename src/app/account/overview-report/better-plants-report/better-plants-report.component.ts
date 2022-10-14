@@ -105,6 +105,7 @@ export class BetterPlantsReportComponent implements OnInit {
       this.worker.onmessage = ({ data }) => {
         this.betterPlantsSummary = data;
         this.calculating = false;
+        this.worker.terminate();
       };
       this.calculating = true;
       this.worker.postMessage({

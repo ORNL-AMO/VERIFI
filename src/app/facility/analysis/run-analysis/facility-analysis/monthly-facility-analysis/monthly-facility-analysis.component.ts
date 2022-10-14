@@ -38,6 +38,7 @@ export class MonthlyFacilityAnalysisComponent implements OnInit {
       this.worker.onmessage = ({ data }) => {
         this.monthlyFacilityAnalysisData = data;
         this.calculating = false;
+        this.worker.terminate();
       };
       this.calculating = true;
       this.worker.postMessage({

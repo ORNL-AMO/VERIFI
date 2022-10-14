@@ -63,6 +63,7 @@ export class AccountHomeComponent implements OnInit {
       this.monthlyAnalysisWorker = new Worker(new URL('src/app/web-workers/monthly-account-analysis.worker', import.meta.url));
       this.monthlyAnalysisWorker.onmessage = ({ data }) => {
         this.accountHomeService.monthlyFacilityAnalysisData.next(data);
+        this.monthlyAnalysisWorker.terminate();
 
       };
       this.monthlyAnalysisWorker.postMessage({
@@ -90,6 +91,7 @@ export class AccountHomeComponent implements OnInit {
       this.annualAnalysisWorker = new Worker(new URL('src/app/web-workers/annual-account-analysis.worker', import.meta.url));
       this.annualAnalysisWorker.onmessage = ({ data }) => {
         this.accountHomeService.annualAnalysisSummary.next(data);
+        this.annualAnalysisWorker.terminate();
       };
       this.annualAnalysisWorker.postMessage({
         accountAnalysisItem: this.accountHomeService.latestAnalysisItem,

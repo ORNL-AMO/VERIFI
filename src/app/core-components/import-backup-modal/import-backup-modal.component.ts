@@ -7,6 +7,7 @@ import { IdbAccount, IdbFacility } from 'src/app/models/idb';
 import { LoadingService } from '../loading/loading.service';
 import { ImportBackupModalService } from './import-backup-modal.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-import-backup-modal',
@@ -32,7 +33,8 @@ export class ImportBackupModalComponent implements OnInit {
     private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
     private importBackupModalService: ImportBackupModalService,
-    private dbChangesService: DbChangesService) { }
+    private dbChangesService: DbChangesService,
+    private router: Router) { }
 
   ngOnInit(): void {
     this.showModalSub = this.importBackupModalService.showModal.subscribe(value => {
@@ -122,6 +124,7 @@ export class ImportBackupModalComponent implements OnInit {
       }
     }
     this.loadingService.setLoadingStatus(false);
+    this.router.navigateByUrl('account');
   }
 
   async importNewAccount(backupFile: BackupFile) {

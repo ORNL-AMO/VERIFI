@@ -44,6 +44,7 @@ export class AnnualAccountAnalysisComponent implements OnInit {
       this.worker.onmessage = ({ data }) => {
         this.annualAnalysisSummary = data;
         this.calculating = false;
+        this.worker.terminate();
       };
       this.calculating = true;
       this.worker.postMessage({
