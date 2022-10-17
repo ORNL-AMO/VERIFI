@@ -20,9 +20,29 @@ void MonthlyFacilityAnalysisData::setMonthPredictorData(std::vector<PredictorEnt
         }
     }
 };
-void MonthlyFacilityAnalysisData::setPredictorUsage(std::vector<PredictorEntry> facilityPredictorEntries){
-
+void MonthlyFacilityAnalysisData::setPredictorUsage(std::vector<PredictorEntry> facilityPredictorEntries)
+{
+    if (facilityPredictorEntries.size() != 0)
+    {
+        for (int i = 0; i < facilityPredictorEntries[0].predictors.size(); i++)
+        {
+            double usageVal = 0;
+            for (int m = 0; m < currentMonthPredictorData.size(); m++)
+            {
+                for (int d = 0; d < currentMonthPredictorData[m].predictors.size(); d++)
+                {
+                    if (currentMonthPredictorData[m].predictors[d].id == facilityPredictorEntries[0].predictors[i].id)
+                    {
+                        usageVal += currentMonthPredictorData[m].predictors[d].amount;
+                        d = currentMonthPredictorData[m].predictors.size();
+                    }
+                }
+                predictorUsage.push_back(PredictorUsage(usageVal, facilityPredictorEntries[0].predictors[i].id));
+            }
+        }
+    }
 };
+
 void MonthlyFacilityAnalysisData::setFiscalYear(Facility facility)
 {
     if (facility.fiscalYear == "calendarYear")
