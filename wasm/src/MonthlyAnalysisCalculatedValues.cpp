@@ -1,32 +1,5 @@
 #include "MonthlyAnalysisCalculatedValues.h"
 
-MonthlyAnalysisCalculatedValues::MonthlyAnalysisCalculatedValues(
-    double energyUse,
-    double modeledEnergy,
-    double baselineAdjustmentForOther,
-    int fiscalYear,
-    int baselineYear,
-    std::vector<MonthlyAnalysisCalculatedValues> previousMonthsValues,
-    double baselineActualEnergyUse)
-    : energyUse(energyUse), modeledEnergy(modeledEnergy), fiscalYear(fiscalYear)
-{
-    initializeYearToDateValues(previousMonthsValues);
-    setYearToDateBaselineActualEnergyUse(baselineActualEnergyUse);
-    setYearToDateModeledEnergyUse();
-    setYearToDateActualEnergyUse();
-    setBaselineModeledEnergyUse(baselineYear, previousMonthsValues);
-    setAdjustedForNormalization(baselineActualEnergyUse);
-    setAdjusted(baselineAdjustmentForOther);
-    setSEnPI();
-    setSavings();
-    setPercentSavingsComparedToBaseline();
-    setYearToDateSavings(baselineYear);
-    setBaselineAdjustmentForNormalization(baselineActualEnergyUse);
-    setBaselineAdjustment(baselineAdjustmentForOther);
-    setRollingSavingsValues(previousMonthsValues, baselineYear);
-    setYearToDatePercentSavings();
-};
-
 void MonthlyAnalysisCalculatedValues::initializeYearToDateValues(std::vector<MonthlyAnalysisCalculatedValues> previousMonthsValues)
 {
     summaryDataIndex = previousMonthsValues.size();
@@ -149,7 +122,6 @@ void MonthlyAnalysisCalculatedValues::setRollingSavingsValues(std::vector<Monthl
         double total12MonthsEnergyUse = energyUse;
         double total12MonthsModeledEnergy = modeledEnergy;
         double total12MonthsAdjusedBaseline = adjusted;
-        double rolling12MonthImprovement = 0;
         for (int i = 0; i < previousMonthValues.size(); i++)
         {
             if (previousMonthValues[i].fiscalYear == baselineYear)

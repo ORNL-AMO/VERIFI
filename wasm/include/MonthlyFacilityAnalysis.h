@@ -7,7 +7,7 @@
 #include <vector>
 #include "AnalysisDate.h"
 #include "MonthlyAnalysisSummary.h"
-
+#include "MonthlyFacilityAnalysisData.h"
 #ifndef MONTHLYACCOUNTANALYSIS_H
 #define MONTHLYACCOUNTANALYSIS_H
 class MonthlyFacilityAnalysis
@@ -25,18 +25,22 @@ public:
         std::vector<CalanderizedMeter> calanderizedMeters,
         std::vector<PredictorEntry> accountPredictorEntries,
         AnalysisDate baselineDate,
-        AnalysisDate endDate){
-
+        AnalysisDate endDate) : endDate(endDate), baselineDate(baselineDate), facility(facility)
+    {
+        setMonthlyGroupAnalysis(selectedGroups, calanderizedMeters, accountPredictorEntries, baselineDate, endDate);
+        setFacilityPredictorEntries(accountPredictorEntries);
     };
 
+    AnalysisDate baselineDate;
+    AnalysisDate endDate;
+    Facility facility;
     std::vector<MonthlyAnalysisSummaryData> monthlyGroupAnalysisData;
     std::vector<PredictorEntry> facilityPredictorEntries;
 
-
-    void setMonthlyGroupAnalysis(std::vector<AnalysisGroup> selectedGroups, Facility facility, std::vector<CalanderizedMeter> calanderizedMeters, std::vector<PredictorEntry> accountPredictorEntries, AnalysisDate baselineDate,
+    void setMonthlyGroupAnalysis(std::vector<AnalysisGroup> selectedGroups, std::vector<CalanderizedMeter> calanderizedMeters, std::vector<PredictorEntry> accountPredictorEntries, AnalysisDate baselineDate,
                                  AnalysisDate endDate);
-    void setFacilityPredictorEntries(std::vector<PredictorEntry> accountPredictorEntries, Facility facility);
-
+    void setFacilityPredictorEntries(std::vector<PredictorEntry> accountPredictorEntries);
+    std::vector<MonthlyFacilityAnalysisData> getMonthlyFacilityAnalysisData();
 };
 
 #endif // MONTHLYACCOUNTANALYSIS_H

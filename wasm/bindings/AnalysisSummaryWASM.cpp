@@ -2,6 +2,7 @@
 
 #include "MonthlyAnalysisSummary.h"
 #include "AnnualAnalysisSummary.h"
+#include "MonthlyFacilityAnalysis.h"
 #include <emscripten/bind.h>
 using namespace emscripten;
 
@@ -15,6 +16,8 @@ EMSCRIPTEN_BINDINGS(monthly_analysis_summary)
     register_vector<MonthlyAnalysisSummaryData>("MonthlyAnalysisSummaryDataVector");
     register_vector<PredictorUsage>("PredictorUsageVector");
     register_vector<AnnualAnalysisSummaryData>("AnnualAnalysisSummaryDataVector");
+    register_vector<AnalysisGroup>("AnalysisGroupVector");
+    register_vector<MonthlyFacilityAnalysisData>("MonthlyFacilityAnalysisDataVector");
 
     class_<MonthlyAnalysisSummary>("MonthlyAnalysisSummary")
         .constructor<AnalysisGroup, AnalysisDate, AnalysisDate, Facility, std::vector<CalanderizedMeter>, std::vector<PredictorEntry>>()
@@ -62,6 +65,20 @@ EMSCRIPTEN_BINDINGS(monthly_analysis_summary)
         .property("cummulativeSavings", &AnnualAnalysisSummaryData::cummulativeSavings)
         .property("newSavings", &AnnualAnalysisSummaryData::newSavings)
         .property("predictorUsage", &AnnualAnalysisSummaryData::predictorUsage);
+
+    class_<MonthlyFacilityAnalysis>("MonthlyFacilityAnalysis")
+        .constructor<std::vector<AnalysisGroup>, Facility, std::vector<CalanderizedMeter>, std::vector<PredictorEntry>, AnalysisDate, AnalysisDate>()
+        .function("getMonthlyFacilityAnalysisData", &MonthlyFacilityAnalysis::getMonthlyFacilityAnalysisData);
+
+    class_<MonthlyFacilityAnalysisData>("MonthlyFacilityAnalysisData")
+        .property("analysisMonth", &MonthlyFacilityAnalysisData::analysisMonth)
+        .property("energyUse", &MonthlyFacilityAnalysisData::energyUse)
+        .property("modeledEnergy", &MonthlyFacilityAnalysisData::modeledEnergy)
+        .property("baselineActualEnergyUse", &MonthlyFacilityAnalysisData::baselineActualEnergyUse)
+        .property("baselineAdjustmentForOther", &MonthlyFacilityAnalysisData::baselineAdjustmentForOther)
+        .property("predictorUsage", &MonthlyFacilityAnalysisData::predictorUsage)
+        .property("fiscalYear", &MonthlyFacilityAnalysisData::fiscalYear)
+        .property("monthlyAnalysisCalculatedValues", &MonthlyFacilityAnalysisData::monthlyAnalysisCalculatedValues);
 
     class_<AnalysisDate>("AnalysisDate")
         .property("year", &AnalysisDate::year)

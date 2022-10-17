@@ -5,6 +5,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/verifi_analysis.dir/src/MonthlyGroupAnalysis.cpp.o"
   "CMakeFiles/verifi_analysis.dir/src/AnnualAnalysisSummary.cpp.o"
   "CMakeFiles/verifi_analysis.dir/src/AnnualAnalysisSummaryData.cpp.o"
+  "CMakeFiles/verifi_analysis.dir/src/MonthlyFacilityAnalysis.cpp.o"
+  "CMakeFiles/verifi_analysis.dir/src/MonthlyFacilityAnalysisData.cpp.o"
   "CMakeFiles/verifi_analysis.dir/bindings/AnalysisSummaryWASM.cpp.o"
   "libverifi_analysis.pdb"
   "libverifi_analysis.a"

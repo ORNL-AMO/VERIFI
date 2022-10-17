@@ -1,6 +1,6 @@
 #include "MonthlyFacilityAnalysis.h"
 
-void MonthlyFacilityAnalysis::setMonthlyGroupAnalysis(std::vector<AnalysisGroup> selectedGroups, Facility facility, std::vector<CalanderizedMeter> calanderizedMeters, std::vector<PredictorEntry> accountPredictorEntries, AnalysisDate baselineDate,
+void MonthlyFacilityAnalysis::setMonthlyGroupAnalysis(std::vector<AnalysisGroup> selectedGroups, std::vector<CalanderizedMeter> calanderizedMeters, std::vector<PredictorEntry> accountPredictorEntries, AnalysisDate baselineDate,
                                                       AnalysisDate endDate)
 {
     for (int i = 0; i < selectedGroups.size(); i++)
@@ -20,7 +20,7 @@ void MonthlyFacilityAnalysis::setMonthlyGroupAnalysis(std::vector<AnalysisGroup>
     }
 };
 
-void MonthlyFacilityAnalysis::setFacilityPredictorEntries(std::vector<PredictorEntry> accountPredictorEntries, Facility facility)
+void MonthlyFacilityAnalysis::setFacilityPredictorEntries(std::vector<PredictorEntry> accountPredictorEntries)
 {
     for (int i = 0; i < accountPredictorEntries.size(); i++)
     {
@@ -29,4 +29,24 @@ void MonthlyFacilityAnalysis::setFacilityPredictorEntries(std::vector<PredictorE
             facilityPredictorEntries.push_back(accountPredictorEntries[i]);
         }
     }
+}
+
+std::vector<MonthlyFacilityAnalysisData> MonthlyFacilityAnalysis::getMonthlyFacilityAnalysisData()
+{
+    std::vector<MonthlyFacilityAnalysisData> monthlyAnalysisSummaryData;
+    AnalysisDate currentMonthDate = AnalysisDate(baselineDate.month, baselineDate.year);
+    while (currentMonthDate.month != endDate.month || currentMonthDate.year != endDate.year)
+    {
+        MonthlyFacilityAnalysisData currentMonthyAnalysisSummaryData = MonthlyFacilityAnalysisData(
+            monthlyGroupAnalysisData,
+            currentMonthDate,
+            facilityPredictorEntries,
+            monthlyAnalysisSummaryData,
+            baselineDate.year,
+            facility);
+
+        monthlyAnalysisSummaryData.push_back(currentMonthyAnalysisSummaryData);
+        currentMonthDate.nextMonth();
+    }
+    return monthlyAnalysisSummaryData;
 }

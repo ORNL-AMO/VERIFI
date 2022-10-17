@@ -140,10 +140,38 @@ CMakeFiles/wasm-analysis.dir/src/AnnualAnalysisSummaryData.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/wasm-analysis.dir/src/AnnualAnalysisSummaryData.cpp.s"
 	C:\Users\mroot\Documents\ORNL\emsdk\upstream\emscripten\em++.bat $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\mroot\Documents\ORNL\VERIFI\wasm\src\AnnualAnalysisSummaryData.cpp -o CMakeFiles\wasm-analysis.dir\src\AnnualAnalysisSummaryData.cpp.s
 
+CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysis.cpp.o: CMakeFiles/wasm-analysis.dir/flags.make
+CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysis.cpp.o: CMakeFiles/wasm-analysis.dir/includes_CXX.rsp
+CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysis.cpp.o: src/MonthlyFacilityAnalysis.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=C:\Users\mroot\Documents\ORNL\VERIFI\wasm\CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysis.cpp.o"
+	C:\Users\mroot\Documents\ORNL\emsdk\upstream\emscripten\em++.bat  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles\wasm-analysis.dir\src\MonthlyFacilityAnalysis.cpp.o -c C:\Users\mroot\Documents\ORNL\VERIFI\wasm\src\MonthlyFacilityAnalysis.cpp
+
+CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysis.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysis.cpp.i"
+	C:\Users\mroot\Documents\ORNL\emsdk\upstream\emscripten\em++.bat $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\mroot\Documents\ORNL\VERIFI\wasm\src\MonthlyFacilityAnalysis.cpp > CMakeFiles\wasm-analysis.dir\src\MonthlyFacilityAnalysis.cpp.i
+
+CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysis.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysis.cpp.s"
+	C:\Users\mroot\Documents\ORNL\emsdk\upstream\emscripten\em++.bat $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\mroot\Documents\ORNL\VERIFI\wasm\src\MonthlyFacilityAnalysis.cpp -o CMakeFiles\wasm-analysis.dir\src\MonthlyFacilityAnalysis.cpp.s
+
+CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysisData.cpp.o: CMakeFiles/wasm-analysis.dir/flags.make
+CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysisData.cpp.o: CMakeFiles/wasm-analysis.dir/includes_CXX.rsp
+CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysisData.cpp.o: src/MonthlyFacilityAnalysisData.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=C:\Users\mroot\Documents\ORNL\VERIFI\wasm\CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysisData.cpp.o"
+	C:\Users\mroot\Documents\ORNL\emsdk\upstream\emscripten\em++.bat  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles\wasm-analysis.dir\src\MonthlyFacilityAnalysisData.cpp.o -c C:\Users\mroot\Documents\ORNL\VERIFI\wasm\src\MonthlyFacilityAnalysisData.cpp
+
+CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysisData.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysisData.cpp.i"
+	C:\Users\mroot\Documents\ORNL\emsdk\upstream\emscripten\em++.bat $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\mroot\Documents\ORNL\VERIFI\wasm\src\MonthlyFacilityAnalysisData.cpp > CMakeFiles\wasm-analysis.dir\src\MonthlyFacilityAnalysisData.cpp.i
+
+CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysisData.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysisData.cpp.s"
+	C:\Users\mroot\Documents\ORNL\emsdk\upstream\emscripten\em++.bat $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\mroot\Documents\ORNL\VERIFI\wasm\src\MonthlyFacilityAnalysisData.cpp -o CMakeFiles\wasm-analysis.dir\src\MonthlyFacilityAnalysisData.cpp.s
+
 CMakeFiles/wasm-analysis.dir/bindings/AnalysisSummaryWASM.cpp.o: CMakeFiles/wasm-analysis.dir/flags.make
 CMakeFiles/wasm-analysis.dir/bindings/AnalysisSummaryWASM.cpp.o: CMakeFiles/wasm-analysis.dir/includes_CXX.rsp
 CMakeFiles/wasm-analysis.dir/bindings/AnalysisSummaryWASM.cpp.o: bindings/AnalysisSummaryWASM.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=C:\Users\mroot\Documents\ORNL\VERIFI\wasm\CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/wasm-analysis.dir/bindings/AnalysisSummaryWASM.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=C:\Users\mroot\Documents\ORNL\VERIFI\wasm\CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/wasm-analysis.dir/bindings/AnalysisSummaryWASM.cpp.o"
 	C:\Users\mroot\Documents\ORNL\emsdk\upstream\emscripten\em++.bat  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles\wasm-analysis.dir\bindings\AnalysisSummaryWASM.cpp.o -c C:\Users\mroot\Documents\ORNL\VERIFI\wasm\bindings\AnalysisSummaryWASM.cpp
 
 CMakeFiles/wasm-analysis.dir/bindings/AnalysisSummaryWASM.cpp.i: cmake_force
@@ -162,6 +190,8 @@ wasm__analysis_OBJECTS = \
 "CMakeFiles/wasm-analysis.dir/src/MonthlyGroupAnalysis.cpp.o" \
 "CMakeFiles/wasm-analysis.dir/src/AnnualAnalysisSummary.cpp.o" \
 "CMakeFiles/wasm-analysis.dir/src/AnnualAnalysisSummaryData.cpp.o" \
+"CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysis.cpp.o" \
+"CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysisData.cpp.o" \
 "CMakeFiles/wasm-analysis.dir/bindings/AnalysisSummaryWASM.cpp.o"
 
 # External object files for target wasm-analysis
@@ -173,11 +203,13 @@ bin/wasm-analysis.js: CMakeFiles/wasm-analysis.dir/src/MonthlyAnalysisSummaryDat
 bin/wasm-analysis.js: CMakeFiles/wasm-analysis.dir/src/MonthlyGroupAnalysis.cpp.o
 bin/wasm-analysis.js: CMakeFiles/wasm-analysis.dir/src/AnnualAnalysisSummary.cpp.o
 bin/wasm-analysis.js: CMakeFiles/wasm-analysis.dir/src/AnnualAnalysisSummaryData.cpp.o
+bin/wasm-analysis.js: CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysis.cpp.o
+bin/wasm-analysis.js: CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysisData.cpp.o
 bin/wasm-analysis.js: CMakeFiles/wasm-analysis.dir/bindings/AnalysisSummaryWASM.cpp.o
 bin/wasm-analysis.js: CMakeFiles/wasm-analysis.dir/build.make
 bin/wasm-analysis.js: CMakeFiles/wasm-analysis.dir/objects1.rsp
 bin/wasm-analysis.js: CMakeFiles/wasm-analysis.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=C:\Users\mroot\Documents\ORNL\VERIFI\wasm\CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Linking CXX executable bin\wasm-analysis.js"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=C:\Users\mroot\Documents\ORNL\VERIFI\wasm\CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Linking CXX executable bin\wasm-analysis.js"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles\wasm-analysis.dir\link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

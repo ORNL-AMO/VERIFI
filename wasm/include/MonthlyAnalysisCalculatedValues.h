@@ -19,8 +19,26 @@ public:
         double baselineAdjustmentForOther,
         int fiscalYear,
         int baselineYear,
-        std::vector<MonthlyAnalysisCalculatedValues> previousMonthValues,
-        double baselineActualEnergyUse);
+        std::vector<MonthlyAnalysisCalculatedValues> previousMonthsValues,
+        double baselineActualEnergyUse)
+        : energyUse(energyUse), modeledEnergy(modeledEnergy), fiscalYear(fiscalYear)
+    {
+        initializeYearToDateValues(previousMonthsValues);
+        setYearToDateBaselineActualEnergyUse(baselineActualEnergyUse);
+        setYearToDateModeledEnergyUse();
+        setYearToDateActualEnergyUse();
+        setBaselineModeledEnergyUse(baselineYear, previousMonthsValues);
+        setAdjustedForNormalization(baselineActualEnergyUse);
+        setAdjusted(baselineAdjustmentForOther);
+        setSEnPI();
+        setSavings();
+        setPercentSavingsComparedToBaseline();
+        setYearToDateSavings(baselineYear);
+        setBaselineAdjustmentForNormalization(baselineActualEnergyUse);
+        setBaselineAdjustment(baselineAdjustmentForOther);
+        setRollingSavingsValues(previousMonthsValues, baselineYear);
+        setYearToDatePercentSavings();
+    };
 
     double energyUse;
     double modeledEnergy;
@@ -65,4 +83,4 @@ private:
     void setYearToDatePercentSavings();
 };
 
-#endif //MONTHLYANALYSISCALCULATEDVALUES_H
+#endif // MONTHLYANALYSISCALCULATEDVALUES_H

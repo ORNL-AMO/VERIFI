@@ -5,6 +5,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/wasm-analysis.dir/src/MonthlyGroupAnalysis.cpp.o"
   "CMakeFiles/wasm-analysis.dir/src/AnnualAnalysisSummary.cpp.o"
   "CMakeFiles/wasm-analysis.dir/src/AnnualAnalysisSummaryData.cpp.o"
+  "CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysis.cpp.o"
+  "CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysisData.cpp.o"
   "CMakeFiles/wasm-analysis.dir/bindings/AnalysisSummaryWASM.cpp.o"
   "bin/wasm-analysis.pdb"
   "bin/wasm-analysis.js"

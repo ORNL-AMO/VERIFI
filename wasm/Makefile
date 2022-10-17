@@ -315,6 +315,66 @@ src/MonthlyAnalysisSummaryData.cpp.s:
 	$(MAKE) -f CMakeFiles\wasm-analysis.dir\build.make CMakeFiles/wasm-analysis.dir/src/MonthlyAnalysisSummaryData.cpp.s
 .PHONY : src/MonthlyAnalysisSummaryData.cpp.s
 
+src/MonthlyFacilityAnalysis.o: src/MonthlyFacilityAnalysis.cpp.o
+
+.PHONY : src/MonthlyFacilityAnalysis.o
+
+# target to build an object file
+src/MonthlyFacilityAnalysis.cpp.o:
+	$(MAKE) -f CMakeFiles\verifi_analysis.dir\build.make CMakeFiles/verifi_analysis.dir/src/MonthlyFacilityAnalysis.cpp.o
+	$(MAKE) -f CMakeFiles\wasm-analysis.dir\build.make CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysis.cpp.o
+.PHONY : src/MonthlyFacilityAnalysis.cpp.o
+
+src/MonthlyFacilityAnalysis.i: src/MonthlyFacilityAnalysis.cpp.i
+
+.PHONY : src/MonthlyFacilityAnalysis.i
+
+# target to preprocess a source file
+src/MonthlyFacilityAnalysis.cpp.i:
+	$(MAKE) -f CMakeFiles\verifi_analysis.dir\build.make CMakeFiles/verifi_analysis.dir/src/MonthlyFacilityAnalysis.cpp.i
+	$(MAKE) -f CMakeFiles\wasm-analysis.dir\build.make CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysis.cpp.i
+.PHONY : src/MonthlyFacilityAnalysis.cpp.i
+
+src/MonthlyFacilityAnalysis.s: src/MonthlyFacilityAnalysis.cpp.s
+
+.PHONY : src/MonthlyFacilityAnalysis.s
+
+# target to generate assembly for a file
+src/MonthlyFacilityAnalysis.cpp.s:
+	$(MAKE) -f CMakeFiles\verifi_analysis.dir\build.make CMakeFiles/verifi_analysis.dir/src/MonthlyFacilityAnalysis.cpp.s
+	$(MAKE) -f CMakeFiles\wasm-analysis.dir\build.make CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysis.cpp.s
+.PHONY : src/MonthlyFacilityAnalysis.cpp.s
+
+src/MonthlyFacilityAnalysisData.o: src/MonthlyFacilityAnalysisData.cpp.o
+
+.PHONY : src/MonthlyFacilityAnalysisData.o
+
+# target to build an object file
+src/MonthlyFacilityAnalysisData.cpp.o:
+	$(MAKE) -f CMakeFiles\verifi_analysis.dir\build.make CMakeFiles/verifi_analysis.dir/src/MonthlyFacilityAnalysisData.cpp.o
+	$(MAKE) -f CMakeFiles\wasm-analysis.dir\build.make CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysisData.cpp.o
+.PHONY : src/MonthlyFacilityAnalysisData.cpp.o
+
+src/MonthlyFacilityAnalysisData.i: src/MonthlyFacilityAnalysisData.cpp.i
+
+.PHONY : src/MonthlyFacilityAnalysisData.i
+
+# target to preprocess a source file
+src/MonthlyFacilityAnalysisData.cpp.i:
+	$(MAKE) -f CMakeFiles\verifi_analysis.dir\build.make CMakeFiles/verifi_analysis.dir/src/MonthlyFacilityAnalysisData.cpp.i
+	$(MAKE) -f CMakeFiles\wasm-analysis.dir\build.make CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysisData.cpp.i
+.PHONY : src/MonthlyFacilityAnalysisData.cpp.i
+
+src/MonthlyFacilityAnalysisData.s: src/MonthlyFacilityAnalysisData.cpp.s
+
+.PHONY : src/MonthlyFacilityAnalysisData.s
+
+# target to generate assembly for a file
+src/MonthlyFacilityAnalysisData.cpp.s:
+	$(MAKE) -f CMakeFiles\verifi_analysis.dir\build.make CMakeFiles/verifi_analysis.dir/src/MonthlyFacilityAnalysisData.cpp.s
+	$(MAKE) -f CMakeFiles\wasm-analysis.dir\build.make CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysisData.cpp.s
+.PHONY : src/MonthlyFacilityAnalysisData.cpp.s
+
 src/MonthlyGroupAnalysis.o: src/MonthlyGroupAnalysis.cpp.o
 
 .PHONY : src/MonthlyGroupAnalysis.o
@@ -373,6 +433,12 @@ help:
 	@echo ... src/MonthlyAnalysisSummaryData.o
 	@echo ... src/MonthlyAnalysisSummaryData.i
 	@echo ... src/MonthlyAnalysisSummaryData.s
+	@echo ... src/MonthlyFacilityAnalysis.o
+	@echo ... src/MonthlyFacilityAnalysis.i
+	@echo ... src/MonthlyFacilityAnalysis.s
+	@echo ... src/MonthlyFacilityAnalysisData.o
+	@echo ... src/MonthlyFacilityAnalysisData.i
+	@echo ... src/MonthlyFacilityAnalysisData.s
 	@echo ... src/MonthlyGroupAnalysis.o
 	@echo ... src/MonthlyGroupAnalysis.i
 	@echo ... src/MonthlyGroupAnalysis.s

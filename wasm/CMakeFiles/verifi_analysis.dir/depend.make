@@ -13,6 +13,8 @@ CMakeFiles/verifi_analysis.dir/bindings/AnalysisSummaryWASM.cpp.o: include/Month
 CMakeFiles/verifi_analysis.dir/bindings/AnalysisSummaryWASM.cpp.o: include/MonthlyAnalysisSummary.h
 CMakeFiles/verifi_analysis.dir/bindings/AnalysisSummaryWASM.cpp.o: include/MonthlyAnalysisSummaryData.h
 CMakeFiles/verifi_analysis.dir/bindings/AnalysisSummaryWASM.cpp.o: include/MonthlyData.h
+CMakeFiles/verifi_analysis.dir/bindings/AnalysisSummaryWASM.cpp.o: include/MonthlyFacilityAnalysis.h
+CMakeFiles/verifi_analysis.dir/bindings/AnalysisSummaryWASM.cpp.o: include/MonthlyFacilityAnalysisData.h
 CMakeFiles/verifi_analysis.dir/bindings/AnalysisSummaryWASM.cpp.o: include/MonthlyGroupAnalysis.h
 CMakeFiles/verifi_analysis.dir/bindings/AnalysisSummaryWASM.cpp.o: include/PredictorEntry.h
 
@@ -71,6 +73,34 @@ CMakeFiles/verifi_analysis.dir/src/MonthlyAnalysisSummaryData.cpp.o: include/Mon
 CMakeFiles/verifi_analysis.dir/src/MonthlyAnalysisSummaryData.cpp.o: include/MonthlyData.h
 CMakeFiles/verifi_analysis.dir/src/MonthlyAnalysisSummaryData.cpp.o: include/MonthlyGroupAnalysis.h
 CMakeFiles/verifi_analysis.dir/src/MonthlyAnalysisSummaryData.cpp.o: include/PredictorEntry.h
+
+CMakeFiles/verifi_analysis.dir/src/MonthlyFacilityAnalysis.cpp.o: src/MonthlyFacilityAnalysis.cpp
+CMakeFiles/verifi_analysis.dir/src/MonthlyFacilityAnalysis.cpp.o: include/AnalysisDate.h
+CMakeFiles/verifi_analysis.dir/src/MonthlyFacilityAnalysis.cpp.o: include/AnalysisGroup.h
+CMakeFiles/verifi_analysis.dir/src/MonthlyFacilityAnalysis.cpp.o: include/CalanderizedMeter.h
+CMakeFiles/verifi_analysis.dir/src/MonthlyFacilityAnalysis.cpp.o: include/Facility.h
+CMakeFiles/verifi_analysis.dir/src/MonthlyFacilityAnalysis.cpp.o: include/Helper.h
+CMakeFiles/verifi_analysis.dir/src/MonthlyFacilityAnalysis.cpp.o: include/MonthlyAnalysisCalculatedValues.h
+CMakeFiles/verifi_analysis.dir/src/MonthlyFacilityAnalysis.cpp.o: include/MonthlyAnalysisSummary.h
+CMakeFiles/verifi_analysis.dir/src/MonthlyFacilityAnalysis.cpp.o: include/MonthlyAnalysisSummaryData.h
+CMakeFiles/verifi_analysis.dir/src/MonthlyFacilityAnalysis.cpp.o: include/MonthlyData.h
+CMakeFiles/verifi_analysis.dir/src/MonthlyFacilityAnalysis.cpp.o: include/MonthlyFacilityAnalysis.h
+CMakeFiles/verifi_analysis.dir/src/MonthlyFacilityAnalysis.cpp.o: include/MonthlyFacilityAnalysisData.h
+CMakeFiles/verifi_analysis.dir/src/MonthlyFacilityAnalysis.cpp.o: include/MonthlyGroupAnalysis.h
+CMakeFiles/verifi_analysis.dir/src/MonthlyFacilityAnalysis.cpp.o: include/PredictorEntry.h
+
+CMakeFiles/verifi_analysis.dir/src/MonthlyFacilityAnalysisData.cpp.o: src/MonthlyFacilityAnalysisData.cpp
+CMakeFiles/verifi_analysis.dir/src/MonthlyFacilityAnalysisData.cpp.o: include/AnalysisDate.h
+CMakeFiles/verifi_analysis.dir/src/MonthlyFacilityAnalysisData.cpp.o: include/AnalysisGroup.h
+CMakeFiles/verifi_analysis.dir/src/MonthlyFacilityAnalysisData.cpp.o: include/CalanderizedMeter.h
+CMakeFiles/verifi_analysis.dir/src/MonthlyFacilityAnalysisData.cpp.o: include/Facility.h
+CMakeFiles/verifi_analysis.dir/src/MonthlyFacilityAnalysisData.cpp.o: include/Helper.h
+CMakeFiles/verifi_analysis.dir/src/MonthlyFacilityAnalysisData.cpp.o: include/MonthlyAnalysisCalculatedValues.h
+CMakeFiles/verifi_analysis.dir/src/MonthlyFacilityAnalysisData.cpp.o: include/MonthlyAnalysisSummaryData.h
+CMakeFiles/verifi_analysis.dir/src/MonthlyFacilityAnalysisData.cpp.o: include/MonthlyData.h
+CMakeFiles/verifi_analysis.dir/src/MonthlyFacilityAnalysisData.cpp.o: include/MonthlyFacilityAnalysisData.h
+CMakeFiles/verifi_analysis.dir/src/MonthlyFacilityAnalysisData.cpp.o: include/MonthlyGroupAnalysis.h
+CMakeFiles/verifi_analysis.dir/src/MonthlyFacilityAnalysisData.cpp.o: include/PredictorEntry.h
 
 CMakeFiles/verifi_analysis.dir/src/MonthlyGroupAnalysis.cpp.o: src/MonthlyGroupAnalysis.cpp
 CMakeFiles/verifi_analysis.dir/src/MonthlyGroupAnalysis.cpp.o: include/AnalysisDate.h

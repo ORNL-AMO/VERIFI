@@ -13,6 +13,8 @@ CMakeFiles/wasm-analysis.dir/bindings/AnalysisSummaryWASM.cpp.o: include/Monthly
 CMakeFiles/wasm-analysis.dir/bindings/AnalysisSummaryWASM.cpp.o: include/MonthlyAnalysisSummary.h
 CMakeFiles/wasm-analysis.dir/bindings/AnalysisSummaryWASM.cpp.o: include/MonthlyAnalysisSummaryData.h
 CMakeFiles/wasm-analysis.dir/bindings/AnalysisSummaryWASM.cpp.o: include/MonthlyData.h
+CMakeFiles/wasm-analysis.dir/bindings/AnalysisSummaryWASM.cpp.o: include/MonthlyFacilityAnalysis.h
+CMakeFiles/wasm-analysis.dir/bindings/AnalysisSummaryWASM.cpp.o: include/MonthlyFacilityAnalysisData.h
 CMakeFiles/wasm-analysis.dir/bindings/AnalysisSummaryWASM.cpp.o: include/MonthlyGroupAnalysis.h
 CMakeFiles/wasm-analysis.dir/bindings/AnalysisSummaryWASM.cpp.o: include/PredictorEntry.h
 
@@ -71,6 +73,34 @@ CMakeFiles/wasm-analysis.dir/src/MonthlyAnalysisSummaryData.cpp.o: include/Month
 CMakeFiles/wasm-analysis.dir/src/MonthlyAnalysisSummaryData.cpp.o: include/MonthlyData.h
 CMakeFiles/wasm-analysis.dir/src/MonthlyAnalysisSummaryData.cpp.o: include/MonthlyGroupAnalysis.h
 CMakeFiles/wasm-analysis.dir/src/MonthlyAnalysisSummaryData.cpp.o: include/PredictorEntry.h
+
+CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysis.cpp.o: src/MonthlyFacilityAnalysis.cpp
+CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysis.cpp.o: include/AnalysisDate.h
+CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysis.cpp.o: include/AnalysisGroup.h
+CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysis.cpp.o: include/CalanderizedMeter.h
+CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysis.cpp.o: include/Facility.h
+CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysis.cpp.o: include/Helper.h
+CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysis.cpp.o: include/MonthlyAnalysisCalculatedValues.h
+CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysis.cpp.o: include/MonthlyAnalysisSummary.h
+CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysis.cpp.o: include/MonthlyAnalysisSummaryData.h
+CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysis.cpp.o: include/MonthlyData.h
+CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysis.cpp.o: include/MonthlyFacilityAnalysis.h
+CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysis.cpp.o: include/MonthlyFacilityAnalysisData.h
+CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysis.cpp.o: include/MonthlyGroupAnalysis.h
+CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysis.cpp.o: include/PredictorEntry.h
+
+CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysisData.cpp.o: src/MonthlyFacilityAnalysisData.cpp
+CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysisData.cpp.o: include/AnalysisDate.h
+CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysisData.cpp.o: include/AnalysisGroup.h
+CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysisData.cpp.o: include/CalanderizedMeter.h
+CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysisData.cpp.o: include/Facility.h
+CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysisData.cpp.o: include/Helper.h
+CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysisData.cpp.o: include/MonthlyAnalysisCalculatedValues.h
+CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysisData.cpp.o: include/MonthlyAnalysisSummaryData.h
+CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysisData.cpp.o: include/MonthlyData.h
+CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysisData.cpp.o: include/MonthlyFacilityAnalysisData.h
+CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysisData.cpp.o: include/MonthlyGroupAnalysis.h
+CMakeFiles/wasm-analysis.dir/src/MonthlyFacilityAnalysisData.cpp.o: include/PredictorEntry.h
 
 CMakeFiles/wasm-analysis.dir/src/MonthlyGroupAnalysis.cpp.o: src/MonthlyGroupAnalysis.cpp
 CMakeFiles/wasm-analysis.dir/src/MonthlyGroupAnalysis.cpp.o: include/AnalysisDate.h
