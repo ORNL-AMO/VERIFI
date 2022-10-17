@@ -4,6 +4,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { IdbAnalysisItem, IdbFacility, IdbPredictorEntry } from 'src/app/models/idb';
+import { AnnualFacilityAnalysisWASM } from 'src/app/web-workers/classes/wasm-api/annualFacilityAnalysisWASM';
 import { MonthlyFacilityAnalysisWASM } from 'src/app/web-workers/classes/wasm-api/monthlyFacilityAnalysisWASM';
 import { AnalysisService } from '../../analysis.service';
 declare var Module: any;
@@ -69,6 +70,8 @@ export class FacilityAnalysisComponent implements OnInit {
     try {
       let test = new MonthlyFacilityAnalysisWASM(Module, analysisItem, facility, calanderizedMeters, accountPredictorEntries);
       this.analysisService.monthlyAccountAnalysisData.next(test.monthlyAnalysisSummaryData);
+      let test2 = new AnnualFacilityAnalysisWASM(Module, analysisItem, facility, calanderizedMeters, accountPredictorEntries);
+      this.analysisService.annualAnalysisSummary.next(test2.annualAnalysisSummary);
       this.analysisService.calculating.next(false);
       // this.monthlyAnalysisSummary = {
       //   predictorVariables: undefined,

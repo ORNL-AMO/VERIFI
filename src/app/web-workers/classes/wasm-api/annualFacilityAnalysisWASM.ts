@@ -1,12 +1,15 @@
-import { MonthlyAnalysisSummaryData } from "src/app/models/analysis";
+import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from "src/app/models/analysis";
 import { CalanderizedMeter } from "src/app/models/calanderization";
-import { AnalysisGroup, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, PredictorData } from "src/app/models/idb";
-import { checkValue } from "../helperService";
-import { getAnalysisGroup, getCalanderizedMetersVector, getPredictorEntriesVector, getPredictorUsage, getStartAndEndDate, parseMonthlyData } from "./HelpersWasm";
+import { AnalysisGroup, IdbAnalysisItem, IdbFacility, IdbPredictorEntry } from "src/app/models/idb";
+import { getAnalysisGroup, getCalanderizedMetersVector, getPredictorEntriesVector, getStartAndEndDate, parseAnnualData, parseMonthlyData } from "./HelpersWasm";
 
-export class MonthlyFacilityAnalysisWASM {
+
+export class AnnualFacilityAnalysisWASM {
+
+    annualAnalysisSummary: Array<AnnualAnalysisSummary>;
     monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>;
     constructor(wasmModule: any, analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorEntry>) {
+        // let wasmGroup = getAnalysisGroup(wasmModule, selectedGroup);
         let wasmGroupVector = new wasmModule.AnalysisGroupVector();
         analysisItem.groups.forEach(group => {
             let wasmGroup = getAnalysisGroup(wasmModule, group);
@@ -20,29 +23,33 @@ export class MonthlyFacilityAnalysisWASM {
         let wasmCMeters = getCalanderizedMetersVector(wasmModule, calanderizedMeters);
         let wasmPredictorEntries = getPredictorEntriesVector(wasmModule, accountPredictorEntries);
 
-        // std::vector<AnalysisGroup> selectedGroups,
+        // AnalysisGroup analysisGroup,
+        // AnalysisDate baselineDate,
+        // AnalysisDate endDate,
         // Facility facility,
         // std::vector<CalanderizedMeter> calanderizedMeters,
-        // std::vector<PredictorEntry> accountPredictorEntries,
-        // AnalysisDate baselineDate,
-        // AnalysisDate endDate
-        let monthlyAnalysisSummary = new wasmModule.MonthlyFacilityAnalysis(
+        // std::vector<PredictorEntry> accountPredictorEntries
+        let annualAnalysisSummary = new wasmModule.AnnualAnalysisSummary(
             wasmGroupVector,
             wasmFacility,
             wasmCMeters,
             wasmPredictorEntries,
             baselineAndEndDate.baselineDate,
-            baselineAndEndDate.endDate);
+            baselineAndEndDate.endDate,
+            true);
+        wasmGroupVector.delete();
         baselineAndEndDate.endDate.delete();
         baselineAndEndDate.baselineDate.delete();
         wasmFacility.delete();
         wasmCMeters.delete();
         wasmPredictorEntries.delete();
 
-        let calculatedData = monthlyAnalysisSummary.getMonthlyFacilityAnalysisData();
-        this.monthlyAnalysisSummaryData = parseMonthlyData(calculatedData, undefined);
-        wasmGroupVector.delete();
+        let calculatedData = annualAnalysisSummary.getAnnualFacilitySummaryData();
+        this.annualAnalysisSummary = parseAnnualData(calculatedData);
+        // this.annualAnalysisSummary = parseMonthlyData(annualAnalysisSummary, selectedGroup);
         calculatedData.delete();
-        monthlyAnalysisSummary.delete();
+        annualAnalysisSummary.delete();
     }
+
+
 }

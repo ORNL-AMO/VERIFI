@@ -31,6 +31,8 @@ CMakeFiles/verifi_analysis.dir/src/AnnualAnalysisSummary.cpp.o
  include/MonthlyAnalysisSummary.h
  include/MonthlyAnalysisSummaryData.h
  include/MonthlyData.h
+ include/MonthlyFacilityAnalysis.h
+ include/MonthlyFacilityAnalysisData.h
  include/MonthlyGroupAnalysis.h
  include/PredictorEntry.h
 CMakeFiles/verifi_analysis.dir/src/AnnualAnalysisSummaryData.cpp.o
@@ -44,6 +46,7 @@ CMakeFiles/verifi_analysis.dir/src/AnnualAnalysisSummaryData.cpp.o
  include/MonthlyAnalysisCalculatedValues.h
  include/MonthlyAnalysisSummaryData.h
  include/MonthlyData.h
+ include/MonthlyFacilityAnalysisData.h
  include/MonthlyGroupAnalysis.h
  include/PredictorEntry.h
 CMakeFiles/verifi_analysis.dir/src/MonthlyAnalysisCalculatedValues.cpp.o

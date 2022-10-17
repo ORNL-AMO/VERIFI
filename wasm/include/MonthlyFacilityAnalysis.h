@@ -8,8 +8,8 @@
 #include "AnalysisDate.h"
 #include "MonthlyAnalysisSummary.h"
 #include "MonthlyFacilityAnalysisData.h"
-#ifndef MONTHLYACCOUNTANALYSIS_H
-#define MONTHLYACCOUNTANALYSIS_H
+#ifndef MONTHLYFACILITYANALYSIS_H
+#define MONTHLYFACILITYANALYSIS_H
 class MonthlyFacilityAnalysis
 {
 public:
@@ -43,4 +43,4 @@ public:
     std::vector<MonthlyFacilityAnalysisData> getMonthlyFacilityAnalysisData();
 };
 
-#endif // MONTHLYACCOUNTANALYSIS_H
+#endif // MONTHLYFACILITYANALYSIS_H

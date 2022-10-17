@@ -30,6 +30,8 @@ CMakeFiles/verifi_analysis.dir/src/AnnualAnalysisSummary.cpp.o: include/MonthlyA
 CMakeFiles/verifi_analysis.dir/src/AnnualAnalysisSummary.cpp.o: include/MonthlyAnalysisSummary.h
 CMakeFiles/verifi_analysis.dir/src/AnnualAnalysisSummary.cpp.o: include/MonthlyAnalysisSummaryData.h
 CMakeFiles/verifi_analysis.dir/src/AnnualAnalysisSummary.cpp.o: include/MonthlyData.h
+CMakeFiles/verifi_analysis.dir/src/AnnualAnalysisSummary.cpp.o: include/MonthlyFacilityAnalysis.h
+CMakeFiles/verifi_analysis.dir/src/AnnualAnalysisSummary.cpp.o: include/MonthlyFacilityAnalysisData.h
 CMakeFiles/verifi_analysis.dir/src/AnnualAnalysisSummary.cpp.o: include/MonthlyGroupAnalysis.h
 CMakeFiles/verifi_analysis.dir/src/AnnualAnalysisSummary.cpp.o: include/PredictorEntry.h
 
@@ -43,6 +45,7 @@ CMakeFiles/verifi_analysis.dir/src/AnnualAnalysisSummaryData.cpp.o: include/Help
 CMakeFiles/verifi_analysis.dir/src/AnnualAnalysisSummaryData.cpp.o: include/MonthlyAnalysisCalculatedValues.h
 CMakeFiles/verifi_analysis.dir/src/AnnualAnalysisSummaryData.cpp.o: include/MonthlyAnalysisSummaryData.h
 CMakeFiles/verifi_analysis.dir/src/AnnualAnalysisSummaryData.cpp.o: include/MonthlyData.h
+CMakeFiles/verifi_analysis.dir/src/AnnualAnalysisSummaryData.cpp.o: include/MonthlyFacilityAnalysisData.h
 CMakeFiles/verifi_analysis.dir/src/AnnualAnalysisSummaryData.cpp.o: include/MonthlyGroupAnalysis.h
 CMakeFiles/verifi_analysis.dir/src/AnnualAnalysisSummaryData.cpp.o: include/PredictorEntry.h
 

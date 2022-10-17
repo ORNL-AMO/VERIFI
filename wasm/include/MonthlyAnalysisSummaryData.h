@@ -33,6 +33,18 @@ public:
         setMonthlyAnalysisCalculatedValues(monthlyGroupAnalysis.baselineDate.year, previousMonthsSummaryData);
     }
 
+    MonthlyAnalysisSummaryData(
+        AnalysisDate analysisMonth,
+        double energyUse,
+        double modeledEnergy,
+        double baselineAdjustmentForOther,
+        double fiscalYear,
+        MonthlyAnalysisCalculatedValues monthlyAnalysisCalculatedValues,
+        std::vector<PredictorUsage> predictorUsage) : analysisMonth(analysisMonth), energyUse(energyUse), modeledEnergy(modeledEnergy), baselineAdjustmentForOther(baselineAdjustmentForOther),
+                                                      fiscalYear(fiscalYear), monthlyAnalysisCalculatedValues(monthlyAnalysisCalculatedValues), predictorUsage(predictorUsage){
+
+                                                                                                                                                };
+
     MonthlyGroupAnalysis monthlyGroupAnalysis;
     AnalysisDate analysisMonth;
     double energyUse;

@@ -3,6 +3,7 @@
 #include "Facility.h"
 #include "MonthlyAnalysisSummaryData.h"
 #include <vector>
+#include "MonthlyFacilityAnalysisData.h"
 
 #ifndef ANNUALANALYSISSUMMARYDATA_H
 #define ANNUALANALYSISSUMMARYDATA_H
@@ -17,6 +18,34 @@ public:
 
     AnnualAnalysisSummaryData(
         std::vector<MonthlyAnalysisSummaryData> monthlyAnalysisSummaryData,
+        int year,
+        std::vector<PredictorEntry> accountPredictorEntries,
+        Facility facility,
+        std::vector<AnnualAnalysisSummaryData> previousYearsSummaryData) : year(year)
+    {
+        setYearAnalysisSummaryData(monthlyAnalysisSummaryData);
+        setPredictorUsage(monthlyAnalysisSummaryData);
+        setEnergyUse();
+        setModeledEnergy();
+        setBaselineEnergyUse(previousYearsSummaryData);
+        setBaselineModeledEnergy(previousYearsSummaryData);
+        setAdjustedForNormalization();
+        setBaselineAdjustmentForOther();
+        setBaselineAdjustmentForNormalization(previousYearsSummaryData);
+        setBaselineAdjustment(previousYearsSummaryData);
+        setAdjusted();
+        setSEnPI();
+        setSavings(previousYearsSummaryData);
+        setTotalSavingsPercentImprovement();
+        setPreviousYearSavings(previousYearsSummaryData);
+        setAnnualSavingsPercentImprovement();
+        setCummulativeSavings(previousYearsSummaryData);
+        setNewSavings();
+    };
+
+    
+    AnnualAnalysisSummaryData(
+        std::vector<MonthlyFacilityAnalysisData> monthlyAnalysisSummaryData,
         int year,
         std::vector<PredictorEntry> accountPredictorEntries,
         Facility facility,
@@ -66,7 +95,9 @@ public:
     double previousYearSavings;
 
     void setYearAnalysisSummaryData(std::vector<MonthlyAnalysisSummaryData> monthlyAnalysisSummaryData);
+    void setYearAnalysisSummaryData(std::vector<MonthlyFacilityAnalysisData> monthlyAnalysisSummaryData);
     void setPredictorUsage(std::vector<MonthlyAnalysisSummaryData> monthlyAnalysisSummaryData);
+    void setPredictorUsage(std::vector<MonthlyFacilityAnalysisData> monthlyAnalysisSummaryData);
     void setEnergyUse();
     void setModeledEnergy();
     void setBaselineEnergyUse(std::vector<AnnualAnalysisSummaryData> previousYearsSummaryData);

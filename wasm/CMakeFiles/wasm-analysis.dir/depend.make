@@ -30,6 +30,8 @@ CMakeFiles/wasm-analysis.dir/src/AnnualAnalysisSummary.cpp.o: include/MonthlyAna
 CMakeFiles/wasm-analysis.dir/src/AnnualAnalysisSummary.cpp.o: include/MonthlyAnalysisSummary.h
 CMakeFiles/wasm-analysis.dir/src/AnnualAnalysisSummary.cpp.o: include/MonthlyAnalysisSummaryData.h
 CMakeFiles/wasm-analysis.dir/src/AnnualAnalysisSummary.cpp.o: include/MonthlyData.h
+CMakeFiles/wasm-analysis.dir/src/AnnualAnalysisSummary.cpp.o: include/MonthlyFacilityAnalysis.h
+CMakeFiles/wasm-analysis.dir/src/AnnualAnalysisSummary.cpp.o: include/MonthlyFacilityAnalysisData.h
 CMakeFiles/wasm-analysis.dir/src/AnnualAnalysisSummary.cpp.o: include/MonthlyGroupAnalysis.h
 CMakeFiles/wasm-analysis.dir/src/AnnualAnalysisSummary.cpp.o: include/PredictorEntry.h
 
@@ -43,6 +45,7 @@ CMakeFiles/wasm-analysis.dir/src/AnnualAnalysisSummaryData.cpp.o: include/Helper
 CMakeFiles/wasm-analysis.dir/src/AnnualAnalysisSummaryData.cpp.o: include/MonthlyAnalysisCalculatedValues.h
 CMakeFiles/wasm-analysis.dir/src/AnnualAnalysisSummaryData.cpp.o: include/MonthlyAnalysisSummaryData.h
 CMakeFiles/wasm-analysis.dir/src/AnnualAnalysisSummaryData.cpp.o: include/MonthlyData.h
+CMakeFiles/wasm-analysis.dir/src/AnnualAnalysisSummaryData.cpp.o: include/MonthlyFacilityAnalysisData.h
 CMakeFiles/wasm-analysis.dir/src/AnnualAnalysisSummaryData.cpp.o: include/MonthlyGroupAnalysis.h
 CMakeFiles/wasm-analysis.dir/src/AnnualAnalysisSummaryData.cpp.o: include/PredictorEntry.h
 

@@ -47,7 +47,9 @@ EMSCRIPTEN_BINDINGS(monthly_analysis_summary)
 
     class_<AnnualAnalysisSummary>("AnnualAnalysisSummary")
         .constructor<AnalysisGroup, AnalysisDate, AnalysisDate, Facility, std::vector<CalanderizedMeter>, std::vector<PredictorEntry>>()
-        .function("getAnnualAnalysisSummaryData", &AnnualAnalysisSummary::getAnnualAnalysisSummaryData);
+        .constructor<std::vector<AnalysisGroup>, Facility, std::vector<CalanderizedMeter>, std::vector<PredictorEntry>, AnalysisDate, AnalysisDate, bool>()
+        .function("getAnnualAnalysisSummaryData", &AnnualAnalysisSummary::getAnnualAnalysisSummaryData)
+        .function("getAnnualFacilitySummaryData", &AnnualAnalysisSummary::getAnnualFacilitySummaryData);
 
     class_<AnnualAnalysisSummaryData>("AnnualAnalysisSummaryData")
         .property("year", &AnnualAnalysisSummaryData::year)

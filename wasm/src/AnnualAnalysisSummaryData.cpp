@@ -10,6 +10,25 @@ void AnnualAnalysisSummaryData::setYearAnalysisSummaryData(std::vector<MonthlyAn
         }
     }
 };
+void AnnualAnalysisSummaryData::setYearAnalysisSummaryData(std::vector<MonthlyFacilityAnalysisData> monthlyAnalysisSummaryData)
+{
+    for (int i = 0; i < monthlyAnalysisSummaryData.size(); i++)
+    {
+        if (monthlyAnalysisSummaryData[i].fiscalYear == year)
+        {
+            MonthlyAnalysisSummaryData convertedDataItem = MonthlyAnalysisSummaryData(
+                monthlyAnalysisSummaryData[i].analysisMonth,
+                monthlyAnalysisSummaryData[i].energyUse,
+                monthlyAnalysisSummaryData[i].modeledEnergy,
+                monthlyAnalysisSummaryData[i].baselineAdjustmentForOther,
+                monthlyAnalysisSummaryData[i].fiscalYear,
+                monthlyAnalysisSummaryData[i].monthlyAnalysisCalculatedValues,
+                monthlyAnalysisSummaryData[i].predictorUsage);
+            yearMonthlyAnalysisSummaryData.push_back(convertedDataItem);
+        }
+    }
+};
+
 void AnnualAnalysisSummaryData::setEnergyUse()
 {
     energyUse = 0;
@@ -150,6 +169,30 @@ void AnnualAnalysisSummaryData::setCummulativeSavings(std::vector<AnnualAnalysis
 void AnnualAnalysisSummaryData::setNewSavings()
 {
     newSavings = savings - previousYearSavings;
+};
+
+void AnnualAnalysisSummaryData::setPredictorUsage(std::vector<MonthlyFacilityAnalysisData> monthlyAnalysisSummaryData)
+{
+    for (int i = 0; i < monthlyAnalysisSummaryData.size(); i++)
+    {
+        if (monthlyAnalysisSummaryData[i].fiscalYear == year)
+        {
+            if (predictorUsage.size() == 0)
+            {
+                for (int p = 0; p < monthlyAnalysisSummaryData[i].predictorUsage.size(); p++)
+                {
+                    predictorUsage.push_back(monthlyAnalysisSummaryData[i].predictorUsage[p]);
+                }
+            }
+            else
+            {
+                for (int p = 0; p < monthlyAnalysisSummaryData[i].predictorUsage.size(); p++)
+                {
+                    predictorUsage[p].usage += monthlyAnalysisSummaryData[i].predictorUsage[p].usage;
+                }
+            }
+        }
+    }
 };
 
 void AnnualAnalysisSummaryData::setPredictorUsage(std::vector<MonthlyAnalysisSummaryData> monthlyAnalysisSummaryData)

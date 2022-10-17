@@ -2,6 +2,8 @@
 #include "MonthlyAnalysisSummaryData.h"
 #include "PredictorEntry.h"
 
+#ifndef MONTHLYFACILITYANALYSISDATA_H
+#define MONTHLYFACILITYANALYSISDATA_H
 class MonthlyFacilityAnalysisData
 {
 public:
@@ -54,3 +56,5 @@ public:
     void setBaselineActualEnergyUse(int baselineYear, std::vector<MonthlyFacilityAnalysisData> previousMonthsSummaryData);
     void setMonthlyAnalysisCalculatedValues(int baselineYear, std::vector<MonthlyFacilityAnalysisData> previousMonthsSummaryData);
 };
+
+#endif //MONTHLYFACILITYANALYSISDATA_H
