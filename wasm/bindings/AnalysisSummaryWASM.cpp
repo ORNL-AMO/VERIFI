@@ -88,7 +88,7 @@ EMSCRIPTEN_BINDINGS(monthly_analysis_summary)
         .constructor<int, int>();
 
     class_<AnalysisGroup>("AnalysisGroup")
-        .constructor<std::string, std::vector<PredictorData>, std::string, double, double, bool, std::vector<BaselineAdjustments>>();
+        .constructor<std::string, std::vector<PredictorData>, std::string, double, double, bool, std::vector<BaselineAdjustments>, std::string>();
 
     class_<Facility>("Facility")
         .constructor<std::string, std::string, bool, int>();

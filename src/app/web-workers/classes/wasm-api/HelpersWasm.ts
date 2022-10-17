@@ -17,7 +17,7 @@ export function getAnalysisGroup(wasmModule: any, selectedGroup: AnalysisGroup) 
     let hasBaselineAdjustment = checkNullDouble(selectedGroup.hasBaselineAdjustement);
     // std::vector<BaselineAdjustments> baselineAdjustments
     let baselineAdjustments = getBaselineAdjustments(wasmModule, selectedGroup.baselineAdjustments);
-    let group = new wasmModule.AnalysisGroup(analysisType, predictorVariables, idbGroupId, regressionConstant, averagePercentBaseload, hasBaselineAdjustment, baselineAdjustments);
+    let group = new wasmModule.AnalysisGroup(analysisType, predictorVariables, idbGroupId, regressionConstant, averagePercentBaseload, hasBaselineAdjustment, baselineAdjustments, true);
     predictorVariables.delete();
     baselineAdjustments.delete();
     return group;

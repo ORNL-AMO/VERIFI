@@ -36,14 +36,16 @@ public:
         double regressionConstant,
         double averagePercentBaseload,
         bool hasBaselineAdjustment,
-        std::vector<BaselineAdjustments> baselineAdjustments)
+        std::vector<BaselineAdjustments> baselineAdjustments,
+        std::string facilityId)
         : analysisType(analysisType),
           predictorVariables(predictorVariables),
           idbGroupId(idbGroupId),
           regressionConstant(regressionConstant),
           averagePercentBaseload(averagePercentBaseload),
           baselineAdjustments(baselineAdjustments),
-          hasBaselineAdjustment(hasBaselineAdjustment){
+          hasBaselineAdjustment(hasBaselineAdjustment),
+          facilityId(facilityId){
 
           };
 
@@ -54,7 +56,7 @@ public:
     double averagePercentBaseload;
     bool hasBaselineAdjustment;
     std::vector<BaselineAdjustments> baselineAdjustments;
+    std::string facilityId;
 };
 
-
-#endif //ANALYSISGROUP_H
+#endif // ANALYSISGROUP_H
