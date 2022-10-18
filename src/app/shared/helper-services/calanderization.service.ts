@@ -431,7 +431,7 @@ export class CalanderizationService {
         });
         let totalMarketEmissions: number = _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
           if (meterData.monthNumValue == yearMonth.month && meterData.year == yearMonth.year) {
-            return (meterData.marketEmissions - meterData.excessRECsEmissions);
+            return meterData.marketEmissions;
           } else {
             return 0;
           }
