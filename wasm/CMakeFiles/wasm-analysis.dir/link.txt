@@ -1,1 +1,0 @@
-C:\Users\mroot\Documents\ORNL\emsdk\upstream\emscripten\em++.bat  -fexceptions -O3 -std=c++11  --no-entry --bind -s WASM=1 -s ASSERTIONS=1 -s ERROR_ON_UNDEFINED_SYMBOLS=0 -s STANDALONE_WASM @CMakeFiles\wasm-analysis.dir\objects1.rsp  -o bin\wasm-analysis.js 

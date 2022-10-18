@@ -9,7 +9,7 @@ export class MonthlyFacilityAnalysisWASM {
     constructor(wasmModule: any, analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorEntry>) {
         let wasmGroupVector = new wasmModule.AnalysisGroupVector();
         analysisItem.groups.forEach(group => {
-            let wasmGroup = getAnalysisGroup(wasmModule, group);
+            let wasmGroup = getAnalysisGroup(wasmModule, group, facility.guid);
             wasmGroupVector.push_back(wasmGroup);
             wasmGroup.delete();
         });

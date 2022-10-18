@@ -33,10 +33,14 @@ void MonthlyFacilityAnalysis::setFacilityPredictorEntries(std::vector<PredictorE
 
 std::vector<MonthlyFacilityAnalysisData> MonthlyFacilityAnalysis::getMonthlyFacilityAnalysisData()
 {
+    std::cout << "getMonthlyFacilityAnalysisData" << std::endl;
     std::vector<MonthlyFacilityAnalysisData> monthlyAnalysisSummaryData;
     AnalysisDate currentMonthDate = AnalysisDate(baselineDate.month, baselineDate.year);
     while (currentMonthDate.month != endDate.month || currentMonthDate.year != endDate.year)
     {
+
+        std::cout << "currentMonthDate.month: " << currentMonthDate.month  << std::endl;
+        std::cout << "currentMonthDate.year: " << currentMonthDate.year  << std::endl;
         MonthlyFacilityAnalysisData currentMonthyAnalysisSummaryData = MonthlyFacilityAnalysisData(
             monthlyGroupAnalysisData,
             currentMonthDate,
@@ -44,7 +48,7 @@ std::vector<MonthlyFacilityAnalysisData> MonthlyFacilityAnalysis::getMonthlyFaci
             monthlyAnalysisSummaryData,
             baselineDate.year,
             facility);
-
+        std::cout << "COMPLETED!" << std::endl;
         monthlyAnalysisSummaryData.push_back(currentMonthyAnalysisSummaryData);
         currentMonthDate.nextMonth();
     }

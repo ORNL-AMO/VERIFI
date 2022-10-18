@@ -9,7 +9,7 @@ export class AnnualGroupAnalysisWASM {
     annualAnalysisSummary: Array<AnnualAnalysisSummary>;
     monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>;
     constructor(wasmModule: any, selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorEntry>) {
-        let wasmGroup = getAnalysisGroup(wasmModule, selectedGroup);
+        let wasmGroup = getAnalysisGroup(wasmModule, selectedGroup, facility.guid);
         let baselineAndEndDate = getStartAndEndDate(wasmModule, facility, analysisItem);
         let wasmFacility = new wasmModule.Facility(facility.guid, facility.fiscalYear, facility.fiscalYearCalendarEnd, facility.fiscalYearMonth)
         let wasmCMeters = getCalanderizedMetersVector(wasmModule, calanderizedMeters);

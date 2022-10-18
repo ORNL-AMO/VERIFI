@@ -2,7 +2,7 @@ import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from "src/app/model
 import { CalanderizedMeter } from "src/app/models/calanderization";
 import { AnalysisGroup, IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeterGroup, PredictorData } from "src/app/models/idb";
 
-export function getAnalysisGroup(wasmModule: any, selectedGroup: AnalysisGroup) {
+export function  getAnalysisGroup(wasmModule: any, selectedGroup: AnalysisGroup, facilityId: string) {
     // std::string analysisType,
     let analysisType = selectedGroup.analysisType;
     // std::vector<PredictorData> predictorVariables,
@@ -17,7 +17,7 @@ export function getAnalysisGroup(wasmModule: any, selectedGroup: AnalysisGroup) 
     let hasBaselineAdjustment = checkNullDouble(selectedGroup.hasBaselineAdjustement);
     // std::vector<BaselineAdjustments> baselineAdjustments
     let baselineAdjustments = getBaselineAdjustments(wasmModule, selectedGroup.baselineAdjustments);
-    let group = new wasmModule.AnalysisGroup(analysisType, predictorVariables, idbGroupId, regressionConstant, averagePercentBaseload, hasBaselineAdjustment, baselineAdjustments, true);
+    let group = new wasmModule.AnalysisGroup(analysisType, predictorVariables, idbGroupId, regressionConstant, averagePercentBaseload, hasBaselineAdjustment, baselineAdjustments, facilityId);
     predictorVariables.delete();
     baselineAdjustments.delete();
     return group;
@@ -45,7 +45,7 @@ export function getBaselineAdjustments(wasmModule: any, baselineAdjustments: Arr
 
 
 
-export function getStartAndEndDate(wasmModule: any, facility: IdbFacility, analysisItem: IdbAnalysisItem): { baselineDate: any, endDate: any } {
+export function getStartAndEndDate(wasmModule: any, facility: IdbFacility | IdbAccount, analysisItem: IdbAnalysisItem | IdbAccountAnalysisItem): { baselineDate: any, endDate: any } {
     let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = getMonthlyStartAndEndDate(facility, analysisItem);
     let baselineDate: Date = monthlyStartAndEndDate.baselineDate;
     let endDate: Date = monthlyStartAndEndDate.endDate;

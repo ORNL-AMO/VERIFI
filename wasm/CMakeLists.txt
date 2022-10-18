@@ -28,7 +28,8 @@ set(SOURCE_FILES
   src/AnnualAnalysisSummaryData.cpp
   src/MonthlyFacilityAnalysis.cpp
   src/MonthlyFacilityAnalysisData.cpp
-  src/MonthlyAccountAnalysis.cpp)
+  src/MonthlyAccountAnalysis.cpp
+  src/MonthlyAccountAnalysisData.cpp)
 
 set(SOURCE_FILES_WASM
   bindings/AnalysisSummaryWASM.cpp)
@@ -50,6 +51,7 @@ set(INCLUDE_FILES
   include/MonthlyFacilityAnalysis.h
   include/MonthlyFacilityAnalysisData.h
   include/MonthlyAccountAnalysis.h
+  include/MonthlyAccountanalysisData.h
 )
 
 

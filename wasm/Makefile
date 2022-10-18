@@ -225,6 +225,66 @@ src/AnnualAnalysisSummaryData.cpp.s:
 	$(MAKE) -f CMakeFiles\wasm-analysis.dir\build.make CMakeFiles/wasm-analysis.dir/src/AnnualAnalysisSummaryData.cpp.s
 .PHONY : src/AnnualAnalysisSummaryData.cpp.s
 
+src/MonthlyAccountAnalysis.o: src/MonthlyAccountAnalysis.cpp.o
+
+.PHONY : src/MonthlyAccountAnalysis.o
+
+# target to build an object file
+src/MonthlyAccountAnalysis.cpp.o:
+	$(MAKE) -f CMakeFiles\verifi_analysis.dir\build.make CMakeFiles/verifi_analysis.dir/src/MonthlyAccountAnalysis.cpp.o
+	$(MAKE) -f CMakeFiles\wasm-analysis.dir\build.make CMakeFiles/wasm-analysis.dir/src/MonthlyAccountAnalysis.cpp.o
+.PHONY : src/MonthlyAccountAnalysis.cpp.o
+
+src/MonthlyAccountAnalysis.i: src/MonthlyAccountAnalysis.cpp.i
+
+.PHONY : src/MonthlyAccountAnalysis.i
+
+# target to preprocess a source file
+src/MonthlyAccountAnalysis.cpp.i:
+	$(MAKE) -f CMakeFiles\verifi_analysis.dir\build.make CMakeFiles/verifi_analysis.dir/src/MonthlyAccountAnalysis.cpp.i
+	$(MAKE) -f CMakeFiles\wasm-analysis.dir\build.make CMakeFiles/wasm-analysis.dir/src/MonthlyAccountAnalysis.cpp.i
+.PHONY : src/MonthlyAccountAnalysis.cpp.i
+
+src/MonthlyAccountAnalysis.s: src/MonthlyAccountAnalysis.cpp.s
+
+.PHONY : src/MonthlyAccountAnalysis.s
+
+# target to generate assembly for a file
+src/MonthlyAccountAnalysis.cpp.s:
+	$(MAKE) -f CMakeFiles\verifi_analysis.dir\build.make CMakeFiles/verifi_analysis.dir/src/MonthlyAccountAnalysis.cpp.s
+	$(MAKE) -f CMakeFiles\wasm-analysis.dir\build.make CMakeFiles/wasm-analysis.dir/src/MonthlyAccountAnalysis.cpp.s
+.PHONY : src/MonthlyAccountAnalysis.cpp.s
+
+src/MonthlyAccountAnalysisData.o: src/MonthlyAccountAnalysisData.cpp.o
+
+.PHONY : src/MonthlyAccountAnalysisData.o
+
+# target to build an object file
+src/MonthlyAccountAnalysisData.cpp.o:
+	$(MAKE) -f CMakeFiles\verifi_analysis.dir\build.make CMakeFiles/verifi_analysis.dir/src/MonthlyAccountAnalysisData.cpp.o
+	$(MAKE) -f CMakeFiles\wasm-analysis.dir\build.make CMakeFiles/wasm-analysis.dir/src/MonthlyAccountAnalysisData.cpp.o
+.PHONY : src/MonthlyAccountAnalysisData.cpp.o
+
+src/MonthlyAccountAnalysisData.i: src/MonthlyAccountAnalysisData.cpp.i
+
+.PHONY : src/MonthlyAccountAnalysisData.i
+
+# target to preprocess a source file
+src/MonthlyAccountAnalysisData.cpp.i:
+	$(MAKE) -f CMakeFiles\verifi_analysis.dir\build.make CMakeFiles/verifi_analysis.dir/src/MonthlyAccountAnalysisData.cpp.i
+	$(MAKE) -f CMakeFiles\wasm-analysis.dir\build.make CMakeFiles/wasm-analysis.dir/src/MonthlyAccountAnalysisData.cpp.i
+.PHONY : src/MonthlyAccountAnalysisData.cpp.i
+
+src/MonthlyAccountAnalysisData.s: src/MonthlyAccountAnalysisData.cpp.s
+
+.PHONY : src/MonthlyAccountAnalysisData.s
+
+# target to generate assembly for a file
+src/MonthlyAccountAnalysisData.cpp.s:
+	$(MAKE) -f CMakeFiles\verifi_analysis.dir\build.make CMakeFiles/verifi_analysis.dir/src/MonthlyAccountAnalysisData.cpp.s
+	$(MAKE) -f CMakeFiles\wasm-analysis.dir\build.make CMakeFiles/wasm-analysis.dir/src/MonthlyAccountAnalysisData.cpp.s
+.PHONY : src/MonthlyAccountAnalysisData.cpp.s
+
 src/MonthlyAnalysisCalculatedValues.o: src/MonthlyAnalysisCalculatedValues.cpp.o
 
 .PHONY : src/MonthlyAnalysisCalculatedValues.o
@@ -424,6 +484,12 @@ help:
 	@echo ... src/AnnualAnalysisSummaryData.o
 	@echo ... src/AnnualAnalysisSummaryData.i
 	@echo ... src/AnnualAnalysisSummaryData.s
+	@echo ... src/MonthlyAccountAnalysis.o
+	@echo ... src/MonthlyAccountAnalysis.i
+	@echo ... src/MonthlyAccountAnalysis.s
+	@echo ... src/MonthlyAccountAnalysisData.o
+	@echo ... src/MonthlyAccountAnalysisData.i
+	@echo ... src/MonthlyAccountAnalysisData.s
 	@echo ... src/MonthlyAnalysisCalculatedValues.o
 	@echo ... src/MonthlyAnalysisCalculatedValues.i
 	@echo ... src/MonthlyAnalysisCalculatedValues.s

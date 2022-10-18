@@ -12,7 +12,7 @@ export class AnnualFacilityAnalysisWASM {
         // let wasmGroup = getAnalysisGroup(wasmModule, selectedGroup);
         let wasmGroupVector = new wasmModule.AnalysisGroupVector();
         analysisItem.groups.forEach(group => {
-            let wasmGroup = getAnalysisGroup(wasmModule, group);
+            let wasmGroup = getAnalysisGroup(wasmModule, group, facility.guid);
             wasmGroupVector.push_back(wasmGroup);
             wasmGroup.delete();
         });
