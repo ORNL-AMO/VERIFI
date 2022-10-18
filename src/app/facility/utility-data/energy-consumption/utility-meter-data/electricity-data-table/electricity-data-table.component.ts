@@ -157,6 +157,9 @@ export class ElectricityDataTableComponent implements OnInit {
       dataItem.RECs = emissionsValues.RECs;
       dataItem.excessRECs = emissionsValues.excessRECs;
       dataItem.excessRECsEmissions = emissionsValues.excessRECsEmissions;
+      if(this.selectedMeter.includeInEnergy == false){
+        dataItem.totalEnergyUse = 0;
+      }
     })
   }
 

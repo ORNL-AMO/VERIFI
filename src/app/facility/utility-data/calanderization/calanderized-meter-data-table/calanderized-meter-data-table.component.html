@@ -23,9 +23,9 @@
                 [ngClass]="{'active': orderDataField == 'locationEmissions'}">Total Location <br>Emissions (kg
                 CO<sub>2</sub>)</th>
             <th (click)="setOrderDataField('RECs')" [ngClass]="{'active': orderDataField == 'RECs'}">RECs<br> (<span
-                    [innerHTML]="calanderizedMeter.energyUnit  | settingsLabel"></span>)</th>
+                    [innerHTML]="calanderizedMeter.energyUnit | settingsLabel"></span>)</th>
             <th (click)="setOrderDataField('excessRECs')" [ngClass]="{'active': orderDataField == 'excessRECs'}">Excess
-                RECs<br> (<span [innerHTML]="calanderizedMeter.energyUnit  | settingsLabel"></span>)</th>
+                RECs<br> (<span [innerHTML]="calanderizedMeter.energyUnit | settingsLabel"></span>)</th>
             <th (click)="setOrderDataField('excessRECsEmissions')"
                 [ngClass]="{'active': orderDataField == 'excessRECsEmissions'}">Excess
                 RECs Emissions<br> (kg CO<sub>2</sub>)</th>
@@ -37,37 +37,22 @@
         <tr *ngFor="let data of calanderizedMeter.monthlyData| orderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage"
             [ngClass]="{'use-and-consumption': data.energyConsumption && data.energyUse}">
             <td>{{data.date | date: 'MMMM, y'}}</td>
-            <td *ngIf="calanderizedMeter.showConsumption">
-                <span *ngIf="data.energyConsumption">{{data.energyConsumption |customNumber}}</span>
-                <span *ngIf="!data.energyConsumption">N/A</span>
+            <td *ngIf="calanderizedMeter.showConsumption">{{data.energyConsumption |customNumber}}
             </td>
-            <td *ngIf="calanderizedMeter.showEnergyUse">
-                <span *ngIf="data.energyUse">{{data.energyUse | customNumber}}</span>
-                <span *ngIf="!data.energyUse">N/A</span>
+            <td *ngIf="calanderizedMeter.showEnergyUse">{{data.energyUse | customNumber}}
             </td>
-            <td *ngIf="calanderizedMeter.showEmissions">
-                <span *ngIf="data.marketEmissions">{{data.marketEmissions | number:'1.0-0'}}</span>
-                <span *ngIf="!data.marketEmissions">N/A</span>
+            <td *ngIf="calanderizedMeter.showEmissions">{{data.marketEmissions | number:'1.0-0'}}
             </td>
-            <td *ngIf="calanderizedMeter.showEmissions">
-                <span *ngIf="data.locationEmissions">{{data.locationEmissions | number:'1.0-0'}}</span>
-                <span *ngIf="!data.locationEmissions">N/A</span>
+            <td *ngIf="calanderizedMeter.showEmissions">{{data.locationEmissions | number:'1.0-0'}}
+            </td>
+            <td *ngIf="calanderizedMeter.showEmissions">{{data.RECs | number:'1.0-0'}}
+            </td>
+            <td *ngIf="calanderizedMeter.showEmissions">{{data.excessRECs | number:'1.0-0'}}
             </td>
             <td *ngIf="calanderizedMeter.showEmissions">
-                <span *ngIf="data.RECs">{{data.RECs | number:'1.0-0'}}</span>
-                <span *ngIf="!data.RECs">N/A</span>
+                {{data.excessRECsEmissions | number:'1.0-0'}}
             </td>
-            <td *ngIf="calanderizedMeter.showEmissions">
-                <span *ngIf="data.excessRECs">{{data.excessRECs | number:'1.0-0'}}</span>
-                <span *ngIf="!data.excessRECs">N/A</span>
-            </td>
-            <td *ngIf="calanderizedMeter.showEmissions">
-                <span *ngIf="data.excessRECsEmissions">{{data.excessRECsEmissions | number:'1.0-0'}}</span>
-                <span *ngIf="!data.excessRECsEmissions">N/A</span>
-            </td>
-            <td>
-                <span *ngIf="data.energyCost">{{data.energyCost | customNumber:true}}</span>
-                <span *ngIf="!data.energyCost">N/A</span>
+            <td>{{data.energyCost | customNumber:true}}
             </td>
         </tr>
     </tbody>
