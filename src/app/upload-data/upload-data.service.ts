@@ -224,6 +224,8 @@ export class UploadDataService {
             meter.siteToSource = siteToSource;
           }
           meter.meterReadingDataApplication = this.getMeterReadingDataApplication(meterData['Calendarize Data?']);
+
+          meter = this.editMeterFormService.setMultipliers(meter);
           importMeters.push(meter);
         }
       }
