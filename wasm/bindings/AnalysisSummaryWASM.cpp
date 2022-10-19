@@ -20,9 +20,10 @@ EMSCRIPTEN_BINDINGS(monthly_analysis_summary)
     register_vector<AnalysisGroup>("AnalysisGroupVector");
     register_vector<MonthlyFacilityAnalysisData>("MonthlyFacilityAnalysisDataVector");
     register_vector<Facility>("FacilityVector");
+    register_vector<MonthlyAccountAnalysisData>("MonthlyAccountAnalysisDataVector");
 
     class_<MonthlyAnalysisSummary>("MonthlyAnalysisSummary")
-        .constructor<AnalysisGroup, AnalysisDate, AnalysisDate, Facility, std::vector<CalanderizedMeter>, std::vector<PredictorEntry>>()
+        .constructor<AnalysisDate, AnalysisDate>()
         .function("getMonthlyAnalysisSummaryData", &MonthlyAnalysisSummary::getMonthlyAnalysisSummaryData);
 
     class_<MonthlyAnalysisSummaryData>("MonthlyAnalysisSummaryData")
@@ -48,8 +49,8 @@ EMSCRIPTEN_BINDINGS(monthly_analysis_summary)
         .property("rolling12MonthImprovement", &MonthlyAnalysisCalculatedValues::rolling12MonthImprovement);
 
     class_<AnnualAnalysisSummary>("AnnualAnalysisSummary")
-        .constructor<AnalysisGroup, AnalysisDate, AnalysisDate, Facility, std::vector<CalanderizedMeter>, std::vector<PredictorEntry>>()
-        .constructor<std::vector<AnalysisGroup>, Facility, std::vector<CalanderizedMeter>, std::vector<PredictorEntry>, AnalysisDate, AnalysisDate, bool>()
+        .constructor<AnalysisDate, AnalysisDate, Facility>()
+        .constructor<Facility, AnalysisDate, AnalysisDate, bool>()
         .function("getAnnualAnalysisSummaryData", &AnnualAnalysisSummary::getAnnualAnalysisSummaryData)
         .function("getAnnualFacilitySummaryData", &AnnualAnalysisSummary::getAnnualFacilitySummaryData);
 
@@ -71,7 +72,7 @@ EMSCRIPTEN_BINDINGS(monthly_analysis_summary)
         .property("predictorUsage", &AnnualAnalysisSummaryData::predictorUsage);
 
     class_<MonthlyFacilityAnalysis>("MonthlyFacilityAnalysis")
-        .constructor<std::vector<AnalysisGroup>, Facility, std::vector<CalanderizedMeter>, std::vector<PredictorEntry>, AnalysisDate, AnalysisDate>()
+        .constructor<Facility, AnalysisDate, AnalysisDate>()
         .function("getMonthlyFacilityAnalysisData", &MonthlyFacilityAnalysis::getMonthlyFacilityAnalysisData);
 
     class_<MonthlyFacilityAnalysisData>("MonthlyFacilityAnalysisData")
@@ -84,10 +85,6 @@ EMSCRIPTEN_BINDINGS(monthly_analysis_summary)
         .property("fiscalYear", &MonthlyFacilityAnalysisData::fiscalYear)
         .property("monthlyAnalysisCalculatedValues", &MonthlyFacilityAnalysisData::monthlyAnalysisCalculatedValues);
 
-    class_<MonthlyAccountAnalysis>("MonthlyAccountAnalysis")
-        .constructor<std::vector<Facility>, std::vector<AnalysisGroup>, std::vector<CalanderizedMeter>, std::vector<PredictorEntry>, AnalysisDate, AnalysisDate, Facility>()
-        .function("getMonthlyAnalysisSummaryData", &MonthlyAccountAnalysis::getMonthlyAnalysisSummaryData);
-
     class_<MonthlyAccountAnalysisData>("MonthlyAccountAnalysisData")
         .property("analysisMonth", &MonthlyAccountAnalysisData::analysisMonth)
         .property("energyUse", &MonthlyAccountAnalysisData::energyUse)
@@ -96,6 +93,10 @@ EMSCRIPTEN_BINDINGS(monthly_analysis_summary)
         .property("baselineAdjustmentForOther", &MonthlyAccountAnalysisData::baselineAdjustmentForOther)
         .property("fiscalYear", &MonthlyAccountAnalysisData::fiscalYear)
         .property("monthlyAnalysisCalculatedValues", &MonthlyAccountAnalysisData::monthlyAnalysisCalculatedValues);
+
+    class_<MonthlyAccountAnalysis>("MonthlyAccountAnalysis")
+        .constructor<AnalysisDate, AnalysisDate, Facility>()
+        .function("getMonthlyAnalysisSummaryData", &MonthlyAccountAnalysis::getMonthlyAnalysisSummaryData);
 
     class_<AnalysisDate>("AnalysisDate")
         .property("year", &AnalysisDate::year)

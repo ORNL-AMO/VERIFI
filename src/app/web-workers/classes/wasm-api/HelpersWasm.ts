@@ -2,7 +2,7 @@ import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from "src/app/model
 import { CalanderizedMeter } from "src/app/models/calanderization";
 import { AnalysisGroup, IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeterGroup, PredictorData } from "src/app/models/idb";
 
-export function  getAnalysisGroup(wasmModule: any, selectedGroup: AnalysisGroup, facilityId: string) {
+export function getAnalysisGroup(wasmModule: any, selectedGroup: AnalysisGroup, facilityId: string) {
     // std::string analysisType,
     let analysisType = selectedGroup.analysisType;
     // std::vector<PredictorData> predictorVariables,
@@ -97,13 +97,15 @@ export function getPredictorEntriesVector(wasmModule: any, accountPredictorEntri
 
 export function getPredictorUsage(data: any): Array<{ predictorId: string, usage: number }> {
     let predictorUsage: Array<{ predictorId: string, usage: number }> = new Array();
-    for (let p = 0; p < data.predictorUsage.size(); p++) {
-        let pUsage = data.predictorUsage.get(p);
-        predictorUsage.push({
-            predictorId: pUsage.predictorId,
-            usage: pUsage.usage
-        });
-        pUsage.delete();
+    if (data.predictorUsage) {
+        for (let p = 0; p < data.predictorUsage.size(); p++) {
+            let pUsage = data.predictorUsage.get(p);
+            predictorUsage.push({
+                predictorId: pUsage.predictorId,
+                usage: pUsage.usage
+            });
+            pUsage.delete();
+        }
     }
     return predictorUsage;
 }

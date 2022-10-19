@@ -20,27 +20,19 @@ public:
     MonthlyFacilityAnalysis(){};
 
     MonthlyFacilityAnalysis(
-        std::vector<AnalysisGroup> selectedGroups,
         Facility facility,
-        std::vector<CalanderizedMeter> calanderizedMeters,
-        std::vector<PredictorEntry> accountPredictorEntries,
         AnalysisDate baselineDate,
-        AnalysisDate endDate) : endDate(endDate), baselineDate(baselineDate), facility(facility)
-    {
-        setMonthlyGroupAnalysis(selectedGroups, calanderizedMeters, accountPredictorEntries, baselineDate, endDate);
-        setFacilityPredictorEntries(accountPredictorEntries);
-    };
+        AnalysisDate endDate) : endDate(endDate), baselineDate(baselineDate), facility(facility){};
 
     AnalysisDate baselineDate;
     AnalysisDate endDate;
     Facility facility;
-    std::vector<MonthlyAnalysisSummaryData> monthlyGroupAnalysisData;
-    std::vector<PredictorEntry> facilityPredictorEntries;
 
-    void setMonthlyGroupAnalysis(std::vector<AnalysisGroup> selectedGroups, std::vector<CalanderizedMeter> calanderizedMeters, std::vector<PredictorEntry> accountPredictorEntries, AnalysisDate baselineDate,
-                                 AnalysisDate endDate);
-    void setFacilityPredictorEntries(std::vector<PredictorEntry> accountPredictorEntries);
-    std::vector<MonthlyFacilityAnalysisData> getMonthlyFacilityAnalysisData();
+    std::vector<MonthlyAnalysisSummaryData> getMonthlyGroupAnalysis(std::vector<AnalysisGroup> selectedGroups, std::vector<CalanderizedMeter> calanderizedMeters, std::vector<PredictorEntry> accountPredictorEntries);
+    std::vector<PredictorEntry> getFacilityPredictorEntries(std::vector<PredictorEntry> accountPredictorEntries);
+    std::vector<MonthlyFacilityAnalysisData> getMonthlyFacilityAnalysisData(std::vector<AnalysisGroup> selectedGroups,
+                                                                            std::vector<CalanderizedMeter> calanderizedMeters,
+                                                                            std::vector<PredictorEntry> accountPredictorEntries);
 };
 
 #endif // MONTHLYFACILITYANALYSIS_H

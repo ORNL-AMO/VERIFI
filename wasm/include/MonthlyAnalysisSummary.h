@@ -22,27 +22,15 @@ public:
     MonthlyAnalysisSummary(){};
 
     MonthlyAnalysisSummary(
-        AnalysisGroup analysisGroup,
         AnalysisDate baselineDate,
-        AnalysisDate endDate,
-        Facility facility,
-        std::vector<CalanderizedMeter> calanderizedMeters,
-        std::vector<PredictorEntry> accountPredictorEntries) : baselineDate(baselineDate), endDate(endDate)
-    {
-        monthlyGroupAnalysis = MonthlyGroupAnalysis(
-            analysisGroup,
-            facility,
-            calanderizedMeters,
-            accountPredictorEntries,
-            baselineDate,
-            endDate);
-        // setMonthlyAnalysisSummaryData(baselineDate, endDate);
-    };
+        AnalysisDate endDate) : baselineDate(baselineDate), endDate(endDate){};
 
     AnalysisDate baselineDate;
     AnalysisDate endDate;
-    MonthlyGroupAnalysis monthlyGroupAnalysis;
-    std::vector<MonthlyAnalysisSummaryData> getMonthlyAnalysisSummaryData();
+    std::vector<MonthlyAnalysisSummaryData> getMonthlyAnalysisSummaryData(AnalysisGroup analysisGroup,
+                                                                          Facility facility,
+                                                                          std::vector<CalanderizedMeter> calanderizedMeters,
+                                                                          std::vector<PredictorEntry> accountPredictorEntries);
 };
 
 #endif // MONTHLYANALYSISSUMMARY_H

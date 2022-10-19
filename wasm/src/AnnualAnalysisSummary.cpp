@@ -1,10 +1,12 @@
 
 #include "AnnualAnalysisSummary.h"
 
-std::vector<AnnualAnalysisSummaryData> AnnualAnalysisSummary::getAnnualAnalysisSummaryData()
+std::vector<AnnualAnalysisSummaryData> AnnualAnalysisSummary::getAnnualAnalysisSummaryData(AnalysisGroup analysisGroup,
+                                                                                           std::vector<CalanderizedMeter> calanderizedMeters,
+                                                                                           std::vector<PredictorEntry> accountPredictorEntries)
 {
     std::vector<AnnualAnalysisSummaryData> annualAnalysisSummaryData;
-    std::vector<MonthlyAnalysisSummaryData> monthlyAnalysisSummaryData = monthlyAnalysisSummary.getMonthlyAnalysisSummaryData();
+    std::vector<MonthlyAnalysisSummaryData> monthlyAnalysisSummaryData = monthlyAnalysisSummary.getMonthlyAnalysisSummaryData(analysisGroup, facility, calanderizedMeters, accountPredictorEntries);
     int year = baselineDate.year;
     while (year < endDate.year)
     {
@@ -20,13 +22,12 @@ std::vector<AnnualAnalysisSummaryData> AnnualAnalysisSummary::getAnnualAnalysisS
     return annualAnalysisSummaryData;
 }
 
-
-
-
-std::vector<AnnualAnalysisSummaryData> AnnualAnalysisSummary::getAnnualFacilitySummaryData()
+std::vector<AnnualAnalysisSummaryData> AnnualAnalysisSummary::getAnnualFacilitySummaryData(std::vector<AnalysisGroup> selectedGroups,
+                                                                                           std::vector<CalanderizedMeter> calanderizedMeters,
+                                                                                           std::vector<PredictorEntry> accountPredictorEntries)
 {
     std::vector<AnnualAnalysisSummaryData> annualAnalysisSummaryData;
-    std::vector<MonthlyFacilityAnalysisData> monthlyAnalysisSummaryData = monthlyFacilityAnalysis.getMonthlyFacilityAnalysisData();
+    std::vector<MonthlyFacilityAnalysisData> monthlyAnalysisSummaryData = monthlyFacilityAnalysis.getMonthlyFacilityAnalysisData(selectedGroups, calanderizedMeters, accountPredictorEntries);
     int year = baselineDate.year;
     while (year < endDate.year)
     {

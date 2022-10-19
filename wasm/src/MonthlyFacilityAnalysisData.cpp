@@ -1,7 +1,8 @@
 #include "MonthlyFacilityAnalysisData.h"
 
-void MonthlyFacilityAnalysisData::setCurrentMonthData(std::vector<MonthlyAnalysisSummaryData> allFacilityAnalysisData)
+std::vector<MonthlyAnalysisSummaryData> MonthlyFacilityAnalysisData::getCurrentMonthData(std::vector<MonthlyAnalysisSummaryData> allFacilityAnalysisData)
 {
+    std::vector<MonthlyAnalysisSummaryData> currentMonthData;
     for (int i = 0; i < allFacilityAnalysisData.size(); i++)
     {
         if (allFacilityAnalysisData[i].analysisMonth.month == analysisMonth.month && allFacilityAnalysisData[i].analysisMonth.year == analysisMonth.year)
@@ -9,9 +10,11 @@ void MonthlyFacilityAnalysisData::setCurrentMonthData(std::vector<MonthlyAnalysi
             currentMonthData.push_back(allFacilityAnalysisData[i]);
         }
     }
+    return currentMonthData;
 };
-void MonthlyFacilityAnalysisData::setMonthPredictorData(std::vector<PredictorEntry> facilityPredictorEntries)
+std::vector<PredictorEntry> MonthlyFacilityAnalysisData::getMonthPredictorData(std::vector<PredictorEntry> facilityPredictorEntries)
 {
+    std::vector<PredictorEntry> currentMonthPredictorData;
     for (int i = 0; i < facilityPredictorEntries.size(); i++)
     {
         if (facilityPredictorEntries[i].date.month == analysisMonth.month && facilityPredictorEntries[i].date.year == analysisMonth.year)
@@ -19,9 +22,11 @@ void MonthlyFacilityAnalysisData::setMonthPredictorData(std::vector<PredictorEnt
             currentMonthPredictorData.push_back(facilityPredictorEntries[i]);
         }
     }
+    return currentMonthPredictorData;
 };
 void MonthlyFacilityAnalysisData::setPredictorUsage(std::vector<PredictorEntry> facilityPredictorEntries)
 {
+    std::vector<PredictorEntry> currentMonthPredictorData = getMonthPredictorData(facilityPredictorEntries);
     if (facilityPredictorEntries.size() != 0)
     {
         for (int i = 0; i < facilityPredictorEntries[0].predictors.size(); i++)
@@ -75,28 +80,16 @@ void MonthlyFacilityAnalysisData::setFiscalYear(Facility facility)
         }
     }
 };
-void MonthlyFacilityAnalysisData::setEnergyUse()
+void MonthlyFacilityAnalysisData::setEnergyUse(std::vector<MonthlyAnalysisSummaryData> allFacilityAnalysisData)
 {
-
+    std::vector<MonthlyAnalysisSummaryData> currentMonthData = getCurrentMonthData(allFacilityAnalysisData);
     energyUse = 0;
-    for (int i = 0; i < currentMonthData.size(); i++)
-    {
-        energyUse += currentMonthData[i].energyUse;
-    }
-};
-void MonthlyFacilityAnalysisData::setModeledEnergy()
-{
     modeledEnergy = 0;
-    for (int i = 0; i < currentMonthData.size(); i++)
-    {
-        modeledEnergy += currentMonthData[i].modeledEnergy;
-    }
-};
-void MonthlyFacilityAnalysisData::setBaselineAdjustmentForOther()
-{
     baselineAdjustmentForOther = 0;
     for (int i = 0; i < currentMonthData.size(); i++)
     {
+        energyUse += currentMonthData[i].energyUse;
+        modeledEnergy += currentMonthData[i].modeledEnergy;
         baselineAdjustmentForOther += currentMonthData[i].baselineAdjustmentForOther;
     }
 };

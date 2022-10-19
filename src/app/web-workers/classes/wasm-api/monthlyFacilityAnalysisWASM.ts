@@ -20,27 +20,24 @@ export class MonthlyFacilityAnalysisWASM {
         let wasmCMeters = getCalanderizedMetersVector(wasmModule, calanderizedMeters);
         let wasmPredictorEntries = getPredictorEntriesVector(wasmModule, accountPredictorEntries);
 
-        // std::vector<AnalysisGroup> selectedGroups,
         // Facility facility,
-        // std::vector<CalanderizedMeter> calanderizedMeters,
-        // std::vector<PredictorEntry> accountPredictorEntries,
         // AnalysisDate baselineDate,
         // AnalysisDate endDate
         let monthlyAnalysisSummary = new wasmModule.MonthlyFacilityAnalysis(
-            wasmGroupVector,
             wasmFacility,
-            wasmCMeters,
-            wasmPredictorEntries,
             baselineAndEndDate.baselineDate,
             baselineAndEndDate.endDate);
         baselineAndEndDate.endDate.delete();
         baselineAndEndDate.baselineDate.delete();
         wasmFacility.delete();
+
+        // std::vector<AnalysisGroup> selectedGroups,
+        // std::vector<CalanderizedMeter> calanderizedMeters,
+        // std::vector<PredictorEntry> accountPredictorEntries,
+        let calculatedData = monthlyAnalysisSummary.getMonthlyFacilityAnalysisData(wasmGroupVector, wasmCMeters, wasmPredictorEntries);
+        this.monthlyAnalysisSummaryData = parseMonthlyData(calculatedData, undefined);
         wasmCMeters.delete();
         wasmPredictorEntries.delete();
-
-        let calculatedData = monthlyAnalysisSummary.getMonthlyFacilityAnalysisData();
-        this.monthlyAnalysisSummaryData = parseMonthlyData(calculatedData, undefined);
         wasmGroupVector.delete();
         calculatedData.delete();
         monthlyAnalysisSummary.delete();

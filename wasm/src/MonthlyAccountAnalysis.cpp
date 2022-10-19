@@ -1,7 +1,8 @@
 #include "MonthlyAccountAnalysis.h"
 
-void MonthlyAccountAnalysis::setFacilityAnalysisItems(std::vector<Facility> facilities, std::vector<AnalysisGroup> allAccountGroups, std::vector<CalanderizedMeter> calanderizedMeters, std::vector<PredictorEntry> accountPredictorEntries)
+std::vector<MonthlyFacilityAnalysisData> MonthlyAccountAnalysis::getFacilityAnalysisItems(std::vector<Facility> facilities, std::vector<AnalysisGroup> allAccountGroups, std::vector<CalanderizedMeter> calanderizedMeters, std::vector<PredictorEntry> accountPredictorEntries)
 {
+    std::vector<MonthlyFacilityAnalysisData> allMonthlyAnalysisData;
     for (int i = 0; i < facilities.size(); i++)
     {
         std::vector<AnalysisGroup> facilityGroups;
@@ -12,33 +13,19 @@ void MonthlyAccountAnalysis::setFacilityAnalysisItems(std::vector<Facility> faci
                 facilityGroups.push_back(allAccountGroups[x]);
             }
         }
-        std::cout << "get monthly analysis: " << i << std::endl;
-        MonthlyFacilityAnalysis monthlyFacilityAnalysis = MonthlyFacilityAnalysis(facilityGroups, facilities[i], calanderizedMeters,
-                                                                                  accountPredictorEntries, baselineDate, endDate);
-
-        std::cout << "get monthly analysis completed...: " << i << std::endl;
-        facilityAnalysisItems.push_back(monthlyFacilityAnalysis);
-    }
-};
-
-void MonthlyAccountAnalysis::setAllMonthlySummaries()
-{
-    std::cout << "setAllMonthlySummaries" << std::endl;
-    for (int i = 0; i < facilityAnalysisItems.size(); i++)
-    {
-        std::cout << "getMonthlyFacilityAnalysisData: " << i << std::endl;
-        std::vector<MonthlyFacilityAnalysisData> monthlyFacilityAnalysisData = facilityAnalysisItems[i].getMonthlyFacilityAnalysisData();
-        std::cout << "getMonthlyFacilityAnalysisData done...: " << i << std::endl;
+        MonthlyFacilityAnalysis monthlyFacilityAnalysis = MonthlyFacilityAnalysis(facilities[i], baselineDate, endDate);
+        std::vector<MonthlyFacilityAnalysisData> monthlyFacilityAnalysisData = monthlyFacilityAnalysis.getMonthlyFacilityAnalysisData(facilityGroups, calanderizedMeters, accountPredictorEntries);
         for (int x = 0; x < monthlyFacilityAnalysisData.size(); x++)
         {
             allMonthlyAnalysisData.push_back(monthlyFacilityAnalysisData[x]);
         }
     }
-}
+    return allMonthlyAnalysisData;
+};
 
-void MonthlyAccountAnalysis::setAnnualUsageValues()
+std::vector<AnnualUsage> MonthlyAccountAnalysis::getAnnualUsageValues(std::vector<MonthlyFacilityAnalysisData> allMonthlyAnalysisData)
 {
-    std::cout << "setAnnualUsageValues" << std::endl;
+    std::vector<AnnualUsage> annualUsageValues;
     for (int i = baselineDate.year; i <= endDate.year; i++)
     {
         double annualUsage = 0;
@@ -52,11 +39,16 @@ void MonthlyAccountAnalysis::setAnnualUsageValues()
         AnnualUsage annualUsageObj = AnnualUsage(i, annualUsage);
         annualUsageValues.push_back(annualUsageObj);
     }
+    return annualUsageValues;
 }
 
-std::vector<MonthlyAccountAnalysisData> MonthlyAccountAnalysis::getMonthlyAnalysisSummaryData()
+std::vector<MonthlyAccountAnalysisData> MonthlyAccountAnalysis::getMonthlyAnalysisSummaryData(std::vector<Facility> facilities,
+                                                                                              std::vector<AnalysisGroup> allAccountGroups,
+                                                                                              std::vector<CalanderizedMeter> calanderizedMeters,
+                                                                                              std::vector<PredictorEntry> accountPredictorEntries)
 {
-    std::cout << "getMonthlyAnalysisSummaryData" << std::endl;
+    std::vector<MonthlyFacilityAnalysisData> allMonthlyAnalysisData = getFacilityAnalysisItems(facilities, allAccountGroups, calanderizedMeters, accountPredictorEntries);
+    std::vector<AnnualUsage> annualUsageValues = getAnnualUsageValues(allMonthlyAnalysisData);
     std::vector<MonthlyAccountAnalysisData> monthlyAnalysisSummaryData;
     AnalysisDate currentMonthDate = AnalysisDate(baselineDate.month, baselineDate.year);
     while (currentMonthDate.month != endDate.month || currentMonthDate.year != endDate.year)

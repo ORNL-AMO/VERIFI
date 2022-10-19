@@ -19,13 +19,11 @@ public:
         std::vector<MonthlyAccountAnalysisData> previousMonthsSummaryData,
         int baselineYear,
         Facility account,
-        std::vector<AnnualUsage> annualUsageValues) : analysisMonth(analysisMonth)
+        std::vector<AnnualUsage> annualUsageValues
+        ) : analysisMonth(analysisMonth)
     {
         setFiscalYear(account);
-        setCurrentMonthData(allFacilityAnalysisData);
-        setEnergyUse();
-        setModeledEnergy();
-        setBaselineAdjustmentForOther();
+        setEnergyUse(allFacilityAnalysisData);
         setMonthIndex(previousMonthsSummaryData);
         setBaselineActualEnergyUse(baselineYear, previousMonthsSummaryData);
         setMonthlyAnalysisCalculatedValues(baselineYear, previousMonthsSummaryData);
@@ -40,13 +38,10 @@ public:
 
     double baselineActualEnergyUse;
     double monthIndex;
-    std::vector<MonthlyFacilityAnalysisData> currentMonthData;
 
     void setFiscalYear(Facility facility);
-    void setCurrentMonthData(std::vector<MonthlyFacilityAnalysisData> allFacilityAnalysisData);
-    void setEnergyUse();
-    void setModeledEnergy();
-    void setBaselineAdjustmentForOther();
+    std::vector<MonthlyFacilityAnalysisData> getCurrentMonthData(std::vector<MonthlyFacilityAnalysisData> allFacilityAnalysisData);
+    void setEnergyUse(std::vector<MonthlyFacilityAnalysisData> allFacilityAnalysisData);
     void setMonthIndex(std::vector<MonthlyAccountAnalysisData> previousMonthsSummaryData);
     void setBaselineActualEnergyUse(int baselineYear, std::vector<MonthlyAccountAnalysisData> previousMonthsSummaryData);
     void setMonthlyAnalysisCalculatedValues(int baselineYear, std::vector<MonthlyAccountAnalysisData> previousMonthsSummaryData);

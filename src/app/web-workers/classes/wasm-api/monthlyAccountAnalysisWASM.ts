@@ -36,30 +36,28 @@ export class MonthlyAccountAnalysisWASM {
         let wasmCMeters = getCalanderizedMetersVector(wasmModule, calanderizedMeters);
         let wasmPredictorEntries = getPredictorEntriesVector(wasmModule, accountPredictorEntries);
         let wasmAccount = new wasmModule.Facility(account.guid, account.fiscalYear, account.fiscalYearCalendarEnd, account.fiscalYearMonth);
-        // std::vector<Facility> facilities,
-        // std::vector<AnalysisGroup> allAccountGroups,
-        // std::vector<CalanderizedMeter> calanderizedMeters,
-        // std::vector<PredictorEntry> accountPredictorEntries,
+
         // AnalysisDate baselineDate,
         // AnalysisDate endDate,
         // Facility account
         let monthlyAnalysisSummary = new wasmModule.MonthlyAccountAnalysis(
-            wasmFacilityVector,
-            wasmGroupVector,
-            wasmCMeters,
-            wasmPredictorEntries,
             baselineAndEndDate.baselineDate,
             baselineAndEndDate.endDate,
             wasmAccount);
+        console.log('got to here!!!!')
         baselineAndEndDate.endDate.delete();
         baselineAndEndDate.baselineDate.delete();
         wasmAccount.delete();
+        // std::vector<Facility> facilities,
+        // std::vector<AnalysisGroup> allAccountGroups,
+        // std::vector<CalanderizedMeter> calanderizedMeters,
+        // std::vector<PredictorEntry> accountPredictorEntries,
+        let calculatedData = monthlyAnalysisSummary.getMonthlyAnalysisSummaryData(wasmFacilityVector, wasmGroupVector, wasmCMeters, wasmPredictorEntries);
+        wasmFacilityVector.delete();
         wasmCMeters.delete();
         wasmPredictorEntries.delete();
-
-        let calculatedData = monthlyAnalysisSummary.getMonthlyAnalysisSummaryData();
-        this.monthlyAnalysisSummaryData = parseMonthlyData(calculatedData, undefined);
         wasmGroupVector.delete();
+        this.monthlyAnalysisSummaryData = parseMonthlyData(calculatedData, undefined);
         calculatedData.delete();
         monthlyAnalysisSummary.delete();
     }

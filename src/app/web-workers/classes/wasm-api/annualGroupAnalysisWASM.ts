@@ -14,33 +14,30 @@ export class AnnualGroupAnalysisWASM {
         let wasmFacility = new wasmModule.Facility(facility.guid, facility.fiscalYear, facility.fiscalYearCalendarEnd, facility.fiscalYearMonth)
         let wasmCMeters = getCalanderizedMetersVector(wasmModule, calanderizedMeters);
         let wasmPredictorEntries = getPredictorEntriesVector(wasmModule, accountPredictorEntries);
-        
-         // AnalysisGroup analysisGroup,
+
+        // AnalysisGroup analysisGroup,
         // AnalysisDate baselineDate,
         // AnalysisDate endDate,
         // Facility facility,
         // std::vector<CalanderizedMeter> calanderizedMeters,
         // std::vector<PredictorEntry> accountPredictorEntries
         let annualAnalysisSummary = new wasmModule.AnnualAnalysisSummary(
-            wasmGroup,
             baselineAndEndDate.baselineDate,
             baselineAndEndDate.endDate,
-            wasmFacility,
-            wasmCMeters,
-            wasmPredictorEntries);
-        wasmGroup.delete();
+            wasmFacility);
         baselineAndEndDate.endDate.delete();
         baselineAndEndDate.baselineDate.delete();
         wasmFacility.delete();
+
+        let calculatedData = annualAnalysisSummary.getAnnualAnalysisSummaryData(wasmGroup, wasmCMeters, wasmPredictorEntries);
+        wasmGroup.delete();
         wasmCMeters.delete();
         wasmPredictorEntries.delete();
-
-        let calculatedData = annualAnalysisSummary.getAnnualAnalysisSummaryData();
         this.annualAnalysisSummary = parseAnnualData(calculatedData);
         // this.annualAnalysisSummary = parseMonthlyData(annualAnalysisSummary, selectedGroup);
         calculatedData.delete();
         annualAnalysisSummary.delete();
-    } 
+    }
 
-    
+
 }

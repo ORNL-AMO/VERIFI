@@ -1,27 +1,27 @@
 #include "MonthlyFacilityAnalysis.h"
 
-void MonthlyFacilityAnalysis::setMonthlyGroupAnalysis(std::vector<AnalysisGroup> selectedGroups, std::vector<CalanderizedMeter> calanderizedMeters, std::vector<PredictorEntry> accountPredictorEntries, AnalysisDate baselineDate,
-                                                      AnalysisDate endDate)
+std::vector<MonthlyAnalysisSummaryData> MonthlyFacilityAnalysis::getMonthlyGroupAnalysis(std::vector<AnalysisGroup> selectedGroups,
+                                                                                         std::vector<CalanderizedMeter> calanderizedMeters, std::vector<PredictorEntry> accountPredictorEntries)
 {
+    std::vector<MonthlyAnalysisSummaryData> monthlyGroupAnalysisData;
     for (int i = 0; i < selectedGroups.size(); i++)
     {
-        MonthlyAnalysisSummary monthlyGroupAnalysis = MonthlyAnalysisSummary(
-            selectedGroups[i],
-            baselineDate,
-            endDate,
-            facility,
-            calanderizedMeters,
-            accountPredictorEntries);
-        std::vector<MonthlyAnalysisSummaryData> monthlyAnalysisSummaryData = monthlyGroupAnalysis.getMonthlyAnalysisSummaryData();
+        MonthlyAnalysisSummary monthlyGroupAnalysis = MonthlyAnalysisSummary(baselineDate, endDate);
+        std::vector<MonthlyAnalysisSummaryData> monthlyAnalysisSummaryData = monthlyGroupAnalysis.getMonthlyAnalysisSummaryData(selectedGroups[i],
+                                                                                                                                facility,
+                                                                                                                                calanderizedMeters,
+                                                                                                                                accountPredictorEntries);
         for (int x = 0; x < monthlyAnalysisSummaryData.size(); x++)
         {
             monthlyGroupAnalysisData.push_back(monthlyAnalysisSummaryData[x]);
         }
     }
+    return monthlyGroupAnalysisData;
 };
 
-void MonthlyFacilityAnalysis::setFacilityPredictorEntries(std::vector<PredictorEntry> accountPredictorEntries)
+std::vector<PredictorEntry> MonthlyFacilityAnalysis::getFacilityPredictorEntries(std::vector<PredictorEntry> accountPredictorEntries)
 {
+    std::vector<PredictorEntry> facilityPredictorEntries;
     for (int i = 0; i < accountPredictorEntries.size(); i++)
     {
         if (accountPredictorEntries[i].facilityId == facility.guid)
@@ -29,18 +29,19 @@ void MonthlyFacilityAnalysis::setFacilityPredictorEntries(std::vector<PredictorE
             facilityPredictorEntries.push_back(accountPredictorEntries[i]);
         }
     }
+    return facilityPredictorEntries;
 }
 
-std::vector<MonthlyFacilityAnalysisData> MonthlyFacilityAnalysis::getMonthlyFacilityAnalysisData()
+std::vector<MonthlyFacilityAnalysisData> MonthlyFacilityAnalysis::getMonthlyFacilityAnalysisData(std::vector<AnalysisGroup> selectedGroups,
+                                                                                                 std::vector<CalanderizedMeter> calanderizedMeters,
+                                                                                                 std::vector<PredictorEntry> accountPredictorEntries)
 {
-    std::cout << "getMonthlyFacilityAnalysisData" << std::endl;
+    std::vector<PredictorEntry> facilityPredictorEntries = getFacilityPredictorEntries(accountPredictorEntries);
+    std::vector<MonthlyAnalysisSummaryData> monthlyGroupAnalysisData = getMonthlyGroupAnalysis(selectedGroups, calanderizedMeters, facilityPredictorEntries);
     std::vector<MonthlyFacilityAnalysisData> monthlyAnalysisSummaryData;
     AnalysisDate currentMonthDate = AnalysisDate(baselineDate.month, baselineDate.year);
     while (currentMonthDate.month != endDate.month || currentMonthDate.year != endDate.year)
     {
-
-        std::cout << "currentMonthDate.month: " << currentMonthDate.month  << std::endl;
-        std::cout << "currentMonthDate.year: " << currentMonthDate.year  << std::endl;
         MonthlyFacilityAnalysisData currentMonthyAnalysisSummaryData = MonthlyFacilityAnalysisData(
             monthlyGroupAnalysisData,
             currentMonthDate,
@@ -48,7 +49,6 @@ std::vector<MonthlyFacilityAnalysisData> MonthlyFacilityAnalysis::getMonthlyFaci
             monthlyAnalysisSummaryData,
             baselineDate.year,
             facility);
-        std::cout << "COMPLETED!" << std::endl;
         monthlyAnalysisSummaryData.push_back(currentMonthyAnalysisSummaryData);
         currentMonthDate.nextMonth();
     }

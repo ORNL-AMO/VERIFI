@@ -32,8 +32,9 @@ void MonthlyAccountAnalysisData::setFiscalYear(Facility facility)
         }
     }
 };
-void MonthlyAccountAnalysisData::setCurrentMonthData(std::vector<MonthlyFacilityAnalysisData> allFacilityAnalysisData)
+std::vector<MonthlyFacilityAnalysisData> MonthlyAccountAnalysisData::getCurrentMonthData(std::vector<MonthlyFacilityAnalysisData> allFacilityAnalysisData)
 {
+    std::vector<MonthlyFacilityAnalysisData> currentMonthData;
     for (int i = 0; i < allFacilityAnalysisData.size(); i++)
     {
         if (allFacilityAnalysisData[i].analysisMonth.month == analysisMonth.month && allFacilityAnalysisData[i].analysisMonth.year == analysisMonth.year)
@@ -41,31 +42,20 @@ void MonthlyAccountAnalysisData::setCurrentMonthData(std::vector<MonthlyFacility
             currentMonthData.push_back(allFacilityAnalysisData[i]);
         }
     }
+    return currentMonthData;
 };
-void MonthlyAccountAnalysisData::setEnergyUse()
+void MonthlyAccountAnalysisData::setEnergyUse(std::vector<MonthlyFacilityAnalysisData> allFacilityAnalysisData)
 {
+    std::vector<MonthlyFacilityAnalysisData> currentMonthData = getCurrentMonthData(allFacilityAnalysisData);
     energyUse = 0;
-    for (int i = 0; i < currentMonthData.size(); i++)
-    {
-        energyUse += currentMonthData[i].energyUse;
-    }
-};
-void MonthlyAccountAnalysisData::setModeledEnergy()
-{
     modeledEnergy = 0;
-    for (int i = 0; i < currentMonthData.size(); i++)
-    {
-        modeledEnergy += currentMonthData[i].modeledEnergy;
-    }
-};
-void MonthlyAccountAnalysisData::setBaselineAdjustmentForOther()
-{
     baselineAdjustmentForOther = 0;
     for (int i = 0; i < currentMonthData.size(); i++)
     {
+        energyUse += currentMonthData[i].energyUse;
+        modeledEnergy += currentMonthData[i].modeledEnergy;
         baselineAdjustmentForOther += currentMonthData[i].baselineAdjustmentForOther;
     }
-    // TODO add baseline adjustment numbers for account
 };
 void MonthlyAccountAnalysisData::setMonthIndex(std::vector<MonthlyAccountAnalysisData> previousMonthsSummaryData)
 {

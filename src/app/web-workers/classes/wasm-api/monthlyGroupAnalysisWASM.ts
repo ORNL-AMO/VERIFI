@@ -12,27 +12,25 @@ export class MonthlyGroupAnalysisWASM {
         let wasmFacility = new wasmModule.Facility(facility.guid, facility.fiscalYear, facility.fiscalYearCalendarEnd, facility.fiscalYearMonth)
         let wasmCMeters = getCalanderizedMetersVector(wasmModule, calanderizedMeters);
         let wasmPredictorEntries = getPredictorEntriesVector(wasmModule, accountPredictorEntries);
-        // AnalysisGroup analysisGroup,
         // AnalysisDate baselineDate,
         // AnalysisDate endDate,
+        let monthlyAnalysisSummary = new wasmModule.MonthlyAnalysisSummary(
+            baselineAndEndDate.baselineDate,
+            baselineAndEndDate.endDate,);
+        baselineAndEndDate.endDate.delete();
+        baselineAndEndDate.baselineDate.delete();
+        // AnalysisGroup analysisGroup,
         // Facility facility,
         // std::vector<CalanderizedMeter> calanderizedMeters,
         // std::vector<PredictorEntry> accountPredictorEntries
-        let monthlyAnalysisSummary = new wasmModule.MonthlyAnalysisSummary(
-            wasmGroup,
-            baselineAndEndDate.baselineDate,
-            baselineAndEndDate.endDate,
+        let calculatedData = monthlyAnalysisSummary.getMonthlyAnalysisSummaryData(wasmGroup,
             wasmFacility,
             wasmCMeters,
             wasmPredictorEntries);
         wasmGroup.delete();
-        baselineAndEndDate.endDate.delete();
-        baselineAndEndDate.baselineDate.delete();
         wasmFacility.delete();
         wasmCMeters.delete();
         wasmPredictorEntries.delete();
-
-        let calculatedData = monthlyAnalysisSummary.getMonthlyAnalysisSummaryData();
         this.monthlyAnalysisSummaryData = parseMonthlyData(calculatedData, selectedGroup);
         calculatedData.delete();
         monthlyAnalysisSummary.delete();

@@ -21,21 +21,15 @@ public:
         int baselineYear,
         Facility facility) : analysisMonth(analysisMonth)
     {
-        setCurrentMonthData(allFacilityAnalysisData);
-        setMonthPredictorData(facilityPredictorEntries);
         setPredictorUsage(facilityPredictorEntries);
         setFiscalYear(facility);
-        setEnergyUse();
-        setModeledEnergy();
-        setBaselineAdjustmentForOther();
+        setEnergyUse(allFacilityAnalysisData);
         setMonthIndex(previousMonthsSummaryData);
         setBaselineActualEnergyUse(baselineYear, previousMonthsSummaryData);
         setMonthlyAnalysisCalculatedValues(baselineYear, previousMonthsSummaryData);
     };
 
     AnalysisDate analysisMonth;
-    std::vector<MonthlyAnalysisSummaryData> currentMonthData;
-    std::vector<PredictorEntry> currentMonthPredictorData;
     double baselineActualEnergyUse;
     int monthIndex;
     double energyUse;
@@ -45,13 +39,11 @@ public:
     double fiscalYear;
     MonthlyAnalysisCalculatedValues monthlyAnalysisCalculatedValues;
 
-    void setCurrentMonthData(std::vector<MonthlyAnalysisSummaryData> allFacilityAnalysisData);
-    void setMonthPredictorData(std::vector<PredictorEntry> facilityPredictorEntries);
+    std::vector<MonthlyAnalysisSummaryData> getCurrentMonthData(std::vector<MonthlyAnalysisSummaryData> allFacilityAnalysisData);
+    std::vector<PredictorEntry> getMonthPredictorData(std::vector<PredictorEntry> facilityPredictorEntries);
     void setPredictorUsage(std::vector<PredictorEntry> facilityPredictorEntries);
     void setFiscalYear(Facility facility);
-    void setEnergyUse();
-    void setModeledEnergy();
-    void setBaselineAdjustmentForOther();
+    void setEnergyUse(std::vector<MonthlyAnalysisSummaryData> allFacilityAnalysisData);
     void setMonthIndex(std::vector<MonthlyFacilityAnalysisData> previousMonthsSummaryData);
     void setBaselineActualEnergyUse(int baselineYear, std::vector<MonthlyFacilityAnalysisData> previousMonthsSummaryData);
     void setMonthlyAnalysisCalculatedValues(int baselineYear, std::vector<MonthlyFacilityAnalysisData> previousMonthsSummaryData);

@@ -21,36 +21,23 @@ public:
     AnnualAnalysisSummary(){};
 
     AnnualAnalysisSummary(
-        AnalysisGroup analysisGroup,
         AnalysisDate baselineDate,
         AnalysisDate endDate,
-        Facility facility,
-        std::vector<CalanderizedMeter> calanderizedMeters,
-        std::vector<PredictorEntry> accountPredictorEntries) : baselineDate(baselineDate), endDate(endDate), accountPredictorEntries(accountPredictorEntries), facility(facility)
+        Facility facility) : baselineDate(baselineDate), endDate(endDate), facility(facility)
     {
         monthlyAnalysisSummary = MonthlyAnalysisSummary(
-            analysisGroup,
             baselineDate,
-            endDate,
-            facility,
-            calanderizedMeters,
-            accountPredictorEntries);
+            endDate);
     };
 
     AnnualAnalysisSummary(
-        std::vector<AnalysisGroup> selectedGroups,
         Facility facility,
-        std::vector<CalanderizedMeter> calanderizedMeters,
-        std::vector<PredictorEntry> accountPredictorEntries,
         AnalysisDate baselineDate,
         AnalysisDate endDate,
-        bool neededForWASM) : baselineDate(baselineDate), endDate(endDate), accountPredictorEntries(accountPredictorEntries), facility(facility)
+        bool neededForWASM) : baselineDate(baselineDate), endDate(endDate), facility(facility)
     {
         monthlyFacilityAnalysis = MonthlyFacilityAnalysis(
-            selectedGroups,
             facility,
-            calanderizedMeters,
-            accountPredictorEntries,
             baselineDate,
             endDate);
     };
@@ -59,10 +46,15 @@ public:
     AnalysisDate endDate;
     MonthlyAnalysisSummary monthlyAnalysisSummary;
     MonthlyFacilityAnalysis monthlyFacilityAnalysis;
-    std::vector<PredictorEntry> accountPredictorEntries;
+    // std::vector<PredictorEntry> accountPredictorEntries;
     Facility facility;
-    std::vector<AnnualAnalysisSummaryData> getAnnualAnalysisSummaryData();
-    std::vector<AnnualAnalysisSummaryData> getAnnualFacilitySummaryData();
+    std::vector<AnnualAnalysisSummaryData> getAnnualAnalysisSummaryData(AnalysisGroup analysisGroup,
+                                                                        std::vector<CalanderizedMeter> calanderizedMeters,
+                                                                        std::vector<PredictorEntry> accountPredictorEntries);
+
+    std::vector<AnnualAnalysisSummaryData> getAnnualFacilitySummaryData(std::vector<AnalysisGroup> selectedGroups,
+                                                                        std::vector<CalanderizedMeter> calanderizedMeters,
+                                                                        std::vector<PredictorEntry> accountPredictorEntries);
 };
 
 #endif // ANNUALANALYSISSUMMARY_H
