@@ -36,7 +36,6 @@ public:
         setGroupMonthlyData();
         setAnnualMeterDataUsage();
         setBaselineYearEnergyIntensity();
-        getYearPredictorUsage();
     };
 
     AnalysisGroup selectedGroup;
@@ -56,7 +55,7 @@ public:
     void setGroupMonthlyData();
     void setAnnualMeterDataUsage();
     void setBaselineYearEnergyIntensity();
-    double getYearPredictorUsage();
+    double getYearPredictorUsage(int year);
 };
 
 #endif // MONTHLYGROUPANALYSIS_H

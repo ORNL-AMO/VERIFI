@@ -1,5 +1,5 @@
 #include "MonthlyGroupAnalysis.h"
-
+#include <iostream>
 void MonthlyGroupAnalysis::setPredictorVariables()
 {
     for (int i = 0; i < selectedGroup.predictorVariables.size(); i++)
@@ -47,7 +47,7 @@ void MonthlyGroupAnalysis::setGroupMonthlyData()
 
 void MonthlyGroupAnalysis::setAnnualMeterDataUsage()
 {
-    for (int year = baselineDate.year + 1; year < endDate.year; year++)
+    for (int year = baselineDate.year; year <= endDate.year; year++)
     {
         double totalUsage = 0;
         for (int i = 0; i < groupMonthlyData.size(); i++)
@@ -66,12 +66,14 @@ void MonthlyGroupAnalysis::setBaselineYearEnergyIntensity()
 {
     if (selectedGroup.analysisType == "energyIntensity" || selectedGroup.analysisType == "modifiedEnergyIntensity")
     {
-        double predictorUsage = getYearPredictorUsage();
-        double baselineYearEnergyUse;
-        for(int i = 0; i < groupMonthlyData.size(); i++){
-            if(groupMonthlyData[i].year == baselineDate.year){
-                baselineYearEnergyUse = groupMonthlyData[i].energyUse;
-                i = groupMonthlyData.size();
+        double predictorUsage = getYearPredictorUsage(baselineDate.year);
+        double baselineYearEnergyUse = 0;
+        for (int i = 0; i < annualMeterDataUsage.size(); i++)
+        {
+            if (annualMeterDataUsage[i].year == baselineDate.year)
+            {
+                baselineYearEnergyUse = annualMeterDataUsage[i].usage;
+                i = annualMeterDataUsage.size();
             }
         };
         baselineEnergyIntensity = (baselineYearEnergyUse / predictorUsage);
@@ -82,18 +84,21 @@ void MonthlyGroupAnalysis::setBaselineYearEnergyIntensity()
     }
 };
 
-double MonthlyGroupAnalysis::getYearPredictorUsage()
+double MonthlyGroupAnalysis::getYearPredictorUsage(int year)
 {
     double totalPredictorUsage = 0;
     for (int i = 0; i < predictorVariables.size(); i++)
     {
         for (int x = 0; x < facilityPredictorData.size(); x++)
         {
-            for (int p = 0; p < facilityPredictorData[x].predictors.size(); p++)
+            if (facilityPredictorData[x].date.year == year)
             {
-                if (predictorVariables[i].id == facilityPredictorData[x].predictors[p].id)
+                for (int p = 0; p < facilityPredictorData[x].predictors.size(); p++)
                 {
-                    totalPredictorUsage += facilityPredictorData[x].predictors[p].amount;
+                    if (predictorVariables[i].id == facilityPredictorData[x].predictors[p].id)
+                    {
+                        totalPredictorUsage += facilityPredictorData[x].predictors[p].amount;
+                    }
                 }
             }
         }

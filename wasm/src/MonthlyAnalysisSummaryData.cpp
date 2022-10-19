@@ -165,6 +165,7 @@ double MonthlyAnalysisSummaryData::calculateEnergyIntensityModeledEnergy(double 
     double totalProductionUsage = getTotalProductionUsage();
     return (totalProductionUsage * baselineYearEnergyIntensity);
 };
+
 double MonthlyAnalysisSummaryData::calculateModifiedEnegyIntensityModeledEnergy(double baselineYearEnergyIntensity)
 {
     double totalProductionUsage = getTotalProductionUsage();
