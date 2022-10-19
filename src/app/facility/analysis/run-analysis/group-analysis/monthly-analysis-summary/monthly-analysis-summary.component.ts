@@ -8,6 +8,9 @@ import { AnalysisGroup, IdbAnalysisItem, IdbFacility, IdbPredictorEntry } from '
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { MonthlyGroupAnalysisWASM } from 'src/app/web-workers/classes/wasm-api/monthlyGroupAnalysisWASM';
+import { WebWorkerService, WorkerRequest } from 'src/app/web-workers/web-worker.service';
+import { Subscription } from 'rxjs';
+
 declare var Module: any;
 
 @Component({
@@ -25,9 +28,11 @@ export class MonthlyAnalysisSummaryComponent implements OnInit {
   itemsPerPage: number = 12;
   worker: Worker;
   calculating: boolean = true;
+  resultsSub: Subscription;
   constructor(private analysisService: AnalysisService, private analysisDbService: AnalysisDbService,
     private analysisCalculationsService: AnalysisCalculationsService, private facilityDbService: FacilitydbService,
-    private predictorDbService: PredictordbService) { }
+    private predictorDbService: PredictordbService,
+    private webWorkerService: WebWorkerService) { }
 
   ngOnInit(): void {
     console.log(Module);
@@ -35,8 +40,35 @@ export class MonthlyAnalysisSummaryComponent implements OnInit {
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     this.group = this.analysisService.selectedGroup.getValue();
     this.facility = this.facilityDbService.selectedFacility.getValue();
-    // let calanderizedMeters: Array<CalanderizedMeter> = this.analysisService.calanderizedMeters;
-    // let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
+    let calanderizedMeters: Array<CalanderizedMeter> = this.analysisService.calanderizedMeters;
+    let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
+    let workerRequest: WorkerRequest = {
+      type: 'monthlyGroupAnalysis',
+      id: this.webWorkerService.getID(),
+      results: undefined,
+      input: {
+        group: this.group,
+        analysisItem: this.analysisItem,
+        facility: this.facility,
+        calanderizedMeters: calanderizedMeters,
+        accountPredictorEntries: accountPredictorEntries
+      }
+    }
+
+
+    this.resultsSub = this.webWorkerService.workerResults.subscribe(val => {
+      console.log('result!!');
+      console.log(val);
+      if (val && val.id == workerRequest.id) {
+        this.monthlyAnalysisSummary = {
+          predictorVariables: this.group.predictorVariables,
+          modelYear: undefined,
+          monthlyAnalysisSummaryData: val.results
+        }
+        this.calculating = false;
+      }
+    });
+    this.webWorkerService.addRequest(workerRequest);
     // if (typeof Worker !== 'undefined') {
     //   this.worker = new Worker(new URL('src/app/web-workers/monthly-group-analysis.worker', import.meta.url), {type: 'module'});
     //   this.worker.onmessage = ({ data }) => {
@@ -64,13 +96,16 @@ export class MonthlyAnalysisSummaryComponent implements OnInit {
     //   // Web Workers are not supported in this environment.
     //   // You should add a fallback so that your program still executes correctly.
     // }
-    this.calculate();
+    // this.calculate();
 
   }
 
   ngOnDestroy() {
-    if (this.worker) {
-      this.worker.terminate();
+    // if (this.worker) {
+    //   this.worker.terminate();
+    // }
+    if(this.resultsSub){
+      this.resultsSub.unsubscribe();
     }
   }
 

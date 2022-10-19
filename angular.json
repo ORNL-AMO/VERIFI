@@ -24,7 +24,7 @@
               {
                 "glob": "**/*",
                 "input": "./wasm/bin/",
-                "output": "./assets/"
+                "output": "./"
               }
             ],
             "styles": [

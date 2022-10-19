@@ -8,7 +8,9 @@ import { AnalysisGroup, IdbAnalysisItem, IdbFacility, IdbPredictorEntry } from '
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { AnnualGroupAnalysisWASM } from 'src/app/web-workers/classes/wasm-api/annualGroupAnalysisWASM';
+import { WebWorkerService, WorkerRequest } from 'src/app/web-workers/web-worker.service';
 declare var Module: any;
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-annual-analysis-summary',
@@ -24,8 +26,11 @@ export class AnnualAnalysisSummaryComponent implements OnInit {
   annualAnalysisSummary: Array<AnnualAnalysisSummary>;
   worker: Worker;
   calculating: boolean = true;
+  resultsSub: Subscription;
   constructor(private analysisService: AnalysisService, private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService,
-    private analysisCalculationsService: AnalysisCalculationsService, private predictorDbService: PredictordbService) {
+    private analysisCalculationsService: AnalysisCalculationsService, 
+    private predictorDbService: PredictordbService,
+    private webWorkerService: WebWorkerService) {
   }
 
   ngOnInit(): void {
@@ -33,7 +38,32 @@ export class AnnualAnalysisSummaryComponent implements OnInit {
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     this.group = this.analysisService.selectedGroup.getValue();
     this.facility = this.facilityDbService.selectedFacility.getValue();
-    this.calculate();
+    let calanderizedMeters: Array<CalanderizedMeter> = this.analysisService.calanderizedMeters;
+    let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
+    let workerRequest: WorkerRequest = {
+      type: 'annualGroupAnalysis',
+      id: this.webWorkerService.getID(),
+      results: undefined,
+      input: {
+        group: this.group,
+        analysisItem: this.analysisItem,
+        facility: this.facility,
+        calanderizedMeters: calanderizedMeters,
+        accountPredictorEntries: accountPredictorEntries
+      }
+    }
+
+
+    this.resultsSub = this.webWorkerService.workerResults.subscribe(val => {
+      console.log('result!!');
+      console.log(val);
+      if (val && val.id == workerRequest.id) {
+        this.annualAnalysisSummary = val.results;
+        this.calculating = false;
+      }
+    });
+    this.webWorkerService.addRequest(workerRequest);
+    // this.calculate();
     // let calanderizedMeters: Array<CalanderizedMeter> = this.analysisService.calanderizedMeters;
     // this.annualAnalysisSummary = this.analysisCalculationsService.getAnnualAnalysisSummary(this.group, this.analysisItem, this.facility, calanderizedMeters);
     // let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();

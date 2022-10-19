@@ -13,10 +13,11 @@ import { UtilityMeterDatadbService } from './indexedDB/utilityMeterData-db.servi
 import { UtilityMeterGroupdbService } from './indexedDB/utilityMeterGroup-db.service';
 import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbCustomEmissionsItem, IdbFacility, IdbOverviewReportOptions, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from './models/idb';
 import { EGridService } from './shared/helper-services/e-grid.service';
+import { WebWorkerService } from './web-workers/web-worker.service';
 
 // declare ga as a function to access the JS code in TS
 declare let gtag: Function;
-
+declare var Module: any;
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -30,6 +31,7 @@ export class AppComponent {
 
   dataInitialized: boolean = false;
   loadingMessage: string = "Loading Accounts...";
+  worker: Worker;
   constructor(
     private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
@@ -43,7 +45,8 @@ export class AppComponent {
     private analysisDbService: AnalysisDbService,
     private accountAnalysisDbService: AccountAnalysisDbService,
     private updateDbEntryService: UpdateDbEntryService,
-    private customEmissionsDbService: CustomEmissionsDbService) {
+    private customEmissionsDbService: CustomEmissionsDbService,
+    private webWorkerService: WebWorkerService) {
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
         gtag('config', 'G-YG1QD02XSE',
@@ -55,7 +58,13 @@ export class AppComponent {
     })
   }
 
-  ngOnInit() {
+  ngOnInit() {    
+    this.webWorkerService.addRequest({
+      type: 'initialize',
+      id: this.webWorkerService.getID(),
+      results: undefined,
+      input: undefined      
+    })
     this.initializeData();
   }
 
