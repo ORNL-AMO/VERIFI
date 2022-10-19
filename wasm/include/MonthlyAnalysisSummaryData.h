@@ -21,8 +21,8 @@ public:
         std::vector<MonthlyAnalysisSummaryData> previousMonthsSummaryData) : analysisMonth(analysisMonth), monthlyGroupAnalysis(monthlyGroupAnalysis)
     {
         setFiscalYear(monthlyGroupAnalysis.facility);
-        setMonthPredictorData(monthlyGroupAnalysis.facilityPredictorData);
         setMonthMeterData(monthlyGroupAnalysis.groupMonthlyData);
+        setMonthPredictorData(monthlyGroupAnalysis.facilityPredictorData);
         setEnergyUse();
         setMonthIndex(previousMonthsSummaryData);
         setBaselineActualEnergyUse(monthlyGroupAnalysis.baselineDate.year, previousMonthsSummaryData);

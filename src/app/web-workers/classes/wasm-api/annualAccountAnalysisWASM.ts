@@ -1,19 +1,21 @@
-import { MonthlyAnalysisSummaryData } from "src/app/models/analysis";
+import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from "src/app/models/analysis";
 import { CalanderizedMeter } from "src/app/models/calanderization";
-import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, IdbPredictorEntry } from "src/app/models/idb";
-import { getAnalysisGroup, getCalanderizedMetersVector, getPredictorEntriesVector, getStartAndEndDate, parseMonthlyData } from "./HelpersWasm";
+import { AnalysisGroup, IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, IdbPredictorEntry } from "src/app/models/idb";
+import { getAnalysisGroup, getCalanderizedMetersVector, getPredictorEntriesVector, getStartAndEndDate, parseAnnualData, parseMonthlyData } from "./HelpersWasm";
 
-export class MonthlyAccountAnalysisWASM {
+
+export class AnnualAccountAnalysisWASM {
+
+    annualAnalysisSummary: Array<AnnualAnalysisSummary>;
     monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>;
-    constructor(
-        wasmModule: any,
+    constructor(wasmModule: any,
         analysisItem: IdbAccountAnalysisItem,
         account: IdbAccount,
         facilities: Array<IdbFacility>,
         calanderizedMeters: Array<CalanderizedMeter>,
         accountPredictorEntries: Array<IdbPredictorEntry>,
-        allAccountAnalysisItems: Array<IdbAnalysisItem>
-    ) {
+        allAccountAnalysisItems: Array<IdbAnalysisItem>) {
+        // let wasmGroup = getAnalysisGroup(wasmModule, selectedGroup);
         let wasmFacilityVector = new wasmModule.FacilityVector();
         let wasmGroupVector = new wasmModule.AnalysisGroupVector();
 
@@ -33,31 +35,40 @@ export class MonthlyAccountAnalysisWASM {
         })
 
         let baselineAndEndDate = getStartAndEndDate(wasmModule, account, analysisItem);
+        let wasmAccount = new wasmModule.Facility(account.guid, account.fiscalYear, account.fiscalYearCalendarEnd, account.fiscalYearMonth)
         let wasmCMeters = getCalanderizedMetersVector(wasmModule, calanderizedMeters);
         let wasmPredictorEntries = getPredictorEntriesVector(wasmModule, accountPredictorEntries);
-        let wasmAccount = new wasmModule.Facility(account.guid, account.fiscalYear, account.fiscalYearCalendarEnd, account.fiscalYearMonth);
 
         // AnalysisDate baselineDate,
         // AnalysisDate endDate,
-        // Facility account
-        let monthlyAnalysisSummary = new wasmModule.MonthlyAccountAnalysis(
+        // Facility account,
+        // bool
+        // bool needed for account
+        let annualAnalysisSummary = new wasmModule.AnnualAnalysisSummary(
             baselineAndEndDate.baselineDate,
             baselineAndEndDate.endDate,
-            wasmAccount);
+            wasmAccount,
+            true,
+            true);
         baselineAndEndDate.endDate.delete();
         baselineAndEndDate.baselineDate.delete();
         wasmAccount.delete();
+
         // std::vector<Facility> facilities,
         // std::vector<AnalysisGroup> allAccountGroups,
         // std::vector<CalanderizedMeter> calanderizedMeters,
-        // std::vector<PredictorEntry> accountPredictorEntries,
-        let calculatedData = monthlyAnalysisSummary.getMonthlyAnalysisSummaryData(wasmFacilityVector, wasmGroupVector, wasmCMeters, wasmPredictorEntries);
-        wasmFacilityVector.delete();
+        // std::vector<PredictorEntry> accountPredictorEntries
+        let calculatedData = annualAnalysisSummary.getAnnualAccountSummaryData(wasmFacilityVector, wasmGroupVector, wasmCMeters, wasmPredictorEntries);
         wasmCMeters.delete();
         wasmPredictorEntries.delete();
         wasmGroupVector.delete();
-        this.monthlyAnalysisSummaryData = parseMonthlyData(calculatedData, undefined);
+        wasmFacilityVector.delete();
+
+        this.annualAnalysisSummary = parseAnnualData(calculatedData);
+        // this.annualAnalysisSummary = parseMonthlyData(annualAnalysisSummary, selectedGroup);
         calculatedData.delete();
-        monthlyAnalysisSummary.delete();
+        annualAnalysisSummary.delete();
     }
+
+
 }

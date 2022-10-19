@@ -51,8 +51,10 @@ EMSCRIPTEN_BINDINGS(monthly_analysis_summary)
     class_<AnnualAnalysisSummary>("AnnualAnalysisSummary")
         .constructor<AnalysisDate, AnalysisDate, Facility>()
         .constructor<Facility, AnalysisDate, AnalysisDate, bool>()
+        .constructor<AnalysisDate, AnalysisDate, Facility, bool, bool>()
         .function("getAnnualAnalysisSummaryData", &AnnualAnalysisSummary::getAnnualAnalysisSummaryData)
-        .function("getAnnualFacilitySummaryData", &AnnualAnalysisSummary::getAnnualFacilitySummaryData);
+        .function("getAnnualFacilitySummaryData", &AnnualAnalysisSummary::getAnnualFacilitySummaryData)
+        .function("getAnnualAccountSummaryData", &AnnualAnalysisSummary::getAnnualAccountSummaryData);
 
     class_<AnnualAnalysisSummaryData>("AnnualAnalysisSummaryData")
         .property("year", &AnnualAnalysisSummaryData::year)

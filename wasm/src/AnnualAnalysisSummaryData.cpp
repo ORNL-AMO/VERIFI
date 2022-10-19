@@ -29,6 +29,26 @@ void AnnualAnalysisSummaryData::setYearAnalysisSummaryData(std::vector<MonthlyFa
     }
 };
 
+void AnnualAnalysisSummaryData::setYearAnalysisSummaryData(std::vector<MonthlyAccountAnalysisData> monthlyAnalysisSummaryData)
+{
+    for (int i = 0; i < monthlyAnalysisSummaryData.size(); i++)
+    {
+        if (monthlyAnalysisSummaryData[i].fiscalYear == year)
+        {
+            std::vector<PredictorUsage> predictorUsage;
+            MonthlyAnalysisSummaryData convertedDataItem = MonthlyAnalysisSummaryData(
+                monthlyAnalysisSummaryData[i].analysisMonth,
+                monthlyAnalysisSummaryData[i].energyUse,
+                monthlyAnalysisSummaryData[i].modeledEnergy,
+                monthlyAnalysisSummaryData[i].baselineAdjustmentForOther,
+                monthlyAnalysisSummaryData[i].fiscalYear,
+                monthlyAnalysisSummaryData[i].monthlyAnalysisCalculatedValues,
+                predictorUsage);
+            yearMonthlyAnalysisSummaryData.push_back(convertedDataItem);
+        }
+    }
+};
+
 void AnnualAnalysisSummaryData::setEnergyUse()
 {
     energyUse = 0;

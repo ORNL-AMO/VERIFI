@@ -7,6 +7,7 @@
 #include "MonthlyAnalysisSummary.h"
 #include "MonthlyFacilityAnalysis.h"
 #include "AnnualAnalysisSummaryData.h"
+#include "MonthlyAccountAnalysis.h"
 #include <iostream>
 
 #ifndef ANNUALANALYSISSUMMARY_H
@@ -42,10 +43,21 @@ public:
             endDate);
     };
 
+    AnnualAnalysisSummary(
+        AnalysisDate baselineDate,
+        AnalysisDate endDate,
+        Facility account,
+        bool neededForWasm,
+        bool alsoNeededForWasmOverload) : baselineDate(baselineDate), endDate(endDate), facility(account)
+    {
+        monthlyAccountAnalysis = MonthlyAccountAnalysis(baselineDate, endDate, account);
+    }
+
     AnalysisDate baselineDate;
     AnalysisDate endDate;
     MonthlyAnalysisSummary monthlyAnalysisSummary;
     MonthlyFacilityAnalysis monthlyFacilityAnalysis;
+    MonthlyAccountAnalysis monthlyAccountAnalysis;
     // std::vector<PredictorEntry> accountPredictorEntries;
     Facility facility;
     std::vector<AnnualAnalysisSummaryData> getAnnualAnalysisSummaryData(AnalysisGroup analysisGroup,
@@ -55,6 +67,11 @@ public:
     std::vector<AnnualAnalysisSummaryData> getAnnualFacilitySummaryData(std::vector<AnalysisGroup> selectedGroups,
                                                                         std::vector<CalanderizedMeter> calanderizedMeters,
                                                                         std::vector<PredictorEntry> accountPredictorEntries);
+
+    std::vector<AnnualAnalysisSummaryData> getAnnualAccountSummaryData(std::vector<Facility> facilities,
+                                                                       std::vector<AnalysisGroup> allAccountGroups,
+                                                                       std::vector<CalanderizedMeter> calanderizedMeters,
+                                                                       std::vector<PredictorEntry> accountPredictorEntries);
 };
 
 #endif // ANNUALANALYSISSUMMARY_H

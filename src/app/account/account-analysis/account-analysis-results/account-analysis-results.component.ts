@@ -6,6 +6,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, IdbPredictorEntry } from 'src/app/models/idb';
+import { AnnualAccountAnalysisWASM } from 'src/app/web-workers/classes/wasm-api/annualAccountAnalysisWASM';
 import { MonthlyAccountAnalysisWASM } from 'src/app/web-workers/classes/wasm-api/monthlyAccountAnalysisWASM';
 import { AccountAnalysisService } from '../account-analysis.service';
 declare var Module: any;
@@ -78,10 +79,14 @@ export class AccountAnalysisResultsComponent implements OnInit {
     // let calanderizedMeters: Array<CalanderizedMeter> = this.analysisService.calanderizedMeters;
     // let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
     try {
+      console.time('test');
       let test = new MonthlyAccountAnalysisWASM(Module, this.accountAnalysisItem, this.account, accountFacilities, calanderizedMeters, accountPredictorEntries, accountAnalysisItems);
       this.accountAnalysisService.monthlyAccountAnalysisData.next(test.monthlyAnalysisSummaryData);
-      // let test2 = new AnnualFacilityAnalysisWASM(Module, analysisItem, facility, calanderizedMeters, accountPredictorEntries);
-      // this.accountAnalysisService.annualAnalysisSummary.next(test2.annualAnalysisSummary);
+      console.timeEnd('test')
+      console.time('test2');
+      let test2 = new AnnualAccountAnalysisWASM(Module, this.accountAnalysisItem, this.account, accountFacilities, calanderizedMeters, accountPredictorEntries, accountAnalysisItems);
+      this.accountAnalysisService.annualAnalysisSummary.next(test2.annualAnalysisSummary);
+      console.timeEnd('test2');
       this.accountAnalysisService.calculating.next(false);
       // this.monthlyAnalysisSummary = {
       //   predictorVariables: undefined,

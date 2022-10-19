@@ -42,3 +42,25 @@ std::vector<AnnualAnalysisSummaryData> AnnualAnalysisSummary::getAnnualFacilityS
     }
     return annualAnalysisSummaryData;
 }
+
+std::vector<AnnualAnalysisSummaryData> AnnualAnalysisSummary::getAnnualAccountSummaryData(std::vector<Facility> facilities,
+                                                                                          std::vector<AnalysisGroup> allAccountGroups,
+                                                                                          std::vector<CalanderizedMeter> calanderizedMeters,
+                                                                                          std::vector<PredictorEntry> accountPredictorEntries)
+{
+    std::vector<AnnualAnalysisSummaryData> annualAnalysisSummaryData;
+    std::vector<MonthlyAccountAnalysisData> monthlyAnalysisSummaryData = monthlyAccountAnalysis.getMonthlyAnalysisSummaryData(facilities, allAccountGroups, calanderizedMeters, accountPredictorEntries);
+    int year = baselineDate.year;
+    while (year < endDate.year)
+    {
+        AnnualAnalysisSummaryData annualAnalysisSummary = AnnualAnalysisSummaryData(
+            monthlyAnalysisSummaryData,
+            year,
+            accountPredictorEntries,
+            facility,
+            annualAnalysisSummaryData);
+        annualAnalysisSummaryData.push_back(annualAnalysisSummary);
+        year++;
+    }
+    return annualAnalysisSummaryData;
+}

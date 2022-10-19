@@ -4,6 +4,7 @@
 #include "MonthlyAnalysisSummaryData.h"
 #include <vector>
 #include "MonthlyFacilityAnalysisData.h"
+#include "MonthlyAccountAnalysisData.h"
 
 #ifndef ANNUALANALYSISSUMMARYDATA_H
 #define ANNUALANALYSISSUMMARYDATA_H
@@ -71,6 +72,32 @@ public:
         setNewSavings();
     };
 
+        AnnualAnalysisSummaryData(
+        std::vector<MonthlyAccountAnalysisData> monthlyAnalysisSummaryData,
+        int year,
+        std::vector<PredictorEntry> accountPredictorEntries,
+        Facility facility,
+        std::vector<AnnualAnalysisSummaryData> previousYearsSummaryData) : year(year)
+    {
+        setYearAnalysisSummaryData(monthlyAnalysisSummaryData);
+        setEnergyUse();
+        setModeledEnergy();
+        setBaselineEnergyUse(previousYearsSummaryData);
+        setBaselineModeledEnergy(previousYearsSummaryData);
+        setAdjustedForNormalization();
+        setBaselineAdjustmentForOther();
+        setBaselineAdjustmentForNormalization(previousYearsSummaryData);
+        setBaselineAdjustment(previousYearsSummaryData);
+        setAdjusted();
+        setSEnPI();
+        setSavings(previousYearsSummaryData);
+        setTotalSavingsPercentImprovement();
+        setPreviousYearSavings(previousYearsSummaryData);
+        setAnnualSavingsPercentImprovement();
+        setCummulativeSavings(previousYearsSummaryData);
+        setNewSavings();
+    };
+
     int year;
     double energyUse;
     double modeledEnergy;
@@ -96,6 +123,7 @@ public:
 
     void setYearAnalysisSummaryData(std::vector<MonthlyAnalysisSummaryData> monthlyAnalysisSummaryData);
     void setYearAnalysisSummaryData(std::vector<MonthlyFacilityAnalysisData> monthlyAnalysisSummaryData);
+    void setYearAnalysisSummaryData(std::vector<MonthlyAccountAnalysisData> monthlyAnalysisSummaryData);
     void setPredictorUsage(std::vector<MonthlyAnalysisSummaryData> monthlyAnalysisSummaryData);
     void setPredictorUsage(std::vector<MonthlyFacilityAnalysisData> monthlyAnalysisSummaryData);
     void setEnergyUse();
