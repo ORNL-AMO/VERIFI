@@ -116,23 +116,30 @@ void MonthlyAnalysisSummaryData::setPredictorAndProductionUsage(std::vector<Pred
 };
 void MonthlyAnalysisSummaryData::setModeledEnergy(std::string analysisType, std::vector<PredictorData> predictorVariables, double baselineYearEnergyIntensity)
 {
-    if (analysisType == "regression")
+    if (monthMeterData.size() != 0)
     {
-        modeledEnergy = calculateRegressionModeledEnergy(predictorVariables);
+        if (analysisType == "regression")
+        {
+            modeledEnergy = calculateRegressionModeledEnergy(predictorVariables);
+        }
+        else if (analysisType == "absoluteEnergyConsumption")
+        {
+            modeledEnergy = baselineActualEnergyUse;
+        }
+        else if (analysisType == "energyIntensity")
+        {
+            modeledEnergy = calculateEnergyIntensityModeledEnergy(baselineYearEnergyIntensity);
+        }
+        else if (analysisType == "modifiedEnergyIntensity")
+        {
+            modeledEnergy = calculateModifiedEnegyIntensityModeledEnergy(baselineYearEnergyIntensity);
+        }
+        if (modeledEnergy < 0)
+        {
+            modeledEnergy = 0;
+        }
     }
-    else if (analysisType == "absoluteEnergyConsumption")
-    {
-        modeledEnergy = baselineActualEnergyUse;
-    }
-    else if (analysisType == "energyIntensity")
-    {
-        modeledEnergy = calculateEnergyIntensityModeledEnergy(baselineYearEnergyIntensity);
-    }
-    else if (analysisType == "modifiedEnergyIntensity")
-    {
-        modeledEnergy = calculateModifiedEnegyIntensityModeledEnergy(baselineYearEnergyIntensity);
-    }
-    if (modeledEnergy < 0)
+    else
     {
         modeledEnergy = 0;
     }
