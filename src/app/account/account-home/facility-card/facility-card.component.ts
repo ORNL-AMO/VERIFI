@@ -11,6 +11,7 @@ import { AccountHomeService } from '../account-home.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { Subscription } from 'rxjs';
+import { WebWorkerService, WorkerRequest } from 'src/app/web-workers/web-worker.service';
 @Component({
   selector: 'app-facility-card',
   templateUrl: './facility-card.component.html',
@@ -41,10 +42,11 @@ export class FacilityCardComponent implements OnInit {
   baselineYear: number;
 
   showContent: boolean = true;
-  facilityAnalysisSummariesSub: Subscription;
+  resultsSub: Subscription;
   constructor(private analysisDbService: AnalysisDbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterDbService: UtilityMeterdbService, private predictorDbService: PredictordbService,
-    private overviewReportService: OverviewReportService, private accountHomeService: AccountHomeService) { }
+    private overviewReportService: OverviewReportService, private accountHomeService: AccountHomeService,
+    private webWorkerService: WebWorkerService) { }
 
   ngOnInit(): void {
     let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
@@ -63,31 +65,15 @@ export class FacilityCardComponent implements OnInit {
       if (this.latestPredictorEntry) {
         this.facilityPredictors = this.latestPredictorEntry.predictors;
       }
+      this.calculateAnalysis();
     }
     this.setNAICS();
     this.setGoalYears();
-    if (this.latestAnalysisItem) {
-      this.facilityAnalysisSummariesSub = this.accountHomeService.facilityAnalysisSummaries.subscribe(summaries => {
-        let facilitySummary: {
-          facilityId: string,
-          annualAnalysisSummary: Array<AnnualAnalysisSummary>,
-          monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
-        } = summaries.find(summary => { return summary.facilityId == this.facility.guid });
-        if (facilitySummary) {
-          this.annualAnalysisSummary = facilitySummary.annualAnalysisSummary;
-          this.monthlyFacilityAnalysisData = facilitySummary.monthlyAnalysisSummaryData;
-          this.setProgressPercentages();
-          this.calculating = false;
-        }
-      })
-    }
-
-
   }
 
   ngOnDestroy() {
-    if (this.facilityAnalysisSummariesSub) {
-      this.facilityAnalysisSummariesSub.unsubscribe();
+    if(this.resultsSub){
+      this.resultsSub.unsubscribe();
     }
   }
 
@@ -139,5 +125,36 @@ export class FacilityCardComponent implements OnInit {
 
   toggleShowContent() {
     this.showContent = !this.showContent;
+  }
+
+  calculateAnalysis() {
+    if (this.latestAnalysisItem) {
+
+      let calanderizedMeters: Array<CalanderizedMeter> = this.accountHomeService.calanderizedMeters;
+      let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
+      let workerAnnualRequest: WorkerRequest = {
+        type: 'annualFacilityAnalysis',
+        id: this.webWorkerService.getID(),
+        results: undefined,
+        input: {
+          analysisItem: this.latestAnalysisItem,
+          facility: this.facility,
+          calanderizedMeters: calanderizedMeters,
+          accountPredictorEntries: accountPredictorEntries
+        }
+      }
+  
+  
+      this.resultsSub = this.webWorkerService.workerResults.subscribe(val => {
+        if (val && val.id == workerAnnualRequest.id) {
+          this.annualAnalysisSummary = val.results.annualAnalysisSummary;
+          this.monthlyFacilityAnalysisData = val.results.monthlyAnalysisSummaryData;
+          this.setProgressPercentages();
+          this.calculating = false;
+        }
+      });
+      this.calculating = true;
+      this.webWorkerService.addRequest(workerAnnualRequest);
+    }
   }
 }

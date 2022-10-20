@@ -1,11 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
-import { FacilityAnalysisCalculationsService } from 'src/app/shared/shared-analysis/calculations/facility-analysis-calculations.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AnnualAnalysisSummary } from 'src/app/models/analysis';
 import { IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
-import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -22,9 +20,8 @@ export class AnnualFacilityAnalysisComponent implements OnInit {
   annualAnalysisSummary: Array<AnnualAnalysisSummary>;
   calculatingSub: Subscription;
   annualAnalysisSummarySub: Subscription;
-  constructor(private analysisService: AnalysisService, private facilityAnalysisCalculationsService: FacilityAnalysisCalculationsService,
-    private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService,
-    private predictorDbService: PredictordbService) { }
+  constructor(private analysisService: AnalysisService,
+    private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
     this.dataDisplay = this.analysisService.dataDisplay.getValue();
@@ -39,7 +36,7 @@ export class AnnualFacilityAnalysisComponent implements OnInit {
   }
 
 
-  ngOnDestroy(){
+  ngOnDestroy() {
     this.calculatingSub.unsubscribe();
     this.annualAnalysisSummarySub.unsubscribe();
   }

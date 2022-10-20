@@ -126,8 +126,8 @@
             </div>
             <div class="col-8">
                 <ng-container *ngIf="latestAnalysisItem">
-                    <app-monthly-analysis-summary-graph *ngIf="!calculating && monthlyFacilityAnalysisData"
-                        [monthlyAnalysisSummaryData]="monthlyFacilityAnalysisData" [analysisItem]="latestAnalysisItem"
+                    <app-monthly-analysis-summary-graph *ngIf="!calculating && monthlyAccountAnalysisData"
+                        [monthlyAnalysisSummaryData]="monthlyAccountAnalysisData" [analysisItem]="latestAnalysisItem"
                         [facilityOrAccount]="account">
                     </app-monthly-analysis-summary-graph>
                     <app-calculating-spinner *ngIf="calculating" [message]="'Calculating Monthly Results...'">

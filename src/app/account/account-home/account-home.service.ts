@@ -7,8 +7,6 @@ import { IdbAccount, IdbAccountAnalysisItem, IdbUtilityMeter } from 'src/app/mod
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { ConvertMeterDataService } from 'src/app/shared/helper-services/convert-meter-data.service';
 import * as _ from 'lodash';
-import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
-import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -17,20 +15,8 @@ export class AccountHomeService {
 
   calanderizedMeters: Array<CalanderizedMeter>;
   latestAnalysisItem: IdbAccountAnalysisItem;
-  annualAnalysisSummary: BehaviorSubject<Array<AnnualAnalysisSummary>>;
-  monthlyAccountAnalysisData: BehaviorSubject<Array<MonthlyAnalysisSummaryData>>;
-  calculating: BehaviorSubject<boolean>;
-  facilityAnalysisSummaries: BehaviorSubject<Array<{
-    facilityId: string,
-    annualAnalysisSummary: Array<AnnualAnalysisSummary>,
-    monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
-  }>>;
   constructor(private accountAnalysisDbService: AccountAnalysisDbService, private utilityMeterDbService: UtilityMeterdbService,
     private accountDbService: AccountdbService, private calendarizationService: CalanderizationService, private convertMeterDataService: ConvertMeterDataService) {
-    this.annualAnalysisSummary = new BehaviorSubject<Array<AnnualAnalysisSummary>>(undefined);
-    this.monthlyAccountAnalysisData = new BehaviorSubject<Array<MonthlyAnalysisSummaryData>>(undefined);
-    this.calculating = new BehaviorSubject<boolean>(true);
-    this.facilityAnalysisSummaries = new BehaviorSubject([]);
   }
 
   setCalanderizedMeters() {

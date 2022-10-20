@@ -1,15 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
-import { AnalysisCalculationsService } from 'src/app/shared/shared-analysis/calculations/analysis-calculations.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AnnualAnalysisSummary } from 'src/app/models/analysis';
 import { AnalysisGroup, IdbAnalysisItem, IdbFacility, IdbPredictorEntry } from 'src/app/models/idb';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
-import { AnnualGroupAnalysisWASM } from 'src/app/web-workers/classes/wasm-api/annualGroupAnalysisWASM';
 import { WebWorkerService, WorkerRequest } from 'src/app/web-workers/web-worker.service';
-declare var Module: any;
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -24,11 +21,9 @@ export class AnnualAnalysisSummaryComponent implements OnInit {
   group: AnalysisGroup;
   facility: IdbFacility;
   annualAnalysisSummary: Array<AnnualAnalysisSummary>;
-  worker: Worker;
   calculating: boolean = true;
   resultsSub: Subscription;
   constructor(private analysisService: AnalysisService, private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService,
-    private analysisCalculationsService: AnalysisCalculationsService,
     private predictorDbService: PredictordbService,
     private webWorkerService: WebWorkerService) {
   }
@@ -55,64 +50,22 @@ export class AnnualAnalysisSummaryComponent implements OnInit {
 
 
     this.resultsSub = this.webWorkerService.workerResults.subscribe(val => {
-      console.log('result!!');
-      console.log(val);
       if (val && val.id == workerRequest.id) {
         this.annualAnalysisSummary = val.results.annualAnalysisSummary;
         this.calculating = false;
       }
     });
     this.webWorkerService.addRequest(workerRequest);
-    // this.calculate();
-    // let calanderizedMeters: Array<CalanderizedMeter> = this.analysisService.calanderizedMeters;
-    // this.annualAnalysisSummary = this.analysisCalculationsService.getAnnualAnalysisSummary(this.group, this.analysisItem, this.facility, calanderizedMeters);
-    // let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
-
-    // if (typeof Worker !== 'undefined') {
-    //   this.worker = new Worker(new URL('src/app/web-workers/annual-group-analysis.worker', import.meta.url));
-    //   this.worker.onmessage = ({ data }) => {
-    //     this.annualAnalysisSummary = data;
-    //     this.calculating = false;
-    //     this.worker.terminate();
-    //   };
-    //   this.calculating = true;
-    //   this.worker.postMessage({
-    //     selectedGroup: this.group,
-    //     analysisItem: this.analysisItem,
-    //     facility: this.facility,
-    //     calanderizedMeters: calanderizedMeters,
-    //     accountPredictorEntries: accountPredictorEntries
-    //   });
-    // } else {
-    //   console.log('nopee')
-
-    //   // Web Workers are not supported in this environment.
-    //   // You should add a fallback so that your program still executes correctly.
-    // }
-
-
   }
 
   ngOnDestroy() {
-    if (this.worker) {
-      this.worker.terminate();
+    if (this.resultsSub) {
+      this.resultsSub.unsubscribe();
     }
   }
 
   setDataDisplay(display: 'table' | 'graph') {
     this.dataDisplay = display;
     this.analysisService.dataDisplay.next(this.dataDisplay);
-  }
-
-  calculate() {
-    let calanderizedMeters: Array<CalanderizedMeter> = this.analysisService.calanderizedMeters;
-    let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
-    try {
-      let annualGroupAnalysisWASM: AnnualGroupAnalysisWASM = new AnnualGroupAnalysisWASM(Module, this.group, this.analysisItem, this.facility, calanderizedMeters, accountPredictorEntries);
-      this.annualAnalysisSummary = annualGroupAnalysisWASM.annualAnalysisSummary;
-      this.calculating = false;
-    } catch (err) {
-      console.log(err)
-    }
   }
 }
