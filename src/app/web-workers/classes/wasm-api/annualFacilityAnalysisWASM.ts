@@ -44,8 +44,8 @@ export class AnnualFacilityAnalysisWASM {
         wasmPredictorEntries.delete();
         wasmGroupVector.delete();
 
-        this.annualAnalysisSummary = parseAnnualData(calculatedData);
-        // this.annualAnalysisSummary = parseMonthlyData(annualAnalysisSummary, selectedGroup);
+        this.annualAnalysisSummary = parseAnnualData(calculatedData.annualAnalysisSummaryData);
+        this.monthlyAnalysisSummaryData = parseMonthlyData(calculatedData.monthlyFacilityAnalysisSummaryData, undefined);
         calculatedData.delete();
         annualAnalysisSummary.delete();
     }

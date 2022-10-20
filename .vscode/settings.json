@@ -54,5 +54,6 @@
         "xtr1common": "cpp",
         "xutility": "cpp",
         "iostream": "cpp"
-    }
+    },
+    "cmake.sourceDirectory": "${workspaceFolder}/wasm"
 }

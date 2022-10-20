@@ -64,8 +64,8 @@ export class AnnualAccountAnalysisWASM {
         wasmGroupVector.delete();
         wasmFacilityVector.delete();
 
-        this.annualAnalysisSummary = parseAnnualData(calculatedData);
-        // this.annualAnalysisSummary = parseMonthlyData(annualAnalysisSummary, selectedGroup);
+        this.annualAnalysisSummary = parseAnnualData(calculatedData.annualAnalysisSummaryData);
+        this.monthlyAnalysisSummaryData = parseMonthlyData(calculatedData.monthlyAccountAnalysisSummaryData, undefined);
         calculatedData.delete();
         annualAnalysisSummary.delete();
     }

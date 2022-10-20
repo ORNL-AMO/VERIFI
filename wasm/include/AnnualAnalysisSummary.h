@@ -12,6 +12,42 @@
 
 #ifndef ANNUALANALYSISSUMMARY_H
 #define ANNUALANALYSISSUMMARY_H
+
+class AnnualAnalysisResults
+{
+public:
+    /**
+     * @brief
+     *
+     */
+    AnnualAnalysisResults(){};
+    AnnualAnalysisResults(
+        std::vector<AnnualAnalysisSummaryData> annualAnalysisSummaryData,
+        std::vector<MonthlyAccountAnalysisData> monthlyAccountAnalysisSummaryData)
+        : annualAnalysisSummaryData(annualAnalysisSummaryData), monthlyAccountAnalysisSummaryData(monthlyAccountAnalysisSummaryData){
+
+                                                                };
+
+    AnnualAnalysisResults(
+        std::vector<AnnualAnalysisSummaryData> annualAnalysisSummaryData,
+        std::vector<MonthlyFacilityAnalysisData> monthlyFacilityAnalysisSummaryData)
+        : annualAnalysisSummaryData(annualAnalysisSummaryData), monthlyFacilityAnalysisSummaryData(monthlyFacilityAnalysisSummaryData){
+
+                                                                };
+
+    AnnualAnalysisResults(
+        std::vector<AnnualAnalysisSummaryData> annualAnalysisSummaryData,
+        std::vector<MonthlyAnalysisSummaryData> monthlyGroupAnalysisSummaryData)
+        : annualAnalysisSummaryData(annualAnalysisSummaryData), monthlyGroupAnalysisSummaryData(monthlyGroupAnalysisSummaryData){
+
+                                                                };
+
+    std::vector<AnnualAnalysisSummaryData> annualAnalysisSummaryData;
+    std::vector<MonthlyAccountAnalysisData> monthlyAccountAnalysisSummaryData;
+    std::vector<MonthlyFacilityAnalysisData> monthlyFacilityAnalysisSummaryData;
+    std::vector<MonthlyAnalysisSummaryData> monthlyGroupAnalysisSummaryData;
+};
+
 class AnnualAnalysisSummary
 {
 public:
@@ -60,18 +96,19 @@ public:
     MonthlyAccountAnalysis monthlyAccountAnalysis;
     // std::vector<PredictorEntry> accountPredictorEntries;
     Facility facility;
-    std::vector<AnnualAnalysisSummaryData> getAnnualAnalysisSummaryData(AnalysisGroup analysisGroup,
-                                                                        std::vector<CalanderizedMeter> calanderizedMeters,
-                                                                        std::vector<PredictorEntry> accountPredictorEntries);
+    AnnualAnalysisResults getAnnualAnalysisSummaryData(AnalysisGroup analysisGroup,
+                                                       std::vector<CalanderizedMeter> calanderizedMeters,
+                                                       std::vector<PredictorEntry> accountPredictorEntries);
 
-    std::vector<AnnualAnalysisSummaryData> getAnnualFacilitySummaryData(std::vector<AnalysisGroup> selectedGroups,
-                                                                        std::vector<CalanderizedMeter> calanderizedMeters,
-                                                                        std::vector<PredictorEntry> accountPredictorEntries);
+    AnnualAnalysisResults getAnnualFacilitySummaryData(std::vector<AnalysisGroup> selectedGroups,
+                                                       std::vector<CalanderizedMeter> calanderizedMeters,
+                                                       std::vector<PredictorEntry> accountPredictorEntries);
 
-    std::vector<AnnualAnalysisSummaryData> getAnnualAccountSummaryData(std::vector<Facility> facilities,
-                                                                       std::vector<AnalysisGroup> allAccountGroups,
-                                                                       std::vector<CalanderizedMeter> calanderizedMeters,
-                                                                       std::vector<PredictorEntry> accountPredictorEntries);
+    AnnualAnalysisResults getAnnualAccountSummaryData(std::vector<Facility> facilities,
+                                                      std::vector<AnalysisGroup> allAccountGroups,
+                                                      std::vector<CalanderizedMeter> calanderizedMeters,
+                                                      std::vector<PredictorEntry> accountPredictorEntries);
 };
+
 
 #endif // ANNUALANALYSISSUMMARY_H

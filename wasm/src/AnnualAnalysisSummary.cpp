@@ -1,7 +1,7 @@
 
 #include "AnnualAnalysisSummary.h"
 
-std::vector<AnnualAnalysisSummaryData> AnnualAnalysisSummary::getAnnualAnalysisSummaryData(AnalysisGroup analysisGroup,
+AnnualAnalysisResults AnnualAnalysisSummary::getAnnualAnalysisSummaryData(AnalysisGroup analysisGroup,
                                                                                            std::vector<CalanderizedMeter> calanderizedMeters,
                                                                                            std::vector<PredictorEntry> accountPredictorEntries)
 {
@@ -19,10 +19,10 @@ std::vector<AnnualAnalysisSummaryData> AnnualAnalysisSummary::getAnnualAnalysisS
         annualAnalysisSummaryData.push_back(annualAnalysisSummary);
         year++;
     }
-    return annualAnalysisSummaryData;
+    return AnnualAnalysisResults(annualAnalysisSummaryData, monthlyAnalysisSummaryData);
 }
 
-std::vector<AnnualAnalysisSummaryData> AnnualAnalysisSummary::getAnnualFacilitySummaryData(std::vector<AnalysisGroup> selectedGroups,
+AnnualAnalysisResults AnnualAnalysisSummary::getAnnualFacilitySummaryData(std::vector<AnalysisGroup> selectedGroups,
                                                                                            std::vector<CalanderizedMeter> calanderizedMeters,
                                                                                            std::vector<PredictorEntry> accountPredictorEntries)
 {
@@ -40,10 +40,10 @@ std::vector<AnnualAnalysisSummaryData> AnnualAnalysisSummary::getAnnualFacilityS
         annualAnalysisSummaryData.push_back(annualAnalysisSummary);
         year++;
     }
-    return annualAnalysisSummaryData;
+    return AnnualAnalysisResults(annualAnalysisSummaryData, monthlyAnalysisSummaryData);
 }
 
-std::vector<AnnualAnalysisSummaryData> AnnualAnalysisSummary::getAnnualAccountSummaryData(std::vector<Facility> facilities,
+AnnualAnalysisResults AnnualAnalysisSummary::getAnnualAccountSummaryData(std::vector<Facility> facilities,
                                                                                           std::vector<AnalysisGroup> allAccountGroups,
                                                                                           std::vector<CalanderizedMeter> calanderizedMeters,
                                                                                           std::vector<PredictorEntry> accountPredictorEntries)
@@ -62,5 +62,5 @@ std::vector<AnnualAnalysisSummaryData> AnnualAnalysisSummary::getAnnualAccountSu
         annualAnalysisSummaryData.push_back(annualAnalysisSummary);
         year++;
     }
-    return annualAnalysisSummaryData;
+    return AnnualAnalysisResults(annualAnalysisSummaryData, monthlyAnalysisSummaryData);
 }

@@ -73,6 +73,13 @@ EMSCRIPTEN_BINDINGS(monthly_analysis_summary)
         .property("newSavings", &AnnualAnalysisSummaryData::newSavings)
         .property("predictorUsage", &AnnualAnalysisSummaryData::predictorUsage);
 
+    class_<AnnualAnalysisResults>("AnnualAnalysisResults")
+        .property("annualAnalysisSummaryData", &AnnualAnalysisResults::annualAnalysisSummaryData)
+        .property("monthlyAccountAnalysisSummaryData", &AnnualAnalysisResults::monthlyAccountAnalysisSummaryData)
+        .property("monthlyFacilityAnalysisSummaryData", &AnnualAnalysisResults::monthlyFacilityAnalysisSummaryData)
+        .property("monthlyGroupAnalysisSummaryData", &AnnualAnalysisResults::monthlyGroupAnalysisSummaryData);
+
+
     class_<MonthlyFacilityAnalysis>("MonthlyFacilityAnalysis")
         .constructor<Facility, AnalysisDate, AnalysisDate>()
         .function("getMonthlyFacilityAnalysisData", &MonthlyFacilityAnalysis::getMonthlyFacilityAnalysisData);

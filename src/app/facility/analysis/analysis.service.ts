@@ -22,6 +22,7 @@ export class AnalysisService {
   calanderizedMeters: Array<CalanderizedMeter>;
   showInvalidModels: BehaviorSubject<boolean>;
   calculating: BehaviorSubject<boolean>;
+  
   annualAnalysisSummary: BehaviorSubject<Array<AnnualAnalysisSummary>>;
   monthlyAccountAnalysisData: BehaviorSubject<Array<MonthlyAnalysisSummaryData>>;
   constructor(private localStorageService: LocalStorageService, private calendarizationService: CalanderizationService,

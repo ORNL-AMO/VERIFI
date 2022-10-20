@@ -32,16 +32,14 @@ export class WebWorkerService {
 
 
   onMessage(data: WorkerRequest) {
-    console.log(data);
     this.workerResults.next(data);
     this.working = false;
     let currentRequests: Array<WorkerRequest> = this.workerRequests.getValue();
-    let remainingRequests: Array<WorkerRequest> = currentRequests.filter(request => { return request.id != data.id });
-    this.workerRequests.next(remainingRequests);
+    currentRequests.splice(0, 1);
+    this.workerRequests.next(currentRequests);
   }
 
   postMessage(data: WorkerRequest) {
-    console.log('POST!')
     this.working = true;
     this.worker.postMessage(data);
   }
@@ -59,7 +57,7 @@ export class WebWorkerService {
 
 
 export interface WorkerRequest {
-  type: 'initialize' | 'monthlyGroupAnalysis' | 'annualGroupAnalysis',
+  type: 'initialize' | 'monthlyGroupAnalysis' | 'annualGroupAnalysis' | 'monthlyFacilityAnalysis' | 'annualFacilityAnalysis' | 'monthlyAccountAnalysis' | 'annualAccountAnalysis',
   id: string,
   results: any,
   input: any

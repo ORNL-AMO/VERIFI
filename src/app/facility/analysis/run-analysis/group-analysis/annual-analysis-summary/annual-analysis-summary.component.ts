@@ -28,7 +28,7 @@ export class AnnualAnalysisSummaryComponent implements OnInit {
   calculating: boolean = true;
   resultsSub: Subscription;
   constructor(private analysisService: AnalysisService, private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService,
-    private analysisCalculationsService: AnalysisCalculationsService, 
+    private analysisCalculationsService: AnalysisCalculationsService,
     private predictorDbService: PredictordbService,
     private webWorkerService: WebWorkerService) {
   }
@@ -58,7 +58,7 @@ export class AnnualAnalysisSummaryComponent implements OnInit {
       console.log('result!!');
       console.log(val);
       if (val && val.id == workerRequest.id) {
-        this.annualAnalysisSummary = val.results;
+        this.annualAnalysisSummary = val.results.annualAnalysisSummary;
         this.calculating = false;
       }
     });

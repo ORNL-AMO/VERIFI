@@ -33,8 +33,8 @@ export class AnnualGroupAnalysisWASM {
         wasmGroup.delete();
         wasmCMeters.delete();
         wasmPredictorEntries.delete();
-        this.annualAnalysisSummary = parseAnnualData(calculatedData);
-        // this.annualAnalysisSummary = parseMonthlyData(annualAnalysisSummary, selectedGroup);
+        this.annualAnalysisSummary = parseAnnualData(calculatedData.annualAnalysisSummaryData);
+        this.monthlyAnalysisSummaryData = parseMonthlyData(calculatedData.monthlyGroupAnalysisSummaryData, selectedGroup);
         calculatedData.delete();
         annualAnalysisSummary.delete();
     }
