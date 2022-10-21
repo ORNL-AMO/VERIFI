@@ -67,6 +67,7 @@ export function getCalanderizedMetersVector(wasmModule: any, calanderizedMeters:
         let wasmMeter = new wasmModule.Meter(cMeter.meter.groupId);
         let wasmCMeter = new wasmModule.CalanderizedMeter(wasmMeter, monthlyDataVector);
         calanderizedMetersVector.push_back(wasmCMeter);
+        monthlyDataVector.delete();
         wasmMeter.delete();
         wasmCMeter.delete();
     });
@@ -88,6 +89,7 @@ export function getPredictorEntriesVector(wasmModule: any, accountPredictorEntri
         let wasmEntryDate = new wasmModule.AnalysisDate(entryDate.getUTCMonth(), entryDate.getUTCFullYear());
         let wasmEntry = new wasmModule.PredictorEntry(entry.facilityId, entryDataVector, wasmEntryDate);
         predictorEntriesVector.push_back(wasmEntry);
+        entryDataVector.delete();
         wasmEntryDate.delete();
         wasmEntry.delete();
     });
@@ -106,6 +108,7 @@ export function getPredictorUsage(data: any): Array<{ predictorId: string, usage
             });
             pUsage.delete();
         }
+        data.predictorUsage.delete();
     }
     return predictorUsage;
 }
@@ -136,6 +139,8 @@ export function parseMonthlyData(calculatedData: any, selectedGroup: AnalysisGro
             rollingSavings: checkValue(data.monthlyAnalysisCalculatedValues.rollingSavings),
             rolling12MonthImprovement: checkValue(data.monthlyAnalysisCalculatedValues.rolling12MonthImprovement) * 100,
         });
+        data.analysisMonth.delete();
+        data.monthlyAnalysisCalculatedValues.delete();
         data.delete();
     }
     return monthlyAnalysisSummaryData;

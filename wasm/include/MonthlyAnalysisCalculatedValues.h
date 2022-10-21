@@ -2,6 +2,12 @@
 #include <vector>
 #ifndef MONTHLYANALYSISCALCULATEDVALUES_H
 #define MONTHLYANALYSISCALCULATEDVALUES_H
+
+
+
+
+
+
 class MonthlyAnalysisCalculatedValues
 {
 public:

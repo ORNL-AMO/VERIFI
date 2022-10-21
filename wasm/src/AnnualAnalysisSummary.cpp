@@ -13,8 +13,8 @@ AnnualAnalysisResults AnnualAnalysisSummary::getAnnualAnalysisSummaryData(Analys
         AnnualAnalysisSummaryData annualAnalysisSummary = AnnualAnalysisSummaryData(
             monthlyAnalysisSummaryData,
             year,
-            accountPredictorEntries,
-            facility,
+            // accountPredictorEntries,
+            // facility,
             annualAnalysisSummaryData);
         annualAnalysisSummaryData.push_back(annualAnalysisSummary);
         year++;
@@ -34,8 +34,8 @@ AnnualAnalysisResults AnnualAnalysisSummary::getAnnualFacilitySummaryData(std::v
         AnnualAnalysisSummaryData annualAnalysisSummary = AnnualAnalysisSummaryData(
             monthlyAnalysisSummaryData,
             year,
-            accountPredictorEntries,
-            facility,
+            // accountPredictorEntries,
+            // facility,
             annualAnalysisSummaryData);
         annualAnalysisSummaryData.push_back(annualAnalysisSummary);
         year++;
@@ -56,8 +56,8 @@ AnnualAnalysisResults AnnualAnalysisSummary::getAnnualAccountSummaryData(std::ve
         AnnualAnalysisSummaryData annualAnalysisSummary = AnnualAnalysisSummaryData(
             monthlyAnalysisSummaryData,
             year,
-            accountPredictorEntries,
-            facility,
+            // accountPredictorEntries,
+            // facility,
             annualAnalysisSummaryData);
         annualAnalysisSummaryData.push_back(annualAnalysisSummary);
         year++;

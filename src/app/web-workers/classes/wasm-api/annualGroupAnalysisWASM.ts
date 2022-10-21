@@ -35,6 +35,8 @@ export class AnnualGroupAnalysisWASM {
         wasmPredictorEntries.delete();
         this.annualAnalysisSummary = parseAnnualData(calculatedData.annualAnalysisSummaryData);
         this.monthlyAnalysisSummaryData = parseMonthlyData(calculatedData.monthlyGroupAnalysisSummaryData, selectedGroup);
+        calculatedData.annualAnalysisSummaryData.delete();
+        calculatedData.monthlyGroupAnalysisSummaryData.delete();
         calculatedData.delete();
         annualAnalysisSummary.delete();
     }

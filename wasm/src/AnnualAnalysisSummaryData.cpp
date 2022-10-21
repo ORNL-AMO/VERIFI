@@ -1,7 +1,8 @@
 #include "AnnualAnalysisSummaryData.h"
 
-void AnnualAnalysisSummaryData::setYearAnalysisSummaryData(std::vector<MonthlyAnalysisSummaryData> monthlyAnalysisSummaryData)
+std::vector<MonthlyAnalysisSummaryData> AnnualAnalysisSummaryData::getYearAnalysisSummaryData(std::vector<MonthlyAnalysisSummaryData> monthlyAnalysisSummaryData)
 {
+    std::vector<MonthlyAnalysisSummaryData> yearMonthlyAnalysisSummaryData;
     for (int i = 0; i < monthlyAnalysisSummaryData.size(); i++)
     {
         if (monthlyAnalysisSummaryData[i].fiscalYear == year)
@@ -9,9 +10,11 @@ void AnnualAnalysisSummaryData::setYearAnalysisSummaryData(std::vector<MonthlyAn
             yearMonthlyAnalysisSummaryData.push_back(monthlyAnalysisSummaryData[i]);
         }
     }
+    return yearMonthlyAnalysisSummaryData;
 };
-void AnnualAnalysisSummaryData::setYearAnalysisSummaryData(std::vector<MonthlyFacilityAnalysisData> monthlyAnalysisSummaryData)
+std::vector<MonthlyAnalysisSummaryData> AnnualAnalysisSummaryData::getYearAnalysisSummaryData(std::vector<MonthlyFacilityAnalysisData> monthlyAnalysisSummaryData)
 {
+    std::vector<MonthlyAnalysisSummaryData> yearMonthlyAnalysisSummaryData;
     for (int i = 0; i < monthlyAnalysisSummaryData.size(); i++)
     {
         if (monthlyAnalysisSummaryData[i].fiscalYear == year)
@@ -27,10 +30,12 @@ void AnnualAnalysisSummaryData::setYearAnalysisSummaryData(std::vector<MonthlyFa
             yearMonthlyAnalysisSummaryData.push_back(convertedDataItem);
         }
     }
+    return yearMonthlyAnalysisSummaryData;
 };
 
-void AnnualAnalysisSummaryData::setYearAnalysisSummaryData(std::vector<MonthlyAccountAnalysisData> monthlyAnalysisSummaryData)
+std::vector<MonthlyAnalysisSummaryData> AnnualAnalysisSummaryData::getYearAnalysisSummaryData(std::vector<MonthlyAccountAnalysisData> monthlyAnalysisSummaryData)
 {
+    std::vector<MonthlyAnalysisSummaryData> yearMonthlyAnalysisSummaryData;
     for (int i = 0; i < monthlyAnalysisSummaryData.size(); i++)
     {
         if (monthlyAnalysisSummaryData[i].fiscalYear == year)
@@ -47,24 +52,56 @@ void AnnualAnalysisSummaryData::setYearAnalysisSummaryData(std::vector<MonthlyAc
             yearMonthlyAnalysisSummaryData.push_back(convertedDataItem);
         }
     }
+    return yearMonthlyAnalysisSummaryData;
 };
 
-void AnnualAnalysisSummaryData::setEnergyUse()
+void AnnualAnalysisSummaryData::setEnergyUse(std::vector<MonthlyAnalysisSummaryData> monthlyAnalysisSummaryData)
 {
+    std::vector<MonthlyAnalysisSummaryData> yearMonthlyAnalysisSummaryData = getYearAnalysisSummaryData(monthlyAnalysisSummaryData);
     energyUse = 0;
+    modeledEnergy = 0;
+    baselineAdjustmentForOther = 0;
     for (int i = 0; i < yearMonthlyAnalysisSummaryData.size(); i++)
     {
         energyUse += yearMonthlyAnalysisSummaryData[i].energyUse;
+        modeledEnergy += yearMonthlyAnalysisSummaryData[i].modeledEnergy;
+        baselineAdjustmentForOther += yearMonthlyAnalysisSummaryData[i].baselineAdjustmentForOther;
     }
 };
-void AnnualAnalysisSummaryData::setModeledEnergy()
+void AnnualAnalysisSummaryData::setEnergyUse(std::vector<MonthlyFacilityAnalysisData> monthlyAnalysisSummaryData)
 {
+    std::vector<MonthlyAnalysisSummaryData> yearMonthlyAnalysisSummaryData = getYearAnalysisSummaryData(monthlyAnalysisSummaryData);
+    energyUse = 0;
     modeledEnergy = 0;
+    baselineAdjustmentForOther = 0;
     for (int i = 0; i < yearMonthlyAnalysisSummaryData.size(); i++)
     {
+        energyUse += yearMonthlyAnalysisSummaryData[i].energyUse;
         modeledEnergy += yearMonthlyAnalysisSummaryData[i].modeledEnergy;
+        baselineAdjustmentForOther += yearMonthlyAnalysisSummaryData[i].baselineAdjustmentForOther;
     }
 };
+void AnnualAnalysisSummaryData::setEnergyUse(std::vector<MonthlyAccountAnalysisData> monthlyAnalysisSummaryData)
+{
+    std::vector<MonthlyAnalysisSummaryData> yearMonthlyAnalysisSummaryData = getYearAnalysisSummaryData(monthlyAnalysisSummaryData);
+    energyUse = 0;
+    modeledEnergy = 0;
+    baselineAdjustmentForOther = 0;
+    for (int i = 0; i < yearMonthlyAnalysisSummaryData.size(); i++)
+    {
+        energyUse += yearMonthlyAnalysisSummaryData[i].energyUse;
+        modeledEnergy += yearMonthlyAnalysisSummaryData[i].modeledEnergy;
+        baselineAdjustmentForOther += yearMonthlyAnalysisSummaryData[i].baselineAdjustmentForOther;
+    }
+};
+// void AnnualAnalysisSummaryData::setModeledEnergy()
+// {
+//     modeledEnergy = 0;
+//     for (int i = 0; i < yearMonthlyAnalysisSummaryData.size(); i++)
+//     {
+//         modeledEnergy += yearMonthlyAnalysisSummaryData[i].modeledEnergy;
+//     }
+// };
 void AnnualAnalysisSummaryData::setBaselineEnergyUse(std::vector<AnnualAnalysisSummaryData> previousYearsSummaryData)
 {
     if (previousYearsSummaryData.size() != 0)
@@ -91,14 +128,14 @@ void AnnualAnalysisSummaryData::setAdjustedForNormalization()
 {
     adjustedForNormalization = modeledEnergy + baselineEnergyUse - baselineModeledEnergyUse;
 };
-void AnnualAnalysisSummaryData::setBaselineAdjustmentForOther()
-{
-    baselineAdjustmentForOther = 0;
-    for (int i = 0; i < yearMonthlyAnalysisSummaryData.size(); i++)
-    {
-        baselineAdjustmentForOther += yearMonthlyAnalysisSummaryData[i].baselineAdjustmentForOther;
-    }
-};
+// void AnnualAnalysisSummaryData::setBaselineAdjustmentForOther()
+// {
+//     baselineAdjustmentForOther = 0;
+//     for (int i = 0; i < yearMonthlyAnalysisSummaryData.size(); i++)
+//     {
+//         baselineAdjustmentForOther += yearMonthlyAnalysisSummaryData[i].baselineAdjustmentForOther;
+//     }
+// };
 void AnnualAnalysisSummaryData::setBaselineAdjustmentForNormalization(std::vector<AnnualAnalysisSummaryData> previousYearsSummaryData)
 {
     if (previousYearsSummaryData.size() != 0)
@@ -239,52 +276,52 @@ void AnnualAnalysisSummaryData::setPredictorUsage(std::vector<MonthlyAnalysisSum
     }
 };
 
-bool AnnualAnalysisSummaryData::checkEntry(PredictorEntry predictorEntry, Facility facility)
-{
-    if (facility.fiscalYear == "calanderYear")
-    {
-        if (predictorEntry.date.year == year)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    else
-    {
-        AnalysisDate startDate = AnalysisDate(facility.fiscalYearMonth, year);
-        AnalysisDate endDate = AnalysisDate(facility.fiscalYearMonth, year + 1);
-        if (predictorEntry.date.year < startDate.year || predictorEntry.date.year > endDate.year)
-        {
-            return false;
-        }
-        else
-        {
-            if (predictorEntry.date.year == startDate.year)
-            {
-                if (predictorEntry.date.month >= startDate.month)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            else if (predictorEntry.date.year == endDate.year)
-            {
-                if (predictorEntry.date.month <= endDate.month)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-        }
-    }
-    return false;
-}
+// bool AnnualAnalysisSummaryData::checkEntry(PredictorEntry predictorEntry, Facility facility)
+// {
+//     if (facility.fiscalYear == "calanderYear")
+//     {
+//         if (predictorEntry.date.year == year)
+//         {
+//             return true;
+//         }
+//         else
+//         {
+//             return false;
+//         }
+//     }
+//     else
+//     {
+//         AnalysisDate startDate = AnalysisDate(facility.fiscalYearMonth, year);
+//         AnalysisDate endDate = AnalysisDate(facility.fiscalYearMonth, year + 1);
+//         if (predictorEntry.date.year < startDate.year || predictorEntry.date.year > endDate.year)
+//         {
+//             return false;
+//         }
+//         else
+//         {
+//             if (predictorEntry.date.year == startDate.year)
+//             {
+//                 if (predictorEntry.date.month >= startDate.month)
+//                 {
+//                     return true;
+//                 }
+//                 else
+//                 {
+//                     return false;
+//                 }
+//             }
+//             else if (predictorEntry.date.year == endDate.year)
+//             {
+//                 if (predictorEntry.date.month <= endDate.month)
+//                 {
+//                     return true;
+//                 }
+//                 else
+//                 {
+//                     return false;
+//                 }
+//             }
+//         }
+//     }
+//     return false;
+// }

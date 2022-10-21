@@ -66,6 +66,8 @@ export class AnnualAccountAnalysisWASM {
 
         this.annualAnalysisSummary = parseAnnualData(calculatedData.annualAnalysisSummaryData);
         this.monthlyAnalysisSummaryData = parseMonthlyData(calculatedData.monthlyAccountAnalysisSummaryData, undefined);
+        calculatedData.annualAnalysisSummaryData.delete();
+        calculatedData.monthlyAccountAnalysisSummaryData.delete();
         calculatedData.delete();
         annualAnalysisSummary.delete();
     }

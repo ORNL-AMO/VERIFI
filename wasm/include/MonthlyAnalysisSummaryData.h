@@ -21,13 +21,13 @@ public:
         std::vector<MonthlyAnalysisSummaryData> previousMonthsSummaryData) : analysisMonth(analysisMonth), monthlyGroupAnalysis(monthlyGroupAnalysis)
     {
         setFiscalYear(monthlyGroupAnalysis.facility);
-        setMonthMeterData(monthlyGroupAnalysis.groupMonthlyData);
-        setMonthPredictorData(monthlyGroupAnalysis.facilityPredictorData);
-        setEnergyUse();
+        // setMonthMeterData(monthlyGroupAnalysis.groupMonthlyData);
+        // setMonthPredictorData(monthlyGroupAnalysis.facilityPredictorData);
+        setEnergyUse(monthlyGroupAnalysis.groupMonthlyData);
         setMonthIndex(previousMonthsSummaryData);
         setBaselineActualEnergyUse(monthlyGroupAnalysis.baselineDate.year, previousMonthsSummaryData);
-        setPredictorAndProductionUsage(monthlyGroupAnalysis.predictorVariables);
-        setModeledEnergy(monthlyGroupAnalysis.selectedGroup.analysisType, monthlyGroupAnalysis.predictorVariables, monthlyGroupAnalysis.baselineEnergyIntensity);
+        setPredictorAndProductionUsage(monthlyGroupAnalysis.predictorVariables, monthlyGroupAnalysis.facilityPredictorData);
+        setModeledEnergy(monthlyGroupAnalysis.selectedGroup.analysisType, monthlyGroupAnalysis.predictorVariables, monthlyGroupAnalysis.baselineEnergyIntensity, monthlyGroupAnalysis.facilityPredictorData);
         setAnnualEnergyUse(monthlyGroupAnalysis.annualMeterDataUsage);
         setBaselineAdjustmentForOther(monthlyGroupAnalysis.baselineDate.year);
         setMonthlyAnalysisCalculatedValues(monthlyGroupAnalysis.baselineDate.year, previousMonthsSummaryData);
@@ -53,29 +53,26 @@ public:
     double fiscalYear;
     MonthlyAnalysisCalculatedValues monthlyAnalysisCalculatedValues;
 
-    std::vector<PredictorEntry> monthPredictorData;
-    std::vector<MonthlyData> monthMeterData;
     double baselineActualEnergyUse;
     int monthIndex;
     std::vector<PredictorUsage> predictorUsage;
-    std::vector<double> productionUsage;
+    double totalProductionUsage;
     double annualEnergyUse;
-
+    bool hasMonthlyData;
     void setFiscalYear(Facility facility);
-    void setMonthPredictorData(std::vector<PredictorEntry> facilityPredictorData);
-    void setMonthMeterData(std::vector<MonthlyData> allMonthlyData);
-    void setEnergyUse();
+    std::vector<PredictorEntry> getMonthPredictorData(std::vector<PredictorEntry> facilityPredictorData);
+    std::vector<MonthlyData> getMonthMeterData(std::vector<MonthlyData> allMonthlyData);
+    void setEnergyUse(std::vector<MonthlyData> allMonthlyData);
     void setBaselineActualEnergyUse(int baselineYear, std::vector<MonthlyAnalysisSummaryData> previousMonthsSummaryData);
-    void setPredictorAndProductionUsage(std::vector<PredictorData> predictorVariables);
+    void setPredictorAndProductionUsage(std::vector<PredictorData> predictorVariables, std::vector<PredictorEntry> facilityPredictorData);
     void setMonthIndex(std::vector<MonthlyAnalysisSummaryData> previousMonthsSummaryData);
-    void setModeledEnergy(std::string analysisType, std::vector<PredictorData> predictorVariables, double baselineYearEnergyIntensity);
-    double calculateRegressionModeledEnergy(std::vector<PredictorData> predictorVariables);
+    void setModeledEnergy(std::string analysisType, std::vector<PredictorData> predictorVariables, double baselineYearEnergyIntensity, std::vector<PredictorEntry> facilityPredictorData);
+    double calculateRegressionModeledEnergy(std::vector<PredictorData> predictorVariables, std::vector<PredictorEntry> facilityPredictorData);
     double calculateEnergyIntensityModeledEnergy(double baselineYearEnergyIntensity);
     double calculateModifiedEnegyIntensityModeledEnergy(double baselineYearEnergyIntensity);
     void setAnnualEnergyUse(std::vector<AnnualUsage> annualUsage);
     void setBaselineAdjustmentForOther(int baselineYear);
     void setMonthlyAnalysisCalculatedValues(int baselineYear, std::vector<MonthlyAnalysisSummaryData> previousMonthsSummaryData);
-    double getTotalProductionUsage();
 };
 
 #endif // MONTHLYANALYSISSUMMARYDATA_H

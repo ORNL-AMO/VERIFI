@@ -33,8 +33,9 @@ void MonthlyAnalysisSummaryData::setFiscalYear(Facility facility)
         }
     }
 };
-void MonthlyAnalysisSummaryData::setMonthPredictorData(std::vector<PredictorEntry> facilityPredictorData)
+std::vector<PredictorEntry> MonthlyAnalysisSummaryData::getMonthPredictorData(std::vector<PredictorEntry> facilityPredictorData)
 {
+    std::vector<PredictorEntry> monthPredictorData;
     for (int i = 0; i < facilityPredictorData.size(); i++)
     {
         if (facilityPredictorData[i].date.month == analysisMonth.month && facilityPredictorData[i].date.year == analysisMonth.year)
@@ -42,9 +43,11 @@ void MonthlyAnalysisSummaryData::setMonthPredictorData(std::vector<PredictorEntr
             monthPredictorData.push_back(facilityPredictorData[i]);
         }
     }
+    return monthPredictorData;
 };
-void MonthlyAnalysisSummaryData::setMonthMeterData(std::vector<MonthlyData> allMonthlyData)
+std::vector<MonthlyData> MonthlyAnalysisSummaryData::getMonthMeterData(std::vector<MonthlyData> allMonthlyData)
 {
+    std::vector<MonthlyData> monthMeterData;
     for (int i = 0; i < allMonthlyData.size(); i++)
     {
         if (allMonthlyData[i].month == analysisMonth.month && allMonthlyData[i].year == analysisMonth.year)
@@ -52,9 +55,12 @@ void MonthlyAnalysisSummaryData::setMonthMeterData(std::vector<MonthlyData> allM
             monthMeterData.push_back(allMonthlyData[i]);
         }
     }
+    return monthMeterData;
 };
-void MonthlyAnalysisSummaryData::setEnergyUse()
+void MonthlyAnalysisSummaryData::setEnergyUse(std::vector<MonthlyData> allMonthlyData)
 {
+    std::vector<MonthlyData> monthMeterData = getMonthMeterData(allMonthlyData);
+    hasMonthlyData = monthMeterData.size() != 0;
     energyUse = 0;
     for (int i = 0; i < monthMeterData.size(); i++)
     {
@@ -91,8 +97,10 @@ void MonthlyAnalysisSummaryData::setBaselineActualEnergyUse(int baselineYear, st
         baselineActualEnergyUse = previousMonthsSummaryData[monthIndex].energyUse;
     }
 };
-void MonthlyAnalysisSummaryData::setPredictorAndProductionUsage(std::vector<PredictorData> predictorVariables)
+void MonthlyAnalysisSummaryData::setPredictorAndProductionUsage(std::vector<PredictorData> predictorVariables, std::vector<PredictorEntry> facilityPredictorData)
 {
+    totalProductionUsage = 0;
+    std::vector<PredictorEntry> monthPredictorData = getMonthPredictorData(facilityPredictorData);
     for (int i = 0; i < predictorVariables.size(); i++)
     {
         double usageVal = 0;
@@ -109,18 +117,18 @@ void MonthlyAnalysisSummaryData::setPredictorAndProductionUsage(std::vector<Pred
             predictorUsage.push_back(PredictorUsage(usageVal, predictorVariables[i].id));
             if (predictorVariables[i].productionInAnalysis)
             {
-                productionUsage.push_back(usageVal);
+                totalProductionUsage += usageVal;
             }
         }
     }
 };
-void MonthlyAnalysisSummaryData::setModeledEnergy(std::string analysisType, std::vector<PredictorData> predictorVariables, double baselineYearEnergyIntensity)
+void MonthlyAnalysisSummaryData::setModeledEnergy(std::string analysisType, std::vector<PredictorData> predictorVariables, double baselineYearEnergyIntensity, std::vector<PredictorEntry> facilityPredictorData)
 {
-    if (monthMeterData.size() != 0)
+    if (hasMonthlyData)
     {
         if (analysisType == "regression")
         {
-            modeledEnergy = calculateRegressionModeledEnergy(predictorVariables);
+            modeledEnergy = calculateRegressionModeledEnergy(predictorVariables, facilityPredictorData);
         }
         else if (analysisType == "absoluteEnergyConsumption")
         {
@@ -144,9 +152,10 @@ void MonthlyAnalysisSummaryData::setModeledEnergy(std::string analysisType, std:
         modeledEnergy = 0;
     }
 };
-double MonthlyAnalysisSummaryData::calculateRegressionModeledEnergy(std::vector<PredictorData> predictorVariables)
+double MonthlyAnalysisSummaryData::calculateRegressionModeledEnergy(std::vector<PredictorData> predictorVariables, std::vector<PredictorEntry> facilityPredictorData)
 {
     modeledEnergy = 0;
+    std::vector<PredictorEntry> monthPredictorData = getMonthPredictorData(facilityPredictorData);
     for (int i = 0; i < predictorVariables.size(); i++)
     {
         double usageVal = 0;
@@ -169,13 +178,11 @@ double MonthlyAnalysisSummaryData::calculateRegressionModeledEnergy(std::vector<
 
 double MonthlyAnalysisSummaryData::calculateEnergyIntensityModeledEnergy(double baselineYearEnergyIntensity)
 {
-    double totalProductionUsage = getTotalProductionUsage();
     return (totalProductionUsage * baselineYearEnergyIntensity);
 };
 
 double MonthlyAnalysisSummaryData::calculateModifiedEnegyIntensityModeledEnergy(double baselineYearEnergyIntensity)
 {
-    double totalProductionUsage = getTotalProductionUsage();
     double baseLoad = monthlyGroupAnalysis.selectedGroup.averagePercentBaseload / 100;
     return (baselineYearEnergyIntensity * totalProductionUsage * (1 - baseLoad) + (baselineActualEnergyUse * baseLoad));
 };
@@ -225,13 +232,3 @@ void MonthlyAnalysisSummaryData::setMonthlyAnalysisCalculatedValues(int baseline
         previousMonthsAnalysisCalculatedValues,
         baselineActualEnergyUse);
 };
-
-double MonthlyAnalysisSummaryData::getTotalProductionUsage()
-{
-    double totalProductionUsage = 0;
-    for (int i = 0; i < productionUsage.size(); i++)
-    {
-        totalProductionUsage += productionUsage[i];
-    }
-    return totalProductionUsage;
-}

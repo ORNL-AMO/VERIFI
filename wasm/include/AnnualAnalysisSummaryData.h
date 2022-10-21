@@ -20,18 +20,13 @@ public:
     AnnualAnalysisSummaryData(
         std::vector<MonthlyAnalysisSummaryData> monthlyAnalysisSummaryData,
         int year,
-        std::vector<PredictorEntry> accountPredictorEntries,
-        Facility facility,
         std::vector<AnnualAnalysisSummaryData> previousYearsSummaryData) : year(year)
     {
-        setYearAnalysisSummaryData(monthlyAnalysisSummaryData);
         setPredictorUsage(monthlyAnalysisSummaryData);
-        setEnergyUse();
-        setModeledEnergy();
+        setEnergyUse(monthlyAnalysisSummaryData);
         setBaselineEnergyUse(previousYearsSummaryData);
         setBaselineModeledEnergy(previousYearsSummaryData);
         setAdjustedForNormalization();
-        setBaselineAdjustmentForOther();
         setBaselineAdjustmentForNormalization(previousYearsSummaryData);
         setBaselineAdjustment(previousYearsSummaryData);
         setAdjusted();
@@ -44,22 +39,16 @@ public:
         setNewSavings();
     };
 
-    
     AnnualAnalysisSummaryData(
         std::vector<MonthlyFacilityAnalysisData> monthlyAnalysisSummaryData,
         int year,
-        std::vector<PredictorEntry> accountPredictorEntries,
-        Facility facility,
         std::vector<AnnualAnalysisSummaryData> previousYearsSummaryData) : year(year)
     {
-        setYearAnalysisSummaryData(monthlyAnalysisSummaryData);
         setPredictorUsage(monthlyAnalysisSummaryData);
-        setEnergyUse();
-        setModeledEnergy();
+        setEnergyUse(monthlyAnalysisSummaryData);
         setBaselineEnergyUse(previousYearsSummaryData);
         setBaselineModeledEnergy(previousYearsSummaryData);
         setAdjustedForNormalization();
-        setBaselineAdjustmentForOther();
         setBaselineAdjustmentForNormalization(previousYearsSummaryData);
         setBaselineAdjustment(previousYearsSummaryData);
         setAdjusted();
@@ -72,20 +61,15 @@ public:
         setNewSavings();
     };
 
-        AnnualAnalysisSummaryData(
+    AnnualAnalysisSummaryData(
         std::vector<MonthlyAccountAnalysisData> monthlyAnalysisSummaryData,
         int year,
-        std::vector<PredictorEntry> accountPredictorEntries,
-        Facility facility,
         std::vector<AnnualAnalysisSummaryData> previousYearsSummaryData) : year(year)
     {
-        setYearAnalysisSummaryData(monthlyAnalysisSummaryData);
-        setEnergyUse();
-        setModeledEnergy();
+        setEnergyUse(monthlyAnalysisSummaryData);
         setBaselineEnergyUse(previousYearsSummaryData);
         setBaselineModeledEnergy(previousYearsSummaryData);
         setAdjustedForNormalization();
-        setBaselineAdjustmentForOther();
         setBaselineAdjustmentForNormalization(previousYearsSummaryData);
         setBaselineAdjustment(previousYearsSummaryData);
         setAdjusted();
@@ -114,24 +98,23 @@ public:
     double newSavings;
     std::vector<PredictorUsage> predictorUsage;
 
-    // calcs
-    std::vector<MonthlyAnalysisSummaryData> yearMonthlyAnalysisSummaryData;
+private:
     double baselineEnergyUse;
     double baselineModeledEnergyUse;
     double previousYearPercentSavings;
     double previousYearSavings;
 
-    void setYearAnalysisSummaryData(std::vector<MonthlyAnalysisSummaryData> monthlyAnalysisSummaryData);
-    void setYearAnalysisSummaryData(std::vector<MonthlyFacilityAnalysisData> monthlyAnalysisSummaryData);
-    void setYearAnalysisSummaryData(std::vector<MonthlyAccountAnalysisData> monthlyAnalysisSummaryData);
+    std::vector<MonthlyAnalysisSummaryData> getYearAnalysisSummaryData(std::vector<MonthlyAnalysisSummaryData> monthlyAnalysisSummaryData);
+    std::vector<MonthlyAnalysisSummaryData> getYearAnalysisSummaryData(std::vector<MonthlyFacilityAnalysisData> monthlyAnalysisSummaryData);
+    std::vector<MonthlyAnalysisSummaryData> getYearAnalysisSummaryData(std::vector<MonthlyAccountAnalysisData> monthlyAnalysisSummaryData);
     void setPredictorUsage(std::vector<MonthlyAnalysisSummaryData> monthlyAnalysisSummaryData);
     void setPredictorUsage(std::vector<MonthlyFacilityAnalysisData> monthlyAnalysisSummaryData);
-    void setEnergyUse();
-    void setModeledEnergy();
+    void setEnergyUse(std::vector<MonthlyAnalysisSummaryData> monthlyAnalysisSummaryData);
+    void setEnergyUse(std::vector<MonthlyFacilityAnalysisData> monthlyAnalysisSummaryData);
+    void setEnergyUse(std::vector<MonthlyAccountAnalysisData> monthlyAnalysisSummaryData);
     void setBaselineEnergyUse(std::vector<AnnualAnalysisSummaryData> previousYearsSummaryData);
     void setBaselineModeledEnergy(std::vector<AnnualAnalysisSummaryData> previousYearsSummaryData);
     void setAdjustedForNormalization();
-    void setBaselineAdjustmentForOther();
     void setBaselineAdjustmentForNormalization(std::vector<AnnualAnalysisSummaryData> previousYearsSummaryData);
     void setBaselineAdjustment(std::vector<AnnualAnalysisSummaryData> previousYearsSummaryData);
     void setAdjusted();
@@ -142,8 +125,6 @@ public:
     void setAnnualSavingsPercentImprovement();
     void setCummulativeSavings(std::vector<AnnualAnalysisSummaryData> previousYearsSummaryData);
     void setNewSavings();
-
-    bool checkEntry(PredictorEntry predictorEntry, Facility facility);
 };
 
-#endif //ANNUALANALYSISSUMMARYDATA_H
+#endif // ANNUALANALYSISSUMMARYDATA_H
