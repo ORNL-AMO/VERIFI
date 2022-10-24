@@ -123,13 +123,15 @@ export class AccountHomeSummaryComponent implements OnInit {
           calanderizedMeters: calanderizedMeters,
           accountPredictorEntries: accountPredictorEntries,
           accountFacilities: accountFacilities,
-          accountAnalysisItems: accountAnalysisItems
+          accountAnalysisItems: accountAnalysisItems,
+          includeFacilitySummaries: true
         }
       }
 
 
       this.resultsSub = this.webWorkerService.workerResults.subscribe(val => {
         if (val && val.id == workerAnnualRequest.id) {
+          console.log(val);
           this.latestAnalysisSummary = _.maxBy(val.results.annualAnalysisSummary, 'year');
           if (this.latestAnalysisSummary) {
             this.accountAnalysisYear = this.latestAnalysisSummary.year;

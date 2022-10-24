@@ -8,13 +8,22 @@ export class AnnualAccountAnalysisWASM {
 
     annualAnalysisSummary: Array<AnnualAnalysisSummary>;
     monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>;
+    annualFacilityAnalysisSummaries: Array<{
+        annualAnalysisSummary: Array<AnnualAnalysisSummary>,
+        monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
+        facilityId: string
+    }>;
     constructor(wasmModule: any,
         analysisItem: IdbAccountAnalysisItem,
         account: IdbAccount,
         facilities: Array<IdbFacility>,
         calanderizedMeters: Array<CalanderizedMeter>,
         accountPredictorEntries: Array<IdbPredictorEntry>,
-        allAccountAnalysisItems: Array<IdbAnalysisItem>) {
+        allAccountAnalysisItems: Array<IdbAnalysisItem>,
+        includeFacilitySummaries: boolean) {
+
+
+
         // let wasmGroup = getAnalysisGroup(wasmModule, selectedGroup);
         let wasmFacilityVector = new wasmModule.FacilityVector();
         let wasmGroupVector = new wasmModule.AnalysisGroupVector();
@@ -59,6 +68,30 @@ export class AnnualAccountAnalysisWASM {
         // std::vector<CalanderizedMeter> calanderizedMeters,
         // std::vector<PredictorEntry> accountPredictorEntries
         let calculatedData = annualAnalysisSummary.getAnnualAccountSummaryData(wasmFacilityVector, wasmGroupVector, wasmCMeters, wasmPredictorEntries);
+
+        this.annualFacilityAnalysisSummaries = new Array();
+        facilities.forEach(facility => {
+            for (let i = 0; i < calculatedData.monthlyFacilityAnalysisSummaryData.size(); i++) {
+                let monthlyFacilityAnalysisDataVector = new wasmModule.MonthlyFacilityAnalysisDataVector();
+                if (calculatedData.monthlyFacilityAnalysisSummaryData.get(i).facilityId == facility.guid) {
+                    monthlyFacilityAnalysisDataVector.push_back(calculatedData.monthlyFacilityAnalysisSummaryData.get(i))
+                }
+                let calculatedMonthlySummary = annualAnalysisSummary.getAnnualFacilitySummaryDataFromMonthlyData(monthlyFacilityAnalysisDataVector);
+
+                this.annualFacilityAnalysisSummaries.push({
+                    annualAnalysisSummary: parseAnnualData(calculatedMonthlySummary.annualAnalysisSummaryData),
+                    monthlyAnalysisSummaryData: parseMonthlyData(calculatedMonthlySummary.monthlyAccountAnalysisSummaryData, undefined),
+                    facilityId: facility.guid
+                });
+                calculatedMonthlySummary.annualAnalysisSummaryData.delete();
+                calculatedMonthlySummary.monthlyAccountAnalysisSummaryData.delete();
+                monthlyFacilityAnalysisDataVector.delete();
+                calculatedMonthlySummary.delete();
+            }
+            calculatedData.monthlyFacilityAnalysisSummaryData.delete();
+        });
+
+
         wasmCMeters.delete();
         wasmPredictorEntries.delete();
         wasmGroupVector.delete();

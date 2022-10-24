@@ -23,10 +23,11 @@ public:
     AnnualAnalysisResults(){};
     AnnualAnalysisResults(
         std::vector<AnnualAnalysisSummaryData> annualAnalysisSummaryData,
-        std::vector<MonthlyAccountAnalysisData> monthlyAccountAnalysisSummaryData)
-        : annualAnalysisSummaryData(annualAnalysisSummaryData), monthlyAccountAnalysisSummaryData(monthlyAccountAnalysisSummaryData){
+        std::vector<MonthlyAccountAnalysisData> monthlyAccountAnalysisSummaryData,
+        std::vector<MonthlyFacilityAnalysisData> monthlyFacilityAnalysisSummaryData)
+        : annualAnalysisSummaryData(annualAnalysisSummaryData), monthlyAccountAnalysisSummaryData(monthlyAccountAnalysisSummaryData), monthlyFacilityAnalysisSummaryData(monthlyFacilityAnalysisSummaryData){
 
-                                                                };
+                                                                                                                                      };
 
     AnnualAnalysisResults(
         std::vector<AnnualAnalysisSummaryData> annualAnalysisSummaryData,
@@ -108,7 +109,8 @@ public:
                                                       std::vector<AnalysisGroup> allAccountGroups,
                                                       std::vector<CalanderizedMeter> calanderizedMeters,
                                                       std::vector<PredictorEntry> accountPredictorEntries);
-};
 
+    AnnualAnalysisResults getAnnualFacilitySummaryDataFromMonthlyData(std::vector<MonthlyFacilityAnalysisData> monthlyAnalysisSummaryData);
+};
 
 #endif // ANNUALANALYSISSUMMARY_H

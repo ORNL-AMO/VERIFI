@@ -48,7 +48,8 @@ export class AccountAnalysisResultsComponent implements OnInit {
         calanderizedMeters: calanderizedMeters,
         accountPredictorEntries: accountPredictorEntries,
         accountFacilities: accountFacilities,
-        accountAnalysisItems: accountAnalysisItems
+        accountAnalysisItems: accountAnalysisItems,
+        includeFacilitySummaries: false
       }
     }
 

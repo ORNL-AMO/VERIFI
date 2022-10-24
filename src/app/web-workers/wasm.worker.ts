@@ -79,10 +79,12 @@ addEventListener('message', ({ data }) => {
             data.input.accountFacilities,
             data.input.calanderizedMeters,
             data.input.accountPredictorEntries,
-            data.input.accountAnalysisItems);
+            data.input.accountAnalysisItems,
+            data.input.includeFacilitySummaries);
         data.results = {
             annualAnalysisSummary: calculation.annualAnalysisSummary,
-            monthlyAnalysisSummaryData: calculation.monthlyAnalysisSummaryData
+            monthlyAnalysisSummaryData: calculation.monthlyAnalysisSummaryData,
+            annualFacilityAnalysisSummaries: calculation.annualFacilityAnalysisSummaries
         };
         postMessage(data);
     }

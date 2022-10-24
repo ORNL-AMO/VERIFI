@@ -54,7 +54,8 @@ EMSCRIPTEN_BINDINGS(monthly_analysis_summary)
         .constructor<AnalysisDate, AnalysisDate, Facility, bool, bool>()
         .function("getAnnualAnalysisSummaryData", &AnnualAnalysisSummary::getAnnualAnalysisSummaryData)
         .function("getAnnualFacilitySummaryData", &AnnualAnalysisSummary::getAnnualFacilitySummaryData)
-        .function("getAnnualAccountSummaryData", &AnnualAnalysisSummary::getAnnualAccountSummaryData);
+        .function("getAnnualAccountSummaryData", &AnnualAnalysisSummary::getAnnualAccountSummaryData)
+        .function("getAnnualFacilitySummaryDataFromMonthlyData", &AnnualAnalysisSummary::getAnnualFacilitySummaryDataFromMonthlyData);
 
     class_<AnnualAnalysisSummaryData>("AnnualAnalysisSummaryData")
         .property("year", &AnnualAnalysisSummaryData::year)
@@ -79,7 +80,6 @@ EMSCRIPTEN_BINDINGS(monthly_analysis_summary)
         .property("monthlyFacilityAnalysisSummaryData", &AnnualAnalysisResults::monthlyFacilityAnalysisSummaryData)
         .property("monthlyGroupAnalysisSummaryData", &AnnualAnalysisResults::monthlyGroupAnalysisSummaryData);
 
-
     class_<MonthlyFacilityAnalysis>("MonthlyFacilityAnalysis")
         .constructor<Facility, AnalysisDate, AnalysisDate>()
         .function("getMonthlyFacilityAnalysisData", &MonthlyFacilityAnalysis::getMonthlyFacilityAnalysisData);
@@ -92,7 +92,8 @@ EMSCRIPTEN_BINDINGS(monthly_analysis_summary)
         .property("baselineAdjustmentForOther", &MonthlyFacilityAnalysisData::baselineAdjustmentForOther)
         .property("predictorUsage", &MonthlyFacilityAnalysisData::predictorUsage)
         .property("fiscalYear", &MonthlyFacilityAnalysisData::fiscalYear)
-        .property("monthlyAnalysisCalculatedValues", &MonthlyFacilityAnalysisData::monthlyAnalysisCalculatedValues);
+        .property("monthlyAnalysisCalculatedValues", &MonthlyFacilityAnalysisData::monthlyAnalysisCalculatedValues)
+        .property("facilityId", &MonthlyFacilityAnalysisData::facilityId);
 
     class_<MonthlyAccountAnalysisData>("MonthlyAccountAnalysisData")
         .property("analysisMonth", &MonthlyAccountAnalysisData::analysisMonth)

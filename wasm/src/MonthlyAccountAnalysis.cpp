@@ -42,19 +42,19 @@ std::vector<AnnualUsage> MonthlyAccountAnalysis::getAnnualUsageValues(std::vecto
     return annualUsageValues;
 }
 
-std::vector<MonthlyAccountAnalysisData> MonthlyAccountAnalysis::getMonthlyAnalysisSummaryData(std::vector<Facility> facilities,
+MonthlyAccountAnalysisResults MonthlyAccountAnalysis::getMonthlyAnalysisSummaryData(std::vector<Facility> facilities,
                                                                                               std::vector<AnalysisGroup> allAccountGroups,
                                                                                               std::vector<CalanderizedMeter> calanderizedMeters,
                                                                                               std::vector<PredictorEntry> accountPredictorEntries)
 {
-    std::vector<MonthlyFacilityAnalysisData> allMonthlyAnalysisData = getFacilityAnalysisItems(facilities, allAccountGroups, calanderizedMeters, accountPredictorEntries);
-    std::vector<AnnualUsage> annualUsageValues = getAnnualUsageValues(allMonthlyAnalysisData);
+    std::vector<MonthlyFacilityAnalysisData> monthlyFacilityanalysisData = getFacilityAnalysisItems(facilities, allAccountGroups, calanderizedMeters, accountPredictorEntries);
+    std::vector<AnnualUsage> annualUsageValues = getAnnualUsageValues(monthlyFacilityanalysisData);
     std::vector<MonthlyAccountAnalysisData> monthlyAnalysisSummaryData;
     AnalysisDate currentMonthDate = AnalysisDate(baselineDate.month, baselineDate.year);
     while (currentMonthDate.month != endDate.month || currentMonthDate.year != endDate.year)
     {
         MonthlyAccountAnalysisData currentMonthyAnalysisSummaryData = MonthlyAccountAnalysisData(
-            allMonthlyAnalysisData,
+            monthlyFacilityanalysisData,
             currentMonthDate,
             monthlyAnalysisSummaryData,
             baselineDate.year,
@@ -64,5 +64,5 @@ std::vector<MonthlyAccountAnalysisData> MonthlyAccountAnalysis::getMonthlyAnalys
         monthlyAnalysisSummaryData.push_back(currentMonthyAnalysisSummaryData);
         currentMonthDate.nextMonth();
     }
-    return monthlyAnalysisSummaryData;
+    return MonthlyAccountAnalysisResults(monthlyAnalysisSummaryData, monthlyFacilityanalysisData);
 };

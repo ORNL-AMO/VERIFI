@@ -21,6 +21,7 @@ public:
         int baselineYear,
         Facility facility) : analysisMonth(analysisMonth)
     {
+        facilityId = facility.guid;
         setPredictorUsage(facilityPredictorEntries);
         setFiscalYear(facility);
         setEnergyUse(allFacilityAnalysisData);
@@ -30,6 +31,7 @@ public:
     };
 
     AnalysisDate analysisMonth;
+    std::string facilityId;
     double baselineActualEnergyUse;
     int monthIndex;
     double energyUse;
