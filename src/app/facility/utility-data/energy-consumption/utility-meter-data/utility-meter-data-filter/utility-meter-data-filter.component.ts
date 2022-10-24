@@ -5,6 +5,7 @@ import { AdditionalChargesFilters, DetailedChargesFilters, ElectricityDataFilter
 import { IdbFacility, MeterSource } from 'src/app/models/idb';
 import { UtilityMeterDataService } from '../utility-meter-data.service';
 import { NavigationEnd, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-utility-meter-data-filter',
@@ -24,15 +25,21 @@ export class UtilityMeterDataFilterComponent implements OnInit {
   generalInformationFilters: GeneralInformationFilters;
   emissionsFilters: EmissionsFilters;
   generalUtilityDataFilters: GeneralUtilityDataFilters;
+  routerSub: Subscription;
   constructor(private utilityMeterDataService: UtilityMeterDataService, private facilityDbService: FacilitydbService,
     private dbChangesService: DbChangesService, private router: Router) { }
 
   ngOnInit(): void {
-    this.router.events.subscribe(event => {
+    this.routerSub = this.router.events.subscribe(event => {
+      console.log('event')
       if (event instanceof NavigationEnd) {
         this.showFilterDropdown = false;
       }
     })
+  }
+
+  ngOnDestroy(){
+    this.routerSub.unsubscribe();
   }
 
   toggleFilterMenu() {

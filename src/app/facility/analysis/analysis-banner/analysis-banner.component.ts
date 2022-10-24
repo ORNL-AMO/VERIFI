@@ -21,6 +21,7 @@ export class AnalysisBannerComponent implements OnInit {
   groups: Array<AnalysisGroup>;
   modalOpen: boolean;
   modalOpenSub: Subscription;
+  routerSub: Subscription;
   constructor(private helpPanelService: HelpPanelService, private router: Router,
     private analysisDbService: AnalysisDbService, private sharedDataService: SharedDataService) { }
 
@@ -29,7 +30,7 @@ export class AnalysisBannerComponent implements OnInit {
       this.analysisItem = item;
       this.checkAnalysisSetupValid();
     })
-    this.router.events.subscribe(event => {
+   this.routerSub = this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
         this.setInRunAnalysis(event.url);
       }
@@ -43,6 +44,7 @@ export class AnalysisBannerComponent implements OnInit {
   ngOnDestroy() {
     this.analysisItemSub.unsubscribe();
     this.modalOpenSub.unsubscribe();
+    this.routerSub.unsubscribe();
   }
 
   toggleHelpPanel() {
