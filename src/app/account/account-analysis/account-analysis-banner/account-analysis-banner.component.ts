@@ -21,11 +21,12 @@ export class AccountAnalysisBannerComponent implements OnInit {
   accountAnalysisItemSub: Subscription;
   setupValid: boolean;
   facilitySelectionValid: boolean;
+  routerSub: Subscription;
   constructor(private router: Router, private helpPanelService: HelpPanelService,
     private sharedDataService: SharedDataService, private accountAnalysisDbService: AccountAnalysisDbService) { }
 
   ngOnInit(): void {
-    this.router.events.subscribe(event => {
+  this.routerSub =  this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
         this.setInDashboard(event.url);
       }
@@ -45,6 +46,7 @@ export class AccountAnalysisBannerComponent implements OnInit {
   ngOnDestroy() {
     this.accountAnalysisItemSub.unsubscribe();
     this.modalOpenSub.unsubscribe();
+    this.routerSub.unsubscribe();
   }
 
   toggleHelpPanel() {

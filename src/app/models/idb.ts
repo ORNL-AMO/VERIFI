@@ -1,6 +1,6 @@
 import { JStatRegressionModel } from './analysis';
 import { CalanderizedMeter, MonthlyData } from './calanderization';
-import { ElectricityDataFilters } from './electricityFilter';
+import { ElectricityDataFilters, GeneralUtilityDataFilters } from './meterDataFilter';
 import { ReportOptions } from './overview-report';
 import { SustainabilityQuestions } from './sustainabilityQuestions';
 
@@ -64,6 +64,7 @@ export interface IdbFacility {
     img?: string,
     tableElectricityFilters?: ElectricityDataFilters,
     electricityInputFilters?: ElectricityDataFilters,
+    tableGeneralUtilityFilters?: GeneralUtilityDataFilters,
     //units
     unitsOfMeasure: string,
     energyUnit: string,
