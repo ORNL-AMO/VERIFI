@@ -1,13 +1,12 @@
 <div class="filter">
     <button class="btn" [ngClass]="{'btn-solid' : !showFilterDropdown, 'btn-outline' : showFilterDropdown}"
         (click)="toggleFilterMenu()">
-        <!-- <span class="fa"
-            [ngClass]="{'fa-chevron-down': showFilterDropdown, 'fa-chevron-up': !showFilterDropdown}"></span> -->
         Choose Columns
     </button>
+    <!--ELECTRICITY FILTERS-->
     <div class="filter-dropdown" *ngIf="showFilterDropdown">
         <p class="small">Choose Table Columns</p>
-        <div class="row">
+        <div class="row" *ngIf="source == 'Electricity'">
             <div class="col" *ngIf="filterType == 'table'">
                 <label>
                     <input type="checkbox" name="totalCost" [(ngModel)]="generalInformationFilters.totalCost"
@@ -101,6 +100,44 @@
                 </label>
             </div>
         </div>
+        <!--non electricity filters-->
+        <div class="row" *ngIf="source != 'Electricity'">
+            <div class="col">
+                <label>
+                    <input type="checkbox" name="totalVolume" [(ngModel)]="generalUtilityDataFilters.totalVolume"
+                        (change)="save()">Total Volume
+                </label>
+                <label>
+                    <input type="checkbox" name="totalCost" [(ngModel)]="generalUtilityDataFilters.totalCost"
+                        (change)="save()">Total Cost
+                </label>
+                <label>
+                    <input type="checkbox" name="totalMarketEmissions"
+                        [(ngModel)]="generalUtilityDataFilters.totalMarketEmissions" (change)="save()">Market Emissions
+                </label>
+                <label>
+                    <input type="checkbox" name="totalLocationEmissions"
+                        [(ngModel)]="generalUtilityDataFilters.totalLocationEmissions" (change)="save()">Location
+                    Emissions
+                </label>
+            </div>
+            <div class="col">
+                <label>
+                    <input type="checkbox" name="commodityCharge"
+                        [(ngModel)]="generalUtilityDataFilters.commodityCharge" (change)="save()">Commodity Charge
+                </label>
+                <label>
+                    <input type="checkbox" name="deliveryCharge" [(ngModel)]="generalUtilityDataFilters.deliveryCharge"
+                        (change)="save()">Delivery Charge
+                </label>
+                <label>
+                    <input type="checkbox" name="otherCharge" [(ngModel)]="generalUtilityDataFilters.otherCharge"
+                        (change)="save()">Other Charge
+                </label>
+            </div>
+        </div>
+
+
         <br>
         <a (click)="showAllColumns();">Show All</a>
         <span> / </span>

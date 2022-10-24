@@ -42,3 +42,14 @@ export interface GeneralInformationFilters {
   realDemand: boolean,
   billedDemand: boolean
 }
+
+
+export interface GeneralUtilityDataFilters{
+  totalVolume: boolean,
+  totalCost: boolean,
+  totalMarketEmissions: boolean,
+  totalLocationEmissions: boolean,
+  commodityCharge: boolean,
+  deliveryCharge: boolean,
+  otherCharge: boolean,
+}

@@ -7,6 +7,9 @@ import { CopyTableService } from 'src/app/shared/helper-services/copy-table.serv
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { CalanderizationService, EmissionsResults } from 'src/app/shared/helper-services/calanderization.service';
 import { EditMeterFormService } from '../../energy-source/edit-meter-form/edit-meter-form.service';
+import { Subscription } from 'rxjs';
+import { GeneralUtilityDataFilters } from 'src/app/models/meterDataFilter';
+import { NavigationEnd, Router } from '@angular/router';
 
 @Component({
   selector: 'app-general-utility-data-table',
@@ -39,11 +42,42 @@ export class GeneralUtilityDataTableComponent implements OnInit {
   currentPageNumber: number = 1;
   copyingTable: boolean = false;
   showEmissions: boolean;
+  filterSub: Subscription;
+  generalUtilityDataFilters: GeneralUtilityDataFilters;
   constructor(public utilityMeterDataService: UtilityMeterDataService, private energyUnitsHelperService: EnergyUnitsHelperService,
     private copyTableService: CopyTableService, private facilityDbService: FacilitydbService,
-    private calanderizationService: CalanderizationService, private editMeterFormService: EditMeterFormService) { }
+    private calanderizationService: CalanderizationService, private editMeterFormService: EditMeterFormService,
+    private router: Router) { }
 
   ngOnInit(): void {
+    this.setData();
+
+    if (this.selectedMeterData.length != 0) {
+      let hasFalseChecked: IdbUtilityMeterData = this.selectedMeterData.find(meterDataItem => { return meterDataItem.checked == false });
+      this.allChecked = (hasFalseChecked == undefined);
+    }
+
+    this.filterSub = this.utilityMeterDataService.tableGeneralUtilityFilters.subscribe(val => {
+      this.generalUtilityDataFilters = val;
+    })
+  }
+
+  ngOnDestroy() {
+    this.filterSub.unsubscribe();
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes.itemsPerPage && !changes.itemsPerPage.firstChange) {
+      this.allChecked = false;
+      this.checkAll();
+    }
+
+    if (changes.selectedMeterData && !changes.selectedMeterData.firstChange) {
+      this.setData();
+    }
+  }
+
+  setData() {
     this.showVolumeColumn = (this.selectedMeterData.find(dataItem => { return dataItem.totalVolume != undefined }) != undefined);
     this.volumeUnit = this.selectedMeter.startingUnit;
     this.showEnergyColumn = this.energyUnitsHelperService.isEnergyMeter(this.selectedMeter.source);
@@ -54,18 +88,8 @@ export class GeneralUtilityDataTableComponent implements OnInit {
     if (this.showEnergyColumn) {
       this.energyUnit = this.selectedMeter.energyUnit;
     }
-    if (this.selectedMeterData.length != 0) {
-      let hasFalseChecked: IdbUtilityMeterData = this.selectedMeterData.find(meterDataItem => { return meterDataItem.checked == false });
-      this.allChecked = (hasFalseChecked == undefined);
-    }
   }
 
-  ngOnChanges(changes: SimpleChanges) {
-    if (changes.itemsPerPage && !changes.itemsPerPage.firstChange) {
-      this.allChecked = false;
-      this.checkAll();
-    }
-  }
 
   checkAll() {
     if (this.allChecked) {
