@@ -80,6 +80,12 @@ import { CorporateReportingSetupComponent } from './setup-wizard/setup-account/c
 import { FacilityInformationSetupComponent } from './setup-wizard/setup-facilities/facility-information-setup/facility-information-setup.component';
 import { FacilityUnitsSetupComponent } from './setup-wizard/setup-facilities/facility-units-setup/facility-units-setup.component';
 import { FacilityReportingSetupComponent } from './setup-wizard/setup-facilities/facility-reporting-setup/facility-reporting-setup.component';
+import { AccountOverviewComponent } from './account/account-overview/account-overview.component';
+import { EnergyOverviewComponent } from './account/account-overview/energy-overview/energy-overview.component';
+import { CostsOverviewComponent } from './account/account-overview/costs-overview/costs-overview.component';
+import { EmissionsOverviewComponent } from './account/account-overview/emissions-overview/emissions-overview.component';
+import { WaterOverviewComponent } from './account/account-overview/water-overview/water-overview.component';
+import { OtherUtilityOverviewComponent } from './account/account-overview/other-utility-overview/other-utility-overview.component';
 
 const routes: Routes = [
   {
@@ -102,6 +108,19 @@ const routes: Routes = [
       },
       {
         path: 'overview',
+        component: AccountOverviewComponent,
+        children: [
+          { path: '', pathMatch: 'full', redirectTo: 'energy' },
+          { path: 'energy', component: EnergyOverviewComponent },
+          { path: 'costs', component: CostsOverviewComponent },
+          { path: 'emissions', component: EmissionsOverviewComponent },
+          { path: 'water', component: WaterOverviewComponent },
+          { path: 'other', component: OtherUtilityOverviewComponent },
+
+        ]
+      },
+      {
+        path: 'dashboard',
         component: AccountDashboardComponent
       },
       {

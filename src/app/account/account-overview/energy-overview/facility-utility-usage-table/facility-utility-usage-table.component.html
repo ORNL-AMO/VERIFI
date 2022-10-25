@@ -12,12 +12,6 @@
                 <th class="w-2">Utility Usage<br> (<span [innerHTML]="accountEnergyUnit | settingsLabel"></span>)
                 </th>
                 <th class="w-2">Utility Cost </th>
-                <th class="w-2">
-                    Market Emissions<br> (tonne CO<sub>2</sub>)
-                </th>
-                <th class="w-2">
-                    Location Emissions<br> (tonne CO<sub>2</sub>)
-                </th>
             </tr>
         </thead>
         <tbody *ngIf="accountFacilitiesSummary && accountFacilitiesSummary.facilitySummaries">
@@ -38,12 +32,6 @@
                 <td>
                     {{summary.energyCost | customNumber:true }}
                 </td>
-                <td>
-                    {{summary.marketEmissions / 1000 | customNumber}}
-                </td>
-                <td>
-                    {{summary.locationEmissions / 1000 | customNumber}}
-                </td>
             </tr>
         </tbody>
         <tfoot>
@@ -62,12 +50,6 @@
                 </th>
                 <th>
                     {{accountFacilitiesSummary.totalEnergyCost | customNumber:true }}
-                </th>
-                <th>
-                    {{accountFacilitiesSummary.totalMarketEmissions / 1000 | customNumber}}
-                </th>
-                <th>
-                    {{accountFacilitiesSummary.totalLocationEmissions / 1000 | customNumber}}
                 </th>
             </tr>
         </tfoot>

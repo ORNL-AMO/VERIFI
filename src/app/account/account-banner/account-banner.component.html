@@ -14,6 +14,10 @@
                         class="fa fa-chart-column"></i>Overview</a>
             </li>
             <li class="nav-item" [ngClass]="{'disabled': meterData.length == 0}">
+                <a class="nav-link" routerLink="dashboard" [routerLinkActive]="['active']"><i
+                        class="fa fa-chart-column"></i>Dashboard</a>
+            </li>
+            <li class="nav-item" [ngClass]="{'disabled': meterData.length == 0}">
                 <a class="nav-link" routerLink="analysis" [routerLinkActive]="['active']"><i
                         class="fa fa-microscope"></i>Analysis</a>
             </li>

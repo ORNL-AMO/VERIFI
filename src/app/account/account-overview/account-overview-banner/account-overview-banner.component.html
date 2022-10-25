@@ -1,0 +1,29 @@
+<div class="utility banner sticky-top d-flex justify-content-between" [ngClass]="{'modal-open': modalOpen}">
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <a class="nav-link" routerLink="energy" [routerLinkActive]="['active']">
+                <i class="fa fa-file-pen"></i>
+                Energy</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" routerLink="water" [routerLinkActive]="['active']">
+                <i class="fa fa-file-pen"></i>
+                Water</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" routerLink="other" [routerLinkActive]="['active']">
+                <i class="fa fa-file-pen"></i>
+                Other</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" routerLink="costs" [routerLinkActive]="['active']">
+                <i class="fa fa-file-pen"></i>
+                Costs</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" routerLink="emissions" [routerLinkActive]="['active']">
+                <i class="fa fa-calendar-days"></i>
+                Emissions</a>
+        </li>
+    </ul>
+</div>

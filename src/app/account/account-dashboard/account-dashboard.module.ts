@@ -9,6 +9,7 @@ import { EnergyUseStackedBarChartComponent } from './energy-use-stacked-bar-char
 import { FacilitiesTableComponent } from './facilities-table/facilities-table.component';
 import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.module';
 import { AccountDashboardComponent } from './account-dashboard.component';
+import { RouterModule } from '@angular/router';
 
 
 
@@ -25,7 +26,8 @@ import { AccountDashboardComponent } from './account-dashboard.component';
   imports: [
     CommonModule,
     FormsModule,
-    HelperPipesModule
+    HelperPipesModule,
+    RouterModule
   ]
 })
 export class AccountDashboardModule { }
