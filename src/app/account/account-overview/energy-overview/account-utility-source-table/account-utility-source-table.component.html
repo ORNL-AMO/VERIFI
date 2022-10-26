@@ -1,4 +1,4 @@
-<div class="table-responsive" *ngIf="!calculating">
+<div class="table-responsive">
     <table class="table table-sm" *ngIf="utilityUsageSummaryData">
         <thead>
             <tr class="table-mh">
@@ -170,6 +170,3 @@
     </table>
 </div>
 
-
-
-<app-calculating-spinner *ngIf="calculating" [message]="'Calculating Utility Summaries...'"></app-calculating-spinner>

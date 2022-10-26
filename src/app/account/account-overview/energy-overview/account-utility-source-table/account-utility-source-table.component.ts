@@ -19,8 +19,6 @@ export class AccountUtilitySourceTableComponent implements OnInit {
   lastMonthsDate: Date;
   yearPriorLastMonth: Date;
   yearPriorDate: Date;
-  calculatingSub: Subscription;
-  calculating: boolean;
   constructor(private accountdbService: AccountdbService, private accountOverviewService: AccountOverviewService) { }
 
   ngOnInit(): void {
@@ -42,15 +40,11 @@ export class AccountUtilitySourceTableComponent implements OnInit {
       }
     });
 
-    this.calculatingSub = this.accountOverviewService.calculating.subscribe(val => {
-      this.calculating = val;
-    })
   }
 
   ngOnDestroy(){
     this.selectedAccountSub.unsubscribe();
     this.accountUtilityUsageSummaryDataSub.unsubscribe();
-    this.calculatingSub.unsubscribe();
   }
 
 }

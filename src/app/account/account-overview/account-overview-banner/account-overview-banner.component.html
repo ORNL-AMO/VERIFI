@@ -1,29 +1,65 @@
-<div class="utility banner sticky-top d-flex justify-content-between" [ngClass]="{'modal-open': modalOpen}">
-    <ul class="nav nav-tabs">
-        <li class="nav-item">
-            <a class="nav-link" routerLink="energy" [routerLinkActive]="['active']">
-                <i class="fa fa-file-pen"></i>
-                Energy</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" routerLink="water" [routerLinkActive]="['active']">
-                <i class="fa fa-file-pen"></i>
-                Water</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" routerLink="other" [routerLinkActive]="['active']">
-                <i class="fa fa-file-pen"></i>
-                Other</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" routerLink="costs" [routerLinkActive]="['active']">
-                <i class="fa fa-file-pen"></i>
-                Costs</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" routerLink="emissions" [routerLinkActive]="['active']">
-                <i class="fa fa-calendar-days"></i>
-                Emissions</a>
-        </li>
-    </ul>
+<div class="sticky-top banner-border" [ngClass]="{'modal-open': modalOpen}">
+    <div class="utility banner d-flex justify-content-between">
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <a class="nav-link" routerLink="energy" [routerLinkActive]="['active']">
+                    <i class="fa fa-file-pen"></i>
+                    Energy</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" routerLink="water" [routerLinkActive]="['active']">
+                    <i class="fa fa-file-pen"></i>
+                    Water</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" routerLink="other" [routerLinkActive]="['active']">
+                    <i class="fa fa-file-pen"></i>
+                    Other</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" routerLink="costs" [routerLinkActive]="['active']">
+                    <i class="fa fa-file-pen"></i>
+                    Costs</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" routerLink="emissions" [routerLinkActive]="['active']">
+                    <i class="fa fa-calendar-days"></i>
+                    Emissions</a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="banner-border">
+        <div class="breadcrumbs d-flex justify-content-center">
+            <div class="d-flex">
+                <div class="pr-1">
+                    <div class="btn-group">
+                        <button class="btn btn-sm m-0 btn-selected" (click)="setAccountEnergyIsSource(true)"
+                            [ngClass]="{'btn-outline': selectedAccount.energyIsSource == false}">Source Energy</button>
+                        <button class="btn btn-sm btn-selected m-0" (click)="setAccountEnergyIsSource(false)"
+                            [ngClass]="{'btn-outline': selectedAccount.energyIsSource == true}">Site Energy</button>
+                    </div>
+                </div>
+
+                <!-- <div class="pl-1">
+                <div class="btn-group">
+                    <button class="btn btn-sm m-0 btn-selected" (click)="setGraphDisplay('usage')"
+                        [ngClass]="{'btn-outline': graphDisplay != 'usage'}">Utility Usage</button>
+                    <button class="btn btn-sm btn-selected m-0" (click)="setGraphDisplay('cost')"
+                        [ngClass]="{'btn-outline': graphDisplay != 'cost'}">Utility Cost</button>
+                    <button class="btn btn-sm btn-selected m-0" (click)="setGraphDisplay('emissions')"
+                        [ngClass]="{'btn-outline': graphDisplay != 'emissions'}">Emissions</button>
+                </div>
+            </div>
+            <div class="pl-1">
+                <div class="btn-group">
+                    <button class="btn btn-sm m-0 btn-selected" (click)="setEmissions('location')"
+                        [ngClass]="{'btn-outline': emissionsDisplay != 'location'}">Location</button>
+                    <button class="btn btn-sm btn-selected m-0" (click)="setEmissions('market')"
+                        [ngClass]="{'btn-outline': emissionsDisplay != 'market'}">Market</button>
+                </div>
+            </div> -->
+            </div>
+        </div>
+    </div>
 </div>

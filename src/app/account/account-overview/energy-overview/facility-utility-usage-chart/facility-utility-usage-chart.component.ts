@@ -30,6 +30,10 @@ export class FacilityUtilityUsageChartComponent implements OnInit {
     this.accountFacilitiesSummarySub.unsubscribe();
   }
 
+  ngAfterViewInit(){
+    this.drawChart();
+  }
+  
   drawChart() {
     if (this.energyUseDonut && this.facilitiesSummary) {
       let selectedAccout: IdbAccount = this.accountDbService.selectedAccount.getValue();

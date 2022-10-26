@@ -19,8 +19,6 @@ export class FacilityUtilityUsageTableComponent implements OnInit {
   lastMonthsDate: Date;
   yearPriorDate: Date;
   accountFacilitiesSummarySub: Subscription;
-  calculating: boolean;
-  calculatingSub: Subscription;
 
   constructor(private router: Router, private accountOverviewService: AccountOverviewService,
     private accountDbService: AccountdbService) { }
@@ -42,14 +40,9 @@ export class FacilityUtilityUsageTableComponent implements OnInit {
         this.yearPriorDate = undefined;
       }
     });
-
-    this.calculatingSub = this.accountOverviewService.calculating.subscribe(val => {
-      this.calculating = val;
-    })
   }
 
   ngOnDestroy() {
-    this.calculatingSub.unsubscribe();
     this.accountFacilitiesSummarySub.unsubscribe();
     this.selectedAccountSub.unsubscribe();
   }

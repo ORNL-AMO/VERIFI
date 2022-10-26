@@ -2,7 +2,7 @@
     <span class="pull-right" *ngIf="yearPriorDate">({{yearPriorDate | date: 'MMM, y'}} -
         {{lastMonthsDate | date: 'MMM, y'}})</span>
 </p> -->
-<div class="table-responsive" *ngIf="!calculating">
+<div class="table-responsive">
     <table class="table table-sm">
         <thead>
             <tr>
@@ -59,6 +59,3 @@
         </tfoot>
     </table>
 </div>
-
-
-<app-calculating-spinner *ngIf="calculating" [message]="'Calculating Facility Summaries...'"></app-calculating-spinner>

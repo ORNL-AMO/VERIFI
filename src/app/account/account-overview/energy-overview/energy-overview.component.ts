@@ -11,9 +11,18 @@ export class EnergyOverviewComponent implements OnInit {
   lastMonthsDate: Date;
   yearPriorDate: Date;
   accountFacilitiesSummarySub: Subscription;
+  calculatingSub: Subscription;
+  calculating: boolean;
   constructor(private accountOverviewService: AccountOverviewService) { }
 
   ngOnInit(): void {
+
+
+    this.calculatingSub = this.accountOverviewService.calculating.subscribe(val => {
+      this.calculating = val;
+    })
+
+
     this.accountFacilitiesSummarySub = this.accountOverviewService.accountFacilitiesSummary.subscribe(accountFacilitiesSummary => {
       if (accountFacilitiesSummary.allMetersLastBill) {
         this.lastMonthsDate = new Date(accountFacilitiesSummary.allMetersLastBill.year, accountFacilitiesSummary.allMetersLastBill.monthNumValue);
@@ -27,6 +36,7 @@ export class EnergyOverviewComponent implements OnInit {
 
   ngOnDestroy(){
     this.accountFacilitiesSummarySub.unsubscribe();
+    this.calculatingSub.unsubscribe();
   }
 
 }
