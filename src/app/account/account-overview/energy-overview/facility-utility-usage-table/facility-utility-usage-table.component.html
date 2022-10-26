@@ -1,14 +1,14 @@
-<p class="label">Account Facilities
+<!-- <p class="label">Account Facilities
     <span class="pull-right" *ngIf="yearPriorDate">({{yearPriorDate | date: 'MMM, y'}} -
         {{lastMonthsDate | date: 'MMM, y'}})</span>
-</p>
-<div class="table-responsive">
+</p> -->
+<div class="table-responsive" *ngIf="!calculating">
     <table class="table table-sm">
         <thead>
             <tr>
                 <th class="w-1">Facility</th>
-                <!-- <th class="w-1"># of Meters</th> -->
-                <!-- <th class="w-1">Last Bill Entered</th> -->
+                <!-- <th class="w-1"># of Energy Meters</th>
+                <th class="w-1">Last Bill Entered</th> -->
                 <th class="w-2">Utility Usage<br> (<span [innerHTML]="accountEnergyUnit | settingsLabel"></span>)
                 </th>
                 <th class="w-2">Utility Cost </th>
@@ -17,7 +17,11 @@
         <tbody *ngIf="accountFacilitiesSummary && accountFacilitiesSummary.facilitySummaries">
             <tr *ngFor="let summary of accountFacilitiesSummary.facilitySummaries">
                 <td>
-                    <a (click)="selectFacility(summary.facility)">{{summary.facility.name}}</a>
+                    <span class="badge"
+                        [ngStyle]="{background: summary.facility.color, color: summary.facility.color }">
+                        &mdash;
+                    </span>
+                    <a class="pl-2" (click)="selectFacility(summary.facility)">{{summary.facility.name}}</a>
                 </td>
                 <!-- <td>
                     {{summary.numberOfMeters}}
@@ -55,3 +59,6 @@
         </tfoot>
     </table>
 </div>
+
+
+<app-calculating-spinner *ngIf="calculating" [message]="'Calculating Facility Summaries...'"></app-calculating-spinner>

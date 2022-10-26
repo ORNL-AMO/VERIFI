@@ -12,8 +12,10 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
 export class AccountOverviewService {
 
   accountFacilitiesSummary: BehaviorSubject<AccountFacilitiesSummary>;
+  calculatingFacilitiesSummary: BehaviorSubject<boolean>;
   calanderizedMeters: Array<CalanderizedMeter>;
   constructor(private calanderizationService: CalanderizationService, private utilityMeterDbService: UtilityMeterdbService) {
+    this.calculatingFacilitiesSummary = new BehaviorSubject<boolean>(undefined);
     this.accountFacilitiesSummary = new BehaviorSubject<AccountFacilitiesSummary>({
       facilitySummaries: [],
       totalEnergyUse: undefined,

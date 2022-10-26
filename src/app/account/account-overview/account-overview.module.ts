@@ -11,6 +11,8 @@ import { OtherUtilityOverviewComponent } from './other-utility-overview/other-ut
 import { FacilityUtilityUsageTableComponent } from './energy-overview/facility-utility-usage-table/facility-utility-usage-table.component';
 import { AccountUtilitySourceTableComponent } from './energy-overview/account-utility-source-table/account-utility-source-table.component';
 import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.module';
+import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/calculating-spinner.module';
+import { FacilityUtilityUsageChartComponent } from './energy-overview/facility-utility-usage-chart/facility-utility-usage-chart.component';
 
 
 
@@ -24,12 +26,14 @@ import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.modu
     WaterOverviewComponent,
     OtherUtilityOverviewComponent,
     FacilityUtilityUsageTableComponent,
-    AccountUtilitySourceTableComponent
+    AccountUtilitySourceTableComponent,
+    FacilityUtilityUsageChartComponent
   ],
   imports: [
     CommonModule,
     RouterModule,
-    HelperPipesModule
+    HelperPipesModule,
+    CalculatingSpinnerModule
   ]
 })
 export class AccountOverviewModule { }

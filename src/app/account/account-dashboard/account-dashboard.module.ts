@@ -10,6 +10,7 @@ import { FacilitiesTableComponent } from './facilities-table/facilities-table.co
 import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.module';
 import { AccountDashboardComponent } from './account-dashboard.component';
 import { RouterModule } from '@angular/router';
+import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/calculating-spinner.module';
 
 
 
@@ -27,7 +28,8 @@ import { RouterModule } from '@angular/router';
     CommonModule,
     FormsModule,
     HelperPipesModule,
-    RouterModule
+    RouterModule,
+    CalculatingSpinnerModule
   ]
 })
 export class AccountDashboardModule { }
