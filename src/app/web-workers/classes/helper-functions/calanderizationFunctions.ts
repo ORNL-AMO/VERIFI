@@ -110,3 +110,19 @@ export function getSumValue(val: number): number {
         return 0;
     }
 }
+
+
+export function   getYearPriorBillEntryFromCalanderizedMeterData(calanderizedMeterData: Array<CalanderizedMeter>, lastBill: MonthlyData): Array<MonthlyData> {
+    let monthlyData: Array<MonthlyData> = calanderizedMeterData.flatMap(data => {
+      return data.monthlyData;
+    });
+    if (lastBill) {
+      let yearPrior: number = lastBill.year - 1;
+      let yearPriorBill: Array<MonthlyData> = monthlyData.filter(dataItem => {
+        return (dataItem.year == yearPrior) && (dataItem.monthNumValue == lastBill.monthNumValue);
+      });
+      return yearPriorBill;
+    } else {
+      return undefined;
+    }
+  }

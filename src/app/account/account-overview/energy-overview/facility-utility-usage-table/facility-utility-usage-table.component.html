@@ -6,12 +6,12 @@
     <table class="table table-sm">
         <thead>
             <tr>
-                <th class="w-1">Facility</th>
+                <th>Facility</th>
                 <!-- <th class="w-1"># of Energy Meters</th>
                 <th class="w-1">Last Bill Entered</th> -->
-                <th class="w-2">Utility Usage<br> (<span [innerHTML]="accountEnergyUnit | settingsLabel"></span>)
+                <th>Utility Usage<br> (<span [innerHTML]="accountEnergyUnit | settingsLabel"></span>)
                 </th>
-                <th class="w-2">Utility Cost </th>
+                <th>Utility Cost </th>
             </tr>
         </thead>
         <tbody *ngIf="accountFacilitiesSummary && accountFacilitiesSummary.facilitySummaries">

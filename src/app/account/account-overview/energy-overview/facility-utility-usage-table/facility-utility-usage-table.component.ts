@@ -34,7 +34,6 @@ export class FacilityUtilityUsageTableComponent implements OnInit {
     });
     this.accountFacilitiesSummarySub = this.accountOverviewService.accountFacilitiesSummary.subscribe(val => {
       this.accountFacilitiesSummary = val;
-      console.log(this.accountFacilitiesSummary);
       if (this.accountFacilitiesSummary.allMetersLastBill) {
         this.lastMonthsDate = new Date(this.accountFacilitiesSummary.allMetersLastBill.year, this.accountFacilitiesSummary.allMetersLastBill.monthNumValue);
         this.yearPriorDate = new Date(this.accountFacilitiesSummary.allMetersLastBill.year - 1, this.accountFacilitiesSummary.allMetersLastBill.monthNumValue);
@@ -44,7 +43,7 @@ export class FacilityUtilityUsageTableComponent implements OnInit {
       }
     });
 
-    this.calculatingSub = this.accountOverviewService.calculatingFacilitiesSummary.subscribe(val => {
+    this.calculatingSub = this.accountOverviewService.calculating.subscribe(val => {
       this.calculating = val;
     })
   }

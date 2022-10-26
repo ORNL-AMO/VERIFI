@@ -39,12 +39,13 @@ export class AccountOverviewComponent implements OnInit {
       this.worker = new Worker(new URL('src/app/web-workers/account-overview.worker', import.meta.url));
       let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
       this.worker.onmessage = ({ data }) => {
-        this.accountOverviewService.accountFacilitiesSummary.next(data);
-        this.accountOverviewService.calculatingFacilitiesSummary.next(false);
+        this.accountOverviewService.accountFacilitiesSummary.next(data.accountFacilitiesSummary);
+        this.accountOverviewService.utilityUsageSummaryData.next(data.utilityUsageSummaryData);
+        this.accountOverviewService.calculating.next(false);
         this.calculating = false;
         this.worker.terminate();
       };
-      this.accountOverviewService.calculatingFacilitiesSummary.next(true);
+      this.accountOverviewService.calculating.next(true);
       this.worker.postMessage({
         calanderizedMeters: this.accountOverviewService.calanderizedMeters,
         facilities: facilities,

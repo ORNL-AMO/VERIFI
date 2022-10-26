@@ -2,7 +2,11 @@
 
 import { AccountFacilitiesSummaryClass } from "./classes/dashboard/accountFacilitiesSummaryClass";
 
-addEventListener('message', ({ data }) => {    
+addEventListener('message', ({ data }) => {
     let accountFacilitiesSummaryClass: AccountFacilitiesSummaryClass = new AccountFacilitiesSummaryClass(data.calanderizedMeters, data.facilities);
-    postMessage(accountFacilitiesSummaryClass.summary);
+    let results = {
+        accountFacilitiesSummary: accountFacilitiesSummaryClass.facilitiesSummary,
+        utilityUsageSummaryData: accountFacilitiesSummaryClass.utilityUsageSummaryData
+    }
+    postMessage(results);
 });

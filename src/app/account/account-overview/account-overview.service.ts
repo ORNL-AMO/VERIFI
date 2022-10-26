@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
-import { AccountFacilitiesSummary } from 'src/app/models/dashboard';
+import { AccountFacilitiesSummary, UtilityUsageSummaryData } from 'src/app/models/dashboard';
 import { IdbUtilityMeter } from 'src/app/models/idb';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 
@@ -12,10 +12,11 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
 export class AccountOverviewService {
 
   accountFacilitiesSummary: BehaviorSubject<AccountFacilitiesSummary>;
-  calculatingFacilitiesSummary: BehaviorSubject<boolean>;
+  utilityUsageSummaryData: BehaviorSubject<UtilityUsageSummaryData>;
+  calculating: BehaviorSubject<boolean>;
   calanderizedMeters: Array<CalanderizedMeter>;
   constructor(private calanderizationService: CalanderizationService, private utilityMeterDbService: UtilityMeterdbService) {
-    this.calculatingFacilitiesSummary = new BehaviorSubject<boolean>(undefined);
+    this.calculating = new BehaviorSubject<boolean>(undefined);
     this.accountFacilitiesSummary = new BehaviorSubject<AccountFacilitiesSummary>({
       facilitySummaries: [],
       totalEnergyUse: undefined,
@@ -25,6 +26,7 @@ export class AccountOverviewService {
       totalMarketEmissions: undefined,
       allMetersLastBill: undefined
     });
+    this.utilityUsageSummaryData = new BehaviorSubject<UtilityUsageSummaryData>(undefined);
   }
 
   setCalanderizedMeters() {
