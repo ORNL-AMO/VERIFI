@@ -14,6 +14,8 @@ import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.modu
 import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/calculating-spinner.module';
 import { FacilityUtilityUsageChartComponent } from './energy-overview/facility-utility-usage-chart/facility-utility-usage-chart.component';
 import { AccountUtilitySourceChartComponent } from './energy-overview/account-utility-source-chart/account-utility-source-chart.component';
+import { EmissionsMapPlotComponent } from './emissions-overview/emissions-map-plot/emissions-map-plot.component';
+import { UtilityUsageMapComponent } from './energy-overview/utility-usage-map/utility-usage-map.component';
 
 
 
@@ -29,7 +31,9 @@ import { AccountUtilitySourceChartComponent } from './energy-overview/account-ut
     FacilityUtilityUsageTableComponent,
     AccountUtilitySourceTableComponent,
     FacilityUtilityUsageChartComponent,
-    AccountUtilitySourceChartComponent
+    AccountUtilitySourceChartComponent,
+    EmissionsMapPlotComponent,
+    UtilityUsageMapComponent
   ],
   imports: [
     CommonModule,

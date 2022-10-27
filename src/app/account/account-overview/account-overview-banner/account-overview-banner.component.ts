@@ -3,6 +3,7 @@ import { SharedDataService } from 'src/app/shared/helper-services/shared-data.se
 import { Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idb';
+import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 
 @Component({
   selector: 'app-account-overview-banner',
@@ -15,7 +16,11 @@ export class AccountOverviewBannerComponent implements OnInit {
   modalOpen: boolean;
   selectedAccount: IdbAccount;
   selectedAccountSub: Subscription;
-  constructor(private sharedDataService: SharedDataService, private accountDbService: AccountdbService) { }
+  routerSub: Subscription;
+  urlDisplay: 'energy' | 'emissions' | 'other';
+  emissionsDisplay: 'market' | 'location';
+  constructor(private sharedDataService: SharedDataService, private accountDbService: AccountdbService,
+    private activatedRoute: ActivatedRoute, private router: Router) { }
 
   ngOnInit(): void {
     this.modalOpenSub = this.sharedDataService.modalOpen.subscribe(val => {
@@ -24,11 +29,28 @@ export class AccountOverviewBannerComponent implements OnInit {
     this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(val => {
       this.selectedAccount = val;
     })
+
+    this.routerSub = this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        this.setUrlString(this.router.url);
+      }
+    });
+    this.setUrlString(this.router.url);
   }
 
   ngOnDestroy() {
     this.modalOpenSub.unsubscribe();
     this.selectedAccountSub.unsubscribe();
+  }
+
+  setUrlString(url: string) {
+    if (url.includes('energy')) {
+      this.urlDisplay = 'energy';
+    } else if (url.includes('emissions')) {
+      this.urlDisplay = 'emissions';
+    } else {
+      this.urlDisplay = 'other';
+    }
   }
 
 
@@ -40,6 +62,11 @@ export class AccountOverviewBannerComponent implements OnInit {
       this.accountDbService.allAccounts.next(allAccounts);
       this.accountDbService.selectedAccount.next(this.selectedAccount);
     }
+  }
+
+
+  setEmissions(display: 'market' | 'location'){
+    this.emissionsDisplay = display;
   }
 
 }

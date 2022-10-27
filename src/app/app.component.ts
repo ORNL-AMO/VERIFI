@@ -67,7 +67,8 @@ export class AppComponent {
     } else if (accounts.length != 0) {
       account = accounts[0];
     }
-
+ 
+    await this.eGridService.parseZipCodeLongLat();
     if (account) {
       await this.initializeFacilities(account);
       await this.initializeAccountAnalysisItems(account);
@@ -88,6 +89,7 @@ export class AppComponent {
       this.dataInitialized = true;
     } else {
       await this.eGridService.parseEGridData();
+
       this.dataInitialized = true;
       this.router.navigateByUrl('setup-wizard');
     }

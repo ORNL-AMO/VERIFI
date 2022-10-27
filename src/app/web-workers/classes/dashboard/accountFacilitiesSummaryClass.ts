@@ -3,7 +3,6 @@ import { AccountFacilitiesSummary, FacilitySummary, SummaryData, UtilityUsageSum
 import { IdbFacility, MeterSource } from "src/app/models/idb";
 import * as _ from 'lodash';
 import { getLastBillEntryFromCalanderizedMeterData, getPastYearData, getSumValue, getYearPriorBillEntryFromCalanderizedMeterData } from "../helper-functions/calanderizationFunctions";
-import { SourceOptions } from "src/app/facility/utility-data/energy-consumption/energy-source/edit-meter-form/editMeterOptions";
 
 
 export class AccountFacilitiesSummaryClass {

@@ -29,10 +29,10 @@
         </ul>
     </div>
 
-    <div class="banner-border">
+    <div class="banner-border" *ngIf="urlDisplay != 'other'">
         <div class="breadcrumbs d-flex justify-content-center">
             <div class="d-flex">
-                <div class="pr-1">
+                <div class="pr-1" *ngIf="urlDisplay == 'energy'">
                     <div class="btn-group">
                         <button class="btn btn-sm m-0 btn-selected" (click)="setAccountEnergyIsSource(true)"
                             [ngClass]="{'btn-outline': selectedAccount.energyIsSource == false}">Source Energy</button>
@@ -50,15 +50,15 @@
                     <button class="btn btn-sm btn-selected m-0" (click)="setGraphDisplay('emissions')"
                         [ngClass]="{'btn-outline': graphDisplay != 'emissions'}">Emissions</button>
                 </div>
-            </div>
-            <div class="pl-1">
-                <div class="btn-group">
-                    <button class="btn btn-sm m-0 btn-selected" (click)="setEmissions('location')"
-                        [ngClass]="{'btn-outline': emissionsDisplay != 'location'}">Location</button>
-                    <button class="btn btn-sm btn-selected m-0" (click)="setEmissions('market')"
-                        [ngClass]="{'btn-outline': emissionsDisplay != 'market'}">Market</button>
+            </div>-->
+                <div class="pl-1" *ngIf="urlDisplay == 'emissions'">
+                    <div class="btn-group">
+                        <button class="btn btn-sm m-0 btn-selected" (click)="setEmissions('location')"
+                            [ngClass]="{'btn-outline': emissionsDisplay != 'location'}">Location</button>
+                        <button class="btn btn-sm btn-selected m-0" (click)="setEmissions('market')"
+                            [ngClass]="{'btn-outline': emissionsDisplay != 'market'}">Market</button>
+                    </div>
                 </div>
-            </div> -->
             </div>
         </div>
     </div>
