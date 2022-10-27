@@ -1,11 +1,12 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbAccount, IdbFacility } from 'src/app/models/idb';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import * as _ from 'lodash';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { Subscription } from 'rxjs';
+import { AccountFacilitiesSummary } from 'src/app/models/dashboard';
+import { AccountOverviewService } from '../../account-overview.service';
 
 @Component({
   selector: 'app-utility-usage-map',
@@ -16,7 +17,8 @@ export class UtilityUsageMapComponent implements OnInit {
   @ViewChild('utilityUsageMap', { static: false }) utilityUsageMap: ElementRef;
 
 
-
+  accountFacilitiesSummary: AccountFacilitiesSummary;
+  accountFacilitiesSummarySub: Subscription;
   mapData: Array<{
     lng: string,
     lat: string,
@@ -26,13 +28,24 @@ export class UtilityUsageMapComponent implements OnInit {
 
 
 
-  constructor(private plotlyService: PlotlyService, private facilityDbService: FacilitydbService,
-    private eGridService: EGridService, private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,) { }
+  constructor(private plotlyService: PlotlyService,
+    private eGridService: EGridService, private accountDbService: AccountdbService,
+    private accountOverviewService: AccountOverviewService) { }
 
   ngOnInit(): void {
-    this.setBarChartData();
+    this.accountFacilitiesSummarySub = this.accountOverviewService.accountFacilitiesSummary.subscribe(accountFacilitiesSummary => {
+      this.accountFacilitiesSummary = accountFacilitiesSummary;
+      this.setBarChartData();
+      this.drawChart();
+    });
+
+
   }
+
+  ngOnDestroy() {
+    this.accountFacilitiesSummarySub.unsubscribe();
+  }
+
 
   ngAfterViewInit() {
     this.drawChart();
@@ -40,120 +53,87 @@ export class UtilityUsageMapComponent implements OnInit {
 
 
   drawChart() {
-    // let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-    // let locations: Array<string> = facilities.map(facility => { return facility.state });
-    // console.log(locations);
-    // let latLong: Array<{ lat: string, long: string }> = new Array();
-    // facilities.forEach(facility => {
-    //   let findLatLong = this.eGridService.zipLatLong.find(zipLL => { return zipLL.ZIP == facility.zip });
-    //   if (findLatLong) {
-    //     console.log('ayooo');
-    //     latLong.push({
-    //       lat: findLatLong.LAT,
-    //       long: findLatLong.LNG
-    //     });
-    //   }
-    // })
+    if (this.utilityUsageMap) {
+      let cmax: number = _.maxBy(this.mapData, 'energyUse').energyUse;
+      // let lats: Array<number> = this.mapData.map(item => { return Number(item.lat) });
+      // let lons: Array<number> = this.mapData.map(item => { return Number(item.lng) });
 
-    let cmax: number = _.maxBy(this.mapData, 'energyUse').energyUse;
-
-    var data = [{
-      type: 'scattergeo',
-      mode: 'markers',
-      // locations: ["CA", "TN", "OK", "MN"],
-      lat: this.mapData.map(item => { return item.lat }),
-      lon: this.mapData.map(item => { return item.lng }),
-      hovertext: this.mapData.map(item => {return item.facility.name + ': ' + item.energyUse}),
-      hoverinfo: 'text',
-      text: this.mapData.map(item => {return item.facility.name}),
-      marker: {
-        text: this.mapData.map(item => {return item.facility.name}),
-        size: this.mapData.map(item => { return (item.energyUse / cmax) * 50 }),
-        color: this.mapData.map(item => { return item.energyUse }),
-        cmin: 0,
-        cmax: cmax,
-        // colorscale: 'Greens',
-        colorbar: {
-          title: 'Energy Consumption',
-          // ticksuffix: '%',
-          // showticksuffix: 'last'
+      let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+      var data = [{
+        type: 'scattergeo',
+        mode: 'markers',
+        // locations: ["CA", "TN", "OK", "MN"],
+        lat: this.mapData.map(item => { return item.lat }),
+        lon: this.mapData.map(item => { return item.lng }),
+        hovertext: this.mapData.map(item => { return item.facility.name + ': ' + (item.energyUse).toLocaleString(undefined, { maximumFractionDigits: 0, minimumIntegerDigits: 1 }) + ' ' + selectedAccount.energyUnit }),
+        hoverinfo: 'text',
+        text: this.mapData.map(item => { return item.facility.name }),
+        marker: {
+          text: this.mapData.map(item => { return item.facility.name }),
+          size: this.mapData.map(item => { return (item.energyUse / cmax) * 25 + 10 }),
+          color: this.mapData.map(item => { return item.energyUse }),
+          cmin: 0,
+          cmax: cmax,
+          // colorscale: 'Greens',
+          colorbar: {
+            title: 'Energy Consumption',
+            // ticksuffix: '%',
+            // showticksuffix: 'last'
+          },
+          line: {
+            color: 'black'
+          }
         },
-        line: {
-          color: 'black'
-        }
-      },
-      name: 'Energy Use Data',
-      // hovertemplate:  '%{label}: %{value:,.0f} <extra></extra>'
+        name: 'Energy Use Data',
+        // hovertemplate:  '%{label}: %{value:,.0f} <extra></extra>'
 
-      // locationmode: "USA-states",
-    }];
+        // locationmode: "USA-states",
+      }];
 
-    var layout = {
-      'geo': {
-        scope: 'usa',
-        // 'resolution': 50
-        // projection: {
-        //   type: 'albers usa'
-        // },
-        showland: true,
-        landcolor: 'rgb(217, 217, 217)',
-        subunitwidth: 1,
-        countrywidth: 1,
-        subunitcolor: 'rgb(255,255,255)',
-        countrycolor: 'rgb(255,255,255)'
-      },
+      var layout = {
+        'geo': {
+          scope: 'usa',
+          resolution: 110,
+          // projection: {
+          //   type: 'albers usa'
+          // },
+          showland: true,
+          landcolor: 'rgb(20, 90, 50)',
+          subunitwidth: 1,
+          countrywidth: 1,
+          subunitcolor: 'rgb(255,255,255)',
+          countrycolor: 'rgb(255,255,255)',
+          // center:{
+          //   lat: _.mean(lats),
+          //   lon: _.mean(lons)
+          // }
+        },
 
-      margin: { "t": 50, "b": 50, "l": 50, "r": 50 },
-    };
+        margin: { "t": 0, "b": 50, "l": 0, "r": 50 },
+      };
 
-    console.log(data);
+      let config = {
+        displaylogo: false,
+        responsive: true
+      }
 
-    this.plotlyService.newPlot(this.utilityUsageMap.nativeElement, data, layout);
+      this.plotlyService.newPlot(this.utilityUsageMap.nativeElement, data, layout, config);
+    }
   }
 
   setBarChartData() {
     this.mapData = new Array();
-    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    let accountMeterData: Array<IdbUtilityMeterData> = new Array();
-    accountMeters.forEach(meter => {
-      let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataForAccount(meter, true);
-      accountMeterData = accountMeterData.concat(meterData)
-    });
-    let accountFacilites: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-    accountFacilites.forEach(facility => {
 
-
-      let facilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.filter(meterData => { return meterData.facilityId == facility.guid });
-      let energyUse: number = 0;
-      facilityMeterData.forEach(dataItem => {
-        let meter: IdbUtilityMeter = this.utilityMeterDbService.getFacilityMeterById(dataItem.meterId);
-        if (meter) {
-          if (meter.source == 'Electricity') {
-            energyUse = (energyUse + Number(dataItem.totalEnergyUse));
-          }
-          else if (meter.source == 'Natural Gas') {
-            energyUse = (energyUse + Number(dataItem.totalEnergyUse));
-          }
-          else if (meter.source == 'Other Fuels') {
-            energyUse = (energyUse + Number(dataItem.totalEnergyUse));
-          }
-          else if (meter.source == 'Other Energy') {
-            energyUse = (energyUse + Number(dataItem.totalEnergyUse));
-          }
-        }
-      });
-      if (facility) {
-        let findLatLong = this.eGridService.zipLatLong.find(zipLL => { return zipLL.ZIP == facility.zip });
-        if (findLatLong) {
-          console.log('ayooo');
-          this.mapData.push({
-            facility: facility,
-            lng: findLatLong.LNG,
-            lat: findLatLong.LAT,
-            energyUse: energyUse,
-          });
-        }
+    this.accountFacilitiesSummary.facilitySummaries.forEach(summary => {
+      let findLatLong = this.eGridService.zipLatLong.find(zipLL => { return zipLL.ZIP == summary.facility.zip });
+      if (findLatLong) {
+        this.mapData.push({
+          facility: summary.facility,
+          lng: findLatLong.LNG,
+          lat: findLatLong.LAT,
+          energyUse: summary.energyUsage,
+        });
       }
-    });
+    })
   }
 }

@@ -16,6 +16,10 @@ import { FacilityUtilityUsageChartComponent } from './energy-overview/facility-u
 import { AccountUtilitySourceChartComponent } from './energy-overview/account-utility-source-chart/account-utility-source-chart.component';
 import { EmissionsMapPlotComponent } from './emissions-overview/emissions-map-plot/emissions-map-plot.component';
 import { UtilityUsageMapComponent } from './energy-overview/utility-usage-map/utility-usage-map.component';
+import { FacilityCostTableComponent } from './costs-overview/facility-cost-table/facility-cost-table.component';
+import { FacilityCostChartComponent } from './costs-overview/facility-cost-chart/facility-cost-chart.component';
+import { UtilityCostChartComponent } from './costs-overview/utility-cost-chart/utility-cost-chart.component';
+import { UtilityCostTableComponent } from './costs-overview/utility-cost-table/utility-cost-table.component';
 
 
 
@@ -33,7 +37,11 @@ import { UtilityUsageMapComponent } from './energy-overview/utility-usage-map/ut
     FacilityUtilityUsageChartComponent,
     AccountUtilitySourceChartComponent,
     EmissionsMapPlotComponent,
-    UtilityUsageMapComponent
+    UtilityUsageMapComponent,
+    FacilityCostTableComponent,
+    FacilityCostChartComponent,
+    UtilityCostChartComponent,
+    UtilityCostTableComponent
   ],
   imports: [
     CommonModule,
