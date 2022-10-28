@@ -14,13 +14,17 @@ import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.modu
 import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/calculating-spinner.module';
 import { FacilityUtilityUsageChartComponent } from './energy-overview/facility-utility-usage-chart/facility-utility-usage-chart.component';
 import { AccountUtilitySourceChartComponent } from './energy-overview/account-utility-source-chart/account-utility-source-chart.component';
-import { EmissionsMapPlotComponent } from './emissions-overview/emissions-map-plot/emissions-map-plot.component';
 import { UtilityUsageMapComponent } from './energy-overview/utility-usage-map/utility-usage-map.component';
 import { FacilityCostTableComponent } from './costs-overview/facility-cost-table/facility-cost-table.component';
 import { FacilityCostChartComponent } from './costs-overview/facility-cost-chart/facility-cost-chart.component';
 import { UtilityCostChartComponent } from './costs-overview/utility-cost-chart/utility-cost-chart.component';
 import { UtilityCostTableComponent } from './costs-overview/utility-cost-table/utility-cost-table.component';
 import { FacilityCostsMapComponent } from './costs-overview/facility-costs-map/facility-costs-map.component';
+import { FacilityEmissionsTableComponent } from './emissions-overview/facility-emissions-table/facility-emissions-table.component';
+import { FacilityEmissionsChartComponent } from './emissions-overview/facility-emissions-chart/facility-emissions-chart.component';
+import { UtilityEmissionsChartComponent } from './emissions-overview/utility-emissions-chart/utility-emissions-chart.component';
+import { UtilityEmissionsTableComponent } from './emissions-overview/utility-emissions-table/utility-emissions-table.component';
+import { FacilityEmissionsMapComponent } from './emissions-overview/facility-emissions-map/facility-emissions-map.component';
 
 
 
@@ -37,13 +41,17 @@ import { FacilityCostsMapComponent } from './costs-overview/facility-costs-map/f
     AccountUtilitySourceTableComponent,
     FacilityUtilityUsageChartComponent,
     AccountUtilitySourceChartComponent,
-    EmissionsMapPlotComponent,
     UtilityUsageMapComponent,
     FacilityCostTableComponent,
     FacilityCostChartComponent,
     UtilityCostChartComponent,
     UtilityCostTableComponent,
-    FacilityCostsMapComponent
+    FacilityCostsMapComponent,
+    FacilityEmissionsTableComponent,
+    FacilityEmissionsChartComponent,
+    UtilityEmissionsChartComponent,
+    UtilityEmissionsTableComponent,
+    FacilityEmissionsMapComponent
   ],
   imports: [
     CommonModule,

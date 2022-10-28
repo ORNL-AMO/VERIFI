@@ -1,7 +1,5 @@
 import { CalanderizedMeter, LastYearData, MonthlyData } from "src/app/models/calanderization";
 import * as _ from 'lodash';
-import { IdbUtilityMeter } from "src/app/models/idb";
-import { ReportOptions } from "src/app/models/overview-report";
 
 export function getLastBillEntryFromCalanderizedMeterData(calanderizedMeterData: Array<CalanderizedMeter>, monthlyData?: Array<MonthlyData>): MonthlyData {
     if (!monthlyData) {
@@ -68,7 +66,7 @@ export function getPastYearData(yearEndBill: MonthlyData, calanderizedMeterData:
             energyUsage += totalEnergyUse;
             energyCost += totalEnergyCost;
             marketEmissions += totalMarketEmissions;
-            locationEmissions += locationEmissions;
+            locationEmissions += totalLocationEmissions;
             return {
                 time: yearMonth.month + ', ' + yearMonth.year,
                 energyUse: totalEnergyUse,

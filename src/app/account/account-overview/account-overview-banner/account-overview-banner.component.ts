@@ -4,6 +4,7 @@ import { Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idb';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
+import { AccountOverviewService } from '../account-overview.service';
 
 @Component({
   selector: 'app-account-overview-banner',
@@ -19,8 +20,10 @@ export class AccountOverviewBannerComponent implements OnInit {
   routerSub: Subscription;
   urlDisplay: 'energy' | 'emissions' | 'other';
   emissionsDisplay: 'market' | 'location';
+  emissionsDisplaySub: Subscription;
   constructor(private sharedDataService: SharedDataService, private accountDbService: AccountdbService,
-    private activatedRoute: ActivatedRoute, private router: Router) { }
+    private activatedRoute: ActivatedRoute, private router: Router,
+    private accountOverviewService: AccountOverviewService) { }
 
   ngOnInit(): void {
     this.modalOpenSub = this.sharedDataService.modalOpen.subscribe(val => {
@@ -28,6 +31,10 @@ export class AccountOverviewBannerComponent implements OnInit {
     });
     this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(val => {
       this.selectedAccount = val;
+    });
+
+    this.emissionsDisplaySub = this.accountOverviewService.emissionsDisplay.subscribe(val => {
+      this.emissionsDisplay = val;
     })
 
     this.routerSub = this.router.events.subscribe(event => {
@@ -41,6 +48,8 @@ export class AccountOverviewBannerComponent implements OnInit {
   ngOnDestroy() {
     this.modalOpenSub.unsubscribe();
     this.selectedAccountSub.unsubscribe();
+    this.routerSub.unsubscribe();
+    this.emissionsDisplaySub.unsubscribe();
   }
 
   setUrlString(url: string) {
@@ -65,8 +74,8 @@ export class AccountOverviewBannerComponent implements OnInit {
   }
 
 
-  setEmissions(display: 'market' | 'location'){
-    this.emissionsDisplay = display;
+  setEmissions(display: 'market' | 'location') {
+    this.accountOverviewService.emissionsDisplay.next(display);
   }
 
 }

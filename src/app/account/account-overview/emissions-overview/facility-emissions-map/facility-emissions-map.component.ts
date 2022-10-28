@@ -9,12 +9,13 @@ import { AccountFacilitiesSummary } from 'src/app/models/dashboard';
 import { AccountOverviewService } from '../../account-overview.service';
 
 @Component({
-  selector: 'app-utility-usage-map',
-  templateUrl: './utility-usage-map.component.html',
-  styleUrls: ['./utility-usage-map.component.css']
+  selector: 'app-facility-emissions-map',
+  templateUrl: './facility-emissions-map.component.html',
+  styleUrls: ['./facility-emissions-map.component.css']
 })
-export class UtilityUsageMapComponent implements OnInit {
-  @ViewChild('utilityUsageMap', { static: false }) utilityUsageMap: ElementRef;
+export class FacilityEmissionsMapComponent implements OnInit {
+
+  @ViewChild('emissionsUsageMap', { static: false }) emissionsUsageMap: ElementRef;
 
 
   accountFacilitiesSummary: AccountFacilitiesSummary;
@@ -22,17 +23,26 @@ export class UtilityUsageMapComponent implements OnInit {
   mapData: Array<{
     lng: string,
     lat: string,
-    energyUse: number,
+    emissions: number,
     facility: IdbFacility
   }>;
 
 
+  emissionsDisplay: "market" | "location";
+  emissionsDisplaySub: Subscription;
 
   constructor(private plotlyService: PlotlyService,
     private eGridService: EGridService, private accountDbService: AccountdbService,
     private accountOverviewService: AccountOverviewService) { }
 
   ngOnInit(): void {
+    this.emissionsDisplaySub = this.accountOverviewService.emissionsDisplay.subscribe(val => {
+      this.emissionsDisplay = val;
+      this.setMapData();
+      this.drawChart();
+    })
+
+
     this.accountFacilitiesSummarySub = this.accountOverviewService.accountFacilitiesEnergySummary.subscribe(accountFacilitiesSummary => {
       this.accountFacilitiesSummary = accountFacilitiesSummary;
       this.setMapData();
@@ -44,6 +54,7 @@ export class UtilityUsageMapComponent implements OnInit {
 
   ngOnDestroy() {
     this.accountFacilitiesSummarySub.unsubscribe();
+    this.emissionsDisplaySub.unsubscribe();
   }
 
 
@@ -53,37 +64,35 @@ export class UtilityUsageMapComponent implements OnInit {
 
 
   drawChart() {
-    if (this.utilityUsageMap) {
-      let cmax: number = _.maxBy(this.mapData, 'energyUse').energyUse;
+    if (this.emissionsUsageMap && this.mapData) {
+      let cmax: number = _.maxBy(this.mapData, 'emissions').emissions;
       // let lats: Array<number> = this.mapData.map(item => { return Number(item.lat) });
       // let lons: Array<number> = this.mapData.map(item => { return Number(item.lng) });
-
-      let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
       var data = [{
         type: 'scattergeo',
         mode: 'markers',
         // locations: ["CA", "TN", "OK", "MN"],
         lat: this.mapData.map(item => { return item.lat }),
         lon: this.mapData.map(item => { return item.lng }),
-        hovertext: this.mapData.map(item => { return item.facility.name + ': ' + (item.energyUse).toLocaleString(undefined, { maximumFractionDigits: 0, minimumIntegerDigits: 1 }) + ' ' + selectedAccount.energyUnit }),
+        hovertext: this.mapData.map(item => { return item.facility.name + ': ' + (item.emissions).toLocaleString(undefined, { maximumFractionDigits: 0, minimumIntegerDigits: 1 }) + ' tonne CO<sub>2</sub>' }),
         hoverinfo: 'text',
         text: this.mapData.map(item => { return item.facility.name }),
         marker: {
           text: this.mapData.map(item => { return item.facility.name }),
-          size: this.mapData.map(item => { return (item.energyUse / cmax) * 25 + 10 }),
-          color: this.mapData.map(item => { return item.energyUse }),
+          size: this.mapData.map(item => { return (item.emissions / cmax) * 25 + 10 }),
+          color: this.mapData.map(item => { return item.emissions }),
           cmin: 0,
           cmax: cmax,
           // colorscale: 'Greens',
           colorbar: {
-            title: 'Energy Consumption',
+            title: 'Facility Emissions',
             // ticksuffix: '%',
             // showticksuffix: 'last'
           },
           line: {
             color: 'black'
           },
-          symbol: 'star-square'
+          // symbol: 'x'
         },
         name: 'Energy Use Data',
         // hovertemplate:  '%{label}: %{value:,.0f} <extra></extra>'
@@ -118,23 +127,30 @@ export class UtilityUsageMapComponent implements OnInit {
         responsive: true
       }
 
-      this.plotlyService.newPlot(this.utilityUsageMap.nativeElement, data, layout, config);
+      this.plotlyService.newPlot(this.emissionsUsageMap.nativeElement, data, layout, config);
     }
   }
 
   setMapData() {
-    this.mapData = new Array();
-
-    this.accountFacilitiesSummary.facilitySummaries.forEach(summary => {
-      let findLatLong = this.eGridService.zipLatLong.find(zipLL => { return zipLL.ZIP == summary.facility.zip });
-      if (findLatLong) {
-        this.mapData.push({
-          facility: summary.facility,
-          lng: findLatLong.LNG,
-          lat: findLatLong.LAT,
-          energyUse: summary.energyUsage,
-        });
-      }
-    })
+    if (this.emissionsDisplay && this.accountFacilitiesSummary) {
+      this.mapData = new Array();
+      this.accountFacilitiesSummary.facilitySummaries.forEach(summary => {
+        let findLatLong = this.eGridService.zipLatLong.find(zipLL => { return zipLL.ZIP == summary.facility.zip });
+        let emissions: number;
+        if (this.emissionsDisplay == 'location') {
+          emissions = summary.locationEmissions;
+        } else {
+          emissions = summary.marketEmissions;
+        }
+        if (findLatLong) {
+          this.mapData.push({
+            facility: summary.facility,
+            lng: findLatLong.LNG,
+            lat: findLatLong.LAT,
+            emissions: emissions / 1000,
+          });
+        }
+      })
+    }
   }
 }
