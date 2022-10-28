@@ -44,8 +44,8 @@ export class AccountOverviewComponent implements OnInit {
           this.accountOverviewService.accountFacilitiesCostsSummary.next(data.accountFacilitiesSummary);
           this.accountOverviewService.costsUtilityUsageSummaryData.next(data.utilityUsageSummaryData);
           this.accountOverviewService.calculatingCosts.next(false);
+          this.worker.terminate();
         }
-        // this.worker.terminate();
       };
       this.accountOverviewService.calculatingEnergy.next(true);
 

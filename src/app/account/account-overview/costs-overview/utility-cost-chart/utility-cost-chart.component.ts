@@ -1,9 +1,8 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { AccountOverviewService } from '../../account-overview.service';
 import { Subscription } from 'rxjs';
-import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { UtilityColors } from 'src/app/shared/utilityColors';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { PlotlyService } from 'angular-plotly.js';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
@@ -16,7 +15,7 @@ import { StackedBarChartData, UtilityItem } from 'src/app/models/dashboard';
   styleUrls: ['./utility-cost-chart.component.css']
 })
 export class UtilityCostChartComponent implements OnInit {
-  @ViewChild('energyUseStackedBarChart', { static: false }) energyUseStackedBarChart: ElementRef;
+  @ViewChild('costsStackedBarChart', { static: false }) costsStackedBarChart: ElementRef;
 
   accountFacilitiesSub: Subscription;
   barChartData: Array<StackedBarChartData>;
@@ -41,7 +40,7 @@ export class UtilityCostChartComponent implements OnInit {
   }
 
   drawChart() {
-    if (this.energyUseStackedBarChart) {
+    if (this.costsStackedBarChart) {
       if (this.barChartData && this.barChartData.length != 0) {
         let tickprefix: string = "$";
         let yaxisTitle: string = "Utility Costs";
@@ -147,7 +146,7 @@ export class UtilityCostChartComponent implements OnInit {
           displaylogo: false,
           responsive: true,
         };
-        this.plotlyService.newPlot(this.energyUseStackedBarChart.nativeElement, data, layout, config);
+        this.plotlyService.newPlot(this.costsStackedBarChart.nativeElement, data, layout, config);
       }
     }
   }

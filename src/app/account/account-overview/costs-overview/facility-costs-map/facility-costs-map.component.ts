@@ -9,12 +9,12 @@ import { AccountFacilitiesSummary } from 'src/app/models/dashboard';
 import { AccountOverviewService } from '../../account-overview.service';
 
 @Component({
-  selector: 'app-utility-usage-map',
-  templateUrl: './utility-usage-map.component.html',
-  styleUrls: ['./utility-usage-map.component.css']
+  selector: 'app-facility-costs-map',
+  templateUrl: './facility-costs-map.component.html',
+  styleUrls: ['./facility-costs-map.component.css']
 })
-export class UtilityUsageMapComponent implements OnInit {
-  @ViewChild('utilityUsageMap', { static: false }) utilityUsageMap: ElementRef;
+export class FacilityCostsMapComponent implements OnInit {
+  @ViewChild('utilityCostsMap', { static: false }) utilityCostsMap: ElementRef;
 
 
   accountFacilitiesSummary: AccountFacilitiesSummary;
@@ -22,7 +22,7 @@ export class UtilityUsageMapComponent implements OnInit {
   mapData: Array<{
     lng: string,
     lat: string,
-    energyUse: number,
+    energyCost: number,
     facility: IdbFacility
   }>;
 
@@ -53,8 +53,8 @@ export class UtilityUsageMapComponent implements OnInit {
 
 
   drawChart() {
-    if (this.utilityUsageMap) {
-      let cmax: number = _.maxBy(this.mapData, 'energyUse').energyUse;
+    if (this.utilityCostsMap && this.mapData && this.mapData.length != 0) {
+      let cmax: number = _.maxBy(this.mapData, 'energyCost').energyCost;
       // let lats: Array<number> = this.mapData.map(item => { return Number(item.lat) });
       // let lons: Array<number> = this.mapData.map(item => { return Number(item.lng) });
 
@@ -65,25 +65,25 @@ export class UtilityUsageMapComponent implements OnInit {
         // locations: ["CA", "TN", "OK", "MN"],
         lat: this.mapData.map(item => { return item.lat }),
         lon: this.mapData.map(item => { return item.lng }),
-        hovertext: this.mapData.map(item => { return item.facility.name + ': ' + (item.energyUse).toLocaleString(undefined, { maximumFractionDigits: 0, minimumIntegerDigits: 1 }) + ' ' + selectedAccount.energyUnit }),
+        hovertext: this.mapData.map(item => { return item.facility.name + ': $' + (item.energyCost).toLocaleString(undefined, { maximumFractionDigits: 0, minimumIntegerDigits: 1 }) }),
         hoverinfo: 'text',
         text: this.mapData.map(item => { return item.facility.name }),
         marker: {
           text: this.mapData.map(item => { return item.facility.name }),
-          size: this.mapData.map(item => { return (item.energyUse / cmax) * 25 + 10 }),
-          color: this.mapData.map(item => { return item.energyUse }),
+          size: this.mapData.map(item => { return (item.energyCost / cmax) * 25 + 10 }),
+          color: this.mapData.map(item => { return item.energyCost }),
           cmin: 0,
           cmax: cmax,
           // colorscale: 'Greens',
           colorbar: {
-            title: 'Energy Consumption',
+            title: 'Energy Costs',
             // ticksuffix: '%',
             // showticksuffix: 'last'
           },
           line: {
             color: 'black'
           },
-          symbol: 'x'
+          symbol: "diamond",
         },
         name: 'Energy Use Data',
         // hovertemplate:  '%{label}: %{value:,.0f} <extra></extra>'
@@ -109,7 +109,6 @@ export class UtilityUsageMapComponent implements OnInit {
           //   lon: _.mean(lons)
           // }
         },
-
         margin: { "t": 0, "b": 50, "l": 0, "r": 50 },
       };
 
@@ -118,7 +117,7 @@ export class UtilityUsageMapComponent implements OnInit {
         responsive: true
       }
 
-      this.plotlyService.newPlot(this.utilityUsageMap.nativeElement, data, layout, config);
+      this.plotlyService.newPlot(this.utilityCostsMap.nativeElement, data, layout, config);
     }
   }
 
@@ -132,7 +131,7 @@ export class UtilityUsageMapComponent implements OnInit {
           facility: summary.facility,
           lng: findLatLong.LNG,
           lat: findLatLong.LAT,
-          energyUse: summary.energyUsage,
+          energyCost: summary.energyCost,
         });
       }
     })

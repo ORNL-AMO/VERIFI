@@ -20,6 +20,7 @@ import { FacilityCostTableComponent } from './costs-overview/facility-cost-table
 import { FacilityCostChartComponent } from './costs-overview/facility-cost-chart/facility-cost-chart.component';
 import { UtilityCostChartComponent } from './costs-overview/utility-cost-chart/utility-cost-chart.component';
 import { UtilityCostTableComponent } from './costs-overview/utility-cost-table/utility-cost-table.component';
+import { FacilityCostsMapComponent } from './costs-overview/facility-costs-map/facility-costs-map.component';
 
 
 
@@ -41,7 +42,8 @@ import { UtilityCostTableComponent } from './costs-overview/utility-cost-table/u
     FacilityCostTableComponent,
     FacilityCostChartComponent,
     UtilityCostChartComponent,
-    UtilityCostTableComponent
+    UtilityCostTableComponent,
+    FacilityCostsMapComponent
   ],
   imports: [
     CommonModule,

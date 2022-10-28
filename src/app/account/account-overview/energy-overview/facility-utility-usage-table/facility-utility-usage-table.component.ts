@@ -16,15 +16,12 @@ export class FacilityUtilityUsageTableComponent implements OnInit {
   selectedAccountSub: Subscription;
   accountEnergyUnit: string;
   accountFacilitiesSummary: AccountFacilitiesSummary;
-  lastMonthsDate: Date;
-  yearPriorDate: Date;
   accountFacilitiesSummarySub: Subscription;
 
   constructor(private router: Router, private accountOverviewService: AccountOverviewService,
     private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
-
     this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(val => {
       if (val) {
         this.accountEnergyUnit = val.energyUnit;
@@ -32,13 +29,6 @@ export class FacilityUtilityUsageTableComponent implements OnInit {
     });
     this.accountFacilitiesSummarySub = this.accountOverviewService.accountFacilitiesEnergySummary.subscribe(val => {
       this.accountFacilitiesSummary = val;
-      if (this.accountFacilitiesSummary.allMetersLastBill) {
-        this.lastMonthsDate = new Date(this.accountFacilitiesSummary.allMetersLastBill.year, this.accountFacilitiesSummary.allMetersLastBill.monthNumValue);
-        this.yearPriorDate = new Date(this.accountFacilitiesSummary.allMetersLastBill.year - 1, this.accountFacilitiesSummary.allMetersLastBill.monthNumValue);
-      } else {
-        this.lastMonthsDate = undefined;
-        this.yearPriorDate = undefined;
-      }
     });
   }
 
