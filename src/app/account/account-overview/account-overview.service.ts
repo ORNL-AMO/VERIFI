@@ -11,13 +11,17 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
 })
 export class AccountOverviewService {
 
-  accountFacilitiesSummary: BehaviorSubject<AccountFacilitiesSummary>;
-  utilityUsageSummaryData: BehaviorSubject<UtilityUsageSummaryData>;
-  calculating: BehaviorSubject<boolean>;
+  accountFacilitiesEnergySummary: BehaviorSubject<AccountFacilitiesSummary>;
+  energyUtilityUsageSummaryData: BehaviorSubject<UtilityUsageSummaryData>;
+  calculatingEnergy: BehaviorSubject<boolean>;
   calanderizedMeters: Array<CalanderizedMeter>;
+
+  accountFacilitiesCostsSummary: BehaviorSubject<AccountFacilitiesSummary>;
+  costsUtilityUsageSummaryData: BehaviorSubject<UtilityUsageSummaryData>;
+  calculatingCosts: BehaviorSubject<boolean>;
   constructor(private calanderizationService: CalanderizationService, private utilityMeterDbService: UtilityMeterdbService) {
-    this.calculating = new BehaviorSubject<boolean>(undefined);
-    this.accountFacilitiesSummary = new BehaviorSubject<AccountFacilitiesSummary>({
+    this.calculatingEnergy = new BehaviorSubject<boolean>(undefined);
+    this.accountFacilitiesEnergySummary = new BehaviorSubject<AccountFacilitiesSummary>({
       facilitySummaries: [],
       totalEnergyUse: undefined,
       totalEnergyCost: undefined,
@@ -26,7 +30,20 @@ export class AccountOverviewService {
       totalMarketEmissions: undefined,
       allMetersLastBill: undefined
     });
-    this.utilityUsageSummaryData = new BehaviorSubject<UtilityUsageSummaryData>(undefined);
+    this.energyUtilityUsageSummaryData = new BehaviorSubject<UtilityUsageSummaryData>(undefined);
+
+    
+    this.calculatingCosts = new BehaviorSubject<boolean>(undefined);
+    this.accountFacilitiesCostsSummary = new BehaviorSubject<AccountFacilitiesSummary>({
+      facilitySummaries: [],
+      totalEnergyUse: undefined,
+      totalEnergyCost: undefined,
+      totalNumberOfMeters: undefined,
+      totalLocationEmissions: undefined,
+      totalMarketEmissions: undefined,
+      allMetersLastBill: undefined
+    });
+    this.costsUtilityUsageSummaryData = new BehaviorSubject<UtilityUsageSummaryData>(undefined);
   }
 
   setCalanderizedMeters() {

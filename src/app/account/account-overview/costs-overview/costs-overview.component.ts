@@ -19,12 +19,12 @@ export class CostsOverviewComponent implements OnInit {
   ngOnInit(): void {
 
 
-    this.calculatingSub = this.accountOverviewService.calculating.subscribe(val => {
+    this.calculatingSub = this.accountOverviewService.calculatingCosts.subscribe(val => {
       this.calculating = val;
     })
 
 
-    this.accountFacilitiesSummarySub = this.accountOverviewService.accountFacilitiesSummary.subscribe(accountFacilitiesSummary => {
+    this.accountFacilitiesSummarySub = this.accountOverviewService.accountFacilitiesCostsSummary.subscribe(accountFacilitiesSummary => {
       if (accountFacilitiesSummary.allMetersLastBill) {
         this.lastMonthsDate = new Date(accountFacilitiesSummary.allMetersLastBill.year, accountFacilitiesSummary.allMetersLastBill.monthNumValue);
         this.yearPriorDate = new Date(accountFacilitiesSummary.allMetersLastBill.year - 1, accountFacilitiesSummary.allMetersLastBill.monthNumValue);

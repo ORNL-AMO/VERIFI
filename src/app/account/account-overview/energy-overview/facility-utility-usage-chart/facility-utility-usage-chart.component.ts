@@ -20,7 +20,7 @@ export class FacilityUtilityUsageChartComponent implements OnInit {
     private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
-    this.accountFacilitiesSummarySub = this.accountOverviewService.accountFacilitiesSummary.subscribe(accountFacilitiesSummary => {
+    this.accountFacilitiesSummarySub = this.accountOverviewService.accountFacilitiesEnergySummary.subscribe(accountFacilitiesSummary => {
       this.facilitiesSummary = accountFacilitiesSummary;
       this.drawChart();
     });

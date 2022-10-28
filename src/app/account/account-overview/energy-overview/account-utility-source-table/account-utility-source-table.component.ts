@@ -27,7 +27,7 @@ export class AccountUtilitySourceTableComponent implements OnInit {
         this.accountEnergyUnit = val.energyUnit;
       }
     });
-    this.accountUtilityUsageSummaryDataSub = this.accountOverviewService.utilityUsageSummaryData.subscribe(val => {
+    this.accountUtilityUsageSummaryDataSub = this.accountOverviewService.energyUtilityUsageSummaryData.subscribe(val => {
       this.utilityUsageSummaryData = val;
       if (this.utilityUsageSummaryData && this.utilityUsageSummaryData.allMetersLastBill) {
         this.lastMonthsDate = new Date(this.utilityUsageSummaryData.allMetersLastBill.year, this.utilityUsageSummaryData.allMetersLastBill.monthNumValue);

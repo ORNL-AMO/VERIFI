@@ -30,7 +30,7 @@ export class FacilityUtilityUsageTableComponent implements OnInit {
         this.accountEnergyUnit = val.energyUnit;
       }
     });
-    this.accountFacilitiesSummarySub = this.accountOverviewService.accountFacilitiesSummary.subscribe(val => {
+    this.accountFacilitiesSummarySub = this.accountOverviewService.accountFacilitiesEnergySummary.subscribe(val => {
       this.accountFacilitiesSummary = val;
       if (this.accountFacilitiesSummary.allMetersLastBill) {
         this.lastMonthsDate = new Date(this.accountFacilitiesSummary.allMetersLastBill.year, this.accountFacilitiesSummary.allMetersLastBill.monthNumValue);

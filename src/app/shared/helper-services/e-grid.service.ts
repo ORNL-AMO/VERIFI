@@ -165,7 +165,6 @@ export class EGridService {
       .then(response => response.arrayBuffer())
       .then(buffer => {
         let wb: XLSX.WorkBook = XLSX.read(new Uint8Array(buffer), { type: "array", raw: false });
-        console.log(wb);
         //zip code regions
         // [0: "ZIP"
         // 1: "LAT"
@@ -179,17 +178,6 @@ export class EGridService {
             LNG: sheetOne[i]['LNG'],
           })
         }
-
-
-        console.log(this.zipLatLong);
-        // this.setSubRegionsByZip(sheetOne)
-        //eGrid data
-        //0: SUBRGN
-        //1: YEAR
-        //2: CATEGORY
-        //3: CO2e
-        // let sheetTwo = XLSX.utils.sheet_to_json(wb.Sheets["eGrid_co2"], { raw: false });
-        // this.setCo2Emissions(sheetTwo);
       });
   }
 

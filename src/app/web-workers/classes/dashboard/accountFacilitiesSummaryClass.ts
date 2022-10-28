@@ -9,9 +9,10 @@ export class AccountFacilitiesSummaryClass {
 
     facilitiesSummary: AccountFacilitiesSummary
     utilityUsageSummaryData: UtilityUsageSummaryData;
-    constructor(calanderizedMeters: Array<CalanderizedMeter>, facilities: Array<IdbFacility>) {
-        this.facilitiesSummary = this.calculateFacilitiesSummary(calanderizedMeters, facilities);
-        this.utilityUsageSummaryData = this.calculateAccountUtilityUsageSummary(calanderizedMeters, this.facilitiesSummary.allMetersLastBill);
+    constructor(calanderizedMeters: Array<CalanderizedMeter>, facilities: Array<IdbFacility>, sources: Array<MeterSource>) {
+        let filteredSourceMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(meter => {return sources.includes(meter.meter.source)})
+        this.facilitiesSummary = this.calculateFacilitiesSummary(filteredSourceMeters, facilities);
+        this.utilityUsageSummaryData = this.calculateAccountUtilityUsageSummary(filteredSourceMeters, this.facilitiesSummary.allMetersLastBill, sources);
     }
 
     calculateFacilitiesSummary(calanderizedMeters: Array<CalanderizedMeter>, facilities: Array<IdbFacility>): AccountFacilitiesSummary {
@@ -66,11 +67,10 @@ export class AccountFacilitiesSummaryClass {
 
     }
 
-    calculateAccountUtilityUsageSummary(calanderizedMeters: Array<CalanderizedMeter>, allMetersLastBill: MonthlyData): UtilityUsageSummaryData {
+    calculateAccountUtilityUsageSummary(calanderizedMeters: Array<CalanderizedMeter>, allMetersLastBill: MonthlyData, sources: Array<MeterSource>): UtilityUsageSummaryData {
         let accountUtilitySummaries: Array<SummaryData> = new Array();
 
-        let energySources: Array<MeterSource> = ['Electricity', 'Natural Gas', 'Other Fuels', 'Other Energy']
-        energySources.forEach(source => {
+        sources.forEach(source => {
             let sourceMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return cMeter.meter.source == source });
             if (sourceMeters.length != 0) {
                 let pastYearData: {

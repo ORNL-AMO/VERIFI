@@ -3,7 +3,7 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountOverviewService } from './account-overview.service';
 import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbFacility } from 'src/app/models/idb';
+import { IdbFacility, MeterSource } from 'src/app/models/idb';
 
 @Component({
   selector: 'app-account-overview',
@@ -14,14 +14,11 @@ export class AccountOverviewComponent implements OnInit {
 
   accountSub: Subscription;
   worker: Worker;
-  calculating: boolean;
   constructor(private accountDbService: AccountdbService, private accountOverviewService: AccountOverviewService, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
     this.accountSub = this.accountDbService.selectedAccount.subscribe(val => {
-      console.time('calanderize');
       this.accountOverviewService.setCalanderizedMeters();
-      console.timeEnd('calanderize');
       this.calculateFacilitiesSummary();
     });
   }
@@ -39,16 +36,40 @@ export class AccountOverviewComponent implements OnInit {
       this.worker = new Worker(new URL('src/app/web-workers/account-overview.worker', import.meta.url));
       let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
       this.worker.onmessage = ({ data }) => {
-        this.accountOverviewService.accountFacilitiesSummary.next(data.accountFacilitiesSummary);
-        this.accountOverviewService.utilityUsageSummaryData.next(data.utilityUsageSummaryData);
-        this.accountOverviewService.calculating.next(false);
-        this.calculating = false;
-        this.worker.terminate();
+        if (data.type == 'energy') {
+          this.accountOverviewService.accountFacilitiesEnergySummary.next(data.accountFacilitiesSummary);
+          this.accountOverviewService.energyUtilityUsageSummaryData.next(data.utilityUsageSummaryData);
+          this.accountOverviewService.calculatingEnergy.next(false);
+        }else if(data.type == 'all'){
+          this.accountOverviewService.accountFacilitiesCostsSummary.next(data.accountFacilitiesSummary);
+          this.accountOverviewService.costsUtilityUsageSummaryData.next(data.utilityUsageSummaryData);
+          this.accountOverviewService.calculatingCosts.next(false);
+        }
+        // this.worker.terminate();
       };
-      this.accountOverviewService.calculating.next(true);
+      this.accountOverviewService.calculatingEnergy.next(true);
+
+      let energySources: Array<MeterSource> = ['Electricity', 'Natural Gas', 'Other Fuels', 'Other Energy']
       this.worker.postMessage({
         calanderizedMeters: this.accountOverviewService.calanderizedMeters,
         facilities: facilities,
+        sources: energySources,
+        type: 'energy'
+      });
+      let allSources: Array<MeterSource> = [
+        "Electricity",
+        "Natural Gas",
+        "Other Fuels",
+        "Other Energy",
+        "Water",
+        "Waste Water",
+        "Other Utility"
+      ]
+      this.worker.postMessage({
+        calanderizedMeters: this.accountOverviewService.calanderizedMeters,
+        facilities: facilities,
+        sources: allSources,
+        type: 'all'
       });
     } else {
       console.log('nopee')

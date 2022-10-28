@@ -33,7 +33,7 @@ export class UtilityUsageMapComponent implements OnInit {
     private accountOverviewService: AccountOverviewService) { }
 
   ngOnInit(): void {
-    this.accountFacilitiesSummarySub = this.accountOverviewService.accountFacilitiesSummary.subscribe(accountFacilitiesSummary => {
+    this.accountFacilitiesSummarySub = this.accountOverviewService.accountFacilitiesEnergySummary.subscribe(accountFacilitiesSummary => {
       this.accountFacilitiesSummary = accountFacilitiesSummary;
       this.setBarChartData();
       this.drawChart();

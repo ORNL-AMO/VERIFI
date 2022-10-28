@@ -8,6 +8,7 @@ import { PlotlyService } from 'angular-plotly.js';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { StackedBarChartData, UtilityItem } from 'src/app/models/dashboard';
 
 @Component({
   selector: 'app-account-utility-source-chart',
@@ -25,7 +26,7 @@ export class AccountUtilitySourceChartComponent implements OnInit {
     private utilityMeterDataDbService: UtilityMeterDatadbService) { }
 
   ngOnInit(): void {
-    this.accountFacilitiesSub = this.accountOverviewService.accountFacilitiesSummary.subscribe(val => {
+    this.accountFacilitiesSub = this.accountOverviewService.accountFacilitiesEnergySummary.subscribe(val => {
       this.setBarChartData();
       this.drawChart();
     });
@@ -164,25 +165,13 @@ export class AccountUtilitySourceChartComponent implements OnInit {
           electricity: electricity,
           naturalGas: naturalGas,
           otherFuels: otherFuels,
-          otherEnergy: otherEnergy
+          otherEnergy: otherEnergy,
+          wasteWater: undefined,
+          water: undefined,
+          otherUtility: undefined
         });
       }
     });
   }
 
-}
-
-export interface StackedBarChartData {
-  facilityName: string
-  electricity: UtilityItem,
-  naturalGas: UtilityItem,
-  otherFuels: UtilityItem,
-  otherEnergy: UtilityItem
-}
-
-export interface UtilityItem {
-  energyUse: number,
-  energyCost: number,
-  marketEmissions: number,
-  locationEmissions: number
 }
