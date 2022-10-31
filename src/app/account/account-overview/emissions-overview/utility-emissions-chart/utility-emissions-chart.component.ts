@@ -211,7 +211,6 @@ export class UtilityEmissionsChartComponent implements OnInit {
           });
         }
       });
-      console.log(this.barChartData);
     }
   }
 }

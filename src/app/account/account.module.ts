@@ -12,6 +12,7 @@ import { AccountDashboardModule } from './account-dashboard/account-dashboard.mo
 import { AccountAnalysisModule } from './account-analysis/account-analysis.module';
 import { AccountHomeModule } from './account-home/account-home.module';
 import { CustomDatabaseModule } from './custom-database/custom-database.module';
+import { AccountOverviewModule } from './account-overview/account-overview.module';
 
 
 @NgModule({
@@ -30,7 +31,8 @@ import { CustomDatabaseModule } from './custom-database/custom-database.module';
     AccountDashboardModule,
     AccountAnalysisModule,
     AccountHomeModule,
-    CustomDatabaseModule
+    CustomDatabaseModule,
+    AccountOverviewModule
   ]
 })
 export class AccountModule { }

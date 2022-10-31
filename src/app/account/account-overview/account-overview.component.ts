@@ -30,7 +30,6 @@ export class AccountOverviewComponent implements OnInit {
     }
   }
 
-
   calculateFacilitiesSummary() {
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('src/app/web-workers/account-overview.worker', import.meta.url));
@@ -41,11 +40,9 @@ export class AccountOverviewComponent implements OnInit {
           this.accountOverviewService.energyUtilityUsageSummaryData.next(data.utilityUsageSummaryData);
           this.accountOverviewService.calculatingEnergy.next(false);
         }else if(data.type == 'water'){
-          console.log(data)
           this.accountOverviewService.accountFacilitiesWaterSummary.next(data.accountFacilitiesSummary);
           this.accountOverviewService.waterUtilityUsageSummaryData.next(data.utilityUsageSummaryData);
           this.accountOverviewService.calculatingWater.next(false);
-          this.worker.terminate();
         } else if(data.type == 'all'){
           this.accountOverviewService.accountFacilitiesCostsSummary.next(data.accountFacilitiesSummary);
           this.accountOverviewService.costsUtilityUsageSummaryData.next(data.utilityUsageSummaryData);

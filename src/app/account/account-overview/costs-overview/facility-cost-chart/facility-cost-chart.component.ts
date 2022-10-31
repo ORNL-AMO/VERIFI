@@ -33,6 +33,7 @@ export class FacilityCostChartComponent implements OnInit {
 
   drawChart() {
     if (this.costDonut && this.facilitiesSummary) {
+      console.log('draw!');
       let hovertemplate: string = '%{label}: %{value:$,.0f} <extra></extra>'
       var data = [{
         values: this.facilitiesSummary.facilitySummaries.map(summary => { return summary.energyCost }),
@@ -60,6 +61,7 @@ export class FacilityCostChartComponent implements OnInit {
         displaylogo: false,
         responsive: true
       }
+      console.log(data);
       this.plotlyService.newPlot(this.costDonut.nativeElement, data, layout, config);
     }
   }

@@ -24,7 +24,6 @@ import { SearchBarComponent } from './core-components/header/search-bar/search-b
 import { NgbTypeaheadModule } from '@ng-bootstrap/ng-bootstrap';
 import { FacilityListPipe } from './core-components/sidebar/facility-list.pipe';
 import { UploadDataModule } from './upload-data/upload-data.module';
-import { AccountOverviewModule } from './account/account-overview/account-overview.module';
 
 @NgModule({
   declarations: [
@@ -54,8 +53,7 @@ import { AccountOverviewModule } from './account/account-overview/account-overvi
     SetupWizardModule,
     HelperPipesModule,
     NgbTypeaheadModule,
-    UploadDataModule,
-    AccountOverviewModule
+    UploadDataModule
   ],
   providers: [],
   bootstrap: [AppComponent]
