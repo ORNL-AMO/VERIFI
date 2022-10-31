@@ -25,6 +25,11 @@ import { FacilityEmissionsChartComponent } from './emissions-overview/facility-e
 import { UtilityEmissionsChartComponent } from './emissions-overview/utility-emissions-chart/utility-emissions-chart.component';
 import { UtilityEmissionsTableComponent } from './emissions-overview/utility-emissions-table/utility-emissions-table.component';
 import { FacilityEmissionsMapComponent } from './emissions-overview/facility-emissions-map/facility-emissions-map.component';
+import { FacilityWaterTableComponent } from './water-overview/facility-water-table/facility-water-table.component';
+import { FacilityWaterChartComponent } from './water-overview/facility-water-chart/facility-water-chart.component';
+import { FacilityWaterMapComponent } from './water-overview/facility-water-map/facility-water-map.component';
+import { UtilityWaterChartComponent } from './water-overview/utility-water-chart/utility-water-chart.component';
+import { UtilityWaterTableComponent } from './water-overview/utility-water-table/utility-water-table.component';
 
 
 
@@ -51,7 +56,12 @@ import { FacilityEmissionsMapComponent } from './emissions-overview/facility-emi
     FacilityEmissionsChartComponent,
     UtilityEmissionsChartComponent,
     UtilityEmissionsTableComponent,
-    FacilityEmissionsMapComponent
+    FacilityEmissionsMapComponent,
+    FacilityWaterTableComponent,
+    FacilityWaterChartComponent,
+    FacilityWaterMapComponent,
+    UtilityWaterChartComponent,
+    UtilityWaterTableComponent
   ],
   imports: [
     CommonModule,

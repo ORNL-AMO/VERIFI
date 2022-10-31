@@ -5,6 +5,7 @@ import { IdbFacility, IdbUtilityMeter } from "./idb";
 export interface AccountFacilitiesSummary {
     facilitySummaries: Array<FacilitySummary>,
     totalEnergyUse: number,
+    totalConsumption: number,
     totalEnergyCost: number,
     totalNumberOfMeters: number,
     totalMarketEmissions: number,
@@ -18,6 +19,7 @@ export interface FacilitySummary {
     energyCost: number,
     marketEmissions: number,
     locationEmissions: number,
+    consumption: number,
     numberOfMeters: number,
     lastBillDate: Date
 }
@@ -55,20 +57,24 @@ export interface SummaryData {
     lastBillDate: Date,
     previousMonthEnergyUse: number,
     previousMonthEnergyCost: number,
+    previousMonthConsumption: number,
     previousMonthLocationEmissions: number,
     previousMonthMarketEmissions: number,
     averageEnergyUse: number,
     averageEnergyCost: number,
+    averageConsumption: number,
     averageLocationEmissions: number,
     averageMarketEmissions: number,
     yearPriorEnergyUse: number,
     yearPriorEnergyCost: number,
+    yearPriorConsumption: number,
     yearPriorLocationEmissions: number,
     yearPriorMarketEmissions: number,
     energyUseChangeSinceLastYear: number,
     energyCostChangeSinceLastYear: number,
     locationEmissionsChangeSinceLastYear: number,
     marketEmissionsChangeSinceLastYear: number,
+    consumptionChangeSinceLastYear: number,
     utility: string
 }
 

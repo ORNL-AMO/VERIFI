@@ -40,7 +40,13 @@ export class AccountOverviewComponent implements OnInit {
           this.accountOverviewService.accountFacilitiesEnergySummary.next(data.accountFacilitiesSummary);
           this.accountOverviewService.energyUtilityUsageSummaryData.next(data.utilityUsageSummaryData);
           this.accountOverviewService.calculatingEnergy.next(false);
-        }else if(data.type == 'all'){
+        }else if(data.type == 'water'){
+          console.log(data)
+          this.accountOverviewService.accountFacilitiesWaterSummary.next(data.accountFacilitiesSummary);
+          this.accountOverviewService.waterUtilityUsageSummaryData.next(data.utilityUsageSummaryData);
+          this.accountOverviewService.calculatingWater.next(false);
+          this.worker.terminate();
+        } else if(data.type == 'all'){
           this.accountOverviewService.accountFacilitiesCostsSummary.next(data.accountFacilitiesSummary);
           this.accountOverviewService.costsUtilityUsageSummaryData.next(data.utilityUsageSummaryData);
           this.accountOverviewService.calculatingCosts.next(false);
@@ -56,6 +62,19 @@ export class AccountOverviewComponent implements OnInit {
         sources: energySources,
         type: 'energy'
       });
+
+      let waterSources: Array<MeterSource> = [
+        "Water",
+        "Waste Water"
+      ];
+      console.log(this.accountOverviewService.calanderizedMeters);
+      this.worker.postMessage({
+        calanderizedMeters: this.accountOverviewService.calanderizedMeters,
+        facilities: facilities,
+        sources: waterSources,
+        type: 'water'
+      });
+      
       let allSources: Array<MeterSource> = [
         "Electricity",
         "Natural Gas",

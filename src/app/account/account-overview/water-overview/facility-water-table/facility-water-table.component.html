@@ -3,12 +3,13 @@
         <thead>
             <tr>
                 <th>Facility</th>
-                <th class="w-1"># of Meters</th>
+                <th>Water Consumption<br> (<span [innerHTML]="waterUnit | settingsLabel"></span>)
+                </th>
                 <th>Utility Cost </th>
             </tr>
         </thead>
         <tbody *ngIf="accountFacilitiesSummary && accountFacilitiesSummary.facilitySummaries">
-            <tr *ngFor="let summary of accountFacilitiesSummary.facilitySummaries | orderBy: 'energyCost'">
+            <tr *ngFor="let summary of accountFacilitiesSummary.facilitySummaries | orderBy: 'consumption'">
                 <td>
                     <span class="badge"
                         [ngStyle]="{background: summary.facility.color, color: summary.facility.color }">
@@ -17,7 +18,8 @@
                     <a class="pl-2" (click)="selectFacility(summary.facility)">{{summary.facility.name}}</a>
                 </td>
                 <td>
-                    {{summary.numberOfMeters}}
+                    {{summary.consumption | customNumber}}
+
                 </td>
                 <td>
                     {{summary.energyCost | customNumber:true }}
@@ -30,7 +32,7 @@
                     Total
                 </th>
                 <th>
-                    {{accountFacilitiesSummary.totalNumberOfMeters}}
+                    {{accountFacilitiesSummary.totalConsumption | customNumber}}
                 </th>
                 <th>
                     {{accountFacilitiesSummary.totalEnergyCost | customNumber:true }}

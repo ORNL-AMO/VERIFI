@@ -9,12 +9,12 @@ import { AccountFacilitiesSummary } from 'src/app/models/dashboard';
 import { AccountOverviewService } from '../../account-overview.service';
 
 @Component({
-  selector: 'app-utility-usage-map',
-  templateUrl: './utility-usage-map.component.html',
-  styleUrls: ['./utility-usage-map.component.css']
+  selector: 'app-facility-water-map',
+  templateUrl: './facility-water-map.component.html',
+  styleUrls: ['./facility-water-map.component.css']
 })
-export class UtilityUsageMapComponent implements OnInit {
-  @ViewChild('utilityUsageMap', { static: false }) utilityUsageMap: ElementRef;
+export class FacilityWaterMapComponent implements OnInit {
+  @ViewChild('waterConsumptionMap', { static: false }) waterConsumptionMap: ElementRef;
 
 
   accountFacilitiesSummary: AccountFacilitiesSummary;
@@ -22,7 +22,7 @@ export class UtilityUsageMapComponent implements OnInit {
   mapData: Array<{
     lng: string,
     lat: string,
-    energyUse: number,
+    consumption: number,
     facility: IdbFacility
   }>;
 
@@ -33,7 +33,7 @@ export class UtilityUsageMapComponent implements OnInit {
     private accountOverviewService: AccountOverviewService) { }
 
   ngOnInit(): void {
-    this.accountFacilitiesSummarySub = this.accountOverviewService.accountFacilitiesEnergySummary.subscribe(accountFacilitiesSummary => {
+    this.accountFacilitiesSummarySub = this.accountOverviewService.accountFacilitiesWaterSummary.subscribe(accountFacilitiesSummary => {
       this.accountFacilitiesSummary = accountFacilitiesSummary;
       this.setMapData();
       this.drawChart();
@@ -53,8 +53,8 @@ export class UtilityUsageMapComponent implements OnInit {
 
 
   drawChart() {
-    if (this.utilityUsageMap && this.mapData && this.mapData.length != 0) {
-      let cmax: number = _.maxBy(this.mapData, 'energyUse').energyUse;
+    if (this.waterConsumptionMap && this.mapData && this.mapData.length != 0) {
+      let cmax: number = _.maxBy(this.mapData, 'consumption').consumption;
       // let lats: Array<number> = this.mapData.map(item => { return Number(item.lat) });
       // let lons: Array<number> = this.mapData.map(item => { return Number(item.lng) });
 
@@ -65,13 +65,12 @@ export class UtilityUsageMapComponent implements OnInit {
         // locations: ["CA", "TN", "OK", "MN"],
         lat: this.mapData.map(item => { return item.lat }),
         lon: this.mapData.map(item => { return item.lng }),
-        hovertext: this.mapData.map(item => { return item.facility.name + ': ' + (item.energyUse).toLocaleString(undefined, { maximumFractionDigits: 0, minimumIntegerDigits: 1 }) + ' ' + selectedAccount.energyUnit }),
-        hoverinfo: 'text',
+        hovertext: this.mapData.map(item => { return item.facility.name + ': ' + (item.consumption).toLocaleString(undefined, { maximumFractionDigits: 0, minimumIntegerDigits: 1 }) + ' ' + selectedAccount.volumeLiquidUnit }),        hoverinfo: 'text',
         text: this.mapData.map(item => { return item.facility.name }),
         marker: {
           text: this.mapData.map(item => { return item.facility.name }),
-          size: this.mapData.map(item => { return (item.energyUse / cmax) * 25 + 10 }),
-          color: this.mapData.map(item => { return item.energyUse }),
+          size: this.mapData.map(item => { return (item.consumption / cmax) * 25 + 10 }),
+          color: this.mapData.map(item => { return item.consumption }),
           cmin: 0,
           cmax: cmax,
           // colorscale: 'Greens',
@@ -84,7 +83,7 @@ export class UtilityUsageMapComponent implements OnInit {
           line: {
             color: 'black'
           },
-          symbol: 'star-square'
+          symbol: 'square'
         },
         name: 'Energy Use Data',
         // hovertemplate:  '%{label}: %{value:,.0f} <extra></extra>'
@@ -120,7 +119,7 @@ export class UtilityUsageMapComponent implements OnInit {
         scrollZoom: false
       }
 
-      this.plotlyService.newPlot(this.utilityUsageMap.nativeElement, data, layout, config);
+      this.plotlyService.newPlot(this.waterConsumptionMap.nativeElement, data, layout, config);
     }
   }
 
@@ -134,7 +133,7 @@ export class UtilityUsageMapComponent implements OnInit {
           facility: summary.facility,
           lng: findLatLong.LNG,
           lat: findLatLong.LAT,
-          energyUse: summary.energyUsage,
+          consumption: summary.consumption,
         });
       }
     })

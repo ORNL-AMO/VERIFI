@@ -18,6 +18,7 @@ export class FacilitiesTableComponent implements OnInit {
   accountEnergyUnit: string;
   accountFacilitiesSummary: AccountFacilitiesSummary = {
     facilitySummaries: [],
+    totalConsumption: undefined,
     totalEnergyUse: undefined,
     totalEnergyCost: undefined,
     totalNumberOfMeters: undefined,

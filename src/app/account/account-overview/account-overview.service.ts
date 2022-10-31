@@ -20,6 +20,11 @@ export class AccountOverviewService {
   costsUtilityUsageSummaryData: BehaviorSubject<UtilityUsageSummaryData>;
   calculatingCosts: BehaviorSubject<boolean>;
 
+  accountFacilitiesWaterSummary: BehaviorSubject<AccountFacilitiesSummary>;
+  waterUtilityUsageSummaryData: BehaviorSubject<UtilityUsageSummaryData>;
+  calculatingWater: BehaviorSubject<boolean>;
+
+
   emissionsDisplay: BehaviorSubject<"market" | "location">;
   constructor(private calanderizationService: CalanderizationService, private utilityMeterDbService: UtilityMeterdbService) {
     this.calculatingEnergy = new BehaviorSubject<boolean>(undefined);
@@ -30,7 +35,8 @@ export class AccountOverviewService {
       totalNumberOfMeters: undefined,
       totalLocationEmissions: undefined,
       totalMarketEmissions: undefined,
-      allMetersLastBill: undefined
+      allMetersLastBill: undefined,
+      totalConsumption: undefined
     });
     this.energyUtilityUsageSummaryData = new BehaviorSubject<UtilityUsageSummaryData>(undefined);
 
@@ -43,9 +49,25 @@ export class AccountOverviewService {
       totalNumberOfMeters: undefined,
       totalLocationEmissions: undefined,
       totalMarketEmissions: undefined,
-      allMetersLastBill: undefined
+      allMetersLastBill: undefined,
+      totalConsumption: undefined
     });
     this.costsUtilityUsageSummaryData = new BehaviorSubject<UtilityUsageSummaryData>(undefined);
+
+    
+
+    this.calculatingWater = new BehaviorSubject<boolean>(undefined);
+    this.accountFacilitiesWaterSummary = new BehaviorSubject<AccountFacilitiesSummary>({
+      facilitySummaries: [],
+      totalEnergyUse: undefined,
+      totalEnergyCost: undefined,
+      totalNumberOfMeters: undefined,
+      totalLocationEmissions: undefined,
+      totalMarketEmissions: undefined,
+      allMetersLastBill: undefined,
+      totalConsumption: undefined
+    });
+    this.waterUtilityUsageSummaryData = new BehaviorSubject<UtilityUsageSummaryData>(undefined);
 
     this.emissionsDisplay = new BehaviorSubject<"market" | "location">("market");
   }

@@ -12,7 +12,7 @@
             </tr>
         </thead>
         <tbody *ngIf="accountFacilitiesSummary && accountFacilitiesSummary.facilitySummaries">
-            <tr *ngFor="let summary of accountFacilitiesSummary.facilitySummaries">
+            <tr *ngFor="let summary of accountFacilitiesSummary.facilitySummaries | orderBy: 'marketEmissions'">
                 <td>
                     <span class="badge"
                         [ngStyle]="{background: summary.facility.color, color: summary.facility.color }">

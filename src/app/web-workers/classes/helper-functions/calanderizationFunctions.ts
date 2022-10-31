@@ -21,12 +21,14 @@ export function getPastYearData(yearEndBill: MonthlyData, calanderizedMeterData:
     energyUsage: number,
     energyCost: number,
     marketEmissions: number,
-    locationEmissions: number
+    locationEmissions: number,
+    consumption: number
 } {
     let energyUsage: number = 0;
     let energyCost: number = 0;
     let marketEmissions: number = 0;
     let locationEmissions: number = 0;
+    let consumption: number = 0;
     if (yearEndBill) {
         //array of year/month combos needed
         let yearMonths: Array<{ year: number, month: number }> = new Array();
@@ -67,6 +69,7 @@ export function getPastYearData(yearEndBill: MonthlyData, calanderizedMeterData:
             energyCost += totalEnergyCost;
             marketEmissions += totalMarketEmissions;
             locationEmissions += totalLocationEmissions;
+            consumption += totalEnergyConsumption;
             return {
                 time: yearMonth.month + ', ' + yearMonth.year,
                 energyUse: totalEnergyUse,
@@ -88,7 +91,8 @@ export function getPastYearData(yearEndBill: MonthlyData, calanderizedMeterData:
             energyUsage: energyUsage,
             energyCost: energyCost,
             marketEmissions: marketEmissions,
-            locationEmissions: locationEmissions
+            locationEmissions: locationEmissions,
+            consumption: consumption
         };
     } else {
         return {
@@ -96,7 +100,8 @@ export function getPastYearData(yearEndBill: MonthlyData, calanderizedMeterData:
             energyUsage: energyUsage,
             energyCost: energyCost,
             marketEmissions: marketEmissions,
-            locationEmissions: locationEmissions
+            locationEmissions: locationEmissions,
+            consumption: consumption
         };
     }
 }
