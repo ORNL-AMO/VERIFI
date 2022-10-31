@@ -128,7 +128,6 @@ export class UtilityEmissionsChartComponent implements OnInit {
             }
           })
         }
-        console.log(data)
 
         var layout = {
           barmode: 'stack',

@@ -75,11 +75,11 @@ export class FacilityCostsMapComponent implements OnInit {
           cmin: 0,
           cmax: cmax,
           // colorscale: 'Greens',
-          colorbar: {
-            title: 'Energy Costs',
-            // ticksuffix: '%',
-            // showticksuffix: 'last'
-          },
+          // colorbar: {
+          //   // title: 'Energy Costs',
+          //   // ticksuffix: '%',
+          //   // showticksuffix: 'last'
+          // },
           line: {
             color: 'black'
           },
@@ -109,12 +109,14 @@ export class FacilityCostsMapComponent implements OnInit {
           //   lon: _.mean(lons)
           // }
         },
+        showlegend: false,
         margin: { "t": 0, "b": 50, "l": 0, "r": 50 },
       };
 
       let config = {
         displaylogo: false,
-        responsive: true
+        responsive: true,
+        scrollZoom: false
       }
 
       this.plotlyService.newPlot(this.utilityCostsMap.nativeElement, data, layout, config);

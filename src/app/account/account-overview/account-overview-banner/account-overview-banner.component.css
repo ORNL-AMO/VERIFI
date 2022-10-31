@@ -1,11 +1,11 @@
 .btn-selected{
-    background-color: #145A32;
+    background-color: #ff6000;
     color: #fff;
-    border-color: #145A32;
+    border-color: #ff6000;
   }
 
   .btn-outline:hover{
-    background-color: #145A32 !important;
+    background-color: #ff6000 !important;
 
   }
   

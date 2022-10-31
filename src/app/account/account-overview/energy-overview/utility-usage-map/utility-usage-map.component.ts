@@ -75,11 +75,12 @@ export class UtilityUsageMapComponent implements OnInit {
           cmin: 0,
           cmax: cmax,
           // colorscale: 'Greens',
-          colorbar: {
-            title: 'Energy Consumption',
-            // ticksuffix: '%',
-            // showticksuffix: 'last'
-          },
+          // colorbar: {
+          //   display: false
+          //   // title: 'Energy Consumption',
+          //   // ticksuffix: '%',
+          //   // showticksuffix: 'last'
+          // },
           line: {
             color: 'black'
           },
@@ -109,13 +110,14 @@ export class UtilityUsageMapComponent implements OnInit {
           //   lon: _.mean(lons)
           // }
         },
-
+        showlegend: false,
         margin: { "t": 0, "b": 50, "l": 0, "r": 50 },
       };
 
       let config = {
         displaylogo: false,
-        responsive: true
+        responsive: true,
+        scrollZoom: false
       }
 
       this.plotlyService.newPlot(this.utilityUsageMap.nativeElement, data, layout, config);
