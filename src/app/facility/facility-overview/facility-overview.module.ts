@@ -11,6 +11,9 @@ import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.modu
 import { EnergyMetersOverviewTableComponent } from './facility-energy-overview/energy-meters-overview-table/energy-meters-overview-table.component';
 import { EnergyMetersOverviewChartComponent } from './facility-energy-overview/energy-meters-overview-chart/energy-meters-overview-chart.component';
 import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/calculating-spinner.module';
+import { EnergyMetersUsageChartComponent } from './facility-energy-overview/energy-meters-usage-chart/energy-meters-usage-chart.component';
+import { EnergyUtilitiesUsageTableComponent } from './facility-energy-overview/energy-utilities-usage-table/energy-utilities-usage-table.component';
+import { EnergyUtilitiesUsageChartComponent } from './facility-energy-overview/energy-utilities-usage-chart/energy-utilities-usage-chart.component';
 
 
 
@@ -23,7 +26,10 @@ import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/cal
     FacilityEmissionsOverviewComponent,
     FacilityOverviewBannerComponent,
     EnergyMetersOverviewTableComponent,
-    EnergyMetersOverviewChartComponent
+    EnergyMetersOverviewChartComponent,
+    EnergyMetersUsageChartComponent,
+    EnergyUtilitiesUsageTableComponent,
+    EnergyUtilitiesUsageChartComponent
   ],
   imports: [
     CommonModule,

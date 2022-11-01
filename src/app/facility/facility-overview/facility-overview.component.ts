@@ -39,15 +39,18 @@ export class FacilityOverviewComponent implements OnInit {
       this.worker.onmessage = ({ data }) => {
         if (data.type == 'energy') {
           this.facilityOverviewService.energyMeterSummaryData.next(data.meterSummaryData);
-          // this.facilityOverviewService.energyUtilityUsageSummaryData.next(data.utilityUsageSummaryData);
+          this.facilityOverviewService.energyMonthlySourceData.next(data.monthlySourceData);
+          this.facilityOverviewService.energyUtilityUsageSummaryData.next(data.utilityUsageSummaryData);
           this.facilityOverviewService.calculatingEnergy.next(false);
         }else if(data.type == 'water'){
           this.facilityOverviewService.waterMeterSummaryData.next(data.meterSummaryData);
-          // this.facilityOverviewService.waterUtilityUsageSummaryData.next(data.utilityUsageSummaryData);
+          this.facilityOverviewService.waterMonthlySourceData.next(data.monthlySourceData);
+          this.facilityOverviewService.waterUtilityUsageSummaryData.next(data.utilityUsageSummaryData);
           this.facilityOverviewService.calculatingWater.next(false);
         } else if(data.type == 'all'){
           this.facilityOverviewService.costsMeterSummaryData.next(data.meterSummaryData);
-          // this.facilityOverviewService.costsUtilityUsageSummaryData.next(data.utilityUsageSummaryData);
+          this.facilityOverviewService.costsMonthlySourceData.next(data.monthlySourceData);
+          this.facilityOverviewService.costsUtilityUsageSummaryData.next(data.utilityUsageSummaryData);
           this.facilityOverviewService.calculatingCosts.next(false);
           this.worker.terminate();
         }

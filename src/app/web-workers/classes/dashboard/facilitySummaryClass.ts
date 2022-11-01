@@ -1,17 +1,24 @@
 import { CalanderizedMeter, MonthlyData } from "src/app/models/calanderization";
-import { FacilityMeterSummaryData, MeterSummary } from "src/app/models/dashboard";
+import { FacilityMeterSummaryData, MeterSummary, UtilityUsageSummaryData } from "src/app/models/dashboard";
 import { IdbUtilityMeterGroup, MeterSource } from "src/app/models/idb";
-import { getLastBillEntryFromCalanderizedMeterData, getPastYearData, getSumValue, LastYearDataResult } from "../helper-functions/calanderizationFunctions";
+import { getLastBillEntryFromCalanderizedMeterData, getPastYearData, getSumValue, getUtilityUsageSummaryData, LastYearDataResult } from "../helper-functions/calanderizationFunctions";
 import * as _ from 'lodash';
+import { FacilityBarChartData } from "src/app/models/visualization";
 
 export class FacilitySummaryClass {
 
     meterSummaryData: FacilityMeterSummaryData;
-
+    monthlySourceData: Array<{
+        source: MeterSource,
+        data: Array<FacilityBarChartData>
+    }>;
+    utilityUsageSummaryData: UtilityUsageSummaryData;
     constructor(calanderizedMeters: Array<CalanderizedMeter>, groups: Array<IdbUtilityMeterGroup>, sources: Array<MeterSource>) {
         let sourceMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return sources.includes(cMeter.meter.source) });
         let allMetersLastBill: MonthlyData = getLastBillEntryFromCalanderizedMeterData(sourceMeters);
         this.meterSummaryData = this.getDashboardFacilityMeterSummary(sourceMeters, allMetersLastBill, groups);
+        this.monthlySourceData = this.getMonthlySourceData(sourceMeters, sources);
+        this.utilityUsageSummaryData = getUtilityUsageSummaryData(sourceMeters, allMetersLastBill, sources);
     };
 
     getDashboardFacilityMeterSummary(calanderizedMeters: Array<CalanderizedMeter>, lastBill: MonthlyData, groups: Array<IdbUtilityMeterGroup>): FacilityMeterSummaryData {
@@ -70,5 +77,56 @@ export class FacilitySummaryClass {
             groupName: groupName,
             lastBillDate: lastBillDate
         }
+    }
+
+
+    getMonthlySourceData(calanderizedMeters: Array<CalanderizedMeter>, sources: Array<MeterSource>): Array<{
+        source: MeterSource,
+        data: Array<FacilityBarChartData>
+    }> {
+        let monthlySourceData: Array<{
+            source: MeterSource,
+            data: Array<FacilityBarChartData>
+        }> = new Array();
+        sources.forEach(source => {
+            let sourceMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return cMeter.meter.source == source });
+            let monthlyData: Array<MonthlyData> = sourceMeters.flatMap(cMeter => { return cMeter.monthlyData });
+            let yearMonths: Array<{ year: number, month: string }> = monthlyData.map(data => { return { year: data.year, month: data.month } });
+            yearMonths = _.uniqWith(yearMonths, (a, b) => {
+                return (a.year == b.year && a.month == b.month)
+            });
+            let data: Array<FacilityBarChartData> = new Array();
+            for (let i = 0; i < yearMonths.length; i++) {
+                let yearMonth: { year: number, month: string } = yearMonths[i];
+                let totalEnergyUse: number = 0;
+                let totalEnergyCost: number = 0;
+                let totalLocationEmissions: number = 0;
+                let totalMarketEmissions: number = 0;
+                let totalConsumption: number = 0;
+                for (let x = 0; x < monthlyData.length; x++) {
+                    if (monthlyData[x].year == yearMonth.year && monthlyData[x].month == yearMonth.month) {
+                        totalEnergyUse += monthlyData[x].energyUse;
+                        totalEnergyCost += monthlyData[x].energyCost;
+                        totalLocationEmissions += monthlyData[x].locationEmissions;
+                        totalMarketEmissions += monthlyData[x].marketEmissions;
+                        totalConsumption += monthlyData[x].energyConsumption;
+                    }
+                }
+                data.push({
+                    time: yearMonth.month + ', ' + yearMonth.year,
+                    energyUse: totalEnergyUse,
+                    energyCost: totalEnergyCost,
+                    locationEmissions: totalLocationEmissions,
+                    marketEmissions: totalMarketEmissions,
+                    year: yearMonth.year
+                })
+            }
+            monthlySourceData.push({
+                source: source,
+                data: data
+            });
+        });
+
+        return monthlySourceData;
     }
 }
