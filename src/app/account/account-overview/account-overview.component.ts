@@ -51,6 +51,8 @@ export class AccountOverviewComponent implements OnInit {
         }
       };
       this.accountOverviewService.calculatingEnergy.next(true);
+      this.accountOverviewService.calculatingWater.next(true);
+      this.accountOverviewService.calculatingCosts.next(true);
 
       let energySources: Array<MeterSource> = ['Electricity', 'Natural Gas', 'Other Fuels', 'Other Energy']
       this.worker.postMessage({
@@ -64,7 +66,6 @@ export class AccountOverviewComponent implements OnInit {
         "Water",
         "Waste Water"
       ];
-      console.log(this.accountOverviewService.calanderizedMeters);
       this.worker.postMessage({
         calanderizedMeters: this.accountOverviewService.calanderizedMeters,
         facilities: facilities,

@@ -5,7 +5,7 @@ import * as _ from 'lodash';
 import { getLastBillEntryFromCalanderizedMeterData, getPastYearData, getSumValue, getYearPriorBillEntryFromCalanderizedMeterData } from "../helper-functions/calanderizationFunctions";
 
 
-export class AccountFacilitiesSummaryClass {
+export class AccountSummaryClass {
 
     facilitiesSummary: AccountFacilitiesSummary
     utilityUsageSummaryData: UtilityUsageSummaryData;

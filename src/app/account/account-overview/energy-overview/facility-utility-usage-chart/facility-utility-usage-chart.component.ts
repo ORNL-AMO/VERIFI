@@ -43,6 +43,10 @@ export class FacilityUtilityUsageChartComponent implements OnInit {
         labels: this.facilitiesSummary.facilitySummaries.map(summary => { return summary.facility.name }),
         marker: {
           colors: this.facilitiesSummary.facilitySummaries.map(summary => { return summary.facility.color }),
+          line: {
+            color: '#fff',
+            width: 5
+          }
         },
         textinfo: 'label+percent',
         textposition: 'auto',

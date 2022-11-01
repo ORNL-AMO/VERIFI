@@ -31,6 +31,7 @@ export interface FacilityMeterSummaryData {
     totalEnergyCost: number,
     totalMarketEmissions: number,
     totalLocationEmissions: number,
+    totalConsumption: number,
     allMetersLastBill: MonthlyData
 }
 
@@ -41,6 +42,7 @@ export interface MeterSummary {
     energyCost: number,
     marketEmissions: number,
     locationEmissions: number,
+    consumption: number,
     lastBill: MonthlyData,
     groupName: string,
     lastBillDate: Date

@@ -47,7 +47,8 @@ export class MeterSummaryService {
       totalEnergyCost: _.sumBy(facilityMetersSummary, 'energyCost'),
       totalMarketEmissions: _.sumBy(facilityMetersSummary, 'marketEmissions'),
       totalLocationEmissions: _.sumBy(facilityMetersSummary, 'locationEmissions'),
-      allMetersLastBill: allMetersLastBill
+      allMetersLastBill: allMetersLastBill,
+      totalConsumption: 0
     };
   }
 
@@ -71,7 +72,8 @@ export class MeterSummaryService {
       locationEmissions: _.sumBy(lastYearData, 'locationEmissions'),
       lastBill: lastBill,
       groupName: groupName,
-      lastBillDate: lastBillDate
+      lastBillDate: lastBillDate,
+      consumption: 0
     }
   }
 
@@ -88,7 +90,8 @@ export class MeterSummaryService {
       totalEnergyCost: _.sumBy(facilityMetersSummary, (data) => { return this.getSumValue(data.energyCost) }),
       totalMarketEmissions: _.sumBy(facilityMetersSummary, (data) => { return this.getSumValue(data.marketEmissions) }),
       totalLocationEmissions: _.sumBy(facilityMetersSummary, (data) => { return this.getSumValue(data.locationEmissions) }),
-      allMetersLastBill: lastBill
+      allMetersLastBill: lastBill,
+      totalConsumption: 0
     };
   }
 
@@ -112,7 +115,8 @@ export class MeterSummaryService {
       locationEmissions: _.sumBy(lastYearData, (data) => { return this.getSumValue(data.locationEmissions) }),
       lastBill: lastBill,
       groupName: groupName,
-      lastBillDate: lastBillDate
+      lastBillDate: lastBillDate,
+      consumption: 0
     }
   }
 

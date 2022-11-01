@@ -16,14 +16,7 @@ export function getLastBillEntryFromCalanderizedMeterData(calanderizedMeterData:
 }
 
 
-export function getPastYearData(yearEndBill: MonthlyData, calanderizedMeterData: Array<CalanderizedMeter>): {
-    yearData: Array<LastYearData>,
-    energyUsage: number,
-    energyCost: number,
-    marketEmissions: number,
-    locationEmissions: number,
-    consumption: number
-} {
+export function getPastYearData(yearEndBill: MonthlyData, calanderizedMeterData: Array<CalanderizedMeter>): LastYearDataResult {
     let energyUsage: number = 0;
     let energyCost: number = 0;
     let marketEmissions: number = 0;
@@ -115,17 +108,26 @@ export function getSumValue(val: number): number {
 }
 
 
-export function   getYearPriorBillEntryFromCalanderizedMeterData(calanderizedMeterData: Array<CalanderizedMeter>, lastBill: MonthlyData): Array<MonthlyData> {
+export function getYearPriorBillEntryFromCalanderizedMeterData(calanderizedMeterData: Array<CalanderizedMeter>, lastBill: MonthlyData): Array<MonthlyData> {
     let monthlyData: Array<MonthlyData> = calanderizedMeterData.flatMap(data => {
-      return data.monthlyData;
+        return data.monthlyData;
     });
     if (lastBill) {
-      let yearPrior: number = lastBill.year - 1;
-      let yearPriorBill: Array<MonthlyData> = monthlyData.filter(dataItem => {
-        return (dataItem.year == yearPrior) && (dataItem.monthNumValue == lastBill.monthNumValue);
-      });
-      return yearPriorBill;
+        let yearPrior: number = lastBill.year - 1;
+        let yearPriorBill: Array<MonthlyData> = monthlyData.filter(dataItem => {
+            return (dataItem.year == yearPrior) && (dataItem.monthNumValue == lastBill.monthNumValue);
+        });
+        return yearPriorBill;
     } else {
-      return undefined;
+        return undefined;
     }
-  }
+}
+
+export interface LastYearDataResult {
+    yearData: Array<LastYearData>,
+    energyUsage: number,
+    energyCost: number,
+    marketEmissions: number,
+    locationEmissions: number,
+    consumption: number
+}

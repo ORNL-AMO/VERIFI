@@ -8,6 +8,9 @@ import { FacilityEmissionsOverviewComponent } from './facility-emissions-overvie
 import { FacilityOverviewBannerComponent } from './facility-overview-banner/facility-overview-banner.component';
 import { RouterModule } from '@angular/router';
 import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.module';
+import { EnergyMetersOverviewTableComponent } from './facility-energy-overview/energy-meters-overview-table/energy-meters-overview-table.component';
+import { EnergyMetersOverviewChartComponent } from './facility-energy-overview/energy-meters-overview-chart/energy-meters-overview-chart.component';
+import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/calculating-spinner.module';
 
 
 
@@ -18,12 +21,15 @@ import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.modu
     FacilityWaterOverviewComponent,
     FacilityCostOverviewComponent,
     FacilityEmissionsOverviewComponent,
-    FacilityOverviewBannerComponent
+    FacilityOverviewBannerComponent,
+    EnergyMetersOverviewTableComponent,
+    EnergyMetersOverviewChartComponent
   ],
   imports: [
     CommonModule,
     RouterModule,
-    HelperPipesModule
+    HelperPipesModule,
+    CalculatingSpinnerModule
   ]
 })
 export class FacilityOverviewModule { }
