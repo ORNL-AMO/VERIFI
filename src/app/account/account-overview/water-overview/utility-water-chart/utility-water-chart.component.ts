@@ -9,6 +9,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { StackedBarChartData, UtilityItem } from 'src/app/models/dashboard';
+import * as _ from 'lodash';
 
 @Component({
   selector: 'app-utility-water-chart',
@@ -140,6 +141,10 @@ export class UtilityWaterChartComponent implements OnInit {
         });
       }
     });
+    
+    this.barChartData = _.orderBy(this.barChartData, (data) => {
+      return (data.wasteWater.energyUse + data.water.energyUse);
+    }, 'desc');
   }
 
 }

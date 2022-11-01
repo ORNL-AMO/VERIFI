@@ -2,13 +2,11 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { FacilityMeterSummaryData, StackedBarChartData } from 'src/app/models/dashboard';
 import { IdbFacility, MeterSource } from 'src/app/models/idb';
 import { FacilityBarChartData } from 'src/app/models/visualization';
 import { UtilityColors } from 'src/app/shared/utilityColors';
 import { FacilityOverviewService } from '../../facility-overview.service';
 import * as _ from 'lodash';
-import { Months, Month } from 'src/app/shared/form-data/months';
 @Component({
   selector: 'app-energy-meters-usage-chart',
   templateUrl: './energy-meters-usage-chart.component.html',

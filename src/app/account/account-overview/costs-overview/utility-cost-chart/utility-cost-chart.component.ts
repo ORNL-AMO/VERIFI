@@ -8,6 +8,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { StackedBarChartData, UtilityItem } from 'src/app/models/dashboard';
+import * as _ from 'lodash';
 
 @Component({
   selector: 'app-utility-cost-chart',
@@ -212,5 +213,11 @@ export class UtilityCostChartComponent implements OnInit {
         });
       }
     });
+
+
+    this.barChartData = _.orderBy(this.barChartData, (data) => {
+      return (data.electricity.energyCost + data.naturalGas.energyCost + data.otherFuels.energyCost + data.otherEnergy.energyCost
+        + data.water.energyCost + data.wasteWater.energyCost + data.otherUtility.energyCost);
+    }, 'desc');
   }
 }

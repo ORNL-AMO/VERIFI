@@ -9,6 +9,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { StackedBarChartData, UtilityItem } from 'src/app/models/dashboard';
+import * as _ from 'lodash';
 
 @Component({
   selector: 'app-account-utility-source-chart',
@@ -32,7 +33,7 @@ export class AccountUtilitySourceChartComponent implements OnInit {
     });
   }
 
-  ngAfterViewInit(){
+  ngAfterViewInit() {
     this.drawChart();
   }
 
@@ -136,7 +137,7 @@ export class AccountUtilitySourceChartComponent implements OnInit {
       let naturalGas: UtilityItem = { energyUse: 0, energyCost: 0, marketEmissions: 0, locationEmissions: 0 };
       let otherFuels: UtilityItem = { energyUse: 0, energyCost: 0, marketEmissions: 0, locationEmissions: 0 };
       let otherEnergy: UtilityItem = { energyUse: 0, energyCost: 0, marketEmissions: 0, locationEmissions: 0 };
-  
+
       let facilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.filter(meterData => { return meterData.facilityId == facility.guid });
       facilityMeterData.forEach(dataItem => {
         let meter: IdbUtilityMeter = this.utilityMeterDbService.getFacilityMeterById(dataItem.meterId);
@@ -172,6 +173,9 @@ export class AccountUtilitySourceChartComponent implements OnInit {
         });
       }
     });
+    this.barChartData = _.orderBy(this.barChartData, (data) => {
+      return (data.electricity.energyUse + data.naturalGas.energyUse + data.otherFuels.energyUse + data.otherEnergy.energyUse);
+    }, 'desc');
   }
 
 }

@@ -10,7 +10,7 @@ import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { StackedBarChartData, UtilityItem } from 'src/app/models/dashboard';
 import { CalanderizationService, EmissionsResults } from 'src/app/shared/helper-services/calanderization.service';
-
+import * as _ from 'lodash';
 
 @Component({
   selector: 'app-utility-emissions-chart',
@@ -61,9 +61,9 @@ export class UtilityEmissionsChartComponent implements OnInit {
         let data = new Array();
         if (this.barChartData.findIndex(dataItem => { return dataItem.electricity.marketEmissions != 0 }) != -1) {
           let yValues: Array<number>;
-          if(this.emissionsDisplay == 'location'){
+          if (this.emissionsDisplay == 'location') {
             yValues = this.barChartData.map(dataItem => { return dataItem.electricity.locationEmissions });
-          }else{
+          } else {
             yValues = this.barChartData.map(dataItem => { return dataItem.electricity.marketEmissions });
           }
 
@@ -79,9 +79,9 @@ export class UtilityEmissionsChartComponent implements OnInit {
         }
         if (this.barChartData.findIndex(dataItem => { return dataItem.naturalGas.marketEmissions != 0 }) != -1) {
           let yValues: Array<number>;
-          if(this.emissionsDisplay == 'location'){
+          if (this.emissionsDisplay == 'location') {
             yValues = this.barChartData.map(dataItem => { return dataItem.naturalGas.locationEmissions });
-          }else{
+          } else {
             yValues = this.barChartData.map(dataItem => { return dataItem.naturalGas.marketEmissions });
           }
           data.push({
@@ -96,9 +96,9 @@ export class UtilityEmissionsChartComponent implements OnInit {
         }
         if (this.barChartData.findIndex(dataItem => { return dataItem.otherFuels.marketEmissions != 0 }) != -1) {
           let yValues: Array<number>;
-          if(this.emissionsDisplay == 'location'){
+          if (this.emissionsDisplay == 'location') {
             yValues = this.barChartData.map(dataItem => { return dataItem.otherFuels.locationEmissions });
-          }else{
+          } else {
             yValues = this.barChartData.map(dataItem => { return dataItem.otherFuels.marketEmissions });
           }
           data.push({
@@ -113,9 +113,9 @@ export class UtilityEmissionsChartComponent implements OnInit {
         }
         if (this.barChartData.findIndex(dataItem => { return dataItem.otherEnergy.marketEmissions != 0 }) != -1) {
           let yValues: Array<number>;
-          if(this.emissionsDisplay == 'location'){
+          if (this.emissionsDisplay == 'location') {
             yValues = this.barChartData.map(dataItem => { return dataItem.otherEnergy.locationEmissions });
-          }else{
+          } else {
             yValues = this.barChartData.map(dataItem => { return dataItem.otherEnergy.marketEmissions });
           }
           data.push({
@@ -211,6 +211,17 @@ export class UtilityEmissionsChartComponent implements OnInit {
           });
         }
       });
+      if (this.emissionsDisplay == 'market') {
+        this.barChartData = _.orderBy(this.barChartData, (data) => {
+          return (data.electricity.marketEmissions + data.naturalGas.marketEmissions + data.otherFuels.marketEmissions + data.otherEnergy.marketEmissions);
+        }, 'desc');
+
+      } else {
+        this.barChartData = _.orderBy(this.barChartData, (data) => {
+          return (data.electricity.locationEmissions + data.naturalGas.locationEmissions + data.otherFuels.locationEmissions + data.otherEnergy.locationEmissions);
+        }, 'desc');
+
+      }
     }
   }
 }
