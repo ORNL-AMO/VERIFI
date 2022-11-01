@@ -1,0 +1,42 @@
+<div class="table-responsive">
+    <table class="table table-sm">
+        <thead>
+            <tr>
+                <th class="w-1">Meter</th>
+                <th class="w-1">Utility</th>
+                <th class="w-1">Group</th>
+                <th class="w-2">Utility Cost</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let summary of facilityMeterSummaryData.meterSummaries | orderBy: 'energyCost'">
+                <td>
+                    {{summary.meter.name}}
+                </td>
+                <td>
+                    {{summary.meter.source}}
+                </td>
+                <td>
+                    {{summary.groupName}}
+                </td>
+                <td>
+                    {{summary.energyCost | customNumber:true }}
+                </td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <th>
+                    Total
+                </th>
+                <th>
+                </th>
+                <th>
+                </th>
+                <th>
+                    {{facilityMeterSummaryData.totalEnergyCost | customNumber:true }}
+                </th>
+            </tr>
+        </tfoot>
+    </table>
+</div>

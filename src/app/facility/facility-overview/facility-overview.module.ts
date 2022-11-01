@@ -14,6 +14,11 @@ import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/cal
 import { EnergyMetersUsageChartComponent } from './facility-energy-overview/energy-meters-usage-chart/energy-meters-usage-chart.component';
 import { EnergyUtilitiesUsageTableComponent } from './facility-energy-overview/energy-utilities-usage-table/energy-utilities-usage-table.component';
 import { EnergyUtilitiesUsageChartComponent } from './facility-energy-overview/energy-utilities-usage-chart/energy-utilities-usage-chart.component';
+import { CostMetersOverviewChartComponent } from './facility-cost-overview/cost-meters-overview-chart/cost-meters-overview-chart.component';
+import { CostMetersOverviewTableComponent } from './facility-cost-overview/cost-meters-overview-table/cost-meters-overview-table.component';
+import { CostMetersUsageChartComponent } from './facility-cost-overview/cost-meters-usage-chart/cost-meters-usage-chart.component';
+import { CostUtilitiesUsageChartComponent } from './facility-cost-overview/cost-utilities-usage-chart/cost-utilities-usage-chart.component';
+import { CostUtilitiesUsageTableComponent } from './facility-cost-overview/cost-utilities-usage-table/cost-utilities-usage-table.component';
 
 
 
@@ -29,7 +34,12 @@ import { EnergyUtilitiesUsageChartComponent } from './facility-energy-overview/e
     EnergyMetersOverviewChartComponent,
     EnergyMetersUsageChartComponent,
     EnergyUtilitiesUsageTableComponent,
-    EnergyUtilitiesUsageChartComponent
+    EnergyUtilitiesUsageChartComponent,
+    CostMetersOverviewChartComponent,
+    CostMetersOverviewTableComponent,
+    CostMetersUsageChartComponent,
+    CostUtilitiesUsageChartComponent,
+    CostUtilitiesUsageTableComponent
   ],
   imports: [
     CommonModule,

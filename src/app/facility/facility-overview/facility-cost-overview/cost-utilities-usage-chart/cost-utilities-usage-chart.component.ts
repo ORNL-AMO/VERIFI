@@ -9,11 +9,11 @@ import * as _ from 'lodash';
 import { UtilityColors } from 'src/app/shared/utilityColors';
 
 @Component({
-  selector: 'app-energy-utilities-usage-chart',
-  templateUrl: './energy-utilities-usage-chart.component.html',
-  styleUrls: ['./energy-utilities-usage-chart.component.css']
+  selector: 'app-cost-utilities-usage-chart',
+  templateUrl: './cost-utilities-usage-chart.component.html',
+  styleUrls: ['./cost-utilities-usage-chart.component.css']
 })
-export class EnergyUtilitiesUsageChartComponent implements OnInit {
+export class CostUtilitiesUsageChartComponent implements OnInit {
 
   @ViewChild('utilityBarChart', { static: false }) utilityBarChart: ElementRef;
 
@@ -22,11 +22,10 @@ export class EnergyUtilitiesUsageChartComponent implements OnInit {
     source: MeterSource,
     data: Array<FacilityBarChartData>
   }>;
-  constructor(private plotlyService: PlotlyService, private facilityOverviewService: FacilityOverviewService,
-    private facilityDbService: FacilitydbService) { }
+  constructor(private plotlyService: PlotlyService, private facilityOverviewService: FacilityOverviewService) { }
 
   ngOnInit(): void {
-    this.monthlySourceDataSub = this.facilityOverviewService.energyMonthlySourceData.subscribe(sourceData => {
+    this.monthlySourceDataSub = this.facilityOverviewService.costsMonthlySourceData.subscribe(sourceData => {
       this.monthlySourceData = sourceData;
       this.drawChart();
     });
@@ -45,11 +44,10 @@ export class EnergyUtilitiesUsageChartComponent implements OnInit {
   drawChart() {
     if (this.utilityBarChart && this.monthlySourceData && this.monthlySourceData.length != 0) {
       let traceData = new Array();
-      let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-      let yaxisTitle: string = "Utility Usage (" + selectedFacility.energyUnit + ")";
+      let yaxisTitle: string = "Utility Costs";
 
-      let hoverformat: string = ",.2f";
-      let tickprefix: string = "";
+      let hoverformat: string = "$,.2f";
+      let tickprefix: string = "$";
 
       this.monthlySourceData.forEach(dataItem => {
         let years: Array<number> = dataItem.data.map(d => { return d.year });
@@ -114,5 +112,6 @@ export class EnergyUtilitiesUsageChartComponent implements OnInit {
       this.plotlyService.newPlot(this.utilityBarChart.nativeElement, traceData, layout, config);
     }
   }
+
 
 }
