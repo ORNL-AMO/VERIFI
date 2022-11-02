@@ -65,7 +65,7 @@ export class FacilityWaterMonthlyChartComponent implements OnInit {
           // marker: {
           //   color: facilityUsage.facility.color,
           // },
-          hovertemplate: hovertemplate,
+          hovertemplate: hovertemplate
         }
         traceData.push(trace);
 

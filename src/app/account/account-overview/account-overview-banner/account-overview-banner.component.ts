@@ -3,7 +3,7 @@ import { SharedDataService } from 'src/app/shared/helper-services/shared-data.se
 import { Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idb';
-import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
+import { NavigationEnd, Router } from '@angular/router';
 import { AccountOverviewService } from '../account-overview.service';
 
 @Component({
@@ -22,7 +22,7 @@ export class AccountOverviewBannerComponent implements OnInit {
   emissionsDisplay: 'market' | 'location';
   emissionsDisplaySub: Subscription;
   constructor(private sharedDataService: SharedDataService, private accountDbService: AccountdbService,
-    private activatedRoute: ActivatedRoute, private router: Router,
+    private router: Router,
     private accountOverviewService: AccountOverviewService) { }
 
   ngOnInit(): void {

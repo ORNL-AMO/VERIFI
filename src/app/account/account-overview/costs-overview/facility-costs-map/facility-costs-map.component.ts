@@ -1,9 +1,8 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { IdbAccount, IdbFacility } from 'src/app/models/idb';
+import { IdbFacility } from 'src/app/models/idb';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import * as _ from 'lodash';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { Subscription } from 'rxjs';
 import { AccountFacilitiesSummary } from 'src/app/models/dashboard';
 import { AccountOverviewService } from '../../account-overview.service';
@@ -29,7 +28,7 @@ export class FacilityCostsMapComponent implements OnInit {
 
 
   constructor(private plotlyService: PlotlyService,
-    private eGridService: EGridService, private accountDbService: AccountdbService,
+    private eGridService: EGridService,
     private accountOverviewService: AccountOverviewService) { }
 
   ngOnInit(): void {
@@ -58,11 +57,9 @@ export class FacilityCostsMapComponent implements OnInit {
       // let lats: Array<number> = this.mapData.map(item => { return Number(item.lat) });
       // let lons: Array<number> = this.mapData.map(item => { return Number(item.lng) });
 
-      let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
       var data = [{
         type: 'scattergeo',
         mode: 'markers',
-        // locations: ["CA", "TN", "OK", "MN"],
         lat: this.mapData.map(item => { return item.lat }),
         lon: this.mapData.map(item => { return item.lng }),
         hovertext: this.mapData.map(item => { return item.facility.name + ': $' + (item.energyCost).toLocaleString(undefined, { maximumFractionDigits: 0, minimumIntegerDigits: 1 }) }),
@@ -74,23 +71,17 @@ export class FacilityCostsMapComponent implements OnInit {
           color: this.mapData.map(item => { return item.energyCost }),
           cmin: 0,
           cmax: cmax,
-          // colorscale: 'Greens',
-          // colorbar: {
-          //   // title: 'Energy Costs',
-          //   // ticksuffix: '%',
-          //   // showticksuffix: 'last'
-          // },
           line: {
             color: 'black'
           },
           symbol: "diamond",
         },
         name: 'Energy Use Data',
-        // hovertemplate:  '%{label}: %{value:,.0f} <extra></extra>'
-
         // locationmode: "USA-states",
       }];
 
+      //TODO: handle international
+      //TODO: maybe center on facilities
       var layout = {
         'geo': {
           scope: 'usa',

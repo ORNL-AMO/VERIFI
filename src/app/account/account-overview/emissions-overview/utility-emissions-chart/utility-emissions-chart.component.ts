@@ -1,16 +1,13 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { AccountOverviewService } from '../../account-overview.service';
 import { Subscription } from 'rxjs';
-import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbFacility } from 'src/app/models/idb';
 import { UtilityColors } from 'src/app/shared/utilityColors';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { PlotlyService } from 'angular-plotly.js';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { StackedBarChartData, UtilityItem } from 'src/app/models/dashboard';
-import { CalanderizationService, EmissionsResults } from 'src/app/shared/helper-services/calanderization.service';
 import * as _ from 'lodash';
+import { CalanderizedMeter } from 'src/app/models/calanderization';
 
 @Component({
   selector: 'app-utility-emissions-chart',
@@ -24,11 +21,8 @@ export class UtilityEmissionsChartComponent implements OnInit {
   barChartData: Array<StackedBarChartData>;
   emissionsDisplay: "market" | "location";
   emissionsDisplaySub: Subscription;
-  constructor(private accountOverviewService: AccountOverviewService, private accountDbService: AccountdbService,
-    private plotlyService: PlotlyService, private facilityDbService: FacilitydbService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private calanderizationService: CalanderizationService) { }
+  constructor(private accountOverviewService: AccountOverviewService,
+    private plotlyService: PlotlyService, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
     this.emissionsDisplaySub = this.accountOverviewService.emissionsDisplay.subscribe(val => {
@@ -134,9 +128,7 @@ export class UtilityEmissionsChartComponent implements OnInit {
           showlegend: true,
           yaxis: {
             title: yaxisTitle,
-            // tickprefix: tickprefix,
             automargin: true,
-            // ticksuffix: ticksuffix
           },
           xaxis: {
             automargin: true
@@ -160,13 +152,6 @@ export class UtilityEmissionsChartComponent implements OnInit {
   setBarChartData() {
     if (this.emissionsDisplay) {
       this.barChartData = new Array();
-      let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-      let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-      let accountMeterData: Array<IdbUtilityMeterData> = new Array();
-      accountMeters.forEach(meter => {
-        let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataForAccount(meter, true);
-        accountMeterData = accountMeterData.concat(meterData)
-      });
       let accountFacilites: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
       accountFacilites.forEach(facility => {
         let electricity: UtilityItem = { energyUse: 0, energyCost: 0, marketEmissions: 0, locationEmissions: 0 };
@@ -174,29 +159,29 @@ export class UtilityEmissionsChartComponent implements OnInit {
         let otherFuels: UtilityItem = { energyUse: 0, energyCost: 0, marketEmissions: 0, locationEmissions: 0 };
         let otherEnergy: UtilityItem = { energyUse: 0, energyCost: 0, marketEmissions: 0, locationEmissions: 0 };
 
-        let facilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.filter(meterData => { return meterData.facilityId == facility.guid });
-        facilityMeterData.forEach(dataItem => {
-          let meter: IdbUtilityMeter = this.utilityMeterDbService.getFacilityMeterById(dataItem.meterId);
-          let emissions: EmissionsResults = this.calanderizationService.getEmissions(meter, dataItem.totalEnergyUse, selectedAccount.energyUnit, selectedAccount.energyIsSource, new Date(dataItem.readDate).getFullYear());
+        let facilityMeters: Array<CalanderizedMeter> = this.accountOverviewService.calanderizedMeters.filter(cMeter => { return cMeter.meter.facilityId == facility.guid });
+        facilityMeters.forEach(cMeter => {
+          cMeter.monthlyData.forEach(dataItem => {
+            // let meter: IdbUtilityMeter = this.utilityMeterDbService.getFacilityMeterById(dataItem.meterId);
+            // let emissions: EmissionsResults = this.calanderizationService.getEmissions(meter, dataItem.totalEnergyUse, selectedAccount.energyUnit, selectedAccount.energyIsSource, new Date(dataItem.readDate).getFullYear());
 
-          if (meter) {
-            if (meter.source == 'Electricity') {
-              electricity.marketEmissions = (electricity.marketEmissions + Number(emissions.marketEmissions));
-              electricity.locationEmissions = (electricity.locationEmissions + Number(emissions.locationEmissions));
+            if (cMeter.meter.source == 'Electricity') {
+              electricity.marketEmissions = (electricity.marketEmissions + Number(dataItem.marketEmissions));
+              electricity.locationEmissions = (electricity.locationEmissions + Number(dataItem.locationEmissions));
             }
-            else if (meter.source == 'Natural Gas') {
-              naturalGas.marketEmissions = (naturalGas.marketEmissions + Number(emissions.marketEmissions));
-              naturalGas.locationEmissions = (naturalGas.locationEmissions + Number(emissions.locationEmissions));
+            else if (cMeter.meter.source == 'Natural Gas') {
+              naturalGas.marketEmissions = (naturalGas.marketEmissions + Number(dataItem.marketEmissions));
+              naturalGas.locationEmissions = (naturalGas.locationEmissions + Number(dataItem.locationEmissions));
             }
-            else if (meter.source == 'Other Fuels') {
-              otherFuels.marketEmissions = (otherFuels.marketEmissions + Number(emissions.marketEmissions));
-              otherFuels.locationEmissions = (otherFuels.locationEmissions + Number(emissions.locationEmissions));
+            else if (cMeter.meter.source == 'Other Fuels') {
+              otherFuels.marketEmissions = (otherFuels.marketEmissions + Number(dataItem.marketEmissions));
+              otherFuels.locationEmissions = (otherFuels.locationEmissions + Number(dataItem.locationEmissions));
             }
-            else if (meter.source == 'Other Energy') {
-              otherEnergy.marketEmissions = (otherEnergy.marketEmissions + Number(emissions.marketEmissions));
-              otherEnergy.locationEmissions = (otherEnergy.locationEmissions + Number(emissions.locationEmissions));
+            else if (cMeter.meter.source == 'Other Energy') {
+              otherEnergy.marketEmissions = (otherEnergy.marketEmissions + Number(dataItem.marketEmissions));
+              otherEnergy.locationEmissions = (otherEnergy.locationEmissions + Number(dataItem.locationEmissions));
             }
-          }
+          });
         });
         if (facility) {
           this.barChartData.push({

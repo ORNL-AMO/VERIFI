@@ -16,7 +16,6 @@ import { AccountOverviewService } from '../../account-overview.service';
 export class UtilityUsageMapComponent implements OnInit {
   @ViewChild('utilityUsageMap', { static: false }) utilityUsageMap: ElementRef;
 
-
   accountFacilitiesSummary: AccountFacilitiesSummary;
   accountFacilitiesSummarySub: Subscription;
   mapData: Array<{
@@ -25,8 +24,6 @@ export class UtilityUsageMapComponent implements OnInit {
     energyUse: number,
     facility: IdbFacility
   }>;
-
-
 
   constructor(private plotlyService: PlotlyService,
     private eGridService: EGridService, private accountDbService: AccountdbService,
@@ -38,8 +35,6 @@ export class UtilityUsageMapComponent implements OnInit {
       this.setMapData();
       this.drawChart();
     });
-
-
   }
 
   ngOnDestroy() {
@@ -62,7 +57,6 @@ export class UtilityUsageMapComponent implements OnInit {
       var data = [{
         type: 'scattergeo',
         mode: 'markers',
-        // locations: ["CA", "TN", "OK", "MN"],
         lat: this.mapData.map(item => { return item.lat }),
         lon: this.mapData.map(item => { return item.lng }),
         hovertext: this.mapData.map(item => { return item.facility.name + ': ' + (item.energyUse).toLocaleString(undefined, { maximumFractionDigits: 0, minimumIntegerDigits: 1 }) + ' ' + selectedAccount.energyUnit }),
@@ -74,20 +68,12 @@ export class UtilityUsageMapComponent implements OnInit {
           color: this.mapData.map(item => { return item.energyUse }),
           cmin: 0,
           cmax: cmax,
-          // colorscale: 'Greens',
-          // colorbar: {
-          //   display: false
-          //   // title: 'Energy Consumption',
-          //   // ticksuffix: '%',
-          //   // showticksuffix: 'last'
-          // },
           line: {
             color: 'black'
           },
           symbol: 'star-square'
         },
         name: 'Energy Use Data',
-        // hovertemplate:  '%{label}: %{value:,.0f} <extra></extra>'
 
         // locationmode: "USA-states",
       }];

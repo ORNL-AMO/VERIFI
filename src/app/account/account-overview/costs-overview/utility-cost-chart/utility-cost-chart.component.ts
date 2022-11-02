@@ -1,14 +1,13 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { AccountOverviewService } from '../../account-overview.service';
 import { Subscription } from 'rxjs';
-import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbFacility } from 'src/app/models/idb';
 import { UtilityColors } from 'src/app/shared/utilityColors';
 import { PlotlyService } from 'angular-plotly.js';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { StackedBarChartData, UtilityItem } from 'src/app/models/dashboard';
 import * as _ from 'lodash';
+import { CalanderizedMeter } from 'src/app/models/calanderization';
 
 @Component({
   selector: 'app-utility-cost-chart',
@@ -21,9 +20,7 @@ export class UtilityCostChartComponent implements OnInit {
   accountFacilitiesSub: Subscription;
   barChartData: Array<StackedBarChartData>;
   constructor(private accountOverviewService: AccountOverviewService,
-    private plotlyService: PlotlyService, private facilityDbService: FacilitydbService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService) { }
+    private plotlyService: PlotlyService, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
     this.accountFacilitiesSub = this.accountOverviewService.accountFacilitiesEnergySummary.subscribe(val => {
@@ -155,14 +152,6 @@ export class UtilityCostChartComponent implements OnInit {
 
   setBarChartData() {
     this.barChartData = new Array();
-    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-
-    let accountMeterData: Array<IdbUtilityMeterData> = new Array();
-    accountMeters.forEach(meter => {
-      let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataForAccount(meter, true);
-      accountMeterData = accountMeterData.concat(meterData)
-    })
-
     let accountFacilites: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
 
     accountFacilites.forEach(facility => {
@@ -173,32 +162,31 @@ export class UtilityCostChartComponent implements OnInit {
       let water: UtilityItem = { energyUse: 0, energyCost: 0, marketEmissions: 0, locationEmissions: 0 };
       let wasteWater: UtilityItem = { energyUse: 0, energyCost: 0, marketEmissions: 0, locationEmissions: 0 };
       let otherUtility: UtilityItem = { energyUse: 0, energyCost: 0, marketEmissions: 0, locationEmissions: 0 };
-      let facilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.filter(meterData => { return meterData.facilityId == facility.guid });
-      facilityMeterData.forEach(dataItem => {
-        let meter: IdbUtilityMeter = this.utilityMeterDbService.getFacilityMeterById(dataItem.meterId);
-        if (meter) {
-          if (meter.source == 'Electricity') {
-            electricity.energyCost = (electricity.energyCost + Number(dataItem.totalCost));
+      let facilityMeters: Array<CalanderizedMeter> = this.accountOverviewService.calanderizedMeters.filter(cMeter => { return cMeter.meter.facilityId == facility.guid });
+      facilityMeters.forEach(cMeter => {
+        cMeter.monthlyData.forEach(dataItem => {
+          if (cMeter.meter.source == 'Electricity') {
+            electricity.energyCost = (electricity.energyCost + Number(dataItem.energyCost));
           }
-          else if (meter.source == 'Natural Gas') {
-            naturalGas.energyCost = (naturalGas.energyCost + Number(dataItem.totalCost));
+          else if (cMeter.meter.source == 'Natural Gas') {
+            naturalGas.energyCost = (naturalGas.energyCost + Number(dataItem.energyCost));
           }
-          else if (meter.source == 'Other Fuels') {
-            otherFuels.energyCost = (otherFuels.energyCost + Number(dataItem.totalCost));
+          else if (cMeter.meter.source == 'Other Fuels') {
+            otherFuels.energyCost = (otherFuels.energyCost + Number(dataItem.energyCost));
           }
-          else if (meter.source == 'Other Energy') {
-            otherEnergy.energyCost = (otherEnergy.energyCost + Number(dataItem.totalCost));
+          else if (cMeter.meter.source == 'Other Energy') {
+            otherEnergy.energyCost = (otherEnergy.energyCost + Number(dataItem.energyCost));
           }
-          else if (meter.source == 'Water') {
-            water.energyCost = (water.energyCost + Number(dataItem.totalCost));
+          else if (cMeter.meter.source == 'Water') {
+            water.energyCost = (water.energyCost + Number(dataItem.energyCost));
           }
-          else if (meter.source == 'Waste Water') {
-            wasteWater.energyCost = (wasteWater.energyCost + Number(dataItem.totalCost));
+          else if (cMeter.meter.source == 'Waste Water') {
+            wasteWater.energyCost = (wasteWater.energyCost + Number(dataItem.energyCost));
           }
-          else if (meter.source == 'Other Utility') {
-            otherUtility.energyCost = (otherUtility.energyCost + Number(dataItem.totalCost));
+          else if (cMeter.meter.source == 'Other Utility') {
+            otherUtility.energyCost = (otherUtility.energyCost + Number(dataItem.energyCost));
           }
-        }
+        });
       });
       if (facility) {
         this.barChartData.push({

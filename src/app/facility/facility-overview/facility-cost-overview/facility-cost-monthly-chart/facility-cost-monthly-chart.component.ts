@@ -59,10 +59,7 @@ export class FacilityCostMonthlyChartComponent implements OnInit {
           y: y,
           name: year,
           text: x.map(item => { return year }),
-          // marker: {
-          //   color: facilityUsage.facility.color,
-          // },
-          hovertemplate: hovertemplate,
+          hovertemplate: hovertemplate
         }
         traceData.push(trace);
 
@@ -70,7 +67,6 @@ export class FacilityCostMonthlyChartComponent implements OnInit {
 
 
       var layout = {
-        // barmode: 'group',
         title: {
           text: yaxisTitle,
           font: {
@@ -79,21 +75,10 @@ export class FacilityCostMonthlyChartComponent implements OnInit {
         },
         xaxis: {
           autotick: false,
-          // title: {
-          //   text: 'Year',
-          //   font: {
-          //     size: 18
-          //   },
-          // },
-          // range: xrange
         },
         yaxis: {
           title: {
-            // text: yaxisTitle,
             tickprefix: tickprefix
-            //   font: {
-            //     size: 18
-            //   },
           },
           hoverformat: hoverformat
         },

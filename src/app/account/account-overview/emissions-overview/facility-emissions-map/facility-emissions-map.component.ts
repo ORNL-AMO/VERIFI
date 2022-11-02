@@ -71,7 +71,6 @@ export class FacilityEmissionsMapComponent implements OnInit {
       var data = [{
         type: 'scattergeo',
         mode: 'markers',
-        // locations: ["CA", "TN", "OK", "MN"],
         lat: this.mapData.map(item => { return item.lat }),
         lon: this.mapData.map(item => { return item.lng }),
         hovertext: this.mapData.map(item => { return item.facility.name + ': ' + (item.emissions).toLocaleString(undefined, { maximumFractionDigits: 0, minimumIntegerDigits: 1 }) + ' tonne CO<sub>2</sub>' }),
@@ -83,19 +82,11 @@ export class FacilityEmissionsMapComponent implements OnInit {
           color: this.mapData.map(item => { return item.emissions }),
           cmin: 0,
           cmax: cmax,
-          // colorscale: 'Greens',
-          // colorbar: {
-          //   // title: 'Facility Emissions',
-          //   // ticksuffix: '%',
-          //   // showticksuffix: 'last'
-          // },
           line: {
             color: 'black'
           },
-          // symbol: 'x'
         },
         name: 'Energy Use Data',
-        // hovertemplate:  '%{label}: %{value:,.0f} <extra></extra>'
 
         // locationmode: "USA-states",
       }];

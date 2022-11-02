@@ -61,8 +61,6 @@ export class FacilityEmissionsChartComponent implements OnInit {
         textinfo: 'label+percent',
         textposition: 'auto',
         insidetextorientation: "horizontal",
-        // textposition: ''
-        // hoverinfo: 'label+value',
         hovertemplate: hovertemplate,
         hole: .6,
         type: 'pie',

@@ -73,21 +73,12 @@ export class FacilityWaterMapComponent implements OnInit {
           color: this.mapData.map(item => { return item.consumption }),
           cmin: 0,
           cmax: cmax,
-          // colorscale: 'Greens',
-          // colorbar: {
-          //   display: false
-          //   // title: 'Energy Consumption',
-          //   // ticksuffix: '%',
-          //   // showticksuffix: 'last'
-          // },
           line: {
             color: 'black'
           },
           symbol: 'square'
         },
         name: 'Energy Use Data',
-        // hovertemplate:  '%{label}: %{value:,.0f} <extra></extra>'
-
         // locationmode: "USA-states",
       }];
 
