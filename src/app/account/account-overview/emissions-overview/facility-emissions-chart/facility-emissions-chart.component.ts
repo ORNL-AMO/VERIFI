@@ -1,8 +1,6 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountFacilitiesSummary } from 'src/app/models/dashboard';
-import { IdbAccount } from 'src/app/models/idb';
 import { AccountOverviewService } from '../../account-overview.service';
 import { Subscription } from 'rxjs';
 
@@ -18,8 +16,7 @@ export class FacilityEmissionsChartComponent implements OnInit {
 
   emissionsDisplay: "market" | "location";
   emissionsDisplaySub: Subscription;
-  constructor(private plotlyService: PlotlyService, private accountOverviewService: AccountOverviewService,
-    private accountDbService: AccountdbService) { }
+  constructor(private plotlyService: PlotlyService, private accountOverviewService: AccountOverviewService) { }
 
   ngOnInit(): void {
     this.emissionsDisplaySub = this.accountOverviewService.emissionsDisplay.subscribe(val => {

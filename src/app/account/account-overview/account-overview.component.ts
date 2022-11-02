@@ -38,14 +38,17 @@ export class AccountOverviewComponent implements OnInit {
         if (data.type == 'energy') {
           this.accountOverviewService.accountFacilitiesEnergySummary.next(data.accountFacilitiesSummary);
           this.accountOverviewService.energyUtilityUsageSummaryData.next(data.utilityUsageSummaryData);
+          this.accountOverviewService.energyYearMonthData.next(data.yearMonthData);
           this.accountOverviewService.calculatingEnergy.next(false);
-        }else if(data.type == 'water'){
+        } else if (data.type == 'water') {
           this.accountOverviewService.accountFacilitiesWaterSummary.next(data.accountFacilitiesSummary);
           this.accountOverviewService.waterUtilityUsageSummaryData.next(data.utilityUsageSummaryData);
+          this.accountOverviewService.waterYearMonthData.next(data.yearMonthData);
           this.accountOverviewService.calculatingWater.next(false);
-        } else if(data.type == 'all'){
+        } else if (data.type == 'all') {
           this.accountOverviewService.accountFacilitiesCostsSummary.next(data.accountFacilitiesSummary);
           this.accountOverviewService.costsUtilityUsageSummaryData.next(data.utilityUsageSummaryData);
+          this.accountOverviewService.costsYearMonthData.next(data.yearMonthData);
           this.accountOverviewService.calculatingCosts.next(false);
           this.worker.terminate();
         }
@@ -72,7 +75,7 @@ export class AccountOverviewComponent implements OnInit {
         sources: waterSources,
         type: 'water'
       });
-      
+
       let allSources: Array<MeterSource> = [
         "Electricity",
         "Natural Gas",

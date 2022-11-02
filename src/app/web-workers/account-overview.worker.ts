@@ -7,6 +7,7 @@ addEventListener('message', ({ data }) => {
     let results = {
         accountFacilitiesSummary: accountFacilitiesSummaryClass.facilitiesSummary,
         utilityUsageSummaryData: accountFacilitiesSummaryClass.utilityUsageSummaryData,
+        yearMonthData: accountFacilitiesSummaryClass.yearMonthData,
         type: data.type
     }
     postMessage(results);

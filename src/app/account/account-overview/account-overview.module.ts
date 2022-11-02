@@ -30,6 +30,10 @@ import { FacilityWaterChartComponent } from './water-overview/facility-water-cha
 import { FacilityWaterMapComponent } from './water-overview/facility-water-map/facility-water-map.component';
 import { UtilityWaterChartComponent } from './water-overview/utility-water-chart/utility-water-chart.component';
 import { UtilityWaterTableComponent } from './water-overview/utility-water-table/utility-water-table.component';
+import { MonthlyUsageChartComponent } from './energy-overview/monthly-usage-chart/monthly-usage-chart.component';
+import { MonthlyCostsChartComponent } from './costs-overview/monthly-costs-chart/monthly-costs-chart.component';
+import { MonthlyEmissionsChartComponent } from './emissions-overview/monthly-emissions-chart/monthly-emissions-chart.component';
+import { MonthlyWaterChartComponent } from './water-overview/monthly-water-chart/monthly-water-chart.component';
 
 
 
@@ -61,7 +65,11 @@ import { UtilityWaterTableComponent } from './water-overview/utility-water-table
     FacilityWaterChartComponent,
     FacilityWaterMapComponent,
     UtilityWaterChartComponent,
-    UtilityWaterTableComponent
+    UtilityWaterTableComponent,
+    MonthlyUsageChartComponent,
+    MonthlyCostsChartComponent,
+    MonthlyEmissionsChartComponent,
+    MonthlyWaterChartComponent
   ],
   imports: [
     CommonModule,

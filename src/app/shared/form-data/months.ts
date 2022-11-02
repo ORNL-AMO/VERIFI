@@ -14,7 +14,7 @@ export const Months: Array<Month> = [
     { name: 'June', abbreviation: 'Jun', monthNumValue: 5 },
     { name: 'July', abbreviation: 'Jul', monthNumValue: 6 },
     { name: 'August', abbreviation: 'Aug', monthNumValue: 7 },
-    { name: 'September', abbreviation: 'Sept', monthNumValue: 8 },
+    { name: 'September', abbreviation: 'Sep', monthNumValue: 8 },
     { name: 'October', abbreviation: 'Oct', monthNumValue: 9 },
     { name: 'November', abbreviation: 'Nov', monthNumValue: 10 },
     { name: 'December', abbreviation: 'Dec', monthNumValue: 11 }
