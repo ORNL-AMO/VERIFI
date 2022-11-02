@@ -27,6 +27,12 @@ import { EmissionsMetersUsageChartComponent } from './facility-emissions-overvie
 import { EmissionsUtilitiesChartComponent } from './facility-emissions-overview/emissions-utilities-chart/emissions-utilities-chart.component';
 import { EmissionsUtilitiesTableComponent } from './facility-emissions-overview/emissions-utilities-table/emissions-utilities-table.component';
 import { FacilityEmissionsMonthlyChartComponent } from './facility-emissions-overview/facility-emissions-monthly-chart/facility-emissions-monthly-chart.component';
+import { WaterMetersOverviewChartComponent } from './facility-water-overview/water-meters-overview-chart/water-meters-overview-chart.component';
+import { WaterMetersOverviewTableComponent } from './facility-water-overview/water-meters-overview-table/water-meters-overview-table.component';
+import { WaterMetersUsageChartComponent } from './facility-water-overview/water-meters-usage-chart/water-meters-usage-chart.component';
+import { WaterUtilitiesUsageChartComponent } from './facility-water-overview/water-utilities-usage-chart/water-utilities-usage-chart.component';
+import { WaterUtilitiesUsageTableComponent } from './facility-water-overview/water-utilities-usage-table/water-utilities-usage-table.component';
+import { FacilityWaterMonthlyChartComponent } from './facility-water-overview/facility-water-monthly-chart/facility-water-monthly-chart.component';
 
 
 
@@ -55,7 +61,13 @@ import { FacilityEmissionsMonthlyChartComponent } from './facility-emissions-ove
     EmissionsMetersUsageChartComponent,
     EmissionsUtilitiesChartComponent,
     EmissionsUtilitiesTableComponent,
-    FacilityEmissionsMonthlyChartComponent
+    FacilityEmissionsMonthlyChartComponent,
+    WaterMetersOverviewChartComponent,
+    WaterMetersOverviewTableComponent,
+    WaterMetersUsageChartComponent,
+    WaterUtilitiesUsageChartComponent,
+    WaterUtilitiesUsageTableComponent,
+    FacilityWaterMonthlyChartComponent
   ],
   imports: [
     CommonModule,

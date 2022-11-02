@@ -119,7 +119,8 @@ export class FacilitySummaryClass {
                     energyCost: totalEnergyCost,
                     locationEmissions: totalLocationEmissions,
                     marketEmissions: totalMarketEmissions,
-                    year: yearMonth.year
+                    year: yearMonth.year,
+                    consumption: totalConsumption
                 })
             }
             monthlySourceData.push({
