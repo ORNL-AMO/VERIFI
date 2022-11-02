@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
-import { IdbUtilityMeterGroup, MeterSource } from 'src/app/models/idb';
+import { IdbFacility, IdbUtilityMeterGroup, MeterSource } from 'src/app/models/idb';
 import { FacilityOverviewService } from './facility-overview.service';
 
 @Component({
@@ -14,14 +15,21 @@ export class FacilityOverviewComponent implements OnInit {
 
   facilitySub: Subscription;
   worker: Worker;
-  constructor(private facilityDbService: FacilitydbService, 
+  noUtilityData: boolean;
+  constructor(private facilityDbService: FacilitydbService,
     private facilityOverviewService: FacilityOverviewService,
-    private utilityMeterGroupDbService: UtilityMeterGroupdbService) { }
+    private utilityMeterGroupDbService: UtilityMeterGroupdbService,
+    private router: Router) { }
 
   ngOnInit(): void {
     this.facilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
       this.facilityOverviewService.setCalanderizedMeters();
-      this.calculateFacilitiesSummary();
+      if (this.facilityOverviewService.calanderizedMeters.length != 0) {
+        this.noUtilityData = false;
+        this.calculateFacilitiesSummary();
+      } else {
+        this.noUtilityData = true;
+      }
     });
   }
 
@@ -43,13 +51,13 @@ export class FacilityOverviewComponent implements OnInit {
           this.facilityOverviewService.energyUtilityUsageSummaryData.next(data.utilityUsageSummaryData);
           this.facilityOverviewService.energyYearMonthData.next(data.yearMonthData);
           this.facilityOverviewService.calculatingEnergy.next(false);
-        }else if(data.type == 'water'){
+        } else if (data.type == 'water') {
           this.facilityOverviewService.waterMeterSummaryData.next(data.meterSummaryData);
           this.facilityOverviewService.waterMonthlySourceData.next(data.monthlySourceData);
           this.facilityOverviewService.waterUtilityUsageSummaryData.next(data.utilityUsageSummaryData);
           this.facilityOverviewService.waterYearMonthData.next(data.yearMonthData);
           this.facilityOverviewService.calculatingWater.next(false);
-        } else if(data.type == 'all'){
+        } else if (data.type == 'all') {
           this.facilityOverviewService.costsMeterSummaryData.next(data.meterSummaryData);
           this.facilityOverviewService.costsMonthlySourceData.next(data.monthlySourceData);
           this.facilityOverviewService.costsUtilityUsageSummaryData.next(data.utilityUsageSummaryData);
@@ -79,7 +87,7 @@ export class FacilityOverviewComponent implements OnInit {
         sources: waterSources,
         type: 'water'
       });
-      
+
       let allSources: Array<MeterSource> = [
         "Electricity",
         "Natural Gas",
@@ -101,5 +109,10 @@ export class FacilityOverviewComponent implements OnInit {
       // Web Workers are not supported in this environment.
       // You should add a fallback so that your program still executes correctly.
     }
+  }
+
+  addUtilityData(){
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    this.router.navigateByUrl('facility/' + selectedFacility.id + '/utility');
   }
 }

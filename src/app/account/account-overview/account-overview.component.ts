@@ -4,6 +4,7 @@ import { AccountOverviewService } from './account-overview.service';
 import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility, MeterSource } from 'src/app/models/idb';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-account-overview',
@@ -14,12 +15,19 @@ export class AccountOverviewComponent implements OnInit {
 
   accountSub: Subscription;
   worker: Worker;
-  constructor(private accountDbService: AccountdbService, private accountOverviewService: AccountOverviewService, private facilityDbService: FacilitydbService) { }
+  noUtilityData: boolean;
+  constructor(private accountDbService: AccountdbService, private accountOverviewService: AccountOverviewService, 
+    private facilityDbService: FacilitydbService, private router: Router) { }
 
   ngOnInit(): void {
     this.accountSub = this.accountDbService.selectedAccount.subscribe(val => {
       this.accountOverviewService.setCalanderizedMeters();
-      this.calculateFacilitiesSummary();
+      if(this.accountOverviewService.calanderizedMeters.length != 0){
+        this.noUtilityData = false;
+        this.calculateFacilitiesSummary();
+      }else{
+        this.noUtilityData = true;
+      }
     });
   }
 
@@ -96,6 +104,14 @@ export class AccountOverviewComponent implements OnInit {
 
       // Web Workers are not supported in this environment.
       // You should add a fallback so that your program still executes correctly.
+    }
+  }
+
+  addUtilityData() {
+    //TODO: Update select facility call
+    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    if (facilities.length > 0) {
+      this.router.navigateByUrl('facility/' + facilities[0].id + '/utility');
     }
   }
 }
