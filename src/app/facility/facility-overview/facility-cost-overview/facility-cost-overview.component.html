@@ -1,4 +1,11 @@
 <ng-container *ngIf="!calculating">
+    <div class="row" *ngIf="displayWarning">
+        <div class="col">
+            <div class="alert alert-warning text-center">
+                No utility costs tracked for this account. Please consider adding utility costs to your readings.
+            </div>
+        </div>
+    </div>
     <div class="row">
         <div class="col">
             <div class="card">

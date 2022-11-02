@@ -2,9 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { IdbAccount } from 'src/app/models/idb';
+import { IdbAccount, IdbUtilityMeter } from 'src/app/models/idb';
 import { NavigationEnd, Router } from '@angular/router';
 import { AccountOverviewService } from '../account-overview.service';
+import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 
 @Component({
   selector: 'app-account-overview-banner',
@@ -21,9 +22,11 @@ export class AccountOverviewBannerComponent implements OnInit {
   urlDisplay: 'energy' | 'emissions' | 'other';
   emissionsDisplay: 'market' | 'location';
   emissionsDisplaySub: Subscription;
+  showWater: boolean;
   constructor(private sharedDataService: SharedDataService, private accountDbService: AccountdbService,
     private router: Router,
-    private accountOverviewService: AccountOverviewService) { }
+    private accountOverviewService: AccountOverviewService,
+    private utilityMeterDbService: UtilityMeterdbService) { }
 
   ngOnInit(): void {
     this.modalOpenSub = this.sharedDataService.modalOpen.subscribe(val => {
@@ -31,6 +34,7 @@ export class AccountOverviewBannerComponent implements OnInit {
     });
     this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(val => {
       this.selectedAccount = val;
+      this.setShowWater();
     });
 
     this.emissionsDisplaySub = this.accountOverviewService.emissionsDisplay.subscribe(val => {
@@ -78,4 +82,9 @@ export class AccountOverviewBannerComponent implements OnInit {
     this.accountOverviewService.emissionsDisplay.next(display);
   }
 
+  setShowWater() {
+    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    let waterMeter: IdbUtilityMeter = accountMeters.find(meter => { return meter.source == 'Water' || meter.source == 'Waste Water' });
+    this.showWater = waterMeter != undefined;
+  }
 }

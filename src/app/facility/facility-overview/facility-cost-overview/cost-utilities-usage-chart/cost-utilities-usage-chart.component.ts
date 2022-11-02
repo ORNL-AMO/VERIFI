@@ -51,19 +51,19 @@ export class CostUtilitiesUsageChartComponent implements OnInit {
       this.monthlySourceData.forEach(dataItem => {
         let years: Array<number> = dataItem.data.map(d => { return d.year });
         years = _.uniq(years)
-        let energyUse: Array<number> = new Array();
+        let energyCosts: Array<number> = new Array();
         years.forEach(year => {
-          let totalEnergyUse: number = 0;
+          let totalEnergyCost: number = 0;
           dataItem.data.forEach(d => {
             if (d.year == year) {
-              totalEnergyUse += d.energyUse;
+              totalEnergyCost += d.energyCost;
             }
           });
-          energyUse.push(totalEnergyUse);
+          energyCosts.push(totalEnergyCost);
         });
         let trace = {
           x: years,
-          y: energyUse,
+          y: energyCosts,
           name: dataItem.source,
           type: 'bar',
           marker: {

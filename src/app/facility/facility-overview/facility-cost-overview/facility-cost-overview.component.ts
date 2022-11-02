@@ -14,6 +14,7 @@ export class FacilityCostOverviewComponent implements OnInit {
   accountFacilitiesSummarySub: Subscription;
   calculatingSub: Subscription;
   calculating: boolean;
+  displayWarning: boolean;
   constructor(private facilityOverviewService: FacilityOverviewService) { }
 
   ngOnInit(): void {
@@ -23,6 +24,7 @@ export class FacilityCostOverviewComponent implements OnInit {
 
     this.accountFacilitiesSummarySub = this.facilityOverviewService.costsMeterSummaryData.subscribe(summaryData => {
       if (summaryData && summaryData.allMetersLastBill) {
+        this.displayWarning = summaryData.totalEnergyCost == 0;
         this.lastMonthsDate = new Date(summaryData.allMetersLastBill.year, summaryData.allMetersLastBill.monthNumValue);
         this.yearPriorDate = new Date(summaryData.allMetersLastBill.year - 1, summaryData.allMetersLastBill.monthNumValue);
       } else {

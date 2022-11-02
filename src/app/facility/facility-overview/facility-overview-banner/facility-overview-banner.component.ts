@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { Subscription } from 'rxjs';
-import { IdbFacility } from 'src/app/models/idb';
+import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
 import { NavigationEnd, Router } from '@angular/router';
 import { FacilityOverviewService } from '../facility-overview.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
+import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 
 @Component({
   selector: 'app-facility-overview-banner',
@@ -22,10 +23,12 @@ export class FacilityOverviewBannerComponent implements OnInit {
   emissionsDisplaySub: Subscription;
   selectedFacility: IdbFacility;
   selectedFacilitySub: Subscription;
+  showWater: boolean;
   constructor(private sharedDataService: SharedDataService, private facilityDbService: FacilitydbService,
     private router: Router,
     private facilityOverviewService: FacilityOverviewService,
-    private dbChangesService: DbChangesService) { }
+    private dbChangesService: DbChangesService,
+    private utilityMeterDbService: UtilityMeterdbService) { }
 
   ngOnInit(): void {
     this.modalOpenSub = this.sharedDataService.modalOpen.subscribe(val => {
@@ -33,6 +36,7 @@ export class FacilityOverviewBannerComponent implements OnInit {
     });
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
       this.selectedFacility = val;
+      this.setShowWater();
     });
 
     this.emissionsDisplaySub = this.facilityOverviewService.emissionsDisplay.subscribe(val => {
@@ -77,4 +81,9 @@ export class FacilityOverviewBannerComponent implements OnInit {
     this.facilityOverviewService.emissionsDisplay.next(display);
   }
 
+  setShowWater() {
+    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    let waterMeter: IdbUtilityMeter = accountMeters.find(meter => { return meter.source == 'Water' || meter.source == 'Waste Water' });
+    this.showWater = waterMeter != undefined;
+  }
 }
