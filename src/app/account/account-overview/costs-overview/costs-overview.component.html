@@ -1,0 +1,80 @@
+<ng-container *ngIf="!calculating">
+    <div class="row" *ngIf="displayWarning">
+        <div class="col">
+            <div class="alert alert-warning text-center">
+                No utility costs tracked for this account. Please consider adding utility costs to your readings.
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h4 class="mb-0">Facility Utility Costs<span class="pull-right"
+                            *ngIf="yearPriorDate">({{yearPriorDate |
+                            date: 'MMM, y'}} -
+                            {{lastMonthsDate | date: 'MMM, y'}})</span></h4>
+
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-12">
+                            <app-facility-costs-map></app-facility-costs-map>
+                            <hr>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6">
+                            <app-facility-cost-table></app-facility-cost-table>
+                        </div>
+                        <div class="col-6">
+                            <app-facility-cost-chart></app-facility-cost-chart>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr>
+    <div class="row">
+        <div class="col">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h4 class="mb-0">Utility Costs</h4>
+                </div>
+                <div class="card-body">
+                    <app-utility-cost-table></app-utility-cost-table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr>
+    <div class="row">
+        <div class="col">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h4 class="mb-0">Utility Costs (All-time)</h4>
+                </div>
+                <div class="card-body">
+                    <app-utility-cost-chart></app-utility-cost-chart>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr>
+    <div class="row">
+        <div class="col">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h4 class="mb-0">Monthly Costs</h4>
+                </div>
+                <div class="card-body">
+                    <app-monthly-costs-chart></app-monthly-costs-chart>
+                </div>
+            </div>
+        </div>
+    </div>
+</ng-container>
+
+
+<app-calculating-spinner *ngIf="calculating" [message]="'Calculating Data Overview...'"></app-calculating-spinner>

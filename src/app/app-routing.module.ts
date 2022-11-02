@@ -13,7 +13,6 @@ import { AboutComponent } from './static-content/about/about.component';
 import { AcknowledgmentsComponent } from './static-content/acknowledgments/acknowledgments.component';
 import { FeedbackComponent } from './static-content/feedback/feedback.component';
 import { HelpComponent } from './static-content/help/help.component';
-// import { UploadDataComponent } from './facility/utility-data/upload-data/upload-data.component';
 import { OverviewReportComponent } from './account/overview-report/overview-report.component';
 import { OverviewReportDashboardComponent } from './account/overview-report/overview-report-dashboard/overview-report-dashboard.component';
 import { OverviewReportMenuComponent } from './account/overview-report/overview-report-menu/overview-report-menu.component';
@@ -31,8 +30,7 @@ import { AnnualAnalysisSummaryComponent } from './facility/analysis/run-analysis
 import { MonthlyAnalysisSummaryComponent } from './facility/analysis/run-analysis/group-analysis/monthly-analysis-summary/monthly-analysis-summary.component';
 import { AnnualFacilityAnalysisComponent } from './facility/analysis/run-analysis/facility-analysis/annual-facility-analysis/annual-facility-analysis.component';
 import { MonthlyFacilityAnalysisComponent } from './facility/analysis/run-analysis/facility-analysis/monthly-facility-analysis/monthly-facility-analysis.component';
-import { AccountDashboardComponent } from './account/account-dashboard/account-dashboard.component';
-import { FacilityDashboardComponent } from './facility/facility-dashboard/facility-dashboard.component';
+
 import { AccountSettingsComponent } from './account/account-settings/account-settings.component';
 import { AccountComponent } from './account/account.component';
 import { FacilityComponent } from './facility/facility.component';
@@ -80,6 +78,17 @@ import { CorporateReportingSetupComponent } from './setup-wizard/setup-account/c
 import { FacilityInformationSetupComponent } from './setup-wizard/setup-facilities/facility-information-setup/facility-information-setup.component';
 import { FacilityUnitsSetupComponent } from './setup-wizard/setup-facilities/facility-units-setup/facility-units-setup.component';
 import { FacilityReportingSetupComponent } from './setup-wizard/setup-facilities/facility-reporting-setup/facility-reporting-setup.component';
+import { AccountOverviewComponent } from './account/account-overview/account-overview.component';
+import { EnergyOverviewComponent } from './account/account-overview/energy-overview/energy-overview.component';
+import { CostsOverviewComponent } from './account/account-overview/costs-overview/costs-overview.component';
+import { EmissionsOverviewComponent } from './account/account-overview/emissions-overview/emissions-overview.component';
+import { WaterOverviewComponent } from './account/account-overview/water-overview/water-overview.component';
+import { OtherUtilityOverviewComponent } from './account/account-overview/other-utility-overview/other-utility-overview.component';
+import { FacilityEnergyOverviewComponent } from './facility/facility-overview/facility-energy-overview/facility-energy-overview.component';
+import { FacilityCostOverviewComponent } from './facility/facility-overview/facility-cost-overview/facility-cost-overview.component';
+import { FacilityEmissionsOverviewComponent } from './facility/facility-overview/facility-emissions-overview/facility-emissions-overview.component';
+import { FacilityWaterOverviewComponent } from './facility/facility-overview/facility-water-overview/facility-water-overview.component';
+import { FacilityOverviewComponent } from './facility/facility-overview/facility-overview.component';
 
 const routes: Routes = [
   {
@@ -102,7 +111,16 @@ const routes: Routes = [
       },
       {
         path: 'overview',
-        component: AccountDashboardComponent
+        component: AccountOverviewComponent,
+        children: [
+          { path: '', pathMatch: 'full', redirectTo: 'energy' },
+          { path: 'energy', component: EnergyOverviewComponent },
+          { path: 'costs', component: CostsOverviewComponent },
+          { path: 'emissions', component: EmissionsOverviewComponent },
+          { path: 'water', component: WaterOverviewComponent },
+          { path: 'other', component: OtherUtilityOverviewComponent },
+
+        ]
       },
       {
         path: 'settings',
@@ -174,7 +192,14 @@ const routes: Routes = [
       },
       {
         path: 'overview',
-        component: FacilityDashboardComponent
+        component: FacilityOverviewComponent,
+        children: [
+          { path: '', pathMatch: 'full', redirectTo: 'energy' },
+          { path: 'energy', component: FacilityEnergyOverviewComponent },
+          { path: 'costs', component: FacilityCostOverviewComponent },
+          { path: 'emissions', component: FacilityEmissionsOverviewComponent },
+          { path: 'water', component: FacilityWaterOverviewComponent },
+        ]
       },
       {
         path: 'settings',

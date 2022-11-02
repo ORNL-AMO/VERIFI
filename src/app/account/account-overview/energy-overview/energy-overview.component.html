@@ -1,0 +1,73 @@
+<ng-container *ngIf="!calculating">
+    <div class="row">
+        <div class="col">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h4 class="mb-0">Facility Utility Usage<span class="pull-right"
+                            *ngIf="yearPriorDate">({{yearPriorDate |
+                            date: 'MMM, y'}} -
+                            {{lastMonthsDate | date: 'MMM, y'}})</span></h4>
+
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-12">
+                            <app-utility-usage-map></app-utility-usage-map>
+                            <hr>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6">
+                            <app-facility-utility-usage-table></app-facility-utility-usage-table>
+                        </div>
+                        <div class="col-6">
+                            <app-facility-utility-usage-chart></app-facility-utility-usage-chart>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr>
+    <div class="row">
+        <div class="col">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h4 class="mb-0">Utility Use and Cost</h4>
+                </div>
+                <div class="card-body">
+                    <app-account-utility-source-table></app-account-utility-source-table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr>
+    <div class="row">
+        <div class="col">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h4 class="mb-0">Utility Usage (All-time)</h4>
+                </div>
+                <div class="card-body">
+                    <app-account-utility-source-chart></app-account-utility-source-chart>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr>
+    <div class="row">
+        <div class="col">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h4 class="mb-0">Monthly Utility Usage</h4>
+                </div>
+                <div class="card-body">
+                    <app-monthly-usage-chart></app-monthly-usage-chart>
+                </div>
+            </div>
+        </div>
+    </div>
+</ng-container>
+
+
+<app-calculating-spinner *ngIf="calculating" [message]="'Calculating Data Overview...'"></app-calculating-spinner>

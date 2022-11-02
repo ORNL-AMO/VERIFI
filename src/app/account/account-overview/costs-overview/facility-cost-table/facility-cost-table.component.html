@@ -1,0 +1,41 @@
+<div class="table-responsive">
+    <table class="table table-sm">
+        <thead>
+            <tr>
+                <th>Facility</th>
+                <th class="w-1"># of Meters</th>
+                <th>Utility Cost </th>
+            </tr>
+        </thead>
+        <tbody *ngIf="accountFacilitiesSummary && accountFacilitiesSummary.facilitySummaries">
+            <tr *ngFor="let summary of accountFacilitiesSummary.facilitySummaries | orderBy: 'energyCost'">
+                <td>
+                    <span class="badge"
+                        [ngStyle]="{background: summary.facility.color, color: summary.facility.color }">
+                        &mdash;
+                    </span>
+                    <a class="pl-2" (click)="selectFacility(summary.facility)">{{summary.facility.name}}</a>
+                </td>
+                <td>
+                    {{summary.numberOfMeters}}
+                </td>
+                <td>
+                    {{summary.energyCost | customNumber:true }}
+                </td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <th>
+                    Total
+                </th>
+                <th>
+                    {{accountFacilitiesSummary.totalNumberOfMeters}}
+                </th>
+                <th>
+                    {{accountFacilitiesSummary.totalEnergyCost | customNumber:true }}
+                </th>
+            </tr>
+        </tfoot>
+    </table>
+</div>

@@ -65,7 +65,8 @@ export class VisualizationService {
           energyCost: totalEnergyCost,
           locationEmissions: totalLocationEmissions,
           marketEmissions: totalMarketEmissions,
-          year: yearMonth.year
+          year: yearMonth.year,
+          consumption: 0
         }
 
       });
@@ -117,7 +118,8 @@ export class VisualizationService {
           energyCost: totalEnergyCost,
           locationEmissions: totalLocationEmissions,
           marketEmissions: totalMarketEmissions,
-          year: yearMonth.year
+          year: yearMonth.year,
+          consumption: 0
         }
       });
     }
@@ -173,7 +175,8 @@ export class VisualizationService {
           energyCost: totalEnergyCost,
           locationEmissions: totalLocationEmissions,
           marketEmissions: totalMarketEmissions,
-          year: yearMonth.year
+          year: yearMonth.year,
+          consumption: 0
         }
 
       });
@@ -225,7 +228,8 @@ export class VisualizationService {
           energyCost: totalEnergyCost,
           locationEmissions: totalLocationEmissions,
           marketEmissions: totalMarketEmissions,
-          year: yearMonth.year
+          year: yearMonth.year,
+          consumption: 0
         }
       });
     }

@@ -13,7 +13,7 @@ export class EGridService {
 
   excelCo2Emissions: Array<SubregionEmissions>;
   co2Emissions: Array<SubregionEmissions>;
-
+  zipLatLong: Array<{ ZIP: string, LAT: string, LNG: string }>;
   constructor(private customEmissionsDbService: CustomEmissionsDbService) {
     this.customEmissionsDbService.accountEmissionsItems.subscribe(emissions => {
       this.combineExcelAndCustomEmissions();
@@ -160,6 +160,36 @@ export class EGridService {
   }
 
 
+  async parseZipCodeLongLat() {
+    await fetch('assets/eGrid_data/zip-long-lat.xlsx')
+      .then(response => response.arrayBuffer())
+      .then(buffer => {
+        let wb: XLSX.WorkBook = XLSX.read(new Uint8Array(buffer), { type: "array", raw: false });
+        //zip code regions
+        // [0: "ZIP"
+        // 1: "LAT"
+        // 2: "LNG"
+        let sheetOne = XLSX.utils.sheet_to_json(wb.Sheets["zip-long-lat"], { raw: false });
+        this.zipLatLong = new Array();
+        for (let i = 0; i < sheetOne.length; i++) {
+          this.zipLatLong.push({
+            ZIP: this.checkZIP(sheetOne[i]['ZIP']),
+            LAT: sheetOne[i]['LAT'],
+            LNG: sheetOne[i]['LNG'],
+          })
+        }
+      });
+  }
+
+
+  checkZIP(zip: string): string {
+    if (zip.length < 5) {
+      for (let i = 0; i <= 5 - zip.length; i++) {
+        zip = '0' + zip;
+      }
+    }
+    return zip;
+  }
 }
 
 export interface SubRegionData {
