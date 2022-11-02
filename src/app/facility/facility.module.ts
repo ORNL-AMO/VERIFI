@@ -9,7 +9,6 @@ import { FacilitySettingsComponent } from './facility-settings/facility-settings
 import { SettingsFormsModule } from '../shared/settings-forms/settings-forms.module';
 import { UtilityDataModule } from './utility-data/utility-data.module';
 import { AnalysisModule } from './analysis/analysis.module';
-import { FacilityDashboardModule } from './facility-dashboard/facility-dashboard.module';
 import { VisualizationModule } from './visualization/visualization.module';
 import { FacilityHomeModule } from './facility-home/facility-home.module';
 import { FacilityOverviewModule } from './facility-overview/facility-overview.module';
@@ -29,7 +28,6 @@ import { FacilityOverviewModule } from './facility-overview/facility-overview.mo
     SettingsFormsModule,
     UtilityDataModule,
     AnalysisModule,
-    FacilityDashboardModule,
     VisualizationModule,
     FacilityHomeModule,
     FacilityOverviewModule

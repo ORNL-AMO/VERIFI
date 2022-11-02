@@ -13,7 +13,6 @@ import { AboutComponent } from './static-content/about/about.component';
 import { AcknowledgmentsComponent } from './static-content/acknowledgments/acknowledgments.component';
 import { FeedbackComponent } from './static-content/feedback/feedback.component';
 import { HelpComponent } from './static-content/help/help.component';
-// import { UploadDataComponent } from './facility/utility-data/upload-data/upload-data.component';
 import { OverviewReportComponent } from './account/overview-report/overview-report.component';
 import { OverviewReportDashboardComponent } from './account/overview-report/overview-report-dashboard/overview-report-dashboard.component';
 import { OverviewReportMenuComponent } from './account/overview-report/overview-report-menu/overview-report-menu.component';
@@ -31,8 +30,7 @@ import { AnnualAnalysisSummaryComponent } from './facility/analysis/run-analysis
 import { MonthlyAnalysisSummaryComponent } from './facility/analysis/run-analysis/group-analysis/monthly-analysis-summary/monthly-analysis-summary.component';
 import { AnnualFacilityAnalysisComponent } from './facility/analysis/run-analysis/facility-analysis/annual-facility-analysis/annual-facility-analysis.component';
 import { MonthlyFacilityAnalysisComponent } from './facility/analysis/run-analysis/facility-analysis/monthly-facility-analysis/monthly-facility-analysis.component';
-import { AccountDashboardComponent } from './account/account-dashboard/account-dashboard.component';
-import { FacilityDashboardComponent } from './facility/facility-dashboard/facility-dashboard.component';
+
 import { AccountSettingsComponent } from './account/account-settings/account-settings.component';
 import { AccountComponent } from './account/account.component';
 import { FacilityComponent } from './facility/facility.component';
@@ -125,10 +123,6 @@ const routes: Routes = [
         ]
       },
       {
-        path: 'dashboard',
-        component: AccountDashboardComponent
-      },
-      {
         path: 'settings',
         component: AccountSettingsComponent
       },
@@ -195,10 +189,6 @@ const routes: Routes = [
       {
         path: 'home',
         component: FacilityHomeComponent
-      },
-      {
-        path: 'dashboard',
-        component: FacilityDashboardComponent
       },
       {
         path: 'overview',
