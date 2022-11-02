@@ -13,7 +13,6 @@ import { UtilityColors } from 'src/app/shared/utilityColors';
   styleUrls: ['./emissions-utilities-chart.component.css']
 })
 export class EmissionsUtilitiesChartComponent implements OnInit {
-
   @ViewChild('emissionsBarChart', { static: false }) emissionsBarChart: ElementRef;
 
   monthlySourceDataSub: Subscription;
@@ -44,8 +43,6 @@ export class EmissionsUtilitiesChartComponent implements OnInit {
     this.drawChart();
   }
 
-
-
   drawChart() {
     if (this.emissionsBarChart && this.monthlySourceData && this.monthlySourceData.length != 0) {
       let traceData = new Array();
@@ -64,7 +61,6 @@ export class EmissionsUtilitiesChartComponent implements OnInit {
             if (d.year == year) {
               if (this.emissionsDisplay == 'location') {
                 totalEmissions += d.locationEmissions;
-
               } else {
                 totalEmissions += d.marketEmissions;
               }
@@ -86,27 +82,12 @@ export class EmissionsUtilitiesChartComponent implements OnInit {
 
       var layout = {
         barmode: 'group',
-        // title: {
-        //   text: 'Utility Costs',
-        //   font: {
-        //     size: 24
-        //   },
-        // },
         xaxis: {
-          // title: {
-          //   text: xAxisTitle,
-          //   font: {
-          //     size: 18
-          //   },
-          // },
         },
         yaxis: {
           title: {
             text: yaxisTitle,
             tickprefix: tickprefix
-            // font: {
-            //   size: 18
-            // },
           },
           hoverformat: hoverformat
         },

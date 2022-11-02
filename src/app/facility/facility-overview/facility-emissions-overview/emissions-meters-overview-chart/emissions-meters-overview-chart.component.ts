@@ -22,12 +22,10 @@ export class EmissionsMetersOverviewChartComponent implements OnInit {
   constructor(private plotlyService: PlotlyService, private facilityOverviewService: FacilityOverviewService) { }
 
   ngOnInit(): void {
-
     this.emissionsDisplaySub = this.facilityOverviewService.emissionsDisplay.subscribe(val => {
       this.emissionsDisplay = val;
       this.drawChart();
     });
-
 
     this.metersSummarySub = this.facilityOverviewService.energyMeterSummaryData.subscribe(metersSummary => {
       this.metersSummary = metersSummary;
@@ -70,8 +68,6 @@ export class EmissionsMetersOverviewChartComponent implements OnInit {
         textinfo: 'label+percent',
         textposition: 'auto',
         insidetextorientation: "horizontal",
-        // textposition: ''
-        // hoverinfo: 'label+value',
         hovertemplate: hovertemplate,
         hole: .6,
         type: 'pie',

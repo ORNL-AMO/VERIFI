@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { FacilityOverviewService } from '../facility-overview.service';
 
-
 @Component({
   selector: 'app-facility-cost-overview',
   templateUrl: './facility-cost-overview.component.html',
@@ -18,12 +17,9 @@ export class FacilityCostOverviewComponent implements OnInit {
   constructor(private facilityOverviewService: FacilityOverviewService) { }
 
   ngOnInit(): void {
-
-
     this.calculatingSub = this.facilityOverviewService.calculatingCosts.subscribe(val => {
       this.calculating = val;
     })
-
 
     this.accountFacilitiesSummarySub = this.facilityOverviewService.costsMeterSummaryData.subscribe(summaryData => {
       if (summaryData && summaryData.allMetersLastBill) {

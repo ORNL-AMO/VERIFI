@@ -40,8 +40,6 @@ export class WaterUtilitiesUsageChartComponent implements OnInit {
     this.drawChart();
   }
 
-
-
   drawChart() {
     if (this.waterBarChart && this.monthlySourceData && this.monthlySourceData.length != 0) {
       let traceData = new Array();
@@ -78,27 +76,12 @@ export class WaterUtilitiesUsageChartComponent implements OnInit {
 
       var layout = {
         barmode: 'group',
-        // title: {
-        //   text: 'Utility Costs',
-        //   font: {
-        //     size: 24
-        //   },
-        // },
         xaxis: {
-          // title: {
-          //   text: xAxisTitle,
-          //   font: {
-          //     size: 18
-          //   },
-          // },
         },
         yaxis: {
           title: {
             text: yaxisTitle,
             tickprefix: tickprefix
-            // font: {
-            //   size: 18
-            // },
           },
           hoverformat: hoverformat
         },

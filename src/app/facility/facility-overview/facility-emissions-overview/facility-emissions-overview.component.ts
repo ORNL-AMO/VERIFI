@@ -8,7 +8,6 @@ import { FacilityOverviewService } from '../facility-overview.service';
   styleUrls: ['./facility-emissions-overview.component.css']
 })
 export class FacilityEmissionsOverviewComponent implements OnInit {
-
   lastMonthsDate: Date;
   yearPriorDate: Date;
   accountFacilitiesSummarySub: Subscription;
@@ -17,12 +16,9 @@ export class FacilityEmissionsOverviewComponent implements OnInit {
   constructor(private facilityOverviewService: FacilityOverviewService) { }
 
   ngOnInit(): void {
-
-
     this.calculatingSub = this.facilityOverviewService.calculatingEnergy.subscribe(val => {
       this.calculating = val;
-    })
-
+    });
 
     this.accountFacilitiesSummarySub = this.facilityOverviewService.energyMeterSummaryData.subscribe(summaryData => {
       if (summaryData && summaryData.allMetersLastBill) {

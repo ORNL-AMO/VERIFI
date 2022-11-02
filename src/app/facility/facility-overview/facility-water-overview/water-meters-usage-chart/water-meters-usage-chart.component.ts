@@ -14,9 +14,7 @@ import * as _ from 'lodash';
   styleUrls: ['./water-meters-usage-chart.component.css']
 })
 export class WaterMetersUsageChartComponent implements OnInit {
-
   @ViewChild('stackedAreaChart', { static: false }) stackedAreaChart: ElementRef;
-
 
   monthlySourceDataSub: Subscription;
   monthlySourceData: Array<{
@@ -94,21 +92,11 @@ export class WaterMetersUsageChartComponent implements OnInit {
         },
         xaxis: {
           autotick: false,
-          // title: {
-          //   text: 'Year',
-          //   font: {
-          //     size: 18
-          //   },
-          // },
           range: xrange
         },
         yaxis: {
           title: {
-            // text: yaxisTitle,
             tickprefix: tickprefix
-            //   font: {
-            //     size: 18
-            //   },
           },
           hoverformat: hoverformat
         },

@@ -10,7 +10,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr *ngFor="let summary of facilityMeterSummaryData.meterSummaries | orderBy: 'energyUsage'">
+            <tr *ngFor="let summary of facilityMeterSummaryData.meterSummaries | orderBy: 'marketEmissions'">
                 <td>
                     {{summary.meter.name}}
                 </td>

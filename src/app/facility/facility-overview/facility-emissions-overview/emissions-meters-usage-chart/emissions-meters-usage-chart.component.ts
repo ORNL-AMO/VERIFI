@@ -1,8 +1,7 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbFacility, MeterSource } from 'src/app/models/idb';
+import { MeterSource } from 'src/app/models/idb';
 import { FacilityBarChartData } from 'src/app/models/visualization';
 import { UtilityColors } from 'src/app/shared/utilityColors';
 import { FacilityOverviewService } from '../../facility-overview.service';
@@ -14,9 +13,7 @@ import * as _ from 'lodash';
   styleUrls: ['./emissions-meters-usage-chart.component.css']
 })
 export class EmissionsMetersUsageChartComponent implements OnInit {
-
   @ViewChild('stackedAreaChart', { static: false }) stackedAreaChart: ElementRef;
-
 
   monthlySourceDataSub: Subscription;
   monthlySourceData: Array<{
@@ -28,7 +25,6 @@ export class EmissionsMetersUsageChartComponent implements OnInit {
   constructor(private plotlyService: PlotlyService, private facilityOverviewService: FacilityOverviewService) { }
 
   ngOnInit(): void {
-
     this.emissionsDisplaySub = this.facilityOverviewService.emissionsDisplay.subscribe(val => {
       this.emissionsDisplay = val;
       this.drawChart();
@@ -104,21 +100,11 @@ export class EmissionsMetersUsageChartComponent implements OnInit {
         },
         xaxis: {
           autotick: false,
-          // title: {
-          //   text: 'Year',
-          //   font: {
-          //     size: 18
-          //   },
-          // },
           range: xrange
         },
         yaxis: {
           title: {
-            // text: yaxisTitle,
             tickprefix: tickprefix
-            //   font: {
-            //     size: 18
-            //   },
           },
           hoverformat: hoverformat
         },

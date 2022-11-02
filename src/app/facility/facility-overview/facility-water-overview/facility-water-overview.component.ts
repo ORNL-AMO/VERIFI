@@ -17,12 +17,9 @@ export class FacilityWaterOverviewComponent implements OnInit {
   constructor(private facilityOverviewService: FacilityOverviewService) { }
 
   ngOnInit(): void {
-
-
     this.calculatingSub = this.facilityOverviewService.calculatingWater.subscribe(val => {
       this.calculating = val;
     })
-
 
     this.accountFacilitiesSummarySub = this.facilityOverviewService.waterMeterSummaryData.subscribe(summaryData => {
       if (summaryData && summaryData.allMetersLastBill) {

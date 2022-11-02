@@ -14,7 +14,6 @@ import { UtilityColors } from 'src/app/shared/utilityColors';
   styleUrls: ['./energy-utilities-usage-chart.component.css']
 })
 export class EnergyUtilitiesUsageChartComponent implements OnInit {
-
   @ViewChild('utilityBarChart', { static: false }) utilityBarChart: ElementRef;
 
   monthlySourceDataSub: Subscription;
@@ -39,8 +38,6 @@ export class EnergyUtilitiesUsageChartComponent implements OnInit {
   ngAfterViewInit() {
     this.drawChart();
   }
-
-
 
   drawChart() {
     if (this.utilityBarChart && this.monthlySourceData && this.monthlySourceData.length != 0) {
@@ -78,27 +75,12 @@ export class EnergyUtilitiesUsageChartComponent implements OnInit {
 
       var layout = {
         barmode: 'group',
-        // title: {
-        //   text: 'Utility Costs',
-        //   font: {
-        //     size: 24
-        //   },
-        // },
         xaxis: {
-          // title: {
-          //   text: xAxisTitle,
-          //   font: {
-          //     size: 18
-          //   },
-          // },
         },
         yaxis: {
           title: {
             text: yaxisTitle,
             tickprefix: tickprefix
-            // font: {
-            //   size: 18
-            // },
           },
           hoverformat: hoverformat
         },

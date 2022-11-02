@@ -13,9 +13,7 @@ import * as _ from 'lodash';
   styleUrls: ['./energy-meters-usage-chart.component.css']
 })
 export class EnergyMetersUsageChartComponent implements OnInit {
-
   @ViewChild('stackedAreaChart', { static: false }) stackedAreaChart: ElementRef;
-
 
   monthlySourceDataSub: Subscription;
   monthlySourceData: Array<{
@@ -82,7 +80,6 @@ export class EnergyMetersUsageChartComponent implements OnInit {
         xrange = [dataPointSize-12, dataPointSize];
       };
 
-
       var layout = {
         barmode: 'group',
         title: {
@@ -93,21 +90,11 @@ export class EnergyMetersUsageChartComponent implements OnInit {
         },
         xaxis: {
           autotick: false,
-          // title: {
-          //   text: 'Year',
-          //   font: {
-          //     size: 18
-          //   },
-          // },
           range: xrange
         },
         yaxis: {
           title: {
-            // text: yaxisTitle,
             tickprefix: tickprefix
-            //   font: {
-            //     size: 18
-            //   },
           },
           hoverformat: hoverformat
         },
