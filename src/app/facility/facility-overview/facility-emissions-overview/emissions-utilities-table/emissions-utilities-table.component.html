@@ -1,0 +1,177 @@
+<div class="table-responsive">
+    <table class="table table-sm" *ngIf="utilityUsageSummaryData">
+        <thead>
+            <tr class="table-mh">
+                <th class="w-25"></th>
+                <th class="w-25">
+                    Last Month Emissions<br> <span class="small" *ngIf="lastMonthsDate">({{lastMonthsDate | date: 'MMM, y'}})</span>
+                </th>
+                <th class="w-25">
+                    Previous Year Emissions<br>
+                    <span class="small" *ngIf="yearPriorLastMonth">({{yearPriorLastMonth | date: 'MMM, y'}})</span>
+                </th>
+                <th class="w-25">
+                    Monthly Average Emissions<br>
+                    <span class="small" *ngIf="yearPriorDate">({{yearPriorDate | date: 'MMM, y'}} -
+                        {{lastMonthsDate | date: 'MMM, y'}})</span>
+                </th>
+            </tr>
+            <tr>
+                <th></th>
+                <th>
+                    (<span>kg CO<sub>2</sub></span>)
+                </th>
+                <th>
+                    (<span>kg CO<sub>2</sub></span>)
+                </th>
+                <th>
+                    (<span>kg CO<sub>2</sub></span>)
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let utilityUsageSummary of utilityUsageSummaryData.utilitySummaries">
+                <td>
+                    {{utilityUsageSummary.utility}}
+                </td>
+                <!--Last Month-->
+                <td *ngIf="emissionsDisplay == 'market'">
+                    <span *ngIf="utilityUsageSummary.previousMonthMarketEmissions">
+                        {{utilityUsageSummary.previousMonthMarketEmissions | customNumber }}
+                    </span>
+                    <span *ngIf="!utilityUsageSummary.previousMonthMarketEmissions">
+                        &mdash;
+                    </span>
+
+                    <span *ngIf="utilityUsageSummary.marketEmissionsChangeSinceLastYear"
+                        class="small pl-2 pull-right green"
+                        [ngClass]="{'red': utilityUsageSummary.marketEmissionsChangeSinceLastYear > 0}">
+                        ({{utilityUsageSummary.marketEmissionsChangeSinceLastYear | customNumber}})
+                    </span>
+                </td>
+                <td *ngIf="emissionsDisplay == 'location'">
+                    <span *ngIf="utilityUsageSummary.previousMonthLocationEmissions">
+                        {{utilityUsageSummary.previousMonthLocationEmissions | customNumber }}
+                    </span>
+                    <span *ngIf="!utilityUsageSummary.previousMonthLocationEmissions">
+                        &mdash;
+                    </span>
+
+                    <span *ngIf="utilityUsageSummary.locationEmissionsChangeSinceLastYear"
+                        class="small pl-2 pull-right green"
+                        [ngClass]="{'red': utilityUsageSummary.locationEmissionsChangeSinceLastYear > 0}">
+                        ({{utilityUsageSummary.locationEmissionsChangeSinceLastYear | customNumber}})
+                    </span>
+                </td>
+                <!--Year prior-->
+                <td *ngIf="emissionsDisplay == 'market'">
+                    <span *ngIf="utilityUsageSummary.yearPriorMarketEmissions">
+                        {{utilityUsageSummary.yearPriorMarketEmissions | customNumber}}
+                    </span>
+                    <span *ngIf="!utilityUsageSummary.yearPriorMarketEmissions">
+                        &mdash;
+                    </span>
+                </td>
+                <td *ngIf="emissionsDisplay == 'location'">
+                    <span *ngIf="utilityUsageSummary.yearPriorLocationEmissions">
+                        {{utilityUsageSummary.yearPriorLocationEmissions | customNumber}}
+                    </span>
+                    <span *ngIf="!utilityUsageSummary.yearPriorLocationEmissions">
+                        &mdash;
+                    </span>
+                </td>
+
+                <!--Average-->
+                <td *ngIf="emissionsDisplay == 'market'">
+                    <span *ngIf="utilityUsageSummary.averageMarketEmissions">
+                        {{utilityUsageSummary.averageMarketEmissions | customNumber}}
+                    </span>
+                    <span *ngIf="!utilityUsageSummary.averageMarketEmissions">
+                        &mdash;
+                    </span>
+                </td>
+                <td *ngIf="emissionsDisplay == 'location'">
+                    <span *ngIf="utilityUsageSummary.averageLocationEmissions">
+                        {{utilityUsageSummary.averageLocationEmissions | customNumber}}
+                    </span>
+                    <span *ngIf="!utilityUsageSummary.averageLocationEmissions">
+                        &mdash;
+                    </span>
+                </td>
+
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <th>
+                    Total
+                </th>
+                <!--previous month-->
+                <th *ngIf="emissionsDisplay == 'market'">
+                    <span *ngIf="utilityUsageSummaryData.total.previousMonthMarketEmissions">
+                        {{utilityUsageSummaryData.total.previousMonthMarketEmissions | customNumber}}
+                    </span>
+                    <span *ngIf="!utilityUsageSummaryData.total.previousMonthMarketEmissions">
+                        &mdash;
+                    </span>
+                    <span *ngIf="utilityUsageSummaryData.total.marketEmissionsChangeSinceLastYear"
+                        class="small pl-2 pull-right green"
+                        [ngClass]="{'red': utilityUsageSummaryData.total.marketEmissionsChangeSinceLastYear > 0}">
+                        ({{utilityUsageSummaryData.total.marketEmissionsChangeSinceLastYear | customNumber}})
+                    </span>
+                </th>
+                <th *ngIf="emissionsDisplay == 'location'">
+                    <span *ngIf="utilityUsageSummaryData.total.previousMonthLocationEmissions">
+                        {{utilityUsageSummaryData.total.previousMonthLocationEmissions | customNumber}}
+                    </span>
+                    <span *ngIf="!utilityUsageSummaryData.total.previousMonthLocationEmissions">
+                        &mdash;
+                    </span>
+                    <span *ngIf="utilityUsageSummaryData.total.locationEmissionsChangeSinceLastYear"
+                        class="small pl-2 pull-right green"
+                        [ngClass]="{'red': utilityUsageSummaryData.total.locationEmissionsChangeSinceLastYear > 0}">
+                        ({{utilityUsageSummaryData.total.locationEmissionsChangeSinceLastYear | customNumber}})
+                    </span>
+                </th>
+
+                <!--year prior-->
+                <th *ngIf="emissionsDisplay == 'market'">
+                    <span *ngIf="utilityUsageSummaryData.total.yearPriorMarketEmissions">
+                        {{utilityUsageSummaryData.total.yearPriorMarketEmissions | customNumber}}
+                    </span>
+                    <span *ngIf="!utilityUsageSummaryData.total.yearPriorMarketEmissions">
+                        &mdash;
+                    </span>
+
+                </th>
+                <th *ngIf="emissionsDisplay == 'location'">
+                    <span *ngIf="utilityUsageSummaryData.total.yearPriorLocationEmissions">
+                        {{utilityUsageSummaryData.total.yearPriorLocationEmissions | customNumber}}
+                    </span>
+                    <span *ngIf="!utilityUsageSummaryData.total.yearPriorLocationEmissions">
+                        &mdash;
+                    </span>
+
+                </th>
+
+                <!--average-->
+                <th *ngIf="emissionsDisplay == 'market'">
+                    <span *ngIf="utilityUsageSummaryData.total.averageMarketEmissions">
+                        {{utilityUsageSummaryData.total.averageMarketEmissions | customNumber}}
+                    </span>
+                    <span *ngIf="!utilityUsageSummaryData.total.averageMarketEmissions">
+                        &mdash;
+                    </span>
+                </th>
+                <th *ngIf="emissionsDisplay == 'location'">
+                    <span *ngIf="utilityUsageSummaryData.total.averageLocationEmissions">
+                        {{utilityUsageSummaryData.total.averageLocationEmissions | customNumber}}
+                    </span>
+                    <span *ngIf="!utilityUsageSummaryData.total.averageLocationEmissions">
+                        &mdash;
+                    </span>
+                </th>
+            </tr>
+        </tfoot>
+    </table>
+</div>

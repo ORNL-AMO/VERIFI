@@ -1,7 +1,7 @@
 import { CalanderizedMeter, MonthlyData } from "src/app/models/calanderization";
-import { FacilityMeterSummaryData, MeterSummary, UtilityUsageSummaryData } from "src/app/models/dashboard";
+import { FacilityMeterSummaryData, MeterSummary, UtilityUsageSummaryData, YearMonthData } from "src/app/models/dashboard";
 import { IdbUtilityMeterGroup, MeterSource } from "src/app/models/idb";
-import { getLastBillEntryFromCalanderizedMeterData, getPastYearData, getSumValue, getUtilityUsageSummaryData, LastYearDataResult } from "../helper-functions/calanderizationFunctions";
+import { getLastBillEntryFromCalanderizedMeterData, getPastYearData, getSumValue, getUtilityUsageSummaryData, getYearlyUsageNumbers, LastYearDataResult } from "../helper-functions/calanderizationFunctions";
 import * as _ from 'lodash';
 import { FacilityBarChartData } from "src/app/models/visualization";
 
@@ -13,17 +13,18 @@ export class FacilitySummaryClass {
         data: Array<FacilityBarChartData>
     }>;
     utilityUsageSummaryData: UtilityUsageSummaryData;
+    yearMonthData: Array<YearMonthData>;
     constructor(calanderizedMeters: Array<CalanderizedMeter>, groups: Array<IdbUtilityMeterGroup>, sources: Array<MeterSource>) {
         let sourceMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return sources.includes(cMeter.meter.source) });
         let allMetersLastBill: MonthlyData = getLastBillEntryFromCalanderizedMeterData(sourceMeters);
         this.meterSummaryData = this.getDashboardFacilityMeterSummary(sourceMeters, allMetersLastBill, groups);
         this.monthlySourceData = this.getMonthlySourceData(sourceMeters, sources);
         this.utilityUsageSummaryData = getUtilityUsageSummaryData(sourceMeters, allMetersLastBill, sources);
+        this.yearMonthData = getYearlyUsageNumbers(sourceMeters);
     };
 
     getDashboardFacilityMeterSummary(calanderizedMeters: Array<CalanderizedMeter>, lastBill: MonthlyData, groups: Array<IdbUtilityMeterGroup>): FacilityMeterSummaryData {
         let facilityMetersSummary: Array<MeterSummary> = new Array();
-        // let allMetersLastBill: MonthlyData = getLastBillEntryFromCalanderizedMeterData(calanderizedMeters);
         calanderizedMeters.forEach(cMeter => {
             let summary: MeterSummary = this.getDashboardMeterSummary(cMeter, lastBill, groups);
             facilityMetersSummary.push(summary);

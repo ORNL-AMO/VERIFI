@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
-import { FacilityMeterSummaryData, UtilityUsageSummaryData } from 'src/app/models/dashboard';
+import { FacilityMeterSummaryData, UtilityUsageSummaryData, YearMonthData } from 'src/app/models/dashboard';
 import { IdbUtilityMeter, MeterSource } from 'src/app/models/idb';
 import { FacilityBarChartData } from 'src/app/models/visualization';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
@@ -22,6 +22,7 @@ export class FacilityOverviewService {
     data: Array<FacilityBarChartData>
   }>>;
   energyUtilityUsageSummaryData: BehaviorSubject<UtilityUsageSummaryData>;
+  energyYearMonthData: BehaviorSubject<Array<YearMonthData>>;
 
 
   calculatingCosts: BehaviorSubject<boolean>;
@@ -31,6 +32,7 @@ export class FacilityOverviewService {
     data: Array<FacilityBarChartData>
   }>>;
   costsUtilityUsageSummaryData: BehaviorSubject<UtilityUsageSummaryData>;
+  costsYearMonthData: BehaviorSubject<Array<YearMonthData>>;
 
   calculatingWater: BehaviorSubject<boolean>;
   waterMeterSummaryData: BehaviorSubject<FacilityMeterSummaryData>;
@@ -39,6 +41,7 @@ export class FacilityOverviewService {
     data: Array<FacilityBarChartData>
   }>>;
   waterUtilityUsageSummaryData: BehaviorSubject<UtilityUsageSummaryData>;
+  waterYearMonthData: BehaviorSubject<Array<YearMonthData>>;
   constructor(private utilityMeterDbService: UtilityMeterdbService, private calanderizationService: CalanderizationService) {
     this.emissionsDisplay = new BehaviorSubject<"market" | "location">("market");
     this.calculatingEnergy = new BehaviorSubject<boolean>(undefined);
@@ -47,12 +50,15 @@ export class FacilityOverviewService {
     this.energyMeterSummaryData = new BehaviorSubject<FacilityMeterSummaryData>(undefined);
     this.energyMonthlySourceData = new BehaviorSubject(undefined);
     this.energyUtilityUsageSummaryData = new BehaviorSubject(undefined);
+    this.energyYearMonthData = new BehaviorSubject(undefined);
     this.costsMeterSummaryData = new BehaviorSubject<FacilityMeterSummaryData>(undefined);
     this.costsMonthlySourceData = new BehaviorSubject(undefined);
     this.costsUtilityUsageSummaryData = new BehaviorSubject(undefined);
+    this.costsYearMonthData = new BehaviorSubject(undefined);
     this.waterMeterSummaryData = new BehaviorSubject<FacilityMeterSummaryData>(undefined);
     this.waterMonthlySourceData = new BehaviorSubject(undefined);
     this.waterUtilityUsageSummaryData = new BehaviorSubject(undefined);
+    this.waterYearMonthData = new BehaviorSubject(undefined);
   }
 
   setCalanderizedMeters() {

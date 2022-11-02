@@ -41,16 +41,19 @@ export class FacilityOverviewComponent implements OnInit {
           this.facilityOverviewService.energyMeterSummaryData.next(data.meterSummaryData);
           this.facilityOverviewService.energyMonthlySourceData.next(data.monthlySourceData);
           this.facilityOverviewService.energyUtilityUsageSummaryData.next(data.utilityUsageSummaryData);
+          this.facilityOverviewService.energyYearMonthData.next(data.yearMonthData);
           this.facilityOverviewService.calculatingEnergy.next(false);
         }else if(data.type == 'water'){
           this.facilityOverviewService.waterMeterSummaryData.next(data.meterSummaryData);
           this.facilityOverviewService.waterMonthlySourceData.next(data.monthlySourceData);
           this.facilityOverviewService.waterUtilityUsageSummaryData.next(data.utilityUsageSummaryData);
+          this.facilityOverviewService.waterYearMonthData.next(data.yearMonthData);
           this.facilityOverviewService.calculatingWater.next(false);
         } else if(data.type == 'all'){
           this.facilityOverviewService.costsMeterSummaryData.next(data.meterSummaryData);
           this.facilityOverviewService.costsMonthlySourceData.next(data.monthlySourceData);
           this.facilityOverviewService.costsUtilityUsageSummaryData.next(data.utilityUsageSummaryData);
+          this.facilityOverviewService.costsYearMonthData.next(data.yearMonthData);
           this.facilityOverviewService.calculatingCosts.next(false);
           this.worker.terminate();
         }

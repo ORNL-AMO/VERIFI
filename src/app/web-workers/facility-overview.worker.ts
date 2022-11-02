@@ -9,6 +9,7 @@ addEventListener('message', ({ data }) => {
         meterSummaryData: facilitySummaryClass.meterSummaryData,
         monthlySourceData: facilitySummaryClass.monthlySourceData,
         utilityUsageSummaryData: facilitySummaryClass.utilityUsageSummaryData,
+        yearMonthData: facilitySummaryClass.yearMonthData,
         type: data.type
     }
     postMessage(results);

@@ -19,6 +19,14 @@ import { CostMetersOverviewTableComponent } from './facility-cost-overview/cost-
 import { CostMetersUsageChartComponent } from './facility-cost-overview/cost-meters-usage-chart/cost-meters-usage-chart.component';
 import { CostUtilitiesUsageChartComponent } from './facility-cost-overview/cost-utilities-usage-chart/cost-utilities-usage-chart.component';
 import { CostUtilitiesUsageTableComponent } from './facility-cost-overview/cost-utilities-usage-table/cost-utilities-usage-table.component';
+import { FacilityEnergyMonthlyChartComponent } from './facility-energy-overview/facility-energy-monthly-chart/facility-energy-monthly-chart.component';
+import { FacilityCostMonthlyChartComponent } from './facility-cost-overview/facility-cost-monthly-chart/facility-cost-monthly-chart.component';
+import { EmissionsMetersOverviewChartComponent } from './facility-emissions-overview/emissions-meters-overview-chart/emissions-meters-overview-chart.component';
+import { EmissionsMetersOverviewTableComponent } from './facility-emissions-overview/emissions-meters-overview-table/emissions-meters-overview-table.component';
+import { EmissionsMetersUsageChartComponent } from './facility-emissions-overview/emissions-meters-usage-chart/emissions-meters-usage-chart.component';
+import { EmissionsUtilitiesChartComponent } from './facility-emissions-overview/emissions-utilities-chart/emissions-utilities-chart.component';
+import { EmissionsUtilitiesTableComponent } from './facility-emissions-overview/emissions-utilities-table/emissions-utilities-table.component';
+import { FacilityEmissionsMonthlyChartComponent } from './facility-emissions-overview/facility-emissions-monthly-chart/facility-emissions-monthly-chart.component';
 
 
 
@@ -39,7 +47,15 @@ import { CostUtilitiesUsageTableComponent } from './facility-cost-overview/cost-
     CostMetersOverviewTableComponent,
     CostMetersUsageChartComponent,
     CostUtilitiesUsageChartComponent,
-    CostUtilitiesUsageTableComponent
+    CostUtilitiesUsageTableComponent,
+    FacilityEnergyMonthlyChartComponent,
+    FacilityCostMonthlyChartComponent,
+    EmissionsMetersOverviewChartComponent,
+    EmissionsMetersOverviewTableComponent,
+    EmissionsMetersUsageChartComponent,
+    EmissionsUtilitiesChartComponent,
+    EmissionsUtilitiesTableComponent,
+    FacilityEmissionsMonthlyChartComponent
   ],
   imports: [
     CommonModule,

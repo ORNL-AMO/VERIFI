@@ -1,7 +1,8 @@
 import { CalanderizedMeter, LastYearData, MonthlyData } from "src/app/models/calanderization";
 import * as _ from 'lodash';
-import { SummaryData, UtilityUsageSummaryData } from "src/app/models/dashboard";
+import { SummaryData, UtilityUsageSummaryData, YearMonthData } from "src/app/models/dashboard";
 import { MeterSource } from "src/app/models/idb";
+import { Months } from "src/app/shared/form-data/months";
 
 export function getLastBillEntryFromCalanderizedMeterData(calanderizedMeterData: Array<CalanderizedMeter>, monthlyData?: Array<MonthlyData>): MonthlyData {
     if (!monthlyData) {
@@ -269,6 +270,47 @@ export function getUtilityUsageSummaryData(calanderizedMeters: Array<Calanderize
         },
         allMetersLastBill: allMetersLastBill
     }
+}
+
+export function getYearlyUsageNumbers(calanderizedMeters: Array<CalanderizedMeter>): Array<YearMonthData> {
+    let monthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(cMeter => {
+        return cMeter.monthlyData;
+    });
+    let years: Array<number> = monthlyData.map(data => { return data.year });
+    years = _.uniq(years);
+
+    let yearMonthData: Array<YearMonthData> = new Array();
+
+    years.forEach(year => {
+        Months.forEach(month => {
+            let energyUse: number = 0;
+            let energyCost: number = 0;
+            let marketEmissions: number = 0;
+            let locationEmissions: number = 0;
+            let consumption: number = 0;
+            for (let i = 0; i < monthlyData.length; i++) {
+                if (monthlyData[i].year == year && monthlyData[i].month == month.abbreviation) {
+                    energyUse += monthlyData[i].energyUse;
+                    energyCost += monthlyData[i].energyCost;
+                    marketEmissions += monthlyData[i].marketEmissions;
+                    locationEmissions += monthlyData[i].locationEmissions;
+                    consumption += monthlyData[i].energyConsumption;
+                }
+            }
+            yearMonthData.push({
+                yearMonth: { year: year, month: month.abbreviation },
+                energyUse: energyUse,
+                energyCost: energyCost,
+                marketEmissions: marketEmissions,
+                locationEmissions: locationEmissions,
+                consumption: consumption
+            })
+        })
+
+
+    })
+    // });
+    return yearMonthData;
 }
 
 
