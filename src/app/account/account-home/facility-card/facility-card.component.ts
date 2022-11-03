@@ -7,6 +7,10 @@ import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service
 import { UtilityColors } from 'src/app/shared/utilityColors';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { OverviewReportService } from '../../overview-report/overview-report.service';
+import { AccountHomeService } from '../account-home.service';
+import { CalanderizedMeter } from 'src/app/models/calanderization';
+import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
+import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-facility-card',
   templateUrl: './facility-card.component.html',
@@ -25,9 +29,22 @@ export class FacilityCardComponent implements OnInit {
   latestPredictorEntry: IdbPredictorEntry;
   noMeterData: boolean;
   naics: string;
+  calculating: boolean = true;
+  annualAnalysisSummary: Array<AnnualAnalysisSummary>;
+  monthlyFacilityAnalysisData: Array<MonthlyAnalysisSummaryData>;
+
+  latestAnalysisYear: number;
+  percentSavings: number = 0;
+  percentGoal: number;
+  percentTowardsGoal: number = 0;
+  goalYear: number;
+  baselineYear: number;
+
+  showContent: boolean = true;
+  facilityAnalysisSummariesSub: Subscription;
   constructor(private analysisDbService: AnalysisDbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterDbService: UtilityMeterdbService, private predictorDbService: PredictordbService,
-    private overviewReportService: OverviewReportService) { }
+    private overviewReportService: OverviewReportService, private accountHomeService: AccountHomeService) { }
 
   ngOnInit(): void {
     let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
@@ -48,8 +65,31 @@ export class FacilityCardComponent implements OnInit {
       }
     }
     this.setNAICS();
+    this.setGoalYears();
+    if (this.latestAnalysisItem) {
+      this.facilityAnalysisSummariesSub = this.accountHomeService.facilityAnalysisSummaries.subscribe(summaries => {
+        let facilitySummary: {
+          facilityId: string,
+          annualAnalysisSummary: Array<AnnualAnalysisSummary>,
+          monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
+        } = summaries.find(summary => { return summary.facilityId == this.facility.guid });
+        if (facilitySummary) {
+          this.annualAnalysisSummary = facilitySummary.annualAnalysisSummary;
+          this.monthlyFacilityAnalysisData = facilitySummary.monthlyAnalysisSummaryData;
+          this.setProgressPercentages();
+          this.calculating = false;
+        }
+      })
+    }
+
+
   }
 
+  ngOnDestroy() {
+    if (this.facilityAnalysisSummariesSub) {
+      this.facilityAnalysisSummariesSub.unsubscribe();
+    }
+  }
 
   checkMeterDataUpToDate() {
     if (this.lastBill) {
@@ -78,8 +118,26 @@ export class FacilityCardComponent implements OnInit {
     return UtilityColors[source].color
   }
 
-  setNAICS(){
+  setNAICS() {
     this.naics = this.overviewReportService.getNAICS(this.facility);
   }
 
+  setGoalYears() {
+    if (this.facility && this.facility.sustainabilityQuestions) {
+      this.percentGoal = this.facility.sustainabilityQuestions.energyReductionPercent;
+      this.goalYear = this.facility.sustainabilityQuestions.energyReductionTargetYear;
+      this.baselineYear = this.facility.sustainabilityQuestions.energyReductionBaselineYear;
+    }
+  }
+
+  setProgressPercentages() {
+    let latestAnalysisSummary: AnnualAnalysisSummary = _.maxBy(this.annualAnalysisSummary, 'year');
+    this.percentSavings = latestAnalysisSummary.totalSavingsPercentImprovement;
+    this.latestAnalysisYear = latestAnalysisSummary.year;
+    this.percentTowardsGoal = (this.percentSavings / this.percentGoal) * 100;
+  }
+
+  toggleShowContent() {
+    this.showContent = !this.showContent;
+  }
 }

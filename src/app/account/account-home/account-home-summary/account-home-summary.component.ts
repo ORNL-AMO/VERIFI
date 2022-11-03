@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { OverviewReportOptionsDbService } from 'src/app/indexedDB/overview-report-options-db.service';
-import { AnnualAnalysisSummary } from 'src/app/models/analysis';
-import { IdbAccount, IdbOverviewReportOptions, IdbUtilityMeterData } from 'src/app/models/idb';
+import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
+import { IdbAccount, IdbAccountAnalysisItem, IdbOverviewReportOptions, IdbUtilityMeterData } from 'src/app/models/idb';
 import { AccountHomeService } from '../account-home.service';
 import * as _ from 'lodash';
 import { Router } from '@angular/router';
@@ -21,6 +21,7 @@ export class AccountHomeSummaryComponent implements OnInit {
   accountSub: Subscription;
   latestAnalysisSummary: AnnualAnalysisSummary;
   latestSummarySub: Subscription;
+  latestAnalysisYear: number;
   percentSavings: number = 0;
   percentGoal: number;
   percentTowardsGoal: number = 0;
@@ -32,7 +33,11 @@ export class AccountHomeSummaryComponent implements OnInit {
 
   overviewReportOptionsSub: Subscription;
   disableButtons: boolean;
-
+  monthlyFacilityAnalysisData: Array<MonthlyAnalysisSummaryData>;
+  monthlyDataSub: Subscription;
+  latestAnalysisItem: IdbAccountAnalysisItem;
+  calculatingSub: Subscription;
+  calculating: boolean;
   constructor(private accountDbService: AccountdbService, private accountHomeService: AccountHomeService,
     private overviewReportOptionsDbService: OverviewReportOptionsDbService, private router: Router,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
@@ -42,6 +47,7 @@ export class AccountHomeSummaryComponent implements OnInit {
     this.accountSub = this.accountDbService.selectedAccount.subscribe(val => {
       this.account = val;
       this.setGoalYears();
+      this.latestAnalysisItem = this.accountHomeService.latestAnalysisItem;
       let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
       this.disableButtons = (accountMeterData.length == 0);
     });
@@ -56,6 +62,14 @@ export class AccountHomeSummaryComponent implements OnInit {
         this.percentTowardsGoal = 0;
       }
     });
+
+    this.calculatingSub = this.accountHomeService.calculating.subscribe(val => {
+      this.calculating = val;
+      if(!this.calculating){
+        this.monthlyFacilityAnalysisData = this.accountHomeService.monthlyAccountAnalysisData.getValue();
+      }
+    })
+
 
     this.overviewReportOptionsSub = this.overviewReportOptionsDbService.accountOverviewReportOptions.subscribe(accountOverviewReportOptions => {
       let betterPlantsReports: Array<IdbOverviewReportOptions> = accountOverviewReportOptions.filter(options => { return options.type == 'report' && options.reportOptionsType == "betterPlants" });
@@ -75,8 +89,8 @@ export class AccountHomeSummaryComponent implements OnInit {
     this.overviewReportOptionsSub.unsubscribe();
   }
 
-  setGoalYears(){
-    if(this.account && this.account.sustainabilityQuestions){
+  setGoalYears() {
+    if (this.account && this.account.sustainabilityQuestions) {
       this.percentGoal = this.account.sustainabilityQuestions.energyReductionPercent;
       this.goalYear = this.account.sustainabilityQuestions.energyReductionTargetYear;
       this.baselineYear = this.account.sustainabilityQuestions.energyReductionBaselineYear;
@@ -85,6 +99,7 @@ export class AccountHomeSummaryComponent implements OnInit {
 
   setProgressPercentages() {
     this.percentSavings = this.latestAnalysisSummary.totalSavingsPercentImprovement;
+    this.latestAnalysisYear = this.latestAnalysisSummary.year;
     this.percentTowardsGoal = (this.percentSavings / this.percentGoal) * 100;
   }
 
@@ -99,4 +114,7 @@ export class AccountHomeSummaryComponent implements OnInit {
   exportData() {
     this.exportToExcelTemplateService.exportFacilityData();
   }
+
+
+ 
 }

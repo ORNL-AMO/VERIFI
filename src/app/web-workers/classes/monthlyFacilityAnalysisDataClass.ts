@@ -23,6 +23,7 @@ export class MonthlyFacilityAnalysisDataClass {
     baselineActualEnergyUse: number;
     monthIndex: number;
     helperService: HelperService;
+    facilityGUID: string;
     constructor(
         allFacilityAnalysisData: Array<MonthlyAnalysisSummaryDataClass>,
         monthDate: Date,
@@ -30,6 +31,7 @@ export class MonthlyFacilityAnalysisDataClass {
         previousMonthsSummaryData: Array<MonthlyFacilityAnalysisDataClass>,
         baselineYear: number,
         facility: IdbFacility) {
+        this.facilityGUID = facility.guid;
         this.helperService = new HelperService();
         this.date = monthDate;
         this.setFiscalYear(facility);

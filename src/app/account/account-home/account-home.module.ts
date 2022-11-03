@@ -5,6 +5,8 @@ import { AccountHomeSummaryComponent } from './account-home-summary/account-home
 import { FacilityCardComponent } from './facility-card/facility-card.component';
 import { RouterModule } from '@angular/router';
 import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.module';
+import { SharedAnalysisModule } from 'src/app/shared/shared-analysis/shared-analysis.module';
+import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/calculating-spinner.module';
 
 
 
@@ -12,12 +14,14 @@ import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.modu
   declarations: [
     AccountHomeComponent,
     AccountHomeSummaryComponent,
-    FacilityCardComponent
+    FacilityCardComponent,
   ],
   imports: [
     CommonModule,
     RouterModule,
-    HelperPipesModule
+    HelperPipesModule,
+    SharedAnalysisModule,
+    CalculatingSpinnerModule
   ]
 })
 export class AccountHomeModule { }

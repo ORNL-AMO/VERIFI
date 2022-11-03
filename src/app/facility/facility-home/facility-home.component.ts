@@ -18,7 +18,6 @@ export class FacilityHomeComponent implements OnInit {
   facilityMeterDataSub: Subscription;
   facilityMeters: Array<IdbUtilityMeter>;
   facility: IdbFacility;
-  monthlyAnalysisWorker: Worker;
   annualAnalysisWorker: Worker;
   constructor(private facilityDbService: FacilitydbService,
     private facilityHomeService: FacilityHomeService, private utilityMeterDbService: UtilityMeterdbService,
@@ -30,7 +29,6 @@ export class FacilityHomeComponent implements OnInit {
       this.facilityHomeService.setCalanderizedMeters(this.facility);
       this.facilityMeters = this.utilityMeterDbService.facilityMeters.getValue();
       if (this.facilityHomeService.latestAnalysisItem) {
-        this.setMonthlyAnalysisSummary();
         this.setAnnualAnalysisSummary();
       } else {
         this.facilityHomeService.monthlyFacilityAnalysisData.next(undefined);
@@ -41,9 +39,6 @@ export class FacilityHomeComponent implements OnInit {
 
   ngOnDestroy() {
     this.facilityMeterDataSub.unsubscribe();
-    if (this.monthlyAnalysisWorker) {
-      this.monthlyAnalysisWorker.terminate();
-    }
     if (this.annualAnalysisWorker) {
       this.annualAnalysisWorker.terminate();
     }
@@ -56,38 +51,18 @@ export class FacilityHomeComponent implements OnInit {
     this.router.navigateByUrl('facility/' + this.facility.id + '/utility');
   }
 
-  setMonthlyAnalysisSummary() {
-    let calanderizedMeters: Array<CalanderizedMeter> = this.facilityHomeService.calanderizedMeters;
-    let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
-    if (typeof Worker !== 'undefined') {
-      this.monthlyAnalysisWorker = new Worker(new URL('src/app/web-workers/monthly-facility-analysis.worker', import.meta.url));
-      this.monthlyAnalysisWorker.onmessage = ({ data }) => {
-        this.facilityHomeService.monthlyFacilityAnalysisData.next(data);
-        this.monthlyAnalysisWorker.terminate();
-      };
-      this.monthlyAnalysisWorker.postMessage({
-        analysisItem: this.facilityHomeService.latestAnalysisItem,
-        facility: this.facility,
-        calanderizedMeters: calanderizedMeters,
-        accountPredictorEntries: accountPredictorEntries
-      });
-    } else {
-      console.log('nopee')
-
-      // Web Workers are not supported in this environment.
-      // You should add a fallback so that your program still executes correctly.
-    }
-  }
-
   setAnnualAnalysisSummary() {
     let calanderizedMeters: Array<CalanderizedMeter> = this.facilityHomeService.calanderizedMeters;
     let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
     if (typeof Worker !== 'undefined') {
       this.annualAnalysisWorker = new Worker(new URL('src/app/web-workers/annual-facility-analysis.worker', import.meta.url));
       this.annualAnalysisWorker.onmessage = ({ data }) => {
-        this.facilityHomeService.annualAnalysisSummary.next(data);
+        this.facilityHomeService.annualAnalysisSummary.next(data.annualAnalysisSummaries);
+        this.facilityHomeService.monthlyFacilityAnalysisData.next(data.monthlyAnalysisSummaryData);
+        this.facilityHomeService.calculating.next(false);
         this.annualAnalysisWorker.terminate();
       };
+      this.facilityHomeService.calculating.next(true);
       this.annualAnalysisWorker.postMessage({
         analysisItem: this.facilityHomeService.latestAnalysisItem,
         facility: this.facility,

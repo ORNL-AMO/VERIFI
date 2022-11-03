@@ -6,7 +6,7 @@ import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db
 import { IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, MeterSource, PredictorData } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { FacilityHomeService } from '../facility-home.service';
-import { AnnualAnalysisSummary } from 'src/app/models/analysis';
+import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { Router } from '@angular/router';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
@@ -47,6 +47,12 @@ export class FacilityHomeSummaryComponent implements OnInit {
   naics: string;
 
   selectedFacilitySub: Subscription;
+
+  calculating: boolean;
+  calculatingSub: Subscription;
+
+  monthlyFacilityAnalysisData: Array<MonthlyAnalysisSummaryData>;
+  monthlyFacilityAnalysisDataSub: Subscription;
   constructor(private analysisDbService: AnalysisDbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private facilityDbService: FacilitydbService, private facilityHomeService: FacilityHomeService,
     private router: Router, private predictorDbService: PredictordbService,
@@ -55,6 +61,11 @@ export class FacilityHomeSummaryComponent implements OnInit {
     private exportToExcelTemplateService: ExportToExcelTemplateService) { }
 
   ngOnInit(): void {
+
+    this.calculatingSub = this.facilityHomeService.calculating.subscribe(val => {
+      this.calculating = val;
+    });
+
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
       this.facility = this.facilityDbService.selectedFacility.getValue();
       this.setGoalYears()
@@ -72,11 +83,17 @@ export class FacilityHomeSummaryComponent implements OnInit {
         this.percentTowardsGoal = 0;
       }
     });
+
+    this.monthlyFacilityAnalysisDataSub = this.facilityHomeService.monthlyFacilityAnalysisData.subscribe(val => {
+      this.monthlyFacilityAnalysisData = val;
+    })
   }
 
   ngOnDestroy() {
     this.latestSummarySub.unsubscribe();
     this.selectedFacilitySub.unsubscribe();
+    this.calculatingSub.unsubscribe();
+    this.monthlyFacilityAnalysisDataSub.unsubscribe();
   }
 
   checkMeterDataUpToDate() {

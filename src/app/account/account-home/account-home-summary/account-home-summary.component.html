@@ -8,13 +8,14 @@
                     {{account.country}}
                 </p>
             </div>
-            <div class="col">
+            <div class="col" *ngIf="goalYear">
                 <div class="row">
                     <div class="col-2 text-center">
                         Baseline
                     </div>
                     <div class="col-8 text-center">
-                        Energy Reduction Goal
+                        Energy Reduction Progress <ng-container *ngIf="latestAnalysisYear">({{latestAnalysisYear}})
+                        </ng-container>
                     </div>
                     <div class="col-2 text-center">
                         Goal
@@ -28,7 +29,8 @@
                         <div class="progress">
                             <div class="progress-bar" role="progressbar" [style.width.%]="percentTowardsGoal"
                                 aria-valuemin="0" aria-valuemax="percentGoal">
-                                <span class="progress-bar-data">{{percentSavings | number:'1.0-0'}}%</span>
+                                <span class="progress-bar-data">{{percentSavings | number:'1.0-0'}}%
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -44,30 +46,8 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-4">
-                <!-- <h5>Account Status</h5> -->
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item">
-                        <a class="nav-link" routerLink="/account/analysis">
-                            <span class="fa fa-chevron-right pr-2"></span>
-                            <span>Latest Plant Analysis:
-                                <span *ngIf="accountAnalysisYear">{{accountAnalysisYear}}</span>
-                                <span *ngIf="!accountAnalysisYear">&mdash;</span></span>
-                        </a>
-                    </li>
-                    <li class="list-group-item">
-                        <a class="nav-link" routerLink="/account/reports">
-                            <span class="fa fa-chevron-right pr-2"></span>
-                            <span>Latest Better Plants Report:
-                                <span *ngIf="betterPlantsReportYear">{{betterPlantsReportYear}}</span>
-                                <span *ngIf="!betterPlantsReportYear">&mdash;</span>
-                            </span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
             <div class="col">
-                <div class="d-flex justify-content-end flex-wrap">
+                <div class="d-flex justify-content-center flex-wrap">
                     <div class="p-1">
                         <button class="btn btn-outline m-0" (click)="navigateTo('overview')"
                             [disabled]="disableButtons">
@@ -116,6 +96,47 @@
                 </div>
             </div>
         </div>
+        <div class="row">
+            <div class="col-12">
+                <hr>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-4">
+                <!-- <h5>Account Status</h5> -->
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <a class="nav-link" routerLink="/account/analysis">
+                            <span class="fa fa-chevron-right pr-2"></span>
+                            <span>Latest Plant Analysis:
+                                <span *ngIf="accountAnalysisYear">{{accountAnalysisYear}}</span>
+                                <span *ngIf="!accountAnalysisYear">&mdash;</span></span>
+                        </a>
+                    </li>
+                    <li class="list-group-item">
+                        <a class="nav-link" routerLink="/account/reports">
+                            <span class="fa fa-chevron-right pr-2"></span>
+                            <span>Latest Better Plants Report:
+                                <span *ngIf="betterPlantsReportYear">{{betterPlantsReportYear}}</span>
+                                <span *ngIf="!betterPlantsReportYear">&mdash;</span>
+                            </span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-8">
+                <ng-container *ngIf="latestAnalysisItem">
+                    <app-monthly-analysis-summary-graph *ngIf="!calculating && monthlyFacilityAnalysisData"
+                        [monthlyAnalysisSummaryData]="monthlyFacilityAnalysisData" [analysisItem]="latestAnalysisItem"
+                        [facilityOrAccount]="account">
+                    </app-monthly-analysis-summary-graph>
+                    <app-calculating-spinner *ngIf="calculating" [message]="'Calculating Monthly Results...'">
+                    </app-calculating-spinner>
+                </ng-container>
+            </div>
+        </div>
+
+
         <div class="row" *ngIf="disableButtons">
             <div class="col-12">
                 <hr>
