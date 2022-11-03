@@ -1,3 +1,10 @@
+<div class="d-flex w-100">
+    <div>
+        <button class="btn btn-outline m-0" (click)="createNewItem()">+Add Analysis</button>
+    </div>
+</div>
+<hr>
+
 <div class="table-responsive">
     <table class="table table-sm table-hover">
         <thead>
@@ -20,8 +27,8 @@
         <tbody>
             <tr *ngFor="let analysisItem of facilityAnalysisItems">
                 <td>
-                    <input type="radio" class="rowToggle" [(ngModel)]="selectedFacilityItemId" [value]="analysisItem.guid"
-                        name="{{analysisItem.id+'_selectedFacilityItemId'}}"
+                    <input type="radio" class="rowToggle" [(ngModel)]="selectedFacilityItemId"
+                        [value]="analysisItem.guid" name="{{analysisItem.id+'_selectedFacilityItemId'}}"
                         id="{{analysisItem.id+'_selectedFacilityItemId'}}" (change)="save()">
                 </td>
                 <td>
@@ -53,7 +60,9 @@
             </tr>
             <tr *ngIf="facilityAnalysisItems.length == 0">
                 <td colspan="7" class="text-center">
-                    No analysis items found matching the selected report year!
+                    No <span *ngIf="selectedAnalysisItem.energyIsSource">source energy</span>
+                    <span *ngIf="!selectedAnalysisItem.energyIsSource">site energy</span> analysis items found matching
+                    the selected report year!
                 </td>
             </tr>
             <tr>
@@ -68,7 +77,15 @@
         </tbody>
     </table>
 </div>
-
+<hr>
+<div class="d-flex w-100 justify-content-between">
+    <div>
+        <button class="btn btn-secondary" (click)="goBack()">Back</button>
+    </div>
+    <div>
+        <button class="btn btn-secondary" (click)="continue()">Continue</button>
+    </div>
+</div>
 
 <div class="popup" [class.open]="itemToEdit">
     <div class="popup-header" *ngIf="itemToEdit">Go To: {{itemToEdit.name}}
@@ -81,5 +98,21 @@
     <div class="saveCancel popup-footer text-right">
         <button class="btn btn-secondary" (click)="cancelEditItem()">Cancel</button>
         <button class="btn btn-outline" (click)="confirmEditItem()">Go To Facility Analysis</button>
+    </div>
+</div>
+
+
+
+<div class="popup" [class.open]="showCreateItem">
+    <div class="popup-header">Create New Facility Analysis
+        <button class="item-right" (click)="cancelCreateNew()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>WARNING: Are you sure you want to create a new analysis item for this facility? Your progress will be saved and you will leave
+            this screen.</p>
+    </div>
+    <div class="saveCancel popup-footer text-right">
+        <button class="btn btn-secondary" (click)="cancelCreateNew()">Cancel</button>
+        <button class="btn btn-outline" (click)="confirmCreateNew()">Create Facility Analysis</button>
     </div>
 </div>

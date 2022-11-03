@@ -27,7 +27,6 @@ export class SelectFacilityAnalysisItemsComponent implements OnInit {
 
   ngOnInit(): void {
     this.selectedAnalysisItem = this.accountAnalysisDbService.selectedAnalysisItem.getValue();
-    console.log(this.selectedAnalysisItem);
     if (!this.selectedAnalysisItem) {
       this.router.navigateByUrl('/account/analysis/dashboard')
     }

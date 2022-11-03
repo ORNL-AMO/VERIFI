@@ -45,8 +45,9 @@
                         Has Baseline Adjustement
                     </label>
                     <label class="switch" for="hasBaselineAdjustement">
-                        <input class="checkbox" type="checkbox" id="hasBaselineAdjustement" name="hasBaselineAdjustement"
-                            [(ngModel)]="analysisItem.hasBaselineAdjustement" (change)="saveItem()">
+                        <input class="checkbox" type="checkbox" id="hasBaselineAdjustement"
+                            name="hasBaselineAdjustement" [(ngModel)]="analysisItem.hasBaselineAdjustement"
+                            (change)="saveItem()">
                         <span class="slider round"></span>
                     </label>
                     <!-- <div class="input-group w-50">
@@ -58,7 +59,7 @@
                 <div class="d-flex flex-column" *ngIf="analysisItem.hasBaselineAdjustement">
                     <div class="row form-group" *ngFor="let baselineAdjustment of analysisItem.baselineAdjustments">
                         <div class="col-12 d-flex">
-        
+
                             <label class="w-50 bold">{{baselineAdjustment.year}}</label>
                             <div class="input-group w-50">
                                 <input type="number" id="baselineAdjustment" id="baselineAdjustment"
@@ -113,6 +114,18 @@
                     Fields set in "<span class="fa fa-gear"></span> Settings" tab.
                 </div>
                 <hr>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <hr>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col d-flex justify-content-end">
+                <div>
+                    <button class="btn btn-secondary" (click)="goToFacilityItems()">Select Facility Items</button>
+                </div>
             </div>
         </div>
     </div>
