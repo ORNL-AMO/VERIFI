@@ -6,6 +6,8 @@ import { RouterModule } from '@angular/router';
 import { ScorecardStatusComponent } from './scorecard-status/scorecard-status.component';
 import { MeterCardComponent } from './meter-card/meter-card.component';
 import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.module';
+import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/calculating-spinner.module';
+import { SharedAnalysisModule } from 'src/app/shared/shared-analysis/shared-analysis.module';
 
 
 
@@ -19,7 +21,9 @@ import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.modu
   imports: [
     CommonModule,
     RouterModule,
-    HelperPipesModule
+    HelperPipesModule,
+    CalculatingSpinnerModule,
+    SharedAnalysisModule
   ]
 })
 export class FacilityHomeModule { }

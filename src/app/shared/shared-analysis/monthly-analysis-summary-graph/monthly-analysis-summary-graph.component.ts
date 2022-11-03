@@ -54,7 +54,7 @@ export class MonthlyAnalysisSummaryGraphComponent implements OnInit {
         }
       }
 
-      var data = [trace1, trace2];
+      var data = [trace2, trace1];
 
       var layout = {
         // height: 700,
