@@ -250,9 +250,17 @@ export class UploadDataService {
           if (key != 'Facility Name' && key != 'Date') {
             let predictorIndex: number = existingFacilityPredictorData.findIndex(predictor => { return predictor.name == key });
             if (predictorIndex == -1) {
-              let newPredictor: PredictorData = this.predictorDbService.getNewPredictor([]);
-              newPredictor.name = key;
-              existingFacilityPredictorData.push(newPredictor);
+              let hasData: boolean = false;
+              facilityPredictorData.forEach(dataItem => {
+                if(dataItem[key] != 0){
+                  hasData = true;
+                }
+              });
+              if(hasData){
+                let newPredictor: PredictorData = this.predictorDbService.getNewPredictor([]);
+                newPredictor.name = key;
+                existingFacilityPredictorData.push(newPredictor);
+              }
             }
           }
         });
