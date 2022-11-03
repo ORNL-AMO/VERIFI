@@ -1,0 +1,50 @@
+<div class="table-responsive">
+    <table class="table table-sm">
+        <thead>
+            <tr>
+                <th class="w-1">Meter</th>
+                <th class="w-1">Utility</th>
+                <th class="w-1">Group</th>
+                <th class="w-2">Utility Usage <br>(<span [innerHTML]="facilityEnergyUnit | settingsLabel"></span>)
+                </th>
+                <th class="w-2">Utility Cost</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let summary of facilityMeterSummaryData.meterSummaries | orderBy: 'energyUsage'">
+                <td>
+                    {{summary.meter.name}}
+                </td>
+                <td>
+                    {{summary.meter.source}}
+                </td>
+                <td>
+                    {{summary.groupName}}
+                </td>
+                <td>
+                    {{summary.energyUsage | customNumber}}
+                </td>
+                <td>
+                    {{summary.energyCost | customNumber:true }}
+                </td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <th>
+                    Total
+                </th>
+                <th>
+                </th>
+                <th>
+                </th>
+                <th>
+                    {{facilityMeterSummaryData.totalEnergyUse | customNumber}}
+                </th>
+                <th>
+                    {{facilityMeterSummaryData.totalEnergyCost | customNumber:true }}
+                </th>
+            </tr>
+        </tfoot>
+    </table>
+</div>

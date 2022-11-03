@@ -1,0 +1,16 @@
+<ng-container *ngIf="!noUtilityData">
+    <app-facility-overview-banner></app-facility-overview-banner>
+    <div class="measur-wrapper main-content">
+        <router-outlet></router-outlet>
+    </div>
+</ng-container>
+
+<ng-container *ngIf="noUtilityData">
+    <div class="text-center mt-3">
+        <h2>Start building your facility dashboard!</h2>
+        <p>Before we can create any charts, you will need to add some utility data.</p>
+        <button class="btn btn-primary-2" (click)="addUtilityData()"><i class="fa fa-plus"></i> Add
+            Utility
+            Data</button>
+    </div>
+</ng-container>

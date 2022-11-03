@@ -54,7 +54,10 @@ export class CalanderizationService {
       }
 
       let calanderizedMeter: Array<MonthlyData> = this.calanderizeMeterData(meter, meterData, energyIsSource, calanderizedenergyUnit, monthDisplayShort);
-      let showConsumption: boolean = calanderizedMeter.find(meterData => { return meterData.energyConsumption != meterData.energyUse }) != undefined;
+      let showConsumption: boolean;
+      if (meter.source != 'Electricity') {
+        showConsumption = calanderizedMeter.find(meterData => { return meterData.energyConsumption != meterData.energyUse }) != undefined;
+      }
       let consumptionUnit: string = meter.startingUnit;
       let showEmissions: boolean = (meter.source == "Electricity" || meter.source == "Natural Gas" || meter.source == "Other Fuels");
 
@@ -188,6 +191,10 @@ export class CalanderizationService {
           monthStr = new Date(year, month).toLocaleString('default', { month: 'long' });
         }
         let emissionsValues: EmissionsResults = this.getEmissions(meter, totals.totalEnergyUse, calanderizedEnergyUnit, energyIsSource, year);
+        if (meter.includeInEnergy == false) {
+          totals.totalEnergyUse = 0;
+
+        }
         calanderizeData.push({
           month: monthStr,
           monthNumValue: month,
@@ -790,6 +797,7 @@ export class CalanderizationService {
       if (energyIsSource) {
         energyUse = energyUse / meter.siteToSource;
       }
+
       let convertedEnergyUse: number = this.convertUnitsService.value(energyUse).from(energyUnit).to(meter.energyUnit);
       let locationEmissions: number;
       let marketEmissions: number;
@@ -797,12 +805,18 @@ export class CalanderizationService {
 
       let marketEmissionsOutputRate: number;
       if (meter.source == 'Electricity') {
-        let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-        let meterFacility: IdbFacility = accountFacilities.find(facility => {return facility.guid == meter.facilityId});
-        let emissionsRates: {marketRate: number, locationRate: number} = this.eGridService.getEmissionsRate(meterFacility.eGridSubregion, year);
-        marketEmissionsOutputRate = emissionsRates.marketRate;
-        locationEmissions = convertedEnergyUse * emissionsRates.locationRate * meter.locationGHGMultiplier;
-        marketEmissions = convertedEnergyUse * emissionsRates.marketRate * meter.marketGHGMultiplier;
+          let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+          let meterFacility: IdbFacility = accountFacilities.find(facility => { return facility.guid == meter.facilityId });
+          let emissionsRates: { marketRate: number, locationRate: number } = this.eGridService.getEmissionsRate(meterFacility.eGridSubregion, year);
+          marketEmissionsOutputRate = emissionsRates.marketRate;
+          
+        if (meter.includeInEnergy) {
+          locationEmissions = convertedEnergyUse * emissionsRates.locationRate * meter.locationGHGMultiplier;
+          marketEmissions = convertedEnergyUse * emissionsRates.marketRate * meter.marketGHGMultiplier;
+        }else{
+          marketEmissions = 0;
+          locationEmissions = 0;
+        }
       } else {
         marketEmissionsOutputRate = this.energyUseCalculationsService.getFuelEmissionsOutputRate(meter.source, meter.fuel, meter.phase, energyUnit);
         locationEmissions = convertedEnergyUse * marketEmissionsOutputRate;
@@ -810,13 +824,18 @@ export class CalanderizationService {
       }
       let RECs: number = energyUse * meter.recsMultiplier;
       let excessRECs: number;
-      if(RECs - energyUse <= 0){
+      let emissionsEnergyUse: number = energyUse;
+      if(meter.includeInEnergy == false){
+        emissionsEnergyUse = 0;
+      }
+
+      if (RECs - emissionsEnergyUse <= 0) {
         excessRECs = 0;
-      }else{
+      } else {
         excessRECs = RECs;
       }
       let excessRECsEmissions: number = excessRECs * marketEmissionsOutputRate;
-      return { RECs: RECs, locationEmissions: locationEmissions, marketEmissions: marketEmissions, excessRECs: excessRECs, excessRECsEmissions: excessRECsEmissions};
+      return { RECs: RECs, locationEmissions: locationEmissions, marketEmissions: marketEmissions, excessRECs: excessRECs, excessRECsEmissions: excessRECsEmissions };
     } else {
       return { RECs: 0, locationEmissions: 0, marketEmissions: 0, excessRECs: 0, excessRECsEmissions: 0 };
     }

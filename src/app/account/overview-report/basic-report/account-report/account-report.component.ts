@@ -27,7 +27,8 @@ export class AccountReportComponent implements OnInit {
     totalNumberOfMeters: undefined,
     totalMarketEmissions: undefined,
     totalLocationEmissions: undefined,
-    allMetersLastBill: undefined
+    allMetersLastBill: undefined,
+    totalConsumption: undefined
   };
   accountReportUtilitySummary: ReportUtilitySummary;
   facilitiesUtilitySummaries: Array<{

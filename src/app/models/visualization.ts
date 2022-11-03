@@ -32,5 +32,6 @@ export interface FacilityBarChartData {
   energyCost: number, 
   marketEmissions: number,
   locationEmissions: number,
+  consumption: number,
   year: number
 }

@@ -1,0 +1,49 @@
+<div class="table-responsive">
+    <table class="table table-sm">
+        <thead>
+            <tr>
+                <th class="w-1">Meter</th>
+                <th class="w-1">Utility</th>
+                <th class="w-1">Group</th>
+                <th class="w-2">Emissions <br>(kg CO<sub>2</sub>)
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let summary of facilityMeterSummaryData.meterSummaries | orderBy: 'marketEmissions'">
+                <td>
+                    {{summary.meter.name}}
+                </td>
+                <td>
+                    {{summary.meter.source}}
+                </td>
+                <td>
+                    {{summary.groupName}}
+                </td>
+                <td *ngIf="emissionsDisplay == 'market'">
+                    {{summary.marketEmissions |customNumber }}
+                </td>
+                <td *ngIf="emissionsDisplay == 'location'">
+                    {{summary.locationEmissions |customNumber }}
+                </td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <th>
+                    Total
+                </th>
+                <th>
+                </th>
+                <th>
+                </th>
+                <th *ngIf="emissionsDisplay == 'market'">
+                    {{facilityMeterSummaryData.totalMarketEmissions | customNumber }}
+                </th>
+                <th *ngIf="emissionsDisplay == 'location'">
+                    {{facilityMeterSummaryData.totalLocationEmissions | customNumber }}
+                </th>
+            </tr>
+        </tfoot>
+    </table>
+</div>

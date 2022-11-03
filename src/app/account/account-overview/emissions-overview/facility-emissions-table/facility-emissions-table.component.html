@@ -1,0 +1,45 @@
+<div class="table-responsive">
+    <table class="table table-sm">
+        <thead>
+            <tr>
+                <th class="w-50">Facility</th>
+                <th class="w-50" *ngIf="emissionsDisplay == 'market'">
+                    Market Emissions<br> (tonne CO<sub>2</sub>)
+                </th>
+                <th class="w-50" *ngIf="emissionsDisplay == 'location'">
+                    Location Emissions<br> (tonne CO<sub>2</sub>)
+                </th>
+            </tr>
+        </thead>
+        <tbody *ngIf="accountFacilitiesSummary && accountFacilitiesSummary.facilitySummaries">
+            <tr *ngFor="let summary of accountFacilitiesSummary.facilitySummaries | orderBy: 'marketEmissions'">
+                <td>
+                    <span class="badge"
+                        [ngStyle]="{background: summary.facility.color, color: summary.facility.color }">
+                        &mdash;
+                    </span>
+                    <a class="pl-2" (click)="selectFacility(summary.facility)">{{summary.facility.name}}</a>
+                </td>
+                <td *ngIf="emissionsDisplay == 'market'">
+                    {{summary.marketEmissions / 1000 | customNumber}}
+                </td>
+                <td *ngIf="emissionsDisplay == 'location'">
+                    {{summary.locationEmissions / 1000 | customNumber}}
+                </td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <th>
+                    Total
+                </th>
+                <th *ngIf="emissionsDisplay == 'market'">
+                    {{accountFacilitiesSummary.totalMarketEmissions / 1000 | customNumber}}
+                </th>
+                <th *ngIf="emissionsDisplay == 'location'">
+                    {{accountFacilitiesSummary.totalLocationEmissions / 1000 | customNumber}}
+                </th>
+            </tr>
+        </tfoot>
+    </table>
+</div>

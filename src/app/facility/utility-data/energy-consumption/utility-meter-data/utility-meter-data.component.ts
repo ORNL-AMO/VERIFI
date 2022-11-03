@@ -3,6 +3,7 @@ import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service
 import { IdbUtilityMeter } from 'src/app/models/idb';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { UtilityColors } from 'src/app/shared/utilityColors';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-utility-meter-data',
@@ -14,6 +15,7 @@ export class UtilityMeterDataComponent implements OnInit {
 
   selectedMeter: IdbUtilityMeter;
   label: string;
+  routerSub: Subscription;
   constructor(
     private utilityMeterDbService: UtilityMeterdbService,
     private activatedRoute: ActivatedRoute,
@@ -26,12 +28,16 @@ export class UtilityMeterDataComponent implements OnInit {
       let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
       this.selectedMeter = facilityMeters.find(meter => { return meter.id == meterId });
     });
-    this.router.events.subscribe(event => {
+    this.routerSub = this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
         this.setLabel(this.router.url);
       }
     });
     this.setLabel(this.router.url);
+  }
+
+  ngOnDestroy(){
+    this.routerSub.unsubscribe();
   }
 
 

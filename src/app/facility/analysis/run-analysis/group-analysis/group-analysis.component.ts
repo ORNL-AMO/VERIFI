@@ -22,6 +22,7 @@ export class GroupAnalysisComponent implements OnInit {
   regressionModelNeeded: boolean;
   analysisItemSub: Subscription;
   showModelSelection: boolean;
+  routerSub: Subscription;
   constructor(private activatedRoute: ActivatedRoute, private analysisDbService: AnalysisDbService,
     private analysisService: AnalysisService, private router: Router,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
@@ -39,7 +40,7 @@ export class GroupAnalysisComponent implements OnInit {
       this.setGroupError();
       this.analysisService.selectedGroup.next(this.selectedGroup);
     });
-    this.router.events.subscribe(event => {
+    this.routerSub = this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
         this.setLabel(this.router.url);
       }
@@ -49,6 +50,7 @@ export class GroupAnalysisComponent implements OnInit {
 
   ngOnDestroy() {
     this.analysisItemSub.unsubscribe();
+    this.routerSub.unsubscribe();
   }
 
   setSelectedGroup() {
@@ -82,13 +84,13 @@ export class GroupAnalysisComponent implements OnInit {
       if (!this.groupHasError) {
         this.groupHasError = this.selectedGroup.groupHasError;
       }
-      if(this.selectedGroup.analysisType == 'regression' && this.selectedGroup.userDefinedModel){
-        if(!this.selectedGroup.selectedModelId){
+      if (this.selectedGroup.analysisType == 'regression' && this.selectedGroup.userDefinedModel) {
+        if (!this.selectedGroup.selectedModelId) {
           this.regressionModelNeeded = true;
-        }else{
+        } else {
           this.regressionModelNeeded = false;
         }
-      }else{
+      } else {
         this.regressionModelNeeded = false;
       }
     }
