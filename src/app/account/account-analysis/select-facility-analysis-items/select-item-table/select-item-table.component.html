@@ -1,6 +1,6 @@
 <div class="d-flex w-100">
     <div>
-        <button class="btn btn-outline m-0" (click)="createNewItem()">+Add Analysis</button>
+        <button class="btn btn-outline m-0" (click)="createNewItem()">+Add Facility Analysis</button>
     </div>
 </div>
 <hr>
@@ -62,7 +62,9 @@
                 <td colspan="7" class="text-center">
                     No <span *ngIf="selectedAnalysisItem.energyIsSource">source energy</span>
                     <span *ngIf="!selectedAnalysisItem.energyIsSource">site energy</span> analysis items found matching
-                    the selected report year!
+                    the selected report year!<br>
+                    Click the "+Add Facility Analysis" button to conduct a facility level analysis that will be added to
+                    this account analysis in progress.
                 </td>
             </tr>
             <tr>
@@ -108,7 +110,8 @@
         <button class="item-right" (click)="cancelCreateNew()">x</button>
     </div>
     <div class="popup-body">
-        <p>WARNING: Are you sure you want to create a new analysis item for this facility? Your progress will be saved and you will leave
+        <p>WARNING: Are you sure you want to create a new analysis item for this facility? Your progress will be saved
+            and you will leave
             this screen.</p>
     </div>
     <div class="saveCancel popup-footer text-right">

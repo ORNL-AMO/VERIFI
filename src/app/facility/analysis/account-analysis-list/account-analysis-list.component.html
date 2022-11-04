@@ -1,0 +1,58 @@
+<div class="content-padding">
+    <h4>Associated Account Analysis Items</h4>
+
+    <div *ngIf="accountAnalysisItems.length == 0" class="text-center mt-5">
+        <h5>This facility analysis is not a part of any account analysis.</h5>
+    </div>
+
+    <div *ngIf="accountAnalysisItems.length != 0" class="alert alert-info text-center">
+        Listed below are the account analysis items in which this facility analysis has been used.
+    </div>
+
+    <div *ngIf="accountAnalysisItems.length > 0">
+        <div class="controls mb-2">
+
+            <div class="items-per-page item-right">
+                <span>Show </span>
+                <select [(ngModel)]="itemsPerPage">
+                    <option [ngValue]=10>10</option>
+                    <option [ngValue]=20>20</option>
+                    <option [ngValue]=30>30</option>
+                    <option [ngValue]=40>40</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-sm table-hover">
+                <thead>
+                    <tr>
+                        <th (click)="setOrderDataField('name')" [ngClass]="{'active': orderDataField == 'name'}">
+                            Name</th>
+                        <th (click)="setOrderDataField('date')" [ngClass]="{'active': orderDataField == 'date'}">
+                            Last Modified</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr
+                        *ngFor="let analysisItem of accountAnalysisItems  | orderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
+                        <td>
+                            <a (click)="selectAnalysisItem(analysisItem)">
+                                {{analysisItem.name}}
+                            </a>
+                        </td>
+                        <td>{{analysisItem.date | date}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="tableControls overflow-hidden">
+            <div class="item-right">
+                <ngb-pagination [collectionSize]="accountAnalysisItems.length" [(page)]="currentPageNumber"
+                    [pageSize]="itemsPerPage" [rotate]="true" aria-label="Default pagination"></ngb-pagination>
+            </div>
+            <p class="item-right">{{accountAnalysisItems.length}} entries</p>
+        </div>
+    </div>
+</div>

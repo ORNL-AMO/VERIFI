@@ -8,7 +8,7 @@ import { AnalysisTableColumns, AnnualAnalysisSummary, MonthlyAnalysisSummaryData
 import { CalanderizationOptions, CalanderizedMeter } from 'src/app/models/calanderization';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { ConvertMeterDataService } from 'src/app/shared/helper-services/convert-meter-data.service';
-import { AnalysisGroup, IdbAccount, IdbAnalysisItem, IdbFacility, IdbUtilityMeter, PredictorData } from '../../models/idb';
+import { AnalysisGroup, IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, IdbUtilityMeter, PredictorData } from '../../models/idb';
 
 @Injectable({
   providedIn: 'root'
