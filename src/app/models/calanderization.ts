@@ -62,7 +62,7 @@ export interface CalanderizationFilters {
 
   export interface MeterGroupType {
     meterGroups: Array<IdbUtilityMeterGroup>,
-    groupType: string,
+    groupType: 'Energy' | 'Water' | 'Other',
     id: string,
     meterGroupIds: Array<string>,
     totalUsage: number

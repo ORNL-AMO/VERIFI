@@ -6,6 +6,11 @@
     </div>
     <hr>
     <input type="file" #importFile id="importFile" (input)="setImportFile($event.target)" multiple accept=".xlsx">
+    <div *ngIf="fileUploadError">
+        <div class="p-2 alert-danger">
+            There was an error processing this file. Please try a different file.
+        </div>
+    </div>
     <div *ngIf="fileReferences.length != 0">
         <hr>
         <table class="table table-hover">

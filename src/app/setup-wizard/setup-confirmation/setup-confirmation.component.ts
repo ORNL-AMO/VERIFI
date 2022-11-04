@@ -29,7 +29,7 @@ export class SetupConfirmationComponent implements OnInit {
   setSummary(){
     let setupSummaries: Array<SetupSummaryItem> = new Array();
     //account
-    let accountSummary: SetupSummaryItem = this.getSummary(this.account, 'Account: ' + this.account.name);
+    let accountSummary: SetupSummaryItem = this.getSummary(this.account, 'Corporate Account: ' + this.account.name);
     setupSummaries.push(accountSummary);
     this.facilities.forEach(facility => {
       let facilitySummary: SetupSummaryItem = this.getSummary(facility, 'Facility: ' + facility.name);

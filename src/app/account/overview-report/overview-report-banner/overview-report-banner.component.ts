@@ -18,6 +18,7 @@ export class OverviewReportBannerComponent implements OnInit {
   bannerTitle: string;
   modalOpen: boolean;
   modalOpenSub: Subscription;
+  routerSub: Subscription;
   constructor(private overviewReportService: OverviewReportService, private router: Router,
     private sharedDataService: SharedDataService) { }
 
@@ -25,7 +26,7 @@ export class OverviewReportBannerComponent implements OnInit {
     this.modalOpenSub = this.sharedDataService.modalOpen.subscribe(val => {
       this.modalOpen = val;
     })
-    this.router.events.subscribe(event => {
+    this.routerSub = this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
         this.setInBasicReport(event.url);
       }
@@ -35,6 +36,7 @@ export class OverviewReportBannerComponent implements OnInit {
 
   ngOnDestroy() {
     this.modalOpenSub.unsubscribe();
+    this.routerSub.unsubscribe();
   }
 
   goToDashboard() {

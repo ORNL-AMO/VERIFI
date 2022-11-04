@@ -172,7 +172,8 @@ export class MeterGroupingComponent implements OnInit {
     this.setGroupTypes();
   }
 
-  groupAdd(groupType: string) {
+  groupAdd(groupType: 'Energy' | 'Water' | 'Other') {
+    console.log(groupType);
     this.editOrAdd = 'add';
     this.groupToEdit = this.utilityMeterGroupDbService.getNewIdbUtilityMeterGroup(groupType, 'New Group', this.selectedFacility.guid, this.selectedFacility.accountId);
     this.sharedDataService.modalOpen.next(true);

@@ -7,8 +7,7 @@ import { IdbAccount, IdbAccountAnalysisItem, IdbUtilityMeter } from 'src/app/mod
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { ConvertMeterDataService } from 'src/app/shared/helper-services/convert-meter-data.service';
 import * as _ from 'lodash';
-import { AnnualAnalysisSummary } from 'src/app/models/analysis';
-import { AccountAnalysisCalculationsService } from 'src/app/shared/shared-analysis/calculations/account-analysis-calculations.service';
+import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
@@ -18,39 +17,41 @@ export class AccountHomeService {
 
   calanderizedMeters: Array<CalanderizedMeter>;
   latestAnalysisItem: IdbAccountAnalysisItem;
-  latestAnalysisSummary: BehaviorSubject<AnnualAnalysisSummary>;
+  annualAnalysisSummary: BehaviorSubject<Array<AnnualAnalysisSummary>>;
+  monthlyAccountAnalysisData: BehaviorSubject<Array<MonthlyAnalysisSummaryData>>;
+  calculating: BehaviorSubject<boolean>;
+  facilityAnalysisSummaries: BehaviorSubject<Array<{
+    facilityId: string,
+    annualAnalysisSummary: Array<AnnualAnalysisSummary>,
+    monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
+  }>>;
   constructor(private accountAnalysisDbService: AccountAnalysisDbService, private utilityMeterDbService: UtilityMeterdbService,
-    private accountDbService: AccountdbService, private calendarizationService: CalanderizationService, private convertMeterDataService: ConvertMeterDataService,
-    private accountAnalysisCalculationsService: AccountAnalysisCalculationsService) { 
-      this.latestAnalysisSummary = new BehaviorSubject<AnnualAnalysisSummary>(undefined);
-    }
+    private accountDbService: AccountdbService, private calendarizationService: CalanderizationService, private convertMeterDataService: ConvertMeterDataService) {
+    this.annualAnalysisSummary = new BehaviorSubject<Array<AnnualAnalysisSummary>>(undefined);
+    this.monthlyAccountAnalysisData = new BehaviorSubject<Array<MonthlyAnalysisSummaryData>>(undefined);
+    this.calculating = new BehaviorSubject<boolean>(true);
+    this.facilityAnalysisSummaries = new BehaviorSubject([]);
+  }
 
   setCalanderizedMeters() {
     let analysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
     this.latestAnalysisItem = _.maxBy(analysisItems, 'reportYear');
+
     if (this.latestAnalysisItem) {
-      let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
       let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
       let calanderizationOptions: CalanderizationOptions = {
         energyIsSource: this.latestAnalysisItem.energyIsSource
       }
+      let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
       let calanderizedMeterData: Array<CalanderizedMeter> = this.calendarizationService.getCalanderizedMeterData(accountMeters, true, false, calanderizationOptions);
+
       calanderizedMeterData.forEach(calanderizedMeter => {
         calanderizedMeter.monthlyData = this.convertMeterDataService.convertMeterDataToAnalysis(this.latestAnalysisItem, calanderizedMeter.monthlyData, selectedAccount, calanderizedMeter.meter);
       });
       this.calanderizedMeters = calanderizedMeterData;
     } else {
-      this.calanderizedMeters = undefined;
-    }
-  }
-
-  setAnalysisSummary(account: IdbAccount) {
-    if (this.latestAnalysisItem) {
-      let analysisSummaries: Array<AnnualAnalysisSummary> = this.accountAnalysisCalculationsService.getAnnualAnalysisSummary(this.latestAnalysisItem, account, this.calanderizedMeters);
-      let latestSummary: AnnualAnalysisSummary = _.maxBy(analysisSummaries, 'year');
-      this.latestAnalysisSummary.next(latestSummary)
-    } else {
-      this.latestAnalysisSummary.next(undefined);
+      let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+      this.calanderizedMeters = this.calendarizationService.getCalanderizedMeterData(accountMeters, true, false, undefined);
     }
   }
 }

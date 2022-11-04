@@ -46,3 +46,26 @@ h3 .badge{
     cursor: pointer;
     background-color: #efefef;
 }
+
+
+
+.progress-bar-data-year{
+    top: 50px;
+    right: 48%;
+    font-weight: bold;
+    position: absolute;
+}
+
+.progress {
+    margin: 7px 0px;
+    /* height: 8px; */
+}
+.progress-bar {
+    background-color: #145A32;
+}
+.progress-bar-data {
+    position: absolute;
+    right: 50%;
+    top: 35px;
+    font-weight: bold;
+}

@@ -65,7 +65,8 @@ export class VisualizationService {
           energyCost: totalEnergyCost,
           locationEmissions: totalLocationEmissions,
           marketEmissions: totalMarketEmissions,
-          year: yearMonth.year
+          year: yearMonth.year,
+          consumption: 0
         }
 
       });
@@ -117,7 +118,8 @@ export class VisualizationService {
           energyCost: totalEnergyCost,
           locationEmissions: totalLocationEmissions,
           marketEmissions: totalMarketEmissions,
-          year: yearMonth.year
+          year: yearMonth.year,
+          consumption: 0
         }
       });
     }
@@ -155,7 +157,7 @@ export class VisualizationService {
         });
         let totalMarketEmissions: number = _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
           if (meterData.month == yearMonth.month && meterData.year == yearMonth.year) {
-            return meterData.marketEmissions;
+            return (meterData.marketEmissions - meterData.excessRECsEmissions);
           } else {
             return 0;
           }
@@ -173,7 +175,8 @@ export class VisualizationService {
           energyCost: totalEnergyCost,
           locationEmissions: totalLocationEmissions,
           marketEmissions: totalMarketEmissions,
-          year: yearMonth.year
+          year: yearMonth.year,
+          consumption: 0
         }
 
       });
@@ -207,7 +210,7 @@ export class VisualizationService {
 
         let totalMarketEmissions: number = _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
           if (meterData.month == yearMonth.month && meterData.year == yearMonth.year) {
-            return meterData.marketEmissions;
+            return (meterData.marketEmissions - meterData.excessRECsEmissions);
           } else {
             return 0;
           }
@@ -225,7 +228,8 @@ export class VisualizationService {
           energyCost: totalEnergyCost,
           locationEmissions: totalLocationEmissions,
           marketEmissions: totalMarketEmissions,
-          year: yearMonth.year
+          year: yearMonth.year,
+          consumption: 0
         }
       });
     }
@@ -274,7 +278,7 @@ export class VisualizationService {
         //TODO: Market vs location emissions if not removing heat map
         let totalEmissions: number = _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
           if (meterData.year == year && meterData.month == month) {
-            return meterData.marketEmissions;
+            return (meterData.marketEmissions - meterData.excessRECsEmissions);
           } else {
             return 0;
           }

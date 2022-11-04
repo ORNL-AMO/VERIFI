@@ -1,11 +1,10 @@
 import { Component, OnInit } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnnualAnalysisSummary } from 'src/app/models/analysis';
-import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { IdbAccount, IdbAccountAnalysisItem } from 'src/app/models/idb';
-import { AccountAnalysisCalculationsService } from 'src/app/shared/shared-analysis/calculations/account-analysis-calculations.service';
 import { AccountAnalysisService } from '../../account-analysis.service';
 
 @Component({
@@ -16,19 +15,34 @@ import { AccountAnalysisService } from '../../account-analysis.service';
 export class AnnualAccountAnalysisComponent implements OnInit {
 
   dataDisplay: 'table' | 'graph';
-  analysisItem: IdbAccountAnalysisItem;
+  accountAnalysisItem: IdbAccountAnalysisItem;
   account: IdbAccount;
   annualAnalysisSummary: Array<AnnualAnalysisSummary>;
-  constructor(private analysisService: AnalysisService, private accountAnalysisCalculationsService: AccountAnalysisCalculationsService,
+  worker: Worker;
+  calculating: boolean;
+  calculatingSub: Subscription;
+  annualAnalysisSummarySub: Subscription;
+  constructor(private analysisService: AnalysisService,
     private accountAnalysisDbService: AccountAnalysisDbService, private accountDbService: AccountdbService,
     private accountAnalysisService: AccountAnalysisService) { }
 
   ngOnInit(): void {
     this.dataDisplay = this.analysisService.dataDisplay.getValue();
-    this.analysisItem = this.accountAnalysisDbService.selectedAnalysisItem.getValue();
+    this.accountAnalysisItem = this.accountAnalysisDbService.selectedAnalysisItem.getValue();
     this.account = this.accountDbService.selectedAccount.getValue();
-    let calanderizedMeters: Array<CalanderizedMeter> = this.accountAnalysisService.calanderizedMeters;
-    this.annualAnalysisSummary = this.accountAnalysisCalculationsService.getAnnualAnalysisSummary(this.analysisItem, this.account, calanderizedMeters);
+
+    this.annualAnalysisSummarySub = this.accountAnalysisService.annualAnalysisSummary.subscribe(val => {
+      this.annualAnalysisSummary = val;
+    });
+    this.calculatingSub = this.accountAnalysisService.calculating.subscribe(val => {
+      this.calculating = val;
+    })
+
+  }
+
+  ngOnDestroy() {
+    this.calculatingSub.unsubscribe();
+    this.annualAnalysisSummarySub.unsubscribe();
   }
 
   setDataDisplay(display: 'table' | 'graph') {

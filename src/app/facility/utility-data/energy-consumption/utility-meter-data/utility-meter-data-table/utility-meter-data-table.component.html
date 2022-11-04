@@ -41,7 +41,7 @@
         </div>
 
         <!--Column Filters-->
-        <app-utility-meter-data-filter *ngIf="selectedMeter.source == 'Electricity'" [filterType]="'table'">
+        <app-utility-meter-data-filter [source]="selectedMeter.source" [filterType]="'table'">
         </app-utility-meter-data-filter>
     </div>
 

@@ -4,7 +4,7 @@ import { BehaviorSubject } from 'rxjs';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { AnalysisTableColumns } from 'src/app/models/analysis';
+import { AnalysisTableColumns, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { CalanderizationOptions, CalanderizedMeter } from 'src/app/models/calanderization';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { ConvertMeterDataService } from 'src/app/shared/helper-services/convert-meter-data.service';
@@ -21,6 +21,9 @@ export class AnalysisService {
   analysisTableColumns: BehaviorSubject<AnalysisTableColumns>;
   calanderizedMeters: Array<CalanderizedMeter>;
   showInvalidModels: BehaviorSubject<boolean>;
+  calculating: BehaviorSubject<boolean>;
+  annualAnalysisSummary: BehaviorSubject<Array<AnnualAnalysisSummary>>;
+  monthlyAccountAnalysisData: BehaviorSubject<Array<MonthlyAnalysisSummaryData>>;
   constructor(private localStorageService: LocalStorageService, private calendarizationService: CalanderizationService,
     private convertMeterDataService: ConvertMeterDataService, private facilityDbService: FacilitydbService,
     private utilityMeterDbService: UtilityMeterdbService, private analysisDbService: AnalysisDbService) {
@@ -31,6 +34,9 @@ export class AnalysisService {
     this.selectedGroup = new BehaviorSubject<AnalysisGroup>(undefined);
     this.dataDisplay = new BehaviorSubject<"graph" | "table">(dataDisplay);
     this.showInvalidModels = new BehaviorSubject<boolean>(false);
+    this.calculating = new BehaviorSubject<boolean>(true);
+    this.annualAnalysisSummary = new BehaviorSubject([]);
+    this.monthlyAccountAnalysisData = new BehaviorSubject([]);
 
 
     let analysisTableColumns: AnalysisTableColumns = this.localStorageService.retrieve("analysisTableColumns");

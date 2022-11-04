@@ -36,4 +36,15 @@
       color: #ff6000;
   }
 
-  
+  p a {
+    font-size: 22px;
+  }
+
+  .box{
+    border: solid white 2px;
+  }
+
+  .box.account-setup-box:hover{
+    cursor: pointer;
+    border: solid gray 2px;
+  }

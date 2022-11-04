@@ -47,7 +47,8 @@ export class MeterSummaryService {
       totalEnergyCost: _.sumBy(facilityMetersSummary, 'energyCost'),
       totalMarketEmissions: _.sumBy(facilityMetersSummary, 'marketEmissions'),
       totalLocationEmissions: _.sumBy(facilityMetersSummary, 'locationEmissions'),
-      allMetersLastBill: allMetersLastBill
+      allMetersLastBill: allMetersLastBill,
+      totalConsumption: 0
     };
   }
 
@@ -71,7 +72,8 @@ export class MeterSummaryService {
       locationEmissions: _.sumBy(lastYearData, 'locationEmissions'),
       lastBill: lastBill,
       groupName: groupName,
-      lastBillDate: lastBillDate
+      lastBillDate: lastBillDate,
+      consumption: 0
     }
   }
 
@@ -88,7 +90,8 @@ export class MeterSummaryService {
       totalEnergyCost: _.sumBy(facilityMetersSummary, (data) => { return this.getSumValue(data.energyCost) }),
       totalMarketEmissions: _.sumBy(facilityMetersSummary, (data) => { return this.getSumValue(data.marketEmissions) }),
       totalLocationEmissions: _.sumBy(facilityMetersSummary, (data) => { return this.getSumValue(data.locationEmissions) }),
-      allMetersLastBill: lastBill
+      allMetersLastBill: lastBill,
+      totalConsumption: 0
     };
   }
 
@@ -112,7 +115,8 @@ export class MeterSummaryService {
       locationEmissions: _.sumBy(lastYearData, (data) => { return this.getSumValue(data.locationEmissions) }),
       lastBill: lastBill,
       groupName: groupName,
-      lastBillDate: lastBillDate
+      lastBillDate: lastBillDate,
+      consumption: 0
     }
   }
 
@@ -132,6 +136,7 @@ export class MeterSummaryService {
             energyCost: _.sumBy(facilityMetersDataSummary, (data) => { return this.getSumValue(data.energyCost) }),
             marketEmissions: _.sumBy(facilityMetersDataSummary, (data) => { return this.getSumValue(data.marketEmissions) }),
             locationEmissions: _.sumBy(facilityMetersDataSummary, (data) => { return this.getSumValue(data.locationEmissions) }),
+            consumption: _.sumBy(facilityMetersDataSummary, (data) => { return this.getSumValue(data.energyConsumption) }),
             numberOfMeters: facilityMeters.length,
             lastBillDate: new Date(facilityLastBill.year, (facilityLastBill.monthNumValue + 1))
           })
@@ -145,6 +150,7 @@ export class MeterSummaryService {
       totalNumberOfMeters: _.sumBy(facilitiesSummary, (data) => { return this.getSumValue(data.numberOfMeters) }),
       totalMarketEmissions: _.sumBy(facilitiesSummary, (data) => { return this.getSumValue(data.marketEmissions) }),
       totalLocationEmissions: _.sumBy(facilitiesSummary, (data) => { return this.getSumValue(data.locationEmissions) }),
+      totalConsumption: _.sumBy(facilitiesSummary, (data) => { return this.getSumValue(data.energyConsumption) }),
       allMetersLastBill: accountLastBill
     };
 
@@ -178,6 +184,7 @@ export class MeterSummaryService {
         totalNumberOfMeters: _.sumBy(facilitiesSummary, 'numberOfMeters'),
         totalMarketEmissions: _.sumBy(facilitiesSummary, 'marketEmissions'),
         totalLocationEmissions: _.sumBy(facilitiesSummary, 'locationEmissions'),
+        totalConsumption:  _.sumBy(facilitiesSummary, 'consumption'),
         allMetersLastBill: accountLastBill
       };
     } else {
@@ -207,6 +214,7 @@ export class MeterSummaryService {
         totalEnergyUse: _.sumBy(facilitiesSummary, 'energyUsage'),
         totalEnergyCost: _.sumBy(facilitiesSummary, 'energyCost'),
         totalNumberOfMeters: _.sumBy(facilitiesSummary, 'numberOfMeters'),
+        totalConsumption:  _.sumBy(facilitiesSummary, 'consumption'),
         totalLocationEmissions: undefined,
         totalMarketEmissions: undefined,
         allMetersLastBill: accountTargetYearBill
@@ -225,13 +233,14 @@ export class MeterSummaryService {
     if (facilityMeters.length != 0) {
       let facilityLastBill: MonthlyData = this.calanderizationService.getLastBillEntry(facilityMeters, inAccount, reportOptions);
       if (facilityLastBill) {
-        let facilityMetersDataSummary: Array<{ time: string, energyUse: number, energyCost: number }> = this.calanderizationService.getPastYearData(facilityMeters, inAccount, accountMetersLastBill, undefined, reportOptions);
+        let facilityMetersDataSummary: Array<LastYearData> = this.calanderizationService.getPastYearData(facilityMeters, inAccount, accountMetersLastBill, undefined, reportOptions);
         return {
           facility: facility,
           energyUsage: _.sumBy(facilityMetersDataSummary, 'energyUse'),
           energyCost: _.sumBy(facilityMetersDataSummary, 'energyCost'),
           marketEmissions:_.sumBy(facilityMetersDataSummary, 'marketEmissions'),
           locationEmissions:_.sumBy(facilityMetersDataSummary, 'locationEmissions'),
+          consumption:  _.sumBy(facilityMetersDataSummary, 'energyConsumption'),
           numberOfMeters: facilityMeters.length,
           lastBillDate: new Date(facilityLastBill.year, (facilityLastBill.monthNumValue + 1))
         }
@@ -243,6 +252,7 @@ export class MeterSummaryService {
           locationEmissions: 0,
           marketEmissions: 0,
           numberOfMeters: facilityMeters.length,
+          consumption: 0,
           lastBillDate: undefined
         }
       }
@@ -254,6 +264,7 @@ export class MeterSummaryService {
       locationEmissions: 0,
       marketEmissions: 0,
       numberOfMeters: 0,
+      consumption: 0,
       lastBillDate: undefined
     }
   }

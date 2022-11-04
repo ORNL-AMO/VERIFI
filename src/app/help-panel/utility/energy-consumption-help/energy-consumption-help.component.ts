@@ -3,7 +3,6 @@ import { NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idb';
-
 @Component({
   selector: 'app-energy-consumption-help',
   templateUrl: './energy-consumption-help.component.html',
@@ -14,13 +13,14 @@ export class EnergyConsumptionHelpComponent implements OnInit {
   selectedSource: string;
   selectedFacility: IdbFacility;
   selectedFacilitySub: Subscription;
+  routerSub: Subscription;
   constructor(private facilityDbService: FacilitydbService, private router: Router) { }
 
   ngOnInit(): void {
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(selectedFacility => {
       this.selectedFacility = selectedFacility;
     });
-    this.router.events.subscribe((val) => {
+    this.routerSub = this.router.events.subscribe((val) => {
       if (val instanceof NavigationEnd) {
         this.setSelectedSource(val.url);
       }
@@ -29,6 +29,7 @@ export class EnergyConsumptionHelpComponent implements OnInit {
   }
 
   ngOnDestroy() {
+    this.routerSub.unsubscribe();
     this.selectedFacilitySub.unsubscribe();
   }
 

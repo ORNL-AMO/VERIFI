@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-setup-wizard-help',
@@ -9,10 +10,11 @@ import { NavigationEnd, Router } from '@angular/router';
 export class SetupWizardHelpComponent implements OnInit {
 
   helpURL: string;
+  routerSub: Subscription;
   constructor(private router: Router) { }
 
   ngOnInit(): void {
-    this.router.events.subscribe((event) => {
+    this.routerSub = this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
         this.setHelpURL(event.urlAfterRedirects);
       }
@@ -21,6 +23,9 @@ export class SetupWizardHelpComponent implements OnInit {
     this.setHelpURL(this.router.url);
   }
 
+  ngOnDestroy(){
+    this.routerSub.unsubscribe();
+  }
 
   setHelpURL(url: string){
     let componentOptions: Array<string> = [

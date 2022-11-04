@@ -40,10 +40,25 @@
                 Source
             </th>
             <th>
-                Group
+                <div class="d-flex w-100 justify-content-between">
+                    <div>
+                        Group
+                    </div>
+                    <div>
+                        <a class="text-right" (click)="autoGroup()">Auto Group</a>
+                    </div>
+                </div>
+                
             </th>
             <th>
-                Calanderize?
+                <div class="d-flex w-100 justify-content-between">
+                    <div>
+                        Calanderize?
+                    </div>
+                    <div>
+                        <a class="text-right" (click)="toggleCalanderizeAll()">Toggle</a>
+                    </div>
+                </div>
             </th>
             <th>
                 New / Existing

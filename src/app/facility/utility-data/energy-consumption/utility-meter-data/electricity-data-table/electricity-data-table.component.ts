@@ -6,7 +6,7 @@ import * as _ from 'lodash';
 import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
 import { CalanderizationService, EmissionsResults } from 'src/app/shared/helper-services/calanderization.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { AdditionalChargesFilters, DetailedChargesFilters, EmissionsFilters, GeneralInformationFilters } from 'src/app/models/electricityFilter';
+import { AdditionalChargesFilters, DetailedChargesFilters, EmissionsFilters, GeneralInformationFilters } from 'src/app/models/meterDataFilter';
 import { EmissionsDataFormComponent } from 'src/app/account/custom-database/regional-emissions-data/emissions-data-form/emissions-data-form.component';
 
 @Component({
@@ -157,6 +157,9 @@ export class ElectricityDataTableComponent implements OnInit {
       dataItem.RECs = emissionsValues.RECs;
       dataItem.excessRECs = emissionsValues.excessRECs;
       dataItem.excessRECsEmissions = emissionsValues.excessRECsEmissions;
+      if(this.selectedMeter.includeInEnergy == false){
+        dataItem.totalEnergyUse = 0;
+      }
     })
   }
 

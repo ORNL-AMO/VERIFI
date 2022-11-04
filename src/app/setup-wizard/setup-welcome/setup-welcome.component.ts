@@ -40,8 +40,8 @@ export class SetupWelcomeComponent implements OnInit {
     this.importBackupModalService.showModal.next(true);
   }
 
+  goToAccountSetup(){
+    this.router.navigateByUrl('setup-wizard/account-setup');   
 
-  addAccount() {
-    this.router.navigateByUrl('setup-wizard/account-setup');
   }
 }

@@ -39,6 +39,7 @@ export class MonthlyAnalysisSummaryComponent implements OnInit {
       this.worker.onmessage = ({ data }) => {
         this.monthlyAnalysisSummary = data;
         this.calculating = false;
+        this.worker.terminate();
       };
       this.calculating = true;
       this.worker.postMessage({

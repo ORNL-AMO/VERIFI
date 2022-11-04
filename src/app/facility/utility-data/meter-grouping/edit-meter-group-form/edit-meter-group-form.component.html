@@ -4,9 +4,19 @@
 <form [formGroup]="groupForm">
     <label for="name">Name <span class="required">*</span> </label>
     <div class="input-group mb-3">
-        <input id="name" class="form-control" type="text" formControlName="name" minlength="0" maxlength ="42">
+        <input id="name" class="form-control" type="text" formControlName="name" minlength="0" maxlength="42">
     </div>
     <span class="inputError" *ngIf="groupForm.get('name').hasError('required')">Name is required</span>
+
+    <ng-container *ngIf="meterGroupTypes.length > 1">
+        <label for="groupType">Group Type <span class="required">*</span></label>
+        <select id="groupType" class="form-control mb-3" formControlName="groupType">
+            <option [value]="'Energy'">Energy</option>
+            <option [value]="'Water'">Water</option>
+            <option [value]="'Other'">Other</option>
+        </select>
+    </ng-container>
+
 
     <label for="name">Description</label>
     <div class="input-group mb-3">

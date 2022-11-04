@@ -35,4 +35,4 @@
         [monthlyAnalysisSummaryData]="monthlyAnalysisSummary.monthlyAnalysisSummaryData" [facilityOrAccount]="facility"></app-monthly-analysis-summary-graph>
 </div>
 
-<app-calculating-spinner *ngIf="calculating"></app-calculating-spinner>
+<app-calculating-spinner *ngIf="calculating" [message]="'Calculating Monthly Results...'"></app-calculating-spinner>

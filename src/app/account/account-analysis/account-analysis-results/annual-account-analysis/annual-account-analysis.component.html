@@ -9,11 +9,13 @@
     </div>
 </div>
 
-<div class="w-100 x-scroll">
+<div class="w-100 x-scroll" *ngIf="!calculating">
     <app-annual-analysis-summary-table *ngIf="dataDisplay == 'table'" [annualAnalysisSummary]="annualAnalysisSummary"
-        [analysisItem]="analysisItem">
+        [analysisItem]="accountAnalysisItem">
     </app-annual-analysis-summary-table>
     <app-annual-analysis-summary-graph *ngIf="dataDisplay == 'graph'" [annualAnalysisSummary]="annualAnalysisSummary"
-        [analysisItem]="analysisItem">
+        [analysisItem]="accountAnalysisItem">
     </app-annual-analysis-summary-graph>
 </div>
+
+<app-calculating-spinner *ngIf="calculating" [message]="'Calculating Annual Results...'"></app-calculating-spinner>

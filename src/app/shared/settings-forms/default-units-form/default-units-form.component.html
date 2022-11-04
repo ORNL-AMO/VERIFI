@@ -43,7 +43,7 @@
             </select>
         </div>
         <div class="mb-3 col">
-            <label>Liquid Volume Unit</label>
+            <label>Volume Unit (Liquid)</label>
             <select formControlName="volumeLiquidUnit" (change)="saveChanges()">
                 <option *ngFor="let volumeUnitOption of volumeLiquidOptions" [ngValue]="volumeUnitOption.value">
                     <span [innerHTML]="volumeUnitOption.display"></span>
@@ -55,7 +55,7 @@
     <div class="row">
 
         <div class="mb-3 col">
-            <label>Gas Volume Unit</label>
+            <label>Volume Unit (Gases)</label>
             <select formControlName="volumeGasUnit" (change)="saveChanges()">
                 <option *ngFor="let volumeUnitOption of volumeGasOptions" [ngValue]="volumeUnitOption.value">
                     <span [innerHTML]="volumeUnitOption.display"></span>

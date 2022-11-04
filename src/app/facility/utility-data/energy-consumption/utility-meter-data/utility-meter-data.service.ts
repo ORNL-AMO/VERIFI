@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { BehaviorSubject } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { AdditionalChargesFilters, DetailedChargesFilters, ElectricityDataFilters, EmissionsFilters, GeneralInformationFilters } from 'src/app/models/electricityFilter';
+import { AdditionalChargesFilters, DetailedChargesFilters, ElectricityDataFilters, EmissionsFilters, GeneralInformationFilters, GeneralUtilityDataFilters } from 'src/app/models/meterDataFilter';
 import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
@@ -15,12 +15,17 @@ import { MonthlyData } from 'src/app/models/calanderization';
 export class UtilityMeterDataService {
 
   tableElectricityFilters: BehaviorSubject<ElectricityDataFilters>;
+  tableGeneralUtilityFilters: BehaviorSubject<GeneralUtilityDataFilters>;
+  
   electricityInputFilters: BehaviorSubject<ElectricityDataFilters>;
+
   constructor(private formBuilder: FormBuilder, private facilityDbService: FacilitydbService,
     private calanderizationService: CalanderizationService) {
     let defaultFilters: ElectricityDataFilters = this.getDefaultFilters();
     this.tableElectricityFilters = new BehaviorSubject<ElectricityDataFilters>(defaultFilters);
     this.electricityInputFilters = new BehaviorSubject<ElectricityDataFilters>(defaultFilters);
+    let defaultGeneralFilters: GeneralUtilityDataFilters = this.getDefaultGeneralFilters();
+    this.tableGeneralUtilityFilters = new BehaviorSubject<GeneralUtilityDataFilters>(defaultGeneralFilters)
     this.facilityDbService.selectedFacility.subscribe(selectedFacility => {
       if (selectedFacility) {
         if (selectedFacility.electricityInputFilters) {
@@ -30,6 +35,10 @@ export class UtilityMeterDataService {
         if (selectedFacility.tableElectricityFilters) {
           selectedFacility.tableElectricityFilters = this.checkSavedFilters(selectedFacility.tableElectricityFilters);
           this.tableElectricityFilters.next(selectedFacility.tableElectricityFilters);
+        }
+
+        if(selectedFacility.tableGeneralUtilityFilters){
+          this.tableGeneralUtilityFilters.next(selectedFacility.tableGeneralUtilityFilters)
         }
       }
     });
@@ -103,6 +112,18 @@ export class UtilityMeterDataService {
       recs: true,
       excessRecs: true,
       excessRecsEmissions: true
+    }
+  }
+
+  getDefaultGeneralFilters(): GeneralUtilityDataFilters{
+    return {
+      totalVolume: true,
+      totalCost: true,
+      totalMarketEmissions: true,
+      totalLocationEmissions: true,
+      commodityCharge: true,
+      deliveryCharge: true,
+      otherCharge: true,
     }
   }
 

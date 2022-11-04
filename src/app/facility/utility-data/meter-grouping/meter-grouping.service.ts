@@ -96,7 +96,7 @@ export class MeterGroupingService {
     return meterGroups
   }
 
-  addEnergyMetersWithoutGroups(energyMeters: Array<CalanderizedMeter>, groupType: string, meterGroupTypes: Array<MeterGroupType>) {
+  addEnergyMetersWithoutGroups(energyMeters: Array<CalanderizedMeter>, groupType: 'Energy' | 'Water' | 'Other', meterGroupTypes: Array<MeterGroupType>) {
     // let calanderizedMeterData: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMeterData(energyMeters, false);
     let combinedMonthlyData: Array<MonthlyData> = this.combineCalanderizedMeterData(energyMeters);
     let meterGroup: IdbUtilityMeterGroup = {
