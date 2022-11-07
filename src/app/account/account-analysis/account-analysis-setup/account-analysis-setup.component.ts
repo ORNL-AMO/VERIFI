@@ -68,8 +68,4 @@ export class AccountAnalysisSetupComponent implements OnInit {
     this.accountAnalysisService.setCalanderizedMeters();
   }
 
-  goToFacilityItems(){
-    this.router.navigateByUrl('/account/analysis/select-items');
-  }
-
 }

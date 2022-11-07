@@ -69,15 +69,6 @@
         </tbody>
     </table>
 </div>
-<hr>
-<div class="d-flex w-100 justify-content-between">
-    <div>
-        <button class="btn btn-secondary" (click)="goBack()"> <span class="fa fa-chevron-left"></span>Back</button>
-    </div>
-    <div>
-        <button class="btn btn-secondary" (click)="continue()">Continue <span class="fa fa-chevron-right"></span></button>
-    </div>
-</div>
 
 <div class="popup" [class.open]="itemToEdit">
     <div class="popup-header" *ngIf="itemToEdit">Go To: {{itemToEdit.name}}

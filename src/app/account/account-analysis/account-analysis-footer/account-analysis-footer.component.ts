@@ -3,6 +3,9 @@ import { HelpPanelService } from 'src/app/help-panel/help-panel.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { Subscription } from 'rxjs';
 import { NavigationEnd, Router } from '@angular/router';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { IdbFacility } from 'src/app/models/idb';
+import { AccountAnalysisService } from '../account-analysis.service';
 
 @Component({
   selector: 'app-account-analysis-footer',
@@ -20,7 +23,9 @@ export class AccountAnalysisFooterComponent implements OnInit {
   inDashboard: boolean;
   constructor(private sharedDataService: SharedDataService,
     private helpPanelService: HelpPanelService,
-    private router: Router) { }
+    private router: Router,
+    private facilityDbService: FacilitydbService,
+    private accountAnalysisService: AccountAnalysisService) { }
 
   ngOnInit(): void {
     this.routerSub = this.router.events.subscribe(event => {
@@ -41,6 +46,7 @@ export class AccountAnalysisFooterComponent implements OnInit {
   ngOnDestroy() {
     this.sidebarOpenSub.unsubscribe();
     this.helpPanelOpenSub.unsubscribe();
+    this.routerSub.unsubscribe();
   }
 
   setInDashboard(url: string) {
@@ -49,11 +55,43 @@ export class AccountAnalysisFooterComponent implements OnInit {
 
 
   goBack() {
-
+    if (this.router.url.includes('setup')) {
+      this.router.navigateByUrl('account/analysis/dashboard');
+    } else if (this.router.url.includes('account/analysis/select-items')) {
+      let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+      let selectedFacility: IdbFacility = this.accountAnalysisService.selectedFacility.getValue();
+      let facilityIndex: number = facilities.findIndex(facility => { return facility.guid == selectedFacility.guid });
+      if (facilityIndex == 0) {
+        this.router.navigateByUrl('/account/analysis/setup');
+      } else {
+        this.accountAnalysisService.selectedFacility.next(facilities[facilityIndex - 1]);
+      }
+    } else if (this.router.url.includes('results')) {
+      if (this.router.url.includes('monthly-analysis')) {
+        this.router.navigateByUrl('/account/analysis/results/annual-analysis');
+      } else {
+        let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+        this.accountAnalysisService.selectedFacility.next(facilities[facilities.length - 1]);
+        this.router.navigateByUrl('account/analysis/select-items');
+      }
+    }
   }
 
   continue() {
-
+    if (this.router.url.includes('setup')) {
+      this.router.navigateByUrl('account/analysis/select-items');
+    } else if (this.router.url.includes('select-items')) {
+      let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+      let selectedFacility: IdbFacility = this.accountAnalysisService.selectedFacility.getValue();
+      let facilityIndex: number = facilities.findIndex(facility => { return facility.guid == selectedFacility.guid });
+      if (facilityIndex == facilities.length - 1) {
+        this.router.navigateByUrl('/account/analysis/results/annual-analysis');
+      } else {
+        this.accountAnalysisService.selectedFacility.next(facilities[facilityIndex + 1]);
+      }
+    } else if (this.router.url.includes('results')) {
+      this.router.navigateByUrl('/account/analysis/results/monthly-analysis');
+    }
   }
 
 }

@@ -70,25 +70,6 @@ export class SelectItemTableComponent implements OnInit {
     this.router.navigateByUrl('facility/' + this.facility.id + '/analysis/run-analysis');
   }
 
-  goBack() {
-    let facilityIndex: number = this.facilities.findIndex(facility => { return facility.guid == this.facility.guid });
-    if (facilityIndex == 0) {
-      this.router.navigateByUrl("/account/analysis/setup");
-    } else {
-      this.accountAnalysisService.selectedFacility.next(this.facilities[facilityIndex - 1]);
-    }
-  }
-
-  continue() {
-    let facilityIndex: number = this.facilities.findIndex(facility => { return facility.guid == this.facility.guid });
-    if (facilityIndex == this.facilities.length - 1) {
-      this.router.navigateByUrl("/account/analysis/results/annual-analysis");
-    } else {
-      this.accountAnalysisService.selectedFacility.next(this.facilities[facilityIndex + 1]);
-    }
-  }
-
-
   createNewItem(){
     this.showCreateItem = true;
   }
