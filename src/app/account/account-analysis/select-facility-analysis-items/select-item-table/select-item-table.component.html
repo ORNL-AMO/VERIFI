@@ -1,4 +1,4 @@
-<div class="d-flex w-100">
+<div class="d-flex w-100 justify-content-end">
     <div>
         <button class="btn btn-outline m-0" (click)="createNewItem()">+Add Facility Analysis</button>
     </div>
@@ -12,32 +12,21 @@
                 <th></th>
                 <th>Analysis Item</th>
                 <th>
-                    Report Year
-                </th>
-                <th>
-                    Site or Source Energy?
-                </th>
-                <th>
                     Group Analysis
                 </th>
                 <th>Last Modified</th>
-                <th>Actions</th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
-            <tr *ngFor="let analysisItem of facilityAnalysisItems">
-                <td>
+            <tr *ngFor="let analysisItem of facilityAnalysisItems | orderBy: 'date'">
+                <td class="radio-td">
                     <input type="radio" class="rowToggle" [(ngModel)]="selectedFacilityItemId"
                         [value]="analysisItem.guid" name="{{analysisItem.id+'_selectedFacilityItemId'}}"
                         id="{{analysisItem.id+'_selectedFacilityItemId'}}" (change)="save()">
                 </td>
                 <td>
                     {{analysisItem.name}}
-                </td>
-                <td>{{analysisItem.reportYear}}</td>
-                <td>
-                    <span *ngIf="analysisItem.energyIsSource">Source</span>
-                    <span *ngIf="!analysisItem.energyIsSource">Site</span>
                 </td>
                 <td>
                     <span *ngFor="let group of analysisItem.groups">
@@ -50,7 +39,7 @@
                         <br>
                     </span>
                 </td>
-                <td>{{analysisItem.date | date}}</td>
+                <td>{{analysisItem.date | date:'short'}}</td>
                 <td class="actions">
                     <!-- <div class="d-flex">
                         <i class="fa fa-pencil" title="Edit" (click)="editItem(analysisItem)"></i>
@@ -61,10 +50,11 @@
             <tr *ngIf="facilityAnalysisItems.length == 0">
                 <td colspan="7" class="text-center">
                     No <span *ngIf="selectedAnalysisItem.energyIsSource">source energy</span>
-                    <span *ngIf="!selectedAnalysisItem.energyIsSource">site energy</span> analysis items found matching
-                    the selected report year!<br>
+                    <span *ngIf="!selectedAnalysisItem.energyIsSource">site energy</span> analysis items found for this
+                    facility that match
+                    the selected report year.<br>
                     Click the "+Add Facility Analysis" button to conduct a facility level analysis that will be added to
-                    this account analysis in progress.
+                    the account analysis in progress.
                 </td>
             </tr>
             <tr>
@@ -82,10 +72,10 @@
 <hr>
 <div class="d-flex w-100 justify-content-between">
     <div>
-        <button class="btn btn-secondary" (click)="goBack()">Back</button>
+        <button class="btn btn-secondary" (click)="goBack()"> <span class="fa fa-chevron-left"></span>Back</button>
     </div>
     <div>
-        <button class="btn btn-secondary" (click)="continue()">Continue</button>
+        <button class="btn btn-secondary" (click)="continue()">Continue <span class="fa fa-chevron-right"></span></button>
     </div>
 </div>
 

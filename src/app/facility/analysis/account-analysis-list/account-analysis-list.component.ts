@@ -5,6 +5,7 @@ import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
+import { AnalysisService } from '../analysis.service';
 
 @Component({
   selector: 'app-account-analysis-list',
@@ -18,11 +19,16 @@ export class AccountAnalysisListComponent implements OnInit {
   itemsPerPage: number = 10;
   orderDataField: string = 'date';
   orderByDirection: string = 'desc';
+  canReturnToAccount: boolean;
   constructor(private analysisDbService: AnalysisDbService, private accountAnalysisDbService: AccountAnalysisDbService,
     private router: Router, private accountAnalysisService: AccountAnalysisService,
-    private facilityDbService: FacilitydbService) { }
+    private facilityDbService: FacilitydbService, private analysisService: AnalysisService) { }
 
   ngOnInit(): void {
+    this.canReturnToAccount = this.analysisService.accountAnalysisItem != undefined;
+    console.log(this.canReturnToAccount);
+
+
     let selectedAnalysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     let allAccountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
     this.accountAnalysisItems = new Array();
@@ -44,6 +50,9 @@ export class AccountAnalysisListComponent implements OnInit {
     this.accountAnalysisService.selectedFacility.next(selectedFacility);
     this.accountAnalysisDbService.selectedAnalysisItem.next(item);
     this.router.navigateByUrl('/account/analysis/select-items')
+  }
 
+  goBackToAccount() {
+    this.selectAnalysisItem(this.analysisService.accountAnalysisItem);
   }
 }

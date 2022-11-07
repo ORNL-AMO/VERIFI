@@ -7,6 +7,7 @@ import { EnergyUnitOptions, UnitOption } from 'src/app/shared/unitOptions';
 import * as _ from 'lodash';
 import { AnalysisCalculationsHelperService } from 'src/app/shared/shared-analysis/calculations/analysis-calculations-helper.service';
 import { AnalysisService } from '../../analysis.service';
+import { Router } from '@angular/router';
 @Component({
   selector: 'app-analysis-setup',
   templateUrl: './analysis-setup.component.html',
@@ -23,7 +24,7 @@ export class AnalysisSetupComponent implements OnInit {
   yearOptions: Array<number>;
   constructor(private facilityDbService: FacilitydbService, private analysisDbService: AnalysisDbService,
     private analysisCalculationsHelperService: AnalysisCalculationsHelperService,
-    private analysisService: AnalysisService) { }
+    private analysisService: AnalysisService, private router: Router) { }
 
   ngOnInit(): void {
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
@@ -53,8 +54,12 @@ export class AnalysisSetupComponent implements OnInit {
     this.saveItem();
   }
 
-  async setSiteSource(){
+  async setSiteSource() {
     await this.saveItem();
     this.analysisService.setCalanderizedMeters();
+  }
+
+  continue() {
+    this.router.navigateByUrl('/facility/' + this.facility.id + '/analysis/run-analysis/group-analysis/' + this.analysisItem.groups[0].idbGroupId + '/options');
   }
 }

@@ -24,6 +24,7 @@ export class AnalysisService {
   calculating: BehaviorSubject<boolean>;
   annualAnalysisSummary: BehaviorSubject<Array<AnnualAnalysisSummary>>;
   monthlyAccountAnalysisData: BehaviorSubject<Array<MonthlyAnalysisSummaryData>>;
+  accountAnalysisItem: IdbAccountAnalysisItem;
   constructor(private localStorageService: LocalStorageService, private calendarizationService: CalanderizationService,
     private convertMeterDataService: ConvertMeterDataService, private facilityDbService: FacilitydbService,
     private utilityMeterDbService: UtilityMeterdbService, private analysisDbService: AnalysisDbService) {

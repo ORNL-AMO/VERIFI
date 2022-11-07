@@ -2,9 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
-import { AnalysisGroup, IdbAnalysisItem, IdbUtilityMeter, IdbUtilityMeterGroup } from 'src/app/models/idb';
+import { AnalysisGroup, IdbAnalysisItem, IdbFacility, IdbUtilityMeter, IdbUtilityMeterGroup } from 'src/app/models/idb';
 import { AnalysisService } from '../../analysis.service';
 
 @Component({
@@ -26,7 +27,8 @@ export class GroupAnalysisComponent implements OnInit {
   constructor(private activatedRoute: ActivatedRoute, private analysisDbService: AnalysisDbService,
     private analysisService: AnalysisService, private router: Router,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
-    private utilityMeterDbService: UtilityMeterdbService) { }
+    private utilityMeterDbService: UtilityMeterdbService,
+    private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
     this.analysisItemSub = this.analysisDbService.selectedAnalysisItem.subscribe(val => {
@@ -94,5 +96,19 @@ export class GroupAnalysisComponent implements OnInit {
         this.regressionModelNeeded = false;
       }
     }
+  }
+  continue() {
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    if (this.router.url.includes('options')) {
+      if (this.selectedGroup.analysisType == 'regression') {
+        this.router.navigateByUrl('/facility/' + selectedFacility.id + '/analysis/run-analysis/group-analysis/' + this.selectedGroup.idbGroupId + '/model-selection')
+      }else{
+        this.router.navigateByUrl('/facility/' + selectedFacility.id + '/analysis/run-analysis/group-analysis/' + this.selectedGroup.idbGroupId + '/annual-analysis')
+      }
+    }
+  }
+
+  goBack() {
+
   }
 }

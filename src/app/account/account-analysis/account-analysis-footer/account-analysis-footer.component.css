@@ -1,0 +1,14 @@
+.fixed-bottom{
+    left: 70px;
+    transition: .2s left;
+    transition: .2s right;
+
+}
+
+.fixed-bottom.sidebar-open{
+    left: 260px;
+}
+
+.fixed-bottom.help-panel-open{
+    right: 260px;
+}
