@@ -5,7 +5,7 @@ import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
-import { AnalysisGroup, IdbAnalysisItem, IdbFacility, IdbUtilityMeter, IdbUtilityMeterGroup } from 'src/app/models/idb';
+import { AnalysisGroup, GroupErrors, IdbAnalysisItem, IdbFacility, IdbUtilityMeter, IdbUtilityMeterGroup } from 'src/app/models/idb';
 import { AnalysisService } from '../../analysis.service';
 
 @Component({
@@ -17,30 +17,25 @@ export class GroupAnalysisComponent implements OnInit {
 
   analysisItem: IdbAnalysisItem;
   selectedGroup: AnalysisGroup;
+  selectedGroupSub: Subscription;
   groupId: string;
   label: string
-  groupHasError: boolean;
-  regressionModelNeeded: boolean;
+  groupErrors: GroupErrors;
   analysisItemSub: Subscription;
   showModelSelection: boolean;
   routerSub: Subscription;
   constructor(private activatedRoute: ActivatedRoute, private analysisDbService: AnalysisDbService,
     private analysisService: AnalysisService, private router: Router,
-    private utilityMeterGroupDbService: UtilityMeterGroupdbService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private facilityDbService: FacilitydbService) { }
+    private utilityMeterGroupDbService: UtilityMeterGroupdbService) { }
 
   ngOnInit(): void {
     this.analysisItemSub = this.analysisDbService.selectedAnalysisItem.subscribe(val => {
       this.analysisItem = val;
       this.setSelectedGroup()
-      this.setGroupError();
     })
     this.activatedRoute.params.subscribe(params => {
       this.groupId = params['id'];
       this.setSelectedGroup();
-      this.setGroupError();
-      this.analysisService.selectedGroup.next(this.selectedGroup);
     });
     this.routerSub = this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
@@ -48,19 +43,26 @@ export class GroupAnalysisComponent implements OnInit {
       }
     });
     this.setLabel(this.router.url);
+
+    this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(val => {
+      this.selectedGroup = val;
+      if(this.selectedGroup){
+        this.groupErrors = this.selectedGroup.groupErrors;
+        this.showModelSelection = this.selectedGroup.analysisType == 'regression';
+      }
+    });
   }
 
   ngOnDestroy() {
     this.analysisItemSub.unsubscribe();
     this.routerSub.unsubscribe();
+    this.selectedGroupSub.unsubscribe();
   }
 
   setSelectedGroup() {
     if (this.groupId != undefined) {
-      let accountGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
-      let idbGroup: IdbUtilityMeterGroup = accountGroups.find(group => { return group.guid == this.groupId });
-      this.selectedGroup = this.analysisItem.groups.find(group => { return group.idbGroupId == idbGroup.guid });
-      this.showModelSelection = this.selectedGroup.analysisType == 'regression';
+      let selectedGroup: AnalysisGroup = this.analysisItem.groups.find(group => { return group.idbGroupId == this.groupId });
+      this.analysisService.selectedGroup.next(selectedGroup);
     }
   }
 
@@ -77,38 +79,5 @@ export class GroupAnalysisComponent implements OnInit {
         this.label = groupName + ' Setup'
       }
     }
-  }
-
-  setGroupError() {
-    if (this.selectedGroup) {
-      let groupMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getGroupMetersByGroupId(this.selectedGroup.idbGroupId);
-      this.groupHasError = (groupMeters.length == 0);
-      if (!this.groupHasError) {
-        this.groupHasError = this.selectedGroup.groupHasError;
-      }
-      if (this.selectedGroup.analysisType == 'regression' && this.selectedGroup.userDefinedModel) {
-        if (!this.selectedGroup.selectedModelId) {
-          this.regressionModelNeeded = true;
-        } else {
-          this.regressionModelNeeded = false;
-        }
-      } else {
-        this.regressionModelNeeded = false;
-      }
-    }
-  }
-  continue() {
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    if (this.router.url.includes('options')) {
-      if (this.selectedGroup.analysisType == 'regression') {
-        this.router.navigateByUrl('/facility/' + selectedFacility.id + '/analysis/run-analysis/group-analysis/' + this.selectedGroup.idbGroupId + '/model-selection')
-      }else{
-        this.router.navigateByUrl('/facility/' + selectedFacility.id + '/analysis/run-analysis/group-analysis/' + this.selectedGroup.idbGroupId + '/annual-analysis')
-      }
-    }
-  }
-
-  goBack() {
-
   }
 }

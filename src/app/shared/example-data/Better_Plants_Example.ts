@@ -2310,7 +2310,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 10,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.148Z"),
         "id": 123
     }, {
@@ -2325,7 +2325,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 24,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.154Z"),
         "id": 124
     }, {
@@ -2340,7 +2340,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 8,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.162Z"),
         "id": 125
     }, {
@@ -2355,7 +2355,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 28,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.168Z"),
         "id": 126
     }, {
@@ -2370,7 +2370,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 32,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.175Z"),
         "id": 127
     }, {
@@ -2385,7 +2385,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 35,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.181Z"),
         "id": 128
     }, {
@@ -2400,7 +2400,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 30,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.188Z"),
         "id": 129
     }, {
@@ -2415,7 +2415,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 34,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.208Z"),
         "id": 130
     }, {
@@ -2430,7 +2430,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 40,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.215Z"),
         "id": 131
     }, {
@@ -2445,7 +2445,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 39,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.222Z"),
         "id": 132
     }, {
@@ -2460,7 +2460,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 24,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.229Z"),
         "id": 133
     }, {
@@ -2475,7 +2475,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 18,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.237Z"),
         "id": 134
     }, {
@@ -2490,7 +2490,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 15,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.244Z"),
         "id": 135
     }, {
@@ -2505,7 +2505,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 7,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.251Z"),
         "id": 136
     }, {
@@ -2520,7 +2520,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 28,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.257Z"),
         "id": 137
     }, {
@@ -2535,7 +2535,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 36,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.264Z"),
         "id": 138
     }, {
@@ -2550,7 +2550,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 21,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.271Z"),
         "id": 139
     }, {
@@ -2565,7 +2565,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 19,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.279Z"),
         "id": 140
     }, {
@@ -2580,7 +2580,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 21,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.286Z"),
         "id": 141
     }, {
@@ -2595,7 +2595,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 23,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.292Z"),
         "id": 142
     }, {
@@ -2610,7 +2610,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 5,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.299Z"),
         "id": 143
     }, {
@@ -2625,7 +2625,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 18,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.306Z"),
         "id": 144
     }, {
@@ -2640,7 +2640,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 12,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.312Z"),
         "id": 145
     }, {
@@ -2655,7 +2655,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 37,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.319Z"),
         "id": 146
     }, {
@@ -2670,7 +2670,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 29,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.327Z"),
         "id": 147
     }, {
@@ -2685,7 +2685,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 18,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.333Z"),
         "id": 148
     }, {
@@ -2700,7 +2700,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 23,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.340Z"),
         "id": 149
     }, {
@@ -2715,7 +2715,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 38,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.348Z"),
         "id": 150
     }, {
@@ -2730,7 +2730,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 14,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.354Z"),
         "id": 151
     }, {
@@ -2745,7 +2745,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 28,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.361Z"),
         "id": 152
     }, {
@@ -2760,7 +2760,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 23,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.367Z"),
         "id": 153
     }, {
@@ -2775,7 +2775,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 18,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.373Z"),
         "id": 154
     }, {
@@ -2790,7 +2790,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 17,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.383Z"),
         "id": 155
     }, {
@@ -2805,7 +2805,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 24,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.389Z"),
         "id": 156
     }, {
@@ -2820,7 +2820,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 33,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.398Z"),
         "id": 157
     }, {
@@ -2835,7 +2835,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 28,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.405Z"),
         "id": 158
     }, {
@@ -2850,7 +2850,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 8,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.411Z"),
         "id": 159
     }, {
@@ -2865,7 +2865,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 27,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.416Z"),
         "id": 160
     }, {
@@ -2880,7 +2880,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 26,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.424Z"),
         "id": 161
     }, {
@@ -2895,7 +2895,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 8,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.432Z"),
         "id": 162
     }, {
@@ -2910,7 +2910,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 36,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.438Z"),
         "id": 163
     }, {
@@ -2925,7 +2925,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 3,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.445Z"),
         "id": 164
     }, {
@@ -2940,7 +2940,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 40,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.451Z"),
         "id": 165
     }, {
@@ -2955,7 +2955,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 9,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.458Z"),
         "id": 166
     }, {
@@ -2970,7 +2970,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 9,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.464Z"),
         "id": 167
     }, {
@@ -2985,7 +2985,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 33,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.471Z"),
         "id": 168
     }, {
@@ -3000,7 +3000,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 11,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.477Z"),
         "id": 169
     }, {
@@ -3015,7 +3015,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 23,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.483Z"),
         "id": 170
     }, {
@@ -3030,7 +3030,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 16,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.491Z"),
         "id": 171
     }, {
@@ -3045,7 +3045,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 15,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.498Z"),
         "id": 172
     }, {
@@ -3060,7 +3060,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 10,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.505Z"),
         "id": 173
     }, {
@@ -3075,7 +3075,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 24,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.509Z"),
         "id": 174
     }, {
@@ -3090,7 +3090,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 8,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.515Z"),
         "id": 175
     }, {
@@ -3105,7 +3105,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 28,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.522Z"),
         "id": 176
     }, {
@@ -3120,7 +3120,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 32,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.528Z"),
         "id": 177
     }, {
@@ -3135,7 +3135,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 35,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.535Z"),
         "id": 178
     }, {
@@ -3150,7 +3150,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 30,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.542Z"),
         "id": 179
     }, {
@@ -3165,7 +3165,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 34,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.549Z"),
         "id": 180
     }, {
@@ -3180,7 +3180,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 40,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.556Z"),
         "id": 181
     }, {
@@ -3195,7 +3195,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 39,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.563Z"),
         "id": 182
     }, {
@@ -3210,7 +3210,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 24,
         "meterNumber": "12347",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.570Z"),
         "id": 183
     }, {
@@ -3225,7 +3225,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 18,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.577Z"),
         "id": 184
     }, {
@@ -3240,7 +3240,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 15,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.584Z"),
         "id": 185
     }, {
@@ -3255,7 +3255,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 7,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.591Z"),
         "id": 186
     }, {
@@ -3270,7 +3270,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 28,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.598Z"),
         "id": 187
     }, {
@@ -3285,7 +3285,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 36,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.605Z"),
         "id": 188
     }, {
@@ -3300,7 +3300,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 21,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.611Z"),
         "id": 189
     }, {
@@ -3315,7 +3315,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 19,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.618Z"),
         "id": 190
     }, {
@@ -3330,7 +3330,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 21,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.625Z"),
         "id": 191
     }, {
@@ -3345,7 +3345,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 23,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.632Z"),
         "id": 192
     }, {
@@ -3360,7 +3360,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 5,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.638Z"),
         "id": 193
     }, {
@@ -3375,7 +3375,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 18,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.645Z"),
         "id": 194
     }, {
@@ -3390,7 +3390,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 12,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.652Z"),
         "id": 195
     }, {
@@ -3405,7 +3405,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 37,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.657Z"),
         "id": 196
     }, {
@@ -3420,7 +3420,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 29,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.663Z"),
         "id": 197
     }, {
@@ -3435,7 +3435,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 18,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.669Z"),
         "id": 198
     }, {
@@ -3450,7 +3450,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 23,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.675Z"),
         "id": 199
     }, {
@@ -3465,7 +3465,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 38,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.680Z"),
         "id": 200
     }, {
@@ -3480,7 +3480,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 14,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.686Z"),
         "id": 201
     }, {
@@ -3495,7 +3495,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 28,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.693Z"),
         "id": 202
     }, {
@@ -3510,7 +3510,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 23,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.700Z"),
         "id": 203
     }, {
@@ -3525,7 +3525,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 18,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.706Z"),
         "id": 204
     }, {
@@ -3540,7 +3540,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 17,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.712Z"),
         "id": 205
     }, {
@@ -3555,7 +3555,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 24,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.719Z"),
         "id": 206
     }, {
@@ -3570,7 +3570,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 33,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.725Z"),
         "id": 207
     }, {
@@ -3585,7 +3585,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 28,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.731Z"),
         "id": 208
     }, {
@@ -3600,7 +3600,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 8,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.737Z"),
         "id": 209
     }, {
@@ -3615,7 +3615,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 27,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.744Z"),
         "id": 210
     }, {
@@ -3630,7 +3630,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 26,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.751Z"),
         "id": 211
     }, {
@@ -3645,7 +3645,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 8,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.757Z"),
         "id": 212
     }, {
@@ -3660,7 +3660,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 36,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.762Z"),
         "id": 213
     }, {
@@ -3675,7 +3675,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 3,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.768Z"),
         "id": 214
     }, {
@@ -3690,7 +3690,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 40,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.774Z"),
         "id": 215
     }, {
@@ -3705,7 +3705,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 9,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.780Z"),
         "id": 216
     }, {
@@ -3720,7 +3720,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 9,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.786Z"),
         "id": 217
     }, {
@@ -3735,7 +3735,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 33,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.792Z"),
         "id": 218
     }, {
@@ -3750,7 +3750,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 11,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.799Z"),
         "id": 219
     }, {
@@ -3765,7 +3765,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 23,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.806Z"),
         "id": 220
     }, {
@@ -3780,7 +3780,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 16,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.812Z"),
         "id": 221
     }, {
@@ -3795,7 +3795,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 15,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.819Z"),
         "id": 222
     }, {
@@ -3810,7 +3810,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 10,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.826Z"),
         "id": 223
     }, {
@@ -3825,7 +3825,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 24,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.833Z"),
         "id": 224
     }, {
@@ -3840,7 +3840,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 8,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.841Z"),
         "id": 225
     }, {
@@ -3855,7 +3855,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 28,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.848Z"),
         "id": 226
     }, {
@@ -3870,7 +3870,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 32,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.854Z"),
         "id": 227
     }, {
@@ -3885,7 +3885,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 35,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.859Z"),
         "id": 228
     }, {
@@ -3900,7 +3900,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 30,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.866Z"),
         "id": 229
     }, {
@@ -3915,7 +3915,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 34,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.873Z"),
         "id": 230
     }, {
@@ -3930,7 +3930,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 40,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.879Z"),
         "id": 231
     }, {
@@ -3945,7 +3945,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 39,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.887Z"),
         "id": 232
     }, {
@@ -3960,7 +3960,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 24,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.893Z"),
         "id": 233
     }, {
@@ -3975,7 +3975,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 18,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.899Z"),
         "id": 234
     }, {
@@ -3990,7 +3990,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 15,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.905Z"),
         "id": 235
     }, {
@@ -4005,7 +4005,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 7,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.912Z"),
         "id": 236
     }, {
@@ -4020,7 +4020,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 28,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.920Z"),
         "id": 237
     }, {
@@ -4035,7 +4035,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 36,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.927Z"),
         "id": 238
     }, {
@@ -4050,7 +4050,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 21,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.933Z"),
         "id": 239
     }, {
@@ -4065,7 +4065,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 19,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.940Z"),
         "id": 240
     }, {
@@ -4080,7 +4080,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 21,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.947Z"),
         "id": 241
     }, {
@@ -4095,7 +4095,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 23,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.951Z"),
         "id": 242
     }, {
@@ -4110,7 +4110,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 5,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.959Z"),
         "id": 243
     }, {
@@ -4125,7 +4125,7 @@ export const ExampleAccount: BackupFile = {
         "checked": false,
         "powerFactorCharge": 18,
         "meterNumber": "12348",
-       
+
         "dbDate": new Date("2022-08-22T18:22:28.965Z"),
         "id": 244
     }, {
@@ -10755,7 +10755,18 @@ export const ExampleAccount: BackupFile = {
             "productionUnits": "units",
             "regressionModelYear": 2018,
             "regressionConstant": 1852,
-            "groupHasError": false,
+            "groupErrors": {
+                "hasErrors": false,
+                "missingProductionVariables": false,
+                "missingRegressionConstant": false,
+                "missingRegressionModelYear": false,
+                "missingRegressionModelSelection": false,
+                "missingRegressionPredictorCoef": false,
+                "invalidAverageBaseload": false,
+                "invalidMonthlyBaseload": false,
+                "noProductionVariables": false,
+                "missingGroupMeters": false
+            },
             "specifiedMonthlyPercentBaseload": false,
             "averagePercentBaseload": 0,
             "monthlyPercentBaseload": [{
@@ -10833,7 +10844,18 @@ export const ExampleAccount: BackupFile = {
             "productionUnits": "units",
             "regressionModelYear": 2018,
             "regressionConstant": 3.32,
-            "groupHasError": false,
+            "groupErrors": {
+                "hasErrors": false,
+                "missingProductionVariables": false,
+                "missingRegressionConstant": false,
+                "missingRegressionModelYear": false,
+                "missingRegressionModelSelection": false,
+                "missingRegressionPredictorCoef": false,
+                "invalidAverageBaseload": false,
+                "invalidMonthlyBaseload": false,
+                "noProductionVariables": false,
+                "missingGroupMeters": false
+            },
             "specifiedMonthlyPercentBaseload": false,
             "averagePercentBaseload": 0,
             "monthlyPercentBaseload": [{
@@ -10909,7 +10931,18 @@ export const ExampleAccount: BackupFile = {
             "productionUnits": "units",
             "regressionModelYear": 2018,
             "regressionConstant": 199.03,
-            "groupHasError": false,
+            "groupErrors": {
+                "hasErrors": false,
+                "missingProductionVariables": false,
+                "missingRegressionConstant": false,
+                "missingRegressionModelYear": false,
+                "missingRegressionModelSelection": false,
+                "missingRegressionPredictorCoef": false,
+                "invalidAverageBaseload": false,
+                "invalidMonthlyBaseload": false,
+                "noProductionVariables": false,
+                "missingGroupMeters": false
+            },
             "specifiedMonthlyPercentBaseload": false,
             "averagePercentBaseload": 0,
             "monthlyPercentBaseload": [{
@@ -10987,7 +11020,18 @@ export const ExampleAccount: BackupFile = {
                 "productionInAnalysis": true
             }],
             "productionUnits": "units",
-            "groupHasError": false,
+            "groupErrors": {
+                "hasErrors": false,
+                "missingProductionVariables": false,
+                "missingRegressionConstant": false,
+                "missingRegressionModelYear": false,
+                "missingRegressionModelSelection": false,
+                "missingRegressionPredictorCoef": false,
+                "invalidAverageBaseload": false,
+                "invalidMonthlyBaseload": false,
+                "noProductionVariables": false,
+                "missingGroupMeters": false
+            },
             "specifiedMonthlyPercentBaseload": false,
             "averagePercentBaseload": 0,
             "monthlyPercentBaseload": [{
@@ -11057,7 +11101,18 @@ export const ExampleAccount: BackupFile = {
             "productionUnits": "units",
             "regressionModelYear": 2018,
             "regressionConstant": 62.3,
-            "groupHasError": false,
+            "groupErrors": {
+                "hasErrors": false,
+                "missingProductionVariables": false,
+                "missingRegressionConstant": false,
+                "missingRegressionModelYear": false,
+                "missingRegressionModelSelection": false,
+                "missingRegressionPredictorCoef": false,
+                "invalidAverageBaseload": false,
+                "invalidMonthlyBaseload": false,
+                "noProductionVariables": false,
+                "missingGroupMeters": false
+            },
             "specifiedMonthlyPercentBaseload": false,
             "averagePercentBaseload": 0,
             "monthlyPercentBaseload": [{
@@ -11135,7 +11190,18 @@ export const ExampleAccount: BackupFile = {
                 "productionInAnalysis": true
             }],
             "productionUnits": "units",
-            "groupHasError": false,
+            "groupErrors": {
+                "hasErrors": false,
+                "missingProductionVariables": false,
+                "missingRegressionConstant": false,
+                "missingRegressionModelYear": false,
+                "missingRegressionModelSelection": false,
+                "missingRegressionPredictorCoef": false,
+                "invalidAverageBaseload": false,
+                "invalidMonthlyBaseload": false,
+                "noProductionVariables": false,
+                "missingGroupMeters": false
+            },
             "specifiedMonthlyPercentBaseload": false,
             "averagePercentBaseload": 0,
             "monthlyPercentBaseload": [{
@@ -11204,7 +11270,18 @@ export const ExampleAccount: BackupFile = {
                 "productionInAnalysis": true
             }],
             "productionUnits": "units",
-            "groupHasError": false,
+            "groupErrors": {
+                "hasErrors": false,
+                "missingProductionVariables": false,
+                "missingRegressionConstant": false,
+                "missingRegressionModelYear": false,
+                "missingRegressionModelSelection": false,
+                "missingRegressionPredictorCoef": false,
+                "invalidAverageBaseload": false,
+                "invalidMonthlyBaseload": false,
+                "noProductionVariables": false,
+                "missingGroupMeters": false
+            },
             "specifiedMonthlyPercentBaseload": false,
             "averagePercentBaseload": 70,
             "monthlyPercentBaseload": [{
@@ -11283,7 +11360,18 @@ export const ExampleAccount: BackupFile = {
                 "regressionCoefficient": 0.06894796742158746
             }],
             "productionUnits": "units",
-            "groupHasError": false,
+            "groupErrors": {
+                "hasErrors": false,
+                "missingProductionVariables": false,
+                "missingRegressionConstant": false,
+                "missingRegressionModelYear": false,
+                "missingRegressionModelSelection": false,
+                "missingRegressionPredictorCoef": false,
+                "invalidAverageBaseload": false,
+                "invalidMonthlyBaseload": false,
+                "noProductionVariables": false,
+                "missingGroupMeters": false
+            },
             "specifiedMonthlyPercentBaseload": false,
             "monthlyPercentBaseload": [{
                 "percent": 0,
@@ -11680,7 +11768,18 @@ export const ExampleAccount: BackupFile = {
                 "regressionCoefficient": 0
             }],
             "productionUnits": "units",
-            "groupHasError": false,
+            "groupErrors": {
+                "hasErrors": false,
+                "missingProductionVariables": false,
+                "missingRegressionConstant": false,
+                "missingRegressionModelYear": false,
+                "missingRegressionModelSelection": false,
+                "missingRegressionPredictorCoef": false,
+                "invalidAverageBaseload": false,
+                "invalidMonthlyBaseload": false,
+                "noProductionVariables": false,
+                "missingGroupMeters": false
+            },
             "specifiedMonthlyPercentBaseload": false,
             "monthlyPercentBaseload": [{
                 "percent": 0,
@@ -11852,17 +11951,17 @@ export const ExampleAccount: BackupFile = {
             "name": "Product 1",
             "id": "5d8dnn98y",
             "importWizardName": "Product 1",
-            "amount": 38908, 
-            "production": true, 
+            "amount": 38908,
+            "production": true,
             "productionInAnalysis": true
         }, {
             "name": "Product 2",
             "id": "uup46zw3w",
             "importWizardName": "Product 2",
-            "amount": 1274, 
-            "production": true, 
+            "amount": 1274,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:31.930Z"),
         "id": 1
     }, {
@@ -11884,17 +11983,17 @@ export const ExampleAccount: BackupFile = {
             "name": "Product 1",
             "id": "5d8dnn98y",
             "importWizardName": "Product 1",
-            "amount": 39393, 
-            "production": true, 
+            "amount": 39393,
+            "production": true,
             "productionInAnalysis": true
         }, {
             "name": "Product 2",
             "id": "uup46zw3w",
             "importWizardName": "Product 2",
-            "amount": 1394, 
-            "production": true, 
+            "amount": 1394,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:31.937Z"),
         "id": 2
     }, {
@@ -11916,17 +12015,17 @@ export const ExampleAccount: BackupFile = {
             "name": "Product 1",
             "id": "5d8dnn98y",
             "importWizardName": "Product 1",
-            "amount": 39575, 
-            "production": true, 
+            "amount": 39575,
+            "production": true,
             "productionInAnalysis": true
         }, {
             "name": "Product 2",
             "id": "uup46zw3w",
             "importWizardName": "Product 2",
-            "amount": 1125, 
-            "production": true, 
+            "amount": 1125,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:31.943Z"),
         "id": 3
     }, {
@@ -11948,17 +12047,17 @@ export const ExampleAccount: BackupFile = {
             "name": "Product 1",
             "id": "5d8dnn98y",
             "importWizardName": "Product 1",
-            "amount": 41394, 
-            "production": true, 
+            "amount": 41394,
+            "production": true,
             "productionInAnalysis": true
         }, {
             "name": "Product 2",
             "id": "uup46zw3w",
             "importWizardName": "Product 2",
-            "amount": 1164, 
-            "production": true, 
+            "amount": 1164,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:31.949Z"),
         "id": 4
     }, {
@@ -11980,17 +12079,17 @@ export const ExampleAccount: BackupFile = {
             "name": "Product 1",
             "id": "5d8dnn98y",
             "importWizardName": "Product 1",
-            "amount": 38813, 
-            "production": true, 
+            "amount": 38813,
+            "production": true,
             "productionInAnalysis": true
         }, {
             "name": "Product 2",
             "id": "uup46zw3w",
             "importWizardName": "Product 2",
-            "amount": 1287, 
-            "production": true, 
+            "amount": 1287,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:31.955Z"),
         "id": 5
     }, {
@@ -12012,17 +12111,17 @@ export const ExampleAccount: BackupFile = {
             "name": "Product 1",
             "id": "5d8dnn98y",
             "importWizardName": "Product 1",
-            "amount": 35627, 
-            "production": true, 
+            "amount": 35627,
+            "production": true,
             "productionInAnalysis": true
         }, {
             "name": "Product 2",
             "id": "uup46zw3w",
             "importWizardName": "Product 2",
-            "amount": 1161, 
-            "production": true, 
+            "amount": 1161,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:31.962Z"),
         "id": 6
     }, {
@@ -12044,17 +12143,17 @@ export const ExampleAccount: BackupFile = {
             "name": "Product 1",
             "id": "5d8dnn98y",
             "importWizardName": "Product 1",
-            "amount": 34319, 
-            "production": true, 
+            "amount": 34319,
+            "production": true,
             "productionInAnalysis": true
         }, {
             "name": "Product 2",
             "id": "uup46zw3w",
             "importWizardName": "Product 2",
-            "amount": 991, 
-            "production": true, 
+            "amount": 991,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:31.968Z"),
         "id": 7
     }, {
@@ -12076,17 +12175,17 @@ export const ExampleAccount: BackupFile = {
             "name": "Product 1",
             "id": "5d8dnn98y",
             "importWizardName": "Product 1",
-            "amount": 33810, 
-            "production": true, 
+            "amount": 33810,
+            "production": true,
             "productionInAnalysis": true
         }, {
             "name": "Product 2",
             "id": "uup46zw3w",
             "importWizardName": "Product 2",
-            "amount": 1078, 
-            "production": true, 
+            "amount": 1078,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:31.975Z"),
         "id": 8
     }, {
@@ -12108,17 +12207,17 @@ export const ExampleAccount: BackupFile = {
             "name": "Product 1",
             "id": "5d8dnn98y",
             "importWizardName": "Product 1",
-            "amount": 36148, 
-            "production": true, 
+            "amount": 36148,
+            "production": true,
             "productionInAnalysis": true
         }, {
             "name": "Product 2",
             "id": "uup46zw3w",
             "importWizardName": "Product 2",
-            "amount": 1136, 
-            "production": true, 
+            "amount": 1136,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:31.981Z"),
         "id": 9
     }, {
@@ -12140,17 +12239,17 @@ export const ExampleAccount: BackupFile = {
             "name": "Product 1",
             "id": "5d8dnn98y",
             "importWizardName": "Product 1",
-            "amount": 29495, 
-            "production": true, 
+            "amount": 29495,
+            "production": true,
             "productionInAnalysis": true
         }, {
             "name": "Product 2",
             "id": "uup46zw3w",
             "importWizardName": "Product 2",
-            "amount": 972, 
-            "production": true, 
+            "amount": 972,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:31.988Z"),
         "id": 10
     }, {
@@ -12172,17 +12271,17 @@ export const ExampleAccount: BackupFile = {
             "name": "Product 1",
             "id": "5d8dnn98y",
             "importWizardName": "Product 1",
-            "amount": 36162, 
-            "production": true, 
+            "amount": 36162,
+            "production": true,
             "productionInAnalysis": true
         }, {
             "name": "Product 2",
             "id": "uup46zw3w",
             "importWizardName": "Product 2",
-            "amount": 1215, 
-            "production": true, 
+            "amount": 1215,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:31.994Z"),
         "id": 11
     }, {
@@ -12204,17 +12303,17 @@ export const ExampleAccount: BackupFile = {
             "name": "Product 1",
             "id": "5d8dnn98y",
             "importWizardName": "Product 1",
-            "amount": 30363, 
-            "production": true, 
+            "amount": 30363,
+            "production": true,
             "productionInAnalysis": true
         }, {
             "name": "Product 2",
             "id": "uup46zw3w",
             "importWizardName": "Product 2",
-            "amount": 1005, 
-            "production": true, 
+            "amount": 1005,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.000Z"),
         "id": 12
     }, {
@@ -12236,17 +12335,17 @@ export const ExampleAccount: BackupFile = {
             "name": "Product 1",
             "id": "5d8dnn98y",
             "importWizardName": "Product 1",
-            "amount": 27991, 
-            "production": true, 
+            "amount": 27991,
+            "production": true,
             "productionInAnalysis": true
         }, {
             "name": "Product 2",
             "id": "uup46zw3w",
             "importWizardName": "Product 2",
-            "amount": 1087, 
-            "production": true, 
+            "amount": 1087,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.007Z"),
         "id": 13
     }, {
@@ -12268,17 +12367,17 @@ export const ExampleAccount: BackupFile = {
             "name": "Product 1",
             "id": "5d8dnn98y",
             "importWizardName": "Product 1",
-            "amount": 36602, 
-            "production": true, 
+            "amount": 36602,
+            "production": true,
             "productionInAnalysis": true
         }, {
             "name": "Product 2",
             "id": "uup46zw3w",
             "importWizardName": "Product 2",
-            "amount": 1175, 
-            "production": true, 
+            "amount": 1175,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.015Z"),
         "id": 14
     }, {
@@ -12300,17 +12399,17 @@ export const ExampleAccount: BackupFile = {
             "name": "Product 1",
             "id": "5d8dnn98y",
             "importWizardName": "Product 1",
-            "amount": 38346, 
-            "production": true, 
+            "amount": 38346,
+            "production": true,
             "productionInAnalysis": true
         }, {
             "name": "Product 2",
             "id": "uup46zw3w",
             "importWizardName": "Product 2",
-            "amount": 1129, 
-            "production": true, 
+            "amount": 1129,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.021Z"),
         "id": 15
     }, {
@@ -12332,17 +12431,17 @@ export const ExampleAccount: BackupFile = {
             "name": "Product 1",
             "id": "5d8dnn98y",
             "importWizardName": "Product 1",
-            "amount": 40297, 
-            "production": true, 
+            "amount": 40297,
+            "production": true,
             "productionInAnalysis": true
         }, {
             "name": "Product 2",
             "id": "uup46zw3w",
             "importWizardName": "Product 2",
-            "amount": 1121, 
-            "production": true, 
+            "amount": 1121,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.028Z"),
         "id": 16
     }, {
@@ -12364,17 +12463,17 @@ export const ExampleAccount: BackupFile = {
             "name": "Product 1",
             "id": "5d8dnn98y",
             "importWizardName": "Product 1",
-            "amount": 34612, 
-            "production": true, 
+            "amount": 34612,
+            "production": true,
             "productionInAnalysis": true
         }, {
             "name": "Product 2",
             "id": "uup46zw3w",
             "importWizardName": "Product 2",
-            "amount": 1212, 
-            "production": true, 
+            "amount": 1212,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.034Z"),
         "id": 17
     }, {
@@ -12396,17 +12495,17 @@ export const ExampleAccount: BackupFile = {
             "name": "Product 1",
             "id": "5d8dnn98y",
             "importWizardName": "Product 1",
-            "amount": 32862, 
-            "production": true, 
+            "amount": 32862,
+            "production": true,
             "productionInAnalysis": true
         }, {
             "name": "Product 2",
             "id": "uup46zw3w",
             "importWizardName": "Product 2",
-            "amount": 1264, 
-            "production": true, 
+            "amount": 1264,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.040Z"),
         "id": 18
     }, {
@@ -12428,17 +12527,17 @@ export const ExampleAccount: BackupFile = {
             "name": "Product 1",
             "id": "5d8dnn98y",
             "importWizardName": "Product 1",
-            "amount": 30658, 
-            "production": true, 
+            "amount": 30658,
+            "production": true,
             "productionInAnalysis": true
         }, {
             "name": "Product 2",
             "id": "uup46zw3w",
             "importWizardName": "Product 2",
-            "amount": 1178, 
-            "production": true, 
+            "amount": 1178,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.046Z"),
         "id": 19
     }, {
@@ -12460,17 +12559,17 @@ export const ExampleAccount: BackupFile = {
             "name": "Product 1",
             "id": "5d8dnn98y",
             "importWizardName": "Product 1",
-            "amount": 32011, 
-            "production": true, 
+            "amount": 32011,
+            "production": true,
             "productionInAnalysis": true
         }, {
             "name": "Product 2",
             "id": "uup46zw3w",
             "importWizardName": "Product 2",
-            "amount": 1176, 
-            "production": true, 
+            "amount": 1176,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.052Z"),
         "id": 20
     }, {
@@ -12492,17 +12591,17 @@ export const ExampleAccount: BackupFile = {
             "name": "Product 1",
             "id": "5d8dnn98y",
             "importWizardName": "Product 1",
-            "amount": 32835, 
-            "production": true, 
+            "amount": 32835,
+            "production": true,
             "productionInAnalysis": true
         }, {
             "name": "Product 2",
             "id": "uup46zw3w",
             "importWizardName": "Product 2",
-            "amount": 1101, 
-            "production": true, 
+            "amount": 1101,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.058Z"),
         "id": 21
     }, {
@@ -12524,17 +12623,17 @@ export const ExampleAccount: BackupFile = {
             "name": "Product 1",
             "id": "5d8dnn98y",
             "importWizardName": "Product 1",
-            "amount": 30601, 
-            "production": true, 
+            "amount": 30601,
+            "production": true,
             "productionInAnalysis": true
         }, {
             "name": "Product 2",
             "id": "uup46zw3w",
             "importWizardName": "Product 2",
-            "amount": 1078, 
-            "production": true, 
+            "amount": 1078,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.065Z"),
         "id": 22
     }, {
@@ -12556,17 +12655,17 @@ export const ExampleAccount: BackupFile = {
             "name": "Product 1",
             "id": "5d8dnn98y",
             "importWizardName": "Product 1",
-            "amount": 36526, 
-            "production": true, 
+            "amount": 36526,
+            "production": true,
             "productionInAnalysis": true
         }, {
             "name": "Product 2",
             "id": "uup46zw3w",
             "importWizardName": "Product 2",
-            "amount": 1125, 
-            "production": true, 
+            "amount": 1125,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.072Z"),
         "id": 23
     }, {
@@ -12588,17 +12687,17 @@ export const ExampleAccount: BackupFile = {
             "name": "Product 1",
             "id": "5d8dnn98y",
             "importWizardName": "Product 1",
-            "amount": 30157, 
-            "production": true, 
+            "amount": 30157,
+            "production": true,
             "productionInAnalysis": true
         }, {
             "name": "Product 2",
             "id": "uup46zw3w",
             "importWizardName": "Product 2",
-            "amount": 1003, 
-            "production": true, 
+            "amount": 1003,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.081Z"),
         "id": 24
     }, {
@@ -12620,17 +12719,17 @@ export const ExampleAccount: BackupFile = {
             "name": "Product 1",
             "id": "5d8dnn98y",
             "importWizardName": "Product 1",
-            "amount": 35243, 
-            "production": true, 
+            "amount": 35243,
+            "production": true,
             "productionInAnalysis": true
         }, {
             "name": "Product 2",
             "id": "uup46zw3w",
             "importWizardName": "Product 2",
-            "amount": 1000, 
-            "production": true, 
+            "amount": 1000,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.088Z"),
         "id": 25
     }, {
@@ -12652,17 +12751,17 @@ export const ExampleAccount: BackupFile = {
             "name": "Product 1",
             "id": "5d8dnn98y",
             "importWizardName": "Product 1",
-            "amount": 35141, 
-            "production": true, 
+            "amount": 35141,
+            "production": true,
             "productionInAnalysis": true
         }, {
             "name": "Product 2",
             "id": "uup46zw3w",
             "importWizardName": "Product 2",
-            "amount": 1501, 
-            "production": true, 
+            "amount": 1501,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.094Z"),
         "id": 26
     }, {
@@ -12684,17 +12783,17 @@ export const ExampleAccount: BackupFile = {
             "name": "Product 1",
             "id": "5d8dnn98y",
             "importWizardName": "Product 1",
-            "amount": 35718, 
-            "production": true, 
+            "amount": 35718,
+            "production": true,
             "productionInAnalysis": true
         }, {
             "name": "Product 2",
             "id": "uup46zw3w",
             "importWizardName": "Product 2",
-            "amount": 1351, 
-            "production": true, 
+            "amount": 1351,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.100Z"),
         "id": 27
     }, {
@@ -12716,17 +12815,17 @@ export const ExampleAccount: BackupFile = {
             "name": "Product 1",
             "id": "5d8dnn98y",
             "importWizardName": "Product 1",
-            "amount": 37551, 
-            "production": true, 
+            "amount": 37551,
+            "production": true,
             "productionInAnalysis": true
         }, {
             "name": "Product 2",
             "id": "uup46zw3w",
             "importWizardName": "Product 2",
-            "amount": 1434, 
-            "production": true, 
+            "amount": 1434,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.107Z"),
         "id": 28
     }, {
@@ -12748,17 +12847,17 @@ export const ExampleAccount: BackupFile = {
             "name": "Product 1",
             "id": "5d8dnn98y",
             "importWizardName": "Product 1",
-            "amount": 32899, 
-            "production": true, 
+            "amount": 32899,
+            "production": true,
             "productionInAnalysis": true
         }, {
             "name": "Product 2",
             "id": "uup46zw3w",
             "importWizardName": "Product 2",
-            "amount": 1538, 
-            "production": true, 
+            "amount": 1538,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.113Z"),
         "id": 29
     }, {
@@ -12780,17 +12879,17 @@ export const ExampleAccount: BackupFile = {
             "name": "Product 1",
             "id": "5d8dnn98y",
             "importWizardName": "Product 1",
-            "amount": 30920, 
-            "production": true, 
+            "amount": 30920,
+            "production": true,
             "productionInAnalysis": true
         }, {
             "name": "Product 2",
             "id": "uup46zw3w",
             "importWizardName": "Product 2",
-            "amount": 1228, 
-            "production": true, 
+            "amount": 1228,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.120Z"),
         "id": 30
     }, {
@@ -12812,17 +12911,17 @@ export const ExampleAccount: BackupFile = {
             "name": "Product 1",
             "id": "5d8dnn98y",
             "importWizardName": "Product 1",
-            "amount": 29729, 
-            "production": true, 
+            "amount": 29729,
+            "production": true,
             "productionInAnalysis": true
         }, {
             "name": "Product 2",
             "id": "uup46zw3w",
             "importWizardName": "Product 2",
-            "amount": 1360, 
-            "production": true, 
+            "amount": 1360,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.125Z"),
         "id": 31
     }, {
@@ -12844,17 +12943,17 @@ export const ExampleAccount: BackupFile = {
             "name": "Product 1",
             "id": "5d8dnn98y",
             "importWizardName": "Product 1",
-            "amount": 31357, 
-            "production": true, 
+            "amount": 31357,
+            "production": true,
             "productionInAnalysis": true
         }, {
             "name": "Product 2",
             "id": "uup46zw3w",
             "importWizardName": "Product 2",
-            "amount": 1508, 
-            "production": true, 
+            "amount": 1508,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.132Z"),
         "id": 32
     }, {
@@ -12876,17 +12975,17 @@ export const ExampleAccount: BackupFile = {
             "name": "Product 1",
             "id": "5d8dnn98y",
             "importWizardName": "Product 1",
-            "amount": 30893, 
-            "production": true, 
+            "amount": 30893,
+            "production": true,
             "productionInAnalysis": true
         }, {
             "name": "Product 2",
             "id": "uup46zw3w",
             "importWizardName": "Product 2",
-            "amount": 1405, 
-            "production": true, 
+            "amount": 1405,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.139Z"),
         "id": 33
     }, {
@@ -12908,17 +13007,17 @@ export const ExampleAccount: BackupFile = {
             "name": "Product 1",
             "id": "5d8dnn98y",
             "importWizardName": "Product 1",
-            "amount": 29379, 
-            "production": true, 
+            "amount": 29379,
+            "production": true,
             "productionInAnalysis": true
         }, {
             "name": "Product 2",
             "id": "uup46zw3w",
             "importWizardName": "Product 2",
-            "amount": 1139, 
-            "production": true, 
+            "amount": 1139,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.144Z"),
         "id": 34
     }, {
@@ -12940,17 +13039,17 @@ export const ExampleAccount: BackupFile = {
             "name": "Product 1",
             "id": "5d8dnn98y",
             "importWizardName": "Product 1",
-            "amount": 34036, 
-            "production": true, 
+            "amount": 34036,
+            "production": true,
             "productionInAnalysis": true
         }, {
             "name": "Product 2",
             "id": "uup46zw3w",
             "importWizardName": "Product 2",
-            "amount": 1322, 
-            "production": true, 
+            "amount": 1322,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.151Z"),
         "id": 35
     }, {
@@ -12972,17 +13071,17 @@ export const ExampleAccount: BackupFile = {
             "name": "Product 1",
             "id": "5d8dnn98y",
             "importWizardName": "Product 1",
-            "amount": 28664, 
-            "production": true, 
+            "amount": 28664,
+            "production": true,
             "productionInAnalysis": true
         }, {
             "name": "Product 2",
             "id": "uup46zw3w",
             "importWizardName": "Product 2",
-            "amount": 1057, 
-            "production": true, 
+            "amount": 1057,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.158Z"),
         "id": 36
     }, {
@@ -13004,17 +13103,17 @@ export const ExampleAccount: BackupFile = {
             "name": "Product 1",
             "id": "5d8dnn98y",
             "importWizardName": "Product 1",
-            "amount": 33836, 
-            "production": true, 
+            "amount": 33836,
+            "production": true,
             "productionInAnalysis": true
         }, {
             "name": "Product 2",
             "id": "uup46zw3w",
             "importWizardName": "Product 2",
-            "amount": 1239, 
-            "production": true, 
+            "amount": 1239,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.165Z"),
         "id": 37
     }, {
@@ -13036,17 +13135,17 @@ export const ExampleAccount: BackupFile = {
             "name": "Product 1",
             "id": "5d8dnn98y",
             "importWizardName": "Product 1",
-            "amount": 35070, 
-            "production": true, 
+            "amount": 35070,
+            "production": true,
             "productionInAnalysis": true
         }, {
             "name": "Product 2",
             "id": "uup46zw3w",
             "importWizardName": "Product 2",
-            "amount": 1411, 
-            "production": true, 
+            "amount": 1411,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.175Z"),
         "id": 38
     }, {
@@ -13068,17 +13167,17 @@ export const ExampleAccount: BackupFile = {
             "name": "Product 1",
             "id": "5d8dnn98y",
             "importWizardName": "Product 1",
-            "amount": 34301, 
-            "production": true, 
+            "amount": 34301,
+            "production": true,
             "productionInAnalysis": true
         }, {
             "name": "Product 2",
             "id": "uup46zw3w",
             "importWizardName": "Product 2",
-            "amount": 1191, 
-            "production": true, 
+            "amount": 1191,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.183Z"),
         "id": 39
     }, {
@@ -13100,17 +13199,17 @@ export const ExampleAccount: BackupFile = {
             "name": "Product 1",
             "id": "5d8dnn98y",
             "importWizardName": "Product 1",
-            "amount": 39656, 
-            "production": true, 
+            "amount": 39656,
+            "production": true,
             "productionInAnalysis": true
         }, {
             "name": "Product 2",
             "id": "uup46zw3w",
             "importWizardName": "Product 2",
-            "amount": 1519, 
-            "production": true, 
+            "amount": 1519,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.189Z"),
         "id": 40
     }, {
@@ -13132,17 +13231,17 @@ export const ExampleAccount: BackupFile = {
             "name": "Product 1",
             "id": "5d8dnn98y",
             "importWizardName": "Product 1",
-            "amount": 34406, 
-            "production": true, 
+            "amount": 34406,
+            "production": true,
             "productionInAnalysis": true
         }, {
             "name": "Product 2",
             "id": "uup46zw3w",
             "importWizardName": "Product 2",
-            "amount": 1430, 
-            "production": true, 
+            "amount": 1430,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.197Z"),
         "id": 41
     }, {
@@ -13164,17 +13263,17 @@ export const ExampleAccount: BackupFile = {
             "name": "Product 1",
             "id": "5d8dnn98y",
             "importWizardName": "Product 1",
-            "amount": 31808, 
-            "production": true, 
+            "amount": 31808,
+            "production": true,
             "productionInAnalysis": true
         }, {
             "name": "Product 2",
             "id": "uup46zw3w",
             "importWizardName": "Product 2",
-            "amount": 1296, 
-            "production": true, 
+            "amount": 1296,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.204Z"),
         "id": 42
     }, {
@@ -13196,17 +13295,17 @@ export const ExampleAccount: BackupFile = {
             "name": "Product 1",
             "id": "5d8dnn98y",
             "importWizardName": "Product 1",
-            "amount": 36037, 
-            "production": true, 
+            "amount": 36037,
+            "production": true,
             "productionInAnalysis": true
         }, {
             "name": "Product 2",
             "id": "uup46zw3w",
             "importWizardName": "Product 2",
-            "amount": 1591, 
-            "production": true, 
+            "amount": 1591,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.210Z"),
         "id": 43
     }, {
@@ -13228,17 +13327,17 @@ export const ExampleAccount: BackupFile = {
             "name": "Product 1",
             "id": "5d8dnn98y",
             "importWizardName": "Product 1",
-            "amount": 32448, 
-            "production": true, 
+            "amount": 32448,
+            "production": true,
             "productionInAnalysis": true
         }, {
             "name": "Product 2",
             "id": "uup46zw3w",
             "importWizardName": "Product 2",
-            "amount": 1365, 
-            "production": true, 
+            "amount": 1365,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.217Z"),
         "id": 44
     }, {
@@ -13260,17 +13359,17 @@ export const ExampleAccount: BackupFile = {
             "name": "Product 1",
             "id": "5d8dnn98y",
             "importWizardName": "Product 1",
-            "amount": 31835, 
-            "production": true, 
+            "amount": 31835,
+            "production": true,
             "productionInAnalysis": true
         }, {
             "name": "Product 2",
             "id": "uup46zw3w",
             "importWizardName": "Product 2",
-            "amount": 1491, 
-            "production": true, 
+            "amount": 1491,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.223Z"),
         "id": 45
     }, {
@@ -13292,17 +13391,17 @@ export const ExampleAccount: BackupFile = {
             "name": "Product 1",
             "id": "5d8dnn98y",
             "importWizardName": "Product 1",
-            "amount": 29718, 
-            "production": true, 
+            "amount": 29718,
+            "production": true,
             "productionInAnalysis": true
         }, {
             "name": "Product 2",
             "id": "uup46zw3w",
             "importWizardName": "Product 2",
-            "amount": 1417, 
-            "production": true, 
+            "amount": 1417,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.230Z"),
         "id": 46
     }, {
@@ -13324,17 +13423,17 @@ export const ExampleAccount: BackupFile = {
             "name": "Product 1",
             "id": "5d8dnn98y",
             "importWizardName": "Product 1",
-            "amount": 30338, 
-            "production": true, 
+            "amount": 30338,
+            "production": true,
             "productionInAnalysis": true
         }, {
             "name": "Product 2",
             "id": "uup46zw3w",
             "importWizardName": "Product 2",
-            "amount": 1581, 
-            "production": true, 
+            "amount": 1581,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.237Z"),
         "id": 47
     }, {
@@ -13356,17 +13455,17 @@ export const ExampleAccount: BackupFile = {
             "name": "Product 1",
             "id": "5d8dnn98y",
             "importWizardName": "Product 1",
-            "amount": 29282, 
-            "production": true, 
+            "amount": 29282,
+            "production": true,
             "productionInAnalysis": true
         }, {
             "name": "Product 2",
             "id": "uup46zw3w",
             "importWizardName": "Product 2",
-            "amount": 1485, 
-            "production": true, 
+            "amount": 1485,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.243Z"),
         "id": 48
     }, {
@@ -13388,17 +13487,17 @@ export const ExampleAccount: BackupFile = {
             "name": "Product 1",
             "id": "5d8dnn98y",
             "importWizardName": "Product 1",
-            "amount": 37360, 
-            "production": true, 
+            "amount": 37360,
+            "production": true,
             "productionInAnalysis": true
         }, {
             "name": "Product 2",
             "id": "uup46zw3w",
             "importWizardName": "Product 2",
-            "amount": 1417, 
-            "production": true, 
+            "amount": 1417,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.248Z"),
         "id": 49
     }, {
@@ -13420,17 +13519,17 @@ export const ExampleAccount: BackupFile = {
             "name": "Product 1",
             "id": "5d8dnn98y",
             "importWizardName": "Product 1",
-            "amount": 1107677.49, 
-            "production": true, 
+            "amount": 1107677.49,
+            "production": true,
             "productionInAnalysis": true
         }, {
             "name": "Product 2",
             "id": "uup46zw3w",
             "importWizardName": "Product 2",
-            "amount": 1221, 
-            "production": true, 
+            "amount": 1221,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.255Z"),
         "id": 50
     }, {
@@ -13452,10 +13551,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "r6uvq2q70",
             "importWizardName": "Production",
-            "amount": 39247, 
-            "production": true, 
+            "amount": 39247,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.261Z"),
         "id": 51
     }, {
@@ -13477,10 +13576,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "r6uvq2q70",
             "importWizardName": "Production",
-            "amount": 48145, 
-            "production": true, 
+            "amount": 48145,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.268Z"),
         "id": 52
     }, {
@@ -13502,10 +13601,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "r6uvq2q70",
             "importWizardName": "Production",
-            "amount": 43914, 
-            "production": true, 
+            "amount": 43914,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.274Z"),
         "id": 53
     }, {
@@ -13527,10 +13626,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "r6uvq2q70",
             "importWizardName": "Production",
-            "amount": 49053, 
-            "production": true, 
+            "amount": 49053,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.280Z"),
         "id": 54
     }, {
@@ -13552,10 +13651,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "r6uvq2q70",
             "importWizardName": "Production",
-            "amount": 47562, 
-            "production": true, 
+            "amount": 47562,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.286Z"),
         "id": 55
     }, {
@@ -13577,10 +13676,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "r6uvq2q70",
             "importWizardName": "Production",
-            "amount": 40576, 
-            "production": true, 
+            "amount": 40576,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.292Z"),
         "id": 56
     }, {
@@ -13602,10 +13701,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "r6uvq2q70",
             "importWizardName": "Production",
-            "amount": 39755, 
-            "production": true, 
+            "amount": 39755,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.298Z"),
         "id": 57
     }, {
@@ -13627,10 +13726,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "r6uvq2q70",
             "importWizardName": "Production",
-            "amount": 37552, 
-            "production": true, 
+            "amount": 37552,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.304Z"),
         "id": 58
     }, {
@@ -13652,10 +13751,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "r6uvq2q70",
             "importWizardName": "Production",
-            "amount": 46192, 
-            "production": true, 
+            "amount": 46192,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.310Z"),
         "id": 59
     }, {
@@ -13677,10 +13776,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "r6uvq2q70",
             "importWizardName": "Production",
-            "amount": 35150, 
-            "production": true, 
+            "amount": 35150,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.316Z"),
         "id": 60
     }, {
@@ -13702,10 +13801,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "r6uvq2q70",
             "importWizardName": "Production",
-            "amount": 46471, 
-            "production": true, 
+            "amount": 46471,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.326Z"),
         "id": 61
     }, {
@@ -13727,10 +13826,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "r6uvq2q70",
             "importWizardName": "Production",
-            "amount": 42949, 
-            "production": true, 
+            "amount": 42949,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.332Z"),
         "id": 62
     }, {
@@ -13752,10 +13851,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "r6uvq2q70",
             "importWizardName": "Production",
-            "amount": 30956, 
-            "production": true, 
+            "amount": 30956,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.338Z"),
         "id": 63
     }, {
@@ -13777,10 +13876,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "r6uvq2q70",
             "importWizardName": "Production",
-            "amount": 42843, 
-            "production": true, 
+            "amount": 42843,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.345Z"),
         "id": 64
     }, {
@@ -13802,10 +13901,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "r6uvq2q70",
             "importWizardName": "Production",
-            "amount": 37213, 
-            "production": true, 
+            "amount": 37213,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.352Z"),
         "id": 65
     }, {
@@ -13827,10 +13926,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "r6uvq2q70",
             "importWizardName": "Production",
-            "amount": 37146, 
-            "production": true, 
+            "amount": 37146,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.358Z"),
         "id": 66
     }, {
@@ -13852,10 +13951,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "r6uvq2q70",
             "importWizardName": "Production",
-            "amount": 48552, 
-            "production": true, 
+            "amount": 48552,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.364Z"),
         "id": 67
     }, {
@@ -13877,10 +13976,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "r6uvq2q70",
             "importWizardName": "Production",
-            "amount": 46238, 
-            "production": true, 
+            "amount": 46238,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.371Z"),
         "id": 68
     }, {
@@ -13902,10 +14001,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "r6uvq2q70",
             "importWizardName": "Production",
-            "amount": 44893, 
-            "production": true, 
+            "amount": 44893,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.376Z"),
         "id": 69
     }, {
@@ -13927,10 +14026,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "r6uvq2q70",
             "importWizardName": "Production",
-            "amount": 48654, 
-            "production": true, 
+            "amount": 48654,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.382Z"),
         "id": 70
     }, {
@@ -13952,10 +14051,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "r6uvq2q70",
             "importWizardName": "Production",
-            "amount": 39996, 
-            "production": true, 
+            "amount": 39996,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.389Z"),
         "id": 71
     }, {
@@ -13977,10 +14076,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "r6uvq2q70",
             "importWizardName": "Production",
-            "amount": 38938, 
-            "production": true, 
+            "amount": 38938,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.395Z"),
         "id": 72
     }, {
@@ -14002,10 +14101,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "r6uvq2q70",
             "importWizardName": "Production",
-            "amount": 54851, 
-            "production": true, 
+            "amount": 54851,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.402Z"),
         "id": 73
     }, {
@@ -14027,10 +14126,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "r6uvq2q70",
             "importWizardName": "Production",
-            "amount": 43061, 
-            "production": true, 
+            "amount": 43061,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.409Z"),
         "id": 74
     }, {
@@ -14052,10 +14151,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "r6uvq2q70",
             "importWizardName": "Production",
-            "amount": 30471, 
-            "production": true, 
+            "amount": 30471,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.415Z"),
         "id": 75
     }, {
@@ -14077,10 +14176,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "r6uvq2q70",
             "importWizardName": "Production",
-            "amount": 44895, 
-            "production": true, 
+            "amount": 44895,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.422Z"),
         "id": 76
     }, {
@@ -14102,10 +14201,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "r6uvq2q70",
             "importWizardName": "Production",
-            "amount": 44687, 
-            "production": true, 
+            "amount": 44687,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.429Z"),
         "id": 77
     }, {
@@ -14127,10 +14226,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "r6uvq2q70",
             "importWizardName": "Production",
-            "amount": 28306, 
-            "production": true, 
+            "amount": 28306,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.435Z"),
         "id": 78
     }, {
@@ -14152,10 +14251,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "r6uvq2q70",
             "importWizardName": "Production",
-            "amount": 0, 
-            "production": true, 
+            "amount": 0,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.440Z"),
         "id": 79
     }, {
@@ -14177,10 +14276,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "r6uvq2q70",
             "importWizardName": "Production",
-            "amount": 12376, 
-            "production": true, 
+            "amount": 12376,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.447Z"),
         "id": 80
     }, {
@@ -14202,10 +14301,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "r6uvq2q70",
             "importWizardName": "Production",
-            "amount": 26493, 
-            "production": true, 
+            "amount": 26493,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.454Z"),
         "id": 81
     }, {
@@ -14227,10 +14326,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "r6uvq2q70",
             "importWizardName": "Production",
-            "amount": 24239, 
-            "production": true, 
+            "amount": 24239,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.460Z"),
         "id": 82
     }, {
@@ -14252,10 +14351,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "r6uvq2q70",
             "importWizardName": "Production",
-            "amount": 29235, 
-            "production": true, 
+            "amount": 29235,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.467Z"),
         "id": 83
     }, {
@@ -14277,10 +14376,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "r6uvq2q70",
             "importWizardName": "Production",
-            "amount": 27889, 
-            "production": true, 
+            "amount": 27889,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.473Z"),
         "id": 84
     }, {
@@ -14302,10 +14401,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "r6uvq2q70",
             "importWizardName": "Production",
-            "amount": 31813, 
-            "production": true, 
+            "amount": 31813,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.479Z"),
         "id": 85
     }, {
@@ -14327,10 +14426,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "r6uvq2q70",
             "importWizardName": "Production",
-            "amount": 26575, 
-            "production": true, 
+            "amount": 26575,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.485Z"),
         "id": 86
     }, {
@@ -14352,10 +14451,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "r6uvq2q70",
             "importWizardName": "Production",
-            "amount": 20712, 
-            "production": true, 
+            "amount": 20712,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.490Z"),
         "id": 87
     }, {
@@ -14377,10 +14476,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "r6uvq2q70",
             "importWizardName": "Production",
-            "amount": 25475, 
-            "production": true, 
+            "amount": 25475,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.497Z"),
         "id": 88
     }, {
@@ -14402,10 +14501,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "r6uvq2q70",
             "importWizardName": "Production",
-            "amount": 20275, 
-            "production": true, 
+            "amount": 20275,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.504Z"),
         "id": 89
     }, {
@@ -14427,10 +14526,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "r6uvq2q70",
             "importWizardName": "Production",
-            "amount": 25647, 
-            "production": true, 
+            "amount": 25647,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.512Z"),
         "id": 90
     }, {
@@ -14452,10 +14551,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "r6uvq2q70",
             "importWizardName": "Production",
-            "amount": 36449, 
-            "production": true, 
+            "amount": 36449,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.517Z"),
         "id": 91
     }, {
@@ -14477,10 +14576,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "r6uvq2q70",
             "importWizardName": "Production",
-            "amount": 32746, 
-            "production": true, 
+            "amount": 32746,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.523Z"),
         "id": 92
     }, {
@@ -14502,10 +14601,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "r6uvq2q70",
             "importWizardName": "Production",
-            "amount": 35588, 
-            "production": true, 
+            "amount": 35588,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.529Z"),
         "id": 93
     }, {
@@ -14527,10 +14626,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "r6uvq2q70",
             "importWizardName": "Production",
-            "amount": 30282, 
-            "production": true, 
+            "amount": 30282,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.535Z"),
         "id": 94
     }, {
@@ -14552,10 +14651,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "r6uvq2q70",
             "importWizardName": "Production",
-            "amount": 35576, 
-            "production": true, 
+            "amount": 35576,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.542Z"),
         "id": 95
     }, {
@@ -14577,10 +14676,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "r6uvq2q70",
             "importWizardName": "Production",
-            "amount": 38071, 
-            "production": true, 
+            "amount": 38071,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.548Z"),
         "id": 96
     }, {
@@ -14602,10 +14701,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "r6uvq2q70",
             "importWizardName": "Production",
-            "amount": 30715, 
-            "production": true, 
+            "amount": 30715,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.555Z"),
         "id": 97
     }, {
@@ -14627,10 +14726,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "r6uvq2q70",
             "importWizardName": "Production",
-            "amount": 26517, 
-            "production": true, 
+            "amount": 26517,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.562Z"),
         "id": 98
     }, {
@@ -14652,10 +14751,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "r6uvq2q70",
             "importWizardName": "Production",
-            "amount": 30333, 
-            "production": true, 
+            "amount": 30333,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.568Z"),
         "id": 99
     }, {
@@ -14677,10 +14776,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "5kd5ke369",
             "importWizardName": "Production",
-            "amount": 1146531.87, 
-            "production": true, 
+            "amount": 1146531.87,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.575Z"),
         "id": 100
     }, {
@@ -14702,10 +14801,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "5kd5ke369",
             "importWizardName": "Production",
-            "amount": 1185326.56, 
-            "production": true, 
+            "amount": 1185326.56,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.581Z"),
         "id": 101
     }, {
@@ -14727,10 +14826,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "5kd5ke369",
             "importWizardName": "Production",
-            "amount": 1185100.5, 
-            "production": true, 
+            "amount": 1185100.5,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.589Z"),
         "id": 102
     }, {
@@ -14752,10 +14851,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "5kd5ke369",
             "importWizardName": "Production",
-            "amount": 1245443.28, 
-            "production": true, 
+            "amount": 1245443.28,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.595Z"),
         "id": 103
     }, {
@@ -14777,10 +14876,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "5kd5ke369",
             "importWizardName": "Production",
-            "amount": 1165940.01, 
-            "production": true, 
+            "amount": 1165940.01,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.603Z"),
         "id": 104
     }, {
@@ -14802,10 +14901,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "5kd5ke369",
             "importWizardName": "Production",
-            "amount": 1313323.51, 
-            "production": true, 
+            "amount": 1313323.51,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.611Z"),
         "id": 105
     }, {
@@ -14827,10 +14926,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "5kd5ke369",
             "importWizardName": "Production",
-            "amount": 1468443.85, 
-            "production": true, 
+            "amount": 1468443.85,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.618Z"),
         "id": 106
     }, {
@@ -14852,10 +14951,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "5kd5ke369",
             "importWizardName": "Production",
-            "amount": 1159935.45, 
-            "production": true, 
+            "amount": 1159935.45,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.630Z"),
         "id": 107
     }, {
@@ -14877,10 +14976,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "5kd5ke369",
             "importWizardName": "Production",
-            "amount": 1313491.15, 
-            "production": true, 
+            "amount": 1313491.15,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.637Z"),
         "id": 108
     }, {
@@ -14902,10 +15001,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "5kd5ke369",
             "importWizardName": "Production",
-            "amount": 1406138.92, 
-            "production": true, 
+            "amount": 1406138.92,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.645Z"),
         "id": 109
     }, {
@@ -14927,10 +15026,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "5kd5ke369",
             "importWizardName": "Production",
-            "amount": 1910777.23, 
-            "production": true, 
+            "amount": 1910777.23,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.651Z"),
         "id": 110
     }, {
@@ -14952,10 +15051,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "5kd5ke369",
             "importWizardName": "Production",
-            "amount": 1806322.27, 
-            "production": true, 
+            "amount": 1806322.27,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.658Z"),
         "id": 111
     }, {
@@ -14977,10 +15076,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "5kd5ke369",
             "importWizardName": "Production",
-            "amount": 1917627.61, 
-            "production": true, 
+            "amount": 1917627.61,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.664Z"),
         "id": 112
     }, {
@@ -15002,10 +15101,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "5kd5ke369",
             "importWizardName": "Production",
-            "amount": 1875228.66, 
-            "production": true, 
+            "amount": 1875228.66,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.671Z"),
         "id": 113
     }, {
@@ -15027,10 +15126,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "5kd5ke369",
             "importWizardName": "Production",
-            "amount": 1710801.76, 
-            "production": true, 
+            "amount": 1710801.76,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.677Z"),
         "id": 114
     }, {
@@ -15052,10 +15151,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "5kd5ke369",
             "importWizardName": "Production",
-            "amount": 1732564.48, 
-            "production": true, 
+            "amount": 1732564.48,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.682Z"),
         "id": 115
     }, {
@@ -15077,10 +15176,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "5kd5ke369",
             "importWizardName": "Production",
-            "amount": 1654841.75, 
-            "production": true, 
+            "amount": 1654841.75,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.692Z"),
         "id": 116
     }, {
@@ -15102,10 +15201,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "5kd5ke369",
             "importWizardName": "Production",
-            "amount": 1623827.08, 
-            "production": true, 
+            "amount": 1623827.08,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.699Z"),
         "id": 117
     }, {
@@ -15127,10 +15226,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "5kd5ke369",
             "importWizardName": "Production",
-            "amount": 1475588.87, 
-            "production": true, 
+            "amount": 1475588.87,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.706Z"),
         "id": 118
     }, {
@@ -15152,10 +15251,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "5kd5ke369",
             "importWizardName": "Production",
-            "amount": 1187575.73, 
-            "production": true, 
+            "amount": 1187575.73,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.712Z"),
         "id": 119
     }, {
@@ -15177,10 +15276,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "5kd5ke369",
             "importWizardName": "Production",
-            "amount": 1299745.94, 
-            "production": true, 
+            "amount": 1299745.94,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.718Z"),
         "id": 120
     }, {
@@ -15202,10 +15301,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "5kd5ke369",
             "importWizardName": "Production",
-            "amount": 1299357.32, 
-            "production": true, 
+            "amount": 1299357.32,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.725Z"),
         "id": 121
     }, {
@@ -15227,10 +15326,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "5kd5ke369",
             "importWizardName": "Production",
-            "amount": 1761757.97, 
-            "production": true, 
+            "amount": 1761757.97,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.731Z"),
         "id": 122
     }, {
@@ -15252,10 +15351,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "5kd5ke369",
             "importWizardName": "Production",
-            "amount": 1291130.26, 
-            "production": true, 
+            "amount": 1291130.26,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.738Z"),
         "id": 123
     }, {
@@ -15277,10 +15376,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "5kd5ke369",
             "importWizardName": "Production",
-            "amount": 1096548.48, 
-            "production": true, 
+            "amount": 1096548.48,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.744Z"),
         "id": 124
     }, {
@@ -15302,10 +15401,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "5kd5ke369",
             "importWizardName": "Production",
-            "amount": 1432556.19, 
-            "production": true, 
+            "amount": 1432556.19,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.753Z"),
         "id": 125
     }, {
@@ -15327,10 +15426,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "5kd5ke369",
             "importWizardName": "Production",
-            "amount": 1336362.58, 
-            "production": true, 
+            "amount": 1336362.58,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.760Z"),
         "id": 126
     }, {
@@ -15352,10 +15451,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "5kd5ke369",
             "importWizardName": "Production",
-            "amount": 1217250.55, 
-            "production": true, 
+            "amount": 1217250.55,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.767Z"),
         "id": 127
     }, {
@@ -15377,10 +15476,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "5kd5ke369",
             "importWizardName": "Production",
-            "amount": 824951.36, 
-            "production": true, 
+            "amount": 824951.36,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.774Z"),
         "id": 128
     }, {
@@ -15402,10 +15501,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "5kd5ke369",
             "importWizardName": "Production",
-            "amount": 909276.8200000001, 
-            "production": true, 
+            "amount": 909276.8200000001,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.781Z"),
         "id": 129
     }, {
@@ -15427,10 +15526,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "5kd5ke369",
             "importWizardName": "Production",
-            "amount": 1134670.07, 
-            "production": true, 
+            "amount": 1134670.07,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.788Z"),
         "id": 130
     }, {
@@ -15452,10 +15551,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "5kd5ke369",
             "importWizardName": "Production",
-            "amount": 1317895.51, 
-            "production": true, 
+            "amount": 1317895.51,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.796Z"),
         "id": 131
     }, {
@@ -15477,10 +15576,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "5kd5ke369",
             "importWizardName": "Production",
-            "amount": 1427883.86, 
-            "production": true, 
+            "amount": 1427883.86,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.803Z"),
         "id": 132
     }, {
@@ -15502,10 +15601,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "5kd5ke369",
             "importWizardName": "Production",
-            "amount": 1421028.4, 
-            "production": true, 
+            "amount": 1421028.4,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.809Z"),
         "id": 133
     }, {
@@ -15527,10 +15626,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "5kd5ke369",
             "importWizardName": "Production",
-            "amount": 1523377.7, 
-            "production": true, 
+            "amount": 1523377.7,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.817Z"),
         "id": 134
     }, {
@@ -15552,10 +15651,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "5kd5ke369",
             "importWizardName": "Production",
-            "amount": 1235688.41, 
-            "production": true, 
+            "amount": 1235688.41,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.823Z"),
         "id": 135
     }, {
@@ -15577,10 +15676,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "5kd5ke369",
             "importWizardName": "Production",
-            "amount": 1067147.98, 
-            "production": true, 
+            "amount": 1067147.98,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.829Z"),
         "id": 136
     }, {
@@ -15602,10 +15701,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "5kd5ke369",
             "importWizardName": "Production",
-            "amount": 1311722.04, 
-            "production": true, 
+            "amount": 1311722.04,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.836Z"),
         "id": 137
     }, {
@@ -15627,10 +15726,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "5kd5ke369",
             "importWizardName": "Production",
-            "amount": 1330341.51, 
-            "production": true, 
+            "amount": 1330341.51,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.842Z"),
         "id": 138
     }, {
@@ -15652,10 +15751,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "5kd5ke369",
             "importWizardName": "Production",
-            "amount": 1558085.53, 
-            "production": true, 
+            "amount": 1558085.53,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.849Z"),
         "id": 139
     }, {
@@ -15677,10 +15776,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "5kd5ke369",
             "importWizardName": "Production",
-            "amount": 1337207.1300000001, 
-            "production": true, 
+            "amount": 1337207.1300000001,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.855Z"),
         "id": 140
     }, {
@@ -15702,10 +15801,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "5kd5ke369",
             "importWizardName": "Production",
-            "amount": 1416978.37, 
-            "production": true, 
+            "amount": 1416978.37,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.861Z"),
         "id": 141
     }, {
@@ -15727,10 +15826,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "5kd5ke369",
             "importWizardName": "Production",
-            "amount": 1230462.36, 
-            "production": true, 
+            "amount": 1230462.36,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.869Z"),
         "id": 142
     }, {
@@ -15752,10 +15851,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "5kd5ke369",
             "importWizardName": "Production",
-            "amount": 1396042.42, 
-            "production": true, 
+            "amount": 1396042.42,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.876Z"),
         "id": 143
     }, {
@@ -15777,10 +15876,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "5kd5ke369",
             "importWizardName": "Production",
-            "amount": 1487291.92, 
-            "production": true, 
+            "amount": 1487291.92,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.883Z"),
         "id": 144
     }, {
@@ -15802,10 +15901,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "5kd5ke369",
             "importWizardName": "Production",
-            "amount": 1394399.04, 
-            "production": true, 
+            "amount": 1394399.04,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.890Z"),
         "id": 145
     }, {
@@ -15827,10 +15926,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "5kd5ke369",
             "importWizardName": "Production",
-            "amount": 1348936.85, 
-            "production": true, 
+            "amount": 1348936.85,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.898Z"),
         "id": 146
     }, {
@@ -15852,10 +15951,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "5kd5ke369",
             "importWizardName": "Production",
-            "amount": 1125021.8800000001, 
-            "production": true, 
+            "amount": 1125021.8800000001,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.906Z"),
         "id": 147
     }, {
@@ -15877,10 +15976,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "5kd5ke369",
             "importWizardName": "Production",
-            "amount": 1125021.8800000001, 
-            "production": true, 
+            "amount": 1125021.8800000001,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.914Z"),
         "id": 148
     }, {
@@ -15902,10 +16001,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "5kd5ke369",
             "importWizardName": "Production",
-            "amount": 1107677.49, 
-            "production": true, 
+            "amount": 1107677.49,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.920Z"),
         "id": 149
     }, {
@@ -15927,10 +16026,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "rv17fb0yt",
             "importWizardName": "Production",
-            "amount": 71500, 
-            "production": true, 
+            "amount": 71500,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.927Z"),
         "id": 150
     }, {
@@ -15952,10 +16051,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "rv17fb0yt",
             "importWizardName": "Production",
-            "amount": 77100, 
-            "production": true, 
+            "amount": 77100,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.933Z"),
         "id": 151
     }, {
@@ -15977,10 +16076,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "rv17fb0yt",
             "importWizardName": "Production",
-            "amount": 92900, 
-            "production": true, 
+            "amount": 92900,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.939Z"),
         "id": 152
     }, {
@@ -16002,10 +16101,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "rv17fb0yt",
             "importWizardName": "Production",
-            "amount": 82200, 
-            "production": true, 
+            "amount": 82200,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.945Z"),
         "id": 153
     }, {
@@ -16027,10 +16126,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "rv17fb0yt",
             "importWizardName": "Production",
-            "amount": 76100, 
-            "production": true, 
+            "amount": 76100,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.951Z"),
         "id": 154
     }, {
@@ -16052,10 +16151,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "rv17fb0yt",
             "importWizardName": "Production",
-            "amount": 83400, 
-            "production": true, 
+            "amount": 83400,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.958Z"),
         "id": 155
     }, {
@@ -16077,10 +16176,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "rv17fb0yt",
             "importWizardName": "Production",
-            "amount": 83200, 
-            "production": true, 
+            "amount": 83200,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.965Z"),
         "id": 156
     }, {
@@ -16102,10 +16201,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "rv17fb0yt",
             "importWizardName": "Production",
-            "amount": 87300, 
-            "production": true, 
+            "amount": 87300,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.971Z"),
         "id": 157
     }, {
@@ -16127,10 +16226,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "rv17fb0yt",
             "importWizardName": "Production",
-            "amount": 73500, 
-            "production": true, 
+            "amount": 73500,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.979Z"),
         "id": 158
     }, {
@@ -16152,10 +16251,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "rv17fb0yt",
             "importWizardName": "Production",
-            "amount": 76800, 
-            "production": true, 
+            "amount": 76800,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.985Z"),
         "id": 159
     }, {
@@ -16177,10 +16276,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "rv17fb0yt",
             "importWizardName": "Production",
-            "amount": 72700, 
-            "production": true, 
+            "amount": 72700,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.992Z"),
         "id": 160
     }, {
@@ -16202,10 +16301,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "rv17fb0yt",
             "importWizardName": "Production",
-            "amount": 65100, 
-            "production": true, 
+            "amount": 65100,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:32.998Z"),
         "id": 161
     }, {
@@ -16227,10 +16326,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "rv17fb0yt",
             "importWizardName": "Production",
-            "amount": 75400, 
-            "production": true, 
+            "amount": 75400,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:33.006Z"),
         "id": 162
     }, {
@@ -16252,10 +16351,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "rv17fb0yt",
             "importWizardName": "Production",
-            "amount": 80700, 
-            "production": true, 
+            "amount": 80700,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:33.013Z"),
         "id": 163
     }, {
@@ -16277,10 +16376,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "rv17fb0yt",
             "importWizardName": "Production",
-            "amount": 95700, 
-            "production": true, 
+            "amount": 95700,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:33.020Z"),
         "id": 164
     }, {
@@ -16302,10 +16401,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "rv17fb0yt",
             "importWizardName": "Production",
-            "amount": 85700, 
-            "production": true, 
+            "amount": 85700,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:33.027Z"),
         "id": 165
     }, {
@@ -16327,10 +16426,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "rv17fb0yt",
             "importWizardName": "Production",
-            "amount": 79300, 
-            "production": true, 
+            "amount": 79300,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:33.033Z"),
         "id": 166
     }, {
@@ -16352,10 +16451,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "rv17fb0yt",
             "importWizardName": "Production",
-            "amount": 87300, 
-            "production": true, 
+            "amount": 87300,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:33.041Z"),
         "id": 167
     }, {
@@ -16377,10 +16476,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "rv17fb0yt",
             "importWizardName": "Production",
-            "amount": 85500, 
-            "production": true, 
+            "amount": 85500,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:33.048Z"),
         "id": 168
     }, {
@@ -16402,10 +16501,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "rv17fb0yt",
             "importWizardName": "Production",
-            "amount": 91300, 
-            "production": true, 
+            "amount": 91300,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:33.054Z"),
         "id": 169
     }, {
@@ -16427,10 +16526,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "rv17fb0yt",
             "importWizardName": "Production",
-            "amount": 76500, 
-            "production": true, 
+            "amount": 76500,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:33.060Z"),
         "id": 170
     }, {
@@ -16452,10 +16551,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "rv17fb0yt",
             "importWizardName": "Production",
-            "amount": 80200, 
-            "production": true, 
+            "amount": 80200,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:33.066Z"),
         "id": 171
     }, {
@@ -16477,10 +16576,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "rv17fb0yt",
             "importWizardName": "Production",
-            "amount": 76800, 
-            "production": true, 
+            "amount": 76800,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:33.073Z"),
         "id": 172
     }, {
@@ -16502,10 +16601,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "rv17fb0yt",
             "importWizardName": "Production",
-            "amount": 67500, 
-            "production": true, 
+            "amount": 67500,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:33.082Z"),
         "id": 173
     }, {
@@ -16527,10 +16626,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "rv17fb0yt",
             "importWizardName": "Production",
-            "amount": 66800, 
-            "production": true, 
+            "amount": 66800,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:33.089Z"),
         "id": 174
     }, {
@@ -16552,10 +16651,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "rv17fb0yt",
             "importWizardName": "Production",
-            "amount": 72700, 
-            "production": true, 
+            "amount": 72700,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:33.095Z"),
         "id": 175
     }, {
@@ -16577,10 +16676,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "rv17fb0yt",
             "importWizardName": "Production",
-            "amount": 74600, 
-            "production": true, 
+            "amount": 74600,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:33.102Z"),
         "id": 176
     }, {
@@ -16602,10 +16701,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "rv17fb0yt",
             "importWizardName": "Production",
-            "amount": 80200, 
-            "production": true, 
+            "amount": 80200,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:33.108Z"),
         "id": 177
     }, {
@@ -16627,10 +16726,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "rv17fb0yt",
             "importWizardName": "Production",
-            "amount": 78300, 
-            "production": true, 
+            "amount": 78300,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:33.114Z"),
         "id": 178
     }, {
@@ -16652,10 +16751,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "rv17fb0yt",
             "importWizardName": "Production",
-            "amount": 83300, 
-            "production": true, 
+            "amount": 83300,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:33.121Z"),
         "id": 179
     }, {
@@ -16677,10 +16776,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "rv17fb0yt",
             "importWizardName": "Production",
-            "amount": 80600, 
-            "production": true, 
+            "amount": 80600,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:33.128Z"),
         "id": 180
     }, {
@@ -16702,10 +16801,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "rv17fb0yt",
             "importWizardName": "Production",
-            "amount": 90300, 
-            "production": true, 
+            "amount": 90300,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:33.134Z"),
         "id": 181
     }, {
@@ -16727,10 +16826,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "rv17fb0yt",
             "importWizardName": "Production",
-            "amount": 76300, 
-            "production": true, 
+            "amount": 76300,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:33.139Z"),
         "id": 182
     }, {
@@ -16752,10 +16851,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "rv17fb0yt",
             "importWizardName": "Production",
-            "amount": 76100, 
-            "production": true, 
+            "amount": 76100,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:33.145Z"),
         "id": 183
     }, {
@@ -16777,10 +16876,10 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "rv17fb0yt",
             "importWizardName": "Production",
-            "amount": 72400, 
-            "production": true, 
+            "amount": 72400,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:33.153Z"),
         "id": 184
     }, {
@@ -16802,13 +16901,13 @@ export const ExampleAccount: BackupFile = {
             "name": "Production",
             "id": "rv17fb0yt",
             "importWizardName": "Production",
-            "amount": 65700, 
-            "production": true, 
+            "amount": 65700,
+            "production": true,
             "productionInAnalysis": true
-        }], 
+        }],
         "dbDate": new Date("2022-08-22T18:22:33.160Z"),
         "id": 185
     }],
-    "backupFileType":"Account",
-    "origin":"VERIFI"
+    "backupFileType": "Account",
+    "origin": "VERIFI"
 }

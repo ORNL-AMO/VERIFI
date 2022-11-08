@@ -269,7 +269,7 @@ export interface AnalysisGroup {
     productionUnits: string,
     regressionModelYear: number,
     regressionConstant: number,
-    groupHasError: boolean,
+    groupErrors: GroupErrors,
     specifiedMonthlyPercentBaseload: boolean,
     averagePercentBaseload: number,
     monthlyPercentBaseload: Array<{
@@ -285,6 +285,19 @@ export interface AnalysisGroup {
     models?: Array<JStatRegressionModel>,
     selectedModelId?: string,
     dateModelsGenerated?: Date
+}
+
+export interface GroupErrors {
+    hasErrors: boolean,
+    missingProductionVariables: boolean,
+    missingRegressionConstant: boolean,
+    missingRegressionModelYear: boolean,
+    missingRegressionModelSelection: boolean,
+    missingRegressionPredictorCoef: boolean,
+    noProductionVariables: boolean,
+    invalidAverageBaseload: boolean,
+    invalidMonthlyBaseload: boolean,
+    missingGroupMeters: boolean
 }
 
 export interface IdbAccountAnalysisItem {

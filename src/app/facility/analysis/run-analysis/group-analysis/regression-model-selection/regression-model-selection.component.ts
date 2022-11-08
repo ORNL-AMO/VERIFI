@@ -6,6 +6,7 @@ import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { JStatRegressionModel } from 'src/app/models/analysis';
 import { AnalysisGroup, IdbAccount, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
+import { AnalysisValidationService } from '../../../analysis-validation.service';
 import { AnalysisService } from '../../../analysis.service';
 @Component({
   selector: 'app-regression-model-selection',
@@ -22,7 +23,8 @@ export class RegressionModelSelectionComponent implements OnInit {
   selectedGroupSub: Subscription;
   constructor(private analysisService: AnalysisService,
     private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService, private dbChangesService: DbChangesService,
-    private accountDbService: AccountdbService) { }
+    private accountDbService: AccountdbService,
+    private analysisValidationService: AnalysisValidationService) { }
 
   ngOnInit(): void {
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(group => {
@@ -57,7 +59,7 @@ export class RegressionModelSelectionComponent implements OnInit {
   async saveItem() {
     let analysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     let groupIndex: number = analysisItem.groups.findIndex(group => { return group.idbGroupId == this.selectedGroup.idbGroupId });
-    this.selectedGroup.groupHasError = this.analysisService.checkGroupHasError(this.selectedGroup);
+    this.selectedGroup.groupErrors = this.analysisValidationService.getGroupErrors(this.selectedGroup);
     analysisItem.groups[groupIndex] = this.selectedGroup;
     await this.analysisDbService.updateWithObservable(analysisItem).toPromise();
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();

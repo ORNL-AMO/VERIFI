@@ -31,7 +31,7 @@ export class AnalysisBannerComponent implements OnInit {
       this.analysisItem = item;
       this.checkAnalysisSetupValid();
     })
-   this.routerSub = this.router.events.subscribe(event => {
+    this.routerSub = this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
         this.setInRunAnalysis(event.url);
       }
@@ -71,7 +71,7 @@ export class AnalysisBannerComponent implements OnInit {
       this.analysisSetupValid = this.analysisItem.reportYear != undefined;
       let groupHasError: boolean = false;
       this.analysisItem.groups.forEach(group => {
-        if (group.groupHasError) {
+        if (group.groupErrors.hasErrors) {
           groupHasError = true;
         }
       });

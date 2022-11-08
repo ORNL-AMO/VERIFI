@@ -10,7 +10,7 @@
             <li class="nav-item" *ngFor="let group of groups" [ngClass]="{'disabled': !analysisSetupValid}">
                 <a class="nav-link" routerLink="run-analysis/group-analysis/{{group.idbGroupId}}"
                     [routerLinkActive]="['active']">
-                    <span class="fa fa-exclamation-circle" *ngIf="group.groupHasError"></span>
+                    <span class="fa fa-exclamation-circle" *ngIf="group.groupErrors?.hasErrors"></span>
                     <i class="fa fa-file-edit"></i>
                     {{group.idbGroupId | groupName}}
                 </a>

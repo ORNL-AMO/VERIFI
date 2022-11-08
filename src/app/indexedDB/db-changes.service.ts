@@ -95,6 +95,13 @@ export class DbChangesService {
 
   async setAnalysisItems(account: IdbAccount, facility?: IdbFacility) {
     let analysisItems: Array<IdbAnalysisItem> = await this.analysisDbService.getAllByIndexRange('accountId', account.guid).toPromise();
+    for (let i = 0; i < analysisItems.length; i++) {
+      let updateAnalysis: { analysisItem: IdbAnalysisItem, isChanged: boolean } = this.updateDbEntryService.updateAnalysis(analysisItems[i]);
+      if (updateAnalysis.isChanged) {
+        analysisItems[i] = updateAnalysis.analysisItem;
+        await this.analysisDbService.updateWithObservable(analysisItems[i]).toPromise();
+      };
+    }
     this.analysisDbService.accountAnalysisItems.next(analysisItems);
     if (facility) {
       this.setFacilityAnalysisItems(facility);

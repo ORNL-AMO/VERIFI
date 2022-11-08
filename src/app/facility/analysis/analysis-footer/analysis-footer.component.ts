@@ -62,7 +62,7 @@ export class AnalysisFooterComponent implements OnInit {
 
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(val => {
       this.selectedGroup = val;
-    })
+    });
   }
 
   ngOnDestroy() {

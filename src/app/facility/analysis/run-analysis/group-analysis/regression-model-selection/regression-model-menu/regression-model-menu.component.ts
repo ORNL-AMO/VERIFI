@@ -14,6 +14,7 @@ import { AnalysisGroup, IdbAccount, IdbAnalysisItem, IdbFacility, IdbPredictorEn
 import { AnalysisCalculationsHelperService } from 'src/app/shared/shared-analysis/calculations/analysis-calculations-helper.service';
 import { RegressionModelsService } from 'src/app/shared/shared-analysis/calculations/regression-models.service';
 import * as _ from 'lodash';
+import { AnalysisValidationService } from 'src/app/facility/analysis/analysis-validation.service';
 @Component({
   selector: 'app-regression-model-menu',
   templateUrl: './regression-model-menu.component.html',
@@ -34,7 +35,8 @@ export class RegressionModelMenuComponent implements OnInit {
     private dbChangesService: DbChangesService, private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService, private analysisCalculationsHelperService: AnalysisCalculationsHelperService,
     private regressionsModelsService: RegressionModelsService, private predictorDbService: PredictordbService,
-    private utilityMeterDbService: UtilityMeterdbService, private utilityMeterDataDbService: UtilityMeterDatadbService) { }
+    private utilityMeterDbService: UtilityMeterdbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private analysisValidationService: AnalysisValidationService) { }
 
   ngOnInit(): void {
     this.showInvalid = this.analysisService.showInvalidModels.getValue();
@@ -57,7 +59,7 @@ export class RegressionModelMenuComponent implements OnInit {
   async saveItem() {
     let analysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     let groupIndex: number = analysisItem.groups.findIndex(group => { return group.idbGroupId == this.group.idbGroupId });
-    this.group.groupHasError = this.analysisService.checkGroupHasError(this.group);
+    this.group.groupErrors = this.analysisValidationService.getGroupErrors(this.group);
 
     analysisItem.groups[groupIndex] = this.group;
     await this.analysisDbService.updateWithObservable(analysisItem).toPromise();
