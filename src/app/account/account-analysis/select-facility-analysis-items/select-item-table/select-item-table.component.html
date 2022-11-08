@@ -1,9 +1,15 @@
-<div class="d-flex w-100 justify-content-end">
-    <div>
-        <button class="btn btn-outline m-0" (click)="createNewItem()">+Add Facility Analysis</button>
+<h4>
+    <div class="d-flex justify-content-between">
+        <div class="mt-auto">
+            <i class="fa fa-industry pr-2" [ngStyle]="{color: facility.color}"></i>{{facility.name}}
+            Analysis Items
+        </div>
+
+        <div>
+            <button class="btn btn-outline m-0" (click)="createNewItem()">+Add Facility Analysis</button>
+        </div>
     </div>
-</div>
-<hr>
+</h4>
 
 <div class="table-responsive">
     <table class="table table-sm table-hover">

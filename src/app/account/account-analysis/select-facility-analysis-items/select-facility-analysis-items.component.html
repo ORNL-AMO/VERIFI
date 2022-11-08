@@ -9,10 +9,8 @@
         </ul>
     </div>
     <div class="content-padding">
-        <h4><i class="fa fa-industry pr-2" [ngStyle]="{color: selectedFacility.color}"></i>{{selectedFacility.name}}
-            Analysis Items</h4>
-
         <app-select-item-table [facility]="selectedFacility" [selectedAnalysisItem]="selectedAnalysisItem"
             [facilityAnalysisItems]="facilityAnalysisItems"></app-select-item-table>
+        <hr>
     </div>
 </div>

@@ -1,6 +1,6 @@
 .content-padding{
     padding: 20px 30px;
-    height: calc(100vh - 290px);
+    /* height: calc(100vh - 290px); */
     overflow-y: auto;
 }
 

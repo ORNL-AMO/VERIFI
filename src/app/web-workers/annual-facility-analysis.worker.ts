@@ -9,6 +9,7 @@ addEventListener('message', ({ data }) => {
     let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;
     postMessage({
         annualAnalysisSummaries: annualAnalysisSummaries,
-        monthlyAnalysisSummaryData: monthlyAnalysisSummaryData
+        monthlyAnalysisSummaryData: monthlyAnalysisSummaryData,
+        itemId: data.analysisItem.guid
     });
 });

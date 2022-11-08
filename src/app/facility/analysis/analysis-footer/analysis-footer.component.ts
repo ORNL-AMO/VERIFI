@@ -7,6 +7,8 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AnalysisService } from '../analysis.service';
 import { AnalysisGroup, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
+import { AccountAnalysisService } from 'src/app/account/account-analysis/account-analysis.service';
+import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 
 @Component({
   selector: 'app-analysis-footer',
@@ -27,14 +29,18 @@ export class AnalysisFooterComponent implements OnInit {
 
   routerSub: Subscription;
   showContinue: boolean;
+  showGoBackToAccount: boolean;
   constructor(private sharedDataService: SharedDataService,
     private helpPanelService: HelpPanelService,
     private router: Router,
     private facilityDbService: FacilitydbService,
     private analysisService: AnalysisService,
-    private analysisDbService: AnalysisDbService) { }
+    private analysisDbService: AnalysisDbService,
+    private accountAnalysisService: AccountAnalysisService,
+    private accountAnalysisDbService: AccountAnalysisDbService) { }
 
   ngOnInit(): void {
+    this.showGoBackToAccount = this.analysisService.accountAnalysisItem != undefined;
     this.routerSub = this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
         this.setShowContinue(event.url);
@@ -137,6 +143,14 @@ export class AnalysisFooterComponent implements OnInit {
 
   setShowContinue(url: string) {
     this.showContinue = (url.includes('account-analysis') == false);
+  }
+
+
+  goBackToAccount() {
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    this.accountAnalysisService.selectedFacility.next(selectedFacility);
+    this.accountAnalysisDbService.selectedAnalysisItem.next(this.analysisService.accountAnalysisItem);
+    this.router.navigateByUrl('/account/analysis/select-items')
   }
 
 }
