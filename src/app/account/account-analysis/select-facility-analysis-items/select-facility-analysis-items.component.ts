@@ -76,17 +76,26 @@ export class SelectFacilityAnalysisItemsComponent implements OnInit {
     });
   }
 
-  getClassAndValid(facility: IdbFacility): { cssClass: 'fa fa-square-minus' | 'fa fa-square-check', isInvalid: boolean } {
+  getClassAndValid(facility: IdbFacility): { cssClass: 'fa fa-square-minus' | 'fa fa-square-check' | 'fa fa-square', isInvalid: boolean } {
     let facilityItem: { facilityId: string, analysisItemId: string } = this.selectedAnalysisItem.facilityAnalysisItems.find(item => { return item.facilityId == facility.guid });
-    let cssClass: 'fa fa-square-minus' | 'fa fa-square-check' = 'fa fa-square-minus';
+    let cssClass: 'fa fa-square-minus' | 'fa fa-square-check' | 'fa fa-square' = 'fa fa-square';
     let isInvalid: boolean = false;
     if (facilityItem && facilityItem.analysisItemId) {
-      cssClass = 'fa fa-square-check';
-      let analysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
-      let item: IdbAnalysisItem = analysisItems.find(item => { return item.guid == facilityItem.analysisItemId });
-      if (item.setupErrors.hasError || item.setupErrors.groupsHaveErrors) {
-        isInvalid = true;
+      if (facilityItem.analysisItemId != 'skip') {
+        cssClass = 'fa fa-square-check';
+        let analysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
+        let item: IdbAnalysisItem = analysisItems.find(item => { return item.guid == facilityItem.analysisItemId });
+        if (item.setupErrors.hasError || item.setupErrors.groupsHaveErrors) {
+          isInvalid = true;
+        } else{
+          isInvalid = false;
+        }
+      } else {
+        cssClass = 'fa fa-square-minus';
+        isInvalid = false;
       }
+    } else {
+      isInvalid = true;
     }
     return { cssClass: cssClass, isInvalid: isInvalid }
   }
@@ -94,7 +103,7 @@ export class SelectFacilityAnalysisItemsComponent implements OnInit {
   setFacilitiesList() {
     let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     this.facilitiesList = facilities.map(facility => {
-      let data: { cssClass: 'fa fa-square-minus' | 'fa fa-square-check', isInvalid: boolean } = this.getClassAndValid(facility);
+      let data: { cssClass: 'fa fa-square-minus' | 'fa fa-square-check' | 'fa fa-square', isInvalid: boolean } = this.getClassAndValid(facility);
       return {
         facility: facility,
         cssClass: data.cssClass,
