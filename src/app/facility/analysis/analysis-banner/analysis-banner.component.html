@@ -4,21 +4,28 @@
         <ul class="nav nav-tabs">
             <li class="nav-item">
                 <a class="nav-link" routerLink="run-analysis/analysis-setup" [routerLinkActive]="['active']">
+                    <span class="fa fa-exclamation-circle" *ngIf="analysisItem.setupErrors.hasError"></span>
                     <i class="fa fa-gears"></i>
                     Analysis Setup</a>
             </li>
-            <li class="nav-item" *ngFor="let group of groups" [ngClass]="{'disabled': !analysisSetupValid}">
+            <li class="nav-item" *ngFor="let group of groups" [ngClass]="{'disabled': !analysisSetupValid || analysisItem.setupErrors.hasError}">
                 <a class="nav-link" routerLink="run-analysis/group-analysis/{{group.idbGroupId}}"
                     [routerLinkActive]="['active']">
-                    <span class="fa fa-exclamation-circle" *ngIf="group.groupHasError"></span>
+                    <span class="fa fa-exclamation-circle" *ngIf="group.groupErrors?.hasErrors"></span>
+                    <span class="fa fa-exclamation-circle warning" *ngIf="group.groupErrors?.hasInvalidRegressionModel"></span>
                     <i class="fa fa-file-edit"></i>
                     {{group.idbGroupId | groupName}}
                 </a>
             </li>
-            <li class="nav-item" [ngClass]="{'disabled': !analysisSetupValid || groupHasError}">
+            <li class="nav-item" [ngClass]="{'disabled': !analysisSetupValid || groupHasError || analysisItem.setupErrors.hasError}">
                 <a class="nav-link" routerLink="run-analysis/facility-analysis" [routerLinkActive]="['active']">
                     <i class="fa fa-magnifying-glass-chart"></i>Facility
                     Summary</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" routerLink="run-analysis/account-analysis" [routerLinkActive]="['active']">
+                    <i class="fa fa-building"></i>
+                    Account Analysis</a>
             </li>
         </ul>
     </div>
@@ -27,7 +34,7 @@
             <li class="nav-item">
                 <a class="nav-link" routerLink="analysis-dashboard" [routerLinkActive]="['active']">
                     <i class="fa fa-list"></i>
-                    Return to Dashboard</a>
+                    All Facility Analysis</a>
             </li>
         </ul>
     </div>

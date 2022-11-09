@@ -14,6 +14,10 @@
     color: red;
 }
 
+.fa.fa-exclamation-circle.warning, .banner a.nav-link:not(.active) .fa.fa.fa-exclamation-circle.warning{
+    color: orange;
+}
+
 
 .nav-tabs .nav-link.active{
     color: #ff6000;

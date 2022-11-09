@@ -1,6 +1,6 @@
 .content-padding{
     padding: 20px 30px;
-    height: calc(100vh - 290px);
+    /* height: calc(100vh - 290px); */
     overflow-y: auto;
 }
 
@@ -39,4 +39,8 @@ h4 i.fa-industry{
 
 .nav-tabs .nav-link.active, .nav-tabs .nav-link.active i.fa{
     color: #ff6000;
+}
+
+.fa.fa-exclamation-circle, .banner a.nav-link:not(.active) .fa.fa.fa-exclamation-circle{
+    color: red;
 }

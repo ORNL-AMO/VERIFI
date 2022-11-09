@@ -8,6 +8,7 @@ import { FacilitydbService } from './facility-db.service';
 import { PredictordbService } from './predictors-db.service';
 import { UtilityMeterGroupdbService } from './utilityMeterGroup-db.service';
 import * as _ from 'lodash';
+import { AnalysisValidationService } from '../facility/analysis/analysis-validation.service';
 
 @Injectable({
   providedIn: 'root'
@@ -21,7 +22,8 @@ export class AnalysisDbService {
   constructor(private dbService: NgxIndexedDBService, private localStorageService: LocalStorageService,
     private facilityDbService: FacilitydbService, private accountDbService: AccountdbService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
-    private predictorDbService: PredictordbService) {
+    private predictorDbService: PredictordbService,
+    private analysisValidationService: AnalysisValidationService) {
     this.accountAnalysisItems = new BehaviorSubject<Array<IdbAnalysisItem>>([]);
     this.facilityAnalysisItems = new BehaviorSubject<Array<IdbAnalysisItem>>([]);
     this.selectedAnalysisItem = new BehaviorSubject<IdbAnalysisItem>(undefined);
@@ -136,24 +138,27 @@ export class AnalysisDbService {
         predictorVariables.forEach(variable => {
           variable.productionInAnalysis = variable.production;
         });
-        itemGroups.push({
+        let analysisGroup: AnalysisGroup = {
           idbGroupId: group.guid,
           analysisType: 'energyIntensity',
           predictorVariables: JSON.parse(JSON.stringify(predictorVariables)),
           productionUnits: this.getUnits(predictorVariables),
           regressionModelYear: undefined,
           regressionConstant: undefined,
-          groupHasError: false,
+          groupErrors: undefined,
           specifiedMonthlyPercentBaseload: false,
           averagePercentBaseload: undefined,
           monthlyPercentBaseload: this.getMonthlyPercentBaseload(),
           hasBaselineAdjustement: false,
           baselineAdjustments: [],
           userDefinedModel: false
-        });
+        }
+        analysisGroup.groupErrors = this.analysisValidationService.getGroupErrors(analysisGroup);
+        itemGroups.push(analysisGroup);
       }
     });
-    return {
+
+    let analysisItem: IdbAnalysisItem = {
       facilityId: selectedFacility.guid,
       accountId: selectedAccount.guid,
       guid: Math.random().toString(36).substr(2, 9),
@@ -163,7 +168,10 @@ export class AnalysisDbService {
       energyIsSource: selectedFacility.energyIsSource,
       energyUnit: selectedFacility.energyUnit,
       groups: itemGroups,
-    }
+      setupErrors: undefined
+    };
+    analysisItem.setupErrors = this.analysisValidationService.getAnalysisItemErrors(analysisItem);
+    return analysisItem;
   }
 
   getUnits(predictorVariables: Array<PredictorData>): string {
@@ -191,6 +199,7 @@ export class AnalysisDbService {
       let analysisItem: IdbAnalysisItem = facilityAnalysisItems[index];
       analysisItem.groups.forEach(group => {
         group.predictorVariables = this.updatePredictorVariables(predictorEntries, group.predictorVariables);
+        group.groupErrors = this.analysisValidationService.getGroupErrors(group);
       });
       await this.updateWithObservable(analysisItem).toPromise();
     };
@@ -243,21 +252,23 @@ export class AnalysisDbService {
     let facilityAnalysisItems: Array<IdbAnalysisItem> = this.facilityAnalysisItems.getValue();
     for (let index = 0; index < facilityAnalysisItems.length; index++) {
       let item: IdbAnalysisItem = facilityAnalysisItems[index];
-      item.groups.push({
+      let analysisGroup: AnalysisGroup = {
         idbGroupId: groupId,
         analysisType: 'energyIntensity',
         predictorVariables: predictorVariables,
         productionUnits: this.getUnits(predictorVariables),
         regressionConstant: undefined,
         regressionModelYear: undefined,
-        groupHasError: false,
+        groupErrors: undefined,
         specifiedMonthlyPercentBaseload: false,
         averagePercentBaseload: undefined,
         monthlyPercentBaseload: this.getMonthlyPercentBaseload(),
         hasBaselineAdjustement: false,
         baselineAdjustments: [],
         userDefinedModel: false
-      });
+      }
+      analysisGroup.groupErrors = this.analysisValidationService.getGroupErrors(analysisGroup);
+      item.groups.push(analysisGroup);
       await this.updateWithObservable(item).toPromise();
     };
   }

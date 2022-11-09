@@ -26,7 +26,9 @@ export class AccountAnalysisResultsComponent implements OnInit {
     private analysisDbService: AnalysisDbService) { }
 
   ngOnInit(): void {
-    this.accountAnalysisService.setCalanderizedMeters();
+    if(!this.accountAnalysisService.calanderizedMeters){
+      this.accountAnalysisService.setCalanderizedMeters();
+    }
     this.accountAnalysisItem = this.accountAnalysisDbService.selectedAnalysisItem.getValue();
     this.account = this.accountDbService.selectedAccount.getValue();
     let calanderizedMeters: Array<CalanderizedMeter> = this.accountAnalysisService.calanderizedMeters;

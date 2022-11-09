@@ -1,28 +1,29 @@
-<div class="banner p-0">
-        <ul class="nav nav-tabs">
-                <li class="nav-item" [ngClass]="{'error': groupHasError}"><a class="nav-link" routerLink="options"
-                                [routerLinkActive]="['active']">
-                                <span class="fa fa-exclamation-circle" *ngIf="groupHasError"></span>
-                                <i class="fa fa-gears"></i>
-                                Analysis Options</a></li>
-                <li class="nav-item" *ngIf="showModelSelection"><a class="nav-link" routerLink="model-selection"
-                                [routerLinkActive]="['active']">
-                                <span class="fa fa-exclamation-circle" *ngIf="regressionModelNeeded"></span>
-                                <i class="fa fa-arrow-up-right-dots"></i>
-                                Regression Model</a></li>
-                <li class="nav-item"
-                        [ngClass]="{'disabled': groupHasError || regressionModelNeeded, 'error': groupHasError}"><a
-                                class="nav-link" routerLink="annual-analysis" [routerLinkActive]="['active']">
-                                <i class="fa fa-magnifying-glass-chart"></i>Annual
-                                Analysis</a></li>
-                <li class="nav-item"
-                        [ngClass]="{'disabled': groupHasError || regressionModelNeeded, 'error': groupHasError}"><a
-                                class="nav-link" routerLink="monthly-analysis" [routerLinkActive]="['active']">
-                                <i class="fa fa-magnifying-glass-chart"></i>Monthly
-                                Analysis</a></li>
-        </ul>
-</div>
-<div class="content-padding">
-        <h4>{{label}}</h4>
-        <router-outlet></router-outlet>
-</div>
+<ng-container *ngIf="selectedGroup">
+        <div class="banner p-0">
+                <ul class="nav nav-tabs">
+                        <li class="nav-item" [ngClass]="{'error': setupErrors}"><a class="nav-link" routerLink="options"
+                                        [routerLinkActive]="['active']">
+                                        <span class="fa fa-exclamation-circle" *ngIf="setupErrors"></span>
+                                        <i class="fa fa-gears"></i>
+                                        Analysis Options</a></li>
+                        <li class="nav-item" *ngIf="showModelSelection"><a class="nav-link" routerLink="model-selection"
+                                        [routerLinkActive]="['active']">
+                                        <span class="fa fa-exclamation-circle" *ngIf="regressionErrors"></span>
+                                        <span class="fa fa-exclamation-circle warning" *ngIf="hasInvalidRegressionModel"></span>
+                                        <i class=" fa fa-arrow-up-right-dots"></i>
+                                        Regression Model</a></li>
+                        <li class="nav-item" [ngClass]="{'disabled': hasErrors}"><a class="nav-link"
+                                        routerLink="annual-analysis" [routerLinkActive]="['active']">
+                                        <i class="fa fa-magnifying-glass-chart"></i>Annual
+                                        Analysis</a></li>
+                        <li class="nav-item" [ngClass]="{'disabled': hasErrors}"><a class="nav-link"
+                                        routerLink="monthly-analysis" [routerLinkActive]="['active']">
+                                        <i class="fa fa-magnifying-glass-chart"></i>Monthly
+                                        Analysis</a></li>
+                </ul>
+        </div>
+        <div class="content-padding">
+                <h4>{{label}}</h4>
+                <router-outlet></router-outlet>
+        </div>
+</ng-container>

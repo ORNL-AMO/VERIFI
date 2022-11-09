@@ -21,6 +21,8 @@ import { SharedAnalysisModule } from 'src/app/shared/shared-analysis/shared-anal
 import { ModelFilterPipe } from './run-analysis/group-analysis/regression-model-selection/model-filter.pipe';
 import { RegressionModelMenuComponent } from './run-analysis/group-analysis/regression-model-selection/regression-model-menu/regression-model-menu.component';
 import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/calculating-spinner.module';
+import { AccountAnalysisListComponent } from './account-analysis-list/account-analysis-list.component';
+import { AnalysisFooterComponent } from './analysis-footer/analysis-footer.component';
 
 
 
@@ -40,7 +42,9 @@ import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/cal
     MonthlyFacilityAnalysisComponent,
     AnnualFacilityAnalysisComponent,
     ModelFilterPipe,
-    RegressionModelMenuComponent
+    RegressionModelMenuComponent,
+    AccountAnalysisListComponent,
+    AnalysisFooterComponent
   ],
   imports: [
     CommonModule,

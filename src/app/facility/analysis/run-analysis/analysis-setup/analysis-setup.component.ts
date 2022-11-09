@@ -7,6 +7,8 @@ import { EnergyUnitOptions, UnitOption } from 'src/app/shared/unitOptions';
 import * as _ from 'lodash';
 import { AnalysisCalculationsHelperService } from 'src/app/shared/shared-analysis/calculations/analysis-calculations-helper.service';
 import { AnalysisService } from '../../analysis.service';
+import { Router } from '@angular/router';
+import { AnalysisValidationService } from '../../analysis-validation.service';
 @Component({
   selector: 'app-analysis-setup',
   templateUrl: './analysis-setup.component.html',
@@ -23,7 +25,8 @@ export class AnalysisSetupComponent implements OnInit {
   yearOptions: Array<number>;
   constructor(private facilityDbService: FacilitydbService, private analysisDbService: AnalysisDbService,
     private analysisCalculationsHelperService: AnalysisCalculationsHelperService,
-    private analysisService: AnalysisService) { }
+    private analysisService: AnalysisService, private router: Router,
+    private analysisValidationService: AnalysisValidationService) { }
 
   ngOnInit(): void {
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
@@ -33,28 +36,22 @@ export class AnalysisSetupComponent implements OnInit {
   }
 
   async saveItem() {
+    this.analysisItem.setupErrors = this.analysisValidationService.getAnalysisItemErrors(this.analysisItem);
     await this.analysisDbService.updateWithObservable(this.analysisItem).toPromise();
     this.analysisDbService.selectedAnalysisItem.next(this.analysisItem);
   }
 
   changeReportYear() {
-    if (this.facility.sustainabilityQuestions.energyReductionBaselineYear < this.analysisItem.reportYear) {
-      let yearAdjustments: Array<{ year: number, amount: number }> = new Array();
-      for (let year: number = this.facility.sustainabilityQuestions.energyReductionBaselineYear + 1; year <= this.analysisItem.reportYear; year++) {
-        yearAdjustments.push({
-          year: year,
-          amount: 0
-        })
-      }
-      this.analysisItem.groups.forEach(group => {
-        group.baselineAdjustments = yearAdjustments;
-      });
-    }
+    this.analysisItem = this.analysisService.setBaselineAdjustments(this.facility, this.analysisItem);
     this.saveItem();
   }
 
-  async setSiteSource(){
+  async setSiteSource() {
     await this.saveItem();
     this.analysisService.setCalanderizedMeters();
+  }
+
+  continue() {
+    this.router.navigateByUrl('/facility/' + this.facility.id + '/analysis/run-analysis/group-analysis/' + this.analysisItem.groups[0].idbGroupId + '/options');
   }
 }

@@ -259,7 +259,17 @@ export interface IdbAnalysisItem {
     energyIsSource: boolean,
     reportYear: number,
     energyUnit: string,
+    setupErrors: AnalysisSetupErrors,
     groups: Array<AnalysisGroup>
+}
+
+export interface AnalysisSetupErrors{
+    hasError: boolean,
+    missingName: boolean,
+    noGroups: boolean,
+    missingReportYear: boolean,
+    reportYearBeforeBaselineYear: boolean,
+    groupsHaveErrors: boolean
 }
 
 export interface AnalysisGroup {
@@ -269,7 +279,7 @@ export interface AnalysisGroup {
     productionUnits: string,
     regressionModelYear: number,
     regressionConstant: number,
-    groupHasError: boolean,
+    groupErrors: GroupErrors,
     specifiedMonthlyPercentBaseload: boolean,
     averagePercentBaseload: number,
     monthlyPercentBaseload: Array<{
@@ -285,6 +295,20 @@ export interface AnalysisGroup {
     models?: Array<JStatRegressionModel>,
     selectedModelId?: string,
     dateModelsGenerated?: Date
+}
+
+export interface GroupErrors {
+    hasErrors: boolean,
+    missingProductionVariables: boolean,
+    missingRegressionConstant: boolean,
+    missingRegressionModelYear: boolean,
+    missingRegressionModelSelection: boolean,
+    missingRegressionPredictorCoef: boolean,
+    noProductionVariables: boolean,
+    invalidAverageBaseload: boolean,
+    invalidMonthlyBaseload: boolean,
+    missingGroupMeters: boolean,
+    hasInvalidRegressionModel: boolean
 }
 
 export interface IdbAccountAnalysisItem {

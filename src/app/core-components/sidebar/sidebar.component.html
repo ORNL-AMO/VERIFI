@@ -4,14 +4,16 @@
     </a>
     <hr>
     <a title="Account Overview" class="nav-link" routerLink="/account" [routerLinkActive]="['active-head']"
-        [ngClass]="{'open': open}"><i class="fa fa-building"></i>
+        [ngClass]="{'open': open}" (mouseenter)="setHoverAccount(true)" (mouseleave)="setHoverAccount(false)"><i
+            class="fa fa-building"></i>
         <span [hidden]="!open" class="pl-2 nav-label bold">
             {{accountName}}
         </span>
     </a>
 
     <div class="d-flex"
-        [ngClass]="{'flex-column not-open': !open, 'icon-row open': open, 'hidden': checkHideAccountLinks()}">
+        [ngClass]="{'flex-column not-open': !open, 'icon-row open': open, 'hidden': checkHideAccountLinks()}"
+        (mouseenter)="setHoverAccount(true)" (mouseleave)="setHoverAccount(false)">
         <a title="Account Overview" class="nav-link" routerLink="/account/home" [routerLinkActive]="['active']"><i
                 class="fa fa-home"></i>
         </a>
