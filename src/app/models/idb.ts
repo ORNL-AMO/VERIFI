@@ -259,7 +259,16 @@ export interface IdbAnalysisItem {
     energyIsSource: boolean,
     reportYear: number,
     energyUnit: string,
+    setupErrors: AnalysisSetupErrors,
     groups: Array<AnalysisGroup>
+}
+
+export interface AnalysisSetupErrors{
+    hasError: boolean,
+    missingName: boolean,
+    noGroups: boolean,
+    missingReportYear: boolean,
+    reportYearBeforeBaselineYear: boolean
 }
 
 export interface AnalysisGroup {
@@ -297,7 +306,8 @@ export interface GroupErrors {
     noProductionVariables: boolean,
     invalidAverageBaseload: boolean,
     invalidMonthlyBaseload: boolean,
-    missingGroupMeters: boolean
+    missingGroupMeters: boolean,
+    hasInvalidRegressionModel: boolean
 }
 
 export interface IdbAccountAnalysisItem {

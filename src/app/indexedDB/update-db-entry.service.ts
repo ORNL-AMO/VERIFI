@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { AnalysisValidationService } from '../facility/analysis/analysis-validation.service';
-import { GroupErrors, IdbAccount, IdbAnalysisItem, IdbFacility } from '../models/idb';
+import { AnalysisSetupErrors, GroupErrors, IdbAccount, IdbAnalysisItem, IdbFacility } from '../models/idb';
 
 @Injectable({
   providedIn: 'root'
@@ -29,6 +29,19 @@ export class UpdateDbEntryService {
 
   updateAnalysis(analysisItem: IdbAnalysisItem): { analysisItem: IdbAnalysisItem, isChanged: boolean } {
     let isChanged: boolean = false;
+    if(!analysisItem.setupErrors){
+      analysisItem.setupErrors = this.analysisValidationService.getAnalysisItemErrors(analysisItem);
+      isChanged = true;
+    }else{
+      let setupErrors: AnalysisSetupErrors = this.analysisValidationService.getAnalysisItemErrors(analysisItem);
+      Object.keys(setupErrors).forEach(key => {
+        if (setupErrors[key] != analysisItem.setupErrors[key]) {
+          analysisItem.setupErrors[key] = setupErrors[key];
+          isChanged = true;
+        }
+      });
+    }
+
     analysisItem.groups.forEach(group => {
       if (!group.groupErrors) {
         group.groupErrors = this.analysisValidationService.getGroupErrors(group);

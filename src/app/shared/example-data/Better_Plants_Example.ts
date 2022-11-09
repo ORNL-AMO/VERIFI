@@ -10716,6 +10716,13 @@ export const ExampleAccount: BackupFile = {
         "reportYear": 2021,
         "energyIsSource": true,
         "energyUnit": "MMBtu",
+        "setupErrors": {
+            "hasError": false,
+            "missingName": false,
+            "noGroups": false,
+            "missingReportYear": false,
+            "reportYearBeforeBaselineYear": false
+        },
         "groups": [{
             "baselineAdjustments": [],
             "hasBaselineAdjustement": false,
@@ -10757,6 +10764,7 @@ export const ExampleAccount: BackupFile = {
             "regressionConstant": 1852,
             "groupErrors": {
                 "hasErrors": false,
+                "hasInvalidRegressionModel": false,
                 "missingProductionVariables": false,
                 "missingRegressionConstant": false,
                 "missingRegressionModelYear": false,
@@ -10846,6 +10854,7 @@ export const ExampleAccount: BackupFile = {
             "regressionConstant": 3.32,
             "groupErrors": {
                 "hasErrors": false,
+                "hasInvalidRegressionModel": false,
                 "missingProductionVariables": false,
                 "missingRegressionConstant": false,
                 "missingRegressionModelYear": false,
@@ -10933,6 +10942,7 @@ export const ExampleAccount: BackupFile = {
             "regressionConstant": 199.03,
             "groupErrors": {
                 "hasErrors": false,
+                "hasInvalidRegressionModel": false,
                 "missingProductionVariables": false,
                 "missingRegressionConstant": false,
                 "missingRegressionModelYear": false,
@@ -10993,6 +11003,13 @@ export const ExampleAccount: BackupFile = {
         "reportYear": 2021,
         "energyIsSource": true,
         "energyUnit": "MMBtu",
+        "setupErrors": {
+            "hasError": false,
+            "missingName": false,
+            "noGroups": false,
+            "missingReportYear": false,
+            "reportYearBeforeBaselineYear": false
+        },
         "groups": [{
             "regressionConstant": undefined,
             "regressionModelYear": undefined,
@@ -11022,6 +11039,7 @@ export const ExampleAccount: BackupFile = {
             "productionUnits": "units",
             "groupErrors": {
                 "hasErrors": false,
+                "hasInvalidRegressionModel": false,
                 "missingProductionVariables": false,
                 "missingRegressionConstant": false,
                 "missingRegressionModelYear": false,
@@ -11103,6 +11121,7 @@ export const ExampleAccount: BackupFile = {
             "regressionConstant": 62.3,
             "groupErrors": {
                 "hasErrors": false,
+                "hasInvalidRegressionModel": false,
                 "missingProductionVariables": false,
                 "missingRegressionConstant": false,
                 "missingRegressionModelYear": false,
@@ -11163,6 +11182,13 @@ export const ExampleAccount: BackupFile = {
         "reportYear": 2021,
         "energyIsSource": true,
         "energyUnit": "MMBtu",
+        "setupErrors": {
+            "hasError": false,
+            "missingName": false,
+            "noGroups": false,
+            "missingReportYear": false,
+            "reportYearBeforeBaselineYear": false
+        },
         "groups": [{
             "regressionConstant": undefined,
             "regressionModelYear": undefined,
@@ -11192,6 +11218,7 @@ export const ExampleAccount: BackupFile = {
             "productionUnits": "units",
             "groupErrors": {
                 "hasErrors": false,
+                "hasInvalidRegressionModel": false,
                 "missingProductionVariables": false,
                 "missingRegressionConstant": false,
                 "missingRegressionModelYear": false,
@@ -11272,6 +11299,7 @@ export const ExampleAccount: BackupFile = {
             "productionUnits": "units",
             "groupErrors": {
                 "hasErrors": false,
+                "hasInvalidRegressionModel": false,
                 "missingProductionVariables": false,
                 "missingRegressionConstant": false,
                 "missingRegressionModelYear": false,
@@ -11332,6 +11360,13 @@ export const ExampleAccount: BackupFile = {
         "reportYear": 2021,
         "energyIsSource": true,
         "energyUnit": "MMBtu",
+        "setupErrors": {
+            "hasError": false,
+            "missingName": false,
+            "noGroups": false,
+            "missingReportYear": false,
+            "reportYearBeforeBaselineYear": false
+        },
         "groups": [{
             "averagePercentBaseload": 0,
             "idbGroupId": "656z3c20n",
@@ -11362,6 +11397,7 @@ export const ExampleAccount: BackupFile = {
             "productionUnits": "units",
             "groupErrors": {
                 "hasErrors": false,
+                "hasInvalidRegressionModel": false,
                 "missingProductionVariables": false,
                 "missingRegressionConstant": false,
                 "missingRegressionModelYear": false,
@@ -11770,6 +11806,7 @@ export const ExampleAccount: BackupFile = {
             "productionUnits": "units",
             "groupErrors": {
                 "hasErrors": false,
+                "hasInvalidRegressionModel": false,
                 "missingProductionVariables": false,
                 "missingRegressionConstant": false,
                 "missingRegressionModelYear": false,

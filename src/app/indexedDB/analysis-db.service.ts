@@ -157,7 +157,8 @@ export class AnalysisDbService {
         itemGroups.push(analysisGroup);
       }
     });
-    return {
+
+    let analysisItem: IdbAnalysisItem = {
       facilityId: selectedFacility.guid,
       accountId: selectedAccount.guid,
       guid: Math.random().toString(36).substr(2, 9),
@@ -167,7 +168,10 @@ export class AnalysisDbService {
       energyIsSource: selectedFacility.energyIsSource,
       energyUnit: selectedFacility.energyUnit,
       groups: itemGroups,
-    }
+      setupErrors: undefined
+    };
+    analysisItem.setupErrors = this.analysisValidationService.getAnalysisItemErrors(analysisItem);
+    return analysisItem;
   }
 
   getUnits(predictorVariables: Array<PredictorData>): string {

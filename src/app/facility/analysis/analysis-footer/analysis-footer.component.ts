@@ -21,7 +21,6 @@ export class AnalysisFooterComponent implements OnInit {
   sidebarOpenSub: Subscription;
   helpPanelOpen: boolean;
   helpPanelOpenSub: Subscription;
-  canContinue: boolean;
   analysisItem: IdbAnalysisItem;
   analysisItemSub: Subscription;
   selectedGroup: AnalysisGroup;
@@ -30,6 +29,7 @@ export class AnalysisFooterComponent implements OnInit {
   routerSub: Subscription;
   showContinue: boolean;
   showGoBackToAccount: boolean;
+  disableContinue: boolean = false;
   constructor(private sharedDataService: SharedDataService,
     private helpPanelService: HelpPanelService,
     private router: Router,
@@ -43,10 +43,10 @@ export class AnalysisFooterComponent implements OnInit {
     this.showGoBackToAccount = this.analysisService.accountAnalysisItem != undefined;
     this.routerSub = this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
-        this.setShowContinue(event.url);
+        this.setShowContinue();
       }
     });
-    this.setShowContinue(this.router.url);
+    this.setShowContinue();
 
     this.sidebarOpenSub = this.sharedDataService.sidebarOpen.subscribe(val => {
       this.sidebarOpen = val;
@@ -58,10 +58,12 @@ export class AnalysisFooterComponent implements OnInit {
 
     this.analysisItemSub = this.analysisDbService.selectedAnalysisItem.subscribe(val => {
       this.analysisItem = val;
+      this.setDisableContinue();
     });
 
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(val => {
       this.selectedGroup = val;
+      this.setDisableContinue();
     });
   }
 
@@ -141,16 +143,53 @@ export class AnalysisFooterComponent implements OnInit {
     }
   }
 
-  setShowContinue(url: string) {
-    this.showContinue = (url.includes('account-analysis') == false);
+  setShowContinue() {
+    this.showContinue = (this.router.url.includes('account-analysis') == false);
   }
-
 
   goBackToAccount() {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     this.accountAnalysisService.selectedFacility.next(selectedFacility);
     this.accountAnalysisDbService.selectedAnalysisItem.next(this.analysisService.accountAnalysisItem);
     this.router.navigateByUrl('/account/analysis/select-items')
+  }
+
+  setDisableContinue() {
+    if (this.router.url.includes('analysis-setup')) {
+      if (this.analysisItem.setupErrors.hasError) {
+        this.disableContinue = true;
+      } else {
+        this.disableContinue = false;
+      }
+    } else if (this.router.url.includes('group-analysis') && this.selectedGroup) {
+      if (this.router.url.includes('options')) {
+        if (this.selectedGroup.groupErrors.hasErrors) {
+          if (this.selectedGroup.groupErrors.invalidAverageBaseload || this.selectedGroup.groupErrors.invalidMonthlyBaseload
+            || this.selectedGroup.groupErrors.missingGroupMeters || this.selectedGroup.groupErrors.noProductionVariables || this.selectedGroup.groupErrors.missingProductionVariables) {
+            this.disableContinue = true;
+          } else {
+            this.disableContinue = false;
+          }
+        } else {
+          this.disableContinue = false;
+        }
+      } else if (this.router.url.includes('model-selection')) {
+        if (this.selectedGroup.groupErrors.hasErrors) {
+          if (this.selectedGroup.groupErrors.missingRegressionConstant ||
+            this.selectedGroup.groupErrors.missingRegressionModelYear ||
+            this.selectedGroup.groupErrors.missingRegressionModelSelection ||
+            this.selectedGroup.groupErrors.missingRegressionPredictorCoef) {
+            this.disableContinue = true;
+          } else {
+            this.disableContinue = false;
+          }
+        } else {
+          this.disableContinue = false;
+        }
+      }else{
+        this.disableContinue = false;
+      }
+    }
   }
 
 }

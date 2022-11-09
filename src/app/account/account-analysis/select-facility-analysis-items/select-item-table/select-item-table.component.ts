@@ -9,6 +9,7 @@ import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
+import { AnalysisValidationService } from 'src/app/facility/analysis/analysis-validation.service';
 @Component({
   selector: 'app-select-item-table',
   templateUrl: './select-item-table.component.html',
@@ -32,7 +33,8 @@ export class SelectItemTableComponent implements OnInit {
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
     private loadingService: LoadingService,
-    private analysisService: AnalysisService) { }
+    private analysisService: AnalysisService,
+    private analysisValidationService: AnalysisValidationService) { }
 
   ngOnInit(): void {
     this.facilities = this.facilityDbService.accountFacilities.getValue();
@@ -70,15 +72,15 @@ export class SelectItemTableComponent implements OnInit {
     this.router.navigateByUrl('facility/' + this.facility.id + '/analysis/run-analysis');
   }
 
-  createNewItem(){
+  createNewItem() {
     this.showCreateItem = true;
   }
 
-  cancelCreateNew(){
+  cancelCreateNew() {
     this.showCreateItem = false;
   }
 
-  async confirmCreateNew(){
+  async confirmCreateNew() {
     this.loadingService.setLoadingMessage('Creating Facility Analysis...')
     this.loadingService.setLoadingStatus(true);
     this.showCreateItem = false;
@@ -86,9 +88,11 @@ export class SelectItemTableComponent implements OnInit {
     let newIdbItem: IdbAnalysisItem = this.analysisDbService.getNewAnalysisItem();
     newIdbItem.energyIsSource = this.selectedAnalysisItem.energyIsSource;
     newIdbItem.reportYear = this.selectedAnalysisItem.reportYear;
+    newIdbItem = this.analysisService.setBaselineAdjustments(this.facility, newIdbItem);
+    newIdbItem.setupErrors = this.analysisValidationService.getAnalysisItemErrors(newIdbItem);
     newIdbItem = await this.analysisDbService.addWithObservable(newIdbItem).toPromise();
     this.selectedFacilityItemId = newIdbItem.guid;
-    await this.save();    
+    await this.save();
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.selectAccount(account);
     this.analysisDbService.selectedAnalysisItem.next(newIdbItem);

@@ -1,14 +1,32 @@
 import { Injectable } from '@angular/core';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { AnalysisGroup, GroupErrors, IdbUtilityMeter, PredictorData } from 'src/app/models/idb';
+import { JStatRegressionModel } from 'src/app/models/analysis';
+import { AnalysisGroup, AnalysisSetupErrors, GroupErrors, IdbAnalysisItem, IdbFacility, IdbUtilityMeter, PredictorData } from 'src/app/models/idb';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AnalysisValidationService {
 
-  constructor(private utilityMeterDbService: UtilityMeterdbService) { }
+  constructor(private utilityMeterDbService: UtilityMeterdbService, private facilityDbService: FacilitydbService) { }
 
+  getAnalysisItemErrors(analysisItem: IdbAnalysisItem): AnalysisSetupErrors {
+    let missingName: boolean = (analysisItem.name == undefined || analysisItem.name == '');
+    let noGroups: boolean = analysisItem.groups.length == 0;
+    let missingReportYear: boolean = this.checkValueValid(analysisItem.reportYear) == false;
+    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let analysisFacility: IdbFacility = accountFacilities.find(facility => {return facility.guid == analysisItem.facilityId});
+    let reportYearBeforeBaselineYear: boolean = analysisFacility.sustainabilityQuestions.energyReductionBaselineYear > analysisItem.reportYear;
+    let hasError: boolean = (missingName || noGroups || missingReportYear || reportYearBeforeBaselineYear);
+    return {
+      hasError: hasError,
+      missingName: missingName,
+      noGroups: noGroups,
+      missingReportYear: missingReportYear,
+      reportYearBeforeBaselineYear: reportYearBeforeBaselineYear
+    }
+  }
 
   getGroupErrors(group: AnalysisGroup): GroupErrors {
     let missingProductionVariables: boolean = false;
@@ -20,6 +38,8 @@ export class AnalysisValidationService {
     let invalidMonthlyBaseload: boolean = false;
     let noProductionVariables: boolean = false;
     let groupMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getGroupMetersByGroupId(group.idbGroupId);
+
+    let hasInvalidRegressionModel: boolean = false;
 
     let missingGroupMeters: boolean = groupMeters.length == 0;
     if (group.analysisType != 'absoluteEnergyConsumption') {
@@ -35,6 +55,9 @@ export class AnalysisValidationService {
         }
         if (group.userDefinedModel && !group.selectedModelId) {
           missingRegressionModelSelection = true;
+        }else if (group.selectedModelId){
+          let model: JStatRegressionModel = group.models.find(model => {return model.modelId == group.selectedModelId});
+          hasInvalidRegressionModel = model.isValid == false;
         }
       } else {
         let hasProductionVariable: boolean = false;
@@ -70,7 +93,8 @@ export class AnalysisValidationService {
       invalidAverageBaseload: invalidAverageBaseload,
       invalidMonthlyBaseload: invalidMonthlyBaseload,
       noProductionVariables: noProductionVariables,
-      missingGroupMeters: missingGroupMeters
+      missingGroupMeters: missingGroupMeters,
+      hasInvalidRegressionModel: hasInvalidRegressionModel
     };
   }
 

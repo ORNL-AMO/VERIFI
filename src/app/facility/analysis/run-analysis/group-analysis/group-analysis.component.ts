@@ -20,10 +20,13 @@ export class GroupAnalysisComponent implements OnInit {
   selectedGroupSub: Subscription;
   groupId: string;
   label: string
-  groupErrors: GroupErrors;
   analysisItemSub: Subscription;
   showModelSelection: boolean;
   routerSub: Subscription;
+  setupErrors: boolean;
+  regressionErrors: boolean;
+  hasErrors: boolean;
+  hasInvalidRegressionModel: boolean;
   constructor(private activatedRoute: ActivatedRoute, private analysisDbService: AnalysisDbService,
     private analysisService: AnalysisService, private router: Router,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService) { }
@@ -42,15 +45,15 @@ export class GroupAnalysisComponent implements OnInit {
         this.setLabel(this.router.url);
       }
     });
-    this.setLabel(this.router.url);
 
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(val => {
       this.selectedGroup = val;
-      if(this.selectedGroup){
-        this.groupErrors = this.selectedGroup.groupErrors;
+      if (this.selectedGroup) {
+        this.setErrorBools();
         this.showModelSelection = this.selectedGroup.analysisType == 'regression';
       }
     });
+    this.setLabel(this.router.url);
   }
 
   ngOnDestroy() {
@@ -78,6 +81,22 @@ export class GroupAnalysisComponent implements OnInit {
       } else {
         this.label = groupName + ' Setup'
       }
+    }
+  }
+
+  setErrorBools() {
+    this.hasErrors = this.selectedGroup.groupErrors.hasErrors;
+    this.hasInvalidRegressionModel = this.selectedGroup.groupErrors.hasInvalidRegressionModel;
+    if (this.selectedGroup.groupErrors.hasErrors) {
+      this.regressionErrors = (this.selectedGroup.groupErrors.missingRegressionConstant ||
+        this.selectedGroup.groupErrors.missingRegressionModelYear ||
+        this.selectedGroup.groupErrors.missingRegressionModelSelection ||
+        this.selectedGroup.groupErrors.missingRegressionPredictorCoef);
+      this.setupErrors = (this.selectedGroup.groupErrors.invalidAverageBaseload || this.selectedGroup.groupErrors.noProductionVariables ||
+        this.selectedGroup.groupErrors.invalidAverageBaseload || this.selectedGroup.groupErrors.invalidMonthlyBaseload || this.selectedGroup.groupErrors.missingGroupMeters)
+    } else {
+      this.regressionErrors = false;
+      this.setupErrors = false;
     }
   }
 }
