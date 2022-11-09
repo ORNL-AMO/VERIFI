@@ -28,7 +28,6 @@ export class AccountAnalysisSetupComponent implements OnInit {
 
   ngOnInit(): void {
     this.analysisItem = this.accountAnalysisDbService.selectedAnalysisItem.getValue();
-    console.log(this.analysisItem);
     if (!this.analysisItem) {
       this.router.navigateByUrl('/account/analysis/dashboard')
     }
