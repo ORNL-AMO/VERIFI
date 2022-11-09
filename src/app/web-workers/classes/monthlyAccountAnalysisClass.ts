@@ -52,7 +52,7 @@ export class MonthlyAccountAnalysisClass {
         allAccountAnalysisItems: Array<IdbAnalysisItem>) {
         this.monthlyFacilityAnalysisClasses = new Array();
         accountAnalysisItem.facilityAnalysisItems.forEach(item => {
-            if (item.analysisItemId != undefined) {
+            if (item.analysisItemId != undefined && item.analysisItemId != 'skip') {
                 let analysisItem: IdbAnalysisItem = allAccountAnalysisItems.find(accountItem => { return item.analysisItemId == accountItem.guid });
                 analysisItem.energyUnit = accountAnalysisItem.energyUnit;
                 let facility: IdbFacility = accountFacilities.find(facility => { return facility.guid == item.facilityId });

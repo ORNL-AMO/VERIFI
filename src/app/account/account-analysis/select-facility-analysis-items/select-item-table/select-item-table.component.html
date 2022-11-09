@@ -19,6 +19,15 @@
     <hr>
 </ng-container>
 
+
+<ng-container *ngIf="selectedFacilityItemId == undefined">
+    <div class="alert alert-danger w-100 text-center">
+        Analysis item selection required.
+    </div>
+    <hr>
+</ng-container>
+
+
 <div class="table-responsive">
     <table class="table table-sm table-hover">
         <thead>
@@ -75,7 +84,7 @@
             </tr>
             <tr>
                 <td>
-                    <input type="radio" class="rowToggle" [(ngModel)]="selectedFacilityItemId" [value]="undefined"
+                    <input type="radio" class="rowToggle" [(ngModel)]="selectedFacilityItemId" [value]="'skip'"
                         name="{{facility.name+'undefined'}}" id="{{facility.name+'undefined'}}" (change)="save()">
                 </td>
                 <td colspan="6">
