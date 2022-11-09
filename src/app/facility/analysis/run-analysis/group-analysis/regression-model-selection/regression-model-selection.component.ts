@@ -21,12 +21,14 @@ export class RegressionModelSelectionComponent implements OnInit {
   orderDataField: string = 'modelPValue';
   orderByDirection: 'asc' | 'desc' = 'asc';
   selectedGroupSub: Subscription;
+  selectedFacility: IdbFacility;
   constructor(private analysisService: AnalysisService,
     private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService, private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
     private analysisValidationService: AnalysisValidationService) { }
 
   ngOnInit(): void {
+    this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(group => {
       this.selectedGroup = group;
     });
@@ -63,8 +65,7 @@ export class RegressionModelSelectionComponent implements OnInit {
     analysisItem.groups[groupIndex] = this.selectedGroup;
     await this.analysisDbService.updateWithObservable(analysisItem).toPromise();
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.dbChangesService.setAnalysisItems(selectedAccount, selectedFacility);
+    this.dbChangesService.setAnalysisItems(selectedAccount, this.selectedFacility);
     this.analysisDbService.selectedAnalysisItem.next(analysisItem);
     this.analysisService.selectedGroup.next(this.selectedGroup)
   }

@@ -44,7 +44,7 @@
                     </div>
                     <div class="p-0" *ngIf="group.dateModelsGenerated">
                         Current Models Generated:
-                        {{group.dateModelsGenerated | date}}
+                        {{group.dateModelsGenerated | date:'short'}}
                     </div>
                 </div>
 
@@ -122,9 +122,9 @@
             </div>
             <div class="col-6">
                 <select required class="form-control" id="regressionModelYear" id="regressionModelYear"
-                    [(ngModel)]="group.regressionModelYear" (change)="saveItem()"
-                    [disabled]="group.userDefinedModel">
-                    <option *ngFor="let year of yearOptions" [ngValue]="year">{{year}}</option>
+                    [(ngModel)]="group.regressionModelYear" (change)="saveItem()" [disabled]="group.userDefinedModel">
+                    <option *ngFor="let year of yearOptions" [ngValue]="year">{{year |
+                        yearDisplay:selectedFacility.fiscalYear}}</option>
                 </select>
             </div>
         </div>

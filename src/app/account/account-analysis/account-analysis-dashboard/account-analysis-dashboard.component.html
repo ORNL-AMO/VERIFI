@@ -53,7 +53,7 @@
                                     {{analysisItem.name}}
                                 </a>
                             </td>
-                            <td>{{analysisItem.reportYear}}</td>
+                            <td>{{analysisItem.reportYear| yearDisplay: selectedAccount.fiscalYear}}</td>
                             <td>{{analysisItem.date  | date:'short'}}</td>
                             <td class="actions">
                                 <div class="d-flex">

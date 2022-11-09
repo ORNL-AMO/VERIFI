@@ -38,7 +38,7 @@
                 </label>
                 <select required class="w-50" id="reportYear" id="reportYear" [(ngModel)]="analysisItem.reportYear"
                     (change)="changeReportYear()">
-                    <option *ngFor="let year of yearOptions" [ngValue]="year">{{year}}</option>
+                    <option *ngFor="let year of yearOptions" [ngValue]="year">{{year| yearDisplay: facility.fiscalYear}}</option>
                 </select>
             </div>
             <hr>
@@ -51,7 +51,7 @@
                 <select id="baselineYear" name="baselineYear" disabled class="w-50"
                     [(ngModel)]="facility.sustainabilityQuestions.energyReductionBaselineYear">
                     <option [ngValue]="facility.sustainabilityQuestions.energyReductionBaselineYear">
-                        {{facility.sustainabilityQuestions.energyReductionBaselineYear}}</option>
+                        {{facility.sustainabilityQuestions.energyReductionBaselineYear| yearDisplay: facility.fiscalYear}}</option>
                 </select>
             </div>
             <div class="form-group d-flex">
