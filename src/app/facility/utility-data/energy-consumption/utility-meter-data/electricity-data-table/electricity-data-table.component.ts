@@ -1,13 +1,11 @@
 import { Component, ElementRef, EventEmitter, Input, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { UtilityMeterDataService } from '../utility-meter-data.service';
 import * as _ from 'lodash';
 import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
 import { CalanderizationService, EmissionsResults } from 'src/app/shared/helper-services/calanderization.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AdditionalChargesFilters, DetailedChargesFilters, EmissionsFilters, GeneralInformationFilters } from 'src/app/models/meterDataFilter';
-import { EmissionsDataFormComponent } from 'src/app/account/custom-database/regional-emissions-data/emissions-data-form/emissions-data-form.component';
 
 @Component({
   selector: 'app-electricity-data-table',
@@ -48,7 +46,7 @@ export class ElectricityDataTableComponent implements OnInit {
   numGeneralInformation: number;
   numEmissions: number;
   constructor(private utilityMeterDataService: UtilityMeterDataService, private copyTableService: CopyTableService,
-    private calanderizationService: CalanderizationService, private facilityDbService: FacilitydbService) { }
+    private calanderizationService: CalanderizationService) { }
 
   ngOnInit(): void {
     this.energyUnit = this.selectedMeter.startingUnit;
@@ -148,10 +146,8 @@ export class ElectricityDataTableComponent implements OnInit {
   }
 
   setEmissions() {
-    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-    let facility: IdbFacility = accountFacilities.find(facility => { return facility.guid == this.selectedMeter.facilityId });
     this.selectedMeterData.forEach(dataItem => {
-      let emissionsValues: EmissionsResults = this.calanderizationService.getEmissions(this.selectedMeter, dataItem.totalEnergyUse, this.selectedMeter.energyUnit, facility.energyIsSource, new Date(dataItem.readDate).getFullYear());
+      let emissionsValues: EmissionsResults = this.calanderizationService.getEmissions(this.selectedMeter, dataItem.totalEnergyUse, this.selectedMeter.energyUnit, new Date(dataItem.readDate).getFullYear());
       dataItem.totalMarketEmissions = emissionsValues.marketEmissions;
       dataItem.totalLocationEmissions = emissionsValues.locationEmissions;
       dataItem.RECs = emissionsValues.RECs;

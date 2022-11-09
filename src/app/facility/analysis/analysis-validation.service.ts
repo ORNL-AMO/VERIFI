@@ -21,7 +21,7 @@ export class AnalysisValidationService {
     let hasError: boolean = (missingName || noGroups || missingReportYear || reportYearBeforeBaselineYear);
     let groupsHaveErrors: boolean = false;
     analysisItem.groups.forEach(group => {
-      if(group.groupErrors.hasErrors){
+      if(group.groupErrors && group.groupErrors.hasErrors){
         groupsHaveErrors = true;
       }
     })
