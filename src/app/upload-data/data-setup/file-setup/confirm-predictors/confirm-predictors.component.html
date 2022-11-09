@@ -6,6 +6,13 @@
         <button class="btn btn-success" (click)="continue()">Submit &amp; Continue</button>
     </div>
 </div>
+<ng-container *ngIf="fileReference.isTemplate">
+    <hr>
+    <div class="alert alert-warning w-100 text-center">
+        We have made some assumptions about your predictors. Please make sure that we have marked the proper predictor
+        variables as "Production".
+    </div>
+</ng-container>
 <hr>
 <ng-container *ngIf="predictorsExist">
     <div class="row no-gutters">
@@ -19,9 +26,9 @@
             <div class="card-body">
                 <div class="list-item template mt-2 mb-2 p-2" *ngFor="let groupItem of facilityGroup.groupItems">
                     <div class="d-flex flex-column text-center">
-                        {{groupItem.value}} 
-                        <span *ngIf="groupItem.isExisting">(existing)</span>
-                        <span *ngIf="!groupItem.isExisting">(new)</span>
+                        {{groupItem.value}}
+                        <!-- <span *ngIf="groupItem.isExisting">(existing)</span>
+                        <span *ngIf="!groupItem.isExisting">(new)</span> -->
 
                         <!-- <hr> -->
                         <div class="d-flex justify-content-center">

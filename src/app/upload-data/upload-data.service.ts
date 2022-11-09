@@ -258,6 +258,10 @@ export class UploadDataService {
               });
               if(hasData){
                 let newPredictor: PredictorData = this.predictorDbService.getNewPredictor([]);
+                let nameTest: string = key.toLocaleLowerCase();
+                if(!nameTest.includes('cdd') && !nameTest.includes('hdd')){
+                  newPredictor.production = true;
+                }
                 newPredictor.name = key;
                 existingFacilityPredictorData.push(newPredictor);
               }
