@@ -10721,7 +10721,8 @@ export const ExampleAccount: BackupFile = {
             "missingName": false,
             "noGroups": false,
             "missingReportYear": false,
-            "reportYearBeforeBaselineYear": false
+            "reportYearBeforeBaselineYear": false,
+            "groupsHaveErrors": false
         },
         "groups": [{
             "baselineAdjustments": [],
@@ -11008,7 +11009,8 @@ export const ExampleAccount: BackupFile = {
             "missingName": false,
             "noGroups": false,
             "missingReportYear": false,
-            "reportYearBeforeBaselineYear": false
+            "reportYearBeforeBaselineYear": false,
+            "groupsHaveErrors": false
         },
         "groups": [{
             "regressionConstant": undefined,
@@ -11187,7 +11189,8 @@ export const ExampleAccount: BackupFile = {
             "missingName": false,
             "noGroups": false,
             "missingReportYear": false,
-            "reportYearBeforeBaselineYear": false
+            "reportYearBeforeBaselineYear": false,
+            "groupsHaveErrors": false
         },
         "groups": [{
             "regressionConstant": undefined,
@@ -11365,7 +11368,8 @@ export const ExampleAccount: BackupFile = {
             "missingName": false,
             "noGroups": false,
             "missingReportYear": false,
-            "reportYearBeforeBaselineYear": false
+            "reportYearBeforeBaselineYear": false,
+            "groupsHaveErrors": false
         },
         "groups": [{
             "averagePercentBaseload": 0,

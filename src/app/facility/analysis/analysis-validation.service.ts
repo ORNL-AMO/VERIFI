@@ -19,12 +19,19 @@ export class AnalysisValidationService {
     let analysisFacility: IdbFacility = accountFacilities.find(facility => {return facility.guid == analysisItem.facilityId});
     let reportYearBeforeBaselineYear: boolean = analysisFacility.sustainabilityQuestions.energyReductionBaselineYear > analysisItem.reportYear;
     let hasError: boolean = (missingName || noGroups || missingReportYear || reportYearBeforeBaselineYear);
+    let groupsHaveErrors: boolean = false;
+    analysisItem.groups.forEach(group => {
+      if(group.groupErrors.hasErrors){
+        groupsHaveErrors = true;
+      }
+    })
     return {
       hasError: hasError,
       missingName: missingName,
       noGroups: noGroups,
       missingReportYear: missingReportYear,
-      reportYearBeforeBaselineYear: reportYearBeforeBaselineYear
+      reportYearBeforeBaselineYear: reportYearBeforeBaselineYear,
+      groupsHaveErrors: groupsHaveErrors
     }
   }
 

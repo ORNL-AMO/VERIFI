@@ -6,3 +6,7 @@ i.fa-industry{
 .radio-td{
     width: 15px;
 }
+
+.fa.fa-exclamation-circle, .banner a.nav-link:not(.active) .fa.fa.fa-exclamation-circle{
+    color: red;
+}

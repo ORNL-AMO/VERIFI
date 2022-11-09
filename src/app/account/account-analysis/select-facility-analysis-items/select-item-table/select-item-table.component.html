@@ -11,6 +11,14 @@
     </div>
 </h4>
 
+<ng-container
+    *ngIf="selectedFacilityItem && (selectedFacilityItem.setupErrors.hasError || selectedFacilityItem.setupErrors.groupsHaveErrors)">
+    <div class="alert alert-danger w-100 text-center">
+        The selected facility analysis contains errors. Click "View Analysis" to view and fix the errors.
+    </div>
+    <hr>
+</ng-container>
+
 <div class="table-responsive">
     <table class="table table-sm table-hover">
         <thead>
@@ -32,6 +40,8 @@
                         id="{{analysisItem.id+'_selectedFacilityItemId'}}" (change)="save()">
                 </td>
                 <td>
+                    <span class="fa fa-exclamation-circle"
+                        *ngIf="analysisItem.setupErrors.hasError || analysisItem.setupErrors.groupsHaveErrors"></span>
                     {{analysisItem.name}}
                 </td>
                 <td>

@@ -15,3 +15,6 @@ th:hover{
 th.active{
     text-decoration: underline;
 }
+.fa.fa-exclamation-circle, .banner a.nav-link:not(.active) .fa.fa.fa-exclamation-circle{
+    color: red;
+}

@@ -4,7 +4,6 @@ import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
-import { AccountAnalysisService } from '../../account-analysis.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
@@ -27,9 +26,10 @@ export class SelectItemTableComponent implements OnInit {
   itemToEdit: IdbAnalysisItem;
   facilities: Array<IdbFacility>
   showCreateItem: boolean;
+  selectedItemHasErrors: boolean;
+  selectedFacilityItem: IdbAnalysisItem;
   constructor(private accountAnalysisDbService: AccountAnalysisDbService, private router: Router,
     private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService,
-    private accountAnalysisService: AccountAnalysisService,
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
     private loadingService: LoadingService,
@@ -42,7 +42,6 @@ export class SelectItemTableComponent implements OnInit {
 
   ngOnChanges() {
     this.setSelectedFacilityItemId();
-
   }
 
   setSelectedFacilityItemId() {
@@ -51,10 +50,12 @@ export class SelectItemTableComponent implements OnInit {
         this.selectedFacilityItemId = item.analysisItemId;
       }
     });
+    this.setSelectedFacilityItem();
   }
 
   async save() {
     await this.accountAnalysisDbService.updateFacilityItemSelection(this.selectedAnalysisItem, this.selectedFacilityItemId, this.facility.guid);
+    this.setSelectedFacilityItem();
   }
 
 
@@ -99,5 +100,15 @@ export class SelectItemTableComponent implements OnInit {
     this.loadingService.setLoadingStatus(false);
     this.analysisService.accountAnalysisItem = this.selectedAnalysisItem;
     this.router.navigateByUrl("/facility/" + this.facility.id + "/analysis/run-analysis/analysis-setup");
+  }
+
+  setSelectedFacilityItem() {
+    if (this.selectedFacilityItemId) {
+      let analysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
+      this.selectedFacilityItem = analysisItems.find(item => { return item.guid == this.selectedFacilityItemId });
+    } else {
+      this.selectedFacilityItem = undefined;
+    }
+
   }
 }

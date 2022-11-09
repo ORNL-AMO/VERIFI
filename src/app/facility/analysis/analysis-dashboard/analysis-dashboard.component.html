@@ -50,11 +50,13 @@
                             *ngFor="let analysisItem of facilityAnalysisItems  | orderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
                             <td>
                                 <a (click)=" selectAnalysisItem(analysisItem)">
+                                    <span class="fa fa-exclamation-circle"
+                                        *ngIf="analysisItem.setupErrors.hasError || analysisItem.setupErrors.groupsHaveErrors"></span>
                                     {{analysisItem.name}}
                                 </a>
                             </td>
                             <td>{{analysisItem.reportYear}}</td>
-                            <td>{{analysisItem.date | date}}</td>
+                            <td>{{analysisItem.date | date:'short'}}</td>
                             <td class="actions">
                                 <div class="d-flex">
                                     <i class="fa fa-pencil" title="Edit" (click)="selectAnalysisItem(analysisItem)"></i>

@@ -268,7 +268,8 @@ export interface AnalysisSetupErrors{
     missingName: boolean,
     noGroups: boolean,
     missingReportYear: boolean,
-    reportYearBeforeBaselineYear: boolean
+    reportYearBeforeBaselineYear: boolean,
+    groupsHaveErrors: boolean
 }
 
 export interface AnalysisGroup {
