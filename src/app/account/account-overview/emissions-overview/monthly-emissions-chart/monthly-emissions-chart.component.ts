@@ -4,6 +4,9 @@ import { Subscription } from 'rxjs';
 import { YearMonthData } from 'src/app/models/dashboard';
 import { AccountOverviewService } from '../../account-overview.service';
 import * as _ from 'lodash';
+import { Month, Months } from 'src/app/shared/form-data/months';
+import { IdbAccount } from 'src/app/models/idb';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 
 @Component({
   selector: 'app-monthly-emissions-chart',
@@ -15,10 +18,11 @@ export class MonthlyEmissionsChartComponent implements OnInit {
   @ViewChild('monthlyEmissionsChart', { static: false }) monthlyEmissionsChart: ElementRef;
   yearMonthData: Array<YearMonthData>;
   yearMonthDataSub: Subscription;
-  
+
   emissionsDisplay: "market" | "location";
   emissionsDisplaySub: Subscription;
-  constructor(private plotlyService: PlotlyService, private accountOverviewService: AccountOverviewService) { }
+  constructor(private plotlyService: PlotlyService, private accountOverviewService: AccountOverviewService,
+    private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
     this.emissionsDisplaySub = this.accountOverviewService.emissionsDisplay.subscribe(val => {
@@ -49,27 +53,48 @@ export class MonthlyEmissionsChartComponent implements OnInit {
       let hoverformat: string = ",.2f";
       let hovertemplate: string = '%{text} (%{x}): %{y:,.0f} kg CO<sub>2</sub> <extra></extra>'
 
-      let years: Array<number> = this.yearMonthData.flatMap(data => { return data.yearMonth.year });
+      let years: Array<number> = this.yearMonthData.flatMap(data => { return data.yearMonth.fiscalYear });
       years = _.uniq(years);
+      let months: Array<Month> = Months.map(month => { return month });
+      let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+      if (selectedAccount.fiscalYear == 'nonCalendarYear') {
+        let monthStartIndex: number = months.findIndex(month => { return month.monthNumValue == selectedAccount.fiscalYearMonth });
+        let fromStartMonth: Array<Month> = months.splice(monthStartIndex);
+        months = fromStartMonth.concat(months);
+      }
       years.forEach(year => {
         let x: Array<string> = new Array();
         let y: Array<number> = new Array();
-        for (let i = 0; i < this.yearMonthData.length; i++) {
-          if (this.yearMonthData[i].yearMonth.year == year) {
-            x.push(this.yearMonthData[i].yearMonth.month);
-            if(this.emissionsDisplay == 'location'){
-              y.push(this.yearMonthData[i].locationEmissions);
-            }else{
-              y.push(this.yearMonthData[i].marketEmissions);
+        months.forEach(month => {
+          let emissions: number;
+          let ymData: YearMonthData = this.yearMonthData.find(ymData => { return ymData.yearMonth.fiscalYear == year && ymData.yearMonth.month === month.abbreviation });
+          if (ymData) {
+            if (this.emissionsDisplay == 'location') {
+              emissions = ymData.locationEmissions;
+            } else {
+              emissions = ymData.marketEmissions;
             }
           }
+          x.push(month.abbreviation);
+          y.push(emissions)
+        });
+
+        let name: string = year.toString();
+        if (selectedAccount.fiscalYear == 'nonCalendarYear') {
+          name = 'FY - ' + year
         }
         let trace = {
           type: 'scatter',
           x: x,
           y: y,
-          name: year,
-          text: x.map(item => { return year }),
+          name: name,
+          text: x.map(item => {
+            if (selectedAccount.fiscalYear == 'nonCalendarYear') {
+              return 'FY - ' + year
+            } else {
+              return year
+            }
+          }),
           hovertemplate: hovertemplate,
         }
         traceData.push(trace);

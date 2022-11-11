@@ -1,6 +1,6 @@
 import { CalanderizedMeter, LastYearData, MonthlyData } from "src/app/models/calanderization";
 import { AccountFacilitiesSummary, FacilitySummary, YearMonthData, SummaryData, UtilityUsageSummaryData } from "src/app/models/dashboard";
-import { IdbFacility, MeterSource } from "src/app/models/idb";
+import { IdbAccount, IdbFacility, MeterSource } from "src/app/models/idb";
 import * as _ from 'lodash';
 import { getLastBillEntryFromCalanderizedMeterData, getPastYearData, getSumValue, getUtilityUsageSummaryData, getYearlyUsageNumbers, getYearPriorBillEntryFromCalanderizedMeterData } from "../helper-functions/calanderizationFunctions";
 import { Months } from "src/app/shared/form-data/months";
@@ -11,11 +11,11 @@ export class AccountSummaryClass {
     facilitiesSummary: AccountFacilitiesSummary
     utilityUsageSummaryData: UtilityUsageSummaryData;
     yearMonthData: Array<YearMonthData>;
-    constructor(calanderizedMeters: Array<CalanderizedMeter>, facilities: Array<IdbFacility>, sources: Array<MeterSource>) {
+    constructor(calanderizedMeters: Array<CalanderizedMeter>, facilities: Array<IdbFacility>, sources: Array<MeterSource>, account: IdbAccount) {
         let filteredSourceMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(meter => { return sources.includes(meter.meter.source) })
         this.facilitiesSummary = this.calculateFacilitiesSummary(filteredSourceMeters, facilities);
         this.utilityUsageSummaryData = getUtilityUsageSummaryData(filteredSourceMeters, this.facilitiesSummary.allMetersLastBill, sources);
-        this.yearMonthData = getYearlyUsageNumbers(filteredSourceMeters);
+        this.yearMonthData = getYearlyUsageNumbers(filteredSourceMeters, account);
     }
 
     calculateFacilitiesSummary(calanderizedMeters: Array<CalanderizedMeter>, facilities: Array<IdbFacility>): AccountFacilitiesSummary {

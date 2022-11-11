@@ -6,6 +6,7 @@ import { IdbFacility } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { FacilityOverviewService } from '../../facility-overview.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { Month, Months } from 'src/app/shared/form-data/months';
 
 @Component({
   selector: 'app-facility-water-monthly-chart',
@@ -45,23 +46,41 @@ export class FacilityWaterMonthlyChartComponent implements OnInit {
       let hoverformat: string = ",.2f";
       let hovertemplate: string = '%{text} (%{x}): %{y:,.0f} ' + selectedFacility.volumeLiquidUnit + ' <extra></extra>'
 
-      let years: Array<number> = this.yearMonthData.flatMap(data => { return data.yearMonth.year });
+      let years: Array<number> = this.yearMonthData.flatMap(data => { return data.yearMonth.fiscalYear });
       years = _.uniq(years);
+      let months: Array<Month> = Months.map(month => { return month });
+      if (selectedFacility.fiscalYear == 'nonCalendarYear') {
+        let monthStartIndex: number = months.findIndex(month => { return month.monthNumValue == selectedFacility.fiscalYearMonth });
+        let fromStartMonth: Array<Month> = months.splice(monthStartIndex);
+        months = fromStartMonth.concat(months);
+
+        
+      }
+
       years.forEach(year => {
         let x: Array<string> = new Array();
         let y: Array<number> = new Array();
-        for (let i = 0; i < this.yearMonthData.length; i++) {
-          if (this.yearMonthData[i].yearMonth.year == year) {
-            x.push(this.yearMonthData[i].yearMonth.month);
-            y.push(this.yearMonthData[i].consumption);
-          }
+        months.forEach(month => {
+          let energyUse: number = this.yearMonthData.find(ymData => { return ymData.yearMonth.fiscalYear == year && ymData.yearMonth.month === month.abbreviation })?.consumption;
+          x.push(month.abbreviation);
+          y.push(energyUse);
+        });
+        let name: string = year.toString();
+        if (selectedFacility.fiscalYear == 'nonCalendarYear') {
+          name = 'FY - ' + year
         }
         let trace = {
           type: 'scatter',
           x: x,
           y: y,
-          name: year,
-          text: x.map(item => { return year }),
+          name: name,
+          text: x.map(item => {
+            if (selectedFacility.fiscalYear == 'nonCalendarYear') {
+              return 'FY - ' + year
+            } else {
+              return year
+            }
+          }),
           hovertemplate: hovertemplate
         }
         traceData.push(trace);

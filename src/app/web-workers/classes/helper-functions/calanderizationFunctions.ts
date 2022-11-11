@@ -1,7 +1,7 @@
 import { CalanderizedMeter, LastYearData, MonthlyData } from "src/app/models/calanderization";
 import * as _ from 'lodash';
 import { SummaryData, UtilityUsageSummaryData, YearMonthData } from "src/app/models/dashboard";
-import { MeterSource } from "src/app/models/idb";
+import { IdbAccount, IdbFacility, MeterSource } from "src/app/models/idb";
 import { Months } from "src/app/shared/form-data/months";
 
 export function getLastBillEntryFromCalanderizedMeterData(calanderizedMeterData: Array<CalanderizedMeter>, monthlyData?: Array<MonthlyData>): MonthlyData {
@@ -272,7 +272,7 @@ export function getUtilityUsageSummaryData(calanderizedMeters: Array<Calanderize
     }
 }
 
-export function getYearlyUsageNumbers(calanderizedMeters: Array<CalanderizedMeter>): Array<YearMonthData> {
+export function getYearlyUsageNumbers(calanderizedMeters: Array<CalanderizedMeter>, facilityOrAccount: IdbFacility | IdbAccount): Array<YearMonthData> {
     let monthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(cMeter => {
         return cMeter.monthlyData;
     });
@@ -297,8 +297,10 @@ export function getYearlyUsageNumbers(calanderizedMeters: Array<CalanderizedMete
                     consumption += monthlyData[i].energyConsumption;
                 }
             }
+            let date: Date = new Date(year, month.monthNumValue, 1)
+            let fiscalYear: number = getFiscalYear(date, facilityOrAccount);
             yearMonthData.push({
-                yearMonth: { year: year, month: month.abbreviation },
+                yearMonth: { year: year, month: month.abbreviation, fiscalYear: fiscalYear },
                 energyUse: energyUse,
                 energyCost: energyCost,
                 marketEmissions: marketEmissions,
@@ -313,6 +315,26 @@ export function getYearlyUsageNumbers(calanderizedMeters: Array<CalanderizedMete
     return yearMonthData;
 }
 
+
+export function getFiscalYear(date: Date, facilityOrAccount: IdbFacility | IdbAccount): number {
+    if (facilityOrAccount.fiscalYear == 'calendarYear') {
+        return date.getUTCFullYear();
+    } else {
+        if (facilityOrAccount.fiscalYearCalendarEnd) {
+            if (date.getUTCMonth() >= facilityOrAccount.fiscalYearMonth) {
+                return date.getUTCFullYear() + 1;
+            } else {
+                return date.getUTCFullYear();
+            }
+        } else {
+            if (date.getUTCMonth() >= facilityOrAccount.fiscalYearMonth) {
+                return date.getUTCFullYear();
+            } else {
+                return date.getUTCFullYear() - 1;
+            }
+        }
+    }
+}
 
 export interface LastYearDataResult {
     yearData: Array<LastYearData>,
