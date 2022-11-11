@@ -34,7 +34,6 @@ export class GroupAnalysisComponent implements OnInit {
   ngOnInit(): void {
     this.analysisItemSub = this.analysisDbService.selectedAnalysisItem.subscribe(val => {
       this.analysisItem = val;
-      this.setSelectedGroup()
     })
     this.activatedRoute.params.subscribe(params => {
       this.groupId = params['id'];

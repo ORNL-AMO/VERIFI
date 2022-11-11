@@ -32,6 +32,7 @@ export class RegressionModelMenuComponent implements OnInit {
   showConfirmPredictorChangeModel: boolean = false;
   modelingError: boolean = false;
   selectedFacility: IdbFacility;
+  isFormChange: boolean;
   constructor(private analysisDbService: AnalysisDbService, private analysisService: AnalysisService,
     private dbChangesService: DbChangesService, private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService, private analysisCalculationsHelperService: AnalysisCalculationsHelperService,
@@ -40,16 +41,21 @@ export class RegressionModelMenuComponent implements OnInit {
     private analysisValidationService: AnalysisValidationService) { }
 
   ngOnInit(): void {
-    this.selectedFacility  = this.facilityDbService.selectedFacility.getValue();
+    this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
     this.showInvalid = this.analysisService.showInvalidModels.getValue();
     this.yearOptions = this.analysisCalculationsHelperService.getYearOptions();
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(group => {
-      this.group = JSON.parse(JSON.stringify(group));
-      if (this.group.models && this.group.models.length != 0) {
-        this.checkModelData();
-        this.checkHasValidModels();
+      if (!this.isFormChange) {
+        console.log("CHANGEDD")
+        this.group = JSON.parse(JSON.stringify(group));
+        if (this.group.models && this.group.models.length != 0) {
+          this.checkModelData();
+          this.checkHasValidModels();
+        } else {
+          this.noValidModels = false;
+        }
       } else {
-        this.noValidModels = false;
+        this.isFormChange = false;
       }
     });
   }
@@ -59,6 +65,7 @@ export class RegressionModelMenuComponent implements OnInit {
   }
 
   async saveItem() {
+    this.isFormChange = true;
     let analysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     let groupIndex: number = analysisItem.groups.findIndex(group => { return group.idbGroupId == this.group.idbGroupId });
     this.group.groupErrors = this.analysisValidationService.getGroupErrors(this.group);
