@@ -1,11 +1,12 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
-import { MeterSource } from 'src/app/models/idb';
+import { IdbFacility, MeterSource } from 'src/app/models/idb';
 import { FacilityBarChartData } from 'src/app/models/visualization';
 import { FacilityOverviewService } from '../../facility-overview.service';
 import * as _ from 'lodash';
 import { UtilityColors } from 'src/app/shared/utilityColors';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 
 @Component({
   selector: 'app-emissions-utilities-chart',
@@ -22,7 +23,9 @@ export class EmissionsUtilitiesChartComponent implements OnInit {
   }>;
   emissionsDisplay: 'market' | 'location';
   emissionsDisplaySub: Subscription;
-  constructor(private plotlyService: PlotlyService, private facilityOverviewService: FacilityOverviewService) { }
+  constructor(private plotlyService: PlotlyService, 
+    private facilityOverviewService: FacilityOverviewService,
+    private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
     this.emissionsDisplaySub = this.facilityOverviewService.emissionsDisplay.subscribe(val => {
@@ -52,13 +55,13 @@ export class EmissionsUtilitiesChartComponent implements OnInit {
       let tickprefix: string = "";
 
       this.monthlySourceData.forEach(dataItem => {
-        let years: Array<number> = dataItem.data.map(d => { return d.year });
+        let years: Array<number> = dataItem.data.map(d => { return d.fiscalYear });
         years = _.uniq(years)
         let emissions: Array<number> = new Array();
         years.forEach(year => {
           let totalEmissions: number = 0;
           dataItem.data.forEach(d => {
-            if (d.year == year) {
+            if (d.fiscalYear == year) {
               if (this.emissionsDisplay == 'location') {
                 totalEmissions += d.locationEmissions;
               } else {
@@ -80,9 +83,17 @@ export class EmissionsUtilitiesChartComponent implements OnInit {
         traceData.push(trace);
       })
 
+      let xAxisTitle: string = 'Year';
+      let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+      if (selectedFacility.fiscalYear == 'nonCalendarYear') {
+        xAxisTitle = 'Fiscal Year';
+      }
       var layout = {
         barmode: 'group',
         xaxis: {
+          title: {
+            text:xAxisTitle
+          }
         },
         yaxis: {
           title: {

@@ -1,7 +1,7 @@
 import { CalanderizedMeter, MonthlyData } from "src/app/models/calanderization";
 import { FacilityMeterSummaryData, MeterSummary, UtilityUsageSummaryData, YearMonthData } from "src/app/models/dashboard";
 import { IdbFacility, IdbUtilityMeterGroup, MeterSource } from "src/app/models/idb";
-import { getLastBillEntryFromCalanderizedMeterData, getPastYearData, getSumValue, getUtilityUsageSummaryData, getYearlyUsageNumbers, LastYearDataResult } from "../helper-functions/calanderizationFunctions";
+import { getFiscalYear, getLastBillEntryFromCalanderizedMeterData, getPastYearData, getSumValue, getUtilityUsageSummaryData, getYearlyUsageNumbers, LastYearDataResult } from "../helper-functions/calanderizationFunctions";
 import * as _ from 'lodash';
 import { FacilityBarChartData } from "src/app/models/visualization";
 
@@ -18,7 +18,7 @@ export class FacilitySummaryClass {
         let sourceMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return sources.includes(cMeter.meter.source) });
         let allMetersLastBill: MonthlyData = getLastBillEntryFromCalanderizedMeterData(sourceMeters);
         this.meterSummaryData = this.getDashboardFacilityMeterSummary(sourceMeters, allMetersLastBill, groups);
-        this.monthlySourceData = this.getMonthlySourceData(sourceMeters, sources);
+        this.monthlySourceData = this.getMonthlySourceData(sourceMeters, sources,facility);
         this.utilityUsageSummaryData = getUtilityUsageSummaryData(sourceMeters, allMetersLastBill, sources);
         this.yearMonthData = getYearlyUsageNumbers(sourceMeters, facility);
     };
@@ -81,7 +81,7 @@ export class FacilitySummaryClass {
     }
 
 
-    getMonthlySourceData(calanderizedMeters: Array<CalanderizedMeter>, sources: Array<MeterSource>): Array<{
+    getMonthlySourceData(calanderizedMeters: Array<CalanderizedMeter>, sources: Array<MeterSource>, facility: IdbFacility): Array<{
         source: MeterSource,
         data: Array<FacilityBarChartData>
     }> {
@@ -92,13 +92,13 @@ export class FacilitySummaryClass {
         sources.forEach(source => {
             let sourceMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return cMeter.meter.source == source });
             let monthlyData: Array<MonthlyData> = sourceMeters.flatMap(cMeter => { return cMeter.monthlyData });
-            let yearMonths: Array<{ year: number, month: string }> = monthlyData.map(data => { return { year: data.year, month: data.month } });
+            let yearMonths: Array<{ year: number, month: string, monthNumValue: number }> = monthlyData.map(data => { return { year: data.year, month: data.month, monthNumValue: data.monthNumValue } });
             yearMonths = _.uniqWith(yearMonths, (a, b) => {
                 return (a.year == b.year && a.month == b.month)
             });
             let data: Array<FacilityBarChartData> = new Array();
             for (let i = 0; i < yearMonths.length; i++) {
-                let yearMonth: { year: number, month: string } = yearMonths[i];
+                let yearMonth: { year: number, month: string, monthNumValue: number } = yearMonths[i];
                 let totalEnergyUse: number = 0;
                 let totalEnergyCost: number = 0;
                 let totalLocationEmissions: number = 0;
@@ -113,6 +113,9 @@ export class FacilitySummaryClass {
                         totalConsumption += monthlyData[x].energyConsumption;
                     }
                 }
+
+                let date: Date = new Date(yearMonth.year, yearMonth.monthNumValue, 1)
+                let fiscalYear: number = getFiscalYear(date, facility);
                 data.push({
                     time: yearMonth.month + ', ' + yearMonth.year,
                     energyUse: totalEnergyUse,
@@ -120,7 +123,8 @@ export class FacilitySummaryClass {
                     locationEmissions: totalLocationEmissions,
                     marketEmissions: totalMarketEmissions,
                     year: yearMonth.year,
-                    consumption: totalConsumption
+                    consumption: totalConsumption,
+                    fiscalYear: fiscalYear
                 })
             }
             monthlySourceData.push({
