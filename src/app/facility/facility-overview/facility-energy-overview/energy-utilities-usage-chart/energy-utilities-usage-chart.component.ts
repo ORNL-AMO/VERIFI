@@ -49,13 +49,13 @@ export class EnergyUtilitiesUsageChartComponent implements OnInit {
       let tickprefix: string = "";
 
       this.monthlySourceData.forEach(dataItem => {
-        let years: Array<number> = dataItem.data.map(d => { return d.year });
+        let years: Array<number> = dataItem.data.map(d => { return d.fiscalYear });
         years = _.uniq(years)
         let energyUse: Array<number> = new Array();
         years.forEach(year => {
           let totalEnergyUse: number = 0;
           dataItem.data.forEach(d => {
-            if (d.year == year) {
+            if (d.fiscalYear == year) {
               totalEnergyUse += d.energyUse;
             }
           });
@@ -73,9 +73,17 @@ export class EnergyUtilitiesUsageChartComponent implements OnInit {
         traceData.push(trace);
       })
 
+      let xAxisTitle: string = 'Year';
+      if (selectedFacility.fiscalYear == 'nonCalendarYear') {
+        xAxisTitle = 'Fiscal Year';
+      }
+
       var layout = {
         barmode: 'group',
         xaxis: {
+          title: {
+            text:xAxisTitle
+          }
         },
         yaxis: {
           title: {

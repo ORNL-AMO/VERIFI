@@ -5,6 +5,8 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { YearMonthData } from 'src/app/models/dashboard';
 import { AccountOverviewService } from '../../account-overview.service';
 import * as _ from 'lodash';
+import { Month, Months } from 'src/app/shared/form-data/months';
+import { IdbAccount } from 'src/app/models/idb';
 
 @Component({
   selector: 'app-monthly-costs-chart',
@@ -15,7 +17,8 @@ export class MonthlyCostsChartComponent implements OnInit {
   @ViewChild('monthlyCostsChart', { static: false }) monthlyCostsChart: ElementRef;
   yearMonthData: Array<YearMonthData>;
   yearMonthDataSub: Subscription;
-  constructor(private plotlyService: PlotlyService, private accountOverviewService: AccountOverviewService) { }
+  constructor(private plotlyService: PlotlyService, private accountOverviewService: AccountOverviewService,
+    private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
     this.yearMonthDataSub = this.accountOverviewService.costsYearMonthData.subscribe(val => {
@@ -40,23 +43,40 @@ export class MonthlyCostsChartComponent implements OnInit {
       let hoverformat: string = ",.2f";
       let hovertemplate: string = '%{text} (%{x}): %{y:$,.0f} <extra></extra>'
 
-      let years: Array<number> = this.yearMonthData.flatMap(data => { return data.yearMonth.year });
+      let years: Array<number> = this.yearMonthData.flatMap(data => { return data.yearMonth.fiscalYear });
       years = _.uniq(years);
+      let months: Array<Month> = Months.map(month => { return month });
+      let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+
+      if (selectedAccount.fiscalYear == 'nonCalendarYear') {
+        let monthStartIndex: number = months.findIndex(month => { return month.monthNumValue == selectedAccount.fiscalYearMonth });
+        let fromStartMonth: Array<Month> = months.splice(monthStartIndex);
+        months = fromStartMonth.concat(months);
+      }
       years.forEach(year => {
         let x: Array<string> = new Array();
         let y: Array<number> = new Array();
-        for (let i = 0; i < this.yearMonthData.length; i++) {
-          if (this.yearMonthData[i].yearMonth.year == year) {
-            x.push(this.yearMonthData[i].yearMonth.month);
-            y.push(this.yearMonthData[i].energyCost);
-          }
+        months.forEach(month => {
+          let energyUse: number = this.yearMonthData.find(ymData => { return ymData.yearMonth.fiscalYear == year && ymData.yearMonth.month === month.abbreviation })?.energyCost;
+          x.push(month.abbreviation);
+          y.push(energyUse);
+        });
+        let name: string = year.toString();
+        if (selectedAccount.fiscalYear == 'nonCalendarYear') {
+          name = 'FY - ' + year
         }
         let trace = {
           type: 'scatter',
           x: x,
           y: y,
-          name: year,
-          text: x.map(item => { return year }),
+          name: name,
+          text: x.map(item => {
+            if (selectedAccount.fiscalYear == 'nonCalendarYear') {
+              return 'FY - ' + year
+            } else {
+              return year
+            }
+          }),
           hovertemplate: hovertemplate,
         }
         traceData.push(trace);

@@ -34,16 +34,16 @@ export class AnnualAccountAnalysisSummaryClass {
 
     setBaselineYear(account: IdbAccount) {
         this.baselineYear = account.sustainabilityQuestions.energyReductionBaselineYear;
-        if (account.fiscalYear == 'nonCalendarYear' && account.fiscalYearCalendarEnd) {
-            this.baselineYear = this.baselineYear - 1;
-        }
+        // if (account.fiscalYear == 'nonCalendarYear' && account.fiscalYearCalendarEnd) {
+        //     this.baselineYear = this.baselineYear - 1;
+        // }
     }
 
     setReportYear(analysisItem: IdbAccountAnalysisItem, account: IdbAccount) {
         this.reportYear = analysisItem.reportYear;
-        if (account.fiscalYear == 'nonCalendarYear' && account.fiscalYearCalendarEnd) {
-            this.reportYear = this.reportYear - 1;
-        }
+        // if (account.fiscalYear == 'nonCalendarYear' && account.fiscalYearCalendarEnd) {
+        //     this.reportYear = this.reportYear - 1;
+        // }
     }
 
 
