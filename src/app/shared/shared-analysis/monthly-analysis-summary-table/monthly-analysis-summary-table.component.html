@@ -99,7 +99,7 @@
                 {{data.date | date: 'MMMM, y'}}
             </td>
             <td>
-                {{data.fiscalYear}}
+                {{data.fiscalYear | yearDisplay: facilityOrAccount.fiscalYear}}
             </td>
             <td *ngIf="analysisTableColumns.actualEnergy">
                 <span *ngIf="data.energyUse" [ngClass]="{'red': data.energyUse < 0}">
