@@ -46,7 +46,6 @@ export class RegressionModelMenuComponent implements OnInit {
     this.yearOptions = this.analysisCalculationsHelperService.getYearOptions();
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(group => {
       if (!this.isFormChange) {
-        console.log("CHANGEDD")
         this.group = JSON.parse(JSON.stringify(group));
         if (this.group.models && this.group.models.length != 0) {
           this.checkModelData();
