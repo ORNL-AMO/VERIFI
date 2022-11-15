@@ -91,6 +91,7 @@ export class EditMeterFormComponent implements OnInit {
     this.setHeatCapacity();
     this.setSiteToSource();
     this.setDefaultScope();
+    this.setDisplayEmissionsValues();
     this.cd.detectChanges();
   }
 
