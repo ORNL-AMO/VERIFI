@@ -42,6 +42,11 @@ export class EditMeterFormComponent implements OnInit {
   displayEnergyUnits: boolean = true;
   isEnergyMeter: boolean;
   collectionUnitIsEnergy: boolean;
+
+
+  displayRetainRecs: boolean;
+  displayIncludeEnergy: boolean;
+
   constructor(
     private energyUnitsHelperService: EnergyUnitsHelperService, private energyUseCalculationsService: EnergyUseCalculationsService,
     private editMeterFormService: EditMeterFormService, private cd: ChangeDetectorRef, private convertUnitsService: ConvertUnitsService) { }
@@ -60,6 +65,7 @@ export class EditMeterFormComponent implements OnInit {
     this.setUnitBooleans();
     this.checkShowHeatCapacity();
     this.checkShowSiteToSource();
+    this.setDisplayEmissionsValues();
   }
 
   changeSource() {
@@ -319,6 +325,7 @@ export class EditMeterFormComponent implements OnInit {
     }
     this.checkShowSiteToSource();
     this.setSiteToSource();
+    this.setDisplayEmissionsValues();
   }
 
   setIncludeEnergy() {
@@ -342,4 +349,35 @@ export class EditMeterFormComponent implements OnInit {
       this.scopeOptions = ScopeOptions.filter(option => { return option.scope == 'Scope 1' });
     }
   }
+
+  setDisplayEmissionsValues(){
+    if(this.meterForm.controls.source.value == 'Electricity'){
+      if(this.meterForm.controls.agreementType.value == 1){
+        //grid
+        this.displayRetainRecs = false;
+        this.displayIncludeEnergy = false;        
+      }else if(this.meterForm.controls.agreementType.value == 2){
+        //self-generated
+        this.displayIncludeEnergy = true;
+        this.displayRetainRecs = true;
+      } else if(this.meterForm.controls.agreementType.value == 3){
+        //PPPA
+        this.displayIncludeEnergy = true;
+        this.displayRetainRecs = true;
+      } else if(this.meterForm.controls.agreementType.value == 4){
+        //VPPA
+        this.displayIncludeEnergy = false;
+        this.displayRetainRecs = true;
+      } else if(this.meterForm.controls.agreementType.value == 5){
+        //Utility Green Product
+        this.displayIncludeEnergy = false;
+        this.displayRetainRecs = false;
+      }else if(this.meterForm.controls.agreementType.value == 6){
+        //RECS
+        this.displayIncludeEnergy = false;
+        this.displayRetainRecs = true;
+      } 
+    }
+  }
+
 }
