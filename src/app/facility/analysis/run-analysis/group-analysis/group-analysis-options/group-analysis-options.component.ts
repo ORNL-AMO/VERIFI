@@ -54,6 +54,7 @@ export class GroupAnalysisOptionsComponent implements OnInit {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     this.dbChangesService.setAnalysisItems(selectedAccount, selectedFacility);
     this.analysisDbService.selectedAnalysisItem.next(analysisItem);
+    this.analysisService.selectedGroup.next(this.group);
   }
 
   setProductionUnits() {
