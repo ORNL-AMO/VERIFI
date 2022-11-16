@@ -275,6 +275,8 @@ export class RegressionModelsService {
 
 
     model.predictorVariables.forEach(variable => {
+      let variableNotes: Array<string> = new Array();
+      let variableValid: boolean = true;
       let modelYearUsage: Array<number> = modelPredictorData.map(data => {
         let predictorData: PredictorData = data.predictors.find(predictor => { return predictor.id == variable.id });
         return predictorData.amount;
@@ -287,26 +289,41 @@ export class RegressionModelsService {
         return predictorData.amount;
       });
       let reportAvg: number = _.mean(reportYearUsage);
-      if (modelMax < reportAvg) {
-        SEPNotes.push(variable.name + ' mean for the report year is greater than model year max.');
+
+      if (modelMax < reportAvg || reportAvg < modelMin) {
+        variableValid = false;
+        if (modelMax < reportAvg) {
+          variableNotes.push(variable.name + ' mean for the report year is greater than model year max.');
+        }
+        if (reportAvg < modelMin) {
+          variableNotes.push(variable.name + ' mean for the report year is less than model year min.');
+        }
       }
-      if (reportAvg < modelMin) {
-        SEPNotes.push(variable.name + ' mean for the report year is less than model year min.');
+
+      if (variableValid == false) {
+        let sumSquare: number = _.sumBy(modelYearUsage, (usage) => {
+          return (usage - modelAvg) * (usage - modelAvg)
+        });
+
+        let modelStandardDev: number = Math.sqrt((sumSquare / modelYearUsage.length));
+
+        if (modelAvg - 3 * modelStandardDev > reportAvg || modelAvg + 3 * modelStandardDev < reportAvg) {
+          variableValid = false;
+          if (modelAvg - 3 * modelStandardDev > reportAvg) {
+            variableNotes.push(variable.name + ' mean for report year is less than 3 standard deviations from model year mean.');
+          }
+          if (modelAvg + 3 * modelStandardDev < reportAvg) {
+            variableNotes.push(variable.name + ' mean for the report year is greater than 3 standard deviations from model year mean.');
+          }
+        } else {
+          variableValid = true;
+        }
       }
 
-
-      let sumSquare: number = _.sumBy(modelYearUsage, (usage) => {
-        return (usage - modelAvg) * (usage - modelAvg)
-      });
-
-      let modelStandardDev: number = Math.sqrt((sumSquare / modelYearUsage.length));
-
-
-      if (modelAvg - 3 * modelStandardDev > reportAvg) {
-        SEPNotes.push(variable.name + ' mean for report year is less than 3 standard deviations from model year mean.');
-      }
-      if (modelAvg + 3 * modelStandardDev < reportAvg) {
-        SEPNotes.push(variable.name + ' mean for the report year is greater than 3 standard deviations from model year mean.');
+      if (variableValid == false) {
+        variableNotes.forEach(note => {
+          SEPNotes.push(note);
+        })
       }
     });
     return SEPNotes;
