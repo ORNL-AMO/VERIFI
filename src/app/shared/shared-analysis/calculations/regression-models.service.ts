@@ -261,6 +261,7 @@ export class RegressionModelsService {
     let SEPNotes: Array<string> = new Array();
     let modelPredictorData: Array<IdbPredictorEntry> = new Array();
     let reportYearPredictorData: Array<IdbPredictorEntry> = new Array();
+    let baselineYearPredictorData: Array<IdbPredictorEntry> = new Array();
     for (let i = 0; i < facilityPredictorData.length; i++) {
       let fiscalYear: number = this.analysisCalculationsHelperService.getFiscalYear(facilityPredictorData[i].date, facility);
       if (fiscalYear == reportYear) {
@@ -268,6 +269,9 @@ export class RegressionModelsService {
       }
       if (fiscalYear == model.modelYear) {
         modelPredictorData.push(facilityPredictorData[i])
+      }
+      if(fiscalYear == facility.sustainabilityQuestions.energyReductionBaselineYear){
+        baselineYearPredictorData.push(facilityPredictorData[i]);
       }
     }
 
@@ -281,6 +285,7 @@ export class RegressionModelsService {
       });
       let modelMin: number = _.min(modelYearUsage);
       let modelMax: number = _.max(modelYearUsage);
+
       let modelAvg: number = _.mean(modelYearUsage);
       let reportYearUsage: Array<number> = reportYearPredictorData.map(data => {
         let predictorData: PredictorData = data.predictors.find(predictor => { return predictor.id == variable.id });
@@ -288,7 +293,14 @@ export class RegressionModelsService {
       });
       let reportAvg: number = _.mean(reportYearUsage);
 
-      if (modelMax < reportAvg || reportAvg < modelMin) {
+      let baselineYearUsage: Array<number> = baselineYearPredictorData.map(data => {
+        let predictorData: PredictorData = data.predictors.find(predictor => { return predictor.id == variable.id });
+        return predictorData.amount;
+      });
+
+      let baselineAvg: number = _.mean(baselineYearUsage);
+
+      if (modelMax < reportAvg || reportAvg < modelMin || modelMax < baselineAvg || baselineAvg < modelMin) {
         variableValid = false;
         if (modelMax < reportAvg) {
           variableNotes.push(variable.name + ' mean for the report year is greater than model year max.');
@@ -296,22 +308,43 @@ export class RegressionModelsService {
         if (reportAvg < modelMin) {
           variableNotes.push(variable.name + ' mean for the report year is less than model year min.');
         }
+
+        if (modelMax < baselineAvg) {
+          variableNotes.push(variable.name + ' mean for the baseline year is greater than model year max.');
+        }
+        if (baselineAvg < modelMin) {
+          variableNotes.push(variable.name + ' mean for the baseline year is less than model year min.');
+        }
+        
       }
 
       if (variableValid == false) {
-        let sumSquare: number = _.sumBy(modelYearUsage, (usage) => {
-          return (usage - modelAvg) * (usage - modelAvg)
+        let sumSquare: number = 0;
+        modelYearUsage.forEach(usage => {
+          sumSquare = sumSquare + ((usage - modelAvg) * (usage - modelAvg));
         });
+        
+        let modelStandardDev: number = Math.sqrt((sumSquare / (modelYearUsage.length - 1)));
+        if (model.modelYear == 2011) {
+          console.log(modelAvg);
+          console.log(modelStandardDev);
+        }
+        let standardMax: number = modelAvg - 3 * modelStandardDev;
+        let standardMin: number = modelAvg + 3 * modelStandardDev;
 
-        let modelStandardDev: number = Math.sqrt((sumSquare / modelYearUsage.length));
-
-        if (modelAvg - 3 * modelStandardDev > reportAvg || modelAvg + 3 * modelStandardDev < reportAvg) {
+        if (standardMax > reportAvg || standardMin < reportAvg || standardMax > baselineAvg || standardMin < baselineAvg) {
           variableValid = false;
-          if (modelAvg - 3 * modelStandardDev > reportAvg) {
+          if (standardMax > reportAvg) {
             variableNotes.push(variable.name + ' mean for report year is less than 3 standard deviations from model year mean.');
           }
-          if (modelAvg + 3 * modelStandardDev < reportAvg) {
+          if (standardMin < reportAvg) {
             variableNotes.push(variable.name + ' mean for the report year is greater than 3 standard deviations from model year mean.');
+          }
+          if (standardMax > baselineAvg) {
+            variableNotes.push(variable.name + ' mean for baseline year is less than 3 standard deviations from model year mean.');
+          }
+          if (standardMin < baselineAvg) {
+            variableNotes.push(variable.name + ' mean for the baseline year is greater than 3 standard deviations from model year mean.');
           }
         } else {
           variableValid = true;
