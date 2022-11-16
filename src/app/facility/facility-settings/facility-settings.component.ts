@@ -45,7 +45,7 @@ export class FacilitySettingsComponent implements OnInit {
 
   ngOnInit() {
     let accountFacilites: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-    this.canDelete = accountFacilites.length > 1;
+    // this.canDelete = accountFacilites.length > 1;
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
       this.selectedFacility = facility;
     });
