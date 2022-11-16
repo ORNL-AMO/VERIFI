@@ -199,10 +199,8 @@ export class RegressionModelsService {
     }
 
     model.t.p.forEach((val, index) => {
-      if (val > .2) {
-        if (index != 0) {
-          modelNotes.push(model.predictorVariables[index - 1].name + ' p-Value > .2')
-        }
+      if (val > .2 && index != 0) {
+        modelNotes.push(model.predictorVariables[index - 1].name + ' p-Value > .2')
         model['isValid'] = false;
       }
     })
