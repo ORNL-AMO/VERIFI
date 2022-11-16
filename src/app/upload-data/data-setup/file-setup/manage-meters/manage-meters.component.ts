@@ -85,7 +85,10 @@ export class ManageMetersComponent implements OnInit {
           let facilityGroups: Array<IdbUtilityMeterGroup> = this.getFacilityMeterGroups(meter.facilityId);
           let selectedGroup: IdbUtilityMeterGroup = facilityGroups.find(group => { return group.guid == meter.groupId });
           if (selectedGroup && !selectedGroup.id) {
-            newGroups.push(selectedGroup);
+            let groupExists: IdbUtilityMeterGroup = newGroups.find(group => { return group.guid == selectedGroup.guid });
+            if (groupExists == undefined) {
+              newGroups.push(selectedGroup);
+            }
           }
         }
       });
@@ -97,8 +100,8 @@ export class ManageMetersComponent implements OnInit {
 
   getFacilityName(facilityId: string): string {
     let facility: IdbFacility = this.fileReference.importFacilities.find(facility => { return facility.guid == facilityId });
-    if(facility){
-      return facility.name;      
+    if (facility) {
+      return facility.name;
     }
     return;
   }
@@ -138,9 +141,9 @@ export class ManageMetersComponent implements OnInit {
     } = this.facilityGroups.find(group => {
       return group.facilityId == facilityId;
     });
-    if(facilityGroups){
+    if (facilityGroups) {
       return facilityGroups.groupOptions;
-    }else{
+    } else {
       return [];
     }
   }
@@ -197,6 +200,7 @@ export class ManageMetersComponent implements OnInit {
       });
     });
     this.facilityGroups = facilityGroups;
+    console.log(this.facilityGroups);
   }
 
   setValidMeters() {
