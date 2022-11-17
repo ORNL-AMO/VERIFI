@@ -55,6 +55,8 @@ export class SelectItemTableComponent implements OnInit {
 
   async save() {
     await this.accountAnalysisDbService.updateFacilityItemSelection(this.selectedAnalysisItem, this.selectedFacilityItemId, this.facility.guid);
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    await this.dbChangesService.setAccountAnalysisItems(account);
     this.setSelectedFacilityItem();
   }
 

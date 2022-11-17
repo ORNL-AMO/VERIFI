@@ -7,6 +7,7 @@ import { IdbAccount, IdbAccountAnalysisItem } from 'src/app/models/idb';
 import { Month, Months } from 'src/app/shared/form-data/months';
 import { EnergyUnitOptions, UnitOption } from 'src/app/shared/unitOptions';
 import { AccountAnalysisService } from '../account-analysis.service';
+import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 
 @Component({
   selector: 'app-account-analysis-setup',
@@ -24,7 +25,8 @@ export class AccountAnalysisSetupComponent implements OnInit {
   yearOptions: Array<number>;
   constructor(private accountDbService: AccountdbService, private accountAnalysisDbService: AccountAnalysisDbService,
     private analysisCalculationsHelperService: AnalysisCalculationsHelperService,
-    private router: Router, private accountAnalysisService: AccountAnalysisService) { }
+    private router: Router, private accountAnalysisService: AccountAnalysisService,
+    private dbChangesService: DbChangesService) { }
 
   ngOnInit(): void {
     this.analysisItem = this.accountAnalysisDbService.selectedAnalysisItem.getValue();
@@ -38,6 +40,8 @@ export class AccountAnalysisSetupComponent implements OnInit {
 
   async saveItem() {
     await this.accountAnalysisDbService.updateWithObservable(this.analysisItem).toPromise();
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    await this.dbChangesService.setAccountAnalysisItems(account);
     this.accountAnalysisDbService.selectedAnalysisItem.next(this.analysisItem);
   }
 
@@ -62,7 +66,7 @@ export class AccountAnalysisSetupComponent implements OnInit {
     this.saveItem();
   }
 
-  changeSiteSource(){
+  changeSiteSource() {
     this.resetFacilityItems();
     this.accountAnalysisService.setCalanderizedMeters();
   }
