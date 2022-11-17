@@ -8,12 +8,12 @@
                 <td class="bold text-center w-25">
                     Baseline Year
                     <br>
-                    {{reportOptions.baselineYear}}
+                    {{reportOptions.baselineYear | yearDisplay: account.fiscalYear}}
                 </td>
                 <td class="bold text-center w-25">
                     Report Year
                     <br>
-                    {{reportOptions.targetYear}}
+                    {{reportOptions.targetYear | yearDisplay: account.fiscalYear}}
                 </td>
             </tr>
             <tr>
