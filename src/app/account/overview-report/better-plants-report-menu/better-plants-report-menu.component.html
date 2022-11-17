@@ -25,7 +25,7 @@
                         <app-label-with-tooltip [isSemiBold]="true" [label]="'Baseline Year'" [field]="'baselineYear'" [labelId]="'baselineYear'"></app-label-with-tooltip>
                         <select id="baselineYear" name="baselineYear" [(ngModel)]="reportOptions.baselineYear"
                             class="form-control" required>
-                            <option *ngFor="let year of baselineYears" [ngValue]="year">{{year}}</option>
+                            <option *ngFor="let year of baselineYears" [ngValue]="year">{{year | yearDisplay: account.fiscalYear}}</option>
                         </select>
                     </div>
                     <div class="alert alert-danger" *ngIf="!reportOptions.baselineYear">
@@ -38,7 +38,7 @@
                         </app-label-with-tooltip>
                         <select id="targetYear" name="targetYear" [(ngModel)]="reportOptions.targetYear"
                             class="form-control" required (change)="setAnalysisOptions()">
-                            <option *ngFor="let year of targetYears" [ngValue]="year">{{year}}</option>
+                            <option *ngFor="let year of targetYears" [ngValue]="year">{{year | yearDisplay: account.fiscalYear}}</option>
                         </select>
                     </div>
                     <div class="alert alert-danger" *ngIf="!reportOptions.targetYear">

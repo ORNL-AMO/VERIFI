@@ -28,6 +28,7 @@ export class BetterPlantsReportMenuComponent implements OnInit {
   targetYears: Array<number>;
 
   accountAnalysisItems: Array<IdbAccountAnalysisItem>;
+  account: IdbAccount;
   constructor(private overviewReportService: OverviewReportService, private router: Router,
     private overviewReportOptionsDbService: OverviewReportOptionsDbService,
     private accountDbService: AccountdbService,
@@ -37,6 +38,7 @@ export class BetterPlantsReportMenuComponent implements OnInit {
     private dbChangesService: DbChangesService) { }
 
   ngOnInit(): void {
+    this.account = this.accountDbService.selectedAccount.getValue();
     this.selectedReportOptions = this.overviewReportOptionsDbService.selectedOverviewReportOptions.getValue();
     if (this.selectedReportOptions) {
       this.name = this.selectedReportOptions.name;
