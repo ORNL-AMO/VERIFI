@@ -118,7 +118,7 @@ export class BetterPlantsEnergySummaryClass {
             return sourceMeter.monthlyData;
         });
         let yearData: Array<MonthlyData> = meterMonthlyData.filter(meter => {
-            return meter.year == year;
+            return meter.fiscalYear == year;
         });
         return yearData;
     }

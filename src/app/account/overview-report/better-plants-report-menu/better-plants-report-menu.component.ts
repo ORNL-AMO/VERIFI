@@ -10,6 +10,7 @@ import { OverviewReportService } from '../overview-report.service';
 import * as _ from 'lodash';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
+import { getFiscalYear } from 'src/app/shared/shared-analysis/calculations/getFiscalYear';
 
 @Component({
   selector: 'app-better-plants-report-menu',
@@ -112,8 +113,8 @@ export class BetterPlantsReportMenuComponent implements OnInit {
     let orderedMeterData: Array<IdbUtilityMeterData> = _.orderBy(accountMeterData, (data) => { return new Date(data.readDate) });
     let firstBill: IdbUtilityMeterData = orderedMeterData[0];
     let lastBill: IdbUtilityMeterData = orderedMeterData[orderedMeterData.length - 1];
-    let yearStart: number = new Date(firstBill.readDate).getUTCFullYear();
-    let yearEnd: number = new Date(lastBill.readDate).getUTCFullYear();
+    let yearStart: number = getFiscalYear(new Date(firstBill.readDate), this.account);
+    let yearEnd: number = getFiscalYear(new Date(lastBill.readDate), this.account);
     this.targetYears = new Array();
     this.baselineYears = new Array();
     for (let i = yearStart; i <= yearEnd; i++) {

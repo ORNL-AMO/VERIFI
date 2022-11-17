@@ -68,8 +68,10 @@ export class BetterPlantsReportClass {
         reportOptions: ReportOptions) {
         let annualAccountAnalysisSummaryClass: AnnualAccountAnalysisSummaryClass = new AnnualAccountAnalysisSummaryClass(accountAnalysisItem, account, calanderizedMeters, accountFacilities, accountPredictorEntries, allAccountAnalysisItems);
         let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = annualAccountAnalysisSummaryClass.getAnnualAnalysisSummaries();
+        console.log(annualAnalysisSummaries);
         this.reportYearAnalysisSummary = annualAnalysisSummaries.find(summary => { return summary.year == reportOptions.targetYear });
         this.baselineYearAnalysisSummary = annualAnalysisSummaries.find(summary => { return summary.year == reportOptions.baselineYear });
+        console.log(this.baselineYearAnalysisSummary);
     }
 
     setReportYearEnergySummaryClass(calanderizedMeters: Array<CalanderizedMeter>, year: number) {

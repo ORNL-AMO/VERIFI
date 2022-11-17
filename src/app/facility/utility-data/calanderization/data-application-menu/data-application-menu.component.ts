@@ -51,7 +51,7 @@ export class DataApplicationMenuComponent implements OnInit {
 
   calanderizeMeter() {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.monthlyData = this.calanderizationService.calanderizeMeterData(this.meter, this.utilityMeterData, selectedFacility.energyIsSource, selectedFacility.energyUnit);
+    this.monthlyData = this.calanderizationService.calanderizeMeterData(this.meter, this.utilityMeterData, selectedFacility.energyIsSource, selectedFacility.energyUnit, false, false);
     if (this.meter.meterReadingDataApplication == 'backward') {
       this.monthlyData = this.monthlyData.splice(0, 2);
     } else {

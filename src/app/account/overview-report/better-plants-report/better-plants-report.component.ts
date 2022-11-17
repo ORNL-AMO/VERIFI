@@ -13,6 +13,7 @@ import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, IdbOv
 import { BetterPlantsSummary, ReportOptions } from 'src/app/models/overview-report';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { ConvertMeterDataService } from 'src/app/shared/helper-services/convert-meter-data.service';
+import { BetterPlantsReportClass } from 'src/app/web-workers/classes/betterPlantsReportClass';
 import { OverviewReportService } from '../overview-report.service';
 
 @Component({
@@ -61,7 +62,7 @@ export class BetterPlantsReportComponent implements OnInit {
 
   ngOnDestroy() {
     this.printSub.unsubscribe();
-    if(this.worker){
+    if (this.worker) {
       this.worker.terminate();
     }
   }
@@ -77,7 +78,7 @@ export class BetterPlantsReportComponent implements OnInit {
   }
 
 
-  setBetterPlantsSummary(){
+  setBetterPlantsSummary() {
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
 
     let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
@@ -119,7 +120,16 @@ export class BetterPlantsReportComponent implements OnInit {
       });
     } else {
       console.log('nopee')
-
+      let betterPlantsReportClass: BetterPlantsReportClass = new BetterPlantsReportClass(
+        this.reportOptions,
+        selectedAnalysisItem,
+        calanderizedMeters,
+        accountPredictorEntries,
+        this.account,
+        accountFacilities,
+        accountFacilityAnalysisItems
+      );
+      this.betterPlantsSummary = betterPlantsReportClass.getBetterPlantsSummary();
       // Web Workers are not supported in this environment.
       // You should add a fallback so that your program still executes correctly.
     }
