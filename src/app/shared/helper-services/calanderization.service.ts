@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
@@ -10,6 +10,8 @@ import { ReportOptions } from 'src/app/models/overview-report';
 import { EGridService } from './e-grid.service';
 import { EnergyUseCalculationsService } from './energy-use-calculations.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { getFiscalYear } from '../shared-analysis/calculations/getFiscalYear';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 
 @Injectable({
   providedIn: 'root'
@@ -23,7 +25,8 @@ export class CalanderizationService {
   dataDisplay: "table" | "graph" = 'table';
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private energyUnitsHelperService: EnergyUnitsHelperService,
     private convertUnitsService: ConvertUnitsService, private eGridService: EGridService, private energyUseCalculationsService: EnergyUseCalculationsService,
-    private facilityDbService: FacilitydbService) {
+    private facilityDbService: FacilitydbService,
+    private accountDbService: AccountdbService) {
     this.calanderizedDataFilters = new BehaviorSubject({
       selectedSources: [],
       showAllSources: true,
@@ -53,7 +56,7 @@ export class CalanderizationService {
         energyIsSource = calanderizationOptions.energyIsSource;
       }
 
-      let calanderizedMeter: Array<MonthlyData> = this.calanderizeMeterData(meter, meterData, energyIsSource, calanderizedenergyUnit, monthDisplayShort);
+      let calanderizedMeter: Array<MonthlyData> = this.calanderizeMeterData(meter, meterData, energyIsSource, calanderizedenergyUnit, monthDisplayShort, inAccount);
       let showConsumption: boolean;
       if (meter.source != 'Electricity') {
         showConsumption = calanderizedMeter.find(meterData => { return meterData.energyConsumption != meterData.energyUse }) != undefined;
@@ -74,17 +77,17 @@ export class CalanderizationService {
     return calanderizedMeterData;
   }
 
-  calanderizeMeterData(meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData>, energyIsSource: boolean, calanderizedEnergyUnit: string, monthDisplayShort?: boolean): Array<MonthlyData> {
+  calanderizeMeterData(meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData>, energyIsSource: boolean, calanderizedEnergyUnit: string, monthDisplayShort: boolean, inAccount: boolean): Array<MonthlyData> {
     if (meter.meterReadingDataApplication == 'fullMonth' || !meter.meterReadingDataApplication) {
       //used as default
-      return this.calanderizeMeterDataFullMonth(meter, meterData, energyIsSource, calanderizedEnergyUnit, monthDisplayShort);
+      return this.calanderizeMeterDataFullMonth(meter, meterData, energyIsSource, calanderizedEnergyUnit, monthDisplayShort, inAccount);
     } else if (meter.meterReadingDataApplication == 'backward') {
-      return this.calanderizeMeterDataBackwards(meter, meterData, energyIsSource, calanderizedEnergyUnit, monthDisplayShort);
+      return this.calanderizeMeterDataBackwards(meter, meterData, energyIsSource, calanderizedEnergyUnit, monthDisplayShort, inAccount);
     }
   }
 
   //calanderize backwards
-  calanderizeMeterDataBackwards(meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData>, energyIsSource: boolean, calanderizedEnergyUnit: string, monthDisplayShort?: boolean): Array<MonthlyData> {
+  calanderizeMeterDataBackwards(meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData>, energyIsSource: boolean, calanderizedEnergyUnit: string, monthDisplayShort: boolean, inAccount: boolean): Array<MonthlyData> {
     let calanderizeData: Array<MonthlyData> = new Array();
     let orderedMeterData: Array<IdbUtilityMeterData> = _.orderBy(meterData, (data) => { return new Date(data.readDate) });
     if (orderedMeterData.length > 3) {
@@ -193,12 +196,19 @@ export class CalanderizationService {
         let emissionsValues: EmissionsResults = this.getEmissions(meter, totals.totalEnergyUse, calanderizedEnergyUnit, year);
         if (meter.includeInEnergy == false) {
           totals.totalEnergyUse = 0;
-
+        }
+        let accountOrFacility: IdbAccount | IdbFacility;
+        if (inAccount) {
+          accountOrFacility = this.accountDbService.selectedAccount.getValue();
+        } else {
+          let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+          accountOrFacility = accountFacilities.find(facility => { return facility.guid == meter.facilityId });
         }
         calanderizeData.push({
           month: monthStr,
           monthNumValue: month,
           year: year,
+          fiscalYear: getFiscalYear(new Date(year, month), accountOrFacility),
           energyConsumption: totals.totalConsumption,
           energyUse: totals.totalEnergyUse,
           energyCost: totals.totalCost,
@@ -303,7 +313,7 @@ export class CalanderizationService {
   }
 
   //calanderize fullMonth
-  calanderizeMeterDataFullMonth(meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData>, energyIsSource: boolean, calanderizedEnergyUnit: string, monthDisplayShort?: boolean): Array<MonthlyData> {
+  calanderizeMeterDataFullMonth(meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData>, energyIsSource: boolean, calanderizedEnergyUnit: string, monthDisplayShort: boolean, inAccount: boolean): Array<MonthlyData> {
     let calanderizeData: Array<MonthlyData> = new Array();
     let orderedMeterData: Array<IdbUtilityMeterData> = _.orderBy(meterData, (data) => { return new Date(data.readDate) });
     if (orderedMeterData.length > 3) {
@@ -352,10 +362,18 @@ export class CalanderizationService {
         }
         let emissionsValues: EmissionsResults = this.getEmissions(meter, totalEnergyUse, calanderizedEnergyUnit, year)
 
+        let accountOrFacility: IdbAccount | IdbFacility;
+        if (inAccount) {
+          accountOrFacility = this.accountDbService.selectedAccount.getValue();
+        } else {
+          let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+          accountOrFacility = accountFacilities.find(facility => { return facility.guid == meter.facilityId });
+        }
         calanderizeData.push({
           month: monthStr,
           monthNumValue: month,
           year: year,
+          fiscalYear: getFiscalYear(new Date(year, month), accountOrFacility),
           energyConsumption: totalConsumption,
           energyUse: totalEnergyUse,
           energyCost: totalCost,
@@ -523,6 +541,7 @@ export class CalanderizationService {
         month: undefined,
         monthNumValue: undefined,
         year: undefined,
+        fiscalYear: undefined,
         energyConsumption: 0,
         energyUse: 0,
         energyCost: 0,
@@ -801,15 +820,15 @@ export class CalanderizationService {
 
       let marketEmissionsOutputRate: number;
       if (meter.source == 'Electricity') {
-          let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-          let meterFacility: IdbFacility = accountFacilities.find(facility => { return facility.guid == meter.facilityId });
-          let emissionsRates: { marketRate: number, locationRate: number } = this.eGridService.getEmissionsRate(meterFacility.eGridSubregion, year);
-          marketEmissionsOutputRate = emissionsRates.marketRate;
-          
+        let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+        let meterFacility: IdbFacility = accountFacilities.find(facility => { return facility.guid == meter.facilityId });
+        let emissionsRates: { marketRate: number, locationRate: number } = this.eGridService.getEmissionsRate(meterFacility.eGridSubregion, year);
+        marketEmissionsOutputRate = emissionsRates.marketRate;
+
         if (meter.includeInEnergy) {
           locationEmissions = convertedEnergyUse * emissionsRates.locationRate * meter.locationGHGMultiplier;
           marketEmissions = convertedEnergyUse * emissionsRates.marketRate * meter.marketGHGMultiplier;
-        }else{
+        } else {
           marketEmissions = 0;
           locationEmissions = 0;
         }
@@ -821,7 +840,7 @@ export class CalanderizationService {
       let RECs: number = energyUse * meter.recsMultiplier;
       let excessRECs: number;
       let emissionsEnergyUse: number = energyUse;
-      if(meter.includeInEnergy == false){
+      if (meter.includeInEnergy == false) {
         emissionsEnergyUse = 0;
       }
 

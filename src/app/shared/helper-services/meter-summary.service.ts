@@ -20,19 +20,21 @@ export class MeterSummaryService {
 
   getFacilityMetersSummary(inAccount: boolean, facilityMeters: Array<IdbUtilityMeter>, reportOptions?: ReportOptions): FacilityMeterSummaryData {
     let facilityMetersSummary: Array<MeterSummary> = new Array();
-    let allMetersLastBill: MonthlyData = this.calanderizationService.getLastBillEntry(facilityMeters, inAccount, reportOptions)
+    let allMetersLastBill: MonthlyData = this.calanderizationService.getLastBillEntry(facilityMeters, inAccount, reportOptions);
+    //TODO: Add fiscal year math..?
     if (reportOptions) {
       allMetersLastBill = {
         month: 'Dec',
         monthNumValue: 11,
         year: reportOptions.targetYear,
+        fiscalYear: undefined,
         energyConsumption: undefined,
         energyUse: undefined,
         energyCost: undefined,
         date: new Date(reportOptions.targetYear, 11),
         marketEmissions: undefined,
         locationEmissions: undefined,
-        excessRECs: undefined, 
+        excessRECs: undefined,
         excessRECsEmissions: undefined,
         RECs: undefined
       }
@@ -184,21 +186,23 @@ export class MeterSummaryService {
         totalNumberOfMeters: _.sumBy(facilitiesSummary, 'numberOfMeters'),
         totalMarketEmissions: _.sumBy(facilitiesSummary, 'marketEmissions'),
         totalLocationEmissions: _.sumBy(facilitiesSummary, 'locationEmissions'),
-        totalConsumption:  _.sumBy(facilitiesSummary, 'consumption'),
+        totalConsumption: _.sumBy(facilitiesSummary, 'consumption'),
         allMetersLastBill: accountLastBill
       };
     } else {
+      //TODO: Add fiscal year..?
       let accountTargetYearBill: MonthlyData = {
         month: 'Dec',
         monthNumValue: 11,
         year: reportOptions.targetYear,
+        fiscalYear: undefined,
         energyConsumption: undefined,
         energyUse: undefined,
         energyCost: undefined,
         date: new Date(reportOptions.targetYear, 11),
         marketEmissions: undefined,
         locationEmissions: undefined,
-        excessRECs: undefined, 
+        excessRECs: undefined,
         excessRECsEmissions: undefined,
         RECs: undefined
       }
@@ -214,7 +218,7 @@ export class MeterSummaryService {
         totalEnergyUse: _.sumBy(facilitiesSummary, 'energyUsage'),
         totalEnergyCost: _.sumBy(facilitiesSummary, 'energyCost'),
         totalNumberOfMeters: _.sumBy(facilitiesSummary, 'numberOfMeters'),
-        totalConsumption:  _.sumBy(facilitiesSummary, 'consumption'),
+        totalConsumption: _.sumBy(facilitiesSummary, 'consumption'),
         totalLocationEmissions: undefined,
         totalMarketEmissions: undefined,
         allMetersLastBill: accountTargetYearBill
@@ -238,9 +242,9 @@ export class MeterSummaryService {
           facility: facility,
           energyUsage: _.sumBy(facilityMetersDataSummary, 'energyUse'),
           energyCost: _.sumBy(facilityMetersDataSummary, 'energyCost'),
-          marketEmissions:_.sumBy(facilityMetersDataSummary, 'marketEmissions'),
-          locationEmissions:_.sumBy(facilityMetersDataSummary, 'locationEmissions'),
-          consumption:  _.sumBy(facilityMetersDataSummary, 'energyConsumption'),
+          marketEmissions: _.sumBy(facilityMetersDataSummary, 'marketEmissions'),
+          locationEmissions: _.sumBy(facilityMetersDataSummary, 'locationEmissions'),
+          consumption: _.sumBy(facilityMetersDataSummary, 'energyConsumption'),
           numberOfMeters: facilityMeters.length,
           lastBillDate: new Date(facilityLastBill.year, (facilityLastBill.monthNumValue + 1))
         }
