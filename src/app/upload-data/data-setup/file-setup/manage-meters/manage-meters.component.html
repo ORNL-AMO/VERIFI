@@ -40,6 +40,9 @@
                 Source
             </th>
             <th>
+                Units
+            </th>
+            <th>
                 <div class="d-flex w-100 justify-content-between">
                     <div>
                         Group
@@ -48,7 +51,7 @@
                         <a class="text-right" (click)="autoGroup()">Auto Group</a>
                     </div>
                 </div>
-                
+
             </th>
             <th>
                 <div class="d-flex w-100 justify-content-between">
@@ -90,6 +93,9 @@
             </td>
             <td>
                 {{meter.source}}
+            </td>
+            <td>
+                <span [innerHTML]="meter.startingUnit | settingsLabel"></span>
             </td>
             <td>
                 <select class="form-control" id="meterGroup" [(ngModel)]="meter.groupId">
