@@ -626,8 +626,10 @@ export class UploadDataService {
       newMeter.startingUnit = this.energyUnitsHelperService.parseStartingUnit(groupItem.value);
       if (newMeter.source == 'Electricity') {
         newMeter.scope = 3
-        newMeter.startingUnit = 'kWh';
-        newMeter.energyUnit = 'kWh';
+        if (newMeter.startingUnit == undefined) {
+          newMeter.startingUnit = 'kWh';
+          newMeter.energyUnit = 'kWh';
+        }
       } else if (newMeter.source == 'Natural Gas') {
         newMeter.scope = 1;
       } else if (newMeter.source == 'Other Energy') {
