@@ -214,6 +214,22 @@ export class UploadDataService {
               meter.retainRECs = true;
             }
           }
+
+          if (meter.agreementType != undefined) {
+            if (meter.agreementType == 1) {
+              //grid
+              meter.includeInEnergy = true;
+              meter.retainRECs = false;
+            } else if (meter.agreementType == 4 || meter.agreementType == 6) {
+              //VPPA || RECs
+              meter.includeInEnergy = false;
+            } else if (meter.agreementType == 5) {
+              //Utility green product
+              meter.includeInEnergy = true;
+            }
+          }
+
+
           if (meter.siteToSource == undefined) {
             let selectedFuelTypeOption: FuelTypeOption;
             if (meter.fuel != undefined) {
@@ -252,12 +268,16 @@ export class UploadDataService {
             if (predictorIndex == -1) {
               let hasData: boolean = false;
               facilityPredictorData.forEach(dataItem => {
-                if(dataItem[key] != 0){
+                if (dataItem[key] != 0) {
                   hasData = true;
                 }
               });
-              if(hasData){
+              if (hasData) {
                 let newPredictor: PredictorData = this.predictorDbService.getNewPredictor([]);
+                let nameTest: string = key.toLocaleLowerCase();
+                if (!nameTest.includes('cdd') && !nameTest.includes('hdd')) {
+                  newPredictor.production = true;
+                }
                 newPredictor.name = key;
                 existingFacilityPredictorData.push(newPredictor);
               }
@@ -606,8 +626,10 @@ export class UploadDataService {
       newMeter.startingUnit = this.energyUnitsHelperService.parseStartingUnit(groupItem.value);
       if (newMeter.source == 'Electricity') {
         newMeter.scope = 3
-        newMeter.startingUnit = 'kWh';
-        newMeter.energyUnit = 'kWh';
+        if (newMeter.startingUnit == undefined) {
+          newMeter.startingUnit = 'kWh';
+          newMeter.energyUnit = 'kWh';
+        }
       } else if (newMeter.source == 'Natural Gas') {
         newMeter.scope = 1;
       } else if (newMeter.source == 'Other Energy') {

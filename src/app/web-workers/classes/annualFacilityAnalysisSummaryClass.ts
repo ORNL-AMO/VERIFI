@@ -28,16 +28,16 @@ export class AnnualFacilityAnalysisSummaryClass {
 
     setBaselineYear(facilityOrAccount: IdbFacility | IdbAccount) {
         this.baselineYear = facilityOrAccount.sustainabilityQuestions.energyReductionBaselineYear;
-        if (facilityOrAccount.fiscalYear == 'nonCalendarYear' && facilityOrAccount.fiscalYearCalendarEnd) {
-            this.baselineYear = this.baselineYear - 1;
-        }
+        // if (facilityOrAccount.fiscalYear == 'nonCalendarYear' && facilityOrAccount.fiscalYearCalendarEnd) {
+        //     this.baselineYear = this.baselineYear - 1;
+        // }
     }
 
     setReportYear(analysisItem: IdbAnalysisItem, facilityOrAccount: IdbFacility | IdbAccount) {
         this.reportYear = analysisItem.reportYear;
-        if (facilityOrAccount.fiscalYear == 'nonCalendarYear' && facilityOrAccount.fiscalYearCalendarEnd) {
-            this.reportYear = this.reportYear - 1;
-        }
+        // if (facilityOrAccount.fiscalYear == 'nonCalendarYear' && facilityOrAccount.fiscalYearCalendarEnd) {
+        //     this.reportYear = this.reportYear - 1;
+        // }
     }
 
 

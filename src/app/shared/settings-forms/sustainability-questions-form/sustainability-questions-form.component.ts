@@ -26,6 +26,7 @@ export class SustainabilityQuestionsFormComponent implements OnInit {
   sustainQuestionsDontMatchAccount: boolean;
   years: Array<number> = new Array();
   isFormChange: boolean = false;
+  fiscalYearOption: "calendarYear" | "nonCalendarYear";
   constructor(private accountDbService: AccountdbService, private settingsFormsService: SettingsFormsService, private facilityDbService: FacilitydbService,
     private setupWizardService: SetupWizardService) { }
 
@@ -34,6 +35,7 @@ export class SustainabilityQuestionsFormComponent implements OnInit {
       this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(account => {
         this.selectedAccount = account;
         if (account && this.inAccount) {
+          this.fiscalYearOption = account.fiscalYear;
           if (this.isFormChange == false) {
             this.form = this.settingsFormsService.getSustainabilityQuestionsForm(account);
           } else {
@@ -46,6 +48,7 @@ export class SustainabilityQuestionsFormComponent implements OnInit {
       this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
         this.selectedFacility = facility;
         if (facility && !this.inAccount) {
+          this.fiscalYearOption = facility.fiscalYear;
           this.sustainQuestionsDontMatchAccount = this.settingsFormsService.areAccountAndFacilitySustainQuestionsDifferent(this.selectedAccount, this.selectedFacility);
           if (this.isFormChange == false) {
             this.form = this.settingsFormsService.getSustainabilityQuestionsForm(facility);
@@ -58,6 +61,7 @@ export class SustainabilityQuestionsFormComponent implements OnInit {
       this.selectedAccountSub = this.setupWizardService.account.subscribe(account => {
         this.selectedAccount = account;
         if (account && this.inAccount) {
+          this.fiscalYearOption = account.fiscalYear;
           if (this.isFormChange == false) {
             this.form = this.settingsFormsService.getSustainabilityQuestionsForm(account);
           } else {
@@ -69,6 +73,7 @@ export class SustainabilityQuestionsFormComponent implements OnInit {
       this.selectedFacilitySub = this.setupWizardService.selectedFacility.subscribe(facility => {
         this.selectedFacility = facility;
         if (facility && !this.inAccount) {
+          this.fiscalYearOption = facility.fiscalYear;
           this.sustainQuestionsDontMatchAccount = this.settingsFormsService.areAccountAndFacilitySustainQuestionsDifferent(this.selectedAccount, this.selectedFacility);
           if (this.isFormChange == false) {
             this.form = this.settingsFormsService.getSustainabilityQuestionsForm(facility);

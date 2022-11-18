@@ -71,13 +71,13 @@ export class AppComponent {
     await this.eGridService.parseZipCodeLongLat();
     if (account) {
       await this.initializeFacilities(account);
-      await this.initializeAccountAnalysisItems(account);
-      await this.initializeFacilityAnalysisItems(account);
       await this.initializeReports(account);
       await this.initializePredictors(account);
       await this.initializeMeters(account);
       await this.initializeMeterData(account);
       await this.initilizeMeterGroups(account);
+      await this.initializeAccountAnalysisItems(account);
+      await this.initializeFacilityAnalysisItems(account);
       await this.initializeCustomEmissions(account);
       let updatedAccount: { account: IdbAccount, isChanged: boolean } = this.updateDbEntryService.updateAccount(account);
       if(updatedAccount.isChanged){
@@ -122,6 +122,13 @@ export class AppComponent {
   async initializeFacilityAnalysisItems(account: IdbAccount) {
     //set analysis
     let analysisItems: Array<IdbAnalysisItem> = await this.analysisDbService.getAllByIndexRange('accountId', account.guid).toPromise();
+    for (let i = 0; i < analysisItems.length; i++) {
+      let updateAnalysis: { analysisItem: IdbAnalysisItem, isChanged: boolean } = this.updateDbEntryService.updateAnalysis(analysisItems[i]);
+      if (updateAnalysis.isChanged) {
+        analysisItems[i] = updateAnalysis.analysisItem;
+        await this.analysisDbService.updateWithObservable(analysisItems[i]).toPromise();
+      };
+    }
     this.analysisDbService.accountAnalysisItems.next(analysisItems);
     let localStorageAnalysisId: number = this.analysisDbService.getInitialAnalysisItem();
     if (localStorageAnalysisId) {

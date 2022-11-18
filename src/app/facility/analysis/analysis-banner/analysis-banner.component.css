@@ -7,6 +7,10 @@
 }
 
 
+.fa.fa-exclamation-circle.warning, .banner a.nav-link:not(.active) .fa.fa.fa-exclamation-circle.warning{
+    color: orange;
+}
+
 
 .analysis.banner{
     background-color: white;

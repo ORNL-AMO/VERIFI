@@ -148,3 +148,19 @@
 .btn.btn-dark:hover{
   background-color: gray;
 }
+
+
+
+.footer-nav .btn .fa{
+  color: white;
+}
+
+.footer-nav .btn{
+  background-color: black;
+  color: white;
+  border-color: black;
+}
+
+.footer-nav .btn:hover{
+  background-color: gray;
+}

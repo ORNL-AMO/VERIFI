@@ -16,6 +16,7 @@ export class FacilityOverviewComponent implements OnInit {
   facilitySub: Subscription;
   worker: Worker;
   noUtilityData: boolean;
+  facility: IdbFacility;
   constructor(private facilityDbService: FacilitydbService,
     private facilityOverviewService: FacilityOverviewService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
@@ -23,6 +24,7 @@ export class FacilityOverviewComponent implements OnInit {
 
   ngOnInit(): void {
     this.facilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
+      this.facility = val;
       this.facilityOverviewService.setCalanderizedMeters();
       if (this.facilityOverviewService.calanderizedMeters.length != 0) {
         this.noUtilityData = false;
@@ -74,7 +76,8 @@ export class FacilityOverviewComponent implements OnInit {
         calanderizedMeters: this.facilityOverviewService.calanderizedMeters,
         groups: groups,
         sources: energySources,
-        type: 'energy'
+        type: 'energy',
+        facility: this.facility
       });
 
       let waterSources: Array<MeterSource> = [
@@ -85,7 +88,8 @@ export class FacilityOverviewComponent implements OnInit {
         calanderizedMeters: this.facilityOverviewService.calanderizedMeters,
         groups: groups,
         sources: waterSources,
-        type: 'water'
+        type: 'water',
+        facility: this.facility
       });
 
       let allSources: Array<MeterSource> = [
@@ -101,7 +105,8 @@ export class FacilityOverviewComponent implements OnInit {
         calanderizedMeters: this.facilityOverviewService.calanderizedMeters,
         groups: groups,
         sources: allSources,
-        type: 'all'
+        type: 'all',
+        facility: this.facility
       });
     } else {
       console.log('nopee')

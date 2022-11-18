@@ -105,7 +105,8 @@ export interface UtilityItem {
 export interface YearMonthData {
     yearMonth: {
         year: number,
-        month: string
+        month: string,
+        fiscalYear: number
     },
     energyUse: number,
     energyCost: number,

@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
 import { AnalysisTableColumns, AnnualAnalysisSummary } from 'src/app/models/analysis';
-import { IdbAccountAnalysisItem, IdbAnalysisItem, PredictorData } from 'src/app/models/idb';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, PredictorData } from 'src/app/models/idb';
 import { CopyTableService } from '../../helper-services/copy-table.service';
 
 @Component({
@@ -16,6 +16,8 @@ export class AnnualAnalysisSummaryTableComponent implements OnInit {
   annualAnalysisSummary: Array<AnnualAnalysisSummary>;
   @Input()
   analysisItem: IdbAnalysisItem | IdbAccountAnalysisItem;
+  @Input()
+  accountOrFacility: IdbAccount | IdbFacility;
 
   @ViewChild('dataTable', { static: false }) dataTable: ElementRef;
 

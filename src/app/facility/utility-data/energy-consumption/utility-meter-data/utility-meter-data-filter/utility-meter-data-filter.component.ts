@@ -31,7 +31,6 @@ export class UtilityMeterDataFilterComponent implements OnInit {
 
   ngOnInit(): void {
     this.routerSub = this.router.events.subscribe(event => {
-      console.log('event')
       if (event instanceof NavigationEnd) {
         this.showFilterDropdown = false;
       }

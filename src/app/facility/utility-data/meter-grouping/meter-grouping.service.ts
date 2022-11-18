@@ -1,11 +1,13 @@
 import { Injectable } from '@angular/core';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { CalanderizedMeter, LastYearData, MeterGroupType, MonthlyData } from 'src/app/models/calanderization';
-import { IdbUtilityMeter, IdbUtilityMeterGroup } from 'src/app/models/idb';
+import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterGroup } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { BehaviorSubject } from 'rxjs';
 import { Month, Months } from 'src/app/shared/form-data/months';
+import { getFiscalYear } from 'src/app/shared/shared-analysis/calculations/getFiscalYear';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 @Injectable({
   providedIn: 'root'
 })
@@ -15,7 +17,8 @@ export class MeterGroupingService {
   displayGraphEnergy: "bar" | "scatter" = "bar";
   displayGraphCost: "bar" | "scatter" = "bar";
   dateRange: BehaviorSubject<{ minDate: Date, maxDate: Date }>;
-  constructor(private utilityMeterGroupDbService: UtilityMeterGroupdbService, private calanderizationService: CalanderizationService) {
+  constructor(private utilityMeterGroupDbService: UtilityMeterGroupdbService, private calanderizationService: CalanderizationService,
+    private facilityDbService: FacilitydbService) {
     this.dateRange = new BehaviorSubject<{ minDate: Date, maxDate: Date }>({ minDate: undefined, maxDate: undefined });
   }
 
@@ -144,6 +147,7 @@ export class MeterGroupingService {
     }
     let startDate: Date = new Date(dateRange.minDate);
     let endDate: Date = new Date(dateRange.maxDate);
+    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     while (startDate <= endDate) {
       let filteredData: Array<MonthlyData> = allMonthlyData.filter(monthlyData => {
         let dataDate: Date = new Date(monthlyData.date);
@@ -155,6 +159,7 @@ export class MeterGroupingService {
         month: month.abbreviation,
         monthNumValue: month.monthNumValue,
         year: startDate.getFullYear(),
+        fiscalYear: getFiscalYear(startDate, facility),
         energyConsumption: _.sumBy(filteredData, 'energyConsumption'),
         energyUse: _.sumBy(filteredData, 'energyUse'),
         energyCost: _.sumBy(filteredData, 'energyCost'),

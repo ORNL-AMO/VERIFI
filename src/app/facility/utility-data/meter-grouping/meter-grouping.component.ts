@@ -168,12 +168,12 @@ export class MeterGroupingComponent implements OnInit {
     await this.utilityMeterDbService.updateWithObservable(draggedMeter).toPromise();
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setMeters(selectedAccount, this.selectedFacility);
+    await this.dbChangesService.setAnalysisItems(selectedAccount, this.selectedFacility);
     this.setCalanderizedMeters();
     this.setGroupTypes();
   }
 
   groupAdd(groupType: 'Energy' | 'Water' | 'Other') {
-    console.log(groupType);
     this.editOrAdd = 'add';
     this.groupToEdit = this.utilityMeterGroupDbService.getNewIdbUtilityMeterGroup(groupType, 'New Group', this.selectedFacility.guid, this.selectedFacility.accountId);
     this.sharedDataService.modalOpen.next(true);
@@ -187,7 +187,7 @@ export class MeterGroupingComponent implements OnInit {
     await this.dbChangesService.setMeterGroups(selectedAccount, this.selectedFacility);
     //update analysis items
     await this.analysisDbService.deleteGroup(this.groupToDelete.guid);
-    await this.dbChangesService.setAnalysisItems(selectedAccount, this.selectedFacility)
+    await this.dbChangesService.setAnalysisItems(selectedAccount, this.selectedFacility);
     this.closeDeleteGroup();
     this.loadingService.setLoadingStatus(false);
     this.toastNoticationService.showToast("Meter Group Deleted!", undefined, undefined, false, "success");

@@ -14,8 +14,13 @@ import { AccountAnalysisService } from '../account-analysis.service';
 })
 export class SelectFacilityAnalysisItemsComponent implements OnInit {
 
-  facilities: Array<IdbFacility>;
+  facilitiesList: Array<{
+    facility: IdbFacility,
+    cssClass: string,
+    isInvalid: boolean
+  }>;
   selectedAnalysisItem: IdbAccountAnalysisItem;
+  selectedAnalysisItemSub: Subscription;
   facilityAnalysisItems: Array<IdbAnalysisItem>;
   selectedFacilitySub: Subscription;
   selectedFacility: IdbFacility;
@@ -26,54 +31,84 @@ export class SelectFacilityAnalysisItemsComponent implements OnInit {
     private accountAnalysisService: AccountAnalysisService) { }
 
   ngOnInit(): void {
-    this.selectedAnalysisItem = this.accountAnalysisDbService.selectedAnalysisItem.getValue();
-    console.log(this.selectedAnalysisItem);
+    this.selectedAnalysisItemSub = this.accountAnalysisDbService.selectedAnalysisItem.subscribe(item => {
+      this.selectedAnalysisItem = item;
+      this.setFacilitiesList();
+    })
+
     if (!this.selectedAnalysisItem) {
       this.router.navigateByUrl('/account/analysis/dashboard')
     }
-    this.facilities = this.facilityDbService.accountFacilities.getValue();
     this.selectedFacilitySub = this.accountAnalysisService.selectedFacility.subscribe(val => {
-      if(val){
+      if (val) {
         this.selectedFacility = val;
-        let checkExists = this.selectedAnalysisItem.facilityAnalysisItems.find(facility => {return this.selectedFacility.guid == facility.facilityId});
-        if(!checkExists){
+        let checkExists = this.selectedAnalysisItem.facilityAnalysisItems.find(facility => { return this.selectedFacility.guid == facility.facilityId });
+        if (!checkExists) {
           this.initSelectedFacility();
-        }else{
+        } else {
           this.setFacilityAnlaysisItems();
         }
-      }else{
+      } else {
         this.initSelectedFacility();
       }
     });
   }
 
-  ngOnDestroy(){
+  ngOnDestroy() {
     this.selectedFacilitySub.unsubscribe();
+    this.selectedAnalysisItemSub.unsubscribe();
   }
 
-  initSelectedFacility(){
-    if(this.facilities && this.facilities.length != 0){
-      this.accountAnalysisService.selectedFacility.next(this.facilities[0]);
+  initSelectedFacility() {
+    if (this.facilitiesList && this.facilitiesList.length != 0) {
+      this.accountAnalysisService.selectedFacility.next(this.facilitiesList[0].facility);
     }
   }
 
-  selectFacility(facility: IdbFacility){
+  selectFacility(facility: IdbFacility) {
     this.accountAnalysisService.selectedFacility.next(facility);
   }
 
-  setFacilityAnlaysisItems(){
+  setFacilityAnlaysisItems() {
     let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
-    this.facilityAnalysisItems = accountAnalysisItems.filter(item => { 
+    this.facilityAnalysisItems = accountAnalysisItems.filter(item => {
       return item.facilityId == this.selectedFacility.guid && item.reportYear == this.selectedAnalysisItem.reportYear && item.energyIsSource == this.selectedAnalysisItem.energyIsSource
     });
   }
 
-  getClass(facility: IdbFacility): 'fa fa-square-minus' | 'fa fa-square-check' {
-    let facilityItem: {facilityId: string, analysisItemId: string} = this.selectedAnalysisItem.facilityAnalysisItems.find(item => {return item.facilityId == facility.guid});
-    if(facilityItem && facilityItem.analysisItemId){
-      return 'fa fa-square-check';
-    }else{
-      return 'fa fa-square-minus';
+  getClassAndValid(facility: IdbFacility): { cssClass: 'fa fa-square-minus' | 'fa fa-square-check' | 'fa fa-square', isInvalid: boolean } {
+    let facilityItem: { facilityId: string, analysisItemId: string } = this.selectedAnalysisItem.facilityAnalysisItems.find(item => { return item.facilityId == facility.guid });
+    let cssClass: 'fa fa-square-minus' | 'fa fa-square-check' | 'fa fa-square' = 'fa fa-square';
+    let isInvalid: boolean = false;
+    if (facilityItem && facilityItem.analysisItemId) {
+      if (facilityItem.analysisItemId != 'skip') {
+        cssClass = 'fa fa-square-check';
+        let analysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
+        let item: IdbAnalysisItem = analysisItems.find(item => { return item.guid == facilityItem.analysisItemId });
+        if (item.setupErrors.hasError || item.setupErrors.groupsHaveErrors) {
+          isInvalid = true;
+        } else{
+          isInvalid = false;
+        }
+      } else {
+        cssClass = 'fa fa-square-minus';
+        isInvalid = false;
+      }
+    } else {
+      isInvalid = true;
     }
+    return { cssClass: cssClass, isInvalid: isInvalid }
+  }
+
+  setFacilitiesList() {
+    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    this.facilitiesList = facilities.map(facility => {
+      let data: { cssClass: 'fa fa-square-minus' | 'fa fa-square-check' | 'fa fa-square', isInvalid: boolean } = this.getClassAndValid(facility);
+      return {
+        facility: facility,
+        cssClass: data.cssClass,
+        isInvalid: data.isInvalid
+      }
+    })
   }
 }

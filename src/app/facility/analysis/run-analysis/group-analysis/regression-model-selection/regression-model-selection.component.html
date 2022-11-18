@@ -1,4 +1,9 @@
-
+<ng-container *ngIf="selectedGroup.groupErrors?.hasInvalidRegressionModel">
+    <div class="alert alert-warning w-100 text-center">
+        The selected model is invalid.
+    </div>
+    <hr>
+</ng-container>
 
 <app-regression-model-menu></app-regression-model-menu>
 
@@ -50,7 +55,7 @@
                         id="{{modelIndex+'_selectedModelId'}}" (change)="selectModel()">
                 </td>
                 <td *ngIf="!model.errorModeling">
-                    {{model.modelYear}}
+                    {{model.modelYear | yearDisplay:selectedFacility.fiscalYear}}
                 </td>
                 <td *ngIf="!model.errorModeling">
                     <span *ngFor="let pVal of model.t.p; let index = index">
@@ -90,7 +95,8 @@
                 </td>
                 <!--error modeling-->
                 <td class="alert-danger" *ngIf="model.errorModeling" colspan="9">
-                    There was an error when generating model for {{model.modelYear}}: <span class="pr-1" *ngFor="let variable of model.predictorVariables">{{variable.name}}</span>.
+                    There was an error when generating model for {{model.modelYear}}: <span class="pr-1"
+                        *ngFor="let variable of model.predictorVariables">{{variable.name}}</span>.
                 </td>
             </tr>
         </tbody>

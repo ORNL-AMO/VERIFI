@@ -14,6 +14,7 @@ import { AnalysisGroup, IdbAccount, IdbAnalysisItem, IdbFacility, IdbPredictorEn
 import { AnalysisCalculationsHelperService } from 'src/app/shared/shared-analysis/calculations/analysis-calculations-helper.service';
 import { RegressionModelsService } from 'src/app/shared/shared-analysis/calculations/regression-models.service';
 import * as _ from 'lodash';
+import { AnalysisValidationService } from 'src/app/facility/analysis/analysis-validation.service';
 @Component({
   selector: 'app-regression-model-menu',
   templateUrl: './regression-model-menu.component.html',
@@ -30,22 +31,30 @@ export class RegressionModelMenuComponent implements OnInit {
   noValidModels: boolean;
   showConfirmPredictorChangeModel: boolean = false;
   modelingError: boolean = false;
+  selectedFacility: IdbFacility;
+  isFormChange: boolean;
   constructor(private analysisDbService: AnalysisDbService, private analysisService: AnalysisService,
     private dbChangesService: DbChangesService, private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService, private analysisCalculationsHelperService: AnalysisCalculationsHelperService,
     private regressionsModelsService: RegressionModelsService, private predictorDbService: PredictordbService,
-    private utilityMeterDbService: UtilityMeterdbService, private utilityMeterDataDbService: UtilityMeterDatadbService) { }
+    private utilityMeterDbService: UtilityMeterdbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private analysisValidationService: AnalysisValidationService) { }
 
   ngOnInit(): void {
+    this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
     this.showInvalid = this.analysisService.showInvalidModels.getValue();
     this.yearOptions = this.analysisCalculationsHelperService.getYearOptions();
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(group => {
-      this.group = JSON.parse(JSON.stringify(group));
-      if (this.group.models && this.group.models.length != 0) {
-        this.checkModelData();
-        this.checkHasValidModels();
+      if (!this.isFormChange) {
+        this.group = JSON.parse(JSON.stringify(group));
+        if (this.group.models && this.group.models.length != 0) {
+          this.checkModelData();
+          this.checkHasValidModels();
+        } else {
+          this.noValidModels = false;
+        }
       } else {
-        this.noValidModels = false;
+        this.isFormChange = false;
       }
     });
   }
@@ -55,15 +64,15 @@ export class RegressionModelMenuComponent implements OnInit {
   }
 
   async saveItem() {
+    this.isFormChange = true;
     let analysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     let groupIndex: number = analysisItem.groups.findIndex(group => { return group.idbGroupId == this.group.idbGroupId });
-    this.group.groupHasError = this.analysisService.checkGroupHasError(this.group);
+    this.group.groupErrors = this.analysisValidationService.getGroupErrors(this.group);
 
     analysisItem.groups[groupIndex] = this.group;
     await this.analysisDbService.updateWithObservable(analysisItem).toPromise();
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.dbChangesService.setAnalysisItems(selectedAccount, selectedFacility);
+    this.dbChangesService.setAnalysisItems(selectedAccount, this.selectedFacility);
     this.analysisDbService.selectedAnalysisItem.next(analysisItem);
     this.analysisService.selectedGroup.next(this.group);
   }
@@ -84,9 +93,8 @@ export class RegressionModelMenuComponent implements OnInit {
 
   generateModels() {
     let analysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
-    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let calanderizedMeters: Array<CalanderizedMeter> = this.analysisService.calanderizedMeters;
-    this.group.models = this.regressionsModelsService.getModels(this.group, calanderizedMeters, facility, analysisItem);
+    this.group.models = this.regressionsModelsService.getModels(this.group, calanderizedMeters, this.selectedFacility, analysisItem);
     if (this.group.models) {
       this.modelingError = false;
       this.checkHasValidModels();

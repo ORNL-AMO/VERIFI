@@ -1,18 +1,19 @@
 <div class="wrapper main-content p-0">
     <div class="banner p-0">
         <ul class="nav nav-tabs">
-            <li class="nav-item" *ngFor="let facility of facilities"><a class="nav-link"
-                    (click)="selectFacility(facility)" [ngClass]="{'active': facility.id == selectedFacility.id}">
-                    <i [ngClass]="getClass(facility)"></i>
-                    {{facility.name}}</a>
+            <li class="nav-item" *ngFor="let listItem of facilitiesList"><a class="nav-link"
+                    (click)="selectFacility(listItem.facility)"
+                    [ngClass]="{'active': listItem.facility.id == selectedFacility.id}">
+                    <i [ngClass]="listItem.cssClass"></i>
+                    <span class="fa fa-exclamation-circle" *ngIf="listItem.isInvalid"></span>
+
+                    {{listItem.facility.name}}</a>
             </li>
         </ul>
     </div>
     <div class="content-padding">
-        <h4><i class="fa fa-industry pr-2" [ngStyle]="{color: selectedFacility.color}"></i>{{selectedFacility.name}}
-            Analysis Items</h4>
-
         <app-select-item-table [facility]="selectedFacility" [selectedAnalysisItem]="selectedAnalysisItem"
             [facilityAnalysisItems]="facilityAnalysisItems"></app-select-item-table>
+        <hr>
     </div>
 </div>

@@ -8,7 +8,7 @@ import { AnalysisTableColumns, AnnualAnalysisSummary, MonthlyAnalysisSummaryData
 import { CalanderizationOptions, CalanderizedMeter } from 'src/app/models/calanderization';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { ConvertMeterDataService } from 'src/app/shared/helper-services/convert-meter-data.service';
-import { AnalysisGroup, IdbAccount, IdbAnalysisItem, IdbFacility, IdbUtilityMeter, PredictorData } from '../../models/idb';
+import { AnalysisGroup, IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, IdbUtilityMeter, PredictorData } from '../../models/idb';
 
 @Injectable({
   providedIn: 'root'
@@ -24,6 +24,7 @@ export class AnalysisService {
   calculating: BehaviorSubject<boolean>;
   annualAnalysisSummary: BehaviorSubject<Array<AnnualAnalysisSummary>>;
   monthlyAccountAnalysisData: BehaviorSubject<Array<MonthlyAnalysisSummaryData>>;
+  accountAnalysisItem: IdbAccountAnalysisItem;
   constructor(private localStorageService: LocalStorageService, private calendarizationService: CalanderizationService,
     private convertMeterDataService: ConvertMeterDataService, private facilityDbService: FacilitydbService,
     private utilityMeterDbService: UtilityMeterdbService, private analysisDbService: AnalysisDbService) {
@@ -91,52 +92,20 @@ export class AnalysisService {
     // });
   }
 
-  checkGroupHasError(group: AnalysisGroup): boolean {
-    if (group.analysisType != 'absoluteEnergyConsumption') {
-      let hasProductionVariable: boolean = false;
-      group.predictorVariables.forEach(variable => {
-        if (variable.productionInAnalysis) {
-          hasProductionVariable = true;
-        }
+  setBaselineAdjustments(facility: IdbFacility, analysisItem: IdbAnalysisItem): IdbAnalysisItem {
+    if (facility.sustainabilityQuestions.energyReductionBaselineYear < analysisItem.reportYear) {
+      let yearAdjustments: Array<{ year: number, amount: number }> = new Array();
+      for (let year: number = facility.sustainabilityQuestions.energyReductionBaselineYear + 1; year <= analysisItem.reportYear; year++) {
+        yearAdjustments.push({
+          year: year,
+          amount: 0
+        })
+      }
+      analysisItem.groups.forEach(group => {
+        group.baselineAdjustments = yearAdjustments;
       });
-      if (!hasProductionVariable) {
-        return true;
-      }
-      if (group.analysisType == 'regression') {
-        if (!this.checkValueValid(group.regressionConstant)) {
-          return true;
-        }
-        if (!this.checkValueValid(group.regressionModelYear)) {
-          return true;
-        }
-        for (let index = 0; index < group.predictorVariables.length; index++) {
-          let variable: PredictorData = group.predictorVariables[index];
-          if (variable.productionInAnalysis && !this.checkValueValid(variable.regressionCoefficient)) {
-            return true;
-          }
-        }
-
-        if (group.userDefinedModel && !group.selectedModelId) {
-          return true;
-        }
-      }
-      if (group.analysisType == 'modifiedEnergyIntensity') {
-        if (group.specifiedMonthlyPercentBaseload) {
-          for (let i = 0; i < group.monthlyPercentBaseload.length; i++) {
-            if (!this.checkValueValid(group.monthlyPercentBaseload[i].percent)) {
-              return true;
-            }
-          }
-        } else if (!this.checkValueValid(group.averagePercentBaseload)) {
-          return true;
-        }
-      }
     }
-    return false;
-  }
-
-  checkValueValid(value: number): boolean {
-    return (value != undefined) && (value != null) && (isNaN(value) == false);
+    return analysisItem;
   }
 
   checkFiscalYearEnd(date: Date, facilityOrAccount: IdbFacility | IdbAccount, orderDataField: string, orderByDirection: 'asc' | 'desc'): boolean {

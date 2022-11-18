@@ -36,7 +36,7 @@
                     </label>
                     <select required class="w-50" id="reportYear" id="reportYear" [(ngModel)]="analysisItem.reportYear"
                         (change)="changeReportYear()">
-                        <option *ngFor="let year of yearOptions" [ngValue]="year">{{year}}</option>
+                        <option *ngFor="let year of yearOptions" [ngValue]="year">{{year | yearDisplay: account.fiscalYear}}</option>
                     </select>
                 </div>
                 <hr>
@@ -45,8 +45,9 @@
                         Has Baseline Adjustement
                     </label>
                     <label class="switch" for="hasBaselineAdjustement">
-                        <input class="checkbox" type="checkbox" id="hasBaselineAdjustement" name="hasBaselineAdjustement"
-                            [(ngModel)]="analysisItem.hasBaselineAdjustement" (change)="saveItem()">
+                        <input class="checkbox" type="checkbox" id="hasBaselineAdjustement"
+                            name="hasBaselineAdjustement" [(ngModel)]="analysisItem.hasBaselineAdjustement"
+                            (change)="saveItem()">
                         <span class="slider round"></span>
                     </label>
                     <!-- <div class="input-group w-50">
@@ -58,7 +59,7 @@
                 <div class="d-flex flex-column" *ngIf="analysisItem.hasBaselineAdjustement">
                     <div class="row form-group" *ngFor="let baselineAdjustment of analysisItem.baselineAdjustments">
                         <div class="col-12 d-flex">
-        
+
                             <label class="w-50 bold">{{baselineAdjustment.year}}</label>
                             <div class="input-group w-50">
                                 <input type="number" id="baselineAdjustment" id="baselineAdjustment"
@@ -77,7 +78,7 @@
                     <select id="baselineYear" name="baselineYear" disabled class="w-50"
                         [(ngModel)]="account.sustainabilityQuestions.energyReductionBaselineYear">
                         <option [ngValue]="account.sustainabilityQuestions.energyReductionBaselineYear">
-                            {{account.sustainabilityQuestions.energyReductionBaselineYear}}</option>
+                            {{account.sustainabilityQuestions.energyReductionBaselineYear | yearDisplay: account.fiscalYear}}</option>
                     </select>
                 </div>
                 <div class="form-group d-flex">

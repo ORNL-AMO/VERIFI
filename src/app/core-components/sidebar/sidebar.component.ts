@@ -29,6 +29,7 @@ export class SidebarComponent implements OnInit {
   showSidebar: boolean;
   showAllFacilities: boolean = false;
   hoverIndex: number;
+  hoverAccount: boolean;
   constructor(private localStorageService: LocalStorageService, private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService, private router: Router,
     private sharedDataService: SharedDataService) {
@@ -82,7 +83,7 @@ export class SidebarComponent implements OnInit {
     } else {
       if (this.open && !this.showAllFacilities) {
         return false;
-      } else if (this.router.url.includes('account')) {
+      } else if (this.router.url.includes('account') && !this.router.url.includes('facility')) {
         if (index == this.hoverIndex) {
           return false;
         }else{
@@ -100,9 +101,9 @@ export class SidebarComponent implements OnInit {
   }
 
   checkHideAccountLinks(): boolean {
-    if (this.open) {
+    if (this.open || this.hoverAccount) {
       return false;
-    } else if (!this.router.url.includes('account')) {
+    } else if (!this.router.url.includes('account') || this.router.url.includes('facility')) {
       return true;
     }
     return false;
@@ -149,6 +150,10 @@ export class SidebarComponent implements OnInit {
 
   setHoverIndex(index: number) {
     this.hoverIndex = index;
+  }
+
+  setHoverAccount(bool: boolean){
+    this.hoverAccount = bool;
   }
 }
 

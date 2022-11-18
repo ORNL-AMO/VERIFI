@@ -219,7 +219,7 @@
                     </div>
                 </div>
             </div>
-            <div class="row">
+            <div class="row" *ngIf="displayIncludeEnergy">
                 <div class="col align-items-center">
                     <div class="d-flex">
                         <label class="switch" for="includeInEnergy">
@@ -233,7 +233,7 @@
                     </div>
                 </div>
             </div>
-            <div class="row">
+            <div class="row" *ngIf="displayRetainRecs">
                 <div class="col align-items-center">
                     <div class="d-flex">
                         <label class="switch" for="retainRECs">

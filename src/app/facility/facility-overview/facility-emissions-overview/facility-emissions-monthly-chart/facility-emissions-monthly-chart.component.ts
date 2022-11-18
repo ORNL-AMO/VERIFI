@@ -4,6 +4,9 @@ import { Subscription } from 'rxjs';
 import { YearMonthData } from 'src/app/models/dashboard';
 import * as _ from 'lodash';
 import { FacilityOverviewService } from '../../facility-overview.service';
+import { Month, Months } from 'src/app/shared/form-data/months';
+import { IdbFacility } from 'src/app/models/idb';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 
 @Component({
   selector: 'app-facility-emissions-monthly-chart',
@@ -17,7 +20,8 @@ export class FacilityEmissionsMonthlyChartComponent implements OnInit {
   yearMonthDataSub: Subscription;
   emissionsDisplay: 'market' | 'location';
   emissionsDisplaySub: Subscription;
-  constructor(private plotlyService: PlotlyService, private facilityOverviewService: FacilityOverviewService) { }
+  constructor(private plotlyService: PlotlyService, private facilityOverviewService: FacilityOverviewService,
+    private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
     this.emissionsDisplaySub = this.facilityOverviewService.emissionsDisplay.subscribe(val => {
@@ -48,27 +52,48 @@ export class FacilityEmissionsMonthlyChartComponent implements OnInit {
       let hoverformat: string = ",.2f";
       let hovertemplate: string = '%{text} (%{x}): %{y:,.0f} kg CO<sub>2</sub> <extra></extra>'
 
-      let years: Array<number> = this.yearMonthData.flatMap(data => { return data.yearMonth.year });
+      let years: Array<number> = this.yearMonthData.flatMap(data => { return data.yearMonth.fiscalYear });
       years = _.uniq(years);
+      let months: Array<Month> = Months.map(month => { return month });
+      let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+      if (selectedFacility.fiscalYear == 'nonCalendarYear') {
+        let monthStartIndex: number = months.findIndex(month => { return month.monthNumValue == selectedFacility.fiscalYearMonth });
+        let fromStartMonth: Array<Month> = months.splice(monthStartIndex);
+        months = fromStartMonth.concat(months);
+      }
       years.forEach(year => {
         let x: Array<string> = new Array();
         let y: Array<number> = new Array();
-        for (let i = 0; i < this.yearMonthData.length; i++) {
-          if (this.yearMonthData[i].yearMonth.year == year) {
-            x.push(this.yearMonthData[i].yearMonth.month);
+        months.forEach(month => {
+          let emissions: number;
+          let ymData: YearMonthData = this.yearMonthData.find(ymData => { return ymData.yearMonth.fiscalYear == year && ymData.yearMonth.month === month.abbreviation });
+          if (ymData) {
             if (this.emissionsDisplay == 'location') {
-              y.push(this.yearMonthData[i].locationEmissions);
+              emissions = ymData.locationEmissions;
             } else {
-              y.push(this.yearMonthData[i].marketEmissions);
+              emissions = ymData.marketEmissions;
             }
           }
+          x.push(month.abbreviation);
+          y.push(emissions)
+        });
+
+        let name: string = year.toString();
+        if (selectedFacility.fiscalYear == 'nonCalendarYear') {
+          name = 'FY - ' + year
         }
         let trace = {
           type: 'scatter',
           x: x,
           y: y,
-          name: year,
-          text: x.map(item => { return year }),
+          name: name,
+          text: x.map(item => {
+            if (selectedFacility.fiscalYear == 'nonCalendarYear') {
+              return 'FY - ' + year
+            } else {
+              return year
+            }
+          }),
           hovertemplate: hovertemplate,
         }
         traceData.push(trace);

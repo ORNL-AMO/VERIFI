@@ -3,7 +3,7 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountOverviewService } from './account-overview.service';
 import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbFacility, MeterSource } from 'src/app/models/idb';
+import { IdbAccount, IdbFacility, MeterSource } from 'src/app/models/idb';
 import { Router } from '@angular/router';
 
 @Component({
@@ -16,11 +16,13 @@ export class AccountOverviewComponent implements OnInit {
   accountSub: Subscription;
   worker: Worker;
   noUtilityData: boolean;
+  account: IdbAccount;
   constructor(private accountDbService: AccountdbService, private accountOverviewService: AccountOverviewService, 
     private facilityDbService: FacilitydbService, private router: Router) { }
 
   ngOnInit(): void {
     this.accountSub = this.accountDbService.selectedAccount.subscribe(val => {
+      this.account = val;
       this.accountOverviewService.setCalanderizedMeters();
       if(this.accountOverviewService.calanderizedMeters.length != 0){
         this.noUtilityData = false;
@@ -70,7 +72,8 @@ export class AccountOverviewComponent implements OnInit {
         calanderizedMeters: this.accountOverviewService.calanderizedMeters,
         facilities: facilities,
         sources: energySources,
-        type: 'energy'
+        type: 'energy',
+        account: this.account
       });
 
       let waterSources: Array<MeterSource> = [
@@ -81,7 +84,8 @@ export class AccountOverviewComponent implements OnInit {
         calanderizedMeters: this.accountOverviewService.calanderizedMeters,
         facilities: facilities,
         sources: waterSources,
-        type: 'water'
+        type: 'water',
+        account: this.account
       });
 
       let allSources: Array<MeterSource> = [
@@ -97,7 +101,8 @@ export class AccountOverviewComponent implements OnInit {
         calanderizedMeters: this.accountOverviewService.calanderizedMeters,
         facilities: facilities,
         sources: allSources,
-        type: 'all'
+        type: 'all',
+        account: this.account
       });
     } else {
       console.log('nopee')

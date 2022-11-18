@@ -25,7 +25,8 @@
                 [ngClass]="{'active': orderDataField == 'modeledEnergy'}">
                 Modeled
             </th>
-            <th *ngIf="analysisTableColumns.adjustedForNormalization" (click)="setOrderDataField('adjustedForNormalization')"
+            <th *ngIf="analysisTableColumns.adjustedForNormalization"
+                (click)="setOrderDataField('adjustedForNormalization')"
                 [ngClass]="{'active': orderDataField == 'adjustedForNormalization'}">
                 Adjusted for<br> Normalization
             </th>
@@ -33,16 +34,18 @@
                 [ngClass]="{'active': orderDataField == 'adjusted'}">
                 Adjusted
             </th>
-            <th *ngIf="analysisTableColumns.baselineAdjustmentForNormalization" (click)="setOrderDataField('baselineAdjustmentForNormalization')"
+            <th *ngIf="analysisTableColumns.baselineAdjustmentForNormalization"
+                (click)="setOrderDataField('baselineAdjustmentForNormalization')"
                 [ngClass]="{'active': orderDataField == 'baselineAdjustmentForNormalization'}">
                 Baseline<br> Adjustment<br> for Normalization
             </th>
-            
-            <th *ngIf="analysisTableColumns.baselineAdjustmentForOther" (click)="setOrderDataField('baselineAdjustmentForOther')"
+
+            <th *ngIf="analysisTableColumns.baselineAdjustmentForOther"
+                (click)="setOrderDataField('baselineAdjustmentForOther')"
                 [ngClass]="{'active': orderDataField == 'baselineAdjustmentForOther'}">
                 Baseline<br> Adjustment<br> for Other
             </th>
-            
+
             <th *ngIf="analysisTableColumns.baselineAdjustment" (click)="setOrderDataField('baselineAdjustment')"
                 [ngClass]="{'active': orderDataField == 'baselineAdjustment'}">
                 Baseline<br> Adjustment
@@ -84,7 +87,7 @@
     <tbody>
         <tr *ngFor="let summary of annualAnalysisSummary | orderBy: orderDataField: orderByDirection">
             <td>
-                {{summary.year}}
+                {{summary.year | yearDisplay: accountOrFacility.fiscalYear}}
             </td>
             <td *ngIf="analysisTableColumns.actualEnergy">
                 <span *ngIf="summary.energyUse" [ngClass]="{'red': summary.energyUse < 0}">
@@ -102,10 +105,11 @@
                     &mdash;
                 </span>
             </td>
-           
-            
+
+
             <td *ngIf="analysisTableColumns.adjustedForNormalization">
-                <span *ngIf="summary.adjustedForNormalization" [ngClass]="{'red': summary.adjustedForNormalization < 0}">
+                <span *ngIf="summary.adjustedForNormalization"
+                    [ngClass]="{'red': summary.adjustedForNormalization < 0}">
                     {{summary.adjustedForNormalization | customNumber}}
                 </span>
                 <span *ngIf="!summary.adjustedForNormalization">
@@ -122,7 +126,8 @@
             </td>
 
             <td *ngIf="analysisTableColumns.baselineAdjustmentForNormalization">
-                <span *ngIf="summary.baselineAdjustmentForNormalization" [ngClass]="{'red': summary.baselineAdjustmentForNormalization < 0}">
+                <span *ngIf="summary.baselineAdjustmentForNormalization"
+                    [ngClass]="{'red': summary.baselineAdjustmentForNormalization < 0}">
                     {{summary.baselineAdjustmentForNormalization | customNumber}}
                 </span>
                 <span *ngIf="!summary.baselineAdjustmentForNormalization">
@@ -130,7 +135,8 @@
                 </span>
             </td>
             <td *ngIf="analysisTableColumns.baselineAdjustmentForOther">
-                <span *ngIf="summary.baselineAdjustmentForOther" [ngClass]="{'red': summary.baselineAdjustmentForOther < 0}">
+                <span *ngIf="summary.baselineAdjustmentForOther"
+                    [ngClass]="{'red': summary.baselineAdjustmentForOther < 0}">
                     {{summary.baselineAdjustmentForOther | customNumber}}
                 </span>
                 <span *ngIf="!summary.baselineAdjustmentForOther">

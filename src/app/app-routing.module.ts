@@ -89,6 +89,7 @@ import { FacilityCostOverviewComponent } from './facility/facility-overview/faci
 import { FacilityEmissionsOverviewComponent } from './facility/facility-overview/facility-emissions-overview/facility-emissions-overview.component';
 import { FacilityWaterOverviewComponent } from './facility/facility-overview/facility-water-overview/facility-water-overview.component';
 import { FacilityOverviewComponent } from './facility/facility-overview/facility-overview.component';
+import { AccountAnalysisListComponent } from './facility/analysis/account-analysis-list/account-analysis-list.component';
 
 const routes: Routes = [
   {
@@ -304,6 +305,10 @@ const routes: Routes = [
                   { path: 'annual-analysis', component: AnnualFacilityAnalysisComponent },
                   { path: 'monthly-analysis', component: MonthlyFacilityAnalysisComponent }
                 ]
+              },
+              {
+                path: 'account-analysis',
+                component: AccountAnalysisListComponent
               }
             ]
           }

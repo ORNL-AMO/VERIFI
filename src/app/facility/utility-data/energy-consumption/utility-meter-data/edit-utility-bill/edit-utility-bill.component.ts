@@ -1,8 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData, MeterSource } from 'src/app/models/idb';
+import { IdbUtilityMeter, IdbUtilityMeterData, MeterSource } from 'src/app/models/idb';
 import { CalanderizationService, EmissionsResults } from 'src/app/shared/helper-services/calanderization.service';
 import { EditMeterFormService } from '../../energy-source/edit-meter-form/edit-meter-form.service';
 
@@ -32,14 +31,11 @@ export class EditUtilityBillComponent implements OnInit {
   volumeUnit: string;
   marketEmissions: number = 0;
   locationEmissions: number = 0;
-  facility: IdbFacility;
   showEmissions: boolean;
-  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private facilityDbService: FacilitydbService,
+  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService,
     private calanderizationService: CalanderizationService, private editMeterFormService: EditMeterFormService) { }
 
   ngOnInit(): void {
-    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-    this.facility = accountFacilities.find(facility => { return facility.guid == this.editMeter.facilityId });
     this.showEmissions = this.editMeterFormService.checkShowEmissionsOutputRate(this.editMeter.source);
   }
 
@@ -75,7 +71,7 @@ export class EditUtilityBillComponent implements OnInit {
 
   setTotalEmissions() {
     if (this.meterDataForm.controls.totalEnergyUse.value && this.showEmissions) {
-      let emissionsValues: EmissionsResults = this.calanderizationService.getEmissions(this.editMeter, this.meterDataForm.controls.totalEnergyUse.value, this.editMeter.energyUnit, this.facility.energyIsSource, new Date(this.meterDataForm.controls.readDate.value).getFullYear());
+      let emissionsValues: EmissionsResults = this.calanderizationService.getEmissions(this.editMeter, this.meterDataForm.controls.totalEnergyUse.value, this.editMeter.energyUnit, new Date(this.meterDataForm.controls.readDate.value).getFullYear());
       this.marketEmissions = emissionsValues.marketEmissions;
       this.locationEmissions = emissionsValues.locationEmissions;
     } else {
