@@ -1,12 +1,21 @@
-.data-template-div{
+.data-template-div {
     width: 100%;
     text-align: center;
 }
 
-.data-template-div p, .data-template-div p a{
+.data-template-div p,
+.data-template-div p a {
     font-size: larger;
 }
 
-a.click-link.danger{
+a.click-link.danger {
     color: red !important;
+}
+
+input[type="file"] {
+    border: solid grey;
+}
+
+input[type="file"].drag-in {
+    border: solid black;
 }

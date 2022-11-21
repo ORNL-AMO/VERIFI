@@ -14,6 +14,7 @@ export class FileUploadComponent implements OnInit {
   disableImport: boolean = false;
   filesUploaded: boolean = false;
   fileUploadError: boolean = false;
+  dragOver: boolean = false;
   constructor(private router: Router, private uploadDataService: UploadDataService) { }
 
   ngOnInit(): void {
@@ -61,5 +62,13 @@ export class FileUploadComponent implements OnInit {
       }
     };
     reader.readAsBinaryString(file);
+  }
+
+  setDragEnter(){
+    this.dragOver = true;
+  }
+
+  setDragOut(){
+    this.dragOver = false;
   }
 }
