@@ -1,0 +1,12 @@
+<div class="items-per-page item-right">
+    <span>Show </span>
+    <select [(ngModel)]="itemsPerPage" (change)="save()">
+        <option [ngValue]=6>6</option>
+        <option [ngValue]=12>12</option>
+        <option [ngValue]=24>24</option>
+        <option [ngValue]=36>36</option>
+        <option [ngValue]=48>48</option>
+        <option [ngValue]=60>60</option>
+        <option [ngValue]=999999999999>All</option>
+    </select>
+</div>

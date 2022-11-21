@@ -9,6 +9,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.module';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { TableItemsDropdownModule } from 'src/app/shared/table-items-dropdown/table-items-dropdown.module';
 
 
 
@@ -26,7 +27,8 @@ import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
     FormsModule,
     DragDropModule,
     HelperPipesModule,
-    NgbPaginationModule
+    NgbPaginationModule,
+    TableItemsDropdownModule
   ]
 })
 export class MeterGroupingModule { }

@@ -12,6 +12,7 @@ import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db
 import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
+import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { EditMeterFormService } from '../edit-meter-form/edit-meter-form.service';
 
 @Component({
@@ -23,7 +24,8 @@ export class UtilityMetersTableComponent implements OnInit {
   @ViewChild('meterTable', { static: false }) meterTable: ElementRef;
 
   currentPageNumber: number = 1;
-  itemsPerPage: number = 10;
+  itemsPerPage: number;
+  itemsPerPageSub: Subscription;
   selectedFacilitySub: Subscription;
   selectedFacility: IdbFacility;
   meterList: Array<IdbUtilityMeter>;
@@ -42,7 +44,8 @@ export class UtilityMetersTableComponent implements OnInit {
     private toastNotificationsService: ToastNotificationsService,
     private editMeterFormService: EditMeterFormService,
     private dbChangesService: DbChangesService,
-    private accountDbService: AccountdbService) { }
+    private accountDbService: AccountdbService,
+    private sharedDataService: SharedDataService) { }
 
   ngOnInit(): void {
     this.selectedFacilitySub = this.facilitydbService.selectedFacility.subscribe(facility => {
@@ -52,11 +55,16 @@ export class UtilityMetersTableComponent implements OnInit {
     this.meterListSub = this.utilityMeterdbService.facilityMeters.subscribe(meters => {
       this.meterList = this.checkMeterUnits(meters);
     });
+
+    this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
+      this.itemsPerPage = val;
+    })
   }
 
   ngOnDestroy() {
     this.meterListSub.unsubscribe();
     this.selectedFacilitySub.unsubscribe();
+    this.itemsPerPageSub.unsubscribe();
   }
 
   uploadData() {

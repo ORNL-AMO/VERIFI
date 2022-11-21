@@ -6,6 +6,7 @@ import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { IdbAccount, IdbAccountAnalysisItem } from 'src/app/models/idb';
+import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { AnalysisCalculationsHelperService } from 'src/app/shared/shared-analysis/calculations/analysis-calculations-helper.service';
 
 @Component({
@@ -19,7 +20,8 @@ export class AccountAnalysisDashboardComponent implements OnInit {
   accountAnalysisItemsSub: Subscription;
 
   currentPageNumber: number = 1;
-  itemsPerPage: number = 10;
+  itemsPerPage: number;
+  itemsPerPageSub: Subscription;
   orderDataField: string = 'name';
   orderByDirection: string = 'desc';
 
@@ -29,7 +31,7 @@ export class AccountAnalysisDashboardComponent implements OnInit {
   selectedAccount: IdbAccount;
   constructor(private router: Router, private accountAnalysisDbService: AccountAnalysisDbService, private toastNotificationService: ToastNotificationsService,
     private accountDbService: AccountdbService, private analysisCalculationsHelperService: AnalysisCalculationsHelperService,
-    private dbChangesService: DbChangesService) { }
+    private dbChangesService: DbChangesService, private sharedDataService: SharedDataService) { }
 
   ngOnInit(): void {
     this.selectedAccount = this.accountDbService.selectedAccount.getValue();
@@ -41,10 +43,15 @@ export class AccountAnalysisDashboardComponent implements OnInit {
     if (this.yearOptions) {
       this.baselineYearError = this.yearOptions[0] > this.selectedAccount.sustainabilityQuestions.energyReductionBaselineYear
     }
+
+    this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
+      this.itemsPerPage = val;
+    })
   }
 
   ngOnDestroy() {
     this.accountAnalysisItemsSub.unsubscribe();
+    this.itemsPerPageSub.unsubscribe();
   }
 
   async createAnalysis() {

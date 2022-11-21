@@ -27,24 +27,8 @@
                 <!-- <button class="btn btn-outline" (click)="predictorExport()">Export</button> -->
             </div>
 
-
-            <!-- <div class="importExport item-right">
-                <button class="btn btn-outline" (click)="uploadData()">Import</button>
-                <button class="btn btn-outline" (click)="predictorExport()">Export</button>
-            </div> -->
             <!--Items Per Page-->
-            <div class="items-per-page item-right">
-                <span>Show </span>
-                <select [(ngModel)]="itemsPerPage">
-                    <option [ngValue]=6>6</option>
-                    <option [ngValue]=12>12</option>
-                    <option [ngValue]=24>24</option>
-                    <option [ngValue]=36>36</option>
-                    <option [ngValue]=48>48</option>
-                    <option [ngValue]=60>60</option>
-                    <option [ngValue]=999999999999>All</option>
-                </select>
-            </div>
+            <app-table-items-dropdown></app-table-items-dropdown>
 
             <!--Bulk Delete-->
             <div class="bulk-delete item-right" [class.show]="hasCheckedItems">

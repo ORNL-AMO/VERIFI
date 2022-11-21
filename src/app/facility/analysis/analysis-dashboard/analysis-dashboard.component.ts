@@ -10,6 +10,7 @@ import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 
 @Component({
   selector: 'app-analysis-dashboard',
@@ -22,7 +23,8 @@ export class AnalysisDashboardComponent implements OnInit {
   facilityAnalysisItemsSub: Subscription;
 
   currentPageNumber: number = 1;
-  itemsPerPage: number = 10;
+  itemsPerPage: number;
+  itemsPerPageSub: Subscription;
   orderDataField: string = 'name';
   orderByDirection: string = 'desc';
 
@@ -38,7 +40,8 @@ export class AnalysisDashboardComponent implements OnInit {
     private facilityDbService: FacilitydbService,
     private accountAnalysisDbService: AccountAnalysisDbService,
     private dbChangesService: DbChangesService,
-    private accountDbService: AccountdbService) { }
+    private accountDbService: AccountdbService,
+    private sharedDataService: SharedDataService) { }
 
   ngOnInit(): void {
     this.facilityAnalysisItemsSub = this.analysisDbService.facilityAnalysisItems.subscribe(items => {
@@ -53,11 +56,16 @@ export class AnalysisDashboardComponent implements OnInit {
         this.baselineYearErrorMax = this.yearOptions[this.yearOptions.length - 1] < this.selectedFacility.sustainabilityQuestions.energyReductionBaselineYear
       }
     });
+
+    this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
+      this.itemsPerPage = val;
+    })
   }
 
   ngOnDestroy() {
     this.facilityAnalysisItemsSub.unsubscribe();
     this.selectedFacilitySub.unsubscribe();
+    this.itemsPerPageSub.unsubscribe();
   }
 
   async createAnalysis() {

@@ -10,6 +10,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { UtilityColors } from 'src/app/shared/utilityColors';
+import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 
 @Component({
   selector: 'app-calanderization',
@@ -19,7 +20,8 @@ import { UtilityColors } from 'src/app/shared/utilityColors';
 export class CalanderizationComponent implements OnInit {
 
 
-  itemsPerPage = 12;
+  itemsPerPage: number;
+  itemsPerPageSub: Subscription;
   calanderizedMeter: CalanderizedMeter;
   facilityMetersSub: Subscription;
   facilityMeterDataSub: Subscription;
@@ -40,7 +42,8 @@ export class CalanderizationComponent implements OnInit {
   displayDataApplicationModal: boolean = false;
   constructor(private calanderizationService: CalanderizationService, private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService, private facilityDbService: FacilitydbService,
-    private dbChangesService: DbChangesService, private accountDbService: AccountdbService) { }
+    private dbChangesService: DbChangesService, private accountDbService: AccountdbService,
+    private sharedDataService: SharedDataService) { }
 
   ngOnInit(): void {
     this.displayGraphCost = this.calanderizationService.displayGraphCost;
@@ -63,12 +66,16 @@ export class CalanderizationComponent implements OnInit {
       this.setCalanderizedMeterData();
     });
 
+    this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
+      this.itemsPerPage = val;
+    });
   }
 
   ngOnDestroy() {
     this.facilityMetersSub.unsubscribe();
     this.facilityMeterDataSub.unsubscribe();
     this.calanderizedDataFiltersSub.unsubscribe();
+    this.itemsPerPageSub.unsubscribe();
     this.calanderizationService.calanderizedDataFilters.next({
       selectedSources: [],
       showAllSources: true,

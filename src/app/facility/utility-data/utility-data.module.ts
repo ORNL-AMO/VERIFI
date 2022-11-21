@@ -28,7 +28,7 @@ import { RouterModule } from '@angular/router';
     NgbModule,
     LabelWithTooltipModule,
     RouterModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
   ]
 })
 export class UtilityDataModule { }

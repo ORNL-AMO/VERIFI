@@ -31,6 +31,7 @@ import { PrimaryEnergyConsumptionTableComponent } from './better-plants-report/p
 import { FacilityPerformanceTableComponent } from './better-plants-report/facility-performance-table/facility-performance-table.component';
 import { LabelWithTooltipModule } from 'src/app/shared/label-with-tooltip/label-with-tooltip.module';
 import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/calculating-spinner.module';
+import { TableItemsDropdownModule } from 'src/app/shared/table-items-dropdown/table-items-dropdown.module';
 
 
 
@@ -69,7 +70,8 @@ import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/cal
     RouterModule,
     NgbPaginationModule,
     LabelWithTooltipModule,
-    CalculatingSpinnerModule
+    CalculatingSpinnerModule,
+    TableItemsDropdownModule
   ]
 })
 export class OverviewReportModule { }
