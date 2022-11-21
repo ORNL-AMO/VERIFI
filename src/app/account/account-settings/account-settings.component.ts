@@ -34,6 +34,16 @@ export class AccountSettingsComponent implements OnInit {
   selectedAccount: IdbAccount;
   displayDeleteFacility: boolean;
   orderOptions: Array<number>;
+  displayApplyFacilitySettings: boolean;
+  applySettingsOptions: {
+    units: boolean,
+    sustainabilityQuestions: boolean,
+    financialReporting: boolean
+  } = {
+      units: true,
+      sustainabilityQuestions: true,
+      financialReporting: true
+    };
   constructor(
     private router: Router,
     private accountDbService: AccountdbService,
@@ -231,14 +241,53 @@ export class AccountSettingsComponent implements OnInit {
   }
 
   async setFacilityOrder(facility: IdbFacility) {
-    await this.dbChangesService.updateFacilities(facility, true);
+    await this.dbChangesService.updateFacilities(facility, false);
     for (let i = 0; i < this.facilityList.length; i++) {
       if (this.facilityList[i].guid != facility.guid) {
         if (this.facilityList[i].facilityOrder && this.facilityList[i].facilityOrder == facility.facilityOrder) {
           this.facilityList[i].facilityOrder = undefined;
-          await this.dbChangesService.updateFacilities(this.facilityList[i], true);
+          await this.dbChangesService.updateFacilities(this.facilityList[i], false);
         }
       }
     };
+  }
+
+  openApplySettingsModal() {
+    this.displayApplyFacilitySettings = true;
+  }
+
+  async applySettingsToFacility() {
+    this.closeApplySettingsModel();
+    this.loadingService.setLoadingMessage('Updating Facilities...');
+    this.loadingService.setLoadingStatus(true);
+    let accountCopy: IdbAccount = JSON.parse(JSON.stringify(this.selectedAccount))
+    for (let i = 0; i < this.facilityList.length; i++) {
+      let facility: IdbFacility = this.facilityList[i];
+      if (this.applySettingsOptions.units) {
+        facility.unitsOfMeasure = accountCopy.unitsOfMeasure;
+        facility.energyUnit = accountCopy.energyUnit;
+        facility.massUnit = accountCopy.massUnit;
+        facility.volumeLiquidUnit = accountCopy.volumeLiquidUnit;
+        facility.volumeGasUnit = accountCopy.volumeGasUnit;
+        facility.energyIsSource = accountCopy.energyIsSource;
+        facility.electricityUnit = accountCopy.electricityUnit;
+      }
+      if (this.applySettingsOptions.financialReporting) {
+        facility.fiscalYear = accountCopy.fiscalYear;
+        facility.fiscalYearMonth = accountCopy.fiscalYearMonth;
+        facility.fiscalYearCalendarEnd = accountCopy.fiscalYearCalendarEnd;
+      }
+      if (this.applySettingsOptions.sustainabilityQuestions) {
+        facility.sustainabilityQuestions = accountCopy.sustainabilityQuestions
+      }
+      await this.dbChangesService.updateFacilities(facility, false);
+    }
+    this.loadingService.setLoadingStatus(false);
+    this.toastNotificationService.showToast('Facility Settings Updated!', undefined, undefined, false, "success");
+  }
+
+
+  closeApplySettingsModel() {
+    this.displayApplyFacilitySettings = false;
   }
 }

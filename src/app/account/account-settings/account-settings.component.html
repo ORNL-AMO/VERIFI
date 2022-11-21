@@ -12,8 +12,7 @@
             <app-default-units-form [inAccount]="true"></app-default-units-form>
         </div>
     </div>
-    <br>
-
+    <hr>
     <div class="row">
         <div class="col-lg-7">
             <h4>Sustainability Questions</h4>
@@ -28,8 +27,7 @@
         </div>
     </div>
 
-    <br>
-    <br>
+    <hr>
 
     <h4>Portfolio</h4>
 
@@ -71,12 +69,17 @@
             </tbody>
         </table>
     </div>
-    <button class="btn btn-link" (click)="addNewFacility()"><i class="fa fa-plus"></i> Add New Facility</button>
-
-    <br>
-    <br>
-    <br>
-    <br>
+    <div class="row">
+        <div class="col">
+            <button class="btn btn-link" (click)="addNewFacility()"><i class="fa fa-plus"></i> Add New Facility</button>
+        </div>
+        <div class="col justify-content-end d-flex">
+            <div>
+                <button class="btn btn-outline" (click)="openApplySettingsModal()">Apply Settings To Facilities</button>
+            </div>
+        </div>
+    </div>
+    <hr>
 
     <div class="row">
         <div class="col-lg-6">
@@ -104,6 +107,9 @@
     </div>
 </div>
 
+
+<div id="overlay" [class.open]="showDeleteAccount || displayDeleteFacility || displayApplyFacilitySettings"></div>
+
 <div class="popup" [class.open]="showDeleteAccount" *ngIf="showDeleteAccount">
     <div class="popup-header">Delete Account: {{selectedAccount.name}}
         <button class="item-right" (click)="cancelAccountDelete()">x</button>
@@ -129,5 +135,35 @@
     <div class="popup-footer text-right">
         <button class="btn btn-secondary" (click)="cancelFacilityDelete()">Cancel</button>
         <button class="btn btn-danger" (click)="confirmFacilityDelete()">Confirm Delete</button>
+    </div>
+</div>
+
+
+<div class="popup" [class.open]="displayApplyFacilitySettings" *ngIf="displayApplyFacilitySettings">
+    <div class="popup-header">Apply Account Settings to Facilities
+        <button class="item-right" (click)="closeApplySettingsModel()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>
+            Select the account settings you want to apply to all of the facilities in this account.
+        </p>
+        <p>WARNING: Applying account settings will override any existing facility settings.</p>
+        <hr>
+        <label class="checkbox-label" for="applyUnits">
+            <input class="checkbox" type="checkbox" id="applyUnits" name="applyUnits" [(ngModel)]="applySettingsOptions.units">
+            Apply Default Units
+        </label>
+        <label class="checkbox-label" for="sustainabilityQuestions">
+            <input class="checkbox" type="checkbox" id="sustainabilityQuestions" name="sustainabilityQuestions" [(ngModel)]="applySettingsOptions.sustainabilityQuestions">
+            Apply Sustainabity Goals
+        </label>
+        <label class="checkbox-label" for="financialReporting">
+            <input class="checkbox" type="checkbox" id="financialReporting" name="financialReporting" [(ngModel)]="applySettingsOptions.financialReporting">
+            Apply Financial Reporting Details
+        </label>
+    </div>
+    <div class="popup-footer text-right">
+        <button class="btn btn-secondary" (click)="closeApplySettingsModel()">Cancel</button>
+        <button class="btn btn-outline" (click)="applySettingsToFacility()">Apply Settings</button>
     </div>
 </div>
