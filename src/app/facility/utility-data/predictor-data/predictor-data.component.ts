@@ -20,7 +20,8 @@ export class PredictorDataComponent implements OnInit {
   @ViewChild('predictorTable', { static: false }) predictorTable: ElementRef;
 
 
-  itemsPerPage: number = 6;
+  itemsPerPage: number;
+  itemsPerPageSub: Subscription;
   currentPageNumber: number = 1;
 
   facilityPredictors: Array<PredictorData>;
@@ -56,11 +57,16 @@ export class PredictorDataComponent implements OnInit {
       this.setHasChecked();
       this.setHasData();
     });
+
+    this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
+      this.itemsPerPage = val;
+    });
   }
 
   ngOnDestroy() {
     this.facilityPredictorsSub.unsubscribe();
     this.facilityPredictorEntriesSub.unsubscribe();
+    this.itemsPerPageSub.unsubscribe();
   }
 
   setHasData() {

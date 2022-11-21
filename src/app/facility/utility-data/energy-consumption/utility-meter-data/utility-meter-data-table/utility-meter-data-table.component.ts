@@ -9,6 +9,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 
 @Component({
   selector: 'app-utility-meter-data-table',
@@ -17,7 +18,8 @@ import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 's
 })
 export class UtilityMeterDataTableComponent implements OnInit {
 
-  itemsPerPage: number = 6;
+  itemsPerPage: number;
+  itemsPerPageSub: Subscription;
   selectedMeter: IdbUtilityMeter;
   meterData: Array<IdbUtilityMeterData>;
   facilityMeters: Array<IdbUtilityMeter>;
@@ -27,6 +29,7 @@ export class UtilityMeterDataTableComponent implements OnInit {
   showDeleteModal: boolean = false;
   showBulkDelete: boolean = false;
   showIndividualDelete: boolean = false;
+  paramsSub: Subscription;
   constructor(
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
@@ -36,11 +39,12 @@ export class UtilityMeterDataTableComponent implements OnInit {
     private toastNoticationService: ToastNotificationsService,
     private facilityDbService: FacilitydbService,
     private accountDbService: AccountdbService,
-    private dbChangesService: DbChangesService
+    private dbChangesService: DbChangesService,
+    private sharedDataService: SharedDataService
   ) { }
 
   ngOnInit(): void {
-    this.activatedRoute.parent.params.subscribe(params => {
+    this.paramsSub = this.activatedRoute.parent.params.subscribe(params => {
       let meterId: number = parseInt(params['id']);
       this.facilityMeters = this.utilityMeterDbService.facilityMeters.getValue();
       this.selectedMeter = this.facilityMeters.find(meter => { return meter.id == meterId });
@@ -49,11 +53,17 @@ export class UtilityMeterDataTableComponent implements OnInit {
 
     this.accountMeterDataSub = this.utilityMeterDataDbService.accountMeterData.subscribe(data => {
       this.setData();
-    })
+    });
+
+    this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
+      this.itemsPerPage = val;
+    });
   }
 
   ngOnDestroy() {
     this.accountMeterDataSub.unsubscribe();
+    this.itemsPerPageSub.unsubscribe();
+    this.paramsSub.unsubscribe();
   }
 
   setData() {

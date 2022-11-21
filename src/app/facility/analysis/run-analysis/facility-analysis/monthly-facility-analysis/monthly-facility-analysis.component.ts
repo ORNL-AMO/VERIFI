@@ -5,6 +5,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 import { Subscription } from 'rxjs';
+import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 
 @Component({
   selector: 'app-monthly-facility-analysis',
@@ -17,12 +18,14 @@ export class MonthlyFacilityAnalysisComponent implements OnInit {
   monthlyFacilityAnalysisData: Array<MonthlyAnalysisSummaryData>;
   analysisItem: IdbAnalysisItem;
   facility: IdbFacility;
-  itemsPerPage: number = 12;
+  itemsPerPage: number;
+  itemsPerPageSub: Subscription;
   calculating: boolean;
   calculatingSub: Subscription;
   monthlyFacilityAnalysisDataSub: Subscription;
   constructor(private analysisService: AnalysisService,
-    private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService) { }
+    private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService,
+    private sharedDataService: SharedDataService) { }
 
   ngOnInit(): void {
     this.dataDisplay = this.analysisService.dataDisplay.getValue();
@@ -33,6 +36,10 @@ export class MonthlyFacilityAnalysisComponent implements OnInit {
     });
     this.monthlyFacilityAnalysisDataSub = this.analysisService.monthlyAccountAnalysisData.subscribe(val => {
       this.monthlyFacilityAnalysisData = val;
+    });
+
+    this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
+      this.itemsPerPage = val;
     })
 
   }
@@ -40,6 +47,7 @@ export class MonthlyFacilityAnalysisComponent implements OnInit {
   ngOnDestroy() {
     this.calculatingSub.unsubscribe();
     this.monthlyFacilityAnalysisDataSub.unsubscribe();
+    this.itemsPerPageSub.unsubscribe();
   }
 
   setDataDisplay(display: 'table' | 'graph') {

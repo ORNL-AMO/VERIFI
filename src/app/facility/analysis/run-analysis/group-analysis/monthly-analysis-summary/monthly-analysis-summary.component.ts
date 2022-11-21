@@ -7,6 +7,8 @@ import { MonthlyAnalysisSummary } from 'src/app/models/analysis';
 import { AnalysisGroup, IdbAnalysisItem, IdbFacility, IdbPredictorEntry } from 'src/app/models/idb';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
+import { Subscription } from 'rxjs';
+import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 
 @Component({
   selector: 'app-monthly-analysis-summary',
@@ -20,14 +22,21 @@ export class MonthlyAnalysisSummaryComponent implements OnInit {
   group: AnalysisGroup;
   monthlyAnalysisSummary: MonthlyAnalysisSummary;
   facility: IdbFacility;
-  itemsPerPage: number = 12;
+  itemsPerPage: number;
+  itemsPerPageSub: Subscription;
   worker: Worker;
   calculating: boolean;
   constructor(private analysisService: AnalysisService, private analysisDbService: AnalysisDbService,
-    private analysisCalculationsService: AnalysisCalculationsService, private facilityDbService: FacilitydbService,
-    private predictorDbService: PredictordbService) { }
+    private facilityDbService: FacilitydbService,
+    private predictorDbService: PredictordbService,
+    private sharedDataService: SharedDataService) { }
 
   ngOnInit(): void {
+    this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
+      this.itemsPerPage = val;
+    });
+
+
     this.dataDisplay = this.analysisService.dataDisplay.getValue();
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     this.group = this.analysisService.selectedGroup.getValue();
@@ -43,10 +52,10 @@ export class MonthlyAnalysisSummaryComponent implements OnInit {
       };
       this.calculating = true;
       this.worker.postMessage({
-        selectedGroup: this.group, 
-        analysisItem: this.analysisItem, 
-        facility: this.facility, 
-        calanderizedMeters: calanderizedMeters, 
+        selectedGroup: this.group,
+        analysisItem: this.analysisItem,
+        facility: this.facility,
+        calanderizedMeters: calanderizedMeters,
         accountPredictorEntries: accountPredictorEntries
       });
     } else {
@@ -59,10 +68,11 @@ export class MonthlyAnalysisSummaryComponent implements OnInit {
 
   }
 
-  ngOnDestroy(){
-    if(this.worker){
+  ngOnDestroy() {
+    if (this.worker) {
       this.worker.terminate();
     }
+    this.itemsPerPageSub.unsubscribe();
   }
 
   setDataDisplay(display: 'table' | 'graph') {
