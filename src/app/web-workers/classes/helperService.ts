@@ -66,14 +66,9 @@ export class HelperService {
         return new Date(meterDataItem.date).getUTCFullYear() == year;
       });
     } else {
-      let startDate: Date = new Date(year, facility.fiscalYearMonth, 1)
-      console.log(startDate);
-      let endDate: Date = new Date(year + 1, facility.fiscalYearMonth, 1)
-      console.log(endDate);
-      console.log('***');
       return meterData.filter(meterDataItem => {
         let meterItemDate: Date = new Date(meterDataItem.date);
-        return meterItemDate >= startDate && meterItemDate < endDate;
+        return this.getFiscalYear(meterItemDate, facility) == year;
       });
     }
   }
