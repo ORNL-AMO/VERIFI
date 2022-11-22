@@ -15,3 +15,12 @@ thead tr:not(.table-mh) th.can-click:hover{
 button span{
     color: white;
 }
+
+
+td{
+    vertical-align: middle;
+}
+
+button span.fa-microscope{
+    color: black;
+}

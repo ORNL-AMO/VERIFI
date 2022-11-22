@@ -1,0 +1,13 @@
+.badge.inspected{
+    background-color: #212F3D;
+    color: #212F3D;
+}
+
+.badge.selected{
+    background-color: #148F77;
+    color: #148F77;
+}
+
+td{
+    vertical-align: middle;
+}

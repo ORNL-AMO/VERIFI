@@ -1,0 +1,152 @@
+<div class="d-flex w-100 justify-content-between">
+    <div>
+        <a class="click-link" (click)="cancelInspectModel()"><span class="fa fa-chevron-left"></span>Return to Model
+            Selection</a>
+    </div>
+    <div>
+        <ng-container *ngIf="isSelectedModel">
+            <span class="fa fa-check-circle-o"></span> Selected Model
+        </ng-container>
+
+        <div class="d-flex" *ngIf="!isSelectedModel">
+            <button *ngIf="!compareSelectedModel" class="btn btn-primary m-0" (click)="setCompareSelected()">Compare
+                Selected Model</button>
+            <button *ngIf="compareSelectedModel" class="btn btn-primary m-0" (click)="hideCompareSelected()">Hide
+                Selected Model</button>
+        </div>
+    </div>
+</div>
+<hr>
+
+
+<div class="table-responsive">
+
+    <table class="table table-sm table-hover">
+        <thead>
+            <tr>
+                <th *ngIf="compareSelectedModel">
+
+                </th>
+                <th>
+                    Model<br> Year
+                </th>
+                <th>
+                    Variable<br> p-Values
+                </th>
+                <th>
+                    R2
+                </th>
+                <th>
+                    Adjusted<br> R2
+                </th>
+                <th>
+                    Model<br> p-Value
+                </th>
+                <th>
+                    Formula
+                </th>
+                <th>
+                    Model Notes
+                </th>
+                <th *ngIf="!isSelectedModel">
+
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <!--inspected-->
+            <tr>
+                <td *ngIf="compareSelectedModel">
+                    <span class="badge inspected">#</span>
+                    Inspected Model
+                </td>
+                <td>
+                    {{model.modelYear | yearDisplay:selectedFacility.fiscalYear}}
+                </td>
+                <td>
+                    <span *ngFor="let pVal of model.t.p; let index = index">
+                        <span *ngIf="index != 0">{{model.predictorVariables[index-1].name}}: {{pVal | customNumber}}
+                            <br>
+                        </span>
+                    </span>
+                </td>
+                <td>
+                    {{model.R2| customNumber}}
+                </td>
+                <td>
+                    {{model.adjust_R2| customNumber}}
+                </td>
+                <td>
+                    {{model.modelPValue| customNumber}}
+                </td>
+                <td>
+                    <span *ngFor="let coefVal of model.coef; let index = index;">
+                        <span *ngIf="index == 0">{{coefVal| customNumber}}</span>
+                        <span *ngIf="index != 0">({{coefVal|
+                            customNumber}}*{{model.predictorVariables[index-1].name}})</span> <span
+                            *ngIf="index != model.coef.length-1"> +</span>
+                    </span>
+                </td>
+                <td>
+                    <span *ngFor="let notes of model.modelNotes">
+                        {{notes}}<br>
+                    </span>
+                    <span *ngIf="model.modelNotes.length == 0">
+                        &mdash;
+                    </span>
+                </td>
+                <td *ngIf="!isSelectedModel">
+                    <a class="click-link" (click)="selectModel()">Select Model</a>
+                </td>
+            </tr>
+            <!--selected-->
+            <tr *ngIf="selectedModel">
+                <td>
+                    <span class="badge selected">#</span>
+                    Selected Model
+                </td>
+                <td>
+                    {{selectedModel.modelYear | yearDisplay:selectedFacility.fiscalYear}}
+                </td>
+                <td>
+                    <span *ngFor="let pVal of selectedModel.t.p; let index = index">
+                        <span *ngIf="index != 0">{{selectedModel.predictorVariables[index-1].name}}: {{pVal |
+                            customNumber}}
+                            <br>
+                        </span>
+                    </span>
+                </td>
+                <td>
+                    {{selectedModel.R2| customNumber}}
+                </td>
+                <td>
+                    {{selectedModel.adjust_R2| customNumber}}
+                </td>
+                <td>
+                    {{selectedModel.modelPValue| customNumber}}
+                </td>
+                <td>
+                    <span *ngFor="let coefVal of selectedModel.coef; let index = index;">
+                        <span *ngIf="index == 0">{{coefVal| customNumber}}</span>
+                        <span *ngIf="index != 0">({{coefVal|
+                            customNumber}}*{{selectedModel.predictorVariables[index-1].name}})</span> <span
+                            *ngIf="index != selectedModel.coef.length-1"> +</span>
+                    </span>
+                </td>
+                <td>
+                    <span *ngFor="let notes of selectedModel.modelNotes">
+                        {{notes}}<br>
+                    </span>
+                    <span *ngIf="selectedModel.modelNotes.length == 0">
+                        &mdash;
+                    </span>
+                </td>
+                <td></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<hr>
+<app-calculating-spinner *ngIf="calculating" [message]="'Calculating Model Details...'"></app-calculating-spinner>
+<div #monthlyAnalysisGraph id="monthlyAnalysisGraph"></div>
