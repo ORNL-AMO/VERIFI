@@ -128,6 +128,17 @@
                 </select>
             </div>
         </div>
+        <div class="row sub-column">
+            <div class="col-4">
+                <label for="regressionModelNotes">
+                    Additional Model Notes
+                </label>
+            </div>
+            <div class="col-8">
+                <textarea class="form-control" name="regressionModelNotes" id="regressionModelNotes"
+                    [(ngModel)]="group.regressionModelNotes" (input)="saveItem()"></textarea>
+            </div>
+        </div>
     </div>
 </div>
 

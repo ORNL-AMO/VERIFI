@@ -57,7 +57,7 @@
                     <td *ngIf="!model.errorModeling">
                         <input type="radio" class="rowToggle" [(ngModel)]="selectedGroup.selectedModelId"
                             [value]="model.modelId" name="{{modelIndex+'_selectedModelId'}}"
-                            id="{{modelIndex+'_selectedModelId'}}" (change)="selectModel()">
+                            id="{{modelIndex+'_selectedModelId'}}" (change)="selectModel()" title="Select this model">
                     </td>
                     <td *ngIf="!model.errorModeling">
                         {{model.modelYear | yearDisplay:selectedFacility.fiscalYear}}
@@ -104,7 +104,7 @@
                             *ngFor="let variable of model.predictorVariables">{{variable.name}}</span>.
                     </td>
                     <td class="text-center">
-                        <button class="btn btn-outline" (click)="inspectModel(model)">
+                        <button class="btn btn-outline" (click)="inspectModel(model)" title="Inspect Model">
                             <span class="fa fa-microscope"></span>
                         </button>
                     </td>

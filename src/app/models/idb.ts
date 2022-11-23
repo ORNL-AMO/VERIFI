@@ -294,7 +294,8 @@ export interface AnalysisGroup {
     userDefinedModel: boolean,
     models?: Array<JStatRegressionModel>,
     selectedModelId?: string,
-    dateModelsGenerated?: Date
+    dateModelsGenerated?: Date,
+    regressionModelNotes?: string
 }
 
 export interface GroupErrors {
