@@ -5,14 +5,14 @@
     </div>
     <div>
         <ng-container *ngIf="isSelectedModel">
-            <span class="fa fa-check-circle-o"></span> Selected Model
+            <span class="fa fa-check-circle-o"></span> Current Model
         </ng-container>
 
         <div class="d-flex" *ngIf="!isSelectedModel">
             <button *ngIf="!compareSelectedModel" class="btn btn-primary m-0" (click)="setCompareSelected()">Compare
-                Selected Model</button>
+                Current Model</button>
             <button *ngIf="compareSelectedModel" class="btn btn-primary m-0" (click)="hideCompareSelected()">Hide
-                Selected Model</button>
+                Current Model</button>
         </div>
     </div>
 </div>
@@ -58,7 +58,7 @@
             <tr>
                 <td *ngIf="compareSelectedModel">
                     <span class="badge inspected">#</span>
-                    Inspected Model
+                    Potential Model
                 </td>
                 <td>
                     {{model.modelYear | yearDisplay:selectedFacility.fiscalYear}}
@@ -103,7 +103,7 @@
             <tr *ngIf="selectedModel">
                 <td>
                     <span class="badge selected">#</span>
-                    Selected Model
+                    Current Model
                 </td>
                 <td>
                     {{selectedModel.modelYear | yearDisplay:selectedFacility.fiscalYear}}
@@ -147,6 +147,226 @@
     </table>
 </div>
 
+<hr>
+<div class="d-flex w-100 justify-content-center">
+    <div class="pr-2">
+        <table class="table table-sm sep-table">
+            <thead>
+                <tr>
+                    <th>
+                        <span *ngIf="compareSelectedModel">
+                            Potential Model
+                        </span>
+                    </th>
+                    <th>
+
+                    </th>
+                    <th *ngFor="let sepValidation of model.SEPValidation">
+                        {{sepValidation.predictorVariable}}
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="bg-white border-top">
+                    <td>
+
+                    </td>
+                    <td>
+                        SEP Mean Report Year Value
+                    </td>
+                    <td *ngFor="let sepValidation of model.SEPValidation">
+                        {{sepValidation.meanReportYear | customNumber}}
+                    </td>
+                </tr>
+                <tr class="bg-white">
+                    <td>
+
+                    </td>
+                    <td>
+                        SEP Mean Baseline Year Value
+                    </td>
+                    <td *ngFor="let sepValidation of model.SEPValidation">
+                        {{sepValidation.meanBaselineYear | customNumber}}
+                    </td>
+                </tr>
+                <tr class="bg-white border-top">
+                    <td>
+                        Range 1
+                    </td>
+                    <td>
+                        Minimum of Model Variable
+                    </td>
+                    <td *ngFor="let sepValidation of model.SEPValidation"
+                        [ngClass]="{'alert-danger': !sepValidation.modelMinValid}">
+                        {{sepValidation.modelMin | customNumber}}
+                    </td>
+                </tr>
+                <tr class="bg-white">
+                    <td>
+
+                    </td>
+                    <td>
+                        Maximum of Model Variable
+                    </td>
+                    <td *ngFor="let sepValidation of model.SEPValidation"
+                        [ngClass]="{'alert-danger': !sepValidation.modelMaxValid}">
+                        {{sepValidation.modelMax | customNumber}}
+                    </td>
+                </tr>
+                <tr class="bg-white border-top">
+                    <td>
+                        Range 2
+                    </td>
+                    <td>
+                        Model Avg -3 Std Dev
+                    </td>
+                    <td *ngFor="let sepValidation of model.SEPValidation"
+                        [ngClass]="{'alert-danger': !sepValidation.modelMinus3StdDevValid}">
+                        {{sepValidation.modelMinus3StdDev | customNumber}}
+                    </td>
+                </tr>
+                <tr class="bg-white">
+                    <td>
+
+                    </td>
+                    <td>
+                        Model Avg +3 Std Dev
+                    </td>
+                    <td *ngFor="let sepValidation of model.SEPValidation"
+                        [ngClass]="{'alert-danger': !sepValidation.modelPlus3StdDevValid}">
+                        {{sepValidation.modelPlus3StdDev | customNumber}}
+                    </td>
+                </tr>
+            </tbody>
+            <tfoot class="border-top">
+                <tr>
+                    <th>
+
+                    </th>
+                    <th>
+                        SEP Validation Check
+                    </th>
+                    <th *ngFor="let sepValidation of model.SEPValidation">
+                        <span *ngIf="sepValidation.isValid">
+                            Pass
+                        </span>
+                        <span *ngIf="!sepValidation.isValid">
+                            Fail
+                        </span>
+                    </th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+    <div class="pl-2" *ngIf="selectedModel">
+        <table class="table table-sm sep-table">
+            <thead>
+                <tr>
+                    <th>
+                        Current Model
+                    </th>
+                    <th>
+
+                    </th>
+                    <th *ngFor="let sepValidation of selectedModel.SEPValidation">
+                        {{sepValidation.predictorVariable}}
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="bg-white border-top">
+                    <td>
+
+                    </td>
+                    <td>
+                        SEP Mean Report Year Value
+                    </td>
+                    <td *ngFor="let sepValidation of selectedModel.SEPValidation">
+                        {{sepValidation.meanReportYear | customNumber}}
+                    </td>
+                </tr>
+                <tr class="bg-white">
+                    <td>
+
+                    </td>
+                    <td>
+                        SEP Mean Baseline Year Value
+                    </td>
+                    <td *ngFor="let sepValidation of selectedModel.SEPValidation">
+                        {{sepValidation.meanBaselineYear | customNumber}}
+                    </td>
+                </tr>
+                <tr class="bg-white border-top">
+                    <td>
+                        Range 1
+                    </td>
+                    <td>
+                        Minimum of Model Variable
+                    </td>
+                    <td *ngFor="let sepValidation of selectedModel.SEPValidation"
+                        [ngClass]="{'alert-danger': !sepValidation.modelMinValid}">
+                        {{sepValidation.modelMin | customNumber}}
+                    </td>
+                </tr>
+                <tr class="bg-white">
+                    <td>
+
+                    </td>
+                    <td>
+                        Maximum of Model Variable
+                    </td>
+                    <td *ngFor="let sepValidation of selectedModel.SEPValidation"
+                        [ngClass]="{'alert-danger': !sepValidation.modelMaxValid}">
+                        {{sepValidation.modelMax | customNumber}}
+                    </td>
+                </tr>
+                <tr class="bg-white border-top">
+                    <td>
+                        Range 2
+                    </td>
+                    <td>
+                        Model Avg -3 Std Dev
+                    </td>
+                    <td *ngFor="let sepValidation of selectedModel.SEPValidation"
+                        [ngClass]="{'alert-danger': !sepValidation.modelMinus3StdDevValid}">
+                        {{sepValidation.modelMinus3StdDev | customNumber}}
+                    </td>
+                </tr>
+                <tr class="bg-white">
+                    <td>
+
+                    </td>
+                    <td>
+                        Model Avg +3 Std Dev
+                    </td>
+                    <td *ngFor="let sepValidation of selectedModel.SEPValidation"
+                        [ngClass]="{'alert-danger': !sepValidation.modelPlus3StdDevValid}">
+                        {{sepValidation.modelPlus3StdDev | customNumber}}
+                    </td>
+                </tr>
+            </tbody>
+            <tfoot class="border-top">
+                <tr>
+                    <th>
+
+                    </th>
+                    <th>
+                        SEP Validation Check
+                    </th>
+                    <th *ngFor="let sepValidation of selectedModel.SEPValidation">
+                        <span *ngIf="sepValidation.isValid">
+                            Pass
+                        </span>
+                        <span *ngIf="!sepValidation.isValid">
+                            Fail
+                        </span>
+                    </th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+</div>
 <hr>
 <app-calculating-spinner *ngIf="calculating" [message]="'Calculating Model Details...'"></app-calculating-spinner>
 <div #monthlyAnalysisGraph id="monthlyAnalysisGraph"></div>

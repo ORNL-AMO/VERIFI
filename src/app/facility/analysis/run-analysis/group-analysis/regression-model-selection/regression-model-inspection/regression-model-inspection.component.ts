@@ -116,9 +116,9 @@ export class RegressionModelInspectionComponent implements OnInit {
 
   drawChart() {
     if (this.monthlyAnalysisGraph) {
-      let name: string = 'Modeled';
+      let name: string = 'Modeled Energy';
       if(this.selectedMonthlyAnalysisSummaryData){
-        name = 'Inspected Modeled';
+        name = 'Potential Modeled Energy';
       }
 
       var trace1 = {
@@ -127,39 +127,73 @@ export class RegressionModelInspectionComponent implements OnInit {
         name: name,
         x: this.inspectedMonthlyAnalysisSummaryData.map(results => { return results.date }),
         y: this.inspectedMonthlyAnalysisSummaryData.map(results => { return results.modeledEnergy }),
-        line: { color: '#212F3D', width: 4 },
+        line: { color: '#BB8FCE', width: 4 },
         marker: {
           size: 8
         }
       }
-
+      let potentialModelYearData: Array<MonthlyAnalysisSummaryData> = this.inspectedMonthlyAnalysisSummaryData.filter(data => {
+        return data.fiscalYear == this.model.modelYear;
+      });
       var trace2 = {
         type: "scatter",
         mode: "markers",
-        name: 'Actual',
-        x: this.inspectedMonthlyAnalysisSummaryData.map(results => { return results.date }),
-        y: this.inspectedMonthlyAnalysisSummaryData.map(results => { return results.energyUse }),
-        line: { color: '#D35400', width: 4 },
+        name: 'Potential Model Year',
+        x: potentialModelYearData.map(results => { return results.date }),
+        y: potentialModelYearData.map(results => { return results.modeledEnergy }),
+        line: { color: '#8E44AD', width: 4 },
         marker: {
-          size: 8
+          size: 16,
+          symbol: 'star'
         }
       }
 
-      var data = [trace2, trace1];
+      var trace3 = {
+        type: "scatter",
+        mode: "markers",
+        name: 'Actual Energy',
+        x: this.inspectedMonthlyAnalysisSummaryData.map(results => { return results.date }),
+        y: this.inspectedMonthlyAnalysisSummaryData.map(results => { return results.energyUse }),
+        line: { color: '#515A5A', width: 4 },
+        marker: {
+          size: 10,
+          symbol: 'square'
+        }
+      }
+
+      var data = [trace3, trace1, trace2 ];
 
       if (this.compareSelectedModel) {
-        var trace3 = {
+        var trace4 = {
           type: "scatter",
           mode: "lines+markers",
-          name: 'Selected Modeled',
+          name: 'Current Modeled Energy',
           x: this.selectedMonthlyAnalysisSummaryData.map(results => { return results.date }),
           y: this.selectedMonthlyAnalysisSummaryData.map(results => { return results.modeledEnergy }),
-          line: { color: '#148F77', width: 4 },
+          line: { color: '#5DADE2', width: 4 },
           marker: {
             size: 8
           }
         }
-        data.push(trace3);
+        data.push(trace4);
+        let modelYearData: Array<MonthlyAnalysisSummaryData> = this.selectedMonthlyAnalysisSummaryData.filter(data => {
+          return data.fiscalYear == this.selectedGroup.regressionModelYear;
+        });
+        var trace5 = {
+          type: "scatter",
+          mode: "markers",
+          name: 'Current Model Year',
+          x: modelYearData.map(results => { return results.date }),
+          y: modelYearData.map(results => { return results.modeledEnergy }),
+          line: { color: '#2E86C1', width: 4 },
+          marker: {
+            size: 16,
+            symbol: 'star'
+          }
+        }
+        data.push(trace5);
+
+
       }
 
 
