@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import * as jStat from 'jstat';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
-import { JStatRegressionModel } from 'src/app/models/analysis';
+import { JStatRegressionModel, SEPValidation } from 'src/app/models/analysis';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import { AnalysisGroup, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, PredictorData } from 'src/app/models/idb';
 import { AnalysisCalculationsHelperService } from './analysis-calculations-helper.service';
@@ -224,10 +224,11 @@ export class RegressionModelsService {
       modelNotes.push('No production variable in model');
     }
 
-    let SEPNotes: Array<string> = this.checkSEPNotes(model, facilityPredictorData, reportYear, facility);
-    SEPNotes.forEach(note => {
+    let validationCheck: { SEPNotes: Array<string>, SEPValidation: Array<SEPValidation> } = this.checkSEPNotes(model, facilityPredictorData, reportYear, facility);
+    validationCheck.SEPNotes.forEach(note => {
       modelNotes.push(note);
-    })
+    });
+    model['SEPValidation'] = validationCheck.SEPValidation;
     model['modelNotes'] = modelNotes;
     return model;
   }
@@ -257,8 +258,9 @@ export class RegressionModelsService {
   }
 
 
-  checkSEPNotes(model: JStatRegressionModel, facilityPredictorData: Array<IdbPredictorEntry>, reportYear: number, facility: IdbFacility): Array<string> {
+  checkSEPNotes(model: JStatRegressionModel, facilityPredictorData: Array<IdbPredictorEntry>, reportYear: number, facility: IdbFacility): { SEPNotes: Array<string>, SEPValidation: Array<SEPValidation> } {
     let SEPNotes: Array<string> = new Array();
+    let SEPValidation: Array<SEPValidation> = new Array();
     let modelPredictorData: Array<IdbPredictorEntry> = new Array();
     let reportYearPredictorData: Array<IdbPredictorEntry> = new Array();
     let baselineYearPredictorData: Array<IdbPredictorEntry> = new Array();
@@ -270,13 +272,19 @@ export class RegressionModelsService {
       if (fiscalYear == model.modelYear) {
         modelPredictorData.push(facilityPredictorData[i])
       }
-      if(fiscalYear == facility.sustainabilityQuestions.energyReductionBaselineYear){
+      if (fiscalYear == facility.sustainabilityQuestions.energyReductionBaselineYear) {
         baselineYearPredictorData.push(facilityPredictorData[i]);
       }
     }
 
 
     model.predictorVariables.forEach(variable => {
+      let modelMinValid: boolean = true;
+      let modelMaxValid: boolean = true;
+      let modelPlus3StdDevValid: boolean = true;
+      let modelMinus3StdDevValid: boolean = true;
+
+
       let variableNotes: Array<string> = new Array();
       let variableValid: boolean = true;
       let modelYearUsage: Array<number> = modelPredictorData.map(data => {
@@ -303,53 +311,70 @@ export class RegressionModelsService {
       if (modelMax < reportAvg || reportAvg < modelMin || modelMax < baselineAvg || baselineAvg < modelMin) {
         variableValid = false;
         if (modelMax < reportAvg) {
+          modelMaxValid = false;
           variableNotes.push(variable.name + ' mean for the report year is greater than model year max.');
         }
         if (reportAvg < modelMin) {
+          modelMinValid = false;
           variableNotes.push(variable.name + ' mean for the report year is less than model year min.');
         }
 
         if (modelMax < baselineAvg) {
+          modelMaxValid = false;
           variableNotes.push(variable.name + ' mean for the baseline year is greater than model year max.');
         }
         if (baselineAvg < modelMin) {
+          modelMinValid = false;
           variableNotes.push(variable.name + ' mean for the baseline year is less than model year min.');
         }
-        
+
       }
 
-      if (variableValid == false) {
-        let sumSquare: number = 0;
-        modelYearUsage.forEach(usage => {
-          sumSquare = sumSquare + ((usage - modelAvg) * (usage - modelAvg));
-        });
-        
-        let modelStandardDev: number = Math.sqrt((sumSquare / (modelYearUsage.length - 1)));
-        if (model.modelYear == 2011) {
-          console.log(modelAvg);
-          console.log(modelStandardDev);
-        }
-        let standardMax: number = modelAvg - 3 * modelStandardDev;
-        let standardMin: number = modelAvg + 3 * modelStandardDev;
+      let sumSquare: number = 0;
+      modelYearUsage.forEach(usage => {
+        sumSquare = sumSquare + ((usage - modelAvg) * (usage - modelAvg));
+      });
 
-        if (standardMax > reportAvg || standardMin < reportAvg || standardMax > baselineAvg || standardMin < baselineAvg) {
-          variableValid = false;
-          if (standardMax > reportAvg) {
-            variableNotes.push(variable.name + ' mean for report year is less than 3 standard deviations from model year mean.');
-          }
-          if (standardMin < reportAvg) {
-            variableNotes.push(variable.name + ' mean for the report year is greater than 3 standard deviations from model year mean.');
-          }
-          if (standardMax > baselineAvg) {
-            variableNotes.push(variable.name + ' mean for baseline year is less than 3 standard deviations from model year mean.');
-          }
-          if (standardMin < baselineAvg) {
-            variableNotes.push(variable.name + ' mean for the baseline year is greater than 3 standard deviations from model year mean.');
-          }
-        } else {
-          variableValid = true;
+      let modelStandardDev: number = Math.sqrt((sumSquare / (modelYearUsage.length - 1)));
+      let standardMax: number = modelAvg - 3 * modelStandardDev;
+      let standardMin: number = modelAvg + 3 * modelStandardDev;
+
+      if (standardMax > reportAvg || standardMin < reportAvg || standardMax > baselineAvg || standardMin < baselineAvg) {
+        variableValid = false;
+        if (standardMax > reportAvg) {
+          modelPlus3StdDevValid = false;
+          variableNotes.push(variable.name + ' mean for report year is less than 3 standard deviations from model year mean.');
         }
+        if (standardMin < reportAvg) {
+          modelMinus3StdDevValid = false
+          variableNotes.push(variable.name + ' mean for the report year is greater than 3 standard deviations from model year mean.');
+        }
+        if (standardMax > baselineAvg) {
+          modelPlus3StdDevValid = false;
+          variableNotes.push(variable.name + ' mean for baseline year is less than 3 standard deviations from model year mean.');
+        }
+        if (standardMin < baselineAvg) {
+          modelMinus3StdDevValid = false
+          variableNotes.push(variable.name + ' mean for the baseline year is greater than 3 standard deviations from model year mean.');
+        }
+      } else {
+        variableValid = true;
       }
+
+      SEPValidation.push({
+        predictorVariable: variable.name,
+        meanReportYear: reportAvg,
+        meanBaselineYear: baselineAvg,
+        modelMin: modelMin,
+        modelMinValid: modelMinValid,
+        modelMax: modelMax,
+        modelMaxValid: modelMaxValid,
+        modelPlus3StdDev: standardMax,
+        modelPlus3StdDevValid: modelPlus3StdDevValid,
+        modelMinus3StdDev: standardMin,
+        modelMinus3StdDevValid: modelMinus3StdDevValid,
+        isValid: variableValid
+      })
 
       if (variableValid == false) {
         variableNotes.forEach(note => {
@@ -357,7 +382,10 @@ export class RegressionModelsService {
         })
       }
     });
-    return SEPNotes;
+    return {
+      SEPNotes: SEPNotes,
+      SEPValidation: SEPValidation
+    };
   }
 
 }

@@ -153,5 +153,21 @@ export interface JStatRegressionModel {
   isValid: boolean,
   modelPValue: number,
   modelNotes: Array<string>,
-  errorModeling?: boolean
+  errorModeling?: boolean,
+  SEPValidation?: Array<SEPValidation>
+}
+
+export interface SEPValidation {
+  predictorVariable: string,
+  meanReportYear: number,
+  meanBaselineYear: number,
+  modelMin: number,
+  modelMinValid: boolean,
+  modelMax: number,
+  modelMaxValid: boolean,
+  modelPlus3StdDev: number,
+  modelPlus3StdDevValid: boolean,
+  modelMinus3StdDev: number,
+  modelMinus3StdDevValid: boolean,
+  isValid: boolean
 }

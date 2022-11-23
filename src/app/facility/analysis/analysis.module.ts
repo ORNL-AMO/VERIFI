@@ -24,6 +24,7 @@ import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/cal
 import { AccountAnalysisListComponent } from './account-analysis-list/account-analysis-list.component';
 import { AnalysisFooterComponent } from './analysis-footer/analysis-footer.component';
 import { TableItemsDropdownModule } from 'src/app/shared/table-items-dropdown/table-items-dropdown.module';
+import { RegressionModelInspectionComponent } from './run-analysis/group-analysis/regression-model-selection/regression-model-inspection/regression-model-inspection.component';
 
 
 
@@ -45,7 +46,8 @@ import { TableItemsDropdownModule } from 'src/app/shared/table-items-dropdown/ta
     ModelFilterPipe,
     RegressionModelMenuComponent,
     AccountAnalysisListComponent,
-    AnalysisFooterComponent
+    AnalysisFooterComponent,
+    RegressionModelInspectionComponent
   ],
   imports: [
     CommonModule,

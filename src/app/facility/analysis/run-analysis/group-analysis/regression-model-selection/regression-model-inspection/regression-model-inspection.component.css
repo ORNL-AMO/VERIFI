@@ -1,0 +1,26 @@
+.badge.inspected{
+    background-color: #BB8FCE;
+    color: #BB8FCE;
+}
+
+.badge.selected{
+    background-color: #5DADE2;
+    color: #5DADE2;
+}
+
+td{
+    vertical-align: middle;
+}
+
+table.sep-table{
+    width: auto;
+}
+
+tr.border-top, tfoot.border-top{
+    border-top: solid black 2px !important;
+}
+
+
+td.invalid{
+    color: red;
+}
