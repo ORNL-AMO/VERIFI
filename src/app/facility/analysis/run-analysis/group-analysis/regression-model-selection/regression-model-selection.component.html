@@ -52,8 +52,8 @@
                 </tr>
             </thead>
             <tbody>
-                <tr
-                    *ngFor="let model of selectedGroup.models | orderBy: orderDataField: orderByDirection | modelFilter:showInvalid; let modelIndex = index;">
+                <tr *ngFor="let model of selectedGroup.models | orderBy: orderDataField: orderByDirection | modelFilter:showInvalid; let modelIndex = index;"
+                    [ngClass]="{'selected-model': selectedGroup.selectedModelId == model.modelId}">
                     <td *ngIf="!model.errorModeling">
                         <input type="radio" class="rowToggle" [(ngModel)]="selectedGroup.selectedModelId"
                             [value]="model.modelId" name="{{modelIndex+'_selectedModelId'}}"

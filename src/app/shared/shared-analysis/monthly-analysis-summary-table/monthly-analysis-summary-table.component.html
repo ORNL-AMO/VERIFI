@@ -102,19 +102,13 @@
                 {{data.fiscalYear | yearDisplay: facilityOrAccount.fiscalYear}}
             </td>
             <td *ngIf="analysisTableColumns.actualEnergy">
-                <span *ngIf="data.energyUse" [ngClass]="{'red': data.energyUse < 0}">
+                <span [ngClass]="{'red': data.energyUse <= 0}">
                     {{data.energyUse | customNumber}}
-                </span>
-                <span *ngIf="!data.energyUse">
-                    &mdash;
                 </span>
             </td>
             <td *ngIf="analysisTableColumns.modeledEnergy">
-                <span *ngIf="data.modeledEnergy" [ngClass]="{'red': data.modeledEnergy < 0}">
+                <span [ngClass]="{'red': data.modeledEnergy <= 0}">
                     {{data.modeledEnergy | customNumber}}
-                </span>
-                <span *ngIf="!data.modeledEnergy">
-                    &mdash;
                 </span>
             </td>
             
