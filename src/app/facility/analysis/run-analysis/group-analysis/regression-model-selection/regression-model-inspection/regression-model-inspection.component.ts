@@ -4,7 +4,7 @@ import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
-import { JStatRegressionModel, MonthlyAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
+import { JStatRegressionModel, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { AnalysisGroup, IdbAnalysisItem, IdbFacility, IdbPredictorEntry } from 'src/app/models/idb';
 
@@ -221,18 +221,6 @@ export class RegressionModelInspectionComponent implements OnInit {
           },
           automargin: true,
         },
-        // yaxis2: {
-        //   title: {
-        //     text: 'Predictor Usage',
-        //     font: {
-        //       size: 16
-        //     },
-        //     standoff: 18
-        //   },
-        //   automargin: true,
-        //   side: 'right',
-        //   overlaying: 'y'
-        // },
         margin: { r: 0, t: 50 }
       };
       var config = { responsive: true };
