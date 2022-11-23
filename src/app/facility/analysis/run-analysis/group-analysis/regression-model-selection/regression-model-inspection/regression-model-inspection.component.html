@@ -218,7 +218,7 @@
                         Range 2
                     </td>
                     <td>
-                        Model Avg -3 Std Dev
+                        Model Mean -3 Std Dev
                     </td>
                     <td *ngFor="let sepValidation of model.SEPValidation"
                         [ngClass]="{'alert-danger': !sepValidation.modelMinus3StdDevValid}">
@@ -230,7 +230,7 @@
 
                     </td>
                     <td>
-                        Model Avg +3 Std Dev
+                        Model Mean +3 Std Dev
                     </td>
                     <td *ngFor="let sepValidation of model.SEPValidation"
                         [ngClass]="{'alert-danger': !sepValidation.modelPlus3StdDevValid}">

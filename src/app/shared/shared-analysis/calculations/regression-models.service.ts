@@ -336,26 +336,26 @@ export class RegressionModelsService {
       });
 
       let modelStandardDev: number = Math.sqrt((sumSquare / (modelYearUsage.length - 1)));
-      let standardMax: number = modelAvg - 3 * modelStandardDev;
-      let standardMin: number = modelAvg + 3 * modelStandardDev;
+      let standardMax: number = modelAvg + (3 * modelStandardDev);
+      let standardMin: number = modelAvg - (3 * modelStandardDev);
 
-      if (standardMax > reportAvg || standardMin < reportAvg || standardMax > baselineAvg || standardMin < baselineAvg) {
+      if (standardMax < reportAvg || standardMin > reportAvg || standardMax < baselineAvg || standardMin > baselineAvg) {
         variableValid = false;
-        if (standardMax > reportAvg) {
+        if (standardMax < reportAvg) {
           modelPlus3StdDevValid = false;
-          variableNotes.push(variable.name + ' mean for report year is less than 3 standard deviations from model year mean.');
+          variableNotes.push(variable.name + ' mean for report year is greater than 3 standard deviations from model year mean.');
         }
-        if (standardMin < reportAvg) {
+        if (standardMin > reportAvg) {
           modelMinus3StdDevValid = false
-          variableNotes.push(variable.name + ' mean for the report year is greater than 3 standard deviations from model year mean.');
+          variableNotes.push(variable.name + ' mean for the report year is less than 3 standard deviations from model year mean.');
         }
-        if (standardMax > baselineAvg) {
+        if (standardMax < baselineAvg) {
           modelPlus3StdDevValid = false;
-          variableNotes.push(variable.name + ' mean for baseline year is less than 3 standard deviations from model year mean.');
+          variableNotes.push(variable.name + ' mean for baseline year is greater than 3 standard deviations from model year mean.');
         }
-        if (standardMin < baselineAvg) {
+        if (standardMin > baselineAvg) {
           modelMinus3StdDevValid = false
-          variableNotes.push(variable.name + ' mean for the baseline year is greater than 3 standard deviations from model year mean.');
+          variableNotes.push(variable.name + ' mean for the baseline year is less than 3 standard deviations from model year mean.');
         }
       } else {
         variableValid = true;
