@@ -26,6 +26,7 @@ export class FacilityPerformanceTableComponent implements OnInit {
     this.addPerformanceLevel(6, 8, '6-8%');
     this.addPerformanceLevel(8, 10, '8-10%');
     this.addPerformanceLevel(10, 15, '10-15%');
+    this.addPerformanceLevel(15, 20, '15-20%');
     this.addPerformanceLevel(20, 25, '20-25%');
     this.addPerformanceLevel(25, 30, '25-30%');
     this.addPerformanceLevel(30, 35, '30-35%');
