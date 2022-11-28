@@ -626,7 +626,7 @@ export class UploadDataService {
       newMeter.startingUnit = this.energyUnitsHelperService.parseStartingUnit(groupItem.value);
       if (newMeter.source == 'Electricity') {
         newMeter.scope = 3
-        if (newMeter.startingUnit == undefined) {
+        if (newMeter.startingUnit == undefined || this.energyUnitsHelperService.isEnergyUnit(newMeter.startingUnit) == false) {
           newMeter.startingUnit = 'kWh';
           newMeter.energyUnit = 'kWh';
         }
