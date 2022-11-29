@@ -99,4 +99,10 @@ export class UtilityMeterGroupdbService {
             return;
         }
     }
+
+    getAccountMeterGroupsCopy(): Array<IdbUtilityMeterGroup> {
+        let groups: Array<IdbUtilityMeterGroup> = this.accountMeterGroups.getValue();
+        let groupsCopy: Array<IdbUtilityMeterGroup> = JSON.parse(JSON.stringify(groups));
+        return groupsCopy;
+    }
 }
