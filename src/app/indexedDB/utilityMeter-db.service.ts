@@ -46,7 +46,7 @@ export class UtilityMeterdbService {
     updateWithObservable(utilityMeter: IdbUtilityMeter): Observable<IdbUtilityMeter> {
         return this.dbService.update('utilityMeter', utilityMeter);
     }
-    
+
     deleteIndexWithObservable(utilityMeterId: number): Observable<any> {
         return this.dbService.delete('utilityMeter', utilityMeterId)
     }
@@ -118,5 +118,11 @@ export class UtilityMeterdbService {
     getFacilityMeterById(meterGuid: string): IdbUtilityMeter {
         let facilityMeters: Array<IdbUtilityMeter> = this.accountMeters.getValue();
         return facilityMeters.find(meter => { return meter.guid == meterGuid });
+    }
+
+    getAccountMetersCopy() {
+        let accountMeters: Array<IdbUtilityMeter> = this.accountMeters.getValue();
+        let metersCopy: Array<IdbUtilityMeter> = JSON.parse(JSON.stringify(accountMeters));
+        return metersCopy;
     }
 }
