@@ -1,4 +1,4 @@
-<div class="wrapper main-content p-0">
+<!-- <div class="wrapper main-content p-0">
     <div class="banner p-0">
         <ul class="nav nav-tabs">
             <li class="nav-item" *ngFor="let listItem of facilitiesList"><a class="nav-link"
@@ -15,5 +15,24 @@
         <app-select-item-table [facility]="selectedFacility" [selectedAnalysisItem]="selectedAnalysisItem"
             [facilityAnalysisItems]="facilityAnalysisItems"></app-select-item-table>
         <hr>
+    </div>
+</div> -->
+
+
+<div class="wrapper">
+    <div class="d-flex w-100 h-100">
+        <div class="d-flex p-2 flex-column nav">
+            <div class="nav-item" *ngFor="let listItem of facilitiesList"><a class="nav-link"
+                    (click)="selectFacility(listItem.facility)"
+                    [ngClass]="{'active': listItem.facility.id == selectedFacility.id}">
+                    <i class="pr-2" [ngClass]="listItem.cssClass"></i>
+                    <span class="fa fa-exclamation-circle" *ngIf="listItem.isInvalid"></span>
+                    {{listItem.facility.name}}</a>
+            </div>
+        </div>
+        <div class="flex-fill pt-2 pl-4 pr-4 pb-4">
+            <app-select-item-table [facility]="selectedFacility" [selectedAnalysisItem]="selectedAnalysisItem"
+                [facilityAnalysisItems]="facilityAnalysisItems"></app-select-item-table>
+        </div>
     </div>
 </div>

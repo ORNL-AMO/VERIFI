@@ -1,7 +1,13 @@
 .content-padding{
     padding: 20px 30px;
-    /* height: calc(100vh - 290px); */
+    height: calc(100vh - 290px);
     overflow-y: auto;
+}
+
+.wrapper{
+    /* margin-bottom: 100px; */
+    padding: 0px;
+    height: calc(100vh - 290px);
 }
 
 .nav-tabs{
@@ -29,18 +35,52 @@
     font-weight: 600;
 }
 
-a:not([href]){
-    color: white !important;
-}
+/*a:not([href]){
+     color: white !important;
+} */
 
 h4 i.fa-industry{
     font-size: 16px;
 }
 
-.nav-tabs .nav-link.active, .nav-tabs .nav-link.active i.fa{
-    color: #ff6000;
+a:not([href]).active, .nav .nav-link.active i.fa{
+    color: #ff6000 !important;
 }
 
 .fa.fa-exclamation-circle, .banner a.nav-link:not(.active) .fa.fa.fa-exclamation-circle{
     color: red;
+}
+
+
+.nav{
+    border-right: solid #145A32;
+    width: 210px;
+    max-height: 100%;
+    overflow-y: auto;
+}
+
+.nav-item{
+    border-bottom: groove 1px;
+}
+
+/* .badge{
+    background-color: #145A32;
+    color: white;
+} */
+
+.nav-link{
+    font-size: 16px;
+}
+
+.nav-link.active{
+    background-color: #efefef;
+}
+
+.nav-link:hover{
+    cursor: pointer;
+    background-color: #efefef;
+}
+
+.disabled .badge {
+    background-color: #efefef !important;
 }
