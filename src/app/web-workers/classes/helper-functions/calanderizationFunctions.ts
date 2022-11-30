@@ -276,31 +276,33 @@ export function getYearlyUsageNumbers(calanderizedMeters: Array<CalanderizedMete
     let monthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(cMeter => {
         return cMeter.monthlyData;
     });
-    let years: Array<number> = monthlyData.map(data => { return data.year });
+    let years: Array<number> = monthlyData.map(data => { return data.fiscalYear });
     years = _.uniq(years);
 
     let yearMonthData: Array<YearMonthData> = new Array();
-
     years.forEach(year => {
-        Months.forEach(month => {
+        let yearData: Array<MonthlyData> = monthlyData.filter(data => {
+            return data.fiscalYear == year;
+        });
+        let months: Array<string> = yearData.map(data => { return data.month });
+        months = _.uniq(months)
+        months.forEach(month => {
             let energyUse: number = 0;
             let energyCost: number = 0;
             let marketEmissions: number = 0;
             let locationEmissions: number = 0;
             let consumption: number = 0;
-            for (let i = 0; i < monthlyData.length; i++) {
-                if (monthlyData[i].year == year && monthlyData[i].month == month.abbreviation) {
-                    energyUse += monthlyData[i].energyUse;
-                    energyCost += monthlyData[i].energyCost;
-                    marketEmissions += monthlyData[i].marketEmissions;
-                    locationEmissions += monthlyData[i].locationEmissions;
-                    consumption += monthlyData[i].energyConsumption;
+            for (let i = 0; i < yearData.length; i++) {
+                if (yearData[i].month == month) {
+                    energyUse += yearData[i].energyUse;
+                    energyCost += yearData[i].energyCost;
+                    marketEmissions += yearData[i].marketEmissions;
+                    locationEmissions += yearData[i].locationEmissions;
+                    consumption += yearData[i].energyConsumption;
                 }
             }
-            let date: Date = new Date(year, month.monthNumValue, 1)
-            let fiscalYear: number = getFiscalYear(date, facilityOrAccount);
             yearMonthData.push({
-                yearMonth: { year: year, month: month.abbreviation, fiscalYear: fiscalYear },
+                yearMonth: { year: year, month: month, fiscalYear: year },
                 energyUse: energyUse,
                 energyCost: energyCost,
                 marketEmissions: marketEmissions,
@@ -308,10 +310,7 @@ export function getYearlyUsageNumbers(calanderizedMeters: Array<CalanderizedMete
                 consumption: consumption
             })
         })
-
-
     })
-    // });
     return yearMonthData;
 }
 
