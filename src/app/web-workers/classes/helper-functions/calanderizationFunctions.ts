@@ -310,16 +310,6 @@ export function getYearlyUsageNumbers(calanderizedMeters: Array<CalanderizedMete
                 consumption: consumption
             })
         })
-        yearData.forEach(dataItem => {
-            yearMonthData.push({
-                yearMonth: { year: year, month: dataItem.month, fiscalYear: year },
-                energyUse: dataItem.energyUse,
-                energyCost: dataItem.energyCost,
-                marketEmissions: dataItem.marketEmissions,
-                locationEmissions: dataItem.locationEmissions,
-                consumption: dataItem.energyConsumption
-            })
-        })
     })
     return yearMonthData;
 }
