@@ -26,20 +26,10 @@
     border: solid 1px white;
 }
 
-.wrapper.main-content{
-    margin: 25px 40px;
-}
 
 
 .nav-link{
     font-weight: 600;
-}
-
-/*a:not([href]){
-     color: white !important;
-} */
-
-h4 i.fa-industry{
     font-size: 16px;
 }
 
@@ -63,15 +53,6 @@ a:not([href]).active, .nav .nav-link.active i.fa{
     border-bottom: groove 1px;
 }
 
-/* .badge{
-    background-color: #145A32;
-    color: white;
-} */
-
-.nav-link{
-    font-size: 16px;
-}
-
 .nav-link.active{
     background-color: #efefef;
 }
@@ -79,8 +60,4 @@ a:not([href]).active, .nav .nav-link.active i.fa{
 .nav-link:hover{
     cursor: pointer;
     background-color: #efefef;
-}
-
-.disabled .badge {
-    background-color: #efefef !important;
 }
