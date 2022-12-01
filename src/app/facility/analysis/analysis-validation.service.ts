@@ -16,22 +16,33 @@ export class AnalysisValidationService {
     let noGroups: boolean = analysisItem.groups.length == 0;
     let missingReportYear: boolean = this.checkValueValid(analysisItem.reportYear) == false;
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-    let analysisFacility: IdbFacility = accountFacilities.find(facility => {return facility.guid == analysisItem.facilityId});
-    let reportYearBeforeBaselineYear: boolean = analysisFacility.sustainabilityQuestions.energyReductionBaselineYear > analysisItem.reportYear;
-    let hasError: boolean = (missingName || noGroups || missingReportYear || reportYearBeforeBaselineYear);
-    let groupsHaveErrors: boolean = false;
-    analysisItem.groups.forEach(group => {
-      if(group.groupErrors && group.groupErrors.hasErrors){
-        groupsHaveErrors = true;
+    let analysisFacility: IdbFacility = accountFacilities.find(facility => { return facility.guid == analysisItem.facilityId });
+    if (analysisFacility) {
+      let reportYearBeforeBaselineYear: boolean = analysisFacility.sustainabilityQuestions.energyReductionBaselineYear > analysisItem.reportYear;
+      let hasError: boolean = (missingName || noGroups || missingReportYear || reportYearBeforeBaselineYear);
+      let groupsHaveErrors: boolean = false;
+      analysisItem.groups.forEach(group => {
+        if (group.groupErrors && group.groupErrors.hasErrors) {
+          groupsHaveErrors = true;
+        }
+      })
+      return {
+        hasError: hasError,
+        missingName: missingName,
+        noGroups: noGroups,
+        missingReportYear: missingReportYear,
+        reportYearBeforeBaselineYear: reportYearBeforeBaselineYear,
+        groupsHaveErrors: groupsHaveErrors
       }
-    })
-    return {
-      hasError: hasError,
-      missingName: missingName,
-      noGroups: noGroups,
-      missingReportYear: missingReportYear,
-      reportYearBeforeBaselineYear: reportYearBeforeBaselineYear,
-      groupsHaveErrors: groupsHaveErrors
+    } else {
+      return {
+        hasError: true,
+        missingName: true,
+        noGroups: true,
+        missingReportYear: true,
+        reportYearBeforeBaselineYear: true,
+        groupsHaveErrors: true
+      }
     }
   }
 
@@ -62,8 +73,8 @@ export class AnalysisValidationService {
         }
         if (group.userDefinedModel && !group.selectedModelId) {
           missingRegressionModelSelection = true;
-        }else if (group.selectedModelId){
-          let model: JStatRegressionModel = group.models.find(model => {return model.modelId == group.selectedModelId});
+        } else if (group.selectedModelId) {
+          let model: JStatRegressionModel = group.models.find(model => { return model.modelId == group.selectedModelId });
           hasInvalidRegressionModel = model.isValid == false;
         }
       } else {
