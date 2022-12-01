@@ -155,8 +155,8 @@ export class MonthlyAnalysisCalculatedValues {
             let baselineMonthsSummaryData: Array<MonthlyAnalysisCalculatedValues> = previousMonthsValues.filter(dataItem => { return dataItem.fiscalYear == baselineYear });
             let totalBaselineModeledEnergy: number = _.sumBy(baselineMonthsSummaryData, 'modeledEnergy');
             let totalBaselineEnergy: number = _.sumBy(baselineMonthsSummaryData, 'energyUse');
-            let last11MonthsData: Array<MonthlyAnalysisCalculatedValues> = JSON.parse(JSON.stringify(previousMonthsValues));
-            last11MonthsData = last11MonthsData.splice(this.summaryDataIndex - 11, this.summaryDataIndex);
+            // let last11MonthsData: Array<MonthlyAnalysisCalculatedValues> = JSON.parse(JSON.stringify(previousMonthsValues));
+            let last11MonthsData: Array<MonthlyAnalysisCalculatedValues> = previousMonthsValues.splice(this.summaryDataIndex - 11, this.summaryDataIndex);
             let total12MonthsEnergyUse: number = _.sumBy(last11MonthsData, 'energyUse') + this.energyUse;
             let total12MonthsModeledEnergy: number = _.sumBy(last11MonthsData, 'modeledEnergy') + this.modeledEnergy;
             this.rollingSavings = (totalBaselineEnergy - totalBaselineModeledEnergy) - (total12MonthsEnergyUse - total12MonthsModeledEnergy);

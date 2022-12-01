@@ -45,8 +45,8 @@ export class AnnualFacilityAnalysisSummaryClass {
         this.annualAnalysisSummaryDataClasses = new Array();
         let analysisYear: number = this.baselineYear;
         while (analysisYear <= this.reportYear) {
-            let annualAnalysisSummaryDataClassCopy: Array<AnnualAnalysisSummaryDataClass> = JSON.parse(JSON.stringify(this.annualAnalysisSummaryDataClasses))
-            let yearAnalysisSummaryDataClass: AnnualAnalysisSummaryDataClass = new AnnualAnalysisSummaryDataClass(this.monthlyAnalysisSummaryData, analysisYear, accountPredictorEntries, facility, annualAnalysisSummaryDataClassCopy);
+            // let annualAnalysisSummaryDataClassCopy: Array<AnnualAnalysisSummaryDataClass> = JSON.parse(JSON.stringify(this.annualAnalysisSummaryDataClasses))
+            let yearAnalysisSummaryDataClass: AnnualAnalysisSummaryDataClass = new AnnualAnalysisSummaryDataClass(this.monthlyAnalysisSummaryData, analysisYear, accountPredictorEntries, facility, this.annualAnalysisSummaryDataClasses);
             this.annualAnalysisSummaryDataClasses.push(yearAnalysisSummaryDataClass);
             analysisYear++;
         }
