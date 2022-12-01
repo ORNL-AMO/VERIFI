@@ -85,10 +85,12 @@ export class SelectFacilityAnalysisItemsComponent implements OnInit {
         cssClass = 'fa fa-square-check';
         let analysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
         let item: IdbAnalysisItem = analysisItems.find(item => { return item.guid == facilityItem.analysisItemId });
-        if (item.setupErrors.hasError || item.setupErrors.groupsHaveErrors) {
-          isInvalid = true;
-        } else{
-          isInvalid = false;
+        if (item) {
+          if (item.setupErrors.hasError || item.setupErrors.groupsHaveErrors) {
+            isInvalid = true;
+          } else {
+            isInvalid = false;
+          }
         }
       } else {
         cssClass = 'fa fa-square-minus';

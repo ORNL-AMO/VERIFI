@@ -12,9 +12,8 @@ export class SharedDataService {
   itemsPerPage: BehaviorSubject<number>;
   constructor(private localStorageService: LocalStorageService) {
     this.modalOpen = new BehaviorSubject<boolean>(false);
-    this.sidebarOpen = new BehaviorSubject<boolean>(undefined);
+    this.sidebarOpen = new BehaviorSubject<boolean>(true);
     let initialItemsPerPage: number = this.getInitialItemsPerPage();
-    console.log('GET');
     if (initialItemsPerPage) {
       this.itemsPerPage = new BehaviorSubject<number>(initialItemsPerPage);
     } else {
