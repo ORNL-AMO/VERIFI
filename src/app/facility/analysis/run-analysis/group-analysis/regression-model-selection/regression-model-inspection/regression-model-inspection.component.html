@@ -65,25 +65,25 @@
                 </td>
                 <td>
                     <span *ngFor="let pVal of model.t.p; let index = index">
-                        <span *ngIf="index != 0">{{model.predictorVariables[index-1].name}}: {{pVal | customNumber}}
+                        <span *ngIf="index != 0">{{model.predictorVariables[index-1].name}}: {{pVal | number:'0.2-2'}}
                             <br>
                         </span>
                     </span>
                 </td>
                 <td>
-                    {{model.R2| customNumber}}
+                    {{model.R2|  number:'0.3-3'}}
                 </td>
                 <td>
-                    {{model.adjust_R2| customNumber}}
+                    {{model.adjust_R2|  number:'0.3-3'}}
                 </td>
                 <td>
-                    {{model.modelPValue| customNumber}}
+                    {{model.modelPValue| number:'0.2-2'}}
                 </td>
                 <td>
                     <span *ngFor="let coefVal of model.coef; let index = index;">
-                        <span *ngIf="index == 0">{{coefVal| customNumber}}</span>
+                        <span *ngIf="index == 0">{{coefVal| regressionNumber}}</span>
                         <span *ngIf="index != 0">({{coefVal|
-                            customNumber}}*{{model.predictorVariables[index-1].name}})</span> <span
+                            regressionNumber}}*{{model.predictorVariables[index-1].name}})</span> <span
                             *ngIf="index != model.coef.length-1"> +</span>
                     </span>
                 </td>
@@ -111,25 +111,25 @@
                 <td>
                     <span *ngFor="let pVal of selectedModel.t.p; let index = index">
                         <span *ngIf="index != 0">{{selectedModel.predictorVariables[index-1].name}}: {{pVal |
-                            customNumber}}
+                            number:'0.2-2'}}
                             <br>
                         </span>
                     </span>
                 </td>
                 <td>
-                    {{selectedModel.R2| customNumber}}
+                    {{selectedModel.R2| number:'0.3-3'}}
                 </td>
                 <td>
-                    {{selectedModel.adjust_R2| customNumber}}
+                    {{selectedModel.adjust_R2| number:'0.3-3'}}
                 </td>
                 <td>
-                    {{selectedModel.modelPValue| customNumber}}
+                    {{selectedModel.modelPValue| number:'0.2-2'}}
                 </td>
                 <td>
                     <span *ngFor="let coefVal of selectedModel.coef; let index = index;">
-                        <span *ngIf="index == 0">{{coefVal| customNumber}}</span>
+                        <span *ngIf="index == 0">{{coefVal| regressionNumber}}</span>
                         <span *ngIf="index != 0">({{coefVal|
-                            customNumber}}*{{selectedModel.predictorVariables[index-1].name}})</span> <span
+                            regressionNumber}}*{{selectedModel.predictorVariables[index-1].name}})</span> <span
                             *ngIf="index != selectedModel.coef.length-1"> +</span>
                     </span>
                 </td>
