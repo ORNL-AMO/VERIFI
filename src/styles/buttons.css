@@ -173,18 +173,19 @@
 
 
 
-.footer-nav .btn .fa {
+.footer-nav .btn .fa, .btn.nav-btn .fa {
   color: white;
 }
 
-.footer-nav .btn {
-  background-color: black;
+.footer-nav .btn, .btn.nav-btn {
+  background-color: #17202A;
   color: white;
-  border-color: black;
+  border-color: #17202A;
 }
 
-.footer-nav .btn:hover {
+.footer-nav .btn:hover, .btn.nav-btn:hover {
   background-color: gray;
+  color: white;
 }
 
 
@@ -206,3 +207,30 @@
 .btn.toggle-btn.active .fa{
   color: #fff;
 }
+
+
+.btn.action-btn {
+  color: #2c386b;
+  background-color: #fff;
+  border-color: #2c386b;
+}
+
+.btn.action-btn .fa{
+  color: #2c386b;
+}
+
+.btn.action-btn:hover {
+  background-color: #2c386b;
+  color: #fff;
+  opacity: .5;
+}
+
+.btn.action-btn:hover .fa{
+  color: #fff;
+}
+
+/* .btn.dropdown-btn{
+  background-color: #34495E;
+  border-color: #34495E;
+  color: #fff;
+} */

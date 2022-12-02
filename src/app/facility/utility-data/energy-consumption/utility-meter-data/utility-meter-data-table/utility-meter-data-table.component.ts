@@ -30,6 +30,7 @@ export class UtilityMeterDataTableComponent implements OnInit {
   showBulkDelete: boolean = false;
   showIndividualDelete: boolean = false;
   paramsSub: Subscription;
+  showFilterDropdown: boolean = false;
   constructor(
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
@@ -46,6 +47,7 @@ export class UtilityMeterDataTableComponent implements OnInit {
   ngOnInit(): void {
     this.paramsSub = this.activatedRoute.parent.params.subscribe(params => {
       let meterId: number = parseInt(params['id']);
+      this.showFilterDropdown = false;
       this.facilityMeters = this.utilityMeterDbService.facilityMeters.getValue();
       this.selectedMeter = this.facilityMeters.find(meter => { return meter.id == meterId });
       this.setData();
@@ -131,13 +133,18 @@ export class UtilityMeterDataTableComponent implements OnInit {
   }
 
   meterDataAdd() {
+    this.showFilterDropdown = false;
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     this.router.navigateByUrl('facility/' + selectedFacility.id + '/utility/energy-consumption/utility-meter/' + this.selectedMeter.id + '/new-bill');
   }
 
   setEditMeterData(meterData: IdbUtilityMeterData) {
+    this.showFilterDropdown = false;
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     this.router.navigateByUrl('facility/' + selectedFacility.id + '/utility/energy-consumption/utility-meter/' + this.selectedMeter.id + '/edit-bill/' + meterData.id);
+  }
 
+  toggleFilterMenu() {
+    this.showFilterDropdown = !this.showFilterDropdown;
   }
 }

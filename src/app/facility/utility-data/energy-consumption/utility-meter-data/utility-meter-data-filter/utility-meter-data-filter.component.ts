@@ -4,8 +4,6 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AdditionalChargesFilters, DetailedChargesFilters, ElectricityDataFilters, EmissionsFilters, GeneralInformationFilters, GeneralUtilityDataFilters } from 'src/app/models/meterDataFilter';
 import { IdbFacility, MeterSource } from 'src/app/models/idb';
 import { UtilityMeterDataService } from '../utility-meter-data.service';
-import { NavigationEnd, Router } from '@angular/router';
-import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-utility-meter-data-filter',
@@ -18,47 +16,29 @@ export class UtilityMeterDataFilterComponent implements OnInit {
   @Input()
   source: MeterSource;
 
-  // electricityDataFilters: ElectricityDataFilters;
-  showFilterDropdown: boolean = false;
   detailedChargesFilters: DetailedChargesFilters;
   additionalChargesFilters: AdditionalChargesFilters;
   generalInformationFilters: GeneralInformationFilters;
   emissionsFilters: EmissionsFilters;
   generalUtilityDataFilters: GeneralUtilityDataFilters;
-  routerSub: Subscription;
   constructor(private utilityMeterDataService: UtilityMeterDataService, private facilityDbService: FacilitydbService,
-    private dbChangesService: DbChangesService, private router: Router) { }
+    private dbChangesService: DbChangesService) { }
 
   ngOnInit(): void {
-    this.routerSub = this.router.events.subscribe(event => {
-      if (event instanceof NavigationEnd) {
-        this.showFilterDropdown = false;
-      }
-    })
-  }
-
-  ngOnDestroy(){
-    this.routerSub.unsubscribe();
-  }
-
-  toggleFilterMenu() {
-    if (this.showFilterDropdown == false) {
-      if (this.source == 'Electricity') {
-        let electricityDataFilters: ElectricityDataFilters;
-        if (this.filterType == 'table') {
-          electricityDataFilters = this.utilityMeterDataService.tableElectricityFilters.getValue();
-        } else {
-          electricityDataFilters = this.utilityMeterDataService.electricityInputFilters.getValue();
-        }
-        this.additionalChargesFilters = electricityDataFilters.additionalCharges;
-        this.detailedChargesFilters = electricityDataFilters.detailedCharges;
-        this.emissionsFilters = electricityDataFilters.emissionsFilters;
-        this.generalInformationFilters = electricityDataFilters.generalInformationFilters;
+    if (this.source == 'Electricity') {
+      let electricityDataFilters: ElectricityDataFilters;
+      if (this.filterType == 'table') {
+        electricityDataFilters = this.utilityMeterDataService.tableElectricityFilters.getValue();
       } else {
-        this.generalUtilityDataFilters = this.utilityMeterDataService.tableGeneralUtilityFilters.getValue();
+        electricityDataFilters = this.utilityMeterDataService.electricityInputFilters.getValue();
       }
+      this.additionalChargesFilters = electricityDataFilters.additionalCharges;
+      this.detailedChargesFilters = electricityDataFilters.detailedCharges;
+      this.emissionsFilters = electricityDataFilters.emissionsFilters;
+      this.generalInformationFilters = electricityDataFilters.generalInformationFilters;
+    } else {
+      this.generalUtilityDataFilters = this.utilityMeterDataService.tableGeneralUtilityFilters.getValue();
     }
-    this.showFilterDropdown = !this.showFilterDropdown;
   }
 
   async save() {

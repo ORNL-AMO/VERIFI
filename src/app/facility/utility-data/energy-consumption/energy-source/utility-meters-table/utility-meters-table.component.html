@@ -3,26 +3,22 @@
     <p>Please <i class="fa fa-plus"></i> Add New Meter or <i class="fa fa-upload"></i> Import multiple meters from
         excel.</p>
     <div class="meterData">
-        <button class="btn btn-primary-4 mr-2" (click)="addMeter()"><i class="fa fa-plus"></i> Add New Meter</button>
-        <button class="btn btn-outline" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
+        <button class="btn action-btn" (click)="addMeter()"><i class="fa fa-plus"></i> Add New Meter</button>
+        <button class="btn action-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
     </div>
 </div>
 
 <div *ngIf="meterList.length > 0">
 
-    <div class="controls mb-2">
-        <div class="meterData item-right">
-            <button class="btn btn-primary-4 item-right m-0 ml-2" (click)="addMeter()"><i class="fa fa-plus"></i> Add
+    <div class="d-flex w-100 justify-content-end">
+        <app-table-items-dropdown></app-table-items-dropdown>
+        <div class="pl-2">
+            <button class="btn action-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
+        </div>
+        <div class="pl-2">
+            <button class="btn action-btn" (click)="addMeter()"><i class="fa fa-plus"></i> Add
                 New Meter</button>
         </div>
-
-        <div class="importExport item-right">
-            <button class="btn btn-outline" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
-            <!-- <button class="btn btn-outline" (click)="meterExport()"><i class="fa fa-download"></i> Export</button> -->
-        </div>
-
-
-        <app-table-items-dropdown></app-table-items-dropdown>
     </div>
 
     <div class="table-responsive">
