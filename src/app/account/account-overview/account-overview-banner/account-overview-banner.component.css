@@ -1,14 +1,3 @@
-.btn-selected{
-    background-color: #ff6000;
-    color: #fff;
-    border-color: #ff6000;
-  }
-
-  .btn-outline:hover{
-    background-color: #ff6000 !important;
-
-  }
-  
   .banner-border{
     border-bottom: solid #145A32;
   }

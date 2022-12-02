@@ -6,9 +6,9 @@
     <div class="d-flex">
         <app-table-items-dropdown *ngIf="dataDisplay == 'table'"></app-table-items-dropdown>
         <div class="btn-group">
-            <button class="btn" [ngClass]="{'btn-solid': dataDisplay == 'table'}"
+            <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'table'}"
                 (click)="setDataDisplay('table')">Table</button>
-            <button class="btn" [ngClass]="{'btn-solid': dataDisplay == 'graph'}"
+            <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'graph'}"
                 (click)="setDataDisplay('graph')">Graph</button>
         </div>
     </div>
