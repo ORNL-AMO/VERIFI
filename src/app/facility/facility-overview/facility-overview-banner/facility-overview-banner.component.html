@@ -31,19 +31,19 @@
         <div class="d-flex" *ngIf="urlDisplay != 'other'">
             <div class="pr-1" *ngIf="urlDisplay == 'energy'">
                 <div class="btn-group">
-                    <button class="btn btn-sm m-0 btn-selected" (click)="setEnergyIsSource(true)"
-                        [ngClass]="{'btn-outline': selectedFacility.energyIsSource == false}">Source Energy</button>
-                    <button class="btn btn-sm btn-selected m-0" (click)="setEnergyIsSource(false)"
-                        [ngClass]="{'btn-outline': selectedFacility.energyIsSource == true}">Site Energy</button>
+                    <button class="btn btn-sm m-0 toggle-btn" (click)="setEnergyIsSource(true)"
+                        [ngClass]="{'active': selectedFacility.energyIsSource == true}">Source Energy</button>
+                    <button class="btn btn-sm toggle-btn m-0" (click)="setEnergyIsSource(false)"
+                        [ngClass]="{'active': selectedFacility.energyIsSource == false}">Site Energy</button>
                 </div>
             </div>
 
             <div class="pl-1" *ngIf="urlDisplay == 'emissions'">
                 <div class="btn-group">
-                    <button class="btn btn-sm m-0 btn-selected" (click)="setEmissions('location')"
-                        [ngClass]="{'btn-outline': emissionsDisplay != 'location'}">Location</button>
-                    <button class="btn btn-sm btn-selected m-0" (click)="setEmissions('market')"
-                        [ngClass]="{'btn-outline': emissionsDisplay != 'market'}">Market</button>
+                    <button class="btn btn-sm m-0 toggle-btn" (click)="setEmissions('location')"
+                        [ngClass]="{'active': emissionsDisplay != 'location'}">Location</button>
+                    <button class="btn btn-sm toggle-btn m-0" (click)="setEmissions('market')"
+                        [ngClass]="{'active': emissionsDisplay != 'market'}">Market</button>
                 </div>
             </div>
         </div>
