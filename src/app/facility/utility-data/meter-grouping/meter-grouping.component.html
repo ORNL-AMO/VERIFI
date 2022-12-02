@@ -115,7 +115,7 @@
                             <div class="progress-bar" [ngClass]="meterGroup.name" role="progressbar"
                                 [style.width.%]="meterGroup.factionOfTotalEnergy" aria-valuemin="0" aria-valuemax="100">
                             </div>
-                            <span class="tooltip up">(total energy in this group / total energy in all groups)*100<span
+                            <span class="tooltip up">(Total energy in this group / Total energy in all groups)<span
                                     class="arrow arrow-up"></span></span>
                         </div>
                         <span class="progress-bar-data">{{meterGroup.factionOfTotalEnergy | number:'1.0-1'}}%</span>
