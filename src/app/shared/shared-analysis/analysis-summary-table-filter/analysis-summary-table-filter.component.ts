@@ -16,18 +16,12 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
   @Input()
   group: AnalysisGroup;
 
-
-  showFilterDropdown: boolean = false;
   analysisTableColumns: AnalysisTableColumns;
   constructor(private analysisService: AnalysisService, private predictorDbService: PredictordbService) { }
 
   ngOnInit(): void {
     this.analysisTableColumns = this.analysisService.analysisTableColumns.getValue();
     this.setPredictorVariables();
-  }
-
-  toggleFilterMenu() {
-    this.showFilterDropdown = !this.showFilterDropdown;
   }
 
   save() {

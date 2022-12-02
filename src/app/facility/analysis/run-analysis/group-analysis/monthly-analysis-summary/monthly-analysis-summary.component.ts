@@ -26,6 +26,7 @@ export class MonthlyAnalysisSummaryComponent implements OnInit {
   itemsPerPageSub: Subscription;
   worker: Worker;
   calculating: boolean;
+  showFilterDropdown: boolean = false;
   constructor(private analysisService: AnalysisService, private analysisDbService: AnalysisDbService,
     private facilityDbService: FacilitydbService,
     private predictorDbService: PredictordbService,
@@ -64,8 +65,6 @@ export class MonthlyAnalysisSummaryComponent implements OnInit {
       // Web Workers are not supported in this environment.
       // You should add a fallback so that your program still executes correctly.
     }
-
-
   }
 
   ngOnDestroy() {
@@ -78,6 +77,10 @@ export class MonthlyAnalysisSummaryComponent implements OnInit {
   setDataDisplay(display: 'table' | 'graph') {
     this.dataDisplay = display;
     this.analysisService.dataDisplay.next(this.dataDisplay);
+  }
+
+  toggleFilterMenu(){
+    this.showFilterDropdown = !this.showFilterDropdown;
   }
 
 }

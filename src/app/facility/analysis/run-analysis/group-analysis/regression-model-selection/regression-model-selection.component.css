@@ -21,10 +21,6 @@ td{
     vertical-align: middle;
 }
 
-button span.fa-microscope{
-    color: black;
-}
-
 tr.selected-model{
     border: solid !important;
 }

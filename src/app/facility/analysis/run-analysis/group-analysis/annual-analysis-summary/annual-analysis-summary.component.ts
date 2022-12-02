@@ -22,6 +22,7 @@ export class AnnualAnalysisSummaryComponent implements OnInit {
   annualAnalysisSummary: Array<AnnualAnalysisSummary>;
   worker: Worker;
   calculating: boolean;
+  showFilterDropdown: boolean = false;
   constructor(private analysisService: AnalysisService, private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService,
     private analysisCalculationsService: AnalysisCalculationsService, private predictorDbService: PredictordbService) {
   }
@@ -69,5 +70,9 @@ export class AnnualAnalysisSummaryComponent implements OnInit {
   setDataDisplay(display: 'table' | 'graph') {
     this.dataDisplay = display;
     this.analysisService.dataDisplay.next(this.dataDisplay);
+  }
+
+  toggleFilterMenu(){
+    this.showFilterDropdown = !this.showFilterDropdown;
   }
 }

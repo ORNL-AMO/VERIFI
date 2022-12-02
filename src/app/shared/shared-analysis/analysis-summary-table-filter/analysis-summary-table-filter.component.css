@@ -1,5 +1,7 @@
 .filter-dropdown{
-    width: 740px;
+    /* width: 740px; */
+    width: 100%;
+    top: 0px;
 }
 
 .filter-dropdown input{
