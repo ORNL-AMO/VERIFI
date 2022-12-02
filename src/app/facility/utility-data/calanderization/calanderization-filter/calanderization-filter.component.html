@@ -1,7 +1,6 @@
-<div class="filter" [ngClass]="{'filter-open': showFilterDropdown}">
-    <button class="btn" [ngClass]="{'btn-solid' : !showFilterDropdown, 'btn-outline' : showFilterDropdown}"
-        (click)="toggleFilterMenu()">Filter</button>
-    <div class="filter-dropdown" *ngIf="showFilterDropdown">
+<div class="filter">
+
+    <div class="filter-dropdown">
         <!-- <p class="small">Filter Monthly Meter Data</p> -->
         <div class="d-flex">
             <div class="p-2">

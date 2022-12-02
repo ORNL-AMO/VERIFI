@@ -2,6 +2,7 @@
     width: fit-content;
 } */
 
-.filter.filter-open{
-    width: 400px;
+.filter-dropdown{
+    top: 0px;
+    width: 100%;
 }

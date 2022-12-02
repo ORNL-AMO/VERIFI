@@ -13,38 +13,43 @@
         </div>
     </div>
 
-    <div *ngIf="hasData">
+    <ng-container *ngIf="hasData">
 
-        <div class="controls mb-2">
-            <button class="btn btn-outline" (click)="editPredictors()">Add/Edit Predictors</button>
-
-            <div class="meterData item-right">
-                <button class="btn btn-primary-4 item-right m-0 ml-2" (click)="addPredictorEntry()"><i
-                        class="fa fa-plus"></i> Add Predictor Entry</button>
-            </div>
-            <div class="importExport item-right">
-                <button class="btn btn-outline" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
-                <!-- <button class="btn btn-outline" (click)="predictorExport()">Export</button> -->
+        <div class="d-flex w-100 justify-content-between">
+            <div>
+                <button class="btn action-btn" (click)="editPredictors()">Add/Edit Predictors</button>
             </div>
 
-            <!--Items Per Page-->
-            <app-table-items-dropdown></app-table-items-dropdown>
+            <div class="d-flex">
+                <!--Bulk Delete-->
+                <div class="pr-2 bulk-delete" [class.show]="hasCheckedItems">
+                    <button class="btn btn-danger" (click)='openBulkDelete()' [disabled]="!hasCheckedItems">Bulk
+                        Delete</button>
+                </div>
+                <!--Items Per Page-->
+                <app-table-items-dropdown></app-table-items-dropdown>
+                <div>
+                    <button class="btn nav-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import
+                        Data</button>
+                </div>
 
-            <!--Bulk Delete-->
-            <div class="bulk-delete item-right" [class.show]="hasCheckedItems">
-                <button class="btn btn-danger" (click)='openBulkDelete()' [disabled]="!hasCheckedItems">Bulk Delete</button>
+
+                <div class="pl-2">
+                    <button class="btn action-btn" (click)="addPredictorEntry()"><i class="fa fa-plus"></i> Add
+                        Predictor
+                        Entry</button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div *ngIf="hasData">
         <table class="table table-sm" #predictorTable [ngClass]="{'copying-table': copyingTable}">
             <thead>
                 <tr>
                     <th class="input" *ngIf="!copyingTable">
                         <input #masterCheckbox type="checkbox" (change)="checkAll()" [(ngModel)]="allChecked">
                     </th>
-                    <th (click)="setOrderDataField('date')" [ngClass]="{'active': orderDataField == 'date'}">Date</th>
+                    <th (click)="setOrderDataField('date')" [ngClass]="{'active': orderDataField == 'date'}">Date
+                    </th>
                     <th class="header" *ngFor="let predictor of facilityPredictors; let predictorIndex = index;"
                         (click)="setOrderDataField(predictor.name)"
                         [ngClass]="{'active': orderDataField == predictor.name}">
@@ -70,22 +75,22 @@
                     <td class="actions" *ngIf="!copyingTable">
                         <div class="d-flex">
                             <i class="fa fa-pencil" title="Edit" (click)="setEditPredictorEntry(predictorEntry)"></i>
-                            <i class="fa fa-trash" title="Delete" (click)="setDeletePredictorEntry(predictorEntry)"></i>                            
+                            <i class="fa fa-trash" title="Delete" (click)="setDeletePredictorEntry(predictorEntry)"></i>
                         </div>
                     </td>
                 </tr>
             </tbody>
         </table>
-    </div>
-    <div class="tableControls overflow-hidden" *ngIf="hasData">
-        <a class="click-link" (click)="copyTable()"><span class="fa fa-copy"></span> Copy Table</a>
-        <div class="item-right">
-            <ngb-pagination [collectionSize]="facilityPredictorEntries.length" [(page)]="currentPageNumber"
-                [pageSize]="itemsPerPage" [rotate]="true" aria-label="Default pagination" [maxSize]="5">
-            </ngb-pagination>
+        <div class="tableControls overflow-hidden">
+            <a class="click-link" (click)="copyTable()"><span class="fa fa-copy"></span> Copy Table</a>
+            <div class="item-right">
+                <ngb-pagination [collectionSize]="facilityPredictorEntries.length" [(page)]="currentPageNumber"
+                    [pageSize]="itemsPerPage" [rotate]="true" aria-label="Default pagination" [maxSize]="5">
+                </ngb-pagination>
+            </div>
+            <p class="item-right"> {{facilityPredictorEntries.length}} entries</p>
         </div>
-        <p class="item-right"> {{facilityPredictorEntries.length}} entries</p>
-    </div>
+    </ng-container>
 </div>
 
 <div class="window" [class.open]="predictorEntryToEdit">
