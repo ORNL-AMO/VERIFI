@@ -1,23 +1,27 @@
-<div class="d-flex justify-content-between" *ngIf="!fileReference.dataSubmitted">
+<ng-container *ngIf="!fileReference.dataSubmitted">
     <div class="d-flex">
-        <button class="btn btn-secondary" (click)="goBack()">Back</button>
+        <div class="d-flex">
+            <button class="btn nav-btn" (click)="goBack()">Back</button>
+        </div>
     </div>
-    <div class="d-flex">
-        <button class="btn btn-success" (click)="submit()">Submit</button>
+    <hr>
+    <div class="d-flex w-100 justify-content-center">
+        <div class="d-flex">
+            <button class="btn btn-lg action-btn" (click)="submit()">Submit Upload Data</button>
+        </div>
     </div>
-</div>
-<hr>
-<div class="alert alert-info text-center" *ngIf="!fileReference.dataSubmitted">
-    Click "Submit" to add the utility data to this account from the template setup in the previous steps.
-    Once submitted,
-    this file will no longer be able to be modifed in this setup. <b>This cannot be undone.</b>
-</div>
-
+    <hr>
+    <div class="alert alert-info text-center">
+        Click "Submit Upload Data" to add the utility data to this account from the template setup in the previous steps.
+        Once submitted,
+        this file will no longer be able to be modifed in this setup. <b>This cannot be undone.</b>
+    </div>
+</ng-container>
 
 <div class="p-4 text-center justify-content-center" *ngIf="fileReference.dataSubmitted && hasNextFile">
     <p class="alert alert-info">Data for this file has been submitted. Click the button below to continue to the next
         file.</p>
-    <button class="btn btn-success" (click)="goToNext()">Go To Next File</button>
+    <button class="btn nav-btn" (click)="goToNext()">Go To Next File</button>
 </div>
 
 <div class="p-4 text-center justify-content-center" *ngIf="fileReference.dataSubmitted && !hasNextFile">
@@ -25,7 +29,7 @@
         files or navigate to the
         account dashboard.</p>
     <div class="d-flex justify-content-center">
-        <button class="btn btn-secondary mr-2" (click)="goToUpload()">Upload Additional Files</button>
-        <button class="btn btn-secondary" (click)="goToAccountDashboard()">Go To Account Dashboard</button>
+        <button class="btn btn-lg nav-btn mr-2" (click)="goToUpload()">Upload Additional Files</button>
+        <button class="btn btn-lg nav-btn" (click)="goToAccountDashboard()"><span class="fa fa-home"></span> Go To Account Home</button>
     </div>
 </div>

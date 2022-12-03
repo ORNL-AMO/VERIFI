@@ -1,9 +1,9 @@
 <div class="d-flex justify-content-between">
     <div class="d-flex">
-        <button class="btn btn-secondary" (click)="goBack()">Back</button>
+        <button class="btn nav-btn" (click)="goBack()">Back</button>
     </div>
     <div class="d-flex flex-column">
-        <button class="btn btn-success" (click)="continue()" [disabled]="noPredictorsOrMeters || noDateColumn">Submit
+        <button class="btn nav-btn" (click)="continue()" [disabled]="noPredictorsOrMeters || noDateColumn">Submit
             &amp; Continue</button>
     </div>
 </div>
