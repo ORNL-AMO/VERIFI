@@ -51,3 +51,9 @@
 .nav-tabs .nav-link.active, .nav-tabs .nav-link.active i.fa{
     color: #ff6000;
 }
+
+.nav-tabs .nav-item .nav-link.home-link{
+    background-color: #17202A;
+    color: white;
+    border-color: #17202A;
+}
