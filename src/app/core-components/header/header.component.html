@@ -17,7 +17,7 @@
                     (click)="toggleDropdown()">Account Required
                 </div>
                 <div class="dropdown-menu" [ngClass]="{'show':showDropdown}">
-                    <a *ngFor="let account of accountList" [class.active]="activeAccount?.id === account.id"
+                    <a *ngFor="let account of accountList| orderBy:'name':'asc'" [class.active]="activeAccount?.id === account.id"
                         class="dropdown-item" (click)="switchAccount(account)"> {{account.name}}</a>
                     <div class="dropdown-divider"></div>
                     <a class="dropdown-item" (click)="addNewAccount()"><i class="fa fa-plus"></i> Add New
