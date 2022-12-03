@@ -207,12 +207,14 @@ export class CalanderizationComponent implements OnInit {
   }
 
   showDataApplicationModal() {
+    this.sharedDataService.modalOpen.next(true);
     this.showFilterDropdown = false;
     this.dataApplicationMeter = JSON.parse(JSON.stringify(this.selectedMeter));
     this.displayDataApplicationModal = true;
   }
 
   cancelSetDataApplication() {
+    this.sharedDataService.modalOpen.next(false);
     this.displayDataApplicationModal = false;
     this.dataApplicationMeter = undefined;
   }

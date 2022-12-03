@@ -95,6 +95,8 @@
     </table>
 </div>
 
+
+<div [ngClass]="{'windowOverlay': itemToEdit || showCreateItem}"></div>
 <div class="popup" [class.open]="itemToEdit">
     <div class="popup-header" *ngIf="itemToEdit">Go To: {{itemToEdit.name}}
         <button class="item-right" (click)="cancelEditItem()">x</button>

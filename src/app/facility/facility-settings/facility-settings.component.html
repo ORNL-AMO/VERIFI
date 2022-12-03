@@ -58,6 +58,7 @@
     </div>
 </div>
 
+<div [ngClass]="{'windowOverlay': showDeleteFacility}"></div>
 <div class="popup" [class.open]="showDeleteFacility" *ngIf="selectedFacility">
     <div class="popup-header">Delete Facility: {{selectedFacility.name}}
         <button class="item-right" (click)="cancelDelete()">x</button>

@@ -97,6 +97,7 @@
     </div>
 </div>
 
+<div [ngClass]="{'windowOverlay': meterToDelete}"></div>
 <div class="popup" [class.open]="meterToDelete">
     <div class="popup-header" *ngIf="meterToDelete">Delete Meter: {{meterToDelete.name}}
         <button class="item-right" (click)="cancelDelete()">x</button>

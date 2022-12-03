@@ -81,6 +81,7 @@
 
 
 
+<div [ngClass]="{'windowOverlay': showIndividualDelete || showBulkDelete}"></div>
 <!--individual delete-->
 <div class="popup" [class.open]="showIndividualDelete">
     <div class="popup-header" *ngIf="meterDataToDelete">Delete Meter Data

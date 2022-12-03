@@ -98,11 +98,13 @@ export class UtilityMeterDataTableComponent implements OnInit {
   }
 
   setDeleteMeterData(meterData: IdbUtilityMeterData) {
+    this.sharedDataService.modalOpen.next(true);
     this.meterDataToDelete = meterData;
     this.showIndividualDelete = true;
   }
 
   cancelDelete() {
+    this.sharedDataService.modalOpen.next(false);
     this.showIndividualDelete = false;
     this.meterDataToDelete = undefined;
   }
@@ -125,10 +127,12 @@ export class UtilityMeterDataTableComponent implements OnInit {
   }
 
   openBulkDelete() {
+    this.sharedDataService.modalOpen.next(true);
     this.showBulkDelete = true;
   }
 
   cancelBulkDelete() {
+    this.sharedDataService.modalOpen.next(false);
     this.showBulkDelete = false;
   }
 

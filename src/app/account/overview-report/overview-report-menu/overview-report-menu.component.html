@@ -223,6 +223,7 @@
 </div>
 
 <!--save template modal-->
+<div [ngClass]="{'windowOverlay': displayCreateTemplate}"></div>
 <div class="popup" [class.open]="displayCreateTemplate">
     <div class="popup-header" *ngIf="displayCreateTemplate">Create New Report Template
         <button class="item-right" (click)="cancelNewTemplate()">x</button>

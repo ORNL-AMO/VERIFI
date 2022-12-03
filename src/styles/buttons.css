@@ -111,7 +111,6 @@
 .bulk-delete {
   opacity: 0;
   transition: 0.5s opacity;
-  margin: 0 15px;
 }
 
 .bulk-delete.show {

@@ -108,7 +108,7 @@
 </div>
 
 
-<div id="overlay" [class.open]="showDeleteAccount || displayDeleteFacility || displayApplyFacilitySettings"></div>
+<div [class.open]="{'windowOverlay':showDeleteAccount || displayDeleteFacility || displayApplyFacilitySettings}"></div>
 
 <div class="popup" [class.open]="showDeleteAccount" *ngIf="showDeleteAccount">
     <div class="popup-header">Delete Account: {{selectedAccount.name}}
@@ -150,15 +150,18 @@
         <p>WARNING: Applying account settings will override any existing facility settings.</p>
         <hr>
         <label class="checkbox-label" for="applyUnits">
-            <input class="checkbox" type="checkbox" id="applyUnits" name="applyUnits" [(ngModel)]="applySettingsOptions.units">
+            <input class="checkbox" type="checkbox" id="applyUnits" name="applyUnits"
+                [(ngModel)]="applySettingsOptions.units">
             Apply Default Units
         </label>
         <label class="checkbox-label" for="sustainabilityQuestions">
-            <input class="checkbox" type="checkbox" id="sustainabilityQuestions" name="sustainabilityQuestions" [(ngModel)]="applySettingsOptions.sustainabilityQuestions">
+            <input class="checkbox" type="checkbox" id="sustainabilityQuestions" name="sustainabilityQuestions"
+                [(ngModel)]="applySettingsOptions.sustainabilityQuestions">
             Apply Sustainabity Goals
         </label>
         <label class="checkbox-label" for="financialReporting">
-            <input class="checkbox" type="checkbox" id="financialReporting" name="financialReporting" [(ngModel)]="applySettingsOptions.financialReporting">
+            <input class="checkbox" type="checkbox" id="financialReporting" name="financialReporting"
+                [(ngModel)]="applySettingsOptions.financialReporting">
             Apply Financial Reporting Details
         </label>
     </div>

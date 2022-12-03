@@ -171,6 +171,7 @@
     </div>
 </div>
 
+<div [ngClass]="{'windowOverlay': groupToDelete}"></div>
 <div class="popup" [class.open]="groupToDelete">
     <div class="popup-header" *ngIf="groupToDelete">Delete Meter Data {{groupToDelete.name}}
         <button class="item-right" (click)="closeDeleteGroup()">x</button>

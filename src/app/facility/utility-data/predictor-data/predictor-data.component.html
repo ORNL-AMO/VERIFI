@@ -111,6 +111,7 @@
 </div>
 
 
+<div [ngClass]="{'windowOverlay': predictorEntryToDelete || showBulkDelete}"></div>
 <div class="popup" [class.open]="predictorEntryToDelete">
     <div class="popup-header">Delete Predictor
         <button class="item-right" (click)="cancelDeletePredictorEntry()">x</button>

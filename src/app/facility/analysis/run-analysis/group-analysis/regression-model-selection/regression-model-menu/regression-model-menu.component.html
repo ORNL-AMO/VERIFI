@@ -144,6 +144,7 @@
 
 
 
+<div [ngClass]="{'windowOverlay': showUpdateModelsModal || showConfirmPredictorChangeModel}"></div>
 <div class="popup" [class.open]="showUpdateModelsModal">
     <div class="popup-header">Are you sure you want to update the models?
         <button class="item-right" (click)="closeUpdateModelsModal()">x</button>

@@ -86,6 +86,7 @@
 </div>
 
 
+<div [ngClass]="{'windowOverlay': reportToDelete || showNewReportModal}"></div>
 <div class="popup" [class.open]="reportToDelete">
     <div class="popup-header" *ngIf="reportToDelete">Delete: {{reportToDelete.reportOptions.title}}
         <button class="item-right" (click)="cancelDelete()">x</button>
@@ -98,7 +99,6 @@
         <button class="btn btn-danger" (click)="confirmDelete()">Delete</button>
     </div>
 </div>
-
 
 <div class="popup report-type-menu" [class.open]="showNewReportModal">
     <div class="popup-header">Select New Report Type

@@ -108,6 +108,8 @@
     </div>
 </div>
 
+
+<div [ngClass]="{'windowOverlay':displayDataApplicationModal}"></div>
 <div class="popup calanderization" [class.open]="displayDataApplicationModal">
     <div class="popup-header" *ngIf="dataApplicationMeter">Select Calendarization Method:
         {{dataApplicationMeter.name}}
