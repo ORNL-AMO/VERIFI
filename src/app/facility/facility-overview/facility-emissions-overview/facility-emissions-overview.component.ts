@@ -23,7 +23,7 @@ export class FacilityEmissionsOverviewComponent implements OnInit {
     this.accountFacilitiesSummarySub = this.facilityOverviewService.energyMeterSummaryData.subscribe(summaryData => {
       if (summaryData && summaryData.allMetersLastBill) {
         this.lastMonthsDate = new Date(summaryData.allMetersLastBill.year, summaryData.allMetersLastBill.monthNumValue);
-        this.yearPriorDate = new Date(summaryData.allMetersLastBill.year - 1, summaryData.allMetersLastBill.monthNumValue);
+        this.yearPriorDate = new Date(summaryData.allMetersLastBill.year - 1, summaryData.allMetersLastBill.monthNumValue + 1);
       } else {
         this.lastMonthsDate = undefined;
         this.yearPriorDate = undefined;

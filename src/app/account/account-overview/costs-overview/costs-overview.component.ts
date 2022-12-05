@@ -26,7 +26,7 @@ export class CostsOverviewComponent implements OnInit {
       if (accountFacilitiesSummary.allMetersLastBill) {
         this.displayWarning = accountFacilitiesSummary.totalEnergyCost == 0;
         this.lastMonthsDate = new Date(accountFacilitiesSummary.allMetersLastBill.year, accountFacilitiesSummary.allMetersLastBill.monthNumValue);
-        this.yearPriorDate = new Date(accountFacilitiesSummary.allMetersLastBill.year - 1, accountFacilitiesSummary.allMetersLastBill.monthNumValue);
+        this.yearPriorDate = new Date(accountFacilitiesSummary.allMetersLastBill.year - 1, accountFacilitiesSummary.allMetersLastBill.monthNumValue + 1);
       } else {
         this.lastMonthsDate = undefined;
         this.yearPriorDate = undefined;

@@ -77,8 +77,8 @@ export class WaterMetersUsageChartComponent implements OnInit {
       })
 
       let xrange;
-      if(dataPointSize >= 12){
-        xrange = [dataPointSize-12, dataPointSize];
+      if(dataPointSize >= 11){
+        xrange = [dataPointSize-11, dataPointSize];
       };
 
 

@@ -116,7 +116,6 @@ export class FacilityOverviewComponent implements OnInit {
       //TODO: Rest of types
       let energySources: Array<MeterSource> = ['Electricity', 'Natural Gas', 'Other Fuels', 'Other Energy']
       let facilitySummaryClass: FacilitySummaryClass = new FacilitySummaryClass(this.facilityOverviewService.calanderizedMeters, groups, energySources, this.facility);
-
       this.facilityOverviewService.energyMeterSummaryData.next(facilitySummaryClass.meterSummaryData);
       this.facilityOverviewService.energyMonthlySourceData.next(facilitySummaryClass.monthlySourceData);
       this.facilityOverviewService.energyUtilityUsageSummaryData.next(facilitySummaryClass.utilityUsageSummaryData);
