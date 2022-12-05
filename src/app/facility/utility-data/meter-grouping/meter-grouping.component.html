@@ -1,6 +1,6 @@
 <div class="wrapper main-content">
     <h4>Meter Grouping</h4>
-    <div class="controls pb-0 d-flex w-100 justify-content-between flex-wrap">
+    <div class="pb-0 d-flex w-100 justify-content-between flex-wrap">
 
         <div class="d-flex">
             <select name="minMonth" [(ngModel)]="minMonth" class="form-control" (change)="setMinDate()">
@@ -49,7 +49,7 @@
                         (click)="setDisplayGraphCost('scatter')"><span class="fa fa-line-chart"></span></button>
                 </div>
             </div>
-            <div class="btn-group">
+            <div class="btn-group pl-2">
                 <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'grouping'}"
                     (click)="setDataDisplay('grouping')">Set Groups</button>
                 <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'table'}"
@@ -171,6 +171,7 @@
     </div>
 </div>
 
+<div [ngClass]="{'windowOverlay': groupToDelete}"></div>
 <div class="popup" [class.open]="groupToDelete">
     <div class="popup-header" *ngIf="groupToDelete">Delete Meter Data {{groupToDelete.name}}
         <button class="item-right" (click)="closeDeleteGroup()">x</button>

@@ -98,7 +98,7 @@ Popups & Windows
     position: fixed;
     width: 500px;
     left: calc(50% - 250px);
-    top: 20px;
+    top: 20%;
     background-color: white;
     transition: 0.2s transform;
   }

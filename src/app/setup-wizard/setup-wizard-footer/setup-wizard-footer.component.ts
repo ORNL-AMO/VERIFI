@@ -20,6 +20,7 @@ export class SetupWizardFooterComponent implements OnInit {
   canContinue: boolean;
   canContinueSub: Subscription;
   routerSub: Subscription;
+  displayBack: boolean;
   constructor(private router: Router, private setupWizardService: SetupWizardService) {
 
   }
@@ -28,9 +29,11 @@ export class SetupWizardFooterComponent implements OnInit {
     this.routerSub = this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
         this.setProgress();
+        this.setDisplayBack();
       }
     });
     this.setProgress();
+    this.setDisplayBack();
 
     this.canContinueSub = this.setupWizardService.canContinue.subscribe(val => {
       this.canContinue = val;
@@ -45,6 +48,10 @@ export class SetupWizardFooterComponent implements OnInit {
     this.canContinueSub.unsubscribe();
     this.facilitiesSub.unsubscribe();
     this.routerSub.unsubscribe();
+  }
+
+  setDisplayBack(){
+    this.displayBack = !this.router.url.includes('welcome');
   }
 
   back() {

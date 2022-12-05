@@ -1,7 +1,9 @@
 <div class="d-flex w-100 justify-content-between">
     <div>
-        <a class="click-link" (click)="cancelInspectModel()"><span class="fa fa-chevron-left"></span>Return to Model
-            Selection</a>
+        <button class="btn nav-btn m-0" (click)="cancelInspectModel()">
+            <span class="fa fa-chevron-left"></span>Return to Model
+            Selection
+        </button>
     </div>
     <div>
         <ng-container *ngIf="isSelectedModel">
@@ -9,9 +11,9 @@
         </ng-container>
 
         <div class="d-flex" *ngIf="!isSelectedModel">
-            <button *ngIf="!compareSelectedModel" class="btn btn-primary m-0" (click)="setCompareSelected()">Compare
+            <button *ngIf="!compareSelectedModel" class="btn action-btn m-0" (click)="setCompareSelected()">Compare
                 Current Model</button>
-            <button *ngIf="compareSelectedModel" class="btn btn-primary m-0" (click)="hideCompareSelected()">Hide
+            <button *ngIf="compareSelectedModel" class="btn action-btn m-0" (click)="hideCompareSelected()">Hide
                 Current Model</button>
         </div>
     </div>
@@ -71,10 +73,10 @@
                     </span>
                 </td>
                 <td>
-                    {{model.R2|  number:'0.3-3'}}
+                    {{model.R2| number:'0.3-3'}}
                 </td>
                 <td>
-                    {{model.adjust_R2|  number:'0.3-3'}}
+                    {{model.adjust_R2| number:'0.3-3'}}
                 </td>
                 <td>
                     {{model.modelPValue| number:'0.2-2'}}
@@ -96,7 +98,7 @@
                     </span>
                 </td>
                 <td *ngIf="!isSelectedModel">
-                    <a class="click-link" (click)="selectModel()">Select Model</a>
+                    <button class="btn action-btn" (click)="selectModel()">Select Model</button>
                 </td>
             </tr>
             <!--selected-->

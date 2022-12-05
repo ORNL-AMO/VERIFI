@@ -1,7 +1,7 @@
 <div class="account d-flex setup-footer justify-content-between align-items-center">
     <div class="col-3">
-        <button class="btn btn-secondary" (click)="back()">Back</button>
-        <button *ngIf="showAddFacility && facilities.length != 0" class="btn btn-danger ml-2" (click)="resetFacilities()">Choose Different Method</button>
+        <button *ngIf="displayBack" class="btn nav-btn" (click)="back()">Back</button>
+        <button *ngIf="showAddFacility && facilities.length != 0" class="btn action-btn ml-2" (click)="resetFacilities()">Choose Different Method</button>
     </div>
 
     <div class="col">
@@ -14,7 +14,7 @@
         </div>
     </div>
     <div class="col-3 text-right">
-        <button *ngIf="showAddFacility && facilities.length != 0" class="btn btn-secondary mr-2" (click)="addfacility()">Add Another Facility</button>
-        <button *ngIf="!showSubmit" class="btn btn-primary-4" (click)="next()" [disabled]="!canContinue">Continue</button>
+        <button *ngIf="showAddFacility && facilities.length != 0" class="btn action-btn mr-2" (click)="addfacility()">Add Another Facility</button>
+        <button *ngIf="!showSubmit" class="btn nav-btn" (click)="next()" [disabled]="!canContinue">Continue</button>
     </div>
 </div>

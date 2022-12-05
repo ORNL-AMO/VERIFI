@@ -93,10 +93,12 @@ export class UtilityMetersTableComponent implements OnInit {
   }
 
   selectDeleteMeter(meter: IdbUtilityMeter) {
+    this.sharedDataService.modalOpen.next(true);
     this.meterToDelete = meter;
   }
 
   cancelDelete() {
+    this.sharedDataService.modalOpen.next(false);
     this.meterToDelete = undefined;
   }
 

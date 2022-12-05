@@ -39,6 +39,7 @@ export class CalanderizationComponent implements OnInit {
   selectedMeter: IdbUtilityMeter;
   selectedFacility: IdbFacility;
   displayDataApplicationModal: boolean = false;
+  showFilterDropdown: boolean = false;
   constructor(private calanderizationService: CalanderizationService, private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService, private facilityDbService: FacilitydbService,
     private dbChangesService: DbChangesService, private accountDbService: AccountdbService,
@@ -179,6 +180,7 @@ export class CalanderizationComponent implements OnInit {
   }
 
   setDataDisplay(str: "table" | "graph") {
+    this.showFilterDropdown = false;
     this.dataDisplay = str;
   }
 
@@ -199,11 +201,14 @@ export class CalanderizationComponent implements OnInit {
   }
 
   showDataApplicationModal() {
+    this.sharedDataService.modalOpen.next(true);
+    this.showFilterDropdown = false;
     this.dataApplicationMeter = JSON.parse(JSON.stringify(this.selectedMeter));
     this.displayDataApplicationModal = true;
   }
 
   cancelSetDataApplication() {
+    this.sharedDataService.modalOpen.next(false);
     this.displayDataApplicationModal = false;
     this.dataApplicationMeter = undefined;
   }
@@ -223,6 +228,7 @@ export class CalanderizationComponent implements OnInit {
   }
 
   async setFacilityEnergyIsSource(energyIsSource: boolean) {
+    this.showFilterDropdown = false;
     if (this.selectedFacility.energyIsSource != energyIsSource) {
       this.selectedFacility.energyIsSource = energyIsSource;
       await this.dbChangesService.updateFacilities(this.selectedFacility);
@@ -231,12 +237,17 @@ export class CalanderizationComponent implements OnInit {
   }
 
   selectMeter(meter: IdbUtilityMeter) {
+    this.showFilterDropdown = false;
     this.selectedMeter = meter;
     this.setCalanderizedMeterData();
   }
 
-  
+
   getColor(): string {
     return UtilityColors[this.selectedMeter.source].color
+  }
+
+  toggleFilterMenu() {
+    this.showFilterDropdown = !this.showFilterDropdown;
   }
 }

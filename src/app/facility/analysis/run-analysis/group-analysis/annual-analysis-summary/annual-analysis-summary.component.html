@@ -1,5 +1,12 @@
-<div class="controls d-flex justify-content-between">
-    <app-analysis-summary-table-filter [tableContext]="'annualGroup'" [group]="group"></app-analysis-summary-table-filter>
+<div class="d-flex justify-content-between">
+
+    <div>
+        <button *ngIf="dataDisplay == 'table'" class="btn action-btn" [ngClass]="{'active' : showFilterDropdown}" (click)="toggleFilterMenu()">
+            <i class="fa fa-chevron-down" *ngIf="showFilterDropdown"></i>
+            <i class="fa fa-chevron-up" *ngIf="!showFilterDropdown"></i>
+            Choose Columns
+        </button>
+    </div>
 
     <div class="btn-group">
         <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'table'}"
@@ -8,6 +15,9 @@
             (click)="setDataDisplay('graph')">Graph</button>
     </div>
 </div>
+
+<app-analysis-summary-table-filter *ngIf="showFilterDropdown" [tableContext]="'annualGroup'" [group]="group">
+</app-analysis-summary-table-filter>
 
 <div class="w-100 x-scroll" *ngIf="!calculating">
     <app-annual-analysis-summary-table *ngIf="dataDisplay == 'table'" [annualAnalysisSummary]="annualAnalysisSummary"

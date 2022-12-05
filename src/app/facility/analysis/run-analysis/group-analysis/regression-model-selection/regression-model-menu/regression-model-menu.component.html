@@ -32,13 +32,13 @@
 
                 <div class="p-2 d-flex flex-column justify-content-center align-items-center">
                     <div class="p-0">
-                        <button class="mt-0 btn btn-info" (click)="generateModels()"
+                        <button class="mt-0 btn action-btn" (click)="generateModels()"
                             *ngIf="!group.models || group.models.length == 0">Generate
                             Models</button>
                     </div>
 
                     <div class="p-0">
-                        <button class="mt-0 btn btn-info" (click)="updateModels()"
+                        <button class="mt-0 btn action-btn" (click)="updateModels()"
                             *ngIf="group.models && group.models.length != 0">
                             Update Models</button>
                     </div>
@@ -144,6 +144,7 @@
 
 
 
+<div [ngClass]="{'windowOverlay': showUpdateModelsModal || showConfirmPredictorChangeModel}"></div>
 <div class="popup" [class.open]="showUpdateModelsModal">
     <div class="popup-header">Are you sure you want to update the models?
         <button class="item-right" (click)="closeUpdateModelsModal()">x</button>

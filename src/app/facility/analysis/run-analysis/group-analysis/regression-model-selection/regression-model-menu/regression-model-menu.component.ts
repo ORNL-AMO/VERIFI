@@ -15,6 +15,7 @@ import { AnalysisCalculationsHelperService } from 'src/app/shared/shared-analysi
 import { RegressionModelsService } from 'src/app/shared/shared-analysis/calculations/regression-models.service';
 import * as _ from 'lodash';
 import { AnalysisValidationService } from 'src/app/facility/analysis/analysis-validation.service';
+import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 @Component({
   selector: 'app-regression-model-menu',
   templateUrl: './regression-model-menu.component.html',
@@ -38,7 +39,8 @@ export class RegressionModelMenuComponent implements OnInit {
     private facilityDbService: FacilitydbService, private analysisCalculationsHelperService: AnalysisCalculationsHelperService,
     private regressionsModelsService: RegressionModelsService, private predictorDbService: PredictordbService,
     private utilityMeterDbService: UtilityMeterdbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private analysisValidationService: AnalysisValidationService) { }
+    private analysisValidationService: AnalysisValidationService,
+    private sharedDataService: SharedDataService) { }
 
   ngOnInit(): void {
     this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
@@ -122,10 +124,12 @@ export class RegressionModelMenuComponent implements OnInit {
 
 
   updateModels() {
+    this.sharedDataService.modalOpen.next(true);
     this.showUpdateModelsModal = true;
   }
 
   closeUpdateModelsModal() {
+    this.sharedDataService.modalOpen.next(false);
     this.showUpdateModelsModal = false;
   }
 

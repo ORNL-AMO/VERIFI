@@ -22,16 +22,7 @@
      /* color: #fff; */
      background-color: #CCCCCC;
  }
- 
- .breadcrumbs .nav-item a.nav-link{
-     padding: .5rem;
-     font-size: 12px;
- 
- }
- .nav-pills .nav-link.active, .nav-pills .show>.nav-link {
-     background-color: #2c386b;
- }
- 
+  
  .banner-border{
      border-bottom: solid #2c386b;
  }
@@ -51,4 +42,10 @@
 
 .nav-tabs .nav-link.active, .nav-tabs .nav-link.active i.fa{
     color: #ff6000;
+}
+
+.nav-tabs .nav-item .nav-link.home-link{
+    background-color: #17202A;
+    color: white;
+    border-color: #17202A;
 }

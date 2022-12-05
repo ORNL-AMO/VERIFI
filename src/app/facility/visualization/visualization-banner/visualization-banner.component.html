@@ -27,20 +27,20 @@
         <div class="d-flex">
             <div class="pr-1">
                 <div class="btn-group">
-                    <button class="btn btn-sm btn-outline" (click)="setFacilityEnergyIsSource(true)"
-                        [ngClass]="{'btn-primary-2': selectedFacility.energyIsSource == true}">Source Energy</button>
-                    <button class="btn btn-sm btn-outline" (click)="setFacilityEnergyIsSource(false)"
-                        [ngClass]="{'btn-primary-2': selectedFacility.energyIsSource == false}">Site Energy</button>
+                    <button class="btn btn-sm toggle-btn" (click)="setFacilityEnergyIsSource(true)"
+                        [ngClass]="{'active': selectedFacility.energyIsSource == true}">Source Energy</button>
+                    <button class="btn btn-sm toggle-btn" (click)="setFacilityEnergyIsSource(false)"
+                        [ngClass]="{'active': selectedFacility.energyIsSource == false}">Site Energy</button>
                 </div>
             </div>
 
             <div class="pl-1">
                 <div class="btn-group">
-                    <button class="btn btn-sm btn-outline" [ngClass]="{'btn-primary-2': selectedChart == 'splom'}"
+                    <button class="btn btn-sm toggle-btn" [ngClass]="{'active': selectedChart == 'splom'}"
                         (click)="setView('splom')">Data Correlation</button>
-                    <button class="btn btn-sm btn-outline" [ngClass]="{'btn-primary-2': selectedChart == 'heatmap'}"
+                    <button class="btn btn-sm toggle-btn" [ngClass]="{'active': selectedChart == 'heatmap'}"
                         (click)="setView('heatmap')">R<sup>2</sup> Variance</button>
-                    <button class="btn btn-sm btn-outline" [ngClass]="{'btn-primary-2': selectedChart == 'timeseries'}"
+                    <button class="btn btn-sm toggle-btn" [ngClass]="{'active': selectedChart == 'timeseries'}"
                         (click)="setView('timeseries')">Time Series</button>
                 </div>
 

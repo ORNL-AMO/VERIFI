@@ -1,10 +1,16 @@
-<div class="controls d-flex justify-content-between">
-    <app-analysis-summary-table-filter [tableContext]="'monthAccount'"></app-analysis-summary-table-filter>
+<div class="d-flex justify-content-between">
+    <div>
+        <button *ngIf="dataDisplay == 'table'" class="btn action-btn" [ngClass]="{'active' : showFilterDropdown}" (click)="toggleFilterMenu()">
+            <i class="fa fa-chevron-down" *ngIf="showFilterDropdown"></i>
+            <i class="fa fa-chevron-up" *ngIf="!showFilterDropdown"></i>
+            Choose Columns
+        </button>
+    </div>
 
     <div class="d-flex">
         <!--Items Per Page-->
         <app-table-items-dropdown *ngIf="dataDisplay == 'table'"></app-table-items-dropdown>
-        <div class="btn-group">
+        <div class="btn-group pl-2">
             <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'table'}"
                 (click)="setDataDisplay('table')">Table</button>
             <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'graph'}"
@@ -12,6 +18,7 @@
         </div>
     </div>
 </div>
+<app-analysis-summary-table-filter *ngIf="showFilterDropdown" [tableContext]="'monthAccount'"></app-analysis-summary-table-filter>
 <div class="w-100 x-scroll" *ngIf="!calculating">
     <app-monthly-analysis-summary-graph *ngIf="dataDisplay == 'graph'"
         [monthlyAnalysisSummaryData]="monthlyAccountAnalysisData" [analysisItem]="accountAnalysisItem"

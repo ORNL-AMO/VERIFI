@@ -5,21 +5,22 @@
         <div *ngIf="accountOverviewReportOptions.length === 0" class="text-center mt-5">
             <h5>No reports found for this account.</h5>
             <div class="meterData">
-                <button class="btn btn-primary-4 mr-2" (click)="openAddNewReportModal()"><i class="fa fa-plus"></i> Add
+                <button class="btn action-btn mr-2" (click)="openAddNewReportModal()"><i class="fa fa-plus"></i> Add
                     New
                     Report</button>
             </div>
         </div>
 
         <div *ngIf="accountOverviewReportOptions.length > 0">
-            <div class="controls mb-2">
-                <div class="meterData item-right">
-                    <button class="btn btn-primary-4 item-right m-0 ml-2" (click)="openAddNewReportModal()"><i
+            <div class="d-flex w-100 justify-content-end">
+                <app-table-items-dropdown></app-table-items-dropdown>
+
+                <div class="pl-2">
+                    <button class="btn action-btn" (click)="openAddNewReportModal()"><i
                             class="fa fa-plus"></i>
                         Add New Report</button>
                 </div>
 
-                <app-table-items-dropdown></app-table-items-dropdown>
             </div>
 
             <div class="table-responsive">
@@ -85,6 +86,7 @@
 </div>
 
 
+<div [ngClass]="{'windowOverlay': reportToDelete || showNewReportModal}"></div>
 <div class="popup" [class.open]="reportToDelete">
     <div class="popup-header" *ngIf="reportToDelete">Delete: {{reportToDelete.reportOptions.title}}
         <button class="item-right" (click)="cancelDelete()">x</button>
@@ -97,7 +99,6 @@
         <button class="btn btn-danger" (click)="confirmDelete()">Delete</button>
     </div>
 </div>
-
 
 <div class="popup report-type-menu" [class.open]="showNewReportModal">
     <div class="popup-header">Select New Report Type
@@ -122,6 +123,6 @@
     </div>
     <div class="saveCancel popup-footer text-right">
         <button class="btn btn-secondary" (click)="cancelNewReport()">Cancel</button>
-        <button class="btn btn-success" (click)="createNewReport()">Create New Report</button>
+        <button class="btn action-btn" (click)="createNewReport()">Create New Report</button>
     </div>
 </div>
