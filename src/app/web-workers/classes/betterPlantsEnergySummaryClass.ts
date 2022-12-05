@@ -134,8 +134,10 @@ export class BetterPlantsEnergySummaryClass {
                 return cMeter.meter.source == source && fuels.includes(cMeter.meter.fuel);
             });
         } else if (phase) {
+            let categorizedFuels: Array<string> = ['Distillate Fuel Oil', 'Diesel', 'Fuel Oil #1', 'Fuel Oil #2', 'Fuel Oil #2', 'Residual Fuel Oil', 'Fuel Oil #5', 'Fuel Oil #6 (low sulfur)', 'Fuel Oil #6 (high sulfur)',
+                'Coal (anthracite)', 'Coal (bituminous)', 'Coal (Lignite)', 'Coal (subbituminous)', 'Coke', 'Coke Over Gas', 'Wood', 'Blast Furnace Gas'];
             filteredMeters = calanderizedMeters.filter(cMeter => {
-                return cMeter.meter.source == source && cMeter.meter.phase == phase;
+                return cMeter.meter.source == source && cMeter.meter.phase == phase && !categorizedFuels.includes(cMeter.meter.fuel);
             });
         }
         return filteredMeters;
@@ -173,7 +175,7 @@ export class BetterPlantsEnergySummaryClass {
     }
 
 
-    getBetterPlantsEnergySummary(): BetterPlantsEnergySummary { 
+    getBetterPlantsEnergySummary(): BetterPlantsEnergySummary {
         return {
             numberOfFacilities: this.numberOfFacilities,
             electricityUse: this.electricityUse,
