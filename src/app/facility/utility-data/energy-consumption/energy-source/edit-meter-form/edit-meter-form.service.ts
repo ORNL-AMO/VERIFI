@@ -142,10 +142,8 @@ export class EditMeterFormService {
   checkShowSiteToSource(source: MeterSource, startingUnit: string, includeInEnergy: boolean): boolean {
     if (!includeInEnergy) {
       return false;
-    } else if (source == "Electricity" || source == "Natural Gas") {
+    } else if (source == "Electricity" || source == "Natural Gas" || source == 'Other Energy') {
       return true;
-    } else if (source != 'Waste Water' && source != 'Water' && source != 'Other Utility' && startingUnit) {
-      return (this.energyUnitsHelperService.isEnergyUnit(startingUnit) == false);
     } else {
       return false;
     }
