@@ -32,7 +32,7 @@
 
                 <div class="p-2 d-flex flex-column justify-content-center align-items-center">
                     <div class="p-0">
-                        <button class="mt-0 btn action-btn" (click)="generateModels()"
+                        <button class="mt-0 btn action-btn" (click)="generateModels(true)"
                             *ngIf="!group.models || group.models.length == 0">Generate
                             Models</button>
                     </div>
@@ -73,7 +73,7 @@
         <label class="bold">Regression Model</label>
         <div class="row sub-column mb-2 bold">
             <div class="col-4">
-                Production Variables
+                Analysis Variables
             </div>
             <div class="col-4">
                 Use For Analysis
