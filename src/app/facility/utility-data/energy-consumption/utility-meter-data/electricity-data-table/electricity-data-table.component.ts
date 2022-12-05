@@ -61,6 +61,7 @@ export class ElectricityDataTableComponent implements OnInit {
       this.emissionsFilters = electricityDataFilters.emissionsFilters;
       this.setColumnNumbers();
     });
+    console.log(this.selectedMeterData);
   }
 
   ngOnDestroy() {

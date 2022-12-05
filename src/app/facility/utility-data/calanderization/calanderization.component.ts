@@ -24,7 +24,6 @@ export class CalanderizationComponent implements OnInit {
   itemsPerPageSub: Subscription;
   calanderizedMeter: CalanderizedMeter;
   facilityMetersSub: Subscription;
-  facilityMeterDataSub: Subscription;
   facilityMeters: Array<IdbUtilityMeter>;
   orderDataField: string = 'date';
   orderByDirection: string = 'desc';
@@ -61,11 +60,6 @@ export class CalanderizationComponent implements OnInit {
       this.setCalanderizedMeterData();
     });
 
-
-    this.facilityMeterDataSub = this.utilityMeterDataDbService.accountMeterData.subscribe(() => {
-      this.setCalanderizedMeterData();
-    });
-
     this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
       this.itemsPerPage = val;
     });
@@ -73,7 +67,7 @@ export class CalanderizationComponent implements OnInit {
 
   ngOnDestroy() {
     this.facilityMetersSub.unsubscribe();
-    this.facilityMeterDataSub.unsubscribe();
+    // this.facilityMeterDataSub.unsubscribe();
     this.calanderizedDataFiltersSub.unsubscribe();
     this.itemsPerPageSub.unsubscribe();
     this.calanderizationService.calanderizedDataFilters.next({
