@@ -48,7 +48,7 @@
 
             <th *ngIf="analysisTableColumns.baselineAdjustment" (click)="setOrderDataField('baselineAdjustment')"
                 [ngClass]="{'active': orderDataField == 'baselineAdjustment'}">
-                Baseline<br> Adjustment
+                Total<br>Baseline<br> Adjustment
             </th>
             <th *ngFor="let predictorVariable of predictorColumns" (click)="setOrderDataField(predictorVariable.name)"
                 [ngClass]="{'active': orderDataField == predictorVariable.name}">
@@ -69,6 +69,10 @@
                 [ngClass]="{'active': orderDataField == 'totalSavingsPercentImprovement'}">
                 Total Savings <br> % Improvement
             </th>
+            <th *ngIf="analysisTableColumns.newSavings" (click)="setOrderDataField('newSavings')"
+                [ngClass]="{'active': orderDataField == 'newSavings'}">
+                New <br> Savings
+            </th>
             <th *ngIf="analysisTableColumns.annualSavingsPercentImprovement"
                 (click)="setOrderDataField('annualSavingsPercentImprovement')"
                 [ngClass]="{'active': orderDataField == 'annualSavingsPercentImprovement'}">
@@ -76,11 +80,7 @@
             </th>
             <th *ngIf="analysisTableColumns.cummulativeSavings" (click)="setOrderDataField('cummulativeSavings')"
                 [ngClass]="{'active': orderDataField == 'cummulativeSavings'}">
-                Cummulative <br> Savings
-            </th>
-            <th *ngIf="analysisTableColumns.newSavings" (click)="setOrderDataField('newSavings')"
-                [ngClass]="{'active': orderDataField == 'newSavings'}">
-                New <br> Savings
+                Cumulative <br> Savings
             </th>
         </tr>
     </thead>
@@ -185,6 +185,14 @@
                     &mdash;
                 </span>
             </td>
+            <td *ngIf="analysisTableColumns.newSavings">
+                <span *ngIf="summary.newSavings" [ngClass]="{'red': summary.newSavings < 0}">
+                    {{summary.newSavings | customNumber}}
+                </span>
+                <span *ngIf="!summary.newSavings">
+                    &mdash;
+                </span>
+            </td>
             <td *ngIf="analysisTableColumns.annualSavingsPercentImprovement">
                 <span *ngIf="summary.annualSavingsPercentImprovement"
                     [ngClass]="{'red': summary.annualSavingsPercentImprovement < 0}">
@@ -199,14 +207,6 @@
                     {{summary.cummulativeSavings | customNumber}}
                 </span>
                 <span *ngIf="!summary.cummulativeSavings">
-                    &mdash;
-                </span>
-            </td>
-            <td *ngIf="analysisTableColumns.newSavings">
-                <span *ngIf="summary.newSavings" [ngClass]="{'red': summary.newSavings < 0}">
-                    {{summary.newSavings | customNumber}}
-                </span>
-                <span *ngIf="!summary.newSavings">
                     &mdash;
                 </span>
             </td>
