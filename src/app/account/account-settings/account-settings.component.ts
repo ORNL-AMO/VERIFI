@@ -105,6 +105,7 @@ export class AccountSettingsComponent implements OnInit {
         facilityId: newFacility.guid,
         analysisItemId: undefined
       });
+      await this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[index]).toPromise();
     }
 
     await this.dbChangesService.selectAccount(this.selectedAccount);

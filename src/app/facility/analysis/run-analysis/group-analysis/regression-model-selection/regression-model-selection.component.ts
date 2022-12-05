@@ -18,8 +18,8 @@ export class RegressionModelSelectionComponent implements OnInit {
   selectedGroup: AnalysisGroup;
   showInvalid: boolean;
   showInvalidSub: Subscription;
-  orderDataField: string = 'modelPValue';
-  orderByDirection: 'asc' | 'desc' = 'asc';
+  orderDataField: string = 'adjust_R2';
+  orderByDirection: 'asc' | 'desc' = 'desc';
   selectedGroupSub: Subscription;
   selectedFacility: IdbFacility;
   selectedInspectModel: JStatRegressionModel;

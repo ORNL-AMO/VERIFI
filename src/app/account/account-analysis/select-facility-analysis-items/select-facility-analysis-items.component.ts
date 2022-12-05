@@ -111,6 +111,6 @@ export class SelectFacilityAnalysisItemsComponent implements OnInit {
         cssClass: data.cssClass,
         isInvalid: data.isInvalid
       }
-    })
+    });
   }
 }

@@ -5,7 +5,13 @@
         </div>
         <hr>
     </ng-container>
-
+    
+    <ng-container *ngIf="selectedGroup.groupErrors?.missingRegressionModelSelection">
+        <div class="alert alert-warning w-100 text-center">
+            Model selection required.
+        </div>
+        <hr>
+    </ng-container>
     <app-regression-model-menu></app-regression-model-menu>
 
     <hr>
