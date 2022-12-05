@@ -3,14 +3,13 @@ import { Router } from '@angular/router';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { OverviewReportOptionsDbService } from 'src/app/indexedDB/overview-report-options-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbAccount, IdbAccountAnalysisItem, IdbOverviewReportOptions, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbAccount, IdbAccountAnalysisItem, IdbOverviewReportOptions } from 'src/app/models/idb';
 import { ReportOptions } from 'src/app/models/overview-report';
 import { OverviewReportService } from '../overview-report.service';
 import * as _ from 'lodash';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { getFiscalYear } from 'src/app/shared/shared-analysis/calculations/getFiscalYear';
+import { AnalysisCalculationsHelperService } from 'src/app/shared/shared-analysis/calculations/analysis-calculations-helper.service';
 
 @Component({
   selector: 'app-better-plants-report-menu',
@@ -34,9 +33,9 @@ export class BetterPlantsReportMenuComponent implements OnInit {
     private overviewReportOptionsDbService: OverviewReportOptionsDbService,
     private accountDbService: AccountdbService,
     private toastNotificationsService: ToastNotificationsService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
     private accountAnalysisDbService: AccountAnalysisDbService,
-    private dbChangesService: DbChangesService) { }
+    private dbChangesService: DbChangesService,
+    private analysisCalculationsHelperService: AnalysisCalculationsHelperService) { }
 
   ngOnInit(): void {
     this.account = this.accountDbService.selectedAccount.getValue();
@@ -109,18 +108,8 @@ export class BetterPlantsReportMenuComponent implements OnInit {
 
 
   setYearOptions() {
-    let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
-    let orderedMeterData: Array<IdbUtilityMeterData> = _.orderBy(accountMeterData, (data) => { return new Date(data.readDate) });
-    let firstBill: IdbUtilityMeterData = orderedMeterData[0];
-    let lastBill: IdbUtilityMeterData = orderedMeterData[orderedMeterData.length - 1];
-    let yearStart: number = getFiscalYear(new Date(firstBill.readDate), this.account);
-    let yearEnd: number = getFiscalYear(new Date(lastBill.readDate), this.account);
-    this.targetYears = new Array();
-    this.baselineYears = new Array();
-    for (let i = yearStart; i <= yearEnd; i++) {
-      this.targetYears.push(i);
-      this.baselineYears.push(i);
-    }
+    this.targetYears = this.analysisCalculationsHelperService.getYearOptions(true);
+    this.baselineYears = this.analysisCalculationsHelperService.getYearOptions(true);
   }
 
   setAnalysisOptions() {
