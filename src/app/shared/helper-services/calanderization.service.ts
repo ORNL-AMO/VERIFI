@@ -320,7 +320,7 @@ export class CalanderizationService {
       let startDate: Date = new Date(orderedMeterData[0].readDate);
       let endDate: Date = new Date(orderedMeterData[orderedMeterData.length - 1].readDate);
       endDate.setUTCMonth(endDate.getUTCMonth() + 1);
-      while (startDate < endDate) {
+      while (startDate.getUTCMonth() != endDate.getUTCMonth() || startDate.getUTCFullYear() != endDate.getUTCFullYear()) {
         let month: number = startDate.getUTCMonth();
         let year: number = startDate.getUTCFullYear();
         let currentMonthsReadings: Array<IdbUtilityMeterData> = this.getCurrentMonthsReadings(month, year, orderedMeterData);
