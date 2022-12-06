@@ -19,6 +19,7 @@ Popups & Windows
     top: 0;
     left: 0;
     opacity: 0.8;
+    z-index: 9990;
   }
   .windowContent {
     position: fixed;

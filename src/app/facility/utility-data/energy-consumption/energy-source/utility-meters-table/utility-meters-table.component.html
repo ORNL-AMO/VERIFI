@@ -2,9 +2,13 @@
     <h5>No utility meters found for this facility.</h5>
     <p>Please <i class="fa fa-plus"></i> Add New Meter or <i class="fa fa-upload"></i> Import multiple meters from
         excel.</p>
-    <div class="meterData">
-        <button class="btn action-btn" (click)="addMeter()"><i class="fa fa-plus"></i> Add New Meter</button>
-        <button class="btn action-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
+    <div class="d-flex w-100 justify-content-center">
+        <div class="pr-1">
+            <button class="btn action-btn" (click)="addMeter()"><i class="fa fa-plus"></i> Add New Meter</button>
+        </div>
+        <div class="pl-1">
+            <button class="btn nav-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
+        </div>
     </div>
 </div>
 

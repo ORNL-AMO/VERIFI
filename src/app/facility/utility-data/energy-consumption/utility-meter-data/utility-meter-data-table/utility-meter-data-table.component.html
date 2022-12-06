@@ -2,9 +2,13 @@
     <h5>No {{selectedMeter.name}} bills found for this facility.</h5>
     <p>Please <i class="fa fa-plus"></i> Add New Bill or <i class="fa fa-upload"></i> Import multiple bills from excel.
     </p>
-    <div class="meterData">
-        <button class="btn action-btn" (click)="meterDataAdd()"><i class="fa fa-plus"></i> Add New Bill</button>
-        <button class="btn action-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
+    <div class="d-flex w-100 justify-content-center">
+        <div class="pr-1">
+            <button class="btn action-btn" (click)="meterDataAdd()"><i class="fa fa-plus"></i> Add New Bill</button>
+        </div>
+        <div class="pl-1">
+            <button class="btn nav-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
+        </div>
     </div>
 </div>
 <div *ngIf="meterData.length != 0">
