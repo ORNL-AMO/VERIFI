@@ -1,5 +1,5 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { FormGroup, NumberValueAccessor } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
@@ -103,14 +103,17 @@ export class UtilityMetersTableComponent implements OnInit {
   }
 
   async deleteMeter() {
+    let deleteMeterId: number = this.meterToDelete.id;
+    let deleteMeterGuid: string = this.meterToDelete.guid;
+    this.meterToDelete = undefined;
     this.loadingService.setLoadingMessage('Deleteing Meters and Data...')
     this.loadingService.setLoadingStatus(true);
     //delete meter
-    await this.utilityMeterdbService.deleteIndexWithObservable(this.meterToDelete.id).toPromise();
+    await this.utilityMeterdbService.deleteIndexWithObservable(deleteMeterId).toPromise();
 
 
     //delete meter data
-    let meterData: Array<IdbUtilityMeterData> = await this.utilityMeterDatadbService.getAllByIndexRange('meterId', this.meterToDelete.guid).toPromise();
+    let meterData: Array<IdbUtilityMeterData> = await this.utilityMeterDatadbService.getAllByIndexRange('meterId', deleteMeterGuid).toPromise();
     for (let index = 0; index < meterData.length; index++) {
       await this.utilityMeterDatadbService.deleteWithObservable(meterData[index].id).toPromise();
     }
