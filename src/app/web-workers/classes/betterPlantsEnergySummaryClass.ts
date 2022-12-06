@@ -21,6 +21,8 @@ export class BetterPlantsEnergySummaryClass {
     otherSolidUse: number;
     otherLiquidFuels: Array<string>;
     otherLiquidUse: number;
+    otherEnergyUse: number;
+    otherEnergyTypes: Array<string>;
     totalEnergyUse: number;
     constructor(calanderizedMeters: Array<CalanderizedMeter>, year: number) {
         this.setElectricityUse(calanderizedMeters, year);
@@ -34,6 +36,7 @@ export class BetterPlantsEnergySummaryClass {
         this.setOtherGasFuelUse(calanderizedMeters, year);
         this.setOtherLiquidFuelUse(calanderizedMeters, year);
         this.setOtherSolidFuelUse(calanderizedMeters, year);
+        this.setTotalOtherEnergy(calanderizedMeters, year);
         this.setTotalEnergyUse();
         this.setNumberOfFacilities(calanderizedMeters, year);
     }
@@ -113,6 +116,13 @@ export class BetterPlantsEnergySummaryClass {
         this.otherSolidUse = _.sumBy(yearData, 'energyUse');
     }
 
+    setTotalOtherEnergy(calanderizedMeters: Array<CalanderizedMeter>, year: number){
+        let filteredMeters: Array<CalanderizedMeter> = this.getFilteredMeters(calanderizedMeters, 'Other Energy', undefined, undefined);
+        this.otherEnergyTypes = filteredMeters.map(fMeter => { return fMeter.meter.fuel });
+        let yearData: Array<MonthlyData> = this.getYearData(filteredMeters, year);
+        this.otherEnergyUse = _.sumBy(yearData, 'energyUse');
+    }
+
     getYearData(filteredMeters: Array<CalanderizedMeter>, year: number): Array<MonthlyData> {
         let meterMonthlyData: Array<MonthlyData> = filteredMeters.flatMap(sourceMeter => {
             return sourceMeter.monthlyData;
@@ -155,7 +165,8 @@ export class BetterPlantsEnergySummaryClass {
             this.woodWasteEnergyUse +
             this.otherGasUse +
             this.otherSolidUse +
-            this.otherLiquidUse
+            this.otherLiquidUse + 
+            this.otherEnergyUse
         );
     }
 
@@ -193,6 +204,8 @@ export class BetterPlantsEnergySummaryClass {
             otherLiquidFuels: this.otherLiquidFuels,
             otherLiquidUse: this.otherLiquidUse,
             totalEnergyUse: this.totalEnergyUse,
+            otherEnergyUse: this.otherEnergyUse,
+            otherEnergyTypes: this.otherEnergyTypes
         }
     }
 }

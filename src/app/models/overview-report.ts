@@ -111,5 +111,7 @@ export interface BetterPlantsEnergySummary {
   otherSolidUse: number,
   otherLiquidFuels: Array<string>,
   otherLiquidUse: number,
-  totalEnergyUse: number
+  totalEnergyUse: number,
+  otherEnergyUse: number,
+  otherEnergyTypes: Array<string>
 }

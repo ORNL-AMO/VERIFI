@@ -3,12 +3,12 @@ Popups & Windows
 ======================================================== */
 .window {
     position: relative;
-    z-index: 1000;
+    z-index: 9999;
     display: none;
   }
   .window.open {
-    position: relative;
-    z-index: 1000;
+    /* position: relative; */
+    /* z-index: 1000; */
     display: block;
   }
   .windowOverlay {

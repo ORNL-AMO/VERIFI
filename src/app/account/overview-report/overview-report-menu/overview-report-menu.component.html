@@ -240,8 +240,8 @@
 
 
 
+<div class="windowOverlay" *ngIf="displayEditTemplates"></div>
 <div class="window" [class.open]="displayEditTemplates">
-    <div class="windowOverlay"></div>
     <div class="windowContent windowContentMed">
         <app-manage-report-templates (emitClose)="closeEditTemplates()"></app-manage-report-templates>
     </div>

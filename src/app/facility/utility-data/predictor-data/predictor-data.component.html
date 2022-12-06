@@ -94,7 +94,6 @@
 </div>
 
 <div class="window" [class.open]="predictorEntryToEdit">
-    <div class="windowOverlay"></div>
     <div class="windowContent">
         <app-edit-predictor-entry-row *ngIf="predictorEntryToEdit" (emitClose)="cancelEditPredictorEntry()"
             [predictorEntry]="predictorEntryToEdit" [addOrEdit]="addOrEdit">
@@ -104,14 +103,13 @@
 
 
 <div class="window" [class.open]="showEditPredictors">
-    <div class="windowOverlay"></div>
     <div class="windowContent windowContentLg">
         <app-edit-predictors *ngIf="showEditPredictors" (emitClose)="closeEditPredictors()"></app-edit-predictors>
     </div>
 </div>
 
 
-<div [ngClass]="{'windowOverlay': predictorEntryToDelete || showBulkDelete}"></div>
+<div [ngClass]="{'windowOverlay': predictorEntryToDelete || showBulkDelete || showEditPredictors || predictorEntryToEdit}"></div>
 <div class="popup" [class.open]="predictorEntryToDelete">
     <div class="popup-header">Delete Predictor
         <button class="item-right" (click)="cancelDeletePredictorEntry()">x</button>
