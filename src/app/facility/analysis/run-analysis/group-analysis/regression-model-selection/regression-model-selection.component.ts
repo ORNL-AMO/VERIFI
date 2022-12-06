@@ -18,10 +18,11 @@ export class RegressionModelSelectionComponent implements OnInit {
   selectedGroup: AnalysisGroup;
   showInvalid: boolean;
   showInvalidSub: Subscription;
-  orderDataField: string = 'modelPValue';
-  orderByDirection: 'asc' | 'desc' = 'asc';
+  orderDataField: string = 'adjust_R2';
+  orderByDirection: 'asc' | 'desc' = 'desc';
   selectedGroupSub: Subscription;
   selectedFacility: IdbFacility;
+  selectedInspectModel: JStatRegressionModel;
   constructor(private analysisService: AnalysisService,
     private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService, private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
@@ -80,5 +81,19 @@ export class RegressionModelSelectionComponent implements OnInit {
     } else {
       this.orderDataField = str;
     }
+  }
+
+  inspectModel(model: JStatRegressionModel){
+    this.selectedInspectModel = model;
+  }
+
+  cancelInspectModel(){
+    this.selectedInspectModel = undefined;
+  }
+
+  async selectFromInspection(){
+    this.selectedGroup.selectedModelId = this.selectedInspectModel.modelId;
+    await this.selectModel();
+    this.cancelInspectModel();
   }
 }

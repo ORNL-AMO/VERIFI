@@ -1,11 +1,7 @@
 <div class="filter">
-    <button class="btn" [ngClass]="{'btn-solid' : !showFilterDropdown, 'btn-outline' : showFilterDropdown}"
-        (click)="toggleFilterMenu()">
-        Choose Columns
-    </button>
     <!--ELECTRICITY FILTERS-->
-    <div class="filter-dropdown" *ngIf="showFilterDropdown">
-        <p class="small">Choose Table Columns</p>
+    <div class="filter-dropdown">
+        <p>Choose Table Columns</p>
         <div class="row" *ngIf="source == 'Electricity'">
             <div class="col" *ngIf="filterType == 'table'">
                 <label>

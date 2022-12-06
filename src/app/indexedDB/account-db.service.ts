@@ -110,7 +110,7 @@ export class AccountdbService {
                 energyReductionPercent: 25,
                 energyReductionBaselineYear: baselineYear,
                 energyReductionTargetYear: targetYear,
-                energyIsAbsolute: true,
+                energyIsAbsolute: false,
                 greenhouseReductionGoal: false,
                 greenhouseReductionPercent: 0,
                 greenhouseReductionBaselineYear: baselineYear,
@@ -129,7 +129,7 @@ export class AccountdbService {
                 waterReductionPercent: 0,
                 waterReductionBaselineYear: baselineYear,
                 waterReductionTargetYear: targetYear,
-                waterIsAbsolute: true
+                waterIsAbsolute: false
             },
             fiscalYear: 'calendarYear',
             fiscalYearMonth: 0,

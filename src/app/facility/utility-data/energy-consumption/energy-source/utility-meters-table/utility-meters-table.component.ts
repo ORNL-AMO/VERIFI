@@ -1,5 +1,5 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { FormGroup, NumberValueAccessor } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
@@ -12,6 +12,7 @@ import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db
 import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
+import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { EditMeterFormService } from '../edit-meter-form/edit-meter-form.service';
 
 @Component({
@@ -23,7 +24,8 @@ export class UtilityMetersTableComponent implements OnInit {
   @ViewChild('meterTable', { static: false }) meterTable: ElementRef;
 
   currentPageNumber: number = 1;
-  itemsPerPage: number = 10;
+  itemsPerPage: number;
+  itemsPerPageSub: Subscription;
   selectedFacilitySub: Subscription;
   selectedFacility: IdbFacility;
   meterList: Array<IdbUtilityMeter>;
@@ -42,7 +44,8 @@ export class UtilityMetersTableComponent implements OnInit {
     private toastNotificationsService: ToastNotificationsService,
     private editMeterFormService: EditMeterFormService,
     private dbChangesService: DbChangesService,
-    private accountDbService: AccountdbService) { }
+    private accountDbService: AccountdbService,
+    private sharedDataService: SharedDataService) { }
 
   ngOnInit(): void {
     this.selectedFacilitySub = this.facilitydbService.selectedFacility.subscribe(facility => {
@@ -52,11 +55,16 @@ export class UtilityMetersTableComponent implements OnInit {
     this.meterListSub = this.utilityMeterdbService.facilityMeters.subscribe(meters => {
       this.meterList = this.checkMeterUnits(meters);
     });
+
+    this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
+      this.itemsPerPage = val;
+    })
   }
 
   ngOnDestroy() {
     this.meterListSub.unsubscribe();
     this.selectedFacilitySub.unsubscribe();
+    this.itemsPerPageSub.unsubscribe();
   }
 
   uploadData() {
@@ -85,22 +93,27 @@ export class UtilityMetersTableComponent implements OnInit {
   }
 
   selectDeleteMeter(meter: IdbUtilityMeter) {
+    this.sharedDataService.modalOpen.next(true);
     this.meterToDelete = meter;
   }
 
   cancelDelete() {
+    this.sharedDataService.modalOpen.next(false);
     this.meterToDelete = undefined;
   }
 
   async deleteMeter() {
+    let deleteMeterId: number = this.meterToDelete.id;
+    let deleteMeterGuid: string = this.meterToDelete.guid;
+    this.meterToDelete = undefined;
     this.loadingService.setLoadingMessage('Deleteing Meters and Data...')
     this.loadingService.setLoadingStatus(true);
     //delete meter
-    await this.utilityMeterdbService.deleteIndexWithObservable(this.meterToDelete.id).toPromise();
+    await this.utilityMeterdbService.deleteIndexWithObservable(deleteMeterId).toPromise();
 
 
     //delete meter data
-    let meterData: Array<IdbUtilityMeterData> = await this.utilityMeterDatadbService.getAllByIndexRange('meterId', this.meterToDelete.guid).toPromise();
+    let meterData: Array<IdbUtilityMeterData> = await this.utilityMeterDatadbService.getAllByIndexRange('meterId', deleteMeterGuid).toPromise();
     for (let index = 0; index < meterData.length; index++) {
       await this.utilityMeterDatadbService.deleteWithObservable(meterData[index].id).toPromise();
     }

@@ -44,7 +44,8 @@ export class UploadDataService {
   getFileReference(file: File, workBook: XLSX.WorkBook): FileReference {
     let isTemplate: boolean = this.checkSheetNamesForTemplate(workBook.SheetNames);
     if (!isTemplate) {
-      let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+      let accountFacilities: Array<IdbFacility> = this.facilityDbService.getAccountFacilitiesCopy();
+
       return {
         name: file.name,
         file: file,
@@ -113,7 +114,7 @@ export class UploadDataService {
     let facilitiesData = XLSX.utils.sheet_to_json(workbook.Sheets['Facilities']);
     let importFacilities: Array<IdbFacility> = new Array();
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let accountFacilities: Array<IdbFacility> = this.facilityDbService.getAccountFacilitiesCopy();
     facilitiesData.forEach(facilityDataRow => {
       let facilityName: string = facilityDataRow['Facility Name'];
       if (facilityName) {
@@ -144,7 +145,7 @@ export class UploadDataService {
       }
     })
     let metersData = XLSX.utils.sheet_to_json(workbook.Sheets['Meters-Utilities']);
-    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getAccountMetersCopy();
     let importMeters: Array<IdbUtilityMeter> = new Array();
     let newGroups: Array<IdbUtilityMeterGroup> = new Array();
     metersData.forEach(meterData => {
@@ -253,7 +254,7 @@ export class UploadDataService {
     let predictorsData = XLSX.utils.sheet_to_json(workbook.Sheets['Predictors']);
     // debugger
     let predictorEntries: Array<IdbPredictorEntry> = new Array();
-    let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
+    let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.getAccountPerdictorsCopy();
     importFacilities.forEach(facility => {
       let facilityPredictorData = predictorsData.filter(data => { return data['Facility Name'] == facility.name });
       let facilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(entry => { return entry.facilityId == facility.guid });
@@ -312,7 +313,7 @@ export class UploadDataService {
 
 
   getMeterGroup(groupName: string, facilityId: string, newGroups: Array<IdbUtilityMeterGroup>): { group: IdbUtilityMeterGroup, newGroups: Array<IdbUtilityMeterGroup> } {
-    let accountGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
+    let accountGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.getAccountMeterGroupsCopy();
     let facilityGroups: Array<IdbUtilityMeterGroup> = accountGroups.filter(accountGroup => { return accountGroup.facilityId == facilityId });
     let dbGroup: IdbUtilityMeterGroup = facilityGroups.find(group => { return group.name == groupName || group.guid == groupName });
     if (dbGroup) {
@@ -378,7 +379,7 @@ export class UploadDataService {
     //electricity readings
     let importMeterData: Array<IdbUtilityMeterData> = new Array();
     let electricityData = XLSX.utils.sheet_to_json(workbook.Sheets['Electricity']);
-    let utilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+    let utilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getAccountMeterDataCopy();
     electricityData.forEach(dataPoint => {
       let meterNumber: string = dataPoint['Meter Number'];
       let readDate: Date = new Date(dataPoint['Read Date']);
@@ -581,7 +582,7 @@ export class UploadDataService {
 
   parseMetersFromGroups(fileReference: FileReference): Array<IdbUtilityMeter> {
     let meters: Array<IdbUtilityMeter> = new Array();
-    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getAccountMetersCopy();
     fileReference.meterFacilityGroups.forEach(group => {
       if (group.facilityName != 'Unmapped Meters') {
         let facility: IdbFacility = fileReference.importFacilities.find(facility => { return group.facilityId == facility.guid });
@@ -626,7 +627,7 @@ export class UploadDataService {
       newMeter.startingUnit = this.energyUnitsHelperService.parseStartingUnit(groupItem.value);
       if (newMeter.source == 'Electricity') {
         newMeter.scope = 3
-        if (newMeter.startingUnit == undefined) {
+        if (newMeter.startingUnit == undefined || this.energyUnitsHelperService.isEnergyUnit(newMeter.startingUnit) == false) {
           newMeter.startingUnit = 'kWh';
           newMeter.energyUnit = 'kWh';
         }
@@ -669,7 +670,7 @@ export class UploadDataService {
     let dateColumnGroup: ColumnGroup = fileReference.columnGroups.find(group => { return group.groupLabel == 'Date' });
     let dateColumnVal: string = dateColumnGroup.groupItems[0].value;
 
-    let accountUtilityData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+    let accountUtilityData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getAccountMeterDataCopy();
 
     let utilityData: Array<IdbUtilityMeterData> = new Array();
     fileReference.meters.forEach(meter => {
@@ -715,7 +716,7 @@ export class UploadDataService {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
 
     let predictorData: Array<IdbPredictorEntry> = new Array();
-    let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
+    let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.getAccountPerdictorsCopy();
     fileReference.predictorFacilityGroups.forEach(group => {
       if (group.facilityName != 'Unmapped Predictors' && group.groupItems.length != 0) {
         let facilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(entry => {

@@ -94,6 +94,7 @@ export class SettingsFormsService {
     account.energyUnit = form.controls.energyUnit.value;
     account.massUnit = form.controls.massUnit.value;
     account.volumeLiquidUnit = form.controls.volumeLiquidUnit.value;
+    account.volumeGasUnit = form.controls.volumeGasUnit.value;
     account.energyIsSource = form.controls.energyIsSource.value;
     account.eGridSubregion = form.controls.eGridSubregion.value;
     account.electricityUnit = form.controls.electricityUnit.value;
@@ -105,6 +106,7 @@ export class SettingsFormsService {
     facility.energyUnit = form.controls.energyUnit.value;
     facility.massUnit = form.controls.massUnit.value;
     facility.volumeLiquidUnit = form.controls.volumeLiquidUnit.value;
+    facility.volumeGasUnit = form.controls.volumeGasUnit.value;
     facility.energyIsSource = form.controls.energyIsSource.value;
     facility.eGridSubregion = form.controls.eGridSubregion.value;
     facility.electricityUnit = form.controls.electricityUnit.value;

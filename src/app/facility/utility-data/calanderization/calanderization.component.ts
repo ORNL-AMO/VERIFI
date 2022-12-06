@@ -10,6 +10,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { UtilityColors } from 'src/app/shared/utilityColors';
+import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 
 @Component({
   selector: 'app-calanderization',
@@ -19,10 +20,10 @@ import { UtilityColors } from 'src/app/shared/utilityColors';
 export class CalanderizationComponent implements OnInit {
 
 
-  itemsPerPage = 12;
+  itemsPerPage: number;
+  itemsPerPageSub: Subscription;
   calanderizedMeter: CalanderizedMeter;
   facilityMetersSub: Subscription;
-  facilityMeterDataSub: Subscription;
   facilityMeters: Array<IdbUtilityMeter>;
   orderDataField: string = 'date';
   orderByDirection: string = 'desc';
@@ -38,9 +39,11 @@ export class CalanderizationComponent implements OnInit {
   selectedMeter: IdbUtilityMeter;
   selectedFacility: IdbFacility;
   displayDataApplicationModal: boolean = false;
+  showFilterDropdown: boolean = false;
   constructor(private calanderizationService: CalanderizationService, private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService, private facilityDbService: FacilitydbService,
-    private dbChangesService: DbChangesService, private accountDbService: AccountdbService) { }
+    private dbChangesService: DbChangesService, private accountDbService: AccountdbService,
+    private sharedDataService: SharedDataService) { }
 
   ngOnInit(): void {
     this.displayGraphCost = this.calanderizationService.displayGraphCost;
@@ -58,17 +61,16 @@ export class CalanderizationComponent implements OnInit {
       this.setCalanderizedMeterData();
     });
 
-
-    this.facilityMeterDataSub = this.utilityMeterDataDbService.accountMeterData.subscribe(() => {
-      this.setCalanderizedMeterData();
+    this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
+      this.itemsPerPage = val;
     });
-
   }
 
   ngOnDestroy() {
     this.facilityMetersSub.unsubscribe();
-    this.facilityMeterDataSub.unsubscribe();
+    // this.facilityMeterDataSub.unsubscribe();
     this.calanderizedDataFiltersSub.unsubscribe();
+    this.itemsPerPageSub.unsubscribe();
     this.calanderizationService.calanderizedDataFilters.next({
       selectedSources: [],
       showAllSources: true,
@@ -178,6 +180,7 @@ export class CalanderizationComponent implements OnInit {
   }
 
   setDataDisplay(str: "table" | "graph") {
+    this.showFilterDropdown = false;
     this.dataDisplay = str;
   }
 
@@ -198,11 +201,14 @@ export class CalanderizationComponent implements OnInit {
   }
 
   showDataApplicationModal() {
+    this.sharedDataService.modalOpen.next(true);
+    this.showFilterDropdown = false;
     this.dataApplicationMeter = JSON.parse(JSON.stringify(this.selectedMeter));
     this.displayDataApplicationModal = true;
   }
 
   cancelSetDataApplication() {
+    this.sharedDataService.modalOpen.next(false);
     this.displayDataApplicationModal = false;
     this.dataApplicationMeter = undefined;
   }
@@ -222,6 +228,7 @@ export class CalanderizationComponent implements OnInit {
   }
 
   async setFacilityEnergyIsSource(energyIsSource: boolean) {
+    this.showFilterDropdown = false;
     if (this.selectedFacility.energyIsSource != energyIsSource) {
       this.selectedFacility.energyIsSource = energyIsSource;
       await this.dbChangesService.updateFacilities(this.selectedFacility);
@@ -230,12 +237,17 @@ export class CalanderizationComponent implements OnInit {
   }
 
   selectMeter(meter: IdbUtilityMeter) {
+    this.showFilterDropdown = false;
     this.selectedMeter = meter;
     this.setCalanderizedMeterData();
   }
 
-  
+
   getColor(): string {
     return UtilityColors[this.selectedMeter.source].color
+  }
+
+  toggleFilterMenu() {
+    this.showFilterDropdown = !this.showFilterDropdown;
   }
 }

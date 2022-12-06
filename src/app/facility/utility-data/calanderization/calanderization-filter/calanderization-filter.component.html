@@ -1,11 +1,10 @@
-<div class="filter" [ngClass]="{'filter-open': showFilterDropdown}">
-    <button class="btn" [ngClass]="{'btn-solid' : !showFilterDropdown, 'btn-outline' : showFilterDropdown}"
-        (click)="toggleFilterMenu()">Filter</button>
-    <div class="filter-dropdown" *ngIf="showFilterDropdown">
+<div class="filter">
+
+    <div class="filter-dropdown">
         <!-- <p class="small">Filter Monthly Meter Data</p> -->
         <div class="d-flex">
-            <div class="p-2">
-                <!--sources-->
+            <!-- <div class="p-2">
+                <!--sources--
                 <label>Sources</label>
                 <label>
                     <input type="checkbox" name="showAllSources" [(ngModel)]="calanderizedDataFilters.showAllSources"
@@ -15,7 +14,7 @@
                     <input type="checkbox" name={{sourceOption.source}} [(ngModel)]="sourceOption.selected"
                         (change)="save()">{{sourceOption.source}}
                 </label>
-            </div>
+            </div> -->
 
 
             <!--date range-->

@@ -2,4 +2,4 @@
     <img class="loading" src="assets/images/Ripple-2s-84px-fff.gif">
     <div class="loading_message" [hidden]="!loading">{{loadingMessage}}</div>
 </div>
-<div id="overlay" [class.open]="loading"></div>
+<div [ngClass]="{'windowOverlay': loading}"></div>

@@ -9,7 +9,7 @@
 
         <ul class="navbar-nav ml-auto" *ngIf="dataInitialized">
             <li class="nav-item dropdown">
-                <button *ngIf="activeAccount" class="btn btn-outline nav-link dropdown-toggle"
+                <button *ngIf="activeAccount" class="btn action-btn dropdown-toggle"
                     (click)="toggleDropdown()"><span class="fa fa-building"></span>
                     {{activeAccount.name}}
                 </button>
@@ -17,7 +17,7 @@
                     (click)="toggleDropdown()">Account Required
                 </div>
                 <div class="dropdown-menu" [ngClass]="{'show':showDropdown}">
-                    <a *ngFor="let account of accountList" [class.active]="activeAccount?.id === account.id"
+                    <a *ngFor="let account of accountList| orderBy:'name':'asc'" [class.active]="activeAccount?.id === account.id"
                         class="dropdown-item" (click)="switchAccount(account)"> {{account.name}}</a>
                     <div class="dropdown-divider"></div>
                     <a class="dropdown-item" (click)="addNewAccount()"><i class="fa fa-plus"></i> Add New
@@ -27,7 +27,7 @@
             </li>
         </ul>
         <div class="pl-2" *ngIf="dataInitialized && activeAccount">
-            <button class="btn btn-dark backup-account" (click)="backupAccount()">Backup Account
+            <button class="btn action-btn" (click)="backupAccount()">Backup Account
             </button>
         </div>
         <div class="pl-2" *ngIf="dataInitialized && activeAccount">Last Backup: (<span

@@ -1,30 +1,26 @@
-<div class="controls d-flex justify-content-between">
-
-    <app-analysis-summary-table-filter [tableContext]="'monthGroup'" [group]="group"></app-analysis-summary-table-filter>
-
+<div class="d-flex justify-content-between">
+    <div>
+        <button *ngIf="dataDisplay == 'table'" class="btn action-btn" [ngClass]="{'active' : showFilterDropdown}" (click)="toggleFilterMenu()">
+            <i class="fa fa-chevron-down" *ngIf="showFilterDropdown"></i>
+            <i class="fa fa-chevron-up" *ngIf="!showFilterDropdown"></i>
+            Choose Columns
+        </button>
+    </div>
 
     <!--Items Per Page-->
     <div class="d-flex">
-        <div class="items-per-page" *ngIf="dataDisplay == 'table'">
-            <span>Show </span>
-            <select [(ngModel)]="itemsPerPage">
-                <option [ngValue]=6>6</option>
-                <option [ngValue]=12>12</option>
-                <option [ngValue]=24>24</option>
-                <option [ngValue]=36>36</option>
-                <option [ngValue]=48>48</option>
-                <option [ngValue]=60>60</option>
-                <option [ngValue]=999999999999>All</option>
-            </select>
-        </div>
-        <div class="btn-group">
-            <button class="btn" [ngClass]="{'btn-solid': dataDisplay == 'table'}"
+        <app-table-items-dropdown *ngIf="dataDisplay == 'table'"></app-table-items-dropdown>
+        <div class="btn-group pl-2">
+            <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'table'}"
                 (click)="setDataDisplay('table')">Table</button>
-            <button class="btn" [ngClass]="{'btn-solid': dataDisplay == 'graph'}"
+            <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'graph'}"
                 (click)="setDataDisplay('graph')">Graph</button>
         </div>
     </div>
 </div>
+
+<app-analysis-summary-table-filter *ngIf="showFilterDropdown" [tableContext]="'monthGroup'" [group]="group">
+</app-analysis-summary-table-filter>
 
 <div class="w-100 x-scroll" *ngIf="!calculating">
     <app-monthly-analysis-summary-table *ngIf="dataDisplay == 'table'" [analysisItem]="analysisItem"
@@ -32,7 +28,8 @@
         [facilityOrAccount]="facility" [predictorVariables]="monthlyAnalysisSummary.predictorVariables" [group]="group">
     </app-monthly-analysis-summary-table>
     <app-monthly-analysis-summary-graph *ngIf="dataDisplay == 'graph'" [analysisItem]="analysisItem"
-        [monthlyAnalysisSummaryData]="monthlyAnalysisSummary.monthlyAnalysisSummaryData" [facilityOrAccount]="facility"></app-monthly-analysis-summary-graph>
+        [monthlyAnalysisSummaryData]="monthlyAnalysisSummary.monthlyAnalysisSummaryData" [facilityOrAccount]="facility">
+    </app-monthly-analysis-summary-graph>
 </div>
 
 <app-calculating-spinner *ngIf="calculating" [message]="'Calculating Monthly Results...'"></app-calculating-spinner>

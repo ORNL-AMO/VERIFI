@@ -39,7 +39,8 @@ export class MeterGroupingComponent implements OnInit {
   dataDisplay: "grouping" | "table" | "graph";
   displayGraphEnergy: "bar" | "scatter";
   displayGraphCost: "bar" | "scatter";
-  itemsPerPage: number = 6;
+  itemsPerPage: number;
+  itemsPerPageSub: Subscription
   minMonth: number;
   minYear: number;
   maxMonth: number;
@@ -89,11 +90,16 @@ export class MeterGroupingComponent implements OnInit {
         this.initializeDateRange();
       }
     });
+
+    this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
+      this.itemsPerPage = val;
+    });
   }
 
   ngOnDestroy() {
     this.selectedFacilitySub.unsubscribe();
     this.dateRangeSub.unsubscribe();
+    this.itemsPerPageSub.unsubscribe();
     this.meterGroupingService.dataDisplay = this.dataDisplay;
     this.meterGroupingService.displayGraphEnergy = this.displayGraphEnergy;
     this.meterGroupingService.displayGraphCost = this.displayGraphCost;

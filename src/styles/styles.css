@@ -32,12 +32,7 @@ input.unitDollar {
   padding: 15px 0px;
   min-height: 75px;
 }
-.importExport,
-.items-per-page,
-.bulk-delete {
-  position:relative;
-  z-index: 2;
-}
+
 .tableControls {
   padding: 4px 0px;
   margin: 0px;

@@ -23,6 +23,9 @@ import { RegressionModelMenuComponent } from './run-analysis/group-analysis/regr
 import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/calculating-spinner.module';
 import { AccountAnalysisListComponent } from './account-analysis-list/account-analysis-list.component';
 import { AnalysisFooterComponent } from './analysis-footer/analysis-footer.component';
+import { TableItemsDropdownModule } from 'src/app/shared/table-items-dropdown/table-items-dropdown.module';
+import { RegressionModelInspectionComponent } from './run-analysis/group-analysis/regression-model-selection/regression-model-inspection/regression-model-inspection.component';
+import { RegressionNumberPipe } from './run-analysis/group-analysis/regression-model-selection/regression-number.pipe';
 
 
 
@@ -44,7 +47,9 @@ import { AnalysisFooterComponent } from './analysis-footer/analysis-footer.compo
     ModelFilterPipe,
     RegressionModelMenuComponent,
     AccountAnalysisListComponent,
-    AnalysisFooterComponent
+    AnalysisFooterComponent,
+    RegressionModelInspectionComponent,
+    RegressionNumberPipe
   ],
   imports: [
     CommonModule,
@@ -53,7 +58,8 @@ import { AnalysisFooterComponent } from './analysis-footer/analysis-footer.compo
     HelperPipesModule,
     NgbPaginationModule,
     SharedAnalysisModule,
-    CalculatingSpinnerModule
+    CalculatingSpinnerModule,
+    TableItemsDropdownModule
   ]
 })
 export class AnalysisModule { }

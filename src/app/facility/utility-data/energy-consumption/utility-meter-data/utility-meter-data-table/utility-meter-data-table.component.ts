@@ -9,6 +9,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 
 @Component({
   selector: 'app-utility-meter-data-table',
@@ -17,7 +18,8 @@ import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 's
 })
 export class UtilityMeterDataTableComponent implements OnInit {
 
-  itemsPerPage: number = 6;
+  itemsPerPage: number;
+  itemsPerPageSub: Subscription;
   selectedMeter: IdbUtilityMeter;
   meterData: Array<IdbUtilityMeterData>;
   facilityMeters: Array<IdbUtilityMeter>;
@@ -27,6 +29,8 @@ export class UtilityMeterDataTableComponent implements OnInit {
   showDeleteModal: boolean = false;
   showBulkDelete: boolean = false;
   showIndividualDelete: boolean = false;
+  paramsSub: Subscription;
+  showFilterDropdown: boolean = false;
   constructor(
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
@@ -36,12 +40,14 @@ export class UtilityMeterDataTableComponent implements OnInit {
     private toastNoticationService: ToastNotificationsService,
     private facilityDbService: FacilitydbService,
     private accountDbService: AccountdbService,
-    private dbChangesService: DbChangesService
+    private dbChangesService: DbChangesService,
+    private sharedDataService: SharedDataService
   ) { }
 
   ngOnInit(): void {
-    this.activatedRoute.parent.params.subscribe(params => {
+    this.paramsSub = this.activatedRoute.parent.params.subscribe(params => {
       let meterId: number = parseInt(params['id']);
+      this.showFilterDropdown = false;
       this.facilityMeters = this.utilityMeterDbService.facilityMeters.getValue();
       this.selectedMeter = this.facilityMeters.find(meter => { return meter.id == meterId });
       this.setData();
@@ -49,11 +55,17 @@ export class UtilityMeterDataTableComponent implements OnInit {
 
     this.accountMeterDataSub = this.utilityMeterDataDbService.accountMeterData.subscribe(data => {
       this.setData();
-    })
+    });
+
+    this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
+      this.itemsPerPage = val;
+    });
   }
 
   ngOnDestroy() {
     this.accountMeterDataSub.unsubscribe();
+    this.itemsPerPageSub.unsubscribe();
+    this.paramsSub.unsubscribe();
   }
 
   setData() {
@@ -86,11 +98,13 @@ export class UtilityMeterDataTableComponent implements OnInit {
   }
 
   setDeleteMeterData(meterData: IdbUtilityMeterData) {
+    this.sharedDataService.modalOpen.next(true);
     this.meterDataToDelete = meterData;
     this.showIndividualDelete = true;
   }
 
   cancelDelete() {
+    this.sharedDataService.modalOpen.next(false);
     this.showIndividualDelete = false;
     this.meterDataToDelete = undefined;
   }
@@ -113,21 +127,28 @@ export class UtilityMeterDataTableComponent implements OnInit {
   }
 
   openBulkDelete() {
+    this.sharedDataService.modalOpen.next(true);
     this.showBulkDelete = true;
   }
 
   cancelBulkDelete() {
+    this.sharedDataService.modalOpen.next(false);
     this.showBulkDelete = false;
   }
 
   meterDataAdd() {
+    this.showFilterDropdown = false;
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     this.router.navigateByUrl('facility/' + selectedFacility.id + '/utility/energy-consumption/utility-meter/' + this.selectedMeter.id + '/new-bill');
   }
 
   setEditMeterData(meterData: IdbUtilityMeterData) {
+    this.showFilterDropdown = false;
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     this.router.navigateByUrl('facility/' + selectedFacility.id + '/utility/energy-consumption/utility-meter/' + this.selectedMeter.id + '/edit-bill/' + meterData.id);
+  }
 
+  toggleFilterMenu() {
+    this.showFilterDropdown = !this.showFilterDropdown;
   }
 }

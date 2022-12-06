@@ -8,6 +8,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgbDatepickerModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.module';
 import { CalanderizedMeterDataTableComponent } from './calanderized-meter-data-table/calanderized-meter-data-table.component';
+import { TableItemsDropdownModule } from 'src/app/shared/table-items-dropdown/table-items-dropdown.module';
 
 
 
@@ -25,7 +26,8 @@ import { CalanderizedMeterDataTableComponent } from './calanderized-meter-data-t
     ReactiveFormsModule,
     NgbDatepickerModule,
     HelperPipesModule,
-    NgbPaginationModule
+    NgbPaginationModule,
+    TableItemsDropdownModule
   ]
 })
 export class CalanderizationModule { }

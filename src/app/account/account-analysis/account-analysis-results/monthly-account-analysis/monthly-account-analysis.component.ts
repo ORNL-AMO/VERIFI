@@ -5,6 +5,7 @@ import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { IdbAccount, IdbAccountAnalysisItem} from 'src/app/models/idb';
+import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { AccountAnalysisService } from '../../account-analysis.service';
 
 @Component({
@@ -18,14 +19,16 @@ export class MonthlyAccountAnalysisComponent implements OnInit {
   monthlyAccountAnalysisData: Array<MonthlyAnalysisSummaryData>;
   accountAnalysisItem: IdbAccountAnalysisItem;
   account: IdbAccount;
-  itemsPerPage: number = 12;
+  itemsPerPage: number;
+  itemsPerPageSub: Subscription;
   calculating: boolean;
 
   calculatingSub: Subscription;
+  showFilterDropdown: boolean = false;
   monthlyAccountAnalysisDataSub: Subscription;
   constructor(private analysisService: AnalysisService,
     private accountAnalysisDbService: AccountAnalysisDbService, private accountDbService: AccountdbService,
-    private accountAnalysisService: AccountAnalysisService) { }
+    private accountAnalysisService: AccountAnalysisService, private sharedDataService: SharedDataService) { }
 
   ngOnInit(): void {
     this.dataDisplay = this.analysisService.dataDisplay.getValue();
@@ -39,15 +42,25 @@ export class MonthlyAccountAnalysisComponent implements OnInit {
     this.monthlyAccountAnalysisDataSub = this.accountAnalysisService.monthlyAccountAnalysisData.subscribe(val => {
       this.monthlyAccountAnalysisData = val;
     });
+
+    this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
+      this.itemsPerPage = val;
+    });
   }
 
   ngOnDestroy(){
     this.calculatingSub.unsubscribe();
     this.monthlyAccountAnalysisDataSub.unsubscribe();
+    this.itemsPerPageSub.unsubscribe();
   }
   
   setDataDisplay(display: 'table' | 'graph') {
+    this.showFilterDropdown = false;
     this.dataDisplay = display;
     this.analysisService.dataDisplay.next(this.dataDisplay);
+  }
+
+  toggleFilterMenu(){
+    this.showFilterDropdown = !this.showFilterDropdown;
   }
 }

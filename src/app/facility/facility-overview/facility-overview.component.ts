@@ -4,6 +4,7 @@ import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { IdbFacility, IdbUtilityMeterGroup, MeterSource } from 'src/app/models/idb';
+import { FacilitySummaryClass } from 'src/app/web-workers/classes/dashboard/facilitySummaryClass';
 import { FacilityOverviewService } from './facility-overview.service';
 
 @Component({
@@ -43,9 +44,9 @@ export class FacilityOverviewComponent implements OnInit {
   }
 
   calculateFacilitiesSummary() {
+    let groups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.facilityMeterGroups.getValue();
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('src/app/web-workers/facility-overview.worker', import.meta.url));
-      let groups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.facilityMeterGroups.getValue();
       this.worker.onmessage = ({ data }) => {
         if (data.type == 'energy') {
           this.facilityOverviewService.energyMeterSummaryData.next(data.meterSummaryData);
@@ -110,13 +111,22 @@ export class FacilityOverviewComponent implements OnInit {
       });
     } else {
       console.log('nopee')
-
       // Web Workers are not supported in this environment.
       // You should add a fallback so that your program still executes correctly.
+      //TODO: Rest of types
+      let energySources: Array<MeterSource> = ['Electricity', 'Natural Gas', 'Other Fuels', 'Other Energy']
+      let facilitySummaryClass: FacilitySummaryClass = new FacilitySummaryClass(this.facilityOverviewService.calanderizedMeters, groups, energySources, this.facility);
+      this.facilityOverviewService.energyMeterSummaryData.next(facilitySummaryClass.meterSummaryData);
+      this.facilityOverviewService.energyMonthlySourceData.next(facilitySummaryClass.monthlySourceData);
+      this.facilityOverviewService.energyUtilityUsageSummaryData.next(facilitySummaryClass.utilityUsageSummaryData);
+      this.facilityOverviewService.energyYearMonthData.next(facilitySummaryClass.yearMonthData);
+
+
+
     }
   }
 
-  addUtilityData(){
+  addUtilityData() {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     this.router.navigateByUrl('facility/' + selectedFacility.id + '/utility');
   }

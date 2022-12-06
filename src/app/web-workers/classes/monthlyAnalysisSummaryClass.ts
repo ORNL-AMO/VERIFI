@@ -20,8 +20,8 @@ export class MonthlyAnalysisSummaryClass {
         this.monthlyAnalysisSummaryData = new Array();
         let baselineDate: Date = new Date(this.monthlyGroupAnalysisClass.baselineDate);
         while (baselineDate < this.monthlyGroupAnalysisClass.endDate) {
-            let monthlyanalysisSummaryDataCopy: Array<MonthlyAnalysisSummaryDataClass> = JSON.parse(JSON.stringify(this.monthlyAnalysisSummaryData))
-            let monthlyAnalysisSummaryDataClass: MonthlyAnalysisSummaryDataClass = new MonthlyAnalysisSummaryDataClass(this.monthlyGroupAnalysisClass, baselineDate, monthlyanalysisSummaryDataCopy)
+            // let monthlyanalysisSummaryDataCopy: Array<MonthlyAnalysisSummaryDataClass> = JSON.parse(JSON.stringify(this.monthlyAnalysisSummaryData))
+            let monthlyAnalysisSummaryDataClass: MonthlyAnalysisSummaryDataClass = new MonthlyAnalysisSummaryDataClass(this.monthlyGroupAnalysisClass, baselineDate, this.monthlyAnalysisSummaryData)
             this.monthlyAnalysisSummaryData.push(monthlyAnalysisSummaryDataClass);
             let currentMonth: number = baselineDate.getUTCMonth()
             let nextMonth: number = currentMonth + 1;

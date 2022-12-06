@@ -1,17 +1,17 @@
 <div class="sticky-top banner-border hide-print" *ngIf="inBasicReport" [ngClass]="{'modal-open': modalOpen}">
     <div class="breadcrumbs d-flex">
         <div>
-            <button class="btn btn-sm btn-primary-4 m-0" (click)="goToDashboard()">
+            <button class="btn btn-sm nav-btn m-0" (click)="goToDashboard()">
                 View All Reports
             </button>
         </div>
         <div class="pr-2 pl-2">
-            <button class="btn btn-sm btn-primary-4 m-0" (click)="goToMenu()">
+            <button class="btn btn-sm nav-btn m-0" (click)="goToMenu()">
                 Edit Report Options
             </button>
         </div>
         <div>
-            <button class="btn btn-sm btn-primary-4 m-0" (click)="print()">
+            <button class="btn btn-sm action-btn m-0" (click)="print()">
                 <span class="fa fa-print"></span>
                 Print Report
             </button>

@@ -134,14 +134,18 @@ export class AnalysisDbService {
     let predictors: Array<PredictorData> = this.predictorDbService.facilityPredictors.getValue();
     facilityMeterGroups.forEach(group => {
       if (group.groupType == 'Energy') {
-        let predictorVariables: Array<PredictorData> = JSON.parse(JSON.stringify(predictors));
-        predictorVariables.forEach(variable => {
-          variable.productionInAnalysis = variable.production;
-        });
+        let predictorVariables: Array<PredictorData> = { ...predictors };
+        // predictorVariables.forEach(variable => {
+        //   variable.productionInAnalysis = true;
+        // });
+
         let analysisGroup: AnalysisGroup = {
           idbGroupId: group.guid,
-          analysisType: 'energyIntensity',
-          predictorVariables: JSON.parse(JSON.stringify(predictorVariables)),
+          analysisType: 'regression',
+          predictorVariables: predictorVariables.map(variable => {
+            variable.productionInAnalysis = true;
+            return variable
+          }),
           productionUnits: this.getUnits(predictorVariables),
           regressionModelYear: undefined,
           regressionConstant: undefined,
@@ -151,7 +155,8 @@ export class AnalysisDbService {
           monthlyPercentBaseload: this.getMonthlyPercentBaseload(),
           hasBaselineAdjustement: false,
           baselineAdjustments: [],
-          userDefinedModel: false
+          userDefinedModel: true,
+          models: undefined
         }
         analysisGroup.groupErrors = this.analysisValidationService.getGroupErrors(analysisGroup);
         itemGroups.push(analysisGroup);

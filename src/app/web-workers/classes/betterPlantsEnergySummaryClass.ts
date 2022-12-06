@@ -21,6 +21,8 @@ export class BetterPlantsEnergySummaryClass {
     otherSolidUse: number;
     otherLiquidFuels: Array<string>;
     otherLiquidUse: number;
+    otherEnergyUse: number;
+    otherEnergyTypes: Array<string>;
     totalEnergyUse: number;
     constructor(calanderizedMeters: Array<CalanderizedMeter>, year: number) {
         this.setElectricityUse(calanderizedMeters, year);
@@ -34,6 +36,7 @@ export class BetterPlantsEnergySummaryClass {
         this.setOtherGasFuelUse(calanderizedMeters, year);
         this.setOtherLiquidFuelUse(calanderizedMeters, year);
         this.setOtherSolidFuelUse(calanderizedMeters, year);
+        this.setTotalOtherEnergy(calanderizedMeters, year);
         this.setTotalEnergyUse();
         this.setNumberOfFacilities(calanderizedMeters, year);
     }
@@ -113,6 +116,13 @@ export class BetterPlantsEnergySummaryClass {
         this.otherSolidUse = _.sumBy(yearData, 'energyUse');
     }
 
+    setTotalOtherEnergy(calanderizedMeters: Array<CalanderizedMeter>, year: number){
+        let filteredMeters: Array<CalanderizedMeter> = this.getFilteredMeters(calanderizedMeters, 'Other Energy', undefined, undefined);
+        this.otherEnergyTypes = filteredMeters.map(fMeter => { return fMeter.meter.fuel });
+        let yearData: Array<MonthlyData> = this.getYearData(filteredMeters, year);
+        this.otherEnergyUse = _.sumBy(yearData, 'energyUse');
+    }
+
     getYearData(filteredMeters: Array<CalanderizedMeter>, year: number): Array<MonthlyData> {
         let meterMonthlyData: Array<MonthlyData> = filteredMeters.flatMap(sourceMeter => {
             return sourceMeter.monthlyData;
@@ -134,8 +144,10 @@ export class BetterPlantsEnergySummaryClass {
                 return cMeter.meter.source == source && fuels.includes(cMeter.meter.fuel);
             });
         } else if (phase) {
+            let categorizedFuels: Array<string> = ['Distillate Fuel Oil', 'Diesel', 'Fuel Oil #1', 'Fuel Oil #2', 'Fuel Oil #2', 'Residual Fuel Oil', 'Fuel Oil #5', 'Fuel Oil #6 (low sulfur)', 'Fuel Oil #6 (high sulfur)',
+                'Coal (anthracite)', 'Coal (bituminous)', 'Coal (Lignite)', 'Coal (subbituminous)', 'Coke', 'Coke Over Gas', 'Wood', 'Blast Furnace Gas'];
             filteredMeters = calanderizedMeters.filter(cMeter => {
-                return cMeter.meter.source == source && cMeter.meter.phase == phase;
+                return cMeter.meter.source == source && cMeter.meter.phase == phase && !categorizedFuels.includes(cMeter.meter.fuel);
             });
         }
         return filteredMeters;
@@ -153,7 +165,8 @@ export class BetterPlantsEnergySummaryClass {
             this.woodWasteEnergyUse +
             this.otherGasUse +
             this.otherSolidUse +
-            this.otherLiquidUse
+            this.otherLiquidUse + 
+            this.otherEnergyUse
         );
     }
 
@@ -173,7 +186,7 @@ export class BetterPlantsEnergySummaryClass {
     }
 
 
-    getBetterPlantsEnergySummary(): BetterPlantsEnergySummary { 
+    getBetterPlantsEnergySummary(): BetterPlantsEnergySummary {
         return {
             numberOfFacilities: this.numberOfFacilities,
             electricityUse: this.electricityUse,
@@ -191,6 +204,8 @@ export class BetterPlantsEnergySummaryClass {
             otherLiquidFuels: this.otherLiquidFuels,
             otherLiquidUse: this.otherLiquidUse,
             totalEnergyUse: this.totalEnergyUse,
+            otherEnergyUse: this.otherEnergyUse,
+            otherEnergyTypes: this.otherEnergyTypes
         }
     }
 }

@@ -48,8 +48,8 @@ export class GroupAnalysisComponent implements OnInit {
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(val => {
       this.selectedGroup = val;
       if (this.selectedGroup) {
-        this.setErrorBools();
         this.showModelSelection = this.selectedGroup.analysisType == 'regression';
+        this.setErrorBools();
       }
     });
     this.setLabel(this.router.url);

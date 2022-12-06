@@ -1,11 +1,28 @@
 <div class="wrapper main-content">
     <h4>Import Data From .XLSX Files</h4>
     <div class="alert alert-info">
-        Select the files you wish to upload data from into facilities. .XLSX and .CSV files are supported. Once the
-        files have been selected we will work through parsing out the relevant data into the correct places.
+        <ul class="mb-0">
+            <li>
+                Select the files you wish to upload data from into facilities. 
+            </li>
+            <li>
+                Data must be in excel (.XLSX) files.
+            </li>
+            <li>
+                Once the files have been selected we will work through parsing out the relevant data into the correct
+                places.
+            </li>
+            <li>
+                Click the "Choose Files" button or drag and drop files into the grey box.
+            </li>
+            <li>
+                Multiple files can be uploaded.
+            </li>
+        </ul>
     </div>
     <hr>
-    <input type="file" #importFile id="importFile" (input)="setImportFile($event.target)" multiple accept=".xlsx">
+    <input [ngClass]="{'drag-in': dragOver}" type="file" #importFile id="importFile" (dragenter)="setDragEnter()"
+        (input)="setImportFile($event.target)" multiple accept=".xlsx" (dragleave)="setDragOut()">
     <div *ngIf="fileUploadError">
         <div class="p-2 alert-danger">
             There was an error processing this file. Please try a different file.
@@ -44,7 +61,7 @@
     </div>
     <div class="d-flex justify-content-end mt-auto" *ngIf="fileReferences.length != 0">
         <div class="d-flex">
-            <button class="btn btn-success" (click)="continue()">Submit &amp; Continue</button>
+            <button class="btn nav-btn" (click)="continue()">Submit &amp; Continue</button>
         </div>
     </div>
 </div>

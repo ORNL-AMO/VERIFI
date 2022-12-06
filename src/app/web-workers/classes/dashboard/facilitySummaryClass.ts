@@ -93,6 +93,7 @@ export class FacilitySummaryClass {
             let sourceMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return cMeter.meter.source == source });
             let monthlyData: Array<MonthlyData> = sourceMeters.flatMap(cMeter => { return cMeter.monthlyData });
             let yearMonths: Array<{ year: number, month: string, monthNumValue: number }> = monthlyData.map(data => { return { year: data.year, month: data.month, monthNumValue: data.monthNumValue } });
+            
             yearMonths = _.uniqWith(yearMonths, (a, b) => {
                 return (a.year == b.year && a.month == b.month)
             });

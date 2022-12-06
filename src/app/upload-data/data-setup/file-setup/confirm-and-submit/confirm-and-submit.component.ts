@@ -11,6 +11,7 @@ import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { IdbAccount, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from 'src/app/models/idb';
+import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { FileReference, UploadDataService } from 'src/app/upload-data/upload-data.service';
 
 @Component({
@@ -32,7 +33,8 @@ export class ConfirmAndSubmitComponent implements OnInit {
     private toastNotificationService: ToastNotificationsService,
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
-    private utilityMeterGroupDbService: UtilityMeterGroupdbService) { }
+    private utilityMeterGroupDbService: UtilityMeterGroupdbService,
+    private sharedDataService: SharedDataService) { }
 
   ngOnInit(): void {
     this.paramsSub = this.activatedRoute.parent.params.subscribe(param => {
@@ -50,6 +52,7 @@ export class ConfirmAndSubmitComponent implements OnInit {
   }
 
   async submit() {
+    this.sharedDataService.modalOpen.next(true);
     this.loadingService.setLoadingMessage('Submitting File Data..');
     this.loadingService.setLoadingStatus(true);
 
@@ -126,6 +129,7 @@ export class ConfirmAndSubmitComponent implements OnInit {
     this.hasNextFile = fileReferenceIndex < (this.uploadDataService.fileReferences.length - 1);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast(this.fileReference.name + ' Data Submitted', undefined, undefined, false, "success");
+    this.sharedDataService.modalOpen.next(false);
   }
 
   goToNext() {

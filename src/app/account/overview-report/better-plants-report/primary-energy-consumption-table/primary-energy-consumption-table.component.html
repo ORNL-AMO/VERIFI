@@ -137,6 +137,8 @@
                 <td>
                     Other Gas (<span
                         *ngFor="let fuel of betterPlantsSummary.baselineYearResults.otherGasFuels">{{fuel}}</span>)
+                    (<span *ngFor="let fuel of otherGasFuels; let index = index;">{{fuel}}<span class="pr-1"
+                            *ngIf="index != otherGasFuels.length - 1">,</span> </span>)
                 </td>
                 <td>
                     {{betterPlantsSummary.baselineYearResults.otherGasUse | customNumber}}
@@ -148,8 +150,8 @@
             <tr
                 *ngIf="betterPlantsSummary.baselineYearResults.otherLiquidUse || betterPlantsSummary.reportYearResults.otherLiquidUse">
                 <td>
-                    Other Liquid (<span
-                        *ngFor="let fuel of betterPlantsSummary.baselineYearResults.otherLiquidFuels">{{fuel}}</span>)
+                    Other Liquid (<span *ngFor="let fuel of otherLiquidFuels; let index = index;">{{fuel}}<span
+                            class="pr-1" *ngIf="index != otherLiquidFuels.length - 1">,</span> </span>)
                 </td>
                 <td>
                     {{betterPlantsSummary.baselineYearResults.otherLiquidUse | customNumber}}
@@ -161,14 +163,27 @@
             <tr
                 *ngIf="betterPlantsSummary.baselineYearResults.otherSolidUse || betterPlantsSummary.reportYearResults.otherSolidUse">
                 <td>
-                    Other Solid (<span
-                        *ngFor="let fuel of betterPlantsSummary.baselineYearResults.otherSolidFuels">{{fuel}}</span>)
+                    Other Solid (<span *ngFor="let fuel of otherSolidFuels; let index = index;">{{fuel}}<span
+                            class="pr-1" *ngIf="index != otherSolidFuels.length - 1">,</span> </span>)
                 </td>
                 <td>
                     {{betterPlantsSummary.baselineYearResults.otherSolidUse | customNumber}}
                 </td>
                 <td>
                     {{betterPlantsSummary.reportYearResults.otherSolidUse | customNumber}}
+                </td>
+            </tr>
+            <tr
+                *ngIf="betterPlantsSummary.baselineYearResults.otherEnergyUse || betterPlantsSummary.reportYearResults.otherEnergyUse">
+                <td>
+                    Other Energy (<span *ngFor="let fuel of otherEnergyFuels; let index = index;">{{fuel}}<span
+                        class="pr-1" *ngIf="index != otherEnergyFuels.length - 1">,</span> </span>)
+                </td>
+                <td>
+                    {{betterPlantsSummary.baselineYearResults.otherEnergyUse | customNumber}}
+                </td>
+                <td>
+                    {{betterPlantsSummary.reportYearResults.otherEnergyUse | customNumber}}
                 </td>
             </tr>
             <tr>

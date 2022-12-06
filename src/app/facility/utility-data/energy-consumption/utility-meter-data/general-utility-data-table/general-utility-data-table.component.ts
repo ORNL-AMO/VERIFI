@@ -75,7 +75,7 @@ export class GeneralUtilityDataTableComponent implements OnInit {
   }
 
   setData() {
-    this.showVolumeColumn = (this.selectedMeterData.find(dataItem => { return dataItem.totalVolume != undefined }) != undefined);
+    this.showVolumeColumn = (this.selectedMeterData.find(dataItem => { return dataItem.totalVolume != undefined && dataItem.totalVolume != 0}) != undefined);
     this.volumeUnit = this.selectedMeter.startingUnit;
     this.showEnergyColumn = this.energyUnitsHelperService.isEnergyMeter(this.selectedMeter.source);
     this.showEmissions = this.editMeterFormService.checkShowEmissionsOutputRate(this.selectedMeter.source);

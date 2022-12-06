@@ -139,16 +139,16 @@
     <hr>
     <div class="row justify-content-between">
         <div class="col">
-            <button class="btn btn-danger" (click)="goToDashboard()">Return to Dashboard</button>
+            <button class="btn nav-btn" (click)="goToDashboard()">Return to Dashboard</button>
         </div>
         <div class="col text-right">
             <button *ngIf="!selectedReportOptions" class="btn btn-primary" (click)="createReport()"
                 [disabled]="!reportOptions.targetYear || !reportOptions.baselineYear || !reportOptions.analysisItemId"><span
                     class="fa fa-save"></span> Create
                 Report</button>
-            <button *ngIf="selectedReportOptions" class="btn btn-secondary mr-2" (click)="cancelChanges()">Discard
+            <button *ngIf="selectedReportOptions" class="btn nav-btn" (click)="cancelChanges()">Discard
                 Changes</button>
-            <button *ngIf="selectedReportOptions" class="btn btn-primary" (click)="updateReport()"
+            <button *ngIf="selectedReportOptions" class="btn action-btn ml-2" (click)="updateReport()"
                 [disabled]="!reportOptions.targetYear || !reportOptions.baselineYear || !reportOptions.analysisItemId"><span
                     class="fa fa-save"></span> Update
                 Report</button>

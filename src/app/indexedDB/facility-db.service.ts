@@ -125,4 +125,10 @@ export class FacilitydbService {
         }
         return '';
     }
+
+    getAccountFacilitiesCopy(): Array<IdbFacility>{
+        let accountFacilites: Array<IdbFacility> = this.accountFacilities.getValue();
+        let accountFacilitesCopy: Array<IdbFacility> = JSON.parse(JSON.stringify(accountFacilites));
+        return accountFacilitesCopy;
+    }
 }

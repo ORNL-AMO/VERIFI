@@ -125,7 +125,7 @@ export class PredictordbService {
     }
 
     async importNewPredictorEntries(entries: Array<IdbPredictorEntry>) {
-        for(let index = 0; index < entries.length; index++){
+        for (let index = 0; index < entries.length; index++) {
             let entry: IdbPredictorEntry = entries[index];
             await this.addWithObservable(entry).toPromise();
         }
@@ -188,6 +188,12 @@ export class PredictordbService {
         predictor.date = new Date(predictor.date);
         predictor.dbDate = new Date();
         return this.dbService.add('predictors', predictor);
+    }
+
+    getAccountPerdictorsCopy(): Array<IdbPredictorEntry> {
+        let accountPredictorEntries: Array<IdbPredictorEntry> = this.accountPredictorEntries.getValue();
+        let predictorsCopy: Array<IdbPredictorEntry> = JSON.parse(JSON.stringify(accountPredictorEntries));
+        return predictorsCopy;
     }
 
 }

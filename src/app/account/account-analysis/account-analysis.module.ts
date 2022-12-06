@@ -16,6 +16,7 @@ import { AnnualAccountAnalysisComponent } from './account-analysis-results/annua
 import { SharedAnalysisModule } from 'src/app/shared/shared-analysis/shared-analysis.module';
 import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/calculating-spinner.module';
 import { AccountAnalysisFooterComponent } from './account-analysis-footer/account-analysis-footer.component';
+import { TableItemsDropdownModule } from 'src/app/shared/table-items-dropdown/table-items-dropdown.module';
 
 
 @NgModule({
@@ -38,7 +39,8 @@ import { AccountAnalysisFooterComponent } from './account-analysis-footer/accoun
     FormsModule,
     HelperPipesModule,
     SharedAnalysisModule,
-    CalculatingSpinnerModule
+    CalculatingSpinnerModule,
+    TableItemsDropdownModule
   ]
 })
 export class AccountAnalysisModule { }

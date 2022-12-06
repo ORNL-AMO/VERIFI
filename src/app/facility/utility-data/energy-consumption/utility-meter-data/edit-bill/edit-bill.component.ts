@@ -27,6 +27,7 @@ export class EditBillComponent implements OnInit {
   displayEnergyUse: boolean;
   invalidDate: boolean;
   showConfirmCancel: boolean = false;
+  showFilterDropdown: boolean = false;
   constructor(private activatedRoute: ActivatedRoute, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterDbService: UtilityMeterdbService, private loadingService: LoadingService,
     private dbChangesService: DbChangesService, private facilityDbService: FacilitydbService, private accountDbService: AccountdbService,
@@ -131,5 +132,9 @@ export class EditBillComponent implements OnInit {
     this.meterDataForm.valueChanges.subscribe(() => {
       this.showConfirmCancel = false;
     })
+  }
+
+  toggleFilterMenu(){
+    this.showFilterDropdown = !this.showFilterDropdown;
   }
 }

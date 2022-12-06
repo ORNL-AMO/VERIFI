@@ -97,7 +97,7 @@ export class UtilityMeterDatadbService {
             checked: false,
             // Electricity Use Only
             totalRealDemand: undefined,
-            totalBilledDemand :undefined,
+            totalBilledDemand: undefined,
             nonEnergyCharge: undefined,
             block1Consumption: undefined,
             block1ConsumptionCharge: undefined,
@@ -186,6 +186,12 @@ export class UtilityMeterDatadbService {
         if (convertData) {
             meterDataCopy = this.convertMeterDataService.convertMeterDataToAccount(meter, meterDataCopy, account);
         }
+        return meterDataCopy;
+    }
+
+    getAccountMeterDataCopy() {
+        let accountMeterData: Array<IdbUtilityMeterData> = this.accountMeterData.getValue();
+        let meterDataCopy: Array<IdbUtilityMeterData> = JSON.parse(JSON.stringify(accountMeterData));
         return meterDataCopy;
     }
 }

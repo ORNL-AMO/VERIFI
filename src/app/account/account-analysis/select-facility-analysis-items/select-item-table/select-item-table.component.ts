@@ -9,6 +9,7 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
 import { AnalysisValidationService } from 'src/app/facility/analysis/analysis-validation.service';
+import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 @Component({
   selector: 'app-select-item-table',
   templateUrl: './select-item-table.component.html',
@@ -34,7 +35,8 @@ export class SelectItemTableComponent implements OnInit {
     private accountDbService: AccountdbService,
     private loadingService: LoadingService,
     private analysisService: AnalysisService,
-    private analysisValidationService: AnalysisValidationService) { }
+    private analysisValidationService: AnalysisValidationService,
+    private sharedDataService: SharedDataService) { }
 
   ngOnInit(): void {
     this.facilities = this.facilityDbService.accountFacilities.getValue();
@@ -62,28 +64,34 @@ export class SelectItemTableComponent implements OnInit {
 
 
   editItem(analysisItem: IdbAnalysisItem) {
+    this.sharedDataService.modalOpen.next(true);
     this.itemToEdit = analysisItem;
   }
 
   cancelEditItem() {
+    this.sharedDataService.modalOpen.next(false);
     this.itemToEdit = undefined;
   }
 
   confirmEditItem() {
+    this.sharedDataService.modalOpen.next(false);
     this.analysisService.accountAnalysisItem = this.selectedAnalysisItem;
     this.analysisDbService.selectedAnalysisItem.next(this.itemToEdit);
     this.router.navigateByUrl('facility/' + this.facility.id + '/analysis/run-analysis');
   }
 
   createNewItem() {
+    this.sharedDataService.modalOpen.next(true);
     this.showCreateItem = true;
   }
 
   cancelCreateNew() {
+    this.sharedDataService.modalOpen.next(false);
     this.showCreateItem = false;
   }
 
   async confirmCreateNew() {
+    this.sharedDataService.modalOpen.next(false);
     this.loadingService.setLoadingMessage('Creating Facility Analysis...')
     this.loadingService.setLoadingStatus(true);
     this.showCreateItem = false;

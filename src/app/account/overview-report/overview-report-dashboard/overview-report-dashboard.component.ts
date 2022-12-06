@@ -7,6 +7,7 @@ import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { OverviewReportOptionsDbService } from 'src/app/indexedDB/overview-report-options-db.service';
 import { IdbAccount, IdbOverviewReportOptions } from 'src/app/models/idb';
 import { ReportOptions } from 'src/app/models/overview-report';
+import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { OverviewReportService } from '../overview-report.service';
 
 @Component({
@@ -21,23 +22,29 @@ export class OverviewReportDashboardComponent implements OnInit {
   reportToDelete: IdbOverviewReportOptions;
 
   currentPageNumber: number = 1;
-  itemsPerPage: number = 10;
+  itemsPerPage: number;
+  itemsPerPageSub: Subscription;
   orderDataField: string = 'name';
   orderByDirection: string = 'desc';
   showNewReportModal: boolean = false;
   reportType: 'data' | 'betterPlants' = 'betterPlants';
   constructor(private overviewReportService: OverviewReportService, private router: Router, private overviewReportOptionsDbService: OverviewReportOptionsDbService,
     private toastNotificationService: ToastNotificationsService, private dbChangesService: DbChangesService,
-    private accountDbService: AccountdbService) { }
+    private accountDbService: AccountdbService, private sharedDataService: SharedDataService) { }
 
   ngOnInit(): void {
     this.accountOverviewReportOptionsSub = this.overviewReportOptionsDbService.accountOverviewReportOptions.subscribe(options => {
       this.accountOverviewReportOptions = this.setOptions(options);
     });
+
+    this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
+      this.itemsPerPage = val;
+    })
   }
 
   ngOnDestory() {
     this.accountOverviewReportOptionsSub.unsubscribe();
+    this.itemsPerPageSub.unsubscribe();
   }
 
   setOptions(options: Array<IdbOverviewReportOptions>): Array<IdbOverviewReportOptions> {

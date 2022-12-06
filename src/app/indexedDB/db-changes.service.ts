@@ -51,12 +51,8 @@ export class DbChangesService {
       }
     }
     this.facilityDbService.accountFacilities.next(accountFacilites);
-    //set account analysis
-    await this.setAccountAnalysisItems(account);
     //set overview reports
     await this.setAccountOverviewReportOptions(account);
-    //set analysis
-    await this.setAnalysisItems(account);
     //set predictors
     await this.setPredictors(account);
     //set meters
@@ -67,6 +63,10 @@ export class DbChangesService {
     await this.setMeterGroups(account);
     //set custom emissions
     await this.setCustomEmissions(account);
+    //set analysis
+    await this.setAnalysisItems(account);
+    //set account analysis
+    await this.setAccountAnalysisItems(account);
 
     this.accountDbService.selectedAccount.next(account);
   }
@@ -75,8 +75,6 @@ export class DbChangesService {
     facility = this.updateDbEntryService.updateFacility(facility).facility;
     this.updateFacilities(facility, true);
     console.log('DB Changes Select Facility');
-    //set analaysis
-    this.setFacilityAnalysisItems(facility);
     //set predictors
     this.setFacilityPredictors(facility);
     //set meters
@@ -85,6 +83,8 @@ export class DbChangesService {
     this.setFacilityMeterData(facility);
     //set meter groups
     this.setFacilityMeterGroups(facility);
+    //set analaysis
+    this.setFacilityAnalysisItems(facility);
     this.facilityDbService.selectedFacility.next(facility);
   }
 

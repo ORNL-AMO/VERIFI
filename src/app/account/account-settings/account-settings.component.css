@@ -1,3 +1,13 @@
 .wrapper{
     margin-bottom: 100px;
 }
+
+label.checkbox-label input[type="checkbox"]{
+    float: none;
+    width: auto;
+}
+
+#loading.open {
+    top: calc(50% - 100px);
+    opacity: 1;
+}
