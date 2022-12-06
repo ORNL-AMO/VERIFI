@@ -173,6 +173,19 @@
                     {{betterPlantsSummary.reportYearResults.otherSolidUse | customNumber}}
                 </td>
             </tr>
+            <tr
+                *ngIf="betterPlantsSummary.baselineYearResults.otherEnergyUse || betterPlantsSummary.reportYearResults.otherEnergyUse">
+                <td>
+                    Other Energy (<span *ngFor="let fuel of otherEnergyFuels; let index = index;">{{fuel}}<span
+                        class="pr-1" *ngIf="index != otherEnergyFuels.length - 1">,</span> </span>)
+                </td>
+                <td>
+                    {{betterPlantsSummary.baselineYearResults.otherEnergyUse | customNumber}}
+                </td>
+                <td>
+                    {{betterPlantsSummary.reportYearResults.otherEnergyUse | customNumber}}
+                </td>
+            </tr>
             <tr>
                 <td class="w-50">
                     Total Primary Energy Consumed, (MMBtu)

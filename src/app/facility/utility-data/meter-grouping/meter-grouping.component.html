@@ -163,7 +163,6 @@
 </div>
 
 <div class="window" [class.open]="groupToEdit">
-    <div class="windowOverlay"></div>
     <div class="windowContent">
         <app-edit-meter-group-form *ngIf="groupToEdit" [groupToEdit]="groupToEdit" (emitClose)="closeEditGroup($event)"
             [editOrAdd]="editOrAdd" [meterGroupTypes]="meterGroupTypes">
@@ -171,7 +170,7 @@
     </div>
 </div>
 
-<div [ngClass]="{'windowOverlay': groupToDelete}"></div>
+<div [ngClass]="{'windowOverlay': groupToDelete || groupToEdit}"></div>
 <div class="popup" [class.open]="groupToDelete">
     <div class="popup-header" *ngIf="groupToDelete">Delete Meter Data {{groupToDelete.name}}
         <button class="item-right" (click)="closeDeleteGroup()">x</button>

@@ -134,8 +134,8 @@
 
 </p>
 
+<div class="windowOverlay" *ngIf="openEmissionsRates"></div>
 <div class="window" [class.open]="openEmissionsRates">
-    <div class="windowOverlay"></div>
     <div class="windowContent emission-rates">
         <app-e-grid-emissions-table *ngIf="selectedSubregionEmissions"
             [selectedSubregionEmissions]="selectedSubregionEmissions"
