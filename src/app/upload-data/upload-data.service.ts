@@ -155,7 +155,7 @@ export class UploadDataService {
         if (facility) {
           let meterNumber: string = meterData['Meter Number'];
           let meter: IdbUtilityMeter = accountMeters.find(aMeter => { return aMeter.meterNumber == meterNumber });
-          if (!meter) {
+          if (!meter || !facility.id || facility.guid != meter.facilityId) {
             meter = this.utilityMeterDbService.getNewIdbUtilityMeter(facility.guid, selectedAccount.guid, true, facility.energyUnit);
           }
 

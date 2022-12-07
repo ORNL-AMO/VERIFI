@@ -44,7 +44,6 @@ export class WaterMetersOverviewChartComponent implements OnInit {
       let hovertemplate: string = '%{label}: %{value:,.0f} ' + selectedFacility.volumeLiquidUnit + ' <extra></extra>'
 
       this.metersSummary.meterSummaries = _.orderBy(this.metersSummary.meterSummaries, (summary) => { return summary.meter.source });
-
       var data = [{
         values: this.metersSummary.meterSummaries.map(summary => { return summary.consumption }),
         labels: this.metersSummary.meterSummaries.map(summary => { return summary.meter.name }),
@@ -55,11 +54,11 @@ export class WaterMetersOverviewChartComponent implements OnInit {
             width: 5
           }
         },
-        textinfo: 'label+percent',
+        texttemplate: '%{label}: (%{percent:.1%})',
         textposition: 'auto',
         insidetextorientation: "horizontal",
         hovertemplate: hovertemplate,
-        hole: .6,
+        hole: .5,
         type: 'pie',
         automargin: true,
         sort: false
