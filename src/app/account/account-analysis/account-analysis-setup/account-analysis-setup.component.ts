@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { AnalysisCalculationsHelperService } from 'src/app/shared/shared-analysis/calculations/analysis-calculations-helper.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount, IdbAccountAnalysisItem } from 'src/app/models/idb';
@@ -8,6 +7,7 @@ import { Month, Months } from 'src/app/shared/form-data/months';
 import { EnergyUnitOptions, UnitOption } from 'src/app/shared/unitOptions';
 import { AccountAnalysisService } from '../account-analysis.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 
 @Component({
   selector: 'app-account-analysis-setup',
@@ -24,7 +24,7 @@ export class AccountAnalysisSetupComponent implements OnInit {
   analysisItem: IdbAccountAnalysisItem;
   yearOptions: Array<number>;
   constructor(private accountDbService: AccountdbService, private accountAnalysisDbService: AccountAnalysisDbService,
-    private analysisCalculationsHelperService: AnalysisCalculationsHelperService,
+    private utilityMeterDataDbService: UtilityMeterDatadbService,
     private router: Router, private accountAnalysisService: AccountAnalysisService,
     private dbChangesService: DbChangesService) { }
 
@@ -35,7 +35,7 @@ export class AccountAnalysisSetupComponent implements OnInit {
     }
     this.account = this.accountDbService.selectedAccount.getValue();
     this.energyUnit = this.account.energyUnit;
-    this.yearOptions = this.analysisCalculationsHelperService.getYearOptions(true);
+    this.yearOptions = this.utilityMeterDataDbService.getYearOptions(true);
   }
 
   async saveItem() {

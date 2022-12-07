@@ -4,12 +4,12 @@ import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { AnalysisGroup, IdbAccount, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 import * as _ from 'lodash';
-import { AnalysisCalculationsHelperService } from 'src/app/shared/shared-analysis/calculations/analysis-calculations-helper.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AnalysisValidationService } from '../../../analysis-validation.service';
 import { Router } from '@angular/router';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 
 @Component({
   selector: 'app-group-analysis-options',
@@ -24,7 +24,7 @@ export class GroupAnalysisOptionsComponent implements OnInit {
   yearOptions: Array<number>;
   analysisItem: IdbAnalysisItem;
   constructor(private analysisService: AnalysisService, private analysisDbService: AnalysisDbService,
-     private analysisCalculationsHelperService: AnalysisCalculationsHelperService,
+     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private accountDbService: AccountdbService, private facilityDbService: FacilitydbService,
     private dbChangesService: DbChangesService,
     private analysisValidationService: AnalysisValidationService,
@@ -32,7 +32,7 @@ export class GroupAnalysisOptionsComponent implements OnInit {
 
   ngOnInit(): void {
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
-    this.yearOptions = this.analysisCalculationsHelperService.getYearOptions();
+    this.yearOptions = this.utilityMeterDataDbService.getYearOptions();
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(group => {
       this.group = group;
       this.checkUnitsWarning();

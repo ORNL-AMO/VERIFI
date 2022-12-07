@@ -4,7 +4,6 @@ import { Subscription } from 'rxjs';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { AnalysisCalculationsHelperService } from 'src/app/shared/shared-analysis/calculations/analysis-calculations-helper.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
@@ -36,7 +35,7 @@ export class AnalysisDashboardComponent implements OnInit {
   selectedFacilitySub: Subscription;
 
   constructor(private router: Router, private analysisDbService: AnalysisDbService, private toastNotificationService: ToastNotificationsService,
-    private analysisCalculationsHelperService: AnalysisCalculationsHelperService,
+    private utilityMeterDataDbService: UtilityMeterDatadbService,
     private facilityDbService: FacilitydbService,
     private accountAnalysisDbService: AccountAnalysisDbService,
     private dbChangesService: DbChangesService,
@@ -50,7 +49,7 @@ export class AnalysisDashboardComponent implements OnInit {
 
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
       this.selectedFacility = val;
-      this.yearOptions = this.analysisCalculationsHelperService.getYearOptions();
+      this.yearOptions = this.utilityMeterDataDbService.getYearOptions();
       if (this.yearOptions) {
         this.baselineYearErrorMin = this.yearOptions[0] > this.selectedFacility.sustainabilityQuestions.energyReductionBaselineYear;
         this.baselineYearErrorMax = this.yearOptions[this.yearOptions.length - 1] < this.selectedFacility.sustainabilityQuestions.energyReductionBaselineYear
