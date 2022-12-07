@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
-import { AnalysisCalculationsService } from 'src/app/shared/shared-analysis/calculations/analysis-calculations.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AnnualAnalysisSummary } from 'src/app/models/analysis';
@@ -25,7 +24,7 @@ export class AnnualAnalysisSummaryComponent implements OnInit {
   calculating: boolean;
   showFilterDropdown: boolean = false;
   constructor(private analysisService: AnalysisService, private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService,
-    private analysisCalculationsService: AnalysisCalculationsService, private predictorDbService: PredictordbService) {
+     private predictorDbService: PredictordbService) {
   }
 
   ngOnInit(): void {

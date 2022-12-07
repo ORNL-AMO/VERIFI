@@ -1,5 +1,6 @@
 import { MonthlyData } from "src/app/models/calanderization";
 import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, PredictorData } from "src/app/models/idb";
+import { getFiscalYear } from "./calanderizationFunctions";
 
 export function getMonthlyStartAndEndDate(facilityOrAccount: IdbFacility | IdbAccount, analysisItem: IdbAnalysisItem | IdbAccountAnalysisItem): { baselineDate: Date, endDate: Date } {
     let baselineDate: Date;
@@ -30,7 +31,7 @@ export function filterYearPredictorData(predictorData: Array<IdbPredictorEntry>,
     } else {
         return predictorData.filter(predictorDataItem => {
             let predictorItemDate: Date = new Date(predictorDataItem.date);
-            return this.getFiscalYear(predictorItemDate, facilityOrAccount) == year;
+            return getFiscalYear(predictorItemDate, facilityOrAccount) == year;
         });
     }
 }
@@ -43,7 +44,7 @@ export function filterYearMeterData(meterData: Array<MonthlyData>, year: number,
     } else {
         return meterData.filter(meterDataItem => {
             let meterItemDate: Date = new Date(meterDataItem.date);
-            return this.getFiscalYear(meterItemDate, facility) == year;
+            return getFiscalYear(meterItemDate, facility) == year;
         });
     }
 }

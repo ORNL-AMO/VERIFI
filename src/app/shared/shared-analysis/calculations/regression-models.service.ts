@@ -6,6 +6,7 @@ import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import { AnalysisGroup, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, PredictorData } from 'src/app/models/idb';
 import { AnalysisCalculationsHelperService } from './analysis-calculations-helper.service';
 import * as _ from 'lodash';
+import { getFiscalYear } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
 @Injectable({
   providedIn: 'root'
 })
@@ -18,7 +19,7 @@ export class RegressionModelsService {
     let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = this.analysisCalculationsHelperService.getMonthlyStartAndEndDate(facility, analysisItem);
     let baselineDate: Date = monthlyStartAndEndDate.baselineDate;
     let reportYear: number = analysisItem.reportYear;
-    let baselineYear: number = this.analysisCalculationsHelperService.getFiscalYear(baselineDate, facility);
+    let baselineYear: number = getFiscalYear(baselineDate, facility);
     // if (facility.fiscalYear == 'nonCalendarYear' && facility.fiscalYearCalendarEnd) {
     //   baselineYear = baselineYear - 1;
     //   reportYear = reportYear - 1;
@@ -265,7 +266,7 @@ export class RegressionModelsService {
     let reportYearPredictorData: Array<IdbPredictorEntry> = new Array();
     let baselineYearPredictorData: Array<IdbPredictorEntry> = new Array();
     for (let i = 0; i < facilityPredictorData.length; i++) {
-      let fiscalYear: number = this.analysisCalculationsHelperService.getFiscalYear(facilityPredictorData[i].date, facility);
+      let fiscalYear: number = getFiscalYear(facilityPredictorData[i].date, facility);
       if (fiscalYear == reportYear) {
         reportYearPredictorData.push(facilityPredictorData[i]);
       }
