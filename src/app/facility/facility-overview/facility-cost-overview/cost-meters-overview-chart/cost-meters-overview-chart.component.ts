@@ -50,11 +50,11 @@ export class CostMetersOverviewChartComponent implements OnInit {
             width: 5
           }
         },
-        textinfo: 'label+percent',
+        texttemplate: '%{label}: (%{percent:.1%})',
         textposition: 'auto',
         insidetextorientation: "horizontal",
         hovertemplate: hovertemplate,
-        hole: .6,
+        hole: .5,
         type: 'pie',
         automargin: true,
         sort: false

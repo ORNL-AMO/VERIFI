@@ -26,14 +26,14 @@ export class FacilityUtilityUsageChartComponent implements OnInit {
     });
   }
 
-  ngOnDestroy(){
+  ngOnDestroy() {
     this.accountFacilitiesSummarySub.unsubscribe();
   }
 
-  ngAfterViewInit(){
+  ngAfterViewInit() {
     this.drawChart();
   }
-  
+
   drawChart() {
     if (this.energyUseDonut && this.facilitiesSummary) {
       let selectedAccout: IdbAccount = this.accountDbService.selectedAccount.getValue();
@@ -48,11 +48,11 @@ export class FacilityUtilityUsageChartComponent implements OnInit {
             width: 5
           }
         },
-        textinfo: 'label+percent',
+        texttemplate: '%{label}: (%{percent:.1%})',
         textposition: 'auto',
         insidetextorientation: "horizontal",
         hovertemplate: hovertemplate,
-        hole: .6,
+        hole: .5,
         type: 'pie',
         automargin: true
       }];
