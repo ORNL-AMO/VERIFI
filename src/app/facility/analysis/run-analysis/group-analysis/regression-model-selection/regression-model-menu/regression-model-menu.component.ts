@@ -47,7 +47,7 @@ export class RegressionModelMenuComponent implements OnInit {
     this.yearOptions = this.utilityMeterDataDbService.getYearOptions();
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(group => {
       if (!this.isFormChange) {
-        this.group = { ...group };
+        this.group = JSON.parse(JSON.stringify(group));
         if (this.group.models && this.group.models.length != 0) {
           this.checkModelData();
           this.checkHasValidModels();

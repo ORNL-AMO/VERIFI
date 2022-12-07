@@ -134,7 +134,7 @@ export class AnalysisDbService {
     let predictors: Array<PredictorData> = this.predictorDbService.facilityPredictors.getValue();
     facilityMeterGroups.forEach(group => {
       if (group.groupType == 'Energy') {
-        let predictorVariables: Array<PredictorData> = { ...predictors };
+        let predictorVariables: Array<PredictorData> = JSON.parse(JSON.stringify(predictors));
         // predictorVariables.forEach(variable => {
         //   variable.productionInAnalysis = true;
         // });
