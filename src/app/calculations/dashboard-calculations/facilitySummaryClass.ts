@@ -1,7 +1,7 @@
 import { CalanderizedMeter, MonthlyData } from "src/app/models/calanderization";
 import { FacilityMeterSummaryData, MeterSummary, UtilityUsageSummaryData, YearMonthData } from "src/app/models/dashboard";
 import { IdbFacility, IdbUtilityMeterGroup, MeterSource } from "src/app/models/idb";
-import { getFiscalYear, getLastBillEntryFromCalanderizedMeterData, getPastYearData, getSumValue, getUtilityUsageSummaryData, getYearlyUsageNumbers, LastYearDataResult } from "../helper-functions/calanderizationFunctions";
+import { getFiscalYear, getLastBillEntryFromCalanderizedMeterData, getPastYearData, getUtilityUsageSummaryData, getYearlyUsageNumbers, LastYearDataResult } from "../shared-calculations/calanderizationFunctions";
 import * as _ from 'lodash';
 import { FacilityBarChartData } from "src/app/models/visualization";
 

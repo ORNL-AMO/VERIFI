@@ -11,7 +11,6 @@ import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db
 import { JStatRegressionModel } from 'src/app/models/analysis';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { AnalysisGroup, IdbAccount, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
-import { AnalysisCalculationsHelperService } from 'src/app/shared/shared-analysis/calculations/analysis-calculations-helper.service';
 import { RegressionModelsService } from 'src/app/shared/shared-analysis/calculations/regression-models.service';
 import * as _ from 'lodash';
 import { AnalysisValidationService } from 'src/app/facility/analysis/analysis-validation.service';
@@ -36,7 +35,7 @@ export class RegressionModelMenuComponent implements OnInit {
   isFormChange: boolean;
   constructor(private analysisDbService: AnalysisDbService, private analysisService: AnalysisService,
     private dbChangesService: DbChangesService, private accountDbService: AccountdbService,
-    private facilityDbService: FacilitydbService, private analysisCalculationsHelperService: AnalysisCalculationsHelperService,
+    private facilityDbService: FacilitydbService,
     private regressionsModelsService: RegressionModelsService, private predictorDbService: PredictordbService,
     private utilityMeterDbService: UtilityMeterdbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private analysisValidationService: AnalysisValidationService,
@@ -45,7 +44,7 @@ export class RegressionModelMenuComponent implements OnInit {
   ngOnInit(): void {
     this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
     this.showInvalid = this.analysisService.showInvalidModels.getValue();
-    this.yearOptions = this.analysisCalculationsHelperService.getYearOptions();
+    this.yearOptions = this.utilityMeterDataDbService.getYearOptions();
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(group => {
       if (!this.isFormChange) {
         this.group = { ...group };

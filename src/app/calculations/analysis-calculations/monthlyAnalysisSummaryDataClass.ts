@@ -1,9 +1,9 @@
 import { MonthlyData } from "src/app/models/calanderization";
 import { AnalysisGroup, AnalysisType, IdbFacility, IdbPredictorEntry, PredictorData } from "src/app/models/idb";
-import { HelperService } from "./helperService";
 import { MonthlyGroupAnalysisClass } from "./monthlyGroupAnalysisClass";
 import * as _ from 'lodash';
 import { MonthlyAnalysisCalculatedValues } from "./monthlyAnalysisCalculatedValuesClass";
+import { getFiscalYear } from "../shared-calculations/calanderizationFunctions";
 
 export class MonthlyAnalysisSummaryDataClass {
     //results
@@ -20,7 +20,6 @@ export class MonthlyAnalysisSummaryDataClass {
     monthlyAnalysisCalculatedValues: MonthlyAnalysisCalculatedValues;
 
     //used for calcs
-    helperService: HelperService;
     monthPredictorData: Array<IdbPredictorEntry>;
     monthMeterData: Array<MonthlyData>;
     productionUsage: Array<number>;
@@ -32,7 +31,6 @@ export class MonthlyAnalysisSummaryDataClass {
         monthDate: Date,
         previousMonthsSummaryData: Array<MonthlyAnalysisSummaryDataClass>
     ) {
-        this.helperService = new HelperService();
         this.date = monthDate;
         this.group = monthlyGroupAnalysisClass.selectedGroup;
         this.setFiscalYear(monthlyGroupAnalysisClass.facility);
@@ -49,7 +47,7 @@ export class MonthlyAnalysisSummaryDataClass {
     }
 
     setFiscalYear(facility: IdbFacility) {
-        this.fiscalYear = this.helperService.getFiscalYear(new Date(this.date), facility);
+        this.fiscalYear = getFiscalYear(new Date(this.date), facility);
     }
 
     setMonthPredictorData(facilityPredictorData: Array<IdbPredictorEntry>) {

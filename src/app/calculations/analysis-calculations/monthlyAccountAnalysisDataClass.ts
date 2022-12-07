@@ -1,46 +1,35 @@
-import { MonthlyAnalysisSummaryData } from "src/app/models/analysis";
-import { IdbFacility, IdbPredictorEntry, PredictorData } from "src/app/models/idb";
-import * as _ from 'lodash';
+import { IdbAccount, IdbAccountAnalysisItem } from "src/app/models/idb";
 import { MonthlyAnalysisCalculatedValues } from "./monthlyAnalysisCalculatedValuesClass";
 import { MonthlyAnalysisSummaryDataClass } from "./monthlyAnalysisSummaryDataClass";
-import { HelperService } from "./helperService";
+import * as _ from 'lodash';
+import { getFiscalYear } from "../shared-calculations/calanderizationFunctions";
+export class MonthlyAccountAnalysisDataClass {
 
-export class MonthlyFacilityAnalysisDataClass {
 
     date: Date;
     energyUse: number;
     modeledEnergy: number;
     baselineAdjustmentForOther: number;
-    predictorUsage: Array<{
-        usage: number,
-        predictorId: string
-    }>;
     fiscalYear: number;
     monthlyAnalysisCalculatedValues: MonthlyAnalysisCalculatedValues;
 
     currentMonthData: Array<MonthlyAnalysisSummaryDataClass>;
-    monthPredictorData: Array<IdbPredictorEntry>;
     baselineActualEnergyUse: number;
     monthIndex: number;
-    helperService: HelperService;
-    facilityGUID: string;
     constructor(
         allFacilityAnalysisData: Array<MonthlyAnalysisSummaryDataClass>,
         monthDate: Date,
-        facilityPredictorEntries: Array<IdbPredictorEntry>,
-        previousMonthsSummaryData: Array<MonthlyFacilityAnalysisDataClass>,
+        previousMonthsSummaryData: Array<MonthlyAccountAnalysisDataClass>,
         baselineYear: number,
-        facility: IdbFacility) {
-        this.facilityGUID = facility.guid;
-        this.helperService = new HelperService();
+        account: IdbAccount,
+        analysisItem: IdbAccountAnalysisItem,
+        annualUsageValues: Array<{year: number, usage: number}>) {
         this.date = monthDate;
-        this.setFiscalYear(facility);
+        this.setFiscalYear(account);
         this.setCurrentMonthData(allFacilityAnalysisData);
-        this.setMonthPredictorData(facilityPredictorEntries);
-        this.setPredictorUsage(facilityPredictorEntries);
         this.setEnergyUse();
         this.setModeledEnergy();
-        this.setBaselineAdjustmentForOther();
+        this.setBaselineAdjustmentForOther(analysisItem, baselineYear, annualUsageValues);
         this.setMonthIndex(previousMonthsSummaryData);
         this.setBaselineActualEnergyUse(baselineYear, previousMonthsSummaryData);
         this.setMonthlyAnalysisCalculatedValues(baselineYear, previousMonthsSummaryData);
@@ -53,33 +42,8 @@ export class MonthlyFacilityAnalysisDataClass {
         });
     }
 
-    setMonthPredictorData(facilityPredictorEntries: Array<IdbPredictorEntry>) {
-        this.monthPredictorData = facilityPredictorEntries.filter(predictorData => {
-            let predictorDate: Date = new Date(predictorData.date);
-            return predictorDate.getUTCFullYear() == this.date.getUTCFullYear() && predictorDate.getUTCMonth() == this.date.getUTCMonth();
-        });
-    }
-
-    setPredictorUsage(facilityPredictorEntries: Array<IdbPredictorEntry>) {
-        this.predictorUsage = new Array();
-        if (facilityPredictorEntries.length != 0) {
-            let predictorVariables: Array<PredictorData> = facilityPredictorEntries[0].predictors;
-            predictorVariables.forEach(variable => {
-                let usageVal: number = 0;
-                this.monthPredictorData.forEach(data => {
-                    let predictorData: PredictorData = data.predictors.find(predictor => { return predictor.id == variable.id });
-                    usageVal = usageVal + predictorData.amount;
-                });
-                this.predictorUsage.push({
-                    usage: usageVal,
-                    predictorId: variable.id
-                });
-            });
-        }
-    }
-
-    setFiscalYear(facility: IdbFacility) {
-        this.fiscalYear = this.helperService.getFiscalYear(new Date(this.date), facility);
+    setFiscalYear(facility: IdbAccount) {
+        this.fiscalYear = getFiscalYear(new Date(this.date), facility);
     }
 
     setEnergyUse() {
@@ -90,16 +54,24 @@ export class MonthlyFacilityAnalysisDataClass {
         this.modeledEnergy = _.sumBy(this.currentMonthData, 'modeledEnergy');
     }
 
-    setBaselineAdjustmentForOther() {
+    setBaselineAdjustmentForOther(accountAnalysisItem: IdbAccountAnalysisItem, baselineYear: number, annualUsageValues: Array<{year: number, usage: number}>) {
         this.baselineAdjustmentForOther = _.sumBy(this.currentMonthData, 'baselineAdjustmentForOther');
+        if (accountAnalysisItem.hasBaselineAdjustement && this.fiscalYear != baselineYear) {
+            let annualEnergyUse: number = annualUsageValues.find(usageVal => {return usageVal.year == this.fiscalYear})?.usage;
+            let yearAdjustment: { year: number, amount: number } = accountAnalysisItem.baselineAdjustments.find(bAdjustement => { return bAdjustement.year == this.date.getUTCFullYear(); })
+            if (yearAdjustment.amount) {
+                let accountBaselineAdjustementForOther: number = (this.energyUse / annualEnergyUse) * yearAdjustment.amount;
+                this.baselineAdjustmentForOther = this.baselineAdjustmentForOther + accountBaselineAdjustementForOther;
+            }
+        }
     }
 
-    setMonthIndex(previousMonthsSummaryData: Array<MonthlyFacilityAnalysisDataClass>) {
+    setMonthIndex(previousMonthsSummaryData: Array<MonthlyAccountAnalysisDataClass>) {
         let summaryDataIndex: number = previousMonthsSummaryData.length;
         if (summaryDataIndex == 0) {
             this.monthIndex = 0;
         } else {
-            let previousMonthSummaryData: MonthlyFacilityAnalysisDataClass = previousMonthsSummaryData[summaryDataIndex - 1];
+            let previousMonthSummaryData: MonthlyAccountAnalysisDataClass = previousMonthsSummaryData[summaryDataIndex - 1];
             if (previousMonthSummaryData.fiscalYear == this.fiscalYear) {
                 this.monthIndex = previousMonthSummaryData.monthIndex + 1;
             } else {
@@ -108,14 +80,14 @@ export class MonthlyFacilityAnalysisDataClass {
         }
     }
 
-    setBaselineActualEnergyUse(baselineYear: number, previousMonthsSummaryData: Array<MonthlyFacilityAnalysisDataClass>) {
+    setBaselineActualEnergyUse(baselineYear: number, previousMonthsSummaryData: Array<MonthlyAccountAnalysisDataClass>) {
         if (this.fiscalYear == baselineYear) {
             this.baselineActualEnergyUse = this.energyUse;
         } else {
             this.baselineActualEnergyUse = previousMonthsSummaryData[this.monthIndex].energyUse;
         }
     }
-    setMonthlyAnalysisCalculatedValues(baselineYear: number, previousMonthsSummaryData: Array<MonthlyFacilityAnalysisDataClass>) {
+    setMonthlyAnalysisCalculatedValues(baselineYear: number, previousMonthsSummaryData: Array<MonthlyAccountAnalysisDataClass>) {
         let previousMonthsAnalysisCalculatedValues: Array<MonthlyAnalysisCalculatedValues> = previousMonthsSummaryData.map(data => { return data.monthlyAnalysisCalculatedValues });
         this.monthlyAnalysisCalculatedValues = new MonthlyAnalysisCalculatedValues(
             this.energyUse,

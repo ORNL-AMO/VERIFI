@@ -13,7 +13,7 @@ import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, IdbOv
 import { BetterPlantsSummary, ReportOptions } from 'src/app/models/overview-report';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { ConvertMeterDataService } from 'src/app/shared/helper-services/convert-meter-data.service';
-import { BetterPlantsReportClass } from 'src/app/web-workers/classes/betterPlantsReportClass';
+import { BetterPlantsReportClass } from 'src/app/calculations/better-plants-calculations/betterPlantsReportClass';
 import { OverviewReportService } from '../overview-report.service';
 
 @Component({
@@ -117,7 +117,7 @@ export class BetterPlantsReportComponent implements OnInit {
         accountAnalysisItems: accountFacilityAnalysisItems
       });
     } else {
-      console.log('nopee')
+      // Web Workers are not supported in this environment.
       let betterPlantsReportClass: BetterPlantsReportClass = new BetterPlantsReportClass(
         this.reportOptions,
         selectedAnalysisItem,
@@ -128,8 +128,6 @@ export class BetterPlantsReportComponent implements OnInit {
         accountFacilityAnalysisItems
       );
       this.betterPlantsSummary = betterPlantsReportClass.getBetterPlantsSummary();
-      // Web Workers are not supported in this environment.
-      // You should add a fallback so that your program still executes correctly.
     }
   }
 }

@@ -1,8 +1,8 @@
 
 import { MonthlyAnalysisSummaryData } from "src/app/models/analysis";
 import * as _ from 'lodash';
-import { HelperService } from "./helperService";
-import { IdbAccount, IdbFacility, IdbPredictorEntry, PredictorData } from "src/app/models/idb";
+import { IdbFacility, IdbPredictorEntry, PredictorData } from "src/app/models/idb";
+import { filterYearPredictorData } from "../shared-calculations/calculationsHelpers";
 
 export class AnnualAnalysisSummaryDataClass {
 
@@ -27,7 +27,6 @@ export class AnnualAnalysisSummaryDataClass {
 
 
     yearAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>;
-    helperService: HelperService;
     baselineEnergyUse: number;
     baselineModeledEnergyUse: number;
     previousYearPercentSavings: number;
@@ -39,7 +38,6 @@ export class AnnualAnalysisSummaryDataClass {
         facility: IdbFacility,
         previousYearsSummaryData: Array<AnnualAnalysisSummaryDataClass>
     ) {
-        this.helperService = new HelperService();
         this.year = year;
         this.setYearAnalysisSummaryData(monthlyAnalysisSummaryData);
         this.setPredictorUsage(accountPredictorEntries, facility);
@@ -167,7 +165,7 @@ export class AnnualAnalysisSummaryDataClass {
         this.predictorUsage = new Array();
         if (facility) {
             let facilityPredictorData: Array<IdbPredictorEntry> = accountPredictorEntries.filter(entry => { return entry.facilityId == facility.guid });
-            let summaryYearPredictorData: Array<IdbPredictorEntry> = this.helperService.filterYearPredictorData(facilityPredictorData, this.year, facility);
+            let summaryYearPredictorData: Array<IdbPredictorEntry> = filterYearPredictorData(facilityPredictorData, this.year, facility);
             if (summaryYearPredictorData.length > 0) {
                 let predictorVariables: Array<PredictorData> = summaryYearPredictorData[0].predictors;
                 predictorVariables.forEach(variable => {

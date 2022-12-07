@@ -1,7 +1,7 @@
 /// <reference lib="webworker" />
 
 import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from "src/app/models/analysis";
-import { AnnualFacilityAnalysisSummaryClass } from "./classes/annualFacilityAnalysisSummaryClass";
+import { AnnualFacilityAnalysisSummaryClass } from "src/app/calculations/analysis-calculations/annualFacilityAnalysisSummaryClass";
 
 addEventListener('message', ({ data }) => {
     let annualAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(data.analysisItem, data.facility, data.calanderizedMeters, data.accountPredictorEntries);

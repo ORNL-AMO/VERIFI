@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
-import { AnalysisCalculationsService } from 'src/app/shared/shared-analysis/calculations/analysis-calculations.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { MonthlyAnalysisSummary } from 'src/app/models/analysis';
@@ -9,6 +8,7 @@ import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { Subscription } from 'rxjs';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
+import { MonthlyAnalysisSummaryClass } from 'src/app/calculations/analysis-calculations/monthlyAnalysisSummaryClass';
 
 @Component({
   selector: 'app-monthly-analysis-summary',
@@ -60,10 +60,9 @@ export class MonthlyAnalysisSummaryComponent implements OnInit {
         accountPredictorEntries: accountPredictorEntries
       });
     } else {
-      console.log('nopee')
-
       // Web Workers are not supported in this environment.
-      // You should add a fallback so that your program still executes correctly.
+      let monthlyAnalysisSummaryClass: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(this.group, this.analysisItem, this.facility, calanderizedMeters, accountPredictorEntries);
+      this.monthlyAnalysisSummary = monthlyAnalysisSummaryClass.getResults();
     }
   }
 
@@ -80,7 +79,7 @@ export class MonthlyAnalysisSummaryComponent implements OnInit {
     this.analysisService.dataDisplay.next(this.dataDisplay);
   }
 
-  toggleFilterMenu(){
+  toggleFilterMenu() {
     this.showFilterDropdown = !this.showFilterDropdown;
   }
 

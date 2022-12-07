@@ -1,11 +1,12 @@
 import { MonthlyAnalysisSummaryData } from "src/app/models/analysis";
 import { CalanderizedMeter } from "src/app/models/calanderization";
 import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, IdbPredictorEntry } from "src/app/models/idb";
-import { HelperService } from "./helperService";
 import { MonthlyAccountAnalysisDataClass } from "./monthlyAccountAnalysisDataClass";
 import { MonthlyAnalysisSummaryDataClass } from "./monthlyAnalysisSummaryDataClass";
 import { MonthlyFacilityAnalysisClass } from "./monthlyFacilityAnalysisClass";
 import * as _ from 'lodash';
+import { checkAnalysisValue, getMonthlyStartAndEndDate } from "../shared-calculations/calculationsHelpers";
+import { getFiscalYear } from "../shared-calculations/calanderizationFunctions";
 
 export class MonthlyAccountAnalysisClass {
 
@@ -14,7 +15,6 @@ export class MonthlyAccountAnalysisClass {
     monthlyFacilityAnalysisClasses: Array<MonthlyFacilityAnalysisClass>
     startDate: Date;
     endDate: Date;
-    helperService: HelperService;
     facilityPredictorEntries: Array<IdbPredictorEntry>;
     baselineYear: number;
     annualUsageValues: Array<{year: number, usage: number}>
@@ -26,7 +26,6 @@ export class MonthlyAccountAnalysisClass {
         accountPredictorEntries: Array<IdbPredictorEntry>,
         allAccountAnalysisItems: Array<IdbAnalysisItem>
     ) {
-        this.helperService = new HelperService();
         this.setStartAndEndDate(account, accountAnalysisItem);
         this.setBaselineYear(account);
         this.setMonthlyFacilityAnlysisClasses(accountAnalysisItem, calanderizedMeters, accountFacilities, accountPredictorEntries, allAccountAnalysisItems);
@@ -35,13 +34,13 @@ export class MonthlyAccountAnalysisClass {
     }
 
     setStartAndEndDate(account: IdbAccount, analysisItem: IdbAccountAnalysisItem) {
-        let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = this.helperService.getMonthlyStartAndEndDate(account, analysisItem);
+        let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = getMonthlyStartAndEndDate(account, analysisItem);
         this.startDate = monthlyStartAndEndDate.baselineDate;
         this.endDate = monthlyStartAndEndDate.endDate;
     }
 
     setBaselineYear(account: IdbAccount) {
-        this.baselineYear = this.helperService.getFiscalYear(this.startDate, account);
+        this.baselineYear = getFiscalYear(this.startDate, account);
     }
 
     setMonthlyFacilityAnlysisClasses(
@@ -112,13 +111,13 @@ export class MonthlyAccountAnalysisClass {
                 // predictorUsage: summaryDataItem.predictorUsage,
                 fiscalYear: summaryDataItem.fiscalYear,
                 group: undefined,
-                SEnPI: this.helperService.checkValue(summaryDataItem.monthlyAnalysisCalculatedValues.SEnPI),
-                savings: this.helperService.checkValue(summaryDataItem.monthlyAnalysisCalculatedValues.savings),
-                percentSavingsComparedToBaseline: this.helperService.checkValue(summaryDataItem.monthlyAnalysisCalculatedValues.percentSavingsComparedToBaseline) * 100,
-                yearToDateSavings: this.helperService.checkValue(summaryDataItem.monthlyAnalysisCalculatedValues.yearToDateSavings),
-                yearToDatePercentSavings: this.helperService.checkValue(summaryDataItem.monthlyAnalysisCalculatedValues.yearToDatePercentSavings) * 100,
-                rollingSavings: this.helperService.checkValue(summaryDataItem.monthlyAnalysisCalculatedValues.rollingSavings),
-                rolling12MonthImprovement: this.helperService.checkValue(summaryDataItem.monthlyAnalysisCalculatedValues.rolling12MonthImprovement) * 100,
+                SEnPI: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.SEnPI),
+                savings: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.savings),
+                percentSavingsComparedToBaseline: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.percentSavingsComparedToBaseline) * 100,
+                yearToDateSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.yearToDateSavings),
+                yearToDatePercentSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.yearToDatePercentSavings) * 100,
+                rollingSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.rollingSavings),
+                rolling12MonthImprovement: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.rolling12MonthImprovement) * 100,
             }
         })
     }

@@ -4,25 +4,22 @@ import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { JStatRegressionModel, SEPValidation } from 'src/app/models/analysis';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import { AnalysisGroup, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, PredictorData } from 'src/app/models/idb';
-import { AnalysisCalculationsHelperService } from './analysis-calculations-helper.service';
 import * as _ from 'lodash';
+import { getFiscalYear } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
+import { getMonthlyStartAndEndDate } from 'src/app/calculations/shared-calculations/calculationsHelpers';
 @Injectable({
   providedIn: 'root'
 })
 export class RegressionModelsService {
 
   allResults: Array<Array<number>>;
-  constructor(private analysisCalculationsHelperService: AnalysisCalculationsHelperService, private predictorDbService: PredictordbService) { }
+  constructor(private predictorDbService: PredictordbService) { }
 
   getModels(analysisGroup: AnalysisGroup, calanderizedMeters: Array<CalanderizedMeter>, facility: IdbFacility, analysisItem: IdbAnalysisItem): Array<JStatRegressionModel> {
-    let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = this.analysisCalculationsHelperService.getMonthlyStartAndEndDate(facility, analysisItem);
+    let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = getMonthlyStartAndEndDate(facility, analysisItem);
     let baselineDate: Date = monthlyStartAndEndDate.baselineDate;
     let reportYear: number = analysisItem.reportYear;
-    let baselineYear: number = this.analysisCalculationsHelperService.getFiscalYear(baselineDate, facility);
-    // if (facility.fiscalYear == 'nonCalendarYear' && facility.fiscalYearCalendarEnd) {
-    //   baselineYear = baselineYear - 1;
-    //   reportYear = reportYear - 1;
-    // }
+    let baselineYear: number = getFiscalYear(baselineDate, facility);
     let predictorVariables: Array<PredictorData> = new Array();
     let predictorVariableIds: Array<string> = new Array();
     analysisGroup.predictorVariables.forEach(variable => {
@@ -44,7 +41,7 @@ export class RegressionModelsService {
 
       let models: Array<JStatRegressionModel> = new Array();
       while (baselineYear <= reportYear) {
-        let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = this.getMonthlyStartAndEndDate(facility, baselineYear);
+        let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = this.getModelMonthlyStartAndEndDate(facility, baselineYear);
         allPredictorVariableCombos.forEach(variableIdCombo => {
           let regressionData: { endog: Array<number>, exog: Array<Array<number>> } = this.getRegressionData(monthlyStartAndEndDate.baselineDate, monthlyStartAndEndDate.endDate, allMeterData, facilityPredictorData, variableIdCombo);
           try {
@@ -56,7 +53,6 @@ export class RegressionModelsService {
               modelPredictorVariables.push(variable);
             });
             model['predictorVariables'] = modelPredictorVariables;
-            // model['isValid'] = this.checkModelValid(model);
             model = this.setModelVaildAndNotes(model, facilityPredictorData, reportYear, facility);
             model['modelId'] = Math.random().toString(36).substr(2, 9);
             model['modelPValue'] = model.f.pvalue;
@@ -144,7 +140,7 @@ export class RegressionModelsService {
     }
   }
 
-  getMonthlyStartAndEndDate(facilityOrAccount: IdbFacility, startYear: number): { baselineDate: Date, endDate: Date } {
+  getModelMonthlyStartAndEndDate(facilityOrAccount: IdbFacility, startYear: number): { baselineDate: Date, endDate: Date } {
     let baselineDate: Date;
     let endDate: Date;
     if (facilityOrAccount.fiscalYear == 'calendarYear') {
@@ -265,7 +261,7 @@ export class RegressionModelsService {
     let reportYearPredictorData: Array<IdbPredictorEntry> = new Array();
     let baselineYearPredictorData: Array<IdbPredictorEntry> = new Array();
     for (let i = 0; i < facilityPredictorData.length; i++) {
-      let fiscalYear: number = this.analysisCalculationsHelperService.getFiscalYear(facilityPredictorData[i].date, facility);
+      let fiscalYear: number = getFiscalYear(facilityPredictorData[i].date, facility);
       if (fiscalYear == reportYear) {
         reportYearPredictorData.push(facilityPredictorData[i]);
       }

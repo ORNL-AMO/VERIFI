@@ -4,20 +4,17 @@ import { AnalysisGroup, IdbAccount, IdbAnalysisItem, IdbFacility, IdbPredictorEn
 import { AnnualAnalysisSummaryDataClass } from "./annualAnalysisSummaryDataClass";
 import { MonthlyAnalysisSummaryClass } from "./monthlyAnalysisSummaryClass";
 import { AnnualAnalysisSummary } from 'src/app/models/analysis';
-import { HelperService } from "./helperService";
-
+import { checkAnalysisValue } from "../shared-calculations/calculationsHelpers";
 export class AnnualGroupAnalysisSummaryClass {
 
     monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>;
     annualAnalysisSummaryDataClasses: Array<AnnualAnalysisSummaryDataClass>;
     baselineYear: number;
     reportYear: number;
-    helperService: HelperService;
     constructor(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorEntry>) {
-        this.helperService = new HelperService();
         this.setMonthlyAnalysisSummaryData(selectedGroup, analysisItem, facility, calanderizedMeters, accountPredictorEntries);
         this.setBaselineYear(facility);
-        this.setReportYear(analysisItem, facility);
+        this.setReportYear(analysisItem);
         this.setAnnualAnalysisSummaryDataClasses(accountPredictorEntries, facility);
     }
 
@@ -28,16 +25,10 @@ export class AnnualGroupAnalysisSummaryClass {
 
     setBaselineYear(facilityOrAccount: IdbFacility | IdbAccount) {
         this.baselineYear = facilityOrAccount.sustainabilityQuestions.energyReductionBaselineYear;
-        // if (facilityOrAccount.fiscalYear == 'nonCalendarYear' && facilityOrAccount.fiscalYearCalendarEnd) {
-        //     this.baselineYear = this.baselineYear - 1;
-        // }
     }
 
-    setReportYear(analysisItem: IdbAnalysisItem, facilityOrAccount: IdbFacility | IdbAccount) {
+    setReportYear(analysisItem: IdbAnalysisItem) {
         this.reportYear = analysisItem.reportYear;
-        // if (facilityOrAccount.fiscalYear == 'nonCalendarYear' && facilityOrAccount.fiscalYearCalendarEnd) {
-        //     this.reportYear = this.reportYear - 1;
-        // }
     }
 
 
@@ -45,7 +36,6 @@ export class AnnualGroupAnalysisSummaryClass {
         this.annualAnalysisSummaryDataClasses = new Array();
         let analysisYear: number = this.baselineYear;
         while (analysisYear <= this.reportYear) {
-            // let annualAnalysisSummaryDataClassCopy: Array<AnnualAnalysisSummaryDataClass> = JSON.parse(JSON.stringify(this.annualAnalysisSummaryDataClasses))
             let yearAnalysisSummaryDataClass: AnnualAnalysisSummaryDataClass = new AnnualAnalysisSummaryDataClass(this.monthlyAnalysisSummaryData, analysisYear, accountPredictorEntries, facility, this.annualAnalysisSummaryDataClasses);
             this.annualAnalysisSummaryDataClasses.push(yearAnalysisSummaryDataClass);
             analysisYear++;
@@ -63,12 +53,12 @@ export class AnnualGroupAnalysisSummaryClass {
                 baselineAdjustmentForNormalization: summaryDataClass.baselineAdjustmentForNormalization,
                 baselineAdjustmentForOther: summaryDataClass.baselineAdjustmentForOther,
                 baselineAdjustment: summaryDataClass.baselineAdjustment,
-                SEnPI: this.helperService.checkValue(summaryDataClass.SEnPI),
-                savings: this.helperService.checkValue(summaryDataClass.savings),
-                totalSavingsPercentImprovement: this.helperService.checkValue(summaryDataClass.totalSavingsPercentImprovement) * 100,
-                annualSavingsPercentImprovement: this.helperService.checkValue(summaryDataClass.annualSavingsPercentImprovement) * 100,
-                cummulativeSavings: this.helperService.checkValue(summaryDataClass.cummulativeSavings),
-                newSavings: this.helperService.checkValue(summaryDataClass.newSavings),
+                SEnPI: checkAnalysisValue(summaryDataClass.SEnPI),
+                savings: checkAnalysisValue(summaryDataClass.savings),
+                totalSavingsPercentImprovement: checkAnalysisValue(summaryDataClass.totalSavingsPercentImprovement) * 100,
+                annualSavingsPercentImprovement: checkAnalysisValue(summaryDataClass.annualSavingsPercentImprovement) * 100,
+                cummulativeSavings: checkAnalysisValue(summaryDataClass.cummulativeSavings),
+                newSavings: checkAnalysisValue(summaryDataClass.newSavings),
                 predictorUsage: summaryDataClass.predictorUsage
             }
         })

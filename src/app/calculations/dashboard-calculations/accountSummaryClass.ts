@@ -2,7 +2,7 @@ import { CalanderizedMeter, LastYearData, MonthlyData } from "src/app/models/cal
 import { AccountFacilitiesSummary, FacilitySummary, YearMonthData, UtilityUsageSummaryData } from "src/app/models/dashboard";
 import { IdbAccount, IdbFacility, MeterSource } from "src/app/models/idb";
 import * as _ from 'lodash';
-import { getLastBillEntryFromCalanderizedMeterData, getPastYearData, getUtilityUsageSummaryData, getYearlyUsageNumbers } from "../helper-functions/calanderizationFunctions";
+import { getLastBillEntryFromCalanderizedMeterData, getPastYearData, getUtilityUsageSummaryData, getYearlyUsageNumbers } from "../shared-calculations/calanderizationFunctions";
 
 
 export class AccountSummaryClass {

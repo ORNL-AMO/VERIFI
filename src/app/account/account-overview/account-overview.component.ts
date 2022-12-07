@@ -5,6 +5,7 @@ import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAccount, IdbFacility, MeterSource } from 'src/app/models/idb';
 import { Router } from '@angular/router';
+import { AccountSummaryClass } from 'src/app/calculations/dashboard-calculations/accountSummaryClass';
 
 @Component({
   selector: 'app-account-overview',
@@ -17,17 +18,17 @@ export class AccountOverviewComponent implements OnInit {
   worker: Worker;
   noUtilityData: boolean;
   account: IdbAccount;
-  constructor(private accountDbService: AccountdbService, private accountOverviewService: AccountOverviewService, 
+  constructor(private accountDbService: AccountdbService, private accountOverviewService: AccountOverviewService,
     private facilityDbService: FacilitydbService, private router: Router) { }
 
   ngOnInit(): void {
     this.accountSub = this.accountDbService.selectedAccount.subscribe(val => {
       this.account = val;
       this.accountOverviewService.setCalanderizedMeters();
-      if(this.accountOverviewService.calanderizedMeters.length != 0){
+      if (this.accountOverviewService.calanderizedMeters.length != 0) {
         this.noUtilityData = false;
         this.calculateFacilitiesSummary();
-      }else{
+      } else {
         this.noUtilityData = true;
       }
     });
@@ -41,9 +42,9 @@ export class AccountOverviewComponent implements OnInit {
   }
 
   calculateFacilitiesSummary() {
+    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('src/app/web-workers/account-overview.worker', import.meta.url));
-      let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
       this.worker.onmessage = ({ data }) => {
         if (data.type == 'energy') {
           this.accountOverviewService.accountFacilitiesEnergySummary.next(data.accountFacilitiesSummary);
@@ -105,10 +106,33 @@ export class AccountOverviewComponent implements OnInit {
         account: this.account
       });
     } else {
-      console.log('nopee')
-
       // Web Workers are not supported in this environment.
-      // You should add a fallback so that your program still executes correctly.
+      let energySources: Array<MeterSource> = ['Electricity', 'Natural Gas', 'Other Fuels', 'Other Energy']
+      let energySummaryClass: AccountSummaryClass = new AccountSummaryClass(this.accountOverviewService.calanderizedMeters, facilities, energySources, this.account);
+      this.accountOverviewService.accountFacilitiesEnergySummary.next(energySummaryClass.facilitiesSummary);
+      this.accountOverviewService.energyUtilityUsageSummaryData.next(energySummaryClass.utilityUsageSummaryData);
+      this.accountOverviewService.energyYearMonthData.next(energySummaryClass.yearMonthData);
+      let waterSources: Array<MeterSource> = [
+        "Water",
+        "Waste Water"
+      ];
+      let waterSummaryClass: AccountSummaryClass = new AccountSummaryClass(this.accountOverviewService.calanderizedMeters, facilities, waterSources, this.account);
+      this.accountOverviewService.accountFacilitiesWaterSummary.next(waterSummaryClass.facilitiesSummary);
+      this.accountOverviewService.waterUtilityUsageSummaryData.next(waterSummaryClass.utilityUsageSummaryData);
+      this.accountOverviewService.waterYearMonthData.next(waterSummaryClass.yearMonthData);
+      let allSources: Array<MeterSource> = [
+        "Electricity",
+        "Natural Gas",
+        "Other Fuels",
+        "Other Energy",
+        "Water",
+        "Waste Water",
+        "Other Utility"
+      ]
+      let allSummaryClass: AccountSummaryClass = new AccountSummaryClass(this.accountOverviewService.calanderizedMeters, facilities, allSources, this.account);
+      this.accountOverviewService.accountFacilitiesCostsSummary.next(allSummaryClass.facilitiesSummary);
+      this.accountOverviewService.costsUtilityUsageSummaryData.next(allSummaryClass.utilityUsageSummaryData);
+      this.accountOverviewService.costsYearMonthData.next(allSummaryClass.yearMonthData);
     }
   }
 

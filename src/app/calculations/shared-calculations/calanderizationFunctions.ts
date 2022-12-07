@@ -2,7 +2,6 @@ import { CalanderizedMeter, LastYearData, MonthlyData } from "src/app/models/cal
 import * as _ from 'lodash';
 import { SummaryData, UtilityUsageSummaryData, YearMonthData } from "src/app/models/dashboard";
 import { IdbAccount, IdbFacility, MeterSource } from "src/app/models/idb";
-import { Months } from "src/app/shared/form-data/months";
 
 export function getLastBillEntryFromCalanderizedMeterData(calanderizedMeterData: Array<CalanderizedMeter>, monthlyData?: Array<MonthlyData>): MonthlyData {
     if (!monthlyData) {

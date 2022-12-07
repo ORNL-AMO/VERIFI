@@ -10,8 +10,8 @@ import { ReportOptions } from 'src/app/models/overview-report';
 import { EGridService } from './e-grid.service';
 import { EnergyUseCalculationsService } from './energy-use-calculations.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { getFiscalYear } from '../shared-analysis/calculations/getFiscalYear';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { getFiscalYear } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
 
 @Injectable({
   providedIn: 'root'
