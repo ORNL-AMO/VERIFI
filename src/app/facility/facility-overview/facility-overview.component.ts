@@ -1,10 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { FacilitySummaryClass } from 'src/app/calculations/dashboard-calculations/facilitySummaryClass';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { IdbFacility, IdbUtilityMeterGroup, MeterSource } from 'src/app/models/idb';
-import { FacilitySummaryClass } from 'src/app/web-workers/classes/dashboard/facilitySummaryClass';
 import { FacilityOverviewService } from './facility-overview.service';
 
 @Component({

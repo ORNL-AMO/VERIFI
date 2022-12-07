@@ -13,7 +13,7 @@ import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, IdbOv
 import { BetterPlantsSummary, ReportOptions } from 'src/app/models/overview-report';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { ConvertMeterDataService } from 'src/app/shared/helper-services/convert-meter-data.service';
-import { BetterPlantsReportClass } from 'src/app/web-workers/classes/betterPlantsReportClass';
+import { BetterPlantsReportClass } from 'src/app/calculations/better-plants-calculations/betterPlantsReportClass';
 import { OverviewReportService } from '../overview-report.service';
 
 @Component({
