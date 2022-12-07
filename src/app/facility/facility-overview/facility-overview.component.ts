@@ -110,10 +110,7 @@ export class FacilityOverviewComponent implements OnInit {
         facility: this.facility
       });
     } else {
-      console.log('nopee')
       // Web Workers are not supported in this environment.
-      // You should add a fallback so that your program still executes correctly.
-      //TODO: Rest of types
       let energySources: Array<MeterSource> = ['Electricity', 'Natural Gas', 'Other Fuels', 'Other Energy']
       let facilitySummaryClass: FacilitySummaryClass = new FacilitySummaryClass(this.facilityOverviewService.calanderizedMeters, groups, energySources, this.facility);
       this.facilityOverviewService.energyMeterSummaryData.next(facilitySummaryClass.meterSummaryData);
@@ -121,8 +118,29 @@ export class FacilityOverviewComponent implements OnInit {
       this.facilityOverviewService.energyUtilityUsageSummaryData.next(facilitySummaryClass.utilityUsageSummaryData);
       this.facilityOverviewService.energyYearMonthData.next(facilitySummaryClass.yearMonthData);
 
-
-
+      let waterSources: Array<MeterSource> = [
+        "Water",
+        "Waste Water"
+      ];
+      let waterSummaryClass: FacilitySummaryClass = new FacilitySummaryClass(this.facilityOverviewService.calanderizedMeters, groups, waterSources, this.facility);
+      this.facilityOverviewService.waterMeterSummaryData.next(waterSummaryClass.meterSummaryData);
+      this.facilityOverviewService.waterMonthlySourceData.next(waterSummaryClass.monthlySourceData);
+      this.facilityOverviewService.waterUtilityUsageSummaryData.next(waterSummaryClass.utilityUsageSummaryData);
+      this.facilityOverviewService.waterYearMonthData.next(waterSummaryClass.yearMonthData);
+      let allSources: Array<MeterSource> = [
+        "Electricity",
+        "Natural Gas",
+        "Other Fuels",
+        "Other Energy",
+        "Water",
+        "Waste Water",
+        "Other Utility"
+      ]
+      let allSourcesSummaryClass: FacilitySummaryClass = new FacilitySummaryClass(this.facilityOverviewService.calanderizedMeters, groups, allSources, this.facility);
+      this.facilityOverviewService.costsMeterSummaryData.next(allSourcesSummaryClass.meterSummaryData);
+      this.facilityOverviewService.costsMonthlySourceData.next(allSourcesSummaryClass.monthlySourceData);
+      this.facilityOverviewService.costsUtilityUsageSummaryData.next(allSourcesSummaryClass.utilityUsageSummaryData);
+      this.facilityOverviewService.costsYearMonthData.next(allSourcesSummaryClass.yearMonthData);
     }
   }
 

@@ -117,7 +117,7 @@ export class BetterPlantsReportComponent implements OnInit {
         accountAnalysisItems: accountFacilityAnalysisItems
       });
     } else {
-      console.log('nopee')
+      // Web Workers are not supported in this environment.
       let betterPlantsReportClass: BetterPlantsReportClass = new BetterPlantsReportClass(
         this.reportOptions,
         selectedAnalysisItem,
@@ -128,8 +128,6 @@ export class BetterPlantsReportComponent implements OnInit {
         accountFacilityAnalysisItems
       );
       this.betterPlantsSummary = betterPlantsReportClass.getBetterPlantsSummary();
-      // Web Workers are not supported in this environment.
-      // You should add a fallback so that your program still executes correctly.
     }
   }
 }
