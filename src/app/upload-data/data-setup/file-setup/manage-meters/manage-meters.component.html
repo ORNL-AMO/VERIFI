@@ -22,6 +22,13 @@
         </div>
     </div>
 </div>
+<div class="d-flex justify-content-end" *ngIf="hasNoCalanderizationSelection">
+    <div class="d-flex flex-column">
+        <div class="alert alert-warning p-2">
+            One or more meters are missing a calanderization method selection.
+        </div>
+    </div>
+</div>
 <hr>
 
 <table *ngIf="!editMeterForm && metersIncluded">
@@ -106,7 +113,7 @@
             <td>
                 <!-- {{meter.groupId}} -->
                 <select class="form-control" id="meterReadingDataApplication"
-                    [(ngModel)]="meter.meterReadingDataApplication">
+                    [(ngModel)]="meter.meterReadingDataApplication" (change)="setHasNoCalanderizationSelection()">
                     <option [ngValue]="'backward'">Calanderize</option>
                     <option [ngValue]="'fullMonth'">Do Not Calanderize</option>
                     <option [ngValue]="undefined">Unselected</option>
