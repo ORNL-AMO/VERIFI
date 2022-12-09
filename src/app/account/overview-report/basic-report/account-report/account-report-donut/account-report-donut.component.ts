@@ -82,7 +82,7 @@ export class AccountReportDonutComponent implements OnInit {
     } else if (this.graphType == 'usage') {
       return '%{label}: %{value:,.0f} ' + this.account.energyUnit + ' <extra></extra>';
     } else if (this.graphType == 'marketEmissions' || this.graphType == 'locationEmissions') {
-      return '%{label}: %{value:,.0f} tonne CO<sub>2</sub> <extra></extra>';
+      return '%{label}: %{value:,.0f} tonne CO<sub>2</sub>e <extra></extra>';
     }
   }
 
