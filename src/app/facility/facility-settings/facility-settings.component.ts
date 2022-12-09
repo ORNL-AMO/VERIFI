@@ -44,8 +44,6 @@ export class FacilitySettingsComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    let accountFacilites: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-    // this.canDelete = accountFacilites.length > 1;
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
       this.selectedFacility = facility;
     });
@@ -58,31 +56,7 @@ export class FacilitySettingsComponent implements OnInit {
 
   async facilityDelete() {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    this.loadingService.setLoadingStatus(true);
-    this.loadingService.setLoadingMessage("Deleting Facility Predictors...");
-    // Delete all info associated with account
-    await this.predictorDbService.deleteAllFacilityPredictors(this.selectedFacility.guid);
-    this.loadingService.setLoadingMessage("Deleting Facility Meter Data...");
-    await this.utilityMeterDataDbService.deleteAllFacilityMeterData(this.selectedFacility.guid);
-    this.loadingService.setLoadingMessage("Deleting Facility Meters...");
-    await this.utilityMeterDbService.deleteAllFacilityMeters(this.selectedFacility.guid);
-    this.loadingService.setLoadingMessage("Deleting Facility Meter Groups...");
-    await this.utilityMeterGroupDbService.deleteAllFacilityMeterGroups(this.selectedFacility.guid);
-    this.loadingService.setLoadingMessage('Updating Reports...');
-    let overviewReportOptions: Array<IdbOverviewReportOptions> = this.overviewReportOptionsDbService.accountOverviewReportOptions.getValue();
-    for (let index = 0; index < overviewReportOptions.length; index++) {
-      overviewReportOptions[index].reportOptions.facilities = overviewReportOptions[index].reportOptions.facilities.filter(reportFacility => { return reportFacility.facilityId != this.selectedFacility.guid });
-      await this.overviewReportOptionsDbService.updateWithObservable(overviewReportOptions[index]).toPromise();
-    }
-    this.loadingService.setLoadingMessage("Deleting Facility...");
-    await this.facilityDbService.deleteFacilitiesAsync([this.selectedFacility]);
-    // Then navigate to another facility
-    let allFacilities: Array<IdbFacility> = await this.facilityDbService.getAll().toPromise();
-    // this.facilityDbService.allFacilities.next(allFacilities);
-    let accountFacilites: Array<IdbFacility> = allFacilities.filter(facility => { return facility.accountId == selectedAccount.guid });
-    this.facilityDbService.accountFacilities.next(accountFacilites);
-    this.loadingService.setLoadingStatus(false);
-    this.toastNotificationService.showToast('Facility Deleted!', undefined, undefined, false, "success");
+    await this.dbChangesService.deleteFacility(this.selectedFacility, selectedAccount);
     this.router.navigate(['/']);
   }
 

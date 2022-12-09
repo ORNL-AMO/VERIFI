@@ -1,4 +1,6 @@
 import { Injectable } from '@angular/core';
+import { LoadingService } from '../core-components/loading/loading.service';
+import { ToastNotificationsService } from '../core-components/toast-notifications/toast-notifications.service';
 import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbCustomEmissionsItem, IdbFacility, IdbOverviewReportOptions, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from '../models/idb';
 import { AccountAnalysisDbService } from './account-analysis-db.service';
 import { AccountdbService } from './account-db.service';
@@ -24,7 +26,9 @@ export class DbChangesService {
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private updateDbEntryService: UpdateDbEntryService,
-    private customEmissionsDbService: CustomEmissionsDbService) { }
+    private customEmissionsDbService: CustomEmissionsDbService,
+    private loadingService: LoadingService,
+    private toastNotificationService: ToastNotificationsService) { }
 
   async updateAccount(account: IdbAccount) {
     let updatedAccount: IdbAccount = await this.accountDbService.updateWithObservable(account).toPromise();
@@ -204,5 +208,42 @@ export class DbChangesService {
       customEmissionsItems.push(uSAverageItem);
     }
     this.customEmissionsDbService.accountEmissionsItems.next(customEmissionsItems);
+  }
+
+  async deleteFacility(facility: IdbFacility, selectedAccount: IdbAccount){
+    this.loadingService.setLoadingStatus(true);
+
+    // Delete all info associated with account
+    this.loadingService.setLoadingMessage("Deleting Facility Predictors...");
+    await this.predictorsDbService.deleteAllFacilityPredictors(facility.guid);
+    this.loadingService.setLoadingMessage("Deleting Facility Meter Data...");
+    await this.utilityMeterDataDbService.deleteAllFacilityMeterData(facility.guid);
+    this.loadingService.setLoadingMessage("Deleting Facility Meters...");
+    await this.utilityMeterDbService.deleteAllFacilityMeters(facility.guid);
+    this.loadingService.setLoadingMessage("Deleting Facility Meter Groups...");
+    await this.utilityMeterGroupDbService.deleteAllFacilityMeterGroups(facility.guid);
+    this.loadingService.setLoadingMessage("Updating Reports...")
+    await this.overviewReportOptionsDbService.updateReportsRemoveFacility(facility.guid);
+    this.loadingService.setLoadingMessage("Deleting Analysis Items...")
+    await this.analysisDbService.deleteAllFacilityAnalysisItems(facility.guid);
+    this.loadingService.setLoadingMessage('Updating Analysis Items...');
+    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
+    for (let index = 0; index < accountAnalysisItems.length; index++) {
+      accountAnalysisItems[index].facilityAnalysisItems = accountAnalysisItems[index].facilityAnalysisItems.filter(facilityItem => { return facilityItem.facilityId != facility.guid });
+      await this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[index]).toPromise();
+    }
+
+    this.loadingService.setLoadingMessage('Updating Reports...');
+    let overviewReportOptions: Array<IdbOverviewReportOptions> = this.overviewReportOptionsDbService.accountOverviewReportOptions.getValue();
+    for (let index = 0; index < overviewReportOptions.length; index++) {
+      overviewReportOptions[index].reportOptions.facilities = overviewReportOptions[index].reportOptions.facilities.filter(reportFacility => { return reportFacility.facilityId != facility.guid });
+      await this.overviewReportOptionsDbService.updateWithObservable(overviewReportOptions[index]).toPromise();
+    }
+
+    this.loadingService.setLoadingMessage("Deleting Facility...");
+    await this.facilityDbService.deleteFacilitiesAsync([facility]);
+    await this.selectAccount(selectedAccount);
+    this.loadingService.setLoadingStatus(false);
+    this.toastNotificationService.showToast('Facility Deleted!', undefined, undefined, false, 'success');
   }
 }
