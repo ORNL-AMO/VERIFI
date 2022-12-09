@@ -41,9 +41,9 @@
             <div class="pl-1" *ngIf="urlDisplay == 'emissions'">
                 <div class="btn-group">
                     <button class="btn btn-sm m-0 toggle-btn" (click)="setEmissions('location')"
-                        [ngClass]="{'active': emissionsDisplay != 'location'}">Location</button>
+                        [ngClass]="{'active': emissionsDisplay == 'location'}">Location</button>
                     <button class="btn btn-sm toggle-btn m-0" (click)="setEmissions('market')"
-                        [ngClass]="{'active': emissionsDisplay != 'market'}">Market</button>
+                        [ngClass]="{'active': emissionsDisplay == 'market'}">Market</button>
                 </div>
             </div>
         </div>

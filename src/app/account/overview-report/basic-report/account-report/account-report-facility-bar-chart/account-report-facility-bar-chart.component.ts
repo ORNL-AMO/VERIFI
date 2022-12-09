@@ -158,7 +158,7 @@ export class AccountReportFacilityBarChartComponent implements OnInit {
         barmode: 'group',
         yaxis: {
           title: {
-            text: "tonne CO<sub>2</sub>",
+            text: "tonne CO<sub>2</sub>e",
           },
           hoverformat: ",.2f"
         },
@@ -197,7 +197,7 @@ export class AccountReportFacilityBarChartComponent implements OnInit {
         barmode: 'group',
         yaxis: {
           title: {
-            text: "tonne CO<sub>2</sub>",
+            text: "tonne CO<sub>2</sub>e",
           },
           hoverformat: ",.2f"
         },

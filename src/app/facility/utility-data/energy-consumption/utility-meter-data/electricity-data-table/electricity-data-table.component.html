@@ -39,10 +39,10 @@
                 [ngClass]="{'active': orderDataField == 'totalBilledDemand'}">Total
                 Billed<br> Demand (kW)</th>
             <th *ngIf="emissionsFilters.marketEmissions" (click)="setOrderDataField('totalMarketEmissions')"
-                [ngClass]="{'active': orderDataField == 'totalMarketEmissions'}">Total Market <br>Emissions (kg
+                [ngClass]="{'active': orderDataField == 'totalMarketEmissions'}">Total <br>Market-Based <br>Emissions (kg
                 CO<sub>2</sub>)</th>
             <th *ngIf="emissionsFilters.locationEmissions" (click)="setOrderDataField('totalLocationEmissions')"
-                [ngClass]="{'active': orderDataField == 'totalLocationEmissions'}">Total Location <br>Emissions (kg
+                [ngClass]="{'active': orderDataField == 'totalLocationEmissions'}">Total <br>Location-Based <br>Emissions (kg
                 CO<sub>2</sub>)</th>
             <th *ngIf="emissionsFilters.recs" (click)="setOrderDataField('RECs')"
                 [ngClass]="{'active': orderDataField == 'RECs'}">RECs<br> (<span
@@ -52,7 +52,7 @@
                 RECs<br> (<span [innerHTML]="energyUnit | settingsLabel"></span>)</th>
             <th *ngIf="emissionsFilters.excessRecsEmissions" (click)="setOrderDataField('excessRECsEmissions')"
                 [ngClass]="{'active': orderDataField == 'excessRECsEmissions'}">Excess
-                RECs<br> Emissions (kg CO<sub>2</sub>)</th>
+                RECs<br> Emissions (kg CO<sub>2</sub>e)</th>
 
             <!-- block1Consumption -->
             <th *ngIf="detailedChargesFilters.block1" (click)="setOrderDataField('block1Consumption')"

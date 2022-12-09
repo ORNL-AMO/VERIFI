@@ -49,7 +49,7 @@ export class EmissionsUtilitiesChartComponent implements OnInit {
   drawChart() {
     if (this.emissionsBarChart && this.monthlySourceData && this.monthlySourceData.length != 0) {
       let traceData = new Array();
-      let yaxisTitle: string = "Utility Emissions (kg CO<sub>2</sub>)";
+      let yaxisTitle: string = "Utility Emissions (kg CO<sub>2</sub>e)";
 
       let hoverformat: string = ",.2f";
       let tickprefix: string = "";

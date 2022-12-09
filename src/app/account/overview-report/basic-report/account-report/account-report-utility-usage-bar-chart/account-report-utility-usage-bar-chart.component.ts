@@ -123,7 +123,7 @@ export class AccountReportUtilityUsageBarChartComponent implements OnInit {
     } else if (this.graphType == 'usage') {
       return this.account.energyUnit;
     } else if (this.graphType == 'locationEmissions' || this.graphType == 'marketEmissions') {
-      return "tonne CO<sub>2</sub>";
+      return "tonne CO<sub>2</sub>e";
     }
   }
 

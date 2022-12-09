@@ -47,10 +47,10 @@ export class EmissionsMetersUsageChartComponent implements OnInit {
   drawChart() {
     if (this.stackedAreaChart && this.monthlySourceData && this.monthlySourceData.length != 0 && this.emissionsDisplay) {
       let traceData = new Array();
-      let yaxisTitle: string = "Utility Emissions (kg CO<sub>2</sub>)";
+      let yaxisTitle: string = "Utility Emissions (kg CO<sub>2</sub>e)";
       let tickprefix: string = "";
       let hoverformat: string = ",.2f";
-      let hovertemplate: string = '%{text} (%{x}): %{y:,.0f} kg CO<sub>2</sub> <extra></extra>'
+      let hovertemplate: string = '%{text} (%{x}): %{y:,.0f} kg CO<sub>2</sub>e <extra></extra>'
       this.facilityOverviewService.calanderizedMeters = _.orderBy(this.facilityOverviewService.calanderizedMeters, (cMeter) => { return cMeter.meter.source });
 
       let dataPointSize: number = 0;

@@ -40,7 +40,7 @@ export class FacilityEmissionsChartComponent implements OnInit {
   
   drawChart() {
     if (this.emissionsDonut && this.facilitiesSummary && this.emissionsDisplay) {
-      let hovertemplate: string = '%{label}: %{value:,.0f} tonne CO<sub>2</sub> <extra></extra>'
+      let hovertemplate: string = '%{label}: %{value:,.0f} tonne CO<sub>2</sub>e <extra></extra>'
       let values: Array<number>;
       if(this.emissionsDisplay == 'location'){
         values = this.facilitiesSummary.facilitySummaries.map(summary => { return summary.locationEmissions / 1000 });
