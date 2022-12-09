@@ -98,8 +98,7 @@ export class BetterPlantsReportComponent implements OnInit {
     calanderizedMeters.forEach(calanderizedMeter => {
       calanderizedMeter.monthlyData = this.convertMeterDataService.convertMeterDataToAnalysis(selectedAnalysisItem, calanderizedMeter.monthlyData, this.account, calanderizedMeter.meter);
     });
-    let isFalse: boolean = false
-    if (typeof Worker !== 'undefined' && isFalse) {
+    if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('src/app/web-workers/better-plants-report.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
         this.betterPlantsSummary = data;
@@ -118,8 +117,6 @@ export class BetterPlantsReportComponent implements OnInit {
       });
     } else {
       // Web Workers are not supported in this environment.
-      console.log(this.reportOptions);
-      console.log(selectedAnalysisItem);
       let betterPlantsReportClass: BetterPlantsReportClass = new BetterPlantsReportClass(
         this.reportOptions,
         selectedAnalysisItem,
