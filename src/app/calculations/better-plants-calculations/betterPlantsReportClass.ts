@@ -43,7 +43,7 @@ export class BetterPlantsReportClass {
 
         this.facilityPerformance = new Array();
         selectedAnalysisItem.facilityAnalysisItems.forEach(item => {
-            if (item.analysisItemId != undefined) {
+            if (item.analysisItemId != undefined && item.analysisItemId != 'skip') {
                 let facilityAnalysisItem: IdbAnalysisItem = accountAnalysisItems.find(accountItem => { return accountItem.guid == item.analysisItemId });
                 let calanderizedFacilityMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(meter => { return meter.meter.facilityId == item.facilityId });
                 let facility: IdbFacility = facilities.find(facility => { return facility.guid == item.facilityId });

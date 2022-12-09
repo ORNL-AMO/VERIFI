@@ -115,45 +115,11 @@ export class AccountSettingsComponent implements OnInit {
 
 
   async facilityDelete() {
-    this.loadingService.setLoadingStatus(true);
-
-    // Delete all info associated with account
-    this.loadingService.setLoadingMessage("Deleting Facility Predictors...");
-    await this.predictorDbService.deleteAllFacilityPredictors(this.facilityToDelete.guid);
-    this.loadingService.setLoadingMessage("Deleting Facility Meter Data...");
-    await this.utilityMeterDataDbService.deleteAllFacilityMeterData(this.facilityToDelete.guid);
-    this.loadingService.setLoadingMessage("Deleting Facility Meters...");
-    await this.utilityMeterDbService.deleteAllFacilityMeters(this.facilityToDelete.guid);
-    this.loadingService.setLoadingMessage("Deleting Facility Meter Groups...");
-    await this.utilityMeterGroupDbService.deleteAllFacilityMeterGroups(this.facilityToDelete.guid);
-    this.loadingService.setLoadingMessage("Updating Reports...")
-    await this.overviewReportOptionsDbService.updateReportsRemoveFacility(this.facilityToDelete.guid);
-    this.loadingService.setLoadingMessage("Deleting Analysis Items...")
-    await this.analysisDbService.deleteAllFacilityAnalysisItems(this.facilityToDelete.guid);
-    this.loadingService.setLoadingMessage('Updating Analysis Items...');
-    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
-    for (let index = 0; index < accountAnalysisItems.length; index++) {
-      accountAnalysisItems[index].facilityAnalysisItems = accountAnalysisItems[index].facilityAnalysisItems.filter(facilityItem => { return facilityItem.facilityId != this.facilityToDelete.guid });
-      await this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[index]).toPromise();
-    }
-
-    this.loadingService.setLoadingMessage('Updating Reports...');
-    let overviewReportOptions: Array<IdbOverviewReportOptions> = this.overviewReportOptionsDbService.accountOverviewReportOptions.getValue();
-    for (let index = 0; index < overviewReportOptions.length; index++) {
-      overviewReportOptions[index].reportOptions.facilities = overviewReportOptions[index].reportOptions.facilities.filter(reportFacility => { return reportFacility.facilityId != this.facilityToDelete.guid });
-      await this.overviewReportOptionsDbService.updateWithObservable(overviewReportOptions[index]).toPromise();
-    }
-
-    this.loadingService.setLoadingMessage("Deleting Facility...");
-    await this.facilityDbService.deleteFacilitiesAsync([this.facilityToDelete]);
-    await this.dbChangesService.selectAccount(this.selectedAccount);
-    this.loadingService.setLoadingStatus(false);
-    this.toastNotificationService.showToast('Facility Deleted!', undefined, undefined, false, 'success');
+    await this.dbChangesService.deleteFacility(this.facilityToDelete, this.selectedAccount);
   }
 
   async confirmAccountDelete() {
     this.showDeleteAccount = false;
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
 
     this.loadingService.setLoadingStatus(true);
 
@@ -174,7 +140,7 @@ export class AccountSettingsComponent implements OnInit {
     await this.analysisDbService.deleteAccountAnalysisItems();
     await this.accountAnalysisDbService.deleteAccountAnalysisItems();
     this.loadingService.setLoadingMessage("Deleting Account...");
-    await this.accountDbService.deleteAccountWithObservable(selectedAccount.id).toPromise();
+    await this.accountDbService.deleteAccountWithObservable(this.selectedAccount.id).toPromise();
 
     // Then navigate to another account
     let accounts: Array<IdbAccount> = await this.accountDbService.getAll().toPromise();
