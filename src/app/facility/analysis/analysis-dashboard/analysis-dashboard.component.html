@@ -1,4 +1,32 @@
-<div class="wrapper main-content p-0" *ngIf="!baselineYearErrorMax && !baselineYearErrorMin">
+<div class="main-content p-0" *ngIf="!baselineYearErrorMax && !baselineYearErrorMin">
+    <div class="content-padding">
+        <div class="card card-body">
+            <h4 class="pt-0">
+                <div class="d-flex justify-content-between">
+                    <div class="mt-auto">
+                        <i class="fa fa-microscope pr-2"></i>{{selectedFacility.name}}
+                        Analysis
+                    </div>
+
+                    <div>
+                        <button class="btn action-btn m-0" (click)="createAnalysis()">+Add New Analysis</button>
+                    </div>
+                </div>
+            </h4>
+        </div>
+        <hr>
+        <div class="d-flex flex-wrap">
+            <div class="col-6" *ngFor="let analysisItem of facilityAnalysisItems">
+                <app-analysis-item-card [analysisItem]="analysisItem"></app-analysis-item-card>
+            </div>
+        </div>
+        <!-- <app-analysis-items></app-analysis-items> -->
+    </div>
+</div>
+
+
+
+<!-- <div class="wrapper main-content p-0" *ngIf="!baselineYearErrorMax && !baselineYearErrorMin">
     <div class="content-padding">
         <h4>Saved Analysis Items</h4>
 
@@ -68,7 +96,7 @@
             </div>
         </div>
     </div>
-</div>
+</div> -->
 
 <div class="w-100 justify-content-center p-5" *ngIf="baselineYearErrorMax || baselineYearErrorMin">
     <div class="alert alert-danger text-center p-2">

@@ -1,0 +1,49 @@
+<div class="card">
+    <div class="card-header bg-white justify-content-between bold">
+        <a class="larger" (click)="selectAnalysisItem()">
+            <span class="fa fa-exclamation-circle"
+                *ngIf="analysisItem.setupErrors.hasError || analysisItem.setupErrors.groupsHaveErrors"></span>
+            {{analysisItem.name}}
+        </a>
+        <span class="badge report-year pull-right">
+            {{analysisItem.reportYear}}
+        </span>
+    </div>
+    <div class="card-body d-flex flex-column">
+        <div class="d-flex flex-column" *ngFor="let groupItem of groupItems; let index = index;">
+            <div>
+                <span class="bold larger">
+                    {{groupItem.group.idbGroupId | groupName}}
+                </span>
+                <span class="badge badge-secondary ml-2 pull-right">
+                    {{groupItem.group.analysisType | analysisTypeLabel }}
+                </span>
+                <span class="badge badge-info ml-2 pull-right"
+                    *ngFor="let predictor of groupItem.predictorVariables">{{predictor.name}}</span>
+            </div>
+            <div class="pt-2" *ngIf="groupItem.group.analysisType == 'regression'">
+                Modeled Energy = {{groupItem.regressionEquation}}<br>
+                Adjusted R<sup>2</sup>: {{groupItem.adjust_R2 | number:'0.3-3'}}
+
+            </div>
+            <div *ngIf="groupItems.length-1 != index;">
+                <hr>
+            </div>
+        </div>
+    </div>
+    <div class="card-footer text-right bg-white">
+        <div class="d-flex justify-content-between">
+            <div class="d-flex">
+                Last Modified: {{analysisItem.date | date}}
+            </div>
+            <div class="d-flex">
+                <button class="btn action-btn btn-sm">
+                    <i class="fa fa-copy" title="Copy" (click)="createCopy()"></i>
+                </button>
+                <button class="btn action-btn btn-sm ml-1">
+                    <i class="fa fa-trash" title="Delete" (click)="deleteItem()"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

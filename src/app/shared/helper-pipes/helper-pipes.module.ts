@@ -13,6 +13,7 @@ import { PhoneNumberPipe } from './phone-number.pipe';
 import { ScopeLabelPipe } from './scope-label.pipe';
 import { AgreementTypeLabelPipe } from './agreement-type-label.pipe';
 import { YearDisplayPipe } from './year-display.pipe';
+import { AnalysisTypeLabelPipe } from './analysis-type-label.pipe';
 
 @NgModule({
   declarations: [
@@ -28,7 +29,8 @@ import { YearDisplayPipe } from './year-display.pipe';
     PhoneNumberPipe,
     ScopeLabelPipe,
     AgreementTypeLabelPipe,
-    YearDisplayPipe
+    YearDisplayPipe,
+    AnalysisTypeLabelPipe
   ],
   imports: [
     CommonModule
@@ -46,7 +48,8 @@ import { YearDisplayPipe } from './year-display.pipe';
     PhoneNumberPipe,
     ScopeLabelPipe,
     AgreementTypeLabelPipe,
-    YearDisplayPipe
+    YearDisplayPipe,
+    AnalysisTypeLabelPipe
   ]
 })
 export class HelperPipesModule { }

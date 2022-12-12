@@ -18,3 +18,10 @@ th.active{
 .fa.fa-exclamation-circle, .banner a.nav-link:not(.active) .fa.fa.fa-exclamation-circle{
     color: red;
 }
+
+
+.header{
+    padding: .25rem;
+    background-color: white;
+    border-radius: .2rem;
+}
