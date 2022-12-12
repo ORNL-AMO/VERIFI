@@ -147,7 +147,7 @@ export class ElectricityDataTableComponent implements OnInit {
 
   setEmissions() {
     this.selectedMeterData.forEach(dataItem => {
-      let emissionsValues: EmissionsResults = this.calanderizationService.getEmissions(this.selectedMeter, dataItem.totalEnergyUse, this.selectedMeter.energyUnit, new Date(dataItem.readDate).getFullYear());
+      let emissionsValues: EmissionsResults = this.calanderizationService.getEmissions(this.selectedMeter, dataItem.totalEnergyUse, this.selectedMeter.energyUnit, new Date(dataItem.readDate).getFullYear(), false);
       dataItem.totalMarketEmissions = emissionsValues.marketEmissions;
       dataItem.totalLocationEmissions = emissionsValues.locationEmissions;
       dataItem.RECs = emissionsValues.RECs;
