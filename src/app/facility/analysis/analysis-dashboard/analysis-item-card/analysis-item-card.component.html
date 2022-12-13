@@ -1,15 +1,30 @@
 <div class="card">
     <div class="card-header bg-white justify-content-between bold">
-        <a class="larger" (click)="selectAnalysisItem()">
-            <span class="fa fa-exclamation-circle"
-                *ngIf="analysisItem.setupErrors.hasError || analysisItem.setupErrors.groupsHaveErrors"></span>
-            {{analysisItem.name}}
-        </a>
-        <span class="badge report-year pull-right">
+        <div class="d-flex justify-content-between">
+            <div>
+                <span class="fa"
+                    [ngClass]="{'fa-circle-check':analysisItem.selectedYearAnalysis, 'fa-circle':!analysisItem.selectedYearAnalysis}" (click)="setUseItem()"></span>
+                <a class="item-name" (click)="selectAnalysisItem()">
+                    <span class="fa fa-exclamation-circle"
+                        *ngIf="analysisItem.setupErrors.hasError || analysisItem.setupErrors.groupsHaveErrors"></span>
+                    {{analysisItem.name}}
+                </a>
+            </div>
+
+            <!-- <span class="badge report-year pull-right">
             {{analysisItem.reportYear}}
-        </span>
+        </span> -->
+            <div class="d-flex">
+                <button class="btn action-btn btn-sm">
+                    <i class="fa fa-copy" title="Copy" (click)="createCopy()"></i>
+                </button>
+                <button class="btn action-btn btn-sm ml-1">
+                    <i class="fa fa-trash" title="Delete" (click)="deleteItem()"></i>
+                </button>
+            </div>
+        </div>
     </div>
-    <div class="card-body d-flex flex-column">
+    <div class="card-body d-flex flex-column" *ngIf="!hideDetails">
         <div class="d-flex flex-column" *ngFor="let groupItem of groupItems; let index = index;">
             <div>
                 <span class="bold larger">
@@ -31,18 +46,10 @@
             </div>
         </div>
     </div>
-    <div class="card-footer text-right bg-white">
-        <div class="d-flex justify-content-between">
+    <div class="card-footer bg-white">
+        <div class="d-flex justify-content-end">
             <div class="d-flex">
                 Last Modified: {{analysisItem.date | date}}
-            </div>
-            <div class="d-flex">
-                <button class="btn action-btn btn-sm">
-                    <i class="fa fa-copy" title="Copy" (click)="createCopy()"></i>
-                </button>
-                <button class="btn action-btn btn-sm ml-1">
-                    <i class="fa fa-trash" title="Delete" (click)="deleteItem()"></i>
-                </button>
             </div>
         </div>
     </div>

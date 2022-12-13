@@ -1,9 +1,14 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
+import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { JStatRegressionModel } from 'src/app/models/analysis';
-import { AnalysisGroup, IdbAnalysisItem, IdbFacility, PredictorData } from 'src/app/models/idb';
+import { AnalysisGroup, IdbAccount, IdbAnalysisItem, IdbFacility, PredictorData } from 'src/app/models/idb';
+import { AnalysisService } from '../../analysis.service';
 
 @Component({
   selector: 'app-analysis-item-card',
@@ -22,10 +27,21 @@ export class AnalysisItemCardComponent implements OnInit {
   }>;
 
 
-  constructor(private analysisDbService: AnalysisDbService, private router: Router, private facilityDbService: FacilitydbService) { }
+  hideDetailsSub: Subscription;
+  hideDetails: boolean;
+  constructor(private analysisDbService: AnalysisDbService, private router: Router, private facilityDbService: FacilitydbService,
+    private analysisService: AnalysisService, private dbChangesService: DbChangesService,
+    private accountDbService: AccountdbService, private toastNotificationService: ToastNotificationsService) { }
 
   ngOnInit(): void {
     this.initializeGroups();
+    this.hideDetailsSub = this.analysisService.hideDetails.subscribe(val => {
+      this.hideDetails = val;
+    });
+  }
+
+  ngOnDestroy() {
+    this.hideDetailsSub.unsubscribe();
   }
 
   initializeGroups() {
@@ -99,11 +115,32 @@ export class AnalysisItemCardComponent implements OnInit {
     return regressionEquation;
   }
 
-  createCopy(){
+  createCopy() {
 
   }
 
-  deleteItem(){
-    
+  deleteItem() {
+
+  }
+
+  async setUseItem() {
+    let facilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.facilityAnalysisItems.getValue();
+    for (let i = 0; i < facilityAnalysisItems.length; i++) {
+      if (facilityAnalysisItems[i].guid == this.analysisItem.guid) {
+        if (facilityAnalysisItems[i].selectedYearAnalysis) {
+          facilityAnalysisItems[i].selectedYearAnalysis = false;
+        } else {
+          facilityAnalysisItems[i].selectedYearAnalysis = true;
+        }
+        await this.analysisDbService.updateWithObservable(facilityAnalysisItems[i]).toPromise();
+      } else if (facilityAnalysisItems[i].reportYear == this.analysisItem.reportYear && facilityAnalysisItems[i].selectedYearAnalysis) {
+        facilityAnalysisItems[i].selectedYearAnalysis = false;
+        await this.analysisDbService.updateWithObservable(facilityAnalysisItems[i]).toPromise();
+      }
+    }
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    await this.dbChangesService.setAnalysisItems(selectedAccount, selectedFacility);
+    this.toastNotificationService.showToast("Analysis Item Selected for " + this.analysisItem.reportYear, undefined, undefined, false, "success");
   }
 }

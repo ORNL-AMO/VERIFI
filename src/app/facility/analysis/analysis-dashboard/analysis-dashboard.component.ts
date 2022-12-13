@@ -10,6 +10,8 @@ import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
+import * as _ from 'lodash';
+import { AnalysisService } from '../analysis.service';
 
 @Component({
   selector: 'app-analysis-dashboard',
@@ -33,18 +35,26 @@ export class AnalysisDashboardComponent implements OnInit {
   yearOptions: Array<number>;
   selectedFacility: IdbFacility;
   selectedFacilitySub: Subscription;
-
+  analysisItemsList: Array<{
+    year: number,
+    analysisItems: Array<IdbAnalysisItem>
+  }>;
+  hideDetails: boolean;
+  hideDetailsSub: Subscription;
   constructor(private router: Router, private analysisDbService: AnalysisDbService, private toastNotificationService: ToastNotificationsService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private facilityDbService: FacilitydbService,
     private accountAnalysisDbService: AccountAnalysisDbService,
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
-    private sharedDataService: SharedDataService) { }
+    private sharedDataService: SharedDataService,
+    private analysisService: AnalysisService) { }
 
   ngOnInit(): void {
     this.facilityAnalysisItemsSub = this.analysisDbService.facilityAnalysisItems.subscribe(items => {
-      this.facilityAnalysisItems = items;
+      // this.facilityAnalysisItems = items;
+      console.log(items);
+      this.setAnalysisItemsList(items);
     });
 
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
@@ -58,6 +68,10 @@ export class AnalysisDashboardComponent implements OnInit {
 
     this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
       this.itemsPerPage = val;
+    });
+
+    this.hideDetailsSub = this.analysisService.hideDetails.subscribe(hideDetails => {
+      this.hideDetails = hideDetails;
     })
   }
 
@@ -65,6 +79,7 @@ export class AnalysisDashboardComponent implements OnInit {
     this.facilityAnalysisItemsSub.unsubscribe();
     this.selectedFacilitySub.unsubscribe();
     this.itemsPerPageSub.unsubscribe();
+    this.hideDetailsSub.unsubscribe();
   }
 
   async createAnalysis() {
@@ -141,5 +156,22 @@ export class AnalysisDashboardComponent implements OnInit {
     this.analysisDbService.selectedAnalysisItem.next(addedItem);
     this.toastNotificationService.showToast('Analysis Copy Created', undefined, undefined, false, "success");
     this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/analysis/run-analysis');
+  }
+
+  setAnalysisItemsList(facilityAnalysisItems: Array<IdbAnalysisItem>) {
+    this.analysisItemsList = new Array();
+    let years: Array<number> = facilityAnalysisItems.map(item => { return item.reportYear });
+    years = _.uniq(years);
+    years.forEach(year => {
+      let yearAnalysisItems: Array<IdbAnalysisItem> = facilityAnalysisItems.filter(item => { return item.reportYear == year });
+      this.analysisItemsList.push({
+        year: year,
+        analysisItems: yearAnalysisItems
+      });
+    })
+  }
+
+  toggleHideDetails() {
+    this.analysisService.hideDetails.next(!this.hideDetails);
   }
 }
