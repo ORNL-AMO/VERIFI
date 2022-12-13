@@ -35,7 +35,7 @@
                 <div class="row" *ngFor="let listItem of analysisItemsList; let index = index;">
                     <div class="col-12 text-center pb-2">
                         <span class="badge report-year">
-                            {{listItem.year}}
+                            {{listItem.year | yearDisplay:selectedFacility.fiscalYear}}
                         </span>
                         <ng-container *ngIf="!listItem.hasSelectedItem">
                             <br>
@@ -46,7 +46,7 @@
                             </div>
                         </ng-container>
                     </div>
-                    <div class="col-6" *ngFor="let analysisItem of listItem.analysisItems">
+                    <div class="col-6 pt-2" *ngFor="let analysisItem of listItem.analysisItems">
                         <app-analysis-item-card [analysisItem]="analysisItem"></app-analysis-item-card>
                     </div>
                     <div class="col-12">

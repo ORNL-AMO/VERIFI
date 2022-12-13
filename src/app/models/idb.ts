@@ -330,7 +330,8 @@ export interface IdbAccountAnalysisItem {
     baselineAdjustments: Array<{
         year: number,
         amount: number
-    }>
+    }>,
+    selectedYearAnalysis?: boolean
 }
 
 

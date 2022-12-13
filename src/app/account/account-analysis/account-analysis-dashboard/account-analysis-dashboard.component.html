@@ -1,3 +1,75 @@
+<div class="main-content p-0" *ngIf="!baselineYearError">
+    <div class="content-padding">
+        <div class="card card-body">
+            <h4 class="pt-0">
+                <div class="d-flex justify-content-between">
+                    <div class="mt-auto">
+                        <i class="fa fa-microscope pr-2"></i>{{selectedAccount.name}}
+                        Analysis
+                    </div>
+
+                    <div>
+                        <button class="btn action-btn m-0" (click)="createAnalysis()">+Add New Analysis</button>
+                    </div>
+                </div>
+            </h4>
+            <div class="d-flex justify-content-between" *ngIf="analysisItemsList.length != 0">
+                <div>
+                    <span class="fa fa-circle-check"></span> Denotes selected analysis for report year.
+                </div>
+                <!-- <div class="d-flex">
+                    <div class="pr-1">
+                        Show Details
+                    </div>
+                    <label class="switch mb-0" for="showDetail">
+                        <input class="checkbox" type="checkbox" id="showDetail" name="showDetail"
+                            [(ngModel)]="showDetail" (change)="saveShowDetails()">
+                        <span class="slider round"></span>
+                    </label>
+                </div> -->
+            </div>
+        </div>
+        <hr>
+        <ng-container *ngIf="analysisItemsList.length != 0">
+            <div class="d-flex flex-column">
+                <div class="row" *ngFor="let listItem of analysisItemsList; let index = index;">
+                    <div class="col-12 text-center pb-2">
+                        <span class="badge report-year">
+                            {{listItem.year | yearDisplay:selectedAccount.fiscalYear}}
+                        </span>
+                        <ng-container *ngIf="!listItem.hasSelectedItem">
+                            <br>
+                            <div class="mt-2">
+                                <span class="alert alert-danger">
+                                    No item selected!
+                                </span>
+                            </div>
+                        </ng-container>
+                    </div>
+                    <div class="col-6 pt-2" *ngFor="let analysisItem of listItem.analysisItems">
+                        <app-account-analysis-item-card [analysisItem]="analysisItem"></app-account-analysis-item-card>
+                    </div>
+                    <div class="col-12">
+                        <hr>
+                    </div>
+                </div>
+            </div>
+        </ng-container>
+        <ng-container *ngIf="analysisItemsList.length == 0">
+            <div class="card card-body text-center bold">
+                No analysis items found for this account. Click "+Add New Analysis" to start analyzing this
+                account!
+            </div>
+        </ng-container>
+    </div>
+</div>
+
+
+
+
+
+
+<!-- 
 <div class="wrapper main-content p-0" *ngIf="!baselineYearError">
     <div class="content-padding">
         <h4>Saved Analysis Items</h4>
@@ -66,7 +138,7 @@
             </div>
         </div>
     </div>
-</div>
+</div> -->
 
 <div class="w-100 justify-content-center p-5" *ngIf="baselineYearError">
     <div class="alert alert-danger text-center p-2">

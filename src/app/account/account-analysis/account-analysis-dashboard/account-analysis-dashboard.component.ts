@@ -8,6 +8,8 @@ import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbAccount, IdbAccountAnalysisItem } from 'src/app/models/idb';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
+import * as _ from 'lodash';
+import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
 
 @Component({
   selector: 'app-account-analysis-dashboard',
@@ -29,14 +31,22 @@ export class AccountAnalysisDashboardComponent implements OnInit {
   baselineYearError: boolean;
   yearOptions: Array<number>;
   selectedAccount: IdbAccount;
+  analysisItemsList: Array<{
+    year: number,
+    analysisItems: Array<IdbAccountAnalysisItem>,
+    hasSelectedItem: boolean
+  }>;
+  showDetail: boolean;
+  showDetailSub: Subscription;
   constructor(private router: Router, private accountAnalysisDbService: AccountAnalysisDbService, private toastNotificationService: ToastNotificationsService,
     private accountDbService: AccountdbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private dbChangesService: DbChangesService, private sharedDataService: SharedDataService) { }
+    private dbChangesService: DbChangesService, private sharedDataService: SharedDataService, private analysisService: AnalysisService) { }
 
   ngOnInit(): void {
     this.selectedAccount = this.accountDbService.selectedAccount.getValue();
     this.accountAnalysisItemsSub = this.accountAnalysisDbService.accountAnalysisItems.subscribe(items => {
-      this.accountAnalysisItems = items;
+      // this.accountAnalysisItems = items;
+      this.setAnalysisItemsList(items);
     });
 
     this.yearOptions = this.utilityMeterDataDbService.getYearOptions(true);
@@ -47,11 +57,16 @@ export class AccountAnalysisDashboardComponent implements OnInit {
     this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
       this.itemsPerPage = val;
     })
+    
+    this.showDetailSub = this.analysisService.showDetail.subscribe(showDetail => {
+      this.showDetail = showDetail;
+    })
   }
 
   ngOnDestroy() {
     this.accountAnalysisItemsSub.unsubscribe();
     this.itemsPerPageSub.unsubscribe();
+    this.showDetailSub.unsubscribe();
   }
 
   async createAnalysis() {
@@ -101,7 +116,7 @@ export class AccountAnalysisDashboardComponent implements OnInit {
     }
   }
 
-  async createCopy(analysisItem: IdbAccountAnalysisItem){
+  async createCopy(analysisItem: IdbAccountAnalysisItem) {
     let newItem: IdbAccountAnalysisItem = JSON.parse(JSON.stringify(analysisItem));
     delete newItem.id;
     newItem.name = newItem.name + ' (Copy)';
@@ -112,5 +127,25 @@ export class AccountAnalysisDashboardComponent implements OnInit {
     this.router.navigateByUrl('account/analysis/setup');
 
   }
+
+  setAnalysisItemsList(accountAnalysisItems: Array<IdbAccountAnalysisItem>) {
+    this.analysisItemsList = new Array();
+    let years: Array<number> = accountAnalysisItems.map(item => { return item.reportYear });
+    years = _.uniq(years);
+    years = _.orderBy(years, (year) => { return year }, 'desc');
+    years.forEach(year => {
+      let yearAnalysisItems: Array<IdbAccountAnalysisItem> = accountAnalysisItems.filter(item => { return item.reportYear == year });
+      this.analysisItemsList.push({
+        year: year,
+        analysisItems: yearAnalysisItems,
+        hasSelectedItem: yearAnalysisItems.findIndex((item: IdbAccountAnalysisItem) => { return item.selectedYearAnalysis == true }) != -1
+      });
+    })
+  }
+
+  saveShowDetails() {
+    this.analysisService.showDetail.next(this.showDetail);
+  }
+
 
 }
