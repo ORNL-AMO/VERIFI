@@ -28,8 +28,8 @@ export class AnalysisItemCardComponent implements OnInit {
   }>;
 
 
-  hideDetailsSub: Subscription;
-  hideDetails: boolean;
+  showDetailSub: Subscription;
+  showDetail: boolean;
   displayDeleteModal: boolean = false;
   constructor(private analysisDbService: AnalysisDbService, private router: Router, private facilityDbService: FacilitydbService,
     private analysisService: AnalysisService, private dbChangesService: DbChangesService,
@@ -38,13 +38,13 @@ export class AnalysisItemCardComponent implements OnInit {
 
   ngOnInit(): void {
     this.initializeGroups();
-    this.hideDetailsSub = this.analysisService.hideDetails.subscribe(val => {
-      this.hideDetails = val;
+    this.showDetailSub = this.analysisService.showDetail.subscribe(val => {
+      this.showDetail = val;
     });
   }
 
   ngOnDestroy() {
-    this.hideDetailsSub.unsubscribe();
+    this.showDetailSub.unsubscribe();
   }
 
   initializeGroups() {

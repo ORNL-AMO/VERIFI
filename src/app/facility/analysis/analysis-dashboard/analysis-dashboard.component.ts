@@ -31,8 +31,8 @@ export class AnalysisDashboardComponent implements OnInit {
     analysisItems: Array<IdbAnalysisItem>,
     hasSelectedItem: boolean
   }>;
-  hideDetails: boolean;
-  hideDetailsSub: Subscription;
+  showDetail: boolean;
+  showDetailSub: Subscription;
   constructor(private router: Router, private analysisDbService: AnalysisDbService, private toastNotificationService: ToastNotificationsService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private facilityDbService: FacilitydbService,
@@ -54,15 +54,15 @@ export class AnalysisDashboardComponent implements OnInit {
       }
     });
 
-    this.hideDetailsSub = this.analysisService.hideDetails.subscribe(hideDetails => {
-      this.hideDetails = hideDetails;
+    this.showDetailSub = this.analysisService.showDetail.subscribe(showDetail => {
+      this.showDetail = showDetail;
     })
   }
 
   ngOnDestroy() {
     this.facilityAnalysisItemsSub.unsubscribe();
     this.selectedFacilitySub.unsubscribe();
-    this.hideDetailsSub.unsubscribe();
+    this.showDetailSub.unsubscribe();
   }
 
   async createAnalysis() {
@@ -96,7 +96,7 @@ export class AnalysisDashboardComponent implements OnInit {
     })
   }
 
-  saveHideDetails() {
-    this.analysisService.hideDetails.next(this.hideDetails);
+  saveShowDetails() {
+    this.analysisService.showDetail.next(this.showDetail);
   }
 }

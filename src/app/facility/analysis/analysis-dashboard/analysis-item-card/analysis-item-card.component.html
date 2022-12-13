@@ -25,7 +25,7 @@
             </div>
         </div>
     </div>
-    <div class="card-body d-flex flex-column" *ngIf="!hideDetails">
+    <div class="card-body d-flex flex-column" *ngIf="showDetail">
         <div class="d-flex flex-column" *ngFor="let groupItem of groupItems; let index = index;">
             <div>
                 <span class="mr-1 fa fa-exclamation-circle" *ngIf="groupItem.group.groupErrors.hasErrors"></span>
