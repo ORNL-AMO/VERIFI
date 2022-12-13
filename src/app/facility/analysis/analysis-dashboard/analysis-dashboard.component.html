@@ -17,9 +17,15 @@
                 <div>
                     <span class="fa fa-circle-check"></span> Denotes selected analysis for report year.
                 </div>
-                <div>
-                    <a *ngIf="!hideDetails" (click)="toggleHideDetails()">Hide Details</a>
-                    <a *ngIf="hideDetails" (click)="toggleHideDetails()">Show Details</a>
+                <div class="d-flex">
+                    <div class="pr-1">
+                        Hide Details
+                    </div>
+                    <label class="switch mb-0" for="hideDetails">
+                        <input class="checkbox" type="checkbox" id="hideDetails" name="hideDetails"
+                            [(ngModel)]="hideDetails" (change)="saveHideDetails()">
+                        <span class="slider round"></span>
+                    </label>
                 </div>
             </div>
         </div>
@@ -30,6 +36,14 @@
                     <span class="badge report-year">
                         {{listItem.year}}
                     </span>
+                    <ng-container *ngIf="!listItem.hasSelectedItem">
+                        <br>
+                        <div class="mt-2">
+                            <span class="alert alert-danger">
+                                No item selected!
+                            </span>
+                        </div>
+                    </ng-container>
                 </div>
                 <div class="col-6" *ngFor="let analysisItem of listItem.analysisItems">
                     <app-analysis-item-card [analysisItem]="analysisItem"></app-analysis-item-card>
@@ -38,85 +52,9 @@
                     <hr>
                 </div>
             </div>
-
         </div>
-        <!-- <app-analysis-items></app-analysis-items> -->
     </div>
 </div>
-
-
-
-<!-- <div class="wrapper main-content p-0" *ngIf="!baselineYearErrorMax && !baselineYearErrorMin">
-    <div class="content-padding">
-        <h4>Saved Analysis Items</h4>
-
-        <div *ngIf="facilityAnalysisItems.length == 0" class="text-center mt-5">
-            <h5>No previous analysis data found.</h5>
-            <div class="meterData">
-                <button class="btn action-btn mr-2" (click)="createAnalysis()"><i class="fa fa-plus"></i> Add New
-                    Analysis</button>
-            </div>
-        </div>
-
-
-        <div *ngIf="facilityAnalysisItems.length > 0">
-            <div class="d-flex w-100 justify-content-end">
-                <app-table-items-dropdown></app-table-items-dropdown>
-                <div class="pl-2">
-                    <button class="btn action-btn" (click)="createAnalysis()"><i class="fa fa-plus"></i>
-                        Add New Analysis</button>
-                </div>
-            </div>
-
-            <div class="table-responsive">
-                <table class="table table-sm table-hover">
-                    <thead>
-                        <tr>
-                            <th (click)="setOrderDataField('name')" [ngClass]="{'active': orderDataField == 'name'}">
-                                Name</th>
-                            <th (click)="setOrderDataField('reportYear')"
-                                [ngClass]="{'active': orderDataField == 'reportYear'}">
-                                Report Year
-                            </th>
-                            <th (click)="setOrderDataField('date')" [ngClass]="{'active': orderDataField == 'date'}">
-                                Last Modified</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr
-                            *ngFor="let analysisItem of facilityAnalysisItems  | orderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
-                            <td>
-                                <a (click)=" selectAnalysisItem(analysisItem)">
-                                    <span class="fa fa-exclamation-circle"
-                                        *ngIf="analysisItem.setupErrors.hasError || analysisItem.setupErrors.groupsHaveErrors"></span>
-                                    {{analysisItem.name}}
-                                </a>
-                            </td>
-                            <td>{{analysisItem.reportYear| yearDisplay: selectedFacility.fiscalYear}}</td>
-                            <td>{{analysisItem.date | date:'short'}}</td>
-                            <td class="actions">
-                                <div class="d-flex">
-                                    <i class="fa fa-pencil" title="Edit" (click)="selectAnalysisItem(analysisItem)"></i>
-                                    <i class="fa fa-copy" title="Copy" (click)="createCopy(analysisItem)"></i>
-                                    <i class="fa fa-trash" title="Delete" (click)="deleteItem(analysisItem)"></i>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="tableControls overflow-hidden">
-                <div class="item-right">
-                    <ngb-pagination [collectionSize]="facilityAnalysisItems.length" [(page)]="currentPageNumber"
-                        [pageSize]="itemsPerPage" [rotate]="true" aria-label="Default pagination"></ngb-pagination>
-                </div>
-                <p class="item-right">{{facilityAnalysisItems.length}} entries</p>
-            </div>
-        </div>
-    </div>
-</div> -->
 
 <div class="w-100 justify-content-center p-5" *ngIf="baselineYearErrorMax || baselineYearErrorMin">
     <div class="alert alert-danger text-center p-2">
@@ -129,20 +67,5 @@
             and your meter readings end {{yearOptions[yearOptions.length -1]}}.
         </ng-container>
         Fix your reduction goal year in facility settings or add data.
-    </div>
-</div>
-
-
-<div [ngClass]="{'windowOverlay': itemToDelete}"></div>
-<div class="popup" [class.open]="itemToDelete">
-    <div class="popup-header" *ngIf="itemToDelete">Delete: {{itemToDelete.name}}
-        <button class="item-right" (click)="cancelDelete()">x</button>
-    </div>
-    <div class="popup-body">
-        <p>WARNING: Deleting this analysis item cannot be undone.</p>
-    </div>
-    <div class="saveCancel popup-footer text-right">
-        <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
-        <button class="btn btn-danger" (click)="confirmDelete()">Delete</button>
     </div>
 </div>

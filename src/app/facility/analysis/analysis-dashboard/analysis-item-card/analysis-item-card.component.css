@@ -19,7 +19,7 @@
 
 .item-name,
 .fa-circle-check,
-.fa-circle-o {
+.fa-circle {
     font-size: 18px;
 }
 
@@ -34,5 +34,9 @@
 
 .fa-circle:hover{
     color: gray;
+    cursor: pointer;
+}
+
+.fa-circle-check:hover{
     cursor: pointer;
 }
