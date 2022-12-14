@@ -2,7 +2,7 @@ import { CalanderizedMeter, MonthlyData } from "src/app/models/calanderization";
 import { AnalysisGroup, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, PredictorData } from "src/app/models/idb";
 import * as _ from 'lodash';
 import { filterYearMeterData, filterYearPredictorData, getMonthlyStartAndEndDate, getPredictorUsage } from "../shared-calculations/calculationsHelpers";
-import { getFiscalYear } from "../shared-calculations/calanderizationFunctions";
+import { getFiscalYear, getLastBillEntryFromCalanderizedMeterData } from "../shared-calculations/calanderizationFunctions";
 
 export class MonthlyGroupAnalysisClass {
 
@@ -18,12 +18,12 @@ export class MonthlyGroupAnalysisClass {
   baselineYear: number;
   annualMeterDataUsage: Array<{ year: number, usage: number }>;
   baselineYearEnergyIntensity: number;
-  constructor(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorEntry>) {
+  constructor(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorEntry>, calculateAllMonthlyData: boolean) {
     this.selectedGroup = selectedGroup;
     this.analysisItem = analysisItem;
     this.facility = facility;
 
-    this.setStartAndEndDate();
+    this.setStartAndEndDate(calanderizedMeters, calculateAllMonthlyData);
     this.setPredictorVariables();
     this.setFacilityPredictorData(accountPredictorEntries);
     this.setGroupMeters(calanderizedMeters);
@@ -33,10 +33,15 @@ export class MonthlyGroupAnalysisClass {
     this.setBaselineYearEnergyIntensity();
   }
 
-  setStartAndEndDate() {
+  setStartAndEndDate(calanderizedMeters: Array<CalanderizedMeter>, calculateAllMonthlyData: boolean) {
     let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = getMonthlyStartAndEndDate(this.facility, this.analysisItem);
     this.baselineDate = monthlyStartAndEndDate.baselineDate;
-    this.endDate = monthlyStartAndEndDate.endDate;
+    if (calculateAllMonthlyData) {
+      let lastBill: MonthlyData = getLastBillEntryFromCalanderizedMeterData(calanderizedMeters);
+      this.endDate = new Date(lastBill.date);
+  } else {
+      this.endDate = monthlyStartAndEndDate.endDate;
+  }
   }
 
   setPredictorVariables() {

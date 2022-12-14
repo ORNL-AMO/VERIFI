@@ -21,14 +21,14 @@ import { ExportToExcelTemplateService } from 'src/app/shared/helper-services/exp
 })
 export class FacilityHomeSummaryComponent implements OnInit {
 
-  latestAnalysisSummary: AnnualAnalysisSummary;
+  latestAnalysisSummary: MonthlyAnalysisSummaryData;
   latestSummarySub: Subscription;
   percentSavings: number = 0;
   percentGoal: number;
   percentTowardsGoal: number = 0;
   goalYear: number;
   baselineYear: number;
-  facilityAnalysisYear: number;
+  // facilityAnalysisYear: number;
 
 
   facility: IdbFacility
@@ -53,6 +53,7 @@ export class FacilityHomeSummaryComponent implements OnInit {
 
   monthlyFacilityAnalysisData: Array<MonthlyAnalysisSummaryData>;
   monthlyFacilityAnalysisDataSub: Subscription;
+  latestAnalysisDate: Date; 
   constructor(private analysisDbService: AnalysisDbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private facilityDbService: FacilitydbService, private facilityHomeService: FacilityHomeService,
     private router: Router, private predictorDbService: PredictordbService,
@@ -72,28 +73,28 @@ export class FacilityHomeSummaryComponent implements OnInit {
       this.setNAICS();
       this.setFacilityStatus();
     });
-    this.latestSummarySub = this.facilityHomeService.annualAnalysisSummary.subscribe(val => {
-      this.latestAnalysisSummary = _.maxBy(val, 'year');
+    this.latestSummarySub = this.facilityHomeService.monthlyFacilityAnalysisData.subscribe(val => {
+      this.monthlyFacilityAnalysisData = val;
+      this.latestAnalysisSummary = _.maxBy(val, 'date');
       if (this.latestAnalysisSummary) {
-        this.facilityAnalysisYear = this.latestAnalysisSummary.year;
+        this.latestAnalysisDate = new Date(this.latestAnalysisSummary.date);
+        // this.facilityAnalysisYear = this.latestAnalysisSummary.year;
         this.setProgressPercentages();
       } else {
-        this.facilityAnalysisYear = undefined;
+        // this.facilityAnalysisYear = undefined;
+        this.latestAnalysisDate = undefined;
         this.percentSavings = 0;
         this.percentTowardsGoal = 0;
       }
     });
 
-    this.monthlyFacilityAnalysisDataSub = this.facilityHomeService.monthlyFacilityAnalysisData.subscribe(val => {
-      this.monthlyFacilityAnalysisData = val;
-    })
   }
 
   ngOnDestroy() {
     this.latestSummarySub.unsubscribe();
     this.selectedFacilitySub.unsubscribe();
     this.calculatingSub.unsubscribe();
-    this.monthlyFacilityAnalysisDataSub.unsubscribe();
+    // this.monthlyFacilityAnalysisDataSub.unsubscribe();
   }
 
   checkMeterDataUpToDate() {
@@ -120,7 +121,7 @@ export class FacilityHomeSummaryComponent implements OnInit {
   }
 
   setProgressPercentages() {
-    this.percentSavings = this.latestAnalysisSummary.totalSavingsPercentImprovement;
+    this.percentSavings = this.latestAnalysisSummary.rolling12MonthImprovement;
     this.percentTowardsGoal = (this.percentSavings / this.percentGoal) * 100;
     if (this.percentTowardsGoal < 0) {
       this.percentTowardsGoal = 0;

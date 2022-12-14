@@ -47,7 +47,7 @@ export class BetterPlantsReportClass {
                 let facilityAnalysisItem: IdbAnalysisItem = accountAnalysisItems.find(accountItem => { return accountItem.guid == item.analysisItemId });
                 let calanderizedFacilityMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(meter => { return meter.meter.facilityId == item.facilityId });
                 let facility: IdbFacility = facilities.find(facility => { return facility.guid == item.facilityId });
-                let facilityAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(facilityAnalysisItem, facility, calanderizedFacilityMeters, accountPredictorEntries);
+                let facilityAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(facilityAnalysisItem, facility, calanderizedFacilityMeters, accountPredictorEntries, false);
                 let annualAnalysisSummary: Array<AnnualAnalysisSummary> = facilityAnalysisSummaryClass.getAnnualAnalysisSummaries();
                 let reportYearSummary: AnnualAnalysisSummary = annualAnalysisSummary.find(summary => { return summary.year == selectedAnalysisItem.reportYear });
                 this.facilityPerformance.push({
@@ -66,7 +66,7 @@ export class BetterPlantsReportClass {
         accountPredictorEntries: Array<IdbPredictorEntry>,
         allAccountAnalysisItems: Array<IdbAnalysisItem>,
         reportOptions: ReportOptions) {
-        let annualAccountAnalysisSummaryClass: AnnualAccountAnalysisSummaryClass = new AnnualAccountAnalysisSummaryClass(accountAnalysisItem, account, calanderizedMeters, accountFacilities, accountPredictorEntries, allAccountAnalysisItems);
+        let annualAccountAnalysisSummaryClass: AnnualAccountAnalysisSummaryClass = new AnnualAccountAnalysisSummaryClass(accountAnalysisItem, account, calanderizedMeters, accountFacilities, accountPredictorEntries, allAccountAnalysisItems, false);
         let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = annualAccountAnalysisSummaryClass.getAnnualAnalysisSummaries();
         this.reportYearAnalysisSummary = annualAnalysisSummaries.find(summary => { return summary.year == reportOptions.targetYear });
         this.baselineYearAnalysisSummary = annualAnalysisSummaries.find(summary => { return summary.year == reportOptions.baselineYear });

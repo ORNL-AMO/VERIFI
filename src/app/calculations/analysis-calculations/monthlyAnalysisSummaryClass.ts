@@ -9,8 +9,8 @@ export class MonthlyAnalysisSummaryClass {
 
     monthlyGroupAnalysisClass: MonthlyGroupAnalysisClass;
     monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryDataClass>;
-    constructor(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorEntry>) {
-        this.monthlyGroupAnalysisClass = new MonthlyGroupAnalysisClass(selectedGroup, analysisItem, facility, calanderizedMeters, accountPredictorEntries);
+    constructor(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorEntry>, calculateAllMonthlyData: boolean) {
+        this.monthlyGroupAnalysisClass = new MonthlyGroupAnalysisClass(selectedGroup, analysisItem, facility, calanderizedMeters, accountPredictorEntries, calculateAllMonthlyData);
         this.setMonthlyAnalysisSummaryData();
     }
 

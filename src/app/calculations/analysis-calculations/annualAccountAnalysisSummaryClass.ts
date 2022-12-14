@@ -18,15 +18,16 @@ export class AnnualAccountAnalysisSummaryClass {
         calanderizedMeters: Array<CalanderizedMeter>,
         accountFacilities: Array<IdbFacility>,
         accountPredictorEntries: Array<IdbPredictorEntry>,
-        allAccountAnalysisItems: Array<IdbAnalysisItem>) {
-        this.setMonthlyAnalysisSummaryData(accountAnalysisItem, account, calanderizedMeters, accountFacilities, accountPredictorEntries, allAccountAnalysisItems);
+        allAccountAnalysisItems: Array<IdbAnalysisItem>,
+        calculateAllMonthlyData: boolean) {
+        this.setMonthlyAnalysisSummaryData(accountAnalysisItem, account, calanderizedMeters, accountFacilities, accountPredictorEntries, allAccountAnalysisItems, calculateAllMonthlyData);
         this.setBaselineYear(account);
         this.setReportYear(accountAnalysisItem);
         this.setAnnualAnalysisSummaryDataClasses(accountPredictorEntries);
     }
 
-    setMonthlyAnalysisSummaryData(analysisItem: IdbAccountAnalysisItem, account: IdbAccount, calanderizedMeters: Array<CalanderizedMeter>, accountFacilities: Array<IdbFacility>, accountPredictorEntries: Array<IdbPredictorEntry>, allAccountAnalysisItems: Array<IdbAnalysisItem>) {
-        let monthlyAnalysisSummaryClass: MonthlyAccountAnalysisClass = new MonthlyAccountAnalysisClass(analysisItem, account, calanderizedMeters, accountFacilities, accountPredictorEntries, allAccountAnalysisItems);
+    setMonthlyAnalysisSummaryData(analysisItem: IdbAccountAnalysisItem, account: IdbAccount, calanderizedMeters: Array<CalanderizedMeter>, accountFacilities: Array<IdbFacility>, accountPredictorEntries: Array<IdbPredictorEntry>, allAccountAnalysisItems: Array<IdbAnalysisItem>, calculateAllMonthlyData: boolean) {
+        let monthlyAnalysisSummaryClass: MonthlyAccountAnalysisClass = new MonthlyAccountAnalysisClass(analysisItem, account, calanderizedMeters, accountFacilities, accountPredictorEntries, allAccountAnalysisItems, calculateAllMonthlyData);
         this.monthlyAnalysisSummaryData = monthlyAnalysisSummaryClass.getMonthlyAnalysisSummaryData();
     }
 

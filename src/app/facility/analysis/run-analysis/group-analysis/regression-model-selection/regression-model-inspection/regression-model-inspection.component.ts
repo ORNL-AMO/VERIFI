@@ -82,7 +82,7 @@ export class RegressionModelInspectionComponent implements OnInit {
       });
     } else {
       // Web Workers are not supported in this environment.
-      let monthlyAnalysisSummaryClass: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(groupCopy, this.analysisItem, this.selectedFacility, this.calanderizedMeters, this.accountPredictorEntries);
+      let monthlyAnalysisSummaryClass: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(groupCopy, this.analysisItem, this.selectedFacility, this.calanderizedMeters, this.accountPredictorEntries, false);
       this.inspectedMonthlyAnalysisSummaryData = monthlyAnalysisSummaryClass.getMonthlyAnalysisSummaryData();
       this.drawChart();
     }
@@ -107,7 +107,7 @@ export class RegressionModelInspectionComponent implements OnInit {
       });
     } else {
       // Web Workers are not supported in this environment.
-      let monthlyAnalysisSummaryClass: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(this.selectedGroup, this.analysisItem, this.selectedFacility, this.calanderizedMeters, this.accountPredictorEntries);
+      let monthlyAnalysisSummaryClass: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(this.selectedGroup, this.analysisItem, this.selectedFacility, this.calanderizedMeters, this.accountPredictorEntries, false);
       this.selectedMonthlyAnalysisSummaryData = monthlyAnalysisSummaryClass.getMonthlyAnalysisSummaryData();
       this.drawChart();
     }

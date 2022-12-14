@@ -61,7 +61,7 @@ export class MonthlyAnalysisSummaryComponent implements OnInit {
       });
     } else {
       // Web Workers are not supported in this environment.
-      let monthlyAnalysisSummaryClass: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(this.group, this.analysisItem, this.facility, calanderizedMeters, accountPredictorEntries);
+      let monthlyAnalysisSummaryClass: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(this.group, this.analysisItem, this.facility, calanderizedMeters, accountPredictorEntries, false);
       this.monthlyAnalysisSummary = monthlyAnalysisSummaryClass.getResults();
     }
   }

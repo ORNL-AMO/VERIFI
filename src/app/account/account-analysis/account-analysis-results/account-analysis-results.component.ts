@@ -53,11 +53,12 @@ export class AccountAnalysisResultsComponent implements OnInit {
         calanderizedMeters: calanderizedMeters,
         accountFacilities: accountFacilities,
         accountPredictorEntries: accountPredictorEntries,
-        allAccountAnalysisItems: accountAnalysisItems
+        allAccountAnalysisItems: accountAnalysisItems,
+        calculateAllMonthlyData: false
       });
     } else {
       // Web Workers are not supported in this environment.
-      let annualAnalysisSummaryClass: AnnualAccountAnalysisSummaryClass = new AnnualAccountAnalysisSummaryClass(this.accountAnalysisItem, this.account, calanderizedMeters, accountFacilities, accountPredictorEntries, accountAnalysisItems);
+      let annualAnalysisSummaryClass: AnnualAccountAnalysisSummaryClass = new AnnualAccountAnalysisSummaryClass(this.accountAnalysisItem, this.account, calanderizedMeters, accountFacilities, accountPredictorEntries, accountAnalysisItems, false);
       let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
       let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;
       this.accountAnalysisService.annualAnalysisSummary.next(annualAnalysisSummaries);

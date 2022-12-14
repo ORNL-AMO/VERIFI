@@ -79,11 +79,12 @@ export class AccountHomeComponent implements OnInit {
         calanderizedMeters: calanderizedMeters,
         accountFacilities: accountFacilities,
         accountPredictorEntries: accountPredictorEntries,
-        allAccountAnalysisItems: accountAnalysisItems
+        allAccountAnalysisItems: accountAnalysisItems,
+        calculateAllMonthlyData: true
       });
     } else {
       // Web Workers are not supported in this environment.
-      let annualAnalysisSummaryClass: AnnualAccountAnalysisSummaryClass = new AnnualAccountAnalysisSummaryClass(this.accountHomeService.latestAnalysisItem, this.account, calanderizedMeters, accountFacilities, accountPredictorEntries, accountAnalysisItems);
+      let annualAnalysisSummaryClass: AnnualAccountAnalysisSummaryClass = new AnnualAccountAnalysisSummaryClass(this.accountHomeService.latestAnalysisItem, this.account, calanderizedMeters, accountFacilities, accountPredictorEntries, accountAnalysisItems, true);
       let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
       let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;
       this.accountHomeService.annualAnalysisSummary.next(annualAnalysisSummaries);
@@ -129,11 +130,12 @@ export class AccountHomeComponent implements OnInit {
           analysisItem: latestAnalysisItem,
           facility: facility,
           calanderizedMeters: calanderizedMeters,
-          accountPredictorEntries: accountPredictorEntries
+          accountPredictorEntries: accountPredictorEntries,
+          calculateAllMonthlyData: true
         });
       } else {
         // Web Workers are not supported in this environment.
-        let annualAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(latestAnalysisItem, facility, calanderizedMeters, accountPredictorEntries);
+        let annualAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(latestAnalysisItem, facility, calanderizedMeters, accountPredictorEntries, true);
         let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
         let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;
         let facilitySummary: {
