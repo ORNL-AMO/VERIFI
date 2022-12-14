@@ -6,7 +6,8 @@ import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { IdbAccount, IdbAccountAnalysisItem } from 'src/app/models/idb';
+import { OverviewReportOptionsDbService } from 'src/app/indexedDB/overview-report-options-db.service';
+import { IdbAccount, IdbAccountAnalysisItem, IdbOverviewReportOptions } from 'src/app/models/idb';
 
 @Component({
   selector: 'app-account-analysis-item-card',
@@ -23,7 +24,8 @@ export class AccountAnalysisItemCardComponent implements OnInit {
   constructor(private router: Router,
     private analysisService: AnalysisService, private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService, private toastNotificationService: ToastNotificationsService,
-    private accountAnalysisDbService: AccountAnalysisDbService) { }
+    private accountAnalysisDbService: AccountAnalysisDbService,
+    private overviewReportOptionsDbService: OverviewReportOptionsDbService) { }
 
   ngOnInit(): void {
     this.showDetailSub = this.analysisService.showDetail.subscribe(val => {
@@ -52,7 +54,21 @@ export class AccountAnalysisItemCardComponent implements OnInit {
   async confirmDelete() {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.accountAnalysisDbService.deleteWithObservable(this.analysisItem.id).toPromise();
+    let overviewReportOptions: Array<IdbOverviewReportOptions> = this.overviewReportOptionsDbService.accountOverviewReportOptions.getValue();
+    let updateReportOptions: boolean = false;
+    for (let i = 0; i < overviewReportOptions.length; i++) {
+      if (overviewReportOptions[i].reportOptionsType == 'betterPlants') {
+        if (overviewReportOptions[i].reportOptions.analysisItemId == this.analysisItem.guid) {
+          overviewReportOptions[i].reportOptions.analysisItemId = undefined;
+          await this.overviewReportOptionsDbService.updateWithObservable(overviewReportOptions[i]).toPromise();
+          updateReportOptions = true;
+        }
+      }
+    }
     await this.dbChangesService.setAccountAnalysisItems(selectedAccount);
+    if (updateReportOptions) {
+      await this.dbChangesService.setAccountOverviewReportOptions(selectedAccount);
+    }
     this.displayDeleteModal = false;
     this.toastNotificationService.showToast('Analysis Item Deleted', undefined, undefined, false, "success");
   }

@@ -48,16 +48,16 @@
 </div>
 
 
-<!-- <div [ngClass]="{'windowOverlay': displayDeleteModal}"></div>
+<div [ngClass]="{'windowOverlay': displayDeleteModal}"></div>
 <div class="popup" [class.open]="displayDeleteModal">
     <div class="popup-header" *ngIf="displayDeleteModal">Delete: {{analysisItem.name}}
         <button class="item-right" (click)="cancelDelete()">x</button>
     </div>
     <div class="popup-body">
-        <p>WARNING: Deleting this analysis item cannot be undone.</p>
+        <p>WARNING: Deleting this analysis item cannot be undone. Reports using this analysis may be effected.</p>
     </div>
     <div class="saveCancel popup-footer text-right">
         <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
         <button class="btn btn-danger" (click)="confirmDelete()">Delete</button>
     </div>
-</div> -->
+</div>
