@@ -151,7 +151,8 @@
                 [disabled]="!reportOptions.targetYear || !reportOptions.baselineYear || !reportOptions.analysisItemId"><span
                     class="fa fa-save"></span> Create
                 Report</button>
-            <button *ngIf="selectedReportOptions" class="btn nav-btn" (click)="cancelChanges()">Discard
+            <button *ngIf="selectedReportOptions" class="btn nav-btn" (click)="cancelChanges()"
+                [disabled]="!reportOptions.targetYear || !reportOptions.baselineYear || !reportOptions.analysisItemId">Discard
                 Changes</button>
             <button *ngIf="selectedReportOptions" class="btn action-btn ml-2" (click)="updateReport()"
                 [disabled]="!reportOptions.targetYear || !reportOptions.baselineYear || !reportOptions.analysisItemId"><span

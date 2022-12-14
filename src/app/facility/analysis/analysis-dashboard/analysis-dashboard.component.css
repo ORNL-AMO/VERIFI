@@ -1,20 +1,32 @@
 
-.wrapper.main-content{
-    margin: 25px 40px;
-}
-
 .content-padding{
     padding: 20px 30px 30px;
 }
 
-th:hover{
-    cursor: pointer;
-    text-decoration: underline;
-}
-
-th.active{
-    text-decoration: underline;
-}
 .fa.fa-exclamation-circle, .banner a.nav-link:not(.active) .fa.fa.fa-exclamation-circle{
     color: red;
+}
+
+.header{
+    padding: .25rem;
+    background-color: white;
+    border-radius: .2rem;
+}
+
+.badge.report-year{
+    font-size: 22px;
+    background-color: #2c386b;
+    color: white;
+}
+
+.fa-circle-check{
+    font-size: 18px;
+}
+
+.fa-circle-check{
+    color: green;
+}
+
+h4 .mt-auto, h4 .mt-auto i.fa-microscope{
+    font-size: 22px !important;
 }

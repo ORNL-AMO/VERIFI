@@ -26,6 +26,7 @@ import { AnalysisFooterComponent } from './analysis-footer/analysis-footer.compo
 import { TableItemsDropdownModule } from 'src/app/shared/table-items-dropdown/table-items-dropdown.module';
 import { RegressionModelInspectionComponent } from './run-analysis/group-analysis/regression-model-selection/regression-model-inspection/regression-model-inspection.component';
 import { RegressionNumberPipe } from './run-analysis/group-analysis/regression-model-selection/regression-number.pipe';
+import { AnalysisItemCardComponent } from './analysis-dashboard/analysis-item-card/analysis-item-card.component';
 
 
 
@@ -49,7 +50,8 @@ import { RegressionNumberPipe } from './run-analysis/group-analysis/regression-m
     AccountAnalysisListComponent,
     AnalysisFooterComponent,
     RegressionModelInspectionComponent,
-    RegressionNumberPipe
+    RegressionNumberPipe,
+    AnalysisItemCardComponent
   ],
   imports: [
     CommonModule,

@@ -25,6 +25,7 @@ export class AnalysisService {
   annualAnalysisSummary: BehaviorSubject<Array<AnnualAnalysisSummary>>;
   monthlyAccountAnalysisData: BehaviorSubject<Array<MonthlyAnalysisSummaryData>>;
   accountAnalysisItem: IdbAccountAnalysisItem;
+  showDetail: BehaviorSubject<boolean>;
   constructor(private localStorageService: LocalStorageService, private calendarizationService: CalanderizationService,
     private convertMeterDataService: ConvertMeterDataService, private facilityDbService: FacilitydbService,
     private utilityMeterDbService: UtilityMeterdbService, private analysisDbService: AnalysisDbService) {
@@ -38,7 +39,11 @@ export class AnalysisService {
     this.calculating = new BehaviorSubject<boolean>(true);
     this.annualAnalysisSummary = new BehaviorSubject([]);
     this.monthlyAccountAnalysisData = new BehaviorSubject([]);
-
+    let showDetail: boolean = this.localStorageService.retrieve("showDetail");
+    if(showDetail == undefined){
+      showDetail = true;
+    }
+    this.showDetail = new BehaviorSubject<boolean>(showDetail);
 
     let analysisTableColumns: AnalysisTableColumns = this.localStorageService.retrieve("analysisTableColumns");
     if (!analysisTableColumns) {
@@ -85,11 +90,11 @@ export class AnalysisService {
     });
 
 
-    // this.monthlyTableColumns.subscribe(annualTableColumns => {
-    //   if (annualTableColumns) {
-    //     this.localStorageService.store('annualTableColumns', monthlyTableColumns);
-    //   }
-    // });
+    this.showDetail.subscribe(showDetail => {
+      if (showDetail != undefined) {
+        this.localStorageService.store('showDetail', showDetail);
+      }
+    });
   }
 
   setBaselineAdjustments(facility: IdbFacility, analysisItem: IdbAnalysisItem): IdbAnalysisItem {
