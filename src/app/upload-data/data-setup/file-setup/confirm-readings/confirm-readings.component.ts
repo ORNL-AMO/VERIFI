@@ -102,6 +102,7 @@ export class ConfirmReadingsComponent implements OnInit {
             form = this.utilityMeterDataService.getGeneralMeterDataForm(reading, displayVolumeInput, displayEnergyUse);
           }
           if (form.invalid) {
+            console.log(form);
             invalidReadings.push(reading);
           } else {
             if (reading.id) {

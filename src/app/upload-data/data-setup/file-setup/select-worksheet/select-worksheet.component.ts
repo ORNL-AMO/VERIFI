@@ -59,7 +59,12 @@ export class SelectWorksheetComponent implements OnInit {
 
   setSelectedWorksheetName() {
     this.fileReference.selectedWorksheetData = XLSX.utils.sheet_to_json(this.fileReference.workbook.Sheets[this.fileReference.selectedWorksheetName], { header: 1 });
-    this.fileReference.headerMap = XLSX.utils.sheet_to_json(this.fileReference.workbook.Sheets[this.fileReference.selectedWorksheetName]);
+    this.fileReference.headerMap = XLSX.utils.sheet_to_json(this.fileReference.workbook.Sheets[this.fileReference.selectedWorksheetName]).map(row =>
+      Object.keys(row).reduce((obj, key) => {
+        obj[key.trim()] = row[key];
+        return obj;
+      }, {})
+    );
     this.fileReference.columnGroups = [];
   }
 
@@ -67,12 +72,12 @@ export class SelectWorksheetComponent implements OnInit {
     this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/identify-columns');
   }
 
-  goBack(){
+  goBack() {
     this.router.navigateByUrl('/upload');
   }
 
-  
-  setImportFacility(){
+
+  setImportFacility() {
     this.fileReference.meterFacilityGroups = [];
     this.fileReference.predictorFacilityGroups = [];
     this.fileReference.newMeterGroups = [];
