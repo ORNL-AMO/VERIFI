@@ -48,7 +48,6 @@ export class AccountHomeSummaryComponent implements OnInit {
       this.account = val;
       this.setGoalYears();
       this.latestAnalysisItem = this.accountHomeService.latestAnalysisItem;
-      console.log(this.latestAnalysisItem);
       if(this.latestAnalysisItem){
         this.accountAnalysisYear = this.latestAnalysisItem.reportYear;
       }else{

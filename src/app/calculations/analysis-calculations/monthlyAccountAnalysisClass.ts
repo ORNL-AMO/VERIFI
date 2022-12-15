@@ -40,6 +40,8 @@ export class MonthlyAccountAnalysisClass {
         if (calculateAllMonthlyData) {
             let lastBill: MonthlyData = getLastBillEntryFromCalanderizedMeterData(calanderizedMeters);
             this.endDate = new Date(lastBill.date);
+            this.endDate.setMonth(this.endDate.getMonth() + 1);
+            this.endDate.setDate(1);
         } else {
             this.endDate = monthlyStartAndEndDate.endDate;
         }

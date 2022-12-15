@@ -39,9 +39,11 @@ export class MonthlyGroupAnalysisClass {
     if (calculateAllMonthlyData) {
       let lastBill: MonthlyData = getLastBillEntryFromCalanderizedMeterData(calanderizedMeters);
       this.endDate = new Date(lastBill.date);
-  } else {
+      this.endDate.setMonth(this.endDate.getMonth() + 1);
+      this.endDate.setDate(1);
+    } else {
       this.endDate = monthlyStartAndEndDate.endDate;
-  }
+    }
   }
 
   setPredictorVariables() {
@@ -56,25 +58,25 @@ export class MonthlyGroupAnalysisClass {
     });
   }
 
-  setFacilityPredictorData(accountPredictorEntries: Array<IdbPredictorEntry>){
+  setFacilityPredictorData(accountPredictorEntries: Array<IdbPredictorEntry>) {
     this.facilityPredictorData = accountPredictorEntries.filter(entry => {
       return entry.facilityId == this.facility.guid;
     });
   }
 
-  setGroupMeters(calanderizedMeters: Array<CalanderizedMeter>){
+  setGroupMeters(calanderizedMeters: Array<CalanderizedMeter>) {
     this.groupMeters = calanderizedMeters.filter(cMeter => { return cMeter.meter.groupId == this.selectedGroup.idbGroupId });
   }
 
-  setGroupMonthlyData(){
+  setGroupMonthlyData() {
     this.groupMonthlyData = this.groupMeters.flatMap(calanderizedMeter => { return calanderizedMeter.monthlyData });
   }
 
-  setBaselineYear(){
+  setBaselineYear() {
     this.baselineYear = getFiscalYear(this.baselineDate, this.facility);
   }
 
-  setAnnualMeterDataUsage(){
+  setAnnualMeterDataUsage() {
     this.annualMeterDataUsage = new Array();
     for (let year = this.baselineYear + 1; year <= this.endDate.getUTCFullYear(); year++) {
       let yearMeterData: Array<MonthlyData> = this.groupMonthlyData.filter(data => { return data.year == year });
@@ -83,7 +85,7 @@ export class MonthlyGroupAnalysisClass {
     }
   }
 
-  setBaselineYearEnergyIntensity(){
+  setBaselineYearEnergyIntensity() {
     if (this.selectedGroup.analysisType == 'energyIntensity' || this.selectedGroup.analysisType == 'modifiedEnergyIntensity') {
       let baselineYearPredictorData: Array<IdbPredictorEntry> = filterYearPredictorData(this.facilityPredictorData, this.baselineYear, this.facility);
       let baselineMeterData: Array<MonthlyData> = filterYearMeterData(this.groupMonthlyData, this.baselineYear, this.facility);
