@@ -223,6 +223,7 @@ export class ManageMetersComponent implements OnInit {
         meter.meterReadingDataApplication = 'fullMonth';
       }
     });
+    this.setHasNoCalanderizationSelection();
   }
 
   autoGroup() {
