@@ -1,6 +1,6 @@
 <div class="wrapper">
     <div class="d-flex w-100 h-100">
-        <div class="d-flex p-2 flex-column nav">
+        <div class="p-2 nav flex-column">
             <div class="nav-item" *ngFor="let listItem of facilitiesList"><a class="nav-link"
                     (click)="selectFacility(listItem.facility)"
                     [ngClass]="{'active': listItem.facility.id == selectedFacility.id}">
