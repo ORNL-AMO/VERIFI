@@ -202,7 +202,6 @@ export class ManageMetersComponent implements OnInit {
       });
     });
     this.facilityGroups = facilityGroups;
-    console.log(this.facilityGroups);
   }
 
   setValidMeters() {

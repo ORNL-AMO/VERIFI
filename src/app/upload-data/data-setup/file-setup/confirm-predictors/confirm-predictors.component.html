@@ -6,7 +6,7 @@
         <button class="btn nav-btn" (click)="continue()">Submit &amp; Continue</button>
     </div>
 </div>
-<ng-container *ngIf="fileReference.isTemplate">
+<ng-container *ngIf="fileReference.isTemplate && predictorsExist">
     <hr>
     <div class="alert alert-warning w-100 text-center">
         We have made some assumptions about your predictors. Please make sure that we have marked the proper predictor

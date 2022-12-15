@@ -71,10 +71,8 @@ export class EditMeterFormComponent implements OnInit {
   changeSource() {
     if (this.meterForm.controls.source.value == 'Electricity') {
       this.meterForm.controls.energyUnit.patchValue('kWh');
-      this.meterForm.controls.startingUnit.disable();
     } else {
       this.meterForm.controls.energyUnit.patchValue(this.facility.energyUnit);
-      this.meterForm.controls.startingUnit.enable();
     }
     this.setFuelTypeOptions(false);
     this.checkDisplayFuel();
