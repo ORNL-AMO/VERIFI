@@ -1,11 +1,12 @@
 import { MonthlyAnalysisSummaryData } from "src/app/models/analysis";
-import { CalanderizedMeter } from "src/app/models/calanderization";
+import { CalanderizedMeter, MonthlyData } from "src/app/models/calanderization";
 import { IdbAnalysisItem, IdbFacility, IdbPredictorEntry } from "src/app/models/idb";
-import { getFiscalYear } from "../shared-calculations/calanderizationFunctions";
+import { getFiscalYear, getLastBillEntryFromCalanderizedMeterData } from "../shared-calculations/calanderizationFunctions";
 import { checkAnalysisValue, getMonthlyStartAndEndDate } from "../shared-calculations/calculationsHelpers";
 import { MonthlyAnalysisSummaryClass } from "./monthlyAnalysisSummaryClass";
 import { MonthlyAnalysisSummaryDataClass } from "./monthlyAnalysisSummaryDataClass";
 import { MonthlyFacilityAnalysisDataClass } from "./monthlyFacilityAnalysisDataClass";
+import * as _ from 'lodash';
 
 export class MonthlyFacilityAnalysisClass {
 
@@ -15,24 +16,31 @@ export class MonthlyFacilityAnalysisClass {
     endDate: Date;
     facilityPredictorEntries: Array<IdbPredictorEntry>;
     baselineYear: number;
-    constructor(analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorEntry>) {
-        this.setStartAndEndDate(facility, analysisItem);
-        this.setGroupSummaries(analysisItem, facility, calanderizedMeters, accountPredictorEntries);
+    constructor(analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorEntry>, calculateAllMonthlyData: boolean) {
+        this.setStartAndEndDate(facility, analysisItem, calculateAllMonthlyData, calanderizedMeters);
+        this.setGroupSummaries(analysisItem, facility, calanderizedMeters, accountPredictorEntries, calculateAllMonthlyData);
         this.setFacilityPredictorEntries(accountPredictorEntries, facility);
         this.setBaselineYear(facility);
         this.setFacilityMonthSummaries(facility);
     }
 
-    setStartAndEndDate(facility: IdbFacility, analysisItem: IdbAnalysisItem) {
+    setStartAndEndDate(facility: IdbFacility, analysisItem: IdbAnalysisItem, calculateAllMonthlyData: boolean, calanderizedMeters: Array<CalanderizedMeter>) {
         let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = getMonthlyStartAndEndDate(facility, analysisItem);
         this.startDate = monthlyStartAndEndDate.baselineDate;
-        this.endDate = monthlyStartAndEndDate.endDate;
+        if (calculateAllMonthlyData) {
+            let lastBill: MonthlyData = getLastBillEntryFromCalanderizedMeterData(calanderizedMeters);
+            this.endDate = new Date(lastBill.date);
+            this.endDate.setMonth(this.endDate.getMonth() + 1);
+            this.endDate.setDate(1);
+        } else {
+            this.endDate = monthlyStartAndEndDate.endDate;
+        }
     }
 
-    setGroupSummaries(analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorEntry>) {
+    setGroupSummaries(analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorEntry>, calculateAllMonthlyData: boolean) {
         let groupMonthlySummariesClasses: Array<MonthlyAnalysisSummaryClass> = new Array();
         analysisItem.groups.forEach(group => {
-            let monthlySummary: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(group, analysisItem, facility, calanderizedMeters, accountPredictorEntries);
+            let monthlySummary: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(group, analysisItem, facility, calanderizedMeters, accountPredictorEntries, calculateAllMonthlyData);
             groupMonthlySummariesClasses.push(monthlySummary);
         });
         this.allFacilityAnalysisData = groupMonthlySummariesClasses.flatMap(summary => { return summary.monthlyAnalysisSummaryData });
@@ -69,7 +77,7 @@ export class MonthlyFacilityAnalysisClass {
     }
 
 
-    
+
     getMonthlyAnalysisSummaryData(): Array<MonthlyAnalysisSummaryData> {
         return this.facilityMonthSummaries.map(summaryDataItem => {
             return {

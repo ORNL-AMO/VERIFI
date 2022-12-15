@@ -42,12 +42,12 @@ export class FacilityAnalysisComponent implements OnInit {
         analysisItem: analysisItem,
         facility: facility,
         calanderizedMeters: calanderizedMeters,
-        accountPredictorEntries: accountPredictorEntries
+        accountPredictorEntries: accountPredictorEntries,
+        calculateAllMonthlyData: false
       });
     } else {
       // Web Workers are not supported in this environment.
-      let annualAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(analysisItem, facility, calanderizedMeters, accountPredictorEntries);
-      let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
+      let annualAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(analysisItem, facility, calanderizedMeters, accountPredictorEntries, false); let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
       let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;
       this.analysisService.annualAnalysisSummary.next(annualAnalysisSummaries);
       this.analysisService.monthlyAccountAnalysisData.next(monthlyAnalysisSummaryData);

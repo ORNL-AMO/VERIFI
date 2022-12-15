@@ -19,9 +19,9 @@ export class AccountHomeSummaryComponent implements OnInit {
 
   account: IdbAccount;
   accountSub: Subscription;
-  latestAnalysisSummary: AnnualAnalysisSummary;
+  latestAnalysisSummary: MonthlyAnalysisSummaryData;
   latestSummarySub: Subscription;
-  latestAnalysisYear: number;
+  latestAnalysisDate: Date;
   percentSavings: number = 0;
   percentGoal: number;
   percentTowardsGoal: number = 0;
@@ -48,16 +48,21 @@ export class AccountHomeSummaryComponent implements OnInit {
       this.account = val;
       this.setGoalYears();
       this.latestAnalysisItem = this.accountHomeService.latestAnalysisItem;
+      if(this.latestAnalysisItem){
+        this.accountAnalysisYear = this.latestAnalysisItem.reportYear;
+      }else{
+        this.accountAnalysisYear = undefined;
+      }
       let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
       this.disableButtons = (accountMeterData.length == 0);
     });
-    this.latestSummarySub = this.accountHomeService.annualAnalysisSummary.subscribe(val => {
-      this.latestAnalysisSummary = _.maxBy(val, 'year');
+    this.latestSummarySub = this.accountHomeService.monthlyAccountAnalysisData.subscribe(val => {
+      this.latestAnalysisSummary = _.maxBy(val, 'date');
       if (this.latestAnalysisSummary) {
-        this.accountAnalysisYear = this.latestAnalysisSummary.year;
+        this.latestAnalysisDate = new Date(this.latestAnalysisSummary.date);
         this.setProgressPercentages();
       } else {
-        this.accountAnalysisYear = undefined;
+        this.latestAnalysisDate = undefined
         this.percentSavings = 0;
         this.percentTowardsGoal = 0;
       }
@@ -98,8 +103,7 @@ export class AccountHomeSummaryComponent implements OnInit {
   }
 
   setProgressPercentages() {
-    this.percentSavings = this.latestAnalysisSummary.totalSavingsPercentImprovement;
-    this.latestAnalysisYear = this.latestAnalysisSummary.year;
+    this.percentSavings = this.latestAnalysisSummary.rolling12MonthImprovement;
     this.percentTowardsGoal = (this.percentSavings / this.percentGoal) * 100;
   }
 

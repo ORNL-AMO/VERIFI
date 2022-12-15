@@ -28,7 +28,8 @@
                         Baseline
                     </div>
                     <div class="col-8 text-center">
-                        Energy Reduction Goal
+                        Energy Reduction Goal <ng-container *ngIf="latestAnalysisDate">({{latestAnalysisDate | date: 'MMM. y'}})
+                        </ng-container>
                     </div>
                     <div class="col-2 text-center">
                         Goal

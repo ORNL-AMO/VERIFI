@@ -1,12 +1,12 @@
 import { MonthlyAnalysisSummaryData } from "src/app/models/analysis";
-import { CalanderizedMeter } from "src/app/models/calanderization";
+import { CalanderizedMeter, MonthlyData } from "src/app/models/calanderization";
 import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, IdbPredictorEntry } from "src/app/models/idb";
 import { MonthlyAccountAnalysisDataClass } from "./monthlyAccountAnalysisDataClass";
 import { MonthlyAnalysisSummaryDataClass } from "./monthlyAnalysisSummaryDataClass";
 import { MonthlyFacilityAnalysisClass } from "./monthlyFacilityAnalysisClass";
 import * as _ from 'lodash';
 import { checkAnalysisValue, getMonthlyStartAndEndDate } from "../shared-calculations/calculationsHelpers";
-import { getFiscalYear } from "../shared-calculations/calanderizationFunctions";
+import { getFiscalYear, getLastBillEntryFromCalanderizedMeterData } from "../shared-calculations/calanderizationFunctions";
 
 export class MonthlyAccountAnalysisClass {
 
@@ -24,19 +24,27 @@ export class MonthlyAccountAnalysisClass {
         calanderizedMeters: Array<CalanderizedMeter>,
         accountFacilities: Array<IdbFacility>,
         accountPredictorEntries: Array<IdbPredictorEntry>,
-        allAccountAnalysisItems: Array<IdbAnalysisItem>
+        allAccountAnalysisItems: Array<IdbAnalysisItem>,
+        calculateAllMonthlyData: boolean
     ) {
-        this.setStartAndEndDate(account, accountAnalysisItem);
+        this.setStartAndEndDate(account, accountAnalysisItem, calanderizedMeters, calculateAllMonthlyData);
         this.setBaselineYear(account);
-        this.setMonthlyFacilityAnlysisClasses(accountAnalysisItem, calanderizedMeters, accountFacilities, accountPredictorEntries, allAccountAnalysisItems);
+        this.setMonthlyFacilityAnlysisClasses(accountAnalysisItem, calanderizedMeters, accountFacilities, accountPredictorEntries, allAccountAnalysisItems, calculateAllMonthlyData);
         this.setAnnualUsageValues();
         this.setAccountMonthSummaries(account, accountAnalysisItem);
     }
 
-    setStartAndEndDate(account: IdbAccount, analysisItem: IdbAccountAnalysisItem) {
+    setStartAndEndDate(account: IdbAccount, analysisItem: IdbAccountAnalysisItem, calanderizedMeters: Array<CalanderizedMeter>, calculateAllMonthlyData: boolean) {
         let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = getMonthlyStartAndEndDate(account, analysisItem);
         this.startDate = monthlyStartAndEndDate.baselineDate;
-        this.endDate = monthlyStartAndEndDate.endDate;
+        if (calculateAllMonthlyData) {
+            let lastBill: MonthlyData = getLastBillEntryFromCalanderizedMeterData(calanderizedMeters);
+            this.endDate = new Date(lastBill.date);
+            this.endDate.setMonth(this.endDate.getMonth() + 1);
+            this.endDate.setDate(1);
+        } else {
+            this.endDate = monthlyStartAndEndDate.endDate;
+        }
     }
 
     setBaselineYear(account: IdbAccount) {
@@ -48,7 +56,8 @@ export class MonthlyAccountAnalysisClass {
         calanderizedMeters: Array<CalanderizedMeter>,
         accountFacilities: Array<IdbFacility>,
         accountPredictorEntries: Array<IdbPredictorEntry>,
-        allAccountAnalysisItems: Array<IdbAnalysisItem>) {
+        allAccountAnalysisItems: Array<IdbAnalysisItem>,
+        calculateAllMonthlyData: boolean) {
         this.monthlyFacilityAnalysisClasses = new Array();
         accountAnalysisItem.facilityAnalysisItems.forEach(item => {
             if (item.analysisItemId != undefined && item.analysisItemId != 'skip') {
@@ -59,7 +68,8 @@ export class MonthlyAccountAnalysisClass {
                     analysisItem,
                     facility,
                     calanderizedMeters,
-                    accountPredictorEntries
+                    accountPredictorEntries,
+                    calculateAllMonthlyData
                 );
                 this.monthlyFacilityAnalysisClasses.push(monthlyFacilityAnalysisClass);
             }

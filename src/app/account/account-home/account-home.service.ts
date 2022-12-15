@@ -35,8 +35,12 @@ export class AccountHomeService {
 
   setCalanderizedMeters() {
     let analysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
-    this.latestAnalysisItem = _.maxBy(analysisItems, 'reportYear');
-
+    let selectedAnalysisItems: Array<IdbAccountAnalysisItem> = analysisItems.filter(item => { return item.selectedYearAnalysis == true });
+    if (selectedAnalysisItems.length != 0) {
+      this.latestAnalysisItem = _.maxBy(selectedAnalysisItems, 'reportYear');
+    } else {
+      this.latestAnalysisItem = _.maxBy(analysisItems, 'reportYear');
+    }
     if (this.latestAnalysisItem) {
       let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
       let calanderizationOptions: CalanderizationOptions = {
