@@ -37,7 +37,7 @@
                 </div>
                 <div class="row">
                     <div class="col-2 text-center">
-                        {{baselineYear}}
+                        {{baselineYear | yearDisplay:facility.fiscalYear}}
                     </div>
                     <div class="col-8">
                         <div class="progress">
@@ -48,7 +48,7 @@
                         </div>
                     </div>
                     <div class="col-2 text-center">
-                        {{goalYear}} ({{percentGoal}}%)
+                        {{goalYear | yearDisplay:facility.fiscalYear}} ({{percentGoal}}%)
                     </div>
                 </div>
             </div>
@@ -162,7 +162,7 @@
                         <a class="nav-link" routerLink="/facility/{{facility.id}}/analysis">
                             <span class="fa fa-chevron-right pr-2"></span>
                             <span *ngIf="latestAnalysisItem">Latest Facility Analysis:
-                                {{latestAnalysisItem.reportYear}}</span>
+                                {{latestAnalysisItem.reportYear | yearDisplay:facility.fiscalYear}}</span>
                             <span *ngIf="!latestAnalysisItem">No Analysis Found For Facility</span>
                         </a>
                     </li>
