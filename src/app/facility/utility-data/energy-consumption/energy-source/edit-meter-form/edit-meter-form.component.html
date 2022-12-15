@@ -140,7 +140,7 @@
             </div>
 
             <p class="alert alert-warning"
-                *ngIf="meterDataExists && meterForm.controls.source.value != 'Electricity' && !changingUnits"> Data
+                *ngIf="meterDataExists && !changingUnits"> Data
                 found for this
                 meter. Collection units and heating capacity should not be changed after entering meter readings. <a
                     (click)="enableChangeUnits()">Click here to change values if necessary.</a> </p>
