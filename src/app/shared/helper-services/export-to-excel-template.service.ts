@@ -285,6 +285,8 @@ export class ExportToExcelTemplateService {
     let alphabet: Array<string> = alpha.map(x => { return String.fromCharCode(x) });
     let additionalAlphabet: Array<string> = alpha.map(x => { return 'A'+String.fromCharCode(x) });
     alphabet = alphabet.concat(additionalAlphabet);
+    additionalAlphabet = alpha.map(x => { return 'B'+String.fromCharCode(x) });
+    alphabet = alphabet.concat(additionalAlphabet);
     worksheet.getCell('A1').value = 'Facility Name';
     worksheet.getCell('B1').value = 'Date';
     let alphaIndex: number = 2;
