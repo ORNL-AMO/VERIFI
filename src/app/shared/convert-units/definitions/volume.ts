@@ -64,7 +64,14 @@ export const volume = {
             }
             , to_anchor: 1000000000000
         }
-
+        , MCM: {
+            name: {
+                singular: 'Million cubic meter'
+                , plural: 'Million cubic meters',
+                 display:  '(MCM)'
+            }
+            , to_anchor: 1000000
+        }
         // Swedish units
         , krm: {
             name: {
