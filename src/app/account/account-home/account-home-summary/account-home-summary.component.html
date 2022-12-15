@@ -14,7 +14,8 @@
                         Baseline
                     </div>
                     <div class="col-8 text-center">
-                        Energy Reduction Progress <ng-container *ngIf="latestAnalysisDate">({{latestAnalysisDate | date: 'MMM. y'}})
+                        Energy Reduction Progress <ng-container *ngIf="latestAnalysisDate">({{latestAnalysisDate | date:
+                            'MMM. y'}})
                         </ng-container>
                     </div>
                     <div class="col-2 text-center">
@@ -23,7 +24,7 @@
                 </div>
                 <div class="row">
                     <div class="col-2 text-center">
-                        {{baselineYear}}
+                        {{baselineYear | yearDisplay:account.fiscalYear}}
                     </div>
                     <div class="col-8">
                         <div class="progress">
@@ -35,7 +36,7 @@
                         </div>
                     </div>
                     <div class="col-2 text-center">
-                        {{goalYear}} ({{percentGoal}}%)
+                        {{goalYear | yearDisplay:account.fiscalYear}} ({{percentGoal}}%)
                     </div>
                 </div>
             </div>
@@ -109,7 +110,7 @@
                         <a class="nav-link" routerLink="/account/analysis">
                             <span class="fa fa-chevron-right pr-2"></span>
                             <span>Latest Plant Analysis:
-                                <span *ngIf="accountAnalysisYear">{{accountAnalysisYear}}</span>
+                                <span *ngIf="accountAnalysisYear">{{accountAnalysisYear | yearDisplay:account.fiscalYear}}</span>
                                 <span *ngIf="!accountAnalysisYear">&mdash;</span></span>
                         </a>
                     </li>
@@ -117,7 +118,7 @@
                         <a class="nav-link" routerLink="/account/reports">
                             <span class="fa fa-chevron-right pr-2"></span>
                             <span>Latest Better Plants Report:
-                                <span *ngIf="betterPlantsReportYear">{{betterPlantsReportYear}}</span>
+                                <span *ngIf="betterPlantsReportYear">{{betterPlantsReportYear | yearDisplay:account.fiscalYear}}</span>
                                 <span *ngIf="!betterPlantsReportYear">&mdash;</span>
                             </span>
                         </a>
