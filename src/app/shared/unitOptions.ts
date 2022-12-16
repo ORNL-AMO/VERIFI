@@ -105,7 +105,7 @@ export const VolumeGasOptions: Array<UnitOption> = [
     {
         display: 'Million Cubic Meters (MCM)',
         value: 'MCM',
-        unitsOfMeasure: 'Imperial'
+        unitsOfMeasure: 'Metric'
     },
 ]
 
