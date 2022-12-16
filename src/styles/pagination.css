@@ -34,7 +34,8 @@ Pagination
     padding: 3px 3px 5px 5px;
   }
   .items-per-page select {
-    padding: 6px 5px 7px 5px;
+    padding: .375rem .75rem;
     border-radius: 3px;
     cursor: pointer;
+    border-color: #2c386b;
   }

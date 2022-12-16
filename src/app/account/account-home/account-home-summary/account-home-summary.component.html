@@ -88,7 +88,7 @@
                         </button>
                     </div>
                     <!--TODO: Add functionality-->
-                    <!--<div class="pr-2">
+                    <!--<div class="pe-2">
                         <button class="btn btn-outline m-0">
                             <span class="fa fa-plus"></span><br>
                             Add New <br> Facility
@@ -108,7 +108,7 @@
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item">
                         <a class="nav-link" routerLink="/account/analysis">
-                            <span class="fa fa-chevron-right pr-2"></span>
+                            <span class="fa fa-chevron-right pe-2"></span>
                             <span>Latest Plant Analysis:
                                 <span *ngIf="accountAnalysisYear">{{accountAnalysisYear | yearDisplay:account.fiscalYear}}</span>
                                 <span *ngIf="!accountAnalysisYear">&mdash;</span></span>
@@ -116,7 +116,7 @@
                     </li>
                     <li class="list-group-item">
                         <a class="nav-link" routerLink="/account/reports">
-                            <span class="fa fa-chevron-right pr-2"></span>
+                            <span class="fa fa-chevron-right pe-2"></span>
                             <span>Latest Better Plants Report:
                                 <span *ngIf="betterPlantsReportYear">{{betterPlantsReportYear | yearDisplay:account.fiscalYear}}</span>
                                 <span *ngIf="!betterPlantsReportYear">&mdash;</span>

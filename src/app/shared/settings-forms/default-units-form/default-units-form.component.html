@@ -91,9 +91,9 @@
         <div class="col">
             <hr>
             <label class="mb-3">Electricity Global Warming Potential
-                <!-- <span (click)="toggleCustomEmissionsRate()" class="float-right click-link"
+                <!-- <span (click)="toggleCustomEmissionsRate()" class="float-end click-link"
                     *ngIf="!form.controls.customEmissionsRate.value">Rate Known</span>
-                <span (click)="toggleCustomEmissionsRate()" class="float-right click-link"
+                <span (click)="toggleCustomEmissionsRate()" class="float-end click-link"
                     *ngIf="form.controls.customEmissionsRate.value && showCustomLink">Use eGRID</span> -->
             </label>
         </div>
@@ -102,7 +102,7 @@
         <div class="col-md-6 col-sm-12">
             <div class="form-group">
                 <label>eGRID Subregion
-                    <span (click)="showEmissionsRates()" class="float-right click-link"
+                    <span (click)="showEmissionsRates()" class="float-end click-link"
                         *ngIf="zipCodeSubRegionData.length != 0">View Emission Rates</span>
                 </label>
                 <select *ngIf="zipCodeSubRegionData.length > 1" name="eGridSubregion" class="form-control"

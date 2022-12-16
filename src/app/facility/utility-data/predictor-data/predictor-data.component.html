@@ -7,7 +7,7 @@
             predictors from
             excel.</p>
         <div class="meterData">
-            <button class="btn btn-primary-4 mr-2" (click)="editPredictors()"><i class="fa fa-plus"></i> Add New
+            <button class="btn btn-primary-4 me-2" (click)="editPredictors()"><i class="fa fa-plus"></i> Add New
                 Predictor</button>
             <button class="btn btn-outline" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
         </div>
@@ -22,19 +22,19 @@
 
             <div class="d-flex">
                 <!--Bulk Delete-->
-                <div class="pr-2 bulk-delete" [class.show]="hasCheckedItems">
+                <div class="pe-2 bulk-delete" [class.show]="hasCheckedItems">
                     <button class="btn btn-danger" (click)='openBulkDelete()' [disabled]="!hasCheckedItems">Bulk
                         Delete</button>
                 </div>
                 <!--Items Per Page-->
                 <app-table-items-dropdown></app-table-items-dropdown>
-                <div class="pl-2">
+                <div class="ps-2">
                     <button class="btn nav-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import
                         Data</button>
                 </div>
 
 
-                <div class="pl-2">
+                <div class="ps-2">
                     <button class="btn action-btn" (click)="addPredictorEntry()"><i class="fa fa-plus"></i> Add
                         Predictor
                         Entry</button>
@@ -118,7 +118,7 @@
         <p>WARNING: By deleting this predictor, you are also deleting all of the data associated with it. Are you sure
             you want to preform this action?</p>
     </div>
-    <div class="saveCancel popup-footer text-right">
+    <div class="saveCancel popup-footer text-end">
         <button class="btn btn-secondary" (click)="cancelDeletePredictorEntry()">Cancel</button>
         <button class="btn btn-danger" (click)="confirmDeletePredictorEntry()">Delete</button>
     </div>
@@ -134,7 +134,7 @@
         <p>WARNING: Deleting predictor entries cannot be undone.
             Are you sure you want to preform this action?</p>
     </div>
-    <div class="saveCancel popup-footer text-right">
+    <div class="saveCancel popup-footer text-end">
         <button class="btn btn-secondary" (click)="cancelBulkDelete()">Cancel</button>
         <button class="btn btn-danger" (click)="bulkDelete()">Delete</button>
     </div>

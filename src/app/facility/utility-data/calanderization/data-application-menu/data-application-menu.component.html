@@ -1,7 +1,7 @@
 <div class="row no-gutters justify-content-center" *ngIf="utilityMeterData.length > 2">
     <div class="col-md-12 col-lg-8">
         <div class="d-flex pb-2">
-            <div class="pl-0 w-50 calanderization-label" for="dataApplication">Calendarization Method</div>
+            <div class="ps-0 w-50 calanderization-label" for="dataApplication">Calendarization Method</div>
             <select id="dataApplication" name="dataApplicationMeter" class="form-control w-50"
                 [(ngModel)]="meter.meterReadingDataApplication" (change)="calanderizeMeter()">
                 <option [ngValue]="'fullMonth'">Do <b>Not</b> Calanderize Meter Data</option>

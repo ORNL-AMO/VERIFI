@@ -5,7 +5,7 @@
         <div *ngIf="accountOverviewReportOptions.length === 0" class="text-center mt-5">
             <h5>No reports found for this account.</h5>
             <div class="meterData">
-                <button class="btn action-btn mr-2" (click)="openAddNewReportModal()"><i class="fa fa-plus"></i> Add
+                <button class="btn action-btn me-2" (click)="openAddNewReportModal()"><i class="fa fa-plus"></i> Add
                     New
                     Report</button>
             </div>
@@ -15,7 +15,7 @@
             <div class="d-flex w-100 justify-content-end">
                 <app-table-items-dropdown></app-table-items-dropdown>
 
-                <div class="pl-2">
+                <div class="ps-2">
                     <button class="btn action-btn" (click)="openAddNewReportModal()"><i
                             class="fa fa-plus"></i>
                         Add New Report</button>
@@ -94,7 +94,7 @@
     <div class="popup-body">
         <p>WARNING: Deleting this report cannot be undone.</p>
     </div>
-    <div class="saveCancel popup-footer text-right">
+    <div class="saveCancel popup-footer text-end">
         <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
         <button class="btn btn-danger" (click)="confirmDelete()">Delete</button>
     </div>
@@ -109,19 +109,19 @@
             <div>
 
                 <label (click)="setReportType('betterPlants')">
-                    <i class="pr-2"
+                    <i class="pe-2"
                         [ngClass]="{'fa fa-square': reportType != 'betterPlants', 'fa-solid fa-square-check': reportType == 'betterPlants'}"></i>Better
                     Plants</label>
             </div>
             <div>
 
-                <label (click)="setReportType('data')"><i class="pr-2"
+                <label (click)="setReportType('data')"><i class="pe-2"
                         [ngClass]="{'fa fa-square': reportType != 'data', 'fa-solid fa-square-check': reportType == 'data'}"></i>Data
                     Overview</label>
             </div>
         </div>
     </div>
-    <div class="saveCancel popup-footer text-right">
+    <div class="saveCancel popup-footer text-end">
         <button class="btn btn-secondary" (click)="cancelNewReport()">Cancel</button>
         <button class="btn action-btn" (click)="createNewReport()">Create New Report</button>
     </div>

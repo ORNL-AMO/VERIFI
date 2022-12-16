@@ -1,7 +1,7 @@
 <div class="account d-flex setup-footer justify-content-between align-items-center">
     <div class="col-3">
         <button *ngIf="displayBack" class="btn nav-btn" (click)="back()">Back</button>
-        <button *ngIf="showAddFacility && facilities.length != 0" class="btn action-btn ml-2" (click)="resetFacilities()">Choose Different Method</button>
+        <button *ngIf="showAddFacility && facilities.length != 0" class="btn action-btn ms-2" (click)="resetFacilities()">Choose Different Method</button>
     </div>
 
     <div class="col">
@@ -13,8 +13,8 @@
                 aria-valuemax="100"></div>
         </div>
     </div>
-    <div class="col-3 text-right">
-        <button *ngIf="showAddFacility && facilities.length != 0" class="btn action-btn mr-2" (click)="addfacility()">Add Another Facility</button>
+    <div class="col-3 text-end">
+        <button *ngIf="showAddFacility && facilities.length != 0" class="btn action-btn me-2" (click)="addfacility()">Add Another Facility</button>
         <button *ngIf="!showSubmit" class="btn nav-btn" (click)="next()" [disabled]="!canContinue">Continue</button>
     </div>
 </div>

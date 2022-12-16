@@ -106,7 +106,7 @@
                     </td>
                     <!--error modeling-->
                     <td class="alert-danger" *ngIf="model.errorModeling" colspan="9">
-                        There was an error when generating model for {{model.modelYear}}: <span class="pr-1"
+                        There was an error when generating model for {{model.modelYear}}: <span class="pe-1"
                             *ngFor="let variable of model.predictorVariables">{{variable.name}}</span>.
                     </td>
                     <td class="text-center">

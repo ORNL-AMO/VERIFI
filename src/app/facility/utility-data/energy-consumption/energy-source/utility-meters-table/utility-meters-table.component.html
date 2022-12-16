@@ -3,10 +3,10 @@
     <p>Please <i class="fa fa-plus"></i> Add New Meter or <i class="fa fa-upload"></i> Import multiple meters from
         excel.</p>
     <div class="d-flex w-100 justify-content-center">
-        <div class="pr-1">
+        <div class="pe-1">
             <button class="btn action-btn" (click)="addMeter()"><i class="fa fa-plus"></i> Add New Meter</button>
         </div>
-        <div class="pl-1">
+        <div class="ps-1">
             <button class="btn nav-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
         </div>
     </div>
@@ -16,10 +16,10 @@
 
     <div class="d-flex w-100 justify-content-end">
         <app-table-items-dropdown></app-table-items-dropdown>
-        <div class="pl-2">
+        <div class="ps-2">
             <button class="btn action-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
         </div>
-        <div class="pl-2">
+        <div class="ps-2">
             <button class="btn action-btn" (click)="addMeter()"><i class="fa fa-plus"></i> Add
                 New Meter</button>
         </div>
@@ -110,7 +110,7 @@
         <p>WARNING: By deleting this meter, you are also deleting all of the meter data and bills associated with it.
             Are you sure you want to preform this action?</p>
     </div>
-    <div class="saveCancel popup-footer text-right">
+    <div class="saveCancel popup-footer text-end">
         <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
         <button class="btn btn-danger" (click)="deleteMeter()">Delete</button>
     </div>

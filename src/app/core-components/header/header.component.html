@@ -3,11 +3,11 @@
     <span class="badge badge-secondary">v{{version}}</span>
 
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <div class="pl-2" *ngIf="dataInitialized && activeAccount">
+        <div class="ps-2" *ngIf="dataInitialized && activeAccount">
             <app-search-bar></app-search-bar>
         </div>
 
-        <ul class="navbar-nav ml-auto" *ngIf="dataInitialized">
+        <ul class="navbar-nav ms-auto" *ngIf="dataInitialized">
             <li class="nav-item dropdown">
                 <button *ngIf="activeAccount" class="btn action-btn dropdown-toggle"
                     (click)="toggleDropdown()"><span class="fa fa-building"></span>
@@ -26,15 +26,15 @@
                 </div>
             </li>
         </ul>
-        <div class="pl-2" *ngIf="dataInitialized && activeAccount">
+        <div class="ps-2" *ngIf="dataInitialized && activeAccount">
             <button class="btn action-btn" (click)="backupAccount()">Backup Account
             </button>
         </div>
-        <div class="pl-2" *ngIf="dataInitialized && activeAccount">Last Backup: (<span
+        <div class="ps-2" *ngIf="dataInitialized && activeAccount">Last Backup: (<span
                 *ngIf="lastBackupDate">{{lastBackupDate | date:'medium'}}</span><span
                 *ngIf="!lastBackupDate">&mdash;</span>)</div>
         <!--TODO: Remove For Production-->
-        <div class="pl-2" *ngIf="!isProduction">
+        <div class="ps-2" *ngIf="!isProduction">
             <button *ngIf="!resetDatabase" class="btn btn-danger backup-account" (click)="toggleResetDatabase()">Reset
                 Database
             </button>

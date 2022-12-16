@@ -14,7 +14,7 @@
         <div class="d-flex flex-column pt-3"
             *ngIf="backupFile != undefined && backupFileError == undefined && importIsAccount">
             <div class="input-group">
-                <label class="w-50 pl-0 bold">
+                <label class="w-50 ps-0 bold">
                     Import Account Name
                 </label>
                 <div class="w-50">
@@ -22,7 +22,7 @@
                 </div>
             </div>
             <div class="input-group pt-2" *ngIf="selectedAccount">
-                <label class="w-50 pl-0 bold">Overwrite current account? </label>
+                <label class="w-50 ps-0 bold">Overwrite current account? </label>
                 <select class="form-control" [(ngModel)]="overwriteData" name="overwriteData">
                     <option [ngValue]="true">Overwrite Account</option>
                     <option [ngValue]="false">Create New Account</option>
@@ -36,7 +36,7 @@
         <div class="d-flex flex-column pt-3"
             *ngIf="backupFile != undefined && backupFileError == undefined && !importIsAccount && accountFacilities.length != 0">
             <div class="input-group">
-                <label class="w-50 pl-0 bold">
+                <label class="w-50 ps-0 bold">
                     Import Facility Name
                 </label>
                 <div class="w-50">
@@ -44,14 +44,14 @@
                 </div>
             </div>
             <div class="input-group pt-2">
-                <label class="w-50 pl-0 bold">Overwrite existing facility? </label>
+                <label class="w-50 ps-0 bold">Overwrite existing facility? </label>
                 <select class="form-control" [(ngModel)]="overwriteData" name="overwriteData">
                     <option [ngValue]="true">Overwrite Facility</option>
                     <option [ngValue]="false">Create New Facilty</option>
                 </select>
             </div>
             <div class="input-group pt-2" *ngIf="overwriteData">
-                <label class="w-50 pl-0 bold">Facility to overwrite</label>
+                <label class="w-50 ps-0 bold">Facility to overwrite</label>
                 <select class="form-control" [(ngModel)]="overwriteFacility" name="overwriteFacility">
                     <option *ngFor="let facility of accountFacilities" [ngValue]="facility">{{facility.name}}</option>
                 </select>
@@ -62,7 +62,7 @@
             </p>
         </div>
     </div>
-    <div class="popup-footer text-right">
+    <div class="popup-footer text-end">
         <button class="btn btn-secondary" (click)="cancelImportBackup()">Cancel</button>
         <button class="btn btn-primary" (click)="importBackupFile()"
             [disabled]="backupFile == undefined || backupFileError != undefined">Import Backup

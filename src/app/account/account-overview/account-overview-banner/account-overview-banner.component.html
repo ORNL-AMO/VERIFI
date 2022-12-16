@@ -29,7 +29,7 @@
         </ul>
 
         <div class="d-flex" *ngIf="urlDisplay != 'other'">
-            <div class="pr-1" *ngIf="urlDisplay == 'energy'">
+            <div class="pe-1" *ngIf="urlDisplay == 'energy'">
                 <div class="btn-group">
                     <button class="btn btn-sm m-0 toggle-btn" (click)="setAccountEnergyIsSource(true)"
                         [ngClass]="{'active': selectedAccount.energyIsSource == true}">Source Energy</button>
@@ -38,7 +38,7 @@
                 </div>
             </div>
 
-            <div class="pl-1" *ngIf="urlDisplay == 'emissions'">
+            <div class="ps-1" *ngIf="urlDisplay == 'emissions'">
                 <div class="btn-group">
                     <button class="btn btn-sm m-0 toggle-btn" (click)="setEmissions('location')"
                         [ngClass]="{'active': emissionsDisplay == 'location'}">Location</button>

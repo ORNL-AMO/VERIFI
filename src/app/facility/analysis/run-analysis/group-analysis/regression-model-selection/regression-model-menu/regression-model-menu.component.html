@@ -50,7 +50,7 @@
 
 
                 <div class="d-flex" *ngIf="group.models">
-                    <label class="show-models-label bold pr-3" for="showInvalid">
+                    <label class="show-models-label bold pe-3" for="showInvalid">
                         Show Invalid Models
                     </label>
                     <div>
@@ -152,7 +152,7 @@
     <div class="popup-body">
         <p>WARNING: Updated models will replace existing models. This cannot be undone.</p>
     </div>
-    <div class="saveCancel popup-footer text-right">
+    <div class="saveCancel popup-footer text-end">
         <button class="btn btn-secondary" (click)="closeUpdateModelsModal()">Cancel</button>
         <button class="btn btn-success" (click)="confirmUpdateModals()">Update Models</button>
     </div>
@@ -165,7 +165,7 @@
     <div class="popup-body">
         <p>WARNING: Changing predictor variables will remove existing models. This cannot be undone.</p>
     </div>
-    <div class="saveCancel popup-footer text-right">
+    <div class="saveCancel popup-footer text-end">
         <button class="btn btn-secondary" (click)="cancelTogglePredictor()">Cancel</button>
         <button class="btn btn-success" (click)="confirmTogglePredictor()">Clear Models</button>
     </div>
