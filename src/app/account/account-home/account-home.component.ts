@@ -9,6 +9,8 @@ import { IdbAccount, IdbAnalysisItem, IdbFacility, IdbPredictorEntry } from 'src
 import { AccountHomeService } from './account-home.service';
 import * as _ from 'lodash';
 import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
+import { AnnualAccountAnalysisSummaryClass } from 'src/app/calculations/analysis-calculations/annualAccountAnalysisSummaryClass';
+import { AnnualFacilityAnalysisSummaryClass } from 'src/app/calculations/analysis-calculations/annualFacilityAnalysisSummaryClass';
 
 @Component({
   selector: 'app-account-home',
@@ -32,7 +34,7 @@ export class AccountHomeComponent implements OnInit {
       this.account = val
       this.accountHomeService.setCalanderizedMeters();
       this.accountFacilities = this.facilityDbService.accountFacilities.getValue();
-      if(this.accountFacilities.length != 0){
+      if (this.accountFacilities.length != 0) {
         this.setFacilityAnalysisSummary(0);
       }
       if (this.accountHomeService.latestAnalysisItem) {
@@ -49,7 +51,7 @@ export class AccountHomeComponent implements OnInit {
     if (this.accountWorker) {
       this.accountWorker.terminate();
     }
-    if(this.facilityWorker){
+    if (this.facilityWorker) {
       this.facilityWorker.terminate();
     }
     this.accountHomeService.monthlyAccountAnalysisData.next(undefined);
@@ -77,13 +79,16 @@ export class AccountHomeComponent implements OnInit {
         calanderizedMeters: calanderizedMeters,
         accountFacilities: accountFacilities,
         accountPredictorEntries: accountPredictorEntries,
-        allAccountAnalysisItems: accountAnalysisItems
+        allAccountAnalysisItems: accountAnalysisItems,
+        calculateAllMonthlyData: true
       });
     } else {
-      console.log('nopee')
-
       // Web Workers are not supported in this environment.
-      // You should add a fallback so that your program still executes correctly.
+      let annualAnalysisSummaryClass: AnnualAccountAnalysisSummaryClass = new AnnualAccountAnalysisSummaryClass(this.accountHomeService.latestAnalysisItem, this.account, calanderizedMeters, accountFacilities, accountPredictorEntries, accountAnalysisItems, true);
+      let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
+      let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;
+      this.accountHomeService.annualAnalysisSummary.next(annualAnalysisSummaries);
+      this.accountHomeService.monthlyAccountAnalysisData.next(monthlyAnalysisSummaryData);
     }
   }
 
@@ -100,7 +105,6 @@ export class AccountHomeComponent implements OnInit {
       if (typeof Worker !== 'undefined') {
         this.facilityWorker = new Worker(new URL('src/app/web-workers/annual-facility-analysis.worker', import.meta.url));
         this.facilityWorker.onmessage = ({ data }) => {
-          // console.log('ON MESSAGE! ' + facility.name);
           this.facilityWorker.terminate();
           let facilitySummary: {
             facilityId: string,
@@ -122,18 +126,37 @@ export class AccountHomeComponent implements OnInit {
             this.setFacilityAnalysisSummary(facilityIndex + 1);
           }
         };
-        // console.log('POST! ' + facility.name);
         this.facilityWorker.postMessage({
           analysisItem: latestAnalysisItem,
           facility: facility,
           calanderizedMeters: calanderizedMeters,
-          accountPredictorEntries: accountPredictorEntries
+          accountPredictorEntries: accountPredictorEntries,
+          calculateAllMonthlyData: true
         });
       } else {
-        console.log('nopee')
-
         // Web Workers are not supported in this environment.
-        // You should add a fallback so that your program still executes correctly.
+        let annualAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(latestAnalysisItem, facility, calanderizedMeters, accountPredictorEntries, true);
+        let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
+        let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;
+        let facilitySummary: {
+          facilityId: string,
+          annualAnalysisSummary: Array<AnnualAnalysisSummary>,
+          monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
+        } = {
+          facilityId: facility.guid,
+          annualAnalysisSummary: annualAnalysisSummaries,
+          monthlyAnalysisSummaryData: monthlyAnalysisSummaryData
+        }
+        let allSummaries: Array<{
+          facilityId: string,
+          annualAnalysisSummary: Array<AnnualAnalysisSummary>,
+          monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
+        }> = this.accountHomeService.facilityAnalysisSummaries.getValue();
+        allSummaries.push(facilitySummary);
+        this.accountHomeService.facilityAnalysisSummaries.next(allSummaries);
+        if (facilityIndex != this.accountFacilities.length - 1) {
+          this.setFacilityAnalysisSummary(facilityIndex + 1);
+        }
       }
     }
   }

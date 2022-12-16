@@ -32,7 +32,12 @@ export class FacilityHomeService {
   setCalanderizedMeters(selectedFacility: IdbFacility) {
     let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
     let facilityAnalysisItems: Array<IdbAnalysisItem> = accountAnalysisItems.filter(item => { return item.facilityId == selectedFacility.guid });
-    this.latestAnalysisItem = _.maxBy(facilityAnalysisItems, 'reportYear');
+    let selectedAnalysisItems: Array<IdbAnalysisItem> = facilityAnalysisItems.filter(item => { return item.selectedYearAnalysis == true });
+    if (selectedAnalysisItems.length != 0) {
+      this.latestAnalysisItem = _.maxBy(selectedAnalysisItems, 'reportYear');
+    } else {
+      this.latestAnalysisItem = _.maxBy(facilityAnalysisItems, 'reportYear');
+    }
     if (this.latestAnalysisItem) {
       let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
       let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == selectedFacility.guid });

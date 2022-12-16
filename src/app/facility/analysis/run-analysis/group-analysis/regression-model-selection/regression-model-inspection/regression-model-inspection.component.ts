@@ -1,5 +1,6 @@
 import { Component, OnInit, Input, ViewChild, ElementRef, Output, EventEmitter } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
+import { MonthlyAnalysisSummaryClass } from 'src/app/calculations/analysis-calculations/monthlyAnalysisSummaryClass';
 import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -80,10 +81,10 @@ export class RegressionModelInspectionComponent implements OnInit {
         accountPredictorEntries: this.accountPredictorEntries
       });
     } else {
-      console.log('nopee')
-
       // Web Workers are not supported in this environment.
-      // You should add a fallback so that your program still executes correctly.
+      let monthlyAnalysisSummaryClass: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(groupCopy, this.analysisItem, this.selectedFacility, this.calanderizedMeters, this.accountPredictorEntries, false);
+      this.inspectedMonthlyAnalysisSummaryData = monthlyAnalysisSummaryClass.getMonthlyAnalysisSummaryData();
+      this.drawChart();
     }
   }
 
@@ -105,10 +106,10 @@ export class RegressionModelInspectionComponent implements OnInit {
         accountPredictorEntries: this.accountPredictorEntries
       });
     } else {
-      console.log('nopee')
-
       // Web Workers are not supported in this environment.
-      // You should add a fallback so that your program still executes correctly.
+      let monthlyAnalysisSummaryClass: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(this.selectedGroup, this.analysisItem, this.selectedFacility, this.calanderizedMeters, this.accountPredictorEntries, false);
+      this.selectedMonthlyAnalysisSummaryData = monthlyAnalysisSummaryClass.getMonthlyAnalysisSummaryData();
+      this.drawChart();
     }
   }
 
@@ -117,7 +118,7 @@ export class RegressionModelInspectionComponent implements OnInit {
   drawChart() {
     if (this.monthlyAnalysisGraph) {
       let name: string = 'Modeled Energy';
-      if(this.selectedMonthlyAnalysisSummaryData){
+      if (this.selectedMonthlyAnalysisSummaryData) {
         name = 'Potential Modeled Energy';
       }
 
@@ -161,7 +162,7 @@ export class RegressionModelInspectionComponent implements OnInit {
         }
       }
 
-      var data = [trace3, trace1, trace2 ];
+      var data = [trace3, trace1, trace2];
 
       if (this.compareSelectedModel) {
         var trace4 = {
@@ -234,22 +235,22 @@ export class RegressionModelInspectionComponent implements OnInit {
   }
 
   setCompareSelected() {
-    this.selectedModel = this.selectedGroup.models.find(model => {return model.modelId == this.selectedGroup.selectedModelId});
+    this.selectedModel = this.selectedGroup.models.find(model => { return model.modelId == this.selectedGroup.selectedModelId });
     this.compareSelectedModel = true;
-    if(!this.selectedMonthlyAnalysisSummaryData){
+    if (!this.selectedMonthlyAnalysisSummaryData) {
       this.calculateSelectedModel();
-    }else{
+    } else {
       this.drawChart();
     }
   }
 
-  hideCompareSelected(){
+  hideCompareSelected() {
     this.selectedModel = undefined;
     this.compareSelectedModel = false;
     this.drawChart();
   }
 
-  selectModel(){
+  selectModel() {
     this.emitSelect.emit(true);
   }
 }

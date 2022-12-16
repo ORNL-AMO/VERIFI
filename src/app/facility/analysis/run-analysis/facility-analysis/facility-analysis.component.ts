@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
+import { AnnualFacilityAnalysisSummaryClass } from 'src/app/calculations/analysis-calculations/annualFacilityAnalysisSummaryClass';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
+import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { IdbAnalysisItem, IdbFacility, IdbPredictorEntry } from 'src/app/models/idb';
 import { AnalysisService } from '../../analysis.service';
@@ -40,18 +42,20 @@ export class FacilityAnalysisComponent implements OnInit {
         analysisItem: analysisItem,
         facility: facility,
         calanderizedMeters: calanderizedMeters,
-        accountPredictorEntries: accountPredictorEntries
+        accountPredictorEntries: accountPredictorEntries,
+        calculateAllMonthlyData: false
       });
     } else {
-      console.log('nopee')
-
       // Web Workers are not supported in this environment.
-      // You should add a fallback so that your program still executes correctly.
+      let annualAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(analysisItem, facility, calanderizedMeters, accountPredictorEntries, false); let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
+      let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;
+      this.analysisService.annualAnalysisSummary.next(annualAnalysisSummaries);
+      this.analysisService.monthlyAccountAnalysisData.next(monthlyAnalysisSummaryData);
     }
   }
 
-  ngOnDestroy(){
-    if(this.worker){
+  ngOnDestroy() {
+    if (this.worker) {
       this.worker.terminate();
     }
   }

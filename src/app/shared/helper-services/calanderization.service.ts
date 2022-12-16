@@ -10,8 +10,8 @@ import { ReportOptions } from 'src/app/models/overview-report';
 import { EGridService } from './e-grid.service';
 import { EnergyUseCalculationsService } from './energy-use-calculations.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { getFiscalYear } from '../shared-analysis/calculations/getFiscalYear';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { getFiscalYear } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
 
 @Injectable({
   providedIn: 'root'
@@ -193,7 +193,7 @@ export class CalanderizationService {
         } else {
           monthStr = new Date(year, month).toLocaleString('default', { month: 'long' });
         }
-        let emissionsValues: EmissionsResults = this.getEmissions(meter, totals.totalEnergyUse, calanderizedEnergyUnit, year);
+        let emissionsValues: EmissionsResults = this.getEmissions(meter, totals.totalEnergyUse, calanderizedEnergyUnit, year, energyIsSource);
         if (meter.includeInEnergy == false) {
           totals.totalEnergyUse = 0;
         }
@@ -360,7 +360,7 @@ export class CalanderizationService {
         } else {
           monthStr = new Date(year, month).toLocaleString('default', { month: 'long' });
         }
-        let emissionsValues: EmissionsResults = this.getEmissions(meter, totalEnergyUse, calanderizedEnergyUnit, year)
+        let emissionsValues: EmissionsResults = this.getEmissions(meter, totalEnergyUse, calanderizedEnergyUnit, year, energyIsSource)
 
         let accountOrFacility: IdbAccount | IdbFacility;
         if (inAccount) {
@@ -811,8 +811,11 @@ export class CalanderizationService {
     return calanderizationSummary;
   }
 
-  getEmissions(meter: IdbUtilityMeter, energyUse: number, energyUnit: string, year: number): EmissionsResults {
+  getEmissions(meter: IdbUtilityMeter, energyUse: number, energyUnit: string, year: number, energyIsSource: boolean): EmissionsResults {
     if (meter.source == 'Electricity' || meter.source == 'Natural Gas' || meter.source == 'Other Fuels') {
+      if(energyIsSource){
+        energyUse = energyUse / meter.siteToSource;
+      }
       let convertedEnergyUse: number = this.convertUnitsService.value(energyUse).from(energyUnit).to(meter.energyUnit);
       let locationEmissions: number;
       let marketEmissions: number;

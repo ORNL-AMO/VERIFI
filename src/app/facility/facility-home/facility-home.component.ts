@@ -1,9 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { AnnualFacilityAnalysisSummaryClass } from 'src/app/calculations/analysis-calculations/annualFacilityAnalysisSummaryClass';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
+import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { IdbFacility, IdbPredictorEntry, IdbUtilityMeter } from 'src/app/models/idb';
 import { FacilityHomeService } from './facility-home.service';
@@ -67,13 +69,16 @@ export class FacilityHomeComponent implements OnInit {
         analysisItem: this.facilityHomeService.latestAnalysisItem,
         facility: this.facility,
         calanderizedMeters: calanderizedMeters,
-        accountPredictorEntries: accountPredictorEntries
+        accountPredictorEntries: accountPredictorEntries,
+        calculateAllMonthlyData: true
       });
     } else {
-      console.log('nopee')
-
       // Web Workers are not supported in this environment.
-      // You should add a fallback so that your program still executes correctly.
+      let annualAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(this.facilityHomeService.latestAnalysisItem, this.facility, calanderizedMeters, accountPredictorEntries, true);
+      let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
+      let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;
+      this.facilityHomeService.annualAnalysisSummary.next(annualAnalysisSummaries);
+      this.facilityHomeService.monthlyFacilityAnalysisData.next(monthlyAnalysisSummaryData);
     }
   }
 }

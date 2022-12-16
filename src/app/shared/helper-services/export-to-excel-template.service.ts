@@ -205,7 +205,8 @@ export class ExportToExcelTemplateService {
       let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataForFacility(meter, false, true);
       meterData.forEach(dataReading => {
         worksheet.getCell('A' + index).value = meter.meterNumber;
-        worksheet.getCell('B' + index).value = dataReading.readDate;
+        //format date!!!!!!
+        worksheet.getCell('B' + index).value = this.getFormatedDate(dataReading.readDate);
         worksheet.getCell('C' + index).value = dataReading.totalEnergyUse;
         //TODO: update '0' when new fields added and names changed
         worksheet.getCell('D' + index).value = dataReading.totalRealDemand;
@@ -261,7 +262,7 @@ export class ExportToExcelTemplateService {
       let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataForFacility(meter, false, true);
       meterData.forEach(dataReading => {
         worksheet.getCell('A' + index).value = meter.meterNumber;
-        worksheet.getCell('B' + index).value = dataReading.readDate;
+        worksheet.getCell('B' + index).value = this.getFormatedDate(dataReading.readDate);
         worksheet.getCell('C' + index).value = dataReading.totalEnergyUse;
         worksheet.getCell('D' + index).value = dataReading.totalCost;
         worksheet.getCell('E' + index).value = dataReading.commodityCharge;
@@ -281,7 +282,11 @@ export class ExportToExcelTemplateService {
   getPredictorWorksheet(workbook: ExcelJS.Workbook, facilityId?: string): ExcelJS.Worksheet {
     let worksheet: ExcelJS.Worksheet = workbook.addWorksheet('Predictors');
     let alpha = Array.from(Array(26)).map((e, i) => i + 65);
-    let alphabet = alpha.map(x => { return String.fromCharCode(x) });
+    let alphabet: Array<string> = alpha.map(x => { return String.fromCharCode(x) });
+    let additionalAlphabet: Array<string> = alpha.map(x => { return 'A'+String.fromCharCode(x) });
+    alphabet = alphabet.concat(additionalAlphabet);
+    additionalAlphabet = alpha.map(x => { return 'B'+String.fromCharCode(x) });
+    alphabet = alphabet.concat(additionalAlphabet);
     worksheet.getCell('A1').value = 'Facility Name';
     worksheet.getCell('B1').value = 'Date';
     let alphaIndex: number = 2;
@@ -311,7 +316,7 @@ export class ExportToExcelTemplateService {
       predictorEntries.forEach(entry => {
         let facilityName: string = facilities.find(facility => { return facility.guid == entry.facilityId }).name;
         worksheet.getCell('A' + index).value = facilityName;
-        worksheet.getCell('B' + index).value = new Date(entry.date).toISOString()
+        worksheet.getCell('B' + index).value = this.getFormatedDate(entry.date)
         // alphaIndex = 1;
         entry.predictors.forEach(predictor => {
           // let letter: string = alphabet[alphaIndex];
@@ -337,6 +342,11 @@ export class ExportToExcelTemplateService {
       }
     });
     return predictorNames;
+  }
+
+  getFormatedDate(dateReading: Date): string {
+    let readingDate: Date = new Date(dateReading)
+    return readingDate.getFullYear() + '-' + readingDate.getMonth() + '-' + readingDate.getDate();
   }
 
 }

@@ -194,4 +194,27 @@ export class UtilityMeterDatadbService {
         let meterDataCopy: Array<IdbUtilityMeterData> = JSON.parse(JSON.stringify(accountMeterData));
         return meterDataCopy;
     }
+
+    getYearOptions(inAccount?: boolean): Array<number> {
+        let meterData: Array<IdbUtilityMeterData>
+        if (!inAccount) {
+          meterData = this.facilityMeterData.getValue();
+        } else {
+          meterData = this.accountMeterData.getValue();
+        }
+        if (meterData.length != 0) {
+          let orderedMeterData: Array<IdbUtilityMeterData> = _.orderBy(meterData, (data) => { return new Date(data.readDate) });
+          let firstBill: IdbUtilityMeterData = orderedMeterData[0];
+          let lastBill: IdbUtilityMeterData = orderedMeterData[orderedMeterData.length - 1];
+          let yearStart: number = new Date(firstBill.readDate).getUTCFullYear();
+          let yearEnd: number = new Date(lastBill.readDate).getUTCFullYear();
+          let yearOptions: Array<number> = new Array();
+          for (let i = yearStart; i <= yearEnd; i++) {
+            yearOptions.push(i);
+          }
+          return yearOptions;
+        } else {
+          return
+        }
+      }
 }

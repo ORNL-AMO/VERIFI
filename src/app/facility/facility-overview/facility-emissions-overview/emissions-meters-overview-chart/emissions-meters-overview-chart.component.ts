@@ -44,7 +44,7 @@ export class EmissionsMetersOverviewChartComponent implements OnInit {
 
   drawChart() {
     if (this.emissionsDonut && this.metersSummary && this.emissionsDisplay) {
-      let hovertemplate: string = '%{label}: %{value:,.0f} kg CO<sub>2</sub> <extra></extra>'
+      let hovertemplate: string = '%{label}: %{value:,.0f} kg CO<sub>2</sub>e <extra></extra>'
 
       this.metersSummary.meterSummaries = _.orderBy(this.metersSummary.meterSummaries, (summary) => { return summary.meter.source });
 
@@ -65,11 +65,11 @@ export class EmissionsMetersOverviewChartComponent implements OnInit {
             width: 5
           }
         },
-        textinfo: 'label+percent',
+        texttemplate: '%{label}: (%{percent:.1%})',
         textposition: 'auto',
         insidetextorientation: "horizontal",
         hovertemplate: hovertemplate,
-        hole: .6,
+        hole: .5,
         type: 'pie',
         automargin: true,
         sort: false

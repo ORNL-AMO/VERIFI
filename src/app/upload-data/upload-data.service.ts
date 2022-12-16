@@ -17,6 +17,7 @@ import { UnitOption } from '../shared/unitOptions';
 import { Countries, Country } from '../shared/form-data/countries';
 import { EGridService, SubRegionData } from '../shared/helper-services/e-grid.service';
 import * as _ from 'lodash';
+import { State, States } from '../shared/form-data/states';
 
 @Injectable({
   providedIn: 'root'
@@ -125,9 +126,9 @@ export class UploadDataService {
         }
         facility.address = facilityDataRow['Address'];
         facility.country = this.getCountryCode(facilityDataRow['Country']);
-        facility.state = facilityDataRow['State'];
+        facility.state = this.getState(facilityDataRow['State']);
         facility.city = facilityDataRow['City'];
-        facility.zip = facilityDataRow['Zip']?.toString();
+        facility.zip = this.getZip(facilityDataRow['Zip']);
         facility.naics2 = facilityDataRow['NAICS Code 2'];
         facility.naics3 = facilityDataRow['NAICS Code 3'];
         facility.contactName = facilityDataRow['Contact Name'];
@@ -155,7 +156,7 @@ export class UploadDataService {
         if (facility) {
           let meterNumber: string = meterData['Meter Number'];
           let meter: IdbUtilityMeter = accountMeters.find(aMeter => { return aMeter.meterNumber == meterNumber });
-          if (!meter) {
+          if (!meter || !facility.id || facility.guid != meter.facilityId) {
             meter = this.utilityMeterDbService.getNewIdbUtilityMeter(facility.guid, selectedAccount.guid, true, facility.energyUnit);
           }
 
@@ -421,6 +422,9 @@ export class UploadDataService {
         dbDataPoint.stateSalesTax = dataPoint['State Sales Tax'];
         dbDataPoint.latePayment = dataPoint['Late Payment'];
         dbDataPoint.otherCharge = dataPoint['Other Charge'];
+
+
+
         importMeterData.push(dbDataPoint);
       } else {
         console.log('no meter');
@@ -516,13 +520,6 @@ export class UploadDataService {
   getMeterFacilityGroups(templateData: { importFacilities: Array<IdbFacility>, importMeters: Array<IdbUtilityMeter> }): Array<FacilityGroup> {
     let facilityGroups: Array<FacilityGroup> = new Array();
     let meterIndex: number = 0;
-
-    // facilityGroups.push({
-    //   facilityId: Math.random().toString(36).substr(2, 9),
-    //   groupItems: [],
-    //   facilityName: 'Unmapped Meters',
-    //   color: ''
-    // })
     templateData.importFacilities.forEach(facility => {
       let facilityMeters: Array<IdbUtilityMeter> = templateData.importMeters.filter(meter => { return meter.facilityId == facility.guid });
       let groupItems: Array<ColumnItem> = new Array();
@@ -548,13 +545,6 @@ export class UploadDataService {
   getPredictorFacilityGroups(templateData: { importFacilities: Array<IdbFacility>, predictorEntries: Array<IdbPredictorEntry> }): Array<FacilityGroup> {
     let facilityGroups: Array<FacilityGroup> = new Array();
     let predictorIndex: number = 0;
-
-    // facilityGroups.push({
-    //   facilityId: Math.random().toString(36).substr(2, 9),
-    //   groupItems: [],
-    //   facilityName: 'Unmapped Predictors',
-    //   color: ''
-    // })
     templateData.importFacilities.forEach(facility => {
       let facilityPredictorEntry: IdbPredictorEntry = templateData.predictorEntries.find(entry => { return entry.facilityId == facility.guid });
       let groupItems: Array<ColumnItem> = new Array();
@@ -786,6 +776,29 @@ export class UploadDataService {
       }
     }
     return undefined;
+  }
+
+  getState(stateStr: string): string {
+    let state: State = States.find(state => {
+      return stateStr.toLocaleLowerCase() == state.abbreviation.toLocaleLowerCase() || stateStr.toLocaleLowerCase() == state.name.toLocaleLowerCase();
+    });
+    if (state) {
+      return state.name;
+    }
+    return;
+  }
+
+  getZip(zip: string): string {
+    if (zip.length == 5) {
+      return zip;
+    } else if (zip) {
+      let neededZeros: number = 5 - zip.length;
+      for (let i = 0; i < neededZeros; i++) {
+        zip = '0' + zip;
+      }
+      return zip;
+    }
+    return;
   }
 }
 

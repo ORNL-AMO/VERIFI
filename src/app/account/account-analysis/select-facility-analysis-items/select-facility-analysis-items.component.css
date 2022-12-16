@@ -47,10 +47,13 @@ a:not([href]).active, .nav .nav-link.active i.fa{
     width: 210px;
     max-height: 100%;
     overflow-y: auto;
+    flex-wrap: nowrap;
 }
 
 .nav-item{
     border-bottom: groove 1px;
+    width: 100%;
+    height: fit-content;
 }
 
 .nav-link.active{

@@ -5,9 +5,10 @@ import { ToastNotificationsService } from 'src/app/core-components/toast-notific
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbAccount, IdbAccountAnalysisItem } from 'src/app/models/idb';
-import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
-import { AnalysisCalculationsHelperService } from 'src/app/shared/shared-analysis/calculations/analysis-calculations-helper.service';
+import * as _ from 'lodash';
+import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
 
 @Component({
   selector: 'app-account-analysis-dashboard',
@@ -16,42 +17,41 @@ import { AnalysisCalculationsHelperService } from 'src/app/shared/shared-analysi
 })
 export class AccountAnalysisDashboardComponent implements OnInit {
 
-  accountAnalysisItems: Array<IdbAccountAnalysisItem>;
   accountAnalysisItemsSub: Subscription;
 
-  currentPageNumber: number = 1;
-  itemsPerPage: number;
-  itemsPerPageSub: Subscription;
-  orderDataField: string = 'name';
-  orderByDirection: string = 'desc';
-
-  itemToDelete: IdbAccountAnalysisItem;
   baselineYearError: boolean;
   yearOptions: Array<number>;
   selectedAccount: IdbAccount;
+  analysisItemsList: Array<{
+    year: number,
+    analysisItems: Array<IdbAccountAnalysisItem>,
+    hasSelectedItem: boolean
+  }>;
+  showDetail: boolean;
+  showDetailSub: Subscription;
   constructor(private router: Router, private accountAnalysisDbService: AccountAnalysisDbService, private toastNotificationService: ToastNotificationsService,
-    private accountDbService: AccountdbService, private analysisCalculationsHelperService: AnalysisCalculationsHelperService,
-    private dbChangesService: DbChangesService, private sharedDataService: SharedDataService) { }
+    private accountDbService: AccountdbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private dbChangesService: DbChangesService, private analysisService: AnalysisService) { }
 
   ngOnInit(): void {
     this.selectedAccount = this.accountDbService.selectedAccount.getValue();
     this.accountAnalysisItemsSub = this.accountAnalysisDbService.accountAnalysisItems.subscribe(items => {
-      this.accountAnalysisItems = items;
+      this.setAnalysisItemsList(items);
     });
 
-    this.yearOptions = this.analysisCalculationsHelperService.getYearOptions(true);
+    this.yearOptions = this.utilityMeterDataDbService.getYearOptions(true);
     if (this.yearOptions) {
       this.baselineYearError = this.yearOptions[0] > this.selectedAccount.sustainabilityQuestions.energyReductionBaselineYear
     }
-
-    this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
-      this.itemsPerPage = val;
+   
+    this.showDetailSub = this.analysisService.showDetail.subscribe(showDetail => {
+      this.showDetail = showDetail;
     })
   }
 
   ngOnDestroy() {
     this.accountAnalysisItemsSub.unsubscribe();
-    this.itemsPerPageSub.unsubscribe();
+    this.showDetailSub.unsubscribe();
   }
 
   async createAnalysis() {
@@ -62,55 +62,24 @@ export class AccountAnalysisDashboardComponent implements OnInit {
     this.toastNotificationService.showToast('Analysis Item Created', undefined, undefined, false, "success");
     this.router.navigateByUrl('account/analysis/setup');
   }
+  
 
-  selectAnalysisItem(item: IdbAccountAnalysisItem) {
-    this.accountAnalysisDbService.selectedAnalysisItem.next(item);
-    //todo: route to results if item setup
-    this.router.navigateByUrl('account/analysis/setup');
+  setAnalysisItemsList(accountAnalysisItems: Array<IdbAccountAnalysisItem>) {
+    this.analysisItemsList = new Array();
+    let years: Array<number> = accountAnalysisItems.map(item => { return item.reportYear });
+    years = _.uniq(years);
+    years = _.orderBy(years, (year) => { return year }, 'desc');
+    years.forEach(year => {
+      let yearAnalysisItems: Array<IdbAccountAnalysisItem> = accountAnalysisItems.filter(item => { return item.reportYear == year });
+      this.analysisItemsList.push({
+        year: year,
+        analysisItems: yearAnalysisItems,
+        hasSelectedItem: yearAnalysisItems.findIndex((item: IdbAccountAnalysisItem) => { return item.selectedYearAnalysis == true }) != -1
+      });
+    })
   }
 
-  deleteItem(item: IdbAccountAnalysisItem) {
-    this.itemToDelete = item;
+  saveShowDetails() {
+    this.analysisService.showDetail.next(this.showDetail);
   }
-
-  cancelDelete() {
-    this.itemToDelete = undefined;
-  }
-
-  async confirmDelete() {
-    await this.accountAnalysisDbService.deleteWithObservable(this.itemToDelete.id).toPromise();
-    await this.dbChangesService.setAccountAnalysisItems(this.selectedAccount);
-    this.itemToDelete = undefined;
-    this.toastNotificationService.showToast('Analysis Item Deleted', undefined, undefined, false, "success");
-  }
-
-  editItem(item: IdbAccountAnalysisItem) {
-    this.accountAnalysisDbService.selectedAnalysisItem.next(item);
-    this.router.navigateByUrl('account/analysis/setup');
-  }
-
-  setOrderDataField(str: string) {
-    if (str == this.orderDataField) {
-      if (this.orderByDirection == 'desc') {
-        this.orderByDirection = 'asc';
-      } else {
-        this.orderByDirection = 'desc';
-      }
-    } else {
-      this.orderDataField = str;
-    }
-  }
-
-  async createCopy(analysisItem: IdbAccountAnalysisItem){
-    let newItem: IdbAccountAnalysisItem = JSON.parse(JSON.stringify(analysisItem));
-    delete newItem.id;
-    newItem.name = newItem.name + ' (Copy)';
-    let addedItem: IdbAccountAnalysisItem = await this.accountAnalysisDbService.addWithObservable(newItem).toPromise();
-    await this.dbChangesService.setAccountAnalysisItems(this.selectedAccount);
-    this.accountAnalysisDbService.selectedAnalysisItem.next(addedItem);
-    this.toastNotificationService.showToast('Analysis Item Copy Created', undefined, undefined, false, "success");
-    this.router.navigateByUrl('account/analysis/setup');
-
-  }
-
 }

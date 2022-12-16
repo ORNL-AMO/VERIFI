@@ -47,10 +47,10 @@ export class FacilityEmissionsMonthlyChartComponent implements OnInit {
     if (this.monthlyEmissionsChart && this.yearMonthData && this.emissionsDisplay) {
       let traceData = Array();
 
-      let yaxisTitle: string = "Utility Emissions (kg CO<sub>2</sub>)";
+      let yaxisTitle: string = "Utility Emissions (kg CO<sub>2</sub>e)";
       let tickprefix: string = "";
       let hoverformat: string = ",.2f";
-      let hovertemplate: string = '%{text} (%{x}): %{y:,.0f} kg CO<sub>2</sub> <extra></extra>'
+      let hovertemplate: string = '%{text} (%{x}): %{y:,.0f} kg CO<sub>2</sub>e <extra></extra>'
 
       let years: Array<number> = this.yearMonthData.flatMap(data => { return data.yearMonth.fiscalYear });
       years = _.uniq(years);

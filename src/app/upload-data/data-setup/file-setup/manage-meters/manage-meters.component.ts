@@ -47,6 +47,7 @@ export class ManageMetersComponent implements OnInit {
   }>;
   allMetersValid: boolean;
   calanderizeAllOnToggle: boolean = false;
+  hasNoCalanderizationSelection: boolean = false;
   constructor(private activatedRoute: ActivatedRoute, private uploadDataService: UploadDataService,
     private editMeterFormService: EditMeterFormService, private router: Router,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService) { }
@@ -63,6 +64,7 @@ export class ManageMetersComponent implements OnInit {
           meter.isValid = form.valid;
         });
         this.setValidMeters();
+        this.setHasNoCalanderizationSelection();
       } else {
         this.allMetersValid = true;
       }
@@ -168,9 +170,9 @@ export class ManageMetersComponent implements OnInit {
         naturalGasGroup = this.utilityMeterGroupDbService.getNewIdbUtilityMeterGroup("Energy", "Natural Gas", importFacility.guid, importFacility.accountId);
         facilityMeterGroups.push(naturalGasGroup);
       }
-      let otherFuelGroup: IdbUtilityMeterGroup = facilityMeterGroups.find(group => { return group.name == 'Other Fuel' });
+      let otherFuelGroup: IdbUtilityMeterGroup = facilityMeterGroups.find(group => { return group.name == 'Other Fuels' });
       if (!otherFuelGroup) {
-        otherFuelGroup = this.utilityMeterGroupDbService.getNewIdbUtilityMeterGroup("Energy", "Other Fuel", importFacility.guid, importFacility.accountId);
+        otherFuelGroup = this.utilityMeterGroupDbService.getNewIdbUtilityMeterGroup("Energy", "Other Fuels", importFacility.guid, importFacility.accountId);
         facilityMeterGroups.push(otherFuelGroup);
       }
 
@@ -200,7 +202,6 @@ export class ManageMetersComponent implements OnInit {
       });
     });
     this.facilityGroups = facilityGroups;
-    console.log(this.facilityGroups);
   }
 
   setValidMeters() {
@@ -222,6 +223,7 @@ export class ManageMetersComponent implements OnInit {
         meter.meterReadingDataApplication = 'fullMonth';
       }
     });
+    this.setHasNoCalanderizationSelection();
   }
 
   autoGroup() {
@@ -241,5 +243,15 @@ export class ManageMetersComponent implements OnInit {
         }
       }
     });
+  }
+
+  setHasNoCalanderizationSelection() {
+    let missingCalanderization: boolean = false;
+    this.fileReference.meters.forEach(meter => {
+      if (meter.meterReadingDataApplication == undefined) {
+        missingCalanderization = true;
+      }
+    });
+    this.hasNoCalanderizationSelection = missingCalanderization;
   }
 }

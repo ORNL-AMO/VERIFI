@@ -1,6 +1,6 @@
 /// <reference lib="webworker" />
 
-import { FacilitySummaryClass } from "./classes/dashboard/facilitySummaryClass";
+import { FacilitySummaryClass } from "src/app/calculations/dashboard-calculations/facilitySummaryClass";
 
 
 addEventListener('message', ({ data }) => {

@@ -73,7 +73,7 @@ export class FacilityEmissionsMapComponent implements OnInit {
         mode: 'markers',
         lat: this.mapData.map(item => { return item.lat }),
         lon: this.mapData.map(item => { return item.lng }),
-        hovertext: this.mapData.map(item => { return item.facility.name + ': ' + (item.emissions).toLocaleString(undefined, { maximumFractionDigits: 0, minimumIntegerDigits: 1 }) + ' tonne CO<sub>2</sub>' }),
+        hovertext: this.mapData.map(item => { return item.facility.name + ': ' + (item.emissions).toLocaleString(undefined, { maximumFractionDigits: 0, minimumIntegerDigits: 1 }) + ' tonne CO<sub>2</sub>e' }),
         hoverinfo: 'text',
         text: this.mapData.map(item => { return item.facility.name }),
         marker: {

@@ -5,12 +5,12 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAccount, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 import { EnergyUnitOptions, UnitOption } from 'src/app/shared/unitOptions';
 import * as _ from 'lodash';
-import { AnalysisCalculationsHelperService } from 'src/app/shared/shared-analysis/calculations/analysis-calculations-helper.service';
 import { AnalysisService } from '../../analysis.service';
 import { Router } from '@angular/router';
 import { AnalysisValidationService } from '../../analysis-validation.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 @Component({
   selector: 'app-analysis-setup',
   templateUrl: './analysis-setup.component.html',
@@ -26,7 +26,7 @@ export class AnalysisSetupComponent implements OnInit {
   analysisItem: IdbAnalysisItem;
   yearOptions: Array<number>;
   constructor(private facilityDbService: FacilitydbService, private analysisDbService: AnalysisDbService,
-    private analysisCalculationsHelperService: AnalysisCalculationsHelperService,
+    private utilityMeterDataDbService: UtilityMeterDatadbService,
     private analysisService: AnalysisService, private router: Router,
     private analysisValidationService: AnalysisValidationService,
     private dbChangesService: DbChangesService,
@@ -36,7 +36,7 @@ export class AnalysisSetupComponent implements OnInit {
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     this.facility = this.facilityDbService.selectedFacility.getValue();
     this.energyUnit = this.facility.energyUnit;
-    this.yearOptions = this.analysisCalculationsHelperService.getYearOptions();
+    this.yearOptions = this.utilityMeterDataDbService.getYearOptions();
   }
 
   async saveItem() {

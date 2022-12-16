@@ -9,7 +9,7 @@ import { OverviewReportService } from '../overview-report.service';
 import * as _ from 'lodash';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { AnalysisCalculationsHelperService } from 'src/app/shared/shared-analysis/calculations/analysis-calculations-helper.service';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 
 @Component({
   selector: 'app-better-plants-report-menu',
@@ -35,7 +35,7 @@ export class BetterPlantsReportMenuComponent implements OnInit {
     private toastNotificationsService: ToastNotificationsService,
     private accountAnalysisDbService: AccountAnalysisDbService,
     private dbChangesService: DbChangesService,
-    private analysisCalculationsHelperService: AnalysisCalculationsHelperService) { }
+    private utilityMeterDataDbService: UtilityMeterDatadbService) { }
 
   ngOnInit(): void {
     this.account = this.accountDbService.selectedAccount.getValue();
@@ -108,8 +108,8 @@ export class BetterPlantsReportMenuComponent implements OnInit {
 
 
   setYearOptions() {
-    this.targetYears = this.analysisCalculationsHelperService.getYearOptions(true);
-    this.baselineYears = this.analysisCalculationsHelperService.getYearOptions(true);
+    this.targetYears = this.utilityMeterDataDbService.getYearOptions(true);
+    this.baselineYears = this.utilityMeterDataDbService.getYearOptions(true);
   }
 
   setAnalysisOptions() {

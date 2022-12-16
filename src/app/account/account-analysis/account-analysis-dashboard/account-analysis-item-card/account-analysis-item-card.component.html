@@ -1,0 +1,63 @@
+<div class="card">
+    <div class="card-header bg-white justify-content-between bold">
+        <div class="d-flex justify-content-between">
+            <div>
+                <span class="fa"
+                    [ngClass]="{'fa-circle-check':analysisItem.selectedYearAnalysis, 'fa-circle':!analysisItem.selectedYearAnalysis}"
+                    (click)="setUseItem()"></span>
+                <a class="item-name" (click)="selectAnalysisItem()">
+                    {{analysisItem.name}}
+                </a>
+            </div>
+
+            <!-- <span class="badge report-year pull-right">
+            {{analysisItem.reportYear}}
+        </span> -->
+            <div class="d-flex">
+                <button class="btn action-btn btn-sm" (click)="createCopy()">
+                    <i class="fa fa-copy" title="Copy"></i>
+                </button>
+                <button class="btn action-btn btn-sm ml-1" (click)="deleteItem()">
+                    <i class="fa fa-trash" title="Delete"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- <div class="card-body d-flex flex-column" *ngIf="showDetail">
+        <div class="d-flex flex-column">
+            <div>
+                Include Facilities:
+            </div>
+            <ng-container *ngFor="let facilityItem of analysisItem.facilityAnalysisItems; let index = index;">
+                <ng-container *ngIf="facilityItem.analysisItemId && facilityItem.analysisItemId != 'skip'">
+                    {{facilityItem.facilityId | facilityName}}
+                    <div *ngIf="analysisItem.facilityAnalysisItems.length-1 != index;">
+                        <hr>
+                    </div>
+                </ng-container>
+            </ng-container>
+        </div>
+    </div> -->
+    <div class="card-footer bg-white">
+        <div class="d-flex justify-content-end">
+            <div class="d-flex">
+                Last Modified: {{analysisItem.date | date}}
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div [ngClass]="{'windowOverlay': displayDeleteModal}"></div>
+<div class="popup" [class.open]="displayDeleteModal">
+    <div class="popup-header" *ngIf="displayDeleteModal">Delete: {{analysisItem.name}}
+        <button class="item-right" (click)="cancelDelete()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>WARNING: Deleting this analysis item cannot be undone. Reports using this analysis may be effected.</p>
+    </div>
+    <div class="saveCancel popup-footer text-right">
+        <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
+        <button class="btn btn-danger" (click)="confirmDelete()">Delete</button>
+    </div>
+</div>

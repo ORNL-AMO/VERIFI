@@ -1,9 +1,8 @@
-
 <div class="wrapper" *ngIf="reportOptions">
     <div class="row">
         <div class="col-6">
-            <app-label-with-tooltip [isSemiBold]="true" [label]="'Report Name'" [field]="'reportName'" [labelId]="'reportName'" 
-                [isRequired]="true">
+            <app-label-with-tooltip [isSemiBold]="true" [label]="'Report Name'" [field]="'reportName'"
+                [labelId]="'reportName'" [isRequired]="true">
             </app-label-with-tooltip>
             <div>
                 <input type="text" class="form-control" name="reportName" id="reportName" [(ngModel)]="name" />
@@ -22,10 +21,12 @@
             <div class="row">
                 <div class="col-6">
                     <div class="form-group">
-                        <app-label-with-tooltip [isSemiBold]="true" [label]="'Baseline Year'" [field]="'baselineYear'" [labelId]="'baselineYear'"></app-label-with-tooltip>
+                        <app-label-with-tooltip [isSemiBold]="true" [label]="'Baseline Year'" [field]="'baselineYear'"
+                            [labelId]="'baselineYear'"></app-label-with-tooltip>
                         <select id="baselineYear" name="baselineYear" [(ngModel)]="reportOptions.baselineYear"
                             class="form-control" required>
-                            <option *ngFor="let year of baselineYears" [ngValue]="year">{{year | yearDisplay: account.fiscalYear}}</option>
+                            <option *ngFor="let year of baselineYears" [ngValue]="year">{{year | yearDisplay:
+                                account.fiscalYear}}</option>
                         </select>
                     </div>
                     <div class="alert alert-danger" *ngIf="!reportOptions.baselineYear">
@@ -34,11 +35,13 @@
                 </div>
                 <div class="col-6">
                     <div class="form-group">
-                        <app-label-with-tooltip [isSemiBold]="true" [label]="'Report Year'" [field]="'targetYear'" [labelId]="'targetYear'">
+                        <app-label-with-tooltip [isSemiBold]="true" [label]="'Report Year'" [field]="'targetYear'"
+                            [labelId]="'targetYear'">
                         </app-label-with-tooltip>
                         <select id="targetYear" name="targetYear" [(ngModel)]="reportOptions.targetYear"
                             class="form-control" required (change)="setAnalysisOptions()">
-                            <option *ngFor="let year of targetYears" [ngValue]="year">{{year | yearDisplay: account.fiscalYear}}</option>
+                            <option *ngFor="let year of targetYears" [ngValue]="year">{{year | yearDisplay:
+                                account.fiscalYear}}</option>
                         </select>
                     </div>
                     <div class="alert alert-danger" *ngIf="!reportOptions.targetYear">
@@ -54,8 +57,8 @@
                             Include Facility Names in Performance Table
                         </label>
                         <label class="switch" for="includeFacilityNames">
-                            <input class="checkbox" type="checkbox" id="includeFacilityNames" name="includeFacilityNames"
-                                [(ngModel)]="reportOptions.includeFacilityNames">
+                            <input class="checkbox" type="checkbox" id="includeFacilityNames"
+                                name="includeFacilityNames" [(ngModel)]="reportOptions.includeFacilityNames">
                             <span class="slider round"></span>
                         </label>
                     </div>
@@ -63,7 +66,8 @@
             </div>
         </div>
         <div class="col-6">
-            <app-label-with-tooltip [isSemiBold]="true" [label]="'Select Account Analysis'" [field]="'selectAccountAnalysis'">
+            <app-label-with-tooltip [isSemiBold]="true" [label]="'Select Account Analysis'"
+                [field]="'selectAccountAnalysis'">
             </app-label-with-tooltip>
             <div class="table-responsive">
                 <table class="table table-sm table-hover">
@@ -94,7 +98,7 @@
                             </td>
                             <td>
                                 <span *ngFor="let facilityItem of analysisItem.facilityAnalysisItems">
-                                    <span *ngIf="facilityItem.analysisItemId">
+                                    <span *ngIf="facilityItem.analysisItemId && facilityItem.analysisItemId != 'skip'">
                                         {{facilityItem.facilityId | facilityName}}<br>
                                     </span>
                                 </span>
@@ -118,7 +122,8 @@
     <div class="row">
         <div class="col-12">
             <app-label-with-tooltip [isSemiBold]="true" [label]="'Please describe any methods undertaken to normalize energy intensity data or adjust baseline data
-            to account for economic and other factors that affect energy use:'" [field]="'methodsUndertaken'" [labelId]="'baselineAdjustmentNotes'">
+            to account for economic and other factors that affect energy use:'" [field]="'methodsUndertaken'"
+                [labelId]="'baselineAdjustmentNotes'">
             </app-label-with-tooltip>
             <textarea class="form-control" name="baselineAdjustmentNotes" id="baselineAdjustmentNotes"
                 [(ngModel)]="reportOptions.baselineAdjustmentNotes"></textarea>
@@ -146,7 +151,8 @@
                 [disabled]="!reportOptions.targetYear || !reportOptions.baselineYear || !reportOptions.analysisItemId"><span
                     class="fa fa-save"></span> Create
                 Report</button>
-            <button *ngIf="selectedReportOptions" class="btn nav-btn" (click)="cancelChanges()">Discard
+            <button *ngIf="selectedReportOptions" class="btn nav-btn" (click)="cancelChanges()"
+                [disabled]="!reportOptions.targetYear || !reportOptions.baselineYear || !reportOptions.analysisItemId">Discard
                 Changes</button>
             <button *ngIf="selectedReportOptions" class="btn action-btn ml-2" (click)="updateReport()"
                 [disabled]="!reportOptions.targetYear || !reportOptions.baselineYear || !reportOptions.analysisItemId"><span

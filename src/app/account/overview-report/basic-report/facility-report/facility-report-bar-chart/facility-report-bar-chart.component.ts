@@ -112,7 +112,7 @@ export class FacilityReportBarChartComponent implements OnInit {
         yaxis: {
           hoverformat: ",.2f",
           title: {
-            text: 'tonne CO<sub>2</sub>'
+            text: 'tonne CO<sub>2</sub>e'
           }
         },
         margin: { t: 10 },
@@ -137,7 +137,7 @@ export class FacilityReportBarChartComponent implements OnInit {
         yaxis: {
           hoverformat: ",.2f",
           title: {
-            text: 'tonne CO<sub>2</sub>'
+            text: 'tonne CO<sub>2</sub>e'
           }
         },
         margin: { t: 10 },

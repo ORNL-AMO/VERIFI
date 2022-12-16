@@ -30,10 +30,10 @@ export class FacilityCardComponent implements OnInit {
   noMeterData: boolean;
   naics: string;
   calculating: boolean = true;
-  annualAnalysisSummary: Array<AnnualAnalysisSummary>;
+  // annualAnalysisSummary: Array<AnnualAnalysisSummary>;
   monthlyFacilityAnalysisData: Array<MonthlyAnalysisSummaryData>;
 
-  latestAnalysisYear: number;
+  latestAnalysisDate: Date;
   percentSavings: number = 0;
   percentGoal: number;
   percentTowardsGoal: number = 0;
@@ -74,7 +74,7 @@ export class FacilityCardComponent implements OnInit {
           monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
         } = summaries.find(summary => { return summary.facilityId == this.facility.guid });
         if (facilitySummary) {
-          this.annualAnalysisSummary = facilitySummary.annualAnalysisSummary;
+          // this.annualAnalysisSummary = facilitySummary.annualAnalysisSummary;
           this.monthlyFacilityAnalysisData = facilitySummary.monthlyAnalysisSummaryData;
           this.setProgressPercentages();
           this.calculating = false;
@@ -131,9 +131,9 @@ export class FacilityCardComponent implements OnInit {
   }
 
   setProgressPercentages() {
-    let latestAnalysisSummary: AnnualAnalysisSummary = _.maxBy(this.annualAnalysisSummary, 'year');
-    this.percentSavings = latestAnalysisSummary.totalSavingsPercentImprovement;
-    this.latestAnalysisYear = latestAnalysisSummary.year;
+    let latestAnalysisSummary: MonthlyAnalysisSummaryData = _.maxBy(this.monthlyFacilityAnalysisData, 'date');
+    this.percentSavings = latestAnalysisSummary.rolling12MonthImprovement;
+    this.latestAnalysisDate = new Date(latestAnalysisSummary.date);
     this.percentTowardsGoal = (this.percentSavings / this.percentGoal) * 100;
   }
 

@@ -1,7 +1,7 @@
 /// <reference lib="webworker" />
 
 import { BetterPlantsSummary } from "../models/overview-report";
-import { BetterPlantsReportClass } from "./classes/betterPlantsReportClass";
+import { BetterPlantsReportClass } from "../calculations/better-plants-calculations/betterPlantsReportClass";
 
 addEventListener('message', ({ data }) => {
     let betterPlantsReportClass: BetterPlantsReportClass = new BetterPlantsReportClass(

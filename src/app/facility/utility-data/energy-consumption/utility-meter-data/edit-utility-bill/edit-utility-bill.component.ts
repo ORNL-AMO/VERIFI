@@ -71,7 +71,7 @@ export class EditUtilityBillComponent implements OnInit {
 
   setTotalEmissions() {
     if (this.meterDataForm.controls.totalEnergyUse.value && this.showEmissions) {
-      let emissionsValues: EmissionsResults = this.calanderizationService.getEmissions(this.editMeter, this.meterDataForm.controls.totalEnergyUse.value, this.editMeter.energyUnit, new Date(this.meterDataForm.controls.readDate.value).getFullYear());
+      let emissionsValues: EmissionsResults = this.calanderizationService.getEmissions(this.editMeter, this.meterDataForm.controls.totalEnergyUse.value, this.editMeter.energyUnit, new Date(this.meterDataForm.controls.readDate.value).getFullYear(), false);
       this.marketEmissions = emissionsValues.marketEmissions;
       this.locationEmissions = emissionsValues.locationEmissions;
     } else {

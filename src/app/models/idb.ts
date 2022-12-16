@@ -260,7 +260,8 @@ export interface IdbAnalysisItem {
     reportYear: number,
     energyUnit: string,
     setupErrors: AnalysisSetupErrors,
-    groups: Array<AnalysisGroup>
+    groups: Array<AnalysisGroup>,
+    selectedYearAnalysis?: boolean
 }
 
 export interface AnalysisSetupErrors{
@@ -329,7 +330,8 @@ export interface IdbAccountAnalysisItem {
     baselineAdjustments: Array<{
         year: number,
         amount: number
-    }>
+    }>,
+    selectedYearAnalysis?: boolean
 }
 
 

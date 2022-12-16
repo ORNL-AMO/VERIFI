@@ -53,7 +53,7 @@ export class OverviewReportDashboardComponent implements OnInit {
       option.baselineYear = option.reportOptions.baselineYear;
       option.targetYear = option.reportOptions.targetYear;
       option.title = option.reportOptions.title,
-      option.reportOptionsType = option.reportOptions.reportType
+        option.reportOptionsType = option.reportOptions.reportType
     });
     return options;
   }
@@ -61,10 +61,14 @@ export class OverviewReportDashboardComponent implements OnInit {
   selectReport(report: IdbOverviewReportOptions) {
     this.overviewReportOptionsDbService.selectedOverviewReportOptions.next(report);
     this.overviewReportService.reportOptions.next(report.reportOptions);
-    if(report.reportOptions.reportType == 'data'){
+    if (report.reportOptions.reportType == 'data') {
       this.router.navigateByUrl('/account/reports/basic-report');
-    }else if(report.reportOptions.reportType == 'betterPlants'){
-      this.router.navigateByUrl('/account/reports/better-plants-report');
+    } else if (report.reportOptions.reportType == 'betterPlants') {
+      if (report.reportOptions.analysisItemId && report.reportOptions.targetYear) {
+        this.router.navigateByUrl('/account/reports/better-plants-report');
+      } else {
+        this.router.navigateByUrl('/account/reports/better-plants-menu');
+      }
     }
   }
 
@@ -87,9 +91,9 @@ export class OverviewReportDashboardComponent implements OnInit {
   editReport(report: IdbOverviewReportOptions) {
     this.overviewReportOptionsDbService.selectedOverviewReportOptions.next(report);
     this.overviewReportService.reportOptions.next(report.reportOptions);
-    if(report.reportOptions.reportType == 'data'){
+    if (report.reportOptions.reportType == 'data') {
       this.router.navigateByUrl('/account/reports/menu');
-    }else if(report.reportOptions.reportType == 'betterPlants'){
+    } else if (report.reportOptions.reportType == 'betterPlants') {
       this.router.navigateByUrl('/account/reports/better-plants-menu');
     }
   }
@@ -129,12 +133,12 @@ export class OverviewReportDashboardComponent implements OnInit {
     this.reportType = reportType;
   }
 
-  createCopy(report: IdbOverviewReportOptions){
+  createCopy(report: IdbOverviewReportOptions) {
     this.overviewReportOptionsDbService.selectedOverviewReportOptions.next(undefined);
     this.overviewReportService.reportOptions.next(report.reportOptions);
-    if(report.reportOptions.reportType == 'data'){
+    if (report.reportOptions.reportType == 'data') {
       this.router.navigateByUrl('/account/reports/menu');
-    }else if(report.reportOptions.reportType == 'betterPlants'){
+    } else if (report.reportOptions.reportType == 'betterPlants') {
       this.router.navigateByUrl('/account/reports/better-plants-menu');
     }
   }
