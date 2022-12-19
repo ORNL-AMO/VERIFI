@@ -91,7 +91,7 @@
                     <a class="nav-link" routerLink="/facility/{{facility.id}}/utility/predictors">
                         <span class="fa fa-chevron-right pe-2"></span>
                         <span *ngIf="facilityPredictors">Facility Predictor Variables:
-                            <span class="badge badge-info ms-2"
+                            <span class="badge bg-info ms-2"
                                 *ngFor="let predictor of facilityPredictors">{{predictor.name}}</span>
                         </span>
                         <span *ngIf="!facilityPredictors">No Predictor Variables Found</span>

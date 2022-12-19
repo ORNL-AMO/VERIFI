@@ -32,10 +32,10 @@
                 <span class="bold larger">
                     {{groupItem.group.idbGroupId | groupName}}
                 </span>
-                <span class="badge badge-secondary ms-2 pull-right">
+                <span class="badge bg-secondary ms-2 pull-right">
                     {{groupItem.group.analysisType | analysisTypeLabel }}
                 </span>
-                <span class="badge badge-info ms-2 pull-right"
+                <span class="badge bg-info ms-2 pull-right"
                     *ngFor="let predictor of groupItem.predictorVariables">{{predictor.name}}</span>
             </div>
             <div class="pt-2"
