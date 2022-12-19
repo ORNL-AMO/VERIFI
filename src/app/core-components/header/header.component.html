@@ -13,9 +13,9 @@
                     (click)="toggleDropdown()"><span class="fa fa-building"></span>
                     {{activeAccount.name}}
                 </button>
-                <div *ngIf="!activeAccount" class="nav-link dropdown-toggle account-required"
+                <button *ngIf="!activeAccount" class="btn action-btn dropdown-toggle italic"
                     (click)="toggleDropdown()">Account Required
-                </div>
+                </button>
                 <div class="dropdown-menu" [ngClass]="{'show':showDropdown}">
                     <a *ngFor="let account of accountList| orderBy:'name':'asc'" [class.active]="activeAccount?.id === account.id"
                         class="dropdown-item" (click)="switchAccount(account)"> {{account.name}}</a>
@@ -35,10 +35,10 @@
                 *ngIf="!lastBackupDate">&mdash;</span>)</div>
         <!--TODO: Remove For Production-->
         <div class="ps-2" *ngIf="!isProduction">
-            <button *ngIf="!resetDatabase" class="btn btn-danger backup-account" (click)="toggleResetDatabase()">Reset
+            <button *ngIf="!resetDatabase" class="btn btn-danger" (click)="toggleResetDatabase()">Reset
                 Database
             </button>
-            <button *ngIf="resetDatabase" class="btn btn-danger backup-account" (click)="deleteDatabase()">Are you sure
+            <button *ngIf="resetDatabase" class="btn btn-danger" (click)="deleteDatabase()">Are you sure
                 you want to reset the database?
             </button>
         </div>
