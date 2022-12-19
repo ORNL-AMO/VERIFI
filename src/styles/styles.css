@@ -152,3 +152,22 @@ ngb-typeahead-window.dropdown-menu .dropdown-item.active{
 ngb-typeahead-window.dropdown-menu .badge, ngb-typeahead-window.dropdown-menu .template-text{
   font-size: 16px;
 }
+
+
+/*Scrollvar*/
+::-webkit-scrollbar {
+  -webkit-appearance: none;
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  /*background-color: rgba(0, 0, 0, 0.3);*/
+  background-color: rgb(0 0 0 / 15%);
+  -webkit-box-shadow: 0 0 1px rgba(255, 255, 255, 0.5);
+}
+body {
+  /* Firefox */
+  scrollbar-color: rgb(0 0 0 / 15%) transparent;
+  scrollbar-width: thin;
+}

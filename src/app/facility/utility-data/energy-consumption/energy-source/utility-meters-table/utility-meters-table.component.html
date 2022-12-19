@@ -26,8 +26,8 @@
     </div>
 
     <div class="table-responsive">
-        <table class="table table-hover table-sm" #meterTable>
-            <thead>
+        <table class="table utility-data table-sm table-bordered table-hover" #meterTable>
+            <thead class="sortable">
                 <tr>
                     <th (click)="setOrderDataField('name')" [ngClass]="{'active': orderDataField == 'name'}">Name</th>
                     <th (click)="setOrderDataField('source')" [ngClass]="{'active': orderDataField == 'source'}">Source
@@ -58,7 +58,7 @@
                     <th *ngIf="!copyingTable">Actions</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="table-group-divider">
                 <tr
                     *ngFor="let meter of meterList  | orderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
                     <td [ngClass]="{'invalid': isMeterInvalid(meter)}">
@@ -79,11 +79,16 @@
                     <td>{{meter.agreementType | agreementTypeLabel}}</td>
                     <td>{{meter.siteToSource}}</td>
                     <td class="actions" *ngIf="!copyingTable">
-                        <div class="d-flex">
-                            <i [ngClass]="{'highlight': meter.unitsDifferent}" class="fa fa-pencil" title="Edit"
-                                (click)="selectEditMeter(meter)"></i>
-                            <i class="fa fa-copy" title="Copy" (click)="createCopy(meter)"></i>
-                            <i class="fa fa-trash" title="Delete" (click)="selectDeleteMeter(meter)"></i>
+                        <div class="btn-group">
+                            <button class="btn btn-sm btn-outline" (click)="selectEditMeter(meter)" title="Edit">
+                                <i class="fa fa-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline" (click)="createCopy(meter)" title="Copy">
+                                <i class="fa fa-copy"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline" (click)="selectDeleteMeter(meter)" title="Delete">
+                                <i class="fa fa-trash"></i>
+                            </button>
                         </div>
                     </td>
                 </tr>
