@@ -42,8 +42,8 @@
             </div>
         </div>
 
-        <table class="table table-sm" #predictorTable [ngClass]="{'copying-table': copyingTable}">
-            <thead>
+        <table class="table utility-data table-sm table-bordered table-hover" #predictorTable [ngClass]="{'copying-table': copyingTable}">
+            <thead class="clickable">
                 <tr>
                     <th class="input" *ngIf="!copyingTable">
                         <input #masterCheckbox type="checkbox" (change)="checkAll()" [(ngModel)]="allChecked">
@@ -73,9 +73,13 @@
                     <td>{{predictorEntry.date | date:'MMM, yyyy'}}</td>
                     <td *ngFor="let predictor of predictorEntry.predictors">{{predictor.amount | customNumber}}</td>
                     <td class="actions" *ngIf="!copyingTable">
-                        <div class="d-flex">
-                            <i class="fa fa-pencil" title="Edit" (click)="setEditPredictorEntry(predictorEntry)"></i>
-                            <i class="fa fa-trash" title="Delete" (click)="setDeletePredictorEntry(predictorEntry)"></i>
+                        <div class="btn-group">
+                            <button class="btn btn-sm btn-outline"  (click)="setEditPredictorEntry(predictorEntry)"title="Edit">
+                                <i class="fa fa-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline"  (click)="setDeletePredictorEntry(predictorEntry)" title="Delete">
+                                <i class="fa fa-trash"></i>
+                            </button>
                         </div>
                     </td>
                 </tr>

@@ -1,5 +1,5 @@
-<table class="table table-sm" #meterDataTable [ngClass]="{'copying-table': copyingTable}">
-    <thead>
+<table class="table utility-data table-sm table-bordered table-hover" #meterDataTable [ngClass]="{'copying-table': copyingTable}">
+    <thead class="sortable">
         <tr class="table-mh">
             <th colspan=9>{{calanderizedMeter.meter.name}}
                 <span class="item-right small source-label">{{calanderizedMeter.meter.source}}</span>
@@ -28,7 +28,7 @@
                 RECs<br> (<span [innerHTML]="calanderizedMeter.energyUnit | settingsLabel"></span>)</th>
             <th (click)="setOrderDataField('excessRECsEmissions')"
                 [ngClass]="{'active': orderDataField == 'excessRECsEmissions'}">Excess
-                RECs Emissions<br> (kg CO<sub>2</sub>e)</th>
+                RECs <br>Emissions<br> (kg CO<sub>2</sub>e)</th>
             <th (click)="setOrderDataField('energyCost')" [ngClass]="{'active': orderDataField == 'energyCost'}">Total
                 Cost</th>
         </tr>
