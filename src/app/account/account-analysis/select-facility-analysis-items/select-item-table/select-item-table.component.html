@@ -29,7 +29,7 @@
 
 
 <div class="table-responsive">
-    <table class="table table-sm table-hover">
+    <table class="table table-bordered table-sm table-hover">
         <thead>
             <tr>
                 <th></th>
@@ -48,12 +48,12 @@
                         [value]="analysisItem.guid" name="{{analysisItem.id+'_selectedFacilityItemId'}}"
                         id="{{analysisItem.id+'_selectedFacilityItemId'}}" (change)="save()">
                 </td>
-                <td>
+                <td class="w-25">
                     <span class="fa fa-exclamation-circle"
                         *ngIf="analysisItem.setupErrors.hasError || analysisItem.setupErrors.groupsHaveErrors"></span>
                     {{analysisItem.name}}
                 </td>
-                <td>
+                <td class="w-50">
                     <span *ngFor="let group of analysisItem.groups">
                         {{group.idbGroupId | groupName}}:
                         <span *ngIf="group.analysisType == 'absoluteEnergyConsumption'">Absolute Energy
