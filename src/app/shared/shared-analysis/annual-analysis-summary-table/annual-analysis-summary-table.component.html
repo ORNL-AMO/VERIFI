@@ -1,5 +1,5 @@
-<table class="table table-sm table-hover" #dataTable [ngClass]="{'copying-table': copyingTable}">
-    <thead>
+<table class="table utility-data table-sm table-bordered table-hover" #dataTable [ngClass]="{'copying-table': copyingTable}">
+    <thead class="sortable">
         <tr class="table-mh">
             <th class="first-column"></th>
             <th *ngIf="analysisTableColumns.energy" class="text-center th-3" [attr.colspan]="numEnergyColumns">
