@@ -32,7 +32,7 @@
     <h4>Portfolio</h4>
 
     <div class="table-responsive">
-        <table class="table table-sm table-hover">
+        <table class="table table-sm utility-data table-hover table-bordered">
             <thead>
                 <tr>
                     <th></th>
@@ -40,7 +40,7 @@
                     <th>NAICS</th>
                     <th>State</th>
                     <th>Country</th>
-                    <th>Facility Size</th>
+                    <!-- <th>Facility Size</th> -->
                     <th>Units</th>
                     <th class="actions">Actions</th>
                 </tr>
@@ -57,12 +57,17 @@
                     <td>{{facility.naics3}}</td>
                     <td>{{facility.state}}</td>
                     <td>{{facility.country}}</td>
-                    <td>{{facility.size}}</td>
+                    <!-- <td>{{facility.size}}</td> -->
                     <td>{{facility.unitsOfMeasure}}</td>
                     <td class="actions">
-                        <div class="d-flex">
-                            <i class="fa fa-pencil" title="Edit" (click)="switchFacility(facility)"></i>
-                            <i class="fa fa-trash" title="Delete" (click)="setDeleteFacilityEntry(facility)"></i>
+                        <div class="btn-group">
+                            <button class="btn btn-sm btn-outline" (click)="switchFacility(facility)" title="Edit">
+                                <i class="fa fa-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline" (click)="setDeleteFacilityEntry(facility)"
+                                title="Delete">
+                                <i class="fa fa-trash"></i>
+                            </button>
                         </div>
                     </td>
                 </tr>
