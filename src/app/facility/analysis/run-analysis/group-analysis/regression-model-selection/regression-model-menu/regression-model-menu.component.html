@@ -1,7 +1,7 @@
 <div class="row">
     <div class="col-md-4 col-sm-12">
         <label class="bold">Select Modeling Method</label>
-        <select required class="form-control" id="userDefinedModel" id="userDefinedModel"
+        <select required class="form-select" id="userDefinedModel" id="userDefinedModel"
             [(ngModel)]="group.userDefinedModel" (change)="changeModelType()">
             <option [ngValue]="true">Calculate Models</option>
             <option [ngValue]="false">User Defined Model</option>
@@ -94,12 +94,12 @@
                     <span class="slider round"></span>
                 </label>
             </div>
-            <div class="col-4">
+            <div class="col-4 mdash">
                 <input class="form-control" *ngIf="predictor.productionInAnalysis" type="number" step="any"
                     id="{{'regressionCoefficient_'+predictor.id}}" name="{{'regressionCoefficient_'+predictor.id}}"
                     [(ngModel)]="predictor.regressionCoefficient" required (input)="saveItem()"
                     [disabled]="group.userDefinedModel">
-                <span class="bold" *ngIf="!predictor.productionInAnalysis">&mdash;</span>
+                <span class="bold " *ngIf="!predictor.productionInAnalysis">&mdash;</span>
             </div>
         </div>
         <div class="row mb-2 sub-column">

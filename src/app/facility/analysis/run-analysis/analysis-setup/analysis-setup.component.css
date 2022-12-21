@@ -6,3 +6,7 @@
 .alert-info .fa{
     color: #0c5460;
 }
+
+.form-group.row{
+    margin-bottom: .25rem;
+}
