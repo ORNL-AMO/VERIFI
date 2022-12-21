@@ -14,7 +14,7 @@
 
     <div class="row" *ngIf="form.controls.fiscalYear.value === 'nonCalendarYear'">
         <div class="col-lg-12 mb-3">
-            <label>Start Month</label>
+            <label for="fiscalYearMonth">Start Month</label>
             <select class="form-select" formControlName="fiscalYearMonth" (change)="saveChanges()">
                 <option *ngFor="let month of months" [ngValue]="month.monthNumValue">{{month.name}}
                 </option>

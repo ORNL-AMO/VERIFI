@@ -1,13 +1,13 @@
 <form [formGroup]="form">
     <div class="row">
         <div class="mb-3 col">
-            <label>Units of Measure</label>
+            <label for="unitsOfMeasure">Units of Measure</label>
             <select class="form-select" formControlName="unitsOfMeasure" (change)="setUnitsOfMeasure()">
                 <option [ngValue]="'Imperial'">Imperial</option>
                 <option [ngValue]="'Metric'">Metric</option>
                 <option [ngValue]="'Custom'">Custom</option>
             </select>
-            <label class="mt-3">Result Energy Unit</label>
+            <label for="energyUnit">Result Energy Unit</label>
             <select class="form-select" formControlName="energyUnit" (change)="saveChanges()">
                 <option *ngFor="let energyUnitOption of energyUnitOptions" [ngValue]="energyUnitOption.value">
                     <span [innerHTML]="energyUnitOption.display"></span>
@@ -42,7 +42,7 @@
 
     <div class="row">
         <div class="mb-3 col">
-            <label>Electricity Unit</label>
+            <label for="electricityUnit">Electricity Unit</label>
             <select class="form-select" formControlName="electricityUnit" (change)="saveChanges()">
                 <option *ngFor="let energyUnitOption of energyUnitOptions" [ngValue]="energyUnitOption.value">
                     <span [innerHTML]="energyUnitOption.display"></span>
@@ -50,7 +50,7 @@
             </select>
         </div>
         <div class="mb-3 col">
-            <label>Volume Unit (Liquid)</label>
+            <label for="volumeLiquidUnit">Volume Unit (Liquid)</label>
             <select class="form-select" formControlName="volumeLiquidUnit" (change)="saveChanges()">
                 <option *ngFor="let volumeUnitOption of volumeLiquidOptions" [ngValue]="volumeUnitOption.value">
                     <span [innerHTML]="volumeUnitOption.display"></span>
@@ -62,7 +62,7 @@
     <div class="row">
 
         <div class="mb-3 col">
-            <label>Volume Unit (Gases)</label>
+            <label for="volumeGasUnit">Volume Unit (Gases)</label>
             <select class="form-select" formControlName="volumeGasUnit" (change)="saveChanges()">
                 <option *ngFor="let volumeUnitOption of volumeGasOptions" [ngValue]="volumeUnitOption.value">
                     <span [innerHTML]="volumeUnitOption.display"></span>
@@ -71,7 +71,7 @@
         </div>
 
         <div class="mb-3 col">
-            <label>Mass Unit</label>
+            <label for="massUnit">Mass Unit</label>
             <select class="form-select" formControlName="massUnit" (change)="saveChanges()">
                 <option *ngFor="let massUnitOption of massUnitOptions" [ngValue]="massUnitOption.value">
                     <span [innerHTML]="massUnitOption.display"></span>
@@ -105,7 +105,7 @@
             <div class="form-group">
                 <div class="d-flex w-100 justify-content-between">
                     <div>
-                        <label>eGRID Subregion </label>
+                        <label for="eGridSubregion">eGRID Subregion </label>
                     </div>
                     <div>
                         <a (click)="showEmissionsRates()" class="float-end click-link"

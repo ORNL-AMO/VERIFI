@@ -7,7 +7,7 @@
     </div>
     <div class="row" [hidden]="!form.controls.energyReductionGoal.value">
         <div class="col-6">
-            <label>Reduction Goal</label>
+            <label for="energyReductionPercent">Reduction Goal</label>
             <div class="input-group">
                 <input type="number" class="form-control" formControlName="energyReductionPercent"
                     (input)="saveChanges();" min="0" max="100">
@@ -30,14 +30,14 @@
             </div>
         </div>
         <div class="col-6">
-            <label>Baseline Year</label>
+            <label for="energyReductionBaselineYear">Baseline Year</label>
             <select class="form-select" formControlName="energyReductionBaselineYear"
                 (change)="changeBaselineYear('energyReductionBaselineYear','energyReductionTargetYear')">
                 <option *ngFor="let year of years" [ngValue]="year">{{year | yearDisplay:fiscalYearOption}}</option>
             </select>
         </div>
         <div class="col-6">
-            <label>Target Year</label>
+            <label for="energyReductionTargetYear">Target Year</label>
             <select class="form-select" formControlName="energyReductionTargetYear" (change)="saveChanges()">
                 <option *ngFor="let year of years | yearOptions: form.controls.energyReductionBaselineYear.value"
                     [ngValue]="year">{{year | yearDisplay:fiscalYearOption}}</option>
@@ -60,7 +60,7 @@
     </div>
     <div class="row" [hidden]="!form.controls.greenhouseReductionGoal.value">
         <div class="col-6">
-            <label>Reduction Goal</label>
+            <label for="greenhouseReductionPercent">Reduction Goal</label>
             <div class="input-group">
                 <input type="number" class="form-control" formControlName="greenhouseReductionPercent"
                     (input)="saveChanges();" min="0" max="100">
@@ -85,14 +85,14 @@
             </div>
         </div>
         <div class="col-6">
-            <label>Baseline Year</label>
+            <label for="greenhouseReductionBaselineYear">Baseline Year</label>
             <select class="form-select" formControlName="greenhouseReductionBaselineYear"
                 (change)="changeBaselineYear('greenhouseReductionBaselineYear','greenhouseReductionTargetYear')">
                 <option *ngFor="let year of years" [ngValue]="year">{{year | yearDisplay:fiscalYearOption}}</option>
             </select>
         </div>
         <div class="col-6">
-            <label>Target Year</label>
+            <label for="greenhouseReductionTargetYear">Target Year</label>
             <select class="form-select" formControlName="greenhouseReductionTargetYear" (change)="saveChanges()">
                 <option *ngFor="let year of years | yearOptions: form.controls.greenhouseReductionBaselineYear.value"
                     [ngValue]="year">{{year | yearDisplay:fiscalYearOption}}</option>
@@ -111,7 +111,7 @@
     </div>
     <div class="row" [hidden]="!form.controls.renewableEnergyGoal.value">
         <div class="col-6">
-            <label>Implementation Goal</label>
+            <label for="renewableEnergyPercent">Implementation Goal</label>
             <div class="input-group mb-3">
                 <input type="number" class="form-control" formControlName="renewableEnergyPercent"
                     (input)="saveChanges();" min="0" max="100">
@@ -121,7 +121,7 @@
         <div class="col-12">
             <div class="row">
                 <div class="col-6">
-                    <label>Baseline Year</label>
+                    <label for="renewableEnergyBaselineYear">Baseline Year</label>
                     <select class="form-select" formControlName="renewableEnergyBaselineYear"
                         (change)="changeBaselineYear('renewableEnergyBaselineYear','renewableEnergyTargetYear');">
                         <option *ngFor="let year of years" [ngValue]="year">{{year | yearDisplay:fiscalYearOption}}
@@ -129,7 +129,7 @@
                     </select>
                 </div>
                 <div class="col-6">
-                    <label>Target Year</label>
+                    <label for="renewableEnergyTargetYear">Target Year</label>
                     <select class="form-select" formControlName="renewableEnergyTargetYear" (change)="saveChanges()">
                         <option
                             *ngFor="let year of years | yearOptions: form.controls.renewableEnergyBaselineYear.value"
@@ -150,7 +150,7 @@
     </div>
     <div class="row" [hidden]="!form.controls.wasteReductionGoal.value">
         <div class="col-6">
-            <label>Reduction Goal</label>
+            <label for="wasteReductionPercent">Reduction Goal</label>
             <div class="input-group mb-3">
                 <input type="number" class="form-control" formControlName="wasteReductionPercent"
                     (input)="saveChanges();" min="0" max="100">
@@ -173,14 +173,14 @@
             </div>
         </div>
         <div class="col-6">
-            <label>Baseline Year</label>
+            <label for="wasteReductionBaselineYear">Baseline Year</label>
             <select class="form-select" formControlName="wasteReductionBaselineYear"
                 (change)="changeBaselineYear('wasteReductionBaselineYear','wasteReductionTargetYear')">
                 <option *ngFor="let year of years" [ngValue]="year">{{year | yearDisplay:fiscalYearOption}}</option>
             </select>
         </div>
         <div class="col-6">
-            <label>Target Year</label>
+            <label for="wasteReductionTargetYear">Target Year</label>
             <select class="form-select" formControlName="wasteReductionTargetYear" (change)="saveChanges()">
                 <option *ngFor="let year of years | yearOptions: form.controls.wasteReductionBaselineYear.value"
                     [ngValue]="year">{{year | yearDisplay:fiscalYearOption}}</option>
@@ -198,7 +198,7 @@
     </div>
     <div class="row" [hidden]="!form.controls.waterReductionGoal.value">
         <div class="col-6">
-            <label>Reduction Goal</label>
+            <label for="waterReductionPercent">Reduction Goal</label>
             <div class="input-group mb-3">
                 <input type="number" class="form-control" formControlName="waterReductionPercent"
                     (input)="saveChanges();" min="0" max="100">
@@ -221,14 +221,14 @@
             </div>
         </div>
         <div class="col-6">
-            <label>Baseline Year</label>
+            <label for="waterReductionBaselineYear">Baseline Year</label>
             <select class="form-select" formControlName="waterReductionBaselineYear"
                 (change)="changeBaselineYear('waterReductionBaselineYear','waterReductionTargetYear')">
                 <option *ngFor="let year of years" [ngValue]="year">{{year | yearDisplay:fiscalYearOption}}</option>
             </select>
         </div>
         <div class="col-6">
-            <label>Target Year</label>
+            <label for="waterReductionTargetYear">Target Year</label>
             <select class="form-select" formControlName="waterReductionTargetYear" (change)="saveChanges()">
                 <option *ngFor="let year of years | yearOptions: form.controls.waterReductionBaselineYear.value"
                     [ngValue]="year">{{year | yearDisplay:fiscalYearOption}}</option>
