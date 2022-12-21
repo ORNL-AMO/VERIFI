@@ -1,4 +1,4 @@
-select.form-control{
+select.form-select{
     height: min-content !important;
     /* margin-top: 10px; */
 }
@@ -9,7 +9,7 @@ select.form-control{
 }
 
 .fa-arrow-right{
-    padding-top: 6px;
+    padding-top: 10px;
     padding-right: .25rem;
     padding-left: .25rem;
 }

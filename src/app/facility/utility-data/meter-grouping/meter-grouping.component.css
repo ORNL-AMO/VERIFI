@@ -144,13 +144,13 @@
 }
 
 
-select.form-control {
+select.form-select {
     height: min-content !important;
     margin-top: 10px;
 }
 
 .fa-arrow-right {
-    padding-top: 16px;
+    padding-top: 20px;
     padding-right: .25rem;
     padding-left: .25rem;
 }

@@ -43,8 +43,8 @@
                     <ng-container *ngIf="dataDisplay == 'table'">
                         <button class="btn action-btn" [ngClass]="{'active' : showFilterDropdown}"
                             (click)="toggleFilterMenu()">
-                            <i class="fa fa-chevron-down" *ngIf="showFilterDropdown"></i>
-                            <i class="fa fa-chevron-up" *ngIf="!showFilterDropdown"></i>
+                            <i class="fa fa-chevron-down" *ngIf="!showFilterDropdown"></i>
+                            <i class="fa fa-chevron-up" *ngIf="showFilterDropdown"></i>
                             Filter
                         </button>
                         <div class="ps-2">

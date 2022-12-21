@@ -3,12 +3,12 @@
     <div class="pb-0 d-flex w-100 justify-content-between flex-wrap">
 
         <div class="d-flex">
-            <select name="minMonth" [(ngModel)]="minMonth" class="form-control" (change)="setMinDate()">
+            <select name="minMonth" [(ngModel)]="minMonth" class="form-select" (change)="setMinDate()">
                 <option class="pe-2" *ngFor="let month of months" [ngValue]="month.monthNumValue">
                     {{month.abbreviation}}</option>
             </select>
 
-            <select name="minYear" [(ngModel)]="minYear" class="form-control" (change)="setMinDate()">
+            <select name="minYear" [(ngModel)]="minYear" class="form-select" (change)="setMinDate()">
                 <option class="pe-2" *ngFor="let year of years" [ngValue]="year">{{year}}</option>
             </select>
 
@@ -16,12 +16,12 @@
                 <span class="fa fa-arrow-right"></span>
             </div>
 
-            <select name="maxMonth" [(ngModel)]="maxMonth" class="form-control" (change)="setMaxDate()">
+            <select name="maxMonth" [(ngModel)]="maxMonth" class="form-select" (change)="setMaxDate()">
                 <option class="pe-2" *ngFor="let month of months" [ngValue]="month.monthNumValue">
                     {{month.abbreviation}}</option>
             </select>
 
-            <select name="maxYear" [(ngModel)]="maxYear" class="form-control" (change)="setMaxDate()">
+            <select name="maxYear" [(ngModel)]="maxYear" class="form-select" (change)="setMaxDate()">
                 <option class="pe-2" *ngFor="let year of years" [ngValue]="year">{{year}}</option>
             </select>
         </div>
