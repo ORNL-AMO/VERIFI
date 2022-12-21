@@ -6,6 +6,8 @@
     z-index: 100;
     background-color: white;
     transition: .2s width;
+    padding-left: .5rem;
+    padding-right: .5rem;
 }
 
 .progress-bar {

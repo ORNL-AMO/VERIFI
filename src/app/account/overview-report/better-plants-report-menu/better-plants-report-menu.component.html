@@ -1,14 +1,19 @@
 <div class="wrapper" *ngIf="reportOptions">
-    <div class="row">
-        <div class="col-6">
-            <app-label-with-tooltip [isSemiBold]="true" [label]="'Report Name'" [field]="'reportName'"
-                [labelId]="'reportName'" [isRequired]="true">
-            </app-label-with-tooltip>
-            <div>
-                <input type="text" class="form-control" name="reportName" id="reportName" [(ngModel)]="name" />
-            </div>
-            <hr>
-            <!-- <div class="form-group">
+    <form>
+        <div class="row">
+            <div class="col-6">
+                <app-label-with-tooltip [isSemiBold]="true" [label]="'Report Name'" [field]="'reportName'"
+                    [labelId]="'reportName'" [isRequired]="true">
+                </app-label-with-tooltip>
+                <div>
+                    <input required type="text" class="form-control" name="reportName" id="reportName"
+                        [(ngModel)]="name" />
+                    <div class="alert alert-danger" *ngIf="!name">
+                        Name Required
+                    </div>
+                </div>
+                <hr>
+                <!-- <div class="form-group">
                 <label for="reportTitle">Report Cover Title</label>
                 <textarea class="form-control" name="reportTitle" id="reportTitle"
                     [(ngModel)]="reportOptions.title"></textarea>
@@ -18,146 +23,149 @@
                 <textarea class="form-control" name="reportNotes" id="reportNotes"
                     [(ngModel)]="reportOptions.notes"></textarea>
             </div> -->
-            <div class="row">
-                <div class="col-6">
-                    <div class="form-group">
-                        <app-label-with-tooltip [isSemiBold]="true" [label]="'Baseline Year'" [field]="'baselineYear'"
-                            [labelId]="'baselineYear'"></app-label-with-tooltip>
-                        <select id="baselineYear" name="baselineYear" [(ngModel)]="reportOptions.baselineYear"
-                            class="form-control" required>
-                            <option *ngFor="let year of baselineYears" [ngValue]="year">{{year | yearDisplay:
-                                account.fiscalYear}}</option>
-                        </select>
+                <div class="row">
+                    <div class="col-6">
+                        <div class="form-group">
+                            <app-label-with-tooltip [isSemiBold]="true" [label]="'Baseline Year'"
+                                [field]="'baselineYear'" [labelId]="'baselineYear'"></app-label-with-tooltip>
+                            <select id="baselineYear" name="baselineYear" [(ngModel)]="reportOptions.baselineYear"
+                                class="form-select" required>
+                                <option *ngFor="let year of baselineYears" [ngValue]="year">{{year | yearDisplay:
+                                    account.fiscalYear}}</option>
+                            </select>
+                        </div>
+                        <div class="alert alert-danger" *ngIf="!reportOptions.baselineYear">
+                            Baseline Year Required
+                        </div>
                     </div>
-                    <div class="alert alert-danger" *ngIf="!reportOptions.baselineYear">
-                        Baseline Year Required
+                    <div class="col-6">
+                        <div class="form-group">
+                            <app-label-with-tooltip [isSemiBold]="true" [label]="'Report Year'" [field]="'targetYear'"
+                                [labelId]="'targetYear'">
+                            </app-label-with-tooltip>
+                            <select id="targetYear" name="targetYear" [(ngModel)]="reportOptions.targetYear"
+                                class="form-select" required (change)="setAnalysisOptions()">
+                                <option *ngFor="let year of targetYears" [ngValue]="year">{{year | yearDisplay:
+                                    account.fiscalYear}}</option>
+                            </select>
+                        </div>
+                        <div class="alert alert-danger" *ngIf="!reportOptions.targetYear">
+                            Target Year Required
+                        </div>
                     </div>
                 </div>
-                <div class="col-6">
-                    <div class="form-group">
-                        <app-label-with-tooltip [isSemiBold]="true" [label]="'Report Year'" [field]="'targetYear'"
-                            [labelId]="'targetYear'">
-                        </app-label-with-tooltip>
-                        <select id="targetYear" name="targetYear" [(ngModel)]="reportOptions.targetYear"
-                            class="form-control" required (change)="setAnalysisOptions()">
-                            <option *ngFor="let year of targetYears" [ngValue]="year">{{year | yearDisplay:
-                                account.fiscalYear}}</option>
-                        </select>
-                    </div>
-                    <div class="alert alert-danger" *ngIf="!reportOptions.targetYear">
-                        Target Year Required
+                <div class="row">
+                    <div class="col-12">
+                        <hr>
+                        <div class="form-group d-flex">
+                            <label for="includeFacilityNames" class="w-50 bold">
+                                Include Facility Names in Performance Table
+                            </label>
+                            <label class="switch" for="includeFacilityNames">
+                                <input class="checkbox" type="checkbox" id="includeFacilityNames"
+                                    name="includeFacilityNames" [(ngModel)]="reportOptions.includeFacilityNames">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-12">
-                    <hr>
-                    <div class="form-group d-flex">
-                        <label for="includeFacilityNames" class="w-50 bold">
-                            Include Facility Names in Performance Table
-                        </label>
-                        <label class="switch" for="includeFacilityNames">
-                            <input class="checkbox" type="checkbox" id="includeFacilityNames"
-                                name="includeFacilityNames" [(ngModel)]="reportOptions.includeFacilityNames">
-                            <span class="slider round"></span>
-                        </label>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-6">
-            <app-label-with-tooltip [isSemiBold]="true" [label]="'Select Account Analysis'"
-                [field]="'selectAccountAnalysis'">
-            </app-label-with-tooltip>
-            <div class="table-responsive">
-                <table class="table table-sm table-hover">
-                    <thead>
-                        <td>
-
-                        </td>
-                        <td>
-                            Item Name
-                        </td>
-                        <td>
-                            Facilities Included
-                        </td>
-                        <td>
-                            Report Year
-                        </td>
-                    </thead>
-
-                    <tbody>
-                        <tr *ngFor="let analysisItem of accountAnalysisItems">
+            <div class="col-6">
+                <app-label-with-tooltip [isSemiBold]="true" [label]="'Select Account Analysis'"
+                    [field]="'selectAccountAnalysis'">
+                </app-label-with-tooltip>
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover table-bordered">
+                        <thead>
                             <td>
-                                <input type="radio" class="rowToggle" [(ngModel)]="reportOptions.analysisItemId"
-                                    [value]="analysisItem.guid" name="{{analysisItem.guid+'_selectedAccountItemId'}}"
-                                    id="{{analysisItem.guid+'_selectedAccountItemId'}}" (change)="save()">
+
                             </td>
                             <td>
-                                {{analysisItem.name}}
+                                Item Name
                             </td>
                             <td>
-                                <span *ngFor="let facilityItem of analysisItem.facilityAnalysisItems">
-                                    <span *ngIf="facilityItem.analysisItemId && facilityItem.analysisItemId != 'skip'">
-                                        {{facilityItem.facilityId | facilityName}}<br>
+                                Facilities Included
+                            </td>
+                            <td>
+                                Report Year
+                            </td>
+                        </thead>
+
+                        <tbody>
+                            <tr *ngFor="let analysisItem of accountAnalysisItems">
+                                <td>
+                                    <input type="radio" class="rowToggle" [(ngModel)]="reportOptions.analysisItemId"
+                                        [value]="analysisItem.guid"
+                                        name="{{analysisItem.guid+'_selectedAccountItemId'}}"
+                                        id="{{analysisItem.guid+'_selectedAccountItemId'}}" (change)="save()">
+                                </td>
+                                <td>
+                                    {{analysisItem.name}}
+                                </td>
+                                <td>
+                                    <span *ngFor="let facilityItem of analysisItem.facilityAnalysisItems">
+                                        <span
+                                            *ngIf="facilityItem.analysisItemId && facilityItem.analysisItemId != 'skip'">
+                                            {{facilityItem.facilityId | facilityName}}<br>
+                                        </span>
                                     </span>
-                                </span>
-                            </td>
-                            <td>{{analysisItem.reportYear}}</td>
-                        </tr>
-                        <tr *ngIf="accountAnalysisItems.length == 0">
-                            <td colspan="4" class="alert alert-warning">
-                                No analysis items matching selected report year.
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            <div class="alert alert-danger" *ngIf="!reportOptions.analysisItemId">
-                Analysis Item Required
+                                </td>
+                                <td>{{analysisItem.reportYear}}</td>
+                            </tr>
+                            <tr *ngIf="accountAnalysisItems.length == 0">
+                                <td colspan="4" class="alert alert-warning">
+                                    No analysis items matching selected report year.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="alert alert-danger" *ngIf="!reportOptions.analysisItemId">
+                    Analysis Item Required
+                </div>
             </div>
         </div>
-    </div>
-    <hr>
-    <div class="row">
-        <div class="col-12">
-            <app-label-with-tooltip [isSemiBold]="true" [label]="'Please describe any methods undertaken to normalize energy intensity data or adjust baseline data
+        <hr>
+        <div class="row">
+            <div class="col-12">
+                <app-label-with-tooltip [isSemiBold]="true" [label]="'Please describe any methods undertaken to normalize energy intensity data or adjust baseline data
             to account for economic and other factors that affect energy use:'" [field]="'methodsUndertaken'"
-                [labelId]="'baselineAdjustmentNotes'">
-            </app-label-with-tooltip>
-            <textarea class="form-control" name="baselineAdjustmentNotes" id="baselineAdjustmentNotes"
-                [(ngModel)]="reportOptions.baselineAdjustmentNotes"></textarea>
+                    [labelId]="'baselineAdjustmentNotes'">
+                </app-label-with-tooltip>
+                <textarea class="form-control" name="baselineAdjustmentNotes" id="baselineAdjustmentNotes"
+                    [(ngModel)]="reportOptions.baselineAdjustmentNotes"></textarea>
+            </div>
         </div>
-    </div>
-    <hr>
-    <div class="row">
-        <div class="col-12">
-            <app-label-with-tooltip [isSemiBold]="true" [label]="'Please describe the energy efficient technologies, strategies, and practices employed during the
+        <hr>
+        <div class="row">
+            <div class="col-12">
+                <app-label-with-tooltip [isSemiBold]="true" [label]="'Please describe the energy efficient technologies, strategies, and practices employed during the
             previous year to decrease intensity. Please identify systems impacted and approximate savings from
             projects. (Ex: Furnace insulation project-12,000 MMBtu/yr savings, compressor controls upgrade-6,000
             MMBtu/yr, energy awareness campaign, etc):'" [field]="'reportYearNotes'" [labelId]="'modificationNotes'">
-            </app-label-with-tooltip>
-            <textarea class="form-control" name="modificationNotes" id="modificationNotes"
-                [(ngModel)]="reportOptions.modificationNotes"></textarea>
+                </app-label-with-tooltip>
+                <textarea class="form-control" name="modificationNotes" id="modificationNotes"
+                    [(ngModel)]="reportOptions.modificationNotes"></textarea>
+            </div>
         </div>
-    </div>
-    <hr>
-    <div class="row justify-content-between">
-        <div class="col">
-            <button class="btn nav-btn" (click)="goToDashboard()">Return to Dashboard</button>
+        <hr>
+        <div class="row justify-content-between">
+            <div class="col">
+                <button class="btn nav-btn" (click)="goToDashboard()">Return to Dashboard</button>
+            </div>
+            <div class="col text-end">
+                <button *ngIf="!selectedReportOptions" class="btn btn-primary" (click)="createReport()"
+                    [disabled]="!reportOptions.targetYear || !reportOptions.baselineYear || !reportOptions.analysisItemId"><span
+                        class="fa fa-save"></span> Create
+                    Report</button>
+                <button *ngIf="selectedReportOptions" class="btn nav-btn" (click)="cancelChanges()"
+                    [disabled]="!reportOptions.targetYear || !reportOptions.baselineYear || !reportOptions.analysisItemId">Discard
+                    Changes</button>
+                <button *ngIf="selectedReportOptions" class="btn action-btn ms-2" (click)="updateReport()"
+                    [disabled]="!reportOptions.targetYear || !reportOptions.baselineYear || !reportOptions.analysisItemId"><span
+                        class="fa fa-save"></span> Update
+                    Report</button>
+            </div>
         </div>
-        <div class="col text-end">
-            <button *ngIf="!selectedReportOptions" class="btn btn-primary" (click)="createReport()"
-                [disabled]="!reportOptions.targetYear || !reportOptions.baselineYear || !reportOptions.analysisItemId"><span
-                    class="fa fa-save"></span> Create
-                Report</button>
-            <button *ngIf="selectedReportOptions" class="btn nav-btn" (click)="cancelChanges()"
-                [disabled]="!reportOptions.targetYear || !reportOptions.baselineYear || !reportOptions.analysisItemId">Discard
-                Changes</button>
-            <button *ngIf="selectedReportOptions" class="btn action-btn ms-2" (click)="updateReport()"
-                [disabled]="!reportOptions.targetYear || !reportOptions.baselineYear || !reportOptions.analysisItemId"><span
-                    class="fa fa-save"></span> Update
-                Report</button>
-        </div>
-    </div>
+    </form>
 </div>

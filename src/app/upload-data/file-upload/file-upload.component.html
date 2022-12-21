@@ -21,7 +21,7 @@
         </ul>
     </div>
     <hr>
-    <input [ngClass]="{'drag-in': dragOver}" type="file" #importFile id="importFile" (dragenter)="setDragEnter()"
+    <input class="form-control" [ngClass]="{'drag-in': dragOver}" type="file" #importFile id="importFile" (dragenter)="setDragEnter()"
         (input)="setImportFile($event.target)" multiple accept=".xlsx" (dragleave)="setDragOut()">
     <div *ngIf="fileUploadError">
         <div class="p-2 alert-danger">

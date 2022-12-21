@@ -152,3 +152,11 @@ form select {
 .inputWarning {
   color: #a76c00;
 } */
+
+input.ng-invalid,
+select.ng-invalid {
+  outline: 2px solid #bf3d00c4 !important;
+  outline-offset: 0;
+  background-color: #bf3d001c;
+  border: 1px solid #fff !important;
+}
