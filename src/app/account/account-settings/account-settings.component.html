@@ -47,13 +47,13 @@
             </thead>
             <tbody>
                 <tr *ngFor="let facility of facilityList">
-                    <th>
-                        <select [(ngModel)]="facility.facilityOrder" class="form-control" id="facilityOrder"
+                    <td class="actions">
+                        <select [(ngModel)]="facility.facilityOrder" class="form-select" id="facilityOrder"
                             name="facilityOrder" (change)="setFacilityOrder(facility)">
                             <option *ngFor="let option of orderOptions" [ngValue]="option">{{option}}</option>
                         </select>
-                    </th>
-                    <td><a (click)="switchFacility(facility)">{{facility.name}}</a></td>
+                    </td>
+                    <td><a class="click-link" (click)="switchFacility(facility)">{{facility.name}}</a></td>
                     <td>{{facility.naics3}}</td>
                     <td>{{facility.state}}</td>
                     <td>{{facility.country}}</td>
@@ -154,21 +154,28 @@
         </p>
         <p>WARNING: Applying account settings will override any existing facility settings.</p>
         <hr>
-        <label class="checkbox-label" for="applyUnits">
-            <input class="checkbox" type="checkbox" id="applyUnits" name="applyUnits"
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="applyUnits" name="applyUnits"
                 [(ngModel)]="applySettingsOptions.units">
-            Apply Default Units
-        </label>
-        <label class="checkbox-label" for="sustainabilityQuestions">
-            <input class="checkbox" type="checkbox" id="sustainabilityQuestions" name="sustainabilityQuestions"
+            <label class="form-check-label" for="applyUnits">
+                Apply Default Units
+            </label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="sustainabilityQuestions" name="sustainabilityQuestions"
                 [(ngModel)]="applySettingsOptions.sustainabilityQuestions">
-            Apply Sustainabity Goals
-        </label>
-        <label class="checkbox-label" for="financialReporting">
-            <input class="checkbox" type="checkbox" id="financialReporting" name="financialReporting"
+            <label class="form-check-label" for="sustainabilityQuestions">
+                Apply Sustainabity Goals
+            </label>
+        </div>
+
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="financialReporting" name="financialReporting"
                 [(ngModel)]="applySettingsOptions.financialReporting">
-            Apply Financial Reporting Details
-        </label>
+            <label class="form-check-label" for="financialReporting">
+                Apply Financial Reporting Details
+            </label>
+        </div>
     </div>
     <div class="popup-footer text-end">
         <button class="btn btn-secondary" (click)="closeApplySettingsModel()">Cancel</button>

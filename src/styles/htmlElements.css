@@ -37,3 +37,14 @@ body {
 .copying-table br{
   display: none;
 }
+
+a.click-link{
+  color: #007bff;
+  font-size: small;
+  text-decoration: none;
+}
+
+a.click-link:hover{
+  cursor: pointer;
+  text-decoration: underline;
+}

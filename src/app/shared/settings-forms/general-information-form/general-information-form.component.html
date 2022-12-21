@@ -17,15 +17,13 @@
         <div class="row">
             <div class="mb-3 col-md-6 col-sm-12">
                 <label>Country</label>
-                <!-- <input type="text" class="form-control" formControlName="country" (input)="saveChanges()"
-                onfocus="this.select();" minlength="1" maxlength="60"> -->
-                <select formControlName="country" (change)="saveChanges()">
+                <select class="form-select" formControlName="country" (change)="saveChanges()">
                     <option *ngFor="let country of countries" [ngValue]="country.code">{{country.name}}</option>
                 </select>
             </div>
             <div class="mb-3 col-md-6 col-sm-12" *ngIf="form.controls.country.value == 'US'">
                 <label>State</label>
-                <select formControlName="state" (change)="saveChanges()">
+                <select class="form-select" formControlName="state" (change)="saveChanges()">
                     <option *ngFor="let state of states" [ngValue]="state.name">{{state.name}}</option>
                 </select>
             </div>
@@ -47,17 +45,17 @@
                 <app-label-with-tooltip [label]="'NAICS Code'" [field]="'naicsCode'" [labelId]="'naics1'"
                     [isRequired]="false">
                 </app-label-with-tooltip>
-                <select formControlName="naics1" (change)="checkNAICS()" id="naics1">
+                <select class="form-select" formControlName="naics1" (change)="checkNAICS()" id="naics1">
                     <option *ngFor="let naics of firstNaicsList" [ngValue]="naics.code">{{naics.code}} -
                         {{naics.industryType}}</option>
                 </select>
-                <select formControlName="naics2" (change)="checkNAICS()" *ngIf="form.controls.naics1.value" id="naics2">
+                <select class="form-select" formControlName="naics2" (change)="checkNAICS()" *ngIf="form.controls.naics1.value" id="naics2">
                     <option *ngFor="let naics of secondNaicsList | naicsList:form.controls.naics1.value"
                         [ngValue]="naics.code">{{naics.code}} -
                         {{naics.industryType}}</option>
                     <option [ngValue]=null></option>
                 </select>
-                <select formControlName="naics3" (change)="saveChanges()" *ngIf="form.controls.naics2.value"
+                <select class="form-select" formControlName="naics3" (change)="saveChanges()" *ngIf="form.controls.naics2.value"
                     id="naics3">
                     <option *ngFor="let naics of thirdNaicsList | naicsList:form.controls.naics2.value"
                         [ngValue]="naics.code">{{naics.code}} -
@@ -73,8 +71,8 @@
                         <div class="input-group">
                             <input type="text" class="form-control" formControlName="size" (input)="saveChanges()"
                                 onfocus="this.select();" minlength="1" maxlength="60">
-                            <span class="unit" *ngIf="unitsOfMeasure != 'Metric'">ft<sup>2</sup></span>
-                            <span class="unit" *ngIf="unitsOfMeasure === 'Metric'">m<sup>2</sup></span>
+                            <span class="input-group-text" *ngIf="unitsOfMeasure != 'Metric'">ft<sup>2</sup></span>
+                            <span class="input-group-text" *ngIf="unitsOfMeasure === 'Metric'">m<sup>2</sup></span>
                         </div>
                     </div>
                 </div>
@@ -93,7 +91,7 @@
 
         <div class="mb-3">
             <label class="">Notes</label>
-            <textarea formControlName="notes" (input)="saveChanges()"></textarea>
+            <textarea class="form-control" formControlName="notes" (input)="saveChanges()"></textarea>
         </div>
 
         <div class="row">

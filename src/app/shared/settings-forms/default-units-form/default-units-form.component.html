@@ -2,28 +2,30 @@
     <div class="row">
         <div class="mb-3 col">
             <label>Units of Measure</label>
-            <select formControlName="unitsOfMeasure" (change)="setUnitsOfMeasure()">
+            <select class="form-select" formControlName="unitsOfMeasure" (change)="setUnitsOfMeasure()">
                 <option [ngValue]="'Imperial'">Imperial</option>
                 <option [ngValue]="'Metric'">Metric</option>
                 <option [ngValue]="'Custom'">Custom</option>
             </select>
             <label class="mt-3">Result Energy Unit</label>
-            <select formControlName="energyUnit" (change)="saveChanges()">
+            <select class="form-select" formControlName="energyUnit" (change)="saveChanges()">
                 <option *ngFor="let energyUnitOption of energyUnitOptions" [ngValue]="energyUnitOption.value">
                     <span [innerHTML]="energyUnitOption.display"></span>
                 </option>
             </select>
         </div>
         <div class="mb-3 col">
-            <label class="checkbox mb-3">Energy displayed as site or source? </label>
-
-            <input type="radio" class="rowToggle" name="energyIsSource" formControlName="energyIsSource" [value]="true"
-                (change)="saveChanges()" id="sourceEnergy">
-            <label class="checkbox" for="sourceEnergy">Source Energy</label>
-
-            <input type="radio" class="rowToggle" name="energyIsSource" formControlName="energyIsSource" [value]="false"
-                (change)="saveChanges()" id="siteEnergy">
-            <label class="checkbox" for="siteEnergy">Site Energy</label>
+            <label>Energy displayed as site or source? </label>
+            <div class="form-check">
+                <input type="radio" class="form-check-input" name="energyIsSource" formControlName="energyIsSource"
+                    [value]="true" (change)="saveChanges()" id="sourceEnergy">
+                <label class="form-check-label" for="sourceEnergy">Source Energy</label>
+            </div>
+            <div class="form-check">
+                <input type="radio" class="form-check-input" name="energyIsSource" formControlName="energyIsSource"
+                    [value]="false" (change)="saveChanges()" id="siteEnergy">
+                <label class="form-check-label" for="siteEnergy">Site Energy</label>
+            </div>
         </div>
     </div>
 
@@ -41,7 +43,7 @@
     <div class="row">
         <div class="mb-3 col">
             <label>Electricity Unit</label>
-            <select formControlName="electricityUnit" (change)="saveChanges()">
+            <select class="form-select" formControlName="electricityUnit" (change)="saveChanges()">
                 <option *ngFor="let energyUnitOption of energyUnitOptions" [ngValue]="energyUnitOption.value">
                     <span [innerHTML]="energyUnitOption.display"></span>
                 </option>
@@ -49,7 +51,7 @@
         </div>
         <div class="mb-3 col">
             <label>Volume Unit (Liquid)</label>
-            <select formControlName="volumeLiquidUnit" (change)="saveChanges()">
+            <select class="form-select" formControlName="volumeLiquidUnit" (change)="saveChanges()">
                 <option *ngFor="let volumeUnitOption of volumeLiquidOptions" [ngValue]="volumeUnitOption.value">
                     <span [innerHTML]="volumeUnitOption.display"></span>
                 </option>
@@ -61,7 +63,7 @@
 
         <div class="mb-3 col">
             <label>Volume Unit (Gases)</label>
-            <select formControlName="volumeGasUnit" (change)="saveChanges()">
+            <select class="form-select" formControlName="volumeGasUnit" (change)="saveChanges()">
                 <option *ngFor="let volumeUnitOption of volumeGasOptions" [ngValue]="volumeUnitOption.value">
                     <span [innerHTML]="volumeUnitOption.display"></span>
                 </option>
@@ -70,7 +72,7 @@
 
         <div class="mb-3 col">
             <label>Mass Unit</label>
-            <select formControlName="massUnit" (change)="saveChanges()">
+            <select class="form-select" formControlName="massUnit" (change)="saveChanges()">
                 <option *ngFor="let massUnitOption of massUnitOptions" [ngValue]="massUnitOption.value">
                     <span [innerHTML]="massUnitOption.display"></span>
                 </option>
@@ -99,13 +101,18 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-md-6 col-sm-12">
+        <div class="col-12">
             <div class="form-group">
-                <label>eGRID Subregion
-                    <span (click)="showEmissionsRates()" class="float-end click-link"
-                        *ngIf="zipCodeSubRegionData.length != 0">View Emission Rates</span>
-                </label>
-                <select *ngIf="zipCodeSubRegionData.length > 1" name="eGridSubregion" class="form-control"
+                <div class="d-flex w-100 justify-content-between">
+                    <div>
+                        <label>eGRID Subregion </label>
+                    </div>
+                    <div>
+                        <a (click)="showEmissionsRates()" class="float-end click-link"
+                            *ngIf="zipCodeSubRegionData.length != 0">View Emission Rates</a>
+                    </div>
+                </div>
+                <select class="form-select" *ngIf="zipCodeSubRegionData.length > 1" name="eGridSubregion"
                     id="eGridSubregion" formControlName="eGridSubregion" (change)="setSelectedSubregionEmissions()">
                     <option *ngFor="let subregion of zipCodeSubRegionData" [ngValue]="subregion">{{subregion}}</option>
                 </select>
@@ -121,14 +128,14 @@
 </form>
 
 <p class="alert alert-info w-100 text-center">The eGRID Subregion and emissions output rate will be set
-    based on your zipcode and the <a target="_blank"
+    based on your zipcode and the <a class="click-link" target="_blank"
         href="https://www.epa.gov/sites/default/files/2021-04/documents/emission-factors_apr2021.pdf">EPA
         Emissions & Generation
         Resource Integrated Database (2021)</a>
     <ng-container *ngIf="!inWizard">
         <br>
         <br>
-        Custom emssions rates can be added and managed in the <a (click)="goToCustomData()">Account Custom Data</a>
+        Custom emssions rates can be added and managed in the <a class="click-link" (click)="goToCustomData()">Account Custom Data</a>
         page.
     </ng-container>
 
