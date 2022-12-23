@@ -30,14 +30,14 @@ Meter Displays
     min-width: 210px;
     border-radius: 2px;
   }
-  .filter .filter-dropdown label {
+  /* .filter .filter-dropdown label {
     margin: 0px 10px 0 0;
   }
   .filter .filter-dropdown input[type="checkbox"] {
     float: left;
     width: auto;
     margin: 0px 10px 0 0;
-  }
+  } */
   i.fa.fa-arrow-circle-up {
     color: green;
   }

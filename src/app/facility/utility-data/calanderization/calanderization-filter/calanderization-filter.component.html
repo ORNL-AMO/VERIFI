@@ -22,13 +22,13 @@
                 <label>
                     Start Date
                 </label>
-                <select name="minDateMonth" [(ngModel)]="calanderizedDataFilters.selectedDateMin.month"
+                <select class="form-select" name="minDateMonth" [(ngModel)]="calanderizedDataFilters.selectedDateMin.month"
                     (change)="save()">
                     <option *ngFor="let monthOption of months" [ngValue]="monthOption.monthNumValue">
                         {{monthOption.name}}
                     </option>
                 </select>
-                <select name="minDateYear" [(ngModel)]="calanderizedDataFilters.selectedDateMin.year" (change)="save()">
+                <select class="form-select" name="minDateYear" [(ngModel)]="calanderizedDataFilters.selectedDateMin.year" (change)="save()">
                     <option *ngFor="let yearOption of yearOptions" [ngValue]="yearOption">{{yearOption}}</option>
                 </select>
             </div>
@@ -37,13 +37,13 @@
                 <label>
                     End Date
                 </label>
-                <select name="maxDateMonth" [(ngModel)]="calanderizedDataFilters.selectedDateMax.month"
+                <select class="form-select" name="maxDateMonth" [(ngModel)]="calanderizedDataFilters.selectedDateMax.month"
                     (change)="save()">
                     <option *ngFor="let monthOption of months" [ngValue]="monthOption.monthNumValue">
                         {{monthOption.name}}
                     </option>
                 </select>
-                <select name="maxDateYear" [(ngModel)]="calanderizedDataFilters.selectedDateMax.year" (change)="save()">
+                <select class="form-select" name="maxDateYear" [(ngModel)]="calanderizedDataFilters.selectedDateMax.year" (change)="save()">
                     <option *ngFor="let yearOption of yearOptions" [ngValue]="yearOption">{{yearOption}}</option>
                 </select>
             </div>

@@ -12,7 +12,7 @@ import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
 })
 export class AnalysisSummaryTableFilterComponent implements OnInit {
   @Input()
-  tableContext: 'monthGroup' | 'annualGroup' | 'monthFacility' | 'annualFacility' | 'monthAccount' | 'annualAccount';
+  tableContext: string;
   @Input()
   group: AnalysisGroup;
 
