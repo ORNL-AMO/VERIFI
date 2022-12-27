@@ -49,7 +49,9 @@
               "src/styles/plotly.css"
             ],
             "scripts": [
-              "node_modules/plotly.js/dist/plotly.min.js"
+              "node_modules/plotly.js/dist/plotly.min.js",
+              "node_modules/@popperjs/core/dist/umd/popper.min.js",
+              "node_modules/bootstrap/dist/js/bootstrap.bundle.js"
             ],
             "allowedCommonJsDependencies": [
               "lodash",

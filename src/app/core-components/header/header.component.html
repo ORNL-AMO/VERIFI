@@ -7,25 +7,29 @@
             <app-search-bar></app-search-bar>
         </div>
 
-        <ul class="navbar-nav ms-auto" *ngIf="dataInitialized">
-            <li class="nav-item dropdown">
-                <button *ngIf="activeAccount" class="btn action-btn dropdown-toggle"
-                    (click)="toggleDropdown()"><span class="fa fa-building"></span>
-                    {{activeAccount.name}}
-                </button>
-                <button *ngIf="!activeAccount" class="btn action-btn dropdown-toggle italic"
-                    (click)="toggleDropdown()">Account Required
-                </button>
-                <div class="dropdown-menu" [ngClass]="{'show':showDropdown}">
-                    <a *ngFor="let account of accountList| orderBy:'name':'asc'" [class.active]="activeAccount?.id === account.id"
-                        class="dropdown-item" (click)="switchAccount(account)"> {{account.name}}</a>
-                    <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" (click)="addNewAccount()"><i class="fa fa-plus"></i> Add New
-                        Account</a>
-                    <a class="dropdown-item" (click)="addNewAccount()"><i class="fa fa-upload"></i> Import Backup</a>
-                </div>
-            </li>
-        </ul>
+        <div class="dropdown ms-auto" *ngIf="dataInitialized">
+            <button *ngIf="activeAccount" class="btn action-btn dropdown-toggle"
+                data-bs-toggle="dropdown" aria-expanded="false"><span class="fa fa-building"></span>
+                {{activeAccount.name}}
+            </button>
+            <button *ngIf="!activeAccount" class="btn action-btn dropdown-toggle italic"
+                data-bs-toggle="dropdown" aria-expanded="false">Account Required
+            </button>
+            <ul class="dropdown-menu">
+                <li>
+                    <a *ngFor="let account of accountList| orderBy:'name':'asc'"
+                        [class.active]="activeAccount?.id === account.id" class="dropdown-item"
+                        (click)="switchAccount(account)"> {{account.name}}</a>
+                </li>
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
+                <li><a class="dropdown-item" (click)="addNewAccount()"><i class="fa fa-plus"></i> Add New
+                        Account</a></li>
+                <li><a class="dropdown-item" (click)="addNewAccount()"><i class="fa fa-upload"></i> Import Backup</a>
+                </li>
+            </ul>
+        </div>
         <div class="ps-2" *ngIf="dataInitialized && activeAccount">
             <button class="btn action-btn" (click)="backupAccount()">Backup Account
             </button>

@@ -1,57 +1,37 @@
-<div class="filter">
-
-    <div class="filter-dropdown">
-        <!-- <p class="small">Filter Monthly Meter Data</p> -->
-        <div class="d-flex">
-            <!-- <div class="p-2">
-                <!--sources--
-                <label>Sources</label>
-                <label>
-                    <input type="checkbox" name="showAllSources" [(ngModel)]="calanderizedDataFilters.showAllSources"
-                        (change)="setAll()">All Sources
-                </label>
-                <label *ngFor="let sourceOption of calanderizedDataFilters.selectedSources">
-                    <input type="checkbox" name={{sourceOption.source}} [(ngModel)]="sourceOption.selected"
-                        (change)="save()">{{sourceOption.source}}
-                </label>
-            </div> -->
-
-
-            <!--date range-->
-            <div class="p-2" *ngIf="calanderizedDataFilters.selectedDateMin">
-                <label>
-                    Start Date
-                </label>
-                <select class="form-select" name="minDateMonth" [(ngModel)]="calanderizedDataFilters.selectedDateMin.month"
-                    (change)="save()">
-                    <option *ngFor="let monthOption of months" [ngValue]="monthOption.monthNumValue">
-                        {{monthOption.name}}
-                    </option>
-                </select>
-                <select class="form-select" name="minDateYear" [(ngModel)]="calanderizedDataFilters.selectedDateMin.year" (change)="save()">
-                    <option *ngFor="let yearOption of yearOptions" [ngValue]="yearOption">{{yearOption}}</option>
-                </select>
-            </div>
-
-            <div class="p-2" *ngIf="calanderizedDataFilters.selectedDateMax">
-                <label>
-                    End Date
-                </label>
-                <select class="form-select" name="maxDateMonth" [(ngModel)]="calanderizedDataFilters.selectedDateMax.month"
-                    (change)="save()">
-                    <option *ngFor="let monthOption of months" [ngValue]="monthOption.monthNumValue">
-                        {{monthOption.name}}
-                    </option>
-                </select>
-                <select class="form-select" name="maxDateYear" [(ngModel)]="calanderizedDataFilters.selectedDateMax.year" (change)="save()">
-                    <option *ngFor="let yearOption of yearOptions" [ngValue]="yearOption">{{yearOption}}</option>
-                </select>
-            </div>
-
+<div class="dropdown">
+    <button class="btn action-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+        Filter
+    </button>
+    <form class="dropdown-menu">
+        <div class="p-2" *ngIf="calanderizedDataFilters.selectedDateMin">
+            <label>
+                Start Date
+            </label>
+            <select class="form-select" name="minDateMonth" [(ngModel)]="calanderizedDataFilters.selectedDateMin.month"
+                (change)="save()">
+                <option *ngFor="let monthOption of months" [ngValue]="monthOption.monthNumValue">
+                    {{monthOption.name}}
+                </option>
+            </select>
+            <select class="form-select" name="minDateYear" [(ngModel)]="calanderizedDataFilters.selectedDateMin.year"
+                (change)="save()">
+                <option *ngFor="let yearOption of yearOptions" [ngValue]="yearOption">{{yearOption}}</option>
+            </select>
         </div>
-
-
-        <!--energy use range-->
-        <!--energy cost range-->
-    </div>
+        <div class="p-2" *ngIf="calanderizedDataFilters.selectedDateMax">
+            <label>
+                End Date
+            </label>
+            <select class="form-select" name="maxDateMonth" [(ngModel)]="calanderizedDataFilters.selectedDateMax.month"
+                (change)="save()">
+                <option *ngFor="let monthOption of months" [ngValue]="monthOption.monthNumValue">
+                    {{monthOption.name}}
+                </option>
+            </select>
+            <select class="form-select" name="maxDateYear" [(ngModel)]="calanderizedDataFilters.selectedDateMax.year"
+                (change)="save()">
+                <option *ngFor="let yearOption of yearOptions" [ngValue]="yearOption">{{yearOption}}</option>
+            </select>
+        </div>
+    </form>
 </div>

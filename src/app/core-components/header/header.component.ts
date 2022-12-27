@@ -31,7 +31,6 @@ export class HeaderComponent implements OnInit {
 
   allAccountsSub: Subscription;
   selectedAccountSub: Subscription;
-  showDropdown: boolean = false;
   showSearch: boolean = false;
   lastBackupDate: Date;
   resetDatabase: boolean = false;
@@ -72,7 +71,6 @@ export class HeaderComponent implements OnInit {
   }
 
   addNewAccount() {
-    this.toggleDropdown();
     this.router.navigateByUrl('/setup-wizard');
   }
 
@@ -82,17 +80,11 @@ export class HeaderComponent implements OnInit {
     await this.dbChangesService.selectAccount(account);
     this.router.navigate(['/']);
     this.loadingService.setLoadingStatus(false);
-    this.toggleDropdown();
   }
 
   openImportBackup() {
     this.importBackupModalService.inFacility = false;
     this.importBackupModalService.showModal.next(true);
-  }
-
-  toggleDropdown() {
-    this.showDropdown = !this.showDropdown;
-    this.sharedDataService.modalOpen.next(this.showDropdown);
   }
 
   toggleSearch() {

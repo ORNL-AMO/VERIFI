@@ -24,3 +24,7 @@ a:not([href]).dropdown-item.active {
 .btn{
     margin: 0px;
 }
+
+.dropdown-menu{
+    z-index: 9999;
+}

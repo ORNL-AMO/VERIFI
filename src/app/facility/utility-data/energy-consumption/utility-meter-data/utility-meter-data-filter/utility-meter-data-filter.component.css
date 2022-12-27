@@ -1,4 +1,9 @@
-.filter-dropdown{
-    top: 0px;
-    width: 100%;
+.dropdown-menu{
+    min-width: max-content;
+    background-color: #efefef;
+}
+
+.form-check:hover{
+    cursor: pointer;
+    background-color: rgba(0, 0, 0, 0.075);
 }
