@@ -19,7 +19,7 @@
 </div>
 <hr>
 <div class="worksheet-data-table">
-    <table *ngIf="fileReference.selectedWorksheetData">
+    <table class="table table-sm table-bordered" *ngIf="fileReference.selectedWorksheetData">
         <thead>
             <tr>
                 <th *ngFor="let header of fileReference.selectedWorksheetData[0]" [ngClass]="getColumnClass(header)">
