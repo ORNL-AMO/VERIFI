@@ -16,7 +16,6 @@ import { EGridService } from './shared/helper-services/e-grid.service';
 
 // declare ga as a function to access the JS code in TS
 declare let gtag: Function;
-declare var bootstrap: any;
 
 @Component({
   selector: 'app-root',
@@ -52,11 +51,6 @@ export class AppComponent {
         );
       }
     })
-        // Bootstrap tooltip initialization
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl)
-        }) 
   }
 
   ngOnInit() {
@@ -73,7 +67,7 @@ export class AppComponent {
     } else if (accounts.length != 0) {
       account = accounts[0];
     }
- 
+
     await this.eGridService.parseZipCodeLongLat();
     if (account) {
       await this.initializeFacilities(account);
@@ -86,10 +80,10 @@ export class AppComponent {
       await this.initializeFacilityAnalysisItems(account);
       await this.initializeCustomEmissions(account);
       let updatedAccount: { account: IdbAccount, isChanged: boolean } = this.updateDbEntryService.updateAccount(account);
-      if(updatedAccount.isChanged){
+      if (updatedAccount.isChanged) {
         await this.accountDbService.updateWithObservable(updatedAccount.account).toPromise();
         this.accountDbService.selectedAccount.next(updatedAccount.account);
-      }else{
+      } else {
         this.accountDbService.selectedAccount.next(account);
       }
       this.dataInitialized = true;

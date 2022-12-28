@@ -111,18 +111,14 @@
                                 Total Consumption: {{meterGroup.totalConsumption | customNumber}}
                                 <!-- <span [innerHTML]="waterUnit | settingsLabel"></span> -->
                             </div>
-                            <div class="d-flex">
-                                <div class="progress">
-                                    <div class="progress-bar" [ngClass]="meterGroup.name" role="progressbar"
-                                        [style.width.%]="meterGroup.factionOfTotalEnergy" aria-valuemin="0"
-                                        aria-valuemax="100">
-                                    </div>
-                                    <span class="tooltip up">(Total energy in this group / Total energy in all
-                                        groups)<span class="arrow arrow-up"></span></span>
+                            <div class="progress">
+                                <div class="progress-bar" [ngClass]="meterGroup.name" role="progressbar"
+                                    [style.width.%]="meterGroup.factionOfTotalEnergy" aria-valuemin="0"
+                                    aria-valuemax="100">
                                 </div>
-                                <div class="progress-bar-data">{{meterGroup.factionOfTotalEnergy |
-                                    number:'1.0-1'}}%</div>
                             </div>
+                            <div class="progress-bar-data">{{meterGroup.factionOfTotalEnergy |
+                                number:'1.0-1'}}%</div>
                             <div class="actions ps-3" *ngIf="meterGroup.name != 'Ungrouped'">
                                 <div class="btn-group">
                                     <button class="btn btn-sm btn-outline" (click)="setEditGroup(meterGroup)"
