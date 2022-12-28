@@ -1,7 +1,7 @@
 /*
 Arrows & Tooltips
 =============================================== */
-.tooltip {
+/* .tooltip {
     opacity: 1 !important;
     box-shadow: 1px 4px 10px 0px #0000003d;
     background-color: #2980b9;
@@ -18,7 +18,7 @@ Arrows & Tooltips
   }
   .tooltip.right {
     box-shadow: 4px 1px 10px 0px #0000003d;
-  }
+  } */
   .arrow {
     width: 0;
     height: 0;

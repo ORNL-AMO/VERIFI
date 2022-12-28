@@ -16,6 +16,7 @@ import { EGridService } from './shared/helper-services/e-grid.service';
 
 // declare ga as a function to access the JS code in TS
 declare let gtag: Function;
+declare var bootstrap: any;
 
 @Component({
   selector: 'app-root',
@@ -51,6 +52,11 @@ export class AppComponent {
         );
       }
     })
+        // Bootstrap tooltip initialization
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+        }) 
   }
 
   ngOnInit() {
