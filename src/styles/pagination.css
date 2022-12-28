@@ -27,7 +27,7 @@ Pagination
     margin: 0px;
   }
   .items-per-page {
-    padding-top: 10px;
+    /* padding-top: 10px; */
     /* font-size: 12px; */
   }
   .items-per-page span {

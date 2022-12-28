@@ -14,10 +14,10 @@
 
 <div *ngIf="meterList.length > 0">
 
-    <div class="d-flex w-100 justify-content-end">
+    <div class="d-flex w-100 justify-content-end mb-2">
         <app-table-items-dropdown></app-table-items-dropdown>
         <div class="ps-2">
-            <button class="btn action-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
+            <button class="btn nav-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
         </div>
         <div class="ps-2">
             <button class="btn action-btn" (click)="addMeter()"><i class="fa fa-plus"></i> Add
@@ -96,14 +96,15 @@
         </table>
     </div>
 
-    <div class="tableControls overflow-hidden">
+    <!-- <div class="tableControls overflow-hidden">
         <a class="click-link" (click)="copyTable()"><span class="fa fa-copy"></span> Copy Table</a>
         <div class="item-right">
             <ngb-pagination [collectionSize]="meterList.length" [(page)]="currentPageNumber" [pageSize]="itemsPerPage"
                 [rotate]="true" aria-label="Default pagination"></ngb-pagination>
         </div>
         <p class="item-right">{{meterList.length}} entries</p>
-    </div>
+    </div> -->
+    <app-table-footer-controls></app-table-footer-controls>
 </div>
 
 <div [ngClass]="{'windowOverlay': meterToDelete}"></div>

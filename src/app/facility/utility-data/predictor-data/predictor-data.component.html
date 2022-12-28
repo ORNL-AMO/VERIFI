@@ -6,7 +6,7 @@
         <p>Please <i class="fa fa-plus"></i> Add New Predictor or <i class="fa fa-upload"></i> Import multiple
             predictors from
             excel.</p>
-        <div class="meterData">
+        <div>
             <button class="btn btn-primary-4 me-2" (click)="editPredictors()"><i class="fa fa-plus"></i> Add New
                 Predictor</button>
             <button class="btn btn-outline" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
@@ -15,7 +15,7 @@
 
     <ng-container *ngIf="hasData">
 
-        <div class="d-flex w-100 justify-content-between">
+        <div class="d-flex w-100 justify-content-between mb-2">
             <div>
                 <button class="btn action-btn" (click)="editPredictors()">Add/Edit Predictors</button>
             </div>

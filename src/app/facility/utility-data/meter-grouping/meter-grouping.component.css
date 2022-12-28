@@ -131,12 +131,6 @@
     color: #fff !important;
 }
 
-
-select.form-select {
-    height: min-content !important;
-    margin-top: 10px;
-}
-
 .fa-arrow-right {
     padding-top: 20px;
     padding-right: .25rem;

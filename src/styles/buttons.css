@@ -1,16 +1,6 @@
 /*
   Buttons
   =============================================== */
-.btn {
-  border-radius: 3px;
-  margin: 10px 0;
-}
-
-.btn-small {
-  padding: 2px 10px !important;
-  border-radius: 3px;
-}
-
 .btn-outline {
   color: #2c386b !important;
   background-color: #fff !important;
