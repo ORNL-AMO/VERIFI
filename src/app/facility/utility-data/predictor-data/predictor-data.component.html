@@ -85,14 +85,15 @@
                 </tr>
             </tbody>
         </table>
-        <div class="tableControls overflow-hidden">
-            <a class="click-link" (click)="copyTable()"><span class="fa fa-copy"></span> Copy Table</a>
-            <div class="item-right">
-                <ngb-pagination [collectionSize]="facilityPredictorEntries.length" [(page)]="currentPageNumber"
-                    [pageSize]="itemsPerPage" [rotate]="true" aria-label="Default pagination" [maxSize]="5">
-                </ngb-pagination>
+        <div class="d-flex w-100 justify-content-between">
+            <div>
+                <button class="btn action-btn btn-sm" (click)="copyTable()">
+                    <span class="fa fa-copy"></span> Copy Table
+                </button>
             </div>
-            <p class="item-right"> {{facilityPredictorEntries.length}} entries</p>
+            <ngb-pagination [collectionSize]="facilityPredictorEntries.length" [(page)]="currentPageNumber"
+                [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Pagination">
+            </ngb-pagination>
         </div>
     </ng-container>
 </div>

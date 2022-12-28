@@ -18,9 +18,6 @@ import { UtilityMetersTableComponent } from './energy-source/utility-meters-tabl
 import { UtilityMeterDataTableComponent } from './utility-meter-data/utility-meter-data-table/utility-meter-data-table.component';
 import { EditBillComponent } from './utility-meter-data/edit-bill/edit-bill.component';
 import { TableItemsDropdownModule } from 'src/app/shared/table-items-dropdown/table-items-dropdown.module';
-import { TableFooterControlsModule } from 'src/app/shared/table-footer-controls/table-footer-controls.module';
-
-
 
 @NgModule({
   declarations: [
@@ -45,8 +42,7 @@ import { TableFooterControlsModule } from 'src/app/shared/table-footer-controls/
     NgbPaginationModule,
     HelperPipesModule,
     RouterModule,
-    TableItemsDropdownModule,
-    TableFooterControlsModule
+    TableItemsDropdownModule
   ]
 })
 export class EnergyConsumptionModule { }

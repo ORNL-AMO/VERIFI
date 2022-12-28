@@ -50,19 +50,15 @@
             </tbody>
         </table>
     </div>
-    <div class="d-flex justify-content-between">
+    <div class="d-flex w-100 justify-content-between">
         <div>
-            <a class="click-link" (click)="copyTable()"><span class="fa fa-copy"></span> Copy Table</a>
+            <button class="btn action-btn btn-sm" (click)="copyTable()">
+                <span class="fa fa-copy"></span> Copy Table
+            </button>
         </div>
-        <div>
-            <div class="item-right">
-                <ngb-pagination [collectionSize]="meterGroup.combinedMonthlyData.length"
-                    [(page)]="tablePageNumbers[index]" [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true"
-                    aria-label="Default pagination">
-                </ngb-pagination>
-            </div>
-            <p class="item-right">{{meterGroup.combinedMonthlyData.length}} entries</p>
-        </div>
+        <ngb-pagination [collectionSize]="meterGroup.combinedMonthlyData.length" [(page)]="tablePageNumbers[index]"
+            [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Pagination">
+        </ngb-pagination>
     </div>
 </div>
 
