@@ -45,11 +45,12 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
     if (this.analysisTableColumns.energy == false) {
       this.analysisTableColumns.actualEnergy = false;
       this.analysisTableColumns.modeledEnergy = false;
-      this.analysisTableColumns.adjustedForNormalization = true;
-      this.analysisTableColumns.adjusted = true;
-      this.analysisTableColumns.baselineAdjustmentForNormalization = true;
-      this.analysisTableColumns.baselineAdjustmentForOther = true;
-      this.analysisTableColumns.baselineAdjustment = true;
+      this.analysisTableColumns.adjustedForNormalization = false;
+      this.analysisTableColumns.adjusted = false;
+      this.analysisTableColumns.baselineAdjustmentForNormalization = false;
+      this.analysisTableColumns.baselineAdjustmentForOther = false;
+      this.analysisTableColumns.baselineAdjustment = false;
+      this.analysisTableColumns.adjustmentToBaseline = false;
     } else {
       this.analysisTableColumns.actualEnergy = true;
       this.analysisTableColumns.modeledEnergy = true;
@@ -58,6 +59,7 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
       this.analysisTableColumns.baselineAdjustmentForNormalization = true;
       this.analysisTableColumns.baselineAdjustmentForOther = true;
       this.analysisTableColumns.baselineAdjustment = true;
+      this.analysisTableColumns.adjustmentToBaseline = true;
     }
     this.save();
   }
@@ -73,7 +75,6 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
       this.analysisTableColumns.rolling12MonthImprovement = false;
       this.analysisTableColumns.totalSavingsPercentImprovement = false;
       this.analysisTableColumns.annualSavingsPercentImprovement = false;
-      this.analysisTableColumns.adjustmentToBaseline = false;
       this.analysisTableColumns.cummulativeSavings = false;
       this.analysisTableColumns.newSavings = false;
     } else {
@@ -86,7 +87,6 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
       this.analysisTableColumns.rolling12MonthImprovement = true;
       this.analysisTableColumns.totalSavingsPercentImprovement = true;
       this.analysisTableColumns.annualSavingsPercentImprovement = true;
-      this.analysisTableColumns.adjustmentToBaseline = true;
       this.analysisTableColumns.cummulativeSavings = true;
       this.analysisTableColumns.newSavings = true;
     }

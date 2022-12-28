@@ -1,26 +1,27 @@
-<div class="filter">
-    <div class="filter-dropdown">
+<div class="dropdown">
+    <button class="btn action-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside"
+        aria-expanded="false">
+        Choose Columns
+    </button>
+    <form class="dropdown-menu p-2">
         <p>Choose Table Columns</p>
         <div class="row">
             <div class="col">
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" name="energy"
-                        [(ngModel)]="analysisTableColumns.energy" (change)="toggleEnergyColumns()"
-                        id="energy">
+                        [(ngModel)]="analysisTableColumns.energy" (change)="toggleEnergyColumns()" id="energy">
                     <label class="bold form-check-label" for="energy">Energy Columns
                     </label>
 
                 </div>
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" name="actualEnergy"
-                        [(ngModel)]="analysisTableColumns.actualEnergy" (change)="save()"
-                        id="actualEnergy">
+                        [(ngModel)]="analysisTableColumns.actualEnergy" (change)="save()" id="actualEnergy">
                     <label class="form-check-label" for="actualEnergy">Actual Energy Use</label>
                 </div>
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" name="modeledEnergy"
-                        [(ngModel)]="analysisTableColumns.modeledEnergy" (change)="save()"
-                        id="modeledEnergy">
+                        [(ngModel)]="analysisTableColumns.modeledEnergy" (change)="save()" id="modeledEnergy">
                     <label class="form-check-label" for="modeledEnergy">Modeled Energy Use</label>
                 </div>
                 <div class="form-check">
@@ -32,8 +33,7 @@
                 </div>
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" name="adjusted"
-                        [(ngModel)]="analysisTableColumns.adjusted" (change)="save()"
-                        id="adjusted">
+                        [(ngModel)]="analysisTableColumns.adjusted" (change)="save()" id="adjusted">
                     <label class="form-check-label" for="adjusted">Adjusted</label>
                 </div>
                 <div class="form-check">
@@ -52,15 +52,13 @@
                 </div>
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" name="baselineAdjustment"
-                        [(ngModel)]="analysisTableColumns.baselineAdjustment" (change)="save()"
-                        id="baselineAdjustment">
+                        [(ngModel)]="analysisTableColumns.baselineAdjustment" (change)="save()" id="baselineAdjustment">
                     <label class="form-check-label" for="baselineAdjustment">Baseline Adjustment</label>
                 </div>
 
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" name="adjustmentToBaseline"
-                        [(ngModel)]="analysisTableColumns.adjustmentToBaseline" (change)="save()"
-                        id="modeledEnergy">
+                        [(ngModel)]="analysisTableColumns.adjustmentToBaseline" (change)="save()" id="adjustmentToBaseline">
                     <label class="form-check-label" for="adjustmentToBaseline">Adjustment to
                         Baseline</label>
                 </div>
@@ -77,8 +75,7 @@
 
                 <div class="form-check" *ngFor="let predictorOption of analysisTableColumns.predictors">
                     <input class="form-check-input" type="checkbox" name={{predictorOption.predictor.name}}
-                        [(ngModel)]="predictorOption.display" (change)="save()"
-                        id={{predictorOption.predictor.name}}>
+                        [(ngModel)]="predictorOption.display" (change)="save()" id={{predictorOption.predictor.name}}>
                     <label class="form-check-label"
                         for={{predictorOption.predictor.name}}>{{predictorOption.predictor.name}} <span
                             *ngIf="predictorOption.usedInAnalysis">&#42;</span>
@@ -89,22 +86,19 @@
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" name="incrementalImprovement"
                         [(ngModel)]="analysisTableColumns.incrementalImprovement"
-                        (change)="toggleIncrementalImprovement()"
-                        id="incrementalImprovement">
+                        (change)="toggleIncrementalImprovement()" id="incrementalImprovement">
                     <label class="bold form-check-label" for="incrementalImprovement">
                         Incremental Improvement
                     </label>
                 </div>
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" name="SEnPI"
-                        [(ngModel)]="analysisTableColumns.SEnPI" (change)="save()"
-                        id="SEnPI">
+                        [(ngModel)]="analysisTableColumns.SEnPI" (change)="save()" id="SEnPI">
                     <label class="form-check-label" for="SEnPI">SEnPI</label>
                 </div>
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" name="savings"
-                        [(ngModel)]="analysisTableColumns.savings" (change)="save()"
-                        id="savings">
+                        [(ngModel)]="analysisTableColumns.savings" (change)="save()" id="savings">
                     <label class="form-check-label" for="savings">Savings</label>
                 </div>
                 <!--groupMonth-->
@@ -119,8 +113,7 @@
                 <div class="form-check"
                     *ngIf="tableContext == 'monthGroup' || tableContext == 'monthFacility' || tableContext == 'monthAccount'">
                     <input class="form-check-input" type="checkbox" name="yearToDateSavings"
-                        [(ngModel)]="analysisTableColumns.yearToDateSavings" (change)="save()"
-                        id="yearToDateSavings">
+                        [(ngModel)]="analysisTableColumns.yearToDateSavings" (change)="save()" id="yearToDateSavings">
                     <label class="form-check-label" for="yearToDateSavings">YTD Savings</label>
                 </div>
                 <div class="form-check"
@@ -133,8 +126,7 @@
                 <div class="form-check"
                     *ngIf="tableContext == 'monthGroup' || tableContext == 'monthFacility' || tableContext == 'monthAccount'">
                     <input class="form-check-input" type="checkbox" name="rollingSavings"
-                        [(ngModel)]="analysisTableColumns.rollingSavings" (change)="save()"
-                        id="rollingSavings">
+                        [(ngModel)]="analysisTableColumns.rollingSavings" (change)="save()" id="rollingSavings">
                     <label class="form-check-label" for="rollingSavings">Rolling Savings</label>
                 </div>
                 <div class="form-check" *ngIf="tableContext == 'monthGroup' || tableContext == 'monthFacility'">
@@ -165,18 +157,16 @@
                 <div class="form-check"
                     *ngIf="tableContext == 'annualGroup' || tableContext == 'annualFacility' || tableContext == 'annualAccount'">
                     <input class="form-check-input" type="checkbox" name="cummulativeSavings"
-                        [(ngModel)]="analysisTableColumns.cummulativeSavings" (change)="save()"
-                        id="cummulativeSavings">
+                        [(ngModel)]="analysisTableColumns.cummulativeSavings" (change)="save()" id="cummulativeSavings">
                     <label class="form-check-label" for="cummulativeSavings">Cumulative Savings</label>
                 </div>
                 <div class="form-check"
                     *ngIf="tableContext == 'annualGroup' || tableContext == 'annualFacility' || tableContext == 'annualAccount'">
                     <input class="form-check-input" type="checkbox" name="newSavings"
-                        [(ngModel)]="analysisTableColumns.newSavings" (change)="save()"
-                        id="newSavings">
+                        [(ngModel)]="analysisTableColumns.newSavings" (change)="save()" id="newSavings">
                     <label class="form-check-label" for="newSavings">New Savings</label>
                 </div>
             </div>
         </div>
-    </div>
+    </form>
 </div>
