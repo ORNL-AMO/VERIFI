@@ -4,12 +4,12 @@
             <div class="col">
                 <h1 class="card-title"><span class="fa fa-industry" [ngStyle]="{color: facility.color}"></span>
                     {{facility.name}}</h1>
-                <p class="card-text" *ngIf="facility.address">{{facility.address}}, {{facility.city}},
+                <p class="card-text mb-0" *ngIf="facility.address">{{facility.address}}, {{facility.city}},
                     {{facility.state}}
                     {{facility.zip}}
                     {{facility.country}}
                 </p>
-                <p>
+                <p class="mb-0">
                     Contact:
                     <span *ngIf="facility.contactName" class="pe-2">{{facility.contactName}},</span>
                     <span *ngIf="facility.contactEmail" class="pe-2">{{facility.contactEmail}},</span>
@@ -17,7 +17,7 @@
                     <span
                         *ngIf="!facility.contactPhone && !facility.contactEmail && !facility.contactName">&mdash;</span>
                 </p>
-                <p class="card-text">NAICS:
+                <p class="card-text mb-0">NAICS:
                     <span *ngIf="naics">{{naics}}</span>
                     <span *ngIf="!naics">&mdash;</span>
                 </p>
@@ -28,7 +28,8 @@
                         Baseline
                     </div>
                     <div class="col-8 text-center">
-                        Energy Reduction Goal <ng-container *ngIf="latestAnalysisDate">({{latestAnalysisDate | date: 'MMM. y'}})
+                        Energy Reduction Goal <ng-container *ngIf="latestAnalysisDate">({{latestAnalysisDate | date:
+                            'MMM. y'}})
                         </ng-container>
                     </div>
                     <div class="col-2 text-center">
@@ -40,10 +41,14 @@
                         {{baselineYear | yearDisplay:facility.fiscalYear}}
                     </div>
                     <div class="col-8">
-                        <div class="progress">
-                            <div class="progress-bar" role="progressbar" [style.width.%]="percentTowardsGoal"
-                                aria-valuemin="0" aria-valuemax="percentGoal">
-                                <span class="progress-bar-data">{{percentSavings | number:'1.0-0'}}%</span>
+                        <div class="d-flex flex-column">
+                            <div class="progress">
+                                <div class="progress-bar" role="progressbar" [style.width.%]="percentTowardsGoal"
+                                    aria-valuemin="0" aria-valuemax="percentGoal">
+                                </div>
+                            </div>
+                            <div class="w-100 text-center bold">
+                                {{percentSavings | number:'1.0-0'}}%
                             </div>
                         </div>
                     </div>
