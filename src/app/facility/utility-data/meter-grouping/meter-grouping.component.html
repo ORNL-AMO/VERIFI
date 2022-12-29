@@ -169,7 +169,8 @@
                     </div>
                 </div>
             </div>
-            <button class="btn btn-link" (click)="groupAdd(meterGroupType.groupType)"><i class="fa fa-plus"></i> Add New
+            <button class="btn action-btn btn-sm" (click)="groupAdd(meterGroupType.groupType)">
+                <i class="fa fa-plus"></i> Add New {{meterGroupType.groupType}}
                 Group</button>
         </div>
         <div class="pe-2 ps-2" *ngIf="dataDisplay == 'table'">

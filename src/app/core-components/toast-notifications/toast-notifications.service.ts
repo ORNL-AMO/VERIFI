@@ -9,15 +9,7 @@ export class ToastNotificationsService {
   toastNotification: BehaviorSubject<ToastNotification>;
   disableNotification: BehaviorSubject<boolean>;
   constructor() {
-    this.toastNotification = new BehaviorSubject<ToastNotification>({
-
-      title: 'Test',
-      body: 'Test',
-      setTimeoutVal: 10000000,
-      showDisableFooter: true,
-      toastClass: "bg-success",
-      confetti: true
-    });
+    this.toastNotification = new BehaviorSubject<ToastNotification>(undefined);
     this.disableNotification = new BehaviorSubject<boolean>(undefined);
   }
 

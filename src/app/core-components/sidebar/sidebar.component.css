@@ -1,14 +1,6 @@
 /*
 Sidebar
 =============================================== */
-.menuHeader {
-    height: 22px;
-    padding-left: 2rem;
-}
-.menuHeader p {
-    font-weight: bold;
-    text-transform: uppercase;
-}
 .active i {
     color: #ff6000;
 }
@@ -23,6 +15,13 @@ i.fa {
 nav.sidebar.open{
     width: 260px;
 }
+
+@media (max-width: 1500px) {
+    nav.sidebar.open{
+        width: 200px;
+    }
+}
+
 
 nav.sidebar{
     width: 70px;
