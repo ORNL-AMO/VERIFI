@@ -67,7 +67,7 @@ export class SetupWizardComponent implements OnInit {
       let fileReference: FileReference = this.uploadDataService.getFileReference(undefined, workbook);
       this.uploadDataService.fileReferences = [fileReference];
       this.loadingService.setLoadingStatus(false);
-      this.toastNotificationService.showToast("Account Created!", "Use the upload data wizard to finish uploading facility data!", 10000, false, "success", true);
+      this.toastNotificationService.showToast("Account Created!", "Use the upload data wizard to finish uploading facility data!", 10000, false, "bg-success", true);
       this.router.navigateByUrl('upload/data-setup/file-setup/' + fileReference.id + '/template-facilities');
 
     } else {
@@ -87,7 +87,7 @@ export class SetupWizardComponent implements OnInit {
       this.accountdbService.allAccounts.next(allAccounts);
       await this.dbChangesService.selectAccount(account);
       this.loadingService.setLoadingStatus(false);
-      this.toastNotificationService.showToast("Account and Facilities Created!", "You can now add utility data to your facilities for analysis!", 10000, false, "success", true);
+      this.toastNotificationService.showToast("Account and Facilities Created!", "You can now add utility data to your facilities for analysis!", 10000, false, "bg-success", true);
       this.router.navigateByUrl('facility/' + newFacility.id + '/utility');
     }
 

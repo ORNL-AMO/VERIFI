@@ -9,11 +9,19 @@ export class ToastNotificationsService {
   toastNotification: BehaviorSubject<ToastNotification>;
   disableNotification: BehaviorSubject<boolean>;
   constructor() {
-    this.toastNotification = new BehaviorSubject<ToastNotification>(undefined);
+    this.toastNotification = new BehaviorSubject<ToastNotification>({
+
+      title: 'Test',
+      body: 'Test',
+      setTimeoutVal: 10000000,
+      showDisableFooter: true,
+      toastClass: "bg-success",
+      confetti: true
+    });
     this.disableNotification = new BehaviorSubject<boolean>(undefined);
   }
 
-  showToast(title: string, body: string, setTimeoutVal: number, showDisableFooter: boolean, toastClass: "success" | "warning" | "info" | "comment" | "error", confetti?: boolean) {
+  showToast(title: string, body: string, setTimeoutVal: number, showDisableFooter: boolean, toastClass: "bg-success" | "bg-warning" | "bg-info" | "bg-danger", confetti?: boolean) {
     this.toastNotification.next({
       title: title,
       body: body,
@@ -36,6 +44,6 @@ export interface ToastNotification {
   body: string,
   setTimeoutVal: number,
   showDisableFooter: boolean,
-  toastClass: "success" | "warning" | "info" | "comment" | "error",
+  toastClass: "bg-success" | "bg-warning" | "bg-info" | "bg-danger",
   confetti?: boolean
 }

@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { LabelTooltips } from './labelTooltips';
+// import * as bootstrap from 'bootstrap'
 declare var bootstrap: any;
 @Component({
   selector: 'app-label-with-tooltip',

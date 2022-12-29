@@ -194,7 +194,7 @@ export class PredictorDataComponent implements OnInit {
     let facilityPredictors: Array<IdbPredictorEntry> = accountPredictors.filter(predictor => { return predictor.facilityId == selectedFacility.guid });
     this.predictorsDbService.facilityPredictorEntries.next(facilityPredictors);
     this.loadingService.setLoadingStatus(false);
-    this.toastNotificationsService.showToast("Predictor Data Deleted!", undefined, undefined, false, "success");
+    this.toastNotificationsService.showToast("Predictor Data Deleted!", undefined, undefined, false, "bg-success");
   }
 
 

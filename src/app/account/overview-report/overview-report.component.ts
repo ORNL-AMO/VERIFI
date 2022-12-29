@@ -17,7 +17,7 @@ export class OverviewReportComponent implements OnInit {
   ngOnInit(): void {
     let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
     if (accountMeterData.length == 0) {
-      this.toastNotificationsService.showToast("Meter Data Needed", "Meter data must be entered before generating reports.", undefined, false, "error");
+      this.toastNotificationsService.showToast("Meter Data Needed", "Meter data must be entered before generating reports.", undefined, false, "bg-danger");
       this.router.navigateByUrl("account");
     }
   }
