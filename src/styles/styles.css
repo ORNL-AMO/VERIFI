@@ -44,19 +44,6 @@ input.unitDollar {
 .meterData {
   overflow: hidden;
 }
-/*
-.meterData .bold {
-  color: #060a2b;
-  width: 115px;
-  display: inline-block;
-}*/
-.meterData .btn-link {
-  margin: 0px;
-}
-.meterData h6 {
-  padding: 9px 0 0;
-  margin: 0 0 10px 0;
-}
 .importQuickView {
   width: 100%;
   overflow: scroll;
@@ -90,14 +77,6 @@ input.unitDollar {
   border: none;
   background-color: #e6e6e6;
 }
-.measurFooter {
-  background-color: #577656;
-  height: 69px;
-  margin-top: -68px;
-  z-index: 2;
-  border-top: 1px solid #5c7859;
-  box-shadow: 1px -1px 0px #9eb39b;
-}
 .measur-wrapper {
   background-color: #f1f1f100;
   margin: 0px 30px;
@@ -108,22 +87,6 @@ input.unitDollar {
   background-repeat: no-repeat;
   position:relative; */
   /* z-index: 1; */
-}
-.tag {
-  background-color: #eee;
-  color: #333333;
-  padding: 2px 7px!Important;
-  font-size: 11px;
-  margin-left: 10px;
-  line-height: initial;
-}
-.tag.coming-soon {
-  background-color: #ffe400;
-}
-
-.tag.new {
-  background-color: #145932;
-  color: white;
 }
 
 /*Added by mark for import-v2. Not sure correct place to put.*/

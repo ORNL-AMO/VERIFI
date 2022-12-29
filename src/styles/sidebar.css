@@ -3,39 +3,11 @@
 Sidebar
 =========================================== */
 .content {
-    /*margin: 67px 0 0 70px;
-      padding: 20px 16px;*/
-    /* padding: 67px 0 0 70px; */
     background-color: #f1f1f1;
-    /* min-height: calc(100vh - 35px); */
-    /* height: calc(100vh - 35px); */
     transition: 0.2s all;
   }
   .open .content {
-    /*margin: 67px 0 0 261px;*/
-    /* padding: 67px 0 0 261px; */
     width: 100%;
-  }
-  .open #sidebar {
-    width: calc(310px - 50px) !important;
-  }
-  .menuHeader p {
-    display: none;
-  }
-  .open .menuHeader p {
-    display: inline-block;
-    animation: 0.6s fadeInAnimation ease;
-  }
-  #sidebar span {
-    padding-left: 10px;
-    display: none;
-  }
-  .open #sidebar span {
-    display: inline-block;
-    animation: 0.6s fadeInAnimation ease;
-  }
-  .open #sidebar ul li {
-    min-width: 150px;
   }
   @keyframes fadeInAnimation {
     0% {
