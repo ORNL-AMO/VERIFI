@@ -5,10 +5,16 @@
         <!--Items Per Page-->
         <app-table-items-dropdown *ngIf="dataDisplay == 'table'"></app-table-items-dropdown>
         <div class="btn-group ps-2">
-            <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'table'}"
-                (click)="setDataDisplay('table')">Table</button>
-            <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'graph'}"
-                (click)="setDataDisplay('graph')">Graph</button>
+            <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'table'}" (click)="setDataDisplay('table')">
+                <span class="fa fa-chevron-right"></span>
+                Table
+                <span class="fa fa-chevron-left"></span>
+            </button>
+            <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'graph'}" (click)="setDataDisplay('graph')">
+                <span class="fa fa-chevron-right"></span>
+                Graph
+                <span class="fa fa-chevron-left"></span>
+            </button>
         </div>
     </div>
 </div>

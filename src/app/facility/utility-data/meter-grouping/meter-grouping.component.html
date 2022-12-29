@@ -51,18 +51,38 @@
             </div>
             <div class="btn-group ps-2">
                 <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'grouping'}"
-                    (click)="setDataDisplay('grouping')">Set Groups</button>
+                    (click)="setDataDisplay('grouping')">
+                    <span class="fa fa-chevron-right"></span>
+                    Set Groups
+                    <span class="fa fa-chevron-left"></span>
+                </button>
                 <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'table'}"
-                    (click)="setDataDisplay('table')">Table</button>
+                    (click)="setDataDisplay('table')">
+                    <span class="fa fa-chevron-right"></span>
+                    Table
+                    <span class="fa fa-chevron-left"></span>
+                </button>
                 <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'graph'}"
-                    (click)="setDataDisplay('graph')">Graph</button>
+                    (click)="setDataDisplay('graph')">
+                    <span class="fa fa-chevron-right"></span>
+                    Graph
+                    <span class="fa fa-chevron-left"></span>
+                </button>
             </div>
 
             <div class="btn-group ps-2">
                 <button class="btn toggle-btn" (click)="setFacilityEnergyIsSource(true)"
-                    [ngClass]="{'active': selectedFacility.energyIsSource == true}">Source Energy</button>
+                    [ngClass]="{'active': selectedFacility.energyIsSource == true}">
+                    <span class="fa fa-chevron-right"></span>
+                    Source Energy
+                    <span class="fa fa-chevron-left"></span>
+                </button>
                 <button class="btn toggle-btn" (click)="setFacilityEnergyIsSource(false)"
-                    [ngClass]="{'active': selectedFacility.energyIsSource == false}">Site Energy</button>
+                    [ngClass]="{'active': selectedFacility.energyIsSource == false}">
+                    <span class="fa fa-chevron-right"></span>
+                    Site Energy
+                    <span class="fa fa-chevron-left"></span>
+                </button>
             </div>
         </div>
     </div>

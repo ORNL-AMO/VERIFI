@@ -181,12 +181,18 @@
 .btn.toggle-btn.active {
   background-color: #ff6000;
   color: #fff;
+  border-color: #2c386b;
 }
 
 .btn.toggle-btn {
   color: #2c386b;
   background-color: #fff;
   border-color: #2c386b;
+}
+
+.btn.toggle-btn .fa-chevron-right, .btn.toggle-btn .fa-chevron-left{
+  color: #fff;
+  font-size: 10px;
 }
 
 .btn.toggle-btn:hover {

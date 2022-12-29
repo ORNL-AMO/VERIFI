@@ -10,19 +10,31 @@
         <div *ngIf="meterDataOption == 'meters'">
             <div *ngFor="let option of meterOptions; let index = index;">
                 <button class="btn w-100 mb-0 btn-sm toggle-btn" [ngClass]="{'active': option.selected}"
-                    (click)="toggleMeterOption(index)">{{option.meter.name}}</button>
+                    (click)="toggleMeterOption(index)">
+                    <span class="fa fa-chevron-right"></span>
+                    {{option.meter.name}}
+                    <span class="fa fa-chevron-left"></span>
+                </button>
             </div>
         </div>
         <div *ngIf="meterDataOption == 'groups'">
             <div *ngFor="let option of meterGroupOptions; let index = index;">
                 <button class="btn w-100 mb-0 btn-sm toggle-btn" [ngClass]="{'active': option.selected}"
-                    (click)="toggleMeterGroupOption(index)">{{option.meterGroup.name}}</button>
+                    (click)="toggleMeterGroupOption(index)">
+                    <span class="fa fa-chevron-right"></span>
+                    {{option.meterGroup.name}}
+                    <span class="fa fa-chevron-left"></span>
+                </button>
             </div>
         </div>
         <div class="w-100 p-1 border-bottom"></div>
         <div *ngFor="let option of predictorOptions; let index = index;">
             <button class="btn w-100 mb-0 btn-sm toggle-btn" [ngClass]="{'active': option.selected}"
-                (click)="togglePredictorOption(index)">{{option.predictor.name}}</button>
+                (click)="togglePredictorOption(index)">
+                <span class="fa fa-chevron-right"></span>
+                {{option.predictor.name}}
+                <span class="fa fa-chevron-left"></span>
+            </button>
         </div>
     </div>
 </div>

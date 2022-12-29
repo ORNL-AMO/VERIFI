@@ -32,18 +32,35 @@
             <div class="pe-1" *ngIf="urlDisplay == 'energy'">
                 <div class="btn-group">
                     <button class="btn btn-sm m-0 toggle-btn" (click)="setAccountEnergyIsSource(true)"
-                        [ngClass]="{'active': selectedAccount.energyIsSource == true}">Source Energy</button>
+                        [ngClass]="{'active': selectedAccount.energyIsSource == true}">
+                        <span class="fa fa-chevron-right"></span>
+                        Source Energy
+
+                        <span class="fa fa-chevron-left"></span>
+                    </button>
                     <button class="btn btn-sm toggle-btn m-0" (click)="setAccountEnergyIsSource(false)"
-                        [ngClass]="{'active': selectedAccount.energyIsSource == false}">Site Energy</button>
+                        [ngClass]="{'active': selectedAccount.energyIsSource == false}">
+                        <span class="fa fa-chevron-right"></span>
+                        Site Energy
+                        <span class="fa fa-chevron-left"></span>
+                    </button>
                 </div>
             </div>
 
             <div class="ps-1" *ngIf="urlDisplay == 'emissions'">
                 <div class="btn-group">
                     <button class="btn btn-sm m-0 toggle-btn" (click)="setEmissions('location')"
-                        [ngClass]="{'active': emissionsDisplay == 'location'}">Location</button>
+                        [ngClass]="{'active': emissionsDisplay == 'location'}">
+                        <span class="fa fa-chevron-right"></span>
+                        Location
+                        <span class="fa fa-chevron-left"></span>
+                    </button>
                     <button class="btn btn-sm toggle-btn m-0" (click)="setEmissions('market')"
-                        [ngClass]="{'active': emissionsDisplay == 'market'}">Market</button>
+                        [ngClass]="{'active': emissionsDisplay == 'market'}">
+                        <span class="fa fa-chevron-right"></span>
+                        Market
+                        <span class="fa fa-chevron-left"></span>
+                    </button>
                 </div>
             </div>
         </div>

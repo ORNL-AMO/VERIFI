@@ -2,10 +2,16 @@
     <app-analysis-summary-table-filter [tableContext]="'annualAccount'"></app-analysis-summary-table-filter>
 
     <div class="btn-group">
-        <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'table'}"
-            (click)="setDataDisplay('table')">Table</button>
-        <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'graph'}"
-            (click)="setDataDisplay('graph')">Graph</button>
+        <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'table'}" (click)="setDataDisplay('table')">
+            <span class="fa fa-chevron-right"></span>
+            Table
+            <span class="fa fa-chevron-left"></span>
+        </button>
+        <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'graph'}" (click)="setDataDisplay('graph')">
+            <span class="fa fa-chevron-right"></span>
+            Graph
+            <span class="fa fa-chevron-left"></span>
+        </button>
     </div>
 </div>
 
