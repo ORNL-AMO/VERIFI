@@ -30,13 +30,13 @@ export class ToastNotificationsComponent implements OnInit {
 
   ngOnInit() {
     this.toastNotificationSub = this.toastNotificationsService.toastNotification.subscribe(val => {
-      this.toastNotification = val;
-      this.createToast();
+      // this.toastNotification = val;
+      // this.createToast();
     });
   }
 
   ngAfterViewInit() {
-    this.createToast();
+    // this.createToast();
   }
 
 
