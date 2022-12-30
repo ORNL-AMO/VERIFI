@@ -110,34 +110,8 @@
     border-left: 1px solid #dadada;
 }
 
-
-.btn-group,
-.btn-group-vertical {
-    display: inline-block !important;
-}
-
-.btn.btn-solid span.fa {
-    color: white;
-}
-
-.button-label {
-    font-size: 24px;
-    padding-right: .5rem;
-    padding-top: .25rem;
-}
-
-.btn-solid-utility span,
-.btn-solid-cost span {
-    color: #fff !important;
-}
-
 .fa-arrow-right {
     padding-top: 10px;
     padding-right: .25rem;
     padding-left: .25rem;
-}
-
-.actions .btn-group .btn {
-    margin-top: 0px;
-    margin-bottom: 0px;
 }

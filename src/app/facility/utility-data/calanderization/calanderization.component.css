@@ -1,33 +1,3 @@
-.btn-group, .btn-group-vertical {
-    display: inline-block!important;
-}
-
-.btn.btn-solid span.fa{
-    color: white;
-}
-
-.button-label{
-    font-size: 24px;
-    padding-right: .5rem;
-    padding-top: .25rem;
-}
-.btn-solid-utility span,
-.btn-solid-cost span {
-    color: #fff !important;
-}
-
-/* .btn-solid-utility {
-    background-color: #1f78b4 !important;
-    border-color: #1f78b4 !important;
-    border: 1px solid #09619c!important;
-}
-
-.btn-solid-cost {
-    background-color: #ff7f0f !important;
-    border-color: #ff7f0f !important;
-    border: 1px solid #e46c04!important;
-} */
-
 
 .popup.calanderization{
     top: 30px;
