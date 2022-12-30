@@ -92,7 +92,7 @@
             </th>
         </tr>
     </thead>
-    <tbody>
+    <tbody class="table-group-divider">
         <tr *ngFor="let data of monthlyAnalysisSummaryData | orderBy: orderDataField: orderByDirection |  slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage"
             [ngClass]="{'fiscal-year-end': checkFiscalYearEnd(data.date)}">
             <td class="no-wrap">

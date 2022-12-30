@@ -139,7 +139,7 @@
             <th *ngIf="!copyingTable">Actions</th>
         </tr>
     </thead>
-    <tbody>
+    <tbody class="table-group-divider">
         <tr
             *ngFor="let meterData of selectedMeterData | orderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
             <td *ngIf="!copyingTable" class="input">

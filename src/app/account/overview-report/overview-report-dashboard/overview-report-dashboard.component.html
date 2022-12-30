@@ -12,7 +12,7 @@
         </div>
 
         <div *ngIf="accountOverviewReportOptions.length > 0">
-            <div class="d-flex w-100 justify-content-end">
+            <div class="d-flex w-100 justify-content-end mb-2">
                 <app-table-items-dropdown></app-table-items-dropdown>
 
                 <div class="ps-2">
@@ -43,7 +43,7 @@
                             <th>Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="table-group-divider">
                         <tr
                             *ngFor="let report of accountOverviewReportOptions  | orderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
                             <td>

@@ -84,7 +84,7 @@
             </th>
         </tr>
     </thead>
-    <tbody>
+    <tbody class="table-group-divider">
         <tr *ngFor="let summary of annualAnalysisSummary | orderBy: orderDataField: orderByDirection">
             <td>
                 {{summary.year | yearDisplay: accountOrFacility.fiscalYear}}

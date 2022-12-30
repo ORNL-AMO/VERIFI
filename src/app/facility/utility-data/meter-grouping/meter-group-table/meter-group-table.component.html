@@ -24,7 +24,7 @@
                         Cost</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="table-group-divider">
                 <tr
                     *ngFor="let data of meterGroup.combinedMonthlyData| orderBy: orderDataField: orderByDirection | slice: ((tablePageNumbers[index]-1) * itemsPerPage): tablePageNumbers[index] * itemsPerPage">
                     <td>{{data.date | date: 'MMMM, y'}}</td>

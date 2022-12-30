@@ -42,7 +42,7 @@
                 </th>
             </tr>
         </thead>
-        <tbody>
+        <tbody class="table-group-divider">
             <tr *ngFor="let worksheetData of fileReference.selectedWorksheetData; let index = index;"
                 [ngClass]="{'hidden': index == 0}">
                 <td *ngFor="let data of worksheetData">

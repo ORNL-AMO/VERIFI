@@ -41,7 +41,7 @@
                 <th></th>
             </tr>
         </thead>
-        <tbody>
+        <tbody class="table-group-divider">
             <tr *ngFor="let analysisItem of facilityAnalysisItems | orderBy: 'date'">
                 <td class="radio-td">
                     <input type="radio" class="rowToggle" [(ngModel)]="selectedFacilityItemId"

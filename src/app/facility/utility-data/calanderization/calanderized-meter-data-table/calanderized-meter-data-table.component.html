@@ -33,7 +33,7 @@
                 Cost</th>
         </tr>
     </thead>
-    <tbody>
+    <tbody class="table-group-divider">
         <tr *ngFor="let data of calanderizedMeter.monthlyData| orderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage"
             [ngClass]="{'use-and-consumption': data.energyConsumption && data.energyUse}">
             <td>{{data.date | date: 'MMMM, y'}}</td>

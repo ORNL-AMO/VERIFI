@@ -10,7 +10,7 @@
                 <th>Utility Cost</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody class="table-group-divider">
             <tr *ngFor="let summary of facilityMeterSummaryData.meterSummaries | orderBy: 'energyUsage'">
                 <td>
                     {{summary.meter.name}}

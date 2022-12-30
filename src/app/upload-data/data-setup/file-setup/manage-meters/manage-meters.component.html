@@ -79,7 +79,7 @@
                 </th>
             </tr>
         </thead>
-        <tbody>
+        <tbody class="table-group-divider">
             <tr *ngFor="let meter of fileReference.meters | orderBy: 'isValid': 'asc'"
                 [ngClass]="{'skip': meter.skipImport, 'alert-danger': !meter.isValid}">
                 <td>

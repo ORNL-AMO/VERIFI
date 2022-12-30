@@ -8,7 +8,7 @@
                 <th>Utility Cost </th>
             </tr>
         </thead>
-        <tbody *ngIf="accountFacilitiesSummary && accountFacilitiesSummary.facilitySummaries">
+        <tbody class="table-group-divider" *ngIf="accountFacilitiesSummary && accountFacilitiesSummary.facilitySummaries">
             <tr *ngFor="let summary of accountFacilitiesSummary.facilitySummaries | orderBy: 'consumption'">
                 <td>
                     <span class="badge"

@@ -63,7 +63,7 @@
                     </td>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="table-group-divider">
                 <tr
                     *ngFor="let predictorEntry of facilityPredictorEntries | predictorsOrderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
                     <td class="input" *ngIf="!copyingTable">
