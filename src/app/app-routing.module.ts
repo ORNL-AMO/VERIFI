@@ -2,7 +2,6 @@ import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { EnergyConsumptionComponent } from './facility/utility-data/energy-consumption/energy-consumption.component';
 import { EnergySourceComponent } from './facility/utility-data/energy-consumption/energy-source/energy-source.component';
-import { StyleGuideComponent } from './static-content/style-guide/style-guide.component';
 import { UtilityMeterDataComponent } from './facility/utility-data/energy-consumption/utility-meter-data/utility-meter-data.component';
 import { MeterGroupingComponent } from './facility/utility-data/meter-grouping/meter-grouping.component';
 import { PredictorDataComponent } from './facility/utility-data/predictor-data/predictor-data.component';
@@ -353,7 +352,6 @@ const routes: Routes = [
   { path: 'acknowledgments', component: AcknowledgmentsComponent },
   { path: 'feedback', component: FeedbackComponent },
   { path: 'help', component: HelpComponent },
-  { path: 'style-guide', component: StyleGuideComponent },
   {
     path: 'upload',
     component: UploadDataComponent,
