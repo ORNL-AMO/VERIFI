@@ -19,14 +19,12 @@
 <form *ngIf="!predictorToDelete">
     <div class="row" *ngFor="let predictor of facilityPredictors">
         <div class="col">
-            <label>
-                <input class="full-width" type="text" [(ngModel)]="predictor.name"
-                    name="{{'predictorName'+predictor.id}}" onfocus="this.select();" minlength="0" maxlength="100">
-            </label>
+            <input class="form-control" type="text" [(ngModel)]="predictor.name" name="{{'predictorName'+predictor.id}}"
+                onfocus="this.select();" minlength="0" maxlength="100">
         </div>
         <div class="col-4">
-            <input class="full-width" [(ngModel)]="predictor.unit" name="{{'predictorUnit'+predictor.id}}" onfocus="this.select();"
-                minlength="0" maxlength="100">
+            <input class="form-control" [(ngModel)]="predictor.unit" name="{{'predictorUnit'+predictor.id}}"
+                onfocus="this.select();" minlength="0" maxlength="100">
         </div>
         <div class="col-2 text-center">
             <label class="switch" for="{{'predictor_'+predictor.id}}">
@@ -43,7 +41,7 @@
     </div>
 </form>
 
-<button *ngIf="!predictorToDelete" class="btn btn-link item-left pl-0" (click)="addPredictorEntry()"><i
+<button *ngIf="!predictorToDelete" class="btn btn-sm action-btn" (click)="addPredictorEntry()"><i
         class="fa fa-plus"></i> Add Predictor</button>
 
 <div class="saveCancel item-right" *ngIf="!predictorToDelete">

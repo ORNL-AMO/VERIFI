@@ -25,6 +25,9 @@ export class UtilityMeterDataFilterComponent implements OnInit {
     private dbChangesService: DbChangesService) { }
 
   ngOnInit(): void {
+  }
+
+  ngOnChanges(){
     if (this.source == 'Electricity') {
       let electricityDataFilters: ElectricityDataFilters;
       if (this.filterType == 'table') {

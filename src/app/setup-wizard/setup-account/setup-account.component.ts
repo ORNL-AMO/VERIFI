@@ -19,8 +19,8 @@ export class SetupAccountComponent implements OnInit {
   missingEmissions: boolean;
   missingEnergyReductionGoal: boolean;
   accountSub: Subscription;
-  unitsClass: 'badge-danger' | 'badge-success' | 'badge-warning';
-  reportingClass: 'badge-danger' | 'badge-success' | 'badge-warning';
+  unitsClass: 'bg-danger' | 'bg-success' | 'bg-warning';
+  reportingClass: 'bg-danger' | 'bg-success' | 'bg-warning';
   constructor(private accountdbService: AccountdbService, private setupWizardService: SetupWizardService,
     private settingsFormService: SettingsFormsService, private router: Router, private cd: ChangeDetectorRef) { }
 
@@ -58,22 +58,22 @@ export class SetupAccountComponent implements OnInit {
   }
 
   setUnitsClass() {
-    let badgeClass: 'badge-danger' | 'badge-success' | 'badge-warning' = 'badge-success';
+    let badgeClass: 'bg-danger' | 'bg-success' | 'bg-warning' = 'bg-success';
     if (this.unitsInvalid) {
-      badgeClass = 'badge-danger';
+      badgeClass = 'bg-danger';
     } else if (this.missingEmissions) {
-      badgeClass = 'badge-warning';
+      badgeClass = 'bg-warning';
     }
     this.unitsClass = badgeClass;
     this.cd.detectChanges();
   }
 
   setReportsClass() {
-    let badgeClass: 'badge-danger' | 'badge-success' | 'badge-warning' = 'badge-success';
+    let badgeClass: 'bg-danger' | 'bg-success' | 'bg-warning' = 'bg-success';
     if (this.reportingInvalid) {
-      badgeClass = 'badge-danger';
+      badgeClass = 'bg-danger';
     } else if (this.missingEnergyReductionGoal) {
-      badgeClass = 'badge-warning';
+      badgeClass = 'bg-warning';
     }
     this.reportingClass = badgeClass;
     this.cd.detectChanges();

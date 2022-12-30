@@ -13,7 +13,7 @@
             will be lost.</button>
         <button *ngIf="addOrEdit == 'edit'" class="btn btn-primary" (click)="saveAndQuit()"
             [disabled]="meterDataForm.invalid || invalidDate">Save</button>
-        <button *ngIf="addOrEdit == 'add'" class="btn btn-primary mr-2" (click)="saveAndQuit()"
+        <button *ngIf="addOrEdit == 'add'" class="btn btn-primary me-2" (click)="saveAndQuit()"
             [disabled]="meterDataForm.invalid || invalidDate">Save + Quit</button>
         <button *ngIf="addOrEdit == 'add'" class="btn btn-primary" (click)="saveAndAddAnother()"
             [disabled]="meterDataForm.invalid || invalidDate">Save +

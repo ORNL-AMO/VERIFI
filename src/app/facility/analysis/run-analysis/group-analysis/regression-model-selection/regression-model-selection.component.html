@@ -18,7 +18,7 @@
 
     <div class="table-responsive" *ngIf="selectedGroup.models && selectedGroup.userDefinedModel">
 
-        <table class="table table-sm table-hover">
+        <table class="table table-sm table-hover utility-data table-bordered">
             <thead>
                 <tr>
                     <th>
@@ -60,7 +60,7 @@
             <tbody>
                 <tr *ngFor="let model of selectedGroup.models | orderBy: orderDataField: orderByDirection | modelFilter:showInvalid; let modelIndex = index;"
                     [ngClass]="{'selected-model': selectedGroup.selectedModelId == model.modelId}">
-                    <td *ngIf="!model.errorModeling">
+                    <td class="text-center" *ngIf="!model.errorModeling">
                         <input type="radio" class="rowToggle" [(ngModel)]="selectedGroup.selectedModelId"
                             [value]="model.modelId" name="{{modelIndex+'_selectedModelId'}}"
                             id="{{modelIndex+'_selectedModelId'}}" (change)="selectModel()" title="Select this model">
@@ -106,7 +106,7 @@
                     </td>
                     <!--error modeling-->
                     <td class="alert-danger" *ngIf="model.errorModeling" colspan="9">
-                        There was an error when generating model for {{model.modelYear}}: <span class="pr-1"
+                        There was an error when generating model for {{model.modelYear}}: <span class="pe-1"
                             *ngFor="let variable of model.predictorVariables">{{variable.name}}</span>.
                     </td>
                     <td class="text-center">

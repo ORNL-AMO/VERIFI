@@ -1,5 +1,5 @@
-<table class="table table-sm table-hover" #dataTable [ngClass]="{'copying-table': copyingTable}">
-    <thead>
+<table class="table utility-data table-sm table-bordered table-hover" #dataTable [ngClass]="{'copying-table': copyingTable}">
+    <thead class="sortable">
         <tr class="table-mh">
             <th class="first-column"></th>
             <th *ngIf="analysisTableColumns.energy" class="text-center th-3" [attr.colspan]="numEnergyColumns">
@@ -84,7 +84,7 @@
             </th>
         </tr>
     </thead>
-    <tbody>
+    <tbody class="table-group-divider">
         <tr *ngFor="let summary of annualAnalysisSummary | orderBy: orderDataField: orderByDirection">
             <td>
                 {{summary.year | yearDisplay: accountOrFacility.fiscalYear}}
@@ -213,4 +213,4 @@
         </tr>
     </tbody>
 </table>
-<a class="click-link" (click)="copyTable()"><span class="fa fa-copy"></span> Copy Table</a>
+<button class="btn action-btn btn-sm" (click)="copyTable()"><span class="fa fa-copy"></span> Copy Table</button>

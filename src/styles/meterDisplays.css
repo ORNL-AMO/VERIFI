@@ -7,46 +7,9 @@ Meter Displays
   .meter.collapsed {
     margin-bottom: 0px;
   }
-  .meterData {
-    padding: 10px 0px;
-    position: relative;
-  }
-  .meterData p {
-    margin: 0 0 0 10px;
-  }
-  .filter {
-    position: relative;
-    z-index: 1;
-  }
-  .filter-dropdown {
-    position: absolute;
-    top: 44px;
-    left: 0;
-    /* width: 100%; */
-    background-color: #ececec;
-    border: 1px solid #d2d2d2;
-    z-index: 1;
-    padding: 20px;
-    min-width: 210px;
-    border-radius: 2px;
-  }
-  .filter .filter-dropdown label {
-    margin: 0px 10px 0 0;
-  }
-  .filter .filter-dropdown input[type="checkbox"] {
-    float: left;
-    width: auto;
-    margin: 0px 10px 0 0;
-  }
   i.fa.fa-arrow-circle-up {
     color: green;
   }
   i.fa.fa-arrow-circle-down {
     color: red;
-  }
-  .filter button:nth-child(2) {
-    border-left: none;
-  }
-  .controls .meterData {
-    z-index: 2;
   }

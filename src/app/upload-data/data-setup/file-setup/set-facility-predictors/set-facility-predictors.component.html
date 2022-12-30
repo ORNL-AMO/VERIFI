@@ -20,7 +20,7 @@
             <div class="card-header">
                 <i *ngIf="index != 0" class="fa fa-industry" [ngStyle]="{color: facilityGroup.color}"></i>
                 {{facilityGroup.facilityName}}
-                <a *ngIf="index != 0" class="click-link float-right"
+                <a *ngIf="index != 0" class="click-link float-end"
                     (click)="setFacility(facilityGroup.facilityId)">+Add
                     All</a>
             </div>

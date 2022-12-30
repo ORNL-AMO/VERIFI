@@ -1,47 +1,67 @@
 <div class="sticky-top banner-border" [ngClass]="{'modal-open': modalOpen}">
     <div class="breadcrumbs d-flex justify-content-between">
-        <div class="d-flex pr-2">
-            <select name="minMonth" [(ngModel)]="minMonth" class="form-control" (change)="setMinDate()">
-                <option class="pr-2" *ngFor="let month of months" [ngValue]="month.monthNumValue">
+        <div class="d-flex pe-2">
+            <select name="minMonth" [(ngModel)]="minMonth" class="form-select" (change)="setMinDate()">
+                <option class="pe-2" *ngFor="let month of months" [ngValue]="month.monthNumValue">
                     {{month.abbreviation}}</option>
             </select>
 
-            <select name="minYear" [(ngModel)]="minYear" class="form-control" (change)="setMinDate()">
-                <option class="pr-2" *ngFor="let year of years" [ngValue]="year">{{year}}</option>
+            <select name="minYear" [(ngModel)]="minYear" class="form-select" (change)="setMinDate()">
+                <option class="pe-2" *ngFor="let year of years" [ngValue]="year">{{year}}</option>
             </select>
 
-            <div class="pl-1 pr-1">
+            <div class="ps-1 pe-1">
                 <span class="fa fa-arrow-right"></span>
             </div>
 
-            <select name="maxMonth" [(ngModel)]="maxMonth" class="form-control" (change)="setMaxDate()">
-                <option class="pr-2" *ngFor="let month of months" [ngValue]="month.monthNumValue">
+            <select name="maxMonth" [(ngModel)]="maxMonth" class="form-select" (change)="setMaxDate()">
+                <option class="pe-2" *ngFor="let month of months" [ngValue]="month.monthNumValue">
                     {{month.abbreviation}}</option>
             </select>
 
-            <select name="maxYear" [(ngModel)]="maxYear" class="form-control" (change)="setMaxDate()">
-                <option class="pr-2" *ngFor="let year of years" [ngValue]="year">{{year}}</option>
+            <select name="maxYear" [(ngModel)]="maxYear" class="form-select" (change)="setMaxDate()">
+                <option class="pe-2" *ngFor="let year of years" [ngValue]="year">{{year}}</option>
             </select>
         </div>
 
         <div class="d-flex">
-            <div class="pr-1">
+            <div class="pe-1">
                 <div class="btn-group">
                     <button class="btn btn-sm toggle-btn" (click)="setFacilityEnergyIsSource(true)"
-                        [ngClass]="{'active': selectedFacility.energyIsSource == true}">Source Energy</button>
+                        [ngClass]="{'active': selectedFacility.energyIsSource == true}">
+                        <span class="fa fa-chevron-right"></span>
+                        Source Energy
+                        <span class="fa fa-chevron-left"></span>
+                    </button>
                     <button class="btn btn-sm toggle-btn" (click)="setFacilityEnergyIsSource(false)"
-                        [ngClass]="{'active': selectedFacility.energyIsSource == false}">Site Energy</button>
+                        [ngClass]="{'active': selectedFacility.energyIsSource == false}">
+                        <span class="fa fa-chevron-right"></span>
+                        Site Energy
+                        <span class="fa fa-chevron-left"></span>
+                    </button>
                 </div>
             </div>
 
-            <div class="pl-1">
+            <div class="ps-1">
                 <div class="btn-group">
                     <button class="btn btn-sm toggle-btn" [ngClass]="{'active': selectedChart == 'splom'}"
-                        (click)="setView('splom')">Data Correlation</button>
+                        (click)="setView('splom')">
+                        <span class="fa fa-chevron-right"></span>
+                        Data Correlation
+                        <span class="fa fa-chevron-left"></span>
+                    </button>
                     <button class="btn btn-sm toggle-btn" [ngClass]="{'active': selectedChart == 'heatmap'}"
-                        (click)="setView('heatmap')">R<sup>2</sup> Variance</button>
+                        (click)="setView('heatmap')">
+                        <span class="fa fa-chevron-right"></span>
+                        R<sup>2</sup> Variance
+                        <span class="fa fa-chevron-left"></span>
+                    </button>
                     <button class="btn btn-sm toggle-btn" [ngClass]="{'active': selectedChart == 'timeseries'}"
-                        (click)="setView('timeseries')">Time Series</button>
+                        (click)="setView('timeseries')">
+                        <span class="fa fa-chevron-right"></span>
+                        Time Series
+                        <span class="fa fa-chevron-left"></span>
+                    </button>
                 </div>
 
             </div>

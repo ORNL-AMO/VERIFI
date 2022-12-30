@@ -1,9 +1,9 @@
-.filter-dropdown{
-    /* width: 740px; */
-    width: 100%;
-    top: 0px;
+.dropdown-menu{
+    min-width: max-content;
+    background-color: #efefef;
 }
 
-.filter-dropdown input{
-    margin-top: 5px;
+.form-check:hover{
+    cursor: pointer;
+    background-color: rgba(0, 0, 0, 0.075);
 }

@@ -22,7 +22,6 @@ export class AnnualAccountAnalysisComponent implements OnInit {
   calculating: boolean;
   calculatingSub: Subscription;
   annualAnalysisSummarySub: Subscription;
-  showFilterDropdown: boolean = false;
   constructor(private analysisService: AnalysisService,
     private accountAnalysisDbService: AccountAnalysisDbService, private accountDbService: AccountdbService,
     private accountAnalysisService: AccountAnalysisService) { }
@@ -47,12 +46,7 @@ export class AnnualAccountAnalysisComponent implements OnInit {
   }
 
   setDataDisplay(display: 'table' | 'graph') {
-    this.showFilterDropdown = false;
     this.dataDisplay = display;
     this.analysisService.dataDisplay.next(this.dataDisplay);
-  }
-
-  toggleFilterMenu() {
-    this.showFilterDropdown = !this.showFilterDropdown;
   }
 }

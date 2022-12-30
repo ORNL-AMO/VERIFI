@@ -23,7 +23,6 @@ export class MonthlyFacilityAnalysisComponent implements OnInit {
   calculating: boolean;
   calculatingSub: Subscription;
   monthlyFacilityAnalysisDataSub: Subscription;
-  showFilterDropdown: boolean = false;
   constructor(private analysisService: AnalysisService,
     private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService,
     private sharedDataService: SharedDataService) { }
@@ -52,11 +51,7 @@ export class MonthlyFacilityAnalysisComponent implements OnInit {
   }
 
   setDataDisplay(display: 'table' | 'graph') {
-    this.showFilterDropdown = false;
     this.dataDisplay = display;
     this.analysisService.dataDisplay.next(this.dataDisplay);
-  }
-  toggleFilterMenu(){
-    this.showFilterDropdown = !this.showFilterDropdown;
   }
 }

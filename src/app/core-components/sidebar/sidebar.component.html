@@ -6,7 +6,7 @@
     <a title="Account Overview" class="nav-link" routerLink="/account" [routerLinkActive]="['active-head']"
         [ngClass]="{'open': open}" (mouseenter)="setHoverAccount(true)" (mouseleave)="setHoverAccount(false)"><i
             class="fa fa-building"></i>
-        <span [hidden]="!open" class="pl-2 nav-label bold">
+        <span [hidden]="!open" class="ps-2 nav-label bold">
             {{accountName}}
         </span>
     </a>
@@ -39,7 +39,7 @@
         (mouseleave)="setHoverIndex(undefined)">
         <a title="Facility Overview" class="nav-link" routerLink="/facility/{{facility.id}}"
             [routerLinkActive]="['active-head']"><i class="fa fa-industry" [ngStyle]="{color: facility.color}"></i>
-            <span [hidden]="!open" class="pl-2 nav-label">
+            <span [hidden]="!open" class="ps-2 nav-label">
                 {{facility.guid | facilityName}}
             </span>
         </a>
@@ -72,22 +72,18 @@
     </a>
     <hr *ngIf="facilityList.length > 4 && open">
     <a class="nav-link" routerLink="/upload" [routerLinkActive]="['active']"><i class="fa fa-upload"></i> <span
-            [hidden]="!open" class="pl-2 nav-label">Upload Data</span> </a>
+            [hidden]="!open" class="ps-2 nav-label">Upload Data</span> </a>
     <a class="nav-link" routerLink="/help" [routerLinkActive]="['active']"
         [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-question"></i> <span [hidden]="!open"
-            class="pl-2 nav-label">Help</span> </a>
+            class="ps-2 nav-label">Help</span> </a>
     <a class="nav-link" routerLink="/about" [routerLinkActive]="['active']"
         [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-info-circle"></i> <span [hidden]="!open"
-            class="pl-2 nav-label">About</span></a>
+            class="ps-2 nav-label">About</span></a>
     <a class="nav-link" routerLink="/feedback" [routerLinkActive]="['active']"
         [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-inbox"></i> <span [hidden]="!open"
-            class="pl-2 nav-label">Feedback</span></a>
+            class="ps-2 nav-label">Feedback</span></a>
     <a class="nav-link" routerLink="/acknowledgments" [routerLinkActive]="['active']"
         [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-trophy"></i>
-        <span [hidden]="!open" class="pl-2 nav-label">Acknowledgments</span></a>
+        <span [hidden]="!open" class="ps-2 nav-label">Acknowledgments</span></a>
     <hr>
-    <a class="nav-link" *ngIf="isDev" routerLink="style-guide" [routerLinkActive]="['active']"
-        [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-star"></i> <span [hidden]="!open"
-            class="pl-2 nav-label">Style
-            Guide</span></a>
 </nav>

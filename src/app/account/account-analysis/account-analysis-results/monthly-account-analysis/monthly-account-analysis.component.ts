@@ -24,7 +24,6 @@ export class MonthlyAccountAnalysisComponent implements OnInit {
   calculating: boolean;
 
   calculatingSub: Subscription;
-  showFilterDropdown: boolean = false;
   monthlyAccountAnalysisDataSub: Subscription;
   constructor(private analysisService: AnalysisService,
     private accountAnalysisDbService: AccountAnalysisDbService, private accountDbService: AccountdbService,
@@ -55,12 +54,7 @@ export class MonthlyAccountAnalysisComponent implements OnInit {
   }
   
   setDataDisplay(display: 'table' | 'graph') {
-    this.showFilterDropdown = false;
     this.dataDisplay = display;
     this.analysisService.dataDisplay.next(this.dataDisplay);
-  }
-
-  toggleFilterMenu(){
-    this.showFilterDropdown = !this.showFilterDropdown;
   }
 }

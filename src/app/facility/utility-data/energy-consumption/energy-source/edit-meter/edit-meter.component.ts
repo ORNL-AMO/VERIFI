@@ -80,7 +80,7 @@ export class EditMeterComponent implements OnInit {
     await this.dbChangesService.setMeters(selectedAccount, selectedFacility);
     this.cancel();
     this.loadingService.setLoadingStatus(false);
-    this.toastNotificationService.showToast('Meter Saved!', undefined, undefined, false, "success");
+    this.toastNotificationService.showToast('Meter Saved!', undefined, undefined, false, "bg-success");
   }
 
   cancel() {
@@ -104,7 +104,7 @@ export class EditMeterComponent implements OnInit {
       this.utilityMeterDataDbService.accountMeterData.next(accountMeterData);
       let facilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.filter(meterData => { return meterData.facilityId == this.selectedFacility.guid });
       this.utilityMeterDataDbService.facilityMeterData.next(facilityMeterData);
-      this.toastNotificationService.showToast("Meter and Meter Data Updated", undefined, undefined, false, "success");
+      this.toastNotificationService.showToast("Meter and Meter Data Updated", undefined, undefined, false, "bg-success");
     }
   }
 }

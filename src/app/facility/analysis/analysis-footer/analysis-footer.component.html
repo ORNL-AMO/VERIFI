@@ -1,13 +1,13 @@
 <div class="fixed-bottom footer-nav" [ngClass]="{'sidebar-open': sidebarOpen, 'help-panel-open': helpPanelOpen}">
-    <div class="d-flex flex-fill justify-content-between pr-3 pl-3">
+    <div class="d-flex flex-fill justify-content-between pe-3 ps-3">
         <div>
-            <button class="btn" (click)="goBack()"><span class="fa fa-chevron-left pr-1"></span>Back </button>
+            <button class="btn" (click)="goBack()"><span class="fa fa-chevron-left pe-1"></span>Back </button>
         </div>
         <div *ngIf="showGoBackToAccount">
             <button class="btn btn-secondary" (click)="goBackToAccount()">Return to Account Analysis</button>
         </div>
         <div>
-            <button *ngIf="showContinue" class="btn" (click)="continue()" [disabled]="disableContinue">Continue<span class="fa fa-chevron-right pl-1"></span></button>
+            <button *ngIf="showContinue" class="btn" (click)="continue()" [disabled]="disableContinue">Continue<span class="fa fa-chevron-right ps-1"></span></button>
         </div>
     </div>
 </div>

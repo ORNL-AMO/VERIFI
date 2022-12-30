@@ -1,70 +1,69 @@
 <div *ngIf="meterGroup.combinedMonthlyData && meterGroup.combinedMonthlyData.length > 0">
-    <table class="table table-sm" #meterGroupTable>
-        <thead>
-            <tr class="table-mh">
-                <th colspan=5>{{meterGroup.name}}
-                </th>
-            </tr>
-            <tr>
-                <th (click)="setOrderDataField('date')" [ngClass]="{'active': orderDataField == 'date'}"
-                    class="row-year">
-                    Month</th>
-                <th (click)="setOrderDataField('energyConsumption')"
-                    [ngClass]="{'active': orderDataField == 'energyConsumption'}"
-                    *ngIf="meterGroupType.groupType == 'Water' || meterGroupType.groupType == 'Other'">
-                    Total Consumption (<span *ngIf="meterGroupType.groupType == 'Water'"
-                        [innerHTML]="waterUnit | settingsLabel"></span>)</th>
-                <th (click)="setOrderDataField('energyUse')" [ngClass]="{'active': orderDataField == 'energyUse'}"
-                    *ngIf="meterGroupType.groupType == 'Energy'">
-                    Total Energy (<span [innerHTML]=" energyUnit | settingsLabel"></span>)</th>
-                <th (click)="setOrderDataField('energyCost')" [ngClass]="{'active': orderDataField == 'energyCost'}">
-                    Total
-                    Cost</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr
-                *ngFor="let data of meterGroup.combinedMonthlyData| orderBy: orderDataField: orderByDirection | slice: ((tablePageNumbers[index]-1) * itemsPerPage): tablePageNumbers[index] * itemsPerPage">
-                <td>{{data.date | date: 'MMMM, y'}}</td>
-                <td>
-                    <span *ngIf="meterGroupType.groupType == 'Energy'">
-                        <span *ngIf="data.energyUse">
-                            {{data.energyUse | number:'1.0-1'}}
+    <div class="table-responsive">
+        <table class="table utility-data table-sm table-bordered table-hover" #meterGroupTable>
+            <thead class="sortable">
+                <tr class="table-mh">
+                    <th colspan=5>{{meterGroup.name}}
+                    </th>
+                </tr>
+                <tr>
+                    <th (click)="setOrderDataField('date')" [ngClass]="{'active': orderDataField == 'date'}"
+                        class="row-year">
+                        Month</th>
+                    <th (click)="setOrderDataField('energyConsumption')"
+                        [ngClass]="{'active': orderDataField == 'energyConsumption'}"
+                        *ngIf="meterGroupType.groupType == 'Water' || meterGroupType.groupType == 'Other'">
+                        Total Consumption (<span *ngIf="meterGroupType.groupType == 'Water'"
+                            [innerHTML]="waterUnit | settingsLabel"></span>)</th>
+                    <th (click)="setOrderDataField('energyUse')" [ngClass]="{'active': orderDataField == 'energyUse'}"
+                        *ngIf="meterGroupType.groupType == 'Energy'">
+                        Total Energy (<span [innerHTML]=" energyUnit | settingsLabel"></span>)</th>
+                    <th (click)="setOrderDataField('energyCost')"
+                        [ngClass]="{'active': orderDataField == 'energyCost'}">
+                        Total
+                        Cost</th>
+                </tr>
+            </thead>
+            <tbody class="table-group-divider">
+                <tr
+                    *ngFor="let data of meterGroup.combinedMonthlyData| orderBy: orderDataField: orderByDirection | slice: ((tablePageNumbers[index]-1) * itemsPerPage): tablePageNumbers[index] * itemsPerPage">
+                    <td>{{data.date | date: 'MMMM, y'}}</td>
+                    <td>
+                        <span *ngIf="meterGroupType.groupType == 'Energy'">
+                            <span *ngIf="data.energyUse">
+                                {{data.energyUse | number:'1.0-1'}}
+                            </span>
+                            <span *ngIf="!data.energyUse">N/A</span>
                         </span>
-                        <span *ngIf="!data.energyUse">N/A</span>
-                    </span>
-                    <span *ngIf="meterGroupType.groupType == 'Water' || meterGroupType.groupType == 'Other'">
-                        <span *ngIf="data.energyConsumption">
-                            {{data.energyConsumption | number:'1.0-1'}}
+                        <span *ngIf="meterGroupType.groupType == 'Water' || meterGroupType.groupType == 'Other'">
+                            <span *ngIf="data.energyConsumption">
+                                {{data.energyConsumption | number:'1.0-1'}}
+                            </span>
+                            <span *ngIf="!data.energyConsumption">N/A</span>
                         </span>
-                        <span *ngIf="!data.energyConsumption">N/A</span>
-                    </span>
-                </td>
-                <td>
-                    <span *ngIf="data.energyCost">{{data.energyCost | currency}}</span>
-                    <span *ngIf="!data.energyCost">N/A</span>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    <div class="d-flex justify-content-between">
+                    </td>
+                    <td>
+                        <span *ngIf="data.energyCost">{{data.energyCost | currency}}</span>
+                        <span *ngIf="!data.energyCost">N/A</span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="d-flex w-100 justify-content-between">
         <div>
-            <a class="click-link" (click)="copyTable()"><span class="fa fa-copy"></span> Copy Table</a>
+            <button class="btn action-btn btn-sm" (click)="copyTable()">
+                <span class="fa fa-copy"></span> Copy Table
+            </button>
         </div>
-        <div>
-            <div class="item-right">
-                <ngb-pagination [collectionSize]="meterGroup.combinedMonthlyData.length"
-                    [(page)]="tablePageNumbers[index]" [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true"
-                    aria-label="Default pagination">
-                </ngb-pagination>
-            </div>
-            <p class="item-right">{{meterGroup.combinedMonthlyData.length}} entries</p>
-        </div>
+        <ngb-pagination [collectionSize]="meterGroup.combinedMonthlyData.length" [(page)]="tablePageNumbers[index]"
+            [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Pagination">
+        </ngb-pagination>
     </div>
 </div>
 
 <div *ngIf="!meterGroup.combinedMonthlyData || meterGroup.combinedMonthlyData.length == 0">
-    <table class="table table-sm">
+    <table class="table utility-data table-sm table-bordered table-hover">
         <thead>
             <tr class="table-mh">
                 <th colspan=5>{{meterGroup.name}}

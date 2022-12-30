@@ -11,6 +11,7 @@ import { AccountHomeService } from '../account-home.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { Subscription } from 'rxjs';
+import { Router } from '@angular/router';
 @Component({
   selector: 'app-facility-card',
   templateUrl: './facility-card.component.html',
@@ -44,7 +45,8 @@ export class FacilityCardComponent implements OnInit {
   facilityAnalysisSummariesSub: Subscription;
   constructor(private analysisDbService: AnalysisDbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterDbService: UtilityMeterdbService, private predictorDbService: PredictordbService,
-    private overviewReportService: OverviewReportService, private accountHomeService: AccountHomeService) { }
+    private overviewReportService: OverviewReportService, private accountHomeService: AccountHomeService,
+    private router: Router) { }
 
   ngOnInit(): void {
     let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
@@ -139,5 +141,9 @@ export class FacilityCardComponent implements OnInit {
 
   toggleShowContent() {
     this.showContent = !this.showContent;
+  }
+
+  navigateTo(urlStr: string) {
+    this.router.navigateByUrl('/facility/' + this.facility.id + '/' + urlStr);
   }
 }

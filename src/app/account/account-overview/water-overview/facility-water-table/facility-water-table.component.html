@@ -1,5 +1,5 @@
 <div class="table-responsive">
-    <table class="table table-sm">
+    <table class="table utility-data table-sm table-bordered table-hover">
         <thead>
             <tr>
                 <th>Facility</th>
@@ -8,14 +8,14 @@
                 <th>Utility Cost </th>
             </tr>
         </thead>
-        <tbody *ngIf="accountFacilitiesSummary && accountFacilitiesSummary.facilitySummaries">
+        <tbody class="table-group-divider" *ngIf="accountFacilitiesSummary && accountFacilitiesSummary.facilitySummaries">
             <tr *ngFor="let summary of accountFacilitiesSummary.facilitySummaries | orderBy: 'consumption'">
                 <td>
                     <span class="badge"
                         [ngStyle]="{background: summary.facility.color, color: summary.facility.color }">
                         &mdash;
                     </span>
-                    <a class="pl-2" (click)="selectFacility(summary.facility)">{{summary.facility.name}}</a>
+                    <a class="ps-2 click-link" (click)="selectFacility(summary.facility)">{{summary.facility.name}}</a>
                 </td>
                 <td>
                     {{summary.consumption | customNumber}}

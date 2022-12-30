@@ -6,13 +6,10 @@
     z-index: 100;
     background-color: white;
     transition: .2s width;
+    padding-left: .5rem;
+    padding-right: .5rem;
 }
 
 .progress-bar {
     background-color: #145A32!important;
-}
-
-
-.text-right{
-    text-align: right;
 }

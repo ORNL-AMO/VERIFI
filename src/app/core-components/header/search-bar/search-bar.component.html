@@ -1,6 +1,6 @@
 <form class="form-inline">
     <div class="input-group">
-        <span class="unit">
+        <span class="input-group-text">
             <span class="fa fa-search"></span>
         </span>
         <input class="form-control" type="search" placeholder="Search Account" aria-label="Search"
@@ -13,7 +13,7 @@
 
 <ng-template #resultTemplate let-r="result" let-t="term">
     <div class="w-100 d-flex justify-content-between" (click)="selectValue(r)">
-        <div class="d-flex pr-5 template-text">
+        <div class="d-flex pe-5 template-text">
             {{r.name}}
         </div>
         <div class="d-flex" *ngIf="r.type == 'facility'">

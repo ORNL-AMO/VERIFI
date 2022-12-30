@@ -33,20 +33,22 @@
     </div>
 </div>
 <br>
-<table *ngIf="fileReference.selectedWorksheetData">
-    <thead>
-        <tr>
-            <th *ngFor="let header of fileReference.selectedWorksheetData[0]">
-                {{header}}
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr *ngFor="let worksheetData of fileReference.selectedWorksheetData; let index = index;"
-            [ngClass]="{'hidden': index == 0}">
-            <td *ngFor="let data of worksheetData">
-                {{data}}
-            </td>
-        </tr>
-    </tbody>
-</table>
+<div class="table-responsive" *ngIf="fileReference.selectedWorksheetData">
+    <table class="table table-bordered table-sm table-hover utility-data">
+        <thead class="table-mh">
+            <tr>
+                <th *ngFor="let header of fileReference.selectedWorksheetData[0]">
+                    {{header}}
+                </th>
+            </tr>
+        </thead>
+        <tbody class="table-group-divider">
+            <tr *ngFor="let worksheetData of fileReference.selectedWorksheetData; let index = index;"
+                [ngClass]="{'hidden': index == 0}">
+                <td *ngFor="let data of worksheetData">
+                    {{data}}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

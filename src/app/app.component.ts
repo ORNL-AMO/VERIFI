@@ -67,7 +67,7 @@ export class AppComponent {
     } else if (accounts.length != 0) {
       account = accounts[0];
     }
- 
+
     await this.eGridService.parseZipCodeLongLat();
     if (account) {
       await this.initializeFacilities(account);
@@ -80,10 +80,10 @@ export class AppComponent {
       await this.initializeFacilityAnalysisItems(account);
       await this.initializeCustomEmissions(account);
       let updatedAccount: { account: IdbAccount, isChanged: boolean } = this.updateDbEntryService.updateAccount(account);
-      if(updatedAccount.isChanged){
+      if (updatedAccount.isChanged) {
         await this.accountDbService.updateWithObservable(updatedAccount.account).toPromise();
         this.accountDbService.selectedAccount.next(updatedAccount.account);
-      }else{
+      } else {
         this.accountDbService.selectedAccount.next(account);
       }
       this.dataInitialized = true;

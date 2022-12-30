@@ -129,7 +129,7 @@ export class AnalysisItemCardComponent implements OnInit {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setAnalysisItems(selectedAccount, selectedFacility);
     this.analysisDbService.selectedAnalysisItem.next(addedItem);
-    this.toastNotificationService.showToast('Analysis Copy Created', undefined, undefined, false, "success");
+    this.toastNotificationService.showToast('Analysis Copy Created', undefined, undefined, false, "bg-success");
     this.router.navigateByUrl('facility/' + selectedFacility.id + '/analysis/run-analysis');
   }
 
@@ -158,7 +158,7 @@ export class AnalysisItemCardComponent implements OnInit {
     await this.dbChangesService.setAccountAnalysisItems(selectedAccount)
     await this.dbChangesService.setAnalysisItems(selectedAccount, selectedFacility);
     this.displayDeleteModal = false;
-    this.toastNotificationService.showToast('Analysis Item Deleted', undefined, undefined, false, "success");
+    this.toastNotificationService.showToast('Analysis Item Deleted', undefined, undefined, false, "bg-success");
   }
 
   cancelDelete(){

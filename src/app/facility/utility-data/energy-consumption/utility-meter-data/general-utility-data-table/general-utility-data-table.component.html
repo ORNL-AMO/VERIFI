@@ -1,5 +1,5 @@
-<table class="table table-sm" #meterTable [ngClass]="{'copying-table': copyingTable}">
-    <thead>
+<table class="table utility-data table-sm table-bordered table-hover" #meterTable [ngClass]="{'copying-table': copyingTable}">
+    <thead class="sortable">
         <tr>
             <th *ngIf="!copyingTable" class="input">
                 <input #masterCheckbox type="checkbox" (change)="checkAll()" [(ngModel)]="allChecked">
@@ -33,13 +33,13 @@
             <th *ngIf="!copyingTable">Actions</th>
         </tr>
     </thead>
-    <tbody>
+    <tbody class="table-group-divider">
         <tr
             *ngFor="let meterData of selectedMeterData | orderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
             <td *ngIf="!copyingTable" class="input">
                 <input type="checkbox" name="metersSelected" (change)="toggleChecked()" [(ngModel)]="meterData.checked">
             </td>
-            <td [ngClass]="checkError(meterData.readDate)">{{meterData.readDate | date}}</td>
+            <td class="read-date" [ngClass]="checkError(meterData.readDate)">{{meterData.readDate | date}}</td>
             <td *ngIf="generalUtilityDataFilters.totalVolume && showVolumeColumn">{{meterData.totalVolume |
                 customNumber}}</td>
             <td *ngIf="showEnergyColumn">{{meterData.totalEnergyUse | customNumber}}</td>
@@ -52,21 +52,26 @@
             <td *ngIf="generalUtilityDataFilters.deliveryCharge">{{meterData.deliveryCharge | customNumber:true}}</td>
             <td *ngIf="generalUtilityDataFilters.otherCharge">{{meterData.otherCharge | customNumber:true}}</td>
             <td class="actions" *ngIf="!copyingTable">
-                <div class="d-flex">
-                    <i class="fa fa-pencil" title="Edit" (click)="setEditMeterData(meterData)"></i>
-                    <i class="fa fa-trash" title="Delete" (click)="setDeleteMeterData(meterData)"></i>
+                <div class="btn-group">
+                    <button class="btn btn-sm btn-outline" (click)="setEditMeterData(meterData)" title="Edit">
+                        <i class="fa fa-pencil"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline" (click)="setDeleteMeterData(meterData)" title="Delete">
+                        <i class="fa fa-trash"></i>
+                    </button>
                 </div>
             </td>
         </tr>
     </tbody>
 </table>
 
-<div class="tableControls overflow-hidden">
-    <a class="click-link" (click)="copyTable()"><span class="fa fa-copy"></span> Copy Table</a>
-    <div class="item-right">
-        <ngb-pagination [collectionSize]="selectedMeterData.length" [(page)]="currentPageNumber"
-            [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Default pagination">
-        </ngb-pagination>
+<div class="d-flex w-100 justify-content-between">
+    <div>
+        <button class="btn action-btn btn-sm" (click)="copyTable()">
+            <span class="fa fa-copy"></span> Copy Table
+        </button>
     </div>
-    <p class="item-right">{{selectedMeterData.length}} entries</p>
+    <ngb-pagination [collectionSize]="selectedMeterData.length" [(page)]="currentPageNumber" [pageSize]="itemsPerPage"
+        [maxSize]="5" [rotate]="true" aria-label="Pagination">
+    </ngb-pagination>
 </div>

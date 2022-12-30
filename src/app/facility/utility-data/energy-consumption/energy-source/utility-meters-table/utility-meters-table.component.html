@@ -3,10 +3,10 @@
     <p>Please <i class="fa fa-plus"></i> Add New Meter or <i class="fa fa-upload"></i> Import multiple meters from
         excel.</p>
     <div class="d-flex w-100 justify-content-center">
-        <div class="pr-1">
+        <div class="pe-1">
             <button class="btn action-btn" (click)="addMeter()"><i class="fa fa-plus"></i> Add New Meter</button>
         </div>
-        <div class="pl-1">
+        <div class="ps-1">
             <button class="btn nav-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
         </div>
     </div>
@@ -14,20 +14,20 @@
 
 <div *ngIf="meterList.length > 0">
 
-    <div class="d-flex w-100 justify-content-end">
+    <div class="d-flex w-100 justify-content-end mb-2">
         <app-table-items-dropdown></app-table-items-dropdown>
-        <div class="pl-2">
-            <button class="btn action-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
+        <div class="ps-2">
+            <button class="btn nav-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
         </div>
-        <div class="pl-2">
+        <div class="ps-2">
             <button class="btn action-btn" (click)="addMeter()"><i class="fa fa-plus"></i> Add
                 New Meter</button>
         </div>
     </div>
 
     <div class="table-responsive">
-        <table class="table table-hover table-sm" #meterTable>
-            <thead>
+        <table class="table utility-data table-sm table-bordered table-hover" #meterTable>
+            <thead class="sortable">
                 <tr>
                     <th (click)="setOrderDataField('name')" [ngClass]="{'active': orderDataField == 'name'}">Name</th>
                     <th (click)="setOrderDataField('source')" [ngClass]="{'active': orderDataField == 'source'}">Source
@@ -58,7 +58,7 @@
                     <th *ngIf="!copyingTable">Actions</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="table-group-divider">
                 <tr
                     *ngFor="let meter of meterList  | orderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
                     <td [ngClass]="{'invalid': isMeterInvalid(meter)}">
@@ -79,11 +79,16 @@
                     <td>{{meter.agreementType | agreementTypeLabel}}</td>
                     <td>{{meter.siteToSource}}</td>
                     <td class="actions" *ngIf="!copyingTable">
-                        <div class="d-flex">
-                            <i [ngClass]="{'highlight': meter.unitsDifferent}" class="fa fa-pencil" title="Edit"
-                                (click)="selectEditMeter(meter)"></i>
-                            <i class="fa fa-copy" title="Copy" (click)="createCopy(meter)"></i>
-                            <i class="fa fa-trash" title="Delete" (click)="selectDeleteMeter(meter)"></i>
+                        <div class="btn-group">
+                            <button class="btn btn-sm btn-outline" (click)="selectEditMeter(meter)" title="Edit">
+                                <i class="fa fa-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline" (click)="createCopy(meter)" title="Copy">
+                                <i class="fa fa-copy"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline" (click)="selectDeleteMeter(meter)" title="Delete">
+                                <i class="fa fa-trash"></i>
+                            </button>
                         </div>
                     </td>
                 </tr>
@@ -91,13 +96,15 @@
         </table>
     </div>
 
-    <div class="tableControls overflow-hidden">
-        <a class="click-link" (click)="copyTable()"><span class="fa fa-copy"></span> Copy Table</a>
-        <div class="item-right">
-            <ngb-pagination [collectionSize]="meterList.length" [(page)]="currentPageNumber" [pageSize]="itemsPerPage"
-                [rotate]="true" aria-label="Default pagination"></ngb-pagination>
+    <div class="d-flex w-100 justify-content-between">
+        <div>
+            <button class="btn action-btn btn-sm" (click)="copyTable()">
+                <span class="fa fa-copy"></span> Copy Table
+            </button>
         </div>
-        <p class="item-right">{{meterList.length}} entries</p>
+        <ngb-pagination [collectionSize]="meterList.length" [(page)]="currentPageNumber" [pageSize]="itemsPerPage"
+            [maxSize]="5" [rotate]="true" aria-label="Pagination">
+        </ngb-pagination>
     </div>
 </div>
 
@@ -110,7 +117,7 @@
         <p>WARNING: By deleting this meter, you are also deleting all of the meter data and bills associated with it.
             Are you sure you want to preform this action?</p>
     </div>
-    <div class="saveCancel popup-footer text-right">
+    <div class="saveCancel popup-footer text-end">
         <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
         <button class="btn btn-danger" (click)="deleteMeter()">Delete</button>
     </div>

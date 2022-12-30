@@ -1,16 +1,6 @@
 /*
   Buttons
   =============================================== */
-.btn {
-  border-radius: 3px;
-  margin: 10px 0;
-}
-
-.btn-small {
-  padding: 2px 10px !important;
-  border-radius: 3px;
-}
-
 .btn-outline {
   color: #2c386b !important;
   background-color: #fff !important;
@@ -44,18 +34,7 @@
   border-color: #2980b9 !important;
 }
 
-.btn-primary-2,
-.btn-solid {
-  color: #fff !important;
-  background-color: #2c386b !important;
-  border-color: #2c386b !important;
-}
 
-.btn-primary-3 {
-  color: #fff !important;
-  background-color: #17a1b8 !important;
-  border-color: #17a1b8 !important;
-}
 
 .btn-primary-4 {
   color: #fff !important;
@@ -63,17 +42,6 @@
   border-color: #bf3d00 !important;
 }
 
-.btn-primary-5 {
-  color: #333;
-  background-color: #f39c11 !important;
-  border-color: #f39c11 !important;
-}
-
-.btn-primary-6 {
-  color: #333;
-  background-color: #ffe400 !important;
-  border-color: #ffe400 !important;
-}
 
 .btn-secondary {
   color: #333 !important;
@@ -81,11 +49,6 @@
   border-color: #e6e6e6 !important;
 }
 
-.btn-primary i,
-.btn-primary-1 i,
-.btn-primary-2 i,
-.btn-primary-3 i,
-.btn-primary-4 i,
 .btn-outline:hover i {
   color: #fff !important;
 }
@@ -101,13 +64,6 @@
 .saveCancel button:first-child {
   margin-right: 10px;
 }
-
-.btn.add-new {
-  position: absolute;
-  bottom: 10px;
-  right: 0;
-}
-
 .bulk-delete {
   opacity: 0;
   transition: 0.5s opacity;
@@ -116,17 +72,6 @@
 .bulk-delete.show {
   opacity: 1;
 }
-
-.btn-group button:fist-child {
-  border-top-right-radius: 0 !important;
-  border-bottom-right-radius: 0 !important;
-}
-
-.btn-group button:not(:first-child) {
-  border-top-left-radius: 0 !important;
-  border-bottom-left-radius: 0 !important;
-}
-
 
 .analysis .btn-primary-4 {
   color: #fff !important;
@@ -155,8 +100,7 @@
   border-color: #2c386b !important;
 }
 
-.account .btn-primary-4,
-.account .btn-solid {
+.account .btn-primary-4 {
   color: #fff !important;
   background-color: #145A32 !important;
   border-color: #145A32 !important;
@@ -191,12 +135,18 @@
 .btn.toggle-btn.active {
   background-color: #ff6000;
   color: #fff;
+  border-color: #2c386b;
 }
 
 .btn.toggle-btn {
   color: #2c386b;
   background-color: #fff;
   border-color: #2c386b;
+}
+
+.btn.toggle-btn .fa-chevron-right, .btn.toggle-btn .fa-chevron-left{
+  color: #fff;
+  font-size: 10px;
 }
 
 .btn.toggle-btn:hover {
@@ -227,9 +177,3 @@
 .btn.action-btn:hover .fa{
   color: #fff;
 }
-
-/* .btn.dropdown-btn{
-  background-color: #34495E;
-  border-color: #34495E;
-  color: #fff;
-} */

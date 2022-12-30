@@ -21,7 +21,7 @@
             <div class="card-header">
                 <i *ngIf="index != 0" class="fa fa-industry" [ngStyle]="{color: facilityGroup.color}"></i>
                 {{facilityGroup.facilityName}}
-                <a *ngIf="index != 0" class="click-link float-right"
+                <a *ngIf="index != 0" class="click-link float-end"
                     (click)="setFacility(facilityGroup.facilityId)">+Add
                     All</a>
             </div>
@@ -38,45 +38,3 @@
 <div class="alert alert-warning p-2" *ngIf="!importMetersFound">
     No import meters found. Go back to column selection and include meters or click continue to move on to predictors.
 </div>
-
-
-
-
-<!--Column layout modified, not working
-     <div class="row" cdkDropList [cdkDropListData]="fileReference.meterFacilityGroups"
-    [cdkDropListConnectedTo]="facilityGroupIds" (cdkDropListDropped)="dropColumn($event)">
-    <div class="col-3">
-        <div class="card h-100" id={{fileReference.meterFacilityGroups[0].facilityId}}>
-            <div class="card-header">
-                {{fileReference.meterFacilityGroups[0].facilityName}}
-            </div>
-            <div class="card-body">
-                <div class="list-item mt-2 mb-2 p-2" [cdkDragData]="groupItem"
-                    *ngFor="let groupItem of fileReference.meterFacilityGroups[0].groupItems" cdkDrag>
-                    <span class="fa fa-arrows-alt"></span>{{groupItem.value}} <br>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-9">
-        <div class="row no-gutters">
-            <div class="col-12 card"
-                *ngFor="let facilityGroup of fileReference.meterFacilityGroups | slice:1:fileReference.meterFacilityGroups.length; let index = index"
-                id={{facilityGroup.facilityId}}>
-                <div class="card-header">
-                    <i class="fa fa-industry" [ngStyle]="{color: facilityGroup.color}"></i>
-                    {{facilityGroup.facilityName}}
-                    <a class="click-link float-right" (click)="setFacility(facilityGroup.facilityId)">+Add
-                        All</a>
-                </div>
-                <div class="card-body row">
-                    <div class="list-item mt-2 mb-2 p-2 col-3" [cdkDragData]="groupItem"
-                        *ngFor="let groupItem of facilityGroup.groupItems" cdkDrag>
-                        <span class="fa fa-arrows-alt"></span>{{groupItem.value}} <br>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </div>
-</div> -->

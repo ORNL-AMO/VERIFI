@@ -1,5 +1,6 @@
-<table class="table table-sm" #meterTable [ngClass]="{'copying-table': copyingTable}">
-    <thead>
+<table class="table utility-data table-sm table-bordered table-hover" #meterTable
+    [ngClass]="{'copying-table': copyingTable}">
+    <thead class="sortable">
         <tr class="table-mh">
             <th></th>
             <th [attr.colspan]="numGeneralInformation">
@@ -39,11 +40,14 @@
                 [ngClass]="{'active': orderDataField == 'totalBilledDemand'}">Total
                 Billed<br> Demand (kW)</th>
             <th *ngIf="emissionsFilters.marketEmissions" (click)="setOrderDataField('totalMarketEmissions')"
-                [ngClass]="{'active': orderDataField == 'totalMarketEmissions'}">Total <br>Market-Based <br>Emissions (kg
+                [ngClass]="{'active': orderDataField == 'totalMarketEmissions'}">Total <br>Market-Based <br>Emissions
+                (kg
                 CO<sub>2</sub>)</th>
             <th *ngIf="emissionsFilters.locationEmissions" (click)="setOrderDataField('totalLocationEmissions')"
-                [ngClass]="{'active': orderDataField == 'totalLocationEmissions'}">Total <br>Location-Based <br>Emissions (kg
-                CO<sub>2</sub>)</th>
+                [ngClass]="{'active': orderDataField == 'totalLocationEmissions'}">Total <br>Location-Based
+                <br>Emissions (kg
+                CO<sub>2</sub>)
+            </th>
             <th *ngIf="emissionsFilters.recs" (click)="setOrderDataField('RECs')"
                 [ngClass]="{'active': orderDataField == 'RECs'}">RECs<br> (<span
                     [innerHTML]="energyUnit | settingsLabel"></span>)</th>
@@ -135,13 +139,13 @@
             <th *ngIf="!copyingTable">Actions</th>
         </tr>
     </thead>
-    <tbody>
+    <tbody class="table-group-divider">
         <tr
             *ngFor="let meterData of selectedMeterData | orderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
             <td *ngIf="!copyingTable" class="input">
                 <input type="checkbox" name="metersSelected" (change)="toggleChecked()" [(ngModel)]="meterData.checked">
             </td>
-            <td [ngClass]="checkError(meterData.readDate)">{{meterData.readDate | date}}</td>
+            <td class="read-date" [ngClass]="checkError(meterData.readDate)">{{meterData.readDate | date}}</td>
             <td>{{meterData.totalEnergyUse | customNumber}}</td>
             <td *ngIf="generalInformationFilters.totalCost">{{meterData.totalCost | customNumber:true}}</td>
             <td *ngIf="generalInformationFilters.realDemand">{{meterData.totalRealDemand | customNumber}}</td>
@@ -176,21 +180,26 @@
             <td *ngIf="additionalChargesFilters.latePayment">{{meterData.latePayment | customNumber:true}}</td>
             <td *ngIf="additionalChargesFilters.otherCharge">{{meterData.otherCharge | customNumber:true}}</td>
             <td *ngIf="!copyingTable" class="actions">
-                <div class="d-flex">
-                    <i class="fa fa-pencil" title="Edit" (click)="setEditMeterData(meterData)"></i>
-                    <i class="fa fa-trash" title="Delete" (click)="setDeleteMeterData(meterData)"></i>
+                <div class="btn-group">
+                    <button class="btn btn-sm btn-outline" (click)="setEditMeterData(meterData)" title="Edit">
+                        <i class="fa fa-pencil"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline" (click)="setDeleteMeterData(meterData)" title="Delete">
+                        <i class="fa fa-trash"></i>
+                    </button>
                 </div>
             </td>
         </tr>
     </tbody>
 </table>
 
-<div class="tableControls overflow-hidden">
-    <a class="click-link" (click)="copyTable()"><span class="fa fa-copy"></span> Copy Table</a>
-    <div class="item-right">
-        <ngb-pagination [collectionSize]="selectedMeterData.length" [(page)]="currentPageNumber"
-            [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Default pagination">
-        </ngb-pagination>
+<div class="d-flex w-100 justify-content-between">
+    <div>
+        <button class="btn action-btn btn-sm" (click)="copyTable()">
+            <span class="fa fa-copy"></span> Copy Table
+        </button>
     </div>
-    <p class="item-right">{{selectedMeterData.length}} entries</p>
+    <ngb-pagination [collectionSize]="selectedMeterData.length" [(page)]="currentPageNumber" [pageSize]="itemsPerPage"
+        [maxSize]="5" [rotate]="true" aria-label="Pagination">
+    </ngb-pagination>
 </div>

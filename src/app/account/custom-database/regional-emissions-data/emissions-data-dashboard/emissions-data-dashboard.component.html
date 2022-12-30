@@ -5,7 +5,7 @@
                 <h5 class="card-title">Manage Custom Electrical Emissions Factors</h5>
                 <p class="card-text">
                     A database has been provided by VERIFI that pulls emissions output rates from eGrid Subregions based
-                    on the <a target="_blank"
+                    on the <a class="click-link" target="_blank"
                     href="https://www.epa.gov/sites/default/files/2021-04/documents/emission-factors_apr2021.pdf">EPA
                     Emissions & Generation
                     Resource Integrated Database (2021)</a>.
@@ -48,7 +48,7 @@
                         <h5 class="card-title">{{customEmissionsItem.subregion}}</h5>
                     </div>
                     <div>
-                        <button class="btn btn-sm btn-secondary mr-2"
+                        <button class="btn btn-sm btn-secondary me-2"
                             *ngIf="customEmissionsItem.subregion != 'U.S. Average'"
                             (click)="deleteItem(customEmissionsItem)"><span class="fa fa-trash"></span></button>
                         <button class="btn btn-sm btn-secondary" (click)="editItem(customEmissionsItem)"><span

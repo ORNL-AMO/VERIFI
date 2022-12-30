@@ -110,7 +110,7 @@ export class AccountSettingsComponent implements OnInit {
 
     await this.dbChangesService.selectAccount(this.selectedAccount);
     this.loadingService.setLoadingStatus(false);
-    this.toastNotificationService.showToast('New Facility Added!', undefined, undefined, false, 'success');
+    this.toastNotificationService.showToast('New Facility Added!', undefined, undefined, false, 'bg-success');
   }
 
 
@@ -153,7 +153,7 @@ export class AccountSettingsComponent implements OnInit {
       this.router.navigateByUrl('/setup-wizard');
     }
     this.loadingService.setLoadingStatus(false);
-    this.toastNotificationService.showToast('Account Deleted!', undefined, undefined, false, 'success');
+    this.toastNotificationService.showToast('Account Deleted!', undefined, undefined, false, 'bg-success');
   }
 
   setDeleteFacilityEntry(facility: IdbFacility) {
@@ -250,7 +250,7 @@ export class AccountSettingsComponent implements OnInit {
       await this.dbChangesService.updateFacilities(facility, false);
     }
     this.loadingService.setLoadingStatus(false);
-    this.toastNotificationService.showToast('Facility Settings Updated!', undefined, undefined, false, "success");
+    this.toastNotificationService.showToast('Facility Settings Updated!', undefined, undefined, false, "bg-success");
   }
 
 

@@ -19,8 +19,6 @@ import { UtilityMeterDataTableComponent } from './utility-meter-data/utility-met
 import { EditBillComponent } from './utility-meter-data/edit-bill/edit-bill.component';
 import { TableItemsDropdownModule } from 'src/app/shared/table-items-dropdown/table-items-dropdown.module';
 
-
-
 @NgModule({
   declarations: [
     EditMeterComponent,

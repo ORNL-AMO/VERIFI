@@ -4,12 +4,12 @@
             <div class="nav-item" *ngFor="let listItem of facilitiesList"><a class="nav-link"
                     (click)="selectFacility(listItem.facility)"
                     [ngClass]="{'active': listItem.facility.id == selectedFacility.id}">
-                    <i class="pr-2" [ngClass]="listItem.cssClass"></i>
+                    <i class="pe-2" [ngClass]="listItem.cssClass"></i>
                     <span class="fa fa-exclamation-circle" *ngIf="listItem.isInvalid"></span>
                     {{listItem.facility.name}}</a>
             </div>
         </div>
-        <div class="flex-fill pt-2 pl-4 pr-4 pb-4">
+        <div class="flex-fill pt-2 ps-4 pe-4 pb-4">
             <app-select-item-table [facility]="selectedFacility" [selectedAnalysisItem]="selectedAnalysisItem"
                 [facilityAnalysisItems]="facilityAnalysisItems"></app-select-item-table>
         </div>

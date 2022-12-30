@@ -32,7 +32,7 @@
 
                         <!-- <hr> -->
                         <div class="d-flex justify-content-center">
-                            <div class="pr-2">
+                            <div class="pe-2">
                                 Production Variable?
                             </div>
                             <label class="switch" for="{{'isProductionPredictor_'+groupItem.id}}">
@@ -48,46 +48,50 @@
         </div>
     </div>
     <hr>
-    <table>
-        <thead>
-            <tr>
-                <th>
-                    Facility Name
-                </th>
-                <th>
-                    New Predictors Entries
-                </th>
-                <th>
-                    Existing Predictors Entries
-                </th>
-                <th>
-                    Skip Existing?
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr *ngFor="let summary of predictorDataSummaries">
-                <td>
-                    {{summary.facilityName}}
-                </td>
-                <td>
-                    {{summary.newEntries}}
-                    <span *ngIf="summary.newStart">
-                        ({{summary.newStart | date}} - {{summary.newEnd | date}})
-                    </span>
-                </td>
-                <td [ngClass]="{'skip': summary.skipExisting}">
-                    {{summary.existingEntries}}
-                    <span *ngIf="summary.existingStart">
-                        ({{summary.existingStart | date}} - {{summary.existingEnd | date}})
-                    </span>
-                </td>
-                <td>
-                    <input type="checkbox" class="form-control" [(ngModel)]="summary.skipExisting">
-                </td>
-            </tr>
-        </tbody>
-    </table>
+    <div class="table-responsive">
+        <table class="table table-sm table-bordered table-hover utility-data">
+            <thead class="table-mh">
+                <tr>
+                    <th>
+                        Facility Name
+                    </th>
+                    <th>
+                        New Predictors Entries
+                    </th>
+                    <th>
+                        Existing Predictors Entries
+                    </th>
+                    <th>
+                        Skip Existing?
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="table-group-divider">
+                <tr *ngFor="let summary of predictorDataSummaries">
+                    <td>
+                        {{summary.facilityName}}
+                    </td>
+                    <td>
+                        {{summary.newEntries}}
+                        <span *ngIf="summary.newStart">
+                            ({{summary.newStart | date}} - {{summary.newEnd | date}})
+                        </span>
+                    </td>
+                    <td [ngClass]="{'skip': summary.skipExisting}">
+                        {{summary.existingEntries}}
+                        <span *ngIf="summary.existingStart">
+                            ({{summary.existingStart | date}} - {{summary.existingEnd | date}})
+                        </span>
+                    </td>
+                    <td>
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" [(ngModel)]="summary.skipExisting">
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </ng-container>
 
 <div class="alert alert-warning p-2" *ngIf="!predictorsExist">

@@ -1,13 +1,5 @@
-<label for={{labelId}} [ngClass]="{'bold': isBold, 'semibold': isSemiBold}"> {{label}}
+<label class="w-100" for={{labelId}} [ngClass]="{'bold': isBold, 'semibold': isSemiBold}"> {{label}}
     <span *ngIf="isRequired" class="required">*</span>
-    <span class="fa fa-question-circle pull-right" (mouseenter)="displayTooltipHover()"
-        (mouseleave)="hideTooltipHover()" (click)="toggleClickTooltip()"></span>
+    <span class="fa fa-question-circle pull-right" data-bs-toggle="tooltip" data-bs-placement="top"
+        title={{helpTooltip.tooltip}} data-bs-html="true"></span>
 </label>
-
-
-<div class="tooltip-box" *ngIf="showTooltipHover || showTooltipClick">
-    <div class="tooltip up"><span class="arrow arrow-up"></span>
-        <div [innerHTML]="helpTooltip.tooltip" class="p-2">
-        </div>
-    </div>
-</div>

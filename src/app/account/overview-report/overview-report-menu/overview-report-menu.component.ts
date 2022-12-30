@@ -74,7 +74,7 @@ export class OverviewReportMenuComponent implements OnInit {
     this.overviewReportService.reportOptions.next(this.reportOptions);
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setAccountOverviewReportOptions(selectedAccount);
-    this.toastNotificationsService.showToast('New Report Created', undefined, 4000, false, "success");
+    this.toastNotificationsService.showToast('New Report Created', undefined, 4000, false, "bg-success");
     this.router.navigateByUrl('/account/reports/basic-report');
   }
 
@@ -89,7 +89,7 @@ export class OverviewReportMenuComponent implements OnInit {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setAccountOverviewReportOptions(selectedAccount);
     this.overviewReportService.reportOptions.next(this.reportOptions);
-    this.toastNotificationsService.showToast('Report Updated', undefined, 4000, false, "success");
+    this.toastNotificationsService.showToast('Report Updated', undefined, 4000, false, "bg-success");
     this.router.navigateByUrl('/account/reports/basic-report');
   }
 
@@ -122,7 +122,7 @@ export class OverviewReportMenuComponent implements OnInit {
       await this.dbChangesService.setAccountOverviewReportOptions(selectedAccount);
     }
     this.overviewReportService.reportOptions.next(this.reportOptions);
-    this.toastNotificationsService.showToast('Template Configuration Saved', undefined, 4000, false, "success");
+    this.toastNotificationsService.showToast('Template Configuration Saved', undefined, 4000, false, "bg-success");
     this.displayCreateTemplate = false;
   }
 

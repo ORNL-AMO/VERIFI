@@ -37,7 +37,7 @@
                     <span *ngIf="!utilityUsageSummary.consumptionTargetYear">
                         &mdash;
                     </span>
-                    <span *ngIf="utilityUsageSummary.consumptionChange" class="small pl-2 pull-right green"
+                    <span *ngIf="utilityUsageSummary.consumptionChange" class="small ps-2 pull-right green"
                         [ngClass]="{'red': utilityUsageSummary.consumptionChange > 0}">
                         ({{utilityUsageSummary.consumptionChange | customNumber}})
                     </span>
@@ -50,7 +50,7 @@
                         &mdash;
                     </span>
 
-                    <span *ngIf="utilityUsageSummary.costChange" class="small pl-2 pull-right green"
+                    <span *ngIf="utilityUsageSummary.costChange" class="small ps-2 pull-right green"
                         [ngClass]="{'red': utilityUsageSummary.costChange > 0}">
                         ({{utilityUsageSummary.costChange | customNumber:true}})
                     </span>
@@ -63,7 +63,7 @@
                         &mdash;
                     </span>
 
-                    <span *ngIf="utilityUsageSummary.marketEmissionsChange" class="small pl-2 pull-right green"
+                    <span *ngIf="utilityUsageSummary.marketEmissionsChange" class="small ps-2 pull-right green"
                         [ngClass]="{'red': utilityUsageSummary.marketEmissionsChange > 0}">
                         ({{utilityUsageSummary.marketEmissionsChange | customNumber}})
                     </span>
@@ -76,7 +76,7 @@
                         &mdash;
                     </span>
 
-                    <span *ngIf="utilityUsageSummary.locationEmissionsChange" class="small pl-2 pull-right green"
+                    <span *ngIf="utilityUsageSummary.locationEmissionsChange" class="small ps-2 pull-right green"
                         [ngClass]="{'red': utilityUsageSummary.locationEmissionsChange > 0}">
                         ({{utilityUsageSummary.locationEmissionsChange | customNumber}})
                     </span>
@@ -130,7 +130,7 @@
                         &mdash;
                     </span>
                     <span *ngIf="facilityReportUtilitySummary.totals.consumptionChange"
-                        class="small pl-2 pull-right green"
+                        class="small ps-2 pull-right green"
                         [ngClass]="{'red': facilityReportUtilitySummary.totals.consumptionChange > 0}">
                         ({{facilityReportUtilitySummary.totals.consumptionChange | customNumber}})
                     </span>
@@ -143,7 +143,7 @@
                     <span *ngIf="!facilityReportUtilitySummary.totals.costTargetYear">
                         &mdash;
                     </span>
-                    <span *ngIf="facilityReportUtilitySummary.totals.costChange" class="small pl-2 pull-right green"
+                    <span *ngIf="facilityReportUtilitySummary.totals.costChange" class="small ps-2 pull-right green"
                         [ngClass]="{'red': facilityReportUtilitySummary.totals.costChange > 0}">
                         ({{facilityReportUtilitySummary.totals.costChange | customNumber: true}})
                     </span>
@@ -156,7 +156,7 @@
                         &mdash;
                     </span>
                     <span *ngIf="facilityReportUtilitySummary.totals.marketEmissionsChange"
-                        class="small pl-2 pull-right green"
+                        class="small ps-2 pull-right green"
                         [ngClass]="{'red': facilityReportUtilitySummary.totals.marketEmissionsChange > 0}">
                         ({{facilityReportUtilitySummary.totals.marketEmissionsChange | customNumber}})
                     </span>
@@ -169,7 +169,7 @@
                         &mdash;
                     </span>
                     <span *ngIf="facilityReportUtilitySummary.totals.locationEmissionsChange"
-                        class="small pl-2 pull-right green"
+                        class="small ps-2 pull-right green"
                         [ngClass]="{'red': facilityReportUtilitySummary.totals.locationEmissionsChange > 0}">
                         ({{facilityReportUtilitySummary.totals.locationEmissionsChange | customNumber}})
                     </span>

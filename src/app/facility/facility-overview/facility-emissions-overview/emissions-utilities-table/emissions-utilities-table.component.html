@@ -1,5 +1,5 @@
 <div class="table-responsive">
-    <table class="table table-sm" *ngIf="utilityUsageSummaryData">
+    <table class="table utility-data table-sm table-bordered table-hover" *ngIf="utilityUsageSummaryData">
         <thead>
             <tr class="table-mh">
                 <th class="w-25"></th>
@@ -29,7 +29,7 @@
                 </th>
             </tr>
         </thead>
-        <tbody>
+        <tbody class="table-group-divider">
             <tr *ngFor="let utilityUsageSummary of utilityUsageSummaryData.utilitySummaries">
                 <td>
                     {{utilityUsageSummary.utility}}
@@ -44,7 +44,7 @@
                     </span>
 
                     <span *ngIf="utilityUsageSummary.marketEmissionsChangeSinceLastYear"
-                        class="small pl-2 pull-right green"
+                        class="small ps-2 pull-right green"
                         [ngClass]="{'red': utilityUsageSummary.marketEmissionsChangeSinceLastYear > 0}">
                         ({{utilityUsageSummary.marketEmissionsChangeSinceLastYear | customNumber}})
                     </span>
@@ -58,7 +58,7 @@
                     </span>
 
                     <span *ngIf="utilityUsageSummary.locationEmissionsChangeSinceLastYear"
-                        class="small pl-2 pull-right green"
+                        class="small ps-2 pull-right green"
                         [ngClass]="{'red': utilityUsageSummary.locationEmissionsChangeSinceLastYear > 0}">
                         ({{utilityUsageSummary.locationEmissionsChangeSinceLastYear | customNumber}})
                     </span>
@@ -115,7 +115,7 @@
                         &mdash;
                     </span>
                     <span *ngIf="utilityUsageSummaryData.total.marketEmissionsChangeSinceLastYear"
-                        class="small pl-2 pull-right green"
+                        class="small ps-2 pull-right green"
                         [ngClass]="{'red': utilityUsageSummaryData.total.marketEmissionsChangeSinceLastYear > 0}">
                         ({{utilityUsageSummaryData.total.marketEmissionsChangeSinceLastYear | customNumber}})
                     </span>
@@ -128,7 +128,7 @@
                         &mdash;
                     </span>
                     <span *ngIf="utilityUsageSummaryData.total.locationEmissionsChangeSinceLastYear"
-                        class="small pl-2 pull-right green"
+                        class="small ps-2 pull-right green"
                         [ngClass]="{'red': utilityUsageSummaryData.total.locationEmissionsChangeSinceLastYear > 0}">
                         ({{utilityUsageSummaryData.total.locationEmissionsChangeSinceLastYear | customNumber}})
                     </span>
