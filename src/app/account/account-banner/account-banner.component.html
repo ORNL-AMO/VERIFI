@@ -18,6 +18,10 @@
                         class="fa fa-microscope"></i>Analysis</a>
             </li>
             <li class="nav-item" [ngClass]="{'disabled': meterData.length == 0}">
+                <a class="nav-link" routerLink="account-reports" [routerLinkActive]="['active']"><i
+                        class="fa fa-folder"></i>Acc. Reports</a>
+            </li>
+            <li class="nav-item" [ngClass]="{'disabled': meterData.length == 0}">
                 <a class="nav-link" routerLink="reports" [routerLinkActive]="['active']"><i
                         class="fa fa-folder"></i>Reports</a>
             </li>

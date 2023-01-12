@@ -1,0 +1,23 @@
+<div class="reports banner sticky-top d-flex justify-content-between" *ngIf="!inDashboard"
+    [ngClass]="{'modal-open': modalOpen}">
+    <div>
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <a class="nav-link" routerLink="/account/account-reports/setup" [routerLinkActive]="['active']">
+                    <span class="fa fa-exclamation-circle" *ngIf="!setupValid"></span>
+                    <i class="fa fa-gears"></i>
+                    Report Setup</a>
+            </li>
+        </ul>
+    </div>
+    <div>
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <a class="nav-link home-link" routerLink="dashboard" [routerLinkActive]="['active']">
+                    <i class="fa fa-list"></i>
+                    All Account Reports
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>

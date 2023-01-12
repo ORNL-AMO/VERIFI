@@ -2,6 +2,7 @@ import { Component, ElementRef, ViewChild } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { AccountAnalysisDbService } from './indexedDB/account-analysis-db.service';
 import { AccountdbService } from './indexedDB/account-db.service';
+import { AccountReportDbService } from './indexedDB/account-report-db.service';
 import { AnalysisDbService } from './indexedDB/analysis-db.service';
 import { CustomEmissionsDbService } from './indexedDB/custom-emissions-db.service';
 import { FacilitydbService } from './indexedDB/facility-db.service';
@@ -11,7 +12,7 @@ import { UpdateDbEntryService } from './indexedDB/update-db-entry.service';
 import { UtilityMeterdbService } from './indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from './indexedDB/utilityMeterData-db.service';
 import { UtilityMeterGroupdbService } from './indexedDB/utilityMeterGroup-db.service';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbCustomEmissionsItem, IdbFacility, IdbOverviewReportOptions, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from './models/idb';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbCustomEmissionsItem, IdbFacility, IdbOverviewReportOptions, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from './models/idb';
 import { EGridService } from './shared/helper-services/e-grid.service';
 
 // declare ga as a function to access the JS code in TS
@@ -41,7 +42,8 @@ export class AppComponent {
     private analysisDbService: AnalysisDbService,
     private accountAnalysisDbService: AccountAnalysisDbService,
     private updateDbEntryService: UpdateDbEntryService,
-    private customEmissionsDbService: CustomEmissionsDbService) {
+    private customEmissionsDbService: CustomEmissionsDbService,
+    private accountReportDbService: AccountReportDbService) {
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
         gtag('config', 'G-YG1QD02XSE',
@@ -72,6 +74,7 @@ export class AppComponent {
     if (account) {
       await this.initializeFacilities(account);
       await this.initializeReports(account);
+      await this.initializeAccountReports(account);
       await this.initializePredictors(account);
       await this.initializeMeters(account);
       await this.initializeMeterData(account);
@@ -151,6 +154,19 @@ export class AppComponent {
       this.overviewReportOptionsDbService.selectedOverviewReportOptions.next(reportOptions);
     }
   }
+
+  async initializeAccountReports(account: IdbAccount) {
+    this.loadingMessage = "Loading Reports 2.0...."
+    let accountReports: Array<IdbAccountReport> = await this.accountReportDbService.getAllByIndexRange('accountId', account.guid).toPromise();
+    this.accountReportDbService.accountReports.next(accountReports);
+    let accountReportId: number = this.accountReportDbService.getInitialReport();
+    if (accountReportId) {
+      let report: IdbAccountReport = accountReports.find(item => { return item.id == accountReportId });
+      this.accountReportDbService.selectedReport.next(report);
+    }
+  }
+
+
 
   async initializePredictors(account: IdbAccount) {
     //set predictors

@@ -178,7 +178,7 @@ export interface IdbUtilityMeterData {
 
     //electricity
     totalRealDemand?: number,
-    totalBilledDemand? :number,
+    totalBilledDemand?: number,
     nonEnergyCharge?: number,
     block1Consumption?: number,
     block1ConsumptionCharge?: number,
@@ -249,6 +249,20 @@ export interface IdbOverviewReportOptions {
     reportOptionsType?: 'betterPlants' | 'data'
 }
 
+
+export interface IdbAccountReport {
+    id?: number,
+    guid: string,
+    accountId: string,
+    overviewReportId?: string,
+    reportYear: number,
+    date: Date,
+    name: string,
+    reportType: ReportType
+}
+
+
+
 export interface IdbAnalysisItem {
     id?: number,
     guid: string,
@@ -264,7 +278,7 @@ export interface IdbAnalysisItem {
     selectedYearAnalysis?: boolean
 }
 
-export interface AnalysisSetupErrors{
+export interface AnalysisSetupErrors {
     hasError: boolean,
     missingName: boolean,
     noGroups: boolean,
@@ -350,3 +364,4 @@ export interface IdbCustomEmissionsItem {
 export type AnalysisType = 'absoluteEnergyConsumption' | 'energyIntensity' | 'modifiedEnergyIntensity' | 'regression';
 export type MeterSource = "Electricity" | "Natural Gas" | "Other Fuels" | "Other Energy" | "Water" | "Waste Water" | "Other Utility";
 export type MeterPhase = "Solid" | "Liquid" | "Gas";
+export type ReportType = "betterPlants" | 'dataOverview';

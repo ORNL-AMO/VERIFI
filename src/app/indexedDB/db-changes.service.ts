@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { LoadingService } from '../core-components/loading/loading.service';
 import { ToastNotificationsService } from '../core-components/toast-notifications/toast-notifications.service';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbCustomEmissionsItem, IdbFacility, IdbOverviewReportOptions, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from '../models/idb';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbCustomEmissionsItem, IdbFacility, IdbOverviewReportOptions, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from '../models/idb';
 import { AccountAnalysisDbService } from './account-analysis-db.service';
 import { AccountdbService } from './account-db.service';
+import { AccountReportDbService } from './account-report-db.service';
 import { AnalysisDbService } from './analysis-db.service';
 import { CustomEmissionsDbService } from './custom-emissions-db.service';
 import { FacilitydbService } from './facility-db.service';
@@ -28,7 +29,8 @@ export class DbChangesService {
     private updateDbEntryService: UpdateDbEntryService,
     private customEmissionsDbService: CustomEmissionsDbService,
     private loadingService: LoadingService,
-    private toastNotificationService: ToastNotificationsService) { }
+    private toastNotificationService: ToastNotificationsService,
+    private accountReportDbService: AccountReportDbService) { }
 
   async updateAccount(account: IdbAccount) {
     let updatedAccount: IdbAccount = await this.accountDbService.updateWithObservable(account).toPromise();
@@ -57,6 +59,8 @@ export class DbChangesService {
     this.facilityDbService.accountFacilities.next(accountFacilites);
     //set overview reports
     await this.setAccountOverviewReportOptions(account);
+    //set reports
+    await this.setAccountReports(account);
     //set predictors
     await this.setPredictors(account);
     //set meters
@@ -137,6 +141,12 @@ export class DbChangesService {
     this.overviewReportOptionsDbService.overviewReportOptionsTemplates.next(templates);
   }
 
+  async setAccountReports(account: IdbAccount) {
+    let accountReports: Array<IdbAccountReport> = await this.accountReportDbService.getAllByIndexRange('accountId', account.guid).toPromise();
+    this.accountReportDbService.accountReports.next(accountReports);
+  }
+
+
 
   async setPredictors(account: IdbAccount, facility?: IdbFacility) {
     let predictors: Array<IdbPredictorEntry> = await this.predictorsDbService.getAllByIndexRange('accountId', account.guid).toPromise();
@@ -210,7 +220,7 @@ export class DbChangesService {
     this.customEmissionsDbService.accountEmissionsItems.next(customEmissionsItems);
   }
 
-  async deleteFacility(facility: IdbFacility, selectedAccount: IdbAccount){
+  async deleteFacility(facility: IdbFacility, selectedAccount: IdbAccount) {
     this.loadingService.setLoadingStatus(true);
 
     // Delete all info associated with account

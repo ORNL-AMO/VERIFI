@@ -89,6 +89,9 @@ import { FacilityEmissionsOverviewComponent } from './facility/facility-overview
 import { FacilityWaterOverviewComponent } from './facility/facility-overview/facility-water-overview/facility-water-overview.component';
 import { FacilityOverviewComponent } from './facility/facility-overview/facility-overview.component';
 import { AccountAnalysisListComponent } from './facility/analysis/account-analysis-list/account-analysis-list.component';
+import { AccountReportsDashboardComponent } from './account/account-reports/account-reports-dashboard/account-reports-dashboard.component';
+import { AccountReportsComponent } from './account/account-reports/account-reports.component';
+import { AccountReportSetupComponent } from './account/account-reports/account-report-setup/account-report-setup.component';
 
 const routes: Routes = [
   {
@@ -136,6 +139,15 @@ const routes: Routes = [
           { path: 'basic-report', component: BasicReportComponent },
           { path: 'better-plants-menu', component: BetterPlantsReportMenuComponent },
           { path: 'better-plants-report', component: BetterPlantsReportComponent }
+        ]
+      },
+      {
+        path: 'account-reports',
+        component: AccountReportsComponent,
+        children: [
+          { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
+          { path: 'dashboard', component: AccountReportsDashboardComponent },
+          { path: 'setup', component: AccountReportSetupComponent }
         ]
       },
       {

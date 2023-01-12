@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { HelpPanelService } from 'src/app/help-panel/help-panel.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { IdbAccountAnalysisItem } from 'src/app/models/idb';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
@@ -22,7 +21,7 @@ export class AccountAnalysisBannerComponent implements OnInit {
   setupValid: boolean;
   facilitySelectionValid: boolean;
   routerSub: Subscription;
-  constructor(private router: Router, private helpPanelService: HelpPanelService,
+  constructor(private router: Router,
     private sharedDataService: SharedDataService, private accountAnalysisDbService: AccountAnalysisDbService) { }
 
   ngOnInit(): void {
@@ -47,11 +46,6 @@ export class AccountAnalysisBannerComponent implements OnInit {
     this.accountAnalysisItemSub.unsubscribe();
     this.modalOpenSub.unsubscribe();
     this.routerSub.unsubscribe();
-  }
-
-  toggleHelpPanel() {
-    let helpPanelOpen: boolean = this.helpPanelService.helpPanelOpen.getValue();
-    this.helpPanelService.helpPanelOpen.next(!helpPanelOpen);
   }
 
   setInDashboard(url: string) {
