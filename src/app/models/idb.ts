@@ -1,7 +1,7 @@
 import { JStatRegressionModel } from './analysis';
 import { CalanderizedMeter, MonthlyData } from './calanderization';
 import { ElectricityDataFilters, GeneralUtilityDataFilters } from './meterDataFilter';
-import { ReportOptions } from './overview-report';
+import { BetterPlantsReportSetup, ReportOptions } from './overview-report';
 import { SustainabilityQuestions } from './sustainabilityQuestions';
 
 export interface IdbAccount {
@@ -255,10 +255,12 @@ export interface IdbAccountReport {
     guid: string,
     accountId: string,
     overviewReportId?: string,
+    baselineYear: number,
     reportYear: number,
     date: Date,
     name: string,
-    reportType: ReportType
+    reportType: ReportType,
+    betterPlantsReportSetup: BetterPlantsReportSetup
 }
 
 

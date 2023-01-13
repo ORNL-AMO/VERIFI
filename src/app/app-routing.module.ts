@@ -147,7 +147,7 @@ const routes: Routes = [
         children: [
           { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
           { path: 'dashboard', component: AccountReportsDashboardComponent },
-          { path: 'setup', component: AccountReportSetupComponent }
+          { path: 'setup', component: AccountReportSetupComponent },
         ]
       },
       {

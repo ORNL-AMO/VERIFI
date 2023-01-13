@@ -25,7 +25,7 @@
                     </div>
                     <div class="col-6 pt-2" *ngFor="let report of listItem.reports">
                         <!-- <app-account-analysis-item-card [analysisItem]="analysisItem"></app-account-analysis-item-card> -->
-                        <app-account-reports-item-card></app-account-reports-item-card>
+                        <app-account-reports-item-card [report]="report"></app-account-reports-item-card>
                     </div>
                     <div class="col-12">
                         <hr>

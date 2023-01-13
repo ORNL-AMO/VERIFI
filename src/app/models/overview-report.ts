@@ -115,3 +115,10 @@ export interface BetterPlantsEnergySummary {
   otherEnergyUse: number,
   otherEnergyTypes: Array<string>
 }
+
+export interface BetterPlantsReportSetup {
+  analysisItemId: string,
+  includeFacilityNames: boolean,
+  baselineAdjustmentNotes: string,
+  modificationNotes: string,
+}

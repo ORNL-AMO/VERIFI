@@ -5,7 +5,7 @@
                 <span class="fa"
                     [ngClass]="{'fa-circle-check':analysisItem.selectedYearAnalysis, 'fa-circle':!analysisItem.selectedYearAnalysis}"
                     (click)="setUseItem()"></span>
-                <a class="item-name" (click)="selectAnalysisItem()">
+                <a class="item-name click-link" (click)="selectAnalysisItem()">
                     {{analysisItem.name}}
                 </a>
             </div>

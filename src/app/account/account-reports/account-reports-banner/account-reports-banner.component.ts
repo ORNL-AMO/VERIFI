@@ -20,6 +20,9 @@ export class AccountReportsBannerComponent {
   modalOpen: boolean;
   setupValid: boolean;
   selectedReportSub: Subscription;
+  selectedReport: IdbAccountReport;
+  betterPlantsValid: boolean;
+  dataOverviewValid: boolean;
   constructor(private router: Router,
     private sharedDataService: SharedDataService,
     private accountReportsService: AccountReportsService,
@@ -35,6 +38,7 @@ export class AccountReportsBannerComponent {
       this.modalOpen = val;
     });
     this.selectedReportSub = this.accountReportDbService.selectedReport.subscribe(val => {
+      this.selectedReport = val;
       if (val && !this.inDashboard) {
         this.setValidation(val);
       }
@@ -53,7 +57,15 @@ export class AccountReportsBannerComponent {
   }
 
   setValidation(report: IdbAccountReport) {
-    this.setupValid = this.accountReportsService.getSetupFormFromReport(report).valid;
+    let setupValid: boolean = this.accountReportsService.getSetupFormFromReport(report).valid;
+    let betterPlantsValid: boolean = true;
+    let dataOverviewValid: boolean = true;
+    if (report.reportType == 'betterPlants') {
+      betterPlantsValid = this.accountReportsService.getBetterPlantsFormFromReport(report.betterPlantsReportSetup).valid;
+    } else if (report.reportType == 'dataOverview') {
+      // dataOverviewValid = 
+    }
+    this.setupValid = (setupValid && betterPlantsValid && dataOverviewValid);
   }
 
 

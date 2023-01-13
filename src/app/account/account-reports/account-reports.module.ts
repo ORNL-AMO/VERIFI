@@ -7,6 +7,10 @@ import { AccountReportsDashboardComponent } from './account-reports-dashboard/ac
 import { AccountReportsItemCardComponent } from './account-reports-dashboard/account-reports-item-card/account-reports-item-card.component';
 import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.module';
 import { AccountReportSetupComponent } from './account-report-setup/account-report-setup.component';
+import { ReactiveFormsModule } from '@angular/forms';
+import { BetterPlantsSetupComponent } from './account-report-setup/better-plants-setup/better-plants-setup.component';
+import { DataOverviewSetupComponent } from './account-report-setup/data-overview-setup/data-overview-setup.component';
+import { LabelWithTooltipModule } from 'src/app/shared/label-with-tooltip/label-with-tooltip.module';
 
 
 
@@ -16,12 +20,16 @@ import { AccountReportSetupComponent } from './account-report-setup/account-repo
     AccountReportsBannerComponent,
     AccountReportsDashboardComponent,
     AccountReportsItemCardComponent,
-    AccountReportSetupComponent
+    AccountReportSetupComponent,
+    BetterPlantsSetupComponent,
+    DataOverviewSetupComponent
   ],
   imports: [
     CommonModule,
     RouterModule,
-    HelperPipesModule
+    HelperPipesModule,
+    ReactiveFormsModule,
+    LabelWithTooltipModule
   ]
 })
 export class AccountReportsModule { }
