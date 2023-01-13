@@ -55,7 +55,6 @@ export class BetterPlantsSetupComponent {
     this.accountReportDbService.selectedReport.next(selectedReport);
   }
 
-
   setAnalysisOptions(report: IdbAccountReport) {
     let analysisOptions: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
     this.accountAnalysisItems = analysisOptions.filter(option => { return option.reportYear == report.reportYear && option.energyIsSource });

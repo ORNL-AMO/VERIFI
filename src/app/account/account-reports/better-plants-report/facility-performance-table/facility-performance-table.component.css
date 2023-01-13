@@ -1,0 +1,11 @@
+table tbody tr:nth-child(even){
+    background-color: white;
+}
+table tbody tr:nth-child(even):hover{
+    background-color: rgba(0,0,0,.075);
+}
+
+th, td{
+    text-align: center;
+    width: 33.3333%;
+}

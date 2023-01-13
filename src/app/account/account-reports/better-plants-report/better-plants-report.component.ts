@@ -9,12 +9,13 @@ import { OverviewReportOptionsDbService } from 'src/app/indexedDB/overview-repor
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, IdbOverviewReportOptions, IdbPredictorEntry, IdbUtilityMeter } from 'src/app/models/idb';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbFacility, IdbOverviewReportOptions, IdbPredictorEntry, IdbUtilityMeter } from 'src/app/models/idb';
 import { BetterPlantsSummary, ReportOptions } from 'src/app/models/overview-report';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { ConvertMeterDataService } from 'src/app/shared/helper-services/convert-meter-data.service';
 import { BetterPlantsReportClass } from 'src/app/calculations/better-plants-calculations/betterPlantsReportClass';
-import { OverviewReportService } from '../overview-report.service';
+import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
+import { AccountReportsService } from '../account-reports.service';
 
 @Component({
   selector: 'app-better-plants-report',
@@ -23,14 +24,15 @@ import { OverviewReportService } from '../overview-report.service';
 })
 export class BetterPlantsReportComponent implements OnInit {
 
-  reportOptions: ReportOptions;
+  selectedReport: IdbAccountReport;
   printSub: Subscription;
   print: boolean;
   account: IdbAccount;
   betterPlantsSummary: BetterPlantsSummary;
   calculating: boolean;
   worker: Worker;
-  constructor(private overviewReportService: OverviewReportService, private overviewReportOptionsDbService: OverviewReportOptionsDbService,
+  constructor(private accountReportDbService: AccountReportDbService,
+    private accountReportsService: AccountReportsService,
     private router: Router, private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
     private predictorDbService: PredictordbService,
@@ -41,20 +43,22 @@ export class BetterPlantsReportComponent implements OnInit {
     private utilityMeterDbService: UtilityMeterdbService) { }
 
   ngOnInit(): void {
-    this.printSub = this.overviewReportService.print.subscribe(print => {
+    this.printSub = this.accountReportsService.print.subscribe(print => {
       this.print = print;
       if (this.print) {
         this.printReport();
       }
     });
-    this.reportOptions = this.overviewReportService.reportOptions.getValue();
-    if (!this.reportOptions) {
-      let selectedOptions: IdbOverviewReportOptions = this.overviewReportOptionsDbService.selectedOverviewReportOptions.getValue()
-      if (selectedOptions) {
-        this.reportOptions = selectedOptions.reportOptions;
-      } else {
-        this.router.navigateByUrl('/overview-report/report-dashboard');
-      }
+    this.selectedReport = this.accountReportDbService.selectedReport.getValue();
+    if (!this.selectedReport) {
+      // let selectedOptions: IdbOverviewReportOptions = this.overviewReportOptionsDbService.selectedOverviewReportOptions.getValue()
+      // if (selectedOptions) {
+      //   this.reportOptions = selectedOptions.reportOptions;
+      // } else {
+      //   this.router.navigateByUrl('/overview-report/report-dashboard');
+      // }
+      // this.router.navigateByUrl('/overview-report/report-dashboard');
+    } else {
     }
     this.account = this.accountDbService.selectedAccount.getValue();
     this.setBetterPlantsSummary();
@@ -72,7 +76,7 @@ export class BetterPlantsReportComponent implements OnInit {
       window.dispatchEvent(new Event("resize"));
       setTimeout(() => {
         window.print();
-        this.overviewReportService.print.next(false)
+        this.accountReportsService.print.next(false)
       }, 100)
     }, 100)
   }
@@ -84,7 +88,7 @@ export class BetterPlantsReportComponent implements OnInit {
     let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
     let accountFacilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
-    let selectedAnalysisItem: IdbAccountAnalysisItem = accountAnalysisItems.find(item => { return item.guid == this.reportOptions.analysisItemId });
+    let selectedAnalysisItem: IdbAccountAnalysisItem = accountAnalysisItems.find(item => { return item.guid == this.selectedReport.betterPlantsReportSetup.analysisItemId });
     selectedAnalysisItem.energyUnit = 'MMBtu';
     let includedFacilityIds: Array<string> = new Array();
     selectedAnalysisItem.facilityAnalysisItems.forEach(item => {
@@ -107,8 +111,8 @@ export class BetterPlantsReportComponent implements OnInit {
       };
       this.calculating = true;
       this.worker.postMessage({
-        reportYear: this.reportOptions.targetYear,
-        baselineYear: this.reportOptions.baselineYear,
+        baselineYear: this.selectedReport.baselineYear,
+        reportYear: this.selectedReport.reportYear,
         selectedAnalysisItem: selectedAnalysisItem,
         calanderizedMeters: calanderizedMeters,
         accountPredictorEntries: accountPredictorEntries,
@@ -119,8 +123,8 @@ export class BetterPlantsReportComponent implements OnInit {
     } else {
       // Web Workers are not supported in this environment.
       let betterPlantsReportClass: BetterPlantsReportClass = new BetterPlantsReportClass(
-        this.reportOptions.baselineYear,
-        this.reportOptions.targetYear,
+        this.selectedReport.baselineYear,
+        this.selectedReport.reportYear,
         selectedAnalysisItem,
         calanderizedMeters,
         accountPredictorEntries,

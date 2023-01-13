@@ -17,7 +17,8 @@ export class BetterPlantsReportClass {
     totalEnergySavings: number;
     percentTotalImprovement: number;
     constructor(
-        reportOptions: ReportOptions,
+        baselineYear: number,
+        reportYear: number,
         selectedAnalysisItem: IdbAccountAnalysisItem,
         calanderizedMeters: Array<CalanderizedMeter>,
         accountPredictorEntries: Array<IdbPredictorEntry>,
@@ -26,9 +27,9 @@ export class BetterPlantsReportClass {
         accountAnalysisItems: Array<IdbAnalysisItem>
     ) {
         this.setFacilityPerformance(selectedAnalysisItem, facilities, calanderizedMeters, accountPredictorEntries, accountAnalysisItems);
-        this.setReportAndBaselineYearSummaries(selectedAnalysisItem, account, calanderizedMeters, facilities, accountPredictorEntries, accountAnalysisItems, reportOptions);
-        this.setReportYearEnergySummaryClass(calanderizedMeters, reportOptions.targetYear);
-        this.setBaselineYearEnergySummaryClass(calanderizedMeters, reportOptions.baselineYear);
+        this.setReportAndBaselineYearSummaries(selectedAnalysisItem, account, calanderizedMeters, facilities, accountPredictorEntries, accountAnalysisItems, baselineYear, reportYear);
+        this.setReportYearEnergySummaryClass(calanderizedMeters, reportYear);
+        this.setBaselineYearEnergySummaryClass(calanderizedMeters, baselineYear);
         this.setAdjustBaselinePrimaryEnergy();
         this.setTotalEnergySavings();
         this.setPercentTotalImprovement();
@@ -65,11 +66,12 @@ export class BetterPlantsReportClass {
         accountFacilities: Array<IdbFacility>,
         accountPredictorEntries: Array<IdbPredictorEntry>,
         allAccountAnalysisItems: Array<IdbAnalysisItem>,
-        reportOptions: ReportOptions) {
+        baselineYear: number,
+        reportYear: number) {
         let annualAccountAnalysisSummaryClass: AnnualAccountAnalysisSummaryClass = new AnnualAccountAnalysisSummaryClass(accountAnalysisItem, account, calanderizedMeters, accountFacilities, accountPredictorEntries, allAccountAnalysisItems, false);
         let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = annualAccountAnalysisSummaryClass.getAnnualAnalysisSummaries();
-        this.reportYearAnalysisSummary = annualAnalysisSummaries.find(summary => { return summary.year == reportOptions.targetYear });
-        this.baselineYearAnalysisSummary = annualAnalysisSummaries.find(summary => { return summary.year == reportOptions.baselineYear });
+        this.reportYearAnalysisSummary = annualAnalysisSummaries.find(summary => { return summary.year == reportYear });
+        this.baselineYearAnalysisSummary = annualAnalysisSummaries.find(summary => { return summary.year == baselineYear });
     }
 
     setReportYearEnergySummaryClass(calanderizedMeters: Array<CalanderizedMeter>, year: number) {

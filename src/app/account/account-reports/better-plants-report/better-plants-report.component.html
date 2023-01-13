@@ -1,0 +1,78 @@
+<div class="report" [ngClass]="{'print': print}" *ngIf="selectedReport && !calculating">
+    <img src="assets/images/better-plants-report-banner.jpg" class="w-100">
+    <div class="row justify-content-center pt-3">
+        <div class="col-12">
+            <app-company-information-table [account]="account">
+            </app-company-information-table>
+        </div>
+    </div>
+    <div class="row justify-content-center pt-2">
+        <div class="col-8">
+            <app-primary-energy-consumption-table [betterPlantsSummary]="betterPlantsSummary" [account]="account"
+                [report]="selectedReport">
+            </app-primary-energy-consumption-table>
+        </div>
+    </div>
+    <div class="row justify-content-center pt-4">
+        <div class="col-10">
+            <p>
+                *Participating plants should be only include those located in the United States
+            </p>
+            <p>
+                **Please refer to the DOE's Energy Baseline Guidance document to determine changes in intensity.
+                Improvement in performance should be reported as a positive number.
+            </p>
+        </div>
+    </div>
+    <div class="row justify-content-center print-break-before">
+        <div class="col-10">
+            <hr class="hide-print">
+            <p class="bold">
+                Please describe any methods undertaken to normalize energy intensity data or adjust baseline data to
+                account for economic and other factors that affect energy use:
+            </p>
+            <p>
+                <span
+                    *ngIf="selectedReport.betterPlantsReportSetup.baselineAdjustmentNotes">{{selectedReport.betterPlantsReportSetup.baselineAdjustmentNotes}}</span>
+                <span *ngIf="!selectedReport.betterPlantsReportSetup.baselineAdjustmentNotes">N/A</span>
+            </p>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-10">
+            <p class="bold">
+                Please describe the energy efficient technologies, strategies, and practices employed during the
+                previous year to decrease intensity. Please identify systems impacted and approximate savings from
+                projects. (Ex: Furnace insulation project-12,000 MMBtu/yr savings, compressor controls upgrade-6,000
+                MMBtu/yr, energy awareness campaign, etc):
+            </p>
+            <p>
+                <span
+                    *ngIf="selectedReport.betterPlantsReportSetup.modificationNotes">{{selectedReport.betterPlantsReportSetup.modificationNotes}}</span>
+                <span *ngIf="!selectedReport.betterPlantsReportSetup.modificationNotes">N/A</span>
+            </p>
+        </div>
+    </div>
+    <div class="row justify-content-center print-break-before">
+        <div class="col-10">
+            <hr class="hide-print">
+            <p class="bold pt-4">
+                Facility-level Energy Performance (Applies to Companies with Multiple Plants)
+            </p>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-6">
+            <app-facility-performance-table [betterPlantsSummary]="betterPlantsSummary"
+                [betterPlantsReportSetup]="selectedReport.betterPlantsReportSetup">
+            </app-facility-performance-table>
+        </div>
+    </div>
+    <img src="assets/images/better-plants-report-footer.jpg" class="w-100 pt-4">
+</div>
+
+<div class="w-100 justify-content-center" *ngIf="calculating">
+    <div class="pt-5">
+        <app-calculating-spinner [message]="'Generating Better Plants Report...'"></app-calculating-spinner>
+    </div>
+</div>

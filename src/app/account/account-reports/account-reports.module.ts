@@ -11,6 +11,11 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { BetterPlantsSetupComponent } from './account-report-setup/better-plants-setup/better-plants-setup.component';
 import { DataOverviewSetupComponent } from './account-report-setup/data-overview-setup/data-overview-setup.component';
 import { LabelWithTooltipModule } from 'src/app/shared/label-with-tooltip/label-with-tooltip.module';
+import { BetterPlantsReportComponent } from './better-plants-report/better-plants-report.component';
+import { PrimaryEnergyConsumptionTableComponent } from './better-plants-report/primary-energy-consumption-table/primary-energy-consumption-table.component';
+import { FacilityPerformanceTableComponent } from './better-plants-report/facility-performance-table/facility-performance-table.component';
+import { CompanyInformationTableComponent } from './better-plants-report/company-information-table/company-information-table.component';
+import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/calculating-spinner.module';
 
 
 
@@ -22,14 +27,19 @@ import { LabelWithTooltipModule } from 'src/app/shared/label-with-tooltip/label-
     AccountReportsItemCardComponent,
     AccountReportSetupComponent,
     BetterPlantsSetupComponent,
-    DataOverviewSetupComponent
+    DataOverviewSetupComponent,
+    BetterPlantsReportComponent,
+    PrimaryEnergyConsumptionTableComponent,
+    FacilityPerformanceTableComponent,
+    CompanyInformationTableComponent
   ],
   imports: [
     CommonModule,
     RouterModule,
     HelperPipesModule,
     ReactiveFormsModule,
-    LabelWithTooltipModule
+    LabelWithTooltipModule,
+    CalculatingSpinnerModule
   ]
 })
 export class AccountReportsModule { }

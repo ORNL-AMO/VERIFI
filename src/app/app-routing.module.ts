@@ -47,7 +47,7 @@ import { AccountAnalysisResultsComponent } from './account/account-analysis/acco
 import { MonthlyAccountAnalysisComponent } from './account/account-analysis/account-analysis-results/monthly-account-analysis/monthly-account-analysis.component';
 import { AnnualAccountAnalysisComponent } from './account/account-analysis/account-analysis-results/annual-account-analysis/annual-account-analysis.component';
 import { BetterPlantsReportMenuComponent } from './account/overview-report/better-plants-report-menu/better-plants-report-menu.component';
-import { BetterPlantsReportComponent } from './account/overview-report/better-plants-report/better-plants-report.component';
+// import { BetterPlantsReportComponent } from './account/overview-report/better-plants-report/better-plants-report.component';
 import { EditMeterComponent } from './facility/utility-data/energy-consumption/energy-source/edit-meter/edit-meter.component';
 import { UtilityMetersTableComponent } from './facility/utility-data/energy-consumption/energy-source/utility-meters-table/utility-meters-table.component';
 import { UtilityMeterDataTableComponent } from './facility/utility-data/energy-consumption/utility-meter-data/utility-meter-data-table/utility-meter-data-table.component';
@@ -92,6 +92,7 @@ import { AccountAnalysisListComponent } from './facility/analysis/account-analys
 import { AccountReportsDashboardComponent } from './account/account-reports/account-reports-dashboard/account-reports-dashboard.component';
 import { AccountReportsComponent } from './account/account-reports/account-reports.component';
 import { AccountReportSetupComponent } from './account/account-reports/account-report-setup/account-report-setup.component';
+import { BetterPlantsReportComponent } from './account/account-reports/better-plants-report/better-plants-report.component';
 
 const routes: Routes = [
   {
@@ -138,7 +139,7 @@ const routes: Routes = [
           { path: 'menu', component: OverviewReportMenuComponent },
           { path: 'basic-report', component: BasicReportComponent },
           { path: 'better-plants-menu', component: BetterPlantsReportMenuComponent },
-          { path: 'better-plants-report', component: BetterPlantsReportComponent }
+          // { path: 'better-plants-report', component: BetterPlantsReportComponent }
         ]
       },
       {
@@ -148,6 +149,7 @@ const routes: Routes = [
           { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
           { path: 'dashboard', component: AccountReportsDashboardComponent },
           { path: 'setup', component: AccountReportSetupComponent },
+          { path: 'better-plants-report', component: BetterPlantsReportComponent }
         ]
       },
       {

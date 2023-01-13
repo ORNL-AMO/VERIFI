@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
-import { HelpPanelService } from 'src/app/help-panel/help-panel.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { Subscription } from 'rxjs';
 import { AccountReportsService } from '../account-reports.service';
@@ -21,8 +20,6 @@ export class AccountReportsBannerComponent {
   setupValid: boolean;
   selectedReportSub: Subscription;
   selectedReport: IdbAccountReport;
-  betterPlantsValid: boolean;
-  dataOverviewValid: boolean;
   constructor(private router: Router,
     private sharedDataService: SharedDataService,
     private accountReportsService: AccountReportsService,
