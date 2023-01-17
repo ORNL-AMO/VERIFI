@@ -16,6 +16,8 @@ import { PrimaryEnergyConsumptionTableComponent } from './better-plants-report/p
 import { FacilityPerformanceTableComponent } from './better-plants-report/facility-performance-table/facility-performance-table.component';
 import { CompanyInformationTableComponent } from './better-plants-report/company-information-table/company-information-table.component';
 import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/calculating-spinner.module';
+import { DataOverviewReportComponent } from './data-overview-report/data-overview-report.component';
+import { AccountTitlePageComponent } from './data-overview-report/account-title-page/account-title-page.component';
 
 
 
@@ -31,7 +33,9 @@ import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/cal
     BetterPlantsReportComponent,
     PrimaryEnergyConsumptionTableComponent,
     FacilityPerformanceTableComponent,
-    CompanyInformationTableComponent
+    CompanyInformationTableComponent,
+    DataOverviewReportComponent,
+    AccountTitlePageComponent
   ],
   imports: [
     CommonModule,

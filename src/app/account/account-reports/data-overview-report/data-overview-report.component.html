@@ -1,0 +1,14 @@
+<div class="report" [ngClass]="{'print': print}" *ngIf="selectedReport && !calculating">
+    <div class="row justify-content-center pt-3">
+        <div class="col-12">
+            <app-account-title-page></app-account-title-page>
+        </div>
+    </div>
+
+</div>
+
+<div class="w-100 justify-content-center" *ngIf="calculating">
+    <div class="pt-5">
+        <app-calculating-spinner [message]="'Generating Data Overview Report...'"></app-calculating-spinner>
+    </div>
+</div>

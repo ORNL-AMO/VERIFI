@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { IdbAccountReport } from 'src/app/models/idb';
-import { BetterPlantsReportSetup } from 'src/app/models/overview-report';
+import { BetterPlantsReportSetup, DataOverviewReportSetup } from 'src/app/models/overview-report';
 import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
@@ -10,7 +10,7 @@ import { BehaviorSubject } from 'rxjs';
 export class AccountReportsService {
 
   print: BehaviorSubject<boolean>;
-  constructor(private formBuilder: FormBuilder) { 
+  constructor(private formBuilder: FormBuilder) {
     this.print = new BehaviorSubject<boolean>(false);
   }
 
@@ -50,4 +50,10 @@ export class AccountReportsService {
     return betterPlantsReportSetup;
   }
 
+  getDataOverviewFormFromReport(dataOverviewReportSetup: DataOverviewReportSetup): FormGroup {
+    let form: FormGroup = this.formBuilder.group({
+      energyIsSource: [dataOverviewReportSetup.energyIsSource, Validators.required],
+    });
+    return form;
+  }
 }

@@ -78,6 +78,9 @@ export class AccountReportDbService {
         includeFacilityNames: true,
         modificationNotes: undefined,
         baselineAdjustmentNotes: undefined,
+      },
+      dataOverviewReportSetup: {
+        energyIsSource: selectedAccount.energyIsSource
       }
     }
   }

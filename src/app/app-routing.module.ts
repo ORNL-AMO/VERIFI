@@ -93,6 +93,7 @@ import { AccountReportsDashboardComponent } from './account/account-reports/acco
 import { AccountReportsComponent } from './account/account-reports/account-reports.component';
 import { AccountReportSetupComponent } from './account/account-reports/account-report-setup/account-report-setup.component';
 import { BetterPlantsReportComponent } from './account/account-reports/better-plants-report/better-plants-report.component';
+import { DataOverviewReportComponent } from './account/account-reports/data-overview-report/data-overview-report.component';
 
 const routes: Routes = [
   {
@@ -149,7 +150,8 @@ const routes: Routes = [
           { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
           { path: 'dashboard', component: AccountReportsDashboardComponent },
           { path: 'setup', component: AccountReportSetupComponent },
-          { path: 'better-plants-report', component: BetterPlantsReportComponent }
+          { path: 'better-plants-report', component: BetterPlantsReportComponent },
+          { path: 'data-overview-report', component: DataOverviewReportComponent }
         ]
       },
       {

@@ -122,3 +122,7 @@ export interface BetterPlantsReportSetup {
   baselineAdjustmentNotes: string,
   modificationNotes: string,
 }
+
+export interface DataOverviewReportSetup {
+  energyIsSource: boolean
+}

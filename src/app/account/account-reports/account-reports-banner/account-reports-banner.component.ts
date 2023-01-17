@@ -26,11 +26,9 @@ export class AccountReportsBannerComponent {
     private accountReportDbService: AccountReportDbService) { }
   ngOnInit() {
     this.routerSub = this.router.events.subscribe(event => {
-      if (event instanceof NavigationEnd) {
-        this.setInDashboard(event.url);
-      }
+        this.setInDashboard();
     });
-    this.setInDashboard(this.router.url);
+    this.setInDashboard();
     this.modalOpenSub = this.sharedDataService.modalOpen.subscribe(val => {
       this.modalOpen = val;
     });
@@ -49,8 +47,8 @@ export class AccountReportsBannerComponent {
   }
 
 
-  setInDashboard(url: string) {
-    this.inDashboard = url.includes('dashboard');
+  setInDashboard() {
+    this.inDashboard = this.router.url.includes('dashboard');
   }
 
   setValidation(report: IdbAccountReport) {
@@ -60,7 +58,7 @@ export class AccountReportsBannerComponent {
     if (report.reportType == 'betterPlants') {
       betterPlantsValid = this.accountReportsService.getBetterPlantsFormFromReport(report.betterPlantsReportSetup).valid;
     } else if (report.reportType == 'dataOverview') {
-      // dataOverviewValid = 
+      dataOverviewValid = this.accountReportsService.getDataOverviewFormFromReport(report.dataOverviewReportSetup).valid;
     }
     this.setupValid = (setupValid && betterPlantsValid && dataOverviewValid);
   }
