@@ -80,6 +80,7 @@ export class AccountOverviewBannerComponent implements OnInit {
 
   setEmissions(display: 'market' | 'location') {
     this.accountOverviewService.emissionsDisplay.next(display);
+    // this.accountOverviewService.accountFacilitiesEnergySummary.next(this.accountOverviewService.accountFacilitiesEnergySummary.getValue());
   }
 
   setShowWater() {

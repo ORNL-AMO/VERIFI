@@ -34,7 +34,7 @@ export class AccountReportsBannerComponent {
     });
     this.selectedReportSub = this.accountReportDbService.selectedReport.subscribe(val => {
       this.selectedReport = val;
-      if (val && !this.inDashboard) {
+      if (val) {
         this.setValidation(val);
       }
     });
