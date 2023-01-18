@@ -12,18 +12,14 @@ import { FacilityUtilityUsageTableComponent } from './energy-overview/facility-u
 import { AccountUtilitySourceTableComponent } from './energy-overview/account-utility-source-table/account-utility-source-table.component';
 import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.module';
 import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/calculating-spinner.module';
-import { FacilityUtilityUsageChartComponent } from './energy-overview/facility-utility-usage-chart/facility-utility-usage-chart.component';
 import { AccountUtilitySourceChartComponent } from './energy-overview/account-utility-source-chart/account-utility-source-chart.component';
 import { FacilityCostTableComponent } from './costs-overview/facility-cost-table/facility-cost-table.component';
-import { FacilityCostChartComponent } from './costs-overview/facility-cost-chart/facility-cost-chart.component';
 import { UtilityCostChartComponent } from './costs-overview/utility-cost-chart/utility-cost-chart.component';
 import { UtilityCostTableComponent } from './costs-overview/utility-cost-table/utility-cost-table.component';
 import { FacilityEmissionsTableComponent } from './emissions-overview/facility-emissions-table/facility-emissions-table.component';
-import { FacilityEmissionsChartComponent } from './emissions-overview/facility-emissions-chart/facility-emissions-chart.component';
 import { UtilityEmissionsChartComponent } from './emissions-overview/utility-emissions-chart/utility-emissions-chart.component';
 import { UtilityEmissionsTableComponent } from './emissions-overview/utility-emissions-table/utility-emissions-table.component';
 import { FacilityWaterTableComponent } from './water-overview/facility-water-table/facility-water-table.component';
-import { FacilityWaterChartComponent } from './water-overview/facility-water-chart/facility-water-chart.component';
 import { UtilityWaterChartComponent } from './water-overview/utility-water-chart/utility-water-chart.component';
 import { UtilityWaterTableComponent } from './water-overview/utility-water-table/utility-water-table.component';
 import { MonthlyUsageChartComponent } from './energy-overview/monthly-usage-chart/monthly-usage-chart.component';
@@ -45,18 +41,14 @@ import { DataOverviewModule } from 'src/app/shared/data-overview/data-overview.m
     OtherUtilityOverviewComponent,
     FacilityUtilityUsageTableComponent,
     AccountUtilitySourceTableComponent,
-    FacilityUtilityUsageChartComponent,
     AccountUtilitySourceChartComponent,
     FacilityCostTableComponent,
-    FacilityCostChartComponent,
     UtilityCostChartComponent,
     UtilityCostTableComponent,
     FacilityEmissionsTableComponent,
-    FacilityEmissionsChartComponent,
     UtilityEmissionsChartComponent,
     UtilityEmissionsTableComponent,
     FacilityWaterTableComponent,
-    FacilityWaterChartComponent,
     UtilityWaterChartComponent,
     UtilityWaterTableComponent,
     MonthlyUsageChartComponent,
