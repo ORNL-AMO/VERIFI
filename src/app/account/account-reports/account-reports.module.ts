@@ -20,6 +20,9 @@ import { DataOverviewReportComponent } from './data-overview-report/data-overvie
 import { AccountTitlePageComponent } from './data-overview-report/account-title-page/account-title-page.component';
 import { AccountEnergyReportComponent } from './data-overview-report/account-energy-report/account-energy-report.component';
 import { DataOverviewModule } from 'src/app/shared/data-overview/data-overview.module';
+import { AccountEmissionsReportComponent } from './data-overview-report/account-emissions-report/account-emissions-report.component';
+import { AccountCostReportComponent } from './data-overview-report/account-cost-report/account-cost-report.component';
+import { AccountWaterReportComponent } from './data-overview-report/account-water-report/account-water-report.component';
 
 
 
@@ -38,7 +41,10 @@ import { DataOverviewModule } from 'src/app/shared/data-overview/data-overview.m
     CompanyInformationTableComponent,
     DataOverviewReportComponent,
     AccountTitlePageComponent,
-    AccountEnergyReportComponent
+    AccountEnergyReportComponent,
+    AccountEmissionsReportComponent,
+    AccountCostReportComponent,
+    AccountWaterReportComponent
   ],
   imports: [
     CommonModule,
