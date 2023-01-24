@@ -21,7 +21,7 @@ export class DataOverviewReportComponent {
   print: boolean = false;
   worker: any;
   account: IdbAccount;
-  calanderizedMeters: Array<CalanderizedMeter>;
+  // calanderizedMeters: Array<CalanderizedMeter>;
   constructor(private accountReportDbService: AccountReportDbService,
     private accountOverviewService: AccountOverviewService,
     private facilityDbService: FacilitydbService,
@@ -35,7 +35,7 @@ export class DataOverviewReportComponent {
     this.account = this.accountDbService.selectedAccount.getValue();
     this.selectedReport = this.accountReportDbService.selectedReport.getValue();
     let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    this.calanderizedMeters = this.calanderizationService.getCalanderizedMeterData(meters, true, true, { energyIsSource: this.selectedReport.dataOverviewReportSetup.energyIsSource });
+    this.accountOverviewService.calanderizedMeters = this.calanderizationService.getCalanderizedMeterData(meters, true, true, { energyIsSource: this.selectedReport.dataOverviewReportSetup.energyIsSource });
     this.calculateFacilitiesSummary();
   }
 
@@ -69,7 +69,7 @@ export class DataOverviewReportComponent {
 
       let energySources: Array<MeterSource> = ['Electricity', 'Natural Gas', 'Other Fuels', 'Other Energy']
       this.worker.postMessage({
-        calanderizedMeters: this.calanderizedMeters,
+        calanderizedMeters: this.accountOverviewService.calanderizedMeters,
         facilities: facilities,
         sources: energySources,
         type: 'energy',
@@ -81,7 +81,7 @@ export class DataOverviewReportComponent {
         "Waste Water"
       ];
       this.worker.postMessage({
-        calanderizedMeters: this.calanderizedMeters,
+        calanderizedMeters: this.accountOverviewService.calanderizedMeters,
         facilities: facilities,
         sources: waterSources,
         type: 'water',
@@ -98,7 +98,7 @@ export class DataOverviewReportComponent {
         "Other Utility"
       ]
       this.worker.postMessage({
-        calanderizedMeters: this.calanderizedMeters,
+        calanderizedMeters: this.accountOverviewService.calanderizedMeters,
         facilities: facilities,
         sources: allSources,
         type: 'all',
@@ -107,7 +107,7 @@ export class DataOverviewReportComponent {
     } else {
       // Web Workers are not supported in this environment.
       let energySources: Array<MeterSource> = ['Electricity', 'Natural Gas', 'Other Fuels', 'Other Energy']
-      let energySummaryClass: AccountSummaryClass = new AccountSummaryClass(this.calanderizedMeters, facilities, energySources, this.account);
+      let energySummaryClass: AccountSummaryClass = new AccountSummaryClass(this.accountOverviewService.calanderizedMeters, facilities, energySources, this.account);
       this.accountOverviewService.accountFacilitiesEnergySummary.next(energySummaryClass.facilitiesSummary);
       this.accountOverviewService.energyUtilityUsageSummaryData.next(energySummaryClass.utilityUsageSummaryData);
       this.accountOverviewService.energyYearMonthData.next(energySummaryClass.yearMonthData);
@@ -115,7 +115,7 @@ export class DataOverviewReportComponent {
         "Water",
         "Waste Water"
       ];
-      let waterSummaryClass: AccountSummaryClass = new AccountSummaryClass(this.calanderizedMeters, facilities, waterSources, this.account);
+      let waterSummaryClass: AccountSummaryClass = new AccountSummaryClass(this.accountOverviewService.calanderizedMeters, facilities, waterSources, this.account);
       this.accountOverviewService.accountFacilitiesWaterSummary.next(waterSummaryClass.facilitiesSummary);
       this.accountOverviewService.waterUtilityUsageSummaryData.next(waterSummaryClass.utilityUsageSummaryData);
       this.accountOverviewService.waterYearMonthData.next(waterSummaryClass.yearMonthData);
@@ -128,7 +128,7 @@ export class DataOverviewReportComponent {
         "Waste Water",
         "Other Utility"
       ]
-      let allSummaryClass: AccountSummaryClass = new AccountSummaryClass(this.calanderizedMeters, facilities, allSources, this.account);
+      let allSummaryClass: AccountSummaryClass = new AccountSummaryClass(this.accountOverviewService.calanderizedMeters, facilities, allSources, this.account);
       this.accountOverviewService.accountFacilitiesCostsSummary.next(allSummaryClass.facilitiesSummary);
       this.accountOverviewService.costsUtilityUsageSummaryData.next(allSummaryClass.utilityUsageSummaryData);
       this.accountOverviewService.costsYearMonthData.next(allSummaryClass.yearMonthData);

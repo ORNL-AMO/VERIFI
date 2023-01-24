@@ -17,11 +17,9 @@
                     </div>
                     <div class="row">
                         <div class="col-6">
-                            <!-- <app-facility-emissions-table></app-facility-emissions-table> -->
                             <app-facilities-usage-table [dataType]="'emissions'"></app-facilities-usage-table>
                         </div>
                         <div class="col-6">
-                            <!-- <app-facility-emissions-chart></app-facility-emissions-chart> -->
                             <app-facility-usage-donut [dataType]="'emissions'"></app-facility-usage-donut>
                         </div>
                     </div>
@@ -37,7 +35,6 @@
                     <h4 class="mb-0">Utility Emissions</h4>
                 </div>
                 <div class="card-body">
-                    <!-- <app-utility-emissions-table></app-utility-emissions-table> -->
                     <app-account-utility-consumption-table
                         [dataType]="'emissions'"></app-account-utility-consumption-table>
                 </div>
@@ -52,7 +49,7 @@
                     <h4 class="mb-0">Utility Emissions (All-time)</h4>
                 </div>
                 <div class="card-body">
-                    <app-utility-emissions-chart></app-utility-emissions-chart>
+                    <app-facilities-usage-stacked-bar-chart [dataType]="'emissions'"></app-facilities-usage-stacked-bar-chart>
                 </div>
             </div>
         </div>

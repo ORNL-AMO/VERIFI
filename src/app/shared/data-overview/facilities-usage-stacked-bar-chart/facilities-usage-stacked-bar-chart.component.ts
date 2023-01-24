@@ -1,0 +1,426 @@
+import { Component, ElementRef, ViewChild, Input } from '@angular/core';
+import { PlotlyService } from 'angular-plotly.js';
+import { Subscription } from 'rxjs';
+import { AccountOverviewService } from 'src/app/account/account-overview/account-overview.service';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { CalanderizedMeter } from 'src/app/models/calanderization';
+import { StackedBarChartData, UtilityItem } from 'src/app/models/dashboard';
+import { IdbAccount, IdbFacility } from 'src/app/models/idb';
+import { UtilityColors } from '../../utilityColors';
+import * as _ from 'lodash';
+
+@Component({
+  selector: 'app-facilities-usage-stacked-bar-chart',
+  templateUrl: './facilities-usage-stacked-bar-chart.component.html',
+  styleUrls: ['./facilities-usage-stacked-bar-chart.component.css']
+})
+export class FacilitiesUsageStackedBarChartComponent {
+  @Input()
+  dataType: 'energyUse' | 'emissions' | 'cost' | 'water';
+
+
+
+
+  @ViewChild('stackedBarChart', { static: false }) stackedBarChart: ElementRef;
+
+  accountFacilitiesSub: Subscription;
+  barChartData: Array<StackedBarChartData>;
+  emissionsDisplay: "market" | "location";
+  emissionsDisplaySub: Subscription;
+  constructor(private accountOverviewService: AccountOverviewService, private accountDbService: AccountdbService,
+    private plotlyService: PlotlyService, private facilityDbService: FacilitydbService) { }
+
+  ngOnInit(): void {
+    if (this.dataType == 'emissions') {
+      this.emissionsDisplaySub = this.accountOverviewService.emissionsDisplay.subscribe(val => {
+        this.emissionsDisplay = val;
+        this.setBarChartData();
+        this.drawChart();
+      });
+    }
+
+    this.accountFacilitiesSub = this.accountOverviewService.accountFacilitiesEnergySummary.subscribe(val => {
+      this.setBarChartData();
+      this.drawChart();
+    });
+  }
+
+  ngAfterViewInit() {
+    this.drawChart();
+  }
+
+  ngOnDestroy() {
+    if (this.dataType == 'emissions') {
+      this.emissionsDisplaySub.unsubscribe();
+    }
+    this.accountFacilitiesSub.unsubscribe();
+  }
+
+  drawChart() {
+    if (this.stackedBarChart) {
+      if (this.barChartData && this.barChartData.length != 0) {
+
+        let data = new Array();
+        if (this.dataType == 'energyUse') {
+          data = this.getEnergyUseData();
+        } else if (this.dataType == 'cost') {
+          data = this.getCostData();
+        } else if (this.dataType == 'emissions') {
+          data = this.getEmissionsData();
+        } else if (this.dataType == 'water') {
+          data = this.getWaterData();
+        }
+
+
+        var layout = {
+          barmode: 'stack',
+          showlegend: true,
+          yaxis: {
+            title: this.getYAxisTitle(),
+            automargin: true,
+            tickprefix: this.getTickPrefix()
+          },
+          xaxis: {
+            automargin: true
+          },
+          legend: {
+            orientation: "h"
+          },
+          clickmode: "none",
+          margin: { t: 10 }
+        };
+        let config = {
+          modeBarButtonsToRemove: ['autoScale2d', 'lasso2d', 'pan2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian', 'autoscale', 'zoom', 'zoomin', 'zoomout'],
+          displaylogo: false,
+          responsive: true,
+        };
+        this.plotlyService.newPlot(this.stackedBarChart.nativeElement, data, layout, config);
+      }
+    }
+  }
+
+  getEnergyUseData(): Array<any> {
+    let data = new Array();
+    if (this.barChartData.findIndex(dataItem => { return dataItem.electricity.energyUse != 0 }) != -1) {
+      data.push({
+        x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
+        y: this.barChartData.map(dataItem => { return dataItem.electricity.energyUse }),
+        name: 'Electricity',
+        type: 'bar',
+        marker: {
+          color: UtilityColors.Electricity.color
+        }
+      });
+    }
+    if (this.barChartData.findIndex(dataItem => { return dataItem.naturalGas.energyUse != 0 }) != -1) {
+      data.push({
+        x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
+        y: this.barChartData.map(dataItem => { return dataItem.naturalGas.energyUse }),
+        name: 'Natural Gas',
+        type: 'bar',
+        marker: {
+          color: UtilityColors['Natural Gas'].color
+        }
+      })
+    }
+    if (this.barChartData.findIndex(dataItem => { return dataItem.otherFuels.energyUse != 0 }) != -1) {
+      data.push({
+        x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
+        y: this.barChartData.map(dataItem => { return dataItem.otherFuels.energyUse }),
+        name: 'Other Fuels',
+        type: 'bar',
+        marker: {
+          color: UtilityColors['Other Fuels'].color
+        }
+      })
+    }
+    if (this.barChartData.findIndex(dataItem => { return dataItem.otherEnergy.energyUse != 0 }) != -1) {
+      data.push({
+        x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
+        y: this.barChartData.map(dataItem => { return dataItem.otherEnergy.energyUse }),
+        name: 'Other Energy',
+        type: 'bar',
+        marker: {
+          color: UtilityColors['Other Energy'].color
+        }
+      })
+    }
+    return data;
+  }
+
+  getCostData(): Array<any> {
+    let data = new Array();
+    if (this.barChartData.findIndex(dataItem => { return dataItem.electricity.energyCost != 0 }) != -1) {
+      data.push({
+        x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
+        y: this.barChartData.map(dataItem => { return dataItem.electricity.energyCost }),
+        name: 'Electricity',
+        type: 'bar',
+        marker: {
+          color: UtilityColors.Electricity.color
+        }
+      });
+    }
+    if (this.barChartData.findIndex(dataItem => { return dataItem.naturalGas.energyCost != 0 }) != -1) {
+      data.push({
+        x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
+        y: this.barChartData.map(dataItem => { return dataItem.naturalGas.energyCost }),
+        name: 'Natural Gas',
+        type: 'bar',
+        marker: {
+          color: UtilityColors['Natural Gas'].color
+        }
+      })
+    }
+    if (this.barChartData.findIndex(dataItem => { return dataItem.otherFuels.energyCost != 0 }) != -1) {
+      data.push({
+        x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
+        y: this.barChartData.map(dataItem => { return dataItem.otherFuels.energyCost }),
+        name: 'Other Fuels',
+        type: 'bar',
+        marker: {
+          color: UtilityColors['Other Fuels'].color
+        }
+      })
+    }
+    if (this.barChartData.findIndex(dataItem => { return dataItem.otherEnergy.energyCost != 0 }) != -1) {
+      data.push({
+        x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
+        y: this.barChartData.map(dataItem => { return dataItem.otherEnergy.energyCost }),
+        name: 'Other Energy',
+        type: 'bar',
+        marker: {
+          color: UtilityColors['Other Energy'].color
+        }
+      })
+    }
+    if (this.barChartData.findIndex(dataItem => { return dataItem.water.energyCost != 0 }) != -1) {
+      data.push({
+        x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
+        y: this.barChartData.map(dataItem => { return dataItem.water.energyCost }),
+        name: 'Water',
+        type: 'bar',
+        marker: {
+          color: UtilityColors['Water'].color
+        }
+      })
+    }
+    if (this.barChartData.findIndex(dataItem => { return dataItem.wasteWater.energyCost != 0 }) != -1) {
+      data.push({
+        x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
+        y: this.barChartData.map(dataItem => { return dataItem.wasteWater.energyCost }),
+        name: 'Waste Water',
+        type: 'bar',
+        marker: {
+          color: UtilityColors['Waste Water'].color
+        }
+      })
+    }
+    if (this.barChartData.findIndex(dataItem => { return dataItem.otherUtility.energyCost != 0 }) != -1) {
+      data.push({
+        x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
+        y: this.barChartData.map(dataItem => { return dataItem.otherUtility.energyCost }),
+        name: 'Other Utility',
+        type: 'bar',
+        marker: {
+          color: UtilityColors['Other Utility'].color
+        }
+      })
+    }
+    return data;
+  }
+
+  getEmissionsData(): Array<any> {
+    let data = new Array();
+    if (this.barChartData.findIndex(dataItem => { return dataItem.electricity.marketEmissions != 0 }) != -1) {
+      let yValues: Array<number>;
+      if (this.emissionsDisplay == 'location') {
+        yValues = this.barChartData.map(dataItem => { return dataItem.electricity.locationEmissions });
+      } else {
+        yValues = this.barChartData.map(dataItem => { return dataItem.electricity.marketEmissions });
+      }
+
+      data.push({
+        x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
+        y: yValues,
+        name: 'Electricity',
+        type: 'bar',
+        marker: {
+          color: UtilityColors.Electricity.color
+        }
+      });
+    }
+    if (this.barChartData.findIndex(dataItem => { return dataItem.naturalGas.marketEmissions != 0 }) != -1) {
+      let yValues: Array<number>;
+      if (this.emissionsDisplay == 'location') {
+        yValues = this.barChartData.map(dataItem => { return dataItem.naturalGas.locationEmissions });
+      } else {
+        yValues = this.barChartData.map(dataItem => { return dataItem.naturalGas.marketEmissions });
+      }
+      data.push({
+        x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
+        y: yValues,
+        name: 'Natural Gas',
+        type: 'bar',
+        marker: {
+          color: UtilityColors['Natural Gas'].color
+        }
+      })
+    }
+    if (this.barChartData.findIndex(dataItem => { return dataItem.otherFuels.marketEmissions != 0 }) != -1) {
+      let yValues: Array<number>;
+      if (this.emissionsDisplay == 'location') {
+        yValues = this.barChartData.map(dataItem => { return dataItem.otherFuels.locationEmissions });
+      } else {
+        yValues = this.barChartData.map(dataItem => { return dataItem.otherFuels.marketEmissions });
+      }
+      data.push({
+        x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
+        y: yValues,
+        name: 'Other Fuels',
+        type: 'bar',
+        marker: {
+          color: UtilityColors['Other Fuels'].color
+        }
+      })
+    }
+    if (this.barChartData.findIndex(dataItem => { return dataItem.otherEnergy.marketEmissions != 0 }) != -1) {
+      let yValues: Array<number>;
+      if (this.emissionsDisplay == 'location') {
+        yValues = this.barChartData.map(dataItem => { return dataItem.otherEnergy.locationEmissions });
+      } else {
+        yValues = this.barChartData.map(dataItem => { return dataItem.otherEnergy.marketEmissions });
+      }
+      data.push({
+        x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
+        y: yValues,
+        name: 'Other Energy',
+        type: 'bar',
+        marker: {
+          color: UtilityColors['Other Energy'].color
+        }
+      })
+    }
+    return data;
+  }
+
+  getWaterData(): Array<any> {
+    let data = new Array();
+    if (this.barChartData.findIndex(dataItem => { return dataItem.water.energyUse != 0 }) != -1) {
+      data.push({
+        x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
+        y: this.barChartData.map(dataItem => { return dataItem.water.energyUse }),
+        name: 'Water',
+        type: 'bar',
+        marker: {
+          color: UtilityColors.Water.color
+        }
+      });
+    }
+    if (this.barChartData.findIndex(dataItem => { return dataItem.wasteWater.energyUse != 0 }) != -1) {
+      data.push({
+        x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
+        y: this.barChartData.map(dataItem => { return dataItem.wasteWater.energyUse }),
+        name: 'Waste Water',
+        type: 'bar',
+        marker: {
+          color: UtilityColors['Waste Water'].color
+        }
+      })
+    }
+    return data;
+  }
+
+
+  setBarChartData() {
+    this.barChartData = new Array();
+
+    let accountFacilites: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    accountFacilites.forEach(facility => {
+      let electricity: UtilityItem = { energyUse: 0, energyCost: 0, marketEmissions: 0, locationEmissions: 0 };
+      let naturalGas: UtilityItem = { energyUse: 0, energyCost: 0, marketEmissions: 0, locationEmissions: 0 };
+      let otherFuels: UtilityItem = { energyUse: 0, energyCost: 0, marketEmissions: 0, locationEmissions: 0 };
+      let otherEnergy: UtilityItem = { energyUse: 0, energyCost: 0, marketEmissions: 0, locationEmissions: 0 };
+      let water: UtilityItem = { energyUse: 0, energyCost: 0, marketEmissions: 0, locationEmissions: 0 };
+      let wasteWater: UtilityItem = { energyUse: 0, energyCost: 0, marketEmissions: 0, locationEmissions: 0 };
+      let otherUtility: UtilityItem = { energyUse: 0, energyCost: 0, marketEmissions: 0, locationEmissions: 0 };
+
+      let facilityMeters: Array<CalanderizedMeter> = this.accountOverviewService.calanderizedMeters.filter(cMeter => { return cMeter.meter.facilityId == facility.guid });
+      facilityMeters.forEach(cMeter => {
+        cMeter.monthlyData.forEach(dataItem => {
+          if (cMeter.meter.source == 'Electricity') {
+            electricity.marketEmissions = (electricity.marketEmissions + Number(dataItem.marketEmissions));
+            electricity.locationEmissions = (electricity.locationEmissions + Number(dataItem.locationEmissions));
+            electricity.energyUse = (electricity.energyUse + Number(dataItem.energyUse));
+            electricity.energyCost = (electricity.energyCost + Number(dataItem.energyCost));
+          }
+          else if (cMeter.meter.source == 'Natural Gas') {
+            naturalGas.marketEmissions = (naturalGas.marketEmissions + Number(dataItem.marketEmissions));
+            naturalGas.locationEmissions = (naturalGas.locationEmissions + Number(dataItem.locationEmissions));
+            naturalGas.energyUse = (naturalGas.energyUse + Number(dataItem.energyUse));
+            naturalGas.energyCost = (naturalGas.energyCost + Number(dataItem.energyCost));
+          }
+          else if (cMeter.meter.source == 'Other Fuels') {
+            otherFuels.marketEmissions = (otherFuels.marketEmissions + Number(dataItem.marketEmissions));
+            otherFuels.locationEmissions = (otherFuels.locationEmissions + Number(dataItem.locationEmissions));
+            otherFuels.energyUse = (otherFuels.energyUse + Number(dataItem.energyUse));
+            otherFuels.energyCost = (otherFuels.energyCost + Number(dataItem.energyCost));
+          }
+          else if (cMeter.meter.source == 'Other Energy') {
+            otherEnergy.marketEmissions = (otherEnergy.marketEmissions + Number(dataItem.marketEmissions));
+            otherEnergy.locationEmissions = (otherEnergy.locationEmissions + Number(dataItem.locationEmissions));
+            otherEnergy.energyUse = (otherEnergy.energyUse + Number(dataItem.energyUse));
+            otherEnergy.energyCost = (otherEnergy.energyCost + Number(dataItem.energyCost));
+          }
+          else if (cMeter.meter.source == 'Water') {
+            water.energyUse = (water.energyUse + Number(dataItem.energyUse));
+            water.energyCost = (water.energyCost + Number(dataItem.energyCost));
+          }
+          else if (cMeter.meter.source == 'Waste Water') {
+            wasteWater.energyUse = (wasteWater.energyUse + Number(dataItem.energyUse));
+            wasteWater.energyCost = (wasteWater.energyCost + Number(dataItem.energyCost));
+          }
+          else if (cMeter.meter.source == 'Other Utility') {
+            otherUtility.energyUse = (otherUtility.energyUse + Number(dataItem.energyUse));
+            otherUtility.energyCost = (otherUtility.energyCost + Number(dataItem.energyCost));
+          }
+        });
+      });
+      if (facility) {
+        this.barChartData.push({
+          facilityName: facility.name,
+          electricity: electricity,
+          naturalGas: naturalGas,
+          otherFuels: otherFuels,
+          otherEnergy: otherEnergy,
+          wasteWater: wasteWater,
+          water: water,
+          otherUtility: otherUtility
+        });
+      }
+    });
+    this.barChartData = _.orderBy(this.barChartData, (data) => {
+      return (data.electricity.energyUse + data.naturalGas.energyUse + data.otherFuels.energyUse + data.otherEnergy.energyUse);
+    }, 'desc');
+  }
+
+  getYAxisTitle(): string {
+    if (this.dataType == 'energyUse') {
+      let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+      return "Utility Usage (" + selectedAccount.energyUnit + ")";
+    } else if (this.dataType == 'cost') {
+      return "Utility Costs";
+    } else if (this.dataType == 'emissions') {
+      return "Emissions (kg CO<sub>2</sub>)";
+    }
+  }
+
+  getTickPrefix(): string {
+    if (this.dataType == 'cost') {
+      return "$";
+    }
+    return;
+  }
+
+}

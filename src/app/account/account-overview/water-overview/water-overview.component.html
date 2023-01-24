@@ -37,7 +37,6 @@
                     <h4 class="mb-0">Water Costs</h4>
                 </div>
                 <div class="card-body">
-                    <!-- <app-utility-water-table></app-utility-water-table> -->
                     <app-account-utility-consumption-table [dataType]="'water'"></app-account-utility-consumption-table>
                 </div>
             </div>
@@ -51,7 +50,7 @@
                     <h4 class="mb-0">Water Costs (All-time)</h4>
                 </div>
                 <div class="card-body">
-                    <app-utility-water-chart></app-utility-water-chart>
+                    <app-facilities-usage-stacked-bar-chart [dataType]="'water'"></app-facilities-usage-stacked-bar-chart>
                 </div>
             </div>
         </div>

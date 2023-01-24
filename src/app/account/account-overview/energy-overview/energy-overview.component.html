@@ -18,11 +18,9 @@
                     </div>
                     <div class="row">
                         <div class="col-6">
-                            <!-- <app-facility-utility-usage-table></app-facility-utility-usage-table> -->
                             <app-facilities-usage-table [dataType]="'energyUse'"></app-facilities-usage-table>
                         </div>
                         <div class="col-6">
-                            <!-- <app-facility-utility-usage-chart></app-facility-utility-usage-chart> -->
                             <app-facility-usage-donut [dataType]="'energyUse'"></app-facility-usage-donut>
                         </div>
                     </div>
@@ -38,7 +36,6 @@
                     <h4 class="mb-0">Utility Use and Cost</h4>
                 </div>
                 <div class="card-body">
-                    <!-- <app-account-utility-source-table></app-account-utility-source-table> -->
                     <app-account-utility-consumption-table [dataType]="'energyUse'"></app-account-utility-consumption-table>
                 </div>
             </div>
@@ -52,7 +49,7 @@
                     <h4 class="mb-0">Utility Usage (All-time)</h4>
                 </div>
                 <div class="card-body">
-                    <app-account-utility-source-chart></app-account-utility-source-chart>
+                    <app-facilities-usage-stacked-bar-chart [dataType]="'energyUse'"></app-facilities-usage-stacked-bar-chart>
                 </div>
             </div>
         </div>

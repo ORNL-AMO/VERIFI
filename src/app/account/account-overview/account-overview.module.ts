@@ -10,10 +10,6 @@ import { WaterOverviewComponent } from './water-overview/water-overview.componen
 import { OtherUtilityOverviewComponent } from './other-utility-overview/other-utility-overview.component';
 import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.module';
 import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/calculating-spinner.module';
-import { AccountUtilitySourceChartComponent } from './energy-overview/account-utility-source-chart/account-utility-source-chart.component';
-import { UtilityCostChartComponent } from './costs-overview/utility-cost-chart/utility-cost-chart.component';
-import { UtilityEmissionsChartComponent } from './emissions-overview/utility-emissions-chart/utility-emissions-chart.component';
-import { UtilityWaterChartComponent } from './water-overview/utility-water-chart/utility-water-chart.component';
 import { MonthlyUsageChartComponent } from './energy-overview/monthly-usage-chart/monthly-usage-chart.component';
 import { MonthlyCostsChartComponent } from './costs-overview/monthly-costs-chart/monthly-costs-chart.component';
 import { MonthlyEmissionsChartComponent } from './emissions-overview/monthly-emissions-chart/monthly-emissions-chart.component';
@@ -31,10 +27,6 @@ import { DataOverviewModule } from 'src/app/shared/data-overview/data-overview.m
     EmissionsOverviewComponent,
     WaterOverviewComponent,
     OtherUtilityOverviewComponent,
-    AccountUtilitySourceChartComponent,
-    UtilityCostChartComponent,
-    UtilityEmissionsChartComponent,
-    UtilityWaterChartComponent,
     MonthlyUsageChartComponent,
     MonthlyCostsChartComponent,
     MonthlyEmissionsChartComponent,
