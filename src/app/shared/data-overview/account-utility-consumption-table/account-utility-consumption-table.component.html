@@ -1,0 +1,612 @@
+<div class="table-responsive" *ngIf="utilityUsageSummaryData">
+    <!--energy use-->
+    <table class="table utility-data table-sm table-bordered table-hover" *ngIf="dataType == 'energyUse'">
+        <thead>
+            <tr class="table-mh">
+                <th></th>
+                <th colspan="2">
+                    Last Month <span class="small" *ngIf="lastMonthsDate">({{lastMonthsDate | date: 'MMM, y'}})</span>
+                </th>
+                <th colspan="2">
+                    Previous Year
+                    <span class="small" *ngIf="yearPriorLastMonth">({{yearPriorLastMonth | date: 'MMM, y'}})</span>
+                </th>
+                <th colspan="2">
+                    Monthly Average
+                    <span class="small" *ngIf="yearPriorDate">({{yearPriorDate | date: 'MMM, y'}} -
+                        {{lastMonthsDate | date: 'MMM, y'}})</span>
+                </th>
+            </tr>
+            <tr>
+                <th>Utility</th>
+                <th>Utility Use <br> (<span [innerHTML]="accountEnergyUnit | settingsLabel"></span>)</th>
+                <th>Utility Cost</th>
+                <th>Utility Use <br> (<span [innerHTML]="accountEnergyUnit | settingsLabel"></span>)</th>
+                <th>Utility Cost</th>
+                <th>Utility Use <br> (<span [innerHTML]="accountEnergyUnit | settingsLabel"></span>)</th>
+                <th>Utility Cost</th>
+            </tr>
+        </thead>
+        <tbody class="table-group-divider">
+            <tr *ngFor="let utilityUsageSummary of utilityUsageSummaryData.utilitySummaries">
+                <td>
+                    {{utilityUsageSummary.utility}}
+                </td>
+                <!--Last Month-->
+                <td>
+                    <span *ngIf="utilityUsageSummary.previousMonthEnergyUse">
+                        {{utilityUsageSummary.previousMonthEnergyUse | customNumber}}
+                    </span>
+                    <span *ngIf="!utilityUsageSummary.previousMonthEnergyUse">
+                        &mdash;
+                    </span>
+                    <span *ngIf="utilityUsageSummary.energyUseChangeSinceLastYear" class="small ps-2 pull-right green"
+                        [ngClass]="{'red': utilityUsageSummary.energyUseChangeSinceLastYear > 0}">
+                        ({{utilityUsageSummary.energyUseChangeSinceLastYear | customNumber}})
+                    </span>
+                </td>
+                <td>
+                    <span *ngIf="utilityUsageSummary.previousMonthEnergyCost">
+                        {{utilityUsageSummary.previousMonthEnergyCost | customNumber:true }}
+                    </span>
+                    <span *ngIf="!utilityUsageSummary.previousMonthEnergyCost">
+                        &mdash;
+                    </span>
+
+                    <span *ngIf="utilityUsageSummary.energyCostChangeSinceLastYear" class="small ps-2 pull-right green"
+                        [ngClass]="{'red': utilityUsageSummary.energyCostChangeSinceLastYear > 0}">
+                        ({{utilityUsageSummary.energyCostChangeSinceLastYear | customNumber:true}})
+                    </span>
+                </td>
+
+                <!--Year prior-->
+                <td>
+                    <span *ngIf="utilityUsageSummary.yearPriorEnergyUse">
+                        {{utilityUsageSummary.yearPriorEnergyUse | customNumber}}
+                    </span>
+                    <span *ngIf="!utilityUsageSummary.yearPriorEnergyUse">
+                        &mdash;
+                    </span>
+                </td>
+                <td>
+                    <span *ngIf="utilityUsageSummary.yearPriorEnergyCost">
+                        {{utilityUsageSummary.yearPriorEnergyCost | customNumber:true }}
+                    </span>
+                    <span *ngIf="!utilityUsageSummary.yearPriorEnergyCost">
+                        &mdash;
+                    </span>
+                </td>
+
+                <!--Average-->
+                <td>
+                    <span *ngIf="utilityUsageSummary.averageEnergyUse">
+                        {{utilityUsageSummary.averageEnergyUse | customNumber}}
+                    </span>
+                    <span *ngIf="!utilityUsageSummary.averageEnergyUse">
+                        &mdash;
+                    </span>
+                </td>
+                <td>
+                    <span *ngIf="utilityUsageSummary.averageEnergyCost">
+                        {{utilityUsageSummary.averageEnergyCost | customNumber:true }}
+                    </span>
+                    <span *ngIf="!utilityUsageSummary.averageEnergyCost">
+                        &mdash;
+                    </span>
+                </td>
+
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <th>
+                    Total
+                </th>
+                <!--previous month-->
+                <th>
+                    <span *ngIf="utilityUsageSummaryData.total.previousMonthEnergyUse">
+                        {{utilityUsageSummaryData.total.previousMonthEnergyUse | customNumber}}
+                    </span>
+                    <span *ngIf="!utilityUsageSummaryData.total.previousMonthEnergyUse">
+                        &mdash;
+                    </span>
+                    <span *ngIf="utilityUsageSummaryData.total.energyUseChangeSinceLastYear"
+                        class="small ps-2 pull-right green"
+                        [ngClass]="{'red': utilityUsageSummaryData.total.energyUseChangeSinceLastYear > 0}">
+                        ({{utilityUsageSummaryData.total.energyUseChangeSinceLastYear | customNumber}})
+                    </span>
+                </th>
+                <th>
+                    <span *ngIf="utilityUsageSummaryData.total.previousMonthEnergyCost">
+                        {{utilityUsageSummaryData.total.previousMonthEnergyCost | customNumber:true }}
+                    </span>
+                    <span *ngIf="!utilityUsageSummaryData.total.previousMonthEnergyCost">
+                        &mdash;
+                    </span>
+                    <span *ngIf="utilityUsageSummaryData.total.energyCostChangeSinceLastYear"
+                        class="small ps-2 pull-right green"
+                        [ngClass]="{'red': utilityUsageSummaryData.total.energyCostChangeSinceLastYear > 0}">
+                        ({{utilityUsageSummaryData.total.energyCostChangeSinceLastYear | customNumber:true}})
+                    </span>
+                </th>
+
+                <!--year prior-->
+                <th>
+                    <span *ngIf="utilityUsageSummaryData.total.yearPriorEnergyUse">
+                        {{utilityUsageSummaryData.total.yearPriorEnergyUse | customNumber}}
+                    </span>
+                    <span *ngIf="!utilityUsageSummaryData.total.yearPriorEnergyUse">
+                        &mdash;
+                    </span>
+
+                </th>
+                <th>
+                    <span *ngIf="utilityUsageSummaryData.total.yearPriorEnergyCost">
+                        {{utilityUsageSummaryData.total.yearPriorEnergyCost | customNumber:true }}
+                    </span>
+                    <span *ngIf="!utilityUsageSummaryData.total.yearPriorEnergyCost">
+                        &mdash;
+                    </span>
+                </th>
+
+                <!--average-->
+                <th>
+                    <span *ngIf="utilityUsageSummaryData.total.averageEnergyUse">
+                        {{utilityUsageSummaryData.total.averageEnergyUse | customNumber}}
+                    </span>
+                    <span *ngIf="!utilityUsageSummaryData.total.averageEnergyUse">
+                        &mdash;
+                    </span>
+                </th>
+                <th>
+                    <span *ngIf="utilityUsageSummaryData.total.averageEnergyCost">
+                        {{utilityUsageSummaryData.total.averageEnergyCost | customNumber:true }}
+                    </span>
+                    <span *ngIf="!utilityUsageSummaryData.total.averageEnergyCost">
+                        &mdash;
+                    </span>
+                </th>
+            </tr>
+        </tfoot>
+    </table>
+    <!--emissions-->
+    <table class="table utility-data table-sm table-bordered table-hover" *ngIf="dataType == 'emissions'">
+        <thead>
+            <tr class="table-mh">
+                <th class="w-25"></th>
+                <th class="w-25">
+                    Last Month Emissions<br> <span class="small" *ngIf="lastMonthsDate">({{lastMonthsDate | date: 'MMM, y'}})</span>
+                </th>
+                <th class="w-25">
+                    Previous Year Emissions<br>
+                    <span class="small" *ngIf="yearPriorLastMonth">({{yearPriorLastMonth | date: 'MMM, y'}})</span>
+                </th>
+                <th class="w-25">
+                    Monthly Average Emissions<br>
+                    <span class="small" *ngIf="yearPriorDate">({{yearPriorDate | date: 'MMM, y'}} -
+                        {{lastMonthsDate | date: 'MMM, y'}})</span>
+                </th>
+            </tr>
+            <tr>
+                <th></th>
+                <th>
+                    (<span>kg CO<sub>2</sub>e</span>)
+                </th>
+                <th>
+                    (<span>kg CO<sub>2</sub>e</span>)
+                </th>
+                <th>
+                    (<span>kg CO<sub>2</sub>e</span>)
+                </th>
+            </tr>
+        </thead>
+        <tbody class="table-group-divider">
+            <tr *ngFor="let utilityUsageSummary of utilityUsageSummaryData.utilitySummaries">
+                <td>
+                    {{utilityUsageSummary.utility}}
+                </td>
+                <!--Last Month-->
+                <td *ngIf="emissionsDisplay == 'market'">
+                    <span *ngIf="utilityUsageSummary.previousMonthMarketEmissions">
+                        {{utilityUsageSummary.previousMonthMarketEmissions | customNumber }}
+                    </span>
+                    <span *ngIf="!utilityUsageSummary.previousMonthMarketEmissions">
+                        &mdash;
+                    </span>
+
+                    <span *ngIf="utilityUsageSummary.marketEmissionsChangeSinceLastYear"
+                        class="small ps-2 pull-right green"
+                        [ngClass]="{'red': utilityUsageSummary.marketEmissionsChangeSinceLastYear > 0}">
+                        ({{utilityUsageSummary.marketEmissionsChangeSinceLastYear | customNumber}})
+                    </span>
+                </td>
+                <td *ngIf="emissionsDisplay == 'location'">
+                    <span *ngIf="utilityUsageSummary.previousMonthLocationEmissions">
+                        {{utilityUsageSummary.previousMonthLocationEmissions | customNumber }}
+                    </span>
+                    <span *ngIf="!utilityUsageSummary.previousMonthLocationEmissions">
+                        &mdash;
+                    </span>
+
+                    <span *ngIf="utilityUsageSummary.locationEmissionsChangeSinceLastYear"
+                        class="small ps-2 pull-right green"
+                        [ngClass]="{'red': utilityUsageSummary.locationEmissionsChangeSinceLastYear > 0}">
+                        ({{utilityUsageSummary.locationEmissionsChangeSinceLastYear | customNumber}})
+                    </span>
+                </td>
+                <!--Year prior-->
+                <td *ngIf="emissionsDisplay == 'market'">
+                    <span *ngIf="utilityUsageSummary.yearPriorMarketEmissions">
+                        {{utilityUsageSummary.yearPriorMarketEmissions | customNumber}}
+                    </span>
+                    <span *ngIf="!utilityUsageSummary.yearPriorMarketEmissions">
+                        &mdash;
+                    </span>
+                </td>
+                <td *ngIf="emissionsDisplay == 'location'">
+                    <span *ngIf="utilityUsageSummary.yearPriorLocationEmissions">
+                        {{utilityUsageSummary.yearPriorLocationEmissions | customNumber}}
+                    </span>
+                    <span *ngIf="!utilityUsageSummary.yearPriorLocationEmissions">
+                        &mdash;
+                    </span>
+                </td>
+
+                <!--Average-->
+                <td *ngIf="emissionsDisplay == 'market'">
+                    <span *ngIf="utilityUsageSummary.averageMarketEmissions">
+                        {{utilityUsageSummary.averageMarketEmissions | customNumber}}
+                    </span>
+                    <span *ngIf="!utilityUsageSummary.averageMarketEmissions">
+                        &mdash;
+                    </span>
+                </td>
+                <td *ngIf="emissionsDisplay == 'location'">
+                    <span *ngIf="utilityUsageSummary.averageLocationEmissions">
+                        {{utilityUsageSummary.averageLocationEmissions | customNumber}}
+                    </span>
+                    <span *ngIf="!utilityUsageSummary.averageLocationEmissions">
+                        &mdash;
+                    </span>
+                </td>
+
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <th>
+                    Total
+                </th>
+                <!--previous month-->
+                <th *ngIf="emissionsDisplay == 'market'">
+                    <span *ngIf="utilityUsageSummaryData.total.previousMonthMarketEmissions">
+                        {{utilityUsageSummaryData.total.previousMonthMarketEmissions | customNumber}}
+                    </span>
+                    <span *ngIf="!utilityUsageSummaryData.total.previousMonthMarketEmissions">
+                        &mdash;
+                    </span>
+                    <span *ngIf="utilityUsageSummaryData.total.marketEmissionsChangeSinceLastYear"
+                        class="small ps-2 pull-right green"
+                        [ngClass]="{'red': utilityUsageSummaryData.total.marketEmissionsChangeSinceLastYear > 0}">
+                        ({{utilityUsageSummaryData.total.marketEmissionsChangeSinceLastYear | customNumber}})
+                    </span>
+                </th>
+                <th *ngIf="emissionsDisplay == 'location'">
+                    <span *ngIf="utilityUsageSummaryData.total.previousMonthLocationEmissions">
+                        {{utilityUsageSummaryData.total.previousMonthLocationEmissions | customNumber}}
+                    </span>
+                    <span *ngIf="!utilityUsageSummaryData.total.previousMonthLocationEmissions">
+                        &mdash;
+                    </span>
+                    <span *ngIf="utilityUsageSummaryData.total.locationEmissionsChangeSinceLastYear"
+                        class="small ps-2 pull-right green"
+                        [ngClass]="{'red': utilityUsageSummaryData.total.locationEmissionsChangeSinceLastYear > 0}">
+                        ({{utilityUsageSummaryData.total.locationEmissionsChangeSinceLastYear | customNumber}})
+                    </span>
+                </th>
+
+                <!--year prior-->
+                <th *ngIf="emissionsDisplay == 'market'">
+                    <span *ngIf="utilityUsageSummaryData.total.yearPriorMarketEmissions">
+                        {{utilityUsageSummaryData.total.yearPriorMarketEmissions | customNumber}}
+                    </span>
+                    <span *ngIf="!utilityUsageSummaryData.total.yearPriorMarketEmissions">
+                        &mdash;
+                    </span>
+
+                </th>
+                <th *ngIf="emissionsDisplay == 'location'">
+                    <span *ngIf="utilityUsageSummaryData.total.yearPriorLocationEmissions">
+                        {{utilityUsageSummaryData.total.yearPriorLocationEmissions | customNumber}}
+                    </span>
+                    <span *ngIf="!utilityUsageSummaryData.total.yearPriorLocationEmissions">
+                        &mdash;
+                    </span>
+
+                </th>
+
+                <!--average-->
+                <th *ngIf="emissionsDisplay == 'market'">
+                    <span *ngIf="utilityUsageSummaryData.total.averageMarketEmissions">
+                        {{utilityUsageSummaryData.total.averageMarketEmissions | customNumber}}
+                    </span>
+                    <span *ngIf="!utilityUsageSummaryData.total.averageMarketEmissions">
+                        &mdash;
+                    </span>
+                </th>
+                <th *ngIf="emissionsDisplay == 'location'">
+                    <span *ngIf="utilityUsageSummaryData.total.averageLocationEmissions">
+                        {{utilityUsageSummaryData.total.averageLocationEmissions | customNumber}}
+                    </span>
+                    <span *ngIf="!utilityUsageSummaryData.total.averageLocationEmissions">
+                        &mdash;
+                    </span>
+                </th>
+            </tr>
+        </tfoot>
+    </table>
+    <!--costs-->
+    <table class="table utility-data table-sm table-bordered table-hover"  *ngIf="dataType == 'cost'">
+        <thead>
+            <tr class="table-mh">
+                <th>Utility</th>
+                <th>
+                    Last Month Cost <br> <span class="small" *ngIf="lastMonthsDate">({{lastMonthsDate | date: 'MMM, y'}})</span>
+                </th>
+                <th>
+                    Previous Year Cost<br> 
+                    <span class="small" *ngIf="yearPriorLastMonth">({{yearPriorLastMonth | date: 'MMM, y'}})</span>
+                </th>
+                <th>
+                    Monthly Average Cost<br> 
+                    <span class="small" *ngIf="yearPriorDate">({{yearPriorDate | date: 'MMM, y'}} -
+                        {{lastMonthsDate | date: 'MMM, y'}})</span>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let utilityUsageSummary of utilityUsageSummaryData.utilitySummaries">
+                <td>
+                    {{utilityUsageSummary.utility}}
+                </td>
+                <td>
+                    <span *ngIf="utilityUsageSummary.previousMonthEnergyCost">
+                        {{utilityUsageSummary.previousMonthEnergyCost | customNumber:true }}
+                    </span>
+                    <span *ngIf="!utilityUsageSummary.previousMonthEnergyCost">
+                        &mdash;
+                    </span>
+
+                    <span *ngIf="utilityUsageSummary.energyCostChangeSinceLastYear" class="small ps-2 pull-right green"
+                        [ngClass]="{'red': utilityUsageSummary.energyCostChangeSinceLastYear > 0}">
+                        ({{utilityUsageSummary.energyCostChangeSinceLastYear | customNumber:true}})
+                    </span>
+                </td>
+                <td>
+                    <span *ngIf="utilityUsageSummary.yearPriorEnergyCost">
+                        {{utilityUsageSummary.yearPriorEnergyCost | customNumber:true }}
+                    </span>
+                    <span *ngIf="!utilityUsageSummary.yearPriorEnergyCost">
+                        &mdash;
+                    </span>
+                </td>
+                <td>
+                    <span *ngIf="utilityUsageSummary.averageEnergyCost">
+                        {{utilityUsageSummary.averageEnergyCost | customNumber:true }}
+                    </span>
+                    <span *ngIf="!utilityUsageSummary.averageEnergyCost">
+                        &mdash;
+                    </span>
+                </td>
+
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <th>
+                    Total
+                </th>
+                <th>
+                    <span *ngIf="utilityUsageSummaryData.total.previousMonthEnergyCost">
+                        {{utilityUsageSummaryData.total.previousMonthEnergyCost | customNumber:true }}
+                    </span>
+                    <span *ngIf="!utilityUsageSummaryData.total.previousMonthEnergyCost">
+                        &mdash;
+                    </span>
+                    <span *ngIf="utilityUsageSummaryData.total.energyCostChangeSinceLastYear"
+                        class="small ps-2 pull-right green"
+                        [ngClass]="{'red': utilityUsageSummaryData.total.energyCostChangeSinceLastYear > 0}">
+                        ({{utilityUsageSummaryData.total.energyCostChangeSinceLastYear | customNumber:true}})
+                    </span>
+                </th>
+                <th>
+                    <span *ngIf="utilityUsageSummaryData.total.yearPriorEnergyCost">
+                        {{utilityUsageSummaryData.total.yearPriorEnergyCost | customNumber:true }}
+                    </span>
+                    <span *ngIf="!utilityUsageSummaryData.total.yearPriorEnergyCost">
+                        &mdash;
+                    </span>
+                </th>
+                <th>
+                    <span *ngIf="utilityUsageSummaryData.total.averageEnergyCost">
+                        {{utilityUsageSummaryData.total.averageEnergyCost | customNumber:true }}
+                    </span>
+                    <span *ngIf="!utilityUsageSummaryData.total.averageEnergyCost">
+                        &mdash;
+                    </span>
+                </th>
+            </tr>
+        </tfoot>
+    </table>
+    <!--water-->
+     <table class="table utility-data table-sm table-bordered table-hover"  *ngIf="dataType == 'water'">
+        <thead>
+            <tr class="table-mh">
+                <th></th>
+                <th colspan="2">
+                    Last Month <span class="small" *ngIf="lastMonthsDate">({{lastMonthsDate | date: 'MMM, y'}})</span>
+                </th>
+                <th colspan="2">
+                    Previous Year
+                    <span class="small" *ngIf="yearPriorLastMonth">({{yearPriorLastMonth | date: 'MMM, y'}})</span>
+                </th>
+                <th colspan="2">
+                    Monthly Average
+                    <span class="small" *ngIf="yearPriorDate">({{yearPriorDate | date: 'MMM, y'}} -
+                        {{lastMonthsDate | date: 'MMM, y'}})</span>
+                </th>
+            </tr>
+            <tr>
+                <th>Utility</th>
+                <th>Utility Use <br> (<span [innerHTML]="accountWaterUnit | settingsLabel"></span>)</th>
+                <th>Utility Cost</th>
+                <th>Utility Use <br> (<span [innerHTML]="accountWaterUnit | settingsLabel"></span>)</th>
+                <th>Utility Cost</th>
+                <th>Utility Use <br> (<span [innerHTML]="accountWaterUnit | settingsLabel"></span>)</th>
+                <th>Utility Cost</th>
+            </tr>
+        </thead>
+        <tbody class="table-group-divider">
+            <tr *ngFor="let utilityUsageSummary of utilityUsageSummaryData.utilitySummaries">
+                <td>
+                    {{utilityUsageSummary.utility}}
+                </td>
+                <!--Last Month-->
+                <td>
+                    <span *ngIf="utilityUsageSummary.previousMonthConsumption">
+                        {{utilityUsageSummary.previousMonthConsumption | customNumber}}
+                    </span>
+                    <span *ngIf="!utilityUsageSummary.previousMonthConsumption">
+                        &mdash;
+                    </span>
+                    <span *ngIf="utilityUsageSummary.consumptionChangeSinceLastYear" class="small ps-2 pull-right green"
+                        [ngClass]="{'red': utilityUsageSummary.consumptionChangeSinceLastYear > 0}">
+                        ({{utilityUsageSummary.consumptionChangeSinceLastYear | customNumber}})
+                    </span>
+                </td>
+                <td>
+                    <span *ngIf="utilityUsageSummary.previousMonthEnergyCost">
+                        {{utilityUsageSummary.previousMonthEnergyCost | customNumber:true }}
+                    </span>
+                    <span *ngIf="!utilityUsageSummary.previousMonthEnergyCost">
+                        &mdash;
+                    </span>
+
+                    <span *ngIf="utilityUsageSummary.energyCostChangeSinceLastYear" class="small ps-2 pull-right green"
+                        [ngClass]="{'red': utilityUsageSummary.energyCostChangeSinceLastYear > 0}">
+                        ({{utilityUsageSummary.energyCostChangeSinceLastYear | customNumber:true}})
+                    </span>
+                </td>
+
+                <!--Year prior-->
+                <td>
+                    <span *ngIf="utilityUsageSummary.yearPriorConsumption">
+                        {{utilityUsageSummary.yearPriorConsumption | customNumber}}
+                    </span>
+                    <span *ngIf="!utilityUsageSummary.yearPriorConsumption">
+                        &mdash;
+                    </span>
+                </td>
+                <td>
+                    <span *ngIf="utilityUsageSummary.yearPriorEnergyCost">
+                        {{utilityUsageSummary.yearPriorEnergyCost | customNumber:true }}
+                    </span>
+                    <span *ngIf="!utilityUsageSummary.yearPriorEnergyCost">
+                        &mdash;
+                    </span>
+                </td>
+
+                <!--Average-->
+                <td>
+                    <span *ngIf="utilityUsageSummary.averageConsumption">
+                        {{utilityUsageSummary.averageConsumption | customNumber}}
+                    </span>
+                    <span *ngIf="!utilityUsageSummary.averageConsumption">
+                        &mdash;
+                    </span>
+                </td>
+                <td>
+                    <span *ngIf="utilityUsageSummary.averageEnergyCost">
+                        {{utilityUsageSummary.averageEnergyCost | customNumber:true }}
+                    </span>
+                    <span *ngIf="!utilityUsageSummary.averageEnergyCost">
+                        &mdash;
+                    </span>
+                </td>
+
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <th>
+                    Total
+                </th>
+                <!--previous month-->
+                <th>
+                    <span *ngIf="utilityUsageSummaryData.total.previousMonthConsumption">
+                        {{utilityUsageSummaryData.total.previousMonthConsumption | customNumber}}
+                    </span>
+                    <span *ngIf="!utilityUsageSummaryData.total.previousMonthConsumption">
+                        &mdash;
+                    </span>
+                    <span *ngIf="utilityUsageSummaryData.total.consumptionChangeSinceLastYear"
+                        class="small ps-2 pull-right green"
+                        [ngClass]="{'red': utilityUsageSummaryData.total.consumptionChangeSinceLastYear > 0}">
+                        ({{utilityUsageSummaryData.total.consumptionChangeSinceLastYear | customNumber}})
+                    </span>
+                </th>
+                <th>
+                    <span *ngIf="utilityUsageSummaryData.total.previousMonthEnergyCost">
+                        {{utilityUsageSummaryData.total.previousMonthEnergyCost | customNumber:true }}
+                    </span>
+                    <span *ngIf="!utilityUsageSummaryData.total.previousMonthEnergyCost">
+                        &mdash;
+                    </span>
+                    <span *ngIf="utilityUsageSummaryData.total.energyCostChangeSinceLastYear"
+                        class="small ps-2 pull-right green"
+                        [ngClass]="{'red': utilityUsageSummaryData.total.energyCostChangeSinceLastYear > 0}">
+                        ({{utilityUsageSummaryData.total.energyCostChangeSinceLastYear | customNumber:true}})
+                    </span>
+                </th>
+
+                <!--year prior-->
+                <th>
+                    <span *ngIf="utilityUsageSummaryData.total.yearPriorConsumption">
+                        {{utilityUsageSummaryData.total.yearPriorConsumption | customNumber}}
+                    </span>
+                    <span *ngIf="!utilityUsageSummaryData.total.yearPriorConsumption">
+                        &mdash;
+                    </span>
+
+                </th>
+                <th>
+                    <span *ngIf="utilityUsageSummaryData.total.yearPriorEnergyCost">
+                        {{utilityUsageSummaryData.total.yearPriorEnergyCost | customNumber:true }}
+                    </span>
+                    <span *ngIf="!utilityUsageSummaryData.total.yearPriorEnergyCost">
+                        &mdash;
+                    </span>
+                </th>
+
+                <!--average-->
+                <th>
+                    <span *ngIf="utilityUsageSummaryData.total.averageConsumption">
+                        {{utilityUsageSummaryData.total.averageConsumption | customNumber}}
+                    </span>
+                    <span *ngIf="!utilityUsageSummaryData.total.averageConsumption">
+                        &mdash;
+                    </span>
+                </th>
+                <th>
+                    <span *ngIf="utilityUsageSummaryData.total.averageEnergyCost">
+                        {{utilityUsageSummaryData.total.averageEnergyCost | customNumber:true }}
+                    </span>
+                    <span *ngIf="!utilityUsageSummaryData.total.averageEnergyCost">
+                        &mdash;
+                    </span>
+                </th>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+

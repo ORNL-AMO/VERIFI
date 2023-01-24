@@ -4,6 +4,7 @@ import { DataOverviewMapComponent } from './data-overview-map/data-overview-map.
 import { FacilityUsageDonutComponent } from './facility-usage-donut/facility-usage-donut.component';
 import { FacilitiesUsageTableComponent } from './facilities-usage-table/facilities-usage-table.component';
 import { HelperPipesModule } from '../helper-pipes/helper-pipes.module';
+import { AccountUtilityConsumptionTableComponent } from './account-utility-consumption-table/account-utility-consumption-table.component';
 
 
 
@@ -11,7 +12,8 @@ import { HelperPipesModule } from '../helper-pipes/helper-pipes.module';
   declarations: [
     DataOverviewMapComponent,
     FacilityUsageDonutComponent,
-    FacilitiesUsageTableComponent
+    FacilitiesUsageTableComponent,
+    AccountUtilityConsumptionTableComponent
   ],
   imports: [
     CommonModule,
@@ -20,7 +22,8 @@ import { HelperPipesModule } from '../helper-pipes/helper-pipes.module';
   exports: [
     DataOverviewMapComponent,
     FacilityUsageDonutComponent,
-    FacilitiesUsageTableComponent
+    FacilitiesUsageTableComponent,
+    AccountUtilityConsumptionTableComponent
   ]
 })
 export class DataOverviewModule { }
