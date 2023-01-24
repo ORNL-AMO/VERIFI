@@ -1,0 +1,78 @@
+<div class="table-responsive">
+    <table class="table utility-data table-sm table-bordered table-hover">
+        <thead>
+            <tr [ngClass]="{'emissions': dataType == 'emissions'}">
+                <th>Facility</th>
+                <th *ngIf="dataType == 'energyUse'">Utility Usage<br> (<span
+                        [innerHTML]="accountEnergyUnit | settingsLabel"></span>)
+                </th>
+                <th *ngIf="dataType == 'water'">Water Consumption<br> (<span
+                        [innerHTML]="waterUnit | settingsLabel"></span>)
+                </th>
+                <th *ngIf="dataType == 'cost'"># of Meters</th>
+                <th *ngIf="dataType != 'emissions'">Utility Cost </th>
+                <th *ngIf="dataType == 'emissions' && emissionsDisplay == 'market'">
+                    Market-Based <br>Emissions (tonne CO<sub>2</sub>e)
+                </th>
+                <th *ngIf="dataType == 'emissions' && emissionsDisplay == 'location'">
+                    Location-Based <br>Emissions (tonne CO<sub>2</sub>e)
+                </th>
+            </tr>
+        </thead>
+        <tbody class="table-group-divider"
+            *ngIf="accountFacilitiesSummary && accountFacilitiesSummary.facilitySummaries">
+            <tr *ngFor="let summary of accountFacilitiesSummary.facilitySummaries | orderBy: 'energyUsage'">
+                <td>
+                    <span class="badge"
+                        [ngStyle]="{background: summary.facility.color, color: summary.facility.color }">
+                        &mdash;
+                    </span>
+                    <a class="ps-2 click-link" (click)="selectFacility(summary.facility)">{{summary.facility.name}}</a>
+                </td>
+                <td *ngIf="dataType == 'energyUse'">
+                    {{summary.energyUsage | customNumber}}
+                </td>
+                <td *ngIf="dataType == 'water'">
+                    {{summary.consumption | customNumber}}
+                </td>
+                <td *ngIf="dataType == 'cost'">
+                    {{summary.numberOfMeters}}
+                </td>
+                <td *ngIf="dataType != 'emissions'">
+                    {{summary.energyCost | customNumber:true }}
+                </td>
+                <td *ngIf="dataType == 'emissions' && emissionsDisplay == 'market'">
+                    {{summary.marketEmissions / 1000 | customNumber}}
+                </td>
+                <td *ngIf="dataType == 'emissions' && emissionsDisplay == 'location'">
+                    {{summary.locationEmissions / 1000 | customNumber}}
+                </td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <th>
+                    Total
+                </th>
+                <th *ngIf="dataType == 'energyUse'">
+                    {{accountFacilitiesSummary.totalEnergyUse | customNumber}}
+                </th>
+                <th *ngIf="dataType == 'water'">
+                    {{accountFacilitiesSummary.totalConsumption | customNumber}}
+                </th>
+                <th *ngIf="dataType == 'cost'">
+                    {{accountFacilitiesSummary.totalNumberOfMeters}}
+                </th>
+                <th *ngIf="dataType != 'emissions'">
+                    {{accountFacilitiesSummary.totalEnergyCost | customNumber:true }}
+                </th>
+                <th *ngIf="dataType == 'emissions' && emissionsDisplay == 'market'">
+                    {{accountFacilitiesSummary.totalMarketEmissions / 1000 | customNumber}}
+                </th>
+                <th *ngIf="dataType == 'emissions' && emissionsDisplay == 'location'">
+                    {{accountFacilitiesSummary.totalLocationEmissions / 1000 | customNumber}}
+                </th>
+            </tr>
+        </tfoot>
+    </table>
+</div>

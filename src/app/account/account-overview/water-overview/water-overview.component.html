@@ -3,8 +3,8 @@
         <div class="col">
             <div class="card">
                 <div class="card-header bg-white">
-                    <h4 class="mb-0">Facility Water Costs<span class="pull-right"
-                            *ngIf="yearPriorDate">({{yearPriorDate |
+                    <h4 class="mb-0">Facility Water Costs<span class="pull-right" *ngIf="yearPriorDate">({{yearPriorDate
+                            |
                             date: 'MMM, y'}} -
                             {{lastMonthsDate | date: 'MMM, y'}})</span></h4>
 
@@ -18,7 +18,8 @@
                     </div>
                     <div class="row">
                         <div class="col-6">
-                            <app-facility-water-table></app-facility-water-table>
+                            <!-- <app-facility-water-table></app-facility-water-table> -->
+                            <app-facilities-usage-table [dataType]="'water'"></app-facilities-usage-table>
                         </div>
                         <div class="col-6">
                             <app-facility-usage-donut [dataType]="'water'"></app-facility-usage-donut>
