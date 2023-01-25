@@ -125,6 +125,7 @@ export interface BetterPlantsReportSetup {
 
 export interface DataOverviewReportSetup {
   energyIsSource: boolean,
+  emissionsDisplay: 'market' | 'location'
   accountEnergySection: DataOverviewReportAccountSection,
   accountEmissionsSection: DataOverviewReportAccountSection,
   accountCostsSection: DataOverviewReportAccountSection,

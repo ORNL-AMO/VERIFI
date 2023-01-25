@@ -81,6 +81,7 @@ export class AccountReportDbService {
       },
       dataOverviewReportSetup: {
         energyIsSource: selectedAccount.energyIsSource,
+        emissionsDisplay: 'location',
         accountEnergySection: {
           includeSection: true,
           includeMap: true,

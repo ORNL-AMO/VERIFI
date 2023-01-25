@@ -35,6 +35,7 @@ export class DataOverviewReportComponent {
     this.account = this.accountDbService.selectedAccount.getValue();
     this.selectedReport = this.accountReportDbService.selectedReport.getValue();
     let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    this.accountOverviewService.emissionsDisplay.next(this.selectedReport.dataOverviewReportSetup.emissionsDisplay);
     this.accountOverviewService.calanderizedMeters = this.calanderizationService.getCalanderizedMeterData(meters, true, true, { energyIsSource: this.selectedReport.dataOverviewReportSetup.energyIsSource });
     this.calculateFacilitiesSummary();
   }

@@ -53,12 +53,14 @@ export class AccountReportsService {
   getDataOverviewFormFromReport(dataOverviewReportSetup: DataOverviewReportSetup): FormGroup {
     let form: FormGroup = this.formBuilder.group({
       energyIsSource: [dataOverviewReportSetup.energyIsSource, Validators.required],
+      emissionsDisplay: [dataOverviewReportSetup.emissionsDisplay]
     });
     return form;
   }
 
   updateDataOverviewReportFromForm(dataOverviewReportSetup: DataOverviewReportSetup, form: FormGroup): DataOverviewReportSetup {
     dataOverviewReportSetup.energyIsSource = form.controls.energyIsSource.value;
+    dataOverviewReportSetup.emissionsDisplay = form.controls.emissionsDisplay.value;
     return dataOverviewReportSetup;
   }
 
