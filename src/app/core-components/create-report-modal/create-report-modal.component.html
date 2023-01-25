@@ -1,0 +1,13 @@
+<div [ngClass]="{'windowOverlay': showModal}"></div>
+<div class="popup" [ngClass]="{'open': showModal}">
+    <div class="popup-header">Create New Report
+        <button class="item-right" (click)="cancelCreateReport()">x</button>
+    </div>
+    <div class="popup-body">
+
+    </div>
+    <div class="popup-footer text-end">
+        <button class="btn btn-secondary" (click)="cancelCreateReport()">Cancel</button>
+        <button class="btn btn-primary" (click)="createReport()">Create Report</button>
+    </div>
+</div>

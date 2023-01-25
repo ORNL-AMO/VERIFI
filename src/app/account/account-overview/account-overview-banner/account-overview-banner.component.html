@@ -28,7 +28,10 @@
             </li>
         </ul>
 
-        <div class="d-flex" *ngIf="urlDisplay != 'other'">
+        <div class="d-flex">
+            <div class="pe-1">
+                <button class="btn action-btn btn-sm" (click)="createReport()"><span class="fa fa-file"></span> Create Report</button>
+            </div>
             <div class="pe-1" *ngIf="urlDisplay == 'energy'">
                 <div class="btn-group">
                     <button class="btn btn-sm m-0 toggle-btn" (click)="setAccountEnergyIsSource(true)"
