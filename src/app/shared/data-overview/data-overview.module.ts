@@ -6,6 +6,7 @@ import { FacilitiesUsageTableComponent } from './facilities-usage-table/faciliti
 import { HelperPipesModule } from '../helper-pipes/helper-pipes.module';
 import { AccountUtilityConsumptionTableComponent } from './account-utility-consumption-table/account-utility-consumption-table.component';
 import { FacilitiesUsageStackedBarChartComponent } from './facilities-usage-stacked-bar-chart/facilities-usage-stacked-bar-chart.component';
+import { MonthlyUtilityUsageLineChartComponent } from './monthly-utility-usage-line-chart/monthly-utility-usage-line-chart.component';
 
 
 
@@ -15,7 +16,8 @@ import { FacilitiesUsageStackedBarChartComponent } from './facilities-usage-stac
     FacilityUsageDonutComponent,
     FacilitiesUsageTableComponent,
     AccountUtilityConsumptionTableComponent,
-    FacilitiesUsageStackedBarChartComponent
+    FacilitiesUsageStackedBarChartComponent,
+    MonthlyUtilityUsageLineChartComponent
   ],
   imports: [
     CommonModule,
@@ -26,7 +28,8 @@ import { FacilitiesUsageStackedBarChartComponent } from './facilities-usage-stac
     FacilityUsageDonutComponent,
     FacilitiesUsageTableComponent,
     AccountUtilityConsumptionTableComponent,
-    FacilitiesUsageStackedBarChartComponent
+    FacilitiesUsageStackedBarChartComponent,
+    MonthlyUtilityUsageLineChartComponent
   ]
 })
 export class DataOverviewModule { }
