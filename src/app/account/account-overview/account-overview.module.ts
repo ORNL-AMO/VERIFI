@@ -10,10 +10,6 @@ import { WaterOverviewComponent } from './water-overview/water-overview.componen
 import { OtherUtilityOverviewComponent } from './other-utility-overview/other-utility-overview.component';
 import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.module';
 import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/calculating-spinner.module';
-import { MonthlyUsageChartComponent } from './energy-overview/monthly-usage-chart/monthly-usage-chart.component';
-import { MonthlyCostsChartComponent } from './costs-overview/monthly-costs-chart/monthly-costs-chart.component';
-import { MonthlyEmissionsChartComponent } from './emissions-overview/monthly-emissions-chart/monthly-emissions-chart.component';
-import { MonthlyWaterChartComponent } from './water-overview/monthly-water-chart/monthly-water-chart.component';
 import { DataOverviewModule } from 'src/app/shared/data-overview/data-overview.module';
 
 
@@ -26,11 +22,7 @@ import { DataOverviewModule } from 'src/app/shared/data-overview/data-overview.m
     CostsOverviewComponent,
     EmissionsOverviewComponent,
     WaterOverviewComponent,
-    OtherUtilityOverviewComponent,
-    MonthlyUsageChartComponent,
-    MonthlyCostsChartComponent,
-    MonthlyEmissionsChartComponent,
-    MonthlyWaterChartComponent
+    OtherUtilityOverviewComponent
   ],
   imports: [
     CommonModule,
