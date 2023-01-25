@@ -1,0 +1,31 @@
+<div class="row">
+    <div class="col-12" *ngIf="sectionOptions.includeMap">
+        <app-data-overview-map [dataType]="dataType"></app-data-overview-map>
+    </div>
+    <div class="col-6" *ngIf="sectionOptions.includeFacilityTable">
+        <app-facilities-usage-table [dataType]="dataType"></app-facilities-usage-table>
+    </div>
+    <div class="col-6" *ngIf="sectionOptions.includeFacilityDonut">
+        <app-facility-usage-donut [dataType]="dataType"></app-facility-usage-donut>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12">
+        <hr>
+    </div>
+</div>
+<div class="row" *ngIf="sectionOptions.includeUtilityTable">
+    <div class="col-12">
+        <app-account-utility-consumption-table [dataType]="dataType"></app-account-utility-consumption-table>
+    </div>
+</div>
+<div class="row" *ngIf="sectionOptions.includeStackedBarChart">
+    <div class="col-12">
+        <app-facilities-usage-stacked-bar-chart [dataType]="dataType"></app-facilities-usage-stacked-bar-chart>
+    </div>
+</div>
+<div class="row" *ngIf="sectionOptions.includeMonthlyLineChart">
+    <div class="col-12">
+        <app-monthly-utility-usage-line-chart [dataType]="dataType"></app-monthly-utility-usage-line-chart>
+    </div>
+</div>

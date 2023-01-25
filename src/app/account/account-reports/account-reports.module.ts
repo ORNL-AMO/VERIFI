@@ -18,11 +18,8 @@ import { CompanyInformationTableComponent } from './better-plants-report/company
 import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/calculating-spinner.module';
 import { DataOverviewReportComponent } from './data-overview-report/data-overview-report.component';
 import { AccountTitlePageComponent } from './data-overview-report/account-title-page/account-title-page.component';
-import { AccountEnergyReportComponent } from './data-overview-report/account-energy-report/account-energy-report.component';
 import { DataOverviewModule } from 'src/app/shared/data-overview/data-overview.module';
-import { AccountEmissionsReportComponent } from './data-overview-report/account-emissions-report/account-emissions-report.component';
-import { AccountCostReportComponent } from './data-overview-report/account-cost-report/account-cost-report.component';
-import { AccountWaterReportComponent } from './data-overview-report/account-water-report/account-water-report.component';
+import { AccountSectionReportComponent } from './data-overview-report/account-section-report/account-section-report.component';
 
 
 
@@ -41,10 +38,7 @@ import { AccountWaterReportComponent } from './data-overview-report/account-wate
     CompanyInformationTableComponent,
     DataOverviewReportComponent,
     AccountTitlePageComponent,
-    AccountEnergyReportComponent,
-    AccountEmissionsReportComponent,
-    AccountCostReportComponent,
-    AccountWaterReportComponent
+    AccountSectionReportComponent
   ],
   imports: [
     CommonModule,

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { IdbAccountReport } from 'src/app/models/idb';
-import { BetterPlantsReportSetup, DataOverviewReportSetup } from 'src/app/models/overview-report';
+import { BetterPlantsReportSetup, DataOverviewReportAccountSection, DataOverviewReportSetup } from 'src/app/models/overview-report';
 import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
@@ -55,5 +55,35 @@ export class AccountReportsService {
       energyIsSource: [dataOverviewReportSetup.energyIsSource, Validators.required],
     });
     return form;
+  }
+
+  updateDataOverviewReportFromForm(dataOverviewReportSetup: DataOverviewReportSetup, form: FormGroup): DataOverviewReportSetup {
+    dataOverviewReportSetup.energyIsSource = form.controls.energyIsSource.value;
+    return dataOverviewReportSetup;
+  }
+
+
+  getSectionFormFromReport(overviewReportAccountSection: DataOverviewReportAccountSection): FormGroup {
+    let form: FormGroup = this.formBuilder.group({
+      includeSection: [overviewReportAccountSection.includeSection, Validators.required],
+      includeMap: [overviewReportAccountSection.includeMap, Validators.required],
+      includeFacilityTable: [overviewReportAccountSection.includeFacilityTable, Validators.required],
+      includeFacilityDonut: [overviewReportAccountSection.includeFacilityDonut, Validators.required],
+      includeUtilityTable: [overviewReportAccountSection.includeUtilityTable, Validators.required],
+      includeStackedBarChart: [overviewReportAccountSection.includeStackedBarChart, Validators.required],
+      includeMonthlyLineChart: [overviewReportAccountSection.includeMonthlyLineChart, Validators.required],
+    });
+    return form;
+  }
+
+  updateReportSectionFromForm(overviewReportAccountSection: DataOverviewReportAccountSection, form: FormGroup): DataOverviewReportAccountSection {
+    overviewReportAccountSection.includeSection = form.controls.includeSection.value;
+    overviewReportAccountSection.includeMap = form.controls.includeMap.value
+    overviewReportAccountSection.includeFacilityTable = form.controls.includeFacilityTable.value
+    overviewReportAccountSection.includeFacilityDonut = form.controls.includeFacilityDonut.value
+    overviewReportAccountSection.includeUtilityTable = form.controls.includeUtilityTable.value
+    overviewReportAccountSection.includeStackedBarChart = form.controls.includeStackedBarChart.value
+    overviewReportAccountSection.includeMonthlyLineChart = form.controls.includeMonthlyLineChart.value
+    return overviewReportAccountSection;
   }
 }

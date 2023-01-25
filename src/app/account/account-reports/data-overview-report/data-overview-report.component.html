@@ -1,21 +1,19 @@
 <div class="report" [ngClass]="{'print': print}" *ngIf="selectedReport && !calculating">
-    <div class="row justify-content-center pt-3">
+    <div class="row justify-content-center pt-3 report-page">
         <div class="col-12">
             <app-account-title-page></app-account-title-page>
         </div>
     </div>
-    <!--account energy consumption-->
-    <div class="row justify-content-center">
-        <div class="col-12">
-            <hr>
+    <ng-container *ngIf="selectedReport.dataOverviewReportSetup.accountEnergySection.includeSection">
+        <hr>
+        <!--account energy consumption-->
+        <div class="row justify-content-center report-page">
+            <div class="col-12">
+                <h4>Account Energy Consumption</h4>
+                <app-account-section-report [dataType]="'energyUse'"></app-account-section-report>
+            </div>
         </div>
-        <div class="col-12">
-            <h4>Account Energy Consumption</h4>
-        </div>
-        <div class="col-12">
-            <app-account-energy-report></app-account-energy-report>
-        </div>
-    </div>
+    </ng-container>
     <!--account water consumption-->
     <!-- <div class="row justify-content-center">
         <div class="col-12">
@@ -28,30 +26,26 @@
             <app-account-water-report></app-account-water-report>
         </div>
     </div> -->
-    <!--account emissions-->
-    <div class="row justify-content-center">
-        <div class="col-12">
-            <hr>
-        </div>
-        <div class="col-12">
-            <h1>Account Emissions</h1>
-        </div>
-        <div class="col-12">
-            <app-account-emissions-report></app-account-emissions-report>
-        </div>
-    </div>
     <!--account costs-->
-    <div class="row justify-content-center">
-        <div class="col-12">
-            <hr>
+    <ng-container *ngIf="selectedReport.dataOverviewReportSetup.accountCostsSection.includeSection">
+        <hr>
+        <div class="row justify-content-center report-page">
+            <div class="col-12">
+                <h4>Account Costs</h4>
+                <app-account-section-report [dataType]="'cost'"></app-account-section-report>
+            </div>
         </div>
-        <div class="col-12">
-            <h1>Account Costs</h1>
+    </ng-container>
+    <ng-container *ngIf="selectedReport.dataOverviewReportSetup.accountEmissionsSection.includeSection">
+        <hr>
+        <!--account emissions-->
+        <div class="row justify-content-center report-page">
+            <div class="col-12">
+                <h4>Account Emissions</h4>
+                <app-account-section-report [dataType]="'emissions'"></app-account-section-report>
+            </div>
         </div>
-        <div class="col-12">
-            <app-account-cost-report></app-account-cost-report>
-        </div>
-    </div>
+    </ng-container>
 </div>
 
 <div class="w-100 justify-content-center" *ngIf="calculating">

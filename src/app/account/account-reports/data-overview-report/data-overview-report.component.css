@@ -1,6 +1,6 @@
 .report{
     /* height: 100%; */
-    background-color: white;
+    /* background-color: white; */
     margin: 30px 40px;
     padding: 20px;
     /* max-height: 100%;
@@ -45,4 +45,9 @@ hr.page-spacer{
 .disclaimer-text p{
     font-style: italic;
     font-size: xx-small;
+}
+
+.report-page{
+    background-color: white;
+    border: solid 1px lightgray;
 }

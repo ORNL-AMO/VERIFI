@@ -80,7 +80,44 @@ export class AccountReportDbService {
         baselineAdjustmentNotes: undefined,
       },
       dataOverviewReportSetup: {
-        energyIsSource: selectedAccount.energyIsSource
+        energyIsSource: selectedAccount.energyIsSource,
+        accountEnergySection: {
+          includeSection: true,
+          includeMap: true,
+          includeFacilityTable: true,
+          includeFacilityDonut: true,
+          includeUtilityTable: true,
+          includeStackedBarChart: true,
+          includeMonthlyLineChart: true
+        },
+        accountEmissionsSection: {
+          includeSection: true,
+          includeMap: true,
+          includeFacilityTable: true,
+          includeFacilityDonut: true,
+          includeUtilityTable: true,
+          includeStackedBarChart: true,
+          includeMonthlyLineChart: true
+        },
+        accountCostsSection: {
+          includeSection: true,
+          includeMap: true,
+          includeFacilityTable: true,
+          includeFacilityDonut: true,
+          includeUtilityTable: true,
+          includeStackedBarChart: true,
+          includeMonthlyLineChart: true
+        },
+        accountWaterSection: {
+          includeSection: true,
+          includeMap: true,
+          includeFacilityTable: true,
+          includeFacilityDonut: true,
+          includeUtilityTable: true,
+          includeStackedBarChart: true,
+          includeMonthlyLineChart: true
+        }
+
       }
     }
   }

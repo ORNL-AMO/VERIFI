@@ -124,5 +124,19 @@ export interface BetterPlantsReportSetup {
 }
 
 export interface DataOverviewReportSetup {
-  energyIsSource: boolean
+  energyIsSource: boolean,
+  accountEnergySection: DataOverviewReportAccountSection,
+  accountEmissionsSection: DataOverviewReportAccountSection,
+  accountCostsSection: DataOverviewReportAccountSection,
+  accountWaterSection: DataOverviewReportAccountSection
+}
+
+export interface DataOverviewReportAccountSection {
+  includeSection: boolean,
+  includeMap: boolean,
+  includeFacilityTable: boolean,
+  includeFacilityDonut: boolean,
+  includeUtilityTable: boolean,
+  includeStackedBarChart: boolean,
+  includeMonthlyLineChart: boolean
 }
