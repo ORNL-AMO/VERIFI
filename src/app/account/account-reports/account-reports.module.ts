@@ -20,7 +20,6 @@ import { DataOverviewReportComponent } from './data-overview-report/data-overvie
 import { AccountTitlePageComponent } from './data-overview-report/account-title-page/account-title-page.component';
 import { DataOverviewModule } from 'src/app/shared/data-overview/data-overview.module';
 import { AccountSectionReportComponent } from './data-overview-report/account-section-report/account-section-report.component';
-import { AccountSectionFormComponent } from './account-report-setup/data-overview-setup/account-section-form/account-section-form.component';
 
 
 
@@ -39,8 +38,7 @@ import { AccountSectionFormComponent } from './account-report-setup/data-overvie
     CompanyInformationTableComponent,
     DataOverviewReportComponent,
     AccountTitlePageComponent,
-    AccountSectionReportComponent,
-    AccountSectionFormComponent
+    AccountSectionReportComponent
   ],
   imports: [
     CommonModule,

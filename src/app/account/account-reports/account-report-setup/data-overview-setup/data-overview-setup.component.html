@@ -6,51 +6,98 @@
                 <div class="col-7">
                     <div class="form-check">
                         <input type="radio" class="form-check-input" name="energyIsSource" [value]="true"
-                            id="sourceEnergy" formControlName="energyIsSource" (change)="saveGeneralInformation()">
+                            id="sourceEnergy" formControlName="energyIsSource" (change)="save()">
                         <label class="form-check-label" for="sourceEnergy">Source Energy</label>
                     </div>
                     <div class="form-check">
                         <input type="radio" class="form-check-input" name="energyIsSource" [value]="false"
-                            id="siteEnergy" formControlName="energyIsSource" (change)="saveGeneralInformation()">
+                            id="siteEnergy" formControlName="energyIsSource" (change)="save()">
                         <label class="form-check-label" for="siteEnergy">Site Energy</label>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-6" *ngIf="showEmissions">
+        <div class="col-6" *ngIf="overviewForm.controls.includeEmissionsSection.value">
             <div class="row form-group">
                 <label class="col-5 col-form-label semibold">Emissions Display</label>
                 <div class="col-7">
                     <div class="form-check">
                         <input type="radio" class="form-check-input" name="emissionsDisplay" [value]="'market'"
-                            id="marketEmissions" formControlName="emissionsDisplay" (change)="saveGeneralInformation()">
+                            id="marketEmissions" formControlName="emissionsDisplay" (change)="save()">
                         <label class="form-check-label" for="marketEmissions">Market-based</label>
                     </div>
                     <div class="form-check">
                         <input type="radio" class="form-check-input" name="emissionsDisplay" [value]="'location'"
-                            id="locationEmissions" formControlName="emissionsDisplay"
-                            (change)="saveGeneralInformation()">
+                            id="locationEmissions" formControlName="emissionsDisplay" (change)="save()">
                         <label class="form-check-label" for="locationEmissions">Location-based</label>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    <hr>
+    <div class="d-flex">
+        <div class="pe-3">
+            <label class="semibold larger">Account Sections to Include in Report</label>
+            <div class="section-options">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" name="includeEnergySection"
+                        id="includeEnergySection" formControlName="includeEnergySection" (change)="save()">
+                    <label class="form-check-label" for="includeEnergySection">Energy Use</label>
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" name="includeCostsSection" id="includeCostsSection"
+                        formControlName="includeCostsSection" (change)="save()">
+                    <label class="form-check-label" for="includeCostsSection">Costs</label>
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" name="includeEmissionsSection"
+                        id="includeEmissionsSection" formControlName="includeEmissionsSection" (change)="save()">
+                    <label class="form-check-label" for="includeEmissionsSection">Emissions</label>
+                </div>
+                <!-- <div class="form-check">
+                    <input type="checkbox" class="form-check-input" name="includeWaterSection" id="includeWaterSection"
+                        formControlName="includeWaterSection" (change)="save()">
+                    <label class="form-check-label" for="includeWaterSection">Water</label>
+                </div> -->
+            </div>
+
+        </div>
+        <div class="ps-3">
+            <label class="semibold larger">Content to Include in Account Sections</label>
+            <div class="section-options">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" name="includeMap" id="includeMap"
+                        formControlName="includeMap" (change)="save()">
+                    <label class="form-check-label" for="includeMap">Map</label>
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" name="includeFacilityTable" id="includeMap"
+                        formControlName="includeFacilityTable" (change)="save()">
+                    <label class="form-check-label" for="includeMap">Facilities Table</label>
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" name="includeFacilityDonut"
+                        id="includeFacilityDonut" formControlName="includeFacilityDonut" (change)="save()">
+                    <label class="form-check-label" for="includeFacilityDonut">Facilities
+                        Donut Chart</label>
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" name="includeUtilityTable" id="includeUtilityTable"
+                        formControlName="includeUtilityTable" (change)="save()">
+                    <label class="form-check-label" for="includeUtilityTable">Utilities Table</label>
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" name="includeStackedBarChart"
+                        id="includeStackedBarChart" formControlName="includeStackedBarChart" (change)="save()">
+                    <label class="form-check-label" for="includeStackedBarChart">Utilities Stacked Bar Chart</label>
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" name="includeMonthlyLineChart"
+                        id="includeMonthlyLineChart" formControlName="includeMonthlyLineChart" (change)="save()">
+                    <label class="form-check-label" for="includeMonthlyLineChart"> Monthly Line Chart</label>
+                </div>
+            </div>
+        </div>
+    </div>
 </form>
-<hr>
-<div class="d-flex flex-wrap">
-    <div class="p-2">
-        <app-account-section-form [dataType]="'energyUse'"></app-account-section-form>
-    </div>
-    <div class="p-2">
-        <app-account-section-form [dataType]="'cost'"></app-account-section-form>
-    </div>
-    <div class="p-2">
-        <app-account-section-form [dataType]="'emissions'"></app-account-section-form>
-    </div>
-    <!-- <div class="p-2">
-      <app-account-section-form [dataType]="'water'"></app-account-section-form>
-    </div> -->
-
-
-</div>

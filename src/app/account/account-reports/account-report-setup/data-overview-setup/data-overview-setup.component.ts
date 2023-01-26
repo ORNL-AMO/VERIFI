@@ -18,11 +18,6 @@ export class DataOverviewSetupComponent {
   account: IdbAccount;
   selectedReportSub: Subscription;
   isFormChange: boolean = false;
-  accountEnergySectionForm: FormGroup;
-  accountCostsSectionForm: FormGroup;
-  accountEmissionsSectionForm: FormGroup;
-  accountWaterSectionForm: FormGroup;
-  showEmissions: boolean;
   constructor(private accountReportDbService: AccountReportDbService,
     private accountReportsService: AccountReportsService,
     private dbChangesService: DbChangesService,
@@ -33,7 +28,6 @@ export class DataOverviewSetupComponent {
   ngOnInit() {
     this.account = this.accountDbService.selectedAccount.getValue();
     this.selectedReportSub = this.accountReportDbService.selectedReport.subscribe(val => {
-      this.showEmissions = val.dataOverviewReportSetup.accountEmissionsSection.includeSection;
       if (!this.isFormChange) {
         this.overviewForm = this.accountReportsService.getDataOverviewFormFromReport(val.dataOverviewReportSetup);
       } else {
@@ -46,7 +40,7 @@ export class DataOverviewSetupComponent {
     this.selectedReportSub.unsubscribe();
   }
 
-  async saveGeneralInformation() {
+  async save() {
     this.isFormChange = true;
     let selectedReport: IdbAccountReport = this.accountReportDbService.selectedReport.getValue()
     selectedReport.dataOverviewReportSetup = this.accountReportsService.updateDataOverviewReportFromForm(selectedReport.dataOverviewReportSetup, this.overviewForm);
@@ -55,39 +49,4 @@ export class DataOverviewSetupComponent {
     this.accountReportDbService.selectedReport.next(selectedReport);
   }
 
-  async saveEnergySection() {
-    this.isFormChange = true;
-    let selectedReport: IdbAccountReport = this.accountReportDbService.selectedReport.getValue()
-    selectedReport.dataOverviewReportSetup.accountEnergySection = this.accountReportsService.updateReportSectionFromForm(selectedReport.dataOverviewReportSetup.accountEnergySection, this.accountEnergySectionForm);
-    await this.accountReportDbService.updateWithObservable(selectedReport).toPromise();
-    await this.dbChangesService.setAccountReports(this.account);
-    this.accountReportDbService.selectedReport.next(selectedReport);
-  }
-
-  async saveCostsSection() {
-    this.isFormChange = true;
-    let selectedReport: IdbAccountReport = this.accountReportDbService.selectedReport.getValue()
-    selectedReport.dataOverviewReportSetup.accountCostsSection = this.accountReportsService.updateReportSectionFromForm(selectedReport.dataOverviewReportSetup.accountCostsSection, this.accountCostsSectionForm);
-    await this.accountReportDbService.updateWithObservable(selectedReport).toPromise();
-    await this.dbChangesService.setAccountReports(this.account);
-    this.accountReportDbService.selectedReport.next(selectedReport);
-  }
-
-  async saveEmissionsSection() {
-    this.isFormChange = true;
-    let selectedReport: IdbAccountReport = this.accountReportDbService.selectedReport.getValue()
-    selectedReport.dataOverviewReportSetup.accountEmissionsSection = this.accountReportsService.updateReportSectionFromForm(selectedReport.dataOverviewReportSetup.accountEmissionsSection, this.accountEmissionsSectionForm);
-    await this.accountReportDbService.updateWithObservable(selectedReport).toPromise();
-    await this.dbChangesService.setAccountReports(this.account);
-    this.accountReportDbService.selectedReport.next(selectedReport);
-  }
-
-  async saveWaterSection() {
-    this.isFormChange = true;
-    let selectedReport: IdbAccountReport = this.accountReportDbService.selectedReport.getValue()
-    selectedReport.dataOverviewReportSetup.accountWaterSection = this.accountReportsService.updateReportSectionFromForm(selectedReport.dataOverviewReportSetup.accountWaterSection, this.accountWaterSectionForm);
-    await this.accountReportDbService.updateWithObservable(selectedReport).toPromise();
-    await this.dbChangesService.setAccountReports(this.account);
-    this.accountReportDbService.selectedReport.next(selectedReport);
-  }
 }

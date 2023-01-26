@@ -53,25 +53,25 @@ export class CreateReportModalComponent {
       newReport.reportYear = yearOptions[yearOptions.length - 1];
       if (this.router.url.includes('energy')) {
         newReport.name = 'Energy Report';
-        newReport.dataOverviewReportSetup.accountCostsSection.includeSection = false;
-        newReport.dataOverviewReportSetup.accountEmissionsSection.includeSection = false;
-        newReport.dataOverviewReportSetup.accountWaterSection.includeSection = false;
+        newReport.dataOverviewReportSetup.includeCostsSection = false;
+        newReport.dataOverviewReportSetup.includeEmissionsSection = false;
+        newReport.dataOverviewReportSetup.includeWaterSection = false;
       } else if (this.router.url.includes('costs')) {
         newReport.name = 'Costs Report';
-        newReport.dataOverviewReportSetup.accountEmissionsSection.includeSection = false;
-        newReport.dataOverviewReportSetup.accountEnergySection.includeSection = false;
-        newReport.dataOverviewReportSetup.accountWaterSection.includeSection = false;
+        newReport.dataOverviewReportSetup.includeEnergySection = false;
+        newReport.dataOverviewReportSetup.includeEmissionsSection = false;
+        newReport.dataOverviewReportSetup.includeWaterSection = false;
       } else if (this.router.url.includes('emissions')) {
         newReport.name = 'Emissions Report';
-        newReport.dataOverviewReportSetup.accountCostsSection.includeSection = false;
-        newReport.dataOverviewReportSetup.accountEnergySection.includeSection = false;
-        newReport.dataOverviewReportSetup.accountWaterSection.includeSection = false;
+        newReport.dataOverviewReportSetup.includeEnergySection = false;
+        newReport.dataOverviewReportSetup.includeCostsSection = false;
+        newReport.dataOverviewReportSetup.includeWaterSection = false;
         newReport.dataOverviewReportSetup.emissionsDisplay = this.accountOverviewService.emissionsDisplay.getValue();
       } else if (this.router.url.includes('water')) {
         newReport.name = 'Water Report';
-        newReport.dataOverviewReportSetup.accountCostsSection.includeSection = false;
-        newReport.dataOverviewReportSetup.accountEnergySection.includeSection = false;
-        newReport.dataOverviewReportSetup.accountEmissionsSection.includeSection = false;
+        newReport.dataOverviewReportSetup.includeEnergySection = false;
+        newReport.dataOverviewReportSetup.includeCostsSection = false;
+        newReport.dataOverviewReportSetup.includeEmissionsSection = false;
       }
     } else if (this.router.url.includes('account/analysis')) {
       let selectedAnalysisItem: IdbAccountAnalysisItem = this.accountAnalysisDbService.selectedAnalysisItem.getValue();

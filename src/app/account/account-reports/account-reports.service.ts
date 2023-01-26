@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { IdbAccountReport } from 'src/app/models/idb';
-import { BetterPlantsReportSetup, DataOverviewReportAccountSection, DataOverviewReportSetup } from 'src/app/models/overview-report';
+import { BetterPlantsReportSetup, DataOverviewReportSetup } from 'src/app/models/overview-report';
 import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
@@ -53,7 +53,17 @@ export class AccountReportsService {
   getDataOverviewFormFromReport(dataOverviewReportSetup: DataOverviewReportSetup): FormGroup {
     let form: FormGroup = this.formBuilder.group({
       energyIsSource: [dataOverviewReportSetup.energyIsSource, Validators.required],
-      emissionsDisplay: [dataOverviewReportSetup.emissionsDisplay]
+      emissionsDisplay: [dataOverviewReportSetup.emissionsDisplay],
+      includeEnergySection: [dataOverviewReportSetup.includeEnergySection, Validators.required],
+      includeCostsSection: [dataOverviewReportSetup.includeCostsSection, Validators.required],
+      includeEmissionsSection: [dataOverviewReportSetup.includeEmissionsSection, Validators.required],
+      includeWaterSection: [dataOverviewReportSetup.includeWaterSection, Validators.required],
+      includeMap: [dataOverviewReportSetup.includeMap, Validators.required],
+      includeFacilityTable: [dataOverviewReportSetup.includeFacilityTable, Validators.required],
+      includeFacilityDonut: [dataOverviewReportSetup.includeFacilityDonut, Validators.required],
+      includeUtilityTable: [dataOverviewReportSetup.includeUtilityTable, Validators.required],
+      includeStackedBarChart: [dataOverviewReportSetup.includeStackedBarChart, Validators.required],
+      includeMonthlyLineChart: [dataOverviewReportSetup.includeMonthlyLineChart, Validators.required],
     });
     return form;
   }
@@ -61,31 +71,41 @@ export class AccountReportsService {
   updateDataOverviewReportFromForm(dataOverviewReportSetup: DataOverviewReportSetup, form: FormGroup): DataOverviewReportSetup {
     dataOverviewReportSetup.energyIsSource = form.controls.energyIsSource.value;
     dataOverviewReportSetup.emissionsDisplay = form.controls.emissionsDisplay.value;
+    dataOverviewReportSetup.includeEnergySection = form.controls.includeEnergySection.value;
+    dataOverviewReportSetup.includeCostsSection = form.controls.includeCostsSection.value;
+    dataOverviewReportSetup.includeEmissionsSection = form.controls.includeEmissionsSection.value;
+    dataOverviewReportSetup.includeWaterSection = form.controls.includeWaterSection.value;
+    dataOverviewReportSetup.includeMap = form.controls.includeMap.value;
+    dataOverviewReportSetup.includeFacilityTable = form.controls.includeFacilityTable.value;
+    dataOverviewReportSetup.includeFacilityDonut = form.controls.includeFacilityDonut.value;
+    dataOverviewReportSetup.includeUtilityTable = form.controls.includeUtilityTable.value;
+    dataOverviewReportSetup.includeStackedBarChart = form.controls.includeStackedBarChart.value;
+    dataOverviewReportSetup.includeMonthlyLineChart = form.controls.includeMonthlyLineChart.value;
     return dataOverviewReportSetup;
   }
 
 
-  getSectionFormFromReport(overviewReportAccountSection: DataOverviewReportAccountSection): FormGroup {
-    let form: FormGroup = this.formBuilder.group({
-      includeSection: [overviewReportAccountSection.includeSection, Validators.required],
-      includeMap: [overviewReportAccountSection.includeMap, Validators.required],
-      includeFacilityTable: [overviewReportAccountSection.includeFacilityTable, Validators.required],
-      includeFacilityDonut: [overviewReportAccountSection.includeFacilityDonut, Validators.required],
-      includeUtilityTable: [overviewReportAccountSection.includeUtilityTable, Validators.required],
-      includeStackedBarChart: [overviewReportAccountSection.includeStackedBarChart, Validators.required],
-      includeMonthlyLineChart: [overviewReportAccountSection.includeMonthlyLineChart, Validators.required],
-    });
-    return form;
-  }
+  // getSectionFormFromReport(overviewReportAccountSection: DataOverviewReportAccountSection): FormGroup {
+  //   let form: FormGroup = this.formBuilder.group({
+  //     includeSection: [overviewReportAccountSection.includeSection, Validators.required],
+  //     includeMap: [overviewReportAccountSection.includeMap, Validators.required],
+  //     includeFacilityTable: [overviewReportAccountSection.includeFacilityTable, Validators.required],
+  //     includeFacilityDonut: [overviewReportAccountSection.includeFacilityDonut, Validators.required],
+  //     includeUtilityTable: [overviewReportAccountSection.includeUtilityTable, Validators.required],
+  //     includeStackedBarChart: [overviewReportAccountSection.includeStackedBarChart, Validators.required],
+  //     includeMonthlyLineChart: [overviewReportAccountSection.includeMonthlyLineChart, Validators.required],
+  //   });
+  //   return form;
+  // }
 
-  updateReportSectionFromForm(overviewReportAccountSection: DataOverviewReportAccountSection, form: FormGroup): DataOverviewReportAccountSection {
-    overviewReportAccountSection.includeSection = form.controls.includeSection.value;
-    overviewReportAccountSection.includeMap = form.controls.includeMap.value
-    overviewReportAccountSection.includeFacilityTable = form.controls.includeFacilityTable.value
-    overviewReportAccountSection.includeFacilityDonut = form.controls.includeFacilityDonut.value
-    overviewReportAccountSection.includeUtilityTable = form.controls.includeUtilityTable.value
-    overviewReportAccountSection.includeStackedBarChart = form.controls.includeStackedBarChart.value
-    overviewReportAccountSection.includeMonthlyLineChart = form.controls.includeMonthlyLineChart.value
-    return overviewReportAccountSection;
-  }
+  // updateReportSectionFromForm(overviewReportAccountSection: DataOverviewReportAccountSection, form: FormGroup): DataOverviewReportAccountSection {
+  //   overviewReportAccountSection.includeSection = form.controls.includeSection.value;
+  //   overviewReportAccountSection.includeMap = form.controls.includeMap.value
+  //   overviewReportAccountSection.includeFacilityTable = form.controls.includeFacilityTable.value
+  //   overviewReportAccountSection.includeFacilityDonut = form.controls.includeFacilityDonut.value
+  //   overviewReportAccountSection.includeUtilityTable = form.controls.includeUtilityTable.value
+  //   overviewReportAccountSection.includeStackedBarChart = form.controls.includeStackedBarChart.value
+  //   overviewReportAccountSection.includeMonthlyLineChart = form.controls.includeMonthlyLineChart.value
+  //   return overviewReportAccountSection;
+  // }
 }

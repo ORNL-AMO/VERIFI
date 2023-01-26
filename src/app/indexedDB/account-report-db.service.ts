@@ -82,43 +82,16 @@ export class AccountReportDbService {
       dataOverviewReportSetup: {
         energyIsSource: selectedAccount.energyIsSource,
         emissionsDisplay: 'location',
-        accountEnergySection: {
-          includeSection: true,
-          includeMap: true,
-          includeFacilityTable: true,
-          includeFacilityDonut: true,
-          includeUtilityTable: true,
-          includeStackedBarChart: true,
-          includeMonthlyLineChart: true
-        },
-        accountEmissionsSection: {
-          includeSection: true,
-          includeMap: true,
-          includeFacilityTable: true,
-          includeFacilityDonut: true,
-          includeUtilityTable: true,
-          includeStackedBarChart: true,
-          includeMonthlyLineChart: true
-        },
-        accountCostsSection: {
-          includeSection: true,
-          includeMap: true,
-          includeFacilityTable: true,
-          includeFacilityDonut: true,
-          includeUtilityTable: true,
-          includeStackedBarChart: true,
-          includeMonthlyLineChart: true
-        },
-        accountWaterSection: {
-          includeSection: true,
-          includeMap: true,
-          includeFacilityTable: true,
-          includeFacilityDonut: true,
-          includeUtilityTable: true,
-          includeStackedBarChart: true,
-          includeMonthlyLineChart: true
-        }
-
+        includeMap: true,
+        includeFacilityTable: true,
+        includeFacilityDonut: true,
+        includeUtilityTable: true,
+        includeStackedBarChart: true,
+        includeMonthlyLineChart: true,
+        includeCostsSection: true,
+        includeEmissionsSection: true,
+        includeEnergySection: true,
+        includeWaterSection: true
       }
     }
   }

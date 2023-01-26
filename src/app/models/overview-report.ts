@@ -125,19 +125,29 @@ export interface BetterPlantsReportSetup {
 
 export interface DataOverviewReportSetup {
   energyIsSource: boolean,
-  emissionsDisplay: 'market' | 'location'
-  accountEnergySection: DataOverviewReportAccountSection,
-  accountEmissionsSection: DataOverviewReportAccountSection,
-  accountCostsSection: DataOverviewReportAccountSection,
-  accountWaterSection: DataOverviewReportAccountSection
-}
-
-export interface DataOverviewReportAccountSection {
-  includeSection: boolean,
+  emissionsDisplay: 'market' | 'location',
+  includeEnergySection: boolean,
+  includeCostsSection: boolean,
+  includeEmissionsSection: boolean,
+  includeWaterSection: boolean,
   includeMap: boolean,
   includeFacilityTable: boolean,
   includeFacilityDonut: boolean,
   includeUtilityTable: boolean,
   includeStackedBarChart: boolean,
   includeMonthlyLineChart: boolean
+  // accountEnergySection: DataOverviewReportAccountSection,
+  // accountEmissionsSection: DataOverviewReportAccountSection,
+  // accountCostsSection: DataOverviewReportAccountSection,
+  // accountWaterSection: DataOverviewReportAccountSection
 }
+
+// export interface DataOverviewReportAccountSection {
+//   includeSection: boolean,
+//   includeMap: boolean,
+//   includeFacilityTable: boolean,
+//   includeFacilityDonut: boolean,
+//   includeUtilityTable: boolean,
+//   includeStackedBarChart: boolean,
+//   includeMonthlyLineChart: boolean
+// }

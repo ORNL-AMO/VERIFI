@@ -4,7 +4,7 @@
             <app-account-title-page></app-account-title-page>
         </div>
     </div>
-    <ng-container *ngIf="selectedReport.dataOverviewReportSetup.accountEnergySection.includeSection">
+    <ng-container *ngIf="selectedReport.dataOverviewReportSetup.includeEnergySection">
         <hr>
         <!--account energy consumption-->
         <div class="row justify-content-center report-page">
@@ -27,7 +27,7 @@
         </div>
     </div> -->
     <!--account costs-->
-    <ng-container *ngIf="selectedReport.dataOverviewReportSetup.accountCostsSection.includeSection">
+    <ng-container *ngIf="selectedReport.dataOverviewReportSetup.includeCostsSection">
         <hr>
         <div class="row justify-content-center report-page">
             <div class="col-12">
@@ -36,7 +36,7 @@
             </div>
         </div>
     </ng-container>
-    <ng-container *ngIf="selectedReport.dataOverviewReportSetup.accountEmissionsSection.includeSection">
+    <ng-container *ngIf="selectedReport.dataOverviewReportSetup.includeEmissionsSection">
         <hr>
         <!--account emissions-->
         <div class="row justify-content-center report-page">
