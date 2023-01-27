@@ -6,6 +6,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { IdbAccount, IdbAccountReport, IdbFacility, IdbUtilityMeter, MeterSource } from 'src/app/models/idb';
+import { DataOverviewReportSetup } from 'src/app/models/overview-report';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { AccountOverviewService } from '../../account-overview/account-overview.service';
 
@@ -17,7 +18,7 @@ import { AccountOverviewService } from '../../account-overview/account-overview.
 export class DataOverviewReportComponent {
 
   calculating: boolean = true;
-  selectedReport: IdbAccountReport;
+  overviewReport: DataOverviewReportSetup;
   print: boolean = false;
   worker: any;
   account: IdbAccount;
@@ -33,10 +34,12 @@ export class DataOverviewReportComponent {
 
   ngOnInit() {
     this.account = this.accountDbService.selectedAccount.getValue();
-    this.selectedReport = this.accountReportDbService.selectedReport.getValue();
+    let selectedReport: IdbAccountReport = this.accountReportDbService.selectedReport.getValue();
+    this.overviewReport = selectedReport.dataOverviewReportSetup;
+    console.log(this.overviewReport);
     let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    this.accountOverviewService.emissionsDisplay.next(this.selectedReport.dataOverviewReportSetup.emissionsDisplay);
-    this.accountOverviewService.calanderizedMeters = this.calanderizationService.getCalanderizedMeterData(meters, true, true, { energyIsSource: this.selectedReport.dataOverviewReportSetup.energyIsSource });
+    this.accountOverviewService.emissionsDisplay.next(this.overviewReport.emissionsDisplay);
+    this.accountOverviewService.calanderizedMeters = this.calanderizationService.getCalanderizedMeterData(meters, true, true, { energyIsSource: this.overviewReport.energyIsSource });
     this.calculateFacilitiesSummary();
   }
 

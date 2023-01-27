@@ -7,7 +7,7 @@ import { AccountReportsDashboardComponent } from './account-reports-dashboard/ac
 import { AccountReportsItemCardComponent } from './account-reports-dashboard/account-reports-item-card/account-reports-item-card.component';
 import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.module';
 import { AccountReportSetupComponent } from './account-report-setup/account-report-setup.component';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BetterPlantsSetupComponent } from './account-report-setup/better-plants-setup/better-plants-setup.component';
 import { DataOverviewSetupComponent } from './account-report-setup/data-overview-setup/data-overview-setup.component';
 import { LabelWithTooltipModule } from 'src/app/shared/label-with-tooltip/label-with-tooltip.module';
@@ -20,6 +20,8 @@ import { DataOverviewReportComponent } from './data-overview-report/data-overvie
 import { AccountTitlePageComponent } from './data-overview-report/account-title-page/account-title-page.component';
 import { DataOverviewModule } from 'src/app/shared/data-overview/data-overview.module';
 import { AccountSectionReportComponent } from './data-overview-report/account-section-report/account-section-report.component';
+import { FacilityTitlePageComponent } from './data-overview-report/facility-title-page/facility-title-page.component';
+import { FacilitySectionReportComponent } from './data-overview-report/facility-section-report/facility-section-report.component';
 
 
 
@@ -38,13 +40,16 @@ import { AccountSectionReportComponent } from './data-overview-report/account-se
     CompanyInformationTableComponent,
     DataOverviewReportComponent,
     AccountTitlePageComponent,
-    AccountSectionReportComponent
+    AccountSectionReportComponent,
+    FacilityTitlePageComponent,
+    FacilitySectionReportComponent
   ],
   imports: [
     CommonModule,
     RouterModule,
     HelperPipesModule,
     ReactiveFormsModule,
+    FormsModule,
     LabelWithTooltipModule,
     CalculatingSpinnerModule,
     DataOverviewModule

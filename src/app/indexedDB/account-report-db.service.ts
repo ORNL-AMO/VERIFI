@@ -2,8 +2,9 @@ import { Injectable } from '@angular/core';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { LocalStorageService } from 'ngx-webstorage';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { IdbAccount, IdbAccountReport } from '../models/idb';
+import { IdbAccount, IdbAccountReport, IdbFacility } from '../models/idb';
 import { AccountdbService } from './account-db.service';
+import { FacilitydbService } from './facility-db.service';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +14,8 @@ export class AccountReportDbService {
   accountReports: BehaviorSubject<Array<IdbAccountReport>>;
   selectedReport: BehaviorSubject<IdbAccountReport>;
   constructor(private dbService: NgxIndexedDBService, private localStorageService: LocalStorageService,
-    private accountDbService: AccountdbService) {
+    private accountDbService: AccountdbService,
+    private facilityDbService: FacilitydbService) {
     this.accountReports = new BehaviorSubject<Array<IdbAccountReport>>([]);
     this.selectedReport = new BehaviorSubject<IdbAccountReport>(undefined);
     //subscribe after initialization
@@ -65,6 +67,7 @@ export class AccountReportDbService {
 
   getNewAccountReport(): IdbAccountReport {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     return {
       accountId: selectedAccount.guid,
       guid: Math.random().toString(36).substr(2, 9),
@@ -91,7 +94,21 @@ export class AccountReportDbService {
         includeCostsSection: true,
         includeEmissionsSection: true,
         includeEnergySection: true,
-        includeWaterSection: true
+        includeWaterSection: true,
+        includedFacilities: facilities.map(facility => {
+          return {
+            facilityId: facility.guid,
+            included: true
+          }
+        }),
+        includeAccountReport: true,
+        includeFacilityReports: true,
+        includeMeterUsageStackedLineChart: true,
+        includeMeterUsageTable: true,
+        includeMeterUsageDonut: true,
+        includeUtilityTableForFacility: true,
+        includeAnnualBarChart: true,
+        includeMonthlyLineChartForFacility: true
       }
     }
   }

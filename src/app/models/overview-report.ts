@@ -135,7 +135,19 @@ export interface DataOverviewReportSetup {
   includeFacilityDonut: boolean,
   includeUtilityTable: boolean,
   includeStackedBarChart: boolean,
-  includeMonthlyLineChart: boolean
+  includeMonthlyLineChart: boolean,
+  includedFacilities: Array<{
+    facilityId: string,
+    included: boolean
+  }>,
+  includeAccountReport: boolean,
+  includeFacilityReports: boolean,
+  includeMeterUsageStackedLineChart: boolean,
+  includeMeterUsageTable: boolean,
+  includeMeterUsageDonut: boolean,
+  includeUtilityTableForFacility: boolean,
+  includeAnnualBarChart: boolean,
+  includeMonthlyLineChartForFacility: boolean
   // accountEnergySection: DataOverviewReportAccountSection,
   // accountEmissionsSection: DataOverviewReportAccountSection,
   // accountCostsSection: DataOverviewReportAccountSection,

@@ -5,6 +5,7 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { IdbAccount, IdbAccountReport } from 'src/app/models/idb';
+import { DataOverviewReportSetup } from 'src/app/models/overview-report';
 import { AccountReportsService } from '../../account-reports.service';
 
 @Component({
@@ -14,10 +15,11 @@ import { AccountReportsService } from '../../account-reports.service';
 })
 export class DataOverviewSetupComponent {
 
-  overviewForm: FormGroup;
+  // overviewForm: FormGroup;
   account: IdbAccount;
   selectedReportSub: Subscription;
   isFormChange: boolean = false;
+  reportSetup: DataOverviewReportSetup;
   constructor(private accountReportDbService: AccountReportDbService,
     private accountReportsService: AccountReportsService,
     private dbChangesService: DbChangesService,
@@ -29,7 +31,7 @@ export class DataOverviewSetupComponent {
     this.account = this.accountDbService.selectedAccount.getValue();
     this.selectedReportSub = this.accountReportDbService.selectedReport.subscribe(val => {
       if (!this.isFormChange) {
-        this.overviewForm = this.accountReportsService.getDataOverviewFormFromReport(val.dataOverviewReportSetup);
+        this.reportSetup = val.dataOverviewReportSetup;
       } else {
         this.isFormChange = false;
       }
@@ -43,7 +45,8 @@ export class DataOverviewSetupComponent {
   async save() {
     this.isFormChange = true;
     let selectedReport: IdbAccountReport = this.accountReportDbService.selectedReport.getValue()
-    selectedReport.dataOverviewReportSetup = this.accountReportsService.updateDataOverviewReportFromForm(selectedReport.dataOverviewReportSetup, this.overviewForm);
+    // selectedReport.dataOverviewReportSetup = this.accountReportsService.updateDataOverviewReportFromForm(selectedReport.dataOverviewReportSetup, this.overviewForm);
+    selectedReport.dataOverviewReportSetup = this.reportSetup;
     await this.accountReportDbService.updateWithObservable(selectedReport).toPromise();
     await this.dbChangesService.setAccountReports(this.account);
     this.accountReportDbService.selectedReport.next(selectedReport);
