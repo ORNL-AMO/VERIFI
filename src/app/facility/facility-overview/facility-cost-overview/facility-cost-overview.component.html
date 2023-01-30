@@ -28,7 +28,8 @@
                             <app-cost-meters-overview-table></app-cost-meters-overview-table>
                         </div>
                         <div class="col-6">
-                            <app-cost-meters-overview-chart></app-cost-meters-overview-chart>
+                            <!-- <app-cost-meters-overview-chart></app-cost-meters-overview-chart> -->
+                            <app-meter-usage-donut [dataType]="'cost'" [facilityId]="facilityId"></app-meter-usage-donut>
                         </div>
                     </div>
                 </div>

@@ -22,7 +22,8 @@
                             <app-emissions-meters-overview-table></app-emissions-meters-overview-table>
                         </div>
                         <div class="col-6">
-                            <app-emissions-meters-overview-chart></app-emissions-meters-overview-chart>
+                            <!-- <app-emissions-meters-overview-chart></app-emissions-meters-overview-chart> -->
+                            <app-meter-usage-donut [dataType]="'emissions'" [facilityId]="facilityId"></app-meter-usage-donut>
                         </div>
                     </div>
                 </div>

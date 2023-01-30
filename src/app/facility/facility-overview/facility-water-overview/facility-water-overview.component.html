@@ -21,7 +21,8 @@
                             <app-water-meters-overview-table></app-water-meters-overview-table>
                         </div>
                         <div class="col-6">
-                            <app-water-meters-overview-chart></app-water-meters-overview-chart>
+                            <!-- <app-water-meters-overview-chart></app-water-meters-overview-chart> -->
+                            <app-meter-usage-donut [dataType]="'water'" [facilityId]="facilityId"></app-meter-usage-donut>
                         </div>
                     </div>
                 </div>
