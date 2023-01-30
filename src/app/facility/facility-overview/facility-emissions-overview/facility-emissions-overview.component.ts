@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FacilityOverviewService } from '../facility-overview.service';
 
 @Component({
@@ -13,9 +14,15 @@ export class FacilityEmissionsOverviewComponent implements OnInit {
   accountFacilitiesSummarySub: Subscription;
   calculatingSub: Subscription;
   calculating: boolean;
-  constructor(private facilityOverviewService: FacilityOverviewService) { }
+  facilityId: string;
+  selectedFacilitySub: Subscription;
+  constructor(private facilityOverviewService: FacilityOverviewService, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
+    this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
+      this.facilityId = val.guid;
+    })
+
     this.calculatingSub = this.facilityOverviewService.calculatingEnergy.subscribe(val => {
       this.calculating = val;
     });
@@ -34,6 +41,7 @@ export class FacilityEmissionsOverviewComponent implements OnInit {
   ngOnDestroy() {
     this.accountFacilitiesSummarySub.unsubscribe();
     this.calculatingSub.unsubscribe();
+    this.selectedFacilitySub.unsubscribe();
   }
 
 
