@@ -19,10 +19,9 @@
                     </div>
                     <div class="row">
                         <div class="col-6">
-                            <app-emissions-meters-overview-table></app-emissions-meters-overview-table>
+                            <app-meter-usage-table [dataType]="'emissions'" [facilityId]="facilityId"></app-meter-usage-table>
                         </div>
                         <div class="col-6">
-                            <!-- <app-emissions-meters-overview-chart></app-emissions-meters-overview-chart> -->
                             <app-meter-usage-donut [dataType]="'emissions'" [facilityId]="facilityId"></app-meter-usage-donut>
                         </div>
                     </div>

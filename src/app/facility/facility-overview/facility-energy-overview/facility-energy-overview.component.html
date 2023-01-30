@@ -18,10 +18,9 @@
                     </div>
                     <div class="row">
                         <div class="col-6">
-                            <app-energy-meters-overview-table></app-energy-meters-overview-table>
+                            <app-meter-usage-table [dataType]="'energyUse'" [facilityId]="facilityId"></app-meter-usage-table>
                         </div>
                         <div class="col-6">
-                            <!-- <app-energy-meters-overview-chart></app-energy-meters-overview-chart> -->
                             <app-meter-usage-donut [dataType]="'energyUse'" [facilityId]="facilityId"></app-meter-usage-donut>
                         </div>
                     </div>
