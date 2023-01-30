@@ -12,16 +12,19 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-12">
-                            <app-meters-overview-stacked-line-chart [dataType]="'water'" [facilityId]="facilityId"></app-meters-overview-stacked-line-chart>
+                            <app-meters-overview-stacked-line-chart [dataType]="'water'"
+                                [facilityId]="facilityId"></app-meters-overview-stacked-line-chart>
                             <hr>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-6">
-                            <app-meter-usage-table [dataType]="'water'" [facilityId]="facilityId"></app-meter-usage-table>
+                            <app-meter-usage-table [dataType]="'water'"
+                                [facilityId]="facilityId"></app-meter-usage-table>
                         </div>
                         <div class="col-6">
-                            <app-meter-usage-donut [dataType]="'water'" [facilityId]="facilityId"></app-meter-usage-donut>
+                            <app-meter-usage-donut [dataType]="'water'"
+                                [facilityId]="facilityId"></app-meter-usage-donut>
                         </div>
                     </div>
                 </div>
@@ -36,7 +39,8 @@
                     <h4 class="mb-0">Water Use and Cost</h4>
                 </div>
                 <div class="card-body">
-                    <app-water-utilities-usage-table></app-water-utilities-usage-table>
+                    <app-utility-consumption-table [dataType]="'water'"
+                        [facilityId]="facilityId"></app-utility-consumption-table>
                 </div>
             </div>
         </div>
