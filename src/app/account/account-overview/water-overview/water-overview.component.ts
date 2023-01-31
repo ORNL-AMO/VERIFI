@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { AccountOverviewService } from '../account-overview.service';
 import { Subscription } from 'rxjs';
 import { AccountFacilitiesSummary } from 'src/app/models/dashboard';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 
 
 @Component({
@@ -17,9 +18,17 @@ export class WaterOverviewComponent implements OnInit {
   calculatingSub: Subscription;
   calculating: boolean;
   accountFacilitiesSummary: AccountFacilitiesSummary;
-  constructor(private accountOverviewService: AccountOverviewService) { }
+  selectedAccountSub: Subscription;
+  waterUnit: string;
+  constructor(private accountOverviewService: AccountOverviewService,
+    private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
+    this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(val => {
+      if (val) {
+        this.waterUnit = val.volumeLiquidUnit;
+      }
+    });
     this.calculatingSub = this.accountOverviewService.calculatingWater.subscribe(val => {
       this.calculating = val;
     })
@@ -39,6 +48,7 @@ export class WaterOverviewComponent implements OnInit {
   ngOnDestroy() {
     this.accountFacilitiesSummarySub.unsubscribe();
     this.calculatingSub.unsubscribe();
+    this.selectedAccountSub.unsubscribe();
   }
 
 }

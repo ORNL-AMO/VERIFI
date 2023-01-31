@@ -20,7 +20,9 @@
                     <div class="row">
                         <div class="col-6">
                             <!-- <app-facility-water-table></app-facility-water-table> -->
-                            <app-facilities-usage-table [dataType]="'water'"></app-facilities-usage-table>
+                            <app-facilities-usage-table [dataType]="'water'"
+                                [accountFacilitiesSummary]="accountFacilitiesSummary"
+                                [waterUnit]="waterUnit"></app-facilities-usage-table>
                         </div>
                         <div class="col-6">
                             <app-facility-usage-donut [dataType]="'water'"></app-facility-usage-donut>

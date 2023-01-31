@@ -1,7 +1,8 @@
 import { Component, Input } from '@angular/core';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { AccountFacilitiesSummary } from 'src/app/models/dashboard';
-import { IdbAccountReport } from 'src/app/models/idb';
+import { IdbAccount, IdbAccountReport } from 'src/app/models/idb';
 import { DataOverviewReportSetup } from 'src/app/models/overview-report';
 
 @Component({
@@ -17,10 +18,16 @@ export class AccountSectionReportComponent {
 
 
   sectionOptions: DataOverviewReportSetup;
-  constructor(private accountReportDbService: AccountReportDbService) {
+  waterUnit: string;
+  energyUnit: string;
+  constructor(private accountReportDbService: AccountReportDbService,
+    private accountDbService: AccountdbService) {
   }
 
   ngOnInit() {
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    this.waterUnit = account.volumeLiquidUnit;
+    this.energyUnit = account.energyUnit;
     let selectedReport: IdbAccountReport = this.accountReportDbService.selectedReport.getValue();
     this.sectionOptions = selectedReport.dataOverviewReportSetup;
   }

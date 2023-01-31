@@ -1,10 +1,11 @@
 <div class="row">
     <div class="col-12" *ngIf="sectionOptions.includeMap">
         <app-data-overview-map [dataType]="dataType"
-        [accountFacilitiesSummary]="accountFacilitiesSummary"></app-data-overview-map>
+            [accountFacilitiesSummary]="accountFacilitiesSummary"></app-data-overview-map>
     </div>
     <div class="col-6" *ngIf="sectionOptions.includeFacilityTable">
-        <app-facilities-usage-table [dataType]="dataType"></app-facilities-usage-table>
+        <app-facilities-usage-table [dataType]="dataType" [accountFacilitiesSummary]="accountFacilitiesSummary"
+            [waterUnit]="waterUnit" [energyUnit]="energyUnit"></app-facilities-usage-table>
     </div>
     <div class="col-6" *ngIf="sectionOptions.includeFacilityDonut">
         <app-facility-usage-donut [dataType]="dataType"></app-facility-usage-donut>

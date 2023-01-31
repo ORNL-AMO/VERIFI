@@ -4,7 +4,7 @@
             <tr [ngClass]="{'emissions': dataType == 'emissions'}">
                 <th>Facility</th>
                 <th *ngIf="dataType == 'energyUse'">Utility Usage<br> (<span
-                        [innerHTML]="accountEnergyUnit | settingsLabel"></span>)
+                        [innerHTML]="energyUnit | settingsLabel"></span>)
                 </th>
                 <th *ngIf="dataType == 'water'">Water Consumption<br> (<span
                         [innerHTML]="waterUnit | settingsLabel"></span>)
