@@ -46,7 +46,6 @@
                     <h4 class="mb-0">Utility Costs</h4>
                 </div>
                 <div class="card-body">
-                    <!-- <app-cost-utilities-usage-table></app-cost-utilities-usage-table> -->
                     <app-utility-consumption-table [dataType]="'cost'"
                         [facilityId]="facilityId"></app-utility-consumption-table>
                 </div>
@@ -61,7 +60,8 @@
                     <h4 class="mb-0">Annual Utility Costs</h4>
                 </div>
                 <div class="card-body">
-                    <app-cost-utilities-usage-chart></app-cost-utilities-usage-chart>
+                    <app-utilities-usage-chart [dataType]="'cost'"
+                        [facilityId]="facilityId"></app-utilities-usage-chart>
                 </div>
             </div>
         </div>

@@ -11,6 +11,7 @@ import { MetersOverviewStackedLineChartComponent } from './meters-overview-stack
 import { MeterUsageDonutComponent } from './meter-usage-donut/meter-usage-donut.component';
 import { MeterUsageTableComponent } from './meter-usage-table/meter-usage-table.component';
 import { UtilityConsumptionTableComponent } from './utility-consumption-table/utility-consumption-table.component';
+import { UtilitiesUsageChartComponent } from './utilities-usage-chart/utilities-usage-chart.component';
 
 
 
@@ -24,7 +25,8 @@ import { UtilityConsumptionTableComponent } from './utility-consumption-table/ut
     MetersOverviewStackedLineChartComponent,
     MeterUsageDonutComponent,
     MeterUsageTableComponent,
-    UtilityConsumptionTableComponent
+    UtilityConsumptionTableComponent,
+    UtilitiesUsageChartComponent
   ],
   imports: [
     CommonModule,
@@ -39,7 +41,8 @@ import { UtilityConsumptionTableComponent } from './utility-consumption-table/ut
     MetersOverviewStackedLineChartComponent,
     MeterUsageDonutComponent,
     MeterUsageTableComponent,
-    UtilityConsumptionTableComponent
+    UtilityConsumptionTableComponent,
+    UtilitiesUsageChartComponent
   ]
 })
 export class DataOverviewModule { }

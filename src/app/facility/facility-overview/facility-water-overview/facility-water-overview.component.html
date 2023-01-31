@@ -53,7 +53,8 @@
                     <h4 class="mb-0">Annual Water Consumption</h4>
                 </div>
                 <div class="card-body">
-                    <app-water-utilities-usage-chart></app-water-utilities-usage-chart>
+                    <app-utilities-usage-chart [dataType]="'water'"
+                        [facilityId]="facilityId"></app-utilities-usage-chart>
                 </div>
             </div>
         </div>

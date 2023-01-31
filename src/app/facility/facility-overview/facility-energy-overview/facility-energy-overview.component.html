@@ -53,7 +53,8 @@
                     <h4 class="mb-0">Annual Utility Usage</h4>
                 </div>
                 <div class="card-body">
-                    <app-energy-utilities-usage-chart></app-energy-utilities-usage-chart>
+                    <app-utilities-usage-chart [dataType]="'energyUse'"
+                        [facilityId]="facilityId"></app-utilities-usage-chart>
                 </div>
             </div>
         </div>
