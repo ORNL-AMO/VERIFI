@@ -36,11 +36,11 @@ export class DataOverviewReportComponent {
     this.account = this.accountDbService.selectedAccount.getValue();
     let selectedReport: IdbAccountReport = this.accountReportDbService.selectedReport.getValue();
     this.overviewReport = selectedReport.dataOverviewReportSetup;
-    console.log(this.overviewReport);
-    let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    this.accountOverviewService.emissionsDisplay.next(this.overviewReport.emissionsDisplay);
-    this.accountOverviewService.calanderizedMeters = this.calanderizationService.getCalanderizedMeterData(meters, true, true, { energyIsSource: this.overviewReport.energyIsSource });
-    this.calculateFacilitiesSummary();
+    // console.log(this.overviewReport);
+    // let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    // this.accountOverviewService.emissionsDisplay.next(this.overviewReport.emissionsDisplay);
+    // this.accountOverviewService.calanderizedMeters = this.calanderizationService.getCalanderizedMeterData(meters, true, true, { energyIsSource: this.overviewReport.energyIsSource });
+    // this.calculateFacilitiesSummary();
   }
 
   calculateFacilitiesSummary() {

@@ -30,7 +30,8 @@
                                 [accountFacilitiesSummary]="accountFacilitiesSummary"></app-facilities-usage-table>
                         </div>
                         <div class="col-6">
-                            <app-facility-usage-donut [dataType]="'cost'"></app-facility-usage-donut>
+                            <app-facility-usage-donut [dataType]="'cost'"
+                                [accountFacilitiesSummary]="accountFacilitiesSummary"></app-facility-usage-donut>
                         </div>
                     </div>
                 </div>
@@ -45,7 +46,8 @@
                     <h4 class="mb-0">Utility Costs</h4>
                 </div>
                 <div class="card-body">
-                    <app-utility-consumption-table [dataType]="'cost'"></app-utility-consumption-table>
+                    <app-utility-consumption-table [dataType]="'cost'"
+                        [utilityUsageSummaryData]="utilityUsageSummaryData"></app-utility-consumption-table>
                 </div>
             </div>
         </div>

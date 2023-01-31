@@ -39,8 +39,9 @@
                     <h4 class="mb-0">Utility Use and Cost</h4>
                 </div>
                 <div class="card-body">
-                    <app-utility-consumption-table [dataType]="'energyUse'"
-                        [facilityId]="facilityId"></app-utility-consumption-table>
+                    <app-utility-consumption-table [dataType]="'energyUse'" [facilityId]="facilityId"
+                        [utilityUsageSummaryData]="utilityUsageSummaryData"
+                        [energyUnit]="energyUnit"></app-utility-consumption-table>
                 </div>
             </div>
         </div>
@@ -69,7 +70,7 @@
                 <div class="card-body">
                     <!-- <app-facility-energy-monthly-chart></app-facility-energy-monthly-chart> -->
                     <app-monthly-utility-usage-line-chart [dataType]="'energyUse'"
-                    [facilityId]="facilityId"></app-monthly-utility-usage-line-chart>
+                        [facilityId]="facilityId"></app-monthly-utility-usage-line-chart>
                 </div>
             </div>
         </div>

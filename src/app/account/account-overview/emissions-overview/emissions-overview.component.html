@@ -22,7 +22,8 @@
                                 [accountFacilitiesSummary]="accountFacilitiesSummary"></app-facilities-usage-table>
                         </div>
                         <div class="col-6">
-                            <app-facility-usage-donut [dataType]="'emissions'"></app-facility-usage-donut>
+                            <app-facility-usage-donut [dataType]="'emissions'"
+                                [accountFacilitiesSummary]="accountFacilitiesSummary"></app-facility-usage-donut>
                         </div>
                     </div>
                 </div>
@@ -37,7 +38,8 @@
                     <h4 class="mb-0">Utility Emissions</h4>
                 </div>
                 <div class="card-body">
-                    <app-utility-consumption-table [dataType]="'emissions'"></app-utility-consumption-table>
+                    <app-utility-consumption-table [dataType]="'emissions'"
+                        [utilityUsageSummaryData]="utilityUsageSummaryData"></app-utility-consumption-table>
                 </div>
             </div>
         </div>

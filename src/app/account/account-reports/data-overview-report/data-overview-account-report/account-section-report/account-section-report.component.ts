@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
-import { AccountFacilitiesSummary } from 'src/app/models/dashboard';
+import { AccountFacilitiesSummary, UtilityUsageSummaryData } from 'src/app/models/dashboard';
 import { IdbAccount, IdbAccountReport } from 'src/app/models/idb';
 import { DataOverviewReportSetup } from 'src/app/models/overview-report';
 
@@ -15,7 +15,8 @@ export class AccountSectionReportComponent {
   dataType: 'energyUse' | 'emissions' | 'cost' | 'water';
   @Input()
   accountFacilitiesSummary: AccountFacilitiesSummary;
-
+  @Input()
+  utilityUsageSummaryData: UtilityUsageSummaryData;
 
   sectionOptions: DataOverviewReportSetup;
   waterUnit: string;

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AccountOverviewService } from '../account-overview.service';
 import { Subscription } from 'rxjs';
-import { AccountFacilitiesSummary } from 'src/app/models/dashboard';
+import { AccountFacilitiesSummary, UtilityUsageSummaryData } from 'src/app/models/dashboard';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 @Component({
   selector: 'app-energy-overview',
@@ -18,10 +18,12 @@ export class EnergyOverviewComponent implements OnInit {
   accountFacilitiesSummary: AccountFacilitiesSummary;
   energyUnit: string;
   selectedAccountSub: Subscription;
+  utilityUsageSummaryData: UtilityUsageSummaryData;
+  utilityUsageSummaryDataSub: Subscription;
 
   constructor(private accountOverviewService: AccountOverviewService, private accountDbService: AccountdbService) { }
 
-  ngOnInit(): void {  
+  ngOnInit(): void {
     this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(val => {
       if (val) {
         this.energyUnit = val.energyUnit;
@@ -41,12 +43,17 @@ export class EnergyOverviewComponent implements OnInit {
         this.yearPriorDate = undefined;
       }
     });
+
+    this.utilityUsageSummaryDataSub = this.accountOverviewService.energyUtilityUsageSummaryData.subscribe(utilityUsageSummaryData => {
+      this.utilityUsageSummaryData = utilityUsageSummaryData;
+    })
   }
 
-  ngOnDestroy(){
+  ngOnDestroy() {
     this.accountFacilitiesSummarySub.unsubscribe();
     this.calculatingSub.unsubscribe();
     this.selectedAccountSub.unsubscribe();
+    this.utilityUsageSummaryDataSub.unsubscribe();
   }
 
 }

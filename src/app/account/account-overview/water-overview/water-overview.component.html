@@ -25,7 +25,9 @@
                                 [waterUnit]="waterUnit"></app-facilities-usage-table>
                         </div>
                         <div class="col-6">
-                            <app-facility-usage-donut [dataType]="'water'"></app-facility-usage-donut>
+                            <app-facility-usage-donut [dataType]="'water'"
+                                [accountFacilitiesSummary]="accountFacilitiesSummary"
+                                [waterUnit]="waterUnit"></app-facility-usage-donut>
                         </div>
                     </div>
                 </div>
@@ -40,7 +42,9 @@
                     <h4 class="mb-0">Water Costs</h4>
                 </div>
                 <div class="card-body">
-                    <app-utility-consumption-table [dataType]="'water'"></app-utility-consumption-table>
+                    <app-utility-consumption-table [dataType]="'water'"
+                        [utilityUsageSummaryData]="utilityUsageSummaryData"
+                        [waterUnit]="waterUnit"></app-utility-consumption-table>
                 </div>
             </div>
         </div>

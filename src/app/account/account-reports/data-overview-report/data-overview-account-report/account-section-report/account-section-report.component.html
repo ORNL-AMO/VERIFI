@@ -8,7 +8,8 @@
             [waterUnit]="waterUnit" [energyUnit]="energyUnit"></app-facilities-usage-table>
     </div>
     <div class="col-6" *ngIf="sectionOptions.includeFacilityDonut">
-        <app-facility-usage-donut [dataType]="dataType"></app-facility-usage-donut>
+        <app-facility-usage-donut [dataType]="dataType" [accountFacilitiesSummary]="accountFacilitiesSummary"
+            [waterUnit]="waterUnit" [energyUnit]="energyUnit"></app-facility-usage-donut>
     </div>
 </div>
 <div class="row">
@@ -18,7 +19,8 @@
 </div>
 <div class="row" *ngIf="sectionOptions.includeUtilityTable">
     <div class="col-12">
-        <app-utility-consumption-table [dataType]="dataType"></app-utility-consumption-table>
+        <app-utility-consumption-table [dataType]="dataType" [utilityUsageSummaryData]="utilityUsageSummaryData"
+            [waterUnit]="waterUnit" [energyUnit]="energyUnit"></app-utility-consumption-table>
     </div>
 </div>
 <div class="row" *ngIf="sectionOptions.includeStackedBarChart">

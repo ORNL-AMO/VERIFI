@@ -2,10 +2,7 @@ import { Component, Input } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AccountOverviewService } from 'src/app/account/account-overview/account-overview.service';
 import { FacilityOverviewService } from 'src/app/facility/facility-overview/facility-overview.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityUsageSummaryData } from 'src/app/models/dashboard';
-import { IdbAccount, IdbFacility } from 'src/app/models/idb';
 
 @Component({
   selector: 'app-utility-consumption-table',
@@ -17,76 +14,42 @@ export class UtilityConsumptionTableComponent {
   dataType: 'energyUse' | 'emissions' | 'cost' | 'water';
   @Input()
   facilityId: string;
-
+  @Input()
+  utilityUsageSummaryData: UtilityUsageSummaryData;
+  @Input()
   energyUnit: string;
+  @Input()
   waterUnit: string;
 
-  utilityUsageSummaryData: UtilityUsageSummaryData;
-  utilityUsageSummaryDataSub: Subscription;
   lastMonthsDate: Date;
   yearPriorLastMonth: Date;
   yearPriorDate: Date;
   emissionsDisplay: "market" | "location";
   emissionsDisplaySub: Subscription;
-  constructor(private accountdbService: AccountdbService, private accountOverviewService: AccountOverviewService,
-    private facilityDbService: FacilitydbService, private facilityOverviewService: FacilityOverviewService) { }
+  constructor(private accountOverviewService: AccountOverviewService, private facilityOverviewService: FacilityOverviewService) { }
 
   ngOnInit(): void {
-    this.setUnits();
-
-    if (!this.facilityId) {
-      //ACCOUNT
-      this.emissionsDisplaySub = this.accountOverviewService.emissionsDisplay.subscribe(val => {
-        this.emissionsDisplay = val;
-      });
-
-      if (this.dataType == 'energyUse' || this.dataType == 'emissions') {
-        this.utilityUsageSummaryDataSub = this.accountOverviewService.energyUtilityUsageSummaryData.subscribe(accountFacilitiesSummary => {
-          this.utilityUsageSummaryData = accountFacilitiesSummary;
-          this.setDates();
-
+    this.setDates();
+    if (this.dataType == 'emissions') {
+      if (!this.facilityId) {
+        //ACCOUNT
+        this.emissionsDisplaySub = this.accountOverviewService.emissionsDisplay.subscribe(val => {
+          this.emissionsDisplay = val;
         });
-      } else if (this.dataType == 'cost') {
-        this.utilityUsageSummaryDataSub = this.accountOverviewService.costsUtilityUsageSummaryData.subscribe(accountFacilitiesSummary => {
-          this.utilityUsageSummaryData = accountFacilitiesSummary;
-          this.setDates();
-        });
-      } else if (this.dataType == 'water') {
-        this.utilityUsageSummaryDataSub = this.accountOverviewService.waterUtilityUsageSummaryData.subscribe(accountFacilitiesSummary => {
-          this.utilityUsageSummaryData = accountFacilitiesSummary;
-          this.setDates();
+
+      } else {
+        //FACILITY
+        this.emissionsDisplaySub = this.facilityOverviewService.emissionsDisplay.subscribe(val => {
+          this.emissionsDisplay = val;
         });
       }
-    } else {
-      //FACILITY
-      this.emissionsDisplaySub = this.facilityOverviewService.emissionsDisplay.subscribe(val => {
-        this.emissionsDisplay = val;
-      });
-
-      if (this.dataType == 'energyUse' || this.dataType == 'emissions') {
-        this.utilityUsageSummaryDataSub = this.facilityOverviewService.energyUtilityUsageSummaryData.subscribe(accountFacilitiesSummary => {
-          this.utilityUsageSummaryData = accountFacilitiesSummary;
-          this.setDates();
-
-        });
-      } else if (this.dataType == 'cost') {
-        this.utilityUsageSummaryDataSub = this.facilityOverviewService.costsUtilityUsageSummaryData.subscribe(accountFacilitiesSummary => {
-          this.utilityUsageSummaryData = accountFacilitiesSummary;
-          this.setDates();
-        });
-      } else if (this.dataType == 'water') {
-        this.utilityUsageSummaryDataSub = this.facilityOverviewService.waterUtilityUsageSummaryData.subscribe(accountFacilitiesSummary => {
-          this.utilityUsageSummaryData = accountFacilitiesSummary;
-          this.setDates();
-        });
-      }
-
     }
   }
 
   ngOnDestroy() {
-    this.utilityUsageSummaryDataSub.unsubscribe();
-    this.emissionsDisplaySub.unsubscribe();
+    if (this.emissionsDisplaySub) {
+      this.emissionsDisplaySub.unsubscribe();
+    }
   }
 
   setDates() {
@@ -100,19 +63,4 @@ export class UtilityConsumptionTableComponent {
       this.yearPriorLastMonth = undefined;
     }
   }
-
-  setUnits() {
-    if (this.facilityId) {
-      let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-      let selectedFacility: IdbFacility = facilities.find(facility => { return facility.guid == this.facilityId });
-      this.energyUnit = selectedFacility.energyUnit;
-      this.waterUnit = selectedFacility.volumeLiquidUnit;
-    } else {
-      let selectedAccount: IdbAccount = this.accountdbService.selectedAccount.getValue();
-      this.energyUnit = selectedAccount.energyUnit;
-      this.waterUnit = selectedAccount.volumeLiquidUnit;
-    }
-  }
-
-
 }
