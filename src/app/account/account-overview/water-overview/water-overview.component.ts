@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AccountOverviewService } from '../account-overview.service';
 import { Subscription } from 'rxjs';
+import { AccountFacilitiesSummary } from 'src/app/models/dashboard';
 
 
 @Component({
@@ -15,17 +16,16 @@ export class WaterOverviewComponent implements OnInit {
   accountFacilitiesSummarySub: Subscription;
   calculatingSub: Subscription;
   calculating: boolean;
+  accountFacilitiesSummary: AccountFacilitiesSummary;
   constructor(private accountOverviewService: AccountOverviewService) { }
 
   ngOnInit(): void {
-
-
     this.calculatingSub = this.accountOverviewService.calculatingWater.subscribe(val => {
       this.calculating = val;
     })
 
-
     this.accountFacilitiesSummarySub = this.accountOverviewService.accountFacilitiesWaterSummary.subscribe(accountFacilitiesSummary => {
+      this.accountFacilitiesSummary = accountFacilitiesSummary;
       if (accountFacilitiesSummary.allMetersLastBill) {
         this.lastMonthsDate = new Date(accountFacilitiesSummary.allMetersLastBill.year, accountFacilitiesSummary.allMetersLastBill.monthNumValue);
         this.yearPriorDate = new Date(accountFacilitiesSummary.allMetersLastBill.year - 1, accountFacilitiesSummary.allMetersLastBill.monthNumValue + 1);
@@ -36,7 +36,7 @@ export class WaterOverviewComponent implements OnInit {
     });
   }
 
-  ngOnDestroy(){
+  ngOnDestroy() {
     this.accountFacilitiesSummarySub.unsubscribe();
     this.calculatingSub.unsubscribe();
   }

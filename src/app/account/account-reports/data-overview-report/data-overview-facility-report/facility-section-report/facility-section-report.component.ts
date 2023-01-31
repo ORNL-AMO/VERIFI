@@ -4,14 +4,15 @@ import { IdbAccountReport } from 'src/app/models/idb';
 import { DataOverviewReportSetup } from 'src/app/models/overview-report';
 
 @Component({
-  selector: 'app-account-section-report',
-  templateUrl: './account-section-report.component.html',
-  styleUrls: ['./account-section-report.component.css']
+  selector: 'app-facility-section-report',
+  templateUrl: './facility-section-report.component.html',
+  styleUrls: ['./facility-section-report.component.css']
 })
-export class AccountSectionReportComponent {
+export class FacilitySectionReportComponent {
   @Input()
   dataType: 'energyUse' | 'emissions' | 'cost' | 'water';
-
+  @Input()
+  facilityId: string;
 
   sectionOptions: DataOverviewReportSetup;
   constructor(private accountReportDbService: AccountReportDbService) {
@@ -21,5 +22,4 @@ export class AccountSectionReportComponent {
     let selectedReport: IdbAccountReport = this.accountReportDbService.selectedReport.getValue();
     this.sectionOptions = selectedReport.dataOverviewReportSetup;
   }
-
 }

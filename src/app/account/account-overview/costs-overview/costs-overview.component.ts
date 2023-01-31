@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AccountOverviewService } from '../account-overview.service';
 import { Subscription } from 'rxjs';
+import { AccountFacilitiesSummary } from 'src/app/models/dashboard';
 
 @Component({
   selector: 'app-costs-overview',
@@ -15,6 +16,7 @@ export class CostsOverviewComponent implements OnInit {
   calculatingSub: Subscription;
   calculating: boolean;
   displayWarning: boolean;
+  accountFacilitiesSummary: AccountFacilitiesSummary;
   constructor(private accountOverviewService: AccountOverviewService) { }
 
   ngOnInit(): void {
@@ -23,6 +25,7 @@ export class CostsOverviewComponent implements OnInit {
     })
 
     this.accountFacilitiesSummarySub = this.accountOverviewService.accountFacilitiesCostsSummary.subscribe(accountFacilitiesSummary => {
+      this.accountFacilitiesSummary = accountFacilitiesSummary;
       if (accountFacilitiesSummary.allMetersLastBill) {
         this.displayWarning = accountFacilitiesSummary.totalEnergyCost == 0;
         this.lastMonthsDate = new Date(accountFacilitiesSummary.allMetersLastBill.year, accountFacilitiesSummary.allMetersLastBill.monthNumValue);

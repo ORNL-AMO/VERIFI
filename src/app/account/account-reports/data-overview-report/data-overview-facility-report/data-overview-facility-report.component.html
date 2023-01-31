@@ -1,0 +1,49 @@
+<hr>
+<div class="row justify-content-center pt-3">
+    <div class="col-12 report-page">
+        <app-facility-title-page [facilityId]="facilityId"></app-facility-title-page>
+    </div>
+</div>
+<ng-container *ngIf="overviewReport.includeEnergySection">
+    <hr>
+    <!--account energy consumption-->
+    <div class="row justify-content-center">
+        <div class="col-11 report-page">
+            <h4>{{facilityId | facilityName}} Energy Consumption</h4>
+            <app-facility-section-report [dataType]="'energyUse'"
+                [facilityId]="facilityId"></app-facility-section-report>
+        </div>
+    </div>
+</ng-container>
+<!--account water consumption-->
+<!-- <div class="row justify-content-center">
+        <div class="col-12">
+            <hr>
+        </div>
+        <div class="col-12">
+            <h1>Account Water Consumption</h1>
+        </div>
+        <div class="col-12">
+            <app-account-water-report></app-account-water-report>
+        </div>
+    </div> -->
+<!--account costs-->
+<ng-container *ngIf="overviewReport.includeCostsSection">
+    <hr>
+    <div class="row justify-content-center">
+        <div class="col-11 report-page">
+            <h4>{{facilityId | facilityName}} Costs</h4>
+            <app-facility-section-report [dataType]="'cost'"></app-facility-section-report>
+        </div>
+    </div>
+</ng-container>
+<ng-container *ngIf="overviewReport.includeEmissionsSection">
+    <hr>
+    <!--account emissions-->
+    <div class="row justify-content-center">
+        <div class="col-11 report-page">
+            <h4>{{facilityId | facilityName}} Emissions</h4>
+            <app-facility-section-report [dataType]="'emissions'"></app-facility-section-report>
+        </div>
+    </div>
+</ng-container>

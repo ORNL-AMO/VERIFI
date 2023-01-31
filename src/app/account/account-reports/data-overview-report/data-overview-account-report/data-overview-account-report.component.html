@@ -1,0 +1,59 @@
+<ng-container *ngIf="!calculating">
+    <div class="row justify-content-center">
+        <div class="col-12 report-page pt-3">
+            <app-account-title-page></app-account-title-page>
+        </div>
+    </div>
+    <ng-container *ngIf="overviewReport.includeEnergySection">
+        <hr>
+        <!--account energy consumption-->
+        <div class="row justify-content-center">
+            <div class="col-11 report-page">
+                <h4>Account Energy Consumption</h4>
+                <app-account-section-report [dataType]="'energyUse'"
+                    [accountFacilitiesSummary]="accountFacilitiesEnergySummary"></app-account-section-report>
+            </div>
+        </div>
+    </ng-container>
+    <!--account water consumption-->
+    <!-- <div class="row justify-content-center">
+<div class="col-12">
+    <hr>
+</div>
+<div class="col-12">
+    <h1>Account Water Consumption</h1>
+</div>
+<div class="col-12">
+    <app-account-water-report></app-account-water-report>
+</div>
+</div> -->
+    <!--account costs-->
+    <ng-container *ngIf="overviewReport.includeCostsSection">
+        <hr>
+        <div class="row justify-content-center">
+            <div class="col-11 report-page">
+                <h4>Account Costs</h4>
+                <app-account-section-report [dataType]="'cost'"
+                    [accountFacilitiesSummary]="accountFacilitiesCostsSummary"></app-account-section-report>
+            </div>
+        </div>
+    </ng-container>
+    <ng-container *ngIf="overviewReport.includeEmissionsSection">
+        <hr>
+        <!--account emissions-->
+        <div class="row justify-content-center">
+            <div class="col-11 report-page">
+                <h4>Account Emissions</h4>
+                <app-account-section-report [dataType]="'emissions'"
+                    [accountFacilitiesSummary]="accountFacilitiesEnergySummary"></app-account-section-report>
+            </div>
+        </div>
+    </ng-container>
+</ng-container>
+
+
+<div class="w-100 justify-content-center" *ngIf="calculating">
+    <div class="pt-5">
+        <app-calculating-spinner [message]="'Generating Data Overview Report...'"></app-calculating-spinner>
+    </div>
+</div>

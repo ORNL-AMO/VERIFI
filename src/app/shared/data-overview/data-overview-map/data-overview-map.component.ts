@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, ViewChild, SimpleChanges } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
 import { AccountOverviewService } from 'src/app/account/account-overview/account-overview.service';
@@ -16,11 +16,12 @@ import * as _ from 'lodash';
 export class DataOverviewMapComponent {
   @Input()
   dataType: 'energyUse' | 'emissions' | 'cost' | 'water';
+  @Input()
+  accountFacilitiesSummary: AccountFacilitiesSummary;
 
 
   @ViewChild('utilityUsageMap', { static: false }) utilityUsageMap: ElementRef;
 
-  accountFacilitiesSummary: AccountFacilitiesSummary;
   accountFacilitiesSummarySub: Subscription;
   mapData: Array<{
     lng: string,
@@ -36,30 +37,7 @@ export class DataOverviewMapComponent {
     private accountOverviewService: AccountOverviewService) { }
 
   ngOnInit(): void {
-    if (this.dataType == 'energyUse' || this.dataType == 'emissions') {
-      this.accountFacilitiesSummarySub = this.accountOverviewService.accountFacilitiesEnergySummary.subscribe(accountFacilitiesSummary => {
-        this.accountFacilitiesSummary = accountFacilitiesSummary;
-        if (this.dataType == 'emissions' && this.emissionsDisplay) {
-          this.setMapData();
-          this.drawChart();
-        } else {
-          this.setMapData();
-          this.drawChart();
-        }
-      });
-    } else if (this.dataType == 'cost') {
-      this.accountFacilitiesSummarySub = this.accountOverviewService.accountFacilitiesCostsSummary.subscribe(accountFacilitiesSummary => {
-        this.accountFacilitiesSummary = accountFacilitiesSummary;
-        this.setMapData();
-        this.drawChart();
-      });
-    }else if(this.dataType == 'water'){
-      this.accountFacilitiesSummarySub = this.accountOverviewService.accountFacilitiesWaterSummary.subscribe(accountFacilitiesSummary => {
-        this.accountFacilitiesSummary = accountFacilitiesSummary;
-        this.setMapData();
-        this.drawChart();
-      });
-    }
+    this.setMapData();
 
     if (this.dataType == 'emissions') {
       this.emissionsDisplaySub = this.accountOverviewService.emissionsDisplay.subscribe(val => {
@@ -73,7 +51,7 @@ export class DataOverviewMapComponent {
   }
 
   ngOnDestroy() {
-    this.accountFacilitiesSummarySub.unsubscribe();
+    // this.accountFacilitiesSummarySub.unsubscribe();
     if (this.dataType == 'emissions') {
       this.emissionsDisplaySub.unsubscribe();
     }
@@ -81,6 +59,13 @@ export class DataOverviewMapComponent {
 
   ngAfterViewInit() {
     this.drawChart();
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (!changes.dataType && !changes.accountFacilitiesSummary.isFirstChange()) {
+      this.setMapData();
+      this.drawChart();
+    }
   }
 
   drawChart() {
@@ -162,7 +147,7 @@ export class DataOverviewMapComponent {
           } else {
             dataTypeAmount = summary.marketEmissions;
           }
-        }else if(this.dataType == 'water'){
+        } else if (this.dataType == 'water') {
           dataTypeAmount = summary.consumption;
         }
         this.mapData.push({
@@ -183,7 +168,7 @@ export class DataOverviewMapComponent {
       return this.mapData.map(item => { return item.facility.name + ': $' + (item.dataTypeAmount).toLocaleString(undefined, { maximumFractionDigits: 0, minimumIntegerDigits: 1 }) });
     } else if (this.dataType == 'emissions') {
       return this.mapData.map(item => { return item.facility.name + ': ' + (item.dataTypeAmount).toLocaleString(undefined, { maximumFractionDigits: 0, minimumIntegerDigits: 1 }) + ' tonne CO<sub>2</sub>e' });
-    } else if(this.dataType == 'water'){
+    } else if (this.dataType == 'water') {
       let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
       return this.mapData.map(item => { return item.facility.name + ': ' + (item.dataTypeAmount).toLocaleString(undefined, { maximumFractionDigits: 0, minimumIntegerDigits: 1 }) + ' ' + selectedAccount.volumeLiquidUnit });
     }
@@ -197,7 +182,7 @@ export class DataOverviewMapComponent {
     } else if (this.dataType == 'emissions') {
       //nothing use default circle
       return;
-    } else if(this.dataType == 'water'){
+    } else if (this.dataType == 'water') {
       return 'square';
     }
   }
@@ -209,7 +194,7 @@ export class DataOverviewMapComponent {
       return 'Energy Cost Data';
     } else if (this.dataType == 'emissions') {
       return 'Energy Emissions Data';
-    } else if(this.dataType == 'water'){
+    } else if (this.dataType == 'water') {
       return 'Water Consumption Data';
     }
   }

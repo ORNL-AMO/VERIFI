@@ -12,7 +12,8 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-12">
-                            <app-data-overview-map [dataType]="'water'"></app-data-overview-map>
+                            <app-data-overview-map [dataType]="'water'"
+                                [accountFacilitiesSummary]="accountFacilitiesSummary"></app-data-overview-map>
                             <hr>
                         </div>
                     </div>
@@ -50,7 +51,8 @@
                     <h4 class="mb-0">Water Costs (All-time)</h4>
                 </div>
                 <div class="card-body">
-                    <app-facilities-usage-stacked-bar-chart [dataType]="'water'"></app-facilities-usage-stacked-bar-chart>
+                    <app-facilities-usage-stacked-bar-chart
+                        [dataType]="'water'"></app-facilities-usage-stacked-bar-chart>
                 </div>
             </div>
         </div>
