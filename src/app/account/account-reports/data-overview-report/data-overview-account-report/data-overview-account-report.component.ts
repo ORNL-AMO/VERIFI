@@ -51,8 +51,18 @@ export class DataOverviewAccountReportComponent {
     this.account = this.accountDbService.selectedAccount.getValue();
     let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     this.accountOverviewService.emissionsDisplay.next(this.overviewReport.emissionsDisplay);
+    let includedFacilityIds: Array<string> = new Array();
+    this.overviewReport.includedFacilities.forEach(facility => {
+      if (facility.included) {
+        includedFacilityIds.push(facility.facilityId);
+      }
+    });
+
+    meters = meters.filter(meter => {
+      return includedFacilityIds.includes(meter.facilityId);
+    });
     this.calanderizedMeters = this.calanderizationService.getCalanderizedMeterData(meters, true, true, { energyIsSource: this.overviewReport.energyIsSource });
-    this.calculateFacilitiesSummary();
+    this.calculateFacilitiesSummary(includedFacilityIds);
   }
 
   ngOnDestroy() {
@@ -62,8 +72,11 @@ export class DataOverviewAccountReportComponent {
   }
 
 
-  calculateFacilitiesSummary() {
+  calculateFacilitiesSummary(includedFacilityIds: Array<string>) {
     let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    facilities = facilities.filter(facility => {
+      return includedFacilityIds.includes(facility.guid);
+    });
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('src/app/web-workers/account-overview.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
