@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AccountOverviewService } from '../account-overview.service';
 import { Subscription } from 'rxjs';
-import { AccountFacilitiesSummary, UtilityUsageSummaryData } from 'src/app/models/dashboard';
+import { AccountFacilitiesSummary, UtilityUsageSummaryData, YearMonthData } from 'src/app/models/dashboard';
 
 @Component({
   selector: 'app-costs-overview',
@@ -19,6 +19,8 @@ export class CostsOverviewComponent implements OnInit {
   accountFacilitiesSummary: AccountFacilitiesSummary;
   utilityUsageSummaryData: UtilityUsageSummaryData;
   utilityUsageSummaryDataSub: Subscription;
+  yearMonthData: Array<YearMonthData>;
+  yearMonthDataSub: Subscription;
   constructor(private accountOverviewService: AccountOverviewService) { }
 
   ngOnInit(): void {
@@ -39,13 +41,18 @@ export class CostsOverviewComponent implements OnInit {
     });
     this.utilityUsageSummaryDataSub = this.accountOverviewService.costsUtilityUsageSummaryData.subscribe(utilityUsageSummaryData => {
       this.utilityUsageSummaryData = utilityUsageSummaryData;
-    })
+    });
+    
+    this.yearMonthDataSub = this.accountOverviewService.costsYearMonthData.subscribe(yearMonthData => {
+      this.yearMonthData = yearMonthData;
+    });
   }
 
   ngOnDestroy(){
     this.accountFacilitiesSummarySub.unsubscribe();
     this.calculatingSub.unsubscribe();
     this.utilityUsageSummaryDataSub.unsubscribe();
+    this.yearMonthDataSub.unsubscribe();
   }
 
 }

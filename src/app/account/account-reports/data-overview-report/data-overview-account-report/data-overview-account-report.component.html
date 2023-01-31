@@ -12,7 +12,8 @@
                 <h4>Account Energy Consumption</h4>
                 <app-account-section-report [dataType]="'energyUse'"
                     [accountFacilitiesSummary]="accountFacilitiesEnergySummary"
-                    [utilityUsageSummaryData]="energyUtilityUsageSummaryData"></app-account-section-report>
+                    [utilityUsageSummaryData]="energyUtilityUsageSummaryData"
+                    [yearMonthData]="energyYearMonthData"></app-account-section-report>
             </div>
         </div>
     </ng-container>
@@ -36,7 +37,8 @@
                 <h4>Account Costs</h4>
                 <app-account-section-report [dataType]="'cost'"
                     [accountFacilitiesSummary]="accountFacilitiesCostsSummary"
-                    [utilityUsageSummaryData]="costsUtilityUsageSummaryData"></app-account-section-report>
+                    [utilityUsageSummaryData]="costsUtilityUsageSummaryData"
+                    [yearMonthData]="costsYearMonthData"></app-account-section-report>
             </div>
         </div>
     </ng-container>
@@ -48,7 +50,8 @@
                 <h4>Account Emissions</h4>
                 <app-account-section-report [dataType]="'emissions'"
                     [accountFacilitiesSummary]="accountFacilitiesEnergySummary"
-                    [utilityUsageSummaryData]="energyUtilityUsageSummaryData"></app-account-section-report>
+                    [utilityUsageSummaryData]="energyUtilityUsageSummaryData"
+                    [yearMonthData]="energyYearMonthData"></app-account-section-report>
             </div>
         </div>
     </ng-container>

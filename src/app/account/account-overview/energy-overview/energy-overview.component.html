@@ -70,9 +70,8 @@
                     <h4 class="mb-0">Monthly Utility Usage</h4>
                 </div>
                 <div class="card-body">
-                    <!-- <app-monthly-usage-chart></app-monthly-usage-chart> -->
-                    <app-monthly-utility-usage-line-chart
-                        [dataType]="'energyUse'"></app-monthly-utility-usage-line-chart>
+                    <app-monthly-utility-usage-line-chart [dataType]="'energyUse'"
+                        [yearMonthData]="yearMonthData"></app-monthly-utility-usage-line-chart>
                 </div>
             </div>
         </div>

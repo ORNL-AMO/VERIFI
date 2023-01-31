@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AccountOverviewService } from '../account-overview.service';
 import { Subscription } from 'rxjs';
-import { AccountFacilitiesSummary, UtilityUsageSummaryData } from 'src/app/models/dashboard';
+import { AccountFacilitiesSummary, UtilityUsageSummaryData, YearMonthData } from 'src/app/models/dashboard';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 
 
@@ -22,6 +22,8 @@ export class WaterOverviewComponent implements OnInit {
   utilityUsageSummaryDataSub: Subscription;
   selectedAccountSub: Subscription;
   waterUnit: string;
+  yearMonthData: Array<YearMonthData>;
+  yearMonthDataSub: Subscription;
   constructor(private accountOverviewService: AccountOverviewService,
     private accountDbService: AccountdbService) { }
 
@@ -48,7 +50,11 @@ export class WaterOverviewComponent implements OnInit {
 
     this.utilityUsageSummaryDataSub = this.accountOverviewService.waterUtilityUsageSummaryData.subscribe(utilityUsageSummaryData => {
       this.utilityUsageSummaryData = utilityUsageSummaryData;
-    })
+    });
+    
+    this.yearMonthDataSub = this.accountOverviewService.waterYearMonthData.subscribe(yearMonthData => {
+      this.yearMonthData = yearMonthData;
+    });
   }
 
   ngOnDestroy() {
@@ -56,6 +62,7 @@ export class WaterOverviewComponent implements OnInit {
     this.calculatingSub.unsubscribe();
     this.selectedAccountSub.unsubscribe();
     this.utilityUsageSummaryDataSub.unsubscribe();
+    this.yearMonthDataSub.unsubscribe();
   }
 
 }

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityUsageSummaryData } from 'src/app/models/dashboard';
+import { UtilityUsageSummaryData, YearMonthData } from 'src/app/models/dashboard';
 import { FacilityOverviewService } from '../facility-overview.service';
 
 @Component({
@@ -19,6 +19,8 @@ export class FacilityEmissionsOverviewComponent implements OnInit {
   selectedFacilitySub: Subscription;
   utilityUsageSummaryData: UtilityUsageSummaryData;
   utilityUsageSummaryDataSub: Subscription;
+  yearMonthData: Array<YearMonthData>;
+  yearMonthDataSub: Subscription;
   constructor(private facilityOverviewService: FacilityOverviewService, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
@@ -42,7 +44,11 @@ export class FacilityEmissionsOverviewComponent implements OnInit {
 
     this.utilityUsageSummaryDataSub = this.facilityOverviewService.energyUtilityUsageSummaryData.subscribe(utilityUsageSummaryData => {
       this.utilityUsageSummaryData = utilityUsageSummaryData;
-    })
+    });
+    
+    this.yearMonthDataSub = this.facilityOverviewService.energyYearMonthData.subscribe(yearMonthData => {
+      this.yearMonthData = yearMonthData;
+    });
   }
 
   ngOnDestroy() {
@@ -50,6 +56,7 @@ export class FacilityEmissionsOverviewComponent implements OnInit {
     this.calculatingSub.unsubscribe();
     this.selectedFacilitySub.unsubscribe();
     this.utilityUsageSummaryDataSub.unsubscribe();
+    this.yearMonthDataSub.unsubscribe();
   }
 
 

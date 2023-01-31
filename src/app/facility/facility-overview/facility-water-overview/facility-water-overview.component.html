@@ -39,8 +39,7 @@
                     <h4 class="mb-0">Water Use and Cost</h4>
                 </div>
                 <div class="card-body">
-                    <app-utility-consumption-table [dataType]="'water'"
-                        [facilityId]="facilityId"
+                    <app-utility-consumption-table [dataType]="'water'" [facilityId]="facilityId"
                         [utilityUsageSummaryData]="utilityUsageSummaryData"
                         [waterUnit]="waterUnit"></app-utility-consumption-table>
                 </div>
@@ -70,8 +69,8 @@
                 </div>
                 <div class="card-body">
                     <!-- <app-facility-water-monthly-chart></app-facility-water-monthly-chart> -->
-                    <app-monthly-utility-usage-line-chart [dataType]="'water'"
-                        [facilityId]="facilityId"></app-monthly-utility-usage-line-chart>
+                    <app-monthly-utility-usage-line-chart [dataType]="'water'" [facilityId]="facilityId"
+                        [yearMonthData]="yearMonthData"></app-monthly-utility-usage-line-chart>
                 </div>
             </div>
         </div>

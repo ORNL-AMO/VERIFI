@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild, Input } from '@angular/core';
+import { Component, ElementRef, ViewChild, Input, SimpleChanges } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
 import { AccountOverviewService } from 'src/app/account/account-overview/account-overview.service';
@@ -20,10 +20,10 @@ export class MonthlyUtilityUsageLineChartComponent {
   dataType: 'energyUse' | 'emissions' | 'cost' | 'water';
   @Input()
   facilityId: string;
+  @Input()
+  yearMonthData: Array<YearMonthData>;
 
   @ViewChild('monthlyUsageChart', { static: false }) monthlyUsageChart: ElementRef;
-  yearMonthData: Array<YearMonthData>;
-  yearMonthDataSub: Subscription;
 
   emissionsDisplaySub: Subscription;
   emissionsDisplay: "market" | "location";
@@ -34,65 +34,20 @@ export class MonthlyUtilityUsageLineChartComponent {
   ngOnInit(): void {
     if (!this.facilityId) {
       //ACCOUNT
-
-      if (this.dataType == 'energyUse' || this.dataType == 'emissions') {
-        this.yearMonthDataSub = this.accountOverviewService.energyYearMonthData.subscribe(yearMonthData => {
-          this.yearMonthData = yearMonthData;
-          if (this.dataType == 'energyUse') {
-            this.drawChart();
-          } else if (this.dataType == 'emissions' && this.emissionsDisplay) {
-            this.drawChart();
-          }
-
-        });
-      } else if (this.dataType == 'cost') {
-        this.yearMonthDataSub = this.accountOverviewService.costsYearMonthData.subscribe(yearMonthData => {
-          this.yearMonthData = yearMonthData;
-          this.drawChart();
-        });
-      } else if (this.dataType == 'water') {
-        this.yearMonthDataSub = this.accountOverviewService.waterYearMonthData.subscribe(yearMonthData => {
-          this.yearMonthData = yearMonthData;
-          this.drawChart();
-        });
-      }
       this.emissionsDisplaySub = this.accountOverviewService.emissionsDisplay.subscribe(val => {
         this.emissionsDisplay = val;
         this.drawChart();
       });
     } else {
       //FACILITY
-
-      if (this.dataType == 'energyUse' || this.dataType == 'emissions') {
-        this.yearMonthDataSub = this.facilityOverviewService.energyYearMonthData.subscribe(yearMonthData => {
-          this.yearMonthData = yearMonthData;
-          if (this.dataType == 'energyUse') {
-            this.drawChart();
-          } else if (this.dataType == 'emissions' && this.emissionsDisplay) {
-            this.drawChart();
-          }
-
-        });
-      } else if (this.dataType == 'cost') {
-        this.yearMonthDataSub = this.facilityOverviewService.costsYearMonthData.subscribe(yearMonthData => {
-          this.yearMonthData = yearMonthData;
-          this.drawChart();
-        });
-      } else if (this.dataType == 'water') {
-        this.yearMonthDataSub = this.facilityOverviewService.waterYearMonthData.subscribe(yearMonthData => {
-          this.yearMonthData = yearMonthData;
-          this.drawChart();
-        });
-      }
+      this.emissionsDisplaySub = this.facilityOverviewService.emissionsDisplay.subscribe(val => {
+        this.emissionsDisplay = val;
+        this.drawChart()
+      });
     }
-    this.emissionsDisplaySub = this.facilityOverviewService.emissionsDisplay.subscribe(val => {
-      this.emissionsDisplay = val;
-      this.drawChart()
-    });
   }
 
   ngOnDestroy() {
-    this.yearMonthDataSub.unsubscribe();
     if (this.emissionsDisplaySub) {
       this.emissionsDisplaySub.unsubscribe();
     }
@@ -101,6 +56,14 @@ export class MonthlyUtilityUsageLineChartComponent {
   ngAfterViewInit() {
     this.drawChart();
   }
+
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (!changes.dataType && !changes.accountFacilitiesSummary.isFirstChange()) {
+      this.drawChart();
+    }
+  }
+
 
   drawChart() {
     if (this.monthlyUsageChart && this.yearMonthData) {
