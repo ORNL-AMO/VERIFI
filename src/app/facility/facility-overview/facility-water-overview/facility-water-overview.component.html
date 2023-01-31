@@ -67,7 +67,9 @@
                     <h4 class="mb-0">Monthly Water Consumption</h4>
                 </div>
                 <div class="card-body">
-                    <app-facility-water-monthly-chart></app-facility-water-monthly-chart>
+                    <!-- <app-facility-water-monthly-chart></app-facility-water-monthly-chart> -->
+                    <app-monthly-utility-usage-line-chart [dataType]="'water'"
+                        [facilityId]="facilityId"></app-monthly-utility-usage-line-chart>
                 </div>
             </div>
         </div>

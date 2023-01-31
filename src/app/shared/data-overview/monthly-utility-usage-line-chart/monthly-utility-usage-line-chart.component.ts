@@ -4,9 +4,11 @@ import { Subscription } from 'rxjs';
 import { AccountOverviewService } from 'src/app/account/account-overview/account-overview.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { YearMonthData } from 'src/app/models/dashboard';
-import { IdbAccount } from 'src/app/models/idb';
+import { IdbAccount, IdbFacility } from 'src/app/models/idb';
 import { Month, Months } from '../../form-data/months';
 import * as _ from 'lodash';
+import { FacilityOverviewService } from 'src/app/facility/facility-overview/facility-overview.service';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 
 @Component({
   selector: 'app-monthly-utility-usage-line-chart',
@@ -16,6 +18,8 @@ import * as _ from 'lodash';
 export class MonthlyUtilityUsageLineChartComponent {
   @Input()
   dataType: 'energyUse' | 'emissions' | 'cost' | 'water';
+  @Input()
+  facilityId: string;
 
   @ViewChild('monthlyUsageChart', { static: false }) monthlyUsageChart: ElementRef;
   yearMonthData: Array<YearMonthData>;
@@ -24,48 +28,72 @@ export class MonthlyUtilityUsageLineChartComponent {
   emissionsDisplaySub: Subscription;
   emissionsDisplay: "market" | "location";
   constructor(private plotlyService: PlotlyService, private accountOverviewService: AccountOverviewService,
-    private accountDbService: AccountdbService) { }
+    private accountDbService: AccountdbService, private facilityOverviewService: FacilityOverviewService,
+    private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
-    this.yearMonthDataSub = this.accountOverviewService.energyYearMonthData.subscribe(val => {
-      this.yearMonthData = val;
-      this.drawChart();
-    })
+    if (!this.facilityId) {
+      //ACCOUNT
 
-    if (this.dataType == 'energyUse' || this.dataType == 'emissions') {
-      this.yearMonthDataSub = this.accountOverviewService.energyYearMonthData.subscribe(accountFacilitiesSummary => {
-        this.yearMonthData = accountFacilitiesSummary;
-        if (this.dataType == 'energyUse') {
-          this.drawChart();
-        } else if (this.dataType == 'emissions' && this.emissionsDisplay) {
-          this.drawChart();
-        }
-      });
-    } else if (this.dataType == 'cost') {
-      this.yearMonthDataSub = this.accountOverviewService.costsYearMonthData.subscribe(accountFacilitiesSummary => {
-        this.yearMonthData = accountFacilitiesSummary;
-        this.drawChart();
-      });
-    } else if (this.dataType == 'water') {
-      this.yearMonthDataSub = this.accountOverviewService.waterYearMonthData.subscribe(accountFacilitiesSummary => {
-        this.yearMonthData = accountFacilitiesSummary;
-        this.drawChart();
-      });
-    }
+      if (this.dataType == 'energyUse' || this.dataType == 'emissions') {
+        this.yearMonthDataSub = this.accountOverviewService.energyYearMonthData.subscribe(yearMonthData => {
+          this.yearMonthData = yearMonthData;
+          if (this.dataType == 'energyUse') {
+            this.drawChart();
+          } else if (this.dataType == 'emissions' && this.emissionsDisplay) {
+            this.drawChart();
+          }
 
-    if (this.dataType == 'emissions') {
+        });
+      } else if (this.dataType == 'cost') {
+        this.yearMonthDataSub = this.accountOverviewService.costsYearMonthData.subscribe(yearMonthData => {
+          this.yearMonthData = yearMonthData;
+          this.drawChart();
+        });
+      } else if (this.dataType == 'water') {
+        this.yearMonthDataSub = this.accountOverviewService.waterYearMonthData.subscribe(yearMonthData => {
+          this.yearMonthData = yearMonthData;
+          this.drawChart();
+        });
+      }
       this.emissionsDisplaySub = this.accountOverviewService.emissionsDisplay.subscribe(val => {
         this.emissionsDisplay = val;
-        if (this.emissionsDisplay) {
+        this.drawChart();
+      });
+    } else {
+      //FACILITY
+
+      if (this.dataType == 'energyUse' || this.dataType == 'emissions') {
+        this.yearMonthDataSub = this.facilityOverviewService.energyYearMonthData.subscribe(yearMonthData => {
+          this.yearMonthData = yearMonthData;
+          if (this.dataType == 'energyUse') {
+            this.drawChart();
+          } else if (this.dataType == 'emissions' && this.emissionsDisplay) {
+            this.drawChart();
+          }
+
+        });
+      } else if (this.dataType == 'cost') {
+        this.yearMonthDataSub = this.facilityOverviewService.costsYearMonthData.subscribe(yearMonthData => {
+          this.yearMonthData = yearMonthData;
           this.drawChart();
-        }
-      })
+        });
+      } else if (this.dataType == 'water') {
+        this.yearMonthDataSub = this.facilityOverviewService.waterYearMonthData.subscribe(yearMonthData => {
+          this.yearMonthData = yearMonthData;
+          this.drawChart();
+        });
+      }
     }
+    this.emissionsDisplaySub = this.facilityOverviewService.emissionsDisplay.subscribe(val => {
+      this.emissionsDisplay = val;
+      this.drawChart()
+    });
   }
 
   ngOnDestroy() {
     this.yearMonthDataSub.unsubscribe();
-    if(this.emissionsDisplaySub){
+    if (this.emissionsDisplaySub) {
       this.emissionsDisplaySub.unsubscribe();
     }
   }
@@ -78,12 +106,18 @@ export class MonthlyUtilityUsageLineChartComponent {
     if (this.monthlyUsageChart && this.yearMonthData) {
       let traceData = Array();
 
-      let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+      let accountOrFacility: IdbFacility | IdbAccount;
+      if (!this.facilityId) {
+        accountOrFacility = this.accountDbService.selectedAccount.getValue();
+      } else {
+        let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+        accountOrFacility = facilities.find(facility => { return facility.guid == this.facilityId });
+      }
       let years: Array<number> = this.yearMonthData.flatMap(data => { return data.yearMonth.fiscalYear });
       years = _.uniq(years);
       let months: Array<Month> = Months.map(month => { return month });
-      if (selectedAccount.fiscalYear == 'nonCalendarYear') {
-        let monthStartIndex: number = months.findIndex(month => { return month.monthNumValue == selectedAccount.fiscalYearMonth });
+      if (accountOrFacility.fiscalYear == 'nonCalendarYear') {
+        let monthStartIndex: number = months.findIndex(month => { return month.monthNumValue == accountOrFacility.fiscalYearMonth });
         let fromStartMonth: Array<Month> = months.splice(monthStartIndex);
         months = fromStartMonth.concat(months);
       }
@@ -96,7 +130,7 @@ export class MonthlyUtilityUsageLineChartComponent {
           y.push(yValue);
         });
         let name: string = year.toString();
-        if (selectedAccount.fiscalYear == 'nonCalendarYear') {
+        if (accountOrFacility.fiscalYear == 'nonCalendarYear') {
           name = 'FY - ' + year
         }
         let trace = {
@@ -105,13 +139,13 @@ export class MonthlyUtilityUsageLineChartComponent {
           y: y,
           name: name,
           text: x.map(item => {
-            if (selectedAccount.fiscalYear == 'nonCalendarYear') {
+            if (accountOrFacility.fiscalYear == 'nonCalendarYear') {
               return 'FY - ' + year
             } else {
               return year
             }
           }),
-          hovertemplate: this.getHoverTemplate(selectedAccount),
+          hovertemplate: this.getHoverTemplate(accountOrFacility),
         }
         traceData.push(trace);
 
@@ -120,7 +154,7 @@ export class MonthlyUtilityUsageLineChartComponent {
 
       var layout = {
         title: {
-          text: this.getYAxisTitle(selectedAccount),
+          text: this.getYAxisTitle(accountOrFacility),
           font: {
             size: 24
           },
@@ -169,23 +203,23 @@ export class MonthlyUtilityUsageLineChartComponent {
   }
 
 
-  getYAxisTitle(selectedAccount: IdbAccount): string {
+  getYAxisTitle(accountOrFacility: IdbAccount | IdbFacility): string {
     if (this.dataType == 'energyUse') {
-      return "Utility Usage (" + selectedAccount.energyUnit + ")";
+      return "Utility Usage (" + accountOrFacility.energyUnit + ")";
     } else if (this.dataType == 'cost') {
       return "Utility Costs";
     } else if (this.dataType == 'emissions') {
       return "Utility Emissions (kg CO<sub>2</sub>e)";
     } else if (this.dataType == 'water') {
-      return "Water Usage (" + selectedAccount.volumeLiquidUnit + ")";
+      return "Water Usage (" + accountOrFacility.volumeLiquidUnit + ")";
     }
   }
 
-  getHoverTemplate(selectedAccount: IdbAccount): string {
+  getHoverTemplate(accountOrFacility: IdbAccount | IdbFacility): string {
     if (this.dataType == 'energyUse') {
-      return '%{text} (%{x}): %{y:,.0f} ' + selectedAccount.energyUnit + ' <extra></extra>';
+      return '%{text} (%{x}): %{y:,.0f} ' + accountOrFacility.energyUnit + ' <extra></extra>';
     } else if (this.dataType == 'water') {
-      return '%{text} (%{x}): %{y:,.0f} ' + selectedAccount.volumeLiquidUnit + ' <extra></extra>';
+      return '%{text} (%{x}): %{y:,.0f} ' + accountOrFacility.volumeLiquidUnit + ' <extra></extra>';
     } else if (this.dataType == 'emissions') {
       return '%{text} (%{x}): %{y:,.0f} kg CO<sub>2</sub>e <extra></extra>';
     } else if (this.dataType == 'cost') {

@@ -9,10 +9,6 @@ import { FacilityOverviewBannerComponent } from './facility-overview-banner/faci
 import { RouterModule } from '@angular/router';
 import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.module';
 import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/calculating-spinner.module';
-import { FacilityEnergyMonthlyChartComponent } from './facility-energy-overview/facility-energy-monthly-chart/facility-energy-monthly-chart.component';
-import { FacilityCostMonthlyChartComponent } from './facility-cost-overview/facility-cost-monthly-chart/facility-cost-monthly-chart.component';
-import { FacilityEmissionsMonthlyChartComponent } from './facility-emissions-overview/facility-emissions-monthly-chart/facility-emissions-monthly-chart.component';
-import { FacilityWaterMonthlyChartComponent } from './facility-water-overview/facility-water-monthly-chart/facility-water-monthly-chart.component';
 import { DataOverviewModule } from 'src/app/shared/data-overview/data-overview.module';
 
 
@@ -24,11 +20,7 @@ import { DataOverviewModule } from 'src/app/shared/data-overview/data-overview.m
     FacilityWaterOverviewComponent,
     FacilityCostOverviewComponent,
     FacilityEmissionsOverviewComponent,
-    FacilityOverviewBannerComponent,
-    FacilityEnergyMonthlyChartComponent,
-    FacilityCostMonthlyChartComponent,
-    FacilityEmissionsMonthlyChartComponent,
-    FacilityWaterMonthlyChartComponent
+    FacilityOverviewBannerComponent
   ],
   imports: [
     CommonModule,

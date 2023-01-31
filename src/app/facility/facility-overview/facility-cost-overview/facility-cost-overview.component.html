@@ -74,7 +74,9 @@
                     <h4 class="mb-0">Monthly Costs</h4>
                 </div>
                 <div class="card-body">
-                    <app-facility-cost-monthly-chart></app-facility-cost-monthly-chart>
+                    <!-- <app-facility-cost-monthly-chart></app-facility-cost-monthly-chart> -->
+                    <app-monthly-utility-usage-line-chart [dataType]="'cost'"
+                        [facilityId]="facilityId"></app-monthly-utility-usage-line-chart>
                 </div>
             </div>
         </div>

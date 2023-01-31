@@ -68,7 +68,9 @@
                     <h4 class="mb-0">Monthly Emissions</h4>
                 </div>
                 <div class="card-body">
-                    <app-facility-emissions-monthly-chart></app-facility-emissions-monthly-chart>
+                    <!-- <app-facility-emissions-monthly-chart></app-facility-emissions-monthly-chart> -->
+                    <app-monthly-utility-usage-line-chart [dataType]="'emissions'"
+                        [facilityId]="facilityId"></app-monthly-utility-usage-line-chart>
                 </div>
             </div>
         </div>
