@@ -57,8 +57,9 @@
                     <h4 class="mb-0">Water Costs (All-time)</h4>
                 </div>
                 <div class="card-body">
-                    <app-facilities-usage-stacked-bar-chart
-                        [dataType]="'water'"></app-facilities-usage-stacked-bar-chart>
+                    <app-facilities-usage-stacked-bar-chart [dataType]="'water'"
+                        [calanderizedMeters]="calanderizedMeters"
+                        [waterUnit]="waterUnit"></app-facilities-usage-stacked-bar-chart>
                 </div>
             </div>
         </div>

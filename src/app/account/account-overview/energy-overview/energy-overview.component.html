@@ -56,8 +56,9 @@
                     <h4 class="mb-0">Utility Usage (All-time)</h4>
                 </div>
                 <div class="card-body">
-                    <app-facilities-usage-stacked-bar-chart
-                        [dataType]="'energyUse'"></app-facilities-usage-stacked-bar-chart>
+                    <app-facilities-usage-stacked-bar-chart [dataType]="'energyUse'"
+                        [calanderizedMeters]="calanderizedMeters"
+                        [energyUnit]="energyUnit"></app-facilities-usage-stacked-bar-chart>
                 </div>
             </div>
         </div>

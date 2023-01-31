@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { AccountOverviewService } from '../account-overview.service';
 import { Subscription } from 'rxjs';
 import { AccountFacilitiesSummary, UtilityUsageSummaryData, YearMonthData } from 'src/app/models/dashboard';
+import { CalanderizedMeter } from 'src/app/models/calanderization';
 
 @Component({
   selector: 'app-emissions-overview',
@@ -20,9 +21,11 @@ export class EmissionsOverviewComponent implements OnInit {
   utilityUsageSummaryDataSub: Subscription;
   yearMonthData: Array<YearMonthData>;
   yearMonthDataSub: Subscription;
+  calanderizedMeters: Array<CalanderizedMeter>;
   constructor(private accountOverviewService: AccountOverviewService) { }
 
   ngOnInit(): void {
+    this.calanderizedMeters = this.accountOverviewService.calanderizedMeters;
     this.calculatingSub = this.accountOverviewService.calculatingEnergy.subscribe(val => {
       this.calculating = val;
     })

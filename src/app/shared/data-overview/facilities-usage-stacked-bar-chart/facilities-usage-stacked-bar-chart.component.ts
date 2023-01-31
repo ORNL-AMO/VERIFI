@@ -1,12 +1,11 @@
-import { Component, ElementRef, ViewChild, Input } from '@angular/core';
+import { Component, ElementRef, ViewChild, Input, SimpleChanges } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
 import { AccountOverviewService } from 'src/app/account/account-overview/account-overview.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { StackedBarChartData, UtilityItem } from 'src/app/models/dashboard';
-import { IdbAccount, IdbFacility } from 'src/app/models/idb';
+import { IdbFacility } from 'src/app/models/idb';
 import { UtilityColors } from '../../utilityColors';
 import * as _ from 'lodash';
 
@@ -18,17 +17,19 @@ import * as _ from 'lodash';
 export class FacilitiesUsageStackedBarChartComponent {
   @Input()
   dataType: 'energyUse' | 'emissions' | 'cost' | 'water';
-
-
+  @Input()
+  calanderizedMeters: Array<CalanderizedMeter>;
+  @Input()
+  waterUnit: string;
+  @Input()
+  energyUnit: string;
 
 
   @ViewChild('stackedBarChart', { static: false }) stackedBarChart: ElementRef;
-
-  accountFacilitiesSub: Subscription;
   barChartData: Array<StackedBarChartData>;
   emissionsDisplay: "market" | "location";
   emissionsDisplaySub: Subscription;
-  constructor(private accountOverviewService: AccountOverviewService, private accountDbService: AccountdbService,
+  constructor(private accountOverviewService: AccountOverviewService,
     private plotlyService: PlotlyService, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
@@ -38,23 +39,26 @@ export class FacilitiesUsageStackedBarChartComponent {
         this.setBarChartData();
         this.drawChart();
       });
-    }
-
-    this.accountFacilitiesSub = this.accountOverviewService.accountFacilitiesEnergySummary.subscribe(val => {
+    } else {
       this.setBarChartData();
-      this.drawChart();
-    });
+    }
   }
 
   ngAfterViewInit() {
     this.drawChart();
   }
 
+  ngOnChanges(changes: SimpleChanges) {
+    if (!changes.dataType && (changes.calanderizedMeters && !changes.calanderizedMeters.isFirstChange())) {
+      this.setBarChartData();
+      this.drawChart();
+    }
+  }
+
   ngOnDestroy() {
     if (this.dataType == 'emissions') {
       this.emissionsDisplaySub.unsubscribe();
     }
-    this.accountFacilitiesSub.unsubscribe();
   }
 
   drawChart() {
@@ -346,7 +350,7 @@ export class FacilitiesUsageStackedBarChartComponent {
       let wasteWater: UtilityItem = { energyUse: 0, energyCost: 0, marketEmissions: 0, locationEmissions: 0 };
       let otherUtility: UtilityItem = { energyUse: 0, energyCost: 0, marketEmissions: 0, locationEmissions: 0 };
 
-      let facilityMeters: Array<CalanderizedMeter> = this.accountOverviewService.calanderizedMeters.filter(cMeter => { return cMeter.meter.facilityId == facility.guid });
+      let facilityMeters: Array<CalanderizedMeter> = this.calanderizedMeters.filter(cMeter => { return cMeter.meter.facilityId == facility.guid });
       facilityMeters.forEach(cMeter => {
         cMeter.monthlyData.forEach(dataItem => {
           if (cMeter.meter.source == 'Electricity') {
@@ -400,19 +404,34 @@ export class FacilitiesUsageStackedBarChartComponent {
         });
       }
     });
-    this.barChartData = _.orderBy(this.barChartData, (data) => {
-      return (data.electricity.energyUse + data.naturalGas.energyUse + data.otherFuels.energyUse + data.otherEnergy.energyUse);
-    }, 'desc');
+    if (this.dataType == 'cost') {
+      this.barChartData = _.orderBy(this.barChartData, (data) => {
+        return (data.electricity.energyCost + data.naturalGas.energyCost + data.otherFuels.energyCost + data.otherEnergy.energyCost + data.water.energyCost + data.wasteWater.energyCost + data.otherUtility.energyCost);
+      }, 'desc');
+    } else if (this.dataType == 'emissions') {
+      this.barChartData = _.orderBy(this.barChartData, (data) => {
+        return (data.electricity.marketEmissions + data.naturalGas.marketEmissions + data.otherFuels.marketEmissions + data.otherEnergy.marketEmissions);
+      }, 'desc');
+    } else if (this.dataType == 'energyUse') {
+      this.barChartData = _.orderBy(this.barChartData, (data) => {
+        return (data.electricity.energyUse + data.naturalGas.energyUse + data.otherFuels.energyUse + data.otherEnergy.energyUse);
+      }, 'desc');
+    } else if (this.dataType == 'water') {
+      this.barChartData = _.orderBy(this.barChartData, (data) => {
+        return (data.water.energyUse + data.wasteWater.energyUse);
+      }, 'desc');
+    }
   }
 
   getYAxisTitle(): string {
     if (this.dataType == 'energyUse') {
-      let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-      return "Utility Usage (" + selectedAccount.energyUnit + ")";
+      return "Utility Usage (" + this.energyUnit + ")";
     } else if (this.dataType == 'cost') {
       return "Utility Costs";
     } else if (this.dataType == 'emissions') {
       return "Emissions (kg CO<sub>2</sub>)";
+    } else if(this.dataType == 'water'){
+      return "Water Usage (" + this.waterUnit + ")"
     }
   }
 

@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
+import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { AccountFacilitiesSummary, UtilityUsageSummaryData, YearMonthData } from 'src/app/models/dashboard';
 import { IdbAccount, IdbAccountReport } from 'src/app/models/idb';
 import { DataOverviewReportSetup } from 'src/app/models/overview-report';
@@ -19,6 +20,8 @@ export class AccountSectionReportComponent {
   utilityUsageSummaryData: UtilityUsageSummaryData;
   @Input()
   yearMonthData: Array<YearMonthData>;
+  @Input()
+  calanderizedMeters: Array<CalanderizedMeter>;
 
   sectionOptions: DataOverviewReportSetup;
   waterUnit: string;

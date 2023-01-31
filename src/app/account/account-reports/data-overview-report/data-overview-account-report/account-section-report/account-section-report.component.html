@@ -25,7 +25,8 @@
 </div>
 <div class="row" *ngIf="sectionOptions.includeStackedBarChart">
     <div class="col-12">
-        <app-facilities-usage-stacked-bar-chart [dataType]="dataType"></app-facilities-usage-stacked-bar-chart>
+        <app-facilities-usage-stacked-bar-chart [dataType]="dataType" [calanderizedMeters]="calanderizedMeters"
+            [waterUnit]="waterUnit" [energyUnit]="energyUnit"></app-facilities-usage-stacked-bar-chart>
     </div>
 </div>
 <div class="row" *ngIf="sectionOptions.includeMonthlyLineChart">

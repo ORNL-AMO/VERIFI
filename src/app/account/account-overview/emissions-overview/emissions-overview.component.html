@@ -52,8 +52,8 @@
                     <h4 class="mb-0">Utility Emissions (All-time)</h4>
                 </div>
                 <div class="card-body">
-                    <app-facilities-usage-stacked-bar-chart
-                        [dataType]="'emissions'"></app-facilities-usage-stacked-bar-chart>
+                    <app-facilities-usage-stacked-bar-chart [dataType]="'emissions'"
+                        [calanderizedMeters]="calanderizedMeters"></app-facilities-usage-stacked-bar-chart>
                 </div>
             </div>
         </div>
@@ -67,8 +67,7 @@
                 </div>
                 <div class="card-body">
                     <!-- <app-monthly-emissions-chart></app-monthly-emissions-chart> -->
-                    <app-monthly-utility-usage-line-chart
-                        [dataType]="'emissions'"
+                    <app-monthly-utility-usage-line-chart [dataType]="'emissions'"
                         [yearMonthData]="yearMonthData"></app-monthly-utility-usage-line-chart>
                 </div>
             </div>

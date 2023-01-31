@@ -3,6 +3,7 @@ import { AccountOverviewService } from '../account-overview.service';
 import { Subscription } from 'rxjs';
 import { AccountFacilitiesSummary, UtilityUsageSummaryData, YearMonthData } from 'src/app/models/dashboard';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { CalanderizedMeter } from 'src/app/models/calanderization';
 
 
 @Component({
@@ -24,10 +25,12 @@ export class WaterOverviewComponent implements OnInit {
   waterUnit: string;
   yearMonthData: Array<YearMonthData>;
   yearMonthDataSub: Subscription;
+  calanderizedMeters: Array<CalanderizedMeter>;
   constructor(private accountOverviewService: AccountOverviewService,
     private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
+    this.calanderizedMeters = this.accountOverviewService.calanderizedMeters;
     this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(val => {
       if (val) {
         this.waterUnit = val.volumeLiquidUnit;
