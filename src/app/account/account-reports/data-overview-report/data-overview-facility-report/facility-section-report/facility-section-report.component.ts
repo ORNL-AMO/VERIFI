@@ -19,7 +19,7 @@ export class FacilitySectionReportComponent {
   @Input()
   calanderizedMeters: Array<CalanderizedMeter>;
   @Input()
-  facilityMeterSummaryData: FacilityMeterSummaryData;
+  metersSummary: FacilityMeterSummaryData;
   @Input()
   monthlySourceData: Array<{
     source: MeterSource,

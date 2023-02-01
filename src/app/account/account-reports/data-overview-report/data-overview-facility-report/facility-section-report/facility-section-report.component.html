@@ -3,10 +3,10 @@
         <app-meters-overview-stacked-line-chart [dataType]="dataType" [facilityId]="facilityId"
             [calanderizedMeters]="calanderizedMeters"></app-meters-overview-stacked-line-chart>
     </div>
-    <!-- <div class="col-6" *ngIf="sectionOptions.includeFacilityTable">
-        <app-facilities-usage-table [dataType]="dataType"></app-facilities-usage-table>
+    <div class="col-6" *ngIf="sectionOptions.includeMeterUsageTable">
+        <app-meter-usage-table [dataType]="dataType" [facilityId]="facilityId" [metersSummary]="metersSummary"></app-meter-usage-table>
     </div>
-    <div class="col-6" *ngIf="sectionOptions.includeFacilityDonut">
+    <!-- <div class="col-6" *ngIf="sectionOptions.includeFacilityDonut">
         <app-facility-usage-donut [dataType]="dataType"></app-facility-usage-donut>
     </div> -->
 </div>

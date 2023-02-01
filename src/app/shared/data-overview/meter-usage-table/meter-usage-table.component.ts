@@ -15,9 +15,9 @@ export class MeterUsageTableComponent {
   dataType: 'energyUse' | 'emissions' | 'cost' | 'water';
   @Input()
   facilityId: string;
-
+  @Input()
   metersSummary: FacilityMeterSummaryData;
-  metersSummarySub: Subscription;
+
   emissionsDisplay: 'market' | 'location';
   emissionsDisplaySub: Subscription;
 
@@ -34,20 +34,6 @@ export class MeterUsageTableComponent {
     this.facilityEnergyUnit = selectedFacility.energyUnit;
     this.facilityVolumeLiquidUnit = selectedFacility.volumeLiquidUnit;
 
-    if (this.dataType == 'energyUse' || this.dataType == 'emissions') {
-      this.metersSummarySub = this.facilityOverviewService.energyMeterSummaryData.subscribe(sourceData => {
-        this.metersSummary = sourceData;
-      });
-    } else if (this.dataType == 'cost') {
-      this.metersSummarySub = this.facilityOverviewService.costsMeterSummaryData.subscribe(sourceData => {
-        this.metersSummary = sourceData;
-      });
-    } else if (this.dataType == 'water') {
-      this.metersSummarySub = this.facilityOverviewService.waterMeterSummaryData.subscribe(sourceData => {
-        this.metersSummary = sourceData;
-      });
-    }
-
     if (this.dataType == 'emissions') {
       this.emissionsDisplaySub = this.facilityOverviewService.emissionsDisplay.subscribe(val => {
         this.emissionsDisplay = val;
@@ -57,7 +43,6 @@ export class MeterUsageTableComponent {
   }
 
   ngOnDestroy() {
-    this.metersSummarySub.unsubscribe();
     if (this.emissionsDisplaySub) {
       this.emissionsDisplaySub.unsubscribe();
     }

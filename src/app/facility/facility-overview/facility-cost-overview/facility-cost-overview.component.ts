@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
-import { UtilityUsageSummaryData, YearMonthData } from 'src/app/models/dashboard';
+import { FacilityMeterSummaryData, UtilityUsageSummaryData, YearMonthData } from 'src/app/models/dashboard';
 import { MeterSource } from 'src/app/models/idb';
 import { FacilityBarChartData } from 'src/app/models/visualization';
 import { FacilityOverviewService } from '../facility-overview.service';
@@ -32,6 +32,8 @@ export class FacilityCostOverviewComponent implements OnInit {
   }>;
   monthlySourceDataSub: Subscription;
   calanderizedMeters: Array<CalanderizedMeter>;
+  metersSummary: FacilityMeterSummaryData;
+  metersSummarySub: Subscription;
   constructor(private facilityOverviewService: FacilityOverviewService, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
@@ -64,7 +66,10 @@ export class FacilityCostOverviewComponent implements OnInit {
     });
     this.monthlySourceDataSub = this.facilityOverviewService.costsMonthlySourceData.subscribe(monthlySourceData => {
       this.monthlySourceData = monthlySourceData;
-    })
+    });
+    this.metersSummarySub = this.facilityOverviewService.costsMeterSummaryData.subscribe(metersSummary => {
+      this.metersSummary = metersSummary;
+    });
   }
 
   ngOnDestroy() {
@@ -74,6 +79,7 @@ export class FacilityCostOverviewComponent implements OnInit {
     this.utilityUsageSummaryDataSub.unsubscribe();
     this.yearMonthDataSub.unsubscribe();
     this.monthlySourceDataSub.unsubscribe();
+    this.metersSummarySub.unsubscribe();
   }
 
 }

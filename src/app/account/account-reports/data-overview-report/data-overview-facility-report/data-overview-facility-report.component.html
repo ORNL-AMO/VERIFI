@@ -12,8 +12,8 @@
             <div class="col-11 report-page">
                 <h4>{{facilityId | facilityName}} Energy Consumption</h4>
                 <app-facility-section-report [dataType]="'energyUse'" [facilityId]="facilityId"
-                    [monthlySourceData]="energyMonthlySourceData"
-                    [calanderizedMeters]="calanderizedMeters"></app-facility-section-report>
+                    [monthlySourceData]="energyMonthlySourceData" [calanderizedMeters]="calanderizedMeters"
+                    [metersSummary]="energyMeterSummaryData"></app-facility-section-report>
             </div>
         </div>
     </ng-container>
@@ -36,8 +36,8 @@
             <div class="col-11 report-page">
                 <h4>{{facilityId | facilityName}} Costs</h4>
                 <app-facility-section-report [dataType]="'cost'" [facilityId]="facilityId"
-                    [monthlySourceData]="costsMonthlySourceData"
-                    [calanderizedMeters]="calanderizedMeters"></app-facility-section-report>
+                    [monthlySourceData]="costsMonthlySourceData" [calanderizedMeters]="calanderizedMeters"
+                    [metersSummary]="costsMeterSummaryData"></app-facility-section-report>
             </div>
         </div>
     </ng-container>
@@ -48,8 +48,8 @@
             <div class="col-11 report-page">
                 <h4>{{facilityId | facilityName}} Emissions</h4>
                 <app-facility-section-report [dataType]="'emissions'" [facilityId]="facilityId"
-                    [monthlySourceData]="energyMonthlySourceData"
-                    [calanderizedMeters]="calanderizedMeters"></app-facility-section-report>
+                    [monthlySourceData]="energyMonthlySourceData" [calanderizedMeters]="calanderizedMeters"
+                    [metersSummary]="energyMeterSummaryData"></app-facility-section-report>
             </div>
         </div>
     </ng-container>

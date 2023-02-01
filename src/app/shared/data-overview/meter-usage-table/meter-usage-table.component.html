@@ -12,7 +12,11 @@
                         [innerHTML]="facilityVolumeLiquidUnit | settingsLabel"></span>)
                 </th>
                 <th *ngIf="dataType != 'emissions'">Utility Cost</th>
-                <th *ngIf="dataType == 'emissions'">Emissions <br>(kg CO<sub>2</sub>e)
+                <th *ngIf="dataType == 'emissions' && emissionsDisplay == 'market'">
+                    Market-Based <br>Emissions (kg CO<sub>2</sub>e)
+                </th>
+                <th *ngIf="dataType == 'emissions' && emissionsDisplay == 'location'">
+                    Location-Based <br>Emissions (kg CO<sub>2</sub>e)
                 </th>
             </tr>
         </thead>
