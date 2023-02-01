@@ -3,7 +3,7 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountOverviewService } from './account-overview.service';
 import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbAccount, IdbFacility, MeterSource } from 'src/app/models/idb';
+import { AllSources, EnergySources, IdbAccount, IdbFacility, MeterSource, WaterSources } from 'src/app/models/idb';
 import { Router } from '@angular/router';
 import { AccountSummaryClass } from 'src/app/calculations/dashboard-calculations/accountSummaryClass';
 
@@ -68,7 +68,7 @@ export class AccountOverviewComponent implements OnInit {
       this.accountOverviewService.calculatingWater.next(true);
       this.accountOverviewService.calculatingCosts.next(true);
 
-      let energySources: Array<MeterSource> = ['Electricity', 'Natural Gas', 'Other Fuels', 'Other Energy']
+      let energySources: Array<MeterSource> = EnergySources;
       this.worker.postMessage({
         calanderizedMeters: this.accountOverviewService.calanderizedMeters,
         facilities: facilities,
@@ -77,10 +77,7 @@ export class AccountOverviewComponent implements OnInit {
         account: this.account
       });
 
-      let waterSources: Array<MeterSource> = [
-        "Water",
-        "Waste Water"
-      ];
+      let waterSources: Array<MeterSource> = WaterSources;
       this.worker.postMessage({
         calanderizedMeters: this.accountOverviewService.calanderizedMeters,
         facilities: facilities,
@@ -89,15 +86,7 @@ export class AccountOverviewComponent implements OnInit {
         account: this.account
       });
 
-      let allSources: Array<MeterSource> = [
-        "Electricity",
-        "Natural Gas",
-        "Other Fuels",
-        "Other Energy",
-        "Water",
-        "Waste Water",
-        "Other Utility"
-      ]
+      let allSources: Array<MeterSource> = AllSources;
       this.worker.postMessage({
         calanderizedMeters: this.accountOverviewService.calanderizedMeters,
         facilities: facilities,
@@ -107,28 +96,17 @@ export class AccountOverviewComponent implements OnInit {
       });
     } else {
       // Web Workers are not supported in this environment.
-      let energySources: Array<MeterSource> = ['Electricity', 'Natural Gas', 'Other Fuels', 'Other Energy']
+      let energySources: Array<MeterSource> = EnergySources;
       let energySummaryClass: AccountSummaryClass = new AccountSummaryClass(this.accountOverviewService.calanderizedMeters, facilities, energySources, this.account);
       this.accountOverviewService.accountFacilitiesEnergySummary.next(energySummaryClass.facilitiesSummary);
       this.accountOverviewService.energyUtilityUsageSummaryData.next(energySummaryClass.utilityUsageSummaryData);
       this.accountOverviewService.energyYearMonthData.next(energySummaryClass.yearMonthData);
-      let waterSources: Array<MeterSource> = [
-        "Water",
-        "Waste Water"
-      ];
+      let waterSources: Array<MeterSource> = WaterSources;
       let waterSummaryClass: AccountSummaryClass = new AccountSummaryClass(this.accountOverviewService.calanderizedMeters, facilities, waterSources, this.account);
       this.accountOverviewService.accountFacilitiesWaterSummary.next(waterSummaryClass.facilitiesSummary);
       this.accountOverviewService.waterUtilityUsageSummaryData.next(waterSummaryClass.utilityUsageSummaryData);
       this.accountOverviewService.waterYearMonthData.next(waterSummaryClass.yearMonthData);
-      let allSources: Array<MeterSource> = [
-        "Electricity",
-        "Natural Gas",
-        "Other Fuels",
-        "Other Energy",
-        "Water",
-        "Waste Water",
-        "Other Utility"
-      ]
+      let allSources: Array<MeterSource> = AllSources;
       let allSummaryClass: AccountSummaryClass = new AccountSummaryClass(this.accountOverviewService.calanderizedMeters, facilities, allSources, this.account);
       this.accountOverviewService.accountFacilitiesCostsSummary.next(allSummaryClass.facilitiesSummary);
       this.accountOverviewService.costsUtilityUsageSummaryData.next(allSummaryClass.utilityUsageSummaryData);

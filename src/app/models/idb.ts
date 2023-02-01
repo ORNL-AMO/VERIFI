@@ -368,3 +368,8 @@ export type AnalysisType = 'absoluteEnergyConsumption' | 'energyIntensity' | 'mo
 export type MeterSource = "Electricity" | "Natural Gas" | "Other Fuels" | "Other Energy" | "Water" | "Waste Water" | "Other Utility";
 export type MeterPhase = "Solid" | "Liquid" | "Gas";
 export type ReportType = "betterPlants" | 'dataOverview';
+
+
+export const EnergySources: Array<MeterSource> = ["Electricity", "Natural Gas", "Other Fuels", "Other Energy"];
+export const AllSources: Array<MeterSource> = ["Electricity", "Natural Gas", "Other Fuels", "Other Energy", "Water", "Waste Water", "Other Utility"];
+export const WaterSources: Array<MeterSource> = ["Water", "Waste Water"];

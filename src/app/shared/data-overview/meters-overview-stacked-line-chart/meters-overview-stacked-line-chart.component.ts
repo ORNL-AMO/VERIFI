@@ -1,12 +1,13 @@
-import { Component, ElementRef, ViewChild, Input } from '@angular/core';
+import { Component, ElementRef, ViewChild, Input, SimpleChanges } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { FacilityOverviewService } from 'src/app/facility/facility-overview/facility-overview.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbFacility, MeterSource } from 'src/app/models/idb';
+import { AllSources, EnergySources, IdbFacility, MeterSource, WaterSources } from 'src/app/models/idb';
 import { UtilityColors } from '../../utilityColors';
 import * as _ from 'lodash';
 import { Subscription } from 'rxjs';
 import { FacilityBarChartData } from 'src/app/models/visualization';
+import { CalanderizedMeter } from 'src/app/models/calanderization';
 
 @Component({
   selector: 'app-meters-overview-stacked-line-chart',
@@ -18,14 +19,11 @@ export class MetersOverviewStackedLineChartComponent {
   dataType: 'energyUse' | 'emissions' | 'cost' | 'water';
   @Input()
   facilityId: string;
+  @Input()
+  calanderizedMeters: Array<CalanderizedMeter>
 
   @ViewChild('stackedAreaChart', { static: false }) stackedAreaChart: ElementRef;
 
-  monthlySourceDataSub: Subscription;
-  monthlySourceData: Array<{
-    source: MeterSource,
-    data: Array<FacilityBarChartData>
-  }>
   selectedFacility: IdbFacility;
   emissionsDisplay: 'market' | 'location';
   emissionsDisplaySub: Subscription;
@@ -36,36 +34,17 @@ export class MetersOverviewStackedLineChartComponent {
     let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     this.selectedFacility = facilities.find(facility => { return facility.guid == this.facilityId });
 
-    if (this.dataType == 'energyUse' || this.dataType == 'emissions') {
-      this.monthlySourceDataSub = this.facilityOverviewService.energyMonthlySourceData.subscribe(sourceData => {
-        this.monthlySourceData = sourceData;
-        if (this.dataType == 'energyUse') {
-          this.drawChart();
-        } else if (this.dataType == 'emissions' && this.emissionsDisplay) {
-          this.drawChart();
-        }
-      });
-    } else if (this.dataType == 'cost') {
-      this.monthlySourceDataSub = this.facilityOverviewService.costsMonthlySourceData.subscribe(sourceData => {
-        this.monthlySourceData = sourceData;
-        this.drawChart();
-      });
-    } else if (this.dataType == 'water') {
-      this.monthlySourceDataSub = this.facilityOverviewService.waterMonthlySourceData.subscribe(sourceData => {
-        this.monthlySourceData = sourceData;
-        this.drawChart();
-      });
-    }
     if (this.dataType == 'emissions') {
       this.emissionsDisplaySub = this.facilityOverviewService.emissionsDisplay.subscribe(val => {
         this.emissionsDisplay = val;
         this.drawChart();
       });
+    } else {
+      this.drawChart();
     }
   }
 
   ngOnDestroy() {
-    this.monthlySourceDataSub.unsubscribe();
     if (this.dataType == 'emissions') {
       this.emissionsDisplaySub.unsubscribe();
     }
@@ -75,45 +54,54 @@ export class MetersOverviewStackedLineChartComponent {
     this.drawChart();
   }
 
+  ngOnChanges(changes: SimpleChanges) {
+    if (!changes.dataType && (changes.monthlySourceData && !changes.monthlySourceData.isFirstChange())) {
+      this.drawChart();
+    }
+  }
+
   drawChart() {
-    if (this.stackedAreaChart && this.monthlySourceData && this.monthlySourceData.length != 0) {
+    if (this.stackedAreaChart && this.calanderizedMeters && this.calanderizedMeters.length != 0) {
       let traceData = new Array();
-      this.facilityOverviewService.calanderizedMeters = _.orderBy(this.facilityOverviewService.calanderizedMeters, (cMeter) => { return cMeter.meter.source });
+      this.calanderizedMeters = _.orderBy(this.calanderizedMeters, (cMeter) => { return cMeter.meter.source });
       let dataPointSize: number = 0;
-      this.facilityOverviewService.calanderizedMeters.forEach(cMeter => {
-        let x: Array<string> = new Array();
-        let y: Array<number> = new Array();
-        if (dataPointSize < cMeter.monthlyData.length - 1) {
-          dataPointSize = cMeter.monthlyData.length - 1;
-        }
-        cMeter.monthlyData.forEach(dataItem => {
-          x.push(dataItem.month + ', ' + dataItem.year);
-          if (this.dataType == 'energyUse') {
-            y.push(dataItem.energyUse);
-          } else if (this.dataType == 'cost') {
-            y.push(dataItem.energyCost);
-          } else if (this.dataType == 'emissions') {
-            if (this.emissionsDisplay == 'location') {
-              y.push(dataItem.locationEmissions);
-            } else {
-              y.push(dataItem.marketEmissions);
-            }
-          } else if (this.dataType == 'water') {
-            y.push(dataItem.energyConsumption);
+      let includedSources: Array<MeterSource> = this.getIncludedSources();
+      this.calanderizedMeters.forEach(cMeter => {
+        if (includedSources.includes(cMeter.meter.source)) {
+          let x: Array<string> = new Array();
+          let y: Array<number> = new Array();
+          if (dataPointSize < cMeter.monthlyData.length - 1) {
+            dataPointSize = cMeter.monthlyData.length - 1;
           }
-        })
-        let trace = {
-          x: x,
-          y: y,
-          name: cMeter.meter.name,
-          text: cMeter.monthlyData.map(item => { return cMeter.meter.name }),
-          stackgroup: 'one',
-          marker: {
-            color: UtilityColors[cMeter.meter.source].color,
-          },
-          hovertemplate: this.getHoverTemplate(),
+          cMeter.monthlyData.forEach(dataItem => {
+            x.push(dataItem.month + ', ' + dataItem.year);
+            if (this.dataType == 'energyUse') {
+              y.push(dataItem.energyUse);
+            } else if (this.dataType == 'cost') {
+              y.push(dataItem.energyCost);
+            } else if (this.dataType == 'emissions') {
+              if (this.emissionsDisplay == 'location') {
+                y.push(dataItem.locationEmissions);
+              } else {
+                y.push(dataItem.marketEmissions);
+              }
+            } else if (this.dataType == 'water') {
+              y.push(dataItem.energyConsumption);
+            }
+          })
+          let trace = {
+            x: x,
+            y: y,
+            name: cMeter.meter.name,
+            text: cMeter.monthlyData.map(item => { return cMeter.meter.name }),
+            stackgroup: 'one',
+            marker: {
+              color: UtilityColors[cMeter.meter.source].color,
+            },
+            hovertemplate: this.getHoverTemplate(),
+          }
+          traceData.push(trace);
         }
-        traceData.push(trace);
       })
 
       let xrange;
@@ -174,6 +162,16 @@ export class MetersOverviewStackedLineChartComponent {
       return '%{text} (%{x}): %{y:$,.0f} <extra></extra>';
     } else if (this.dataType == 'water') {
       return '%{text} (%{x}): %{y:,.0f} ' + this.selectedFacility.volumeLiquidUnit + ' <extra></extra>';
+    }
+  }
+
+  getIncludedSources(): Array<MeterSource> {
+    if (this.dataType == 'energyUse' || this.dataType == 'emissions') {
+      return EnergySources;
+    } else if (this.dataType == 'cost') {
+      return AllSources;
+    } else if (this.dataType == 'water') {
+      return WaterSources;
     }
   }
 }

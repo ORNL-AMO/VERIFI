@@ -6,7 +6,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { AccountFacilitiesSummary, UtilityUsageSummaryData, YearMonthData } from 'src/app/models/dashboard';
-import { IdbAccount, IdbFacility, IdbUtilityMeter, MeterSource } from 'src/app/models/idb';
+import { AllSources, EnergySources, IdbAccount, IdbFacility, IdbUtilityMeter, MeterSource, WaterSources } from 'src/app/models/idb';
 import { DataOverviewReportSetup } from 'src/app/models/overview-report';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 
@@ -97,7 +97,7 @@ export class DataOverviewAccountReportComponent {
         }
       };
 
-      let energySources: Array<MeterSource> = ['Electricity', 'Natural Gas', 'Other Fuels', 'Other Energy']
+      let energySources: Array<MeterSource> = EnergySources;
       this.worker.postMessage({
         calanderizedMeters: this.calanderizedMeters,
         facilities: facilities,
@@ -106,10 +106,7 @@ export class DataOverviewAccountReportComponent {
         account: this.account
       });
 
-      let waterSources: Array<MeterSource> = [
-        "Water",
-        "Waste Water"
-      ];
+      let waterSources: Array<MeterSource> = WaterSources;
       this.worker.postMessage({
         calanderizedMeters: this.calanderizedMeters,
         facilities: facilities,
@@ -118,15 +115,7 @@ export class DataOverviewAccountReportComponent {
         account: this.account
       });
 
-      let allSources: Array<MeterSource> = [
-        "Electricity",
-        "Natural Gas",
-        "Other Fuels",
-        "Other Energy",
-        "Water",
-        "Waste Water",
-        "Other Utility"
-      ]
+      let allSources: Array<MeterSource> = AllSources;
       this.worker.postMessage({
         calanderizedMeters: this.calanderizedMeters,
         facilities: facilities,
@@ -136,28 +125,17 @@ export class DataOverviewAccountReportComponent {
       });
     } else {
       // Web Workers are not supported in this environment.
-      let energySources: Array<MeterSource> = ['Electricity', 'Natural Gas', 'Other Fuels', 'Other Energy']
+      let energySources: Array<MeterSource> = EnergySources;
       let energySummaryClass: AccountSummaryClass = new AccountSummaryClass(this.calanderizedMeters, facilities, energySources, this.account);
       this.accountFacilitiesEnergySummary = energySummaryClass.facilitiesSummary;
       this.energyUtilityUsageSummaryData = energySummaryClass.utilityUsageSummaryData;
       this.energyYearMonthData = energySummaryClass.yearMonthData;
-      let waterSources: Array<MeterSource> = [
-        "Water",
-        "Waste Water"
-      ];
+      let waterSources: Array<MeterSource> = WaterSources;
       let waterSummaryClass: AccountSummaryClass = new AccountSummaryClass(this.calanderizedMeters, facilities, waterSources, this.account);
       this.accountFacilitiesWaterSummary = waterSummaryClass.facilitiesSummary;
       this.waterUtilityUsageSummaryData = waterSummaryClass.utilityUsageSummaryData;
       this.waterYearMonthData = waterSummaryClass.yearMonthData;
-      let allSources: Array<MeterSource> = [
-        "Electricity",
-        "Natural Gas",
-        "Other Fuels",
-        "Other Energy",
-        "Water",
-        "Waste Water",
-        "Other Utility"
-      ]
+      let allSources: Array<MeterSource> = AllSources;
       let allSummaryClass: AccountSummaryClass = new AccountSummaryClass(this.calanderizedMeters, facilities, allSources, this.account);
       this.accountFacilitiesCostsSummary = allSummaryClass.facilitiesSummary;
       this.costsUtilityUsageSummaryData = allSummaryClass.utilityUsageSummaryData;

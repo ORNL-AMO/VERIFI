@@ -19,8 +19,8 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-12">
-                            <app-meters-overview-stacked-line-chart [dataType]="'cost'"
-                                [facilityId]="facilityId"></app-meters-overview-stacked-line-chart>
+                            <app-meters-overview-stacked-line-chart [dataType]="'cost'" [facilityId]="facilityId"
+                                [calanderizedMeters]="calanderizedMeters"></app-meters-overview-stacked-line-chart>
                             <hr>
                         </div>
                     </div>
@@ -75,8 +75,7 @@
                 </div>
                 <div class="card-body">
                     <!-- <app-facility-cost-monthly-chart></app-facility-cost-monthly-chart> -->
-                    <app-monthly-utility-usage-line-chart [dataType]="'cost'"
-                        [facilityId]="facilityId"
+                    <app-monthly-utility-usage-line-chart [dataType]="'cost'" [facilityId]="facilityId"
                         [yearMonthData]="yearMonthData"></app-monthly-utility-usage-line-chart>
                 </div>
             </div>

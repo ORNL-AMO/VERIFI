@@ -1,7 +1,7 @@
 <div class="row">
     <div class="col-12" *ngIf="sectionOptions.includeMeterUsageStackedLineChart">
-        <app-meters-overview-stacked-line-chart [dataType]="'energyUse'"
-            [facilityId]="facilityId"></app-meters-overview-stacked-line-chart>
+        <app-meters-overview-stacked-line-chart [dataType]="dataType" [facilityId]="facilityId"
+            [calanderizedMeters]="calanderizedMeters"></app-meters-overview-stacked-line-chart>
     </div>
     <!-- <div class="col-6" *ngIf="sectionOptions.includeFacilityTable">
         <app-facilities-usage-table [dataType]="dataType"></app-facilities-usage-table>

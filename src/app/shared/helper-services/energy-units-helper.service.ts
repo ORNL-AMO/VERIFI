@@ -30,7 +30,8 @@ export class EnergyUnitsHelperService {
   }
 
   getMeterConsumptionUnitInFacility(meter: IdbUtilityMeter): string {
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let selectedFacility: IdbFacility = accountFacilities.find(facility => {return meter.facilityId == facility.guid});
     if (selectedFacility) {
       let isEnergyMeter: boolean = this.isEnergyMeter(meter.source);
       //use meter unit 
