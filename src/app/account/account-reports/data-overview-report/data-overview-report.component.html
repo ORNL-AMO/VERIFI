@@ -1,19 +1,19 @@
-<div class="report" [ngClass]="{'print': print}" *ngIf="overviewReport">
+<div class="report" [ngClass]="{'print': print}"
+    *ngIf="overviewReport && !calculatingAccounts && !calculatingFacilities">
     <app-data-overview-account-report *ngIf="overviewReport.includeAccountReport"
-        [overviewReport]="overviewReport"></app-data-overview-account-report>
+        [overviewReport]="overviewReport" [accountData]="accountData"></app-data-overview-account-report>
 
     <ng-container *ngIf="overviewReport.includeFacilityReports">
-        <ng-container *ngFor="let facility of overviewReport.includedFacilities">
-            <app-data-overview-facility-report *ngIf="facility.included" [facilityId]="facility.facilityId"
+        <ng-container *ngFor="let dataOverviewFacility of facilitiesData">
+            <app-data-overview-facility-report [dataOverviewFacility]="dataOverviewFacility"
                 [overviewReport]="overviewReport"></app-data-overview-facility-report>
-
         </ng-container>
 
     </ng-container>
 </div>
 
-<!-- <div class="w-100 justify-content-center" *ngIf="calculating">
+<div class="w-100 justify-content-center" *ngIf="calculatingFacilities || calculatingAccounts">
     <div class="pt-5">
         <app-calculating-spinner [message]="'Generating Data Overview Report...'"></app-calculating-spinner>
     </div>
-</div> -->
+</div>

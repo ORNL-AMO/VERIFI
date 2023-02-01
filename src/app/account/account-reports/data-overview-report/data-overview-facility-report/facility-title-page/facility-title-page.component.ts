@@ -10,9 +10,8 @@ import { IdbFacility } from 'src/app/models/idb';
 })
 export class FacilityTitlePageComponent {
   @Input()
-  facilityId: string;
-
   facility: IdbFacility;
+
   naics: string;
   constructor(private facilityDbService: FacilitydbService,
     private overviewReportService: OverviewReportService) {
@@ -20,8 +19,6 @@ export class FacilityTitlePageComponent {
   }
 
   ngOnInit() {
-    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-    this.facility = facilities.find(facility => { return facility.guid == this.facilityId });
     this.naics = this.overviewReportService.getNAICS(this.facility);
   }
 

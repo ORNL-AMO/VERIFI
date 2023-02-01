@@ -16,7 +16,7 @@ export class FacilitySectionReportComponent {
   @Input()
   dataType: 'energyUse' | 'emissions' | 'cost' | 'water';
   @Input()
-  facilityId: string;
+  facility: IdbFacility;
   @Input()
   calanderizedMeters: Array<CalanderizedMeter>;
   @Input()
@@ -41,9 +41,9 @@ export class FacilitySectionReportComponent {
   ngOnInit() {
     let selectedReport: IdbAccountReport = this.accountReportDbService.selectedReport.getValue();
     this.sectionOptions = selectedReport.dataOverviewReportSetup;
-    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-    let facility: IdbFacility = accountFacilities.find(facility => { return facility.guid == this.facilityId })
-    this.waterUnit = facility.volumeLiquidUnit;
-    this.energyUnit = facility.energyUnit;
+    // let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    // let facility: IdbFacility = accountFacilities.find(facility => { return facility.guid == this.facilityId })
+    this.waterUnit = this.facility.volumeLiquidUnit;
+    this.energyUnit = this.facility.energyUnit;
   }
 }

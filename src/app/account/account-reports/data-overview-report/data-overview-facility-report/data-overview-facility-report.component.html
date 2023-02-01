@@ -1,25 +1,27 @@
-<ng-container *ngIf="!calculating">
+<!-- <ng-container *ngIf="!calculating"> -->
+<hr>
+<div class="row justify-content-center pt-3">
+    <div class="col-12 report-page">
+        <app-facility-title-page [facility]="dataOverviewFacility.facility"></app-facility-title-page>
+    </div>
+</div>
+<ng-container *ngIf="overviewReport.includeEnergySection">
     <hr>
-    <div class="row justify-content-center pt-3">
-        <div class="col-12 report-page">
-            <app-facility-title-page [facilityId]="facilityId"></app-facility-title-page>
+    <!--account energy consumption-->
+    <div class="row justify-content-center">
+        <div class="col-11 report-page">
+            <h4>{{dataOverviewFacility.facility.guid | facilityName}} Energy Consumption</h4>
+            <app-facility-section-report [dataType]="'energyUse'" [facility]="dataOverviewFacility.facility"
+                [monthlySourceData]="dataOverviewFacility.energyMonthlySourceData"
+                [calanderizedMeters]="dataOverviewFacility.calanderizedMeters"
+                [metersSummary]="dataOverviewFacility.energyMeterSummaryData"
+                [utilityUsageSummaryData]="dataOverviewFacility.energyUtilityUsageSummaryData"
+                [yearMonthData]="dataOverviewFacility.energyYearMonthData"></app-facility-section-report>
         </div>
     </div>
-    <ng-container *ngIf="overviewReport.includeEnergySection">
-        <hr>
-        <!--account energy consumption-->
-        <div class="row justify-content-center">
-            <div class="col-11 report-page">
-                <h4>{{facilityId | facilityName}} Energy Consumption</h4>
-                <app-facility-section-report [dataType]="'energyUse'" [facilityId]="facilityId"
-                    [monthlySourceData]="energyMonthlySourceData" [calanderizedMeters]="calanderizedMeters"
-                    [metersSummary]="energyMeterSummaryData" [utilityUsageSummaryData]="energyUtilityUsageSummaryData"
-                    [yearMonthData]="energyYearMonthData"></app-facility-section-report>
-            </div>
-        </div>
-    </ng-container>
-    <!--account water consumption-->
-    <!-- <div class="row justify-content-center">
+</ng-container>
+<!--account water consumption-->
+<!-- <div class="row justify-content-center">
         <div class="col-12">
             <hr>
         </div>
@@ -30,36 +32,40 @@
             <app-account-water-report></app-account-water-report>
         </div>
     </div> -->
-    <!--account costs-->
-    <ng-container *ngIf="overviewReport.includeCostsSection">
-        <hr>
-        <div class="row justify-content-center">
-            <div class="col-11 report-page">
-                <h4>{{facilityId | facilityName}} Costs</h4>
-                <app-facility-section-report [dataType]="'cost'" [facilityId]="facilityId"
-                    [monthlySourceData]="costsMonthlySourceData" [calanderizedMeters]="calanderizedMeters"
-                    [metersSummary]="costsMeterSummaryData" [utilityUsageSummaryData]="costsUtilityUsageSummaryData"
-                    [yearMonthData]="costsYearMonthData"></app-facility-section-report>
-            </div>
+<!--account costs-->
+<ng-container *ngIf="overviewReport.includeCostsSection">
+    <hr>
+    <div class="row justify-content-center">
+        <div class="col-11 report-page">
+            <h4>{{dataOverviewFacility.facility.guid | facilityName}} Costs</h4>
+            <app-facility-section-report [dataType]="'cost'" [facility]="dataOverviewFacility.facility"
+                [monthlySourceData]="dataOverviewFacility.costsMonthlySourceData"
+                [calanderizedMeters]="dataOverviewFacility.calanderizedMeters"
+                [metersSummary]="dataOverviewFacility.costsMeterSummaryData"
+                [utilityUsageSummaryData]="dataOverviewFacility.costsUtilityUsageSummaryData"
+                [yearMonthData]="dataOverviewFacility.costsYearMonthData"></app-facility-section-report>
         </div>
-    </ng-container>
-    <ng-container *ngIf="overviewReport.includeEmissionsSection">
-        <hr>
-        <!--account emissions-->
-        <div class="row justify-content-center">
-            <div class="col-11 report-page">
-                <h4>{{facilityId | facilityName}} Emissions</h4>
-                <app-facility-section-report [dataType]="'emissions'" [facilityId]="facilityId"
-                    [monthlySourceData]="energyMonthlySourceData" [calanderizedMeters]="calanderizedMeters"
-                    [metersSummary]="energyMeterSummaryData" [utilityUsageSummaryData]="energyUtilityUsageSummaryData"
-                    [yearMonthData]="energyYearMonthData"></app-facility-section-report>
-            </div>
-        </div>
-    </ng-container>
+    </div>
 </ng-container>
+<ng-container *ngIf="overviewReport.includeEmissionsSection">
+    <hr>
+    <!--account emissions-->
+    <div class="row justify-content-center">
+        <div class="col-11 report-page">
+            <h4>{{dataOverviewFacility.facility.guid | facilityName}} Emissions</h4>
+            <app-facility-section-report [dataType]="'emissions'" [facility]="dataOverviewFacility.facility"
+                [monthlySourceData]="dataOverviewFacility.energyMonthlySourceData"
+                [calanderizedMeters]="dataOverviewFacility.calanderizedMeters"
+                [metersSummary]="dataOverviewFacility.energyMeterSummaryData"
+                [utilityUsageSummaryData]="dataOverviewFacility.energyUtilityUsageSummaryData"
+                [yearMonthData]="dataOverviewFacility.energyYearMonthData"></app-facility-section-report>
+        </div>
+    </div>
+</ng-container>
+<!-- </ng-container> -->
 
-<div class="w-100 justify-content-center" *ngIf="calculating">
+<!-- <div class="w-100 justify-content-center" *ngIf="calculating">
     <div class="pt-5">
         <app-calculating-spinner [message]="'Generating Data Overview Report...'"></app-calculating-spinner>
     </div>
-</div>
+</div> -->
