@@ -29,7 +29,7 @@ export class FacilitySectionReportComponent {
   @Input()
   utilityUsageSummaryData: UtilityUsageSummaryData;
   @Input()
-  facilityYearMonthData: Array<YearMonthData>;
+  yearMonthData: Array<YearMonthData>;
 
   sectionOptions: DataOverviewReportSetup;
   waterUnit: string;

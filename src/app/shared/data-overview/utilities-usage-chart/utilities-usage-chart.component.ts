@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild, Input } from '@angular/core';
+import { Component, ElementRef, ViewChild, Input, SimpleChanges } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -18,16 +18,16 @@ export class UtilitiesUsageChartComponent {
   dataType: 'energyUse' | 'emissions' | 'cost' | 'water';
   @Input()
   facilityId: string;
+  @Input()
+  monthlySourceData: Array<{
+    source: MeterSource,
+    data: Array<FacilityBarChartData>
+  }>;
 
   @ViewChild('utilityBarChart', { static: false }) utilityBarChart: ElementRef;
 
   emissionsDisplay: 'market' | 'location';
   emissionsDisplaySub: Subscription;
-  monthlySourceDataSub: Subscription;
-  monthlySourceData: Array<{
-    source: MeterSource,
-    data: Array<FacilityBarChartData>
-  }>;
   selectedFacility: IdbFacility;
   constructor(private plotlyService: PlotlyService, private facilityOverviewService: FacilityOverviewService,
     private facilityDbService: FacilitydbService) { }
@@ -36,38 +36,18 @@ export class UtilitiesUsageChartComponent {
     let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     this.selectedFacility = facilities.find(facility => { return facility.guid == this.facilityId });
 
-    if (this.dataType == 'energyUse' || this.dataType == 'emissions') {
-      this.monthlySourceDataSub = this.facilityOverviewService.energyMonthlySourceData.subscribe(sourceData => {
-        this.monthlySourceData = sourceData;
-        if (this.dataType == 'energyUse') {
-          this.drawChart();
-        } else if (this.dataType == 'emissions' && this.emissionsDisplay) {
-          this.drawChart();
-        }
-      });
-    } else if (this.dataType == 'cost') {
-      this.monthlySourceDataSub = this.facilityOverviewService.costsMonthlySourceData.subscribe(sourceData => {
-        this.monthlySourceData = sourceData;
-        this.drawChart();
-      });
-    } else if (this.dataType == 'water') {
-      this.monthlySourceDataSub = this.facilityOverviewService.waterMonthlySourceData.subscribe(sourceData => {
-        this.monthlySourceData = sourceData;
-        this.drawChart();
-      });
-    }
-
-
     if (this.dataType == 'emissions') {
       this.emissionsDisplaySub = this.facilityOverviewService.emissionsDisplay.subscribe(val => {
         this.emissionsDisplay = val;
         this.drawChart();
       });
+    } else {
+      this.drawChart();
     }
   }
 
   ngOnDestroy() {
-    this.monthlySourceDataSub.unsubscribe();
+    // this.monthlySourceDataSub.unsubscribe();
     if (this.emissionsDisplaySub) {
       this.emissionsDisplaySub.unsubscribe();
     }
@@ -75,6 +55,12 @@ export class UtilitiesUsageChartComponent {
 
   ngAfterViewInit() {
     this.drawChart();
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (!changes.dataType && !changes.monthlySourceData.isFirstChange()) {
+      this.drawChart();
+    }
   }
 
   drawChart() {

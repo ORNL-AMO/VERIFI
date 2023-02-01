@@ -23,15 +23,15 @@
             [waterUnit]="waterUnit" [energyUnit]="energyUnit"></app-utility-consumption-table>
     </div>
 </div>
-<!-- <div class="row" *ngIf="sectionOptions.includeStackedBarChart">
+<div class="row" *ngIf="sectionOptions.includeAnnualBarChart">
     <div class="col-12">
-        <app-facilities-usage-stacked-bar-chart [dataType]="dataType" [calanderizedMeters]="calanderizedMeters"
-            [waterUnit]="waterUnit" [energyUnit]="energyUnit"></app-facilities-usage-stacked-bar-chart>
+        <app-utilities-usage-chart [dataType]="dataType" [facilityId]="facilityId"
+            [monthlySourceData]="monthlySourceData"></app-utilities-usage-chart>
     </div>
 </div>
-<div class="row" *ngIf="sectionOptions.includeMonthlyLineChart">
+<div class="row" *ngIf="sectionOptions.includeMonthlyLineChartForFacility">
     <div class="col-12">
         <app-monthly-utility-usage-line-chart [dataType]="dataType"
             [yearMonthData]="yearMonthData"></app-monthly-utility-usage-line-chart>
     </div>
-</div> -->
+</div>

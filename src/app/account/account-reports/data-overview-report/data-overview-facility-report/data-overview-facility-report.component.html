@@ -13,8 +13,8 @@
                 <h4>{{facilityId | facilityName}} Energy Consumption</h4>
                 <app-facility-section-report [dataType]="'energyUse'" [facilityId]="facilityId"
                     [monthlySourceData]="energyMonthlySourceData" [calanderizedMeters]="calanderizedMeters"
-                    [metersSummary]="energyMeterSummaryData"
-                    [utilityUsageSummaryData]="energyUtilityUsageSummaryData"></app-facility-section-report>
+                    [metersSummary]="energyMeterSummaryData" [utilityUsageSummaryData]="energyUtilityUsageSummaryData"
+                    [yearMonthData]="energyYearMonthData"></app-facility-section-report>
             </div>
         </div>
     </ng-container>
@@ -38,8 +38,8 @@
                 <h4>{{facilityId | facilityName}} Costs</h4>
                 <app-facility-section-report [dataType]="'cost'" [facilityId]="facilityId"
                     [monthlySourceData]="costsMonthlySourceData" [calanderizedMeters]="calanderizedMeters"
-                    [metersSummary]="costsMeterSummaryData"
-                    [utilityUsageSummaryData]="costsUtilityUsageSummaryData"></app-facility-section-report>
+                    [metersSummary]="costsMeterSummaryData" [utilityUsageSummaryData]="costsUtilityUsageSummaryData"
+                    [yearMonthData]="costsYearMonthData"></app-facility-section-report>
             </div>
         </div>
     </ng-container>
@@ -51,8 +51,8 @@
                 <h4>{{facilityId | facilityName}} Emissions</h4>
                 <app-facility-section-report [dataType]="'emissions'" [facilityId]="facilityId"
                     [monthlySourceData]="energyMonthlySourceData" [calanderizedMeters]="calanderizedMeters"
-                    [metersSummary]="energyMeterSummaryData"
-                    [utilityUsageSummaryData]="energyUtilityUsageSummaryData"></app-facility-section-report>
+                    [metersSummary]="energyMeterSummaryData" [utilityUsageSummaryData]="energyUtilityUsageSummaryData"
+                    [yearMonthData]="energyYearMonthData"></app-facility-section-report>
             </div>
         </div>
     </ng-container>
