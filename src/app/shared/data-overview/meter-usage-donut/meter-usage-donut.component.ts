@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild, Input } from '@angular/core';
+import { Component, ElementRef, ViewChild, Input, SimpleChanges } from '@angular/core';
 import { FacilityMeterSummaryData } from 'src/app/models/dashboard';
 import { UtilityColors } from '../../utilityColors';
 import * as _ from 'lodash';
@@ -18,10 +18,10 @@ export class MeterUsageDonutComponent {
   dataType: 'energyUse' | 'emissions' | 'cost' | 'water';
   @Input()
   facilityId: string;
+  @Input()
+  metersSummary: FacilityMeterSummaryData;
 
   @ViewChild('energyUseDonut', { static: false }) energyUseDonut: ElementRef;
-  metersSummary: FacilityMeterSummaryData;
-  metersSummarySub: Subscription;
   selectedFacility: IdbFacility;
   emissionsDisplay: 'market' | 'location';
   emissionsDisplaySub: Subscription;
@@ -33,43 +33,31 @@ export class MeterUsageDonutComponent {
     let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     this.selectedFacility = facilities.find(facility => { return facility.guid == this.facilityId });
 
-    if (this.dataType == 'energyUse' || this.dataType == 'emissions') {
-      this.metersSummarySub = this.facilityOverviewService.energyMeterSummaryData.subscribe(sourceData => {
-        this.metersSummary = sourceData;
-        if (this.dataType == 'energyUse') {
-          this.drawChart();
-        } else if (this.dataType == 'emissions' && this.emissionsDisplay) {
-          this.drawChart();
-        }
-      });
-    } else if (this.dataType == 'cost') {
-      this.metersSummarySub = this.facilityOverviewService.costsMeterSummaryData.subscribe(sourceData => {
-        this.metersSummary = sourceData;
-        this.drawChart();
-      });
-    } else if (this.dataType == 'water') {
-      this.metersSummarySub = this.facilityOverviewService.waterMeterSummaryData.subscribe(sourceData => {
-        this.metersSummary = sourceData;
-        this.drawChart();
-      });
-    }
+
     if (this.dataType == 'emissions') {
       this.emissionsDisplaySub = this.facilityOverviewService.emissionsDisplay.subscribe(val => {
         this.emissionsDisplay = val;
         this.drawChart();
       });
+    } else {
+      this.drawChart();
     }
   }
 
   ngOnDestroy() {
-    this.metersSummarySub.unsubscribe();
-    if(this.emissionsDisplaySub){
+    if (this.emissionsDisplaySub) {
       this.emissionsDisplaySub.unsubscribe();
     }
   }
 
   ngAfterViewInit() {
     this.drawChart();
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (!changes.dataType && !changes.metersSummary.isFirstChange()) {
+      this.drawChart();
+    }
   }
 
   drawChart() {

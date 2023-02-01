@@ -17,22 +17,20 @@ export class MeterUsageTableComponent {
   facilityId: string;
   @Input()
   metersSummary: FacilityMeterSummaryData;
+  @Input()
+  waterUnit: string;
+  @Input()
+  energyUnit: string;
 
   emissionsDisplay: 'market' | 'location';
   emissionsDisplaySub: Subscription;
 
-  facilityEnergyUnit: string;
-  facilityVolumeLiquidUnit: string;
   orderByValue: 'energyUsage' | 'energyCost' | 'marketEmissions' | 'consumption';
   constructor(
-    private facilityDbService: FacilitydbService,
     private facilityOverviewService: FacilityOverviewService) { }
 
   ngOnInit(): void {
-    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-    let selectedFacility: IdbFacility = facilities.find(facility => { return facility.guid == this.facilityId });
-    this.facilityEnergyUnit = selectedFacility.energyUnit;
-    this.facilityVolumeLiquidUnit = selectedFacility.volumeLiquidUnit;
+
 
     if (this.dataType == 'emissions') {
       this.emissionsDisplaySub = this.facilityOverviewService.emissionsDisplay.subscribe(val => {

@@ -20,11 +20,13 @@
                     <div class="row">
                         <div class="col-6">
                             <app-meter-usage-table [dataType]="'water'" [facilityId]="facilityId"
-                                [metersSummary]="metersSummary"></app-meter-usage-table>
+                                [metersSummary]="metersSummary"
+                                [waterUnit]="waterUnit"></app-meter-usage-table>
                         </div>
                         <div class="col-6">
                             <app-meter-usage-donut [dataType]="'water'"
-                                [facilityId]="facilityId"></app-meter-usage-donut>
+                                [facilityId]="facilityId"
+                                [metersSummary]="metersSummary"></app-meter-usage-donut>
                         </div>
                     </div>
                 </div>

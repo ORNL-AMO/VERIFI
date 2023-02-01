@@ -4,9 +4,34 @@
             [calanderizedMeters]="calanderizedMeters"></app-meters-overview-stacked-line-chart>
     </div>
     <div class="col-6" *ngIf="sectionOptions.includeMeterUsageTable">
-        <app-meter-usage-table [dataType]="dataType" [facilityId]="facilityId" [metersSummary]="metersSummary"></app-meter-usage-table>
+        <app-meter-usage-table [dataType]="dataType" [facilityId]="facilityId" [metersSummary]="metersSummary"
+            [waterUnit]="waterUnit" [energyUnit]="energyUnit"></app-meter-usage-table>
     </div>
-    <!-- <div class="col-6" *ngIf="sectionOptions.includeFacilityDonut">
-        <app-facility-usage-donut [dataType]="dataType"></app-facility-usage-donut>
-    </div> -->
+    <div class="col-6" *ngIf="sectionOptions.includeMeterUsageTable">
+        <app-meter-usage-donut [dataType]="dataType" [facilityId]="facilityId"
+            [metersSummary]="metersSummary"></app-meter-usage-donut>
+    </div>
 </div>
+<div class="row">
+    <div class="col-12">
+        <hr>
+    </div>
+</div>
+<div class="row" *ngIf="sectionOptions.includeUtilityTableForFacility">
+    <div class="col-12">
+        <app-utility-consumption-table [dataType]="dataType" [utilityUsageSummaryData]="utilityUsageSummaryData"
+            [waterUnit]="waterUnit" [energyUnit]="energyUnit"></app-utility-consumption-table>
+    </div>
+</div>
+<!-- <div class="row" *ngIf="sectionOptions.includeStackedBarChart">
+    <div class="col-12">
+        <app-facilities-usage-stacked-bar-chart [dataType]="dataType" [calanderizedMeters]="calanderizedMeters"
+            [waterUnit]="waterUnit" [energyUnit]="energyUnit"></app-facilities-usage-stacked-bar-chart>
+    </div>
+</div>
+<div class="row" *ngIf="sectionOptions.includeMonthlyLineChart">
+    <div class="col-12">
+        <app-monthly-utility-usage-line-chart [dataType]="dataType"
+            [yearMonthData]="yearMonthData"></app-monthly-utility-usage-line-chart>
+    </div>
+</div> -->

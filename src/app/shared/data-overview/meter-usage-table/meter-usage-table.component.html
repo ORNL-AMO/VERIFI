@@ -6,10 +6,10 @@
                 <th>Utility</th>
                 <th>Group</th>
                 <th *ngIf="dataType =='energyUse'">Utility Usage <br>(<span
-                        [innerHTML]="facilityEnergyUnit | settingsLabel"></span>)
+                        [innerHTML]="energyUnit | settingsLabel"></span>)
                 </th>
                 <th *ngIf="dataType =='water'">Consumption <br>(<span
-                        [innerHTML]="facilityVolumeLiquidUnit | settingsLabel"></span>)
+                        [innerHTML]="waterUnit | settingsLabel"></span>)
                 </th>
                 <th *ngIf="dataType != 'emissions'">Utility Cost</th>
                 <th *ngIf="dataType == 'emissions' && emissionsDisplay == 'market'">

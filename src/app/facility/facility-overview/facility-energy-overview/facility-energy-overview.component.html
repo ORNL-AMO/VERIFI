@@ -13,18 +13,18 @@
                     <div class="row">
                         <div class="col-12">
                             <app-meters-overview-stacked-line-chart [dataType]="'energyUse'" [facilityId]="facilityId"
-                            [calanderizedMeters]="calanderizedMeters"></app-meters-overview-stacked-line-chart>
+                                [calanderizedMeters]="calanderizedMeters"></app-meters-overview-stacked-line-chart>
                             <hr>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-6">
-                            <app-meter-usage-table [dataType]="'energyUse'"
-                                [facilityId]="facilityId" [metersSummary]="metersSummary"></app-meter-usage-table>
+                            <app-meter-usage-table [dataType]="'energyUse'" [facilityId]="facilityId"
+                                [metersSummary]="metersSummary" [energyUnit]="energyUnit"></app-meter-usage-table>
                         </div>
                         <div class="col-6">
-                            <app-meter-usage-donut [dataType]="'energyUse'"
-                                [facilityId]="facilityId"></app-meter-usage-donut>
+                            <app-meter-usage-donut [dataType]="'energyUse'" [facilityId]="facilityId"
+                                [metersSummary]="metersSummary"></app-meter-usage-donut>
                         </div>
                     </div>
                 </div>
