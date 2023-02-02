@@ -8,7 +8,7 @@
 }
 
 .report.print{
-    width: 1200px;
+    width: 750px;
 }
 
 hr.page-spacer{
@@ -50,4 +50,19 @@ hr.page-spacer{
 .report-page{
     background-color: white;
     border: solid 1px lightgray;
+}
+
+
+.print-button-div{
+    position: fixed;
+    bottom: 15px;
+    right: 15px;
+    background-color: white;
+    border-radius: 25px;
+    padding: 9.5px;
+    opacity: .75
+}
+
+.print-button-div:hover{
+    opacity: 1;
 }
