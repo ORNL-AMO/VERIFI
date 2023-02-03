@@ -21,6 +21,7 @@ export class AccountAnalysisFooterComponent implements OnInit {
   helpPanelOpenSub: Subscription;
   routerSub: Subscription;
   inDashboard: boolean;
+  showContinue: boolean;
   constructor(private sharedDataService: SharedDataService,
     private helpPanelService: HelpPanelService,
     private router: Router,
@@ -31,9 +32,11 @@ export class AccountAnalysisFooterComponent implements OnInit {
     this.routerSub = this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
         this.setInDashboard(event.url);
+        this.setShowContinue(event.url);
       }
     });
     this.setInDashboard(this.router.url);
+    this.setShowContinue(this.router.url);
     this.sidebarOpenSub = this.sharedDataService.sidebarOpen.subscribe(val => {
       this.sidebarOpen = val;
     });
@@ -91,6 +94,14 @@ export class AccountAnalysisFooterComponent implements OnInit {
       }
     } else if (this.router.url.includes('results')) {
       this.router.navigateByUrl('/account/analysis/results/monthly-analysis');
+    }
+  }
+
+  setShowContinue(url: string) {
+    if (url.includes('/results/monthly-analysis')) {
+      this.showContinue = false;
+    } else {
+      this.showContinue = true;
     }
   }
 
