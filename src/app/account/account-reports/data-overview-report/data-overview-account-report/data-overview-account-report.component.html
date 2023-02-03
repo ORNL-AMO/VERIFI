@@ -6,8 +6,8 @@
 <ng-container *ngIf="overviewReport.includeEnergySection">
     <hr>
     <!--account energy consumption-->
-    <div class="row justify-content-center">
-        <div class="col-11 report-page">
+    <div class="row justify-content-center print-break-before">
+        <div class="report-page" [ngClass]="{'col-11': !print, 'col-12': print}">
             <h4>Account Energy Consumption</h4>
             <app-account-section-report [dataType]="'energyUse'"
                 [accountFacilitiesSummary]="accountData.accountFacilitiesEnergySummary"
@@ -30,10 +30,10 @@
 </div>
 </div> -->
 <!--account costs-->
-<ng-container *ngIf="overviewReport.includeCostsSection">
+<ng-container class="print-break-before" *ngIf="overviewReport.includeCostsSection">
     <hr>
     <div class="row justify-content-center">
-        <div class="col-11 report-page">
+        <div class="report-page" [ngClass]="{'col-11': !print, 'col-12': print}">
             <h4>Account Costs</h4>
             <app-account-section-report [dataType]="'cost'"
                 [accountFacilitiesSummary]="accountData.accountFacilitiesCostsSummary"
@@ -43,11 +43,11 @@
         </div>
     </div>
 </ng-container>
-<ng-container *ngIf="overviewReport.includeEmissionsSection">
+<ng-container class="print-break-before" *ngIf="overviewReport.includeEmissionsSection">
     <hr>
     <!--account emissions-->
     <div class="row justify-content-center">
-        <div class="col-11 report-page">
+        <div class="report-page" [ngClass]="{'col-11': !print, 'col-12': print}">
             <h4>Account Emissions</h4>
             <app-account-section-report [dataType]="'emissions'"
                 [accountFacilitiesSummary]="accountData.accountFacilitiesEnergySummary"

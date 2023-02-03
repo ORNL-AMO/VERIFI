@@ -1,5 +1,7 @@
 import { Component, Input } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { DataOverviewReportSetup } from 'src/app/models/overview-report';
+import { AccountReportsService } from '../../account-reports.service';
 import { DataOverviewAccount } from '../data-overview-report.component';
 
 @Component({
@@ -14,10 +16,18 @@ export class DataOverviewAccountReportComponent {
   accountData: DataOverviewAccount;
 
 
-  constructor() {
+  print: boolean = false;
+  printSub: Subscription;
+  constructor(private accountReportsService: AccountReportsService) {
   }
 
   ngOnInit() {
+    this.printSub = this.accountReportsService.print.subscribe(print => {
+      this.print = print;
+    });
+  }
 
+  ngOnDestroy(){
+    this.printSub.unsubscribe();
   }
 }
