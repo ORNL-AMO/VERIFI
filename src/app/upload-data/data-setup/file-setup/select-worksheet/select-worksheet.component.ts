@@ -68,7 +68,6 @@ export class SelectWorksheetComponent implements OnInit {
         return obj;
       }, {})
     );
-    console.log(this.fileReference);
     this.fileReference.columnGroups = [];
   }
 

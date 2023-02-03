@@ -22,11 +22,27 @@
     </ul>
     <ul class="nav nav-tabs">
         <li class="nav-item home-link">
-            <a class="nav-link" routerLink="/upload" [routerLinkActive]="['active']">
+            <a class="nav-link" (click)="openStartOverModal()">
                 Start Over
             </a>
         </li>
 
     </ul>
 
+</div>
+
+
+
+<div [ngClass]="{'windowOverlay': showStartOverModal}"></div>
+<div class="popup" [class.open]="showStartOverModal">
+    <div class="popup-header">Are you sure?
+        <button class="item-right" (click)="cancelStartOver()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>WARNING: Are you sure you want to start the upload process over? Progress will be lost.</p>
+    </div>
+    <div class="saveCancel popup-footer text-end pb-2">
+        <button class="btn btn-secondary" (click)="cancelStartOver()">Cancel</button>
+        <button class="btn btn-outline" (click)="confirmStartOver()">Start Over</button>
+    </div>
 </div>
