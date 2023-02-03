@@ -59,12 +59,16 @@ export class SelectWorksheetComponent implements OnInit {
 
   setSelectedWorksheetName() {
     this.fileReference.selectedWorksheetData = XLSX.utils.sheet_to_json(this.fileReference.workbook.Sheets[this.fileReference.selectedWorksheetName], { header: 1 });
+    if(this.fileReference.selectedWorksheetData.length != 0){
+      this.fileReference.selectedWorksheetData[0] = this.fileReference.selectedWorksheetData[0].map(item => { return item.trim() });      
+    }
     this.fileReference.headerMap = XLSX.utils.sheet_to_json(this.fileReference.workbook.Sheets[this.fileReference.selectedWorksheetName]).map(row =>
       Object.keys(row).reduce((obj, key) => {
         obj[key.trim()] = row[key];
         return obj;
       }, {})
     );
+    console.log(this.fileReference);
     this.fileReference.columnGroups = [];
   }
 

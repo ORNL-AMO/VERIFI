@@ -11,9 +11,9 @@
     <div class="col-6">
         <app-label-with-tooltip [field]="'selectWorksheet'" [label]="'Select Worksheet'" [isBold]="true"
             [labelId]="'worksheetName'"></app-label-with-tooltip>
-        <select class="form-control" name="worksheetName" [(ngModel)]="fileReference.selectedWorksheetName"
+        <select class="form-select" name="worksheetName" [(ngModel)]="fileReference.selectedWorksheetName"
             (change)="setSelectedWorksheetName()" id="worksheetName">
-            <option class="form-control" *ngFor="let name of fileReference.workbook?.SheetNames" [ngValue]="name">
+            <option *ngFor="let name of fileReference.workbook?.SheetNames" [ngValue]="name">
                 {{name}}
             </option>
         </select>
@@ -21,12 +21,12 @@
     <div class="col-6">
         <app-label-with-tooltip [field]="'selectImportFacility'" [label]="'Select Import Facility'" [isBold]="true"
             [labelId]="'selectedFacilityId'"></app-label-with-tooltip>
-        <select class="form-control" name="selectedFacilityId" [(ngModel)]="fileReference.selectedFacilityId"
+        <select class="form-select" name="selectedFacilityId" [(ngModel)]="fileReference.selectedFacilityId"
             (change)="setImportFacility()">
-            <option class="form-control" [ngValue]="undefined">
+            <option [ngValue]="undefined">
                 Multiple Facilities
             </option>
-            <option class="form-control" *ngFor="let facility of facilityOptions" [ngValue]="facility.guid">
+            <option *ngFor="let facility of facilityOptions" [ngValue]="facility.guid">
                 {{facility.name}}
             </option>
         </select>
