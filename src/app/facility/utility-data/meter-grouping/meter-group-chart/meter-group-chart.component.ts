@@ -165,6 +165,7 @@ export class MeterGroupChartComponent implements OnInit {
           automargin: true,
           overlaying: y2overlay,
           side: 'right',
+          tickmode: 'sync'
         },
         margin: { r: 0, t: 50 }
       };

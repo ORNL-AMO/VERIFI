@@ -95,7 +95,8 @@ export class TimeSeriesComponent implements OnInit {
         },
         automargin: true,
         side: 'right',
-        overlaying: 'y'
+        overlaying: 'y',
+        tickmode: 'sync'
       },
       margin: { r: 0, t: 50 }
     };
