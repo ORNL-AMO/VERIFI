@@ -16,8 +16,5 @@
     </div>
 </div>
 
-<div class="print-button-div hide-print">
-    <button class="btn action-btn" (click)="togglePrint()">
-        <span class="fa fa-print"></span>
-    </button>
-</div>
+<app-print-report-button
+    *ngIf="overviewReport && !calculatingAccounts && !calculatingFacilities"></app-print-report-button>

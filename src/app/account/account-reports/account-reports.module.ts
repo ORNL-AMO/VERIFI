@@ -24,6 +24,7 @@ import { FacilityTitlePageComponent } from './data-overview-report/data-overview
 import { FacilitySectionReportComponent } from './data-overview-report/data-overview-facility-report/facility-section-report/facility-section-report.component';
 import { DataOverviewAccountReportComponent } from './data-overview-report/data-overview-account-report/data-overview-account-report.component';
 import { DataOverviewFacilityReportComponent } from './data-overview-report/data-overview-facility-report/data-overview-facility-report.component';
+import { PrintReportButtonComponent } from './print-report-button/print-report-button.component';
 
 
 
@@ -46,7 +47,8 @@ import { DataOverviewFacilityReportComponent } from './data-overview-report/data
     FacilityTitlePageComponent,
     FacilitySectionReportComponent,
     DataOverviewAccountReportComponent,
-    DataOverviewFacilityReportComponent
+    DataOverviewFacilityReportComponent,
+    PrintReportButtonComponent
   ],
   imports: [
     CommonModule,

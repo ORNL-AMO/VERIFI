@@ -45,9 +45,6 @@ export class BetterPlantsReportComponent implements OnInit {
   ngOnInit(): void {
     this.printSub = this.accountReportsService.print.subscribe(print => {
       this.print = print;
-      if (this.print) {
-        this.printReport();
-      }
     });
     this.selectedReport = this.accountReportDbService.selectedReport.getValue();
     if (!this.selectedReport) {
@@ -69,16 +66,6 @@ export class BetterPlantsReportComponent implements OnInit {
     if (this.worker) {
       this.worker.terminate();
     }
-  }
-
-  printReport() {
-    setTimeout(() => {
-      window.dispatchEvent(new Event("resize"));
-      setTimeout(() => {
-        window.print();
-        this.accountReportsService.print.next(false)
-      }, 100)
-    }, 100)
   }
 
 

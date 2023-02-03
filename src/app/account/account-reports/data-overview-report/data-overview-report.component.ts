@@ -54,9 +54,6 @@ export class DataOverviewReportComponent {
   ngOnInit() {
     this.printSub = this.accountReportsService.print.subscribe(print => {
       this.print = print;
-      if (this.print) {
-        this.printReport();
-      }
     });
     this.account = this.accountDbService.selectedAccount.getValue();
     let selectedReport: IdbAccountReport = this.accountReportDbService.selectedReport.getValue();
@@ -90,21 +87,6 @@ export class DataOverviewReportComponent {
   ngOnDestroy() {
     this.printSub.unsubscribe();
   }
-
-  printReport() {
-    setTimeout(() => {
-      window.dispatchEvent(new Event("resize"));
-      setTimeout(() => {
-        window.print();
-        this.accountReportsService.print.next(false)
-      }, 1000)
-    }, 100)
-  }
-
-  togglePrint() {
-    this.accountReportsService.print.next(true);
-  }
-
 
   calculateFacilitiesSummary(facilityIndex: number, accountFacilities: Array<IdbFacility>, accountMeterGroups: Array<IdbUtilityMeterGroup>) {
     let facilityId: string = this.includedFacilities[facilityIndex];

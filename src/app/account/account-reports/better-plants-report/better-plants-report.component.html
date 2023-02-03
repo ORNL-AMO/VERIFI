@@ -1,3 +1,5 @@
+<!-- <div class="row justify-content-center me-0 ms-0" *ngIf="selectedReport && !calculating">
+    <div class="col-11"> -->
 <div class="report" [ngClass]="{'print': print}" *ngIf="selectedReport && !calculating">
     <img src="assets/images/better-plants-report-banner.jpg" class="w-100">
     <div class="row justify-content-center pt-3">
@@ -28,7 +30,8 @@
         <div class="col-10">
             <hr class="hide-print">
             <p class="bold">
-                Please describe any methods undertaken to normalize energy intensity data or adjust baseline data to
+                Please describe any methods undertaken to normalize energy intensity data or adjust baseline
+                data to
                 account for economic and other factors that affect energy use:
             </p>
             <p>
@@ -42,8 +45,10 @@
         <div class="col-10">
             <p class="bold">
                 Please describe the energy efficient technologies, strategies, and practices employed during the
-                previous year to decrease intensity. Please identify systems impacted and approximate savings from
-                projects. (Ex: Furnace insulation project-12,000 MMBtu/yr savings, compressor controls upgrade-6,000
+                previous year to decrease intensity. Please identify systems impacted and approximate savings
+                from
+                projects. (Ex: Furnace insulation project-12,000 MMBtu/yr savings, compressor controls
+                upgrade-6,000
                 MMBtu/yr, energy awareness campaign, etc):
             </p>
             <p>
@@ -76,3 +81,6 @@
         <app-calculating-spinner [message]="'Generating Better Plants Report...'"></app-calculating-spinner>
     </div>
 </div>
+
+
+<app-print-report-button *ngIf="!calculating"></app-print-report-button>
