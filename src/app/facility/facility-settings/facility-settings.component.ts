@@ -18,8 +18,6 @@ export class FacilitySettingsComponent implements OnInit {
   showDeleteFacility: boolean = false;
   selectedFacilitySub: Subscription;
   selectedFacility: IdbFacility;
-  unitsDontMatchAccount: boolean;
-  canDelete: boolean;
   constructor(
     private router: Router,
     private facilityDbService: FacilitydbService,
