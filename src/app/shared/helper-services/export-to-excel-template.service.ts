@@ -203,6 +203,7 @@ export class ExportToExcelTemplateService {
     let index: number = 2;
     electricityMeters.forEach(meter => {
       let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataForFacility(meter, false, true);
+      meterData = _.orderBy(meterData, 'readDate');
       meterData.forEach(dataReading => {
         worksheet.getCell('A' + index).value = meter.meterNumber;
         //format date!!!!!!
@@ -260,6 +261,7 @@ export class ExportToExcelTemplateService {
     let index: number = 2;
     electricityMeters.forEach(meter => {
       let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataForFacility(meter, false, true);
+      meterData = _.orderBy(meterData, 'readDate');
       meterData.forEach(dataReading => {
         worksheet.getCell('A' + index).value = meter.meterNumber;
         worksheet.getCell('B' + index).value = this.getFormatedDate(dataReading.readDate);
@@ -283,9 +285,9 @@ export class ExportToExcelTemplateService {
     let worksheet: ExcelJS.Worksheet = workbook.addWorksheet('Predictors');
     let alpha = Array.from(Array(26)).map((e, i) => i + 65);
     let alphabet: Array<string> = alpha.map(x => { return String.fromCharCode(x) });
-    let additionalAlphabet: Array<string> = alpha.map(x => { return 'A'+String.fromCharCode(x) });
+    let additionalAlphabet: Array<string> = alpha.map(x => { return 'A' + String.fromCharCode(x) });
     alphabet = alphabet.concat(additionalAlphabet);
-    additionalAlphabet = alpha.map(x => { return 'B'+String.fromCharCode(x) });
+    additionalAlphabet = alpha.map(x => { return 'B' + String.fromCharCode(x) });
     alphabet = alphabet.concat(additionalAlphabet);
     worksheet.getCell('A1').value = 'Facility Name';
     worksheet.getCell('B1').value = 'Date';
@@ -346,7 +348,7 @@ export class ExportToExcelTemplateService {
 
   getFormatedDate(dateReading: Date): string {
     let readingDate: Date = new Date(dateReading)
-    return readingDate.getFullYear() + '-' + readingDate.getMonth() + '-' + readingDate.getDate();
+    return readingDate.getFullYear() + '-' + (readingDate.getMonth() + 1) + '-' + readingDate.getDate();
   }
 
 }
