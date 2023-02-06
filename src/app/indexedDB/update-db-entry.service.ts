@@ -17,7 +17,7 @@ export class UpdateDbEntryService {
     }
 
     if (account.volumeGasUnit == 'MCF') {
-      account.volumeGasUnit = 'MMCF';
+      account.volumeGasUnit = 'kSCF';
       isChanged = true;
     }
 
@@ -32,7 +32,7 @@ export class UpdateDbEntryService {
     }
 
     if (facility.volumeGasUnit == 'MCF') {
-      facility.volumeGasUnit = 'MMCF';
+      facility.volumeGasUnit = 'kSCF';
       isChanged = true;
     }
 
