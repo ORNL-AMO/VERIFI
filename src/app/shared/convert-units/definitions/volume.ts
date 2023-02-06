@@ -68,7 +68,15 @@ export const volume = {
             name: {
                 singular: 'Million cubic meter'
                 , plural: 'Million cubic meters',
-                 display:  '(MCM)'
+                display: '(MCM)'
+            }
+            , to_anchor: 1000000000
+        }
+        , kCM: {
+            name: {
+                singular: 'Thousand cubic meter'
+                , plural: 'Thousand cubic meters',
+                display: '(kCM)'
             }
             , to_anchor: 1000000
         }
@@ -215,10 +223,10 @@ export const volume = {
         , CCF: {
             name: {
                 singular: 'Hundred Cubic feet'
-                , plural: 'Hundreds Cubic feet' ,
-                 display:  'CCF'
+                , plural: 'Hundreds Cubic feet',
+                display: 'CCF'
             }
-            , to_anchor: 957.506/100
+            , to_anchor: 957.506 * 100
         }
         , kSCF: {
             name: {
@@ -226,15 +234,15 @@ export const volume = {
                 plural: 'Thousand Standard Cubic feet',
                 display: '(kSCF;)'
             }
-            , to_anchor: 957.506 / 1000
+            , to_anchor: 957.506 * 1000
         }
-        , MCF: {
+        , MMCF: {
             name: {
-                singular: 'Thousand Cubic foot',
-                plural: 'Thousand Cubic feet',
-                display: '(MCF)'
+                singular: 'Million Cubic foot',
+                plural: 'Million Cubic feet',
+                display: '(MMCF)'
             }
-            , to_anchor: 957.506 / 1000
+            , to_anchor: 957.506 * 1000000
         }
         , yd3: {
             name: {

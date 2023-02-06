@@ -15,6 +15,12 @@ export class UpdateDbEntryService {
       account.electricityUnit = 'kWh';
       isChanged = true;
     }
+
+    if (account.volumeGasUnit == 'MCF') {
+      account.volumeGasUnit = 'MMCF';
+      isChanged = true;
+    }
+
     return { account: account, isChanged: isChanged };
   }
 
@@ -24,15 +30,21 @@ export class UpdateDbEntryService {
       facility.electricityUnit = 'kWh';
       isChanged = true;
     }
+
+    if (facility.volumeGasUnit == 'MCF') {
+      facility.volumeGasUnit = 'MMCF';
+      isChanged = true;
+    }
+
     return { facility: facility, isChanged: isChanged };
   }
 
   updateAnalysis(analysisItem: IdbAnalysisItem): { analysisItem: IdbAnalysisItem, isChanged: boolean } {
     let isChanged: boolean = false;
-    if(!analysisItem.setupErrors){
+    if (!analysisItem.setupErrors) {
       analysisItem.setupErrors = this.analysisValidationService.getAnalysisItemErrors(analysisItem);
       isChanged = true;
-    }else{
+    } else {
       let setupErrors: AnalysisSetupErrors = this.analysisValidationService.getAnalysisItemErrors(analysisItem);
       Object.keys(setupErrors).forEach(key => {
         if (setupErrors[key] != analysisItem.setupErrors[key]) {
@@ -58,4 +70,6 @@ export class UpdateDbEntryService {
     });
     return { analysisItem: analysisItem, isChanged: isChanged };
   }
+
+
 }
