@@ -90,6 +90,7 @@ export class CalanderizationService {
   calanderizeMeterDataBackwards(meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData>, energyIsSource: boolean, calanderizedEnergyUnit: string, monthDisplayShort: boolean, inAccount: boolean): Array<MonthlyData> {
     let calanderizeData: Array<MonthlyData> = new Array();
     let orderedMeterData: Array<IdbUtilityMeterData> = _.orderBy(meterData, (data) => { return new Date(data.readDate) });
+
     if (orderedMeterData.length > 3) {
       let startDate: Date = new Date(orderedMeterData[0].readDate);
       startDate.setUTCMonth(startDate.getUTCMonth() + 1);
@@ -332,16 +333,16 @@ export class CalanderizationService {
         currentMonthsReadings.forEach(reading => {
           let totalMonthEnergyUse: number = 0;
           let totalMonthEnergyConsumption: number = 0;
-          let totalMonthCost: number = reading.totalCost;
+          let totalMonthCost: number = Number(reading.totalCost);
           //energy use
           let isEnergyMeter: boolean = this.energyUnitsHelperService.isEnergyMeter(meter.source);
           if (isEnergyMeter) {
-            totalMonthEnergyUse = reading.totalEnergyUse;
+            totalMonthEnergyUse = Number(reading.totalEnergyUse);
           }
           //energy consumption (data input not as energy)
           let isEnergyUnit: boolean = this.energyUnitsHelperService.isEnergyUnit(meter.startingUnit);
           if (!isEnergyUnit) {
-            totalMonthEnergyConsumption = reading.totalVolume;
+            totalMonthEnergyConsumption = Number(reading.totalVolume);
           } else {
             totalMonthEnergyConsumption = totalMonthEnergyUse;
           }
@@ -813,7 +814,7 @@ export class CalanderizationService {
 
   getEmissions(meter: IdbUtilityMeter, energyUse: number, energyUnit: string, year: number, energyIsSource: boolean): EmissionsResults {
     if (meter.source == 'Electricity' || meter.source == 'Natural Gas' || meter.source == 'Other Fuels') {
-      if(energyIsSource){
+      if (energyIsSource) {
         energyUse = energyUse / meter.siteToSource;
       }
       let convertedEnergyUse: number = this.convertUnitsService.value(energyUse).from(energyUnit).to(meter.energyUnit);
