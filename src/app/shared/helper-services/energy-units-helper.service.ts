@@ -224,9 +224,9 @@ export class EnergyUnitsHelperService {
       });
 
     }
-    if(unit){
+    if (unit) {
       return unit.value;
-    }else{
+    } else {
       return;
     }
   }
@@ -275,6 +275,8 @@ export class EnergyUnitsHelperService {
         if (meterEnergyUnit != selectedFacility.energyUnit) {
           hasDifferentEnergyUnits = true;
         }
+      } else if (meterEnergyUnit != selectedFacility.electricityUnit) {
+        hasDifferentEnergyUnits = true;
       }
       if (!isEnergyUnit) {
         if (source == 'Natural Gas' && startingUnit != selectedFacility.volumeGasUnit) {
