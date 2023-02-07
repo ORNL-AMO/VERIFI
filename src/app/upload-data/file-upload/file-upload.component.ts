@@ -58,6 +58,7 @@ export class FileUploadComponent implements OnInit {
         let fileReference: FileReference = this.uploadDataService.getFileReference(file, workBook);
         this.fileReferences.push(fileReference);
       }catch (err){
+        console.log(err);
         this.fileUploadError = true;
       }
     };
