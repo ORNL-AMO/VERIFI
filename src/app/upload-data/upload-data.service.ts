@@ -779,11 +779,13 @@ export class UploadDataService {
   }
 
   getState(stateStr: string): string {
-    let state: State = States.find(state => {
-      return stateStr.toLocaleLowerCase() == state.abbreviation.toLocaleLowerCase() || stateStr.toLocaleLowerCase() == state.name.toLocaleLowerCase();
-    });
-    if (state) {
-      return state.name;
+    if (stateStr) {
+      let state: State = States.find(state => {
+        return stateStr.toLocaleLowerCase() == state.abbreviation.toLocaleLowerCase() || stateStr.toLocaleLowerCase() == state.name.toLocaleLowerCase();
+      });
+      if (state) {
+        return state.name;
+      }
     }
     return;
   }
