@@ -190,7 +190,6 @@ export class EditMeterFormComponent implements OnInit {
     if (this.displayHeatCapacity) {
       let selectedEnergyOption: FuelTypeOption = this.fuelTypeOptions.find(option => { return option.value == this.meterForm.controls.fuel.value });
       let heatCapacity: number = this.energyUseCalculationsService.getHeatingCapacity(this.meterForm.controls.source.value, this.meterForm.controls.startingUnit.value, this.meterForm.controls.energyUnit.value, selectedEnergyOption)
-      console.log(heatCapacity);
       this.meterForm.controls.heatCapacity.patchValue(heatCapacity);
     }
   }
