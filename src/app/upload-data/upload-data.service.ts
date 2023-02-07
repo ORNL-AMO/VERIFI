@@ -789,14 +789,16 @@ export class UploadDataService {
   }
 
   getZip(zip: string): string {
-    if (zip.length == 5) {
-      return zip;
-    } else if (zip) {
-      let neededZeros: number = 5 - zip.length;
-      for (let i = 0; i < neededZeros; i++) {
-        zip = '0' + zip;
+    if (zip) {
+      if (zip.length == 5) {
+        return zip;
+      } else {
+        let neededZeros: number = 5 - zip.length;
+        for (let i = 0; i < neededZeros; i++) {
+          zip = '0' + zip;
+        }
+        return zip;
       }
-      return zip;
     }
     return;
   }
