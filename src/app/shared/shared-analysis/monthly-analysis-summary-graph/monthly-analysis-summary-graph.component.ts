@@ -45,7 +45,7 @@ export class MonthlyAnalysisSummaryGraphComponent implements OnInit {
       var trace2 = {
         type: "scatter",
         mode: "lines+markers",
-        name: 'Predicted Energy Use',
+        name: 'Calculated Energy Use',
         x: this.monthlyAnalysisSummaryData.map(results => { return results.date }),
         y: this.monthlyAnalysisSummaryData.map(results => { return results.adjusted }),
         line: { color: '#7D3C98', width: 4 },
@@ -57,16 +57,9 @@ export class MonthlyAnalysisSummaryGraphComponent implements OnInit {
       var data = [trace2, trace1];
 
       var layout = {
-        // height: 700,
         legend: {
           orientation: "h"
         },
-        // title: {
-        //   text: 'Time Series',
-        //   font: {
-        //     size: 18
-        //   },
-        // },
         xaxis: {
           hoverformat: "%b, %y"
         },
@@ -80,18 +73,6 @@ export class MonthlyAnalysisSummaryGraphComponent implements OnInit {
           },
           automargin: true,
         },
-        // yaxis2: {
-        //   title: {
-        //     text: 'Predictor Usage',
-        //     font: {
-        //       size: 16
-        //     },
-        //     standoff: 18
-        //   },
-        //   automargin: true,
-        //   side: 'right',
-        //   overlaying: 'y'
-        // },
         margin: { r: 0, t: 50 }
       };
       var config = { responsive: true };
