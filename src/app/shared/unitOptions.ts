@@ -107,6 +107,16 @@ export const VolumeGasOptions: Array<UnitOption> = [
         value: 'MCM',
         unitsOfMeasure: 'Metric'
     },
+    {
+        display: 'Thousand Standard Cubic Feet (kSCF)',
+        value: 'kSCF',
+        unitsOfMeasure: 'Imperial'
+    },
+    {
+        display: 'Thousand Cubic Meters (kCM)',
+        value: 'kCM',
+        unitsOfMeasure: 'Metric'
+    },
 ]
 
 
