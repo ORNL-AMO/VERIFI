@@ -18,11 +18,11 @@
             <th *ngIf="generalUtilityDataFilters.totalMarketEmissions && showEmissions"
                 (click)="setOrderDataField('totalMarketEmissions')"
                 [ngClass]="{'active': orderDataField == 'totalMarketEmissions'}">Total Market <br>Emissions (kg
-                CO<sub>2</sub>)</th>
+                CO<sub>2</sub>e)</th>
             <th *ngIf="generalUtilityDataFilters.totalLocationEmissions && showEmissions"
                 (click)="setOrderDataField('totalLocationEmissions')"
                 [ngClass]="{'active': orderDataField == 'totalLocationEmissions'}">Total Location <br>Emissions (kg
-                CO<sub>2</sub>)</th>
+                CO<sub>2</sub>e)</th>
             <th *ngIf="generalUtilityDataFilters.commodityCharge" (click)="setOrderDataField('commodityCharge')"
                 [ngClass]="{'active': orderDataField == 'commodityCharge'}">Commodity Charge</th>
             <th *ngIf="generalUtilityDataFilters.deliveryCharge" (click)="setOrderDataField('deliveryCharge')"

@@ -268,7 +268,8 @@ export class SettingsFormsService {
         account.energyUnit != facility.energyUnit ||
         account.volumeGasUnit != facility.volumeGasUnit ||
         account.volumeLiquidUnit != facility.volumeLiquidUnit ||
-        account.energyIsSource != facility.energyIsSource
+        account.energyIsSource != facility.energyIsSource ||
+        account.electricityUnit != facility.electricityUnit
       )
     } else {
       return false;
@@ -282,6 +283,7 @@ export class SettingsFormsService {
     facilityForm.controls.massUnit.patchValue(account.massUnit);
     facilityForm.controls.unitsOfMeasure.patchValue(account.unitsOfMeasure);
     facilityForm.controls.energyIsSource.patchValue(account.energyIsSource);
+    facilityForm.controls.electricityUnit.patchValue(account.electricityUnit);
     return facilityForm;
   }
 

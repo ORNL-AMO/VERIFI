@@ -121,8 +121,7 @@ export class PredictorDataComponent implements OnInit {
   }
 
   uploadData() {
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.router.navigateByUrl('facility/'+selectedFacility.id+'/utility/upload-data');
+    this.router.navigateByUrl('/upload');
   }
 
   checkAll() {
