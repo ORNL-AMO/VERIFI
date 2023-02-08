@@ -108,10 +108,11 @@ export class ExportToExcelTemplateService {
     worksheet.getCell('L1').value = 'Collection Unit';
     worksheet.getCell('M1').value = 'Heat Capacity';
     worksheet.getCell('N1').value = 'Site To Source';
-    worksheet.getCell('O1').value = 'Scope';
-    worksheet.getCell('P1').value = 'Agreement Type';
-    worksheet.getCell('Q1').value = 'Include In Energy';
-    worksheet.getCell('R1').value = 'Retain RECS';
+    worksheet.getCell('O1').value = 'Calendarize Data?';
+    worksheet.getCell('P1').value = 'Scope';
+    worksheet.getCell('Q1').value = 'Agreement Type';
+    worksheet.getCell('R1').value = 'Include In Energy';
+    worksheet.getCell('S1').value = 'Retain RECS';
 
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     if (facilityId) {
@@ -135,10 +136,11 @@ export class ExportToExcelTemplateService {
       worksheet.getCell('L' + index).value = meter.startingUnit;
       worksheet.getCell('M' + index).value = meter.heatCapacity;
       worksheet.getCell('N' + index).value = meter.siteToSource;
-      worksheet.getCell('O' + index).value = this.getScope(meter.scope);
-      worksheet.getCell('P' + index).value = this.getAgreementType(meter.agreementType);
-      worksheet.getCell('Q' + index).value = this.getYesNo(meter.includeInEnergy);
-      worksheet.getCell('R' + index).value = this.getYesNo(meter.retainRECs);
+      worksheet.getCell('O' + index).value = this.getCalendarization(meter.meterReadingDataApplication);
+      worksheet.getCell('P' + index).value = this.getScope(meter.scope);
+      worksheet.getCell('Q' + index).value = this.getAgreementType(meter.agreementType);
+      worksheet.getCell('R' + index).value = this.getYesNo(meter.includeInEnergy);
+      worksheet.getCell('S' + index).value = this.getYesNo(meter.retainRECs);
       index++;
     })
     return worksheet;
@@ -146,6 +148,13 @@ export class ExportToExcelTemplateService {
 
   getYesNo(bool: boolean): 'Yes' | 'No' {
     if (bool) {
+      return 'Yes';
+    }
+    return 'No';
+  }
+
+  getCalendarization(val: "backward" | "fullMonth"): 'Yes' | 'No' {
+    if (val == 'backward') {
       return 'Yes';
     }
     return 'No';
