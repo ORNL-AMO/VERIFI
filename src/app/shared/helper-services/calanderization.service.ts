@@ -814,10 +814,10 @@ export class CalanderizationService {
 
   getEmissions(meter: IdbUtilityMeter, energyUse: number, energyUnit: string, year: number, energyIsSource: boolean): EmissionsResults {
     if (meter.source == 'Electricity' || meter.source == 'Natural Gas' || meter.source == 'Other Fuels') {
-      if (energyIsSource) {
+      if (energyIsSource && meter.siteToSource != 0) {
         energyUse = energyUse / meter.siteToSource;
       }
-      let convertedEnergyUse: number = this.convertUnitsService.value(energyUse).from(energyUnit).to(meter.energyUnit);
+      let convertedEnergyUse: number = this.convertUnitsService.value(energyUse).from(energyUnit).to('kWh');
       let locationEmissions: number;
       let marketEmissions: number;
 
@@ -841,9 +841,9 @@ export class CalanderizationService {
         locationEmissions = convertedEnergyUse * marketEmissionsOutputRate;
         marketEmissions = convertedEnergyUse * marketEmissionsOutputRate;
       }
-      let RECs: number = energyUse * meter.recsMultiplier;
+      let RECs: number = convertedEnergyUse * meter.recsMultiplier;
       let excessRECs: number;
-      let emissionsEnergyUse: number = energyUse;
+      let emissionsEnergyUse: number = convertedEnergyUse;
       if (meter.includeInEnergy == false) {
         emissionsEnergyUse = 0;
       }
@@ -854,6 +854,8 @@ export class CalanderizationService {
         excessRECs = RECs;
       }
       let excessRECsEmissions: number = excessRECs * marketEmissionsOutputRate;
+      excessRECs = this.convertUnitsService.value(excessRECs).from('kWh').to('MWh');
+      RECs = this.convertUnitsService.value(RECs).from('kWh').to('MWh');
       return { RECs: RECs, locationEmissions: locationEmissions, marketEmissions: marketEmissions, excessRECs: excessRECs, excessRECsEmissions: excessRECsEmissions };
     } else {
       return { RECs: 0, locationEmissions: 0, marketEmissions: 0, excessRECs: 0, excessRECsEmissions: 0 };

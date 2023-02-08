@@ -71,6 +71,8 @@ export class ElectricityDataTableComponent implements OnInit {
     if (changes.itemsPerPage && !changes.itemsPerPage.firstChange) {
       this.allChecked = false;
       this.checkAll();
+    } else if (changes.selectedMeter && !changes.selectedMeter.firstChange) {
+      this.energyUnit = this.selectedMeter.startingUnit;
     }
     this.setEmissions();
   }
@@ -153,7 +155,7 @@ export class ElectricityDataTableComponent implements OnInit {
       dataItem.RECs = emissionsValues.RECs;
       dataItem.excessRECs = emissionsValues.excessRECs;
       dataItem.excessRECsEmissions = emissionsValues.excessRECsEmissions;
-      if(this.selectedMeter.includeInEnergy == false){
+      if (this.selectedMeter.includeInEnergy == false) {
         dataItem.totalEnergyUse = 0;
       }
     })
