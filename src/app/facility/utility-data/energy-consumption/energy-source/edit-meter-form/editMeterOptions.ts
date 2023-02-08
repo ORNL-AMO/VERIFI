@@ -396,7 +396,7 @@ export const AgreementTypes: Array<AgreementType> = [
         value: 1
     },
     {
-        typeLabel: 'Self-generated',
+        typeLabel: 'On-site Generation',
         value: 2
     },
     {
