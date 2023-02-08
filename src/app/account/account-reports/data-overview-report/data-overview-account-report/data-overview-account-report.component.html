@@ -18,6 +18,19 @@
     </div>
 </ng-container>
 <!--account water consumption-->
+<ng-container class="print-break-before" *ngIf="overviewReport.includeWaterSection">
+    <hr>
+    <div class="row justify-content-center">
+        <div class="report-page" [ngClass]="{'col-11': !print, 'col-12': print}">
+            <h4>Account Water Consumption</h4>
+            <app-account-section-report [dataType]="'water'"
+                [accountFacilitiesSummary]="accountData.accountFacilitiesWaterSummary"
+                [utilityUsageSummaryData]="accountData.waterUtilityUsageSummaryData"
+                [yearMonthData]="accountData.waterYearMonthData"
+                [calanderizedMeters]="accountData.calanderizedMeters"></app-account-section-report>
+        </div>
+    </div>
+</ng-container>
 <!-- <div class="row justify-content-center">
 <div class="col-12">
     <hr>

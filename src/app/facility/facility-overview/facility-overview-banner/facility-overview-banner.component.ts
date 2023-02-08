@@ -86,4 +86,8 @@ export class FacilityOverviewBannerComponent implements OnInit {
     let waterMeter: IdbUtilityMeter = accountMeters.find(meter => { return meter.source == 'Water' || meter.source == 'Waste Water' });
     this.showWater = waterMeter != undefined;
   }
+
+  createReport(){
+    this.sharedDataService.openCreateReportModal.next(true);
+  }
 }

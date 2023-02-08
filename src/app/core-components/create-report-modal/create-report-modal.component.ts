@@ -4,12 +4,13 @@ import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport } from 'src/app/models/idb';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbFacility } from 'src/app/models/idb';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountOverviewService } from 'src/app/account/account-overview/account-overview.service';
 import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 
 @Component({
   selector: 'app-create-report-modal',
@@ -27,7 +28,8 @@ export class CreateReportModalComponent {
     private accountOverviewService: AccountOverviewService,
     private toastNotificationService: ToastNotificationsService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private accountAnalysisDbService: AccountAnalysisDbService) {
+    private accountAnalysisDbService: AccountAnalysisDbService,
+    private facilityDbService: FacilitydbService) {
 
   }
 
@@ -35,6 +37,10 @@ export class CreateReportModalComponent {
     this.showModalSub = this.sharedDataService.openCreateReportModal.subscribe(val => {
       this.showModal = val;
     });
+  }
+
+  ngOnDestroy() {
+    this.showModalSub.unsubscribe();
   }
 
   cancelCreateReport() {
@@ -51,6 +57,43 @@ export class CreateReportModalComponent {
       let yearOptions: Array<number> = this.utilityMeterDataDbService.getYearOptions(true);
       newReport.baselineYear = yearOptions[0];
       newReport.reportYear = yearOptions[yearOptions.length - 1];
+      if (this.router.url.includes('energy')) {
+        newReport.name = 'Energy Report';
+        newReport.dataOverviewReportSetup.includeCostsSection = false;
+        newReport.dataOverviewReportSetup.includeEmissionsSection = false;
+        newReport.dataOverviewReportSetup.includeWaterSection = false;
+      } else if (this.router.url.includes('costs')) {
+        newReport.name = 'Costs Report';
+        newReport.dataOverviewReportSetup.includeEnergySection = false;
+        newReport.dataOverviewReportSetup.includeEmissionsSection = false;
+        newReport.dataOverviewReportSetup.includeWaterSection = false;
+      } else if (this.router.url.includes('emissions')) {
+        newReport.name = 'Emissions Report';
+        newReport.dataOverviewReportSetup.includeEnergySection = false;
+        newReport.dataOverviewReportSetup.includeCostsSection = false;
+        newReport.dataOverviewReportSetup.includeWaterSection = false;
+        newReport.dataOverviewReportSetup.emissionsDisplay = this.accountOverviewService.emissionsDisplay.getValue();
+      } else if (this.router.url.includes('water')) {
+        newReport.name = 'Water Report';
+        newReport.dataOverviewReportSetup.includeEnergySection = false;
+        newReport.dataOverviewReportSetup.includeCostsSection = false;
+        newReport.dataOverviewReportSetup.includeEmissionsSection = false;
+      }
+    } else if (this.router.url.includes('facility') && this.router.url.includes('/overview')) {
+      let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+      navigateToStr = 'account/account-reports/data-overview-report';
+      newReport.reportType = 'dataOverview';
+      let yearOptions: Array<number> = this.utilityMeterDataDbService.getYearOptions(false);
+      newReport.baselineYear = yearOptions[0];
+      newReport.reportYear = yearOptions[yearOptions.length - 1];
+      newReport.dataOverviewReportSetup.includeAccountReport = false;
+      newReport.dataOverviewReportSetup.includedFacilities.forEach(facility => {
+        if (facility.facilityId == selectedFacility.guid) {
+          facility.included = true;
+        } else {
+          facility.included = false;
+        }
+      });
       if (this.router.url.includes('energy')) {
         newReport.name = 'Energy Report';
         newReport.dataOverviewReportSetup.includeCostsSection = false;

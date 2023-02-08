@@ -21,6 +21,20 @@
     </div>
 </ng-container>
 <!--account water consumption-->
+<ng-container *ngIf="overviewReport.includeWaterSection">
+    <hr>
+    <div class="row justify-content-center">
+        <div class="col-11 report-page">
+            <h4>{{dataOverviewFacility.facility.guid | facilityName}} Water</h4>
+            <app-facility-section-report [dataType]="'water'" [facility]="dataOverviewFacility.facility"
+                [monthlySourceData]="dataOverviewFacility.waterMonthlySourceData"
+                [calanderizedMeters]="dataOverviewFacility.calanderizedMeters"
+                [metersSummary]="dataOverviewFacility.waterMeterSummaryData"
+                [utilityUsageSummaryData]="dataOverviewFacility.waterUtilityUsageSummaryData"
+                [yearMonthData]="dataOverviewFacility.waterYearMonthData"></app-facility-section-report>
+        </div>
+    </div>
+</ng-container>
 <!-- <div class="row justify-content-center">
         <div class="col-12">
             <hr>
