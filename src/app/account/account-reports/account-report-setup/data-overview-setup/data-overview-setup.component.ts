@@ -4,7 +4,8 @@ import { Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { IdbAccount, IdbAccountReport } from 'src/app/models/idb';
+import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
+import { IdbAccount, IdbAccountReport, IdbUtilityMeter } from 'src/app/models/idb';
 import { DataOverviewReportSetup } from 'src/app/models/overview-report';
 import { AccountReportsService } from '../../account-reports.service';
 
@@ -20,10 +21,12 @@ export class DataOverviewSetupComponent {
   selectedReportSub: Subscription;
   isFormChange: boolean = false;
   reportSetup: DataOverviewReportSetup;
+  showWater: boolean;
   constructor(private accountReportDbService: AccountReportDbService,
     private accountReportsService: AccountReportsService,
     private dbChangesService: DbChangesService,
-    private accountDbService: AccountdbService) {
+    private accountDbService: AccountdbService,
+    private utilityMeterDbService: UtilityMeterdbService) {
   }
 
 
@@ -35,7 +38,8 @@ export class DataOverviewSetupComponent {
       } else {
         this.isFormChange = false;
       }
-    })
+    });
+    this.setShowWater();
   }
 
   ngOnDestroy() {
@@ -50,6 +54,16 @@ export class DataOverviewSetupComponent {
     await this.accountReportDbService.updateWithObservable(selectedReport).toPromise();
     await this.dbChangesService.setAccountReports(this.account);
     this.accountReportDbService.selectedReport.next(selectedReport);
+  }
+
+  setShowWater() {
+    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    let waterMeter: IdbUtilityMeter = accountMeters.find(meter => { return meter.source == 'Water' || meter.source == 'Waste Water' });
+    this.showWater = waterMeter != undefined;
+    if (!this.showWater && this.reportSetup.includeWaterSection) {
+      this.reportSetup.includeWaterSection = false;
+      this.save();
+    }
   }
 
 }

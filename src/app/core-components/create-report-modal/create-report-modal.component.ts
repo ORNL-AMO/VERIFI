@@ -4,13 +4,14 @@ import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbFacility } from 'src/app/models/idb';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountOverviewService } from 'src/app/account/account-overview/account-overview.service';
 import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 
 @Component({
   selector: 'app-create-report-modal',
@@ -21,6 +22,9 @@ export class CreateReportModalComponent {
 
   showModalSub: Subscription;
   showModal: boolean;
+  accountReport: IdbAccountReport;
+  isOverviewReport: boolean;
+  showWater: boolean;
   constructor(private sharedDataService: SharedDataService, private router: Router,
     private accountReportDbService: AccountReportDbService,
     private dbChangesService: DbChangesService,
@@ -29,12 +33,20 @@ export class CreateReportModalComponent {
     private toastNotificationService: ToastNotificationsService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private accountAnalysisDbService: AccountAnalysisDbService,
-    private facilityDbService: FacilitydbService) {
+    private facilityDbService: FacilitydbService,
+    private utilityMeterDbService: UtilityMeterdbService) {
 
   }
 
   ngOnInit() {
     this.showModalSub = this.sharedDataService.openCreateReportModal.subscribe(val => {
+      if (val == true) {
+        this.accountReport = this.getNewReport();
+        this.setIsOverviewReport();
+        if (this.isOverviewReport) {
+          this.setShowWater();
+        }
+      }
       this.showModal = val;
     });
   }
@@ -48,11 +60,27 @@ export class CreateReportModalComponent {
   }
 
   async createReport() {
-    let newReport: IdbAccountReport = this.accountReportDbService.getNewAccountReport();
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let navigateToStr: string;
     if (this.router.url.includes('account/overview')) {
       navigateToStr = 'account/account-reports/data-overview-report';
+    } else if (this.router.url.includes('facility') && this.router.url.includes('/overview')) {
+      navigateToStr = 'account/account-reports/data-overview-report';
+    } else if (this.router.url.includes('account/analysis')) {
+      navigateToStr = 'account/account-reports/better-plants-report';
+    }
+    let addedReport: IdbAccountReport = await this.accountReportDbService.addWithObservable(this.accountReport).toPromise();
+    await this.dbChangesService.setAccountReports(account);
+    this.accountReportDbService.selectedReport.next(addedReport);
+    this.toastNotificationService.showToast('Report Created', undefined, undefined, false, "bg-success");
+    this.sharedDataService.openCreateReportModal.next(false);
+    this.router.navigateByUrl(navigateToStr);
+  }
+
+  getNewReport(): IdbAccountReport {
+    let newReport: IdbAccountReport = this.accountReportDbService.getNewAccountReport();
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    if (this.router.url.includes('account/overview')) {
       newReport.reportType = 'dataOverview';
       let yearOptions: Array<number> = this.utilityMeterDataDbService.getYearOptions(true);
       newReport.baselineYear = yearOptions[0];
@@ -81,7 +109,6 @@ export class CreateReportModalComponent {
       }
     } else if (this.router.url.includes('facility') && this.router.url.includes('/overview')) {
       let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-      navigateToStr = 'account/account-reports/data-overview-report';
       newReport.reportType = 'dataOverview';
       let yearOptions: Array<number> = this.utilityMeterDataDbService.getYearOptions(false);
       newReport.baselineYear = yearOptions[0];
@@ -123,13 +150,23 @@ export class CreateReportModalComponent {
       newReport.baselineYear = account.sustainabilityQuestions.energyReductionBaselineYear;
       newReport.reportYear = selectedAnalysisItem.reportYear;
       newReport.betterPlantsReportSetup.analysisItemId = selectedAnalysisItem.guid;
-      navigateToStr = 'account/account-reports/better-plants-report';
     }
-    let addedReport: IdbAccountReport = await this.accountReportDbService.addWithObservable(newReport).toPromise();
-    await this.dbChangesService.setAccountReports(account);
-    this.accountReportDbService.selectedReport.next(addedReport);
-    this.toastNotificationService.showToast('Report Created', undefined, undefined, false, "bg-success");
-    this.sharedDataService.openCreateReportModal.next(false);
-    this.router.navigateByUrl(navigateToStr);
+    return newReport;
+  }
+
+  setIsOverviewReport() {
+    this.isOverviewReport = this.router.url.includes('overview');
+  }
+
+  setShowWater() {
+    if (this.router.url.includes('account')) {
+      let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+      let waterMeter: IdbUtilityMeter = accountMeters.find(meter => { return meter.source == 'Water' || meter.source == 'Waste Water' });
+      this.showWater = waterMeter != undefined;
+    } else if (this.router.url.includes('facility')) {
+      let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+      let waterMeter: IdbUtilityMeter = facilityMeters.find(meter => { return meter.source == 'Water' || meter.source == 'Waste Water' });
+      this.showWater = waterMeter != undefined;
+    }
   }
 }

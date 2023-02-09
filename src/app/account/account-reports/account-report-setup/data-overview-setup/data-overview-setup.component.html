@@ -70,11 +70,11 @@
                         (change)="save()">
                     <label class="form-check-label" for="includeEmissionsSection">Emissions</label>
                 </div>
-                <!-- <div class="form-check">
+                <div class="form-check" *ngIf="showWater">
                     <input type="checkbox" class="form-check-input" name="includeWaterSection" id="includeWaterSection"
-                        formControlName="includeWaterSection" (change)="save()">
+                        [(ngModel)]="reportSetup.includeWaterSection" (change)="save()">
                     <label class="form-check-label" for="includeWaterSection">Water</label>
-                </div> -->
+                </div>
             </div>
 
         </div>
@@ -93,8 +93,8 @@
                     <label class="form-check-label" for="includeMap">Map</label>
                 </div>
                 <div class="form-check">
-                    <input type="checkbox" class="form-check-input" name="includeFacilityTable" id="includeFacilityTable"
-                        [(ngModel)]="reportSetup.includeFacilityTable" (change)="save()">
+                    <input type="checkbox" class="form-check-input" name="includeFacilityTable"
+                        id="includeFacilityTable" [(ngModel)]="reportSetup.includeFacilityTable" (change)="save()">
                     <label class="form-check-label" for="includeFacilityTable">Facilities Table</label>
                 </div>
                 <div class="form-check">
