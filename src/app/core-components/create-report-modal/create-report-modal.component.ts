@@ -63,11 +63,11 @@ export class CreateReportModalComponent {
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let navigateToStr: string;
     if (this.router.url.includes('account/overview')) {
-      navigateToStr = 'account/account-reports/data-overview-report';
+      navigateToStr = 'account/reports/data-overview-report';
     } else if (this.router.url.includes('facility') && this.router.url.includes('/overview')) {
-      navigateToStr = 'account/account-reports/data-overview-report';
+      navigateToStr = 'account/reports/data-overview-report';
     } else if (this.router.url.includes('account/analysis')) {
-      navigateToStr = 'account/account-reports/better-plants-report';
+      navigateToStr = 'account/reports/better-plants-report';
     }
     let addedReport: IdbAccountReport = await this.accountReportDbService.addWithObservable(this.accountReport).toPromise();
     await this.dbChangesService.setAccountReports(account);

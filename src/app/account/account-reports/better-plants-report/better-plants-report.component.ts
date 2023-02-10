@@ -5,12 +5,11 @@ import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { OverviewReportOptionsDbService } from 'src/app/indexedDB/overview-report-options-db.service';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbFacility, IdbOverviewReportOptions, IdbPredictorEntry, IdbUtilityMeter } from 'src/app/models/idb';
-import { BetterPlantsSummary, ReportOptions } from 'src/app/models/overview-report';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeter } from 'src/app/models/idb';
+import { BetterPlantsSummary } from 'src/app/models/overview-report';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { ConvertMeterDataService } from 'src/app/shared/helper-services/convert-meter-data.service';
 import { BetterPlantsReportClass } from 'src/app/calculations/better-plants-calculations/betterPlantsReportClass';

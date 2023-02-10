@@ -44,7 +44,7 @@ export class AccountReportsDashboardComponent {
     await this.dbChangesService.setAccountReports(this.selectedAccount);
     this.accountReportDbService.selectedReport.next(addedReport);
     this.toastNotificationService.showToast('Report Created', undefined, undefined, false, "bg-success");
-    this.router.navigateByUrl('account/account-reports/setup');
+    this.router.navigateByUrl('account/reports/setup');
 
   }
 

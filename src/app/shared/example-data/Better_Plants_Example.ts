@@ -10625,61 +10625,55 @@ export const ExampleAccount: BackupFile = {
         "totalEnergyUse": 86800.61285858722,
         "id": 9
     }],
-    "reports": [{
+    "accountReports": [{
         "date": new Date("2022-04-22T17:06:12.184Z"),
         "guid": "34jjnk09l",
-        "reportOptions": {
-            "includeFacilityNames": true,
-            "title": "Energy Consumption Report",
-            "notes": "",
-            "includeAccount": true,
-            "accountInfo": true,
-            "facilitySummaryTable": true,
-            "accountUtilityTable": true,
-            "accountFacilityCharts": true,
-            "includeFacilities": true,
-            "facilityMetersTable": true,
-            "facilityUtilityUsageTable": true,
-            "facilityInfo": true,
-            "electricity": true,
-            "naturalGas": true,
-            "otherFuels": false,
-            "otherEnergy": false,
-            "water": false,
-            "wasteWater": false,
-            "otherUtility": false,
-            "facilities": [{
+        "dataOverviewReportSetup": {
+            "energyIsSource": true,
+            "emissionsDisplay": 'location',
+            "includeMap": true,
+            "includeFacilityTable": true,
+            "includeFacilityDonut": true,
+            "includeUtilityTable": true,
+            "includeStackedBarChart": true,
+            "includeMonthlyLineChart": true,
+            "includeCostsSection": true,
+            "includeEmissionsSection": true,
+            "includeEnergySection": true,
+            "includeWaterSection": true,
+            "includedFacilities": [{
                 "facilityId": "ff1wwz4hv",
-                "selected": true
+                "included": true
             }, {
                 "facilityId": "s1jmr5gxt",
-                "selected": true
+                "included": true
             }, {
                 "facilityId": "q5eohwsmc",
-                "selected": true
+                "included": true
             }, {
                 "facilityId": "zhcsukh81",
-                "selected": false
+                "included": false
             }],
-            "baselineYear": 2018,
-            "targetYear": 2021,
-            "annualBarCharts": true,
-            "monthBarCharts": false,
-            "energyIsSource": true,
-            "meterReadings": false,
-            "reportType": "betterPlants",
+            "includeAccountReport": true,
+            "includeFacilityReports": true,
+            "includeMeterUsageStackedLineChart": true,
+            "includeMeterUsageTable": true,
+            "includeMeterUsageDonut": true,
+            "includeUtilityTableForFacility": true,
+            "includeAnnualBarChart": true,
+            "includeMonthlyLineChartForFacility": true
+        },
+        "betterPlantsReportSetup": {
+            "analysisItemId": "krzjijiri",
+            "includeFacilityNames": true,
             "modificationNotes": "",
             "baselineAdjustmentNotes": "",
-            "analysisItemId": "krzjijiri",
-            "templateId": undefined
         },
         "accountId": "ys5runb2h",
-        "type": "report",
+        "reportType": "betterPlants",
         "name": "Better Plants Report",
         "baselineYear": 2018,
-        "targetYear": 2021,
-        "title": "Energy Consumption Report",
-        "reportOptionsType": "betterPlants",
+        "reportYear": 2021,
         "id": 1,
     }],
     "accountAnalysisItems": [{

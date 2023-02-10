@@ -1,3 +1,22 @@
+import { IdbAccount, IdbFacility } from "src/app/models/idb";
+
+export function getNAICS(accountOrFacility: IdbAccount | IdbFacility): string {
+  let matchingNAICS: NAICS;
+  if (accountOrFacility.naics3) {
+    matchingNAICS = ThirdNaicsList.find(item => { return item.code == accountOrFacility.naics3 });
+  } else if (accountOrFacility.naics2) {
+    matchingNAICS = SecondNaicsList.find(item => { return item.code == accountOrFacility.naics2 });
+  } else if (accountOrFacility.naics1) {
+    matchingNAICS = FirstNaicsList.find(item => { return item.code == accountOrFacility.naics1 });
+  }
+
+  if (matchingNAICS) {
+    return matchingNAICS.code + ' - ' + matchingNAICS.industryType;
+  }
+  return;
+}
+
+
 export interface NAICS {
     code: string,
     industryType: string,

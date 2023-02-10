@@ -1,7 +1,6 @@
 import { Component, Input } from '@angular/core';
-import { OverviewReportService } from 'src/app/account/overview-report/overview-report.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idb';
+import { getNAICS } from 'src/app/shared/form-data/naics-data';
 
 @Component({
   selector: 'app-facility-title-page',
@@ -13,13 +12,12 @@ export class FacilityTitlePageComponent {
   facility: IdbFacility;
 
   naics: string;
-  constructor(private facilityDbService: FacilitydbService,
-    private overviewReportService: OverviewReportService) {
+  constructor() {
 
   }
 
   ngOnInit() {
-    this.naics = this.overviewReportService.getNAICS(this.facility);
+    this.naics = getNAICS(this.facility);
   }
 
 }

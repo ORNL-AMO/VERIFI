@@ -73,7 +73,7 @@ export class AppComponent {
     await this.eGridService.parseZipCodeLongLat();
     if (account) {
       await this.initializeFacilities(account);
-      await this.initializeReports(account);
+      // await this.initializeReports(account);
       await this.initializeAccountReports(account);
       await this.initializePredictors(account);
       await this.initializeMeters(account);
@@ -140,23 +140,40 @@ export class AppComponent {
     }
   }
 
-  async initializeReports(account: IdbAccount) {
-    //set overview reports
-    this.loadingMessage = "Loading Reports..";
-    let overviewReportOptions: Array<IdbOverviewReportOptions> = await this.overviewReportOptionsDbService.getAllByIndexRange('accountId', account.guid).toPromise();
-    let templates: Array<IdbOverviewReportOptions> = overviewReportOptions.filter(option => { return option.type == 'template' });
-    let nonTemplates: Array<IdbOverviewReportOptions> = overviewReportOptions.filter(option => { return option.type != 'template' });
-    this.overviewReportOptionsDbService.accountOverviewReportOptions.next(nonTemplates);
-    this.overviewReportOptionsDbService.overviewReportOptionsTemplates.next(templates);
-    let overviewReportId: number = this.overviewReportOptionsDbService.getInitialReport();
-    if (overviewReportId) {
-      let reportOptions: IdbOverviewReportOptions = overviewReportOptions.find(item => { return item.id == overviewReportId });
-      this.overviewReportOptionsDbService.selectedOverviewReportOptions.next(reportOptions);
-    }
-  }
+  // async initializeReports(account: IdbAccount) {
+  //   //set overview reports
+  //   this.loadingMessage = "Loading Reports..";
+  //   let overviewReportOptions: Array<IdbOverviewReportOptions> = await this.overviewReportOptionsDbService.getAllByIndexRange('accountId', account.guid).toPromise();
+  //   let templates: Array<IdbOverviewReportOptions> = overviewReportOptions.filter(option => { return option.type == 'template' });
+  //   let nonTemplates: Array<IdbOverviewReportOptions> = overviewReportOptions.filter(option => { return option.type != 'template' });
+  //   this.overviewReportOptionsDbService.accountOverviewReportOptions.next(nonTemplates);
+  //   this.overviewReportOptionsDbService.overviewReportOptionsTemplates.next(templates);
+  //   let overviewReportId: number = this.overviewReportOptionsDbService.getInitialReport();
+  //   if (overviewReportId) {
+  //     let reportOptions: IdbOverviewReportOptions = overviewReportOptions.find(item => { return item.id == overviewReportId });
+  //     this.overviewReportOptionsDbService.selectedOverviewReportOptions.next(reportOptions);
+  //   }
+  // }
 
   async initializeAccountReports(account: IdbAccount) {
     this.loadingMessage = "Loading Reports 2.0...."
+    let overviewReportOptions: Array<IdbOverviewReportOptions> = await this.overviewReportOptionsDbService.getAllByIndexRange('accountId', account.guid).toPromise();
+    for (let i = 0; i < overviewReportOptions.length; i++) {
+      let overviewReport: IdbOverviewReportOptions = overviewReportOptions[i];
+      if (overviewReport.type == 'report' && overviewReport.reportOptionsType == 'betterPlants') {
+        let newReport: IdbAccountReport = this.accountReportDbService.getNewAccountReport(account);
+        newReport.name = overviewReport.name;
+        newReport.baselineYear = overviewReport.baselineYear;
+        newReport.reportYear = overviewReport.targetYear;
+        newReport.reportType = 'betterPlants';
+        newReport.betterPlantsReportSetup.analysisItemId = overviewReport.reportOptions.analysisItemId;
+        newReport.betterPlantsReportSetup.baselineAdjustmentNotes = overviewReport.reportOptions.baselineAdjustmentNotes;
+        newReport.betterPlantsReportSetup.includeFacilityNames = overviewReport.reportOptions.includeFacilityNames;
+        newReport.betterPlantsReportSetup.modificationNotes = overviewReport.reportOptions.modificationNotes;
+        await this.accountReportDbService.addWithObservable(newReport).toPromise();
+      }
+      await this.overviewReportOptionsDbService.deleteWithObservable(overviewReport.id).toPromise();
+    }
     let accountReports: Array<IdbAccountReport> = await this.accountReportDbService.getAllByIndexRange('accountId', account.guid).toPromise();
     this.accountReportDbService.accountReports.next(accountReports);
     let accountReportId: number = this.accountReportDbService.getInitialReport();

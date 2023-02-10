@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
-import { OverviewReportService } from 'src/app/account/overview-report/overview-report.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idb';
+import { getNAICS } from 'src/app/shared/form-data/naics-data';
 
 @Component({
   selector: 'app-account-title-page',
@@ -12,13 +12,12 @@ export class AccountTitlePageComponent {
   account: IdbAccount;
   
   naics: string;
-  constructor(private accountDbService: AccountdbService,
-    private overviewReportService: OverviewReportService) {
+  constructor(private accountDbService: AccountdbService) {
 
   }
 
   ngOnInit() {
     this.account = this.accountDbService.selectedAccount.getValue();
-    this.naics = this.overviewReportService.getNAICS(this.account);
+    this.naics = getNAICS(this.account);
   }
 }

@@ -6,12 +6,11 @@ import * as _ from 'lodash';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityColors } from 'src/app/shared/utilityColors';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
-import { OverviewReportService } from '../../overview-report/overview-report.service';
 import { AccountHomeService } from '../account-home.service';
-import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
+import { getNAICS } from 'src/app/shared/form-data/naics-data';
 @Component({
   selector: 'app-facility-card',
   templateUrl: './facility-card.component.html',
@@ -45,7 +44,7 @@ export class FacilityCardComponent implements OnInit {
   facilityAnalysisSummariesSub: Subscription;
   constructor(private analysisDbService: AnalysisDbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterDbService: UtilityMeterdbService, private predictorDbService: PredictordbService,
-    private overviewReportService: OverviewReportService, private accountHomeService: AccountHomeService,
+    private accountHomeService: AccountHomeService,
     private router: Router) { }
 
   ngOnInit(): void {
@@ -121,7 +120,7 @@ export class FacilityCardComponent implements OnInit {
   }
 
   setNAICS() {
-    this.naics = this.overviewReportService.getNAICS(this.facility);
+    this.naics = getNAICS(this.facility);
   }
 
   setGoalYears() {

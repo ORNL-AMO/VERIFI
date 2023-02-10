@@ -135,10 +135,26 @@ export class DbChangesService {
 
   async setAccountOverviewReportOptions(account: IdbAccount) {
     let overviewReportOptions: Array<IdbOverviewReportOptions> = await this.overviewReportOptionsDbService.getAllByIndexRange('accountId', account.guid).toPromise();
-    let templates: Array<IdbOverviewReportOptions> = overviewReportOptions.filter(option => { return option.type == 'template' });
-    let nonTemplates: Array<IdbOverviewReportOptions> = overviewReportOptions.filter(option => { return option.type != 'template' });
-    this.overviewReportOptionsDbService.accountOverviewReportOptions.next(nonTemplates);
-    this.overviewReportOptionsDbService.overviewReportOptionsTemplates.next(templates);
+    // let templates: Array<IdbOverviewReportOptions> = overviewReportOptions.filter(option => { return option.type == 'template' });
+    // let nonTemplates: Array<IdbOverviewReportOptions> = overviewReportOptions.filter(option => { return option.type != 'template' });
+    // this.overviewReportOptionsDbService.accountOverviewReportOptions.next(nonTemplates);
+    // this.overviewReportOptionsDbService.overviewReportOptionsTemplates.next(templates);
+    for (let i = 0; i < overviewReportOptions.length; i++) {
+      let overviewReport: IdbOverviewReportOptions = overviewReportOptions[i];
+      if (overviewReport.type == 'report' && overviewReport.reportOptionsType == 'betterPlants') {
+        let newReport: IdbAccountReport = this.accountReportDbService.getNewAccountReport(account);
+        newReport.name = overviewReport.name;
+        newReport.baselineYear = overviewReport.baselineYear;
+        newReport.reportYear = overviewReport.targetYear;
+        newReport.reportType = 'betterPlants';
+        newReport.betterPlantsReportSetup.analysisItemId = overviewReport.reportOptions.analysisItemId;
+        newReport.betterPlantsReportSetup.baselineAdjustmentNotes = overviewReport.reportOptions.baselineAdjustmentNotes;
+        newReport.betterPlantsReportSetup.includeFacilityNames = overviewReport.reportOptions.includeFacilityNames;
+        newReport.betterPlantsReportSetup.modificationNotes = overviewReport.reportOptions.modificationNotes;
+        await this.accountReportDbService.addWithObservable(newReport).toPromise();
+      }
+      await this.overviewReportOptionsDbService.deleteWithObservable(overviewReport.id).toPromise();
+    }
   }
 
   async setAccountReports(account: IdbAccount) {
@@ -233,7 +249,7 @@ export class DbChangesService {
     this.loadingService.setLoadingMessage("Deleting Facility Meter Groups...");
     await this.utilityMeterGroupDbService.deleteAllFacilityMeterGroups(facility.guid);
     this.loadingService.setLoadingMessage("Updating Reports...")
-    await this.overviewReportOptionsDbService.updateReportsRemoveFacility(facility.guid);
+    await this.accountReportDbService.updateReportsRemoveFacility(facility.guid);
     this.loadingService.setLoadingMessage("Deleting Analysis Items...")
     await this.analysisDbService.deleteAllFacilityAnalysisItems(facility.guid);
     this.loadingService.setLoadingMessage('Updating Analysis Items...');
@@ -241,13 +257,6 @@ export class DbChangesService {
     for (let index = 0; index < accountAnalysisItems.length; index++) {
       accountAnalysisItems[index].facilityAnalysisItems = accountAnalysisItems[index].facilityAnalysisItems.filter(facilityItem => { return facilityItem.facilityId != facility.guid });
       await this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[index]).toPromise();
-    }
-
-    this.loadingService.setLoadingMessage('Updating Reports...');
-    let overviewReportOptions: Array<IdbOverviewReportOptions> = this.overviewReportOptionsDbService.accountOverviewReportOptions.getValue();
-    for (let index = 0; index < overviewReportOptions.length; index++) {
-      overviewReportOptions[index].reportOptions.facilities = overviewReportOptions[index].reportOptions.facilities.filter(reportFacility => { return reportFacility.facilityId != facility.guid });
-      await this.overviewReportOptionsDbService.updateWithObservable(overviewReportOptions[index]).toPromise();
     }
 
     this.loadingService.setLoadingMessage("Deleting Facility...");

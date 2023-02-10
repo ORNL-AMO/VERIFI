@@ -65,11 +65,13 @@ export class AccountReportDbService {
     return this.dbService.update('accountReports', values);
   }
 
-  getNewAccountReport(): IdbAccountReport {
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+  getNewAccountReport(account?: IdbAccount): IdbAccountReport {
+    if (!account) {
+      account = this.accountDbService.selectedAccount.getValue();
+    }
     let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     return {
-      accountId: selectedAccount.guid,
+      accountId: account.guid,
       guid: Math.random().toString(36).substr(2, 9),
       date: new Date(),
       name: 'Account Report',
@@ -83,7 +85,7 @@ export class AccountReportDbService {
         baselineAdjustmentNotes: undefined,
       },
       dataOverviewReportSetup: {
-        energyIsSource: selectedAccount.energyIsSource,
+        energyIsSource: account.energyIsSource,
         emissionsDisplay: 'location',
         includeMap: true,
         includeFacilityTable: true,
@@ -112,6 +114,16 @@ export class AccountReportDbService {
       }
     }
   }
+
+  async updateReportsRemoveFacility(facilityId: string) {
+    let accountReports: Array<IdbAccountReport> = this.accountReports.getValue();
+    for (let i = 0; i < accountReports.length; i++) {
+      let report: IdbAccountReport = accountReports[i];
+      report.dataOverviewReportSetup.includedFacilities = report.dataOverviewReportSetup.includedFacilities.filter(facility => { return facility.facilityId != facilityId });
+      await this.updateWithObservable(report).toPromise();
+    }
+  }
+
 
   async deleteAccountReports() {
     let accountReports: Array<IdbAccountReport> = this.accountReports.getValue();
