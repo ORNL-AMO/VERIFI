@@ -68,6 +68,31 @@ app.on('ready', function () {
                 win.webContents.send('update-downloaded');
             });
         }
+
+        win.webContents.session.on('will-download', (event, item, webContents) => {
+            log.info(item.getSavePath());
+            item.on('updated', (event, state) => {
+            if (state === 'interrupted') {
+            //   log.info('Download is interrupted but can be resumed')
+            } else if (state === 'progressing') {
+              if (item.isPaused()) {
+                // log.info('Download is paused');
+              } else {
+                // log.info(`Received bytes: ${item.getReceivedBytes()}`)
+              }
+            }
+          });
+
+          item.once('done', (event, state) => {
+            if (state === 'completed') {
+              //Open the document using the external application
+              shell.showItemInFolder(item.getSavePath());
+            } else {
+             log.info(`Download failed: ${state}`)
+            }
+          })
+        })
+
     })
 
     ipcMain.once('quit-and-install', (event, arg) => {
