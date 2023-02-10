@@ -816,8 +816,12 @@ export class CalanderizationService {
     if (meter.source == 'Electricity' || meter.source == 'Natural Gas' || meter.source == 'Other Fuels') {
       if (energyIsSource && meter.siteToSource != 0) {
         energyUse = energyUse / meter.siteToSource;
+      } let convertedEnergyUse: number = energyUse;
+      if (meter.source == 'Electricity') {
+        convertedEnergyUse = this.convertUnitsService.value(energyUse).from(energyUnit).to('kWh');
+      } else {
+        convertedEnergyUse = this.convertUnitsService.value(energyUse).from(energyUnit).to(meter.energyUnit);
       }
-      let convertedEnergyUse: number = this.convertUnitsService.value(energyUse).from(energyUnit).to('kWh');
       let locationEmissions: number;
       let marketEmissions: number;
 
@@ -838,6 +842,7 @@ export class CalanderizationService {
         }
       } else {
         marketEmissionsOutputRate = this.energyUseCalculationsService.getFuelEmissionsOutputRate(meter.source, meter.fuel, meter.phase, energyUnit);
+        console.log(marketEmissionsOutputRate);
         locationEmissions = convertedEnergyUse * marketEmissionsOutputRate;
         marketEmissions = convertedEnergyUse * marketEmissionsOutputRate;
       }
