@@ -842,7 +842,6 @@ export class CalanderizationService {
         }
       } else {
         marketEmissionsOutputRate = this.energyUseCalculationsService.getFuelEmissionsOutputRate(meter.source, meter.fuel, meter.phase, energyUnit);
-        console.log(marketEmissionsOutputRate);
         locationEmissions = convertedEnergyUse * marketEmissionsOutputRate;
         marketEmissions = convertedEnergyUse * marketEmissionsOutputRate;
       }
