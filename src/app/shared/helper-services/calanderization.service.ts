@@ -818,13 +818,14 @@ export class CalanderizationService {
         energyUse = energyUse / meter.siteToSource;
       } let convertedEnergyUse: number = energyUse;
       if (meter.source == 'Electricity') {
+        //electricty emissions rates in kWh
         convertedEnergyUse = this.convertUnitsService.value(energyUse).from(energyUnit).to('kWh');
       } else {
-        convertedEnergyUse = this.convertUnitsService.value(energyUse).from(energyUnit).to(meter.energyUnit);
+        //non-electricity emissions rates are in MMBtu
+        convertedEnergyUse = this.convertUnitsService.value(energyUse).from(energyUnit).to('MMBtu');
       }
       let locationEmissions: number;
       let marketEmissions: number;
-
 
       let marketEmissionsOutputRate: number;
       if (meter.source == 'Electricity') {
