@@ -24,7 +24,7 @@ export class GroupAnalysisOptionsComponent implements OnInit {
   yearOptions: Array<number>;
   analysisItem: IdbAnalysisItem;
   constructor(private analysisService: AnalysisService, private analysisDbService: AnalysisDbService,
-     private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private utilityMeterDataDbService: UtilityMeterDatadbService,
     private accountDbService: AccountdbService, private facilityDbService: FacilitydbService,
     private dbChangesService: DbChangesService,
     private analysisValidationService: AnalysisValidationService,
@@ -47,12 +47,11 @@ export class GroupAnalysisOptionsComponent implements OnInit {
     let analysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     let groupIndex: number = analysisItem.groups.findIndex(group => { return group.idbGroupId == this.group.idbGroupId });
     this.group.groupErrors = this.analysisValidationService.getGroupErrors(this.group);
-
     analysisItem.groups[groupIndex] = this.group;
     await this.analysisDbService.updateWithObservable(analysisItem).toPromise();
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.dbChangesService.setAnalysisItems(selectedAccount, selectedFacility);
+    await this.dbChangesService.setAnalysisItems(selectedAccount, selectedFacility);
     this.analysisDbService.selectedAnalysisItem.next(analysisItem);
     this.analysisService.selectedGroup.next(this.group);
   }
@@ -91,7 +90,7 @@ export class GroupAnalysisOptionsComponent implements OnInit {
     this.router.navigateByUrl('facility/' + facility.id + '/utility/predictors');
   }
 
-  goToMeterGroups(){
+  goToMeterGroups() {
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     this.router.navigateByUrl('facility/' + facility.id + '/utility/meter-groups');
   }

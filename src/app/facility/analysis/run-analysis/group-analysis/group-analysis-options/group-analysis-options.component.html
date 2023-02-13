@@ -174,17 +174,18 @@
                     </div>
                 </div>
                 <div class="row sub-column" *ngIf="group.hasBaselineAdjustement">
-                    <div class="col-12 mt-2" *ngFor="let baselineAdjustment of group.baselineAdjustments">
+                    <div class="col-12 mt-2"
+                        *ngFor="let baselineAdjustment of group.baselineAdjustments; let index = index;">
                         <div class="row">
                             <div class="col-6">
-                                <label>{{baselineAdjustment.year}}</label>
+                                <label for="{{'baselineAdjustment_'+index}}">{{baselineAdjustment.year}}</label>
                             </div>
                             <div class="col-6">
                                 <div class="input-group">
                                     <!-- <span class="input-group-text">{{baselineAdjustment.year}}</span> -->
-                                    <input class="form-control" type="number" name="baselineAdjustment"
-                                        id="baselineAdjustment" [(ngModel)]="baselineAdjustment.amount"
-                                        (change)="saveItem()" min="0">
+                                    <input class="form-control" type="number" name="{{'baselineAdjustment_'+index}}"
+                                        id="{{'baselineAdjustment_'+index}}" [(ngModel)]="baselineAdjustment.amount"
+                                        (input)="saveItem()" min="0">
                                     <span class="input-group-text"
                                         [innerHTML]="analysisItem.energyUnit | settingsLabel:'/yr'"></span>
                                 </div>
