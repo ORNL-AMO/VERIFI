@@ -172,6 +172,7 @@ export class BackupDataService {
       meterData.accountId = accountGUIDs.newId;
       meterData.facilityId = this.getNewId(meterData.facilityId, facilityGUIDs);
       meterData.meterId = this.getNewId(meterData.meterId, meterGUIDs);
+      meterData.readDate = this.getImportDate(meterData.readDate);
       await this.utilityMeterDataDbService.addWithObservable(meterData).toPromise();
     }
 
@@ -189,6 +190,7 @@ export class BackupDataService {
       predictorEntry.guid = newGUID;
       predictorEntry.accountId = accountGUIDs.newId;
       predictorEntry.facilityId = this.getNewId(predictorEntry.facilityId, facilityGUIDs);
+      predictorEntry.date = this.getImportDate(predictorEntry.date);
       await this.predictorsDbService.addWithObservable(predictorEntry).toPromise();
     }
 
@@ -307,6 +309,7 @@ export class BackupDataService {
       meterData.accountId = accountGUID;
       meterData.facilityId = newFacilityGUID;
       meterData.meterId = this.getNewId(meterData.meterId, meterGUIDs);
+      meterData.readDate = this.getImportDate(meterData.readDate);
       await this.utilityMeterDataDbService.addWithObservable(meterData).toPromise();
     }
 
@@ -343,6 +346,7 @@ export class BackupDataService {
       predictorEntry.guid = newGUID;
       predictorEntry.accountId = accountGUID;
       predictorEntry.facilityId = newFacilityGUID;
+      predictorEntry.date = this.getImportDate(predictorEntry.date);
       await this.predictorsDbService.addWithObservable(predictorEntry).toPromise();
     }
 
@@ -455,15 +459,27 @@ export class BackupDataService {
     //update reports
     let reports: Array<IdbOverviewReportOptions> = this.overviewReportOptionsDbService.accountOverviewReportOptions.getValue();
     for (let i = 0; i < reports.length; i++) {
-      reports[i].reportOptions.facilities = reports[i].reportOptions.facilities.filter(option => {return option.facilityId != facility.guid});
+      reports[i].reportOptions.facilities = reports[i].reportOptions.facilities.filter(option => { return option.facilityId != facility.guid });
       await this.overviewReportOptionsDbService.updateWithObservable(reports[i]).toPromise();
     }
     //update account analysis
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
     for (let i = 0; i < accountAnalysisItems.length; i++) {
-      accountAnalysisItems[i].facilityAnalysisItems = accountAnalysisItems[i].facilityAnalysisItems.filter(option => {return option.facilityId != facility.guid});
+      accountAnalysisItems[i].facilityAnalysisItems = accountAnalysisItems[i].facilityAnalysisItems.filter(option => { return option.facilityId != facility.guid });
       await this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[i]).toPromise();
     }
+  }
+
+
+  getImportDate(date: Date): Date {
+    //date imported with timestap cause problems.
+    let readDateString: string = String(date);
+    //remove time stamp
+    let newString: string = readDateString.split('T')[0];
+    //Format: YYYY-MM-DD
+    let yearMonthDate: Array<string> = newString.split('-');
+    //Month 0 indexed (-1)
+    return new Date(Number(yearMonthDate[0]), Number(yearMonthDate[1]) - 1, Number(yearMonthDate[2]));
   }
 }
 
