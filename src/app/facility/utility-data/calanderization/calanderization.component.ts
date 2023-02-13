@@ -167,23 +167,6 @@ export class CalanderizationComponent implements OnInit {
     }
   }
 
-  setUndefinedRanges() {
-    this.calanderizedDataFilters.selectedDateMax = {
-      year: undefined,
-      month: undefined
-    };
-    this.calanderizedDataFilters.selectedDateMin = {
-      year: undefined,
-      month: undefined
-    };
-    this.calanderizedDataFilters.dataDateRange = {
-      minDate: undefined,
-      maxDate: undefined
-    }
-    this.calanderizationService.calanderizedDataFilters.next(this.calanderizedDataFilters);
-  }
-
-
   filterMeterDataDateRanges(calanderizedMeterData: Array<CalanderizedMeter>): Array<CalanderizedMeter> {
     if (this.calanderizedDataFilters.selectedDateMax && this.calanderizedDataFilters.selectedDateMin) {
       calanderizedMeterData.forEach(calanderizedMeter => {
