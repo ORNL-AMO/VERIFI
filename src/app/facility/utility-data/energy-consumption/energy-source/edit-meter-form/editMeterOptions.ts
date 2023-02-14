@@ -22,38 +22,38 @@ export const SourceOptions: Array<MeterSource> = [
 export const GasOptions: Array<FuelTypeOption> = [
     {
         startingUnit: 'ft3',
-        heatCapacityValue: .00009,
+        heatCapacityValue: .000092,
         value: 'Blast Furnace Gas',
         siteToSourceMultiplier: 1,
-        emissionsOutputRate: 274.32
+        emissionsOutputRate: 274.3504
     },
     {
         startingUnit: 'ft3',
-        heatCapacityValue: .00059,
+        heatCapacityValue: .000599,
         value: 'Coke Oven Gas',
         siteToSourceMultiplier: 1,
-        emissionsOutputRate: 46.85
+        emissionsOutputRate: 46.8918
     },
     {
         startingUnit: 'ft3',
         heatCapacityValue: .0027,
         value: 'Liquefied Petroleum Gas (LPG)',
         siteToSourceMultiplier: 1,
-        emissionsOutputRate: 61.71
+        emissionsOutputRate: 61.9638
     },
     {
         startingUnit: 'ft3',
-        heatCapacityValue: .002816,
+        heatCapacityValue: .002516,
         value: 'Propane',
         siteToSourceMultiplier: 1,
-        emissionsOutputRate: 61.46
+        emissionsOutputRate: 61.7138
     },
     {
         startingUnit: 'ft3',
         heatCapacityValue: .00328,
         value: 'Butane',
         siteToSourceMultiplier: 1,
-        emissionsOutputRate: 64.77
+        emissionsOutputRate: 64.0238
     },
     {
         startingUnit: 'ft3',
@@ -64,10 +64,10 @@ export const GasOptions: Array<FuelTypeOption> = [
     },
     {
         startingUnit: 'ft3',
-        heatCapacityValue: .0006,
+        heatCapacityValue: .000485,
         value: 'Landfill Gas',
         siteToSourceMultiplier: 1,
-        emissionsOutputRate: 52.07
+        emissionsOutputRate: 52.33774
     }
 ]
 
@@ -77,168 +77,168 @@ export const LiquidOptions: Array<FuelTypeOption> = [
         heatCapacityValue: .0916476,
         value: 'Propane',
         siteToSourceMultiplier: 1,
-        emissionsOutputRate: 62.87
+        emissionsOutputRate: 63.1238
     },
     {
         startingUnit: 'gal',
-        heatCapacityValue: .0916476,
+        heatCapacityValue: .092,
         value: 'LPG',
         siteToSourceMultiplier: 1,
-        emissionsOutputRate: 61.71
+        emissionsOutputRate: 61.9638
     },
     {
         startingUnit: 'gal',
-        heatCapacityValue: .13869,
+        heatCapacityValue: .141,
         value: 'Distillate Fuel Oil',
         siteToSourceMultiplier: 1,
-        emissionsOutputRate: 74.08
+        emissionsOutputRate: 74.33713
     },
     {
         startingUnit: 'gal',
-        heatCapacityValue: .14969,
+        heatCapacityValue: .145,
         value: 'Residual Fuel Oil',
         siteToSourceMultiplier: 1,
-        emissionsOutputRate: 74.02
+        emissionsOutputRate: 74.2688
     },
     {
         startingUnit: 'gal',
         heatCapacityValue: .13869,
         value: 'Heating Oil',
         siteToSourceMultiplier: 1,
-        emissionsOutputRate: 74.08
+        emissionsOutputRate: 74.33713
     },
     {
         startingUnit: 'gal',
         heatCapacityValue: .13869,
         value: 'Diesel',
         siteToSourceMultiplier: 1,
-        emissionsOutputRate: 73.96
+        emissionsOutputRate: 74.2138
     },
     {
         startingUnit: 'gal',
         heatCapacityValue: .102032,
         value: 'Butane',
         siteToSourceMultiplier: 1,
-        emissionsOutputRate: 64.77
+        emissionsOutputRate: 65.0238
     },
     {
         startingUnit: 'gal',
-        heatCapacityValue: .10375,
+        heatCapacityValue: .099,
         value: 'Isobutane',
         siteToSourceMultiplier: 1,
-        emissionsOutputRate: 64.94
+        emissionsOutputRate: 65.1938
     },
     {
         startingUnit: 'gal',
         heatCapacityValue: .1108,
         value: 'Pentane',
         siteToSourceMultiplier: 1,
-        emissionsOutputRate: 70.02
+        emissionsOutputRate: 70.0738
     },
     {
         startingUnit: 'gal',
-        heatCapacityValue: .012072,
+        heatCapacityValue: .058,
         value: 'Ethylene',
         siteToSourceMultiplier: 1,
-        emissionsOutputRate: 65.96
+        emissionsOutputRate: 66.2138
     },
     {
         startingUnit: 'gal',
-        heatCapacityValue: .017473,
+        heatCapacityValue: .091,
         value: 'Propylene',
         siteToSourceMultiplier: 1,
-        emissionsOutputRate: 67.77
+        emissionsOutputRate: 68.0238
     },
     {
         startingUnit: 'gal',
         heatCapacityValue: .1374,
         value: 'Fuel Oil #1',
         siteToSourceMultiplier: 1,
-        emissionsOutputRate: 73.25
+        emissionsOutputRate: 73.5038
     },
     {
         startingUnit: 'gal',
         heatCapacityValue: .1396,
         value: 'Fuel Oil #2',
         siteToSourceMultiplier: 1,
-        emissionsOutputRate: 73.96
+        emissionsOutputRate: 74.2138
     },
     {
         startingUnit: 'gal',
         heatCapacityValue: .1451,
         value: 'Fuel Oil #4',
         siteToSourceMultiplier: 1,
-        emissionsOutputRate: 75.04
+        emissionsOutputRate: 75.2938
     },
     {
         startingUnit: 'gal',
         heatCapacityValue: .1488,
         value: 'Fuel Oil #5',
         siteToSourceMultiplier: 1,
-        emissionsOutputRate: 72.93
+        emissionsOutputRate: 73.1838
     },
     {
         startingUnit: 'gal',
         heatCapacityValue: .1524,
         value: 'Fuel Oil #6 (high sulfur)',
         siteToSourceMultiplier: 1,
-        emissionsOutputRate: 75.1
+        emissionsOutputRate: 75.3538
     },
     {
         startingUnit: 'gal',
         heatCapacityValue: .149,
         value: 'Fuel Oil #6 (low sulfur)',
         siteToSourceMultiplier: 1,
-        emissionsOutputRate: 75.1
+        emissionsOutputRate: 75.3538
     },
     {
         startingUnit: 'gal',
         heatCapacityValue: .1387,
         value: 'Crude Oil',
         siteToSourceMultiplier: 1,
-        emissionsOutputRate: 74.54
+        emissionsOutputRate: 74.7938
     },
     {
         startingUnit: 'gal',
         heatCapacityValue: .12760,
         value: 'Gasoline',
         siteToSourceMultiplier: 1,
-        emissionsOutputRate: 70.22
+        emissionsOutputRate: 67.1338
     },
     {
         startingUnit: 'gal',
         heatCapacityValue: .1351,
         value: 'Kerosene',
         siteToSourceMultiplier: 1,
-        emissionsOutputRate: 75.2
+        emissionsOutputRate: 75.4538
     },
     {
         startingUnit: 'gal',
-        heatCapacityValue: .138,
+        heatCapacityValue: .148,
         value: 'Gas Oil',
         siteToSourceMultiplier: 1,
-        emissionsOutputRate: 74.92
+        emissionsOutputRate: 75.1738
     },
     {
         startingUnit: 'gal',
         heatCapacityValue: .086,
         value: 'Liquefied Natural Gas (LNG)',
         siteToSourceMultiplier: 1,
-        emissionsOutputRate: 61.71
+        emissionsOutputRate: 53.1148
     },
     {
         startingUnit: 'gal',
-        heatCapacityValue: .127,
+        heatCapacityValue: .128,
         value: 'Biodiesel (100%)',
         siteToSourceMultiplier: 1,
-        emissionsOutputRate: 73.84
+        emissionsOutputRate: 73.90028
     },
     {
         startingUnit: 'gal',
-        heatCapacityValue: .084262,
+        heatCapacityValue: .084,
         value: 'Ethanol (100%)',
         siteToSourceMultiplier: 1,
-        emissionsOutputRate: 68.44
+        emissionsOutputRate: 68.50028
     }
 
 ]
@@ -249,70 +249,70 @@ export const SolidOptions: Array<FuelTypeOption> = [
         heatCapacityValue: 25.09,
         value: 'Coal (anthracite)',
         siteToSourceMultiplier: 1,
-        emissionsOutputRate: 103.69
+        emissionsOutputRate: 104.4418
     },
     {
         startingUnit: 'ton',
         heatCapacityValue: 24.93,
         value: 'Coal (bituminous)',
         siteToSourceMultiplier: 1,
-        emissionsOutputRate: 93.28
+        emissionsOutputRate: 94.0318
     },
     {
         startingUnit: 'ton',
         heatCapacityValue: 14.21,
         value: 'Coal (Lignite)',
         siteToSourceMultiplier: 1,
-        emissionsOutputRate: 97.72
+        emissionsOutputRate: 98.4718
     },
     {
         startingUnit: 'ton',
         heatCapacityValue: 17.25,
         value: 'Coal (subbituminous)',
         siteToSourceMultiplier: 1,
-        emissionsOutputRate: 97.17
+        emissionsOutputRate: 97.9218
     },
     {
         startingUnit: 'lb',
         heatCapacityValue: .013,
         value: 'Coke',
         siteToSourceMultiplier: 1,
-        emissionsOutputRate: 113.67
+        emissionsOutputRate: 104.4616
     },
     {
         startingUnit: 'lb',
         heatCapacityValue: .006,
         value: 'Peat',
         siteToSourceMultiplier: 1,
-        emissionsOutputRate: 111.84
+        emissionsOutputRate: 113.8916
     },
     {
         startingUnit: 'lb',
         heatCapacityValue: .008,
         value: 'Wood',
         siteToSourceMultiplier: 1,
-        emissionsOutputRate: 93.8
+        emissionsOutputRate: 95.0528
     },
     {
         startingUnit: 'lb',
         heatCapacityValue: .004125,
         value: 'Biomass',
         siteToSourceMultiplier: 1,
-        emissionsOutputRate: 118.17
+        emissionsOutputRate: 120.2216
     },
     {
         startingUnit: 'lb',
         heatCapacityValue: .0065,
         value: 'Black Liquor',
         siteToSourceMultiplier: 1,
-        emissionsOutputRate: 94.5
+        emissionsOutputRate: 94.65266
     },
     {
         startingUnit: 'lb',
         heatCapacityValue: .016,
         value: 'Scrap Tires',
         siteToSourceMultiplier: 1,
-        emissionsOutputRate: 85.97
+        emissionsOutputRate: 88.0216
     }
 ]
 
@@ -323,7 +323,7 @@ export const OtherEnergyOptions: Array<FuelTypeOption> = [
         value: 'Purchased Steam',
         siteToSourceMultiplier: 1.33,
         otherEnergyType: 'Steam',
-        emissionsOutputRate: 66.4
+        emissionsOutputRate: 66.3985
     },
     {
         startingUnit: 'tonHr',
@@ -355,7 +355,7 @@ export const OtherEnergyOptions: Array<FuelTypeOption> = [
         value: 'District Hot Water',
         siteToSourceMultiplier: undefined,
         otherEnergyType: 'Hot Water',
-        emissionsOutputRate: 66.4
+        emissionsOutputRate: 66.3985
     }
 ]
 
