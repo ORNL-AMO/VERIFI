@@ -6,7 +6,7 @@ export interface Country {
     number: string
 }
 
-export var Countries: Array<Country> = [
+export const Countries: Array<Country> = [
     { code: "US", code3: "USA", name: "United States of America (the)", number: "840" },
     { code: "AF", code3: "AFG", name: "Afghanistan", number: "004" },
     { code: "AL", code3: "ALB", name: "Albania", number: "008" },
