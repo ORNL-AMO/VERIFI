@@ -10,6 +10,7 @@ import { LoadingService } from '../../core-components/loading/loading.service';
 import { OverviewReportOptionsDbService } from '../../indexedDB/overview-report-options-db.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
+import { JStatRegressionModel } from 'src/app/models/analysis';
 
 @Injectable({
   providedIn: 'root'
@@ -29,7 +30,7 @@ export class BackupDataService {
       facilities: this.facilityDbService.accountFacilities.getValue(),
       meters: this.utilityMeterDbService.accountMeters.getValue(),
       meterData: this.utilityMeterDataDbService.accountMeterData.getValue(),
-      groups: this.utilityMeterGroupDbService.accountMeterGroups.getValue(),
+      groups: this.trimGroups(this.utilityMeterGroupDbService.accountMeterGroups.getValue()),
       reports: this.overviewReportOptionsDbService.accountOverviewReportOptions.getValue(),
       accountAnalysisItems: this.accountAnalysisDbService.accountAnalysisItems.getValue(),
       facilityAnalysisItems: this.analysisDbService.accountAnalysisItems.getValue(),
@@ -52,6 +53,7 @@ export class BackupDataService {
 
     let groups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
     let facilityGroups: Array<IdbUtilityMeterGroup> = groups.filter(meter => { return meter.facilityId == facility.guid });
+    facilityGroups = this.trimGroups(facilityGroups);
 
     let analysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
     let facilityAnalysisItems: Array<IdbAnalysisItem> = analysisItems.filter(meter => { return meter.facilityId == facility.guid });
@@ -209,6 +211,11 @@ export class BackupDataService {
       facilityAnalysisItem.facilityId = this.getNewId(facilityAnalysisItem.facilityId, facilityGUIDs);
       facilityAnalysisItem.groups.forEach(group => {
         group.idbGroupId = this.getNewId(group.idbGroupId, meterGroupGUIDs);
+        if (group.models) {
+          group.models = group.models.map(model => {
+            return this.getTrimmedModel(model);
+          })
+        }
         // group.predictorVariables.forEach(variable => {
         //   variable.id = this.getNewId(variable.id, predictorDataGUIDs);
         // });
@@ -473,13 +480,55 @@ export class BackupDataService {
 
   getImportDate(date: Date): Date {
     //date imported with timestap cause problems.
-    let readDateString: string = String(date);
-    //remove time stamp
-    let newString: string = readDateString.split('T')[0];
-    //Format: YYYY-MM-DD
-    let yearMonthDate: Array<string> = newString.split('-');
-    //Month 0 indexed (-1)
-    return new Date(Number(yearMonthDate[0]), Number(yearMonthDate[1]) - 1, Number(yearMonthDate[2]));
+    if (date.toString()) {
+      return date;
+    } else {
+      let readDateString: string = String(date);
+      //remove time stamp
+      let newString: string = readDateString.split('T')[0];
+      //Format: YYYY-MM-DD
+      let yearMonthDate: Array<string> = newString.split('-');
+      //Month 0 indexed (-1)
+      return new Date(Number(yearMonthDate[0]), Number(yearMonthDate[1]) - 1, Number(yearMonthDate[2]));
+    }
+  }
+
+  getTrimmedModel(model: JStatRegressionModel): JStatRegressionModel {
+    return {
+      coef: model.coef,
+      R2: model.R2,
+      SSE: model.SSE,
+      SSR: model.SSR,
+      SST: model.SST,
+      adjust_R2: model.adjust_R2,
+      df_model: model.df_model,
+      df_resid: model.df_resid,
+      ybar: model.ybar,
+      t: {
+        se: model.t.se,
+        sigmaHat: model.t.sigmaHat,
+        p: model.t.p
+      },
+      f: {
+        pvalue: model.f.pvalue,
+        F_statistic: model.f.F_statistic
+      },
+      modelYear: model.modelYear,
+      predictorVariables: model.predictorVariables,
+      modelId: model.modelId,
+      isValid: model.isValid,
+      modelPValue: model.modelPValue,
+      modelNotes: model.modelNotes,
+      errorModeling: model.errorModeling,
+      SEPValidation: model.SEPValidation
+    }
+  }
+
+  trimGroups(groups: Array<IdbUtilityMeterGroup>): Array<IdbUtilityMeterGroup> {
+    return groups.map(group => {
+      delete group.combinedMonthlyData;
+      return group;
+    })
   }
 }
 
@@ -497,3 +546,5 @@ export interface BackupFile {
   origin: "VERIFI",
   backupFileType: "Account" | "Facility"
 }
+
+
