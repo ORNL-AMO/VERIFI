@@ -95,7 +95,7 @@ export class EnergyUseCalculationsService {
     let emissionsRate: number;
     if (source == 'Natural Gas') {
       // emissionsRate = this.convertEmissions(53.06, energyUnit);
-      emissionsRate = 53.06;
+      emissionsRate = 53.1148;
     } else if (source == 'Other Fuels') {
       let fuelTypeOptions: Array<FuelTypeOption> = this.getFuelTypeOptions(source, phase);
       let selectedFuel: FuelTypeOption = fuelTypeOptions.find(option => { return option.value == fuel })
