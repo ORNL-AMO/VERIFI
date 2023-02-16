@@ -159,6 +159,11 @@ export const MassUnitOptions: Array<UnitOption> = [
         display: 'Metric Tonnes (tonnes)',
         value: 'tonne',
         unitsOfMeasure: 'Metric'
+    },
+    {
+        display: 'Thousand pounds (klb)',
+        value: 'klb',
+        unitsOfMeasure: 'Imperial'
     }
 ]
 
