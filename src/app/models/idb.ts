@@ -299,7 +299,7 @@ export interface AnalysisGroup {
     regressionConstant: number,
     groupErrors: GroupErrors,
     specifiedMonthlyPercentBaseload: boolean,
-    averagePercentBaseload: number,
+    averagePercentBaseload?: number,
     monthlyPercentBaseload: Array<{
         monthNum: number,
         percent: number

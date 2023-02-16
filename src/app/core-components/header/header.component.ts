@@ -105,7 +105,12 @@ export class HeaderComponent implements OnInit {
     this.accountdbService.deleteDatabase();
   }
 
-  toggleResetDatabase(){
+  toggleResetDatabase() {
     this.resetDatabase = !this.resetDatabase;
+  }
+
+  openBackupModal() {
+    this.importBackupModalService.inFacility = this.router.url.includes('facility');
+    this.importBackupModalService.showModal.next(true);
   }
 }

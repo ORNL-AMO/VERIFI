@@ -9,6 +9,7 @@ import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbAccount, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import * as _ from 'lodash';
+import { LoadingService } from 'src/app/core-components/loading/loading.service';
 
 @Injectable({
   providedIn: 'root'
@@ -19,45 +20,53 @@ export class ExportToExcelTemplateService {
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private predictorDbService: PredictordbService,
     private facilityDbService: FacilitydbService,
-    private accountDbService: AccountdbService) { }
+    private accountDbService: AccountdbService,
+    private loadingService: LoadingService) { }
 
 
   exportFacilityData(facilityId?: string) {
-    let workbook: ExcelJS.Workbook = this.getWorkBook();
-    workbook.xlsx.writeBuffer().then(excelData => {
-      let blob: Blob = new Blob([excelData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-      let a = document.createElement("a");
-      let url = window.URL.createObjectURL(blob);
-      a.href = url;
-      let date = new Date();
-      let datePipe = new DatePipe('en-us');
-      let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-      let accountName: string = account.name;
 
-      a.download = accountName.replaceAll(' ', '-') + "-" + datePipe.transform(date, 'MM-dd-yyyy');
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    });
+    let workbook = new ExcelJS.Workbook();
+    var request = new XMLHttpRequest();
+    request.open('GET', 'assets/csv_templates/VERIFI-Import-Data.xlsx', true);
+    request.responseType = 'blob';
+    request.onload = () => {
+      workbook.xlsx.load(request.response).then(() => {
+        this.fillWorkbook(workbook, facilityId);
+        workbook.xlsx.writeBuffer().then(excelData => {
+          let blob: Blob = new Blob([excelData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+          let a = document.createElement("a");
+          let url = window.URL.createObjectURL(blob);
+          a.href = url;
+          let date = new Date();
+          let datePipe = new DatePipe('en-us');
+          let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+          let accountName: string = account.name;
+
+          a.download = accountName.replaceAll(' ', '-') + "-" + datePipe.transform(date, 'MM-dd-yyyy');
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+          this.loadingService.setLoadingStatus(false);
+        });
+      })
+    };
+    this.loadingService.setLoadingMessage('Exporting to .xlsx template');
+    this.loadingService.setLoadingStatus(true);
+    request.send();
   }
-
-  getWorkBook(facilityId?: string): ExcelJS.Workbook {
-    let workbook: ExcelJS.Workbook = new ExcelJS.Workbook();
-    workbook.properties.date1904 = true;
-    workbook.calcProperties.fullCalcOnLoad = true;
-    workbook.addWorksheet('Help');
-    workbook.worksheets[1] = this.getFacilityWorksheet(workbook, facilityId);
-    workbook.worksheets[2] = this.getMetersWorksheet(workbook, facilityId);
-    workbook.worksheets[3] = this.getElectricityWorksheet(workbook, facilityId);
-    workbook.worksheets[4] = this.getNonElectricityWorksheet(workbook, facilityId);
-    workbook.worksheets[5] = this.getPredictorWorksheet(workbook, facilityId);
-
+  fillWorkbook(workbook: ExcelJS.Workbook, facilityId?: string): ExcelJS.Workbook {
+    this.getFacilityWorksheet(workbook, facilityId);
+    this.getMetersWorksheet(workbook, facilityId);
+    this.getElectricityWorksheet(workbook, facilityId);
+    this.getNonElectricityWorksheet(workbook, facilityId);
+    this.getPredictorWorksheet(workbook, facilityId);
     return workbook;
   }
 
   getFacilityWorksheet(workbook: ExcelJS.Workbook, facilityId?: string): ExcelJS.Worksheet {
-    let worksheet: ExcelJS.Worksheet = workbook.addWorksheet('Facilities');
+    let worksheet: ExcelJS.Worksheet = workbook.getWorksheet('Facilities');
     worksheet.getCell('A1').value = 'Facility Name';
     worksheet.getCell('B1').value = 'Address';
     worksheet.getCell('C1').value = 'Country';
@@ -78,7 +87,7 @@ export class ExportToExcelTemplateService {
     accountFacilities.forEach(facility => {
       worksheet.getCell('A' + index).value = facility.name;
       worksheet.getCell('B' + index).value = facility.address;
-      worksheet.getCell('C' + index).value = facility.country;
+      worksheet.getCell('C' + index).value = this.getCountry(facility);
       worksheet.getCell('D' + index).value = facility.state;
       worksheet.getCell('E' + index).value = facility.city;
       worksheet.getCell('F' + index).value = facility.zip;
@@ -92,8 +101,17 @@ export class ExportToExcelTemplateService {
     return worksheet;
   }
 
+  getCountry(facility: IdbFacility): string {
+    if (facility.country) {
+      return facility.country;
+    } else if (facility.state) {
+      return 'United States of America (the)';
+    };
+    return;
+  }
+
   getMetersWorksheet(workbook: ExcelJS.Workbook, facilityId?: string): ExcelJS.Worksheet {
-    let worksheet: ExcelJS.Worksheet = workbook.addWorksheet('Meters-Utilities');
+    let worksheet: ExcelJS.Worksheet = workbook.getWorksheet('Meters-Utilities');
     worksheet.getCell('A1').value = 'Facility Name';
     worksheet.getCell('B1').value = 'Meter Number';
     worksheet.getCell('C1').value = 'Account Number';
@@ -177,7 +195,7 @@ export class ExportToExcelTemplateService {
   }
 
   getElectricityWorksheet(workbook: ExcelJS.Workbook, facilityId?: string): ExcelJS.Worksheet {
-    let worksheet: ExcelJS.Worksheet = workbook.addWorksheet('Electricity');
+    let worksheet: ExcelJS.Worksheet = workbook.getWorksheet('Electricity');
     worksheet.getCell('A1').value = 'Meter Number';
     worksheet.getCell('B1').value = 'Read Date';
     worksheet.getCell('C1').value = 'Total Consumption';
@@ -249,7 +267,7 @@ export class ExportToExcelTemplateService {
   }
 
   getNonElectricityWorksheet(workbook: ExcelJS.Workbook, facilityId?: string): ExcelJS.Worksheet {
-    let worksheet: ExcelJS.Worksheet = workbook.addWorksheet('Non-electricity');
+    let worksheet: ExcelJS.Worksheet = workbook.getWorksheet('Non-electricity');
     worksheet.getCell('A1').value = 'Meter Number';
     worksheet.getCell('B1').value = 'Read Date';
     worksheet.getCell('C1').value = 'Total Consumption';
@@ -291,7 +309,7 @@ export class ExportToExcelTemplateService {
   }
 
   getPredictorWorksheet(workbook: ExcelJS.Workbook, facilityId?: string): ExcelJS.Worksheet {
-    let worksheet: ExcelJS.Worksheet = workbook.addWorksheet('Predictors');
+    let worksheet: ExcelJS.Worksheet = workbook.getWorksheet('Predictors');
     let alpha = Array.from(Array(26)).map((e, i) => i + 65);
     let alphabet: Array<string> = alpha.map(x => { return String.fromCharCode(x) });
     let additionalAlphabet: Array<string> = alpha.map(x => { return 'A' + String.fromCharCode(x) });

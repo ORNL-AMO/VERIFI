@@ -91,15 +91,17 @@ export class EnergyUseCalculationsService {
   }
 
   getFuelEmissionsOutputRate(source: MeterSource, fuel: string, phase: MeterPhase, energyUnit: string): number {
+    //emissions rates in kg/MMBtu
     let emissionsRate: number;
     if (source == 'Natural Gas') {
-      emissionsRate = this.convertEmissions(53.06, energyUnit);
+      // emissionsRate = this.convertEmissions(53.06, energyUnit);
+      emissionsRate = 53.1148;
     } else if (source == 'Other Fuels') {
       let fuelTypeOptions: Array<FuelTypeOption> = this.getFuelTypeOptions(source, phase);
       let selectedFuel: FuelTypeOption = fuelTypeOptions.find(option => { return option.value == fuel })
       if (selectedFuel) {
         emissionsRate = selectedFuel.emissionsOutputRate;
-        emissionsRate = this.convertEmissions(emissionsRate, energyUnit);
+        // emissionsRate = this.convertEmissions(emissionsRate, energyUnit);
       }
     }
     return emissionsRate;

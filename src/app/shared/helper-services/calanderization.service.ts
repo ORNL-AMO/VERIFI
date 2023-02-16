@@ -816,11 +816,16 @@ export class CalanderizationService {
     if (meter.source == 'Electricity' || meter.source == 'Natural Gas' || meter.source == 'Other Fuels') {
       if (energyIsSource && meter.siteToSource != 0) {
         energyUse = energyUse / meter.siteToSource;
+      } let convertedEnergyUse: number = energyUse;
+      if (meter.source == 'Electricity') {
+        //electricty emissions rates in kWh
+        convertedEnergyUse = this.convertUnitsService.value(energyUse).from(energyUnit).to('kWh');
+      } else {
+        //non-electricity emissions rates are in MMBtu
+        convertedEnergyUse = this.convertUnitsService.value(energyUse).from(energyUnit).to('MMBtu');
       }
-      let convertedEnergyUse: number = this.convertUnitsService.value(energyUse).from(energyUnit).to('kWh');
       let locationEmissions: number;
       let marketEmissions: number;
-
 
       let marketEmissionsOutputRate: number;
       if (meter.source == 'Electricity') {

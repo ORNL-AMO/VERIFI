@@ -57,7 +57,37 @@ export class RegressionModelsService {
             model['modelId'] = Math.random().toString(36).substr(2, 9);
             model['modelPValue'] = model.f.pvalue;
             model['errorModeling'] = false;
-            models.push(model);
+            //Remove unused JSTAT data from model
+            let jstatModelToSave: JStatRegressionModel = {
+              coef: model.coef,
+              R2: model.R2,
+              SSE: model.SSE,
+              SSR: model.SSR,
+              SST: model.SST,
+              adjust_R2: model.adjust_R2,
+              df_model: model.df_model,
+              df_resid: model.df_resid,
+              ybar: model.ybar,
+              t: {
+                se: model.t.se,
+                sigmaHat: model.t.sigmaHat,
+                p: model.t.p
+              },
+              f: {
+                pvalue: model.f.pvalue,
+                F_statistic: model.f.F_statistic
+              },
+              modelYear: model.modelYear,
+              predictorVariables: model.predictorVariables,
+              modelId: model.modelId,
+              isValid: model.isValid,
+              modelPValue: model.modelPValue,
+              modelNotes: model.modelNotes,
+              errorModeling: model.errorModeling,
+              SEPValidation: model.SEPValidation
+            };
+
+            models.push(jstatModelToSave);
           } catch (err) {
             console.log(err);
             let modelPredictorVariables: Array<PredictorData> = new Array();
