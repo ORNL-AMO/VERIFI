@@ -1,10 +1,7 @@
 <div class="d-flex w-100 justify-content-between">
     <div>
-        <button *ngIf="editMeter.source == 'Electricity'" class="btn action-btn" [ngClass]="{'active' : showFilterDropdown}" (click)="toggleFilterMenu()">
-            <i class="fa fa-chevron-down" *ngIf="showFilterDropdown"></i>
-            <i class="fa fa-chevron-up" *ngIf="!showFilterDropdown"></i>
-            Choose Columns
-        </button>
+        <app-utility-meter-data-filter *ngIf="editMeter.source == 'Electricity'" [source]="'Electricity'">
+        </app-utility-meter-data-filter>
     </div>
     <div class="saveCancel item-right">
         <button *ngIf="!showConfirmCancel" class="btn nav-btn" (click)="cancel()">Cancel</button>
@@ -20,15 +17,7 @@
             Add Another</button>
     </div>
 </div>
-<div *ngIf="editMeter.source == 'Electricity' && showFilterDropdown">
-    <app-utility-meter-data-filter [source]="'Electricity'">
-    </app-utility-meter-data-filter>
-</div>
 <hr>
-
-
-
-
 
 <app-edit-electricity-bill *ngIf="editMeter.source == 'Electricity'" [editMeterData]="editMeterData"
     [addOrEdit]="addOrEdit" [editMeter]="editMeter" [meterDataForm]="meterDataForm" [invalidDate]="invalidDate">
