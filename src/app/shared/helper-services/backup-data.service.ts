@@ -480,7 +480,7 @@ export class BackupDataService {
 
   getImportDate(date: Date): Date {
     //date imported with timestap cause problems.
-    if (date.toString()) {
+    if (typeof date.getMonth === 'function') {
       return date;
     } else {
       let readDateString: string = String(date);
@@ -489,7 +489,11 @@ export class BackupDataService {
       //Format: YYYY-MM-DD
       let yearMonthDate: Array<string> = newString.split('-');
       //Month 0 indexed (-1)
-      return new Date(Number(yearMonthDate[0]), Number(yearMonthDate[1]) - 1, Number(yearMonthDate[2]));
+      if (yearMonthDate.length == 3) {
+        return new Date(Number(yearMonthDate[0]), Number(yearMonthDate[1]) - 1, Number(yearMonthDate[2]));
+      } else {
+        return date;
+      }
     }
   }
 
