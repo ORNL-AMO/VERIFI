@@ -17,7 +17,7 @@
 </div>
 
 <form *ngIf="!predictorToDelete">
-    <div class="row" *ngFor="let predictor of facilityPredictors">
+    <div class="row mb-2" *ngFor="let predictor of facilityPredictors">
         <div class="col">
             <input class="form-control" type="text" [(ngModel)]="predictor.name" name="{{'predictorName'+predictor.id}}"
                 onfocus="this.select();" minlength="0" maxlength="100">

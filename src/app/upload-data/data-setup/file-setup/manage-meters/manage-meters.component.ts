@@ -183,7 +183,7 @@ export class ManageMetersComponent implements OnInit {
       }
       let otherGroup: IdbUtilityMeterGroup = facilityMeterGroups.find(group => { return group.name == 'Other' });
       if (!otherGroup) {
-        otherGroup = this.utilityMeterGroupDbService.getNewIdbUtilityMeterGroup("Other", "Other", importFacility.guid, importFacility.accountId);
+        otherGroup = this.utilityMeterGroupDbService.getNewIdbUtilityMeterGroup("Other", "Other (non-energy)", importFacility.guid, importFacility.accountId);
         facilityMeterGroups.push(otherGroup);
       }
 

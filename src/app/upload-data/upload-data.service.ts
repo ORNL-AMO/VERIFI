@@ -259,14 +259,14 @@ export class UploadDataService {
     importFacilities.forEach(facility => {
       let facilityPredictorData = predictorsData.filter(data => { return data['Facility Name'] == facility.name });
       let facilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(entry => { return entry.facilityId == facility.guid });
-      let existingFacilityPredictorData: Array<PredictorData> = new Array();
-      if (facilityPredictorEntries.length != 0) {
-        existingFacilityPredictorData = facilityPredictorEntries[0].predictors;
-      }
+      // let existingFacilityPredictorData: Array<PredictorData> = new Array();
+      // if (facilityPredictorEntries.length != 0) {
+      //   existingFacilityPredictorData = facilityPredictorEntries[0].predictors;
+      // }
       if (facilityPredictorData.length != 0) {
         Object.keys(facilityPredictorData[0]).forEach((key) => {
           if (key != 'Facility Name' && key != 'Date') {
-            let predictorIndex: number = existingFacilityPredictorData.findIndex(predictor => { return predictor.name == key });
+            let predictorIndex: number = facilityPredictorEntries[0].predictors.findIndex(predictor => { return predictor.name == key });
             if (predictorIndex == -1) {
               let hasData: boolean = false;
               facilityPredictorData.forEach(dataItem => {
@@ -281,7 +281,10 @@ export class UploadDataService {
                   newPredictor.production = true;
                 }
                 newPredictor.name = key;
-                existingFacilityPredictorData.push(newPredictor);
+                // existingFacilityPredictorData.push(newPredictor);
+                facilityPredictorEntries.forEach(predictorEntry => {
+                  predictorEntry.predictors.push(newPredictor);
+                });
               }
             }
           }
@@ -294,7 +297,7 @@ export class UploadDataService {
         });
         if (!facilityPredictorEntry) {
           facilityPredictorEntry = this.predictorDbService.getNewIdbPredictorEntry(facility.guid, selectedAccount.guid, dataItemDate);
-          facilityPredictorEntry.predictors = JSON.parse(JSON.stringify(existingFacilityPredictorData));
+          facilityPredictorEntry.predictors = JSON.parse(JSON.stringify(facilityPredictorEntries[0].predictors));
         }
         Object.keys(dataItem).forEach((key) => {
           if (key != 'Facility Name' && key != 'Date') {
@@ -305,7 +308,7 @@ export class UploadDataService {
           }
         });
         if (facilityPredictorEntry.predictors.length != 0) {
-          predictorEntries.push(facilityPredictorEntry);
+          predictorEntries.push(JSON.parse(JSON.stringify(facilityPredictorEntry)));
         }
       });
     })
