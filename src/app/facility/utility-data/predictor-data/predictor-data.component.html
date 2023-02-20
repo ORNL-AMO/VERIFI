@@ -43,7 +43,7 @@
         </div>
 
         <table class="table utility-data table-sm table-bordered table-hover" #predictorTable [ngClass]="{'copying-table': copyingTable}">
-            <thead class="clickable">
+            <thead class="sortable">
                 <tr>
                     <th class="input" *ngIf="!copyingTable">
                         <input #masterCheckbox type="checkbox" (change)="checkAll()" [(ngModel)]="allChecked">
