@@ -23,7 +23,7 @@
             </div>
             <div class="input-group pt-2" *ngIf="selectedAccount">
                 <label class="w-50 ps-0 bold">Overwrite current account? </label>
-                <select class="form-control" [(ngModel)]="overwriteData" name="overwriteData">
+                <select class="form-select" [(ngModel)]="overwriteData" name="overwriteData">
                     <option [ngValue]="true">Overwrite Account</option>
                     <option [ngValue]="false">Create New Account</option>
                 </select>
@@ -45,14 +45,14 @@
             </div>
             <div class="input-group pt-2">
                 <label class="w-50 ps-0 bold">Overwrite existing facility? </label>
-                <select class="form-control" [(ngModel)]="overwriteData" name="overwriteData">
+                <select class="form-select" [(ngModel)]="overwriteData" name="overwriteData">
                     <option [ngValue]="true">Overwrite Facility</option>
                     <option [ngValue]="false">Create New Facilty</option>
                 </select>
             </div>
             <div class="input-group pt-2" *ngIf="overwriteData">
                 <label class="w-50 ps-0 bold">Facility to overwrite</label>
-                <select class="form-control" [(ngModel)]="overwriteFacility" name="overwriteFacility">
+                <select class="form-select" [(ngModel)]="overwriteFacility" name="overwriteFacility">
                     <option *ngFor="let facility of accountFacilities" [ngValue]="facility">{{facility.name}}</option>
                 </select>
             </div>
