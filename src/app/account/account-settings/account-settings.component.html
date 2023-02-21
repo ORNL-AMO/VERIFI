@@ -32,7 +32,7 @@
     <h4>Portfolio</h4>
 
     <div class="table-responsive">
-        <table class="table table-sm table-hover">
+        <table class="table table-sm utility-data table-hover table-bordered">
             <thead>
                 <tr>
                     <th></th>
@@ -40,29 +40,34 @@
                     <th>NAICS</th>
                     <th>State</th>
                     <th>Country</th>
-                    <th>Facility Size</th>
+                    <!-- <th>Facility Size</th> -->
                     <th>Units</th>
                     <th class="actions">Actions</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="table-group-divider">
                 <tr *ngFor="let facility of facilityList">
-                    <th>
-                        <select [(ngModel)]="facility.facilityOrder" class="form-control" id="facilityOrder"
+                    <td class="actions">
+                        <select [(ngModel)]="facility.facilityOrder" class="form-select" id="facilityOrder"
                             name="facilityOrder" (change)="setFacilityOrder(facility)">
                             <option *ngFor="let option of orderOptions" [ngValue]="option">{{option}}</option>
                         </select>
-                    </th>
-                    <td><a (click)="switchFacility(facility)">{{facility.name}}</a></td>
+                    </td>
+                    <td><a class="click-link" (click)="switchFacility(facility)">{{facility.name}}</a></td>
                     <td>{{facility.naics3}}</td>
                     <td>{{facility.state}}</td>
                     <td>{{facility.country}}</td>
-                    <td>{{facility.size}}</td>
+                    <!-- <td>{{facility.size}}</td> -->
                     <td>{{facility.unitsOfMeasure}}</td>
                     <td class="actions">
-                        <div class="d-flex">
-                            <i class="fa fa-pencil" title="Edit" (click)="switchFacility(facility)"></i>
-                            <i class="fa fa-trash" title="Delete" (click)="setDeleteFacilityEntry(facility)"></i>
+                        <div class="btn-group">
+                            <button class="btn btn-sm btn-outline" (click)="switchFacility(facility)" title="Edit">
+                                <i class="fa fa-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline" (click)="setDeleteFacilityEntry(facility)"
+                                title="Delete">
+                                <i class="fa fa-trash"></i>
+                            </button>
                         </div>
                     </td>
                 </tr>
@@ -108,7 +113,8 @@
 </div>
 
 
-<div [class.open]="{'windowOverlay':showDeleteAccount || displayDeleteFacility || displayApplyFacilitySettings}"></div>
+<div [ngClass]="{'windowOverlay': (showDeleteAccount || displayDeleteFacility || displayApplyFacilitySettings)}">
+</div>
 
 <div class="popup" [class.open]="showDeleteAccount" *ngIf="showDeleteAccount">
     <div class="popup-header">Delete Account: {{selectedAccount.name}}
@@ -118,7 +124,7 @@
         <p>WARNING: By deleting this account, you are also deleting all of the data associated with it.
             Are you sure you want to preform this action?</p>
     </div>
-    <div class="popup-footer text-right">
+    <div class="popup-footer text-end pb-2">
         <button class="btn btn-secondary" (click)="cancelAccountDelete()">Cancel</button>
         <button class="btn btn-danger" (click)="confirmAccountDelete()">Confirm Delete</button>
     </div>
@@ -132,7 +138,7 @@
         <p>WARNING: By deleting this facility, you are also deleting all of the data associated with it.
             Are you sure you want to preform this action?</p>
     </div>
-    <div class="popup-footer text-right">
+    <div class="popup-footer text-end pb-2">
         <button class="btn btn-secondary" (click)="cancelFacilityDelete()">Cancel</button>
         <button class="btn btn-danger" (click)="confirmFacilityDelete()">Confirm Delete</button>
     </div>
@@ -149,23 +155,30 @@
         </p>
         <p>WARNING: Applying account settings will override any existing facility settings.</p>
         <hr>
-        <label class="checkbox-label" for="applyUnits">
-            <input class="checkbox" type="checkbox" id="applyUnits" name="applyUnits"
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="applyUnits" name="applyUnits"
                 [(ngModel)]="applySettingsOptions.units">
-            Apply Default Units
-        </label>
-        <label class="checkbox-label" for="sustainabilityQuestions">
-            <input class="checkbox" type="checkbox" id="sustainabilityQuestions" name="sustainabilityQuestions"
+            <label class="form-check-label" for="applyUnits">
+                Apply Default Units
+            </label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="sustainabilityQuestions" name="sustainabilityQuestions"
                 [(ngModel)]="applySettingsOptions.sustainabilityQuestions">
-            Apply Sustainabity Goals
-        </label>
-        <label class="checkbox-label" for="financialReporting">
-            <input class="checkbox" type="checkbox" id="financialReporting" name="financialReporting"
+            <label class="form-check-label" for="sustainabilityQuestions">
+                Apply Sustainabity Goals
+            </label>
+        </div>
+
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="financialReporting" name="financialReporting"
                 [(ngModel)]="applySettingsOptions.financialReporting">
-            Apply Financial Reporting Details
-        </label>
+            <label class="form-check-label" for="financialReporting">
+                Apply Financial Reporting Details
+            </label>
+        </div>
     </div>
-    <div class="popup-footer text-right">
+    <div class="popup-footer text-end pb-2">
         <button class="btn btn-secondary" (click)="closeApplySettingsModel()">Cancel</button>
         <button class="btn btn-outline" (click)="applySettingsToFacility()">Apply Settings</button>
     </div>

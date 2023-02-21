@@ -7,15 +7,6 @@
     padding: 20px 30px 30px;
 }
 
-th:hover{
-    cursor: pointer;
-    text-decoration: underline;
-}
-
-th.active{
-    text-decoration: underline;
-}
-
 
 .report-type-menu .fa-square-check, .report-type-menu .fa-square, .report-type-menu label {
     font-size: 20px;

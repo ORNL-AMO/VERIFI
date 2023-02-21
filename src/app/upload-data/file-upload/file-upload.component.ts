@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { FileReference, UploadDataService } from '../upload-data.service';
 import * as XLSX from 'xlsx';
+import { ExportToExcelTemplateService } from 'src/app/shared/helper-services/export-to-excel-template.service';
 
 @Component({
   selector: 'app-file-upload',
@@ -15,7 +16,8 @@ export class FileUploadComponent implements OnInit {
   filesUploaded: boolean = false;
   fileUploadError: boolean = false;
   dragOver: boolean = false;
-  constructor(private router: Router, private uploadDataService: UploadDataService) { }
+  constructor(private router: Router, private uploadDataService: UploadDataService,
+    private exportToExcelTemplateService: ExportToExcelTemplateService) { }
 
   ngOnInit(): void {
     this.fileReferences = new Array();
@@ -58,6 +60,7 @@ export class FileUploadComponent implements OnInit {
         let fileReference: FileReference = this.uploadDataService.getFileReference(file, workBook);
         this.fileReferences.push(fileReference);
       }catch (err){
+        console.log(err);
         this.fileUploadError = true;
       }
     };
@@ -70,5 +73,9 @@ export class FileUploadComponent implements OnInit {
 
   setDragOut(){
     this.dragOver = false;
+  }
+
+  downloadTemplate(){
+    this.exportToExcelTemplateService.exportFacilityData();
   }
 }

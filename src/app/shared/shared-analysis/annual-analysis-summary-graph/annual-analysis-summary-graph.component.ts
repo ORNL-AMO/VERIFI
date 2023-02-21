@@ -50,7 +50,7 @@ export class AnnualAnalysisSummaryGraphComponent implements OnInit {
         y: summariesCopy.map(summary => { return summary.adjusted }),
         // width: summariesCopy.map(summary => { return .75 }),
         // texttemplate: '%{value:.5f}',
-        name: "Adjusted Energy Use",
+        name: "Calculated Energy Use",
         type: 'bar',
         marker: {
           color: '#7D3C98'

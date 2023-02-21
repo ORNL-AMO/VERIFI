@@ -1,7 +1,7 @@
 <div class="row">
     <div class="col-md-4 col-sm-12">
         <label class="bold">Select Modeling Method</label>
-        <select required class="form-control" id="userDefinedModel" id="userDefinedModel"
+        <select required class="form-select" id="userDefinedModel" id="userDefinedModel"
             [(ngModel)]="group.userDefinedModel" (change)="changeModelType()">
             <option [ngValue]="true">Calculate Models</option>
             <option [ngValue]="false">User Defined Model</option>
@@ -50,7 +50,7 @@
 
 
                 <div class="d-flex" *ngIf="group.models">
-                    <label class="show-models-label bold pr-3" for="showInvalid">
+                    <label class="show-models-label bold pe-3" for="showInvalid">
                         Show Invalid Models
                     </label>
                     <div>
@@ -94,12 +94,12 @@
                     <span class="slider round"></span>
                 </label>
             </div>
-            <div class="col-4">
+            <div class="col-4 mdash">
                 <input class="form-control" *ngIf="predictor.productionInAnalysis" type="number" step="any"
                     id="{{'regressionCoefficient_'+predictor.id}}" name="{{'regressionCoefficient_'+predictor.id}}"
                     [(ngModel)]="predictor.regressionCoefficient" required (input)="saveItem()"
                     [disabled]="group.userDefinedModel">
-                <span class="bold" *ngIf="!predictor.productionInAnalysis">&mdash;</span>
+                <span class="bold " *ngIf="!predictor.productionInAnalysis">&mdash;</span>
             </div>
         </div>
         <div class="row mb-2 sub-column">
@@ -152,7 +152,7 @@
     <div class="popup-body">
         <p>WARNING: Updated models will replace existing models. This cannot be undone.</p>
     </div>
-    <div class="saveCancel popup-footer text-right">
+    <div class="saveCancel popup-footer text-end">
         <button class="btn btn-secondary" (click)="closeUpdateModelsModal()">Cancel</button>
         <button class="btn btn-success" (click)="confirmUpdateModals()">Update Models</button>
     </div>
@@ -165,7 +165,7 @@
     <div class="popup-body">
         <p>WARNING: Changing predictor variables will remove existing models. This cannot be undone.</p>
     </div>
-    <div class="saveCancel popup-footer text-right">
+    <div class="saveCancel popup-footer text-end">
         <button class="btn btn-secondary" (click)="cancelTogglePredictor()">Cancel</button>
         <button class="btn btn-success" (click)="confirmTogglePredictor()">Clear Models</button>
     </div>

@@ -1,21 +1,19 @@
-<div class="d-flex justify-content-between">
-    <div>
-        <button *ngIf="dataDisplay == 'table'" class="btn action-btn" [ngClass]="{'active' : showFilterDropdown}" (click)="toggleFilterMenu()">
-            <i class="fa fa-chevron-down" *ngIf="showFilterDropdown"></i>
-            <i class="fa fa-chevron-up" *ngIf="!showFilterDropdown"></i>
-            Choose Columns
-        </button>
-    </div>
-
+<div class="d-flex justify-content-between mb-2">
+    <app-analysis-summary-table-filter [tableContext]="'annualAccount'"></app-analysis-summary-table-filter>
 
     <div class="btn-group">
-        <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'table'}"
-            (click)="setDataDisplay('table')">Table</button>
-        <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'graph'}"
-            (click)="setDataDisplay('graph')">Graph</button>
+        <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'table'}" (click)="setDataDisplay('table')">
+            <span class="fa fa-chevron-right"></span>
+            Table
+            <span class="fa fa-chevron-left"></span>
+        </button>
+        <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'graph'}" (click)="setDataDisplay('graph')">
+            <span class="fa fa-chevron-right"></span>
+            Graph
+            <span class="fa fa-chevron-left"></span>
+        </button>
     </div>
 </div>
-<app-analysis-summary-table-filter *ngIf="showFilterDropdown" [tableContext]="'annualAccount'"></app-analysis-summary-table-filter>
 
 <div class="w-100 x-scroll" *ngIf="!calculating">
     <app-annual-analysis-summary-table *ngIf="dataDisplay == 'table'" [annualAnalysisSummary]="annualAnalysisSummary"

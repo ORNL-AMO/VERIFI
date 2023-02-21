@@ -1,44 +1,48 @@
 <nav class="navbar navbar-expand-sm" #header>
     <a class="navbar-brand" routerLink="/account">VERIFI</a>
-    <span class="badge badge-secondary">v{{version}}</span>
+    <span class="badge bg-secondary">v{{version}}</span>
 
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <div class="pl-2" *ngIf="dataInitialized && activeAccount">
+        <div class="ps-2" *ngIf="dataInitialized && activeAccount">
             <app-search-bar></app-search-bar>
         </div>
 
-        <ul class="navbar-nav ml-auto" *ngIf="dataInitialized">
-            <li class="nav-item dropdown">
-                <button *ngIf="activeAccount" class="btn action-btn dropdown-toggle"
-                    (click)="toggleDropdown()"><span class="fa fa-building"></span>
-                    {{activeAccount.name}}
-                </button>
-                <div *ngIf="!activeAccount" class="nav-link dropdown-toggle account-required"
-                    (click)="toggleDropdown()">Account Required
-                </div>
-                <div class="dropdown-menu" [ngClass]="{'show':showDropdown}">
-                    <a *ngFor="let account of accountList| orderBy:'name':'asc'" [class.active]="activeAccount?.id === account.id"
-                        class="dropdown-item" (click)="switchAccount(account)"> {{account.name}}</a>
-                    <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" (click)="addNewAccount()"><i class="fa fa-plus"></i> Add New
-                        Account</a>
-                    <a class="dropdown-item" (click)="addNewAccount()"><i class="fa fa-upload"></i> Import Backup</a>
-                </div>
-            </li>
-        </ul>
-        <div class="pl-2" *ngIf="dataInitialized && activeAccount">
+        <div class="dropdown ms-auto" *ngIf="dataInitialized">
+            <button *ngIf="activeAccount" class="btn action-btn dropdown-toggle"
+                data-bs-toggle="dropdown" aria-expanded="false"><span class="fa fa-building"></span>
+                {{activeAccount.name}}
+            </button>
+            <button *ngIf="!activeAccount" class="btn action-btn dropdown-toggle italic"
+                data-bs-toggle="dropdown" aria-expanded="false">Account Required
+            </button>
+            <ul class="dropdown-menu">
+                <li>
+                    <a *ngFor="let account of accountList| orderBy:'name':'asc'"
+                        [class.active]="activeAccount?.id === account.id" class="dropdown-item"
+                        (click)="switchAccount(account)"> {{account.name}}</a>
+                </li>
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
+                <li><a class="dropdown-item" (click)="addNewAccount()"><i class="fa fa-plus"></i> Add New
+                        Account</a></li>
+                <li><a class="dropdown-item" (click)="openBackupModal()"><i class="fa fa-upload"></i> Import Backup</a>
+                </li>
+            </ul>
+        </div>
+        <div class="ps-2" *ngIf="dataInitialized && activeAccount">
             <button class="btn action-btn" (click)="backupAccount()">Backup Account
             </button>
         </div>
-        <div class="pl-2" *ngIf="dataInitialized && activeAccount">Last Backup: (<span
+        <div class="ps-2" *ngIf="dataInitialized && activeAccount">Last Backup: (<span
                 *ngIf="lastBackupDate">{{lastBackupDate | date:'medium'}}</span><span
                 *ngIf="!lastBackupDate">&mdash;</span>)</div>
         <!--TODO: Remove For Production-->
-        <div class="pl-2" *ngIf="!isProduction">
-            <button *ngIf="!resetDatabase" class="btn btn-danger backup-account" (click)="toggleResetDatabase()">Reset
+        <div class="ps-2" *ngIf="!isProduction">
+            <button *ngIf="!resetDatabase" class="btn btn-danger" (click)="toggleResetDatabase()">Reset
                 Database
             </button>
-            <button *ngIf="resetDatabase" class="btn btn-danger backup-account" (click)="deleteDatabase()">Are you sure
+            <button *ngIf="resetDatabase" class="btn btn-danger" (click)="deleteDatabase()">Are you sure
                 you want to reset the database?
             </button>
         </div>

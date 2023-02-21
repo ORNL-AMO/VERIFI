@@ -1,11 +1,3 @@
-thead th.active {
-    text-decoration: underline;
-}
-
-thead th:hover{
-    cursor: pointer;
-    text-decoration: underline;
-}
 
 .fa.fa-check-circle-o{
     color: green;

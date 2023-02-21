@@ -1,5 +1,6 @@
-<table class="table table-sm" #meterDataTable [ngClass]="{'copying-table': copyingTable}">
-    <thead>
+<table class="table utility-data table-sm table-bordered table-hover" #meterDataTable
+    [ngClass]="{'copying-table': copyingTable}">
+    <thead class="sortable">
         <tr class="table-mh">
             <th colspan=9>{{calanderizedMeter.meter.name}}
                 <span class="item-right small source-label">{{calanderizedMeter.meter.source}}</span>
@@ -18,22 +19,21 @@
             </th>
             <th (click)="setOrderDataField('marketEmissions')"
                 [ngClass]="{'active': orderDataField == 'marketEmissions'}">Total <br>Market-Based<br>Emissions (kg
-                CO<sub>2</sub>)</th>
+                CO<sub>2</sub>e)</th>
             <th (click)="setOrderDataField('locationEmissions')"
                 [ngClass]="{'active': orderDataField == 'locationEmissions'}">Total <br>Location-Based<br>Emissions (kg
-                CO<sub>2</sub>)</th>
-            <th (click)="setOrderDataField('RECs')" [ngClass]="{'active': orderDataField == 'RECs'}">RECs<br> (<span
-                    [innerHTML]="calanderizedMeter.energyUnit | settingsLabel"></span>)</th>
+                CO<sub>2</sub>e)</th>
+            <th (click)="setOrderDataField('RECs')" [ngClass]="{'active': orderDataField == 'RECs'}">RECs<br> (MWh)</th>
             <th (click)="setOrderDataField('excessRECs')" [ngClass]="{'active': orderDataField == 'excessRECs'}">Excess
-                RECs<br> (<span [innerHTML]="calanderizedMeter.energyUnit | settingsLabel"></span>)</th>
+                RECs<br> (MWh)</th>
             <th (click)="setOrderDataField('excessRECsEmissions')"
                 [ngClass]="{'active': orderDataField == 'excessRECsEmissions'}">Excess
-                RECs Emissions<br> (kg CO<sub>2</sub>e)</th>
+                RECs <br>Emissions<br> (kg CO<sub>2</sub>e)</th>
             <th (click)="setOrderDataField('energyCost')" [ngClass]="{'active': orderDataField == 'energyCost'}">Total
                 Cost</th>
         </tr>
     </thead>
-    <tbody>
+    <tbody class="table-group-divider">
         <tr *ngFor="let data of calanderizedMeter.monthlyData| orderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage"
             [ngClass]="{'use-and-consumption': data.energyConsumption && data.energyUse}">
             <td>{{data.date | date: 'MMMM, y'}}</td>
@@ -41,16 +41,16 @@
             </td>
             <td *ngIf="calanderizedMeter.showEnergyUse">{{data.energyUse | customNumber}}
             </td>
-            <td *ngIf="calanderizedMeter.showEmissions">{{data.marketEmissions | number:'1.0-0'}}
+            <td *ngIf="calanderizedMeter.showEmissions">{{data.marketEmissions | customNumber}}
             </td>
-            <td *ngIf="calanderizedMeter.showEmissions">{{data.locationEmissions | number:'1.0-0'}}
+            <td *ngIf="calanderizedMeter.showEmissions">{{data.locationEmissions | customNumber}}
             </td>
-            <td *ngIf="calanderizedMeter.showEmissions">{{data.RECs | number:'1.0-0'}}
+            <td *ngIf="calanderizedMeter.showEmissions">{{data.RECs | customNumber}}
             </td>
-            <td *ngIf="calanderizedMeter.showEmissions">{{data.excessRECs | number:'1.0-0'}}
+            <td *ngIf="calanderizedMeter.showEmissions">{{data.excessRECs | customNumber}}
             </td>
             <td *ngIf="calanderizedMeter.showEmissions">
-                {{data.excessRECsEmissions | number:'1.0-0'}}
+                {{data.excessRECsEmissions | customNumber}}
             </td>
             <td>{{data.energyCost | customNumber:true}}
             </td>
@@ -58,12 +58,13 @@
     </tbody>
 </table>
 
-<div class="tableControls overflow-hidden">
-    <a class="click-link" (click)="copyTable()"><span class="fa fa-copy"></span> Copy Table</a>
-    <div class="item-right">
-        <ngb-pagination [collectionSize]="calanderizedMeter.monthlyData.length" [(page)]="currentPageNumber"
-            [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Default pagination">
-        </ngb-pagination>
+<div class="d-flex w-100 justify-content-between">
+    <div>
+        <button class="btn action-btn btn-sm" (click)="copyTable()">
+            <span class="fa fa-copy"></span> Copy Table
+        </button>
     </div>
-    <p class="item-right">{{calanderizedMeter.monthlyData.length}} entries</p>
+    <ngb-pagination [collectionSize]="calanderizedMeter.monthlyData.length" [(page)]="currentPageNumber"
+        [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Pagination">
+    </ngb-pagination>
 </div>

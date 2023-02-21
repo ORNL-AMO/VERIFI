@@ -129,23 +129,23 @@ export interface AnalysisTableColumns {
 
 
 export interface JStatRegressionModel {
-  coef: Array<number>,
-  R2: number,
-  SSE: number,
-  SSR: number,
-  SST: number,
-  adjust_R2: number,
-  df_model: number,
-  df_resid: number,
-  ybar: number,
+  coef?: Array<number>,
+  R2?: number,
+  SSE?: number,
+  SSR?: number,
+  SST?: number,
+  adjust_R2?: number,
+  df_model?: number,
+  df_resid?: number,
+  ybar?: number,
   t: {
-    se: Array<number>,
-    sigmaHat: number
-    p: Array<number>
+    se?: Array<number>,
+    sigmaHat?: number
+    p?: Array<number>
   },
   f: {
-    pvalue: number,
-    F_statistic: number
+    pvalue?: number,
+    F_statistic?: number
   },
   modelYear: number,
   predictorVariables: Array<PredictorData>,

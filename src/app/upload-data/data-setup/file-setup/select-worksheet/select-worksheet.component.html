@@ -11,9 +11,9 @@
     <div class="col-6">
         <app-label-with-tooltip [field]="'selectWorksheet'" [label]="'Select Worksheet'" [isBold]="true"
             [labelId]="'worksheetName'"></app-label-with-tooltip>
-        <select class="form-control" name="worksheetName" [(ngModel)]="fileReference.selectedWorksheetName"
+        <select class="form-select" name="worksheetName" [(ngModel)]="fileReference.selectedWorksheetName"
             (change)="setSelectedWorksheetName()" id="worksheetName">
-            <option class="form-control" *ngFor="let name of fileReference.workbook?.SheetNames" [ngValue]="name">
+            <option *ngFor="let name of fileReference.workbook?.SheetNames" [ngValue]="name">
                 {{name}}
             </option>
         </select>
@@ -21,32 +21,34 @@
     <div class="col-6">
         <app-label-with-tooltip [field]="'selectImportFacility'" [label]="'Select Import Facility'" [isBold]="true"
             [labelId]="'selectedFacilityId'"></app-label-with-tooltip>
-        <select class="form-control" name="selectedFacilityId" [(ngModel)]="fileReference.selectedFacilityId"
+        <select class="form-select" name="selectedFacilityId" [(ngModel)]="fileReference.selectedFacilityId"
             (change)="setImportFacility()">
-            <option class="form-control" [ngValue]="undefined">
+            <option [ngValue]="undefined">
                 Multiple Facilities
             </option>
-            <option class="form-control" *ngFor="let facility of facilityOptions" [ngValue]="facility.guid">
+            <option *ngFor="let facility of facilityOptions" [ngValue]="facility.guid">
                 {{facility.name}}
             </option>
         </select>
     </div>
 </div>
 <br>
-<table *ngIf="fileReference.selectedWorksheetData">
-    <thead>
-        <tr>
-            <th *ngFor="let header of fileReference.selectedWorksheetData[0]">
-                {{header}}
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr *ngFor="let worksheetData of fileReference.selectedWorksheetData; let index = index;"
-            [ngClass]="{'hidden': index == 0}">
-            <td *ngFor="let data of worksheetData">
-                {{data}}
-            </td>
-        </tr>
-    </tbody>
-</table>
+<div class="table-responsive" *ngIf="fileReference.selectedWorksheetData">
+    <table class="table table-bordered table-sm table-hover utility-data">
+        <thead class="table-mh">
+            <tr>
+                <th *ngFor="let header of fileReference.selectedWorksheetData[0]">
+                    {{header}}
+                </th>
+            </tr>
+        </thead>
+        <tbody class="table-group-divider">
+            <tr *ngFor="let worksheetData of fileReference.selectedWorksheetData; let index = index;"
+                [ngClass]="{'hidden': index == 0}">
+                <td *ngFor="let data of worksheetData">
+                    {{data}}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

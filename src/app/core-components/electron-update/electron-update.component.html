@@ -1,7 +1,7 @@
 <div class="card toast" [@updateToast]="showUpdateAvailable"
     [ngClass]="{'warning': !updateError, 'error': updateError}">
     <div class="header">
-        <i class="fa fa-exclamation-circle item-left mr-2"></i>
+        <i class="fa fa-exclamation-circle item-left me-2"></i>
 
         <p class="item-left toast-title" *ngIf="!updateError">A new version of VERIFI is available!</p>
         <p class="item-left toast-title" *ngIf="updateError">Ooops! Something went wrong!</p>
@@ -15,7 +15,7 @@
         <p class="mb-0">Something went wrong, please contact ORNL to inform them that there was an error downloading the
             update so they can fix the issue as quickly as possible.</p>
     </div>
-    <div class="footer text-right" *ngIf="!downloading">
+    <div class="footer text-end" *ngIf="!downloading">
         <hr>
         <a class="click-link" (click)="update()">Download Update</a>
     </div>

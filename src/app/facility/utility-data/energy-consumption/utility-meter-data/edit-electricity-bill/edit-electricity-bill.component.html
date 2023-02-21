@@ -12,9 +12,9 @@
         <input id="readDate" class="form-control" type="date" formControlName="readDate" (change)="checkDate()"
           [ngClass]="{'error': invalidDate}">
       </div>
-      <span class="inputError" *ngIf="meterDataForm.get('readDate').hasError('required')">Meter read date is
-        required</span>
-      <span class="inputError" *ngIf="invalidDate">Meter already has data entered for selected date</span>
+      <div class="alert alert-danger" *ngIf="meterDataForm.get('readDate').hasError('required')">Meter read date is
+        required</div>
+      <div class="alert alert-danger" *ngIf="invalidDate">Meter already has data entered for selected date</div>
 
       <!--energy use-->
       <label for="totalEnergyUse">
@@ -25,13 +25,13 @@
         <input id="totalEnergyUse" class="form-control" type="number" formControlName="totalEnergyUse"
           [class.warning]="meterDataForm.controls.totalEnergyUse.value === 0" onfocus="this.select();" min="0"
           (input)="setTotalEmissions()">
-        <span class="unit" [innerHTML]="energyUnit | settingsLabel"></span>
+        <span class="input-group-text" [innerHTML]="energyUnit | settingsLabel"></span>
       </div>
-      <span class="inputError" *ngIf="meterDataForm.get('totalEnergyUse').hasError('required')">Total energy use is
-        required</span>
-      <span class="inputError" *ngIf="meterDataForm.get('totalEnergyUse').hasError('min')">Can't be less than 0</span>
-      <span class="inputWarning" *ngIf="meterDataForm.controls.totalEnergyUse.value === 0">Total energy use should be
-        greater than 0</span>
+      <div class="alert alert-danger" *ngIf="meterDataForm.get('totalEnergyUse').hasError('required')">Total energy use is
+        required</div>
+      <div class="alert alert-danger" *ngIf="meterDataForm.get('totalEnergyUse').hasError('min')">Can't be less than 0</div>
+      <div class="alert alert-warning" *ngIf="meterDataForm.controls.totalEnergyUse.value === 0">Total energy use should be
+        greater than 0</div>
 
       <!--calculated emissions-->
       <div class="row">
@@ -63,14 +63,14 @@
       <div class="input-group mb-3">
         <input id="totalRealDemand" class="form-control" type="number" formControlName="totalRealDemand"
           [class.warning]="meterDataForm.controls.totalRealDemand.value === 0" onfocus="this.select();" min="0">
-        <span class="unit">kW</span>
+        <span class="input-group-text">kW</span>
       </div>
-      <span class="inputError" *ngIf="meterDataForm.get('totalRealDemand').hasError('required')">Total demand is
-        required</span>
-      <span class="inputError" *ngIf="meterDataForm.get('totalRealDemand').hasError('min')">Can't be less than 0</span>
-      <span class="inputWarning" *ngIf="meterDataForm.controls.totalRealDemand.value === 0">Total demand should be
+      <div class="alert alert-danger" *ngIf="meterDataForm.get('totalRealDemand').hasError('required')">Total demand is
+        required</div>
+      <div class="alert alert-danger" *ngIf="meterDataForm.get('totalRealDemand').hasError('min')">Can't be less than 0</div>
+      <div class="alert alert-warning" *ngIf="meterDataForm.controls.totalRealDemand.value === 0">Total demand should be
         greater
-        than 0</span>
+        than 0</div>
 
       <!--billed demand-->
       <label for="totalBilledDemand">
@@ -79,15 +79,15 @@
       <div class="input-group mb-3">
         <input id="totalBilledDemand" class="form-control" type="number" formControlName="totalBilledDemand"
           [class.warning]="meterDataForm.controls.totalBilledDemand.value === 0" onfocus="this.select();" min="0">
-        <span class="unit">kW</span>
+        <span class="input-group-text">kW</span>
       </div>
-      <span class="inputError" *ngIf="meterDataForm.get('totalBilledDemand').hasError('required')">Total demand is
-        required</span>
-      <span class="inputError" *ngIf="meterDataForm.get('totalBilledDemand').hasError('min')">Can't be less than
-        0</span>
-      <span class="inputWarning" *ngIf="meterDataForm.controls.totalBilledDemand.value === 0">Total demand should be
+      <div class="alert alert-danger" *ngIf="meterDataForm.get('totalBilledDemand').hasError('required')">Total demand is
+        required</div>
+      <div class="alert alert-danger" *ngIf="meterDataForm.get('totalBilledDemand').hasError('min')">Can't be less than
+        0</div>
+      <div class="alert alert-warning" *ngIf="meterDataForm.controls.totalBilledDemand.value === 0">Total demand should be
         greater
-        than 0</span>
+        than 0</div>
 
       <!--total cost-->
       <label for="totalCost">
@@ -96,13 +96,13 @@
       <div class="input-group mb-3">
         <input id="totalCost" class="form-control" type="number" formControlName="totalCost"
           [class.warning]="meterDataForm.controls.totalCost.value === 0" onfocus="this.select();" min="0">
-        <span class="unit">$</span>
+        <span class="input-group-text">$</span>
       </div>
-      <span class="inputError" *ngIf="meterDataForm.get('totalCost').hasError('required')">Total cost is
-        required</span>
-      <span class="inputError" *ngIf="meterDataForm.get('totalCost').hasError('min')">Can't be less than 0</span>
-      <span class="inputWarning" *ngIf="meterDataForm.controls.totalCost.value === 0">Total cost should be greater
-        than 0</span>
+      <div class="alert alert-danger" *ngIf="meterDataForm.get('totalCost').hasError('required')">Total cost is
+        required</div>
+      <div class="alert alert-danger" *ngIf="meterDataForm.get('totalCost').hasError('min')">Can't be less than 0</div>
+      <div class="alert alert-warning" *ngIf="meterDataForm.controls.totalCost.value === 0">Total cost should be greater
+        than 0</div>
 
     </div>
   </div>
@@ -120,10 +120,10 @@
           <div class="input-group mb-3">
             <input id="block1Consumption" class="form-control" type="number" formControlName="block1Consumption"
               onfocus="this.select();" min="0">
-            <span class="unit" [innerHTML]="energyUnit | settingsLabel"></span>
+            <span class="input-group-text" [innerHTML]="energyUnit | settingsLabel"></span>
             <input id="block1ConsumptionCharge" class="form-control" type="number"
               formControlName="block1ConsumptionCharge" min="0">
-            <span class="unit">$</span>
+            <span class="input-group-text">$</span>
           </div>
         </div>
         <!--block 2-->
@@ -132,10 +132,10 @@
           <div class="input-group mb-3">
             <input id="block2Consumption" class="form-control" type="number" formControlName="block2Consumption"
               onfocus="this.select();" min="0">
-            <span class="unit" [innerHTML]="energyUnit | settingsLabel"></span>
+            <span class="input-group-text" [innerHTML]="energyUnit | settingsLabel"></span>
             <input id="block2ConsumptionCharge" class="form-control" type="number"
               formControlName="block2ConsumptionCharge" min="0">
-            <span class="unit">$</span>
+            <span class="input-group-text">$</span>
           </div>
         </div>
 
@@ -145,10 +145,10 @@
           <div class="input-group mb-3">
             <input id="block3Consumption" class="form-control" type="number" formControlName="block3Consumption"
               onfocus="this.select();" min="0">
-            <span class="unit" [innerHTML]="energyUnit | settingsLabel"></span>
+            <span class="input-group-text" [innerHTML]="energyUnit | settingsLabel"></span>
             <input id="block3ConsumptionCharge" class="form-control" type="number"
               formControlName="block3ConsumptionCharge" min="0">
-            <span class="unit">$</span>
+            <span class="input-group-text">$</span>
           </div>
         </div>
 
@@ -158,10 +158,10 @@
           <div class="input-group mb-3">
             <input id="otherConsumption" class="form-control" type="number" formControlName="otherConsumption"
               onfocus="this.select();" min="0">
-            <span class="unit" [innerHTML]="energyUnit | settingsLabel"></span>
+            <span class="input-group-text" [innerHTML]="energyUnit | settingsLabel"></span>
             <input id="otherConsumptionCharge" class="form-control" type="number"
               formControlName="otherConsumptionCharge" min="0">
-            <span class="unit">$</span>
+            <span class="input-group-text">$</span>
           </div>
         </div>
       </div>
@@ -174,9 +174,9 @@
           <div class="input-group mb-3">
             <input id="onPeakAmount" class="form-control" type="number" formControlName="onPeakAmount"
               onfocus="this.select();" min="0">
-            <span class="unit" [innerHTML]="energyUnit | settingsLabel"></span>
+            <span class="input-group-text" [innerHTML]="energyUnit | settingsLabel"></span>
             <input id="onPeakCharge" class="form-control" type="number" formControlName="onPeakCharge" min="0">
-            <span class="unit">$</span>
+            <span class="input-group-text">$</span>
           </div>
         </div>
 
@@ -186,9 +186,9 @@
           <div class="input-group mb-3">
             <input id="offPeakAmount" class="form-control" type="number" formControlName="offPeakAmount"
               onfocus="this.select();" min="0">
-            <span class="unit" [innerHTML]="energyUnit | settingsLabel"></span>
+            <span class="input-group-text" [innerHTML]="energyUnit | settingsLabel"></span>
             <input id="offPeakCharge" class="form-control" type="number" formControlName="offPeakCharge" min="0">
-            <span class="unit">$</span>
+            <span class="input-group-text">$</span>
           </div>
         </div>
 
@@ -198,10 +198,10 @@
           <div class="input-group mb-3">
             <input id="powerFactor" class="form-control" type="number" formControlName="powerFactor"
               onfocus="this.select();" min="0">
-            <span class="unit"></span>
+            <span class="input-group-text"></span>
             <input id="powerFactorCharge" class="form-control" type="number" formControlName="powerFactorCharge"
               min="0">
-            <span class="unit">$</span>
+            <span class="input-group-text">$</span>
           </div>
         </div>
       </div>
@@ -222,7 +222,7 @@
         <div class="input-group mb-3">
           <input id="nonEnergyCharge" class="form-control" type="number" formControlName="nonEnergyCharge"
             onfocus="this.select();" min="0">
-          <span class="unit">$</span>
+          <span class="input-group-text">$</span>
         </div>
       </div>
 
@@ -234,7 +234,7 @@
         <div class="input-group mb-3">
           <input id="transmissionAndDeliveryCharge" class="form-control" type="number"
             formControlName="transmissionAndDeliveryCharge" onfocus="this.select();" min="0">
-          <span class="unit">$</span>
+          <span class="input-group-text">$</span>
         </div>
       </div>
 
@@ -246,7 +246,7 @@
         <div class="input-group mb-3">
           <input id="localSalesTax" class="form-control" type="number" formControlName="localSalesTax"
             onfocus="this.select();" min="0">
-          <span class="unit">$</span>
+          <span class="input-group-text">$</span>
         </div>
       </div>
 
@@ -258,7 +258,7 @@
         <div class="input-group mb-3">
           <input id="stateSalesTax" class="form-control" type="number" formControlName="stateSalesTax"
             onfocus="this.select();" min="0">
-          <span class="unit">$</span>
+          <span class="input-group-text">$</span>
         </div>
       </div>
 
@@ -270,7 +270,7 @@
         <div class="input-group mb-3">
           <input id="latePayment" class="form-control" type="number" formControlName="latePayment"
             onfocus="this.select();" min="0">
-          <span class="unit">$</span>
+          <span class="input-group-text">$</span>
         </div>
       </div>
 
@@ -282,7 +282,7 @@
         <div class="input-group mb-3">
           <input id="otherCharge" class="form-control" type="number" formControlName="otherCharge"
             onfocus="this.select();" min="0">
-          <span class="unit">$</span>
+          <span class="input-group-text">$</span>
         </div>
       </div>
 

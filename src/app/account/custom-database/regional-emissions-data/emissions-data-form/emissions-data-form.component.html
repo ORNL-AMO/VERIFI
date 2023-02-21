@@ -17,7 +17,7 @@
                 </div>
                 <div class="col-6">
                     <div class="d-flex justify-content-end align-items-center h-100">
-                        <button class="btn btn-secondary mr-2" (click)="navigateHome()">Cancel</button>
+                        <button class="btn btn-secondary me-2" (click)="navigateHome()">Cancel</button>
                         <button class="btn btn-success" [disabled]="isInvalid" (click)="save()">
                             <span class="fa fa-save"></span>
                             Save</button>
@@ -28,7 +28,7 @@
             <div class="row">
                 <div class="col-6">
                     <label>Location Emission Rates</label>
-                    <table class="table table-hover">
+                    <table class="table table-hover table-border utility-data">
                         <thead>
                             <tr>
                                 <th class="w-50">
@@ -46,7 +46,7 @@
                             <tr
                                 *ngFor="let emissionRate of editCustomEmissions.locationEmissionRates; let index = index;">
                                 <td>
-                                    <select [(ngModel)]="emissionRate.year" name="{{'locationYear_'+index}}"
+                                    <select class="form-select" [(ngModel)]="emissionRate.year" name="{{'locationYear_'+index}}"
                                         id="{{'locationYear_'+index}}" (change)="checkInvalid()" required>
                                         <option *ngFor="let year of years" [ngValue]="year">{{year}}</option>
                                     </select>
@@ -58,7 +58,7 @@
                                             name="{{'locationCo2Emissions_'+index}}"
                                             id="{{'locationCo2Emissions_'+index}}" (input)="checkInvalid()" required
                                             min="0">
-                                        <span class="unit">kg CO<sub>2</sub>/kWh</span>
+                                        <span class="input-group-text">kg CO<sub>2</sub>/kWh</span>
                                     </div>
                                 </td>
                                 <td class="p-0" *ngIf="editCustomEmissions.locationEmissionRates.length != 1">
@@ -79,7 +79,7 @@
                 </div>
                 <div class="col-6">
                     <label>Residual Emission Rates</label>
-                    <table class="table table-hover">
+                    <table class="table table-hover table-border utility-data">
                         <thead>
                             <tr>
                                 <th class="w-50">
@@ -97,7 +97,7 @@
                             <tr
                                 *ngFor="let emissionRate of editCustomEmissions.residualEmissionRates; let index = index;">
                                 <td>
-                                    <select [(ngModel)]="emissionRate.year" name="{{'residualYear_'+index}}"
+                                    <select class="form-select" [(ngModel)]="emissionRate.year" name="{{'residualYear_'+index}}"
                                         id="{{'residualYear_'+index}}" (change)="checkInvalid()" required>
                                         <option *ngFor="let year of years" [ngValue]="year">{{year}}</option>
                                     </select>
@@ -109,7 +109,7 @@
                                             name="{{'residualCo2Emissions_'+index}}"
                                             id="{{'residualCo2Emissions_'+index}}" (input)="checkInvalid()" required
                                             min="0">
-                                        <span class="unit">kg CO<sub>2</sub>/kWh</span>
+                                        <span class="input-group-text">kg CO<sub>2</sub>/kWh</span>
                                     </div>
                                 </td>
                                 <td class="p-0" *ngIf="editCustomEmissions.residualEmissionRates.length != 1">

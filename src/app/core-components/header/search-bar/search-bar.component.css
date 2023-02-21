@@ -3,13 +3,6 @@
     padding: 5.2px 10px;
 }
 
-.unit{
-    border-left: 1px solid #9b9b9b;
-    border-top-left-radius: .25rem !important;
-    border-bottom-left-radius: .25rem !important;
-    border-right: none;
-}
-
 .dropdown-item.active{
     background-color: inherit;
 }

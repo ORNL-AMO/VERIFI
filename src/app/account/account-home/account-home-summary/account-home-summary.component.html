@@ -3,7 +3,7 @@
         <div class="row">
             <div class="col">
                 <h1 class="card-title"><span class="fa fa-building"></span> {{account.name}}</h1>
-                <p class="card-text" *ngIf="account.address">{{account.address}}, {{account.city}}, {{account.state}}
+                <p class="card-text mg-0" *ngIf="account.address">{{account.address}}, {{account.city}}, {{account.state}}
                     {{account.zip}}
                     {{account.country}}
                 </p>
@@ -27,11 +27,14 @@
                         {{baselineYear | yearDisplay:account.fiscalYear}}
                     </div>
                     <div class="col-8">
-                        <div class="progress">
-                            <div class="progress-bar" role="progressbar" [style.width.%]="percentTowardsGoal"
-                                aria-valuemin="0" aria-valuemax="percentGoal">
-                                <span class="progress-bar-data">{{percentSavings | number:'1.0-0'}}%
-                                </span>
+                        <div class="d-flex flex-column">
+                            <div class="progress">
+                                <div class="progress-bar" role="progressbar" [style.width.%]="percentTowardsGoal"
+                                    aria-valuemin="0" aria-valuemax="percentGoal">
+                                </div>
+                            </div>
+                            <div class="w-100 text-center bold">
+                                {{percentSavings | number:'1.0-0'}}%
                             </div>
                         </div>
                     </div>
@@ -88,7 +91,7 @@
                         </button>
                     </div>
                     <!--TODO: Add functionality-->
-                    <!--<div class="pr-2">
+                    <!--<div class="pe-2">
                         <button class="btn btn-outline m-0">
                             <span class="fa fa-plus"></span><br>
                             Add New <br> Facility
@@ -108,7 +111,7 @@
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item">
                         <a class="nav-link" routerLink="/account/analysis">
-                            <span class="fa fa-chevron-right pr-2"></span>
+                            <span class="fa fa-chevron-right pe-2"></span>
                             <span>Latest Plant Analysis:
                                 <span *ngIf="accountAnalysisYear">{{accountAnalysisYear | yearDisplay:account.fiscalYear}}</span>
                                 <span *ngIf="!accountAnalysisYear">&mdash;</span></span>
@@ -116,7 +119,7 @@
                     </li>
                     <li class="list-group-item">
                         <a class="nav-link" routerLink="/account/reports">
-                            <span class="fa fa-chevron-right pr-2"></span>
+                            <span class="fa fa-chevron-right pe-2"></span>
                             <span>Latest Better Plants Report:
                                 <span *ngIf="betterPlantsReportYear">{{betterPlantsReportYear | yearDisplay:account.fiscalYear}}</span>
                                 <span *ngIf="!betterPlantsReportYear">&mdash;</span>

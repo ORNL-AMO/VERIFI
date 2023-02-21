@@ -13,10 +13,10 @@ export class CopyTableService {
       console.log(tableRef);
       // let tableStr: string = tableRef.nativeElement.innerText.replace("\n", ",")
       navigator.clipboard.writeText(tableRef.nativeElement.innerText).then(() => {
-        this.toastNotificationService.showToast('Data Copied To Clipboard!', undefined, undefined, false, "success");
+        this.toastNotificationService.showToast('Data Copied To Clipboard!', undefined, undefined, false, "bg-success");
       });
     }else{
-      this.toastNotificationService.showToast('Something went wrong!', "Could not copy table", undefined, false, "error");
+      this.toastNotificationService.showToast('Something went wrong!', "Could not copy table", undefined, false, "bg-danger");
     }
   }
 }

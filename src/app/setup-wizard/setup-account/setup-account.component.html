@@ -5,7 +5,7 @@
                 <a class="nav-link" routerLink="/setup-wizard/account-setup/information-setup"
                     [routerLinkActive]="['active']">
                     <span class="badge"
-                        [ngClass]="{'badge-danger':generalInformationInvalid, 'badge-success': !generalInformationInvalid}">1</span>
+                        [ngClass]="{'bg-danger':generalInformationInvalid, 'bg-success': !generalInformationInvalid}">1</span>
                     General Information
                 </a>
             </div>
@@ -24,7 +24,7 @@
                 </a>
             </div>
         </div>
-        <div class="flex-fill pt-2 pl-4 pr-4 pb-4">
+        <div class="flex-fill pt-2 ps-4 pe-4 pb-4">
             <router-outlet></router-outlet>
         </div>
     </div>

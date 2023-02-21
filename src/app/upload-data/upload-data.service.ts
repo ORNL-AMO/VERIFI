@@ -261,7 +261,7 @@ export class UploadDataService {
       let facilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(entry => { return entry.facilityId == facility.guid });
       let existingFacilityPredictorData: Array<PredictorData> = new Array();
       if (facilityPredictorEntries.length != 0) {
-        existingFacilityPredictorData = facilityPredictorEntries[0].predictors;
+        existingFacilityPredictorData = facilityPredictorEntries[0].predictors.map(predictor => { return predictor });
       }
       if (facilityPredictorData.length != 0) {
         Object.keys(facilityPredictorData[0]).forEach((key) => {
@@ -282,6 +282,9 @@ export class UploadDataService {
                 }
                 newPredictor.name = key;
                 existingFacilityPredictorData.push(newPredictor);
+                facilityPredictorEntries.forEach(predictorEntry => {
+                  predictorEntry.predictors.push(newPredictor);
+                });
               }
             }
           }
@@ -294,7 +297,11 @@ export class UploadDataService {
         });
         if (!facilityPredictorEntry) {
           facilityPredictorEntry = this.predictorDbService.getNewIdbPredictorEntry(facility.guid, selectedAccount.guid, dataItemDate);
-          facilityPredictorEntry.predictors = JSON.parse(JSON.stringify(existingFacilityPredictorData));
+          if (facilityPredictorEntries.length != 0) {
+            facilityPredictorEntry.predictors = JSON.parse(JSON.stringify(facilityPredictorEntries[0].predictors));
+          } else {
+            facilityPredictorEntry.predictors = JSON.parse(JSON.stringify(existingFacilityPredictorData));
+          }
         }
         Object.keys(dataItem).forEach((key) => {
           if (key != 'Facility Name' && key != 'Date') {
@@ -305,7 +312,7 @@ export class UploadDataService {
           }
         });
         if (facilityPredictorEntry.predictors.length != 0) {
-          predictorEntries.push(facilityPredictorEntry);
+          predictorEntries.push(JSON.parse(JSON.stringify(facilityPredictorEntry)));
         }
       });
     })
@@ -398,30 +405,30 @@ export class UploadDataService {
           dbDataPoint = this.utilityMeterDataDbService.getNewIdbUtilityMeterData(meter);
         }
         dbDataPoint.readDate = readDate;
-        dbDataPoint.totalEnergyUse = dataPoint['Total Consumption'];
-        dbDataPoint.totalRealDemand = dataPoint['Total Real Demand'];
-        dbDataPoint.totalBilledDemand = dataPoint['Total Billed Demand'];
-        dbDataPoint.totalCost = dataPoint['Total Cost'];
-        dbDataPoint.nonEnergyCharge = dataPoint['Non-energy Charge'];
-        dbDataPoint.block1Consumption = dataPoint['Block 1 Consumption'];
-        dbDataPoint.block1ConsumptionCharge = dataPoint['Block 1 Consumption Charge'];
-        dbDataPoint.block2Consumption = dataPoint['Block 2 Consumption'];
-        dbDataPoint.block2ConsumptionCharge = dataPoint['Block 2 Consumption Charge'];
-        dbDataPoint.block3Consumption = dataPoint['Block 3 Consumption'];
-        dbDataPoint.block3ConsumptionCharge = dataPoint['Block 3 Consumption Charge'];
-        dbDataPoint.otherConsumption = dataPoint['Other Consumption'];
-        dbDataPoint.otherConsumptionCharge = dataPoint['Other Consumption Charge'];
-        dbDataPoint.onPeakAmount = dataPoint['On Peak Amount'];
-        dbDataPoint.onPeakCharge = dataPoint['On Peak Charge'];
-        dbDataPoint.offPeakAmount = dataPoint['Off Peak Amount'];
-        dbDataPoint.offPeakCharge = dataPoint['Off Peak Charge'];
-        dbDataPoint.transmissionAndDeliveryCharge = dataPoint['Transmission & Delivery Charge'];
-        dbDataPoint.powerFactor = dataPoint['Power Factor'];
-        dbDataPoint.powerFactorCharge = dataPoint['Power Factor Charge'];
-        dbDataPoint.localSalesTax = dataPoint['Local Sales Tax'];
-        dbDataPoint.stateSalesTax = dataPoint['State Sales Tax'];
-        dbDataPoint.latePayment = dataPoint['Late Payment'];
-        dbDataPoint.otherCharge = dataPoint['Other Charge'];
+        dbDataPoint.totalEnergyUse = this.checkImportCellNumber(dataPoint['Total Consumption']);
+        dbDataPoint.totalRealDemand = this.checkImportCellNumber(dataPoint['Total Real Demand']);
+        dbDataPoint.totalBilledDemand = this.checkImportCellNumber(dataPoint['Total Billed Demand']);
+        dbDataPoint.totalCost = this.checkImportCellNumber(dataPoint['Total Cost']);
+        dbDataPoint.nonEnergyCharge = this.checkImportCellNumber(dataPoint['Non-energy Charge']);
+        dbDataPoint.block1Consumption = this.checkImportCellNumber(dataPoint['Block 1 Consumption']);
+        dbDataPoint.block1ConsumptionCharge = this.checkImportCellNumber(dataPoint['Block 1 Consumption Charge']);
+        dbDataPoint.block2Consumption = this.checkImportCellNumber(dataPoint['Block 2 Consumption']);
+        dbDataPoint.block2ConsumptionCharge = this.checkImportCellNumber(dataPoint['Block 2 Consumption Charge']);
+        dbDataPoint.block3Consumption = this.checkImportCellNumber(dataPoint['Block 3 Consumption']);
+        dbDataPoint.block3ConsumptionCharge = this.checkImportCellNumber(dataPoint['Block 3 Consumption Charge']);
+        dbDataPoint.otherConsumption = this.checkImportCellNumber(dataPoint['Other Consumption']);
+        dbDataPoint.otherConsumptionCharge = this.checkImportCellNumber(dataPoint['Other Consumption Charge']);
+        dbDataPoint.onPeakAmount = this.checkImportCellNumber(dataPoint['On Peak Amount']);
+        dbDataPoint.onPeakCharge = this.checkImportCellNumber(dataPoint['On Peak Charge']);
+        dbDataPoint.offPeakAmount = this.checkImportCellNumber(dataPoint['Off Peak Amount']);
+        dbDataPoint.offPeakCharge = this.checkImportCellNumber(dataPoint['Off Peak Charge']);
+        dbDataPoint.transmissionAndDeliveryCharge = this.checkImportCellNumber(dataPoint['Transmission & Delivery Charge']);
+        dbDataPoint.powerFactor = this.checkImportCellNumber(dataPoint['Power Factor']);
+        dbDataPoint.powerFactorCharge = this.checkImportCellNumber(dataPoint['Power Factor Charge']);
+        dbDataPoint.localSalesTax = this.checkImportCellNumber(dataPoint['Local Sales Tax']);
+        dbDataPoint.stateSalesTax = this.checkImportCellNumber(dataPoint['State Sales Tax']);
+        dbDataPoint.latePayment = this.checkImportCellNumber(dataPoint['Late Payment']);
+        dbDataPoint.otherCharge = this.checkImportCellNumber(dataPoint['Other Charge']);
 
 
 
@@ -451,7 +458,7 @@ export class UploadDataService {
         }
         let totalVolume: number = 0;
         let energyUse: number = 0;
-        let totalConsumption: number = dataPoint['Total Consumption'];
+        let totalConsumption: number = this.checkImportCellNumber(dataPoint['Total Consumption']);
         let displayVolumeInput: boolean = (this.energyUnitsHelperService.isEnergyUnit(meter.startingUnit) == false);
         let displayEnergyUse: boolean = this.energyUnitsHelperService.isEnergyMeter(meter.source);
         if (!displayVolumeInput) {
@@ -466,15 +473,15 @@ export class UploadDataService {
         dbDataPoint.readDate = readDate;
         dbDataPoint.totalVolume = totalVolume;
         dbDataPoint.totalEnergyUse = energyUse;
-        dbDataPoint.totalCost = dataPoint['Total Cost'];
-        dbDataPoint.commodityCharge = dataPoint['Commodity Charge'];
-        dbDataPoint.deliveryCharge = dataPoint['Delivery Charge'];
-        dbDataPoint.otherCharge = dataPoint['Other Charge'];
-        dbDataPoint.demandUsage = dataPoint['Demand Usage'];
-        dbDataPoint.demandCharge = dataPoint['Demand Charge'];
-        dbDataPoint.localSalesTax = dataPoint['Local Sales Tax'];
-        dbDataPoint.stateSalesTax = dataPoint['State Sales Tax'];
-        dbDataPoint.latePayment = dataPoint['Late Payment'];
+        dbDataPoint.totalCost = this.checkImportCellNumber(dataPoint['Total Cost']);
+        dbDataPoint.commodityCharge = this.checkImportCellNumber(dataPoint['Commodity Charge']);
+        dbDataPoint.deliveryCharge = this.checkImportCellNumber(dataPoint['Delivery Charge']);
+        dbDataPoint.otherCharge = this.checkImportCellNumber(dataPoint['Other Charge']);
+        dbDataPoint.demandUsage = this.checkImportCellNumber(dataPoint['Demand Usage']);
+        dbDataPoint.demandCharge = this.checkImportCellNumber(dataPoint['Demand Charge']);
+        dbDataPoint.localSalesTax = this.checkImportCellNumber(dataPoint['Local Sales Tax']);
+        dbDataPoint.stateSalesTax = this.checkImportCellNumber(dataPoint['State Sales Tax']);
+        dbDataPoint.latePayment = this.checkImportCellNumber(dataPoint['Late Payment']);
         importMeterData.push(dbDataPoint);
       } else {
         console.log('no meter');
@@ -779,24 +786,35 @@ export class UploadDataService {
   }
 
   getState(stateStr: string): string {
-    let state: State = States.find(state => {
-      return stateStr.toLocaleLowerCase() == state.abbreviation.toLocaleLowerCase() || stateStr.toLocaleLowerCase() == state.name.toLocaleLowerCase();
-    });
-    if (state) {
-      return state.name;
+    if (stateStr) {
+      let state: State = States.find(state => {
+        return stateStr.toLocaleLowerCase() == state.abbreviation.toLocaleLowerCase() || stateStr.toLocaleLowerCase() == state.name.toLocaleLowerCase();
+      });
+      if (state) {
+        return state.name;
+      }
     }
     return;
   }
 
   getZip(zip: string): string {
-    if (zip.length == 5) {
-      return zip;
-    } else if (zip) {
-      let neededZeros: number = 5 - zip.length;
-      for (let i = 0; i < neededZeros; i++) {
-        zip = '0' + zip;
+    if (zip) {
+      if (zip.length == 5) {
+        return zip;
+      } else {
+        let neededZeros: number = 5 - zip.length;
+        for (let i = 0; i < neededZeros; i++) {
+          zip = '0' + zip;
+        }
+        return zip;
       }
-      return zip;
+    }
+    return;
+  }
+
+  checkImportCellNumber(value: any): number {
+    if (value != undefined && value != null) {
+      return Number(value);
     }
     return;
   }

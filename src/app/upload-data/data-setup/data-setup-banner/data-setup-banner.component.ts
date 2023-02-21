@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { FileReference, UploadDataService } from '../../upload-data.service';
@@ -13,7 +14,9 @@ export class DataSetupBannerComponent implements OnInit {
   fileReferences: Array<FileReference>;
   modalOpen: boolean;
   modalOpenSub: Subscription;
-  constructor(private uploadDataService: UploadDataService, private sharedDataService: SharedDataService) { }
+  showStartOverModal: boolean = false;
+  constructor(private uploadDataService: UploadDataService, private sharedDataService: SharedDataService,
+    private router: Router) { }
 
   ngOnInit(): void {
     this.fileReferences = this.uploadDataService.fileReferences;
@@ -22,8 +25,22 @@ export class DataSetupBannerComponent implements OnInit {
     })
   }
 
-  ngOnDestroy(){
+  ngOnDestroy() {
     this.modalOpenSub.unsubscribe();
+  }
+
+
+  openStartOverModal() {
+    this.showStartOverModal = true;
+  }
+
+  cancelStartOver() {
+    this.showStartOverModal = false;
+  }
+
+  confirmStartOver() {
+    this.showStartOverModal = false;
+    this.router.navigateByUrl('/upload');
   }
 
 }

@@ -1,7 +1,66 @@
 /*
 Tables
 ========================================= */
-table {
+
+
+.table thead.sortable tr:not(.table-mh) th.active {
+    text-decoration: underline;
+}
+
+.table thead.sortable tr:not(.table-mh) th:hover{
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.table .btn {
+  margin-top: 0px;
+  margin-bottom: 0px;
+}
+
+.table td.actions{
+  text-align: center;
+  width: 75px;
+}
+
+.table.utility-data thead tr {
+  background-color: #e3e7ec;
+}
+
+.table.utility-data {
+  vertical-align: middle;
+}
+
+.table.utility-data td.input, .table.utility-data th.input{
+  text-align: center;
+}
+
+.table.utility-data thead .table-mh th, 
+.table.utility-data thead .table-mh th span {
+  background-color: #2c386b;
+  color: #ffffff;
+}
+
+
+.table.utility-data thead .table-mh th {
+  border: 1px solid #c2ccda;
+}
+
+
+.account .table.utility-data thead .table-mh th, .account .table.utility-data thead .table-mh th span{
+  background-color: #145A32;
+}
+
+
+/* .table.utility-data thead .table-mh th span {
+  border: none;
+  padding: 0 5px!important;
+} */
+
+
+
+
+
+/* table {
     width: 100%;
     border: 1px solid #ddd;
   }
@@ -15,23 +74,9 @@ table {
   .overflowTable {
     max-height: 400px;
     overflow: auto;
+
   }
-  ::-webkit-scrollbar {
-    -webkit-appearance: none;
-    width: 10px;
-    height: 10px;
-  }
-  ::-webkit-scrollbar-thumb {
-    border-radius: 10px;
-    /*background-color: rgba(0, 0, 0, 0.3);*/
-    background-color: rgb(0 0 0 / 15%);
-    -webkit-box-shadow: 0 0 1px rgba(255, 255, 255, 0.5);
-  }
-  body {
-    /* Firefox */
-    scrollbar-color: rgb(0 0 0 / 15%) transparent;
-    scrollbar-width: thin;
-  }
+
   tfoot {
     border-top: 3px double #c9d3e0;
   }
@@ -125,8 +170,6 @@ table {
   }
   .table-mh th, 
   .table-mh th span {
-    /* font-weight: normal!important; 
-    background-color: #d2d9e2;*/
     background-color: #2c386b;
     border: 1px solid #c2ccda;
     font-size: 12px;
@@ -142,4 +185,4 @@ table {
   .table-mh th span {
     border: none;
     padding: 0 5px!important;
-  }
+  } */

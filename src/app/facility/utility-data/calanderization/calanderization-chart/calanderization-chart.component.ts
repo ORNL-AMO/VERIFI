@@ -155,7 +155,8 @@ export class CalanderizationChartComponent implements OnInit {
           automargin: true,
           overlaying: y1overlay,
           dtick: yAxisDtick,
-          rangemode: 'tozero'
+          rangemode: 'tozero',
+          tickmode: 'sync'
         },
         yaxis2: {
           title: {
@@ -172,7 +173,8 @@ export class CalanderizationChartComponent implements OnInit {
           overlaying: y2overlay,
           side: 'right',
           dtick: yAxis2Dtick,
-          rangemode: 'tozero'
+          rangemode: 'tozero',
+          tickmode: 'sync'
         },
         margin: { r: 0, t: 50 }
       };

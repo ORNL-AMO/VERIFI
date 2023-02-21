@@ -3,7 +3,7 @@
     <div class="alert alert-info">
         <ul class="mb-0">
             <li>
-                Select the files you wish to upload data from into facilities. 
+                Select the files you wish to upload data from into facilities.
             </li>
             <li>
                 Data must be in excel (.XLSX) files.
@@ -21,17 +21,18 @@
         </ul>
     </div>
     <hr>
-    <input [ngClass]="{'drag-in': dragOver}" type="file" #importFile id="importFile" (dragenter)="setDragEnter()"
-        (input)="setImportFile($event.target)" multiple accept=".xlsx" (dragleave)="setDragOut()">
+    <input class="form-control" [ngClass]="{'drag-in': dragOver}" type="file" #importFile id="importFile"
+        (dragenter)="setDragEnter()" (input)="setImportFile($event.target)" multiple accept=".xlsx"
+        (dragleave)="setDragOut()">
     <div *ngIf="fileUploadError">
         <div class="p-2 alert-danger">
             There was an error processing this file. Please try a different file.
         </div>
     </div>
-    <div *ngIf="fileReferences.length != 0">
+    <div class="table-responsive" *ngIf="fileReferences.length != 0">
         <hr>
-        <table class="table table-hover">
-            <thead>
+        <table class="table table-hover table-sm table-bordered utility-data">
+            <thead class="table-mh">
                 <tr>
                     <th>
                         Files
@@ -41,13 +42,13 @@
                     </th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="table-group-divider">
                 <tr *ngFor="let reference of fileReferences; let index = index;">
                     <td>
                         {{reference.name}}
                     </td>
                     <td class="text-center">
-                        <a class="click-link danger" (click)="removeReference(index)">Remove</a>
+                        <button class="btn btn-danger btn-sm danger" (click)="removeReference(index)">Remove</button>
                     </td>
                 </tr>
             </tbody>
@@ -55,7 +56,8 @@
     </div>
     <div class="data-template-div" *ngIf="fileReferences.length == 0">
         <hr>
-        <p>An excel tamplate can be used to make uploading your data easier, use this link to download the template:<br>
+        <p>An excel template can be used to make uploading your data easier, use this link to download the template:<br>
+            <!-- <button class="btn action-btn" (click)="downloadTemplate()">Download Account Data Template</button> -->
             <a href="assets/csv_templates/VERIFI-Import-Data.xlsx">Download Data Template</a>
         </p>
     </div>

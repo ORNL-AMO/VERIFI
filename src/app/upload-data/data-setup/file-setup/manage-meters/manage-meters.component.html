@@ -11,7 +11,7 @@
         <button class="btn btn-secondary" (click)="cancelEdit()">Cancel</button>
     </div>
     <div class="d-flex">
-        <button class="btn btn-success ml-2" (click)="submitMeter()">Submit</button>
+        <button class="btn btn-success ms-2" (click)="submitMeter()">Submit</button>
     </div>
 </div>
 <div class="d-flex justify-content-end" *ngIf="!allMetersValid">
@@ -31,109 +31,113 @@
 </div>
 <hr>
 
-<table *ngIf="!editMeterForm && metersIncluded">
-    <thead>
-        <tr>
-            <th>
-                Facility Name
-            </th>
-            <th>
-                Meter Name
-            </th>
-            <th>
-                Is Valid?
-            </th>
-            <th>
-                Source
-            </th>
-            <th>
-                Units
-            </th>
-            <th>
-                <div class="d-flex w-100 justify-content-between">
-                    <div>
-                        Group
+<div class="table-responsive">
+    <table class="table utility-data table-sm table-bordered table-hover" *ngIf="!editMeterForm && metersIncluded">
+        <thead class="table-mh">
+            <tr>
+                <th>
+                    Facility Name
+                </th>
+                <th>
+                    Meter Name
+                </th>
+                <th>
+                    Is Valid?
+                </th>
+                <th>
+                    Source
+                </th>
+                <th>
+                    Units
+                </th>
+                <th>
+                    <div class="d-flex w-100 justify-content-between">
+                        <div>
+                            Group
+                        </div>
+                        <div>
+                            <a class="text-end click-link" (click)="autoGroup()">Auto Group</a>
+                        </div>
                     </div>
-                    <div>
-                        <a class="text-right" (click)="autoGroup()">Auto Group</a>
-                    </div>
-                </div>
 
-            </th>
-            <th>
-                <div class="d-flex w-100 justify-content-between">
-                    <div>
-                        Calanderize?
+                </th>
+                <th>
+                    <div class="d-flex w-100 justify-content-between">
+                        <div>
+                            Calanderize?
+                        </div>
+                        <div>
+                            <a class="text-end click-link" (click)="toggleCalanderizeAll()">Toggle</a>
+                        </div>
                     </div>
-                    <div>
-                        <a class="text-right" (click)="toggleCalanderizeAll()">Toggle</a>
+                </th>
+                <th>
+                    New / Existing
+                </th>
+                <th>
+                    Skip Import
+                </th>
+            </tr>
+        </thead>
+        <tbody class="table-group-divider">
+            <tr *ngFor="let meter of fileReference.meters | orderBy: 'isValid': 'asc'"
+                [ngClass]="{'skip': meter.skipImport, 'alert-danger': !meter.isValid}">
+                <td>
+                    {{getFacilityName(meter.facilityId)}}
+                </td>
+                <td>
+                    <a class="click-link" (click)="editMeter(meter)" *ngIf="!meter.skipImport">{{meter.name}}
+                        <span *ngIf="!meter.isValid">(click to edit)</span>
+                    </a>
+                    <span *ngIf="meter.skipImport">{{meter.name}}</span>
+                </td>
+                <td>
+                    <span *ngIf="meter.isValid">
+                        Yes
+                    </span>
+                    <span *ngIf="!meter.isValid">
+                        No
+                    </span>
+                </td>
+                <td>
+                    {{meter.source}}
+                </td>
+                <td>
+                    <span [innerHTML]="meter.startingUnit | settingsLabel"></span>
+                </td>
+                <td>
+                    <select class="form-select" id="meterGroup" [(ngModel)]="meter.groupId">
+                        <option *ngFor="let group of getFacilityMeterGroups(meter.facilityId)" [ngValue]="group.guid">
+                            {{group.name}}</option>
+                    </select>
+                </td>
+                <td>
+                    <!-- {{meter.groupId}} -->
+                    <select class="form-select" id="meterReadingDataApplication"
+                        [(ngModel)]="meter.meterReadingDataApplication" (change)="setHasNoCalanderizationSelection()">
+                        <option [ngValue]="'backward'">Calanderize</option>
+                        <option [ngValue]="'fullMonth'">Do Not Calanderize</option>
+                        <option [ngValue]="undefined">Unselected</option>
+                    </select>
+                </td>
+                <td>
+                    <span *ngIf="meter.id">
+                        Existing
+                    </span>
+                    <span *ngIf="!meter.id">
+                        New
+                    </span>
+                </td>
+                <td>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" [(ngModel)]="meter.skipImport"
+                            (change)="setValidMeters()">
                     </div>
-                </div>
-            </th>
-            <th>
-                New / Existing
-            </th>
-            <th>
-                Skip Import
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr *ngFor="let meter of fileReference.meters | orderBy: 'isValid': 'asc'"
-            [ngClass]="{'skip': meter.skipImport, 'alert-danger': !meter.isValid}">
-            <td>
-                {{getFacilityName(meter.facilityId)}}
-            </td>
-            <td>
-                <a class="click-link" (click)="editMeter(meter)" *ngIf="!meter.skipImport">{{meter.name}}
-                    <span *ngIf="!meter.isValid">(click to edit)</span>
-                </a>
-                <span *ngIf="meter.skipImport">{{meter.name}}</span>
-            </td>
-            <td>
-                <span *ngIf="meter.isValid">
-                    Yes
-                </span>
-                <span *ngIf="!meter.isValid">
-                    No
-                </span>
-            </td>
-            <td>
-                {{meter.source}}
-            </td>
-            <td>
-                <span [innerHTML]="meter.startingUnit | settingsLabel"></span>
-            </td>
-            <td>
-                <select class="form-control" id="meterGroup" [(ngModel)]="meter.groupId">
-                    <option *ngFor="let group of getFacilityMeterGroups(meter.facilityId)" [ngValue]="group.guid">
-                        {{group.name}}</option>
-                </select>
-            </td>
-            <td>
-                <!-- {{meter.groupId}} -->
-                <select class="form-control" id="meterReadingDataApplication"
-                    [(ngModel)]="meter.meterReadingDataApplication" (change)="setHasNoCalanderizationSelection()">
-                    <option [ngValue]="'backward'">Calanderize</option>
-                    <option [ngValue]="'fullMonth'">Do Not Calanderize</option>
-                    <option [ngValue]="undefined">Unselected</option>
-                </select>
-            </td>
-            <td>
-                <span *ngIf="meter.id">
-                    Existing
-                </span>
-                <span *ngIf="!meter.id">
-                    New
-                </span>
-            </td>
-            <td>
-                <input type="checkbox" class="form-control" [(ngModel)]="meter.skipImport" (change)="setValidMeters()">
-            </td>
-        </tr>
-    </tbody>
-</table>
-
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
 
 <app-edit-meter-form *ngIf="editMeterForm" [meterForm]="editMeterForm" [facility]="editMeterFacility">
 </app-edit-meter-form>

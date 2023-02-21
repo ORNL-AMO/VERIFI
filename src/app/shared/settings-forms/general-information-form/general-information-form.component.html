@@ -2,40 +2,38 @@
     <!--no in setup (under settings)-->
     <ng-container *ngIf="!inWizard">
         <div class="mb-3 ">
-            <label>{{formNameLabel}} Name <span class="required">*</span></label>
+            <label for="name">{{formNameLabel}} Name <span class="required">*</span></label>
             <input type="text" class="form-control" formControlName="name" (input)="saveChanges()"
                 onfocus="this.select();" minlength="1" maxlength="42" required>
         </div>
-        <span class="inputError" *ngIf="form.get('name').hasError('required')">{{formNameLabel}} name is required</span>
+        <span class="alert alert-danger" *ngIf="form.get('name').hasError('required')">{{formNameLabel}} name is required</span>
 
         <div class="mb-3">
-            <label>Address</label>
+            <label for="address">Address</label>
             <input type="text" class="form-control" formControlName="address" autocomplete="shipping street-address"
                 (input)="saveChanges()" onfocus="this.select();" minlength="1" maxlength="60">
         </div>
 
         <div class="row">
             <div class="mb-3 col-md-6 col-sm-12">
-                <label>Country</label>
-                <!-- <input type="text" class="form-control" formControlName="country" (input)="saveChanges()"
-                onfocus="this.select();" minlength="1" maxlength="60"> -->
-                <select formControlName="country" (change)="saveChanges()">
+                <label for="country">Country</label>
+                <select class="form-select" formControlName="country" (change)="saveChanges()">
                     <option *ngFor="let country of countries" [ngValue]="country.code">{{country.name}}</option>
                 </select>
             </div>
             <div class="mb-3 col-md-6 col-sm-12" *ngIf="form.controls.country.value == 'US'">
-                <label>State</label>
-                <select formControlName="state" (change)="saveChanges()">
+                <label for="state">State</label>
+                <select class="form-select" formControlName="state" (change)="saveChanges()">
                     <option *ngFor="let state of states" [ngValue]="state.name">{{state.name}}</option>
                 </select>
             </div>
             <div class="mb-3 col-md-6 col-sm-12" [ngClass]="{'col-6':form.controls.country.value == 'US'}">
-                <label>City</label>
+                <label for="city">City</label>
                 <input type="text" class="form-control" formControlName="city" (input)="saveChanges()"
                     onfocus="this.select();" minlength="1" maxlength="85">
             </div>
             <div class="mb-3 col-md-6 col-sm-12" *ngIf="form.controls.country.value == 'US'">
-                <label>Zip</label>
+                <label for="zip">Zip</label>
                 <input type="text" class="form-control" formControlName="zip" (input)="saveChanges()"
                     autocomplete="postal-code" onfocus="this.select();" minlength="1" maxlength="12">
             </div>
@@ -47,18 +45,19 @@
                 <app-label-with-tooltip [label]="'NAICS Code'" [field]="'naicsCode'" [labelId]="'naics1'"
                     [isRequired]="false">
                 </app-label-with-tooltip>
-                <select formControlName="naics1" (change)="checkNAICS()" id="naics1">
+                <select class="form-select" formControlName="naics1" (change)="checkNAICS()" id="naics1">
                     <option *ngFor="let naics of firstNaicsList" [ngValue]="naics.code">{{naics.code}} -
                         {{naics.industryType}}</option>
                 </select>
-                <select formControlName="naics2" (change)="checkNAICS()" *ngIf="form.controls.naics1.value" id="naics2">
+                <select class="form-select" formControlName="naics2" (change)="checkNAICS()"
+                    *ngIf="form.controls.naics1.value" id="naics2">
                     <option *ngFor="let naics of secondNaicsList | naicsList:form.controls.naics1.value"
                         [ngValue]="naics.code">{{naics.code}} -
                         {{naics.industryType}}</option>
                     <option [ngValue]=null></option>
                 </select>
-                <select formControlName="naics3" (change)="saveChanges()" *ngIf="form.controls.naics2.value"
-                    id="naics3">
+                <select class="form-select" formControlName="naics3" (change)="saveChanges()"
+                    *ngIf="form.controls.naics2.value" id="naics3">
                     <option *ngFor="let naics of thirdNaicsList | naicsList:form.controls.naics2.value"
                         [ngValue]="naics.code">{{naics.code}} -
                         {{naics.industryType}}</option>
@@ -69,12 +68,12 @@
             <div class="mb-3 col-md-6 col-sm-12" *ngIf="!inAccount">
                 <div class="row">
                     <div class="col-12">
-                        <label>Facility Area</label>
+                        <label for="facilityArea">Facility Area</label>
                         <div class="input-group">
                             <input type="text" class="form-control" formControlName="size" (input)="saveChanges()"
                                 onfocus="this.select();" minlength="1" maxlength="60">
-                            <span class="unit" *ngIf="unitsOfMeasure != 'Metric'">ft<sup>2</sup></span>
-                            <span class="unit" *ngIf="unitsOfMeasure === 'Metric'">m<sup>2</sup></span>
+                            <span class="input-group-text" *ngIf="unitsOfMeasure != 'Metric'">ft<sup>2</sup></span>
+                            <span class="input-group-text" *ngIf="unitsOfMeasure === 'Metric'">m<sup>2</sup></span>
                         </div>
                     </div>
                 </div>
@@ -92,23 +91,23 @@
         </div>
 
         <div class="mb-3">
-            <label class="">Notes</label>
-            <textarea formControlName="notes" (input)="saveChanges()"></textarea>
+            <label for="notes">Notes</label>
+            <textarea class="form-control" formControlName="notes" (input)="saveChanges()"></textarea>
         </div>
 
         <div class="row">
             <div class="mb-3 col-md-6 col-sm-12">
-                <label>Contact Name</label>
+                <label for="contactName">Contact Name</label>
                 <input type="text" class="form-control" formControlName="contactName" (input)="saveChanges()"
                     onfocus="this.select();" minlength="1" maxlength="60">
             </div>
             <div class="mb-3 col-md-6 col-sm-12">
-                <label>Contact Phone</label>
+                <label for="phone">Contact Phone</label>
                 <input type="text" class="form-control" formControlName="contactPhone" (input)="saveChanges()"
                     onfocus="this.select();" minlength="1" maxlength="10">
             </div>
             <div class="mb-3 col-md-6 col-sm-12">
-                <label>Contact Email</label>
+                <label for="email">Contact Email</label>
                 <input type="email" class="form-control" formControlName="contactEmail" (input)="saveChanges()"
                     onfocus="this.select();" minlength="1" maxlength="85">
             </div>
@@ -119,32 +118,32 @@
         <div class="row">
             <div class="col-6 d-flex flex-column">
                 <div class="mb-3">
-                    <label>{{formNameLabel}} Name <span class="required">*</span></label>
+                    <label for="name">{{formNameLabel}} Name <span class="required">*</span></label>
                     <input type="text" class="form-control" formControlName="name" (input)="saveChanges()"
                         onfocus="this.select();" minlength="1" maxlength="42" required>
                 </div>
 
-                <span class="inputError" *ngIf="form.get('name').hasError('required')">{{formNameLabel}} name is
+                <span class="alert alert-danger" *ngIf="form.get('name').hasError('required')">{{formNameLabel}} name is
                     required</span>
                 <div class="mb-3">
-                    <label>Contact Name</label>
+                    <label for="contactName">Contact Name</label>
                     <input type="text" class="form-control" formControlName="contactName" (input)="saveChanges()"
                         onfocus="this.select();" minlength="1" maxlength="60">
                 </div>
                 <div class="mb-3">
-                    <label>Contact Phone</label>
+                    <label for="contactPhone">Contact Phone</label>
                     <input type="text" class="form-control" formControlName="contactPhone" (input)="saveChanges()"
                         onfocus="this.select();" minlength="1" maxlength="10">
                 </div>
                 <div class="mb-3">
-                    <label>Contact Email</label>
+                    <label for="contactEmail">Contact Email</label>
                     <input type="email" class="form-control" formControlName="contactEmail" (input)="saveChanges()"
                         onfocus="this.select();" minlength="1" maxlength="85">
                 </div>
             </div>
             <div class="col-6">
                 <div class="mb-3">
-                    <label>Address</label>
+                    <label for="address">Address</label>
                     <input type="text" class="form-control" formControlName="address"
                         autocomplete="shipping street-address" (input)="saveChanges()" onfocus="this.select();"
                         minlength="1" maxlength="60">
@@ -152,24 +151,24 @@
 
                 <div class="row">
                     <div class="mb-3 col-md-6 col-sm-12">
-                        <label>Country</label>
-                        <select formControlName="country" (change)="saveChanges()">
+                        <label for="country">Country</label>
+                        <select class="form-select" formControlName="country" (change)="saveChanges()">
                             <option *ngFor="let country of countries" [ngValue]="country.code">{{country.name}}</option>
                         </select>
                     </div>
                     <div class="mb-3 col-md-6 col-sm-12" *ngIf="form.controls.country.value == 'US'">
-                        <label>State</label>
-                        <select formControlName="state" (change)="saveChanges()">
+                        <label for="state">State</label>
+                        <select class="form-select" formControlName="state" (change)="saveChanges()">
                             <option *ngFor="let state of states" [ngValue]="state.name">{{state.name}}</option>
                         </select>
                     </div>
                     <div class="mb-3 col-md-6 col-sm-12" [ngClass]="{'col-6':form.controls.country.value == 'US'}">
-                        <label>City</label>
+                        <label for="city">City</label>
                         <input type="text" class="form-control" formControlName="city" (input)="saveChanges()"
                             onfocus="this.select();" minlength="1" maxlength="85">
                     </div>
                     <div class="mb-3 col-md-6 col-sm-12" *ngIf="form.controls.country.value == 'US'">
-                        <label>Zip</label>
+                        <label for="zip">Zip</label>
                         <input type="text" class="form-control" formControlName="zip" (input)="saveChanges()"
                             autocomplete="postal-code" onfocus="this.select();" minlength="1" maxlength="12">
                         <div class="alert alert-warning">
@@ -185,7 +184,7 @@
             <!--facility only-->
             <div class="row">
                 <div class="col-6">
-                    <label>Facility Area</label>
+                    <label for="size">Facility Area</label>
                     <div class="input-group">
                         <input type="text" class="form-control" formControlName="size" (input)="saveChanges()"
                             onfocus="this.select();" minlength="1" maxlength="60">
@@ -210,17 +209,17 @@
                 <app-label-with-tooltip [label]="'NAICS Code'" [field]="'naicsCode'" [labelId]="'naics1'"
                     [isRequired]="false">
                 </app-label-with-tooltip>
-                <select formControlName="naics1" (change)="checkNAICS()" id="naics1">
+                <select class="form-select" formControlName="naics1" (change)="checkNAICS()" id="naics1">
                     <option *ngFor="let naics of firstNaicsList" [ngValue]="naics.code">{{naics.code}} -
                         {{naics.industryType}}</option>
                 </select>
-                <select formControlName="naics2" (change)="checkNAICS()" *ngIf="form.controls.naics1.value" id="naics2">
+                <select class="form-select" formControlName="naics2" (change)="checkNAICS()" *ngIf="form.controls.naics1.value" id="naics2">
                     <option *ngFor="let naics of secondNaicsList | naicsList:form.controls.naics1.value"
                         [ngValue]="naics.code">{{naics.code}} -
                         {{naics.industryType}}</option>
                     <option [ngValue]=null></option>
                 </select>
-                <select formControlName="naics3" (change)="saveChanges()" *ngIf="form.controls.naics2.value"
+                <select class="form-select" formControlName="naics3" (change)="saveChanges()" *ngIf="form.controls.naics2.value"
                     id="naics3">
                     <option *ngFor="let naics of thirdNaicsList | naicsList:form.controls.naics2.value"
                         [ngValue]="naics.code">{{naics.code}} -
@@ -231,8 +230,8 @@
 
 
             <div class="mb-3 col-6">
-                <label class="">Notes</label>
-                <textarea formControlName="notes" (input)="saveChanges()"></textarea>
+                <label for="notes">Notes</label>
+                <textarea class="form-control" formControlName="notes" (input)="saveChanges()"></textarea>
             </div>
         </div>
 

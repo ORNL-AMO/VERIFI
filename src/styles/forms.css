@@ -1,7 +1,7 @@
 /*
 Forms
 =============================================== */
-input,
+/* input,
 textarea {
   background-color: #fff;
   border: #9c9c9c solid 1px;
@@ -69,15 +69,7 @@ label .row .col:nth-child(3) {
 label label {
   padding-left: 20px;
 }
-/* label a {
-  position: absolute;
-  right: -37px;
-  font-size: 12px;
-  top: 5px;
-} */
 span.unit {
-  /*float: right;
-  display: block;*/
   border: 1px solid #9b9b9b;
   border-left: none;
   padding: 2px 5px;
@@ -159,4 +151,12 @@ form select {
 }
 .inputWarning {
   color: #a76c00;
+} */
+
+input.ng-invalid,
+select.ng-invalid {
+  outline: 2px solid #bf3d00c4 !important;
+  outline-offset: 0;
+  background-color: #bf3d001c;
+  border: 1px solid #fff !important;
 }

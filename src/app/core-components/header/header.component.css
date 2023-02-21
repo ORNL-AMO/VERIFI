@@ -1,5 +1,6 @@
 .navbar{
     background-color: white;
+    padding: .5rem .5rem;
 }
 
 .navbar-brand:first-letter, .dropdown-toggle span.active{
@@ -16,21 +17,14 @@ a:not([href]).dropdown-item.active {
     font-weight: 500;
     font-size: 30px;
     color: black;
+    padding-top: 0px;
+    padding-bottom: 0px;
 }
 
-.account-name{
-    font-size: 20px;
-    font-weight: 500;
+.btn{
+    margin: 0px;
 }
 
-.backup-account.btn{
-    font-size: 12px;
-}
-
-.backup-account.btn span.small{
-    font-size: 10px;
-}
-
-.account-required{
-    font-style: italic;
+.dropdown-menu{
+    z-index: 9999;
 }

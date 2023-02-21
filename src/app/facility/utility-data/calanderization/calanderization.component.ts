@@ -3,7 +3,7 @@ import { Subscription } from 'rxjs';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { CalanderizationFilters, CalanderizationOptions, CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
-import { IdbAccount, IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
+import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { CalanderizationService } from '../../../shared/helper-services/calanderization.service';
 import * as _ from 'lodash';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -39,11 +39,12 @@ export class CalanderizationComponent implements OnInit {
   selectedMeter: IdbUtilityMeter;
   selectedFacility: IdbFacility;
   displayDataApplicationModal: boolean = false;
-  showFilterDropdown: boolean = false;
+  hasMeterData: boolean;
   constructor(private calanderizationService: CalanderizationService, private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService, private facilityDbService: FacilitydbService,
+    private facilityDbService: FacilitydbService,
     private dbChangesService: DbChangesService, private accountDbService: AccountdbService,
-    private sharedDataService: SharedDataService) { }
+    private sharedDataService: SharedDataService,
+    private utilityMeterDataDbService: UtilityMeterDatadbService) { }
 
   ngOnInit(): void {
     this.displayGraphCost = this.calanderizationService.displayGraphCost;
@@ -85,11 +86,11 @@ export class CalanderizationComponent implements OnInit {
 
   initializeSelectedMeter() {
     if (!this.selectedMeter) {
-      this.selectedMeter = this.facilityMeters[0];
+      this.selectMeter(this.facilityMeters[0])
     } else {
       let meterInFacility: IdbUtilityMeter = this.facilityMeters.find(meter => { return meter.id == this.selectedMeter.id });
       if (!meterInFacility) {
-        this.selectedMeter = this.facilityMeters[0];
+        this.selectMeter(this.facilityMeters[0])
       }
     }
   }
@@ -119,45 +120,50 @@ export class CalanderizationComponent implements OnInit {
   }
 
   setDateRange(calanderizedMeterData: Array<CalanderizedMeter>) {
-    if (!this.calanderizedDataFilters.selectedDateMax || !this.calanderizedDataFilters.selectedDateMin) {
-      let allMeterData: Array<MonthlyData> = calanderizedMeterData.flatMap(calanderizedMeter => { return calanderizedMeter.monthlyData });
-      let maxDateEntry: MonthlyData = _.maxBy(allMeterData, 'date');
-      let minDateEntry: MonthlyData = _.minBy(allMeterData, 'date');
-      if (minDateEntry && maxDateEntry) {
-        this.calanderizedDataFilters.selectedDateMax = {
-          year: maxDateEntry.year,
-          month: maxDateEntry.monthNumValue
-        };
-        this.calanderizedDataFilters.selectedDateMin = {
-          year: minDateEntry.year,
-          month: minDateEntry.monthNumValue
-        };
-        this.calanderizedDataFilters.dataDateRange = {
-          minDate: minDateEntry.date,
-          maxDate: maxDateEntry.date
+    if (calanderizedMeterData.length != 0) {
+      if (!this.calanderizedDataFilters.selectedDateMax || !this.calanderizedDataFilters.selectedDateMin) {
+        let allMeterData: Array<MonthlyData> = calanderizedMeterData.flatMap(calanderizedMeter => { return calanderizedMeter.monthlyData });
+        if (allMeterData.length != 0) {
+          let maxDateEntry: MonthlyData = _.maxBy(allMeterData, 'date');
+          let minDateEntry: MonthlyData = _.minBy(allMeterData, 'date');
+          if (minDateEntry && maxDateEntry) {
+            this.calanderizedDataFilters.selectedDateMax = {
+              year: maxDateEntry.year,
+              month: maxDateEntry.monthNumValue
+            };
+            this.calanderizedDataFilters.selectedDateMin = {
+              year: minDateEntry.year,
+              month: minDateEntry.monthNumValue
+            };
+            this.calanderizedDataFilters.dataDateRange = {
+              minDate: minDateEntry.date,
+              maxDate: maxDateEntry.date
+            }
+            this.calanderizationService.calanderizedDataFilters.next(this.calanderizedDataFilters);
+          }
         }
-        this.calanderizationService.calanderizedDataFilters.next(this.calanderizedDataFilters);
-      }
-    } else {
-      let allMeterData: Array<MonthlyData> = calanderizedMeterData.flatMap(calanderizedMeter => { return calanderizedMeter.monthlyData });
-      let maxDateEntry: MonthlyData = _.maxBy(allMeterData, 'date');
-      let minDateEntry: MonthlyData = _.minBy(allMeterData, 'date');
-      if (minDateEntry && this.calanderizedDataFilters.dataDateRange.maxDate < minDateEntry.date || this.calanderizedDataFilters.dataDateRange.minDate > maxDateEntry.date) {
-        this.calanderizedDataFilters.selectedDateMax = {
-          year: maxDateEntry.year,
-          month: maxDateEntry.monthNumValue
-        };
-        this.calanderizedDataFilters.selectedDateMin = {
-          year: minDateEntry.year,
-          month: minDateEntry.monthNumValue
-        };
-        this.calanderizedDataFilters.dataDateRange = {
-          minDate: minDateEntry.date,
-          maxDate: maxDateEntry.date
+      } else {
+        let allMeterData: Array<MonthlyData> = calanderizedMeterData.flatMap(calanderizedMeter => { return calanderizedMeter.monthlyData });
+        if (allMeterData.length != 0) {
+          let maxDateEntry: MonthlyData = _.maxBy(allMeterData, 'date');
+          let minDateEntry: MonthlyData = _.minBy(allMeterData, 'date');
+          if (minDateEntry && this.calanderizedDataFilters.dataDateRange.maxDate < minDateEntry.date || this.calanderizedDataFilters.dataDateRange.minDate > maxDateEntry.date) {
+            this.calanderizedDataFilters.selectedDateMax = {
+              year: maxDateEntry.year,
+              month: maxDateEntry.monthNumValue
+            };
+            this.calanderizedDataFilters.selectedDateMin = {
+              year: minDateEntry.year,
+              month: minDateEntry.monthNumValue
+            };
+            this.calanderizedDataFilters.dataDateRange = {
+              minDate: minDateEntry.date,
+              maxDate: maxDateEntry.date
+            }
+            this.calanderizationService.calanderizedDataFilters.next(this.calanderizedDataFilters);
+          }
         }
-        this.calanderizationService.calanderizedDataFilters.next(this.calanderizedDataFilters);
       }
-
     }
   }
 
@@ -180,7 +186,6 @@ export class CalanderizationComponent implements OnInit {
   }
 
   setDataDisplay(str: "table" | "graph") {
-    this.showFilterDropdown = false;
     this.dataDisplay = str;
   }
 
@@ -202,7 +207,6 @@ export class CalanderizationComponent implements OnInit {
 
   showDataApplicationModal() {
     this.sharedDataService.modalOpen.next(true);
-    this.showFilterDropdown = false;
     this.dataApplicationMeter = JSON.parse(JSON.stringify(this.selectedMeter));
     this.displayDataApplicationModal = true;
   }
@@ -228,7 +232,6 @@ export class CalanderizationComponent implements OnInit {
   }
 
   async setFacilityEnergyIsSource(energyIsSource: boolean) {
-    this.showFilterDropdown = false;
     if (this.selectedFacility.energyIsSource != energyIsSource) {
       this.selectedFacility.energyIsSource = energyIsSource;
       await this.dbChangesService.updateFacilities(this.selectedFacility);
@@ -237,17 +240,18 @@ export class CalanderizationComponent implements OnInit {
   }
 
   selectMeter(meter: IdbUtilityMeter) {
-    this.showFilterDropdown = false;
     this.selectedMeter = meter;
-    this.setCalanderizedMeterData();
+    let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataForFacility(this.selectedMeter, false);
+    if (meterData.length != 0) {
+      this.hasMeterData = true;
+      this.setCalanderizedMeterData();
+    } else {
+      this.hasMeterData = false;
+    }
   }
 
 
   getColor(): string {
     return UtilityColors[this.selectedMeter.source].color
-  }
-
-  toggleFilterMenu() {
-    this.showFilterDropdown = !this.showFilterDropdown;
   }
 }

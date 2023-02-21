@@ -1,17 +1,14 @@
 import { Injectable } from '@angular/core';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbFacility, IdbUtilityMeter, MeterPhase, MeterSource } from 'src/app/models/idb';
+import { MeterPhase, MeterSource } from 'src/app/models/idb';
 import { FuelTypeOption, GasOptions, LiquidOptions, OtherEnergyOptions, SolidOptions } from 'src/app/facility/utility-data/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
 import { ConvertUnitsService } from '../convert-units/convert-units.service';
-import { EGridService } from './e-grid.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class EnergyUseCalculationsService {
 
-  constructor(private convertUnitsService: ConvertUnitsService, private facilityDbService: FacilitydbService,
-    private eGridService: EGridService) { }
+  constructor(private convertUnitsService: ConvertUnitsService) { }
 
   getHeatingCapacity(source: MeterSource, startingUnit: string, meterEnergyUnit: string, selectedFuelTypeOption?: FuelTypeOption): number {
     let heatCapacity: number;
@@ -19,13 +16,9 @@ export class EnergyUseCalculationsService {
       heatCapacity = this.convertUnitsService.value(.003412).from('kWh').to(startingUnit);
     }
     else if (source == 'Natural Gas') {
-      // console.log(startingUnit);
       let conversionHelper: number = this.convertUnitsService.value(1).from('ft3').to(startingUnit);
-      // let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
       let convertedHeatCapacity: number = this.convertUnitsService.value(.001029).from('MMBtu').to(meterEnergyUnit);
       heatCapacity = (convertedHeatCapacity / conversionHelper);
-
-
     }
     else if (source == 'Other Fuels' || source == 'Other Energy') {
       if (selectedFuelTypeOption) {
@@ -39,7 +32,8 @@ export class EnergyUseCalculationsService {
       }
     }
     if (heatCapacity) {
-      heatCapacity = Number((heatCapacity).toLocaleString(undefined, { maximumSignificantDigits: 5 }));
+      let numberAsString: string = (heatCapacity).toLocaleString(undefined, { maximumSignificantDigits: 5 });
+      heatCapacity = parseFloat(numberAsString.replace(/,/g, ''));
     }
     return heatCapacity;
   }
@@ -97,15 +91,17 @@ export class EnergyUseCalculationsService {
   }
 
   getFuelEmissionsOutputRate(source: MeterSource, fuel: string, phase: MeterPhase, energyUnit: string): number {
+    //emissions rates in kg/MMBtu
     let emissionsRate: number;
     if (source == 'Natural Gas') {
-      emissionsRate = this.convertEmissions(53.06, energyUnit);
+      // emissionsRate = this.convertEmissions(53.06, energyUnit);
+      emissionsRate = 53.1148;
     } else if (source == 'Other Fuels') {
       let fuelTypeOptions: Array<FuelTypeOption> = this.getFuelTypeOptions(source, phase);
       let selectedFuel: FuelTypeOption = fuelTypeOptions.find(option => { return option.value == fuel })
       if (selectedFuel) {
         emissionsRate = selectedFuel.emissionsOutputRate;
-        emissionsRate = this.convertEmissions(emissionsRate, energyUnit);
+        // emissionsRate = this.convertEmissions(emissionsRate, energyUnit);
       }
     }
     return emissionsRate;

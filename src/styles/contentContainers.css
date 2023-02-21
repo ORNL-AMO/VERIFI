@@ -13,6 +13,3 @@ Content Container
     height: calc(100vh - 250px);
     overflow-y: auto;
   }
-  .help-panel.tab-margin {
-    margin-top: 65px;
-  }

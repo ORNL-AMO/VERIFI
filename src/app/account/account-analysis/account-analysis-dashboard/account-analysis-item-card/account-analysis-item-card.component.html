@@ -17,7 +17,7 @@
                 <button class="btn action-btn btn-sm" (click)="createCopy()">
                     <i class="fa fa-copy" title="Copy"></i>
                 </button>
-                <button class="btn action-btn btn-sm ml-1" (click)="deleteItem()">
+                <button class="btn action-btn btn-sm ms-1" (click)="deleteItem()">
                     <i class="fa fa-trash" title="Delete"></i>
                 </button>
             </div>
@@ -56,7 +56,7 @@
     <div class="popup-body">
         <p>WARNING: Deleting this analysis item cannot be undone. Reports using this analysis may be effected.</p>
     </div>
-    <div class="saveCancel popup-footer text-right">
+    <div class="saveCancel popup-footer text-end">
         <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
         <button class="btn btn-danger" (click)="confirmDelete()">Delete</button>
     </div>

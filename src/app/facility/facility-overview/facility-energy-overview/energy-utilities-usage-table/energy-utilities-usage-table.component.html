@@ -1,5 +1,5 @@
 <div class="table-responsive">
-    <table class="table table-sm" *ngIf="utilityUsageSummaryData">
+    <table class="table utility-data table-sm table-bordered table-hover" *ngIf="utilityUsageSummaryData">
         <thead>
             <tr class="table-mh">
                 <th></th>
@@ -25,7 +25,7 @@
                 <th>Utility Cost</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody class="table-group-divider">
             <tr *ngFor="let utilityUsageSummary of utilityUsageSummaryData.utilitySummaries">
                 <td>
                     {{utilityUsageSummary.utility}}
@@ -38,7 +38,7 @@
                     <span *ngIf="!utilityUsageSummary.previousMonthEnergyUse">
                         &mdash;
                     </span>
-                    <span *ngIf="utilityUsageSummary.energyUseChangeSinceLastYear" class="small pl-2 pull-right green"
+                    <span *ngIf="utilityUsageSummary.energyUseChangeSinceLastYear" class="small ps-2 pull-right green"
                         [ngClass]="{'red': utilityUsageSummary.energyUseChangeSinceLastYear > 0}">
                         ({{utilityUsageSummary.energyUseChangeSinceLastYear | customNumber}})
                     </span>
@@ -51,7 +51,7 @@
                         &mdash;
                     </span>
 
-                    <span *ngIf="utilityUsageSummary.energyCostChangeSinceLastYear" class="small pl-2 pull-right green"
+                    <span *ngIf="utilityUsageSummary.energyCostChangeSinceLastYear" class="small ps-2 pull-right green"
                         [ngClass]="{'red': utilityUsageSummary.energyCostChangeSinceLastYear > 0}">
                         ({{utilityUsageSummary.energyCostChangeSinceLastYear | customNumber:true}})
                     </span>
@@ -109,7 +109,7 @@
                         &mdash;
                     </span>
                     <span *ngIf="utilityUsageSummaryData.total.energyUseChangeSinceLastYear"
-                        class="small pl-2 pull-right green"
+                        class="small ps-2 pull-right green"
                         [ngClass]="{'red': utilityUsageSummaryData.total.energyUseChangeSinceLastYear > 0}">
                         ({{utilityUsageSummaryData.total.energyUseChangeSinceLastYear | customNumber}})
                     </span>
@@ -123,7 +123,7 @@
                         &mdash;
                     </span>
                     <span *ngIf="utilityUsageSummaryData.total.energyCostChangeSinceLastYear"
-                        class="small pl-2 pull-right green"
+                        class="small ps-2 pull-right green"
                         [ngClass]="{'red': utilityUsageSummaryData.total.energyCostChangeSinceLastYear > 0}">
                         ({{utilityUsageSummaryData.total.energyCostChangeSinceLastYear | customNumber: true}})
                     </span>

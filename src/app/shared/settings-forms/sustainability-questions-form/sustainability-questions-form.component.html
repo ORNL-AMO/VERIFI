@@ -1,189 +1,235 @@
 <form [formGroup]="form">
     <!--energy reduction-->
-    <input type="checkbox" class="rowToggle" name="energyReductionGoal" formControlName="energyReductionGoal"
-        (change)="saveChanges()" id="energyReductionGoal">
-    <label class="checkbox mb-3" for="energyReductionGoal">1. Do you have Energy Reduction goal? </label>
-
+    <div class="form-check">
+        <input type="checkbox" class="form-check-input" name="energyReductionGoal" formControlName="energyReductionGoal"
+            (change)="saveChanges()" id="energyReductionGoal">
+        <label class="form-check-label" for="energyReductionGoal">1. Do you have Energy Reduction goal? </label>
+    </div>
     <div class="row" [hidden]="!form.controls.energyReductionGoal.value">
         <div class="col-6">
-            <label>Reduction Goal</label>
-            <div class="input-group mb-3">
+            <label for="energyReductionPercent">Reduction Goal</label>
+            <div class="input-group">
                 <input type="number" class="form-control" formControlName="energyReductionPercent"
                     (input)="saveChanges();" min="0" max="100">
-                <span class="unit">%</span>
+                <span class="input-group-text">%</span>
             </div>
         </div>
         <div class="col-6">
-            <label class="checkbox mb-3">Is goal for absolute energy or energy intensity?</label>
+            <label>Is goal for absolute energy or energy intensity?</label>
 
-            <input type="radio" class="rowToggle" name="energyIsAbsolute" formControlName="energyIsAbsolute"
-                [value]="true" (change)="saveChanges()" id="energyAbsolute">
-            <label class="checkbox" for="energyAbsolute">Absolute</label>
+            <div class="form-check">
+                <input type="radio" class="form-check-input" name="energyIsAbsolute" formControlName="energyIsAbsolute"
+                    [value]="true" (change)="saveChanges()" id="energyAbsolute">
+                <label class="form-check-label" for="energyAbsolute">Absolute</label>
+            </div>
 
-            <input type="radio" class="rowToggle" name="energyIsAbsolute" formControlName="energyIsAbsolute"
-                [value]="false" (change)="saveChanges()" id="energyIntensity">
-            <label class="checkbox" for="energyIntensity">Intensity</label>
+            <div class="form-check">
+                <input type="radio" class="form-check-input" name="energyIsAbsolute" formControlName="energyIsAbsolute"
+                    [value]="false" (change)="saveChanges()" id="energyIntensity">
+                <label class="form-check-label" for="energyIntensity">Intensity</label>
+            </div>
         </div>
         <div class="col-6">
-            <label>Baseline Year</label>
-            <select formControlName="energyReductionBaselineYear"
+            <label for="energyReductionBaselineYear">Baseline Year</label>
+            <select class="form-select" formControlName="energyReductionBaselineYear"
                 (change)="changeBaselineYear('energyReductionBaselineYear','energyReductionTargetYear')">
                 <option *ngFor="let year of years" [ngValue]="year">{{year | yearDisplay:fiscalYearOption}}</option>
             </select>
         </div>
         <div class="col-6">
-            <label>Target Year</label>
-            <select formControlName="energyReductionTargetYear" (change)="saveChanges()">
+            <label for="energyReductionTargetYear">Target Year</label>
+            <select class="form-select" formControlName="energyReductionTargetYear" (change)="saveChanges()">
                 <option *ngFor="let year of years | yearOptions: form.controls.energyReductionBaselineYear.value"
                     [ngValue]="year">{{year | yearDisplay:fiscalYearOption}}</option>
             </select>
+        </div>
+        <div class="col-12">
+            <hr>
         </div>
     </div>
     <div class="alert alert-warning mb-2" [hidden]="form.controls.energyReductionGoal.value">
         Energy Reduction goal needed to perform analysis.
     </div>
     <!--Greenhouse reduction-->
-    <input type="checkbox" class="rowToggle" name="greenhouseReductionGoal" formControlName="greenhouseReductionGoal"
-        (change)="saveChanges()" id="greenhouseReductionGoal">
-    <label class="checkbox mb-3" for="greenhouseReductionGoal">2. Do you have a Greenhouse Emission/Carbon Reduction
-        goal? </label>
+    <div class="form-check">
+        <input type="checkbox" class="form-check-input" name="greenhouseReductionGoal"
+            formControlName="greenhouseReductionGoal" (change)="saveChanges()" id="greenhouseReductionGoal">
+        <label class="form-check-label" for="greenhouseReductionGoal">2. Do you have a Greenhouse Emission/Carbon
+            Reduction
+            goal? </label>
+    </div>
     <div class="row" [hidden]="!form.controls.greenhouseReductionGoal.value">
         <div class="col-6">
-            <label>Reduction Goal</label>
-            <div class="input-group mb-3">
+            <label for="greenhouseReductionPercent">Reduction Goal</label>
+            <div class="input-group">
                 <input type="number" class="form-control" formControlName="greenhouseReductionPercent"
                     (input)="saveChanges();" min="0" max="100">
-                <span class="unit">%</span>
+                <span class="input-group-text">%</span>
             </div>
         </div>
         <div class="col-6">
-            <label class="checkbox mb-3">Is goal for absolute GHG/Carbon or GHG/Carbon intensity?</label>
+            <label>Is goal for absolute GHG/Carbon or GHG/Carbon intensity?</label>
 
-            <input type="radio" class="rowToggle" name="greenhouseIsAbsolute" formControlName="greenhouseIsAbsolute"
-                [value]="true" (change)="saveChanges()" id="greenhouseAbsolute">
-            <label class="checkbox" for="greenhouseAbsolute">Absolute</label>
+            <div class="form-check">
+                <input type="radio" class="form-check-input" name="greenhouseIsAbsolute"
+                    formControlName="greenhouseIsAbsolute" [value]="true" (change)="saveChanges()"
+                    id="greenhouseAbsolute">
+                <label class="checkbox" for="greenhouseAbsolute">Absolute</label>
+            </div>
 
-            <input type="radio" class="rowToggle" name="greenhouseIsAbsolute" formControlName="greenhouseIsAbsolute"
-                [value]="false" (change)="saveChanges()" id="greenhouseIntensity">
-            <label class="checkbox" for="greenhouseIntensity">Intensity</label>
+            <div class="form-check">
+                <input type="radio" class="form-check-input" name="greenhouseIsAbsolute"
+                    formControlName="greenhouseIsAbsolute" [value]="false" (change)="saveChanges()"
+                    id="greenhouseIntensity">
+                <label class="checkbox" for="greenhouseIntensity">Intensity</label>
+            </div>
         </div>
         <div class="col-6">
-            <label>Baseline Year</label>
-            <select formControlName="greenhouseReductionBaselineYear"
+            <label for="greenhouseReductionBaselineYear">Baseline Year</label>
+            <select class="form-select" formControlName="greenhouseReductionBaselineYear"
                 (change)="changeBaselineYear('greenhouseReductionBaselineYear','greenhouseReductionTargetYear')">
                 <option *ngFor="let year of years" [ngValue]="year">{{year | yearDisplay:fiscalYearOption}}</option>
             </select>
         </div>
         <div class="col-6">
-            <label>Target Year</label>
-            <select formControlName="greenhouseReductionTargetYear" (change)="saveChanges()">
+            <label for="greenhouseReductionTargetYear">Target Year</label>
+            <select class="form-select" formControlName="greenhouseReductionTargetYear" (change)="saveChanges()">
                 <option *ngFor="let year of years | yearOptions: form.controls.greenhouseReductionBaselineYear.value"
                     [ngValue]="year">{{year | yearDisplay:fiscalYearOption}}</option>
             </select>
         </div>
+        <div class="col-12">
+            <hr>
+        </div>
     </div>
 
     <!--renewable energy-->
-    <input type="checkbox" class="rowToggle" name="renewableEnergyGoal" formControlName="renewableEnergyGoal"
-        (change)="saveChanges()" id="renewableEnergyGoal">
-    <label class="checkbox mb-3" for="renewableEnergyGoal">3. Do you have Renewable Energy goal?</label>
+    <div class="form-check">
+        <input type="checkbox" class="form-check-input" name="renewableEnergyGoal" formControlName="renewableEnergyGoal"
+            (change)="saveChanges()" id="renewableEnergyGoal">
+        <label class="form-check-label" for="renewableEnergyGoal">3. Do you have Renewable Energy goal?</label>
+    </div>
     <div class="row" [hidden]="!form.controls.renewableEnergyGoal.value">
-        <div class="col-12">
-            <label>Implementation Goal</label>
+        <div class="col-6">
+            <label for="renewableEnergyPercent">Implementation Goal</label>
             <div class="input-group mb-3">
                 <input type="number" class="form-control" formControlName="renewableEnergyPercent"
                     (input)="saveChanges();" min="0" max="100">
-                <span class="unit">%</span>
+                <span class="input-group-text">%</span>
             </div>
         </div>
-        <div class="col-6">
-            <label>Baseline Year</label>
-            <select formControlName="renewableEnergyBaselineYear"
-                (change)="changeBaselineYear('renewableEnergyBaselineYear','renewableEnergyTargetYear');">
-                <option *ngFor="let year of years" [ngValue]="year">{{year | yearDisplay:fiscalYearOption}}</option>
-            </select>
+        <div class="col-12">
+            <div class="row">
+                <div class="col-6">
+                    <label for="renewableEnergyBaselineYear">Baseline Year</label>
+                    <select class="form-select" formControlName="renewableEnergyBaselineYear"
+                        (change)="changeBaselineYear('renewableEnergyBaselineYear','renewableEnergyTargetYear');">
+                        <option *ngFor="let year of years" [ngValue]="year">{{year | yearDisplay:fiscalYearOption}}
+                        </option>
+                    </select>
+                </div>
+                <div class="col-6">
+                    <label for="renewableEnergyTargetYear">Target Year</label>
+                    <select class="form-select" formControlName="renewableEnergyTargetYear" (change)="saveChanges()">
+                        <option
+                            *ngFor="let year of years | yearOptions: form.controls.renewableEnergyBaselineYear.value"
+                            [ngValue]="year">{{year | yearDisplay:fiscalYearOption}}</option>
+                    </select>
+                </div>
+            </div>
         </div>
-        <div class="col-6">
-            <label>Target Year</label>
-            <select formControlName="renewableEnergyTargetYear" (change)="saveChanges()">
-                <option *ngFor="let year of years | yearOptions: form.controls.renewableEnergyBaselineYear.value"
-                    [ngValue]="year">{{year | yearDisplay:fiscalYearOption}}</option>
-            </select>
+        <div class="col-12">
+            <hr>
         </div>
     </div>
     <!--waste reduction-->
-    <input type="checkbox" class="rowToggle" name="wasteReductionGoal" formControlName="wasteReductionGoal"
-        (change)="saveChanges()" id="wasteWaterReductionGoal">
-    <label class="checkbox mb-3" for="wasteWaterReductionGoal">4. Do you have a Waste Reduction goal?</label>
+    <div class="form-check">
+        <input type="checkbox" class="form-check-input" name="wasteReductionGoal" formControlName="wasteReductionGoal"
+            (change)="saveChanges()" id="wasteWaterReductionGoal">
+        <label class="form-check-label" for="wasteWaterReductionGoal">4. Do you have a Waste Reduction goal?</label>
+    </div>
     <div class="row" [hidden]="!form.controls.wasteReductionGoal.value">
         <div class="col-6">
-            <label>Reduction Goal</label>
+            <label for="wasteReductionPercent">Reduction Goal</label>
             <div class="input-group mb-3">
                 <input type="number" class="form-control" formControlName="wasteReductionPercent"
                     (input)="saveChanges();" min="0" max="100">
-                <span class="unit">%</span>
+                <span class="input-group-text">%</span>
             </div>
         </div>
         <div class="col-6">
-            <label class="checkbox mb-3">Is goal for absolute waste or waste intensity?</label>
+            <label>Is goal for absolute waste or waste intensity?</label>
 
-            <input type="radio" class="rowToggle" name="wasteIsAbsolute" formControlName="wasteIsAbsolute"
-                [value]="true" (change)="saveChanges()" id="wasteAbsolute">
-            <label class="checkbox" for="wasteAbsolute">Absolute</label>
+            <div class="form-check">
+                <input type="radio" class="form-check-input" name="wasteIsAbsolute" formControlName="wasteIsAbsolute"
+                    [value]="true" (change)="saveChanges()" id="wasteAbsolute">
+                <label class="form-check-label" for="wasteAbsolute">Absolute</label>
+            </div>
 
-            <input type="radio" class="rowToggle" name="wasteIsAbsolute" formControlName="wasteIsAbsolute"
-                [value]="false" (change)="saveChanges()" id="wasteIntensity">
-            <label class="checkbox" for="wasteIntensity">Intensity</label>
+            <div class="form-check">
+                <input type="radio" class="form-check-input" name="wasteIsAbsolute" formControlName="wasteIsAbsolute"
+                    [value]="false" (change)="saveChanges()" id="wasteIntensity">
+                <label class="form-check-label" for="wasteIntensity">Intensity</label>
+            </div>
         </div>
         <div class="col-6">
-            <label>Baseline Year</label>
-            <select formControlName="wasteReductionBaselineYear"
+            <label for="wasteReductionBaselineYear">Baseline Year</label>
+            <select class="form-select" formControlName="wasteReductionBaselineYear"
                 (change)="changeBaselineYear('wasteReductionBaselineYear','wasteReductionTargetYear')">
                 <option *ngFor="let year of years" [ngValue]="year">{{year | yearDisplay:fiscalYearOption}}</option>
             </select>
         </div>
         <div class="col-6">
-            <label>Target Year</label>
-            <select formControlName="wasteReductionTargetYear" (change)="saveChanges()">
+            <label for="wasteReductionTargetYear">Target Year</label>
+            <select class="form-select" formControlName="wasteReductionTargetYear" (change)="saveChanges()">
                 <option *ngFor="let year of years | yearOptions: form.controls.wasteReductionBaselineYear.value"
                     [ngValue]="year">{{year | yearDisplay:fiscalYearOption}}</option>
             </select>
         </div>
+        <div class="col-12">
+            <hr>
+        </div>
     </div>
     <!--water reduction-->
-    <input type="checkbox" class="rowToggle" name="waterReductionGoal" formControlName="waterReductionGoal"
-        (change)="saveChanges()" id="waterReductionGoal">
-    <label class="checkbox mb-3" for="waterReductionGoal">5. Do you have a Water Reduction goal?</label>
+    <div class="form-check">
+        <input type="checkbox" class="form-check-input" name="waterReductionGoal" formControlName="waterReductionGoal"
+            (change)="saveChanges()" id="waterReductionGoal">
+        <label class="form-check-label" for="waterReductionGoal">5. Do you have a Water Reduction goal?</label>
+    </div>
     <div class="row" [hidden]="!form.controls.waterReductionGoal.value">
         <div class="col-6">
-            <label>Reduction Goal</label>
+            <label for="waterReductionPercent">Reduction Goal</label>
             <div class="input-group mb-3">
                 <input type="number" class="form-control" formControlName="waterReductionPercent"
                     (input)="saveChanges();" min="0" max="100">
-                <span class="unit">%</span>
+                <span class="input-group-text">%</span>
             </div>
         </div>
         <div class="col-6">
-            <label class="checkbox mb-3">Is goal for absolute water or water intensity?</label>
+            <label>Is goal for absolute water or water intensity?</label>
 
-            <input type="radio" class="rowToggle" name="waterIsAbsolute" formControlName="waterIsAbsolute"
-                [value]="true" (change)="saveChanges()" id="waterAbsolute">
-            <label class="checkbox" for="waterAbsolute">Absolute</label>
+            <div class="form-check">
+                <input type="radio" class="form-check-input" name="waterIsAbsolute" formControlName="waterIsAbsolute"
+                    [value]="true" (change)="saveChanges()" id="waterAbsolute">
+                <label class="form-check-label" for="waterAbsolute">Absolute</label>
+            </div>
 
-            <input type="radio" class="rowToggle" name="waterIsAbsolute" formControlName="waterIsAbsolute"
-                [value]="false" (change)="saveChanges()" id="waterIntensity">
-            <label class="checkbox" for="waterIntensity">Intensity</label>
+            <div class="form-check">
+                <input type="radio" class="form-check-input" name="waterIsAbsolute" formControlName="waterIsAbsolute"
+                    [value]="false" (change)="saveChanges()" id="waterIntensity">
+                <label class="form-check-label" for="waterIntensity">Intensity</label>
+            </div>
         </div>
         <div class="col-6">
-            <label>Baseline Year</label>
-            <select formControlName="waterReductionBaselineYear"
+            <label for="waterReductionBaselineYear">Baseline Year</label>
+            <select class="form-select" formControlName="waterReductionBaselineYear"
                 (change)="changeBaselineYear('waterReductionBaselineYear','waterReductionTargetYear')">
                 <option *ngFor="let year of years" [ngValue]="year">{{year | yearDisplay:fiscalYearOption}}</option>
             </select>
         </div>
         <div class="col-6">
-            <label>Target Year</label>
-            <select formControlName="waterReductionTargetYear" (change)="saveChanges()">
+            <label for="waterReductionTargetYear">Target Year</label>
+            <select class="form-select" formControlName="waterReductionTargetYear" (change)="saveChanges()">
                 <option *ngFor="let year of years | yearOptions: form.controls.waterReductionBaselineYear.value"
                     [ngValue]="year">{{year | yearDisplay:fiscalYearOption}}</option>
             </select>
@@ -193,6 +239,6 @@
 <p class="alert alert-warning" *ngIf="sustainQuestionsDontMatchAccount">
     Facility sustainability answers are different then the answers set for the account. If you would like to
     use the
-    account answers for this facility click here: <a (click)="setAccountSustainQuestions()">Use Account
-        Answers</a>
+    account answers for this facility click here: <a class="click-link" (click)="setAccountSustainQuestions()">Use
+        Account Answers</a>
 </p>

@@ -59,7 +59,7 @@ export class AccountAnalysisDashboardComponent implements OnInit {
     let addedItem: IdbAccountAnalysisItem = await this.accountAnalysisDbService.addWithObservable(newItem).toPromise();
     await this.dbChangesService.setAccountAnalysisItems(this.selectedAccount);
     this.accountAnalysisDbService.selectedAnalysisItem.next(addedItem);
-    this.toastNotificationService.showToast('Analysis Item Created', undefined, undefined, false, "success");
+    this.toastNotificationService.showToast('Analysis Item Created', undefined, undefined, false, "bg-success");
     this.router.navigateByUrl('account/analysis/setup');
   }
   

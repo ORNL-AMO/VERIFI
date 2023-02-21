@@ -69,7 +69,7 @@ export class BetterPlantsReportMenuComponent implements OnInit {
     this.overviewReportService.reportOptions.next(this.reportOptions);
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setAccountOverviewReportOptions(selectedAccount);
-    this.toastNotificationsService.showToast('New Report Created', undefined, 4000, false, "success");
+    this.toastNotificationsService.showToast('New Report Created', undefined, 4000, false, "bg-success");
     this.router.navigateByUrl('/account/reports/better-plants-report');
   }
 
@@ -84,7 +84,7 @@ export class BetterPlantsReportMenuComponent implements OnInit {
     this.overviewReportService.reportOptions.next(this.reportOptions);
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setAccountOverviewReportOptions(selectedAccount);
-    this.toastNotificationsService.showToast('Report Updated', undefined, 4000, false, "success");
+    this.toastNotificationsService.showToast('Report Updated', undefined, 4000, false, "bg-success");
     this.router.navigateByUrl('/account/reports/better-plants-report');
   }
 

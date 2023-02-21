@@ -7,104 +7,123 @@
     </ul>
     <div class="content-padding">
         <h4>{{selectedMeter.name}} Calanderized Data
-            <span class="badge float-right" [ngStyle]="{'background-color': getColor()}">{{selectedMeter.source}}</span>
+            <span class="badge float-end" [ngStyle]="{'background-color': getColor()}">{{selectedMeter.source}}</span>
         </h4>
-
-        <div class="p-2 text-center" *ngIf="!selectedMeter.meterReadingDataApplication">
-            <p>
-                No Calanderization Method Selected. Select the method you would like to use to calanderize your meter
-                data. The modal will give a more detailed look at how calanderization is done!
-            </p>
-            <div class="row justify-content-center">
-                <div class="col">
-                    <button class="btn btn-primary mr-3" (click)="setCalanderizeData('backward')">
-                        Calanderize Meter
-                    </button>
-                    <button class="btn btn-primary mr-3" (click)="setCalanderizeData('fullMonth')">
-                        Do Not Calanderize
-                    </button>
-                </div>
-            </div>
-            <div class="row justify-content-center">
-                <div class="col">
-                    <button class="btn btn-primary mr-3" (click)="showDataApplicationModal()">
-                        View Calanderization Modal
-                    </button>
-                </div>
-            </div>
-            <hr>
-        </div>
-
-        <ng-container *ngIf="selectedMeter.meterReadingDataApplication">
-            <div class="d-flex pb-0 justify-content-between">
-
-                <!--Table/Chart Filters-->
-                <div class="d-flex">
-                    <ng-container *ngIf="dataDisplay == 'table'">
-                        <button class="btn action-btn" [ngClass]="{'active' : showFilterDropdown}"
-                            (click)="toggleFilterMenu()">
-                            <i class="fa fa-chevron-down" *ngIf="showFilterDropdown"></i>
-                            <i class="fa fa-chevron-up" *ngIf="!showFilterDropdown"></i>
-                            Filter
+        <ng-container *ngIf="hasMeterData">
+            <div class="p-2 text-center" *ngIf="!selectedMeter.meterReadingDataApplication">
+                <p>
+                    No Calanderization Method Selected. Select the method you would like to use to calanderize your
+                    meter
+                    data. The modal will give a more detailed look at how calanderization is done!
+                </p>
+                <div class="row justify-content-center pb-2">
+                    <div class="col">
+                        <button class="btn btn-primary me-3" (click)="setCalanderizeData('backward')">
+                            Calanderize Meter
                         </button>
-                        <div class="pl-2">
-                            <button class="btn action-btn" (click)="showDataApplicationModal()">Select Method</button>
-                        </div>
-                    </ng-container>
-                </div>
-
-                <div class="d-flex">
-                    <!--Items Per Page-->
-                    <app-table-items-dropdown *ngIf="dataDisplay == 'table'"></app-table-items-dropdown>
-                    <!--Chart Controls-->
-                    <div *ngIf="dataDisplay == 'graph'" class="pl-2">
-                        <span class="btn-label pr-2">Utility</span>
-                        <div class="btn-group pr-2 mr-2">
-                            <button class="btn toggle-btn" [ngClass]="{'active': displayGraphEnergy == 'bar'}"
-                                (click)="setDisplayGraphEnergy('bar')"><span class="fa fa-bar-chart"></span></button>
-                            <button class="btn toggle-btn" [ngClass]="{'active': displayGraphEnergy == 'scatter'}"
-                                (click)="setDisplayGraphEnergy('scatter')"><span
-                                    class="fa fa-line-chart"></span></button>
-                        </div>
-
-                        <span class="btn-label pr-2">Cost</span>
-                        <div class="btn-group pr-2 mr-2">
-                            <button class="btn toggle-btn" [ngClass]="{'active': displayGraphCost == 'bar'}"
-                                (click)="setDisplayGraphCost('bar')"><span class="fa fa-bar-chart"></span></button>
-                            <button class="btn toggle-btn" [ngClass]="{'active': displayGraphCost == 'scatter'}"
-                                (click)="setDisplayGraphCost('scatter')"><span class="fa fa-line-chart"></span></button>
-                        </div>
-                    </div>
-                    <div class="btn-group pl-2">
-                        <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'table'}"
-                            (click)="setDataDisplay('table')">Table</button>
-                        <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'graph'}"
-                            (click)="setDataDisplay('graph')">Graph</button>
-                    </div>
-
-                    <div class="btn-group pl-2">
-                        <button class="btn toggle-btn" (click)="setFacilityEnergyIsSource(true)"
-                            [ngClass]="{'active': selectedFacility.energyIsSource == true}">Source Energy</button>
-                        <button class="btn toggle-btn" (click)="setFacilityEnergyIsSource(false)"
-                            [ngClass]="{'active': selectedFacility.energyIsSource == false}">Site Energy</button>
+                        <button class="btn btn-primary me-3" (click)="setCalanderizeData('fullMonth')">
+                            Do Not Calanderize
+                        </button>
                     </div>
                 </div>
+                <div class="row justify-content-center">
+                    <div class="col">
+                        <button class="btn btn-primary me-3" (click)="showDataApplicationModal()">
+                            View Calanderization Modal
+                        </button>
+                    </div>
+                </div>
+                <hr>
             </div>
 
-            <div *ngIf="showFilterDropdown">
-                <app-calanderization-filter></app-calanderization-filter>
-            </div>
+            <ng-container *ngIf="selectedMeter.meterReadingDataApplication">
+                <div class="d-flex pb-0 justify-content-between">
 
+                    <!--Table/Chart Filters-->
+                    <div class="d-flex">
+                        <ng-container *ngIf="dataDisplay == 'table'">
+                            <app-calanderization-filter></app-calanderization-filter>
+                            <div class="ps-2">
+                                <button class="btn action-btn" (click)="showDataApplicationModal()">Select
+                                    Method</button>
+                            </div>
+                        </ng-container>
+                    </div>
 
-            <div>
-                <app-calanderized-meter-data-table *ngIf="dataDisplay == 'table'" [itemsPerPage]="itemsPerPage"
-                    [calanderizedMeter]="calanderizedMeter">
-                </app-calanderized-meter-data-table>
-                <app-calanderization-chart *ngIf="dataDisplay == 'graph'" [meterData]="calanderizedMeter"
-                    [displayGraphEnergy]="displayGraphEnergy" [displayGraphCost]="displayGraphCost">
-                </app-calanderization-chart>
-            </div>
+                    <div class="d-flex mb-2">
+                        <!--Items Per Page-->
+                        <app-table-items-dropdown *ngIf="dataDisplay == 'table'"></app-table-items-dropdown>
+                        <!--Chart Controls-->
+                        <div *ngIf="dataDisplay == 'graph'" class="ps-2">
+                            <span class="btn-label pe-2">Utility</span>
+                            <div class="btn-group pe-2 me-2">
+                                <button class="btn toggle-btn" [ngClass]="{'active': displayGraphEnergy == 'bar'}"
+                                    (click)="setDisplayGraphEnergy('bar')">
+                                    <span class="fa fa-bar-chart"></span>
+                                </button>
+                                <button class="btn toggle-btn" [ngClass]="{'active': displayGraphEnergy == 'scatter'}"
+                                    (click)="setDisplayGraphEnergy('scatter')">
+                                    <span class="fa fa-line-chart"></span>
+                                </button>
+                            </div>
+
+                            <span class="btn-label pe-2">Cost</span>
+                            <div class="btn-group pe-2 me-2">
+                                <button class="btn toggle-btn" [ngClass]="{'active': displayGraphCost == 'bar'}"
+                                    (click)="setDisplayGraphCost('bar')">
+                                    <span class="fa fa-bar-chart"></span>
+                                </button>
+                                <button class="btn toggle-btn" [ngClass]="{'active': displayGraphCost == 'scatter'}"
+                                    (click)="setDisplayGraphCost('scatter')">
+                                    <span class="fa fa-line-chart"></span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="btn-group ps-2">
+                            <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'table'}"
+                                (click)="setDataDisplay('table')">
+                                <span class="fa fa-chevron-right"></span>
+                                Table
+                                <span class="fa fa-chevron-left"></span>
+                            </button>
+                            <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'graph'}"
+                                (click)="setDataDisplay('graph')">
+                                <span class="fa fa-chevron-right"></span>
+                                Graph
+                                <span class="fa fa-chevron-left"></span>
+                            </button>
+                        </div>
+
+                        <div class="btn-group ps-2">
+                            <button class="btn toggle-btn" (click)="setFacilityEnergyIsSource(true)"
+                                [ngClass]="{'active': selectedFacility.energyIsSource == true}">
+                                <span class="fa fa-chevron-right"></span>
+                                Source Energy
+                                <span class="fa fa-chevron-left"></span>
+                            </button>
+                            <button class="btn toggle-btn" (click)="setFacilityEnergyIsSource(false)"
+                                [ngClass]="{'active': selectedFacility.energyIsSource == false}">
+                                <span class="fa fa-chevron-right"></span>
+                                Site Energy
+                                <span class="fa fa-chevron-left"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <app-calanderized-meter-data-table *ngIf="dataDisplay == 'table'" [itemsPerPage]="itemsPerPage"
+                        [calanderizedMeter]="calanderizedMeter">
+                    </app-calanderized-meter-data-table>
+                    <app-calanderization-chart *ngIf="dataDisplay == 'graph'" [meterData]="calanderizedMeter"
+                        [displayGraphEnergy]="displayGraphEnergy" [displayGraphCost]="displayGraphCost">
+                    </app-calanderization-chart>
+                </div>
+            </ng-container>
         </ng-container>
+        <div class="alert alert-warning text-center" *ngIf="!hasMeterData">
+            No data found for this meter. Please enter utility bills under the "Meter Management" tab.
+        </div>
     </div>
 </div>
 
@@ -118,7 +137,7 @@
     <div class="popup-body" *ngIf="displayDataApplicationModal">
         <app-data-application-menu [meter]="dataApplicationMeter"></app-data-application-menu>
     </div>
-    <div class="saveCancel popup-footer text-right">
+    <div class="saveCancel popup-footer text-end pb-2">
         <button class="btn btn-secondary" (click)="cancelSetDataApplication()">Cancel</button>
         <button class="btn btn-success" (click)="setDataApplication()">Submit</button>
     </div>

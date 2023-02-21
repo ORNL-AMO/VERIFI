@@ -47,12 +47,10 @@
             </table>
         </div>
 
-        <div class="tableControls overflow-hidden">
-            <div class="item-right">
-                <ngb-pagination [collectionSize]="accountAnalysisItems.length" [(page)]="currentPageNumber"
-                    [pageSize]="itemsPerPage" [rotate]="true" aria-label="Default pagination"></ngb-pagination>
-            </div>
-            <p class="item-right">{{accountAnalysisItems.length}} entries</p>
+        <div class="d-flex w-100 justify-content-end">
+            <ngb-pagination [collectionSize]="accountAnalysisItems.length" [(page)]="currentPageNumber" [pageSize]="itemsPerPage"
+                [maxSize]="5" [rotate]="true" aria-label="Pagination">
+            </ngb-pagination>
         </div>
     </div>
 </div>

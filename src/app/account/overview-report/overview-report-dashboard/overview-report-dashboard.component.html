@@ -5,31 +5,31 @@
         <div *ngIf="accountOverviewReportOptions.length === 0" class="text-center mt-5">
             <h5>No reports found for this account.</h5>
             <div class="meterData">
-                <button class="btn action-btn mr-2" (click)="openAddNewReportModal()"><i class="fa fa-plus"></i> Add
+                <button class="btn action-btn me-2" (click)="openAddNewReportModal()"><i class="fa fa-plus"></i> Add
                     New
                     Report</button>
             </div>
         </div>
 
         <div *ngIf="accountOverviewReportOptions.length > 0">
-            <div class="d-flex w-100 justify-content-end">
+            <div class="d-flex w-100 justify-content-end mb-2">
                 <app-table-items-dropdown></app-table-items-dropdown>
 
-                <div class="pl-2">
-                    <button class="btn action-btn" (click)="openAddNewReportModal()"><i
-                            class="fa fa-plus"></i>
+                <div class="ps-2">
+                    <button class="btn action-btn" (click)="openAddNewReportModal()"><i class="fa fa-plus"></i>
                         Add New Report</button>
                 </div>
 
             </div>
 
             <div class="table-responsive">
-                <table class="table table-sm table-hover">
-                    <thead>
+                <table class="table table-sm table-hover utility-data table-bordered">
+                    <thead class="sortable">
                         <tr>
                             <th (click)="setOrderDataField('name')" [ngClass]="{'active': orderDataField == 'name'}">
                                 Name</th>
-                            <th (click)="setOrderDataField('reportOptionsType')" [ngClass]="{'active': orderDataField == 'reportOptionsType'}">
+                            <th (click)="setOrderDataField('reportOptionsType')"
+                                [ngClass]="{'active': orderDataField == 'reportOptionsType'}">
                                 Report Type</th>
                             <th (click)="setOrderDataField('baselineYear')"
                                 [ngClass]="{'active': orderDataField == 'baselineYear'}">Baseline Year
@@ -43,7 +43,7 @@
                             <th>Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="table-group-divider">
                         <tr
                             *ngFor="let report of accountOverviewReportOptions  | orderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
                             <td>
@@ -63,10 +63,17 @@
                             <td>{{report.targetYear}}</td>
                             <td>{{report.date | date}}</td>
                             <td class="actions">
-                                <div class="d-flex">
-                                    <i class="fa fa-pencil" title="Edit" (click)="editReport(report)"></i>
-                                    <i class="fa fa-copy" title="Copy" (click)="createCopy(report)"></i>
-                                    <i class="fa fa-trash" title="Delete" (click)="deleteReport(report)"></i>
+                                <div class="btn-group">
+                                    <button class="btn btn-sm btn-outline" (click)="editReport(report)" title="Edit">
+                                        <i class="fa fa-pencil"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline" (click)="createCopy(report)" title="Copy">
+                                        <i class="fa fa-copy"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline" (click)="deleteReport(report)"
+                                        title="Delete">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -74,12 +81,10 @@
                 </table>
             </div>
 
-            <div class="tableControls overflow-hidden">
-                <div class="item-right">
-                    <ngb-pagination [collectionSize]="accountOverviewReportOptions.length" [(page)]="currentPageNumber"
-                        [pageSize]="itemsPerPage" [rotate]="true" aria-label="Default pagination"></ngb-pagination>
-                </div>
-                <p class="item-right">{{accountOverviewReportOptions.length}} entries</p>
+            <div class="d-flex w-100 justify-content-end">
+                <ngb-pagination [collectionSize]="accountOverviewReportOptions.length" [(page)]="currentPageNumber" [pageSize]="itemsPerPage"
+                    [maxSize]="5" [rotate]="true" aria-label="Pagination">
+                </ngb-pagination>
             </div>
         </div>
     </div>
@@ -94,7 +99,7 @@
     <div class="popup-body">
         <p>WARNING: Deleting this report cannot be undone.</p>
     </div>
-    <div class="saveCancel popup-footer text-right">
+    <div class="saveCancel popup-footer text-end">
         <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
         <button class="btn btn-danger" (click)="confirmDelete()">Delete</button>
     </div>
@@ -109,19 +114,19 @@
             <div>
 
                 <label (click)="setReportType('betterPlants')">
-                    <i class="pr-2"
+                    <i class="pe-2"
                         [ngClass]="{'fa fa-square': reportType != 'betterPlants', 'fa-solid fa-square-check': reportType == 'betterPlants'}"></i>Better
                     Plants</label>
             </div>
             <div>
 
-                <label (click)="setReportType('data')"><i class="pr-2"
+                <label (click)="setReportType('data')"><i class="pe-2"
                         [ngClass]="{'fa fa-square': reportType != 'data', 'fa-solid fa-square-check': reportType == 'data'}"></i>Data
                     Overview</label>
             </div>
         </div>
     </div>
-    <div class="saveCancel popup-footer text-right">
+    <div class="saveCancel popup-footer text-end">
         <button class="btn btn-secondary" (click)="cancelNewReport()">Cancel</button>
         <button class="btn action-btn" (click)="createNewReport()">Create New Report</button>
     </div>

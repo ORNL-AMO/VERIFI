@@ -1,6 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { LabelTooltips } from './labelTooltips';
-
+// import * as bootstrap from 'bootstrap'
+declare var bootstrap: any;
 @Component({
   selector: 'app-label-with-tooltip',
   templateUrl: './label-with-tooltip.component.html',
@@ -23,6 +24,7 @@ export class LabelWithTooltipComponent implements OnInit {
   helpTooltip: { tooltip: string };
   showTooltipHover: boolean = false;
   showTooltipClick: boolean = false;
+  tooltipList: Array<any>;
   constructor() { }
 
   ngOnInit(): void {
@@ -32,6 +34,22 @@ export class LabelWithTooltipComponent implements OnInit {
         tooltip: 'Help Text Missing. Sorry :/'
       }
     }
+  }
+
+  ngAfterViewInit(){
+    // Bootstrap tooltip initialization
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    this.tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl)
+    }) 
+  }
+
+  ngOnDestroy(){
+    this.tooltipList;
+    for (const tooltip of this.tooltipList) {
+      tooltip.dispose();
+    }
+    this.tooltipList = new Array<any>();
   }
   
   hideTooltipHover() {

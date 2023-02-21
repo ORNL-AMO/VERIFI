@@ -3,45 +3,36 @@
     <p>Please <i class="fa fa-plus"></i> Add New Bill or <i class="fa fa-upload"></i> Import multiple bills from excel.
     </p>
     <div class="d-flex w-100 justify-content-center">
-        <div class="pr-1">
+        <div class="pe-1">
             <button class="btn action-btn" (click)="meterDataAdd()"><i class="fa fa-plus"></i> Add New Bill</button>
         </div>
-        <div class="pl-1">
+        <div class="ps-1">
             <button class="btn nav-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
         </div>
     </div>
 </div>
 <div *ngIf="meterData.length != 0">
-    <div class="d-flex w-100 justify-content-between">
-        <div>
-            <button class="btn action-btn" [ngClass]="{'active' : showFilterDropdown}" (click)="toggleFilterMenu()">
-                <i class="fa fa-chevron-down" *ngIf="showFilterDropdown"></i>
-                <i class="fa fa-chevron-up" *ngIf="!showFilterDropdown"></i>
-                Choose Columns
-            </button>
-        </div>
+    <div class="d-flex w-100 justify-content-between mb-2">
+        <app-utility-meter-data-filter [source]="selectedMeter.source" [filterType]="'table'">
+        </app-utility-meter-data-filter>
+
         <div class="d-flex">
             <!--Bulk Delete-->
-            <div class="pr-2 bulk-delete" [class.show]="hasCheckedItems">
+            <div class="pe-2 bulk-delete" [class.show]="hasCheckedItems">
                 <button class="btn btn-danger" (click)='openBulkDelete()' [disabled]="!hasCheckedItems">Bulk
                     Delete</button>
             </div>
             <!--Items Per Page-->
             <app-table-items-dropdown></app-table-items-dropdown>
             <!--Import/Export-->
-            <div class="pl-2">
+            <div class="ps-2">
                 <button class="btn nav-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
             </div>
-            <div class="pl-2">
+            <div class="ps-2">
                 <button class="btn action-btn" (click)="meterDataAdd()"><i class="fa fa-plus"></i>
                     Add New Bill</button>
             </div>
         </div>
-    </div>
-
-    <div *ngIf="showFilterDropdown">
-        <app-utility-meter-data-filter [source]="selectedMeter.source" [filterType]="'table'">
-        </app-utility-meter-data-filter>
     </div>
 
     <div class="meter">
@@ -95,7 +86,7 @@
         <p>WARNING: Deleting meter data cannot be undone.
             Are you sure you want to preform this action?</p>
     </div>
-    <div class="saveCancel popup-footer text-right">
+    <div class="saveCancel popup-footer text-end">
         <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
         <button class="btn btn-danger" (click)="deleteMeterData()">Delete</button>
     </div>
@@ -109,7 +100,7 @@
         <p>WARNING: Deleting meter data cannot be undone.
             Are you sure you want to preform this action?</p>
     </div>
-    <div class="saveCancel popup-footer text-right">
+    <div class="saveCancel popup-footer text-end">
         <button class="btn btn-secondary" (click)="cancelBulkDelete()">Cancel</button>
         <button class="btn btn-danger" (click)="bulkDelete()">Delete</button>
     </div>

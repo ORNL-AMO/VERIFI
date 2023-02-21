@@ -11,9 +11,6 @@ li.disabled:hover .navigation-warning{
     z-index: 99;
     margin-left: 10px;
 }
-.navigation-warning .arrow-up {
-    border-bottom: 10px solid #f1c3be;
-}
 
 .utility.banner{
    background-color: white;

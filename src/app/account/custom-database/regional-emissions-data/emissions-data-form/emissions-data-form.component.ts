@@ -162,7 +162,7 @@ export class EmissionsDataFormComponent implements OnInit {
     let customEmissionsItems: Array<IdbCustomEmissionsItem> = await this.customEmissionsDbService.getAllByIndexRange('accountId', this.editCustomEmissions.accountId).toPromise();
     this.customEmissionsDbService.accountEmissionsItems.next(customEmissionsItems);
     this.loadingService.setLoadingStatus(false);
-    this.toastNotificationService.showToast(successMessage, undefined, undefined, false, 'success');
+    this.toastNotificationService.showToast(successMessage, undefined, undefined, false, 'bg-success');
     this.navigateHome();
   }
 

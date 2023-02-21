@@ -10,8 +10,8 @@
                     <input id="meterName" class="form-control" type="text" formControlName="name"
                         onfocus="this.select();" minlength="0" maxlength="100">
                 </div>
-                <span class="inputError" *ngIf="meterForm.get('name').hasError('required')">Meter name is
-                    required</span>
+                <div class="alert alert-danger" *ngIf="meterForm.get('name').hasError('required')">Meter name is
+                    required</div>
             </div>
 
             <div class="row">
@@ -21,19 +21,19 @@
                     </app-label-with-tooltip>
                     <!-- <label for="source">Source <span class="required">*</span> </label> -->
                     <div class="mb-3">
-                        <select class="form-control" id="source" type="text" formControlName="source"
+                        <select class="form-select" id="source" type="text" formControlName="source"
                             (change)="changeSource()">
                             <option *ngFor="let sourceOption of sourceOptions" [ngValue]="sourceOption">{{sourceOption}}
                             </option>
                         </select>
                     </div>
-                    <span class="inputError" *ngIf="meterForm.get('source').hasError('required')">Source is
-                        required</span>
+                    <div class="alert-danger alert" *ngIf="meterForm.get('source').hasError('required')">Source is
+                        required</div>
                 </div>
                 <div class="col-6" *ngIf="displayScope">
                     <label for="scope">Scope</label>
                     <div class="mb-3">
-                        <select class="form-control" id="scope" type="text" formControlName="scope">
+                        <select class="form-select" id="scope" type="text" formControlName="scope">
                             <option *ngFor="let scopeOption of scopeOptions" [ngValue]="scopeOption.value">
                                 {{scopeOption.scope}}: {{scopeOption.optionLabel}}
                             </option>
@@ -47,7 +47,7 @@
                         [labelId]="'startingUnit'" [isRequired]="true">
                     </app-label-with-tooltip>
                     <div class="mb-3">
-                        <select class="form-control" id="startingUnit" type="text" formControlName="startingUnit"
+                        <select class="form-select" id="startingUnit" type="text" formControlName="startingUnit"
                             (change)="changeCollectionUnit()">
                             <option *ngFor="let startingUnitOption of startingUnitOptions"
                                 [ngValue]="startingUnitOption.value">
@@ -55,8 +55,8 @@
                             </option>
                         </select>
                     </div>
-                    <span class="inputError" *ngIf="meterForm.get('startingUnit').hasError('required')">Starting unit is
-                        required</span>
+                    <div class="alert-danger alert" *ngIf="meterForm.get('startingUnit').hasError('required')">Starting unit is
+                        required</div>
                     <div class="alert alert-warning"
                         *ngIf="hasDifferentCollectionUnits || (hasDifferentEnergyUnits && collectionUnitIsEnergy)">
                         Units selected differ from the facility settings.
@@ -65,7 +65,7 @@
                 <div class="col-6" *ngIf="isEnergyMeter && !collectionUnitIsEnergy">
                     <label for="energyUnit">Energy Unit <span class="required">*</span> </label>
                     <div class="mb-3">
-                        <select class="form-control" id="energyUnit" type="text" formControlName="energyUnit"
+                        <select class="form-select" id="energyUnit" type="text" formControlName="energyUnit"
                             (change)="changeEnergyUnit()">
                             <option *ngFor="let energyUnitOption of energyUnitOptions"
                                 [ngValue]="energyUnitOption.value">
@@ -73,8 +73,8 @@
                             </option>
                         </select>
                     </div>
-                    <span class="inputError" *ngIf="meterForm.get('energyUnit').hasError('required')">Energy unit is
-                        required</span>
+                    <div class="alert-danger alert" *ngIf="meterForm.get('energyUnit').hasError('required')">Energy unit is
+                        required</div>
                     <div class="alert alert-warning" *ngIf="hasDifferentEnergyUnits">
                         Units selected differ from the facility settings.
                     </div>
@@ -87,55 +87,55 @@
                         <input id="siteToSource" class="form-control" type="number" formControlName="siteToSource"
                             onfocus="this.select();" min="0" max="999999999999999">
                     </div>
-                    <span class="inputError" *ngIf="meterForm.get('siteToSource').hasError('required')">Site to source
-                        is required</span>
-                    <span class="inputWarning" *ngIf="meterForm.controls.siteToSource.value === 0">Site to source
-                        should be greater than 0</span>
+                    <div class="alert-danger alert" *ngIf="meterForm.get('siteToSource').hasError('required')">Site to source
+                        is required</div>
+                    <div class="alert-warning alert" *ngIf="meterForm.controls.siteToSource.value === 0">Site to source
+                        should be greater than 0</div>
                 </div>
 
                 <div *ngIf="displayPhase" class="col-6">
                     <label for="phase">Phase <span class="required">*</span> </label>
                     <div class="mb-3">
-                        <select class="form-control" id="phase" type="text" formControlName="phase"
+                        <select class="form-select" id="phase" type="text" formControlName="phase"
                             (change)="changePhase();">
                             <option [ngValue]="'Solid'">Solid</option>
                             <option [ngValue]="'Liquid'">Liquid</option>
                             <option [ngValue]="'Gas'">Gas</option>
                         </select>
                     </div>
-                    <span class="inputError" *ngIf="meterForm.get('phase').hasError('required')">Phase is
-                        required</span>
+                    <div class="alert-danger alert" *ngIf="meterForm.get('phase').hasError('required')">Phase is
+                        required</div>
                 </div>
 
                 <div *ngIf="displayFuel" class="col-6">
                     <label for="energySource">{{energySourceLabel}} <span class="required">*</span> </label>
                     <div class="mb-3">
-                        <select class="form-control" id="energySource" type="text" formControlName="fuel"
+                        <select class="form-select" id="energySource" type="text" formControlName="fuel"
                             (change)="changeFuel()">
                             <option *ngFor="let fuelOption of fuelTypeOptions" [ngValue]="fuelOption.value">
                                 {{fuelOption.value}}
                             </option>
                         </select>
                     </div>
-                    <span class="inputError" *ngIf="meterForm.get('fuel').hasError('required')">Fuel type is
-                        required</span>
+                    <div class="alert-danger alert" *ngIf="meterForm.get('fuel').hasError('required')">Fuel type is
+                        required</div>
                 </div>
                 <div class="col-6" *ngIf="displayHeatCapacity">
                     <label for="heatCapacity">Heat Capacity <span class="required">*</span> </label>
                     <div class="input-group mb-3">
                         <input id="heatCapacity" class="form-control" type="number" formControlName="heatCapacity"
                             onfocus="this.select();">
-                        <span class="unit"><span
+                        <span class="input-group-text"><span
                                 [innerHTML]="meterForm.controls.energyUnit.value | settingsLabel"></span>/<span
                                 [innerHTML]="meterForm.controls.startingUnit.value | settingsLabel"></span>
                         </span>
                     </div>
-                    <span class="inputError" *ngIf="meterForm.get('heatCapacity').hasError('required')">Heat capacity is
-                        required</span>
-                    <span class="inputError" *ngIf="meterForm.get('heatCapacity').hasError('min')">Value can't be less
-                        than 0</span>
-                    <span class="inputWarning" *ngIf="meterForm.controls.heatCapacity.value === 0">Heat capacity
-                        should be greater than 0</span>
+                    <div class="alert-danger alert" *ngIf="meterForm.get('heatCapacity').hasError('required')">Heat capacity is
+                        required</div>
+                    <div class="alert-danger alert" *ngIf="meterForm.get('heatCapacity').hasError('min')">Value can't be less
+                        than 0</div>
+                    <div class="alert-warning alert" *ngIf="meterForm.controls.heatCapacity.value === 0">Heat capacity
+                        should be greater than 0</div>
                 </div>
             </div>
 
@@ -202,7 +202,7 @@
                 <div class="col-lg-6 col-md-12 col-sm-12">
                     <label for="agreementType">Agreement Type</label>
                     <div class="mb-3">
-                        <select class="form-control" id="agreementType" type="text" formControlName="agreementType"
+                        <select class="form-select" id="agreementType" type="text" formControlName="agreementType"
                             (change)="changeAgreementType()">
                             <option *ngFor="let agreementType of agreementTypes" [ngValue]="agreementType.value">
                                 {{agreementType.typeLabel}}
@@ -215,11 +215,11 @@
                     <div class="input-group mb-3">
                         <input id="greenPurchaseFraction" class="form-control" type="number"
                             formControlName="greenPurchaseFraction" onfocus="this.select();">
-                        <span class="unit">%</span>
+                        <span class="input-group-text">%</span>
                     </div>
                 </div>
             </div>
-            <div class="row" *ngIf="displayIncludeEnergy">
+            <div class="row pb-2" *ngIf="displayIncludeEnergy">
                 <div class="col align-items-center">
                     <div class="d-flex">
                         <label class="switch" for="includeInEnergy">
@@ -227,13 +227,13 @@
                                 formControlName="includeInEnergy" (change)="setIncludeEnergy()">
                             <span class="slider round"></span>
                         </label>
-                        <div class="pl-2">
+                        <div class="ps-2">
                             Include In Energy
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="row" *ngIf="displayRetainRecs">
+            <div class="row pb-2" *ngIf="displayRetainRecs">
                 <div class="col align-items-center">
                     <div class="d-flex">
                         <label class="switch" for="retainRECs">
@@ -241,13 +241,13 @@
                                 formControlName="retainRECs">
                             <span class="slider round"></span>
                         </label>
-                        <div class="pl-2">
+                        <div class="ps-2">
                             Retain RECs
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="row" *ngIf="meterForm.controls.agreementType.value == 2">
+            <div class="row pb-2" *ngIf="meterForm.controls.agreementType.value == 2">
                 <div class="col align-items-center">
                     <div class="d-flex">
                         <label class="switch" for="directConnection">
@@ -255,7 +255,7 @@
                                 formControlName="directConnection">
                             <span class="slider round"></span>
                         </label>
-                        <div class="pl-2">
+                        <div class="ps-2">
                             Direct Connection
                         </div>
                     </div>

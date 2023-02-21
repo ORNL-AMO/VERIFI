@@ -63,9 +63,7 @@ h3 .badge{
 .progress-bar {
     background-color: #145A32;
 }
-.progress-bar-data {
-    position: absolute;
-    right: 50%;
-    top: 35px;
-    font-weight: bold;
+
+.card-footer .nav-btn{
+    margin: 0px;
 }

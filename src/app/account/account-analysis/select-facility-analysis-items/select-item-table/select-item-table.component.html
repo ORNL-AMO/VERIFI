@@ -1,7 +1,7 @@
 <h4>
     <div class="d-flex justify-content-between">
         <div class="mt-auto">
-            <i class="fa fa-industry pr-2" [ngStyle]="{color: facility.color}"></i>{{facility.name}}
+            <i class="fa fa-industry pe-2" [ngStyle]="{color: facility.color}"></i>{{facility.name}}
             Analysis Items
         </div>
 
@@ -29,7 +29,7 @@
 
 
 <div class="table-responsive">
-    <table class="table table-sm table-hover">
+    <table class="table table-bordered table-sm table-hover">
         <thead>
             <tr>
                 <th></th>
@@ -41,19 +41,19 @@
                 <th></th>
             </tr>
         </thead>
-        <tbody>
+        <tbody class="table-group-divider">
             <tr *ngFor="let analysisItem of facilityAnalysisItems | orderBy: 'date'">
                 <td class="radio-td">
                     <input type="radio" class="rowToggle" [(ngModel)]="selectedFacilityItemId"
                         [value]="analysisItem.guid" name="{{analysisItem.id+'_selectedFacilityItemId'}}"
                         id="{{analysisItem.id+'_selectedFacilityItemId'}}" (change)="save()">
                 </td>
-                <td>
+                <td class="w-25">
                     <span class="fa fa-exclamation-circle"
                         *ngIf="analysisItem.setupErrors.hasError || analysisItem.setupErrors.groupsHaveErrors"></span>
                     {{analysisItem.name}}
                 </td>
-                <td>
+                <td class="w-50">
                     <span *ngFor="let group of analysisItem.groups">
                         {{group.idbGroupId | groupName}}:
                         <span *ngIf="group.analysisType == 'absoluteEnergyConsumption'">Absolute Energy
@@ -105,7 +105,7 @@
         <p>WARNING: Are you sure you want to go to this analysis item? Your progress will be saved and you will leave
             this screen.</p>
     </div>
-    <div class="saveCancel popup-footer text-right">
+    <div class="saveCancel popup-footer text-end">
         <button class="btn btn-secondary" (click)="cancelEditItem()">Cancel</button>
         <button class="btn btn-outline" (click)="confirmEditItem()">Go To Facility Analysis</button>
     </div>
@@ -122,7 +122,7 @@
             and you will leave
             this screen.</p>
     </div>
-    <div class="saveCancel popup-footer text-right">
+    <div class="saveCancel popup-footer text-end">
         <button class="btn btn-secondary" (click)="cancelCreateNew()">Cancel</button>
         <button class="btn btn-outline" (click)="confirmCreateNew()">Create Facility Analysis</button>
     </div>

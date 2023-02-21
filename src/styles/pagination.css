@@ -1,6 +1,7 @@
 /*
 Pagination
 =============================================== */
+/* 
 .page-item.active .page-link {
     z-index: 0!important;
     background-color: #2c386b !important;
@@ -25,16 +26,17 @@ Pagination
   }
   .pagination {
     margin: 0px;
-  }
+  } */
   .items-per-page {
-    padding-top: 10px;
+    /* padding-top: 10px; */
     /* font-size: 12px; */
   }
   .items-per-page span {
     padding: 3px 3px 5px 5px;
   }
   .items-per-page select {
-    padding: 6px 5px 7px 5px;
+    padding: .375rem .75rem;
     border-radius: 3px;
     cursor: pointer;
+    border-color: #2c386b;
   }
