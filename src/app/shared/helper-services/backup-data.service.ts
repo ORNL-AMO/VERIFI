@@ -247,7 +247,7 @@ export class BackupDataService {
     }
 
     this.loadingService.setLoadingMessage('Adding Account Reports...');
-    for (let i = 0; i < backupFile.accountReports.length; i++) {
+    for (let i = 0; i < backupFile.accountReports?.length; i++) {
       let accountReport: IdbAccountReport = backupFile.accountReports[i];
       accountReport.guid = this.getGUID();
       delete accountReport.id;
@@ -270,6 +270,21 @@ export class BackupDataService {
     }
 
 
+    for (let i = 0; i < backupFile.reports?.length; i++) {
+      let overviewReport: IdbOverviewReportOptions = backupFile.reports[i];
+      if (overviewReport.type == 'report' && overviewReport.reportOptionsType == 'betterPlants') {
+        let newReport: IdbAccountReport = this.accountReportsDbService.getNewAccountReport(newAccount);
+        newReport.name = overviewReport.name;
+        newReport.baselineYear = overviewReport.baselineYear;
+        newReport.reportYear = overviewReport.targetYear;
+        newReport.reportType = 'betterPlants';
+        newReport.betterPlantsReportSetup.analysisItemId = this.getNewId(overviewReport.reportOptions.analysisItemId, accountAnalysisGUIDs);
+        newReport.betterPlantsReportSetup.baselineAdjustmentNotes = overviewReport.reportOptions.baselineAdjustmentNotes;
+        newReport.betterPlantsReportSetup.includeFacilityNames = overviewReport.reportOptions.includeFacilityNames;
+        newReport.betterPlantsReportSetup.modificationNotes = overviewReport.reportOptions.modificationNotes;
+        await this.accountReportsDbService.addWithObservable(newReport).toPromise();
+      }
+    }
 
     // for (let i = 0; i < backupFile.reports.length; i++) {
     //   let reportOptions: IdbOverviewReportOptions = backupFile.reports[i];
@@ -576,6 +591,7 @@ export interface BackupFile {
   meterData: Array<IdbUtilityMeterData>,
   groups: Array<IdbUtilityMeterGroup>,
   accountReports: Array<IdbAccountReport>,
+  reports?: Array<IdbOverviewReportOptions>,
   accountAnalysisItems: Array<IdbAccountAnalysisItem>,
   facilityAnalysisItems: Array<IdbAnalysisItem>,
   predictorData: Array<IdbPredictorEntry>,

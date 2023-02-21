@@ -1,11 +1,12 @@
 import { Component } from '@angular/core';
 import { FormGroup } from '@angular/forms';
+import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport } from 'src/app/models/idb';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem } from 'src/app/models/idb';
 import { AccountReportsService } from '../../account-reports.service';
 
 @Component({
@@ -23,11 +24,13 @@ export class BetterPlantsSetupComponent {
   accountAnalysisItems: Array<IdbAccountAnalysisItem>;
   selectedReportSub: Subscription;
   isFormChange: boolean = false;
+  itemToEdit: IdbAccountAnalysisItem;
   constructor(private accountReportDbService: AccountReportDbService,
     private accountReportsService: AccountReportsService,
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
-    private accountAnalysisDbService: AccountAnalysisDbService) {
+    private accountAnalysisDbService: AccountAnalysisDbService,
+    private router: Router) {
   }
 
   ngOnInit() {
@@ -66,4 +69,16 @@ export class BetterPlantsSetupComponent {
     }
   }
 
+  viewAnalysis(analysisItem: IdbAccountAnalysisItem){
+    this.itemToEdit = analysisItem;
+  }
+
+  confirmEditItem(){
+    this.accountAnalysisDbService.selectedAnalysisItem.next(this.itemToEdit);
+    this.router.navigateByUrl('account/analysis/results/annual-analysis');
+  }
+
+  cancelEditItem(){
+    this.itemToEdit = undefined;
+  }
 }
