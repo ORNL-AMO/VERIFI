@@ -26,3 +26,8 @@
   </div>
 </div>
 <canvas *ngIf="toastNotification && toastNotification?.confetti" class="confetti-canvas" #canvasElement></canvas> -->
+
+<ngb-toast class="toast-container position-fixed bottom-0 end-0 p-3 m-2" [header]="'Notification header'"
+  [autohide]="false">
+  Some Toast Body!
+</ngb-toast>

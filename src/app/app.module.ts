@@ -21,7 +21,7 @@ import { AccountModule } from './account/account.module';
 import { SetupWizardModule } from './setup-wizard/setup-wizard.module';
 import { HelperPipesModule } from './shared/helper-pipes/helper-pipes.module';
 import { SearchBarComponent } from './core-components/header/search-bar/search-bar.component';
-import { NgbTypeaheadModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbToastModule, NgbTypeaheadModule } from '@ng-bootstrap/ng-bootstrap';
 import { FacilityListPipe } from './core-components/sidebar/facility-list.pipe';
 import { UploadDataModule } from './upload-data/upload-data.module';
 
@@ -53,7 +53,8 @@ import { UploadDataModule } from './upload-data/upload-data.module';
     SetupWizardModule,
     HelperPipesModule,
     NgbTypeaheadModule,
-    UploadDataModule
+    UploadDataModule,
+    NgbToastModule
   ],
   providers: [],
   bootstrap: [AppComponent]
