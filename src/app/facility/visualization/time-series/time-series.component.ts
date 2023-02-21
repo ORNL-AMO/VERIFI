@@ -84,6 +84,7 @@ export class TimeSeriesComponent implements OnInit {
           standoff: 18
         },
         automargin: true,
+        tickmode: 'sync'
       },
       yaxis2: {
         title: {
