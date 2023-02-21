@@ -149,7 +149,8 @@ export class MeterGroupChartComponent implements OnInit {
           // ticksuffix: tickSuffix,
           // tickprefix: tickPrefix,
           automargin: true,
-          overlaying: y1overlay
+          overlaying: y1overlay,
+          tickmode: 'sync'
         },
         yaxis2: {
           title: {
