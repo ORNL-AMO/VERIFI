@@ -40,7 +40,7 @@ export class EditPredictorsComponent implements OnInit {
     this.analysisDbService.updateAnalysisPredictors(this.facilityPredictors);
     this.loadingService.setLoadingStatus(false);
 
-    this.toastNoticationService.showToast("Predictors updated!", undefined, undefined, false, "bg-success");
+    this.toastNoticationService.showToast("Predictors updated!", undefined, undefined, false, "alert-success");
     this.cancel();
   }
 

@@ -94,7 +94,7 @@ export class UtilityMeterDataTableComponent implements OnInit {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setMeterData(selectedAccount, selectedFacility);
     this.loadingService.setLoadingStatus(false);
-    this.toastNoticationService.showToast("Meter Data Deleted!", undefined, undefined, false, "bg-success");
+    this.toastNoticationService.showToast("Meter Data Deleted!", undefined, undefined, false, "alert-success");
   }
 
   setDeleteMeterData(meterData: IdbUtilityMeterData) {
@@ -118,7 +118,7 @@ export class UtilityMeterDataTableComponent implements OnInit {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setMeterData(selectedAccount, selectedFacility);
     this.loadingService.setLoadingStatus(false);
-    this.toastNoticationService.showToast("Meter Data Deleted!", undefined, undefined, false, "bg-success");
+    this.toastNoticationService.showToast("Meter Data Deleted!", undefined, undefined, false, "alert-success");
     this.cancelDelete();
   }
 

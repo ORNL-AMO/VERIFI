@@ -1,17 +1,16 @@
-import { Component, OnInit, Input, EventEmitter, Output, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
 import { trigger, state, style, animate, transition } from '@angular/animations';
 import { ToastNotification, ToastNotificationsService } from './toast-notifications.service';
 import { Subscription } from 'rxjs';
 import * as confetti from 'canvas-confetti';
-// import * as bootstrap from 'bootstrap'
-declare var bootstrap: any;
+
 @Component({
   selector: 'app-toast-notifications',
   templateUrl: './toast-notifications.component.html',
   styleUrls: ['./toast-notifications.component.css'],
   animations: [
     trigger('toast', [
-      state('show', style({ bottom: '40px' })),
+      state('show', style({ bottom: '0px' })),
       state('hide', style({ bottom: '-200px' })),
       transition('hide => show', animate('.5s ease')),
       transition('show => hide', animate('.5s ease'))
@@ -21,24 +20,24 @@ declare var bootstrap: any;
 export class ToastNotificationsComponent implements OnInit {
 
   @ViewChild('canvasElement', { static: false }) canvasElement: ElementRef;
-  @ViewChild('toastElement', { static: false }) toastElement: ElementRef;
 
   toastNotification: ToastNotification;
   toastNotificationSub: Subscription;
-  toast: any;
+
+  showToast: 'show' | 'hide' = 'hide';
+  destroyToast: boolean = true;
   constructor(private toastNotificationsService: ToastNotificationsService) { }
 
   ngOnInit() {
     this.toastNotificationSub = this.toastNotificationsService.toastNotification.subscribe(val => {
-      // this.toastNotification = val;
-      // this.createToast();
+      this.toastNotification = val;
+      this.createToast();
     });
   }
 
   ngAfterViewInit() {
-    // this.createToast();
+    this.createToast();
   }
-
 
   ngOnDestroy() {
     this.toastNotificationSub.unsubscribe();
@@ -46,13 +45,14 @@ export class ToastNotificationsComponent implements OnInit {
 
 
   createToast() {
-    this.disposeToast();
-    if (this.toastNotification && this.toastElement) {
-      this.toast = new bootstrap.Toast(this.toastElement.nativeElement)
-      this.toast.show();
-      if (this.toastNotification.confetti) {
-        this.createConfetti();
-      }
+    if (this.toastNotification) {
+      this.destroyToast = false;
+      setTimeout(() => {
+        this.showToast = 'show';
+        if (this.toastNotification.confetti) {
+          this.createConfetti();
+        }
+      }, 100);
       if (this.toastNotification.setTimeoutVal) {
         setTimeout(() => {
           this.closeToast();
@@ -60,30 +60,28 @@ export class ToastNotificationsComponent implements OnInit {
       } else {
         setTimeout(() => {
           this.closeToast();
-        }, 2000);
+        }, 3000);
       }
     };
 
   }
 
-  disposeToast() {
-    if (this.toast && this.toastElement) {
-      console.log(this.toast);
-      console.log('dispose');
-      this.toast.dispose();
-    }
-  }
-
-
   closeToast() {
-    this.toastNotificationsService.disableNotification.next(false);
-    this.toastNotificationsService.hideToast();
+    this.showToast = 'hide';
+    setTimeout(() => {
+      this.toastNotificationsService.disableNotification.next(false);
+      this.toastNotificationsService.hideToast();
+      this.destroyToast = false;
+    }, 100);
   }
 
-  //TODO: Disable logic whenever we want to have something disabled
   disable() {
-    this.toastNotificationsService.disableNotification.next(true);
-    this.toastNotificationsService.hideToast();
+    this.showToast = 'hide';
+    setTimeout(() => {
+      this.toastNotificationsService.disableNotification.next(true);
+      this.toastNotificationsService.hideToast();
+      this.destroyToast = false;
+    }, 100);
   }
 
   createConfetti() {
@@ -94,6 +92,7 @@ export class ToastNotificationsComponent implements OnInit {
         scalar: .5,
         origin: { y: 1, x: 1 }
       });
+      console.log(confetti);
     }
   }
 }

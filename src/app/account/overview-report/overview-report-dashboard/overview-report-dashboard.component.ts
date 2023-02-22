@@ -85,7 +85,7 @@ export class OverviewReportDashboardComponent implements OnInit {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setAccountOverviewReportOptions(selectedAccount);
     this.reportToDelete = undefined;
-    this.toastNotificationService.showToast('Report Deleted', undefined, undefined, false, "bg-success");
+    this.toastNotificationService.showToast('Report Deleted', undefined, undefined, false, "alert-success");
   }
 
   editReport(report: IdbOverviewReportOptions) {
