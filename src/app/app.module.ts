@@ -53,8 +53,7 @@ import { UploadDataModule } from './upload-data/upload-data.module';
     SetupWizardModule,
     HelperPipesModule,
     NgbTypeaheadModule,
-    UploadDataModule,
-    NgbToastModule
+    UploadDataModule
   ],
   providers: [],
   bootstrap: [AppComponent]

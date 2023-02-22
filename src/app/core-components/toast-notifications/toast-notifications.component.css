@@ -1,11 +1,36 @@
 canvas.confetti-canvas {
-    top: auto!important;
-    left: auto!important;
-    bottom: 40px!important;
-    right: 55px!important;
-    z-index: 1001!important;
+    top: auto !important;
+    left: auto !important;
+    bottom: 40px !important;
+    right: 55px !important;
+    z-index: 1001 !important;
     /*height: 200px;*/
     position: absolute;
     /* width: 500px; */
     /* height: 200px; */
+}
+
+.card.card-toast {
+    position: fixed;
+    z-index: 800;
+    right: 0px;
+    bottom: 0px;
+    margin: 10px;
+    min-width: 300px;
+    max-width: 500px;
+    /* background-color: #2d386b; */
+    /* padding: 15px 20px; */
+    /* opacity: .95; */
+}
+
+.btn-close {
+    float: right;
+}
+
+.card-header i.fa{
+    font-size: 20px;
+}
+
+.card.card-toast .card-header{
+    background-color: none;
 }

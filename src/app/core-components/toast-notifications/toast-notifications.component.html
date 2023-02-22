@@ -1,33 +1,22 @@
-<!--TODO: Bring back toast..-->
-<!-- <div class="toast-container position-fixed bottom-0 end-0 p-3">
-  <div class="toast" #toastElement data-bs-autohide="false">
-    <div class="toast-header">
-      <i *ngIf="toastNotification?.toastClass === 'bg-success'" class="fa fa-check-circle item-left me-2"></i>
-      <i *ngIf="toastNotification?.toastClass === 'bg-warning'" class="fa fa-exclamation-circle item-left me-2"></i>
-      <i *ngIf="toastNotification?.toastClass === 'bg-info'" class="fa fa-info-circle item-left me-2"></i>
-      <i *ngIf="toastNotification?.toastClass === 'bg-danger'" class="fa fa-times-circle item-left me-2"></i>
-
-      <strong class="me-auto">{{toastNotification?.title}}</strong>
-      <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+<ng-container *ngIf="!destroyToast">
+  <div class="card card-toast alert" [@toast]="showToast" *ngIf="toastNotification"
+    [ngClass]="toastNotification.toastClass">
+    <div class="card-header">
+      <i *ngIf="toastNotification.toastClass === 'alert-success'" class="fa fa-check-circle item-left me-2"></i>
+      <i *ngIf="toastNotification.toastClass === 'alert-warning'" class="fa fa-exclamation-circle item-left me-2"></i>
+      <i *ngIf="toastNotification.toastClass === 'alert-info'" class="fa fa-info-circle item-left me-2"></i>
+      <i *ngIf="toastNotification.toastClass === 'alert-danger'" class="fa fa-times-circle item-left me-2"></i>
+      {{toastNotification.title}}
+      <!-- <button class="close item-right" (click)="closeToast()">&times;</button> -->
+      <button type="button" class="btn-close" aria-label="Close" (click)="closeToast()"></button>
     </div>
-    <ng-container *ngIf="toastNotification">
-      <div class="toast-body" *ngIf="toastNotification.body || toastNotification.showDisableFooter">
-        <p *ngIf="toastNotification.body" class="mb-0" [innerHTML]="toastNotification.body"></p>
-        <hr *ngIf="toastNotification.showDisableFooter">
-        <div class="d-flex w-100 justify-content-end" *ngIf="toastNotification.showDisableFooter">
-          <div>
-            <button class="btn action-btn btn-sm" (click)="disable()">
-              Disable
-            </button>
-          </div>
-        </div>
-      </div>
-    </ng-container>
+    <div class="card-body" *ngIf="toastNotification.body">
+      <p class="card-text" [innerHTML]="toastNotification.body"></p>
+    </div>
+    <div class="card-footer text-end" *ngIf="toastNotification.showDisableFooter">
+      <!-- <hr> -->
+      <a class="click-link" (click)="disable()">Disable</a>
+    </div>
   </div>
-</div>
-<canvas *ngIf="toastNotification && toastNotification?.confetti" class="confetti-canvas" #canvasElement></canvas> -->
-
-<ngb-toast class="toast-container position-fixed bottom-0 end-0 p-3 m-2" [header]="'Notification header'"
-  [autohide]="false">
-  Some Toast Body!
-</ngb-toast>
+</ng-container>
+<canvas *ngIf="!destroyToast && toastNotification?.confetti" class="confetti-canvas" #canvasElement></canvas>

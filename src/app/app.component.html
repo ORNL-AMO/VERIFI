@@ -8,6 +8,7 @@
       <div class="content w-100" role="main" *ngIf="dataInitialized">
         <router-outlet></router-outlet>
         <app-import-backup-modal class="hide-print"></app-import-backup-modal>
+        <app-toast-notifications class="hide-print"></app-toast-notifications>
       </div>
       <app-help-panel *ngIf="dataInitialized"></app-help-panel>
       <div class="content w-100" *ngIf="!dataInitialized">
@@ -28,6 +29,5 @@
     <!-- <app-footer class="hide-print footer-height"></app-footer> -->
     <app-loading class="hide-print"></app-loading>
     <app-electron-update class="hide-print"></app-electron-update>
-    <app-toast-notifications class="hide-print"></app-toast-notifications>
   </div>
 </div>

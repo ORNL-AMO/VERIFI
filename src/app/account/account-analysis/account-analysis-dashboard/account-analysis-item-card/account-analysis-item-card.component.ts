@@ -70,7 +70,7 @@ export class AccountAnalysisItemCardComponent implements OnInit {
       await this.dbChangesService.setAccountOverviewReportOptions(selectedAccount);
     }
     this.displayDeleteModal = false;
-    this.toastNotificationService.showToast('Analysis Item Deleted', undefined, undefined, false, "bg-success");
+    this.toastNotificationService.showToast('Analysis Item Deleted', undefined, undefined, false, "alert-success");
   }
 
   async setUseItem() {
@@ -102,7 +102,7 @@ export class AccountAnalysisItemCardComponent implements OnInit {
     let addedItem: IdbAccountAnalysisItem = await this.accountAnalysisDbService.addWithObservable(newItem).toPromise();
     await this.dbChangesService.setAccountAnalysisItems(selectedAccount);
     this.accountAnalysisDbService.selectedAnalysisItem.next(addedItem);
-    this.toastNotificationService.showToast('Analysis Item Copy Created', undefined, undefined, false, "bg-success");
+    this.toastNotificationService.showToast('Analysis Item Copy Created', undefined, undefined, false, "alert-success");
     this.router.navigateByUrl('account/analysis/setup');
   }
 }

@@ -130,7 +130,7 @@ export class UtilityMetersTableComponent implements OnInit {
     this.utilityMeterDatadbService.facilityMeterData.next(facilityMeterData);
     this.cancelDelete();
     this.loadingService.setLoadingStatus(false);
-    this.toastNotificationsService.showToast("Meter and Meter Data Deleted", undefined, undefined, false, "bg-success");
+    this.toastNotificationsService.showToast("Meter and Meter Data Deleted", undefined, undefined, false, "alert-success");
   }
 
 

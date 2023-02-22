@@ -146,7 +146,7 @@ export class ConfirmAndSubmitComponent implements OnInit {
     this.uploadDataService.fileReferences[fileReferenceIndex] = this.fileReference;
     this.hasNextFile = fileReferenceIndex < (this.uploadDataService.fileReferences.length - 1);
     this.loadingService.setLoadingStatus(false);
-    this.toastNotificationService.showToast(this.fileReference.name + ' Data Submitted', undefined, undefined, false, "bg-success");
+    this.toastNotificationService.showToast(this.fileReference.name + ' Data Submitted', undefined, undefined, false, "alert-success");
     this.sharedDataService.modalOpen.next(false);
   }
 
