@@ -263,6 +263,6 @@ export class DbChangesService {
     await this.facilityDbService.deleteFacilitiesAsync([facility]);
     await this.selectAccount(selectedAccount);
     this.loadingService.setLoadingStatus(false);
-    this.toastNotificationService.showToast('Facility Deleted!', undefined, undefined, false, 'bg-success');
+    this.toastNotificationService.showToast('Facility Deleted!', undefined, undefined, false, 'alert-success');
   }
 }

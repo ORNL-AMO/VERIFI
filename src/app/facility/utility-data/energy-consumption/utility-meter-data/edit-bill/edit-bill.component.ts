@@ -90,7 +90,7 @@ export class EditBillComponent implements OnInit {
     await this.dbChangesService.setMeterData(selectedAccount, selectedFacility);
     this.cancel(true);
     this.loadingService.setLoadingStatus(false);
-    this.toastNotificationService.showToast('Reading Saved!', undefined, undefined, false, "bg-success");
+    this.toastNotificationService.showToast('Reading Saved!', undefined, undefined, false, "alert-success");
   }
 
   async saveAndAddAnother() {
@@ -113,7 +113,7 @@ export class EditBillComponent implements OnInit {
     this.editMeterData.readDate.setMonth(this.editMeterData.readDate.getUTCMonth() + 1);
     this.setMeterDataForm();
     this.loadingService.setLoadingStatus(false);
-    this.toastNotificationService.showToast('Reading Saved!', undefined, undefined, false, "bg-success");
+    this.toastNotificationService.showToast('Reading Saved!', undefined, undefined, false, "alert-success");
   }
 
 
