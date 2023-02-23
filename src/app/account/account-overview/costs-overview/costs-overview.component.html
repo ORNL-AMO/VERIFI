@@ -10,28 +10,26 @@
         <div class="col">
             <div class="card">
                 <div class="card-header bg-white">
-                    <h4 class="mb-0">Facility Utility Costs<span class="pull-right"
-                            *ngIf="yearPriorDate">({{yearPriorDate |
-                            date: 'MMM, y'}} -
-                            {{lastMonthsDate | date: 'MMM, y'}})</span></h4>
+                    <h4 class="mb-0">Facility Utility Costs</h4>
 
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-12">
                             <app-data-overview-map [dataType]="'cost'"
-                                [accountFacilitiesSummary]="accountFacilitiesSummary"></app-data-overview-map>
+                                [accountOverviewFacilities]="accountOverviewData.facilitiesCost"></app-data-overview-map>
                             <hr>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-6">
                             <app-facilities-usage-table [dataType]="'cost'"
-                                [accountFacilitiesSummary]="accountFacilitiesSummary"></app-facilities-usage-table>
+                                [accountOverviewFacilities]="accountOverviewData.facilitiesCost"
+                                [accountOverviewData]="accountOverviewData"></app-facilities-usage-table>
                         </div>
                         <div class="col-6">
                             <app-facility-usage-donut [dataType]="'cost'"
-                                [accountFacilitiesSummary]="accountFacilitiesSummary"></app-facility-usage-donut>
+                                [accountOverviewFacilities]="accountOverviewData.facilitiesCost"></app-facility-usage-donut>
                         </div>
                     </div>
                 </div>

@@ -2,9 +2,8 @@ import { Component, ElementRef, ViewChild, Input, SimpleChanges } from '@angular
 import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
 import { AccountOverviewService } from 'src/app/account/account-overview/account-overview.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { AccountOverviewFacility } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
 import { AccountFacilitiesSummary } from 'src/app/models/dashboard';
-import { IdbAccount } from 'src/app/models/idb';
 
 @Component({
   selector: 'app-facility-usage-donut',
@@ -20,36 +19,16 @@ export class FacilityUsageDonutComponent {
   energyUnit: string;
   @Input()
   waterUnit: string;
+  @Input()
+  accountOverviewFacilities: Array<AccountOverviewFacility>;
 
   @ViewChild('usageDonut', { static: false }) usageDonut: ElementRef;
-  // accountFacilitiesSummarySub: Subscription;
 
   emissionsDisplaySub: Subscription;
   emissionsDisplay: "market" | "location";
-  constructor(private plotlyService: PlotlyService, private accountOverviewService: AccountOverviewService,
-    private accountDbService: AccountdbService) { }
+  constructor(private plotlyService: PlotlyService, private accountOverviewService: AccountOverviewService) { }
 
   ngOnInit(): void {
-    // if (this.dataType == 'energyUse' || this.dataType == 'emissions') {
-    //   this.accountFacilitiesSummarySub = this.accountOverviewService.accountFacilitiesEnergySummary.subscribe(accountFacilitiesSummary => {
-    //     this.facilitiesSummary = accountFacilitiesSummary;
-    //     if (this.dataType == 'energyUse') {
-    //       this.drawChart();
-    //     } else if (this.dataType == 'emissions' && this.emissionsDisplay) {
-    //       this.drawChart();
-    //     }
-    //   });
-    // } else if (this.dataType == 'cost') {
-    //   this.accountFacilitiesSummarySub = this.accountOverviewService.accountFacilitiesCostsSummary.subscribe(accountFacilitiesSummary => {
-    //     this.facilitiesSummary = accountFacilitiesSummary;
-    //     this.drawChart();
-    //   });
-    // } else if (this.dataType == 'water') {
-    //   this.accountFacilitiesSummarySub = this.accountOverviewService.accountFacilitiesWaterSummary.subscribe(accountFacilitiesSummary => {
-    //     this.facilitiesSummary = accountFacilitiesSummary;
-    //     this.drawChart();
-    //   });
-    // }
 
     if (this.dataType == 'emissions') {
       this.emissionsDisplaySub = this.accountOverviewService.emissionsDisplay.subscribe(val => {
@@ -73,18 +52,18 @@ export class FacilityUsageDonutComponent {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (!changes.dataType && !changes.accountFacilitiesSummary.isFirstChange()) {
+    if (!changes.dataType && !changes.accountOverviewFacilities.isFirstChange()) {
       this.drawChart();
     }
   }
 
   drawChart() {
-    if (this.usageDonut && this.accountFacilitiesSummary) {
+    if (this.usageDonut && this.accountOverviewFacilities) {
       var data = [{
         values: this.getValues(),
-        labels: this.accountFacilitiesSummary.facilitySummaries.map(summary => { return summary.facility.name }),
+        labels: this.accountOverviewFacilities.map(summary => { return summary.facility.name }),
         marker: {
-          colors: this.accountFacilitiesSummary.facilitySummaries.map(summary => { return summary.facility.color }),
+          colors: this.accountOverviewFacilities.map(summary => { return summary.facility.color }),
           line: {
             color: '#fff',
             width: 5
@@ -126,16 +105,16 @@ export class FacilityUsageDonutComponent {
 
   getValues(): Array<number> {
     if (this.dataType == 'energyUse') {
-      return this.accountFacilitiesSummary.facilitySummaries.map(summary => { return summary.energyUsage });
+      return this.accountOverviewFacilities.map(summary => { return summary.totalUsage });
     } else if (this.dataType == 'cost') {
-      return this.accountFacilitiesSummary.facilitySummaries.map(summary => { return summary.energyCost });
+      return this.accountOverviewFacilities.map(summary => { return summary.totalCost });
     } else if (this.dataType == 'water') {
-      return this.accountFacilitiesSummary.facilitySummaries.map(summary => { return summary.consumption });
+      return this.accountOverviewFacilities.map(summary => { return summary.totalUsage });
     } else if (this.dataType == 'emissions') {
       if (this.emissionsDisplay == 'location') {
-        return this.accountFacilitiesSummary.facilitySummaries.map(summary => { return summary.locationEmissions / 1000 });
+        return this.accountOverviewFacilities.map(summary => { return summary.totalLocationEmissions / 1000 });
       } else {
-        return this.accountFacilitiesSummary.facilitySummaries.map(summary => { return summary.marketEmissions / 1000 });
+        return this.accountOverviewFacilities.map(summary => { return summary.totalMarketEmissions / 1000 });
       }
     }
 

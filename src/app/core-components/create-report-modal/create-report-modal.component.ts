@@ -72,7 +72,7 @@ export class CreateReportModalComponent {
     let addedReport: IdbAccountReport = await this.accountReportDbService.addWithObservable(this.accountReport).toPromise();
     await this.dbChangesService.setAccountReports(account);
     this.accountReportDbService.selectedReport.next(addedReport);
-    this.toastNotificationService.showToast('Report Created', undefined, undefined, false, "bg-success");
+    this.toastNotificationService.showToast('Report Created', undefined, undefined, false, "alert-success");
     this.sharedDataService.openCreateReportModal.next(false);
     this.router.navigateByUrl(navigateToStr);
   }

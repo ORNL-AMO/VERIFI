@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import { AccountOverviewData, AccountOverviewFacility } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { AccountFacilitiesSummary, UtilityUsageSummaryData, YearMonthData } from 'src/app/models/dashboard';
@@ -29,6 +30,14 @@ export class AccountOverviewService {
 
 
   emissionsDisplay: BehaviorSubject<"market" | "location">;
+
+  dateRange: BehaviorSubject<{
+    startDate: Date,
+    endDate: Date
+  }>;
+
+  accountOverviewData: BehaviorSubject<AccountOverviewData>;
+  calculatingAccountOverviewData: BehaviorSubject<boolean>;
   constructor(private calanderizationService: CalanderizationService, private utilityMeterDbService: UtilityMeterdbService) {
     this.calculatingEnergy = new BehaviorSubject<boolean>(undefined);
     this.accountFacilitiesEnergySummary = new BehaviorSubject<AccountFacilitiesSummary>({
@@ -76,6 +85,14 @@ export class AccountOverviewService {
     this.waterYearMonthData = new BehaviorSubject<Array<YearMonthData>>(undefined);
 
     this.emissionsDisplay = new BehaviorSubject<"market" | "location">("market");
+
+    this.dateRange = new BehaviorSubject<{
+      startDate: Date,
+      endDate: Date
+    }>(undefined);
+
+    this.accountOverviewData = new BehaviorSubject<AccountOverviewData>(undefined);
+    this.calculatingAccountOverviewData = new BehaviorSubject<boolean>(undefined)
   }
 
   setCalanderizedMeters() {

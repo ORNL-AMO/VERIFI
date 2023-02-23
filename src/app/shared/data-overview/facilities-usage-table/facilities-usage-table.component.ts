@@ -2,6 +2,7 @@ import { Component, Input } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AccountOverviewService } from 'src/app/account/account-overview/account-overview.service';
+import { AccountOverviewData, AccountOverviewFacility } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
 import { AccountFacilitiesSummary } from 'src/app/models/dashboard';
 import { IdbFacility } from 'src/app/models/idb';
 @Component({
@@ -18,6 +19,13 @@ export class FacilitiesUsageTableComponent {
   energyUnit: string;
   @Input()
   waterUnit: string;
+  @Input()
+  accountOverviewFacilities: Array<AccountOverviewFacility>;
+  @Input()
+  accountOverviewData: AccountOverviewData;
+  
+
+
 
   selectedAccountSub: Subscription;
   accountFacilitiesSummarySub: Subscription;

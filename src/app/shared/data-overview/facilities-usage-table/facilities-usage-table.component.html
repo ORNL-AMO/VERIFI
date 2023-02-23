@@ -20,8 +20,8 @@
             </tr>
         </thead>
         <tbody class="table-group-divider"
-            *ngIf="accountFacilitiesSummary && accountFacilitiesSummary.facilitySummaries">
-            <tr *ngFor="let summary of accountFacilitiesSummary.facilitySummaries | orderBy: 'energyUsage'">
+            *ngIf="accountOverviewFacilities">
+            <tr *ngFor="let summary of accountOverviewFacilities | orderBy: 'energyUsage'">
                 <td>
                     <span class="badge"
                         [ngStyle]="{background: summary.facility.color, color: summary.facility.color }">
@@ -30,22 +30,22 @@
                     <a class="ps-2 click-link" (click)="selectFacility(summary.facility)">{{summary.facility.name}}</a>
                 </td>
                 <td *ngIf="dataType == 'energyUse'">
-                    {{summary.energyUsage | customNumber}}
+                    {{summary.totalUsage | customNumber}}
                 </td>
                 <td *ngIf="dataType == 'water'">
-                    {{summary.consumption | customNumber}}
+                    {{summary.totalUsage | customNumber}}
                 </td>
                 <td *ngIf="dataType == 'cost'">
                     {{summary.numberOfMeters}}
                 </td>
                 <td *ngIf="dataType != 'emissions'">
-                    {{summary.energyCost | customNumber:true }}
+                    {{summary.totalCost | customNumber:true }}
                 </td>
                 <td *ngIf="dataType == 'emissions' && emissionsDisplay == 'market'">
-                    {{summary.marketEmissions / 1000 | customNumber}}
+                    {{summary.totalMarketEmissions / 1000 | customNumber}}
                 </td>
                 <td *ngIf="dataType == 'emissions' && emissionsDisplay == 'location'">
-                    {{summary.locationEmissions / 1000 | customNumber}}
+                    {{summary.totalMarketEmissions / 1000 | customNumber}}
                 </td>
             </tr>
         </tbody>
@@ -55,22 +55,22 @@
                     Total
                 </th>
                 <th *ngIf="dataType == 'energyUse'">
-                    {{accountFacilitiesSummary.totalEnergyUse | customNumber}}
+                    {{accountOverviewData.totalEnergyUsage | customNumber}}
                 </th>
                 <th *ngIf="dataType == 'water'">
-                    {{accountFacilitiesSummary.totalConsumption | customNumber}}
+                    {{accountOverviewData.totalWaterConsumption | customNumber}}
                 </th>
                 <th *ngIf="dataType == 'cost'">
-                    {{accountFacilitiesSummary.totalNumberOfMeters}}
+                    {{accountOverviewData.numberOfMeters}}
                 </th>
                 <th *ngIf="dataType != 'emissions'">
-                    {{accountFacilitiesSummary.totalEnergyCost | customNumber:true }}
+                    {{accountOverviewData.totalEnergyCost | customNumber:true }}
                 </th>
                 <th *ngIf="dataType == 'emissions' && emissionsDisplay == 'market'">
-                    {{accountFacilitiesSummary.totalMarketEmissions / 1000 | customNumber}}
+                    {{accountOverviewData.totalMarketEmissions / 1000 | customNumber}}
                 </th>
                 <th *ngIf="dataType == 'emissions' && emissionsDisplay == 'location'">
-                    {{accountFacilitiesSummary.totalLocationEmissions / 1000 | customNumber}}
+                    {{accountOverviewData.totalLocationEmissions / 1000 | customNumber}}
                 </th>
             </tr>
         </tfoot>

@@ -3,6 +3,7 @@ import { AccountOverviewService } from '../account-overview.service';
 import { Subscription } from 'rxjs';
 import { AccountFacilitiesSummary, UtilityUsageSummaryData, YearMonthData } from 'src/app/models/dashboard';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
+import { AccountOverviewData } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
 
 @Component({
   selector: 'app-emissions-overview',
@@ -11,8 +12,7 @@ import { CalanderizedMeter } from 'src/app/models/calanderization';
 })
 export class EmissionsOverviewComponent implements OnInit {
 
-  lastMonthsDate: Date;
-  yearPriorDate: Date;
+
   accountFacilitiesSummarySub: Subscription;
   calculatingSub: Subscription;
   calculating: boolean;
@@ -22,39 +22,43 @@ export class EmissionsOverviewComponent implements OnInit {
   yearMonthData: Array<YearMonthData>;
   yearMonthDataSub: Subscription;
   calanderizedMeters: Array<CalanderizedMeter>;
+
+  accountOverviewDataSub: Subscription;
+  accountOverviewData: AccountOverviewData;
   constructor(private accountOverviewService: AccountOverviewService) { }
 
   ngOnInit(): void {
     this.calanderizedMeters = this.accountOverviewService.calanderizedMeters;
-    this.calculatingSub = this.accountOverviewService.calculatingEnergy.subscribe(val => {
+    this.calculatingSub = this.accountOverviewService.calculatingAccountOverviewData.subscribe(val => {
       this.calculating = val;
     })
 
     this.accountFacilitiesSummarySub = this.accountOverviewService.accountFacilitiesEnergySummary.subscribe(accountFacilitiesSummary => {
       this.accountFacilitiesSummary = accountFacilitiesSummary;
-      if (accountFacilitiesSummary.allMetersLastBill) {
-        this.lastMonthsDate = new Date(accountFacilitiesSummary.allMetersLastBill.year, accountFacilitiesSummary.allMetersLastBill.monthNumValue);
-        this.yearPriorDate = new Date(accountFacilitiesSummary.allMetersLastBill.year - 1, accountFacilitiesSummary.allMetersLastBill.monthNumValue + 1);
-      } else {
-        this.lastMonthsDate = undefined;
-        this.yearPriorDate = undefined;
-      }
     });
-    
+
     this.utilityUsageSummaryDataSub = this.accountOverviewService.energyUtilityUsageSummaryData.subscribe(utilityUsageSummaryData => {
       this.utilityUsageSummaryData = utilityUsageSummaryData;
     });
-    
+
     this.yearMonthDataSub = this.accountOverviewService.energyYearMonthData.subscribe(yearMonthData => {
       this.yearMonthData = yearMonthData;
     });
+
+
+    this.accountOverviewDataSub = this.accountOverviewService.accountOverviewData.subscribe(val => {
+      this.accountOverviewData = val;
+    });
+
+
   }
 
-  ngOnDestroy(){
+  ngOnDestroy() {
     this.accountFacilitiesSummarySub.unsubscribe();
     this.calculatingSub.unsubscribe();
     this.utilityUsageSummaryDataSub.unsubscribe();
     this.yearMonthDataSub.unsubscribe();
+    this.accountOverviewDataSub.unsubscribe();
   }
 
 

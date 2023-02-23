@@ -26,3 +26,15 @@
 .nav-tabs .nav-link.active, .nav-tabs .nav-link.active i.fa{
     color: #ff6000;
 }
+
+.fa-arrow-right{
+  padding-top: 10px;
+  padding-right: .25rem;
+  padding-left: .25rem;
+  color: black !important;
+}
+
+
+select.form-select{
+  height: min-content !important;
+}

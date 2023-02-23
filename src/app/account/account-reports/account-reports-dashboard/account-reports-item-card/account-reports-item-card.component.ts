@@ -43,7 +43,7 @@ export class AccountReportsItemCardComponent {
     let addedReport: IdbAccountReport = await this.accountReportDbService.addWithObservable(newReport).toPromise();
     await this.dbChangesService.setAccountReports(selectedAccount);
     this.accountReportDbService.selectedReport.next(addedReport);
-    this.toastNotificationService.showToast('Report Copy Created', undefined, undefined, false, "bg-success");
+    this.toastNotificationService.showToast('Report Copy Created', undefined, undefined, false, "alert-success");
     this.router.navigateByUrl('account/reports/setup');
 
   }
@@ -61,6 +61,6 @@ export class AccountReportsItemCardComponent {
     await this.accountReportDbService.deleteWithObservable(this.report.id).toPromise();
     await this.dbChangesService.setAccountReports(selectedAccount);
     this.displayDeleteModal = false;
-    this.toastNotificationService.showToast('Report Deleted', undefined, undefined, false, "bg-success");
+    this.toastNotificationService.showToast('Report Deleted', undefined, undefined, false, "alert-success");
   }
 }

@@ -4,6 +4,7 @@ import { Subscription } from 'rxjs';
 import { AccountFacilitiesSummary, UtilityUsageSummaryData, YearMonthData } from 'src/app/models/dashboard';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
+import { AccountOverviewData } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
 
 
 @Component({
@@ -13,8 +14,6 @@ import { CalanderizedMeter } from 'src/app/models/calanderization';
 })
 export class WaterOverviewComponent implements OnInit {
 
-  lastMonthsDate: Date;
-  yearPriorDate: Date;
   accountFacilitiesSummarySub: Subscription;
   calculatingSub: Subscription;
   calculating: boolean;
@@ -26,6 +25,9 @@ export class WaterOverviewComponent implements OnInit {
   yearMonthData: Array<YearMonthData>;
   yearMonthDataSub: Subscription;
   calanderizedMeters: Array<CalanderizedMeter>;
+  
+  accountOverviewDataSub: Subscription;
+  accountOverviewData: AccountOverviewData;
   constructor(private accountOverviewService: AccountOverviewService,
     private accountDbService: AccountdbService) { }
 
@@ -36,19 +38,12 @@ export class WaterOverviewComponent implements OnInit {
         this.waterUnit = val.volumeLiquidUnit;
       }
     });
-    this.calculatingSub = this.accountOverviewService.calculatingWater.subscribe(val => {
+    this.calculatingSub = this.accountOverviewService.calculatingAccountOverviewData.subscribe(val => {
       this.calculating = val;
     })
 
     this.accountFacilitiesSummarySub = this.accountOverviewService.accountFacilitiesWaterSummary.subscribe(accountFacilitiesSummary => {
       this.accountFacilitiesSummary = accountFacilitiesSummary;
-      if (accountFacilitiesSummary.allMetersLastBill) {
-        this.lastMonthsDate = new Date(accountFacilitiesSummary.allMetersLastBill.year, accountFacilitiesSummary.allMetersLastBill.monthNumValue);
-        this.yearPriorDate = new Date(accountFacilitiesSummary.allMetersLastBill.year - 1, accountFacilitiesSummary.allMetersLastBill.monthNumValue + 1);
-      } else {
-        this.lastMonthsDate = undefined;
-        this.yearPriorDate = undefined;
-      }
     });
 
     this.utilityUsageSummaryDataSub = this.accountOverviewService.waterUtilityUsageSummaryData.subscribe(utilityUsageSummaryData => {
@@ -58,6 +53,10 @@ export class WaterOverviewComponent implements OnInit {
     this.yearMonthDataSub = this.accountOverviewService.waterYearMonthData.subscribe(yearMonthData => {
       this.yearMonthData = yearMonthData;
     });
+
+    this.accountOverviewDataSub = this.accountOverviewService.accountOverviewData.subscribe(val => {
+      this.accountOverviewData = val;
+    });
   }
 
   ngOnDestroy() {
@@ -66,6 +65,7 @@ export class WaterOverviewComponent implements OnInit {
     this.selectedAccountSub.unsubscribe();
     this.utilityUsageSummaryDataSub.unsubscribe();
     this.yearMonthDataSub.unsubscribe();
+    this.accountOverviewDataSub.unsubscribe();
   }
 
 }

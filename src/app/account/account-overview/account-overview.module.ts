@@ -11,6 +11,7 @@ import { OtherUtilityOverviewComponent } from './other-utility-overview/other-ut
 import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.module';
 import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/calculating-spinner.module';
 import { DataOverviewModule } from 'src/app/shared/data-overview/data-overview.module';
+import { FormsModule } from '@angular/forms';
 
 
 
@@ -29,7 +30,8 @@ import { DataOverviewModule } from 'src/app/shared/data-overview/data-overview.m
     RouterModule,
     HelperPipesModule,
     CalculatingSpinnerModule,
-    DataOverviewModule
+    DataOverviewModule,
+    FormsModule
   ]
 })
 export class AccountOverviewModule { }

@@ -7,6 +7,7 @@ import { AccountFacilitiesSummary } from 'src/app/models/dashboard';
 import { IdbAccount, IdbFacility } from 'src/app/models/idb';
 import { EGridService } from '../../helper-services/e-grid.service';
 import * as _ from 'lodash';
+import { AccountOverviewFacility } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
 
 @Component({
   selector: 'app-data-overview-map',
@@ -18,6 +19,8 @@ export class DataOverviewMapComponent {
   dataType: 'energyUse' | 'emissions' | 'cost' | 'water';
   @Input()
   accountFacilitiesSummary: AccountFacilitiesSummary;
+  @Input()
+  accountOverviewFacilities: Array<AccountOverviewFacility>;
 
 
   @ViewChild('utilityUsageMap', { static: false }) utilityUsageMap: ElementRef;
@@ -51,7 +54,6 @@ export class DataOverviewMapComponent {
   }
 
   ngOnDestroy() {
-    // this.accountFacilitiesSummarySub.unsubscribe();
     if (this.dataType == 'emissions') {
       this.emissionsDisplaySub.unsubscribe();
     }
@@ -62,7 +64,7 @@ export class DataOverviewMapComponent {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (!changes.dataType && !changes.accountFacilitiesSummary.isFirstChange()) {
+    if (!changes.dataType && !changes.accountOverviewFacilities.isFirstChange()) {
       this.setMapData();
       this.drawChart();
     }
@@ -133,25 +135,25 @@ export class DataOverviewMapComponent {
   setMapData() {
     this.mapData = new Array();
 
-    this.accountFacilitiesSummary.facilitySummaries.forEach(summary => {
-      let findLatLong = this.eGridService.zipLatLong.find(zipLL => { return zipLL.ZIP == summary.facility.zip });
+    this.accountOverviewFacilities.forEach(accountOverviewFacility => {
+      let findLatLong = this.eGridService.zipLatLong.find(zipLL => { return zipLL.ZIP == accountOverviewFacility.facility.zip });
       if (findLatLong) {
         let dataTypeAmount: number;
         if (this.dataType == 'energyUse') {
-          dataTypeAmount = summary.energyUsage;
+          dataTypeAmount = accountOverviewFacility.totalUsage;
         } else if (this.dataType == 'cost') {
-          dataTypeAmount = summary.energyCost;
+          dataTypeAmount = accountOverviewFacility.totalCost;
         } else if (this.dataType == 'emissions') {
           if (this.emissionsDisplay == 'location') {
-            dataTypeAmount = summary.locationEmissions;
+            dataTypeAmount = accountOverviewFacility.totalLocationEmissions;
           } else {
-            dataTypeAmount = summary.marketEmissions;
+            dataTypeAmount = accountOverviewFacility.totalMarketEmissions;
           }
         } else if (this.dataType == 'water') {
-          dataTypeAmount = summary.consumption;
+          dataTypeAmount = accountOverviewFacility.totalUsage;
         }
         this.mapData.push({
-          facility: summary.facility,
+          facility: accountOverviewFacility.facility,
           lng: findLatLong.LNG,
           lat: findLatLong.LAT,
           dataTypeAmount: dataTypeAmount,
