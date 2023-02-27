@@ -40,8 +40,9 @@
                 </div>
                 <div class="card-body">
                     <app-utility-consumption-table [dataType]="'energyUse'"
-                        [utilityUsageSummaryData]="utilityUsageSummaryData"
-                        [energyUnit]="energyUnit"></app-utility-consumption-table>
+                        [sourcesUseAndCost]="utilityUseAndCost.energyUseAndCost"
+                        [useAndCostTotal]="utilityUseAndCost.energyTotal" [previousYear]="utilityUseAndCost.previousYear"
+                        [dateRange]="dateRange" [energyUnit]="energyUnit"></app-utility-consumption-table>
                 </div>
             </div>
         </div>

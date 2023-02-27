@@ -3,7 +3,7 @@ import { AccountOverviewService } from '../account-overview.service';
 import { Subscription } from 'rxjs';
 import { AccountFacilitiesSummary, UtilityUsageSummaryData, YearMonthData } from 'src/app/models/dashboard';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
-import { AccountOverviewData } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
+import { AccountOverviewData, UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
 
 @Component({
   selector: 'app-emissions-overview',
@@ -25,6 +25,10 @@ export class EmissionsOverviewComponent implements OnInit {
 
   accountOverviewDataSub: Subscription;
   accountOverviewData: AccountOverviewData;
+  utilityUseAndCostSub: Subscription;
+  utilityUseAndCost: UtilityUseAndCost;
+  dateRangeSub: Subscription;
+  dateRange: {startDate: Date, endDate: Date};
   constructor(private accountOverviewService: AccountOverviewService) { }
 
   ngOnInit(): void {
@@ -35,6 +39,11 @@ export class EmissionsOverviewComponent implements OnInit {
 
     this.accountFacilitiesSummarySub = this.accountOverviewService.accountFacilitiesEnergySummary.subscribe(accountFacilitiesSummary => {
       this.accountFacilitiesSummary = accountFacilitiesSummary;
+    });
+
+
+    this.dateRangeSub = this.accountOverviewService.dateRange.subscribe(dateRange => {
+      this.dateRange = dateRange;
     });
 
     this.utilityUsageSummaryDataSub = this.accountOverviewService.energyUtilityUsageSummaryData.subscribe(utilityUsageSummaryData => {
@@ -50,6 +59,10 @@ export class EmissionsOverviewComponent implements OnInit {
       this.accountOverviewData = val;
     });
 
+    this.utilityUseAndCostSub = this.accountOverviewService.utilityUseAndCost.subscribe(val => {
+      this.utilityUseAndCost = val;
+    });
+
 
   }
 
@@ -59,6 +72,8 @@ export class EmissionsOverviewComponent implements OnInit {
     this.utilityUsageSummaryDataSub.unsubscribe();
     this.yearMonthDataSub.unsubscribe();
     this.accountOverviewDataSub.unsubscribe();
+    this.utilityUseAndCostSub.unsubscribe();
+    this.dateRangeSub.unsubscribe();
   }
 
 

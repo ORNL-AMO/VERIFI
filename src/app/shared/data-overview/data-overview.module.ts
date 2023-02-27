@@ -12,6 +12,10 @@ import { MeterUsageDonutComponent } from './meter-usage-donut/meter-usage-donut.
 import { MeterUsageTableComponent } from './meter-usage-table/meter-usage-table.component';
 import { UtilityConsumptionTableComponent } from './utility-consumption-table/utility-consumption-table.component';
 import { UtilitiesUsageChartComponent } from './utilities-usage-chart/utilities-usage-chart.component';
+import { EnergyConsumptionTableComponent } from './utility-consumption-table/energy-consumption-table/energy-consumption-table.component';
+import { EmissionsConsumptionTableComponent } from './utility-consumption-table/emissions-consumption-table/emissions-consumption-table.component';
+import { CostsConsumptionTableComponent } from './utility-consumption-table/costs-consumption-table/costs-consumption-table.component';
+import { WaterConsumptionTableComponent } from './utility-consumption-table/water-consumption-table/water-consumption-table.component';
 
 
 
@@ -26,7 +30,11 @@ import { UtilitiesUsageChartComponent } from './utilities-usage-chart/utilities-
     MeterUsageDonutComponent,
     MeterUsageTableComponent,
     UtilityConsumptionTableComponent,
-    UtilitiesUsageChartComponent
+    UtilitiesUsageChartComponent,
+    EnergyConsumptionTableComponent,
+    EmissionsConsumptionTableComponent,
+    CostsConsumptionTableComponent,
+    WaterConsumptionTableComponent
   ],
   imports: [
     CommonModule,

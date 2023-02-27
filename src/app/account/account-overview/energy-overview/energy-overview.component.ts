@@ -4,7 +4,7 @@ import { Subscription } from 'rxjs';
 import { AccountFacilitiesSummary, UtilityUsageSummaryData, YearMonthData } from 'src/app/models/dashboard';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
-import { AccountOverviewData } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
+import { AccountOverviewData, UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
 @Component({
   selector: 'app-energy-overview',
   templateUrl: './energy-overview.component.html',
@@ -26,7 +26,10 @@ export class EnergyOverviewComponent implements OnInit {
 
   accountOverviewDataSub: Subscription;
   accountOverviewData: AccountOverviewData;
-
+  utilityUseAndCostSub: Subscription;
+  utilityUseAndCost: UtilityUseAndCost;
+  dateRangeSub: Subscription;
+  dateRange: {startDate: Date, endDate: Date};
   constructor(private accountOverviewService: AccountOverviewService, private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
@@ -52,10 +55,17 @@ export class EnergyOverviewComponent implements OnInit {
     });
 
 
+    this.dateRangeSub = this.accountOverviewService.dateRange.subscribe(dateRange => {
+      this.dateRange = dateRange;
+    });
 
 
     this.accountOverviewDataSub = this.accountOverviewService.accountOverviewData.subscribe(val => {
       this.accountOverviewData = val;
+    });
+
+    this.utilityUseAndCostSub = this.accountOverviewService.utilityUseAndCost.subscribe(val => {
+      this.utilityUseAndCost = val;
     });
   }
 
@@ -66,6 +76,8 @@ export class EnergyOverviewComponent implements OnInit {
     this.utilityUsageSummaryDataSub.unsubscribe();
     this.yearMonthDataSub.unsubscribe();
     this.accountOverviewDataSub.unsubscribe();
+    this.utilityUseAndCostSub.unsubscribe();
+    this.dateRangeSub.unsubscribe();
   }
 
 }

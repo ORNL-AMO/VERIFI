@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { AccountOverviewData, AccountOverviewFacility } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
+import { AccountOverviewData, AccountOverviewFacility, UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { AccountFacilitiesSummary, UtilityUsageSummaryData, YearMonthData } from 'src/app/models/dashboard';
@@ -37,6 +37,7 @@ export class AccountOverviewService {
   }>;
 
   accountOverviewData: BehaviorSubject<AccountOverviewData>;
+  utilityUseAndCost: BehaviorSubject<UtilityUseAndCost>;
   calculatingAccountOverviewData: BehaviorSubject<boolean>;
   constructor(private calanderizationService: CalanderizationService, private utilityMeterDbService: UtilityMeterdbService) {
     this.calculatingEnergy = new BehaviorSubject<boolean>(undefined);
@@ -92,6 +93,7 @@ export class AccountOverviewService {
     }>(undefined);
 
     this.accountOverviewData = new BehaviorSubject<AccountOverviewData>(undefined);
+    this.utilityUseAndCost = new BehaviorSubject<UtilityUseAndCost>(undefined);
     this.calculatingAccountOverviewData = new BehaviorSubject<boolean>(undefined)
   }
 

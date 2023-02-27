@@ -40,8 +40,9 @@
                 </div>
                 <div class="card-body">
                     <app-utility-consumption-table [dataType]="'water'"
-                        [utilityUsageSummaryData]="utilityUsageSummaryData"
-                        [waterUnit]="waterUnit"></app-utility-consumption-table>
+                        [sourcesUseAndCost]="utilityUseAndCost.waterUseAndCost"
+                        [useAndCostTotal]="utilityUseAndCost.waterTotal" [previousYear]="utilityUseAndCost.previousYear"
+                        [dateRange]="dateRange" [waterUnit]="waterUnit"></app-utility-consumption-table>
                 </div>
             </div>
         </div>

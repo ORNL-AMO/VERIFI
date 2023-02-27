@@ -134,7 +134,6 @@ export class DataOverviewMapComponent {
 
   setMapData() {
     this.mapData = new Array();
-
     this.accountOverviewFacilities.forEach(accountOverviewFacility => {
       let findLatLong = this.eGridService.zipLatLong.find(zipLL => { return zipLL.ZIP == accountOverviewFacility.facility.zip });
       if (findLatLong) {

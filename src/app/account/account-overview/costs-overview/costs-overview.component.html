@@ -45,7 +45,10 @@
                 </div>
                 <div class="card-body">
                     <app-utility-consumption-table [dataType]="'cost'"
-                        [utilityUsageSummaryData]="utilityUsageSummaryData"></app-utility-consumption-table>
+                        [sourcesUseAndCost]="utilityUseAndCost.allSourcesUseAndCost"
+                        [useAndCostTotal]="utilityUseAndCost.allSourcesTotal"
+                        [previousYear]="utilityUseAndCost.previousYear"
+                        [dateRange]="dateRange"></app-utility-consumption-table>
                 </div>
             </div>
         </div>

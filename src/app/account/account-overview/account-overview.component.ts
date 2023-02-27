@@ -71,6 +71,7 @@ export class AccountOverviewComponent implements OnInit {
         } else if (data.type == 'overview') {
           console.log(data);
           this.accountOverviewService.accountOverviewData.next(data.accountOverviewData);
+          this.accountOverviewService.utilityUseAndCost.next(data.utilityUseAndCost);
           this.accountOverviewService.calculatingAccountOverviewData.next(false);
           this.worker.terminate();
         }

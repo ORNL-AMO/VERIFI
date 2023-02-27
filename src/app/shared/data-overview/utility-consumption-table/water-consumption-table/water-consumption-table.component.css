@@ -1,7 +1,3 @@
-tr > td {
-    width: 10%;
-} 
-
 thead th{
     text-align: center;
 }
@@ -13,4 +9,8 @@ thead th{
 
 .badge{
     font-weight: normal;
+}
+
+.text-right{
+    text-align: right;
 }
