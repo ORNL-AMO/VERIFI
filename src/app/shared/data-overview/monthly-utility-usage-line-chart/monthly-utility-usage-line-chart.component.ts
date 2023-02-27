@@ -59,7 +59,7 @@ export class MonthlyUtilityUsageLineChartComponent {
 
 
   ngOnChanges(changes: SimpleChanges) {
-    if (!changes.dataType && !changes.accountFacilitiesSummary.isFirstChange()) {
+    if (!changes.dataType && (changes.yearMonthData && !changes.yearMonthData.isFirstChange())) {
       this.drawChart();
     }
   }

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AccountOverviewService } from '../account-overview.service';
 import { Subscription } from 'rxjs';
-import { AccountFacilitiesSummary, UtilityUsageSummaryData, YearMonthData } from 'src/app/models/dashboard';
+import { YearMonthData } from 'src/app/models/dashboard';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { AccountOverviewData, UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
 
@@ -13,15 +13,11 @@ import { AccountOverviewData, UtilityUseAndCost } from 'src/app/calculations/das
 export class CostsOverviewComponent implements OnInit {
 
 
-  accountFacilitiesSummarySub: Subscription;
   calculatingSub: Subscription;
   calculating: boolean;
+  //TODO: Need to add warning back in!
   displayWarning: boolean;
-  accountFacilitiesSummary: AccountFacilitiesSummary;
-  utilityUsageSummaryData: UtilityUsageSummaryData;
-  utilityUsageSummaryDataSub: Subscription;
-  yearMonthData: Array<YearMonthData>;
-  yearMonthDataSub: Subscription;
+
   calanderizedMeters: Array<CalanderizedMeter>;
 
   accountOverviewDataSub: Subscription;
@@ -29,7 +25,7 @@ export class CostsOverviewComponent implements OnInit {
   utilityUseAndCostSub: Subscription;
   utilityUseAndCost: UtilityUseAndCost;
   dateRangeSub: Subscription;
-  dateRange: {startDate: Date, endDate: Date};
+  dateRange: { startDate: Date, endDate: Date };
   constructor(private accountOverviewService: AccountOverviewService) { }
 
   ngOnInit(): void {
@@ -38,21 +34,10 @@ export class CostsOverviewComponent implements OnInit {
       this.calculating = val;
     })
 
-    this.accountFacilitiesSummarySub = this.accountOverviewService.accountFacilitiesCostsSummary.subscribe(accountFacilitiesSummary => {
-      this.accountFacilitiesSummary = accountFacilitiesSummary;
-    });
-    this.utilityUsageSummaryDataSub = this.accountOverviewService.costsUtilityUsageSummaryData.subscribe(utilityUsageSummaryData => {
-      this.utilityUsageSummaryData = utilityUsageSummaryData;
-    });
-    
-    this.yearMonthDataSub = this.accountOverviewService.costsYearMonthData.subscribe(yearMonthData => {
-      this.yearMonthData = yearMonthData;
-    });
-
     this.dateRangeSub = this.accountOverviewService.dateRange.subscribe(dateRange => {
       this.dateRange = dateRange;
     });
-    
+
     this.accountOverviewDataSub = this.accountOverviewService.accountOverviewData.subscribe(val => {
       this.accountOverviewData = val;
     });
@@ -62,11 +47,8 @@ export class CostsOverviewComponent implements OnInit {
     });
   }
 
-  ngOnDestroy(){
-    this.accountFacilitiesSummarySub.unsubscribe();
+  ngOnDestroy() {
     this.calculatingSub.unsubscribe();
-    this.utilityUsageSummaryDataSub.unsubscribe();
-    this.yearMonthDataSub.unsubscribe();
     this.accountOverviewDataSub.unsubscribe();
     this.utilityUseAndCostSub.unsubscribe();
     this.dateRangeSub.unsubscribe();

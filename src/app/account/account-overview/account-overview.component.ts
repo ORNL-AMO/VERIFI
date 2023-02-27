@@ -58,55 +58,16 @@ export class AccountOverviewComponent implements OnInit {
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('src/app/web-workers/account-overview.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
-        if (data.type == 'energy') {
-          this.accountOverviewService.accountFacilitiesEnergySummary.next(data.accountFacilitiesSummary);
-          this.accountOverviewService.energyUtilityUsageSummaryData.next(data.utilityUsageSummaryData);
-          this.accountOverviewService.energyYearMonthData.next(data.yearMonthData);
-          this.accountOverviewService.calculatingEnergy.next(false);
-        } else if (data.type == 'water') {
-          this.accountOverviewService.accountFacilitiesWaterSummary.next(data.accountFacilitiesSummary);
-          this.accountOverviewService.waterUtilityUsageSummaryData.next(data.utilityUsageSummaryData);
-          this.accountOverviewService.waterYearMonthData.next(data.yearMonthData);
-          this.accountOverviewService.calculatingWater.next(false);
-        } else if (data.type == 'overview') {
-          console.log(data);
-          this.accountOverviewService.accountOverviewData.next(data.accountOverviewData);
-          this.accountOverviewService.utilityUseAndCost.next(data.utilityUseAndCost);
-          this.accountOverviewService.calculatingAccountOverviewData.next(false);
-          this.worker.terminate();
-        }
-        else if (data.type == 'all') {
-          this.accountOverviewService.accountFacilitiesCostsSummary.next(data.accountFacilitiesSummary);
-          this.accountOverviewService.costsUtilityUsageSummaryData.next(data.utilityUsageSummaryData);
-          this.accountOverviewService.costsYearMonthData.next(data.yearMonthData);
-          this.accountOverviewService.calculatingCosts.next(false);
-          this.worker.terminate();
-        }
+        this.accountOverviewService.accountOverviewData.next(data.accountOverviewData);
+        this.accountOverviewService.utilityUseAndCost.next(data.utilityUseAndCost);
+        this.accountOverviewService.calculatingAccountOverviewData.next(false);
+        this.worker.terminate();
       };
-      this.accountOverviewService.calculatingEnergy.next(true);
-      this.accountOverviewService.calculatingWater.next(true);
-      this.accountOverviewService.calculatingCosts.next(true);
-      this.accountOverviewService.calculatingAccountOverviewData.next(true);
 
-      let energySources: Array<MeterSource> = EnergySources;
-      this.worker.postMessage({
-        calanderizedMeters: this.accountOverviewService.calanderizedMeters,
-        facilities: facilities,
-        sources: energySources,
-        type: 'energy',
-        account: this.account
-      });
-
-      let waterSources: Array<MeterSource> = WaterSources;
-      this.worker.postMessage({
-        calanderizedMeters: this.accountOverviewService.calanderizedMeters,
-        facilities: facilities,
-        sources: waterSources,
-        type: 'water',
-        account: this.account
-      });
-
-      let allSources: Array<MeterSource> = AllSources;
+      //only show calculating spinner if no data calculated yet
+      if (this.accountOverviewService.accountOverviewData.getValue() == undefined) {
+        this.accountOverviewService.calculatingAccountOverviewData.next(true);
+      }
       this.worker.postMessage({
         calanderizedMeters: this.accountOverviewService.calanderizedMeters,
         facilities: facilities,
@@ -114,35 +75,18 @@ export class AccountOverviewComponent implements OnInit {
         dateRange: dateRange
       });
 
-      this.worker.postMessage({
-        calanderizedMeters: this.accountOverviewService.calanderizedMeters,
-        facilities: facilities,
-        sources: allSources,
-        type: 'all',
-        account: this.account
-      });
-
-      // let allSources: Array<MeterSource> = AllSources;
-
-
 
     } else {
       // Web Workers are not supported in this environment.
-      let energySources: Array<MeterSource> = EnergySources;
-      let energySummaryClass: AccountSummaryClass = new AccountSummaryClass(this.accountOverviewService.calanderizedMeters, facilities, energySources, this.account);
-      this.accountOverviewService.accountFacilitiesEnergySummary.next(energySummaryClass.facilitiesSummary);
-      this.accountOverviewService.energyUtilityUsageSummaryData.next(energySummaryClass.utilityUsageSummaryData);
-      this.accountOverviewService.energyYearMonthData.next(energySummaryClass.yearMonthData);
-      let waterSources: Array<MeterSource> = WaterSources;
-      let waterSummaryClass: AccountSummaryClass = new AccountSummaryClass(this.accountOverviewService.calanderizedMeters, facilities, waterSources, this.account);
-      this.accountOverviewService.accountFacilitiesWaterSummary.next(waterSummaryClass.facilitiesSummary);
-      this.accountOverviewService.waterUtilityUsageSummaryData.next(waterSummaryClass.utilityUsageSummaryData);
-      this.accountOverviewService.waterYearMonthData.next(waterSummaryClass.yearMonthData);
-      let allSources: Array<MeterSource> = AllSources;
-      let allSummaryClass: AccountSummaryClass = new AccountSummaryClass(this.accountOverviewService.calanderizedMeters, facilities, allSources, this.account);
-      this.accountOverviewService.accountFacilitiesCostsSummary.next(allSummaryClass.facilitiesSummary);
-      this.accountOverviewService.costsUtilityUsageSummaryData.next(allSummaryClass.utilityUsageSummaryData);
-      this.accountOverviewService.costsYearMonthData.next(allSummaryClass.yearMonthData);
+      // let energySources: Array<MeterSource> = EnergySources;
+      // let energySummaryClass: AccountSummaryClass = new AccountSummaryClass(this.accountOverviewService.calanderizedMeters, facilities, energySources, this.account);
+      //      this.accountOverviewService.energyYearMonthData.next(energySummaryClass.yearMonthData);
+      // let waterSources: Array<MeterSource> = WaterSources;
+      // let waterSummaryClass: AccountSummaryClass = new AccountSummaryClass(this.accountOverviewService.calanderizedMeters, facilities, waterSources, this.account);
+      // this.accountOverviewService.waterYearMonthData.next(waterSummaryClass.yearMonthData);
+      // let allSources: Array<MeterSource> = AllSources;
+      // let allSummaryClass: AccountSummaryClass = new AccountSummaryClass(this.accountOverviewService.calanderizedMeters, facilities, allSources, this.account);
+      // this.accountOverviewService.costsYearMonthData.next(allSummaryClass.yearMonthData);
     }
   }
 

@@ -14,7 +14,7 @@ export class AccountSummaryClass {
         let filteredSourceMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(meter => { return sources.includes(meter.meter.source) })
         this.facilitiesSummary = this.calculateFacilitiesSummary(filteredSourceMeters, facilities);
         this.utilityUsageSummaryData = getUtilityUsageSummaryData(filteredSourceMeters, this.facilitiesSummary.allMetersLastBill, sources);
-        this.yearMonthData = getYearlyUsageNumbers(filteredSourceMeters, account);
+        this.yearMonthData = getYearlyUsageNumbers(filteredSourceMeters);
     }
 
     calculateFacilitiesSummary(calanderizedMeters: Array<CalanderizedMeter>, facilities: Array<IdbFacility>): AccountFacilitiesSummary {

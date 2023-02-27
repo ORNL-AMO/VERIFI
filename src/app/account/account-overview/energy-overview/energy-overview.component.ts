@@ -12,16 +12,10 @@ import { AccountOverviewData, UtilityUseAndCost } from 'src/app/calculations/das
 })
 export class EnergyOverviewComponent implements OnInit {
 
-  accountFacilitiesSummarySub: Subscription;
   calculatingSub: Subscription;
   calculating: boolean;
-  accountFacilitiesSummary: AccountFacilitiesSummary;
   energyUnit: string;
   selectedAccountSub: Subscription;
-  utilityUsageSummaryData: UtilityUsageSummaryData;
-  utilityUsageSummaryDataSub: Subscription;
-  yearMonthData: Array<YearMonthData>;
-  yearMonthDataSub: Subscription;
   calanderizedMeters: Array<CalanderizedMeter>;
 
   accountOverviewDataSub: Subscription;
@@ -43,22 +37,9 @@ export class EnergyOverviewComponent implements OnInit {
       this.calculating = val;
     });
 
-    this.accountFacilitiesSummarySub = this.accountOverviewService.accountFacilitiesEnergySummary.subscribe(accountFacilitiesSummary => {
-      this.accountFacilitiesSummary = accountFacilitiesSummary;
-    });
-
-    this.utilityUsageSummaryDataSub = this.accountOverviewService.energyUtilityUsageSummaryData.subscribe(utilityUsageSummaryData => {
-      this.utilityUsageSummaryData = utilityUsageSummaryData;
-    });
-    this.yearMonthDataSub = this.accountOverviewService.energyYearMonthData.subscribe(yearMonthData => {
-      this.yearMonthData = yearMonthData;
-    });
-
-
     this.dateRangeSub = this.accountOverviewService.dateRange.subscribe(dateRange => {
       this.dateRange = dateRange;
     });
-
 
     this.accountOverviewDataSub = this.accountOverviewService.accountOverviewData.subscribe(val => {
       this.accountOverviewData = val;
@@ -70,11 +51,8 @@ export class EnergyOverviewComponent implements OnInit {
   }
 
   ngOnDestroy() {
-    this.accountFacilitiesSummarySub.unsubscribe();
     this.calculatingSub.unsubscribe();
     this.selectedAccountSub.unsubscribe();
-    this.utilityUsageSummaryDataSub.unsubscribe();
-    this.yearMonthDataSub.unsubscribe();
     this.accountOverviewDataSub.unsubscribe();
     this.utilityUseAndCostSub.unsubscribe();
     this.dateRangeSub.unsubscribe();

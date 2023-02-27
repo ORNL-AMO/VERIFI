@@ -1,8 +1,14 @@
 import { CalanderizedMeter, MonthlyData } from "src/app/models/calanderization";
 import { AllSources, EnergySources, IdbAccount, IdbFacility, MeterSource, WaterSources } from "src/app/models/idb";
 import * as _ from 'lodash';
+import { YearMonthData } from "src/app/models/dashboard";
+import { getYearlyUsageNumbers } from "../shared-calculations/calanderizationFunctions";
 
 export class AccountOverviewData {
+
+    energyYearMonthData: Array<YearMonthData>;
+    waterYearMonthData: Array<YearMonthData>;
+    allSourcesYearMonthData: Array<YearMonthData>;
 
     facilitiesEnergy: Array<AccountOverviewFacility>;
     totalEnergyUsage: number;
@@ -19,13 +25,16 @@ export class AccountOverviewData {
     totalWaterCost: number;
 
     constructor(calanderizedMeters: Array<CalanderizedMeter>, facilities: Array<IdbFacility>, account: IdbAccount, dateRange: { startDate: Date, endDate: Date }) {
+
         //energy
+        this.setEnergyYearMonthData(calanderizedMeters);
         this.setEnergyFacilities(calanderizedMeters, facilities, dateRange);
         this.setTotalEnergyUsage();
         this.setTotalEnergyCost();
         this.setTotalLocationEmissions();
         this.setTotalMarketEmissions();
         //costs
+        this.setAllSourcesYearMonthData(calanderizedMeters);
         this.setCostFacilities(calanderizedMeters, facilities, dateRange);
         this.setTotalAccountCost();
         //water
@@ -34,7 +43,27 @@ export class AccountOverviewData {
             this.setWaterFacilities(calanderizedMeters, facilities, dateRange);
             this.setTotalWaterConsumption();
             this.setTotalWaterCost();
+            this.setWaterYearMonthData(calanderizedMeters);
         }
+    }
+
+    setEnergyYearMonthData(calanderizedMeters: Array<CalanderizedMeter>) {
+        let sourceMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => {
+            return EnergySources.includes(cMeter.meter.source);
+        });
+        this.energyYearMonthData = getYearlyUsageNumbers(sourceMeters);
+    }
+
+    setAllSourcesYearMonthData(calanderizedMeters: Array<CalanderizedMeter>) {
+        this.energyYearMonthData = getYearlyUsageNumbers(calanderizedMeters);
+    }
+
+    setWaterYearMonthData(calanderizedMeters: Array<CalanderizedMeter>) {
+        let sourceMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => {
+            return WaterSources.includes(cMeter.meter.source);
+        });
+        this.energyYearMonthData = getYearlyUsageNumbers(sourceMeters);
+
     }
 
     //energy

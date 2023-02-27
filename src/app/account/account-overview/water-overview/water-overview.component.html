@@ -56,8 +56,7 @@
                 </div>
                 <div class="card-body">
                     <app-facilities-usage-stacked-bar-chart [dataType]="'water'"
-                        [calanderizedMeters]="calanderizedMeters"
-                        [waterUnit]="waterUnit"
+                        [calanderizedMeters]="calanderizedMeters" [waterUnit]="waterUnit"
                         [dateRange]="dateRange"></app-facilities-usage-stacked-bar-chart>
                 </div>
             </div>
@@ -71,9 +70,8 @@
                     <h4 class="mb-0">Monthly Utility Usage</h4>
                 </div>
                 <div class="card-body">
-                    <!-- <app-monthly-water-chart></app-monthly-water-chart> -->
                     <app-monthly-utility-usage-line-chart [dataType]="'water'"
-                        [yearMonthData]="yearMonthData"></app-monthly-utility-usage-line-chart>
+                        [yearMonthData]="accountOverviewData.waterYearMonthData"></app-monthly-utility-usage-line-chart>
                 </div>
             </div>
         </div>

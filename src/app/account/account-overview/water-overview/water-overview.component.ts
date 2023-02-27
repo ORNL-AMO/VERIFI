@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AccountOverviewService } from '../account-overview.service';
 import { Subscription } from 'rxjs';
-import { AccountFacilitiesSummary, UtilityUsageSummaryData, YearMonthData } from 'src/app/models/dashboard';
+import { YearMonthData } from 'src/app/models/dashboard';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { AccountOverviewData, UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
@@ -14,16 +14,10 @@ import { AccountOverviewData, UtilityUseAndCost } from 'src/app/calculations/das
 })
 export class WaterOverviewComponent implements OnInit {
 
-  accountFacilitiesSummarySub: Subscription;
   calculatingSub: Subscription;
   calculating: boolean;
-  accountFacilitiesSummary: AccountFacilitiesSummary;
-  utilityUsageSummaryData: UtilityUsageSummaryData;
-  utilityUsageSummaryDataSub: Subscription;
   selectedAccountSub: Subscription;
   waterUnit: string;
-  yearMonthData: Array<YearMonthData>;
-  yearMonthDataSub: Subscription;
   calanderizedMeters: Array<CalanderizedMeter>;
   
   accountOverviewDataSub: Subscription;
@@ -46,18 +40,6 @@ export class WaterOverviewComponent implements OnInit {
       this.calculating = val;
     })
 
-    this.accountFacilitiesSummarySub = this.accountOverviewService.accountFacilitiesWaterSummary.subscribe(accountFacilitiesSummary => {
-      this.accountFacilitiesSummary = accountFacilitiesSummary;
-    });
-
-    this.utilityUsageSummaryDataSub = this.accountOverviewService.waterUtilityUsageSummaryData.subscribe(utilityUsageSummaryData => {
-      this.utilityUsageSummaryData = utilityUsageSummaryData;
-    });
-    
-    this.yearMonthDataSub = this.accountOverviewService.waterYearMonthData.subscribe(yearMonthData => {
-      this.yearMonthData = yearMonthData;
-    });
-
     this.dateRangeSub = this.accountOverviewService.dateRange.subscribe(dateRange => {
       this.dateRange = dateRange;
     });
@@ -72,11 +54,8 @@ export class WaterOverviewComponent implements OnInit {
   }
 
   ngOnDestroy() {
-    this.accountFacilitiesSummarySub.unsubscribe();
     this.calculatingSub.unsubscribe();
     this.selectedAccountSub.unsubscribe();
-    this.utilityUsageSummaryDataSub.unsubscribe();
-    this.yearMonthDataSub.unsubscribe();
     this.accountOverviewDataSub.unsubscribe();
     this.utilityUseAndCostSub.unsubscribe();
     this.dateRangeSub.unsubscribe();

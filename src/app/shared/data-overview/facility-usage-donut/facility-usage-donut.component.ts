@@ -52,7 +52,7 @@ export class FacilityUsageDonutComponent {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (!changes.dataType && !changes.accountOverviewFacilities.isFirstChange()) {
+    if (!changes.dataType && (changes.accountOverviewFacilities && !changes.accountOverviewFacilities.isFirstChange())) {
       this.drawChart();
     }
   }

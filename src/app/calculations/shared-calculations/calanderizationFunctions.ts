@@ -271,7 +271,7 @@ export function getUtilityUsageSummaryData(calanderizedMeters: Array<Calanderize
     }
 }
 
-export function getYearlyUsageNumbers(calanderizedMeters: Array<CalanderizedMeter>, facilityOrAccount: IdbFacility | IdbAccount): Array<YearMonthData> {
+export function getYearlyUsageNumbers(calanderizedMeters: Array<CalanderizedMeter>): Array<YearMonthData> {
     let monthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(cMeter => {
         return cMeter.monthlyData;
     });

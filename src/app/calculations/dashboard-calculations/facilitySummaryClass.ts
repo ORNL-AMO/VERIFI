@@ -20,7 +20,7 @@ export class FacilitySummaryClass {
         this.meterSummaryData = this.getDashboardFacilityMeterSummary(sourceMeters, allMetersLastBill, groups);
         this.monthlySourceData = this.getMonthlySourceData(sourceMeters, sources,facility);
         this.utilityUsageSummaryData = getUtilityUsageSummaryData(sourceMeters, allMetersLastBill, sources);
-        this.yearMonthData = getYearlyUsageNumbers(sourceMeters, facility);
+        this.yearMonthData = getYearlyUsageNumbers(sourceMeters);
     };
 
     getDashboardFacilityMeterSummary(calanderizedMeters: Array<CalanderizedMeter>, lastBill: MonthlyData, groups: Array<IdbUtilityMeterGroup>): FacilityMeterSummaryData {
