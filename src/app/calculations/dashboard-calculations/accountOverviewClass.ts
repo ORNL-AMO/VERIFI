@@ -55,7 +55,7 @@ export class AccountOverviewData {
     }
 
     setAllSourcesYearMonthData(calanderizedMeters: Array<CalanderizedMeter>) {
-        this.energyYearMonthData = getYearlyUsageNumbers(calanderizedMeters);
+        this.allSourcesYearMonthData = getYearlyUsageNumbers(calanderizedMeters);
     }
 
     setWaterYearMonthData(calanderizedMeters: Array<CalanderizedMeter>) {

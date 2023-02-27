@@ -67,10 +67,8 @@ export class FacilitiesUsageStackedBarChartComponent {
   }
 
   drawChart() {
-    console.log('draw');
     if (this.stackedBarChart) {
       if (this.barChartData && this.barChartData.length != 0) {
-        console.log(this.barChartData);
         let data = new Array();
         if (this.dataType == 'energyUse') {
           data = this.getEnergyUseData();
