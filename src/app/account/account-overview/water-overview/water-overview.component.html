@@ -52,12 +52,13 @@
         <div class="col">
             <div class="card">
                 <div class="card-header bg-white">
-                    <h4 class="mb-0">Water Costs (All-time)</h4>
+                    <h4 class="mb-0">Water Consumption</h4>
                 </div>
                 <div class="card-body">
                     <app-facilities-usage-stacked-bar-chart [dataType]="'water'"
                         [calanderizedMeters]="calanderizedMeters"
-                        [waterUnit]="waterUnit"></app-facilities-usage-stacked-bar-chart>
+                        [waterUnit]="waterUnit"
+                        [dateRange]="dateRange"></app-facilities-usage-stacked-bar-chart>
                 </div>
             </div>
         </div>

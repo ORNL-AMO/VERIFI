@@ -51,11 +51,12 @@
         <div class="col">
             <div class="card">
                 <div class="card-header bg-white">
-                    <h4 class="mb-0">Utility Emissions (All-time)</h4>
+                    <h4 class="mb-0">Utility Emissions</h4>
                 </div>
                 <div class="card-body">
                     <app-facilities-usage-stacked-bar-chart [dataType]="'emissions'"
-                        [calanderizedMeters]="calanderizedMeters"></app-facilities-usage-stacked-bar-chart>
+                        [calanderizedMeters]="calanderizedMeters"
+                        [dateRange]="dateRange"></app-facilities-usage-stacked-bar-chart>
                 </div>
             </div>
         </div>

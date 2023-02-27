@@ -26,6 +26,8 @@ export class FacilitiesUsageStackedBarChartComponent {
   energyUnit: string;
   @Input()
   reportOptions: DataOverviewReportSetup;
+  @Input()
+  dateRange: { startDate: Date, endDate: Date };
 
 
   @ViewChild('stackedBarChart', { static: false }) stackedBarChart: ElementRef;
@@ -65,9 +67,10 @@ export class FacilitiesUsageStackedBarChartComponent {
   }
 
   drawChart() {
+    console.log('draw');
     if (this.stackedBarChart) {
       if (this.barChartData && this.barChartData.length != 0) {
-
+        console.log(this.barChartData);
         let data = new Array();
         if (this.dataType == 'energyUse') {
           data = this.getEnergyUseData();
@@ -352,7 +355,7 @@ export class FacilitiesUsageStackedBarChartComponent {
         }
       })
     }
-    
+
 
     accountFacilites.forEach(facility => {
       if (!this.reportOptions || includedFacilityIds.includes(facility.guid)) {
@@ -367,41 +370,43 @@ export class FacilitiesUsageStackedBarChartComponent {
         let facilityMeters: Array<CalanderizedMeter> = this.calanderizedMeters.filter(cMeter => { return cMeter.meter.facilityId == facility.guid });
         facilityMeters.forEach(cMeter => {
           cMeter.monthlyData.forEach(dataItem => {
-            if (cMeter.meter.source == 'Electricity') {
-              electricity.marketEmissions = (electricity.marketEmissions + Number(dataItem.marketEmissions));
-              electricity.locationEmissions = (electricity.locationEmissions + Number(dataItem.locationEmissions));
-              electricity.energyUse = (electricity.energyUse + Number(dataItem.energyUse));
-              electricity.energyCost = (electricity.energyCost + Number(dataItem.energyCost));
-            }
-            else if (cMeter.meter.source == 'Natural Gas') {
-              naturalGas.marketEmissions = (naturalGas.marketEmissions + Number(dataItem.marketEmissions));
-              naturalGas.locationEmissions = (naturalGas.locationEmissions + Number(dataItem.locationEmissions));
-              naturalGas.energyUse = (naturalGas.energyUse + Number(dataItem.energyUse));
-              naturalGas.energyCost = (naturalGas.energyCost + Number(dataItem.energyCost));
-            }
-            else if (cMeter.meter.source == 'Other Fuels') {
-              otherFuels.marketEmissions = (otherFuels.marketEmissions + Number(dataItem.marketEmissions));
-              otherFuels.locationEmissions = (otherFuels.locationEmissions + Number(dataItem.locationEmissions));
-              otherFuels.energyUse = (otherFuels.energyUse + Number(dataItem.energyUse));
-              otherFuels.energyCost = (otherFuels.energyCost + Number(dataItem.energyCost));
-            }
-            else if (cMeter.meter.source == 'Other Energy') {
-              otherEnergy.marketEmissions = (otherEnergy.marketEmissions + Number(dataItem.marketEmissions));
-              otherEnergy.locationEmissions = (otherEnergy.locationEmissions + Number(dataItem.locationEmissions));
-              otherEnergy.energyUse = (otherEnergy.energyUse + Number(dataItem.energyUse));
-              otherEnergy.energyCost = (otherEnergy.energyCost + Number(dataItem.energyCost));
-            }
-            else if (cMeter.meter.source == 'Water') {
-              water.energyUse = (water.energyUse + Number(dataItem.energyUse));
-              water.energyCost = (water.energyCost + Number(dataItem.energyCost));
-            }
-            else if (cMeter.meter.source == 'Waste Water') {
-              wasteWater.energyUse = (wasteWater.energyUse + Number(dataItem.energyUse));
-              wasteWater.energyCost = (wasteWater.energyCost + Number(dataItem.energyCost));
-            }
-            else if (cMeter.meter.source == 'Other Utility') {
-              otherUtility.energyUse = (otherUtility.energyUse + Number(dataItem.energyUse));
-              otherUtility.energyCost = (otherUtility.energyCost + Number(dataItem.energyCost));
+            if (dataItem.date >= this.dateRange.startDate && dataItem.date <= this.dateRange.endDate) {
+              if (cMeter.meter.source == 'Electricity') {
+                electricity.marketEmissions = (electricity.marketEmissions + Number(dataItem.marketEmissions));
+                electricity.locationEmissions = (electricity.locationEmissions + Number(dataItem.locationEmissions));
+                electricity.energyUse = (electricity.energyUse + Number(dataItem.energyUse));
+                electricity.energyCost = (electricity.energyCost + Number(dataItem.energyCost));
+              }
+              else if (cMeter.meter.source == 'Natural Gas') {
+                naturalGas.marketEmissions = (naturalGas.marketEmissions + Number(dataItem.marketEmissions));
+                naturalGas.locationEmissions = (naturalGas.locationEmissions + Number(dataItem.locationEmissions));
+                naturalGas.energyUse = (naturalGas.energyUse + Number(dataItem.energyUse));
+                naturalGas.energyCost = (naturalGas.energyCost + Number(dataItem.energyCost));
+              }
+              else if (cMeter.meter.source == 'Other Fuels') {
+                otherFuels.marketEmissions = (otherFuels.marketEmissions + Number(dataItem.marketEmissions));
+                otherFuels.locationEmissions = (otherFuels.locationEmissions + Number(dataItem.locationEmissions));
+                otherFuels.energyUse = (otherFuels.energyUse + Number(dataItem.energyUse));
+                otherFuels.energyCost = (otherFuels.energyCost + Number(dataItem.energyCost));
+              }
+              else if (cMeter.meter.source == 'Other Energy') {
+                otherEnergy.marketEmissions = (otherEnergy.marketEmissions + Number(dataItem.marketEmissions));
+                otherEnergy.locationEmissions = (otherEnergy.locationEmissions + Number(dataItem.locationEmissions));
+                otherEnergy.energyUse = (otherEnergy.energyUse + Number(dataItem.energyUse));
+                otherEnergy.energyCost = (otherEnergy.energyCost + Number(dataItem.energyCost));
+              }
+              else if (cMeter.meter.source == 'Water') {
+                water.energyUse = (water.energyUse + Number(dataItem.energyConsumption));
+                water.energyCost = (water.energyCost + Number(dataItem.energyCost));
+              }
+              else if (cMeter.meter.source == 'Waste Water') {
+                wasteWater.energyUse = (wasteWater.energyUse + Number(dataItem.energyConsumption));
+                wasteWater.energyCost = (wasteWater.energyCost + Number(dataItem.energyCost));
+              }
+              else if (cMeter.meter.source == 'Other Utility') {
+                otherUtility.energyUse = (otherUtility.energyUse + Number(dataItem.energyUse));
+                otherUtility.energyCost = (otherUtility.energyCost + Number(dataItem.energyCost));
+              }
             }
           });
         });
